@@ -1,0 +1,37 @@
+[
+  {
+    "path": "depot_250903.tar.gz.part-000",
+    "bytes": 50331648,
+    "sha256": "9f7d6e0c0f378dd63ec9c8ae7d90b69de8cf4a7e27609162c6f2a5c0e4a0544c"
+  },
+  {
+    "path": "depot_250903.tar.gz.part-001",
+    "bytes": 50331648,
+    "sha256": "83f3c4e1d9c725958471ef4b0439e4f5eca8e17e55316894a61d9850911ebfcf"
+  },
+  {
+    "path": "depot_250903.tar.gz.part-002",
+    "bytes": 50331648,
+    "sha256": "19f60d1e80c29a830bc357dafd732d1e13ad5cfb6d951813eee152018b8b2933"
+  },
+  {
+    "path": "depot_250903.tar.gz.part-003",
+    "bytes": 50331648,
+    "sha256": "759639b7e977512e150e5a485f5bfeeed332911a640956f8654010761f8a7892"
+  },
+  {
+    "path": "depot_250903.tar.gz.part-004",
+    "bytes": 50331648,
+    "sha256": "39d3af7794907d1f9fa7d1adf62f3390a69696039c99e19959a6943d5a7d7be3"
+  },
+  {
+    "path": "depot_250903.tar.gz.part-005",
+    "bytes": 50331648,
+    "sha256": "347e07e3d4016a07d7a2d99e894028294cbd68891e3780d8ca81679a0a331c14"
+  },
+  {
+    "path": "depot_250903.tar.gz.part-006",
+    "bytes": 24545346,
+    "sha256": "b8c1a2403698799116819f04b3460088fc0e6e4d0089e6302df77f152e71111e"
+  }
+]

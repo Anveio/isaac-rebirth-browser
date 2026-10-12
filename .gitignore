@@ -11,3 +11,5 @@ cloud/*.log
 cloud/validation.json
 ResourceExtractor_log.txt
 
+references/isaac/linux/depot_250903/
+references/isaac/linux/depot_250903.tar.gz
