@@ -1,4 +1,3 @@
-# syntax=docker/dockerfile:1
 FROM node:24-bookworm
 WORKDIR /workspace/isaac-rebirth-browser
 COPY . .
