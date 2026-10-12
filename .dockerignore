@@ -1,0 +1,10 @@
+.git
+node_modules
+.venv
+dist
+.cache
+test-results
+references/isaac/extracted
+**/*.log
+ResourceExtractor_log.txt
+

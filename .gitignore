@@ -1,0 +1,13 @@
+node_modules/
+.venv/
+dist/
+test-results/
+playwright-report/
+.cache/
+.DS_Store
+references/isaac/extracted/
+references/isaac/*extraction.log
+cloud/*.log
+cloud/validation.json
+ResourceExtractor_log.txt
+
