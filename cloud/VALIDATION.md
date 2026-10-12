@@ -1,8 +1,10 @@
 # Setup validation — 2026-10-12
 
 The repository and setup configuration are prepared. A managed ChatGPT cloud
-environment has **not been created or published**. The available ChatGPT web
-session is signed out, and native desktop app control is unavailable.
+environment has **not been created or published**. The intended entry point is
+the desktop app's Cloud > Choose environment > Create environment menu, using
+the owner's personal ChatGPT account. The computer-use tool explicitly blocks
+controlling this desktop app; the first menu action must be taken in the app.
 
 ## Passed on the owner's Mac
 

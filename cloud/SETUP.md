@@ -18,7 +18,8 @@ Official workflow: https://learn.chatgpt.com/docs/environments/cloud-environment
 
 ## Setup request
 
-Paste this into the environment setup conversation after selecting the repo:
+Paste [SETUP_REQUEST.txt](SETUP_REQUEST.txt) into the environment setup conversation
+after selecting the repo. The same request is reproduced below:
 
 > Set up this repository for a browser-based port of The Binding of Isaac:
 > Rebirth. Use Node 24. Run `bash cloud/install.sh`, which installs the pinned
@@ -34,9 +35,14 @@ Paste this into the environment setup conversation after selecting the repo:
 
 ## Finish and verify
 
-Open Settings > Codex Cloud > Environments > Create environment. Select the
-private repository and Get started. Supply the setup request above, review the
-report and configuration, and Publish when the checks pass.
+In the desktop app's new-task composer, choose Cloud, open Choose environment,
+then click Create environment. Select `Anveio/isaac-rebirth-browser` and click
+Get started. Use your personal ChatGPT account and keep Who can use set to
+Only me. Supply the setup request above, review the report and configuration,
+and Publish when the checks pass.
+
+The desktop menu is the intended entry point for this project. The same flow is
+also available under Settings > Codex Cloud > Environments > Create environment.
 
 Only an `Environment published` confirmation establishes that the reusable
 environment is ready. A local Docker check is supporting evidence, not proof of
