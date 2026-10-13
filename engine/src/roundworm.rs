@@ -8,6 +8,32 @@ use crate::{
     npcs::Npc,
     phase::Phase,
 };
+use std::sync::OnceLock;
+
+fn collide(npc: &mut Npc, grid: &Grid, preview: bool) -> Result<(), String> {
+    static COLLIDER: OnceLock<crate::grid::Collider> = OnceLock::new();
+    let collider = COLLIDER.get_or_init(|| {
+        crate::grid::Collider::new(crate::grid::CollisionGeometry {
+            radius: content::NPC_244_COLLISIONRADIUS,
+            scale: WorldVector { x: 1.0, y: 1.0 },
+            points: content::NPC_244_GRID_POINTS,
+        })
+        .expect("authored Worm collision geometry")
+    });
+    if preview {
+        let mut velocity = npc.velocity;
+        collider.resolve_nonplayer_ground(
+            grid,
+            &mut npc.presented_position,
+            &mut velocity,
+            true,
+        )?;
+    } else {
+        collider.resolve_nonplayer_ground(grid, &mut npc.position, &mut npc.velocity, false)?;
+        npc.presented_position = npc.position;
+    }
+    Ok(())
+}
 
 const ZERO: WorldVector = WorldVector { x: 0.0, y: 0.0 };
 
@@ -240,6 +266,7 @@ pub fn advance(
     }
     if phase != Phase::Update {
         npc.presented_position = npc.position + npc.velocity * 0.5;
+        collide(npc, world.grid, true)?;
         return Ok(None);
     }
     if npc.dead {
@@ -284,6 +311,7 @@ pub fn advance(
     npc.velocity = npc.velocity * friction;
     npc.position = npc.position + npc.velocity;
     npc.presented_position = npc.position;
+    collide(npc, world.grid, false)?;
     let mut health = npc.health();
     npc.damage.advance(&mut health, phase)?;
     npc.hp = health.hp;

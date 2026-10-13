@@ -446,7 +446,11 @@ impl Npc {
             collision_damage,
             base_friction,
             shadow_size,
-            grid_collision_class: 3,
+            grid_collision_class: match selector.entity_type {
+                13 => content::NPC_13_GRID_CLASS,
+                18 => content::NPC_18_GRID_CLASS,
+                _ => content::NPC_244_GRID_CLASS,
+            },
             entity_collision_class: 4,
             can_shut_doors: if selector.entity_type == 13 {
                 content::NPC_13_CAN_SHUT_DOORS
@@ -472,7 +476,9 @@ impl Npc {
             }
             .into(),
             animation_clock: 0.0,
-            animation_playing: true,
+            // NPC config47f573 uses Sprite.SetFrame(default,0), which stops
+            // playback. Worm waits for the staged forced Appear at counter4.
+            animation_playing: selector.entity_type != 244,
             visible: true,
             saved_initialized_state: 0,
             appearance_effect_seed: None,

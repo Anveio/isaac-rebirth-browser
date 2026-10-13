@@ -234,6 +234,26 @@ fn main() {
             let can_shut_doors = attribute(tag, "shutdoors").unwrap_or("true") == "true";
             let boss = entity_number(&xml, kind, 0, "boss") != 0.0;
             generated.push_str(&format!("pub const NPC_{kind}_CAN_SHUT_DOORS: bool = {can_shut_doors};\npub const NPC_{kind}_BOSS: bool = {boss};\n"));
+            let points = entity_number(&xml, kind, 0, "numGridCollisionPoints") as u16;
+            let class = match attribute(tag, "gridCollision") {
+                Some("none") => 0,
+                Some("walls") => 3,
+                Some("ground") => 5,
+                None => {
+                    if points > 0 {
+                        5
+                    } else {
+                        3
+                    }
+                }
+                Some(value) => panic!("unsupported authored NPC grid class {value}"),
+            };
+            generated.push_str(&format!(
+                "pub const NPC_{kind}_GRID_CLASS: u32 = {class};\n"
+            ));
+            if kind == 244 {
+                generated.push_str(&format!("pub const NPC_244_GRID_POINTS: u16 = {points};\n"));
+            }
         }
         for field in [
             "baseHP",
