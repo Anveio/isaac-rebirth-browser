@@ -736,31 +736,8 @@ impl Game {
     fn held(&self, code: &str) -> bool {
         self.state.pressed.contains(code)
     }
-    /// The room/loot generator supplies a concrete authored selector. This is
-    /// an internal gameplay admission API, not a browser debug-spawn command.
-    pub fn admit_pickup(
-        &mut self,
-        variant: u32,
-        subtype: u32,
-        position: motion::WorldVector,
-        appear: bool,
-    ) -> Result<u32, String> {
-        let id = self.state.next_pickup;
-        let next = id
-            .checked_add(1)
-            .ok_or("pickup identity counter exhausted")?;
-        let pickup = Pickup::spawn(id, variant, subtype, position, appear)?;
-        self.state.room.pickups.push(pickup);
-        self.state.actor_scheduler.admit(actors::ActorRef {
-            kind: actors::ActorKind::Pickup,
-            id,
-        })?;
-        self.state.next_pickup = next;
-        self.refresh_stage_effects();
-        Ok(id)
-    }
-    /// Fresh authored contents admit before the player, preserving the native
-    /// room's actor order. Unsupported selectors stay with the room generator.
+    /// Fresh coin-room observations retain the existing player before the
+    /// authored pickups. Unsupported selectors stay with the room generator.
     pub fn admit_room_pickups(
         &mut self,
         selectors: &[room_spawns::SpawnSelector],
@@ -793,9 +770,13 @@ impl Game {
         Ok(())
     }
     /// Restored Room clones retain the collected animation and removed state;
-    /// their source handles precede Player0 just as on initial admission.
+    /// their source handles follow Player0 just as on initial coin admission.
     pub fn rebuild_room_actor_schedule(&mut self) -> Result<(), String> {
         self.state.actor_scheduler = actors::Scheduler::default();
+        self.state.actor_scheduler.admit(actors::ActorRef {
+            kind: actors::ActorKind::Player,
+            id: 0,
+        })?;
         for pickup in &self.state.room.pickups {
             if !pickup.removed {
                 self.state.actor_scheduler.admit(actors::ActorRef {
@@ -804,10 +785,6 @@ impl Game {
                 })?;
             }
         }
-        self.state.actor_scheduler.admit(actors::ActorRef {
-            kind: actors::ActorKind::Player,
-            id: 0,
-        })?;
         Ok(())
     }
     fn tick(&mut self) -> Result<(), String> {
@@ -885,6 +862,16 @@ impl Game {
             while let Some(actor) = self.state.actor_scheduler.get(index) {
                 self.advance_actor(actor, phase, !existing.contains(&actor), bomb_triggered)?;
                 index += 1;
+            }
+        }
+        // Source manager454df0 finishes its admission-fenced actor updates
+        // before4545d0 admits entity contacts. Coins can become idle in this
+        // full phase and collect against the player's newly moved position.
+        if phase == phase::Phase::Update {
+            for pickup in &mut self.state.room.pickups {
+                if pickup.touches(&self.state.player) {
+                    pickup.try_collect(&mut self.state.inventory);
+                }
             }
         }
         for impact in &mut self.state.impacts {

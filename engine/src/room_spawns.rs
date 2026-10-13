@@ -61,6 +61,9 @@ pub fn select(asset: &RoomAsset, spawn_seed: u32) -> Result<RoomSpawns, String> 
         return Err("room spawn dimensions or group count exceed source bounds".into());
     }
     let grid_width = width + 2;
+    if usize::from(grid_width) * usize::from(height + 2) > crate::mt::PADDED_GRID_CELLS {
+        return Err("room spawn grid exceeds the source padded grid capacity".into());
+    }
     let mut state = next11(spawn_seed);
     let tinted_x = state % u32::from(width) + 1;
     state = next11(state);
@@ -72,8 +75,8 @@ pub fn select(asset: &RoomAsset, spawn_seed: u32) -> Result<RoomSpawns, String> 
         if group.entries.is_empty() {
             continue;
         }
-        if group.x < 0 || group.y < 0 || group.x >= width as i16 || group.y >= height as i16 {
-            return Err("authored spawn position outside the room interior".into());
+        if group.x < -1 || group.y < -1 || group.x > width as i16 || group.y > height as i16 {
+            return Err("authored spawn position outside the padded room grid".into());
         }
         let mut total = 0.0_f32;
         for entry in &group.entries {
@@ -104,7 +107,7 @@ pub fn select(asset: &RoomAsset, spawn_seed: u32) -> Result<RoomSpawns, String> 
         };
         selectors.push(SpawnSelector {
             group_index: group_index as u16,
-            grid_index: group.x as u16 + 1 + (group.y as u16 + 1) * grid_width,
+            grid_index: (group.x + 1) as u16 + (group.y + 1) as u16 * grid_width,
             category,
             entity_type: entry.entity_type,
             variant: entry.variant,

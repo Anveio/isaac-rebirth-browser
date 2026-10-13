@@ -38,39 +38,16 @@ pub fn regular_subtype(variant: u32, subtype: u32, spawn_seed: u32) -> Result<u3
         state = crate::room_spawns::next35(state);
         state % bound
     };
-    match variant {
-        20 => {
-            let mut selected = if random(20) == 0 { 2 } else { 1 };
-            if random(100) == 0 {
-                selected = 3;
-            }
-            Ok(selected)
-        }
-        30 => Ok(if random(50) == 0 { 2 } else { 1 }),
-        40 => {
-            let mut selected = if random(7) == 0 { 2 } else { 1 };
-            if random(50) == 0 {
-                selected = 5;
-            }
-            if random(10) == 0 {
-                selected = 3;
-            }
-            Ok(selected)
-        }
-        10 => {
-            let mut selected = if random(2) == 0 { 2 } else { 1 };
-            if random(50) == 0 {
-                selected = 4;
-            }
-            if random(10) == 0 {
-                selected = if random(20) == 0 { 6 } else { 3 };
-            }
-            Ok(selected)
-        }
-        _ => Err(format!(
+    if variant != 20 {
+        return Err(format!(
             "pickup selector {variant}/0 requires its owning pool or subtype resolver"
-        )),
+        ));
     }
+    let mut selected = if random(20) == 0 { 2 } else { 1 };
+    if random(100) == 0 {
+        selected = 3;
+    }
+    Ok(selected)
 }
 
 pub fn definition(variant: u32, subtype: u32) -> Option<&'static Definition> {
@@ -114,15 +91,12 @@ impl Pickup {
         selector: &crate::room_spawns::SpawnSelector,
         appear: bool,
     ) -> Result<Option<Self>, String> {
-        if selector.entity_type != 5 || !matches!(selector.variant, 10 | 20 | 30 | 40) {
+        if selector.entity_type != 5 || selector.variant != 20 {
             return Ok(None);
         }
         let variant = u32::from(selector.variant);
         let subtype = regular_subtype(variant, u32::from(selector.subtype), selector.spawn_seed)?;
-        if !matches!(
-            (variant, subtype),
-            (10, 1 | 2 | 5) | (20, 1..=4) | (30, 1 | 3) | (40, 1 | 2)
-        ) {
+        if !matches!((variant, subtype), (20, 1..=4)) {
             return Ok(None);
         }
         let mut pickup = Self::spawn(id, variant, subtype, selector.position, appear)?;
@@ -220,9 +194,9 @@ impl Pickup {
         (dx * dx + dy * dy).sqrt() < radius
     }
 
-    /// Common free pickups. Health containers, pockets, shops and item effects
-    /// have separate admission rules and remain available until those admit.
-    pub fn try_collect(&mut self, player: &mut Player, inventory: &mut Inventory) -> bool {
+    /// Free regular coins. Other pickup families keep typed room selectors
+    /// until their source collection rules and live gates are admitted.
+    pub fn try_collect(&mut self, inventory: &mut Inventory) -> bool {
         if !self.can_collect || self.collected || self.removed || self.collection_delay != 0 {
             return false;
         }
@@ -230,21 +204,6 @@ impl Pickup {
             (20, 1..=4) => {
                 let amount = [1, 5, 10, 2][self.subtype as usize - 1];
                 inventory.coins = inventory.coins.saturating_add(amount).min(99);
-            }
-            (30, 1 | 3) => {
-                inventory.keys = inventory
-                    .keys
-                    .saturating_add(if self.subtype == 3 { 2 } else { 1 })
-                    .min(99)
-            }
-            (40, 1 | 2) => inventory.bombs = inventory.bombs.saturating_add(self.subtype).min(99),
-            (10, 1 | 2 | 5) if player.hp < player.max_hp => {
-                let amount = match self.subtype {
-                    1 => 2,
-                    2 => 1,
-                    _ => 4,
-                };
-                player.hp = player.hp.saturating_add(amount).min(player.max_hp);
             }
             _ => return false,
         }
