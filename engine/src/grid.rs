@@ -39,6 +39,156 @@ pub struct GridDescriptor {
     pub cells: Vec<GridCell>,
 }
 
+#[derive(Clone, Copy, Debug)]
+pub struct DoorCollision {
+    pub slot: u8,
+    pub open: bool,
+}
+
+/// Admit supported authored rocks with their actual local spawn seeds. The
+/// boundary/door entries are collision profiles; their independent actor RNG
+/// and callbacks are not represented by those geometry-only spawn seeds.
+/// Unsupported selectors stay verbatim and use the source fallback query.
+pub fn for_room(
+    asset: &crate::room_assets::RoomAsset,
+    spawns: &crate::room_spawns::RoomSpawns,
+    decoration_seed: u32,
+    doors: &[DoorCollision],
+) -> Result<GridDescriptor, String> {
+    let width = u16::from(asset.template.width) + 2;
+    let height = u16::from(asset.template.height) + 2;
+    let count = usize::from(width) * usize::from(height);
+    if width < 3 || height < 3 || count > MAX_GRID_CELLS {
+        return Err("authored room grid exceeds native cell bounds".into());
+    }
+    let mut cells = vec![GridCell::default(); count];
+    for (index, cell) in cells.iter_mut().enumerate() {
+        let column = index % usize::from(width);
+        let row = index / usize::from(width);
+        if column == 0
+            || column + 1 == usize::from(width)
+            || row == 0
+            || row + 1 == usize::from(height)
+        {
+            cell.entity = Some(GridEntity {
+                kind: 15,
+                variant: 0,
+                state: 0,
+                collision_class: 4,
+                spawn_seed: 0,
+            });
+        }
+    }
+    for door in doors {
+        let authored = asset
+            .doors
+            .iter()
+            .find(|candidate| {
+                candidate.enabled
+                    && crate::room_assets::door_slot(candidate.x, candidate.y) == Ok(door.slot)
+            })
+            .ok_or("admitted door has no authored boundary position")?;
+        let column = usize::try_from(authored.x + 1).map_err(|_| "negative door column")?;
+        let row = usize::try_from(authored.y + 1).map_err(|_| "negative door row")?;
+        if column >= usize::from(width) || row >= usize::from(height) {
+            return Err("authored door outside boundary grid".into());
+        }
+        cells[column + row * usize::from(width)].entity = Some(GridEntity {
+            kind: 16,
+            variant: 0,
+            state: if door.open { 2 } else { 1 },
+            collision_class: if door.open { 5 } else { 4 },
+            spawn_seed: 0,
+        });
+    }
+    for spawn in &spawns.selectors {
+        if spawn.category != crate::room_spawns::SpawnCategory::Grid {
+            continue;
+        }
+        let index = usize::from(spawn.grid_index);
+        let cell = cells
+            .get_mut(index)
+            .ok_or("authored grid selector outside room")?;
+        cell.selector = u32::from(spawn.entity_type);
+        // Tinted/special rock callbacks are not ordinary Rock admission.
+        if spawn.entity_type == 1000
+            && spawn.variant == 0
+            && spawn.subtype == 0
+            && spawn.grid_index != spawns.tinted_rock_index
+        {
+            cell.entity = Some(GridEntity {
+                kind: 2,
+                // Rock normal has three authored frames. Native SetType(-1)
+                // seeds RNG35 with (decoration seed + grid index) | 1.
+                variant: crate::room_spawns::next35(decoration_seed.wrapping_add(index as u32) | 1)
+                    % 3,
+                state: 1,
+                collision_class: 3,
+                spawn_seed: spawn.spawn_seed,
+            });
+        }
+    }
+    // Rock Init runs after admission with the complete grid available. It
+    // visits indices in order and skips rocks already linked by an earlier one.
+    for index in 0..count {
+        let Some(rock) = cells[index].entity.as_ref() else {
+            continue;
+        };
+        if rock.kind != 2 || rock.variant >= 1000 {
+            continue;
+        }
+        let mut random = crate::room_spawns::next35(rock.spawn_seed);
+        if random.is_multiple_of(4) {
+            continue;
+        }
+        let candidates = [
+            index + 1,
+            index + usize::from(width),
+            index + usize::from(width) + 1,
+        ];
+        let mut mask = 0_u32;
+        for (bit, neighbor) in candidates.iter().enumerate() {
+            if cells
+                .get(*neighbor)
+                .and_then(|cell| cell.entity.as_ref())
+                .is_some_and(|entity| entity.kind == 2 && entity.variant < 1000)
+            {
+                mask |= 1 << bit;
+            }
+        }
+        if mask == 7 {
+            random = crate::room_spawns::next35(random);
+            if !random.is_multiple_of(4) {
+                random = crate::room_spawns::next35(random);
+                mask -= random % 7;
+            }
+        }
+        let links: &[(usize, u32)] = match mask {
+            1 | 5 => &[(index, 1000), (candidates[0], 1001)],
+            2 | 3 | 6 => &[(index, 1002), (candidates[1], 1003)],
+            7 => &[
+                (index, 1004),
+                (candidates[0], 1005),
+                (candidates[1], 1006),
+                (candidates[2], 1007),
+            ],
+            _ => &[],
+        };
+        for &(at, variant) in links {
+            cells[at]
+                .entity
+                .as_mut()
+                .expect("selected ordinary rock exists")
+                .variant = variant;
+        }
+    }
+    Ok(GridDescriptor {
+        width,
+        height,
+        cells,
+    })
+}
+
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Grid {
     descriptor: GridDescriptor,
