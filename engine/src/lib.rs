@@ -382,7 +382,7 @@ pub struct Game {
     pub saved_game: mt::SavedGameSeeds,
     pub boot_level_grid: mt::DescriptorSeeds,
     pub saved_run: Option<saved_game::SavedRun>,
-    pub player_manager_pocket_rng: saved_game::PocketRng,
+    pub player_manager_secondary_rng: saved_game::PlayerManagerSecondaryRng,
 }
 
 impl Game {
@@ -489,7 +489,7 @@ impl Game {
             saved_game,
             boot_level_grid,
             saved_run: None,
-            player_manager_pocket_rng: saved_game::PocketRng::default(),
+            player_manager_secondary_rng: saved_game::PlayerManagerSecondaryRng::default(),
         };
         game.refresh_minimap();
         Ok(game)
@@ -986,7 +986,7 @@ impl Game {
         self.saved_game
             .descriptor_seeds
             .copy_rooms_from(&self.boot_level_grid, &rooms)?;
-        self.saved_game.player_rng_seed = self.player_manager_pocket_rng.seed;
+        self.saved_game.player_rng_seed = self.player_manager_secondary_rng.seed;
         let saved = saved_game::SavedRun::copy_from(&self.state);
         self.state.saved_run_summary = Some(saved.summary(empty, occupied_pending));
         self.saved_run = Some(saved);

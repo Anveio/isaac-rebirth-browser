@@ -7,11 +7,11 @@ use serde::{Deserialize, Serialize};
 /// It is distinct from the +0 manager RNG initialized from the startup seed.
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub struct PocketRng {
+pub struct PlayerManagerSecondaryRng {
     pub seed: u32,
 }
 
-impl Default for PocketRng {
+impl Default for PlayerManagerSecondaryRng {
     fn default() -> Self {
         Self { seed: 0xaa17_414f }
     }
