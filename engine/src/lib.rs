@@ -16,6 +16,7 @@ mod content;
 mod doors;
 mod effects;
 pub mod enemy_projectiles;
+pub mod fireplaces;
 pub mod floor;
 pub mod grid;
 mod grid_hazards;
@@ -341,6 +342,8 @@ pub struct State {
     pub tears: Vec<Tear>,
     pub enemy_projectiles: Vec<enemy_projectiles::EnemyProjectile>,
     pub next_enemy_projectile: u32,
+    pub fire_particles: Vec<fireplaces::Ember>,
+    pub next_fire_particle: u32,
     pub impacts: Vec<Impact>,
     pub fire_cooldown: i32,
     pub max_fire_delay: i32,
@@ -471,6 +474,8 @@ impl Game {
                 tears: Vec::new(),
                 enemy_projectiles: Vec::new(),
                 next_enemy_projectile: 1,
+                fire_particles: Vec::new(),
+                next_fire_particle: 1,
                 impacts: Vec::new(),
                 fire_cooldown: -1,
                 max_fire_delay: 10,
@@ -921,6 +926,8 @@ impl Game {
         self.state.next_tear = 1;
         self.state.enemy_projectiles.clear();
         self.state.next_enemy_projectile = 1;
+        self.state.fire_particles.clear();
+        self.state.next_fire_particle = 1;
         self.state.fire_cooldown = -1;
         self.state.max_fire_delay = 10;
         self.state.head_timer = -1;
@@ -1335,6 +1342,9 @@ impl Game {
         self.state
             .enemy_projectiles
             .retain(|projectile| !projectile.removed);
+        self.state
+            .fire_particles
+            .retain(|particle| !particle.removed);
         self.refresh_minimap();
         if phase.updates_nonplayers() {
             npcs::advance_room_clear(&mut self.state);
@@ -1354,6 +1364,11 @@ impl Game {
                 .enemy_projectiles
                 .iter()
                 .any(|projectile| projectile.id == actor.id),
+            actors::ActorKind::Effect => self
+                .state
+                .fire_particles
+                .iter()
+                .any(|particle| particle.id == actor.id),
             _ => true,
         });
         if phase != phase::Phase::Skipped {
@@ -1410,7 +1425,16 @@ impl Game {
             actors::ActorKind::Projectile => {
                 enemy_projectiles::advance_actor(&mut self.state, phase, actor.id)?
             }
-            _ => return Err("actor kind has no admitted runtime yet".into()),
+            actors::ActorKind::Effect => {
+                if let Some(particle) = self
+                    .state
+                    .fire_particles
+                    .iter_mut()
+                    .find(|particle| particle.id == actor.id)
+                {
+                    particle.advance(phase, &mut self.state.boot_lifecycle.shared)?;
+                }
+            }
         }
         Ok(())
     }
@@ -1444,6 +1468,54 @@ impl Game {
         let Some(index) = self.state.room.npcs.iter().position(|npc| npc.id == id) else {
             return Ok(());
         };
+        if self.state.room.npcs[index].kind == 33 {
+            let produced = fireplaces::advance(
+                &mut self.state.room.npcs[index],
+                phase,
+                &mut self.state.boot_lifecycle.shared,
+                &mut fireplaces::World {
+                    grid: self
+                        .state
+                        .room
+                        .grid
+                        .as_mut()
+                        .expect("admitted Fire has grid"),
+                    audio: &mut self.state.audio,
+                    system_counter: self.state.system_clock.system_counter.wrapping_sub(1),
+                },
+            )?;
+            if let Some(birth) = produced.particle {
+                let id = self.state.next_fire_particle;
+                self.state.next_fire_particle =
+                    id.checked_add(1).ok_or("Ember identity exhausted")?;
+                self.state.fire_particles.push(fireplaces::Ember::birth(
+                    id,
+                    birth,
+                    self.state.room.npcs[index].variant,
+                    self.state.game_update_count,
+                ));
+                self.state.actor_scheduler.admit(actors::ActorRef {
+                    kind: actors::ActorKind::Effect,
+                    id,
+                })?;
+            }
+            if let Some(birth) = produced.loot {
+                let subtype = fireplaces::loot_subtype(birth.variant, birth.spawn_seed)?;
+                let id = self.state.next_pickup;
+                let mut pickup = Pickup::spawn(id, birth.variant, subtype, birth.position, true)?;
+                pickup.spawn_seed = birth.spawn_seed;
+                pickup.birth_game_update = self.state.game_update_count;
+                self.state.next_pickup = id.checked_add(1).ok_or("Fire loot identity exhausted")?;
+                self.state.room.pickups.push(pickup);
+                let actor = actors::ActorRef {
+                    kind: actors::ActorKind::Pickup,
+                    id,
+                };
+                self.state.room.authored_actor_order.push(actor);
+                self.state.actor_scheduler.admit(actor)?;
+            }
+            return Ok(());
+        }
         if self.state.room.npcs[index].kind != 244 {
             return self.state.room.npcs[index].advance(
                 phase,

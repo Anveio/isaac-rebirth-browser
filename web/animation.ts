@@ -17,7 +17,7 @@ export interface Frame {
 }
 interface Animation { Name: string; FrameNum: number; Loop: boolean; RootAnimation: Frame[]; LayerAnimations: { LayerId: number; Visible: boolean; Frames: Frame[] }[]; NullAnimations?: { NullId: number; Visible: boolean; Frames: Frame[] }[]; }
 interface Actor { BaseSpritesheetPath: string; Spritesheets: { Id: number; Path: string }[]; Layers: { Id: number; SpritesheetId: number; Name: string }[]; Animations: Animation[]; }
-export interface DrawOptions { scale?: number; layers?: number[]; overrides?: Record<number, Partial<Frame>>; spritesheets?: Record<number, string>; pixelSnap?: number; }
+export interface DrawOptions { scale?: number; layers?: number[]; overrides?: Record<number, Partial<Frame>>; layerScales?: Record<number, readonly [number, number]>; spritesheets?: Record<number, string>; pixelSnap?: number; }
 interface Glyph { x: number; y: number; width: number; height: number; xoffset: number; yoffset: number; xadvance: number; page: number; }
 interface Font { lineHeight: number; pages: string[]; chars: Record<string, Glyph>; kernings: { first: number; second: number; amount: number }[]; }
 const normalize = (path: string) => path.replaceAll("\\", "/").replace(/\/\.\//g, "/").replace(/\/\.$/, "").replace(/^resources\//i, "").toLowerCase();
@@ -47,6 +47,10 @@ const urls = import.meta.glob([
   "../references/isaac/rebirth/resources/gfx/grid/door_13_librarydoor.png",
   "../references/isaac/rebirth/resources/gfx/grid/rocks_basement.png",
   "../references/isaac/rebirth/resources/gfx/grid/grid_spikes.png",
+  "../references/isaac/rebirth/resources/gfx/grid/grid_fireplace.png",
+  "../references/isaac/rebirth/resources/gfx/grid/effect_005_fire.png",
+  "../references/isaac/rebirth/resources/gfx/grid/effect_ember.png",
+  "../references/isaac/rebirth/resources/gfx/effects/effect_poopspawn.png",
   "../references/isaac/rebirth/resources/gfx/monsters/classic/monster_010_fly.png",
   "../references/isaac/rebirth/resources/gfx/effects/hangingguys.png",
   "../references/isaac/rebirth/resources/gfx/monsters/rebirth/monster_244_roundworm.png",
@@ -126,6 +130,11 @@ export class Assets {
       if (!layer.Visible || options.layers && !options.layers.includes(layer.LayerId)) continue;
       const found = sampleFrame(layer.Frames, tick, animation.Loop); if (!found) continue;
       const frame = overrideFrame(found, options.overrides?.[layer.LayerId]); if (!frame.Visible || frame.AlphaTint <= 0) continue;
+      const layerScale = options.layerScales?.[layer.LayerId];
+      if (layerScale) {
+        frame.XScale = Math.fround(frame.XScale * layerScale[0]);
+        frame.YScale = Math.fround(frame.YScale * layerScale[1]);
+      }
       const definition = actor.Layers.find(definition => definition.Id === layer.LayerId)!;
       const sheet = actor.Spritesheets.find(sheet => sheet.Id === definition.SpritesheetId)!;
       const imagePath = normalize(options.spritesheets?.[sheet.Id] ?? `${actor.BaseSpritesheetPath}/${sheet.Path}`);

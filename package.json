@@ -48,7 +48,8 @@
     "test:e2e:item-acquisition": "cargo build --manifest-path engine/Cargo.toml --locked --bin floor && bash tools/original/with-display.sh node tools/e2e/items.mjs --acquisition --count 2",
     "test:e2e:troll-bombs": "bash tools/original/with-display.sh node tools/e2e/troll-bombs.mjs",
     "test:e2e:bomb-pickups": "cargo build --manifest-path engine/Cargo.toml --locked --bin floor && bash tools/original/with-display.sh node tools/e2e/bomb-pickups.mjs --count 2",
-    "test:e2e:large-rooms": "cargo build --manifest-path engine/Cargo.toml --locked --bin floor && bash tools/original/with-display.sh node tools/e2e/large-rooms.mjs --count 2"
+    "test:e2e:large-rooms": "cargo build --manifest-path engine/Cargo.toml --locked --bin floor && bash tools/original/with-display.sh node tools/e2e/large-rooms.mjs --count 2",
+    "test:e2e:fireplaces": "bash tools/original/with-display.sh node tools/e2e/fireplaces.mjs"
   },
   "devDependencies": {
     "@playwright/test": "1.64.0",

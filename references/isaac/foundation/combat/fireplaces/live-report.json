@@ -1,0 +1,128 @@
+{
+  "schema": 1,
+  "status": "required-failures-retained",
+  "runtimeHead": "c6811a04e2e23b85181cee7643525546c42fbe38",
+  "comparatorHead": "c4d230ae2744120a61e87d10ac0be83f044079c3",
+  "comparatorSha256": "4532a7b9d42837c3ee2359c6b86a6fec9743b68cdac063a6c51967c7183293b8",
+  "nativeBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "artifactSha256": "3dbd3de19a114636752a8202cf54dca3a77f0acc1eed42fe5df63a973de45c23",
+  "scope": "Source-supported ordinary Fire construction, actual queued Tear/flag4 Bomb extinguish and persistent empty actor execute in both public-input games. Own actor motion/lifetime/birth fence/retirement laws pass. No whole paired gameplay/shared-RNG/HP/timing or pixel parity acceptance.",
+  "totals": {"freshCases":3,"generalPassed":825,"generalCheckpoints":852,"directChecks":191217,"requiredFailures":8525,"ownActorChecks":110642,"ownActorFailures":0},
+  "retainedFailureScope": ["General active Tear counts","Paired Fire countdown/HP/physical/queue/sprite/extinction timing","Paired Ember birth/presence/lifetime/manual frame/death/retirement","Shared seeds/numeric trajectory and global counter diagnostics","Prior W0/T1/H2/center mandatory regressions unchanged"],
+  "cases": [
+    {
+      "id": "paired-fire-w0-admission",
+      "status": "required-failures-retained",
+      "seed": "W0L0LYYM",
+      "freshOriginalStatus": "pass",
+      "productionBrowserStatus": "pass",
+      "nativeFrameTimeout": 60,
+      "artifactSha256": "3dbd3de19a114636752a8202cf54dca3a77f0acc1eed42fe5df63a973de45c23",
+      "sourcesStable": true,
+      "generalPair": {"passed":222,"checkpoints":223},
+      "direct": {"checks":23016,"failures":1066,"ownActorChecks":11438,"ownActorFailures":0,"diagnosticFields":974,"diagnosticFailures":617},
+      "execution": {
+        "native": {"admission":true,"tear-queue":false,"tear-drain":false,"bomb-queue":false,"extinguish":false,"empty-persistence":false,"ember-birth":true,"ember-first-full":true,"ember-retirement":true},
+        "browser": {"admission":true,"tear-queue":false,"tear-drain":false,"bomb-queue":false,"extinguish":false,"empty-persistence":false,"ember-birth":true,"ember-first-full":true,"ember-retirement":true}
+      },
+      "emberCoverage": {
+        "native": {"fastFreeze":116,"fastMotion":106,"fullMotion":106,"birthFence":20,"retirement":6},
+        "browser": {"fastFreeze":176,"fastMotion":147,"fullMotion":147,"birthFence":43,"retirement":6}
+      },
+      "completePairedLifetimes": 4,
+      "actualWitnesses": {
+        "native": {
+          "firstAdmission": {"label":"bomb-door-132","seeds":[3393345672,4165951145,2659702953]},
+          "firstQueuedDamage": null,
+          "firstExtinguished": null,
+          "lastPersistentEmpty": null
+        },
+        "browser": {
+          "firstAdmission": {"label":"bomb-door-132","seeds":[3393345672,4165951145,2659702953]},
+          "firstQueuedDamage": null,
+          "firstExtinguished": null,
+          "lastPersistentEmpty": null
+        }
+      },
+      "requiredFailureCounts": {"countdown":225,"activeCount":63,"pairedPresence":253,"ttl":154,"divisor":164,"frame":116,"playing":36,"dead":12,"initialTtl":10,"deathPresentation":7,"retirementPresentation":7,"birthPresentation":8,"firstFullPresentation":8,"birthWitness":3},
+      "proofSha256": {"case":"f96da38fbd4b49f8e9b4b23bdaa6b8a6452fa68e3e09028ae96dfa211f692445","originalManifest":"57a3fe640e14a2d3a39ecd1345a72f1d3d95d4d755582aa86dbbc82f6999ea75","browserManifest":"fe7fcb919c0cd6ac18ac114925d2092c216b719251c3d4a618d0dc318858b038","pairReport":"887906bf5e4196cfd446a9e3943a7a4c0f74892b4edd7ef25c165b37d5e5ce2a","directReport":"f9c85d890e3d4dd20e08c5064d1457f3643ea2874580a06251dda6eaf785b2f9"}
+    },
+    {
+      "id": "paired-fire-w0-tears",
+      "status": "required-failures-retained",
+      "seed": "W0L0LYYM",
+      "freshOriginalStatus": "pass",
+      "productionBrowserStatus": "pass",
+      "nativeFrameTimeout": 60,
+      "artifactSha256": "3dbd3de19a114636752a8202cf54dca3a77f0acc1eed42fe5df63a973de45c23",
+      "sourcesStable": true,
+      "generalPair": {"passed":351,"checkpoints":363},
+      "direct": {"checks":102629,"failures":4836,"ownActorChecks":61083,"ownActorFailures":0,"diagnosticFields":2647,"diagnosticFailures":2218},
+      "execution": {
+        "native": {"admission":true,"tear-queue":true,"tear-drain":true,"bomb-queue":false,"extinguish":true,"empty-persistence":true,"ember-birth":true,"ember-first-full":true,"ember-retirement":true},
+        "browser": {"admission":true,"tear-queue":true,"tear-drain":true,"bomb-queue":false,"extinguish":true,"empty-persistence":true,"ember-birth":true,"ember-first-full":true,"ember-retirement":true}
+      },
+      "emberCoverage": {
+        "native": {"fastFreeze":738,"fastMotion":676,"fullMotion":673,"birthFence":109,"retirement":37},
+        "browser": {"fastFreeze":799,"fastMotion":732,"fullMotion":726,"birthFence":118,"retirement":45}
+      },
+      "completePairedLifetimes": 34,
+      "actualWitnesses": {
+        "native": {
+          "firstAdmission": {"label":"fire-depart-73","seeds":[3393345672,4165951145,2659702953]},
+          "firstQueuedDamage": {"label":"fire-tear-35","spawnSeed":3393345672,"hp":5,"state":8,"gridClass":3,"entityClass":4,"active":true,"dead":false,"visible":true,"orderedDamage":[{"amount":3.5,"flags":0,"sourceType":2}]},
+          "firstExtinguished": {"label":"fire-tear-81","spawnSeed":3393345672,"hp":1,"state":3,"gridClass":0,"entityClass":0,"active":true,"dead":false,"visible":true},
+          "lastPersistentEmpty": {"label":"fire-empty-20","spawnSeed":3393345672,"hp":1,"state":3,"gridClass":0,"entityClass":0,"active":true,"dead":false,"visible":true}
+        },
+        "browser": {
+          "firstAdmission": {"label":"fire-depart-73","seeds":[3393345672,4165951145,2659702953]},
+          "firstQueuedDamage": {"label":"fire-tear-35","spawnSeed":3393345672,"hp":5,"state":8,"gridClass":3,"entityClass":4,"active":true,"dead":false,"visible":true,"orderedDamage":[{"amount":3.5,"flags":0,"sourceType":2}]},
+          "firstExtinguished": {"label":"fire-tear-103","spawnSeed":3393345672,"hp":1,"state":3,"gridClass":0,"entityClass":0,"active":true,"dead":false,"visible":true},
+          "lastPersistentEmpty": {"label":"fire-empty-20","spawnSeed":3393345672,"hp":1,"state":3,"gridClass":0,"entityClass":0,"active":true,"dead":false,"visible":true}
+        }
+      },
+      "requiredFailureCounts": {"countdown":110,"ttl":730,"divisor":765,"activeCount":227,"frame":674,"pairedPresence":1347,"playing":156,"dead":72,"position":90,"velocity":92,"tearSeed":6,"hp":66,"gridClass":22,"entityClass":22,"state":22,"animation":22,"animationFrame":52,"renderOrderOffset":22,"actorRngState":22,"selector":74,"pendingDamage":2,"orderedDamage":2,"animationPlaying":22,"initialTtl":45,"deathPresentation":39,"retirementPresentation":39,"birthPresentation":45,"firstFullPresentation":45,"birthWitness":4},
+      "proofSha256": {"case":"8b7823f1191a70d5d04c4b1f72c065507595c02e1c47a948b2f7fd4c9e85737b","originalManifest":"0aa5407a643ba4733c588448d04f64f119763db0cab3b973fcc98952a6eab6c4","browserManifest":"0e650965fcb39fc84ddc5b273ea7996be5e1b467afec38dc50905ea1fa1fa369","pairReport":"003cfb82b0a372d376eee5d897a65278bab43d46d51863fa36262fb0c91b3daf","directReport":"c946d3d0e969e33b9720d22e3bec4b7379c417fd8b88b537a5d77ac564a21798"}
+    },
+    {
+      "id": "paired-fire-w0-blast",
+      "status": "required-failures-retained",
+      "seed": "W0L0LYYM",
+      "freshOriginalStatus": "pass",
+      "productionBrowserStatus": "pass",
+      "nativeFrameTimeout": 60,
+      "artifactSha256": "3dbd3de19a114636752a8202cf54dca3a77f0acc1eed42fe5df63a973de45c23",
+      "sourcesStable": true,
+      "generalPair": {"passed":252,"checkpoints":266},
+      "direct": {"checks":65572,"failures":2623,"ownActorChecks":38121,"ownActorFailures":0,"diagnosticFields":1841,"diagnosticFailures":1507},
+      "execution": {
+        "native": {"admission":true,"tear-queue":false,"tear-drain":false,"bomb-queue":true,"extinguish":true,"empty-persistence":true,"ember-birth":true,"ember-first-full":true,"ember-retirement":true},
+        "browser": {"admission":true,"tear-queue":false,"tear-drain":false,"bomb-queue":true,"extinguish":true,"empty-persistence":true,"ember-birth":true,"ember-first-full":true,"ember-retirement":true}
+      },
+      "emberCoverage": {
+        "native": {"fastFreeze":513,"fastMotion":452,"fullMotion":452,"birthFence":95,"retirement":28},
+        "browser": {"fastFreeze":466,"fastMotion":409,"fullMotion":409,"birthFence":88,"retirement":25}
+      },
+      "completePairedLifetimes": 18,
+      "actualWitnesses": {
+        "native": {
+          "firstAdmission": {"label":"fire-depart-73","seeds":[3393345672,4165951145,2659702953]},
+          "firstQueuedDamage": {"label":"fire-blast-119","spawnSeed":2659702953,"hp":5,"state":8,"gridClass":3,"entityClass":4,"active":true,"dead":false,"visible":true,"orderedDamage":[{"amount":60,"flags":4,"sourceType":4}]},
+          "firstExtinguished": {"label":"fire-blast-121","spawnSeed":2659702953,"hp":1,"state":3,"gridClass":0,"entityClass":0,"active":true,"dead":false,"visible":true},
+          "lastPersistentEmpty": {"label":"fire-blast-140","spawnSeed":2659702953,"hp":1,"state":3,"gridClass":0,"entityClass":0,"active":true,"dead":false,"visible":true}
+        },
+        "browser": {
+          "firstAdmission": {"label":"fire-depart-73","seeds":[3393345672,4165951145,2659702953]},
+          "firstQueuedDamage": {"label":"fire-blast-119","spawnSeed":2659702953,"hp":5,"state":8,"gridClass":3,"entityClass":4,"active":true,"dead":false,"visible":true,"orderedDamage":[{"amount":60,"flags":4,"sourceType":4}]},
+          "firstExtinguished": {"label":"fire-blast-121","spawnSeed":2659702953,"hp":1,"state":3,"gridClass":0,"entityClass":0,"active":true,"dead":false,"visible":true},
+          "lastPersistentEmpty": {"label":"fire-blast-140","spawnSeed":2659702953,"hp":1,"state":3,"gridClass":0,"entityClass":0,"active":true,"dead":false,"visible":true}
+        }
+      },
+      "requiredFailureCounts": {"countdown":86,"ttl":478,"divisor":477,"activeCount":134,"frame":410,"pairedPresence":683,"playing":118,"dead":40,"combatClearCountdown":22,"countablePolicy":22,"velocity":2,"position":1,"initialTtl":31,"deathPresentation":23,"retirementPresentation":23,"birthPresentation":32,"firstFullPresentation":32,"birthWitness":9},
+      "proofSha256": {"case":"7b077e05ef0b92fb3391e7a88bcc961287b565737c95ad3c2b53e3b31ff5ee50","originalManifest":"0cd9d3628086e24bcd71ac76ec04fabe43e1ce1ae315b29698e682c6088f0c96","browserManifest":"8907b03ab43e090bfcf8066dedfcb70311836e5dfeae0cdcc4e3d1772732bc1f","pairReport":"d4c0f69a526ef4d10d9ec814ddc575e58ab14ef8a4041e324c53c58c0eab601a","directReport":"b103296be97298cf6a71387d58d82468736101782c097951e7aad68da9a61b37"}
+    }
+  ],
+  "previousRejectedComparatorReport": "provenance-gate-correction.json",
+  "rawProofDirectory": "/workspace/isaac-worktrees/combat/.cache/e2e/fireplaces/source-stable-cohort",
+  "captureArchivePolicy": "Original PNG/manifests/tapes and direct bodies retained; large inactive JSON may be gzip archived with exact decompressed SHA and restore tooling."
+}

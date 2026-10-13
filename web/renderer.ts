@@ -73,6 +73,10 @@ export class Renderer {
               AlphaTint: keeper.tint[3]! * 255, RedOffset: keeper.offsets[0]! * 255,
               GreenOffset: keeper.offsets[1]! * 255, BlueOffset: keeper.offsets[2]! * 255,
             } } });
+        } else if (npc.fireplace) {
+          this.assets.draw(ctx, "gfx/033.000_fireplace.anm2", npc.animation,
+            npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46, npc.animationClock,
+            { scale: 0.65, layerScales: { 1: [npc.fireplace.flameScale, npc.fireplace.flameScale] } });
         } else {
           this.assets.draw(ctx, npc.kind === 13 ? "gfx/013.000_fly.anm2" : npc.kind === 18 ? "gfx/018.000_attack fly.anm2" : "gfx/244.000_round worm.anm2", npc.animation,
             npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46, npc.animationFrame, { scale: 0.65 });
@@ -82,6 +86,10 @@ export class Renderer {
         if (!projectile.removed && projectile.animation)
           this.assets.draw(ctx, "gfx/009.000_projectile.anm2", projectile.animation,
             projectile.presentedPosition.x * 0.65 + 32, (projectile.presentedPosition.y + projectile.height) * 0.65 - 46, projectile.animationFrame, { scale:0.65 });
+      for (const particle of state.fireParticles)
+        if (!particle.removed && particle.visible)
+          this.assets.draw(ctx, "gfx/1000.066_ember particle.anm2", "Idle",
+            particle.presentedPosition.x * 0.65 + 32, particle.presentedPosition.y * 0.65 - 46, particle.animationClock, { scale: 0.65 });
       this.drawPlayer(ctx, state);
       for (const tear of state.tears)
         this.assets.draw(ctx, TEAR, "RegularTear6", Math.round(tear.x * 2) / 2, Math.round(tear.y * 2) / 2, tear.age);

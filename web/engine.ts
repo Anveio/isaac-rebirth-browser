@@ -19,7 +19,7 @@ export interface Tear {
   };
 }
 export interface Impact { id: number; x: number; y: number; age: number; }
-export interface ActorRef { kind: "player" | "tear" | "bomb" | "pickup" | "npc" | "effect"; id: number; }
+export interface ActorRef { kind: "player" | "tear" | "bomb" | "pickup" | "npc" | "projectile" | "effect"; id: number; }
 export interface MtState { words: number[]; index: number; }
 export interface GridSeedSample { roomRecord: number; gridIndex: number; seeds: [number, number]; }
 export interface BootLifecycle {
@@ -125,7 +125,11 @@ export interface Room {
     state: number; frameAge: number; animationFrame: number; animation: string; animationClock: number; animationPlaying: boolean; visible: boolean; savedInitializedState: number; shadowSize: number; dead: boolean; removed: boolean;
     damage: {pendingDamage: number; pendingFlags: number};
     keeper: {anchor: {x: number; y: number}; entityFlags: number; stateFrame: number; countdown: number;
-      animation: string; animationClock: number; animationPlaying: boolean; tint: number[]; offsets: number[]} | null }[];
+      animation: string; animationClock: number; animationPlaying: boolean; tint: number[]; offsets: number[]} | null;
+    fireplace: {anchor: {x: number; y: number}; authoredGridIndex: number; entityFlags: number; countdown: number;
+      actorRngState: number; renderOrderOffset: number; flameScale: number; flameRenderMode: number;
+      particleBirthCount: number; lastParticleBirth: {parentId: number; spawnSeed: number; position: {x: number; y: number}; velocity: {x: number; y: number}} | null;
+      lootBirth: {parentId: number; variant: number; spawnSeed: number; position: {x: number; y: number}} | null} | null }[];
   authoredActorOrder: {kind: "npc" | "pickup"; id: number}[];
   combatClear: boolean; combatClearCountdown: number; combatShutDoorSlots: number[];
   grid: { width: number; height: number; cells: {selector: number; entity: {kind: number; variant: number; state: number; collisionClass: number; spawnSeed: number} | null}[] } | null;
@@ -183,6 +187,12 @@ export interface State {
   nextPickup: number;
   minimap: { cells: { x: number; y: number; visibility: "unvisited" | "visited" | "current" }[] };
   tears: Tear[]; impacts: Impact[]; fireCooldown: number; nextTear: number;
+  fireParticles: {id: number; parentNpc: number; parentType: number; parentVariant: number; spawnSeed: number; birthGameUpdate: number;
+    position: {x: number; y: number}; presentedPosition: {x: number; y: number}; velocity: {x: number; y: number};
+    hp: number; maxHp: number; collisionRadius: number; collisionMass: number; collisionDamage: number; baseFriction: number;
+    gridCollisionClass: number; entityCollisionClass: number; visible: boolean;
+    lifetimeDivisor: number; timeToLive: number; fullUpdates: number; animationClock: number; animationPlaying: boolean;
+    dead: boolean; removed: boolean}[];
   maxFireDelay: number; headTimer: number; actorScheduler: { actors: ActorRef[] };
   bombs: Bomb[]; explosions: Explosion[]; nextBomb: number; damageCooldown: number;
   bombPlacementCooldown: { remainingUpdates: number }; bombActionWasDown: boolean;
