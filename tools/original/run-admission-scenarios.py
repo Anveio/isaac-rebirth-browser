@@ -34,7 +34,19 @@ def tape(case):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--count', type=int, default=2)
+    parser.add_argument('--validate-original', type=Path)
     args = parser.parse_args()
+    if args.validate_original:
+        spec = importlib.util.spec_from_file_location('admission_validator', ROOT / 'tools/original/foundation-clock-verify.py')
+        validator = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(validator)
+        manifest = json.loads(args.validate_original.read_text())
+        failures = validator.validate_run(manifest)
+        print(json.dumps({'status': 'fail' if failures else 'pass', 'failures': failures,
+            'issuedInputs': len(manifest.get('inputs', [])),
+            'acknowledgedPresentations': len(manifest.get('presentations', [])),
+            'stepNs': manifest.get('clock', {}).get('stepNs')}))
+        raise SystemExit(1 if failures else 0)
     if not 2 <= args.count <= 16:
         raise SystemExit('Requires2..16 unfiltered recorded OS-random cases')
     cases = [

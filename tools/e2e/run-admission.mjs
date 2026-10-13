@@ -21,6 +21,7 @@ const output = resolve(value('--output') || join(ROOT, '.cache/e2e/run-admission
 const sources = ['tools/e2e/run-admission.mjs', 'tools/original/run-admission-scenarios.py',
   'tools/original/run-admission-observe.py', 'tools/original/native-identity.py', 'tools/original/state-observer.py',
   'tools/original/foundation-clock-run.py', 'tools/original/foundation-clock-gate.c', 'tools/original/foundation-seeds.py',
+  'tools/original/foundation-clock-verify.py', 'tools/original/foundation-random-seeds.py', 'tools/original/foundation-clock-scenarios.py',
   'tools/original/debug-run.py', 'tools/original/with-display.sh', 'tools/foundation/verify.mjs',
   'tools/foundation/browser-evidence.mjs', 'tools/foundation/browser.mjs', 'tools/foundation/production-server.mjs',
   'engine/src/run_admission.rs', 'engine/src/lib.rs', 'engine/src/phase.rs', 'engine/src/motion.rs',
@@ -76,6 +77,9 @@ try {
       assert.equal(native.status, 'pass'); assert.deepEqual(native.failures, []);
       assert.deepEqual(native.tape, c.tape); assert.equal(native.seedValue, c.runSeed);
       assert.equal(native.bootEpochSeed, c.bootEpochSeed); assert.equal(native.seedReadbackMatchesCodec, true);
+      result.originalInputProvenance = JSON.parse((await run('python3',
+        ['tools/original/run-admission-scenarios.py', '--validate-original', nativePath], {cwd: ROOT})).stdout);
+      assert.equal(result.originalInputProvenance.status, 'pass');
       const baseline = native.debugObservations.find(row => row.context.label === 'before-run-confirmation');
       assert.ok(baseline, 'Original must observe the actual pre-confirmation boundary');
       const nativeRows = native.debugObservations.filter(row => row.context.label.startsWith('step-')

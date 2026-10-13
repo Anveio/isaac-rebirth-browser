@@ -1,0 +1,200 @@
+{
+  "schema": 1,
+  "status": "fail",
+  "producerHead": "f711fbc961ca9a37a88dad946ec2084c2c129d06",
+  "baseMainHead": "f79338a6ebee7e095bfbd5df183c43da8e5fee56",
+  "nativeBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "production": {
+    "sha256": "fa86a65280ede95da479a4ce98839ae30969fdc9b9bfdb8f42911c25bb0c55c6",
+    "files": 938,
+    "source": "/workspace/isaac-worktrees/e2e-ci/dist",
+    "scope": "Immutable snapshot of production build bytes; source/native replay equality is checked separately"
+  },
+  "wasmSha256": "7c04a7a9c7a84863fbd290fccf14f6584d02f7f6cc250533af8b38cccbe34496",
+  "build": {
+    "path": ".cache/coordination/game-age-research/clock-check-build.log",
+    "sha256": "9e8d252cbea2c40fc1efa358d6f7c3ad309218cd667588fe9eeba1a1b9bcfb29"
+  },
+  "report": {
+    "path": ".cache/e2e/run-admission/first-four-case-live/report.json",
+    "sha256": "d4a9f895ca4e9086b0e3e6f8759e8bac624c2937d4ec53e3a755bb55b9c3eb95"
+  },
+  "capturedScenarioBank": {
+    "path": ".cache/e2e/run-admission/first-four-case-live/scenarios.json",
+    "sha256": "3660e2bcdf0a8bd72f0b2efac852cc2922f746a64958e2a28370f0d713dd1b27"
+  },
+  "recordedReplayBank": {
+    "path": "references/isaac/foundation/run-admission/scenarios.json",
+    "sha256": "3388d1115984cca07ba9e7a03c462b70928d4981910450a7b0e50d668e83f658"
+  },
+  "phases": 1368,
+  "checks": 12504,
+  "requiredFailures": 640,
+  "failureFields": {
+    "own-relative-request-clock-ms": 308,
+    "initial-fade-f32": 100,
+    "primary-controls-enabled-raw-byte": 4,
+    "absolute-active-game-age": 228
+  },
+  "pairedFunctionalPasses": 0,
+  "inputAndBackendProvenancePasses": 4,
+  "sourceStability": "pass",
+  "independentAudit": {
+    "path": ".cache/coordination/game-age-research/clock-cohort-audit.json",
+    "sha256": "3f70a6af43815dd5cad0f2999cf07405ec7afdc88de935d6f41283a43100a647"
+  },
+  "independentVerifier": {
+    "path": ".cache/coordination/game-age-research/audit-clock-cohort.py",
+    "sha256": "75f1d579ce912832845f94b2a4edc81172aa79f4954d6cb331dd2829b431a9ee"
+  },
+  "nativeValidationSidecar": {
+    "path": ".cache/coordination/game-age-research/clock-native-validation.json",
+    "sha256": "000e8d9841c2144f5154f78405cddc7db37f1c3bb921cb26f0aaac4629fbf370"
+  },
+  "scope": "All four fresh real original and production WASM pairs executed342dense public presentations each. Sidecar independently reproduces everyfield failure, complete publiccommand plan and manualseed/reset/boot/clock/callback evidence, with full source-object and gzip/hash readback. Actual-X11/clock/seed validation is added after capture with no report/runtime/native-input change or recapture.",
+  "precisionNormalization": {
+    "onlyF32Fields": [
+      "initialFade",
+      "fadeRate",
+      "player native-world position projected through existing motion origin/scale",
+      "player native-world velocity projected through existing motion scale"
+    ],
+    "neverNormalized": [
+      "seed/ID fields",
+      "Game age",
+      "System counter/parity",
+      "clockmilliseconds/nanoseconds",
+      "booleans/flags"
+    ]
+  },
+  "cases": [
+    {
+      "name": "fixed-idle",
+      "code": "T1PK6Y0W",
+      "phases": 342,
+      "checks": 3126,
+      "failures": 243,
+      "failureFields": {
+        "own-relative-request-clock-ms": 77,
+        "initial-fade-f32": 50,
+        "primary-controls-enabled-raw-byte": 2,
+        "absolute-active-game-age": 114
+      },
+      "commands": 389,
+      "callbackStates": 4,
+      "inputTraceTruncated": false,
+      "stateHistoryTruncated": true,
+      "backendStateTruncated": false,
+      "nativeManifest": {
+        "path": "/workspace/isaac-worktrees/e2e-ci/.cache/e2e/run-admission/first-four-case-live/fixed-idle/original/manifest.json",
+        "bytes": 1005436,
+        "sha256": "05a0a340245360bb5c1ae39604334c57c8605645ae7ac02c357967431c58b512"
+      },
+      "browserEvidence": {
+        "path": "/workspace/isaac-worktrees/e2e-ci/.cache/e2e/run-admission/first-four-case-live/fixed-idle/browser-states.json.gz",
+        "encoding": "gzip",
+        "rawBytes": 90060465,
+        "rawSha256": "4c972d3c35a679f88797043743e372d6919fb15f68a244e8017bf0b2e9acb89f",
+        "archiveBytes": 11053600,
+        "archiveSha256": "48fed213529316d2432bb60dc586b3ffc41d2897406423fa2438d3f0b631a2e5",
+        "scope": "Every selected phase retains its full actual snapshot, native comparisons, complete public commands and backend callbacks. JSON is written in lossless chunks without truncating snapshots or creating one whole-cohort string. Separate trace caps are disclosed; decompress before replay or inspection"
+      }
+    },
+    {
+      "name": "opposite-phase-held-input",
+      "code": "QSYVKMSE",
+      "phases": 342,
+      "checks": 3126,
+      "failures": 77,
+      "failureFields": {
+        "own-relative-request-clock-ms": 77
+      },
+      "commands": 392,
+      "callbackStates": 4,
+      "inputTraceTruncated": false,
+      "stateHistoryTruncated": true,
+      "backendStateTruncated": false,
+      "nativeManifest": {
+        "path": "/workspace/isaac-worktrees/e2e-ci/.cache/e2e/run-admission/first-four-case-live/opposite-phase-held-input/original/manifest.json",
+        "bytes": 1015441,
+        "sha256": "fa4e174bf64095a86f6d6f999c1d7f97e379a1a8af6dec4ad02ef85c35a7de2f"
+      },
+      "browserEvidence": {
+        "path": "/workspace/isaac-worktrees/e2e-ci/.cache/e2e/run-admission/first-four-case-live/opposite-phase-held-input/browser-states.json.gz",
+        "encoding": "gzip",
+        "rawBytes": 89923300,
+        "rawSha256": "ab6d7d34507f55462471c73b0d6aca264384fd021085c7678950624a59ab28f3",
+        "archiveBytes": 11139001,
+        "archiveSha256": "9ac6b837f1bdfa2832f36030a2b680fd0c1e16130148c056cb36d002b759ee8e",
+        "scope": "Every selected phase retains its full actual snapshot, native comparisons, complete public commands and backend callbacks. JSON is written in lossless chunks without truncating snapshots or creating one whole-cohort string. Separate trace caps are disclosed; decompress before replay or inspection"
+      }
+    },
+    {
+      "name": "os-0",
+      "code": "ZPA39JY2",
+      "phases": 342,
+      "checks": 3126,
+      "failures": 243,
+      "failureFields": {
+        "own-relative-request-clock-ms": 77,
+        "initial-fade-f32": 50,
+        "primary-controls-enabled-raw-byte": 2,
+        "absolute-active-game-age": 114
+      },
+      "commands": 389,
+      "callbackStates": 3,
+      "inputTraceTruncated": false,
+      "stateHistoryTruncated": true,
+      "backendStateTruncated": false,
+      "nativeManifest": {
+        "path": "/workspace/isaac-worktrees/e2e-ci/.cache/e2e/run-admission/first-four-case-live/os-0/original/manifest.json",
+        "bytes": 1003399,
+        "sha256": "4cb4794f0f5cf172a0acf4c1fbaf9ecb1b1f552dc30ea6163d5159c467f3cbc8"
+      },
+      "browserEvidence": {
+        "path": "/workspace/isaac-worktrees/e2e-ci/.cache/e2e/run-admission/first-four-case-live/os-0/browser-states.json.gz",
+        "encoding": "gzip",
+        "rawBytes": 89827476,
+        "rawSha256": "df19efb154e3b1d3f39ddf316aacd4c771aa1206e23d966adde7c34a3a38867f",
+        "archiveBytes": 11073383,
+        "archiveSha256": "8bb98db82e01251798b71f6035a5d87f1eb4d3da52b7ee6b76a5746a9e0ec993",
+        "scope": "Every selected phase retains its full actual snapshot, native comparisons, complete public commands and backend callbacks. JSON is written in lossless chunks without truncating snapshots or creating one whole-cohort string. Separate trace caps are disclosed; decompress before replay or inspection"
+      }
+    },
+    {
+      "name": "os-1",
+      "code": "XZQZSDD4",
+      "phases": 342,
+      "checks": 3126,
+      "failures": 77,
+      "failureFields": {
+        "own-relative-request-clock-ms": 77
+      },
+      "commands": 392,
+      "callbackStates": 3,
+      "inputTraceTruncated": false,
+      "stateHistoryTruncated": true,
+      "backendStateTruncated": false,
+      "nativeManifest": {
+        "path": "/workspace/isaac-worktrees/e2e-ci/.cache/e2e/run-admission/first-four-case-live/os-1/original/manifest.json",
+        "bytes": 1011139,
+        "sha256": "c72b6261425354efbfd92825fa902d60a433f0a3bfe8f9f1a727b99cc247ea51"
+      },
+      "browserEvidence": {
+        "path": "/workspace/isaac-worktrees/e2e-ci/.cache/e2e/run-admission/first-four-case-live/os-1/browser-states.json.gz",
+        "encoding": "gzip",
+        "rawBytes": 90040510,
+        "rawSha256": "c82bc9dd455fefbdd018b4c899177e6c59b8f6913241e429facda415e38c3412",
+        "archiveBytes": 11167106,
+        "archiveSha256": "a5162691ba45acf6c61676c24113595fd7d1e4d4ea683b86d7616ec6bbc53611",
+        "scope": "Every selected phase retains its full actual snapshot, native comparisons, complete public commands and backend callbacks. JSON is written in lossless chunks without truncating snapshots or creating one whole-cohort string. Separate trace caps are disclosed; decompress before replay or inspection"
+      }
+    }
+  ],
+  "unaccepted": [
+    "All640 source differences remain blocking. Relative-clock discrepancies are retained, not labeled equal. Idle cases retain one-full age error; no source-derived baseline/offset/skip.",
+    "Omitted pre-Title clock/cutscene lifecycle and complete original pixel parity.",
+    "585500 stage-title and593660 reset callback effects; early-pause admission before fadeguard. Controls byte is not Entity31d visibility.",
+    "Complete other freeze/death/exit/transition/load/stat/cache/familiar/effect behavior remains in separate owners."
+  ]
+}

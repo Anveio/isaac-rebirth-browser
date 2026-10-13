@@ -38,10 +38,31 @@ parity, player world position/velocity and relative clocks remain required;
 every mismatch is retained. Complete selected snapshots, commands and backend
 callback states are streamed losslessly with independently recorded hashes.
 
-Live paired acceptance is pending. The [source contract](../references/isaac/foundation/run-admission/source-contract.json)
+The first frozen four-case cohort executes all 1,368 dense phases and 12,504
+checks on artifact `fa86a65280ede95da479a4ce98839ae30969fdc9b9bfdb8f42911c25bb0c55c6`.
+All four gates remain failed with 640 required differences: 308 relative-clock,
+100 fade, four controls-byte and 228 active-age comparisons. The two idle
+cases end one full update behind the original. The opposite-phase held-input
+cases match their owned fade/controls/age and physical fields, while their
+relative-clock differences still block acceptance. Every selected outcome
+remains required. All four original/browser input and callback histories are
+complete; independent full archive readback reproduces every required error.
+
+The [live record](../references/isaac/foundation/run-admission/first-live.json)
+pins the unchanged report, exact producer, raw/archive hashes and the separate
+native-validation sidecar. The sidecar additionally verifies every actual
+issued/consumed X11 event, clock acknowledgement and source seed readback.
+Those checks now also run in the default live gate. No recapture, native field,
+report rewrite, tolerance or counter/time offset was used to strengthen them.
+
+The [source contract](../references/isaac/foundation/run-admission/source-contract.json)
 pins exact static functions and preserves the first source-only 339-state
 trace, including its historical controls-byte label and declared-hash
 limitation. Stage-title `585500` and input-reset `593660` callback effects
 remain explicitly pending in the runtime. Saved-run Load, the omitted native
 introductory cutscene and complete freeze/death/transition behavior are
 separate; unmatched startup ages or clocks cannot be repaired with a baseline.
+Early pause remains unaccepted: the current zero-tick Escape handler can open
+pause before the initial full guard, whereas the source fade guard precedes
+pause admission. The pending `593660` reset also prevents claiming general
+held movement/aim semantics at the completion boundary from controls alone.
