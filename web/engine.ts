@@ -72,6 +72,7 @@ export interface Pickup {
   x: number; y: number; actor: string; animation: string; animationFrame: number; animationPlaying: boolean;
   canCollect: boolean; collected: boolean; removed: boolean; collisionRadius: number; shadowSize: number; collectionDelay: number;
   age: number; birthGameUpdate: number; charge: number; touched: boolean;
+  chest: {rng: ItemRng; gridCollisionClass: number; entityCollisionClass: number; price: number; cooldown: number} | null;
 }
 export interface RunIntroduction { age: number; active: boolean; }
 export interface PauseMenu {

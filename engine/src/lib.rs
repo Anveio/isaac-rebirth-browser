@@ -10,6 +10,7 @@ use std::collections::{BTreeMap, BTreeSet};
 pub mod actors;
 pub mod audio;
 pub mod bombs;
+pub mod chests;
 pub mod combat;
 mod content;
 mod doors;
