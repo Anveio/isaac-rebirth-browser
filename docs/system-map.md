@@ -171,8 +171,15 @@ unaccepted. The registered large-room gate always launches both games fresh.
 [Large-room evidence](large-room-evidence.md) and
 [Chest evidence](chest-evidence.md) retain the distinct capture and recovery scopes.
 [Camera evidence](large-room-camera.md) records the separate fresh scope.
-The authored Familiar catalogue includes Leech, Poof and Heart resources;
-resource admission does not establish Familiar gameplay behavior.
+The authored Familiar catalogue includes Leech, Poof and Heart resources.
+The following typed Leech/Poof leaf implements cache admission, actual child
+RNG ownership, explicit birth updates, appearance and empty-room owner deadband.
+Its four fresh pairs complete 80,878 checks with 25,131 required failures; all
+input and source-stability guards pass. Sequence, placement and shared-seed
+gaps remain blocking. Ember motion rows compare ordinal candidates when
+identity or counts differ and do not establish a same-actor motion defect.
+Retained Familiar IDs do not establish room-return update/grid or navigation
+parity. [Familiar evidence](familiars.md) retains those scopes.
 
 Ordinary Fire33 now admits real actors, drains queued Tear/Bomb damage,
 extinguishes to persistent HP1 and produces independently scheduled Ember66
@@ -185,12 +192,16 @@ Fresh-run save admission now owns destination Clear, ItemPool copy, supported
 Room.Save mutation, all 135 ordinary Level rows and supported Player fields.
 The required SavedGame gate checks actual current-row seeds and complete live
 grid occupancy. Its corrected six-case comparison remains red on 115 required
-fields, with copy ownership passing separately. Occupied grid constructors,
-variable ambient decorations, post-acquisition Player state, load/continue and
+fields, with copy ownership passing separately. A separate fresh GridBase leaf
+now owns supported starting-room construction and seven-field Room.Save
+records. Its six pairs retain 254 required record/seed/occupancy failures while
+copy ownership and provenance pass; strict recorded W0 passes 18/18 on that
+leaf's artifact. Variable ambient decorations, other grid callbacks,
+post-acquisition Player state, load/continue and
 durable browser saves remain open. [SavedGame evidence](../references/isaac/foundation/saved-game/README.md)
 retains the original reports and the correction that made those gaps blocking.
 
-CI discovers all twenty-nine registered live suites and runs separate jobs with
+CI discovers all thirty-one registered live suites and runs separate jobs with
 `fail-fast: false`, preserving each result and evidence. The first matrix run
 completed floors, weapons, boot MT and pickups successfully while retaining
 core and traversal failures. Build, typecheck, assets, matrix and strict Clippy
@@ -204,16 +215,31 @@ The full 24-suite local run at detached checkpoint `cb36018` finished with
 14 passing suites and five completed gameplay failures. Floor setup failed before capture;
 disk exhaustion interrupted RoundWorm grading and prevented the final Level,
 item and bomb-pickup suites from capturing. Partial RoundWorm comparisons also
-retain gameplay failures. These environmental attempts remain recorded, with
-separate corrected reruns planned. This run uses its own immutable production
-artifact; later leaves do not inherit its results.
-This is a build checkpoint, not a fresh all-suite passing result.
+retain gameplay failures. Separate corrected runs at the same immutable
+`cb36018` checkpoint pass five floor, six Level, four item-selection and six
+bomb-pickup cases. A fresh four-case Worm rerun remains red: 50,420 required
+fields, 1,821 failures and 651/882 passing paired checkpoints. Combining these
+separate completed scopes gives 18 passing and six gameplay-failing suites;
+the original 14/10 attempt stays unchanged. Later leaves do not inherit those
+results, and no complete current-main acceptance is claimed.
+The current main also contains reviewed Monstro source corrections, typed
+Familiar and Grid leaves; the `472b154` build artifact predates those changes.
 Complete gameplay RNG, other floors/characters, persistence, later music
 callers/cutscenes and whole-game parity remain open. GitHub required-check
 enforcement is unavailable for this private repository's current plan. The
 hosted run at `7783e58` was refused before any job started because GitHub
-reported an account billing/spending-limit issue; local live verification
-continues with the same required contracts.
+reported an account billing/spending-limit issue. That refusal is historical.
+[Run 38449613521](https://github.com/Anveio/isaac-rebirth-browser/actions/runs/38449613521)
+completed on former PR2 head `83228caa`: discovery and 20 suites pass, eight
+suites fail and rock-blast is cancelled. Seven failures retain gameplay gaps;
+key-doors fails while serializing W31 evidence after 936 comparison attempts,
+before its field-failure list and some provenance/backend guards are recorded.
+That row's field outcome is unknown; its other case passes 750 phases.
+The cancelled rock-blast job retains partial gameplay failures. A streamed
+complete-evidence writer is now integrated, with a separate 1,814-snapshot
+actual-browser storage proof; the failed hosted attempt remains failed.
+[Current evidence scopes](../references/isaac/foundation/runtime-progress/history/20261013-main-live-scopes.json)
+pin the historical reports, source heads and distinct artifacts.
 
 ## Initial live paired verification after unit-suite removal
 
