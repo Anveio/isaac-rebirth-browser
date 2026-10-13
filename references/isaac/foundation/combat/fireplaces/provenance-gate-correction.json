@@ -1,0 +1,76 @@
+{
+  "schema": 1,
+  "status": "required-failures-retained",
+  "correction": "Read and validate actual paired report build.sha256 before recording artifact provenance; previous gate.production lookup threw after checks and produced no report.",
+  "runtimeHeadFrozen": "c6811a04e2e23b85181cee7643525546c42fbe38",
+  "artifactFrozen": "3dbd3de19a114636752a8202cf54dca3a77f0acc1eed42fe5df63a973de45c23",
+  "previousComparatorSha256": "0b83a281603f9d013db43e651cbe5fd945e8aa65cfa901232068dabdfa0e27d4",
+  "newComparatorSha256": "4532a7b9d42837c3ee2359c6b86a6fec9743b68cdac063a6c51967c7183293b8",
+  "verification": "node --check plus direct comparator replay on immutable completed source/browser captures; no recapture or runtime change.",
+  "originalManifestSha256": "57a3fe640e14a2d3a39ecd1345a72f1d3d95d4d755582aa86dbbc82f6999ea75",
+  "browserManifestSha256": "fe7fcb919c0cd6ac18ac114925d2092c216b719251c3d4a618d0dc318858b038",
+  "pairedReportSha256": "cae0ea36fb0f4c6fa184dec168cd3fbf65dd24b42aadfe32f09230d2ce26d36a",
+  "oldRejectedDriverReportSha256": "b6ab74e49d223925f7d10b79ac19a9cfb87c512fd538af6d86ea9d736d652b85",
+  "newDirectReportSha256": "f9c85d890e3d4dd20e08c5064d1457f3643ea2874580a06251dda6eaf785b2f9",
+  "generalPair": {
+    "passed": 222,
+    "checkpoints": 223,
+    "requiredFailure": {
+      "label": "random-resumed",
+      "field": "tears.alive",
+      "native": 0,
+      "browser": 1
+    }
+  },
+  "directComparison": {
+    "checks": 23016,
+    "requiredFailures": 1066,
+    "ownActorChecks": 11438,
+    "ownActorFailures": 0,
+    "diagnosticFields": 974,
+    "diagnosticFailures": 617
+  },
+  "requiredFailuresScope": "Actual3 Fire cooldown draws and paired Ember presence/birth/TTL/divisor/manual frame/playing/dead/retirement differences stay blocking. Shared RNG alignment is not accepted.",
+  "execution": {
+    "native": {
+      "admission": true,
+      "tear-queue": false,
+      "tear-drain": false,
+      "bomb-queue": false,
+      "extinguish": false,
+      "empty-persistence": false,
+      "ember-birth": true,
+      "ember-first-full": true,
+      "ember-retirement": true
+    },
+    "browser": {
+      "admission": true,
+      "tear-queue": false,
+      "tear-drain": false,
+      "bomb-queue": false,
+      "extinguish": false,
+      "empty-persistence": false,
+      "ember-birth": true,
+      "ember-first-full": true,
+      "ember-retirement": true
+    }
+  },
+  "emberCoverage": {
+    "native": {
+      "fastFreeze": 116,
+      "fastMotion": 106,
+      "fullMotion": 106,
+      "birthFence": 20,
+      "retirement": 6
+    },
+    "browser": {
+      "fastFreeze": 176,
+      "fastMotion": 147,
+      "fullMotion": 147,
+      "birthFence": 43,
+      "retirement": 6
+    }
+  },
+  "completePairedLifetimes": 4,
+  "remaining": "Fresh tear/blast queue/drain/extinction/persistence cases not yet executed at this comparator correction."
+}
