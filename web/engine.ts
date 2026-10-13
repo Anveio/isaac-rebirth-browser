@@ -9,6 +9,7 @@ export interface Player {
 }
 export interface Tear { id: number; x: number; y: number; vx: number; vy: number; age: number; }
 export interface Impact { id: number; x: number; y: number; age: number; }
+export interface ActorRef { kind: "player" | "tear" | "bomb" | "pickup" | "npc" | "effect"; id: number; }
 export interface Bomb { id: number; x: number; y: number; age: number; }
 export interface RunIntroduction { age: number; active: boolean; }
 export interface PauseMenu {
@@ -61,6 +62,7 @@ export interface State {
   player: Player; room: Room; stageEffects: StageEffects; inventory: { coins: number; bombs: number; keys: number };
   minimap: { cells: { x: number; y: number; visibility: "unvisited" | "visited" | "current" }[] };
   tears: Tear[]; impacts: Impact[]; fireCooldown: number; nextTear: number;
+  maxFireDelay: number; headTimer: number; actorScheduler: { actors: ActorRef[] };
   bombs: Bomb[]; explosions: Bomb[]; nextBomb: number; damageCooldown: number;
   runIntroduction: RunIntroduction; pauseMenu: PauseMenu;
 }
