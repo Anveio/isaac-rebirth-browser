@@ -61,12 +61,24 @@ classes/flags/health/friction and main Sprite fields match. Actual Player motion
 and all 347 child/count/temporary/queue fields match across 1,470 compared phases.
 
 Required reds expose the absent initial LightBeam33 and OS-grant Effect68,
-Ember presence/motion/shared seed differences, source actor order/sequence,
+Ember presence/shared-seed differences, source actor order/sequence,
 Leech shared-direction placement, and Poof shared seed/RNG30/placement/sequence.
+The Ember comparator consumes the first unused browser Ember. When counts,
+order or seeds differ, its position/velocity rows compare ordinal candidates;
+they do not establish a motion defect in the same actor. Those raw rows and
+all required failures remain retained. Presence, actor order and sequence gaps
+remain blocking independently of that association limit.
 `references/isaac/foundation/familiars/initial-live.json` pins the full failing
 report, immutable production artifact, complete tape, native/browser gzip bytes
 and restoration journals. No failing source capture has been replaced or called
 passing. The compiler/build check passed; the fresh game gate did not.
+
+The separate frozen-evidence audit verifies every native/browser gzip digest
+and size, intended tape, complete DOM command plan, actual backend callback
+state and all 39 captured source hashes against producer307701df Git objects.
+It also rechecks all 347 count/child RNG owners and temporary/queue fields in
+every phase. Its report and verifier hashes are recorded beside the original
+report; audit success does not change the required parity failure.
 
 Navigation/target/contact/healing,
 other Familiar subclasses/modifiers, missing real shared/spawn consumers,

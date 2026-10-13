@@ -15,6 +15,18 @@
     "path": ".cache/e2e/familiars/first-four-case-live/report.json",
     "sha256": "540162cbde6f03b2605adaefb8ac9b7105b4347416fcb36a741c0a3b05cf556f"
   },
+  "independentEvidenceAudit": {
+    "status": "evidence audit pass; required paired runtime parity fail",
+    "path": ".cache/coordination/item-research/leech-admission/first-familiar-proof-audit.json",
+    "sha256": "ff06422b2f9c91902a8cc60e2625b911bf628ff22af531e77a85eb7cc74b1853",
+    "verifierPath": ".cache/coordination/item-research/leech-admission/audit-first-familiar-proof.py",
+    "verifierSha256": "5f6ee7c3bbcfa399206bd1e69a86d6e7a9fc8877c6429d5174c441624040ba57",
+    "checks": "All four native/browser gzip digests and sizes, independent intended tapes and command plans, manual seed/boot inputs, every actual backend callback state, all 39 captured source hashes versus producer Git objects, and all 347 count/child RNG/temporary/queue fields in every phase"
+  },
+  "associationScope": {
+    "ember": "The captured comparator consumes the first unused browser Ember. When count/order/seed diverges, position and velocity are ordinal candidate comparisons, not established same-actor trajectories. All raw rows and 25,131 required failures remain unchanged. Actual presence/order/sequence/shared-seed gaps remain required.",
+    "reportUnchanged": true
+  },
   "sourceStability": {
     "status": "pass",
     "allPinnedSourcesMatchProducerGitObjects": true,
@@ -78,7 +90,7 @@
   ],
   "blockingGaps": [
     "Source initial LightBeam Effect33 and OS-acquisition Effect68 absent",
-    "Actual complete actor order/room sequence and Ember presence/motion/shared-seed differences",
+    "Actual complete actor order/room sequence and Ember presence/shared-seed differences; its position/velocity rows have ordinal candidate association limits",
     "Leech shared-direction placement and source sequence mismatch",
     "Poof shared seed/RNG30/placement/source sequence mismatch"
   ],
