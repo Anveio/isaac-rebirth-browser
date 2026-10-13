@@ -154,6 +154,7 @@ fn familiar_catalog(path: &Path, entities_xml: &str) -> String {
     let mut output = String::from("pub static DEFINITIONS: &[Definition] = &[\n");
     for (entity_type, variant, actor) in [
         (3, 56, "gfx/003.056_leech.anm2"),
+        (1000, 7, "gfx/1000.007_blood splat.anm2"),
         (1000, 15, "gfx/1000.015_poof01.anm2"),
         (1000, 49, "gfx/1000.049_heart.anm2"),
     ] {
@@ -324,6 +325,13 @@ fn main() {
             projectile_clip["FrameNum"].as_u64().unwrap()
         ));
     }
+    let level2 = &npc_clips["gfx/213.000_level2fly.anm2"]["Animations"][0];
+    assert_eq!(level2["Name"], "Idle");
+    assert_eq!(level2["Loop"], true);
+    generated.push_str(&format!(
+        "pub const LEVEL2_FLY_IDLE_FRAMES: u32 = {};\n",
+        level2["FrameNum"].as_u64().unwrap()
+    ));
     for clip in npc_clips["gfx/020.000_monstro.anm2"]["Animations"]
         .as_array()
         .expect("Monstro clips missing")
@@ -407,7 +415,7 @@ fn main() {
         "pub const EMBER_IDLE_FRAMES: u32 = {};\n",
         ember["FrameNum"].as_u64().unwrap()
     ));
-    for kind in [9, 13, 18, 20, 33, 244] {
+    for kind in [9, 13, 18, 20, 33, 214, 244] {
         let tag = xml
             .split("<entity ")
             .find(|tag| {
@@ -437,7 +445,7 @@ fn main() {
             generated.push_str(&format!(
                 "pub const NPC_{kind}_GRID_CLASS: u32 = {class};\n"
             ));
-            if matches!(kind, 20 | 244) {
+            if matches!(kind, 20 | 214 | 244) {
                 generated.push_str(&format!(
                     "pub const NPC_{kind}_GRID_POINTS: u16 = {points};\n"
                 ));

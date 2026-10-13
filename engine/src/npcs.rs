@@ -13,6 +13,14 @@ use crate::{
 use serde::{Deserialize, Serialize};
 use std::sync::OnceLock;
 
+pub struct World<'a> {
+    pub game_counter: u32,
+    pub player: WorldVector,
+    pub grid: &'a Grid,
+    pub audio: &'a mut crate::audio::AudioState,
+    pub system_counter: u32,
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Npc {
@@ -53,6 +61,7 @@ pub struct Npc {
     pub keeper: Option<crate::keepers::KeeperState>,
     pub fireplace: Option<crate::fireplaces::FireplaceState>,
     pub monstro: Option<crate::monstro::MonstroState>,
+    pub level2_fly: Option<crate::level2_flies::Level2FlyState>,
 }
 
 const ZERO: WorldVector = WorldVector { x: 0.0, y: 0.0 };
@@ -346,6 +355,7 @@ pub(crate) fn post_contact_grid(state: &mut State) -> Result<(), String> {
         }
         match npc.kind {
             20 => crate::monstro::post_contact_grid(npc, &grid)?,
+            214 => crate::level2_flies::post_contact_grid(npc, &grid)?,
             244 => crate::roundworm::post_contact_grid(npc, &grid)?,
             // Source class3 clamps the center first. These authored families
             // have zero grid collision points, so their sample loop is empty.
@@ -449,6 +459,9 @@ pub(crate) fn direction(random: &mut Mt19937) -> WorldVector {
 
 impl Npc {
     pub fn from_selector(id: u32, selector: &SpawnSelector) -> Result<Option<Self>, String> {
+        if let Some(fly) = crate::level2_flies::from_selector(id, selector)? {
+            return Ok(Some(fly));
+        }
         if let Some(monstro) = crate::monstro::from_selector(id, selector)? {
             return Ok(Some(monstro));
         }
@@ -564,6 +577,7 @@ impl Npc {
             keeper: None,
             fireplace: None,
             monstro: None,
+            level2_fly: None,
         }))
     }
 
@@ -577,10 +591,8 @@ impl Npc {
     pub fn advance(
         &mut self,
         phase: Phase,
-        full_counter: u32,
         random: &mut Mt19937,
-        player: WorldVector,
-        grid: &Grid,
+        world: &mut World<'_>,
     ) -> Result<(), String> {
         if self.kind == 17 {
             return crate::keepers::advance(self, phase);
@@ -603,7 +615,13 @@ impl Npc {
             if self.frame_age == 0 {
                 // First Appear update temporarily sets AI state0 and executes
                 // its initializer at4f9a41 before the real Poof15 seed.
-                friction = self.fly_ai(full_counter, random, player, grid, friction * 0.01);
+                friction = self.fly_ai(
+                    world.game_counter,
+                    random,
+                    world.player,
+                    world.grid,
+                    friction * 0.01,
+                );
                 self.appearance_effect_seed = Some(random.next_u32());
             }
             self.frame_age += 1;
@@ -615,7 +633,13 @@ impl Npc {
                 friction = self.base_friction;
             }
         } else {
-            friction = self.fly_ai(full_counter, random, player, grid, friction);
+            friction = self.fly_ai(
+                world.game_counter,
+                random,
+                world.player,
+                world.grid,
+                friction,
+            );
         }
         self.velocity = self.velocity * friction;
         self.position = self.position + self.velocity;
@@ -629,8 +653,18 @@ impl Npc {
         self.hp = health.hp;
         if self.hp <= 0.0 {
             self.dead = true;
-            // Zero-gib Fly definitions still admit BloodSplat7 with a real
-            // shared seed at 0x44622e. Its remaining FX constructor is separate.
+            // Source44641d zero-gib sound precedes the real Blood Splat seed.
+            world.audio.admit(
+                random,
+                world.system_counter,
+                crate::audio::SoundRequest {
+                    id: 30,
+                    volume: 0.8,
+                    delay: 2,
+                    looping: false,
+                    pitch: 1.0,
+                },
+            );
             self.death_effect_seed = Some(random.next_u32());
         }
         if !self.position.is_finite() || !self.velocity.is_finite() {
