@@ -316,6 +316,20 @@ impl Grid {
                 .map_or(cell.selector != 0, |entity| entity.kind != 7)
     }
 
+    /// Type9 uses the same class4 center query, but442da1..daa admits
+    /// collision class2 only for type2. Fresh enemy projectiles accept3..5.
+    pub fn contacts_enemy_projectile(&self, point: WorldVector) -> bool {
+        let Some(index) = self.index(point) else {
+            return false;
+        };
+        let cell = &self.descriptor.cells[index];
+        matches!(self.collision(index), 3..=5)
+            && cell
+                .entity
+                .as_ref()
+                .map_or(cell.selector != 0, |entity| entity.kind != 7)
+    }
+
     pub fn collision(&self, index: usize) -> u32 {
         let Some(cell) = self.descriptor.cells.get(index) else {
             return 4;

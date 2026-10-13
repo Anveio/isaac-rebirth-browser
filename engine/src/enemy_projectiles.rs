@@ -120,7 +120,7 @@ impl EnemyProjectile {
         }
         // Common post-update ground query, read by the following Update.
         self.grid_contact =
-            self.grid_collision_class == 4 && grid.contacts_regular_tear(self.position);
+            self.grid_collision_class == 4 && grid.contacts_enemy_projectile(self.position);
         if !self.position.is_finite() || !self.height.is_finite() || !self.falling_speed.is_finite()
         {
             return Err("hostile projectile motion overflowed".into());
