@@ -107,9 +107,14 @@ pub(crate) fn evaluate_cache(state: &mut State) -> Result<(), String> {
     }
     if flags & RANGE != 0 {
         // 5127c8 resets all three actual tear fields;5128d3/5128f3
-        // subtract5 per permanent RoidRage14 from the cached height.
-        state.player_stats.tear_height = (-23.75_f32 - count(owner, 14) as f32 * 5.0).min(-7.0);
-        state.player_stats.tear_falling_speed = 0.0;
+        // subtract5 per permanent RoidRage14. The separate512a10/512a85
+        // aggregate stores count*.5 in c90;512afc/512b0d then subtracts
+        // half that stored falling speed from c8c. Preserve both roundings.
+        let roid = count(owner, 14) as f32;
+        state.player_stats.tear_falling_speed = roid * 0.5_f32;
+        state.player_stats.tear_height = ((-23.75_f32 - roid * 5.0_f32)
+            - state.player_stats.tear_falling_speed * 0.5_f32)
+            .min(-7.0);
         state.player_stats.tear_falling_acceleration = 0.0;
         if !has_unmapped_owner(owner, RANGE, &[14]) {
             handled |= RANGE;
