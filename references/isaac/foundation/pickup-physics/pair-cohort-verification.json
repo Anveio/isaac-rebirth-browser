@@ -28,7 +28,7 @@
   "completeDefaultCohortAttempted": true,
   "completePresentationsCompared": true,
   "gateSourcesStable": true,
-  "provenance": "Every raw native archive, scoped report, direct browser snapshot archive and trace archive was independently SHA/size verified after capture. The complete reset/menu/seed/key/tick command tape and seed text/code/value/flags were rechecked. Native read-only observations cover every requested gameplay presentation. Input and backend callback states are uncapped; the 32 MiB trace state histories are explicitly capped, while independent per-presentation snapshots are complete.",
+  "provenance": "Every raw native archive, scoped report, direct browser snapshot archive and trace archive was independently SHA/size verified after capture. The complete reset/menu/seed/key/tick command tape and seed text/code/value/flags were rechecked. Native read-only observations cover every requested gameplay presentation. Complete input and backend callback states fit their explicit caps without truncation; ordinary 32 MiB state history is capped, while selected per-phase snapshots are complete.",
   "liveScope": "Motion comparisons here exercise naturally authored Bomb40 pickups. Other ordinary families share the pinned common branch without new blast-motion acceptance. Variant100 home, Chest and other family owners remain separate.",
   "observedContracts": [
     "All observed regular pickup friction, collision classes, collection and animation boundaries match in all seven cases.",
