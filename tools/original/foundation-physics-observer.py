@@ -8,6 +8,8 @@ landmarks identify reference fields, not portable production addresses.
 import importlib.util, os, math, signal, struct, time
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[2]
+identity_spec=importlib.util.spec_from_file_location('native_identity',ROOT/'tools/original/native-identity.py')
+identity=importlib.util.module_from_spec(identity_spec);identity_spec.loader.exec_module(identity)
 spec=importlib.util.spec_from_file_location('reader', ROOT/'tools/original/state-observer.py')
 reader=importlib.util.module_from_spec(spec); spec.loader.exec_module(reader)
 MT_INDEX=0x8e6b64
@@ -25,6 +27,7 @@ def observe(pid, context):
  parent=next(line.split(':',1)[1].strip() for line in Path(f'/proc/{pid}/status').read_text().splitlines() if line.startswith('PPid:'))
  if int(parent)!=os.getpid() or not context.get('gateBlocked'): raise PermissionError('Requires owned child blocked at a presentation gate')
  if owner!=pid: owner=pid; tracked=[]
+ native_sha=identity.native_binary_sha256(pid)
  os.kill(pid, signal.SIGSTOP)
  try:
   deadline=time.monotonic()+2
@@ -99,7 +102,7 @@ def observe(pid, context):
         'shotSpeed':vals[0], 'damage':vals[3], 'tearHeight':vals[4], 'fallingSpeed':vals[5], 'fallingAcceleration':vals[6],
         'eye':struct.unpack('<b',read(address+0xd70,1))[0]})
    return {'schema':1,'status':'pass','scope':'reference-only bounded native writable MT state and temporally identified tear fields; no original memory is modified or passed to the port',
-      'memoryWritten':False,'executableMappingsRead':False,'simulationTicks':False,
+      'nativeBinarySha256':native_sha,'memoryWritten':False,'executableMappingsRead':False,'simulationTicks':False,
       'players':players,'systemPhaseCounter':system_phase_counter,'gameUpdateCounter':struct.unpack('<I',read(game+0xce9f4,4))[0] if allowed(game+0xce9f4,4) else None,'mtIndex':mt_index,'mtState':mt_state,'poolCandidates':len(tracked),'scanBytes':scan_bytes,'tears':tears}
   finally:os.close(fd)
  finally:os.kill(pid,signal.SIGCONT)

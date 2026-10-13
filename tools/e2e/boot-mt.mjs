@@ -14,6 +14,9 @@ import { waitForReady } from '../foundation/verify.mjs';
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const run = promisify(execFile);
 const ORIGINAL_SHA = '724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13';
+const GATE_SOURCES = ["tools/e2e/boot-mt.mjs", "tools/original/boot-mt-observer.py", "tools/original/native-identity.py", "tools/original/state-observer.py", "tools/original/foundation-clock-run.py", "tools/original/foundation-clock-gate.c", "tools/original/foundation-seeds.py", "tools/original/debug-run.py", "tools/original/with-display.sh", "tools/foundation/browser.mjs", "tools/foundation/production-server.mjs", "tools/foundation/verify.mjs"];
+const sourceHashes = async () => Object.fromEntries(await Promise.all(GATE_SOURCES.map(async path => [path, createHash('sha256').update(await readFile(join(ROOT, path))).digest('hex')])));
+const gateSources = await sourceHashes();
 const value = flag => { const i = process.argv.indexOf(flag); return i < 0 ? undefined : process.argv[i + 1]; };
 const output = resolve(value('--output') || join(ROOT, '.cache/e2e/boot-mt', String(Date.now())));
 const count = Number(value('--count') || 4);
@@ -39,7 +42,7 @@ await writeFile(join(output, 'scenarios.json'), JSON.stringify({ schema: 1, entr
 
 const production = await startProductionServer();
 const browser = await chromium.launch(browserLaunchOptions());
-const report = { schema: 1, status: 'running', originalBinarySha256: ORIGINAL_SHA, production: production.build,
+const report = { schema: 1, status: 'running', gateSources, originalBinarySha256: ORIGINAL_SHA, production: production.build,
   graphics: await inspectBrowserGraphics(browser),
   scope: 'Causal startup and initialized menu fields at Title: full 624-word MT state, saved player seed, nine saved grid pairs, menu run seed and 179 stat poses. Later menu navigation, run/room/ambient random routing and tear fall uniforms remain incomplete.', cases: [] };
 try {
@@ -58,6 +61,7 @@ try {
       assert.equal(native.status, 'pass'); assert.deepEqual(native.failures, []);
       assert.equal(native.bootEpochSeed, scenario.bootEpochSeed); assert.equal(native.seedReadbackMatchesCodec, true);
       const observed = native.debugObservations.find(row => row.context.label === 'title').observation;
+      assert.equal(observed.nativeBinarySha256, ORIGINAL_SHA);
       assert.equal(observed.memoryWritten, false); assert.equal(observed.executableMappingsRead, false);
       assert.equal(observed.title.loaded, true);
       page = await browser.newPage(); const errors = []; page.on('pageerror', error => errors.push(String(error)));
@@ -85,6 +89,9 @@ try {
       await writeFile(join(output, 'report.json'), JSON.stringify(report, null, 2) + '\n');
     }
   }
+  report.gateSourcesEnd = await sourceHashes();
+  report.gateSourcesStable = JSON.stringify(report.gateSources) === JSON.stringify(report.gateSourcesEnd);
+  assert.equal(report.gateSourcesStable, true, 'Boot MT gate source files changed during capture');
   report.status = report.cases.every(c => c.status === 'pass') ? 'pass' : 'fail';
   if (report.status === 'fail') throw new AggregateError(report.cases.filter(c => c.status === 'fail').map(c => new Error(`${c.name}: ${c.error}`)), 'Selected boot lifecycle cases failed; every case was attempted');
 } catch (error) { report.status = 'fail'; report.error = String(error); throw error; }

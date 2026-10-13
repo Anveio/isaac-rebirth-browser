@@ -2,10 +2,13 @@
 import importlib.util,os,signal,struct,time
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[2]
+identity_spec=importlib.util.spec_from_file_location('native_identity',ROOT/'tools/original/native-identity.py')
+identity=importlib.util.module_from_spec(identity_spec);identity_spec.loader.exec_module(identity)
 spec=importlib.util.spec_from_file_location('state_reader',ROOT/'tools/original/state-observer.py');reader=importlib.util.module_from_spec(spec);spec.loader.exec_module(reader)
 def observe(pid,context):
  parent=next(line.split(':',1)[1].strip() for line in Path(f'/proc/{pid}/status').read_text().splitlines() if line.startswith('PPid:'))
  if int(parent)!=os.getpid() or not context.get('gateBlocked'):raise PermissionError('Requires owned child at presentation gate')
+ native_sha=identity.native_binary_sha256(pid)
  os.kill(pid,signal.SIGSTOP)
  try:
   deadline=time.monotonic()+2
@@ -35,7 +38,7 @@ def observe(pid,context):
    title={'loaded':loaded,'menuScreen':u32(menus+0x38) if menus else None}
    if loaded:title.update({'position':f32(anm+0x120),'speed':f32(anm+0x2d8),'playing':bool(read(anm+0x124,1)[0]),'menuRunSeed':u32(menus+0x60d00),'statsSamples':[{'index':i,'pose':u32(menus+0x64488+0x310+4*i)} for i in range(179)]})
    return {'schema':1,'status':'pass','scope':'bounded original writable GameState seeds, MT state and source-located title animation clock; no memory writes or gameplay input',
-    'memoryWritten':False,'executableMappingsRead':False,'mtIndex':u32(0x8e6b64),'mtState':list(struct.unpack('<624Q',read(0x8ed680,624*8))),
+    'nativeBinarySha256':native_sha,'memoryWritten':False,'executableMappingsRead':False,'mtIndex':u32(0x8e6b64),'mtState':list(struct.unpack('<624Q',read(0x8ed680,624*8))),
     'managerCounter':u32(manager+0x2efa0),'stateSeed9688':u32(saved+0x9688),'gridSeedSamples':samples,'title':title}
   finally:os.close(fd)
  finally:os.kill(pid,signal.SIGCONT)
