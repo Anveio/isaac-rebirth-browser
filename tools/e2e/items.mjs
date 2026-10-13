@@ -44,7 +44,7 @@ const scenarios = replayOriginal ? JSON.parse(await readFile(join(replayOriginal
     ...(acquisition ? ['--acquisition'] : [])], { cwd: ROOT, timeout: 600000 })).stdout);
 assert.equal(scenarios.schema, 1);
 assert.equal(scenarios.bootEpochSeed, 1700000000);
-assert.ok(scenarios.cases.length >= 4 && scenarios.cases.length <= 6);
+assert.ok(scenarios.cases.length >= 4 && scenarios.cases.length <= (acquisition ? 8 : 6));
 assert.equal(new Set(scenarios.cases.map(item => item.name)).size, scenarios.cases.length);
 for (const item of scenarios.cases) {
   assert.match(item.name, /^[a-zA-Z0-9_-]{1,32}$/);

@@ -135,7 +135,13 @@ across 50,900 fields. The wider hostile AI and downstream death effects remain
 open. Natural pedestal selection now follows authored pool weights and
 depletion: four pairs match 10,296 selection checks and 542 presentations,
 followed by 7,588 independent room-context checks on those same captures.
-Pickup acquisition, cache/stat callbacks and familiar behavior remain separate.
+First free acquisition now owns the deferred Pickup queue/grant, all 347 item
+counts, authored inventory grants, first active charge and retained empty-altar
+motion. A fresh browser recovery against four complete original recordings
+passes 70,696 scoped checks; initial and intermediate failures remain retained.
+Its separate required acquisition suite captures both games freshly, retaining
+the two recorded random active/passive cases alongside two new unfiltered
+random cases. Item-specific cache/stat and familiar callbacks remain separate.
 Natural regular/double bomb pickups pass 2,727 phases across four retained tapes
 and two fresh unfiltered OS-random cases. Troll/Megatroll conversions remain
 required when observed and in the retained regressions.
@@ -151,14 +157,14 @@ unaccepted. The registered large-room gate always launches both games fresh.
 [Large-room evidence](large-room-evidence.md) and
 [Chest evidence](chest-evidence.md) retain the distinct capture and recovery scopes.
 
-CI discovers all twenty-five registered live suites and runs separate jobs with
+CI discovers all twenty-six registered live suites and runs separate jobs with
 `fail-fast: false`, preserving each result and evidence. The first matrix run
 completed floors, weapons, boot MT and pickups successfully while retaining
 core and traversal failures. Build, typecheck, assets, matrix and strict Clippy
-pass at integrated checkpoint `beb24f2`, including the reviewed Level,
+pass at integrated checkpoint `96a86d8`, including the reviewed Level,
 RoundWorm, item-selection, bomb-pickup, large-room geometry, Chest constructor
-and bounded callback-history leaves. Its production artifact is
-`7abd642e881bf430398f73e2112d68d93f32214ea90e30f49c36e0e22e93d141`.
+bounded callback-history and first-acquisition leaves. Its production artifact is
+`c1753096efacacf002f623d4bfc9cd337908e7b7d55f668d53a9e91c44573651`.
 The continuing full 24-suite local run uses detached checkpoint `cb36018` and
 its separate immutable production artifact; later leaves do not inherit its results.
 This is a build checkpoint, not a fresh all-suite passing result.
