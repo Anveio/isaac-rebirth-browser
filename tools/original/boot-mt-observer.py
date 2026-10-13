@@ -30,13 +30,14 @@ def observe(pid,context):
     if length>9:raise ValueError('Source menu seed text exceeds bounded public code')
     return read(pointer,length).decode('ascii') if length else ''
    manager=u64(0x8ed560);menus=u64(0x8ed570);game=u64(0x8ecd30);saved=manager+0x4a8;system_state=u32(manager)
-   samples=[];level_samples=[]
+   samples=[];level_samples=[];saved_rows=[];level_rows=[]
    for room in [0,1,134]:
     # GameState room record0 begins+f8, stridef0; gridvector starts+58.
     pointer=u64(saved+0xf8+room*0xf0+0x58)
     for slot in [0,1,447]:
      words=struct.unpack('<7I',read(pointer+slot*0x1c,0x1c))
      samples.append({'roomRecord':room,'gridIndex':slot,'seed10':words[4],'seed18':words[6]})
+    saved_rows.append({'roomRecord':room,'gridIndex':struct.unpack('<i',read(saved+0xf8+room*0xf0,4))[0]})
    if game:
     for room in [0,1,134]:
      # 5881b6: record base+10, stridef0; +14 is its room index field.
@@ -44,6 +45,16 @@ def observe(pid,context):
      for slot in [0,1,447]:
       words=struct.unpack('<7I',read(pointer+slot*0x1c,0x1c))
       level_samples.append({'roomRecord':room,'gridIndex':slot,'seed10':words[4],'seed18':words[6]})
+     level_rows.append({'roomRecord':room,'gridIndex':struct.unpack('<i',read(game+0x10+room*0xf0,4))[0]})
+   saved_run=None;live_grid=None
+   if game and system_state==2:
+    allocated=[room for room in range(135) if struct.unpack('<i',read(game+0x10+room*0xf0,4))[0]!=-3]
+    saved_run={'seedText':seed_string(saved+0xef80),'seededRun':bool(read(saved+4,1)[0]),'stage':u32(saved+0x94),'gameUpdateCount':u32(saved+0x50),
+     'redHp':u32(saved+0x88a0),'maxRedHp':u32(saved+0x88a4),'inventory':{'coins':u32(saved+0x88b8),'bombs':u32(saved+0x88c0),'keys':u32(saved+0x88bc)},'allocatedRoomRecords':allocated}
+    room=u64(game+0x8180);width=u32(room+0x14);height=u32(room+0x18);cells=width*height
+    if not 0<cells<=448:raise ValueError('Live room grid exceeds source capacity')
+    pointers=struct.unpack('<'+'Q'*cells,read(room+0x30,cells*8))
+    live_grid={'width':width,'height':height,'emptyIndices':[index for index,pointer in enumerate(pointers) if not pointer]}
    anm=menus+0x60d10+8
    loaded=bool(menus) and bool(read(anm+0x2dd,1)[0])
    title={'loaded':loaded,'menuScreen':u32(menus+0x38) if menus else None}
@@ -53,6 +64,6 @@ def observe(pid,context):
     'managerCounter':u32(manager+0x2efa0),'systemState':system_state,'systemSeededRun':bool(read(manager+0x11,1)[0]),
     'gameRunSeed':u32(game+0xa190) if game else None,'gameSeedText':seed_string(game+0xa1e0) if game and system_state==2 else None,
     'gameSeededRun':bool(read(game+0x10ecd0,1)[0]) if game and system_state==2 else None,
-    'stateSeed9688':u32(saved+0x9688),'gridSeedSamples':samples,'levelGridSeedSamples':level_samples,'title':title}
+    'stateSeed9688':u32(saved+0x9688),'gridSeedSamples':samples,'levelGridSeedSamples':level_samples,'savedRows':saved_rows,'levelRows':level_rows,'savedRun':saved_run,'liveGrid':live_grid,'title':title}
   finally:os.close(fd)
  finally:os.kill(pid,signal.SIGCONT)

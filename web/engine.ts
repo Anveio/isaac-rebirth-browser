@@ -25,6 +25,12 @@ export interface BootLifecycle {
   shared: MtState; savedPlayerSeed: number; savedGridSeedSamples: GridSeedSample[];
   levelGridSeedSamples: GridSeedSample[]; backdropSeed: number; menuRunSeed: number; menuSeedText: string; secretPoses: number[];
 }
+export interface SavedRunSummary {
+  runSeed: string; seededRun: boolean; stage: number; gameUpdateCount: number;
+  descriptorCount: number; redHp: number; maxRedHp: number;
+  inventory: {coins: number; bombs: number; keys: number};
+  emptyGridCellsSaved: number; occupiedGridSeedsPending: number[];
+}
 export interface SoundEvent {
   sequence: number; id: number; sampleIndex: number; systemCounter: number; halfTick: number;
   looping: boolean; pitch: number; gain: number;
@@ -155,6 +161,7 @@ export interface State {
   runSeeds: {startSeed: number; streamState: number; initializedFields: number[]} | null;
   itemPools: {seed: number; rootRng: ItemRng; secondaryRng: ItemRng; pools: ItemPool[];
     specialFactor: number; removed: boolean[]; selected: boolean[]; roomRoutes: number[]; pillEffects: number[]} | null;
+  savedRunSummary: SavedRunSummary | null;
   pendingMenuInitializations: { afterAudioRequests: number; initialization: { type: "loadFreshProfile"; profile: number } | { type: "resetCharacterSeed" } | { type: "commitCharacterSeed"; seed: number } }[];
   stage: number; stageSeed: number; seededRun: boolean; achievementEligibility: boolean;
   profiles: { slot: number; unlockedCharacters: string[]; selectedCharacter: string; achievements: boolean[] }[];

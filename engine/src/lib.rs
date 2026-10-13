@@ -35,6 +35,7 @@ pub mod room_assets;
 pub mod room_spawns;
 pub mod room_templates;
 pub mod roundworm;
+pub mod saved_game;
 pub mod seed;
 pub mod traversal;
 pub use bombs::{Bomb, Explosion};
@@ -303,6 +304,7 @@ pub struct State {
     pub initial_seed: u32,
     pub boot_epoch_seed: u32,
     pub boot_lifecycle: mt::BootState,
+    pub saved_run_summary: Option<saved_game::SavedRunSummary>,
     pub audio: audio::AudioState,
     #[serde(default)]
     pub pending_menu_initializations: Vec<menu_lifecycle::Pending>,
@@ -377,8 +379,10 @@ pub enum Command {
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 pub struct Game {
     pub state: State,
-    pub boot_saved_grid: mt::DescriptorSeeds,
+    pub saved_game: mt::SavedGameSeeds,
     pub boot_level_grid: mt::DescriptorSeeds,
+    pub saved_run: Option<saved_game::SavedRun>,
+    pub player_manager_pocket_rng: saved_game::PocketRng,
 }
 
 impl Game {
@@ -387,7 +391,7 @@ impl Game {
     }
     pub fn new_with_boot_epoch(initial_seed: u32, boot_epoch_seed: u32) -> Result<Self, String> {
         let run_seed = seed::encode(initial_seed)?;
-        let (boot_lifecycle, boot_saved_grid, boot_level_grid) =
+        let (boot_lifecycle, saved_game, boot_level_grid) =
             mt::BootLifecycle::new(boot_epoch_seed).into_parts();
         let player = Player::starting();
         let floor = floor::generate_basement(seed::stage1_seed(initial_seed))?;
@@ -422,6 +426,7 @@ impl Game {
                 initial_seed,
                 boot_epoch_seed,
                 boot_lifecycle,
+                saved_run_summary: None,
                 audio: audio::AudioState::default(),
                 pending_menu_initializations: Vec::new(),
                 music: music::MusicState::default(),
@@ -481,8 +486,10 @@ impl Game {
                 },
                 pause_menu: PauseMenu::hidden(),
             },
-            boot_saved_grid,
+            saved_game,
             boot_level_grid,
+            saved_run: None,
+            player_manager_pocket_rng: saved_game::PocketRng::default(),
         };
         game.refresh_minimap();
         Ok(game)
@@ -953,7 +960,42 @@ impl Game {
         if let Some(id) = music::stage_track(self.state.stage, false) {
             self.state.music.room(id);
         }
+        self.save_supported_run()?;
         self.refresh_minimap();
+        Ok(())
+    }
+
+    /// Level.Init calls System.Save at 58c411 once the starting room is loaded.
+    /// Game.Save clears the destination, updates Room grid records, then copies
+    /// allocated Level rows and PlayerManager state in that source order.
+    fn save_supported_run(&mut self) -> Result<(), String> {
+        self.saved_game = self.state.boot_lifecycle.clear_saved_game();
+        let (empty, occupied_pending) = saved_game::save_empty_grid_cells(
+            &mut self.boot_level_grid,
+            &mut self.state.boot_lifecycle.shared,
+            &self.state.room,
+            self.state.current_room,
+        )?;
+        let rooms: Vec<_> = self
+            .state
+            .floor
+            .descriptors
+            .iter()
+            .map(|room| room.index)
+            .collect();
+        self.saved_game
+            .descriptor_seeds
+            .copy_rooms_from(&self.boot_level_grid, &rooms)?;
+        self.saved_game.player_rng_seed = self.player_manager_pocket_rng.seed;
+        let saved = saved_game::SavedRun::copy_from(&self.state);
+        self.state.saved_run_summary = Some(saved.summary(empty, occupied_pending));
+        self.saved_run = Some(saved);
+        self.state
+            .boot_lifecycle
+            .update_level_grid_samples(&self.boot_level_grid);
+        self.state
+            .boot_lifecycle
+            .update_saved_game_samples(&self.saved_game);
         Ok(())
     }
     fn held(&self, code: &str) -> bool {
@@ -1085,7 +1127,9 @@ impl Game {
                     .initialization
                 {
                     menu_lifecycle::Initialization::LoadFreshProfile { .. } => {
-                        self.boot_saved_grid = self.state.boot_lifecycle.clear_saved_game();
+                        self.saved_game = self.state.boot_lifecycle.clear_saved_game();
+                        self.saved_run = None;
+                        self.state.saved_run_summary = None;
                     }
                     menu_lifecycle::Initialization::ResetCharacterSeed => {
                         self.state.boot_lifecycle.reset_character_seed();

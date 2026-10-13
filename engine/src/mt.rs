@@ -177,6 +177,31 @@ impl DescriptorSeeds {
         self.mutations.insert(key, pair);
         Ok(())
     }
+
+    /// Level.Save 58cd90 copies only allocated descriptors. The fresh Clear
+    /// table remains authoritative for unused room records, rather than being
+    /// replaced wholesale by the Level's constructor origin.
+    pub fn copy_rooms_from(&mut self, source: &Self, rooms: &[usize]) -> Result<(), String> {
+        let mut copied = [false; ROOM_DESCRIPTOR_CAPACITY];
+        for &room in rooms {
+            if room >= ROOM_DESCRIPTOR_CAPACITY {
+                return Err("saved descriptor copy is outside the source table".into());
+            }
+            copied[room] = true;
+        }
+        let mut derived = source.origin.clone();
+        for (room, copy) in copied.into_iter().enumerate() {
+            for cell in 0..PADDED_GRID_CELLS {
+                let initial = [derived.next_u32(), derived.next_u32()];
+                if copy {
+                    let key = Self::key(room, cell)?;
+                    self.mutations
+                        .insert(key, source.mutations.get(&key).copied().unwrap_or(initial));
+                }
+            }
+        }
+        Ok(())
+    }
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
@@ -251,11 +276,19 @@ impl BootState {
 
     /// LoadProfile first clears the saved state even for an empty profile. Keep
     /// the generated descriptor seed state, rather than advancing a cursor.
-    pub fn clear_saved_game(&mut self) -> DescriptorSeeds {
+    pub fn clear_saved_game(&mut self) -> SavedGameSeeds {
         let saved = SavedGameSeeds::clear(&mut self.shared);
+        self.update_saved_game_samples(&saved);
+        saved
+    }
+
+    pub fn update_saved_game_samples(&mut self, saved: &SavedGameSeeds) {
         self.saved_player_seed = saved.player_rng_seed;
         self.saved_grid_seed_samples = grid_seed_samples(&saved.descriptor_seeds);
-        saved.descriptor_seeds
+    }
+
+    pub fn update_level_grid_samples(&mut self, table: &DescriptorSeeds) {
+        self.level_grid_seed_samples = grid_seed_samples(table);
     }
 
     /// CharacterReset clears its seed string before decoding it; the empty
@@ -320,7 +353,7 @@ impl BootLifecycle {
         }
     }
 
-    pub fn into_parts(self) -> (BootState, DescriptorSeeds, DescriptorSeeds) {
+    pub fn into_parts(self) -> (BootState, SavedGameSeeds, DescriptorSeeds) {
         let saved_grid_seed_samples = grid_seed_samples(&self.saved_game.descriptor_seeds);
         let level_grid_seed_samples = grid_seed_samples(&self.level_grid);
         let state = BootState {
@@ -334,6 +367,6 @@ impl BootLifecycle {
                 .expect("boot Character initializer produces a nonzero seed"),
             secret_poses: self.secret_poses,
         };
-        (state, self.saved_game.descriptor_seeds, self.level_grid)
+        (state, self.saved_game, self.level_grid)
     }
 }
