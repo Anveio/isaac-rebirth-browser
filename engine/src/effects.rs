@@ -252,7 +252,7 @@ impl StageEffects {
     /// a symmetric sprite rectangle around the physical bomb position.
     pub fn add_explosion_lights(&mut self, explosions: &[Explosion]) {
         for explosion in explosions {
-            let frame = explosion.age / 2;
+            let frame = u32::from(explosion.animation_frame);
             if frame >= 6 {
                 continue;
             }
@@ -281,7 +281,10 @@ impl StageEffects {
     /// Planted bombs use authored entity shadow scales and the independently
     /// observed sprite ground anchor, then the same signed raster as players.
     pub fn add_bomb_shadows(&mut self, bombs: &[Bomb]) {
-        for bomb in bombs {
+        for bomb in bombs
+            .iter()
+            .filter(|bomb| bomb.motion.lifetime == crate::bombs::BombLifetime::Alive)
+        {
             self.shadow_casters.push(ShadowCaster::authored(
                 bomb.id,
                 bomb.x,

@@ -10,6 +10,7 @@
 use crate::{Player, Room};
 use serde::{Deserialize, Serialize};
 use std::ops::{Add, Mul};
+use std::sync::OnceLock;
 
 #[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(deny_unknown_fields)]
@@ -97,6 +98,31 @@ pub fn advance_world(
 }
 
 pub fn advance(player: &mut Player, room: &Room, dx: i32, dy: i32) {
+    static BOUNDARY: OnceLock<crate::grid::Grid> = OnceLock::new();
+    static COLLIDER: OnceLock<crate::grid::Collider> = OnceLock::new();
+    let grid = BOUNDARY.get_or_init(crate::grid::Grid::closed_1x1_boundary);
+    let collider = COLLIDER.get_or_init(|| {
+        crate::grid::Collider::new(crate::grid::CollisionGeometry {
+            radius: 10.0,
+            scale: WorldVector { x: 1.0, y: 1.0 },
+            points: 40,
+        })
+        .expect("authored Isaac collision geometry is valid")
+    });
+    advance_in_grid(player, room, grid, collider, dx, dy)
+        .expect("gameplay input and world vectors are bounded");
+}
+
+/// Full and intermediate player motion share the source ground-contact
+/// solver. Room admission owns the grid and cached collision geometry.
+pub fn advance_in_grid(
+    player: &mut Player,
+    room: &Room,
+    grid: &crate::grid::Grid,
+    collider: &crate::grid::Collider,
+    dx: i32,
+    dy: i32,
+) -> Result<(), String> {
     let position = WorldVector {
         x: ((player.x - WORLD_ORIGIN_X) / WORLD_SCALE) as f32,
         y: ((player.y - WORLD_ORIGIN_Y) / WORLD_SCALE) as f32,
@@ -105,10 +131,11 @@ pub fn advance(player: &mut Player, room: &Room, dx: i32, dy: i32) {
         x: (player.vx / WORLD_SCALE) as f32,
         y: (player.vy / WORLD_SCALE) as f32,
     };
-    let (position, velocity) = advance_world(position, velocity, dx, dy)
-        .expect("gameplay input and world vectors are bounded");
+    let (mut position, mut velocity) = advance_world(position, velocity, dx, dy)?;
+    collider.resolve_player(grid, &mut position, &mut velocity, false)?;
     player.x = (f64::from(position.x) * WORLD_SCALE + WORLD_ORIGIN_X).clamp(room.left, room.right);
     player.y = (f64::from(position.y) * WORLD_SCALE + WORLD_ORIGIN_Y).clamp(room.top, room.bottom);
     player.vx = f64::from(velocity.x) * WORLD_SCALE;
     player.vy = f64::from(velocity.y) * WORLD_SCALE;
+    Ok(())
 }

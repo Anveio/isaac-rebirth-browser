@@ -10,7 +10,15 @@ export interface Player {
 export interface Tear { id: number; x: number; y: number; vx: number; vy: number; age: number; }
 export interface Impact { id: number; x: number; y: number; age: number; }
 export interface ActorRef { kind: "player" | "tear" | "bomb" | "pickup" | "npc" | "effect"; id: number; }
-export interface Bomb { id: number; x: number; y: number; age: number; }
+export interface Bomb {
+  id: number; x: number; y: number;
+  motion: {
+    position: { x: number; y: number }; presentedPosition: { x: number; y: number };
+    velocity: { x: number; y: number }; fuseUpdatesRemaining: number;
+    fullUpdates: number; animationFrame: number; lifetime: "alive" | "exploding" | "removed";
+  };
+}
+export interface Explosion { id: number; x: number; y: number; animationFrame: number; }
 export interface RunIntroduction { age: number; active: boolean; }
 export interface PauseMenu {
   phase: "hidden" | "appearing" | "idle" | "disappearing";
@@ -82,7 +90,8 @@ export interface State {
   minimap: { cells: { x: number; y: number; visibility: "unvisited" | "visited" | "current" }[] };
   tears: Tear[]; impacts: Impact[]; fireCooldown: number; nextTear: number;
   maxFireDelay: number; headTimer: number; actorScheduler: { actors: ActorRef[] };
-  bombs: Bomb[]; explosions: Bomb[]; nextBomb: number; damageCooldown: number;
+  bombs: Bomb[]; explosions: Explosion[]; nextBomb: number; damageCooldown: number;
+  bombPlacementCooldown: { remainingUpdates: number }; bombActionWasDown: boolean;
   runIntroduction: RunIntroduction; pauseMenu: PauseMenu;
 }
 export type Command = { type: "key"; code: string; down: boolean } | { type: "text"; text: string } | { type: "tick"; count: number };

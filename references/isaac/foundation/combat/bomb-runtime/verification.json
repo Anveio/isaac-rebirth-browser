@@ -1,0 +1,269 @@
+{
+  "schema": 1,
+  "status": "fail",
+  "scope": {
+    "functional": "Real input/phase/readback and source title, fade, player motion, pause/controller, HP, immunity, active tear/bomb counts",
+    "pixels": "Strict full RGBA diagnostic; every difference remains a failure in its own pixel result",
+    "exactPixelsRequired": false,
+    "completeOriginalStateParity": false
+  },
+  "build": {
+    "sha256": "482aad71c480ac24df0db336c59ff2b9a0b7324d9cfd388ba3e6b7c6640a5c8f",
+    "files": 97,
+    "scope": "Immutable snapshot of production build bytes; source/native replay equality is checked separately"
+  },
+  "sourceBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "gateSources": {
+    "tools/foundation/paired-game.mjs": "ca3ddd0d106e52dd532a3146c68502decf10bce7afc8f7997a1ead1efd26e442",
+    "tools/foundation/production-server.mjs": "e3152b58e2353319ba0963b30439e33c3cc65f84a8c6ebb765c2812486245952",
+    "tools/foundation/compare.mjs": "007227c2431f837b347ec29dcbc3492f49eaeb71d08b84ead0b88cfeef98b534",
+    "tools/original/foundation-paired-scenarios.py": "7b11104cf0544fb9225f603d84c2d44ba423ed4f6a173bab998f8f8c1f20fc01",
+    "tools/original/foundation-paired-observer.py": "b49cb171da79eabba8054c8338018ffa38e3a38305fbff2240d6631214dddacf",
+    "tools/original/foundation-menu-observer.py": "a5b8a91047f9bccee75e844c5eba59c8bbf96a84b6a1b7142b59e32bacc91315",
+    "tools/original/foundation-combat-observe.py": "d241cee76dc3fbdbe99c047597a760b8c79a8d61b99eef9c519b925a1b5b24cd",
+    "tools/original/foundation-clock-run.py": "973445fd4f5e41296c90449597438e5f4eadb02391176d9071d7f7b3a6cfde86",
+    "tools/original/foundation-clock-gate.c": "c77b51f323a66d75a14980164b48d34b94da08064068a310c0bd1e8b6b185efe",
+    "tools/original/foundation-clock-verify.py": "c488100a187b44803c06374535715eaa5a7cde9d4513f6e866e090367d4f2054",
+    "tools/original/foundation-clock-scenarios.py": "87316815cfa490d534fae5f9d27e55f16b17404a93df1b79e528b3f4b58391c5",
+    "tools/original/foundation-bomb-scenario.py": "4d8dacb4bbe7222c6bfa3ffe1c9f8ea69b76f304825a01db0e973f14ddddd090",
+    "tools/original/foundation-presentation-scenario.py": "530666412639fae6cb2d71f6f49e89a9de12377503d84541a73240bca0be3351",
+    "tools/original/foundation-title-scenario.py": "ea1bfb8b53a46a55f0c234ea75753775b70fd69e0b88f1be8021287a13adb4a9",
+    "tools/original/foundation-combat-scenario.py": "d125481add29d1032fb164741a8d3ab54da9e54e9e6c1d0581278bc255044420",
+    "tools/original/foundation-seeds.py": "dd4633c955e7518e9bc0f0147ddfae46d356468238477a68dc06c86656ccba89",
+    "tools/original/foundation-random-seeds.py": "6ce7e4309ee9492dc0c20c0bf1144394dd92e70aec2037d0db91bb0f2928f625",
+    "tools/original/state-observer.py": "58e3b510abbe5ff57f05844efbdf764e2a02530cda4fa99f538d886d258af6f1",
+    "tools/original/debug-run.py": "d785d32c6cc557959be38880a3b046c4040b988fbe3d06d4a8c1f4aa2e833cf5",
+    "tools/original/with-display.sh": "af469210e803786a60d8632c28a6f2da77bc8ab02cc06be50016ddb25e95b848",
+    "tools/foundation/browser.mjs": "60c4bc851470f47e4dd0399148ce0c1edf351d41fbf7f7e15fa823af5948b4c8"
+  },
+  "gateSourcesStable": true,
+  "cases": [
+    {
+      "id": "paired-bomb-moving-even",
+      "seed": "T1PK6Y0W",
+      "status": "pass",
+      "originalStatus": "pass",
+      "browserStatus": "pass",
+      "caseSha256": "7865e269c2bbba1866eca5715b0da3c71c33e7ebc2329db19f2f7a460aabbc8e",
+      "originalManifestSha256": "080b3b420f507eb5861db5b6f4c1802f64ee47a71405fc1570c4fea201d8f9f6",
+      "browserManifestSha256": "38b8afc48a5c979a758e53af76b5aea4a854e75dcc5865be79bd344d585a4699",
+      "replayCase": null,
+      "checkpoints": 18,
+      "passingCheckpoints": 18,
+      "stateFailures": [],
+      "pixels": {
+        "exactCheckpoints": 7,
+        "failedCheckpoints": 11,
+        "required": false
+      }
+    },
+    {
+      "id": "paired-bomb-moving-odd",
+      "seed": "T1PK6Y0W",
+      "status": "pass",
+      "originalStatus": "pass",
+      "browserStatus": "pass",
+      "caseSha256": "5bacc9fad80bf6e2b163603dd950b69a56f877d8bdbcec8ea1f19220c50bf326",
+      "originalManifestSha256": "c17372817fa082d4b28bf4ac3197b0f1482e25b62da10af42f98c2d29387ea5c",
+      "browserManifestSha256": "cefff170d08d606193c72c2f3f27bc162338846f6154966bdedcab46d94ba2be",
+      "replayCase": null,
+      "checkpoints": 18,
+      "passingCheckpoints": 18,
+      "stateFailures": [],
+      "pixels": {
+        "exactCheckpoints": 7,
+        "failedCheckpoints": 11,
+        "required": false
+      }
+    },
+    {
+      "id": "paired-pause-release",
+      "seed": "T1PK6Y0W",
+      "status": "pass",
+      "originalStatus": "pass",
+      "browserStatus": "pass",
+      "caseSha256": "3c61ac3eb5c2d9966243d89fac8c8ecc7d833a269b2fbfb292992e7a5a2394a9",
+      "originalManifestSha256": "65d7bcb43d21a804d85e765d9ec4e4b00e007bb0564cba32d66b57b6966d8ee5",
+      "browserManifestSha256": "96a0fc9c99480dd8519857c32669db3c4d7aac44f21df321b0f8b4f65e0d5bda",
+      "replayCase": null,
+      "checkpoints": 18,
+      "passingCheckpoints": 18,
+      "stateFailures": [],
+      "pixels": {
+        "exactCheckpoints": 7,
+        "failedCheckpoints": 11,
+        "required": false
+      }
+    },
+    {
+      "id": "paired-random-run",
+      "seed": "EQCA 3XZX",
+      "status": "fail",
+      "originalStatus": "pass",
+      "browserStatus": "pass",
+      "caseSha256": "d747ef13b6685fd649cbd4077814b90b7c11d237f84c8cbbc6d77f5bc119629d",
+      "originalManifestSha256": "9948ede86aa5e3235866c0dae081a2a5cde45073e51c39f04cf7e9c0abe0096a",
+      "browserManifestSha256": "5ddbd5d81a4d342e0a19c1057661d424f9753daaf349abd636551647dc7f36c8",
+      "replayCase": "EQCA3XZX.json",
+      "checkpoints": 18,
+      "passingCheckpoints": 15,
+      "stateFailures": [
+        {
+          "checkpoint": "random-coasting-0",
+          "fields": [
+            {
+              "field": "tears.length",
+              "expected": 2,
+              "actual": 1,
+              "status": "fail"
+            }
+          ]
+        },
+        {
+          "checkpoint": "random-held-1",
+          "fields": [
+            {
+              "field": "tears.length",
+              "expected": 3,
+              "actual": 2,
+              "status": "fail"
+            }
+          ]
+        },
+        {
+          "checkpoint": "random-resumed",
+          "fields": [
+            {
+              "field": "tears.length",
+              "expected": 1,
+              "actual": 0,
+              "status": "fail"
+            }
+          ]
+        }
+      ],
+      "pixels": {
+        "exactCheckpoints": 7,
+        "failedCheckpoints": 11,
+        "required": false
+      }
+    },
+    {
+      "id": "paired-random-run",
+      "seed": "C7YP WS61",
+      "status": "fail",
+      "originalStatus": "pass",
+      "browserStatus": "pass",
+      "caseSha256": "2cb3a86b4c0ff86341058d785e8cf6a8628e8762d8bf74a9df89da9f53d133c9",
+      "originalManifestSha256": "cf84379bbd83d8308e9451231fb60d633238f7dca782227b9a26cb22b6cc54a1",
+      "browserManifestSha256": "d6a1a293ca32466312ed602cabb1f977dc2b000d3f49435221bbf98fd884183e",
+      "replayCase": "C7YPWS61.json",
+      "checkpoints": 18,
+      "passingCheckpoints": 17,
+      "stateFailures": [
+        {
+          "checkpoint": "random-after-bomb",
+          "fields": [
+            {
+              "field": "player.x",
+              "expected": 112.55239753723144,
+              "actual": 106.0996925354004,
+              "status": "fail"
+            },
+            {
+              "field": "player.y",
+              "expected": 220.24708557128906,
+              "actual": 220.49603271484375,
+              "status": "fail"
+            },
+            {
+              "field": "player.vx",
+              "expected": -1.4814303040504455,
+              "actual": -1.6372550368309022,
+              "status": "fail"
+            },
+            {
+              "field": "player.vy",
+              "expected": -0.008352636545896531,
+              "actual": -3.968638580295107e-21,
+              "status": "fail"
+            }
+          ]
+        }
+      ],
+      "pixels": {
+        "exactCheckpoints": 7,
+        "failedCheckpoints": 11,
+        "required": false
+      }
+    }
+  ],
+  "masks": {
+    "cases": [
+      {
+        "id": "8m72-neutral",
+        "status": "pass",
+        "checkpoint": "gameplay-start"
+      },
+      {
+        "id": "j4g3-neutral",
+        "status": "pass",
+        "checkpoint": "gameplay-start"
+      },
+      {
+        "id": "3bmb-neutral",
+        "status": "pass",
+        "checkpoint": "gameplay-start"
+      },
+      {
+        "id": "3bmb-moved",
+        "status": "pass",
+        "checkpoint": "movement"
+      },
+      {
+        "id": "3bmb-explosion-start",
+        "status": "pass",
+        "checkpoint": "explosion-start"
+      },
+      {
+        "id": "3bmb-explosion-faded",
+        "status": "pass",
+        "checkpoint": "explosion-faded"
+      },
+      {
+        "id": "3bmb-explosion-middle",
+        "status": "pass",
+        "checkpoint": "explosion-middle"
+      },
+      {
+        "id": "3bmb-explosion-late",
+        "status": "pass",
+        "checkpoint": "explosion-late"
+      },
+      {
+        "id": "3bmb-explosion-removed",
+        "status": "pass",
+        "checkpoint": "explosion-removed"
+      }
+    ],
+    "selected": 9,
+    "skipped": 0,
+    "originalStateParity": false,
+    "originalSimulationTickDelivery": false
+  },
+  "validation": {
+    "typecheck": "pass",
+    "clippyAllTargetsDenyWarnings": "pass",
+    "productionWasmBuild": "pass"
+  },
+  "retainedReports": {
+    "paired": "a12b6b3be073c15a0b609af40cfcada96dc4e54f1ffaf0341f4886b491e7f565",
+    "earlierUncorrectedWallHoldout": "a63f08906002865d57a049582515dfc552e2e9900bbde012c8cfa31360fa5ea9"
+  },
+  "limits": [
+    "Full original RGBA diagnostics remain failing, with unchanged comparisons.",
+    "EQCA3XZX exposes three provisional tear lifetime/count differences.",
+    "C7YPWS61 exposes nonplayer bomb grid response missing at the bottom wall; blast trajectory differs.",
+    "No enemy AI, general grid admission, grid destruction or complete original state parity is claimed."
+  ]
+}
