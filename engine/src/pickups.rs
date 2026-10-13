@@ -3,6 +3,7 @@
 //! source admission order, including a pickup collected earlier in its phase.
 use crate::{motion::WorldVector, phase::Phase, Inventory, Player};
 use serde::{Deserialize, Serialize};
+use std::collections::BTreeSet;
 
 #[derive(Debug)]
 pub struct Clip {
@@ -81,6 +82,15 @@ pub fn definition(variant: u32, subtype: u32) -> Option<&'static Definition> {
         })
 }
 
+/// The fresh free regular families own these two source collision fields.
+/// Collectible and Chest collision state remains with their existing owners.
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct RegularCollision {
+    pub grid_collision_class: u32,
+    pub entity_collision_class: u32,
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Pickup {
@@ -115,6 +125,8 @@ pub struct Pickup {
     pub birth_game_update: u32,
     pub charge: i32,
     pub touched: bool,
+    #[serde(default)]
+    pub regular_collision: Option<RegularCollision>,
     #[serde(default)]
     pub chest: Option<crate::chests::Chest>,
 }
@@ -255,6 +267,10 @@ impl Pickup {
             birth_game_update: 0,
             charge: 0,
             touched: false,
+            regular_collision: matches!(variant, 10 | 20 | 30 | 40).then_some(RegularCollision {
+                grid_collision_class: 5,
+                entity_collision_class: if animation == "Idle" { 4 } else { 0 },
+            }),
             chest: None,
         })
     }
@@ -295,6 +311,13 @@ impl Pickup {
             self.position = self.position + self.velocity;
             self.presented_position = self.position;
             self.current_friction = self.configured_friction * 0.965;
+            //507044 calls5068b0 even for a retained Collect actor. Normal
+            //Isaac lacks trinket6, so506b30/506b3d restores class3 to5 here.
+            if let Some(collision) = &mut self.regular_collision {
+                if collision.grid_collision_class == 3 {
+                    collision.grid_collision_class = 5;
+                }
+            }
             self.project();
         }
         // 442b30 uses the Game clock minus the entity's creation clock. The
@@ -342,6 +365,9 @@ impl Pickup {
             self.animation_frame = 0.0;
             self.animation_playing = true;
             self.can_collect = true;
+            if let Some(collision) = &mut self.regular_collision {
+                collision.entity_collision_class = 4;
+            }
             if let Some(chest) = &mut self.chest {
                 // Pickup Update507115/50715a admits the closed Chest's Idle
                 // clip and player entity contacts after Appear finishes.
@@ -390,6 +416,10 @@ impl Pickup {
         // Collect504d30 clears physical velocity before playing Collect,
         // changes the ground class to3, then sets the dead31f flag.
         self.velocity = WorldVector { x: 0.0, y: 0.0 };
+        if let Some(collision) = &mut self.regular_collision {
+            collision.grid_collision_class = 3;
+            collision.entity_collision_class = 0;
+        }
         self.animation = "Collect".into();
         self.animation_frame = 0.0;
         self.animation_playing = true;
@@ -409,7 +439,7 @@ pub(crate) fn advance_actor(state: &mut crate::State, phase: Phase, id: u32) -> 
     let pickup = &mut state.room.pickups[index];
     if phase != Phase::Interpolate
         || !pickup.has_regular_physics()
-        || pickup.collected
+        || !has_ground_class(pickup)
         || pickup.removed
     {
         return Ok(());
@@ -427,12 +457,7 @@ pub(crate) fn advance_actor(state: &mut crate::State, phase: Phase, id: u32) -> 
 /// 4545d0 finishes all entity contacts, then454b10 invokes442b90 for the live
 /// nonplayer list. New births get this grid pass without a full actor update.
 pub(crate) fn full_grid_contacts(state: &mut crate::State) -> Result<(), String> {
-    if !state
-        .room
-        .pickups
-        .iter()
-        .any(|pickup| pickup.has_regular_physics() && !pickup.collected && !pickup.removed)
-    {
+    if !state.room.pickups.iter().any(has_ground_class) {
         return Ok(());
     }
     let grid = crate::grid::Grid::new(
@@ -443,8 +468,138 @@ pub(crate) fn full_grid_contacts(state: &mut crate::State) -> Result<(), String>
             .ok_or("admitted pickup requires room grid")?,
     )?;
     for pickup in &mut state.room.pickups {
-        if pickup.has_regular_physics() && !pickup.collected && !pickup.removed {
+        if has_ground_class(pickup) {
             resolve_grid(pickup, &grid, false)?;
+        }
+    }
+    Ok(())
+}
+
+fn has_ground_class(pickup: &Pickup) -> bool {
+    !pickup.removed
+        && pickup
+            .regular_collision
+            .as_ref()
+            .is_some_and(|collision| collision.grid_collision_class == 5)
+}
+
+/// Pool+20 is constructed before callbacks at4545d0. Its snapshot excludes
+/// actors born during contacts; the later live-list ground pass includes them.
+pub(crate) struct ContactCandidates {
+    cells: Vec<Vec<u32>>,
+}
+
+pub(crate) fn contact_candidates(state: &crate::State) -> Result<ContactCandidates, String> {
+    //454381..4543a7 ->454070:80-unit cells,1200x720 extent (15x9).
+    let mut cells = vec![Vec::new(); 15 * 9];
+    for actor in state.actor_scheduler.full_phase() {
+        if actor.kind != crate::actors::ActorKind::Pickup {
+            continue;
+        }
+        let pickup = state
+            .room
+            .pickups
+            .iter()
+            .find(|pickup| pickup.id == actor.id)
+            .ok_or("pickup contact handle requires its admitted actor")?;
+        if !has_entity_contacts(pickup) {
+            continue;
+        }
+        let radius = pickup.collision_radius;
+        if !pickup.position.is_finite() || !radius.is_finite() || radius <= 0.0 {
+            return Err("pickup contact pool requires finite authored geometry".into());
+        }
+        //452bd0 uses f32 component division and truncation toward zero, then
+        //row-major admission. Each cell retains at most40 actor pointers.
+        let left = ((pickup.position.x - radius) / 80.0) as i32;
+        let right = ((pickup.position.x + radius) / 80.0) as i32;
+        let top = ((pickup.position.y - radius) / 80.0) as i32;
+        let bottom = ((pickup.position.y + radius) / 80.0) as i32;
+        for row in top..=bottom {
+            for column in left..=right {
+                let index = i64::from(row) * 15 + i64::from(column);
+                if let Some(cell) = usize::try_from(index)
+                    .ok()
+                    .and_then(|index| cells.get_mut(index))
+                {
+                    if cell.len() < 40 {
+                        cell.push(pickup.id);
+                    }
+                }
+            }
+        }
+    }
+    Ok(ContactCandidates { cells })
+}
+
+fn has_entity_contacts(pickup: &Pickup) -> bool {
+    !pickup.collected
+        && !pickup.removed
+        && pickup
+            .regular_collision
+            .as_ref()
+            .is_some_and(|collision| collision.entity_collision_class == 4)
+}
+
+///453340 walks cells and their admitted pointer order, deduplicating each
+///unordered pair before445be0 ->445710. Free PU callbacks504820 veto neither
+///mode1 nor mode0; the common circle kernel owns their physical mass response.
+pub(crate) fn nonplayer_contacts(
+    state: &mut crate::State,
+    candidates: ContactCandidates,
+) -> Result<(), String> {
+    let mut seen = BTreeSet::new();
+    for cell in candidates.cells {
+        for first in 0..cell.len() {
+            for second in first + 1..cell.len() {
+                let first_id = cell[first];
+                let second_id = cell[second];
+                if !seen.insert((first_id.min(second_id), first_id.max(second_id))) {
+                    continue;
+                }
+                let first_index = state
+                    .room
+                    .pickups
+                    .iter()
+                    .position(|pickup| pickup.id == first_id)
+                    .ok_or("pickup contact candidate must survive until manager cleanup")?;
+                let second_index = state
+                    .room
+                    .pickups
+                    .iter()
+                    .position(|pickup| pickup.id == second_id)
+                    .ok_or("pickup contact candidate must survive until manager cleanup")?;
+                let (first, second) = if first_index < second_index {
+                    let (left, right) = state.room.pickups.split_at_mut(second_index);
+                    (&mut left[first_index], &mut right[0])
+                } else {
+                    let (left, right) = state.room.pickups.split_at_mut(first_index);
+                    (&mut right[0], &mut left[second_index])
+                };
+                if !has_entity_contacts(first) || !has_entity_contacts(second) {
+                    continue;
+                }
+                let body = |pickup: &Pickup| crate::combat::ContactBody {
+                    id: pickup.id,
+                    entity_type: 5,
+                    position: pickup.position,
+                    velocity: pickup.velocity,
+                    radius: pickup.collision_radius,
+                    mass: pickup.collision_mass,
+                };
+                let mut a = body(first);
+                let mut b = body(second);
+                if crate::combat::resolve_pickup_pair(&mut a, &mut b)?.colliding {
+                    first.position = a.position;
+                    first.presented_position = a.position;
+                    first.velocity = a.velocity;
+                    first.project();
+                    second.position = b.position;
+                    second.presented_position = b.position;
+                    second.velocity = b.velocity;
+                    second.project();
+                }
+            }
         }
     }
     Ok(())

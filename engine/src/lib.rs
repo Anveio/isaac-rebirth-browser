@@ -1333,6 +1333,7 @@ impl Game {
         // before4545d0 admits entity contacts. Pickups can become idle in this
         // full phase and collect against the player's newly moved position.
         if phase == phase::Phase::Update {
+            let pickup_contacts = pickups::contact_candidates(&self.state)?;
             npcs::player_contacts(&mut self.state)?;
             npcs::nonplayer_contacts(&mut self.state)?;
             enemy_projectiles::player_contacts(&mut self.state)?;
@@ -1386,6 +1387,7 @@ impl Game {
                     }
                 }
             }
+            pickups::nonplayer_contacts(&mut self.state, pickup_contacts)?;
             pickups::full_grid_contacts(&mut self.state)?;
         }
         for impact in &mut self.state.impacts {

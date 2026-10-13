@@ -259,8 +259,8 @@ try {
             equal([Math.fround(actual.velocity.x), Math.fround(actual.velocity.y)], original.velocity, `pickup${index}:velocity`, presentation);
             equal(Math.fround(actual.currentFriction), original.friction, `pickup${index}:current friction`, presentation);
             equal(actual.collisionMass, original.collisionMass, `pickup${index}:collision mass`, presentation);
-            equal(actual.collected ? 3 : 5, original.gridCollisionClass, `pickup${index}:grid collision class`, presentation);
-            equal(actual.canCollect ? 4 : 0, original.entityCollisionClass, `pickup${index}:entity collision class`, presentation);
+            equal(actual.regularCollision?.gridCollisionClass, original.gridCollisionClass, `pickup${index}:grid collision class`, presentation);
+            equal(actual.regularCollision?.entityCollisionClass, original.entityCollisionClass, `pickup${index}:entity collision class`, presentation);
             equal(actual.collected, original.removed, `pickup${index}:collection flag`, presentation);
           }
           const handles = state.actorScheduler.actors;

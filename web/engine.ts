@@ -87,6 +87,7 @@ export interface Pickup {
   overlay: string | null; overlayFrame: number; overlayPlaying: boolean;
   age: number; birthGameUpdate: number; charge: number; touched: boolean;
   chest: {rng: ItemRng; gridCollisionClass: number; entityCollisionClass: number; price: number; cooldown: number} | null;
+  regularCollision: {gridCollisionClass: number; entityCollisionClass: number} | null;
   spritesheetItemId: number;
   presentedPosition: {x: number; y: number}; anchorPosition: {x: number; y: number};
   velocity: {x: number; y: number}; configuredFriction: number; currentFriction: number; collisionMass: number;
