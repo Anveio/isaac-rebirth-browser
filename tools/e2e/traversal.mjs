@@ -13,7 +13,7 @@ const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const run = promisify(execFile);
 const value = flag => { const index = process.argv.indexOf(flag); return index < 0 ? undefined : process.argv[index + 1]; };
 const output = resolve(value('--output') || join(ROOT, '.cache/e2e/traversal', String(Date.now())));
-const helper = join(ROOT, 'tools/original/foundation-traversal-scenarios.py');
+const helper = value('--scenario-helper') || join(ROOT, 'tools/original/foundation-traversal-scenarios.py');
 const python = async args => JSON.parse((await run('python3', [helper, ...args], { cwd: ROOT, maxBuffer: 8 * 1024 * 1024 })).stdout);
 await mkdir(output, { recursive: true });
 const bank = value('--scenarios') ? JSON.parse(await readFile(resolve(value('--scenarios')), 'utf8')) : await python(['--count', value('--count') || '1']);
@@ -24,7 +24,10 @@ await writeFile(join(output, 'scenarios.json'), JSON.stringify(bank, null, 2) + 
 const production = await startProductionServer();
 const browser = await chromium.launch({ headless: true, ...browserLaunchOptions() });
 const report = { schema: 1, status: 'running', skipped: 0, selected: bank.cases.length,
-  scope: 'Ordinary style0 13x7 doorway and no-hostile return; mandatory hostile-room lock/return regression; exact f32 player/descriptor phases, complete authored group accounting, supported actor admission and ordinary Rock metadata, visited-room restoration. NPC behavior, other grids/doors, large-room camera and complete pixels remain separate.',
+  scope: bank.contract === 'curse'
+    ? 'Fresh ordinary Isaac, authored 13x7 no-hostile curse-room entry and exit; exact native half-heart charges, immunity/door collision/admission phases, descriptor/spawn identity and returned room persistence. Flight/items, other door styles, hostile callbacks and complete pixels remain separate.'
+    : 'Ordinary style0 13x7 doorway and no-hostile return; mandatory hostile-room lock/return regression; exact f32 player/descriptor phases, complete authored group accounting, supported actor admission and ordinary Rock metadata, visited-room restoration. NPC behavior, other grids/doors, large-room camera and complete pixels remain separate.',
+  exclusions: bank.contract === 'curse' ? ['Undiscovered native door variant6', 'Red chest callbacks and unsupported actors', 'Flight/items and other door policies', 'Complete rendered pixels'] : [],
   production: production.build, graphics: await inspectBrowserGraphics(browser), cases: [] };
 try {
   for (const scenario of bank.cases) {
@@ -87,6 +90,17 @@ try {
         phaseAssert.deepEqual(state.floor.grid, source.grid, `${label}:floor topology`);
         phaseAssert.deepEqual([state.player.x, state.player.y, state.player.vx, state.player.vy],
           [actor.position[0] * .65 + 32, actor.position[1] * .65 - 46, actor.velocity[0] * .65, actor.velocity[1] * .65], `${label}:source f32 motion projection`);
+        if (scenario.doorContract === 'curse') {
+          phaseAssert.equal(state.player.hp, actor.redHp, `${label}:curse-door native half-heart state`);
+          phaseAssert.equal(state.damageCooldown, actor.damageCountdown, `${label}:curse-door immunity and transition dispatch`);
+          const sourceDoors = observed.contents.grid.filter(cell => cell.type === 16 && cell.variant !== 6);
+          const actualDoors = state.room.grid?.cells.flatMap((cell, index) => cell.entity?.kind === 16 && cell.entity.variant !== 6 ? [index] : []) || [];
+          phaseAssert.deepEqual(actualDoors, sourceDoors.map(door => door.index), `${label}:complete authored curse-route door objects`);
+          for (const door of sourceDoors) {
+            const actual = state.room.grid?.cells[door.index]?.entity;
+            phaseAssert.deepEqual([actual?.kind, actual?.state, actual?.collisionClass], [door.type, door.state, door.collisionClass], `${label}:curse-route door collision phase`);
+          }
+        }
         observedRooms.add(source.currentDescriptorIndex);
         phaseAssert.deepEqual(state.visitedRooms, [...observedRooms].sort((a, b) => a - b), `${label}:visited source room identities`);
         phaseAssert.deepEqual(Object.keys(state.persistedRooms).map(Number).sort((a, b) => a - b),
@@ -142,7 +156,9 @@ try {
             `${label}:complete supported native admission multiset with subtype/seed/position`);
         } else phaseAssert.deepEqual(admission, admissions.get(state.currentRoom), `${label}:return must retain the first selected authored groups`);
         states.push({ label, currentRoom: state.currentRoom, descriptor: state.room.descriptor, spawns: admission,
-          position: actor.position, velocity: actor.velocity, visitedRooms: state.visitedRooms, transition: state.roomTransition });
+          player: state.player, damageCooldown: state.damageCooldown, nativePosition: actor.position,
+          nativeVelocity: actor.velocity, nativeHp: actor.redHp, nativeDamageCountdown: actor.damageCountdown,
+          visitedRooms: state.visitedRooms, transition: state.roomTransition });
         row.comparedPhases++;
       };
       const deliver = async action => {
@@ -172,6 +188,12 @@ try {
         'Mandatory source hostile-room regression must actually keep its attempted return locked');
       else assert.equal(expectedFinal.currentDescriptorIndex, native.debugObservations[0].observation.floor.currentDescriptorIndex,
         'Independent ordinary return route must actually reach the starting descriptor');
+      if (scenario.doorContract === 'curse') {
+        assert.equal(native.debugObservations[0].observation.contents.players[0].redHp, 6, 'Source fresh Isaac starts with three red hearts');
+        assert.equal(originals.get('neighbor').observation.contents.players[0].redHp, 5, 'Source curse entrance must charge half a heart');
+        assert.equal(originals.get('cooled').observation.contents.players[0].damageCountdown, 0, 'Public wait must clear source entry immunity');
+        assert.equal(originals.get('returned').observation.contents.players[0].redHp, 4, 'Source curse exit must charge another half heart');
+      }
       const trace = await page.evaluate(() => window.game.trace());
       assert.equal(trace.enabled, true); assert.equal(trace.truncated, false);
       assert.deepEqual(trace.commands, expectedCommands, 'Every requested DOM key and interval must reach WASM exactly once');

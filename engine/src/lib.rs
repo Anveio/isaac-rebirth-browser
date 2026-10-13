@@ -11,6 +11,7 @@ pub mod actors;
 pub mod bombs;
 pub mod combat;
 mod content;
+mod doors;
 mod effects;
 pub mod floor;
 pub mod grid;
@@ -830,6 +831,12 @@ impl Game {
             });
         if traversal::advance_transition(&mut self.state, phase) {
             if room_before != self.state.current_room {
+                doors::begin_room_admission(&mut self.state);
+                // Transition state1 explicitly dispatches Player::Update at
+                // 5ddf87 before loading, then the admitted Room::Update at
+                // 5de048 dispatches it once more. Inbound phases stay frozen.
+                combat::advance_player_immunity(&mut self.state);
+                combat::advance_player_immunity(&mut self.state);
                 if restoring {
                     self.rebuild_room_actor_schedule()?;
                 } else {
@@ -852,6 +859,7 @@ impl Game {
             self.refresh_minimap();
             return Ok(());
         }
+        doors::advance(&mut self.state, phase);
         let explosion_fence = self.state.explosions.len();
         grid_hazards::advance(&mut self.state, phase)?;
         let existing = self.state.actor_scheduler.full_phase();
@@ -954,7 +962,7 @@ impl Game {
     fn update_player(&mut self, phase: phase::Phase, bomb_triggered: bool) -> Result<(), String> {
         let dx = i32::from(self.held("KeyD")) - i32::from(self.held("KeyA"));
         let dy = i32::from(self.held("KeyS")) - i32::from(self.held("KeyW"));
-        self.state.damage_cooldown = self.state.damage_cooldown.saturating_sub(1);
+        combat::advance_player_immunity(&mut self.state);
         let bomb_admitted = self.state.bomb_placement_cooldown.advance(phase);
         // Shooting inherits the velocity entering this phase, before input acceleration.
         let inherited_velocity = (self.state.player.vx, self.state.player.vy);

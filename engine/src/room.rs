@@ -267,10 +267,14 @@ impl Room {
                     "Opened"
                 }
                 .into(),
-                asset: match destination.template.room_type {
-                    4 => "gfx/grid/door_02_treasureroomdoor.anm2",
-                    10 => "gfx/grid/door_04_selfsacrificeroomdoor.anm2",
-                    _ => "gfx/grid/door_01_normaldoor.anm2",
+                asset: if descriptor.template.room_type == 10
+                    || destination.template.room_type == 10
+                {
+                    "gfx/grid/door_04_selfsacrificeroomdoor.anm2"
+                } else if destination.template.room_type == 4 {
+                    "gfx/grid/door_02_treasureroomdoor.anm2"
+                } else {
+                    "gfx/grid/door_01_normaldoor.anm2"
                 }
                 .into(),
                 x: (40.0 + 40.0 * column) * motion::WORLD_SCALE + 32.0 + inset_x,

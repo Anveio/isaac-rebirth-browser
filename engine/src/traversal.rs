@@ -80,7 +80,7 @@ pub(crate) fn check_departure(state: &mut State) {
         let destination = &state.floor.descriptors[target_room];
         // Large-room camera/backdrop and combat locks need their owning source
         // routes. Preserve those descriptors without claiming this small route.
-        if destination.template.room_type != 1
+        if !matches!(destination.template.room_type, 1 | 10)
             || (destination.template.width, destination.template.height) != (13, 7)
         {
             continue;
@@ -137,6 +137,9 @@ pub(crate) fn advance_transition(state: &mut State, phase: Phase) -> bool {
         return true;
     }
     if transition.phase == TransitionPhase::In {
+        // The state3 completion branch dispatches one Player::Update at
+        // 5dde9e while the room's grid/nonplayer callbacks remain frozen.
+        crate::combat::advance_player_immunity(state);
         return true;
     }
     state
