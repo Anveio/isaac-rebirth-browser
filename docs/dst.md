@@ -117,14 +117,15 @@ the same change.
 ## Findings and engine refactors
 
 Each finding below was fixed in the engine and keeps a guard that fails
-without the fix: a corpus regression tape, or a kernel property when a tape's
-trajectory cannot stay pinned while the engine evolves.
+without the fix: a corpus regression tape, a kernel property or a static rule.
+Game tapes drift as the engine evolves, so a tape that stops reproducing its
+finding is retired rather than kept under a regression label.
 
 | Guard | Finding | Engine change |
 | --- | --- | --- |
 | `regression-locked-character-start` | Confirming a locked or unimplemented character queued a run whose start failed inside the transactional tick, so every later tick failed. In the browser the throwing tick stops the frame loop: the game froze permanently. | Character confirmation validates the selection and rejects the input, like the existing hard-mode rejection ([lib.rs](../engine/src/lib.rs)). |
 | `grid: nonplayer ground resolution never fails for bounded motion` | A bomb coasting into a wall with a ~1e-26 residual velocity underflowed its f32 squared speed to zero in an interpolation preview, which the reflection guard reported as overflow, failing the tick. The preview never divides by that speed. The original game tape stopped reaching the contact once main added the run-start hold; the `grid` unit now drives the solver directly. | The zero-speed guard applies only to the full update, which divides by a reflected speed provably above 0.1 ([grid.rs](../engine/src/grid.rs)). |
-| `regression-native-wasm-trig` | Native `f32::sin/cos` call the host C library, which disagrees with wasm32's libm on about 1.9% of inputs (77,065 of 3,992,186 sampled); a game tape diverged from the shipped WASM at step 665. | [fmath.rs](../engine/src/fmath.rs) routes all engine trigonometry through the `libm` crate, bit-identical to wasm32 std on every sampled input, so the shipped artifact is unchanged while native builds (DST, replay, floor tools) now agree with it. [clippy.toml](../engine/clippy.toml) rejects the host methods. |
+| [clippy.toml](../engine/clippy.toml) `disallowed-methods`; the WASM differential on every tape | Native `f32::sin/cos` call the host C library, which disagrees with wasm32's libm on about 1.9% of inputs (77,065 of 3,992,186 sampled); a game tape diverged from the shipped WASM at step 665. That tape stopped reproducing after later main changes moved its trajectory, so the static rule now guards the fix. | [fmath.rs](../engine/src/fmath.rs) routes all engine trigonometry through the `libm` crate, bit-identical to wasm32 std on every sampled input, so the shipped artifact is unchanged while native builds (DST, replay, floor tools) now agree with it. |
 
 ## Running on Antithesis
 
