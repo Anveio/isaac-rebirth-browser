@@ -911,6 +911,15 @@ impl Game {
         // Shooting inherits the velocity entering this phase, before input acceleration.
         let inherited_velocity = (self.state.player.vx, self.state.player.vy);
         motion::advance(&mut self.state.player, &self.state.room, dx, dy);
+        // Live waited-contact routes cross the same pickup boundary in either
+        // phase: only the full phase admits contact, after player movement.
+        if phase == phase::Phase::Update {
+            for pickup in &mut self.state.room.pickups {
+                if pickup.touches(&self.state.player) {
+                    pickup.try_collect(&mut self.state.player, &mut self.state.inventory);
+                }
+            }
+        }
         if bomb_triggered && bomb_admitted {
             bombs::place(&mut self.state, phase)?;
         }
