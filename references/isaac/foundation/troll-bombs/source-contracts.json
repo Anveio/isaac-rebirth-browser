@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "scope": "Source-backed implementation contracts. Live acceptance is pending; this document is not a kernel or gameplay proof.",
+  "nativeBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "contracts": [
+    {
+      "source": "Pickup::Update506f70 early branch507568; subtype3 at507cc0; subtype5 at50757d",
+      "behavior": "PU40/3 spawns type4 variant3; PU40/5 spawns type4 variant4. Each calls actual42e8c0 raw shared-MT seed wrapper, passes PU world position, global zero velocity, null parent and subtype0 to Game::Spawn550a40, then invokes PU virtualRemove. The branch returns before generic animation/base movement."
+    },
+    {
+      "source": "Entity_Bomb::Init456e00 /456e35 /456f08; authored4/3,4/4 XML and Linux animation cache",
+      "behavior": "Fuse59, base explosionDamage60, gridCollisionClass5, Appear clip; authored collisionRadius16/mass6/friction1/shadow17; both rare variants own Appear35, Pulse59 and Explode5 non-looping clips."
+    },
+    {
+      "source": "Bomb::Update457379..457394 and dead-animation manager cleanup; 40fba0,40fd80",
+      "behavior": "Full-only zero-fuse check precedes decrement. Appear completes before Pulse admission. Detonation starts Explode0; the five-frame variant clip retires after five subsequent full turns. Full scheduler entry fence excludes a child born in PU update; fast traversal retains normal actor admission order."
+    },
+    {
+      "source": "BaseUpdate447190; FastUpdate4446a0; Bomb::Update457bb0..457ccb; Normalize612820; age442b30",
+      "behavior": "Megatroll first applies previous temporary friction before integrating velocity, resets authored friction, then ordinary .95 drag and low-speed .5. It targets the nearest player position plus velocity*5. Strict squared-distance<72900 adds normalized-direction*1.5 using a rounded f32 reciprocal, then velocity*.8. Source age<=19 also selects next-turn friction.8. Fast prediction rounds velocity*friction before halving."
+    }
+  ],
+  "unaccepted": [
+    "Complete shared-MT consumer alignment; actual conversion raw seed is required by the live gate, with any mismatch blocking.",
+    "Blast pickup impulse and motion remain unsupported and required in retained XD0.",
+    "Selected explosive/tinted/alternate Rock callbacks and drops remain blocking rather than silently omitted.",
+    "Additional bomb variants, modifiers, prices, room-exit persistence, active items and full pixels/sample identity are outside this conversion leaf.",
+    "Planted-bomb raw seed remains explicit null metadata until its source admission owner is recovered; no fabricated seed or cursor shift."
+  ]
+}
