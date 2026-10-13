@@ -2,7 +2,6 @@ import { Assets } from "./animation";
 import { MenuRenderer } from "./menu";
 import { GLMenuContext, type GLSurface } from "./gl-menu";
 import { StageComposer, type StageTargets } from "./gl-stage";
-import { graphicsContracts } from "./graphics-contracts";
 import { RunPresentation } from "./presentation";
 import type { RoomAppearance, RoomQuad, State } from "./engine";
 
@@ -71,7 +70,6 @@ export class Renderer {
     this.context.drawImage(gl.canvas, 0, 0);
   }
   debugTargets(): StageTargets { return this.stage.debugTargets(); }
-  debugGraphicsContracts(): Promise<{ mask: number[]; screen: number[] }> { return graphicsContracts(this.assets); }
   private drawQuads(appearance: RoomAppearance, quads: RoomQuad[]): void {
     const gl = this.graphics, image = this.assets.image(appearance.backdrop);
     for (const quad of quads) {

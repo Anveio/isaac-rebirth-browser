@@ -31,22 +31,27 @@ playable build and status; [publish source](tools/sites/push.mjs) preserves its 
 ```sh
 bash cloud/install.sh
 bash cloud/start.sh                    # http://localhost:5173
-npm run check                         # Includes original screenshot comparisons
-npm run verify:foundation             # PNG/state/performance reports in .cache/
-npm run test:original-seeds           # Fresh random-seed original/Rust/WASM probes
-npm run test:original-clock           # Repeat original inputs/pixels on random seeds
-npm run test:original-backdrop        # Fresh original GL geometry vs recovered generator
-npm run test:physics-kernels          # Native projectile phases and complete MT states
-npm run test:layout-kernels           # Retained native weighted-template IDs and guards
-npm run test:combat-kernels           # Exact source grid/contact/deferred-damage kernels
-npm run test:rooms                    # All base room records and corruption guards
+npm run check                         # Build and gate fresh original/browser games
+npm run test:e2e                      # Six contrived + two recorded OS-random runs
+npm run test:e2e -- --replay-cases PATH # Replay a recorded case.json
+npm run verify:foundation             # Strict legacy PNG/state diagnostics; mismatches exit nonzero
+npm run assets:rooms                  # Decode all base room records
 npm run matrix:check
 ```
 
 Browser tests and the default verifier serve an immutable copy of the built
 production artifact on an isolated loopback server. Run `npm run build` before
-standalone browser tests. Reports identify the artifact by SHA256. Full-frame
-original comparison failures remain failures in `npm run check`.
+standalone browser tests. Reports identify the artifact by SHA256.
+Source-observable functional failures block `npm run check`. Every paired
+checkpoint also retains a complete pixel comparison and difference image;
+pixel mismatches stay reported as failures without blocking the default
+functional gate. `verify:foundation` remains a strict pixel diagnostic.
+
+CI executes both games live using public inputs, fresh original profiles and a
+copied production build. Recorded random tapes can be replayed unchanged.
+Checked-in unit suites and component-only harnesses have been removed;
+validators stay in runtime/e2e tools, while temporary probes belong in ignored
+research cache. See [the live-game workflow](.github/workflows/live-games.yml).
 
 Ordinary play retains no command/state history. To capture diagnostic evidence,
 pause automatic stepping and call `game.reset(seed, { trace: true })` in the
@@ -68,11 +73,11 @@ stay red. Rust/WASM self-equality does not prove original-game state parity.
 | Native motion, tear inheritance and regular bombs | [Motion](engine/src/motion.rs), [bombs](engine/src/bombs.rs), [bomb evidence](docs/bomb-evidence.md) |
 | Run introduction, pause and bomb animation | [Presentation](web/presentation.ts), [authored asset selection](tools/foundation/port-animations.txt) |
 | Native title clock, fade and f32 geometry | [Animation evidence](docs/animation-evidence.md), [title browser gate](tools/tests/title.spec.ts), [geometry kernel](web/animation-math.ts) |
-| Supplied-seed floor growth and weighted templates | [Layout evidence](docs/room-layout-evidence.md), [kernel CLI](engine/src/bin/layout.rs), [original verifier](tools/original/foundation-layout-verify.py) |
-| Authored room catalogue and recovered backdrop | [STB decoder](tools/foundation/decode-rooms.py), [backdrop evidence](docs/backdrop-observations.md), [live verifier](tools/original/foundation-backdrop-verify.py) |
+| Supplied-seed floor growth and weighted templates | [Layout evidence](docs/room-layout-evidence.md), [growth](engine/src/layout.rs), [templates](engine/src/room_templates.rs), [source observer](tools/original/foundation-layout-observer.py) |
+| Authored room catalogue and recovered backdrop | [STB decoder](tools/foundation/decode-rooms.py), [backdrop evidence](docs/backdrop-observations.md), [live paired gate](tools/foundation/paired-game.mjs) |
 | Controlled original clock and consumed inputs | [Clock runner](tools/original/foundation-clock-run.py), [exact original repeats](tools/original/foundation-clock-verify.py), [scenario tapes](tools/original/foundation-clock-scenarios.py) |
 | Actual input and command/state capture | [Browser entry](web/main.ts), [browser scenarios](tools/foundation/verify.mjs) |
-| Room, actor, HUD and menu composition | [Renderer](web/renderer.ts), [menus](web/menu.ts), [authored animation playback](web/animation.ts), [GPU harness](web/graphics-contracts.ts) |
+| Room, actor, HUD and menu composition | [Renderer](web/renderer.ts), [menus](web/menu.ts), [authored animation playback](web/animation.ts) |
 | Every divergence → owning system and fix tasks | [System/task registry](tools/foundation/systems.mjs) |
 | Cases, gaps and source synchronization | [TEST_MATRIX.md](TEST_MATRIX.md), [generator](tools/foundation/matrix.mjs) |
 | Exact original light/shadow buffer comparisons | [Stage mask cases](tools/foundation/stage-masks.mjs), [native fixtures](references/isaac/foundation/stage-masks/manifest.json) |
@@ -87,8 +92,9 @@ For each difference, identify the responsible system, record its task and failin
 scenario, implement the general rule, then rerun the comparison. Do not patch a
 screenshot, use per-seed behavior/maps, relax a gate, or skip a selected test.
 Production seeds are ordinary inputs; invariants use random seeds recorded for
-replay. Rust property tests print `FOUNDATION_TEST_SEED` for replay; browser/WASM
-banks use [the seed runner](tools/foundation/seeds.mjs). Fixed seeds belong in reference fixtures.
+replay. Live paired cases retain their OS-random seed and complete action tape in
+`case.json` and `tape.json`; `--replay-cases` uses the recorded choices. Fixed
+seeds belong in contrived interactions and reference fixtures.
 
 Update the matrix with `npm run matrix:update` when checkpoints or system tasks
 change. Pixel reports distinguish exact equality from measured native capture

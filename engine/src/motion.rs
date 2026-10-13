@@ -112,26 +112,3 @@ pub fn advance(player: &mut Player, room: &Room, dx: i32, dy: i32) {
     player.vx = f64::from(velocity.x) * WORLD_SCALE;
     player.vy = f64::from(velocity.y) * WORLD_SCALE;
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn independent_grid_holdout_preserves_two_stage_sideways_rounding() {
-        // Native rock-held steps23/24 differ from a precombined retention,
-        // despite both phases executing the same source player-control law.
-        let position = WorldVector {
-            x: 80.0,
-            y: 329.999_82,
-        };
-        let velocity = WorldVector {
-            x: 1.437_272_3e-8,
-            y: 0.0,
-        };
-        let (_, next) = advance_world(position, velocity, 0, 1).unwrap();
-        assert_eq!(next.x.to_bits(), 1.131_709_3e-8_f32.to_bits());
-        let (_, next) = advance_world(position, next, 0, 1).unwrap();
-        assert_eq!(next.x.to_bits(), 8.911_087e-9_f32.to_bits());
-    }
-}

@@ -1,0 +1,55 @@
+name: Live original and browser game contracts
+
+on:
+  pull_request:
+  push:
+    branches: [main, codex/observed-systems-progress]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: live-games-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  paired-games:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Restore build and browser downloads
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            ~/.cache/ms-playwright
+            engine/target
+          key: ${{ runner.os }}-live-games-${{ hashFiles('engine/Cargo.lock', 'engine/src/**', 'engine/build.rs', 'package-lock.json') }}
+          restore-keys: ${{ runner.os }}-live-games-
+      - name: Install toolchains and prepare both games
+        run: |
+          bash cloud/install.sh
+          npx playwright install --with-deps chromium
+      - name: Build and run live original/browser scenarios
+        run: |
+          source cloud/env.sh
+          npm run check
+      - name: Retain replay tapes and comparison evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-game-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            .cache/foundation/paired-*/
+            test-results/
+          if-no-files-found: warn
+          retention-days: 14

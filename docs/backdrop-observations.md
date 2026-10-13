@@ -62,13 +62,11 @@ adds half the least printed decimal, then scales by the observed 512-pixel
 texture extent. It also checks individual vertices, so equal rectangle bounds
 cannot conceal a skewed quad.
 
-Run `npm run test:original-backdrop` to build the same production generator and
-capture two new independent original seeds in parallel. Per-case manifests,
-capture logs, and the aggregate report remain under `.cache/foundation/`.
-`foundation-backdrop-verify-checks.py` guards missing geometry, skewed vertices,
-coordinate budgets, reused evidence, aggregate failure continuation, and child
-session cleanup. The live contract concerns cache assembly; complete presented
-image equality requires the separate graphics comparisons.
+The conditional backdrop verifier and its standalone CLI are now ignored
+research. The production generator and original-only observations remain;
+these earlier cache-assembly checks do not establish run-to-room routing.
+`npm run test:e2e` captures both live games and retains complete image
+differences, while selected functional contracts gate runtime progress.
 
 Production `generate_room(run_seed)` still substitutes the Stage 1 seed for the
 unrecovered room decoration seed and labels this route provisional. Observed

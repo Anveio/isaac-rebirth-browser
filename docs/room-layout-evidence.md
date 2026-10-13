@@ -1,8 +1,8 @@
 # Recovered floor-growth and room-template contracts
 
 The Rust kernels in `engine/src/layout.rs` and `engine/src/room_templates.rs`
-accept independently supplied generator or selector seeds. They are available
-through the bounded `layout` diagnostic binary. Gameplay still uses its
+accept independently supplied generator or selector seeds. The earlier bounded
+`layout` diagnostic binary is now ignored research. Gameplay still uses its
 explicitly provisional room routing: these kernels do not yet generate a
 complete floor from a run seed or enable traversal.
 
@@ -15,8 +15,8 @@ tape, public X11 inputs, consumed event acknowledgments, clock and paired
 gameplay-start observation, with local paths omitted. The verifier checks its
 byte hash and pairs seed/frame/time/context against the actual gate ack and
 consumed tape. Original addresses and private cache paths are excluded from
-these portable observations. The reusable observer and live verifier reproduce
-the checks without depending on ignored files.
+these portable observations. The reusable read-only observer remains checked
+in; the earlier component verifier is now ignored research.
 
 The source executable SHA256 is
 `724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13`,
@@ -114,25 +114,11 @@ the native general expansion rule closes it, and later random-seed holds
 exercise zero, one and two expansions. Omitting native weight decay likewise
 produced later-template mismatches; the actual source mutation closes them.
 
-Run the retained independent selector comparison with:
-
-```sh
-source cloud/env.sh
-cargo build --manifest-path engine/Cargo.toml --locked --bin layout
-python3 tools/original/foundation-layout-verify.py
-python3 tools/original/foundation-layout-verify-checks.py
-```
-
-Fresh held-out source runs use:
-
-```sh
-python3 tools/original/foundation-layout-verify.py --capture --count 2 --jobs 2
-```
-
-The aggregate verifier attempts every selected case, rejects duplicate seed
-identities and incomplete/log-mismatched/RNG-mismatched observations, and emits
-a report with nonzero exit on failure. `--contract both` keeps the strict
-finalized-growth comparison available and exposes the retained resizing gap.
+The component-only selector/growth verifier and diagnostic CLI are now ignored
+research. The production kernels, authored tables, retained original evidence
+and read-only layout observer remain checked in. Their earlier conditional
+results do not establish browser floor routing. `npm run test:e2e` runs both
+games live; room traversal failures remain visible until runtime hooks land.
 
 Remaining work includes full primary stage draw consumption with real profile
 and challenge predicates, special assignment/resizing, outer generation

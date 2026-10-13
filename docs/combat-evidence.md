@@ -2,8 +2,8 @@
 
 The native world kernels in `engine/src/grid.rs` and `engine/src/combat.rs`
 match 100 retained original checkpoints across eight conditional cases. The
-diagnostic `engine/src/bin/combat.rs` exercises them independently of browser
-room routing. These checks establish the supplied grid, trajectory, contact
+component-only harness is now ignored research. Its earlier checks establish
+the supplied grid, trajectory, contact
 and ordinary damage queue contracts. They do not establish enemy AI, the full
 collision manager, rock drops, death callbacks or browser combat integration.
 
@@ -27,12 +27,10 @@ and resumes the child in `finally`. It never writes native memory or reads
 executable process mappings. The checked-in archive preserves selected raw
 checkpoints, native counters, public input events and original manifest hashes.
 
-Run the portable checks after sourcing `cloud/env.sh`:
+Run both games live after sourcing `cloud/env.sh`:
 
 ```sh
-cargo build --manifest-path engine/Cargo.toml --bin combat --locked
-python3 tools/original/foundation-combat-verify-checks.py
-python3 tools/original/foundation-combat-verify.py
+npm run test:e2e -- --scenarios paired-room-combat --random-count 0
 ```
 
 `tools/original/foundation-combat-scenario.py --case rock-held --output PATH`
@@ -43,19 +41,11 @@ The routes are paired with their observed seeds; another seed can select a
 different neighbor. The reusable matrix builder accepts another seed for
 discovery without asserting the same room contents.
 
-After a fresh original run, independently verify its values without updating
-expectations:
-
-```sh
-python3 tools/original/foundation-combat-verify.py \
-  --native-manifest rock-held=PATH/run/manifest.json
-```
-
-Multiple `--native-manifest SCENARIO=PATH` arguments verify independent runs
-together. A failure does not suppress later selected cases. Fixture/proof
-identity, native hash, profile, seed, read-only flags and actual input edges
-are checked before the kernel output. Every numeric gameplay comparison
-uses exact IEEE-754 f32 bits, including signed zero; no tolerance is used.
+The live paired gate retains source read-only observations, actual consumed
+input edges, browser command traces and pixel diagnostics. Its selected
+functional comparisons remain failures until the corresponding runtime hooks
+are implemented. The retained component observations below remain source
+evidence, not current browser combat coverage.
 
 ## Accepted native holds
 

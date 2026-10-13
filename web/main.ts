@@ -82,7 +82,6 @@ async function boot() {
   const game = {
     snapshot: () => engine.snapshot(),
     rendererTargets: () => renderer.debugTargets(),
-    graphicsContracts: () => renderer.debugGraphicsContracts(),
     command: (command: Command) => structuredClone(dispatch(command)),
     step: (count = 1) => structuredClone(dispatch({ type: 'tick', count })),
     pause: () => { automaticPaused = true; accumulator = 0; },
