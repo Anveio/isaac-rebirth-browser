@@ -159,5 +159,15 @@
     "Rare51/360 and modifier/stage replacements",
     "Actual saved/revisited actor reconstruction; whole-Room clone persistence is separate",
     "Camera/backdrop and complete pixels"
-  ]
+  ],
+  "restackedComposition": {
+    "baseCommit": "fc7533766163fa152bc6c346d5081fa33aae2d25",
+    "runtimeCommit": "b1f74ba",
+    "runtimeSourceUnchangedFromProof": true,
+    "leanSteppingPreserved": true,
+    "check:build": "pass",
+    "buildLog": "/workspace/isaac-worktrees/floor/.cache/door-mechanics/chest-restacked-build.log",
+    "buildLogSha256": "a4e49548567b76ff155509520bb6a67b71716b264bc7cb97bf55c96fdaa66e31",
+    "liveScope": "The1843-phase artifact above predates this restack. No passing fresh-both-games CI claim is added by composition checks."
+  }
 }
