@@ -22,7 +22,7 @@
     "cohorts": "Two contrived ordinary-only YQ16XWHR phase offsets plus fresh recorded OS-random ordinary-only neighbors selected from all four starting directions using authored seeds/local factory rolls. Both26T688VM offsets, original794ZK08P random tape and ZLJJ61ZJ tinted tape remain mandatory. The already-discovered XD0VNH46 troll-bomb tape is also mandatory in every default run; its source failure is not waived or replaced by a regular pickup.",
     "assertions": [
       "Source public seed readback and bounded read-only executable identity",
-      "Actual DOM/WASM command trace and phase parity",
+      "Complete actual reset/menu/manual-seed/gameplay command tape with inputTraceTruncated=false; seedText/seedValid/seededRun/runSeed/numeric readback and phase parity",
       "Player XY/VXY/HP/inventory/immunity every presentation",
       "Living player bomb admission, presented XY/VXY and fuse countdown every phase",
       "Relative full-game-update counter",
@@ -34,10 +34,13 @@
     "knownFailures": "known-regressions.json",
     "relatedBombFinding": "related-bomb-selector-regressions.json",
     "failurePolicy": "Every selected case executes; functional failures remain blocking and cause a nonzero gate exit",
-    "result": "Four isolated ordinary routes pass1652 exact phases; previously selected794ZK08P also passes470 after factory classification. Default8-case gate remains fail with both26T688VM explosive offsets and ZLJJ61ZJ tinted regression blocking; everycase executes. The ninth mandatory troll case is now added to the default public cohort; targeted live report follows separately.",
+    "result": "Four isolated ordinary routes pass1652 exact phases; previously selected794ZK08P also passes470 after factory classification. Default8-case gate remains fail with both26T688VM explosive offsets and ZLJJ61ZJ tinted regression blocking; everycase executes. The ninth mandatory troll case is now added to the default public cohort; fresh targeted pair fails375 phases with11807 field mismatches, preserved separately. Full menu provenance follow-up is recorded separately.",
     "report": "live-report.json",
     "firstFailureReport": "first-live-report.json",
-    "historicalEightCaseReplay": "scenarios-eight-case.json"
+    "historicalEightCaseReplay": "scenarios-eight-case.json",
+    "trollReport": "troll-live-report.json",
+    "fullInputReport": "full-input-live-report.json",
+    "fullInputResult": "Fresh contrivedYQ16XWHR470 +recordedOS Z6Y6PNT8355 =825 presentations pass complete setup/readback/input history and every compared gameplay field. The full default9-case cohort remains blocking on recorded missing systems."
   },
   "unaccepted": [
     "Tinted kind4 admission/drop callback; explosivekind5 and alternatekind6 callbacks and modifier drops (kind5/6 factory metadata is implemented)",

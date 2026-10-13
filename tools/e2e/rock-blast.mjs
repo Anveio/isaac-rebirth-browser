@@ -114,6 +114,14 @@ try {
       await page.evaluate(({ seedValue, bootEpochSeed }) => {
         window.game.pause(); window.game.reset(seedValue, { trace: true, bootEpochSeed });
       }, { seedValue: item.seedValue, bootEpochSeed: scenarios.bootEpochSeed });
+      // Independently declared complete input tape, beginning at reset. A
+      // reset seed cannot stand in for actual manual seed entry/readback.
+      const press = code => [{ type: 'key', code, down: true }, { type: 'key', code, down: false }];
+      const expected = [
+        ...press('Enter'), ...press('Enter'), ...press('Enter'), ...press('Tab'),
+        ...[...item.code].map(text => ({ type: 'text', text })),
+        ...press('Enter'), ...press('Enter'),
+      ];
       for (let index = 0; index < 3; index++) await page.keyboard.press('Enter');
       await page.keyboard.press('Tab');
       await page.keyboard.type(item.code);
@@ -121,10 +129,14 @@ try {
       await page.keyboard.press('Enter');
       const start = await page.evaluate(() => window.game.snapshot());
       assert.equal(start.screen, 'playing');
+      assert.equal(start.seedText, item.code);
+      assert.equal(start.seedValid, true);
+      assert.equal(start.seededRun, true);
+      assert.equal(start.runSeed, item.code);
       assert.equal(start.runSeedValue, item.seedValue);
       assert.equal(start.systemClock.systemCounter % 2, 0);
-      const traceStart = (await page.evaluate(() => window.game.trace())).commands.length;
-      const expected = [];
+      caseResult.seedReadback = { seedText: start.seedText, seedValid: start.seedValid,
+        seededRun: start.seededRun, runSeed: start.runSeed, runSeedValue: start.runSeedValue };
       let presentation = 0;
       for (const { key, frames } of item.actions) {
         const code = key ? 'Key' + key.toUpperCase() : null;
@@ -188,7 +200,7 @@ try {
             for (const field of ['variant', 'subtype', 'spawnSeed', 'animation', 'animationFrame', 'animationPlaying', 'collisionRadius']) {
               equal(actual[field], original[field], `pickup${index}:${field}`, presentation);
             }
-            equal([actual.position.x, actual.position.y], original.position, `pickup${index}:position`, presentation);
+            equal([Math.fround(actual.position.x), Math.fround(actual.position.y)], original.position, `pickup${index}:position`, presentation);
             equal(actual.collected, original.removed, `pickup${index}:collection flag`, presentation);
           }
           const handles = state.actorScheduler.actors;
@@ -210,7 +222,7 @@ try {
       assert.equal(stateLast(states).inventory.bombs, 0, 'Public E action must consume the starting bomb');
       const trace = await page.evaluate(() => window.game.trace());
       assert.equal(trace.inputTraceTruncated, false, 'Every public command must remain recorded');
-      assert.deepEqual(trace.commands.slice(traceStart), expected);
+      assert.deepEqual(trace.commands, expected, 'Complete reset/menu/manual-seed/gameplay input tape');
       caseResult.trace = { inputTraceTruncated: trace.inputTraceTruncated,
         stateHistoryTruncated: trace.stateHistoryTruncated,
         stateHistoryTruncationReason: trace.stateHistoryTruncationReason,
