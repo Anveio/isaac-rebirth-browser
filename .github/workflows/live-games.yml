@@ -1,43 +1,34 @@
-name: Live original and browser game contracts
+name: Live e2e
 
+# Every registered live suite (tools/e2e/suites.mjs) against fresh original
+# processes. Runs after main changes rather than on pull requests; a run in
+# progress finishes and only the newest pending main commit queues behind it.
+# The schedule keeps drawing fresh OS-random seeds while main is quiet.
 on:
-  pull_request:
   push:
-    # Feature updates already run through pull_request; do not duplicate the
-    # complete original/browser matrix for the aggregate's branch push.
     branches: [main]
+  schedule:
+    - cron: '41 */6 * * *'
   workflow_dispatch:
+    inputs:
+      suites:
+        description: Comma-separated suite ids (empty runs every suite)
+        required: false
+        default: ''
 
 permissions:
   contents: read
 
 concurrency:
-  group: live-games-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  group: live-e2e
+  cancel-in-progress: false
 
 jobs:
-  live-suites:
+  build:
     runs-on: ubuntu-24.04
+    timeout-minutes: 30
     outputs:
-      scripts: ${{ steps.suites.outputs.scripts }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-      - name: Discover every registered live game suite
-        id: suites
-        run: echo "scripts=$(node tools/e2e/run.mjs --list)" >> "$GITHUB_OUTPUT"
-  paired-games:
-    needs: live-suites
-    runs-on: ubuntu-24.04
-    strategy:
-      fail-fast: false
-      matrix:
-        script: ${{ fromJSON(needs.live-suites.outputs.scripts) }}
-    timeout-minutes: 35
+      suites: ${{ steps.suites.outputs.suites }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -46,39 +37,95 @@ jobs:
         with:
           node-version: 24
           cache: npm
-      - name: Restore build and browser downloads
-        uses: actions/cache@v4
+      - uses: actions/cache@v4
         with:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
-            ~/.cache/ms-playwright
             engine/target
-          key: ${{ runner.os }}-live-games-${{ hashFiles('engine/Cargo.lock', 'engine/src/**', 'engine/build.rs', 'package-lock.json') }}
-          restore-keys: ${{ runner.os }}-live-games-
-      - name: Install toolchains and prepare both games
-        run: |
-          bash cloud/install.sh
-          npx playwright install --with-deps chromium
-      - name: Build and run live original/browser scenarios
+          key: ${{ runner.os }}-live-${{ hashFiles('engine/Cargo.lock', 'engine/src/**', 'engine/build.rs') }}
+          restore-keys: ${{ runner.os }}-live-
+      - name: Install toolchains
+        env:
+          SKIP_PRODUCTION_BUILD: '1'
+        run: bash cloud/install.sh
+      - name: Check and build once for every suite
         run: |
           source cloud/env.sh
           npm run check:build
-          npm run test:e2e -- --suite '${{ matrix.script }}'
+          cargo build --manifest-path engine/Cargo.toml --locked --bin floor
+          mkdir -p shared/bin && cp engine/target/debug/floor shared/bin/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: production-build
+          path: |
+            dist/
+            shared/bin/floor
+          retention-days: 3
+      - name: Select suites
+        id: suites
+        env:
+          REQUESTED: ${{ inputs.suites }}
+        run: |
+          if [[ -n "$REQUESTED" ]]; then
+            echo "suites=$(node -p 'JSON.stringify(process.env.REQUESTED.split(",").map(s => s.trim()).filter(Boolean))')" >> "$GITHUB_OUTPUT"
+          else
+            echo "suites=$(node tools/e2e/run.mjs --list)" >> "$GITHUB_OUTPUT"
+          fi
+
+  e2e:
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: ${{ fromJSON(needs.build.outputs.suites) }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - uses: actions/cache/restore@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            engine/target
+          key: ${{ runner.os }}-live-${{ hashFiles('engine/Cargo.lock', 'engine/src/**', 'engine/build.rs') }}
+          restore-keys: ${{ runner.os }}-live-
+      - name: Install toolchains and the original runtime
+        env:
+          SKIP_PRODUCTION_BUILD: '1'
+        run: |
+          bash cloud/install.sh
+          npx playwright install --with-deps chromium
+      - uses: actions/download-artifact@v4
+        with:
+          name: production-build
+      - name: Place the shared build
+        run: |
+          mkdir -p engine/target/debug
+          install -m 755 shared/bin/floor engine/target/debug/floor
+      - name: Run ${{ matrix.suite }}
+        run: |
+          source cloud/env.sh
+          npm run test:e2e -- '${{ matrix.suite }}' --no-build --output ".cache/e2e/ci/${{ matrix.suite }}"
       - name: Retain replay tapes and comparison evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: live-game-evidence-${{ strategy.job-index }}-${{ github.run_id }}-${{ github.run_attempt }}
+          name: e2e-${{ matrix.suite }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
+            .cache/e2e/ci/
             .cache/foundation/paired-*/
-            .cache/foundation/floor-e2e*.json
-            .cache/foundation/floor-browser-live.json
             .cache/original-floor/**
-            .cache/e2e/**
             test-results/
+            !.cache/e2e/**/game/**
             !.cache/foundation/paired-*/**/game/**
             !.cache/original-floor/**/game/**
-            !.cache/e2e/**/game/**
           if-no-files-found: warn
           retention-days: 14

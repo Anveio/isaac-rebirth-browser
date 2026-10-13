@@ -1,0 +1,43 @@
+name: Build
+
+# Fast pull-request gate: assets, test matrix, typecheck, production build and
+# clippy. Live original/browser e2e suites run on main (live-games.yml).
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check-build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            engine/target
+          key: ${{ runner.os }}-build-${{ hashFiles('engine/Cargo.lock', 'engine/src/**', 'engine/build.rs') }}
+          restore-keys: ${{ runner.os }}-build-
+      - name: Install toolchains
+        env:
+          SKIP_PRODUCTION_BUILD: '1'
+        run: bash cloud/install.sh
+      - name: Check and build
+        run: |
+          source cloud/env.sh
+          npm run check:build
