@@ -140,12 +140,20 @@ Natural regular/double bomb pickups pass 2,727 phases across four retained tapes
 and two fresh unfiltered OS-random cases. Troll/Megatroll conversions remain
 required when observed and in the retained regressions.
 
-CI discovers all twenty-four registered live suites and runs separate jobs with
+Ordinary 13×14 room admission and reciprocal extended doorway routing now
+match 1,843 selected geometry, player, grid, door and minimap phases across
+three source tapes. The separate same-turn source/fresh-browser comparison
+retains three required missing Chest50 actors. Camera/backdrop and chest
+interaction remain unaccepted; the registered large-room gate always launches
+both games fresh. [Large-room evidence](large-room-evidence.md) retains the
+actual capture, stopped duplicate attempt and recovery scopes.
+
+CI discovers all twenty-five registered live suites and runs separate jobs with
 `fail-fast: false`, preserving each result and evidence. The first matrix run
 completed floors, weapons, boot MT and pickups successfully while retaining
 core and traversal failures. Build, typecheck, assets, matrix and strict Clippy
-pass at integrated checkpoint `cb36018`, including the reviewed Level,
-RoundWorm, item-selection and bomb-pickup leaves. The full 24-suite local run
+pass at integrated runtime checkpoint `3cb34f6`, including the reviewed Level,
+RoundWorm, item-selection, bomb-pickup and large-room geometry leaves. The full 24-suite local run
 uses a detached source checkout and a separate immutable production artifact.
 This is a build checkpoint, not a fresh all-suite passing result.
 Complete gameplay RNG, other floors/characters, persistence, later music
