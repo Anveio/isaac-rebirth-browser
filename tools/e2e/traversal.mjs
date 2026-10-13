@@ -225,7 +225,8 @@ try {
           const tuple = entity => [entity.type, entity.variant, entity.subtype, entity.spawnSeed,
             ...(Array.isArray(entity.position) ? entity.position : [entity.position.x, entity.position.y])];
           const multiset = entities => entities.map(tuple).map(JSON.stringify).sort();
-          const actualEntities = [...selectors.filter(selector => selector.category === 'entity' && rawMetadata(selector)),
+          const actualEntities = [...selectors.filter(selector => selector.category === 'entity' && rawMetadata(selector)
+            && !(state.room.npcs || []).some(npc => npc.kind === selector.type && npc.variant === selector.variant && npc.spawnSeed === selector.spawnSeed)),
             ...(state.room.npcs || []).map(npc => ({...npc, type: npc.kind})),
             ...(state.room.pickups || []).map(pickup => ({type: 5, ...pickup}))].filter(supported);
           phaseAssert.deepEqual(multiset(actualEntities), multiset(observed.contents.entities.filter(supported)),

@@ -25,7 +25,7 @@
     "tools/original/keeper-scenarios.py": "86eb88eda09e127052757729f490188004c821677f492ff0992b709dce4a72c0",
     "tools/original/foundation-pickup-observe.py": "2ce3a3f528259c876941d505e31981164a550ce1b2097f4ea136607e3bd365a5"
   },
-  "currentComparatorOnlyAddition": "Preserve raw metadata fallback for unsupported Keeper variants0/2; tested variant1 path is unchanged.",
+  "currentComparatorOnlyAddition": "Preserve raw metadata fallback for unsupported Keeper variants0/2 and suppress a fallback when its exact type/variant/spawnSeed is an actual NPC; tested variant1 path is unchanged.",
   "authoredInputs": {
     "web/npc-data.json": "1877ebb0544e5751e23b8b9f22862fbf5ff1645763364ebeaf2d8549c4909c58",
     "tools/foundation/port-npc-animations.txt": "73ef5641d429077512d535d82a4e875d6faa059717df0ced1c9e45c5552f58e1",
