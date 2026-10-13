@@ -227,7 +227,6 @@ pub fn player_contacts(state: &mut State) -> Result<(), String> {
 /// whose entry countdown is zero marks the descriptor clear and opens doors.
 pub fn admit_room_combat(state: &mut State) {
     if state.room.npcs.iter().any(|npc| npc.can_shut_doors) {
-        state.room.has_enemies = true;
         state.room.combat_clear = false;
         state.room.combat_clear_countdown = 10;
         change_doors(state, false);

@@ -92,7 +92,7 @@ export interface Room {
     gridCollisionClass: number; entityCollisionClass: number; canShutDoors: boolean; boss: boolean;
     state: number; frameAge: number; animationFrame: number; shadowSize: number; dead: boolean; removed: boolean;
     damage: {pendingDamage: number; pendingFlags: number} }[];
-  combatClear: boolean; hasEnemies: boolean; combatClearCountdown: number;
+  combatClear: boolean; combatClearCountdown: number;
   grid: { width: number; height: number; cells: {selector: number; entity: {kind: number; variant: number; state: number; collisionClass: number; spawnSeed: number} | null}[] } | null;
 }
 export interface Rect { x: number; y: number; width: number; height: number; }
