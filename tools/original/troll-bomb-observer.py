@@ -1,4 +1,4 @@
-"""Bounded read-only original bomb animation and admission metadata.
+"""Bounded read-only original bomb/pickup animation and admission metadata.
 
 The public controller owns the stopped original child. All observations remain
 reference evidence; none of these fields are provided to browser gameplay.
@@ -63,12 +63,17 @@ def observe(pid, context):
                 if not pointer:
                     continue
                 raw = read(pointer, 0x20)
-                if struct.unpack_from('<I', raw, 0x10)[0] != 4:
+                kind = struct.unpack_from('<I', raw, 0x10)[0]
+                if kind not in (4, 5):
                     continue
                 entity = entities[struct.unpack_from('<I', raw, 8)[0]]
                 entity['birthGameUpdate'] = struct.unpack('<I', read(pointer + 0x42c, 4))[0]
                 entity['spawnerType'] = struct.unpack_from('<I', raw, 0x1c)[0]
                 entity['spawnerVariant'] = struct.unpack('<I', read(pointer + 0x20, 4))[0]
+                if kind == 5:
+                    entity['pickupRng'] = list(struct.unpack('<IIII', read(pointer + 0x7c0, 16)))
+                    entity['pickupAnchor'] = list(struct.unpack('<ff', read(pointer + 0x440, 8)))
+                    continue
                 actor = pointer + 0x28
                 clip = u64(actor + 0x18)
                 name = u64(clip)
