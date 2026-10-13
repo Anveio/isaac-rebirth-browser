@@ -1,0 +1,2 @@
+gfx/013.000_fly.anm2
+gfx/018.000_attack fly.anm2

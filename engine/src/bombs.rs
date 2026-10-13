@@ -360,6 +360,7 @@ pub fn advance_actor(state: &mut State, phase: Phase, id: u32) -> Result<(), Str
     state.bombs[index].x = f64::from(presented.x) * WORLD_SCALE + 32.0;
     state.bombs[index].y = f64::from(presented.y) * WORLD_SCALE - 46.0;
     if detonated {
+        crate::npcs::bomb_hit(state, position, id)?;
         if let Some(velocity) =
             isaac_blast_velocity(player_world(state), player_velocity(state), position)?
         {

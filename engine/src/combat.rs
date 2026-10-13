@@ -70,6 +70,12 @@ pub fn player_npc_overlap(player: &ContactBody, npc: &ContactBody) -> Result<boo
     if player.entity_type != 1 || !(10..1000).contains(&npc.entity_type) {
         return Err("ordinary contact requires a player and an NPC descriptor".into());
     }
+    contact_overlap(player, npc)
+}
+
+fn contact_overlap(player: &ContactBody, npc: &ContactBody) -> Result<bool, String> {
+    player.validate()?;
+    npc.validate()?;
     let delta = WorldVector {
         x: npc.position.x - player.position.x,
         y: npc.position.y - player.position.y,
@@ -96,7 +102,42 @@ pub fn resolve_player_npc_contact(
     npc: &mut ContactBody,
     blocks_player_shift: impl FnOnce(WorldVector) -> bool,
 ) -> Result<ContactResolution, String> {
-    if !player_npc_overlap(player, npc)? {
+    if player.entity_type != 1 || !(10..1000).contains(&npc.entity_type) {
+        return Err("ordinary player contact requires source actor types".into());
+    }
+    resolve_contact(player, npc, blocks_player_shift, |_, _| {})
+}
+
+/// Fresh regular Tear callback5462a9 adds half incoming velocity to AttackFly,
+/// then54638a advances the Tear by0.8 of the NPC velocity. Generic445710
+/// retains its pre-callback overlap vector for mass separation afterward.
+pub fn resolve_tear_npc_contact(
+    tear: &mut ContactBody,
+    npc: &mut ContactBody,
+) -> Result<ContactResolution, String> {
+    if tear.entity_type != 2 || !matches!(npc.entity_type, 13 | 18) {
+        return Err("regular tear response requires admitted ordinary Fly types".into());
+    }
+    resolve_contact(
+        tear,
+        npc,
+        |_| false,
+        |tear, npc| {
+            if npc.entity_type == 18 {
+                npc.velocity = npc.velocity + tear.velocity * 0.5;
+            }
+            tear.position = tear.position + npc.velocity * 0.8;
+        },
+    )
+}
+
+fn resolve_contact(
+    player: &mut ContactBody,
+    npc: &mut ContactBody,
+    blocks_player_shift: impl FnOnce(WorldVector) -> bool,
+    callback: impl FnOnce(&mut ContactBody, &mut ContactBody),
+) -> Result<ContactResolution, String> {
+    if !contact_overlap(player, npc)? {
         return Ok(ContactResolution {
             colliding: false,
             player_displacement_blocked: false,
@@ -107,6 +148,7 @@ pub fn resolve_player_npc_contact(
         y: npc.position.y - player.position.y,
     };
     let mut distance = (delta.x * delta.x + delta.y * delta.y).sqrt();
+    callback(player, npc);
     if distance < 0.0001 {
         return Ok(ContactResolution {
             colliding: true,
@@ -153,7 +195,9 @@ pub fn resolve_player_npc_contact(
     next_player.position.x -= (delta.x * player_share) * overlap_ratio;
     next_player.position.y -= (delta.y * player_share) * overlap_ratio;
     next_npc.position = next_npc.position + (delta * npc_share) * overlap_ratio;
-    player_share *= 0.5;
+    if player.entity_type == 1 {
+        player_share *= 0.5;
+    }
     let impulse = WorldVector {
         x: delta.x / distance * relative_speed,
         y: delta.y / distance * relative_speed,
@@ -221,7 +265,7 @@ pub struct DamageEvent {
     pub source: DamageSource,
 }
 
-#[derive(Clone, Debug, Default, Serialize, PartialEq)]
+#[derive(Clone, Debug, Default, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct DamageQueue {
     events: Vec<DamageEvent>,

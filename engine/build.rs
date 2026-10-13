@@ -146,6 +146,33 @@ fn main() {
          pub const PLAYER_COLLISION_RADIUS_WORLD: f64 = {collision_radius:?};\n"
     );
     let light = authored_light_frame(&animations);
+    for kind in [13, 18] {
+        let tag = xml
+            .split("<entity ")
+            .find(|tag| {
+                attribute(tag, "id").and_then(|value| value.parse::<u32>().ok()) == Some(kind)
+                    && attribute(tag, "variant").and_then(|value| value.parse::<u32>().ok())
+                        == Some(0)
+            })
+            .expect("admitted NPC config is authored");
+        let can_shut_doors = attribute(tag, "shutdoors").unwrap_or("true") == "true";
+        let boss = entity_number(&xml, kind, 0, "boss") != 0.0;
+        generated.push_str(&format!("pub const NPC_{kind}_CAN_SHUT_DOORS: bool = {can_shut_doors};\npub const NPC_{kind}_BOSS: bool = {boss};\n"));
+        for field in [
+            "baseHP",
+            "collisionRadius",
+            "collisionMass",
+            "collisionDamage",
+            "friction",
+            "shadowSize",
+        ] {
+            generated.push_str(&format!(
+                "pub const NPC_{kind}_{}: f32 = {:?}_f32;\n",
+                field.to_uppercase(),
+                entity_number(&xml, kind, 0, field)
+            ));
+        }
+    }
     for (constant, attribute) in [
         ("LIGHT_CROP_X", "XCrop"),
         ("LIGHT_CROP_Y", "YCrop"),
