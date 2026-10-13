@@ -854,6 +854,12 @@ impl Game {
             .add_explosion_lights(&self.state.explosions);
     }
     fn start_run(&mut self) -> Result<(), String> {
+        // Character 59f470 passes the existing menu seed code to the System
+        // request; Game 54eb20 decodes that code into its startup stream. This
+        // also applies when no public seed dialog was entered: the real
+        // Character initializer owns the generated seed, not reset entropy.
+        self.state.run_seed_value = self.state.boot_lifecycle.menu_run_seed;
+        self.state.run_seed = seed::encode(self.state.run_seed_value)?;
         let unlocked =
             &self.state.profiles[usize::from(self.state.profile - 1)].unlocked_characters;
         let chosen = if self.state.character == "Random" {

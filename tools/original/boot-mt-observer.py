@@ -29,7 +29,7 @@ def observe(pid,context):
     pointer=u64(addr);length=u64(pointer-0x18)
     if length>9:raise ValueError('Source menu seed text exceeds bounded public code')
     return read(pointer,length).decode('ascii') if length else ''
-   manager=u64(0x8ed560);menus=u64(0x8ed570);saved=manager+0x4a8
+   manager=u64(0x8ed560);menus=u64(0x8ed570);game=u64(0x8ecd30);saved=manager+0x4a8
    samples=[]
    for room in [0,1,134]:
     # GameState room record0 begins+f8, stridef0; gridvector starts+58.
@@ -43,6 +43,6 @@ def observe(pid,context):
    if loaded:title.update({'position':f32(anm+0x120),'speed':f32(anm+0x2d8),'playing':bool(read(anm+0x124,1)[0]),'menuRunSeed':u32(menus+0x60d00),'menuSeedText':seed_string(menus+0x60d08),'characterState':u32(menus+0x62440),'characterSeedInput':seed_string(menus+0x62440+0x1758),'characterSeedCommitted':bool(read(menus+0x62440+0xc,1)[0]),'statsSamples':[{'index':i,'pose':u32(menus+0x64488+0x310+4*i)} for i in range(179)]})
    return {'schema':1,'status':'pass','scope':'bounded original writable GameState seeds, MT state and source-located title animation clock; no memory writes or gameplay input',
     'nativeBinarySha256':native_sha,'memoryWritten':False,'executableMappingsRead':False,'mtIndex':u32(0x8e6b64),'mtState':list(struct.unpack('<624Q',read(0x8ed680,624*8))),
-    'managerCounter':u32(manager+0x2efa0),'stateSeed9688':u32(saved+0x9688),'gridSeedSamples':samples,'title':title}
+    'managerCounter':u32(manager+0x2efa0),'systemState':u32(manager),'gameRunSeed':u32(game+0xa190) if game else None,'stateSeed9688':u32(saved+0x9688),'gridSeedSamples':samples,'title':title}
   finally:os.close(fd)
  finally:os.kill(pid,signal.SIGCONT)

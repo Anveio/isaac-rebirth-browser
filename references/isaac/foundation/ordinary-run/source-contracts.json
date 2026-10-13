@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "scope": "Ordinary no-dialog seed admission from the real Character menu seed into run startup. Existing delayed Character admission and audio owners are preserved. Complete run/room/effect shared-MT consumers are not claimed.",
+  "fieldRouting": "The single boot_lifecycle shared stream and named Character initializer already generate menu_run_seed. At actual run admission the same menu seed is encoded/assigned to run_seed_value; stage1/floor use that admitted value. No independent reset entropy, captured seed or cursor offset supplies the run seed. Manual commitment writes the same menu field and remains seeded.",
+  "publicInputs": "Native Return and actual browser Enter only: three menu confirmations12held/72released, then run12held/300released. No Tab, glyph or manual seed commitment. Recorded random boot epoch and browser reset seed are independent public case inputs.",
+  "functions": [
+    {
+      "address": "0x59b110",
+      "unwindSize": 103,
+      "codeSha256": "e5638f671551da08931c239de865a4bf5456da1e3def1ca5a21d888ce7fb8e03",
+      "contract": "Character confirmation preserves the generated menu+60d00 seed. Only zero takes a new raw42e8c0 value, clamped0to1; the ordinary initialized Character path is already nonzero."
+    },
+    {
+      "address": "0x59f470",
+      "unwindSize": 1072,
+      "codeSha256": "e5e3a7b360464db0105a9fa7166d89901a56dbc628aac716eca367748010ed49",
+      "contract": "Qualified Character fade completion reads menu+60d00. An empty menu code is encoded with5e1170 at59f6bb/59f71d; source594620 queues the actual code and Character committed flag."
+    },
+    {
+      "address": "0x594620",
+      "unwindSize": 108,
+      "codeSha256": "1ffd313f73192a30ec61d88054df4ed7418d291f7aaa097afffa8ea3665bf8d7",
+      "contract": "System run request stores the actual seed code, selected character and committed flag before setting pending+2f2c8."
+    },
+    {
+      "address": "0x594a10",
+      "unwindSize": 662,
+      "codeSha256": "2b7a5498ffe78f500cab0232e0f05e1e1599d6e89969de641e7cb23e9c860de3",
+      "contract": "Source pending request copies the queued code to Game54eb20 at594ab8, without any extra shared RNG draw for ordinary admission."
+    },
+    {
+      "address": "0x54eb20",
+      "unwindSize": 437,
+      "codeSha256": "8d8c79be91c134a55da4b1ae722bd0ace87b6a259f14828aedad26a74a6e852b",
+      "contract": "Game start copies the queued code toGame+a1e0, then5e1470 decodes it intoGame+a190; stage/item-pool initialization follows using its real startup RNG."
+    },
+    {
+      "address": "0x5e1470",
+      "unwindSize": 258,
+      "codeSha256": "b77be46739741e63296640bdc8f68e777acf6a6313f155bb5e5688ea0bd0b455",
+      "contract": "Actual code decode writesseed+0; initializesRNG+4 withshiftindex27(3,23,25), stores12namedstage seeds andonefurtherinitializer output. The nextreal5c2d70 inGameNewRun seedsItemPool. SharedMT run/room/effect parity remains separate."
+    }
+  ]
+}
