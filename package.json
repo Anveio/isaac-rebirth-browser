@@ -33,7 +33,8 @@
     "test:e2e:regressions": "bash tools/original/with-display.sh node tools/foundation/paired-game.mjs --replay-cases references/isaac/foundation/runtime-progress/1E0WJX06.json,references/isaac/foundation/runtime-progress/W0L0LYYM.json",
     "test:e2e:tear-lifecycle": "bash tools/original/with-display.sh node tools/e2e/weapons.mjs --lifecycle --count 4",
     "test:e2e:rock-blast": "cargo build --manifest-path engine/Cargo.toml --locked --bin floor && bash tools/original/with-display.sh node tools/e2e/rock-blast.mjs --count 2",
-    "test:e2e:menu-mt": "bash tools/original/with-display.sh node tools/e2e/boot-mt.mjs --menu-navigation --count 4"
+    "test:e2e:menu-mt": "bash tools/original/with-display.sh node tools/e2e/boot-mt.mjs --menu-navigation --count 4",
+    "test:e2e:seed-dialog-mt": "bash tools/original/with-display.sh node tools/e2e/boot-mt.mjs --seed-dialog --count 4"
   },
   "devDependencies": {
     "@playwright/test": "1.64.0",
