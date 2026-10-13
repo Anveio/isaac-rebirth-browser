@@ -14,6 +14,15 @@ Node unit suites, Python schema suites or standalone component test harnesses.
 Validators belong in runtime and live e2e tools. Put temporary kernel probes,
 negative checks and reverse-engineering harnesses in ignored research cache.
 
+The only exception is the Antithesis deterministic simulation testing (DST)
+harness in `engine/dst/` (`npm run test:dst`, `docs/dst.md`). Only that crate
+may hold per-unit engine workloads and Antithesis properties; it never adds
+`#[cfg(test)]` modules to `engine/src` and admits no other unit suite or
+component harness anywhere. DST checks engine safety, determinism, snapshot
+completeness, native/WASM agreement and documented contracts. It is not
+original-game evidence and never replaces live e2e parity. Fix or record
+every DST violation; never weaken a property or its workload to pass.
+
 Use `source cloud/env.sh` for the installed toolchain. `npm run check` builds and
 tests an immutable production artifact against fresh original processes through
 public inputs. CI runs contrived interactions and recorded OS-random scenarios;

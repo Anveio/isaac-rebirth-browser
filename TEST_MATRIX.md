@@ -2,7 +2,7 @@
 
 Generated from live paired-game declarations, actual browser e2e scenarios and retained strict pixel diagnostics. Run `npm run matrix:update` after adding a scenario or checkpoint; `npm run matrix:check` rejects drift. The previous port and its scenarios have been removed.
 
-`npm run check` builds the Rust/WASM port and runs every live suite registered in [run.mjs](tools/e2e/run.mjs), retaining every exit status before failing. CI discovers that same registry and runs each suite in a separate job with `fail-fast: false`; a failed suite cannot cancel the other system checks. Each job checks assets, matrix synchronization, types, build and strict Clippy before its live original/browser gate. The paired gate gives a fresh original process and immutable production browser the same public tape after an explicit first-Title bootstrap boundary. CI gates actual input delivery, seed readback and declared source-observable functional state across contrived and recorded OS-random cases. Every selected case executes; failures remain failures. Checked-in unit suites have been removed by user instruction.
+`npm run check` builds the Rust/WASM port and runs every live suite registered in [run.mjs](tools/e2e/run.mjs), retaining every exit status before failing. CI discovers that same registry and runs each suite in a separate job with `fail-fast: false`; a failed suite cannot cancel the other system checks. Each job checks assets, matrix synchronization, types, build and strict Clippy before its live original/browser gate. The paired gate gives a fresh original process and immutable production browser the same public tape after an explicit first-Title bootstrap boundary. CI gates actual input delivery, seed readback and declared source-observable functional state across contrived and recorded OS-random cases. Every selected case executes; failures remain failures. Checked-in unit suites have been removed by user instruction; the only exception is the Antithesis deterministic simulation testing harness indexed below.
 
 All paired captures retain strict decoded-RGBA diagnostics. Their pixel failures remain failures in the report; tiny visual differences do not determine the default functional CI result. `--require-exact-pixels` opts into full-frame equality. The retained `verify:foundation` gate remains strict and optional, with its five known legacy full-frame failures. Earlier supplied-input physics/layout/combat diagnostic CLIs are now ignored research; their retained evidence remains separate from live browser gameplay acceptance.
 
@@ -177,6 +177,183 @@ Combat routes replay their retained source seed; arbitrary-seed overrides are di
 The original uses seed **T1PK 6Y0W**, fresh profiles, and a 960×540 window. Captures and observed log/input metadata live in [baseline](references/isaac/foundation/baseline/manifest.json) and [repeat](references/isaac/foundation/repeat/manifest.json). They are comparison evidence; the renderer composes authored sprites and never draws a captured game frame. [Capture](tools/original/foundation-capture.py) and [save-reference.py](tools/foundation/save-reference.py) refresh these fixtures from the runnable original.
 
 Pixel gates compare decoded RGBA over the whole frame, HUD, actor and projectile regions. Any tolerance is measured from the independent native captures; it is not a freely chosen similarity threshold. Reports distinguish exact pixels from native capture variability. Legacy screenshot fixtures use wall-clock keys/SIGSTOP. The newer clock adapter controls presented frames and main-thread time, disables X11 autorepeat and records actual consumed key events; neither adapter proves native simulation ticks or hidden-state parity. Native process CPU/RSS and browser draw/encoding timings remain separate.
+
+## Antithesis deterministic simulation units
+
+The only checked-in unit-level verification is the [Antithesis DST harness](docs/dst.md) in `engine/dst/` (user-authorized exception; see [AGENTS.md](AGENTS.md)). `npm run test:dst` drives each registered unit with seeded entropy, checks every property after each step and replays the game tapes through the shipped `engine.wasm`; `--entropy antithesis` hands every decision to the Antithesis platform. Units and properties below are discovered from [the registry](engine/dst/src/units/mod.rs) and source; a run's report, not this list, is the outcome. DST establishes engine safety, determinism, snapshot completeness and native/WASM agreement only, never original-game parity.
+
+| DST unit | Scope | Always | Sometimes | Reachability |
+| --- | --- | ---: | ---: | ---: |
+| `seed_codec` | public seed codes, canonical decoding and the run-seed xorshift handoff | 11 | 2 | 0 |
+| `mt` | shared MT19937 stream, lazy descriptor seed tables and boot lifecycle | 19 | 1 | 0 |
+| `phase` | system update/interpolation phases against a counter model | 6 | 2 | 0 |
+| `actors` | actor admission order and room identities against a list model | 4 | 2 | 0 |
+| `floor` | Basement generation structure, retries and per-descriptor room admission | 14 | 3 | 0 |
+| `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 48 | 31 | 2 |
+| `abi` | the exported C ABI transport the browser bridge drives | 10 | 1 | 0 |
+
+<details><summary>Every declared DST property</summary>
+
+| Kind | Property | Source |
+| --- | --- | --- |
+| Always | seed_codec: reserved seed zero never encodes | [seed_codec.rs](engine/dst/src/units/seed_codec.rs) |
+| Always | seed_codec: every nonzero seed encodes | [seed_codec.rs](engine/dst/src/units/seed_codec.rs) |
+| Always | seed_codec: codes are eight public alphabet glyphs | [seed_codec.rs](engine/dst/src/units/seed_codec.rs) |
+| Always | seed_codec: decode inverts encode | [seed_codec.rs](engine/dst/src/units/seed_codec.rs) |
+| Always | seed_codec: decode ignores case and spaces | [seed_codec.rs](engine/dst/src/units/seed_codec.rs) |
+| Sometimes | seed_codec: a random code passes its checksum | [seed_codec.rs](engine/dst/src/units/seed_codec.rs) |
+| Always | seed_codec: every accepted code is the canonical encoding of its seed | [seed_codec.rs](engine/dst/src/units/seed_codec.rs) |
+| Sometimes | seed_codec: a random code is rejected | [seed_codec.rs](engine/dst/src/units/seed_codec.rs) |
+| Always | seed_codec: a substituted glyph never aliases the original seed | [seed_codec.rs](engine/dst/src/units/seed_codec.rs) |
+| Always | seed_codec: codes with glyphs outside the alphabet are rejected | [seed_codec.rs](engine/dst/src/units/seed_codec.rs) |
+| Always | seed_codec: codes without exactly eight glyphs are rejected | [seed_codec.rs](engine/dst/src/units/seed_codec.rs) |
+| Always | seed_codec: run-seed derivation never yields reserved zero | [seed_codec.rs](engine/dst/src/units/seed_codec.rs) |
+| Always | seed_codec: run seed fields and item-pool seed are nonzero | [seed_codec.rs](engine/dst/src/units/seed_codec.rs) |
+| Always | mt: serialized state continues the identical stream | [mt.rs](engine/dst/src/units/mt.rs) |
+| Always | mt: deserialization rejects invalid word counts and cursors | [mt.rs](engine/dst/src/units/mt.rs) |
+| Always | mt: Random(0) returns zero without consuming the stream | [mt.rs](engine/dst/src/units/mt.rs) |
+| Always | mt: bounded draws lie below their bound | [mt.rs](engine/dst/src/units/mt.rs) |
+| Always | mt: uniform draws lie in the closed unit interval | [mt.rs](engine/dst/src/units/mt.rs) |
+| Always | mt: default seed reproduces the C++ standard mt19937 outputs | [mt.rs](engine/dst/src/units/mt.rs) |
+| Always | mt: descriptor initialization consumes exactly two draws per padded cell | [mt.rs](engine/dst/src/units/mt.rs) |
+| Always | mt: in-range descriptor replacement succeeds | [mt.rs](engine/dst/src/units/mt.rs) |
+| Always | mt: in-range descriptor room copies succeed | [mt.rs](engine/dst/src/units/mt.rs) |
+| Sometimes | mt: a complete descriptor table copy is exercised | [mt.rs](engine/dst/src/units/mt.rs) |
+| Always | mt: lazy descriptor seed pairs equal the eager source table | [mt.rs](engine/dst/src/units/mt.rs) |
+| Always | mt: descriptor queries outside the source grid are rejected | [mt.rs](engine/dst/src/units/mt.rs) |
+| Always | mt: descriptor tables round-trip through JSON | [mt.rs](engine/dst/src/units/mt.rs) |
+| Always | mt: descriptor tables reject mutations outside the source grid | [mt.rs](engine/dst/src/units/mt.rs) |
+| Always | mt: boot lifecycle is a pure function of the epoch seed | [mt.rs](engine/dst/src/units/mt.rs) |
+| Always | mt: boot owns 179 authored secret poses and a nonzero menu seed | [mt.rs](engine/dst/src/units/mt.rs) |
+| Always | mt: the menu seed text decodes to the menu seed | [mt.rs](engine/dst/src/units/mt.rs) |
+| Always | mt: Character reset consumes one shared draw for a nonzero menu seed | [mt.rs](engine/dst/src/units/mt.rs) |
+| Always | mt: committing a dialog seed consumes no shared draw | [mt.rs](engine/dst/src/units/mt.rs) |
+| Always | mt: committing reserved zero is rejected without mutation | [mt.rs](engine/dst/src/units/mt.rs) |
+| Always | phase: exhausted run-start alignment fails without mutation | [phase.rs](engine/dst/src/units/phase.rs) |
+| Always | phase: run start aligns to the next full phase without rewinding | [phase.rs](engine/dst/src/units/phase.rs) |
+| Always | phase: an aligned clock's next phase is a full update | [phase.rs](engine/dst/src/units/phase.rs) |
+| Always | phase: even counters run full updates and odd counters interpolate or skip | [phase.rs](engine/dst/src/units/phase.rs) |
+| Always | phase: every two-phase window runs two player and one nonplayer update | [phase.rs](engine/dst/src/units/phase.rs) |
+| Sometimes | phase: a window without interpolation is exercised | [phase.rs](engine/dst/src/units/phase.rs) |
+| Always | phase: only an exhausted counter fails, without mutation | [phase.rs](engine/dst/src/units/phase.rs) |
+| Sometimes | phase: counter exhaustion is exercised | [phase.rs](engine/dst/src/units/phase.rs) |
+| Always | actors: admission rejects exactly the already-admitted handles | [actors.rs](engine/dst/src/units/actors.rs) |
+| Sometimes | actors: a duplicate admission is attempted | [actors.rs](engine/dst/src/units/actors.rs) |
+| Sometimes | actors: a room reset retains Player or Familiar handles | [actors.rs](engine/dst/src/units/actors.rs) |
+| Always | actors: the scheduler round-trips through JSON | [actors.rs](engine/dst/src/units/actors.rs) |
+| Always | actors: dispatch order equals admission order minus retired handles | [actors.rs](engine/dst/src/units/actors.rs) |
+| Always | actors: room sequence identities follow admission and reset with the room | [actors.rs](engine/dst/src/units/actors.rs) |
+| Always | floor: reserved stage seed zero is rejected | [floor.rs](engine/dst/src/units/floor.rs) |
+| Always | floor: generation is a pure function of the stage seed | [floor.rs](engine/dst/src/units/floor.rs) |
+| Always | floor: every nonzero stage seed generates a floor | [floor.rs](engine/dst/src/units/floor.rs) |
+| Always | floor: the starting descriptor occupies the grid centre | [floor.rs](engine/dst/src/units/floor.rs) |
+| Always | floor: grid cells and descriptors index the descriptor table | [floor.rs](engine/dst/src/units/floor.rs) |
+| Always | floor: every descriptor owns exactly its shape's footprint at its origin | [floor.rs](engine/dst/src/units/floor.rs) |
+| Always | floor: neighbor links are reciprocal edge adjacencies | [floor.rs](engine/dst/src/units/floor.rs) |
+| Always | floor: every descriptor is reachable from the starting room | [floor.rs](engine/dst/src/units/floor.rs) |
+| Always | floor: exactly one boss, super secret, shop and treasure room | [floor.rs](engine/dst/src/units/floor.rs) |
+| Sometimes | floor: a secret room is placed | [floor.rs](engine/dst/src/units/floor.rs) |
+| Sometimes | floor: a large room shape is placed | [floor.rs](engine/dst/src/units/floor.rs) |
+| Always | floor: attempts are bounded, contiguous and end with a placement | [floor.rs](engine/dst/src/units/floor.rs) |
+| Sometimes | floor: a generation retry is exercised | [floor.rs](engine/dst/src/units/floor.rs) |
+| Always | floor: floors round-trip through JSON | [floor.rs](engine/dst/src/units/floor.rs) |
+| Always | floor: every descriptor resolves authored layout and spawns | [floor.rs](engine/dst/src/units/floor.rs) |
+| Always | floor: every descriptor admits as a room without panicking | [floor.rs](engine/dst/src/units/floor.rs) |
+| Always | floor: admitted rooms have one door per neighbor and bounded geometry | [floor.rs](engine/dst/src/units/floor.rs) |
+| Always | game: exactly the documented invalid inputs are rejected | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: bounded Tick commands always succeed | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Sometimes | game: an over-budget Tick is rejected | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Sometimes | game: an out-of-range volume is rejected | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Sometimes | game: an unsupported key is rejected | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Sometimes | game: an unimplemented main menu action is rejected | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Sometimes | game: an unimplemented hard-mode run is rejected | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Sometimes | game: a locked or unimplemented character is rejected | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Sometimes | game: text outside the seed dialog is rejected | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Sometimes | game: invalid seed text is rejected | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: Tick advances the tick and system clocks by its count (plus run-start alignment) | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: the menu animation clock advances with Tick and restarts on screen changes | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: Tick changes the screen only by starting a run | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: unpaused gameplay advances the run clock once per tick | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: within a run the floor is fixed and full updates never rewind | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: a paused run freezes gameplay and the shared stream | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Sometimes | game: ticks elapse while paused | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Reachable | game: a run starts through the public menus | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: a run starts in the starting room of its seed's floor | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Sometimes | game: a seeded run starts | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Sometimes | game: a Random character run starts | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: key events never advance simulation or consume the shared stream | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: key events update the held-key set | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: menu screens change only along the documented key graph | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: menu inputs during the run-start fade are ignored | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Sometimes | game: a key arrives during the run-start fade | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: key presses during a boss scene are ignored | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Sometimes | game: a key arrives during a boss scene | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: Escape opens the pause menu | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Sometimes | game: the pause menu opens | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: seed text appends its uppercase compact glyphs | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: SFX volume commands set the SFX volume | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: music volume commands set the music volume | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: stale music backend callbacks are ignored | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Sometimes | game: a stale music backend callback arrives | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Sometimes | game: a current music backend callback arrives | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Sometimes | game: a pickup is collected | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Sometimes | game: a valid seed code is committed through the dialog | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Sometimes | game: an invalid seed code is dismissed | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: menu selections stay within their menus | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: the highlighted character is the selected character | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: dialog seed text is at most eight uppercase glyphs and its validity is its decode | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: the run seed code, value, stage seed and eligibility agree | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: only supported keys are ever held | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: pause state agrees with the pause menu phase | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: volumes stay within the unit interval | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: the run introduction lasts at most 140 ticks | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: no run-start request is pending during gameplay | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: player motion is finite and health is bounded | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: consumables are capped at 99 | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: fire cooldown and head timers stay in range | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: entity identities are unique and below their allocators | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: room NPC identities are unique | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: the actor schedule names exactly the live player, tears, bombs and room actors | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: room bookkeeping indexes the run's floor | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: room transitions follow floor neighbor links | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Sometimes | game: a room transition reaches its inbound phase | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: the loaded room is the current descriptor's room | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: the minimap marks exactly the current room | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Sometimes | game: the player enters another room | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Sometimes | game: a tear is in flight | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Sometimes | game: a tear impact is presented | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Sometimes | game: a bomb is live | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Sometimes | game: a bomb explodes | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Sometimes | game: the player takes damage | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Sometimes | game: the player shares a room with a collectible pickup | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Sometimes | game: the player shares a room with an NPC | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Sometimes | game: three rooms are visited in one run | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Sometimes | game: a bomb destroys an ordinary rock | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: every nonzero seed and epoch boots to Title | [mod.rs](engine/dst/src/units/game/mod.rs) |
+| Always | game: boot publishes the first Title with its seeds | [mod.rs](engine/dst/src/units/game/mod.rs) |
+| Always | game: boot is a pure function of its seeds | [mod.rs](engine/dst/src/units/game/mod.rs) |
+| Unreachable | game: public commands never panic the engine | [mod.rs](engine/dst/src/units/game/mod.rs) |
+| Always | game: a rejected command leaves the whole game unchanged | [mod.rs](engine/dst/src/units/game/mod.rs) |
+| Always | game: published states round-trip losslessly through their validators | [mod.rs](engine/dst/src/units/game/mod.rs) |
+| Always | game: complete games round-trip losslessly through their validators | [mod.rs](engine/dst/src/units/game/mod.rs) |
+| Sometimes | game: a run lasts more than 3,000 ticks | [mod.rs](engine/dst/src/units/game/mod.rs) |
+| Always | game: replaying a tape reproduces every outcome and state | [mod.rs](engine/dst/src/units/game/mod.rs) |
+| Always | game: a game resumed from its serialized midpoint reaches the same end | [mod.rs](engine/dst/src/units/game/mod.rs) |
+| Always | game: the C ABI agrees with direct dispatch | [mod.rs](engine/dst/src/units/game/mod.rs) |
+| Always | wasm: the shipped engine agrees with native dispatch | [wasm.rs](engine/dst/src/wasm.rs) |
+| Always | abi: the exported ABI version is current | [abi.rs](engine/dst/src/units/abi.rs) |
+| Always | abi: commands before reset fail and snapshots publish null | [abi.rs](engine/dst/src/units/abi.rs) |
+| Always | abi: reset with a nonzero seed succeeds and clears the error | [abi.rs](engine/dst/src/units/abi.rs) |
+| Always | abi: the published snapshot is a valid state of the reset seed | [abi.rs](engine/dst/src/units/abi.rs) |
+| Always | abi: a failed reset reports an error and keeps the previous game | [abi.rs](engine/dst/src/units/abi.rs) |
+| Always | abi: request buffers are bounded at 64 KiB | [abi.rs](engine/dst/src/units/abi.rs) |
+| Always | abi: malformed requests fail with an error and leave the snapshot unchanged | [abi.rs](engine/dst/src/units/abi.rs) |
+| Always | abi: the return code and error buffer agree | [abi.rs](engine/dst/src/units/abi.rs) |
+| Always | abi: rejected commands leave the snapshot unchanged | [abi.rs](engine/dst/src/units/abi.rs) |
+| Always | abi: every published snapshot is a valid state | [abi.rs](engine/dst/src/units/abi.rs) |
+| Sometimes | abi: a well-formed command is rejected | [abi.rs](engine/dst/src/units/abi.rs) |
+
+</details>
 
 ## Divergence tasks by game system
 
