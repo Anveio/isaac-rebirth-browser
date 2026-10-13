@@ -1,0 +1,113 @@
+{
+  "schema": 1,
+  "status": "source-mapped; live paired acceptance pending",
+  "nativeBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "sourceContractSha256": "31eb722295b649f7a357540a61abd4bf136740fed735e8f01bc66d7deec2caab",
+  "functions": [
+    {
+      "function": "0x593470",
+      "bytes": 261,
+      "rawSha256": "ea888438384616c7261f8e133d04aac1da521d988e07bd10d856a59f55a9c35c",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/game-age-research/function-593470.txt",
+      "dumpSha256": "ff7f41945e190ee35fab2703ea0fc4d741beafb668ca8228c289e651bc64ad0c"
+    },
+    {
+      "function": "0x59b110",
+      "bytes": 103,
+      "rawSha256": "e5638f671551da08931c239de865a4bf5456da1e3def1ca5a21d888ce7fb8e03",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/game-age-research/function-59b110.txt",
+      "dumpSha256": "aaa5119c23731b8a225a794b889111d88176053c2765f3199b6d0e6fd3cec0ee"
+    },
+    {
+      "function": "0x611660",
+      "bytes": 66,
+      "rawSha256": "bbcbacc158420ec1e254dad165d28061a13527eab85941d4361cf7cbc2ea2fe2",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/game-age-research/function-611660.txt",
+      "dumpSha256": "804fc61fad6ca36feb615eb5c56e95e37495dff663dd7ec52fddaee9628dd5b2"
+    },
+    {
+      "function": "0x54eaa0",
+      "bytes": 95,
+      "rawSha256": "48cc386158c27474d4288dd55b950ddbd6b0785b0f5c8c7efeaaf4bfa795e988",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/game-age-research/function-54eaa0.txt",
+      "dumpSha256": "59fe291cfaaeb5949dde71520b80130f5ad92919077c5b073b4364bbd9d01f3e"
+    },
+    {
+      "function": "0x54eb20",
+      "bytes": 437,
+      "rawSha256": "8d8c79be91c134a55da4b1ae722bd0ace87b6a259f14828aedad26a74a6e852b",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/game-age-research/function-54eb20.txt",
+      "dumpSha256": "75ea94c22047194e6623692a826c60f03f37bf4fbe5cbe524ca3b802c4441e3f"
+    },
+    {
+      "function": "0x54ece0",
+      "bytes": 753,
+      "rawSha256": "350c1ce511b99d5766fec2e9cce29d27d61c35749c22534129cecaa109241d4d",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/game-age-research/function-54ece0.txt",
+      "dumpSha256": "108f8151ca4c1e5cddf3bf7a84b37a39af8beda350b35470ff90e97648c92774"
+    },
+    {
+      "function": "0x54f910",
+      "bytes": 950,
+      "rawSha256": "2b75ee0a88f2bb8047ae89ac0d7156e181251615e2f616402bcb70fb0f5ea239",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/game-age-research/function-54f910.txt",
+      "dumpSha256": "970cdc1c85eebdb9c56a7649f8f8987f57dde67d8bea9f4af9fc4a7eb5f72a45"
+    },
+    {
+      "function": "0x5507f0",
+      "bytes": 106,
+      "rawSha256": "22ec1f75e6207048ea315e9d8fc59c651bf569d518f48b857aa176739f3ced3a",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/game-age-research/function-5507f0.txt",
+      "dumpSha256": "ed6197fc3d58ab0c54021330c4820210370dac1eaeef24711bd4a3957d5a3fe3"
+    },
+    {
+      "function": "0x550760",
+      "bytes": 140,
+      "rawSha256": "c553f89487c1654d6b34b7087dcd18b176c4d8827693de71e477cb90f3f05b71",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/game-age-research/function-550760.txt",
+      "dumpSha256": "d003de88acefaeefe9fc59b418d34c1b80b854354cb414b5d09d01d04f3c7c8a"
+    },
+    {
+      "function": "0x5950e0",
+      "bytes": 1180,
+      "rawSha256": "a636b96ce2448547236a17212700569d9f48daedc2759937ac027e1678f9c560",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/game-age-research/function-5950e0.txt",
+      "dumpSha256": "8ce42ce93472eacf091046cd1bb05066dcc0b2473c6e05115245abe846bd9367"
+    },
+    {
+      "function": "0x585500",
+      "bytes": 244,
+      "rawSha256": "857df308fabb76138d03b499dc07a4c2e521eb81b8e910746dbde65a3e11a50f",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/game-age-research/function-585500.txt",
+      "dumpSha256": "b28ed17a4860e3770dc6f9de4d428b0173fff549a3a0983a9f0ff42c103a83de"
+    }
+  ],
+  "laws": {
+    "request": "MenuController59b110->593470 writes own gettimeofday-ms anchor after load-image selection at actual confirmation dispatch.",
+    "initializer": "Fresh54eb20 invokes54eaa0 after Level.Init/Save and manager initialization; alpha1 and f32 rate0.04, actual primary Player+7d4 controlsEnabled=false.",
+    "full": "54f910 compares signed clockMs-anchor>3000, subtracts f32rate only in full branch. Clampzero sets controlsEnabled true, admits585500 and593660, then increments Game+ce9f4 at54fa82 and executes full callbacks in SAME dispatch.",
+    "fast": "5507f0->550760->Room5cd920 has no initial-fade guard; fast room/actor callbacks continue.",
+    "clockInput": "Manual public step declares16667000ns presentation input independently of phase and Gameage. Normal browser RAF ticks supply their actual Date.now integer milliseconds, recorded in the tick. No original elapsed/counter/age enters production."
+  },
+  "historicalSourceOnlyEvidence": {
+    "manifestPath": "/workspace/isaac-rebirth-browser/.cache/coordination/game-age-research/admission-native-1/manifest.json",
+    "manifestSha256": "cedefe909f3c5e90f6223c0520c4d52bd60259a42d253153f188c3b4af379189",
+    "observations": 339,
+    "inputTapeSha256": "ee0954597fab467fa9b0a74470aa613e1155b886ee37d317163820e651819393",
+    "observerSha256": "867fb3d90ea5bfcef10ddfbb9d821a2551f98336e3014ba1641e14aa97a226c6",
+    "limitations": [
+      "Temporary observer declares fixed known source binary SHA; it did not independently hash /proc/pid/exe. Controlled launcher uses the pinned original derivative. Process-executable identity belongs in the reusable observer before live acceptance.",
+      "No port runtime or paired acceptance result.",
+      "93 frozen full updates in this one tape is an observation, not an implementation constant."
+    ]
+  },
+  "corrections": [
+    "The first immutable observer called Player+7d4 primaryPlayerVisible; that raw byte is controlsEnabled, independently used before bomb input at5095a0. Original observer and339raw observations remain unchanged. Entity+31d visibility is distinct.",
+    "The new reusable observer verifies the actual owned /proc/pid/exe via native-identity.py; the first source-only trace declared a fixed known binary hash and does not receive retroactive process-identity acceptance."
+  ],
+  "unaccepted": [
+    "Stage-title585500/593660 UI/input-reset callback effects are explicitly pending rather than fabricated.",
+    "Complete saved-run Load54ece0 and all other freeze/transition/exit/death callbacks are separate.",
+    "Absolute pre-Title system/clock lifecycle is omitted; full Game age, phase parity and relative request-clock differences remain required live comparisons, without fitted baseline."
+  ]
+}
