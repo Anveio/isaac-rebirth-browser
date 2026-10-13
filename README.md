@@ -32,8 +32,9 @@ playable build and status; [publish source](tools/sites/push.mjs) preserves its 
 bash cloud/install.sh
 bash cloud/start.sh                    # http://localhost:5173
 npm run check                         # Build and gate fresh original/browser games
-npm run test:e2e                      # Six contrived + two recorded OS-random runs
-npm run test:e2e -- --replay-cases PATH # Replay a recorded case.json
+npm run test:e2e                      # Run paired, floor and weapons gates; retain every result
+npm run test:e2e:paired               # Six contrived + two recorded OS-random runs
+npm run test:e2e:paired -- --replay-cases PATH # Replay a recorded case.json
 npm run verify:foundation             # Strict legacy PNG/state diagnostics; mismatches exit nonzero
 npm run assets:rooms                  # Decode all base room records
 npm run matrix:check
@@ -48,7 +49,9 @@ pixel mismatches stay reported as failures without blocking the default
 functional gate. `verify:foundation` remains a strict pixel diagnostic.
 
 CI executes both games live using public inputs, fresh original profiles and a
-copied production build. Recorded random tapes can be replayed unchanged.
+copied production build. The suite runner executes paired, floor and weapons
+gates in sequence and reports failure after every suite has run; an earlier
+functional failure cannot omit later suites. Recorded random tapes can be replayed unchanged.
 Checked-in unit suites and component-only harnesses have been removed;
 validators stay in runtime/e2e tools, while temporary probes belong in ignored
 research cache. See [the live-game workflow](.github/workflows/live-games.yml).

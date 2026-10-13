@@ -24,18 +24,18 @@ def load(name, filename):
 scenarios = load('paired_clock_scenarios', 'foundation-clock-scenarios.py')
 runner = scenarios.runner
 SCENARIOS = [
-    {'id': 'paired-title-menu', 'description': 'Title fade, loop, retained reentry and seeded menu navigation',
-     'systems': ['menu-navigation', 'menu-animation', 'input-determinism']},
+    {'id': 'paired-title-menu', 'description': 'Title fade, loop, retained reentry, seeded menu navigation and movement/fire',
+     'systems': ['menu-navigation', 'menu-animation', 'locomotion', 'projectile-physics', 'input-determinism']},
     {'id': 'paired-movement-fire', 'description': 'Run entry, held movement, release, shooting and live tears',
      'systems': ['locomotion', 'projectile-physics', 'run-introduction', 'input-determinism']},
     {'id': 'paired-pause-release', 'description': 'Pause while moving, release controls during pause, animate exit and resume both phases',
-     'systems': ['menu-navigation', 'locomotion', 'entity-animation', 'input-determinism']},
+     'systems': ['menu-navigation', 'menu-animation', 'locomotion', 'input-determinism']},
     {'id': 'paired-bomb-moving-even', 'description': 'Moving bomb birth, held E, coasting blast and damage on one source phase',
      'systems': ['bombs', 'health-inventory', 'locomotion', 'input-determinism']},
     {'id': 'paired-bomb-moving-odd', 'description': 'Same moving bomb interaction shifted by one public presentation',
      'systems': ['bombs', 'health-inventory', 'locomotion', 'input-determinism']},
     {'id': 'paired-room-combat', 'description': 'Enter adjacent room, shoot rocks, blast them and cross destroyed cells',
-     'systems': ['grid-entities', 'entity-collision', 'damage-pipeline', 'locomotion']},
+     'systems': ['room-connectivity', 'grid-entities', 'locomotion', 'health-inventory', 'bombs', 'projectile-physics', 'input-determinism']},
     {'id': 'paired-random-run', 'description': 'Fresh OS-random run seed and recorded randomized movement, firing, coasting, pause and bomb actions',
      'systems': ['locomotion', 'projectile-physics', 'bombs', 'menu-navigation', 'input-determinism'],
      'randomized': True},
