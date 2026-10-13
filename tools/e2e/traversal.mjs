@@ -159,8 +159,9 @@ try {
             const baseline = native.debugObservations[0].observation;
             if (observed.doorSound.lastTick !== baseline.doorSound.lastTick) {
               const sound = state.audio.slots[156], halfTick = baseline.audioSystemCounter >> 1;
-              phaseAssert.equal(sound.lastTick, observed.doorSound.lastTick - halfTick, `${label}:native unlock sound admission phase`);
-              phaseAssert.equal(sound.nextAllowed, observed.doorSound.nextAllowed - halfTick, `${label}:native unlock sound cooldown`);
+              const browserHalfTick = seeded.systemClock.systemCounter >> 1;
+              phaseAssert.equal(sound.lastTick - browserHalfTick, observed.doorSound.lastTick - halfTick, `${label}:native unlock sound admission phase`);
+              phaseAssert.equal(sound.nextAllowed - browserHalfTick, observed.doorSound.nextAllowed - halfTick, `${label}:native unlock sound cooldown`);
               phaseAssert.equal(Math.fround(sound.lastVolume), observed.doorSound.lastVolume, `${label}:native unlock sound volume`);
               phaseAssert.equal(sound.loaded, observed.doorSound.loaded, `${label}:native unlock sound loaded state`);
             }

@@ -179,6 +179,10 @@ pub fn try_blow_open(state: &mut State, index: usize, _animated: bool) -> bool {
 }
 
 fn restore_secret_connections(state: &mut State) {
+    let from_room = state
+        .room_transition
+        .as_ref()
+        .map(|transition| transition.from_room);
     let Some(grid) = &mut state.room.grid else {
         return;
     };
@@ -190,12 +194,16 @@ fn restore_secret_connections(state: &mut State) {
             continue;
         }
         door.state = "Opened".into();
-        door.blown_open = true;
+        // Door constructor56292f clears the transient+611 byte. Saved variant7
+        // preserves discovery; Level.ChangeRoom58dba0 marks only the actual
+        // inbound secret connection again through TryBlowOpen. Other revealed
+        // doors follow ordinary admission collision4 until their next update.
+        door.blown_open = Some(door.target_room as usize) == from_room;
         let index = door_index(door.world_position, grid.width);
         if let Some(entity) = &mut grid.cells[index].entity {
             entity.variant = 7;
             entity.state = 2;
-            entity.collision_class = 5;
+            entity.collision_class = if door.blown_open { 5 } else { 4 };
         }
     }
 }
