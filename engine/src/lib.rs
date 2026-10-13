@@ -1278,7 +1278,20 @@ impl Game {
                     .persisted_rooms
                     .contains_key(&transition.target_room)
             });
+        let boss_cleanup = phase == phase::Phase::Update
+            && self
+                .state
+                .room_transition
+                .as_ref()
+                .is_some_and(|transition| {
+                    transition.phase == traversal::TransitionPhase::BossCleanup
+                });
         if traversal::advance_transition(&mut self.state, phase) {
+            if boss_cleanup {
+                // State3 calls Player.Update at5dde9e before enabling controls
+                // and leaving the transition. The outer actor pass stays frozen.
+                self.update_player(phase, false, false)?;
+            }
             if room_before != self.state.current_room {
                 doors::begin_room_admission(&mut self.state);
                 // Transition explicitly updates Player before loading; the
@@ -1471,7 +1484,7 @@ impl Game {
         bomb_triggered: bool,
     ) -> Result<(), String> {
         match actor.kind {
-            actors::ActorKind::Player => self.update_player(phase, bomb_triggered)?,
+            actors::ActorKind::Player => self.update_player(phase, bomb_triggered, true)?,
             actors::ActorKind::Tear => {
                 let grid = if phase == phase::Phase::Update && !newborn {
                     Some(
@@ -1694,16 +1707,29 @@ impl Game {
         }
         Ok(())
     }
-    fn update_player(&mut self, phase: phase::Phase, bomb_triggered: bool) -> Result<(), String> {
+    fn update_player(
+        &mut self,
+        phase: phase::Phase,
+        bomb_triggered: bool,
+        controls_enabled: bool,
+    ) -> Result<(), String> {
         player_items::advance_presentation(&mut self.state, phase);
-        let dx = i32::from(self.held("KeyD")) - i32::from(self.held("KeyA"));
-        let dy = i32::from(self.held("KeyS")) - i32::from(self.held("KeyW"));
+        let dx = if controls_enabled {
+            i32::from(self.held("KeyD")) - i32::from(self.held("KeyA"))
+        } else {
+            0
+        };
+        let dy = if controls_enabled {
+            i32::from(self.held("KeyS")) - i32::from(self.held("KeyW"))
+        } else {
+            0
+        };
         combat::advance_player_immunity(&mut self.state);
         let bomb_admitted = self.state.bomb_placement_cooldown.advance(phase);
         // Shooting inherits the velocity entering this phase, before input acceleration.
         let inherited_velocity = (self.state.player.vx, self.state.player.vy);
         motion::advance(&mut self.state.player, &self.state.room, dx, dy);
-        if bomb_triggered && bomb_admitted {
+        if controls_enabled && bomb_triggered && bomb_admitted {
             bombs::place(&mut self.state, phase)?;
         }
         let player = &mut self.state.player;
@@ -1728,7 +1754,9 @@ impl Game {
                 player.facing = Direction::Down;
             }
         }
-        let aim = if self.held("ArrowLeft") {
+        let aim = if !controls_enabled {
+            None
+        } else if self.held("ArrowLeft") {
             Some(Direction::Left)
         } else if self.held("ArrowRight") {
             Some(Direction::Right)

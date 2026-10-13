@@ -237,10 +237,8 @@ pub(crate) fn advance_transition(state: &mut State, phase: Phase) -> bool {
         return true;
     }
     if transition.phase == TransitionPhase::BossCleanup {
-        // State3 explicitly updates Player with controls disabled, then enables
-        // controls and leaves the transition. Outer Game skips its actor pass.
-        crate::combat::advance_player_immunity(state);
-        state.player.shooting_lock = state.player.shooting_lock.saturating_sub(1);
+        // Game owns the real controls-disabled Player.Update at5dde9e before
+        // resuming ordinary actors. Removing the transition ends its freeze.
         return true;
     }
     if transition.phase == TransitionPhase::In && transition.full_updates < 7 {
