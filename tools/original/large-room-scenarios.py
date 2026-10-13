@@ -90,6 +90,22 @@ def validate(path):
         room = contents['room']
         if (room['gridWidth'], room['gridHeight'], room['boundsMin'], room['boundsMax']) != (15, 16, [60, 140], [580, 700]):
             raise ValueError('Native room dimensions and bounds must follow authored geometry')
+        if room['cameraStyle'] != 1 or not room.get('cameraDiagnostics'):
+            raise ValueError('Selected original must expose the default CameraStyle1 controller')
+        camera = room['cameraDiagnostics']
+        if camera['specialTargetSupplied'] or camera['alternatePosition'] != [0, 0] or camera['alternateVelocity'] != [0, 0]:
+            raise ValueError('Selected camera scope excludes alternate/special focus modes')
+        if [(history['capacity'], history['size']) for history in camera['histories']] != [(n, n) for n in (60, 90, 300, 60, 4, 120)]:
+            raise ValueError('Source camera must retain all six complete bounded histories')
+        for index in (0, 2, 3, 4, 5):
+            expected = [-1, -1] if index == 5 else [0, 0]
+            if any(sample != expected for sample in camera['histories'][index]['samples']):
+                raise ValueError('Selected fresh single-Isaac scope excludes aim/hostile/co-op/shake/special camera inputs')
+        inputs = contents['players'][0]['cameraInputDiagnostics']
+        if inputs != {'vectorDa8': [0, 0], 'vectorDb4': [0, 0], 'modeC08': 1, 'modeD80': 0}:
+            raise ValueError('Selected source player must remain in ordinary no-shooting camera mode')
+        if any(entity['type'] == 4 for entity in contents['entities']):
+            raise ValueError('Selected camera scope excludes active bombs and shake')
         if any(entity['type'] not in (1, 2, 4, 5, 1000) for entity in contents['entities']):
             raise ValueError('This selected tall-room route must remain free of hostile actors')
         chests = [entity for entity in contents['entities'] if entity['type'] == 5 and entity['variant'] == 50]
@@ -118,6 +134,11 @@ def validate(path):
     provenance['largeGeometry'] = {'shape': [13, 14], 'sourceGrid': [15, 16],
         'nativeBounds': [[60, 140], [580, 700]], 'lowerAndUpperPlanesExecuted': True,
         'returnedToStartingDescriptor': True, 'mandatoryConcreteActor': 'Pickup5/50'}
+    if not all(any(entry['observation']['contents']['room']['renderScroll'] == [0, endpoint] for entry in tall)
+               for endpoint in (0, -182)):
+        raise ValueError('Public tall-room route must exercise both source camera clamp endpoints')
+    provenance['camera'] = {'style': 1, 'scrollEndpoints': [[0, 0], [0, -182]],
+        'histories': [60, 90, 300, 60, 4, 120], 'scope': 'fresh no-shooting/no-hostile single Isaac; bounded scrolling and history/admission lifecycle'}
     return provenance
 
 

@@ -11,6 +11,7 @@ import { chromium } from '@playwright/test';
 import { browserLaunchOptions, inspectBrowserGraphics } from '../foundation/browser.mjs';
 import { startProductionServer } from '../foundation/production-server.mjs';
 import { assertInputProvenance, assertSeededRun, enterSeededRun, manualSeedCommands, waitForReady } from '../foundation/verify.mjs';
+import { compareCamera, captureCameraVisibility } from './camera-checks.mjs';
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const run = promisify(execFile);
 const value = flag => { const index = process.argv.indexOf(flag); return index < 0 ? undefined : process.argv[index + 1]; };
@@ -30,7 +31,7 @@ const production = await startProductionServer();
 const browser = await chromium.launch({ headless: true, ...browserLaunchOptions() });
 const report = { schema: 1, status: 'running', skipped: 0, selected: bank.cases.length,
   scope: bank.contract === 'large-geometry'
-    ? 'Fresh Isaac enters an authored ordinary13x14 room through public movement, follows both radius-inset vertical boundary planes and returns. Exact full/intermediate player motion, native dimensions/bounds, complete authored door indices/positions/endpoints, source descriptor/spawn/visited/minimap joins and supported Rock state are required. Actual normal Chest5/50 constructor, Appear/Idle clocks, radius and collision classes are joined every selected phase. Source camera offsets are retained as diagnostics; camera/backdrop rendering and chest contact/loot callbacks remain separate.'
+    ? 'Fresh Isaac enters an authored ordinary13x14 room through public movement, follows both radius-inset vertical boundary planes and returns. Exact full/intermediate player motion, native dimensions/bounds, complete authored door indices/positions/endpoints, source descriptor/spawn/visited/minimap joins and supported Rock state are required. Actual normal Chest5/50 constructor, Appear/Idle clocks, radius and collision classes are joined every selected phase. Default CameraStyle1 requires bounded scrolling, exact native endpoints, complete history and freeze/admission lifecycle plus actual viewport visibility at three source-projected phases; interior camera float differences remain diagnostic.'
     : bank.contract === 'keeper-idle'
     ? 'Fresh Isaac enters real13x7 secret rooms through public bomb/movement inputs. Actual NPC17/1 constructor and anchored idle compare complete identity/seed/subtype, authored collision/health/countability, source state/flags/anchor/color, static and animated Guy clips, every full/intermediate/frozen phase and room/player/door/minimap joins. Damage/drop callbacks and other Keeper variants remain separate.'
     : bank.contract === 'curse'
@@ -43,7 +44,7 @@ const report = { schema: 1, status: 'running', skipped: 0, selected: bank.cases.
           ? 'Fresh Isaac, no-hostile13x7 natural secret keys and ordinary library lock: denied zero-key approach, actual collection/spending, full-only unlock/collision/SFX156, admission/return/revisit, exact player/HP/immunity, complete door/display/minimap/descriptor joins. Actual Keeper17 constructor admission remains required; golden/double locks, library items and pixels remain separate.'
         : 'Ordinary style0 13x7 doorway and no-hostile return; mandatory hostile-room lock/return regression; exact f32 player/descriptor phases, complete authored group accounting, supported actor admission and ordinary Rock metadata, visited-room restoration. NPC behavior, other grids/doors, large-room camera and complete pixels remain separate.',
   exclusions: bank.contract === 'large-geometry'
-    ? ['Default Style1 camera controller, large-room backdrop generation and rendered pixel parity', 'Chest contact/loot, motion and rare51/360 replacements remain unsupported; historical missing normal Chest admissions stay retained', 'Chest persistent RNG30 initialization is statically mapped; this source observer does not read its four words', 'Boss/shop and other special-door art/policy/traversal, hostile large-room lifecycle, other large shapes, later floors and exits']
+    ? ['Interior camera scroll float details, large-room backdrop generation and complete rendered pixel parity', 'Special player/item focus, co-op, shooting lookahead, camera shake, hostile camera behavior and alternate CameraStyle2 are not accepted by this fresh no-shooting/no-hostile tape', 'Chest contact/loot, motion and rare51/360 replacements remain unsupported; historical missing normal Chest admissions stay retained', 'Chest persistent RNG30 initialization is statically mapped; this source observer does not read its four words', 'Boss/shop and other special-door art/policy/traversal, hostile large-room lifecycle, other large shapes, later floors and exits']
     : bank.contract === 'keeper-idle'
     ? ['Keeper damage/death/drop callbacks and actor mutation persistence', 'Other Keeper variants, hostile secret policy, other room shapes and floor exits', 'Complete sprite/backdrop/pixel parity and total shared MT consumer alignment']
     : bank.contract === 'secret'
@@ -127,8 +128,15 @@ try {
         phaseAssert.deepEqual(state.floor.grid, source.grid, `${label}:floor topology`);
         phaseAssert.deepEqual([state.player.x, state.player.y, state.player.vx, state.player.vy],
           [actor.position[0] * .65 + 32, actor.position[1] * .65 - 46, actor.velocity[0] * .65, actor.velocity[1] * .65], `${label}:source f32 motion projection`);
+        let cameraComparison;
         if (scenario.doorContract === 'large-geometry') {
           const nativeRoom = observed.contents.room;
+          cameraComparison = compareCamera(phaseAssert, state, observed.contents, label);
+          if (['large-admitted', 'lower-boundary-settle-30', 'upper-boundary-settle-30'].includes(label)) {
+            try {
+              (row.cameraFrames ||= []).push(await captureCameraVisibility(page, native, label, observed.contents, directory));
+            } catch (error) { comparisonFailures.push({label, error: String(error)}); }
+          }
           phaseAssert.deepEqual([state.room.grid?.width, state.room.grid?.height, state.room.grid?.cells.length],
             [nativeRoom.gridWidth, nativeRoom.gridHeight, nativeRoom.gridWidth * nativeRoom.gridHeight], `${label}:complete native padded room dimensions`);
           phaseAssert.deepEqual([state.room.left, state.room.right, state.room.top, state.room.bottom],
@@ -337,6 +345,7 @@ try {
           combatClear: state.room.combatClear, nativeCombatClear: descriptor.combatClear,
           damageCooldown: state.damageCooldown, nativePosition: actor.position,
           nativeVelocity: actor.velocity, nativeHp: actor.redHp, nativeDamageCountdown: actor.damageCountdown,
+          cameraComparison,
           roomGeometry: scenario.doorContract === 'large-geometry' ? {
             actualBounds: [state.room.left, state.room.right, state.room.top, state.room.bottom],
             actualGridDimensions: [state.room.grid?.width, state.room.grid?.height], source: observed.contents.room,
@@ -375,6 +384,8 @@ try {
       for (const action of setup) await deliver(action);
       for (const action of scenario.actions) await deliver(action);
       assert.equal(observedRooms.size, scenario.expectedVisitedRooms || 2, 'A complete declared route must reach every intended authored room');
+      if (scenario.doorContract === 'large-geometry' && row.cameraFrames?.length !== 3)
+        comparisonFailures.push({label: 'camera-visibility', error: 'Every selected large-room route must retain actual admitted, lower and upper camera visibility frames'});
       const expectedFinal = originals.get(scenario.actions.filter(action => action.type === 'capture').at(-1).label).observation.floor;
       if (scenario.mode === 'blocked-return') assert.notEqual(expectedFinal.currentDescriptorIndex, native.debugObservations[0].observation.floor.currentDescriptorIndex,
         'Mandatory source hostile-room regression must actually keep its attempted return locked');
