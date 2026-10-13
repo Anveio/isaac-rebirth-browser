@@ -1,0 +1,70 @@
+{
+  "schema": 1,
+  "status": "source-mapped; live acquisition proof pending",
+  "nativeBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "scope": "Fresh normal Isaac, first natural free collectible. Actual queued counts/authored inventory/health and first active ownership; separate item-specific stat/cache/familiar callbacks remain unaccepted.",
+  "contact": {
+    "source": "504820/505d3a",
+    "guard": "nonzero natural free100 subtype, age Game.current minus born >20, pickup and Player collection delay clear, no Pickup animation guard",
+    "order": [
+      "581750 mark removed ID",
+      "50a830 starts main Pickup at playback1 and copies PlayerPickupSparkle",
+      "52f310 flush prior queue and stores actual config/charge/pre-contact touched",
+      "empty subtype0, overlay Empty; retain altar actor",
+      "504480 admits SFX128 at gain0.5, delay2 in treasure4/library12"
+    ]
+  },
+  "playerPhase": {
+    "main": "447190 ->40f9f0 ->40f920 advances actual Sprite speed only on full callback; Pickup authored42 nonloop retains41 at finish",
+    "copy": "531e6f copied Sprite advances full-only; PlayerPickupSparkle authored36 loop",
+    "queue": "531850 clears bf4 after same base finished update; flags0x4000 at531f01 guards fast callback;53261c flushes before postactor contacts",
+    "motion": "529750 remains active during Pickup;52f370 preserves aim/cooldown while bf4 suppresses normal emissions"
+  },
+  "grant": {
+    "source": "52ee40 ->52cc90",
+    "order": [
+      "validate sparse config",
+      "increment permanent count e1c+4id",
+      "normal authored bombs,keys,coins,maxred,red,soul,black helpers in native order",
+      "active replacement sets ownership/charge/delay30; generic pending cache OR bypassed for active except130/181",
+      "Rosary72 adds5 to all16 Bible special counters",
+      "pointer and requested charge clear; stored touched argument persists"
+    ],
+    "cacheLimitation": "Unevaluated requested bits are retained explicitly. This leaf does not equate OR/clear with511f10 stat/familiar evaluation or route guessed item-effect aliases."
+  },
+  "rng": {
+    "runSeeds": "decoded public code ->shift27 saved output13",
+    "player": "5bf4a0 manager RNG34 passes unchanged output13 ->519350 local RNG5 (1,11,16)",
+    "children": "347 item,62 trinket,41 pocket named Next/init35 consumers, followed by base Entity seed; no shared MT draws",
+    "later": "Source item-specific local draws and shared familiar placement/appearance draws are diagnostic until actual callbacks are implemented; no cursor compensation"
+  },
+  "unsupported": [
+    "active swap/Morph/RemoveCollectible and item use",
+    "item-specific stat/health transformations and costumes",
+    "familiar creation/AI, temporary effects and later item RNG consumers",
+    "persistent achievement bookkeeping",
+    "paid/special override contexts, native-origin/backdrop and pixels"
+  ],
+  "researchContracts": [
+    {
+      "name": "acquisition-timing-contract.json",
+      "sha256": "30960a085d46e37db1b1bcfd5664693f8060e67377eb02d99abe704b964505e1",
+      "bytes": 3718
+    },
+    {
+      "name": "grant-helper-contract.json",
+      "sha256": "c5b963149eb071b41cf3c8e81a80d173abe0433db4c1754f39923420980a4c1c",
+      "bytes": 16163
+    },
+    {
+      "name": "per-item-rng-contract.json",
+      "sha256": "9170fecd8c6e998f7fdca001dae336fdbfbdb1447c4d21f0544532bbd83b8537",
+      "bytes": 14845
+    },
+    {
+      "name": "player-sprite-phase-contract.json",
+      "sha256": "c8d41af3d453dd07641ed122998a70760e9c209bf7c6252eb3ad64c3d3ac709e",
+      "bytes": 3373
+    }
+  ]
+}

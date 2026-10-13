@@ -15,7 +15,7 @@ export interface Frame {
   RedTint: number; GreenTint: number; BlueTint: number; AlphaTint: number;
   RedOffset: number; GreenOffset: number; BlueOffset: number; Rotation: number; Interpolated: boolean;
 }
-interface Animation { Name: string; FrameNum: number; Loop: boolean; RootAnimation: Frame[]; LayerAnimations: { LayerId: number; Visible: boolean; Frames: Frame[] }[]; }
+interface Animation { Name: string; FrameNum: number; Loop: boolean; RootAnimation: Frame[]; LayerAnimations: { LayerId: number; Visible: boolean; Frames: Frame[] }[]; NullAnimations?: { NullId: number; Visible: boolean; Frames: Frame[] }[]; }
 interface Actor { BaseSpritesheetPath: string; Spritesheets: { Id: number; Path: string }[]; Layers: { Id: number; SpritesheetId: number; Name: string }[]; Animations: Animation[]; }
 export interface DrawOptions { scale?: number; layers?: number[]; overrides?: Record<number, Partial<Frame>>; spritesheets?: Record<number, string>; pixelSnap?: number; }
 interface Glyph { x: number; y: number; width: number; height: number; xoffset: number; yoffset: number; xadvance: number; page: number; }
@@ -100,6 +100,14 @@ export class Assets {
     if (!animation) throw new Error(`Missing animation ${path}:${name}`);
     const layer = animation.LayerAnimations.find(layer => layer.LayerId === layerId);
     return layer?.Visible ? sampleFrame(layer.Frames, tick, animation.Loop) : undefined;
+  }
+  nullFrame(path: string, name: string, nullId: number, tick: number): SampledFrame | undefined {
+    const actor = (sceneData as unknown as Record<string, Actor>)[normalize(path)];
+    if (!actor) throw new Error(`Missing authored animation: ${path}`);
+    const animation = actor.Animations.find(animation => animation.Name === name);
+    if (!animation) throw new Error(`Missing animation ${path}:${name}`);
+    const attachment = animation.NullAnimations?.find(attachment => attachment.NullId === nullId);
+    return attachment?.Visible ? sampleFrame(attachment.Frames, tick, animation.Loop) : undefined;
   }
   private colorImage(path: string, tint: number[], offsets = [0, 0, 0]): CanvasImageSource {
     if (tint.every(value => Math.abs(value - 255) < .001) && offsets.every(value => value === 0)) return this.image(path);

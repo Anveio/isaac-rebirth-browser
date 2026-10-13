@@ -46,8 +46,25 @@ def observe(pid,context):
     b=list(read(a,n))
     if any(x not in(0,1)for x in b):raise ValueError('Invalid native bool')
     return b
+   def clip_name(actor,offset=0x18):
+    pointer=u64(actor+offset)
+    if not pointer:return None
+    text=u64(pointer);count=u64(text-24)
+    if count>128:raise ValueError('Animation name outside bound')
+    return read(text,count).decode('ascii')
+   def sprite(actor):
+    return {'animation':clip_name(actor),'animationFrame':f32(actor+0x120),
+            'animationPlaying':bools(actor+0x124,1)[0]==1,
+            'overlay':clip_name(actor,0x138),'overlayFrame':f32(actor+0x240)}
    system=u64(0x8ed560);report['systemState']=i32(system);report['systemCounter']=struct.unpack('<I',read(system+0x2efa0,4))[0]
    report['achievements']=bools(system+0x30,179)
+   report['sharedMt']={'index':struct.unpack('<I',read(0x8e6b64,4))[0],
+                       'words':list(struct.unpack('<624Q',read(0x8ed680,624*8)))}
+   report['collectionSounds']=[]
+   for sound in (128,171,218):
+    slot=system+0x12c20+sound*0x158
+    report['collectionSounds'].append({'id':sound,'lastTick':i32(slot),'nextAllowed':i32(slot+4),
+                                      'lastVolume':f32(slot+0x14c),'loaded':bools(slot+0x150,1)[0]==1})
    configs=[]
    for item_id in range(347):
     pointer=u64(system+0x2dfe0+8*item_id)
@@ -93,7 +110,19 @@ def observe(pid,context):
      # Record that raw byte without asserting a nonexistent active bool.
      touched_raw=read(player+0x3064,1)[0]
      touched=bools(player+0x3064,1)[0]if queued else None
-     players.append({'ownedCounts':list(struct.unpack('<347i',read(player+0xe1c,347*4))),'queuedId':i32(queued+4)if queued else None,'queuedCharge':i32(player+0x3060),'queuedTouched':touched,'queuedTouchedRaw':touched_raw,'cacheFlags':struct.unpack('<I',read(player+0xd6c,4))[0],'activeId':i32(player+0xd74),'activeCharge':i32(player+0xd78),'pickupCooldown':i32(player+0x30d4)})
+     players.append({'ownedCounts':list(struct.unpack('<347i',read(player+0xe1c,347*4))),'queuedId':i32(queued+4)if queued else None,'queuedCharge':i32(player+0x3060),'queuedTouched':touched,'queuedTouchedRaw':touched_raw,'cacheFlags':struct.unpack('<I',read(player+0xd6c,4))[0],'activeId':i32(player+0xd74),'activeCharge':i32(player+0xd78),'pickupCooldown':i32(player+0x30d4),
+                     'itemRngWords':[list(struct.unpack('<4I',read(player+0x1424+16*i,16)))for i in range(347)],
+                     'trinketRngWords':[list(struct.unpack('<4I',read(player+0x29d4+16*i,16)))for i in range(62)],
+                     'pocketRngWords':[list(struct.unpack('<4I',read(player+0x2db4+16*i,16)))for i in range(41)],
+                     'managerRngWords':list(struct.unpack('<4I',read(game+0xa138,16))),
+                     'entitySpawnSeed':struct.unpack('<I',read(player+0x7d0,4))[0],
+                     'health':[i32(player+offset)for offset in (0xbb4,0xbb8,0xbc0,0xbc4)],
+                     'inventory':{'bombs':i32(player+0xbd4),'keys':i32(player+0xbcc),'coins':i32(player+0xbd8)},
+                     'pickupAnimationGuard':bools(player+0xbf4,1)[0]==1,'mainSprite':sprite(player+0x28),
+                     'pickupSprite':sprite(player+0x7e0),
+                     'activeSubordinateCharge':i32(player+0xd7c),'activeStateD80':i32(player+0xd80),
+                     'activeStateD84':i32(player+0xd84),'reserveCharge':i32(player+0xd8c),
+                     'activeFlag3076':bools(player+0x3076,1)[0]==1 if i32(player+0xd74)else None})
     report['players']=players
     room=u64(game+0x8180);manager=room+0x15d0
     count=struct.unpack('<I',read(manager+0x74,4))[0]

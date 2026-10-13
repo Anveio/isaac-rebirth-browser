@@ -85,6 +85,7 @@ pub struct Pickup {
     pub spawn_seed: u32,
     pub variant: u32,
     pub subtype: u32,
+    pub spritesheet_item_id: u32,
     pub position: WorldVector,
     pub x: f64,
     pub y: f64,
@@ -92,6 +93,9 @@ pub struct Pickup {
     pub animation: String,
     pub animation_frame: f64,
     pub animation_playing: bool,
+    pub overlay: Option<String>,
+    pub overlay_frame: f32,
+    pub overlay_playing: bool,
     pub can_collect: bool,
     pub collected: bool,
     pub removed: bool,
@@ -180,6 +184,7 @@ impl Pickup {
             spawn_seed: 0,
             variant,
             subtype,
+            spritesheet_item_id: subtype,
             position,
             x: f64::from(position.x) * 0.65 + 32.0,
             y: f64::from(position.y) * 0.65 - 46.0,
@@ -187,6 +192,9 @@ impl Pickup {
             animation: animation.into(),
             animation_frame: 0.0,
             animation_playing: true,
+            overlay: (variant == 100).then(|| "Alternates".into()),
+            overlay_frame: 0.0,
+            overlay_playing: false,
             can_collect: animation == "Idle",
             collected: false,
             removed: false,
@@ -226,6 +234,23 @@ impl Pickup {
                 self.animation_playing = clip.looping;
             } else {
                 self.animation_frame = f64::from(next);
+            }
+        }
+        if self.overlay_playing {
+            let clip = definition(self.variant, self.subtype)
+                .expect("admitted pickup definition")
+                .clips
+                .iter()
+                .find(|clip| Some(clip.name) == self.overlay.as_deref())
+                .expect("admitted pickup overlay");
+            self.overlay_frame += 1.0;
+            if self.overlay_frame >= clip.frames as f32 {
+                self.overlay_frame = if clip.looping {
+                    0.0
+                } else {
+                    clip.frames as f32 - 1.0
+                };
+                self.overlay_playing = clip.looping;
             }
         }
         if !self.animation_playing && self.animation == "Appear" {

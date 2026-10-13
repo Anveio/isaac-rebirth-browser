@@ -159,6 +159,12 @@ export class Renderer {
     const player = state.player, x = Math.round((player.x + player.renderOffset.x) * 2) / 2,
       y = Math.round((player.y + player.renderOffset.y) * 2) / 2;
     const [RedTint, GreenTint, BlueTint] = state.stageEffects.actorTint;
+    if (state.playerItems?.pickupAnimationGuard) {
+      this.assets.draw(ctx, PLAYER, "Pickup", x, y, state.playerItems.pickupAnimationFrame,
+        { overrides: Object.fromEntries(Array.from({length: 5}, (_, layer) => [layer, {RedTint, GreenTint, BlueTint}])) });
+      this.pickups.drawCarried(ctx, state, x, y);
+      return;
+    }
     this.assets.draw(ctx, PLAYER, `Walk${directionName(player.bodyFacing)}`, x, y, player.walkFrame,
       { layers: [1], overrides: { 1: { RedTint, GreenTint, BlueTint } } });
     this.assets.draw(ctx, PLAYER, `Head${directionName(player.facing)}`, x, y, player.headFrame,

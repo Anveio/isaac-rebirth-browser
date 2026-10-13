@@ -28,6 +28,7 @@ pub mod music;
 pub mod npcs;
 pub mod phase;
 pub mod pickups;
+pub mod player_items;
 pub mod projectiles;
 pub mod rock_blast;
 mod room;
@@ -75,6 +76,8 @@ pub struct Player {
     pub vy: f64,
     pub hp: u8,
     pub max_hp: u8,
+    pub soul_hp: i32,
+    pub black_heart_mask: u32,
     pub facing: Direction,
     pub body_facing: Direction,
     pub walk_frame: u8,
@@ -92,6 +95,8 @@ impl Player {
             vy: 0.0,
             hp: 6,
             max_hp: 6,
+            soul_hp: 0,
+            black_heart_mask: 0,
             facing: Direction::Down,
             body_facing: Direction::Down,
             walk_frame: 0,
@@ -310,6 +315,7 @@ pub struct State {
     pub run_seed_value: u32,
     pub run_seeds: Option<seed::RunSeeds>,
     pub item_pools: Option<items::ItemPools>,
+    pub player_items: Option<player_items::PlayerItems>,
     pub stage: u32,
     pub stage_seed: u32,
     pub seeded_run: bool,
@@ -428,6 +434,7 @@ impl Game {
                 run_seed_value: initial_seed,
                 run_seeds: None,
                 item_pools: None,
+                player_items: None,
                 stage: 1,
                 stage_seed: seed::stage1_seed(initial_seed),
                 seeded_run: false,
@@ -899,6 +906,9 @@ impl Game {
             run_seeds.item_pool_seed(),
             &self.state.profiles[usize::from(self.state.profile - 1)].achievements,
         )?);
+        self.state.player_items = Some(player_items::PlayerItems::new(
+            run_seeds.initialized_fields[12],
+        )?);
         self.state.run_seeds = Some(run_seeds);
         self.state.system_clock.align_run_start()?;
         self.state.screen = Screen::Playing;
@@ -1266,7 +1276,12 @@ impl Game {
                     }
                 }
             }
-            for pickup in &mut self.state.room.pickups {
+            for index in 0..self.state.room.pickups.len() {
+                if self.state.room.pickups[index].variant == 100 {
+                    player_items::collect(&mut self.state, index)?;
+                    continue;
+                }
+                let pickup = &mut self.state.room.pickups[index];
                 if pickup.touches(&self.state.player)
                     && pickup.try_collect(&mut self.state.inventory)
                 {
@@ -1472,6 +1487,7 @@ impl Game {
         Ok(())
     }
     fn update_player(&mut self, phase: phase::Phase, bomb_triggered: bool) -> Result<(), String> {
+        player_items::advance_presentation(&mut self.state, phase);
         let dx = i32::from(self.held("KeyD")) - i32::from(self.held("KeyA"));
         let dy = i32::from(self.held("KeyS")) - i32::from(self.held("KeyW"));
         combat::advance_player_immunity(&mut self.state);
@@ -1527,7 +1543,13 @@ impl Game {
         }
         if let Some(direction) = aim {
             self.state.player.facing = direction;
-            if self.state.fire_cooldown < 0 {
+            if self.state.fire_cooldown < 0
+                && !self
+                    .state
+                    .player_items
+                    .as_ref()
+                    .is_some_and(|items| items.pickup_animation_guard)
+            {
                 let (dx, dy) = match direction {
                     Direction::Left => (-1.0, 0.0),
                     Direction::Right => (1.0, 0.0),
@@ -1598,6 +1620,7 @@ impl Game {
                     ((self.state.max_fire_delay as f32 * 0.45_f32) as i32 + 7).max(11);
             }
         }
+        player_items::finish_player_update(&mut self.state, phase)?;
         Ok(())
     }
     pub fn snapshot(&self) -> State {

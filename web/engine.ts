@@ -4,6 +4,7 @@ export type Screen = "title" | "profile" | "main" | "character" | "seed" | "play
 export type Direction = "left" | "right" | "up" | "down";
 export interface Player {
   x: number; y: number; vx: number; vy: number; hp: number; maxHp: number;
+  soulHp: number; blackHeartMask: number;
   facing: Direction; bodyFacing: Direction; walkFrame: number; headFrame: number; shooting: boolean;
   renderOffset: { x: number; y: number };
   eye: "negative" | "positive";
@@ -71,7 +72,9 @@ export interface Pickup {
   id: number; spawnSeed: number; variant: number; subtype: number; position: { x: number; y: number };
   x: number; y: number; actor: string; animation: string; animationFrame: number; animationPlaying: boolean;
   canCollect: boolean; collected: boolean; removed: boolean; collisionRadius: number; shadowSize: number; collectionDelay: number;
+  overlay: string | null; overlayFrame: number; overlayPlaying: boolean;
   age: number; birthGameUpdate: number; charge: number; touched: boolean;
+  spritesheetItemId: number;
 }
 export interface RunIntroduction { age: number; active: boolean; }
 export interface PauseMenu {
@@ -155,6 +158,14 @@ export interface State {
   runSeeds: {startSeed: number; streamState: number; initializedFields: number[]} | null;
   itemPools: {seed: number; rootRng: ItemRng; secondaryRng: ItemRng; pools: ItemPool[];
     specialFactor: number; removed: boolean[]; selected: boolean[]; roomRoutes: number[]; pillEffects: number[]} | null;
+  playerItems: {initializerSeed: number; managerRng: ItemRng; initializerRng: ItemRng;
+    itemRngs: ItemRng[]; trinketRngs: ItemRng[]; pocketRngs: ItemRng[]; entitySpawnSeed: number;
+    ownedCounts: number[]; queuedId: number | null; queuedCharge: number; queuedTouched: boolean;
+    pickupAnimationFrame: number; pickupAnimationPlaying: boolean; pickupAnimationGuard: boolean;
+    pickupPresentation: {itemId: number; animationFrame: number; animationPlaying: boolean} | null;
+    collectionDelay: number; activeId: number; activeCharge: number; activeSubordinateCharge: number;
+    activeStateD80: number; activeStateD84: number; reserveCharge: number; activeFlag3076: boolean;
+    unevaluatedCacheFlags: number} | null;
   pendingMenuInitializations: { afterAudioRequests: number; initialization: { type: "loadFreshProfile"; profile: number } | { type: "resetCharacterSeed" } | { type: "commitCharacterSeed"; seed: number } }[];
   stage: number; stageSeed: number; seededRun: boolean; achievementEligibility: boolean;
   profiles: { slot: number; unlockedCharacters: string[]; selectedCharacter: string; achievements: boolean[] }[];
