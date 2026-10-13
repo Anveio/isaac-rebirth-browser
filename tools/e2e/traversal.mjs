@@ -11,10 +11,19 @@ import { startProductionServer } from '../foundation/production-server.mjs';
 import { writeBrowserEvidence } from '../foundation/browser-evidence.mjs';
 import { assertInputProvenance, assertSeededRun, enterSeededRun, manualSeedCommands, waitForReady } from '../foundation/verify.mjs';
 import { compareCamera, captureCameraVisibility } from './camera-checks.mjs';
+import { compareChests } from './chest-checks.mjs';
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const run = promisify(execFile);
 const value = flag => { const index = process.argv.indexOf(flag); return index < 0 ? undefined : process.argv[index + 1]; };
 const nativeProcessTimeoutSeconds = Number(value('--native-process-timeout') || '600');
+const declaredBootSeed = value('--boot-epoch-seed');
+const bootEpochSeed = Number(declaredBootSeed || '0');
+assert.ok(Number.isInteger(bootEpochSeed) && bootEpochSeed >= 0 && bootEpochSeed <= 0xffffffff,
+  'Declared public boot time must be an unsigned32 value');
+const declaredSfxVolume = value('--sfx-volume');
+const sfxVolume = Number(declaredSfxVolume);
+assert.ok(declaredSfxVolume === undefined || Number.isFinite(sfxVolume) && sfxVolume >= 0 && sfxVolume <= 1,
+  'Declared public SFX volume must be within0..1');
 assert.ok(Number.isInteger(nativeProcessTimeoutSeconds) && nativeProcessTimeoutSeconds > 0
   && nativeProcessTimeoutSeconds <= 3600, 'Native process timeout must be 1..3600 host seconds');
 const output = resolve(value('--output') || join(ROOT, '.cache/e2e/traversal', String(Date.now())));
@@ -31,6 +40,8 @@ const browser = await chromium.launch({ headless: true, ...browserLaunchOptions(
 const report = { schema: 1, status: 'running', skipped: 0, selected: bank.cases.length,
   scope: bank.contract === 'large-geometry'
     ? 'Fresh Isaac enters an authored ordinary13x14 room through public movement, follows both radius-inset vertical boundary planes and returns. Exact full/intermediate player motion, native dimensions/bounds, complete authored door indices/positions/endpoints, source descriptor/spawn/visited/minimap joins and supported Rock state are required. Actual normal Chest5/50 constructor, Appear/Idle clocks, radius and collision classes are joined every selected phase. Default CameraStyle1 requires bounded scrolling, exact native endpoints, complete history and freeze/admission lifecycle plus actual viewport visibility at three source-projected phases; interior camera float differences remain diagnostic.'
+    : bank.contract === 'chest-opening'
+    ? 'Fresh free Basement normal50 opening through public starting-bomb access and contact. Complete pickup actor multisets, persistent parent RNG30 words, full/intermediate motion/classes/clips, newborn admission order, actual SFX21/22 and route/room/player/inventory joins are required. Unsupported loot families and existing shared-MT/pickup-pair gaps remain blocking; no native state or scatter vectors are supplied.'
     : bank.contract === 'keeper-idle'
     ? 'Fresh Isaac enters real13x7 secret rooms through public bomb/movement inputs. Actual NPC17/1 constructor and anchored idle compare complete identity/seed/subtype, authored collision/health/countability, source state/flags/anchor/color, static and animated Guy clips, every full/intermediate/frozen phase and room/player/door/minimap joins. Damage/drop callbacks and other Keeper variants remain separate.'
     : bank.contract === 'curse'
@@ -44,6 +55,8 @@ const report = { schema: 1, status: 'running', skipped: 0, selected: bank.cases.
         : 'Ordinary style0 13x7 doorway and no-hostile return; mandatory hostile-room lock/return regression; exact f32 player/descriptor phases, complete authored group accounting, supported actor admission and ordinary Rock metadata, visited-room restoration. NPC behavior, other grids/doors, large-room camera and complete pixels remain separate.',
   exclusions: bank.contract === 'large-geometry'
     ? ['Interior camera scroll float details, large-room backdrop generation and complete rendered pixel parity', 'Special player/item focus, co-op, shooting lookahead, camera shake, hostile camera behavior and alternate CameraStyle2 are not accepted by this fresh no-shooting/no-hostile tape', 'Chest contact/loot, motion and rare51/360 replacements remain unsupported; historical missing normal Chest admissions stay retained', 'Chest persistent RNG30 initialization is statically mapped; this source observer does not read its four words', 'Boss/shop and other special-door art/policy/traversal, hostile large-room lifecycle, other large shapes, later floors and exits']
+    : bank.contract === 'chest-opening'
+    ? ['Rare Chest51/360/60, pill70/trinket350 and item/trinket/stage11 callbacks remain unsupported and cannot be substituted', 'Total shared MT consumer alignment, regular child DropSound and generic pickup-pair callbacks remain separate mechanisms; their observed identity/motion fields stay required', 'Opened/revisited Chest reconstruction, saved actor mutation, complete sprite/backdrop/camera pixels, other player collision scales and other room shapes']
     : bank.contract === 'keeper-idle'
     ? ['Keeper damage/death/drop callbacks and actor mutation persistence', 'Other Keeper variants, hostile secret policy, other room shapes and floor exits', 'Complete sprite/backdrop/pixel parity and total shared MT consumer alignment']
     : bank.contract === 'secret'
@@ -67,6 +80,8 @@ try {
         await run('bash', [join(ROOT, 'tools/original/with-display.sh'), 'python3',
           join(ROOT, 'tools/original/foundation-clock-run.py'), '--seed', scenario.code, '--tape', tape,
           '--state-observer', value('--state-observer') || join(ROOT, 'tools/original/foundation-traversal-observe.py'),
+          ...(declaredBootSeed ? ['--boot-epoch-seed', String(bootEpochSeed)] : []),
+          ...(declaredSfxVolume !== undefined ? ['--sfx-volume', String(sfxVolume)] : []),
           '--output', join(directory, 'original')], { cwd: ROOT, timeout: nativeProcessTimeoutSeconds * 1000, maxBuffer: 8 * 1024 * 1024 });
       } catch (error) {
         row.originalExecution.failure = { code: error.code ?? null, signal: error.signal ?? null,
@@ -79,12 +94,16 @@ try {
       assert.equal(provenance.status, 'pass');
       const native = JSON.parse(await readFile(sourceManifest, 'utf8'));
       assert.equal(native.seedValue, scenario.runSeed);
+      if (declaredBootSeed) assert.equal(native.bootEpochSeed, bootEpochSeed, 'Both games use the independently declared public boot input');
+      if (declaredSfxVolume !== undefined) assert.equal(native.audioOptions.sfxVolume, sfxVolume,
+        'Original launch options must bind the independently declared public SFX volume');
       const originals = new Map(native.debugObservations.map(entry => [entry.context.label, entry]));
       const setup = scenario.setup || [{ type: 'step', frames: 60 }, ...(scenario.slot % 2 === 0
         ? [{ type: 'key', key: 'w', down: true }, { type: 'step', frames: 27 }, { type: 'key', key: 'w', down: false }, { type: 'step', frames: 30 }] : [])];
       const keyCodes = { a: 'KeyA', w: 'KeyW', d: 'KeyD', s: 'KeyS', e: 'KeyE', Up: 'ArrowUp',
         Down: 'ArrowDown', Left: 'ArrowLeft', Right: 'ArrowRight', Escape: 'Escape' };
       const expectedCommands = [...manualSeedCommands(scenario.code),
+        ...(declaredSfxVolume !== undefined ? [{ type: 'audioVolume', sfx_volume: sfxVolume }] : []),
         ...[...setup, ...scenario.actions].flatMap(action => {
           if (action.type === 'step') return [{ type: 'tick', count: action.frames }];
           if (action.type === 'capture') return [];
@@ -99,8 +118,10 @@ try {
       page = await browser.newPage({ viewport: { width: 960, height: 540 } });
       const errors = []; page.on('pageerror', error => errors.push(String(error)));
       await page.goto(production.url + '/?manual=1'); await waitForReady(page);
-      await page.evaluate(seed => { window.game.pause(); window.game.reset(seed, { trace: true }); }, scenario.runSeed);
-      const seeded = await enterSeededRun(page, scenario.code);
+      await page.evaluate(({seed, bootEpochSeed}) => { window.game.pause(); window.game.reset(seed, { trace: true, bootEpochSeed }); }, {seed: scenario.runSeed, bootEpochSeed});
+      let seeded = await enterSeededRun(page, scenario.code);
+      if (declaredSfxVolume !== undefined)
+        seeded = await page.evaluate(volume => window.game.command({ type: 'audioVolume', sfx_volume: volume }), sfxVolume);
       await writeFile(join(directory, 'browser-input.json'), JSON.stringify({ schema: 1, seeded,
         trace: await page.evaluate(() => window.game.trace()), expectedCommands }, null, 2) + '\n');
       assertSeededRun(seeded, scenario.code, scenario.runSeed);
@@ -127,7 +148,9 @@ try {
         phaseAssert.deepEqual(state.floor.grid, source.grid, `${label}:floor topology`);
         phaseAssert.deepEqual([state.player.x, state.player.y, state.player.vx, state.player.vy],
           [actor.position[0] * .65 + 32, actor.position[1] * .65 - 46, actor.velocity[0] * .65, actor.velocity[1] * .65], `${label}:source f32 motion projection`);
-        let cameraComparison;
+        let cameraComparison, chestComparison;
+        if (scenario.doorContract === 'chest-opening')
+          chestComparison = compareChests(phaseAssert, state, observed, native.debugObservations[0].observation, seeded, label);
         if (scenario.doorContract === 'large-geometry') {
           const nativeRoom = observed.contents.room;
           cameraComparison = compareCamera(phaseAssert, state, observed.contents, label);
@@ -306,7 +329,7 @@ try {
             || (scenario.doorContract === 'free-treasure' && entity.type === 33);
           const supported = entity => rawMetadata(entity)
             || (['secret', 'key'].includes(scenario.doorContract) && entity.type === 17 && entity.variant === 1)
-            || (scenario.doorContract === 'large-geometry' && entity.type === 5 && entity.variant === 50)
+            || (['large-geometry', 'chest-opening'].includes(scenario.doorContract) && entity.type === 5 && entity.variant === 50)
             || (entity.type === 5 && ({10: [1, 2, 5], 20: [1, 2, 3, 4], 30: [1, 3], 40: [1, 2]})[entity.variant]?.includes(entity.subtype));
           const tuple = entity => [entity.type, entity.variant, entity.subtype, entity.spawnSeed,
             ...(Array.isArray(entity.position) ? entity.position : [entity.position.x, entity.position.y])];
@@ -346,6 +369,7 @@ try {
           damageCooldown: state.damageCooldown, nativePosition: actor.position,
           nativeVelocity: actor.velocity, nativeHp: actor.redHp, nativeDamageCountdown: actor.damageCountdown,
           cameraComparison,
+          chestComparison,
           roomGeometry: scenario.doorContract === 'large-geometry' ? {
             actualBounds: [state.room.left, state.room.right, state.room.top, state.room.bottom],
             actualGridDimensions: [state.room.grid?.width, state.room.grid?.height], source: observed.contents.room,
@@ -427,7 +451,7 @@ try {
       const trace = await page.evaluate(() => window.game.trace());
       const archivePath = join(directory, 'browser-states.json.gz');
       row.browserEvidence = await writeBrowserEvidence(archivePath, {states, trace, expectedCommands});
-      assertInputProvenance(trace, expectedCommands, scenario.runSeed);
+      assertInputProvenance(trace, expectedCommands, scenario.runSeed, bootEpochSeed);
       row.traceHistory = { truncated: trace.truncated, inputTraceTruncated: trace.inputTraceTruncated,
         stateHistoryTruncated: trace.stateHistoryTruncated, retainedStates: trace.states.length,
         stateEncodedBytes: trace.stateEncodedBytes, maxStateEncodedBytes: trace.maxStateEncodedBytes,

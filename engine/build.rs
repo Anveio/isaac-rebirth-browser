@@ -119,6 +119,30 @@ fn pickup_catalog(path: &Path, animations: &Path, entities_xml: &str) -> String 
             pickup["shadowSize"].as_f64().expect("pickup shadow size missing")));
     }
     output.push_str("];\n");
+    let chest = &actors["gfx/005.050_chest.anm2"];
+    let drop_id = chest["Events"]
+        .as_array()
+        .expect("authored Chest event list")
+        .iter()
+        .find(|event| event["Name"] == "DropSound")
+        .and_then(|event| event["Id"].as_u64())
+        .expect("authored Chest DropSound event");
+    let drop_frame = chest["Animations"]
+        .as_array()
+        .expect("authored Chest animations")
+        .iter()
+        .find(|clip| clip["Name"] == "Appear")
+        .and_then(|clip| clip["Triggers"].as_array())
+        .and_then(|triggers| {
+            triggers
+                .iter()
+                .find(|trigger| trigger["EventId"] == drop_id)
+        })
+        .and_then(|trigger| trigger["AtFrame"].as_u64())
+        .expect("authored Chest Appear DropSound frame");
+    output.push_str(&format!(
+        "pub const CHEST_DROP_SOUND_FRAME: u32 = {drop_frame};\n"
+    ));
     output
 }
 
