@@ -7,8 +7,8 @@ The lifecycle report retains 18 RNG-dependent height, falling-speed and ground d
 Reproduce after `source cloud/env.sh` and `npm run check:build`:
 
 ```sh
-npm run test:e2e:weapons -- --scenarios references/isaac/foundation/weapons/menu-admission-compat/cadence-scenarios.json
-npm run test:e2e:tear-lifecycle -- --scenarios references/isaac/foundation/weapons/menu-admission-compat/lifecycle-scenarios.json
+npm run test:e2e -- weapons --scenarios references/isaac/foundation/weapons/menu-admission-compat/cadence-scenarios.json
+npm run test:e2e -- tear-lifecycle --scenarios references/isaac/foundation/weapons/menu-admission-compat/lifecycle-scenarios.json
 ```
 
 Run the heavyweight native cohorts sequentially. The reports preserve the immutable artifact, recorded tapes, native manifest hashes, executable identity and exact gate-source hashes. `validation.json` records totals and the final build-check log identity.
