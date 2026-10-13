@@ -20,6 +20,8 @@ export function compareCamera(phaseAssert, state, contents, label) {
       phaseAssert.equal(scroll[axis], room.renderScroll[axis], `${label}:source clamped camera endpoint axis${axis}`);
   }
   const source = room.cameraDiagnostics;
+  if (room.gridWidth === 15 && room.gridHeight === 16)
+    phaseAssert.ok(source, `${label}:every tall-room phase requires complete native camera histories`);
   if (source) {
     phaseAssert.deepEqual(vector(actual.lastPlayerPosition), source.lastPlayerPosition,
       `${label}:source camera freeze/admission last-player position`);
@@ -30,9 +32,9 @@ export function compareCamera(phaseAssert, state, contents, label) {
       source.histories.map(history => history.samples), `${label}:complete source camera input history`);
     phaseAssert.deepEqual(source.position, room.renderScroll, `${label}:source camera/render-offset join`);
   }
-  return {actual: scroll, native: room.renderScroll,
+  return {actual: scroll, native: room.renderScroll, completeHistoryCompared: Boolean(source),
     difference: scroll.map((value, axis) => value - room.renderScroll[axis]),
-    scope: 'Interior scroll float differences are diagnostic; bounds, source endpoints and complete input-history/lifecycle fields are required'};
+    scope: 'All phases require camera bounds/source endpoints; complete input-history/lifecycle fields are required on the tall-room portion with native readback. Interior scroll floats remain diagnostic'};
 }
 
 function skinComponent(image, anchor) {
