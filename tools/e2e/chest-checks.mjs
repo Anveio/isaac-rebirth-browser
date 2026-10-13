@@ -60,9 +60,13 @@ export function compareChests(check, state, observed, baseline, seeded, label) {
     if (!source.loaded) continue;
     const sourceTick = baseline.audioSystemCounter >> 1;
     const browserTick = seeded.systemClock.systemCounter >> 1;
-    check.equal(model.lastTick - browserTick, source.lastTick - sourceTick,
+    // Native virgin lastTick bytes are not an event timestamp. The initialized
+    // nextAllowed discriminator is also used by the shared live audio gate.
+    check.equal(model.nextAllowed < 0 ? null : model.lastTick - browserTick,
+      source.nextAllowed < 0 ? null : source.lastTick - sourceTick,
       `${label}:native Chest sound${source.id} admission phase`);
-    check.equal(model.nextAllowed - browserTick, source.nextAllowed - sourceTick,
+    check.equal(model.nextAllowed < 0 ? -1 : model.nextAllowed - browserTick,
+      source.nextAllowed < 0 ? -1 : source.nextAllowed - sourceTick,
       `${label}:native Chest sound${source.id} cooldown`);
     check.equal(Math.fround(model.lastVolume), source.lastVolume,
       `${label}:native Chest sound${source.id} volume`);
