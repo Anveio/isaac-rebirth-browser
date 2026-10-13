@@ -38,6 +38,7 @@ export interface SavedRunSummary {
   currentRoomRecord: number; currentRoomSeedSamples: {gridIndex: number;
     levelSeeds: [number, number]; savedSeeds: [number, number]; occupancy: "empty" | "occupied" | "padding";
     record: GridRecord | null}[];
+  doorCellRecords: {gridIndex: number; record: GridRecord | null}[];
   itemPools: {poolSeed: number; rootRngSeed: number; secondaryRngSeed: number;
     specialFactor: number; specialCounters: number[]; removedSamples: {itemId: number; removed: boolean}[];
     pillEffects: number[]; weightSamples: {poolId: number; itemId: number; weight: number}[]};

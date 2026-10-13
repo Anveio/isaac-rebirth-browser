@@ -98,6 +98,13 @@ impl SavedRun {
             item_pools: SavedItemPoolsSummary::from_pools(&self.item_pools),
             current_room_record: self.current_room,
             current_room_seed_samples,
+            door_cell_records: [7, 60, 74, 127]
+                .into_iter()
+                .map(|grid_index| SampledGridRecord {
+                    grid_index,
+                    record: self.grid_records.get(grid_index).cloned().flatten(),
+                })
+                .collect(),
         })
     }
 }
@@ -121,6 +128,15 @@ pub struct SavedRunSummary {
     pub item_pools: SavedItemPoolsSummary,
     pub current_room_record: usize,
     pub current_room_seed_samples: Vec<CurrentRoomSeedSample>,
+    /// Four native starting-room boundary slots, including enabled Door16.
+    pub door_cell_records: Vec<SampledGridRecord>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct SampledGridRecord {
+    pub grid_index: usize,
+    pub record: Option<crate::grid_records::GridRecord>,
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]

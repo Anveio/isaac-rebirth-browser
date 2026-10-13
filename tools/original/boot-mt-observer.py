@@ -46,7 +46,7 @@ def observe(pid,context):
       words=struct.unpack('<7I',read(pointer+slot*0x1c,0x1c))
       level_samples.append({'roomRecord':room,'gridIndex':slot,'seed10':words[4],'seed18':words[6]})
      level_rows.append({'roomRecord':room,'gridIndex':struct.unpack('<i',read(game+0x10+room*0xf0,4))[0]})
-   saved_run=None;live_grid=None;saved_pools=None;current_samples=[]
+   saved_run=None;live_grid=None;saved_pools=None;current_samples=[];door_cell_records=[]
    if game and system_state==2:
     indices=[struct.unpack('<i',read(game+0x10+room*0xf0,4))[0] for room in range(135)]
     allocated=[room for room,index in enumerate(indices) if index>=0]
@@ -68,6 +68,10 @@ def observe(pid,context):
      sample={'gridIndex':index,'levelSeeds':[level_words[4],level_words[6]],'savedSeeds':[saved_words[4],saved_words[6]],'levelRecord':record(level_words),'savedRecord':record(saved_words),'occupancy':'padding' if index>=cells else 'occupied' if pointer else 'empty'}
      if pointer:sample['object']={'kind':u32(pointer+8),'variant':u32(pointer+0xc),'primarySeed':u32(pointer+0x18),'secondarySeed':u32(pointer+0x20)}
      current_samples.append(sample)
+    for index in [7,60,74,127]:
+     if index>=cells:raise ValueError('Starting-room door sample exceeds actual grid')
+     level_words=struct.unpack('<7I',read(level_grid+index*0x1c,0x1c));saved_words=struct.unpack('<7I',read(saved_grid+index*0x1c,0x1c))
+     door_cell_records.append({'gridIndex':index,'levelRecord':record(level_words),'savedRecord':record(saved_words)})
     pools=game+0x8bd0;weight_samples=[]
     for pool in [0,15]:
      record=pools+8+pool*0x48;begin=u64(record+8);end=u64(record+0x10)
@@ -90,6 +94,6 @@ def observe(pid,context):
     'managerCounter':u32(manager+0x2efa0),'systemState':system_state,'systemSeededRun':bool(read(manager+0x11,1)[0]),
     'gameRunSeed':u32(game+0xa190) if game else None,'gameSeedText':seed_string(game+0xa1e0) if game and system_state==2 else None,
     'gameSeededRun':bool(read(game+0x10ecd0,1)[0]) if game and system_state==2 else None,
-    'stateSeed9688':u32(saved+0x9688),'gridSeedSamples':samples,'levelGridSeedSamples':level_samples,'savedRows':saved_rows,'levelRows':level_rows,'savedRun':saved_run,'liveGrid':live_grid,'savedItemPools':saved_pools,'currentRoomSeedSamples':current_samples,'title':title}
+    'stateSeed9688':u32(saved+0x9688),'gridSeedSamples':samples,'levelGridSeedSamples':level_samples,'savedRows':saved_rows,'levelRows':level_rows,'savedRun':saved_run,'liveGrid':live_grid,'savedItemPools':saved_pools,'currentRoomSeedSamples':current_samples,'doorCellRecords':door_cell_records,'title':title}
   finally:os.close(fd)
  finally:os.kill(pid,signal.SIGCONT)

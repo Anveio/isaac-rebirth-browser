@@ -310,7 +310,7 @@
     "contractSha256": "38fde7ea6bc333badb9a0ace5a1fa97348296c9805fc982f1e72789521ce6247",
     "scope": "Base virtual Update/Render/Init are empty408e00. Derived object+14 writes are not inferred."
   },
-  "implementation": "Actual constructor first seed enters GridEntity.spawn_seed, second enters its source_owner; fresh caller InitSeed replaces only primary. The actual default local RNG retains four5/9/7 words. Null records own two fresh raw words; supported occupied records copy actual object fields and seeds into Level before Saved copy. Complete records remain internal, with eight actual-cell bounded samples plus padding seed pair observations. InitRecord API constructs before both seed overrides but durable restore is not routed/claimed.",
+  "implementation": "Actual constructor first seed enters GridEntity.spawn_seed, second enters its source_owner; fresh caller InitSeed replaces only primary. The actual default local RNG retains four5/9/7 words. Null records own two fresh raw words; supported occupied records copy actual object fields and seeds into Level before Saved copy. Complete records remain internal, with twelve actual-cell bounded samples plus padding seed pair observations. InitRecord API constructs before both seed overrides but durable restore is not routed/claimed.",
   "remaining": [
     "Variable additional GridDecoration1/0 admission remains an actual whole-grid occupancy failure",
     "Other derived constructors and update/effect callbacks remain unadmitted; no sampler padding",
@@ -318,5 +318,34 @@
     "Post-update/continue/load and mapped PlayerItems Save/Load remain separate leaves",
     "Complete postrun shared MT remains diagnostic; actual paired saved current-row seeds/occupancy and sampled record fields are blocking"
   ],
-  "prohibitedInference": "No observed nativeMT state/index can seed port owners, reset cursors or determine skipped draw counts. Store/mutateactual grid objects on actual constructor/Init paths only."
+  "prohibitedInference": "No observed nativeMT state/index can seed port owners, reset cursors or determine skipped draw counts. Store/mutateactual grid objects on actual constructor/Init paths only.",
+  "observation": {
+    "scope": "Seven semantic fields from actual current-row Level and Saved records. Nine existing seed/occupancy cells remain required; four additional starting-room boundary slots independently exercise Door16 and Wall15 records. Physical cell records are required for all12 actual sampled cells, while padding447 keeps its seed-pair requirement without a metadata claim.",
+    "currentCells": [
+      0,
+      1,
+      16,
+      17,
+      56,
+      85,
+      103,
+      134,
+      447
+    ],
+    "doorCells": [
+      7,
+      60,
+      74,
+      127
+    ],
+    "fields": [
+      "kind",
+      "variant",
+      "state",
+      "sourceWord14",
+      "primarySeed",
+      "initialized",
+      "secondarySeed"
+    ]
+  }
 }
