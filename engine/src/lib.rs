@@ -1274,6 +1274,9 @@ impl Game {
         self.refresh_minimap();
         if phase.updates_nonplayers() {
             npcs::advance_room_clear(&mut self.state);
+            let dx = i32::from(self.held("KeyD")) - i32::from(self.held("KeyA"));
+            let dy = i32::from(self.held("KeyS")) - i32::from(self.held("KeyW"));
+            doors::check_unlock(&mut self.state, dx, dy);
             traversal::check_departure(&mut self.state);
         }
         let surviving = &self.state.tears;

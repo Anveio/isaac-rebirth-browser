@@ -157,6 +157,7 @@ pub struct RoomDoor {
     pub side: String,
     pub state: String,
     pub asset: String,
+    pub spritesheet: Option<String>,
     pub x: f64,
     pub y: f64,
     pub target_room: u32,
@@ -272,6 +273,12 @@ impl Room {
                     "gfx/grid/door_01_normaldoor.anm2"
                 }
                 .into(),
+                // Door.Init562b48 uses the current room's backdrop palette,
+                // not the neighbor type. Library palettes14/15 replace every
+                // sheet of the ordinary door with the authored library PNG.
+                spritesheet: (descriptor.template.room_type == 12
+                    && destination.template.room_type == 1)
+                    .then(|| "gfx/grid/door_13_librarydoor.png".into()),
                 x: (40.0 + 40.0 * column) * motion::WORLD_SCALE + 32.0 + inset_x,
                 y: (120.0 + 40.0 * row) * motion::WORLD_SCALE - 46.0 - 1.0 + inset_y,
                 target_room: *target as u32,
