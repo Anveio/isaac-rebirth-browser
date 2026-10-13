@@ -7,6 +7,34 @@ the supplied grid, trajectory, contact
 and ordinary damage queue contracts. They do not establish enemy AI, the full
 collision manager, rock drops, death callbacks or browser combat integration.
 
+The production contact/grid follow-up now admits ordinary authored rocks and
+uses the persisted room grid for both player and regular-bomb ground contact.
+`grid::for_room` consumes the STB asset, selected local-stream spawn descriptors,
+room decoration seed and admitted doorway geometry. It preserves unsupported
+selectors. Ordinary1000/0/0 rocks receive native kind2/state1/class3 with their
+actual local spawn seed; tinted/special rock callbacks remain outside this
+slice. Boundary and door entries describe collision geometry with seed0 and
+do not claim those actors' random admission. Opened doors use class5: players
+admit0/5, while ordinary nonplayer ground actors admit only0.
+
+Rock SetType(-1) at `0x56c240` seeds RNG35 with
+`(decorationSeed + gridIndex) | 1` and chooses one of the three authored normal
+frames. Init at `0x56c390` uses the rock's own spawn seed for a conditional
+cluster draw, queries right/down/diagonal neighbors in order, and assigns
+horizontal1000/1001, vertical1002/1003 or square1004..1007 frames. Production
+floor generation, STB lookup, local selector draws and this factory reproduce
+all45 kind/variant/state/collision/spawn-seed fields from the independently
+observed nine rocks in Basement181. The source-bound summary is
+`references/isaac/foundation/combat/bomb-runtime/rock-admission-verification.json`;
+this factory comparison is separate from live traversal acceptance.
+
+The browser displays those admitted rocks through the original
+`gfx/grid/grid_rock.anm2` normal/big clips and Basement sheet. Regenerate its
+catalogue with `extract-animations.py --archive PATH/animations.a --select-file
+tools/foundation/port-grid-animations.txt --json-output web/grid-data.json`.
+Rock destruction/drop/linked-frame updates, hazard callbacks, general enemy AI
+and full frame pixels remain incomplete.
+
 ## Source and reproduction
 
 The reference is base Rebirth Linux v1.05. The unmodified private ELF has

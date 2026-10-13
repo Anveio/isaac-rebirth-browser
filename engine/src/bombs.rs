@@ -318,6 +318,43 @@ pub fn advance_actor(state: &mut State, phase: Phase, id: u32) -> Result<(), Str
         return Ok(());
     };
     let detonated = state.bombs[index].motion.advance(phase)?;
+    if state.bombs[index].motion.lifetime == BombLifetime::Alive {
+        use std::sync::OnceLock;
+        static COLLIDER: OnceLock<crate::grid::Collider> = OnceLock::new();
+        let grid = state
+            .room
+            .grid
+            .as_ref()
+            .map(|descriptor| crate::grid::Grid::new(descriptor.clone()))
+            .transpose()?
+            .unwrap_or_else(crate::grid::Grid::closed_1x1_boundary);
+        let collider = COLLIDER.get_or_init(|| {
+            crate::grid::Collider::new(crate::grid::CollisionGeometry {
+                radius: 16.0,
+                scale: WorldVector { x: 1.0, y: 1.0 },
+                points: 12,
+            })
+            .expect("authored regular bomb collision geometry is valid")
+        });
+        let motion = &mut state.bombs[index].motion;
+        if phase == Phase::Update {
+            collider.resolve_nonplayer_ground(
+                &grid,
+                &mut motion.position,
+                &mut motion.velocity,
+                false,
+            )?;
+            motion.presented_position = motion.position;
+        } else if phase == Phase::Interpolate {
+            let mut preview_velocity = motion.velocity;
+            collider.resolve_nonplayer_ground(
+                &grid,
+                &mut motion.presented_position,
+                &mut preview_velocity,
+                true,
+            )?;
+        }
+    }
     let position = state.bombs[index].motion.position;
     let presented = state.bombs[index].motion.presented_position;
     state.bombs[index].x = f64::from(presented.x) * WORLD_SCALE + 32.0;

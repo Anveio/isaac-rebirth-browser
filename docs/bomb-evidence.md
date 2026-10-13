@@ -156,6 +156,26 @@ Both complete input cases remain replayable with the paired gate's
 remain under `.cache/foundation/bomb-handoff-contact-live/`; no failed result
 was replaced or weakened.
 
+The subsequent ordinary nonplayer ground-contact path now resolves the
+`C7YPWS61` bottom-wall holdout. Static `0x442b90`/`0x443628` evidence and a
+new dense public-input replay distinguish it from player reflection. A full
+contact first adds `normal * (1.8 * inward - .1)` to velocity, uses that
+reflected speed for12 penetration refinements, then scales the whole vector
+by `1 + (inward / reflectedSpeed) * .5`. Intermediate prediction corrects the
+presented position while preserving stored position/velocity. The source's
+first full wall hit supplies vy−.1, and the subsequent .95/.5 drag settles the
+bomb at y407.803467. No captured positions enter gameplay.
+
+`bomb-state-pair.mjs` reads fresh original and production browser manifests,
+verifies their provenance, and compares the single admitted bomb's presented
+world position, stored velocity, and timer. The dense replay passes42/42 paired
+checkpoints and125/125 exact f32/integer field comparisons; all nine original
+GPU mask cases still pass. Its complete tape and hash-bound verification
+summary are beside the earlier failing evidence as
+`C7YPWS61-dense-wall.json` and `nonplayer-contact-verification.json`. The
+ordinary class5 kernel does not implement type-specific bounce exceptions,
+other grid classes, or grid destruction.
+
 The independent Fly-room probe at
 `.cache/coordination/combat/fly-bomb/manifest.json` records player HP6→4 at
 presentation120 after E. Two nearby Fly13 actors retain HP3 while pendingDamage

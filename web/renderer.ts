@@ -49,6 +49,15 @@ export class Renderer {
     else {
       this.drawRoom(state.room.appearance);
       this.stage.ground(state.stageEffects);
+      const grid = state.room.grid;
+      if (grid) for (const [index, cell] of grid.cells.entries()) {
+        const rock = cell.entity;
+        if (rock?.kind !== 2 || rock.state !== 1) continue;
+        const x = (40 + index % grid.width * 40) * 0.65 + 32;
+        const y = (120 + Math.floor(index / grid.width) * 40) * 0.65 - 46;
+        this.assets.draw(ctx, "gfx/grid/grid_rock.anm2", rock.variant >= 1000 ? "big" : "normal",
+          x, y, rock.variant >= 1000 ? rock.variant - 1000 : rock.variant);
+      }
       this.pickups.draw(ctx, state);
       this.drawPlayer(ctx, state);
       for (const tear of state.tears)
