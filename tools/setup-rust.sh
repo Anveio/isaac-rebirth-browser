@@ -9,3 +9,4 @@ if ! command -v rustup >/dev/null && [[ ! -f "$HOME/.cargo/env" ]]; then
 fi
 if ! command -v rustup >/dev/null; then source "$HOME/.cargo/env"; fi
 rustup target add wasm32-unknown-unknown
+rustup component add rustfmt clippy

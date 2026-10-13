@@ -1,0 +1,15 @@
+{
+  "schema": 1,
+  "scope": "Retained original-only discovery for the next bomb-pickup owning gate; this finding is not claimed passing by the ordinary Rock cohort",
+  "case": {
+    "code": "XD0VNH46",
+    "seedValue": 2533542370,
+    "entropy": "Recorded OS secrets discovery, candidate186",
+    "input": "S17, release100, S25, release30, E1, release122, S50, release30",
+    "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+    "nativeManifestSha256": "78369a6b5cc6c473643169b46666aa14d0e6e7ddd6722f62bd0c0e7320c0ef60",
+    "retainedArtifacts": ".cache/inventory/rock-open-native",
+    "observed": "Authored Room35 third Bomb40/0 at world360,280 becomes native type4/variant3/subtype0, fuse59 at admission17. It detonates at presentation153 before the player places E at173, destroys18 rocks and imparts velocity to the two remaining regular bomb pickups.",
+    "productionGap": "Unsupported bomb selector replacement, troll-bomb actor, pickup blast impulse/contact and bomb pickup collection remain typed authored admission gaps; do not substitute regular Bomb40/1."
+  }
+}

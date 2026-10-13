@@ -11,4 +11,7 @@ elif ! command -v Xvfb >/dev/null || ! command -v xvfb-run >/dev/null; then
   exit 1
 fi
 export LIBGL_ALWAYS_SOFTWARE=1
+# Bound llvmpipe's worker pool on shared runners; preserve an explicit caller
+# setting. This changes host scheduling, never the released presentation tape.
+if [[ -z ${LP_NUM_THREADS+x} ]]; then export LP_NUM_THREADS=2; fi
 exec xvfb-run --auto-servernum --server-args='-screen 0 1280x720x24 -nolisten tcp +extension GLX +render -noreset' "$@"

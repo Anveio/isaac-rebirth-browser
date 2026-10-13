@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "status": "live-not-run",
+  "runtimeHeadFrozen": "c6811a04e2e23b85181cee7643525546c42fbe38",
+  "artifactFrozen": "3dbd3de19a114636752a8202cf54dca3a77f0acc1eed42fe5df63a973de45c23",
+  "previousComparatorSha256": "593811c3e07948f1de1bed15ad8710ae7874e5195b6193ac133b6b78003f1bd7",
+  "newComparatorSha256": "0b83a281603f9d013db43e651cbe5fd945e8aa65cfa901232068dabdfa0e27d4",
+  "reviewFinding": "Aggregate Ember count plus independent full lifetime checks omitted fast freeze/motion/playing, full birth fence and paired birth/lifetime/retirement linkage. Old comparator preserved verbatim; there are no fresh Fire captures or old accepted live reports to rewrite.",
+  "correction": [
+    "Consecutive own-actor frozen TTL/divisor/frame/playing/dead/active/velocity in unchanged full counter",
+    "Observed own-ground f32 full/fast motion and base playing law",
+    "Same-counter actual born actor remains unadvanced; first full uses born counter+1",
+    "Dead active actor retires at next full; unexpected live disappearance fails",
+    "Actual parent type/variant plus observed append ordinal per contiguous segment joins paired birth/full/death/retire timing and live TTL/divisor/frame/playing/dead/active",
+    "Coverage requires each own-actor law and a complete paired lifetime to execute"
+  ],
+  "joinLimit": "GameSpawn only retains parent type/variant; no actual source Fire pointer/seed is invented. Dense capture segments reset after gaps.",
+  "exactTrajectoryLimit": "Different shared seeds and paired numeric trajectories remain explicit diagnostics; same-seed numeric pairs and all independent physical/lifetime laws remain required."
+}

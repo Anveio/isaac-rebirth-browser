@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { chromium } from "@playwright/test";
-import { spawn, spawnSync } from "node:child_process";
+import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -8,6 +8,8 @@ import { PNG } from "pngjs";
 import { actorForegroundComparison, compareProjectileSprites, compareReferenceSamples, decodePng, exactStateDifference, scaleNearest } from "./compare.mjs";
 import { tasksForRegion } from "./systems.mjs";
 import { browserLaunchOptions, inspectBrowserGraphics } from "./browser.mjs";
+import { startProductionServer } from "./production-server.mjs";
+import { CONTROLLED_BOMB_CHECKPOINTS } from "./mask-checkpoints.mjs";
 
 const ROOT = resolve(fileURLToPath(new URL("../..", import.meta.url)));
 export const FOUNDATION_SEED = "T1PK6Y0W";
@@ -60,11 +62,95 @@ export async function waitForReady(page) {
   const boot = await page.evaluate(() => ({ ready: document.body.dataset.ready, error: document.querySelector("#status")?.textContent }));
   assert.equal(boot.ready, "true", `Browser boot failed: ${boot.error}`);
 }
-export async function browserScenario(page, { initialSeed = FOUNDATION_REFERENCE_INITIAL_SEED, manualSeedText = FOUNDATION_SEED, onCheckpoint } = {}) {
+
+// The requested setup is independent of the observed trace and browser screen.
+export function manualSeedCommands(seedText) {
+  const commands = [{ type: "tick", count: 63 }];
+  const press = (code, settle) => commands.push({ type: "key", code, down: true }, { type: "tick", count: 12 },
+    { type: "key", code, down: false }, { type: "tick", count: settle });
+  for (let index = 0; index < 3; index++) press("Enter", 72);
+  if (seedText !== null) {
+    press("Tab", 108);
+    for (const text of seedText.replaceAll(" ", "").toUpperCase())
+      commands.push({ type: "text", text }, { type: "tick", count: 12 }, { type: "tick", count: 6 });
+    press("Enter", 72);
+  }
+  press("Enter", 300);
+  return commands;
+}
+
+// Replay the public native menu tape from the browser's first Title boundary.
+// These are declared intervals, including New Run's fade and admission, rather
+// than waits inferred from an observed screen, clock, or introduction counter.
+export async function enterSeededRun(page, seedText, { onCommand, onTick, onCheckpoint } = {}) {
+  const record = async command => { if (onCommand) await onCommand(command); };
+  const key = async (code, down) => {
+    await page.keyboard[down ? "down" : "up"](code);
+    await record({ type: "key", code, down });
+  };
+  const tick = async count => {
+    const durationMs = await page.evaluate(count => {
+      const started = performance.now(); window.game.step(count); return performance.now() - started;
+    }, count);
+    if (onTick) onTick(count, durationMs);
+    await record({ type: "tick", count });
+  };
+  const press = async (code, settle) => { await key(code, true); await tick(12); await key(code, false); await tick(settle); };
+  const checkpoint = async (label, screen) => {
+    const state = await page.evaluate(() => window.game.snapshot());
+    assert.equal(state.screen, screen, `${label}: actual keyboard navigation must reach ${screen}`);
+    if (onCheckpoint) await onCheckpoint(label, screen);
+    return state;
+  };
+  // The native settled Title is 63 presentations after the first rendered
+  // Title snapshot, which is the browser reset boundary.
+  await tick(63); await checkpoint("title", "title");
+  for (const screen of ["profile", "main", "character"]) {
+    await press("Enter", 72); await checkpoint(screen, screen);
+  }
+  if (seedText !== null) {
+    await press("Tab", 108);
+    for (const text of seedText.replaceAll(" ", "").toUpperCase()) {
+      // Seed glyphs enter through trusted DOM keydown as text; keyup releases
+      // the real key without emitting a second WASM command in seed mode.
+      await page.keyboard.down(text.toLowerCase()); await record({ type: "text", text });
+      await tick(12); await page.keyboard.up(text.toLowerCase()); await tick(6);
+    }
+    await checkpoint("seed-entry", "seed");
+    await press("Enter", 72);
+    assertSeededRun(await checkpoint("character-seeded", "character"), seedText);
+  }
+  await press("Enter", 300);
+  const state = await checkpoint("gameplay-start", "playing");
+  if (seedText !== null) assertSeededRun(state, seedText);
+  assert.deepEqual((await page.evaluate(() => window.game.trace())).commands, manualSeedCommands(seedText),
+    "The complete menu setup must follow the independently declared command plan");
+  return state;
+}
+
+export function assertSeededRun(state, seedText, seedValue) {
+  const code = seedText.replaceAll(" ", "").toUpperCase();
+  assert.equal(state.seededRun, true, "Browser must commit the public manual seed entry");
+  assert.equal(state.seedValid, true, "Browser must validate the entered seed");
+  assert.equal(state.seedText.replaceAll(" ", "").toUpperCase(), code, "Browser must read back every entered seed character");
+  assert.equal(state.runSeed.replaceAll(" ", "").toUpperCase(), code, "The committed run code must match the public seed entry");
+  if (seedValue !== undefined) assert.equal(state.runSeedValue, seedValue, "The committed run seed must match the declared case");
+}
+
+export function assertInputProvenance(trace, commands, initialSeed, bootEpochSeed = 0) {
+  assert.equal(trace.enabled, true, "Live verification requires actual input capture");
+  assert.equal(trace.inputTraceTruncated, false, "Every requested command from reset must be retained");
+  assert.equal(trace.initialSeed, initialSeed, "The input trace must preserve the requested reset seed");
+  assert.equal(trace.bootEpochSeed, bootEpochSeed, "The input trace must preserve the independent boot input");
+  assert.deepEqual(trace.commands, commands, "Every requested DOM key/text and interval from reset must reach WASM exactly once");
+}
+
+export async function browserScenario(page, { initialSeed = FOUNDATION_REFERENCE_INITIAL_SEED, bootEpochSeed = 0, manualSeedText = FOUNDATION_SEED, onCheckpoint, bombCheckpoint } = {}) {
   await waitForReady(page);
-  await page.evaluate((initialSeed) => { window.game.pause(); window.game.reset(initialSeed); window.game.pause(); }, initialSeed);
+  await page.evaluate(({ initialSeed, bootEpochSeed }) => { window.game.pause(); window.game.reset(initialSeed, { trace: true, bootEpochSeed }); window.game.pause(); }, { initialSeed, bootEpochSeed });
   const commands = [], states = [await page.evaluate(() => window.game.snapshot())], frames = [], timings = [];
   assert.equal(states[0].initialSeed, initialSeed, "Browser reset must use the requested initial seed, never a production preset");
+  assert.equal(states[0].bootEpochSeed, bootEpochSeed, "Browser reset must preserve the independent boot RNG input");
   const record = async (command) => {
     commands.push(command);
     states.push(await page.evaluate(() => window.game.snapshot()));
@@ -73,7 +159,6 @@ export async function browserScenario(page, { initialSeed = FOUNDATION_REFERENCE
     await page.keyboard[down ? "down" : "up"](code);
     await record({ type: "key", code, down });
   };
-  const press = async (code) => { await key(code, true); await key(code, false); };
   const tick = async (count) => {
     const timing = await page.evaluate((count) => {
       const started = performance.now();
@@ -93,33 +178,34 @@ export async function browserScenario(page, { initialSeed = FOUNDATION_REFERENCE
     frames.push(frame);
     if (onCheckpoint) await onCheckpoint(frame);
   };
-  await capture("title", "title");
-  await press("Enter"); await capture("profile", "profile");
-  await press("Enter"); await capture("main", "main");
-  await press("Enter"); await capture("character", "character");
-  if (manualSeedText !== null) {
-    await press("Tab");
-    for (const text of manualSeedText) {
-      await page.keyboard.type(text);
-      await record({ type: "text", text });
-    }
-    await capture("seed-entry", "seed");
-    await press("Enter"); await capture("character-seeded", "character");
-  }
-  await press("Enter"); await capture("gameplay-start", "playing");
-  if (manualSeedText !== null) assert.equal(states.at(-1).seedText.replaceAll(" ", ""), manualSeedText);
+  const finish = async () => {
+    const actualTrace = await page.evaluate(() => window.game.trace());
+    assertInputProvenance(actualTrace, commands, initialSeed, bootEpochSeed);
+    assert.equal(actualTrace.stateHistoryTruncated, false, "Replay comparison requires complete browser state history");
+    assert.equal(actualTrace.states.length, commands.length + 1, "Replay comparison must retain every public command state");
+    assert.ok(actualTrace.backendEvents.every(event => event.state), "Replay comparison must retain every actual music callback state");
+    return { initialSeed, bootEpochSeed, commands, states: actualTrace.states, backendEvents: actualTrace.backendEvents,
+      frames, timings, tickRate: 60, seed: states.at(-1).runSeed, inputTransport: "actual DOM keyboard; manually stepped WASM simulation; recorded audio backend callbacks" };
+  };
+  await enterSeededRun(page, manualSeedText, { onCommand: record, onCheckpoint: capture,
+    onTick: (count, durationMs) => timings.push({ commandIndex: commands.length, ticks: count, durationMs,
+      scope: "Tick command CPU wall time including WASM bridge, state snapshot and Canvas redraw; excludes Playwright transport/GPU completion" }) });
+  assert.deepEqual(commands, manualSeedCommands(manualSeedText), "The complete menu setup must follow the declared command plan");
   await key("KeyD", true); await tick(27); await key("KeyD", false); await tick(30);
   await capture("movement", "playing");
+  if (bombCheckpoint !== undefined) {
+    const presentations = CONTROLLED_BOMB_CHECKPOINTS[bombCheckpoint];
+    assert.ok(presentations, "Bomb mask verification requires an explicit original checkpoint");
+    await key("KeyE", true); await tick(1); await key("KeyE", false); await tick(presentations - 1);
+    await capture(bombCheckpoint, "playing");
+    return finish();
+  }
   await key("ArrowRight", true); await tick(54); await key("ArrowRight", false);
   await capture("shooting", "playing");
   assert.ok(states.at(-1).tears.length > 0, "Held shooting must produce live tears");
   await tick(30);
   await capture("after-fire", "playing");
-  const actualTrace = await page.evaluate(() => window.game.trace());
-  assert.equal(actualTrace.truncated, false, "Actual keyboard trace must preserve every command");
-  assert.equal(actualTrace.initialSeed, initialSeed, "Replays must contain the actual initial seed");
-  assert.deepEqual(actualTrace.commands, commands, "Browser DOM input delivery must match the canonical command tape");
-  return { initialSeed, commands, states, frames, timings, tickRate: 60, seed: states.at(-1).runSeed, inputTransport: "actual DOM keyboard; manually stepped WASM simulation" };
+  return finish();
 }
 
 function regionsFor(frame) {
@@ -182,36 +268,51 @@ export function compareCapturedFrames(frames, original, output) {
 }
 
 let nativeReplayBuilt = false;
-export function nativeReplay(initialSeed, commands) {
+export function nativeReplay(initialSeed, commands, bootEpochSeed = 0, backendEvents = []) {
+  assert.ok(Number.isInteger(bootEpochSeed) && bootEpochSeed >= 0 && bootEpochSeed <= 0xffffffff, "Boot epoch seed must be an unsigned 32-bit value");
   if (!nativeReplayBuilt) {
     const build = spawnSync("cargo", ["build", "--locked", "--manifest-path", "engine/Cargo.toml", "--bin", "replay"], { cwd: ROOT, encoding: "utf8" });
     assert.equal(build.status, 0, build.stderr);
     nativeReplayBuilt = true;
   }
-  const replay = spawnSync(join(ROOT, "engine/target/debug/replay"), [], { cwd: ROOT, input: JSON.stringify({ initialSeed, commands }), encoding: "utf8", maxBuffer: 32 * 1024 * 1024 });
+  const timeline = [], publicStateIndices = [0], backendStateIndices = []; let eventIndex = 0;
+  assert.ok(Array.isArray(backendEvents) && commands.length + backendEvents.length <= 36000, 'Replay command budget includes audio callbacks');
+  for (let i = 0; i <= commands.length; i++) {
+    while (eventIndex < backendEvents.length && backendEvents[eventIndex].afterCommandCount === i) {
+      const event = backendEvents[eventIndex++];
+      assert.equal(event.command.type, 'musicBackend', 'Recorded backend stream accepts actual audio completion/loop callbacks only');
+      timeline.push(event.command);
+      backendStateIndices.push({ index: timeline.length, state: event.state });
+    }
+    if (i < commands.length) { timeline.push(commands[i]); publicStateIndices.push(timeline.length); }
+  }
+  assert.equal(eventIndex, backendEvents.length, 'Audio callback positions must be ordered and inside the public command tape');
+  const replay = spawnSync(join(ROOT, "engine/target/debug/replay"), [], { cwd: ROOT, input: JSON.stringify({ initialSeed, bootEpochSeed, commands: timeline }), encoding: "utf8", maxBuffer: 32 * 1024 * 1024 });
   assert.equal(replay.status, 0, replay.stderr);
-  const states = replay.stdout.trim().split("\n").map((line) => JSON.parse(line));
+  const allStates = replay.stdout.trim().split("\n").map((line) => JSON.parse(line));
+  assert.equal(allStates.length, timeline.length + 1, 'Native replay must emit every public and actual audio callback state');
+  for (const event of backendStateIndices) if (event.state)
+    assert.equal(exactStateDifference(allStates[event.index], event.state), null, `Native Rust/WASM state divergence after actual audio callback ${event.index}`);
+  const states = publicStateIndices.map(index => allStates[index]);
   assert.equal(states.length, commands.length + 1, "Native replay must emit initial and every command state");
   return states;
 }
 
 export async function verify({ references, output = join(ROOT, ".cache/foundation/verification/latest"), baseURL: providedURL } = {}) {
-  const baseURL = providedURL || process.env.FOUNDATION_BROWSER_URL || "http://127.0.0.1:5173";
+  let baseURL = providedURL || process.env.FOUNDATION_BROWSER_URL;
   mkdirSync(output, { recursive: true });
   const report = { schema: 1, status: "running", seed: FOUNDATION_SEED, checks: [], exactOriginalPixels: false, originalStateParity: false, originalSimulationTickDelivery: false };
   let server, browser;
   try {
     const original = readReferences(references || [join(ROOT, "references/isaac/foundation/baseline/manifest.json"), join(ROOT, "references/isaac/foundation/repeat/manifest.json")]);
-    let ready = false;
-    try { ready = (await fetch(baseURL)).ok; } catch {}
-    if (!ready) {
-      assert.ok(!providedURL && !process.env.FOUNDATION_BROWSER_URL, `Provided foundation browser server is unavailable: ${baseURL}`);
-      server = spawn("npm", ["run", "dev"], { cwd: ROOT, stdio: "ignore", detached: true });
-      for (let tries = 0; tries < 100 && !ready; tries++) {
-        await new Promise((done) => setTimeout(done, 100));
-        try { ready = (await fetch(baseURL)).ok; } catch {}
-      }
-      assert.ok(ready, "Foundation browser server did not become ready");
+    if (!baseURL) {
+      server = await startProductionServer();
+      baseURL = server.url;
+      report.browserArtifact = server.build;
+    } else {
+      const ready = await fetch(baseURL, { signal: AbortSignal.timeout(10_000) });
+      assert.ok(ready.ok, `Provided foundation browser server is unavailable: ${baseURL}`);
+      report.browserArtifact = { source: baseURL, scope: "Explicit external browser server; immutable production provenance is not established" };
     }
     browser = await chromium.launch({ headless: true, ...browserLaunchOptions() });
     report.graphics = await inspectBrowserGraphics(browser);
@@ -226,7 +327,7 @@ export async function verify({ references, output = join(ROOT, ".cache/foundatio
     save(join(output, "wasm-states.json"), run.states);
     save(join(output, "command-performance.json"), { tickRate: run.tickRate, measurements: run.timings, nativePhaseComparison: "Unavailable: native observations are process lifetime CPU/RSS, not corresponding simulation/render phase timers" });
     try {
-      const native = nativeReplay(run.initialSeed, run.commands);
+      const native = nativeReplay(run.initialSeed, run.commands, run.bootEpochSeed, run.backendEvents);
       save(join(output, "rust-states.json"), native);
       for (let index = 0; index < native.length; index++) assert.equal(exactStateDifference(native[index], run.states[index]), null, `Native Rust/WASM state divergence after command ${index}`);
       report.checks.push({ id: "actual-keyboard-menu-seed-movement-shooting", status: "pass", commands: run.commands.length, statesCompared: native.length, scope: "Exact native Rust/WASM foundation state; original game hidden state is not observed" });
@@ -241,7 +342,7 @@ export async function verify({ references, output = join(ROOT, ".cache/foundatio
     report.checks.push({ id: "foundation-pipeline", status: "fail", error: error.message || String(error) });
   } finally {
     await browser?.close();
-    if (server) { try { process.kill(-server.pid, "SIGTERM"); } catch (error) { if (error.code !== "ESRCH") throw error; } }
+    await server?.close();
   }
   report.status = report.checks.length > 0 && report.checks.every((check) => check.status === "pass") ? "pass" : "fail";
   save(join(output, "report.json"), report);

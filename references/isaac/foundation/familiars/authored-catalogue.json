@@ -1,0 +1,111 @@
+{
+  "schema": 1,
+  "scope": "Pinned base-Rebirth Familiar56 and Effect15/49 authored resources; no live actor/AI/contact acceptance.",
+  "archiveSha256": "182e071934fc2d4600506bb326bb8d3946861bfa7ce3c4404d524d68ada8abf5",
+  "extractor": "tools/foundation/extract-animations.py",
+  "extractorSha256": "119af26ad7d962f9fed0b7efaec41962b805eee8154abac600fbae0bffc2cebb",
+  "animationCatalogue": "web/familiar-data.json",
+  "animationCatalogueSha256": "88d4519eca9406e6ebaddcfc0c3581da9c10339ee6bb90dfd41e8926e78f8067",
+  "actors": [
+    {
+      "path": "gfx/003.056_leech.anm2",
+      "default": "Move Hori",
+      "clips": [
+        {
+          "name": "Move Hori",
+          "frames": 12,
+          "looping": true
+        },
+        {
+          "name": "Move Down",
+          "frames": 24,
+          "looping": true
+        },
+        {
+          "name": "Appear",
+          "frames": 25,
+          "looping": false
+        },
+        {
+          "name": "Move Up",
+          "frames": 24,
+          "looping": true
+        },
+        {
+          "name": "Attack Down",
+          "frames": 3,
+          "looping": true
+        },
+        {
+          "name": "Attack Hori",
+          "frames": 3,
+          "looping": true
+        },
+        {
+          "name": "Attack Up",
+          "frames": 3,
+          "looping": true
+        }
+      ]
+    },
+    {
+      "path": "gfx/1000.015_poof01.anm2",
+      "default": "Poof",
+      "clips": [
+        {
+          "name": "Poof",
+          "frames": 43,
+          "looping": false
+        },
+        {
+          "name": "Poof_Small",
+          "frames": 43,
+          "looping": false
+        },
+        {
+          "name": "Poof_Large",
+          "frames": 43,
+          "looping": false
+        }
+      ]
+    },
+    {
+      "path": "gfx/1000.049_heart.anm2",
+      "default": "Heart",
+      "clips": [
+        {
+          "name": "Heart",
+          "frames": 8,
+          "looping": false
+        }
+      ]
+    }
+  ],
+  "sheets": [
+    {
+      "path": "references/isaac/rebirth/resources/gfx/familiar/familiar_270_leech.png",
+      "bytes": 5344,
+      "sha256": "b29e8ee0050db2df260ab0cbef2a3135b73ffbb43198da5935a680c7a189c0cd"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/gfx/effects/effect_009_poof01.png",
+      "bytes": 11316,
+      "sha256": "d27704ef1e15cd60442c14c8bae4930e7c2a8c89e066587bf4f89f27895053b7"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/gfx/effects/effect_009_poof01_small.png",
+      "bytes": 6692,
+      "sha256": "8d8b0ecae9bfc57bdae91503340857e3d53cf8507a8d64b0a810069b3a957113"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/gfx/effects/effect_009_poof01_large.png",
+      "bytes": 17504,
+      "sha256": "63b60e2eaee61f8242549cbb2c71f4aff893130a557d1149604c658b5a4af911"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/gfx/effects/effect_006_hearteffect.png",
+      "bytes": 4076,
+      "sha256": "ca905c3c2a01f9e0ad502c9d77a9a1d4e35f7e99c1b248ae465f9e900baf04cb"
+    }
+  ]
+}

@@ -1,0 +1,209 @@
+{
+  "schema": 1,
+  "status": "pass",
+  "gateSources": {
+    "tools/e2e/weapons.mjs": "4fcc53a6ad2c5a5ef07cfaee15fb3a9f0447150c825a7b04bc46fcdc50c4ee35",
+    "tools/e2e/tear-contracts.mjs": "db3d2de0f2f98d1fdf28734ce020f58a5b15576b48e245869f463d71da7d184f",
+    "tools/original/foundation-physics-observer.py": "a55b80c9d6c6cf606484fc5aa1fee339cd455c9d8ae34eb02f4436baae432bc9",
+    "tools/original/native-identity.py": "4fd5591be56fc4e9ad0486d0f2ec2828f6389786245ee09f9d0b3a395ae18acb",
+    "tools/original/state-observer.py": "58e3b510abbe5ff57f05844efbdf764e2a02530cda4fa99f538d886d258af6f1",
+    "tools/original/foundation-clock-run.py": "b79997f1fdc983a6e6fac74d87c24d2036ea956021fa944d1c0bd7f04e15a243",
+    "tools/original/foundation-clock-gate.c": "f517f1fc0edf2bbe17021e529fb41652e991e286bef070b8aecefd32bfa62e75",
+    "tools/original/foundation-seeds.py": "dd4633c955e7518e9bc0f0147ddfae46d356468238477a68dc06c86656ccba89",
+    "tools/original/debug-run.py": "d785d32c6cc557959be38880a3b046c4040b988fbe3d06d4a8c1f4aa2e833cf5",
+    "tools/original/with-display.sh": "af469210e803786a60d8632c28a6f2da77bc8ab02cc06be50016ddb25e95b848",
+    "tools/foundation/browser.mjs": "60c4bc851470f47e4dd0399148ce0c1edf351d41fbf7f7e15fa823af5948b4c8",
+    "tools/foundation/production-server.mjs": "e3152b58e2353319ba0963b30439e33c3cc65f84a8c6ebb765c2812486245952",
+    "tools/foundation/verify.mjs": "b28ed8af6bf50a7aa8b6b81f55fd29d0c963285f2d54500d61a4a58925de1d9f",
+    "tools/original/weapons-scenarios.py": "b63de8e94c600ab34fdad5026bcafee98836f08eacd382a56acba87a8c498085"
+  },
+  "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "scope": "Paired live original/browser weapon cooldown, held/released head clock, shot births, actor birth fence and horizontal birth positions, with exact requested DOM/tick provenance, seed readback and paired player XY/VXY",
+  "production": {
+    "sha256": "6fcd80f941f4e68e02673d64a949e898fc82c876a5f451ae5d9a9ba2002358ae",
+    "files": 832,
+    "source": "/workspace/isaac-worktrees/weapons/dist",
+    "scope": "Immutable snapshot of production build bytes; source/native replay equality is checked separately"
+  },
+  "graphics": {
+    "requestedProfile": "mesa",
+    "actualProfile": "mesa",
+    "renderer": "ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL ES 3.2 Mesa 25.0.7-2+deb13u1)",
+    "vendor": "Google Inc. (Mesa)",
+    "version": "OpenGL ES 3.0 (ANGLE 2.1 git hash: unknown hash)",
+    "displayType": "ANGLE_OPENGL_EGL",
+    "devices": [
+      {
+        "vendorId": 0,
+        "deviceId": 0,
+        "vendorString": "Google Inc. (Mesa)",
+        "deviceString": "ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL ES 3.2 Mesa 25.0.7-2+deb13u1)",
+        "driverVendor": "Mesa",
+        "driverVersion": "25.0.7"
+      }
+    ],
+    "observedFrom": "Chromium SystemInfo.getInfo",
+    "scope": "Observed Chromium graphics backend; shader/pixel equality still requires the original reference comparisons"
+  },
+  "cases": [
+    {
+      "name": "full-first-shot",
+      "code": "QSYVKMSE",
+      "direction": "Right",
+      "delay": 0,
+      "status": "pass",
+      "inputProvenance": {
+        "status": "pass",
+        "expectedCommands": 102,
+        "observedCommands": 102,
+        "initialSeed": 2076625747,
+        "bootEpochSeed": 1700000000,
+        "runSeedValue": 2076625747
+      },
+      "nativeManifestSha256": "31ca7cbaee5ba84bfe8ee2a5f173af4ea153977099d79b0d4341ee0cc9b14206",
+      "nativeManifest": "/workspace/isaac-worktrees/weapons/.cache/e2e/weapons/provenance-aggregate-final/full-first-shot/original/manifest.json",
+      "comparedPresentations": 80,
+      "comparedHeldPresentations": 54,
+      "comparedReleasePresentations": 26,
+      "observedBirths": 3,
+      "pairedPlayerCheckpoints": 81,
+      "pairedPlayerFields": 324
+    },
+    {
+      "name": "intermediate-first-shot",
+      "code": "ZG800TRJ",
+      "direction": "Right",
+      "delay": 1,
+      "status": "pass",
+      "inputProvenance": {
+        "status": "pass",
+        "expectedCommands": 103,
+        "observedCommands": 103,
+        "initialSeed": 2790397112,
+        "bootEpochSeed": 1700000000,
+        "runSeedValue": 2790397112
+      },
+      "nativeManifestSha256": "8faf0c9a21b6b28e44b2ebcd6bb066987efb2104e41b2af9e614a2dfcc0d823e",
+      "nativeManifest": "/workspace/isaac-worktrees/weapons/.cache/e2e/weapons/provenance-aggregate-final/intermediate-first-shot/original/manifest.json",
+      "comparedPresentations": 80,
+      "comparedHeldPresentations": 54,
+      "comparedReleasePresentations": 26,
+      "observedBirths": 3,
+      "pairedPlayerCheckpoints": 82,
+      "pairedPlayerFields": 328
+    },
+    {
+      "name": "random-0",
+      "code": "SPHV9X8Q",
+      "direction": "Right",
+      "delay": 0,
+      "seedValue": 2359345202,
+      "status": "pass",
+      "inputProvenance": {
+        "status": "pass",
+        "expectedCommands": 102,
+        "observedCommands": 102,
+        "initialSeed": 2359345202,
+        "bootEpochSeed": 1700000000,
+        "runSeedValue": 2359345202
+      },
+      "nativeManifestSha256": "cd96ba1415ee576c9154b4098e52890aac0e8655f4e731be27da1192c8310432",
+      "nativeManifest": "/workspace/isaac-worktrees/weapons/.cache/e2e/weapons/provenance-aggregate-final/random-0/original/manifest.json",
+      "comparedPresentations": 80,
+      "comparedHeldPresentations": 54,
+      "comparedReleasePresentations": 26,
+      "observedBirths": 3,
+      "pairedPlayerCheckpoints": 81,
+      "pairedPlayerFields": 324
+    },
+    {
+      "name": "random-1",
+      "code": "ML7RYAZ1",
+      "direction": "Left",
+      "delay": 1,
+      "seedValue": 1431668223,
+      "status": "pass",
+      "inputProvenance": {
+        "status": "pass",
+        "expectedCommands": 103,
+        "observedCommands": 103,
+        "initialSeed": 1431668223,
+        "bootEpochSeed": 1700000000,
+        "runSeedValue": 1431668223
+      },
+      "nativeManifestSha256": "c7754c861578aefe587b61205559d069a66ea6ed90a9867b0dcee1e7bbc046b8",
+      "nativeManifest": "/workspace/isaac-worktrees/weapons/.cache/e2e/weapons/provenance-aggregate-final/random-1/original/manifest.json",
+      "comparedPresentations": 80,
+      "comparedHeldPresentations": 54,
+      "comparedReleasePresentations": 26,
+      "observedBirths": 3,
+      "pairedPlayerCheckpoints": 82,
+      "pairedPlayerFields": 328
+    },
+    {
+      "name": "random-2",
+      "code": "Y90W77GW",
+      "direction": "Up",
+      "delay": 0,
+      "seedValue": 2818724105,
+      "status": "pass",
+      "inputProvenance": {
+        "status": "pass",
+        "expectedCommands": 102,
+        "observedCommands": 102,
+        "initialSeed": 2818724105,
+        "bootEpochSeed": 1700000000,
+        "runSeedValue": 2818724105
+      },
+      "nativeManifestSha256": "11306d75d119960721c400a83fd96bbf7c17a33d4a041fa142476135fe4d4b1b",
+      "nativeManifest": "/workspace/isaac-worktrees/weapons/.cache/e2e/weapons/provenance-aggregate-final/random-2/original/manifest.json",
+      "comparedPresentations": 80,
+      "comparedHeldPresentations": 54,
+      "comparedReleasePresentations": 26,
+      "observedBirths": 3,
+      "pairedPlayerCheckpoints": 81,
+      "pairedPlayerFields": 324
+    },
+    {
+      "name": "random-3",
+      "code": "1RYQL8AT",
+      "direction": "Down",
+      "delay": 1,
+      "seedValue": 3020397189,
+      "status": "pass",
+      "inputProvenance": {
+        "status": "pass",
+        "expectedCommands": 103,
+        "observedCommands": 103,
+        "initialSeed": 3020397189,
+        "bootEpochSeed": 1700000000,
+        "runSeedValue": 3020397189
+      },
+      "nativeManifestSha256": "d4209e247f5c0d7c4b93d7654871c29139a3c1a795fec30e21f0d6b67f5ace5b",
+      "nativeManifest": "/workspace/isaac-worktrees/weapons/.cache/e2e/weapons/provenance-aggregate-final/random-3/original/manifest.json",
+      "comparedPresentations": 80,
+      "comparedHeldPresentations": 54,
+      "comparedReleasePresentations": 26,
+      "observedBirths": 3,
+      "pairedPlayerCheckpoints": 82,
+      "pairedPlayerFields": 328
+    }
+  ],
+  "gateSourcesEnd": {
+    "tools/e2e/weapons.mjs": "4fcc53a6ad2c5a5ef07cfaee15fb3a9f0447150c825a7b04bc46fcdc50c4ee35",
+    "tools/e2e/tear-contracts.mjs": "db3d2de0f2f98d1fdf28734ce020f58a5b15576b48e245869f463d71da7d184f",
+    "tools/original/foundation-physics-observer.py": "a55b80c9d6c6cf606484fc5aa1fee339cd455c9d8ae34eb02f4436baae432bc9",
+    "tools/original/native-identity.py": "4fd5591be56fc4e9ad0486d0f2ec2828f6389786245ee09f9d0b3a395ae18acb",
+    "tools/original/state-observer.py": "58e3b510abbe5ff57f05844efbdf764e2a02530cda4fa99f538d886d258af6f1",
+    "tools/original/foundation-clock-run.py": "b79997f1fdc983a6e6fac74d87c24d2036ea956021fa944d1c0bd7f04e15a243",
+    "tools/original/foundation-clock-gate.c": "f517f1fc0edf2bbe17021e529fb41652e991e286bef070b8aecefd32bfa62e75",
+    "tools/original/foundation-seeds.py": "dd4633c955e7518e9bc0f0147ddfae46d356468238477a68dc06c86656ccba89",
+    "tools/original/debug-run.py": "d785d32c6cc557959be38880a3b046c4040b988fbe3d06d4a8c1f4aa2e833cf5",
+    "tools/original/with-display.sh": "af469210e803786a60d8632c28a6f2da77bc8ab02cc06be50016ddb25e95b848",
+    "tools/foundation/browser.mjs": "60c4bc851470f47e4dd0399148ce0c1edf351d41fbf7f7e15fa823af5948b4c8",
+    "tools/foundation/production-server.mjs": "e3152b58e2353319ba0963b30439e33c3cc65f84a8c6ebb765c2812486245952",
+    "tools/foundation/verify.mjs": "b28ed8af6bf50a7aa8b6b81f55fd29d0c963285f2d54500d61a4a58925de1d9f",
+    "tools/original/weapons-scenarios.py": "b63de8e94c600ab34fdad5026bcafee98836f08eacd382a56acba87a8c498085"
+  },
+  "gateSourcesStable": true
+}

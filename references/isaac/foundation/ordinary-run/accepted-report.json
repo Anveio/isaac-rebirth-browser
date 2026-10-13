@@ -1,0 +1,523 @@
+{
+  "schema": 1,
+  "status": "pass",
+  "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "gateSources": {
+    "tools/e2e/ordinary-run.mjs": "02b0353661a59b69cd465ea548eafe443afc5029e7408dfaab6d9280619cfaf5",
+    "tools/original/boot-mt-observer.py": "552176ea73716321466b25ae0da87dfd746f5041fad350a036239ff5fdd4b165",
+    "tools/original/native-identity.py": "4fd5591be56fc4e9ad0486d0f2ec2828f6389786245ee09f9d0b3a395ae18acb",
+    "tools/original/state-observer.py": "58e3b510abbe5ff57f05844efbdf764e2a02530cda4fa99f538d886d258af6f1",
+    "tools/original/foundation-clock-run.py": "8f2fa981fbe26073d5a5a34ff46fbc6e9c70c2d30f81784abded5e40b9110c5b",
+    "tools/original/foundation-clock-gate.c": "f517f1fc0edf2bbe17021e529fb41652e991e286bef070b8aecefd32bfa62e75",
+    "tools/original/foundation-seeds.py": "dd4633c955e7518e9bc0f0147ddfae46d356468238477a68dc06c86656ccba89",
+    "tools/original/debug-run.py": "d785d32c6cc557959be38880a3b046c4040b988fbe3d06d4a8c1f4aa2e833cf5",
+    "tools/original/with-display.sh": "4371efe64ae1639564b4a85292ff252e20bcfe84b5387927ecf7093c6b8d3dfb",
+    "tools/foundation/browser.mjs": "60c4bc851470f47e4dd0399148ce0c1edf351d41fbf7f7e15fa823af5948b4c8",
+    "tools/foundation/production-server.mjs": "e3152b58e2353319ba0963b30439e33c3cc65f84a8c6ebb765c2812486245952",
+    "tools/foundation/verify.mjs": "3743b773cf2ede253c6d78f2605eb43f34e9d7002284b6a1dd2c413d45835a5c",
+    "engine/src/lib.rs": "7bea11d3461e3667cfee59b7b69c0d21e24cd94553596cf41922617eda99aac8",
+    "engine/src/mt.rs": "2fae0fc8dff620f766c40d4253d26dd65e9dbff05bf6e0ff85f5beb2e0e0f9d0",
+    "engine/src/menu_lifecycle.rs": "2ccfe4da0f3213a43caa987f80d092a8ae21e03ad9e27120aa574fe9fad1c5e0",
+    "engine/src/seed.rs": "187c2ef91bb929d912010819632a97575d6f91a751dcc33e5ec49934381a653f",
+    "engine/src/audio.rs": "d026fad8a0a4645061fa26061947dd5465d1e7e7a1edc86aae1fe733c1627110",
+    "engine/src/music.rs": "12ca1b7359622b16c54915e53e76ac87271dbd35f5a51a91b9801f54782c12dd",
+    "web/main.ts": "d1992ec663f1594f02beb660d33d35c5277423bbac00881ef6c18d772df80440",
+    "web/trace.ts": "2df69cfbbae14084baadacbcffbc9ecb7b6e363e61c1efb26f721475cfb198a9"
+  },
+  "production": {
+    "sha256": "0cbb1668f1e980b9dc3e9e45f24521dfcf8c1e4d998239025cb663d2759d40b4",
+    "files": 918,
+    "source": "/workspace/isaac-worktrees/weapons/dist",
+    "scope": "Immutable snapshot of production build bytes; source/native replay equality is checked separately"
+  },
+  "graphics": {
+    "requestedProfile": "mesa",
+    "actualProfile": "mesa",
+    "renderer": "ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL ES 3.2 Mesa 25.0.7-2+deb13u1)",
+    "vendor": "Google Inc. (Mesa)",
+    "version": "OpenGL ES 3.0 (ANGLE 2.1 git hash: unknown hash)",
+    "displayType": "ANGLE_OPENGL_EGL",
+    "devices": [
+      {
+        "vendorId": 0,
+        "deviceId": 0,
+        "vendorString": "Google Inc. (Mesa)",
+        "deviceString": "ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL ES 3.2 Mesa 25.0.7-2+deb13u1)",
+        "driverVendor": "Mesa",
+        "driverVersion": "25.0.7"
+      }
+    ],
+    "observedFrom": "Chromium SystemInfo.getInfo",
+    "scope": "Observed Chromium graphics backend; shader/pixel equality still requires the original reference comparisons"
+  },
+  "scope": "Ordinary public no-dialog Character-to-run admission uses the generated menu seed, preserving unseeded eligibility. Complete shared MT, saved/menu fields, nine grid pairs and179 stat poses compare through Character; actual run seed/code/stage and System admission are blocking. Run shared-MT differences remain explicit diagnostics; no original state becomes browser input.",
+  "cases": [
+    {
+      "name": "zero-epoch",
+      "bootEpochSeed": 0,
+      "initialSeed": 1,
+      "status": "pass",
+      "nativeManifestSha256": "0e618f73bb09f3a04aaa8c8af55a4366be94d45ae51ed094ab65c465c949151f",
+      "runMtDiagnostic": {
+        "status": "fail",
+        "originalIndex": 459,
+        "productionIndex": 47,
+        "differingWords": 624,
+        "firstDifferences": [
+          {
+            "index": 0,
+            "original": 3340451949,
+            "production": 2036641171
+          },
+          {
+            "index": 1,
+            "original": 121460540,
+            "production": 3629929466
+          },
+          {
+            "index": 2,
+            "original": 838145477,
+            "production": 2435249504
+          },
+          {
+            "index": 3,
+            "original": 261364067,
+            "production": 877484564
+          },
+          {
+            "index": 4,
+            "original": 1352443946,
+            "production": 408610346
+          },
+          {
+            "index": 5,
+            "original": 373631584,
+            "production": 3277601238
+          },
+          {
+            "index": 6,
+            "original": 3190102260,
+            "production": 1225163759
+          },
+          {
+            "index": 7,
+            "original": 427804612,
+            "production": 2487165038
+          }
+        ],
+        "reason": "Run/room/effect shared-stream consumers remain incomplete; source values and cursor adjustments are never supplied to production"
+      },
+      "comparedMenuCheckpoints": 4,
+      "comparedStateWords": 2496,
+      "comparedGridPairs": 36,
+      "comparedStatPoses": 716,
+      "actualRun": {
+        "seedValue": 893504905,
+        "code": "HL1ME7FN",
+        "stageSeed": 2132069013,
+        "seededRun": false,
+        "achievementEligibility": true
+      },
+      "inputProvenance": {
+        "status": "pass",
+        "expectedCommands": 16,
+        "observedCommands": 16,
+        "initialSeed": 1,
+        "bootEpochSeed": 0
+      }
+    },
+    {
+      "name": "fixed-epoch",
+      "bootEpochSeed": 1700000000,
+      "initialSeed": 4294967295,
+      "status": "pass",
+      "nativeManifestSha256": "5b9e5a11645954d9c84d06e232d56f207091cb38ddec1a2ffed04ce5ff7ab130",
+      "runMtDiagnostic": {
+        "status": "fail",
+        "originalIndex": 464,
+        "productionIndex": 47,
+        "differingWords": 624,
+        "firstDifferences": [
+          {
+            "index": 0,
+            "original": 3025920350,
+            "production": 3652612403
+          },
+          {
+            "index": 1,
+            "original": 1803947576,
+            "production": 2283866689
+          },
+          {
+            "index": 2,
+            "original": 913377430,
+            "production": 3550552114
+          },
+          {
+            "index": 3,
+            "original": 1155432017,
+            "production": 3496399398
+          },
+          {
+            "index": 4,
+            "original": 3467819560,
+            "production": 189748128
+          },
+          {
+            "index": 5,
+            "original": 726306269,
+            "production": 2430237628
+          },
+          {
+            "index": 6,
+            "original": 2636645993,
+            "production": 2122200330
+          },
+          {
+            "index": 7,
+            "original": 3957854490,
+            "production": 323861920
+          }
+        ],
+        "reason": "Run/room/effect shared-stream consumers remain incomplete; source values and cursor adjustments are never supplied to production"
+      },
+      "comparedMenuCheckpoints": 4,
+      "comparedStateWords": 2496,
+      "comparedGridPairs": 36,
+      "comparedStatPoses": 716,
+      "actualRun": {
+        "seedValue": 1953094013,
+        "code": "RQDLPAD0",
+        "stageSeed": 1134067221,
+        "seededRun": false,
+        "achievementEligibility": true
+      },
+      "inputProvenance": {
+        "status": "pass",
+        "expectedCommands": 16,
+        "observedCommands": 16,
+        "initialSeed": 4294967295,
+        "bootEpochSeed": 1700000000
+      }
+    },
+    {
+      "name": "random-0",
+      "bootEpochSeed": 2988990213,
+      "initialSeed": 3846854834,
+      "status": "pass",
+      "nativeManifestSha256": "8b6271ece589c5d91de96be7000020791b5f7767ba2dc781f8147edf69a8e94f",
+      "runMtDiagnostic": {
+        "status": "fail",
+        "originalIndex": 62,
+        "productionIndex": 47,
+        "differingWords": 624,
+        "firstDifferences": [
+          {
+            "index": 0,
+            "original": 1909881571,
+            "production": 2330609707
+          },
+          {
+            "index": 1,
+            "original": 1699927280,
+            "production": 910427206
+          },
+          {
+            "index": 2,
+            "original": 625669200,
+            "production": 4265801852
+          },
+          {
+            "index": 3,
+            "original": 3973969853,
+            "production": 1342036083
+          },
+          {
+            "index": 4,
+            "original": 4057912311,
+            "production": 839775880
+          },
+          {
+            "index": 5,
+            "original": 4087458364,
+            "production": 2720360443
+          },
+          {
+            "index": 6,
+            "original": 4006868703,
+            "production": 4112391295
+          },
+          {
+            "index": 7,
+            "original": 1094523382,
+            "production": 3877560747
+          }
+        ],
+        "reason": "Run/room/effect shared-stream consumers remain incomplete; source values and cursor adjustments are never supplied to production"
+      },
+      "comparedMenuCheckpoints": 4,
+      "comparedStateWords": 2496,
+      "comparedGridPairs": 36,
+      "comparedStatPoses": 716,
+      "actualRun": {
+        "seedValue": 621718409,
+        "code": "FMS7J7G0",
+        "stageSeed": 3491402084,
+        "seededRun": false,
+        "achievementEligibility": true
+      },
+      "inputProvenance": {
+        "status": "pass",
+        "expectedCommands": 16,
+        "observedCommands": 16,
+        "initialSeed": 3846854834,
+        "bootEpochSeed": 2988990213
+      }
+    },
+    {
+      "name": "random-1",
+      "bootEpochSeed": 1901939540,
+      "initialSeed": 294623253,
+      "status": "pass",
+      "nativeManifestSha256": "32b7eea1e6abde75344b2451112a129b7be37b73dd49e3a5e6c6fd88b82e9aa5",
+      "runMtDiagnostic": {
+        "status": "fail",
+        "originalIndex": 462,
+        "productionIndex": 47,
+        "differingWords": 624,
+        "firstDifferences": [
+          {
+            "index": 0,
+            "original": 2728054550,
+            "production": 2581189352
+          },
+          {
+            "index": 1,
+            "original": 2560755352,
+            "production": 2156659185
+          },
+          {
+            "index": 2,
+            "original": 1637979711,
+            "production": 2178477566
+          },
+          {
+            "index": 3,
+            "original": 339724275,
+            "production": 2893667553
+          },
+          {
+            "index": 4,
+            "original": 2144236572,
+            "production": 2229448486
+          },
+          {
+            "index": 5,
+            "original": 1622707621,
+            "production": 4240453405
+          },
+          {
+            "index": 6,
+            "original": 1291386230,
+            "production": 3416959692
+          },
+          {
+            "index": 7,
+            "original": 2486244996,
+            "production": 1452774440
+          }
+        ],
+        "reason": "Run/room/effect shared-stream consumers remain incomplete; source values and cursor adjustments are never supplied to production"
+      },
+      "comparedMenuCheckpoints": 4,
+      "comparedStateWords": 2496,
+      "comparedGridPairs": 36,
+      "comparedStatPoses": 716,
+      "actualRun": {
+        "seedValue": 1399508554,
+        "code": "MWCVDP67",
+        "stageSeed": 278357310,
+        "seededRun": false,
+        "achievementEligibility": true
+      },
+      "inputProvenance": {
+        "status": "pass",
+        "expectedCommands": 16,
+        "observedCommands": 16,
+        "initialSeed": 294623253,
+        "bootEpochSeed": 1901939540
+      }
+    },
+    {
+      "name": "random-2",
+      "bootEpochSeed": 3795305435,
+      "initialSeed": 1274095651,
+      "status": "pass",
+      "nativeManifestSha256": "85125d0175b4307055f8e1f9a3223fec5673445111819bf7d1acbb7c43a1dc9a",
+      "runMtDiagnostic": {
+        "status": "fail",
+        "originalIndex": 461,
+        "productionIndex": 47,
+        "differingWords": 624,
+        "firstDifferences": [
+          {
+            "index": 0,
+            "original": 1435739992,
+            "production": 1212789698
+          },
+          {
+            "index": 1,
+            "original": 3535535866,
+            "production": 3361980291
+          },
+          {
+            "index": 2,
+            "original": 3312224284,
+            "production": 550126586
+          },
+          {
+            "index": 3,
+            "original": 506196360,
+            "production": 2397775793
+          },
+          {
+            "index": 4,
+            "original": 2037629984,
+            "production": 2871171038
+          },
+          {
+            "index": 5,
+            "original": 1495569117,
+            "production": 2151899288
+          },
+          {
+            "index": 6,
+            "original": 4126319005,
+            "production": 74630110
+          },
+          {
+            "index": 7,
+            "original": 2347648239,
+            "production": 1896687524
+          }
+        ],
+        "reason": "Run/room/effect shared-stream consumers remain incomplete; source values and cursor adjustments are never supplied to production"
+      },
+      "comparedMenuCheckpoints": 4,
+      "comparedStateWords": 2496,
+      "comparedGridPairs": 36,
+      "comparedStatPoses": 716,
+      "actualRun": {
+        "seedValue": 1676712118,
+        "code": "PSR8QW3J",
+        "stageSeed": 3900660468,
+        "seededRun": false,
+        "achievementEligibility": true
+      },
+      "inputProvenance": {
+        "status": "pass",
+        "expectedCommands": 16,
+        "observedCommands": 16,
+        "initialSeed": 1274095651,
+        "bootEpochSeed": 3795305435
+      }
+    },
+    {
+      "name": "random-3",
+      "bootEpochSeed": 2991455915,
+      "initialSeed": 3486913207,
+      "status": "pass",
+      "nativeManifestSha256": "f70383908d66e7bdbbfa6b14b8ae58aa2f54cc2eef440c6fbc810018c87f8d05",
+      "runMtDiagnostic": {
+        "status": "fail",
+        "originalIndex": 460,
+        "productionIndex": 47,
+        "differingWords": 624,
+        "firstDifferences": [
+          {
+            "index": 0,
+            "original": 4212082116,
+            "production": 1477321301
+          },
+          {
+            "index": 1,
+            "original": 3136791858,
+            "production": 3547835474
+          },
+          {
+            "index": 2,
+            "original": 1143446238,
+            "production": 3276522915
+          },
+          {
+            "index": 3,
+            "original": 3527225697,
+            "production": 1850785118
+          },
+          {
+            "index": 4,
+            "original": 2593066419,
+            "production": 20229967
+          },
+          {
+            "index": 5,
+            "original": 3416594032,
+            "production": 3001914243
+          },
+          {
+            "index": 6,
+            "original": 3363252188,
+            "production": 628479257
+          },
+          {
+            "index": 7,
+            "original": 4015764639,
+            "production": 4232340674
+          }
+        ],
+        "reason": "Run/room/effect shared-stream consumers remain incomplete; source values and cursor adjustments are never supplied to production"
+      },
+      "comparedMenuCheckpoints": 4,
+      "comparedStateWords": 2496,
+      "comparedGridPairs": 36,
+      "comparedStatPoses": 716,
+      "actualRun": {
+        "seedValue": 440707883,
+        "code": "C0Z7KZYT",
+        "stageSeed": 4098734561,
+        "seededRun": false,
+        "achievementEligibility": true
+      },
+      "inputProvenance": {
+        "status": "pass",
+        "expectedCommands": 16,
+        "observedCommands": 16,
+        "initialSeed": 3486913207,
+        "bootEpochSeed": 2991455915
+      }
+    }
+  ],
+  "gateSourcesEnd": {
+    "tools/e2e/ordinary-run.mjs": "02b0353661a59b69cd465ea548eafe443afc5029e7408dfaab6d9280619cfaf5",
+    "tools/original/boot-mt-observer.py": "552176ea73716321466b25ae0da87dfd746f5041fad350a036239ff5fdd4b165",
+    "tools/original/native-identity.py": "4fd5591be56fc4e9ad0486d0f2ec2828f6389786245ee09f9d0b3a395ae18acb",
+    "tools/original/state-observer.py": "58e3b510abbe5ff57f05844efbdf764e2a02530cda4fa99f538d886d258af6f1",
+    "tools/original/foundation-clock-run.py": "8f2fa981fbe26073d5a5a34ff46fbc6e9c70c2d30f81784abded5e40b9110c5b",
+    "tools/original/foundation-clock-gate.c": "f517f1fc0edf2bbe17021e529fb41652e991e286bef070b8aecefd32bfa62e75",
+    "tools/original/foundation-seeds.py": "dd4633c955e7518e9bc0f0147ddfae46d356468238477a68dc06c86656ccba89",
+    "tools/original/debug-run.py": "d785d32c6cc557959be38880a3b046c4040b988fbe3d06d4a8c1f4aa2e833cf5",
+    "tools/original/with-display.sh": "4371efe64ae1639564b4a85292ff252e20bcfe84b5387927ecf7093c6b8d3dfb",
+    "tools/foundation/browser.mjs": "60c4bc851470f47e4dd0399148ce0c1edf351d41fbf7f7e15fa823af5948b4c8",
+    "tools/foundation/production-server.mjs": "e3152b58e2353319ba0963b30439e33c3cc65f84a8c6ebb765c2812486245952",
+    "tools/foundation/verify.mjs": "3743b773cf2ede253c6d78f2605eb43f34e9d7002284b6a1dd2c413d45835a5c",
+    "engine/src/lib.rs": "7bea11d3461e3667cfee59b7b69c0d21e24cd94553596cf41922617eda99aac8",
+    "engine/src/mt.rs": "2fae0fc8dff620f766c40d4253d26dd65e9dbff05bf6e0ff85f5beb2e0e0f9d0",
+    "engine/src/menu_lifecycle.rs": "2ccfe4da0f3213a43caa987f80d092a8ae21e03ad9e27120aa574fe9fad1c5e0",
+    "engine/src/seed.rs": "187c2ef91bb929d912010819632a97575d6f91a751dcc33e5ec49934381a653f",
+    "engine/src/audio.rs": "d026fad8a0a4645061fa26061947dd5465d1e7e7a1edc86aae1fe733c1627110",
+    "engine/src/music.rs": "12ca1b7359622b16c54915e53e76ac87271dbd35f5a51a91b9801f54782c12dd",
+    "web/main.ts": "d1992ec663f1594f02beb660d33d35c5277423bbac00881ef6c18d772df80440",
+    "web/trace.ts": "2df69cfbbae14084baadacbcffbc9ecb7b6e363e61c1efb26f721475cfb198a9"
+  },
+  "gateSourcesStable": true
+}

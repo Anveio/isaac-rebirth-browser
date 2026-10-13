@@ -19,7 +19,138 @@
       "rooms.a": "c6e4495b77a4ceb6742d7efeaf60a205844c08d739bcea7a95cda0d10428634e",
       "sfx.a": "1f66a8e6695edd332ab7b94378b0c9625deae2e04f4c95539ad5682d52a44273",
       "videos.a": "e7a025789a2c0b3f5de974e701039d46867e469e9b20cf68fa15fda3c41e9400"
-    }
+    },
+    "supplementary_extractions": [
+      {
+        "kind": "Missing authored base audio resources",
+        "depot_id": 250903,
+        "manifest_id": "367036646469636831",
+        "extractor": "tools/foundation/extract-audio.py",
+        "decoder": {
+          "path": "tools/foundation/extract-animations.py",
+          "sha256": "119af26ad7d962f9fed0b7efaec41962b805eee8154abac600fbae0bffc2cebb"
+        },
+        "archives": [
+          {
+            "path": "references/isaac/linux/depot_250903/resources/packed/sfx.a",
+            "bytes": 25333050,
+            "sha256": "1f66a8e6695edd332ab7b94378b0c9625deae2e04f4c95539ad5682d52a44273"
+          },
+          {
+            "path": "references/isaac/linux/depot_250903/resources/packed/music.a",
+            "bytes": 182744758,
+            "sha256": "0e8288bf503246e0c57b6a37d6d9d87ba5a07680cc120e926b3327371f305bec"
+          }
+        ],
+        "output_paths": [
+          "references/isaac/rebirth/resources/music/jingle ogg/secret room find #2_07.ogg",
+          "references/isaac/rebirth/resources/sfx/1 up theremin.wav",
+          "references/isaac/rebirth/resources/sfx/baby hurt 1.wav",
+          "references/isaac/rebirth/resources/sfx/baby hurt 2.wav",
+          "references/isaac/rebirth/resources/sfx/baby hurt 3.wav",
+          "references/isaac/rebirth/resources/sfx/band aid pick up.wav",
+          "references/isaac/rebirth/resources/sfx/battery charge.wav",
+          "references/isaac/rebirth/resources/sfx/beep.wav",
+          "references/isaac/rebirth/resources/sfx/blood bank spawn.wav",
+          "references/isaac/rebirth/resources/sfx/book page turn.wav",
+          "references/isaac/rebirth/resources/sfx/boss 2 intro errorbuzz.wav",
+          "references/isaac/rebirth/resources/sfx/castleportcullis.wav",
+          "references/isaac/rebirth/resources/sfx/character select left.wav",
+          "references/isaac/rebirth/resources/sfx/character select right.wav",
+          "references/isaac/rebirth/resources/sfx/chest drop 1.wav",
+          "references/isaac/rebirth/resources/sfx/chest open 1.wav",
+          "references/isaac/rebirth/resources/sfx/choir.wav",
+          "references/isaac/rebirth/resources/sfx/coin slot.wav",
+          "references/isaac/rebirth/resources/sfx/death card mix.wav",
+          "references/isaac/rebirth/resources/sfx/derp 0.wav",
+          "references/isaac/rebirth/resources/sfx/derp 1.wav",
+          "references/isaac/rebirth/resources/sfx/dime drop.wav",
+          "references/isaac/rebirth/resources/sfx/dime pick up.wav",
+          "references/isaac/rebirth/resources/sfx/door heavy close.wav",
+          "references/isaac/rebirth/resources/sfx/door heavy open.wav",
+          "references/isaac/rebirth/resources/sfx/evil laugh.wav",
+          "references/isaac/rebirth/resources/sfx/filter death 1.wav",
+          "references/isaac/rebirth/resources/sfx/filter evil laugh.wav",
+          "references/isaac/rebirth/resources/sfx/filter hurt 1.wav",
+          "references/isaac/rebirth/resources/sfx/filter hurt 2.wav",
+          "references/isaac/rebirth/resources/sfx/filter hurt.wav",
+          "references/isaac/rebirth/resources/sfx/fire burning.wav",
+          "references/isaac/rebirth/resources/sfx/golden key.wav",
+          "references/isaac/rebirth/resources/sfx/grunt 2.wav",
+          "references/isaac/rebirth/resources/sfx/grunt 3.wav",
+          "references/isaac/rebirth/resources/sfx/grunt 4.wav",
+          "references/isaac/rebirth/resources/sfx/grunt.wav",
+          "references/isaac/rebirth/resources/sfx/hand laser.wav",
+          "references/isaac/rebirth/resources/sfx/happy rainbow with giggle.wav",
+          "references/isaac/rebirth/resources/sfx/hell portal 2.wav",
+          "references/isaac/rebirth/resources/sfx/hell portal.wav",
+          "references/isaac/rebirth/resources/sfx/holy!.wav",
+          "references/isaac/rebirth/resources/sfx/hurt 1.wav",
+          "references/isaac/rebirth/resources/sfx/hurt 2.wav",
+          "references/isaac/rebirth/resources/sfx/hurt 3.wav",
+          "references/isaac/rebirth/resources/sfx/hurt grunt .wav",
+          "references/isaac/rebirth/resources/sfx/hurt grunt 1.wav",
+          "references/isaac/rebirth/resources/sfx/hurt grunt 2.wav",
+          "references/isaac/rebirth/resources/sfx/isaac dies new 1.wav",
+          "references/isaac/rebirth/resources/sfx/isaac dies new 2.wav",
+          "references/isaac/rebirth/resources/sfx/isaac dies new.wav",
+          "references/isaac/rebirth/resources/sfx/key drop 2.wav",
+          "references/isaac/rebirth/resources/sfx/key pickup guantlet 4.wav",
+          "references/isaac/rebirth/resources/sfx/lock break 1.wav",
+          "references/isaac/rebirth/resources/sfx/lock break 3.wav",
+          "references/isaac/rebirth/resources/sfx/mom muffle 2.wav",
+          "references/isaac/rebirth/resources/sfx/mom muffle 3.wav",
+          "references/isaac/rebirth/resources/sfx/mom muffle 4.wav",
+          "references/isaac/rebirth/resources/sfx/mom muffle.wav",
+          "references/isaac/rebirth/resources/sfx/mom.wav",
+          "references/isaac/rebirth/resources/sfx/mom2.wav",
+          "references/isaac/rebirth/resources/sfx/mom3.wav",
+          "references/isaac/rebirth/resources/sfx/nickel drop.wav",
+          "references/isaac/rebirth/resources/sfx/nickel pickup.wav",
+          "references/isaac/rebirth/resources/sfx/penny drop 1.wav",
+          "references/isaac/rebirth/resources/sfx/penny pickup 1.wav",
+          "references/isaac/rebirth/resources/sfx/power up 3.wav",
+          "references/isaac/rebirth/resources/sfx/power up 4.wav",
+          "references/isaac/rebirth/resources/sfx/power up 7.wav",
+          "references/isaac/rebirth/resources/sfx/power up spewer.wav",
+          "references/isaac/rebirth/resources/sfx/power up1.wav",
+          "references/isaac/rebirth/resources/sfx/satan appear.wav",
+          "references/isaac/rebirth/resources/sfx/satan blast 1.wav",
+          "references/isaac/rebirth/resources/sfx/satan blast 2.wav",
+          "references/isaac/rebirth/resources/sfx/satan charge up 2.wav",
+          "references/isaac/rebirth/resources/sfx/satan charge up.wav",
+          "references/isaac/rebirth/resources/sfx/satan grow.wav",
+          "references/isaac/rebirth/resources/sfx/satan hurt.wav",
+          "references/isaac/rebirth/resources/sfx/satan rise up.wav",
+          "references/isaac/rebirth/resources/sfx/satan room appear.wav",
+          "references/isaac/rebirth/resources/sfx/satan spit 2.wav",
+          "references/isaac/rebirth/resources/sfx/satan spit 3.wav",
+          "references/isaac/rebirth/resources/sfx/satan spit.wav",
+          "references/isaac/rebirth/resources/sfx/satan stomp 2.wav",
+          "references/isaac/rebirth/resources/sfx/satan stomp 3.wav",
+          "references/isaac/rebirth/resources/sfx/satan stomp.wav",
+          "references/isaac/rebirth/resources/sfx/slotspawn 0.wav",
+          "references/isaac/rebirth/resources/sfx/slotspawn 2.wav",
+          "references/isaac/rebirth/resources/sfx/slotspawn1.wav",
+          "references/isaac/rebirth/resources/sfx/summonsound.wav",
+          "references/isaac/rebirth/resources/sfx/superholy.wav",
+          "references/isaac/rebirth/resources/sfx/thumbs down.wav",
+          "references/isaac/rebirth/resources/sfx/thumbs up.wav",
+          "references/isaac/rebirth/resources/sfx/unlock.wav",
+          "references/isaac/rebirth/resources/sfx/vox death.wav"
+        ]
+      },
+      {
+        "kind": "Authored ordinary Fireplace flame page absent from the initial filename inventory",
+        "extractor": "tools/foundation/extract-animations.py",
+        "decoder_sha256": "119af26ad7d962f9fed0b7efaec41962b805eee8154abac600fbae0bffc2cebb",
+        "archive": "graphics.a",
+        "archive_sha256": "b1286fcfc4f3dd899cd225d46db9132a787352b4169b9de56a5d2c65e43ee23e",
+        "output_paths": [
+          "references/isaac/rebirth/resources/gfx/grid/effect_005_fire.png"
+        ]
+      }
+    ]
   },
   "files": [
     {
@@ -12326,6 +12457,486 @@
       "path": "references/isaac/native/resource-extractor.macho",
       "bytes": 125632,
       "sha256": "7d0b837bf3826915be1eb3f42cb117a0496ebb1c27aa765b841c61fa587e519b"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/music/jingle ogg/secret room find #2_07.ogg",
+      "bytes": 182897,
+      "sha256": "15a607e6fe1f0940c20cd285a7e02712079dc05d57a46e3051a026278263da35"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/1 up theremin.wav",
+      "bytes": 25626,
+      "sha256": "0db1d6ffd7eb54000941e653ee002c94e397f794805f0ad482ce7c755263b426"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/baby hurt 1.wav",
+      "bytes": 23530,
+      "sha256": "905444700c6110b9d06c006272d9ce3379f8e3d8b59cbc62b2c468b7986650da"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/baby hurt 2.wav",
+      "bytes": 16796,
+      "sha256": "e27e6efd4e13470f40f442f69f1f35c44227ba50ba89e6c452b41aad9ec6980f"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/baby hurt 3.wav",
+      "bytes": 21130,
+      "sha256": "ae7a89b825b549d1d2807b013c137e7aad765b80233f3f9a99964604a92c2be7"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/band aid pick up.wav",
+      "bytes": 29074,
+      "sha256": "4855128d288b230b5bc2a551dd525b9be7aff8dce65d192c2e9f255a0d8e2062"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/battery charge.wav",
+      "bytes": 60580,
+      "sha256": "24a30c3ca2fc2b83ab7868347700e9a502dbcca8603e9fd5b36961a4f13b31cd"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/beep.wav",
+      "bytes": 6874,
+      "sha256": "e8e4092a5ca8fb7c14ae8230e6f6e041f103442b887e6b5bbe51a5b7ccdc9825"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/blood bank spawn.wav",
+      "bytes": 27086,
+      "sha256": "c89df68e202b7f91abebf51d34119933ec15bab3c819f48590a3607c22417718"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/book page turn.wav",
+      "bytes": 45032,
+      "sha256": "78e46e4dcb99ac9cb21a7849ae040bb0d716c3fa4d4b6b4724c3c338ad63a2cc"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/boss 2 intro errorbuzz.wav",
+      "bytes": 64604,
+      "sha256": "0e4a896c35576d4557c9a17576060d10c8a33caf53fcefed784009b9289a45f9"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/castleportcullis.wav",
+      "bytes": 158888,
+      "sha256": "0581969c9ad7b652be3356a628266c970cb2a9e60a633415de9a0b791818c0c7"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/character select left.wav",
+      "bytes": 3292,
+      "sha256": "3ffddb1b37fe438b1b3375b385155372aa12ce0696404523bd3d0c45598f42a1"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/character select right.wav",
+      "bytes": 3230,
+      "sha256": "15f899d3bb35b0dcc6118da0af70548aab3bc87ea548ead1f73a13b8494a3057"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/chest drop 1.wav",
+      "bytes": 33706,
+      "sha256": "f1a5f1b7a97c225d00f43df00f6a51ad11716ec6cb25ec485f0fafef3e542257"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/chest open 1.wav",
+      "bytes": 43454,
+      "sha256": "153982d0299a7570c3e6b44bfb0ec1f290b52397081908149df630020b28dd24"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/choir.wav",
+      "bytes": 227728,
+      "sha256": "7b3ed17902b8fa8f84b80242c01c3b9c37e5de213f9f60e629f8054faa262178"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/coin slot.wav",
+      "bytes": 47818,
+      "sha256": "be1f064124ef95eb01f11370d2c760f5742a6433235b66f826a89965acaa0a18"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/death card mix.wav",
+      "bytes": 346894,
+      "sha256": "dd12c2374497d3c4386df66f5ed3e9262dafcb488c1467ba648777ebe53b219a"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/derp 0.wav",
+      "bytes": 44510,
+      "sha256": "25be9af3fa75e58a4213324223387579a026912b3287ffddb0e9b1f0e832c737"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/derp 1.wav",
+      "bytes": 55166,
+      "sha256": "60dc33ba4ed8ad507d9f1062d2b1384ed42f26a92647d0eb8b34919109bd304b"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/dime drop.wav",
+      "bytes": 63512,
+      "sha256": "56d64bd5ee24458ba8ba3ec8de0c4cecb9b87e671b9ba69a3a27f241f5dd2450"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/dime pick up.wav",
+      "bytes": 21378,
+      "sha256": "dc51d218fa134dc8af24b69f95577c1923c128269dcd6eb77d67e79f9ceaddaf"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/door heavy close.wav",
+      "bytes": 123266,
+      "sha256": "207d1bc5f81a661883db1cfdccc2bea76a64f8d8fe1ea9690268e4a0c4bfade7"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/door heavy open.wav",
+      "bytes": 98866,
+      "sha256": "cd0367df2757c60389b632c239b358929d004a5985f03ed9b91d9e038f032d60"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/evil laugh.wav",
+      "bytes": 253978,
+      "sha256": "d674dc755596cf81ab3c0da57e7147e2525b9955e41ef21b787a67d91d082089"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/filter death 1.wav",
+      "bytes": 393784,
+      "sha256": "962d364e7a599ee74a171e62e26bba0556a0847f74a3ebaa1343a482e548d01b"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/filter evil laugh.wav",
+      "bytes": 254542,
+      "sha256": "05bdd53cfa1d91106a4d3366d281bc27eaafe9a434bbbdb2404c4f6dbfa6c6ef"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/filter hurt 1.wav",
+      "bytes": 36932,
+      "sha256": "c1a1e0da8fc563a0ad072f5c95e07205f020c648df6a507d68d3d13aec52a05b"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/filter hurt 2.wav",
+      "bytes": 43948,
+      "sha256": "8b9a94866e4a60caff3954e9c1b3a738b68d53cdc10bf325e9f4d248878b6309"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/filter hurt.wav",
+      "bytes": 29652,
+      "sha256": "8cfebff2f3bd618466f5ebcc058c34763f387b24a8c95c8eb1f6b3d926643b78"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/fire burning.wav",
+      "bytes": 1326216,
+      "sha256": "1c917f2d2e9f1c5581ec809acd651ebb82ba29e68bc2dc55ef46b9cf831ccfc7"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/golden key.wav",
+      "bytes": 444138,
+      "sha256": "c10569faa3dbbda4d32a22837480355d2842b283721c56df0d0c2f12833132d0"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/grunt 2.wav",
+      "bytes": 60970,
+      "sha256": "a1baa787a6cb6195766e6a402c3158725ca99b51563d0a1dd065d3f0937624da"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/grunt 3.wav",
+      "bytes": 51922,
+      "sha256": "edf3b690edd3c5fbbd397544b9aad19b2d015fe7d5312bd7c9b724268fbf7cb1"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/grunt 4.wav",
+      "bytes": 54484,
+      "sha256": "c304de2c030e01fee212d87dff0d89c8726ecf0f277502eb0eeb240f4df7b9ef"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/grunt.wav",
+      "bytes": 39986,
+      "sha256": "3ea02173d96947caebafe9ead0ef570d54d88fcf0bf8c49f60b3b221e0bbdbf9"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/hand laser.wav",
+      "bytes": 263164,
+      "sha256": "91843c5f3d5365b9df7df3ff0ab9e460f698aeb5c3e81ad905e6120a1f6e005d"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/happy rainbow with giggle.wav",
+      "bytes": 308738,
+      "sha256": "57775c812c164281979b542bd6dcbe0b78c613ae7ea7d705d22c0353d83c6fc2"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/hell portal 2.wav",
+      "bytes": 17390,
+      "sha256": "761d72ce99e0c42f5dcbaa499992c07b4a68fd329ac9ef9ab33ead4ad04ad86f"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/hell portal.wav",
+      "bytes": 17036,
+      "sha256": "8795a36b3056a53f9e2010ead31380a09caa63334b999cf98dede2b8a84909de"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/holy!.wav",
+      "bytes": 125104,
+      "sha256": "515ac0279a1f237aa3d8a38aab8434e04419cf4c1f63488e771854d789fa9544"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/hurt 1.wav",
+      "bytes": 35594,
+      "sha256": "35669788d2806850b68bbb1a407ada1774729c7efe4d47b890564dd5ec3de2c8"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/hurt 2.wav",
+      "bytes": 65120,
+      "sha256": "06665ec088c7cb82ed7854a0dc59827e1de1acacaefcfc9867a0c94b288171c4"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/hurt 3.wav",
+      "bytes": 56610,
+      "sha256": "3442f2df7d17b563b83f8820d858a772a0b6b28cb96ea5c592287c637eea4142"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/hurt grunt .wav",
+      "bytes": 33400,
+      "sha256": "1c9ec39c14949bd2696868b4a15ef62ab24c859aaf52b994869fa63adc1ae7ff"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/hurt grunt 1.wav",
+      "bytes": 27722,
+      "sha256": "6947c778162d77948965b99ff73e2a66e4de01010b50e2461ca95c2c9b28edc5"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/hurt grunt 2.wav",
+      "bytes": 23172,
+      "sha256": "e5f26dadb1f4747651e53a3f5f0ec00fa2719c8e496c4527ac0a6d22b2f5b400"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/isaac dies new 1.wav",
+      "bytes": 78124,
+      "sha256": "d3a03c5dd31c7aafcc8d62e2c2781950e0e7344a81dbf266b887be7cee9e2864"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/isaac dies new 2.wav",
+      "bytes": 55728,
+      "sha256": "30851f8e262a938ee662069e9c62ea8f37055f6139caa4e4f50e4b32d349dfc2"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/isaac dies new.wav",
+      "bytes": 96264,
+      "sha256": "a78721818e49e04f61df1764df65050c7e16d1900fa2712fbb6670bd170f6cf7"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/key drop 2.wav",
+      "bytes": 21918,
+      "sha256": "4000208b34c5960e857241e144f92f71ec26542d6d4feda64efbb5b4c30a1a3e"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/key pickup guantlet 4.wav",
+      "bytes": 38890,
+      "sha256": "6ed9d18320f05d86ff925434980048eea8be31cf81ce7bba42526898efdf1359"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/lock break 1.wav",
+      "bytes": 119188,
+      "sha256": "16609b7bd83dc79b29b2a58fe427acac651c8ae2d9b44cdadd8db9470aed247b"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/lock break 3.wav",
+      "bytes": 98824,
+      "sha256": "e44d79d64034562d180c5f77fc9c6ba9ac754ddebc9b10a42a8e9d15c18202e0"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/mom muffle 2.wav",
+      "bytes": 45132,
+      "sha256": "6efe57077ccb4ce24520e818bb107a2fc490cbb6aa7e00b11170488b710cf756"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/mom muffle 3.wav",
+      "bytes": 52694,
+      "sha256": "521ee887815f5e09022d6fe3326a14ef1d0a5854e0363266117bd6a05b061fb2"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/mom muffle 4.wav",
+      "bytes": 56046,
+      "sha256": "8fee23e755dc9243b954e8af813ed47b4fd55ff8cad59658975151b8f85d7339"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/mom muffle.wav",
+      "bytes": 54524,
+      "sha256": "0c8339228648e63003bfb26474daaa0c366ba34e87db8a621779ae42197f8f47"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/mom.wav",
+      "bytes": 52904,
+      "sha256": "e2e520cfca6b3edbc5e6971d5f5022a067c78a8dba4737de70b0cb944fce3b1b"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/mom2.wav",
+      "bytes": 57848,
+      "sha256": "29f161ea6a282b1f412ce43a84ef0abbda0acd86a8b8ac9669128d00d88ab41a"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/mom3.wav",
+      "bytes": 80804,
+      "sha256": "0913db2e6f4ed7b763a59c551c565c38db8b9a32f55e0ef7209da798fb3ac920"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/nickel drop.wav",
+      "bytes": 52746,
+      "sha256": "d9a8f1fe7bd3730573c1f05c54b0291558a28fb287ad5842ff6f224bb03600a4"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/nickel pickup.wav",
+      "bytes": 19452,
+      "sha256": "b1e696bca86d3df04206e2f99e7d356c5338e20ed210dd732a5307028ca48b00"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/penny drop 1.wav",
+      "bytes": 103716,
+      "sha256": "da730f32f158d2612a65008ccb96a6dec603a7e0921da69dababfd8ab735d21c"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/penny pickup 1.wav",
+      "bytes": 21494,
+      "sha256": "d966a9a8674dcbee880045f8ed316bdcc4def8db2aad2d3ea95f2b5ae0954e9f"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/power up 3.wav",
+      "bytes": 182302,
+      "sha256": "58aff06480c79291895eb92cb9da056c92a6806b4709800268f65d1b3d0287a2"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/power up 4.wav",
+      "bytes": 171122,
+      "sha256": "ba9be22a9f0522775bc9cba32ce5936052027e606aeac3b754ecb7a5aeeaab82"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/power up 7.wav",
+      "bytes": 231140,
+      "sha256": "b1f0305426801b19dfd7b54fef61d8daac1acd3dfd5d3ab546267dae5055050c"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/power up spewer.wav",
+      "bytes": 138126,
+      "sha256": "b30552b8be5ee61486c6789ffaa43dc49ee28d546d45c31672b8ea79d7a87394"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/power up1.wav",
+      "bytes": 86012,
+      "sha256": "febabe194e23ea16702755842252ec0aaa10fd91cd747147b023c8f321880819"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/satan appear.wav",
+      "bytes": 183870,
+      "sha256": "7e16604457705bafc77bae30db8b8a88b0cf39aa1a524d6866b60ea626e0c762"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/satan blast 1.wav",
+      "bytes": 178094,
+      "sha256": "16a891d1380c18528d725472e908f507900464cf7136cc7d5d06bb6222125d0a"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/satan blast 2.wav",
+      "bytes": 216804,
+      "sha256": "b7423e7569e03568cbfae1e303efd2345901267f46bc3623cebce51cd2481778"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/satan charge up 2.wav",
+      "bytes": 216146,
+      "sha256": "d13556ebe101eadd6f2f48a26740c86e4e8743f06f636baf015627375d7872cd"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/satan charge up.wav",
+      "bytes": 162418,
+      "sha256": "746658b89c119912066af8b00bba1af213c4c6125ba345861410265bc3a1679b"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/satan grow.wav",
+      "bytes": 341472,
+      "sha256": "0b521dfe8b01701811af9e3c02e643d80192531858b37ad20caad588b18a7b01"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/satan hurt.wav",
+      "bytes": 302062,
+      "sha256": "7be36080e2bc980cb45b6ded801fd2755f14070fb5401e27d27a232707c5db5b"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/satan rise up.wav",
+      "bytes": 269416,
+      "sha256": "cb2ed47fa3235757e22d78ebee009d950523520c5daf46dc8e2782f7ad6bac9f"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/satan room appear.wav",
+      "bytes": 387258,
+      "sha256": "c7f824a414fb5313845b61e59617834142a5635ad978ac9281eec2447a40f982"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/satan spit 2.wav",
+      "bytes": 273244,
+      "sha256": "642b3cd2472612c43bb70573740a86de35acc0c6a0403f99efbe3e65f58ae6cd"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/satan spit 3.wav",
+      "bytes": 239436,
+      "sha256": "ec95d2461714f86e71e3af885c080567d0cc88de3f5919b47ceeb7f8a17e1861"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/satan spit.wav",
+      "bytes": 246900,
+      "sha256": "1e2fb32ffbfbcd296d06acf0337d5d8964ef50d4793c7f1d63f876f784e76bab"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/satan stomp 2.wav",
+      "bytes": 299050,
+      "sha256": "757967d75342bb8b82da7deea44aca53056d34912df60ba425213ddc7b108dac"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/satan stomp 3.wav",
+      "bytes": 230604,
+      "sha256": "a060548671e27de774b91779ce7dfa10a3cdaec973ffde438901c4b93e0a28f1"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/satan stomp.wav",
+      "bytes": 277660,
+      "sha256": "abd7f130cfb03a52d4bbe353742c526ffa0ec5d758ebb7b516f167f1cbfac8a1"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/slotspawn 0.wav",
+      "bytes": 37826,
+      "sha256": "d6b1c4f05630cacc1d3a5941f88a516a7f19855a6b42da229e2d6ba7d5948a8a"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/slotspawn 2.wav",
+      "bytes": 33580,
+      "sha256": "523677c050e18a0b5bc6298b265584c0df5355765125416b24ce5a4435bce734"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/slotspawn1.wav",
+      "bytes": 37344,
+      "sha256": "6643a3f163b1caf835bd0a11daab07913f5aa26da75dd74b13c20a98ddc0ea9f"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/summonsound.wav",
+      "bytes": 102608,
+      "sha256": "2d4e7ce882547d92fe0461a51714bf485711f45cad4761b4959f351cbbec15e2"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/superholy.wav",
+      "bytes": 376102,
+      "sha256": "476b2398dedd24f847bf11cd9b4e3081688a4717672822df4927e0c4c0ca3e99"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/thumbs down.wav",
+      "bytes": 33872,
+      "sha256": "5b3f8bbab666e76af9e77b031e3bacf945a1f4af98862b977bd780d71753d2dd"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/thumbs up.wav",
+      "bytes": 16720,
+      "sha256": "13ba8f46cd4daf3bef49cccbad61660169b8091135def55f4e53de024df549d8"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/unlock.wav",
+      "bytes": 35560,
+      "sha256": "0531ee864bfec839cab65c3880e63a7d1fda692e74c0dc3e753a81a70fb185a1"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/sfx/vox death.wav",
+      "bytes": 279136,
+      "sha256": "29f5b9dc59b701fd482436a02bc01fa0e1e577da015f4b497d029c553728c498"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/gfx/grid/effect_005_fire.png",
+      "bytes": 19109,
+      "sha256": "56dbfc5dff2517dc3c192cee77849dbd1518d9267a67a8e5520e0c72c264a050"
     }
   ]
 }

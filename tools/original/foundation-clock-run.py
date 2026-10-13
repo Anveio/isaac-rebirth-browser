@@ -60,6 +60,7 @@ def validate_tape(tape):
         raise ValueError('Tape must be a list of at most 36000 public input/presentation commands')
     labels = set()
     total = 0
+    host_hold_seconds = 0
     for action in tape:
         kind = action.get('type')
         if kind == 'step':
@@ -75,19 +76,41 @@ def validate_tape(tape):
             if not isinstance(label, str) or not label or len(label) > 80 or not all(c.isalnum() or c in '-_' for c in label) or label in labels:
                 raise ValueError('capture labels must be unique simple names')
             labels.add(label)
+        elif kind == 'audioHold':
+            seconds = action.get('seconds')
+            if type(seconds) not in (int, float) or not 0 < seconds <= 30:
+                raise ValueError('audioHold requires 0..30 explicit real host seconds')
+            host_hold_seconds += seconds
         else:
             raise ValueError(f'Unsupported tape action: {kind}')
     if total > 36000:
         raise ValueError('Tape has more than 36000 presented frames')
+    if host_hold_seconds > 120:
+        raise ValueError('Tape has more than 120 explicit real audio-device hold seconds')
+
+
+def checked_observation(observer, pid, context):
+    """Observers may explicitly skip checkpoints outside their typed scope."""
+    observed = observer.observe(pid, context)
+    json.dumps(observed, allow_nan=False)
+    if not isinstance(observed, dict) or observed.get('status') not in ('pass', 'skip'):
+        raise RuntimeError('Reference debug observer failed at '+context['label']+': '+str(observed))
+    return observed
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--seed', help='Valid seed; omitted means new OS-random seed')
-    parser.add_argument('--tape', type=Path, help='List of key/step/capture commands; public X11 key names')
+    parser.add_argument('--ordinary-run', action='store_true', help='Observe a generated Character seed through an explicit no-dialog tape; no requested run seed')
+    parser.add_argument('--boot-epoch-seed', type=int, default=1700000000, help='Public realtime seconds supplied to native time(NULL); independent of the requested run seed')
+    parser.add_argument('--tape', type=Path, help='List of key/step/capture/audioHold commands; public X11 keys and explicit real audio-device holds')
     parser.add_argument('--focus-handoff', action='append', default=[], help='At named capture, generate public X11 focus out/in and release one presentation before capture; diagnostic tape alteration is recorded')
     parser.add_argument('--state-observer', type=Path, help='Optional parent-only reference debug module exposing observe(pid, context); never production game input')
+    parser.add_argument('--observe-every-step', action='store_true', help='Observe at each tape step gate without screenshots; use one-frame steps for dense trajectories')
     parser.add_argument('--gl-trace', type=Path, help='Optional documented graphics API observer to chain; no game instructions/state')
+    parser.add_argument('--audio-trace', type=Path, help='Optional forwarding OpenAL API observer to chain; no game instructions/state')
+    parser.add_argument('--sfx-volume', type=float, default=0, help='Owned public SFXVolume option, 0..1; admission still occurs when muted')
+    parser.add_argument('--music-volume', type=float, default=0, help='Owned public MusicVolume option, 0..1')
     parser.add_argument('--trace-every-frame', action='store_true', help='Request graphics observer continuous draw/presentation tracing')
     parser.add_argument('--width', type=int, default=960, help='Original supported window width; larger values aid public subpixel diagnostics')
     parser.add_argument('--height', type=int, default=540, help='Original supported window height')
@@ -95,8 +118,15 @@ def main():
     parser.add_argument('--fps', type=int, default=60, help='Nominal presentation rate; not asserted native simulation Hz')
     parser.add_argument('--step-ns', type=int, default=16667000, help='Explicit virtual interval; default is 16667 microseconds, above native timer polling threshold')
     parser.add_argument('--output', type=Path, default=ROOT / '.cache/foundation' / f'clock-native-{time.time_ns()}')
-    parser.add_argument('--frame-timeout', type=float, default=30)
+    parser.add_argument('--frame-timeout', type=float, default=60,
+                        help='Host-wall socket/gate wait limit in seconds; does not alter released presentation counts')
     args = parser.parse_args()
+    if not 0 <= args.boot_epoch_seed <= 0xffffffff:
+        raise SystemExit('--boot-epoch-seed must be a u32')
+    if args.observe_every_step and not args.state_observer:
+        raise SystemExit('--observe-every-step requires --state-observer')
+    if not 0 <= args.sfx_volume <= 1 or not 0 <= args.music_volume <= 1:
+        raise SystemExit('Owned public audio volumes must be 0..1')
     if not os.environ.get('DISPLAY'):
         raise SystemExit('Run through tools/original/with-display.sh')
     # X server autorepeat uses real host time; it must not invent input events
@@ -144,10 +174,14 @@ def main():
         raise SystemExit('FPS must be 1..1000; step-ns 1..1000000000; frame timeout 0..300 seconds')
     if not 480 <= args.width <= 3840 or not 270 <= args.height <= 2160 or args.width*9 != args.height*16 or not 1 <= args.max_render_scale <= 8:
         raise SystemExit('Window must be 16:9, from 480x270 through 3840x2160')
-    vector = {'code': args.seed, 'seedValue': codec.decode_seed(args.seed)} if args.seed else codec.random_vector()
-    seed = codec.encode_seed(vector['seedValue'])
+    if args.ordinary_run and (args.seed or not args.tape):
+        raise SystemExit('--ordinary-run requires an explicit public tape and excludes --seed')
+    vector = {'seedValue': None} if args.ordinary_run else ({'code': args.seed, 'seedValue': codec.decode_seed(args.seed)} if args.seed else codec.random_vector())
+    seed = None if args.ordinary_run else codec.encode_seed(vector['seedValue'])
     tape = json.loads(args.tape.read_text()) if args.tape else default_tape(seed)
     validate_tape(tape)
+    if args.ordinary_run and any(a['type'] == 'key' and a['key'] != 'Return' for a in tape):
+        raise SystemExit('--ordinary-run admission tape permits Return confirmations only, without a seed dialog')
     selected_labels = {a['label'] for a in tape if a['type'] == 'capture'}
     if not set(args.focus_handoff) <= selected_labels:
         raise SystemExit('Focus-handoff labels must exist in the selected tape')
@@ -161,7 +195,7 @@ def main():
         directory.mkdir(parents=True, exist_ok=True)
     for name in ('isaac.x64', 'lib64', 'resources'):
         (out / 'game' / name).symlink_to(source / name)
-    (local / 'options.ini').write_text(f'[Options]\nFullscreen=0\nFilter=0\nVSync=0\nPauseOnFocusLost=0\nSteamCloud=1\nMouseControl=0\nWindowWidth={args.width}\nWindowHeight={args.height}\nWindowPosX=0\nWindowPosY=0\nMaxRenderScale={args.max_render_scale}\nMusicVolume=0\nSFXVolume=0\n')
+    (local / 'options.ini').write_text(f'[Options]\nFullscreen=0\nFilter=0\nVSync=0\nPauseOnFocusLost=0\nSteamCloud=1\nMouseControl=0\nWindowWidth={args.width}\nWindowHeight={args.height}\nWindowPosX=0\nWindowPosY=0\nMaxRenderScale={args.max_render_scale}\nMusicVolume={args.music_volume}\nSFXVolume={args.sfx_volume}\n')
     gate = out / 'clock-gate.so'
     subprocess.run(['cc', '-std=c11', '-Wall', '-Wextra', '-Werror', '-fPIC', '-shared',
                     str(Path(__file__).with_name('foundation-clock-gate.c')), '-o', str(gate), '-ldl'], check=True)
@@ -170,7 +204,8 @@ def main():
                 'XDG_CONFIG_HOME': str(out / 'profile/config'), 'ISAAC_OFFLINE_CLOUD_DIR': str(out / 'profile/cloud'),
                 'ALSOFT_DRIVERS': 'null', 'LD_PRELOAD': str(gate) + (' ' + env['LD_PRELOAD'] if env.get('LD_PRELOAD') else ''),
                 'LD_LIBRARY_PATH': str(source / 'lib64') + (':' + env['LD_LIBRARY_PATH'] if env.get('LD_LIBRARY_PATH') else ''),
-                'ISAAC_CLOCK_GATE_FPS': str(args.fps), 'ISAAC_CLOCK_GATE_STEP_NS': str(args.step_ns)})
+                'ISAAC_CLOCK_GATE_FPS': str(args.fps), 'ISAAC_CLOCK_GATE_STEP_NS': str(args.step_ns),
+                'ISAAC_CLOCK_GATE_EPOCH_SEED': str(args.boot_epoch_seed)})
     if args.gl_trace:
         trace = out / 'gl-trace'
         trace.mkdir(exist_ok=True)
@@ -182,6 +217,11 @@ def main():
             env['ISAAC_GL_TRACE_EVERY_FRAME'] = '1'
     elif args.trace_every_frame:
         raise SystemExit('--trace-every-frame requires --gl-trace')
+    if args.audio_trace:
+        trace = out / 'audio-trace'
+        trace.mkdir(exist_ok=True)
+        env['LD_PRELOAD'] += ' ' + str(args.audio_trace.resolve())
+        env['ISAAC_AUDIO_TRACE_DIR'] = str(trace)
     observer = None
     if args.state_observer:
         spec = importlib.util.spec_from_file_location('original_reference_observer', args.state_observer.resolve())
@@ -192,15 +232,20 @@ def main():
     frames, events, acknowledgements = [], [], []
     report = {'schema': 1, 'status': 'running', 'output': str(out),
               'captureClock': 'main-thread virtual Linux clocks and blocking public GL presentation gate; simulation ticks unknown', 'seed': seed, 'seedValue': vector['seedValue'],
+              'seedMode': 'ordinary-character-menu' if args.ordinary_run else 'public-manual-entry',
+              'bootEpochSeed': args.boot_epoch_seed,
               'requestedViewport': {'width': args.width, 'height': args.height, 'maxRenderScale': args.max_render_scale},
               'profile': {'fresh': True, 'isolated': True}, 'tape': tape, 'frames': frames,
+              'audioOptions': {'sfxVolume': args.sfx_volume, 'musicVolume': args.music_volume},
               'inputs': events, 'presentations': acknowledgements,
               'clock': {'scope': 'main-thread wall-clock ABI; worker/CPU clocks unchanged', 'nominalStepsPerSecond': args.fps, 'stepNs': args.step_ns,
                         'mainThreadSleeps': 'recorded then returned without host delay', 'realPerformance': 'controller wall clock'},
               'inputDelivery': {'api': 'public X11 key events', 'serverAutoRepeat': False},
+              'hostExecution': {'frameTimeoutSeconds': args.frame_timeout, 'lpNumThreads': env.get('LP_NUM_THREADS'),
+                                'scope': 'Host-wall wait limit and requested software-renderer pool; public tape/virtual steps unchanged'},
               'simulationTicks': False, 'fullInternalState': False, 'failures': []}
     if observer:
-        report['debugObserver'] = {'module': str(args.state_observer.resolve()), 'scope': 'reference-only parent debug observations at blocked presentation checkpoints; no hidden-state parity claim'}
+        report['debugObserver'] = {'module': str(args.state_observer.resolve()), 'everyTapeStep': args.observe_every_step, 'scope': 'reference-only parent debug observations at blocked presentation checkpoints; no hidden-state parity claim'}
         report['debugObservations'] = []
     (out / 'tape.json').write_text(json.dumps(tape, indent=2) + '\n')
     proc = None
@@ -241,6 +286,16 @@ def main():
             windows = subprocess.check_output(['xdotool', 'search', '--onlyvisible', '--name', '(Isaac|Rebirth)'], text=True)
             window = windows.splitlines()[-1]
             subprocess.run(['xdotool', 'windowfocus', '--sync', window], check=True)
+            def observe_current(label):
+                current_log = debug.observed_state((local / 'log.txt').read_text()) if (local / 'log.txt').exists() else {}
+                context = {'label': label, 'seed': seed, 'seedValue': vector['seedValue'],
+                    'presentedFrame': current['presentedFrame'], 'virtualElapsedNs': current['virtualElapsedNs'],
+                    'output': str(out), 'publicLogState': current_log, 'gateBlocked': True,
+                    'scope': 'reference debug data only; simulation ticks and full internal state not established'}
+                observed = checked_observation(observer, proc.pid, context)
+                report['debugObservations'].append({'context': context, 'observation': observed})
+            if args.observe_every_step:
+                observe_current('bootstrap-'+str(current['presentedFrame']))
             for action in tape:
                 kind = action['type']
                 if kind == 'step':
@@ -260,6 +315,8 @@ def main():
                         'scope': 'native process CPU / controller wall time during released presentations; excludes checkpoint waits, includes observer cost'}
                     if current['presentedFrame'] != before + action['frames']:
                         raise RuntimeError('Presentation acknowledgement count diverged from requested tape')
+                    if args.observe_every_step:
+                        observe_current('step-'+str(current['presentedFrame']))
                 elif kind == 'key':
                     keysym = x11.XStringToKeysym(action['key'].encode('ascii'))
                     if not keysym:
@@ -267,6 +324,14 @@ def main():
                     subprocess.run(['xdotool', 'keydown' if action['down'] else 'keyup', '--window', window, action['key']], check=True)
                     subprocess.run(['xdotool', 'getwindowfocus'], check=True, stdout=subprocess.DEVNULL)
                     events.append({**action, 'keysym': keysym, 'presentedFrame': current['presentedFrame'], 'virtualElapsedNs': current['virtualElapsedNs']})
+                elif kind == 'audioHold':
+                    hold_started = time.monotonic()
+                    time.sleep(action['seconds'])
+                    report.setdefault('hostAudioHolds', []).append({
+                        'requestedSeconds': action['seconds'], 'elapsedSeconds': time.monotonic() - hold_started,
+                        'presentedFrame': current['presentedFrame'], 'virtualElapsedNs': current['virtualElapsedNs'],
+                        'mainThreadGateBlocked': True, 'scope': 'Real worker/audio-device time; no presentations or synthetic completion events',
+                    })
                 else:
                     focus_before = x11_focus()
                     if action['label'] in args.focus_handoff:
@@ -277,17 +342,7 @@ def main():
                     if action['label'] == 'gameplay-start':
                         report['initialState'] = debug.observed_state((local / 'log.txt').read_text())
                     if observer:
-                        current_log = debug.observed_state((local / 'log.txt').read_text()) if (local / 'log.txt').exists() else {}
-                        context = {'label': action['label'], 'seed': seed, 'seedValue': vector['seedValue'],
-                            'presentedFrame': current['presentedFrame'], 'virtualElapsedNs': current['virtualElapsedNs'],
-                            'output': str(out), 'publicLogState': current_log, 'gateBlocked': True,
-                            'scope': 'reference debug data only; simulation ticks and full internal state not established'}
-                        observed = observer.observe(proc.pid, context)
-                        # Reject non-JSON results, errors, or a missing observation.
-                        json.dumps(observed, allow_nan=False)
-                        if not isinstance(observed, dict) or observed.get('status') == 'fail':
-                            raise RuntimeError('Reference debug observer failed at '+action['label']+': '+str(observed))
-                        report['debugObservations'].append({'context': context, 'observation': observed})
+                        observe_current(action['label'])
                     geometry = subprocess.check_output(['xdotool', 'getwindowgeometry', '--shell', window], text=True)
                     values = dict(line.split('=', 1) for line in geometry.splitlines() if '=' in line)
                     path = out / 'frames' / f"{action['label']}.png"
@@ -298,7 +353,13 @@ def main():
                                    'presentedFrame': current['presentedFrame'], 'virtualElapsedNs': current['virtualElapsedNs'],
                                    'simulationTick': None, 'gateBlocked': True, 'x11Focus': x11_focus(), 'targetWindow': int(window)})
             report['observedState'] = debug.observed_state((local / 'log.txt').read_text()) if (local / 'log.txt').exists() else {}
-            if report['observedState'].get('seedValue') != vector['seedValue']:
+            if args.ordinary_run:
+                observed = report['observedState']
+                if codec.decode_seed(observed.get('seed')) != observed.get('seedValue'):
+                    raise RuntimeError('Original generated seed code/value did not agree through the public codec')
+                report['seed'] = codec.encode_seed(observed['seedValue'])
+                report['seedValue'] = observed['seedValue']
+            elif report['observedState'].get('seedValue') != vector['seedValue']:
                 raise RuntimeError('Original did not read back the requested seed; deterministic time/input may be incomplete')
             report['seedReadbackMatchesCodec'] = True
             if args.gl_trace:

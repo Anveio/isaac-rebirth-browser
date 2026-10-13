@@ -1,7 +1,13 @@
-import sceneData from "./scene-data.json";
+import baseSceneData from "./scene-data.json";
+import doorData from "./door-data.json";
+import gridData from "./grid-data.json";
+import npcData from "./npc-data.json";
+import familiarData from "./familiar-data.json";
+const sceneData = { ...baseSceneData, ...doorData, ...gridData, ...npcData, ...familiarData };
 import fontData from "./font-data.json";
 import completionUrl from "./assets/completion_widget.png?url";
 import postitOverlapUrl from "./assets/gamemenu_postitoverlap.png?url";
+import { sampleFrame, overrideFrame, frameQuad, type SampledFrame, type Quad } from "./animation-math";
 
 export interface Frame {
   XCrop?: number; YCrop?: number; Width?: number; Height?: number;
@@ -10,9 +16,9 @@ export interface Frame {
   RedTint: number; GreenTint: number; BlueTint: number; AlphaTint: number;
   RedOffset: number; GreenOffset: number; BlueOffset: number; Rotation: number; Interpolated: boolean;
 }
-interface Animation { Name: string; FrameNum: number; Loop: boolean; RootAnimation: Frame[]; LayerAnimations: { LayerId: number; Visible: boolean; Frames: Frame[] }[]; }
+interface Animation { Name: string; FrameNum: number; Loop: boolean; RootAnimation: Frame[]; LayerAnimations: { LayerId: number; Visible: boolean; Frames: Frame[] }[]; NullAnimations?: { NullId: number; Visible: boolean; Frames: Frame[] }[]; }
 interface Actor { BaseSpritesheetPath: string; Spritesheets: { Id: number; Path: string }[]; Layers: { Id: number; SpritesheetId: number; Name: string }[]; Animations: Animation[]; }
-export interface DrawOptions { scale?: number; layers?: number[]; overrides?: Record<number, Partial<Frame>>; }
+export interface DrawOptions { scale?: number; layers?: number[]; overrides?: Record<number, Partial<Frame>>; layerScales?: Record<number, readonly [number, number]>; spritesheets?: Record<number, string>; pixelSnap?: number; }
 interface Glyph { x: number; y: number; width: number; height: number; xoffset: number; yoffset: number; xadvance: number; page: number; }
 interface Font { lineHeight: number; pages: string[]; chars: Record<string, Glyph>; kernings: { first: number; second: number; amount: number }[]; }
 const normalize = (path: string) => path.replaceAll("\\", "/").replace(/\/\.\//g, "/").replace(/\/\.$/, "").replace(/^resources\//i, "").toLowerCase();
@@ -23,6 +29,11 @@ const urls = import.meta.glob([
   "../references/isaac/rebirth/resources/gfx/ui/hudpickups.png",
   "../references/isaac/rebirth/resources/gfx/ui/minimap1.png",
   "../references/isaac/rebirth/resources/gfx/ui/minimap2.png",
+  "../references/isaac/rebirth/resources/gfx/ui/bgblack.png",
+  "../references/isaac/rebirth/resources/gfx/ui/pausescreen.png",
+  "../references/isaac/rebirth/resources/gfx/ui/menu_mystuff.png",
+  "../references/isaac/rebirth/resources/gfx/ui/effect_024_streak.png",
+  "../references/isaac/rebirth/resources/gfx/ui/effect_cursepaper.png",
   "../references/isaac/rebirth/resources/gfx/characters/costumes/character_001_isaac.png",
   "../references/isaac/rebirth/resources/gfx/characters/costumes/ghost.png",
   "../references/isaac/rebirth/resources/gfx/backdrop/01_basement.png",
@@ -31,27 +42,46 @@ const urls = import.meta.glob([
   "../references/isaac/rebirth/resources/gfx/backdrop/light_gradient.png",
   "../references/isaac/rebirth/resources/gfx/overlays/basement/1x1_*.png",
   "../references/isaac/rebirth/resources/gfx/grid/door_01_normaldoor.png",
+  "../references/isaac/rebirth/resources/gfx/grid/door_02_treasureroomdoor.png",
+  "../references/isaac/rebirth/resources/gfx/grid/door_04_selfsacrificeroomdoor.png",
+  "../references/isaac/rebirth/resources/gfx/grid/door_08_holeinwall.png",
+  "../references/isaac/rebirth/resources/gfx/grid/door_13_librarydoor.png",
+  "../references/isaac/rebirth/resources/gfx/grid/rocks_basement.png",
+  "../references/isaac/rebirth/resources/gfx/grid/grid_spikes.png",
+  "../references/isaac/rebirth/resources/gfx/grid/grid_fireplace.png",
+  "../references/isaac/rebirth/resources/gfx/grid/effect_005_fire.png",
+  "../references/isaac/rebirth/resources/gfx/grid/effect_ember.png",
+  "../references/isaac/rebirth/resources/gfx/effects/effect_poopspawn.png",
+  "../references/isaac/rebirth/resources/gfx/monsters/classic/monster_010_fly.png",
+  "../references/isaac/rebirth/resources/gfx/effects/hangingguys.png",
+  "../references/isaac/rebirth/resources/gfx/monsters/rebirth/monster_244_roundworm.png",
+  "../references/isaac/rebirth/resources/gfx/familiar/familiar_270_leech.png",
+  "../references/isaac/rebirth/resources/gfx/effects/effect_009_poof01*.png",
+  "../references/isaac/rebirth/resources/gfx/effects/effect_006_hearteffect.png",
   "../references/isaac/rebirth/resources/gfx/shadow.png",
   "../references/isaac/rebirth/resources/gfx/tears.png",
+  "../references/isaac/rebirth/resources/gfx/enemybullets.png",
   "../references/isaac/rebirth/resources/gfx/effects/effect_015_tearpoof*.png",
+  "../references/isaac/rebirth/resources/gfx/effects/effect_029_explosion.png",
+  "../references/isaac/rebirth/resources/gfx/items/pick ups/pickup_016_bomb.png",
+  "../references/isaac/rebirth/resources/gfx/items/**/*.png",
+  "../references/isaac/rebirth/resources/gfx/effects/effect_023_starflash.png",
+  "../references/isaac/rebirth/resources/gfx/effects/effect_052_dust cloud.png",
+  "../references/isaac/rebirth/resources/gfx/ui/ui_chargebar.png",
   "../references/isaac/rebirth/resources/font/*_0.png",
 ], { eager: true, query: "?url", import: "default" }) as Record<string, string>;
 
-function frameAt(frames: Frame[], index: number, loop: boolean): Frame | undefined {
-  if (!frames.length) return undefined;
-  const length = frames.reduce((total, frame) => total + frame.Delay, 0);
-  let cursor = loop ? index % length : Math.min(index, length - 1);
-  for (const [i, frame] of frames.entries()) {
-    if (cursor < frame.Delay) {
-      const next = frames[i + 1];
-      if (!frame.Interpolated || !next || frame.Delay === 0) return frame;
-      const result = { ...frame }; const ratio = cursor / frame.Delay;
-      for (const key of ["XPosition", "YPosition", "XScale", "YScale", "RedTint", "GreenTint", "BlueTint", "AlphaTint", "Rotation"] as const) result[key] = frame[key] + (next[key] - frame[key]) * ratio;
-      return result;
-    }
-    cursor -= frame.Delay;
+function fontLineWidth(font: Font, line: string, glyphBounds: boolean): number {
+  let cursor = 0, extent = 0, previous: number | undefined;
+  for (const character of line) {
+    const code = character.codePointAt(0)!, glyph = font.chars[code];
+    if (!glyph) continue;
+    cursor += font.kernings.find(kerning => kerning.first === previous && kerning.second === code)?.amount ?? 0;
+    extent = Math.max(extent, cursor + glyph.xoffset + glyph.width);
+    cursor += glyph.xadvance;
+    previous = code;
   }
-  return frames.at(-1);
+  return glyphBounds ? Math.max(cursor, extent) : cursor;
 }
 
 export class Assets {
@@ -70,6 +100,23 @@ export class Assets {
     const image = this.images.get(normalize(path)); if (!image) throw new Error(`Missing original asset: ${path}`); return image;
   }
   sources(): readonly { path: string; image: HTMLImageElement }[] { return [...this.images.entries()].map(([path, image]) => ({ path, image })); }
+  /** Sample an authored layer so attached text follows the same animation as its paper or streak. */
+  layerFrame(path: string, name: string, layerId: number, tick: number): SampledFrame | undefined {
+    const actor = (sceneData as unknown as Record<string, Actor>)[normalize(path)];
+    if (!actor) throw new Error(`Missing authored animation: ${path}`);
+    const animation = actor.Animations.find(animation => animation.Name === name);
+    if (!animation) throw new Error(`Missing animation ${path}:${name}`);
+    const layer = animation.LayerAnimations.find(layer => layer.LayerId === layerId);
+    return layer?.Visible ? sampleFrame(layer.Frames, tick, animation.Loop) : undefined;
+  }
+  nullFrame(path: string, name: string, nullId: number, tick: number): SampledFrame | undefined {
+    const actor = (sceneData as unknown as Record<string, Actor>)[normalize(path)];
+    if (!actor) throw new Error(`Missing authored animation: ${path}`);
+    const animation = actor.Animations.find(animation => animation.Name === name);
+    if (!animation) throw new Error(`Missing animation ${path}:${name}`);
+    const attachment = animation.NullAnimations?.find(attachment => attachment.NullId === nullId);
+    return attachment?.Visible ? sampleFrame(attachment.Frames, tick, animation.Loop) : undefined;
+  }
   private colorImage(path: string, tint: number[], offsets = [0, 0, 0]): CanvasImageSource {
     if (tint.every(value => Math.abs(value - 255) < .001) && offsets.every(value => value === 0)) return this.image(path);
     const key = `${path}:${tint.map(Math.round)}:${offsets.map(Math.round)}`;
@@ -82,41 +129,57 @@ export class Assets {
   draw(ctx: CanvasRenderingContext2D, path: string, name: string, x = 0, y = 0, tick = 0, options: DrawOptions = {}): void {
     const actor = (sceneData as unknown as Record<string, Actor>)[normalize(path)]; if (!actor) throw new Error(`Missing authored animation: ${path}`);
     const animation = actor.Animations.find(animation => animation.Name === name); if (!animation) throw new Error(`Missing animation ${path}:${name}`);
-    const root = frameAt(animation.RootAnimation, tick, animation.Loop); if (!root || !root.Visible) return;
-    ctx.save(); ctx.translate(x + root.XPosition, y + root.YPosition); ctx.rotate(root.Rotation * Math.PI / 180); ctx.scale(root.XScale / 100 * (options.scale ?? 1), root.YScale / 100 * (options.scale ?? 1));
+    const root = sampleFrame(animation.RootAnimation, tick, animation.Loop); if (!root || !root.Visible || root.AlphaTint <= 0) return;
     for (const layer of animation.LayerAnimations) {
       if (!layer.Visible || options.layers && !options.layers.includes(layer.LayerId)) continue;
-      const found = frameAt(layer.Frames, tick, animation.Loop); if (!found) continue;
-      const frame = { ...found, ...options.overrides?.[layer.LayerId] }; if (!frame.Visible) continue;
+      const found = sampleFrame(layer.Frames, tick, animation.Loop); if (!found) continue;
+      const frame = overrideFrame(found, options.overrides?.[layer.LayerId]); if (!frame.Visible || frame.AlphaTint <= 0) continue;
+      const layerScale = options.layerScales?.[layer.LayerId];
+      if (layerScale) {
+        frame.XScale = Math.fround(frame.XScale * layerScale[0]);
+        frame.YScale = Math.fround(frame.YScale * layerScale[1]);
+      }
       const definition = actor.Layers.find(definition => definition.Id === layer.LayerId)!;
       const sheet = actor.Spritesheets.find(sheet => sheet.Id === definition.SpritesheetId)!;
-      const imagePath = normalize(`${actor.BaseSpritesheetPath}/${sheet.Path}`);
-      ctx.save(); ctx.globalAlpha *= root.AlphaTint / 255 * frame.AlphaTint / 255;
-      ctx.translate(frame.XPosition, frame.YPosition); ctx.rotate(frame.Rotation * Math.PI / 180); ctx.scale(frame.XScale / 100, frame.YScale / 100);
-      const backend = ctx as unknown as { drawTintedImage?: (source: CanvasImageSource, tint: number[], offsets: number[], ...args: number[]) => void };
-      if (backend.drawTintedImage) backend.drawTintedImage(this.image(imagePath), [frame.RedTint / 255, frame.GreenTint / 255, frame.BlueTint / 255, 1], [frame.RedOffset / 255, frame.GreenOffset / 255, frame.BlueOffset / 255], frame.XCrop!, frame.YCrop!, frame.Width!, frame.Height!, -frame.XPivot!, -frame.YPivot!, frame.Width!, frame.Height!);
-      else {
-        const image = this.colorImage(imagePath, [frame.RedTint, frame.GreenTint, frame.BlueTint], [frame.RedOffset, frame.GreenOffset, frame.BlueOffset]);
-        ctx.drawImage(image, frame.XCrop!, frame.YCrop!, frame.Width!, frame.Height!, -frame.XPivot!, -frame.YPivot!, frame.Width!, frame.Height!);
+      const imagePath = normalize(options.spritesheets?.[sheet.Id] ?? `${actor.BaseSpritesheetPath}/${sheet.Path}`);
+      ctx.save(); ctx.globalAlpha *= Math.fround(root.AlphaTint * frame.AlphaTint);
+      const backend = ctx as unknown as {
+        drawTintedImage?: (source: CanvasImageSource, tint: number[], offsets: number[], ...args: number[]) => void;
+        drawTintedImageQuad?: (source: CanvasImageSource, tint: number[], offsets: number[], crop: readonly [number, number, number, number], points: Quad, pixelSize?: number) => void;
+      };
+      const tint = [frame.RedTint, frame.GreenTint, frame.BlueTint, 1];
+      const offsets = [frame.RedOffset, frame.GreenOffset, frame.BlueOffset];
+      if (backend.drawTintedImageQuad) {
+        // The native actor rounds aligned quads on the final display-pixel grid.
+        // Rotated layers retain the sequential f32 coordinates from GetDestQuad.
+        backend.drawTintedImageQuad(this.image(imagePath), tint, offsets,
+          [frame.XCrop!, frame.YCrop!, frame.Width!, frame.Height!], frameQuad(frame, root, [x, y], options.scale), options.pixelSnap ?? 1);
+      } else {
+        ctx.translate(Math.fround(x + root.XPosition), Math.fround(y + root.YPosition));
+        ctx.rotate(root.Rotation * Math.PI / 180); ctx.scale(root.XScale * (options.scale ?? 1), root.YScale * (options.scale ?? 1));
+        ctx.translate(frame.XPosition, frame.YPosition); ctx.rotate(frame.Rotation * Math.PI / 180); ctx.scale(frame.XScale, frame.YScale);
+        const rectangle = [frame.XCrop!, frame.YCrop!, frame.Width!, frame.Height!, -frame.XPivot!, -frame.YPivot!, frame.Width!, frame.Height!];
+        if (backend.drawTintedImage) backend.drawTintedImage(this.image(imagePath), tint, offsets, ...rectangle);
+        else ctx.drawImage(this.colorImage(imagePath, tint.slice(0, 3).map(value => value * 255), offsets.map(value => value * 255)), ...rectangle as [number, number, number, number, number, number, number, number]);
       }
       ctx.restore();
     }
-    ctx.restore();
   }
-  font(ctx: CanvasRenderingContext2D, name: string, text: string, x: number, y: number, options: { scale?: number; color?: string; align?: "left" | "center" | "right" } = {}): void {
+  font(ctx: CanvasRenderingContext2D, name: string, text: string, x: number, y: number, options: { scale?: number; color?: string; align?: "left" | "center" | "right"; pixelSnap?: boolean; measure?: "advance" | "glyph-bounds" } = {}): void {
     const font = (fontData as unknown as Record<string, Font>)[name]; if (!font) throw new Error(`Missing authored font: ${name}`);
     const scale = options.scale ?? 1; const codes = [...text].map(character => character.codePointAt(0)!);
-    const width = codes.reduce((sum, code) => sum + (font.chars[code]?.xadvance ?? 0), 0) * scale;
+    const width = Math.max(0, ...text.split("\n").map(line => fontLineWidth(font, line, options.measure === "glyph-bounds"))) * scale;
     const offset = options.align === "center" ? width / 2 : options.align === "right" ? width : 0;
-    ctx.save(); ctx.translate(x - offset, y); ctx.scale(scale, scale); let cursor = 0;
+    ctx.save(); ctx.translate(options.pixelSnap ? Math.round(x - offset) : x - offset, options.pixelSnap ? Math.round(y) : y); ctx.scale(scale, scale); let cursor = 0, baseline = 0;
     const color = options.color ?? "#ffffff"; const rgb = /^#([0-9a-f]{6})$/i.exec(color); const tint = rgb ? [0, 2, 4].map(i => parseInt(rgb[1]!.slice(i, i + 2), 16)) : [255, 255, 255];
     for (const [i, code] of codes.entries()) {
+      if (code === 10) { cursor = 0; baseline += font.lineHeight; continue; }
       const glyph = font.chars[code]; if (!glyph) continue;
       const previous = codes[i - 1]; cursor += font.kernings.find(kerning => kerning.first === previous && kerning.second === code)?.amount ?? 0;
       if (glyph.width && glyph.height) {
         const backend = ctx as unknown as { drawTintedImage?: (source: CanvasImageSource, tint: number[], offsets: number[], ...args: number[]) => void };
-        if (backend.drawTintedImage) backend.drawTintedImage(this.image(`font/${font.pages[glyph.page]}`), [tint[0]! / 255, tint[1]! / 255, tint[2]! / 255, 1], [0, 0, 0], glyph.x, glyph.y, glyph.width, glyph.height, cursor + glyph.xoffset, glyph.yoffset, glyph.width, glyph.height);
-        else ctx.drawImage(this.colorImage(`font/${font.pages[glyph.page]}`, tint), glyph.x, glyph.y, glyph.width, glyph.height, cursor + glyph.xoffset, glyph.yoffset, glyph.width, glyph.height);
+        if (backend.drawTintedImage) backend.drawTintedImage(this.image(`font/${font.pages[glyph.page]}`), [tint[0]! / 255, tint[1]! / 255, tint[2]! / 255, 1], [0, 0, 0], glyph.x, glyph.y, glyph.width, glyph.height, cursor + glyph.xoffset, baseline + glyph.yoffset, glyph.width, glyph.height);
+        else ctx.drawImage(this.colorImage(`font/${font.pages[glyph.page]}`, tint), glyph.x, glyph.y, glyph.width, glyph.height, cursor + glyph.xoffset, baseline + glyph.yoffset, glyph.width, glyph.height);
       }
       cursor += glyph.xadvance;
     }

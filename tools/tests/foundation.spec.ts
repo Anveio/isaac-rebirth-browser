@@ -6,6 +6,7 @@ import { seedList } from "../foundation/seeds.mjs";
 import { assertGameplayInvariants } from "../foundation/seed-invariants.mjs";
 import { compareStageMaskTargets, loadStageMaskReference, readStageMaskCases } from "../foundation/stage-masks.mjs";
 import { inspectBrowserGraphics } from "../foundation/browser.mjs";
+import { CONTROLLED_BOMB_CHECKPOINTS } from "../foundation/mask-checkpoints.mjs";
 import type { Command, State } from "../../web/engine";
 const ARTIFACTS = process.env.FOUNDATION_BROWSER_ARTIFACTS ?? "test-results/foundation";
 
@@ -46,6 +47,9 @@ test("actual keyboard opens a seeded run, moves and shoots with exact native Rus
 test("game pause freezes movement and release prevents stuck keyboard input", async ({ page }) => {
   await page.goto("/");
   await browserScenario(page);
+  const beforePause = await page.evaluate(() => (window as any).game.trace());
+  expect(beforePause.enabled).toBe(true); expect(beforePause.truncated).toBe(false);
+  const coast = nativeReplay(beforePause.initialSeed, [...beforePause.commands, { type: "tick", count: 30 }]).at(-1)!;
   await page.keyboard.down("KeyD");
   await page.keyboard.press("Escape");
   const paused = await page.evaluate(() => (window as any).game.snapshot()) as State;
@@ -60,13 +64,15 @@ test("game pause freezes movement and release prevents stuck keyboard input", as
   const released = await page.evaluate(() => (window as any).game.snapshot()) as State;
   expect(released.paused).toBe(false);
   expect(released.pressed).not.toContain("KeyD");
-  expect(released.player.x).toBe(after.player.x);
-  expect(released.player.vx).toBe(0);
+  expect(released.player, "Released movement must resume the existing native inertia without adding acceleration").toEqual(coast.player);
+  const trace = await page.evaluate(() => (window as any).game.trace());
+  expect(trace.truncated).toBe(false);
+  expect(nativeReplay(trace.initialSeed, trace.commands)).toEqual(trace.states);
 });
 
 test("releasing a movement key while Control is held clears the actual DOM input state", async ({ page }) => {
   await page.goto("/"); await waitForReady(page);
-  await page.evaluate(() => { const game = (window as any).game; game.pause(); game.reset(game.snapshot().initialSeed); });
+  await page.evaluate(() => { const game = (window as any).game; game.pause(); game.reset(game.snapshot().initialSeed, { trace: true }); });
   for (let index = 0; index < 4; index++) await page.keyboard.press("Enter");
   const before = await page.evaluate(() => (window as any).game.snapshot()) as State;
   expect(before.screen).toBe("playing");
@@ -100,7 +106,7 @@ test("automatic simulation catch-up advances ticks without repeatedly presenting
     };
   });
   await page.goto("/"); await waitForReady(page);
-  await page.evaluate(() => { const game = (window as any).game; game.pause(); game.reset(game.snapshot().initialSeed); });
+  await page.evaluate(() => { const game = (window as any).game; game.pause(); game.reset(game.snapshot().initialSeed, { trace: true }); });
   for (let index = 0; index < 4; index++) await page.keyboard.press("Enter");
   await page.keyboard.down("KeyD");
   const measured = await page.evaluate(async () => {
@@ -223,6 +229,7 @@ test("original GPU shadow and light masks match all complete native targets for 
       let actual: unknown;
       const run = await browserScenario(page, {
         initialSeed: reference.initialSeed, manualSeedText: reference.seedText.replaceAll(" ", ""),
+        bombCheckpoint: CONTROLLED_BOMB_CHECKPOINTS[reference.checkpoint] ? reference.checkpoint : undefined,
         onCheckpoint: async (frame) => {
           if (frame.label === reference.checkpoint) actual = await page.evaluate(() => (window as any).game.rendererTargets());
         },

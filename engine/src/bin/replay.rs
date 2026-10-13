@@ -5,6 +5,8 @@ use std::io::{self, Read};
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 struct Replay {
     initial_seed: u32,
+    #[serde(default)]
+    boot_epoch_seed: u32,
     commands: Vec<Command>,
 }
 fn main() {
@@ -43,7 +45,7 @@ fn main() {
         eprintln!("replay exceeds 36,000 total simulation steps");
         std::process::exit(1);
     }
-    let mut game = match Game::new(replay.initial_seed) {
+    let mut game = match Game::new_with_boot_epoch(replay.initial_seed, replay.boot_epoch_seed) {
         Ok(game) => game,
         Err(error) => {
             eprintln!("{error}");

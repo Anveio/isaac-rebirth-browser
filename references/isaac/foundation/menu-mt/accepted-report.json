@@ -1,0 +1,187 @@
+{
+  "schema": 1,
+  "status": "pass",
+  "gateSources": {
+    "tools/e2e/boot-mt.mjs": "e7c1d27d8d64ce569b42091832ed9118d1aa6c9a46b8b98d422a468cb7d40a6a",
+    "tools/original/boot-mt-observer.py": "6c3fb49fc8a033b49598cc1c3e9bc2ab015ffb676103793c902531abdf5974dc",
+    "tools/original/native-identity.py": "4fd5591be56fc4e9ad0486d0f2ec2828f6389786245ee09f9d0b3a395ae18acb",
+    "tools/original/state-observer.py": "58e3b510abbe5ff57f05844efbdf764e2a02530cda4fa99f538d886d258af6f1",
+    "tools/original/foundation-clock-run.py": "b79997f1fdc983a6e6fac74d87c24d2036ea956021fa944d1c0bd7f04e15a243",
+    "tools/original/foundation-clock-gate.c": "f517f1fc0edf2bbe17021e529fb41652e991e286bef070b8aecefd32bfa62e75",
+    "tools/original/foundation-seeds.py": "dd4633c955e7518e9bc0f0147ddfae46d356468238477a68dc06c86656ccba89",
+    "tools/original/debug-run.py": "d785d32c6cc557959be38880a3b046c4040b988fbe3d06d4a8c1f4aa2e833cf5",
+    "tools/original/with-display.sh": "af469210e803786a60d8632c28a6f2da77bc8ab02cc06be50016ddb25e95b848",
+    "tools/foundation/browser.mjs": "60c4bc851470f47e4dd0399148ce0c1edf351d41fbf7f7e15fa823af5948b4c8",
+    "tools/foundation/production-server.mjs": "e3152b58e2353319ba0963b30439e33c3cc65f84a8c6ebb765c2812486245952",
+    "tools/foundation/verify.mjs": "b28ed8af6bf50a7aa8b6b81f55fd29d0c963285f2d54500d61a4a58925de1d9f",
+    "engine/src/menu_lifecycle.rs": "19a75e1f9ee1debb933ceed4094ae87e5badb0fe6a8466c9dfc041745c93c77b",
+    "engine/src/mt.rs": "715485045a2a0e6625d28fa0b8008e13c9f5e877e91e612358b74f4b4a10e89e",
+    "engine/src/lib.rs": "67401bb63335bf0ab3f5b1e5b9013df38dcc1df7211f3d479071bebff9d2c17e",
+    "engine/src/audio.rs": "d026fad8a0a4645061fa26061947dd5465d1e7e7a1edc86aae1fe733c1627110",
+    "web/main.ts": "4935c7f8fece3fe50544289f011b6fe1825d35749fcf3cfd81c71153a477cef9",
+    "web/trace.ts": "e6a92aa76585548546571c1eb05cdf44d7c9772ded14ef11f0f05144fb335961"
+  },
+  "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "production": {
+    "sha256": "d509c4c25c554b4cdd455f99f42eaf86b76995386c09da7a5a642262ea6e36be",
+    "files": 832,
+    "source": "/workspace/isaac-worktrees/weapons/dist",
+    "scope": "Immutable snapshot of production build bytes; source/native replay equality is checked separately"
+  },
+  "graphics": {
+    "requestedProfile": "mesa",
+    "actualProfile": "mesa",
+    "renderer": "ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL ES 3.2 Mesa 25.0.7-2+deb13u1)",
+    "vendor": "Google Inc. (Mesa)",
+    "version": "OpenGL ES 3.0 (ANGLE 2.1 git hash: unknown hash)",
+    "displayType": "ANGLE_OPENGL_EGL",
+    "devices": [
+      {
+        "vendorId": 0,
+        "deviceId": 0,
+        "vendorString": "Google Inc. (Mesa)",
+        "deviceString": "ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL ES 3.2 Mesa 25.0.7-2+deb13u1)",
+        "driverVendor": "Mesa",
+        "driverVersion": "25.0.7"
+      }
+    ],
+    "observedFrom": "Chromium SystemInfo.getInfo",
+    "scope": "Observed Chromium graphics backend; shader/pixel equality still requires the original reference comparisons"
+  },
+  "scope": "Causal startup and forward Title/Profile/Main/Character initialization: full 624-word MT state, saved player seed, nine saved grid pairs, menu run seed and 179 stat poses at every menu checkpoint, with complete public command and seed-entry provenance. Character-confirm fade/run admission, run/room/ambient random routing and ordinary-run seed use remain separate.",
+  "cases": [
+    {
+      "name": "zero-epoch",
+      "bootEpochSeed": 0,
+      "code": "QSYVKMSE",
+      "status": "pass",
+      "nativeManifestSha256": "0eb6690f8adc9b65fedf8d1e988c46f7e042a20275dc7bc5fc3ffb266b4dc9ac",
+      "comparedMenuCheckpoints": 4,
+      "comparedStateWords": 2496,
+      "comparedGridPairs": 36,
+      "comparedStatPoses": 716,
+      "inputProvenance": {
+        "status": "pass",
+        "commands": 26,
+        "initialSeed": 2076625747,
+        "bootEpochSeed": 0,
+        "runSeedValue": 2076625747
+      }
+    },
+    {
+      "name": "fixed-epoch",
+      "bootEpochSeed": 1700000000,
+      "code": "ZG800TRJ",
+      "status": "pass",
+      "nativeManifestSha256": "51619a13f51459abd6ddfff3ea36c9edf73b9b60207ffd24e8739fc29fb7dd0a",
+      "comparedMenuCheckpoints": 4,
+      "comparedStateWords": 2496,
+      "comparedGridPairs": 36,
+      "comparedStatPoses": 716,
+      "inputProvenance": {
+        "status": "pass",
+        "commands": 26,
+        "initialSeed": 2790397112,
+        "bootEpochSeed": 1700000000,
+        "runSeedValue": 2790397112
+      }
+    },
+    {
+      "name": "random-0",
+      "bootEpochSeed": 2796928130,
+      "code": "ZCQBRD1N",
+      "seedValue": 2809358451,
+      "status": "pass",
+      "nativeManifestSha256": "336b0c83dafcfbefbd8e9fea830965bdfdf5cd08bdf1c8087a67c7fec2ca5e67",
+      "comparedMenuCheckpoints": 4,
+      "comparedStateWords": 2496,
+      "comparedGridPairs": 36,
+      "comparedStatPoses": 716,
+      "inputProvenance": {
+        "status": "pass",
+        "commands": 26,
+        "initialSeed": 2809358451,
+        "bootEpochSeed": 2796928130,
+        "runSeedValue": 2809358451
+      }
+    },
+    {
+      "name": "random-1",
+      "bootEpochSeed": 2457026682,
+      "code": "3J33694K",
+      "seedValue": 3319587202,
+      "status": "pass",
+      "nativeManifestSha256": "51e13a888f6c1d3a5f7a6d7663dbc71e477b45a3b341ad2bbbb8c6e4c4c9bc33",
+      "comparedMenuCheckpoints": 4,
+      "comparedStateWords": 2496,
+      "comparedGridPairs": 36,
+      "comparedStatPoses": 716,
+      "inputProvenance": {
+        "status": "pass",
+        "commands": 26,
+        "initialSeed": 3319587202,
+        "bootEpochSeed": 2457026682,
+        "runSeedValue": 3319587202
+      }
+    },
+    {
+      "name": "random-2",
+      "bootEpochSeed": 24641651,
+      "code": "ELESDL7X",
+      "seedValue": 761691734,
+      "status": "pass",
+      "nativeManifestSha256": "755feaf99397bb2fc3c09d610a8cefd21db84cf7943b4a1df0b2bb1a62e3b30c",
+      "comparedMenuCheckpoints": 4,
+      "comparedStateWords": 2496,
+      "comparedGridPairs": 36,
+      "comparedStatPoses": 716,
+      "inputProvenance": {
+        "status": "pass",
+        "commands": 26,
+        "initialSeed": 761691734,
+        "bootEpochSeed": 24641651,
+        "runSeedValue": 761691734
+      }
+    },
+    {
+      "name": "random-3",
+      "bootEpochSeed": 3726163131,
+      "code": "VNR9W3BW",
+      "seedValue": 3572532889,
+      "status": "pass",
+      "nativeManifestSha256": "2d4ad74cd0d0a4141bb3fa1fc1f19239bdf8134c9dde62736f87e30864e4c97c",
+      "comparedMenuCheckpoints": 4,
+      "comparedStateWords": 2496,
+      "comparedGridPairs": 36,
+      "comparedStatPoses": 716,
+      "inputProvenance": {
+        "status": "pass",
+        "commands": 26,
+        "initialSeed": 3572532889,
+        "bootEpochSeed": 3726163131,
+        "runSeedValue": 3572532889
+      }
+    }
+  ],
+  "gateSourcesEnd": {
+    "tools/e2e/boot-mt.mjs": "e7c1d27d8d64ce569b42091832ed9118d1aa6c9a46b8b98d422a468cb7d40a6a",
+    "tools/original/boot-mt-observer.py": "6c3fb49fc8a033b49598cc1c3e9bc2ab015ffb676103793c902531abdf5974dc",
+    "tools/original/native-identity.py": "4fd5591be56fc4e9ad0486d0f2ec2828f6389786245ee09f9d0b3a395ae18acb",
+    "tools/original/state-observer.py": "58e3b510abbe5ff57f05844efbdf764e2a02530cda4fa99f538d886d258af6f1",
+    "tools/original/foundation-clock-run.py": "b79997f1fdc983a6e6fac74d87c24d2036ea956021fa944d1c0bd7f04e15a243",
+    "tools/original/foundation-clock-gate.c": "f517f1fc0edf2bbe17021e529fb41652e991e286bef070b8aecefd32bfa62e75",
+    "tools/original/foundation-seeds.py": "dd4633c955e7518e9bc0f0147ddfae46d356468238477a68dc06c86656ccba89",
+    "tools/original/debug-run.py": "d785d32c6cc557959be38880a3b046c4040b988fbe3d06d4a8c1f4aa2e833cf5",
+    "tools/original/with-display.sh": "af469210e803786a60d8632c28a6f2da77bc8ab02cc06be50016ddb25e95b848",
+    "tools/foundation/browser.mjs": "60c4bc851470f47e4dd0399148ce0c1edf351d41fbf7f7e15fa823af5948b4c8",
+    "tools/foundation/production-server.mjs": "e3152b58e2353319ba0963b30439e33c3cc65f84a8c6ebb765c2812486245952",
+    "tools/foundation/verify.mjs": "b28ed8af6bf50a7aa8b6b81f55fd29d0c963285f2d54500d61a4a58925de1d9f",
+    "engine/src/menu_lifecycle.rs": "19a75e1f9ee1debb933ceed4094ae87e5badb0fe6a8466c9dfc041745c93c77b",
+    "engine/src/mt.rs": "715485045a2a0e6625d28fa0b8008e13c9f5e877e91e612358b74f4b4a10e89e",
+    "engine/src/lib.rs": "67401bb63335bf0ab3f5b1e5b9013df38dcc1df7211f3d479071bebff9d2c17e",
+    "engine/src/audio.rs": "d026fad8a0a4645061fa26061947dd5465d1e7e7a1edc86aae1fe733c1627110",
+    "web/main.ts": "4935c7f8fece3fe50544289f011b6fe1825d35749fcf3cfd81c71153a477cef9",
+    "web/trace.ts": "e6a92aa76585548546571c1eb05cdf44d7c9772ded14ef11f0f05144fb335961"
+  },
+  "gateSourcesStable": true
+}

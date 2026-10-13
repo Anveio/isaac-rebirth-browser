@@ -1,0 +1,194 @@
+{
+  "schema": 1,
+  "contract": "Fresh ordinary Isaac, authored13x7 curse and first-floor free treasure doors; recorded W0L0LYYM bomb-driven admission and raw1400 fire admission remain mandatory. Exact room/player/HP/immunity/visible door phases, complete authored groups and return metadata; actor/item callbacks and pixels remain separate.",
+  "status": "fail",
+  "sourceBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "productionSha256": "28b028de8cc8213f1c07d83d564867fbb4a7fd161a3804887f1a87884c3e090a",
+  "comparedPhases": 559,
+  "sourceInputsOnly": true,
+  "stateInjection": false,
+  "evidenceScope": "Public X11/DOM controls, immutable production WASM, independently read-only source room/player/grid observations. These retained results never enter production.",
+  "cases": [
+    {
+      "seed": "63B9JKF8",
+      "runSeed": 3920399321,
+      "selection": "contrived opposite-phase curse entry/exit",
+      "status": "pass",
+      "comparedPhases": 120,
+      "manifestSha256": "809fa6e5a0deae0d446853e593e783323524ef108bd5dced4109ab5064c255f4",
+      "originalLogSha256": "73ee8917409f2842123427e2299f37e8b6a345726049273f6e9072b48bcb21d5",
+      "currentDescriptorIndex": 6,
+      "template": {
+        "assetStage": 0,
+        "type": 1,
+        "variant": 2,
+        "name": "Start Room",
+        "width": 13,
+        "height": 7,
+        "shapeIndex": 0
+      },
+      "sourceFinal": {
+        "position": [
+          320.0,
+          400.0
+        ],
+        "velocity": [
+          0.0,
+          0.0
+        ],
+        "hp": 4,
+        "damageCooldown": 30
+      },
+      "browserFinal": {
+        "position": [
+          240,
+          214
+        ],
+        "velocity": [
+          0,
+          0
+        ],
+        "hp": 4,
+        "damageCooldown": 30
+      },
+      "comparisonFailures": []
+    },
+    {
+      "seed": "W0L0LYYM",
+      "runSeed": 2591693487,
+      "selection": "mandatory recorded OS-random bomb-driven treasure admission",
+      "status": "fail",
+      "comparedPhases": 144,
+      "manifestSha256": "9d36ac315677357c6c62a888c3dc1023e35c4aaa147d78c7b3c2ee0692008dc8",
+      "originalLogSha256": "a1a4cbf0141337287b2179e064c480d04a787f78a520db301f2241581fab0433",
+      "currentDescriptorIndex": 3,
+      "template": {
+        "assetStage": 0,
+        "type": 4,
+        "variant": 8,
+        "name": " (copy)",
+        "width": 13,
+        "height": 7,
+        "shapeIndex": 0
+      },
+      "sourceFinal": {
+        "position": [
+          320.0,
+          400.0
+        ],
+        "velocity": [
+          0.0,
+          0.0
+        ],
+        "hp": 4,
+        "damageCooldown": 108
+      },
+      "browserFinal": {
+        "position": [
+          240,
+          214
+        ],
+        "velocity": [
+          0,
+          0
+        ],
+        "hp": 4,
+        "damageCooldown": 108
+      },
+      "comparisonFailures": [
+        {
+          "label": "bomb-door-132",
+          "error": "AssertionError [ERR_ASSERTION]: bomb-door-132:complete supported native admission multiset with subtype/seed/position\n+ actual - expected\n\n+ []\n- [\n-   '[33,0,0,2659702953,400,240]',\n-   '[33,0,1,3393345672,320,200]',\n-   '[33,0,2,4165951145,240,240]'\n- ]\n"
+        }
+      ]
+    },
+    {
+      "seed": "8BHNR2XF",
+      "runSeed": 4288788511,
+      "selection": "recorded OS-random authored no-hostile curse-room route",
+      "status": "pass",
+      "comparedPhases": 120,
+      "manifestSha256": "761f5be37ea1df22f6c6fe7587bf2dc4bd13161dd53221f1300ef6bdcffdd664",
+      "originalLogSha256": "5194e31c27381733b40df6561fe914c991e6edf0009288a2f4d575411f7233da",
+      "currentDescriptorIndex": 6,
+      "template": {
+        "assetStage": 0,
+        "type": 1,
+        "variant": 2,
+        "name": "Start Room",
+        "width": 13,
+        "height": 7,
+        "shapeIndex": 0
+      },
+      "sourceFinal": {
+        "position": [
+          320.0,
+          400.0
+        ],
+        "velocity": [
+          0.0,
+          0.0
+        ],
+        "hp": 4,
+        "damageCooldown": 31
+      },
+      "browserFinal": {
+        "position": [
+          240,
+          214
+        ],
+        "velocity": [
+          0,
+          0
+        ],
+        "hp": 4,
+        "damageCooldown": 31
+      },
+      "comparisonFailures": []
+    },
+    {
+      "seed": "3GWXBB2W",
+      "runSeed": 3326758778,
+      "selection": "recorded OS-random free-treasure doorway/return",
+      "status": "pass",
+      "comparedPhases": 175,
+      "manifestSha256": "2598a66db5e52a840f417157fd14a1c577bd72893705c6f60ca6fbdd0f50b9f8",
+      "originalLogSha256": "71e43c77a65dbc7333b61f1d79dcd5f751013fb04e4219c427b149cddfba7771",
+      "currentDescriptorIndex": 6,
+      "template": {
+        "assetStage": 0,
+        "type": 1,
+        "variant": 2,
+        "name": "Start Room",
+        "width": 13,
+        "height": 7,
+        "shapeIndex": 0
+      },
+      "sourceFinal": {
+        "position": [
+          320.0,
+          160.0
+        ],
+        "velocity": [
+          0.0,
+          0.0
+        ],
+        "hp": 6,
+        "damageCooldown": 0
+      },
+      "browserFinal": {
+        "position": [
+          240,
+          58
+        ],
+        "velocity": [
+          0,
+          0
+        ],
+        "hp": 6,
+        "damageCooldown": 0
+      },
+      "comparisonFailures": []
+    }
+  ]
+}

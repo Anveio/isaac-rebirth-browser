@@ -1,0 +1,172 @@
+{
+  "schema": 1,
+  "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "scope": "Static reference ELF landmarks only; these addresses are never runtime port inputs. Fresh live original/browser comparisons use ordinary public controls and read-only native data.",
+  "nativePlayerFields": {
+    "fireCooldown": {
+      "offset": "0xc74",
+      "type": "i32"
+    },
+    "maxFireDelay": {
+      "offset": "0xc78",
+      "type": "i32"
+    },
+    "headTimer": {
+      "offset": "0xbb0",
+      "type": "i32"
+    },
+    "headAnimationFrame": {
+      "offset": "0x268",
+      "type": "f32"
+    },
+    "position": {
+      "offset": "0x448",
+      "type": "[f32;2]",
+      "projection": "[x*0.65+32,y*0.65-46]"
+    },
+    "velocity": {
+      "offset": "0x464",
+      "type": "[f32;2]",
+      "projection": "[vx*0.65,vy*0.65]"
+    }
+  },
+  "contracts": [
+    {
+      "id": "full-admission-fence",
+      "start": "0x454e51",
+      "stopExclusive": "0x454ee5",
+      "contract": "Full actor traversal keeps the last admitted pointer from entry; stops when it reaches that actor even if the live array grew.",
+      "instructions": [
+        ["0x454e51", "mov    eax,DWORD PTR [rbx+0x74]"],
+        ["0x454e54", "mov    DWORD PTR [rbx+0xd4],0x0"],
+        ["0x454e5e", "movss  DWORD PTR [rsp+0x10],xmm0"],
+        ["0x454e64", "movss  DWORD PTR [rsp+0x1c],xmm0"],
+        ["0x454e6a", "lea    ecx,[rax-0x1]"],
+        ["0x454e6d", "mov    r12,QWORD PTR [rdx+rcx*8]"],
+        ["0x454e71", "xor    edi,edi"],
+        ["0x454e73", "test   eax,eax"],
+        ["0x454e75", "mov    esi,0x66b460"],
+        ["0x454e7a", "setne  dil"],
+        ["0x454e7e", "xor    eax,eax"],
+        ["0x454e80", "call   610580"],
+        ["0x454e85", "mov    rax,QWORD PTR [rbx+0x68]"],
+        ["0x454e89", "mov    edx,ebp"],
+        ["0x454e8b", "mov    rdx,QWORD PTR [rax+rdx*8]"],
+        ["0x454e8f", "cmp    BYTE PTR [rdx+0x31e],0x0"],
+        ["0x454e96", "je     454ed0"],
+        ["0x454e98", "mov    eax,DWORD PTR [rdx+0x318]"],
+        ["0x454e9e", "test   al,0x8"],
+        ["0x454ea0", "jne    4552b0"],
+        ["0x454ea6", "mov    rax,QWORD PTR [rdx]"],
+        ["0x454ea9", "mov    rdi,rdx"],
+        ["0x454eac", "mov    QWORD PTR [rsp+0x8],rdx"],
+        ["0x454eb1", "call   QWORD PTR [rax+0x18]"],
+        ["0x454eb4", "mov    rdx,QWORD PTR [rsp+0x8]"],
+        ["0x454eb9", "cmp    BYTE PTR [rdx+0x31e],0x0"],
+        ["0x454ec0", "jne    4552bb"],
+        ["0x454ec6", "cs nop WORD PTR [rax+rax*1+0x0]"],
+        ["0x454ed0", "mov    r13d,0x1"],
+        ["0x454ed6", "cmp    rdx,r12"],
+        ["0x454ed9", "je     454ee5"],
+        ["0x454edb", "mov    eax,DWORD PTR [rbx+0x74]"],
+        ["0x454ede", "add    ebp,0x1"],
+        ["0x454ee1", "cmp    ebp,eax"],
+        ["0x454ee3", "jb     454e71"]
+      ]
+    },
+    {
+      "id": "intermediate-live-admission",
+      "start": "0x5cd927",
+      "stopExclusive": "0x5cd996",
+      "contract": "Intermediate traversal reads the live array length after dispatch; players update under the intermediate flag, nonplayers call virtual render/prediction.",
+      "instructions": [
+        ["0x5cd927", "mov    eax,DWORD PTR [rdi+0x1644]"],
+        ["0x5cd92d", "test   eax,eax"],
+        ["0x5cd92f", "je     5cd996"],
+        ["0x5cd931", "xor    ebp,ebp"],
+        ["0x5cd933", "jmp    5cd94e"],
+        ["0x5cd935", "nop    DWORD PTR [rax]"],
+        ["0x5cd938", "mov    rax,QWORD PTR [rbx]"],
+        ["0x5cd93b", "mov    rdi,rbx"],
+        ["0x5cd93e", "add    ebp,0x1"],
+        ["0x5cd941", "call   QWORD PTR [rax+0x20]"],
+        ["0x5cd944", "cmp    DWORD PTR [r12+0x1644],ebp"],
+        ["0x5cd94c", "jbe    5cd996"],
+        ["0x5cd94e", "mov    rax,QWORD PTR [r12+0x1638]"],
+        ["0x5cd956", "mov    edx,ebp"],
+        ["0x5cd958", "mov    rbx,QWORD PTR [rax+rdx*8]"],
+        ["0x5cd95c", "cmp    DWORD PTR [rbx+0x10],0x1"],
+        ["0x5cd960", "jne    5cd938"],
+        ["0x5cd962", "mov    rax,QWORD PTR [rbx]"],
+        ["0x5cd965", "or     DWORD PTR [rbx+0x318],0x4000"],
+        ["0x5cd96f", "mov    rdi,rbx"],
+        ["0x5cd972", "add    ebp,0x1"],
+        ["0x5cd975", "call   QWORD PTR [rax+0x18]"],
+        ["0x5cd978", "xor    esi,esi"],
+        ["0x5cd97a", "mov    rdi,rbx"],
+        ["0x5cd97d", "call   443d00"],
+        ["0x5cd982", "and    DWORD PTR [rbx+0x318],0xffffbfff"],
+        ["0x5cd98c", "cmp    DWORD PTR [r12+0x1644],ebp"],
+        ["0x5cd994", "ja     5cd94e"]
+      ]
+    },
+    {
+      "id": "full-only-cooldown",
+      "start": "0x52f66f",
+      "stopExclusive": "0x52f6b7",
+      "contract": "Signed fire cooldown decrements only when nonnegative and the intermediate flag is clear; head mouth frame is selected from the pre-decrement timer >8.",
+      "instructions": [
+        ["0x52f66f", "mov    eax,DWORD PTR [rbx+0xc74]"],
+        ["0x52f675", "test   eax,eax"],
+        ["0x52f677", "js     52f68b"],
+        ["0x52f679", "test   BYTE PTR [rbx+0x319],0x40"],
+        ["0x52f680", "jne    52f68b"],
+        ["0x52f682", "sub    eax,0x1"],
+        ["0x52f685", "mov    DWORD PTR [rbx+0xc74],eax"],
+        ["0x52f68b", "cmp    DWORD PTR [rbx+0xd80],0x2"],
+        ["0x52f692", "je     52f8a0"],
+        ["0x52f698", "mov    eax,DWORD PTR [rbx+0xbb0]"],
+        ["0x52f69e", "cmp    eax,0x8"],
+        ["0x52f6a1", "jg     52f8b8"],
+        ["0x52f6a7", "test   eax,eax"],
+        ["0x52f6a9", "mov    DWORD PTR [rsp+0x30],0x0"],
+        ["0x52f6b1", "jns    52f8c0"]
+      ]
+    },
+    {
+      "id": "full-only-head-timer",
+      "start": "0x52f8b8",
+      "stopExclusive": "0x52f8d6",
+      "contract": "Mouth frame2 is selected before the head timer decrement; intermediate flag skips decrement.",
+      "instructions": [
+        ["0x52f8b8", "mov    DWORD PTR [rsp+0x30],0x2"],
+        ["0x52f8c0", "test   BYTE PTR [rbx+0x319],0x40"],
+        ["0x52f8c7", "jne    52f6b7"],
+        ["0x52f8cd", "sub    eax,0x1"],
+        ["0x52f8d0", "mov    DWORD PTR [rbx+0xbb0],eax"]
+      ]
+    },
+    {
+      "id": "regular-shot-reset",
+      "start": "0x51c7a7",
+      "stopExclusive": "0x51c7ef",
+      "contract": "Regular shot resets cooldown to maxFireDelay and head timer to max(11,trunc(f32(maxFireDelay)*f32(.45))+7).",
+      "instructions": [
+        ["0x51c7a7", "mov    eax,DWORD PTR [rbp+0xc78]"],
+        ["0x51c7ad", "neg    BYTE PTR [rbp+0xd70]"],
+        ["0x51c7b3", "mov    DWORD PTR [rbp+0xc74],eax"],
+        ["0x51c7b9", "cmp    DWORD PTR [rbp+0xbfc],0x2"],
+        ["0x51c7c0", "je     51d695"],
+        ["0x51c7c6", "cvtsi2ss xmm0,eax"],
+        ["0x51c7ca", "mov    eax,0xb"],
+        ["0x51c7cf", "mulss  xmm0,DWORD PTR [rip+0x152865]        # 66f03c"],
+        ["0x51c7d7", "cvttss2si edx,xmm0"],
+        ["0x51c7db", "add    edx,0x7"],
+        ["0x51c7de", "cmp    edx,0xa"],
+        ["0x51c7e1", "cmovg  eax,edx"],
+        ["0x51c7e4", "cmp    BYTE PTR [rsp+0x38],0x0"],
+        ["0x51c7e9", "mov    DWORD PTR [rbp+0xbb0],eax"]
+      ]
+    }
+  ]
+}

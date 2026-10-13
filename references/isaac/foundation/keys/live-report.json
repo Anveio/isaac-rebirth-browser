@@ -1,0 +1,430 @@
+{
+  "schema": 1,
+  "status": "pass",
+  "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "production": {
+    "sha256": "ea9bf33bca18cb662762ed93277f0e5027635a74628bb2826fcdc2dd229dabf4",
+    "files": 833,
+    "source": "/workspace/isaac-worktrees/inventory/dist",
+    "scope": "Immutable snapshot of production build bytes; source/native replay equality is checked separately"
+  },
+  "selection": {
+    "scope": "Complete selected cohort"
+  },
+  "gateSources": {
+    "tools/e2e/keys.mjs": "3dd3756fcf8fa07d2befc64cb10fee481a43a9eabe7f4c6cfbe80bd654923f61",
+    "tools/original/key-scenarios.py": "19e7c89700ad5d293daf68db8cbc76c0ed66421963421760022c7ee569e11797",
+    "tools/original/rock-blast-scenarios.py": "f896f63cc2f4e66487c7c75d68561b1efb46b989cf92dad09f687f3c4621ca65",
+    "tools/foundation/decode-rooms.py": "4640cce2c99d0ef09d6691cf42c021f012e16ed3752bace965ad18dca7250f1a",
+    "tools/original/foundation-seeds.py": "dd4633c955e7518e9bc0f0147ddfae46d356468238477a68dc06c86656ccba89",
+    "tools/original/foundation-pickup-observe.py": "db3fb995087575a039b77c8b87e07bbaa3cdef208adea166b8de07055754b90b",
+    "tools/original/foundation-clock-run.py": "b79997f1fdc983a6e6fac74d87c24d2036ea956021fa944d1c0bd7f04e15a243",
+    "tools/original/foundation-clock-gate.c": "f517f1fc0edf2bbe17021e529fb41652e991e286bef070b8aecefd32bfa62e75",
+    "tools/original/foundation-clock-verify.py": "c488100a187b44803c06374535715eaa5a7cde9d4513f6e866e090367d4f2054",
+    "tools/original/state-observer.py": "58e3b510abbe5ff57f05844efbdf764e2a02530cda4fa99f538d886d258af6f1",
+    "tools/original/with-display.sh": "af469210e803786a60d8632c28a6f2da77bc8ab02cc06be50016ddb25e95b848",
+    "tools/foundation/production-server.mjs": "e3152b58e2353319ba0963b30439e33c3cc65f84a8c6ebb765c2812486245952",
+    "tools/foundation/browser.mjs": "60c4bc851470f47e4dd0399148ce0c1edf351d41fbf7f7e15fa823af5948b4c8",
+    "web/trace.ts": "e6a92aa76585548546571c1eb05cdf44d7c9772ded14ef11f0f05144fb335961",
+    "tools/original/key-observer.py": "a440fb0667a5885e3f114aae6a315c7ad893c398c0398df156ddc4c0c7ae8170",
+    "tools/original/audio-observer.py": "448bc722f76f890c2dd07dc3635c65ceebe1fdcafe30a2ac0b828f59df491b0c"
+  },
+  "graphics": {
+    "requestedProfile": "mesa",
+    "actualProfile": "mesa",
+    "renderer": "ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL ES 3.2 Mesa 25.0.7-2+deb13u1)",
+    "vendor": "Google Inc. (Mesa)",
+    "version": "OpenGL ES 3.0 (ANGLE 2.1 git hash: unknown hash)",
+    "displayType": "ANGLE_OPENGL_EGL",
+    "devices": [
+      {
+        "vendorId": 0,
+        "deviceId": 0,
+        "vendorString": "Google Inc. (Mesa)",
+        "deviceString": "ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL ES 3.2 Mesa 25.0.7-2+deb13u1)",
+        "driverVendor": "Mesa",
+        "driverVersion": "25.0.7"
+      }
+    ],
+    "observedFrom": "Chromium SystemInfo.getInfo",
+    "scope": "Observed Chromium graphics backend; shader/pixel equality still requires the original reference comparisons"
+  },
+  "scope": "Live public-seed secret-room regular key admission, local subtype RNG, full-phase animation/contact/collection, inventory, actor cleanup and actual native key SFX slot admission. Golden keys, item modifiers, keeper NPC behavior, total shared MT/sample identity, key spending and pixels remain unaccepted.",
+  "cases": [
+    {
+      "name": "key-phase-0",
+      "code": "JF2DSF92",
+      "seedValue": 1319061482,
+      "delay": 0,
+      "actions": [
+        {
+          "key": null,
+          "frames": 60
+        },
+        {
+          "key": "e",
+          "frames": 1
+        },
+        {
+          "key": "w",
+          "frames": 35
+        },
+        {
+          "key": null,
+          "frames": 20
+        },
+        {
+          "key": null,
+          "frames": 78
+        },
+        {
+          "key": "s",
+          "frames": 45
+        },
+        {
+          "key": null,
+          "frames": 40
+        },
+        {
+          "key": "a",
+          "frames": 13
+        },
+        {
+          "key": null,
+          "frames": 20
+        },
+        {
+          "key": "s",
+          "frames": 25
+        },
+        {
+          "key": null,
+          "frames": 30
+        },
+        {
+          "key": "d",
+          "frames": 25
+        },
+        {
+          "key": null,
+          "frames": 30
+        }
+      ],
+      "entropy": "Contrived public collection phase offset",
+      "status": "pass",
+      "failures": [],
+      "seedReadback": {
+        "seedText": "JF2DSF92",
+        "seedValid": true,
+        "seededRun": true,
+        "runSeed": "JF2DSF92",
+        "runSeedValue": 1319061482
+      },
+      "trace": {
+        "inputTraceTruncated": false,
+        "stateHistoryTruncated": false,
+        "stateHistoryTruncationReason": null,
+        "inputEncodedBytes": 11738,
+        "stateEncodedBytes": 31302353
+      },
+      "comparedPresentations": 422,
+      "passedPresentations": 422,
+      "admittedKeys": 2,
+      "collections": [
+        {
+          "presentation": 353,
+          "amount": 1
+        },
+        {
+          "presentation": 393,
+          "amount": 1
+        }
+      ],
+      "detonation": 181,
+      "nativeManifestSha256": "e90fd5ae4ab79e8c8841a741939a35864589d3ffd70fcf5b2fc8d51cfcca908d",
+      "nativeManifest": "/workspace/isaac-worktrees/inventory/.cache/e2e/keys/reviewed-final/key-phase-0/original/manifest.json"
+    },
+    {
+      "name": "key-phase-1",
+      "code": "JF2DSF92",
+      "seedValue": 1319061482,
+      "delay": 1,
+      "actions": [
+        {
+          "key": null,
+          "frames": 61
+        },
+        {
+          "key": "e",
+          "frames": 1
+        },
+        {
+          "key": "w",
+          "frames": 35
+        },
+        {
+          "key": null,
+          "frames": 20
+        },
+        {
+          "key": null,
+          "frames": 78
+        },
+        {
+          "key": "s",
+          "frames": 45
+        },
+        {
+          "key": null,
+          "frames": 40
+        },
+        {
+          "key": "a",
+          "frames": 13
+        },
+        {
+          "key": null,
+          "frames": 20
+        },
+        {
+          "key": "s",
+          "frames": 25
+        },
+        {
+          "key": null,
+          "frames": 30
+        },
+        {
+          "key": "d",
+          "frames": 25
+        },
+        {
+          "key": null,
+          "frames": 30
+        }
+      ],
+      "entropy": "Contrived public collection phase offset",
+      "status": "pass",
+      "failures": [],
+      "seedReadback": {
+        "seedText": "JF2DSF92",
+        "seedValid": true,
+        "seededRun": true,
+        "runSeed": "JF2DSF92",
+        "runSeedValue": 1319061482
+      },
+      "trace": {
+        "inputTraceTruncated": false,
+        "stateHistoryTruncated": false,
+        "stateHistoryTruncationReason": null,
+        "inputEncodedBytes": 11763,
+        "stateEncodedBytes": 31347107
+      },
+      "comparedPresentations": 423,
+      "passedPresentations": 423,
+      "admittedKeys": 2,
+      "collections": [
+        {
+          "presentation": 355,
+          "amount": 1
+        },
+        {
+          "presentation": 395,
+          "amount": 1
+        }
+      ],
+      "detonation": 181,
+      "nativeManifestSha256": "2e4be6d69ce5b2e3b5d1863e00e88ca2e5f9d029bc5ea68a9808d0dd7bd9d74b",
+      "nativeManifest": "/workspace/isaac-worktrees/inventory/.cache/e2e/keys/reviewed-final/key-phase-1/original/manifest.json"
+    },
+    {
+      "name": "random-key-0",
+      "code": "2FE8EQ1V",
+      "seedValue": 3467025863,
+      "delay": 0,
+      "actions": [
+        {
+          "key": null,
+          "frames": 60
+        },
+        {
+          "key": "e",
+          "frames": 1
+        },
+        {
+          "key": "w",
+          "frames": 35
+        },
+        {
+          "key": null,
+          "frames": 20
+        },
+        {
+          "key": null,
+          "frames": 78
+        },
+        {
+          "key": "s",
+          "frames": 45
+        },
+        {
+          "key": null,
+          "frames": 40
+        },
+        {
+          "key": "a",
+          "frames": 13
+        },
+        {
+          "key": null,
+          "frames": 20
+        },
+        {
+          "key": "s",
+          "frames": 25
+        },
+        {
+          "key": null,
+          "frames": 30
+        },
+        {
+          "key": "d",
+          "frames": 25
+        },
+        {
+          "key": null,
+          "frames": 30
+        }
+      ],
+      "entropy": "OS secrets",
+      "discoveryAttempts": 129,
+      "status": "pass",
+      "failures": [],
+      "seedReadback": {
+        "seedText": "2FE8EQ1V",
+        "seedValid": true,
+        "seededRun": true,
+        "runSeed": "2FE8EQ1V",
+        "runSeedValue": 3467025863
+      },
+      "trace": {
+        "inputTraceTruncated": false,
+        "stateHistoryTruncated": false,
+        "stateHistoryTruncationReason": null,
+        "inputEncodedBytes": 11738,
+        "stateEncodedBytes": 31325887
+      },
+      "comparedPresentations": 422,
+      "passedPresentations": 422,
+      "admittedKeys": 2,
+      "collections": [
+        {
+          "presentation": 353,
+          "amount": 1
+        },
+        {
+          "presentation": 393,
+          "amount": 1
+        }
+      ],
+      "detonation": 181,
+      "nativeManifestSha256": "956d685b0dd2c3f9cc7511037adaa9d56cac5030cf92748acb88cbb7281864a0",
+      "nativeManifest": "/workspace/isaac-worktrees/inventory/.cache/e2e/keys/reviewed-final/random-key-0/original/manifest.json"
+    },
+    {
+      "name": "random-key-1",
+      "code": "FJRF6L1J",
+      "seedValue": 636559831,
+      "delay": 1,
+      "actions": [
+        {
+          "key": null,
+          "frames": 61
+        },
+        {
+          "key": "e",
+          "frames": 1
+        },
+        {
+          "key": "w",
+          "frames": 35
+        },
+        {
+          "key": null,
+          "frames": 20
+        },
+        {
+          "key": null,
+          "frames": 78
+        },
+        {
+          "key": "s",
+          "frames": 45
+        },
+        {
+          "key": null,
+          "frames": 40
+        },
+        {
+          "key": "a",
+          "frames": 13
+        },
+        {
+          "key": null,
+          "frames": 20
+        },
+        {
+          "key": "s",
+          "frames": 25
+        },
+        {
+          "key": null,
+          "frames": 30
+        },
+        {
+          "key": "d",
+          "frames": 25
+        },
+        {
+          "key": null,
+          "frames": 30
+        }
+      ],
+      "entropy": "OS secrets",
+      "discoveryAttempts": 156,
+      "status": "pass",
+      "failures": [],
+      "seedReadback": {
+        "seedText": "FJRF6L1J",
+        "seedValid": true,
+        "seededRun": true,
+        "runSeed": "FJRF6L1J",
+        "runSeedValue": 636559831
+      },
+      "trace": {
+        "inputTraceTruncated": false,
+        "stateHistoryTruncated": false,
+        "stateHistoryTruncationReason": null,
+        "inputEncodedBytes": 11763,
+        "stateEncodedBytes": 31720845
+      },
+      "comparedPresentations": 423,
+      "passedPresentations": 423,
+      "admittedKeys": 2,
+      "collections": [
+        {
+          "presentation": 355,
+          "amount": 1
+        },
+        {
+          "presentation": 395,
+          "amount": 1
+        }
+      ],
+      "detonation": 181,
+      "nativeManifestSha256": "7c2cd74bd5246c7dac8bb30f04847d36c49c6598dd6e7513a72cf9afb39c2ceb",
+      "nativeManifest": "/workspace/isaac-worktrees/inventory/.cache/e2e/keys/reviewed-final/random-key-1/original/manifest.json"
+    }
+  ],
+  "gateSourcesStable": true
+}

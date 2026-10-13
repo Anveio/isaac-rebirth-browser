@@ -1,6 +1,8 @@
 import './style.css';
 import { Engine, type Command } from './engine';
 import { Renderer } from './renderer';
+import { ReplayTrace } from './trace';
+import { AudioRuntime } from './audio';
 
 const canvas = document.querySelector<HTMLCanvasElement>('#game')!;
 const status = document.querySelector<HTMLElement>('#status')!;
@@ -13,32 +15,40 @@ async function boot() {
     return value;
   };
   let initialSeed = randomSeed();
-  const [engine, renderer] = await Promise.all([Engine.create(initialSeed), Renderer.load(canvas)]);
+  const bootEpochSeed = Math.floor(Date.now() / 1000) >>> 0;
+  const [engine, renderer, audio] = await Promise.all([Engine.create(initialSeed, bootEpochSeed), Renderer.load(canvas), AudioRuntime.load()]);
   let automaticPaused = false;
+  let lifecyclePaused = !document.hasFocus() || document.hidden;
   let accumulator = 0;
   let previous = performance.now();
-  const commands: Command[] = [];
-  const states = [engine.snapshot()];
-  let traceTruncated = false;
-  const dispatch = (command: Command, render = true) => {
+  let currentState = engine.snapshot();
+  let trace = new ReplayTrace(initialSeed, false, currentState);
+  const dispatch = (command: Command, render = true, backendAudioTime?: number) => {
     const state = engine.command(command);
-    if (commands.length < 36_000) {
-      commands.push(structuredClone(command));
-      states.push(state);
-    } else traceTruncated = true;
+    currentState = state;
+    audio.consume(state.audio.events);
+    audio.music.consume(state.music);
+    if (backendAudioTime === undefined) trace.record(command, state);
+    else if (command.type === 'musicBackend') trace.recordBackend(command, state, backendAudioTime);
+    else throw new Error('Backend event metadata requires an actual music callback');
     if (render) renderer.draw(state);
     return state;
   };
-  const supported = new Set(['Enter', 'Escape', 'Tab', 'Backspace', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyW', 'KeyA', 'KeyS', 'KeyD']);
+  audio.music.onBackend((command, audioTime) => dispatch(command, false, audioTime));
+  audio.music.consume(currentState.music);
+  const supported = new Set(['Enter', 'Escape', 'Tab', 'Backspace', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyE']);
   function keyboard(event: KeyboardEvent, down: boolean) {
+    if (down && event.isTrusted) void audio.unlock().catch(console.error);
     if (down && (event.ctrlKey || event.altKey || event.metaKey)) return;
-    const seedText = engine.snapshot().screen === 'seed' && /^[a-z0-9]$/i.test(event.key);
+    const seedText = currentState.screen === 'seed' && /^[a-z0-9]$/i.test(event.key);
     if (!supported.has(event.code) && !seedText) return;
     event.preventDefault();
     if (down && event.repeat) return;
     try {
       if (seedText) {
         if (down) dispatch({ type: 'text', text: event.key.toUpperCase() });
+        else if (supported.has(event.code) && currentState.pressed.includes(event.code))
+          dispatch({ type: 'key', code: event.code, down: false });
       } else dispatch({ type: 'key', code: event.code, down });
     } catch (error) {
       status.textContent = String(error);
@@ -50,41 +60,55 @@ async function boot() {
   window.addEventListener('keyup', (event) => keyboard(event, false));
   window.addEventListener('blur', () => {
     for (const code of supported) dispatch({ type: 'key', code, down: false });
-    automaticPaused = true;
+    lifecyclePaused = true;
+    accumulator = 0;
   });
-  canvas.addEventListener('pointerdown', () => { canvas.focus(); automaticPaused = false; });
+  window.addEventListener('focus', () => {
+    lifecyclePaused = document.hidden;
+    accumulator = 0;
+    previous = performance.now();
+  });
+  document.addEventListener('visibilitychange', () => {
+    lifecyclePaused = document.hidden || !document.hasFocus();
+    accumulator = 0;
+    previous = performance.now();
+  });
+  canvas.addEventListener('pointerdown', (event) => {
+    canvas.focus();
+    if (event.isTrusted) void audio.unlock().catch(console.error);
+  });
   function frame(now: number) {
     const elapsed = Math.min(now - previous, 250);
     previous = now;
-    if (!automaticPaused) {
+    if (!automaticPaused && !lifecyclePaused) {
       accumulator += elapsed;
       while (accumulator >= 1000 / 60) {
         dispatch({ type: 'tick', count: 1 }, false);
         accumulator -= 1000 / 60;
       }
     }
-    renderer.draw(engine.snapshot());
+    renderer.draw(currentState);
     requestAnimationFrame(frame);
   }
   const game = {
     snapshot: () => engine.snapshot(),
     rendererTargets: () => renderer.debugTargets(),
-    graphicsContracts: () => renderer.debugGraphicsContracts(),
-    command: dispatch,
-    step: (count = 1) => dispatch({ type: 'tick', count }),
+    audio: () => audio.snapshot(),
+    command: (command: Command) => structuredClone(dispatch(command)),
+    step: (count = 1) => structuredClone(dispatch({ type: 'tick', count })),
     pause: () => { automaticPaused = true; accumulator = 0; },
     resume: () => { automaticPaused = false; accumulator = 0; previous = performance.now(); },
-    reset: (seed = randomSeed()) => {
-      engine.reset(seed);
+    reset: (seed = randomSeed(), options: { trace?: boolean; bootEpochSeed?: number } = {}) => {
+      currentState = engine.reset(seed, options.bootEpochSeed ?? 0);
+      audio.reset(options.trace === true);
       initialSeed = seed;
-      commands.length = 0;
-      traceTruncated = false;
-      states.splice(0, states.length, engine.snapshot());
+      trace = new ReplayTrace(initialSeed, options.trace === true, currentState);
+      audio.music.consume(currentState.music);
       accumulator = 0;
-      renderer.draw(engine.snapshot());
+      renderer.draw(currentState);
       return engine.snapshot();
     },
-    trace: () => ({ schema: 1, tickRate: 60, initialSeed, truncated: traceTruncated, commands: structuredClone(commands), states: structuredClone(states) }),
+    trace: () => trace.snapshot(),
     capture: () => {
       const start = performance.now();
       const state = engine.snapshot();
@@ -101,7 +125,7 @@ async function boot() {
     },
   };
   Object.assign(window, { game });
-  renderer.draw(engine.snapshot());
+  renderer.draw(currentState);
   status.hidden = true;
   document.body.dataset.ready = 'true';
   canvas.focus();

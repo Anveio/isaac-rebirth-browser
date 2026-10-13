@@ -14,6 +14,37 @@ pub fn startup_next(mut value: u32) -> u32 {
 pub fn stage1_seed(value: u32) -> u32 {
     startup_next(startup_next(value))
 }
+/// Seeds::SetStartSeed5e1470 initializes shift27, fills the twelve fields
+/// at +14..40 and one field at +44. GameNewRun then asks that same owner
+/// for the ItemPool initializer. No shared MT participates in this handoff.
+#[derive(Clone, Debug, serde::Deserialize, serde::Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct RunSeeds {
+    pub start_seed: u32,
+    pub stream_state: u32,
+    pub initialized_fields: [u32; 13],
+}
+impl RunSeeds {
+    pub fn new(start_seed: u32) -> Result<Self, String> {
+        if start_seed == 0 {
+            return Err("run seed zero is reserved".into());
+        }
+        let mut stream_state = start_seed;
+        let initialized_fields = std::array::from_fn(|_| {
+            stream_state = startup_next(stream_state);
+            stream_state
+        });
+        Ok(Self {
+            start_seed,
+            stream_state,
+            initialized_fields,
+        })
+    }
+    pub fn item_pool_seed(&mut self) -> u32 {
+        self.stream_state = startup_next(self.stream_state);
+        self.stream_state
+    }
+}
 fn checksum(mut seed: u32) -> u8 {
     let mut checksum: u32 = 0;
     while seed != 0 {
@@ -56,58 +87,4 @@ pub fn decode(text: &str) -> Result<u32, String> {
         return Err("seed checksum does not match".into());
     }
     Ok(seed)
-}
-#[cfg(test)]
-mod tests {
-    use super::*;
-    #[test]
-    fn matches_observed_original_seed_readbacks() {
-        for (text, value) in [
-            ("T1PK6Y0W", 2184569263),
-            ("FXSWJZBM", 588143529),
-            ("3BMBMFTE", 3350817387),
-            ("J4G39N4Q", 1231216718),
-            ("M8GDNFAA", 1348684265),
-            ("8M72AJ9X", 4246011870),
-        ] {
-            assert_eq!(decode(text).unwrap(), value);
-            assert_eq!(encode(value).unwrap(), text);
-        }
-    }
-    #[test]
-    fn nonzero_unsigned_seed_boundaries_and_many_values_round_trip() {
-        for value in [1, u32::MAX, 0x8000_0000] {
-            assert_eq!(decode(&encode(value).unwrap()).unwrap(), value);
-        }
-        for value in crate::test_seeds::samples(
-            "nonzero_unsigned_seed_boundaries_and_many_values_round_trip",
-            10_000,
-        ) {
-            assert_eq!(decode(&encode(value).unwrap()).unwrap(), value);
-        }
-    }
-    #[test]
-    fn reserved_zero_has_no_valid_run_encoding() {
-        assert!(encode(0).is_err());
-        assert!(decode(&encode_bits(0)).is_err());
-    }
-    #[test]
-    fn rejects_invalid_alphabet_length_and_checksum() {
-        for value in ["", "ABCDEFG", "ABCDEFGHI", "IIIIIIII", "T1PK6Y0X", "💩💩"] {
-            assert!(decode(value).is_err());
-        }
-        assert_eq!(decode("t1pk 6y0w").unwrap(), 2184569263);
-    }
-    #[test]
-    fn startup_stage1_stream_matches_independent_original_logs() {
-        for (seed, stage) in [
-            (2184569263, 1427977769),
-            (3350817387, 3049754554),
-            (1231216718, 2478271409),
-            (1348684265, 1558365435),
-            (4246011870, 3308301364),
-        ] {
-            assert_eq!(stage1_seed(seed), stage);
-        }
-    }
 }

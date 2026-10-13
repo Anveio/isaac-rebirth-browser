@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "bootEpochSeed": 1700000000,
+  "source": "Contrived full/intermediate births plus OS-random recorded seed coverage",
+  "cases": [
+    {
+      "name": "full-first-shot",
+      "code": "QSYVKMSE",
+      "direction": "Right",
+      "delay": 0
+    },
+    {
+      "name": "intermediate-first-shot",
+      "code": "ZG800TRJ",
+      "direction": "Right",
+      "delay": 1
+    },
+    {
+      "name": "random-0",
+      "code": "SPHV9X8Q",
+      "direction": "Right",
+      "delay": 0,
+      "seedValue": 2359345202
+    },
+    {
+      "name": "random-1",
+      "code": "ML7RYAZ1",
+      "direction": "Left",
+      "delay": 1,
+      "seedValue": 1431668223
+    },
+    {
+      "name": "random-2",
+      "code": "Y90W77GW",
+      "direction": "Up",
+      "delay": 0,
+      "seedValue": 2818724105
+    },
+    {
+      "name": "random-3",
+      "code": "1RYQL8AT",
+      "direction": "Down",
+      "delay": 1,
+      "seedValue": 3020397189
+    }
+  ]
+}

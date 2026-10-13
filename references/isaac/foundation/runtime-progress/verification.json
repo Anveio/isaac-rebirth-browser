@@ -1,0 +1,715 @@
+{
+  "schema": 2,
+  "checkpointCommit": "5b4901fba06009b31188687a2d9c03f39f83a2aa",
+  "scope": {
+    "functional": "Real input/phase/readback and source title, fade, player motion, pause/controller, HP, immunity, active tear/bomb counts",
+    "pixels": "Strict full RGBA diagnostic; every difference remains a failure in its own pixel result",
+    "exactPixelsRequired": false,
+    "completeOriginalStateParity": false
+  },
+  "build": {
+    "sha256": "a7a5b4972a72c56cd07b33001295955596c9e8f7910e177f522ea037b25444ef",
+    "files": 531,
+    "source": "/workspace/isaac-rebirth-browser/dist",
+    "scope": "Immutable snapshot of production build bytes; source/native replay equality is checked separately"
+  },
+  "sourceBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "gateSources": {
+    "tools/foundation/paired-game.mjs": "133ac4f889615b51a0e5659dda5cf31f5c13f50aa0687274a1cde80c87955cda",
+    "tools/foundation/production-server.mjs": "e3152b58e2353319ba0963b30439e33c3cc65f84a8c6ebb765c2812486245952",
+    "tools/foundation/compare.mjs": "007227c2431f837b347ec29dcbc3492f49eaeb71d08b84ead0b88cfeef98b534",
+    "tools/original/foundation-paired-scenarios.py": "8f6a4b5130b6d0c1b73d3dcde57382c6ad169ba31efd8b3a13a6502eebe835cf",
+    "tools/original/foundation-paired-observer.py": "b49cb171da79eabba8054c8338018ffa38e3a38305fbff2240d6631214dddacf",
+    "tools/original/foundation-menu-observer.py": "a5b8a91047f9bccee75e844c5eba59c8bbf96a84b6a1b7142b59e32bacc91315",
+    "tools/original/foundation-combat-observe.py": "d241cee76dc3fbdbe99c047597a760b8c79a8d61b99eef9c519b925a1b5b24cd",
+    "tools/original/foundation-clock-run.py": "43fb2bf3dd7cc1b6d6dade384184e7bbe9cc8f0bda13aa8ad701583742192afb",
+    "tools/original/foundation-clock-gate.c": "f517f1fc0edf2bbe17021e529fb41652e991e286bef070b8aecefd32bfa62e75",
+    "tools/original/foundation-clock-verify.py": "c488100a187b44803c06374535715eaa5a7cde9d4513f6e866e090367d4f2054",
+    "tools/original/foundation-clock-scenarios.py": "87316815cfa490d534fae5f9d27e55f16b17404a93df1b79e528b3f4b58391c5",
+    "tools/original/foundation-bomb-scenario.py": "4d8dacb4bbe7222c6bfa3ffe1c9f8ea69b76f304825a01db0e973f14ddddd090",
+    "tools/original/foundation-presentation-scenario.py": "530666412639fae6cb2d71f6f49e89a9de12377503d84541a73240bca0be3351",
+    "tools/original/foundation-title-scenario.py": "ea1bfb8b53a46a55f0c234ea75753775b70fd69e0b88f1be8021287a13adb4a9",
+    "tools/original/foundation-combat-scenario.py": "d125481add29d1032fb164741a8d3ab54da9e54e9e6c1d0581278bc255044420",
+    "tools/original/foundation-seeds.py": "dd4633c955e7518e9bc0f0147ddfae46d356468238477a68dc06c86656ccba89",
+    "tools/original/foundation-random-seeds.py": "6ce7e4309ee9492dc0c20c0bf1144394dd92e70aec2037d0db91bb0f2928f625",
+    "tools/original/state-observer.py": "58e3b510abbe5ff57f05844efbdf764e2a02530cda4fa99f538d886d258af6f1",
+    "tools/original/debug-run.py": "d785d32c6cc557959be38880a3b046c4040b988fbe3d06d4a8c1f4aa2e833cf5",
+    "tools/original/with-display.sh": "af469210e803786a60d8632c28a6f2da77bc8ab02cc06be50016ddb25e95b848",
+    "tools/foundation/browser.mjs": "60c4bc851470f47e4dd0399148ce0c1edf351d41fbf7f7e15fa823af5948b4c8"
+  },
+  "gateSourcesStable": true,
+  "paired": {
+    "status": "fail",
+    "selected": 8,
+    "cases": [
+      {
+        "id": "paired-title-menu",
+        "seed": "T1PK6Y0W",
+        "seedValue": 2184569263,
+        "bootEpochSeed": 1700000000,
+        "caseSha256": "e5055b92e6b599393a09157dc51b8f3e9d27511ef453d4963a98ea9eaecdcf3c",
+        "status": "pass",
+        "originalStatus": "pass",
+        "browserStatus": "pass",
+        "checkpoints": 19,
+        "passingCheckpoints": 19,
+        "pixelExactCheckpoints": 12,
+        "failures": []
+      },
+      {
+        "id": "paired-movement-fire",
+        "seed": "T1PK6Y0W",
+        "seedValue": 2184569263,
+        "bootEpochSeed": 1700000000,
+        "caseSha256": "88cb895b5fc82a226eb180b66eec8f5c511bd7657ab4a3b8aefa3b4dc40c1d8c",
+        "status": "pass",
+        "originalStatus": "pass",
+        "browserStatus": "pass",
+        "checkpoints": 12,
+        "passingCheckpoints": 12,
+        "pixelExactCheckpoints": 7,
+        "failures": []
+      },
+      {
+        "id": "paired-pause-release",
+        "seed": "T1PK6Y0W",
+        "seedValue": 2184569263,
+        "bootEpochSeed": 1700000000,
+        "caseSha256": "673cdbe69bf84488046ec551e2495dfdd5e4df80cd2ad6ac6352a1e70285e52f",
+        "status": "pass",
+        "originalStatus": "pass",
+        "browserStatus": "pass",
+        "checkpoints": 18,
+        "passingCheckpoints": 18,
+        "pixelExactCheckpoints": 7,
+        "failures": []
+      },
+      {
+        "id": "paired-bomb-moving-even",
+        "seed": "T1PK6Y0W",
+        "seedValue": 2184569263,
+        "bootEpochSeed": 1700000000,
+        "caseSha256": "7865e269c2bbba1866eca5715b0da3c71c33e7ebc2329db19f2f7a460aabbc8e",
+        "status": "pass",
+        "originalStatus": "pass",
+        "browserStatus": "pass",
+        "checkpoints": 18,
+        "passingCheckpoints": 18,
+        "pixelExactCheckpoints": 7,
+        "failures": []
+      },
+      {
+        "id": "paired-bomb-moving-odd",
+        "seed": "T1PK6Y0W",
+        "seedValue": 2184569263,
+        "bootEpochSeed": 1700000000,
+        "caseSha256": "5bacc9fad80bf6e2b163603dd950b69a56f877d8bdbcec8ea1f19220c50bf326",
+        "status": "pass",
+        "originalStatus": "pass",
+        "browserStatus": "pass",
+        "checkpoints": 18,
+        "passingCheckpoints": 18,
+        "pixelExactCheckpoints": 7,
+        "failures": []
+      },
+      {
+        "id": "paired-room-combat",
+        "seed": "T1PK6Y0W",
+        "seedValue": 2184569263,
+        "bootEpochSeed": 1700000000,
+        "caseSha256": "a7310be282ce32f3c864a4aac62b4a5397ddfc0b449616ca3fa01d4403fc20a2",
+        "status": "fail",
+        "originalStatus": "pass",
+        "browserStatus": "pass",
+        "checkpoints": 28,
+        "passingCheckpoints": 23,
+        "pixelExactCheckpoints": 7,
+        "failures": [
+          {
+            "label": "rock-after-tears",
+            "fields": [
+              {
+                "field": "tears.length",
+                "expected": 0,
+                "actual": 1,
+                "status": "fail"
+              }
+            ]
+          },
+          {
+            "label": "rock-bomb-planted",
+            "fields": [
+              {
+                "field": "tears.length",
+                "expected": 0,
+                "actual": 1,
+                "status": "fail"
+              }
+            ]
+          },
+          {
+            "label": "rock-bomb-explosion",
+            "fields": [
+              {
+                "field": "player.hp",
+                "expected": 3,
+                "actual": 4,
+                "status": "fail"
+              }
+            ]
+          },
+          {
+            "label": "rock-after-bomb",
+            "fields": [
+              {
+                "field": "player.hp",
+                "expected": 3,
+                "actual": 4,
+                "status": "fail"
+              }
+            ]
+          },
+          {
+            "label": "rock-former-cell-crossed",
+            "fields": [
+              {
+                "field": "player.y",
+                "expected": 219.99036254882816,
+                "actual": 168.4999008178711,
+                "status": "fail"
+              },
+              {
+                "field": "player.vx",
+                "expected": 1.0445412115228005e-24,
+                "actual": 2.2154662104867384e-08,
+                "status": "fail"
+              },
+              {
+                "field": "player.vy",
+                "expected": 2.42152578830719,
+                "actual": -0.03481050580739975,
+                "status": "fail"
+              },
+              {
+                "field": "player.hp",
+                "expected": 3,
+                "actual": 4,
+                "status": "fail"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "paired-random-run",
+        "seed": "W0L0 LYYM",
+        "seedValue": 2591693487,
+        "bootEpochSeed": 1700000000,
+        "caseSha256": "182a03c01f8dadbd10c8f38c23ce55dde286a18c9252438a22e8b982ea545403",
+        "status": "fail",
+        "originalStatus": "pass",
+        "browserStatus": "pass",
+        "checkpoints": 18,
+        "passingCheckpoints": 14,
+        "pixelExactCheckpoints": 7,
+        "failures": [
+          {
+            "label": "random-coasting-1",
+            "fields": [
+              {
+                "field": "tears.length",
+                "expected": 1,
+                "actual": 0,
+                "status": "fail"
+              }
+            ]
+          },
+          {
+            "label": "random-coasting-2",
+            "fields": [
+              {
+                "field": "tears.length",
+                "expected": 1,
+                "actual": 0,
+                "status": "fail"
+              }
+            ]
+          },
+          {
+            "label": "random-paused",
+            "fields": [
+              {
+                "field": "tears.length",
+                "expected": 1,
+                "actual": 0,
+                "status": "fail"
+              }
+            ]
+          },
+          {
+            "label": "random-after-bomb",
+            "fields": [
+              {
+                "field": "player.y",
+                "expected": 214,
+                "actual": 28.022801589965823,
+                "status": "fail"
+              },
+              {
+                "field": "player.vx",
+                "expected": 0,
+                "actual": 7.076459839079431e-25,
+                "status": "fail"
+              },
+              {
+                "field": "player.vy",
+                "expected": 0,
+                "actual": -1.8597967982292176,
+                "status": "fail"
+              },
+              {
+                "field": "damageCooldown",
+                "expected": 108,
+                "actual": 107,
+                "status": "fail"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "paired-random-run",
+        "seed": "4DKC YXY8",
+        "seedValue": 3745338803,
+        "bootEpochSeed": 1700000000,
+        "caseSha256": "8d0705d3f91ddd7a1bf0ac7be69752e47547b90068392b07aa611e47166a6f94",
+        "status": "pass",
+        "originalStatus": "pass",
+        "browserStatus": "pass",
+        "checkpoints": 18,
+        "passingCheckpoints": 18,
+        "pixelExactCheckpoints": 7,
+        "failures": []
+      }
+    ],
+    "checkpoints": 149,
+    "passingCheckpoints": 140,
+    "pixelExactCheckpoints": 61,
+    "passingCases": 6
+  },
+  "reports": {
+    "paired": {
+      "path": ".cache/foundation/paired-1791882715180/report.json",
+      "sha256": "41654cf26c49f4d494c3c5642a0159d68f69e24168f6428019e89b5514753212",
+      "status": "fail"
+    },
+    "suite": {
+      "path": ".cache/e2e/suite-1791882714568-325794/report.json",
+      "sha256": "8a77863d551e1e4dbd12b79ee6b2fd2688795d82edbb28c955b977c314f822f8",
+      "status": "fail"
+    },
+    "floor": {
+      "path": ".cache/foundation/floor-e2e.json",
+      "sha256": "00b0c41b83866b08158a45aea68fa7a9829b2f25f9f85e587a215ab7461a6916",
+      "status": "pass"
+    },
+    "weapons": {
+      "path": ".cache/e2e/weapons/1791883523149/report.json",
+      "sha256": "45f540bc52dca3706cbb51f8fe937f866f5bb06a65c34abc9d9855201fc3ecb4",
+      "status": "pass"
+    },
+    "bootMt": {
+      "path": ".cache/e2e/boot-mt/1791883729298/report.json",
+      "sha256": "52330f3e67907d88381a9efb024c22d6b7fb8605f524e25f2c90539a4553a93f",
+      "status": "pass"
+    },
+    "traversal": {
+      "path": ".cache/e2e/traversal/1791883882960/report.json",
+      "sha256": "523378dd7623ea3d393e010ba4b89b74733081fa750ba7cd32052df02542bf4b",
+      "status": "fail"
+    },
+    "pickups": {
+      "path": ".cache/e2e/pickups/1791884245866/report.json",
+      "sha256": "3e7e3e4bb8f8e53086c6ca91854cb6f52720cea6fb397851a2d08e3a56ab7954",
+      "status": "pass"
+    }
+  },
+  "previousCheckpoint": "references/isaac/foundation/runtime-progress/history/6b2bdce75556.json",
+  "suite": {
+    "status": "fail",
+    "startedAt": "2026-10-13T09:11:54.569Z",
+    "finishedAt": "2026-10-13T09:46:57.897Z",
+    "scripts": [
+      "test:e2e:paired",
+      "test:e2e:floor",
+      "test:e2e:weapons",
+      "test:e2e:boot-mt",
+      "test:e2e:traversal",
+      "test:e2e:pickups"
+    ],
+    "suites": [
+      {
+        "script": "test:e2e:paired",
+        "startedAt": "2026-10-13T09:11:54.570Z",
+        "finishedAt": "2026-10-13T09:21:29.353Z",
+        "exitCode": 1,
+        "signal": null,
+        "status": "fail"
+      },
+      {
+        "script": "test:e2e:floor",
+        "startedAt": "2026-10-13T09:21:29.353Z",
+        "finishedAt": "2026-10-13T09:25:21.605Z",
+        "exitCode": 0,
+        "signal": null,
+        "status": "pass"
+      },
+      {
+        "script": "test:e2e:weapons",
+        "startedAt": "2026-10-13T09:25:21.605Z",
+        "finishedAt": "2026-10-13T09:28:48.817Z",
+        "exitCode": 0,
+        "signal": null,
+        "status": "pass"
+      },
+      {
+        "script": "test:e2e:boot-mt",
+        "startedAt": "2026-10-13T09:28:48.817Z",
+        "finishedAt": "2026-10-13T09:31:22.326Z",
+        "exitCode": 0,
+        "signal": null,
+        "status": "pass"
+      },
+      {
+        "script": "test:e2e:traversal",
+        "startedAt": "2026-10-13T09:31:22.327Z",
+        "finishedAt": "2026-10-13T09:37:25.383Z",
+        "exitCode": 1,
+        "signal": null,
+        "status": "fail"
+      },
+      {
+        "script": "test:e2e:pickups",
+        "startedAt": "2026-10-13T09:37:25.383Z",
+        "finishedAt": "2026-10-13T09:46:57.897Z",
+        "exitCode": 0,
+        "signal": null,
+        "status": "pass"
+      }
+    ]
+  },
+  "floor": {
+    "status": "pass",
+    "scope": null,
+    "cases": [
+      {
+        "seed": "QNXPTVT1",
+        "status": "pass",
+        "descriptorCount": 11,
+        "attempts": 2,
+        "decorationSeed": 1114759373,
+        "inputTransport": "actual DOM keyboard; production WASM; original public X11 tape"
+      },
+      {
+        "seed": "0YAZCZ7N",
+        "status": "pass",
+        "descriptorCount": 11,
+        "attempts": 2,
+        "decorationSeed": 4122183606,
+        "inputTransport": "actual DOM keyboard; production WASM; original public X11 tape"
+      },
+      {
+        "seed": "BHX1EF8A",
+        "status": "pass",
+        "descriptorCount": 11,
+        "attempts": 2,
+        "decorationSeed": 3682764326,
+        "inputTransport": "actual DOM keyboard; production WASM; original public X11 tape"
+      },
+      {
+        "seed": "WX229XAD",
+        "status": "pass",
+        "descriptorCount": 14,
+        "attempts": 1,
+        "decorationSeed": 2562517505,
+        "inputTransport": "actual DOM keyboard; production WASM; original public X11 tape"
+      },
+      {
+        "seed": "042BYB3C",
+        "status": "pass",
+        "descriptorCount": 14,
+        "attempts": 1,
+        "decorationSeed": 2507367802,
+        "inputTransport": "actual DOM keyboard; production WASM; original public X11 tape"
+      }
+    ]
+  },
+  "weapons": {
+    "status": "pass",
+    "scope": "Paired live original/browser weapon cooldown, held/released head clock, shot births, actor birth fence and horizontal birth positions; projected height/range and shared MT routing remain separate work",
+    "cases": [
+      {
+        "name": "full-first-shot",
+        "code": "QSYVKMSE",
+        "direction": "Right",
+        "delay": 0,
+        "status": "pass",
+        "nativeManifestSha256": "26c1d702e37eaaa658a6bad2cd532cf236ff424665d769f7501fd2809a61d520",
+        "comparedPresentations": 80,
+        "comparedHeldPresentations": 54,
+        "comparedReleasePresentations": 26,
+        "observedBirths": 3
+      },
+      {
+        "name": "intermediate-first-shot",
+        "code": "ZG800TRJ",
+        "direction": "Right",
+        "delay": 1,
+        "status": "pass",
+        "nativeManifestSha256": "9915eb55809728dc479f1ed279b567ff5412fcd79da4af84ed71f70268102dd6",
+        "comparedPresentations": 80,
+        "comparedHeldPresentations": 54,
+        "comparedReleasePresentations": 26,
+        "observedBirths": 3
+      },
+      {
+        "name": "random-0",
+        "code": "H4EYRDSF",
+        "direction": "Right",
+        "delay": 0,
+        "seedValue": 828782707,
+        "status": "pass",
+        "nativeManifestSha256": "0f00687ea808812de84bfb3f001a1e3828802385af0ab11b8c1a9cd0975e2302",
+        "comparedPresentations": 80,
+        "comparedHeldPresentations": 54,
+        "comparedReleasePresentations": 26,
+        "observedBirths": 3
+      },
+      {
+        "name": "random-1",
+        "code": "RP1M0QH1",
+        "direction": "Left",
+        "delay": 1,
+        "seedValue": 1954661573,
+        "status": "pass",
+        "nativeManifestSha256": "56e4e451cc6cfab5a38ce2fc1f353c48930c17a771a158d0e7f5143b76a23ace",
+        "comparedPresentations": 80,
+        "comparedHeldPresentations": 54,
+        "comparedReleasePresentations": 26,
+        "observedBirths": 3
+      },
+      {
+        "name": "random-2",
+        "code": "YRXPTS3H",
+        "direction": "Up",
+        "delay": 0,
+        "seedValue": 2886313790,
+        "status": "pass",
+        "nativeManifestSha256": "7ac8a050b572e7106670c2a63e14369cb1fabb0f70879536e13b4332e3d18bb6",
+        "comparedPresentations": 80,
+        "comparedHeldPresentations": 54,
+        "comparedReleasePresentations": 26,
+        "observedBirths": 3
+      },
+      {
+        "name": "random-3",
+        "code": "L0HGWH7H",
+        "direction": "Down",
+        "delay": 1,
+        "seedValue": 1516312290,
+        "status": "pass",
+        "nativeManifestSha256": "31f3ff8ab7aa09914760ebab45dff66ffd8cdcf4aa2807cf8572c4daed84d216",
+        "comparedPresentations": 80,
+        "comparedHeldPresentations": 54,
+        "comparedReleasePresentations": 26,
+        "observedBirths": 3
+      }
+    ]
+  },
+  "bootMt": {
+    "status": "pass",
+    "scope": "Causal startup and initialized menu fields at Title: full 624-word MT state, saved player seed, nine saved grid pairs, menu run seed and 179 stat poses. Later menu navigation, run/room/ambient random routing and tear fall uniforms remain incomplete.",
+    "cases": [
+      {
+        "name": "zero-epoch",
+        "bootEpochSeed": 0,
+        "code": "QSYVKMSE",
+        "status": "pass",
+        "nativeManifestSha256": "2043049c6cc2ca48d7ada1a3b87650e1feca4df460c0e80de4c4d6a1f9047cfb",
+        "comparedStateWords": 624,
+        "comparedGridPairs": 9,
+        "comparedStatPoses": 179
+      },
+      {
+        "name": "fixed-epoch",
+        "bootEpochSeed": 1700000000,
+        "code": "ZG800TRJ",
+        "status": "pass",
+        "nativeManifestSha256": "fc449983d61cd3a508f49fead925366c9e8c7f7a90ef676d647aaf48a2c9c1c8",
+        "comparedStateWords": 624,
+        "comparedGridPairs": 9,
+        "comparedStatPoses": 179
+      },
+      {
+        "name": "random-0",
+        "bootEpochSeed": 688071962,
+        "code": "KRHL98AA",
+        "seedValue": 1143066629,
+        "status": "pass",
+        "nativeManifestSha256": "3b89c3aaf16cf7c564a87d4685a0c11c7077bc5927089b7380758101febde33d",
+        "comparedStateWords": 624,
+        "comparedGridPairs": 9,
+        "comparedStatPoses": 179
+      },
+      {
+        "name": "random-1",
+        "bootEpochSeed": 1588539258,
+        "code": "FS4HLBBG",
+        "seedValue": 601557753,
+        "status": "pass",
+        "nativeManifestSha256": "e83aa33894b68601d64c28a77253ed47d6ff4f1e9370bc559d7720091f8e9d2a",
+        "comparedStateWords": 624,
+        "comparedGridPairs": 9,
+        "comparedStatPoses": 179
+      },
+      {
+        "name": "random-2",
+        "bootEpochSeed": 822154908,
+        "code": "RCAEB8VV",
+        "seedValue": 2003779334,
+        "status": "pass",
+        "nativeManifestSha256": "9a8d5721dc10294e8614b9972907d1d01630e2fe52f90f82065a61fc94d39bdd",
+        "comparedStateWords": 624,
+        "comparedGridPairs": 9,
+        "comparedStatPoses": 179
+      },
+      {
+        "name": "random-3",
+        "bootEpochSeed": 2904704440,
+        "code": "93CEY1MR",
+        "seedValue": 4054529440,
+        "status": "pass",
+        "nativeManifestSha256": "5fed3e7a59c0631964780ec7ab4e8bf3041ef73949ca67be5ab47a39d6dbd295",
+        "comparedStateWords": 624,
+        "comparedGridPairs": 9,
+        "comparedStatPoses": 179
+      }
+    ]
+  },
+  "traversal": {
+    "status": "fail",
+    "scope": "Ordinary style0 13x7 doorway and no-hostile return; mandatory hostile-room lock/return regression; exact f32 player/descriptor phases, complete authored group accounting, supported actor admission and ordinary Rock metadata, visited-room restoration. NPC behavior, other grids/doors, large-room camera and complete pixels remain separate.",
+    "cases": [
+      {
+        "seed": "CSTGNPJ8",
+        "status": "pass",
+        "comparedPhases": 173,
+        "failureCount": 0,
+        "failureSample": []
+      },
+      {
+        "seed": "T1PK6Y0W",
+        "status": "fail",
+        "comparedPhases": 173,
+        "failureCount": 2380,
+        "failureSample": [
+          {
+            "label": "entry-2",
+            "error": "AssertionError [ERR_ASSERTION]: entry-2:mandatory hostile-room door lock\n+ actual - expected\n\n  [\n    16,\n+   2,\n+   5\n-   1,\n-   4\n  ]\n"
+          },
+          {
+            "label": "entry-2",
+            "error": "AssertionError [ERR_ASSERTION]: entry-2:mandatory hostile-room door lock\n+ actual - expected\n\n  [\n    16,\n+   2,\n+   5\n-   1,\n-   4\n  ]\n"
+          }
+        ]
+      },
+      {
+        "seed": "1GJMRRSK",
+        "status": "pass",
+        "comparedPhases": 119,
+        "failureCount": 0,
+        "failureSample": []
+      }
+    ]
+  },
+  "pickups": {
+    "status": "pass",
+    "scope": "Live public-seed natural coin-room admission, seeds/subtypes, full-phase animation/contact/collection, inventory and actor cleanup. Unsupported typed selectors remain with their owning systems.",
+    "cases": [
+      {
+        "name": "contact-phase-0",
+        "code": "PBW9YNC8",
+        "seedValue": 1737131469,
+        "delay": 0,
+        "entropy": "Contrived phase offset on a naturally generated coin room",
+        "cohort": "hazard-free-coin",
+        "status": "pass",
+        "comparedPresentations": 172,
+        "passedPresentations": 172,
+        "admittedPickups": 4,
+        "firstCollection": 139,
+        "nativeManifestSha256": "33c1045276912e93de842b847e25a7b3adea62a0b93420df308d263925fb75b1"
+      },
+      {
+        "name": "contact-phase-1",
+        "code": "PBW9YNC8",
+        "seedValue": 1737131469,
+        "delay": 1,
+        "entropy": "Contrived phase offset on a naturally generated coin room",
+        "cohort": "hazard-free-coin",
+        "status": "pass",
+        "comparedPresentations": 173,
+        "passedPresentations": 173,
+        "admittedPickups": 4,
+        "firstCollection": 139,
+        "nativeManifestSha256": "3fdd2d67870d38ca7a1d0afb00c0f5fc583419aa444b02d2f5a6401c0b950d30"
+      },
+      {
+        "name": "random-0",
+        "code": "DXSR6FRF",
+        "seedValue": 319783400,
+        "delay": 0,
+        "entropy": "OS secrets",
+        "discoveryAttempts": 1136,
+        "cohort": "hazard-free-coin",
+        "status": "pass",
+        "comparedPresentations": 172,
+        "passedPresentations": 172,
+        "admittedPickups": 4,
+        "firstCollection": 139,
+        "nativeManifestSha256": "4390baab6af516274b179a8d1164d26c0d1bcad68721e9ed9005ab3bfa99cb92"
+      },
+      {
+        "name": "random-1",
+        "code": "QSE0LLG8",
+        "seedValue": 2078677717,
+        "delay": 1,
+        "entropy": "OS secrets",
+        "discoveryAttempts": 1654,
+        "cohort": "hazard-free-coin",
+        "status": "pass",
+        "comparedPresentations": 173,
+        "passedPresentations": 173,
+        "admittedPickups": 4,
+        "firstCollection": 139,
+        "nativeManifestSha256": "8f4da682434ec773ce15c7acc1ac14dbb30c25ce3e0d040ed1513650ca331d9e"
+      },
+      {
+        "name": "regression-spike-approach",
+        "code": "22PFCSFS",
+        "seedValue": 3388288701,
+        "delay": 1,
+        "cohort": "hazard-regression",
+        "entropy": "Recorded OS secrets discovery from the first pickup gate",
+        "description": "Natural Room1.279 has authored selector1930 spike cell37 at world320,200; original HP6 to4 on presentation131 while the port lacked grid hazard damage",
+        "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+        "status": "pass",
+        "comparedPresentations": 173,
+        "passedPresentations": 173,
+        "admittedPickups": 4,
+        "firstCollection": 147,
+        "nativeManifestSha256": "998bcb7cf1d11faa80f83141b406f7bb2039fd27fb8603148e3223dc3ea16e03"
+      }
+    ]
+  }
+}

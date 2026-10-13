@@ -1,0 +1,287 @@
+{
+  "checks": [
+    {
+      "actual": 2,
+      "expected": 2,
+      "field": "type",
+      "index": 27
+    },
+    {
+      "actual": 1000,
+      "expected": 1000,
+      "field": "variant",
+      "index": 27
+    },
+    {
+      "actual": 1,
+      "expected": 1,
+      "field": "state",
+      "index": 27
+    },
+    {
+      "actual": 3,
+      "expected": 3,
+      "field": "collisionClass",
+      "index": 27
+    },
+    {
+      "actual": 1537185522,
+      "expected": 1537185522,
+      "field": "spawnSeed",
+      "index": 27
+    },
+    {
+      "actual": 2,
+      "expected": 2,
+      "field": "type",
+      "index": 28
+    },
+    {
+      "actual": 1001,
+      "expected": 1001,
+      "field": "variant",
+      "index": 28
+    },
+    {
+      "actual": 1,
+      "expected": 1,
+      "field": "state",
+      "index": 28
+    },
+    {
+      "actual": 3,
+      "expected": 3,
+      "field": "collisionClass",
+      "index": 28
+    },
+    {
+      "actual": 4037236710,
+      "expected": 4037236710,
+      "field": "spawnSeed",
+      "index": 28
+    },
+    {
+      "actual": 2,
+      "expected": 2,
+      "field": "type",
+      "index": 43
+    },
+    {
+      "actual": 0,
+      "expected": 0,
+      "field": "variant",
+      "index": 43
+    },
+    {
+      "actual": 1,
+      "expected": 1,
+      "field": "state",
+      "index": 43
+    },
+    {
+      "actual": 3,
+      "expected": 3,
+      "field": "collisionClass",
+      "index": 43
+    },
+    {
+      "actual": 2287474820,
+      "expected": 2287474820,
+      "field": "spawnSeed",
+      "index": 43
+    },
+    {
+      "actual": 2,
+      "expected": 2,
+      "field": "type",
+      "index": 51
+    },
+    {
+      "actual": 2,
+      "expected": 2,
+      "field": "variant",
+      "index": 51
+    },
+    {
+      "actual": 1,
+      "expected": 1,
+      "field": "state",
+      "index": 51
+    },
+    {
+      "actual": 3,
+      "expected": 3,
+      "field": "collisionClass",
+      "index": 51
+    },
+    {
+      "actual": 2354826941,
+      "expected": 2354826941,
+      "field": "spawnSeed",
+      "index": 51
+    },
+    {
+      "actual": 2,
+      "expected": 2,
+      "field": "type",
+      "index": 67
+    },
+    {
+      "actual": 0,
+      "expected": 0,
+      "field": "variant",
+      "index": 67
+    },
+    {
+      "actual": 1,
+      "expected": 1,
+      "field": "state",
+      "index": 67
+    },
+    {
+      "actual": 3,
+      "expected": 3,
+      "field": "collisionClass",
+      "index": 67
+    },
+    {
+      "actual": 163582842,
+      "expected": 163582842,
+      "field": "spawnSeed",
+      "index": 67
+    },
+    {
+      "actual": 2,
+      "expected": 2,
+      "field": "type",
+      "index": 83
+    },
+    {
+      "actual": 0,
+      "expected": 0,
+      "field": "variant",
+      "index": 83
+    },
+    {
+      "actual": 1,
+      "expected": 1,
+      "field": "state",
+      "index": 83
+    },
+    {
+      "actual": 3,
+      "expected": 3,
+      "field": "collisionClass",
+      "index": 83
+    },
+    {
+      "actual": 3525095983,
+      "expected": 3525095983,
+      "field": "spawnSeed",
+      "index": 83
+    },
+    {
+      "actual": 2,
+      "expected": 2,
+      "field": "type",
+      "index": 91
+    },
+    {
+      "actual": 1,
+      "expected": 1,
+      "field": "variant",
+      "index": 91
+    },
+    {
+      "actual": 1,
+      "expected": 1,
+      "field": "state",
+      "index": 91
+    },
+    {
+      "actual": 3,
+      "expected": 3,
+      "field": "collisionClass",
+      "index": 91
+    },
+    {
+      "actual": 2852283709,
+      "expected": 2852283709,
+      "field": "spawnSeed",
+      "index": 91
+    },
+    {
+      "actual": 2,
+      "expected": 2,
+      "field": "type",
+      "index": 106
+    },
+    {
+      "actual": 1000,
+      "expected": 1000,
+      "field": "variant",
+      "index": 106
+    },
+    {
+      "actual": 1,
+      "expected": 1,
+      "field": "state",
+      "index": 106
+    },
+    {
+      "actual": 3,
+      "expected": 3,
+      "field": "collisionClass",
+      "index": 106
+    },
+    {
+      "actual": 3229564152,
+      "expected": 3229564152,
+      "field": "spawnSeed",
+      "index": 106
+    },
+    {
+      "actual": 2,
+      "expected": 2,
+      "field": "type",
+      "index": 107
+    },
+    {
+      "actual": 1001,
+      "expected": 1001,
+      "field": "variant",
+      "index": 107
+    },
+    {
+      "actual": 1,
+      "expected": 1,
+      "field": "state",
+      "index": 107
+    },
+    {
+      "actual": 3,
+      "expected": 3,
+      "field": "collisionClass",
+      "index": 107
+    },
+    {
+      "actual": 3248038631,
+      "expected": 3248038631,
+      "field": "spawnSeed",
+      "index": 107
+    }
+  ],
+  "decorationSeed": 3590555450,
+  "room": 181,
+  "scope": "Production floor/STB/local-selector/grid-factory output compared to retained independent native ordinary Rock admission; not a traversal gameplay gate",
+  "seed": "T1PK6Y0W",
+  "spawnSeed": 572589306,
+  "status": "pass",
+  "sourceManifestSha256": "3f2978b19a2b5d3661d7e12acf7c40d8c045ccc1bfe79a1d2dfaa71183d4623f",
+  "sourceBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "sourceAddresses": {
+    "normalVariant": "56c240",
+    "linkedClusterAdmission": "56c390",
+    "fullGridUpdate": "56bf00"
+  }
+}

@@ -1,0 +1,171 @@
+{
+  "schema": 1,
+  "scope": "Two retained key/library public tapes on the Keeper composite. One fresh original/browser case completed together; the other complete fresh original was paired with a separate actual browser after its parent deadline failed. These are distinct attempts, not a passing default two-case cohort.",
+  "runtimeSourceCommit": "0f8a3633fdd4760ef2f64dad6f523a4a43ea872b",
+  "production": {
+    "sha256": "565955530a417b59d61b8d0b0631cd8f58b9a16f929816a6a9eeaecf7a27d00b",
+    "files": 919,
+    "source": "private frozen production snapshot of root0f8a3633"
+  },
+  "freshGateCommit": "deef179055e337460a39150c1033d4768e5ce8cf",
+  "freshGateSources": {
+    "tools/e2e/key-doors.mjs": "620f8b3424d341aec5aa1c0919cafcf973d623049ac56a9ba94e54fb75cee0f8",
+    "tools/e2e/traversal.mjs": "5c2401b4a0fb32c743856ca6fb1e8543ed36a55233feae041930871f2fc0013a",
+    "tools/original/key-door-scenarios.py": "a9b3bec14b4a949dfa4ca278d63f98c5dd1ca6064c627ea257ec602bc5056309",
+    "tools/original/key-door-observe.py": "a4e2f4e9f23b8c9d089decc2f53f3e4f11664842a52f21b3e15a5c9a93dc499a",
+    "tools/original/foundation-traversal-observe.py": "a05fd4ec0cc39757867aea2c04886a6336cdd488623d4368090ea44d27644114",
+    "tools/original/foundation-pickup-observe.py": "2ce3a3f528259c876941d505e31981164a550ce1b2097f4ea136607e3bd365a5",
+    "tools/original/foundation-clock-run.py": "8f2fa981fbe26073d5a5a34ff46fbc6e9c70c2d30f81784abded5e40b9110c5b",
+    "tools/original/foundation-clock-gate.c": "f517f1fc0edf2bbe17021e529fb41652e991e286bef070b8aecefd32bfa62e75",
+    "tools/original/foundation-clock-verify.py": "c488100a187b44803c06374535715eaa5a7cde9d4513f6e866e090367d4f2054",
+    "tools/original/state-observer.py": "58e3b510abbe5ff57f05844efbdf764e2a02530cda4fa99f538d886d258af6f1",
+    "tools/original/with-display.sh": "4371efe64ae1639564b4a85292ff252e20bcfe84b5387927ecf7093c6b8d3dfb",
+    "tools/foundation/verify.mjs": "3743b773cf2ede253c6d78f2605eb43f34e9d7002284b6a1dd2c413d45835a5c",
+    "tools/foundation/browser.mjs": "60c4bc851470f47e4dd0399148ce0c1edf351d41fbf7f7e15fa823af5948b4c8",
+    "tools/foundation/production-server.mjs": "e3152b58e2353319ba0963b30439e33c3cc65f84a8c6ebb765c2812486245952",
+    "engine/src/lib.rs": "21f8c62e8c8ccfa5ed18e8fe7122b120b614e1094ed8cd526ba697c4296c0acf",
+    "engine/src/keepers.rs": "6acaccc970eef9e79497a5714d7b70805da8df7cf628630c7454894349e15b1e",
+    "engine/src/npcs.rs": "aa7a787e697487d1ce5dee7923e78d76f5028bc264b69cea4fadec212c1e7c8a",
+    "engine/src/room_spawns.rs": "6b6551b87b74900b981792b622c9f0aa3d7347d447a012997525f0426f3f529b",
+    "web/engine.ts": "6a53617a235fce9787c3baf7c088aa1db8fb8e749b09ef854ef638526122609e",
+    "web/renderer.ts": "649576e89774684da037e30118bd964079cccc13e840ab43a769037700041f9c",
+    "web/trace.ts": "2df69cfbbae14084baadacbcffbc9ecb7b6e363e61c1efb26f721475cfb198a9"
+  },
+  "freshParent": {
+    "path": ".cache/e2e/aggregate-key-doors-fresh/report.json",
+    "sha256": "d2fce146d4c09ee9f7e7317e05ffb7e523e22949a485da9d1be04c600f61f304",
+    "status": "fail",
+    "selected": 2,
+    "passingCases": 1,
+    "failedSeed": "W31RQ6TH",
+    "reason": "execFile parent deadline300s; original child later completed pass at317.29s"
+  },
+  "cases": [
+    {
+      "seed": "7XGY2Q9P",
+      "status": "pass",
+      "mode": "fresh original and production browser together",
+      "comparedPhases": 750,
+      "sourceManifest": ".cache/e2e/aggregate-key-doors-fresh/7XGY2Q9P/original/manifest.json",
+      "source": {
+        "status": "pass",
+        "nativeBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+        "manifestSha256": "133e23829df5ca3c64a933c3821193aef1abeac211306c785796826872864ea9",
+        "originalLogSha256": "1051240a9e935736496ebcd4c51816b140f2b50d472433cdee21716d5e8756d6",
+        "observations": 750
+      },
+      "inputProvenance": {
+        "status": "pass",
+        "commands": 820,
+        "initialSeed": 3810669510,
+        "bootEpochSeed": 0,
+        "manualSeed": "7XGY2Q9P"
+      },
+      "selectedBrowserEvidence": {
+        "path": ".cache/e2e/aggregate-key-doors-fresh/7XGY2Q9P/browser-states.json.gz",
+        "encoding": "gzip",
+        "rawBytes": 106343342,
+        "rawSha256": "e10a03ddb562412d6364d80de8fd15fb7b4c4b9a9a6e99e9abe1ea5fafaca384",
+        "archiveBytes": 7904634,
+        "archiveSha256": "80e65a3a6414d8ace6b46243bcbcb2e2bee4e3bd53136b5969e411cebc26369c",
+        "scope": "Complete original JSON payload, including every gameplay state, public command and retained backend callback; decompress before replay or inspection"
+      },
+      "internalTraceHistory": {
+        "truncated": true,
+        "inputTraceTruncated": false,
+        "stateHistoryTruncated": true,
+        "retainedStates": 449,
+        "stateEncodedBytes": 33480333,
+        "maxStateEncodedBytes": 33554432
+      },
+      "completeSelectedSnapshotRecorder": false
+    },
+    {
+      "seed": "W31RQ6TH",
+      "status": "pass",
+      "mode": "Separate actual production-browser comparison against completed fresh original; no native recapture",
+      "comparedPhases": 936,
+      "sourceManifest": ".cache/e2e/aggregate-key-doors-fresh/W31RQ6TH/original/manifest.json",
+      "source": {
+        "manifestSha256": "abd267086562e5c629e3ee329463f6f2b865c83c47e23269bd649450f56279ec",
+        "status": "pass",
+        "observations": 936,
+        "nativeBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+        "originalLogSha256": "9f43c06f647a21ec75a81c76e1c4b3813a54ab725c7c23771cec1df8a1604b6d",
+        "controllerElapsedMs": 317289.66590399796
+      },
+      "comparisonFailures": 0,
+      "inputProvenance": {
+        "status": "pass",
+        "commands": 1010,
+        "initialSeed": 2575403151,
+        "bootEpochSeed": 0,
+        "manualSeed": "W31RQ6TH"
+      },
+      "backendEvents": 3,
+      "backendStatesComplete": true,
+      "completeSelectedSnapshots": {
+        "path": ".cache/e2e/w31-fresh-browser-recovery/W31RQ6TH/full-browser-states.ndjson.gz",
+        "encoding": "gzip-ndjson",
+        "snapshots": 936,
+        "rawBytes": 74493280,
+        "rawSha256": "72b5735cf6e7e7f5e48f649ca6ee7d089b7098fa2234b6da10838ada946d38ca",
+        "archiveBytes": 11317647,
+        "archiveSha256": "2169e28d304bb82443554c8e494822c24fa5cb025b445bce90be573ee8817aa8",
+        "scope": "Every selected actual API snapshot captured before the immutable comparator body; complete936 snapshots independent of internal trace cap"
+      },
+      "selectedBrowserEvidence": {
+        "path": ".cache/e2e/w31-fresh-browser-recovery/W31RQ6TH/browser-states.json.gz",
+        "encoding": "gzip",
+        "rawBytes": 107433285,
+        "rawSha256": "469107b2294efd56af7bafcbeb7a86b0484587036dbaee12f6c9785e8675616e",
+        "archiveBytes": 8066365,
+        "archiveSha256": "bc507e1e5c5e060c207ef4047956eaa87ff3c840c1915369aa7cb45ad977af20",
+        "scope": "Complete original JSON payload, including every gameplay state, public command and retained backend callback; decompress before replay or inspection"
+      },
+      "internalTraceHistory": {
+        "truncated": true,
+        "inputTraceTruncated": false,
+        "stateHistoryTruncated": true,
+        "retainedStates": 490,
+        "stateEncodedBytes": 33475796,
+        "maxStateEncodedBytes": 33554432
+      },
+      "comparator": {
+        "originalCommit": "413cef778391cfcef939399fd33051ba41cdd3ce",
+        "sourceGateSha256": "dc12b2278021bd0314cb166a68b328cf85039677df62e94dd41dce840be9a4d7",
+        "compareBodySha256": "824a7a22b670a837b173bac6b09ddb306200d0fa57d81648e1995e544f5120f5",
+        "bodyIdenticalExceptSnapshotRecorder": true,
+        "ignoredReplayTool": ".cache/coordination/w31-recovery/replay.mjs",
+        "replaySha256": "19a4b4b2553301ff297e64eff85917649924d329837f1991fc519ca46736871b",
+        "publicInputs": "Only independently declared scenario seed/DOM commands enter production; all native state is used exclusively as comparison evidence"
+      },
+      "report": {
+        "path": ".cache/e2e/w31-fresh-browser-recovery/report.json",
+        "sha256": "a3c68f587ee38a90020a5dfcf12c55b8a9b35a9143425c16adc0042a89d6bcf8"
+      },
+      "verification": {
+        "path": ".cache/e2e/w31-fresh-browser-recovery/recovery-verification.json",
+        "sha256": "ea7e0f602fa7194ab5bf9f96b4022bbbe687768e2ab6d9220140e0ca63ee9ab7"
+      }
+    }
+  ],
+  "requiredScope": "Fresh Isaac, no-hostile13x7 natural secret keys and ordinary library lock: denied zero-key approach, actual collection/spending, full-only unlock/collision/SFX156, admission/return/revisit, exact player/HP/immunity, complete door/display/minimap/descriptor joins. Actual Keeper17 constructor admission remains required; golden/double locks, library items and pixels remain separate.",
+  "unaccepted": [
+    "Keeper17 damage/death/drop callbacks remain separate",
+    "Golden keys, double-chain locks, item overrides and hostile special-door policy",
+    "Library collectibles/sacks/batteries and complete backdrop/door animation pixels",
+    "Other room shapes, later floors and exits"
+  ],
+  "retainedRejectedAttempts": [
+    {
+      "path": ".cache/e2e/aggregate-key-doors/report.json",
+      "classification": "cached-original diagnostic; not fresh paired acceptance"
+    },
+    {
+      "path": ".cache/e2e/aggregate-key-doors-fresh/report.json",
+      "classification": "failed parent deadline; unchanged failed report"
+    }
+  ],
+  "currentGatePolicy": "Checked-in traversal always launches fresh originals; parent process deadline is configurable and defaults to600seconds. Public game time and per-phase controls are unchanged. Current gates record every selected full browser state independently of internal trace caps."
+}

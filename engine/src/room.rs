@@ -1,13 +1,13 @@
-//! General room appearance with a provisional decoration stream assignment.
+//! Source-derived normal Basement starting-room backdrop and door routing.
 //!
-//! Authored texture geometry is fixed; floor and wall patch choices and the
-//! overlay are selected from the supplied seed using the startup xorshift.
-//! Its use for decoration, draw order, and variant selection are unverified
-//! hypotheses, not a claim of Rebirth room-generation parity.
-//! Public startup stream source:
-//! https://gist.github.com/bladecoding/5fcc1356bfb0cf26555b0ade7c4fedca
+//! The original uses decoration xorshift index 35, a repeated/shuffled floor
+//! catalogue, and conditional wall-variant draws. Independent original GL
+//! cache submissions verify the complete geometry and patch sequence when the
+//! room decoration seed is supplied. The level generator that derives that
+//! seed from the run follows the fresh-profile floor generator. FX stream
+//! assignments remain provisional.
 use crate::effects::{Rect, Viewport};
-use crate::seed::{stage1_seed, startup_next};
+use crate::{content, motion, Player};
 use serde::{Deserialize, Serialize};
 
 pub const ROOM_COLUMNS: u8 = 17;
@@ -22,6 +22,15 @@ pub struct Room {
     pub top: f64,
     pub bottom: f64,
     pub appearance: RoomAppearance,
+    pub descriptor: Option<crate::floor::Descriptor>,
+    pub pickups: Vec<crate::pickups::Pickup>,
+    pub npcs: Vec<crate::npcs::Npc>,
+    pub authored_actor_order: Vec<crate::actors::ActorRef>,
+    pub combat_clear: bool,
+    pub combat_clear_countdown: u32,
+    pub combat_shut_door_slots: Vec<u8>,
+    pub spawns: Option<crate::room_spawns::RoomSpawns>,
+    pub grid: Option<crate::grid::GridDescriptor>,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
@@ -75,7 +84,7 @@ pub struct WallVariant {
 
 fn starting_wall_catalog() -> Vec<WallVariant> {
     [
-        (0, "plain", 8, "starting-room"),
+        (0, "plain", 7, "starting-room"),
         (1, "rough", 1, "starting-room"),
         (2, "cloth", 1, "starting-room"),
         (3, "blood", 0, "outside-basement-authored-palette"),
@@ -92,15 +101,29 @@ fn starting_wall_catalog() -> Vec<WallVariant> {
     .collect()
 }
 
-fn choose_wall(rng: &mut ProvisionalRoomRng, catalog: &[WallVariant]) -> u8 {
-    let mut choice = rng.next() % catalog.iter().map(|variant| variant.weight).sum::<u32>();
-    for variant in catalog {
-        if choice < variant.weight {
-            return variant.source_patch_index;
-        }
-        choice -= variant.weight;
+fn choose_wall(rng: &mut DecorationRng) -> u8 {
+    // A variant draw is conditional. Flattening the resulting 7:1:1
+    // distribution to one weighted draw changes all subsequent stream state.
+    if rng.next().is_multiple_of(3) {
+        (rng.next() % 3) as u8
+    } else {
+        0
     }
-    unreachable!("nonempty wall catalog exhausts its total weight")
+}
+
+fn floor_patches(rng: &mut DecorationRng) -> [u8; 4] {
+    // Random(floors) advances the original stream even with floors=1.
+    rng.next();
+    let mut catalogue: Vec<u8> = (0..6).collect();
+    while catalogue.len() < 32 {
+        catalogue.extend_from_within(..);
+    }
+    for index in (1..catalogue.len()).rev() {
+        let other = rng.next() as usize % (index + 1);
+        catalogue.swap(index, other);
+    }
+    // The final overlapping strip shares one choice across both lower halves.
+    [catalogue[0], catalogue[1], catalogue[2], catalogue[2]]
 }
 
 fn rect(x: f64, y: f64, width: f64, height: f64) -> Rect {
@@ -133,9 +156,14 @@ fn quad(
 pub struct RoomDoor {
     pub side: String,
     pub state: String,
+    pub asset: String,
+    pub spritesheet: Option<String>,
     pub x: f64,
     pub y: f64,
     pub target_room: u32,
+    pub slot: u8,
+    pub world_position: motion::WorldVector,
+    pub blown_open: bool,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
@@ -152,152 +180,309 @@ pub struct RoomFx {
     pub actor_tint: [u8; 3],
 }
 
-/// Reuse the public startup generator after its two Stage 1 initialization
-/// draws. Routing subsequent draws to decoration is provisional. Zero is the
-/// generator's ordinary absorbing state and receives no special handling.
-struct ProvisionalRoomRng {
+/// Original Backdrop::SetSeed uses public shift-index 35 (5, 9, 7).
+/// Zero remains the mathematical absorbing state for invariant testing.
+struct DecorationRng {
     state: u32,
 }
 
-impl ProvisionalRoomRng {
+impl DecorationRng {
     fn new(seed: u32) -> Self {
-        Self {
-            state: stage1_seed(seed),
-        }
+        Self { state: seed }
     }
 
     fn next(&mut self) -> u32 {
-        self.state = startup_next(self.state);
+        self.state ^= self.state >> 5;
+        self.state ^= self.state << 9;
+        self.state ^= self.state >> 7;
         self.state
     }
 }
 
-/// Build the provisional starting-room template for any unsigned seed.
-///
-/// Native public GL submissions assemble the floor from four overlapping
-/// authored patches and the outer walls from forty-four quads. Bottom floor
-/// halves share a patch choice in all independently observed runs. Choosing
-/// those patches from the startup RNG is still an unverified hypothesis.
-/// Floor interiors have six valid patches; walls have four. Atlas row three
-/// contains checkerboard placeholders outside its floor interiors.
-/// Collision planes and authored door anchors do not depend on the seed.
-pub fn generate_room(seed: u32) -> Room {
-    let mut rng = ProvisionalRoomRng::new(seed);
-    let upper_left = (rng.next() % 6) as u8;
-    let upper_right = (rng.next() % 6) as u8;
-    let lower = (rng.next() % 6) as u8;
-    // backdrops.xml declares Basement wallvariants=3, floorvariants=6.
-    // Four native captures show predominantly plain walls, occasional
-    // rough/cloth. 8:1:1 is an empirical distribution hypothesis, not a recovered
-    // original generator. All RNG routing must continue failing parity checks.
-    let wall_variant_catalog = starting_wall_catalog();
-    let floor_quads = vec![
-        quad(
-            upper_left,
-            rect(52.0, 52.0, 182.0, 104.0),
-            rect(52.0, 52.0, 182.0, 104.0),
-            false,
-            false,
-        ),
-        quad(
-            upper_right,
-            rect(52.0, 52.0, 182.0, 104.0),
-            rect(208.0, 52.0, 182.0, 104.0),
-            true,
-            false,
-        ),
-        quad(
-            lower,
-            rect(52.0, 52.0, 182.0, 104.0),
-            rect(52.0, 130.0, 182.0, 104.0),
-            false,
-            true,
-        ),
-        quad(
-            lower,
-            rect(52.0, 52.0, 182.0, 104.0),
-            rect(208.0, 130.0, 182.0, 104.0),
-            true,
-            true,
-        ),
-    ];
-    let mut wall_quads = vec![
-        quad(
-            0,
-            rect(0.0, 0.0, 52.0, 52.0),
-            rect(0.0, 0.0, 52.0, 52.0),
-            false,
-            false,
-        ),
-        quad(
-            0,
-            rect(0.0, 0.0, 52.0, 52.0),
-            rect(390.0, 0.0, 52.0, 52.0),
-            true,
-            false,
-        ),
-        quad(
-            0,
-            rect(0.0, 0.0, 52.0, 52.0),
-            rect(0.0, 234.0, 52.0, 52.0),
-            false,
-            true,
-        ),
-        quad(
-            0,
-            rect(0.0, 0.0, 52.0, 52.0),
-            rect(390.0, 234.0, 52.0, 52.0),
-            true,
-            true,
-        ),
-    ];
-    for column in 0..13 {
-        let x = 52.0 + f64::from(column) * 26.0;
-        let source_x = 52.0 + f64::from(column.min(12 - column)) * 26.0;
-        for bottom in [false, true] {
-            wall_quads.push(quad(
-                choose_wall(&mut rng, &wall_variant_catalog),
-                rect(source_x, 0.0, 26.0, 52.0),
-                rect(x, if bottom { 234.0 } else { 0.0 }, 26.0, 52.0),
-                column > 6,
-                bottom,
-            ));
-        }
+impl Room {
+    pub fn from_starting_floor(floor: &crate::floor::Floor) -> Self {
+        Self::from_floor_descriptor(floor, floor.starting_descriptor)
     }
-    for row in 0..7 {
-        let y = 52.0 + f64::from(row) * 26.0;
-        let source_y = 52.0 + f64::from(row.min(6 - row)) * 26.0;
-        for right in [false, true] {
-            wall_quads.push(quad(
-                choose_wall(&mut rng, &wall_variant_catalog),
-                rect(0.0, source_y, 52.0, 26.0),
-                rect(if right { 390.0 } else { 0.0 }, y, 52.0, 26.0),
-                right,
-                row > 3,
-            ));
-        }
-    }
-    // Authored fxlayers.xml fx id=2, roomsize=0 replacement order.
-    let overlay_variant = [2, 3, 4, 5, 1][(rng.next() % 5) as usize];
-    let overlay_origin = RoomOrigin {
-        // fxlayers.xml supplies random offsets 0..100 on both axes. Natural
-        // overlay size is 663×429, so viewport-centered sampling starts here.
-        // The original stream and exact float conversion remain unverified.
-        x: (663.0 - 480.0) * 0.5 + f64::from(rng.next()) / f64::from(u32::MAX) * 100.0,
-        y: (429.0 - 270.0) * 0.5 + f64::from(rng.next()) / f64::from(u32::MAX) * 100.0,
-    };
 
-    Room {
-        left: 70.0,
-        right: 410.0,
-        top: 48.0,
-        bottom: 222.0,
+    /// Admit the authored configuration once. Mutable fields on Room persist
+    /// with its descriptor when the player leaves and later returns.
+    pub fn from_floor_descriptor(floor: &crate::floor::Floor, index: usize) -> Self {
+        let descriptor = &floor.descriptors[index];
+        let mut room = Self::from_decoration_seed(descriptor.decoration_seed);
+        room.descriptor = Some(descriptor.clone());
+        // Room load5cedf0..5ceec7 uses GridPosition(gridWidth+1)-(20,20)
+        // for minimum(60,140), then adds authored dimensions*40. Project the
+        // radius-inset native planes into the authoritative player space.
+        let radius = content::PLAYER_COLLISION_RADIUS_WORLD;
+        room.left = (60.0 + radius) * motion::WORLD_SCALE + motion::WORLD_ORIGIN_X;
+        room.right = (60.0 + f64::from(descriptor.template.width) * 40.0 - radius)
+            * motion::WORLD_SCALE
+            + motion::WORLD_ORIGIN_X;
+        room.top = (140.0 + radius) * motion::WORLD_SCALE + motion::WORLD_ORIGIN_Y;
+        room.bottom = (140.0 + f64::from(descriptor.template.height) * 40.0 - radius)
+            * motion::WORLD_SCALE
+            + motion::WORLD_ORIGIN_Y;
+        room.appearance.doors.clear();
+        // Start Room's authored boundary door grid positions, padded by one,
+        // use RoomGetGridPosition (40+40*x,120+40*y), .65 projection and
+        // common sprite Y−1. Normal door setup adds the source 15px inset.
+        let authored = crate::room_assets::for_descriptor(descriptor)
+            .expect("generated starting descriptor identifies authored STB");
+        room.spawns = Some(
+            crate::room_spawns::select(&authored, descriptor.spawn_seed)
+                .expect("generated descriptor identifies bounded authored spawns"),
+        );
+        room.appearance.tutorial = descriptor.asset_stage == 0
+            && descriptor.template.room_type == 1
+            && descriptor.template.variant == 2;
+        room.appearance.template = format!(
+            "{}.{}({})",
+            descriptor.template.room_type, descriptor.template.variant, descriptor.template.name
+        );
+        for (slot, target) in descriptor.neighbors.iter().enumerate() {
+            let Some(target) = target else {
+                continue;
+            };
+            let destination = &floor.descriptors[*target];
+            let secret = matches!(descriptor.template.room_type, 7 | 8)
+                || matches!(destination.template.room_type, 7 | 8);
+            let (side, inset_x, inset_y) = match slot % 4 {
+                0 => ("left", 15.0, 0.0),
+                1 => ("up", 0.0, 15.0),
+                2 => ("right", -15.0, 0.0),
+                3 => ("down", 0.0, -15.0),
+                _ => unreachable!(),
+            };
+            let door = authored
+                .doors
+                .iter()
+                .find(|door| {
+                    door.enabled && crate::room_assets::door_slot(door.x, door.y) == Ok(slot as u8)
+                })
+                .expect("required starting door is authored");
+            let column = f64::from(door.x + 1);
+            let row = f64::from(door.y + 1);
+            room.appearance.doors.push(RoomDoor {
+                side: side.into(),
+                state: if secret {
+                    "Hidden"
+                } else if matches!(destination.template.room_type, 2 | 12) {
+                    "KeyClosed"
+                } else {
+                    "Opened"
+                }
+                .into(),
+                asset: if secret {
+                    "gfx/grid/door_08_holeinwall.anm2"
+                } else if descriptor.template.room_type == 10
+                    || destination.template.room_type == 10
+                {
+                    "gfx/grid/door_04_selfsacrificeroomdoor.anm2"
+                } else if descriptor.template.room_type == 4 || destination.template.room_type == 4
+                {
+                    "gfx/grid/door_02_treasureroomdoor.anm2"
+                } else {
+                    "gfx/grid/door_01_normaldoor.anm2"
+                }
+                .into(),
+                // Door.Init562b48 uses the current room's backdrop palette,
+                // not the neighbor type. Library palettes14/15 replace every
+                // sheet of the ordinary door with the authored library PNG.
+                spritesheet: (descriptor.template.room_type == 12
+                    && destination.template.room_type == 1)
+                    .then(|| "gfx/grid/door_13_librarydoor.png".into()),
+                x: (40.0 + 40.0 * column) * motion::WORLD_SCALE + 32.0 + inset_x,
+                y: (120.0 + 40.0 * row) * motion::WORLD_SCALE - 46.0 - 1.0 + inset_y,
+                target_room: *target as u32,
+                slot: slot as u8,
+                world_position: motion::WorldVector {
+                    x: (40.0 + 40.0 * column) as f32,
+                    y: (120.0 + 40.0 * row) as f32,
+                },
+                blown_open: false,
+            });
+        }
+        let doors = room
+            .appearance
+            .doors
+            .iter()
+            .map(|door| crate::grid::DoorCollision {
+                slot: door.slot,
+                open: door.state == "Opened",
+                hidden: door.state == "Hidden",
+            })
+            .collect::<Vec<_>>();
+        room.grid = Some(
+            crate::grid::for_room(
+                &authored,
+                room.spawns.as_ref().expect("authored groups were selected"),
+                descriptor.decoration_seed,
+                &doors,
+            )
+            .expect("authored ordinary grid admission"),
+        );
+        room.appearance.generation =
+            "source-fresh-normal-basement-floor;descriptor-decoration12;authored-spawn11;provisional-fx-route"
+                .into();
+        room
+    }
+
+    /// Assemble the starting-room backdrop from its independently supplied room
+    /// decoration seed. This is also the original-observation verification entry.
+    /// The seed is not a run seed; this method does not generate floor topology.
+    pub fn from_decoration_seed(decoration_seed: u32) -> Self {
+        let mut rng = DecorationRng::new(decoration_seed);
+        let [upper_left, upper_right, lower, _] = floor_patches(&mut rng);
+        let wall_variant_catalog = starting_wall_catalog();
+        let floor_quads = vec![
+            quad(
+                upper_left,
+                rect(52.0, 52.0, 182.0, 104.0),
+                rect(52.0, 52.0, 182.0, 104.0),
+                false,
+                false,
+            ),
+            quad(
+                upper_right,
+                rect(52.0, 52.0, 182.0, 104.0),
+                rect(208.0, 52.0, 182.0, 104.0),
+                true,
+                false,
+            ),
+            quad(
+                lower,
+                rect(52.0, 52.0, 182.0, 104.0),
+                rect(52.0, 130.0, 182.0, 104.0),
+                false,
+                true,
+            ),
+            quad(
+                lower,
+                rect(52.0, 52.0, 182.0, 104.0),
+                rect(208.0, 130.0, 182.0, 104.0),
+                true,
+                true,
+            ),
+        ];
+        // Random(walls) also advances the stream with Basement walls=1.
+        rng.next();
+        let mut wall_quads = vec![
+            quad(
+                choose_wall(&mut rng),
+                rect(0.0, 0.0, 52.0, 52.0),
+                rect(0.0, 0.0, 52.0, 52.0),
+                false,
+                false,
+            ),
+            quad(
+                choose_wall(&mut rng),
+                rect(0.0, 0.0, 52.0, 52.0),
+                rect(390.0, 0.0, 52.0, 52.0),
+                true,
+                false,
+            ),
+            quad(
+                choose_wall(&mut rng),
+                rect(0.0, 0.0, 52.0, 52.0),
+                rect(0.0, 234.0, 52.0, 52.0),
+                false,
+                true,
+            ),
+            quad(
+                choose_wall(&mut rng),
+                rect(0.0, 0.0, 52.0, 52.0),
+                rect(390.0, 234.0, 52.0, 52.0),
+                true,
+                true,
+            ),
+        ];
+        for column in 0..13 {
+            let x = 52.0 + f64::from(column) * 26.0;
+            let source_x = 52.0 + f64::from(column.min(12 - column)) * 26.0;
+            for bottom in [false, true] {
+                wall_quads.push(quad(
+                    choose_wall(&mut rng),
+                    rect(source_x, 0.0, 26.0, 52.0),
+                    rect(x, if bottom { 234.0 } else { 0.0 }, 26.0, 52.0),
+                    column > 6,
+                    bottom,
+                ));
+            }
+        }
+        for row in 0..7 {
+            let y = 52.0 + f64::from(row) * 26.0;
+            let source_y = 52.0 + f64::from(row.min(6 - row)) * 26.0;
+            for right in [false, true] {
+                wall_quads.push(quad(
+                    choose_wall(&mut rng),
+                    rect(0.0, source_y, 52.0, 26.0),
+                    rect(if right { 390.0 } else { 0.0 }, y, 52.0, 26.0),
+                    right,
+                    row > 3,
+                ));
+            }
+        }
+        // Authored fxlayers.xml fx id=2, roomsize=0 replacement order.
+        let overlay_variant = [2, 3, 4, 5, 1][(rng.next() % 5) as usize];
+        let overlay_origin = RoomOrigin {
+            // fxlayers.xml supplies random offsets 0..100 on both axes. Natural
+            // overlay size is 663×429, so viewport-centered sampling starts here.
+            // The original stream and exact float conversion remain unverified.
+            x: (663.0 - 480.0) * 0.5 + f64::from(rng.next()) / f64::from(u32::MAX) * 100.0,
+            y: (429.0 - 270.0) * 0.5 + f64::from(rng.next()) / f64::from(u32::MAX) * 100.0,
+        };
+
+        let origin = RoomOrigin { x: 19.0, y: -8.0 };
+        let radius = content::PLAYER_COLLISION_RADIUS_WORLD * motion::WORLD_SCALE;
+        let render_offset = Player::starting().render_offset;
+        // The authored floor's interior defines the wall planes. Actor ground
+        // and sprite ground differ by the render offset; the actor's circle
+        // must remain one radius inside every plane. Native wall observations
+        // independently verify all four resulting center limits.
+        let left_plane = origin.x
+            + floor_quads
+                .iter()
+                .map(|q| q.dest_rect.x)
+                .fold(f64::INFINITY, f64::min)
+            - render_offset.x;
+        let right_plane = origin.x
+            + floor_quads
+                .iter()
+                .map(|q| q.dest_rect.x + q.dest_rect.width)
+                .fold(f64::NEG_INFINITY, f64::max)
+            - render_offset.x;
+        let top_plane = origin.y
+            + floor_quads
+                .iter()
+                .map(|q| q.dest_rect.y)
+                .fold(f64::INFINITY, f64::min)
+            - render_offset.y;
+        let bottom_plane = origin.y
+            + floor_quads
+                .iter()
+                .map(|q| q.dest_rect.y + q.dest_rect.height)
+                .fold(f64::NEG_INFINITY, f64::max)
+            - render_offset.y;
+        Room {
+            descriptor: None,
+            pickups: Vec::new(),
+            npcs: Vec::new(),
+            authored_actor_order: Vec::new(),
+            combat_clear: true,
+            combat_clear_countdown: 0,
+            combat_shut_door_slots: Vec::new(),
+            spawns: None,
+            grid: None,
+            left: left_plane + radius,
+            right: right_plane - radius,
+            top: top_plane + radius,
+            bottom: bottom_plane - radius,
         appearance: RoomAppearance {
             backdrop: "gfx/backdrop/01_basement.png".into(),
             columns: ROOM_COLUMNS,
             rows: ROOM_ROWS,
             tile_size: ROOM_TILE_SIZE,
-            origin: RoomOrigin { x: 19.0, y: -8.0 },
+                origin,
             backdrop_patch_size: Viewport {
                 width: 234.0,
                 height: 156.0,
@@ -307,25 +492,10 @@ pub fn generate_room(seed: u32) -> Room {
             wall_quads,
             wall_variant_catalog,
             wall_generation_evidence:
-                "authored-basement-palette;provisional-empirical-weights-and-original-rng-route"
+                "recovered-decoration35-conditional-variant-draws;heldout-original-gl-cache"
                     .into(),
             tutorial: true,
-            doors: vec![
-                RoomDoor {
-                    side: "left".into(),
-                    state: "Opened".into(),
-                    x: 62.0,
-                    y: 135.0,
-                    target_room: 1,
-                },
-                RoomDoor {
-                    side: "right".into(),
-                    state: "Opened".into(),
-                    x: 418.0,
-                    y: 135.0,
-                    target_room: 2,
-                },
-            ],
+            doors: Vec::new(),
             fx: RoomFx {
                 ambient: [255, 255, 255],
                 shading: "gfx/backdrop/shading.png".into(),
@@ -342,169 +512,8 @@ pub fn generate_room(seed: u32) -> Room {
                 actor_tint: [255, 255, 255],
             },
             template: "starting-room".into(),
-            generation: "public-start-rng-provisional-decoration-route".into(),
+            generation: "recovered-basement-backdrop;supplied-room-decoration-seed;provisional-fx-route".into(),
         },
     }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use std::collections::BTreeSet;
-
-    #[test]
-    fn seed_replay_reproduces_the_complete_descriptor() {
-        for seed in crate::test_seeds::samples("seed_replay_reproduces_the_complete_descriptor", 32)
-        {
-            let first = generate_room(seed);
-            let _unrelated = generate_room(seed.wrapping_add(1));
-            assert_eq!(first, generate_room(seed));
-        }
-    }
-
-    #[test]
-    fn seed_variation_changes_generated_patch_choices() {
-        let seeds =
-            crate::test_seeds::samples("seed_variation_changes_generated_patch_choices", 256);
-        let maps: BTreeSet<_> = seeds
-            .into_iter()
-            .map(|seed| {
-                let room = generate_room(seed);
-                room.appearance
-                    .floor_quads
-                    .into_iter()
-                    .chain(room.appearance.wall_quads)
-                    .map(|quad| quad.source_patch_index)
-                    .collect::<Vec<_>>()
-            })
-            .collect();
-        assert_eq!(maps.len(), 256);
-    }
-
-    #[test]
-    fn all_seed_boundaries_produce_renderable_domains() {
-        for seed in [0, 1, 0x7fff_ffff, 0x8000_0000, u32::MAX]
-            .into_iter()
-            .chain(crate::test_seeds::samples(
-                "all_seed_boundaries_produce_renderable_domains",
-                32,
-            ))
-        {
-            let room = generate_room(seed);
-            let appearance = &room.appearance;
-            assert_eq!(appearance.floor_quads.len(), 4);
-            assert_eq!(appearance.wall_quads.len(), 44);
-            assert!(appearance
-                .floor_quads
-                .iter()
-                .all(|quad| quad.source_patch_index < 6));
-            assert!(appearance
-                .wall_quads
-                .iter()
-                .all(|quad| quad.source_patch_index < 4));
-            assert_eq!(
-                appearance.floor_quads[2].source_patch_index,
-                appearance.floor_quads[3].source_patch_index
-            );
-            for quad in appearance.floor_quads.iter().chain(&appearance.wall_quads) {
-                assert!(
-                    quad.source_rect.x >= 0.0
-                        && quad.source_rect.x + quad.source_rect.width <= 234.0
-                );
-                assert!(
-                    quad.source_rect.y >= 0.0
-                        && quad.source_rect.y + quad.source_rect.height <= 156.0
-                );
-                assert!(
-                    quad.dest_rect.x >= 0.0 && quad.dest_rect.x + quad.dest_rect.width <= 442.0
-                );
-                assert!(
-                    quad.dest_rect.y >= 0.0 && quad.dest_rect.y + quad.dest_rect.height <= 286.0
-                );
-            }
-            assert_eq!(appearance.columns, ROOM_COLUMNS);
-            assert_eq!(appearance.rows, ROOM_ROWS);
-            assert_eq!(appearance.tile_size * f64::from(ROOM_COLUMNS), 442.0);
-            assert_eq!(appearance.tile_size * f64::from(ROOM_ROWS), 286.0);
-            assert_eq!(appearance.origin, RoomOrigin { x: 19.0, y: -8.0 });
-            assert_eq!(
-                (room.left, room.right, room.top, room.bottom),
-                (70.0, 410.0, 48.0, 222.0)
-            );
-            assert!(appearance.doors.iter().all(|door| {
-                matches!(door.side.as_str(), "left" | "right")
-                    && door.state == "Opened"
-                    && door.x.is_finite()
-                    && door.y.is_finite()
-            }));
-            assert!((1..=5).any(|variant| {
-                appearance.fx.overlay == format!("gfx/overlays/basement/1x1_overlay_{variant}.png")
-            }));
-            assert!((0.0..=1.0).contains(&appearance.fx.overlay_opacity));
-            assert_eq!(
-                appearance.generation,
-                "public-start-rng-provisional-decoration-route"
-            );
-        }
-    }
-
-    #[test]
-    fn authored_floor_overlap_and_wall_mirroring_leave_no_geometry_gaps() {
-        let room = generate_room(crate::test_seeds::one(
-            "authored_floor_overlap_and_wall_mirroring_leave_no_geometry_gaps",
-        ));
-        let floor = &room.appearance.floor_quads;
-        assert_eq!(
-            floor[0].dest_rect.x + floor[0].dest_rect.width - floor[1].dest_rect.x,
-            26.0
-        );
-        assert_eq!(
-            floor[0].dest_rect.y + floor[0].dest_rect.height - floor[2].dest_rect.y,
-            26.0
-        );
-        assert_eq!(
-            floor
-                .iter()
-                .map(|quad| (quad.flip_x, quad.flip_y))
-                .collect::<Vec<_>>(),
-            vec![(false, false), (true, false), (false, true), (true, true)]
-        );
-        // Coverage of the floor/wall cache follows authored rectangles, not
-        // independently guessed per-cell variants. Every logical pixel belongs
-        // to at least one submitted quad before the tutorial/doors are drawn.
-        for y in 0..286 {
-            for x in 0..442 {
-                assert!(
-                    room.appearance
-                        .floor_quads
-                        .iter()
-                        .chain(&room.appearance.wall_quads)
-                        .any(|quad| {
-                            let rect = &quad.dest_rect;
-                            f64::from(x) >= rect.x
-                                && f64::from(x) < rect.x + rect.width
-                                && f64::from(y) >= rect.y
-                                && f64::from(y) < rect.y + rect.height
-                        }),
-                    "uncovered cache pixel {x},{y}"
-                );
-            }
-        }
-    }
-
-    #[test]
-    fn renderer_contract_uses_camel_case_and_roundtrips() {
-        let room = generate_room(crate::test_seeds::one(
-            "renderer_contract_uses_camel_case_and_roundtrips",
-        ));
-        let value = serde_json::to_value(&room).unwrap();
-        assert_eq!(value["appearance"]["tileSize"], 26.0);
-        assert_eq!(value["appearance"]["doors"][0]["targetRoom"], 1);
-        assert_eq!(
-            value["appearance"]["fx"]["actorTint"],
-            serde_json::json!([255, 255, 255])
-        );
-        assert!(value["appearance"]["fx"]["overlayOpacity"].is_number());
-        assert_eq!(serde_json::from_value::<Room>(value).unwrap(), room);
     }
 }

@@ -1,0 +1,47 @@
+{
+  "scope": "Production WASM in Chromium: one ordinary gameplay tick, state serialization, UTF8 decode and JSON parse; excludes renderer, trace storage and screenshot encoding.",
+  "results": [
+    {
+      "name": "aggregate-baseline",
+      "production": {
+        "sha256": "6b2bdce75556c3fb23f13dfcd49e89067737a1f6c8809bcc811ca290c9f8fff7",
+        "files": 99,
+        "scope": "Immutable snapshot of production build bytes; source/native replay equality is checked separately"
+      },
+      "screen": "playing",
+      "serializedBytes": 20519,
+      "bootLifecycleBytes": 0,
+      "batchMillisecondsPerTickSnapshot": [
+        0.41549999998882414,
+        0.4910000000149012,
+        0.5664999999850988,
+        0.33650000000372526,
+        0.2905000000074506,
+        0.3840000000037253
+      ],
+      "medianMillisecondsPerTickSnapshot": 0.3997499999962747
+    },
+    {
+      "name": "boot-lifecycle",
+      "production": {
+        "sha256": "cf07af1694444b160c07994a81b5611a0d71e750aa1bac576121a65fb0aba594",
+        "files": 99,
+        "scope": "Immutable snapshot of production build bytes; source/native replay equality is checked separately"
+      },
+      "screen": "playing",
+      "serializedBytes": 28927,
+      "bootLifecycleBytes": 8391,
+      "batchMillisecondsPerTickSnapshot": [
+        0.4725,
+        0.4480000000074506,
+        0.3815000000037253,
+        0.3875,
+        0.3925,
+        0.3975
+      ],
+      "medianMillisecondsPerTickSnapshot": 0.395
+    }
+  ],
+  "reproduce": "source cloud/env.sh && bash tools/original/with-display.sh node tools/foundation/measure-snapshot-cost.mjs --baseline BASELINE_DIST --candidate dist --output .cache/snapshot-cost.json",
+  "limits": "Six batches of200 ordinary ticks in one Chromium session per immutable artifact; environment-specific timings, excluding renderer/trace/encoding, do not establish original performance parity."
+}

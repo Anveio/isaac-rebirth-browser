@@ -1,0 +1,63 @@
+{
+  "code": "H2MBZRKH",
+  "runSeed": 838427968,
+  "slot": 2,
+  "descriptor": {
+    "index": 8,
+    "generatedIndex": 3,
+    "gridIndex": 85,
+    "assetStage": 1,
+    "catalogIndex": 101,
+    "template": {
+      "type": 1,
+      "variant": 103,
+      "difficulty": 5,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    "doorMask": 15,
+    "neighbors": [
+      6,
+      2,
+      9,
+      5,
+      null,
+      null,
+      null,
+      null
+    ],
+    "roomInitSeed": 984908586,
+    "decorationSeed": 953432009,
+    "spawnSeed": 1180637608,
+    "followingSeed": 3019828573
+  },
+  "authoredEntities": [
+    {
+      "type": 18,
+      "variant": 0,
+      "subtype": 0,
+      "weight": 1.0
+    },
+    {
+      "type": 18,
+      "variant": 0,
+      "subtype": 0,
+      "weight": 1.0
+    },
+    {
+      "type": 18,
+      "variant": 0,
+      "subtype": 0,
+      "weight": 1.0
+    },
+    {
+      "type": 18,
+      "variant": 0,
+      "subtype": 0,
+      "weight": 1.0
+    }
+  ]
+}

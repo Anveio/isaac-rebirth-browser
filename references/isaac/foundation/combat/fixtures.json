@@ -1,0 +1,6273 @@
+{
+  "schema": 1,
+  "source": {
+    "version": "base Rebirth Linux v1.05",
+    "originalSha256": "c1b2ca9375d60d4354f9086871913901428af41b82a5892a0d235c5d8ae2f768",
+    "offlineDerivedSha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+    "clock": "public GL presentation with bounded writable source field observations; native full updates independently counted"
+  },
+  "scope": "conditional grid/contact/regular damage kernels; does not prove room routing, AI, death callbacks or browser scene integration; existing captured grid objects supply collision classes, uncaptured empty-cell selector costs are normalized to0 and do not establish navigation costs",
+  "cases": [
+    {
+      "name": "rock-typed-blast",
+      "provenance": {
+        "scenario": "rock-typed",
+        "seed": "T1PK6Y0W",
+        "seedValue": 2184569263,
+        "nativeManifestSha256": "57fedcdddbb1ea1fb341632ee47485e9132224d3050a1a222ea29fd7905e39d4",
+        "nativeManifest": ".cache/coordination/combat/fresh-1791870215376903906/rock-typed/run/manifest.json",
+        "captureLabels": [
+          "rock-bomb-planted",
+          "rock-bomb-explosion"
+        ],
+        "freshProfile": true,
+        "memoryWritten": false,
+        "executableMappingsRead": false,
+        "nativeProofSha256": "39ccf63bfb70e05f6bf0c573feaa3cdc7a54558f8f2427353a73b5dda6503fd7"
+      },
+      "request": {
+        "operation": "gridBlast",
+        "grid": {
+          "width": 15,
+          "height": 9,
+          "cells": [
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 1791476694
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 4042397790
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 3511499480
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 3235045759
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 4078209276
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 680981559
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 4171584165
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 16,
+                "variant": 7,
+                "state": 1,
+                "collisionClass": 4,
+                "spawnSeed": 260856487
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 3715139466
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 2094072512
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 3041055707
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 3452280317
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 1949941723
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 2714681299
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 2513193461
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 2496322858
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 1,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 0,
+                "spawnSeed": 3181898711
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 2,
+                "variant": 1000,
+                "state": 1,
+                "collisionClass": 3,
+                "spawnSeed": 1537185522
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 2,
+                "variant": 1001,
+                "state": 1,
+                "collisionClass": 3,
+                "spawnSeed": 4037236710
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 1611759364
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 1201224658
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 2,
+                "variant": 0,
+                "state": 1,
+                "collisionClass": 3,
+                "spawnSeed": 2287474820
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 4286145797
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 3171046396
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 2,
+                "variant": 2,
+                "state": 1,
+                "collisionClass": 3,
+                "spawnSeed": 2354826941
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 1,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 0,
+                "spawnSeed": 3266426988
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 505826074
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 16,
+                "variant": 7,
+                "state": 1,
+                "collisionClass": 4,
+                "spawnSeed": 1026505535
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 2,
+                "variant": 0,
+                "state": 1,
+                "collisionClass": 3,
+                "spawnSeed": 163582842
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 16,
+                "variant": 6,
+                "state": 1,
+                "collisionClass": 4,
+                "spawnSeed": 3876200217
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 1179872482
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 2,
+                "variant": 0,
+                "state": 1,
+                "collisionClass": 3,
+                "spawnSeed": 3525095983
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 1352451800
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 1162492518
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 2,
+                "variant": 1,
+                "state": 1,
+                "collisionClass": 3,
+                "spawnSeed": 2852283709
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 3663124239
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 1143932344
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 2,
+                "variant": 1000,
+                "state": 1,
+                "collisionClass": 3,
+                "spawnSeed": 3229564152
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 2,
+                "variant": 1001,
+                "state": 1,
+                "collisionClass": 3,
+                "spawnSeed": 3248038631
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 1,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 0,
+                "spawnSeed": 2215348139
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 827835309
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 1917375614
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 1419600215
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 2087398834
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 2673775228
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 2778428464
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 3509234661
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 1188845238
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 16,
+                "variant": 7,
+                "state": 1,
+                "collisionClass": 4,
+                "spawnSeed": 2487034507
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 4119112260
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 3261306467
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 3675907738
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 3606899725
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 2363891763
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 2796692117
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 1930646102
+              }
+            }
+          ]
+        },
+        "origin": {
+          "x": 80.0,
+          "y": 329.9935302734375
+        },
+        "radius": 75.0
+      },
+      "expectedDestroyedRocks": [
+        91,
+        106,
+        107
+      ]
+    },
+    {
+      "name": "rock-dense-blast",
+      "provenance": {
+        "scenario": "rock-dense",
+        "seed": "T1PK6Y0W",
+        "seedValue": 2184569263,
+        "nativeManifestSha256": "f7dfb8fbb37398135af3aa2ec1746cd797157fb70d51f4ef8e0433bb329b93ac",
+        "nativeManifest": ".cache/coordination/combat/fresh-1791870215376903906/rock-dense/run/manifest.json",
+        "captureLabels": [
+          "rock-middle-before-blast119",
+          "rock-middle-before-blast120"
+        ],
+        "freshProfile": true,
+        "memoryWritten": false,
+        "executableMappingsRead": false,
+        "nativeProofSha256": "9acb966d15995b60f61108ae08fd19c1394d1c403ff284e0eccddf497376bf32"
+      },
+      "request": {
+        "operation": "gridBlast",
+        "grid": {
+          "width": 15,
+          "height": 9,
+          "cells": [
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 1791476694
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 4042397790
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 3511499480
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 3235045759
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 4078209276
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 680981559
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 4171584165
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 16,
+                "variant": 7,
+                "state": 1,
+                "collisionClass": 4,
+                "spawnSeed": 260856487
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 3715139466
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 2094072512
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 3041055707
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 3452280317
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 1949941723
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 2714681299
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 2513193461
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 2496322858
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 1,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 0,
+                "spawnSeed": 3181898711
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 2,
+                "variant": 1000,
+                "state": 1,
+                "collisionClass": 3,
+                "spawnSeed": 1537185522
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 2,
+                "variant": 1001,
+                "state": 1,
+                "collisionClass": 3,
+                "spawnSeed": 4037236710
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 1611759364
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 1201224658
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 2,
+                "variant": 0,
+                "state": 1,
+                "collisionClass": 3,
+                "spawnSeed": 2287474820
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 4286145797
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 3171046396
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 2,
+                "variant": 2,
+                "state": 1,
+                "collisionClass": 3,
+                "spawnSeed": 2354826941
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 1,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 0,
+                "spawnSeed": 3266426988
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 505826074
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 16,
+                "variant": 7,
+                "state": 1,
+                "collisionClass": 4,
+                "spawnSeed": 1026505535
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 2,
+                "variant": 0,
+                "state": 1,
+                "collisionClass": 3,
+                "spawnSeed": 163582842
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 16,
+                "variant": 6,
+                "state": 1,
+                "collisionClass": 4,
+                "spawnSeed": 3876200217
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 1179872482
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 2,
+                "variant": 0,
+                "state": 1,
+                "collisionClass": 3,
+                "spawnSeed": 3525095983
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 1352451800
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 1162492518
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 2,
+                "variant": 1,
+                "state": 1,
+                "collisionClass": 3,
+                "spawnSeed": 2852283709
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 3663124239
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 1143932344
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 2,
+                "variant": 1000,
+                "state": 1,
+                "collisionClass": 3,
+                "spawnSeed": 3229564152
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 2,
+                "variant": 1001,
+                "state": 1,
+                "collisionClass": 3,
+                "spawnSeed": 3248038631
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 1,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 0,
+                "spawnSeed": 2215348139
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 827835309
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 1917375614
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 1419600215
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 2087398834
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 2673775228
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 2778428464
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 3509234661
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 1188845238
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 16,
+                "variant": 7,
+                "state": 1,
+                "collisionClass": 4,
+                "spawnSeed": 2487034507
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 4119112260
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 3261306467
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 3675907738
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 3606899725
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 2363891763
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 2796692117
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 1930646102
+              }
+            }
+          ]
+        },
+        "origin": {
+          "x": 289.6022644042969,
+          "y": 280.0
+        },
+        "radius": 75.0
+      },
+      "expectedDestroyedRocks": [
+        51,
+        67,
+        83
+      ]
+    },
+    {
+      "name": "rock-held-movement",
+      "provenance": {
+        "scenario": "rock-held",
+        "seed": "T1PK6Y0W",
+        "seedValue": 2184569263,
+        "nativeManifestSha256": "82a51373e246b16156a1e84d84fd6fdce0307544ded252475373c7b6ddbec1bd",
+        "nativeManifest": ".cache/coordination/combat/fresh-1791870215376903906/rock-held/run/manifest.json",
+        "captureLabels": [
+          "adjacent-room",
+          "rock-held-1",
+          "rock-held-2",
+          "rock-held-3",
+          "rock-held-4",
+          "rock-held-5",
+          "rock-held-6",
+          "rock-held-7",
+          "rock-held-8",
+          "rock-held-9",
+          "rock-held-10",
+          "rock-held-11",
+          "rock-held-12",
+          "rock-held-13",
+          "rock-held-14",
+          "rock-held-15",
+          "rock-held-16",
+          "rock-held-17",
+          "rock-held-18",
+          "rock-held-19",
+          "rock-held-20",
+          "rock-held-21",
+          "rock-held-22",
+          "rock-held-23",
+          "rock-held-24",
+          "rock-held-25",
+          "rock-held-26",
+          "rock-held-27",
+          "rock-held-28",
+          "rock-held-29",
+          "rock-held-30",
+          "rock-held-31",
+          "rock-held-32"
+        ],
+        "freshProfile": true,
+        "memoryWritten": false,
+        "executableMappingsRead": false,
+        "nativeProofSha256": "e1c6acbb7674b5660944a92fdf575da96a2ec888b8f7f51422ebff270a5f84ca"
+      },
+      "request": {
+        "operation": "gridTrajectory",
+        "grid": {
+          "width": 15,
+          "height": 9,
+          "cells": [
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 1791476694
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 4042397790
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 3511499480
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 3235045759
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 4078209276
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 680981559
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 4171584165
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 16,
+                "variant": 7,
+                "state": 1,
+                "collisionClass": 4,
+                "spawnSeed": 260856487
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 3715139466
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 2094072512
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 3041055707
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 3452280317
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 1949941723
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 2714681299
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 2513193461
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 2496322858
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 1,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 0,
+                "spawnSeed": 3181898711
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 2,
+                "variant": 1000,
+                "state": 1,
+                "collisionClass": 3,
+                "spawnSeed": 1537185522
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 2,
+                "variant": 1001,
+                "state": 1,
+                "collisionClass": 3,
+                "spawnSeed": 4037236710
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 1611759364
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 1201224658
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 2,
+                "variant": 0,
+                "state": 1,
+                "collisionClass": 3,
+                "spawnSeed": 2287474820
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 4286145797
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 3171046396
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 2,
+                "variant": 2,
+                "state": 1,
+                "collisionClass": 3,
+                "spawnSeed": 2354826941
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 1,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 0,
+                "spawnSeed": 3266426988
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 505826074
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 16,
+                "variant": 7,
+                "state": 1,
+                "collisionClass": 4,
+                "spawnSeed": 1026505535
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 2,
+                "variant": 0,
+                "state": 1,
+                "collisionClass": 3,
+                "spawnSeed": 163582842
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 16,
+                "variant": 6,
+                "state": 1,
+                "collisionClass": 4,
+                "spawnSeed": 3876200217
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 1179872482
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 2,
+                "variant": 0,
+                "state": 1,
+                "collisionClass": 3,
+                "spawnSeed": 3525095983
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 1352451800
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 1162492518
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 2,
+                "variant": 1,
+                "state": 1,
+                "collisionClass": 3,
+                "spawnSeed": 2852283709
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 3663124239
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 1143932344
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 2,
+                "variant": 1000,
+                "state": 1,
+                "collisionClass": 3,
+                "spawnSeed": 3229564152
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 2,
+                "variant": 1001,
+                "state": 1,
+                "collisionClass": 3,
+                "spawnSeed": 3248038631
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 1,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 0,
+                "spawnSeed": 2215348139
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 827835309
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 1917375614
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 1419600215
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 2087398834
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 2673775228
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 2778428464
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 3509234661
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 1188845238
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 16,
+                "variant": 7,
+                "state": 1,
+                "collisionClass": 4,
+                "spawnSeed": 2487034507
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 4119112260
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 3261306467
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 3675907738
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 3606899725
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 2363891763
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 2796692117
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 1930646102
+              }
+            }
+          ]
+        },
+        "geometry": {
+          "radius": 10.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "points": 40
+        },
+        "position": {
+          "x": 80.0,
+          "y": 280.0
+        },
+        "velocity": {
+          "x": 0.0,
+          "y": 0.0
+        },
+        "clock": {
+          "systemCounter": 1425,
+          "interpolationEnabled": true
+        },
+        "inputs": [
+          {
+            "x": 0,
+            "y": 1
+          },
+          {
+            "x": 0,
+            "y": 1
+          },
+          {
+            "x": 0,
+            "y": 1
+          },
+          {
+            "x": 0,
+            "y": 1
+          },
+          {
+            "x": 0,
+            "y": 1
+          },
+          {
+            "x": 0,
+            "y": 1
+          },
+          {
+            "x": 0,
+            "y": 1
+          },
+          {
+            "x": 0,
+            "y": 1
+          },
+          {
+            "x": 0,
+            "y": 1
+          },
+          {
+            "x": 0,
+            "y": 1
+          },
+          {
+            "x": 0,
+            "y": 1
+          },
+          {
+            "x": 0,
+            "y": 1
+          },
+          {
+            "x": 0,
+            "y": 1
+          },
+          {
+            "x": 0,
+            "y": 1
+          },
+          {
+            "x": 0,
+            "y": 1
+          },
+          {
+            "x": 0,
+            "y": 1
+          },
+          {
+            "x": 0,
+            "y": 1
+          },
+          {
+            "x": 0,
+            "y": 1
+          },
+          {
+            "x": 0,
+            "y": 1
+          },
+          {
+            "x": 0,
+            "y": 1
+          },
+          {
+            "x": 0,
+            "y": 1
+          },
+          {
+            "x": 0,
+            "y": 1
+          },
+          {
+            "x": 0,
+            "y": 1
+          },
+          {
+            "x": 0,
+            "y": 1
+          },
+          {
+            "x": 0,
+            "y": 1
+          },
+          {
+            "x": 0,
+            "y": 1
+          },
+          {
+            "x": 0,
+            "y": 1
+          },
+          {
+            "x": 0,
+            "y": 1
+          },
+          {
+            "x": 0,
+            "y": 1
+          },
+          {
+            "x": 0,
+            "y": 1
+          },
+          {
+            "x": 0,
+            "y": 1
+          },
+          {
+            "x": 0,
+            "y": 1
+          }
+        ]
+      },
+      "observations": [
+        {
+          "counter": 1426,
+          "position": {
+            "x": 80.0,
+            "y": 280.0
+          },
+          "velocity": {
+            "x": 0.0,
+            "y": 0.5282045006752014
+          },
+          "collidedWithGrid": false,
+          "normal": {
+            "x": 0.0,
+            "y": 0.0
+          }
+        },
+        {
+          "counter": 1427,
+          "position": {
+            "x": 80.0,
+            "y": 280.5281982421875
+          },
+          "velocity": {
+            "x": 0.0,
+            "y": 0.9932045340538025
+          },
+          "collidedWithGrid": false,
+          "normal": {
+            "x": 0.0,
+            "y": 0.0
+          }
+        },
+        {
+          "counter": 1428,
+          "position": {
+            "x": 80.0,
+            "y": 281.5213928222656
+          },
+          "velocity": {
+            "x": 0.0,
+            "y": 1.4025629758834839
+          },
+          "collidedWithGrid": false,
+          "normal": {
+            "x": 0.0,
+            "y": 0.0
+          }
+        },
+        {
+          "counter": 1429,
+          "position": {
+            "x": 80.0,
+            "y": 282.9239501953125
+          },
+          "velocity": {
+            "x": 0.0,
+            "y": 1.7629379034042358
+          },
+          "collidedWithGrid": false,
+          "normal": {
+            "x": 0.0,
+            "y": 0.0
+          }
+        },
+        {
+          "counter": 1430,
+          "position": {
+            "x": 80.0,
+            "y": 284.6868896484375
+          },
+          "velocity": {
+            "x": 0.0,
+            "y": 2.080190658569336
+          },
+          "collidedWithGrid": false,
+          "normal": {
+            "x": 0.0,
+            "y": 0.0
+          }
+        },
+        {
+          "counter": 1431,
+          "position": {
+            "x": 80.0,
+            "y": 286.76708984375
+          },
+          "velocity": {
+            "x": 0.0,
+            "y": 2.3594810962677
+          },
+          "collidedWithGrid": false,
+          "normal": {
+            "x": 0.0,
+            "y": 0.0
+          }
+        },
+        {
+          "counter": 1432,
+          "position": {
+            "x": 80.0,
+            "y": 289.1265563964844
+          },
+          "velocity": {
+            "x": 0.0,
+            "y": 2.6053521633148193
+          },
+          "collidedWithGrid": false,
+          "normal": {
+            "x": 0.0,
+            "y": 0.0
+          }
+        },
+        {
+          "counter": 1433,
+          "position": {
+            "x": 80.0,
+            "y": 291.7319030761719
+          },
+          "velocity": {
+            "x": 0.0,
+            "y": 2.8218023777008057
+          },
+          "collidedWithGrid": false,
+          "normal": {
+            "x": 0.0,
+            "y": 0.0
+          }
+        },
+        {
+          "counter": 1434,
+          "position": {
+            "x": 80.0,
+            "y": 294.5537109375
+          },
+          "velocity": {
+            "x": 0.0,
+            "y": 3.012352466583252
+          },
+          "collidedWithGrid": false,
+          "normal": {
+            "x": 0.0,
+            "y": 0.0
+          }
+        },
+        {
+          "counter": 1435,
+          "position": {
+            "x": 80.0,
+            "y": 297.5660705566406
+          },
+          "velocity": {
+            "x": 0.0,
+            "y": 3.180101156234741
+          },
+          "collidedWithGrid": false,
+          "normal": {
+            "x": 0.0,
+            "y": 0.0
+          }
+        },
+        {
+          "counter": 1436,
+          "position": {
+            "x": 80.0,
+            "y": 300.7461853027344
+          },
+          "velocity": {
+            "x": 0.0,
+            "y": 3.32777738571167
+          },
+          "collidedWithGrid": false,
+          "normal": {
+            "x": 0.0,
+            "y": 0.0
+          }
+        },
+        {
+          "counter": 1437,
+          "position": {
+            "x": 80.0,
+            "y": 304.073974609375
+          },
+          "velocity": {
+            "x": 0.0,
+            "y": 3.457782745361328
+          },
+          "collidedWithGrid": false,
+          "normal": {
+            "x": 0.0,
+            "y": 0.0
+          }
+        },
+        {
+          "counter": 1438,
+          "position": {
+            "x": 80.0,
+            "y": 307.5317687988281
+          },
+          "velocity": {
+            "x": 0.0,
+            "y": 3.5722317695617676
+          },
+          "collidedWithGrid": false,
+          "normal": {
+            "x": 0.0,
+            "y": 0.0
+          }
+        },
+        {
+          "counter": 1439,
+          "position": {
+            "x": 80.0,
+            "y": 311.10400390625
+          },
+          "velocity": {
+            "x": 0.0,
+            "y": 3.672985792160034
+          },
+          "collidedWithGrid": false,
+          "normal": {
+            "x": 0.0,
+            "y": 0.0
+          }
+        },
+        {
+          "counter": 1440,
+          "position": {
+            "x": 80.0,
+            "y": 314.7769775390625
+          },
+          "velocity": {
+            "x": 0.0,
+            "y": 3.761683940887451
+          },
+          "collidedWithGrid": false,
+          "normal": {
+            "x": 0.0,
+            "y": 0.0
+          }
+        },
+        {
+          "counter": 1441,
+          "position": {
+            "x": 80.0,
+            "y": 318.5386657714844
+          },
+          "velocity": {
+            "x": 0.0,
+            "y": 3.839768409729004
+          },
+          "collidedWithGrid": false,
+          "normal": {
+            "x": 0.0,
+            "y": 0.0
+          }
+        },
+        {
+          "counter": 1442,
+          "position": {
+            "x": 80.0,
+            "y": 322.3784484863281
+          },
+          "velocity": {
+            "x": 0.0,
+            "y": 3.9085092544555664
+          },
+          "collidedWithGrid": false,
+          "normal": {
+            "x": 0.0,
+            "y": 0.0
+          }
+        },
+        {
+          "counter": 1443,
+          "position": {
+            "x": 80.0,
+            "y": 326.2869567871094
+          },
+          "velocity": {
+            "x": 0.0,
+            "y": 3.969024658203125
+          },
+          "collidedWithGrid": false,
+          "normal": {
+            "x": 0.0,
+            "y": 0.0
+          }
+        },
+        {
+          "counter": 1444,
+          "position": {
+            "x": 80.0,
+            "y": 329.9996337890625
+          },
+          "velocity": {
+            "x": 0.0,
+            "y": 0.3022301197052002
+          },
+          "collidedWithGrid": true,
+          "normal": {
+            "x": 0.0,
+            "y": 1.0
+          }
+        },
+        {
+          "counter": 1445,
+          "position": {
+            "x": 80.0,
+            "y": 329.9996032714844
+          },
+          "velocity": {
+            "x": 0.0,
+            "y": -0.020573019981384277
+          },
+          "collidedWithGrid": true,
+          "normal": {
+            "x": 0.0,
+            "y": 1.0
+          }
+        },
+        {
+          "counter": 1446,
+          "position": {
+            "x": 80.0,
+            "y": 329.9790344238281
+          },
+          "velocity": {
+            "x": 0.0,
+            "y": 0.5108176469802856
+          },
+          "collidedWithGrid": false,
+          "normal": {
+            "x": 0.0,
+            "y": 0.0
+          }
+        },
+        {
+          "counter": 1447,
+          "position": {
+            "x": 80.0,
+            "y": 329.9996032714844
+          },
+          "velocity": {
+            "x": 1.4372722567657092e-08,
+            "y": -0.0022101998329162598
+          },
+          "collidedWithGrid": true,
+          "normal": {
+            "x": -1.4664422565147106e-08,
+            "y": 1.0
+          }
+        },
+        {
+          "counter": 1448,
+          "position": {
+            "x": 80.0,
+            "y": 329.9974060058594
+          },
+          "velocity": {
+            "x": 1.1317093040474901e-08,
+            "y": 0.5263366103172302
+          },
+          "collidedWithGrid": false,
+          "normal": {
+            "x": 0.0,
+            "y": 0.0
+          }
+        },
+        {
+          "counter": 1449,
+          "position": {
+            "x": 80.0,
+            "y": 329.99981689453125
+          },
+          "velocity": {
+            "x": 2.3464119536242833e-08,
+            "y": -0.0008440017700195312
+          },
+          "collidedWithGrid": true,
+          "normal": {
+            "x": -1.4664422565147106e-08,
+            "y": 1.0
+          }
+        },
+        {
+          "counter": 1450,
+          "position": {
+            "x": 80.0,
+            "y": 329.99896240234375
+          },
+          "velocity": {
+            "x": 1.847566544199708e-08,
+            "y": 0.5274912118911743
+          },
+          "collidedWithGrid": false,
+          "normal": {
+            "x": 0.0,
+            "y": 0.0
+          }
+        },
+        {
+          "counter": 1451,
+          "position": {
+            "x": 80.0,
+            "y": 329.9996032714844
+          },
+          "velocity": {
+            "x": 2.9114200827962122e-08,
+            "y": -0.0007423758506774902
+          },
+          "collidedWithGrid": true,
+          "normal": {
+            "x": -1.4664422565147106e-08,
+            "y": 1.0
+          }
+        },
+        {
+          "counter": 1452,
+          "position": {
+            "x": 80.0,
+            "y": 329.9988708496094
+          },
+          "velocity": {
+            "x": 2.292454404084765e-08,
+            "y": 0.5275771021842957
+          },
+          "collidedWithGrid": false,
+          "normal": {
+            "x": 0.0,
+            "y": 0.0
+          }
+        },
+        {
+          "counter": 1453,
+          "position": {
+            "x": 80.0,
+            "y": 329.9996032714844
+          },
+          "velocity": {
+            "x": 3.2618249434790414e-08,
+            "y": -0.0007348060607910156
+          },
+          "collidedWithGrid": true,
+          "normal": {
+            "x": -1.4664422565147106e-08,
+            "y": 1.0
+          }
+        },
+        {
+          "counter": 1454,
+          "position": {
+            "x": 80.0,
+            "y": 329.9988708496094
+          },
+          "velocity": {
+            "x": 2.568363299815246e-08,
+            "y": 0.5275834798812866
+          },
+          "collidedWithGrid": false,
+          "normal": {
+            "x": 0.0,
+            "y": 0.0
+          }
+        },
+        {
+          "counter": 1455,
+          "position": {
+            "x": 80.0,
+            "y": 329.9996032714844
+          },
+          "velocity": {
+            "x": 3.4790833325359927e-08,
+            "y": -0.0007342100143432617
+          },
+          "collidedWithGrid": true,
+          "normal": {
+            "x": -1.4664422565147106e-08,
+            "y": 1.0
+          }
+        },
+        {
+          "counter": 1456,
+          "position": {
+            "x": 80.0,
+            "y": 329.9988708496094
+          },
+          "velocity": {
+            "x": 2.739432858334112e-08,
+            "y": 0.5275840163230896
+          },
+          "collidedWithGrid": false,
+          "normal": {
+            "x": 0.0,
+            "y": 0.0
+          }
+        },
+        {
+          "counter": 1457,
+          "position": {
+            "x": 80.0,
+            "y": 329.9996032714844
+          },
+          "velocity": {
+            "x": 3.613784116396346e-08,
+            "y": -0.0007342100143432617
+          },
+          "collidedWithGrid": true,
+          "normal": {
+            "x": -1.4664422565147106e-08,
+            "y": 1.0
+          }
+        }
+      ]
+    },
+    {
+      "name": "rock-dense-movement",
+      "provenance": {
+        "scenario": "rock-dense",
+        "seed": "T1PK6Y0W",
+        "seedValue": 2184569263,
+        "nativeManifestSha256": "f7dfb8fbb37398135af3aa2ec1746cd797157fb70d51f4ef8e0433bb329b93ac",
+        "nativeManifest": ".cache/coordination/combat/fresh-1791870215376903906/rock-dense/run/manifest.json",
+        "captureLabels": [
+          "rock-horizontal-6",
+          "rock-coast-1",
+          "rock-coast-2",
+          "rock-coast-3",
+          "rock-coast-4",
+          "rock-coast-5",
+          "rock-coast-6",
+          "rock-coast-7",
+          "rock-coast-8",
+          "rock-coast-9",
+          "rock-coast-10",
+          "rock-coast-11",
+          "rock-coast-12",
+          "rock-coast-13",
+          "rock-coast-14",
+          "rock-coast-15",
+          "rock-coast-16",
+          "rock-coast-17",
+          "rock-coast-18",
+          "rock-coast-19",
+          "rock-coast-20",
+          "rock-coast-21",
+          "rock-coast-22",
+          "rock-coast-23",
+          "rock-coast-24",
+          "rock-coast-25",
+          "rock-coast-26",
+          "rock-coast-27",
+          "rock-coast-28",
+          "rock-coast-29",
+          "rock-coast-30"
+        ],
+        "freshProfile": true,
+        "memoryWritten": false,
+        "executableMappingsRead": false,
+        "nativeProofSha256": "5da33a14cf0e8f13e710f86a6d03ed87604cf2d3f2627933c387e1b9dbdcd3ba"
+      },
+      "request": {
+        "operation": "gridTrajectory",
+        "grid": {
+          "width": 15,
+          "height": 9,
+          "cells": [
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 1791476694
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 4042397790
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 3511499480
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 3235045759
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 4078209276
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 680981559
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 4171584165
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 16,
+                "variant": 7,
+                "state": 1,
+                "collisionClass": 4,
+                "spawnSeed": 260856487
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 3715139466
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 2094072512
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 3041055707
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 3452280317
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 1949941723
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 2714681299
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 2513193461
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 2496322858
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 1,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 0,
+                "spawnSeed": 3181898711
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 2,
+                "variant": 1000,
+                "state": 1,
+                "collisionClass": 3,
+                "spawnSeed": 1537185522
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 2,
+                "variant": 1001,
+                "state": 1,
+                "collisionClass": 3,
+                "spawnSeed": 4037236710
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 1611759364
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 1201224658
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 2,
+                "variant": 0,
+                "state": 1,
+                "collisionClass": 3,
+                "spawnSeed": 2287474820
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 4286145797
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 3171046396
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 2,
+                "variant": 2,
+                "state": 1,
+                "collisionClass": 3,
+                "spawnSeed": 2354826941
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 1,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 0,
+                "spawnSeed": 3266426988
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 505826074
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 16,
+                "variant": 7,
+                "state": 1,
+                "collisionClass": 4,
+                "spawnSeed": 1026505535
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 2,
+                "variant": 0,
+                "state": 1,
+                "collisionClass": 3,
+                "spawnSeed": 163582842
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 16,
+                "variant": 6,
+                "state": 1,
+                "collisionClass": 4,
+                "spawnSeed": 3876200217
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 1179872482
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 2,
+                "variant": 0,
+                "state": 1,
+                "collisionClass": 3,
+                "spawnSeed": 3525095983
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 1352451800
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 1162492518
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 2,
+                "variant": 1,
+                "state": 1,
+                "collisionClass": 3,
+                "spawnSeed": 2852283709
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 3663124239
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 1143932344
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 2,
+                "variant": 1000,
+                "state": 1,
+                "collisionClass": 3,
+                "spawnSeed": 3229564152
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 2,
+                "variant": 1001,
+                "state": 1,
+                "collisionClass": 3,
+                "spawnSeed": 3248038631
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 1,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 0,
+                "spawnSeed": 2215348139
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 827835309
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 1917375614
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 1419600215
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 2087398834
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 2673775228
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 2778428464
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 3509234661
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 1188845238
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 16,
+                "variant": 7,
+                "state": 1,
+                "collisionClass": 4,
+                "spawnSeed": 2487034507
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 4119112260
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 3261306467
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 3675907738
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 3606899725
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 2363891763
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 2796692117
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 1930646102
+              }
+            }
+          ]
+        },
+        "geometry": {
+          "radius": 10.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "points": 40
+        },
+        "position": {
+          "x": 255.0747528076172,
+          "y": 280.0
+        },
+        "velocity": {
+          "x": 4.404510498046875,
+          "y": 0.0
+        },
+        "clock": {
+          "systemCounter": 1473,
+          "interpolationEnabled": true
+        },
+        "inputs": [
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 0
+          }
+        ]
+      },
+      "observations": [
+        {
+          "counter": 1474,
+          "position": {
+            "x": 259.479248046875,
+            "y": 280.0
+          },
+          "velocity": {
+            "x": 3.8774702548980713,
+            "y": 0.0
+          },
+          "collidedWithGrid": false,
+          "normal": {
+            "x": 0.0,
+            "y": 0.0
+          }
+        },
+        {
+          "counter": 1475,
+          "position": {
+            "x": 263.3567199707031,
+            "y": 280.0
+          },
+          "velocity": {
+            "x": 3.4134953022003174,
+            "y": 0.0
+          },
+          "collidedWithGrid": false,
+          "normal": {
+            "x": 0.0,
+            "y": 0.0
+          }
+        },
+        {
+          "counter": 1476,
+          "position": {
+            "x": 266.77020263671875,
+            "y": 280.0
+          },
+          "velocity": {
+            "x": 3.0050392150878906,
+            "y": 0.0
+          },
+          "collidedWithGrid": false,
+          "normal": {
+            "x": 0.0,
+            "y": 0.0
+          }
+        },
+        {
+          "counter": 1477,
+          "position": {
+            "x": 269.7752380371094,
+            "y": 280.0
+          },
+          "velocity": {
+            "x": 2.645458698272705,
+            "y": 0.0
+          },
+          "collidedWithGrid": false,
+          "normal": {
+            "x": 0.0,
+            "y": 0.0
+          }
+        },
+        {
+          "counter": 1478,
+          "position": {
+            "x": 272.4206848144531,
+            "y": 280.0
+          },
+          "velocity": {
+            "x": 2.3289053440093994,
+            "y": 0.0
+          },
+          "collidedWithGrid": false,
+          "normal": {
+            "x": 0.0,
+            "y": 0.0
+          }
+        },
+        {
+          "counter": 1479,
+          "position": {
+            "x": 274.7496032714844,
+            "y": 280.0
+          },
+          "velocity": {
+            "x": 2.0502305030822754,
+            "y": 0.0
+          },
+          "collidedWithGrid": false,
+          "normal": {
+            "x": 0.0,
+            "y": 0.0
+          }
+        },
+        {
+          "counter": 1480,
+          "position": {
+            "x": 276.7998352050781,
+            "y": 280.0
+          },
+          "velocity": {
+            "x": 1.8049015998840332,
+            "y": 0.0
+          },
+          "collidedWithGrid": false,
+          "normal": {
+            "x": 0.0,
+            "y": 0.0
+          }
+        },
+        {
+          "counter": 1481,
+          "position": {
+            "x": 278.604736328125,
+            "y": 280.0
+          },
+          "velocity": {
+            "x": 1.5889285802841187,
+            "y": 0.0
+          },
+          "collidedWithGrid": false,
+          "normal": {
+            "x": 0.0,
+            "y": 0.0
+          }
+        },
+        {
+          "counter": 1482,
+          "position": {
+            "x": 280.19366455078125,
+            "y": 280.0
+          },
+          "velocity": {
+            "x": 1.3987987041473389,
+            "y": 0.0
+          },
+          "collidedWithGrid": false,
+          "normal": {
+            "x": 0.0,
+            "y": 0.0
+          }
+        },
+        {
+          "counter": 1483,
+          "position": {
+            "x": 281.59246826171875,
+            "y": 280.0
+          },
+          "velocity": {
+            "x": 1.231419563293457,
+            "y": 0.0
+          },
+          "collidedWithGrid": false,
+          "normal": {
+            "x": 0.0,
+            "y": 0.0
+          }
+        },
+        {
+          "counter": 1484,
+          "position": {
+            "x": 282.8238830566406,
+            "y": 280.0
+          },
+          "velocity": {
+            "x": 1.0840688943862915,
+            "y": 0.0
+          },
+          "collidedWithGrid": false,
+          "normal": {
+            "x": 0.0,
+            "y": 0.0
+          }
+        },
+        {
+          "counter": 1485,
+          "position": {
+            "x": 283.907958984375,
+            "y": 280.0
+          },
+          "velocity": {
+            "x": 0.9543501138687134,
+            "y": 0.0
+          },
+          "collidedWithGrid": false,
+          "normal": {
+            "x": 0.0,
+            "y": 0.0
+          }
+        },
+        {
+          "counter": 1486,
+          "position": {
+            "x": 284.8623046875,
+            "y": 280.0
+          },
+          "velocity": {
+            "x": 0.8401533365249634,
+            "y": 0.0
+          },
+          "collidedWithGrid": false,
+          "normal": {
+            "x": 0.0,
+            "y": 0.0
+          }
+        },
+        {
+          "counter": 1487,
+          "position": {
+            "x": 285.70245361328125,
+            "y": 280.0
+          },
+          "velocity": {
+            "x": 0.7396212816238403,
+            "y": 0.0
+          },
+          "collidedWithGrid": false,
+          "normal": {
+            "x": 0.0,
+            "y": 0.0
+          }
+        },
+        {
+          "counter": 1488,
+          "position": {
+            "x": 286.44207763671875,
+            "y": 280.0
+          },
+          "velocity": {
+            "x": 0.651118814945221,
+            "y": 0.0
+          },
+          "collidedWithGrid": false,
+          "normal": {
+            "x": 0.0,
+            "y": 0.0
+          }
+        },
+        {
+          "counter": 1489,
+          "position": {
+            "x": 287.09320068359375,
+            "y": 280.0
+          },
+          "velocity": {
+            "x": 0.5732064843177795,
+            "y": 0.0
+          },
+          "collidedWithGrid": false,
+          "normal": {
+            "x": 0.0,
+            "y": 0.0
+          }
+        },
+        {
+          "counter": 1490,
+          "position": {
+            "x": 287.6664123535156,
+            "y": 280.0
+          },
+          "velocity": {
+            "x": 0.5046170353889465,
+            "y": 0.0
+          },
+          "collidedWithGrid": false,
+          "normal": {
+            "x": 0.0,
+            "y": 0.0
+          }
+        },
+        {
+          "counter": 1491,
+          "position": {
+            "x": 288.1710205078125,
+            "y": 280.0
+          },
+          "velocity": {
+            "x": 0.4442349672317505,
+            "y": 0.0
+          },
+          "collidedWithGrid": false,
+          "normal": {
+            "x": 0.0,
+            "y": 0.0
+          }
+        },
+        {
+          "counter": 1492,
+          "position": {
+            "x": 288.6152648925781,
+            "y": 280.0
+          },
+          "velocity": {
+            "x": 0.3910781741142273,
+            "y": 0.0
+          },
+          "collidedWithGrid": false,
+          "normal": {
+            "x": 0.0,
+            "y": 0.0
+          }
+        },
+        {
+          "counter": 1493,
+          "position": {
+            "x": 289.00634765625,
+            "y": 280.0
+          },
+          "velocity": {
+            "x": 0.3442820906639099,
+            "y": 0.0
+          },
+          "collidedWithGrid": false,
+          "normal": {
+            "x": 0.0,
+            "y": 0.0
+          }
+        },
+        {
+          "counter": 1494,
+          "position": {
+            "x": 289.3506164550781,
+            "y": 280.0
+          },
+          "velocity": {
+            "x": 0.3030855655670166,
+            "y": 0.0
+          },
+          "collidedWithGrid": false,
+          "normal": {
+            "x": 0.0,
+            "y": 0.0
+          }
+        },
+        {
+          "counter": 1495,
+          "position": {
+            "x": 289.6537170410156,
+            "y": 280.0
+          },
+          "velocity": {
+            "x": 0.2668185830116272,
+            "y": 0.0
+          },
+          "collidedWithGrid": false,
+          "normal": {
+            "x": 0.0,
+            "y": 0.0
+          }
+        },
+        {
+          "counter": 1496,
+          "position": {
+            "x": 289.9205322265625,
+            "y": 280.0
+          },
+          "velocity": {
+            "x": 0.23489129543304443,
+            "y": 0.0
+          },
+          "collidedWithGrid": false,
+          "normal": {
+            "x": 0.0,
+            "y": 0.0
+          }
+        },
+        {
+          "counter": 1497,
+          "position": {
+            "x": 289.9996643066406,
+            "y": 280.0
+          },
+          "velocity": {
+            "x": -0.07932156324386597,
+            "y": -1.1462913285242848e-08
+          },
+          "collidedWithGrid": true,
+          "normal": {
+            "x": 1.0,
+            "y": 4.006527376532176e-08
+          }
+        },
+        {
+          "counter": 1498,
+          "position": {
+            "x": 289.92034912109375,
+            "y": 280.0
+          },
+          "velocity": {
+            "x": -0.06983000785112381,
+            "y": -1.0091270041812095e-08
+          },
+          "collidedWithGrid": false,
+          "normal": {
+            "x": 0.0,
+            "y": 0.0
+          }
+        },
+        {
+          "counter": 1499,
+          "position": {
+            "x": 289.85052490234375,
+            "y": 280.0
+          },
+          "velocity": {
+            "x": -0.061474207788705826,
+            "y": -8.883756841271406e-09
+          },
+          "collidedWithGrid": false,
+          "normal": {
+            "x": 0.0,
+            "y": 0.0
+          }
+        },
+        {
+          "counter": 1500,
+          "position": {
+            "x": 289.7890625,
+            "y": 280.0
+          },
+          "velocity": {
+            "x": -0.05411825329065323,
+            "y": -7.820733394225954e-09
+          },
+          "collidedWithGrid": false,
+          "normal": {
+            "x": 0.0,
+            "y": 0.0
+          }
+        },
+        {
+          "counter": 1501,
+          "position": {
+            "x": 289.7349548339844,
+            "y": 280.0
+          },
+          "velocity": {
+            "x": -0.047642506659030914,
+            "y": -6.884910863647065e-09
+          },
+          "collidedWithGrid": false,
+          "normal": {
+            "x": 0.0,
+            "y": 0.0
+          }
+        },
+        {
+          "counter": 1502,
+          "position": {
+            "x": 289.68731689453125,
+            "y": 280.0
+          },
+          "velocity": {
+            "x": -0.04194164276123047,
+            "y": -6.061068091867128e-09
+          },
+          "collidedWithGrid": false,
+          "normal": {
+            "x": 0.0,
+            "y": 0.0
+          }
+        },
+        {
+          "counter": 1503,
+          "position": {
+            "x": 289.6453857421875,
+            "y": 280.0
+          },
+          "velocity": {
+            "x": -0.036922939121723175,
+            "y": -5.3358055751573374e-09
+          },
+          "collidedWithGrid": false,
+          "normal": {
+            "x": 0.0,
+            "y": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "name": "attackfly-mass-contact",
+      "provenance": {
+        "scenario": "attackfly-entry",
+        "seed": "3BMBMFTE",
+        "seedValue": 3350817387,
+        "nativeManifestSha256": "446ade300eba914ec0622ee7b07fb1cbfee2a5094cfd569f028d95c07e8993da",
+        "nativeManifest": ".cache/coordination/combat/fresh-1791870215376903906/attackfly-entry/run/manifest.json",
+        "captureLabels": [
+          "down-enter-52",
+          "down-enter-53"
+        ],
+        "freshProfile": true,
+        "memoryWritten": false,
+        "executableMappingsRead": false,
+        "nativeProofSha256": "05fb76e9e95de96e48ac02f1e05c949a4b2fee0c60ac6fc2dea3b42605fa9524"
+      },
+      "request": {
+        "operation": "massContact",
+        "player": {
+          "id": 0,
+          "entityType": 1,
+          "position": {
+            "x": 320.0,
+            "y": 210.25595092773438
+          },
+          "velocity": {
+            "x": 0.0,
+            "y": 4.022298812866211
+          },
+          "radius": 10.0,
+          "mass": 5.0
+        },
+        "npc": {
+          "id": 1,
+          "entityType": 18,
+          "position": {
+            "x": 320.0,
+            "y": 240.0
+          },
+          "velocity": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": 17.0,
+          "mass": 3.0
+        },
+        "control": {
+          "x": 0,
+          "y": 1
+        },
+        "grid": {
+          "width": 15,
+          "height": 9,
+          "cells": [
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 261355080
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 1812919947
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 1684700583
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 1839966670
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 222743614
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 2214180396
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 721365101
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 16,
+                "variant": 7,
+                "state": 1,
+                "collisionClass": 4,
+                "spawnSeed": 390380496
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 2128897293
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 612821714
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 468538839
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 2913866489
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 1285476255
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 3739131701
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 3464331642
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 330382009
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 2,
+                "variant": 1,
+                "state": 1,
+                "collisionClass": 3,
+                "spawnSeed": 68101197
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 1,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 0,
+                "spawnSeed": 3533290722
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 2,
+                "variant": 1,
+                "state": 1,
+                "collisionClass": 3,
+                "spawnSeed": 2189211354
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 3499744759
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 2253338837
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 14,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 3,
+                "spawnSeed": 4076530010
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 1994547524
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 3909445978
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 14,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 3,
+                "spawnSeed": 3988065958
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 893418021
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 16,
+                "variant": 7,
+                "state": 1,
+                "collisionClass": 4,
+                "spawnSeed": 3194488342
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 16,
+                "variant": 1,
+                "state": 1,
+                "collisionClass": 4,
+                "spawnSeed": 3523542592
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 2525727782
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 1,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 0,
+                "spawnSeed": 3721179085
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 14,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 3,
+                "spawnSeed": 567786997
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 1,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 0,
+                "spawnSeed": 3543529127
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 107153011
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 2970103546
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 1,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 0,
+                "spawnSeed": 1335377979
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 14,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 3,
+                "spawnSeed": 4082963002
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 2524629009
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 1398907945
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 2,
+                "variant": 0,
+                "state": 1,
+                "collisionClass": 3,
+                "spawnSeed": 179588781
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 1,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 0,
+                "spawnSeed": 4008204067
+              }
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": null
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 2,
+                "variant": 1,
+                "state": 1,
+                "collisionClass": 3,
+                "spawnSeed": 79606202
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 1330168225
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 2074405554
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 2298239258
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 3671505715
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 193096494
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 3362947039
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 142672212
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 667780523
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 16,
+                "variant": 7,
+                "state": 1,
+                "collisionClass": 4,
+                "spawnSeed": 2693857888
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 3008645381
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 1100602837
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 3836700596
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 922751368
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 537696550
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 19910611
+              }
+            },
+            {
+              "selector": 0,
+              "entity": {
+                "kind": 15,
+                "variant": 0,
+                "state": 0,
+                "collisionClass": 4,
+                "spawnSeed": 3412966805
+              }
+            }
+          ]
+        },
+        "geometry": {
+          "radius": 10.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "points": 40
+        }
+      },
+      "expected": {
+        "player": {
+          "id": 0,
+          "entityType": 1,
+          "position": {
+            "x": 320.0,
+            "y": 213.7989044189453
+          },
+          "velocity": {
+            "x": 0.0,
+            "y": 3.3062233924865723
+          },
+          "radius": 10.0,
+          "mass": 5.0
+        },
+        "npc": {
+          "id": 1,
+          "entityType": 18,
+          "position": {
+            "x": 320.0,
+            "y": 240.7989044189453
+          },
+          "velocity": {
+            "x": 0.0,
+            "y": 2.5432488918304443
+          },
+          "radius": 17.0,
+          "mass": 3.0
+        },
+        "colliding": true
+      }
+    },
+    {
+      "name": "fly-aligned-queue",
+      "provenance": {
+        "scenario": "fly-aligned",
+        "seed": "3BMBMFTE",
+        "seedValue": 3350817387,
+        "nativeManifestSha256": "fdf3e0bc4c77df434223963e30d821fb68c6f1f8795eeb38c242dd0951ccbc1a",
+        "nativeManifest": ".cache/coordination/combat/fresh-1791870215376903906/fly-aligned/run/manifest.json",
+        "captureLabels": [
+          "fly-lineup",
+          "fly-aligned-9",
+          "fly-aligned-13"
+        ],
+        "freshProfile": true,
+        "memoryWritten": false,
+        "executableMappingsRead": false,
+        "nativeProofSha256": "2dc20bffe9fbff3fb0d330db1d4edfa3de608e70e0f32833bb2d748bf117ff73",
+        "targetSequenceId": 2
+      },
+      "request": {
+        "operation": "deferredDamage",
+        "health": {
+          "hp": 3.0,
+          "maxHp": 3.0
+        },
+        "clock": {
+          "systemCounter": 1420,
+          "interpolationEnabled": true
+        },
+        "presentations": 13,
+        "admissions": [
+          {
+            "counter": 1429,
+            "event": {
+              "amount": 3.5,
+              "kind": "tear",
+              "source": {
+                "id": 11,
+                "entityType": 2
+              }
+            }
+          }
+        ]
+      },
+      "observations": [
+        {
+          "counter": 1420,
+          "hp": 3.0,
+          "pendingDamage": 0.0
+        },
+        {
+          "counter": 1421,
+          "hp": 3.0,
+          "pendingDamage": 0.0
+        },
+        {
+          "counter": 1422,
+          "hp": 3.0,
+          "pendingDamage": 0.0
+        },
+        {
+          "counter": 1423,
+          "hp": 3.0,
+          "pendingDamage": 0.0
+        },
+        {
+          "counter": 1424,
+          "hp": 3.0,
+          "pendingDamage": 0.0
+        },
+        {
+          "counter": 1425,
+          "hp": 3.0,
+          "pendingDamage": 0.0
+        },
+        {
+          "counter": 1426,
+          "hp": 3.0,
+          "pendingDamage": 0.0
+        },
+        {
+          "counter": 1427,
+          "hp": 3.0,
+          "pendingDamage": 0.0
+        },
+        {
+          "counter": 1428,
+          "hp": 3.0,
+          "pendingDamage": 0.0
+        },
+        {
+          "counter": 1429,
+          "hp": 3.0,
+          "pendingDamage": 3.5
+        },
+        {
+          "counter": 1430,
+          "hp": 3.0,
+          "pendingDamage": 3.5
+        },
+        {
+          "counter": 1431,
+          "hp": -0.5,
+          "pendingDamage": 0.0
+        },
+        {
+          "counter": 1432,
+          "hp": -0.5,
+          "pendingDamage": 0.0
+        }
+      ]
+    },
+    {
+      "name": "fly-bomb-phase0-queue",
+      "provenance": {
+        "scenario": "fly-bomb-phase0",
+        "seed": "3BMBMFTE",
+        "seedValue": 3350817387,
+        "nativeManifestSha256": "10e5ad48135d070e76f821190c4b1fa5c624dc92979a822ddfa5844666991505",
+        "nativeManifest": ".cache/coordination/combat/fresh-1791870215376903906/fly-bomb-phase0/run/manifest.json",
+        "captureLabels": [
+          "adjacent-room",
+          "fly-bomb120",
+          "fly-bomb123"
+        ],
+        "freshProfile": true,
+        "memoryWritten": false,
+        "executableMappingsRead": false,
+        "nativeProofSha256": "231069ecfdff93d1616bcc99f84c0bc8b2ba46e57a9069ccf4375581a469333d",
+        "targetSequenceId": 2
+      },
+      "request": {
+        "operation": "deferredDamage",
+        "health": {
+          "hp": 3.0,
+          "maxHp": 3.0
+        },
+        "clock": {
+          "systemCounter": 1381,
+          "interpolationEnabled": true
+        },
+        "presentations": 123,
+        "admissions": [
+          {
+            "counter": 1501,
+            "event": {
+              "amount": 60.0,
+              "kind": "bomb",
+              "source": {
+                "id": 9,
+                "entityType": 4
+              }
+            }
+          }
+        ]
+      },
+      "observations": [
+        {
+          "counter": 1381,
+          "hp": 3.0,
+          "pendingDamage": 0.0
+        },
+        {
+          "counter": 1382,
+          "hp": 3.0,
+          "pendingDamage": 0.0
+        },
+        {
+          "counter": 1383,
+          "hp": 3.0,
+          "pendingDamage": 0.0
+        },
+        {
+          "counter": 1384,
+          "hp": 3.0,
+          "pendingDamage": 0.0
+        },
+        {
+          "counter": 1500,
+          "hp": 3.0,
+          "pendingDamage": 0.0
+        },
+        {
+          "counter": 1501,
+          "hp": 3.0,
+          "pendingDamage": 60.0
+        },
+        {
+          "counter": 1502,
+          "hp": 3.0,
+          "pendingDamage": 60.0
+        },
+        {
+          "counter": 1503,
+          "hp": -57.0,
+          "pendingDamage": 0.0
+        },
+        {
+          "counter": 1504,
+          "hp": -57.0,
+          "pendingDamage": 0.0
+        }
+      ]
+    },
+    {
+      "name": "fly-bomb-phase1-queue",
+      "provenance": {
+        "scenario": "fly-bomb-phase1",
+        "seed": "3BMBMFTE",
+        "seedValue": 3350817387,
+        "nativeManifestSha256": "7fbd5d0aef03926086b32c74e280260c165b238f541ab6f242de0396316dc228",
+        "nativeManifest": ".cache/coordination/combat/fresh-1791870215376903906/fly-bomb-phase1/run/manifest.json",
+        "captureLabels": [
+          "adjacent-room",
+          "fly-bomb121",
+          "fly-bomb125"
+        ],
+        "freshProfile": true,
+        "memoryWritten": false,
+        "executableMappingsRead": false,
+        "nativeProofSha256": "7dac5d5a295d533ddbe16ef088cdb31a88458965a5cfe1b439a115438264e2d6",
+        "targetSequenceId": 2
+      },
+      "request": {
+        "operation": "deferredDamage",
+        "health": {
+          "hp": 3.0,
+          "maxHp": 3.0
+        },
+        "clock": {
+          "systemCounter": 1381,
+          "interpolationEnabled": true
+        },
+        "presentations": 126,
+        "admissions": [
+          {
+            "counter": 1503,
+            "event": {
+              "amount": 60.0,
+              "kind": "bomb",
+              "source": {
+                "id": 9,
+                "entityType": 4
+              }
+            }
+          }
+        ]
+      },
+      "observations": [
+        {
+          "counter": 1381,
+          "hp": 3.0,
+          "pendingDamage": 0.0
+        },
+        {
+          "counter": 1383,
+          "hp": 3.0,
+          "pendingDamage": 0.0
+        },
+        {
+          "counter": 1384,
+          "hp": 3.0,
+          "pendingDamage": 0.0
+        },
+        {
+          "counter": 1385,
+          "hp": 3.0,
+          "pendingDamage": 0.0
+        },
+        {
+          "counter": 1501,
+          "hp": 3.0,
+          "pendingDamage": 0.0
+        },
+        {
+          "counter": 1502,
+          "hp": 3.0,
+          "pendingDamage": 0.0
+        },
+        {
+          "counter": 1503,
+          "hp": 3.0,
+          "pendingDamage": 60.0
+        },
+        {
+          "counter": 1504,
+          "hp": 3.0,
+          "pendingDamage": 60.0
+        },
+        {
+          "counter": 1505,
+          "hp": -57.0,
+          "pendingDamage": 0.0
+        },
+        {
+          "counter": 1506,
+          "hp": -57.0,
+          "pendingDamage": 0.0
+        }
+      ]
+    }
+  ]
+}

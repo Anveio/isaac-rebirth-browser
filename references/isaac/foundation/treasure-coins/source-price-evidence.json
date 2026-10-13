@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "status": "pass",
+  "scope": "Fresh read-only original replay of exact retained N90 public tape, solely to confirm free pricing and unchanged raw constructor fields; no production parity claim here. Raw Ac4/Ac8 are retained as raw fields, not assigned invented names.",
+  "nativeManifestSha256": "43a6234dc10cf05ab6f726c9bbc1e0a08e30b54650cb1eccf2adb98bab177cb7",
+  "seedReadbackMatchesCodec": true,
+  "code": "N90GNCJW",
+  "checkpoint": "depart-73",
+  "room": {
+    "type": 4,
+    "gridWidth": 15,
+    "gridHeight": 9
+  },
+  "coins": [
+    {
+      "variant": 20,
+      "subtype": 1,
+      "spawnSeed": 2173919422,
+      "position": [
+        240.0,
+        280.0
+      ],
+      "pickupPrice": 0,
+      "pickupRawAc4": 0,
+      "pickupRawAc8": -1,
+      "collectionDelay": 0
+    },
+    {
+      "variant": 20,
+      "subtype": 1,
+      "spawnSeed": 2586780463,
+      "position": [
+        400.0,
+        280.0
+      ],
+      "pickupPrice": 0,
+      "pickupRawAc4": 0,
+      "pickupRawAc8": -1,
+      "collectionDelay": 0
+    }
+  ],
+  "source": "Pickup.Init4ff1f8 initializes price0,4ff202 initializes rawAc4=0,4ff211 rawAc8=-1. Direct5/20/1 bypasses priced shop-placeholder5/150 path4fff50..4fff8b; variant20 is explicitly exempt from challenge pricing4ff740..4ff746. Source4fec40 stores requested price."
+}

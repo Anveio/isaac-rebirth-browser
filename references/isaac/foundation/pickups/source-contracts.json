@@ -1,0 +1,80 @@
+{
+  "schema": 1,
+  "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "scope": "Fresh normal Isaac, ordinary 1x1 coin rooms. Runtime inputs are public seed/key events and authored STB/XML/ANM2 resources. Native observations never enter WASM.",
+  "roomAdmission": {
+    "entrypoints": [
+      "0x5cf190",
+      "0x5cf230",
+      "0x5d49d0",
+      "0x5ce6b0"
+    ],
+    "stream": "Descriptor spawnSeed initializes local xorshift11 (2,7,7); two initial bounded draws choose tinted-rock coordinates, then one f32 uniform per authored group, including empty groups",
+    "weightedSelection": "Source f32 cumulative weight must strictly exceed uniform times total weight; fallback is the first authored entry",
+    "entitySeed": "A new local xorshift35 (5,9,7), initialized by the group's current RNG11 state, advances once for entity spawnSeed; grids retain the group seed",
+    "unsupported": "Every selected entity/grid remains typed in Room.spawns; this coin runtime does not substitute unsupported pickup families, NPCs, shop prices or hazards"
+  },
+  "coins": {
+    "init": [
+      "0x4ff2c6",
+      "0x500288",
+      "0x5002ab"
+    ],
+    "subtype": "An independent RNG35 initialized by entity spawnSeed rolls Random(20)==0 for nickel2, then Random(100)==0 for dime3; otherwise penny1. Concrete subtypes remain concrete.",
+    "amounts": {
+      "1": 1,
+      "2": 5,
+      "3": 10,
+      "4": 2
+    },
+    "cap": {
+      "source": "0x518ab0",
+      "coins": 99,
+      "liveCapBoundaryAccepted": false
+    },
+    "animation": "Authored penny/nickel/dime clips: Appear33 full updates, Idle30 looping, Collect14 full updates. First room admission executes one update before incoming transition freezes animation.",
+    "scheduling": "Native active array in the observed coin rooms is Player then authored coins. EntityManager454df0 updates its entry-fenced array before calling contact manager4545d0; coin collection uses full phases after all actor movement/animation.",
+    "waitedContacts": [
+      {
+        "code": "PBW9YNC8",
+        "route": "S17, release100, S25, release30",
+        "intermediateCrossingPresentation": 138,
+        "collectionPresentation": 139
+      },
+      {
+        "code": "PBW9YNC8",
+        "route": "S17, release101, S25, release30",
+        "fullCrossingPresentation": 139,
+        "collectionPresentation": 139
+      }
+    ]
+  },
+  "liveGate": {
+    "command": "npm run test:e2e:pickups",
+    "producer": "tools/original/pickup-scenarios.py",
+    "observer": "tools/original/foundation-pickup-observe.py",
+    "comparator": "tools/e2e/pickups.mjs",
+    "cohorts": "Two contrived public phase offsets plus at least two newly recorded OS-random hazard-free coin-room seeds; mandatory recorded22PFCSFS spike regression remains in the default CI cohort",
+    "assertions": [
+      "Actual public seed readback",
+      "DOM/WASM command trace",
+      "Native phase parity",
+      "coin/key/bomb inventory and red/current maxHP",
+      "pickup membership, subtype, spawnSeed, world position, collision radius",
+      "full-phase animation/frame/playing and collection flags",
+      "native relative Player/pickup admission order",
+      "pickup actor cleanup"
+    ],
+    "knownFailures": "known-regressions.json",
+    "failurePolicy": "Every selected case executes. Functional failures are retained and determine a nonzero gate exit; unsupported hazards are not waived. Passing isolated coin cases do not turn the default regression cohort green."
+  },
+  "remaining": [
+    "Key/bomb/heart and other pickup collection",
+    "Live99-coin cap boundary",
+    "Shops, chests, items/pools and pockets",
+    "Grid hazards and full obstacle/room interactions",
+    "Shared MT sound/effect consumers",
+    "Complete original sprite/pixel and continuation parity",
+    "Live pickup reentry and collected persistence parity"
+  ]
+}

@@ -1,0 +1,7 @@
+gfx/013.000_fly.anm2
+gfx/018.000_attack fly.anm2
+gfx/017.002_secret room keeper.anm2
+gfx/244.000_round worm.anm2
+gfx/009.000_projectile.anm2
+gfx/033.000_fireplace.anm2
+gfx/1000.066_ember particle.anm2

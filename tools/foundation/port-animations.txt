@@ -1,0 +1,39 @@
+# Regenerate: python3 tools/foundation/extract-animations.py --select-file tools/foundation/port-animations.txt --out web/scene-data.json
+gfx/001.000_player.anm2
+gfx/002.000_tear.anm2
+gfx/004.000_bomb.anm2
+gfx/005.*
+gfx/1000.001_bomb explosion.anm2
+gfx/1000.012_tear poof_small.anm2
+gfx/1000.012_tear poofa.anm2
+gfx/1000.013_tear poofb.anm2
+gfx/grid/door_01_normaldoor.anm2
+gfx/lightgradient.anm2
+gfx/ui/hudpickups.anm2
+gfx/ui/main menu/challengemenu.anm2
+gfx/ui/main menu/charactermenu.anm2
+gfx/ui/main menu/characterportraits.anm2
+gfx/ui/main menu/collectionmenu.anm2
+gfx/ui/main menu/completion_widget.anm2
+gfx/ui/main menu/controllerselectmenu.anm2
+gfx/ui/main menu/difficultywidget.anm2
+gfx/ui/main menu/endingsmenu.anm2
+gfx/ui/main menu/gamemenu.anm2
+gfx/ui/main menu/gammamenu.anm2
+gfx/ui/main menu/keyconfigmenu.anm2
+gfx/ui/main menu/menushadow.anm2
+gfx/ui/main menu/optionsmenu.anm2
+gfx/ui/main menu/saveselectmenu.anm2
+gfx/ui/main menu/saveselectmenu_drawing.anm2
+gfx/ui/main menu/secretsmenucomponents.anm2
+gfx/ui/main menu/seedentry.anm2
+gfx/ui/main menu/seedwidget.anm2
+gfx/ui/main menu/statsmenu.anm2
+gfx/ui/main menu/titlemenu.anm2
+gfx/ui/main menu/winstreakwidget.anm2
+gfx/ui/minimap1.anm2
+gfx/ui/pausescreen.anm2
+gfx/ui/pausescreenstats.anm2
+gfx/ui/ui_hearts.anm2
+gfx/ui/ui_chargebar.anm2
+gfx/ui/ui_streak.anm2

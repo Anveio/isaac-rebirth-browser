@@ -1,0 +1,299 @@
+{
+  "asset": {
+    "doors": [
+      {"enabled": true, "x": 13, "y": 3},
+      {"enabled": true, "x": 6, "y": -1},
+      {"enabled": false, "x": -1, "y": 3},
+      {"enabled": false, "x": 6, "y": 7}
+    ],
+    "spawns": [
+      {
+        "entries": [
+          {"subtype": 0, "type": 1000, "variant": 0, "weight": 1.0}
+        ],
+        "x": 0,
+        "y": 0
+      },
+      {
+        "entries": [
+          {"subtype": 0, "type": 1000, "variant": 0, "weight": 1.0}
+        ],
+        "x": 1,
+        "y": 0
+      },
+      {
+        "entries": [
+          {"subtype": 0, "type": 1000, "variant": 0, "weight": 1.0}
+        ],
+        "x": 12,
+        "y": 0
+      },
+      {
+        "entries": [
+          {"subtype": 0, "type": 1000, "variant": 0, "weight": 1.0}
+        ],
+        "x": 0,
+        "y": 1
+      },
+      {
+        "entries": [
+          {"subtype": 0, "type": 244, "variant": 0, "weight": 1.0}
+        ],
+        "x": 1,
+        "y": 1
+      },
+      {
+        "entries": [
+          {"subtype": 0, "type": 1000, "variant": 0, "weight": 1.0}
+        ],
+        "x": 0,
+        "y": 2
+      },
+      {
+        "entries": [
+          {"subtype": 0, "type": 1000, "variant": 0, "weight": 1.0}
+        ],
+        "x": 2,
+        "y": 2
+      },
+      {
+        "entries": [
+          {"subtype": 0, "type": 1000, "variant": 0, "weight": 1.0}
+        ],
+        "x": 0,
+        "y": 3
+      },
+      {
+        "entries": [
+          {"subtype": 0, "type": 1000, "variant": 0, "weight": 1.0}
+        ],
+        "x": 0,
+        "y": 4
+      },
+      {
+        "entries": [
+          {"subtype": 0, "type": 1000, "variant": 0, "weight": 1.0}
+        ],
+        "x": 1,
+        "y": 4
+      },
+      {
+        "entries": [
+          {"subtype": 0, "type": 244, "variant": 0, "weight": 1.0}
+        ],
+        "x": 2,
+        "y": 4
+      },
+      {
+        "entries": [
+          {"subtype": 0, "type": 1000, "variant": 0, "weight": 1.0}
+        ],
+        "x": 3,
+        "y": 4
+      },
+      {
+        "entries": [
+          {"subtype": 0, "type": 1000, "variant": 0, "weight": 1.0}
+        ],
+        "x": 0,
+        "y": 5
+      },
+      {
+        "entries": [
+          {"subtype": 0, "type": 1000, "variant": 0, "weight": 1.0}
+        ],
+        "x": 1,
+        "y": 5
+      },
+      {
+        "entries": [
+          {"subtype": 0, "type": 1000, "variant": 0, "weight": 1.0}
+        ],
+        "x": 2,
+        "y": 5
+      },
+      {
+        "entries": [
+          {"subtype": 0, "type": 1000, "variant": 0, "weight": 1.0}
+        ],
+        "x": 3,
+        "y": 5
+      },
+      {
+        "entries": [
+          {"subtype": 0, "type": 1000, "variant": 0, "weight": 1.0}
+        ],
+        "x": 4,
+        "y": 5
+      },
+      {
+        "entries": [
+          {"subtype": 0, "type": 1000, "variant": 0, "weight": 1.0}
+        ],
+        "x": 5,
+        "y": 5
+      },
+      {
+        "entries": [
+          {"subtype": 0, "type": 1000, "variant": 0, "weight": 1.0}
+        ],
+        "x": 6,
+        "y": 5
+      },
+      {
+        "entries": [
+          {"subtype": 0, "type": 1000, "variant": 0, "weight": 1.0}
+        ],
+        "x": 7,
+        "y": 5
+      },
+      {
+        "entries": [
+          {"subtype": 0, "type": 1000, "variant": 0, "weight": 1.0}
+        ],
+        "x": 8,
+        "y": 5
+      },
+      {
+        "entries": [
+          {"subtype": 0, "type": 1000, "variant": 0, "weight": 1.0}
+        ],
+        "x": 9,
+        "y": 5
+      },
+      {
+        "entries": [
+          {"subtype": 0, "type": 1000, "variant": 0, "weight": 1.0}
+        ],
+        "x": 10,
+        "y": 5
+      },
+      {
+        "entries": [
+          {"subtype": 0, "type": 1000, "variant": 0, "weight": 1.0}
+        ],
+        "x": 11,
+        "y": 5
+      },
+      {
+        "entries": [
+          {"subtype": 0, "type": 1000, "variant": 0, "weight": 1.0}
+        ],
+        "x": 12,
+        "y": 5
+      },
+      {
+        "entries": [
+          {"subtype": 0, "type": 1000, "variant": 0, "weight": 1.0}
+        ],
+        "x": 0,
+        "y": 6
+      },
+      {
+        "entries": [
+          {"subtype": 0, "type": 1000, "variant": 0, "weight": 1.0}
+        ],
+        "x": 1,
+        "y": 6
+      },
+      {
+        "entries": [
+          {"subtype": 0, "type": 1000, "variant": 0, "weight": 1.0}
+        ],
+        "x": 2,
+        "y": 6
+      },
+      {
+        "entries": [
+          {"subtype": 0, "type": 1000, "variant": 0, "weight": 1.0}
+        ],
+        "x": 3,
+        "y": 6
+      },
+      {
+        "entries": [
+          {"subtype": 0, "type": 1000, "variant": 0, "weight": 1.0}
+        ],
+        "x": 4,
+        "y": 6
+      },
+      {
+        "entries": [
+          {"subtype": 0, "type": 1000, "variant": 0, "weight": 1.0}
+        ],
+        "x": 5,
+        "y": 6
+      },
+      {
+        "entries": [
+          {"subtype": 0, "type": 1000, "variant": 0, "weight": 1.0}
+        ],
+        "x": 6,
+        "y": 6
+      },
+      {
+        "entries": [
+          {"subtype": 0, "type": 1000, "variant": 0, "weight": 1.0}
+        ],
+        "x": 7,
+        "y": 6
+      },
+      {
+        "entries": [
+          {"subtype": 0, "type": 1000, "variant": 0, "weight": 1.0}
+        ],
+        "x": 8,
+        "y": 6
+      },
+      {
+        "entries": [
+          {"subtype": 0, "type": 1000, "variant": 0, "weight": 1.0}
+        ],
+        "x": 9,
+        "y": 6
+      },
+      {
+        "entries": [
+          {"subtype": 0, "type": 1000, "variant": 0, "weight": 1.0}
+        ],
+        "x": 10,
+        "y": 6
+      },
+      {
+        "entries": [
+          {"subtype": 0, "type": 1000, "variant": 0, "weight": 1.0}
+        ],
+        "x": 11,
+        "y": 6
+      },
+      {
+        "entries": [
+          {"subtype": 0, "type": 1000, "variant": 0, "weight": 1.0}
+        ],
+        "x": 12,
+        "y": 6
+      }
+    ],
+    "template": {"difficulty": 5, "doorMask": 6, "height": 7, "name": "New Room", "type": 1, "variant": 505, "weight": 1.0, "width": 13}
+  },
+  "attempt": 18,
+  "code": "J0JEP2NP",
+  "descriptor": {
+    "assetStage": 1,
+    "catalogIndex": 508,
+    "decorationSeed": 899298898,
+    "doorMask": 6,
+    "followingSeed": 3322184105,
+    "generatedIndex": 2,
+    "gridIndex": 83,
+    "index": 8,
+    "neighbors": [null, 10, 6, null, null, null, null, null],
+    "roomInitSeed": 2970911265,
+    "spawnSeed": 1182926954,
+    "surpriseMiniboss": false,
+    "template": {"difficulty": 5, "doorMask": 6, "height": 7, "name": "New Room", "type": 1, "variant": 505, "weight": 1.0, "width": 13}
+  },
+  "runSeed": 1249851676,
+  "slot": 0,
+  "selectionSource": "OS secrets.randbits, first actual guaranteed244 neighbor selected at recorded attempt18; floor owner source STB and generated descriptor join."
+}

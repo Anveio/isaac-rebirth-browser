@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "scope": "Source seed-dialog admission and valid public seed commitment only. Native fields and complete MT words are read-only comparisons, never production inputs. Ordinary-run seed admission, Character confirmation fade and run/ambient consumers remain separate.",
+  "consumerOrder": [
+    "Drain prior real pending menu/audio requests",
+    "Tab uses the same named Character empty-code initializer: one real shared raw seed, stored nonzero and encoded",
+    "Valid public seed commitment copies/decodes into the menu field without consuming a draw"
+  ],
+  "pendingContract": "Initializer boundaries count queued real audio requests, never draws. FIFO callbacks at each boundary guarantee that an earlier Profile Clear/Reset and Tab reset cannot overwrite a later committed decoded seed even when all DOM input precedes the first tick.",
+  "functions": [
+    {
+      "address": "0x5a09b0",
+      "unwindSize": 2503,
+      "codeSha256": "2496b2ea4b04868095f66d51bce8f3743fa8b70d12f45af2bec4ef1b3d5d8f7c",
+      "lifecycle": "Character menu asset initialization",
+      "contract": "Init calls the named CharacterReset5a0680 at5a0e1b. This is a constructor initializer, not the public Tab handler."
+    },
+    {
+      "address": "0x5a0680",
+      "unwindSize": 816,
+      "codeSha256": "3b8280ff8541243b21133c0e1bd8edd75af4fea2d29ae9aa9772c1408c3c982c",
+      "lifecycle": "Character Reset seed initializer",
+      "contract": "Empty menu seed code selects shared raw42e8c0, clamped0 to1, writes menu+60d00; codec5e1170 writes the actual encoded menu seed field."
+    },
+    {
+      "address": "0x59e9e0",
+      "unwindSize": 2691,
+      "codeSha256": "e069eaf371bced5fc42129ae3ff4b5e04f46c771f271f592c1d6635d2d9f70ea",
+      "lifecycle": "Character Update Tab and seed confirmation",
+      "contract": "Tab admission59ea58 clears Character input+1758, empties menu+60d08, decodes0 at59eacc, raw42e8c0 at59eee8 and clamps0 to1 into menu+60d00. Valid Enter59ee70 copies input to menu+60d08 then decodes at59ee8c and stores+60d00 at59ee93; marks Character+0c true and returns state0. No sample draw for a valid public code."
+    },
+    {
+      "address": "0x5e1290",
+      "unwindSize": 311,
+      "codeSha256": "da9ebee11765825585b61ab84b25a8f14e387eb4a0ea14eb93c08e3eb49b9d8d",
+      "lifecycle": "Public code decode",
+      "contract": "Decodes the entered public code; general checksum/codec implementation supplies the committed seed, no native value is injected."
+    },
+    {
+      "address": "0x5e1170",
+      "unwindSize": 275,
+      "codeSha256": "8f5ed4856b4df427089ee8d0c1144105598b4c126fc13a4f1e042831a787f036",
+      "lifecycle": "Public seed code encode",
+      "contract": "Formats the actual generated nonzero seed when the menu code is not a valid public code."
+    }
+  ],
+  "textRepresentation": "The browser public seed codec stores eight compact uppercase characters; native strings group the same code as four characters, one ASCII space, four characters. Live comparisons remove only that source display separator; neither side is used as input to the other.",
+  "reentryContract": "Tab clears Character input+1758 and generates/encodes a fresh menu seed, but does not clear Character+0xc. A committed seeded flag persists while the reopened input is empty; the live cohort checks reopening and a second valid commitment."
+}

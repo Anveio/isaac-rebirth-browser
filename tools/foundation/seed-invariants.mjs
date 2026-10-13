@@ -1,9 +1,8 @@
 import assert from "node:assert/strict";
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { resolve, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { exactStateDifference } from "./compare.mjs";
-import { seedList } from "./seeds.mjs";
 import { nativeReplay } from "./verify.mjs";
 
 const ROOT = resolve(fileURLToPath(new URL("../..", import.meta.url)));
@@ -24,41 +23,6 @@ function dimensions(asset) {
     textureDimensions.set(asset, { width, height, allocatedWidth: 2 ** Math.ceil(Math.log2(width)), allocatedHeight: 2 ** Math.ceil(Math.log2(height)) });
   }
   return textureDimensions.get(asset);
-}
-export function invariantTape(encodedSeed) {
-  return [
-    ...press("Enter"), ...press("Enter"), ...press("Enter"),
-    ...press("Tab"), { type: "text", text: encodedSeed.replaceAll(" ", "") }, ...press("Enter"), ...press("Enter"),
-    key("KeyD", true), tick(27), key("KeyD", false), tick(30),
-    key("KeyW", true), tick(8), key("KeyW", false), tick(30),
-    key("KeyA", true), key("KeyD", true), tick(30), key("KeyA", false), key("KeyD", false),
-    key("ArrowRight", true), tick(54), key("ArrowRight", false),
-    key("KeyS", true), ...press("Escape"), tick(60), key("KeyS", false), ...press("Escape"), tick(30),
-    key("ArrowLeft", true), tick(30), key("ArrowLeft", false),
-    key("ArrowUp", true), tick(30), key("ArrowUp", false),
-    key("ArrowDown", true), tick(30), key("ArrowDown", false), tick(120),
-  ];
-}
-export async function wasmReplay(initialSeed, commands = []) {
-  const bytes = readFileSync(join(ROOT, "web/generated/engine.wasm"));
-  const { instance } = await WebAssembly.instantiate(bytes);
-  const wasm = instance.exports;
-  assert.equal(wasm.abi_version?.(), 1, "Generated WASM ABI is stale; run npm run build:wasm");
-  const text = (ptr, length) => new TextDecoder().decode(new Uint8Array(wasm.memory.buffer, ptr, length));
-  const resetStatus = wasm.reset(initialSeed);
-  assert.equal(resetStatus, 0, `WASM reset ABI failed: ${text(wasm.error_ptr(), wasm.error_len())}`);
-  const snapshot = () => { const ptr = wasm.snapshot_ptr(); return JSON.parse(text(ptr, wasm.snapshot_len())); };
-  const states = [snapshot()];
-  for (const command of commands) {
-    const input = new TextEncoder().encode(JSON.stringify(command));
-    const ptr = wasm.request_ptr(input.length);
-    assert.notEqual(ptr, 0);
-    new Uint8Array(wasm.memory.buffer, ptr, input.length).set(input);
-    const status = wasm.command();
-    assert.equal(status, 0, text(wasm.error_ptr(), wasm.error_len()));
-    states.push(snapshot());
-  }
-  return states;
 }
 function assertFinite(value, path = "$") {
   if (typeof value === "number") assert.ok(Number.isFinite(value), `Nonfinite state field ${path}`);
@@ -140,9 +104,15 @@ export function assertGameplayInvariants(initialSeed, commands, states, { manual
         directionChecks.push({ code, commandIndex: index - 1, newestTearId: newest.id });
       }
       if (before.pressed.includes("KeyA") && before.pressed.includes("KeyD")) {
-        assert.equal(before.player.vx, 0, "Opposing movement scenario must begin after horizontal inertia has settled");
-        assert.equal(state.player.x, before.player.x, "Opposing horizontal keys must cancel rather than choose one side");
-        assert.equal(state.player.vx, 0, "Opposing horizontal keys cannot create horizontal velocity");
+        // Native motion retains residual inertia after release. Cancelled
+        // inputs must therefore match an independently executed no-input coast
+        // from the same command prefix, rather than freeze a moving player.
+        const coast = nativeReplay(initialSeed, [
+          ...commands.slice(0, index - 1),
+          key("KeyA", false), key("KeyD", false), commands[index - 1],
+        ]).at(-1);
+        assert.equal(exactStateDifference(coast.player, state.player), null,
+          "Opposing horizontal keys must cancel and match the no-input coast, rather than choose one side");
         opposingChecks++;
       }
     }
@@ -155,36 +125,4 @@ export function assertGameplayInvariants(initialSeed, commands, states, { manual
   assert.ok(states.at(-1).player.x > playing.player.x, "Move-right command must move from the spawn position");
   assert.equal(states.at(-1).pressed.length, 0, "Released keys cannot stay held");
   return { states: states.length, liveShotStates: shots, pauseChecks, directionChecks, opposingChecks, effectChecks, roomChecks };
-}
-
-export async function verifySeedInvariants({ seeds: requestedSeeds, output = join(ROOT, ".cache/foundation/random-seed-invariants/latest") } = {}) {
-  const seeds = requestedSeeds ?? seedList();
-  mkdirSync(output, { recursive: true });
-  writeFileSync(join(output, "seeds.json"), JSON.stringify(seeds) + "\n");
-  const cases = [];
-  for (const initialSeed of seeds) {
-    try {
-      const initial = (await wasmReplay(initialSeed))[0];
-      assert.equal(initial.initialSeed, initialSeed);
-      const commands = invariantTape(initial.runSeed);
-      const wasm = await wasmReplay(initialSeed, commands), repeated = await wasmReplay(initialSeed, commands), native = nativeReplay(initialSeed, commands);
-      for (const [label, states] of [["repeat WASM", repeated], ["native Rust", native]]) {
-        assert.equal(states.length, wasm.length);
-        for (let index = 0; index < states.length; index++) assert.equal(exactStateDifference(wasm[index], states[index]), null, `${label}: initialSeed ${initialSeed}, command ${index}`);
-      }
-      const checks = assertGameplayInvariants(initialSeed, commands, wasm);
-      const path = join(output, `${initialSeed}.json`);
-      writeFileSync(path, JSON.stringify({ initialSeed, commands, states: wasm }) + "\n");
-      cases.push({ initialSeed, status: "pass", ...checks, replay: path });
-    } catch (error) { cases.push({ initialSeed, status: "fail", error: error.message }); }
-  }
-  const report = { schema: 1, status: cases.length > 0 && cases.every((item) => item.status === "pass") ? "pass" : "fail", initialSeeds: seeds, seedSource: requestedSeeds !== undefined ? "explicit caller seed list" : process.env.FOUNDATION_TEST_SEEDS ? "explicit replay list" : "OS entropy", cases, scope: "Seed invariants and exact native Rust/WASM replay; original room-generation parity remains unverified", originalStateParity: false };
-  writeFileSync(join(output, "report.json"), JSON.stringify(report, null, 2) + "\n");
-  return report;
-}
-
-if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  const report = await verifySeedInvariants();
-  console.log(JSON.stringify(report));
-  process.exitCode = report.status === "pass" ? 0 : 1;
 }

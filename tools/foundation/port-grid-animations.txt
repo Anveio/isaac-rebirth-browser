@@ -1,0 +1,3 @@
+# Ordinary Basement Rock normal and linked-cluster clips.
+gfx/grid/grid_rock.anm2
+gfx/grid/grid_spikes.anm2

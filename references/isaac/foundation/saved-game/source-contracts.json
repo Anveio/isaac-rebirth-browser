@@ -1,0 +1,133 @@
+{
+  "schema": 1,
+  "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "scope": "Supported actual save lifecycle at fresh normal run admission. All native fields are read-only comparisons; no native state enters production.",
+  "functions": [
+    {
+      "address": "0x58be30",
+      "unwindSize": 2402,
+      "codeSha256": "4ffdd2b7ed2d9b833e1e8a02b1066a7a75317308870d961684366de95536e326",
+      "contract": "Level initialization calls System.Save at58c411 after starting-room load and music"
+    },
+    {
+      "address": "0x594810",
+      "unwindSize": 247,
+      "codeSha256": "063f67e9682f4d4b8cf1d16473246d7dc1354361f60a2c47d38738d4d6ef8c0b",
+      "contract": "System.Save requires System state2 and a living first Player; Game.Save destination is System+4a8"
+    },
+    {
+      "address": "0x54f230",
+      "unwindSize": 437,
+      "codeSha256": "042f744f1420b440becb2e252f05f432d524f30bf1b9e667e08a72ad5d2c9f2d",
+      "contract": "Game.Save clears destination first, copies run fields, then item/Room/Level/Player state in source order"
+    },
+    {
+      "address": "0x55bd80",
+      "unwindSize": 4274,
+      "codeSha256": "328fa81088af44bb2bed90e59200381d241c9043feb917c09b83c6c14f3b1e80",
+      "contract": "Clear generates every135×448 raw seed pair and one raw player-manager seed into the actual saved state"
+    },
+    {
+      "address": "0x581ed0",
+      "unwindSize": 451,
+      "codeSha256": "28bf0c71bdb73395f82e511ee0c728afc5eccb264e6746a57a4ad04e2add1614",
+      "contract": "ItemPool.Save copies current entry weights, special counters, pool/root/secondary seed fields, special factor, removed flags and pill effects without drawing RNG"
+    },
+    {
+      "address": "0x5ce2d0",
+      "unwindSize": 977,
+      "codeSha256": "12704f41da22f69b3bac72b684805520b384f74c6b4bf69245228d10b580a00f",
+      "contract": "Room.Save copies occupied grid object records; each null pointer generates and stores a fresh raw seed pair"
+    },
+    {
+      "address": "0x58cd90",
+      "unwindSize": 965,
+      "codeSha256": "13e022b7c8d4ff0655d0b5d906fddeb428e224a3ac1efe1ad45d3c3783e5a0ef",
+      "contract": "Level copy skips only gridIndex−3; ordinary unused−1 records ARE copied. Fresh normal Level copies all135 generated descriptor seed rows."
+    },
+    {
+      "address": "0x5bf400",
+      "unwindSize": 146,
+      "codeSha256": "b074d85020841575b19dc69102243813382ca127a01ce86d22fa46b66e0ee739",
+      "contract": "PlayerManager.Save copies Player via518350, then the second manager RNG +40 seed to saved+9688"
+    },
+    {
+      "address": "0x518350",
+      "unwindSize": 1337,
+      "codeSha256": "13172dd6b26357c2d24b994a24bb08abad9042b9a51b4e1dc9f974aafbd92127",
+      "contract": "Player save copies supported red HP/maxHP and coin/bomb/key inventory fields"
+    },
+    {
+      "address": "0x5bf020",
+      "unwindSize": 141,
+      "codeSha256": "48e1a3d3c87fdbc37252e33947a0950f72865a43b8f974ffe32afcb88ef1a69e",
+      "contract": "PlayerManager construction initializes both +0 and +40 through the explicit default RNG constructor"
+    },
+    {
+      "address": "0x5c2cb0",
+      "unwindSize": 28,
+      "codeSha256": "f4e4fc99fb566d238d85980e7f64bdfaa72a26f6079f72e644c1c503b1df1570",
+      "contract": "Default RNG constructor stores seed0xaa17414f and shift tuple5/9/7; no shared MT draw"
+    },
+    {
+      "address": "0x5bf4a0",
+      "unwindSize": 327,
+      "codeSha256": "4b11cedd85a92a54fedd935954de3b78d258eff9ff29c3efe1c804df87c44a05",
+      "contract": "Incoming13th startup output initializes only the first +0 manager RNG, separately from the +40 saved RNG"
+    }
+  ],
+  "callOrder": [
+    "58c411→594810",
+    "594891→54f230",
+    "54f23f→55bd80 Clear",
+    "54f33b→581ed0 actual ItemPool copy",
+    "54f347→5ce2d0 Room.Save",
+    "54f352→58cd90 conditional Level copy",
+    "54f382→5bf400 PlayerManager copy"
+  ],
+  "roomSave": {
+    "dimensions": "Room+14/+18",
+    "gridPointers": "Room+30, stride8",
+    "gridDescription": "Descriptor+58 pointer, stride1c",
+    "occupiedSource": "GridEntity+8/+10/+18/+20 copy to record+0/+8/+10/+18; seed10 is object+18, seed18 is object+20",
+    "empty": "Raw42e8c0 calls5ce374/5ce37c store+10/+18 at5ce3a0/5ce3a9",
+    "unaccepted": "Occupied constructor secondary seeds require real560ff0 admission, not a substitute; runtime summary lists pending occupied slots"
+  },
+  "savedPlayerFields": {
+    "rngSeed": "PlayerManager+40→Saved+9688 at5bf445 (explicit default ctor seed remains in fresh ordinary scope)",
+    "redHp": "Player+bb8→Saved+88a0",
+    "maxRedHp": "Player+bb4→Saved+88a4",
+    "coins": "Player+bd8→Saved+88b8",
+    "keys": "Player+bcc→Saved+88bc",
+    "bombs": "Player+bd4→Saved+88c0"
+  },
+  "internalOwnership": "SavedGameSeeds retains the actual Clear-generated destination, then copies actual Level seed state including modeled null-cell mutations. For the fresh normal scope, all135 rows (including unused−1) copy the real source table origin/mutations compactly. SavedRun retains actual modeled ItemPools plus Level/Room/Player/inventory internally; render snapshots carry bounded samples and summary only.",
+  "remaining": "Actual occupied grid admission, decorative additional occupancy, secondary constructor seeds, broader room/effect consumers, and full MT/W0 numerical differences remain explicit comparisons. Trinket/identification selection is outside current ItemPools scope.",
+  "savedItemPoolFields": {
+    "currentWeight": "Entry+8→Saved+9694+4*(poolId*347+itemId)",
+    "specialCounters": "PoolRecord+40→Saved+ed54+4*poolId",
+    "poolSeed": "Root+0→Saved+ed94",
+    "rootRngSeed": "Root+48c→Saved+ed9c",
+    "secondaryRngSeed": "Root+49c→Saved+eda0",
+    "specialFactor": "Root+4ac→Saved+eda4",
+    "removed": "Root+4b0→Saved+eda8,347 bytes",
+    "pillEffects": "Root+9b8→Saved+ef48,10 signed words",
+    "unaccepted": "Trinket pool/identification flags are outside current ItemPools selection scope"
+  },
+  "currentRoomObservation": {
+    "identity": "Room pointer fromGame+8180; actual Descriptor pointer atRoom+8, record index atDescriptor+4; require exact addressGame+10+index*f0",
+    "cells": [
+      0,
+      1,
+      16,
+      17,
+      56,
+      85,
+      103,
+      134,
+      447
+    ],
+    "pairs": "Read actual current Level and Saved row+58 grid vectors, then seeds+10/+18 at1c stride. Read independent room pointer occupancy and object kind/variant/primary+18/secondary+20 where present.",
+    "scope": "Current-row Level/Saved ownership is mandatory within each game; all paired numeric/occupancy comparisons retain actual statuses. Untouched0/1/134 samples do not certify Room.Save mutation parity."
+  }
+}

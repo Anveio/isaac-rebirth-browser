@@ -1,0 +1,347 @@
+{
+  "schema": 1,
+  "scope": "Fresh original title and reentry checkpoints. Public input/presentation gate, actual source title/fade read at matching gate, independently repeated screenshots. Seven settled/full-title frames are pixel gates; three menu-transition captures verify retained actor state only. Full menu transitions, game state and simulation tick parity are not claimed. Legacy title references remain unchanged.",
+  "sourceBinarySHA256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "sourceBuilder": "tools/original/foundation-title-scenario.py",
+  "sourceObserver": "tools/original/foundation-menu-observer.py",
+  "seed": "T1PK6Y0W",
+  "viewport": {
+    "width": 960,
+    "height": 540
+  },
+  "clock": {
+    "scope": "main-thread wall-clock ABI; worker/CPU clocks unchanged",
+    "nominalStepsPerSecond": 60,
+    "stepNs": 16667000,
+    "mainThreadSleeps": "recorded then returned without host delay",
+    "realPerformance": "controller wall clock"
+  },
+  "bootstrapPresentedFrames": 30,
+  "seedReadbackMatchesCodec": true,
+  "primaryTraceSHA256": "0176e18c0d1b8b9a456eb9c6d5eaa073bb93ba1fc7dff019d635ae5e1714f6f5",
+  "repeatTraceSHA256": "6e050f7fda73b68fa1e1b10499cde37b589318f0abcfeb82775fc137ce0f6001",
+  "primaryManifestSHA256": "bdec1d5cb1f24056255bf2a240687fb67214c99b474095bc2a5a792eb5235e08",
+  "repeatManifestSHA256": "1dfc7c195980168bb88558d551595118bfa526adfc9c316ab45d2ec19c1ee7f3",
+  "cases": [
+    {
+      "label": "title-first",
+      "presentation": 231,
+      "sourcePhase": {
+        "schema": 1,
+        "status": "pass",
+        "memoryWritten": false,
+        "scope": "Bounded debug phase observations; not game input or full internal-state parity",
+        "systemCounter": 230,
+        "menuInitialized": true,
+        "menuScreen": 1,
+        "titleAnimation": {
+          "loaded": true,
+          "frame": 0.0,
+          "speed": 1.0,
+          "playing": true
+        },
+        "menuFade": {
+          "active": true,
+          "alpha": 0.9750000238418579,
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            0.9500001668930054
+          ]
+        }
+      },
+      "sha256": "f7b5edfcb7b9f645583f61738404429d9f07b1df95e1c206dc3b3f43b16edcf4",
+      "repeatByteIdentical": true,
+      "comparison": "full-title-frame"
+    },
+    {
+      "label": "title-first-update",
+      "presentation": 232,
+      "sourcePhase": {
+        "schema": 1,
+        "status": "pass",
+        "memoryWritten": false,
+        "scope": "Bounded debug phase observations; not game input or full internal-state parity",
+        "systemCounter": 231,
+        "menuInitialized": true,
+        "menuScreen": 1,
+        "titleAnimation": {
+          "loaded": true,
+          "frame": 1.0,
+          "speed": 1.0,
+          "playing": true
+        },
+        "menuFade": {
+          "active": true,
+          "alpha": 0.9500000476837158,
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            0.9500001668930054
+          ]
+        }
+      },
+      "sha256": "037683eb3187de86361a1c0422c2f896983684ea016239c202e9ad798b39e1e7",
+      "repeatByteIdentical": true,
+      "comparison": "full-title-frame"
+    },
+    {
+      "label": "title-fading",
+      "presentation": 254,
+      "sourcePhase": {
+        "schema": 1,
+        "status": "pass",
+        "memoryWritten": false,
+        "scope": "Bounded debug phase observations; not game input or full internal-state parity",
+        "systemCounter": 253,
+        "menuInitialized": true,
+        "menuScreen": 1,
+        "titleAnimation": {
+          "loaded": true,
+          "frame": 12.0,
+          "speed": 1.0,
+          "playing": true
+        },
+        "menuFade": {
+          "active": true,
+          "alpha": 0.4000004529953003,
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            0.9500001668930054
+          ]
+        }
+      },
+      "sha256": "6bab5d5108a4c8fdcfe7277e92a9067892b8a73eaff207cbfc9dcd0d77bc065f",
+      "repeatByteIdentical": true,
+      "comparison": "full-title-frame"
+    },
+    {
+      "label": "title-fade-last",
+      "presentation": 270,
+      "sourcePhase": {
+        "schema": 1,
+        "status": "pass",
+        "memoryWritten": false,
+        "scope": "Bounded debug phase observations; not game input or full internal-state parity",
+        "systemCounter": 269,
+        "menuInitialized": true,
+        "menuScreen": 1,
+        "titleAnimation": {
+          "loaded": true,
+          "frame": 20.0,
+          "speed": 1.0,
+          "playing": true
+        },
+        "menuFade": {
+          "active": true,
+          "alpha": 3.91155481338501e-07,
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            0.9500001668930054
+          ]
+        }
+      },
+      "sha256": "b4110dacb8e41b021f1ac422ae46bca6d276c77b54da26ba77b88b05d1876d4c",
+      "repeatByteIdentical": true,
+      "comparison": "full-title-frame"
+    },
+    {
+      "label": "title-settled",
+      "presentation": 294,
+      "sourcePhase": {
+        "schema": 1,
+        "status": "pass",
+        "memoryWritten": false,
+        "scope": "Bounded debug phase observations; not game input or full internal-state parity",
+        "systemCounter": 293,
+        "menuInitialized": true,
+        "menuScreen": 1,
+        "titleAnimation": {
+          "loaded": true,
+          "frame": 32.0,
+          "speed": 1.0,
+          "playing": true
+        },
+        "menuFade": {
+          "active": false,
+          "alpha": 0.0,
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            0.9500001668930054
+          ]
+        }
+      },
+      "sha256": "7cfa57e6d01df60f5f45d599f9b69ad03ed5e5a74f1d72c678cf889fabe573f9",
+      "repeatByteIdentical": true,
+      "comparison": "full-title-frame"
+    },
+    {
+      "label": "title-loop",
+      "presentation": 312,
+      "sourcePhase": {
+        "schema": 1,
+        "status": "pass",
+        "memoryWritten": false,
+        "scope": "Bounded debug phase observations; not game input or full internal-state parity",
+        "systemCounter": 311,
+        "menuInitialized": true,
+        "menuScreen": 1,
+        "titleAnimation": {
+          "loaded": true,
+          "frame": 1.0,
+          "speed": 1.0,
+          "playing": true
+        },
+        "menuFade": {
+          "active": false,
+          "alpha": 0.0,
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            0.9500001668930054
+          ]
+        }
+      },
+      "sha256": "c6476e6e94a55bf0b4ae5815e6a649b2bfb747fadc742ea7e6786fec4085e5d6",
+      "repeatByteIdentical": true,
+      "comparison": "full-title-frame"
+    },
+    {
+      "label": "title-leave-1",
+      "presentation": 313,
+      "sourcePhase": {
+        "schema": 1,
+        "status": "pass",
+        "memoryWritten": false,
+        "scope": "Bounded debug phase observations; not game input or full internal-state parity",
+        "systemCounter": 312,
+        "menuInitialized": true,
+        "menuScreen": 2,
+        "titleAnimation": {
+          "loaded": true,
+          "frame": 1.0,
+          "speed": 1.0,
+          "playing": true
+        },
+        "menuFade": {
+          "active": false,
+          "alpha": 0.0,
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            0.9500001668930054
+          ]
+        }
+      },
+      "sha256": "c70494d838c5b7a86e483c1a1eb565f944603d2c9902b6a19abebf4793e89f5c",
+      "repeatByteIdentical": true,
+      "comparison": "phase-state"
+    },
+    {
+      "label": "title-profile",
+      "presentation": 396,
+      "sourcePhase": {
+        "schema": 1,
+        "status": "pass",
+        "memoryWritten": false,
+        "scope": "Bounded debug phase observations; not game input or full internal-state parity",
+        "systemCounter": 395,
+        "menuInitialized": true,
+        "menuScreen": 2,
+        "titleAnimation": {
+          "loaded": true,
+          "frame": 1.0,
+          "speed": 1.0,
+          "playing": true
+        },
+        "menuFade": {
+          "active": false,
+          "alpha": 0.0,
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            0.9500001668930054
+          ]
+        }
+      },
+      "sha256": "a0c969aacfe7b4b2bc90bb7d2ddf27f4dce45e6d815823382ae287618b77cb91",
+      "repeatByteIdentical": true,
+      "comparison": "phase-state"
+    },
+    {
+      "label": "title-return-1",
+      "presentation": 397,
+      "sourcePhase": {
+        "schema": 1,
+        "status": "pass",
+        "memoryWritten": false,
+        "scope": "Bounded debug phase observations; not game input or full internal-state parity",
+        "systemCounter": 396,
+        "menuInitialized": true,
+        "menuScreen": 1,
+        "titleAnimation": {
+          "loaded": true,
+          "frame": 1.0,
+          "speed": 1.0,
+          "playing": true
+        },
+        "menuFade": {
+          "active": false,
+          "alpha": 0.0,
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            0.9500001668930054
+          ]
+        }
+      },
+      "sha256": "3caae9b0acf2b7c269ccdef5aea6aba1e03dbd0255369b947fdeb5ecf2a297f9",
+      "repeatByteIdentical": true,
+      "comparison": "phase-state"
+    },
+    {
+      "label": "title-return-settled",
+      "presentation": 480,
+      "sourcePhase": {
+        "schema": 1,
+        "status": "pass",
+        "memoryWritten": false,
+        "scope": "Bounded debug phase observations; not game input or full internal-state parity",
+        "systemCounter": 479,
+        "menuInitialized": true,
+        "menuScreen": 1,
+        "titleAnimation": {
+          "loaded": true,
+          "frame": 3.0,
+          "speed": 1.0,
+          "playing": true
+        },
+        "menuFade": {
+          "active": false,
+          "alpha": 0.0,
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            0.9500001668930054
+          ]
+        }
+      },
+      "sha256": "41356a5a9d9bffb3fe80e611ba056f92f83bbedbb7aea3e350911f5cebb28ba7",
+      "repeatByteIdentical": true,
+      "comparison": "full-title-frame"
+    }
+  ]
+}

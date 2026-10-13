@@ -1,0 +1,61 @@
+OpenGL version 4.5 (Compatibility Profile) Mesa 25.0.7-2+deb13u1
+GLSL version 4.50
+Framebuffer ID: 1
+Renderbuffer ID: 1 size 1024x1024
+OpenGL version 4.5 (Compatibility Profile) Mesa 25.0.7-2+deb13u1
+GLSL version 4.50
+Binding of Isaac: Rebirth v1.05
+Initialize ColorOffset Shader
+Initialize Pixelation Shader
+Initialize Bloom Shader
+Initialize Color Correction Shader
+Initialize HQ4X Shader
+Initialize Shockwave Shader
+Initialize OldTV Shader
+load archives: 0 milliseconds
+preload anm2: 0 milliseconds
+HQX4 size: 480x270
+Upgrading from an unsupported version. Deleting all Steam stats.
+playing cutscene 1 (Intro).
+Framebuffer Width: 960 
+ Render Width: 960 
+ Window Width: 960 
+ Multiplier: 0.500000 
+ DP per point: 1.000000 
+ Point Scale: 2.000000 
+Framebuffer Width: 960 
+ Render Width: 960 
+ Window Width: 960 
+ Multiplier: 0.444444 
+ DP per point: 1.000000 
+ Point Scale: 2.250000 
+HQX4 size: 960x540
+Viewport: 960x540
+Framebuffer Width: 960 
+ Render Width: 960 
+ Window Width: 960 
+ Multiplier: 2.307692 
+ DP per point: 1.000000 
+ Point Scale: 2.000000 
+HQX4 size: 960x540
+Loading PersistentGameData from Steam Cloud: persistentgamedata1.dat.
+Loading PersistentGameData from Steam Cloud: persistentgamedata2.dat.
+Loading PersistentGameData from Steam Cloud: persistentgamedata3.dat.
+Loading PersistentGameData from Steam Cloud: persistentgamedata1.dat.
+RNG Start Seed: M9QM YR3N (1345570242)
+Initialized player with Variant 0 and Subtype 0
+Level::Init m_Stage 1, m_AltStage 0 Seed 2949843711
+[RoomConfig] load stage 0: Special Rooms
+[RoomConfig] load stage 1: Basement
+[warn] Room (type=0, variant=0, name=(null)) has invalid size (0x0)
+[warn] Room (type=0, variant=0, name=(null)) has invalid size (0x0)
+generate...
+8 rooms in 5 loops
+not enough dead ends, trying to make new one
+not enough dead ends, trying to make new one
+placing rooms...
+Map Generated in 1 Loops
+Room 1.2(Start Room)
+SpawnRNG seed: 469126677
+Saving PersistentGameData to Steam Cloud: persistentgamedata1.dat.
+music stopped playing

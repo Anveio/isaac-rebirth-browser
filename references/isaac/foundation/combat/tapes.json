@@ -1,0 +1,4916 @@
+{
+  "schema": 1,
+  "scope": "public X11 input tapes for the specific retained seeded rooms; different seeds may select different neighbors",
+  "cases": [
+    {
+      "name": "rock-typed",
+      "seed": "T1PK6Y0W",
+      "seedValue": 2184569263,
+      "tape": [
+        {
+          "type": "step",
+          "frames": 180
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "key",
+          "key": "Tab",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Tab",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 108
+        },
+        {
+          "type": "key",
+          "key": "t",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "t",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "1",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "1",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "p",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "p",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "k",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "k",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "6",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "6",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "y",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "y",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "0",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "0",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 300
+        },
+        {
+          "type": "capture",
+          "label": "gameplay-start"
+        },
+        {
+          "type": "step",
+          "frames": 60
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 27
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 30
+        },
+        {
+          "type": "capture",
+          "label": "door-lineup"
+        },
+        {
+          "type": "key",
+          "key": "d",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "capture",
+          "label": "right-entry-1"
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "capture",
+          "label": "right-entry-2"
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "capture",
+          "label": "right-entry-3"
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "capture",
+          "label": "right-entry-4"
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "capture",
+          "label": "right-entry-5"
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "capture",
+          "label": "right-entry-6"
+        },
+        {
+          "type": "key",
+          "key": "d",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 30
+        },
+        {
+          "type": "capture",
+          "label": "adjacent-room"
+        },
+        {
+          "type": "key",
+          "key": "s",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 8
+        },
+        {
+          "type": "capture",
+          "label": "rock-approach-1"
+        },
+        {
+          "type": "step",
+          "frames": 8
+        },
+        {
+          "type": "capture",
+          "label": "rock-approach-2"
+        },
+        {
+          "type": "step",
+          "frames": 8
+        },
+        {
+          "type": "capture",
+          "label": "rock-approach-3"
+        },
+        {
+          "type": "step",
+          "frames": 8
+        },
+        {
+          "type": "capture",
+          "label": "rock-approach-4"
+        },
+        {
+          "type": "step",
+          "frames": 8
+        },
+        {
+          "type": "capture",
+          "label": "rock-approach-5"
+        },
+        {
+          "type": "step",
+          "frames": 8
+        },
+        {
+          "type": "capture",
+          "label": "rock-approach-6"
+        },
+        {
+          "type": "key",
+          "key": "s",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 30
+        },
+        {
+          "type": "capture",
+          "label": "rock-blocked"
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 50
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": false
+        },
+        {
+          "type": "capture",
+          "label": "rock-after-tears"
+        },
+        {
+          "type": "key",
+          "key": "e",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 3
+        },
+        {
+          "type": "key",
+          "key": "e",
+          "down": false
+        },
+        {
+          "type": "capture",
+          "label": "rock-bomb-planted"
+        },
+        {
+          "type": "step",
+          "frames": 118
+        },
+        {
+          "type": "capture",
+          "label": "rock-bomb-explosion"
+        },
+        {
+          "type": "step",
+          "frames": 45
+        },
+        {
+          "type": "capture",
+          "label": "rock-after-bomb"
+        },
+        {
+          "type": "key",
+          "key": "s",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 25
+        },
+        {
+          "type": "key",
+          "key": "s",
+          "down": false
+        },
+        {
+          "type": "capture",
+          "label": "rock-former-cell-crossed"
+        }
+      ]
+    },
+    {
+      "name": "rock-dense",
+      "seed": "T1PK6Y0W",
+      "seedValue": 2184569263,
+      "tape": [
+        {
+          "type": "step",
+          "frames": 180
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "key",
+          "key": "Tab",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Tab",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 108
+        },
+        {
+          "type": "key",
+          "key": "t",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "t",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "1",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "1",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "p",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "p",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "k",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "k",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "6",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "6",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "y",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "y",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "0",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "0",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 300
+        },
+        {
+          "type": "capture",
+          "label": "gameplay-start"
+        },
+        {
+          "type": "step",
+          "frames": 60
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 27
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 30
+        },
+        {
+          "type": "capture",
+          "label": "door-lineup"
+        },
+        {
+          "type": "key",
+          "key": "d",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "capture",
+          "label": "right-entry-1"
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "capture",
+          "label": "right-entry-2"
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "capture",
+          "label": "right-entry-3"
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "capture",
+          "label": "right-entry-4"
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "capture",
+          "label": "right-entry-5"
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "capture",
+          "label": "right-entry-6"
+        },
+        {
+          "type": "key",
+          "key": "d",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 30
+        },
+        {
+          "type": "capture",
+          "label": "adjacent-room"
+        },
+        {
+          "type": "key",
+          "key": "d",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 8
+        },
+        {
+          "type": "capture",
+          "label": "rock-horizontal-1"
+        },
+        {
+          "type": "step",
+          "frames": 8
+        },
+        {
+          "type": "capture",
+          "label": "rock-horizontal-2"
+        },
+        {
+          "type": "step",
+          "frames": 8
+        },
+        {
+          "type": "capture",
+          "label": "rock-horizontal-3"
+        },
+        {
+          "type": "step",
+          "frames": 8
+        },
+        {
+          "type": "capture",
+          "label": "rock-horizontal-4"
+        },
+        {
+          "type": "step",
+          "frames": 8
+        },
+        {
+          "type": "capture",
+          "label": "rock-horizontal-5"
+        },
+        {
+          "type": "step",
+          "frames": 8
+        },
+        {
+          "type": "capture",
+          "label": "rock-horizontal-6"
+        },
+        {
+          "type": "key",
+          "key": "d",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-coast-1"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-coast-2"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-coast-3"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-coast-4"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-coast-5"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-coast-6"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-coast-7"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-coast-8"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-coast-9"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-coast-10"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-coast-11"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-coast-12"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-coast-13"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-coast-14"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-coast-15"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-coast-16"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-coast-17"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-coast-18"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-coast-19"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-coast-20"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-coast-21"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-coast-22"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-coast-23"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-coast-24"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-coast-25"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-coast-26"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-coast-27"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-coast-28"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-coast-29"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-coast-30"
+        },
+        {
+          "type": "capture",
+          "label": "rock-horizontal-blocked"
+        },
+        {
+          "type": "key",
+          "key": "e",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 3
+        },
+        {
+          "type": "key",
+          "key": "e",
+          "down": false
+        },
+        {
+          "type": "capture",
+          "label": "rock-middle-planted"
+        },
+        {
+          "type": "step",
+          "frames": 116
+        },
+        {
+          "type": "capture",
+          "label": "rock-middle-before-blast119"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-middle-before-blast120"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-middle-explosion"
+        },
+        {
+          "type": "step",
+          "frames": 45
+        },
+        {
+          "type": "capture",
+          "label": "rock-middle-after"
+        }
+      ]
+    },
+    {
+      "name": "rock-held",
+      "seed": "T1PK6Y0W",
+      "seedValue": 2184569263,
+      "tape": [
+        {
+          "type": "step",
+          "frames": 180
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "key",
+          "key": "Tab",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Tab",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 108
+        },
+        {
+          "type": "key",
+          "key": "t",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "t",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "1",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "1",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "p",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "p",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "k",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "k",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "6",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "6",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "y",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "y",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "0",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "0",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 300
+        },
+        {
+          "type": "capture",
+          "label": "gameplay-start"
+        },
+        {
+          "type": "step",
+          "frames": 60
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 27
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 30
+        },
+        {
+          "type": "capture",
+          "label": "door-lineup"
+        },
+        {
+          "type": "key",
+          "key": "d",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "capture",
+          "label": "right-entry-1"
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "capture",
+          "label": "right-entry-2"
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "capture",
+          "label": "right-entry-3"
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "capture",
+          "label": "right-entry-4"
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "capture",
+          "label": "right-entry-5"
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "capture",
+          "label": "right-entry-6"
+        },
+        {
+          "type": "key",
+          "key": "d",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 30
+        },
+        {
+          "type": "capture",
+          "label": "adjacent-room"
+        },
+        {
+          "type": "key",
+          "key": "s",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-held-1"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-held-2"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-held-3"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-held-4"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-held-5"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-held-6"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-held-7"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-held-8"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-held-9"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-held-10"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-held-11"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-held-12"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-held-13"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-held-14"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-held-15"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-held-16"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-held-17"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-held-18"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-held-19"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-held-20"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-held-21"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-held-22"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-held-23"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-held-24"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-held-25"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-held-26"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-held-27"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-held-28"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-held-29"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-held-30"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-held-31"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "rock-held-32"
+        },
+        {
+          "type": "key",
+          "key": "s",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 30
+        },
+        {
+          "type": "capture",
+          "label": "rock-held-release"
+        }
+      ]
+    },
+    {
+      "name": "fly-aligned",
+      "seed": "3BMBMFTE",
+      "seedValue": 3350817387,
+      "tape": [
+        {
+          "type": "step",
+          "frames": 180
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "key",
+          "key": "Tab",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Tab",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 108
+        },
+        {
+          "type": "key",
+          "key": "3",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "3",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "b",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "b",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "m",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "m",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "b",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "b",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "m",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "m",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "f",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "f",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "t",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "t",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "e",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "e",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 300
+        },
+        {
+          "type": "capture",
+          "label": "gameplay-start"
+        },
+        {
+          "type": "step",
+          "frames": 60
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 85
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 30
+        },
+        {
+          "type": "capture",
+          "label": "adjacent-room"
+        },
+        {
+          "type": "key",
+          "key": "a",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 9
+        },
+        {
+          "type": "key",
+          "key": "a",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 30
+        },
+        {
+          "type": "capture",
+          "label": "fly-lineup"
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "fly-aligned-1"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "fly-aligned-2"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "fly-aligned-3"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "fly-aligned-4"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "fly-aligned-5"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "fly-aligned-6"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "fly-aligned-7"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "fly-aligned-8"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "fly-aligned-9"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "fly-aligned-10"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "fly-aligned-11"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "fly-aligned-12"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "fly-aligned-13"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "fly-aligned-14"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "fly-aligned-15"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "fly-aligned-16"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "fly-aligned-17"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "fly-aligned-18"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "fly-aligned-19"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "fly-aligned-20"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "fly-aligned-21"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "fly-aligned-22"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "fly-aligned-23"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "fly-aligned-24"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "fly-aligned-25"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "fly-aligned-26"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "fly-aligned-27"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "fly-aligned-28"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "fly-aligned-29"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "fly-aligned-30"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "fly-aligned-31"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "fly-aligned-32"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "fly-aligned-33"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "fly-aligned-34"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "fly-aligned-35"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "fly-aligned-36"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "fly-aligned-37"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "fly-aligned-38"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "fly-aligned-39"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "fly-aligned-40"
+        },
+        {
+          "type": "step",
+          "frames": 80
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 60
+        },
+        {
+          "type": "capture",
+          "label": "fly-after-aligned"
+        }
+      ]
+    },
+    {
+      "name": "fly-bomb-phase0",
+      "seed": "3BMBMFTE",
+      "seedValue": 3350817387,
+      "tape": [
+        {
+          "type": "step",
+          "frames": 180
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "key",
+          "key": "Tab",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Tab",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 108
+        },
+        {
+          "type": "key",
+          "key": "3",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "3",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "b",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "b",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "m",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "m",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "b",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "b",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "m",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "m",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "f",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "f",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "t",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "t",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "e",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "e",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 300
+        },
+        {
+          "type": "capture",
+          "label": "gameplay-start"
+        },
+        {
+          "type": "step",
+          "frames": 60
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 85
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 30
+        },
+        {
+          "type": "capture",
+          "label": "adjacent-room"
+        },
+        {
+          "type": "key",
+          "key": "e",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "fly-bomb1"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "fly-bomb2"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "key",
+          "key": "e",
+          "down": false
+        },
+        {
+          "type": "capture",
+          "label": "fly-bomb-planted"
+        },
+        {
+          "type": "step",
+          "frames": 116
+        },
+        {
+          "type": "capture",
+          "label": "fly-bomb119"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "fly-bomb120"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "fly-bomb121"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "fly-bomb122"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "fly-bomb123"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "fly-bomb124"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "fly-bomb125"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "fly-bomb126"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "fly-bomb127"
+        },
+        {
+          "type": "step",
+          "frames": 60
+        },
+        {
+          "type": "capture",
+          "label": "fly-after-bomb"
+        }
+      ]
+    },
+    {
+      "name": "fly-bomb-phase1",
+      "seed": "3BMBMFTE",
+      "seedValue": 3350817387,
+      "tape": [
+        {
+          "type": "step",
+          "frames": 180
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "key",
+          "key": "Tab",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Tab",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 108
+        },
+        {
+          "type": "key",
+          "key": "3",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "3",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "b",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "b",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "m",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "m",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "b",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "b",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "m",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "m",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "f",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "f",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "t",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "t",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "e",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "e",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 300
+        },
+        {
+          "type": "capture",
+          "label": "gameplay-start"
+        },
+        {
+          "type": "step",
+          "frames": 60
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 85
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 30
+        },
+        {
+          "type": "capture",
+          "label": "adjacent-room"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "key",
+          "key": "e",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "fly-bomb1"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "fly-bomb2"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "key",
+          "key": "e",
+          "down": false
+        },
+        {
+          "type": "capture",
+          "label": "fly-bomb-planted"
+        },
+        {
+          "type": "step",
+          "frames": 116
+        },
+        {
+          "type": "capture",
+          "label": "fly-bomb119"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "fly-bomb120"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "fly-bomb121"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "fly-bomb122"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "fly-bomb123"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "fly-bomb124"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "fly-bomb125"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "fly-bomb126"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "fly-bomb127"
+        },
+        {
+          "type": "step",
+          "frames": 60
+        },
+        {
+          "type": "capture",
+          "label": "fly-after-bomb"
+        }
+      ]
+    },
+    {
+      "name": "attackfly-entry",
+      "seed": "3BMBMFTE",
+      "seedValue": 3350817387,
+      "tape": [
+        {
+          "type": "step",
+          "frames": 180
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "key",
+          "key": "Tab",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Tab",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 108
+        },
+        {
+          "type": "key",
+          "key": "3",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "3",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "b",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "b",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "m",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "m",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "b",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "b",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "m",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "m",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "f",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "f",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "t",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "t",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "e",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "e",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 300
+        },
+        {
+          "type": "capture",
+          "label": "gameplay-start"
+        },
+        {
+          "type": "step",
+          "frames": 60
+        },
+        {
+          "type": "key",
+          "key": "s",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-1"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-2"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-3"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-4"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-5"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-6"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-7"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-8"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-9"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-10"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-11"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-12"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-13"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-14"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-15"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-16"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-17"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-18"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-19"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-20"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-21"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-22"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-23"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-24"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-25"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-26"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-27"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-28"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-29"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-30"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-31"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-32"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-33"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-34"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-35"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-36"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-37"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-38"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-39"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-40"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-41"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-42"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-43"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-44"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-45"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-46"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-47"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-48"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-49"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-50"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-51"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-52"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-53"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-54"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-55"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-56"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-57"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-58"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-59"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-60"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-61"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-62"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-63"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-64"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-65"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-66"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-67"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-68"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-69"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-70"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-71"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-72"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-73"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-74"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-75"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-76"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-77"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-78"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-79"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-80"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-81"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-82"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-83"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-84"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-85"
+        },
+        {
+          "type": "key",
+          "key": "s",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 30
+        },
+        {
+          "type": "capture",
+          "label": "down-enter-settled"
+        }
+      ]
+    },
+    {
+      "name": "gaper-entry",
+      "seed": "GTJ617ZW",
+      "seedValue": 1002353675,
+      "tape": [
+        {
+          "type": "step",
+          "frames": 180
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "key",
+          "key": "Tab",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Tab",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 108
+        },
+        {
+          "type": "key",
+          "key": "g",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "g",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "t",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "t",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "j",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "j",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "6",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "6",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "1",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "1",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "7",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "7",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "z",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "z",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 300
+        },
+        {
+          "type": "capture",
+          "label": "gameplay-start"
+        },
+        {
+          "type": "step",
+          "frames": 60
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 27
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 30
+        },
+        {
+          "type": "capture",
+          "label": "gaper-lineup"
+        },
+        {
+          "type": "key",
+          "key": "d",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "key",
+          "key": "d",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 30
+        },
+        {
+          "type": "capture",
+          "label": "gaper-room-entry"
+        },
+        {
+          "type": "step",
+          "frames": 3
+        },
+        {
+          "type": "capture",
+          "label": "gaper-idle-3"
+        },
+        {
+          "type": "step",
+          "frames": 3
+        },
+        {
+          "type": "capture",
+          "label": "gaper-idle-6"
+        },
+        {
+          "type": "step",
+          "frames": 3
+        },
+        {
+          "type": "capture",
+          "label": "gaper-idle-9"
+        },
+        {
+          "type": "step",
+          "frames": 3
+        },
+        {
+          "type": "capture",
+          "label": "gaper-idle-12"
+        },
+        {
+          "type": "step",
+          "frames": 3
+        },
+        {
+          "type": "capture",
+          "label": "gaper-idle-15"
+        },
+        {
+          "type": "step",
+          "frames": 3
+        },
+        {
+          "type": "capture",
+          "label": "gaper-idle-18"
+        },
+        {
+          "type": "step",
+          "frames": 3
+        },
+        {
+          "type": "capture",
+          "label": "gaper-idle-21"
+        },
+        {
+          "type": "step",
+          "frames": 3
+        },
+        {
+          "type": "capture",
+          "label": "gaper-idle-24"
+        },
+        {
+          "type": "step",
+          "frames": 3
+        },
+        {
+          "type": "capture",
+          "label": "gaper-idle-27"
+        },
+        {
+          "type": "step",
+          "frames": 3
+        },
+        {
+          "type": "capture",
+          "label": "gaper-idle-30"
+        },
+        {
+          "type": "step",
+          "frames": 3
+        },
+        {
+          "type": "capture",
+          "label": "gaper-idle-33"
+        },
+        {
+          "type": "step",
+          "frames": 3
+        },
+        {
+          "type": "capture",
+          "label": "gaper-idle-36"
+        },
+        {
+          "type": "step",
+          "frames": 3
+        },
+        {
+          "type": "capture",
+          "label": "gaper-idle-39"
+        },
+        {
+          "type": "step",
+          "frames": 3
+        },
+        {
+          "type": "capture",
+          "label": "gaper-idle-42"
+        },
+        {
+          "type": "step",
+          "frames": 3
+        },
+        {
+          "type": "capture",
+          "label": "gaper-idle-45"
+        },
+        {
+          "type": "step",
+          "frames": 3
+        },
+        {
+          "type": "capture",
+          "label": "gaper-idle-48"
+        },
+        {
+          "type": "step",
+          "frames": 3
+        },
+        {
+          "type": "capture",
+          "label": "gaper-idle-51"
+        },
+        {
+          "type": "step",
+          "frames": 3
+        },
+        {
+          "type": "capture",
+          "label": "gaper-idle-54"
+        },
+        {
+          "type": "step",
+          "frames": 3
+        },
+        {
+          "type": "capture",
+          "label": "gaper-idle-57"
+        },
+        {
+          "type": "step",
+          "frames": 3
+        },
+        {
+          "type": "capture",
+          "label": "gaper-idle-60"
+        },
+        {
+          "type": "step",
+          "frames": 60
+        },
+        {
+          "type": "capture",
+          "label": "gaper-idle-120"
+        }
+      ]
+    }
+  ]
+}

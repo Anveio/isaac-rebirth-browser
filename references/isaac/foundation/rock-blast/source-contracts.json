@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "scope": "Fresh normal Isaac, ordinary Basement kind2 rocks reached by public entry/movement/E inputs",
+  "source": {
+    "blastTier": "555300 selects75 for the regular40-damage bomb tier;554490 snapshots sorted grid candidates through native rays/line checks before virtual Destroy callbacks",
+    "ordinaryDestroy": "56c670 requires kind2/state1, writes state2/collisionClass0 and current room marker900; linked frame repair observes variants after earlier sorted callbacks",
+    "normalFrame": "56c240 SetType(-1) uses a new local RNG35 seeded by (decorationSeed+gridIndex)|1 and authored normal clip length3",
+    "markerAging": "Room.Update5d13a2..5d13f1 subtracts100/clamps0 for markers1..900 on every third full game update, before actor updates. Game update clock freezes during pause/door transitions.",
+    "sound": "56cb80..56cb9e emits SoundRequest137, volume1/delay2/loopfalse/pitch1 before particles; AudioState.admit uses the real preincrement system counter and owns sample/cooldown draws.",
+    "freshOrdinaryDrops": "Kind2 emits no regular pickup drops without Lucky Rock trinket15. Kind4 tinted rocks and modifiers require their owning source callbacks.",
+    "cosmeticRemaining": "Local RNG35 Random50 may emit Worm effects; normal debris count and Effect4 admission/first-update consume shared MT. Those effect actors remain unadmitted; there are no placeholder cursor draws.",
+    "factory": "5ceba5 first local RNG35 Random1001 per raw1000 group: roll0..9 chooseskind5,10..15 chooseskind6,otherwisekind2; tinted candidate independently overrideskind4. Onlykind2 enters normal link Init.",
+    "clockScope": "GameUpdateCount is relative to the playable boundary (nativebaseline42 in all selected tapes), not the complete absolute intro/global clock. Other loading-phase and rock reentry clock contracts remain unaccepted."
+  },
+  "liveGate": {
+    "command": "npm run test:e2e:rock-blast",
+    "producer": "tools/original/rock-blast-scenarios.py",
+    "observer": "tools/original/foundation-pickup-observe.py",
+    "comparator": "tools/e2e/rock-blast.mjs",
+    "inputs": "Actual public DOM/X11 seed and held-key intervals; observer state never enters WASM",
+    "cohorts": "Two contrived ordinary-only YQ16XWHR phase offsets plus fresh recorded OS-random ordinary-only neighbors selected from all four starting directions using authored seeds/local factory rolls. Both26T688VM offsets, original794ZK08P random tape and ZLJJ61ZJ tinted tape remain mandatory. The already-discovered XD0VNH46 troll-bomb tape is also mandatory in every default run; its source failure is not waived or replaced by a regular pickup.",
+    "assertions": [
+      "Source public seed readback and bounded read-only executable identity",
+      "Complete actual reset/menu/manual-seed/gameplay command tape with inputTraceTruncated=false; seedText/seedValid/seededRun/runSeed/numeric readback and phase parity",
+      "Player XY/VXY/HP/inventory/immunity every presentation",
+      "Living player bomb admission, presented XY/VXY and fuse countdown every phase",
+      "Relative full-game-update counter",
+      "All source Rock-family admission indices and ordinary variant/state/class/seed fields",
+      "Raw destruction markers and source-linked frame repair",
+      "Original Rock destruction plus player bomb detonation/consumption and passage through former cells",
+      "Any source pickup admission caused by a blast"
+    ],
+    "knownFailures": "known-regressions.json",
+    "relatedBombFinding": "related-bomb-selector-regressions.json",
+    "failurePolicy": "Every selected case executes; functional failures remain blocking and cause a nonzero gate exit",
+    "result": "Four isolated ordinary routes pass1652 exact phases; previously selected794ZK08P also passes470 after factory classification. Default8-case gate remains fail with both26T688VM explosive offsets and ZLJJ61ZJ tinted regression blocking; everycase executes. The ninth mandatory troll case is now added to the default public cohort; fresh targeted pair fails375 phases with11807 field mismatches, preserved separately. Full menu provenance follow-up is recorded separately.",
+    "report": "live-report.json",
+    "firstFailureReport": "first-live-report.json",
+    "historicalEightCaseReplay": "scenarios-eight-case.json",
+    "trollReport": "troll-live-report.json",
+    "fullInputReport": "full-input-live-report.json",
+    "fullInputResult": "Fresh contrivedYQ16XWHR470 +recordedOS Z6Y6PNT8355 =825 presentations pass complete setup/readback/input history and every compared gameplay field. The full default9-case cohort remains blocking on recorded missing systems."
+  },
+  "unaccepted": [
+    "Tinted kind4 admission/drop callback; explosivekind5 and alternatekind6 callbacks and modifier drops (kind5/6 factory metadata is implemented)",
+    "Cosmetic debris/Worm actor lifecycle and total shared MT consumer alignment",
+    "Troll bomb replacement and pickup blast/contact motion",
+    "Rock reentry/persistence and full pixel parity",
+    "Other grid kinds and door blast callbacks"
+  ]
+}

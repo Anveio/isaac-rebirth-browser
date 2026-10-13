@@ -77,12 +77,24 @@
       "id": "bomb",
       "context": "gameplay",
       "keys": [
-        "KeyE",
+        "KeyE"
+      ],
+      "x11": "e",
+      "clone": true
+    },
+    {
+      "id": "bomb_shift_candidates",
+      "context": "remapping",
+      "keys": [
         "ShiftLeft",
         "ShiftRight"
       ],
-      "x11": "e",
-      "clone": false
+      "x11": "Shift_L",
+      "x11Alternatives": [
+        "Shift_R"
+      ],
+      "clone": false,
+      "nativeEvidence": "Fresh Linux base Rebirth v1.05 consumed both Shift key events but placed no bomb: inventory stayed 1 and HP stayed 6 in four independent window-targeted X11 and physical XTest probes. Alternate bindings/remapping remain unverified; see docs/bomb-evidence.md."
     },
     {
       "id": "active_item",

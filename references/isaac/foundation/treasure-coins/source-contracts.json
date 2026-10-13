@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "scope": "Only direct free coins in authored treasure-room type4; reuse existing source coin RNG, animation, full contact and inventory callbacks. Preserve NPC and mixed actor admission order, secret-key context, and all unsupported typed selectors.",
+  "productionChange": "Extend the existing room/family admission predicate only with(4,20). No item100/pedestal callback or blanket special-room admission.",
+  "retainedCohort": "retained-door-scenarios.json",
+  "sourcePrice": "source-price-evidence.json",
+  "liveCommand": "bash tools/original/with-display.sh node tools/e2e/doors.mjs --scenarios references/isaac/foundation/treasure-coins/retained-door-scenarios.json",
+  "gatePolicy": "Every selected contrived and recorded OS-random source/browser pair executes; retain existing W0 raw1400 Fire33 admission failure. N90 native pedestal100/329 remains unimplemented and outside this coin admission claim.",
+  "unaccepted": [
+    "Treasure collectible100/329 admission and effects",
+    "Other special-room pickup context, shop pricing/pools/modifiers",
+    "Coin collection in this specific treasure route (the original route does not touch coins); existing ordinary free-coin callbacks are reused",
+    "Mandatory W0 Fire33 constructor",
+    "Full pixels and total shared MT consumer alignment"
+  ],
+  "liveReport": "live-report.json",
+  "result": "Exact retained N90 passes175 phases with complete coin multiset admission. The two curse cases pass120+174. All4 cases/613 phases execute; W0 retains its mandatory Fire33 admission failure and overallgate is fail. Pedestal329 remains outside coin coverage."
+}

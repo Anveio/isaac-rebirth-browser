@@ -2,7 +2,8 @@ import { Assets } from "./animation";
 import { MenuRenderer } from "./menu";
 import { GLMenuContext, type GLSurface } from "./gl-menu";
 import { StageComposer, type StageTargets } from "./gl-stage";
-import { graphicsContracts } from "./graphics-contracts";
+import { RunPresentation } from "./presentation";
+import { PickupRenderer } from "./pickups";
 import type { RoomAppearance, RoomQuad, State } from "./engine";
 
 const PLAYER = "gfx/001.000_player.anm2";
@@ -13,6 +14,8 @@ export class Renderer {
   private readonly context: CanvasRenderingContext2D;
   private readonly menu: MenuRenderer;
   private readonly stage: StageComposer;
+  private readonly presentation: RunPresentation;
+  private readonly pickups: PickupRenderer;
   private readonly floor: GLSurface;
   private readonly walls: GLSurface;
   private roomKey = "";
@@ -21,6 +24,8 @@ export class Renderer {
     this.context = canvas.getContext("2d", { alpha: false })!;
     this.menu = new MenuRenderer(assets);
     this.stage = new StageComposer(graphics, assets);
+    this.presentation = new RunPresentation(assets);
+    this.pickups = new PickupRenderer(assets);
     this.floor = graphics.createTarget(1024, 512);
     this.walls = graphics.createTarget(1024, 512);
   }
@@ -33,7 +38,7 @@ export class Renderer {
     const gl = this.graphics;
     if (state.screen === "playing") {
       this.prepareRoom(state.room.appearance);
-      this.stage.prepare(state.stageEffects);
+      this.stage.prepare(state.stageEffects, state.camera?.scroll);
     }
     gl.beginScreen(); gl.resetTransform(); gl.globalAlpha = 1; gl.imageSmoothingEnabled = false;
     gl.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -42,22 +47,79 @@ export class Renderer {
     const ctx = gl.asCanvasContext();
     if (state.screen !== "playing") this.menu.draw(ctx, state);
     else {
+      ctx.save();
+      if (state.camera) ctx.translate(state.camera.scroll.x, state.camera.scroll.y);
       this.drawRoom(state.room.appearance);
+      ctx.restore();
       this.stage.ground(state.stageEffects);
+      ctx.save();
+      if (state.camera) ctx.translate(state.camera.scroll.x, state.camera.scroll.y);
+      const grid = state.room.grid;
+      if (grid) for (const [index, cell] of grid.cells.entries()) {
+        const entity = cell.entity;
+        if (!entity) continue;
+        const x = (40 + index % grid.width * 40) * 0.65 + 32;
+        const y = (120 + Math.floor(index / grid.width) * 40) * 0.65 - 46;
+        if (entity.kind === 2 && entity.state === 1)
+          this.assets.draw(ctx, "gfx/grid/grid_rock.anm2", entity.variant >= 1000 ? "big" : "normal",
+            x, y, entity.variant >= 1000 ? entity.variant - 1000 : entity.variant);
+        else if (entity.kind === 8 && entity.state === 0)
+          this.assets.draw(ctx, "gfx/grid/grid_spikes.anm2", `Spikes${String(entity.variant).padStart(2, "0")}`, x, y);
+      }
+      this.pickups.draw(ctx, state);
+      for (const npc of state.room.npcs) {
+        if (npc.dead || npc.removed || (!npc.keeper && !npc.visible)) continue;
+        const keeper = npc.keeper;
+        if (keeper) {
+          this.assets.draw(ctx, "gfx/017.002_secret room keeper.anm2", keeper.animation,
+            npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46, keeper.animationClock,
+            { scale: 0.65, overrides: { 0: {
+              RedTint: keeper.tint[0]! * 255, GreenTint: keeper.tint[1]! * 255, BlueTint: keeper.tint[2]! * 255,
+              AlphaTint: keeper.tint[3]! * 255, RedOffset: keeper.offsets[0]! * 255,
+              GreenOffset: keeper.offsets[1]! * 255, BlueOffset: keeper.offsets[2]! * 255,
+            } } });
+        } else if (npc.fireplace) {
+          this.assets.draw(ctx, "gfx/033.000_fireplace.anm2", npc.animation,
+            npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46, npc.animationClock,
+            { scale: 0.65, layerScales: { 1: [npc.fireplace.flameScale, npc.fireplace.flameScale] } });
+        } else {
+          this.assets.draw(ctx, npc.kind === 13 ? "gfx/013.000_fly.anm2" : npc.kind === 18 ? "gfx/018.000_attack fly.anm2" : "gfx/244.000_round worm.anm2", npc.animation,
+            npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46, npc.animationFrame, { scale: 0.65 });
+        }
+      }
+      for (const projectile of state.enemyProjectiles)
+        if (!projectile.removed && projectile.animation)
+          this.assets.draw(ctx, "gfx/009.000_projectile.anm2", projectile.animation,
+            projectile.presentedPosition.x * 0.65 + 32, (projectile.presentedPosition.y + projectile.height) * 0.65 - 46, projectile.animationFrame, { scale:0.65 });
+      for (const particle of state.fireParticles)
+        if (!particle.removed && particle.visible)
+          this.assets.draw(ctx, "gfx/1000.066_ember particle.anm2", "Idle",
+            particle.presentedPosition.x * 0.65 + 32, particle.presentedPosition.y * 0.65 - 46, particle.animationClock, { scale: 0.65 });
       this.drawPlayer(ctx, state);
       for (const tear of state.tears)
         this.assets.draw(ctx, TEAR, "RegularTear6", Math.round(tear.x * 2) / 2, Math.round(tear.y * 2) / 2, tear.age);
       for (const impact of state.impacts)
         this.assets.draw(ctx, "gfx/1000.012_tear poof_small.anm2", "Poof", impact.x, impact.y, impact.age);
+      for (const bomb of state.bombs)
+        if (bomb.motion.lifetime === "alive")
+          this.assets.draw(ctx, bomb.variant === 3 ? "gfx/004.003_troll bomb.anm2" : bomb.variant === 4 ? "gfx/004.004_megatroll bomb.anm2" : "gfx/004.000_bomb.anm2", bomb.animation, bomb.x, bomb.y - 1, bomb.animationFrame, { pixelSnap: this.canvas.width / 480 / 2 });
+      for (const explosion of state.explosions) {
+        this.assets.draw(ctx, "gfx/1000.001_bomb explosion.anm2", "Explosion", explosion.x, explosion.y - 1, explosion.animationFrame, { pixelSnap: this.canvas.width / 480 / 2 });
+      }
+      for (const bomb of state.bombs)
+        if (bomb.motion.lifetime === "exploding")
+          this.assets.draw(ctx, bomb.variant === 3 ? "gfx/004.003_troll bomb.anm2" : bomb.variant === 4 ? "gfx/004.004_megatroll bomb.anm2" : "gfx/004.000_bomb.anm2", bomb.animation, bomb.x, bomb.y - 1, bomb.animationFrame, { pixelSnap: this.canvas.width / 480 / 2 });
+      ctx.restore();
       this.stage.foreground(state.stageEffects);
+      this.presentation.introduction(ctx, state);
       this.hud(ctx, state);
+      this.presentation.pause(ctx, state);
     }
     gl.presentScreen(); gl.finish();
     this.context.reset(); this.context.imageSmoothingEnabled = false;
     this.context.drawImage(gl.canvas, 0, 0);
   }
   debugTargets(): StageTargets { return this.stage.debugTargets(); }
-  debugGraphicsContracts(): Promise<{ mask: number[]; screen: number[] }> { return graphicsContracts(this.assets); }
   private drawQuads(appearance: RoomAppearance, quads: RoomQuad[]): void {
     const gl = this.graphics, image = this.assets.image(appearance.backdrop);
     for (const quad of quads) {
@@ -102,7 +164,8 @@ export class Renderer {
     const rotation = { up: 0, left: -Math.PI / 2, right: Math.PI / 2, down: Math.PI };
     for (const connection of appearance.doors) {
       ctx.save(); ctx.translate(connection.x, connection.y); ctx.rotate(rotation[connection.side]);
-      this.assets.draw(ctx, "gfx/grid/door_01_normaldoor.anm2", connection.state, 0, 0); ctx.restore();
+      this.assets.draw(ctx, connection.asset, connection.state, 0, 0, 0,
+        connection.spritesheet ? { spritesheets: { 0: connection.spritesheet } } : {}); ctx.restore();
     }
     gl.drawImage(this.assets.image(appearance.fx.shading), x, y, width, height);
   }
@@ -110,6 +173,12 @@ export class Renderer {
     const player = state.player, x = Math.round((player.x + player.renderOffset.x) * 2) / 2,
       y = Math.round((player.y + player.renderOffset.y) * 2) / 2;
     const [RedTint, GreenTint, BlueTint] = state.stageEffects.actorTint;
+    if (state.playerItems?.pickupAnimationGuard) {
+      this.assets.draw(ctx, PLAYER, "Pickup", x, y, state.playerItems.pickupAnimationFrame,
+        { overrides: Object.fromEntries(Array.from({length: 5}, (_, layer) => [layer, {RedTint, GreenTint, BlueTint}])) });
+      this.pickups.drawCarried(ctx, state, x, y);
+      return;
+    }
     this.assets.draw(ctx, PLAYER, `Walk${directionName(player.bodyFacing)}`, x, y, player.walkFrame,
       { layers: [1], overrides: { 1: { RedTint, GreenTint, BlueTint } } });
     this.assets.draw(ctx, PLAYER, `Head${directionName(player.facing)}`, x, y, player.headFrame,

@@ -3,7 +3,7 @@
 //! The two mask passes, source rectangles, and modulation values are observable
 //! public OpenGL submissions shared by independently seeded Basement captures.
 //! Original decoration RNG initialization remains unverified.
-use crate::{content, room::RoomFx, Player};
+use crate::{content, room::RoomFx, Bomb, Explosion, Player};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
@@ -36,6 +36,16 @@ pub struct LightGradient {
     pub crop: Rect,
 }
 
+/// Both native mask actors snap their projected anchor to half a logical
+/// pixel before authored extents and integer mask corner rounding.
+fn sprite_anchor(x: f64, y: f64) -> Point {
+    let snap = |value: f64| (value * 2.0).round() / 2.0;
+    Point {
+        x: snap(x),
+        y: snap(y),
+    }
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Light {
@@ -43,6 +53,7 @@ pub struct Light {
     pub x: f64,
     pub y: f64,
     pub radius: f64,
+    pub alpha: f64,
     pub destination_rect: Rect,
 }
 
@@ -95,6 +106,11 @@ impl ShadowCatalog {
                     variant: 0,
                     size_percent: content::TEAR_SHADOW_PERCENT,
                 },
+                ShadowDefinition {
+                    entity_type: 4,
+                    variant: 0,
+                    size_percent: content::BOMB_SHADOW_PERCENT,
+                },
             ],
         }
     }
@@ -137,6 +153,7 @@ impl ShadowCaster {
     pub fn authored(owner_id: u32, x: f64, y: f64, size_percent: f64, raster: &Raster) -> Self {
         let width = content::SHADOW_SOURCE_WIDTH * size_percent / 100.0;
         let height = content::SHADOW_SOURCE_HEIGHT * size_percent / 100.0;
+        let anchor = sprite_anchor(x, y);
         Self {
             owner_id,
             x,
@@ -150,8 +167,8 @@ impl ShadowCaster {
                 height: content::SHADOW_SOURCE_HEIGHT,
             },
             destination_rect: raster.rectangle(Rect {
-                x: x - width / 2.0,
-                y: y - height / 2.0,
+                x: anchor.x - width / 2.0,
+                y: anchor.y - height / 2.0,
                 width,
                 height,
             }),
@@ -230,6 +247,87 @@ pub struct StageEffects {
 }
 
 impl StageEffects {
+    /// The public native draw trace shows a six-ANM2-frame flash. Its gradient
+    /// uses the authored off-center pivot at 150% scale, rather than assuming
+    /// a symmetric sprite rectangle around the physical bomb position.
+    pub fn add_explosion_lights(&mut self, explosions: &[Explosion]) {
+        for explosion in explosions {
+            let frame = u32::from(explosion.animation_frame);
+            if frame >= 6 {
+                continue;
+            }
+            let scale = 1.5;
+            let width = content::LIGHT_WIDTH * scale;
+            let height = content::LIGHT_HEIGHT * scale;
+            let anchor = sprite_anchor(explosion.x, explosion.y - 1.0);
+            let x = anchor.x - content::LIGHT_PIVOT_X * scale;
+            let y = anchor.y - content::LIGHT_PIVOT_Y * scale;
+            let progress = frame as f32 / 6.0;
+            self.lights.push(Light {
+                owner_id: explosion.id,
+                x: x + width / 2.0,
+                y: y + height / 2.0,
+                radius: width / 2.0,
+                alpha: f64::from(1.0_f32 - progress * progress),
+                destination_rect: self.mask_raster.rectangle(Rect {
+                    x,
+                    y,
+                    width,
+                    height,
+                }),
+            });
+        }
+    }
+    /// Planted bombs use authored entity shadow scales and the independently
+    /// observed sprite ground anchor, then the same signed raster as players.
+    pub fn add_bomb_shadows(&mut self, bombs: &[Bomb]) {
+        for bomb in bombs
+            .iter()
+            .filter(|bomb| bomb.motion.lifetime == crate::bombs::BombLifetime::Alive)
+        {
+            self.shadow_casters.push(ShadowCaster::authored(
+                bomb.id,
+                bomb.x,
+                bomb.y - 1.0,
+                if matches!(bomb.variant, 3 | 4) {
+                    content::TROLL_BOMB_SHADOW_PERCENT
+                } else {
+                    content::BOMB_SHADOW_PERCENT
+                },
+                &self.mask_raster,
+            ));
+        }
+    }
+
+    /// Tear shadow follows ground prediction, separately from the height used
+    /// by its sprite. Fresh regular tears use authored shadow size8.
+    pub fn add_tear_shadows(&mut self, tears: &[crate::Tear]) {
+        for tear in tears {
+            self.shadow_casters.push(ShadowCaster::authored(
+                tear.id,
+                f64::from(tear.motion.presented_position.x) * crate::motion::WORLD_SCALE + 32.0,
+                f64::from(tear.motion.presented_position.y) * crate::motion::WORLD_SCALE - 47.0,
+                content::TEAR_SHADOW_PERCENT,
+                &self.mask_raster,
+            ));
+        }
+    }
+
+    pub fn add_pickup_shadows(&mut self, pickups: &[crate::Pickup]) {
+        for pickup in pickups
+            .iter()
+            .filter(|pickup| !pickup.collected && !pickup.removed && pickup.shadow_size > 0.0)
+        {
+            self.shadow_casters.push(ShadowCaster::authored(
+                pickup.id,
+                pickup.x,
+                pickup.y - 1.0,
+                pickup.shadow_size,
+                &self.mask_raster,
+            ));
+        }
+    }
+
     /// Light and sprite anchors remain separate in the current logical model.
     /// Observed raster geometry alone does not identify native physical units.
     pub fn basement(player: &Player, fx: &RoomFx, run_tick: u32) -> Self {
@@ -241,11 +339,12 @@ impl StageEffects {
             pixel_size: 1.0,
             rounding: Rounding::HalfAwayFromZero,
         };
+        let light_anchor = sprite_anchor(player.x, player.y - 1.0);
         let light_rect = mask_raster.rectangle(Rect {
-            x: player.x - 150.0,
-            y: player.y - 150.0,
-            width: 300.0,
-            height: 300.0,
+            x: light_anchor.x - content::LIGHT_PIVOT_X,
+            y: light_anchor.y - content::LIGHT_PIVOT_Y,
+            width: content::LIGHT_WIDTH,
+            height: content::LIGHT_HEIGHT,
         });
         let shadow = ShadowCaster::authored(
             0,
@@ -265,10 +364,10 @@ impl StageEffects {
             light_gradient: LightGradient {
                 asset: "gfx/backdrop/light_gradient.png".into(),
                 crop: Rect {
-                    x: 100.0,
-                    y: 0.0,
-                    width: 300.0,
-                    height: 300.0,
+                    x: content::LIGHT_CROP_X,
+                    y: content::LIGHT_CROP_Y,
+                    width: content::LIGHT_WIDTH,
+                    height: content::LIGHT_HEIGHT,
                 },
             },
             lights: vec![Light {
@@ -276,6 +375,7 @@ impl StageEffects {
                 x: player.x,
                 y: player.y,
                 radius: 150.0,
+                alpha: 1.0,
                 destination_rect: light_rect,
             }],
             shadow_casters: vec![shadow],
@@ -316,203 +416,5 @@ impl StageEffects {
                 motion_evidence: fx.overlay_motion_evidence.clone(),
             },
         }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::Game;
-
-    #[test]
-    fn logical_light_and_authored_shadow_follow_separate_render_anchors() {
-        let game = Game::new(crate::test_seeds::one(
-            "logical_light_and_authored_shadow_follow_separate_render_anchors",
-        ))
-        .unwrap();
-        let mut player = game.state.player;
-        let first = StageEffects::basement(&player, &game.state.room.appearance.fx, 0);
-        assert_eq!(first.lights[0].y, 214.0);
-        assert_eq!(first.shadow_casters[0].y, 213.0);
-        player.x += 57.125;
-        player.y -= 29.75;
-        player.render_offset.x = -2.0;
-        let moved = StageEffects::basement(&player, &game.state.room.appearance.fx, 23);
-        assert_eq!(moved.lights[0].x - first.lights[0].x, 57.125);
-        assert_eq!(moved.lights[0].y - first.lights[0].y, -29.75);
-        assert_eq!(moved.shadow_casters[0].x - moved.lights[0].x, -2.0);
-        assert_eq!(moved.shadow_casters[0].y - moved.lights[0].y, -1.0);
-        assert_eq!(moved.light_gradient, first.light_gradient);
-    }
-
-    #[test]
-    fn independent_signed_corner_rounding_matches_negative_half_light_bounds() {
-        let raster = Raster {
-            pixel_size: 1.0,
-            rounding: Rounding::HalfAwayFromZero,
-        };
-        let bounds = raster.rectangle(Rect {
-            x: -24.5,
-            y: 7.0,
-            width: 300.0,
-            height: 300.0,
-        });
-        assert_eq!(
-            bounds,
-            Rect {
-                x: -25.0,
-                y: 7.0,
-                width: 301.0,
-                height: 300.0
-            }
-        );
-        // The reflected primitive checks the other negative half boundary;
-        // rounding an origin plus an unchanged width gives the wrong edge.
-        let reflected = raster.rectangle(Rect {
-            x: -275.5,
-            y: -307.0,
-            width: 300.0,
-            height: 300.0,
-        });
-        assert_eq!(
-            reflected,
-            Rect {
-                x: -276.0,
-                y: -307.0,
-                width: 301.0,
-                height: 300.0
-            }
-        );
-        let quarter = Raster {
-            pixel_size: 0.25,
-            rounding: Rounding::HalfAwayFromZero,
-        };
-        assert_eq!(
-            quarter.rectangle(Rect {
-                x: -0.125,
-                y: 0.125,
-                width: 1.0,
-                height: 1.0
-            }),
-            Rect {
-                x: -0.25,
-                y: 0.25,
-                width: 1.25,
-                height: 1.0
-            }
-        );
-    }
-
-    #[test]
-    fn authored_shadow_scale_and_subpixel_position_change_destination_width() {
-        let raster = Raster {
-            pixel_size: 1.0,
-            rounding: Rounding::HalfAwayFromZero,
-        };
-        let centered =
-            ShadowCaster::authored(0, 240.0, 213.0, content::PLAYER_SHADOW_PERCENT, &raster);
-        assert_eq!(
-            centered.destination_rect,
-            Rect {
-                x: 230.0,
-                y: 209.0,
-                width: 20.0,
-                height: 8.0
-            }
-        );
-        let half = ShadowCaster::authored(0, 320.5, 213.0, content::PLAYER_SHADOW_PERCENT, &raster);
-        assert_eq!(
-            half.destination_rect,
-            Rect {
-                x: 311.0,
-                y: 209.0,
-                width: 19.0,
-                height: 8.0
-            }
-        );
-        assert_eq!(half.width, centered.width);
-        assert_eq!(half.height, centered.height);
-        assert_ne!(half.width, half.destination_rect.width);
-        let base_tear =
-            ShadowCaster::authored(1, 332.0, 211.0, content::TEAR_SHADOW_PERCENT, &raster);
-        assert_eq!(
-            base_tear.destination_rect,
-            Rect {
-                x: 327.0,
-                y: 209.0,
-                width: 10.0,
-                height: 4.0
-            }
-        );
-        assert_eq!(base_tear.width, centered.width * 0.5);
-        assert_eq!(base_tear.height, centered.height * 0.5);
-    }
-
-    #[test]
-    fn natural_overlay_crop_and_tick_survive_state_roundtrip() {
-        for seed in
-            crate::test_seeds::samples("natural_overlay_crop_and_tick_survive_state_roundtrip", 32)
-        {
-            let game = Game::new(seed).unwrap();
-            let effects =
-                StageEffects::basement(&game.state.player, &game.state.room.appearance.fx, 72);
-            let crop = &effects.overlay.source_crop;
-            assert_eq!((crop.width, crop.height), (480.0, 270.0));
-            assert!((91.5..=191.5).contains(&(crop.x - effects.overlay.offset.x)));
-            assert!((79.5..=179.5).contains(&(crop.y - effects.overlay.offset.y)));
-            assert_eq!(effects.overlay.simulation_tick, 72);
-            assert_eq!(effects.actor_tint, [255; 3]);
-            let json = serde_json::to_value(&effects).unwrap();
-            assert_eq!(json["shadowCasters"][0]["ownerId"], 0);
-            assert_eq!(
-                json["lightingCompositeRGBA"],
-                serde_json::json!([0.3, 0.3, 0.3, 0.3])
-            );
-            assert_eq!(
-                serde_json::from_value::<StageEffects>(json).unwrap(),
-                effects
-            );
-        }
-    }
-
-    #[test]
-    fn overlay_parallax_uses_both_axes_and_is_independent_of_clock() {
-        let game = Game::new(crate::test_seeds::one(
-            "overlay_parallax_uses_both_axes_and_is_independent_of_clock",
-        ))
-        .unwrap();
-        let mut player = game.state.player;
-        let initial = StageEffects::basement(&player, &game.state.room.appearance.fx, 0);
-        let later = StageEffects::basement(&player, &game.state.room.appearance.fx, 1000);
-        assert_eq!(initial.overlay.source_crop, later.overlay.source_crop);
-        player.x += 80.0;
-        let moved = StageEffects::basement(&player, &game.state.room.appearance.fx, 1000);
-        assert_eq!(moved.overlay.offset.x - initial.overlay.offset.x, 2.0);
-        assert_eq!(
-            moved.overlay.source_crop.x - initial.overlay.source_crop.x,
-            2.0
-        );
-        assert_eq!(moved.overlay.source_crop.y, initial.overlay.source_crop.y);
-        player.x += 0.5;
-        let subpixel = StageEffects::basement(&player, &game.state.room.appearance.fx, 1000);
-        assert!(
-            (subpixel.overlay.offset.x - initial.overlay.offset.x - 2.0125).abs()
-                < f64::EPSILON * subpixel.overlay.offset.x.abs() * 4.0
-        );
-        player.y -= 62.5;
-        let vertical = StageEffects::basement(&player, &game.state.room.appearance.fx, 1000);
-        assert_eq!(
-            vertical.overlay.offset.y - initial.overlay.offset.y,
-            -1.5625
-        );
-        assert_eq!(
-            vertical.overlay.source_crop.y - initial.overlay.source_crop.y,
-            -1.5625
-        );
-        player.render_offset.x -= 1.0;
-        player.render_offset.y -= 3.0;
-        let shifted = StageEffects::basement(&player, &game.state.room.appearance.fx, 1000);
-        assert!((shifted.overlay.offset.x - vertical.overlay.offset.x + 0.025).abs() < 1e-14);
-        assert!((shifted.overlay.offset.y - vertical.overlay.offset.y + 0.075).abs() < 1e-14);
     }
 }

@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "bootEpochSeed": 1700000000,
+  "source": "Natural authored pickups; public inputs only",
+  "cases": [
+    {
+      "name": "contact-phase-0",
+      "code": "PBW9YNC8",
+      "seedValue": 1737131469,
+      "delay": 0,
+      "entropy": "Contrived phase offset on a naturally generated coin room"
+    },
+    {
+      "name": "contact-phase-1",
+      "code": "PBW9YNC8",
+      "seedValue": 1737131469,
+      "delay": 1,
+      "entropy": "Contrived phase offset on a naturally generated coin room"
+    },
+    {
+      "name": "random-0",
+      "code": "9DSWNNTV",
+      "seedValue": 4144912847,
+      "delay": 0,
+      "entropy": "OS secrets",
+      "discoveryAttempts": 838
+    },
+    {
+      "name": "random-1",
+      "code": "7WLZLSTH",
+      "seedValue": 3816434367,
+      "delay": 1,
+      "entropy": "OS secrets",
+      "discoveryAttempts": 901
+    },
+    {
+      "name": "regression-spike-approach",
+      "code": "22PFCSFS",
+      "seedValue": 3388288701,
+      "delay": 1,
+      "cohort": "hazard-regression",
+      "entropy": "Recorded OS secrets discovery from the first pickup gate",
+      "description": "Natural Room1.279 has authored selector1930 spike cell37 at world320,200; original HP6 to4 on presentation131 while the port lacked grid hazard damage",
+      "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13"
+    }
+  ]
+}

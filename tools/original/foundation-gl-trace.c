@@ -106,9 +106,10 @@ static int read_bytes(GLenum target, GLuint buffer, const void *pointer, size_t 
 }
 static int components(struct Array array, unsigned index, double values[4]) {
     size_t width = scalar_size(array.type);
-    if (!width || array.size < 1 || array.size > 4) return 0;
-    unsigned char bytes[32]; size_t stride = array.stride ? array.stride : width*array.size;
-    if(!read_bytes(GL_ARRAY_BUFFER, array.buffer, array.pointer, (size_t)index*stride, width*array.size, bytes)) return 0;
+    if (!width || array.size < 1 || array.size > 4 || array.stride < 0) return 0;
+    size_t packed_size = width * (size_t)array.size;
+    unsigned char bytes[32]; size_t stride = array.stride ? (size_t)array.stride : packed_size;
+    if(!read_bytes(GL_ARRAY_BUFFER, array.buffer, array.pointer, (size_t)index*stride, packed_size, bytes)) return 0;
     for(int c=0;c<array.size;c++) {
         if(array.type == GL_FLOAT) { float v; memcpy(&v,bytes+c*4,4); values[c]=v; }
         else if(array.type == GL_DOUBLE) { double v; memcpy(&v,bytes+c*8,8); values[c]=v; }

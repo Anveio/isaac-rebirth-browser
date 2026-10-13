@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "entropy": "Recorded OS-random run seeds and independent Node crypto boot epochs",
+  "cases": [
+    {
+      "name": "audible-title-floor-pause",
+      "code": "QSYVKMSE",
+      "bootEpochSeed": 1700000000,
+      "volume": 1
+    },
+    {
+      "name": "muted-real-lifecycle",
+      "code": "ZG800TRJ",
+      "bootEpochSeed": 0,
+      "volume": 0
+    },
+    {
+      "name": "random-0",
+      "code": "R47PTVVG",
+      "bootEpochSeed": 2597731015,
+      "volume": 0
+    },
+    {
+      "name": "random-1",
+      "code": "T1E933RS",
+      "bootEpochSeed": 2646140068,
+      "volume": 1
+    }
+  ]
+}

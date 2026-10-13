@@ -1,0 +1,362 @@
+{
+  "schema": 1,
+  "status": "pass",
+  "scope": "Actual Level descriptor constructor state matches nine bounded native seed pairs through four menus and actual Game admission. Complete shared MT after admission remains a failing diagnostic; strict W0 result is recorded separately.",
+  "artifact": "ec45c7874d45e2db19e84b1d881f4a11ab6b729fdc065cfec8f7ee308c9bfde9",
+  "cases": 6,
+  "comparedLevelGridPairs": 270,
+  "comparedMenuStateWords": 14976,
+  "comparedMenuGridPairs": 216,
+  "comparedStatPoses": 4296,
+  "exactCommands": 96,
+  "nativeIdentityObservations": 36,
+  "gateSourcesStable": true,
+  "postGameMt": [
+    {
+      "name": "zero-epoch",
+      "runMtDiagnostic": {
+        "status": "fail",
+        "originalIndex": 459,
+        "productionIndex": 575,
+        "differingWords": 624,
+        "firstDifferences": [
+          {
+            "index": 0,
+            "original": 3340451949,
+            "production": 92094361
+          },
+          {
+            "index": 1,
+            "original": 121460540,
+            "production": 1343272881
+          },
+          {
+            "index": 2,
+            "original": 838145477,
+            "production": 218907157
+          },
+          {
+            "index": 3,
+            "original": 261364067,
+            "production": 1467567366
+          },
+          {
+            "index": 4,
+            "original": 1352443946,
+            "production": 1716339572
+          },
+          {
+            "index": 5,
+            "original": 373631584,
+            "production": 2517976392
+          },
+          {
+            "index": 6,
+            "original": 3190102260,
+            "production": 3563859296
+          },
+          {
+            "index": 7,
+            "original": 427804612,
+            "production": 487135617
+          }
+        ],
+        "reason": "Run/room/effect shared-stream consumers remain incomplete; source values and cursor adjustments are never supplied to production"
+      }
+    },
+    {
+      "name": "fixed-epoch",
+      "runMtDiagnostic": {
+        "status": "fail",
+        "originalIndex": 464,
+        "productionIndex": 575,
+        "differingWords": 624,
+        "firstDifferences": [
+          {
+            "index": 0,
+            "original": 3025920350,
+            "production": 1113287580
+          },
+          {
+            "index": 1,
+            "original": 1803947576,
+            "production": 624563352
+          },
+          {
+            "index": 2,
+            "original": 913377430,
+            "production": 1414730680
+          },
+          {
+            "index": 3,
+            "original": 1155432017,
+            "production": 2416110005
+          },
+          {
+            "index": 4,
+            "original": 3467819560,
+            "production": 3780293893
+          },
+          {
+            "index": 5,
+            "original": 726306269,
+            "production": 860477382
+          },
+          {
+            "index": 6,
+            "original": 2636645993,
+            "production": 1181170326
+          },
+          {
+            "index": 7,
+            "original": 3957854490,
+            "production": 2852045341
+          }
+        ],
+        "reason": "Run/room/effect shared-stream consumers remain incomplete; source values and cursor adjustments are never supplied to production"
+      }
+    },
+    {
+      "name": "random-0",
+      "runMtDiagnostic": {
+        "status": "fail",
+        "originalIndex": 62,
+        "productionIndex": 575,
+        "differingWords": 624,
+        "firstDifferences": [
+          {
+            "index": 0,
+            "original": 1909881571,
+            "production": 1267746481
+          },
+          {
+            "index": 1,
+            "original": 1699927280,
+            "production": 3071323172
+          },
+          {
+            "index": 2,
+            "original": 625669200,
+            "production": 1082401952
+          },
+          {
+            "index": 3,
+            "original": 3973969853,
+            "production": 867960427
+          },
+          {
+            "index": 4,
+            "original": 4057912311,
+            "production": 967395486
+          },
+          {
+            "index": 5,
+            "original": 4087458364,
+            "production": 2228961908
+          },
+          {
+            "index": 6,
+            "original": 4006868703,
+            "production": 4240705652
+          },
+          {
+            "index": 7,
+            "original": 1094523382,
+            "production": 927527955
+          }
+        ],
+        "reason": "Run/room/effect shared-stream consumers remain incomplete; source values and cursor adjustments are never supplied to production"
+      }
+    },
+    {
+      "name": "random-1",
+      "runMtDiagnostic": {
+        "status": "fail",
+        "originalIndex": 462,
+        "productionIndex": 575,
+        "differingWords": 624,
+        "firstDifferences": [
+          {
+            "index": 0,
+            "original": 2728054550,
+            "production": 1253691784
+          },
+          {
+            "index": 1,
+            "original": 2560755352,
+            "production": 1892007012
+          },
+          {
+            "index": 2,
+            "original": 1637979711,
+            "production": 4177421582
+          },
+          {
+            "index": 3,
+            "original": 339724275,
+            "production": 4244446745
+          },
+          {
+            "index": 4,
+            "original": 2144236572,
+            "production": 2761220337
+          },
+          {
+            "index": 5,
+            "original": 1622707621,
+            "production": 1286121794
+          },
+          {
+            "index": 6,
+            "original": 1291386230,
+            "production": 3363580934
+          },
+          {
+            "index": 7,
+            "original": 2486244996,
+            "production": 2492732538
+          }
+        ],
+        "reason": "Run/room/effect shared-stream consumers remain incomplete; source values and cursor adjustments are never supplied to production"
+      }
+    },
+    {
+      "name": "random-2",
+      "runMtDiagnostic": {
+        "status": "fail",
+        "originalIndex": 461,
+        "productionIndex": 575,
+        "differingWords": 624,
+        "firstDifferences": [
+          {
+            "index": 0,
+            "original": 1435739992,
+            "production": 1018799195
+          },
+          {
+            "index": 1,
+            "original": 3535535866,
+            "production": 3165965943
+          },
+          {
+            "index": 2,
+            "original": 3312224284,
+            "production": 1626818966
+          },
+          {
+            "index": 3,
+            "original": 506196360,
+            "production": 2290206492
+          },
+          {
+            "index": 4,
+            "original": 2037629984,
+            "production": 2935880913
+          },
+          {
+            "index": 5,
+            "original": 1495569117,
+            "production": 608983280
+          },
+          {
+            "index": 6,
+            "original": 4126319005,
+            "production": 541590198
+          },
+          {
+            "index": 7,
+            "original": 2347648239,
+            "production": 693255289
+          }
+        ],
+        "reason": "Run/room/effect shared-stream consumers remain incomplete; source values and cursor adjustments are never supplied to production"
+      }
+    },
+    {
+      "name": "random-3",
+      "runMtDiagnostic": {
+        "status": "fail",
+        "originalIndex": 460,
+        "productionIndex": 575,
+        "differingWords": 624,
+        "firstDifferences": [
+          {
+            "index": 0,
+            "original": 4212082116,
+            "production": 2126651226
+          },
+          {
+            "index": 1,
+            "original": 3136791858,
+            "production": 3585316590
+          },
+          {
+            "index": 2,
+            "original": 1143446238,
+            "production": 2008933885
+          },
+          {
+            "index": 3,
+            "original": 3527225697,
+            "production": 1672678917
+          },
+          {
+            "index": 4,
+            "original": 2593066419,
+            "production": 964381445
+          },
+          {
+            "index": 5,
+            "original": 3416594032,
+            "production": 3109587663
+          },
+          {
+            "index": 6,
+            "original": 3363252188,
+            "production": 2424542981
+          },
+          {
+            "index": 7,
+            "original": 4015764639,
+            "production": 1451652150
+          }
+        ],
+        "reason": "Run/room/effect shared-stream consumers remain incomplete; source values and cursor adjustments are never supplied to production"
+      }
+    }
+  ],
+  "reportSha256": "0821a840d854f3ee15dba6ef241a07b475e6c19aac11a88ecbe18f1b023d64e3",
+  "scenariosSha256": "e21870391a681f44478af40246ad9f5d13d888ca3e83fdd35b29440cc50c4eef",
+  "mandatoryW0": {
+    "status": "fail",
+    "artifact": "ec45c7874d45e2db19e84b1d881f4a11ab6b729fdc065cfec8f7ee308c9bfde9",
+    "checkpoints": 18,
+    "passedCheckpoints": 17,
+    "failedFields": [
+      {
+        "label": "random-resumed",
+        "field": "tears.alive",
+        "expected": 0,
+        "actual": 1,
+        "status": "fail"
+      }
+    ],
+    "caseSha256": "182a03c01f8dadbd10c8f38c23ce55dde286a18c9252438a22e8b982ea545403",
+    "gateSourcesStable": true,
+    "reportSha256": "1ea5344038fba224a264d126e3f0f084ad5fa9536e8073a7c574341e6ac083e9"
+  },
+  "ordinarySnapshot": {
+    "serializedJsonBytes": 71366,
+    "levelGridSeedSamples": 9,
+    "fullCapacityTablesSerialized": false
+  },
+  "baseCommit": "0f8a3633fdd4760ef2f64dad6f523a4a43ea872b",
+  "verifiedCodeHead": "7225b9991d927f5b67ba96b81c39f6cd13d14ebd",
+  "build": {
+    "command": "npm run check:build",
+    "status": "pass",
+    "logSha256": "a358f69131f4812e5d0d7f8579ce7981bc098598fdd9fd60ac6efebbfa450fd4",
+    "artifactSha256": "ec45c7874d45e2db19e84b1d881f4a11ab6b729fdc065cfec8f7ee308c9bfde9",
+    "files": 919
+  }
+}

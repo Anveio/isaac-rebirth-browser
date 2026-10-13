@@ -1,0 +1,108 @@
+{
+  "schema": 1,
+  "status": "pass",
+  "gateSources": {
+    "tools/e2e/boot-mt.mjs": "3416460c8f40616100a48a0e924c75418b2f21ce4ef2cd1cf5ea616dc57b1e57",
+    "tools/original/boot-mt-observer.py": "6c3fb49fc8a033b49598cc1c3e9bc2ab015ffb676103793c902531abdf5974dc",
+    "tools/original/native-identity.py": "4fd5591be56fc4e9ad0486d0f2ec2828f6389786245ee09f9d0b3a395ae18acb",
+    "tools/original/state-observer.py": "58e3b510abbe5ff57f05844efbdf764e2a02530cda4fa99f538d886d258af6f1",
+    "tools/original/foundation-clock-run.py": "43fb2bf3dd7cc1b6d6dade384184e7bbe9cc8f0bda13aa8ad701583742192afb",
+    "tools/original/foundation-clock-gate.c": "f517f1fc0edf2bbe17021e529fb41652e991e286bef070b8aecefd32bfa62e75",
+    "tools/original/foundation-seeds.py": "dd4633c955e7518e9bc0f0147ddfae46d356468238477a68dc06c86656ccba89",
+    "tools/original/debug-run.py": "d785d32c6cc557959be38880a3b046c4040b988fbe3d06d4a8c1f4aa2e833cf5",
+    "tools/original/with-display.sh": "af469210e803786a60d8632c28a6f2da77bc8ab02cc06be50016ddb25e95b848",
+    "tools/foundation/browser.mjs": "60c4bc851470f47e4dd0399148ce0c1edf351d41fbf7f7e15fa823af5948b4c8",
+    "tools/foundation/production-server.mjs": "e3152b58e2353319ba0963b30439e33c3cc65f84a8c6ebb765c2812486245952",
+    "tools/foundation/verify.mjs": "b28ed8af6bf50a7aa8b6b81f55fd29d0c963285f2d54500d61a4a58925de1d9f"
+  },
+  "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "production": {
+    "sha256": "cf07af1694444b160c07994a81b5611a0d71e750aa1bac576121a65fb0aba594",
+    "files": 99,
+    "scope": "Immutable snapshot of production build bytes; source/native replay equality is checked separately"
+  },
+  "scope": "Causal startup and initialized menu fields at Title: full 624-word MT state, saved player seed, nine saved grid pairs, menu run seed and 179 stat poses. Later menu navigation, run/room/ambient random routing and tear fall uniforms remain incomplete.",
+  "cases": [
+    {
+      "name": "zero-epoch",
+      "bootEpochSeed": 0,
+      "code": "QSYVKMSE",
+      "status": "pass",
+      "nativeManifestSha256": "c82e972b7e1868a14ad41976f93a6bc454d869d30f3dcbdc12a0b28f0e92aea0",
+      "comparedStateWords": 624,
+      "comparedGridPairs": 9,
+      "comparedStatPoses": 179
+    },
+    {
+      "name": "fixed-epoch",
+      "bootEpochSeed": 1700000000,
+      "code": "ZG800TRJ",
+      "status": "pass",
+      "nativeManifestSha256": "8a62dee89d58fb166471a3d9a3da7c4d1aa1a9cd84cff65792dca1136ed138b8",
+      "comparedStateWords": 624,
+      "comparedGridPairs": 9,
+      "comparedStatPoses": 179
+    },
+    {
+      "name": "random-0",
+      "bootEpochSeed": 2872992141,
+      "code": "HKQ9RJLG",
+      "seedValue": 900892764,
+      "status": "pass",
+      "nativeManifestSha256": "a7178930d9349f4cd61fb06610ea913d7b35c7db1c47a519ac1e8e13d8887a4d",
+      "comparedStateWords": 624,
+      "comparedGridPairs": 9,
+      "comparedStatPoses": 179
+    },
+    {
+      "name": "random-1",
+      "bootEpochSeed": 2088375318,
+      "code": "8WXKLF27",
+      "seedValue": 4215925482,
+      "status": "pass",
+      "nativeManifestSha256": "9880b700ffa236dde2dbff540ee861e42983bf2096c5a1c3bd57e91ebafe4c43",
+      "comparedStateWords": 624,
+      "comparedGridPairs": 9,
+      "comparedStatPoses": 179
+    },
+    {
+      "name": "random-2",
+      "bootEpochSeed": 3044527505,
+      "code": "MPC1FBMK",
+      "seedValue": 1420430712,
+      "status": "pass",
+      "nativeManifestSha256": "7bab8a3793f13368bfb6f1a51b449297dad5cfb84c008f5362fdfd779a2d13be",
+      "comparedStateWords": 624,
+      "comparedGridPairs": 9,
+      "comparedStatPoses": 179
+    },
+    {
+      "name": "random-3",
+      "bootEpochSeed": 2791966924,
+      "code": "S9F39E7J",
+      "seedValue": 2284118126,
+      "status": "pass",
+      "nativeManifestSha256": "f45203b10bbeb1d113ef6a60b41c1628e8cd0a8e2ee90501dea72ba02d0e82d7",
+      "comparedStateWords": 624,
+      "comparedGridPairs": 9,
+      "comparedStatPoses": 179
+    }
+  ],
+  "gateSourcesEnd": {
+    "tools/e2e/boot-mt.mjs": "3416460c8f40616100a48a0e924c75418b2f21ce4ef2cd1cf5ea616dc57b1e57",
+    "tools/original/boot-mt-observer.py": "6c3fb49fc8a033b49598cc1c3e9bc2ab015ffb676103793c902531abdf5974dc",
+    "tools/original/native-identity.py": "4fd5591be56fc4e9ad0486d0f2ec2828f6389786245ee09f9d0b3a395ae18acb",
+    "tools/original/state-observer.py": "58e3b510abbe5ff57f05844efbdf764e2a02530cda4fa99f538d886d258af6f1",
+    "tools/original/foundation-clock-run.py": "43fb2bf3dd7cc1b6d6dade384184e7bbe9cc8f0bda13aa8ad701583742192afb",
+    "tools/original/foundation-clock-gate.c": "f517f1fc0edf2bbe17021e529fb41652e991e286bef070b8aecefd32bfa62e75",
+    "tools/original/foundation-seeds.py": "dd4633c955e7518e9bc0f0147ddfae46d356468238477a68dc06c86656ccba89",
+    "tools/original/debug-run.py": "d785d32c6cc557959be38880a3b046c4040b988fbe3d06d4a8c1f4aa2e833cf5",
+    "tools/original/with-display.sh": "af469210e803786a60d8632c28a6f2da77bc8ab02cc06be50016ddb25e95b848",
+    "tools/foundation/browser.mjs": "60c4bc851470f47e4dd0399148ce0c1edf351d41fbf7f7e15fa823af5948b4c8",
+    "tools/foundation/production-server.mjs": "e3152b58e2353319ba0963b30439e33c3cc65f84a8c6ebb765c2812486245952",
+    "tools/foundation/verify.mjs": "b28ed8af6bf50a7aa8b6b81f55fd29d0c963285f2d54500d61a4a58925de1d9f"
+  },
+  "gateSourcesStable": true,
+  "reproduceFresh": "source cloud/env.sh && npm run build && npm run test:e2e:boot-mt",
+  "reproduceRecorded": "source cloud/env.sh && npm run build && npm run test:e2e:boot-mt -- --scenarios references/isaac/foundation/boot-mt/scenarios.json"
+}

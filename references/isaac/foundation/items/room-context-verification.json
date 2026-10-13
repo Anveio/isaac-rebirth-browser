@@ -1,0 +1,70 @@
+{
+  "schema": 1,
+  "status": "pass",
+  "capturedReportSha256": "5b985862f72b39e58dda587b3342f5e94c57be3c72328ff8ff1d00e323870853",
+  "capturedGateSources": {
+    "tools/e2e/items.mjs": "cdce3d5114fa1f7b54e4c8291d56fe7ab6fa445c51fc0d5b7139c4ec143af939",
+    "tools/original/item-scenarios.py": "240ee869e6a7edd2c4175d3b8e0959ee9301b71789ff5b26ab5385549703e02e",
+    "tools/original/item-observer.py": "dea548be81bb71f9776e1d3b35d09ed89a020f698cf5987765d88806b9a26f38",
+    "tools/foundation/item-catalog.py": "d1c009f1584faa63dde8737f1e8bb75c879b8df7a95fb587ed826fb4268a5671",
+    "tools/foundation/decode-rooms.py": "4640cce2c99d0ef09d6691cf42c021f012e16ed3752bace965ad18dca7250f1a",
+    "tools/original/foundation-seeds.py": "dd4633c955e7518e9bc0f0147ddfae46d356468238477a68dc06c86656ccba89",
+    "tools/original/foundation-clock-run.py": "0669849e55218ed984aaa95a9964bba05d20707ec7ed164c77dab689c5891fbc",
+    "tools/original/foundation-clock-gate.c": "f517f1fc0edf2bbe17021e529fb41652e991e286bef070b8aecefd32bfa62e75",
+    "tools/original/foundation-clock-verify.py": "c488100a187b44803c06374535715eaa5a7cde9d4513f6e866e090367d4f2054",
+    "tools/original/foundation-pickup-observe.py": "db3fb995087575a039b77c8b87e07bbaa3cdef208adea166b8de07055754b90b",
+    "tools/original/state-observer.py": "58e3b510abbe5ff57f05844efbdf764e2a02530cda4fa99f538d886d258af6f1",
+    "tools/original/with-display.sh": "af469210e803786a60d8632c28a6f2da77bc8ab02cc06be50016ddb25e95b848",
+    "tools/foundation/verify.mjs": "3743b773cf2ede253c6d78f2605eb43f34e9d7002284b6a1dd2c413d45835a5c",
+    "tools/foundation/browser.mjs": "60c4bc851470f47e4dd0399148ce0c1edf351d41fbf7f7e15fa823af5948b4c8",
+    "tools/foundation/production-server.mjs": "e3152b58e2353319ba0963b30439e33c3cc65f84a8c6ebb765c2812486245952",
+    "web/trace.ts": "2df69cfbbae14084baadacbcffbc9ecb7b6e363e61c1efb26f721475cfb198a9",
+    "engine/src/items.rs": "499883b8ffdd240c49b36055e7c19fb6d17dc811a0b30d75275a35f237950721",
+    "engine/src/seed.rs": "5b34052dfbc34facb7903d1aeae5b063934c7780902d4ccfe6ab2743597d98d3",
+    "engine/src/pickups.rs": "345991261ed5885f2b583a01127e919a5486b5a443e760f0a5384693ef7185fd",
+    "engine/src/lib.rs": "4c5cbd7edd79cbccae097e231f7873998f4c6388f1f45477962ec742fe78c4a8",
+    "engine/build.rs": "c32558f5f9517ee84e683334a2d8c3e3fda4da1ebfc7756ce86286bb66e3e8a7"
+  },
+  "verifierSha256": "3794ab422ca0c4f39ddbb9d4d90639f4a1dc2a8edb4c769850fe5f1ed8a4f17f",
+  "scope": "Every captured original/browser phase requires actual native room type/padded dimensions, public type.variant(name)/spawn-seed joined to the browser current descriptor, and port descriptor/floor consistency. Native appearance origin/backdrop and native descriptor index were not observed and remain unaccepted.",
+  "checks": 7588,
+  "comparedPresentations": 542,
+  "cases": [
+    {
+      "name": "pedestal-phase-0",
+      "status": "pass",
+      "comparedPresentations": 135,
+      "nativeManifestSha256": "5922539402f47e1224309412b09af64583d82cd8fc8ad356d0a2ec96744ad714",
+      "browserRawSha256": "789e692334699d66c2280679fdc4f49e27aa26cf7b0299e8584aef531e68d868",
+      "checks": 1890,
+      "failures": []
+    },
+    {
+      "name": "pedestal-phase-1",
+      "status": "pass",
+      "comparedPresentations": 136,
+      "nativeManifestSha256": "3e93a47073397d5f1651f521a08eb6dcfb3fa2e7c568385f10190dc787cee723",
+      "browserRawSha256": "a045aa4607f903df3ccaf22e956157df34d0d48979572aaba87a26b73b5723a5",
+      "checks": 1904,
+      "failures": []
+    },
+    {
+      "name": "random-pedestal-0",
+      "status": "pass",
+      "comparedPresentations": 135,
+      "nativeManifestSha256": "076792680d0a660b2327ebf7b7e47eec2e05d9350177afef2360566c02653763",
+      "browserRawSha256": "9ebaa030c5b51963751e5f87ee2842b2374fc8d201bd58f70f5182f1b0db6f0e",
+      "checks": 1890,
+      "failures": []
+    },
+    {
+      "name": "random-pedestal-1",
+      "status": "pass",
+      "comparedPresentations": 136,
+      "nativeManifestSha256": "86122230320f7271a6dadc0b0f729aacd189ffef1c0005545517c39fbb51df48",
+      "browserRawSha256": "f0c8245e183dbec49a03d46dc1b9676ed45a3ed758162b339be008f1fa679035",
+      "checks": 1904,
+      "failures": []
+    }
+  ]
+}

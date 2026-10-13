@@ -1,0 +1,496 @@
+{
+  "schema": 1,
+  "status": "pass",
+  "scope": "Fresh Isaac enters an authored ordinary13x14 room through public movement, follows both radius-inset vertical boundary planes and returns. Exact full/intermediate player motion, native dimensions/bounds, complete authored door indices/positions/endpoints, source descriptor/spawn/visited/minimap joins and supported Rock state are required. Actual normal Chest5/50 constructor, Appear/Idle clocks, radius and collision classes are joined every selected phase. Default CameraStyle1 requires bounded scrolling, exact native endpoints, complete history and freeze/admission lifecycle plus actual viewport visibility at three source-projected phases; interior camera float differences remain diagnostic.",
+  "runtimeCommit": "aa408a0f22fc13e13de46f5a168ead289aee3bf5",
+  "baseCommit": "fca2cd4b670f3949da29c28cd857d18364e43c1e",
+  "freshProducerCommit": "16959a4cbd7d701bfa69d3bcf65b8225f7010b31",
+  "freshProducerFiles": {
+    "engine/src/camera.rs": "d991b913c381ea08ff0c7a6db79cafde4b76fb800fefed4461b8a1ba85d12b51",
+    "engine/src/lib.rs": "b1d862ea4c2075cd8f5a6e73c2726a4d0fc3cf7014a0e2eb084e2c8c8f73888e",
+    "web/renderer.ts": "e6022b47c7170f89d815c9bc77980833952bf1a8627cbf7636eb7ad52711fa48",
+    "web/gl-stage.ts": "9388b0d7330a035e173a04715df5bceb79e7d8e40aed9d2c870055b5300ea079",
+    "tools/e2e/traversal.mjs": "da31760b1914fe5fd83c8f2d427c7ad25c22f2f69efc00986f15d5d0b84506d7",
+    "tools/e2e/camera-checks.mjs": "373fd4cd3914ddd47f9c43b5c09a0c76c4cc0ba023337ad8cce35f7705ffc175",
+    "tools/original/large-room-scenarios.py": "e0938c12451afd7830185b2f22538e6e02aecc0cc17cb1d2238d85affef25126"
+  },
+  "production": {
+    "sha256": "93fe40542dc89eb8b08271274c3d7b7c89820fe7a7b420eada2154689b11ce99",
+    "files": 921,
+    "source": "/workspace/isaac-worktrees/floor/dist",
+    "scope": "Immutable snapshot of production build bytes; source/native replay equality is checked separately"
+  },
+  "nativeBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "staticBuild": {
+    "status": "pass",
+    "command": "npm run check:build",
+    "log": "/workspace/isaac-worktrees/floor/.cache/door-mechanics/camera-build.log",
+    "sha256": "c484b946b4389cc13c6779fd5419eabbbb48ecd4e4632670c24f878d99afbf87"
+  },
+  "report": {
+    "path": "/workspace/isaac-worktrees/floor/.cache/e2e/camera/fresh-final/report.json",
+    "sha256": "92ff4f2aa6d6081428ea2609585d4f563aab920c8f064a06d5acde2444eb135d"
+  },
+  "sourceContract": {
+    "path": "/workspace/isaac-worktrees/floor/.cache/coordination/room-generation/large-camera-research/source-contract.json",
+    "sha256": "d3ee2a8355e586c5a536d25ee9a684cc78494c55aca7d8a8b16c21c1a7d5e764"
+  },
+  "selectedPhases": 1843,
+  "actualVisibilityFrames": 9,
+  "requiredComparisonFailures": 0,
+  "freshOriginalProcesses": 3,
+  "gate": "test:e2e:large-rooms always launches both games fresh; no cached-native CI bypass",
+  "sourceArchives": [
+    {
+      "path": "/workspace/isaac-worktrees/floor/.cache/e2e/camera/fresh-final/WF82MYQ2/original/manifest.json",
+      "compressedPath": "/workspace/isaac-worktrees/floor/.cache/e2e/camera/fresh-final/WF82MYQ2/original/manifest.json.gz",
+      "sha256": "ea59db9bdfef9052b8395acd4c6d0c7cf895e91f2d488a72ec80317e48510971",
+      "bytes": 86905762,
+      "compressedSha256": "abd26ed68fb8cdbe4b7240e90abf381a087936147c7d3eded167548f54cf8c87",
+      "compressedBytes": 7169284,
+      "mtimeNs": 1791913042854940897,
+      "verifiedLossless": true
+    },
+    {
+      "path": "/workspace/isaac-worktrees/floor/.cache/e2e/camera/fresh-final/MT7N9MF3/original/manifest.json",
+      "compressedPath": "/workspace/isaac-worktrees/floor/.cache/e2e/camera/fresh-final/MT7N9MF3/original/manifest.json.gz",
+      "sha256": "53983e9261ea15dedf46189114f4895b1e4bc4fba57026ef2e1228ccbc34dfc4",
+      "bytes": 66635780,
+      "compressedSha256": "dc1aa3a3b29d7991154020baafeec0d81bb2e1a4f0d01a0c5cafe1399ac5ab4c",
+      "compressedBytes": 5444652,
+      "mtimeNs": 1791913455244021775,
+      "verifiedLossless": true
+    },
+    {
+      "path": "/workspace/isaac-worktrees/floor/.cache/e2e/camera/fresh-final/C06MGLKV/original/manifest.json",
+      "compressedPath": "/workspace/isaac-worktrees/floor/.cache/e2e/camera/fresh-final/C06MGLKV/original/manifest.json.gz",
+      "sha256": "d1bed8fcdc3ceaa4d495ea6909fb1e66b4e0a79fab12e2f472d322e6a28b9638",
+      "bytes": 81744026,
+      "compressedSha256": "3985eedee8ef46871f70157b20c3cbf209f7535b458604c5b6a9d01d110b9975",
+      "compressedBytes": 6714810,
+      "mtimeNs": 1791913815052045454,
+      "verifiedLossless": true
+    }
+  ],
+  "cases": [
+    {
+      "seed": "WF82MYQ2",
+      "status": "pass",
+      "selectedPhases": 635,
+      "originalExecution": {
+        "mode": "fresh-process",
+        "timeoutSeconds": 600,
+        "ignoredCachedReference": false,
+        "fresh": true
+      },
+      "sourceManifestSha256": "ea59db9bdfef9052b8395acd4c6d0c7cf895e91f2d488a72ec80317e48510971",
+      "inputProvenance": {
+        "status": "pass",
+        "commands": 694,
+        "initialSeed": 2660432428,
+        "bootEpochSeed": 0,
+        "manualSeed": "WF82MYQ2"
+      },
+      "traceHistory": {
+        "truncated": true,
+        "inputTraceTruncated": false,
+        "stateHistoryTruncated": true,
+        "retainedStates": 209,
+        "stateEncodedBytes": 33472363,
+        "maxStateEncodedBytes": 33554432,
+        "backendEvents": 3,
+        "retainedCallbackStates": 3,
+        "backendStateTruncated": false,
+        "backendStateTruncationReason": null,
+        "backendStateEncodedBytes": 539292,
+        "maxBackendStateEncodedBytes": 4194304
+      },
+      "browserEvidence": {
+        "path": "/workspace/isaac-worktrees/floor/.cache/e2e/camera/fresh-final/WF82MYQ2/browser-states.json.gz",
+        "encoding": "gzip",
+        "rawBytes": 517118369,
+        "rawSha256": "d8d1ce02d089aa04edb7e4789f647ee5153fa4b8ce805ed0abaeed72b802bba4",
+        "archiveBytes": 29164056,
+        "archiveSha256": "893e804af2c7ec04b74ebe2ded058d90d26f6836faca374db2ebed41c5102499",
+        "scope": "Every selected phase retains its full actual browser snapshot, alongside selected native comparisons, complete public commands and backend callbacks. The separate trace history caps are disclosed in traceHistory; decompress before replay or inspection"
+      },
+      "cameraFrames": [
+        {
+          "label": "large-admitted",
+          "sourcePath": "/workspace/isaac-worktrees/floor/.cache/e2e/camera/fresh-final/WF82MYQ2/original/frames/large-admitted.png",
+          "browserPath": "/workspace/isaac-worktrees/floor/.cache/e2e/camera/fresh-final/WF82MYQ2/large-admitted-camera.png",
+          "nativeAnchor": [
+            480,
+            116
+          ],
+          "sourceSkin": {
+            "pixels": 320,
+            "width": 24,
+            "height": 23
+          },
+          "browserSkin": {
+            "pixels": 896,
+            "width": 44,
+            "height": 38
+          },
+          "scope": "Functional actual-canvas visibility at the independent native camera anchor; full sprite, backdrop and frame pixel equality remain diagnostic",
+          "sourceSha256": "53f2f7103417bc07ef65cd29557b3ebc46aaf137137b342a2866337424f8485f",
+          "browserSha256": "5da6417851f7375dfc6eb65dde48d691803efec1ef63fd41d5d72a57e2d80e22"
+        },
+        {
+          "label": "lower-boundary-settle-30",
+          "sourcePath": "/workspace/isaac-worktrees/floor/.cache/e2e/camera/fresh-final/WF82MYQ2/original/frames/lower-boundary-settle-30.png",
+          "browserPath": "/workspace/isaac-worktrees/floor/.cache/e2e/camera/fresh-final/WF82MYQ2/lower-boundary-settle-30-camera.png",
+          "nativeAnchor": [
+            155.99942855834962,
+            440.9922241210937
+          ],
+          "sourceSkin": {
+            "pixels": 312,
+            "width": 24,
+            "height": 23
+          },
+          "browserSkin": {
+            "pixels": 896,
+            "width": 44,
+            "height": 38
+          },
+          "scope": "Functional actual-canvas visibility at the independent native camera anchor; full sprite, backdrop and frame pixel equality remain diagnostic",
+          "sourceSha256": "66c11a0c82bee629bf8911e05174f5b395f78a2a9ffd39620059b214c13ab0cc",
+          "browserSha256": "09781422a08d17ae5ca065a089dc7a2752daf3a3bf431109d3855100014cfaf1"
+        },
+        {
+          "label": "upper-boundary-settle-30",
+          "sourcePath": "/workspace/isaac-worktrees/floor/.cache/e2e/camera/fresh-final/WF82MYQ2/original/frames/upper-boundary-settle-30.png",
+          "browserPath": "/workspace/isaac-worktrees/floor/.cache/e2e/camera/fresh-final/WF82MYQ2/upper-boundary-settle-30-camera.png",
+          "nativeAnchor": [
+            155.99942855834962,
+            103.00797424316406
+          ],
+          "sourceSkin": {
+            "pixels": 308,
+            "width": 24,
+            "height": 23
+          },
+          "browserSkin": {
+            "pixels": 432,
+            "width": 28,
+            "height": 33
+          },
+          "scope": "Functional actual-canvas visibility at the independent native camera anchor; full sprite, backdrop and frame pixel equality remain diagnostic",
+          "sourceSha256": "2802f158b1802dfd730d663e0642541a39d4b40e5898af6183b70568c03e04c5",
+          "browserSha256": "90930fc9ed7b7ccefceefa96757a9267c482b585f4a292cafd87cf3f80134f88"
+        }
+      ],
+      "nativeHistoryScope": {
+        "seed": "WF82MYQ2",
+        "allPhases": 635,
+        "completeHistoryPhases": 571,
+        "firstHistoryLabel": "large-enter-18",
+        "lastHistoryLabel": "large-return-13"
+      }
+    },
+    {
+      "seed": "MT7N9MF3",
+      "status": "pass",
+      "selectedPhases": 572,
+      "originalExecution": {
+        "mode": "fresh-process",
+        "timeoutSeconds": 600,
+        "ignoredCachedReference": false,
+        "fresh": true
+      },
+      "sourceManifestSha256": "53983e9261ea15dedf46189114f4895b1e4bc4fba57026ef2e1228ccbc34dfc4",
+      "inputProvenance": {
+        "status": "pass",
+        "commands": 633,
+        "initialSeed": 1402318929,
+        "bootEpochSeed": 0,
+        "manualSeed": "MT7N9MF3"
+      },
+      "traceHistory": {
+        "truncated": true,
+        "inputTraceTruncated": false,
+        "stateHistoryTruncated": true,
+        "retainedStates": 217,
+        "stateEncodedBytes": 33430909,
+        "maxStateEncodedBytes": 33554432,
+        "backendEvents": 3,
+        "retainedCallbackStates": 3,
+        "backendStateTruncated": false,
+        "backendStateTruncationReason": null,
+        "backendStateEncodedBytes": 540796,
+        "maxBackendStateEncodedBytes": 4194304
+      },
+      "browserEvidence": {
+        "path": "/workspace/isaac-worktrees/floor/.cache/e2e/camera/fresh-final/MT7N9MF3/browser-states.json.gz",
+        "encoding": "gzip",
+        "rawBytes": 466793150,
+        "rawSha256": "035875e90ef8816c6896f076149ecb447f6ddb534ebd17167a07938463612f0a",
+        "archiveBytes": 26255348,
+        "archiveSha256": "9bdf7b8a93de6a2175608a5da0e8e70167c9d69f3c2c32e80dae2585a8ab7040",
+        "scope": "Every selected phase retains its full actual browser snapshot, alongside selected native comparisons, complete public commands and backend callbacks. The separate trace history caps are disclosed in traceHistory; decompress before replay or inspection"
+      },
+      "cameraFrames": [
+        {
+          "label": "large-admitted",
+          "sourcePath": "/workspace/isaac-worktrees/floor/.cache/e2e/camera/fresh-final/MT7N9MF3/original/frames/large-admitted.png",
+          "browserPath": "/workspace/isaac-worktrees/floor/.cache/e2e/camera/fresh-final/MT7N9MF3/large-admitted-camera.png",
+          "nativeAnchor": [
+            792,
+            272
+          ],
+          "sourceSkin": {
+            "pixels": 896,
+            "width": 44,
+            "height": 38
+          },
+          "browserSkin": {
+            "pixels": 896,
+            "width": 44,
+            "height": 38
+          },
+          "scope": "Functional actual-canvas visibility at the independent native camera anchor; full sprite, backdrop and frame pixel equality remain diagnostic",
+          "sourceSha256": "edf608d2ba424f32af02c372495a7095691cbea77f22f2a20de4443cd76fb353",
+          "browserSha256": "3319b78a3bcc2948710d993b71f6c69ef042dab05655c86f71ea92ca82d234cd"
+        },
+        {
+          "label": "lower-boundary-settle-30",
+          "sourcePath": "/workspace/isaac-worktrees/floor/.cache/e2e/camera/fresh-final/MT7N9MF3/original/frames/lower-boundary-settle-30.png",
+          "browserPath": "/workspace/isaac-worktrees/floor/.cache/e2e/camera/fresh-final/MT7N9MF3/lower-boundary-settle-30-camera.png",
+          "nativeAnchor": [
+            792,
+            440.4323608398438
+          ],
+          "sourceSkin": {
+            "pixels": 16,
+            "width": 4,
+            "height": 4
+          },
+          "browserSkin": {
+            "pixels": 896,
+            "width": 44,
+            "height": 38
+          },
+          "scope": "Functional actual-canvas visibility at the independent native camera anchor; full sprite, backdrop and frame pixel equality remain diagnostic",
+          "sourceSha256": "04ab7b831b891873b8bfc7c99d7f551488225dc706f1f81ac55f835aba8d4273",
+          "browserSha256": "f63f556e4ab614d40bb7d833b3817e7171b866933b0e5284facaf13c7d455e7b"
+        },
+        {
+          "label": "upper-boundary-settle-30",
+          "sourcePath": "/workspace/isaac-worktrees/floor/.cache/e2e/camera/fresh-final/MT7N9MF3/original/frames/upper-boundary-settle-30.png",
+          "browserPath": "/workspace/isaac-worktrees/floor/.cache/e2e/camera/fresh-final/MT7N9MF3/upper-boundary-settle-30-camera.png",
+          "nativeAnchor": [
+            792,
+            103.00813293457031
+          ],
+          "sourceSkin": {
+            "pixels": 708,
+            "width": 30,
+            "height": 38
+          },
+          "browserSkin": {
+            "pixels": 708,
+            "width": 30,
+            "height": 38
+          },
+          "scope": "Functional actual-canvas visibility at the independent native camera anchor; full sprite, backdrop and frame pixel equality remain diagnostic",
+          "sourceSha256": "90366a6c647e0180337f84dca82eb07214d2595323a2846045d12b1135c547d7",
+          "browserSha256": "ce78b9656e7a8ae001b31cfc6aa9b67e9b0e7d81166f596af080b4658df3f983"
+        }
+      ],
+      "nativeHistoryScope": {
+        "seed": "MT7N9MF3",
+        "allPhases": 572,
+        "completeHistoryPhases": 455,
+        "firstHistoryLabel": "large-enter-settle-2",
+        "lastHistoryLabel": "large-return-16"
+      }
+    },
+    {
+      "seed": "C06MGLKV",
+      "status": "pass",
+      "selectedPhases": 636,
+      "originalExecution": {
+        "mode": "fresh-process",
+        "timeoutSeconds": 600,
+        "ignoredCachedReference": false,
+        "fresh": true
+      },
+      "sourceManifestSha256": "d1bed8fcdc3ceaa4d495ea6909fb1e66b4e0a79fab12e2f472d322e6a28b9638",
+      "inputProvenance": {
+        "status": "pass",
+        "commands": 697,
+        "initialSeed": 441961684,
+        "bootEpochSeed": 0,
+        "manualSeed": "C06MGLKV"
+      },
+      "traceHistory": {
+        "truncated": true,
+        "inputTraceTruncated": false,
+        "stateHistoryTruncated": true,
+        "retainedStates": 217,
+        "stateEncodedBytes": 33449079,
+        "maxStateEncodedBytes": 33554432,
+        "backendEvents": 3,
+        "retainedCallbackStates": 3,
+        "backendStateTruncated": false,
+        "backendStateTruncationReason": null,
+        "backendStateEncodedBytes": 487801,
+        "maxBackendStateEncodedBytes": 4194304
+      },
+      "browserEvidence": {
+        "path": "/workspace/isaac-worktrees/floor/.cache/e2e/camera/fresh-final/C06MGLKV/browser-states.json.gz",
+        "encoding": "gzip",
+        "rawBytes": 508642401,
+        "rawSha256": "9a8b8ef085e918db63f9d7539000f35f49403832e9471a3991c6302f31e73651",
+        "archiveBytes": 28519501,
+        "archiveSha256": "eab001ff275956726301c30fe3f3ec1cb794d7883c001755f40606412fe9a159",
+        "scope": "Every selected phase retains its full actual browser snapshot, alongside selected native comparisons, complete public commands and backend callbacks. The separate trace history caps are disclosed in traceHistory; decompress before replay or inspection"
+      },
+      "cameraFrames": [
+        {
+          "label": "large-admitted",
+          "sourcePath": "/workspace/isaac-worktrees/floor/.cache/e2e/camera/fresh-final/C06MGLKV/original/frames/large-admitted.png",
+          "browserPath": "/workspace/isaac-worktrees/floor/.cache/e2e/camera/fresh-final/C06MGLKV/large-admitted-camera.png",
+          "nativeAnchor": [
+            168,
+            272
+          ],
+          "sourceSkin": {
+            "pixels": 896,
+            "width": 44,
+            "height": 38
+          },
+          "browserSkin": {
+            "pixels": 896,
+            "width": 44,
+            "height": 38
+          },
+          "scope": "Functional actual-canvas visibility at the independent native camera anchor; full sprite, backdrop and frame pixel equality remain diagnostic",
+          "sourceSha256": "d17b66c6bafca89f89039af43e36bd3de75e2857f61b327f61d58474b5e7be66",
+          "browserSha256": "f102b3f37d404f32e4a09153598aa22a41298267deb6494bbf696a11c8054db6"
+        },
+        {
+          "label": "lower-boundary-settle-30",
+          "sourcePath": "/workspace/isaac-worktrees/floor/.cache/e2e/camera/fresh-final/C06MGLKV/original/frames/lower-boundary-settle-30.png",
+          "browserPath": "/workspace/isaac-worktrees/floor/.cache/e2e/camera/fresh-final/C06MGLKV/lower-boundary-settle-30-camera.png",
+          "nativeAnchor": [
+            168,
+            440.4322814941406
+          ],
+          "sourceSkin": {
+            "pixels": 896,
+            "width": 44,
+            "height": 38
+          },
+          "browserSkin": {
+            "pixels": 896,
+            "width": 44,
+            "height": 38
+          },
+          "scope": "Functional actual-canvas visibility at the independent native camera anchor; full sprite, backdrop and frame pixel equality remain diagnostic",
+          "sourceSha256": "2d265c03924ba1c22d1c6099f410321667c0d7a5e57f57eaccb16fb3568ffdde",
+          "browserSha256": "70ace75357c10c062efb11314deaef2a671d0f1833357923dd244e33dc25f849"
+        },
+        {
+          "label": "upper-boundary-settle-30",
+          "sourcePath": "/workspace/isaac-worktrees/floor/.cache/e2e/camera/fresh-final/C06MGLKV/original/frames/upper-boundary-settle-30.png",
+          "browserPath": "/workspace/isaac-worktrees/floor/.cache/e2e/camera/fresh-final/C06MGLKV/upper-boundary-settle-30-camera.png",
+          "nativeAnchor": [
+            168,
+            103.00813293457031
+          ],
+          "sourceSkin": {
+            "pixels": 534,
+            "width": 40,
+            "height": 33
+          },
+          "browserSkin": {
+            "pixels": 534,
+            "width": 40,
+            "height": 33
+          },
+          "scope": "Functional actual-canvas visibility at the independent native camera anchor; full sprite, backdrop and frame pixel equality remain diagnostic",
+          "sourceSha256": "fa5d1236949486ebbf52195aaa0d9b0e07d3c7431328ab4463aafec65305eec4",
+          "browserSha256": "3cc4cec0d2ae1db84616607277d5b03963ff4f1050b81498ba98665b14f789a8"
+        }
+      ],
+      "nativeHistoryScope": {
+        "seed": "C06MGLKV",
+        "allPhases": 636,
+        "completeHistoryPhases": 519,
+        "firstHistoryLabel": "large-enter-settle-2",
+        "lastHistoryLabel": "large-return-16"
+      }
+    }
+  ],
+  "interiorDiagnostics": [
+    {
+      "seed": "WF82MYQ2",
+      "selectedPhases": 635,
+      "interiorDifferences": 16,
+      "maxAbsoluteScrollDifference": 6.103515625e-05,
+      "actualEndpoints": [
+        [
+          0,
+          -182
+        ],
+        [
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "seed": "MT7N9MF3",
+      "selectedPhases": 572,
+      "interiorDifferences": 32,
+      "maxAbsoluteScrollDifference": 0.0001220703125,
+      "actualEndpoints": [
+        [
+          0,
+          -182
+        ],
+        [
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "seed": "C06MGLKV",
+      "selectedPhases": 636,
+      "interiorDifferences": 23,
+      "maxAbsoluteScrollDifference": 0.0001220703125,
+      "actualEndpoints": [
+        [
+          0,
+          -182
+        ],
+        [
+          0,
+          0
+        ]
+      ]
+    }
+  ],
+  "additionalVisibilityAssertion": {
+    "scope": "Additional source-radius minimum component assertion evaluated against the nine actual PNG readbacks from this fresh paired run; runtime/artifact/inputs unchanged",
+    "status": "pass",
+    "actualFrames": 9,
+    "path": "/workspace/isaac-worktrees/floor/.cache/e2e/camera/fresh-final/visible-size-postcapture.json",
+    "sha256": "1e4b73a10501b51b2e7a891e4a609fb50a500dc364d4f5083c48155008d08033",
+    "updatedComparatorSha256": "e07b1ed39e530260f84f006e4b5041f5982213fdc9fa2dcef08cf6e5dd90302c"
+  },
+  "exclusions": [
+    "Interior camera scroll float details, large-room backdrop generation and complete rendered pixel parity",
+    "Special player/item focus, co-op, shooting lookahead, camera shake, hostile camera behavior and alternate CameraStyle2 are not accepted by this fresh no-shooting/no-hostile tape",
+    "Chest contact/loot, motion and rare51/360 replacements remain unsupported; historical missing normal Chest admissions stay retained",
+    "Chest persistent RNG30 initialization is statically mapped; this source observer does not read its four words",
+    "Boss/shop and other special-door art/policy/traversal, hostile large-room lifecycle, other large shapes, later floors and exits",
+    "Complete camera histories in starting/returned15x9 rooms were not observed; only their scalar scroll/bounds/endpoints are accepted here"
+  ],
+  "completeNativeHistoryPhases": 1545,
+  "historyAcceptanceScope": "All1843 phases require numeric geometry/motion/camera bounds/endpoints; complete native history readback exists only on the tall-room portion, not starting/returned15x9 rooms"
+}

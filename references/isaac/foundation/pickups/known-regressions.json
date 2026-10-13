@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "scope": "Mandatory recorded live-game regressions; observations are evidence only, never production state inputs",
+  "cases": [
+    {
+      "name": "regression-spike-approach",
+      "code": "22PFCSFS",
+      "seedValue": 3388288701,
+      "delay": 1,
+      "cohort": "hazard-regression",
+      "entropy": "Recorded OS secrets discovery from the first pickup gate",
+      "description": "Natural Room1.279 has authored selector1930 spike cell37 at world320,200; original HP6 to4 on presentation131 while the port lacked grid hazard damage",
+      "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13"
+    }
+  ]
+}

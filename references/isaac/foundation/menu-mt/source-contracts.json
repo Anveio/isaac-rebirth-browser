@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "scope": "Static reference-only function hashes and caller landmarks. Live source memory is read-only comparison evidence; no native values or cursor tables enter production. Forward fresh-profile navigation is covered; persisted profile restoration, Character-confirm fade/run admission and later shared consumers are separate.",
+  "consumerOrder": [
+    "SavedGameState.Clear generates real descriptor seed state and player-manager seed",
+    "AudioState.admit owns the SFX8 sample-selection draw if admitted",
+    "CharacterReset generates a fresh nonzero menu run seed"
+  ],
+  "pendingContract": "Initializer boundaries count real queued audio requests, including rejected requests. They never count RNG draws or fit a native cursor. Earlier pending confirmations drain before a later profile initializer.",
+  "functions": [
+    {
+      "address": "0x5aa370",
+      "unwindSize": 3587,
+      "codeSha256": "64fac53d2038d994efa5cc792b7b511c04e11f6f18a800541034a52484bea67c",
+      "lifecycle": "SaveMenu Update",
+      "contract": "Forward confirmation calls System.LoadProfile594dc0 before MenuManager.SetMenu59cac0(3) at5aa670..688."
+    },
+    {
+      "address": "0x594dc0",
+      "unwindSize": 458,
+      "codeSha256": "e33e09d7f7e3adb6129eea9aba125c9b47b4ce2ebd029adfc0a890ca0e12265d",
+      "lifecycle": "System LoadProfile",
+      "contract": "Clear saved GameState55bd80 before loading the selected profile, including an empty fresh profile."
+    },
+    {
+      "address": "0x55bd80",
+      "unwindSize": 4274,
+      "codeSha256": "328fa81088af44bb2bed90e59200381d241c9043feb917c09b83c6c14f3b1e80",
+      "lifecycle": "Saved GameState Clear",
+      "contract": "Initialize each of135\u00d7448 grid seed pairs, then assign the player-manager raw seed; keep actual generated seed state."
+    },
+    {
+      "address": "0x59cac0",
+      "unwindSize": 225,
+      "codeSha256": "aa290e00181f340132aeae79ab137aa977d0b366513d3e1c54f4d6ffe4e24ec2",
+      "lifecycle": "MenuManager SetMenu",
+      "contract": "Forward menu admission requests SFX8; oldfamily2/newfamily3 then calls CharacterReset5a0680 followed by MainReset5a43e0."
+    },
+    {
+      "address": "0x5a0680",
+      "unwindSize": 816,
+      "codeSha256": "3b8280ff8541243b21133c0e1bd8edd75af4fea2d29ae9aa9772c1408c3c982c",
+      "lifecycle": "Character Menu Reset",
+      "contract": "Assign empty string0x68e7d5 to menu seed text before decode; decode0 selects raw42e8c0 clamped away from zero at5a08e0..8ef."
+    },
+    {
+      "address": "0x5a43e0",
+      "unwindSize": 163,
+      "codeSha256": "dc5720e8dcbe628aacea80d322214723d0a863d8570a81f7772d4e0e3c9934f1",
+      "lifecycle": "Main Menu Reset",
+      "contract": "Reset authored animations and selection/continue metadata; no shared-MT consumer is introduced."
+    }
+  ]
+}

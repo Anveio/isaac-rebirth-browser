@@ -23,12 +23,13 @@ export class StageComposer {
   private factors(blend: Blend): void {
     this.graphics.blendFactors(blendNames[blend.source], blendNames[blend.destination]);
   }
-  prepare(effects: StageEffects): void {
+  prepare(effects: StageEffects, scroll = { x: 0, y: 0 }): void {
     const gl = this.graphics, { width, height } = effects.viewport;
     gl.beginTarget(this.shadow, width, height); gl.resetTransform();
     gl.globalAlpha = 1; gl.imageSmoothingEnabled = false;
     gl.clearRect(0, 0, this.shadow.width, this.shadow.height);
     this.factors(effects.groundShadowMaskBlend);
+    gl.translate(scroll.x, scroll.y);
     for (const caster of effects.shadowCasters) {
       const rect = caster.destinationRect;
       gl.drawImage(this.assets.image(caster.asset), rect.x, rect.y, rect.width, rect.height);
@@ -39,12 +40,15 @@ export class StageComposer {
     gl.fillStyle = `#${effects.ambientColor.slice(0, 3).map(channel => Math.round(channel * 255).toString(16).padStart(2, "0")).join("")}`;
     gl.globalAlpha = effects.ambientColor[3]; gl.fillRect(0, 0, width, height); gl.globalAlpha = 1;
     this.factors(effects.lightingMaskBlend);
+    gl.translate(scroll.x, scroll.y);
     const crop = effects.lightGradient.crop;
     for (const light of effects.lights) {
       const rect = light.destinationRect;
+      gl.globalAlpha = light.alpha;
       gl.drawImage(this.assets.image(effects.lightGradient.asset), crop.x, crop.y, crop.width, crop.height,
         rect.x, rect.y, rect.width, rect.height);
     }
+    gl.globalAlpha = 1;
     gl.beginTarget(null); gl.resetTransform(); gl.globalAlpha = 1;
   }
   ground(effects: StageEffects): void {

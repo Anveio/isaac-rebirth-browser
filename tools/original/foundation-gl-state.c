@@ -37,6 +37,43 @@ static void floats(FILE *stream, const char *name, GLenum parameter, int length)
     fputc(']', stream);
 }
 
+static void depth_attachment(FILE *stream, GLint framebuffer) {
+    void (*attachment)(GLenum, GLenum, GLenum, GLint *) = dlsym(RTLD_NEXT, "glGetFramebufferAttachmentParameteriv");
+    fprintf(stream, ",\"depthAttachment\":{\"framebuffer\":%d", framebuffer);
+    if (!framebuffer) {
+        fputs(",\"kind\":\"default\"}", stream);
+        return;
+    }
+    if (!attachment) { fputs(",\"available\":false}", stream); return; }
+    GLint type = 0, object = 0;
+    attachment(0x8D40, 0x8D00, 0x8CD0, &type); /* FRAMEBUFFER, DEPTH_ATTACHMENT, OBJECT_TYPE */
+    if (type) attachment(0x8D40, 0x8D00, 0x8CD1, &object); /* OBJECT_NAME */
+    fprintf(stream, ",\"available\":true,\"objectType\":%d,\"object\":%d", type, object);
+    if (type == 0x8D41 && object > 0) { /* RENDERBUFFER */
+        const unsigned char *(*version)(GLenum) = dlsym(RTLD_NEXT, "glGetString");
+        void (*named_parameter)(GLuint, GLenum, GLint *) = dlsym(RTLD_NEXT, "glGetNamedRenderbufferParameteriv");
+        const unsigned char *description = version ? version(0x1F02) : NULL; /* VERSION */
+        int major = 0, minor = 0;
+        if (description) (void)sscanf((const char *)description, "%d.%d", &major, &minor);
+        /* Named queries preserve all bindings. Older contexts retain identity
+           and depth bits above, without invoking unsupported DSA entry points. */
+        int available = named_parameter && (major > 4 || (major == 4 && minor >= 5));
+        fprintf(stream, ",\"renderbufferParametersAvailable\":%s", available ? "true" : "false");
+        if (available) {
+            const struct { const char *name; GLenum parameter; } fields[] = {
+                {"width", 0x8D42}, {"height", 0x8D43}, {"internalFormat", 0x8D44},
+                {"depthBits", 0x8D54}, {"stencilBits", 0x8D55}, {"samples", 0x8CAB}
+            };
+            for (unsigned i = 0; i < sizeof(fields) / sizeof(*fields); i++) {
+                GLint value = 0;
+                named_parameter((GLuint)object, fields[i].parameter, &value);
+                fprintf(stream, ",\"%s\":%d", fields[i].name, value);
+            }
+        }
+    }
+    fputc('}', stream);
+}
+
 void foundation_graphics_state(FILE *stream, unsigned texture) {
     void (*get)(GLenum, GLint *) = dlsym(RTLD_NEXT, "glGetIntegerv");
     GLboolean (*enabled)(GLenum) = dlsym(RTLD_NEXT, "glIsEnabled");
@@ -55,6 +92,12 @@ void foundation_graphics_state(FILE *stream, unsigned texture) {
     integers(stream, "colorWriteMask", 0x0C23, 4);
     integers(stream, "activeTexture", 0x84E0, 1);
     integers(stream, "alphaTestFunction", 0x0BC1, 1);
+    integers(stream, "depthFunction", 0x0B74, 1);
+    integers(stream, "depthWriteMask", 0x0B72, 1);
+    integers(stream, "depthBits", 0x0D56, 1);
+    GLint framebuffer = 0;
+    get(0x8CA6, &framebuffer); /* FRAMEBUFFER_BINDING */
+    depth_attachment(stream, framebuffer);
     integers(stream, "sampleBuffers", 0x80A8, 1);
     integers(stream, "samples", 0x80A9, 1);
     integers(stream, "subpixelBits", 0x0D50, 1);
@@ -67,6 +110,8 @@ void foundation_graphics_state(FILE *stream, unsigned texture) {
     floats(stream, "textureMatrix", 0x0BA8, 16);
     floats(stream, "blendColor", 0x8005, 4);
     floats(stream, "alphaTestReference", 0x0BC2, 1);
+    floats(stream, "depthClearValue", 0x0B73, 1);
+    floats(stream, "depthRange", 0x0B70, 2);
     floats(stream, "currentColor", 0x0B00, 4);
     floats(stream, "currentTextureCoordinates", 0x0B03, 4);
     if (enabled) {

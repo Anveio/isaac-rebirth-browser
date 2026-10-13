@@ -1,0 +1,156 @@
+{
+  "schema": 1,
+  "status": "pass",
+  "gateSources": {
+    "tools/e2e/boot-mt.mjs": "92d070f2dc42bf94b72a86dd31efdee5ee4c90e0402edcd0a1fd128d81f148f5",
+    "tools/original/boot-mt-observer.py": "2bcb20a9841e49cc42cb7a69fe9e4a74f15be211f80a513062b5ee40f64f5929",
+    "tools/original/native-identity.py": "4fd5591be56fc4e9ad0486d0f2ec2828f6389786245ee09f9d0b3a395ae18acb",
+    "tools/original/state-observer.py": "58e3b510abbe5ff57f05844efbdf764e2a02530cda4fa99f538d886d258af6f1",
+    "tools/original/foundation-clock-run.py": "b79997f1fdc983a6e6fac74d87c24d2036ea956021fa944d1c0bd7f04e15a243",
+    "tools/original/foundation-clock-gate.c": "f517f1fc0edf2bbe17021e529fb41652e991e286bef070b8aecefd32bfa62e75",
+    "tools/original/foundation-seeds.py": "dd4633c955e7518e9bc0f0147ddfae46d356468238477a68dc06c86656ccba89",
+    "tools/original/debug-run.py": "d785d32c6cc557959be38880a3b046c4040b988fbe3d06d4a8c1f4aa2e833cf5",
+    "tools/original/with-display.sh": "af469210e803786a60d8632c28a6f2da77bc8ab02cc06be50016ddb25e95b848",
+    "tools/foundation/browser.mjs": "60c4bc851470f47e4dd0399148ce0c1edf351d41fbf7f7e15fa823af5948b4c8",
+    "tools/foundation/production-server.mjs": "e3152b58e2353319ba0963b30439e33c3cc65f84a8c6ebb765c2812486245952",
+    "tools/foundation/verify.mjs": "d88d303bab69ee608fd9390e71683832d76279d21117695b96a21699f3726c08",
+    "engine/src/menu_lifecycle.rs": "2ccfe4da0f3213a43caa987f80d092a8ae21e03ad9e27120aa574fe9fad1c5e0",
+    "engine/src/mt.rs": "2fae0fc8dff620f766c40d4253d26dd65e9dbff05bf6e0ff85f5beb2e0e0f9d0",
+    "engine/src/lib.rs": "a29562c08be3dfd2af5d9fe5c20c431e8ea69c5f211b35617241f9a002bdfa2d",
+    "engine/src/audio.rs": "d026fad8a0a4645061fa26061947dd5465d1e7e7a1edc86aae1fe733c1627110",
+    "web/main.ts": "4935c7f8fece3fe50544289f011b6fe1825d35749fcf3cfd81c71153a477cef9",
+    "web/trace.ts": "e6a92aa76585548546571c1eb05cdf44d7c9772ded14ef11f0f05144fb335961"
+  },
+  "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "production": {
+    "sha256": "9817476f242fead478b06fe853c6ca9c75e9d2d7c450c06e8ed99a1a2a41f2dc",
+    "files": 834,
+    "source": "/workspace/isaac-worktrees/ci-speed/dist",
+    "scope": "Immutable snapshot of production build bytes; source/native replay equality is checked separately"
+  },
+  "graphics": {
+    "requestedProfile": "mesa",
+    "actualProfile": "mesa",
+    "renderer": "ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL ES 3.2 Mesa 25.0.7-2+deb13u1)",
+    "vendor": "Google Inc. (Mesa)",
+    "version": "OpenGL ES 3.0 (ANGLE 2.1 git hash: unknown hash)",
+    "displayType": "ANGLE_OPENGL_EGL",
+    "devices": [
+      {
+        "vendorId": 0,
+        "deviceId": 0,
+        "vendorString": "Google Inc. (Mesa)",
+        "deviceString": "ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL ES 3.2 Mesa 25.0.7-2+deb13u1)",
+        "driverVendor": "Mesa",
+        "driverVersion": "25.0.7"
+      }
+    ],
+    "observedFrom": "Chromium SystemInfo.getInfo",
+    "scope": "Observed Chromium graphics backend; shader/pixel equality still requires the original reference comparisons"
+  },
+  "scope": "Fresh production aggregate verification of the complete selected seed-dialog cohort at e63723a: two contrived and two new recorded OS-random cases. This build precedes Music controller integration.",
+  "cases": [
+    {
+      "name": "zero-epoch",
+      "bootEpochSeed": 0,
+      "code": "QSYVKMSE",
+      "status": "pass",
+      "nativeManifestSha256": "84c39ffbc68935b59807d0aa68d433c2999025ad7a0928e29d7dd7b14cf0b77c",
+      "queuedInputProvenance": {
+        "status": "pass",
+        "commands": 19,
+        "initialSeed": 2076625747,
+        "bootEpochSeed": 0
+      },
+      "comparedMenuCheckpoints": 9,
+      "comparedStateWords": 5616,
+      "comparedGridPairs": 81,
+      "comparedStatPoses": 1611,
+      "inputProvenance": {
+        "status": "pass",
+        "commands": 78,
+        "initialSeed": 2076625747,
+        "bootEpochSeed": 0,
+        "runSeedValue": 2076625747
+      }
+    },
+    {
+      "name": "fixed-epoch",
+      "bootEpochSeed": 1700000000,
+      "code": "ZG800TRJ",
+      "status": "pass",
+      "nativeManifestSha256": "97a09dead93138fa4740c55fbd1d44d8b5314c23babba02fe2989c0f0133b9ba",
+      "queuedInputProvenance": {
+        "status": "pass",
+        "commands": 19,
+        "initialSeed": 2790397112,
+        "bootEpochSeed": 1700000000
+      },
+      "comparedMenuCheckpoints": 9,
+      "comparedStateWords": 5616,
+      "comparedGridPairs": 81,
+      "comparedStatPoses": 1611,
+      "inputProvenance": {
+        "status": "pass",
+        "commands": 78,
+        "initialSeed": 2790397112,
+        "bootEpochSeed": 1700000000,
+        "runSeedValue": 2790397112
+      }
+    },
+    {
+      "name": "random-0",
+      "bootEpochSeed": 1757701681,
+      "code": "WA300LE3",
+      "seedValue": 2682000597,
+      "status": "pass",
+      "nativeManifestSha256": "d3fb296062d06271c3d236be3c12362bf861c387a4ce671062e3d6b383e2bdf3",
+      "queuedInputProvenance": {
+        "status": "pass",
+        "commands": 19,
+        "initialSeed": 2682000597,
+        "bootEpochSeed": 1757701681
+      },
+      "comparedMenuCheckpoints": 9,
+      "comparedStateWords": 5616,
+      "comparedGridPairs": 81,
+      "comparedStatPoses": 1611,
+      "inputProvenance": {
+        "status": "pass",
+        "commands": 78,
+        "initialSeed": 2682000597,
+        "bootEpochSeed": 1757701681,
+        "runSeedValue": 2682000597
+      }
+    },
+    {
+      "name": "random-1",
+      "bootEpochSeed": 457688727,
+      "code": "DY61BP3C",
+      "seedValue": 316018506,
+      "status": "pass",
+      "nativeManifestSha256": "9af835a4a50ba31b0fc3582e6d1402ebcb8a587090ddc97febdf55e6ccf4ae9d",
+      "queuedInputProvenance": {
+        "status": "pass",
+        "commands": 19,
+        "initialSeed": 316018506,
+        "bootEpochSeed": 457688727
+      },
+      "comparedMenuCheckpoints": 9,
+      "comparedStateWords": 5616,
+      "comparedGridPairs": 81,
+      "comparedStatPoses": 1611,
+      "inputProvenance": {
+        "status": "pass",
+        "commands": 78,
+        "initialSeed": 316018506,
+        "bootEpochSeed": 457688727,
+        "runSeedValue": 316018506
+      }
+    }
+  ],
+  "gateSourcesStable": true,
+  "sourceCommit": "e63723ad0972f93e63606ec2b500465538e325c3",
+  "reportPath": "/workspace/isaac-worktrees/ci-speed/.cache/e2e/aggregate-seed-dialog/report.json",
+  "reportSha256": "11a660e16d726abf7c29818145ae83a0e577876c8e1b4dc1d2743f29522beea4"
+}
