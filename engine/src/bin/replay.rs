@@ -37,7 +37,7 @@ fn main() {
         .commands
         .iter()
         .filter_map(|command| match command {
-            Command::Tick { count } => Some(u64::from(*count)),
+            Command::Tick { count, .. } => Some(u64::from(*count)),
             _ => None,
         })
         .sum();

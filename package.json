@@ -54,7 +54,8 @@
     "test:e2e:familiars": "cargo build --manifest-path engine/Cargo.toml --locked --bin floor && bash tools/original/with-display.sh node tools/e2e/familiars.mjs --count 2",
     "test:e2e:grid-records": "bash tools/original/with-display.sh node tools/e2e/ordinary-run.mjs --grid-records --count 4",
     "test:e2e:chest-opening": "cargo build --manifest-path engine/Cargo.toml --locked --bin floor && bash tools/original/with-display.sh node tools/e2e/chest-opening.mjs --count 2",
-    "test:e2e:ambient-grid": "bash tools/original/with-display.sh node tools/e2e/ordinary-run.mjs --ambient-grid --count 4"
+    "test:e2e:ambient-grid": "bash tools/original/with-display.sh node tools/e2e/ordinary-run.mjs --ambient-grid --count 4",
+    "test:e2e:run-admission": "bash tools/original/with-display.sh node tools/e2e/run-admission.mjs --count 2"
   },
   "devDependencies": {
     "@playwright/test": "1.64.0",

@@ -205,10 +205,10 @@ post-acquisition Player state, load/continue and
 durable browser saves remain open. [SavedGame evidence](../references/isaac/foundation/saved-game/README.md)
 retains the original reports and the correction that made those gaps blocking.
 
-CI discovers all thirty-three registered live suites and runs separate jobs with
+CI discovers all thirty-four registered live suites and runs separate jobs with
 `fail-fast: false`, preserving each result and evidence. The first matrix run
 completed floors, weapons, boot MT and pickups successfully while retaining
-core and traversal failures. Build, typecheck, assets, matrix and strict Clippy
+core and traversal failures. Historical build, typecheck, assets, matrix and strict Clippy
 pass at integrated checkpoint `472b154`, including the reviewed Level,
 RoundWorm, item-selection, bomb-pickup, large-room geometry, Chest constructor
 bounded callback-history, first-acquisition, Troll conversion, Fire/Ember,
@@ -226,8 +226,14 @@ fields, 1,821 failures and 651/882 passing paired checkpoints. Combining these
 separate completed scopes gives 18 passing and six gameplay-failing suites;
 the original 14/10 attempt stays unchanged. Later leaves do not inherit those
 results, and no complete current-main acceptance is claimed.
-The current main also contains reviewed Monstro source corrections, typed
-Familiar and Grid leaves; the `472b154` build artifact predates those changes.
+The latest completed consolidated build/static pass is main `f79338a6`, with
+33 registered suites and 938 production files. Its artifact is
+`0f3432b0038e4a9dc36a491f312be05c8999096b153e7ed5d3b2e361f03e784b`;
+it includes the reviewed Monstro corrections, Familiar, Grid, Chest and ambient
+leaves. The subsequent [run-admission leaf](run-admission.md) has its own
+frozen build and four fresh pairs: 1,368 phases and 12,504 checks retain 640
+blocking clock/fade/control/age differences. Later integrations do not inherit
+the f793 build or a complete live-suite acceptance.
 Complete gameplay RNG, other floors/characters, persistence, later music
 callers/cutscenes and whole-game parity remain open. GitHub required-check
 enforcement is unavailable for this private repository's current plan. The
