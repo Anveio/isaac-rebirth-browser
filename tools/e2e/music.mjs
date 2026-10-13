@@ -12,6 +12,7 @@ import { startProductionServer } from '../foundation/production-server.mjs';
 import { waitForReady, nativeReplay } from '../foundation/verify.mjs';
 import { exactStateDifference } from '../foundation/compare.mjs';
 import { installBrowserAudioObserver } from './audio-api-observer.mjs';
+import { compareQueuedMusicOutput, compareMusicDeviceCheckpoint } from './music-output-evidence.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const run = promisify(execFile), sha = bytes => createHash('sha256').update(bytes).digest('hex');
@@ -29,7 +30,7 @@ if (value('--scenarios')) cases = JSON.parse(await readFile(resolve(value('--sce
 assert.ok(Array.isArray(cases) && cases.length > 0 && cases.length <= 10 && new Set(cases.map(c => c.name)).size === cases.length);
 for (const c of cases) assert.ok(/^[a-zA-Z0-9_-]{1,40}$/.test(c.name) && /^[a-zA-Z0-9]{8}$/.test(c.code) &&
   Number.isInteger(c.bootEpochSeed) && c.bootEpochSeed >= 0 && c.bootEpochSeed <= 0xffffffff && (c.volume === 0 || c.volume === 1));
-const sources = ['tools/e2e/music.mjs', 'tools/e2e/audio-api-observer.mjs', 'tools/original/music-observer.py', 'tools/original/audio-trace.c',
+const sources = ['tools/e2e/music.mjs', 'tools/e2e/music-output-evidence.mjs', 'tools/e2e/audio-api-observer.mjs', 'tools/original/music-observer.py', 'tools/original/audio-trace.c',
   'tools/original/foundation-clock-run.py', 'tools/original/foundation-clock-gate.c', 'tools/original/state-observer.py',
   'tools/original/foundation-seeds.py', 'tools/foundation/verify.mjs', 'tools/foundation/compare.mjs', 'tools/foundation/production-server.mjs', 'tools/foundation/browser.mjs',
   'engine/src/music.rs', 'engine/src/lib.rs', 'engine/build.rs', 'web/music.ts', 'web/main.ts', 'web/trace.ts', 'web/audio.ts', 'vite.config.ts', 'web/audio-data.json'];
@@ -228,6 +229,7 @@ try {
             }
           }
           check(`${action.label}: runtime errors`, actual.audio.music.errors, []);
+          result.diagnostics.push(...compareMusicDeviceCheckpoint({ label: action.label, ...actual }, expected, check));
           if (expected.nativePause) check(`${action.label}: actual pause`, actual.state.paused, expected.nativePause.paused);
           result.diagnostics.push({ label: action.label, sourceSystemState: music.systemState, sourcePublicLog: native.debugObservations.find(row => row.context.label === action.label).context.publicLogState,
             browserScreen: actual.state.screen, sourceRoomEntry: expected.roomEntry ?? null,
@@ -248,12 +250,7 @@ try {
       check('independent public API history complete', api.truncated, false); check('production page errors', errors, []);
       const starts = api.events.slice(apiBegin).filter(event => event.type === 'start' && event.channels === 2 && event.when <= event.audioTime + 0.001);
       const scheduled = api.events.slice(apiBegin).filter(event => event.type === 'start' && event.channels === 2 && event.when > event.audioTime + 0.001);
-      const sourceQueued = (label, channel) => observations.get(label).music.channels[channel].queuedStreams.map(item => item.path.toLowerCase().replace(/^resources\//, ''));
-      const expectedLoops = [sourceQueued('title-entry', 1), sourceQueued('floor-prepared', 2), sourceQueued('floor-prepared', 0)];
-      check('each source music channel has one independently observed queued loop', expectedLoops.map(paths => paths.length), [1, 1, 1]);
-      check('actual scheduled loop decode inputs equal native queued paths', scheduled.map(event => event.encodedPath), expectedLoops.flat());
-      for (const [index, introIndex] of [[0, 0], [1, 2], [2, 3]]) if (scheduled[index] && starts[introIndex])
-        check(`loop${index}: actual intro/loop share one output gain graph`, scheduled[index].gainNode, starts[introIndex].gainNode);
+      compareQueuedMusicOutput(api.events.slice(apiBegin), observations, check);
       const titleLoop = scheduled[0], titleGeneration = states.find(row => row.label === 'title-loop').state.music.channels[1].generation;
       check('crossfade disables the actual old Title loop node', !!titleLoop && api.events.slice(api.events.indexOf(titleLoop) + 1).some(event =>
         event.type === 'loop' && event.node === titleLoop.node && event.looping === false), true);

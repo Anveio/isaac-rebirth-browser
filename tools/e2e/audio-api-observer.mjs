@@ -81,4 +81,3 @@ export function installBrowserAudioObserver() {
   AudioBufferSourceNode.prototype.stop = function (...args) { const result = stop.apply(this, args); record({ type: 'stop', node: identify(this) }); return result; };
   window.__audioApi = trace;
 }
-

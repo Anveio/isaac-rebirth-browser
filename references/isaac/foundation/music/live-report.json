@@ -1,0 +1,181 @@
+{
+  "schema": 1,
+  "scope": "Selected original/browser Music controller/output contracts; early decoder/prefetch and onset parity remain explicit. Raw evidence is retained in ignored e2e artifacts.",
+  "captureSourceCommit": "fbe68a1ed8518800829f5f5b426f759c8eae185a",
+  "captureReport": ".cache/e2e/music-final-live/report.json",
+  "captureReportSha256": "8a7a2e0b0604dfe7dc1c94def8c916a8037fa655aa6832abd398c14987e5637d",
+  "production": {
+    "sha256": "c974ad2a4c31a58af03411e2a6c477e2234e905f46bfd0d4e60d1316a686a8cb",
+    "files": 915,
+    "source": "/workspace/isaac-worktrees/e2e-ci/dist",
+    "scope": "Immutable snapshot of production build bytes; source/native replay equality is checked separately"
+  },
+  "capturedSourceHashes": {
+    "tools/e2e/music.mjs": "42bdf315233495f1cc6a57ffd4bb1d65a63defd9db8ca150eaadaa79d754a4e5",
+    "tools/e2e/audio-api-observer.mjs": "bcedc9b4652ae15a30480f654c2fdb419d1d6a9ffa43bd5247225f3d2ad2b56b",
+    "tools/original/music-observer.py": "7ed0b289cf121a132f2438bda9af43ace77f8e1bcc405ab2455f93c375a61472",
+    "tools/original/audio-trace.c": "611ec3fcb9223841559f780cde8074e55b01ac30e136c43c2c64217f421fca7d",
+    "tools/original/foundation-clock-run.py": "0669849e55218ed984aaa95a9964bba05d20707ec7ed164c77dab689c5891fbc",
+    "tools/original/foundation-clock-gate.c": "f517f1fc0edf2bbe17021e529fb41652e991e286bef070b8aecefd32bfa62e75",
+    "tools/original/state-observer.py": "58e3b510abbe5ff57f05844efbdf764e2a02530cda4fa99f538d886d258af6f1",
+    "tools/original/foundation-seeds.py": "dd4633c955e7518e9bc0f0147ddfae46d356468238477a68dc06c86656ccba89",
+    "tools/foundation/verify.mjs": "339b36e7263c5b3edd4d29a6a41837cd67ae3a4dc1202cbad831f88ef6daafc5",
+    "tools/foundation/compare.mjs": "007227c2431f837b347ec29dcbc3492f49eaeb71d08b84ead0b88cfeef98b534",
+    "tools/foundation/production-server.mjs": "e3152b58e2353319ba0963b30439e33c3cc65f84a8c6ebb765c2812486245952",
+    "tools/foundation/browser.mjs": "60c4bc851470f47e4dd0399148ce0c1edf351d41fbf7f7e15fa823af5948b4c8",
+    "engine/src/music.rs": "12ca1b7359622b16c54915e53e76ac87271dbd35f5a51a91b9801f54782c12dd",
+    "engine/src/lib.rs": "44be9e7e19df15954820ca34e4ffa5d45baf3d9d470fc3f63f5977adfc312fd9",
+    "engine/build.rs": "d0e081d8b954c565c24a8cd6ed011e991415ab79f850ee8c0163540c2e06e52a",
+    "web/music.ts": "62fa21d113c73bb1747f65e0a91e3665df3a4faa7f802ae5b1460cb5550e2f84",
+    "web/main.ts": "d1992ec663f1594f02beb660d33d35c5277423bbac00881ef6c18d772df80440",
+    "web/trace.ts": "2df69cfbbae14084baadacbcffbc9ecb7b6e363e61c1efb26f721475cfb198a9",
+    "web/audio.ts": "8281c216c708a3203c188339e1896163b754fb96fe4ed039bb1c09343279f1c9",
+    "vite.config.ts": "4a7d9e1030a8aabfe553a5241d4efab64188f1ec7d26864e6bb4a9454bb3eb3c",
+    "web/audio-data.json": "a93a9bc554d573de9d432db4701fe04a3a86ec8385cdbb81b978c7cfb417a5df"
+  },
+  "nativeBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "nativeObserverLibrarySha256": "98ab438cc9b5a5c570a70b1336453bbad19d584a70cd25b425a697c39f1014c2",
+  "status": "pass",
+  "sourceStability": "pass",
+  "requiredChecks": 816,
+  "actualOutputVerifier": {
+    "artifact": ".cache/e2e/music-final-live/music-output-verification.json",
+    "artifactSha256": "0dfd442a12f812aa1dbe8b767fd97cd71987102c52f9ecd0dc4726f05d2d6ae4",
+    "verifierSha256": "5bc3547afedb0bfe588eab302d4636260ddf4d11468051af53b36fa4946e87cf",
+    "status": "pass",
+    "checks": 252
+  },
+  "cases": [
+    {
+      "name": "audible-title-floor-pause",
+      "code": "QSYVKMSE",
+      "bootEpochSeed": 1700000000,
+      "volume": 1,
+      "status": "pass",
+      "checks": 204,
+      "nativeManifestSha256": "648292acb20efad1092219331338744fc522d53346e6d570c8ec5ad0754ecacd",
+      "nativeAudioCallsSha256": "5d8bce822c7e6956d9349ddae9d6a08c559c82fae41ee8d798cc009a359df797",
+      "earlyQueueDiagnostics": []
+    },
+    {
+      "name": "muted-real-lifecycle",
+      "code": "ZG800TRJ",
+      "bootEpochSeed": 0,
+      "volume": 0,
+      "status": "pass",
+      "checks": 204,
+      "nativeManifestSha256": "76f8eca974c2fabe32a44f70f333969c23c862830fcad30591c63af4c72311c7",
+      "nativeAudioCallsSha256": "32a3a849a5c2720af7d167cb3b3cfefdd861f1ad7480dc9e031349aa90835b7d",
+      "earlyQueueDiagnostics": [
+        {
+          "field": "pause-before-loop: channel0 decoder and queued path",
+          "actual": [
+            false,
+            [
+              {
+                "path": "resources/music/diptera sonata(basement).ogg",
+                "loop": true
+              }
+            ]
+          ],
+          "expected": [
+            true,
+            []
+          ],
+          "status": "fail",
+          "boundaryContracts": {
+            "native": "Decoder EOF while refilling up to four 65536-byte OpenAL buffers",
+            "browser": "Actual introduction AudioBufferSourceNode ended callback"
+          },
+          "deviceTiming": {
+            "nativeSnapshotHostMonotonicNs": 34204588887285,
+            "nativeDevicePlayHostMonotonicNs": 34190943400061,
+            "nativeWallSecondsSinceObservedDevicePlay": 13.645487224,
+            "nativeTimeScope": "Kernel monotonic wall time, including observer thread stops; does not establish the audible playback cursor",
+            "browserContext": [
+              {
+                "state": "running",
+                "sampleRate": 44100,
+                "currentTime": 30.43265306122449
+              }
+            ],
+            "browserStartAudioTime": 28.090340136054422,
+            "browserSecondsSinceStart": 2.3423129251700665,
+            "authoredIntroductionSeconds": 13.716122448979592,
+            "nativeMaximumQueuedPcmSeconds": 1.486077097505669
+          },
+          "scope": "Early native decoder/prefetch parity is unimplemented. Independent elapsed device scheduling can also differ. Both raw states remain recorded; stable explicit late-hold observations are gated."
+        },
+        {
+          "field": "pause-before-loop: channel2 decoder and queued path",
+          "actual": [
+            false,
+            [
+              {
+                "path": "resources/music/diptera layer.ogg",
+                "loop": true
+              }
+            ]
+          ],
+          "expected": [
+            true,
+            []
+          ],
+          "status": "fail",
+          "boundaryContracts": {
+            "native": "Decoder EOF while refilling up to four 65536-byte OpenAL buffers",
+            "browser": "Actual introduction AudioBufferSourceNode ended callback"
+          },
+          "deviceTiming": {
+            "nativeSnapshotHostMonotonicNs": 34204588887285,
+            "nativeDevicePlayHostMonotonicNs": 34190943039806,
+            "nativeWallSecondsSinceObservedDevicePlay": 13.645847479,
+            "nativeTimeScope": "Kernel monotonic wall time, including observer thread stops; does not establish the audible playback cursor",
+            "browserContext": [
+              {
+                "state": "running",
+                "sampleRate": 44100,
+                "currentTime": 30.43265306122449
+              }
+            ],
+            "browserStartAudioTime": 28.090340136054422,
+            "browserSecondsSinceStart": 2.3423129251700665,
+            "authoredIntroductionSeconds": 13.716122448979592,
+            "nativeMaximumQueuedPcmSeconds": 1.486077097505669
+          },
+          "scope": "Early native decoder/prefetch parity is unimplemented. Independent elapsed device scheduling can also differ. Both raw states remain recorded; stable explicit late-hold observations are gated."
+        }
+      ]
+    },
+    {
+      "name": "random-0",
+      "code": "R47PTVVG",
+      "bootEpochSeed": 2597731015,
+      "volume": 0,
+      "status": "pass",
+      "checks": 204,
+      "nativeManifestSha256": "58d6168fa8dd51c93150c5e5dfcdfd876306fa80c3477e68a869ee1f4d3c7139",
+      "nativeAudioCallsSha256": "7c4b9fc533ebafbeb6a1855f5368c0fa982ed9a630d300830856b565b1684af8",
+      "earlyQueueDiagnostics": []
+    },
+    {
+      "name": "random-1",
+      "code": "T1E933RS",
+      "bootEpochSeed": 2646140068,
+      "volume": 1,
+      "status": "pass",
+      "checks": 204,
+      "nativeManifestSha256": "93cae8c98ce0aa4236d58d057704e6bd39a034db515ba054875c2c260bd53968",
+      "nativeAudioCallsSha256": "4d3eb2a9e8b3dd5255032eb6ac1958a9e7698839c75a52662442f2328ef71fdd",
+      "earlyQueueDiagnostics": []
+    }
+  ],
+  "sfxRegression": {
+    "report": ".cache/e2e/music-runtime-audio/report.json",
+    "sha256": "3e7cde3162dc95d23ee3dee511a88680f28677ef3a155374b2917de9da86dfe2",
+    "status": "pass",
+    "cases": 4,
+    "checks": 860,
+    "productionSha256": "c974ad2a4c31a58af03411e2a6c477e2234e905f46bfd0d4e60d1316a686a8cb"
+  }
+}

@@ -79,3 +79,12 @@ The acceptance tape retains a normal 300-presentation run settle and
 12-presentation key holds across both source phases. It also captures the
 actual fade threshold and following Level admission separately. Live
 acceptance results will be recorded separately.
+
+The frozen four-case acceptance passes all 816 required checks on production
+`c974ad2a`. A separately hashed read-only verifier adds 252 passing actual
+queued-node and checkpoint-output checks to those same raw captures. Two early
+native decoder/prefetch queue mismatches remain exact diagnostics. The same
+production build passes the fresh four-case SFX regression, 860 checks.
+[Recorded scenarios and pins](../references/isaac/foundation/music/live-report.json)
+retain the original capture source commit and the independent verifier identity;
+the runnable gate uses these stronger output assertions for future captures.

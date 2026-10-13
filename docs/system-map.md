@@ -192,7 +192,7 @@ are not playable-content or parity percentages.
 | Pocket items | `pocketitems.xml`: 33 cards, eight runes and 28 pill effects | Effects, identification, per-run pill assignment and eligibility |
 | Rooms and stages | `stages.xml`: 13 stage sets; STB records include room weights, difficulty, doors, weighted spawn groups and interior dimensions | Floor graph generation, shape selection, entity spawning, persistence and room transitions |
 | Presentation | 21 backdrops, 223 costumes, 56 boss portraits, 25 boss color entries, 34 giantbook entries, nine nightmares, 19 cutscene entries | Layer timing, selection, camera, animation clocks, lighting and transitions |
-| Audio | Authored catalogue, source SFX admission/shared-MT selection, 301 verified WAV buffers, 16-voice browser output, menu events and trusted-gesture unlock; [audio contracts](audio-runtime.md) | Music lifecycle, remaining gameplay callers, alias/saturation live cohorts and post-Title random lifecycle |
+| Audio | Source SFX admission/shared-MT selection, 301 verified WAV buffers, 16-voice output, three music streams, authored intro/loop/fade/queue cues, actual callbacks and trusted unlock; [SFX contracts](audio-runtime.md), [music contracts](music-runtime.md) | Early decoder/prefetch and autoplay/decode onset parity, remaining gameplay/layer callers, initial video/voiceover, alias/saturation and complete shared random routing |
 | Metagame | 178 achievement entries, 20 challenge definitions and 203 baby definitions | Save state, unlock conditions, completion marks, challenge rules and co-op |
 
 `ambush.xml` and `fxlayers.xml` contain multiple top-level fragments. A single-root
@@ -262,7 +262,7 @@ must not silently turn a room object into a generic enemy or delete it.
 | `Entity_Pickup`, grid entities | Authored entity/STB definitions available; no runtime pickups/grid obstacles | Hearts/coins/keys/bombs, shop/chest collection, rocks/pits/poops/fires and damage |
 | `ItemConfig`, `ItemPool`, player item evaluation | No item-effect or pool runtime; XML references available | Pool routing and depletion, passive/active/trinket/pocket effects, synergy cache and costumes |
 | Graphics, `ANM2`, backdrop/shadow/FX | `web/animation.ts`, `web/gl-menu.ts`, `web/gl-stage.ts`, `engine/src/effects.rs`: authored animation and GPU masks | Full original pixels, all room/backdrop systems, native motion projection and effect selection |
-| `Music`, sound playback | Live paired menu SFX admissions and actual native OpenAL/browser Web Audio PCM submissions | Music events/queues/fades and broader gameplay caller coverage |
+| `Music`, sound playback | Live paired SFX and Title/run/normal-floor music, source f32 controller fades/deferred run admission, original queued-path/output graph/PCM and real callback evidence | Early decoder/prefetch lifecycle, alternate floors, later jingles/layer/pitch callers, initial video/voiceover and broader gameplay sounds |
 | `PersistentGameData`, `GameState` | In-memory profiles and deterministic JSON replay | Durable browser profile/save/continue, achievements, completion marks, unlocks and co-op |
 | Controller/button maps, host input | Actual DOM keyboard commands and text; original consumed X11 keys | Controller/mouse/remapping, focus device parity, fullscreen and unsupported action keys |
 
