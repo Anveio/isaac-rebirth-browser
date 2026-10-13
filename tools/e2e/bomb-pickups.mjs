@@ -2,7 +2,7 @@
 // Rock access, then movement collects every authored bomb pickup. Retained
 // scoped routes plus OS-random rooms with unfiltered pickup subtype draws.
 import assert from 'node:assert/strict';
-import { compareRocks, compareSound, runRoomFrameSuite } from './lib/room-frames.mjs';
+import { compareDoors, compareRocks, compareSound, runRoomFrameSuite } from './lib/room-frames.mjs';
 
 await runRoomFrameSuite({
   name: 'bomb-pickups',
@@ -21,6 +21,7 @@ await runRoomFrameSuite({
     assert.ok(room, 'Native public log identifies the current authored room');
     equal([state.room.descriptor?.template.type, state.room.descriptor?.template.variant, state.room.descriptor?.spawnSeed],
       [Number(room[1]), Number(room[2]), row.context.publicLogState.spawnSeed], 'authored room identity');
+    compareDoors(frame);
     const rocks = compareRocks(frame);
     track.destroyedRocks = Math.max(track.destroyedRocks ?? 0, rocks.filter(rock => rock.state === 2).length);
 

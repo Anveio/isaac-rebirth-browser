@@ -2,7 +2,7 @@
 // movement collects both authored regular keys. Contrived phase offsets on
 // JF2DSF92 plus OS-random seeds whose secret room holds the same two keys.
 import assert from 'node:assert/strict';
-import { compareSound, runRoomFrameSuite } from './lib/room-frames.mjs';
+import { compareDoors, compareSound, runRoomFrameSuite } from './lib/room-frames.mjs';
 
 await runRoomFrameSuite({
   name: 'keys',
@@ -13,14 +13,7 @@ await runRoomFrameSuite({
 
   compare(frame) {
     const { state, source, player, pickups, equal, track, presentation } = frame;
-    const doors = source.grid.filter(cell => cell.type === 16);
-    equal(state.room.grid.cells.flatMap((cell, index) => cell.entity?.kind === 16 ? [index] : []), doors.map(cell => cell.index), 'door admission');
-    for (const door of doors) {
-      const actual = state.room.grid.cells[door.index]?.entity;
-      if (!actual) continue;
-      for (const [field, expected] of [['variant', door.variant], ['state', door.state], ['collisionClass', door.collisionClass]])
-        equal(actual[field], expected, `door${door.index}:${field}`);
-    }
+    compareDoors(frame);
     track.admitted = Math.max(track.admitted ?? 0, pickups.filter(pickup => pickup.variant === 30).length);
     track.collections ??= [];
     if (player.keyInventory !== (track.keys ?? 0)) {

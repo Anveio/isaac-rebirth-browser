@@ -57,6 +57,19 @@ export function compareSound(frame, slot, original, label, fields = []) {
   for (const field of fields) equal(actual[field], original[field], `${label} ${field}`);
 }
 
+// Authored room doors: admission plus variant, state and collision class.
+export function compareDoors(frame) {
+  const { state, source, equal } = frame;
+  const doors = source.grid.filter(cell => cell.type === 16);
+  equal(state.room.grid.cells.flatMap((cell, index) => cell.entity?.kind === 16 ? [index] : []), doors.map(cell => cell.index), 'door admission');
+  for (const door of doors) {
+    const actual = state.room.grid.cells[door.index]?.entity;
+    if (!actual) continue;
+    for (const [field, expected] of [['variant', door.variant], ['state', door.state], ['collisionClass', door.collisionClass]])
+      equal(actual[field], expected, `door${door.index}:${field}`);
+  }
+}
+
 // Ordinary Rock-family grids: admission, retirement, metadata and destruction markers.
 export function compareRocks(frame) {
   const { state, source, equal } = frame;
