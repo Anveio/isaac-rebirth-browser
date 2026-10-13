@@ -224,16 +224,56 @@ fn main() {
         &fs::read_to_string(npc_animations).expect("read authored NPC animations"),
     )
     .expect("parse authored NPC animations");
-    let projectile_clip = npc_clips["gfx/009.000_projectile.anm2"]["Animations"]
+    let boss_scene = npc_clips["gfx/ui/boss/versusscreen.anm2"]["Animations"]
         .as_array()
-        .expect("projectile clips missing")
+        .expect("boss Scene animations missing")
         .iter()
-        .find(|clip| clip["Name"] == "RegularTear6")
-        .expect("regular projectile clip missing");
+        .find(|clip| clip["Name"] == "Scene")
+        .expect("authored boss Scene missing");
     generated.push_str(&format!(
-        "pub const PROJECTILE_REGULAR6_FRAMES: u32 = {};\n",
-        projectile_clip["FrameNum"].as_u64().unwrap()
+        "pub const BOSS_SCENE_FRAMES: u32 = {};\n",
+        boss_scene["FrameNum"].as_u64().unwrap()
     ));
+    for size in [5, 6, 7] {
+        let projectile_name = format!("RegularTear{size}");
+        let projectile_clip = npc_clips["gfx/009.000_projectile.anm2"]["Animations"]
+            .as_array()
+            .expect("projectile clips missing")
+            .iter()
+            .find(|clip| clip["Name"] == projectile_name)
+            .expect("regular projectile clip missing");
+        generated.push_str(&format!(
+            "pub const PROJECTILE_REGULAR{size}_FRAMES: u32 = {};\n",
+            projectile_clip["FrameNum"].as_u64().unwrap()
+        ));
+    }
+    for clip in npc_clips["gfx/020.000_monstro.anm2"]["Animations"]
+        .as_array()
+        .expect("Monstro clips missing")
+    {
+        let name = clip["Name"].as_str().unwrap();
+        generated.push_str(&format!(
+            "pub const MONSTRO_{}_FRAMES: u32 = {};\n",
+            name.to_uppercase(),
+            clip["FrameNum"].as_u64().unwrap()
+        ));
+        if name == "Death" {
+            for trigger in clip["Triggers"]
+                .as_array()
+                .expect("Monstro Death triggers missing")
+            {
+                let event = match trigger["EventId"].as_u64().expect("Monstro event missing") {
+                    0 => "BLOODSTART",
+                    1 => "EXPLOSION",
+                    _ => panic!("unexpected Monstro Death event"),
+                };
+                generated.push_str(&format!(
+                    "pub const MONSTRO_{event}_FRAME: u32 = {};\n",
+                    trigger["AtFrame"].as_u64().unwrap()
+                ));
+            }
+        }
+    }
     for clip in npc_clips["gfx/244.000_round worm.anm2"]["Animations"]
         .as_array()
         .expect("Round Worm clips missing")
@@ -290,7 +330,7 @@ fn main() {
         "pub const EMBER_IDLE_FRAMES: u32 = {};\n",
         ember["FrameNum"].as_u64().unwrap()
     ));
-    for kind in [9, 13, 18, 33, 244] {
+    for kind in [9, 13, 18, 20, 33, 244] {
         let tag = xml
             .split("<entity ")
             .find(|tag| {
@@ -320,8 +360,10 @@ fn main() {
             generated.push_str(&format!(
                 "pub const NPC_{kind}_GRID_CLASS: u32 = {class};\n"
             ));
-            if kind == 244 {
-                generated.push_str(&format!("pub const NPC_244_GRID_POINTS: u16 = {points};\n"));
+            if matches!(kind, 20 | 244) {
+                generated.push_str(&format!(
+                    "pub const NPC_{kind}_GRID_POINTS: u16 = {points};\n"
+                ));
             }
         }
         for field in [

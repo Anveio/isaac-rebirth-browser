@@ -75,7 +75,9 @@ def observe(pid, context):
                     'pendingDamage': struct.unpack_from('<f', raw, 0x378)[0],
                     'gridCollisionClass': struct.unpack_from('<I', raw, 0x340)[0],
                     'entityCollisionClass': struct.unpack_from('<I', raw, 0x344)[0],
-                    'spawnSeed': struct.unpack_from('<I', raw, 0x7d0)[0]}
+                    'spawnSeed': struct.unpack_from('<I', raw, 0x7d0)[0],
+                    'birthGameUpdate': struct.unpack_from('<I', raw, 0x42c)[0],
+                    'spriteFlipX': bool(raw[0x2fc])}
                 definition = struct.unpack_from('<Q', raw, 0x40)[0]
                 text_pointer = u64(definition) if definition else 0
                 length = u64(text_pointer - 24) if text_pointer else 0
@@ -117,6 +119,10 @@ def observe(pid, context):
                     more = read(address + 0x7d4, 0x24)
                     result['projectileHeight'], result['projectileFallingSpeed'], result['projectileFallingAcceleration'] = struct.unpack_from('<fff', more, 0)
                     result['projectileScale'] = struct.unpack_from('<f', more, 0x10)[0]
+                    parent = struct.unpack_from('<Q', raw, 0x498)[0]
+                    result['projectileParent'] = ({'type': u32(parent + 0x10), 'variant': u32(parent + 0x14),
+                        'subtype': u32(parent + 0x18), 'spawnSeed': u32(parent + 0x7d0), 'sequenceId': u32(parent + 8)}
+                        if parent else None)
                     result['projectileParameter1'] = struct.unpack_from('<f', more, 0x14)[0]
                     result['projectileParameter2'] = struct.unpack_from('<f', more, 0x18)[0]
                     result['projectileFullUpdates'] = struct.unpack_from('<I', more, 0x1c)[0]
@@ -132,6 +138,8 @@ def observe(pid, context):
                     result['npcState'] = struct.unpack_from('<I', more, 0)[0]
                     result['npcSavedInitializedState'] = struct.unpack_from('<I', more, 4)[0]
                     result['npcStateFrame'] = struct.unpack_from('<I', more, 8)[0]
+                    result['npcAux1'] = struct.unpack_from('<I', more, 0x38)[0]
+                    result['npcAux2'] = struct.unpack_from('<I', more, 0x3c)[0]
                     result['npcFrameAge'] = struct.unpack_from('<I', more, 0x10)[0]
                     result['npcCountdown'] = struct.unpack_from('<I', more, 0x1c)[0]
                     if result['type'] == 33:
@@ -157,10 +165,18 @@ def observe(pid, context):
                 'boundsTopLeft': list(struct.unpack_from('<ff', raw, 0x1c)),
                 'boundsBottomRight': list(struct.unpack_from('<ff', raw, 0x24)),
                 'combatClear': bool(read(descriptor + 0x3d, 1)[0]),
+                'bossCount': u32(room + 0x2490),
+                'bossPresentationIndex': u32(room + 0x17c8),
                 'descriptorFlag40': bool(read(descriptor + 0x40, 1)[0]),
                 'combatClearCountdown': struct.unpack('<i', read(room + 0x1598, 4))[0],
                 'countablePending': struct.unpack('<i', read(room + 0x16ac, 4))[0],
                 'countableCurrent': struct.unpack('<i', read(room + 0x16b0, 4))[0]}
+            transition = game + 0x95c0
+            report['roomTransition'] = {'state': u32(transition), 'counter': u32(transition + 4),
+                'duration': u32(transition + 8), 'bossIntroduction': bool(read(transition + 0x3f8, 1)[0])}
+            if report['roomTransition']['bossIntroduction']:
+                report['roomTransition']['sceneFrame'] = struct.unpack('<f', read(transition + 0x160, 4))[0]
+                report['roomTransition']['scenePlaying'] = bool(read(transition + 0x164, 1)[0])
             grid_pointers = struct.unpack('<' + 'Q' * (width * height), read(room + 0x30, width * height * 8))
             cells = []
             for index, pointer in enumerate(grid_pointers):
@@ -190,6 +206,8 @@ def observe(pid, context):
                 item = entity(pointer)
                 raw = read(pointer + 0xbb8, 0x44)
                 item['redHp'] = struct.unpack_from('<I', raw, 0)[0]
+                item['shootingLock'] = u32(pointer + 0x7dc)
+                item['controlsEnabled'] = bool(read(pointer + 0x7d4, 1)[0])
                 item['damageCountdown'] = struct.unpack_from('<I', raw, 0x40)[0]
                 damage = read(pointer + 0xde8, 0x2c)
                 attacker_pointer = struct.unpack_from('<Q', damage, 0x20)[0]

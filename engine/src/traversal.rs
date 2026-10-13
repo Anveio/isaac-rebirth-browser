@@ -9,6 +9,8 @@ use serde::{Deserialize, Serialize};
 pub enum TransitionPhase {
     Out,
     In,
+    BossScene,
+    BossCleanup,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
@@ -20,6 +22,54 @@ pub struct RoomTransition {
     pub target_slot: u8,
     pub phase: TransitionPhase,
     pub full_updates: u8,
+    pub boss_scene: Option<BossScene>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct BossScene {
+    pub presentation_index: u32,
+    pub animation_frame: u32,
+    pub animation_playing: bool,
+}
+
+fn supported_boss(descriptor: &crate::floor::Descriptor) -> bool {
+    if descriptor.template.room_type != 5
+        || (descriptor.template.width, descriptor.template.height) != (13, 7)
+    {
+        return false;
+    }
+    let Ok(asset) = crate::room_assets::for_descriptor(descriptor) else {
+        return false;
+    };
+    let Ok(spawns) = crate::room_spawns::select(&asset, descriptor.spawn_seed) else {
+        return false;
+    };
+    spawns.selectors.iter().any(|spawn| {
+        spawn.category == crate::room_spawns::SpawnCategory::Entity
+            && (spawn.entity_type, spawn.variant, spawn.subtype) == (20, 0, 0)
+    })
+}
+
+/// Game551a10 returns presentation index1 for actual Monstro20/0. Source
+/// TransitionChange starts Scene only after the admitted immediate Room.Update.
+pub(crate) fn begin_boss_scene(state: &mut State) {
+    if !state.room.combat_clear
+        && state
+            .room
+            .npcs
+            .iter()
+            .any(|npc| npc.kind == 20 && !npc.removed)
+    {
+        if let Some(transition) = &mut state.room_transition {
+            transition.phase = TransitionPhase::BossScene;
+            transition.boss_scene = Some(BossScene {
+                presentation_index: 1,
+                animation_frame: 0,
+                animation_playing: true,
+            });
+        }
+    }
 }
 
 fn outward(slot: u8) -> WorldVector {
@@ -105,7 +155,7 @@ pub(crate) fn check_departure(state: &mut State) {
             && (destination.template.width, destination.template.height) == (13, 14);
         // This leaf admits ordinary tall-room geometry/lifecycle. Default
         // camera/backdrop, other large shapes and actors keep separate gates.
-        if !ordinary && !tall {
+        if !ordinary && !tall && !supported_boss(destination) {
             continue;
         }
         let normal = outward(door.slot);
@@ -142,6 +192,7 @@ pub(crate) fn check_departure(state: &mut State) {
             phase: TransitionPhase::Out,
             // Game::Update chooses its transition branch before Room::Update.
             full_updates: 0,
+            boss_scene: None,
         });
         state.player.vx = 0.0;
         state.player.vy = 0.0;
@@ -159,6 +210,35 @@ pub(crate) fn advance_transition(state: &mut State, phase: Phase) -> bool {
     };
     if !phase.updates_nonplayers() {
         state.room_transition = Some(transition);
+        return true;
+    }
+    if transition.phase == TransitionPhase::BossScene {
+        let scene = transition
+            .boss_scene
+            .as_mut()
+            .expect("actual boss transition owns Scene");
+        // Sprite.Update precedes IsFinished(empty-name). Authored nonloop
+        // playback stops at its final frame; no fitted transition delay.
+        if scene.animation_playing {
+            let next = scene.animation_frame + 1;
+            if next < crate::content::BOSS_SCENE_FRAMES {
+                scene.animation_frame = next;
+            } else {
+                scene.animation_frame = crate::content::BOSS_SCENE_FRAMES - 1;
+                scene.animation_playing = false;
+            }
+        }
+        if !scene.animation_playing {
+            transition.phase = TransitionPhase::BossCleanup;
+            // Player50e710 sets shooting lock, not damage immunity.
+            state.player.shooting_lock = state.player.shooting_lock.max(10);
+        }
+        state.room_transition = Some(transition);
+        return true;
+    }
+    if transition.phase == TransitionPhase::BossCleanup {
+        // Game owns the real controls-disabled Player.Update at5dde9e before
+        // resuming ordinary actors. Removing the transition ends its freeze.
         return true;
     }
     if transition.phase == TransitionPhase::In && transition.full_updates < 7 {

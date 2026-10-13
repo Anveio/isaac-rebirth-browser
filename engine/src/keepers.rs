@@ -59,6 +59,7 @@ pub(crate) fn from_selector(id: u32, selector: &SpawnSelector) -> Result<Npc, St
         removed: false,
         damage: crate::combat::DamageQueue::default(),
         fireplace: None,
+        monstro: None,
         keeper: Some(KeeperState {
             anchor: selector.position,
             entity_flags: 4,

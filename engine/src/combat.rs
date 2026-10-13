@@ -128,9 +128,9 @@ pub fn resolve_tear_npc_contact(
     tear: &mut ContactBody,
     npc: &mut ContactBody,
 ) -> Result<ContactResolution, String> {
-    if tear.entity_type != 2 || !matches!(npc.entity_type, 13 | 18 | 33 | 244) {
+    if tear.entity_type != 2 || !matches!(npc.entity_type, 13 | 18 | 20 | 33 | 244) {
         return Err(
-            "regular tear response requires an admitted Fly, AttackFly, Fireplace or Round Worm"
+            "regular tear response requires an admitted Fly, AttackFly, Monstro, Fireplace or Round Worm"
                 .into(),
         );
     }
@@ -147,7 +147,7 @@ pub fn resolve_tear_npc_contact(
     )
 }
 
-/// Admitted Fly, AttackFly, Fireplace and Round Worm pairs have no callback veto.
+/// Admitted Fly, AttackFly, Monstro, Fireplace and Round Worm pairs have no callback veto.
 /// The caller admits Fireplace's NPC-only queued damage alongside this response.
 /// The first body may instead be a regular Bomb; its callback
 /// 456c20 damps NPC velocity0.2 and its own0.5 before the mass response.
@@ -156,10 +156,10 @@ pub fn resolve_npc_or_bomb_pair(
     first: &mut ContactBody,
     second: &mut ContactBody,
 ) -> Result<ContactResolution, String> {
-    if !matches!(first.entity_type, 4 | 13 | 18 | 33 | 244)
-        || !matches!(second.entity_type, 13 | 18 | 33 | 244)
+    if !matches!(first.entity_type, 4 | 13 | 18 | 20 | 33 | 244)
+        || !matches!(second.entity_type, 13 | 18 | 20 | 33 | 244)
     {
-        return Err("NPC pairs require admitted Fly, AttackFly, Fireplace or Round Worm types, with an optional first Bomb".into());
+        return Err("NPC pairs require admitted Fly, AttackFly, Monstro, Fireplace or Round Worm types, with an optional first Bomb".into());
     }
     if first.entity_type > second.entity_type {
         resolve_contact(second, first, |_| false, bomb_pair_callback)
