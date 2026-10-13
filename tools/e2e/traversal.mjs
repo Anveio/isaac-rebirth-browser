@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 import { chromium } from '@playwright/test';
 import { browserLaunchOptions, inspectBrowserGraphics } from '../foundation/browser.mjs';
 import { startProductionServer } from '../foundation/production-server.mjs';
-import { assertInputProvenance, assertSeededRun, manualSeedCommands, waitForReady } from '../foundation/verify.mjs';
+import { assertInputProvenance, assertSeededRun, enterSeededRun, manualSeedCommands, waitForReady } from '../foundation/verify.mjs';
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const run = promisify(execFile);
 const value = flag => { const index = process.argv.indexOf(flag); return index < 0 ? undefined : process.argv[index + 1]; };
@@ -60,7 +60,7 @@ try {
         ? [{ type: 'key', key: 'w', down: true }, { type: 'step', frames: 27 }, { type: 'key', key: 'w', down: false }, { type: 'step', frames: 30 }] : [])];
       const keyCodes = { a: 'KeyA', w: 'KeyW', d: 'KeyD', s: 'KeyS', e: 'KeyE', Up: 'ArrowUp',
         Down: 'ArrowDown', Left: 'ArrowLeft', Right: 'ArrowRight', Escape: 'Escape' };
-      const expectedCommands = [...manualSeedCommands(scenario.code), { type: 'tick', count: 140 },
+      const expectedCommands = [...manualSeedCommands(scenario.code),
         ...[...setup, ...scenario.actions].flatMap(action => {
           if (action.type === 'step') return [{ type: 'tick', count: action.frames }];
           if (action.type === 'capture') return [];
@@ -76,11 +76,7 @@ try {
       const errors = []; page.on('pageerror', error => errors.push(String(error)));
       await page.goto(production.url + '/?manual=1'); await waitForReady(page);
       await page.evaluate(seed => { window.game.pause(); window.game.reset(seed, { trace: true }); }, scenario.runSeed);
-      for (let index = 0; index < 3; index++) await page.keyboard.press('Enter');
-      await page.keyboard.press('Tab'); await page.keyboard.type(scenario.code);
-      await page.keyboard.press('Enter'); await page.keyboard.press('Enter');
-      await page.evaluate(() => window.game.step(140));
-      const seeded = await page.evaluate(() => window.game.snapshot());
+      const seeded = await enterSeededRun(page, scenario.code);
       await writeFile(join(directory, 'browser-input.json'), JSON.stringify({ schema: 1, seeded,
         trace: await page.evaluate(() => window.game.trace()), expectedCommands }, null, 2) + '\n');
       assertSeededRun(seeded, scenario.code, scenario.runSeed);

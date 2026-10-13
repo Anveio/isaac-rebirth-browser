@@ -65,16 +65,67 @@ export async function waitForReady(page) {
 
 // The requested setup is independent of the observed trace and browser screen.
 export function manualSeedCommands(seedText) {
-  const commands = [];
-  const press = code => commands.push({ type: "key", code, down: true }, { type: "key", code, down: false });
-  for (let index = 0; index < 3; index++) press("Enter");
+  const commands = [{ type: "tick", count: 63 }];
+  const press = (code, settle) => commands.push({ type: "key", code, down: true }, { type: "tick", count: 12 },
+    { type: "key", code, down: false }, { type: "tick", count: settle });
+  for (let index = 0; index < 3; index++) press("Enter", 72);
   if (seedText !== null) {
-    press("Tab");
-    for (const text of seedText) commands.push({ type: "text", text: text.toUpperCase() });
-    press("Enter");
+    press("Tab", 108);
+    for (const text of seedText.replaceAll(" ", "").toUpperCase())
+      commands.push({ type: "text", text }, { type: "tick", count: 12 }, { type: "tick", count: 6 });
+    press("Enter", 72);
   }
-  press("Enter");
+  press("Enter", 300);
   return commands;
+}
+
+// Replay the public native menu tape from the browser's first Title boundary.
+// These are declared intervals, including New Run's fade and admission, rather
+// than waits inferred from an observed screen, clock, or introduction counter.
+export async function enterSeededRun(page, seedText, { onCommand, onTick, onCheckpoint } = {}) {
+  const record = async command => { if (onCommand) await onCommand(command); };
+  const key = async (code, down) => {
+    await page.keyboard[down ? "down" : "up"](code);
+    await record({ type: "key", code, down });
+  };
+  const tick = async count => {
+    const durationMs = await page.evaluate(count => {
+      const started = performance.now(); window.game.step(count); return performance.now() - started;
+    }, count);
+    if (onTick) onTick(count, durationMs);
+    await record({ type: "tick", count });
+  };
+  const press = async (code, settle) => { await key(code, true); await tick(12); await key(code, false); await tick(settle); };
+  const checkpoint = async (label, screen) => {
+    const state = await page.evaluate(() => window.game.snapshot());
+    assert.equal(state.screen, screen, `${label}: actual keyboard navigation must reach ${screen}`);
+    if (onCheckpoint) await onCheckpoint(label, screen);
+    return state;
+  };
+  // The native settled Title is 63 presentations after the first rendered
+  // Title snapshot, which is the browser reset boundary.
+  await tick(63); await checkpoint("title", "title");
+  for (const screen of ["profile", "main", "character"]) {
+    await press("Enter", 72); await checkpoint(screen, screen);
+  }
+  if (seedText !== null) {
+    await press("Tab", 108);
+    for (const text of seedText.replaceAll(" ", "").toUpperCase()) {
+      // Seed glyphs enter through trusted DOM keydown as text; keyup releases
+      // the real key without emitting a second WASM command in seed mode.
+      await page.keyboard.down(text.toLowerCase()); await record({ type: "text", text });
+      await tick(12); await page.keyboard.up(text.toLowerCase()); await tick(6);
+    }
+    await checkpoint("seed-entry", "seed");
+    await press("Enter", 72);
+    assertSeededRun(await checkpoint("character-seeded", "character"), seedText);
+  }
+  await press("Enter", 300);
+  const state = await checkpoint("gameplay-start", "playing");
+  if (seedText !== null) assertSeededRun(state, seedText);
+  assert.deepEqual((await page.evaluate(() => window.game.trace())).commands, manualSeedCommands(seedText),
+    "The complete menu setup must follow the independently declared command plan");
+  return state;
 }
 
 export function assertSeededRun(state, seedText, seedValue) {
@@ -108,7 +159,6 @@ export async function browserScenario(page, { initialSeed = FOUNDATION_REFERENCE
     await page.keyboard[down ? "down" : "up"](code);
     await record({ type: "key", code, down });
   };
-  const press = async (code) => { await key(code, true); await key(code, false); };
   const tick = async (count) => {
     const timing = await page.evaluate((count) => {
       const started = performance.now();
@@ -131,39 +181,16 @@ export async function browserScenario(page, { initialSeed = FOUNDATION_REFERENCE
   const finish = async () => {
     const actualTrace = await page.evaluate(() => window.game.trace());
     assertInputProvenance(actualTrace, commands, initialSeed, bootEpochSeed);
+    assert.equal(actualTrace.stateHistoryTruncated, false, "Replay comparison requires complete browser state history");
+    assert.equal(actualTrace.states.length, commands.length + 1, "Replay comparison must retain every public command state");
+    assert.ok(actualTrace.backendEvents.every(event => event.state), "Replay comparison must retain every actual music callback state");
     return { initialSeed, bootEpochSeed, commands, states: actualTrace.states, backendEvents: actualTrace.backendEvents,
       frames, timings, tickRate: 60, seed: states.at(-1).runSeed, inputTransport: "actual DOM keyboard; manually stepped WASM simulation; recorded audio backend callbacks" };
   };
-  // The native tape reaches its settled Title checkpoint 63 presentations
-  // after the first rendered Title snapshot (ANM2 frame 32). Runtime reset
-  // starts at that first snapshot, so deliver the intervening presentations.
-  await tick(63);
-  await capture("title", "title");
-  await press("Enter"); await capture("profile", "profile");
-  await press("Enter"); await capture("main", "main");
-  await press("Enter"); await capture("character", "character");
-  if (manualSeedText !== null) {
-    await press("Tab");
-    for (const text of manualSeedText) {
-      await page.keyboard.type(text);
-      await record({ type: "text", text });
-    }
-    await capture("seed-entry", "seed");
-    await press("Enter"); await capture("character-seeded", "character");
-    assertSeededRun(states.at(-1), manualSeedText);
-  }
-  await press("Enter");
-  const setup = [{ type: "tick", count: 63 }, ...manualSeedCommands(manualSeedText)];
-  assert.deepEqual(commands, setup, "The complete menu setup must follow the declared command plan");
-  assert.equal(states.at(-1).screen, "playing", "Actual keyboard must start the run before advancing its introduction");
-  // Existing neutral original fixtures were captured after the authored stage
-  // banner. Advance the explicit transition instead of suppressing its draw.
-  for (let steps = 0; states.at(-1).runIntroduction.active; steps += 10) {
-    assert.ok(steps < 600, "Run introduction must reach its neutral state within ten simulation seconds");
-    await tick(10);
-  }
-  await capture("gameplay-start", "playing");
-  if (manualSeedText !== null) assertSeededRun(states.at(-1), manualSeedText);
+  await enterSeededRun(page, manualSeedText, { onCommand: record, onCheckpoint: capture,
+    onTick: (count, durationMs) => timings.push({ commandIndex: commands.length, ticks: count, durationMs,
+      scope: "Tick command CPU wall time including WASM bridge, state snapshot and Canvas redraw; excludes Playwright transport/GPU completion" }) });
+  assert.deepEqual(commands, manualSeedCommands(manualSeedText), "The complete menu setup must follow the declared command plan");
   await key("KeyD", true); await tick(27); await key("KeyD", false); await tick(30);
   await capture("movement", "playing");
   if (bombCheckpoint !== undefined) {
