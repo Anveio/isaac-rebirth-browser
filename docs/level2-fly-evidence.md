@@ -42,8 +42,28 @@ first room before continuing the same recorded seed/graph. The rejected smoke,
 original public tape and hash remain preserved; neither received native or
 paired acceptance.
 
-Compilation, the frozen production artifact and fresh original/browser proof
-are pending. Syntax, TypeScript, authored assets, formatting and matrix checks
-are preparation evidence only. Complete boss blood/gibs, final heart/reward,
+One-job Rust/all-target Clippy, TypeScript, authored assets 2557, formatting and
+matrix checks pass. The frozen release artifact has 940 files and SHA256
+`30183f3349db92c079794be8918ed0cae74bfdfd5c3fdc7c12bd2aa5eadd8ba0`; its
+WASM is `fc4cc8b6be50466734d0b8045f6822289c9c869af7010188e2d029f23d17773a`.
+
+Both fresh native/browser captures and native provenance pass. Contrived
+admission has 184/184 generic checkpoints, but 576/11692 required actor fields
+fail; the first differences are actual 214 position/velocity on arrival, and
+Poof seeds also differ. Both sides execute admission, appearance, Poof birth
+fence/retirement and active AI. The retained OS-random full route has 149/714
+generic checkpoints and 5145/22067 required actor failures. Native queue/damage
+drain executes, but native remains in uncleared descriptor 9 while the browser
+clears it and reaches Monstro. Missing native death/retirement, delayed-clear
+and boss executions stay blocking. No causal origin is inferred for those
+physical differences.
+
+The initial wrapper ended after capturing both games without its second/final
+report. Exact functional and direct comparators were replayed offline against
+the unchanged captures; their failures, body hashes and source identity are
+pinned in `references/isaac/foundation/combat/level2-flies/verification.json`.
+The missing wrapper exit and unpersisted startup fingerprint remain explicit
+orchestration limits. Original PNGs and difference PNGs remain retained; no
+recovered full pixel summary or complete wrapper success is claimed. Complete boss blood/gibs, final heart/reward,
 Trapdoor and stage progression require subsequent causal callbacks. Existing
 T1 damage, W0, H2/center clearance and shared-stream failures remain required.
