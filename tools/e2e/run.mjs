@@ -7,7 +7,9 @@ import { parseArgs } from 'node:util';
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 export const LIVE_SCRIPTS = ['test:e2e:paired', 'test:e2e:floor', 'test:e2e:weapons', 'test:e2e:boot-mt', 'test:e2e:traversal', 'test:e2e:pickups'];
-const { values } = parseArgs({ options: { output: { type: 'string' }, list: { type: 'boolean' } } });
+const { values } = parseArgs({ options: { output: { type: 'string' }, list: { type: 'boolean' }, suite: { type: 'string' } } });
+if (values.suite && !LIVE_SCRIPTS.includes(values.suite)) throw new Error(`Unknown live game suite: ${values.suite}`);
+const selectedScripts = values.suite ? [values.suite] : LIVE_SCRIPTS;
 
 if (values.list) {
   console.log(JSON.stringify(LIVE_SCRIPTS));
@@ -18,11 +20,11 @@ if (values.list) {
   const report = {
     schema: 1, status: 'running', startedAt: new Date().toISOString(),
     runnerSha256: createHash('sha256').update(readFileSync(fileURLToPath(import.meta.url))).digest('hex'),
-    scripts: LIVE_SCRIPTS, suites: [],
+    scripts: selectedScripts, suites: [],
   };
   const save = () => writeFileSync(reportPath, JSON.stringify(report, null, 2) + '\n');
   save();
-  for (const script of LIVE_SCRIPTS) {
+  for (const script of selectedScripts) {
     console.log(`Running live game suite: ${script}`);
     const startedAt = new Date().toISOString();
     const result = await new Promise(done => {
@@ -34,7 +36,7 @@ if (values.list) {
     save();
     console.log(`${result.status}: ${script} (exit ${result.exitCode}${result.signal ? `, signal ${result.signal}` : ''})`);
   }
-  report.status = report.suites.length === LIVE_SCRIPTS.length && report.suites.every(suite => suite.status === 'pass') ? 'pass' : 'fail';
+  report.status = report.suites.length === selectedScripts.length && report.suites.every(suite => suite.status === 'pass') ? 'pass' : 'fail';
   report.finishedAt = new Date().toISOString();
   save();
   console.log(JSON.stringify({ status: report.status, report: reportPath, suites: report.suites }));

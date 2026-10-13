@@ -14,8 +14,27 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  paired-games:
+  live-suites:
     runs-on: ubuntu-24.04
+    outputs:
+      scripts: ${{ steps.suites.outputs.scripts }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Discover every registered live game suite
+        id: suites
+        run: echo "scripts=$(node tools/e2e/run.mjs --list)" >> "$GITHUB_OUTPUT"
+  paired-games:
+    needs: live-suites
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        script: ${{ fromJSON(needs.live-suites.outputs.scripts) }}
     timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
@@ -42,12 +61,13 @@ jobs:
       - name: Build and run live original/browser scenarios
         run: |
           source cloud/env.sh
-          npm run check
+          npm run check:build
+          npm run test:e2e -- --suite '${{ matrix.script }}'
       - name: Retain replay tapes and comparison evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: live-game-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+          name: live-game-evidence-${{ strategy.job-index }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
             .cache/foundation/paired-*/
             .cache/foundation/floor-e2e*.json
