@@ -52,7 +52,7 @@
   "ownedSources": {
     "engine/src/fireplaces.rs": "ee57af805efca30237f7669c481a0fa70f7be137c88a4fa67292d8348ae7a6a3",
     "tools/e2e/fireplaces.mjs": "79121b4f8848da67b615a8c8426e82110b54d92f6963c1ee8c7419174614f7b5",
-    "tools/foundation/fireplace-state-pair.mjs": "593811c3e07948f1de1bed15ad8710ae7874e5195b6193ac133b6b78003f1bd7",
+    "tools/foundation/fireplace-state-pair.mjs": "d34a2e620bcda2d910f21faa332bfa966b17c73e2cc1637db285942e26c9a686",
     "tools/original/fireplace-scenarios.py": "a0b96d7e2fb9c17a0ed7a60fdbe66134fcef5d78493c35e95db5aa53a5120451",
     "tools/original/foundation-combat-observe.py": "57519cb5a5adc5d5215c4a6e833923fae70ac8a3876e82874d1c6cb081a7b8f7",
     "web/npc-data.json": "dbd77756d4ba32f95d0498483aacfe3335d1acb28b4176fb85c98e944ab92921"
@@ -75,5 +75,6 @@
     "productionIdentityHelperSha256": "e3152b58e2353319ba0963b30439e33c3cc65f84a8c6ebb765c2812486245952",
     "scope": "Same ordered path/length/bytes algorithm as production server buildIdentity; direct scan avoids an unnecessary second full artifact copy"
   },
-  "readOnlyReview": "Source reviewer confirmed Ember BaseUpdate/lifetime/drift/manual-frame/playing/dead-retirement ordering and Fire initializer\u2192second-AI order; no live acceptance claim."
+  "readOnlyReview": "Source reviewer confirmed Ember BaseUpdate/lifetime/drift/manual-frame/playing/dead-retirement ordering and Fire initializer\u2192second-AI order; no live acceptance claim.",
+  "emberGateCorrection": "ember-gate-correction.json"
 }

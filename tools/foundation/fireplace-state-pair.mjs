@@ -37,9 +37,17 @@ assert.ok(replay.fireRequired.every(name => modes.includes(name)));
 const execution = Object.fromEntries(['native', 'browser'].map(game => [game, Object.fromEntries(modes.map(name => [name, false]))]));
 const prior = { native: new Map(), browser: new Map() };
 const priorEmbers = { native: new Map(), browser: new Map() };
+const emberBirths = { native: new Map(), browser: new Map() };
+const parentOrdinals = { native: new Map(), browser: new Map() };
+const emberCoverage = Object.fromEntries(['native', 'browser'].map(game => [game,
+  { fastFreeze: 0, fastMotion: 0, fullMotion: 0, birthFence: 0, retirement: 0 }]));
+let presentation = 0, previousCapturePresentation, previousRoom, segment = 0;
+const add = (a, b) => a.map((value, axis) => f32(value + b[axis]));
+const scale = (point, amount) => point.map(value => f32(value * amount));
 let gameplayStarted = false;
 assert.ok(replay.pairedTape.some(action => action.type === 'capture' && action.label === 'gameplay-start'));
 for (const action of replay.pairedTape) {
+  if (action.type === 'step') presentation += action.frames;
   if (action.type !== 'capture') continue;
   const label = action.label;
   if (label === 'gameplay-start') gameplayStarted = true;
@@ -61,6 +69,9 @@ for (const action of replay.pairedTape) {
   const native = source.entities.filter(actor => actor.type === 33 && actor.variant === 0);
   const port = actual.room.npcs.filter(actor => actor.kind === 33 && actor.variant === 0);
   const phase = source.nativePhase.systemIterations % 2;
+  const room = source.room.descriptorIndex;
+  const dense = previousCapturePresentation !== undefined && presentation === previousCapturePresentation + 1 && room === previousRoom;
+  if (!dense) segment += 1;
   check(checks, label, 'fire.spawnSeedOrder', native.map(actor => actor.spawnSeed), port.map(actor => actor.spawnSeed));
   check(checks, label, 'room.identity', source.room.descriptorIndex, actual.room.descriptor?.index ?? actual.currentRoom);
   check(checks, label, 'system.phase', phase, actual.systemClock.systemCounter % 2);
@@ -162,25 +173,36 @@ for (const action of replay.pairedTape) {
   check(checks, label, 'ember.activeCount', nativeEmbers.filter(actor => actor.active).length, browserEmbers.filter(actor => !actor.removed).length);
   check(diagnostics, label, 'ember.seedOrder', nativeEmbers.map(actor => actor.spawnSeed), browserEmbers.map(actor => actor.spawnSeed));
   const emberGames = {
-    native: { count: source.nativePhase.fullGameUpdates, actors: nativeEmbers.map(actor => ({ seed: actor.spawnSeed,
+    native: { count: source.nativePhase.fullGameUpdates, paused: observation.pause.paused,
+      actors: nativeEmbers.map(actor => ({ id: `${actor.sequenceId}:${actor.spawnSeed}:${actor.effectBirthGameUpdate}`, seed: actor.spawnSeed,
+      birthCount: actor.effectBirthGameUpdate,
       position: actor.position, velocity: actor.velocity, divisor: actor.effectLifetimeDivisor, ttl: actor.effectTimeToLive,
       active: actor.active, dead: actor.removed, animation: actor.animation, frame: actor.animationFrame,
       playing: actor.animationPlaying, parentType: actor.parentType, parentVariant: actor.parentVariant,
       hp: actor.hp, maxHp: actor.maxHp, radius: actor.collisionRadius, mass: actor.collisionMass, damage: actor.collisionDamage,
       friction: actor.friction, gridClass: actor.gridCollisionClass, entityClass: actor.entityCollisionClass })) },
-    browser: { count: actual.gameUpdateCount, actors: browserEmbers.map(actor => ({ seed: actor.spawnSeed,
+    browser: { count: actual.gameUpdateCount, paused: actual.paused,
+      actors: browserEmbers.map(actor => ({ id: `${actor.id}:${actor.spawnSeed}:${actor.birthGameUpdate}`, seed: actor.spawnSeed,
+      birthCount: actor.birthGameUpdate,
       position: vector(phase === 0 ? actor.presentedPosition : actor.position), velocity: vector(actor.velocity),
       divisor: actor.lifetimeDivisor, ttl: actor.timeToLive, active: !actor.removed, dead: actor.dead,
       animation: 'Idle', frame: actor.animationClock, playing: actor.animationPlaying, parentType: actor.parentType, parentVariant: actor.parentVariant,
       hp: actor.hp, maxHp: actor.maxHp, radius: actor.collisionRadius, mass: actor.collisionMass, damage: actor.collisionDamage,
       friction: actor.baseFriction, gridClass: actor.gridCollisionClass, entityClass: actor.entityCollisionClass })) },
   };
+  const currentLinked = { native: new Map(), browser: new Map() };
   for (const [game, world] of Object.entries(emberGames)) {
-    const present = new Set(world.actors.map(actor => actor.seed));
-    for (const [seed, previous] of priorEmbers[game]) {
-      if (!present.has(seed)) {
-        if (previous.actor.dead && previous.actor.active && world.count === previous.count + 1) execution[game]['ember-retirement'] = true;
-        priorEmbers[game].delete(seed);
+    const present = new Set(world.actors.map(actor => actor.id));
+    for (const [id, previous] of priorEmbers[game]) {
+      if (!present.has(id)) {
+        if (dense && world.count === previous.count + 1) {
+          check(checks, label, `${game}.ember${id}.retireOnlyAfterDead`, true, previous.actor.dead && previous.actor.active);
+          check(checks, label, `${game}.ember${id}.retireAtZeroTtl`, 0, previous.actor.ttl);
+          if (previous.actor.dead && previous.actor.active) execution[game]['ember-retirement'] = true;
+          emberCoverage[game].retirement += 1;
+          if (previous.link) emberBirths[game].get(previous.link).retirementPresentation = presentation;
+        }
+        priorEmbers[game].delete(id);
       }
     }
     for (const actor of world.actors) {
@@ -189,16 +211,40 @@ for (const action of replay.pairedTape) {
         ['gridClass', 0, actor.gridClass], ['entityClass', 0, actor.entityClass], ['parentType', 33, actor.parentType],
         ['parentVariant', 0, actor.parentVariant], ['animation', 'Idle', actor.animation]])
         check(checks, label, `${game}.ember${actor.seed}.${field}`, expected, observed);
-      const previous = priorEmbers[game].get(actor.seed);
+      const previous = priorEmbers[game].get(actor.id);
+      let link = previous?.link;
+      if (!previous && actor.divisor === 0 && actor.birthCount === world.count) {
+        //550a40 retains only parent type/variant at+1c/+20, not a Fire
+        //pointer/seed. Join the actual parent tag and observed append ordinal
+        //within this contiguous capture segment; never invent a parent seed.
+        const parent = `${room}:${segment}:${actor.parentType}:${actor.parentVariant}`;
+        const ordinal = parentOrdinals[game].get(parent) || 0;
+        parentOrdinals[game].set(parent, ordinal + 1);
+        link = `${parent}:${ordinal}`;
+        emberBirths[game].set(link, { label, parent: [actor.parentType, actor.parentVariant], ordinal,
+          birthPresentation: presentation, birthCount: world.count, seed: actor.seed });
+      }
       if (actor.divisor === 0) {
         execution[game]['ember-birth'] = true;
         check(checks, label, `${game}.ember${actor.seed}.birthTtl`, -1, actor.ttl);
         check(checks, label, `${game}.ember${actor.seed}.birthDead`, false, actor.dead);
+        check(checks, label, `${game}.ember${actor.seed}.birthFrame`, 0, actor.frame);
+        check(checks, label, `${game}.ember${actor.seed}.birthPlaying`, true, actor.playing);
+      }
+      if (actor.birthCount === world.count) {
+        emberCoverage[game].birthFence += 1;
+        check(checks, label, `${game}.ember${actor.id}.fullBirthFence`, 0, actor.divisor);
+        check(checks, label, `${game}.ember${actor.id}.unadvancedBirthTtl`, -1, actor.ttl);
       }
       if (previous && previous.actor.divisor === 0 && actor.divisor > 0 && world.count === previous.count + 1) {
         execution[game]['ember-first-full'] = true;
         check(checks, label, `${game}.ember${actor.seed}.lifetimeRange`, true, actor.divisor >= 2 && actor.divisor <= 31);
         check(checks, label, `${game}.ember${actor.seed}.firstFullTtl`, actor.divisor - 2, actor.ttl);
+        check(checks, label, `${game}.ember${actor.id}.firstFullCounterFence`, actor.birthCount + 1, world.count);
+        check(checks, label, `${game}.ember${actor.id}.firstFullPlaying`, true, actor.playing);
+        check(checks, label, `${game}.ember${actor.id}.firstFullFrame`, Math.min(8, Math.trunc(f32(9 * f32((actor.ttl + 1) / actor.divisor)))), actor.frame);
+        check(checks, label, `${game}.ember${actor.id}.firstFullDead`, actor.ttl === 0, actor.dead);
+        if (link) Object.assign(emberBirths[game].get(link), { firstFullPresentation: presentation, divisor: actor.divisor, initialTtl: actor.ttl });
       }
       if (previous && previous.actor.divisor > 0 && world.count === previous.count + 1) {
         check(checks, label, `${game}.ember${actor.seed}.divisorRetained`, previous.actor.divisor, actor.divisor);
@@ -206,13 +252,69 @@ for (const action of replay.pairedTape) {
         check(checks, label, `${game}.ember${actor.seed}.manualFrame`, Math.min(8, Math.trunc(f32(9 * f32(previous.actor.ttl / actor.divisor)))), actor.frame);
         check(checks, label, `${game}.ember${actor.seed}.deathFence`, actor.ttl === 0, actor.dead);
       }
-      priorEmbers[game].set(actor.seed, { count: world.count, actor });
+      if (previous && dense && world.count === previous.count) {
+        emberCoverage[game].fastFreeze += 1;
+        for (const field of ['ttl', 'divisor', 'frame', 'playing', 'dead', 'active', 'velocity'])
+          check(checks, label, `${game}.ember${actor.id}.fastFrozen.${field}`, previous.actor[field], actor[field]);
+      }
+      let ground = phase === 1 ? actor.position : previous?.ground;
+      const activeFull = previous && dense && !world.paused && phase === 1 && world.count === previous.count + 1;
+      if (activeFull && previous.ground && previous.actor.active) {
+        emberCoverage[game].fullMotion += 1;
+        check(checks, label, `${game}.ember${actor.id}.fullMotion`, add(previous.ground, scale(previous.actor.velocity, previous.actor.friction)), actor.position);
+        const basePlaying = previous.actor.playing && f32(previous.actor.frame + 1) < 9;
+        check(checks, label, `${game}.ember${actor.id}.basePlayingThenManualFrame`, basePlaying, actor.playing);
+        if (previous.actor.dead) check(checks, label, `${game}.ember${actor.id}.nextFullRemoved`, false, actor.active);
+      }
+      //Native transition admission can update NPCs at a frozen Game counter.
+      //A prior observed active full pass establishes the fast motion law;
+      //birth/TTL/frame freezes above remain required through transition waits.
+      const activeFullSeen = previous?.activeFullSeen || activeFull;
+      if (previous && dense && phase === 0 && world.count === previous.count && !world.paused && activeFullSeen && previous.actor.active) {
+        if (!actual.roomTransition && previous.ground) {
+          emberCoverage[game].fastMotion += 1;
+          check(checks, label, `${game}.ember${actor.id}.fastMotion`, add(previous.ground, scale(scale(actor.velocity, actor.friction), .5)), actor.position);
+        }
+      }
+      if (previous && dense && world.count === previous.count + 1 && !previous.actor.dead && actor.dead && link)
+        emberBirths[game].get(link).deathPresentation = presentation;
+      if (!actor.active && link) emberBirths[game].get(link).retirementPresentation ??= presentation;
+      if (link) currentLinked[game].set(link, actor);
+      priorEmbers[game].set(actor.id, { count: world.count, actor, ground, activeFullSeen, link });
     }
+  }
+  for (const link of new Set([...currentLinked.native.keys(), ...currentLinked.browser.keys()])) {
+    const native = currentLinked.native.get(link), browser = currentLinked.browser.get(link);
+    check(checks, label, `${link}.pairedPresence`, Boolean(native), Boolean(browser));
+    if (!native || !browser) continue;
+    for (const field of ['ttl', 'divisor', 'frame', 'playing', 'dead', 'active', 'parentType', 'parentVariant'])
+      check(checks, label, `${link}.paired.${field}`, native[field], browser[field]);
+    for (const field of ['position', 'velocity'])
+      check(native.seed === browser.seed ? checks : diagnostics, label, `${link}.paired.${field}`, native[field], browser[field]);
   }
   diagnostics.push({ label, field: 'fire.lootActorAdmission', status: 'unsupported',
     browserProducers: port.filter(actor => actor.fireplace?.lootBirth).map(actor => actor.fireplace.lootBirth),
     reason: 'Fresh local35 coin/heart admission is implemented; no live loot fixture or heart collection/modifier acceptance is claimed' });
   bodies.push({ label, native: source, browser: { fires: port, embers: browserEmbers, player: actual.player, immunity: actual.damageCooldown, room: actual.room, audio: actual.audio } });
+  previousCapturePresentation = presentation;
+  previousRoom = room;
+}
+const linkedBirths = new Set([...emberBirths.native.keys(), ...emberBirths.browser.keys()]);
+let completePairedLifetimes = 0;
+for (const link of linkedBirths) {
+  const native = emberBirths.native.get(link), browser = emberBirths.browser.get(link);
+  check(checks, 'ember-birth-links', `${link}.birthWitness`, Boolean(native), Boolean(browser));
+  if (!native || !browser) continue;
+  for (const field of ['parent', 'birthPresentation', 'firstFullPresentation', 'divisor', 'initialTtl', 'deathPresentation', 'retirementPresentation'])
+    check(checks, 'ember-birth-links', `${link}.${field}`, native[field] ?? null, browser[field] ?? null);
+  check(diagnostics, 'ember-birth-links', `${link}.seed`, native.seed, browser.seed);
+  if (['birthPresentation', 'firstFullPresentation', 'divisor', 'initialTtl', 'deathPresentation', 'retirementPresentation']
+    .every(field => Number.isInteger(native[field]) && Number.isInteger(browser[field]))) completePairedLifetimes += 1;
+}
+if (replay.fireRequired.includes('ember-birth')) {
+  for (const game of ['native', 'browser']) for (const [field, count] of Object.entries(emberCoverage[game]))
+    check(checks, 'ember-coverage', `${game}.${field}`, true, count > 0);
+  check(checks, 'ember-coverage', 'pairedCompleteLifetime', true, completePairedLifetimes > 0);
 }
 for (const game of ['native', 'browser']) for (const required of replay.fireRequired)
   check(checks, 'execution', `${game}.${required}`, true, execution[game][required]);
@@ -220,6 +322,10 @@ const report = { schema: 1, status: checks.every(row => row.status === 'pass') ?
   scope: 'Ordinary33 raw1400 factory, actual ordered Tear/Bomb FIFO, subclass extinguish and Effect66 lifetime are required. Exact shared stream/particle seeds, live loot/heart collection/modifiers, blend/depth ordering and saved-room reconstruction remain explicit incomplete contracts.',
   provenance: { originalManifest: originalPath, originalSha256: hash(originalPath), browserManifest: browserPath, browserSha256: hash(browserPath),
     originalBinarySha256: gate.sourceBinarySha256, browserArtifactSha256: gate.production.artifactSha256, comparatorSha256: hash(new URL(import.meta.url)), gateSourcesStable: true },
+  parentJoinScope: 'Source GameSpawn retains type/variant parent identity only, not actual Fire pointer/seed. Paired links use those real tags plus observed append ordinal within each contiguous capture segment; gaps start a new segment. No spatial/captured-parent inference.',
+  exactTrajectoryScope: 'Shared-RNG-dependent seeds/paired numeric positions remain diagnostics; independent own-actor full/fast motion, playing/lifetime/birth/retirement laws and paired observed lifetime timing are required.',
+  emberBirths: Object.fromEntries(Object.entries(emberBirths).map(([game, births]) => [game, Object.fromEntries(births)])),
+  emberCoverage, completePairedLifetimes,
   execution, checks, diagnostics, bodies };
 writeFileSync(resolve(option('--output')), JSON.stringify(report, null, 2) + '\n');
 console.log(JSON.stringify({ status: report.status, checks: checks.length, failures: checks.filter(row => row.status === 'fail').length,
