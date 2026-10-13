@@ -16,7 +16,7 @@ const scenarios=JSON.parse(execFileSync('python3',['tools/original/roundworm-sce
 const selected=option('--case');if(selected){scenarios.cases=scenarios.cases.filter(item=>item.scenario.id===selected);assert.equal(scenarios.cases.length,1);}
 save(resolve(output,'scenarios.json'),scenarios);
 const tapes=scenarios.cases.map((item,index)=>{const path=resolve(output,`replay-${index}.json`);save(path,item);return path;});
-const paired=await runPairedGate({output:resolve(output,'paired'),selected:[],randomCount:0,replayCases:tapes,productionDirectory:option('--production-directory')});
+const paired=await runPairedGate({output:resolve(output,'paired'),selected:[],randomCount:0,replayCases:tapes,productionDirectory:option('--production-directory'),nativeFrameTimeout:Number(option('--native-frame-timeout','120'))});
 const cases=scenarios.cases.map((scenario,index)=>{
   const directory=resolve(output,'paired',`${String(index).padStart(2,'0')}-${scenario.scenario.id}`), target=resolve(directory,'worm-state.json');
   rmSync(target,{force:true});

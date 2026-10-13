@@ -56,9 +56,19 @@ def cohort():
     for elapsed in range(1, 241):
         random += step(1, f'random-worm-active-{elapsed}')
     random_case = case('paired-random-worm-projectile', selection['code'], random,
-                       ['admission', 'appearance', 'hidden', 'relocation', 'shoot', 'projectile-contact'], True)
+                       ['admission', 'appearance', 'hidden', 'relocation', 'shoot'], True)
     random_case['randomSelection'] = selection
-    return [damage, returning, random_case]
+    contact = []
+    for action in random:
+        contact.append(action)
+        if action.get('label') == 'random-worm-active-80': contact.append(key('a', True))
+        if action.get('label') == 'random-worm-active-100': contact.append(key('a', False))
+    contact_case = case('paired-random-worm-contact', selection['code'], contact,
+                        ['admission', 'appearance', 'hidden', 'relocation', 'shoot', 'projectile-contact'], True)
+    contact_case['randomSelection'] = selection
+    contact_case['publicRoute'] = 'Walk left20 presentations after80 active observations through authored empty rowy280, then stand; no actor position or HP is supplied.'
+    random_case['publicRoute'] = 'Unchanged standing holdout; actual native shots at342/408 units ground before Player contact, so it gates emission/vertical law and does not claim contact execution.'
+    return [damage, returning, random_case, contact_case]
 
 
 if __name__ == '__main__':
