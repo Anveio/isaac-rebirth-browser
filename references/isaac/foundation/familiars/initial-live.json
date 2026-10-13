@@ -1,0 +1,475 @@
+{
+  "schema": 1,
+  "status": "fail",
+  "scope": "First source-backed Leech cache/admission/appearance leaf; all four fresh-original/production-browser pairs and required reds retained. No complete Familiar parity.",
+  "producerHead": "307701df0f717eb31b55eef33bcda090293408b9",
+  "producerBase": "472b154",
+  "production": {
+    "sha256": "ec40a42167b8418b5978d9624391046bc548fb609069a68955c8abfa65a20ed8",
+    "files": 930,
+    "source": "/workspace/isaac-worktrees/e2e-ci/dist",
+    "scope": "Immutable snapshot of production build bytes; source/native replay equality is checked separately"
+  },
+  "nativeBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "report": {
+    "path": ".cache/e2e/familiars/first-four-case-live/report.json",
+    "sha256": "540162cbde6f03b2605adaefb8ac9b7105b4347416fcb36a741c0a3b05cf556f"
+  },
+  "independentEvidenceAudit": {
+    "status": "evidence audit pass; required paired runtime parity fail",
+    "path": ".cache/coordination/item-research/leech-admission/first-familiar-proof-audit.json",
+    "sha256": "ff06422b2f9c91902a8cc60e2625b911bf628ff22af531e77a85eb7cc74b1853",
+    "verifierPath": ".cache/coordination/item-research/leech-admission/audit-first-familiar-proof.py",
+    "verifierSha256": "5f6ee7c3bbcfa399206bd1e69a86d6e7a9fc8877c6429d5174c441624040ba57",
+    "checks": "All four native/browser gzip digests and sizes, independent intended tapes and command plans, manual seed/boot inputs, every actual backend callback state, all 39 captured source hashes versus producer Git objects, and all 347 count/child RNG/temporary/queue fields in every phase"
+  },
+  "associationScope": {
+    "ember": "The captured comparator consumes the first unused browser Ember. When count/order/seed diverges, position and velocity are ordinal candidate comparisons, not established same-actor trajectories. All raw rows and 25,131 required failures remain unchanged. Actual presence/order/sequence/shared-seed gaps remain required.",
+    "reportUnchanged": true
+  },
+  "sourceStability": {
+    "status": "pass",
+    "allPinnedSourcesMatchProducerGitObjects": true,
+    "hashes": {
+      "tools/e2e/familiars.mjs": "7310e98c97b9752122815af5386c10e8aaa1363b8038c41581698da0b921e0c3",
+      "tools/original/familiar-scenarios.py": "1e5d892582dd1b7b52962f210880af983593c3107cc4d42c494c24b915c32e9f",
+      "tools/original/familiar-observer.py": "7d9b9e90f79d5453af91ccb1fdac67aab74be615fc49d932a54fc72ec8ff1010",
+      "tools/original/item-scenarios.py": "c55fc3a7de59e23f89e9c0b4ce71b6f8abbf5a78d12936de5e6cda76324eb9fe",
+      "tools/foundation/decode-rooms.py": "4640cce2c99d0ef09d6691cf42c021f012e16ed3752bace965ad18dca7250f1a",
+      "tools/original/foundation-seeds.py": "dd4633c955e7518e9bc0f0147ddfae46d356468238477a68dc06c86656ccba89",
+      "tools/original/foundation-clock-run.py": "8f2fa981fbe26073d5a5a34ff46fbc6e9c70c2d30f81784abded5e40b9110c5b",
+      "tools/original/foundation-clock-verify.py": "c488100a187b44803c06374535715eaa5a7cde9d4513f6e866e090367d4f2054",
+      "tools/original/foundation-clock-gate.c": "f517f1fc0edf2bbe17021e529fb41652e991e286bef070b8aecefd32bfa62e75",
+      "tools/original/state-observer.py": "58e3b510abbe5ff57f05844efbdf764e2a02530cda4fa99f538d886d258af6f1",
+      "tools/original/foundation-pickup-observe.py": "021b095f6dfcd3a2039fa491b692f5e05400224e5286e283e4b071e439176122",
+      "tools/original/with-display.sh": "4371efe64ae1639564b4a85292ff252e20bcfe84b5387927ecf7093c6b8d3dfb",
+      "tools/foundation/browser.mjs": "60c4bc851470f47e4dd0399148ce0c1edf351d41fbf7f7e15fa823af5948b4c8",
+      "tools/foundation/verify.mjs": "3743b773cf2ede253c6d78f2605eb43f34e9d7002284b6a1dd2c413d45835a5c",
+      "tools/foundation/production-server.mjs": "e3152b58e2353319ba0963b30439e33c3cc65f84a8c6ebb765c2812486245952",
+      "tools/e2e/item-room-evidence.mjs": "3794ab422ca0c4f39ddbb9d4d90639f4a1dc2a8edb4c769850fe5f1ed8a4f17f",
+      "engine/src/familiars.rs": "3fd948beaa2b4da0ae49fef96fe300410c7ea86b99f4d786e0e8052753752f0c",
+      "engine/src/actors.rs": "f40cff1bf83d5290cf3d1d4d38a2a3ef869740be6f70fdd0ce5fdd7c46b27e0b",
+      "engine/src/player_items.rs": "8e3103bc7072f268e2ecae4816c30dd89ce80571d633adc101298cedae6164eb",
+      "engine/src/lib.rs": "4e7b7238a313c723031b7ffd14927efe215c81b3b903c12f5c080394568e8916",
+      "engine/src/effects.rs": "cd0369e5d48a2abae0255f63bd6688ed0289e7b68af0795f7cd663f3ee339686",
+      "engine/src/mt.rs": "8a6814236c7aad63d744c86a55416c086648f1e88d41aa10dbcb1e24b1fcc933",
+      "engine/src/grid.rs": "c7714211d3292e17f8ab2f42e084dc63f13d52f106d7e092e4fea5e7d5696e57",
+      "engine/src/items.rs": "499883b8ffdd240c49b36055e7c19fb6d17dc811a0b30d75275a35f237950721",
+      "engine/src/seed.rs": "5b34052dfbc34facb7903d1aeae5b063934c7780902d4ccfe6ab2743597d98d3",
+      "engine/src/motion.rs": "3ad2da4078cc2a03b21b83fde4162ed37ef3886c5bd885cbc9e2ca8e525c556b",
+      "engine/src/bombs.rs": "d580016e51d3775ed34f7857f3302300c824572c1f01538c2eb728e7dd5e823a",
+      "engine/src/pickups.rs": "e40b89d630800675cf681941ba5ba2ecbd1ef71b9f8def053b644c7a1f075606",
+      "engine/src/room.rs": "e68acaa9e7aa3fccff4897cb1877911178acba1e248a22fd5e33d4f42918afb7",
+      "engine/src/npcs.rs": "f736c2921bf8fd30113080e75af8945598c643ed2395f175ca77d7e452d004eb",
+      "engine/src/fireplaces.rs": "ee57af805efca30237f7669c481a0fa70f7be137c88a4fa67292d8348ae7a6a3",
+      "engine/build.rs": "53d5df6ba83a76b12547a7e7795ab17c704d7e65520dd3cefb904c33ce6c8817",
+      "web/engine.ts": "af1b526e14b84ef4c1b1950a92c773683b4e31629b7f6bbadfa41bf52107d061",
+      "web/renderer.ts": "a70b75eb4f1c7d018a704c5f9f33882ae094cca5a5f6d72199cec15d0240df6f",
+      "web/animation.ts": "3a94923bfcdcfb201e89ee69528d22926e67f40caf3f977d07d582919e84e289",
+      "web/trace.ts": "e05eee6d02f687b3b5bf2d31f7eb59d5c3e1900a6c1a078e15f63b71b325fb38",
+      "web/familiar-data.json": "88d4519eca9406e6ebaddcfc0c3581da9c10339ee6bb90dfd41e8926e78f8067",
+      "web/scene-data.json": "457667d62b58d5bc584cba3cccf48471d58a9f068e4277fa4d5bee90d59c2484",
+      "web/pickup-data.json": "b6a14059e82fcca8dabcdf98ba865ea5bc16a70706e18fca604fc6dcd378991b"
+    }
+  },
+  "totals": {
+    "cases": 4,
+    "passedCases": 0,
+    "comparedPresentations": 1470,
+    "checks": 80878,
+    "failures": 25131,
+    "joinedLeechPresentations": 235,
+    "joinedPoofPresentations": 168
+  },
+  "passingContracts": [
+    "Complete independent public tape/boot epoch/seed/log/DOM command provenance in all four cases",
+    "All347 permanent counts/child RNGs, actual temporary owner and deferred queue across every captured phase",
+    "Actual normal Isaac world pose and velocity in every phase",
+    "Leech local seed/RNG30, parent/owner joins, classes/flags/health/mass/friction, all appearance counters/reveal and main Sprite in both contrived cases",
+    "Real Poof15 sprite/countdown/retirement and common fields in both contrived cases; world/seed/sequence remain red"
+  ],
+  "blockingGaps": [
+    "Source initial LightBeam Effect33 and OS-acquisition Effect68 absent",
+    "Actual complete actor order/room sequence and Ember presence/shared-seed differences; its position/velocity rows have ordinal candidate association limits",
+    "Leech shared-direction placement and source sequence mismatch",
+    "Poof shared seed/RNG30/placement/source sequence mismatch"
+  ],
+  "unaccepted": [
+    "Weighted navigation/target/contact/heal and modifiers/other Familiar subclasses",
+    "Complete native cache/stat completion",
+    "Remaining real shared/actor consumers and full624 MT numeric parity",
+    "Absolute cutscene/Game age alignment and room-return Familiar reinitialization",
+    "Full-frame pixels"
+  ],
+  "sourceContracts": [
+    {
+      "path": ".cache/coordination/item-research/leech-admission/minimum-contract.json",
+      "sha256": "f0195e8f5627f15ac3eaefde45b21010686489c006281baefb0bf5be3eb8bff0"
+    },
+    {
+      "path": ".cache/coordination/item-research/leech-admission/runtime-review/contract.json",
+      "sha256": "0c35c0c763b541828f2e142d6100a2738fd48ee5823e43c912dc3129b00a70ff"
+    }
+  ],
+  "cases": [
+    {
+      "name": "familiar-phase-0",
+      "code": "W0L0LYYM",
+      "seedValue": 2591693487,
+      "delay": 0,
+      "entropy": "Contrived public phase offset",
+      "actions": [
+        {
+          "key": "w",
+          "frames": 74
+        },
+        {
+          "key": null,
+          "frames": 60
+        },
+        {
+          "key": "w",
+          "frames": 32
+        },
+        {
+          "key": "Right",
+          "frames": 50
+        },
+        {
+          "key": null,
+          "frames": 50
+        },
+        {
+          "key": null,
+          "frames": 100
+        }
+      ],
+      "status": "fail",
+      "checks": 23564,
+      "comparedPresentations": 367,
+      "grants": 118,
+      "familiarPresentations": 118,
+      "poofPresentations": 84,
+      "appearanceCoverage": {
+        "nativeCounters": [
+          4,
+          3,
+          2,
+          1,
+          0
+        ],
+        "browserCounters": [
+          4,
+          3,
+          2,
+          1,
+          0
+        ],
+        "nativePoofRetired": true,
+        "browserPoofRetired": true
+      },
+      "nativeManifestSha256": "e3ffbda4a9601f4685aec3cf8be0db44c65b103347393e4ad9b801f988ec28b6",
+      "tapeSha256": "db6fc0a77f3de73d97a5b357d2c804bf49b652360ae93e599dceb8446c690da8",
+      "nativeEvidence": {
+        "path": "/workspace/isaac-worktrees/e2e-ci/.cache/e2e/familiars/first-four-case-live/familiar-phase-0/original/manifest.json.gz",
+        "originalPath": "/workspace/isaac-worktrees/e2e-ci/.cache/e2e/familiars/first-four-case-live/familiar-phase-0/original/manifest.json",
+        "encoding": "gzip",
+        "rawBytes": 45940612,
+        "rawSha256": "e3ffbda4a9601f4685aec3cf8be0db44c65b103347393e4ad9b801f988ec28b6",
+        "mode": 384,
+        "mtimeMs": 1791917055799.4478,
+        "scope": "Lossless completed original capture; all observations/failures preserved"
+      },
+      "browserEvidence": {
+        "path": "/workspace/isaac-worktrees/e2e-ci/.cache/e2e/familiars/first-four-case-live/familiar-phase-0/browser-states.json.gz",
+        "encoding": "gzip",
+        "rawSha256": "32946af3df18e2243b99e68a118481c3f7e29d5aba5e196639fdb9d8ebae329c",
+        "rawBytes": 102644131
+      },
+      "inputProvenance": {
+        "status": "pass",
+        "commands": 421,
+        "inputTraceTruncated": false,
+        "stateHistoryTruncated": true,
+        "stateHistoryTruncationReason": "bytes",
+        "independentlyCapturedStates": 366
+      },
+      "failures": 6840,
+      "failureFieldCounts": {
+        "actual Room next sequence owner": 357,
+        "all actual actor presence/order/sequence": 349,
+        "every actual effect presence": 313,
+        "1000/33:typed actor": 73,
+        "1000/66:actual f32 world position": 1562,
+        "1000/66:actual f32 velocity": 1562,
+        "1000/66:actual shared spawn seed": 1562,
+        "1000/66:existing typed Ember owner": 490,
+        "3/56/41:actual sequence": 118,
+        "3/56/41:f32 world position": 118,
+        "1000/15/42:actual sequence": 84,
+        "1000/15/42:spawnSeed": 84,
+        "1000/15/42:f32 world position": 84,
+        "1000/15/42:actual actor RNG30": 84
+      },
+      "completeMtDiagnosticSamples": 331
+    },
+    {
+      "name": "familiar-phase-1",
+      "code": "W0L0LYYM",
+      "seedValue": 2591693487,
+      "delay": 1,
+      "entropy": "Contrived public phase offset",
+      "actions": [
+        {
+          "key": "w",
+          "frames": 74
+        },
+        {
+          "key": null,
+          "frames": 61
+        },
+        {
+          "key": "w",
+          "frames": 32
+        },
+        {
+          "key": "Right",
+          "frames": 50
+        },
+        {
+          "key": null,
+          "frames": 50
+        },
+        {
+          "key": null,
+          "frames": 100
+        }
+      ],
+      "status": "fail",
+      "checks": 22816,
+      "comparedPresentations": 368,
+      "grants": 117,
+      "familiarPresentations": 117,
+      "poofPresentations": 84,
+      "appearanceCoverage": {
+        "nativeCounters": [
+          4,
+          3,
+          2,
+          1,
+          0
+        ],
+        "browserCounters": [
+          4,
+          3,
+          2,
+          1,
+          0
+        ],
+        "nativePoofRetired": true,
+        "browserPoofRetired": true
+      },
+      "nativeManifestSha256": "898b724a441eb2311e37a00eee0388ef51b8f7d14f242cafcd8d18b19d766960",
+      "tapeSha256": "a1f2901a36395cf0278dfad2cb2c42dfa66acc139e720940b8a05d9ea32feb6c",
+      "nativeEvidence": {
+        "path": "/workspace/isaac-worktrees/e2e-ci/.cache/e2e/familiars/first-four-case-live/familiar-phase-1/original/manifest.json.gz",
+        "originalPath": "/workspace/isaac-worktrees/e2e-ci/.cache/e2e/familiars/first-four-case-live/familiar-phase-1/original/manifest.json",
+        "encoding": "gzip",
+        "rawBytes": 45405432,
+        "rawSha256": "898b724a441eb2311e37a00eee0388ef51b8f7d14f242cafcd8d18b19d766960",
+        "mode": 384,
+        "mtimeMs": 1791917293620.7002,
+        "scope": "Lossless completed original capture; all observations/failures preserved"
+      },
+      "browserEvidence": {
+        "path": "/workspace/isaac-worktrees/e2e-ci/.cache/e2e/familiars/first-four-case-live/familiar-phase-1/browser-states.json.gz",
+        "encoding": "gzip",
+        "rawSha256": "0dff82174a90b8233ba67910aa6a3ec4b3ffff3846791688cbb311f13152d2eb",
+        "rawBytes": 102902457
+      },
+      "inputProvenance": {
+        "status": "pass",
+        "commands": 422,
+        "inputTraceTruncated": false,
+        "stateHistoryTruncated": true,
+        "stateHistoryTruncationReason": "bytes",
+        "independentlyCapturedStates": 367
+      },
+      "failures": 6274,
+      "failureFieldCounts": {
+        "actual Room next sequence owner": 358,
+        "all actual actor presence/order/sequence": 350,
+        "every actual effect presence": 320,
+        "1000/33:typed actor": 73,
+        "1000/66:actual f32 world position": 1387,
+        "1000/66:actual f32 velocity": 1387,
+        "1000/66:actual shared spawn seed": 1387,
+        "1000/66:existing typed Ember owner": 442,
+        "3/56/47:actual sequence": 117,
+        "3/56/47:f32 world position": 117,
+        "1000/15/48:actual sequence": 84,
+        "1000/15/48:spawnSeed": 84,
+        "1000/15/48:f32 world position": 84,
+        "1000/15/48:actual actor RNG30": 84
+      },
+      "completeMtDiagnosticSamples": 332
+    },
+    {
+      "name": "random-pedestal-0",
+      "code": "ZL7VS0GL",
+      "seedValue": 2773796773,
+      "delay": 0,
+      "entropy": "OS secrets",
+      "actions": [
+        {
+          "key": "w",
+          "frames": 74
+        },
+        {
+          "key": null,
+          "frames": 60
+        },
+        {
+          "key": "w",
+          "frames": 32
+        },
+        {
+          "key": null,
+          "frames": 100
+        },
+        {
+          "key": null,
+          "frames": 100
+        }
+      ],
+      "status": "fail",
+      "checks": 17179,
+      "comparedPresentations": 367,
+      "grants": 118,
+      "familiarPresentations": 0,
+      "poofPresentations": 0,
+      "appearanceCoverage": {
+        "nativeCounters": [],
+        "browserCounters": [],
+        "nativePoofRetired": false,
+        "browserPoofRetired": false
+      },
+      "nativeManifestSha256": "f707ec2e8c47b9235f52dbe22b8c8d58d27ced9a30cfbf9191180643302aa0f6",
+      "tapeSha256": "c64b26d09fc1e4ca219be164a9b067499f24a7b3394148336e39c750347a3e31",
+      "nativeEvidence": {
+        "path": "/workspace/isaac-worktrees/e2e-ci/.cache/e2e/familiars/first-four-case-live/random-pedestal-0/original/manifest.json.gz",
+        "originalPath": "/workspace/isaac-worktrees/e2e-ci/.cache/e2e/familiars/first-four-case-live/random-pedestal-0/original/manifest.json",
+        "encoding": "gzip",
+        "rawBytes": 44559573,
+        "rawSha256": "f707ec2e8c47b9235f52dbe22b8c8d58d27ced9a30cfbf9191180643302aa0f6",
+        "mode": 384,
+        "mtimeMs": 1791917530941.9343,
+        "scope": "Lossless completed original capture; all observations/failures preserved"
+      },
+      "browserEvidence": {
+        "path": "/workspace/isaac-worktrees/e2e-ci/.cache/e2e/familiars/first-four-case-live/random-pedestal-0/browser-states.json.gz",
+        "encoding": "gzip",
+        "rawSha256": "f7cf416ba643ef18b387b6606d2b7c0de8b575fea69f4cc2b6ee481f664ccfdc",
+        "rawBytes": 102497833
+      },
+      "inputProvenance": {
+        "status": "pass",
+        "commands": 419,
+        "inputTraceTruncated": false,
+        "stateHistoryTruncated": true,
+        "stateHistoryTruncationReason": "bytes",
+        "independentlyCapturedStates": 366
+      },
+      "failures": 5836,
+      "failureFieldCounts": {
+        "actual Room next sequence owner": 350,
+        "all actual actor presence/order/sequence": 276,
+        "every actual effect presence": 234,
+        "1000/66:actual f32 world position": 1560,
+        "1000/66:actual f32 velocity": 1560,
+        "1000/66:actual shared spawn seed": 1560,
+        "1000/66:existing typed Ember owner": 296
+      },
+      "completeMtDiagnosticSamples": 301
+    },
+    {
+      "name": "random-pedestal-1",
+      "code": "WT00SXH1",
+      "seedValue": 2608994225,
+      "delay": 1,
+      "entropy": "OS secrets",
+      "actions": [
+        {
+          "key": "w",
+          "frames": 74
+        },
+        {
+          "key": null,
+          "frames": 61
+        },
+        {
+          "key": "w",
+          "frames": 32
+        },
+        {
+          "key": null,
+          "frames": 100
+        },
+        {
+          "key": null,
+          "frames": 100
+        }
+      ],
+      "status": "fail",
+      "checks": 17319,
+      "comparedPresentations": 368,
+      "grants": 117,
+      "familiarPresentations": 0,
+      "poofPresentations": 0,
+      "appearanceCoverage": {
+        "nativeCounters": [],
+        "browserCounters": [],
+        "nativePoofRetired": false,
+        "browserPoofRetired": false
+      },
+      "nativeManifestSha256": "539f6c297cc804ce2975e26500ce60560bd691db591403a78c5ee0fad81d7267",
+      "tapeSha256": "72eb16ce621a4802831a6f09c17de2dd2a4aade292bcc2e2d406e6554bfff8c1",
+      "nativeEvidence": {
+        "path": "/workspace/isaac-worktrees/e2e-ci/.cache/e2e/familiars/first-four-case-live/random-pedestal-1/original/manifest.json.gz",
+        "originalPath": "/workspace/isaac-worktrees/e2e-ci/.cache/e2e/familiars/first-four-case-live/random-pedestal-1/original/manifest.json",
+        "encoding": "gzip",
+        "rawBytes": 45493717,
+        "rawSha256": "539f6c297cc804ce2975e26500ce60560bd691db591403a78c5ee0fad81d7267",
+        "mode": 384,
+        "mtimeMs": 1791917733318.3972,
+        "scope": "Lossless completed original capture; all observations/failures preserved"
+      },
+      "browserEvidence": {
+        "path": "/workspace/isaac-worktrees/e2e-ci/.cache/e2e/familiars/first-four-case-live/random-pedestal-1/browser-states.json.gz",
+        "encoding": "gzip",
+        "rawSha256": "b25e8e1d7b97388760cb396ca13012004d89cbabdd6ca84f90797a971e1df7e7",
+        "rawBytes": 102493082
+      },
+      "inputProvenance": {
+        "status": "pass",
+        "commands": 420,
+        "inputTraceTruncated": false,
+        "stateHistoryTruncated": true,
+        "stateHistoryTruncationReason": "bytes",
+        "independentlyCapturedStates": 367
+      },
+      "failures": 6181,
+      "failureFieldCounts": {
+        "actual Room next sequence owner": 350,
+        "all actual actor presence/order/sequence": 368,
+        "every actual effect presence": 326,
+        "1000/68:typed actor": 146,
+        "1000/66:existing typed Ember owner": 461,
+        "1000/66:actual f32 world position": 1510,
+        "1000/66:actual f32 velocity": 1510,
+        "1000/66:actual shared spawn seed": 1510
+      },
+      "completeMtDiagnosticSamples": 332
+    }
+  ]
+}

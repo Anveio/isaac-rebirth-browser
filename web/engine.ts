@@ -18,8 +18,31 @@ export interface Tear {
     fallingAcceleration: number; renderOffsetY: number; lifetime: "alive" | "dying" | "removed";
   };
 }
+export interface ActorSprite {
+  animation: string; frame: number; playing: boolean; speed: number; scale: {x: number; y: number};
+  offset: {x: number; y: number}; flipX: boolean;
+}
+export interface Familiar {
+  id: number; variant: number; subtype: number; spawnSeed: number; owner: ActorRef; parent: ActorRef;
+  parentType: number; parentVariant: number; birthGameUpdate: number; actorRng: ItemRng;
+  position: {x: number; y: number}; presentedPosition: {x: number; y: number}; velocity: {x: number; y: number};
+  configuredFriction: number; currentFriction: number; collisionRadius: number; collisionMass: number;
+  collisionDamage: number; hp: number; maxHp: number; shadowSize: number; gridCollisionClass: number; entityCollisionClass: number;
+  flags: number; visible: boolean; active: boolean; removed: boolean; followerIndex: number; appearanceCounter: number;
+  sprite: ActorSprite; fullUpdates: number; unresolvedAiUpdates: number;
+}
+export interface SpriteEffect {
+  id: number; variant: number; subtype: number; spawnSeed: number;
+  parent: {actor: ActorRef; entityType: number; variant: number} | null;
+  birthGameUpdate: number; actorRng: ItemRng; position: {x: number; y: number}; presentedPosition: {x: number; y: number};
+  velocity: {x: number; y: number}; configuredFriction: number; currentFriction: number;
+  collisionRadius: number; collisionMass: number; collisionDamage: number; hp: number; maxHp: number;
+  gridCollisionClass: number; entityCollisionClass: number; flags: number; visible: boolean; active: boolean; removed: boolean;
+  renderOrderOffset: number; lifetimeDivisor: number; timeToLive: number; raw7f4: number; raw7f8: number;
+  sprite: ActorSprite; fullUpdates: number;
+}
 export interface Impact { id: number; x: number; y: number; age: number; }
-export interface ActorRef { kind: "player" | "tear" | "bomb" | "pickup" | "npc" | "projectile" | "effect"; id: number; }
+export interface ActorRef { kind: "player" | "familiar" | "tear" | "bomb" | "pickup" | "npc" | "projectile" | "effect"; id: number; }
 export interface MtState { words: number[]; index: number; }
 export interface GridSeedSample { roomRecord: number; gridIndex: number; seeds: [number, number]; }
 export interface BootLifecycle {
@@ -183,7 +206,7 @@ export interface State {
     specialFactor: number; removed: boolean[]; selected: boolean[]; roomRoutes: number[]; pillEffects: number[]} | null;
   playerItems: {initializerSeed: number; managerRng: ItemRng; initializerRng: ItemRng;
     itemRngs: ItemRng[]; trinketRngs: ItemRng[]; pocketRngs: ItemRng[]; entitySpawnSeed: number;
-    ownedCounts: number[]; queuedId: number | null; queuedCharge: number; queuedTouched: boolean;
+    ownedCounts: number[]; temporaryCollectibles: {itemId: number; count: number}[]; queuedId: number | null; queuedCharge: number; queuedTouched: boolean;
     pickupAnimationFrame: number; pickupAnimationPlaying: boolean; pickupAnimationGuard: boolean;
     pickupPresentation: {itemId: number; animationFrame: number; animationPlaying: boolean} | null;
     collectionDelay: number; activeId: number; activeCharge: number; activeSubordinateCharge: number;
@@ -211,7 +234,8 @@ export interface State {
     gridCollisionClass: number; entityCollisionClass: number; visible: boolean;
     lifetimeDivisor: number; timeToLive: number; fullUpdates: number; animationClock: number; animationPlaying: boolean;
     dead: boolean; removed: boolean}[];
-  maxFireDelay: number; headTimer: number; actorScheduler: { actors: ActorRef[] };
+  familiars: Familiar[]; nextFamiliar: number; spriteEffects: SpriteEffect[]; nextEffect: number;
+  maxFireDelay: number; headTimer: number; actorScheduler: { actors: ActorRef[]; identities: {actor: ActorRef; sequenceId: number}[]; roomNextSequence: number };
   bombs: Bomb[]; explosions: Explosion[]; nextBomb: number; damageCooldown: number;
   bombPlacementCooldown: { remainingUpdates: number }; bombActionWasDown: boolean;
   runIntroduction: RunIntroduction; pauseMenu: PauseMenu;
