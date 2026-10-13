@@ -18,6 +18,7 @@ pub struct Definition {
     pub actor: &'static str,
     pub collision_radius: f32,
     pub collision_mass: f32,
+    pub collision_points: u16,
     pub friction: f32,
     pub shadow_size: f64,
     pub clips: &'static [Clip],
@@ -119,6 +120,12 @@ pub struct Pickup {
 }
 
 impl Pickup {
+    /// Ordinary admitted pickups use the common free ground-motion branch.
+    /// Collectible home return and Chest callbacks keep their own owners.
+    pub(crate) fn has_regular_physics(&self) -> bool {
+        matches!(self.variant, 10 | 20 | 30 | 40)
+    }
+
     /// Concrete room admission for the supported fresh normal Isaac families.
     /// Unsupported runtime selectors remain in RoomSpawns for their owner.
     pub fn from_selector(
@@ -254,7 +261,10 @@ impl Pickup {
 
     /// Base ANM2 playback is admitted only on full nonplayer update phases.
     pub fn advance(&mut self, phase: Phase, game_update: u32) {
-        if !self.removed && self.variant == 100 && phase == Phase::Interpolate {
+        if !self.removed
+            && (self.variant == 100 || self.has_regular_physics())
+            && phase == Phase::Interpolate
+        {
             // 4446a0 backs up the physical448 position, then predicts from
             // stored velocity/current friction. Game550860 restores it before
             // the next full update; this model keeps that physical owner intact.
@@ -273,6 +283,15 @@ impl Pickup {
                 x: self.anchor_position.x - self.position.x,
                 y: self.anchor_position.y - self.position.y,
             } * self.current_friction;
+            self.position = self.position + self.velocity;
+            self.presented_position = self.position;
+            self.current_friction = self.configured_friction * 0.965;
+            self.project();
+        } else if self.has_regular_physics() {
+            //506ff9 invokes Base447190 before507029 sets the next turn's
+            //temporary friction. Velocity is physical; fast prediction never
+            //feeds its presented position back into this full integration.
+            self.velocity = self.velocity * self.current_friction;
             self.position = self.position + self.velocity;
             self.presented_position = self.position;
             self.current_friction = self.configured_friction * 0.965;
@@ -368,6 +387,9 @@ impl Pickup {
             }
             _ => return false,
         }
+        // Collect504d30 clears physical velocity before playing Collect,
+        // changes the ground class to3, then sets the dead31f flag.
+        self.velocity = WorldVector { x: 0.0, y: 0.0 };
         self.animation = "Collect".into();
         self.animation_frame = 0.0;
         self.animation_playing = true;
@@ -375,4 +397,99 @@ impl Pickup {
         self.collected = true;
         true
     }
+}
+
+/// Source full/fast ground class5 after the Pickup's common update. The real
+/// authored sampling count/radius determine collision, including prediction.
+pub(crate) fn advance_actor(state: &mut crate::State, phase: Phase, id: u32) -> Result<(), String> {
+    let Some(index) = state.room.pickups.iter().position(|pickup| pickup.id == id) else {
+        return Ok(());
+    };
+    state.room.pickups[index].advance(phase, state.game_update_count);
+    let pickup = &mut state.room.pickups[index];
+    if !pickup.has_regular_physics()
+        || pickup.collected
+        || pickup.removed
+        || phase == Phase::Skipped
+    {
+        return Ok(());
+    }
+    let grid = crate::grid::Grid::new(
+        state
+            .room
+            .grid
+            .clone()
+            .ok_or("admitted pickup requires room grid")?,
+    )?;
+    let definition = definition(pickup.variant, pickup.subtype)
+        .ok_or("moving pickup requires authored collision definition")?;
+    let collider = crate::grid::Collider::new(crate::grid::CollisionGeometry {
+        radius: pickup.collision_radius,
+        scale: WorldVector { x: 1.0, y: 1.0 },
+        points: definition.collision_points,
+    })?;
+    if phase == Phase::Update {
+        collider.resolve_nonplayer_ground(
+            &grid,
+            &mut pickup.position,
+            &mut pickup.velocity,
+            false,
+        )?;
+        pickup.presented_position = pickup.position;
+    } else {
+        let mut preview_velocity = pickup.velocity;
+        collider.resolve_nonplayer_ground(
+            &grid,
+            &mut pickup.presented_position,
+            &mut preview_velocity,
+            true,
+        )?;
+    }
+    pickup.project();
+    Ok(())
+}
+
+/// The real554490 actor circle changes velocity immediately; ordinary Pickup
+/// HP0 rejects the later damage virtual. No loot or shared-RNG word is sampled.
+pub(crate) fn bomb_hit(state: &mut crate::State, center: WorldVector) -> Result<(), String> {
+    if !center.is_finite() {
+        return Err("pickup blast center must be finite".into());
+    }
+    for pickup in &mut state.room.pickups {
+        //Appear has source entity class0; Collect has dead31f. Admitted
+        //ordinary families have ground class5 and positive authored mass≤20.
+        if !pickup.has_regular_physics()
+            || !pickup.can_collect
+            || pickup.collected
+            || pickup.removed
+            || pickup.collision_mass == 0.0
+        {
+            continue;
+        }
+        let delta = WorldVector {
+            x: pickup.position.x - center.x,
+            y: pickup.position.y - center.y,
+        };
+        let squared = delta.x * delta.x + delta.y * delta.y;
+        let radius = 75.0 + pickup.collision_radius;
+        if !squared.is_finite() || !radius.is_finite() {
+            return Err("pickup blast geometry overflowed".into());
+        }
+        if squared == 0.0 || squared >= radius * radius {
+            continue;
+        }
+        let distance = squared.sqrt();
+        let impulse = (radius - distance).min(15.0);
+        //612b30 divides each f32 component before612a70 multiplies impulse;
+        //this differs from Normalize612820's rounded reciprocal multiply.
+        let radial = WorldVector {
+            x: delta.x / distance,
+            y: delta.y / distance,
+        } * impulse;
+        pickup.velocity = pickup.velocity * 0.5 + radial;
+        if !pickup.velocity.is_finite() {
+            return Err("pickup blast velocity overflowed".into());
+        }
+    }
+    Ok(())
 }

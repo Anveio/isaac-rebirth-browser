@@ -1435,8 +1435,7 @@ impl Game {
                 return Ok(());
             }
         }
-        self.state.room.pickups[index].advance(phase, self.state.game_update_count);
-        Ok(())
+        pickups::advance_actor(&mut self.state, phase, id)
     }
     fn advance_npc(&mut self, id: u32, phase: phase::Phase) -> Result<(), String> {
         let grid = grid::Grid::new(self.state.room.grid.clone().expect("admitted NPC has grid"))?;
