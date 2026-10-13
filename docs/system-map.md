@@ -42,14 +42,14 @@ It includes descriptor-driven ordinary traversal, shared room grid/Rock
 contacts, source spikes, coin collection, bomb phases and initialized-Title MT.
 All eight core original/browser transports pass; functional checks pass
 140/149. Title, movement, pause and both moving-bomb cohorts pass. Room combat
-passes23/28; recorded random `W0L0LYYM` passes14/18 and `4DKCYXY8` passes18/18.
-All149 frames retain strict pixel diagnostics, with61 exact matches.
+passes 23/28; recorded random `W0L0LYYM` passes 14/18 and `4DKCYXY8` passes 18/18.
+All 149 frames retain strict pixel diagnostics, with 61 exact matches.
 
-Finalized floors pass5/5, including three real retries and two OS-random runs.
-Weapon scheduling passes480/480 presentations and18 births. Boot lifecycle
-passes6/6 originals, all3744 MT words,54 grid-seed pairs and1074 stat poses.
-Coin/spike collection passes all5 cases and863 presentations, including the
-mandatory `22PFCSFS` regression. Traversal executes all3 routes: both routes
+Finalized floors pass 5/5, including three real retries and two OS-random runs.
+Weapon scheduling passes480/480 presentations and 18 births. Boot lifecycle
+passes 6/6 originals, all 3744 MT words, 54 grid-seed pairs and 1074 stat poses.
+Coin/spike collection passes all 5 cases and 863 presentations, including the
+mandatory `22PFCSFS` regression. Traversal executes all 3 routes: both routes
 without enemies pass; `T1PK6Y0W` remains a required hostile-lock/return failure.
 The all-suite runner returns failure after recording every result.
 
@@ -63,8 +63,10 @@ small implementation PRs; none is inferred complete from the earlier cohort.
 
 Subsequent reviewed integrations add source SFX admission and actual Web Audio
 playback, plus authored curse-door entry/exit damage. Their own paired cohorts
-pass848 audio checks/36 submitted PCM starts and240 curse-door phases. The
-central registry now requires both gates alongside the prior six. Build,
+pass 848 audio checks/36 submitted PCM starts and 240 curse-door phases. The
+central registry now requires both gates alongside the prior six, plus an
+unchanged replay of both checked-in random holdouts. New random discovery
+cannot replace those regression cases. Build,
 typecheck, assets, matrix and strict Clippy pass after integration; these scoped
 cohorts do not establish complete shared gameplay RNG, other item/actor systems,
 other floors/characters, persistence or music/cutscenes.
