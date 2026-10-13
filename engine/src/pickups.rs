@@ -399,18 +399,18 @@ impl Pickup {
     }
 }
 
-/// Source full/fast ground class5 after the Pickup's common update. The real
-/// authored sampling count/radius determine collision, including prediction.
+/// Full Pickup Update owns motion/friction; the manager owns its later grid
+/// pass. Fast4446a0 predicts and resolves its own ground preview directly.
 pub(crate) fn advance_actor(state: &mut crate::State, phase: Phase, id: u32) -> Result<(), String> {
     let Some(index) = state.room.pickups.iter().position(|pickup| pickup.id == id) else {
         return Ok(());
     };
     state.room.pickups[index].advance(phase, state.game_update_count);
     let pickup = &mut state.room.pickups[index];
-    if !pickup.has_regular_physics()
+    if phase != Phase::Interpolate
+        || !pickup.has_regular_physics()
         || pickup.collected
         || pickup.removed
-        || phase == Phase::Skipped
     {
         return Ok(());
     }
@@ -421,6 +421,41 @@ pub(crate) fn advance_actor(state: &mut crate::State, phase: Phase, id: u32) -> 
             .clone()
             .ok_or("admitted pickup requires room grid")?,
     )?;
+    resolve_grid(pickup, &grid, true)
+}
+
+/// 4545d0 finishes all entity contacts, then454b10 invokes442b90 for the live
+/// nonplayer list. New births get this grid pass without a full actor update.
+pub(crate) fn full_grid_contacts(state: &mut crate::State) -> Result<(), String> {
+    if !state
+        .room
+        .pickups
+        .iter()
+        .any(|pickup| pickup.has_regular_physics() && !pickup.collected && !pickup.removed)
+    {
+        return Ok(());
+    }
+    let grid = crate::grid::Grid::new(
+        state
+            .room
+            .grid
+            .clone()
+            .ok_or("admitted pickup requires room grid")?,
+    )?;
+    for pickup in &mut state.room.pickups {
+        if pickup.has_regular_physics() && !pickup.collected && !pickup.removed {
+            resolve_grid(pickup, &grid, false)?;
+        }
+    }
+    Ok(())
+}
+
+/// Shared authored geometry; family owners choose their collision eligibility.
+pub(crate) fn resolve_grid(
+    pickup: &mut Pickup,
+    grid: &crate::grid::Grid,
+    preview: bool,
+) -> Result<(), String> {
     let definition = definition(pickup.variant, pickup.subtype)
         .ok_or("moving pickup requires authored collision definition")?;
     let collider = crate::grid::Collider::new(crate::grid::CollisionGeometry {
@@ -428,9 +463,9 @@ pub(crate) fn advance_actor(state: &mut crate::State, phase: Phase, id: u32) -> 
         scale: WorldVector { x: 1.0, y: 1.0 },
         points: definition.collision_points,
     })?;
-    if phase == Phase::Update {
+    if !preview {
         collider.resolve_nonplayer_ground(
-            &grid,
+            grid,
             &mut pickup.position,
             &mut pickup.velocity,
             false,
@@ -439,7 +474,7 @@ pub(crate) fn advance_actor(state: &mut crate::State, phase: Phase, id: u32) -> 
     } else {
         let mut preview_velocity = pickup.velocity;
         collider.resolve_nonplayer_ground(
-            &grid,
+            grid,
             &mut pickup.presented_position,
             &mut preview_velocity,
             true,

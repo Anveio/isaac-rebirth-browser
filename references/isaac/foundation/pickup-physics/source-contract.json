@@ -3,9 +3,9 @@
   "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
   "scope": "Free ordinary admitted Pickup variants10/20/30/40 use common physical full motion, fast presentation prediction, authored ground collision and Bomb blast impulse. Live acceptance is pending; the retained Troll cohort's shared-seed, grid18, tinted-Rock and return differences remain required.",
   "full": {
-    "callers": ["Pickup::Update506f70 at506ff9", "Entity::Update447190", "Pickup507029"],
-    "order": "Advance ANM2 once, multiply physical velocity by entering current friction, add it to physical position, restore configured XML friction, resolve ground collision, then set the next current friction to configured friction*.965.",
-    "collision": "Ground class5 uses authored collision radius/scale and entities2.xml numGridCollisionPoints. The supported ordinary families have radius12, mass3, friction1 and24 ordered collision samples. Static Collect504d30 clears velocity, writes grid class3 and entity class0, starts Collect, then sets dead31f; actual ordinary BombPU collection boundaries retain grid class5. The caller/reset responsible for that class discrepancy is unresolved and remains a required live failure."
+    "callers": ["Pickup::Update506f70 at506ff9", "Entity::Update447190", "Pickup507029", "CollisionManager4545d0 at454b10", "Entity grid442b90"],
+    "order": "Advance ANM2 once, multiply physical velocity by entering current friction, add it to physical position, restore configured XML friction, and set the next current friction to configured friction*.965 inside Pickup Update. After all full entity updates and all entity contacts,454b10 invokes442b90 on the live nonplayer list, including new births. Ground collision belongs to that final manager pass, not each Pickup callback.",
+    "collision": "Ground class5 uses authored collision radius/scale and entities2.xml numGridCollisionPoints. The supported ordinary families have radius12, mass3, friction1 and24 ordered collision samples. Static Collect504d30 clears velocity, writes grid class3 and entity class0, starts Collect, then sets dead31f. Pickup5068b0 restores3→5 at506b30/506b3d when the normal player lacks trinket6. Persistent Collect class5 is source-backed; exact first-observed callback/reset chronology and its runtime state remain a required follow-up."
   },
   "fast": {
     "callers": ["Entity4446a0", "Game550860"],
