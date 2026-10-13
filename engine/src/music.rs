@@ -407,6 +407,23 @@ impl MusicState {
         }
         self.events.push(main_start);
     }
+    /// Source5b2c20 ->5b2a30 stops both main channels and plays at configured volume.
+    pub fn play(&mut self, id: u32) {
+        let Some(configured) = track(id) else {
+            return;
+        };
+        self.stop(0);
+        self.stop(1);
+        self.current_id = id;
+        self.queued_id = 0;
+        self.prepare_track(configured, self.volume);
+    }
+    /// Source5b3190 stores the next track; real backend completion admits it.
+    pub fn queue(&mut self, id: u32) {
+        if track(id).is_some() {
+            self.queued_id = id;
+        }
+    }
     pub fn crossfade(&mut self, id: u32) {
         let Some(configured) = track(id) else {
             return;

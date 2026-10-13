@@ -37,6 +37,7 @@ pub mod npcs;
 pub mod phase;
 pub mod pickups;
 pub mod player_animation;
+pub mod player_death;
 pub mod player_items;
 pub mod player_stats;
 pub mod projectiles;
@@ -88,6 +89,7 @@ pub struct Player {
     pub visible: bool,
     /// Source Player+7d8, separate from pickup collection delay.
     pub input_cooldown: i32,
+    pub dead: bool,
     pub x: f64,
     pub y: f64,
     pub vx: f64,
@@ -112,6 +114,7 @@ impl Player {
         Self {
             visible: true,
             input_cooldown: 0,
+            dead: false,
             x: 240.0,
             y: 214.0,
             vx: 0.0,
@@ -355,7 +358,9 @@ pub struct State {
     pub character_catalog: Vec<CharacterDefinition>,
     pub paused: bool,
     pub pressed: BTreeSet<String>,
+    pub public_actions: public_actions::PublicActions,
     pub player: Player,
+    pub player_death: player_death::PlayerDeath,
     pub room: Room,
     #[serde(default)]
     pub camera: Option<camera::Camera>,
@@ -502,7 +507,9 @@ impl Game {
                 character_catalog: character_catalog(),
                 paused: false,
                 pressed: BTreeSet::new(),
+                public_actions: public_actions::PublicActions::default(),
                 player,
+                player_death: player_death::PlayerDeath::default(),
                 room,
                 camera,
                 room_display_flags: vec![0; floor.descriptors.len()],
@@ -697,6 +704,9 @@ impl Game {
         {
             // Game54f760 returns while transition-active after its narrow
             // Scene key handler. Physical action14 mapping remains unaccepted.
+            return Ok(());
+        }
+        if self.state.player_death.game_over.is_some() {
             return Ok(());
         }
         let previous_screen = self.state.screen;
@@ -1039,6 +1049,7 @@ impl Game {
         };
         self.state.pause_menu = PauseMenu::hidden();
         self.state.player = Player::starting();
+        self.state.player_death = player_death::PlayerDeath::default();
         self.state.player_animation = player_animation::PlayerAnimation::default();
         // Source 58bea7 constructs every descriptor's padded grid seed pairs.
         // floor::generate_basement owns the separate primary xorshift advance.
@@ -1328,6 +1339,26 @@ impl Game {
         // Source 594a10 consumes the prior menu request before game dispatch.
         // Room construction and clock alignment happen here, after the f32
         // confirmation fade, rather than in the zero-tick DOM key callback.
+        if let Some(request) = self.state.player_death.system_pending.take() {
+            match request {
+                player_death::Request::Restart => {
+                    if !self.state.seeded_run {
+                        let seed = self.state.boot_lifecycle.shared.next_u32().max(1);
+                        self.state.boot_lifecycle.commit_character_seed(seed)?;
+                    }
+                    self.state.stage = 1;
+                    self.start_run()?;
+                }
+                player_death::Request::Exit => {
+                    self.state.player_death = player_death::PlayerDeath::default();
+                    self.state.run_start_request = RunStartRequest::default();
+                    self.state.paused = false;
+                    self.state.pause_menu = PauseMenu::hidden();
+                    self.state.screen = Screen::Character;
+                    self.state.music.crossfade(1);
+                }
+            }
+        }
         if self.state.run_start_request.system_pending {
             self.state.run_start_request.system_pending = false;
             self.start_run()?;
@@ -1376,6 +1407,13 @@ impl Game {
         }
         if self.state.screen != Screen::Playing || gameplay_was_paused {
             if phase != phase::Phase::Skipped {
+                self.state.music.advance();
+            }
+            return Ok(());
+        }
+        if self.state.player_death.game_over.is_some() {
+            if phase != phase::Phase::Skipped {
+                player_death::poll_popup(&mut self.state);
                 self.state.music.advance();
             }
             return Ok(());
@@ -1537,7 +1575,7 @@ impl Game {
                 .checked_add(1)
                 .ok_or("game update counter exhausted")?;
         }
-        doors::advance(&mut self.state, phase);
+        doors::advance(&mut self.state, phase)?;
         let explosion_fence = self.state.explosions.len();
         grid_hazards::advance(&mut self.state, phase)?;
         let existing = self.state.actor_scheduler.full_phase();
@@ -2004,6 +2042,9 @@ impl Game {
                 // after the actual UseItem clip completes.
                 self.state.player_animation.current = None;
             }
+        }
+        if player_death::advance(&mut self.state, phase) {
+            return Ok(());
         }
         let controls_enabled = controls_enabled
             && self.state.player.controls_enabled

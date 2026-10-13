@@ -221,7 +221,7 @@ pub fn player_contacts(state: &mut State) -> Result<(), String> {
         }
         let contact_damage = npc.collision_damage;
         if contact_damage > 0.0 {
-            combat::try_damage_player(state, contact_damage as u8, 60);
+            combat::try_damage_player(state, contact_damage as u8, 60, 0)?;
         }
         let original_position = player_body.position;
         combat::resolve_player_npc_contact(&mut player_body, &mut npc_body, |shift| {

@@ -251,7 +251,7 @@ pub fn player_contacts(state: &mut State) -> Result<(), String> {
         if !result.colliding {
             continue;
         }
-        let accepted = combat::try_damage_player(state, 1, 60);
+        let accepted = combat::try_damage_player(state, 1, 60, 0)?;
         state.player.x = f64::from(player.position.x) * 0.65 + 32.0;
         state.player.y = f64::from(player.position.y) * 0.65 - 46.0;
         state.player.vx = f64::from(player.velocity.x) * 0.65;

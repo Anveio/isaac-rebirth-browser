@@ -3,7 +3,7 @@ import wasmUrl from "./generated/engine.wasm?url";
 export type Screen = "title" | "profile" | "main" | "character" | "seed" | "playing";
 export type Direction = "left" | "right" | "up" | "down";
 export interface Player {
-  visible: boolean; inputCooldown: number;
+  visible: boolean; inputCooldown: number; dead: boolean;
   x: number; y: number; vx: number; vy: number; hp: number; maxHp: number;
   soulHp: number; blackHeartMask: number;
   facing: Direction; bodyFacing: Direction; walkFrame: number; headFrame: number; shooting: boolean; shootingLock: number;
@@ -240,6 +240,7 @@ export interface State {
   profiles: { slot: number; unlockedCharacters: string[]; selectedCharacter: string; achievements: boolean[] }[];
   characterCatalog: { name: string; animation: string }[];
   paused: boolean; pressed: string[];
+  publicActions: { menuConfirm: boolean; menuBack: boolean; activePressed: boolean; activeTriggered: boolean; pocketPressed: boolean; pocketTriggered: boolean; pocketWasDown: boolean; enterWasDown: boolean; spaceWasDown: boolean; escapeWasDown: boolean };
   floor: Floor; currentRoom: number; visitedRooms: number[];
   roomDisplayFlags: number[]; revealedSecretConnections: [number, number][];
   persistedRooms: Record<string, Room>;
@@ -264,6 +265,7 @@ export interface State {
   bombs: Bomb[]; explosions: Explosion[]; nextBomb: number; damageCooldown: number;
   bombPlacementCooldown: { remainingUpdates: number }; bombActionWasDown: boolean;
   runIntroduction: RunIntroduction; pauseMenu: PauseMenu;
+  playerDeath: { lastDamageFlags: number; gameOver: { state: number; damageFlags: number; diaryFrame: number; diaryPlaying: boolean } | null; systemPending: "restart" | "exit" | null };
 }
 export type Command = { type: "key"; code: string; down: boolean } | { type: "text"; text: string } | { type: "tick"; count: number; timestampMillis?: number } | { type: "audioVolume"; sfx_volume: number } | { type: 'musicVolume'; volume: number } | MusicBackendCommand;
 interface Exports extends WebAssembly.Exports {
