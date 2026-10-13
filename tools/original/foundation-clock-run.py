@@ -93,6 +93,7 @@ def checked_observation(observer, pid, context):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--seed', help='Valid seed; omitted means new OS-random seed')
+    parser.add_argument('--boot-epoch-seed', type=int, default=1700000000, help='Public realtime seconds supplied to native time(NULL); independent of the requested run seed')
     parser.add_argument('--tape', type=Path, help='List of key/step/capture commands; public X11 key names')
     parser.add_argument('--focus-handoff', action='append', default=[], help='At named capture, generate public X11 focus out/in and release one presentation before capture; diagnostic tape alteration is recorded')
     parser.add_argument('--state-observer', type=Path, help='Optional parent-only reference debug module exposing observe(pid, context); never production game input')
@@ -107,6 +108,8 @@ def main():
     parser.add_argument('--output', type=Path, default=ROOT / '.cache/foundation' / f'clock-native-{time.time_ns()}')
     parser.add_argument('--frame-timeout', type=float, default=30)
     args = parser.parse_args()
+    if not 0 <= args.boot_epoch_seed <= 0xffffffff:
+        raise SystemExit('--boot-epoch-seed must be a u32')
     if args.observe_every_step and not args.state_observer:
         raise SystemExit('--observe-every-step requires --state-observer')
     if not os.environ.get('DISPLAY'):
@@ -182,7 +185,8 @@ def main():
                 'XDG_CONFIG_HOME': str(out / 'profile/config'), 'ISAAC_OFFLINE_CLOUD_DIR': str(out / 'profile/cloud'),
                 'ALSOFT_DRIVERS': 'null', 'LD_PRELOAD': str(gate) + (' ' + env['LD_PRELOAD'] if env.get('LD_PRELOAD') else ''),
                 'LD_LIBRARY_PATH': str(source / 'lib64') + (':' + env['LD_LIBRARY_PATH'] if env.get('LD_LIBRARY_PATH') else ''),
-                'ISAAC_CLOCK_GATE_FPS': str(args.fps), 'ISAAC_CLOCK_GATE_STEP_NS': str(args.step_ns)})
+                'ISAAC_CLOCK_GATE_FPS': str(args.fps), 'ISAAC_CLOCK_GATE_STEP_NS': str(args.step_ns),
+                'ISAAC_CLOCK_GATE_EPOCH_SEED': str(args.boot_epoch_seed)})
     if args.gl_trace:
         trace = out / 'gl-trace'
         trace.mkdir(exist_ok=True)
@@ -204,6 +208,7 @@ def main():
     frames, events, acknowledgements = [], [], []
     report = {'schema': 1, 'status': 'running', 'output': str(out),
               'captureClock': 'main-thread virtual Linux clocks and blocking public GL presentation gate; simulation ticks unknown', 'seed': seed, 'seedValue': vector['seedValue'],
+              'bootEpochSeed': args.boot_epoch_seed,
               'requestedViewport': {'width': args.width, 'height': args.height, 'maxRenderScale': args.max_render_scale},
               'profile': {'fresh': True, 'isolated': True}, 'tape': tape, 'frames': frames,
               'inputs': events, 'presentations': acknowledgements,

@@ -1,0 +1,78 @@
+{
+  "schema": 1,
+  "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "scope": "Static reference landmarks and function-byte hashes, independently corroborated by fresh live native data. These addresses and captured values never enter the port.",
+  "sharedMt": {
+    "state": "0x8ed680",
+    "index": "0x8e6b64",
+    "wordCount": 624,
+    "storage": "Native unsigned-long qwords containing32-bit values"
+  },
+  "nativeFields": {
+    "systemPointer": "0x8ed560",
+    "menusPointer": "0x8ed570",
+    "savedGameOffset": "0x4a8",
+    "savedPlayerSeedOffset": "0x9688",
+    "savedRoomRecordsOffset": "0xf8",
+    "savedRoomRecordStride": "0xf0",
+    "gridPointerOffset": "0x58",
+    "gridStride": "0x1c",
+    "gridSeedOffsets": [
+      "0x10",
+      "0x18"
+    ],
+    "menuRunSeedOffset": "0x60d00",
+    "statPosesOffset": "0x64798"
+  },
+  "functions": [
+    {
+      "address": "0x55ce90",
+      "unwindSize": 1217,
+      "codeSha256": "e29add4d45440615a714b012b8fbdcdaa69a2c45e4d55af7c8051191cc338837",
+      "lifecycle": "Saved GameState construction",
+      "contract": "Initialize every135\u00d7448 grid seed pair, then call Clear."
+    },
+    {
+      "address": "0x55bd80",
+      "unwindSize": 4274,
+      "codeSha256": "328fa81088af44bb2bed90e59200381d241c9043feb917c09b83c6c14f3b1e80",
+      "lifecycle": "Saved GameState Clear",
+      "contract": "Assign135\u00d7448 seed pairs, then the player-manager seed at+9688."
+    },
+    {
+      "address": "0x5877e0",
+      "unwindSize": 1111,
+      "codeSha256": "c400eb0ba36f4b181c9ebedc2ea66c5aba30dc9bba33977f0715ac6b6ac30690",
+      "lifecycle": "Level construction",
+      "contract": "Assign135\u00d7448 independent level-grid seed pairs."
+    },
+    {
+      "address": "0x423fa0",
+      "unwindSize": 798,
+      "codeSha256": "b00f1cbd0113481913d6ea28304dbcda898bf59125df96120fe29e1af6f581d4",
+      "lifecycle": "Backdrop construction",
+      "contract": "Obtain a raw global seed for the backdrop-local RNG."
+    },
+    {
+      "address": "0x5a8b80",
+      "unwindSize": 1531,
+      "codeSha256": "7eac6a873f26f613567a6034cee426becf37187d9354dd61b9a675d206e11e85",
+      "lifecycle": "Save Menu reset",
+      "contract": "Load profile slots1,2,3 to build previews, then restore the prior profile; each load clears GameState."
+    },
+    {
+      "address": "0x5a0680",
+      "unwindSize": 816,
+      "codeSha256": "3b8280ff8541243b21133c0e1bd8edd75af4fea2d29ae9aa9772c1408c3c982c",
+      "lifecycle": "Character Menu reset",
+      "contract": "Obtain a nonzero initial ordinary run seed through raw global MT when no valid seed text is present."
+    },
+    {
+      "address": "0x5ae090",
+      "unwindSize": 573,
+      "codeSha256": "556dfe399b1dc85c8836f04c147724ef9c96f0b8ad2c21a09d3957b45f2ed3dd",
+      "lifecycle": "Stats Menu reset",
+      "contract": "Assign179 authored secret poses with boundedRandom(3)+1."
+    }
+  ]
+}

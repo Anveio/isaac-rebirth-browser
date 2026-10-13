@@ -203,3 +203,99 @@ impl SavedGameSeeds {
         Self::clear(shared)
     }
 }
+
+/// Source startup state at the first rendered Title. Every draw belongs to a
+/// generated object or menu field; run/room/ambient routing is still separate.
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct BootLifecycle {
+    pub shared: Mt19937,
+    pub saved_game: SavedGameSeeds,
+    pub level_grid: DescriptorSeeds,
+    pub backdrop_seed: u32,
+    pub menu_run_seed: u32,
+    pub secret_poses: Vec<u8>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct GridSeedSample {
+    pub room_record: usize,
+    pub grid_index: usize,
+    pub seeds: [u32; 2],
+}
+
+/// Ordinary snapshots carry the mutable shared stream and bounded diagnostics.
+/// Historical descriptor origins/mutations remain in Game's internal state.
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct BootState {
+    pub shared: Mt19937,
+    pub saved_player_seed: u32,
+    pub saved_grid_seed_samples: Vec<GridSeedSample>,
+    pub level_grid_seed_samples: Vec<GridSeedSample>,
+    pub backdrop_seed: u32,
+    pub menu_run_seed: u32,
+    pub secret_poses: Vec<u8>,
+}
+
+fn grid_seed_samples(table: &DescriptorSeeds) -> Vec<GridSeedSample> {
+    [0, 1, ROOM_DESCRIPTOR_CAPACITY - 1]
+        .into_iter()
+        .flat_map(|room_record| {
+            [0, 1, PADDED_GRID_CELLS - 1]
+                .into_iter()
+                .map(move |grid_index| GridSeedSample {
+                    room_record,
+                    grid_index,
+                    seeds: table
+                        .seed_pair(room_record, grid_index)
+                        .expect("source bootstrap descriptor dimensions"),
+                })
+        })
+        .collect()
+}
+
+impl BootLifecycle {
+    pub fn new(boot_epoch_seed: u32) -> Self {
+        let mut shared = Mt19937::new(boot_epoch_seed);
+        let _startup_saved_game = SavedGameSeeds::construct(&mut shared);
+        let level_grid = DescriptorSeeds::initialize(&mut shared);
+        let backdrop_seed = shared.next_u32();
+        // SaveMenu reset loads each of the three profiles to compose previews,
+        // then restores the previously active profile. Each load clears the
+        // saved GameState and assigns a fresh player-manager seed.
+        for _profile in 1..=3 {
+            let _preview_saved_game = SavedGameSeeds::clear(&mut shared);
+        }
+        let saved_game = SavedGameSeeds::clear(&mut shared);
+        // CharacterMenu reset initializes an ordinary nonzero run seed; the
+        // public supplied run seed remains independent of this shared stream.
+        let menu_run_seed = shared.next_u32().max(1);
+        // StatsMenu reset owns one authored pose for each of its 179 secrets.
+        let secret_poses = (0..179).map(|_| (shared.bounded(3) + 1) as u8).collect();
+        Self {
+            shared,
+            saved_game,
+            level_grid,
+            backdrop_seed,
+            menu_run_seed,
+            secret_poses,
+        }
+    }
+
+    pub fn into_parts(self) -> (BootState, DescriptorSeeds, DescriptorSeeds) {
+        let saved_grid_seed_samples = grid_seed_samples(&self.saved_game.descriptor_seeds);
+        let level_grid_seed_samples = grid_seed_samples(&self.level_grid);
+        let state = BootState {
+            shared: self.shared,
+            saved_player_seed: self.saved_game.player_rng_seed,
+            saved_grid_seed_samples,
+            level_grid_seed_samples,
+            backdrop_seed: self.backdrop_seed,
+            menu_run_seed: self.menu_run_seed,
+            secret_poses: self.secret_poses,
+        };
+        (state, self.saved_game.descriptor_seeds, self.level_grid)
+    }
+}

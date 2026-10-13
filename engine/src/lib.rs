@@ -257,6 +257,7 @@ pub struct State {
     pub run_seed: String,
     pub initial_seed: u32,
     pub boot_epoch_seed: u32,
+    pub boot_lifecycle: mt::BootState,
     pub run_seed_value: u32,
     pub stage: u32,
     pub stage_seed: u32,
@@ -300,6 +301,8 @@ pub enum Command {
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 pub struct Game {
     pub state: State,
+    pub boot_saved_grid: mt::DescriptorSeeds,
+    pub boot_level_grid: mt::DescriptorSeeds,
 }
 
 impl Game {
@@ -308,6 +311,8 @@ impl Game {
     }
     pub fn new_with_boot_epoch(initial_seed: u32, boot_epoch_seed: u32) -> Result<Self, String> {
         let run_seed = seed::encode(initial_seed)?;
+        let (boot_lifecycle, boot_saved_grid, boot_level_grid) =
+            mt::BootLifecycle::new(boot_epoch_seed).into_parts();
         let player = Player::starting();
         let floor = floor::generate_basement(seed::stage1_seed(initial_seed))?;
         let current_room = floor.starting_descriptor;
@@ -338,6 +343,7 @@ impl Game {
                 run_seed,
                 initial_seed,
                 boot_epoch_seed,
+                boot_lifecycle,
                 run_seed_value: initial_seed,
                 stage: 1,
                 stage_seed: seed::stage1_seed(initial_seed),
@@ -384,6 +390,8 @@ impl Game {
                 },
                 pause_menu: PauseMenu::hidden(),
             },
+            boot_saved_grid,
+            boot_level_grid,
         };
         game.refresh_minimap();
         Ok(game)
