@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "entropy": "OS secrets run seeds and Node crypto randomInt boot epochs",
+  "cases": [
+    {
+      "name": "zero-epoch",
+      "bootEpochSeed": 0,
+      "code": "QSYVKMSE"
+    },
+    {
+      "name": "fixed-epoch",
+      "bootEpochSeed": 1700000000,
+      "code": "ZG800TRJ"
+    },
+    {
+      "name": "random-0",
+      "bootEpochSeed": 2796928130,
+      "code": "ZCQBRD1N",
+      "seedValue": 2809358451
+    },
+    {
+      "name": "random-1",
+      "bootEpochSeed": 2457026682,
+      "code": "3J33694K",
+      "seedValue": 3319587202
+    },
+    {
+      "name": "random-2",
+      "bootEpochSeed": 24641651,
+      "code": "ELESDL7X",
+      "seedValue": 761691734
+    },
+    {
+      "name": "random-3",
+      "bootEpochSeed": 3726163131,
+      "code": "VNR9W3BW",
+      "seedValue": 3572532889
+    }
+  ]
+}

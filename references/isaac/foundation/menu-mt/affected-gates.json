@@ -1,0 +1,666 @@
+{
+  "schema": 1,
+  "scope": "Fresh affected suites retain their actual checks and unresolved MT diagnostics. These reports do not assert complete run/ambient/ordinary-run parity.",
+  "suites": [
+    {
+      "suite": "boot-mt",
+      "status": "pass",
+      "report": ".cache/e2e/boot-mt/menu-routing-live-1/report.json",
+      "production": {
+        "sha256": "d509c4c25c554b4cdd455f99f42eaf86b76995386c09da7a5a642262ea6e36be",
+        "files": 832,
+        "source": "/workspace/isaac-worktrees/weapons/dist",
+        "scope": "Immutable snapshot of production build bytes; source/native replay equality is checked separately"
+      },
+      "cases": [
+        {
+          "name": "zero-epoch",
+          "status": "pass",
+          "nativeManifestSha256": "3828830a2d9c6e255990626150ab4a0b2f80144ef3d09c69c47a142bb5bb0a8e",
+          "comparedStateWords": 624,
+          "comparedGridPairs": 9,
+          "comparedStatPoses": 179,
+          "inputProvenance": {
+            "status": "pass",
+            "commands": 20,
+            "initialSeed": 2076625747,
+            "bootEpochSeed": 0,
+            "runSeedValue": 2076625747
+          }
+        },
+        {
+          "name": "fixed-epoch",
+          "status": "pass",
+          "nativeManifestSha256": "0dd744685f459ee55a1a7d1cc8a0ca8f47a37346f36b8b2a8a00b03feb14a89f",
+          "comparedStateWords": 624,
+          "comparedGridPairs": 9,
+          "comparedStatPoses": 179,
+          "inputProvenance": {
+            "status": "pass",
+            "commands": 20,
+            "initialSeed": 2790397112,
+            "bootEpochSeed": 1700000000,
+            "runSeedValue": 2790397112
+          }
+        },
+        {
+          "name": "random-0",
+          "status": "pass",
+          "nativeManifestSha256": "d342a429f029c1690dbb2c688f474d9a05da61b3aa0f46e7165788bd5e679efe",
+          "comparedStateWords": 624,
+          "comparedGridPairs": 9,
+          "comparedStatPoses": 179,
+          "inputProvenance": {
+            "status": "pass",
+            "commands": 20,
+            "initialSeed": 900892764,
+            "bootEpochSeed": 2872992141,
+            "runSeedValue": 900892764
+          }
+        },
+        {
+          "name": "random-1",
+          "status": "pass",
+          "nativeManifestSha256": "ac3969d3e885354f83cbc0cbfadb3f39e0a7d00cf73cd4b5545a39db630d1076",
+          "comparedStateWords": 624,
+          "comparedGridPairs": 9,
+          "comparedStatPoses": 179,
+          "inputProvenance": {
+            "status": "pass",
+            "commands": 20,
+            "initialSeed": 4215925482,
+            "bootEpochSeed": 2088375318,
+            "runSeedValue": 4215925482
+          }
+        },
+        {
+          "name": "random-2",
+          "status": "pass",
+          "nativeManifestSha256": "0b95e0564b167f443a97e33984ae8aa9f6a53c0cf0f5d4c3687a2553f73404c9",
+          "comparedStateWords": 624,
+          "comparedGridPairs": 9,
+          "comparedStatPoses": 179,
+          "inputProvenance": {
+            "status": "pass",
+            "commands": 20,
+            "initialSeed": 1420430712,
+            "bootEpochSeed": 3044527505,
+            "runSeedValue": 1420430712
+          }
+        },
+        {
+          "name": "random-3",
+          "status": "pass",
+          "nativeManifestSha256": "54c03a69d469ca197aedf64583c2fa59d7180f7299e03409b2b5d9b1100158b1",
+          "comparedStateWords": 624,
+          "comparedGridPairs": 9,
+          "comparedStatPoses": 179,
+          "inputProvenance": {
+            "status": "pass",
+            "commands": 20,
+            "initialSeed": 2284118126,
+            "bootEpochSeed": 2791966924,
+            "runSeedValue": 2284118126
+          }
+        }
+      ]
+    },
+    {
+      "suite": "audio",
+      "status": "pass",
+      "report": ".cache/e2e/audio/menu-routing-live-1/report.json",
+      "production": {
+        "sha256": "d509c4c25c554b4cdd455f99f42eaf86b76995386c09da7a5a642262ea6e36be",
+        "files": 832,
+        "source": "/workspace/isaac-worktrees/weapons/dist",
+        "scope": "Immutable snapshot of production build bytes; source/native replay equality is checked separately"
+      },
+      "cases": [
+        {
+          "name": "audible-restarts",
+          "status": "pass",
+          "nativeManifestSha256": "7a7e5b5bc450c9cb0bd98f7f9a3ed384d73a218a4cd0df1611f4c0a6c709c613",
+          "checkedFields": 178,
+          "failedChecks": 0,
+          "retainedMtMismatches": [
+            {
+              "field": "character-seeded: complete shared MT",
+              "status": "fail",
+              "productionIndex": 51,
+              "originalIndex": 52
+            },
+            {
+              "field": "gameplay-start: complete shared MT",
+              "status": "fail",
+              "productionIndex": 51,
+              "originalIndex": 463
+            }
+          ]
+        },
+        {
+          "name": "muted-admissions",
+          "status": "pass",
+          "nativeManifestSha256": "8c0b600ade8b3b29456576b3c3bad0878d3179a43d5f47d48e98f895a2668472",
+          "checkedFields": 178,
+          "failedChecks": 0,
+          "retainedMtMismatches": [
+            {
+              "field": "character-seeded: complete shared MT",
+              "status": "fail",
+              "productionIndex": 51,
+              "originalIndex": 52
+            },
+            {
+              "field": "gameplay-start: complete shared MT",
+              "status": "fail",
+              "productionIndex": 51,
+              "originalIndex": 465
+            }
+          ]
+        },
+        {
+          "name": "random-0",
+          "status": "pass",
+          "nativeManifestSha256": "074e66d2b15bd55891f81e112951819a601ca1d11b52decd7b1fa905cfd7a374",
+          "checkedFields": 246,
+          "failedChecks": 0,
+          "retainedMtMismatches": [
+            {
+              "field": "character-seeded: complete shared MT",
+              "status": "fail",
+              "productionIndex": 55,
+              "originalIndex": 56
+            },
+            {
+              "field": "gameplay-start: complete shared MT",
+              "status": "fail",
+              "productionIndex": 55,
+              "originalIndex": 469
+            }
+          ]
+        },
+        {
+          "name": "random-1",
+          "status": "pass",
+          "nativeManifestSha256": "c8d8d16195b6f42bec4abb4d36fd7fecf5208c0af8fde229cfcfd59edc7f4603",
+          "checkedFields": 246,
+          "failedChecks": 0,
+          "retainedMtMismatches": [
+            {
+              "field": "character-seeded: complete shared MT",
+              "status": "fail",
+              "productionIndex": 55,
+              "originalIndex": 56
+            },
+            {
+              "field": "gameplay-start: complete shared MT",
+              "status": "fail",
+              "productionIndex": 55,
+              "originalIndex": 222
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "suite": "weapons",
+      "status": "pass",
+      "report": ".cache/e2e/weapons/menu-routing-live-1/report.json",
+      "production": {
+        "sha256": "d509c4c25c554b4cdd455f99f42eaf86b76995386c09da7a5a642262ea6e36be",
+        "files": 832,
+        "source": "/workspace/isaac-worktrees/weapons/dist",
+        "scope": "Immutable snapshot of production build bytes; source/native replay equality is checked separately"
+      },
+      "gateSourcesStable": true,
+      "cases": [
+        {
+          "name": "full-first-shot",
+          "status": "pass",
+          "nativeManifestSha256": "b63125654f2655f091531e54077ca1464b5f67954c4071fe3ecfd597f75a43c0",
+          "comparedPresentations": 80,
+          "pairedPlayerFields": 324,
+          "inputProvenance": {
+            "status": "pass",
+            "expectedCommands": 102,
+            "observedCommands": 102,
+            "initialSeed": 2076625747,
+            "bootEpochSeed": 1700000000,
+            "runSeedValue": 2076625747
+          }
+        },
+        {
+          "name": "intermediate-first-shot",
+          "status": "pass",
+          "nativeManifestSha256": "e505170eee07c6cad5b70638f88ca471228eb454e3051595d38c23808812ccf3",
+          "comparedPresentations": 80,
+          "pairedPlayerFields": 328,
+          "inputProvenance": {
+            "status": "pass",
+            "expectedCommands": 103,
+            "observedCommands": 103,
+            "initialSeed": 2790397112,
+            "bootEpochSeed": 1700000000,
+            "runSeedValue": 2790397112
+          }
+        },
+        {
+          "name": "random-0",
+          "status": "pass",
+          "nativeManifestSha256": "0832e382fc74007fb16de8430a1b90f0e3df1edd29e1e3701d160ec2c192c972",
+          "comparedPresentations": 80,
+          "pairedPlayerFields": 324,
+          "inputProvenance": {
+            "status": "pass",
+            "expectedCommands": 102,
+            "observedCommands": 102,
+            "initialSeed": 2359345202,
+            "bootEpochSeed": 1700000000,
+            "runSeedValue": 2359345202
+          }
+        },
+        {
+          "name": "random-1",
+          "status": "pass",
+          "nativeManifestSha256": "5204e50c3d1b223ead86b355bdc37ad4438891e65685f801c329da4fed8ae341",
+          "comparedPresentations": 80,
+          "pairedPlayerFields": 328,
+          "inputProvenance": {
+            "status": "pass",
+            "expectedCommands": 103,
+            "observedCommands": 103,
+            "initialSeed": 1431668223,
+            "bootEpochSeed": 1700000000,
+            "runSeedValue": 1431668223
+          }
+        },
+        {
+          "name": "random-2",
+          "status": "pass",
+          "nativeManifestSha256": "d6f9a1b2cb8faf9b673faebf09a0d7af3727f62363520d248a07fd63dc67d2f8",
+          "comparedPresentations": 80,
+          "pairedPlayerFields": 324,
+          "inputProvenance": {
+            "status": "pass",
+            "expectedCommands": 102,
+            "observedCommands": 102,
+            "initialSeed": 2818724105,
+            "bootEpochSeed": 1700000000,
+            "runSeedValue": 2818724105
+          }
+        },
+        {
+          "name": "random-3",
+          "status": "pass",
+          "nativeManifestSha256": "ecee374fd2b0ed3949dc0de00d858d783fca3cbb91ac5e207414278d1d56b962",
+          "comparedPresentations": 80,
+          "pairedPlayerFields": 328,
+          "inputProvenance": {
+            "status": "pass",
+            "expectedCommands": 103,
+            "observedCommands": 103,
+            "initialSeed": 3020397189,
+            "bootEpochSeed": 1700000000,
+            "runSeedValue": 3020397189
+          }
+        }
+      ]
+    },
+    {
+      "suite": "tear-lifecycle",
+      "status": "pass",
+      "report": ".cache/e2e/tear-lifecycle/menu-routing-live-1/report.json",
+      "production": {
+        "sha256": "d509c4c25c554b4cdd455f99f42eaf86b76995386c09da7a5a642262ea6e36be",
+        "files": 832,
+        "source": "/workspace/isaac-worktrees/weapons/dist",
+        "scope": "Immutable snapshot of production build bytes; source/native replay equality is checked separately"
+      },
+      "gateSourcesStable": true,
+      "cases": [
+        {
+          "name": "full-first-shot",
+          "status": "pass",
+          "nativeManifestSha256": "85fa7cfe4936608e4bbb6af91a44a79722975aad4ea5a35670ec08cfb2834679",
+          "comparedPresentations": 111,
+          "pairedPlayerFields": 456,
+          "inputProvenance": {
+            "status": "pass",
+            "expectedCommands": 137,
+            "observedCommands": 137,
+            "initialSeed": 2076625747,
+            "bootEpochSeed": 1700000000,
+            "runSeedValue": 2076625747
+          },
+          "lifecycle": {
+            "nativePhaseChecks": 56,
+            "browserPhaseChecks": 56,
+            "nativeRemovals": 1,
+            "browserRemovals": 1,
+            "nativeRangeDeaths": 1,
+            "browserRangeDeaths": 1,
+            "nativeGridDeaths": 0,
+            "browserGridDeaths": 0,
+            "numericMismatches": [
+              {
+                "index": 1,
+                "tearId": 1,
+                "field": "height",
+                "original": -23.564363479614258,
+                "production": -23.548364639282227,
+                "reason": "Shared post-Title/run/ambient/effect consumers remain incomplete; neither source values nor cursor adjustments are supplied to production"
+              },
+              {
+                "index": 1,
+                "tearId": 1,
+                "field": "fallingSpeed",
+                "original": 0.18563592433929443,
+                "production": 0.20163556933403015,
+                "reason": "Shared post-Title/run/ambient/effect consumers remain incomplete; neither source values nor cursor adjustments are supplied to production"
+              },
+              {
+                "index": 1,
+                "tearId": 1,
+                "field": "ground",
+                "original": [
+                  198.26698303222656,
+                  396.5545959472656
+                ],
+                "production": [
+                  198.26698303222656,
+                  396.5953063964844
+                ],
+                "reason": "Shared post-Title/run/ambient/effect consumers remain incomplete; neither source values nor cursor adjustments are supplied to production"
+              }
+            ]
+          }
+        },
+        {
+          "name": "intermediate-first-shot",
+          "status": "pass",
+          "nativeManifestSha256": "279e3b4310125ee3f176688c3219862197d2c24d6ead4c91287eb896c6773b5b",
+          "comparedPresentations": 111,
+          "pairedPlayerFields": 460,
+          "inputProvenance": {
+            "status": "pass",
+            "expectedCommands": 138,
+            "observedCommands": 138,
+            "initialSeed": 2790397112,
+            "bootEpochSeed": 1700000000,
+            "runSeedValue": 2790397112
+          },
+          "lifecycle": {
+            "nativePhaseChecks": 53,
+            "browserPhaseChecks": 55,
+            "nativeRemovals": 1,
+            "browserRemovals": 1,
+            "nativeRangeDeaths": 1,
+            "browserRangeDeaths": 1,
+            "nativeGridDeaths": 0,
+            "browserGridDeaths": 0,
+            "numericMismatches": [
+              {
+                "index": 1,
+                "tearId": 1,
+                "field": "height",
+                "original": -23.515853881835938,
+                "production": -23.548364639282227,
+                "reason": "Shared post-Title/run/ambient/effect consumers remain incomplete; neither source values nor cursor adjustments are supplied to production"
+              },
+              {
+                "index": 1,
+                "tearId": 1,
+                "field": "fallingSpeed",
+                "original": 0.23414605855941772,
+                "production": 0.20163556933403015,
+                "reason": "Shared post-Title/run/ambient/effect consumers remain incomplete; neither source values nor cursor adjustments are supplied to production"
+              },
+              {
+                "index": 1,
+                "tearId": 1,
+                "field": "ground",
+                "original": [
+                  198.26698303222656,
+                  396.4833679199219
+                ],
+                "production": [
+                  198.26698303222656,
+                  396.5953063964844
+                ],
+                "reason": "Shared post-Title/run/ambient/effect consumers remain incomplete; neither source values nor cursor adjustments are supplied to production"
+              }
+            ]
+          }
+        },
+        {
+          "name": "random-0",
+          "status": "pass",
+          "nativeManifestSha256": "87ffd1ace85682dd6468191b371ad668870f094f86b3a84e76772ceef6f717e2",
+          "comparedPresentations": 111,
+          "pairedPlayerFields": 456,
+          "inputProvenance": {
+            "status": "pass",
+            "expectedCommands": 137,
+            "observedCommands": 137,
+            "initialSeed": 3190289751,
+            "bootEpochSeed": 1700000000,
+            "runSeedValue": 3190289751
+          },
+          "lifecycle": {
+            "nativePhaseChecks": 56,
+            "browserPhaseChecks": 56,
+            "nativeRemovals": 1,
+            "browserRemovals": 1,
+            "nativeRangeDeaths": 1,
+            "browserRangeDeaths": 1,
+            "nativeGridDeaths": 0,
+            "browserGridDeaths": 0,
+            "numericMismatches": [
+              {
+                "index": 1,
+                "tearId": 1,
+                "field": "height",
+                "original": -23.579273223876953,
+                "production": -23.548364639282227,
+                "reason": "Shared post-Title/run/ambient/effect consumers remain incomplete; neither source values nor cursor adjustments are supplied to production"
+              },
+              {
+                "index": 1,
+                "tearId": 1,
+                "field": "fallingSpeed",
+                "original": 0.17072603106498718,
+                "production": 0.20163556933403015,
+                "reason": "Shared post-Title/run/ambient/effect consumers remain incomplete; neither source values nor cursor adjustments are supplied to production"
+              },
+              {
+                "index": 1,
+                "tearId": 1,
+                "field": "ground",
+                "original": [
+                  198.26698303222656,
+                  396.0484924316406
+                ],
+                "production": [
+                  198.26698303222656,
+                  396.5953063964844
+                ],
+                "reason": "Shared post-Title/run/ambient/effect consumers remain incomplete; neither source values nor cursor adjustments are supplied to production"
+              }
+            ]
+          }
+        },
+        {
+          "name": "random-1",
+          "status": "pass",
+          "nativeManifestSha256": "6b302ba6fcdb9292fa0b078b536391e19b14c7273bfd38f4afc8558b4e2d98f3",
+          "comparedPresentations": 111,
+          "pairedPlayerFields": 460,
+          "inputProvenance": {
+            "status": "pass",
+            "expectedCommands": 138,
+            "observedCommands": 138,
+            "initialSeed": 2449919791,
+            "bootEpochSeed": 1700000000,
+            "runSeedValue": 2449919791
+          },
+          "lifecycle": {
+            "nativePhaseChecks": 27,
+            "browserPhaseChecks": 27,
+            "nativeRemovals": 1,
+            "browserRemovals": 1,
+            "nativeRangeDeaths": 0,
+            "browserRangeDeaths": 0,
+            "nativeGridDeaths": 1,
+            "browserGridDeaths": 1,
+            "numericMismatches": [
+              {
+                "index": 1,
+                "tearId": 1,
+                "field": "height",
+                "original": -23.515853881835938,
+                "production": -23.548364639282227,
+                "reason": "Shared post-Title/run/ambient/effect consumers remain incomplete; neither source values nor cursor adjustments are supplied to production"
+              },
+              {
+                "index": 1,
+                "tearId": 1,
+                "field": "fallingSpeed",
+                "original": 0.23414605855941772,
+                "production": 0.20163556933403015,
+                "reason": "Shared post-Title/run/ambient/effect consumers remain incomplete; neither source values nor cursor adjustments are supplied to production"
+              },
+              {
+                "index": 1,
+                "tearId": 1,
+                "field": "ground",
+                "original": [
+                  178.15374755859375,
+                  403.55645751953125
+                ],
+                "production": [
+                  178.15374755859375,
+                  403.4432373046875
+                ],
+                "reason": "Shared post-Title/run/ambient/effect consumers remain incomplete; neither source values nor cursor adjustments are supplied to production"
+              }
+            ]
+          }
+        },
+        {
+          "name": "random-2",
+          "status": "pass",
+          "nativeManifestSha256": "91da8e1158ae3dded700185f89c6a67b3d9e14a6ac984a9aa5deb50599523c56",
+          "comparedPresentations": 111,
+          "pairedPlayerFields": 456,
+          "inputProvenance": {
+            "status": "pass",
+            "expectedCommands": 137,
+            "observedCommands": 137,
+            "initialSeed": 3699567784,
+            "bootEpochSeed": 1700000000,
+            "runSeedValue": 3699567784
+          },
+          "lifecycle": {
+            "nativePhaseChecks": 56,
+            "browserPhaseChecks": 56,
+            "nativeRemovals": 1,
+            "browserRemovals": 1,
+            "nativeRangeDeaths": 1,
+            "browserRangeDeaths": 1,
+            "nativeGridDeaths": 0,
+            "browserGridDeaths": 0,
+            "numericMismatches": [
+              {
+                "index": 1,
+                "tearId": 1,
+                "field": "height",
+                "original": -23.564363479614258,
+                "production": -23.548364639282227,
+                "reason": "Shared post-Title/run/ambient/effect consumers remain incomplete; neither source values nor cursor adjustments are supplied to production"
+              },
+              {
+                "index": 1,
+                "tearId": 1,
+                "field": "fallingSpeed",
+                "original": 0.18563592433929443,
+                "production": 0.20163556933403015,
+                "reason": "Shared post-Title/run/ambient/effect consumers remain incomplete; neither source values nor cursor adjustments are supplied to production"
+              },
+              {
+                "index": 1,
+                "tearId": 1,
+                "field": "ground",
+                "original": [
+                  184.70834350585938,
+                  390.03900146484375
+                ],
+                "production": [
+                  184.74905395507812,
+                  390.0385437011719
+                ],
+                "reason": "Shared post-Title/run/ambient/effect consumers remain incomplete; neither source values nor cursor adjustments are supplied to production"
+              }
+            ]
+          }
+        },
+        {
+          "name": "random-3",
+          "status": "pass",
+          "nativeManifestSha256": "a46fe9b5ca8ce540d6bb6010e589d0360355ad4fa3af5fd3cf3cea504f0b1865",
+          "comparedPresentations": 111,
+          "pairedPlayerFields": 460,
+          "inputProvenance": {
+            "status": "pass",
+            "expectedCommands": 138,
+            "observedCommands": 138,
+            "initialSeed": 1587531661,
+            "bootEpochSeed": 1700000000,
+            "runSeedValue": 1587531661
+          },
+          "lifecycle": {
+            "nativePhaseChecks": 5,
+            "browserPhaseChecks": 5,
+            "nativeRemovals": 1,
+            "browserRemovals": 1,
+            "nativeRangeDeaths": 0,
+            "browserRangeDeaths": 0,
+            "nativeGridDeaths": 1,
+            "browserGridDeaths": 1,
+            "numericMismatches": [
+              {
+                "index": 1,
+                "tearId": 1,
+                "field": "height",
+                "original": -23.526897430419922,
+                "production": -23.548364639282227,
+                "reason": "Shared post-Title/run/ambient/effect consumers remain incomplete; neither source values nor cursor adjustments are supplied to production"
+              },
+              {
+                "index": 1,
+                "tearId": 1,
+                "field": "fallingSpeed",
+                "original": 0.22310231626033783,
+                "production": 0.20163556933403015,
+                "reason": "Shared post-Title/run/ambient/effect consumers remain incomplete; neither source values nor cursor adjustments are supplied to production"
+              },
+              {
+                "index": 1,
+                "tearId": 1,
+                "field": "ground",
+                "original": [
+                  191.58905029296875,
+                  410.0389099121094
+                ],
+                "production": [
+                  191.55844116210938,
+                  410.0385437011719
+                ],
+                "reason": "Shared post-Title/run/ambient/effect consumers remain incomplete; neither source values nor cursor adjustments are supplied to production"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
