@@ -10,14 +10,17 @@ import { chromium } from '@playwright/test';
 import { browserLaunchOptions, inspectBrowserGraphics } from '../foundation/browser.mjs';
 import { startProductionServer } from '../foundation/production-server.mjs';
 import { waitForReady } from '../foundation/verify.mjs';
+import { TearContracts } from './tear-contracts.mjs';
 const ROOT=resolve(fileURLToPath(new URL('../..',import.meta.url)));
 const run=promisify(execFile);
 const epoch=1700000000;
 const ORIGINAL_SHA='724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13';
-const GATE_SOURCES = ["tools/e2e/weapons.mjs", "tools/original/foundation-physics-observer.py", "tools/original/native-identity.py", "tools/original/state-observer.py", "tools/original/foundation-clock-run.py", "tools/original/foundation-clock-gate.c", "tools/original/foundation-seeds.py", "tools/original/debug-run.py", "tools/original/with-display.sh", "tools/foundation/browser.mjs", "tools/foundation/production-server.mjs", "tools/foundation/verify.mjs", "tools/original/weapons-scenarios.py"];
+const GATE_SOURCES = ["tools/e2e/weapons.mjs", "tools/e2e/tear-contracts.mjs", "tools/original/foundation-physics-observer.py", "tools/original/native-identity.py", "tools/original/state-observer.py", "tools/original/foundation-clock-run.py", "tools/original/foundation-clock-gate.c", "tools/original/foundation-seeds.py", "tools/original/debug-run.py", "tools/original/with-display.sh", "tools/foundation/browser.mjs", "tools/foundation/production-server.mjs", "tools/foundation/verify.mjs", "tools/original/weapons-scenarios.py"];
 const sourceHashes = async () => Object.fromEntries(await Promise.all(GATE_SOURCES.map(async path => [path, createHash('sha256').update(await readFile(join(ROOT, path))).digest('hex')])));
 const gateSources = await sourceHashes();
 const value=(flag)=>{const index=process.argv.indexOf(flag);return index<0?undefined:process.argv[index+1];};
+const lifecycle=process.argv.includes('--lifecycle');
+const heldPresentations=lifecycle?1:54,releasePresentations=lifecycle?110:26;
 const output=resolve(value('--output')||join(ROOT,'.cache/e2e/weapons',String(Date.now())));
 const randomCount=Number(value('--count')||4);
 assert.ok(Number.isInteger(randomCount)&&randomCount>=2&&randomCount<=16,'Random coverage must contain2..16 recorded seeds');
@@ -43,14 +46,14 @@ assert.equal(createHash('sha256').update(sourceBinary).digest('hex'),ORIGINAL_SH
 await writeFile(join(output,'scenarios.json'),JSON.stringify({schema:1,bootEpochSeed:epoch,source:'Contrived full/intermediate births plus OS-random recorded seed coverage',cases},null,2)+'\n');
 const production=await startProductionServer();
 const browser=await chromium.launch(browserLaunchOptions());
-const report={schema:1,status:'running',gateSources,originalBinarySha256:ORIGINAL_SHA,scope:'Paired live original/browser weapon cooldown, held/released head clock, shot births, actor birth fence and horizontal birth positions; projected height/range and shared MT routing remain separate work',production:production.build,graphics:await inspectBrowserGraphics(browser),cases:[]};
+const report={schema:1,status:'running',gateSources,originalBinarySha256:ORIGINAL_SHA,scope:lifecycle?'Live original/browser source tear ground/height recurrence, half prediction, PRE range/grid death and next-full removal; RNG-dependent numeric mismatches are reported separately from these source contracts. Poof effects and complete shared stream parity remain incomplete':'Paired live original/browser weapon cooldown, held/released head clock, shot births, actor birth fence and horizontal birth positions',production:production.build,graphics:await inspectBrowserGraphics(browser),cases:[]};
 try {
  for(const scenario of cases){
   const directory=join(output,scenario.name);await mkdir(directory,{recursive:true});
-  let page;const states=[];let births=0;let comparisons=0;
+  let page;const states=[];let births=0;let comparisons=0;const contracts=lifecycle?new TearContracts():undefined;
   const result={...scenario,status:'running'};report.cases.push(result);
   try {
-  const tape=await run('python3',[join(ROOT,'tools/original/weapons-scenarios.py'),'--seed',scenario.code,'--direction',scenario.direction,'--delay',String(scenario.delay)],{cwd:ROOT});
+  const tape=await run('python3',[join(ROOT,'tools/original/weapons-scenarios.py'),'--seed',scenario.code,'--direction',scenario.direction,'--delay',String(scenario.delay),'--frames',String(heldPresentations),'--release-frames',String(releasePresentations),...(lifecycle?['--lifecycle']:[])],{cwd:ROOT});
   await writeFile(join(directory,'tape.json'),tape.stdout);
   await run('bash',[join(ROOT,'tools/original/with-display.sh'),'python3',join(ROOT,'tools/original/foundation-clock-run.py'),'--seed',scenario.code,'--tape',join(directory,'tape.json'),'--observe-every-step','--state-observer',join(ROOT,'tools/original/foundation-physics-observer.py'),'--output',join(directory,'original')],{cwd:ROOT,timeout:180000,maxBuffer:1024*1024});
   const raw=await readFile(join(directory,'original/manifest.json'));const native=JSON.parse(raw);
@@ -69,13 +72,14 @@ try {
   const start=await page.evaluate(()=>window.game.snapshot());assert.equal(start.screen,'playing');assert.equal(start.systemClock.systemCounter%2,0);
   assert.equal(start.fireCooldown,baseline.observation.players[0].fireCooldown);
   if(scenario.delay)await page.evaluate(()=>window.game.step(1));
+  if(lifecycle){await page.keyboard.down('KeyA');await page.evaluate(()=>window.game.step(30));await page.keyboard.up('KeyA');await page.evaluate(()=>window.game.step(30));}
   const key=`Arrow${scenario.direction}`;await page.keyboard.down(key);
   const rows=new Map(native.debugObservations.map(row=>[row.context.presentedFrame,row.observation]));
   const seen=new Set();
-  for(let index=1;index<=80;index++){
-   if(index===55)await page.keyboard.up(key);
+  for(let index=1;index<=heldPresentations+releasePresentations;index++){
+   if(index===heldPresentations+1)await page.keyboard.up(key);
    await page.evaluate(()=>window.game.step(1));const state=await page.evaluate(()=>window.game.snapshot());states.push(state);
-   const nativeFrame=baseline.context.presentedFrame+scenario.delay+index;const observed=rows.get(nativeFrame);
+   const nativeFrame=baseline.context.presentedFrame+scenario.delay+(lifecycle?60:0)+index;const observed=rows.get(nativeFrame);
    assert.ok(observed&&observed.memoryWritten===false,`${scenario.name}:missing readonly native phase${nativeFrame}`);
    assert.equal(observed.nativeBinarySha256,ORIGINAL_SHA,`${scenario.name}:${index}:running executable`);
    const player=observed.players[0];
@@ -97,13 +101,15 @@ try {
    }
    const handles=state.actorScheduler.actors;assert.deepEqual(handles[0],{kind:'player',id:0});
    assert.deepEqual(handles.filter(actor=>actor.kind==='tear').map(actor=>actor.id),state.tears.map(tear=>tear.id));
+   contracts?.step(state,observed,index);
    comparisons++;
   }
   assert.deepEqual(errors,[]);
   result.status='pass';
   } catch(error) {result.status='fail';result.error=String(error);}
   finally {
-   result.comparedPresentations=comparisons;result.comparedHeldPresentations=Math.min(comparisons,54);result.comparedReleasePresentations=Math.max(0,comparisons-54);result.observedBirths=births;
+   result.comparedPresentations=comparisons;result.comparedHeldPresentations=Math.min(comparisons,heldPresentations);result.comparedReleasePresentations=Math.max(0,comparisons-heldPresentations);result.observedBirths=births;
+   if(contracts)result.lifecycle=contracts.summary;
    await writeFile(join(directory,'browser-states.json'),JSON.stringify({schema:1,states},null,2)+'\n');
    if(page)await page.close().catch(error=>{result.status='fail';result.cleanupError=String(error);});
    await writeFile(join(output,'report.json'),JSON.stringify(report,null,2)+'\n');

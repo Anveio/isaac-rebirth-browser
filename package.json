@@ -30,7 +30,8 @@
     "test:e2e:pickups": "cargo build --manifest-path engine/Cargo.toml --locked --bin floor && bash tools/original/with-display.sh node tools/e2e/pickups.mjs --count 2",
     "test:e2e:doors": "cargo build --manifest-path engine/Cargo.toml --locked --bin floor && bash tools/original/with-display.sh node tools/e2e/doors.mjs --count 1",
     "test:e2e:audio": "bash tools/original/with-display.sh node tools/e2e/audio.mjs --count 2",
-    "test:e2e:regressions": "bash tools/original/with-display.sh node tools/foundation/paired-game.mjs --replay-cases references/isaac/foundation/runtime-progress/1E0WJX06.json,references/isaac/foundation/runtime-progress/W0L0LYYM.json"
+    "test:e2e:regressions": "bash tools/original/with-display.sh node tools/foundation/paired-game.mjs --replay-cases references/isaac/foundation/runtime-progress/1E0WJX06.json,references/isaac/foundation/runtime-progress/W0L0LYYM.json",
+    "test:e2e:tear-lifecycle": "bash tools/original/with-display.sh node tools/e2e/weapons.mjs --lifecycle --count 4"
   },
   "devDependencies": {
     "@playwright/test": "1.64.0",

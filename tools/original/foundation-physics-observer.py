@@ -48,12 +48,19 @@ def observe(pid, context):
    if mt_index>624 or any(word>0xffffffff for word in mt_state):raise ValueError('Native MT data fails source-sized integrity checks')
    game=struct.unpack('<Q',read(0x8ecd30,8))[0]
    has_players=False
+   shot_admitted=False
    if allowed(game+0xa148,16):
     first,end=struct.unpack('<QQ',read(game+0xa148,16))
     has_players=0<end-first<=32 and (end-first)%8==0 and allowed(first,end-first)
+    if has_players:
+     for address in struct.unpack('<'+'Q'*((end-first)//8),read(first,end-first)):
+      # FireTear5179c9..5179db increments c84 after regular tear admission.
+      # A no-shot coasting prefix must not rescan the whole pool each phase.
+      if allowed(address+0xc84,4) and struct.unpack('<I',read(address+0xc84,4))[0]>0:
+       shot_admitted=True
    scan_bytes=0
    # Typed player admission, not a public-frame offset, triggers the pool scan.
-   if not tracked and has_players:
+   if not tracked and has_players and shot_admitted:
     for m in maps:
      if m['path'] not in ('[heap]',''): continue
      size=min(m['end']-m['start'],MAX_SCAN-scan_bytes)
@@ -84,6 +91,8 @@ def observe(pid, context):
     tears.append({'referenceAddress':hex(address),'position':vals[0:2], 'previousPosition':vals[2:4],
       'renderOffset':vals[4:6],'velocity':vals[6:8], 'height':vals[8], 'fallingSpeed':vals[9], 'fallingAcceleration':vals[10],
       'type':struct.unpack_from('<I',b,0x10)[0], 'variant':struct.unpack_from('<I',b,0x14)[0],
+      'collisionRadius':f32(0x474), 'gridCollisionClass':struct.unpack_from('<I',b,0x340)[0],
+      'gridContact':bool(b[0x34c]), 'spawnSeed':struct.unpack_from('<I',b,0x7d0)[0],
       'frameCountCandidates': [{'offset':hex(o),'u32':struct.unpack_from('<I',b,o)[0]} for o in [0x18,0x1c,0x318,0x31c,0x340,0x344]],
       'active':bool(b[0x31e]), 'dead':bool(b[0x31f]),
       'opaqueBaseBytes':b[:32].hex()})

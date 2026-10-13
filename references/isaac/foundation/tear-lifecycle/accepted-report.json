@@ -1,0 +1,401 @@
+{
+  "schema": 1,
+  "status": "pass",
+  "gateSources": {
+    "tools/e2e/weapons.mjs": "df25c1fc9b1e8c45334eb79aedd48f4cae408e75a8f9639ba8553eb8ab28c99e",
+    "tools/e2e/tear-contracts.mjs": "db3d2de0f2f98d1fdf28734ce020f58a5b15576b48e245869f463d71da7d184f",
+    "tools/original/foundation-physics-observer.py": "0a80c535949ab322bad388b263a93ffaced2b55f79026b97225c39b49cf5c2da",
+    "tools/original/native-identity.py": "4fd5591be56fc4e9ad0486d0f2ec2828f6389786245ee09f9d0b3a395ae18acb",
+    "tools/original/state-observer.py": "58e3b510abbe5ff57f05844efbdf764e2a02530cda4fa99f538d886d258af6f1",
+    "tools/original/foundation-clock-run.py": "b79997f1fdc983a6e6fac74d87c24d2036ea956021fa944d1c0bd7f04e15a243",
+    "tools/original/foundation-clock-gate.c": "f517f1fc0edf2bbe17021e529fb41652e991e286bef070b8aecefd32bfa62e75",
+    "tools/original/foundation-seeds.py": "dd4633c955e7518e9bc0f0147ddfae46d356468238477a68dc06c86656ccba89",
+    "tools/original/debug-run.py": "d785d32c6cc557959be38880a3b046c4040b988fbe3d06d4a8c1f4aa2e833cf5",
+    "tools/original/with-display.sh": "af469210e803786a60d8632c28a6f2da77bc8ab02cc06be50016ddb25e95b848",
+    "tools/foundation/browser.mjs": "60c4bc851470f47e4dd0399148ce0c1edf351d41fbf7f7e15fa823af5948b4c8",
+    "tools/foundation/production-server.mjs": "e3152b58e2353319ba0963b30439e33c3cc65f84a8c6ebb765c2812486245952",
+    "tools/foundation/verify.mjs": "b28ed8af6bf50a7aa8b6b81f55fd29d0c963285f2d54500d61a4a58925de1d9f",
+    "tools/original/weapons-scenarios.py": "b63de8e94c600ab34fdad5026bcafee98836f08eacd382a56acba87a8c498085"
+  },
+  "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "scope": "Live original/browser source tear ground/height recurrence, half prediction, PRE range/grid death and next-full removal; RNG-dependent numeric mismatches are reported separately from these source contracts. Poof effects and complete shared stream parity remain incomplete",
+  "production": {
+    "sha256": "de79f7ca50f150c88eaf955b6d3b02f8ba3950395ebd2aa38aa0af337d57be04",
+    "files": 832,
+    "source": "/workspace/isaac-worktrees/weapons/dist",
+    "scope": "Immutable snapshot of production build bytes; source/native replay equality is checked separately"
+  },
+  "graphics": {
+    "requestedProfile": "mesa",
+    "actualProfile": "mesa",
+    "renderer": "ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL ES 3.2 Mesa 25.0.7-2+deb13u1)",
+    "vendor": "Google Inc. (Mesa)",
+    "version": "OpenGL ES 3.0 (ANGLE 2.1 git hash: unknown hash)",
+    "displayType": "ANGLE_OPENGL_EGL",
+    "devices": [
+      {
+        "vendorId": 0,
+        "deviceId": 0,
+        "vendorString": "Google Inc. (Mesa)",
+        "deviceString": "ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL ES 3.2 Mesa 25.0.7-2+deb13u1)",
+        "driverVendor": "Mesa",
+        "driverVersion": "25.0.7"
+      }
+    ],
+    "observedFrom": "Chromium SystemInfo.getInfo",
+    "scope": "Observed Chromium graphics backend; shader/pixel equality still requires the original reference comparisons"
+  },
+  "cases": [
+    {
+      "name": "full-first-shot",
+      "code": "QSYVKMSE",
+      "direction": "Right",
+      "delay": 0,
+      "status": "pass",
+      "nativeManifestSha256": "21cea647c44472340e6d1a02bce55c71aa74594856cf3550f790bdb93ed47804",
+      "nativeManifest": "/workspace/isaac-worktrees/weapons/.cache/e2e/tear-lifecycle/aggregate-final/full-first-shot/original/manifest.json",
+      "comparedPresentations": 111,
+      "comparedHeldPresentations": 1,
+      "comparedReleasePresentations": 110,
+      "observedBirths": 1,
+      "lifecycle": {
+        "nativePhaseChecks": 56,
+        "browserPhaseChecks": 56,
+        "nativeRemovals": 1,
+        "browserRemovals": 1,
+        "nativeRangeDeaths": 1,
+        "browserRangeDeaths": 1,
+        "nativeGridDeaths": 0,
+        "browserGridDeaths": 0,
+        "numericMismatches": [
+          {
+            "index": 1,
+            "tearId": 1,
+            "field": "height",
+            "original": -23.564363479614258,
+            "production": -23.56181526184082,
+            "reason": "Shared post-Title/run/ambient/effect consumers remain incomplete; neither source values nor cursor adjustments are supplied to production"
+          },
+          {
+            "index": 1,
+            "tearId": 1,
+            "field": "fallingSpeed",
+            "original": 0.18563592433929443,
+            "production": 0.1881842315196991,
+            "reason": "Shared post-Title/run/ambient/effect consumers remain incomplete; neither source values nor cursor adjustments are supplied to production"
+          },
+          {
+            "index": 1,
+            "tearId": 1,
+            "field": "ground",
+            "original": [
+              198.26698303222656,
+              396.5545959472656
+            ],
+            "production": [
+              198.26698303222656,
+              395.169189453125
+            ],
+            "reason": "Shared post-Title/run/ambient/effect consumers remain incomplete; neither source values nor cursor adjustments are supplied to production"
+          }
+        ]
+      }
+    },
+    {
+      "name": "intermediate-first-shot",
+      "code": "ZG800TRJ",
+      "direction": "Right",
+      "delay": 1,
+      "status": "pass",
+      "nativeManifestSha256": "104a618860f3f0a465f5385fcd23582b752b2f61c69dd79d39f7e8d3bd5b638e",
+      "nativeManifest": "/workspace/isaac-worktrees/weapons/.cache/e2e/tear-lifecycle/aggregate-final/intermediate-first-shot/original/manifest.json",
+      "comparedPresentations": 111,
+      "comparedHeldPresentations": 1,
+      "comparedReleasePresentations": 110,
+      "observedBirths": 1,
+      "lifecycle": {
+        "nativePhaseChecks": 53,
+        "browserPhaseChecks": 55,
+        "nativeRemovals": 1,
+        "browserRemovals": 1,
+        "nativeRangeDeaths": 1,
+        "browserRangeDeaths": 1,
+        "nativeGridDeaths": 0,
+        "browserGridDeaths": 0,
+        "numericMismatches": [
+          {
+            "index": 1,
+            "tearId": 1,
+            "field": "height",
+            "original": -23.515853881835938,
+            "production": -23.56181526184082,
+            "reason": "Shared post-Title/run/ambient/effect consumers remain incomplete; neither source values nor cursor adjustments are supplied to production"
+          },
+          {
+            "index": 1,
+            "tearId": 1,
+            "field": "fallingSpeed",
+            "original": 0.23414605855941772,
+            "production": 0.1881842315196991,
+            "reason": "Shared post-Title/run/ambient/effect consumers remain incomplete; neither source values nor cursor adjustments are supplied to production"
+          },
+          {
+            "index": 1,
+            "tearId": 1,
+            "field": "ground",
+            "original": [
+              198.26698303222656,
+              396.4833679199219
+            ],
+            "production": [
+              198.26698303222656,
+              395.169189453125
+            ],
+            "reason": "Shared post-Title/run/ambient/effect consumers remain incomplete; neither source values nor cursor adjustments are supplied to production"
+          }
+        ]
+      }
+    },
+    {
+      "name": "random-0",
+      "code": "WCBCG673",
+      "direction": "Right",
+      "delay": 0,
+      "seedValue": 2674744462,
+      "status": "pass",
+      "nativeManifestSha256": "7fedc5ced07dccb9de85d71adfa0e6e321214d82202b5d0065ef6e622a7f00ee",
+      "nativeManifest": "/workspace/isaac-worktrees/weapons/.cache/e2e/tear-lifecycle/aggregate-final/random-0/original/manifest.json",
+      "comparedPresentations": 111,
+      "comparedHeldPresentations": 1,
+      "comparedReleasePresentations": 110,
+      "observedBirths": 1,
+      "lifecycle": {
+        "nativePhaseChecks": 56,
+        "browserPhaseChecks": 56,
+        "nativeRemovals": 1,
+        "browserRemovals": 1,
+        "nativeRangeDeaths": 1,
+        "browserRangeDeaths": 1,
+        "nativeGridDeaths": 0,
+        "browserGridDeaths": 0,
+        "numericMismatches": [
+          {
+            "index": 1,
+            "tearId": 1,
+            "field": "height",
+            "original": -23.564363479614258,
+            "production": -23.56181526184082,
+            "reason": "Shared post-Title/run/ambient/effect consumers remain incomplete; neither source values nor cursor adjustments are supplied to production"
+          },
+          {
+            "index": 1,
+            "tearId": 1,
+            "field": "fallingSpeed",
+            "original": 0.18563592433929443,
+            "production": 0.1881842315196991,
+            "reason": "Shared post-Title/run/ambient/effect consumers remain incomplete; neither source values nor cursor adjustments are supplied to production"
+          },
+          {
+            "index": 1,
+            "tearId": 1,
+            "field": "ground",
+            "original": [
+              198.26698303222656,
+              396.5545959472656
+            ],
+            "production": [
+              198.26698303222656,
+              395.169189453125
+            ],
+            "reason": "Shared post-Title/run/ambient/effect consumers remain incomplete; neither source values nor cursor adjustments are supplied to production"
+          }
+        ]
+      }
+    },
+    {
+      "name": "random-1",
+      "code": "4180H72K",
+      "direction": "Left",
+      "delay": 1,
+      "seedValue": 3658619914,
+      "status": "pass",
+      "nativeManifestSha256": "092f24acec525389f89c6178959e187a78e9b0ad91f02ac629850b24005f7206",
+      "nativeManifest": "/workspace/isaac-worktrees/weapons/.cache/e2e/tear-lifecycle/aggregate-final/random-1/original/manifest.json",
+      "comparedPresentations": 111,
+      "comparedHeldPresentations": 1,
+      "comparedReleasePresentations": 110,
+      "observedBirths": 1,
+      "lifecycle": {
+        "nativePhaseChecks": 27,
+        "browserPhaseChecks": 27,
+        "nativeRemovals": 1,
+        "browserRemovals": 1,
+        "nativeRangeDeaths": 0,
+        "browserRangeDeaths": 0,
+        "nativeGridDeaths": 1,
+        "browserGridDeaths": 1,
+        "numericMismatches": [
+          {
+            "index": 1,
+            "tearId": 1,
+            "field": "height",
+            "original": -23.515853881835938,
+            "production": -23.56181526184082,
+            "reason": "Shared post-Title/run/ambient/effect consumers remain incomplete; neither source values nor cursor adjustments are supplied to production"
+          },
+          {
+            "index": 1,
+            "tearId": 1,
+            "field": "fallingSpeed",
+            "original": 0.23414605855941772,
+            "production": 0.1881842315196991,
+            "reason": "Shared post-Title/run/ambient/effect consumers remain incomplete; neither source values nor cursor adjustments are supplied to production"
+          },
+          {
+            "index": 1,
+            "tearId": 1,
+            "field": "ground",
+            "original": [
+              178.15374755859375,
+              403.55645751953125
+            ],
+            "production": [
+              178.15374755859375,
+              404.885498046875
+            ],
+            "reason": "Shared post-Title/run/ambient/effect consumers remain incomplete; neither source values nor cursor adjustments are supplied to production"
+          }
+        ]
+      }
+    },
+    {
+      "name": "random-2",
+      "code": "ZPVEKZCH",
+      "direction": "Up",
+      "delay": 0,
+      "seedValue": 2761505577,
+      "status": "pass",
+      "nativeManifestSha256": "6eab35a835713a96e6088cccd5e1edc5ac07ca1aa83be047c785ead4326745d9",
+      "nativeManifest": "/workspace/isaac-worktrees/weapons/.cache/e2e/tear-lifecycle/aggregate-final/random-2/original/manifest.json",
+      "comparedPresentations": 111,
+      "comparedHeldPresentations": 1,
+      "comparedReleasePresentations": 110,
+      "observedBirths": 1,
+      "lifecycle": {
+        "nativePhaseChecks": 54,
+        "browserPhaseChecks": 56,
+        "nativeRemovals": 1,
+        "browserRemovals": 1,
+        "nativeRangeDeaths": 1,
+        "browserRangeDeaths": 1,
+        "nativeGridDeaths": 0,
+        "browserGridDeaths": 0,
+        "numericMismatches": [
+          {
+            "index": 1,
+            "tearId": 1,
+            "field": "height",
+            "original": -23.50152015686035,
+            "production": -23.56181526184082,
+            "reason": "Shared post-Title/run/ambient/effect consumers remain incomplete; neither source values nor cursor adjustments are supplied to production"
+          },
+          {
+            "index": 1,
+            "tearId": 1,
+            "field": "fallingSpeed",
+            "original": 0.2484796941280365,
+            "production": 0.1881842315196991,
+            "reason": "Shared post-Title/run/ambient/effect consumers remain incomplete; neither source values nor cursor adjustments are supplied to production"
+          },
+          {
+            "index": 1,
+            "tearId": 1,
+            "field": "ground",
+            "original": [
+              184.36279296875,
+              390.0429382324219
+            ],
+            "production": [
+              183.32293701171875,
+              390.0546875
+            ],
+            "reason": "Shared post-Title/run/ambient/effect consumers remain incomplete; neither source values nor cursor adjustments are supplied to production"
+          }
+        ]
+      }
+    },
+    {
+      "name": "random-3",
+      "code": "SXXELJMF",
+      "direction": "Down",
+      "delay": 1,
+      "seedValue": 2332637916,
+      "status": "pass",
+      "nativeManifestSha256": "34ee1807fdbf361a85c8c0263484b30a0986f9a89e1d551b122ebcbed9833f0b",
+      "nativeManifest": "/workspace/isaac-worktrees/weapons/.cache/e2e/tear-lifecycle/aggregate-final/random-3/original/manifest.json",
+      "comparedPresentations": 111,
+      "comparedHeldPresentations": 1,
+      "comparedReleasePresentations": 110,
+      "observedBirths": 1,
+      "lifecycle": {
+        "nativePhaseChecks": 5,
+        "browserPhaseChecks": 5,
+        "nativeRemovals": 1,
+        "browserRemovals": 1,
+        "nativeRangeDeaths": 0,
+        "browserRangeDeaths": 0,
+        "nativeGridDeaths": 1,
+        "browserGridDeaths": 1,
+        "numericMismatches": [
+          {
+            "index": 1,
+            "tearId": 1,
+            "field": "height",
+            "original": -23.62885856628418,
+            "production": -23.56181526184082,
+            "reason": "Shared post-Title/run/ambient/effect consumers remain incomplete; neither source values nor cursor adjustments are supplied to production"
+          },
+          {
+            "index": 1,
+            "tearId": 1,
+            "field": "fallingSpeed",
+            "original": 0.12114224582910538,
+            "production": 0.1881842315196991,
+            "reason": "Shared post-Title/run/ambient/effect consumers remain incomplete; neither source values nor cursor adjustments are supplied to production"
+          },
+          {
+            "index": 1,
+            "tearId": 1,
+            "field": "ground",
+            "original": [
+              191.86563110351562,
+              410.0420227050781
+            ],
+            "production": [
+              192.98455810546875,
+              410.0546875
+            ],
+            "reason": "Shared post-Title/run/ambient/effect consumers remain incomplete; neither source values nor cursor adjustments are supplied to production"
+          }
+        ]
+      }
+    }
+  ],
+  "gateSourcesEnd": {
+    "tools/e2e/weapons.mjs": "df25c1fc9b1e8c45334eb79aedd48f4cae408e75a8f9639ba8553eb8ab28c99e",
+    "tools/e2e/tear-contracts.mjs": "db3d2de0f2f98d1fdf28734ce020f58a5b15576b48e245869f463d71da7d184f",
+    "tools/original/foundation-physics-observer.py": "0a80c535949ab322bad388b263a93ffaced2b55f79026b97225c39b49cf5c2da",
+    "tools/original/native-identity.py": "4fd5591be56fc4e9ad0486d0f2ec2828f6389786245ee09f9d0b3a395ae18acb",
+    "tools/original/state-observer.py": "58e3b510abbe5ff57f05844efbdf764e2a02530cda4fa99f538d886d258af6f1",
+    "tools/original/foundation-clock-run.py": "b79997f1fdc983a6e6fac74d87c24d2036ea956021fa944d1c0bd7f04e15a243",
+    "tools/original/foundation-clock-gate.c": "f517f1fc0edf2bbe17021e529fb41652e991e286bef070b8aecefd32bfa62e75",
+    "tools/original/foundation-seeds.py": "dd4633c955e7518e9bc0f0147ddfae46d356468238477a68dc06c86656ccba89",
+    "tools/original/debug-run.py": "d785d32c6cc557959be38880a3b046c4040b988fbe3d06d4a8c1f4aa2e833cf5",
+    "tools/original/with-display.sh": "af469210e803786a60d8632c28a6f2da77bc8ab02cc06be50016ddb25e95b848",
+    "tools/foundation/browser.mjs": "60c4bc851470f47e4dd0399148ce0c1edf351d41fbf7f7e15fa823af5948b4c8",
+    "tools/foundation/production-server.mjs": "e3152b58e2353319ba0963b30439e33c3cc65f84a8c6ebb765c2812486245952",
+    "tools/foundation/verify.mjs": "b28ed8af6bf50a7aa8b6b81f55fd29d0c963285f2d54500d61a4a58925de1d9f",
+    "tools/original/weapons-scenarios.py": "b63de8e94c600ab34fdad5026bcafee98836f08eacd382a56acba87a8c498085"
+  },
+  "gateSourcesStable": true
+}

@@ -6,8 +6,17 @@ export interface Player {
   x: number; y: number; vx: number; vy: number; hp: number; maxHp: number;
   facing: Direction; bodyFacing: Direction; walkFrame: number; headFrame: number; shooting: boolean;
   renderOffset: { x: number; y: number };
+  eye: "negative" | "positive";
 }
-export interface Tear { id: number; x: number; y: number; vx: number; vy: number; age: number; }
+export interface Tear {
+  id: number; x: number; y: number; vx: number; vy: number; age: number;
+  spawnSeed: number; collisionRadius: number; gridContact: boolean;
+  motion: {
+    position: {x: number; y: number}; presentedPosition: {x: number; y: number};
+    velocity: {x: number; y: number}; height: number; fallingSpeed: number;
+    fallingAcceleration: number; renderOffsetY: number; lifetime: "alive" | "dying" | "removed";
+  };
+}
 export interface Impact { id: number; x: number; y: number; age: number; }
 export interface ActorRef { kind: "player" | "tear" | "bomb" | "pickup" | "npc" | "effect"; id: number; }
 export interface MtState { words: number[]; index: number; }
@@ -76,7 +85,6 @@ export interface Room {
   left: number; right: number; top: number; bottom: number; appearance: RoomAppearance;
   descriptor: RoomDescriptor | null;
   spawns: {tintedRockIndex: number; finalSpawnState: number; selectors: {groupIndex: number; gridIndex: number; category: "entity" | "grid"; type: number; variant: number; subtype: number; position: {x: number; y: number}; groupSeed: number; spawnSeed: number}[]} | null;
-  projectileBounds: { left: number; right: number; top: number; bottom: number };
   pickups: Pickup[];
   grid: { width: number; height: number; cells: {selector: number; entity: {kind: number; variant: number; state: number; collisionClass: number; spawnSeed: number} | null}[] } | null;
 }

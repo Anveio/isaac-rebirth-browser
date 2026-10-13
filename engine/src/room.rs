@@ -21,24 +21,11 @@ pub struct Room {
     pub right: f64,
     pub top: f64,
     pub bottom: f64,
-    pub projectile_bounds: ProjectileBounds,
     pub appearance: RoomAppearance,
     pub descriptor: Option<crate::floor::Descriptor>,
     pub pickups: Vec<crate::pickups::Pickup>,
     pub spawns: Option<crate::room_spawns::RoomSpawns>,
     pub grid: Option<crate::grid::GridDescriptor>,
-}
-
-/// Projected tear limits retained separately from verified player clearance.
-/// Native tear-ground collision and its entity radius remain unresolved.
-#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub struct ProjectileBounds {
-    pub left: f64,
-    pub right: f64,
-    pub top: f64,
-    pub bottom: f64,
-    pub evidence: String,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
@@ -456,13 +443,6 @@ impl Room {
             right: right_plane - radius,
             top: top_plane + radius,
             bottom: bottom_plane - radius,
-            projectile_bounds: ProjectileBounds {
-                left: 70.0,
-                right: 410.0,
-                top: 48.0,
-                bottom: 222.0,
-                evidence: "projected-provisional-tear-limits;typed-ground-collision-unrecovered".into(),
-            },
         appearance: RoomAppearance {
             backdrop: "gfx/backdrop/01_basement.png".into(),
             columns: ROOM_COLUMNS,

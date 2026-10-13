@@ -1,0 +1,127 @@
+{
+  "schema": 1,
+  "status": "fail",
+  "scope": "Exact original/browser functional holdout replay after source TearMotion integration; every case executed, all failures retained. Complete RNG and pixel parity remain separate.",
+  "report": ".cache/e2e/paired/tear-aggregate-final/report.json",
+  "reportSha256": "3699fe18a9136e72733bdde524fae5485b549004c6e4ed1a70ea92f59e1f0cc6",
+  "production": {
+    "sha256": "de79f7ca50f150c88eaf955b6d3b02f8ba3950395ebd2aa38aa0af337d57be04",
+    "files": 832,
+    "source": "/workspace/isaac-worktrees/weapons/dist",
+    "scope": "Immutable snapshot of production build bytes; source/native replay equality is checked separately"
+  },
+  "gateSourcesStable": true,
+  "cases": [
+    {
+      "seed": "EQCA 3XZX",
+      "status": "pass",
+      "passedCheckpoints": 18,
+      "totalCheckpoints": 18,
+      "caseDirectory": "/workspace/isaac-worktrees/weapons/.cache/e2e/paired/tear-aggregate-final/00-paired-random-run",
+      "failedFields": []
+    },
+    {
+      "seed": "1E0W JX06",
+      "status": "pass",
+      "passedCheckpoints": 18,
+      "totalCheckpoints": 18,
+      "caseDirectory": "/workspace/isaac-worktrees/weapons/.cache/e2e/paired/tear-aggregate-final/01-paired-random-run",
+      "failedFields": []
+    },
+    {
+      "seed": "W0L0 LYYM",
+      "status": "fail",
+      "passedCheckpoints": 16,
+      "totalCheckpoints": 18,
+      "caseDirectory": "/workspace/isaac-worktrees/weapons/.cache/e2e/paired/tear-aggregate-final/02-paired-random-run",
+      "failedFields": [
+        {
+          "label": "random-resumed",
+          "field": "tears.length",
+          "expected": 0,
+          "actual": 1,
+          "status": "fail"
+        },
+        {
+          "label": "random-after-bomb",
+          "field": "player.y",
+          "expected": 214,
+          "actual": 28.022801589965823,
+          "status": "fail"
+        },
+        {
+          "label": "random-after-bomb",
+          "field": "player.vx",
+          "expected": 0,
+          "actual": 7.076459839079431e-25,
+          "status": "fail"
+        },
+        {
+          "label": "random-after-bomb",
+          "field": "player.vy",
+          "expected": 0,
+          "actual": -1.8597967982292176,
+          "status": "fail"
+        },
+        {
+          "label": "random-after-bomb",
+          "field": "damageCooldown",
+          "expected": 108,
+          "actual": 107,
+          "status": "fail"
+        }
+      ]
+    },
+    {
+      "seed": "T1PK6Y0W",
+      "status": "fail",
+      "passedCheckpoints": 25,
+      "totalCheckpoints": 28,
+      "caseDirectory": "/workspace/isaac-worktrees/weapons/.cache/e2e/paired/tear-aggregate-final/03-paired-room-combat",
+      "failedFields": [
+        {
+          "label": "rock-bomb-explosion",
+          "field": "player.hp",
+          "expected": 3,
+          "actual": 4,
+          "status": "fail"
+        },
+        {
+          "label": "rock-after-bomb",
+          "field": "player.hp",
+          "expected": 3,
+          "actual": 4,
+          "status": "fail"
+        },
+        {
+          "label": "rock-former-cell-crossed",
+          "field": "player.y",
+          "expected": 219.99036254882816,
+          "actual": 168.4999008178711,
+          "status": "fail"
+        },
+        {
+          "label": "rock-former-cell-crossed",
+          "field": "player.vx",
+          "expected": 1.0445412115228005e-24,
+          "actual": 2.2154662104867384e-08,
+          "status": "fail"
+        },
+        {
+          "label": "rock-former-cell-crossed",
+          "field": "player.vy",
+          "expected": 2.42152578830719,
+          "actual": -0.03481050580739975,
+          "status": "fail"
+        },
+        {
+          "label": "rock-former-cell-crossed",
+          "field": "player.hp",
+          "expected": 3,
+          "actual": 4,
+          "status": "fail"
+        }
+      ]
+    }
+  ]
+}
