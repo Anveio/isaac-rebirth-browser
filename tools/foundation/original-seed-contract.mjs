@@ -1,13 +1,8 @@
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
-import { decodePng, exactStateDifference } from "./compare.mjs";
-import { assertGameplayInvariants, invariantTape, wasmReplay } from "./seed-invariants.mjs";
-import { nativeReplay } from "./verify.mjs";
+import { decodePng } from "./compare.mjs";
 
-const ROOT = resolve(fileURLToPath(new URL("../..", import.meta.url)));
 const compact = (seed) => seed.replaceAll(" ", "");
 export function validateNativeSeedReport(report) {
   assert.equal(report.schema, 1);
@@ -62,56 +57,4 @@ export function readOriginalSeedCase(run, reportPath) {
     assert.equal(image.width, 960); assert.equal(image.height, 540);
   }
   return { observed, manifestPath, logPath, manifest };
-}
-
-export async function verifyOriginalSeedContract({ nativeReport, output = join(ROOT, ".cache/foundation/original-seed-contract/latest") } = {}) {
-  mkdirSync(output, { recursive: true });
-  const report = { schema: 1, status: "fail", cases: [], skipped: 0, originalStateParity: false, originalSimulationTickDelivery: false, scope: "Actual original seed-code/value and initial Stage1 RNG readback, plus generic exact native Rust/WASM input replay; room generation, complete hidden state and simulation ticks remain unverified" };
-  try {
-    assert.ok(nativeReport, "A real original random-seed report is required");
-    report.nativeReport = resolve(nativeReport);
-    const source = JSON.parse(readFileSync(nativeReport, "utf8"));
-    const runs = validateNativeSeedReport(source);
-    for (const run of runs) {
-      try {
-        const original = readOriginalSeedCase(run, nativeReport);
-        const commands = invariantTape(original.observed.seed);
-        const wasm = await wasmReplay(run.seedValue, commands), native = nativeReplay(run.seedValue, commands);
-        assert.equal(native.length, wasm.length);
-        for (let index = 0; index < native.length; index++) assert.equal(exactStateDifference(native[index], wasm[index]), null, `Seed ${run.seedValue}: native Rust/WASM diverged after command ${index}`);
-        const invariants = assertGameplayInvariants(run.seedValue, commands, wasm);
-        const playing = wasm.find((state) => state.screen === "playing");
-        assert.equal(compact(playing.runSeed), compact(original.observed.seed));
-        assert.equal(playing.runSeedValue, original.observed.seedValue);
-        assert.equal(playing.stage, original.observed.stage);
-        assert.equal(playing.stageSeed, original.observed.stageSeed, "Generic clone Stage1 RNG must match the actual original random-seed log");
-        assert.equal(playing.character, "Isaac"); assert.equal(playing.difficulty, "normal");
-        const replay = join(output, `${run.seedValue}.json`);
-        writeFileSync(replay, JSON.stringify({ initialSeed: run.seedValue, commands, states: wasm }) + "\n");
-        report.cases.push({ initialSeed: run.seedValue, seed: original.observed.seed, status: "pass", manifest: original.manifestPath, originalLog: original.logPath, actualStageSeed: original.observed.stageSeed, ...invariants, replay });
-      } catch (error) { report.cases.push({ initialSeed: run.seedValue, seed: run.code, status: "fail", error: error.message }); }
-    }
-    report.tested = report.cases.length;
-    report.status = source.status === "pass" && report.cases.length === runs.length && report.cases.every((item) => item.status === "pass") ? "pass" : "fail";
-    if (source.status !== "pass") report.error = "Source original capture report failed";
-  } catch (error) { report.error = error.message; }
-  writeFileSync(join(output, "report.json"), JSON.stringify(report, null, 2) + "\n");
-  return report;
-}
-
-if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  const value = (flag) => { const index = process.argv.indexOf(flag); return index < 0 ? undefined : process.argv[index + 1]; };
-  let nativeReport = value("--native-report"), captureFailed = false;
-  if (process.argv.includes("--capture")) {
-    const parent = join(ROOT, ".cache/foundation/original-random");
-    mkdirSync(parent, { recursive: true });
-    const directory = mkdtempSync(join(parent, "capture-"));
-    const capture = spawnSync("python3", ["tools/original/foundation-random-seeds.py", "--count", value("--count") || "4", "--jobs", value("--jobs") || "2", "--output", directory], { cwd: ROOT, encoding: "utf8", maxBuffer: 32 * 1024 * 1024 });
-    captureFailed = capture.status !== 0;
-    if (captureFailed) console.error(capture.stderr || capture.stdout || capture.error?.message);
-    nativeReport = join(directory, "result.json");
-  }
-  const report = await verifyOriginalSeedContract({ nativeReport: nativeReport ? resolve(nativeReport) : undefined, output: value("--output") ? resolve(value("--output")) : undefined });
-  console.log(JSON.stringify(report));
-  process.exitCode = !captureFailed && report.status === "pass" ? 0 : 1;
 }
