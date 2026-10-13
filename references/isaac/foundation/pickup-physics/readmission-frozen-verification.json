@@ -1,0 +1,518 @@
+{
+  "schema": 1,
+  "status": "fail",
+  "scope": "Frozen PR82 producerf7b5b18, artifactee225a: all seven unchanged declared cases and3045public comparisons attempted. Original four completed pairs and old aborted2SA execution are immutable; only the remaining three cases were captured freshly after environment reset. The derived aggregate does not relabel the old partial report. All11346field failures and both QJ missing-return assertions remain required.",
+  "producer": "f7b5b18fd1cf9fae52dd89bfd068b22a0032ec39",
+  "production": {
+    "sha256": "ee225a956ced2d016d32627b8a3d127a7a474f142d0e58b933db7039fc93e57b",
+    "files": 938,
+    "bytes": 214023221
+  },
+  "productionAfter": {
+    "sha256": "ee225a956ced2d016d32627b8a3d127a7a474f142d0e58b933db7039fc93e57b",
+    "files": 938,
+    "bytes": 214023221
+  },
+  "report": {
+    "path": "/workspace/isaac-worktrees/inventory/.cache/e2e/pickup-readmission/recovery-after-environment-reset/report.json",
+    "sha256": "3d15370404bf97470de445806cfceea79e08b5b5f4c61512eef250c9214faeb7"
+  },
+  "interruption": {
+    "priorReport": "/workspace/isaac-worktrees/inventory/.cache/e2e/pickup-readmission/first-live/report.json",
+    "priorReportSha256": "5d489fec083be31ae1711edfd7aacbd30c37122236f7cc0893e794da67542b85",
+    "priorStatus": "running",
+    "abortedExecution": "/workspace/isaac-worktrees/inventory/.cache/e2e/pickup-readmission/recovery-after-environment-reset/aborted-execution.json",
+    "abortedExecutionSha256": "9c4f3f42aeab661b1653ac50f03514fe0115cb68736b9423b6953e6607f75ab3"
+  },
+  "abortedExecution": {
+    "path": "/workspace/isaac-worktrees/inventory/.cache/e2e/pickup-readmission/recovery-after-environment-reset/aborted-execution.json",
+    "sha256": "9c4f3f42aeab661b1653ac50f03514fe0115cb68736b9423b6953e6607f75ab3",
+    "status": "aborted",
+    "observedNativeStatus": "pass",
+    "nativeObservations": 451,
+    "scope": "Native completed; paired scoped report/browser completion absent. No paired acceptance or complete-case count from this execution."
+  },
+  "gateSources": {
+    "tools/e2e/troll-bombs.mjs": "1008e5899d9beca1aecdabab7d6e39394b911951a5f33f1c52784cb0a9582840",
+    "tools/original/troll-bomb-scenarios.py": "5f198c0628d92ee05a48ef85deaf568607cf5a7ed472809175629095cf0fe495",
+    "tools/original/rock-blast-scenarios.py": "f896f63cc2f4e66487c7c75d68561b1efb46b989cf92dad09f687f3c4621ca65",
+    "tools/foundation/decode-rooms.py": "4640cce2c99d0ef09d6691cf42c021f012e16ed3752bace965ad18dca7250f1a",
+    "tools/original/foundation-seeds.py": "dd4633c955e7518e9bc0f0147ddfae46d356468238477a68dc06c86656ccba89",
+    "tools/original/foundation-pickup-observe.py": "44de79cf98ff0de86508b37ba15e694af74e7f237e824eaf4d090056cf884f4a",
+    "tools/original/foundation-clock-run.py": "8f2fa981fbe26073d5a5a34ff46fbc6e9c70c2d30f81784abded5e40b9110c5b",
+    "tools/original/foundation-clock-gate.c": "f517f1fc0edf2bbe17021e529fb41652e991e286bef070b8aecefd32bfa62e75",
+    "tools/original/foundation-clock-verify.py": "c488100a187b44803c06374535715eaa5a7cde9d4513f6e866e090367d4f2054",
+    "tools/original/state-observer.py": "58e3b510abbe5ff57f05844efbdf764e2a02530cda4fa99f538d886d258af6f1",
+    "tools/original/with-display.sh": "4371efe64ae1639564b4a85292ff252e20bcfe84b5387927ecf7093c6b8d3dfb",
+    "tools/foundation/production-server.mjs": "e3152b58e2353319ba0963b30439e33c3cc65f84a8c6ebb765c2812486245952",
+    "tools/foundation/browser.mjs": "60c4bc851470f47e4dd0399148ce0c1edf351d41fbf7f7e15fa823af5948b4c8",
+    "tools/foundation/verify.mjs": "3743b773cf2ede253c6d78f2605eb43f34e9d7002284b6a1dd2c413d45835a5c",
+    "web/trace.ts": "e05eee6d02f687b3b5bf2d31f7eb59d5c3e1900a6c1a078e15f63b71b325fb38",
+    "references/isaac/foundation/rock-blast/known-regressions.json": "b7767539c58478d2109bbac8c7de617f41ec92686a0e92d24d0067a71e674a22",
+    "references/isaac/foundation/troll-bombs/contrived-cases.json": "f01774ef1e3bf9d95a6effd5334ff1a7ff4eeb336e87879c1b5619ad8a36b04d",
+    "references/isaac/foundation/troll-bombs/scenarios.json": "02d2b23c862adf16b8731a34342c266305ba858978969a61210b709735786ea1",
+    "references/isaac/foundation/pickup-physics/room-readmission-contract.json": "e7f17295f70906be50fbfc358df97e10fee4e5001dd09dedffb0c1bc7bfbfc83",
+    "tools/original/troll-bomb-observer.py": "4a52fa831fda812a4e93e6ce830e33660780f8badb2623c14c5b10eb7b23bd56",
+    "tools/original/bomb-pickup-scenarios.py": "e2d48457eb8ad1c307c8ca98e467a6dbe8030e482d8b5d626362ecab9cbc1889"
+  },
+  "gateSourcesStable": true,
+  "interruptedFilesStable": true,
+  "distinctCompleteCases": 7,
+  "comparedPresentations": 3045,
+  "fieldFailures": 11346,
+  "requiredAssertionFailures": 2,
+  "failureFields": {
+    "bomb0:causal shared spawn seed": 584,
+    "pickup0:base anchor": 2669,
+    "pickup1:base anchor": 2458,
+    "damage countdown": 43,
+    "rock35:destruction marker": 43,
+    "rock36:destruction marker": 43,
+    "rock admission/retirement": 1839,
+    "pickup2:base anchor": 840,
+    "rock98:state": 527,
+    "rock98:collisionClass": 511,
+    "rock98:destruction marker": 511,
+    "pickup1:presented position": 468,
+    "pickup1:full physical position": 234,
+    "pickup1:velocity": 468,
+    "pickup0:presented position": 43,
+    "pickup0:full physical position": 22,
+    "pickup0:velocity": 43
+  },
+  "archiveJournal": {
+    "path": "/workspace/isaac-worktrees/inventory/.cache/inventory/archived-pickup-physics-native-evidence.json",
+    "sha256": "466bbecf4dbe2f1ae31a177536aba20f9fbfe9dacf5644bd37738f4b07f5e8f8"
+  },
+  "fullEvidenceAudit": {
+    "path": "/workspace/isaac-worktrees/inventory/.cache/inventory/pickup-readmission-full-evidence-audit.json",
+    "sha256": "c609e45f6892c1ab98f060a94c0a6dea9d2ebba8fd2497b86058474656c57b09",
+    "auditor": {
+      "path": "/workspace/isaac-worktrees/inventory/.cache/inventory/audit-pickup-readmission-evidence.mjs",
+      "bytes": 15430,
+      "sha256": "7ef11c54707964cb81deecdfcc0052a29a3728bf7a0e2e27eedf93ee38d46f25"
+    },
+    "status": "pass",
+    "scope": "Read-only fidelity audit. All seven historical gameplay gates remain FAIL with11346 field failures and two required-return assertion failures. Complete independent49-prefix/declared command plan, actual reset/seed/boot states, every actual backend state, explicit trace caps, all3045 raw native/browser phase joins and exact original comparator failure rows are checked; no capture, input, runtime or grade changed.",
+    "comparisonExpressionScope": "Exact SHA-pinned historical comparator expressions replayed over raw captures to verify the retained failure list; not an independently recovered gameplay comparator or new acceptance grade.",
+    "independentlyPlannedCommands": 3480,
+    "actualBackendStates": 21,
+    "selectedSnapshotNativeJoins": 3045,
+    "cappedCommandStates": 1417,
+    "nativeProvenanceValidatedCases": 7
+  },
+  "correctedSource": {
+    "runtimeCommit": "54402c1",
+    "originalOwnedCorrection": "3665517a3cbae3e863a202b61556478483472104",
+    "scope": "Six source-derived lines initialize regular mode0 zero440/444 from physical448/44c before Base. This is composed with the reviewed readmission source on main7cd0; it has no newly passing live capture in this frozen proof. Existing exact artifact qualification and fresh CI always remain required.",
+    "sourceReceipt": "anchor-init-contract.json",
+    "sourceReceiptSha256": "626a1374f02ac256c2a9702062d4ce5e2e19abb8960ac1494d0d6408ab652f84",
+    "liveAcceptance": "unaccepted pending distinct corrected production build and required paired gate"
+  },
+  "unaccepted": [
+    "Both QJ offsets observed no required native regular return; the mandatory assertions remain failures.",
+    "Immediate Player/regular pickup overlap at saved admission was not observed; source callback dispatch is not an accepted overlap boundary.",
+    "Converted raw shared birth seeds, rock/grid/return differences and whole shared consumer alignment remain required.",
+    "Active-swap ad4mode1 door-away producer and mode2 reset/clear are mapped but not implemented by the ordinary anchor correction.",
+    "Other saved actor families, price/modifier contexts, durable profiles/continue and complete state/pixels."
+  ],
+  "cases": [
+    {
+      "name": "retained-XD0-troll",
+      "code": "XD0VNH46",
+      "status": "fail",
+      "comparedPresentations": 375,
+      "passedPresentations": 50,
+      "fieldFailures": 925,
+      "failureFields": {
+        "bomb0:causal shared spawn seed": 146,
+        "pickup0:base anchor": 325,
+        "pickup1:base anchor": 325,
+        "damage countdown": 43,
+        "rock35:destruction marker": 43,
+        "rock36:destruction marker": 43
+      },
+      "requiredAssertion": null,
+      "actualNativeReadmissions": 2,
+      "scopedReport": {
+        "path": "/workspace/isaac-worktrees/inventory/.cache/e2e/pickup-readmission/first-live/executions/retained-XD0-troll/report.json",
+        "sha256": "783852b407dd271109a4e1f1dca201b99faf98069579d350317e69134878a4f0",
+        "selection": {
+          "scope": "Explicit targeted recorded-case replay; default CI executes the complete cohort",
+          "case": "retained-XD0-troll"
+        },
+        "wrapperExitCode": 1,
+        "executionSegment": "completed-before-reset"
+      },
+      "nativeArchive": {
+        "path": "/workspace/isaac-worktrees/inventory/.cache/e2e/pickup-readmission/first-live/executions/retained-XD0-troll/retained-XD0-troll/original/manifest.json",
+        "compressedPath": "/workspace/isaac-worktrees/inventory/.cache/e2e/pickup-readmission/first-live/executions/retained-XD0-troll/retained-XD0-troll/original/manifest.json.gz",
+        "bytes": 24044940,
+        "compressedBytes": 2459031,
+        "sha256": "83773f15222ac4013e0ce6a5f83e2c3ef550a97b9792eb7033f16ace4bd995a9",
+        "compressedSha256": "41e289a57efb58e3a8b57b5331cbb79f33afa26e3604486687938e060df4c94a",
+        "mtimeNs": 1791930573034161048
+      },
+      "selectedGameplaySnapshots": {
+        "records": 375,
+        "uncompressedBytes": 75250725,
+        "uncompressedSha256": "0e9ce9bbde2095ee91e00cf209069249798446a495663663628ffc927b886092",
+        "archiveSha256": "7cc1ae09a8cde7fbd99cb6217f9d7a792692bbaa484be3916a94bca81349cabc",
+        "archive": "/workspace/isaac-worktrees/inventory/.cache/e2e/pickup-readmission/first-live/executions/retained-XD0-troll/retained-XD0-troll/browser-states.json.gz"
+      },
+      "inputHistory": {
+        "inputTraceTruncated": false,
+        "stateHistoryTruncated": true,
+        "stateHistoryTruncationReason": "bytes",
+        "inputEncodedBytes": 11541,
+        "stateEncodedBytes": 33473298,
+        "backendEvents": 3,
+        "completeStateRecords": 199,
+        "archive": "/workspace/isaac-worktrees/inventory/.cache/e2e/pickup-readmission/first-live/executions/retained-XD0-troll/retained-XD0-troll/browser-trace.json.gz",
+        "uncompressedSha256": "fc64ea20b0c27e28a051122503a63d5e25804f7c39cb8191ec58d0d156178cee",
+        "archiveSha256": "e1f531bfda9d2bff83e5063f01de2ed347e0e07d5f5dca0b1d663e1010ba822d"
+      }
+    },
+    {
+      "name": "natural-megatroll-phase-0",
+      "code": "KPFMQY6J",
+      "status": "fail",
+      "comparedPresentations": 473,
+      "passedPresentations": 72,
+      "fieldFailures": 1389,
+      "failureFields": {
+        "rock admission/retirement": 401,
+        "pickup0:base anchor": 382,
+        "pickup1:base anchor": 326,
+        "pickup2:base anchor": 280
+      },
+      "requiredAssertion": null,
+      "actualNativeReadmissions": 0,
+      "scopedReport": {
+        "path": "/workspace/isaac-worktrees/inventory/.cache/e2e/pickup-readmission/first-live/executions/natural-megatroll-phase-0/report.json",
+        "sha256": "909347ed5ee9d41d97c8a8ed76cfeed012de0e6b02a369c9faec4e16ffbf4de6",
+        "selection": {
+          "scope": "Explicit targeted recorded-case replay; default CI executes the complete cohort",
+          "case": "natural-megatroll-phase-0"
+        },
+        "wrapperExitCode": 1,
+        "executionSegment": "completed-before-reset"
+      },
+      "nativeArchive": {
+        "path": "/workspace/isaac-worktrees/inventory/.cache/e2e/pickup-readmission/first-live/executions/natural-megatroll-phase-0/natural-megatroll-phase-0/original/manifest.json",
+        "compressedPath": "/workspace/isaac-worktrees/inventory/.cache/e2e/pickup-readmission/first-live/executions/natural-megatroll-phase-0/natural-megatroll-phase-0/original/manifest.json.gz",
+        "bytes": 23240475,
+        "compressedBytes": 2369256,
+        "sha256": "ec61d7a11d1e36b2a78c099915acaf141d8847ad0ea37030b84e0d3b1d6b3467",
+        "compressedSha256": "fce06490f22f43a188feade538a1789edb14c65f398bc5366c8ac54c3ba3ef71",
+        "mtimeNs": 1791930807399329594
+      },
+      "selectedGameplaySnapshots": {
+        "records": 473,
+        "uncompressedBytes": 93067306,
+        "uncompressedSha256": "4f733f43cc91e37b5596e1082f5e822615da4d840256af170730c6cbe5f9d13f",
+        "archiveSha256": "96b6d28965e59bab52df762e23116e2f73f315f0d09d36bceb9ddc7087f41eb8",
+        "archive": "/workspace/isaac-worktrees/inventory/.cache/e2e/pickup-readmission/first-live/executions/natural-megatroll-phase-0/natural-megatroll-phase-0/browser-states.json.gz"
+      },
+      "inputHistory": {
+        "inputTraceTruncated": false,
+        "stateHistoryTruncated": true,
+        "stateHistoryTruncationReason": "bytes",
+        "inputEncodedBytes": 14235,
+        "stateEncodedBytes": 33358288,
+        "backendEvents": 3,
+        "completeStateRecords": 207,
+        "archive": "/workspace/isaac-worktrees/inventory/.cache/e2e/pickup-readmission/first-live/executions/natural-megatroll-phase-0/natural-megatroll-phase-0/browser-trace.json.gz",
+        "uncompressedSha256": "820b1135c17b3344eded4aa4316a437efbb0b7b4a9b23a64e5c555699d273b96",
+        "archiveSha256": "2155f23f46a5fd396e72c53bfabe58c1204918c1ec407f7faf7cd4db9f448b31"
+      }
+    },
+    {
+      "name": "natural-megatroll-phase-1",
+      "code": "KPFMQY6J",
+      "status": "fail",
+      "comparedPresentations": 474,
+      "passedPresentations": 74,
+      "fieldFailures": 1384,
+      "failureFields": {
+        "rock admission/retirement": 400,
+        "pickup0:base anchor": 380,
+        "pickup1:base anchor": 324,
+        "pickup2:base anchor": 280
+      },
+      "requiredAssertion": null,
+      "actualNativeReadmissions": 0,
+      "scopedReport": {
+        "path": "/workspace/isaac-worktrees/inventory/.cache/e2e/pickup-readmission/first-live/executions/natural-megatroll-phase-1/report.json",
+        "sha256": "3f003d8d0b8e7566a6d304aacdb3b9336b5caee80a7c5c7bbc215d1e47425061",
+        "selection": {
+          "scope": "Explicit targeted recorded-case replay; default CI executes the complete cohort",
+          "case": "natural-megatroll-phase-1"
+        },
+        "wrapperExitCode": 1,
+        "executionSegment": "completed-before-reset"
+      },
+      "nativeArchive": {
+        "path": "/workspace/isaac-worktrees/inventory/.cache/e2e/pickup-readmission/first-live/executions/natural-megatroll-phase-1/natural-megatroll-phase-1/original/manifest.json",
+        "compressedPath": "/workspace/isaac-worktrees/inventory/.cache/e2e/pickup-readmission/first-live/executions/natural-megatroll-phase-1/natural-megatroll-phase-1/original/manifest.json.gz",
+        "bytes": 23282758,
+        "compressedBytes": 2367429,
+        "sha256": "f774e6eafbae7512d49de72e8780d1a7d04e6d0bd538214546fcaafb1a2da284",
+        "compressedSha256": "cf46bd99be5d3b5db9df9970ab281b85aba3dadd6f8968693f36e70c2cc1da84",
+        "mtimeNs": 1791931068665087213
+      },
+      "selectedGameplaySnapshots": {
+        "records": 474,
+        "uncompressedBytes": 93210697,
+        "uncompressedSha256": "7675f55d7feb15e6e9f7abd4bdbda30074bfeeabf3cb00ffb916917457098464",
+        "archiveSha256": "865f0dfccdea306f55cbe6d193cf7dc7b14c0b2ab87cbf95f555bd1ed7de75f5",
+        "archive": "/workspace/isaac-worktrees/inventory/.cache/e2e/pickup-readmission/first-live/executions/natural-megatroll-phase-1/natural-megatroll-phase-1/browser-states.json.gz"
+      },
+      "inputHistory": {
+        "inputTraceTruncated": false,
+        "stateHistoryTruncated": true,
+        "stateHistoryTruncationReason": "bytes",
+        "inputEncodedBytes": 14260,
+        "stateEncodedBytes": 33503226,
+        "backendEvents": 3,
+        "completeStateRecords": 208,
+        "archive": "/workspace/isaac-worktrees/inventory/.cache/e2e/pickup-readmission/first-live/executions/natural-megatroll-phase-1/natural-megatroll-phase-1/browser-trace.json.gz",
+        "uncompressedSha256": "4598c2845a17be9a9b1d75110efe934dc87a384fea3d0306c43fbc92ab65c3c8",
+        "archiveSha256": "1240861cce61f0373f53591d5262c127c2c06bc32e321ffe9da5b017f66fc1f5"
+      }
+    },
+    {
+      "name": "unfiltered-bomb-pickup-0",
+      "code": "Z7XVB7J9",
+      "status": "fail",
+      "comparedPresentations": 473,
+      "passedPresentations": 72,
+      "fieldFailures": 1227,
+      "failureFields": {
+        "pickup0:base anchor": 382,
+        "pickup1:base anchor": 326,
+        "pickup2:base anchor": 280,
+        "rock admission/retirement": 239
+      },
+      "requiredAssertion": null,
+      "actualNativeReadmissions": 0,
+      "scopedReport": {
+        "path": "/workspace/isaac-worktrees/inventory/.cache/e2e/pickup-readmission/first-live/executions/unfiltered-bomb-pickup-0/report.json",
+        "sha256": "03b0a1963413ca4d8b1b4f4be9a4dbab98e60c545eccc1a567a83d4da2271d7e",
+        "selection": {
+          "scope": "Explicit targeted recorded-case replay; default CI executes the complete cohort",
+          "case": "unfiltered-bomb-pickup-0"
+        },
+        "wrapperExitCode": 1,
+        "executionSegment": "completed-before-reset"
+      },
+      "nativeArchive": {
+        "path": "/workspace/isaac-worktrees/inventory/.cache/e2e/pickup-readmission/first-live/executions/unfiltered-bomb-pickup-0/unfiltered-bomb-pickup-0/original/manifest.json",
+        "compressedPath": "/workspace/isaac-worktrees/inventory/.cache/e2e/pickup-readmission/first-live/executions/unfiltered-bomb-pickup-0/unfiltered-bomb-pickup-0/original/manifest.json.gz",
+        "bytes": 27944898,
+        "compressedBytes": 2852136,
+        "sha256": "75e9c0bdcc76fc30a215f2a1de888527d49fa6d0d89441065c79dc2880381f4f",
+        "compressedSha256": "e32f0c3516c963d8bec912fb3c74290a3710b6bd06eeeef54ac5492738449bd3",
+        "mtimeNs": 1791931352106884030
+      },
+      "selectedGameplaySnapshots": {
+        "records": 473,
+        "uncompressedBytes": 93273084,
+        "uncompressedSha256": "165cc705f89c44639dbe66427092d16c7218b8e727df49af8428bd1d66a43b72",
+        "archiveSha256": "210d47e6c65c2f86c931c8769552b8ee4ff9a424fd15667c938f051b75c90f0e",
+        "archive": "/workspace/isaac-worktrees/inventory/.cache/e2e/pickup-readmission/first-live/executions/unfiltered-bomb-pickup-0/unfiltered-bomb-pickup-0/browser-states.json.gz"
+      },
+      "inputHistory": {
+        "inputTraceTruncated": false,
+        "stateHistoryTruncated": true,
+        "stateHistoryTruncationReason": "bytes",
+        "inputEncodedBytes": 14234,
+        "stateEncodedBytes": 33415995,
+        "backendEvents": 3,
+        "completeStateRecords": 207,
+        "archive": "/workspace/isaac-worktrees/inventory/.cache/e2e/pickup-readmission/first-live/executions/unfiltered-bomb-pickup-0/unfiltered-bomb-pickup-0/browser-trace.json.gz",
+        "uncompressedSha256": "a1dd351321d7741be250cd0be7ad9362cfd799b9b10604c3a5415fd96ff35755",
+        "archiveSha256": "d111afe6ebd661550c17470f7f2747b5010b87c997795d93cf4953751d974413"
+      }
+    },
+    {
+      "name": "unfiltered-bomb-pickup-1",
+      "code": "2SA7J2Y1",
+      "status": "fail",
+      "comparedPresentations": 417,
+      "passedPresentations": 16,
+      "fieldFailures": 948,
+      "failureFields": {
+        "bomb0:causal shared spawn seed": 146,
+        "pickup0:base anchor": 401,
+        "pickup1:base anchor": 401
+      },
+      "requiredAssertion": null,
+      "actualNativeReadmissions": 0,
+      "scopedReport": {
+        "path": "/workspace/isaac-worktrees/inventory/.cache/e2e/pickup-readmission/recovery-after-environment-reset/executions/unfiltered-bomb-pickup-1/report.json",
+        "sha256": "7d9833bcd7e875d46146a6b1311664d39c069bf62c4c37039992e71600baefd6",
+        "selection": {
+          "scope": "Explicit targeted recorded-case replay; default CI executes the complete cohort",
+          "case": "unfiltered-bomb-pickup-1"
+        },
+        "wrapperExitCode": 1,
+        "executionSegment": "fresh-after-reset"
+      },
+      "nativeArchive": {
+        "path": "/workspace/isaac-worktrees/inventory/.cache/e2e/pickup-readmission/recovery-after-environment-reset/executions/unfiltered-bomb-pickup-1/unfiltered-bomb-pickup-1/original/manifest.json",
+        "compressedPath": "/workspace/isaac-worktrees/inventory/.cache/e2e/pickup-readmission/recovery-after-environment-reset/executions/unfiltered-bomb-pickup-1/unfiltered-bomb-pickup-1/original/manifest.json.gz",
+        "bytes": 22711899,
+        "compressedBytes": 2446787,
+        "sha256": "cfd51b4b29b69aa7abd2b92dcb5cfd525f469747fb44896f95a850eb989d61eb",
+        "compressedSha256": "a1a5f28e896f5a8847c6eec6de41f12167121e06341e7b629817d7b5365b6813",
+        "mtimeNs": 1791933057112066804
+      },
+      "selectedGameplaySnapshots": {
+        "records": 417,
+        "uncompressedBytes": 83816119,
+        "uncompressedSha256": "6ba331947a9c46ca4ec3765b540752f706ee9bb543689e11c13ccc9795ba5ca8",
+        "archiveSha256": "023e71c0b9f4f0ac694349de3947c889d9e7f1e309ce4c5a0a94ba11b5fc19d9",
+        "archive": "/workspace/isaac-worktrees/inventory/.cache/e2e/pickup-readmission/recovery-after-environment-reset/executions/unfiltered-bomb-pickup-1/unfiltered-bomb-pickup-1/browser-states.json.gz"
+      },
+      "inputHistory": {
+        "inputTraceTruncated": false,
+        "stateHistoryTruncated": true,
+        "stateHistoryTruncationReason": "bytes",
+        "inputEncodedBytes": 12833,
+        "stateEncodedBytes": 33539650,
+        "backendEvents": 3,
+        "completeStateRecords": 199,
+        "archive": "/workspace/isaac-worktrees/inventory/.cache/e2e/pickup-readmission/recovery-after-environment-reset/executions/unfiltered-bomb-pickup-1/unfiltered-bomb-pickup-1/browser-trace.json.gz",
+        "uncompressedSha256": "16757697bfe6f15bf1aa164eff6cb305d5169f21ebbe3c6d8d2aa47e170fcb5d",
+        "archiveSha256": "89442ebe23f8d6ebf269b9290be6cabe79d751f3da9aad697490b8b033012c0b"
+      }
+    },
+    {
+      "name": "corrected-megatroll-phase-0",
+      "code": "QJRAQ3F3",
+      "status": "fail",
+      "comparedPresentations": 416,
+      "passedPresentations": 16,
+      "fieldFailures": 2740,
+      "failureFields": {
+        "rock admission/retirement": 400,
+        "bomb0:causal shared spawn seed": 146,
+        "pickup0:base anchor": 400,
+        "pickup1:base anchor": 378,
+        "rock98:state": 264,
+        "rock98:collisionClass": 256,
+        "rock98:destruction marker": 256,
+        "pickup1:presented position": 234,
+        "pickup1:full physical position": 117,
+        "pickup1:velocity": 234,
+        "pickup0:presented position": 22,
+        "pickup0:full physical position": 11,
+        "pickup0:velocity": 22
+      },
+      "requiredAssertion": "AssertionError [ERR_ASSERTION]: The declared public return route must actually reconstruct its required native regular pickups",
+      "actualNativeReadmissions": 0,
+      "scopedReport": {
+        "path": "/workspace/isaac-worktrees/inventory/.cache/e2e/pickup-readmission/recovery-after-environment-reset/executions/corrected-megatroll-phase-0/report.json",
+        "sha256": "18bcb962d1aa856750c4fd5ecc53abf7e35a734b25f9c9c032d17bc72bd85d30",
+        "selection": {
+          "scope": "Explicit targeted recorded-case replay; default CI executes the complete cohort",
+          "case": "corrected-megatroll-phase-0"
+        },
+        "wrapperExitCode": 1,
+        "executionSegment": "fresh-after-reset"
+      },
+      "nativeArchive": {
+        "path": "/workspace/isaac-worktrees/inventory/.cache/e2e/pickup-readmission/recovery-after-environment-reset/executions/corrected-megatroll-phase-0/corrected-megatroll-phase-0/original/manifest.json",
+        "compressedPath": "/workspace/isaac-worktrees/inventory/.cache/e2e/pickup-readmission/recovery-after-environment-reset/executions/corrected-megatroll-phase-0/corrected-megatroll-phase-0/original/manifest.json.gz",
+        "bytes": 22477760,
+        "compressedBytes": 2472585,
+        "sha256": "689c1d2f7902b38b4c8e34bab0d6a60f65bce435da1317c013d3f75920996b05",
+        "compressedSha256": "0e0c2e90680dc292f4f02257d153ffe7fee09bc5fe33cab99c63c369a0bdc558",
+        "mtimeNs": 1791933325741588232
+      },
+      "selectedGameplaySnapshots": {
+        "records": 416,
+        "uncompressedBytes": 83694197,
+        "uncompressedSha256": "8252daf38108f8447bfb03058c2466e3a215df4f62333017d699f6e4dd6c4e81",
+        "archiveSha256": "25c7ac555a1a0c89534a6e6083adaee8b9844a99082be8194bded28379f34753",
+        "archive": "/workspace/isaac-worktrees/inventory/.cache/e2e/pickup-readmission/recovery-after-environment-reset/executions/corrected-megatroll-phase-0/corrected-megatroll-phase-0/browser-states.json.gz"
+      },
+      "inputHistory": {
+        "inputTraceTruncated": false,
+        "stateHistoryTruncated": true,
+        "stateHistoryTruncationReason": "bytes",
+        "inputEncodedBytes": 12809,
+        "stateEncodedBytes": 33371945,
+        "backendEvents": 3,
+        "completeStateRecords": 198,
+        "archive": "/workspace/isaac-worktrees/inventory/.cache/e2e/pickup-readmission/recovery-after-environment-reset/executions/corrected-megatroll-phase-0/corrected-megatroll-phase-0/browser-trace.json.gz",
+        "uncompressedSha256": "9e828592678b1daac451e04f4a7f4efc328e7de10b015c0a39838e98bdca13c5",
+        "archiveSha256": "440f8707017072f3903df997b356a6ae14eb0b0f8202953c4aea7371b5e69e75"
+      }
+    },
+    {
+      "name": "corrected-megatroll-phase-1",
+      "code": "QJRAQ3F3",
+      "status": "fail",
+      "comparedPresentations": 417,
+      "passedPresentations": 18,
+      "fieldFailures": 2733,
+      "failureFields": {
+        "rock admission/retirement": 399,
+        "bomb0:causal shared spawn seed": 146,
+        "pickup0:base anchor": 399,
+        "pickup1:base anchor": 378,
+        "rock98:state": 263,
+        "rock98:collisionClass": 255,
+        "rock98:destruction marker": 255,
+        "pickup1:presented position": 234,
+        "pickup1:full physical position": 117,
+        "pickup1:velocity": 234,
+        "pickup0:presented position": 21,
+        "pickup0:full physical position": 11,
+        "pickup0:velocity": 21
+      },
+      "requiredAssertion": "AssertionError [ERR_ASSERTION]: The declared public return route must actually reconstruct its required native regular pickups",
+      "actualNativeReadmissions": 0,
+      "scopedReport": {
+        "path": "/workspace/isaac-worktrees/inventory/.cache/e2e/pickup-readmission/recovery-after-environment-reset/executions/corrected-megatroll-phase-1/report.json",
+        "sha256": "434028ab001963e802afbcd57305cb8357277d5ad20db38a63f7383f8e4553ca",
+        "selection": {
+          "scope": "Explicit targeted recorded-case replay; default CI executes the complete cohort",
+          "case": "corrected-megatroll-phase-1"
+        },
+        "wrapperExitCode": 1,
+        "executionSegment": "fresh-after-reset"
+      },
+      "nativeArchive": {
+        "path": "/workspace/isaac-worktrees/inventory/.cache/e2e/pickup-readmission/recovery-after-environment-reset/executions/corrected-megatroll-phase-1/corrected-megatroll-phase-1/original/manifest.json",
+        "compressedPath": "/workspace/isaac-worktrees/inventory/.cache/e2e/pickup-readmission/recovery-after-environment-reset/executions/corrected-megatroll-phase-1/corrected-megatroll-phase-1/original/manifest.json.gz",
+        "bytes": 22498475,
+        "compressedBytes": 2466945,
+        "sha256": "b2b78dd64b2e2d0b40855acc3b1703249cbfda041894499e27e8c849128f9a92",
+        "compressedSha256": "2acaae1d011fc114bbc9f6c4e5516635efb5e4ec90fa49e3cde4862c75591dcf",
+        "mtimeNs": 1791933586043200045
+      },
+      "selectedGameplaySnapshots": {
+        "records": 417,
+        "uncompressedBytes": 83842460,
+        "uncompressedSha256": "3f3b6a1cf8a96bbdf158d90daf6851a4610e8c2f4f852e1854ff5a2f921d088f",
+        "archiveSha256": "30093899fbc0796f355caf733c3f7be27884b59179c47b4e18aa151c1d0bf5d3",
+        "archive": "/workspace/isaac-worktrees/inventory/.cache/e2e/pickup-readmission/recovery-after-environment-reset/executions/corrected-megatroll-phase-1/corrected-megatroll-phase-1/browser-states.json.gz"
+      },
+      "inputHistory": {
+        "inputTraceTruncated": false,
+        "stateHistoryTruncated": true,
+        "stateHistoryTruncationReason": "bytes",
+        "inputEncodedBytes": 12835,
+        "stateEncodedBytes": 33489798,
+        "backendEvents": 3,
+        "completeStateRecords": 199,
+        "archive": "/workspace/isaac-worktrees/inventory/.cache/e2e/pickup-readmission/recovery-after-environment-reset/executions/corrected-megatroll-phase-1/corrected-megatroll-phase-1/browser-trace.json.gz",
+        "uncompressedSha256": "ff46347d408387fee91bcf3bf75705ea2afda75af53b8b7da6285634807ff07d",
+        "archiveSha256": "d6e821d85fe0ee4db69e1eb903771c167f27f126e91aa953a5e9e181e5fce0c4"
+      }
+    }
+  ]
+}

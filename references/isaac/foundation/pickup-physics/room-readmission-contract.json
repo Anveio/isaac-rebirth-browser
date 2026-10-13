@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
-  "scope": "Owned free regular Pickup10/20/30/40 projection of ordinary Room.Save/Load records. Source reconstruction is implemented; fresh live acceptance is pending. Other actors, paid/modifier contexts and durable save/continue remain separate.",
+  "scope": "Owned free regular Pickup10/20/30/40 projection of ordinary Room.Save/Load records. Source reconstruction and regular mode0 anchor initialization are implemented. Frozen f7 capture completes seven cases3045 phases with11346 field failures and two required-return assertion failures; the corrected source has separate pending live qualification. Other actors, paid/modifier contexts and durable save/continue remain separate.",
   "functions": [
     {
       "address": "0x5ce2d0",
@@ -117,7 +117,8 @@
     "restore": "5c58e5..5c58f7 restores record+30 through local RNG30 Init.5c5921..5c5956 restores owned PU metadata.5c5970 consumes the ordinary record vector.",
     "newState": "Base441c80 initializes velocity/anchor to zero, creation clock to the active Game counter, configured friction and alive classes. Pickup Init selects Idle on saved-room construction; the actual immediate Room.Update advances that clip and .965 friction at the unchanged Game counter.",
     "admissionTail": "Supported restored regular actors advance in saved order. The fixed candidate snapshot is taken before the shared existing Player/regular collection/SFX callback, then the PU self-pair pass and later live-list grid pass run.454a0a precedes453340/454b10. Mixed browser handles retain their existing relative order; other saved owners remain untouched.",
-    "rng": "Every supported record has an actual nonzero spawn seed and concrete subtype. Persistent RNG30 initializes from that seed, then restores its saved state with shifts4/3/17. Temporary subtype RNG35 is separate; the fresh Normal Isaac nonzero-subtype path draws no output. GameSpawn receives an explicit saved seed and introduces no fitted shared draw or cursor correction."
+    "rng": "Every supported record has an actual nonzero spawn seed and concrete subtype. Persistent RNG30 initializes from that seed, then restores its saved state with shifts4/3/17. Temporary subtype RNG35 is separate; the fresh Normal Isaac nonzero-subtype path draws no output. GameSpawn receives an explicit saved seed and introduces no fitted shared draw or cursor correction.",
+    "ordinaryAnchor": "Source506fa4\u21925075d2 initializes the regular zero440/444 from physical448/44c before BaseUpdate. Explicit active-swap/door-away ad4mode1\u21922 producer and5075ee/5075f3 reset remain mapped but unimplemented."
   },
   "gate": {
     "suite": "test:e2e:troll-bombs",
@@ -129,7 +130,8 @@
       "Actual native regular re-admissions on XD0 and both QJ public return routes; source birth positions/velocities, age, local RNG and null spawner are retained and paired fields stay strict after the real admission pass"
     ],
     "historical": "The immutable c133/f04 pair proof remains red5543 and unchanged. Its XD0 return observations expose native zero velocity and new Idle0 while the clone retained motion. New constructor/RNG fields require fresh original capture; no offline surrogate is called live proof.",
-    "unacceptedEntryBoundary": "The seven retained routes reconstruct pickups away from the entering Player. They cannot accept Player/PU overlap at immediate restored admission, even with source-correct callback dispatch. A natural public overlap witness is still required; no fabricated saved actor or final position is supplied."
+    "unacceptedEntryBoundary": "The seven retained routes reconstruct pickups away from the entering Player. They cannot accept Player/PU overlap at immediate restored admission, even with source-correct callback dispatch. A natural public overlap witness is still required; no fabricated saved actor or final position is supplied.",
+    "frozenProof": "readmission-frozen-verification.json preserves exact f7/ee225a before/end source/artifact, seven complete-case scopes, the aborted segment, full3045 selected snapshots, all3480 planned commands and21 actual backend states. The fidelity audit retains every11346 field failure and both missing QJ return assertions; it does not grant new gameplay parity."
   },
   "excluded": [
     "Other actor saved reconstruction and NPC/Bomb/Chest/collectible motion reset",
