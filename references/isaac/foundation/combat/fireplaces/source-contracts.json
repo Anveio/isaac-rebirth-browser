@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "status": "live-not-run",
+  "status": "required-failures-retained",
   "base": "cb36018",
   "nativeBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
   "artifact": {
@@ -52,12 +52,12 @@
   "ownedSources": {
     "engine/src/fireplaces.rs": "ee57af805efca30237f7669c481a0fa70f7be137c88a4fa67292d8348ae7a6a3",
     "tools/e2e/fireplaces.mjs": "79121b4f8848da67b615a8c8426e82110b54d92f6963c1ee8c7419174614f7b5",
-    "tools/foundation/fireplace-state-pair.mjs": "0b83a281603f9d013db43e651cbe5fd945e8aa65cfa901232068dabdfa0e27d4",
+    "tools/foundation/fireplace-state-pair.mjs": "4532a7b9d42837c3ee2359c6b86a6fec9743b68cdac063a6c51967c7183293b8",
     "tools/original/fireplace-scenarios.py": "a0b96d7e2fb9c17a0ed7a60fdbe66134fcef5d78493c35e95db5aa53a5120451",
     "tools/original/foundation-combat-observe.py": "57519cb5a5adc5d5215c4a6e833923fae70ac8a3876e82874d1c6cb081a7b8f7",
     "web/npc-data.json": "dbd77756d4ba32f95d0498483aacfe3335d1acb28b4176fb85c98e944ab92921"
   },
-  "live": "Fresh original/browser public routes are prepared but no new source process has been launched; this is not accepted gameplay parity.",
+  "live": "Three fresh original+production pairs executed every declared mechanism in both games; direct required failures remain. See live-report.json for immutable capture/body hashes and compact actual queue/extinction witnesses.",
   "remaining": [
     "Variant1/2/3 AI",
     "Heart collection and item/trinket loot modifiers",
@@ -76,5 +76,6 @@
     "scope": "Same ordered path/length/bytes algorithm as production server buildIdentity; direct scan avoids an unnecessary second full artifact copy"
   },
   "readOnlyReview": "Source reviewer confirmed Ember BaseUpdate/lifetime/drift/manual-frame/playing/dead-retirement ordering and Fire initializer\u2192second-AI order; no live acceptance claim.",
-  "emberGateCorrection": "ember-gate-correction.json"
+  "emberGateCorrection": "ember-gate-correction.json",
+  "liveReport": "live-report.json"
 }

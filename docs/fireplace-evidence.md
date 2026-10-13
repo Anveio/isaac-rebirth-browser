@@ -59,10 +59,27 @@ playing state. Ordered queue amounts/flags/actual retained attackers, direct
 HP/classes/clip/cooldown/local RNG fields, source cell950/900 and null grid
 objects remain required; missing observations cannot skip them.
 
-No live acceptance report exists yet. The two-worker production WASM/Vite
-build, typecheck, strict Clippy,2557-file asset inventory, matrix and formatter
-checks pass. Native captures are waiting for a slot after the aggregate and
-acquisition/save cohorts. No cached original is accepted as a fresh Fire pair.
+Three fresh original/production pairs now execute ordinary Fire admission,
+Tear queue/drain/extinguish, flag4 Bomb queue/extinguish and persistent empty
+actors in both games. The immutable artifact is
+`3dbd3de19a114636752a8202cf54dca3a77f0acc1eed42fe5df63a973de45c23`.
+General paired checks pass 825/852. Direct checks retain 8,525 failures among
+191,217 fields; all 110,642 checks of each game's own actor laws pass. These
+include dense full/fast motion, frozen lifetime, birth fences and next-full
+Ember retirement. Paired cooldown, HP, physical, queue, sprite/extinction
+timing and Ember birth/lifetime differences remain blocking. This is not
+whole paired gameplay or shared-RNG acceptance. Compact actual queue/empty
+witnesses and original/browser/body hashes are in `live-report.json`.
+
+The first comparator attempt failed while recording provenance because it
+read a nonexistent production field. Its rejected report is preserved; a
+small fail-closed metadata correction replayed the completed immutable pair.
+The later two fresh cases use that corrected comparator. No source input,
+runtime byte or native state changed to improve the result.
+
+The two-worker production WASM/Vite build, typecheck, strict Clippy,
+2557-file asset inventory, matrix and formatter checks pass. No cached
+original is accepted as a fresh Fire pair.
 Exact shared MT/particle seeds, live loot, saved72 Fire reconstruction on
 room return, variant1/2/3 AI and rendering are unresolved. W0 treasure,
 T1 hostile return/HP, H2 and center-route failures remain mandatory in their
