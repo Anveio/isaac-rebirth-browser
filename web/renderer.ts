@@ -114,7 +114,7 @@ export class Renderer {
     const rotation = { up: 0, left: -Math.PI / 2, right: Math.PI / 2, down: Math.PI };
     for (const connection of appearance.doors) {
       ctx.save(); ctx.translate(connection.x, connection.y); ctx.rotate(rotation[connection.side]);
-      this.assets.draw(ctx, "gfx/grid/door_01_normaldoor.anm2", connection.state, 0, 0); ctx.restore();
+      this.assets.draw(ctx, connection.asset, connection.state, 0, 0); ctx.restore();
     }
     gl.drawImage(this.assets.image(appearance.fx.shading), x, y, width, height);
   }

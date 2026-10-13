@@ -21,12 +21,30 @@ export interface RoomAppearance {
   floorQuads: RoomQuad[]; wallQuads: RoomQuad[]; tutorial: boolean;
   wallVariantCatalog: { sourcePatchIndex: number; name: string; weight: number; eligibility: string }[];
   wallGenerationEvidence: string;
-  doors: { side: Direction; state: "Opened" | "Closed"; x: number; y: number; targetRoom: number }[];
+  doors: { side: Direction; state: string; asset: string; x: number; y: number; targetRoom: number }[];
   fx: { ambient: [number, number, number]; shading: string; overlay: string; overlayOrigin: { x: number; y: number }; overlayAnchor: { x: number; y: number }; overlayParallax: { x: number; y: number }; overlayMotionEvidence: string; overlayOpacity: number; actorTint: [number, number, number] };
   template: string; generation: string;
 }
+export interface RoomTemplate {
+  type: number; variant: number; name: string; width: number; height: number;
+  difficulty: number; weight: number; doorMask: number;
+}
+export interface RoomDescriptor {
+  index: number; generatedIndex: number; gridIndex: number; assetStage: number; catalogIndex: number;
+  template: RoomTemplate; doorMask: number; neighbors: (number | null)[];
+  roomInitSeed: number; decorationSeed: number; spawnSeed: number; followingSeed: number;
+}
+export interface Floor {
+  contract: string; stageSeed: number; additionalRooms: number; attempts: number;
+  descriptors: RoomDescriptor[]; grid: number[]; startingDescriptor: number;
+  primaryState: number; primaryDraws: number; generatorState: number; gameFlags: number;
+  specialWeights: number[]; basementWeights: number[];
+  attemptReports: { attempt: number; initialGeneratorState: number; finalGeneratorState: number;
+    initialPrimaryState: number; finalPrimaryState: number; outcome: string }[];
+}
 export interface Room {
   left: number; right: number; top: number; bottom: number; appearance: RoomAppearance;
+  descriptor: RoomDescriptor | null;
   projectileBounds: { left: number; right: number; top: number; bottom: number };
 }
 export interface Rect { x: number; y: number; width: number; height: number; }
@@ -58,6 +76,7 @@ export interface State {
   profiles: { slot: number; unlockedCharacters: string[]; selectedCharacter: string }[];
   characterCatalog: { name: string; animation: string }[];
   paused: boolean; pressed: string[];
+  floor: Floor; currentRoom: number; visitedRooms: number[];
   player: Player; room: Room; stageEffects: StageEffects; inventory: { coins: number; bombs: number; keys: number };
   minimap: { cells: { x: number; y: number; visibility: "unvisited" | "visited" | "current" }[] };
   tears: Tear[]; impacts: Impact[]; fireCooldown: number; nextTear: number;

@@ -1,11 +1,13 @@
-//! Recovered Basement backdrop assembly with provisional run-to-room routing.
+//! Source-derived normal Basement starting-room backdrop and door routing.
 //!
 //! The original uses decoration xorshift index 35, a repeated/shuffled floor
 //! catalogue, and conditional wall-variant draws. Independent original GL
 //! cache submissions verify the complete geometry and patch sequence when the
 //! room decoration seed is supplied. The level generator that derives that
-//! seed from the run remains unresolved; so do the FX stream assignments.
+//! seed from the run follows the fresh-profile floor generator. FX stream
+//! assignments remain provisional.
 use crate::effects::{Rect, Viewport};
+#[cfg(test)]
 use crate::seed::stage1_seed;
 use crate::{content, motion, Player};
 use serde::{Deserialize, Serialize};
@@ -23,6 +25,7 @@ pub struct Room {
     pub bottom: f64,
     pub projectile_bounds: ProjectileBounds,
     pub appearance: RoomAppearance,
+    pub descriptor: Option<crate::floor::Descriptor>,
 }
 
 /// Projected tear limits retained separately from verified player clearance.
@@ -160,6 +163,7 @@ fn quad(
 pub struct RoomDoor {
     pub side: String,
     pub state: String,
+    pub asset: String,
     pub x: f64,
     pub y: f64,
     pub target_room: u32,
@@ -198,24 +202,85 @@ impl DecorationRng {
     }
 }
 
-/// Build the provisional starting-room template for any unsigned seed.
+/// Build the generated starting-room template for a public run seed.
 ///
 /// Native public GL submissions assemble the floor from four overlapping
 /// authored patches and the outer walls from forty-four quads. The recovered
-/// backdrop generator is verified given the room decoration seed. Substituting
-/// the Stage 1 seed for that seed remains provisional.
+/// backdrop generator is verified given the room decoration seed. Deriving
+/// that room seed follows the source-derived fresh normal floor generator.
 /// Floor interiors have six valid patches; Basement walls use three of the
 /// four authored wall patches. Atlas row three
 /// contains checkerboard placeholders outside its floor interiors.
 /// Collision planes and authored door anchors do not depend on the seed.
+#[cfg(test)]
 pub fn generate_room(seed: u32) -> Room {
-    let mut room = Room::from_decoration_seed(stage1_seed(seed));
-    room.appearance.generation =
-        "recovered-basement-backdrop;provisional-stage-to-room-seed-and-fx-route".into();
-    room
+    let floor = crate::floor::generate_basement(stage1_seed(seed))
+        .expect("fresh normal Basement source contract");
+    Room::from_starting_floor(&floor)
 }
 
 impl Room {
+    pub fn from_starting_floor(floor: &crate::floor::Floor) -> Self {
+        let descriptor = &floor.descriptors[floor.starting_descriptor];
+        let mut room = Self::from_decoration_seed(descriptor.decoration_seed);
+        room.descriptor = Some(descriptor.clone());
+        room.appearance.doors.clear();
+        // Start Room's authored boundary door grid positions, padded by one,
+        // use RoomGetGridPosition (40+40*x,120+40*y), .65 projection and
+        // common sprite Y−1. Normal door setup adds the source 15px inset.
+        let authored = crate::room_assets::for_descriptor(descriptor)
+            .expect("generated starting descriptor identifies authored STB");
+        for (slot, target) in descriptor.neighbors.iter().enumerate().take(4) {
+            let Some(target) = target else {
+                continue;
+            };
+            let destination = &floor.descriptors[*target];
+            if matches!(destination.template.room_type, 7 | 8) {
+                // Source Door.SetRoomTypes initializes gridstate6 and selects
+                // HoleInWall's invisible Hidden animation for secret targets.
+                continue;
+            }
+            let (side, inset_x, inset_y) = match slot {
+                0 => ("left", 15.0, 0.0),
+                1 => ("up", 0.0, 15.0),
+                2 => ("right", -15.0, 0.0),
+                3 => ("down", 0.0, -15.0),
+                _ => unreachable!(),
+            };
+            let door = authored
+                .doors
+                .iter()
+                .find(|door| {
+                    door.enabled && crate::room_assets::door_slot(door.x, door.y) == Ok(slot as u8)
+                })
+                .expect("required starting door is authored");
+            let column = f64::from(door.x + 1);
+            let row = f64::from(door.y + 1);
+            room.appearance.doors.push(RoomDoor {
+                side: side.into(),
+                state: if matches!(destination.template.room_type, 2 | 12) {
+                    "KeyClosed"
+                } else {
+                    "Opened"
+                }
+                .into(),
+                asset: match destination.template.room_type {
+                    4 => "gfx/grid/door_02_treasureroomdoor.anm2",
+                    10 => "gfx/grid/door_04_selfsacrificeroomdoor.anm2",
+                    _ => "gfx/grid/door_01_normaldoor.anm2",
+                }
+                .into(),
+                x: (40.0 + 40.0 * column) * motion::WORLD_SCALE + 32.0 + inset_x,
+                y: (120.0 + 40.0 * row) * motion::WORLD_SCALE - 46.0 - 1.0 + inset_y,
+                target_room: *target as u32,
+            });
+        }
+        room.appearance.generation =
+            "source-fresh-normal-basement-floor;descriptor-decoration12;provisional-fx-route"
+                .into();
+        room
+    }
+
     /// Assemble the starting-room backdrop from its independently supplied room
     /// decoration seed. This is also the original-observation verification entry.
     /// The seed is not a run seed; this method does not generate floor topology.
@@ -353,6 +418,7 @@ impl Room {
                 .fold(f64::NEG_INFINITY, f64::max)
             - render_offset.y;
         Room {
+            descriptor: None,
             left: left_plane + radius,
             right: right_plane - radius,
             top: top_plane + radius,
@@ -386,6 +452,7 @@ impl Room {
                 RoomDoor {
                     side: "left".into(),
                     state: "Opened".into(),
+                    asset: "gfx/grid/door_01_normaldoor.anm2".into(),
                     x: 62.0,
                     y: 135.0,
                     target_room: 1,
@@ -393,6 +460,7 @@ impl Room {
                 RoomDoor {
                     side: "right".into(),
                     state: "Opened".into(),
+                    asset: "gfx/grid/door_01_normaldoor.anm2".into(),
                     x: 418.0,
                     y: 135.0,
                     target_room: 2,
