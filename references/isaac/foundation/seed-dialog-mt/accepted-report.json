@@ -1,0 +1,223 @@
+{
+  "schema": 1,
+  "status": "pass",
+  "gateSources": {
+    "tools/e2e/boot-mt.mjs": "92d070f2dc42bf94b72a86dd31efdee5ee4c90e0402edcd0a1fd128d81f148f5",
+    "tools/original/boot-mt-observer.py": "2bcb20a9841e49cc42cb7a69fe9e4a74f15be211f80a513062b5ee40f64f5929",
+    "tools/original/native-identity.py": "4fd5591be56fc4e9ad0486d0f2ec2828f6389786245ee09f9d0b3a395ae18acb",
+    "tools/original/state-observer.py": "58e3b510abbe5ff57f05844efbdf764e2a02530cda4fa99f538d886d258af6f1",
+    "tools/original/foundation-clock-run.py": "b79997f1fdc983a6e6fac74d87c24d2036ea956021fa944d1c0bd7f04e15a243",
+    "tools/original/foundation-clock-gate.c": "f517f1fc0edf2bbe17021e529fb41652e991e286bef070b8aecefd32bfa62e75",
+    "tools/original/foundation-seeds.py": "dd4633c955e7518e9bc0f0147ddfae46d356468238477a68dc06c86656ccba89",
+    "tools/original/debug-run.py": "d785d32c6cc557959be38880a3b046c4040b988fbe3d06d4a8c1f4aa2e833cf5",
+    "tools/original/with-display.sh": "af469210e803786a60d8632c28a6f2da77bc8ab02cc06be50016ddb25e95b848",
+    "tools/foundation/browser.mjs": "60c4bc851470f47e4dd0399148ce0c1edf351d41fbf7f7e15fa823af5948b4c8",
+    "tools/foundation/production-server.mjs": "e3152b58e2353319ba0963b30439e33c3cc65f84a8c6ebb765c2812486245952",
+    "tools/foundation/verify.mjs": "b28ed8af6bf50a7aa8b6b81f55fd29d0c963285f2d54500d61a4a58925de1d9f",
+    "engine/src/menu_lifecycle.rs": "2ccfe4da0f3213a43caa987f80d092a8ae21e03ad9e27120aa574fe9fad1c5e0",
+    "engine/src/mt.rs": "2fae0fc8dff620f766c40d4253d26dd65e9dbff05bf6e0ff85f5beb2e0e0f9d0",
+    "engine/src/lib.rs": "1d35cd84daf598f66802de13edb6d3c0353997f0964077e8febc338e42ca1a33",
+    "engine/src/audio.rs": "d026fad8a0a4645061fa26061947dd5465d1e7e7a1edc86aae1fe733c1627110",
+    "web/main.ts": "4935c7f8fece3fe50544289f011b6fe1825d35749fcf3cfd81c71153a477cef9",
+    "web/trace.ts": "e6a92aa76585548546571c1eb05cdf44d7c9772ded14ef11f0f05144fb335961"
+  },
+  "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "production": {
+    "sha256": "cb1d361fffc07f8f4cfe88b2c2357eb9ba3c6330082a2aaf9ad3fac18a7bf624",
+    "files": 832,
+    "source": "/workspace/isaac-worktrees/weapons/dist",
+    "scope": "Immutable snapshot of production build bytes; source/native replay equality is checked separately"
+  },
+  "graphics": {
+    "requestedProfile": "mesa",
+    "actualProfile": "mesa",
+    "renderer": "ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL ES 3.2 Mesa 25.0.7-2+deb13u1)",
+    "vendor": "Google Inc. (Mesa)",
+    "version": "OpenGL ES 3.0 (ANGLE 2.1 git hash: unknown hash)",
+    "displayType": "ANGLE_OPENGL_EGL",
+    "devices": [
+      {
+        "vendorId": 0,
+        "deviceId": 0,
+        "vendorString": "Google Inc. (Mesa)",
+        "deviceString": "ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL ES 3.2 Mesa 25.0.7-2+deb13u1)",
+        "driverVendor": "Mesa",
+        "driverVersion": "25.0.7"
+      }
+    ],
+    "observedFrom": "Chromium SystemInfo.getInfo",
+    "scope": "Observed Chromium graphics backend; shader/pixel equality still requires the original reference comparisons"
+  },
+  "scope": "Causal startup, forward menus and public seed dialog admission/reopening and valid commitment: full 624-word shared MT, saved player/menu seeds, menu seed text, Character dialog/committed fields, nine saved grid pairs and 179 stat poses. A second real DOM sequence queues Profile/Tab/commit before its first tick and must preserve the decoded setter after Clear/Reset. Character-confirm fade/run admission and later consumers remain separate.",
+  "cases": [
+    {
+      "name": "zero-epoch",
+      "bootEpochSeed": 0,
+      "code": "QSYVKMSE",
+      "status": "pass",
+      "nativeManifestSha256": "1c9858e60479ae736c7737a05fceb6f9b268aec5ce3886aceec3e16634108a75",
+      "queuedInputProvenance": {
+        "status": "pass",
+        "commands": 19,
+        "initialSeed": 2076625747,
+        "bootEpochSeed": 0
+      },
+      "comparedMenuCheckpoints": 9,
+      "comparedStateWords": 5616,
+      "comparedGridPairs": 81,
+      "comparedStatPoses": 1611,
+      "inputProvenance": {
+        "status": "pass",
+        "commands": 78,
+        "initialSeed": 2076625747,
+        "bootEpochSeed": 0,
+        "runSeedValue": 2076625747
+      }
+    },
+    {
+      "name": "fixed-epoch",
+      "bootEpochSeed": 1700000000,
+      "code": "ZG800TRJ",
+      "status": "pass",
+      "nativeManifestSha256": "cbf6d3dbe1bc5b7ac7eca1246b9f26ffd975fcefb794481fc41f08ad0da03650",
+      "queuedInputProvenance": {
+        "status": "pass",
+        "commands": 19,
+        "initialSeed": 2790397112,
+        "bootEpochSeed": 1700000000
+      },
+      "comparedMenuCheckpoints": 9,
+      "comparedStateWords": 5616,
+      "comparedGridPairs": 81,
+      "comparedStatPoses": 1611,
+      "inputProvenance": {
+        "status": "pass",
+        "commands": 78,
+        "initialSeed": 2790397112,
+        "bootEpochSeed": 1700000000,
+        "runSeedValue": 2790397112
+      }
+    },
+    {
+      "name": "random-0",
+      "bootEpochSeed": 3221271646,
+      "code": "FE27CW8J",
+      "seedValue": 652127926,
+      "status": "pass",
+      "nativeManifestSha256": "60b86193b48f339239716f360f01e770558d3393209ef18a8b4c1bd5d0e4ba1f",
+      "queuedInputProvenance": {
+        "status": "pass",
+        "commands": 19,
+        "initialSeed": 652127926,
+        "bootEpochSeed": 3221271646
+      },
+      "comparedMenuCheckpoints": 9,
+      "comparedStateWords": 5616,
+      "comparedGridPairs": 81,
+      "comparedStatPoses": 1611,
+      "inputProvenance": {
+        "status": "pass",
+        "commands": 78,
+        "initialSeed": 652127926,
+        "bootEpochSeed": 3221271646,
+        "runSeedValue": 652127926
+      }
+    },
+    {
+      "name": "random-1",
+      "bootEpochSeed": 2564462279,
+      "code": "3MBVDNN2",
+      "seedValue": 3308047948,
+      "status": "pass",
+      "nativeManifestSha256": "33715539cf88d43522d2e626c66c764cd812d0c8240e49ad330d99a7236d6d70",
+      "queuedInputProvenance": {
+        "status": "pass",
+        "commands": 19,
+        "initialSeed": 3308047948,
+        "bootEpochSeed": 2564462279
+      },
+      "comparedMenuCheckpoints": 9,
+      "comparedStateWords": 5616,
+      "comparedGridPairs": 81,
+      "comparedStatPoses": 1611,
+      "inputProvenance": {
+        "status": "pass",
+        "commands": 78,
+        "initialSeed": 3308047948,
+        "bootEpochSeed": 2564462279,
+        "runSeedValue": 3308047948
+      }
+    },
+    {
+      "name": "random-2",
+      "bootEpochSeed": 4184317888,
+      "code": "F0E06W1S",
+      "seedValue": 577114551,
+      "status": "pass",
+      "nativeManifestSha256": "f1f9b3ce68878418c2c762a3681dc17ca6326acb39d6e097452a685413c5377f",
+      "queuedInputProvenance": {
+        "status": "pass",
+        "commands": 19,
+        "initialSeed": 577114551,
+        "bootEpochSeed": 4184317888
+      },
+      "comparedMenuCheckpoints": 9,
+      "comparedStateWords": 5616,
+      "comparedGridPairs": 81,
+      "comparedStatPoses": 1611,
+      "inputProvenance": {
+        "status": "pass",
+        "commands": 78,
+        "initialSeed": 577114551,
+        "bootEpochSeed": 4184317888,
+        "runSeedValue": 577114551
+      }
+    },
+    {
+      "name": "random-3",
+      "bootEpochSeed": 1332970921,
+      "code": "EVZNZCCJ",
+      "seedValue": 688239989,
+      "status": "pass",
+      "nativeManifestSha256": "119a38e6a89277bd3251074e83fb7e94143163692da07ac02810eb6c1ca5232f",
+      "queuedInputProvenance": {
+        "status": "pass",
+        "commands": 19,
+        "initialSeed": 688239989,
+        "bootEpochSeed": 1332970921
+      },
+      "comparedMenuCheckpoints": 9,
+      "comparedStateWords": 5616,
+      "comparedGridPairs": 81,
+      "comparedStatPoses": 1611,
+      "inputProvenance": {
+        "status": "pass",
+        "commands": 78,
+        "initialSeed": 688239989,
+        "bootEpochSeed": 1332970921,
+        "runSeedValue": 688239989
+      }
+    }
+  ],
+  "gateSourcesEnd": {
+    "tools/e2e/boot-mt.mjs": "92d070f2dc42bf94b72a86dd31efdee5ee4c90e0402edcd0a1fd128d81f148f5",
+    "tools/original/boot-mt-observer.py": "2bcb20a9841e49cc42cb7a69fe9e4a74f15be211f80a513062b5ee40f64f5929",
+    "tools/original/native-identity.py": "4fd5591be56fc4e9ad0486d0f2ec2828f6389786245ee09f9d0b3a395ae18acb",
+    "tools/original/state-observer.py": "58e3b510abbe5ff57f05844efbdf764e2a02530cda4fa99f538d886d258af6f1",
+    "tools/original/foundation-clock-run.py": "b79997f1fdc983a6e6fac74d87c24d2036ea956021fa944d1c0bd7f04e15a243",
+    "tools/original/foundation-clock-gate.c": "f517f1fc0edf2bbe17021e529fb41652e991e286bef070b8aecefd32bfa62e75",
+    "tools/original/foundation-seeds.py": "dd4633c955e7518e9bc0f0147ddfae46d356468238477a68dc06c86656ccba89",
+    "tools/original/debug-run.py": "d785d32c6cc557959be38880a3b046c4040b988fbe3d06d4a8c1f4aa2e833cf5",
+    "tools/original/with-display.sh": "af469210e803786a60d8632c28a6f2da77bc8ab02cc06be50016ddb25e95b848",
+    "tools/foundation/browser.mjs": "60c4bc851470f47e4dd0399148ce0c1edf351d41fbf7f7e15fa823af5948b4c8",
+    "tools/foundation/production-server.mjs": "e3152b58e2353319ba0963b30439e33c3cc65f84a8c6ebb765c2812486245952",
+    "tools/foundation/verify.mjs": "b28ed8af6bf50a7aa8b6b81f55fd29d0c963285f2d54500d61a4a58925de1d9f",
+    "engine/src/menu_lifecycle.rs": "2ccfe4da0f3213a43caa987f80d092a8ae21e03ad9e27120aa574fe9fad1c5e0",
+    "engine/src/mt.rs": "2fae0fc8dff620f766c40d4253d26dd65e9dbff05bf6e0ff85f5beb2e0e0f9d0",
+    "engine/src/lib.rs": "1d35cd84daf598f66802de13edb6d3c0353997f0964077e8febc338e42ca1a33",
+    "engine/src/audio.rs": "d026fad8a0a4645061fa26061947dd5465d1e7e7a1edc86aae1fe733c1627110",
+    "web/main.ts": "4935c7f8fece3fe50544289f011b6fe1825d35749fcf3cfd81c71153a477cef9",
+    "web/trace.ts": "e6a92aa76585548546571c1eb05cdf44d7c9772ded14ef11f0f05144fb335961"
+  },
+  "gateSourcesStable": true
+}
