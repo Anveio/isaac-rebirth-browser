@@ -95,6 +95,7 @@ pub fn from_selector(id: u32, selector: &SpawnSelector) -> Result<Option<Npc>, S
         damage: combat::DamageQueue::default(),
         keeper: None,
         fireplace: None,
+        level2_fly: None,
         monstro: Some(MonstroState {
             state_frame: 0,
             choice: 0,

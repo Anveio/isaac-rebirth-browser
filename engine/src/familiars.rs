@@ -12,6 +12,9 @@ use serde::{Deserialize, Serialize};
 use std::sync::OnceLock;
 
 const ZERO: WorldVector = WorldVector { x: 0.0, y: 0.0 };
+fn white() -> [f32; 4] {
+    [1.0; 4]
+}
 
 #[derive(Debug)]
 pub struct Clip {
@@ -53,6 +56,12 @@ pub struct Sprite {
     pub scale: WorldVector,
     pub offset: WorldVector,
     pub flip_x: bool,
+    #[serde(default)]
+    pub flip_y: bool,
+    #[serde(default = "white")]
+    pub tint: [f32; 4],
+    #[serde(default)]
+    pub offsets: [f32; 3],
 }
 
 impl Sprite {
@@ -65,6 +74,9 @@ impl Sprite {
             scale: WorldVector { x: 1.0, y: 1.0 },
             offset: ZERO,
             flip_x: false,
+            flip_y: false,
+            tint: white(),
+            offsets: [0.0; 3],
         }
     }
     fn advance(&mut self, config: &Definition) -> Result<(), String> {
@@ -521,6 +533,159 @@ pub(crate) fn grid_contacts(state: &mut State) -> Result<(), String> {
             )?;
             familiar.presented_position = familiar.position;
         }
+    }
+    Ok(())
+}
+
+/// The actual background pool paints and removes flags8 effects during the
+/// same manager full pass. Its room texture retains the selected stopped pose.
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct BackgroundStain {
+    pub source_effect_id: u32,
+    pub spawn_seed: u32,
+    pub birth_game_update: u32,
+    pub position: WorldVector,
+    pub sprite: Sprite,
+}
+
+/// Fresh zero-gib death445c60: caller owns the external seed and color copy.
+/// Blood7 Init consumes no shared draws; the explicit immediate Update does.
+pub fn admit_blood_splat(
+    state: &mut State,
+    seed: u32,
+    position: WorldVector,
+    tint: [f32; 4],
+    offsets: [f32; 3],
+) -> Result<u32, String> {
+    if !position.is_finite() || tint.iter().chain(offsets.iter()).any(|v| !v.is_finite()) {
+        return Err("Blood Splat requires finite ground and copied color".into());
+    }
+    let config = definition(1000, 7).expect("authored Blood Splat config");
+    let id = state.next_effect;
+    state.next_effect = id.checked_add(1).ok_or("effect handle exhausted")?;
+    let mut sprite = Sprite::new(config);
+    sprite.tint = tint;
+    sprite.offsets = offsets;
+    state.sprite_effects.push(SpriteEffect {
+        id,
+        variant: 7,
+        subtype: 0,
+        spawn_seed: seed,
+        parent: None,
+        birth_game_update: state.game_update_count,
+        actor_rng: items::Rng::new(seed, [4, 3, 17]),
+        position,
+        presented_position: position,
+        velocity: ZERO,
+        configured_friction: config.friction,
+        current_friction: config.friction,
+        collision_radius: config.collision_radius,
+        collision_mass: config.collision_mass,
+        collision_damage: 22.0,
+        hp: config.base_hp,
+        max_hp: config.base_hp,
+        grid_collision_class: 0,
+        entity_collision_class: 0,
+        flags: 8,
+        visible: true,
+        active: true,
+        removed: false,
+        render_order_offset: 0,
+        lifetime_divisor: 0,
+        time_to_live: -1,
+        raw_7f4: 1,
+        raw_7f8: 0.0,
+        sprite,
+        full_updates: 0,
+    });
+    // Native4524f0 routes flags8 directly to its separate background pool.
+    // This actor never joins the ordinary full-update scheduler snapshot.
+    Ok(id)
+}
+
+pub fn advance_blood_initial(state: &mut State, id: u32) -> Result<(), String> {
+    let Some(effect) = state.sprite_effects.iter_mut().find(|e| e.id == id) else {
+        return Err("Blood initial callback requires admitted effect".into());
+    };
+    if effect.variant != 7 || effect.full_updates != 0 {
+        return Err("Blood explicit initial callback must execute once".into());
+    }
+    let config = definition(1000, 7).expect("authored Blood Splat config");
+    // BaseUpdate runs before the first7-specific manual pose and shared draws.
+    effect.sprite.advance(config)?;
+    effect.velocity = effect.velocity * effect.current_friction;
+    effect.position = effect.position + effect.velocity;
+    effect.presented_position = effect.position;
+    effect.current_friction = effect.configured_friction;
+    let incoming_scale = effect.sprite.scale.x;
+    let name = if incoming_scale < 0.4 {
+        "Size1BloodStains"
+    } else if incoming_scale < 0.6 {
+        "Size2BloodStains"
+    } else if incoming_scale < 0.8 {
+        "Size3BloodStains"
+    } else if incoming_scale < 1.2 {
+        "Size4BloodStains"
+    } else if incoming_scale < 2.0 {
+        "Size5BloodStains"
+    } else {
+        "Size6BloodStains"
+    };
+    let clip = config
+        .clips
+        .iter()
+        .find(|c| c.name == name)
+        .expect("authored stain size");
+    effect.sprite.scale = WorldVector { x: 1.0, y: 1.0 };
+    effect.sprite.animation = name.into();
+    effect.sprite.frame = state.boot_lifecycle.shared.bounded(clip.frames) as f32;
+    effect.sprite.playing = false;
+    effect.sprite.flip_x = state.boot_lifecycle.shared.bounded(2) == 0;
+    effect.sprite.flip_y = state.boot_lifecycle.shared.bounded(2) == 0;
+    if effect.sprite.tint[3] == 1.0 {
+        effect.sprite.tint[3] = (state.boot_lifecycle.shared.bounded(6) as f32 * 0.1) + 0.5;
+    }
+    effect.full_updates = 1;
+    Ok(())
+}
+
+/// Actual454df0 current-count background pass follows actor callbacks and
+/// precedes entity contacts/grid queries. Newborn flags8 blood participates.
+pub fn paint_background_effects(state: &mut State) -> Result<(), String> {
+    // Insert4524f0 keeps the independent render array in unsigned virtual+50
+    // key order. Equal keys insert before existing entries, so later births
+    // paint first. Ordinary actors also occupy that array; only flags8 paint.
+    let mut pending: Vec<_> = state
+        .sprite_effects
+        .iter()
+        .enumerate()
+        .filter(|(_, effect)| effect.variant == 7 && effect.active && !effect.removed)
+        .map(|(index, effect)| {
+            let key = ((100.0_f32 * effect.position.y + 10030.0) + 0.5).floor() as u32;
+            (
+                index,
+                key.wrapping_add(effect.render_order_offset as u32),
+                effect.id,
+            )
+        })
+        .collect();
+    pending.sort_by(|a, b| a.1.cmp(&b.1).then_with(|| b.2.cmp(&a.2)));
+    for (index, _, _) in pending {
+        let effect = &mut state.sprite_effects[index];
+        if effect.full_updates != 1 {
+            return Err("Blood background paint requires the explicit initial Update".into());
+        }
+        state.room.background_stains.push(BackgroundStain {
+            source_effect_id: effect.id,
+            spawn_seed: effect.spawn_seed,
+            birth_game_update: effect.birth_game_update,
+            position: effect.position,
+            sprite: effect.sprite.clone(),
+        });
+        // Remove441bb0 clears active and marks dead; visibility stays unchanged.
+        effect.active = false;
+        effect.removed = true;
     }
     Ok(())
 }

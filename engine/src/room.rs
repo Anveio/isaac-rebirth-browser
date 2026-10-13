@@ -25,6 +25,8 @@ pub struct Room {
     pub descriptor: Option<crate::floor::Descriptor>,
     pub pickups: Vec<crate::pickups::Pickup>,
     pub npcs: Vec<crate::npcs::Npc>,
+    #[serde(default)]
+    pub background_stains: Vec<crate::familiars::BackgroundStain>,
     pub authored_actor_order: Vec<crate::actors::ActorRef>,
     pub boss_count: u32,
     pub boss_presentation_index: u32,
@@ -469,6 +471,7 @@ impl Room {
             descriptor: None,
             pickups: Vec::new(),
             npcs: Vec::new(),
+            background_stains: Vec::new(),
             authored_actor_order: Vec::new(),
             boss_count: 0,
             boss_presentation_index: 0,
