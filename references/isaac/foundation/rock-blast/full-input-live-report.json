@@ -1,0 +1,134 @@
+{
+  "schema": 1,
+  "status": "pass",
+  "scope": "Fresh original and immutable production DOM replay verifies complete reset/menu/manual-seed/gameplay commands, all seed flags/text/numeric readback, exact f32 wire vectors and independently captured every-phase gameplay fields; runtime callback unchanged. Capped state history disclosed, full input history required.",
+  "presentations": 825,
+  "runs": [
+    {
+      "schema": 1,
+      "status": "pass",
+      "selection": {
+        "scope": "Explicit targeted recorded-case replay; default CI executes the complete cohort",
+        "case": "rock-phase-0"
+      },
+      "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+      "gateSources": {
+        "tools/e2e/rock-blast.mjs": "73f2e41043d1098b2c088a1def47da864f533f91e090182323f8050e49376c24",
+        "tools/original/rock-blast-scenarios.py": "f896f63cc2f4e66487c7c75d68561b1efb46b989cf92dad09f687f3c4621ca65",
+        "tools/original/foundation-pickup-observe.py": "427fe87ddcec991012bdf0a26d38a797781dfbcdbaf246343fdc6c4f9be53a89",
+        "tools/original/foundation-clock-run.py": "b79997f1fdc983a6e6fac74d87c24d2036ea956021fa944d1c0bd7f04e15a243",
+        "tools/original/foundation-clock-gate.c": "f517f1fc0edf2bbe17021e529fb41652e991e286bef070b8aecefd32bfa62e75",
+        "tools/original/foundation-clock-verify.py": "c488100a187b44803c06374535715eaa5a7cde9d4513f6e866e090367d4f2054",
+        "tools/original/state-observer.py": "58e3b510abbe5ff57f05844efbdf764e2a02530cda4fa99f538d886d258af6f1",
+        "tools/original/with-display.sh": "af469210e803786a60d8632c28a6f2da77bc8ab02cc06be50016ddb25e95b848",
+        "tools/foundation/production-server.mjs": "e3152b58e2353319ba0963b30439e33c3cc65f84a8c6ebb765c2812486245952",
+        "tools/foundation/browser.mjs": "60c4bc851470f47e4dd0399148ce0c1edf351d41fbf7f7e15fa823af5948b4c8",
+        "web/trace.ts": "e6a92aa76585548546571c1eb05cdf44d7c9772ded14ef11f0f05144fb335961",
+        "references/isaac/foundation/rock-blast/known-regressions.json": "b7767539c58478d2109bbac8c7de617f41ec92686a0e92d24d0067a71e674a22"
+      },
+      "gateSourcesStable": true,
+      "production": {
+        "sha256": "61186ab300e0fdd92e172655f1a5a78d1404c95e72238eac921984f0db09022a",
+        "files": 832,
+        "scope": "Immutable snapshot of production build bytes; source/native replay equality is checked separately"
+      },
+      "cases": [
+        {
+          "name": "rock-phase-0",
+          "code": "YQ16XWHR",
+          "seedValue": 2889922101,
+          "delay": 0,
+          "slot": 0,
+          "entropy": "Contrived public bomb phase offset on a recorded natural rock room",
+          "cohort": "ordinary-rock-only",
+          "status": "pass",
+          "seedReadback": {
+            "seedText": "YQ16XWHR",
+            "seedValid": true,
+            "seededRun": true,
+            "runSeed": "YQ16XWHR",
+            "runSeedValue": 2889922101
+          },
+          "trace": {
+            "inputTraceTruncated": false,
+            "stateHistoryTruncated": true,
+            "stateHistoryTruncationReason": "bytes",
+            "inputEncodedBytes": 13019,
+            "stateEncodedBytes": 33544974
+          },
+          "comparedPresentations": 470,
+          "passedPresentations": 470,
+          "admittedRocks": 60,
+          "destroyedRocks": 9,
+          "detonation": 405,
+          "nativeManifestSha256": "692779f363796006d3485726b5af1c433c25e775e0f89ccbca97d80be9d5d0eb"
+        }
+      ],
+      "retainedArtifacts": ".cache/e2e/rock-blast/full-input-contrived"
+    },
+    {
+      "schema": 1,
+      "status": "pass",
+      "selection": {
+        "scope": "Explicit targeted recorded-case replay; default CI executes the complete cohort",
+        "case": "random-rock-0"
+      },
+      "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+      "gateSources": {
+        "tools/e2e/rock-blast.mjs": "73f2e41043d1098b2c088a1def47da864f533f91e090182323f8050e49376c24",
+        "tools/original/rock-blast-scenarios.py": "f896f63cc2f4e66487c7c75d68561b1efb46b989cf92dad09f687f3c4621ca65",
+        "tools/original/foundation-pickup-observe.py": "427fe87ddcec991012bdf0a26d38a797781dfbcdbaf246343fdc6c4f9be53a89",
+        "tools/original/foundation-clock-run.py": "b79997f1fdc983a6e6fac74d87c24d2036ea956021fa944d1c0bd7f04e15a243",
+        "tools/original/foundation-clock-gate.c": "f517f1fc0edf2bbe17021e529fb41652e991e286bef070b8aecefd32bfa62e75",
+        "tools/original/foundation-clock-verify.py": "c488100a187b44803c06374535715eaa5a7cde9d4513f6e866e090367d4f2054",
+        "tools/original/state-observer.py": "58e3b510abbe5ff57f05844efbdf764e2a02530cda4fa99f538d886d258af6f1",
+        "tools/original/with-display.sh": "af469210e803786a60d8632c28a6f2da77bc8ab02cc06be50016ddb25e95b848",
+        "tools/foundation/production-server.mjs": "e3152b58e2353319ba0963b30439e33c3cc65f84a8c6ebb765c2812486245952",
+        "tools/foundation/browser.mjs": "60c4bc851470f47e4dd0399148ce0c1edf351d41fbf7f7e15fa823af5948b4c8",
+        "web/trace.ts": "e6a92aa76585548546571c1eb05cdf44d7c9772ded14ef11f0f05144fb335961",
+        "references/isaac/foundation/rock-blast/known-regressions.json": "b7767539c58478d2109bbac8c7de617f41ec92686a0e92d24d0067a71e674a22"
+      },
+      "gateSourcesStable": true,
+      "production": {
+        "sha256": "61186ab300e0fdd92e172655f1a5a78d1404c95e72238eac921984f0db09022a",
+        "files": 832,
+        "scope": "Immutable snapshot of production build bytes; source/native replay equality is checked separately"
+      },
+      "cases": [
+        {
+          "name": "random-rock-0",
+          "code": "Z6Y6PNT8",
+          "seedValue": 2697378127,
+          "delay": 0,
+          "slot": 1,
+          "entropy": "OS secrets",
+          "discoveryAttempts": 917,
+          "cohort": "ordinary-rock-only",
+          "status": "pass",
+          "seedReadback": {
+            "seedText": "Z6Y6PNT8",
+            "seedValid": true,
+            "seededRun": true,
+            "runSeed": "Z6Y6PNT8",
+            "runSeedValue": 2697378127
+          },
+          "trace": {
+            "inputTraceTruncated": false,
+            "stateHistoryTruncated": false,
+            "stateHistoryTruncationReason": null,
+            "inputEncodedBytes": 10063,
+            "stateEncodedBytes": 32592882
+          },
+          "comparedPresentations": 355,
+          "passedPresentations": 355,
+          "admittedRocks": 60,
+          "destroyedRocks": 5,
+          "detonation": 289,
+          "nativeManifestSha256": "f1312c0e3d76dfed53af44d81d01fde7517bafd76a22d217b0c94c9a45ae5931"
+        }
+      ],
+      "retainedArtifacts": ".cache/e2e/rock-blast/full-input-recorded-random"
+    }
+  ],
+  "knownFailuresRemainMandatory": "Complete default9-case gate still blocks explosive/tinted/troll callback and pickup-motion gaps. Historical eight-case and troll reports retain their actual earlier harness/artifact hashes; this scoped pass does not relabel them equal."
+}

@@ -1,0 +1,166 @@
+{
+  "schema": 1,
+  "status": "fail",
+  "scope": "Live public-seed ordinary Rock admission, movement blockage, actual bomb placement/detonation, sorted destruction/link repair, marker aging and passage through former cells. Tinted Rock admission/drops remain blocking regressions; cosmetic effect actors, total shared MT alignment and full pixels are unaccepted. Historical pre-provenance-fix targeted pair; menu trail was sliced and numeric readback alone was asserted. Its actual failure is preserved; full-input follow-up runs separately.",
+  "selection": {
+    "scope": "Explicit targeted recorded-case replay; default CI executes the complete cohort",
+    "case": "regression-troll-bomb"
+  },
+  "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "gateSources": {
+    "tools/e2e/rock-blast.mjs": "fd8a6f8d18c39ea776d037b9a225aa2b5cfc9ea3455daae65fb10a6b5c1e0fc1",
+    "tools/original/rock-blast-scenarios.py": "f896f63cc2f4e66487c7c75d68561b1efb46b989cf92dad09f687f3c4621ca65",
+    "tools/original/foundation-pickup-observe.py": "427fe87ddcec991012bdf0a26d38a797781dfbcdbaf246343fdc6c4f9be53a89",
+    "tools/original/foundation-clock-run.py": "b79997f1fdc983a6e6fac74d87c24d2036ea956021fa944d1c0bd7f04e15a243",
+    "tools/original/foundation-clock-gate.c": "f517f1fc0edf2bbe17021e529fb41652e991e286bef070b8aecefd32bfa62e75",
+    "tools/original/foundation-clock-verify.py": "c488100a187b44803c06374535715eaa5a7cde9d4513f6e866e090367d4f2054",
+    "tools/original/state-observer.py": "58e3b510abbe5ff57f05844efbdf764e2a02530cda4fa99f538d886d258af6f1",
+    "tools/original/with-display.sh": "af469210e803786a60d8632c28a6f2da77bc8ab02cc06be50016ddb25e95b848",
+    "tools/foundation/production-server.mjs": "e3152b58e2353319ba0963b30439e33c3cc65f84a8c6ebb765c2812486245952",
+    "tools/foundation/browser.mjs": "60c4bc851470f47e4dd0399148ce0c1edf351d41fbf7f7e15fa823af5948b4c8",
+    "web/trace.ts": "e6a92aa76585548546571c1eb05cdf44d7c9772ded14ef11f0f05144fb335961",
+    "references/isaac/foundation/rock-blast/known-regressions.json": "b7767539c58478d2109bbac8c7de617f41ec92686a0e92d24d0067a71e674a22"
+  },
+  "gateSourcesStable": true,
+  "production": {
+    "sha256": "61186ab300e0fdd92e172655f1a5a78d1404c95e72238eac921984f0db09022a",
+    "files": 832,
+    "scope": "Immutable snapshot of production build bytes; source/native replay equality is checked separately"
+  },
+  "case": {
+    "name": "regression-troll-bomb",
+    "code": "XD0VNH46",
+    "seedValue": 2533542370,
+    "delay": 0,
+    "actions": [
+      {
+        "key": "s",
+        "frames": 17
+      },
+      {
+        "key": null,
+        "frames": 100
+      },
+      {
+        "key": "s",
+        "frames": 25
+      },
+      {
+        "key": null,
+        "frames": 30
+      },
+      {
+        "key": "e",
+        "frames": 1
+      },
+      {
+        "key": null,
+        "frames": 122
+      },
+      {
+        "key": "s",
+        "frames": 50
+      },
+      {
+        "key": null,
+        "frames": 30
+      }
+    ],
+    "entropy": "Recorded OS secrets discovery, candidate186",
+    "cohort": "troll-bomb-regression",
+    "description": "Authored Bomb40/0 becomes native type4 variant3 and detonates before public E, destroys ordinary rocks and imparts motion to remaining bomb pickups. Missing troll/pickup callbacks remain mandatory blocking.",
+    "status": "fail",
+    "trace": {
+      "inputTraceTruncated": false,
+      "stateHistoryTruncated": true,
+      "stateHistoryTruncationReason": "bytes",
+      "inputEncodedBytes": 10401,
+      "stateEncodedBytes": 33547968
+    },
+    "comparedPresentations": 375,
+    "passedPresentations": 50,
+    "admittedRocks": 34,
+    "destroyedRocks": 20,
+    "detonation": 293,
+    "nativeManifestSha256": "ab8c28c645895b46ca4a1339668a04873510881729fd6952163c58dad48c3492",
+    "failedFieldComparisons": 11807,
+    "failuresByField": {
+      "live bomb admission/retirement": 136,
+      "pickup admission/retirement": 325,
+      "native relative actor admission order": 325,
+      "rock36:variant": 189,
+      "rock37:state": 140,
+      "rock37:collisionClass": 140,
+      "rock37:destruction marker": 189,
+      "rock38:state": 140,
+      "rock38:collisionClass": 140,
+      "rock38:destruction marker": 189,
+      "rock39:state": 140,
+      "rock39:collisionClass": 140,
+      "rock39:destruction marker": 189,
+      "rock51:state": 140,
+      "rock51:collisionClass": 140,
+      "rock51:destruction marker": 189,
+      "rock52:state": 140,
+      "rock52:collisionClass": 140,
+      "rock52:destruction marker": 189,
+      "rock53:variant": 140,
+      "rock53:state": 140,
+      "rock53:collisionClass": 140,
+      "rock53:destruction marker": 189,
+      "rock54:variant": 140,
+      "rock54:state": 189,
+      "rock54:collisionClass": 189,
+      "rock54:destruction marker": 189,
+      "rock55:state": 189,
+      "rock55:collisionClass": 189,
+      "rock55:destruction marker": 189,
+      "rock69:state": 189,
+      "rock69:collisionClass": 189,
+      "rock69:destruction marker": 189,
+      "rock70:variant": 189,
+      "rock70:state": 189,
+      "rock70:collisionClass": 189,
+      "rock70:destruction marker": 189,
+      "rock81:state": 189,
+      "rock81:collisionClass": 189,
+      "rock81:destruction marker": 189,
+      "rock82:state": 189,
+      "rock82:collisionClass": 189,
+      "rock82:destruction marker": 189,
+      "rock83:variant": 189,
+      "rock83:state": 189,
+      "rock83:collisionClass": 189,
+      "rock83:destruction marker": 189,
+      "rock84:variant": 189,
+      "rock84:state": 189,
+      "rock84:collisionClass": 189,
+      "rock84:destruction marker": 189,
+      "rock85:state": 189,
+      "rock85:collisionClass": 189,
+      "rock85:destruction marker": 189,
+      "rock97:state": 189,
+      "rock97:collisionClass": 189,
+      "rock97:destruction marker": 189,
+      "rock98:variant": 189,
+      "rock98:state": 189,
+      "rock98:collisionClass": 189,
+      "rock98:destruction marker": 189,
+      "rock99:state": 189,
+      "rock99:collisionClass": 189,
+      "rock99:destruction marker": 189,
+      "rock51:variant": 49,
+      "damage countdown": 43,
+      "rock35:destruction marker": 43,
+      "rock36:destruction marker": 43
+    },
+    "firstFailure": {
+      "field": "live bomb admission/retirement",
+      "presentation": 17,
+      "actual": 0,
+      "expected": 1,
+      "error": "regression-troll-bomb:17:live bomb admission/retirement\n\n0 !== 1\n"
+    },
+    "retainedArtifacts": ".cache/e2e/rock-blast/troll-mandatory-final/regression-troll-bomb"
+  }
+}
