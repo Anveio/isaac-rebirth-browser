@@ -117,4 +117,29 @@ fn main() {
     }
     let output = PathBuf::from(std::env::var_os("OUT_DIR").unwrap());
     fs::write(output.join("shadow_catalog.rs"), generated).expect("write shadow catalog");
+    let audio_path = manifest.parent().unwrap().join("web/audio-data.json");
+    println!("cargo:rerun-if-changed={}", audio_path.display());
+    let audio: Value = serde_json::from_str(
+        &fs::read_to_string(audio_path).expect("read authored audio catalogue"),
+    )
+    .expect("parse authored audio catalogue");
+    let mut counts = [0_u8; 324];
+    for sound in audio["sounds"].as_array().expect("sound catalogue missing") {
+        let id = sound["id"].as_u64().expect("sound ID missing") as usize;
+        let samples = sound["samples"].as_array().expect("sound samples missing");
+        assert!(
+            id < counts.len() && counts[id] == 0 && !samples.is_empty() && samples.len() <= 5,
+            "invalid authored sound entry"
+        );
+        assert!(
+            samples.iter().all(|sample| sample["weight"] == 1),
+            "base sample selection requires equal authored weights"
+        );
+        counts[id] = samples.len() as u8;
+    }
+    fs::write(
+        output.join("audio_catalog.rs"),
+        format!("pub const SOUND_COUNTS: [u8; 324] = {counts:?};\n"),
+    )
+    .expect("write authored audio catalogue");
 }

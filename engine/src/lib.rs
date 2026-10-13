@@ -8,6 +8,7 @@ use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
 use std::collections::BTreeSet;
 pub mod actors;
+pub mod audio;
 pub mod bombs;
 pub mod combat;
 mod content;

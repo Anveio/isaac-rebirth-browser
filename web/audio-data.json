@@ -1,0 +1,5118 @@
+{
+  "schema": 1,
+  "sources": {
+    "references/isaac/rebirth/resources/sounds.xml": "8e4a4ce10de0835c86df68006b156a62ce3b9d2a9be40ee8b9b541a30b42e30d",
+    "references/isaac/rebirth/resources/music.xml": "679d268e0c1fb9b57b079c6a1476d6ee6b6634a87d70a293bce1e518fcf1d92a"
+  },
+  "sounds": [
+    {
+      "id": 1,
+      "samples": [
+        {
+          "path": "sfx/1 up theremin.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "samples": [
+        {
+          "path": "sfx/bird flap.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/bird flap 2.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/bird flap 3.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "samples": [
+        {
+          "path": "sfx/blobby wiggle.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/blobby wiggle 2.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/blobby wiggle 3.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "samples": [
+        {
+          "path": "sfx/insect swarm.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "samples": [
+        {
+          "path": "sfx/blood laser short.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/blood laser short 2.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "samples": [
+        {
+          "path": "sfx/blood laser long.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "samples": [
+        {
+          "path": "sfx/book page turn.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "samples": [
+        {
+          "path": "sfx/boss bug hiss.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "samples": [
+        {
+          "path": "sfx/boss gurgle roar.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "samples": [
+        {
+          "path": "sfx/boss gurgle lite.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "samples": [
+        {
+          "path": "sfx/boss lite hiss.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/boss lite hiss 2.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/boss lite hiss 3.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "samples": [
+        {
+          "path": "sfx/boss lite roar 1.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/boss lite roar 2.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/boss lite roar 3.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/boss lite roar 4.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 15,
+      "samples": [
+        {
+          "path": "sfx/boss lite sloppy roar.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/boss lite sloppy roar 2.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/boss lite sloppy roar 3.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 16,
+      "samples": [
+        {
+          "path": "sfx/boss spit blob barf 1.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/boss spit blob barf 2.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/boss spit blob barf 3.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 21,
+      "samples": [
+        {
+          "path": "sfx/chest drop 1.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 22,
+      "samples": [
+        {
+          "path": "sfx/chest open 1.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 23,
+      "samples": [
+        {
+          "path": "sfx/choir.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 24,
+      "samples": [
+        {
+          "path": "sfx/coin slot.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 25,
+      "samples": [
+        {
+          "path": "sfx/cute grunt.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/cute grunt 2.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/cute grunt 3.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 28,
+      "samples": [
+        {
+          "path": "sfx/death burst.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/death burst 2.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 30,
+      "samples": [
+        {
+          "path": "sfx/death burst small.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/death burst small 2.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/death burst small 3.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 33,
+      "samples": [
+        {
+          "path": "sfx/death card mix.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 34,
+      "samples": [
+        {
+          "path": "sfx/death card mix.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 35,
+      "samples": [
+        {
+          "path": "sfx/door heavy close.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 36,
+      "samples": [
+        {
+          "path": "sfx/door heavy open.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 37,
+      "samples": [
+        {
+          "path": "sfx/fart.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/fart 2.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/fart 3.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/fart 4.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/fart 5.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 38,
+      "samples": [
+        {
+          "path": "sfx/fetus jump.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/fetus jump 1.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 40,
+      "samples": [
+        {
+          "path": "sfx/fetus land.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/fetus land 1.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 43,
+      "samples": [
+        {
+          "path": "sfx/firedeath hiss.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 44,
+      "samples": [
+        {
+          "path": "sfx/floaty baby roar.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/floaty baby roar 2.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 48,
+      "samples": [
+        {
+          "path": "sfx/forest boss stomp.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/forest boss stomp 2.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/forest boss stomp 3.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 51,
+      "samples": [
+        {
+          "path": "sfx/gascan pour.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 52,
+      "samples": [
+        {
+          "path": "sfx/hellboss ground pound.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/hellboss ground pound 2.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 54,
+      "samples": [
+        {
+          "path": "sfx/holy!.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 55,
+      "samples": [
+        {
+          "path": "sfx/hurt grunt .wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/hurt grunt 1.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/hurt grunt 2.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 56,
+      "samples": [
+        {
+          "path": "sfx/child happy roar short.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/child happy roar short 2.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/child angry roar short.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 57,
+      "samples": [
+        {
+          "path": "sfx/child angry roar 1.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/child angry roar 2.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 58,
+      "samples": [
+        {
+          "path": "sfx/key pickup guantlet 4.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 59,
+      "samples": [
+        {
+          "path": "sfx/key drop 2.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 60,
+      "samples": [
+        {
+          "path": "sfx/baby hurt 1.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/baby hurt 2.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/baby hurt 3.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 64,
+      "samples": [
+        {
+          "path": "sfx/maggot burst out.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/maggot burst out 2.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 66,
+      "samples": [
+        {
+          "path": "sfx/maggot enter ground .wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/maggot enter ground 1.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 68,
+      "samples": [
+        {
+          "path": "sfx/meat feet slow.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 69,
+      "samples": [
+        {
+          "path": "sfx/meat impact.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/meat impacts 2.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/meat impacts 3.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 72,
+      "samples": [
+        {
+          "path": "sfx/meat jumps0.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/meat jumps 1.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/meat jumps 2.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 77,
+      "samples": [
+        {
+          "path": "sfx/meaty deaths 0.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/meaty deaths 1.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/meaty deaths 2.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/meaty deaths 3.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/meaty deaths 4.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 82,
+      "samples": [
+        {
+          "path": "sfx/vox death.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 84,
+      "samples": [
+        {
+          "path": "sfx/evil laugh.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 85,
+      "samples": [
+        {
+          "path": "sfx/filter death 1.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 86,
+      "samples": [
+        {
+          "path": "sfx/filter evil laugh.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 87,
+      "samples": [
+        {
+          "path": "sfx/filter hurt.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/filter hurt 1.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/filter hurt 2.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 90,
+      "samples": [
+        {
+          "path": "sfx/mom muffle.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/mom muffle 2.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/mom muffle 3.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/mom muffle 4.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 93,
+      "samples": [
+        {
+          "path": "sfx/grunt.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/grunt 2.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/grunt 3.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/grunt 4.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 97,
+      "samples": [
+        {
+          "path": "sfx/hurt 1.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/hurt 2.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/hurt 3.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 101,
+      "samples": [
+        {
+          "path": "sfx/mom.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/mom2.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/mom3.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 104,
+      "samples": [
+        {
+          "path": "sfx/monster grunt.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/monster grunt b.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 106,
+      "samples": [
+        {
+          "path": "sfx/monster grunt 1a.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/monster grunt 1b.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 108,
+      "samples": [
+        {
+          "path": "sfx/monster grunt 2a.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/monster grunt 2b.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 112,
+      "samples": [
+        {
+          "path": "sfx/monster grunt 4a.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/monster grunt 4 b.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 114,
+      "samples": [
+        {
+          "path": "sfx/monster grunt 5.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/monster grunt 5b.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 115,
+      "samples": [
+        {
+          "path": "sfx/monster roar.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/monster roar 1.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 116,
+      "samples": [
+        {
+          "path": "sfx/monster roar 2.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/monster roar 3.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 117,
+      "samples": [
+        {
+          "path": "sfx/monster roar 4.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/monster roar 5.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 118,
+      "samples": [
+        {
+          "path": "sfx/monster roar 7.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/monster roar 8.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 119,
+      "samples": [
+        {
+          "path": "sfx/monster yell 1.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/monster yell 2.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 122,
+      "samples": [
+        {
+          "path": "sfx/monster yell b1.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/monster yell b5.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 128,
+      "samples": [
+        {
+          "path": "sfx/power up1.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 129,
+      "samples": [
+        {
+          "path": "sfx/power up 3.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/power up 4.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 130,
+      "samples": [
+        {
+          "path": "sfx/power up 7.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 132,
+      "samples": [
+        {
+          "path": "sfx/power up spewer.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 133,
+      "samples": [
+        {
+          "path": "sfx/red lightning zap1.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/red lightning zap 2.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/red lightning zap 3.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 137,
+      "samples": [
+        {
+          "path": "sfx/rock crumble 0.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/rock crumble 2.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/rock crumble 3.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 138,
+      "samples": [
+        {
+          "path": "sfx/pot breaking sound.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/pot breaking sound 2.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/pot breaking sound 3.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 139,
+      "samples": [
+        {
+          "path": "sfx/mushroom poof.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/mushroom poof 2.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 141,
+      "samples": [
+        {
+          "path": "sfx/rocket blast death 1.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 142,
+      "samples": [
+        {
+          "path": "sfx/large chew.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 143,
+      "samples": [
+        {
+          "path": "sfx/scared whimper.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/scared whimper 2.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 146,
+      "samples": [
+        {
+          "path": "sfx/shakey kid roar.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/shakey kid roar 2.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 149,
+      "samples": [
+        {
+          "path": "sfx/sink drain gurgle.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 150,
+      "samples": [
+        {
+          "path": "sfx/tear block.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 153,
+      "samples": [
+        {
+          "path": "sfx/tear fire 4.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/tear fire 5.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 156,
+      "samples": [
+        {
+          "path": "sfx/unlock.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 157,
+      "samples": [
+        {
+          "path": "sfx/vamp.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 158,
+      "samples": [
+        {
+          "path": "sfx/fly cough.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/fly cough 2.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/fly cough 3.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/fly cough 4.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 159,
+      "samples": [
+        {
+          "path": "sfx/spider coughs.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 165,
+      "samples": [
+        {
+          "path": "sfx/zombie walker kid.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/zombie walker kid 2.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 166,
+      "samples": [
+        {
+          "path": "sfx/animal squish.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/animal squish 1.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/animal squish 2.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 167,
+      "samples": [
+        {
+          "path": "sfx/angry gurgle 1.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/angry gurgle 2.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 169,
+      "samples": [
+        {
+          "path": "sfx/band aid pick up.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 170,
+      "samples": [
+        {
+          "path": "sfx/battery charge.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 171,
+      "samples": [
+        {
+          "path": "sfx/beep.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 175,
+      "samples": [
+        {
+          "path": "sfx/blood bank spawn.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 178,
+      "samples": [
+        {
+          "path": "sfx/blood fire.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/blood fire 2.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/blood fire 3.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/blood fire 4.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 181,
+      "samples": [
+        {
+          "path": "sfx/boil hatch.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 182,
+      "samples": [
+        {
+          "path": "sfx/boss explosions 0.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/boss explosions 1.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/boss expolsions 2.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 185,
+      "samples": [
+        {
+          "path": "sfx/boss 2 bubbles.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/boss 2 bubbles 1.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 187,
+      "samples": [
+        {
+          "path": "sfx/boss 2 intro errorbuzz.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 190,
+      "samples": [
+        {
+          "path": "sfx/castleportcullis.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 194,
+      "samples": [
+        {
+          "path": "sfx/character select left.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 195,
+      "samples": [
+        {
+          "path": "sfx/character select right.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 197,
+      "samples": [
+        {
+          "path": "sfx/derp 0.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/derp 1.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 198,
+      "samples": [
+        {
+          "path": "sfx/dime drop.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 199,
+      "samples": [
+        {
+          "path": "sfx/dime pick up.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 201,
+      "samples": [
+        {
+          "path": "sfx/fetus feet.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/fetus feet 2.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 204,
+      "samples": [
+        {
+          "path": "sfx/golden key.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 205,
+      "samples": [
+        {
+          "path": "sfx/goo attach 1.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/goo attach 2.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 207,
+      "samples": [
+        {
+          "path": "sfx/goo death 0.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/goo death 1.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/goo death 2.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 211,
+      "samples": [
+        {
+          "path": "sfx/hand laser.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 212,
+      "samples": [
+        {
+          "path": "sfx/heartin.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 213,
+      "samples": [
+        {
+          "path": "sfx/heart out.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 214,
+      "samples": [
+        {
+          "path": "sfx/hell portal.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 215,
+      "samples": [
+        {
+          "path": "sfx/hell portal 2.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 217,
+      "samples": [
+        {
+          "path": "sfx/isaac dies new.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/isaac dies new 1.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/isaac dies new 2.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 218,
+      "samples": [
+        {
+          "path": "sfx/battery charge.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 219,
+      "samples": [
+        {
+          "path": "sfx/kiss lips .wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 221,
+      "samples": [
+        {
+          "path": "sfx/leech.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/leech 2.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 224,
+      "samples": [
+        {
+          "path": "sfx/maggot1.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/maggot 2.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 226,
+      "samples": [
+        {
+          "path": "sfx/meat head shoot.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/meat head shoot 1.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/meat head shoot 2.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 229,
+      "samples": [
+        {
+          "path": "sfx/lock break 1.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/lock break 3.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 231,
+      "samples": [
+        {
+          "path": "sfx/nickel drop.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 232,
+      "samples": [
+        {
+          "path": "sfx/nickel pickup.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 233,
+      "samples": [
+        {
+          "path": "sfx/penny drop 1.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 234,
+      "samples": [
+        {
+          "path": "sfx/penny pickup 1.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 237,
+      "samples": [
+        {
+          "path": "sfx/plop.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 238,
+      "samples": [
+        {
+          "path": "sfx/satan appear.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 239,
+      "samples": [
+        {
+          "path": "sfx/satan blast 1.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/satan blast 2.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 240,
+      "samples": [
+        {
+          "path": "sfx/satan charge up.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/satan charge up 2.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 241,
+      "samples": [
+        {
+          "path": "sfx/satan grow.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 242,
+      "samples": [
+        {
+          "path": "sfx/satan hurt.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 243,
+      "samples": [
+        {
+          "path": "sfx/satan rise up.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 245,
+      "samples": [
+        {
+          "path": "sfx/satan spit.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/satan spit 2.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/satan spit 3.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 246,
+      "samples": [
+        {
+          "path": "sfx/satan stomp.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/satan stomp 2.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/satan stomp 3.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 249,
+      "samples": [
+        {
+          "path": "sfx/scamper 1.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/scamper 2.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 252,
+      "samples": [
+        {
+          "path": "sfx/shell game 0.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/shell game 1.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 255,
+      "samples": [
+        {
+          "path": "sfx/slotspawn 0.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/slotspawn1.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/slotspawn 2.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 258,
+      "samples": [
+        {
+          "path": "sfx/splatter 0.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/splatter 1.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/splatter 2.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 261,
+      "samples": [
+        {
+          "path": "sfx/steam half sec.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 262,
+      "samples": [
+        {
+          "path": "sfx/stone shoot .wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/stone shoot 1.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/stone shoot 2.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 263,
+      "samples": [
+        {
+          "path": "sfx/wierd worm spit1.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/wierd worm spit2.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/wierd worm spit3.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 265,
+      "samples": [
+        {
+          "path": "sfx/summonsound.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 266,
+      "samples": [
+        {
+          "path": "sfx/superholy.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 267,
+      "samples": [
+        {
+          "path": "sfx/thumbs down.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 268,
+      "samples": [
+        {
+          "path": "sfx/thumbs up.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 269,
+      "samples": [
+        {
+          "path": "sfx/fire burning.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 270,
+      "samples": [
+        {
+          "path": "sfx/happy rainbow with giggle.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 300,
+      "samples": [
+        {
+          "path": "sfx/boo mad.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 301,
+      "samples": [
+        {
+          "path": "sfx/fart gurg.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/fart gurg 2.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 302,
+      "samples": [
+        {
+          "path": "sfx/fat grunt 1.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/fat grunt 2.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 303,
+      "samples": [
+        {
+          "path": "sfx/fat wiggle.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 304,
+      "samples": [
+        {
+          "path": "sfx/fire rush.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 305,
+      "samples": [
+        {
+          "path": "sfx/ghost roar.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 306,
+      "samples": [
+        {
+          "path": "sfx/ghost shoot 1.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/ghost shoot 2.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 307,
+      "samples": [
+        {
+          "path": "sfx/growl.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 308,
+      "samples": [
+        {
+          "path": "sfx/gurgbarf1.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/gurgbarf 2.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 309,
+      "samples": [
+        {
+          "path": "sfx/inhale.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 310,
+      "samples": [
+        {
+          "path": "sfx/low inhale.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 311,
+      "samples": [
+        {
+          "path": "sfx/megapuke.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 312,
+      "samples": [
+        {
+          "path": "sfx/mouth full.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 313,
+      "samples": [
+        {
+          "path": "sfx/mulit scream.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/multi scream.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 314,
+      "samples": [
+        {
+          "path": "sfx/skin pull 1.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/skin pull 2.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/skin pull 3.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 315,
+      "samples": [
+        {
+          "path": "sfx/ding whistle whistle.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 316,
+      "samples": [
+        {
+          "path": "sfx/death skull dying.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 317,
+      "samples": [
+        {
+          "path": "sfx/spider spit roar 0.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/spider spit roar 1.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/spider spit roar 2.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 318,
+      "samples": [
+        {
+          "path": "sfx/worm spit 1.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/worm spit 2.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/worm spit 3.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 319,
+      "samples": [
+        {
+          "path": "sfx/little spit 1.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/little spit 2.wav",
+          "weight": 1
+        },
+        {
+          "path": "sfx/little spit 4.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 320,
+      "samples": [
+        {
+          "path": "sfx/satan room appear.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 321,
+      "samples": [
+        {
+          "path": "sfx/heartbeat.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 322,
+      "samples": [
+        {
+          "path": "sfx/heartbeat faster.wav",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": 323,
+      "samples": [
+        {
+          "path": "sfx/heartbeat fastest.wav",
+          "weight": 1
+        }
+      ]
+    }
+  ],
+  "music": [
+    {
+      "id": 1,
+      "name": "Basement",
+      "loop": true,
+      "path": "music/diptera sonata(basement).ogg",
+      "intro": "music/diptera sonata intro.ogg",
+      "layer": "music/diptera layer.ogg",
+      "layerintro": "music/diptera layer intro.ogg"
+    },
+    {
+      "id": 2,
+      "name": "Caves",
+      "loop": true,
+      "path": "music/the caves.ogg",
+      "intro": "music/the caves intro.ogg",
+      "layer": "music/the caves layer.ogg",
+      "layerintro": "music/the caves layer intro.ogg"
+    },
+    {
+      "id": 3,
+      "name": "Depths",
+      "loop": true,
+      "path": "music/the depths.ogg",
+      "intro": "music/the depths intro.ogg",
+      "layer": "music/the depths layer.ogg",
+      "layerintro": "music/the depths layer intro.ogg"
+    },
+    {
+      "id": 4,
+      "name": "Cellar",
+      "loop": true,
+      "path": "music/the cellar alt.ogg",
+      "intro": "music/the cellar alt intro.ogg",
+      "layer": "music/the cellar layer.ogg",
+      "layerintro": "music/the cellar layer intro.ogg"
+    },
+    {
+      "id": 5,
+      "name": "Catacombs",
+      "loop": true,
+      "path": "music/catacombs.ogg",
+      "intro": "music/catacombs intro.ogg",
+      "layer": "music/catacombs layer.ogg",
+      "layerintro": "music/catacombs layer intro.ogg"
+    },
+    {
+      "id": 6,
+      "name": "Necropolis",
+      "loop": true,
+      "path": "music/necropolis.ogg",
+      "intro": "music/necropolis intro.ogg",
+      "layer": "music/necropolis layer.ogg",
+      "layerintro": "music/necropolis layer intro.ogg"
+    },
+    {
+      "id": 7,
+      "name": "Womb/Utero",
+      "loop": true,
+      "path": "music/the womb chapter four.ogg",
+      "intro": "music/the womb chapter four intro.ogg",
+      "layer": "music/the womb layer.ogg",
+      "layerintro": "music/the womb layer intro.ogg"
+    },
+    {
+      "id": 8,
+      "name": "Game Over",
+      "loop": true,
+      "path": "music/you died.ogg"
+    },
+    {
+      "id": 9,
+      "name": "Boss",
+      "loop": true,
+      "path": "music/fight ogg/basic boss fight.ogg"
+    },
+    {
+      "id": 10,
+      "name": "Cathedral",
+      "loop": true,
+      "path": "music/cathedral chant.ogg",
+      "intro": "music/cathedral intro.ogg",
+      "layer": "music/cathedral layer.ogg",
+      "layerintro": "music/cathedral layer intro.ogg"
+    },
+    {
+      "id": 11,
+      "name": "Sheol",
+      "loop": true,
+      "path": "music/sheol.ogg",
+      "intro": "music/sheol intro.ogg",
+      "layer": "music/sheol layer.ogg",
+      "layerintro": "music/sheol layer intro.ogg"
+    },
+    {
+      "id": 12,
+      "name": "Dark Room",
+      "loop": true,
+      "path": "music/dark room alt chapter 6.ogg",
+      "intro": "music/dark room alt chapter 6 intro.ogg"
+    },
+    {
+      "id": 13,
+      "name": "Chest",
+      "loop": true,
+      "path": "music/chest room chapter 6.ogg",
+      "intro": "music/chest room intro.ogg",
+      "layer": "music/chest layer.ogg",
+      "layerintro": "music/chest layer intro.ogg"
+    },
+    {
+      "id": 20,
+      "name": "Boss (Depths - Mom)",
+      "loop": true,
+      "path": "music/fight ogg/mom fight.ogg"
+    },
+    {
+      "id": 21,
+      "name": "Boss (Womb - Mom's Heart)",
+      "loop": true,
+      "path": "music/fight ogg/womb fight.ogg"
+    },
+    {
+      "id": 22,
+      "name": "Boss (Cathedral - Isaac)",
+      "loop": true,
+      "path": "music/fight ogg/isaac fight.ogg"
+    },
+    {
+      "id": 23,
+      "name": "Boss (Sheol - Satan)",
+      "loop": true,
+      "path": "music/fight ogg/satan fight.ogg"
+    },
+    {
+      "id": 24,
+      "name": "Boss (Dark Room)",
+      "loop": true,
+      "path": "music/fight ogg/dark room fight.ogg"
+    },
+    {
+      "id": 25,
+      "name": "Boss (Chest - ???)",
+      "loop": true,
+      "path": "music/fight ogg/chest fight.ogg"
+    },
+    {
+      "id": 30,
+      "name": "Library Room",
+      "loop": true,
+      "path": "music/library.ogg",
+      "intro": "music/library intro.ogg"
+    },
+    {
+      "id": 31,
+      "name": "Secret Room",
+      "loop": true,
+      "path": "music/secret to everyone.ogg",
+      "intro": "music/secret to everyone intro.ogg"
+    },
+    {
+      "id": 33,
+      "name": "Devil Room",
+      "loop": true,
+      "path": "music/deal with the devil.ogg"
+    },
+    {
+      "id": 34,
+      "name": "Angel Room",
+      "loop": true,
+      "path": "music/angel room.ogg",
+      "intro": "music/angel room intro.ogg"
+    },
+    {
+      "id": 35,
+      "name": "Shop Room",
+      "loop": true,
+      "path": "music/store loop.ogg",
+      "intro": "music/store loop intro.ogg"
+    },
+    {
+      "id": 36,
+      "name": "Arcade Room",
+      "loop": true,
+      "path": "music/retro beats 8-6-14.ogg",
+      "intro": "music/retro beats intro 8-6-14.ogg"
+    },
+    {
+      "id": 37,
+      "name": "Boss Room (empty)",
+      "loop": true,
+      "path": "music/the calm.ogg",
+      "intro": "music/the calm intro.ogg"
+    },
+    {
+      "id": 38,
+      "name": "Challenge Room (fight)",
+      "loop": true,
+      "path": "music/ambush.ogg"
+    },
+    {
+      "id": 60,
+      "name": "Credits",
+      "loop": true,
+      "path": "music/credits roll.ogg"
+    },
+    {
+      "id": 61,
+      "name": "Title Screen",
+      "loop": true,
+      "path": "music/title screen.ogg",
+      "intro": "music/title screen intro.ogg"
+    },
+    {
+      "id": 81,
+      "name": "Boss (jingle)",
+      "loop": false,
+      "path": "music/jingle ogg/boss fight intro jingle v2.1.ogg"
+    },
+    {
+      "id": 83,
+      "name": "Boss Death (jingle)",
+      "loop": false,
+      "path": "music/jingle ogg/boss fight jingle outro v2_12.ogg"
+    },
+    {
+      "id": 84,
+      "name": "Holy Room Find (jingle)",
+      "loop": false,
+      "path": "music/jingle ogg/angel room appear v2_07.ogg"
+    },
+    {
+      "id": 85,
+      "name": "Secret Room Find (jingle)",
+      "loop": false,
+      "path": "music/jingle ogg/secret room find #2_07.ogg"
+    },
+    {
+      "id": 87,
+      "name": "Treasure Room Entry (jingle) 1",
+      "loop": false,
+      "path": "music/jingle ogg/treasure room discovera.ogg"
+    },
+    {
+      "id": 88,
+      "name": "Treasure Room Entry (jingle) 2",
+      "loop": false,
+      "path": "music/jingle ogg/treasure room discoverb.ogg"
+    },
+    {
+      "id": 89,
+      "name": "Treasure Room Entry (jingle) 3",
+      "loop": false,
+      "path": "music/jingle ogg/treasure room discoverc.ogg"
+    },
+    {
+      "id": 90,
+      "name": "Treasure Room Entry (jingle) 4",
+      "loop": false,
+      "path": "music/jingle ogg/treasure room discover_03.ogg"
+    },
+    {
+      "id": 91,
+      "name": "Challenge Room Entry (jingle)",
+      "loop": false,
+      "path": "music/jingle ogg/ambush jingle.v2_01.ogg"
+    },
+    {
+      "id": 92,
+      "name": "Challenge Room Outro (jingle)",
+      "loop": false,
+      "path": "music/jingle ogg/ambush jinle outro v3_04.ogg"
+    },
+    {
+      "id": 93,
+      "name": "Game Over (jingle)",
+      "loop": false,
+      "path": "music/jingle ogg/isaac died_02.ogg"
+    },
+    {
+      "id": 94,
+      "name": "Devil Room appear (jingle)",
+      "loop": false,
+      "path": "music/jingle ogg/satan room appear v2_01.ogg"
+    },
+    {
+      "id": 95,
+      "name": "Game start (jingle)",
+      "loop": false,
+      "path": "music/jingle ogg/title screen jingle v1_01.ogg"
+    },
+    {
+      "id": 96,
+      "name": "Nightmare",
+      "loop": false,
+      "path": "music/jingle ogg/boss fight intro jingle_01.ogg"
+    },
+    {
+      "id": 100,
+      "name": "Intro Voiceover",
+      "loop": false,
+      "path": "music/introvoiceover.ogg"
+    },
+    {
+      "id": 101,
+      "name": "Epilogue Voiceover",
+      "loop": false,
+      "path": "music/epilogue_01m.ogg"
+    }
+  ],
+  "assets": {
+    "music/ambush.ogg": {
+      "bytes": 6502620,
+      "sha256": "99586e41e357eac5e43e800e478f0695d02003bd5fe3cddebc1f128d16d215b3"
+    },
+    "music/angel room intro.ogg": {
+      "bytes": 491792,
+      "sha256": "c5ad338ffec6fe57eeff2dee2a97310ca237572003e8bc580afc0928779286a5"
+    },
+    "music/angel room.ogg": {
+      "bytes": 2666872,
+      "sha256": "41cdf9da9ef4aa141034e15db4ff437cc56ce548823052215bc09187db605ec9"
+    },
+    "music/catacombs intro.ogg": {
+      "bytes": 423084,
+      "sha256": "d000d395ea19b13fd506393fc62dcb259c47c3e4b8da6664abc1604d339bf49c"
+    },
+    "music/catacombs layer intro.ogg": {
+      "bytes": 4940,
+      "sha256": "8206b42181d875aa1330c68de1234cbbc0552e7636b6bb8b094ab09ce2cc67ca"
+    },
+    "music/catacombs layer.ogg": {
+      "bytes": 1846928,
+      "sha256": "fcba2e696306cc1a32ad39b91c5d7ee0abadafba6c810afbe2983d108900eb1a"
+    },
+    "music/catacombs.ogg": {
+      "bytes": 6873332,
+      "sha256": "e133a8e6bb08e9e71d979f15124348778814fed84563184be3e1a65ff0f4a98d"
+    },
+    "music/cathedral chant.ogg": {
+      "bytes": 3552044,
+      "sha256": "25203ec21496b39114e6cdee8ffc096f54d10e94f2d2ea0be3169a3e8ec0d576"
+    },
+    "music/cathedral intro.ogg": {
+      "bytes": 621296,
+      "sha256": "19549dfe8464ac9357b25fc6a4ced47a8ad6a2b8f6ca3c794f110a72c77696da"
+    },
+    "music/cathedral layer intro.ogg": {
+      "bytes": 5520,
+      "sha256": "3974a13df685f983e0faeabec2af6cd062963d2dc818f95e633a73c4f23fc181"
+    },
+    "music/cathedral layer.ogg": {
+      "bytes": 1329704,
+      "sha256": "4fe37c7c028f55aad1e43a162f7d10ce2dbbb6cfbdeb3a8439d14a047c631145"
+    },
+    "music/chest layer intro.ogg": {
+      "bytes": 4412,
+      "sha256": "e5cda4a344228a2b85f4f32acd87a1b93f0b94c233fb77f62e17df63e472a5fa"
+    },
+    "music/chest layer.ogg": {
+      "bytes": 2245168,
+      "sha256": "834969cfbd6e928f03fa52f098e7df380d6fde97c19d4a2f8f877cc6900a4030"
+    },
+    "music/chest room chapter 6.ogg": {
+      "bytes": 6546344,
+      "sha256": "0d0b3a2218bfeda5fcc90f049751187bfdfb1b3013da45089e257b1b0b08c527"
+    },
+    "music/chest room intro.ogg": {
+      "bytes": 103944,
+      "sha256": "41bc63f35b08de41d7bc66630c0189367b09dd39d99b41d2d45ed0a915b308f9"
+    },
+    "music/credits roll.ogg": {
+      "bytes": 2399880,
+      "sha256": "0c4028bcace90394ad4288ee30fadd743419b82727b910d53db61f4febe46d10"
+    },
+    "music/dark room alt chapter 6 intro.ogg": {
+      "bytes": 2173040,
+      "sha256": "1ab30be50f0e5fbef71726172c419a486b56906f44dc17662d4109c80b5b19f5"
+    },
+    "music/dark room alt chapter 6.ogg": {
+      "bytes": 8457932,
+      "sha256": "7d018318d63e301fedc2ad010828bf28557ac0cf3f7ee861077484b7d01399e8"
+    },
+    "music/deal with the devil.ogg": {
+      "bytes": 2167456,
+      "sha256": "aee8f55039d7fbb909bca885da02486d53cd7e3d6d75950a57a69872d7e48dad"
+    },
+    "music/diptera layer intro.ogg": {
+      "bytes": 5440,
+      "sha256": "3742333c142fbcd11c142803f6c0b05b620fd34c5f1293485e3e4b81cd494366"
+    },
+    "music/diptera layer.ogg": {
+      "bytes": 1669200,
+      "sha256": "bd5341e5d9f72686a7dbc21a98bf4662970d7339b10bcea211ea085276528498"
+    },
+    "music/diptera sonata intro.ogg": {
+      "bytes": 562176,
+      "sha256": "eca2b3cdfffe6d88ba97ce4d8b626acedc8b8bed76874edf0335c7109e7f87b0"
+    },
+    "music/diptera sonata(basement).ogg": {
+      "bytes": 4936976,
+      "sha256": "7e5197d041bf037061f526ec3b4c5611339a43ca8e7c54681f7f1034a2e4b7f1"
+    },
+    "music/epilogue_01m.ogg": {
+      "bytes": 1223992,
+      "sha256": "d4de035d04d1ac63e5c2bece0c8cd2f6e9b2ac2ded618091e74b9e0e00662054"
+    },
+    "music/fight ogg/basic boss fight.ogg": {
+      "bytes": 6030908,
+      "sha256": "db77cf05222ae2c07704ec3dc995dd796b8ff49a347c932728ed2542473df0f4"
+    },
+    "music/fight ogg/chest fight.ogg": {
+      "bytes": 4711824,
+      "sha256": "95b0b847c97eaafc2576917b4ad8d02d35624935d81b43f743629a0a54eba3a5"
+    },
+    "music/fight ogg/dark room fight.ogg": {
+      "bytes": 5789856,
+      "sha256": "68628bac9ca6e4a4fb3734fde5c0160ec9d6163a2c8cce528f91ce64ea61ff6f"
+    },
+    "music/fight ogg/isaac fight.ogg": {
+      "bytes": 7482032,
+      "sha256": "9fb4a8faa2ac583ae801412c196ac12cca3b687b7cb0a9d4dd91976076388146"
+    },
+    "music/fight ogg/mom fight.ogg": {
+      "bytes": 6388312,
+      "sha256": "0051b8c9c9390679c0cbd38ddf193e140281ba53160b16928b36b0622380f7b5"
+    },
+    "music/fight ogg/satan fight.ogg": {
+      "bytes": 5579524,
+      "sha256": "ccf973b8c7bd7a09e2aea0cc5b2dafa27329166388b4e01266283f93572c3286"
+    },
+    "music/fight ogg/womb fight.ogg": {
+      "bytes": 5570484,
+      "sha256": "1146804ffd1b9cb17eb7224fa8e298037c19385dde25f4a30a92c6c88be466c5"
+    },
+    "music/introvoiceover.ogg": {
+      "bytes": 4577776,
+      "sha256": "2f2db2dd3c25749416cd151ff583fa62a79a42216454086be1adf52ed0957589"
+    },
+    "music/jingle ogg/ambush jingle.v2_01.ogg": {
+      "bytes": 315952,
+      "sha256": "906f872f6d9887ca27d1786e15be28dfca79c382014fb0b347249ed8c307087f"
+    },
+    "music/jingle ogg/ambush jinle outro v3_04.ogg": {
+      "bytes": 281064,
+      "sha256": "a9b276b4e5dbf60aa81ea8c07632c4aabf2a3a3ad8c4856ceb6689a99df55cb4"
+    },
+    "music/jingle ogg/angel room appear v2_07.ogg": {
+      "bytes": 170004,
+      "sha256": "d1982ec3dcb7d766d0654c6ef9c11f99d82f22c75cfad45356ba0dacd4f4d2f6"
+    },
+    "music/jingle ogg/boss fight intro jingle v2.1.ogg": {
+      "bytes": 258612,
+      "sha256": "e335f0613098a741949c615a3729604b8d89acd9f192537da6ee1465e74499b2"
+    },
+    "music/jingle ogg/boss fight intro jingle_01.ogg": {
+      "bytes": 250052,
+      "sha256": "0783307d206b4ff1e039fa04ce649b2c15372a5b6b793db759d3bc53d0ad4176"
+    },
+    "music/jingle ogg/boss fight jingle outro v2_12.ogg": {
+      "bytes": 295148,
+      "sha256": "4966c227784a51e19bb3dd96a29409a3aa4b5f11ba1b160f461cb45506009a71"
+    },
+    "music/jingle ogg/isaac died_02.ogg": {
+      "bytes": 203064,
+      "sha256": "b654e6dc609675d596047c994e66f7e0441fcb2b82d6f9de2c34a41f68e9bd56"
+    },
+    "music/jingle ogg/satan room appear v2_01.ogg": {
+      "bytes": 169964,
+      "sha256": "c820324f7055617f340f173c68f34bcf1dcea3032a121c89136ff8a8207ad56e"
+    },
+    "music/jingle ogg/secret room find #2_07.ogg": {
+      "bytes": 182897,
+      "sha256": "15a607e6fe1f0940c20cd285a7e02712079dc05d57a46e3051a026278263da35"
+    },
+    "music/jingle ogg/title screen jingle v1_01.ogg": {
+      "bytes": 222020,
+      "sha256": "874e6b45c65e751c533520d8e7603e18dddaabacd7a5f90b267529aad545d5c5"
+    },
+    "music/jingle ogg/treasure room discover_03.ogg": {
+      "bytes": 142492,
+      "sha256": "e8a10e3a125b53d3680a3d03e8f8d1e2fd8d904fc8f2a4421c91d04fb4f6777f"
+    },
+    "music/jingle ogg/treasure room discovera.ogg": {
+      "bytes": 128624,
+      "sha256": "66385a0cea037210ce11f6092ba26d2bfe9728fa41f6e69dd9a88dc8805f9220"
+    },
+    "music/jingle ogg/treasure room discoverb.ogg": {
+      "bytes": 138096,
+      "sha256": "df317a72e1f89bf6dc1673b8ec6d94a2608dfa65edb15439c5b0453349b2ad8f"
+    },
+    "music/jingle ogg/treasure room discoverc.ogg": {
+      "bytes": 143780,
+      "sha256": "f724448335bdf89041556c5a938ab6abb449fa6c6a9817e4a291e87d1d85ca34"
+    },
+    "music/library intro.ogg": {
+      "bytes": 172000,
+      "sha256": "4328c44a214b9eb81a4bb7cff471a1a073508c9eaa63ccfef195f1a7ab022086"
+    },
+    "music/library.ogg": {
+      "bytes": 2855864,
+      "sha256": "23037c242c5a6ddad38683d3d78e5494964cef5915f1def125b897ba20d0e4cf"
+    },
+    "music/necropolis intro.ogg": {
+      "bytes": 446876,
+      "sha256": "af597e82b0d0cf13ad868f202a4a4dc1a9ac1270b4ce7a65b25dc290d3e6477b"
+    },
+    "music/necropolis layer intro.ogg": {
+      "bytes": 4920,
+      "sha256": "c99e0c64f2f7b6ab1240aab4114590d1d40d9e841494198d485bb0cedb32068a"
+    },
+    "music/necropolis layer.ogg": {
+      "bytes": 1806844,
+      "sha256": "f20b0b265b3e9cfe77c48548adf2293caeeb8a18d8d27e792eb9a42c8f0e56ff"
+    },
+    "music/necropolis.ogg": {
+      "bytes": 6564884,
+      "sha256": "2ba9e765844e5f2c8aa78b48f843f37544d2002f386e4c192c4d03f3634ac752"
+    },
+    "music/retro beats 8-6-14.ogg": {
+      "bytes": 1924204,
+      "sha256": "38e6ece8085b525cf83ac635445e24a76d0a23d480e4eccd9419c46ab40ddc78"
+    },
+    "music/retro beats intro 8-6-14.ogg": {
+      "bytes": 702104,
+      "sha256": "98f6fe9e40a913d4fa320642fa70a1bd55357bbf08e78e4ddedbaf1d6c6eecc5"
+    },
+    "music/secret to everyone intro.ogg": {
+      "bytes": 456356,
+      "sha256": "1f5f3ec769c0691ea42c94b4b227bebd2e85de366e5cd7cc9a6d5ac5d9db1dae"
+    },
+    "music/secret to everyone.ogg": {
+      "bytes": 2035988,
+      "sha256": "aaa32766ec8cc2d0b8d7243e187733799c849a83f550b3ecb44357f6c2f3146a"
+    },
+    "music/sheol intro.ogg": {
+      "bytes": 822956,
+      "sha256": "412466b18b079aa73ace1c596bd9c943d826dc6fb32c830a2dc539d6e6ac552a"
+    },
+    "music/sheol layer intro.ogg": {
+      "bytes": 5784,
+      "sha256": "2f1cac8e234a5b6b215e33b1a3970f498247746a72551abbc64bb221845c14ef"
+    },
+    "music/sheol layer.ogg": {
+      "bytes": 2255444,
+      "sha256": "175a29c8c238a5569b9717fa29e9be490ad3ebcb5e80f641d2b7b523c2c70035"
+    },
+    "music/sheol.ogg": {
+      "bytes": 5975552,
+      "sha256": "e307261c3b0243c0f053e86e4cc9e8dc6ca2b2598cc67884c60fd9beeb39cc34"
+    },
+    "music/store loop intro.ogg": {
+      "bytes": 315116,
+      "sha256": "55219b2dbc50b66ba946cd807a428ba89335ca9f6bebd73781070859c45070e8"
+    },
+    "music/store loop.ogg": {
+      "bytes": 2553660,
+      "sha256": "213c91aa20d73e1080c99719046b3543dd76a378092fa59b5c8821724ddd94be"
+    },
+    "music/the calm intro.ogg": {
+      "bytes": 316144,
+      "sha256": "87030bd76708696beed772b3103e3d7b23251d3a2b403818308c6b1f4a46696c"
+    },
+    "music/the calm.ogg": {
+      "bytes": 4233516,
+      "sha256": "eb74920d6498126a9c5d386db8d163ec5d552077603de033ec8156a2719b5db4"
+    },
+    "music/the caves intro.ogg": {
+      "bytes": 186900,
+      "sha256": "d43ec77dac83c27efe0d2e4605f67b3033338e653dc1353950c5de1c6f900195"
+    },
+    "music/the caves layer intro.ogg": {
+      "bytes": 4548,
+      "sha256": "37f2434d3fd8c81f6bd5da89e2d6403a22190bfaaf72c5f9fba30099c0170361"
+    },
+    "music/the caves layer.ogg": {
+      "bytes": 4836256,
+      "sha256": "1d63863e14dc422f45a021bb806e97570ee5ba361fd3a722bcf2514f4c3bb438"
+    },
+    "music/the caves.ogg": {
+      "bytes": 5305180,
+      "sha256": "fd71d4a8aed9bed5f5238fb1460df2fca5ebd5a78a0665482af632e77599a328"
+    },
+    "music/the cellar alt intro.ogg": {
+      "bytes": 1188132,
+      "sha256": "61b765b3addd7d1ad6452440b15e588d2299c4c0d4078294fc760f2e0a53e228"
+    },
+    "music/the cellar alt.ogg": {
+      "bytes": 4772472,
+      "sha256": "7f1493bfde5cc1e65ba038f7a986e3522082d93836aa8d1c1744f3d053fa0a41"
+    },
+    "music/the cellar layer intro.ogg": {
+      "bytes": 6676,
+      "sha256": "1a5cd9ea206f8b2fd57083ed1b8a7304697b55996b758a624485d306c422eace"
+    },
+    "music/the cellar layer.ogg": {
+      "bytes": 3260652,
+      "sha256": "327e585e8863db7b839c608ff97eb16aeee55f17c9726c383382e6dc66e17a17"
+    },
+    "music/the depths intro.ogg": {
+      "bytes": 431812,
+      "sha256": "c8808160dd1311785f9f8e25a3bc13878d44ea0f02e2642d3ff96f36a1e1c34f"
+    },
+    "music/the depths layer intro.ogg": {
+      "bytes": 5148,
+      "sha256": "4386cdc34b4eb4d41f7d2d69e45fc7f2c1e0fa1463aa0f36cf8fb802e282bbc2"
+    },
+    "music/the depths layer.ogg": {
+      "bytes": 2470072,
+      "sha256": "ece19537ab5fcb3b22b73cd27a258e15d0c1c0e398fcae9942beae04e8a91d94"
+    },
+    "music/the depths.ogg": {
+      "bytes": 4896208,
+      "sha256": "69ebea6c8a1371a7a2bfb4ab9d0f4a0693190b1c9494f758caef10278c9e4721"
+    },
+    "music/the womb chapter four intro.ogg": {
+      "bytes": 683264,
+      "sha256": "e3408b8b6b486ad2459f6b47d0195d0e4d60d00ea5ff63108d68db55a2b2b51c"
+    },
+    "music/the womb chapter four.ogg": {
+      "bytes": 4666596,
+      "sha256": "7f77ffc41694e757310c0b128469c464a438d93d950bd8fbaac8bc7621f565fa"
+    },
+    "music/the womb layer intro.ogg": {
+      "bytes": 5368,
+      "sha256": "918123031bec8112ae3fb9a518152c72d86feb9dea17f55ec1698dcf2862e8af"
+    },
+    "music/the womb layer.ogg": {
+      "bytes": 3040092,
+      "sha256": "ddce252b7afe226f64aabc3d0135abce62fb90f186ce4d190dc81f441e85f460"
+    },
+    "music/title screen intro.ogg": {
+      "bytes": 643876,
+      "sha256": "356f82df3253568cd2239e62f5f54d30ee54c032cde8f4eda91b4ac9c134ae12"
+    },
+    "music/title screen.ogg": {
+      "bytes": 2627320,
+      "sha256": "5b2fa7c3124956f002141ddb7a8ef03e2c4f4c76ea918961bfa92bfecc2a30a0"
+    },
+    "music/you died.ogg": {
+      "bytes": 4417720,
+      "sha256": "2d4a96a000fd514cf7bd69c74d298aeca317297eb98be54717da3ddc079cbc1e"
+    },
+    "sfx/1 up theremin.wav": {
+      "bytes": 25626,
+      "sha256": "0db1d6ffd7eb54000941e653ee002c94e397f794805f0ad482ce7c755263b426",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 12791
+    },
+    "sfx/angry gurgle 1.wav": {
+      "bytes": 58320,
+      "sha256": "94e01bb37e3b86e3bc611c52372bd82f1f710796c36400b12b42b0ba920385b8",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 29138
+    },
+    "sfx/angry gurgle 2.wav": {
+      "bytes": 55128,
+      "sha256": "cce2908fe9e6a9c0253ae27ba90b82f38a67a7765d6e9b9064812d2d623084b8",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 27541
+    },
+    "sfx/animal squish 1.wav": {
+      "bytes": 12756,
+      "sha256": "a6dd331c23feb1cb804f235d8f8b5aee870ba4a2a250607c36426e1a287d3720",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 6355
+    },
+    "sfx/animal squish 2.wav": {
+      "bytes": 14496,
+      "sha256": "0d5cdd3307a9c8a9aa528ea1d22e1b5285549e1a5da4a9575706e993b3137389",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 7226
+    },
+    "sfx/animal squish.wav": {
+      "bytes": 8940,
+      "sha256": "e18dc98f33f60720908d501325860ae3341bb73fa6b5737f969140dbfc6bac14",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 4448
+    },
+    "sfx/baby hurt 1.wav": {
+      "bytes": 23530,
+      "sha256": "905444700c6110b9d06c006272d9ce3379f8e3d8b59cbc62b2c468b7986650da",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 11743
+    },
+    "sfx/baby hurt 2.wav": {
+      "bytes": 16796,
+      "sha256": "e27e6efd4e13470f40f442f69f1f35c44227ba50ba89e6c452b41aad9ec6980f",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 8376
+    },
+    "sfx/baby hurt 3.wav": {
+      "bytes": 21130,
+      "sha256": "ae7a89b825b549d1d2807b013c137e7aad765b80233f3f9a99964604a92c2be7",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 10543
+    },
+    "sfx/band aid pick up.wav": {
+      "bytes": 29074,
+      "sha256": "4855128d288b230b5bc2a551dd525b9be7aff8dce65d192c2e9f255a0d8e2062",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 14515
+    },
+    "sfx/battery charge.wav": {
+      "bytes": 60580,
+      "sha256": "24a30c3ca2fc2b83ab7868347700e9a502dbcca8603e9fd5b36961a4f13b31cd",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 30268
+    },
+    "sfx/beep.wav": {
+      "bytes": 6874,
+      "sha256": "e8e4092a5ca8fb7c14ae8230e6f6e041f103442b887e6b5bbe51a5b7ccdc9825",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 3415
+    },
+    "sfx/bird flap 2.wav": {
+      "bytes": 18600,
+      "sha256": "0f4f90c47851bc90d3da62191ecf008f590637b13b319bf9266c33f655be34b1",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 9278
+    },
+    "sfx/bird flap 3.wav": {
+      "bytes": 21192,
+      "sha256": "47585c0545f65f721e8392f45b144e38c8fec965bb90847a1b0d1984aad25c12",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 10574
+    },
+    "sfx/bird flap.wav": {
+      "bytes": 29380,
+      "sha256": "41b320f396fe7ea128614529cece67f474739db50493383a2a8228a50ba57d1d",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 14668
+    },
+    "sfx/blobby wiggle 2.wav": {
+      "bytes": 47396,
+      "sha256": "c4b298055b97abb37525b83e83227aa55ce08964aeaf76a693ceadcf6c3de591",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 23675
+    },
+    "sfx/blobby wiggle 3.wav": {
+      "bytes": 20304,
+      "sha256": "5e2dfa405909180f76ee52982b2617be9392425704650e955c7c156b13b5fee7",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 10130
+    },
+    "sfx/blobby wiggle.wav": {
+      "bytes": 52860,
+      "sha256": "8e78b1e490169fb8fcd9706cffb08d68a3065d197e9d043a61f0549ae0a3e90d",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 26407
+    },
+    "sfx/blood bank spawn.wav": {
+      "bytes": 27086,
+      "sha256": "c89df68e202b7f91abebf51d34119933ec15bab3c819f48590a3607c22417718",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 13521
+    },
+    "sfx/blood fire 2.wav": {
+      "bytes": 13696,
+      "sha256": "d18cec24864c6a490ec7991f94833ec75aa982859b27682e65455d617f53d773",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 6825
+    },
+    "sfx/blood fire 3.wav": {
+      "bytes": 15192,
+      "sha256": "dabea3c2fb184ef8e38d572dbfdbb5b7aa24291d79c799150d423540effc19ee",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 7573
+    },
+    "sfx/blood fire 4.wav": {
+      "bytes": 17260,
+      "sha256": "dc9d5f493f49138acc18427ae8cdb3b440624a7f12848c814d0261e2977f3332",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 8608
+    },
+    "sfx/blood fire.wav": {
+      "bytes": 16780,
+      "sha256": "d8239c6e5cf120573ba8155fc01eadabc64eb0a757823f2f7914ab63e77cff71",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 8367
+    },
+    "sfx/blood laser long.wav": {
+      "bytes": 341944,
+      "sha256": "cbcde6d4fc3bca794a15306b87e995764c8fc7251b01bf9624e643c846101330",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 170950
+    },
+    "sfx/blood laser short 2.wav": {
+      "bytes": 250380,
+      "sha256": "252571701cb62412f03b82d4e5f0e8a6315aae3ce4ead33771ab2351e8973b96",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 125167
+    },
+    "sfx/blood laser short.wav": {
+      "bytes": 194204,
+      "sha256": "a1ca9906c052ed8fded05e24bb436b4ffd930d7c9ffbead01642d050d14a01c9",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 97080
+    },
+    "sfx/boil hatch.wav": {
+      "bytes": 27408,
+      "sha256": "b67ac6d0245531b9dd38ab0e2e44dfeaf577548c58a4685314134d0caeedaf01",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 13682
+    },
+    "sfx/boo mad.wav": {
+      "bytes": 179172,
+      "sha256": "9345d78a09924194880cb19fc4ef9c7e42b296abb28959a9c7610e06736c12d0",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 89563
+    },
+    "sfx/book page turn.wav": {
+      "bytes": 45032,
+      "sha256": "78e46e4dcb99ac9cb21a7849ae040bb0d716c3fa4d4b6b4724c3c338ad63a2cc",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 22494
+    },
+    "sfx/boss 2 bubbles 1.wav": {
+      "bytes": 36444,
+      "sha256": "3bc0c6622756fb02cb12257068fe1444e458541cf102eba6d4c6e48a29538dc0",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 18199
+    },
+    "sfx/boss 2 bubbles.wav": {
+      "bytes": 28584,
+      "sha256": "0a5d6603013d8f2db40722ec57ff01762c22dbe998c0839ef79276b9bb672ff3",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 14270
+    },
+    "sfx/boss 2 intro errorbuzz.wav": {
+      "bytes": 64604,
+      "sha256": "0e4a896c35576d4557c9a17576060d10c8a33caf53fcefed784009b9289a45f9",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 32280
+    },
+    "sfx/boss bug hiss.wav": {
+      "bytes": 109760,
+      "sha256": "50528c52bea67f22480171c87f19b8d3f5cc6d471752ae1b63ab981ebd473c3b",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 54857
+    },
+    "sfx/boss explosions 0.wav": {
+      "bytes": 90860,
+      "sha256": "455e0e440360dc9727db9cb4953d244c4cda108a2d327f155c261b81d4d1c738",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 45408
+    },
+    "sfx/boss explosions 1.wav": {
+      "bytes": 79668,
+      "sha256": "daddcb557a395715dd5bdd2b8e41d10e2c624baa3cb8771b761956812fce9dda",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 39812
+    },
+    "sfx/boss expolsions 2.wav": {
+      "bytes": 51260,
+      "sha256": "f6824e062bae8a943797966b2281ca1e6dcda9f414f7ce0fcfe7e8b10f8040a7",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 25608
+    },
+    "sfx/boss gurgle lite.wav": {
+      "bytes": 46704,
+      "sha256": "223c553eac63a9b22c982da060fca8c8cda37c4d3f92f3f44ced98e94acb6903",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 23329
+    },
+    "sfx/boss gurgle roar.wav": {
+      "bytes": 123840,
+      "sha256": "0907e0cf08400da91b48adc6febd3effcd16e7626a3d6c6578016b5a159fc74e",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 61898
+    },
+    "sfx/boss lite hiss 2.wav": {
+      "bytes": 32548,
+      "sha256": "a0a6c9c4099249a0e555264761d937617734d44de7e084643eae72ead3e359b5",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 16252
+    },
+    "sfx/boss lite hiss 3.wav": {
+      "bytes": 59688,
+      "sha256": "4df37373d87bba8626550172919c342fa3900b2df96c1ae4a7dab4dd43d2e362",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 29821
+    },
+    "sfx/boss lite hiss.wav": {
+      "bytes": 48380,
+      "sha256": "a1d6661b7968abe738ec03a9485448f46075667a612a655218b7f0ade92bf0a4",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 24168
+    },
+    "sfx/boss lite roar 1.wav": {
+      "bytes": 36512,
+      "sha256": "8a7753725870576508f90b0e8006d005961f2d970f3f7beed28c56585f5cae58",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 18234
+    },
+    "sfx/boss lite roar 2.wav": {
+      "bytes": 43296,
+      "sha256": "8d23d389c0d260c87bb4d4a5a5ce4f66222a99c218a206587a33f25c8b631d4d",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 21626
+    },
+    "sfx/boss lite roar 3.wav": {
+      "bytes": 44604,
+      "sha256": "b944d9e28fee924fe14ecf387eb7509d11a397eaee2155f56154f7447fb16570",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 22280
+    },
+    "sfx/boss lite roar 4.wav": {
+      "bytes": 48068,
+      "sha256": "95fb57d18b80d87fa19b3b3313cc38a433a1647f5fe0cf917651f279cdc96ebd",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 24011
+    },
+    "sfx/boss lite sloppy roar 2.wav": {
+      "bytes": 60564,
+      "sha256": "15bae26f5d89fcb2c4944237ca7c2eb1737483aaa428bad74931d1fe3948792d",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 30260
+    },
+    "sfx/boss lite sloppy roar 3.wav": {
+      "bytes": 63016,
+      "sha256": "ec8c961c45a7ef06cba3809f9b1c63883623e191611dbab31bd4ad7917821f99",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 31486
+    },
+    "sfx/boss lite sloppy roar.wav": {
+      "bytes": 57380,
+      "sha256": "0af7fab613f6255bf0d1c039fa15ed8db023be937863fecbee2dcdc949ccbba6",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 28668
+    },
+    "sfx/boss spit blob barf 1.wav": {
+      "bytes": 93040,
+      "sha256": "6a3e1311935a90262c76af9ef29adf31e5b4269ce5e78071b8fd400075eb169a",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 46498
+    },
+    "sfx/boss spit blob barf 2.wav": {
+      "bytes": 106600,
+      "sha256": "2a0576f136ca511c825f274726bdb296c6ebd081660861f0d67ff219ad7c82cb",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 53277
+    },
+    "sfx/boss spit blob barf 3.wav": {
+      "bytes": 113612,
+      "sha256": "2e72b452a65680906292ac2687c840ffbac705cbe7789dd26c90623580fbf7ed",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 56783
+    },
+    "sfx/castleportcullis.wav": {
+      "bytes": 158888,
+      "sha256": "0581969c9ad7b652be3356a628266c970cb2a9e60a633415de9a0b791818c0c7",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 79422
+    },
+    "sfx/character select left.wav": {
+      "bytes": 3292,
+      "sha256": "3ffddb1b37fe438b1b3375b385155372aa12ce0696404523bd3d0c45598f42a1",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 1624
+    },
+    "sfx/character select right.wav": {
+      "bytes": 3230,
+      "sha256": "15f899d3bb35b0dcc6118da0af70548aab3bc87ea548ead1f73a13b8494a3057",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 1593
+    },
+    "sfx/chest drop 1.wav": {
+      "bytes": 33706,
+      "sha256": "f1a5f1b7a97c225d00f43df00f6a51ad11716ec6cb25ec485f0fafef3e542257",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 16831
+    },
+    "sfx/chest open 1.wav": {
+      "bytes": 43454,
+      "sha256": "153982d0299a7570c3e6b44bfb0ec1f290b52397081908149df630020b28dd24",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 21705
+    },
+    "sfx/child angry roar 1.wav": {
+      "bytes": 41200,
+      "sha256": "bbfd9af86be9bde645ed3c70b54f50fbb8fa139e11ba447646aae692480fbfdb",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 20577
+    },
+    "sfx/child angry roar 2.wav": {
+      "bytes": 73328,
+      "sha256": "dadd5ecf182288c5ed87f0d4bc7a619fd51a25121b06e75d9dd5d04f955b16dc",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 36641
+    },
+    "sfx/child angry roar short.wav": {
+      "bytes": 45972,
+      "sha256": "e4213f64ef60700dd66f1539eda37590534a90d2a5bb031ffa6186177b2bb609",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 22964
+    },
+    "sfx/child happy roar short 2.wav": {
+      "bytes": 62476,
+      "sha256": "d6efe9c1239554e99f740781e2f9ad76a2b4fe363d8246708b313cd6ac601740",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 31215
+    },
+    "sfx/child happy roar short.wav": {
+      "bytes": 41608,
+      "sha256": "90e8ff0093e33dba7f85c3c8430b6177fdf28fcf817ad5f9396043eb8b9052d9",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 20782
+    },
+    "sfx/choir.wav": {
+      "bytes": 227728,
+      "sha256": "7b3ed17902b8fa8f84b80242c01c3b9c37e5de213f9f60e629f8054faa262178",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 113842
+    },
+    "sfx/coin slot.wav": {
+      "bytes": 47818,
+      "sha256": "be1f064124ef95eb01f11370d2c760f5742a6433235b66f826a89965acaa0a18",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 23887
+    },
+    "sfx/cute grunt 2.wav": {
+      "bytes": 35120,
+      "sha256": "e4bcc42d98f4bc2f4b6be4d0e04a52d57fe7f9cb856a56a661a0e672dd53ed99",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 17537
+    },
+    "sfx/cute grunt 3.wav": {
+      "bytes": 35020,
+      "sha256": "daacc3521ba07745d085dffd929a4b92aa4e5c2fe4b41993ce05743751012b6f",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 17488
+    },
+    "sfx/cute grunt.wav": {
+      "bytes": 46712,
+      "sha256": "4ffdbe3b216d9897a51ee1cccb253c3c53a5ef29353e378e5544155710c22783",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 23334
+    },
+    "sfx/death burst 2.wav": {
+      "bytes": 98940,
+      "sha256": "f2d571e432767ce7a2c9cbadb506c275a3bd597f7adfda7d7cbc46105ec04d23",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 49448
+    },
+    "sfx/death burst small 2.wav": {
+      "bytes": 48896,
+      "sha256": "7d08a58b3f15879724c58d1b71755141141400f4715aeae8e5b3aa9739114a3e",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 24425
+    },
+    "sfx/death burst small 3.wav": {
+      "bytes": 44364,
+      "sha256": "e85607e0864f8d4dc15a363d1e51adbba299298f712dd0673e1ae800dffe31e0",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 22159
+    },
+    "sfx/death burst small.wav": {
+      "bytes": 43632,
+      "sha256": "951b95a7868362f26dbdd9ecbe7fd7862d07c424f0351ba7c95e14f8f084e314",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 21794
+    },
+    "sfx/death burst.wav": {
+      "bytes": 120604,
+      "sha256": "25fce30147a4d2e063d89c793b67d70bd01faa99ea09725a0cbbaa12ccf475c1",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 60280
+    },
+    "sfx/death card mix.wav": {
+      "bytes": 346894,
+      "sha256": "dd12c2374497d3c4386df66f5ed3e9262dafcb488c1467ba648777ebe53b219a",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 173425
+    },
+    "sfx/death skull dying.wav": {
+      "bytes": 211876,
+      "sha256": "696d425fa5e2acddc9d3815876ac3398e5e0821b6f4e44b3686c4c3438ed1b3c",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 105915
+    },
+    "sfx/derp 0.wav": {
+      "bytes": 44510,
+      "sha256": "25be9af3fa75e58a4213324223387579a026912b3287ffddb0e9b1f0e832c737",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 22233
+    },
+    "sfx/derp 1.wav": {
+      "bytes": 55166,
+      "sha256": "60dc33ba4ed8ad507d9f1062d2b1384ed42f26a92647d0eb8b34919109bd304b",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 27561
+    },
+    "sfx/dime drop.wav": {
+      "bytes": 63512,
+      "sha256": "56d64bd5ee24458ba8ba3ec8de0c4cecb9b87e671b9ba69a3a27f241f5dd2450",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 31734
+    },
+    "sfx/dime pick up.wav": {
+      "bytes": 21378,
+      "sha256": "dc51d218fa134dc8af24b69f95577c1923c128269dcd6eb77d67e79f9ceaddaf",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 10667
+    },
+    "sfx/ding whistle whistle.wav": {
+      "bytes": 59028,
+      "sha256": "ea982533561a5af49aeefdc1a92e62ccd0aa52b3646e51367bae9cba0415da67",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 29492
+    },
+    "sfx/door heavy close.wav": {
+      "bytes": 123266,
+      "sha256": "207d1bc5f81a661883db1cfdccc2bea76a64f8d8fe1ea9690268e4a0c4bfade7",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 61611
+    },
+    "sfx/door heavy open.wav": {
+      "bytes": 98866,
+      "sha256": "cd0367df2757c60389b632c239b358929d004a5985f03ed9b91d9e038f032d60",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 49411
+    },
+    "sfx/evil laugh.wav": {
+      "bytes": 253978,
+      "sha256": "d674dc755596cf81ab3c0da57e7147e2525b9955e41ef21b787a67d91d082089",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 126967
+    },
+    "sfx/fart 2.wav": {
+      "bytes": 38900,
+      "sha256": "b74682ab41cc6581307eda0a23bb11d471bc8c8e64854e5259430cc6ff2e7ab9",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 19428
+    },
+    "sfx/fart 3.wav": {
+      "bytes": 62328,
+      "sha256": "58fd1953a12fba4a682aa1c77ed43fed4b74fe7341d1cc7bf33a02ef5da7812e",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 31141
+    },
+    "sfx/fart 4.wav": {
+      "bytes": 62824,
+      "sha256": "ac502e8f45609ab6fbb3cb1a2fcaf44205f1a01c385c2265698c913bdef5c788",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 31389
+    },
+    "sfx/fart 5.wav": {
+      "bytes": 29480,
+      "sha256": "ef4c798220d2749a69a85a0bb8b14ec5b56d7f0210f541118753847ae5ca9ba7",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 14718
+    },
+    "sfx/fart gurg 2.wav": {
+      "bytes": 93336,
+      "sha256": "3a9990b6be448c7039b29cd1f267f9c2cb0c2cf21d92fdc5ebfdf35d2bd7211a",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 46645
+    },
+    "sfx/fart gurg.wav": {
+      "bytes": 121844,
+      "sha256": "1af36e711009225d8f7266698a2f8d301178dc1c89c721e80a7c0f8497d1b020",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 60900
+    },
+    "sfx/fart.wav": {
+      "bytes": 60840,
+      "sha256": "091e03abd0e1870e45f8a0821cf06c308af9e6149240b1d682457d7f44719167",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 30397
+    },
+    "sfx/fat grunt 1.wav": {
+      "bytes": 81228,
+      "sha256": "efb6dd1e46ecc31905515705b59f270022364ec69c2e75e067665920a5bdca31",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 40591
+    },
+    "sfx/fat grunt 2.wav": {
+      "bytes": 61088,
+      "sha256": "33428057c00b36f7bb0f26e11b564575bb13fa40aa4b3dd794c6e8377738571e",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 30521
+    },
+    "sfx/fat wiggle.wav": {
+      "bytes": 50324,
+      "sha256": "2e8530a62a3f8084ba883fe32bc987358b8aff79d48a137defbb964131819e6b",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 25140
+    },
+    "sfx/fetus feet 2.wav": {
+      "bytes": 8724,
+      "sha256": "b2c39cb0b0cb1213c119714d339b76e20a3a2a0064988cef9482a4d0fb341717",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 4339
+    },
+    "sfx/fetus feet.wav": {
+      "bytes": 6612,
+      "sha256": "86da9b5f44cf8fa035e6aa5afc12eb8c1e7537096467e6e5e39794054272f4b6",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 3283
+    },
+    "sfx/fetus jump 1.wav": {
+      "bytes": 12672,
+      "sha256": "0c444173c8ac5b51c64268202e7489720564b8922f8853ebee5ec95eccb88157",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 6313
+    },
+    "sfx/fetus jump.wav": {
+      "bytes": 14752,
+      "sha256": "3074f67d8333731a66376d6f5e5ee749fe482dda3699f334ae76b7b825723023",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 7353
+    },
+    "sfx/fetus land 1.wav": {
+      "bytes": 17108,
+      "sha256": "5a6d1400d25517df37b4e99a3d552acf6de384f9c1a86fa3b1a8d4726814a266",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 8532
+    },
+    "sfx/fetus land.wav": {
+      "bytes": 13792,
+      "sha256": "5933e45307bbf44a726925bed8269e1c9051887f5470ba33b3c774e9a2ab184a",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 6873
+    },
+    "sfx/filter death 1.wav": {
+      "bytes": 393784,
+      "sha256": "962d364e7a599ee74a171e62e26bba0556a0847f74a3ebaa1343a482e548d01b",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 196870
+    },
+    "sfx/filter evil laugh.wav": {
+      "bytes": 254542,
+      "sha256": "05bdd53cfa1d91106a4d3366d281bc27eaafe9a434bbbdb2404c4f6dbfa6c6ef",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 127249
+    },
+    "sfx/filter hurt 1.wav": {
+      "bytes": 36932,
+      "sha256": "c1a1e0da8fc563a0ad072f5c95e07205f020c648df6a507d68d3d13aec52a05b",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 18444
+    },
+    "sfx/filter hurt 2.wav": {
+      "bytes": 43948,
+      "sha256": "8b9a94866e4a60caff3954e9c1b3a738b68d53cdc10bf325e9f4d248878b6309",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 21952
+    },
+    "sfx/filter hurt.wav": {
+      "bytes": 29652,
+      "sha256": "8cfebff2f3bd618466f5ebcc058c34763f387b24a8c95c8eb1f6b3d926643b78",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 14804
+    },
+    "sfx/fire burning.wav": {
+      "bytes": 1326216,
+      "sha256": "1c917f2d2e9f1c5581ec809acd651ebb82ba29e68bc2dc55ef46b9cf831ccfc7",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 663086
+    },
+    "sfx/fire rush.wav": {
+      "bytes": 53976,
+      "sha256": "4b17a923e4d5925bcf304bbe83e0afc5fdad0be3d4291110fdfd87ccfda8052b",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 26966
+    },
+    "sfx/firedeath hiss.wav": {
+      "bytes": 106724,
+      "sha256": "52e4afe63808b44f286875ebb6267f7d788c56cfdf0e6b793668c2a7552af965",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 53340
+    },
+    "sfx/floaty baby roar 2.wav": {
+      "bytes": 180028,
+      "sha256": "34fb6ce232788410e1c94050f2223e18cc41e031785b1d23a590bf7f0488d2fa",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 89992
+    },
+    "sfx/floaty baby roar.wav": {
+      "bytes": 86448,
+      "sha256": "66e9244333489c6cbf0342c0befec9ce6687cd67eaa2e291f3377c6459bd405d",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 43201
+    },
+    "sfx/fly cough 2.wav": {
+      "bytes": 50984,
+      "sha256": "ed6a0b079a8a21e031abd14e2f46c0abc45800f040f1112d5093cacccbb0c9e1",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 25470
+    },
+    "sfx/fly cough 3.wav": {
+      "bytes": 32568,
+      "sha256": "bc54a6d9669cabf52c34560db8980458b604f4e2f5ef49f288a51219e524fcfc",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 16262
+    },
+    "sfx/fly cough 4.wav": {
+      "bytes": 60896,
+      "sha256": "c1994da8e318f1bcc38fabf595be9079a4e70dec1c9ddfaacc0be34790c9ecc7",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 30426
+    },
+    "sfx/fly cough.wav": {
+      "bytes": 30268,
+      "sha256": "2a10e79fc76033495429eaaad530dfb667cb35fdc855fb757b80ea8266b003c9",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 15112
+    },
+    "sfx/forest boss stomp 2.wav": {
+      "bytes": 157252,
+      "sha256": "ea263f054aeaca18d49a34b05954ad2ea15abf5cd0d424b1052bf3802ae2d49b",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 78603
+    },
+    "sfx/forest boss stomp 3.wav": {
+      "bytes": 158692,
+      "sha256": "7514c7addc1f3a9651d8f65daf8177f8d5e6cb68897e2fde5916cccf449970be",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 79324
+    },
+    "sfx/forest boss stomp.wav": {
+      "bytes": 155532,
+      "sha256": "ba070dd62d0ee176139884462a4662f4db6bf0d745781e532bf2520f628dd389",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 77743
+    },
+    "sfx/gascan pour.wav": {
+      "bytes": 331812,
+      "sha256": "8818bca460e6909f3792bddacd9af5c3de52a05ea02ab07b3b76b64e2685e9f6",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 165884
+    },
+    "sfx/ghost roar.wav": {
+      "bytes": 123688,
+      "sha256": "361d13b9dbda1ecfc888036ca3f2200f48f5f203fc6b0bb08323c1b15504772d",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 61821
+    },
+    "sfx/ghost shoot 1.wav": {
+      "bytes": 55052,
+      "sha256": "c7e6b33a7916ca39c8e7c1a32e9f6092d5efceabb6f90151269987f627e9807a",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 27504
+    },
+    "sfx/ghost shoot 2.wav": {
+      "bytes": 71276,
+      "sha256": "01bd383b12385297063bbc280b890f3a5394148c40679d4ace76dc7b6d6bedf6",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 35615
+    },
+    "sfx/golden key.wav": {
+      "bytes": 444138,
+      "sha256": "c10569faa3dbbda4d32a22837480355d2842b283721c56df0d0c2f12833132d0",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 222047
+    },
+    "sfx/goo attach 1.wav": {
+      "bytes": 4128,
+      "sha256": "54331be9253ad068832524d318240ecb3bd8c2879e46e3149c6e1081db64f06f",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 2042
+    },
+    "sfx/goo attach 2.wav": {
+      "bytes": 8716,
+      "sha256": "cffc8e487081f771339dfda73216f3e7bb7b3bce10303fa16030ed10ea6e89a8",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 4336
+    },
+    "sfx/goo death 0.wav": {
+      "bytes": 53924,
+      "sha256": "10ec2aa791c820df89499d6b77890f11ca78b900992683c5e8ef23f4daa342b4",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 26939
+    },
+    "sfx/goo death 1.wav": {
+      "bytes": 34596,
+      "sha256": "1d3773040395ff3c42ff2212a707604b86d7e3e489254723b58b58f81d929a7a",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 17276
+    },
+    "sfx/goo death 2.wav": {
+      "bytes": 29140,
+      "sha256": "5af9260645d97d9dffdce745a80a3440dbcfe0729e13e45af1753e63f411e08a",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 14547
+    },
+    "sfx/growl.wav": {
+      "bytes": 154008,
+      "sha256": "d833696d1aeb7fee5a0325761c252b6de7f718f1163c8200b4f37d206e8b2193",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 76982
+    },
+    "sfx/grunt 2.wav": {
+      "bytes": 60970,
+      "sha256": "a1baa787a6cb6195766e6a402c3158725ca99b51563d0a1dd065d3f0937624da",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 30463
+    },
+    "sfx/grunt 3.wav": {
+      "bytes": 51922,
+      "sha256": "edf3b690edd3c5fbbd397544b9aad19b2d015fe7d5312bd7c9b724268fbf7cb1",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 25939
+    },
+    "sfx/grunt 4.wav": {
+      "bytes": 54484,
+      "sha256": "c304de2c030e01fee212d87dff0d89c8726ecf0f277502eb0eeb240f4df7b9ef",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 27220
+    },
+    "sfx/grunt.wav": {
+      "bytes": 39986,
+      "sha256": "3ea02173d96947caebafe9ead0ef570d54d88fcf0bf8c49f60b3b221e0bbdbf9",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 19971
+    },
+    "sfx/gurgbarf 2.wav": {
+      "bytes": 112984,
+      "sha256": "fa7a6599f8db608835d2bea06b6a3cd6ed9122d1e2cb4890f6210e177fc0ccdf",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 56469
+    },
+    "sfx/gurgbarf1.wav": {
+      "bytes": 114072,
+      "sha256": "86f50ae72848eb66fee6026d0e5962fb4631eb848d94ee840b49d60b87b93e5d",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 57014
+    },
+    "sfx/hand laser.wav": {
+      "bytes": 263164,
+      "sha256": "91843c5f3d5365b9df7df3ff0ab9e460f698aeb5c3e81ad905e6120a1f6e005d",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 131560
+    },
+    "sfx/happy rainbow with giggle.wav": {
+      "bytes": 308738,
+      "sha256": "57775c812c164281979b542bd6dcbe0b78c613ae7ea7d705d22c0353d83c6fc2",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 154347
+    },
+    "sfx/heart out.wav": {
+      "bytes": 57624,
+      "sha256": "6fde7e3392d4a488b236c7ae8a87391f0425d6508f3858a31c88fc3c6610587c",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 28789
+    },
+    "sfx/heartbeat faster.wav": {
+      "bytes": 99272,
+      "sha256": "75fe532557a016f932be254ea8c5c85931c25ab325d219469c6d3b48af752958",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 49613
+    },
+    "sfx/heartbeat fastest.wav": {
+      "bytes": 41596,
+      "sha256": "d2f329c40e8507c402e44dbfbe44da96ccee9bc31f664e50191468ced24356dd",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 20775
+    },
+    "sfx/heartbeat.wav": {
+      "bytes": 153212,
+      "sha256": "ab77997ba63dca2c342a13af9f98708434a76381a79960437849a6246c4f1240",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 76584
+    },
+    "sfx/heartin.wav": {
+      "bytes": 64748,
+      "sha256": "b47771efa8a3ab8f420dca12e45ff8a5f950104385da59d4c17344083eb87b03",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 32351
+    },
+    "sfx/hell portal 2.wav": {
+      "bytes": 17390,
+      "sha256": "761d72ce99e0c42f5dcbaa499992c07b4a68fd329ac9ef9ab33ead4ad04ad86f",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 8673
+    },
+    "sfx/hell portal.wav": {
+      "bytes": 17036,
+      "sha256": "8795a36b3056a53f9e2010ead31380a09caa63334b999cf98dede2b8a84909de",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 8496
+    },
+    "sfx/hellboss ground pound 2.wav": {
+      "bytes": 157736,
+      "sha256": "3b6a7aaa8fe8ae77f1e236179e035fefdbce521cafd9591a3e9219cc81ee6e54",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 78846
+    },
+    "sfx/hellboss ground pound.wav": {
+      "bytes": 175148,
+      "sha256": "b9bdeefe3e3938f0aec14646bb8e62e2dffb066a33acdbfdc1b30959a0644386",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 87551
+    },
+    "sfx/holy!.wav": {
+      "bytes": 125104,
+      "sha256": "515ac0279a1f237aa3d8a38aab8434e04419cf4c1f63488e771854d789fa9544",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 62530
+    },
+    "sfx/hurt 1.wav": {
+      "bytes": 35594,
+      "sha256": "35669788d2806850b68bbb1a407ada1774729c7efe4d47b890564dd5ec3de2c8",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 17775
+    },
+    "sfx/hurt 2.wav": {
+      "bytes": 65120,
+      "sha256": "06665ec088c7cb82ed7854a0dc59827e1de1acacaefcfc9867a0c94b288171c4",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 32538
+    },
+    "sfx/hurt 3.wav": {
+      "bytes": 56610,
+      "sha256": "3442f2df7d17b563b83f8820d858a772a0b6b28cb96ea5c592287c637eea4142",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 28283
+    },
+    "sfx/hurt grunt .wav": {
+      "bytes": 33400,
+      "sha256": "1c9ec39c14949bd2696868b4a15ef62ab24c859aaf52b994869fa63adc1ae7ff",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 16678
+    },
+    "sfx/hurt grunt 1.wav": {
+      "bytes": 27722,
+      "sha256": "6947c778162d77948965b99ff73e2a66e4de01010b50e2461ca95c2c9b28edc5",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 13839
+    },
+    "sfx/hurt grunt 2.wav": {
+      "bytes": 23172,
+      "sha256": "e5f26dadb1f4747651e53a3f5f0ec00fa2719c8e496c4527ac0a6d22b2f5b400",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 11564
+    },
+    "sfx/inhale.wav": {
+      "bytes": 153008,
+      "sha256": "0e7267785b294681ee3612a967aee63ae4b2ab79b568f24f647de9554fc81aa4",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 76481
+    },
+    "sfx/insect swarm.wav": {
+      "bytes": 65784,
+      "sha256": "42f6ebe5e9734a38788a05310b61ebc90c4d26a092a3a2999ebf1440d5d2819a",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 32870
+    },
+    "sfx/isaac dies new 1.wav": {
+      "bytes": 78124,
+      "sha256": "d3a03c5dd31c7aafcc8d62e2c2781950e0e7344a81dbf266b887be7cee9e2864",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 39040
+    },
+    "sfx/isaac dies new 2.wav": {
+      "bytes": 55728,
+      "sha256": "30851f8e262a938ee662069e9c62ea8f37055f6139caa4e4f50e4b32d349dfc2",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 27842
+    },
+    "sfx/isaac dies new.wav": {
+      "bytes": 96264,
+      "sha256": "a78721818e49e04f61df1764df65050c7e16d1900fa2712fbb6670bd170f6cf7",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 48110
+    },
+    "sfx/key drop 2.wav": {
+      "bytes": 21918,
+      "sha256": "4000208b34c5960e857241e144f92f71ec26542d6d4feda64efbb5b4c30a1a3e",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 10937
+    },
+    "sfx/key pickup guantlet 4.wav": {
+      "bytes": 38890,
+      "sha256": "6ed9d18320f05d86ff925434980048eea8be31cf81ce7bba42526898efdf1359",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 19423
+    },
+    "sfx/kiss lips .wav": {
+      "bytes": 6060,
+      "sha256": "35ee6da2c9874305567730d282cd69f55efd8f52865eddedbdf6e4ed38810464",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 3008
+    },
+    "sfx/large chew.wav": {
+      "bytes": 22092,
+      "sha256": "f98bc77aff3a850aafaf58a792a2fd53060c60362f7031be987bc1f7b1a05a23",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 11024
+    },
+    "sfx/leech 2.wav": {
+      "bytes": 20420,
+      "sha256": "1b136decb5601264be8ba5d652e1879b5e4d5bc3809a2126e3af4cfb451887d0",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 10187
+    },
+    "sfx/leech.wav": {
+      "bytes": 16704,
+      "sha256": "4e87dc0ea8cc07ea43e50ea5a10a7ee0804dd714999b6adff34d75f09e05b570",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 8329
+    },
+    "sfx/little spit 1.wav": {
+      "bytes": 23436,
+      "sha256": "68b3c48561801f50af88020b7ba5aea1e1376d01da2b720f19e663f283693d8a",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 11696
+    },
+    "sfx/little spit 2.wav": {
+      "bytes": 19664,
+      "sha256": "78506b7100fd4d1094d9e46ffdcd6595908b36796683cbcb34b9710ce68db951",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 9810
+    },
+    "sfx/little spit 4.wav": {
+      "bytes": 19684,
+      "sha256": "4c44014b93e6e23bd50ca09072b019b6a4821f7ad38f9bb8574b1221e6f2df7f",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 9820
+    },
+    "sfx/lock break 1.wav": {
+      "bytes": 119188,
+      "sha256": "16609b7bd83dc79b29b2a58fe427acac651c8ae2d9b44cdadd8db9470aed247b",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 59572
+    },
+    "sfx/lock break 3.wav": {
+      "bytes": 98824,
+      "sha256": "e44d79d64034562d180c5f77fc9c6ba9ac754ddebc9b10a42a8e9d15c18202e0",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 49390
+    },
+    "sfx/low inhale.wav": {
+      "bytes": 69092,
+      "sha256": "c92bdd3687cd21e8864041b059e496a0aeea893e2fb138404a80e15b6949f175",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 34524
+    },
+    "sfx/maggot 2.wav": {
+      "bytes": 12400,
+      "sha256": "addd927867cb7e87773a48b96d4698206bb975511f1b072a0ff1fc07164b2235",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 6177
+    },
+    "sfx/maggot burst out 2.wav": {
+      "bytes": 65416,
+      "sha256": "57dd9eeff806aa954cd9a0d7160be50cced31147306b150edc7b47619e4b447e",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 32686
+    },
+    "sfx/maggot burst out.wav": {
+      "bytes": 73636,
+      "sha256": "8d8491935a7a56195501ea8c21fbca6a21f938731f298629f4f355c9261a059b",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 36795
+    },
+    "sfx/maggot enter ground .wav": {
+      "bytes": 93052,
+      "sha256": "c361db89bb3f96415f11a7c79f570f518863497878560b260712e6d637205ad0",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 46503
+    },
+    "sfx/maggot enter ground 1.wav": {
+      "bytes": 74572,
+      "sha256": "d50e3fae8c033817ee801336fc094c853eb9b4894bce0a1e8ba950b8b63520ce",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 37264
+    },
+    "sfx/maggot1.wav": {
+      "bytes": 11752,
+      "sha256": "c87ef3cf74004cce2fbfaabb1a8b896fe7224e6ea55b52c8424110ec693c2c2a",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 5853
+    },
+    "sfx/meat feet slow.wav": {
+      "bytes": 36208,
+      "sha256": "d24667a2eab25954e1faf284d9975c5589d425962b6d5439a98e9c4a0282f098",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 18082
+    },
+    "sfx/meat head shoot 1.wav": {
+      "bytes": 50952,
+      "sha256": "cf50507a9cff2299667f7de8def9de600fc2d27c00c28071be9de185cc5ce3d1",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 25453
+    },
+    "sfx/meat head shoot 2.wav": {
+      "bytes": 45460,
+      "sha256": "aa988d2317a7499c3ab56d203ae3adee3d8f88061106c253f3a80a51f19b9d4d",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 22707
+    },
+    "sfx/meat head shoot.wav": {
+      "bytes": 41060,
+      "sha256": "3136a918b9dea2d0e1e611f9304644350a97ede40e4eb6dbf07f47da4265bd8d",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 20507
+    },
+    "sfx/meat impact.wav": {
+      "bytes": 4264,
+      "sha256": "3943f185c9c2041135b477743476dcbbb1823f5008034a207149b674e3b30248",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 2110
+    },
+    "sfx/meat impacts 2.wav": {
+      "bytes": 12944,
+      "sha256": "f9f48e81a8359133815a1d91af04c4cbda7431fb244dbea91b1903c249a21fad",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 6450
+    },
+    "sfx/meat impacts 3.wav": {
+      "bytes": 13020,
+      "sha256": "9d82a67f3d8738692b385fd065da4e245cd7c88b843e088d1d4e481bf7bb5635",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 6488
+    },
+    "sfx/meat jumps 1.wav": {
+      "bytes": 12372,
+      "sha256": "c252e072299d3ad48d777ea71215d006bddd1d82c25557dc8a30cbc3d74fa471",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 6163
+    },
+    "sfx/meat jumps 2.wav": {
+      "bytes": 14124,
+      "sha256": "019a1265f55458614c0eec0c3a13955445b81e66754d86318ef5bc6bc3cbc9d7",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 7039
+    },
+    "sfx/meat jumps0.wav": {
+      "bytes": 11744,
+      "sha256": "2790d444917b9dbfdda16ab7df6e0b525fddae21408e33eba22af7225a57e5a6",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 5850
+    },
+    "sfx/meaty deaths 0.wav": {
+      "bytes": 24328,
+      "sha256": "4c0e9915006794e41f845255717870bafac91313e13a3db7781f7ba53db19cf2",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 12141
+    },
+    "sfx/meaty deaths 1.wav": {
+      "bytes": 20312,
+      "sha256": "7c10a98d31365f1eb6621df0881ce779ef1122e48e159caabb4c7825c53a0f6d",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 10134
+    },
+    "sfx/meaty deaths 2.wav": {
+      "bytes": 41504,
+      "sha256": "96a0a215ed46a83b379678b70c3c18331c39807bfb09ef9d3c02d04515bd4173",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 20730
+    },
+    "sfx/meaty deaths 3.wav": {
+      "bytes": 39856,
+      "sha256": "bdd186fec5349462ef3b87218da9d199657b8a6f66c8f66fa00835538f8362fa",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 19905
+    },
+    "sfx/meaty deaths 4.wav": {
+      "bytes": 38136,
+      "sha256": "f8be2253bea611051d1ff1393b893f13b6439acbfe1d7d23752b9e8f7d96d81b",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 19046
+    },
+    "sfx/megapuke.wav": {
+      "bytes": 278960,
+      "sha256": "4e023b69102475edfdfb07da48b66927bdbd2f7cb414142b557b2ae9e9586791",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 139457
+    },
+    "sfx/mom muffle 2.wav": {
+      "bytes": 45132,
+      "sha256": "6efe57077ccb4ce24520e818bb107a2fc490cbb6aa7e00b11170488b710cf756",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 22544
+    },
+    "sfx/mom muffle 3.wav": {
+      "bytes": 52694,
+      "sha256": "521ee887815f5e09022d6fe3326a14ef1d0a5854e0363266117bd6a05b061fb2",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 26325
+    },
+    "sfx/mom muffle 4.wav": {
+      "bytes": 56046,
+      "sha256": "8fee23e755dc9243b954e8af813ed47b4fd55ff8cad59658975151b8f85d7339",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 28001
+    },
+    "sfx/mom muffle.wav": {
+      "bytes": 54524,
+      "sha256": "0c8339228648e63003bfb26474daaa0c366ba34e87db8a621779ae42197f8f47",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 27240
+    },
+    "sfx/mom.wav": {
+      "bytes": 52904,
+      "sha256": "e2e520cfca6b3edbc5e6971d5f5022a067c78a8dba4737de70b0cb944fce3b1b",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 26430
+    },
+    "sfx/mom2.wav": {
+      "bytes": 57848,
+      "sha256": "29f161ea6a282b1f412ce43a84ef0abbda0acd86a8b8ac9669128d00d88ab41a",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 28902
+    },
+    "sfx/mom3.wav": {
+      "bytes": 80804,
+      "sha256": "0913db2e6f4ed7b763a59c551c565c38db8b9a32f55e0ef7209da798fb3ac920",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 40380
+    },
+    "sfx/monster grunt 1a.wav": {
+      "bytes": 40204,
+      "sha256": "a9ee14f237195ef699a706d19a60993988aa179aec42954ed778de21ed710d51",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 20079
+    },
+    "sfx/monster grunt 1b.wav": {
+      "bytes": 41436,
+      "sha256": "7359245bf81fa5271f5ad5f061329fbf7c77fe9b5c1cd4bd0e0e3f0c19af9246",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 20695
+    },
+    "sfx/monster grunt 2a.wav": {
+      "bytes": 33276,
+      "sha256": "7a52d8cf7a855be094eeab6243836ab2fc48babc36ad6063b003d6633a595c3d",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 16616
+    },
+    "sfx/monster grunt 2b.wav": {
+      "bytes": 28876,
+      "sha256": "479355642eae0dfba7bb969c66f0ae8548d9dc1721bcfe033f1148c54653ec7c",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 14416
+    },
+    "sfx/monster grunt 4 b.wav": {
+      "bytes": 37460,
+      "sha256": "0a0d8453e69811a49c8a54fb86abf8dc63839bc906fc8d02c84882176271f1c5",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 18708
+    },
+    "sfx/monster grunt 4a.wav": {
+      "bytes": 40788,
+      "sha256": "3291762c9260775b80e3a80f783c540a5fa5b15435aa1fda38f8ffbc5606bb30",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 20372
+    },
+    "sfx/monster grunt 5.wav": {
+      "bytes": 57796,
+      "sha256": "74b81ed3d7fb4d292c20d5379b9f6d3d97c06df418102094507fa41f370a40d5",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 28875
+    },
+    "sfx/monster grunt 5b.wav": {
+      "bytes": 53032,
+      "sha256": "ca7c0353fc480980be77c096287601d1d7e31ad13d523b0105b153458db1ad60",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 26494
+    },
+    "sfx/monster grunt b.wav": {
+      "bytes": 32320,
+      "sha256": "09513752a5e9ac42a0d6c8398d146b26bbe6cb151b0b4850b29e52d6f799e437",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 16137
+    },
+    "sfx/monster grunt.wav": {
+      "bytes": 35384,
+      "sha256": "ee0f724841aeab543894f0df6bc2ebc9e2f9b31121a8e3ff828c7e79104f158e",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 17669
+    },
+    "sfx/monster roar 1.wav": {
+      "bytes": 72240,
+      "sha256": "8ab1cf7cd844d4ed5b0d82c4a8d27ba4c9d23853b6f9274f172da2496ff25d3a",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 36097
+    },
+    "sfx/monster roar 2.wav": {
+      "bytes": 78916,
+      "sha256": "3f7e2860d6bcacdcd83dc01d5e75a339096da1346f0e5fa5d48d80f8c27048f5",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 39436
+    },
+    "sfx/monster roar 3.wav": {
+      "bytes": 87052,
+      "sha256": "5b9630bf9f3b1a36cce05cc68bf751fd7d9aeecd24578088cc4b7574f0c0b1a0",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 43504
+    },
+    "sfx/monster roar 4.wav": {
+      "bytes": 87792,
+      "sha256": "cb52564c8890b8ca9e86978c56ba138b492f6fefc7f8b63caf2737d407439dac",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 43873
+    },
+    "sfx/monster roar 5.wav": {
+      "bytes": 100268,
+      "sha256": "76098ea864f53e2f12f7c7448dc4f765f7d0bb8e2f83a6e827d9f4589e439a8f",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 50111
+    },
+    "sfx/monster roar 7.wav": {
+      "bytes": 79232,
+      "sha256": "dce5ddb6e38056ec849dfbbd00efe32b9845fe993d1a0337f6d10e0bd47a5e61",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 39594
+    },
+    "sfx/monster roar 8.wav": {
+      "bytes": 88196,
+      "sha256": "871a3528a038a7f81bb5e8bfa3a3fc4b5320f365f381c8944bf15483b569035b",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 44076
+    },
+    "sfx/monster roar.wav": {
+      "bytes": 76832,
+      "sha256": "a5ef1cd97fc8b5bce755581fdae7e48f8a8c73cc0a09bf00ccb7f2ecaf6a09d6",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 38393
+    },
+    "sfx/monster yell 1.wav": {
+      "bytes": 53672,
+      "sha256": "b91c53b2a0478bd7c4e717e634a1e290e6840e0084f9c842fc2f35dc3cae71d7",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 26814
+    },
+    "sfx/monster yell 2.wav": {
+      "bytes": 64668,
+      "sha256": "ff1bfe7746cfcbe337e53c4e7d79688c26748d9fda1d22f505905519437f77cc",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 32311
+    },
+    "sfx/monster yell b1.wav": {
+      "bytes": 75032,
+      "sha256": "f8865d3ca21e0c1237b9c5f9902cc4a7682b0e8c22d41651be45e21f25b8eec3",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 37494
+    },
+    "sfx/monster yell b5.wav": {
+      "bytes": 71284,
+      "sha256": "5354ff2c79d73931f33a8285ede8631220628f40afbfbabb431d395918960729",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 35620
+    },
+    "sfx/mouth full.wav": {
+      "bytes": 98284,
+      "sha256": "2b67e4397b5c9f0932e50e7a8ed0f873e46dc449991a17eb177d471de1a586d4",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 49119
+    },
+    "sfx/mulit scream.wav": {
+      "bytes": 42500,
+      "sha256": "fc37049a537f6502885d793d142f4fb72685cb37458e25369a5565f99180cbad",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 21227
+    },
+    "sfx/multi scream.wav": {
+      "bytes": 137408,
+      "sha256": "b45852d1154daddb0a2ca8171bf73a427a2ac766c00776144ac7802ec49cec9b",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 68682
+    },
+    "sfx/mushroom poof 2.wav": {
+      "bytes": 98124,
+      "sha256": "1fff446e2a05ec55b4aa1869f26925f5189bbf50803302282f442be5ea616e9a",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 49040
+    },
+    "sfx/mushroom poof.wav": {
+      "bytes": 99412,
+      "sha256": "4c23a07eaf748301184c3da367063227c51eb1b1638e7bd62ea361476f79fc55",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 49684
+    },
+    "sfx/nickel drop.wav": {
+      "bytes": 52746,
+      "sha256": "d9a8f1fe7bd3730573c1f05c54b0291558a28fb287ad5842ff6f224bb03600a4",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 26351
+    },
+    "sfx/nickel pickup.wav": {
+      "bytes": 19452,
+      "sha256": "b1e696bca86d3df04206e2f99e7d356c5338e20ed210dd732a5307028ca48b00",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 9704
+    },
+    "sfx/penny drop 1.wav": {
+      "bytes": 103716,
+      "sha256": "da730f32f158d2612a65008ccb96a6dec603a7e0921da69dababfd8ab735d21c",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 51836
+    },
+    "sfx/penny pickup 1.wav": {
+      "bytes": 21494,
+      "sha256": "d966a9a8674dcbee880045f8ed316bdcc4def8db2aad2d3ea95f2b5ae0954e9f",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 10725
+    },
+    "sfx/plop.wav": {
+      "bytes": 12444,
+      "sha256": "adca3af0f5ce80678d17a56ce44f264874e2ea260c6ae9606e005dcb67b3d778",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 6199
+    },
+    "sfx/pot breaking sound 2.wav": {
+      "bytes": 74600,
+      "sha256": "9a9371fa38548394fffe7fd630b4d326145fb921688f4bf2699b3d6063cf3586",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 37278
+    },
+    "sfx/pot breaking sound 3.wav": {
+      "bytes": 110284,
+      "sha256": "0464b4992291c4f84a634973d025c243fe3d767490cff268322044fba46500fd",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 55120
+    },
+    "sfx/pot breaking sound.wav": {
+      "bytes": 111768,
+      "sha256": "4a79b8d04ccb5bdef2660a35ee831ee6d72f5a39c2cf5c20d579616635c94c1f",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 55862
+    },
+    "sfx/power up 3.wav": {
+      "bytes": 182302,
+      "sha256": "58aff06480c79291895eb92cb9da056c92a6806b4709800268f65d1b3d0287a2",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 91129
+    },
+    "sfx/power up 4.wav": {
+      "bytes": 171122,
+      "sha256": "ba9be22a9f0522775bc9cba32ce5936052027e606aeac3b754ecb7a5aeeaab82",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 85539
+    },
+    "sfx/power up 7.wav": {
+      "bytes": 231140,
+      "sha256": "b1f0305426801b19dfd7b54fef61d8daac1acd3dfd5d3ab546267dae5055050c",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 115548
+    },
+    "sfx/power up spewer.wav": {
+      "bytes": 138126,
+      "sha256": "b30552b8be5ee61486c6789ffaa43dc49ee28d546d45c31672b8ea79d7a87394",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 69041
+    },
+    "sfx/power up1.wav": {
+      "bytes": 86012,
+      "sha256": "febabe194e23ea16702755842252ec0aaa10fd91cd747147b023c8f321880819",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 42984
+    },
+    "sfx/red lightning zap 2.wav": {
+      "bytes": 52332,
+      "sha256": "a05facb174a8eaacbd504bf8acceb35c25be587e162bce93fd0e19f8d927fe80",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 26144
+    },
+    "sfx/red lightning zap 3.wav": {
+      "bytes": 42024,
+      "sha256": "a35e01d04bbeefbd54b79d98fcf7415b20a4975ada94a1fb37f4b7ac2faabef0",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 20989
+    },
+    "sfx/red lightning zap1.wav": {
+      "bytes": 56700,
+      "sha256": "e1111dc3ed8947a6c5ac2061c049194b333d4209152f726b597484fbaf7d9d81",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 28328
+    },
+    "sfx/rock crumble 0.wav": {
+      "bytes": 117208,
+      "sha256": "497c76ce8751767745df4c89f16257ff042161e5f5222044ac7347c0a2ae15ea",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 58582
+    },
+    "sfx/rock crumble 2.wav": {
+      "bytes": 110572,
+      "sha256": "23f58a25f6b4437e1074a1c2d3542fe8e9ae12bc78409b5a2f17de0630137e73",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 55264
+    },
+    "sfx/rock crumble 3.wav": {
+      "bytes": 74592,
+      "sha256": "92a6dc20978d039bba1ddcc9cb83ca670eaaf86e86d39c7b657ebd80c7576358",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 37274
+    },
+    "sfx/rocket blast death 1.wav": {
+      "bytes": 181692,
+      "sha256": "dff889f4655c49fa02e6a9c1a8684ca8900546200815adb1c35bfcc025629433",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 90824
+    },
+    "sfx/satan appear.wav": {
+      "bytes": 183870,
+      "sha256": "7e16604457705bafc77bae30db8b8a88b0cf39aa1a524d6866b60ea626e0c762",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 91913
+    },
+    "sfx/satan blast 1.wav": {
+      "bytes": 178094,
+      "sha256": "16a891d1380c18528d725472e908f507900464cf7136cc7d5d06bb6222125d0a",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 89025
+    },
+    "sfx/satan blast 2.wav": {
+      "bytes": 216804,
+      "sha256": "b7423e7569e03568cbfae1e303efd2345901267f46bc3623cebce51cd2481778",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 108380
+    },
+    "sfx/satan charge up 2.wav": {
+      "bytes": 216146,
+      "sha256": "d13556ebe101eadd6f2f48a26740c86e4e8743f06f636baf015627375d7872cd",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 108051
+    },
+    "sfx/satan charge up.wav": {
+      "bytes": 162418,
+      "sha256": "746658b89c119912066af8b00bba1af213c4c6125ba345861410265bc3a1679b",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 81187
+    },
+    "sfx/satan grow.wav": {
+      "bytes": 341472,
+      "sha256": "0b521dfe8b01701811af9e3c02e643d80192531858b37ad20caad588b18a7b01",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 170714
+    },
+    "sfx/satan hurt.wav": {
+      "bytes": 302062,
+      "sha256": "7be36080e2bc980cb45b6ded801fd2755f14070fb5401e27d27a232707c5db5b",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 151009
+    },
+    "sfx/satan rise up.wav": {
+      "bytes": 269416,
+      "sha256": "cb2ed47fa3235757e22d78ebee009d950523520c5daf46dc8e2782f7ad6bac9f",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 134686
+    },
+    "sfx/satan room appear.wav": {
+      "bytes": 387258,
+      "sha256": "c7f824a414fb5313845b61e59617834142a5635ad978ac9281eec2447a40f982",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 193607
+    },
+    "sfx/satan spit 2.wav": {
+      "bytes": 273244,
+      "sha256": "642b3cd2472612c43bb70573740a86de35acc0c6a0403f99efbe3e65f58ae6cd",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 136600
+    },
+    "sfx/satan spit 3.wav": {
+      "bytes": 239436,
+      "sha256": "ec95d2461714f86e71e3af885c080567d0cc88de3f5919b47ceeb7f8a17e1861",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 119696
+    },
+    "sfx/satan spit.wav": {
+      "bytes": 246900,
+      "sha256": "1e2fb32ffbfbcd296d06acf0337d5d8964ef50d4793c7f1d63f876f784e76bab",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 123428
+    },
+    "sfx/satan stomp 2.wav": {
+      "bytes": 299050,
+      "sha256": "757967d75342bb8b82da7deea44aca53056d34912df60ba425213ddc7b108dac",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 149503
+    },
+    "sfx/satan stomp 3.wav": {
+      "bytes": 230604,
+      "sha256": "a060548671e27de774b91779ce7dfa10a3cdaec973ffde438901c4b93e0a28f1",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 115280
+    },
+    "sfx/satan stomp.wav": {
+      "bytes": 277660,
+      "sha256": "abd7f130cfb03a52d4bbe353742c526ffa0ec5d758ebb7b516f167f1cbfac8a1",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 138808
+    },
+    "sfx/scamper 1.wav": {
+      "bytes": 7168,
+      "sha256": "934e4fd662985abd907112a054e8ab6d360b1737d25dc89f0cec07ff25590fb1",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 3562
+    },
+    "sfx/scamper 2.wav": {
+      "bytes": 9728,
+      "sha256": "fef955ef2e8d410f4a21c118a8671b38e1bb99df8e9650599efb9541eb3fa64d",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 4842
+    },
+    "sfx/scared whimper 2.wav": {
+      "bytes": 101920,
+      "sha256": "5486e70de359144baa786e19b62e3429ea97d89eb1c6fea4c1ce3f3a4a946014",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 50937
+    },
+    "sfx/scared whimper.wav": {
+      "bytes": 89468,
+      "sha256": "371495150ac46bc09b5370d5c1ced806394dbc3e698806d46706d0819db58566",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 44712
+    },
+    "sfx/shakey kid roar 2.wav": {
+      "bytes": 43084,
+      "sha256": "3d125064cd1fa0546660a0b1824b1e119d0ff8952919f3e78d752dfc029688ef",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 21520
+    },
+    "sfx/shakey kid roar.wav": {
+      "bytes": 43640,
+      "sha256": "ef115cec1013138a19d38a4fc96f347cffe7958aa4c316061d0d55781a859c4f",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 21798
+    },
+    "sfx/shell game 0.wav": {
+      "bytes": 9488,
+      "sha256": "2046c56d10aa3752efa36b69cba20ac175f345723f8bc774580fd8a227fe2c30",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 4722
+    },
+    "sfx/shell game 1.wav": {
+      "bytes": 10064,
+      "sha256": "152f9c649ed5dbc2fa2bc19601e9d46a3c07d8fa3172ca9c6ab781c80e77fd65",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 5009
+    },
+    "sfx/sink drain gurgle.wav": {
+      "bytes": 62184,
+      "sha256": "11b75917e1a9de61c43681d56fff47660a806c92ae3aa52a1e6e32199685c8ad",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 31070
+    },
+    "sfx/skin pull 1.wav": {
+      "bytes": 41216,
+      "sha256": "0c4fc06f23293f76ae69066e17a62cd39ab0fae5f6614d70eb139552985d8bc8",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 20585
+    },
+    "sfx/skin pull 2.wav": {
+      "bytes": 34480,
+      "sha256": "07aa1565b89eeafe7e384ddaa6df6c33a34414f01ac202fe5e0fd7b880f5acf4",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 17218
+    },
+    "sfx/skin pull 3.wav": {
+      "bytes": 46320,
+      "sha256": "566d08d297dbca0f8cc89f3077597c6de11d33cec33bb185a90d905485a67e01",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 23138
+    },
+    "sfx/slotspawn 0.wav": {
+      "bytes": 37826,
+      "sha256": "d6b1c4f05630cacc1d3a5941f88a516a7f19855a6b42da229e2d6ba7d5948a8a",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 18891
+    },
+    "sfx/slotspawn 2.wav": {
+      "bytes": 33580,
+      "sha256": "523677c050e18a0b5bc6298b265584c0df5355765125416b24ce5a4435bce734",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 16768
+    },
+    "sfx/slotspawn1.wav": {
+      "bytes": 37344,
+      "sha256": "6643a3f163b1caf835bd0a11daab07913f5aa26da75dd74b13c20a98ddc0ea9f",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 18650
+    },
+    "sfx/spider coughs.wav": {
+      "bytes": 101212,
+      "sha256": "487ab97fd46daac29c89d7a50bb721e6a21fe979f8241671af74794a00ce40c4",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 50584
+    },
+    "sfx/spider spit roar 0.wav": {
+      "bytes": 57628,
+      "sha256": "604283935a1ec5f395ef55252328ef7010e419ce58bc4794d8d7074f821624ab",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 28792
+    },
+    "sfx/spider spit roar 1.wav": {
+      "bytes": 74216,
+      "sha256": "4d992b93c57d7998c54f2c113e938068c90cb9f6761baf778637188bdd93cf12",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 37086
+    },
+    "sfx/spider spit roar 2.wav": {
+      "bytes": 70488,
+      "sha256": "441813ebde1fbd0476c10b23fefb44f353cc19b8617a3d27bcec5a2f126949d8",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 35221
+    },
+    "sfx/splatter 0.wav": {
+      "bytes": 3844,
+      "sha256": "c142a7fd5fd1dcdcdedc8b9f20d354a2d2e76dccd01de57128107988f6280818",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 1899
+    },
+    "sfx/splatter 1.wav": {
+      "bytes": 1772,
+      "sha256": "bb1640fe0b3ec55782efc1869fcbd45762811cb175df5f98fd43a139382d8a78",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 863
+    },
+    "sfx/splatter 2.wav": {
+      "bytes": 2856,
+      "sha256": "db5480af40cc5ef353f5749de348e0520f5bbb7debad16a24566732bdfcc9235",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 1406
+    },
+    "sfx/steam half sec.wav": {
+      "bytes": 48608,
+      "sha256": "bf8d39f87f2addc5eacbde9f3131c8db005aaafd06b57c1e0e10033d42a08080",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 24281
+    },
+    "sfx/stone shoot .wav": {
+      "bytes": 17760,
+      "sha256": "cebb8c63a03f3452c9bb166459e6279455e20a860c595d6af474fd4d96778597",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 8857
+    },
+    "sfx/stone shoot 1.wav": {
+      "bytes": 14528,
+      "sha256": "ed4a4c834582488ff1a5a4b2ac3697c03037d37e11ee685df8564f129798bc26",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 7241
+    },
+    "sfx/stone shoot 2.wav": {
+      "bytes": 17108,
+      "sha256": "e5dd784bc5a3be489386d6aff97796e44f9c7a3000b8f5340968c84e46cff468",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 8531
+    },
+    "sfx/summonsound.wav": {
+      "bytes": 102608,
+      "sha256": "2d4e7ce882547d92fe0461a51714bf485711f45cad4761b4959f351cbbec15e2",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 51282
+    },
+    "sfx/superholy.wav": {
+      "bytes": 376102,
+      "sha256": "476b2398dedd24f847bf11cd9b4e3081688a4717672822df4927e0c4c0ca3e99",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 188029
+    },
+    "sfx/tear block.wav": {
+      "bytes": 14436,
+      "sha256": "117754560d029aff56deb213a41c50639bb9503588764c8b07af9a7ffc0b3565",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 7196
+    },
+    "sfx/tear fire 4.wav": {
+      "bytes": 21348,
+      "sha256": "fcff54bd4e5612a3757a656234eaed5f1b449f53594fcee53c7756edb942952c",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 10652
+    },
+    "sfx/tear fire 5.wav": {
+      "bytes": 15660,
+      "sha256": "7d8221ae76137071a2acbd45cd67b9a791751288c77e77a1924e2c2311ef7243",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 7808
+    },
+    "sfx/thumbs down.wav": {
+      "bytes": 33872,
+      "sha256": "5b3f8bbab666e76af9e77b031e3bacf945a1f4af98862b977bd780d71753d2dd",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 16914
+    },
+    "sfx/thumbs up.wav": {
+      "bytes": 16720,
+      "sha256": "13ba8f46cd4daf3bef49cccbad61660169b8091135def55f4e53de024df549d8",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 8338
+    },
+    "sfx/unlock.wav": {
+      "bytes": 35560,
+      "sha256": "0531ee864bfec839cab65c3880e63a7d1fda692e74c0dc3e753a81a70fb185a1",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 17758
+    },
+    "sfx/vamp.wav": {
+      "bytes": 61156,
+      "sha256": "3eb18b901d5b18597760d66ff5cb533f6ffa4ed1aa5e43b0bef812ef28dd9ff4",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 30555
+    },
+    "sfx/vox death.wav": {
+      "bytes": 279136,
+      "sha256": "29f5b9dc59b701fd482436a02bc01fa0e1e577da015f4b497d029c553728c498",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 139546
+    },
+    "sfx/wierd worm spit1.wav": {
+      "bytes": 77948,
+      "sha256": "d2efb5469edfb37d31587ad85b90ed69b4020094ea6a7052ff573a669c5fd1ce",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 38952
+    },
+    "sfx/wierd worm spit2.wav": {
+      "bytes": 69456,
+      "sha256": "758db681dcff9a66bf8a9eed15331041eef227e10fe0e2fc83f62f7e2d5eface",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 34705
+    },
+    "sfx/wierd worm spit3.wav": {
+      "bytes": 88620,
+      "sha256": "761f16ba1982539fe4f2c40007c3bf5d1dc41dcfda2821dc7dd957d02cce98e6",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 44287
+    },
+    "sfx/worm spit 1.wav": {
+      "bytes": 11916,
+      "sha256": "79a3d8d44170c6a2556a2dafef7c6b2580a99604331311acf163aa22e1604110",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 5936
+    },
+    "sfx/worm spit 2.wav": {
+      "bytes": 12080,
+      "sha256": "6c8f72006fae42a01f1f672f306df28e612443124de6d46a22c1a93184a7f471",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 6018
+    },
+    "sfx/worm spit 3.wav": {
+      "bytes": 11592,
+      "sha256": "08464215599217d9c7ce2f6d2b0a28d224026c3806c344d38a7f1d716a90a479",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 5774
+    },
+    "sfx/zombie walker kid 2.wav": {
+      "bytes": 84688,
+      "sha256": "681d0ecdb9f6c8a1933b879f1c9bebb677eefc21f2dab3bd394a736635d9c94c",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 42322
+    },
+    "sfx/zombie walker kid.wav": {
+      "bytes": 83144,
+      "sha256": "ffe3c1b328f4c30afa12d572955e7c89c2cbd7bfb0961aeec06828f3bfc1bc37",
+      "sampleRate": 44100,
+      "channels": 1,
+      "sampleBytes": 2,
+      "frames": 41549
+    }
+  }
+}
