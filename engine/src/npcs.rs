@@ -45,6 +45,7 @@ pub struct Npc {
     pub dead: bool,
     pub removed: bool,
     pub damage: combat::DamageQueue,
+    pub keeper: Option<crate::keepers::KeeperState>,
 }
 
 const ZERO: WorldVector = WorldVector { x: 0.0, y: 0.0 };
@@ -108,7 +109,7 @@ pub fn tear_hit(
         return Err("tear contact requires bounded ground geometry and damage".into());
     }
     for npc in &mut state.room.npcs {
-        if npc.dead || npc.removed || npc.entity_collision_class == 0 {
+        if npc.dead || npc.removed || npc.entity_collision_class != 4 {
             continue;
         }
         let dx = ground.x - npc.position.x;
@@ -241,8 +242,8 @@ pub fn nonplayer_contacts(state: &mut State) -> Result<(), String> {
             let second = &mut right[0];
             if first.dead
                 || second.dead
-                || first.entity_collision_class == 0
-                || second.entity_collision_class == 0
+                || first.entity_collision_class != 4
+                || second.entity_collision_class != 4
             {
                 continue;
             }
@@ -263,7 +264,7 @@ pub fn nonplayer_contacts(state: &mut State) -> Result<(), String> {
             continue;
         }
         for npc in &mut state.room.npcs {
-            if npc.dead || npc.entity_collision_class == 0 {
+            if npc.dead || npc.entity_collision_class != 4 {
                 continue;
             }
             let mut a = combat::ContactBody {
@@ -374,6 +375,13 @@ fn direction(random: &mut Mt19937) -> WorldVector {
 
 impl Npc {
     pub fn from_selector(id: u32, selector: &SpawnSelector) -> Result<Option<Self>, String> {
+        if selector.category == SpawnCategory::Entity
+            && selector.entity_type == 17
+            && selector.variant == 1
+            && selector.subtype == 0
+        {
+            return crate::keepers::from_selector(id, selector).map(Some);
+        }
         if selector.category != SpawnCategory::Entity
             || !matches!(selector.entity_type, 13 | 18)
             || selector.variant != 0
@@ -444,6 +452,7 @@ impl Npc {
             dead: false,
             removed: false,
             damage: combat::DamageQueue::default(),
+            keeper: None,
         }))
     }
 
@@ -462,6 +471,9 @@ impl Npc {
         player: WorldVector,
         grid: &Grid,
     ) -> Result<(), String> {
+        if self.kind == 17 {
+            return crate::keepers::advance(self, phase);
+        }
         if self.removed {
             return Ok(());
         }

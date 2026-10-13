@@ -109,7 +109,9 @@ export interface Room {
     hp: number; maxHp: number; collisionRadius: number; collisionMass: number; collisionDamage: number;
     gridCollisionClass: number; entityCollisionClass: number; canShutDoors: boolean; boss: boolean;
     state: number; frameAge: number; animationFrame: number; shadowSize: number; dead: boolean; removed: boolean;
-    damage: {pendingDamage: number; pendingFlags: number} }[];
+    damage: {pendingDamage: number; pendingFlags: number};
+    keeper: {anchor: {x: number; y: number}; entityFlags: number; stateFrame: number; countdown: number;
+      animation: string; animationClock: number; animationPlaying: boolean; tint: number[]; offsets: number[]} | null }[];
   authoredActorOrder: {kind: "npc" | "pickup"; id: number}[];
   combatClear: boolean; combatClearCountdown: number; combatShutDoorSlots: number[];
   grid: { width: number; height: number; cells: {selector: number; entity: {kind: number; variant: number; state: number; collisionClass: number; spawnSeed: number} | null}[] } | null;

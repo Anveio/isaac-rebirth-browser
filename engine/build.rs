@@ -127,10 +127,12 @@ fn main() {
     let image = resources.join("gfx/shadow.png");
     let animations = manifest.parent().unwrap().join("web/scene-data.json");
     let pickups = manifest.parent().unwrap().join("web/pickup-data.json");
+    let npcs = manifest.parent().unwrap().join("web/npc-data.json");
     println!("cargo:rerun-if-changed={}", entities.display());
     println!("cargo:rerun-if-changed={}", image.display());
     println!("cargo:rerun-if-changed={}", animations.display());
     println!("cargo:rerun-if-changed={}", pickups.display());
+    println!("cargo:rerun-if-changed={}", npcs.display());
     let xml = fs::read_to_string(entities).expect("read authored entity definitions");
     let (width, height) = png_dimensions(&image);
     let player = entity_number(&xml, 1, 0, "shadowSize");
@@ -145,6 +147,50 @@ fn main() {
          pub const BOMB_SHADOW_PERCENT: f64 = {bomb:?};\n\
          pub const PLAYER_COLLISION_RADIUS_WORLD: f64 = {collision_radius:?};\n"
     );
+    let keeper_tag = xml
+        .split("<entity ")
+        .find(|tag| attribute(tag, "id") == Some("17") && attribute(tag, "variant") == Some("1"))
+        .expect("admitted secret Keeper config is authored");
+    let keeper_shut_doors = attribute(keeper_tag, "shutdoors").unwrap_or("true") == "true";
+    let keeper_boss = entity_number(&xml, 17, 1, "boss") != 0.0;
+    generated.push_str(&format!("pub const KEEPER_CAN_SHUT_DOORS: bool = {keeper_shut_doors};\npub const KEEPER_BOSS: bool = {keeper_boss};\n"));
+    for field in [
+        "baseHP",
+        "collisionRadius",
+        "collisionMass",
+        "collisionDamage",
+        "friction",
+        "shadowSize",
+    ] {
+        generated.push_str(&format!(
+            "pub const KEEPER_{}: f32 = {:?}_f32;\n",
+            field.to_uppercase(),
+            entity_number(&xml, 17, 1, field)
+        ));
+    }
+    let npc_assets: Value =
+        serde_json::from_str(&fs::read_to_string(npcs).expect("read authored NPC animations"))
+            .expect("authored NPC animation JSON");
+    let keeper_animations = npc_assets["gfx/017.002_secret room keeper.anm2"]["Animations"]
+        .as_array()
+        .expect("secret Keeper animations are authored");
+    let keeper_frames: Vec<u32> = (1..=9)
+        .map(|subtype| {
+            let name = format!("Guy{subtype}");
+            u32::try_from(
+                keeper_animations
+                    .iter()
+                    .find(|animation| animation["Name"] == name)
+                    .expect("every derived Keeper subtype has an authored clip")["FrameNum"]
+                    .as_u64()
+                    .expect("bounded authored Keeper frame count"),
+            )
+            .expect("Keeper frame count fits native actor clock")
+        })
+        .collect();
+    generated.push_str(&format!(
+        "pub const KEEPER_ANIMATION_FRAMES: [u32; 9] = {keeper_frames:?};\n"
+    ));
     let light = authored_light_frame(&animations);
     for kind in [13, 18] {
         let tag = xml
