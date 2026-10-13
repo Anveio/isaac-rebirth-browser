@@ -210,6 +210,18 @@ impl Room {
         let descriptor = &floor.descriptors[index];
         let mut room = Self::from_decoration_seed(descriptor.decoration_seed);
         room.descriptor = Some(descriptor.clone());
+        // Room load5cedf0..5ceec7 uses GridPosition(gridWidth+1)-(20,20)
+        // for minimum(60,140), then adds authored dimensions*40. Project the
+        // radius-inset native planes into the authoritative player space.
+        let radius = content::PLAYER_COLLISION_RADIUS_WORLD;
+        room.left = (60.0 + radius) * motion::WORLD_SCALE + motion::WORLD_ORIGIN_X;
+        room.right = (60.0 + f64::from(descriptor.template.width) * 40.0 - radius)
+            * motion::WORLD_SCALE
+            + motion::WORLD_ORIGIN_X;
+        room.top = (140.0 + radius) * motion::WORLD_SCALE + motion::WORLD_ORIGIN_Y;
+        room.bottom = (140.0 + f64::from(descriptor.template.height) * 40.0 - radius)
+            * motion::WORLD_SCALE
+            + motion::WORLD_ORIGIN_Y;
         room.appearance.doors.clear();
         // Start Room's authored boundary door grid positions, padded by one,
         // use RoomGetGridPosition (40+40*x,120+40*y), .65 projection and
