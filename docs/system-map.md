@@ -88,7 +88,19 @@ Secret blast discovery, reciprocal doorway persistence and minimap flags have
 538 paired phases of scoped evidence. Regular and double keys now admit and
 collect through real room actors: the four-case cohort passes 1,690 phases,
 followed by a contrived/recorded-random NPC-composite pair passing 845 phases.
-Ordinary library locks now spend one naturally collected regular key after actual room clearance, with persistent return/revisit state. The earlier key-door cohort compares1,686 phases and retains two Keeper admission failures. Keeper17/1 now has source-backed constructor and anchored idle behavior; a separate fresh pair passes658 phases, including subtype/seed, flags, collision classes, authored Guy clips and frozen/full/intermediate callbacks. A fresh key-door composite rerun remains pending; Keeper damage/death/drop callbacks remain separate.
+Ordinary library locks now spend one naturally collected regular key after
+actual room clearance, with persistent return/revisit state. The earlier
+key-door cohort compares 1,686 phases and retains two Keeper admission failures.
+Keeper17/1 now has source-backed constructor and anchored idle behavior; a
+separate fresh pair passes 658 phases, including subtype/seed, flags, collision
+classes, authored Guy clips and frozen/full/intermediate callbacks. On the
+Keeper composite, a fresh key-door pair passes 750 phases. The other original
+completes 936 phases after its parent deadline fails; a separate actual browser
+comparison passes all 936 against that completed fresh original. The failed
+parent report remains failed, and the earlier cached-original attempt remains
+diagnostic. [Composite evidence](../references/isaac/foundation/runtime-progress/history/565955530a41-key-doors.json)
+records those distinct attempts and the complete 936-state recovery. Keeper
+damage/death/drop callbacks remain separate.
 [Key evidence](../references/isaac/foundation/keys/npc-composite-live-report.json)
 and [NPC boundaries](../references/isaac/foundation/combat/npcs/verification.json)
 record each immutable build's scope.
@@ -113,11 +125,29 @@ distinguishes those contracts. Item-pool work continues in small PRs.
 
 Normal run admission now uses the existing Character menu seed through the actual decoded setter. Six original/browser pairs pass24 menu checkpoints,14,976 MT words,216 descriptor pairs,4,296 Stats poses and96 public commands. All six post-run shared-MT comparisons remain red diagnostics. [Ordinary-run evidence](../references/isaac/foundation/ordinary-run/README.md) retains the rejected observer attempt and immutable accepted scope.
 
-CI discovers all twenty registered live suites and runs separate jobs with
+Fresh Level admission now constructs the actual 135×448 descriptor seed pairs;
+six original/browser pairs match 270 bounded pair samples, 14,976 menu MT words
+and 96 commands. Later shared-MT differences remain explicit. RoundWorm244 and
+its real type9 projectile now have typed construction, full/intermediate
+updates, contact/damage and retirement. Their retained cohort passes 6,880
+independent projectile checks while keeping 598 direct required mismatches
+across 50,900 fields. The wider hostile AI and downstream death effects remain
+open. Natural pedestal selection now follows authored pool weights and
+depletion: four pairs match 10,296 selection checks and 542 presentations,
+followed by 7,588 independent room-context checks on those same captures.
+Pickup acquisition, cache/stat callbacks and familiar behavior remain separate.
+Natural regular/double bomb pickups pass 2,727 phases across four retained tapes
+and two fresh unfiltered OS-random cases. Troll/Megatroll conversions remain
+required when observed and in the retained regressions.
+
+CI discovers all twenty-four registered live suites and runs separate jobs with
 `fail-fast: false`, preserving each result and evidence. The first matrix run
 completed floors, weapons, boot MT and pickups successfully while retaining
 core and traversal failures. Build, typecheck, assets, matrix and strict Clippy
-pass at integrated checkpoint `0f8a363` after menu, secret, NPC, natural-key, Music, treasure-coin, key-door, ordinary-run and Keeper integration. This is a build checkpoint, not a fresh all-suite passing result.
+pass at integrated checkpoint `cb36018`, including the reviewed Level,
+RoundWorm, item-selection and bomb-pickup leaves. The full 24-suite local run
+uses a detached source checkout and a separate immutable production artifact.
+This is a build checkpoint, not a fresh all-suite passing result.
 Complete gameplay RNG, other floors/characters, persistence, later music
 callers/cutscenes and whole-game parity remain open. GitHub required-check
 enforcement is unavailable for this private repository's current plan. The
