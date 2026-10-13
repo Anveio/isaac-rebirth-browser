@@ -328,6 +328,37 @@ pub fn nonplayer_contacts(state: &mut State) -> Result<(), String> {
     Ok(())
 }
 
+/// Source4545d0 finishes entity contacts, then454b10 visits the current
+/// manager list with preview=false, including actors appended during Update.
+/// Removed cached NPC records are no longer manager members. Dead active
+/// bosses still receive the grid query. Keeper class1 remains its own scope.
+pub(crate) fn post_contact_grid(state: &mut State) -> Result<(), String> {
+    let grid = Grid::new(
+        state
+            .room
+            .grid
+            .clone()
+            .ok_or("NPC grid pass requires admitted room grid")?,
+    )?;
+    for npc in &mut state.room.npcs {
+        if npc.removed || npc.grid_collision_class == 0 {
+            continue;
+        }
+        match npc.kind {
+            20 => crate::monstro::post_contact_grid(npc, &grid)?,
+            244 => crate::roundworm::post_contact_grid(npc, &grid)?,
+            // Source class3 clamps the center first. These authored families
+            // have zero grid collision points, so their sample loop is empty.
+            13 | 18 | 33 if npc.grid_collision_class == 3 => {
+                npc.position = grid.clamp_room(npc.position, 0.0);
+                npc.presented_position = npc.position;
+            }
+            _ => {}
+        }
+    }
+    Ok(())
+}
+
 /// Source Room::Update 5d149b resets countdown10 while countable actors
 /// remain. After retirement it decrements once per full pass; only a pass
 /// whose entry countdown is zero marks the descriptor clear and opens doors.

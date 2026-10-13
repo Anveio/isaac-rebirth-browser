@@ -1310,6 +1310,7 @@ impl Game {
                             _ => return Err("invalid authored room actor handle".into()),
                         }
                     }
+                    npcs::post_contact_grid(&mut self.state)?;
                     self.state.room.pickups.retain(|pickup| !pickup.removed);
                     let pickups = &self.state.room.pickups;
                     self.state.actor_scheduler.retain(|actor| {
@@ -1401,6 +1402,7 @@ impl Game {
                     }
                 }
             }
+            npcs::post_contact_grid(&mut self.state)?;
         }
         for impact in &mut self.state.impacts {
             impact.age += 1;

@@ -255,6 +255,12 @@ fn ai(
     Ok(shot)
 }
 
+/// Source manager454b10 calls the full grid query after entity contacts.
+/// Fast prediction remains in the actual Render/fast callback.
+pub(crate) fn post_contact_grid(npc: &mut Npc, grid: &Grid) -> Result<(), String> {
+    collide(npc, grid, false)
+}
+
 pub fn advance(
     npc: &mut Npc,
     phase: Phase,
@@ -311,7 +317,6 @@ pub fn advance(
     npc.velocity = npc.velocity * friction;
     npc.position = npc.position + npc.velocity;
     npc.presented_position = npc.position;
-    collide(npc, world.grid, false)?;
     let mut health = npc.health();
     npc.damage.advance(&mut health, phase)?;
     npc.hp = health.hp;
