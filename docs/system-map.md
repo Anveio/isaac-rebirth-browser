@@ -8,6 +8,64 @@ only an actual report establishes its outcome. Rust/WASM replay equality checks
 the port's determinism, while original logs, graphics and controls establish
 independent reference evidence.
 
+## Current live-game testing policy
+
+Checked-in Rust, Node and Python unit suites were removed at the user’s request.
+The current required gate is [paired-game.mjs](../tools/foundation/paired-game.mjs):
+fresh original processes/profiles and an immutable production browser receive
+identical public input/presentation tails across contrived and recorded
+OS-random scenarios. Source-observable title/fader clocks, seed readback,
+player motion, pause/controller state, red HP/immunity and active tear/bomb
+admission are functional checks. Reports
+retain complete original PNGs, consumed X11 phases/focus, DOM traces and
+strict pixel differences. Full-frame equality remains an optional diagnostic;
+its failures are preserved and do not become functional passing results.
+
+The [paired tape registry](../tools/original/foundation-paired-scenarios.py)
+retains the native cutscene prelude and explicitly aligns browser reset at the
+independently observed first Title frame0/f32 fade .975 boundary. Cutscene,
+complete original-state parity, general actor integration and full gameplay
+remain incomplete. Saved `case.json` files replay both seed and randomized
+controls with `--replay-cases`; seed-only replay generates new controls.
+
+The Wave1/Wave2 snapshots below are historical results from the earlier test
+policy. Their removed unit/integrity suites are not current executable gates.
+Consult the latest paired report for current implementation outcomes.
+
+## Live paired verification after unit-suite removal
+
+The reviewed paired gate replayed all eight recorded tapes against immutable artifact
+`d602ad5ecccf9880e204282353cb372e144acaec58c67e4a07bd170a610d48ff`.
+All eight fresh original/browser processes, consumed X11 validations, real DOM
+traces and seed readbacks completed successfully; the gate source hashes stayed
+unchanged during execution. Every capture now requires typed menu or gameplay
+observations; gameplay also requires the browser's playing screen. Functional
+assertions pass 111 of 149 checkpoints.
+The CI result is **failure**, with the actual gaps retained:
+
+| Live scenario | Functional checkpoints | Result / observed gap |
+| --- | ---: | --- |
+| Title/menu/reentry |19/19 | Pass |
+| Movement/fire |12/12 | Pass |
+| Pause/release |12/18 | Source remains paused at exit start; port resumes/coasts early |
+| Moving bomb, even phase |14/18 | Source and port blast/coasting position and velocity differ |
+| Moving bomb, odd phase |13/18 | Source blasts at phase120; port blasts one phase later, shifting HP/immunity and motion |
+| Adjacent room/rocks/combat |14/28 | Room relocation/collision and enemy health loss are absent from the port |
+| Random `KMAG B3XH` |16/18 | Source/port wall motion and active-tear count differ |
+| Random `E74E V3YT` |11/18 | Source/port tear count, resumed motion and immunity differ |
+
+All 149 paired frames were compared as strict pixel diagnostics: 61 match exactly;
+`exactOriginalPixels` remains false. Pixel failures are separate from functional
+CI status. The report, actual original observations and each exact replayable
+`case.json`/public tape are under `.cache/foundation/paired-ci-reviewed/`.
+
+Run `npm run test:e2e -- --replay-case ABS_CASE_JSON --output NEW_DIRECTORY`
+to reproduce a scenario's recorded seed and controls. To exercise a subsystem
+branch's build without sharing its mutable files, add
+`--production-directory ABS_WORKTREE_DIST`; the harness snapshots and hashes
+that build before launching Chromium. Typecheck, strict clippy and matrix
+synchronization pass. No unit/schema suites were added.
+
 ## Reference material
 
 The extracted base archive inventory contains 2,459 resource files: 21 XML,
@@ -41,8 +99,8 @@ The reusable [room decoder](../tools/foundation/decode-rooms.py) verifies the
 Linux archive against its pinned manifest and writes structural room catalogues.
 Run `python3 tools/foundation/decode-rooms.py --all-base` to inspect all stages,
 or add `--output .cache/room-catalog` to preserve private JSON. Its
-[six corruption/reference tests](../tools/foundation/decode-rooms-checks.py)
-exercise truncation, malformed fields, unknown selectors and exact original
+earlier structural validation covered truncation, malformed fields, unknown
+selectors and exact original
 byte round trips. The tool does not reinterpret those selectors as runtime
 entities or mutate reference files.
 
@@ -274,10 +332,10 @@ serialization. This numeric-coordinate bound does not relax original RGBA
 pixel gates.
 
 The generator now uses decoration xorshift index 35, a repeated floor catalogue
-with a general shuffle, and conditional wall-variant draws. Seven Rust room tests
-and seven native verifier integrity cases passed. The independent report is
-`.cache/coordination/room-generation/verification-report.json`; the executable
-contract is [foundation-backdrop-verify.py](../tools/original/foundation-backdrop-verify.py).
+with a general shuffle, and conditional wall-variant draws. Earlier Rust room
+and native verifier integrity cases passed before their removal. The historical
+report is `.cache/coordination/room-generation/verification-report.json`; current
+gameplay acceptance uses the [live paired gate](../tools/foundation/paired-game.mjs).
 The [persistent backdrop observations](backdrop-observations.md) record exact
 licensed/restored binary hashes, identified Linux routine roles and the four
 reference cases for the next generation workstream.
@@ -319,8 +377,8 @@ asserting original simulation ticks or full hidden state.
 
 The [room-layout evidence](room-layout-evidence.md) records accepted standalone
 Rust kernels for rectangular growth/dead-end expansion and weighted authored
-template selection. The bounded [layout CLI](../engine/src/bin/layout.rs) accepts
-independently supplied generator or selector inputs. It does not yet provide
+template selection. The earlier bounded layout CLI accepted independently
+supplied generator or selector inputs and is now ignored research. This does not provide
 complete run-seed floor generation, connected gameplay rooms or traversal.
 
 Eight retained original floors verify all 32 ordinary template identities across
@@ -502,11 +560,11 @@ establish complete stage-entry/loading/fade pixels or unsupported Options/Exit
 behavior.
 
 The generic animation math now uses sequential f32 interpolation and transforms.
-Six executable Node contracts compare all 75 original title quads across 25
+Earlier component validation compared all 75 original title quads across 25
 observed phases and all 42 smoke quads with their alpha values; 38 smoke primitives
 are from independently held-out phases. The retained
 [original primitive fixture](../references/isaac/foundation/animation-math/primitives.json)
-feeds [the executable contracts](../tools/foundation/animation-math.test.mjs),
+feeds [generic animation playback](../web/animation-math.ts),
 and the native scenario registry includes first-title, fade and authored-loop
 checkpoints. This establishes the tested generic geometry/alpha contracts;
 fresh production title/fade pixels are independently checked, while the legacy
@@ -556,7 +614,7 @@ exact byte round trips. The generated matrix agrees with executable source.
 These outcomes validate their scoped contracts; the five original pixel failures,
 phase delivery and complete native-state gaps still block full parity.
 
-## Verification snapshot for Wave2
+## Historical verification snapshot for Wave2
 
 The shared immutable ABI 2 artifact
 `e141553ff314fe5029e2067638e9bdb582c901f7a71721aca731feb60058c1cb`

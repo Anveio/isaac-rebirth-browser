@@ -16,14 +16,15 @@ around the layer and actor anchors. Degree conversion (`0x6124a0`) multiplies
 by f32 radians per degree. Aligned quads round on the final display-pixel grid;
 rotated geometry remains unsnapped.
 
-`npm run test:verification` includes five contracts in
-`tools/foundation/animation-math.test.mjs`. The retained original-only primitive
-fixture contains 75 title quads (600 coordinates) at 25 source-observed phases,
+The retained original-only primitive fixture contains 75 title quads
+(600 coordinates) at 25 source-observed phases,
 and 42 explosion-smoke quads (336 coordinates and 42 alpha values). All match
 exactly. The formula was derived on four smoke quads; 38 other smoke quads and
 all title quads are additional checks. Rounded JavaScript trigonometry agrees
 with source `sincosf` for these authored angles; arbitrary-angle cross-library
-equivalence has not been established.
+equivalence has not been established. The component harness is now ignored
+research; `npm run test:e2e` exercises the live original/browser title lifecycle
+and records complete frame differences separately from functional contracts.
 
 Title initialization (`0x5ae590`) loads `TitleMenu.anm2` and plays Idle at frame0.
 Title update (`0x5ae6c0`) advances ANM2 only when the current global System

@@ -6,7 +6,7 @@ import { parseSync } from "rolldown/utils";
 import { spawnSync } from "node:child_process";
 
 const ROOT = resolve(fileURLToPath(new URL("../..", import.meta.url)));
-export const NODE_TEST_GLOB = "tools/foundation/*.test.mjs";
+export const PAIRED_GAME_SOURCE = "tools/original/foundation-paired-scenarios.py";
 export const ORIGINAL_CLOCK_SOURCE = "tools/original/foundation-clock-scenarios.py";
 export const REQUIRED_ORIGINAL_CLOCK_SCENARIOS = [
   "menu-movement-fire", "menu-run-introduction", "motion-trajectory", "motion-holdout", "projectile-inheritance",
@@ -17,7 +17,7 @@ export const REQUIRED_ORIGINAL_CLOCK_SCENARIOS = [
 
 // This indexes declarations, not cached test outcomes. Dynamic registrations
 // require an explicit index adapter so they cannot silently vanish from docs.
-export function discoverTestCases({ root = ROOT, pattern = NODE_TEST_GLOB } = {}) {
+export function discoverTestCases({ root = ROOT, pattern = "tools/tests/**/*.spec.ts" } = {}) {
   const files = [...globSync(pattern, { cwd: root })].sort();
   assert.ok(files.length > 0, `No executable scenario sources match ${pattern}`);
   const cases = [];
@@ -26,7 +26,7 @@ export function discoverTestCases({ root = ROOT, pattern = NODE_TEST_GLOB } = {}
     const parsed = parseSync(source, text);
     assert.equal(parsed.errors.length, 0, `Scenario source must parse: ${source}`);
     const declarations = [], testNames = new Set(["test"]);
-    for (const node of parsed.program.body) if (node.type === "ImportDeclaration" && ["node:test", "@playwright/test"].includes(node.source.value)) {
+    for (const node of parsed.program.body) if (node.type === "ImportDeclaration" && node.source.value === "@playwright/test") {
       for (const specifier of node.specifiers) if (specifier.imported?.name === "test" || specifier.type === "ImportDefaultSpecifier") testNames.add(specifier.local.name);
     }
     const visit = (node) => {
@@ -63,11 +63,19 @@ export function discoverTestCases({ root = ROOT, pattern = NODE_TEST_GLOB } = {}
   return cases;
 }
 
-export function discoverNodeCases({ root = ROOT } = {}) {
-  const packageJSON = JSON.parse(readFileSync(resolve(root, "package.json"), "utf8"));
-  const patterns = packageJSON.scripts?.["test:verification"]?.match(/\S+\.test\.mjs/g);
-  assert.deepEqual(patterns, [NODE_TEST_GLOB], "The Node matrix index must follow every test:verification source glob");
-  return discoverTestCases({ root, pattern: NODE_TEST_GLOB });
+export function discoverPairedGameScenarios({ root = ROOT, systemIds } = {}) {
+  const listed = spawnSync("python3", [resolve(root, PAIRED_GAME_SOURCE), "--list"], { encoding: "utf8", env: { ...process.env, PYTHONDONTWRITEBYTECODE: "1" }, maxBuffer: 2 * 1024 * 1024 });
+  assert.equal(listed.status, 0, `Paired live scenario source failed: ${listed.error?.message || listed.stderr}`);
+  const cases = JSON.parse(listed.stdout), ids = new Set(), knownSystems = new Set(systemIds);
+  assert.ok(cases.length > 0, "Live paired-game registry must declare actual executable scenarios");
+  for (const item of cases) {
+    assert.ok(item.id && !ids.has(item.id), "Paired case IDs must be unique"); ids.add(item.id);
+    assert.ok(item.captureLabels.length > 0 && item.captureLabels.includes(item.boundaryLabel), `Missing actual paired captures for ${item.id}`);
+    for (const id of item.systems) assert.ok(knownSystems.has(id), `Unknown paired source system ${id}`);
+    assert.equal(item.source, PAIRED_GAME_SOURCE);
+  }
+  assert.ok(cases.some(item => item.randomized), "Live gate must include a recorded randomized scenario");
+  return cases;
 }
 
 export function validateOriginalClockScenarios(scenarios, { systemIds, requiredIds = REQUIRED_ORIGINAL_CLOCK_SCENARIOS } = {}) {
