@@ -115,8 +115,10 @@ pub fn resolve_tear_npc_contact(
     tear: &mut ContactBody,
     npc: &mut ContactBody,
 ) -> Result<ContactResolution, String> {
-    if tear.entity_type != 2 || !matches!(npc.entity_type, 13 | 18) {
-        return Err("regular tear response requires admitted ordinary Fly types".into());
+    if tear.entity_type != 2 || !matches!(npc.entity_type, 13 | 18 | 244) {
+        return Err(
+            "regular tear response requires an admitted Fly, AttackFly or Round Worm".into(),
+        );
     }
     resolve_contact(
         tear,
@@ -131,21 +133,37 @@ pub fn resolve_tear_npc_contact(
     )
 }
 
-/// Fresh ordinary Fly pairs have no callback veto. Regular Bomb callback
+/// Admitted Fly, AttackFly and Round Worm pairs have no callback veto.
+/// The first body may instead be a regular Bomb; its callback
 /// 456c20 damps NPC velocity0.2 and its own0.5 before the mass response.
 /// Source445710 sorts by entity type and retains its pre-callback overlap.
-pub fn resolve_fly_pair(
+pub fn resolve_npc_or_bomb_pair(
     first: &mut ContactBody,
     second: &mut ContactBody,
 ) -> Result<ContactResolution, String> {
-    if !matches!(first.entity_type, 4 | 13 | 18) || !matches!(second.entity_type, 13 | 18) {
-        return Err("ordinary Fly pairs require admitted source actor types".into());
+    if !matches!(first.entity_type, 4 | 13 | 18 | 244)
+        || !matches!(second.entity_type, 13 | 18 | 244)
+    {
+        return Err("NPC pairs require admitted Fly, AttackFly or Round Worm types, with an optional first Bomb".into());
     }
     if first.entity_type > second.entity_type {
         resolve_contact(second, first, |_| false, bomb_pair_callback)
     } else {
         resolve_contact(first, second, |_| false, bomb_pair_callback)
     }
+}
+
+/// Fresh flags-zero hostile projectile538dd0 returns false after its Player
+/// damage callback, so it retains the ordinary Player mass response445710.
+pub fn resolve_player_projectile_contact(
+    player: &mut ContactBody,
+    projectile: &mut ContactBody,
+    blocks_player_shift: impl FnOnce(WorldVector) -> bool,
+) -> Result<ContactResolution, String> {
+    if player.entity_type != 1 || projectile.entity_type != 9 {
+        return Err("hostile projectile contact requires source types1/9".into());
+    }
+    resolve_contact(player, projectile, blocks_player_shift, |_, _| {})
 }
 
 fn bomb_pair_callback(first: &mut ContactBody, second: &mut ContactBody) {

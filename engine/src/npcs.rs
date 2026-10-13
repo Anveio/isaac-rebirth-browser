@@ -40,6 +40,11 @@ pub struct Npc {
     pub state: u32,
     pub frame_age: u32,
     pub animation_frame: u32,
+    pub animation: String,
+    pub animation_clock: f32,
+    pub animation_playing: bool,
+    pub visible: bool,
+    pub saved_initialized_state: u32,
     pub appearance_effect_seed: Option<u32>,
     pub death_effect_seed: Option<u32>,
     pub dead: bool,
@@ -249,7 +254,7 @@ pub fn nonplayer_contacts(state: &mut State) -> Result<(), String> {
             }
             let mut a = body(first);
             let mut b = body(second);
-            if combat::resolve_fly_pair(&mut a, &mut b)?.colliding {
+            if combat::resolve_npc_or_bomb_pair(&mut a, &mut b)?.colliding {
                 first.position = a.position;
                 first.presented_position = a.position;
                 first.velocity = a.velocity;
@@ -276,7 +281,7 @@ pub fn nonplayer_contacts(state: &mut State) -> Result<(), String> {
                 mass: 6.0,
             };
             let mut b = body(npc);
-            if combat::resolve_fly_pair(&mut a, &mut b)?.colliding {
+            if combat::resolve_npc_or_bomb_pair(&mut a, &mut b)?.colliding {
                 bomb.motion.position = a.position;
                 bomb.motion.presented_position = a.position;
                 bomb.motion.velocity = a.velocity;
@@ -383,7 +388,7 @@ impl Npc {
             return crate::keepers::from_selector(id, selector).map(Some);
         }
         if selector.category != SpawnCategory::Entity
-            || !matches!(selector.entity_type, 13 | 18)
+            || !matches!(selector.entity_type, 13 | 18 | 244)
             || selector.variant != 0
             || selector.subtype != 0
         {
@@ -404,7 +409,7 @@ impl Npc {
                     content::NPC_13_FRICTION,
                     content::NPC_13_SHADOWSIZE,
                 )
-            } else {
+            } else if selector.entity_type == 18 {
                 (
                     content::NPC_18_BASEHP,
                     content::NPC_18_COLLISIONRADIUS,
@@ -412,6 +417,15 @@ impl Npc {
                     content::NPC_18_COLLISIONDAMAGE,
                     content::NPC_18_FRICTION,
                     content::NPC_18_SHADOWSIZE,
+                )
+            } else {
+                (
+                    content::NPC_244_BASEHP,
+                    content::NPC_244_COLLISIONRADIUS,
+                    content::NPC_244_COLLISIONMASS,
+                    content::NPC_244_COLLISIONDAMAGE,
+                    content::NPC_244_FRICTION,
+                    content::NPC_244_SHADOWSIZE,
                 )
             };
         Ok(Some(Self {
@@ -432,21 +446,41 @@ impl Npc {
             collision_damage,
             base_friction,
             shadow_size,
-            grid_collision_class: 3,
+            grid_collision_class: match selector.entity_type {
+                13 => content::NPC_13_GRID_CLASS,
+                18 => content::NPC_18_GRID_CLASS,
+                _ => content::NPC_244_GRID_CLASS,
+            },
             entity_collision_class: 4,
             can_shut_doors: if selector.entity_type == 13 {
                 content::NPC_13_CAN_SHUT_DOORS
-            } else {
+            } else if selector.entity_type == 18 {
                 content::NPC_18_CAN_SHUT_DOORS
+            } else {
+                content::NPC_244_CAN_SHUT_DOORS
             },
             boss: if selector.entity_type == 13 {
                 content::NPC_13_BOSS
-            } else {
+            } else if selector.entity_type == 18 {
                 content::NPC_18_BOSS
+            } else {
+                content::NPC_244_BOSS
             },
             state: 1,
             frame_age: 0,
             animation_frame: 0,
+            animation: if selector.entity_type == 244 {
+                "Idle"
+            } else {
+                "Fly"
+            }
+            .into(),
+            animation_clock: 0.0,
+            // NPC config47f573 uses Sprite.SetFrame(default,0), which stops
+            // playback. Worm waits for the staged forced Appear at counter4.
+            animation_playing: selector.entity_type != 244,
+            visible: true,
+            saved_initialized_state: 0,
             appearance_effect_seed: None,
             death_effect_seed: None,
             dead: false,

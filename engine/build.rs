@@ -139,13 +139,15 @@ fn main() {
     let tear = entity_number(&xml, 2, 0, "shadowSize");
     let bomb = entity_number(&xml, 4, 0, "shadowSize");
     let collision_radius = entity_number(&xml, 1, 0, "collisionRadius");
+    let collision_mass = entity_number(&xml, 1, 0, "collisionMass");
     let mut generated = format!(
         "pub const SHADOW_SOURCE_WIDTH: f64 = {width}.0;\n\
          pub const SHADOW_SOURCE_HEIGHT: f64 = {height}.0;\n\
          pub const PLAYER_SHADOW_PERCENT: f64 = {player:?};\n\
          pub const TEAR_SHADOW_PERCENT: f64 = {tear:?};\n\
          pub const BOMB_SHADOW_PERCENT: f64 = {bomb:?};\n\
-         pub const PLAYER_COLLISION_RADIUS_WORLD: f64 = {collision_radius:?};\n"
+         pub const PLAYER_COLLISION_RADIUS_WORLD: f64 = {collision_radius:?};\n\
+         pub const PLAYER_COLLISION_MASS_WORLD: f64 = {collision_mass:?};\n"
     );
     let keeper_tag = xml
         .split("<entity ")
@@ -192,7 +194,46 @@ fn main() {
         "pub const KEEPER_ANIMATION_FRAMES: [u32; 9] = {keeper_frames:?};\n"
     ));
     let light = authored_light_frame(&animations);
-    for kind in [13, 18] {
+    let npc_animations = manifest.parent().unwrap().join("web/npc-data.json");
+    println!("cargo:rerun-if-changed={}", npc_animations.display());
+    let npc_clips: Value = serde_json::from_str(
+        &fs::read_to_string(npc_animations).expect("read authored NPC animations"),
+    )
+    .expect("parse authored NPC animations");
+    let projectile_clip = npc_clips["gfx/009.000_projectile.anm2"]["Animations"]
+        .as_array()
+        .expect("projectile clips missing")
+        .iter()
+        .find(|clip| clip["Name"] == "RegularTear6")
+        .expect("regular projectile clip missing");
+    generated.push_str(&format!(
+        "pub const PROJECTILE_REGULAR6_FRAMES: u32 = {};\n",
+        projectile_clip["FrameNum"].as_u64().unwrap()
+    ));
+    for clip in npc_clips["gfx/244.000_round worm.anm2"]["Animations"]
+        .as_array()
+        .expect("Round Worm clips missing")
+    {
+        let name = clip["Name"].as_str().unwrap();
+        generated.push_str(&format!(
+            "pub const WORM_{}_FRAMES: u32 = {};\n",
+            name.to_uppercase(),
+            clip["FrameNum"].as_u64().unwrap()
+        ));
+        if name == "DigOut" {
+            let trigger = clip["Triggers"]
+                .as_array()
+                .expect("DigOut triggers missing")
+                .iter()
+                .find(|trigger| trigger["EventId"] == 0)
+                .expect("authored Shoot trigger missing");
+            generated.push_str(&format!(
+                "pub const WORM_SHOOT_FRAME: u32 = {};\n",
+                trigger["AtFrame"].as_u64().expect("Shoot frame missing")
+            ));
+        }
+    }
+    for kind in [9, 13, 18, 244] {
         let tag = xml
             .split("<entity ")
             .find(|tag| {
@@ -201,9 +242,31 @@ fn main() {
                         == Some(0)
             })
             .expect("admitted NPC config is authored");
-        let can_shut_doors = attribute(tag, "shutdoors").unwrap_or("true") == "true";
-        let boss = entity_number(&xml, kind, 0, "boss") != 0.0;
-        generated.push_str(&format!("pub const NPC_{kind}_CAN_SHUT_DOORS: bool = {can_shut_doors};\npub const NPC_{kind}_BOSS: bool = {boss};\n"));
+        if kind != 9 {
+            let can_shut_doors = attribute(tag, "shutdoors").unwrap_or("true") == "true";
+            let boss = entity_number(&xml, kind, 0, "boss") != 0.0;
+            generated.push_str(&format!("pub const NPC_{kind}_CAN_SHUT_DOORS: bool = {can_shut_doors};\npub const NPC_{kind}_BOSS: bool = {boss};\n"));
+            let points = entity_number(&xml, kind, 0, "numGridCollisionPoints") as u16;
+            let class = match attribute(tag, "gridCollision") {
+                Some("none") => 0,
+                Some("walls") => 3,
+                Some("ground") => 5,
+                None => {
+                    if points > 0 {
+                        5
+                    } else {
+                        3
+                    }
+                }
+                Some(value) => panic!("unsupported authored NPC grid class {value}"),
+            };
+            generated.push_str(&format!(
+                "pub const NPC_{kind}_GRID_CLASS: u32 = {class};\n"
+            ));
+            if kind == 244 {
+                generated.push_str(&format!("pub const NPC_244_GRID_POINTS: u16 = {points};\n"));
+            }
+        }
         for field in [
             "baseHP",
             "collisionRadius",
@@ -212,6 +275,9 @@ fn main() {
             "friction",
             "shadowSize",
         ] {
+            if kind == 9 && !matches!(field, "collisionRadius" | "collisionMass") {
+                continue;
+            }
             generated.push_str(&format!(
                 "pub const NPC_{kind}_{}: f32 = {:?}_f32;\n",
                 field.to_uppercase(),
