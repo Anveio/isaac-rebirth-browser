@@ -18,6 +18,16 @@
     "headAnimationFrame": {
       "offset": "0x268",
       "type": "f32"
+    },
+    "position": {
+      "offset": "0x448",
+      "type": "[f32;2]",
+      "projection": "[x*0.65+32,y*0.65-46]"
+    },
+    "velocity": {
+      "offset": "0x464",
+      "type": "[f32;2]",
+      "projection": "[vx*0.65,vy*0.65]"
     }
   },
   "contracts": [
