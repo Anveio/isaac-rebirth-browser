@@ -12,7 +12,7 @@ export class MenuRenderer {
   draw(ctx: CanvasRenderingContext2D, state: State): void {
     switch (state.screen) {
       case "title":
-        this.assets.draw(ctx, `${MENU}titlemenu.anm2`, "Idle", 0, 0, Math.floor(state.menuAnimationTick / 2));
+        this.assets.draw(ctx, `${MENU}titlemenu.anm2`, "Idle", 0, 0, state.titleAnimationFrame);
         break;
       case "profile": this.profile(ctx, state); break;
       case "main": this.main(ctx, state); break;
@@ -26,6 +26,16 @@ export class MenuRenderer {
     ctx.imageSmoothingEnabled = false;
     ctx.drawImage(this.assets.image(`${MENU}menushadow.png`), 0, 0, 256, 149, 0, 122, 256, 149);
     ctx.restore();
+    if (state.menuFade.active && state.menuFade.alpha > 0) {
+      const { color, alpha } = state.menuFade;
+      const backend = ctx as unknown as { fillRectRGBA?: (x: number, y: number, width: number, height: number, rgba: readonly number[]) => void };
+      if (backend.fillRectRGBA) backend.fillRectRGBA(0, 0, 480, 270, [color[0]!, color[1]!, color[2]!, alpha]);
+      else {
+        ctx.save(); ctx.globalAlpha *= alpha;
+        ctx.fillStyle = `#${color.slice(0, 3).map(value => Math.round(value * 255).toString(16).padStart(2, "0")).join("")}`;
+        ctx.fillRect(0, 0, 480, 270); ctx.restore();
+      }
+    }
   }
 
   private profile(ctx: CanvasRenderingContext2D, state: State): void {

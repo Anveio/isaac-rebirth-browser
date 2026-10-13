@@ -81,12 +81,22 @@ def validate_tape(tape):
         raise ValueError('Tape has more than 36000 presented frames')
 
 
+def checked_observation(observer, pid, context):
+    """Observers may explicitly skip checkpoints outside their typed scope."""
+    observed = observer.observe(pid, context)
+    json.dumps(observed, allow_nan=False)
+    if not isinstance(observed, dict) or observed.get('status') not in ('pass', 'skip'):
+        raise RuntimeError('Reference debug observer failed at '+context['label']+': '+str(observed))
+    return observed
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--seed', help='Valid seed; omitted means new OS-random seed')
     parser.add_argument('--tape', type=Path, help='List of key/step/capture commands; public X11 key names')
     parser.add_argument('--focus-handoff', action='append', default=[], help='At named capture, generate public X11 focus out/in and release one presentation before capture; diagnostic tape alteration is recorded')
     parser.add_argument('--state-observer', type=Path, help='Optional parent-only reference debug module exposing observe(pid, context); never production game input')
+    parser.add_argument('--observe-every-step', action='store_true', help='Observe at each tape step gate without screenshots; use one-frame steps for dense trajectories')
     parser.add_argument('--gl-trace', type=Path, help='Optional documented graphics API observer to chain; no game instructions/state')
     parser.add_argument('--trace-every-frame', action='store_true', help='Request graphics observer continuous draw/presentation tracing')
     parser.add_argument('--width', type=int, default=960, help='Original supported window width; larger values aid public subpixel diagnostics')
@@ -97,6 +107,8 @@ def main():
     parser.add_argument('--output', type=Path, default=ROOT / '.cache/foundation' / f'clock-native-{time.time_ns()}')
     parser.add_argument('--frame-timeout', type=float, default=30)
     args = parser.parse_args()
+    if args.observe_every_step and not args.state_observer:
+        raise SystemExit('--observe-every-step requires --state-observer')
     if not os.environ.get('DISPLAY'):
         raise SystemExit('Run through tools/original/with-display.sh')
     # X server autorepeat uses real host time; it must not invent input events
@@ -200,7 +212,7 @@ def main():
               'inputDelivery': {'api': 'public X11 key events', 'serverAutoRepeat': False},
               'simulationTicks': False, 'fullInternalState': False, 'failures': []}
     if observer:
-        report['debugObserver'] = {'module': str(args.state_observer.resolve()), 'scope': 'reference-only parent debug observations at blocked presentation checkpoints; no hidden-state parity claim'}
+        report['debugObserver'] = {'module': str(args.state_observer.resolve()), 'everyTapeStep': args.observe_every_step, 'scope': 'reference-only parent debug observations at blocked presentation checkpoints; no hidden-state parity claim'}
         report['debugObservations'] = []
     (out / 'tape.json').write_text(json.dumps(tape, indent=2) + '\n')
     proc = None
@@ -241,6 +253,16 @@ def main():
             windows = subprocess.check_output(['xdotool', 'search', '--onlyvisible', '--name', '(Isaac|Rebirth)'], text=True)
             window = windows.splitlines()[-1]
             subprocess.run(['xdotool', 'windowfocus', '--sync', window], check=True)
+            def observe_current(label):
+                current_log = debug.observed_state((local / 'log.txt').read_text()) if (local / 'log.txt').exists() else {}
+                context = {'label': label, 'seed': seed, 'seedValue': vector['seedValue'],
+                    'presentedFrame': current['presentedFrame'], 'virtualElapsedNs': current['virtualElapsedNs'],
+                    'output': str(out), 'publicLogState': current_log, 'gateBlocked': True,
+                    'scope': 'reference debug data only; simulation ticks and full internal state not established'}
+                observed = checked_observation(observer, proc.pid, context)
+                report['debugObservations'].append({'context': context, 'observation': observed})
+            if args.observe_every_step:
+                observe_current('bootstrap-'+str(current['presentedFrame']))
             for action in tape:
                 kind = action['type']
                 if kind == 'step':
@@ -260,6 +282,8 @@ def main():
                         'scope': 'native process CPU / controller wall time during released presentations; excludes checkpoint waits, includes observer cost'}
                     if current['presentedFrame'] != before + action['frames']:
                         raise RuntimeError('Presentation acknowledgement count diverged from requested tape')
+                    if args.observe_every_step:
+                        observe_current('step-'+str(current['presentedFrame']))
                 elif kind == 'key':
                     keysym = x11.XStringToKeysym(action['key'].encode('ascii'))
                     if not keysym:
@@ -277,17 +301,7 @@ def main():
                     if action['label'] == 'gameplay-start':
                         report['initialState'] = debug.observed_state((local / 'log.txt').read_text())
                     if observer:
-                        current_log = debug.observed_state((local / 'log.txt').read_text()) if (local / 'log.txt').exists() else {}
-                        context = {'label': action['label'], 'seed': seed, 'seedValue': vector['seedValue'],
-                            'presentedFrame': current['presentedFrame'], 'virtualElapsedNs': current['virtualElapsedNs'],
-                            'output': str(out), 'publicLogState': current_log, 'gateBlocked': True,
-                            'scope': 'reference debug data only; simulation ticks and full internal state not established'}
-                        observed = observer.observe(proc.pid, context)
-                        # Reject non-JSON results, errors, or a missing observation.
-                        json.dumps(observed, allow_nan=False)
-                        if not isinstance(observed, dict) or observed.get('status') == 'fail':
-                            raise RuntimeError('Reference debug observer failed at '+action['label']+': '+str(observed))
-                        report['debugObservations'].append({'context': context, 'observation': observed})
+                        observe_current(action['label'])
                     geometry = subprocess.check_output(['xdotool', 'getwindowgeometry', '--shell', window], text=True)
                     values = dict(line.split('=', 1) for line in geometry.splitlines() if '=' in line)
                     path = out / 'frames' / f"{action['label']}.png"

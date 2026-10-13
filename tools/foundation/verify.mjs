@@ -62,11 +62,12 @@ export async function waitForReady(page) {
   const boot = await page.evaluate(() => ({ ready: document.body.dataset.ready, error: document.querySelector("#status")?.textContent }));
   assert.equal(boot.ready, "true", `Browser boot failed: ${boot.error}`);
 }
-export async function browserScenario(page, { initialSeed = FOUNDATION_REFERENCE_INITIAL_SEED, manualSeedText = FOUNDATION_SEED, onCheckpoint, bombCheckpoint } = {}) {
+export async function browserScenario(page, { initialSeed = FOUNDATION_REFERENCE_INITIAL_SEED, bootEpochSeed = 0, manualSeedText = FOUNDATION_SEED, onCheckpoint, bombCheckpoint } = {}) {
   await waitForReady(page);
-  await page.evaluate((initialSeed) => { window.game.pause(); window.game.reset(initialSeed, { trace: true }); window.game.pause(); }, initialSeed);
+  await page.evaluate(({ initialSeed, bootEpochSeed }) => { window.game.pause(); window.game.reset(initialSeed, { trace: true, bootEpochSeed }); window.game.pause(); }, { initialSeed, bootEpochSeed });
   const commands = [], states = [await page.evaluate(() => window.game.snapshot())], frames = [], timings = [];
   assert.equal(states[0].initialSeed, initialSeed, "Browser reset must use the requested initial seed, never a production preset");
+  assert.equal(states[0].bootEpochSeed, bootEpochSeed, "Browser reset must preserve the independent boot RNG input");
   const record = async (command) => {
     commands.push(command);
     states.push(await page.evaluate(() => window.game.snapshot()));
@@ -100,9 +101,14 @@ export async function browserScenario(page, { initialSeed = FOUNDATION_REFERENCE
     assert.equal(actualTrace.enabled, true, "Verification must opt in to actual keyboard replay capture");
     assert.equal(actualTrace.truncated, false, "Actual keyboard trace must preserve every command");
     assert.equal(actualTrace.initialSeed, initialSeed, "Replays must contain the actual initial seed");
+    assert.equal(actualTrace.bootEpochSeed, bootEpochSeed, "Replays must contain the independent boot RNG input");
     assert.deepEqual(actualTrace.commands, commands, "Browser DOM input delivery must match the canonical command tape");
-    return { initialSeed, commands, states, frames, timings, tickRate: 60, seed: states.at(-1).runSeed, inputTransport: "actual DOM keyboard; manually stepped WASM simulation" };
+    return { initialSeed, bootEpochSeed, commands, states, frames, timings, tickRate: 60, seed: states.at(-1).runSeed, inputTransport: "actual DOM keyboard; manually stepped WASM simulation" };
   };
+  // The native tape reaches its settled Title checkpoint 63 presentations
+  // after the first rendered Title snapshot (ANM2 frame 32). Runtime reset
+  // starts at that first snapshot, so deliver the intervening presentations.
+  await tick(63);
   await capture("title", "title");
   await press("Enter"); await capture("profile", "profile");
   await press("Enter"); await capture("main", "main");
@@ -203,13 +209,14 @@ export function compareCapturedFrames(frames, original, output) {
 }
 
 let nativeReplayBuilt = false;
-export function nativeReplay(initialSeed, commands) {
+export function nativeReplay(initialSeed, commands, bootEpochSeed = 0) {
+  assert.ok(Number.isInteger(bootEpochSeed) && bootEpochSeed >= 0 && bootEpochSeed <= 0xffffffff, "Boot epoch seed must be an unsigned 32-bit value");
   if (!nativeReplayBuilt) {
     const build = spawnSync("cargo", ["build", "--locked", "--manifest-path", "engine/Cargo.toml", "--bin", "replay"], { cwd: ROOT, encoding: "utf8" });
     assert.equal(build.status, 0, build.stderr);
     nativeReplayBuilt = true;
   }
-  const replay = spawnSync(join(ROOT, "engine/target/debug/replay"), [], { cwd: ROOT, input: JSON.stringify({ initialSeed, commands }), encoding: "utf8", maxBuffer: 32 * 1024 * 1024 });
+  const replay = spawnSync(join(ROOT, "engine/target/debug/replay"), [], { cwd: ROOT, input: JSON.stringify({ initialSeed, bootEpochSeed, commands }), encoding: "utf8", maxBuffer: 32 * 1024 * 1024 });
   assert.equal(replay.status, 0, replay.stderr);
   const states = replay.stdout.trim().split("\n").map((line) => JSON.parse(line));
   assert.equal(states.length, commands.length + 1, "Native replay must emit initial and every command state");
@@ -245,7 +252,7 @@ export async function verify({ references, output = join(ROOT, ".cache/foundatio
     save(join(output, "wasm-states.json"), run.states);
     save(join(output, "command-performance.json"), { tickRate: run.tickRate, measurements: run.timings, nativePhaseComparison: "Unavailable: native observations are process lifetime CPU/RSS, not corresponding simulation/render phase timers" });
     try {
-      const native = nativeReplay(run.initialSeed, run.commands);
+      const native = nativeReplay(run.initialSeed, run.commands, run.bootEpochSeed);
       save(join(output, "rust-states.json"), native);
       for (let index = 0; index < native.length; index++) assert.equal(exactStateDifference(native[index], run.states[index]), null, `Native Rust/WASM state divergence after command ${index}`);
       report.checks.push({ id: "actual-keyboard-menu-seed-movement-shooting", status: "pass", commands: run.commands.length, statesCompared: native.length, scope: "Exact native Rust/WASM foundation state; original game hidden state is not observed" });

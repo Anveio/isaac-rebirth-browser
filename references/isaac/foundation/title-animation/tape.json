@@ -1,0 +1,456 @@
+[
+  {
+    "type": "step",
+    "frames": 180
+  },
+  {
+    "type": "capture",
+    "label": "intro"
+  },
+  {
+    "type": "key",
+    "key": "Return",
+    "down": true
+  },
+  {
+    "type": "step",
+    "frames": 12
+  },
+  {
+    "type": "key",
+    "key": "Return",
+    "down": false
+  },
+  {
+    "type": "step",
+    "frames": 9
+  },
+  {
+    "type": "capture",
+    "label": "title-first"
+  },
+  {
+    "type": "step",
+    "frames": 1
+  },
+  {
+    "type": "capture",
+    "label": "title-first-update"
+  },
+  {
+    "type": "step",
+    "frames": 22
+  },
+  {
+    "type": "capture",
+    "label": "title-fading"
+  },
+  {
+    "type": "step",
+    "frames": 16
+  },
+  {
+    "type": "capture",
+    "label": "title-fade-last"
+  },
+  {
+    "type": "step",
+    "frames": 24
+  },
+  {
+    "type": "capture",
+    "label": "title-settled"
+  },
+  {
+    "type": "step",
+    "frames": 18
+  },
+  {
+    "type": "capture",
+    "label": "title-loop"
+  },
+  {
+    "type": "key",
+    "key": "Return",
+    "down": true
+  },
+  {
+    "type": "step",
+    "frames": 1
+  },
+  {
+    "type": "capture",
+    "label": "title-leave-1"
+  },
+  {
+    "type": "step",
+    "frames": 11
+  },
+  {
+    "type": "key",
+    "key": "Return",
+    "down": false
+  },
+  {
+    "type": "step",
+    "frames": 72
+  },
+  {
+    "type": "capture",
+    "label": "title-profile"
+  },
+  {
+    "type": "key",
+    "key": "Escape",
+    "down": true
+  },
+  {
+    "type": "step",
+    "frames": 1
+  },
+  {
+    "type": "capture",
+    "label": "title-return-1"
+  },
+  {
+    "type": "step",
+    "frames": 11
+  },
+  {
+    "type": "key",
+    "key": "Escape",
+    "down": false
+  },
+  {
+    "type": "step",
+    "frames": 72
+  },
+  {
+    "type": "capture",
+    "label": "title-return-settled"
+  },
+  {
+    "type": "key",
+    "key": "Return",
+    "down": true
+  },
+  {
+    "type": "step",
+    "frames": 12
+  },
+  {
+    "type": "key",
+    "key": "Return",
+    "down": false
+  },
+  {
+    "type": "step",
+    "frames": 72
+  },
+  {
+    "type": "capture",
+    "label": "profile"
+  },
+  {
+    "type": "key",
+    "key": "Return",
+    "down": true
+  },
+  {
+    "type": "step",
+    "frames": 12
+  },
+  {
+    "type": "key",
+    "key": "Return",
+    "down": false
+  },
+  {
+    "type": "step",
+    "frames": 72
+  },
+  {
+    "type": "capture",
+    "label": "main"
+  },
+  {
+    "type": "key",
+    "key": "Return",
+    "down": true
+  },
+  {
+    "type": "step",
+    "frames": 12
+  },
+  {
+    "type": "key",
+    "key": "Return",
+    "down": false
+  },
+  {
+    "type": "step",
+    "frames": 72
+  },
+  {
+    "type": "capture",
+    "label": "character"
+  },
+  {
+    "type": "key",
+    "key": "Tab",
+    "down": true
+  },
+  {
+    "type": "step",
+    "frames": 12
+  },
+  {
+    "type": "key",
+    "key": "Tab",
+    "down": false
+  },
+  {
+    "type": "step",
+    "frames": 108
+  },
+  {
+    "type": "key",
+    "key": "t",
+    "down": true
+  },
+  {
+    "type": "step",
+    "frames": 12
+  },
+  {
+    "type": "key",
+    "key": "t",
+    "down": false
+  },
+  {
+    "type": "step",
+    "frames": 6
+  },
+  {
+    "type": "key",
+    "key": "1",
+    "down": true
+  },
+  {
+    "type": "step",
+    "frames": 12
+  },
+  {
+    "type": "key",
+    "key": "1",
+    "down": false
+  },
+  {
+    "type": "step",
+    "frames": 6
+  },
+  {
+    "type": "key",
+    "key": "p",
+    "down": true
+  },
+  {
+    "type": "step",
+    "frames": 12
+  },
+  {
+    "type": "key",
+    "key": "p",
+    "down": false
+  },
+  {
+    "type": "step",
+    "frames": 6
+  },
+  {
+    "type": "key",
+    "key": "k",
+    "down": true
+  },
+  {
+    "type": "step",
+    "frames": 12
+  },
+  {
+    "type": "key",
+    "key": "k",
+    "down": false
+  },
+  {
+    "type": "step",
+    "frames": 6
+  },
+  {
+    "type": "key",
+    "key": "6",
+    "down": true
+  },
+  {
+    "type": "step",
+    "frames": 12
+  },
+  {
+    "type": "key",
+    "key": "6",
+    "down": false
+  },
+  {
+    "type": "step",
+    "frames": 6
+  },
+  {
+    "type": "key",
+    "key": "y",
+    "down": true
+  },
+  {
+    "type": "step",
+    "frames": 12
+  },
+  {
+    "type": "key",
+    "key": "y",
+    "down": false
+  },
+  {
+    "type": "step",
+    "frames": 6
+  },
+  {
+    "type": "key",
+    "key": "0",
+    "down": true
+  },
+  {
+    "type": "step",
+    "frames": 12
+  },
+  {
+    "type": "key",
+    "key": "0",
+    "down": false
+  },
+  {
+    "type": "step",
+    "frames": 6
+  },
+  {
+    "type": "key",
+    "key": "w",
+    "down": true
+  },
+  {
+    "type": "step",
+    "frames": 12
+  },
+  {
+    "type": "key",
+    "key": "w",
+    "down": false
+  },
+  {
+    "type": "step",
+    "frames": 6
+  },
+  {
+    "type": "capture",
+    "label": "seed-entry"
+  },
+  {
+    "type": "key",
+    "key": "Return",
+    "down": true
+  },
+  {
+    "type": "step",
+    "frames": 12
+  },
+  {
+    "type": "key",
+    "key": "Return",
+    "down": false
+  },
+  {
+    "type": "step",
+    "frames": 72
+  },
+  {
+    "type": "capture",
+    "label": "character-seeded"
+  },
+  {
+    "type": "key",
+    "key": "Return",
+    "down": true
+  },
+  {
+    "type": "step",
+    "frames": 12
+  },
+  {
+    "type": "key",
+    "key": "Return",
+    "down": false
+  },
+  {
+    "type": "step",
+    "frames": 300
+  },
+  {
+    "type": "capture",
+    "label": "gameplay-start"
+  },
+  {
+    "type": "key",
+    "key": "d",
+    "down": true
+  },
+  {
+    "type": "step",
+    "frames": 27
+  },
+  {
+    "type": "key",
+    "key": "d",
+    "down": false
+  },
+  {
+    "type": "step",
+    "frames": 30
+  },
+  {
+    "type": "capture",
+    "label": "movement"
+  },
+  {
+    "type": "key",
+    "key": "Right",
+    "down": true
+  },
+  {
+    "type": "step",
+    "frames": 54
+  },
+  {
+    "type": "key",
+    "key": "Right",
+    "down": false
+  },
+  {
+    "type": "capture",
+    "label": "shooting"
+  },
+  {
+    "type": "step",
+    "frames": 30
+  },
+  {
+    "type": "capture",
+    "label": "after-fire"
+  }
+]

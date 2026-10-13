@@ -48,8 +48,8 @@ entities or mutate reference files.
 
 Temporary shared analysis lives under `.cache/coordination/system-map/`:
 `macho-symbols.json`, all 790 decoded animations, all 13 decoded STB sets, and
-the static Linux index/queries. `next-subsystems.md` and its validated 41-function,
-41-direct-edge graph map transition, spawn/update, content and persistence seams;
+the static Linux index/queries. `next-subsystems.md` and its validated 75-function,
+97-direct-edge graph map transition, spawn/update, content and persistence seams;
 `mt-consumers.json` inventories the shared MT wrappers with callsites and consumers.
 These are private working notes; they are not port behavior or reference
 replacement images.
@@ -127,9 +127,9 @@ must not silently turn a room object into a generic enemy or delete it.
 
 | Native symbol family | Port location / present contract | Reachable missing contract |
 | --- | --- | --- |
-| `Manager`, `Game`, menus | `engine/src/lib.rs`, `web/main.ts`, `web/menu.ts`, `web/presentation.ts`: title, profiles, New Run, character/seed entry, normal Isaac run, authored introduction and pause state | Original complete presentation pixels, settings, challenges, continue, game-over, restart and all other modes |
+| `Manager`, `Game`, menus | ABI 2 preserves independent bootEpochSeed in Rust/WASM and browser/native replay; retained title animation/f32 fade uses normalized systemClock; state-driven profiles/run/introduction/pause | Shared MT lifecycle/routing, complete transitions, settings, challenges, continue, game-over, restart and all other modes |
 | `Seeds`, `RNG`, global MT19937 | `engine/src/seed.rs`: general seed codec and original-log-verified Stage 1 startup seed; recovered backdrop index-35 stream | Special seed effects, distinct generation/spawn/decoration/item streams, global MT initialization/routing and exact draw consumption |
-| `LevelGenerator`, `Level`, `RoomConfig` | `engine/src/room.rs`: recovered backdrop assembly given a decoration seed, with provisional production run→room routing | Authored room ingestion, original graph generation, connected doors, room persistence and floor progression |
+| `LevelGenerator`, `Level`, `RoomConfig` | `engine/src/room.rs`: recovered supplied-seed backdrop; `engine/src/layout.rs` and `room_templates.rs`: supplied-input growth/expansion and weighted selection kernels, separate from gameplay | Full stage/profile/challenge routing, special fitting/retries, runtime spawning, connected doors, room persistence and floor progression |
 | `Room`, `RoomTransition`, `StageTransition` | Room descriptors, initial adjacent minimap cells, authored room composition | Crossing doors, combat locks, discovery, transitions, stage banners and camera behavior |
 | `Entity_Player` | Observed previous-velocity motion law, coasting, projection, pause and facing/head/body animation; starting red HP/counters and regular-bomb damage | Original update cadence/full state, item stats, health containers, consumables, death and transformations |
 | `Entity_Tear`, `Entity_Projectile`, `Entity_Laser`, `Entity_Knife` | Four-direction regular tears with inherited velocity and corrected emission origins/order; provisional boundary impacts and expiry | Original ground/height/range separation, initial RNG/eye routing, proper projectile bounds, collision damage, enemy shots and weapon families |
@@ -231,12 +231,33 @@ per-entity xorshift streams. The private consumer inventory has 277 function
 owners, with 443 uniform, 717 bounded-integer and 599 raw-uint direct callsites;
 these static counts are not executed draw counts.
 
-Production does not yet implement this boot-clock stream or its shared consumers.
+Production has not yet verified the full boot-clock lifecycle and shared consumer routing.
 Native first-shot eye/height observations are source discoveries, not implemented
 projectile parity. Replacing the stream with startup xorshift or skipping to a
 fitted cursor cannot establish the original routing. Complete-state observations
 must include its future-affecting state/index and the menu, ambient and gameplay
 draw ordering as well as per-room streams. No native addresses enter production.
+
+The shared MT lifecycle now has concrete state-producing boundaries. Level
+construction and GameState construction each initialize 135 room descriptors,
+each with 448 grid descriptions and two raw seeds per description: 120,960
+draws. GameState Clear repeats that initialization and creates one saved
+PlayerManager seed, for 120,961 draws. Startup's three capacity initializations
+plus the Clear/backdrop seeds match the full native MT checkpoint at 362,882
+draws. Save-menu initialization enumerates profiles 1, 2 and 3 and restores the
+previous profile, each invoking Clear. Character initialization generates one
+run seed, and stats initialization generates 179 authored pose values. Independent
+native state, run-seed and pose observations verify all 624 words at
+`362882 + 4×120961 + 1 + 179 = 846906`.
+
+These are initialization consumers with actual generated state, separate from
+variable gameplay consumers. Level reset initializes its grid descriptions again;
+Room Save initializes only absent cells within the actual room grid, consuming
+two words per absent cell. Grid construction consumes two words per object.
+Admitted sound events consume one sample-selection draw after ID/loading/cooldown
+checks, including a one-sample event; volume is scaled afterward. Conditional
+room rendering and update effects still require exact consumer admission and
+ordering. Matching a checkpoint cannot justify an arbitrary cursor skip.
 
 ## Backdrop contract recovered within its scope
 
@@ -294,6 +315,31 @@ replace only that moved-case reference, retain the legacy timing evidence, and
 preserve the exact RGBA gate. This corrects an observed tape mismatch without
 asserting original simulation ticks or full hidden state.
 
+## Supplied-input room growth and template selection
+
+The [room-layout evidence](room-layout-evidence.md) records accepted standalone
+Rust kernels for rectangular growth/dead-end expansion and weighted authored
+template selection. The bounded [layout CLI](../engine/src/bin/layout.rs) accepts
+independently supplied generator or selector inputs. It does not yet provide
+complete run-seed floor generation, connected gameplay rooms or traversal.
+
+Eight retained original floors verify all 32 ordinary template identities across
+all four rectangular shapes. The picker preserves authored order, door-mask
+filtering, source f32 arithmetic and mutable weight decay. Two fresh independent
+originals, `7X7BGA4Y` and `GS9E16DG`, add 12 exact selector identities. Six Rust
+cases and six verifier integrity cases pass; the source observer checks complete
+descriptor/grid/template/RNG chains against the actual initial-room log.
+
+Seven retained finalized rectangle sets match the growth kernel, including zero,
+one and two dead-end expansions. The strict comparison still fails `MPCMQQN6`:
+source special assignment changes a generated 1×2 rectangle at cell 49 into a
+1×1 shop at cell 62. Fresh `7X7BGA4Y` matches growth, while `GS9E16DG` retains a
+second fitting difference, a generated 2×2 at 56 versus native 1×1 at 70.
+Running the verifier with `--contract growth` or `both` reports these as nonzero
+failures and still attempts every selected case. Primary stage/profile/challenge
+draw routing, special fitting, retries, secret placement and runtime spawning
+remain separate open contracts; no captured map or seed-specific offset is used.
+
 ## New bomb reference observations
 
 The bomb workstream captured fresh stationary, escape and continuous-graphics
@@ -316,9 +362,13 @@ comparison, so equality is safe. The implementation now applies the recovered
 f32 outward knockback before attempting damage and stores the normal hit's
 120-step damage countdown. Eleven focused Rust bomb cases pass, including exact
 contact, radial offsets, impulse during immunity, new-run reset and the
-independent complete coasting-blast trajectory. Bomb impulses now run before
-player motion/drag: the D27/release30/E tape reproduces native x/vx at bomb
-presentations 121, 123 and 133 through ordinary commands.
+independent complete coasting-blast trajectory. The existing port applies blast
+impulses before player motion/drag, reproducing the D27/release30/E fixture's
+sampled native x/vx at presentations 121, 123 and 133. That is a scoped
+presented-step fit, not the source full-phase actor order. Fresh typed admission
+lists include the player; later-born bombs update after it in a full phase.
+Their impulse advances the player on the following intermediate phase. The
+source player update calls base integration, movement control and then DropBomb.
 
 Empty inventory and native pause/fuse captures pass. Four independent Shift
 probes, including window-targeted and physical XTest events for each alias,
@@ -394,6 +444,11 @@ which traverses the active entity array. Its separate extra player-update loop
 runs only when `EnableInterpolation` is disabled; with interpolation enabled,
 the fast phase supplies the additional player update. Player grid collision
 `0x443d00` follows that update; render interpolation also calls it with a distinct flag.
+Independent typed lists corroborate this array includes the player. Ordinary
+Fly-room admission is NPCs, player, then later-born bomb; the full update retains
+that order. Newly appended births are fenced by the last actor present when the
+full update starts. The source does not universally update all nonplayers before
+players, and the legacy E121 fit does not establish that ordering.
 NPC RTTI, typed AI dispatch and deferred base damage/update consumers identify
 current/max HP fields. These static boundaries help isolate scheduling and
 collision contracts; they are not complete object layouts or accepted enemy AI.
@@ -412,6 +467,13 @@ traces now verify 215 phase points across five entropy seeds. This is source
 discovery; production still has its prior tear drift/expiry and lacks the shared
 MT routing. The original adapter still emits `simulationTick: null` and does not
 serialize complete source state.
+
+Pending run dispatch at `0x594a10` also aligns an odd System counter to an even
+pre-update phase before gameplay continues; it does not reset the System clock
+for each run. The port now exposes a normalized System clock with this run-entry
+alignment and uses it for retained title animation and f32 menu fade. Full
+gameplay mixed-rate integration and native run-entry phase holdouts remain open;
+the presence of a clock field does not establish complete phase parity.
 
 Fresh native combat observations independently enter an authored adjacent room
 with RoundWorms and rocks. Typed rock state changes from type 2/state 1/class 3 to
@@ -439,18 +501,46 @@ authored attachments and bitmap-font layout within those regions. It does not
 establish complete stage-entry/loading/fade pixels or unsupported Options/Exit
 behavior.
 
+The generic animation math now uses sequential f32 interpolation and transforms.
+Six executable Node contracts compare all 75 original title quads across 25
+observed phases and all 42 smoke quads with their alpha values; 38 smoke primitives
+are from independently held-out phases. The retained
+[original primitive fixture](../references/isaac/foundation/animation-math/primitives.json)
+feeds [the executable contracts](../tools/foundation/animation-math.test.mjs),
+and the native scenario registry includes first-title, fade and authored-loop
+checkpoints. This establishes the tested generic geometry/alpha contracts;
+fresh production title/fade pixels are independently checked, while the legacy
+whole-foundation comparison still has its separate title mismatch.
+
+The [native title/fade evidence](animation-evidence.md) also retains ten
+byte-identical paired original PNGs for entry, fade, loop and menu reentry.
+The read-only menu observer confirms the title animation keeps its actor frame
+while another menu is selected; returning does not restart Idle. Three captured
+transition checkpoints currently establish retained source state, with complete
+transition rendering still pending. Reproducible source tapes and observations
+are in the [title reference manifest](../references/isaac/foundation/title-animation/manifest.json).
+
+An immutable ABI 2 artifact with digest
+`a98a29f426a8c8f58174b02f31cedf94528b78513c4261486af5e021597e72ad`
+matches all seven selected complete original title frames with zero changed
+pixels and zero channel error. All ten scoped title/fade state checkpoints also
+match. The [browser contract](../tools/tests/title.spec.ts) keeps the three menu
+transition captures as source-state checks until their rendering is implemented.
+The focused presentation/generic-GL suite passes five cases. This scoped result
+does not replace the legacy references, full gameplay comparisons or original
+complete-state requirements.
+
 The reusable [presentation tape](../tools/original/foundation-presentation-scenario.py)
 is registered as `run-pause-presentation` in the strict executable original
 scenario index. Introduction age, pause appearance/idle/disappearance, cursor
 selection and stat-frame state live in the engine snapshot, so pause freezes
 gameplay while its menu presentation clock advances independently.
 
-## Verification snapshot for this implementation wave
+## Verification snapshot for the Wave1 checkpoint
 
 Required cloud verification completed against immutable production artifact
 `6f87ca918d1e0da3eb191822065a2da5aa4a84038e5dd48839fcae291daff7c7`.
-All check groups passed except the final original full-frame gate. Its report at
-`.cache/foundation/verification/latest/report.json` executes all eleven selected
+All check groups passed except the final original full-frame gate. That checkpoint executes all eleven selected
 checks: native Rust/browser WASM actual-command state equality and five full menu frames
 pass; title, gameplay-start, movement, shooting and after-fire remain failures.
 The matching menu frames are profile, main, character, seed-entry and
@@ -465,6 +555,38 @@ eight cases. All 13 room resource sets pass complete structural decoding and
 exact byte round trips. The generated matrix agrees with executable source.
 These outcomes validate their scoped contracts; the five original pixel failures,
 phase delivery and complete native-state gaps still block full parity.
+
+## Verification snapshot for Wave2
+
+The shared immutable ABI 2 artifact
+`e141553ff314fe5029e2067638e9bdb582c901f7a71721aca731feb60058c1cb`
+passes strict clippy, all 75 Rust tests, all 49 Node tests and all 17 browser
+tests. Browser coverage includes all nine native mask pairs/all 18 complete
+straight-RGBA targets at zero tolerance, seven complete new native title frames,
+ten scoped title/fade checkpoints, exact pause/banner regions, independent
+boot-epoch replay and held-input regressions. All six layout integrity checks
+and the eight-original/32-template supplied-selector comparison also pass.
+The growth/special-fitting failures described above remain outside that accepted
+selector scope and still fail their strict comparison.
+
+Required cloud verification also passes all six room decoder cases, the native
+clock and observer integrity groups, two fresh original clock runs, four fresh
+original seed probes and two fresh backdrop probes. The retained combat contract
+passes seven integrity checks and all eight cases/100 exact f32 checkpoints.
+The final physics evidence hardening was rerun separately: all 16 integrity
+checks, 215 exact projectile phases, two complete 624-word MT states and 18
+descriptor boundary seed pairs pass. These kernel checks remain conditional on
+their declared source inputs; they do not establish runtime routing.
+
+The retained legacy foundation gate still reports 6 passing checks and 5
+failures. Its title mismatch decreases from 39,484 to 10,538 changed pixels;
+the four gameplay whole-frame failures remain. Its complete menu-frame and
+native/browser command-state checks pass. The new controlled title fixtures
+and this older comparison are separate evidence contracts; neither result
+replaces the other. Current actual results are at
+`.cache/foundation/verification/latest/report.json`. Full original state,
+simulation-tick delivery, shared MT consumer routing and complete gameplay
+parity remain unverified.
 
 ## Parallel implementation acceptance
 

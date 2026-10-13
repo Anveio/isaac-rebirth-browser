@@ -16,6 +16,12 @@ spec.loader.exec_module(bombs)
 spec = importlib.util.spec_from_file_location('presentation_scenarios', Path(__file__).with_name('foundation-presentation-scenario.py'))
 presentation = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(presentation)
+spec = importlib.util.spec_from_file_location('title_scenarios', Path(__file__).with_name('foundation-title-scenario.py'))
+title_scenarios = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(title_scenarios)
+spec = importlib.util.spec_from_file_location('combat_scenarios', Path(__file__).with_name('foundation-combat-scenario.py'))
+combat = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(combat)
 
 SCENARIOS = [
     {'id': 'menu-movement-fire', 'description': 'Fresh menus and seeded run, movement, shooting and release checkpoints',
@@ -35,6 +41,8 @@ SCENARIOS = [
     {'id': 'bomb-pause', 'description': 'Pause during the native bomb fuse, capture the paused state, resume and observe explosion/health',
      'systems': ['bombs', 'health-inventory', 'entity-animation', 'input-determinism']},
     presentation.SCENARIO,
+    title_scenarios.SCENARIO,
+    *combat.SCENARIOS,
 ]
 
 
@@ -65,6 +73,10 @@ def build_scenario(identifier, seed):
         return bombs.build_tape(seed, identifier.removeprefix('bomb-'))
     if identifier == presentation.SCENARIO['id']:
         return presentation.build_tape(seed)
+    if identifier == title_scenarios.SCENARIO['id']:
+        return title_scenarios.build_tape(seed)
+    if identifier in {definition['id'] for definition in combat.SCENARIOS}:
+        return combat.build_tape(seed, identifier)
     if identifier == 'menu-movement-fire':
         return runner.default_tape(seed)
     if identifier == 'menu-run-introduction':

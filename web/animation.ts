@@ -2,6 +2,7 @@ import sceneData from "./scene-data.json";
 import fontData from "./font-data.json";
 import completionUrl from "./assets/completion_widget.png?url";
 import postitOverlapUrl from "./assets/gamemenu_postitoverlap.png?url";
+import { sampleFrame, overrideFrame, frameQuad, type SampledFrame, type Quad } from "./animation-math";
 
 export interface Frame {
   XCrop?: number; YCrop?: number; Width?: number; Height?: number;
@@ -44,23 +45,6 @@ const urls = import.meta.glob([
   "../references/isaac/rebirth/resources/font/*_0.png",
 ], { eager: true, query: "?url", import: "default" }) as Record<string, string>;
 
-function frameAt(frames: Frame[], index: number, loop: boolean): Frame | undefined {
-  if (!frames.length) return undefined;
-  const length = frames.reduce((total, frame) => total + frame.Delay, 0);
-  let cursor = loop ? index % length : Math.min(index, length - 1);
-  for (const [i, frame] of frames.entries()) {
-    if (cursor < frame.Delay) {
-      const next = frames[i + 1];
-      if (!frame.Interpolated || !next || frame.Delay === 0) return frame;
-      const result = { ...frame }; const ratio = cursor / frame.Delay;
-      for (const key of ["XPosition", "YPosition", "XScale", "YScale", "RedTint", "GreenTint", "BlueTint", "AlphaTint", "Rotation"] as const) result[key] = frame[key] + (next[key] - frame[key]) * ratio;
-      return result;
-    }
-    cursor -= frame.Delay;
-  }
-  return frames.at(-1);
-}
-
 function fontLineWidth(font: Font, line: string, glyphBounds: boolean): number {
   let cursor = 0, extent = 0, previous: number | undefined;
   for (const character of line) {
@@ -91,13 +75,13 @@ export class Assets {
   }
   sources(): readonly { path: string; image: HTMLImageElement }[] { return [...this.images.entries()].map(([path, image]) => ({ path, image })); }
   /** Sample an authored layer so attached text follows the same animation as its paper or streak. */
-  layerFrame(path: string, name: string, layerId: number, tick: number): Frame | undefined {
+  layerFrame(path: string, name: string, layerId: number, tick: number): SampledFrame | undefined {
     const actor = (sceneData as unknown as Record<string, Actor>)[normalize(path)];
     if (!actor) throw new Error(`Missing authored animation: ${path}`);
     const animation = actor.Animations.find(animation => animation.Name === name);
     if (!animation) throw new Error(`Missing animation ${path}:${name}`);
     const layer = animation.LayerAnimations.find(layer => layer.LayerId === layerId);
-    return layer?.Visible ? frameAt(layer.Frames, tick, animation.Loop) : undefined;
+    return layer?.Visible ? sampleFrame(layer.Frames, tick, animation.Loop) : undefined;
   }
   private colorImage(path: string, tint: number[], offsets = [0, 0, 0]): CanvasImageSource {
     if (tint.every(value => Math.abs(value - 255) < .001) && offsets.every(value => value === 0)) return this.image(path);
@@ -111,34 +95,36 @@ export class Assets {
   draw(ctx: CanvasRenderingContext2D, path: string, name: string, x = 0, y = 0, tick = 0, options: DrawOptions = {}): void {
     const actor = (sceneData as unknown as Record<string, Actor>)[normalize(path)]; if (!actor) throw new Error(`Missing authored animation: ${path}`);
     const animation = actor.Animations.find(animation => animation.Name === name); if (!animation) throw new Error(`Missing animation ${path}:${name}`);
-    const root = frameAt(animation.RootAnimation, tick, animation.Loop); if (!root || !root.Visible || root.AlphaTint <= 0) return;
-    ctx.save(); ctx.translate(x + root.XPosition, y + root.YPosition); ctx.rotate(root.Rotation * Math.PI / 180); ctx.scale(root.XScale / 100 * (options.scale ?? 1), root.YScale / 100 * (options.scale ?? 1));
+    const root = sampleFrame(animation.RootAnimation, tick, animation.Loop); if (!root || !root.Visible || root.AlphaTint <= 0) return;
     for (const layer of animation.LayerAnimations) {
       if (!layer.Visible || options.layers && !options.layers.includes(layer.LayerId)) continue;
-      const found = frameAt(layer.Frames, tick, animation.Loop); if (!found) continue;
-      const frame = { ...found, ...options.overrides?.[layer.LayerId] }; if (!frame.Visible || frame.AlphaTint <= 0) continue;
+      const found = sampleFrame(layer.Frames, tick, animation.Loop); if (!found) continue;
+      const frame = overrideFrame(found, options.overrides?.[layer.LayerId]); if (!frame.Visible || frame.AlphaTint <= 0) continue;
       const definition = actor.Layers.find(definition => definition.Id === layer.LayerId)!;
       const sheet = actor.Spritesheets.find(sheet => sheet.Id === definition.SpritesheetId)!;
       const imagePath = normalize(`${actor.BaseSpritesheetPath}/${sheet.Path}`);
-      ctx.save(); ctx.globalAlpha *= root.AlphaTint / 255 * frame.AlphaTint / 255;
-      ctx.translate(frame.XPosition, frame.YPosition); ctx.rotate(frame.Rotation * Math.PI / 180); ctx.scale(frame.XScale / 100, frame.YScale / 100);
+      ctx.save(); ctx.globalAlpha *= Math.fround(root.AlphaTint * frame.AlphaTint);
       const backend = ctx as unknown as {
         drawTintedImage?: (source: CanvasImageSource, tint: number[], offsets: number[], ...args: number[]) => void;
-        drawTintedImageAligned?: (source: CanvasImageSource, tint: number[], offsets: number[], pixelSize: number, ...args: number[]) => void;
+        drawTintedImageQuad?: (source: CanvasImageSource, tint: number[], offsets: number[], crop: readonly [number, number, number, number], points: Quad, pixelSize?: number) => void;
       };
-      const tint = [frame.RedTint / 255, frame.GreenTint / 255, frame.BlueTint / 255, 1];
-      const offsets = [frame.RedOffset / 255, frame.GreenOffset / 255, frame.BlueOffset / 255];
-      const rectangle = [frame.XCrop!, frame.YCrop!, frame.Width!, frame.Height!, -frame.XPivot!, -frame.YPivot!, frame.Width!, frame.Height!];
-      if (options.pixelSnap && backend.drawTintedImageAligned)
-        backend.drawTintedImageAligned(this.image(imagePath), tint, offsets, options.pixelSnap, ...rectangle);
-      else if (backend.drawTintedImage) backend.drawTintedImage(this.image(imagePath), tint, offsets, ...rectangle);
-      else {
-        const image = this.colorImage(imagePath, [frame.RedTint, frame.GreenTint, frame.BlueTint], [frame.RedOffset, frame.GreenOffset, frame.BlueOffset]);
-        ctx.drawImage(image, frame.XCrop!, frame.YCrop!, frame.Width!, frame.Height!, -frame.XPivot!, -frame.YPivot!, frame.Width!, frame.Height!);
+      const tint = [frame.RedTint, frame.GreenTint, frame.BlueTint, 1];
+      const offsets = [frame.RedOffset, frame.GreenOffset, frame.BlueOffset];
+      if (backend.drawTintedImageQuad) {
+        // The native actor rounds aligned quads on the final display-pixel grid.
+        // Rotated layers retain the sequential f32 coordinates from GetDestQuad.
+        backend.drawTintedImageQuad(this.image(imagePath), tint, offsets,
+          [frame.XCrop!, frame.YCrop!, frame.Width!, frame.Height!], frameQuad(frame, root, [x, y], options.scale), options.pixelSnap ?? 1);
+      } else {
+        ctx.translate(Math.fround(x + root.XPosition), Math.fround(y + root.YPosition));
+        ctx.rotate(root.Rotation * Math.PI / 180); ctx.scale(root.XScale * (options.scale ?? 1), root.YScale * (options.scale ?? 1));
+        ctx.translate(frame.XPosition, frame.YPosition); ctx.rotate(frame.Rotation * Math.PI / 180); ctx.scale(frame.XScale, frame.YScale);
+        const rectangle = [frame.XCrop!, frame.YCrop!, frame.Width!, frame.Height!, -frame.XPivot!, -frame.YPivot!, frame.Width!, frame.Height!];
+        if (backend.drawTintedImage) backend.drawTintedImage(this.image(imagePath), tint, offsets, ...rectangle);
+        else ctx.drawImage(this.colorImage(imagePath, tint.slice(0, 3).map(value => value * 255), offsets.map(value => value * 255)), ...rectangle as [number, number, number, number, number, number, number, number]);
       }
       ctx.restore();
     }
-    ctx.restore();
   }
   font(ctx: CanvasRenderingContext2D, name: string, text: string, x: number, y: number, options: { scale?: number; color?: string; align?: "left" | "center" | "right"; pixelSnap?: boolean; measure?: "advance" | "glyph-bounds" } = {}): void {
     const font = (fontData as unknown as Record<string, Font>)[name]; if (!font) throw new Error(`Missing authored font: ${name}`);

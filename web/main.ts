@@ -14,7 +14,8 @@ async function boot() {
     return value;
   };
   let initialSeed = randomSeed();
-  const [engine, renderer] = await Promise.all([Engine.create(initialSeed), Renderer.load(canvas)]);
+  const bootEpochSeed = Math.floor(Date.now() / 1000) >>> 0;
+  const [engine, renderer] = await Promise.all([Engine.create(initialSeed, bootEpochSeed), Renderer.load(canvas)]);
   let automaticPaused = false;
   let lifecyclePaused = !document.hasFocus() || document.hidden;
   let accumulator = 0;
@@ -38,6 +39,8 @@ async function boot() {
     try {
       if (seedText) {
         if (down) dispatch({ type: 'text', text: event.key.toUpperCase() });
+        else if (supported.has(event.code) && currentState.pressed.includes(event.code))
+          dispatch({ type: 'key', code: event.code, down: false });
       } else dispatch({ type: 'key', code: event.code, down });
     } catch (error) {
       status.textContent = String(error);
@@ -84,8 +87,8 @@ async function boot() {
     step: (count = 1) => structuredClone(dispatch({ type: 'tick', count })),
     pause: () => { automaticPaused = true; accumulator = 0; },
     resume: () => { automaticPaused = false; accumulator = 0; previous = performance.now(); },
-    reset: (seed = randomSeed(), options: { trace?: boolean } = {}) => {
-      currentState = engine.reset(seed);
+    reset: (seed = randomSeed(), options: { trace?: boolean; bootEpochSeed?: number } = {}) => {
+      currentState = engine.reset(seed, options.bootEpochSeed ?? 0);
       initialSeed = seed;
       trace = new ReplayTrace(initialSeed, options.trace === true, currentState);
       accumulator = 0;

@@ -8,6 +8,7 @@ export class ReplayTrace {
   private encodedBytes = 0;
   private truncationReason: "commands" | "bytes" | null = null;
   private readonly initialSeed: number;
+  private readonly bootEpochSeed: number;
   private readonly enabled: boolean;
   private readonly maxBytes: number;
   private readonly maxCommands: number;
@@ -15,6 +16,7 @@ export class ReplayTrace {
   constructor(initialSeed: number, enabled: boolean, initialState: State,
     maxBytes = 32 * 1024 * 1024, maxCommands = 36_000) {
     this.initialSeed = initialSeed;
+    this.bootEpochSeed = initialState.bootEpochSeed ?? 0;
     this.enabled = enabled;
     this.maxBytes = maxBytes;
     this.maxCommands = maxCommands;
@@ -35,7 +37,7 @@ export class ReplayTrace {
   }
 
   snapshot() {
-    return { schema: 1, tickRate: 60, initialSeed: this.initialSeed, enabled: this.enabled,
+    return { schema: 1, tickRate: 60, initialSeed: this.initialSeed, bootEpochSeed: this.bootEpochSeed, enabled: this.enabled,
       truncated: this.truncationReason !== null, truncationReason: this.truncationReason,
       encodedBytes: this.encodedBytes, maxEncodedBytes: this.maxBytes,
       commands: structuredClone(this.commands), states: structuredClone(this.states) };

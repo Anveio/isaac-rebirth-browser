@@ -39,13 +39,14 @@ export function invariantTape(encodedSeed) {
     key("ArrowDown", true), tick(30), key("ArrowDown", false), tick(120),
   ];
 }
-export async function wasmReplay(initialSeed, commands = []) {
+export async function wasmReplay(initialSeed, commands = [], bootEpochSeed = 0) {
+  assert.ok(Number.isInteger(bootEpochSeed) && bootEpochSeed >= 0 && bootEpochSeed <= 0xffffffff, "Boot epoch seed must be an unsigned 32-bit value");
   const bytes = readFileSync(join(ROOT, "web/generated/engine.wasm"));
   const { instance } = await WebAssembly.instantiate(bytes);
   const wasm = instance.exports;
-  assert.equal(wasm.abi_version?.(), 1, "Generated WASM ABI is stale; run npm run build:wasm");
+  assert.equal(wasm.abi_version?.(), 2, "Generated WASM ABI is stale; run npm run build:wasm");
   const text = (ptr, length) => new TextDecoder().decode(new Uint8Array(wasm.memory.buffer, ptr, length));
-  const resetStatus = wasm.reset(initialSeed);
+  const resetStatus = wasm.reset(initialSeed, bootEpochSeed);
   assert.equal(resetStatus, 0, `WASM reset ABI failed: ${text(wasm.error_ptr(), wasm.error_len())}`);
   const snapshot = () => { const ptr = wasm.snapshot_ptr(); return JSON.parse(text(ptr, wasm.snapshot_len())); };
   const states = [snapshot()];

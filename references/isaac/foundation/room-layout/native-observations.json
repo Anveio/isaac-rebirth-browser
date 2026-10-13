@@ -1,0 +1,4964 @@
+{
+  "schema": 1,
+  "scope": "independent original descriptors and supplied generator/selector inputs; finalized special reshaping remains open",
+  "cases": [
+    {
+      "seed": "N4Z8GWV3",
+      "provenance": {
+        "nativeBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+        "sourceOriginalLog": "n4z8gwv3-original.log",
+        "sourceOriginalLogSha256": "6782f906793049e8ee03115493c9637a8f1cc011581390bc156b520327272b81",
+        "originalCheckpoint": {
+          "context": {
+            "label": "gameplay-start",
+            "seed": "N4Z8GWV3",
+            "seedValue": 1766104246,
+            "presentedFrame": 1206,
+            "virtualElapsedNs": 20100402000,
+            "publicLogState": {
+              "seed": "N4Z8 GWV3",
+              "seedValue": 1766104246,
+              "playerVariant": 0,
+              "playerSubtype": 0,
+              "stage": 1,
+              "altStage": 0,
+              "stageSeed": 2992738024,
+              "rooms": 8,
+              "room": "1.2(Start Room)",
+              "spawnSeed": 1606774692
+            },
+            "gateBlocked": true,
+            "scope": "reference debug data only; simulation ticks and full internal state not established"
+          }
+        },
+        "memoryWritten": false,
+        "reproductionObserverSha256": "1ea457f97f5141c9e0782ae118c3242f66a8d8e2043d9b0593ed55286aa82210",
+        "originalSourceControllerSha256": "59a4f348230a3f61fab051a9cce738cf88ea2ab85bc38e3b2537ee4e78e34a60",
+        "sourceController": "n4z8gwv3-controller.json",
+        "sourceControllerSha256": "e9cb5d543fa0798a0646990c1339ef443c403d84404944d2b7bd187d86a7e146"
+      },
+      "growthInput": {
+        "generatorSeed": 3939655225,
+        "additionalRooms": 8,
+        "shapeMask": 15
+      },
+      "observation": {
+        "schema": 2,
+        "status": "pass",
+        "memoryWritten": false,
+        "scope": "private source-derived descriptor values; no native addresses exported",
+        "nativeBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+        "checkpoint": "gameplay-start",
+        "stage": 1,
+        "altStage": 0,
+        "curseMask": 0,
+        "descriptorCount": 10,
+        "startingGridIndex": 84,
+        "currentGridIndex": 84,
+        "previousGridIndex": 84,
+        "currentDescriptorIndex": 6,
+        "grid": [
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          0,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          1,
+          9,
+          5,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          8,
+          2,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          7,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          6,
+          3,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          4,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1
+        ],
+        "descriptors": [
+          {
+            "index": 0,
+            "gridIndex": 32,
+            "cells": [
+              32
+            ],
+            "doorGridIndices": [
+              31,
+              19,
+              33,
+              45,
+              44,
+              20,
+              46,
+              46
+            ],
+            "doorMask": 8,
+            "template": {
+              "assetStage": 0,
+              "type": 5,
+              "variant": 5023,
+              "name": "Dingle (copy)",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 2418275908,
+            "spawnSeed": 2717791781,
+            "followingSeed": 1232651162,
+            "roomInitSeed": 1795407492,
+            "stage35DrawPositions": [
+              8
+            ]
+          },
+          {
+            "index": 1,
+            "gridIndex": 44,
+            "cells": [
+              44
+            ],
+            "doorGridIndices": [
+              43,
+              31,
+              45,
+              57,
+              56,
+              32,
+              58,
+              58
+            ],
+            "doorMask": 4,
+            "template": {
+              "assetStage": 0,
+              "type": 8,
+              "variant": 0,
+              "name": "",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 1827540538,
+            "spawnSeed": 2640174623,
+            "followingSeed": 3204565674,
+            "roomInitSeed": 3735255542,
+            "stage35DrawPositions": [
+              9
+            ]
+          },
+          {
+            "index": 2,
+            "gridIndex": 59,
+            "cells": [
+              59
+            ],
+            "doorGridIndices": [
+              58,
+              46,
+              60,
+              72,
+              71,
+              47,
+              73,
+              73
+            ],
+            "doorMask": 3,
+            "template": {
+              "assetStage": 0,
+              "type": 2,
+              "variant": 0,
+              "name": "",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 3224569009,
+            "spawnSeed": 4020954520,
+            "followingSeed": 4094956783,
+            "roomInitSeed": 3348076678,
+            "stage35DrawPositions": [
+              11
+            ]
+          },
+          {
+            "index": 3,
+            "gridIndex": 85,
+            "cells": [
+              85
+            ],
+            "doorGridIndices": [
+              84,
+              72,
+              86,
+              98,
+              97,
+              73,
+              99,
+              99
+            ],
+            "doorMask": 1,
+            "template": {
+              "assetStage": 0,
+              "type": 4,
+              "variant": 8,
+              "name": " (copy)",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 4089054163,
+            "spawnSeed": 1697094191,
+            "followingSeed": 1265993395,
+            "roomInitSeed": 2805438082,
+            "stage35DrawPositions": [
+              12
+            ]
+          },
+          {
+            "index": 4,
+            "gridIndex": 97,
+            "cells": [
+              97
+            ],
+            "doorGridIndices": [
+              96,
+              84,
+              98,
+              110,
+              109,
+              85,
+              111,
+              111
+            ],
+            "doorMask": 2,
+            "template": {
+              "assetStage": 0,
+              "type": 10,
+              "variant": 4,
+              "name": " (copy)",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 2721685509,
+            "spawnSeed": 3510330337,
+            "followingSeed": 1602741122,
+            "roomInitSeed": 4145310118,
+            "stage35DrawPositions": [
+              22
+            ]
+          },
+          {
+            "index": 5,
+            "gridIndex": 46,
+            "cells": [
+              46
+            ],
+            "doorGridIndices": [
+              45,
+              33,
+              47,
+              59,
+              58,
+              34,
+              60,
+              60
+            ],
+            "doorMask": 9,
+            "template": {
+              "assetStage": 0,
+              "type": 7,
+              "variant": 8,
+              "name": "",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 3690248740,
+            "spawnSeed": 1777804236,
+            "followingSeed": 3064204037,
+            "roomInitSeed": 1954231321,
+            "stage35DrawPositions": [
+              10
+            ]
+          },
+          {
+            "index": 6,
+            "gridIndex": 84,
+            "cells": [
+              84
+            ],
+            "doorGridIndices": [
+              83,
+              71,
+              85,
+              97,
+              96,
+              72,
+              98,
+              98
+            ],
+            "doorMask": 14,
+            "template": {
+              "assetStage": 0,
+              "type": 1,
+              "variant": 2,
+              "name": "Start Room",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 4271600350,
+            "spawnSeed": 1606774692,
+            "followingSeed": 1376191940,
+            "roomInitSeed": 1813410584,
+            "stage35DrawPositions": [
+              36
+            ]
+          },
+          {
+            "index": 7,
+            "gridIndex": 71,
+            "cells": [
+              71
+            ],
+            "doorGridIndices": [
+              70,
+              58,
+              72,
+              84,
+              83,
+              59,
+              85,
+              85
+            ],
+            "doorMask": 10,
+            "template": {
+              "assetStage": 1,
+              "type": 1,
+              "variant": 252,
+              "name": "New Room",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 609151523,
+            "spawnSeed": 2209677225,
+            "followingSeed": 264125747,
+            "roomInitSeed": 2213687041,
+            "stage35DrawPositions": [
+              37
+            ]
+          },
+          {
+            "index": 8,
+            "gridIndex": 58,
+            "cells": [
+              58
+            ],
+            "doorGridIndices": [
+              57,
+              45,
+              59,
+              71,
+              70,
+              46,
+              72,
+              72
+            ],
+            "doorMask": 14,
+            "template": {
+              "assetStage": 1,
+              "type": 1,
+              "variant": 60,
+              "name": "",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 3665155509,
+            "spawnSeed": 2566164670,
+            "followingSeed": 3665753583,
+            "roomInitSeed": 1546153697,
+            "stage35DrawPositions": [
+              38
+            ]
+          },
+          {
+            "index": 9,
+            "gridIndex": 45,
+            "cells": [
+              45
+            ],
+            "doorGridIndices": [
+              44,
+              32,
+              46,
+              58,
+              57,
+              33,
+              59,
+              59
+            ],
+            "doorMask": 15,
+            "template": {
+              "assetStage": 1,
+              "type": 1,
+              "variant": 61,
+              "name": "",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 3671247674,
+            "spawnSeed": 3744804533,
+            "followingSeed": 2491452524,
+            "roomInitSeed": 3440059797,
+            "stage35DrawPositions": [
+              39
+            ]
+          }
+        ],
+        "stage35CurrentState": 1051424991,
+        "stage35DrawPositions": [
+          62
+        ],
+        "stage2CurrentState": 2992738024,
+        "actualPublicLog": {
+          "seed": "N4Z8 GWV3",
+          "seedValue": 1766104246,
+          "playerVariant": 0,
+          "playerSubtype": 0,
+          "stage": 1,
+          "altStage": 0,
+          "stageSeed": 2992738024,
+          "rooms": 8,
+          "room": "1.2(Start Room)",
+          "spawnSeed": 1606774692
+        }
+      },
+      "knownFinalizationGap": null
+    },
+    {
+      "seed": "W2K03EEH",
+      "provenance": {
+        "nativeBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+        "sourceOriginalLog": "w2k03eeh-original.log",
+        "sourceOriginalLogSha256": "e0424319e1959be2e4491becb64c573b29bf5f7620c040256deb3c0562b68295",
+        "originalCheckpoint": {
+          "context": {
+            "label": "gameplay-start",
+            "seed": "W2K03EEH",
+            "seedValue": 2583434093,
+            "presentedFrame": 1206,
+            "virtualElapsedNs": 20100402000,
+            "publicLogState": {
+              "seed": "W2K0 3EEH",
+              "seedValue": 2583434093,
+              "playerVariant": 0,
+              "playerSubtype": 0,
+              "stage": 1,
+              "altStage": 0,
+              "stageSeed": 2568741737,
+              "rooms": 9,
+              "room": "1.2(Start Room)",
+              "spawnSeed": 2248015275
+            },
+            "gateBlocked": true,
+            "scope": "reference debug data only; simulation ticks and full internal state not established"
+          }
+        },
+        "memoryWritten": false,
+        "reproductionObserverSha256": "1ea457f97f5141c9e0782ae118c3242f66a8d8e2043d9b0593ed55286aa82210",
+        "originalSourceControllerSha256": "fa06031ccf45594723957918181b72e64727276f66aa21252442a43dc245d8eb",
+        "sourceController": "w2k03eeh-controller.json",
+        "sourceControllerSha256": "e086b3f9a3765882325f2a25dce50d9937b729407ecf0f551fd787651d8c3d4a"
+      },
+      "growthInput": {
+        "generatorSeed": 2188898836,
+        "additionalRooms": 9,
+        "shapeMask": 15
+      },
+      "observation": {
+        "schema": 2,
+        "status": "pass",
+        "memoryWritten": false,
+        "scope": "private source-derived descriptor values; no native addresses exported",
+        "nativeBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+        "checkpoint": "gameplay-start",
+        "stage": 1,
+        "altStage": 0,
+        "curseMask": 0,
+        "descriptorCount": 11,
+        "startingGridIndex": 84,
+        "currentGridIndex": 84,
+        "previousGridIndex": 84,
+        "currentDescriptorIndex": 6,
+        "grid": [
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          0,
+          10,
+          9,
+          -1,
+          3,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          8,
+          8,
+          7,
+          6,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          8,
+          8,
+          5,
+          4,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          2,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1
+        ],
+        "descriptors": [
+          {
+            "index": 0,
+            "gridIndex": 66,
+            "cells": [
+              66
+            ],
+            "doorGridIndices": [
+              65,
+              53,
+              67,
+              79,
+              78,
+              54,
+              80,
+              80
+            ],
+            "doorMask": 4,
+            "template": {
+              "assetStage": 0,
+              "type": 5,
+              "variant": 2050,
+              "name": "Gemini",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 475795725,
+            "spawnSeed": 3198079639,
+            "followingSeed": 227326477,
+            "roomInitSeed": 2340973076,
+            "stage35DrawPositions": [
+              17
+            ]
+          },
+          {
+            "index": 1,
+            "gridIndex": 55,
+            "cells": [
+              55
+            ],
+            "doorGridIndices": [
+              54,
+              42,
+              56,
+              68,
+              67,
+              43,
+              69,
+              69
+            ],
+            "doorMask": 8,
+            "template": {
+              "assetStage": 0,
+              "type": 8,
+              "variant": 3,
+              "name": "",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 868329637,
+            "spawnSeed": 2810408142,
+            "followingSeed": 3219625305,
+            "roomInitSeed": 667528198,
+            "stage35DrawPositions": [
+              18
+            ]
+          },
+          {
+            "index": 2,
+            "gridIndex": 108,
+            "cells": [
+              108
+            ],
+            "doorGridIndices": [
+              107,
+              95,
+              109,
+              121,
+              120,
+              96,
+              122,
+              122
+            ],
+            "doorMask": 2,
+            "template": {
+              "assetStage": 0,
+              "type": 2,
+              "variant": 1,
+              "name": "",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 1325649086,
+            "spawnSeed": 1027758442,
+            "followingSeed": 996732315,
+            "roomInitSeed": 168577003,
+            "stage35DrawPositions": [
+              20
+            ]
+          },
+          {
+            "index": 3,
+            "gridIndex": 70,
+            "cells": [
+              70
+            ],
+            "doorGridIndices": [
+              69,
+              57,
+              71,
+              83,
+              82,
+              58,
+              84,
+              84
+            ],
+            "doorMask": 8,
+            "template": {
+              "assetStage": 0,
+              "type": 4,
+              "variant": 1,
+              "name": "",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 1211003206,
+            "spawnSeed": 1224150820,
+            "followingSeed": 1068723248,
+            "roomInitSeed": 3010699983,
+            "stage35DrawPositions": [
+              21
+            ]
+          },
+          {
+            "index": 4,
+            "gridIndex": 97,
+            "cells": [
+              97
+            ],
+            "doorGridIndices": [
+              96,
+              84,
+              98,
+              110,
+              109,
+              85,
+              111,
+              111
+            ],
+            "doorMask": 3,
+            "template": {
+              "assetStage": 0,
+              "type": 13,
+              "variant": 4,
+              "name": "",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 3313353419,
+            "spawnSeed": 3842585406,
+            "followingSeed": 4186471730,
+            "roomInitSeed": 3495387940,
+            "stage35DrawPositions": [
+              26
+            ]
+          },
+          {
+            "index": 5,
+            "gridIndex": 96,
+            "cells": [
+              96
+            ],
+            "doorGridIndices": [
+              95,
+              83,
+              97,
+              109,
+              108,
+              84,
+              110,
+              110
+            ],
+            "doorMask": 7,
+            "template": {
+              "assetStage": 0,
+              "type": 7,
+              "variant": 3,
+              "name": "",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 3181055364,
+            "spawnSeed": 3966546235,
+            "followingSeed": 1821342566,
+            "roomInitSeed": 3366405948,
+            "stage35DrawPositions": [
+              19
+            ]
+          },
+          {
+            "index": 6,
+            "gridIndex": 84,
+            "cells": [
+              84
+            ],
+            "doorGridIndices": [
+              83,
+              71,
+              85,
+              97,
+              96,
+              72,
+              98,
+              98
+            ],
+            "doorMask": 9,
+            "template": {
+              "assetStage": 0,
+              "type": 1,
+              "variant": 2,
+              "name": "Start Room",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 1853843101,
+            "spawnSeed": 2248015275,
+            "followingSeed": 3853583280,
+            "roomInitSeed": 4043826639,
+            "stage35DrawPositions": [
+              45
+            ]
+          },
+          {
+            "index": 7,
+            "gridIndex": 83,
+            "cells": [
+              83
+            ],
+            "doorGridIndices": [
+              82,
+              70,
+              84,
+              96,
+              95,
+              71,
+              97,
+              97
+            ],
+            "doorMask": 15,
+            "template": {
+              "assetStage": 1,
+              "type": 1,
+              "variant": 240,
+              "name": "New Room",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 3149164838,
+            "spawnSeed": 972238082,
+            "followingSeed": 4026857761,
+            "roomInitSeed": 3907546320,
+            "stage35DrawPositions": [
+              46
+            ]
+          },
+          {
+            "index": 8,
+            "gridIndex": 81,
+            "cells": [
+              81,
+              82,
+              94,
+              95
+            ],
+            "doorGridIndices": [
+              80,
+              68,
+              83,
+              107,
+              93,
+              69,
+              96,
+              108
+            ],
+            "doorMask": 198,
+            "template": {
+              "assetStage": 1,
+              "type": 1,
+              "variant": 423,
+              "name": "New Room",
+              "width": 26,
+              "height": 14,
+              "shapeIndex": 3
+            },
+            "decorationSeed": 3346086951,
+            "spawnSeed": 2688872028,
+            "followingSeed": 2733535187,
+            "roomInitSeed": 2962465585,
+            "stage35DrawPositions": [
+              47
+            ]
+          },
+          {
+            "index": 9,
+            "gridIndex": 68,
+            "cells": [
+              68
+            ],
+            "doorGridIndices": [
+              67,
+              55,
+              69,
+              81,
+              80,
+              56,
+              82,
+              82
+            ],
+            "doorMask": 11,
+            "template": {
+              "assetStage": 1,
+              "type": 1,
+              "variant": 66,
+              "name": "",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 3654115984,
+            "spawnSeed": 817590692,
+            "followingSeed": 1987603176,
+            "roomInitSeed": 2589833460,
+            "stage35DrawPositions": [
+              48
+            ]
+          },
+          {
+            "index": 10,
+            "gridIndex": 67,
+            "cells": [
+              67
+            ],
+            "doorGridIndices": [
+              66,
+              54,
+              68,
+              80,
+              79,
+              55,
+              81,
+              81
+            ],
+            "doorMask": 5,
+            "template": {
+              "assetStage": 1,
+              "type": 1,
+              "variant": 508,
+              "name": "New Room",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 393484499,
+            "spawnSeed": 1174765137,
+            "followingSeed": 2514356516,
+            "roomInitSeed": 2166716757,
+            "stage35DrawPositions": [
+              49
+            ]
+          }
+        ],
+        "stage35CurrentState": 758885348,
+        "stage35DrawPositions": [
+          72
+        ],
+        "stage2CurrentState": 2568741737,
+        "actualPublicLog": {
+          "seed": "W2K0 3EEH",
+          "seedValue": 2583434093,
+          "playerVariant": 0,
+          "playerSubtype": 0,
+          "stage": 1,
+          "altStage": 0,
+          "stageSeed": 2568741737,
+          "rooms": 9,
+          "room": "1.2(Start Room)",
+          "spawnSeed": 2248015275
+        }
+      },
+      "knownFinalizationGap": null
+    },
+    {
+      "seed": "ZY997RMD",
+      "provenance": {
+        "nativeBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+        "sourceOriginalLog": "zy997rmd-original.log",
+        "sourceOriginalLogSha256": "9541dd6c16a9b5efc8328ad516f3a3cf7b9a7738b865598685a80c543196f969",
+        "originalCheckpoint": {
+          "context": {
+            "label": "gameplay-start",
+            "seed": "ZY997RMD",
+            "seedValue": 2731573568,
+            "presentedFrame": 1206,
+            "virtualElapsedNs": 20100402000,
+            "publicLogState": {
+              "seed": "ZY99 7RMD",
+              "seedValue": 2731573568,
+              "playerVariant": 0,
+              "playerSubtype": 0,
+              "stage": 1,
+              "altStage": 0,
+              "stageSeed": 2698756884,
+              "rooms": 9,
+              "room": "1.2(Start Room)",
+              "spawnSeed": 1120786431
+            },
+            "gateBlocked": true,
+            "scope": "reference debug data only; simulation ticks and full internal state not established"
+          }
+        },
+        "memoryWritten": false,
+        "reproductionObserverSha256": "1ea457f97f5141c9e0782ae118c3242f66a8d8e2043d9b0593ed55286aa82210",
+        "originalSourceControllerSha256": "050013d5e6c46cc44fb0928f1bc5be87ba663c01fa37747a6fd1649619ad00df",
+        "sourceController": "zy997rmd-controller.json",
+        "sourceControllerSha256": "1ba4d4b4b1b4fc73bb0744db7543ff3d1b953fb75138a9c01e3b6d1d6ff661c5"
+      },
+      "growthInput": {
+        "generatorSeed": 2269800690,
+        "additionalRooms": 9,
+        "shapeMask": 15
+      },
+      "observation": {
+        "schema": 2,
+        "status": "pass",
+        "memoryWritten": false,
+        "scope": "private source-derived descriptor values; no native addresses exported",
+        "nativeBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+        "checkpoint": "gameplay-start",
+        "stage": 1,
+        "altStage": 0,
+        "curseMask": 0,
+        "descriptorCount": 11,
+        "startingGridIndex": 84,
+        "currentGridIndex": 84,
+        "previousGridIndex": 84,
+        "currentDescriptorIndex": 6,
+        "grid": [
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          3,
+          -1,
+          -1,
+          1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          4,
+          9,
+          9,
+          6,
+          8,
+          10,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          5,
+          9,
+          9,
+          7,
+          -1,
+          10,
+          0,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          2,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1
+        ],
+        "descriptors": [
+          {
+            "index": 0,
+            "gridIndex": 100,
+            "cells": [
+              100
+            ],
+            "doorGridIndices": [
+              99,
+              87,
+              101,
+              113,
+              112,
+              88,
+              114,
+              114
+            ],
+            "doorMask": 1,
+            "template": {
+              "assetStage": 0,
+              "type": 5,
+              "variant": 2012,
+              "name": "The Duke of Flies",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 2915765660,
+            "spawnSeed": 3660815394,
+            "followingSeed": 3009113949,
+            "roomInitSeed": 2415669659,
+            "stage35DrawPositions": [
+              15
+            ]
+          },
+          {
+            "index": 1,
+            "gridIndex": 73,
+            "cells": [
+              73
+            ],
+            "doorGridIndices": [
+              72,
+              60,
+              74,
+              86,
+              85,
+              61,
+              87,
+              87
+            ],
+            "doorMask": 8,
+            "template": {
+              "assetStage": 0,
+              "type": 8,
+              "variant": 2,
+              "name": "",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 2492788830,
+            "spawnSeed": 1768112957,
+            "followingSeed": 4001698759,
+            "roomInitSeed": 2369501675,
+            "stage35DrawPositions": [
+              16
+            ]
+          },
+          {
+            "index": 2,
+            "gridIndex": 112,
+            "cells": [
+              112
+            ],
+            "doorGridIndices": [
+              111,
+              99,
+              113,
+              125,
+              124,
+              100,
+              126,
+              126
+            ],
+            "doorMask": 2,
+            "template": {
+              "assetStage": 0,
+              "type": 2,
+              "variant": 0,
+              "name": "",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 372097171,
+            "spawnSeed": 3231618114,
+            "followingSeed": 2893514910,
+            "roomInitSeed": 1919644258,
+            "stage35DrawPositions": [
+              18
+            ]
+          },
+          {
+            "index": 3,
+            "gridIndex": 70,
+            "cells": [
+              70
+            ],
+            "doorGridIndices": [
+              69,
+              57,
+              71,
+              83,
+              82,
+              58,
+              84,
+              84
+            ],
+            "doorMask": 8,
+            "template": {
+              "assetStage": 0,
+              "type": 4,
+              "variant": 10,
+              "name": " (copy)",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 3786402685,
+            "spawnSeed": 1003562690,
+            "followingSeed": 2814451481,
+            "roomInitSeed": 2158533734,
+            "stage35DrawPositions": [
+              19
+            ]
+          },
+          {
+            "index": 4,
+            "gridIndex": 81,
+            "cells": [
+              81
+            ],
+            "doorGridIndices": [
+              80,
+              68,
+              82,
+              94,
+              93,
+              69,
+              95,
+              95
+            ],
+            "doorMask": 12,
+            "template": {
+              "assetStage": 0,
+              "type": 10,
+              "variant": 2,
+              "name": "",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 1993022257,
+            "spawnSeed": 3623676140,
+            "followingSeed": 3818605579,
+            "roomInitSeed": 1834276522,
+            "stage35DrawPositions": [
+              29
+            ]
+          },
+          {
+            "index": 5,
+            "gridIndex": 94,
+            "cells": [
+              94
+            ],
+            "doorGridIndices": [
+              93,
+              81,
+              95,
+              107,
+              106,
+              82,
+              108,
+              108
+            ],
+            "doorMask": 6,
+            "template": {
+              "assetStage": 0,
+              "type": 7,
+              "variant": 11,
+              "name": " (copy)",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 2116116692,
+            "spawnSeed": 3044004549,
+            "followingSeed": 2187726842,
+            "roomInitSeed": 767629436,
+            "stage35DrawPositions": [
+              17
+            ]
+          },
+          {
+            "index": 6,
+            "gridIndex": 84,
+            "cells": [
+              84
+            ],
+            "doorGridIndices": [
+              83,
+              71,
+              85,
+              97,
+              96,
+              72,
+              98,
+              98
+            ],
+            "doorMask": 13,
+            "template": {
+              "assetStage": 0,
+              "type": 1,
+              "variant": 2,
+              "name": "Start Room",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 3781989004,
+            "spawnSeed": 1120786431,
+            "followingSeed": 1830368721,
+            "roomInitSeed": 3764970664,
+            "stage35DrawPositions": [
+              42
+            ]
+          },
+          {
+            "index": 7,
+            "gridIndex": 97,
+            "cells": [
+              97
+            ],
+            "doorGridIndices": [
+              96,
+              84,
+              98,
+              110,
+              109,
+              85,
+              111,
+              111
+            ],
+            "doorMask": 3,
+            "template": {
+              "assetStage": 1,
+              "type": 1,
+              "variant": 53,
+              "name": "",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 330981789,
+            "spawnSeed": 3178664184,
+            "followingSeed": 2280820589,
+            "roomInitSeed": 810344702,
+            "stage35DrawPositions": [
+              43
+            ]
+          },
+          {
+            "index": 8,
+            "gridIndex": 85,
+            "cells": [
+              85
+            ],
+            "doorGridIndices": [
+              84,
+              72,
+              86,
+              98,
+              97,
+              73,
+              99,
+              99
+            ],
+            "doorMask": 5,
+            "template": {
+              "assetStage": 1,
+              "type": 1,
+              "variant": 100,
+              "name": "",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 4192693254,
+            "spawnSeed": 146888221,
+            "followingSeed": 1917449981,
+            "roomInitSeed": 2912483090,
+            "stage35DrawPositions": [
+              44
+            ]
+          },
+          {
+            "index": 9,
+            "gridIndex": 82,
+            "cells": [
+              82,
+              83,
+              95,
+              96
+            ],
+            "doorGridIndices": [
+              81,
+              69,
+              84,
+              108,
+              94,
+              70,
+              97,
+              109
+            ],
+            "doorMask": 117,
+            "template": {
+              "assetStage": 1,
+              "type": 1,
+              "variant": 409,
+              "name": "New Room",
+              "width": 26,
+              "height": 14,
+              "shapeIndex": 3
+            },
+            "decorationSeed": 1486094251,
+            "spawnSeed": 356367185,
+            "followingSeed": 688691982,
+            "roomInitSeed": 1075072611,
+            "stage35DrawPositions": [
+              45
+            ]
+          },
+          {
+            "index": 10,
+            "gridIndex": 86,
+            "cells": [
+              86,
+              99
+            ],
+            "doorGridIndices": [
+              85,
+              73,
+              87,
+              112,
+              98,
+              74,
+              100,
+              113
+            ],
+            "doorMask": 75,
+            "template": {
+              "assetStage": 1,
+              "type": 1,
+              "variant": 437,
+              "name": "New Room",
+              "width": 13,
+              "height": 14,
+              "shapeIndex": 1
+            },
+            "decorationSeed": 2672982800,
+            "spawnSeed": 4220122579,
+            "followingSeed": 1888980170,
+            "roomInitSeed": 1796953480,
+            "stage35DrawPositions": [
+              46
+            ]
+          }
+        ],
+        "stage35CurrentState": 939244354,
+        "stage35DrawPositions": [
+          69
+        ],
+        "stage2CurrentState": 2698756884,
+        "actualPublicLog": {
+          "seed": "ZY99 7RMD",
+          "seedValue": 2731573568,
+          "playerVariant": 0,
+          "playerSubtype": 0,
+          "stage": 1,
+          "altStage": 0,
+          "stageSeed": 2698756884,
+          "rooms": 9,
+          "room": "1.2(Start Room)",
+          "spawnSeed": 1120786431
+        }
+      },
+      "knownFinalizationGap": null
+    },
+    {
+      "seed": "M9QMYR3N",
+      "provenance": {
+        "nativeBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+        "sourceOriginalLog": "m9qmyr3n-original.log",
+        "sourceOriginalLogSha256": "2fb98c4fabf0ab4c4883fad282e50da87cf00e7656b7c0b26b1ecccaea883017",
+        "originalCheckpoint": {
+          "context": {
+            "label": "gameplay-start",
+            "seed": "M9QMYR3N",
+            "seedValue": 1345570242,
+            "presentedFrame": 1206,
+            "virtualElapsedNs": 20100402000,
+            "publicLogState": {
+              "seed": "M9QM YR3N",
+              "seedValue": 1345570242,
+              "playerVariant": 0,
+              "playerSubtype": 0,
+              "stage": 1,
+              "altStage": 0,
+              "stageSeed": 2949843711,
+              "rooms": 8,
+              "room": "1.2(Start Room)",
+              "spawnSeed": 469126677
+            },
+            "gateBlocked": true,
+            "scope": "reference debug data only; simulation ticks and full internal state not established"
+          }
+        },
+        "memoryWritten": false,
+        "reproductionObserverSha256": "1ea457f97f5141c9e0782ae118c3242f66a8d8e2043d9b0593ed55286aa82210",
+        "originalSourceControllerSha256": "1ba820c61a8de88536865fe846b84af9b6c5383021de2a02c949b98f4c30bfd0",
+        "sourceController": "m9qmyr3n-controller.json",
+        "sourceControllerSha256": "2109f552e59b6cd0cb58eb43fd74256db5f6ba2474ea29434184571e01d10886"
+      },
+      "growthInput": {
+        "generatorSeed": 784697578,
+        "additionalRooms": 8,
+        "shapeMask": 15
+      },
+      "observation": {
+        "schema": 2,
+        "status": "pass",
+        "memoryWritten": false,
+        "scope": "private source-derived descriptor values; no native addresses exported",
+        "nativeBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+        "checkpoint": "gameplay-start",
+        "stage": 1,
+        "altStage": 0,
+        "curseMask": 0,
+        "descriptorCount": 12,
+        "startingGridIndex": 84,
+        "currentGridIndex": 84,
+        "previousGridIndex": 84,
+        "currentDescriptorIndex": 6,
+        "grid": [
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          0,
+          11,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          10,
+          1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          9,
+          -1,
+          3,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          8,
+          8,
+          6,
+          7,
+          4,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          5,
+          2,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1
+        ],
+        "descriptors": [
+          {
+            "index": 0,
+            "gridIndex": 43,
+            "cells": [
+              43
+            ],
+            "doorGridIndices": [
+              42,
+              30,
+              44,
+              56,
+              55,
+              31,
+              57,
+              57
+            ],
+            "doorMask": 4,
+            "template": {
+              "assetStage": 0,
+              "type": 5,
+              "variant": 5142,
+              "name": "Gurglings (copy)",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 4046739243,
+            "spawnSeed": 1910562424,
+            "followingSeed": 2713513195,
+            "roomInitSeed": 1811892803,
+            "stage35DrawPositions": [
+              8
+            ]
+          },
+          {
+            "index": 1,
+            "gridIndex": 58,
+            "cells": [
+              58
+            ],
+            "doorGridIndices": [
+              57,
+              45,
+              59,
+              71,
+              70,
+              46,
+              72,
+              72
+            ],
+            "doorMask": 1,
+            "template": {
+              "assetStage": 0,
+              "type": 8,
+              "variant": 2,
+              "name": "",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 3631228397,
+            "spawnSeed": 3625343653,
+            "followingSeed": 3884331241,
+            "roomInitSeed": 697504565,
+            "stage35DrawPositions": [
+              9
+            ]
+          },
+          {
+            "index": 2,
+            "gridIndex": 96,
+            "cells": [
+              96
+            ],
+            "doorGridIndices": [
+              95,
+              83,
+              97,
+              109,
+              108,
+              84,
+              110,
+              110
+            ],
+            "doorMask": 3,
+            "template": {
+              "assetStage": 0,
+              "type": 2,
+              "variant": 0,
+              "name": "",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 72415049,
+            "spawnSeed": 2809272280,
+            "followingSeed": 3649795820,
+            "roomInitSeed": 851775111,
+            "stage35DrawPositions": [
+              11
+            ]
+          },
+          {
+            "index": 3,
+            "gridIndex": 72,
+            "cells": [
+              72
+            ],
+            "doorGridIndices": [
+              71,
+              59,
+              73,
+              85,
+              84,
+              60,
+              86,
+              86
+            ],
+            "doorMask": 8,
+            "template": {
+              "assetStage": 0,
+              "type": 4,
+              "variant": 2,
+              "name": "",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 768489796,
+            "spawnSeed": 2019167883,
+            "followingSeed": 1076501669,
+            "roomInitSeed": 2486500722,
+            "stage35DrawPositions": [
+              12
+            ]
+          },
+          {
+            "index": 4,
+            "gridIndex": 86,
+            "cells": [
+              86
+            ],
+            "doorGridIndices": [
+              85,
+              73,
+              87,
+              99,
+              98,
+              74,
+              100,
+              100
+            ],
+            "doorMask": 1,
+            "template": {
+              "assetStage": 0,
+              "type": 13,
+              "variant": 4,
+              "name": "",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 1233526641,
+            "spawnSeed": 2826951626,
+            "followingSeed": 2989460064,
+            "roomInitSeed": 2717888184,
+            "stage35DrawPositions": [
+              17
+            ]
+          },
+          {
+            "index": 5,
+            "gridIndex": 95,
+            "cells": [
+              95
+            ],
+            "doorGridIndices": [
+              94,
+              82,
+              96,
+              108,
+              107,
+              83,
+              109,
+              109
+            ],
+            "doorMask": 6,
+            "template": {
+              "assetStage": 0,
+              "type": 7,
+              "variant": 11,
+              "name": " (copy)",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 471457250,
+            "spawnSeed": 2491450089,
+            "followingSeed": 1640067862,
+            "roomInitSeed": 2531738123,
+            "stage35DrawPositions": [
+              10
+            ]
+          },
+          {
+            "index": 6,
+            "gridIndex": 84,
+            "cells": [
+              84
+            ],
+            "doorGridIndices": [
+              83,
+              71,
+              85,
+              97,
+              96,
+              72,
+              98,
+              98
+            ],
+            "doorMask": 5,
+            "template": {
+              "assetStage": 0,
+              "type": 1,
+              "variant": 2,
+              "name": "Start Room",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 2532031247,
+            "spawnSeed": 469126677,
+            "followingSeed": 2561238810,
+            "roomInitSeed": 1012722999,
+            "stage35DrawPositions": [
+              36
+            ]
+          },
+          {
+            "index": 7,
+            "gridIndex": 85,
+            "cells": [
+              85
+            ],
+            "doorGridIndices": [
+              84,
+              72,
+              86,
+              98,
+              97,
+              73,
+              99,
+              99
+            ],
+            "doorMask": 7,
+            "template": {
+              "assetStage": 1,
+              "type": 1,
+              "variant": 50,
+              "name": "",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 3772658636,
+            "spawnSeed": 2891987887,
+            "followingSeed": 998188559,
+            "roomInitSeed": 1093264178,
+            "stage35DrawPositions": [
+              37
+            ]
+          },
+          {
+            "index": 8,
+            "gridIndex": 82,
+            "cells": [
+              82,
+              83
+            ],
+            "doorGridIndices": [
+              81,
+              69,
+              84,
+              95,
+              94,
+              70,
+              97,
+              96
+            ],
+            "doorMask": 172,
+            "template": {
+              "assetStage": 1,
+              "type": 1,
+              "variant": 451,
+              "name": "New Room",
+              "width": 26,
+              "height": 7,
+              "shapeIndex": 2
+            },
+            "decorationSeed": 1935552230,
+            "spawnSeed": 2869864282,
+            "followingSeed": 1736043944,
+            "roomInitSeed": 41683935,
+            "stage35DrawPositions": [
+              38
+            ]
+          },
+          {
+            "index": 9,
+            "gridIndex": 70,
+            "cells": [
+              70
+            ],
+            "doorGridIndices": [
+              69,
+              57,
+              71,
+              83,
+              82,
+              58,
+              84,
+              84
+            ],
+            "doorMask": 10,
+            "template": {
+              "assetStage": 1,
+              "type": 1,
+              "variant": 60,
+              "name": "",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 1787364200,
+            "spawnSeed": 1706582015,
+            "followingSeed": 402239780,
+            "roomInitSeed": 3691223122,
+            "stage35DrawPositions": [
+              39
+            ]
+          },
+          {
+            "index": 10,
+            "gridIndex": 57,
+            "cells": [
+              57
+            ],
+            "doorGridIndices": [
+              56,
+              44,
+              58,
+              70,
+              69,
+              45,
+              71,
+              71
+            ],
+            "doorMask": 14,
+            "template": {
+              "assetStage": 1,
+              "type": 1,
+              "variant": 51,
+              "name": "",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 1209525202,
+            "spawnSeed": 1396049890,
+            "followingSeed": 3127220063,
+            "roomInitSeed": 500265433,
+            "stage35DrawPositions": [
+              40
+            ]
+          },
+          {
+            "index": 11,
+            "gridIndex": 44,
+            "cells": [
+              44
+            ],
+            "doorGridIndices": [
+              43,
+              31,
+              45,
+              57,
+              56,
+              32,
+              58,
+              58
+            ],
+            "doorMask": 9,
+            "template": {
+              "assetStage": 1,
+              "type": 1,
+              "variant": 34,
+              "name": "",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 1009404009,
+            "spawnSeed": 2736538882,
+            "followingSeed": 1715621368,
+            "roomInitSeed": 1645134591,
+            "stage35DrawPositions": [
+              41
+            ]
+          }
+        ],
+        "stage35CurrentState": 225287543,
+        "stage35DrawPositions": [
+          64
+        ],
+        "stage2CurrentState": 2949843711,
+        "actualPublicLog": {
+          "seed": "M9QM YR3N",
+          "seedValue": 1345570242,
+          "playerVariant": 0,
+          "playerSubtype": 0,
+          "stage": 1,
+          "altStage": 0,
+          "stageSeed": 2949843711,
+          "rooms": 8,
+          "room": "1.2(Start Room)",
+          "spawnSeed": 469126677
+        }
+      },
+      "knownFinalizationGap": null
+    },
+    {
+      "seed": "GTJ617ZW",
+      "provenance": {
+        "nativeBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+        "sourceOriginalLog": "gtj617zw-original.log",
+        "sourceOriginalLogSha256": "4f1915cc7dedffc34a225b3cdd4f2526f815b2b6d0d2caf85e55b06addcf14e3",
+        "originalCheckpoint": {
+          "context": {
+            "label": "gameplay-start",
+            "seed": "GTJ617ZW",
+            "seedValue": 1002353675,
+            "presentedFrame": 1206,
+            "virtualElapsedNs": 20100402000,
+            "publicLogState": {
+              "seed": "GTJ6 17ZW",
+              "seedValue": 1002353675,
+              "playerVariant": 0,
+              "playerSubtype": 0,
+              "stage": 1,
+              "altStage": 0,
+              "stageSeed": 116412131,
+              "rooms": 8,
+              "room": "1.2(Start Room)",
+              "spawnSeed": 1239365658
+            },
+            "gateBlocked": true,
+            "scope": "reference debug data only; simulation ticks and full internal state not established"
+          }
+        },
+        "memoryWritten": false,
+        "reproductionObserverSha256": "1ea457f97f5141c9e0782ae118c3242f66a8d8e2043d9b0593ed55286aa82210",
+        "originalSourceControllerSha256": "8a3c22f66433312575531c10d54cecf4ae4415296c4d4d187cef737d8148e406",
+        "sourceController": "gtj617zw-controller.json",
+        "sourceControllerSha256": "68d28bd5dccc5383210f77d9cc49bc1dece42ba4ab4cbb1e03235f1fa3841818"
+      },
+      "growthInput": {
+        "generatorSeed": 3355027749,
+        "additionalRooms": 8,
+        "shapeMask": 15
+      },
+      "observation": {
+        "schema": 2,
+        "status": "pass",
+        "memoryWritten": false,
+        "scope": "private source-derived descriptor values; no native addresses exported",
+        "nativeBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+        "checkpoint": "gameplay-start",
+        "stage": 1,
+        "altStage": 0,
+        "curseMask": 0,
+        "descriptorCount": 10,
+        "startingGridIndex": 84,
+        "currentGridIndex": 84,
+        "previousGridIndex": 84,
+        "currentDescriptorIndex": 5,
+        "grid": [
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          8,
+          0,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          2,
+          6,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          6,
+          4,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          5,
+          7,
+          3,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          9,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1
+        ],
+        "descriptors": [
+          {
+            "index": 0,
+            "gridIndex": 46,
+            "cells": [
+              46
+            ],
+            "doorGridIndices": [
+              45,
+              33,
+              47,
+              59,
+              58,
+              34,
+              60,
+              60
+            ],
+            "doorMask": 1,
+            "template": {
+              "assetStage": 0,
+              "type": 5,
+              "variant": 5142,
+              "name": "Gurglings (copy)",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 2796462278,
+            "spawnSeed": 226997198,
+            "followingSeed": 2113348957,
+            "roomInitSeed": 3365887454,
+            "stage35DrawPositions": [
+              8
+            ]
+          },
+          {
+            "index": 1,
+            "gridIndex": 32,
+            "cells": [
+              32
+            ],
+            "doorGridIndices": [
+              31,
+              19,
+              33,
+              45,
+              44,
+              20,
+              46,
+              46
+            ],
+            "doorMask": 8,
+            "template": {
+              "assetStage": 0,
+              "type": 8,
+              "variant": 0,
+              "name": "",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 4176008542,
+            "spawnSeed": 2952082939,
+            "followingSeed": 2155094040,
+            "roomInitSeed": 2036788414,
+            "stage35DrawPositions": [
+              9
+            ]
+          },
+          {
+            "index": 2,
+            "gridIndex": 57,
+            "cells": [
+              57
+            ],
+            "doorGridIndices": [
+              56,
+              44,
+              58,
+              70,
+              69,
+              45,
+              71,
+              71
+            ],
+            "doorMask": 4,
+            "template": {
+              "assetStage": 0,
+              "type": 2,
+              "variant": 1,
+              "name": "",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 526603226,
+            "spawnSeed": 1163570468,
+            "followingSeed": 1378236277,
+            "roomInitSeed": 2221916639,
+            "stage35DrawPositions": [
+              11
+            ]
+          },
+          {
+            "index": 3,
+            "gridIndex": 86,
+            "cells": [
+              86
+            ],
+            "doorGridIndices": [
+              85,
+              73,
+              87,
+              99,
+              98,
+              74,
+              100,
+              100
+            ],
+            "doorMask": 1,
+            "template": {
+              "assetStage": 0,
+              "type": 4,
+              "variant": 4,
+              "name": "",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 3213640902,
+            "spawnSeed": 2811645088,
+            "followingSeed": 3083326853,
+            "roomInitSeed": 419527658,
+            "stage35DrawPositions": [
+              12
+            ]
+          },
+          {
+            "index": 4,
+            "gridIndex": 72,
+            "cells": [
+              72
+            ],
+            "doorGridIndices": [
+              71,
+              59,
+              73,
+              85,
+              84,
+              60,
+              86,
+              86
+            ],
+            "doorMask": 9,
+            "template": {
+              "assetStage": 0,
+              "type": 7,
+              "variant": 8,
+              "name": "",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 2927557559,
+            "spawnSeed": 1970882990,
+            "followingSeed": 2073504825,
+            "roomInitSeed": 559438080,
+            "stage35DrawPositions": [
+              10
+            ]
+          },
+          {
+            "index": 5,
+            "gridIndex": 84,
+            "cells": [
+              84
+            ],
+            "doorGridIndices": [
+              83,
+              71,
+              85,
+              97,
+              96,
+              72,
+              98,
+              98
+            ],
+            "doorMask": 14,
+            "template": {
+              "assetStage": 0,
+              "type": 1,
+              "variant": 2,
+              "name": "Start Room",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 1658047285,
+            "spawnSeed": 1239365658,
+            "followingSeed": 2408845792,
+            "roomInitSeed": 1787078538,
+            "stage35DrawPositions": [
+              37
+            ]
+          },
+          {
+            "index": 6,
+            "gridIndex": 58,
+            "cells": [
+              58,
+              71
+            ],
+            "doorGridIndices": [
+              57,
+              45,
+              59,
+              84,
+              70,
+              46,
+              72,
+              85
+            ],
+            "doorMask": 75,
+            "template": {
+              "assetStage": 1,
+              "type": 1,
+              "variant": 355,
+              "name": "New Room",
+              "width": 13,
+              "height": 14,
+              "shapeIndex": 1
+            },
+            "decorationSeed": 1904710423,
+            "spawnSeed": 2660429853,
+            "followingSeed": 570509626,
+            "roomInitSeed": 3376694635,
+            "stage35DrawPositions": [
+              38
+            ]
+          },
+          {
+            "index": 7,
+            "gridIndex": 85,
+            "cells": [
+              85
+            ],
+            "doorGridIndices": [
+              84,
+              72,
+              86,
+              98,
+              97,
+              73,
+              99,
+              99
+            ],
+            "doorMask": 7,
+            "template": {
+              "assetStage": 1,
+              "type": 1,
+              "variant": 5,
+              "name": "",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 2582509881,
+            "spawnSeed": 1961842281,
+            "followingSeed": 2211754190,
+            "roomInitSeed": 3529991822,
+            "stage35DrawPositions": [
+              39
+            ]
+          },
+          {
+            "index": 8,
+            "gridIndex": 45,
+            "cells": [
+              45
+            ],
+            "doorGridIndices": [
+              44,
+              32,
+              46,
+              58,
+              57,
+              33,
+              59,
+              59
+            ],
+            "doorMask": 14,
+            "template": {
+              "assetStage": 1,
+              "type": 1,
+              "variant": 201,
+              "name": "New Room",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 2923452474,
+            "spawnSeed": 1841409950,
+            "followingSeed": 776261893,
+            "roomInitSeed": 1010284521,
+            "stage35DrawPositions": [
+              40
+            ]
+          },
+          {
+            "index": 9,
+            "gridIndex": 97,
+            "cells": [
+              97
+            ],
+            "doorGridIndices": [
+              96,
+              84,
+              98,
+              110,
+              109,
+              85,
+              111,
+              111
+            ],
+            "doorMask": 2,
+            "template": {
+              "assetStage": 1,
+              "type": 1,
+              "variant": 188,
+              "name": "New Room",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 3623924638,
+            "spawnSeed": 3996648552,
+            "followingSeed": 246670892,
+            "roomInitSeed": 2430673690,
+            "stage35DrawPositions": [
+              41
+            ]
+          }
+        ],
+        "stage35CurrentState": 3102937439,
+        "stage35DrawPositions": [
+          64
+        ],
+        "stage2CurrentState": 116412131,
+        "actualPublicLog": {
+          "seed": "GTJ6 17ZW",
+          "seedValue": 1002353675,
+          "playerVariant": 0,
+          "playerSubtype": 0,
+          "stage": 1,
+          "altStage": 0,
+          "stageSeed": 116412131,
+          "rooms": 8,
+          "room": "1.2(Start Room)",
+          "spawnSeed": 1239365658
+        }
+      },
+      "knownFinalizationGap": null
+    },
+    {
+      "seed": "MZ699MM1",
+      "provenance": {
+        "nativeBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+        "sourceOriginalLog": "mz699mm1-original.log",
+        "sourceOriginalLogSha256": "a34b3348142d85bda8c4846a679fb3ccce0acac63f07f5411e9add579d52828f",
+        "originalCheckpoint": {
+          "context": {
+            "label": "gameplay-start",
+            "seed": "MZ699MM1",
+            "seedValue": 1385594960,
+            "presentedFrame": 1206,
+            "virtualElapsedNs": 20100402000,
+            "publicLogState": {
+              "seed": "MZ69 9MM1",
+              "seedValue": 1385594960,
+              "playerVariant": 0,
+              "playerSubtype": 0,
+              "stage": 1,
+              "altStage": 0,
+              "stageSeed": 1300027978,
+              "rooms": 8,
+              "room": "1.2(Start Room)",
+              "spawnSeed": 3651157841
+            },
+            "gateBlocked": true,
+            "scope": "reference debug data only; simulation ticks and full internal state not established"
+          }
+        },
+        "memoryWritten": false,
+        "reproductionObserverSha256": "1ea457f97f5141c9e0782ae118c3242f66a8d8e2043d9b0593ed55286aa82210",
+        "originalSourceControllerSha256": "719c43467728e86169b4ddff820858cb88f4efa8e52a9e363dd1dde923958adb",
+        "sourceController": "mz699mm1-controller.json",
+        "sourceControllerSha256": "eeeef63e7ed72f129d7dde649a8c845a3f37d7bc9ce9e936eae91bada4d2ea1a"
+      },
+      "growthInput": {
+        "generatorSeed": 2944298398,
+        "additionalRooms": 8,
+        "shapeMask": 15
+      },
+      "observation": {
+        "schema": 2,
+        "status": "pass",
+        "memoryWritten": false,
+        "scope": "private source-derived descriptor values; no native addresses exported",
+        "nativeBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+        "checkpoint": "gameplay-start",
+        "stage": 1,
+        "altStage": 0,
+        "curseMask": 0,
+        "descriptorCount": 11,
+        "startingGridIndex": 84,
+        "currentGridIndex": 84,
+        "previousGridIndex": 84,
+        "currentDescriptorIndex": 6,
+        "grid": [
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          0,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          9,
+          9,
+          10,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          1,
+          8,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          7,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          4,
+          6,
+          3,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          2,
+          5,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1
+        ],
+        "descriptors": [
+          {
+            "index": 0,
+            "gridIndex": 34,
+            "cells": [
+              34
+            ],
+            "doorGridIndices": [
+              33,
+              21,
+              35,
+              47,
+              46,
+              22,
+              48,
+              48
+            ],
+            "doorMask": 8,
+            "template": {
+              "assetStage": 0,
+              "type": 5,
+              "variant": 1024,
+              "name": "Larry Jr.",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 67922600,
+            "spawnSeed": 2197170874,
+            "followingSeed": 2279106497,
+            "roomInitSeed": 4128865767,
+            "stage35DrawPositions": [
+              21
+            ]
+          },
+          {
+            "index": 1,
+            "gridIndex": 57,
+            "cells": [
+              57
+            ],
+            "doorGridIndices": [
+              56,
+              44,
+              58,
+              70,
+              69,
+              45,
+              71,
+              71
+            ],
+            "doorMask": 4,
+            "template": {
+              "assetStage": 0,
+              "type": 8,
+              "variant": 3,
+              "name": "",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 997102851,
+            "spawnSeed": 4015687499,
+            "followingSeed": 2463507884,
+            "roomInitSeed": 2743086404,
+            "stage35DrawPositions": [
+              22
+            ]
+          },
+          {
+            "index": 2,
+            "gridIndex": 97,
+            "cells": [
+              97
+            ],
+            "doorGridIndices": [
+              96,
+              84,
+              98,
+              110,
+              109,
+              85,
+              111,
+              111
+            ],
+            "doorMask": 6,
+            "template": {
+              "assetStage": 0,
+              "type": 2,
+              "variant": 0,
+              "name": "",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 1482569751,
+            "spawnSeed": 1789392461,
+            "followingSeed": 1999659308,
+            "roomInitSeed": 2521233222,
+            "stage35DrawPositions": [
+              24
+            ]
+          },
+          {
+            "index": 3,
+            "gridIndex": 85,
+            "cells": [
+              85
+            ],
+            "doorGridIndices": [
+              84,
+              72,
+              86,
+              98,
+              97,
+              73,
+              99,
+              99
+            ],
+            "doorMask": 9,
+            "template": {
+              "assetStage": 0,
+              "type": 4,
+              "variant": 7,
+              "name": " (copy)",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 3566881078,
+            "spawnSeed": 1070501448,
+            "followingSeed": 784110906,
+            "roomInitSeed": 2072236685,
+            "stage35DrawPositions": [
+              25
+            ]
+          },
+          {
+            "index": 4,
+            "gridIndex": 83,
+            "cells": [
+              83
+            ],
+            "doorGridIndices": [
+              82,
+              70,
+              84,
+              96,
+              95,
+              71,
+              97,
+              97
+            ],
+            "doorMask": 4,
+            "template": {
+              "assetStage": 0,
+              "type": 13,
+              "variant": 0,
+              "name": "",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 844109610,
+            "spawnSeed": 1558381649,
+            "followingSeed": 2791996278,
+            "roomInitSeed": 451246019,
+            "stage35DrawPositions": [
+              29
+            ]
+          },
+          {
+            "index": 5,
+            "gridIndex": 98,
+            "cells": [
+              98
+            ],
+            "doorGridIndices": [
+              97,
+              85,
+              99,
+              111,
+              110,
+              86,
+              112,
+              112
+            ],
+            "doorMask": 3,
+            "template": {
+              "assetStage": 0,
+              "type": 7,
+              "variant": 4,
+              "name": "",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 3147373057,
+            "spawnSeed": 717517967,
+            "followingSeed": 449634163,
+            "roomInitSeed": 2683959502,
+            "stage35DrawPositions": [
+              23
+            ]
+          },
+          {
+            "index": 6,
+            "gridIndex": 84,
+            "cells": [
+              84
+            ],
+            "doorGridIndices": [
+              83,
+              71,
+              85,
+              97,
+              96,
+              72,
+              98,
+              98
+            ],
+            "doorMask": 15,
+            "template": {
+              "assetStage": 0,
+              "type": 1,
+              "variant": 2,
+              "name": "Start Room",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 3440117297,
+            "spawnSeed": 3651157841,
+            "followingSeed": 198548028,
+            "roomInitSeed": 887008373,
+            "stage35DrawPositions": [
+              48
+            ]
+          },
+          {
+            "index": 7,
+            "gridIndex": 71,
+            "cells": [
+              71
+            ],
+            "doorGridIndices": [
+              70,
+              58,
+              72,
+              84,
+              83,
+              59,
+              85,
+              85
+            ],
+            "doorMask": 10,
+            "template": {
+              "assetStage": 1,
+              "type": 1,
+              "variant": 181,
+              "name": "New Room",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 1572050607,
+            "spawnSeed": 628376188,
+            "followingSeed": 949773170,
+            "roomInitSeed": 3292652028,
+            "stage35DrawPositions": [
+              49
+            ]
+          },
+          {
+            "index": 8,
+            "gridIndex": 58,
+            "cells": [
+              58
+            ],
+            "doorGridIndices": [
+              57,
+              45,
+              59,
+              71,
+              70,
+              46,
+              72,
+              72
+            ],
+            "doorMask": 11,
+            "template": {
+              "assetStage": 1,
+              "type": 1,
+              "variant": 249,
+              "name": "New Room",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 1761125048,
+            "spawnSeed": 294338774,
+            "followingSeed": 3780211091,
+            "roomInitSeed": 95778018,
+            "stage35DrawPositions": [
+              50
+            ]
+          },
+          {
+            "index": 9,
+            "gridIndex": 45,
+            "cells": [
+              45,
+              46
+            ],
+            "doorGridIndices": [
+              44,
+              32,
+              47,
+              58,
+              57,
+              33,
+              60,
+              59
+            ],
+            "doorMask": 12,
+            "template": {
+              "assetStage": 1,
+              "type": 1,
+              "variant": 393,
+              "name": "New Room",
+              "width": 26,
+              "height": 7,
+              "shapeIndex": 2
+            },
+            "decorationSeed": 2547621054,
+            "spawnSeed": 2776685064,
+            "followingSeed": 4243120862,
+            "roomInitSeed": 877533679,
+            "stage35DrawPositions": [
+              51
+            ]
+          },
+          {
+            "index": 10,
+            "gridIndex": 47,
+            "cells": [
+              47
+            ],
+            "doorGridIndices": [
+              46,
+              34,
+              48,
+              60,
+              59,
+              35,
+              61,
+              61
+            ],
+            "doorMask": 3,
+            "template": {
+              "assetStage": 1,
+              "type": 1,
+              "variant": 92,
+              "name": "",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 962718085,
+            "spawnSeed": 2879756756,
+            "followingSeed": 656455350,
+            "roomInitSeed": 3974387058,
+            "stage35DrawPositions": [
+              52
+            ]
+          }
+        ],
+        "stage35CurrentState": 3622893199,
+        "stage35DrawPositions": [
+          75
+        ],
+        "stage2CurrentState": 1300027978,
+        "actualPublicLog": {
+          "seed": "MZ69 9MM1",
+          "seedValue": 1385594960,
+          "playerVariant": 0,
+          "playerSubtype": 0,
+          "stage": 1,
+          "altStage": 0,
+          "stageSeed": 1300027978,
+          "rooms": 8,
+          "room": "1.2(Start Room)",
+          "spawnSeed": 3651157841
+        }
+      },
+      "knownFinalizationGap": null
+    },
+    {
+      "seed": "MPCMQQN6",
+      "provenance": {
+        "nativeBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+        "sourceOriginalLog": "mpcmqqn6-original.log",
+        "sourceOriginalLogSha256": "e6e5d8d9cf4b3d1c8ccfc4f2f3b4d0b5c40453995cba749adefacf777a4aa9b4",
+        "originalCheckpoint": {
+          "context": {
+            "label": "gameplay-start",
+            "seed": "MPCMQQN6",
+            "seedValue": 1420544196,
+            "presentedFrame": 1206,
+            "virtualElapsedNs": 20100402000,
+            "publicLogState": {
+              "seed": "MPCM QQN6",
+              "seedValue": 1420544196,
+              "playerVariant": 0,
+              "playerSubtype": 0,
+              "stage": 1,
+              "altStage": 0,
+              "stageSeed": 2084136842,
+              "rooms": 9,
+              "room": "1.2(Start Room)",
+              "spawnSeed": 3960296288
+            },
+            "gateBlocked": true,
+            "scope": "reference debug data only; simulation ticks and full internal state not established"
+          }
+        },
+        "memoryWritten": false,
+        "reproductionObserverSha256": "1ea457f97f5141c9e0782ae118c3242f66a8d8e2043d9b0593ed55286aa82210",
+        "originalSourceControllerSha256": "8a3adb03e591e2de1cf2f316dcaa2c87a5cdfe98f70c64157645b85855c47b27",
+        "sourceController": "mpcmqqn6-controller.json",
+        "sourceControllerSha256": "577ada48ab06c2aa9acb0ba5db24aed32c1493ae509e2bec22ebeef71b577caa"
+      },
+      "growthInput": {
+        "generatorSeed": 2352252874,
+        "additionalRooms": 9,
+        "shapeMask": 15
+      },
+      "observation": {
+        "schema": 2,
+        "status": "pass",
+        "memoryWritten": false,
+        "scope": "private source-derived descriptor values; no native addresses exported",
+        "nativeBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+        "checkpoint": "gameplay-start",
+        "stage": 1,
+        "altStage": 0,
+        "curseMask": 0,
+        "descriptorCount": 11,
+        "startingGridIndex": 84,
+        "currentGridIndex": 84,
+        "previousGridIndex": 84,
+        "currentDescriptorIndex": 6,
+        "grid": [
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          0,
+          9,
+          8,
+          8,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          8,
+          8,
+          2,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          7,
+          7,
+          5,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          4,
+          6,
+          7,
+          7,
+          10,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          3,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1
+        ],
+        "descriptors": [
+          {
+            "index": 0,
+            "gridIndex": 45,
+            "cells": [
+              45
+            ],
+            "doorGridIndices": [
+              44,
+              32,
+              46,
+              58,
+              57,
+              33,
+              59,
+              59
+            ],
+            "doorMask": 4,
+            "template": {
+              "assetStage": 0,
+              "type": 5,
+              "variant": 2051,
+              "name": "Gemini",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 4191129571,
+            "spawnSeed": 428254379,
+            "followingSeed": 3960995303,
+            "roomInitSeed": 2584242271,
+            "stage35DrawPositions": [
+              17
+            ]
+          },
+          {
+            "index": 1,
+            "gridIndex": 33,
+            "cells": [
+              33
+            ],
+            "doorGridIndices": [
+              32,
+              20,
+              34,
+              46,
+              45,
+              21,
+              47,
+              47
+            ],
+            "doorMask": 8,
+            "template": {
+              "assetStage": 0,
+              "type": 8,
+              "variant": 2,
+              "name": "",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 2529932811,
+            "spawnSeed": 265516358,
+            "followingSeed": 536631878,
+            "roomInitSeed": 785583423,
+            "stage35DrawPositions": [
+              18
+            ]
+          },
+          {
+            "index": 2,
+            "gridIndex": 62,
+            "cells": [
+              62
+            ],
+            "doorGridIndices": [
+              61,
+              49,
+              63,
+              75,
+              74,
+              50,
+              76,
+              76
+            ],
+            "doorMask": 1,
+            "template": {
+              "assetStage": 0,
+              "type": 2,
+              "variant": 1,
+              "name": "",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 1279046664,
+            "spawnSeed": 3332137860,
+            "followingSeed": 1790151297,
+            "roomInitSeed": 2920725573,
+            "stage35DrawPositions": [
+              20
+            ]
+          },
+          {
+            "index": 3,
+            "gridIndex": 99,
+            "cells": [
+              99
+            ],
+            "doorGridIndices": [
+              98,
+              86,
+              100,
+              112,
+              111,
+              87,
+              113,
+              113
+            ],
+            "doorMask": 2,
+            "template": {
+              "assetStage": 0,
+              "type": 4,
+              "variant": 6,
+              "name": " (copy)",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 1423707225,
+            "spawnSeed": 3023478427,
+            "followingSeed": 77984878,
+            "roomInitSeed": 1740352808,
+            "stage35DrawPositions": [
+              21
+            ]
+          },
+          {
+            "index": 4,
+            "gridIndex": 83,
+            "cells": [
+              83
+            ],
+            "doorGridIndices": [
+              82,
+              70,
+              84,
+              96,
+              95,
+              71,
+              97,
+              97
+            ],
+            "doorMask": 4,
+            "template": {
+              "assetStage": 0,
+              "type": 6,
+              "variant": 2022,
+              "name": "Lust",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 1514342569,
+            "spawnSeed": 623120454,
+            "followingSeed": 451562568,
+            "roomInitSeed": 1873836600,
+            "stage35DrawPositions": [
+              36
+            ]
+          },
+          {
+            "index": 5,
+            "gridIndex": 74,
+            "cells": [
+              74
+            ],
+            "doorGridIndices": [
+              73,
+              61,
+              75,
+              87,
+              86,
+              62,
+              88,
+              88
+            ],
+            "doorMask": 11,
+            "template": {
+              "assetStage": 0,
+              "type": 7,
+              "variant": 12,
+              "name": " (copy)",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 3605764097,
+            "spawnSeed": 1271630270,
+            "followingSeed": 3320726800,
+            "roomInitSeed": 1682319140,
+            "stage35DrawPositions": [
+              19
+            ]
+          },
+          {
+            "index": 6,
+            "gridIndex": 84,
+            "cells": [
+              84
+            ],
+            "doorGridIndices": [
+              83,
+              71,
+              85,
+              97,
+              96,
+              72,
+              98,
+              98
+            ],
+            "doorMask": 5,
+            "template": {
+              "assetStage": 0,
+              "type": 1,
+              "variant": 2,
+              "name": "Start Room",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 2159344569,
+            "spawnSeed": 3960296288,
+            "followingSeed": 1344658773,
+            "roomInitSeed": 1853345483,
+            "stage35DrawPositions": [
+              45
+            ]
+          },
+          {
+            "index": 7,
+            "gridIndex": 72,
+            "cells": [
+              72,
+              73,
+              85,
+              86
+            ],
+            "doorGridIndices": [
+              71,
+              59,
+              74,
+              98,
+              84,
+              60,
+              87,
+              99
+            ],
+            "doorMask": 244,
+            "template": {
+              "assetStage": 1,
+              "type": 1,
+              "variant": 409,
+              "name": "New Room",
+              "width": 26,
+              "height": 14,
+              "shapeIndex": 3
+            },
+            "decorationSeed": 1325031194,
+            "spawnSeed": 4284429967,
+            "followingSeed": 2226591642,
+            "roomInitSeed": 1697562792,
+            "stage35DrawPositions": [
+              46
+            ]
+          },
+          {
+            "index": 8,
+            "gridIndex": 47,
+            "cells": [
+              47,
+              48,
+              60,
+              61
+            ],
+            "doorGridIndices": [
+              46,
+              34,
+              49,
+              73,
+              59,
+              35,
+              62,
+              74
+            ],
+            "doorMask": 201,
+            "template": {
+              "assetStage": 1,
+              "type": 1,
+              "variant": 429,
+              "name": "New Room",
+              "width": 26,
+              "height": 14,
+              "shapeIndex": 3
+            },
+            "decorationSeed": 2558641528,
+            "spawnSeed": 3993803509,
+            "followingSeed": 307802244,
+            "roomInitSeed": 1773681012,
+            "stage35DrawPositions": [
+              47
+            ]
+          },
+          {
+            "index": 9,
+            "gridIndex": 46,
+            "cells": [
+              46
+            ],
+            "doorGridIndices": [
+              45,
+              33,
+              47,
+              59,
+              58,
+              34,
+              60,
+              60
+            ],
+            "doorMask": 7,
+            "template": {
+              "assetStage": 1,
+              "type": 1,
+              "variant": 241,
+              "name": "New Room",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 2747321311,
+            "spawnSeed": 323341086,
+            "followingSeed": 3718689139,
+            "roomInitSeed": 2147913650,
+            "stage35DrawPositions": [
+              48
+            ]
+          },
+          {
+            "index": 10,
+            "gridIndex": 87,
+            "cells": [
+              87
+            ],
+            "doorGridIndices": [
+              86,
+              74,
+              88,
+              100,
+              99,
+              75,
+              101,
+              101
+            ],
+            "doorMask": 3,
+            "template": {
+              "assetStage": 1,
+              "type": 1,
+              "variant": 64,
+              "name": "",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 2544628967,
+            "spawnSeed": 2458682413,
+            "followingSeed": 2712520893,
+            "roomInitSeed": 2288240516,
+            "stage35DrawPositions": [
+              49
+            ]
+          }
+        ],
+        "stage35CurrentState": 3292970133,
+        "stage35DrawPositions": [
+          72
+        ],
+        "stage2CurrentState": 2084136842,
+        "actualPublicLog": {
+          "seed": "MPCM QQN6",
+          "seedValue": 1420544196,
+          "playerVariant": 0,
+          "playerSubtype": 0,
+          "stage": 1,
+          "altStage": 0,
+          "stageSeed": 2084136842,
+          "rooms": 9,
+          "room": "1.2(Start Room)",
+          "spawnSeed": 3960296288
+        }
+      },
+      "knownFinalizationGap": "special-assignment-resizes-generated-rectangle"
+    },
+    {
+      "seed": "BLH334RQ",
+      "provenance": {
+        "nativeBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+        "sourceOriginalLog": "blh334rq-original.log",
+        "sourceOriginalLogSha256": "a9499fb67f94f12f03f171feec9a9335092ab976b89ab5aa53eb724ad9d044e2",
+        "originalCheckpoint": {
+          "context": {
+            "label": "gameplay-start",
+            "seed": "BLH334RQ",
+            "seedValue": 90235668,
+            "presentedFrame": 1206,
+            "virtualElapsedNs": 20100402000,
+            "publicLogState": {
+              "seed": "BLH3 34RQ",
+              "seedValue": 90235668,
+              "playerVariant": 0,
+              "playerSubtype": 0,
+              "stage": 1,
+              "altStage": 0,
+              "stageSeed": 3474284715,
+              "rooms": 8,
+              "room": "1.2(Start Room)",
+              "spawnSeed": 4054590488
+            },
+            "gateBlocked": true,
+            "scope": "reference debug data only; simulation ticks and full internal state not established"
+          }
+        },
+        "memoryWritten": false,
+        "reproductionObserverSha256": "1ea457f97f5141c9e0782ae118c3242f66a8d8e2043d9b0593ed55286aa82210",
+        "originalSourceControllerSha256": "ce42f8c2ffed870429525f14ecb851f27cfccaf2b6a21fb95b9323d4b26a7928",
+        "sourceController": "blh334rq-controller.json",
+        "sourceControllerSha256": "43777d1ddd1c82a15511d1b059400fd2b6be72522bad31c655ffa0bd3cfad6af"
+      },
+      "growthInput": {
+        "generatorSeed": 1616017197,
+        "additionalRooms": 8,
+        "shapeMask": 15
+      },
+      "observation": {
+        "schema": 2,
+        "status": "pass",
+        "memoryWritten": false,
+        "scope": "private source-derived descriptor values; no native addresses exported",
+        "nativeBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+        "checkpoint": "gameplay-start",
+        "stage": 1,
+        "altStage": 0,
+        "curseMask": 0,
+        "descriptorCount": 11,
+        "startingGridIndex": 84,
+        "currentGridIndex": 84,
+        "previousGridIndex": 84,
+        "currentDescriptorIndex": 6,
+        "grid": [
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          0,
+          10,
+          9,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          5,
+          8,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          4,
+          6,
+          7,
+          2,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          3,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1
+        ],
+        "descriptors": [
+          {
+            "index": 0,
+            "gridIndex": 57,
+            "cells": [
+              57
+            ],
+            "doorGridIndices": [
+              56,
+              44,
+              58,
+              70,
+              69,
+              45,
+              71,
+              71
+            ],
+            "doorMask": 4,
+            "template": {
+              "assetStage": 0,
+              "type": 5,
+              "variant": 5021,
+              "name": "Dingle (copy)",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 241324398,
+            "spawnSeed": 4041216922,
+            "followingSeed": 2692989096,
+            "roomInitSeed": 3651735475,
+            "stage35DrawPositions": [
+              8
+            ]
+          },
+          {
+            "index": 1,
+            "gridIndex": 46,
+            "cells": [
+              46
+            ],
+            "doorGridIndices": [
+              45,
+              33,
+              47,
+              59,
+              58,
+              34,
+              60,
+              60
+            ],
+            "doorMask": 8,
+            "template": {
+              "assetStage": 0,
+              "type": 8,
+              "variant": 2,
+              "name": "",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 146204089,
+            "spawnSeed": 1192668620,
+            "followingSeed": 1062203667,
+            "roomInitSeed": 398724217,
+            "stage35DrawPositions": [
+              9
+            ]
+          },
+          {
+            "index": 2,
+            "gridIndex": 86,
+            "cells": [
+              86
+            ],
+            "doorGridIndices": [
+              85,
+              73,
+              87,
+              99,
+              98,
+              74,
+              100,
+              100
+            ],
+            "doorMask": 1,
+            "template": {
+              "assetStage": 0,
+              "type": 2,
+              "variant": 1,
+              "name": "",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 3873288495,
+            "spawnSeed": 1781624147,
+            "followingSeed": 774973085,
+            "roomInitSeed": 50918682,
+            "stage35DrawPositions": [
+              11
+            ]
+          },
+          {
+            "index": 3,
+            "gridIndex": 97,
+            "cells": [
+              97
+            ],
+            "doorGridIndices": [
+              96,
+              84,
+              98,
+              110,
+              109,
+              85,
+              111,
+              111
+            ],
+            "doorMask": 2,
+            "template": {
+              "assetStage": 0,
+              "type": 4,
+              "variant": 7,
+              "name": " (copy)",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 1950243959,
+            "spawnSeed": 4054619221,
+            "followingSeed": 772284104,
+            "roomInitSeed": 573652255,
+            "stage35DrawPositions": [
+              12
+            ]
+          },
+          {
+            "index": 4,
+            "gridIndex": 83,
+            "cells": [
+              83
+            ],
+            "doorGridIndices": [
+              82,
+              70,
+              84,
+              96,
+              95,
+              71,
+              97,
+              97
+            ],
+            "doorMask": 4,
+            "template": {
+              "assetStage": 0,
+              "type": 10,
+              "variant": 2,
+              "name": "",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 878162140,
+            "spawnSeed": 2552242047,
+            "followingSeed": 2859555460,
+            "roomInitSeed": 4213775174,
+            "stage35DrawPositions": [
+              22
+            ]
+          },
+          {
+            "index": 5,
+            "gridIndex": 71,
+            "cells": [
+              71
+            ],
+            "doorGridIndices": [
+              70,
+              58,
+              72,
+              84,
+              83,
+              59,
+              85,
+              85
+            ],
+            "doorMask": 14,
+            "template": {
+              "assetStage": 0,
+              "type": 7,
+              "variant": 13,
+              "name": " (copy)",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 4102203213,
+            "spawnSeed": 413733694,
+            "followingSeed": 1594309414,
+            "roomInitSeed": 3806616618,
+            "stage35DrawPositions": [
+              10
+            ]
+          },
+          {
+            "index": 6,
+            "gridIndex": 84,
+            "cells": [
+              84
+            ],
+            "doorGridIndices": [
+              83,
+              71,
+              85,
+              97,
+              96,
+              72,
+              98,
+              98
+            ],
+            "doorMask": 15,
+            "template": {
+              "assetStage": 0,
+              "type": 1,
+              "variant": 2,
+              "name": "Start Room",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 319799705,
+            "spawnSeed": 4054590488,
+            "followingSeed": 776374991,
+            "roomInitSeed": 3969994186,
+            "stage35DrawPositions": [
+              35
+            ]
+          },
+          {
+            "index": 7,
+            "gridIndex": 85,
+            "cells": [
+              85
+            ],
+            "doorGridIndices": [
+              84,
+              72,
+              86,
+              98,
+              97,
+              73,
+              99,
+              99
+            ],
+            "doorMask": 7,
+            "template": {
+              "assetStage": 1,
+              "type": 1,
+              "variant": 503,
+              "name": "New Room",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 3430358495,
+            "spawnSeed": 1243778415,
+            "followingSeed": 230419118,
+            "roomInitSeed": 1670224315,
+            "stage35DrawPositions": [
+              36
+            ]
+          },
+          {
+            "index": 8,
+            "gridIndex": 72,
+            "cells": [
+              72
+            ],
+            "doorGridIndices": [
+              71,
+              59,
+              73,
+              85,
+              84,
+              60,
+              86,
+              86
+            ],
+            "doorMask": 11,
+            "template": {
+              "assetStage": 1,
+              "type": 1,
+              "variant": 116,
+              "name": "",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 3525442170,
+            "spawnSeed": 2989671199,
+            "followingSeed": 3253165079,
+            "roomInitSeed": 1140715332,
+            "stage35DrawPositions": [
+              37
+            ]
+          },
+          {
+            "index": 9,
+            "gridIndex": 59,
+            "cells": [
+              59
+            ],
+            "doorGridIndices": [
+              58,
+              46,
+              60,
+              72,
+              71,
+              47,
+              73,
+              73
+            ],
+            "doorMask": 11,
+            "template": {
+              "assetStage": 1,
+              "type": 1,
+              "variant": 76,
+              "name": "",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 1277079841,
+            "spawnSeed": 3556663869,
+            "followingSeed": 1741643235,
+            "roomInitSeed": 2229909702,
+            "stage35DrawPositions": [
+              38
+            ]
+          },
+          {
+            "index": 10,
+            "gridIndex": 58,
+            "cells": [
+              58
+            ],
+            "doorGridIndices": [
+              57,
+              45,
+              59,
+              71,
+              70,
+              46,
+              72,
+              72
+            ],
+            "doorMask": 13,
+            "template": {
+              "assetStage": 1,
+              "type": 1,
+              "variant": 59,
+              "name": "",
+              "width": 13,
+              "height": 7,
+              "shapeIndex": 0
+            },
+            "decorationSeed": 919311277,
+            "spawnSeed": 2273391916,
+            "followingSeed": 2526422338,
+            "roomInitSeed": 488553706,
+            "stage35DrawPositions": [
+              39
+            ]
+          }
+        ],
+        "stage35CurrentState": 2058525667,
+        "stage35DrawPositions": [
+          62
+        ],
+        "stage2CurrentState": 3474284715,
+        "actualPublicLog": {
+          "seed": "BLH3 34RQ",
+          "seedValue": 90235668,
+          "playerVariant": 0,
+          "playerSubtype": 0,
+          "stage": 1,
+          "altStage": 0,
+          "stageSeed": 3474284715,
+          "rooms": 8,
+          "room": "1.2(Start Room)",
+          "spawnSeed": 4054590488
+        }
+      },
+      "knownFinalizationGap": null
+    }
+  ]
+}

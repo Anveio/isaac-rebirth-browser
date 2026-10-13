@@ -87,10 +87,16 @@ velocity = previousVelocity × 0.5 + impulse
 
 A zero-distance blast skips knockback. The port calculates the impulse in f32
 native units and projects back to logical coordinates. Knockback precedes the
-damage attempt and also applies while damage is blocked by immunity. The bomb
-step runs **before** player movement: the same presentation integrates the
-impulse into position and then applies ordinary motion drag. No extra
-bomb-specific decay is added.
+damage attempt and also applies while damage is blocked by immunity. The
+current calibrated port advances the bomb **before** player movement, so that
+presentation integrates the impulse and applies ordinary motion drag. This
+reproduces the accepted later coasting positions below. Fresh phase-aware
+source traces additionally establish that the native full actor array includes
+the player in admission order: a player admitted before its bomb updates first,
+then integrates the new blast impulse on the following intermediate phase.
+The general phase handoff must preserve that order; the legacy presentation
+cadence is not proof of the native full-update schedule. No extra player decay
+is added.
 
 An independent controlled original seed `3BMB MFTE` supplies the complete
 D27/release30/E tape in
@@ -98,8 +104,7 @@ D27/release30/E tape in
 placement, the player is at native x438.4042053222656 with vx0.09337755292654037.
 Coasting settles to x439.18450927734375 before the blast. The port reproduces
 all three following native position/velocity observations through ordinary
-commands; the source fixture guards against applying blast impulse after
-position integration:
+commands; the source fixture guards their complete displacement and drag:
 
 | Presentations after E | Native player x | Native player vx | Original lamp x bounds |
 | --- | --- | --- | --- |
@@ -133,6 +138,16 @@ and queued enemy damage; it does not extend the current port's enemy support.
 The existing starting-room121 blast references remain unchanged. General phase
 alignment across placement, room transitions and pause requires further source
 proof before runtime changes.
+
+The native initializer sets remaining fuse updates to59 at `0x456e35`.
+Bomb Update checks for zero at `0x457379` before decrementing at
+`0x457391`/`0x457394`, giving60 full nonplayer updates before detonation.
+Independent `fly-bomb-phase{0,1}` captures add a single presentation before E:
+the first case detonates after120 presentations, the delayed case after121.
+Bounded writable-data observations record System iterations (`0x8ed560`
+singleton, field `+0x2efa0`) and full Game updates (`0x8ecd30` singleton,
+field `+0xce9f4`) alongside each fuse value. These source fields establish the
+captured native phase; they are reference tooling and do not enter the runtime.
 
 The typed bomb probe is limited to fields identified from the static path; it
 does not establish all bomb internals. The object is in an anonymous writable

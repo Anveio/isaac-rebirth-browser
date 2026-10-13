@@ -10,7 +10,9 @@ export const NODE_TEST_GLOB = "tools/foundation/*.test.mjs";
 export const ORIGINAL_CLOCK_SOURCE = "tools/original/foundation-clock-scenarios.py";
 export const REQUIRED_ORIGINAL_CLOCK_SCENARIOS = [
   "menu-movement-fire", "menu-run-introduction", "motion-trajectory", "motion-holdout", "projectile-inheritance",
-  "bomb-stationary", "bomb-escape", "bomb-pause", "run-pause-presentation",
+  "bomb-stationary", "bomb-escape", "bomb-pause", "run-pause-presentation", "title-animation-fade",
+  "combat-rock-typed", "combat-rock-dense", "combat-rock-held", "combat-fly-aligned",
+  "combat-fly-bomb-phase0", "combat-fly-bomb-phase1", "combat-attackfly-entry", "combat-gaper-entry",
 ];
 
 // This indexes declarations, not cached test outcomes. Dynamic registrations

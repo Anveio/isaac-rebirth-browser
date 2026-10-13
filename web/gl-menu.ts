@@ -186,6 +186,12 @@ export class GLMenuContext {
     if (!Number.isFinite(pixelSize) || pixelSize <= 0) throw new Error("Sprite raster pixel size must be finite and positive");
     this.drawTexture(this.texture(source), arguments_, [rgbaTint[0]!, rgbaTint[1]!, rgbaTint[2]!, rgbaTint[3]! * this.state.alpha], offsets, pixelSize);
   }
+  /** Authored actors supply their sequential f32 geometry before outer transforms. */
+  drawTintedImageQuad(source: CanvasImageSource, rgbaTint: readonly number[], offsets: readonly number[], crop: readonly [number, number, number, number], points: readonly (readonly [number, number])[], pixelSize?: number): void {
+    if (points.length !== 4) throw new Error("An authored sprite must have four corners");
+    if (pixelSize !== undefined && (!Number.isFinite(pixelSize) || pixelSize <= 0)) throw new Error("Sprite raster pixel size must be finite and positive");
+    this.submitQuad(this.texture(source), crop, points, [rgbaTint[0]!, rgbaTint[1]!, rgbaTint[2]!, rgbaTint[3]! * this.state.alpha], offsets, pixelSize);
+  }
 
   get globalAlpha(): number { return this.state.alpha; }
   set globalAlpha(alpha: number) { this.state.alpha = alpha; }
@@ -212,7 +218,11 @@ export class GLMenuContext {
   fillRect(x: number, y: number, width: number, height: number): void {
     const match = /^#([0-9a-f]{6})$/i.exec(this.state.fillStyle); if (!match) throw new Error("Graphics fill color must use six-digit RGB");
     const rgb = [0, 2, 4].map(offset => parseInt(match[1]!.slice(offset, offset + 2), 16) / 255);
-    this.quad(this.white, 0, 0, 1, 1, x, y, width, height, [rgb[0]!, rgb[1]!, rgb[2]!, this.state.alpha]);
+    this.fillRectRGBA(x, y, width, height, [rgb[0]!, rgb[1]!, rgb[2]!, 1]);
+  }
+  /** Source menu fades retain float color rather than an eight-bit CSS color. */
+  fillRectRGBA(x: number, y: number, width: number, height: number, rgba: readonly number[]): void {
+    this.quad(this.white, 0, 0, 1, 1, x, y, width, height, [rgba[0]!, rgba[1]!, rgba[2]!, rgba[3]! * this.state.alpha]);
   }
   drawImage(source: CanvasImageSource, ...arguments_: number[]): void {
     this.drawTexture(this.texture(source), arguments_, [1, 1, 1, this.state.alpha]);
@@ -226,6 +236,10 @@ export class GLMenuContext {
     this.quad(texture, sx, sy, sw, sh, dx, dy, dw, dh, tint, offsets, pixelSize);
   }
   private quad(texture: Texture, sx: number, sy: number, sw: number, sh: number, dx: number, dy: number, dw: number, dh: number, tint: number[], offsets: readonly number[] = [0, 0, 0], pixelSize?: number): void {
+    this.submitQuad(texture, [sx, sy, sw, sh], [[dx, dy], [dx + dw, dy], [dx, dy + dh], [dx + dw, dy + dh]], tint, offsets, pixelSize);
+  }
+  private submitQuad(texture: Texture, crop: readonly [number, number, number, number], points: readonly (readonly [number, number])[], tint: number[], offsets: readonly number[], pixelSize?: number): void {
+    const [sx, sy, sw, sh] = crop;
     const m = this.state.transform, xy = (x: number, y: number) => [m[0]! * x + m[2]! * y + m[4]!, m[1]! * x + m[3]! * y + m[5]!];
     // Source pixels are normalized before the padded-upload texture scale is applied.
     // Keeping both operations in f32 matches the authored renderer's public UV inputs.
@@ -233,8 +247,8 @@ export class GLMenuContext {
       Math.fround(Math.fround(pixel * Math.fround(1 / sourceExtent)) * Math.fround(sourceExtent / uploadExtent));
     const left = uv(sx, texture.width, texture.textureWidth), right = uv(sx + sw, texture.width, texture.textureWidth);
     const top = uv(sy, texture.height, texture.textureHeight), bottom = uv(sy + sh, texture.height, texture.textureHeight);
-    const corners = [[...xy(dx, dy), left, top], [...xy(dx + dw, dy), right, top],
-      [...xy(dx, dy + dh), left, bottom], [...xy(dx + dw, dy + dh), right, bottom]];
+    const coordinates = [[left, top], [right, top], [left, bottom], [right, bottom]];
+    const corners = points.map((point, index) => [...xy(point[0], point[1]), ...coordinates[index]!]);
     if (pixelSize !== undefined) {
       // Apply the observed grid only after the complete sprite transform.
       // Rotation 180 can leave sin(pi) roundoff; actual rotated quads retain

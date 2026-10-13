@@ -1,4 +1,5 @@
-import { Assets, type Frame } from "./animation";
+import { Assets } from "./animation";
+import type { SampledFrame } from "./animation-math";
 import type { State } from "./engine";
 
 const STREAK = "gfx/ui/ui_streak.anm2";
@@ -40,12 +41,12 @@ export class RunPresentation {
     if (menu.phase === "idle") this.assets.draw(ctx, PAUSE, "Cursor", 288, 135, menu.selection, { layers: [2] });
   }
 
-  private attached(ctx: CanvasRenderingContext2D, frame: Frame, x: number, y: number, draw: () => void): void {
+  private attached(ctx: CanvasRenderingContext2D, frame: SampledFrame, x: number, y: number, draw: () => void): void {
     ctx.save();
     ctx.translate(x + frame.XPosition, y + frame.YPosition);
     ctx.rotate(frame.Rotation * Math.PI / 180);
-    ctx.scale(frame.XScale / 100, frame.YScale / 100);
-    ctx.globalAlpha *= frame.AlphaTint / 255;
+    ctx.scale(frame.XScale, frame.YScale);
+    ctx.globalAlpha *= frame.AlphaTint;
     draw();
     ctx.restore();
   }

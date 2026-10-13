@@ -7,17 +7,24 @@ use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
 use std::collections::BTreeSet;
 mod bombs;
+pub mod combat;
 mod content;
 mod effects;
-mod motion;
+pub mod grid;
+pub mod layout;
+pub mod motion;
+pub mod mt;
+pub mod phase;
+pub mod projectiles;
 mod room;
+pub mod room_templates;
 pub mod seed;
 pub use bombs::{Bomb, Explosion};
 pub use effects::{Point, StageEffects};
 pub use room::Room;
 
 pub const TICK_RATE: u32 = 60;
-pub const ABI_VERSION: u32 = 1;
+pub const ABI_VERSION: u32 = 2;
 pub const MAX_COMMAND_TICKS: u32 = 36_000;
 pub const MAX_REPLAY_COMMANDS: usize = 36_000;
 const MAX_REQUEST: usize = 65_536;
@@ -151,6 +158,31 @@ pub struct RunIntroduction {
     pub age: u32,
     pub active: bool,
 }
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct MenuFade {
+    pub active: bool,
+    pub alpha: f64,
+    pub color: [f64; 4],
+}
+impl MenuFade {
+    fn first_title() -> Self {
+        // MenuInit starts at 1, then its first rendered update subtracts .025.
+        // Store expanded f32 values so native and JavaScript snapshots agree.
+        Self {
+            active: true,
+            alpha: f64::from(1.0_f32 - 0.025_f32),
+            color: [1.0, 1.0, 1.0, f64::from(0.95000017_f32)],
+        }
+    }
+    fn advance(&mut self) {
+        if self.active {
+            let alpha = self.alpha as f32 - 0.025_f32;
+            self.active = alpha > 0.0;
+            self.alpha = f64::from(alpha.max(0.0));
+        }
+    }
+}
 #[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "lowercase")]
 pub enum PausePhase {
@@ -205,6 +237,9 @@ pub struct State {
     pub tick_rate: u32,
     pub tick: u32,
     pub menu_animation_tick: u32,
+    pub title_animation_frame: u32,
+    pub menu_fade: MenuFade,
+    pub system_clock: phase::Clock,
     pub run_tick: u32,
     pub screen: Screen,
     pub profile: u8,
@@ -216,6 +251,7 @@ pub struct State {
     pub seed_valid: bool,
     pub run_seed: String,
     pub initial_seed: u32,
+    pub boot_epoch_seed: u32,
     pub run_seed_value: u32,
     pub stage: u32,
     pub stage_seed: u32,
@@ -255,6 +291,9 @@ pub struct Game {
 
 impl Game {
     pub fn new(initial_seed: u32) -> Result<Self, String> {
+        Self::new_with_boot_epoch(initial_seed, 0)
+    }
+    pub fn new_with_boot_epoch(initial_seed: u32, boot_epoch_seed: u32) -> Result<Self, String> {
         let run_seed = seed::encode(initial_seed)?;
         let player = Player::starting();
         let room = room::generate_room(initial_seed);
@@ -265,6 +304,13 @@ impl Game {
                 tick_rate: TICK_RATE,
                 tick: 0,
                 menu_animation_tick: 0,
+                title_animation_frame: 0,
+                menu_fade: MenuFade::first_title(),
+                // The public runtime starts at the first rendered Title,
+                // after the omitted native introductory cutscene. Its next
+                // system iteration is a full update; this clock is relative
+                // to that boundary, not the source's elapsed boot counter.
+                system_clock: phase::Clock::new(0, true),
                 run_tick: 0,
                 screen: Screen::Title,
                 profile: 1,
@@ -276,6 +322,7 @@ impl Game {
                 seed_valid: false,
                 run_seed,
                 initial_seed,
+                boot_epoch_seed,
                 run_seed_value: initial_seed,
                 stage: 1,
                 stage_seed: seed::stage1_seed(initial_seed),
@@ -386,6 +433,11 @@ impl Game {
                     .menu_animation_tick
                     .checked_add(count)
                     .ok_or("menu animation counter exhausted")?;
+                self.state
+                    .system_clock
+                    .system_counter
+                    .checked_add(count)
+                    .ok_or("system counter exhausted")?;
                 if self.state.screen == Screen::Playing && !self.state.paused {
                     self.state
                         .run_tick
@@ -590,6 +642,7 @@ impl Game {
             return Err("selected character runtime is not implemented".into());
         }
         self.state.character = chosen;
+        self.state.system_clock.align_run_start()?;
         self.state.screen = Screen::Playing;
         self.state.paused = false;
         self.state.run_tick = 0;
@@ -621,6 +674,15 @@ impl Game {
         self.state.pressed.contains(code)
     }
     fn tick(&mut self) {
+        let phase = self
+            .state
+            .system_clock
+            .advance()
+            .expect("counter preflight");
+        if self.state.screen == Screen::Title && phase == phase::Phase::Update {
+            self.state.title_animation_frame = (self.state.title_animation_frame + 1) % 40;
+        }
+        self.state.menu_fade.advance();
         self.state.tick += 1;
         self.state.menu_animation_tick += 1;
         if self.state.screen == Screen::Playing {
@@ -775,8 +837,8 @@ pub extern "C" fn abi_version() -> u32 {
     ABI_VERSION
 }
 #[no_mangle]
-pub extern "C" fn reset(initial_seed: u32) -> u32 {
-    match Game::new(initial_seed) {
+pub extern "C" fn reset(initial_seed: u32, boot_epoch_seed: u32) -> u32 {
+    match Game::new_with_boot_epoch(initial_seed, boot_epoch_seed) {
         Ok(game) => {
             GAME.with(|state| *state.borrow_mut() = Some(game));
             ERROR.with(|error| error.borrow_mut().clear());
@@ -963,9 +1025,9 @@ mod tests {
     #[test]
     fn reserved_zero_boot_is_rejected_atomically() {
         assert!(Game::new(0).is_err());
-        assert_eq!(reset(1), 0);
+        assert_eq!(reset(1, 0), 0);
         let before = GAME.with(|game| game.borrow().clone());
-        assert_eq!(reset(0), 1);
+        assert_eq!(reset(0, 0), 1);
         GAME.with(|game| assert_eq!(*game.borrow(), before));
         let mut game = Game::new(1).unwrap();
         for _ in 0..3 {
@@ -1178,12 +1240,13 @@ mod tests {
     }
     #[test]
     fn exhausted_replay_counters_fail_without_partial_ticks_or_key_changes() {
-        for counter in ["tick", "menu", "run", "tear"] {
+        for counter in ["tick", "menu", "system", "run", "tear"] {
             let mut game =
                 run("exhausted_replay_counters_fail_without_partial_ticks_or_key_changes");
             match counter {
                 "tick" => game.state.tick = u32::MAX,
                 "menu" => game.state.menu_animation_tick = u32::MAX,
+                "system" => game.state.system_clock.system_counter = u32::MAX,
                 "run" => game.state.run_tick = u32::MAX,
                 "tear" => game.state.next_tear = u32::MAX,
                 _ => unreachable!(),

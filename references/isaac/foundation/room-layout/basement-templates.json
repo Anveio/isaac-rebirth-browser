@@ -1,0 +1,5728 @@
+{
+  "schema": 1,
+  "source": "resources/rooms/01.basement.stb",
+  "sourceBytes": 310344,
+  "sourceSha256": "8664dae14cfafef6beb7b662edad3b64d9941eb4f5c53220139e2d380cf7bc78",
+  "catalog": [
+    {
+      "type": 0,
+      "variant": 0,
+      "difficulty": 1,
+      "name": "(null)",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 3,
+      "difficulty": 1,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 4,
+      "difficulty": 1,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 5,
+      "difficulty": 1,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 6,
+      "difficulty": 1,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 7,
+      "difficulty": 1,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 8,
+      "difficulty": 1,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 9,
+      "difficulty": 1,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 10,
+      "difficulty": 1,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 11,
+      "difficulty": 1,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 12,
+      "difficulty": 1,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 13,
+      "difficulty": 1,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 14,
+      "difficulty": 1,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 15,
+      "difficulty": 1,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 16,
+      "difficulty": 1,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 17,
+      "difficulty": 1,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 18,
+      "difficulty": 1,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 19,
+      "difficulty": 1,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 20,
+      "difficulty": 1,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 21,
+      "difficulty": 1,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 22,
+      "difficulty": 1,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 23,
+      "difficulty": 1,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 24,
+      "difficulty": 1,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 25,
+      "difficulty": 1,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 26,
+      "difficulty": 1,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 27,
+      "difficulty": 1,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 28,
+      "difficulty": 1,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 29,
+      "difficulty": 1,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 30,
+      "difficulty": 1,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 31,
+      "difficulty": 1,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 32,
+      "difficulty": 1,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 33,
+      "difficulty": 1,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 34,
+      "difficulty": 1,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 35,
+      "difficulty": 1,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 36,
+      "difficulty": 1,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 37,
+      "difficulty": 1,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 38,
+      "difficulty": 1,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 39,
+      "difficulty": 1,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 40,
+      "difficulty": 1,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 41,
+      "difficulty": 1,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 42,
+      "difficulty": 1,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 43,
+      "difficulty": 1,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 44,
+      "difficulty": 1,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 45,
+      "difficulty": 1,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 46,
+      "difficulty": 1,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 47,
+      "difficulty": 1,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 48,
+      "difficulty": 1,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 49,
+      "difficulty": 1,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 50,
+      "difficulty": 1,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 51,
+      "difficulty": 1,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 52,
+      "difficulty": 1,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 53,
+      "difficulty": 1,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 54,
+      "difficulty": 1,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 55,
+      "difficulty": 1,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 56,
+      "difficulty": 5,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 57,
+      "difficulty": 5,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 58,
+      "difficulty": 5,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 59,
+      "difficulty": 5,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 60,
+      "difficulty": 5,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 61,
+      "difficulty": 5,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 62,
+      "difficulty": 5,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 63,
+      "difficulty": 5,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 64,
+      "difficulty": 5,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 65,
+      "difficulty": 5,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 66,
+      "difficulty": 5,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 67,
+      "difficulty": 5,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 68,
+      "difficulty": 5,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 69,
+      "difficulty": 5,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 70,
+      "difficulty": 5,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 71,
+      "difficulty": 5,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 72,
+      "difficulty": 5,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 73,
+      "difficulty": 5,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 74,
+      "difficulty": 5,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 75,
+      "difficulty": 5,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 76,
+      "difficulty": 5,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 77,
+      "difficulty": 5,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 78,
+      "difficulty": 5,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 79,
+      "difficulty": 5,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 80,
+      "difficulty": 5,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 81,
+      "difficulty": 5,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 82,
+      "difficulty": 5,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 83,
+      "difficulty": 5,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 84,
+      "difficulty": 5,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 85,
+      "difficulty": 5,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 86,
+      "difficulty": 5,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 87,
+      "difficulty": 5,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 88,
+      "difficulty": 5,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 89,
+      "difficulty": 5,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 90,
+      "difficulty": 5,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 91,
+      "difficulty": 5,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 92,
+      "difficulty": 5,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 93,
+      "difficulty": 5,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 94,
+      "difficulty": 5,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 95,
+      "difficulty": 5,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 96,
+      "difficulty": 5,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 97,
+      "difficulty": 5,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 98,
+      "difficulty": 5,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 99,
+      "difficulty": 5,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 100,
+      "difficulty": 5,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 101,
+      "difficulty": 5,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 102,
+      "difficulty": 5,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 103,
+      "difficulty": 5,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 104,
+      "difficulty": 5,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 105,
+      "difficulty": 5,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 106,
+      "difficulty": 5,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 107,
+      "difficulty": 5,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 108,
+      "difficulty": 5,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 109,
+      "difficulty": 5,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 110,
+      "difficulty": 5,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 111,
+      "difficulty": 5,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 112,
+      "difficulty": 5,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 113,
+      "difficulty": 5,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 114,
+      "difficulty": 5,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 115,
+      "difficulty": 5,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 116,
+      "difficulty": 2,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 117,
+      "difficulty": 2,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 118,
+      "difficulty": 2,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 119,
+      "difficulty": 10,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 120,
+      "difficulty": 10,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 121,
+      "difficulty": 10,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 122,
+      "difficulty": 10,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 123,
+      "difficulty": 10,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 124,
+      "difficulty": 10,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 125,
+      "difficulty": 10,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 126,
+      "difficulty": 10,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 127,
+      "difficulty": 10,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 128,
+      "difficulty": 10,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 129,
+      "difficulty": 10,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 130,
+      "difficulty": 10,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 131,
+      "difficulty": 10,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 132,
+      "difficulty": 10,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 133,
+      "difficulty": 10,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 134,
+      "difficulty": 10,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 135,
+      "difficulty": 10,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 136,
+      "difficulty": 10,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 137,
+      "difficulty": 10,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 138,
+      "difficulty": 10,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 139,
+      "difficulty": 10,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 140,
+      "difficulty": 10,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 141,
+      "difficulty": 10,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 142,
+      "difficulty": 10,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 143,
+      "difficulty": 10,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 144,
+      "difficulty": 10,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 145,
+      "difficulty": 10,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 146,
+      "difficulty": 10,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 147,
+      "difficulty": 10,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 148,
+      "difficulty": 10,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 149,
+      "difficulty": 10,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 150,
+      "difficulty": 10,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 151,
+      "difficulty": 10,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 152,
+      "difficulty": 10,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 153,
+      "difficulty": 10,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 154,
+      "difficulty": 10,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 155,
+      "difficulty": 10,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 156,
+      "difficulty": 10,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 157,
+      "difficulty": 10,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 158,
+      "difficulty": 10,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 159,
+      "difficulty": 10,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 160,
+      "difficulty": 10,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 161,
+      "difficulty": 10,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 162,
+      "difficulty": 10,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 163,
+      "difficulty": 10,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 164,
+      "difficulty": 10,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 165,
+      "difficulty": 10,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 166,
+      "difficulty": 10,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 167,
+      "difficulty": 10,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 168,
+      "difficulty": 10,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 169,
+      "difficulty": 10,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 170,
+      "difficulty": 10,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 171,
+      "difficulty": 10,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 172,
+      "difficulty": 10,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 173,
+      "difficulty": 10,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 174,
+      "difficulty": 10,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 175,
+      "difficulty": 2,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 176,
+      "difficulty": 2,
+      "name": "",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 0,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 1,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 177,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 178,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 179,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 180,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 181,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 182,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 183,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 184,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 185,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 186,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 187,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 188,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 189,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 190,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 191,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 192,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 193,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 194,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 195,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 196,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 197,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 198,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 199,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 200,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 201,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 202,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 203,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 204,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 205,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 206,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 207,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 0,
+      "variant": 0,
+      "difficulty": 1,
+      "name": "(null)",
+      "weight": 1.0,
+      "width": 0,
+      "height": 0,
+      "doorMask": 0
+    },
+    {
+      "type": 1,
+      "variant": 209,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 210,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 211,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 212,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 213,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 214,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 215,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 216,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 217,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 218,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 219,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 220,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 221,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 222,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 223,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 224,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 225,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 226,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 227,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 228,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 229,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 230,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 231,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 232,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 233,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 234,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 235,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 236,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 237,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 238,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 239,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 240,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 241,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 242,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 243,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 244,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 245,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 246,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 247,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 248,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 249,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 250,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 251,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 252,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 253,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 254,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 255,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 256,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 257,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 258,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 259,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 260,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 261,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 262,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 263,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 264,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 265,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 266,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 267,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 268,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 208,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 269,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 270,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 271,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 272,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 273,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 274,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 275,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 276,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 5
+    },
+    {
+      "type": 1,
+      "variant": 277,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 278,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 10
+    },
+    {
+      "type": 1,
+      "variant": 279,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 280,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 281,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 5
+    },
+    {
+      "type": 1,
+      "variant": 282,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 10
+    },
+    {
+      "type": 1,
+      "variant": 283,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 284,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 285,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 5
+    },
+    {
+      "type": 1,
+      "variant": 286,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 287,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 10
+    },
+    {
+      "type": 1,
+      "variant": 288,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 9
+    },
+    {
+      "type": 1,
+      "variant": 289,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 12
+    },
+    {
+      "type": 1,
+      "variant": 290,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 291,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 8
+    },
+    {
+      "type": 1,
+      "variant": 292,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 0,
+      "variant": 0,
+      "difficulty": 1,
+      "name": "(null)",
+      "weight": 1.0,
+      "width": 0,
+      "height": 0,
+      "doorMask": 0
+    },
+    {
+      "type": 1,
+      "variant": 293,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 294,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 295,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 296,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 297,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 298,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 299,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 300,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 301,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 302,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 303,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 304,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 305,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 306,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 307,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 10
+    },
+    {
+      "type": 1,
+      "variant": 308,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 309,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 310,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 311,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 312,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 10
+    },
+    {
+      "type": 1,
+      "variant": 313,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 314,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 10
+    },
+    {
+      "type": 1,
+      "variant": 315,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 316,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 317,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 318,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 319,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 320,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 5
+    },
+    {
+      "type": 1,
+      "variant": 321,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 322,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 323,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 10
+    },
+    {
+      "type": 1,
+      "variant": 324,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 10
+    },
+    {
+      "type": 1,
+      "variant": 325,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 326,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 5
+    },
+    {
+      "type": 1,
+      "variant": 327,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 328,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 5
+    },
+    {
+      "type": 1,
+      "variant": 329,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 330,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 331,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 12
+    },
+    {
+      "type": 1,
+      "variant": 332,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 333,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 334,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 335,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 336,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 3
+    },
+    {
+      "type": 1,
+      "variant": 337,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 338,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 5
+    },
+    {
+      "type": 1,
+      "variant": 339,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 1
+    },
+    {
+      "type": 1,
+      "variant": 340,
+      "difficulty": 10,
+      "name": "New Room (copy)",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 2,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 341,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 342,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 12
+    },
+    {
+      "type": 1,
+      "variant": 343,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 10
+    },
+    {
+      "type": 1,
+      "variant": 344,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 345,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 95
+    },
+    {
+      "type": 1,
+      "variant": 346,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 95
+    },
+    {
+      "type": 1,
+      "variant": 347,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 95
+    },
+    {
+      "type": 1,
+      "variant": 348,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 78
+    },
+    {
+      "type": 1,
+      "variant": 349,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 95
+    },
+    {
+      "type": 1,
+      "variant": 350,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 95
+    },
+    {
+      "type": 1,
+      "variant": 351,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 95
+    },
+    {
+      "type": 1,
+      "variant": 352,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 95
+    },
+    {
+      "type": 1,
+      "variant": 353,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 85
+    },
+    {
+      "type": 1,
+      "variant": 354,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 95
+    },
+    {
+      "type": 1,
+      "variant": 355,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 95
+    },
+    {
+      "type": 1,
+      "variant": 356,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 10
+    },
+    {
+      "type": 1,
+      "variant": 357,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 95
+    },
+    {
+      "type": 1,
+      "variant": 358,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 95
+    },
+    {
+      "type": 1,
+      "variant": 359,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 95
+    },
+    {
+      "type": 1,
+      "variant": 360,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 95
+    },
+    {
+      "type": 1,
+      "variant": 361,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 85
+    },
+    {
+      "type": 1,
+      "variant": 362,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 10
+    },
+    {
+      "type": 1,
+      "variant": 363,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 95
+    },
+    {
+      "type": 1,
+      "variant": 364,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 95
+    },
+    {
+      "type": 1,
+      "variant": 365,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 10
+    },
+    {
+      "type": 1,
+      "variant": 366,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 95
+    },
+    {
+      "type": 1,
+      "variant": 367,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 95
+    },
+    {
+      "type": 1,
+      "variant": 368,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 95
+    },
+    {
+      "type": 1,
+      "variant": 369,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 95
+    },
+    {
+      "type": 1,
+      "variant": 370,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 95
+    },
+    {
+      "type": 1,
+      "variant": 371,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 10
+    },
+    {
+      "type": 1,
+      "variant": 372,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 85
+    },
+    {
+      "type": 1,
+      "variant": 373,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 10
+    },
+    {
+      "type": 1,
+      "variant": 374,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 95
+    },
+    {
+      "type": 1,
+      "variant": 375,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 175
+    },
+    {
+      "type": 1,
+      "variant": 376,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 175
+    },
+    {
+      "type": 1,
+      "variant": 377,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 5
+    },
+    {
+      "type": 1,
+      "variant": 378,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 175
+    },
+    {
+      "type": 1,
+      "variant": 379,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 130
+    },
+    {
+      "type": 1,
+      "variant": 380,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 135
+    },
+    {
+      "type": 1,
+      "variant": 381,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 170
+    },
+    {
+      "type": 1,
+      "variant": 382,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 175
+    },
+    {
+      "type": 1,
+      "variant": 383,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 135
+    },
+    {
+      "type": 1,
+      "variant": 384,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 175
+    },
+    {
+      "type": 1,
+      "variant": 385,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 5
+    },
+    {
+      "type": 1,
+      "variant": 386,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 175
+    },
+    {
+      "type": 1,
+      "variant": 387,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 175
+    },
+    {
+      "type": 1,
+      "variant": 388,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 5
+    },
+    {
+      "type": 1,
+      "variant": 389,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 175
+    },
+    {
+      "type": 1,
+      "variant": 390,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 5
+    },
+    {
+      "type": 1,
+      "variant": 391,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 175
+    },
+    {
+      "type": 1,
+      "variant": 392,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 175
+    },
+    {
+      "type": 1,
+      "variant": 393,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 175
+    },
+    {
+      "type": 1,
+      "variant": 394,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 5
+    },
+    {
+      "type": 1,
+      "variant": 395,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 170
+    },
+    {
+      "type": 1,
+      "variant": 396,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 5
+    },
+    {
+      "type": 1,
+      "variant": 397,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 175
+    },
+    {
+      "type": 1,
+      "variant": 398,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 11
+    },
+    {
+      "type": 1,
+      "variant": 399,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 170
+    },
+    {
+      "type": 1,
+      "variant": 400,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 164
+    },
+    {
+      "type": 1,
+      "variant": 401,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 175
+    },
+    {
+      "type": 1,
+      "variant": 402,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 175
+    },
+    {
+      "type": 1,
+      "variant": 403,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 1
+    },
+    {
+      "type": 1,
+      "variant": 404,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 135
+    },
+    {
+      "type": 1,
+      "variant": 405,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 14,
+      "doorMask": 255
+    },
+    {
+      "type": 1,
+      "variant": 406,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 14,
+      "doorMask": 255
+    },
+    {
+      "type": 1,
+      "variant": 407,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 14,
+      "doorMask": 170
+    },
+    {
+      "type": 1,
+      "variant": 408,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 14,
+      "doorMask": 85
+    },
+    {
+      "type": 1,
+      "variant": 409,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 14,
+      "doorMask": 255
+    },
+    {
+      "type": 1,
+      "variant": 410,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 14,
+      "doorMask": 255
+    },
+    {
+      "type": 1,
+      "variant": 411,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 14,
+      "doorMask": 170
+    },
+    {
+      "type": 1,
+      "variant": 412,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 14,
+      "doorMask": 27
+    },
+    {
+      "type": 1,
+      "variant": 413,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 14,
+      "doorMask": 216
+    },
+    {
+      "type": 1,
+      "variant": 414,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 14,
+      "doorMask": 255
+    },
+    {
+      "type": 1,
+      "variant": 415,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 14,
+      "doorMask": 27
+    },
+    {
+      "type": 1,
+      "variant": 416,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 14,
+      "doorMask": 255
+    },
+    {
+      "type": 1,
+      "variant": 417,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 14,
+      "doorMask": 255
+    },
+    {
+      "type": 1,
+      "variant": 418,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 14,
+      "doorMask": 170
+    },
+    {
+      "type": 1,
+      "variant": 419,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 14,
+      "doorMask": 255
+    },
+    {
+      "type": 1,
+      "variant": 420,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 14,
+      "doorMask": 27
+    },
+    {
+      "type": 1,
+      "variant": 421,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 14,
+      "doorMask": 195
+    },
+    {
+      "type": 1,
+      "variant": 422,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 14,
+      "doorMask": 255
+    },
+    {
+      "type": 1,
+      "variant": 423,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 14,
+      "doorMask": 255
+    },
+    {
+      "type": 1,
+      "variant": 424,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 14,
+      "doorMask": 170
+    },
+    {
+      "type": 1,
+      "variant": 425,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 14,
+      "doorMask": 85
+    },
+    {
+      "type": 1,
+      "variant": 426,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 14,
+      "doorMask": 60
+    },
+    {
+      "type": 1,
+      "variant": 427,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 14,
+      "doorMask": 255
+    },
+    {
+      "type": 1,
+      "variant": 428,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 14,
+      "doorMask": 155
+    },
+    {
+      "type": 1,
+      "variant": 429,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 14,
+      "doorMask": 255
+    },
+    {
+      "type": 1,
+      "variant": 430,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 14,
+      "doorMask": 27
+    },
+    {
+      "type": 1,
+      "variant": 431,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 14,
+      "doorMask": 60
+    },
+    {
+      "type": 1,
+      "variant": 432,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 14,
+      "doorMask": 170
+    },
+    {
+      "type": 1,
+      "variant": 433,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 14,
+      "doorMask": 255
+    },
+    {
+      "type": 1,
+      "variant": 434,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 14,
+      "doorMask": 215
+    },
+    {
+      "type": 1,
+      "variant": 435,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 95
+    },
+    {
+      "type": 1,
+      "variant": 436,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 95
+    },
+    {
+      "type": 1,
+      "variant": 437,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 95
+    },
+    {
+      "type": 1,
+      "variant": 438,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 20
+    },
+    {
+      "type": 1,
+      "variant": 439,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 85
+    },
+    {
+      "type": 1,
+      "variant": 440,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 27
+    },
+    {
+      "type": 1,
+      "variant": 441,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 7
+    },
+    {
+      "type": 1,
+      "variant": 442,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 95
+    },
+    {
+      "type": 1,
+      "variant": 443,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 88
+    },
+    {
+      "type": 1,
+      "variant": 444,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 95
+    },
+    {
+      "type": 1,
+      "variant": 445,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 170
+    },
+    {
+      "type": 1,
+      "variant": 446,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 11
+    },
+    {
+      "type": 1,
+      "variant": 447,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 175
+    },
+    {
+      "type": 1,
+      "variant": 448,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 39
+    },
+    {
+      "type": 1,
+      "variant": 449,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 11
+    },
+    {
+      "type": 1,
+      "variant": 450,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 175
+    },
+    {
+      "type": 1,
+      "variant": 451,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 175
+    },
+    {
+      "type": 1,
+      "variant": 452,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 175
+    },
+    {
+      "type": 1,
+      "variant": 453,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 170
+    },
+    {
+      "type": 1,
+      "variant": 454,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 165
+    },
+    {
+      "type": 1,
+      "variant": 455,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 95
+    },
+    {
+      "type": 1,
+      "variant": 456,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 95
+    },
+    {
+      "type": 1,
+      "variant": 457,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 95
+    },
+    {
+      "type": 1,
+      "variant": 458,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 65
+    },
+    {
+      "type": 1,
+      "variant": 459,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 7
+    },
+    {
+      "type": 1,
+      "variant": 460,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 27
+    },
+    {
+      "type": 1,
+      "variant": 461,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 95
+    },
+    {
+      "type": 1,
+      "variant": 462,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 88
+    },
+    {
+      "type": 1,
+      "variant": 463,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 7
+    },
+    {
+      "type": 1,
+      "variant": 464,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 78
+    },
+    {
+      "type": 1,
+      "variant": 465,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 5
+    },
+    {
+      "type": 1,
+      "variant": 466,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 175
+    },
+    {
+      "type": 1,
+      "variant": 467,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 11
+    },
+    {
+      "type": 1,
+      "variant": 468,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 170
+    },
+    {
+      "type": 1,
+      "variant": 469,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 11
+    },
+    {
+      "type": 1,
+      "variant": 470,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 175
+    },
+    {
+      "type": 1,
+      "variant": 471,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 139
+    },
+    {
+      "type": 1,
+      "variant": 472,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 164
+    },
+    {
+      "type": 1,
+      "variant": 473,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 175
+    },
+    {
+      "type": 1,
+      "variant": 474,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 45
+    },
+    {
+      "type": 1,
+      "variant": 475,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 7
+    },
+    {
+      "type": 1,
+      "variant": 476,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 10
+    },
+    {
+      "type": 1,
+      "variant": 477,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 85
+    },
+    {
+      "type": 1,
+      "variant": 478,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 75
+    },
+    {
+      "type": 1,
+      "variant": 479,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 3
+    },
+    {
+      "type": 1,
+      "variant": 480,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 95
+    },
+    {
+      "type": 1,
+      "variant": 481,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 95
+    },
+    {
+      "type": 1,
+      "variant": 482,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 95
+    },
+    {
+      "type": 1,
+      "variant": 483,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 95
+    },
+    {
+      "type": 1,
+      "variant": 484,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 27
+    },
+    {
+      "type": 1,
+      "variant": 485,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 11
+    },
+    {
+      "type": 1,
+      "variant": 486,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 170
+    },
+    {
+      "type": 1,
+      "variant": 487,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 39
+    },
+    {
+      "type": 1,
+      "variant": 488,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 164
+    },
+    {
+      "type": 1,
+      "variant": 489,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 175
+    },
+    {
+      "type": 1,
+      "variant": 490,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 175
+    },
+    {
+      "type": 1,
+      "variant": 491,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 175
+    },
+    {
+      "type": 1,
+      "variant": 492,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 10
+    },
+    {
+      "type": 1,
+      "variant": 493,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 170
+    },
+    {
+      "type": 1,
+      "variant": 494,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 175
+    },
+    {
+      "type": 1,
+      "variant": 495,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 3
+    },
+    {
+      "type": 1,
+      "variant": 496,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 12
+    },
+    {
+      "type": 1,
+      "variant": 497,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 9
+    },
+    {
+      "type": 1,
+      "variant": 498,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 6
+    },
+    {
+      "type": 1,
+      "variant": 499,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 2
+    },
+    {
+      "type": 1,
+      "variant": 500,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 8
+    },
+    {
+      "type": 1,
+      "variant": 501,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 1
+    },
+    {
+      "type": 1,
+      "variant": 502,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 4
+    },
+    {
+      "type": 1,
+      "variant": 503,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 504,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 2
+    },
+    {
+      "type": 1,
+      "variant": 505,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 6
+    },
+    {
+      "type": 1,
+      "variant": 506,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 12
+    },
+    {
+      "type": 1,
+      "variant": 507,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 11
+    },
+    {
+      "type": 1,
+      "variant": 508,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 5
+    },
+    {
+      "type": 1,
+      "variant": 509,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 1
+    },
+    {
+      "type": 1,
+      "variant": 510,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 8
+    },
+    {
+      "type": 1,
+      "variant": 511,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 4
+    },
+    {
+      "type": 1,
+      "variant": 512,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 2
+    },
+    {
+      "type": 1,
+      "variant": 513,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 15
+    },
+    {
+      "type": 1,
+      "variant": 514,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 8
+    },
+    {
+      "type": 1,
+      "variant": 515,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 5
+    },
+    {
+      "type": 1,
+      "variant": 516,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 10
+    },
+    {
+      "type": 1,
+      "variant": 517,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 9
+    },
+    {
+      "type": 1,
+      "variant": 518,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 6
+    },
+    {
+      "type": 1,
+      "variant": 519,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 5
+    },
+    {
+      "type": 1,
+      "variant": 520,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 8
+    },
+    {
+      "type": 1,
+      "variant": 521,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 20
+    },
+    {
+      "type": 1,
+      "variant": 522,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 7
+    },
+    {
+      "type": 1,
+      "variant": 523,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 39
+    },
+    {
+      "type": 1,
+      "variant": 524,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 170
+    },
+    {
+      "type": 1,
+      "variant": 525,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 14,
+      "doorMask": 85
+    },
+    {
+      "type": 1,
+      "variant": 526,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 14,
+      "doorMask": 27
+    },
+    {
+      "type": 1,
+      "variant": 527,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 10
+    },
+    {
+      "type": 1,
+      "variant": 528,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 65
+    },
+    {
+      "type": 1,
+      "variant": 529,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 164
+    },
+    {
+      "type": 1,
+      "variant": 530,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 40
+    },
+    {
+      "type": 1,
+      "variant": 531,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 14,
+      "doorMask": 39
+    },
+    {
+      "type": 1,
+      "variant": 532,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 14,
+      "doorMask": 60
+    },
+    {
+      "type": 1,
+      "variant": 533,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 7
+    },
+    {
+      "type": 1,
+      "variant": 534,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 11
+    },
+    {
+      "type": 1,
+      "variant": 535,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 13
+    },
+    {
+      "type": 1,
+      "variant": 536,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 14
+    },
+    {
+      "type": 1,
+      "variant": 537,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 8
+    },
+    {
+      "type": 1,
+      "variant": 538,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 1
+    },
+    {
+      "type": 1,
+      "variant": 539,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 2
+    },
+    {
+      "type": 1,
+      "variant": 540,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 4
+    },
+    {
+      "type": 1,
+      "variant": 541,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 8
+    },
+    {
+      "type": 1,
+      "variant": 542,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 85
+    },
+    {
+      "type": 1,
+      "variant": 543,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 1
+    },
+    {
+      "type": 1,
+      "variant": 544,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 136
+    },
+    {
+      "type": 1,
+      "variant": 545,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 14,
+      "doorMask": 34
+    },
+    {
+      "type": 1,
+      "variant": 546,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 14,
+      "doorMask": 170
+    },
+    {
+      "type": 1,
+      "variant": 547,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 5
+    },
+    {
+      "type": 1,
+      "variant": 548,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 5
+    },
+    {
+      "type": 1,
+      "variant": 549,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 10
+    },
+    {
+      "type": 1,
+      "variant": 550,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 10
+    },
+    {
+      "type": 1,
+      "variant": 551,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 5
+    },
+    {
+      "type": 1,
+      "variant": 552,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 10
+    },
+    {
+      "type": 1,
+      "variant": 553,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 5
+    },
+    {
+      "type": 1,
+      "variant": 554,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 10
+    },
+    {
+      "type": 1,
+      "variant": 555,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 5
+    },
+    {
+      "type": 1,
+      "variant": 556,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 5
+    },
+    {
+      "type": 1,
+      "variant": 557,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 10
+    },
+    {
+      "type": 1,
+      "variant": 558,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 7,
+      "doorMask": 10
+    },
+    {
+      "type": 1,
+      "variant": 559,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 10
+    },
+    {
+      "type": 1,
+      "variant": 560,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 85
+    },
+    {
+      "type": 1,
+      "variant": 561,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 5
+    },
+    {
+      "type": 1,
+      "variant": 562,
+      "difficulty": 1,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 5
+    },
+    {
+      "type": 1,
+      "variant": 563,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 10
+    },
+    {
+      "type": 1,
+      "variant": 564,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 85
+    },
+    {
+      "type": 1,
+      "variant": 565,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 170
+    },
+    {
+      "type": 1,
+      "variant": 566,
+      "difficulty": 5,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 26,
+      "height": 7,
+      "doorMask": 5
+    },
+    {
+      "type": 1,
+      "variant": 567,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 10
+    },
+    {
+      "type": 1,
+      "variant": 568,
+      "difficulty": 10,
+      "name": "New Room",
+      "weight": 1.0,
+      "width": 13,
+      "height": 14,
+      "doorMask": 85
+    }
+  ]
+}
