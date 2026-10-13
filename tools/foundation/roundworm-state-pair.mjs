@@ -91,8 +91,8 @@ for (const action of replay.pairedTape) {
       check(checks,label,`${game}.projectile${projectile.seed}.radius`,5,f32(projectile.radius));
       check(checks,label,`${game}.projectile${projectile.seed}.mass`,8,f32(projectile.mass));
       check(checks,label,`${game}.projectile${projectile.seed}.flags`,0,projectile.flags);
-      check(checks,label,`${game}.projectile${projectile.seed}.fallingAcceleration`,0,f32(projectile.fallingAcceleration));
-      if(projectile.age===0){check(checks,label,`${game}.projectile${projectile.seed}.birthHeight`,-23,f32(projectile.height));check(checks,label,`${game}.projectile${projectile.seed}.initialFallingSpeedBound`,true,projectile.fallingSpeed>=-.1&&projectile.fallingSpeed<.1);}
+      check(checks,label,`${game}.projectile${projectile.seed}.fallingAcceleration`,f32(.1),f32(projectile.fallingAcceleration));
+      if(projectile.age===0){check(checks,label,`${game}.projectile${projectile.seed}.birthHeight`,-23,f32(projectile.height));check(checks,label,`${game}.projectile${projectile.seed}.mode0FallingSpeed`,-3,f32(projectile.fallingSpeed));}
       const previous=prior[game].get(projectile.id);
       if(previous&&source.nativePhase.systemIterations===previous.counter+1) {
         if(phase===0) {
