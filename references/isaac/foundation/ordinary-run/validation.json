@@ -1,0 +1,340 @@
+{
+  "schema": 1,
+  "codeCommit": "a96efd7ab401afb2a0f117252a92d9ca1f3613e1",
+  "aggregateBase": "06c3c735de720df61ae9134401130c02e0bfee01",
+  "status": "pass",
+  "artifact": "0cbb1668f1e980b9dc3e9e45f24521dfcf8c1e4d998239025cb663d2759d40b4",
+  "cases": 6,
+  "comparedMenuCheckpoints": 24,
+  "comparedStateWords": 14976,
+  "comparedGridPairs": 216,
+  "comparedStatPoses": 4296,
+  "exactCommands": 96,
+  "nativeIdentityObservations": 36,
+  "sourcesStable": true,
+  "laterRunMtDiagnostics": [
+    {
+      "name": "zero-epoch",
+      "runMtDiagnostic": {
+        "status": "fail",
+        "originalIndex": 459,
+        "productionIndex": 47,
+        "differingWords": 624,
+        "firstDifferences": [
+          {
+            "index": 0,
+            "original": 3340451949,
+            "production": 2036641171
+          },
+          {
+            "index": 1,
+            "original": 121460540,
+            "production": 3629929466
+          },
+          {
+            "index": 2,
+            "original": 838145477,
+            "production": 2435249504
+          },
+          {
+            "index": 3,
+            "original": 261364067,
+            "production": 877484564
+          },
+          {
+            "index": 4,
+            "original": 1352443946,
+            "production": 408610346
+          },
+          {
+            "index": 5,
+            "original": 373631584,
+            "production": 3277601238
+          },
+          {
+            "index": 6,
+            "original": 3190102260,
+            "production": 1225163759
+          },
+          {
+            "index": 7,
+            "original": 427804612,
+            "production": 2487165038
+          }
+        ],
+        "reason": "Run/room/effect shared-stream consumers remain incomplete; source values and cursor adjustments are never supplied to production"
+      }
+    },
+    {
+      "name": "fixed-epoch",
+      "runMtDiagnostic": {
+        "status": "fail",
+        "originalIndex": 464,
+        "productionIndex": 47,
+        "differingWords": 624,
+        "firstDifferences": [
+          {
+            "index": 0,
+            "original": 3025920350,
+            "production": 3652612403
+          },
+          {
+            "index": 1,
+            "original": 1803947576,
+            "production": 2283866689
+          },
+          {
+            "index": 2,
+            "original": 913377430,
+            "production": 3550552114
+          },
+          {
+            "index": 3,
+            "original": 1155432017,
+            "production": 3496399398
+          },
+          {
+            "index": 4,
+            "original": 3467819560,
+            "production": 189748128
+          },
+          {
+            "index": 5,
+            "original": 726306269,
+            "production": 2430237628
+          },
+          {
+            "index": 6,
+            "original": 2636645993,
+            "production": 2122200330
+          },
+          {
+            "index": 7,
+            "original": 3957854490,
+            "production": 323861920
+          }
+        ],
+        "reason": "Run/room/effect shared-stream consumers remain incomplete; source values and cursor adjustments are never supplied to production"
+      }
+    },
+    {
+      "name": "random-0",
+      "runMtDiagnostic": {
+        "status": "fail",
+        "originalIndex": 62,
+        "productionIndex": 47,
+        "differingWords": 624,
+        "firstDifferences": [
+          {
+            "index": 0,
+            "original": 1909881571,
+            "production": 2330609707
+          },
+          {
+            "index": 1,
+            "original": 1699927280,
+            "production": 910427206
+          },
+          {
+            "index": 2,
+            "original": 625669200,
+            "production": 4265801852
+          },
+          {
+            "index": 3,
+            "original": 3973969853,
+            "production": 1342036083
+          },
+          {
+            "index": 4,
+            "original": 4057912311,
+            "production": 839775880
+          },
+          {
+            "index": 5,
+            "original": 4087458364,
+            "production": 2720360443
+          },
+          {
+            "index": 6,
+            "original": 4006868703,
+            "production": 4112391295
+          },
+          {
+            "index": 7,
+            "original": 1094523382,
+            "production": 3877560747
+          }
+        ],
+        "reason": "Run/room/effect shared-stream consumers remain incomplete; source values and cursor adjustments are never supplied to production"
+      }
+    },
+    {
+      "name": "random-1",
+      "runMtDiagnostic": {
+        "status": "fail",
+        "originalIndex": 462,
+        "productionIndex": 47,
+        "differingWords": 624,
+        "firstDifferences": [
+          {
+            "index": 0,
+            "original": 2728054550,
+            "production": 2581189352
+          },
+          {
+            "index": 1,
+            "original": 2560755352,
+            "production": 2156659185
+          },
+          {
+            "index": 2,
+            "original": 1637979711,
+            "production": 2178477566
+          },
+          {
+            "index": 3,
+            "original": 339724275,
+            "production": 2893667553
+          },
+          {
+            "index": 4,
+            "original": 2144236572,
+            "production": 2229448486
+          },
+          {
+            "index": 5,
+            "original": 1622707621,
+            "production": 4240453405
+          },
+          {
+            "index": 6,
+            "original": 1291386230,
+            "production": 3416959692
+          },
+          {
+            "index": 7,
+            "original": 2486244996,
+            "production": 1452774440
+          }
+        ],
+        "reason": "Run/room/effect shared-stream consumers remain incomplete; source values and cursor adjustments are never supplied to production"
+      }
+    },
+    {
+      "name": "random-2",
+      "runMtDiagnostic": {
+        "status": "fail",
+        "originalIndex": 461,
+        "productionIndex": 47,
+        "differingWords": 624,
+        "firstDifferences": [
+          {
+            "index": 0,
+            "original": 1435739992,
+            "production": 1212789698
+          },
+          {
+            "index": 1,
+            "original": 3535535866,
+            "production": 3361980291
+          },
+          {
+            "index": 2,
+            "original": 3312224284,
+            "production": 550126586
+          },
+          {
+            "index": 3,
+            "original": 506196360,
+            "production": 2397775793
+          },
+          {
+            "index": 4,
+            "original": 2037629984,
+            "production": 2871171038
+          },
+          {
+            "index": 5,
+            "original": 1495569117,
+            "production": 2151899288
+          },
+          {
+            "index": 6,
+            "original": 4126319005,
+            "production": 74630110
+          },
+          {
+            "index": 7,
+            "original": 2347648239,
+            "production": 1896687524
+          }
+        ],
+        "reason": "Run/room/effect shared-stream consumers remain incomplete; source values and cursor adjustments are never supplied to production"
+      }
+    },
+    {
+      "name": "random-3",
+      "runMtDiagnostic": {
+        "status": "fail",
+        "originalIndex": 460,
+        "productionIndex": 47,
+        "differingWords": 624,
+        "firstDifferences": [
+          {
+            "index": 0,
+            "original": 4212082116,
+            "production": 1477321301
+          },
+          {
+            "index": 1,
+            "original": 3136791858,
+            "production": 3547835474
+          },
+          {
+            "index": 2,
+            "original": 1143446238,
+            "production": 3276522915
+          },
+          {
+            "index": 3,
+            "original": 3527225697,
+            "production": 1850785118
+          },
+          {
+            "index": 4,
+            "original": 2593066419,
+            "production": 20229967
+          },
+          {
+            "index": 5,
+            "original": 3416594032,
+            "production": 3001914243
+          },
+          {
+            "index": 6,
+            "original": 3363252188,
+            "production": 628479257
+          },
+          {
+            "index": 7,
+            "original": 4015764639,
+            "production": 4232340674
+          }
+        ],
+        "reason": "Run/room/effect shared-stream consumers remain incomplete; source values and cursor adjustments are never supplied to production"
+      }
+    }
+  ],
+  "acceptedReportSha256": "50e0996576808f01c2ad6c6da94968491771289ab418c5dcd6a514759cf12292",
+  "recordedScenariosSha256": "e21870391a681f44478af40246ad9f5d13d888ca3e83fdd35b29440cc50c4eef",
+  "rejectedObserverReportSha256": "d7cbce6b2159a7c38afe089d1fd150af6590485be1d210ce85140fe24ea63633",
+  "scope": "Actual ordinary run seed/code/stage, System admission and unseeded flags pass. Complete shared MT matches only through Character; all later full-state MT diagnostic failures and mandatory W0 holdout remain unresolved. Native data is comparison evidence only.",
+  "finalBuildCheck": {
+    "command": "source cloud/env.sh; npm run check:build",
+    "status": "pass",
+    "log": "/workspace/isaac-worktrees/weapons/.cache/ordinary-run-build-accepted-final.log",
+    "logSha256": "7b9fe5564f4facdc7e2f8ab894d1d861b1ccf42ad7b5eb573c9393c8ffc36695",
+    "postCheckProductionArtifact": "0cbb1668f1e980b9dc3e9e45f24521dfcf8c1e4d998239025cb663d2759d40b4"
+  }
+}

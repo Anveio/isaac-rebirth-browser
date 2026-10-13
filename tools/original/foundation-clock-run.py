@@ -101,6 +101,7 @@ def checked_observation(observer, pid, context):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--seed', help='Valid seed; omitted means new OS-random seed')
+    parser.add_argument('--ordinary-run', action='store_true', help='Observe a generated Character seed through an explicit no-dialog tape; no requested run seed')
     parser.add_argument('--boot-epoch-seed', type=int, default=1700000000, help='Public realtime seconds supplied to native time(NULL); independent of the requested run seed')
     parser.add_argument('--tape', type=Path, help='List of key/step/capture/audioHold commands; public X11 keys and explicit real audio-device holds')
     parser.add_argument('--focus-handoff', action='append', default=[], help='At named capture, generate public X11 focus out/in and release one presentation before capture; diagnostic tape alteration is recorded')
@@ -173,10 +174,14 @@ def main():
         raise SystemExit('FPS must be 1..1000; step-ns 1..1000000000; frame timeout 0..300 seconds')
     if not 480 <= args.width <= 3840 or not 270 <= args.height <= 2160 or args.width*9 != args.height*16 or not 1 <= args.max_render_scale <= 8:
         raise SystemExit('Window must be 16:9, from 480x270 through 3840x2160')
-    vector = {'code': args.seed, 'seedValue': codec.decode_seed(args.seed)} if args.seed else codec.random_vector()
-    seed = codec.encode_seed(vector['seedValue'])
+    if args.ordinary_run and (args.seed or not args.tape):
+        raise SystemExit('--ordinary-run requires an explicit public tape and excludes --seed')
+    vector = {'seedValue': None} if args.ordinary_run else ({'code': args.seed, 'seedValue': codec.decode_seed(args.seed)} if args.seed else codec.random_vector())
+    seed = None if args.ordinary_run else codec.encode_seed(vector['seedValue'])
     tape = json.loads(args.tape.read_text()) if args.tape else default_tape(seed)
     validate_tape(tape)
+    if args.ordinary_run and any(a['type'] == 'key' and a['key'] != 'Return' for a in tape):
+        raise SystemExit('--ordinary-run admission tape permits Return confirmations only, without a seed dialog')
     selected_labels = {a['label'] for a in tape if a['type'] == 'capture'}
     if not set(args.focus_handoff) <= selected_labels:
         raise SystemExit('Focus-handoff labels must exist in the selected tape')
@@ -227,6 +232,7 @@ def main():
     frames, events, acknowledgements = [], [], []
     report = {'schema': 1, 'status': 'running', 'output': str(out),
               'captureClock': 'main-thread virtual Linux clocks and blocking public GL presentation gate; simulation ticks unknown', 'seed': seed, 'seedValue': vector['seedValue'],
+              'seedMode': 'ordinary-character-menu' if args.ordinary_run else 'public-manual-entry',
               'bootEpochSeed': args.boot_epoch_seed,
               'requestedViewport': {'width': args.width, 'height': args.height, 'maxRenderScale': args.max_render_scale},
               'profile': {'fresh': True, 'isolated': True}, 'tape': tape, 'frames': frames,
@@ -347,7 +353,13 @@ def main():
                                    'presentedFrame': current['presentedFrame'], 'virtualElapsedNs': current['virtualElapsedNs'],
                                    'simulationTick': None, 'gateBlocked': True, 'x11Focus': x11_focus(), 'targetWindow': int(window)})
             report['observedState'] = debug.observed_state((local / 'log.txt').read_text()) if (local / 'log.txt').exists() else {}
-            if report['observedState'].get('seedValue') != vector['seedValue']:
+            if args.ordinary_run:
+                observed = report['observedState']
+                if codec.decode_seed(observed.get('seed')) != observed.get('seedValue'):
+                    raise RuntimeError('Original generated seed code/value did not agree through the public codec')
+                report['seed'] = codec.encode_seed(observed['seedValue'])
+                report['seedValue'] = observed['seedValue']
+            elif report['observedState'].get('seedValue') != vector['seedValue']:
                 raise RuntimeError('Original did not read back the requested seed; deterministic time/input may be incomplete')
             report['seedReadbackMatchesCodec'] = True
             if args.gl_trace:
