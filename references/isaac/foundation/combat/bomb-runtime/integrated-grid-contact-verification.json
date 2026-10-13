@@ -1,0 +1,154 @@
+{
+  "schema": 1,
+  "status": "pass",
+  "scope": {
+    "functional": "Real input/phase/readback and source title, fade, player motion, pause/controller, HP, immunity, active tear/bomb counts",
+    "pixels": "Strict full RGBA diagnostic; every difference remains a failure in its own pixel result",
+    "exactPixelsRequired": false,
+    "completeOriginalStateParity": false
+  },
+  "build": {
+    "sha256": "3388286f670d04dbb2d4df168114a68d8b0f55c08984e98a9bdb79fbc444dd30",
+    "files": 530,
+    "scope": "Immutable snapshot of production build bytes; source/native replay equality is checked separately"
+  },
+  "sourceBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "gateSources": {
+    "tools/foundation/paired-game.mjs": "133ac4f889615b51a0e5659dda5cf31f5c13f50aa0687274a1cde80c87955cda",
+    "tools/foundation/production-server.mjs": "e3152b58e2353319ba0963b30439e33c3cc65f84a8c6ebb765c2812486245952",
+    "tools/foundation/compare.mjs": "007227c2431f837b347ec29dcbc3492f49eaeb71d08b84ead0b88cfeef98b534",
+    "tools/original/foundation-paired-scenarios.py": "8f6a4b5130b6d0c1b73d3dcde57382c6ad169ba31efd8b3a13a6502eebe835cf",
+    "tools/original/foundation-paired-observer.py": "b49cb171da79eabba8054c8338018ffa38e3a38305fbff2240d6631214dddacf",
+    "tools/original/foundation-menu-observer.py": "a5b8a91047f9bccee75e844c5eba59c8bbf96a84b6a1b7142b59e32bacc91315",
+    "tools/original/foundation-combat-observe.py": "d241cee76dc3fbdbe99c047597a760b8c79a8d61b99eef9c519b925a1b5b24cd",
+    "tools/original/foundation-clock-run.py": "973445fd4f5e41296c90449597438e5f4eadb02391176d9071d7f7b3a6cfde86",
+    "tools/original/foundation-clock-gate.c": "c77b51f323a66d75a14980164b48d34b94da08064068a310c0bd1e8b6b185efe",
+    "tools/original/foundation-clock-verify.py": "c488100a187b44803c06374535715eaa5a7cde9d4513f6e866e090367d4f2054",
+    "tools/original/foundation-clock-scenarios.py": "87316815cfa490d534fae5f9d27e55f16b17404a93df1b79e528b3f4b58391c5",
+    "tools/original/foundation-bomb-scenario.py": "4d8dacb4bbe7222c6bfa3ffe1c9f8ea69b76f304825a01db0e973f14ddddd090",
+    "tools/original/foundation-presentation-scenario.py": "530666412639fae6cb2d71f6f49e89a9de12377503d84541a73240bca0be3351",
+    "tools/original/foundation-title-scenario.py": "ea1bfb8b53a46a55f0c234ea75753775b70fd69e0b88f1be8021287a13adb4a9",
+    "tools/original/foundation-combat-scenario.py": "d125481add29d1032fb164741a8d3ab54da9e54e9e6c1d0581278bc255044420",
+    "tools/original/foundation-seeds.py": "dd4633c955e7518e9bc0f0147ddfae46d356468238477a68dc06c86656ccba89",
+    "tools/original/foundation-random-seeds.py": "6ce7e4309ee9492dc0c20c0bf1144394dd92e70aec2037d0db91bb0f2928f625",
+    "tools/original/state-observer.py": "58e3b510abbe5ff57f05844efbdf764e2a02530cda4fa99f538d886d258af6f1",
+    "tools/original/debug-run.py": "d785d32c6cc557959be38880a3b046c4040b988fbe3d06d4a8c1f4aa2e833cf5",
+    "tools/original/with-display.sh": "af469210e803786a60d8632c28a6f2da77bc8ab02cc06be50016ddb25e95b848",
+    "tools/foundation/browser.mjs": "60c4bc851470f47e4dd0399148ce0c1edf351d41fbf7f7e15fa823af5948b4c8"
+  },
+  "gateSourcesStable": true,
+  "cases": [
+    {
+      "id": "paired-bomb-moving-even",
+      "seed": "T1PK6Y0W",
+      "status": "pass",
+      "checkpoints": 18,
+      "passingCheckpoints": 18,
+      "caseSha256": "7865e269c2bbba1866eca5715b0da3c71c33e7ebc2329db19f2f7a460aabbc8e",
+      "stateFailures": []
+    },
+    {
+      "id": "paired-bomb-moving-odd",
+      "seed": "T1PK6Y0W",
+      "status": "pass",
+      "checkpoints": 18,
+      "passingCheckpoints": 18,
+      "caseSha256": "5bacc9fad80bf6e2b163603dd950b69a56f877d8bdbcec8ea1f19220c50bf326",
+      "stateFailures": []
+    },
+    {
+      "id": "paired-pause-release",
+      "seed": "T1PK6Y0W",
+      "status": "pass",
+      "checkpoints": 18,
+      "passingCheckpoints": 18,
+      "caseSha256": "673cdbe69bf84488046ec551e2495dfdd5e4df80cd2ad6ac6352a1e70285e52f",
+      "stateFailures": []
+    },
+    {
+      "id": "paired-random-run",
+      "seed": "C7YP WS61",
+      "status": "pass",
+      "checkpoints": 42,
+      "passingCheckpoints": 42,
+      "caseSha256": "6affa97845c5de00f06d61b9be1612e72109b12cdfaa7bc0fa24c50732e12f47",
+      "stateFailures": []
+    }
+  ],
+  "bombStateFields": 125,
+  "bombStateStatus": "pass",
+  "bombStateSources": {
+    "buildSha256": "3388286f670d04dbb2d4df168114a68d8b0f55c08984e98a9bdb79fbc444dd30",
+    "sourceBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+    "originalManifestSha256": "c2949ae718795592f9ba08956c616b74de664fa83de208aadf33742760634118",
+    "browserManifestSha256": "25cf95b977ebcb2087564d9ce9e1ed572e1ce8f61024c0ef987cfe92558b831a",
+    "caseSha256": "6affa97845c5de00f06d61b9be1612e72109b12cdfaa7bc0fa24c50732e12f47"
+  },
+  "masks": {
+    "cases": [
+      {
+        "id": "8m72-neutral",
+        "status": "pass",
+        "checkpoint": "gameplay-start"
+      },
+      {
+        "id": "j4g3-neutral",
+        "status": "pass",
+        "checkpoint": "gameplay-start"
+      },
+      {
+        "id": "3bmb-neutral",
+        "status": "pass",
+        "checkpoint": "gameplay-start"
+      },
+      {
+        "id": "3bmb-moved",
+        "status": "pass",
+        "checkpoint": "movement"
+      },
+      {
+        "id": "3bmb-explosion-start",
+        "status": "pass",
+        "checkpoint": "explosion-start"
+      },
+      {
+        "id": "3bmb-explosion-faded",
+        "status": "pass",
+        "checkpoint": "explosion-faded"
+      },
+      {
+        "id": "3bmb-explosion-middle",
+        "status": "pass",
+        "checkpoint": "explosion-middle"
+      },
+      {
+        "id": "3bmb-explosion-late",
+        "status": "pass",
+        "checkpoint": "explosion-late"
+      },
+      {
+        "id": "3bmb-explosion-removed",
+        "status": "pass",
+        "checkpoint": "explosion-removed"
+      }
+    ],
+    "selected": 9,
+    "skipped": 0,
+    "originalStateParity": false,
+    "originalSimulationTickDelivery": false
+  },
+  "validation": {
+    "productionWasmBuild": "pass",
+    "typecheck": "pass",
+    "assets": "pass",
+    "matrix": "pass",
+    "clippyAllTargetsDenyWarnings": "pass"
+  },
+  "reportSha256": "7562a274b1777e0ce25e9d907073aac7f6c53e34b2ec15c2d90102ab4e4674de",
+  "bombStateSha256": "07ca87cd8e0bf4b7eb8ad3f8df58a887551f28d740e50b480c36d52020c82d60",
+  "limits": [
+    "Full frame RGBA diagnostics remain failing and are retained.",
+    "Boundary/door grid fields describe collision geometry, not recovered actor RNG seeds.",
+    "Unsupported grids/hazards and hostile room clear/locks remain required failing regressions."
+  ]
+}
