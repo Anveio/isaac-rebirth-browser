@@ -80,6 +80,7 @@ def compare(case, generator, catalogs):
         if expected != actual:
             differences.append({'field': name, 'expected': expected, 'actual': actual})
     return {'seed': case['seed'], 'runSeed': public['seedValue'], 'stageSeed': public['stageSeed'], 'sourceCurseMask': observed['curseMask'],
+        'bootEpochSeed': case['controller'].get('bootEpochSeed'),
         'status': 'fail' if differences else 'pass', 'differences': differences,
         'expected': {'descriptors': native_descriptors, 'grid': observed['grid'],
                      'startingDescriptor': observed['grid'][84], 'attempts': expected_attempts},
