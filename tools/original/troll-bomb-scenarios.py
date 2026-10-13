@@ -13,7 +13,7 @@ spec.loader.exec_module(pickups)
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--count', type=int, default=2)
+    parser.add_argument('--count', type=int, help='Append 2..4 new unfiltered OS draws to every retained case')
     parser.add_argument('--case', type=Path)
     parser.add_argument('--validate-original', type=Path)
     args = parser.parse_args()
@@ -25,13 +25,13 @@ def main():
     if args.case:
         print(json.dumps(pickups.rock.tape(json.loads(args.case.read_text()))))
         return 0
-    if not 2 <= args.count <= 4:
+    if args.count is not None and not 2 <= args.count <= 4:
         raise ValueError('Conversion coverage requires 2..4 new unfiltered OS-random draws')
-    recorded = json.loads((ROOT / 'references/isaac/foundation/troll-bombs/contrived-cases.json').read_text())
+    recorded = json.loads((ROOT / 'references/isaac/foundation/troll-bombs/scenarios.json').read_text())
     print(json.dumps({'schema': 1, 'bootEpochSeed': 1700000000,
                       'source': 'Actual public seeds and held-key intervals; no captured state enters production',
-                      'scope': 'Retained XD0 and natural Megatroll research routes plus newly recorded OS-random ordinary-rock access. Pickup subtype outcomes are unfiltered; every unsupported draw remains required and blocking.',
-                      'cases': recorded['cases'] + pickups.random_cases(args.count)}))
+                      'scope': recorded['scope'],
+                      'cases': recorded['cases'] + (pickups.random_cases(args.count) if args.count is not None else [])}))
     return 0
 
 
