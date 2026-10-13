@@ -191,7 +191,7 @@ def validate_controller(case):
         raise ValueError('Actual X11 events were not consumed at the paired source phase')
 
 
-def validate_case(case, catalogs):
+def validate_case(case, catalogs, *, allow_non_labyrinth_curses=False):
     validate_controller(case)
     observation = case['observation']
     provenance = case['provenance']
@@ -216,12 +216,15 @@ def validate_case(case, catalogs):
     if actual.get('stage') != 1 or actual.get('altStage') != 0 \
             or actual.get('room') != '1.2(Start Room)' \
             or observation.get('stage') != 1 or observation.get('altStage') != 0 \
-            or observation.get('curseMask') != 0:
+            or (not allow_non_labyrinth_curses and observation.get('curseMask') != 0):
         raise ValueError('Contract requires ordinary Basement I / Start Room / no curse')
     for value in (actual['stage'], observation['stage']):
         integer(value, 1, 1, 'normal stage')
-    for value in (actual['altStage'], observation['altStage'], observation['curseMask']):
-        integer(value, 0, 0, 'normal alt-stage/curse')
+    for value in (actual['altStage'], observation['altStage']):
+        integer(value, 0, 0, 'normal alt-stage')
+    curse = integer(observation['curseMask'], 0, 127 if allow_non_labyrinth_curses else 0, 'source curse mask')
+    if curse & 2:
+        raise ValueError('Finalized normal floor contract excludes Labyrinth geometry')
     stage_seed = integer(actual.get('stageSeed'), 1, 0xffffffff, 'actual stage seed')
     if stage_seed != codec.initial_stage_seed(actual['seedValue']):
         raise ValueError('Actual stage seed violates independently recovered startup RNG27')

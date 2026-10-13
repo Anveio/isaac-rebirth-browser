@@ -10,6 +10,7 @@ mod bombs;
 pub mod combat;
 mod content;
 mod effects;
+pub mod floor;
 pub mod grid;
 pub mod layout;
 pub mod motion;
@@ -17,6 +18,7 @@ pub mod mt;
 pub mod phase;
 pub mod projectiles;
 mod room;
+pub mod room_assets;
 pub mod room_templates;
 pub mod seed;
 pub use bombs::{Bomb, Explosion};
@@ -263,6 +265,9 @@ pub struct State {
     pub pressed: BTreeSet<String>,
     pub player: Player,
     pub room: Room,
+    pub floor: floor::Floor,
+    pub current_room: usize,
+    pub visited_rooms: BTreeSet<usize>,
     pub stage_effects: StageEffects,
     pub inventory: Inventory,
     pub minimap: Minimap,
@@ -296,7 +301,9 @@ impl Game {
     pub fn new_with_boot_epoch(initial_seed: u32, boot_epoch_seed: u32) -> Result<Self, String> {
         let run_seed = seed::encode(initial_seed)?;
         let player = Player::starting();
-        let room = room::generate_room(initial_seed);
+        let floor = floor::generate_basement(seed::stage1_seed(initial_seed))?;
+        let current_room = floor.starting_descriptor;
+        let room = Room::from_starting_floor(&floor);
         let stage_effects = StageEffects::basement(&player, &room.appearance.fx, 0);
         let mut game = Self {
             state: State {
@@ -340,6 +347,9 @@ impl Game {
                 pressed: BTreeSet::new(),
                 player,
                 room,
+                floor,
+                current_room,
+                visited_rooms: BTreeSet::from([current_room]),
                 stage_effects,
                 inventory: Inventory {
                     coins: 0,
@@ -659,8 +669,11 @@ impl Game {
             active: true,
         };
         self.state.pause_menu = PauseMenu::hidden();
-        self.state.player = Self::new(self.state.run_seed_value)?.state.player;
-        self.state.room = room::generate_room(self.state.run_seed_value);
+        self.state.player = Player::starting();
+        self.state.floor = floor::generate_basement(seed::stage1_seed(self.state.run_seed_value))?;
+        self.state.current_room = self.state.floor.starting_descriptor;
+        self.state.visited_rooms = BTreeSet::from([self.state.current_room]);
+        self.state.room = Room::from_starting_floor(&self.state.floor);
         self.state.inventory = Inventory {
             coins: 0,
             bombs: 1,
