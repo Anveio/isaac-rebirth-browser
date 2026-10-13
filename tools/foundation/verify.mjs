@@ -103,7 +103,8 @@ export async function browserScenario(page, { initialSeed = FOUNDATION_REFERENCE
     assert.equal(actualTrace.initialSeed, initialSeed, "Replays must contain the actual initial seed");
     assert.equal(actualTrace.bootEpochSeed, bootEpochSeed, "Replays must contain the independent boot RNG input");
     assert.deepEqual(actualTrace.commands, commands, "Browser DOM input delivery must match the canonical command tape");
-    return { initialSeed, bootEpochSeed, commands, states, frames, timings, tickRate: 60, seed: states.at(-1).runSeed, inputTransport: "actual DOM keyboard; manually stepped WASM simulation" };
+    return { initialSeed, bootEpochSeed, commands, states: actualTrace.states, backendEvents: actualTrace.backendEvents,
+      frames, timings, tickRate: 60, seed: states.at(-1).runSeed, inputTransport: "actual DOM keyboard; manually stepped WASM simulation; recorded audio backend callbacks" };
   };
   // The native tape reaches its settled Title checkpoint 63 presentations
   // after the first rendered Title snapshot (ANM2 frame 32). Runtime reset
@@ -209,16 +210,32 @@ export function compareCapturedFrames(frames, original, output) {
 }
 
 let nativeReplayBuilt = false;
-export function nativeReplay(initialSeed, commands, bootEpochSeed = 0) {
+export function nativeReplay(initialSeed, commands, bootEpochSeed = 0, backendEvents = []) {
   assert.ok(Number.isInteger(bootEpochSeed) && bootEpochSeed >= 0 && bootEpochSeed <= 0xffffffff, "Boot epoch seed must be an unsigned 32-bit value");
   if (!nativeReplayBuilt) {
     const build = spawnSync("cargo", ["build", "--locked", "--manifest-path", "engine/Cargo.toml", "--bin", "replay"], { cwd: ROOT, encoding: "utf8" });
     assert.equal(build.status, 0, build.stderr);
     nativeReplayBuilt = true;
   }
-  const replay = spawnSync(join(ROOT, "engine/target/debug/replay"), [], { cwd: ROOT, input: JSON.stringify({ initialSeed, bootEpochSeed, commands }), encoding: "utf8", maxBuffer: 32 * 1024 * 1024 });
+  const timeline = [], publicStateIndices = [0], backendStateIndices = []; let eventIndex = 0;
+  assert.ok(Array.isArray(backendEvents) && commands.length + backendEvents.length <= 36000, 'Replay command budget includes audio callbacks');
+  for (let i = 0; i <= commands.length; i++) {
+    while (eventIndex < backendEvents.length && backendEvents[eventIndex].afterCommandCount === i) {
+      const event = backendEvents[eventIndex++];
+      assert.equal(event.command.type, 'musicBackend', 'Recorded backend stream accepts actual audio completion/loop callbacks only');
+      timeline.push(event.command);
+      backendStateIndices.push({ index: timeline.length, state: event.state });
+    }
+    if (i < commands.length) { timeline.push(commands[i]); publicStateIndices.push(timeline.length); }
+  }
+  assert.equal(eventIndex, backendEvents.length, 'Audio callback positions must be ordered and inside the public command tape');
+  const replay = spawnSync(join(ROOT, "engine/target/debug/replay"), [], { cwd: ROOT, input: JSON.stringify({ initialSeed, bootEpochSeed, commands: timeline }), encoding: "utf8", maxBuffer: 32 * 1024 * 1024 });
   assert.equal(replay.status, 0, replay.stderr);
-  const states = replay.stdout.trim().split("\n").map((line) => JSON.parse(line));
+  const allStates = replay.stdout.trim().split("\n").map((line) => JSON.parse(line));
+  assert.equal(allStates.length, timeline.length + 1, 'Native replay must emit every public and actual audio callback state');
+  for (const event of backendStateIndices) if (event.state)
+    assert.equal(exactStateDifference(allStates[event.index], event.state), null, `Native Rust/WASM state divergence after actual audio callback ${event.index}`);
+  const states = publicStateIndices.map(index => allStates[index]);
   assert.equal(states.length, commands.length + 1, "Native replay must emit initial and every command state");
   return states;
 }
@@ -252,7 +269,7 @@ export async function verify({ references, output = join(ROOT, ".cache/foundatio
     save(join(output, "wasm-states.json"), run.states);
     save(join(output, "command-performance.json"), { tickRate: run.tickRate, measurements: run.timings, nativePhaseComparison: "Unavailable: native observations are process lifetime CPU/RSS, not corresponding simulation/render phase timers" });
     try {
-      const native = nativeReplay(run.initialSeed, run.commands, run.bootEpochSeed);
+      const native = nativeReplay(run.initialSeed, run.commands, run.bootEpochSeed, run.backendEvents);
       save(join(output, "rust-states.json"), native);
       for (let index = 0; index < native.length; index++) assert.equal(exactStateDifference(native[index], run.states[index]), null, `Native Rust/WASM state divergence after command ${index}`);
       report.checks.push({ id: "actual-keyboard-menu-seed-movement-shooting", status: "pass", commands: run.commands.length, statesCompared: native.length, scope: "Exact native Rust/WASM foundation state; original game hidden state is not observed" });

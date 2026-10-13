@@ -23,14 +23,19 @@ async function boot() {
   let previous = performance.now();
   let currentState = engine.snapshot();
   let trace = new ReplayTrace(initialSeed, false, currentState);
-  const dispatch = (command: Command, render = true) => {
+  const dispatch = (command: Command, render = true, backendAudioTime?: number) => {
     const state = engine.command(command);
     currentState = state;
     audio.consume(state.audio.events);
-    trace.record(command, state);
+    audio.music.consume(state.music);
+    if (backendAudioTime === undefined) trace.record(command, state);
+    else if (command.type === 'musicBackend') trace.recordBackend(command, state, backendAudioTime);
+    else throw new Error('Backend event metadata requires an actual music callback');
     if (render) renderer.draw(state);
     return state;
   };
+  audio.music.onBackend((command, audioTime) => dispatch(command, false, audioTime));
+  audio.music.consume(currentState.music);
   const supported = new Set(['Enter', 'Escape', 'Tab', 'Backspace', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyE']);
   function keyboard(event: KeyboardEvent, down: boolean) {
     if (down && event.isTrusted) void audio.unlock().catch(console.error);
@@ -98,6 +103,7 @@ async function boot() {
       audio.reset(options.trace === true);
       initialSeed = seed;
       trace = new ReplayTrace(initialSeed, options.trace === true, currentState);
+      audio.music.consume(currentState.music);
       accumulator = 0;
       renderer.draw(currentState);
       return engine.snapshot();

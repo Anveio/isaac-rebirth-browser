@@ -60,6 +60,7 @@ def validate_tape(tape):
         raise ValueError('Tape must be a list of at most 36000 public input/presentation commands')
     labels = set()
     total = 0
+    host_hold_seconds = 0
     for action in tape:
         kind = action.get('type')
         if kind == 'step':
@@ -75,10 +76,17 @@ def validate_tape(tape):
             if not isinstance(label, str) or not label or len(label) > 80 or not all(c.isalnum() or c in '-_' for c in label) or label in labels:
                 raise ValueError('capture labels must be unique simple names')
             labels.add(label)
+        elif kind == 'audioHold':
+            seconds = action.get('seconds')
+            if type(seconds) not in (int, float) or not 0 < seconds <= 30:
+                raise ValueError('audioHold requires 0..30 explicit real host seconds')
+            host_hold_seconds += seconds
         else:
             raise ValueError(f'Unsupported tape action: {kind}')
     if total > 36000:
         raise ValueError('Tape has more than 36000 presented frames')
+    if host_hold_seconds > 120:
+        raise ValueError('Tape has more than 120 explicit real audio-device hold seconds')
 
 
 def checked_observation(observer, pid, context):
@@ -94,7 +102,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--seed', help='Valid seed; omitted means new OS-random seed')
     parser.add_argument('--boot-epoch-seed', type=int, default=1700000000, help='Public realtime seconds supplied to native time(NULL); independent of the requested run seed')
-    parser.add_argument('--tape', type=Path, help='List of key/step/capture commands; public X11 key names')
+    parser.add_argument('--tape', type=Path, help='List of key/step/capture/audioHold commands; public X11 keys and explicit real audio-device holds')
     parser.add_argument('--focus-handoff', action='append', default=[], help='At named capture, generate public X11 focus out/in and release one presentation before capture; diagnostic tape alteration is recorded')
     parser.add_argument('--state-observer', type=Path, help='Optional parent-only reference debug module exposing observe(pid, context); never production game input')
     parser.add_argument('--observe-every-step', action='store_true', help='Observe at each tape step gate without screenshots; use one-frame steps for dense trajectories')
@@ -307,6 +315,14 @@ def main():
                     subprocess.run(['xdotool', 'keydown' if action['down'] else 'keyup', '--window', window, action['key']], check=True)
                     subprocess.run(['xdotool', 'getwindowfocus'], check=True, stdout=subprocess.DEVNULL)
                     events.append({**action, 'keysym': keysym, 'presentedFrame': current['presentedFrame'], 'virtualElapsedNs': current['virtualElapsedNs']})
+                elif kind == 'audioHold':
+                    hold_started = time.monotonic()
+                    time.sleep(action['seconds'])
+                    report.setdefault('hostAudioHolds', []).append({
+                        'requestedSeconds': action['seconds'], 'elapsedSeconds': time.monotonic() - hold_started,
+                        'presentedFrame': current['presentedFrame'], 'virtualElapsedNs': current['virtualElapsedNs'],
+                        'mainThreadGateBlocked': True, 'scope': 'Real worker/audio-device time; no presentations or synthetic completion events',
+                    })
                 else:
                     focus_before = x11_focus()
                     if action['label'] in args.focus_handoff:

@@ -35,6 +35,23 @@ export interface AudioState {
   slots: Record<string, { lastTick: number | null; nextAllowed: number; lastVolume: number; loaded: boolean;
     samples: { looping: boolean; gain: number; pitch: number }[] }>;
 }
+export interface MusicChannel {
+  generation: number | null; backendPath: string | null; queuedPath: string | null;
+  queuedLooping: boolean; wrapperLooping: boolean; backendLooping: boolean; backendPlaying: boolean;
+  playing: boolean; updatesSincePrepare: number; volume: number; targetVolume: number; fadeRate: number; gain: number; pitch: number;
+}
+export type MusicEvent = { type: 'start'; channel: number; generation: number; path: string; looping: boolean;
+  queuedPath: string | null; queuedLooping: boolean; gain: number; pitch: number } |
+  { type: 'stop'; channel: number; generation: number } |
+  { type: 'gain'; channel: number; generation: number; gain: number } |
+  { type: 'pitch'; channel: number; generation: number; pitch: number } |
+  { type: 'loop'; channel: number; generation: number; looping: boolean };
+export interface MusicState {
+  volume: number; musicEnabled: boolean; activeChannel: number; currentId: number; queuedId: number;
+  layerEnabled: boolean; pitch: number; targetPitch: number; channels: [MusicChannel, MusicChannel, MusicChannel];
+  nextGeneration: number; events: MusicEvent[]; pending: { type: 'crossfade' | 'room'; id: number }[];
+}
+export type MusicBackendCommand = { type: 'musicBackend'; channel: number; generation: number; event: 'ended' | 'loop' };
 export interface Bomb {
   id: number; x: number; y: number;
   motion: {
@@ -110,8 +127,10 @@ export interface StageEffects {
 export interface State {
   schema: 1; tickRate: 60; tick: number; menuAnimationTick: number; runTick: number; gameUpdateCount: number; screen: Screen;
   titleAnimationFrame: number; menuFade: { active: boolean; alpha: number; color: [number, number, number, number] };
+  runStartRequest: { inputPending: boolean; fading: boolean; fadeAlpha: number; systemPending: boolean };
   systemClock: { systemCounter: number; interpolationEnabled: boolean };
   audio: AudioState;
+  music: MusicState;
   profile: number; mainSelection: number; characterSelection: number; character: string; difficulty: string;
   seedText: string; seedValid: boolean; runSeed: string; initialSeed: number; runSeedValue: number; bootEpochSeed: number; bootLifecycle: BootLifecycle;
   pendingMenuInitializations: { afterAudioRequests: number; initialization: { type: "loadFreshProfile"; profile: number } | { type: "resetCharacterSeed" } }[];
@@ -131,7 +150,7 @@ export interface State {
   bombPlacementCooldown: { remainingUpdates: number }; bombActionWasDown: boolean;
   runIntroduction: RunIntroduction; pauseMenu: PauseMenu;
 }
-export type Command = { type: "key"; code: string; down: boolean } | { type: "text"; text: string } | { type: "tick"; count: number } | { type: "audioVolume"; sfx_volume: number };
+export type Command = { type: "key"; code: string; down: boolean } | { type: "text"; text: string } | { type: "tick"; count: number } | { type: "audioVolume"; sfx_volume: number } | { type: 'musicVolume'; volume: number } | MusicBackendCommand;
 interface Exports extends WebAssembly.Exports {
   memory: WebAssembly.Memory; abi_version: () => number; reset: (initialSeed: number, bootEpochSeed: number) => number; request_ptr: (length: number) => number;
   command: () => number; snapshot_ptr: () => number; snapshot_len: () => number;
