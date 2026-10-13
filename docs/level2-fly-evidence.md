@@ -76,3 +76,15 @@ and retires it using actual liveness. One-job Rust/strict Clippy and formatting
 pass; no corrected-artifact live acceptance is inferred. Original PR84 heads,
 artifact and all failed captures remain immutable. Exact source/log hashes are
 in `blood-sequence-correction.json` beside the original verification.
+
+The appearance Poof caller also now runs at its actual pre-Base boundary.
+NPC.Update4fbe85 draws the seed and4fbeb7 admits the effect from the current
+NPC+448 position before447190 moves the NPC or drains queued damage. The old
+post-advance adaptor used the later position and could allocate the effect
+after a damage-driven blood birth. A typed factory context now borrows the
+effect ID, effect array and room sequence owner inside the counter1 callback.
+It retains the actual parent, zero initial velocity, fresh zero offset/height+1
+and newborn fence, with no immediate Poof Update. The caller consumes one
+shared seed; Init consumes none. This narrow correction has source/static
+validation only. Artifact30183f, both failed captures and every required
+comparison remain retained; corrected live parity is pending.
