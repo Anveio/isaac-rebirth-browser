@@ -171,7 +171,8 @@ function scopedState(source, actual, gameplay) {
     check('player.hp', player.redHp, actual.player.hp);
     check('damageCooldown', player.damageCountdown, actual.damageCooldown);
     const admitted = source.gameplay.entities.filter(entity => !entity.removed);
-    check('tears.length', admitted.filter(entity => entity.type === 2).length, actual.tears.length);
+    const activeTears = actual.tears.filter(tear => tear.motion === undefined || tear.motion.lifetime === 'alive');
+    check('tears.alive', admitted.filter(entity => entity.type === 2).length, activeTears.length);
     const livingBombs = actual.bombs.filter(bomb => bomb.motion === undefined || bomb.motion.lifetime === 'alive');
     check('bombs.alive', admitted.filter(entity => entity.type === 4).length, livingBombs.length);
     check('paused', source.pause.paused, actual.paused);
