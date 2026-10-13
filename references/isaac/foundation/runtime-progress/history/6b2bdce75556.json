@@ -1,0 +1,752 @@
+{
+  "schema": 1,
+  "scope": {
+    "functional": "Real input/phase/readback and source title, fade, player motion, pause/controller, HP, immunity, active tear/bomb counts",
+    "pixels": "Strict full RGBA diagnostic; every difference remains a failure in its own pixel result",
+    "exactPixelsRequired": false,
+    "completeOriginalStateParity": false
+  },
+  "build": {
+    "sha256": "6b2bdce75556c3fb23f13dfcd49e89067737a1f6c8809bcc811ca290c9f8fff7",
+    "files": 99,
+    "source": "/workspace/isaac-rebirth-browser/dist",
+    "scope": "Immutable snapshot of production build bytes; source/native replay equality is checked separately"
+  },
+  "sourceBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "gateSources": {
+    "tools/foundation/paired-game.mjs": "ca3ddd0d106e52dd532a3146c68502decf10bce7afc8f7997a1ead1efd26e442",
+    "tools/foundation/production-server.mjs": "e3152b58e2353319ba0963b30439e33c3cc65f84a8c6ebb765c2812486245952",
+    "tools/foundation/compare.mjs": "007227c2431f837b347ec29dcbc3492f49eaeb71d08b84ead0b88cfeef98b534",
+    "tools/original/foundation-paired-scenarios.py": "7b11104cf0544fb9225f603d84c2d44ba423ed4f6a173bab998f8f8c1f20fc01",
+    "tools/original/foundation-paired-observer.py": "b49cb171da79eabba8054c8338018ffa38e3a38305fbff2240d6631214dddacf",
+    "tools/original/foundation-menu-observer.py": "a5b8a91047f9bccee75e844c5eba59c8bbf96a84b6a1b7142b59e32bacc91315",
+    "tools/original/foundation-combat-observe.py": "d241cee76dc3fbdbe99c047597a760b8c79a8d61b99eef9c519b925a1b5b24cd",
+    "tools/original/foundation-clock-run.py": "973445fd4f5e41296c90449597438e5f4eadb02391176d9071d7f7b3a6cfde86",
+    "tools/original/foundation-clock-gate.c": "c77b51f323a66d75a14980164b48d34b94da08064068a310c0bd1e8b6b185efe",
+    "tools/original/foundation-clock-verify.py": "c488100a187b44803c06374535715eaa5a7cde9d4513f6e866e090367d4f2054",
+    "tools/original/foundation-clock-scenarios.py": "87316815cfa490d534fae5f9d27e55f16b17404a93df1b79e528b3f4b58391c5",
+    "tools/original/foundation-bomb-scenario.py": "4d8dacb4bbe7222c6bfa3ffe1c9f8ea69b76f304825a01db0e973f14ddddd090",
+    "tools/original/foundation-presentation-scenario.py": "530666412639fae6cb2d71f6f49e89a9de12377503d84541a73240bca0be3351",
+    "tools/original/foundation-title-scenario.py": "ea1bfb8b53a46a55f0c234ea75753775b70fd69e0b88f1be8021287a13adb4a9",
+    "tools/original/foundation-combat-scenario.py": "d125481add29d1032fb164741a8d3ab54da9e54e9e6c1d0581278bc255044420",
+    "tools/original/foundation-seeds.py": "dd4633c955e7518e9bc0f0147ddfae46d356468238477a68dc06c86656ccba89",
+    "tools/original/foundation-random-seeds.py": "6ce7e4309ee9492dc0c20c0bf1144394dd92e70aec2037d0db91bb0f2928f625",
+    "tools/original/state-observer.py": "58e3b510abbe5ff57f05844efbdf764e2a02530cda4fa99f538d886d258af6f1",
+    "tools/original/debug-run.py": "d785d32c6cc557959be38880a3b046c4040b988fbe3d06d4a8c1f4aa2e833cf5",
+    "tools/original/with-display.sh": "af469210e803786a60d8632c28a6f2da77bc8ab02cc06be50016ddb25e95b848",
+    "tools/foundation/browser.mjs": "60c4bc851470f47e4dd0399148ce0c1edf351d41fbf7f7e15fa823af5948b4c8"
+  },
+  "gateSourcesStable": true,
+  "paired": {
+    "status": "fail",
+    "selected": 8,
+    "passingCases": 6,
+    "checkpoints": 149,
+    "passingCheckpoints": 134,
+    "cases": [
+      {
+        "id": "paired-title-menu",
+        "seed": "T1PK6Y0W",
+        "seedValue": 2184569263,
+        "bootEpochSeed": 1700000000,
+        "caseSha256": "67ad29ef8dcf1373c4a9f3ffbbc3285aafb2bde73ffb3b741160bb42365e842e",
+        "originalStatus": "pass",
+        "browserStatus": "pass",
+        "status": "pass",
+        "checkpoints": 19,
+        "passingCheckpoints": 19,
+        "pixelExactCheckpoints": 12,
+        "failures": []
+      },
+      {
+        "id": "paired-movement-fire",
+        "seed": "T1PK6Y0W",
+        "seedValue": 2184569263,
+        "bootEpochSeed": 1700000000,
+        "caseSha256": "88cb895b5fc82a226eb180b66eec8f5c511bd7657ab4a3b8aefa3b4dc40c1d8c",
+        "originalStatus": "pass",
+        "browserStatus": "pass",
+        "status": "pass",
+        "checkpoints": 12,
+        "passingCheckpoints": 12,
+        "pixelExactCheckpoints": 7,
+        "failures": []
+      },
+      {
+        "id": "paired-pause-release",
+        "seed": "T1PK6Y0W",
+        "seedValue": 2184569263,
+        "bootEpochSeed": 1700000000,
+        "caseSha256": "3c61ac3eb5c2d9966243d89fac8c8ecc7d833a269b2fbfb292992e7a5a2394a9",
+        "originalStatus": "pass",
+        "browserStatus": "pass",
+        "status": "pass",
+        "checkpoints": 18,
+        "passingCheckpoints": 18,
+        "pixelExactCheckpoints": 7,
+        "failures": []
+      },
+      {
+        "id": "paired-bomb-moving-even",
+        "seed": "T1PK6Y0W",
+        "seedValue": 2184569263,
+        "bootEpochSeed": 1700000000,
+        "caseSha256": "7865e269c2bbba1866eca5715b0da3c71c33e7ebc2329db19f2f7a460aabbc8e",
+        "originalStatus": "pass",
+        "browserStatus": "pass",
+        "status": "pass",
+        "checkpoints": 18,
+        "passingCheckpoints": 18,
+        "pixelExactCheckpoints": 7,
+        "failures": []
+      },
+      {
+        "id": "paired-bomb-moving-odd",
+        "seed": "T1PK6Y0W",
+        "seedValue": 2184569263,
+        "bootEpochSeed": 1700000000,
+        "caseSha256": "5bacc9fad80bf6e2b163603dd950b69a56f877d8bdbcec8ea1f19220c50bf326",
+        "originalStatus": "pass",
+        "browserStatus": "pass",
+        "status": "pass",
+        "checkpoints": 18,
+        "passingCheckpoints": 18,
+        "pixelExactCheckpoints": 7,
+        "failures": []
+      },
+      {
+        "id": "paired-room-combat",
+        "seed": "T1PK6Y0W",
+        "seedValue": 2184569263,
+        "bootEpochSeed": 1700000000,
+        "caseSha256": "8b83b3f9c94e57983b40b0a48acd3bcd966166d4e440a4b0822d2729ac8f1147",
+        "originalStatus": "pass",
+        "browserStatus": "pass",
+        "status": "fail",
+        "checkpoints": 28,
+        "passingCheckpoints": 14,
+        "pixelExactCheckpoints": 7,
+        "failures": [
+          {
+            "label": "right-entry-6",
+            "fields": [
+              {
+                "field": "player.x",
+                "expected": 422.61032714843753,
+                "actual": 402.4999206542969,
+                "status": "fail"
+              },
+              {
+                "field": "player.vx",
+                "expected": 0,
+                "actual": -0.0004816144704818726,
+                "status": "fail"
+              },
+              {
+                "field": "player.vy",
+                "expected": 0,
+                "actual": -5.146675370326648e-08,
+                "status": "fail"
+              }
+            ],
+            "error": null
+          },
+          {
+            "label": "adjacent-room",
+            "fields": [
+              {
+                "field": "player.x",
+                "expected": 84,
+                "actual": 402.49603271484375,
+                "status": "fail"
+              },
+              {
+                "field": "player.y",
+                "expected": 136,
+                "actual": 136.7517807006836,
+                "status": "fail"
+              },
+              {
+                "field": "player.vx",
+                "expected": 0,
+                "actual": -1.0525058769417228e-05,
+                "status": "fail"
+              },
+              {
+                "field": "player.vy",
+                "expected": 0,
+                "actual": -1.124739390512275e-09,
+                "status": "fail"
+              }
+            ],
+            "error": null
+          },
+          {
+            "label": "rock-approach-1",
+            "fields": [
+              {
+                "field": "player.x",
+                "expected": 84,
+                "actual": 402.49603271484375,
+                "status": "fail"
+              },
+              {
+                "field": "player.y",
+                "expected": 143.62573699951173,
+                "actual": 144.3775177001953,
+                "status": "fail"
+              },
+              {
+                "field": "player.vx",
+                "expected": 0,
+                "actual": -1.5552174772892613e-06,
+                "status": "fail"
+              }
+            ],
+            "error": null
+          },
+          {
+            "label": "rock-approach-2",
+            "fields": [
+              {
+                "field": "player.x",
+                "expected": 84,
+                "actual": 402.49603271484375,
+                "status": "fail"
+              },
+              {
+                "field": "player.y",
+                "expected": 161.05013275146484,
+                "actual": 161.80191345214845,
+                "status": "fail"
+              },
+              {
+                "field": "player.vx",
+                "expected": 0,
+                "actual": -2.2980404992267723e-07,
+                "status": "fail"
+              }
+            ],
+            "error": null
+          },
+          {
+            "label": "rock-approach-3",
+            "fields": [
+              {
+                "field": "player.x",
+                "expected": 84,
+                "actual": 402.49603271484375,
+                "status": "fail"
+              },
+              {
+                "field": "player.y",
+                "expected": 168.49988098144533,
+                "actual": 182.76112060546876,
+                "status": "fail"
+              },
+              {
+                "field": "player.vx",
+                "expected": 1.5251677698557842e-08,
+                "actual": -3.395661014593543e-08,
+                "status": "fail"
+              },
+              {
+                "field": "player.vy",
+                "expected": -0.0005486011505126953,
+                "actual": 2.73454954624176,
+                "status": "fail"
+              }
+            ],
+            "error": null
+          },
+          {
+            "label": "rock-approach-4",
+            "fields": [
+              {
+                "field": "player.x",
+                "expected": 84,
+                "actual": 402.49603271484375,
+                "status": "fail"
+              },
+              {
+                "field": "player.y",
+                "expected": 168.49974212646484,
+                "actual": 204.99555206298828,
+                "status": "fail"
+              },
+              {
+                "field": "player.vx",
+                "expected": 2.3489596756576248e-08,
+                "actual": -5.017540294360856e-09,
+                "status": "fail"
+              },
+              {
+                "field": "player.vy",
+                "expected": -0.00047723650932312016,
+                "actual": 2.820660710334778,
+                "status": "fail"
+              }
+            ],
+            "error": null
+          },
+          {
+            "label": "rock-approach-5",
+            "fields": [
+              {
+                "field": "player.x",
+                "expected": 84,
+                "actual": 402.49603271484375,
+                "status": "fail"
+              },
+              {
+                "field": "player.y",
+                "expected": 168.49974212646484,
+                "actual": 220.48839569091797,
+                "status": "fail"
+              },
+              {
+                "field": "player.vx",
+                "expected": 2.4707045298555386e-08,
+                "actual": 8.641036863821227e-09,
+                "status": "fail"
+              },
+              {
+                "field": "player.vy",
+                "expected": -0.00047723650932312016,
+                "actual": 0.3337586730718613,
+                "status": "fail"
+              }
+            ],
+            "error": null
+          },
+          {
+            "label": "rock-approach-6",
+            "fields": [
+              {
+                "field": "player.x",
+                "expected": 84,
+                "actual": 402.49603271484375,
+                "status": "fail"
+              },
+              {
+                "field": "player.y",
+                "expected": 168.49974212646484,
+                "actual": 220.49950408935547,
+                "status": "fail"
+              },
+              {
+                "field": "player.vx",
+                "expected": 2.488694157420923e-08,
+                "actual": 1.7975470623099454e-08,
+                "status": "fail"
+              },
+              {
+                "field": "player.vy",
+                "expected": -0.00047723650932312016,
+                "actual": 0.34292933940887455,
+                "status": "fail"
+              }
+            ],
+            "error": null
+          },
+          {
+            "label": "rock-blocked",
+            "fields": [
+              {
+                "field": "player.x",
+                "expected": 84,
+                "actual": 402.49603271484375,
+                "status": "fail"
+              },
+              {
+                "field": "player.y",
+                "expected": 168.49581451416017,
+                "actual": 220.2162994384766,
+                "status": "fail"
+              },
+              {
+                "field": "player.vx",
+                "expected": 5.438718420069932e-10,
+                "actual": 5.154020821240834e-10,
+                "status": "fail"
+              },
+              {
+                "field": "player.vy",
+                "expected": -1.0429385929455747e-05,
+                "actual": -0.0008641419291961939,
+                "status": "fail"
+              }
+            ],
+            "error": null
+          },
+          {
+            "label": "rock-after-tears",
+            "fields": [
+              {
+                "field": "player.x",
+                "expected": 84,
+                "actual": 402.49603271484375,
+                "status": "fail"
+              },
+              {
+                "field": "player.y",
+                "expected": 168.49579467773438,
+                "actual": 220.20913848876955,
+                "status": "fail"
+              },
+              {
+                "field": "player.vx",
+                "expected": 8.178794230415121e-13,
+                "actual": 7.750662850240786e-13,
+                "status": "fail"
+              },
+              {
+                "field": "player.vy",
+                "expected": -1.5683803322730227e-08,
+                "actual": -1.2995041515750927e-06,
+                "status": "fail"
+              }
+            ],
+            "error": null
+          },
+          {
+            "label": "rock-bomb-planted",
+            "fields": [
+              {
+                "field": "player.x",
+                "expected": 84,
+                "actual": 402.49603271484375,
+                "status": "fail"
+              },
+              {
+                "field": "player.y",
+                "expected": 168.49579467773438,
+                "actual": 220.20913848876955,
+                "status": "fail"
+              },
+              {
+                "field": "player.vx",
+                "expected": 4.912387743761724e-13,
+                "actual": 4.655241470086225e-13,
+                "status": "fail"
+              },
+              {
+                "field": "player.vy",
+                "expected": -9.420083202371644e-09,
+                "actual": -7.805145685324533e-07,
+                "status": "fail"
+              }
+            ],
+            "error": null
+          },
+          {
+            "label": "rock-bomb-explosion",
+            "fields": [
+              {
+                "field": "player.x",
+                "expected": 84,
+                "actual": 402.49603271484375,
+                "status": "fail"
+              },
+              {
+                "field": "player.y",
+                "expected": 168.49579467773438,
+                "actual": 220.20913848876955,
+                "status": "fail"
+              },
+              {
+                "field": "player.vx",
+                "expected": 1.4457446202589568e-19,
+                "actual": 1.3700644895362422e-19,
+                "status": "fail"
+              },
+              {
+                "field": "player.vy",
+                "expected": -2.7723839196919427e-15,
+                "actual": -2.297099698498652e-13,
+                "status": "fail"
+              },
+              {
+                "field": "player.hp",
+                "expected": 3,
+                "actual": 4,
+                "status": "fail"
+              }
+            ],
+            "error": null
+          },
+          {
+            "label": "rock-after-bomb",
+            "fields": [
+              {
+                "field": "player.x",
+                "expected": 84,
+                "actual": 402.49603271484375,
+                "status": "fail"
+              },
+              {
+                "field": "player.y",
+                "expected": 168.49579467773438,
+                "actual": 220.20913848876955,
+                "status": "fail"
+              },
+              {
+                "field": "player.vx",
+                "expected": 4.6706698256869965e-22,
+                "actual": 4.426175880790667e-22,
+                "status": "fail"
+              },
+              {
+                "field": "player.vy",
+                "expected": -8.9565565350003e-18,
+                "actual": -7.421086043856579e-16,
+                "status": "fail"
+              },
+              {
+                "field": "player.hp",
+                "expected": 3,
+                "actual": 4,
+                "status": "fail"
+              }
+            ],
+            "error": null
+          },
+          {
+            "label": "rock-former-cell-crossed",
+            "fields": [
+              {
+                "field": "player.x",
+                "expected": 84,
+                "actual": 402.49603271484375,
+                "status": "fail"
+              },
+              {
+                "field": "player.y",
+                "expected": 219.99036254882816,
+                "actual": 220.49984130859377,
+                "status": "fail"
+              },
+              {
+                "field": "player.vx",
+                "expected": 1.0445412115228005e-24,
+                "actual": 2.2222348938782944e-08,
+                "status": "fail"
+              },
+              {
+                "field": "player.vy",
+                "expected": 2.42152578830719,
+                "actual": -0.03481050580739975,
+                "status": "fail"
+              },
+              {
+                "field": "player.hp",
+                "expected": 3,
+                "actual": 4,
+                "status": "fail"
+              }
+            ],
+            "error": null
+          }
+        ]
+      },
+      {
+        "id": "paired-random-run",
+        "seed": "1E0W JX06",
+        "seedValue": 3066190771,
+        "bootEpochSeed": 1700000000,
+        "caseSha256": "23ce583e581aa45f0ec041978a070e7abc0ed042ed2975ac674b81361d70dd7c",
+        "originalStatus": "pass",
+        "browserStatus": "pass",
+        "status": "fail",
+        "checkpoints": 18,
+        "passingCheckpoints": 17,
+        "pixelExactCheckpoints": 7,
+        "failures": [
+          {
+            "label": "random-held-1",
+            "fields": [
+              {
+                "field": "tears.length",
+                "expected": 1,
+                "actual": 0,
+                "status": "fail"
+              }
+            ],
+            "error": null
+          }
+        ]
+      },
+      {
+        "id": "paired-random-run",
+        "seed": "33N6 SVFY",
+        "seedValue": 3249977233,
+        "bootEpochSeed": 1700000000,
+        "caseSha256": "8652651aa5712053a456948c6c19fbe70a3dcad9b675b98a3e492d434b47b219",
+        "originalStatus": "pass",
+        "browserStatus": "pass",
+        "status": "pass",
+        "checkpoints": 18,
+        "passingCheckpoints": 18,
+        "pixelExactCheckpoints": 7,
+        "failures": []
+      }
+    ]
+  },
+  "floor": {
+    "schema": 1,
+    "status": "pass",
+    "sourceReport": "/workspace/isaac-rebirth-browser/.cache/foundation/floor-e2e-native.json",
+    "selected": 5,
+    "skipped": 0,
+    "cases": [
+      {
+        "seed": "QNXPTVT1",
+        "status": "pass",
+        "descriptorCount": 11,
+        "attempts": 2,
+        "decorationSeed": 1114759373,
+        "inputTransport": "actual DOM keyboard; production WASM; original public X11 tape"
+      },
+      {
+        "seed": "0YAZCZ7N",
+        "status": "pass",
+        "descriptorCount": 11,
+        "attempts": 2,
+        "decorationSeed": 4122183606,
+        "inputTransport": "actual DOM keyboard; production WASM; original public X11 tape"
+      },
+      {
+        "seed": "BHX1EF8A",
+        "status": "pass",
+        "descriptorCount": 11,
+        "attempts": 2,
+        "decorationSeed": 3682764326,
+        "inputTransport": "actual DOM keyboard; production WASM; original public X11 tape"
+      },
+      {
+        "seed": "0KQ6087S",
+        "status": "pass",
+        "descriptorCount": 11,
+        "attempts": 1,
+        "decorationSeed": 3104052186,
+        "inputTransport": "actual DOM keyboard; production WASM; original public X11 tape"
+      },
+      {
+        "seed": "NKMG4E44",
+        "status": "pass",
+        "descriptorCount": 11,
+        "attempts": 1,
+        "decorationSeed": 2301022065,
+        "inputTransport": "actual DOM keyboard; production WASM; original public X11 tape"
+      }
+    ],
+    "browserArtifact": {
+      "sha256": "6b2bdce75556c3fb23f13dfcd49e89067737a1f6c8809bcc811ca290c9f8fff7",
+      "files": 99,
+      "source": "/workspace/isaac-rebirth-browser/dist",
+      "scope": "Immutable snapshot of production build bytes; source/native replay equality is checked separately"
+    },
+    "graphics": {
+      "requestedProfile": "mesa",
+      "actualProfile": "mesa",
+      "renderer": "ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL ES 3.2 Mesa 25.0.7-2+deb13u1)",
+      "vendor": "Google Inc. (Mesa)",
+      "version": "OpenGL ES 3.0 (ANGLE 2.1 git hash: unknown hash)",
+      "displayType": "ANGLE_OPENGL_EGL",
+      "devices": [
+        {
+          "vendorId": 0,
+          "deviceId": 0,
+          "vendorString": "Google Inc. (Mesa)",
+          "deviceString": "ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL ES 3.2 Mesa 25.0.7-2+deb13u1)",
+          "driverVendor": "Mesa",
+          "driverVersion": "25.0.7"
+        }
+      ],
+      "observedFrom": "Chromium SystemInfo.getInfo",
+      "scope": "Observed Chromium graphics backend; shader/pixel equality still requires the original reference comparisons"
+    }
+  },
+  "weapons": {
+    "status": "pass",
+    "scope": "Paired live original/browser weapon cooldown, head clock, shot births, actor birth fence and horizontal birth positions; projected height/range and shared MT routing remain separate work",
+    "production": {
+      "sha256": "6b2bdce75556c3fb23f13dfcd49e89067737a1f6c8809bcc811ca290c9f8fff7",
+      "files": 99,
+      "source": "/workspace/isaac-rebirth-browser/dist",
+      "scope": "Immutable snapshot of production build bytes; source/native replay equality is checked separately"
+    },
+    "cases": [
+      {
+        "name": "full-first-shot",
+        "code": "QSYVKMSE",
+        "direction": "Right",
+        "delay": 0,
+        "status": "pass",
+        "nativeManifestSha256": "85e8f7890df335c4c7338fb8857fb1e218d9296d007d9414c8ba072ab9a9d8a8",
+        "nativeManifest": "/workspace/isaac-rebirth-browser/.cache/e2e/weapons/integrated-1/full-first-shot/original/manifest.json",
+        "comparedPresentations": 54,
+        "observedBirths": 3
+      },
+      {
+        "name": "intermediate-first-shot",
+        "code": "ZG800TRJ",
+        "direction": "Right",
+        "delay": 1,
+        "status": "pass",
+        "nativeManifestSha256": "4ad9b71e66ddf4210031c9ead14ae60d55a1698baba9d5bc4cdf21e5f75f83f8",
+        "nativeManifest": "/workspace/isaac-rebirth-browser/.cache/e2e/weapons/integrated-1/intermediate-first-shot/original/manifest.json",
+        "comparedPresentations": 54,
+        "observedBirths": 3
+      },
+      {
+        "name": "random-0",
+        "code": "PMEHN8P9",
+        "direction": "Right",
+        "delay": 0,
+        "seedValue": 1697057156,
+        "status": "pass",
+        "nativeManifestSha256": "30443bbc484af75098016d04b1f05f9ce0144e9c0be2174a6ff4db0dc3824a59",
+        "nativeManifest": "/workspace/isaac-rebirth-browser/.cache/e2e/weapons/integrated-1/random-0/original/manifest.json",
+        "comparedPresentations": 54,
+        "observedBirths": 3
+      },
+      {
+        "name": "random-1",
+        "code": "1L40FKXJ",
+        "direction": "Left",
+        "delay": 1,
+        "seedValue": 3042581851,
+        "status": "pass",
+        "nativeManifestSha256": "eaaf07d8b81c8435e27cbcc3bcf10a4b220c6245809d26eb5f84e303ee4c9a51",
+        "nativeManifest": "/workspace/isaac-rebirth-browser/.cache/e2e/weapons/integrated-1/random-1/original/manifest.json",
+        "comparedPresentations": 54,
+        "observedBirths": 3
+      },
+      {
+        "name": "random-2",
+        "code": "QPNHBR4S",
+        "direction": "Up",
+        "delay": 0,
+        "seedValue": 2092371778,
+        "status": "pass",
+        "nativeManifestSha256": "fb6659f3b78d9c5621f1308fa455f25af3795004dff297d15bf1beb4dac7f374",
+        "nativeManifest": "/workspace/isaac-rebirth-browser/.cache/e2e/weapons/integrated-1/random-2/original/manifest.json",
+        "comparedPresentations": 54,
+        "observedBirths": 3
+      },
+      {
+        "name": "random-3",
+        "code": "Z48V0VN9",
+        "direction": "Down",
+        "delay": 1,
+        "seedValue": 2706556048,
+        "status": "pass",
+        "nativeManifestSha256": "da9512a3357f11ee26183efddfd7d497cac83f4adca0e6b5325b857e2be54d20",
+        "nativeManifest": "/workspace/isaac-rebirth-browser/.cache/e2e/weapons/integrated-1/random-3/original/manifest.json",
+        "comparedPresentations": 54,
+        "observedBirths": 3
+      }
+    ]
+  }
+}
