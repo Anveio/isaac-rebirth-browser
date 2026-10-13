@@ -149,6 +149,23 @@ fn main() {
          pub const PLAYER_COLLISION_RADIUS_WORLD: f64 = {collision_radius:?};\n\
          pub const PLAYER_COLLISION_MASS_WORLD: f64 = {collision_mass:?};\n"
     );
+    let player_actors: Value = serde_json::from_str(
+        &fs::read_to_string(&animations).expect("read authored player animations"),
+    )
+    .expect("parse authored player animations");
+    let pickup_clip = player_actors["gfx/001.000_player.anm2"]["Animations"]
+        .as_array()
+        .expect("authored player clips")
+        .iter()
+        .find(|clip| clip["Name"] == "Pickup")
+        .expect("authored Pickup clip");
+    assert_eq!(pickup_clip["Loop"], false, "Player Pickup is nonlooping");
+    generated.push_str(&format!(
+        "pub const PLAYER_PICKUP_FRAMES: u32 = {};\n",
+        pickup_clip["FrameNum"]
+            .as_u64()
+            .expect("Pickup frame count")
+    ));
     let keeper_tag = xml
         .split("<entity ")
         .find(|tag| attribute(tag, "id") == Some("17") && attribute(tag, "variant") == Some("1"))
