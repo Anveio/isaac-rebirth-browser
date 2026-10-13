@@ -1,0 +1,7 @@
+# Antithesis config image compose file. Set REBIRTH_DST_IMAGE to the pushed
+# image reference (the owner's tenant registry) before building the config.
+services:
+  rebirth-dst:
+    image: ${REBIRTH_DST_IMAGE:-rebirth-dst:latest}
+    container_name: rebirth-dst
+    hostname: rebirth-dst
