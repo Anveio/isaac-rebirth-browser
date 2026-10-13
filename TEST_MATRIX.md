@@ -189,7 +189,8 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | `phase` | system update/interpolation phases against a counter model | 6 | 2 | 0 |
 | `actors` | actor admission order and room identities against a list model | 4 | 2 | 0 |
 | `floor` | Basement generation structure, retries and per-descriptor room admission | 14 | 3 | 0 |
-| `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 48 | 31 | 2 |
+| `grid` | grid queries and ground-collision solvers on generated rooms | 14 | 2 | 0 |
+| `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 52 | 36 | 2 |
 | `abi` | the exported C ABI transport the browser bridge drives | 10 | 1 | 0 |
 
 <details><summary>Every declared DST property</summary>
@@ -260,9 +261,27 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Always | floor: every descriptor resolves authored layout and spawns | [floor.rs](engine/dst/src/units/floor.rs) |
 | Always | floor: every descriptor admits as a room without panicking | [floor.rs](engine/dst/src/units/floor.rs) |
 | Always | floor: admitted rooms have one door per neighbor and bounded geometry | [floor.rs](engine/dst/src/units/floor.rs) |
+| Always | grid: admitted room grids are valid grids | [grid.rs](engine/dst/src/units/grid.rs) |
+| Always | grid: every cell centre indexes back to its cell | [grid.rs](engine/dst/src/units/grid.rs) |
+| Always | grid: nonplayer ground resolution never fails for bounded motion | [grid.rs](engine/dst/src/units/grid.rs) |
+| Always | grid: nonplayer resolution keeps finite vectors | [grid.rs](engine/dst/src/units/grid.rs) |
+| Always | grid: a nonplayer preview never changes velocity | [grid.rs](engine/dst/src/units/grid.rs) |
+| Always | grid: nonplayer resolution without contact changes nothing | [grid.rs](engine/dst/src/units/grid.rs) |
+| Always | grid: nonplayer correction moves only out along the contact normal | [grid.rs](engine/dst/src/units/grid.rs) |
+| Always | grid: a full nonplayer reflection leaves the wall | [grid.rs](engine/dst/src/units/grid.rs) |
+| Sometimes | grid: a residual-speed preview contact is resolved | [grid.rs](engine/dst/src/units/grid.rs) |
+| Always | grid: player ground resolution never fails for bounded motion | [grid.rs](engine/dst/src/units/grid.rs) |
+| Always | grid: player resolution keeps finite vectors and previews keep velocity | [grid.rs](engine/dst/src/units/grid.rs) |
+| Always | grid: player resolution without contact changes nothing | [grid.rs](engine/dst/src/units/grid.rs) |
+| Always | grid: player correction moves only out along the contact normal | [grid.rs](engine/dst/src/units/grid.rs) |
+| Sometimes | grid: a player wall contact changes velocity | [grid.rs](engine/dst/src/units/grid.rs) |
+| Always | grid: blast candidates are ascending, unique cells of the room | [grid.rs](engine/dst/src/units/grid.rs) |
+| Always | grid: blast queries reject non-positive, oversized and non-finite radii | [grid.rs](engine/dst/src/units/grid.rs) |
 | Always | game: exactly the documented invalid inputs are rejected | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
-| Always | game: bounded Tick commands always succeed | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: valid Tick commands always succeed | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: an over-budget Tick is rejected | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Sometimes | game: an out-of-range host timestamp is rejected | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Sometimes | game: a host timestamp on a batched Tick is rejected | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: an out-of-range volume is rejected | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: an unsupported key is rejected | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: an unimplemented main menu action is rejected | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
@@ -299,6 +318,12 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Sometimes | game: a pickup is collected | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: a valid seed code is committed through the dialog | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: an invalid seed code is dismissed | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: the elapsed clock follows host timestamps or exact presentation intervals | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Sometimes | game: a host timestamp drives a tick | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: the run-start fade only falls, and only past the 3 s clock anchor | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: the run-start hold blocks full game updates | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Sometimes | game: the host clock rolls back during the run-start hold | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Sometimes | game: the run-start fade completes and controls return | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: menu selections stay within their menus | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: the highlighted character is the selected character | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: dialog seed text is at most eight uppercase glyphs and its validity is its decode | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
@@ -307,6 +332,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Always | game: pause state agrees with the pause menu phase | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: volumes stay within the unit interval | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: the run introduction lasts at most 140 ticks | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: player controls are disabled exactly while the run-start fade holds | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: no run-start request is pending during gameplay | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: player motion is finite and health is bounded | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: consumables are capped at 99 | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
