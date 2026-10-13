@@ -250,7 +250,17 @@ try {
             for (const field of ['variant', 'subtype', 'spawnSeed', 'animation', 'animationFrame', 'animationPlaying', 'collisionRadius']) {
               equal(actual[field], original[field], `pickup${index}:${field}`, presentation);
             }
-            equal([Math.fround(actual.position.x), Math.fround(actual.position.y)], original.position, `pickup${index}:position`, presentation);
+            // Native448 is the presented position after a fast update. The
+            // port keeps its full-update position separately from prediction.
+            equal([Math.fround(actual.presentedPosition.x), Math.fround(actual.presentedPosition.y)], original.position, `pickup${index}:presented position`, presentation);
+            if (source.nativePhase.systemIterations % 2 === 1) {
+              equal([Math.fround(actual.position.x), Math.fround(actual.position.y)], original.position, `pickup${index}:full physical position`, presentation);
+            }
+            equal([Math.fround(actual.velocity.x), Math.fround(actual.velocity.y)], original.velocity, `pickup${index}:velocity`, presentation);
+            equal(actual.currentFriction, original.friction, `pickup${index}:current friction`, presentation);
+            equal(actual.collisionMass, original.collisionMass, `pickup${index}:collision mass`, presentation);
+            equal(actual.collected ? 3 : 5, original.gridCollisionClass, `pickup${index}:grid collision class`, presentation);
+            equal(actual.canCollect ? 4 : 0, original.entityCollisionClass, `pickup${index}:entity collision class`, presentation);
             equal(actual.collected, original.removed, `pickup${index}:collection flag`, presentation);
           }
           const handles = state.actorScheduler.actors;
