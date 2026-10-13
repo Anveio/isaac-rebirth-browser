@@ -1,0 +1,104 @@
+{
+  "schema": 1,
+  "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "pins": [
+    {
+      "address": "0x511f10",
+      "bytes": 16344,
+      "label": "Player.Cache",
+      "sha256": "8eff2fba2271885f321af5c5757e0ee68eabba755ea4f195c1ee9da89aee2086"
+    },
+    {
+      "address": "0x529750",
+      "bytes": 2819,
+      "label": "Player.Move controls",
+      "sha256": "eddcb4227fbaf4ab2460a578bbc59246c372570f01163b6ff4f02f6e2d3d4833"
+    },
+    {
+      "address": "0x50d090",
+      "bytes": 3444,
+      "label": "Player.GetTearParameters",
+      "sha256": "38494bad07257850c91a4047ce68cfb5f89bb48627dae41bfb175f4f8c2cc1d7"
+    }
+  ],
+  "isaacSpeedModifier": {
+    "address": "0x8e6820",
+    "fileOffset": "0x2e6820",
+    "value": 0.0,
+    "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+  },
+  "selectedPassiveIds": [
+    14,
+    27,
+    28,
+    143
+  ],
+  "dispatchOrder": "FireDelay2,ShotSpeed4,Damage1,Range8,Speed16,Flags32,Color64,Flight128,Familiar512,Luck1024; selected mapped callback precedes actual Familiar0x200 owner",
+  "remaining": "Damage/fire-delay and other effects/cache owners, costumes/flags, later child RNGs, other characters and durable saved cached stats remain open. Global624-word MT comparison is explicit diagnostic; all selected source stats/player motion/tear velocity comparisons remain blocking.",
+  "scope": "Fresh normal Isaac baseline and actual cache bits4/8/16 for14/27/28/143; source-mapped implementation is distinct from fresh game acceptance.",
+  "baseline": {
+    "maxFireDelay": 10,
+    "shotSpeed": 1.0,
+    "damage": 3.5,
+    "tearHeight": -23.75,
+    "tearFallingSpeed": 0.0,
+    "tearFallingAcceleration": 0.0,
+    "moveSpeed": 1.0
+  },
+  "callbacks": [
+    {
+      "bit": 4,
+      "field": "Player+c7c",
+      "law": "Permanent or temporary143 presence selects1.2, otherwise1.0; native final minimum.6.",
+      "source": [
+        "511f68",
+        "513e48",
+        "512103"
+      ]
+    },
+    {
+      "bit": 8,
+      "field": "Player+c8c/c90/c94",
+      "law": "Reset height-23.75/fallingSpeed0/fallingAcceleration0; mapped permanent14 adds5 per copy to the range accumulator, subtracted from height; final height maximum-7.",
+      "source": [
+        "5127c8",
+        "5128d3",
+        "5128f3",
+        "512959"
+      ]
+    },
+    {
+      "bit": 16,
+      "field": "Player+d60",
+      "law": "Selected permanent27+28+143 and temporary143 sum as signed integer before f32*.3; min(permanent14,1)*.6; Isaac modifier0; min(accumulator,1)+1; final.1..2.",
+      "source": [
+        "512c59",
+        "512de2",
+        "512ded",
+        "512e45",
+        "512e86",
+        "512e9d"
+      ]
+    }
+  ],
+  "consumers": {
+    "motion": "529801..529835 scales normalized input by(.25*cachedSpeed)+.75 before repeated dots;529960 divides reverse acceleration by cached speed before+3 and*.4. The current full/intermediate phase and grid solvers remain the authoritative owners.",
+    "shot": "51bd4a scales the aimed10-unit vector by cachedc7c before inherited forward/transverse motion; existing normal tear birth consumes cachedc8c/c90/c94 with actual shared callbacks.",
+    "queue": "52d173 invokes511f10 during the real late Player deferred grant; mapped4/8/16 callbacks precede preserved Familiar0x200 dispatch. Only supported-complete requested bits clear; pending unknown owners expose incomplete evaluation and are not native d6c aliases."
+  },
+  "readback": {
+    "maxFireDelay": "Player+c78 i32",
+    "shotSpeed": "Player+c7c f32",
+    "damage": "Player+c88 f32",
+    "tearHeight": "Player+c8c f32",
+    "tearFallingSpeed": "Player+c90 f32",
+    "tearFallingAcceleration": "Player+c94 f32",
+    "moveSpeed": "Player+d60 f32"
+  },
+  "fixtures": {
+    "freshContrived": "Natural treasure14 and143 at both phase offsets, expected selection and grant blocking. No supplied stats/RNG or direct grant command.",
+    "recorded": "Previously unfiltered OS-secret active291 and passive48 codes retained unchanged; later declared consumer tail extends their fresh replay.",
+    "random": "Two new recorded OS-secret upper authored treasure8 routes, never selected-item filtered.",
+    "unaccepted": "Boss-only27/28 mapped speed branches have no natural boss acquisition acceptance in this leaf."
+  }
+}

@@ -1,0 +1,9 @@
+# Player stat cache
+
+Normal Isaac cache bits 4, 8 and 16 now own actual cached shot speed, tear height/falling fields and movement speed. Roid Rage (14), Wooden Spoon (27), Belt (28) and Speed Ball (143) follow their pinned source count/presence branches. Movement consumes the cached speed before input decomposition and reverse acceleration; regular tear birth consumes cached shot speed and range. Existing Familiar bit 0x200 dispatch follows these callbacks. Unsupported requested owners remain visible.
+
+`npm run test:e2e:stat-cache` runs fresh original processes and an immutable production browser through public menus, seed entry, treasure contact, deferred grant, movement/release and shooting. It requires every cached field/fire delay, Player world position/velocity, actual tear cardinality/stored velocity, pool/count/grant/queue state and complete independent command/seed provenance. It executes all eight selected cases and retains every failure. Full shared MT and unfamiliar/cache/child-state callbacks remain disclosed diagnostics. Tear velocities compare ordinal candidates when actor cardinality differs; those required differences do not establish a same-actor motion defect.
+
+The contrived public codes predict treasure-eligible Roid Rage and Speed Ball at both phase offsets. Original selection and later grant remain independently required. Spoon and Belt are boss-only and have no live acquisition acceptance here. Two retained unfiltered OS outcomes and two newly recorded OS-random routes remain required even when their effects are unsupported. No live passing result is claimed until this leaf's fresh frozen cohort completes.
+
+Source pins and exact fields are in [source-contracts.json](source-contracts.json). Private full readbacks, production snapshots, commands and failed comparison lists remain in the capture bank. Old acquisition evidence does not certify the new cached-stat readback.
