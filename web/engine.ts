@@ -294,6 +294,7 @@ export class Engine {
   key(code: string, down: boolean): State { return this.command({ type: "key", code, down }); }
   text(text: string): State { return this.command({ type: "text", text }); }
   tick(count = 1): State { return this.command({ type: "tick", count }); }
-  snapshot(): State { const ptr = this.wasm.snapshot_ptr(); return JSON.parse(this.read(ptr, this.wasm.snapshot_len())) as State; }
+  snapshot(): State { return JSON.parse(this.snapshotJson()) as State; }
+  snapshotJson(): string { return this.read(this.wasm.snapshot_ptr(), this.wasm.snapshot_len()); }
   private read(ptr: number, length: number) { return new TextDecoder().decode(new Uint8Array(this.wasm.memory.buffer, ptr, length)); }
 }
