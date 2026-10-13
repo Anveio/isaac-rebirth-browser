@@ -295,6 +295,20 @@ impl StageEffects {
         }
     }
 
+    /// Tear shadow follows ground prediction, separately from the height used
+    /// by its sprite. Fresh regular tears use authored shadow size8.
+    pub fn add_tear_shadows(&mut self, tears: &[crate::Tear]) {
+        for tear in tears {
+            self.shadow_casters.push(ShadowCaster::authored(
+                tear.id,
+                f64::from(tear.motion.presented_position.x) * crate::motion::WORLD_SCALE + 32.0,
+                f64::from(tear.motion.presented_position.y) * crate::motion::WORLD_SCALE - 47.0,
+                content::TEAR_SHADOW_PERCENT,
+                &self.mask_raster,
+            ));
+        }
+    }
+
     pub fn add_pickup_shadows(&mut self, pickups: &[crate::Pickup]) {
         for pickup in pickups
             .iter()

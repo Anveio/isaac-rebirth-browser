@@ -285,6 +285,21 @@ impl Grid {
         self.index(point).map_or(4, |index| self.collision(index))
     }
 
+    /// Regular Tear has native grid class4, queried at actual ground after its
+    /// full Update (442d69..442dff). That flag is read by the next Tear.Update.
+    /// Grid kind7 is excluded; empty/outside cells do not create a contact.
+    pub fn contacts_regular_tear(&self, point: WorldVector) -> bool {
+        let Some(index) = self.index(point) else {
+            return false;
+        };
+        let cell = &self.descriptor.cells[index];
+        matches!(self.collision(index), 2..=5)
+            && cell
+                .entity
+                .as_ref()
+                .map_or(cell.selector != 0, |entity| entity.kind != 7)
+    }
+
     pub fn collision(&self, index: usize) -> u32 {
         let Some(cell) = self.descriptor.cells.get(index) else {
             return 4;

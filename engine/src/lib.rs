@@ -72,6 +72,7 @@ pub struct Player {
     pub walk_frame: u8,
     pub head_frame: u8,
     pub shooting: bool,
+    pub eye: projectiles::Eye,
     pub render_offset: Point,
 }
 impl Player {
@@ -88,6 +89,7 @@ impl Player {
             walk_frame: 0,
             head_frame: 0,
             shooting: false,
+            eye: projectiles::Eye::Positive,
             // Authored sprite roots and shadow centers are one logical pixel
             // above the physical ground/light anchor in public GL submissions.
             render_offset: Point { x: 0.0, y: -1.0 },
@@ -103,6 +105,20 @@ pub struct Tear {
     pub vx: f64,
     pub vy: f64,
     pub age: u32,
+    pub spawn_seed: u32,
+    pub collision_radius: f32,
+    pub grid_contact: bool,
+    pub motion: projectiles::TearMotion,
+}
+impl Tear {
+    fn project(&mut self) {
+        self.x = f64::from(self.motion.presented_position.x) * motion::WORLD_SCALE + 32.0;
+        self.y = f64::from(self.motion.presented_position.y + self.motion.render_offset_y)
+            * motion::WORLD_SCALE
+            - 47.0;
+        self.vx = f64::from(self.motion.velocity.x) * motion::WORLD_SCALE;
+        self.vy = f64::from(self.motion.velocity.y) * motion::WORLD_SCALE;
+    }
 }
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -602,6 +618,10 @@ impl Game {
                         && self.state.pause_menu.selection == 1)
                 {
                     if !self.state.paused {
+                        for tear in &mut self.state.tears {
+                            tear.motion.revert_prediction();
+                            tear.project();
+                        }
                         self.state.paused = true;
                         self.state.pause_menu.phase = PausePhase::Appearing;
                         self.state.pause_menu.age = 0;
@@ -707,6 +727,7 @@ impl Game {
             self.state.run_tick,
         );
         self.state.stage_effects.add_bomb_shadows(&self.state.bombs);
+        self.state.stage_effects.add_tear_shadows(&self.state.tears);
         self.state
             .stage_effects
             .add_pickup_shadows(&self.state.room.pickups);
@@ -935,19 +956,13 @@ impl Game {
             impact.age += 1;
         }
         self.state.impacts.retain(|impact| impact.age < 12);
-        let bounds = &self.state.room.projectile_bounds;
         let mut surviving = Vec::new();
         for tear in std::mem::take(&mut self.state.tears) {
-            if tear.age >= 45
-                || tear.x < bounds.left
-                || tear.x > bounds.right
-                || tear.y < bounds.top - 21.25
-                || tear.y > bounds.bottom
-            {
+            if tear.motion.lifetime == projectiles::Lifetime::Removed {
                 self.state.impacts.push(Impact {
                     id: tear.id,
-                    x: tear.x.clamp(bounds.left, bounds.right),
-                    y: tear.y.clamp(bounds.top - 21.25, bounds.bottom),
+                    x: f64::from(tear.motion.position.x) * motion::WORLD_SCALE + 32.0,
+                    y: f64::from(tear.motion.position.y) * motion::WORLD_SCALE - 46.0,
                     age: 0,
                 });
             } else {
@@ -980,14 +995,33 @@ impl Game {
         match actor.kind {
             actors::ActorKind::Player => self.update_player(phase, bomb_triggered)?,
             actors::ActorKind::Tear => {
+                let grid = if phase == phase::Phase::Update && !newborn {
+                    Some(
+                        self.state
+                            .room
+                            .grid
+                            .clone()
+                            .map(grid::Grid::new)
+                            .transpose()?
+                            .unwrap_or_else(|| traversal::doorway_grid(&self.state.room)),
+                    )
+                } else {
+                    None
+                };
                 if let Some(tear) = self.state.tears.iter_mut().find(|tear| tear.id == actor.id) {
-                    // Projected height/range remains the existing provisional
-                    // representation; native ground/height kernels land next.
-                    tear.x += tear.vx;
-                    tear.y += tear.vy;
-                    if !newborn {
-                        tear.age = tear.age.checked_add(1).ok_or("tear age exhausted")?;
+                    if newborn {
+                        tear.motion.present_birth(phase)?;
+                    } else {
+                        tear.motion.advance(phase, tear.grid_contact)?;
+                        if phase == phase::Phase::Update {
+                            tear.age = tear.age.checked_add(1).ok_or("tear age exhausted")?;
+                            tear.grid_contact = grid
+                                .as_ref()
+                                .expect("full tear grid query")
+                                .contacts_regular_tear(tear.motion.position);
+                        }
                     }
+                    tear.project();
                 }
             }
             actors::ActorKind::Bomb => bombs::advance_actor(&mut self.state, phase, actor.id)?,
@@ -1069,38 +1103,56 @@ impl Game {
                     Direction::Up => (0.0, -1.0),
                     Direction::Down => (0.0, 1.0),
                 };
-                // The captured right-facing volleys alternate between two
-                // rendered eye heights about six logical pixels apart.
-                let eye_offset = if self.state.next_tear.is_multiple_of(2) {
-                    6.0
-                } else {
-                    0.0
+                let aim = motion::WorldVector { x: dx, y: dy };
+                let inherited = motion::WorldVector {
+                    x: (inherited_velocity.0 / motion::WORLD_SCALE) as f32,
+                    y: (inherited_velocity.1 / motion::WORLD_SCALE) as f32,
                 };
-                // Native stored velocity projects at 0.65 logical pixels per
-                // world unit for the birth offset; observed presentation
-                // displacement uses half that amount. Moving shots recover 60% of
-                // the player's previous presentation velocity in its motion.
-                // Motion against the aim direction is excluded; sideways
-                // drift and forward motion are inherited. Independent native
-                // perpendicular and opposite-motion shots verify this rule.
-                let backward = (inherited_velocity.0 * dx + inherited_velocity.1 * dy).min(0.0);
-                let vx = dx * 3.25 + (inherited_velocity.0 - dx * backward) * 0.6;
-                let ground_vy = dy * 3.25 + (inherited_velocity.1 - dy * backward) * 0.6;
-                self.state.tears.push(Tear {
+                let velocity = projectiles::stored_velocity(aim, inherited)?;
+                self.state.player.eye = self.state.player.eye.flipped();
+                let eye_uniform = self.state.boot_lifecycle.shared.uniform();
+                let origin = projectiles::eye_origin(
+                    bombs::player_world(&self.state),
+                    velocity,
+                    self.state.player.eye,
+                    eye_uniform,
+                )?;
+                let spawn_seed = self.state.boot_lifecycle.shared.next_u32();
+                // Init computes a falling speed that FireTear overwrites. Its
+                // shared draw is still required before sound admission.
+                let _initializer_falling_speed =
+                    (self.state.boot_lifecycle.shared.uniform() - 0.5) * 0.2;
+                self.state.audio.admit(
+                    &mut self.state.boot_lifecycle.shared,
+                    self.state.system_clock.system_counter - 1,
+                    audio::SoundRequest {
+                        id: 153,
+                        volume: 1.0,
+                        delay: 2,
+                        looping: false,
+                        pitch: 1.0,
+                    },
+                );
+                let final_uniform = self.state.boot_lifecycle.shared.uniform();
+                let mut tear = Tear {
                     id: self.state.next_tear,
-                    x: self.state.player.x
-                        + vx * 2.0
-                        + if dy != 0.0 { eye_offset - 3.0 } else { 0.0 },
-                    y: self.state.player.y + self.state.player.render_offset.y - 20.75
-                        + ground_vy * 2.0
-                        + if dx != 0.0 { eye_offset } else { 0.0 },
-                    vx,
-                    // Height/range still uses the provisional projected drift.
-                    // The independently observed native ground/height/falling
-                    // fields are tracked for the next projectile workstream.
-                    vy: ground_vy + 0.125,
+                    x: 0.0,
+                    y: 0.0,
+                    vx: 0.0,
+                    vy: 0.0,
                     age: 0,
-                });
+                    spawn_seed,
+                    collision_radius: projectiles::collision_radius(3.5, 8.0)?,
+                    grid_contact: false,
+                    motion: projectiles::TearMotion::spawn(
+                        origin,
+                        velocity,
+                        projectiles::Parameters::FRESH_ISAAC,
+                        final_uniform,
+                    )?,
+                };
+                tear.project();
+                self.state.tears.push(tear);
                 self.state.actor_scheduler.admit(actors::ActorRef {
                     kind: actors::ActorKind::Tear,
                     id: self.state.next_tear,
