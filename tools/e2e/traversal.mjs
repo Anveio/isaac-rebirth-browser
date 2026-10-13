@@ -30,9 +30,12 @@ const report = { schema: 1, status: 'running', skipped: 0, selected: bank.cases.
       ? 'Fresh ordinary Isaac, authored13x7 curse and first-floor free treasure doors; recorded W0L0LYYM bomb-driven admission and raw1400 fire admission remain mandatory. Exact room/player/HP/immunity/visible door phases, complete authored groups and return metadata; actor/item callbacks and pixels remain separate.'
       : bank.contract === 'secret'
         ? 'Fresh Isaac, no-hostile13x7 Basement secret bomb revelation/entry/return: complete hidden/open door objects, reciprocal persistence, source display flags and minimap routing, exact room/player/HP/immunity and authored admissions. Keeper/item callbacks, hostile secret closure, other shapes/items and complete pixels remain separate.'
+        : bank.contract === 'key'
+          ? 'Fresh Isaac, no-hostile13x7 natural secret keys and ordinary library lock: denied zero-key approach, actual collection/spending, full-only unlock/collision/SFX156, admission/return/revisit, exact player/HP/immunity, complete door/display/minimap/descriptor joins. Keeper constructor subtype remains required red; golden/double locks, library items and pixels remain separate.'
         : 'Ordinary style0 13x7 doorway and no-hostile return; mandatory hostile-room lock/return regression; exact f32 player/descriptor phases, complete authored group accounting, supported actor admission and ordinary Rock metadata, visited-room restoration. NPC behavior, other grids/doors, large-room camera and complete pixels remain separate.',
   exclusions: bank.contract === 'secret'
     ? ['Keeper17 behavior remains separate; its derived subtype and regular key admission remain required regressions', 'Later-stage surprise substitution and failed-open saved transitions', 'Actor/item/curse policies and door FX/animation pixels', 'Other room shapes and floor exits']
+    : bank.contract === 'key' ? ['Keeper17 constructor subtype remains a required regression', 'Golden keys, double-chain locks, item overrides and hostile special-door policy', 'Library collectibles/sacks/batteries and complete backdrop/door animation pixels', 'Other room shapes, later floors and exits']
     : ['curse', 'authored-doors'].includes(bank.contract) ? ['Undiscovered native door variant6', 'Actor behavior and item callbacks; NPC244 metadata only, raw1400 fire admission remains a required regression', 'Flight/items and other door policies', 'Complete rendered pixels'] : [],
   production: production.build, graphics: await inspectBrowserGraphics(browser), cases: [] };
 try {
@@ -47,7 +50,7 @@ try {
         await writeFile(tape, JSON.stringify(scenario.tape, null, 2) + '\n');
         await run('bash', [join(ROOT, 'tools/original/with-display.sh'), 'python3',
           join(ROOT, 'tools/original/foundation-clock-run.py'), '--seed', scenario.code, '--tape', tape,
-          '--state-observer', join(ROOT, 'tools/original/foundation-traversal-observe.py'),
+          '--state-observer', value('--state-observer') || join(ROOT, 'tools/original/foundation-traversal-observe.py'),
           '--output', join(directory, 'original')], { cwd: ROOT, timeout: 300_000, maxBuffer: 8 * 1024 * 1024 });
         sourceManifest = join(directory, 'original/manifest.json');
       }
@@ -103,8 +106,8 @@ try {
         phaseAssert.deepEqual(state.floor.grid, source.grid, `${label}:floor topology`);
         phaseAssert.deepEqual([state.player.x, state.player.y, state.player.vx, state.player.vy],
           [actor.position[0] * .65 + 32, actor.position[1] * .65 - 46, actor.velocity[0] * .65, actor.velocity[1] * .65], `${label}:source f32 motion projection`);
-        if (['curse', 'free-treasure', 'secret'].includes(scenario.doorContract)) {
-          const includeHidden = scenario.doorContract === 'secret';
+        if (['curse', 'free-treasure', 'secret', 'key'].includes(scenario.doorContract)) {
+          const includeHidden = ['secret', 'key'].includes(scenario.doorContract);
           phaseAssert.equal(state.player.hp, actor.redHp, `${label}:native door-route health state`);
           phaseAssert.equal(state.damageCooldown, actor.damageCountdown, `${label}:door-route immunity and transition dispatch`);
           const sourceDoors = observed.contents.grid.filter(cell => cell.type === 16 && (includeHidden || cell.variant !== 6));
@@ -144,6 +147,23 @@ try {
               visibility: room.index === source.currentDescriptorIndex ? 'current' : room.visited ? 'visited' : 'unvisited',
             }));
             phaseAssert.deepEqual(state.minimap.cells, cells, `${label}:complete source descriptor-derived minimap routing`);
+          }
+          if (scenario.doorContract === 'key') {
+            phaseAssert.equal(state.inventory.keys, actor.keyInventory, `${label}:natural source key acquisition/spending`);
+            phaseAssert.equal(state.room.combatClear, descriptor.combatClear, `${label}:source cleared-room unlock policy`);
+            for (const door of state.room.appearance.doors) {
+              const expected = [14, 15].includes(observed.contents.room.backdropType) && door.asset === 'gfx/grid/door_01_normaldoor.anm2'
+                ? 'gfx/grid/door_13_librarydoor.png' : null;
+              phaseAssert.equal(door.spritesheet, expected, `${label}:source current-room door palette replacement`);
+            }
+            const baseline = native.debugObservations[0].observation;
+            if (observed.doorSound.lastTick !== baseline.doorSound.lastTick) {
+              const sound = state.audio.slots[156], halfTick = baseline.audioSystemCounter >> 1;
+              phaseAssert.equal(sound.lastTick, observed.doorSound.lastTick - halfTick, `${label}:native unlock sound admission phase`);
+              phaseAssert.equal(sound.nextAllowed, observed.doorSound.nextAllowed - halfTick, `${label}:native unlock sound cooldown`);
+              phaseAssert.equal(Math.fround(sound.lastVolume), observed.doorSound.lastVolume, `${label}:native unlock sound volume`);
+              phaseAssert.equal(sound.loaded, observed.doorSound.loaded, `${label}:native unlock sound loaded state`);
+            }
           }
         }
         observedRooms.add(source.currentDescriptorIndex);
@@ -192,7 +212,7 @@ try {
           // Treasure routes also retain the native NPC33 fire admission
           // regression: raw1400 selectors have not yet resolved into actors.
           const rawMetadata = entity => entity.type === 244
-            || (scenario.doorContract === 'secret' && entity.type === 17)
+            || (['secret', 'key'].includes(scenario.doorContract) && entity.type === 17)
             || (scenario.doorContract === 'free-treasure' && entity.type === 33);
           const supported = entity => rawMetadata(entity) || (entity.type === 5 && ({10: [1, 2, 5], 20: [1, 2, 3, 4], 30: [1, 3], 40: [1, 2]})[entity.variant]?.includes(entity.subtype));
           const tuple = entity => [entity.type, entity.variant, entity.subtype, entity.spawnSeed,
@@ -233,7 +253,7 @@ try {
       await compare('gameplay-start');
       for (const action of setup) await deliver(action);
       for (const action of scenario.actions) await deliver(action);
-      assert.equal(observedRooms.size, 2, 'A complete declared route must reach exactly one authored neighbor');
+      assert.equal(observedRooms.size, scenario.expectedVisitedRooms || 2, 'A complete declared route must reach every intended authored room');
       const expectedFinal = originals.get(scenario.actions.filter(action => action.type === 'capture').at(-1).label).observation.floor;
       if (scenario.mode === 'blocked-return') assert.notEqual(expectedFinal.currentDescriptorIndex, native.debugObservations[0].observation.floor.currentDescriptorIndex,
         'Mandatory source hostile-room regression must actually keep its attempted return locked');
@@ -247,7 +267,7 @@ try {
         assert.equal(originals.get('cooled').observation.contents.players[0].damageCountdown, 0, 'Public wait must clear source entry immunity');
         assert.equal(originals.get('returned').observation.contents.players[0].redHp, 4, 'Source curse exit must charge another half heart');
       }
-      if (scenario.doorContract === 'secret') {
+      if (['secret', 'key'].includes(scenario.doorContract)) {
         const start = native.debugObservations[0].observation;
         assert.equal(start.contents.grid.find(door => door.index === 127)?.variant, 6, 'Source must begin with an undiscovered secret doorway');
         const blast = originals.get('blast-133').observation;
@@ -255,6 +275,22 @@ try {
         const entered = originals.get('secret-entry').observation.floor;
         assert.ok([7, 8].includes(entered.descriptors[entered.currentDescriptorIndex].template.type), 'Public source route must enter an actual secret room');
         assert.ok(native.debugObservations.every(entry => entry.observation.contents.players[0].redHp === 6), 'Public retreat must avoid source blast damage');
+      }
+      if (scenario.doorContract === 'key') {
+        const keys = native.debugObservations.map(entry => entry.observation.contents.players[0].keyInventory);
+        assert.equal(keys[0], 0, 'Source fresh Isaac must start without supplied keys');
+        assert.equal(Math.max(...keys), 2, 'Public source movement must collect both natural regular keys');
+        assert.equal(keys.at(-1), 1, 'Exactly one key must be spent despite library revisit');
+        assert.ok(native.debugObservations.some(entry => {
+          const floor = entry.observation.floor;
+          return floor.descriptors[floor.currentDescriptorIndex].template.type === 12;
+        }), 'Public source route must enter the actual library');
+        if (scenario.actions.some(action => action.label?.startsWith('no-key-approach')))
+          for (const entry of native.debugObservations.filter(entry => entry.context.label.startsWith('no-key-approach'))) {
+            assert.equal(entry.observation.contents.players[0].keyInventory, 0, 'Denied route must have no source key');
+            const door = entry.observation.contents.grid.find(cell => cell.index === 7);
+            assert.deepEqual([door.variant, door.state, door.collisionClass], [1, 1, 4], 'Zero-key public approach must retain source key lock');
+          }
       }
       const trace = await page.evaluate(() => window.game.trace());
       await writeFile(join(directory, 'browser-states.json'), JSON.stringify({ schema: 1, states, trace, expectedCommands }, null, 2) + '\n');
