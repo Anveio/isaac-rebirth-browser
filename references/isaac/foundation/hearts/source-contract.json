@@ -1,0 +1,60 @@
+{
+  "schema": 1,
+  "status": "source/static implementation; no production artifact or fresh original/browser acceptance",
+  "binarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "scope": "Normal single-player Isaac free Heart10 with concrete subtypes1..6, owned max/red/soul/black/Eternal fields. Fresh unmodified subtype0 factory shares previously mapped Fire loot Init.",
+  "factory": "500150 local35 rolls2,50,10; Soul branch rolls20. No direct shared MT draw. Humbling Bundle, Eternal and Soul/Black trinket/collectible replacement consumers remain separate.",
+  "contact": "504820\u219250c880 actualdead31f/Death/specialHit predicate precedes subtype callbacks. Caller guard must reuse RootDeath/sharedANM; no HP==0 substitute or broad transition gate. Capacity and actualphysicalcontacts then route health helpers before sourceSound504480 and Collect504d30.",
+  "red": "504db0 subtype1/2/5 maps2/1/4, permanent312 doublesamount. ActualfirstPlayer redHp<max andnotdead admits.",
+  "soul": "5054eb admits2 iff maxRed+soul<=23.",
+  "eternal": "505828 permits1 unless maxRed>23 andheldEternal!=0. 508640 adds signedBBC, if>1 pairs into max/red thenBBC%2. Information queue5805c0(13) remains explicit presentation dependency.",
+  "black": "50e6b0 allows capacity<24 or any full soul pair notblack;508440 marksactualslots before5083b0 cap, including full-cap recolor.",
+  "sound": "504480 routes54Soul,266Eternal,185otherhearts, volume1/pitch1/delay2. No added helper draw before these actualSoundRequest consumers.",
+  "stage": "Floor source52a30f continuingNewStage afterRoomadmission beforeSave: ifBBC>0 clearBBC then queueinfo13, addmax2 thenred2. Stage consumer awaits actualfield/API commit.",
+  "limits": [
+    "No actualpairedheartacceptance.",
+    "Sourceguards await RootDeath/sharedANM integration beforepublishing.",
+    "Damage52b080 soul/black priority andcomplete healthcontainer damage remain tracked withRootDeath owner.",
+    "Heart Room.Save readmission usessamef7 actualrecords and CI-owned440/ad4 correction; no clone-basedacceptance inferred.",
+    "WholeHUD placement/animation, information queue13 andmodifier-completeheartfactory remain unaccepted."
+  ],
+  "sourceDumpSha256": {
+    "function-5082e0.txt": "450b1fb59f8a968140edca07d171f5be54d64f835f4a100901ff36411ef4e7c8",
+    "function-5083b0.txt": "230180974d9f67eb4a7e8791e2c9df35ac3518a81399ab71174541dbea128e10",
+    "function-508640.txt": "05b0529fca4a91f1039b180427ce57fe4b293428558d9ebd04d0fcd3e72657b3",
+    "function-508440.txt": "9d7cdb2d99fcfc045a04656e6348a0c8ce4342ed8caa8ced2f16e063b76cbc4c",
+    "function-504480.txt": "36a50da7840881eda171b2d12d1f2dbce23c1e7e0dc1347f96522e9eb6e5c314",
+    "function-50c880.txt": "ecdc85baf40672016342b1f375f0a21d107dfcf35d83b705efda80601074d6c1",
+    "function-508230.txt": "3b079e817b27dcbeeb5b3579d30ae9cff2b43eb3b93de6f056216610d7ba9c51",
+    "function-508540.txt": "54cb5f9123d9806240b9d33caf24facb7e0a6f3d87b297402d2d65e90b8706f0",
+    "function-504d30.txt": "50c2a2de4aeb5c92b20620e68af323b0234d7c98f720a37ed0f5e497edcdd797",
+    "function-50e6b0.txt": "51a79400195095b877ded3aa248748f08cdc42769d535f4aa6399992ae63484a"
+  },
+  "ownedRuntimeCommit": "624cf52a258f929ba6a55b8935f2bffa2b97e08a",
+  "validation": {
+    "status": "pass",
+    "compilerJobs": 1,
+    "checks": [
+      "cargo check --locked --all-targets",
+      "cargo clippy --locked --all-targets -- -D warnings",
+      "TypeScript",
+      "cargo fmt --check",
+      "matrix registry consistency",
+      "node --check",
+      "Python syntax",
+      "git diff --check"
+    ],
+    "logs": {
+      "rust-check.log": "1b437aae01c189cf7abe056495535e1e48f8f39e9bed74c7563e27c897d6a951",
+      "clippy.log": "7d1198aa07702b54dd17c8b8259dd0d8d470fb10caa44e6a4cc9eca91930323c"
+    },
+    "runtimeSources": {
+      "engine/src/fireplaces.rs": "64b43ad1e33728f25c8f138f99bd180ade1f2e182131021e4867970591c49c02",
+      "engine/src/lib.rs": "e787b5cfe44a636525b73ac00ab0f0abb066f873511c3979a12631395e51d653",
+      "engine/src/pickups.rs": "c0b61cd50c0f288ed2079ac0c404879643803bd617f996ed55971f77588b7b02",
+      "engine/src/player_items.rs": "ea3b0563c92dd0cda160bc09d8594784338c8887dc66397422b3238ff3e9ac6b",
+      "web/engine.ts": "51fc96bdcecdfe82043384835d0321907398031d3e4aaa622d7aad38dbe66aca",
+      "web/renderer.ts": "f3fe71ad32c364c77316d423905637236b27367183eb604bdb05fde26295c962"
+    }
+  }
+}

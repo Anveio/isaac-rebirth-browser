@@ -1,0 +1,96 @@
+{
+  "schema": 1,
+  "status": "source predictions only; no native/browser acceptance",
+  "floorHelperSha256": "ee7d7b0001262f1a726e36defc2cb468b9e1c72f18550c39a8146d3bff01b48d",
+  "sourceFloorSha256": "d20bad026fb9b202e6483bad18d30ce493866ec9e4117f4583e5eed9c2dda6e7",
+  "fixtures": [
+    {
+      "seedValue": 44,
+      "code": "B9119YPW",
+      "down": 8,
+      "catalogIndex": 227,
+      "sourcePredictedHeartSeed": 1798998896,
+      "sourcePredictedSubtype": 3,
+      "category": "soul",
+      "descriptor": {
+        "index": 8,
+        "generatedIndex": 2,
+        "gridIndex": 97,
+        "assetStage": 1,
+        "catalogIndex": 227,
+        "template": {
+          "type": 1,
+          "variant": 227,
+          "difficulty": 1,
+          "name": "New Room",
+          "weight": 1.0,
+          "width": 13,
+          "height": 7,
+          "doorMask": 15
+        },
+        "doorMask": 15,
+        "neighbors": [
+          1,
+          6,
+          9,
+          2,
+          null,
+          null,
+          null,
+          null
+        ],
+        "roomInitSeed": 1549132884,
+        "decorationSeed": 3950754527,
+        "spawnSeed": 51308504,
+        "followingSeed": 3843094538,
+        "surpriseMiniboss": false
+      },
+      "cohort": "deterministic contrived public fixture, selected before live grading; not an OS-random gate"
+    },
+    {
+      "seedValue": 252,
+      "code": "B9118AJA",
+      "down": 7,
+      "catalogIndex": 227,
+      "sourcePredictedHeartSeed": 2863764622,
+      "sourcePredictedSubtype": 2,
+      "category": "red",
+      "descriptor": {
+        "index": 7,
+        "generatedIndex": 1,
+        "gridIndex": 97,
+        "assetStage": 1,
+        "catalogIndex": 227,
+        "template": {
+          "type": 1,
+          "variant": 227,
+          "difficulty": 1,
+          "name": "New Room",
+          "weight": 1.0,
+          "width": 13,
+          "height": 7,
+          "doorMask": 15
+        },
+        "doorMask": 3,
+        "neighbors": [
+          2,
+          6,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "roomInitSeed": 1027540861,
+        "decorationSeed": 169254505,
+        "spawnSeed": 1093617555,
+        "followingSeed": 3814603297,
+        "surpriseMiniboss": false
+      },
+      "cohort": "deterministic contrived public fixture, selected before live grading; not an OS-random gate"
+    }
+  ],
+  "attemptsRetained": 252,
+  "researchJournalSha256": "1e7b7adf01b8d0b5c3c36db8cef8cf6d8a8526d3e9707d21c16778b9ef95c5c1"
+}
