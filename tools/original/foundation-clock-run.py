@@ -117,7 +117,8 @@ def main():
     parser.add_argument('--fps', type=int, default=60, help='Nominal presentation rate; not asserted native simulation Hz')
     parser.add_argument('--step-ns', type=int, default=16667000, help='Explicit virtual interval; default is 16667 microseconds, above native timer polling threshold')
     parser.add_argument('--output', type=Path, default=ROOT / '.cache/foundation' / f'clock-native-{time.time_ns()}')
-    parser.add_argument('--frame-timeout', type=float, default=30)
+    parser.add_argument('--frame-timeout', type=float, default=60,
+                        help='Host-wall socket/gate wait limit in seconds; does not alter released presentation counts')
     args = parser.parse_args()
     if not 0 <= args.boot_epoch_seed <= 0xffffffff:
         raise SystemExit('--boot-epoch-seed must be a u32')
@@ -234,6 +235,8 @@ def main():
               'clock': {'scope': 'main-thread wall-clock ABI; worker/CPU clocks unchanged', 'nominalStepsPerSecond': args.fps, 'stepNs': args.step_ns,
                         'mainThreadSleeps': 'recorded then returned without host delay', 'realPerformance': 'controller wall clock'},
               'inputDelivery': {'api': 'public X11 key events', 'serverAutoRepeat': False},
+              'hostExecution': {'frameTimeoutSeconds': args.frame_timeout, 'lpNumThreads': env.get('LP_NUM_THREADS'),
+                                'scope': 'Host-wall wait limit and requested software-renderer pool; public tape/virtual steps unchanged'},
               'simulationTicks': False, 'fullInternalState': False, 'failures': []}
     if observer:
         report['debugObserver'] = {'module': str(args.state_observer.resolve()), 'everyTapeStep': args.observe_every_step, 'scope': 'reference-only parent debug observations at blocked presentation checkpoints; no hidden-state parity claim'}

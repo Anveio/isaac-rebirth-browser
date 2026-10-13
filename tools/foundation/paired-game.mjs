@@ -60,11 +60,11 @@ function keyCode(key) {
   throw new Error(`No public browser key transport for ${key}`);
 }
 
-async function nativeCapture(caseData, directory) {
+async function nativeCapture(caseData, directory, nativeFrameTimeout) {
   mkdirSync(directory, { recursive: true });
   const args = ['tools/original/with-display.sh', 'python3', 'tools/original/foundation-clock-run.py',
     '--seed', caseData.seed, '--tape', join(dirname(directory), 'tape.json'),
-    '--state-observer', 'tools/original/foundation-paired-observer.py', '--output', directory];
+    '--state-observer', 'tools/original/foundation-paired-observer.py', '--frame-timeout', String(nativeFrameTimeout), '--output', directory];
   let error;
   try {
     const result = await runProcess('bash', args, { cwd: ROOT, maxBuffer: 8 * 1024 * 1024 });
@@ -233,7 +233,10 @@ function comparePair(caseData, native, browser, directory, exactPixels) {
   return checks;
 }
 
-export async function runPairedGate({ output, selected, randomCount = 2, replaySeeds = [], replayCases = [], exactPixels = false, productionDirectory }) {
+export async function runPairedGate({ output, selected, randomCount = 2, replaySeeds = [], replayCases = [], exactPixels = false, productionDirectory,
+  nativeFrameTimeout = 60 }) {
+  assert.ok(Number.isFinite(nativeFrameTimeout) && nativeFrameTimeout > 0 && nativeFrameTimeout <= 300,
+    'Native frame timeout must be more than 0 and at most 300 host-wall seconds');
   mkdirSync(output, { recursive: true });
   const declarations = await pairedScenarioDeclarations();
   const known = new Set(declarations.map(item => item.id));
@@ -241,7 +244,7 @@ export async function runPairedGate({ output, selected, randomCount = 2, replayS
   const server = await startProductionServer({ directory: productionDirectory });
   const browser = await chromium.launch({ ...browserLaunchOptions(), headless: false });
   const report = { schema: 1, status: 'running', mode: 'fresh original process paired with immutable browser production artifact',
-    build: server.build, gateSources: sourceHashes(), browserGraphics: await inspectBrowserGraphics(browser),
+    build: server.build, gateSources: sourceHashes(), browserGraphics: await inspectBrowserGraphics(browser), nativeFrameTimeout,
     sourceBinarySha256: digest(readFileSync(join(ROOT, '.cache/original-runtime/offline-depot/isaac.x64'))),
     comparisons: { functional: 'Real input/phase/readback and source title, fade, player motion, pause/controller, HP, immunity, active tear/bomb counts',
       pixels: 'Strict full RGBA diagnostic; every difference remains a failure in its own pixel result',
@@ -264,7 +267,7 @@ export async function runPairedGate({ output, selected, randomCount = 2, replayS
       process.stdout.write(`Paired ${definition.id} seed ${caseData.seed}\n`);
       // Original and Chromium use independent private displays/profiles.
       const [native, candidate] = await Promise.all([
-        nativeCapture(caseData, join(directory, 'original')),
+        nativeCapture(caseData, join(directory, 'original'), nativeFrameTimeout),
         browserCapture(browser, server, caseData, join(directory, 'browser')),
       ]);
       const checks = comparePair(caseData, native, candidate, join(directory, 'comparison'), exactPixels);
@@ -298,7 +301,8 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
     assert.ok(!replaySeeds.length || replaySeeds.length === randomCount, 'Replay seed count must match randomized case count');
     const output = resolve(option('--output', `.cache/foundation/paired-${Date.now()}`));
     const report = await runPairedGate({ output, selected, randomCount, replaySeeds, replayCases,
-      exactPixels: process.argv.includes('--require-exact-pixels'), productionDirectory: option('--production-directory') });
+      exactPixels: process.argv.includes('--require-exact-pixels'), productionDirectory: option('--production-directory'),
+      nativeFrameTimeout: Number(option('--native-frame-timeout', 60)) });
     console.log(JSON.stringify({ status: report.status, report: join(output, 'report.json'), artifact: report.build.sha256 }));
     process.exitCode = report.status === 'pass' ? 0 : 1;
   }
