@@ -7,6 +7,28 @@
 use crate::{motion::WorldVector, phase::Phase};
 use serde::{Deserialize, Serialize};
 
+/// Apply an admitted fresh-Isaac damage callback. Each caller owns its source
+/// flags, contact/impulse eligibility and observed presentation immunity;
+/// health units do not imply a universal cooldown formula.
+pub fn try_damage_player(
+    state: &mut crate::State,
+    health_units: u8,
+    immunity_presentations: u32,
+) -> bool {
+    if health_units == 0 || state.player.hp == 0 || state.damage_cooldown != 0 {
+        return false;
+    }
+    state.player.hp = state.player.hp.saturating_sub(health_units);
+    state.damage_cooldown = immunity_presentations;
+    true
+}
+
+/// Player Update and its intermediate counterpart each advance admitted hurt
+/// immunity once. Transition freeze does not dispatch either callback.
+pub(crate) fn advance_player_immunity(state: &mut crate::State) {
+    state.damage_cooldown = state.damage_cooldown.saturating_sub(1);
+}
+
 #[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct ContactBody {
