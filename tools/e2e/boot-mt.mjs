@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 import { chromium } from '@playwright/test';
 import { browserLaunchOptions, inspectBrowserGraphics } from '../foundation/browser.mjs';
 import { startProductionServer } from '../foundation/production-server.mjs';
-import { waitForReady } from '../foundation/verify.mjs';
+import { assertInputProvenance, assertSeededRun, manualSeedCommands, waitForReady } from '../foundation/verify.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const run = promisify(execFile);
@@ -69,6 +69,7 @@ try {
       const initialSeed = scenario.seedValue || native.seedValue;
       const state = await page.evaluate(({ initialSeed, bootEpochSeed }) => { window.game.pause(); return window.game.reset(initialSeed, { bootEpochSeed, trace: true }); }, { initialSeed, bootEpochSeed: scenario.bootEpochSeed });
       assert.equal(state.screen, 'title'); const boot = state.bootLifecycle;
+      await writeFile(join(directory, 'browser-title-state.json'), JSON.stringify(state, null, 2) + '\n');
       assert.deepEqual(boot.shared, { words: observed.mtState, index: observed.mtIndex }, `${scenario.name}: complete shared MT`);
       assert.equal(boot.savedPlayerSeed, observed.stateSeed9688, `${scenario.name}: saved player seed`);
       assert.equal(boot.menuRunSeed, observed.title.menuRunSeed, `${scenario.name}: menu run seed`);
@@ -79,10 +80,16 @@ try {
       // The future manually entered seed is independent of startup time.
       for (let i = 0; i < 3; i++) await page.keyboard.press('Enter');
       await page.keyboard.press('Tab'); await page.keyboard.type(scenario.code); await page.keyboard.press('Enter'); await page.keyboard.press('Enter');
-      assert.equal((await page.evaluate(() => window.game.snapshot())).runSeedValue, native.seedValue);
+      const seeded = await page.evaluate(() => window.game.snapshot());
+      const trace = await page.evaluate(() => window.game.trace());
+      await writeFile(join(directory, 'browser-input.json'), JSON.stringify({ schema: 1, seeded, trace,
+        expectedCommands: manualSeedCommands(scenario.code) }, null, 2) + '\n');
+      assertSeededRun(seeded, scenario.code, native.seedValue);
+      assertInputProvenance(trace, manualSeedCommands(scenario.code), initialSeed, scenario.bootEpochSeed);
       assert.deepEqual(errors, []);
-      await writeFile(join(directory, 'browser-title-state.json'), JSON.stringify(state, null, 2) + '\n');
       result.status = 'pass'; result.comparedStateWords = 624; result.comparedGridPairs = 9; result.comparedStatPoses = 179;
+      result.inputProvenance = { status: 'pass', commands: trace.commands.length, initialSeed: trace.initialSeed,
+        bootEpochSeed: trace.bootEpochSeed, manualSeed: scenario.code };
     } catch (error) { result.status = 'fail'; result.error = String(error); }
     finally {
       if (page) await page.close().catch(error => { result.status = 'fail'; result.cleanupError = String(error); });

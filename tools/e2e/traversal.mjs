@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 import { chromium } from '@playwright/test';
 import { browserLaunchOptions, inspectBrowserGraphics } from '../foundation/browser.mjs';
 import { startProductionServer } from '../foundation/production-server.mjs';
-import { waitForReady } from '../foundation/verify.mjs';
+import { assertInputProvenance, assertSeededRun, manualSeedCommands, waitForReady } from '../foundation/verify.mjs';
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const run = promisify(execFile);
 const value = flag => { const index = process.argv.indexOf(flag); return index < 0 ? undefined : process.argv[index + 1]; };
@@ -58,6 +58,15 @@ try {
       const originals = new Map(native.debugObservations.map(entry => [entry.context.label, entry]));
       const setup = scenario.setup || [{ type: 'step', frames: 60 }, ...(scenario.slot % 2 === 0
         ? [{ type: 'key', key: 'w', down: true }, { type: 'step', frames: 27 }, { type: 'key', key: 'w', down: false }, { type: 'step', frames: 30 }] : [])];
+      const keyCodes = { a: 'KeyA', w: 'KeyW', d: 'KeyD', s: 'KeyS', e: 'KeyE', Up: 'ArrowUp',
+        Down: 'ArrowDown', Left: 'ArrowLeft', Right: 'ArrowRight', Escape: 'Escape' };
+      const expectedCommands = [...manualSeedCommands(scenario.code), { type: 'tick', count: 140 },
+        ...[...setup, ...scenario.actions].flatMap(action => {
+          if (action.type === 'step') return [{ type: 'tick', count: action.frames }];
+          if (action.type === 'capture') return [];
+          assert.ok(keyCodes[action.key], 'Every declared route key must have a DOM mapping');
+          return [{ type: 'key', code: keyCodes[action.key], down: action.down }];
+        })];
       const nativeStart = native.tape.findIndex(action => action.type === 'capture' && action.label === 'gameplay-start');
       assert.deepEqual(native.tape.slice(nativeStart + 1), [...setup, ...scenario.actions],
         'The declared browser route must match the actual recorded public X11 route');
@@ -71,8 +80,10 @@ try {
       await page.keyboard.press('Tab'); await page.keyboard.type(scenario.code);
       await page.keyboard.press('Enter'); await page.keyboard.press('Enter');
       await page.evaluate(() => window.game.step(140));
-      const baselineTrace = await page.evaluate(() => window.game.trace());
-      const expectedCommands = [...baselineTrace.commands];
+      const seeded = await page.evaluate(() => window.game.snapshot());
+      await writeFile(join(directory, 'browser-input.json'), JSON.stringify({ schema: 1, seeded,
+        trace: await page.evaluate(() => window.game.trace()), expectedCommands }, null, 2) + '\n');
+      assertSeededRun(seeded, scenario.code, scenario.runSeed);
       const observedRooms = new Set(), admissions = new Map(), states = [], comparisonFailures = [];
       const compare = async label => {
         const phaseAssert = new Proxy(assert, { get(target, name) {
@@ -209,13 +220,10 @@ try {
       };
       const deliver = async action => {
         if (action.type === 'key') {
-          const code = { a: 'KeyA', w: 'KeyW', d: 'KeyD', s: 'KeyS', e: 'KeyE', Up: 'ArrowUp',
-            Down: 'ArrowDown', Left: 'ArrowLeft', Right: 'ArrowRight', Escape: 'Escape' }[action.key];
+          const code = keyCodes[action.key];
           assert.ok(code); await page.keyboard[action.down ? 'down' : 'up'](code);
-          expectedCommands.push({ type: 'key', code, down: action.down });
         } else if (action.type === 'step') {
           await page.evaluate(count => window.game.step(count), action.frames);
-          expectedCommands.push({ type: 'tick', count: action.frames });
         } else {
           try { await compare(action.label); } catch (error) {
             const state = await page.evaluate(() => window.game.snapshot());
@@ -253,11 +261,13 @@ try {
         assert.ok(native.debugObservations.every(entry => entry.observation.contents.players[0].redHp === 6), 'Public retreat must avoid source blast damage');
       }
       const trace = await page.evaluate(() => window.game.trace());
-      assert.equal(trace.enabled, true); assert.equal(trace.inputTraceTruncated, false);
-      assert.deepEqual(trace.commands, expectedCommands, 'Every requested DOM key and interval must reach WASM exactly once');
+      await writeFile(join(directory, 'browser-states.json'), JSON.stringify({ schema: 1, states, trace, expectedCommands }, null, 2) + '\n');
+      assertInputProvenance(trace, expectedCommands, scenario.runSeed);
+      assertSeededRun(await page.evaluate(() => window.game.snapshot()), scenario.code, scenario.runSeed);
       assert.deepEqual(errors, []);
-      await writeFile(join(directory, 'browser-states.json'), JSON.stringify({ schema: 1, states, trace }, null, 2) + '\n');
       Object.assign(row, { status: comparisonFailures.length ? 'fail' : 'pass', sourceManifest, provenance, visitedRooms: [...observedRooms], comparisonFailures,
+        inputProvenance: { status: 'pass', commands: trace.commands.length, initialSeed: trace.initialSeed,
+          bootEpochSeed: trace.bootEpochSeed, manualSeed: scenario.code },
         traceHistory: { truncated: trace.truncated, inputTraceTruncated: trace.inputTraceTruncated, stateHistoryTruncated: trace.stateHistoryTruncated,
           retainedStates: trace.states.length, stateEncodedBytes: trace.stateEncodedBytes, maxStateEncodedBytes: trace.maxStateEncodedBytes } });
     } catch (error) { row.error = String(error); }
