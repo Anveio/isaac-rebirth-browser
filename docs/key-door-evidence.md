@@ -100,4 +100,33 @@ progression, admission and returned door tuples, palette identity, elapsed
 unlock-sound clocks and exact required errors. Full artifacts remain under
 `.cache/e2e/key-doors/timed-transient-final`; the earlier genuinely failing
 `.cache/e2e/key-doors/paired-aggregate-final` report remains separately hashed.
-The default gate must remain red until the actual Keeper actor lands.
+That historical failed report remains preserved after the actual Keeper actor
+landed in a separate leaf.
+
+The hosted run `38449613521` completed the W31 original's 936 observations,
+but a whole-cohort `JSON.stringify` failed with `RangeError: Invalid string
+length` before writing browser evidence or checking final input/backend
+provenance. Its absent comparison-failure field does not establish zero field
+failures. The original failed report remains unchanged.
+
+The streamed writer now retains every selected snapshot, command and callback
+without creating one whole-cohort string. The traversal report also records
+field failures and source provenance before writing evidence, so a later
+serialization error preserves those results. This changes no runtime or
+comparison assertions.
+
+A separately labeled recovery used the two byte-for-byte hosted original
+captures and fresh browser DOM runs on older source `472b154`, artifact
+`01bac4e3fd8e11ecfd400ce205a29e939acba46dfa8d560a3440f9ccbf4c718e`.
+W31 and recorded OS-random 7X pass 936 and 750 phase comparisons. Independent
+complete gzip readback verifies 1,686 full selected states, 1,830 exact planned
+commands, six callback states and every selected manual-seed field. The full
+382,739,680-byte browser payload is retained losslessly in 46,875,801 archive
+bytes. Separate bounded state history remains explicitly truncated; input and
+backend-state histories are complete. Artifact hashes match before and after.
+
+The [recovery record](../references/isaac/foundation/doors/key-evidence-recovery.json)
+pins the report, verifier, original failed attempt, path-only frame relocation
+and lossless native archive journal. This establishes the evidence repair on
+that older artifact. The required CI gate still launches both games fresh;
+latest-main runtime acceptance requires its own fresh run.
