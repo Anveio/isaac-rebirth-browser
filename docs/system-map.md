@@ -79,14 +79,33 @@ Rock factory metadata, free first-floor treasure doors and ordinary bomb-driven
 Rock destruction. The rock gate's historical eight-case cohort passes five
 cases and retains three explosive/tinted failures across 2,957 compared phases.
 Its current default adds the preserved troll-bomb case; every selected case
-remains blocking. NPC callbacks/clear, secret/key admission, music and item
-systems continue in small implementation PRs.
+remains blocking. Reviewed runtime also includes Fly13/AttackFly18 contact,
+queued tear/bomb damage, retirement and delayed room clearance. The scoped
+contact/bomb/tear actor comparisons pass 9,344 fields; full AI/shared-stream
+and center-grid scenarios retain their exact required failures.
 
-CI discovers all eleven registered live suites and runs separate jobs with
+Secret blast discovery, reciprocal doorway persistence and minimap flags have
+538 paired phases of scoped evidence. Regular and double keys now admit and
+collect through real room actors: the four-case cohort passes 1,690 phases,
+followed by a contrived/recorded-random NPC-composite pair passing 845 phases.
+Keeper17 admission remains required and red; key spending is a separate slice.
+[Key evidence](../references/isaac/foundation/keys/npc-composite-live-report.json)
+and [NPC boundaries](../references/isaac/foundation/combat/npcs/verification.json)
+record each immutable build's scope.
+
+Public seed-dialog opening, reopening and commitment now follow the source
+Character initializer and ordered decoded setter. A fresh six-case cohort
+passes 54 checkpoints, 33,696 complete MT words and 582 public commands.
+[Seed-dialog evidence](../references/isaac/foundation/seed-dialog-mt/accepted-report.json)
+retains the source/build identities and queued-input case. The preserved W0
+random tape still fails one tear-lifetime checkpoint; later shared consumers
+remain incomplete. Music and item implementation continue in small PRs.
+
+CI discovers all sixteen registered live suites and runs separate jobs with
 `fail-fast: false`, preserving each result and evidence. The first matrix run
 completed floors, weapons, boot MT and pickups successfully while retaining
 core and traversal failures. Build, typecheck, assets, matrix and strict Clippy
-pass after the rock integration. Complete gameplay RNG, other floors/characters,
+pass after the menu, secret, NPC and natural-key integration at `e63723a`. This is a build checkpoint, not a fresh all-suite passing result. Complete gameplay RNG, other floors/characters,
 persistence, music/cutscenes and whole-game parity remain open. GitHub required-check
 enforcement is unavailable for this private repository's current plan.
 
