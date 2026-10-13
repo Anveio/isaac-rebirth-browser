@@ -41,7 +41,8 @@
     "test:e2e:music": "bash tools/original/with-display.sh node tools/e2e/music.mjs --count 2",
     "test:e2e:key-doors": "cargo build --manifest-path engine/Cargo.toml --locked --bin floor && bash tools/original/with-display.sh node tools/e2e/key-doors.mjs --count 1",
     "test:e2e:ordinary-run": "bash tools/original/with-display.sh node tools/e2e/ordinary-run.mjs --count 4",
-    "test:e2e:keepers": "cargo build --manifest-path engine/Cargo.toml --locked --bin floor && bash tools/original/with-display.sh node tools/e2e/keepers.mjs --count 1"
+    "test:e2e:keepers": "cargo build --manifest-path engine/Cargo.toml --locked --bin floor && bash tools/original/with-display.sh node tools/e2e/keepers.mjs --count 1",
+    "test:e2e:level-descriptors": "bash tools/original/with-display.sh node tools/e2e/ordinary-run.mjs --level-descriptors --count 4"
   },
   "devDependencies": {
     "@playwright/test": "1.64.0",
