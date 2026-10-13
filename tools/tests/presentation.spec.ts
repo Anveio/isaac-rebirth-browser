@@ -1,7 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import { readFileSync, mkdirSync, writeFileSync } from "node:fs";
 import { decodePNG, type RawImage } from "../../web/png";
-import { waitForReady } from "../foundation/verify.mjs";
+import { FOUNDATION_REFERENCE_INITIAL_SEED, FOUNDATION_SEED, manualSeedCommands, waitForReady } from "../foundation/verify.mjs";
 import type { State } from "../../web/engine";
 
 const ARTIFACTS = process.env.FOUNDATION_BROWSER_ARTIFACTS ?? "test-results/presentation";
@@ -9,12 +9,17 @@ const ARTIFACTS = process.env.FOUNDATION_BROWSER_ARTIFACTS ?? "test-results/pres
 async function seededRun(page: Page): Promise<void> {
   await page.goto("/");
   await waitForReady(page);
-  await page.evaluate(() => { const game = (window as any).game; game.pause(); game.reset(2184569263); });
-  for (let index = 0; index < 3; index++) await page.keyboard.press("Enter");
-  await page.keyboard.press("Tab");
-  await page.keyboard.type("T1PK6Y0W");
-  await page.keyboard.press("Enter");
-  await page.keyboard.press("Enter");
+  await page.evaluate((seed) => { const game = (window as any).game; game.pause(); game.reset(seed); }, FOUNDATION_REFERENCE_INITIAL_SEED);
+  // Menu transitions follow the declared native menu tape through the final
+  // New Run release. Its fade and deferred run admission then take 30 ticks,
+  // so the run's first simulated tick is the next one; the presentation
+  // checks below count run ticks from that admission boundary.
+  const plan = manualSeedCommands(FOUNDATION_SEED);
+  for (const command of [...plan.slice(0, -1), { type: "tick", count: 30 } as const]) {
+    if (command.type === "tick") await page.evaluate((count) => (window as any).game.step(count), command.count);
+    else if (command.type === "key") await page.keyboard[command.down ? "down" : "up"](command.code);
+    else if (command.type === "text") await page.keyboard.press(command.text.toLowerCase());
+  }
 }
 
 async function capture(page: Page, name: string): Promise<RawImage> {
@@ -73,7 +78,9 @@ test("pause composes original paper, actual seed and stats while freezing the ru
   await page.keyboard.press("ArrowDown");
   expect((await page.evaluate(() => (window as any).game.snapshot()) as State).pauseMenu.selection).toBe(2);
   await page.keyboard.press("Escape");
-  await page.evaluate(() => (window as any).game.step(22));
+  // The closing animation retains its final frame and completes on the next
+  // full controller update: twelve updates, one every other tick.
+  await page.evaluate(() => (window as any).game.step(24));
   const resumed = await page.evaluate(() => (window as any).game.snapshot()) as State;
   expect(resumed.paused).toBe(false);
   expect(resumed.pauseMenu.phase).toBe("hidden");

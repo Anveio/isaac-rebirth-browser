@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { spawnSync } from "node:child_process";
 import { mkdirSync, writeFileSync } from "node:fs";
-import { browserScenario, nativeReplay, waitForReady } from "../foundation/verify.mjs";
+import { browserScenario, enterSeededRun, nativeReplay, waitForReady } from "../foundation/verify.mjs";
 import { seedList } from "../foundation/seeds.mjs";
 import { assertGameplayInvariants } from "../foundation/seed-invariants.mjs";
 import { compareStageMaskTargets, loadStageMaskReference, readStageMaskCases } from "../foundation/stage-masks.mjs";
@@ -17,6 +17,8 @@ test.beforeAll(async ({ browser }) => {
 });
 
 test("actual keyboard opens a seeded run, moves and shoots with exact native Rust/WASM state", async ({ page }) => {
+  // The source-timed menu tape and its complete native replay exceed the default budget.
+  test.setTimeout(90_000);
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
   await page.goto("/");
@@ -36,20 +38,26 @@ test("actual keyboard opens a seeded run, moves and shoots with exact native Rus
   expect(shooting.pressed).not.toContain("ArrowRight");
   const build = spawnSync("cargo", ["build", "--locked", "--manifest-path", "engine/Cargo.toml", "--bin", "replay"], { encoding: "utf8" });
   expect(build.status, build.stderr).toBe(0);
-  const replay = spawnSync("engine/target/debug/replay", [], { input: JSON.stringify({ initialSeed: run.initialSeed, commands: run.commands }), encoding: "utf8", maxBuffer: 32 * 1024 * 1024 });
-  expect(replay.status, replay.stderr).toBe(0);
-  const native: State[] = replay.stdout.trim().split("\n").map((line) => JSON.parse(line));
+  // The browser trace interleaves actual music backend callbacks with the public
+  // commands; the shared replay helper feeds both and checks the binary exits 0.
+  const native: State[] = nativeReplay(run.initialSeed, run.commands, run.bootEpochSeed, run.backendEvents);
   expect(native).toEqual(run.states);
   mkdirSync(ARTIFACTS, { recursive: true });
   for (const frame of run.frames) writeFileSync(`${ARTIFACTS}/${frame.label}.png`, Buffer.from(frame.png, "base64"));
 });
 
 test("game pause freezes movement and release prevents stuck keyboard input", async ({ page }) => {
+  // The source-timed menu tape and its complete native replay exceed the default budget.
+  test.setTimeout(90_000);
   await page.goto("/");
   await browserScenario(page);
   const beforePause = await page.evaluate(() => (window as any).game.trace());
   expect(beforePause.enabled).toBe(true); expect(beforePause.truncated).toBe(false);
-  const coast = nativeReplay(beforePause.initialSeed, [...beforePause.commands, { type: "tick", count: 30 }]).at(-1)!;
+  // The no-input coast replays the same pause/resume commands and intervals,
+  // omitting only the movement key held during the pause.
+  const escape: Command[] = [{ type: "key", code: "Escape", down: true }, { type: "key", code: "Escape", down: false }];
+  const coast = nativeReplay(beforePause.initialSeed, [...beforePause.commands, ...escape, { type: "tick", count: 60 }, ...escape, { type: "tick", count: 30 }],
+    beforePause.bootEpochSeed, beforePause.backendEvents).at(-1)!;
   await page.keyboard.down("KeyD");
   await page.keyboard.press("Escape");
   const paused = await page.evaluate(() => (window as any).game.snapshot()) as State;
@@ -67,13 +75,13 @@ test("game pause freezes movement and release prevents stuck keyboard input", as
   expect(released.player, "Released movement must resume the existing native inertia without adding acceleration").toEqual(coast.player);
   const trace = await page.evaluate(() => (window as any).game.trace());
   expect(trace.truncated).toBe(false);
-  expect(nativeReplay(trace.initialSeed, trace.commands)).toEqual(trace.states);
+  expect(nativeReplay(trace.initialSeed, trace.commands, trace.bootEpochSeed, trace.backendEvents)).toEqual(trace.states);
 });
 
 test("releasing a movement key while Control is held clears the actual DOM input state", async ({ page }) => {
   await page.goto("/"); await waitForReady(page);
   await page.evaluate(() => { const game = (window as any).game; game.pause(); game.reset(game.snapshot().initialSeed, { trace: true }); });
-  for (let index = 0; index < 4; index++) await page.keyboard.press("Enter");
+  await enterSeededRun(page, null);
   const before = await page.evaluate(() => (window as any).game.snapshot()) as State;
   expect(before.screen).toBe("playing");
   await page.keyboard.down("KeyD"); await page.keyboard.down("ControlLeft");
@@ -85,7 +93,7 @@ test("releasing a movement key while Control is held clears the actual DOM input
   expect(after.player.x).toBe(before.player.x); expect(after.player.vx).toBe(0);
   expect(trace.commands).toContainEqual({ type: "key", code: "KeyD", down: false });
   expect(trace.commands.some((command: Command) => command.type === "key" && command.code === "ControlLeft")).toBe(false);
-  expect(trace.truncated).toBe(false); expect(nativeReplay(trace.initialSeed, trace.commands)).toEqual(trace.states);
+  expect(trace.truncated).toBe(false); expect(nativeReplay(trace.initialSeed, trace.commands, trace.bootEpochSeed, trace.backendEvents)).toEqual(trace.states);
 });
 
 test("automatic simulation catch-up advances ticks without repeatedly presenting the full canvas in one animation frame", async ({ page }) => {
@@ -107,7 +115,7 @@ test("automatic simulation catch-up advances ticks without repeatedly presenting
   });
   await page.goto("/"); await waitForReady(page);
   await page.evaluate(() => { const game = (window as any).game; game.pause(); game.reset(game.snapshot().initialSeed, { trace: true }); });
-  for (let index = 0; index < 4; index++) await page.keyboard.press("Enter");
+  await enterSeededRun(page, null);
   await page.keyboard.down("KeyD");
   const measured = await page.evaluate(async () => {
     const game = (window as any).game, observations = (window as any).__frameObservations;
@@ -125,14 +133,14 @@ test("automatic simulation catch-up advances ticks without repeatedly presenting
   expect(measured.canvasPresents, "Catch-up ticks must not repeatedly composite the complete displayed frame").toBeLessThanOrEqual(measured.rafCallbacks);
   expect(measured.moved).toBe(true);
   const trace = await page.evaluate(() => (window as any).game.trace());
-  expect(trace.truncated).toBe(false); expect(nativeReplay(trace.initialSeed, trace.commands)).toEqual(trace.states);
+  expect(trace.truncated).toBe(false); expect(nativeReplay(trace.initialSeed, trace.commands, trace.bootEpochSeed, trace.backendEvents)).toEqual(trace.states);
   mkdirSync(ARTIFACTS, { recursive: true });
   writeFileSync(`${ARTIFACTS}/frame-catchup.json`, JSON.stringify(measured, null, 2));
 });
 
 test("OS-random seeds support ordinary and manually seeded browser runs with native/WASM replay", async ({ page }) => {
   const initialSeeds = seedList({ count: 4 });
-  test.setTimeout(30_000 + initialSeeds.length * 15_000);
+  test.setTimeout(30_000 + initialSeeds.length * 2 * 45_000);
   expect(initialSeeds.length).toBeGreaterThanOrEqual(2);
   mkdirSync(`${ARTIFACTS}/random`, { recursive: true });
   writeFileSync(`${ARTIFACTS}/random/seeds.json`, JSON.stringify(initialSeeds));
@@ -143,36 +151,45 @@ test("OS-random seeds support ordinary and manually seeded browser runs with nat
     for (const manualSeed of [false, true]) {
       try {
         const encodedSeed = nativeReplay(initialSeed, [])[0]!.runSeed;
-        const run = await browserScenario(page, { initialSeed, manualSeedText: manualSeed ? encodedSeed.replaceAll(" ", "") : null });
+        // Ordinary runs take their seed from the boot RNG, so the public boot
+        // epoch varies with the recorded OS-random seed and replays with it.
+        const bootEpochSeed = (initialSeed ^ 0x9e3779b9) >>> 0;
+        const run = await browserScenario(page, { initialSeed, bootEpochSeed, manualSeedText: manualSeed ? encodedSeed.replaceAll(" ", "") : null });
         const playing = run.frames.find((frame) => frame.label === "gameplay-start")!;
+        const characterMenu = [...run.states].reverse().find((state: State) => state.screen === "character")!;
+        const runSeedValue = manualSeed ? initialSeed : characterMenu.bootLifecycle.menuRunSeed;
         expect(playing.state.initialSeed).toBe(initialSeed);
-        expect(playing.state.runSeedValue).toBe(initialSeed);
+        expect(playing.state.runSeedValue).toBe(runSeedValue);
         expect(playing.state.seededRun).toBe(manualSeed);
         expect(playing.state.achievementEligibility).toBe(!manualSeed);
         expect(run.frames.find((frame) => frame.label === "movement")!.state.player.x).toBeGreaterThan(playing.state.player.x);
         expect(run.frames.find((frame) => frame.label === "shooting")!.state.tears.length).toBeGreaterThan(0);
         const down = (code: string): Command => ({ type: "key", code, down: true }), up = (code: string): Command => ({ type: "key", code, down: false });
         const tick = (count: number): Command => ({ type: "tick", count });
-        const tail = [down("KeyW"), tick(8), up("KeyW"), tick(30), down("KeyA"), down("KeyD"), tick(30), up("KeyA"), up("KeyD"), down("KeyS"), down("Escape"), up("Escape"), tick(60), up("KeyS"), down("Escape"), up("Escape"), tick(30), down("ArrowLeft"), tick(30), up("ArrowLeft"), down("ArrowUp"), tick(30), up("ArrowUp"), down("ArrowDown"), tick(30), up("ArrowDown"), tick(120)];
+        // The resume interval is split where the pause menu's 24-tick closing
+        // animation completes, so each tick batch is wholly paused or running.
+        const tail = [down("KeyW"), tick(8), up("KeyW"), tick(30), down("KeyA"), down("KeyD"), tick(30), up("KeyA"), up("KeyD"), down("KeyS"), down("Escape"), up("Escape"), tick(60), up("KeyS"), down("Escape"), up("Escape"), tick(24), tick(6), down("ArrowLeft"), tick(30), up("ArrowLeft"), down("ArrowUp"), tick(30), up("ArrowUp"), down("ArrowDown"), tick(30), up("ArrowDown"), tick(120)];
         for (const command of tail) {
           if (command.type === "key") await page.keyboard[command.down ? "down" : "up"](command.code);
           else if (command.type === "tick") await page.evaluate((count) => (window as any).game.step(count), command.count);
           run.commands.push(command);
-          run.states.push(await page.evaluate(() => (window as any).game.snapshot()));
         }
         const trace = await page.evaluate(() => (window as any).game.trace());
+        // Take each tail state from the trace at its command boundary: a later
+        // snapshot can already include an asynchronous music backend callback.
+        run.states.push(...trace.states.slice(run.states.length));
         expect(trace.truncated).toBe(false);
         expect(trace.initialSeed).toBe(initialSeed);
         expect(trace.commands).toEqual(run.commands);
-        const invariants = assertGameplayInvariants(initialSeed, run.commands, run.states, { manualSeed });
+        const invariants = assertGameplayInvariants(initialSeed, run.commands, run.states, { manualSeed, runSeedValue });
         expect(invariants.directionChecks.length).toBe(4);
         expect(invariants.pauseChecks).toBeGreaterThan(0);
-        expect(nativeReplay(initialSeed, run.commands)).toEqual(run.states);
+        expect(nativeReplay(initialSeed, run.commands, run.bootEpochSeed, trace.backendEvents)).toEqual(run.states);
         if (!manualSeed) {
           unseededImages.add(playing.png);
           roomDescriptors.add(JSON.stringify(playing.state.room.appearance));
         }
-        writeFileSync(`${ARTIFACTS}/random/${initialSeed}-${manualSeed ? "manual" : "ordinary"}.json`, JSON.stringify({ initialSeed, commands: run.commands, states: run.states }));
+        writeFileSync(`${ARTIFACTS}/random/${initialSeed}-${manualSeed ? "manual" : "ordinary"}.json`, JSON.stringify({ initialSeed, bootEpochSeed, commands: run.commands, states: run.states }));
         cases.push({ initialSeed, manualSeed, status: "pass", states: run.states.length, directionChecks: invariants.directionChecks, pauseChecks: invariants.pauseChecks });
       } catch (error) {
         cases.push({ initialSeed, manualSeed, status: "fail", error: error instanceof Error ? error.message : String(error) });
@@ -218,7 +235,7 @@ test("production boot consumes real crypto entropy and invalid explicit reset se
 
 test("original GPU shadow and light masks match all complete native targets for independent seeds and movement", async ({ page }) => {
   const cases = readStageMaskCases();
-  test.setTimeout(30_000 + cases.length * 15_000);
+  test.setTimeout(30_000 + cases.length * 45_000);
   const output = `${ARTIFACTS}/stage-masks`;
   mkdirSync(output, { recursive: true });
   await page.goto("/");
@@ -238,7 +255,7 @@ test("original GPU shadow and light masks match all complete native targets for 
       expect(start.runSeedValue).toBe(reference.observed.seedValue);
       expect(start.stage).toBe(reference.observed.stage);
       expect(start.stageSeed).toBe(reference.observed.stageSeed);
-      expect(nativeReplay(run.initialSeed, run.commands)).toEqual(run.states);
+      expect(nativeReplay(run.initialSeed, run.commands, run.bootEpochSeed, run.backendEvents)).toEqual(run.states);
       expect(actual, `Selected original checkpoint ${reference.checkpoint} must execute`).toBeTruthy();
       const report = compareStageMaskTargets(actual, reference, `${output}/${reference.id}`);
       expect(report.status, `${reference.id}: all original target RGBA bytes must match`).toBe("pass");

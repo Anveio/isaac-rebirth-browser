@@ -28,7 +28,9 @@ function assertFinite(value, path = "$") {
   if (typeof value === "number") assert.ok(Number.isFinite(value), `Nonfinite state field ${path}`);
   else if (value && typeof value === "object") for (const [key, child] of Object.entries(value)) assertFinite(child, `${path}.${key}`);
 }
-export function assertGameplayInvariants(initialSeed, commands, states, { manualSeed = true } = {}) {
+// A manual run admits the typed seed; an ordinary run admits the seed its
+// Character menu generated at boot. Callers pass the one they expect.
+export function assertGameplayInvariants(initialSeed, commands, states, { manualSeed = true, runSeedValue = initialSeed } = {}) {
   assert.equal(states.length, commands.length + 1);
   assert.equal(states[0].initialSeed, initialSeed);
   let playing, shots = 0, pauseChecks = 0, opposingChecks = 0, effectChecks = 0, roomChecks = 0;
@@ -39,7 +41,7 @@ export function assertGameplayInvariants(initialSeed, commands, states, { manual
     assertFinite(state);
     if (state.screen !== "playing") continue;
     playing ||= state;
-    assert.equal(state.runSeedValue, initialSeed, "Arbitrary encoded seed must round-trip through the actual seed dialog");
+    assert.equal(state.runSeedValue, runSeedValue, manualSeed ? "Arbitrary encoded seed must round-trip through the actual seed dialog" : "The generated Character menu seed must own run admission");
     assert.equal(state.seededRun, manualSeed);
     assert.equal(state.achievementEligibility, !manualSeed);
     assert.ok(state.player.x >= state.room.left && state.player.x <= state.room.right);
