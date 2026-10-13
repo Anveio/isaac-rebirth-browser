@@ -1,0 +1,5386 @@
+{
+  "schema": 1,
+  "status": "fail",
+  "selection": {
+    "scope": "First case completed; remaining obsolete artifact replay interrupted after room-context admission defect was found. Same complete four-case input cohort is retained for fresh corrected replay."
+  },
+  "cases": [
+    {
+      "name": "key-phase-0",
+      "code": "JF2DSF92",
+      "seedValue": 1319061482,
+      "delay": 0,
+      "actions": [
+        {
+          "key": null,
+          "frames": 60
+        },
+        {
+          "key": "e",
+          "frames": 1
+        },
+        {
+          "key": "w",
+          "frames": 35
+        },
+        {
+          "key": null,
+          "frames": 20
+        },
+        {
+          "key": null,
+          "frames": 78
+        },
+        {
+          "key": "s",
+          "frames": 45
+        },
+        {
+          "key": null,
+          "frames": 40
+        },
+        {
+          "key": "a",
+          "frames": 13
+        },
+        {
+          "key": null,
+          "frames": 20
+        },
+        {
+          "key": "s",
+          "frames": 25
+        },
+        {
+          "key": null,
+          "frames": 30
+        },
+        {
+          "key": "d",
+          "frames": 25
+        },
+        {
+          "key": null,
+          "frames": 30
+        }
+      ],
+      "entropy": "Contrived public collection phase offset",
+      "status": "fail",
+      "failures": [
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 251,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:251:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 251,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:251:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 252,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:252:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 252,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:252:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 253,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:253:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 253,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:253:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 254,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:254:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 254,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:254:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 255,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:255:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 255,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:255:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 256,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:256:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 256,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:256:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 257,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:257:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 257,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:257:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 258,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:258:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 258,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:258:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 259,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:259:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 259,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:259:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 260,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:260:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 260,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:260:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 261,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:261:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 261,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:261:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 262,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:262:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 262,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:262:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 263,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:263:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 263,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:263:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 264,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:264:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 264,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:264:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 265,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:265:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 265,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:265:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 266,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:266:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 266,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:266:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 267,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:267:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 267,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:267:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 268,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:268:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 268,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:268:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 269,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:269:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 269,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:269:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 270,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:270:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 270,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:270:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 271,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:271:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 271,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:271:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 272,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:272:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 272,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:272:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 273,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:273:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 273,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:273:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 274,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:274:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 274,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:274:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 275,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:275:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 275,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:275:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 276,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:276:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 276,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:276:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 277,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:277:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 277,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:277:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 278,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:278:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 278,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:278:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 279,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:279:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 279,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:279:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 280,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:280:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 280,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:280:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 281,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:281:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 281,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:281:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 282,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:282:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 282,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:282:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 283,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:283:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 283,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:283:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 284,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:284:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 284,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:284:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 285,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:285:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 285,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:285:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 286,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:286:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 286,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:286:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 287,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:287:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 287,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:287:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 288,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:288:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 288,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:288:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 289,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:289:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 289,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:289:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 290,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:290:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 290,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:290:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 291,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:291:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 291,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:291:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 292,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:292:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 292,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:292:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 293,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:293:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 293,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:293:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 294,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:294:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 294,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:294:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 295,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:295:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 295,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:295:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 296,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:296:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 296,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:296:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 297,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:297:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 297,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:297:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 298,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:298:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 298,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:298:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 299,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:299:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 299,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:299:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 300,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:300:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 300,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:300:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 301,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:301:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 301,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:301:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 302,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:302:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 302,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:302:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 303,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:303:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 303,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:303:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 304,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:304:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 304,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:304:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 305,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:305:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 305,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:305:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 306,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:306:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 306,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:306:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 307,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:307:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 307,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:307:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 308,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:308:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 308,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:308:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 309,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:309:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 309,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:309:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 310,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:310:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 310,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:310:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 311,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:311:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 311,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:311:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 312,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:312:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 312,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:312:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 313,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:313:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 313,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:313:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 314,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:314:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 314,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:314:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 315,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:315:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 315,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:315:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 316,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:316:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 316,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:316:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 317,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:317:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 317,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:317:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 318,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:318:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 318,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:318:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 319,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:319:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 319,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:319:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 320,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:320:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 320,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:320:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 321,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:321:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 321,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:321:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 322,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:322:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 322,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:322:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 323,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:323:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 323,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:323:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 324,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:324:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 324,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:324:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 325,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:325:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 325,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:325:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 326,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:326:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 326,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:326:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 327,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:327:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 327,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:327:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 328,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:328:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 328,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:328:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 329,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:329:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 329,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:329:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 330,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:330:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 330,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:330:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 331,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:331:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 331,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:331:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 332,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:332:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 332,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:332:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 333,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:333:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 333,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:333:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 334,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:334:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 334,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:334:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 335,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:335:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 335,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:335:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 336,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:336:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 336,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:336:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 337,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:337:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 337,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:337:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 338,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:338:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 338,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:338:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 339,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:339:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 339,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:339:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 340,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:340:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 340,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:340:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 341,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:341:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 341,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:341:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 342,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:342:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 342,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:342:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 343,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:343:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 343,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:343:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 344,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:344:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 344,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:344:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 345,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:345:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 345,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:345:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 346,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:346:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 346,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:346:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 347,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:347:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 347,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:347:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 348,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:348:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 348,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:348:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 349,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:349:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 349,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:349:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 350,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:350:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 350,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:350:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 351,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:351:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 351,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:351:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 352,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:352:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 352,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:352:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 353,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:353:keyInventory\n\n0 !== 1\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 353,
+          "actual": null,
+          "expected": 176,
+          "error": "key-phase-0:353:key sound admission tick\n\nnull !== 176\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 353,
+          "actual": -1,
+          "expected": 178,
+          "error": "key-phase-0:353:key sound cooldown\n\n-1 !== 178\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 353,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:353:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 353,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:353:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 353,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:353:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 354,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:354:keyInventory\n\n0 !== 1\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 354,
+          "actual": null,
+          "expected": 176,
+          "error": "key-phase-0:354:key sound admission tick\n\nnull !== 176\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 354,
+          "actual": -1,
+          "expected": 178,
+          "error": "key-phase-0:354:key sound cooldown\n\n-1 !== 178\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 354,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:354:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 354,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:354:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 354,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:354:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 355,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:355:keyInventory\n\n0 !== 1\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 355,
+          "actual": null,
+          "expected": 176,
+          "error": "key-phase-0:355:key sound admission tick\n\nnull !== 176\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 355,
+          "actual": -1,
+          "expected": 178,
+          "error": "key-phase-0:355:key sound cooldown\n\n-1 !== 178\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 355,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:355:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 355,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:355:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 355,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:355:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 356,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:356:keyInventory\n\n0 !== 1\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 356,
+          "actual": null,
+          "expected": 176,
+          "error": "key-phase-0:356:key sound admission tick\n\nnull !== 176\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 356,
+          "actual": -1,
+          "expected": 178,
+          "error": "key-phase-0:356:key sound cooldown\n\n-1 !== 178\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 356,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:356:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 356,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:356:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 356,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:356:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 357,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:357:keyInventory\n\n0 !== 1\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 357,
+          "actual": null,
+          "expected": 176,
+          "error": "key-phase-0:357:key sound admission tick\n\nnull !== 176\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 357,
+          "actual": -1,
+          "expected": 178,
+          "error": "key-phase-0:357:key sound cooldown\n\n-1 !== 178\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 357,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:357:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 357,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:357:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 357,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:357:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 358,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:358:keyInventory\n\n0 !== 1\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 358,
+          "actual": null,
+          "expected": 176,
+          "error": "key-phase-0:358:key sound admission tick\n\nnull !== 176\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 358,
+          "actual": -1,
+          "expected": 178,
+          "error": "key-phase-0:358:key sound cooldown\n\n-1 !== 178\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 358,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:358:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 358,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:358:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 358,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:358:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 359,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:359:keyInventory\n\n0 !== 1\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 359,
+          "actual": null,
+          "expected": 176,
+          "error": "key-phase-0:359:key sound admission tick\n\nnull !== 176\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 359,
+          "actual": -1,
+          "expected": 178,
+          "error": "key-phase-0:359:key sound cooldown\n\n-1 !== 178\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 359,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:359:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 359,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:359:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 359,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:359:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 360,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:360:keyInventory\n\n0 !== 1\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 360,
+          "actual": null,
+          "expected": 176,
+          "error": "key-phase-0:360:key sound admission tick\n\nnull !== 176\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 360,
+          "actual": -1,
+          "expected": 178,
+          "error": "key-phase-0:360:key sound cooldown\n\n-1 !== 178\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 360,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:360:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 360,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:360:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 360,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:360:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 361,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:361:keyInventory\n\n0 !== 1\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 361,
+          "actual": null,
+          "expected": 176,
+          "error": "key-phase-0:361:key sound admission tick\n\nnull !== 176\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 361,
+          "actual": -1,
+          "expected": 178,
+          "error": "key-phase-0:361:key sound cooldown\n\n-1 !== 178\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 361,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:361:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 361,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:361:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 361,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:361:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 362,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:362:keyInventory\n\n0 !== 1\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 362,
+          "actual": null,
+          "expected": 176,
+          "error": "key-phase-0:362:key sound admission tick\n\nnull !== 176\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 362,
+          "actual": -1,
+          "expected": 178,
+          "error": "key-phase-0:362:key sound cooldown\n\n-1 !== 178\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 362,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:362:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 362,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:362:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 362,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:362:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 363,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:363:keyInventory\n\n0 !== 1\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 363,
+          "actual": null,
+          "expected": 176,
+          "error": "key-phase-0:363:key sound admission tick\n\nnull !== 176\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 363,
+          "actual": -1,
+          "expected": 178,
+          "error": "key-phase-0:363:key sound cooldown\n\n-1 !== 178\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 363,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:363:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 363,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:363:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 363,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:363:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 364,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:364:keyInventory\n\n0 !== 1\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 364,
+          "actual": null,
+          "expected": 176,
+          "error": "key-phase-0:364:key sound admission tick\n\nnull !== 176\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 364,
+          "actual": -1,
+          "expected": 178,
+          "error": "key-phase-0:364:key sound cooldown\n\n-1 !== 178\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 364,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:364:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 364,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:364:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 364,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:364:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 365,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:365:keyInventory\n\n0 !== 1\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 365,
+          "actual": null,
+          "expected": 176,
+          "error": "key-phase-0:365:key sound admission tick\n\nnull !== 176\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 365,
+          "actual": -1,
+          "expected": 178,
+          "error": "key-phase-0:365:key sound cooldown\n\n-1 !== 178\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 365,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:365:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 365,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:365:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 365,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:365:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 366,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:366:keyInventory\n\n0 !== 1\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 366,
+          "actual": null,
+          "expected": 176,
+          "error": "key-phase-0:366:key sound admission tick\n\nnull !== 176\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 366,
+          "actual": -1,
+          "expected": 178,
+          "error": "key-phase-0:366:key sound cooldown\n\n-1 !== 178\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 366,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:366:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 366,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:366:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 366,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:366:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 367,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:367:keyInventory\n\n0 !== 1\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 367,
+          "actual": null,
+          "expected": 176,
+          "error": "key-phase-0:367:key sound admission tick\n\nnull !== 176\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 367,
+          "actual": -1,
+          "expected": 178,
+          "error": "key-phase-0:367:key sound cooldown\n\n-1 !== 178\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 367,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:367:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 367,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:367:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 367,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:367:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 368,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:368:keyInventory\n\n0 !== 1\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 368,
+          "actual": null,
+          "expected": 176,
+          "error": "key-phase-0:368:key sound admission tick\n\nnull !== 176\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 368,
+          "actual": -1,
+          "expected": 178,
+          "error": "key-phase-0:368:key sound cooldown\n\n-1 !== 178\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 368,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:368:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 368,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:368:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 368,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:368:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 369,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:369:keyInventory\n\n0 !== 1\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 369,
+          "actual": null,
+          "expected": 176,
+          "error": "key-phase-0:369:key sound admission tick\n\nnull !== 176\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 369,
+          "actual": -1,
+          "expected": 178,
+          "error": "key-phase-0:369:key sound cooldown\n\n-1 !== 178\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 369,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:369:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 369,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:369:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 369,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:369:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 370,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:370:keyInventory\n\n0 !== 1\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 370,
+          "actual": null,
+          "expected": 176,
+          "error": "key-phase-0:370:key sound admission tick\n\nnull !== 176\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 370,
+          "actual": -1,
+          "expected": 178,
+          "error": "key-phase-0:370:key sound cooldown\n\n-1 !== 178\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 370,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:370:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 370,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:370:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 370,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:370:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 371,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:371:keyInventory\n\n0 !== 1\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 371,
+          "actual": null,
+          "expected": 176,
+          "error": "key-phase-0:371:key sound admission tick\n\nnull !== 176\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 371,
+          "actual": -1,
+          "expected": 178,
+          "error": "key-phase-0:371:key sound cooldown\n\n-1 !== 178\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 371,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:371:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 371,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:371:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 371,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:371:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 372,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:372:keyInventory\n\n0 !== 1\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 372,
+          "actual": null,
+          "expected": 176,
+          "error": "key-phase-0:372:key sound admission tick\n\nnull !== 176\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 372,
+          "actual": -1,
+          "expected": 178,
+          "error": "key-phase-0:372:key sound cooldown\n\n-1 !== 178\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 372,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:372:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 372,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:372:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 372,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:372:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 373,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:373:keyInventory\n\n0 !== 1\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 373,
+          "actual": null,
+          "expected": 176,
+          "error": "key-phase-0:373:key sound admission tick\n\nnull !== 176\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 373,
+          "actual": -1,
+          "expected": 178,
+          "error": "key-phase-0:373:key sound cooldown\n\n-1 !== 178\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 373,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:373:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 373,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:373:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 373,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:373:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 374,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:374:keyInventory\n\n0 !== 1\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 374,
+          "actual": null,
+          "expected": 176,
+          "error": "key-phase-0:374:key sound admission tick\n\nnull !== 176\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 374,
+          "actual": -1,
+          "expected": 178,
+          "error": "key-phase-0:374:key sound cooldown\n\n-1 !== 178\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 374,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:374:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 374,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:374:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 374,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:374:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 375,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:375:keyInventory\n\n0 !== 1\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 375,
+          "actual": null,
+          "expected": 176,
+          "error": "key-phase-0:375:key sound admission tick\n\nnull !== 176\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 375,
+          "actual": -1,
+          "expected": 178,
+          "error": "key-phase-0:375:key sound cooldown\n\n-1 !== 178\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 375,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:375:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 375,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:375:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 375,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:375:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 376,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:376:keyInventory\n\n0 !== 1\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 376,
+          "actual": null,
+          "expected": 176,
+          "error": "key-phase-0:376:key sound admission tick\n\nnull !== 176\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 376,
+          "actual": -1,
+          "expected": 178,
+          "error": "key-phase-0:376:key sound cooldown\n\n-1 !== 178\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 376,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:376:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 376,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:376:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 376,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:376:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 377,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:377:keyInventory\n\n0 !== 1\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 377,
+          "actual": null,
+          "expected": 176,
+          "error": "key-phase-0:377:key sound admission tick\n\nnull !== 176\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 377,
+          "actual": -1,
+          "expected": 178,
+          "error": "key-phase-0:377:key sound cooldown\n\n-1 !== 178\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 377,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:377:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 377,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:377:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 377,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:377:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 378,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:378:keyInventory\n\n0 !== 1\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 378,
+          "actual": null,
+          "expected": 176,
+          "error": "key-phase-0:378:key sound admission tick\n\nnull !== 176\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 378,
+          "actual": -1,
+          "expected": 178,
+          "error": "key-phase-0:378:key sound cooldown\n\n-1 !== 178\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 378,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:378:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 378,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:378:pickup admission/retirement\n\n0 !== 2\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 378,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup",
+            "pickup"
+          ],
+          "error": "key-phase-0:378:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 379,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:379:keyInventory\n\n0 !== 1\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 379,
+          "actual": null,
+          "expected": 176,
+          "error": "key-phase-0:379:key sound admission tick\n\nnull !== 176\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 379,
+          "actual": -1,
+          "expected": 178,
+          "error": "key-phase-0:379:key sound cooldown\n\n-1 !== 178\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 379,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:379:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 379,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:379:pickup admission/retirement\n\n0 !== 1\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 379,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup"
+          ],
+          "error": "key-phase-0:379:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 380,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:380:keyInventory\n\n0 !== 1\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 380,
+          "actual": null,
+          "expected": 176,
+          "error": "key-phase-0:380:key sound admission tick\n\nnull !== 176\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 380,
+          "actual": -1,
+          "expected": 178,
+          "error": "key-phase-0:380:key sound cooldown\n\n-1 !== 178\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 380,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:380:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 380,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:380:pickup admission/retirement\n\n0 !== 1\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 380,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup"
+          ],
+          "error": "key-phase-0:380:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 381,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:381:keyInventory\n\n0 !== 1\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 381,
+          "actual": null,
+          "expected": 176,
+          "error": "key-phase-0:381:key sound admission tick\n\nnull !== 176\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 381,
+          "actual": -1,
+          "expected": 178,
+          "error": "key-phase-0:381:key sound cooldown\n\n-1 !== 178\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 381,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:381:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 381,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:381:pickup admission/retirement\n\n0 !== 1\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 381,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup"
+          ],
+          "error": "key-phase-0:381:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 382,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:382:keyInventory\n\n0 !== 1\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 382,
+          "actual": null,
+          "expected": 176,
+          "error": "key-phase-0:382:key sound admission tick\n\nnull !== 176\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 382,
+          "actual": -1,
+          "expected": 178,
+          "error": "key-phase-0:382:key sound cooldown\n\n-1 !== 178\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 382,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:382:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 382,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:382:pickup admission/retirement\n\n0 !== 1\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 382,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup"
+          ],
+          "error": "key-phase-0:382:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 383,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:383:keyInventory\n\n0 !== 1\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 383,
+          "actual": null,
+          "expected": 176,
+          "error": "key-phase-0:383:key sound admission tick\n\nnull !== 176\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 383,
+          "actual": -1,
+          "expected": 178,
+          "error": "key-phase-0:383:key sound cooldown\n\n-1 !== 178\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 383,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:383:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 383,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:383:pickup admission/retirement\n\n0 !== 1\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 383,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup"
+          ],
+          "error": "key-phase-0:383:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 384,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:384:keyInventory\n\n0 !== 1\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 384,
+          "actual": null,
+          "expected": 176,
+          "error": "key-phase-0:384:key sound admission tick\n\nnull !== 176\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 384,
+          "actual": -1,
+          "expected": 178,
+          "error": "key-phase-0:384:key sound cooldown\n\n-1 !== 178\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 384,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:384:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 384,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:384:pickup admission/retirement\n\n0 !== 1\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 384,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup"
+          ],
+          "error": "key-phase-0:384:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 385,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:385:keyInventory\n\n0 !== 1\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 385,
+          "actual": null,
+          "expected": 176,
+          "error": "key-phase-0:385:key sound admission tick\n\nnull !== 176\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 385,
+          "actual": -1,
+          "expected": 178,
+          "error": "key-phase-0:385:key sound cooldown\n\n-1 !== 178\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 385,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:385:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 385,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:385:pickup admission/retirement\n\n0 !== 1\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 385,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup"
+          ],
+          "error": "key-phase-0:385:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 386,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:386:keyInventory\n\n0 !== 1\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 386,
+          "actual": null,
+          "expected": 176,
+          "error": "key-phase-0:386:key sound admission tick\n\nnull !== 176\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 386,
+          "actual": -1,
+          "expected": 178,
+          "error": "key-phase-0:386:key sound cooldown\n\n-1 !== 178\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 386,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:386:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 386,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:386:pickup admission/retirement\n\n0 !== 1\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 386,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup"
+          ],
+          "error": "key-phase-0:386:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 387,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:387:keyInventory\n\n0 !== 1\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 387,
+          "actual": null,
+          "expected": 176,
+          "error": "key-phase-0:387:key sound admission tick\n\nnull !== 176\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 387,
+          "actual": -1,
+          "expected": 178,
+          "error": "key-phase-0:387:key sound cooldown\n\n-1 !== 178\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 387,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:387:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 387,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:387:pickup admission/retirement\n\n0 !== 1\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 387,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup"
+          ],
+          "error": "key-phase-0:387:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 388,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:388:keyInventory\n\n0 !== 1\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 388,
+          "actual": null,
+          "expected": 176,
+          "error": "key-phase-0:388:key sound admission tick\n\nnull !== 176\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 388,
+          "actual": -1,
+          "expected": 178,
+          "error": "key-phase-0:388:key sound cooldown\n\n-1 !== 178\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 388,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:388:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 388,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:388:pickup admission/retirement\n\n0 !== 1\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 388,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup"
+          ],
+          "error": "key-phase-0:388:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 389,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:389:keyInventory\n\n0 !== 1\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 389,
+          "actual": null,
+          "expected": 176,
+          "error": "key-phase-0:389:key sound admission tick\n\nnull !== 176\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 389,
+          "actual": -1,
+          "expected": 178,
+          "error": "key-phase-0:389:key sound cooldown\n\n-1 !== 178\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 389,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:389:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 389,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:389:pickup admission/retirement\n\n0 !== 1\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 389,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup"
+          ],
+          "error": "key-phase-0:389:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 390,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:390:keyInventory\n\n0 !== 1\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 390,
+          "actual": null,
+          "expected": 176,
+          "error": "key-phase-0:390:key sound admission tick\n\nnull !== 176\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 390,
+          "actual": -1,
+          "expected": 178,
+          "error": "key-phase-0:390:key sound cooldown\n\n-1 !== 178\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 390,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:390:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 390,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:390:pickup admission/retirement\n\n0 !== 1\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 390,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup"
+          ],
+          "error": "key-phase-0:390:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 391,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:391:keyInventory\n\n0 !== 1\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 391,
+          "actual": null,
+          "expected": 176,
+          "error": "key-phase-0:391:key sound admission tick\n\nnull !== 176\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 391,
+          "actual": -1,
+          "expected": 178,
+          "error": "key-phase-0:391:key sound cooldown\n\n-1 !== 178\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 391,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:391:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 391,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:391:pickup admission/retirement\n\n0 !== 1\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 391,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup"
+          ],
+          "error": "key-phase-0:391:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 392,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:392:keyInventory\n\n0 !== 1\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 392,
+          "actual": null,
+          "expected": 176,
+          "error": "key-phase-0:392:key sound admission tick\n\nnull !== 176\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 392,
+          "actual": -1,
+          "expected": 178,
+          "error": "key-phase-0:392:key sound cooldown\n\n-1 !== 178\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 392,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:392:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 392,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:392:pickup admission/retirement\n\n0 !== 1\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 392,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup"
+          ],
+          "error": "key-phase-0:392:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 393,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:393:keyInventory\n\n0 !== 2\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 393,
+          "actual": null,
+          "expected": 196,
+          "error": "key-phase-0:393:key sound admission tick\n\nnull !== 196\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 393,
+          "actual": -1,
+          "expected": 198,
+          "error": "key-phase-0:393:key sound cooldown\n\n-1 !== 198\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 393,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:393:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 393,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:393:pickup admission/retirement\n\n0 !== 1\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 393,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup"
+          ],
+          "error": "key-phase-0:393:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 394,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:394:keyInventory\n\n0 !== 2\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 394,
+          "actual": null,
+          "expected": 196,
+          "error": "key-phase-0:394:key sound admission tick\n\nnull !== 196\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 394,
+          "actual": -1,
+          "expected": 198,
+          "error": "key-phase-0:394:key sound cooldown\n\n-1 !== 198\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 394,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:394:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 394,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:394:pickup admission/retirement\n\n0 !== 1\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 394,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup"
+          ],
+          "error": "key-phase-0:394:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 395,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:395:keyInventory\n\n0 !== 2\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 395,
+          "actual": null,
+          "expected": 196,
+          "error": "key-phase-0:395:key sound admission tick\n\nnull !== 196\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 395,
+          "actual": -1,
+          "expected": 198,
+          "error": "key-phase-0:395:key sound cooldown\n\n-1 !== 198\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 395,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:395:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 395,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:395:pickup admission/retirement\n\n0 !== 1\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 395,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup"
+          ],
+          "error": "key-phase-0:395:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 396,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:396:keyInventory\n\n0 !== 2\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 396,
+          "actual": null,
+          "expected": 196,
+          "error": "key-phase-0:396:key sound admission tick\n\nnull !== 196\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 396,
+          "actual": -1,
+          "expected": 198,
+          "error": "key-phase-0:396:key sound cooldown\n\n-1 !== 198\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 396,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:396:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 396,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:396:pickup admission/retirement\n\n0 !== 1\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 396,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup"
+          ],
+          "error": "key-phase-0:396:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 397,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:397:keyInventory\n\n0 !== 2\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 397,
+          "actual": null,
+          "expected": 196,
+          "error": "key-phase-0:397:key sound admission tick\n\nnull !== 196\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 397,
+          "actual": -1,
+          "expected": 198,
+          "error": "key-phase-0:397:key sound cooldown\n\n-1 !== 198\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 397,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:397:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 397,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:397:pickup admission/retirement\n\n0 !== 1\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 397,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup"
+          ],
+          "error": "key-phase-0:397:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 398,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:398:keyInventory\n\n0 !== 2\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 398,
+          "actual": null,
+          "expected": 196,
+          "error": "key-phase-0:398:key sound admission tick\n\nnull !== 196\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 398,
+          "actual": -1,
+          "expected": 198,
+          "error": "key-phase-0:398:key sound cooldown\n\n-1 !== 198\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 398,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:398:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 398,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:398:pickup admission/retirement\n\n0 !== 1\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 398,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup"
+          ],
+          "error": "key-phase-0:398:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 399,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:399:keyInventory\n\n0 !== 2\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 399,
+          "actual": null,
+          "expected": 196,
+          "error": "key-phase-0:399:key sound admission tick\n\nnull !== 196\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 399,
+          "actual": -1,
+          "expected": 198,
+          "error": "key-phase-0:399:key sound cooldown\n\n-1 !== 198\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 399,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:399:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 399,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:399:pickup admission/retirement\n\n0 !== 1\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 399,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup"
+          ],
+          "error": "key-phase-0:399:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 400,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:400:keyInventory\n\n0 !== 2\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 400,
+          "actual": null,
+          "expected": 196,
+          "error": "key-phase-0:400:key sound admission tick\n\nnull !== 196\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 400,
+          "actual": -1,
+          "expected": 198,
+          "error": "key-phase-0:400:key sound cooldown\n\n-1 !== 198\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 400,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:400:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 400,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:400:pickup admission/retirement\n\n0 !== 1\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 400,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup"
+          ],
+          "error": "key-phase-0:400:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 401,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:401:keyInventory\n\n0 !== 2\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 401,
+          "actual": null,
+          "expected": 196,
+          "error": "key-phase-0:401:key sound admission tick\n\nnull !== 196\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 401,
+          "actual": -1,
+          "expected": 198,
+          "error": "key-phase-0:401:key sound cooldown\n\n-1 !== 198\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 401,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:401:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 401,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:401:pickup admission/retirement\n\n0 !== 1\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 401,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup"
+          ],
+          "error": "key-phase-0:401:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 402,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:402:keyInventory\n\n0 !== 2\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 402,
+          "actual": null,
+          "expected": 196,
+          "error": "key-phase-0:402:key sound admission tick\n\nnull !== 196\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 402,
+          "actual": -1,
+          "expected": 198,
+          "error": "key-phase-0:402:key sound cooldown\n\n-1 !== 198\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 402,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:402:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 402,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:402:pickup admission/retirement\n\n0 !== 1\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 402,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup"
+          ],
+          "error": "key-phase-0:402:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 403,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:403:keyInventory\n\n0 !== 2\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 403,
+          "actual": null,
+          "expected": 196,
+          "error": "key-phase-0:403:key sound admission tick\n\nnull !== 196\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 403,
+          "actual": -1,
+          "expected": 198,
+          "error": "key-phase-0:403:key sound cooldown\n\n-1 !== 198\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 403,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:403:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 403,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:403:pickup admission/retirement\n\n0 !== 1\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 403,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup"
+          ],
+          "error": "key-phase-0:403:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 404,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:404:keyInventory\n\n0 !== 2\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 404,
+          "actual": null,
+          "expected": 196,
+          "error": "key-phase-0:404:key sound admission tick\n\nnull !== 196\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 404,
+          "actual": -1,
+          "expected": 198,
+          "error": "key-phase-0:404:key sound cooldown\n\n-1 !== 198\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 404,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:404:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 404,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:404:pickup admission/retirement\n\n0 !== 1\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 404,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup"
+          ],
+          "error": "key-phase-0:404:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 405,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:405:keyInventory\n\n0 !== 2\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 405,
+          "actual": null,
+          "expected": 196,
+          "error": "key-phase-0:405:key sound admission tick\n\nnull !== 196\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 405,
+          "actual": -1,
+          "expected": 198,
+          "error": "key-phase-0:405:key sound cooldown\n\n-1 !== 198\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 405,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:405:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 405,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:405:pickup admission/retirement\n\n0 !== 1\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 405,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup"
+          ],
+          "error": "key-phase-0:405:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 406,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:406:keyInventory\n\n0 !== 2\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 406,
+          "actual": null,
+          "expected": 196,
+          "error": "key-phase-0:406:key sound admission tick\n\nnull !== 196\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 406,
+          "actual": -1,
+          "expected": 198,
+          "error": "key-phase-0:406:key sound cooldown\n\n-1 !== 198\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 406,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:406:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 406,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:406:pickup admission/retirement\n\n0 !== 1\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 406,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup"
+          ],
+          "error": "key-phase-0:406:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 407,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:407:keyInventory\n\n0 !== 2\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 407,
+          "actual": null,
+          "expected": 196,
+          "error": "key-phase-0:407:key sound admission tick\n\nnull !== 196\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 407,
+          "actual": -1,
+          "expected": 198,
+          "error": "key-phase-0:407:key sound cooldown\n\n-1 !== 198\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 407,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:407:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 407,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:407:pickup admission/retirement\n\n0 !== 1\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 407,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup"
+          ],
+          "error": "key-phase-0:407:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 408,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:408:keyInventory\n\n0 !== 2\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 408,
+          "actual": null,
+          "expected": 196,
+          "error": "key-phase-0:408:key sound admission tick\n\nnull !== 196\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 408,
+          "actual": -1,
+          "expected": 198,
+          "error": "key-phase-0:408:key sound cooldown\n\n-1 !== 198\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 408,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:408:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 408,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:408:pickup admission/retirement\n\n0 !== 1\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 408,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup"
+          ],
+          "error": "key-phase-0:408:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 409,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:409:keyInventory\n\n0 !== 2\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 409,
+          "actual": null,
+          "expected": 196,
+          "error": "key-phase-0:409:key sound admission tick\n\nnull !== 196\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 409,
+          "actual": -1,
+          "expected": 198,
+          "error": "key-phase-0:409:key sound cooldown\n\n-1 !== 198\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 409,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:409:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 409,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:409:pickup admission/retirement\n\n0 !== 1\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 409,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup"
+          ],
+          "error": "key-phase-0:409:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 410,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:410:keyInventory\n\n0 !== 2\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 410,
+          "actual": null,
+          "expected": 196,
+          "error": "key-phase-0:410:key sound admission tick\n\nnull !== 196\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 410,
+          "actual": -1,
+          "expected": 198,
+          "error": "key-phase-0:410:key sound cooldown\n\n-1 !== 198\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 410,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:410:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 410,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:410:pickup admission/retirement\n\n0 !== 1\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 410,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup"
+          ],
+          "error": "key-phase-0:410:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 411,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:411:keyInventory\n\n0 !== 2\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 411,
+          "actual": null,
+          "expected": 196,
+          "error": "key-phase-0:411:key sound admission tick\n\nnull !== 196\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 411,
+          "actual": -1,
+          "expected": 198,
+          "error": "key-phase-0:411:key sound cooldown\n\n-1 !== 198\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 411,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:411:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 411,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:411:pickup admission/retirement\n\n0 !== 1\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 411,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup"
+          ],
+          "error": "key-phase-0:411:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 412,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:412:keyInventory\n\n0 !== 2\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 412,
+          "actual": null,
+          "expected": 196,
+          "error": "key-phase-0:412:key sound admission tick\n\nnull !== 196\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 412,
+          "actual": -1,
+          "expected": 198,
+          "error": "key-phase-0:412:key sound cooldown\n\n-1 !== 198\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 412,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:412:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 412,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:412:pickup admission/retirement\n\n0 !== 1\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 412,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup"
+          ],
+          "error": "key-phase-0:412:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 413,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:413:keyInventory\n\n0 !== 2\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 413,
+          "actual": null,
+          "expected": 196,
+          "error": "key-phase-0:413:key sound admission tick\n\nnull !== 196\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 413,
+          "actual": -1,
+          "expected": 198,
+          "error": "key-phase-0:413:key sound cooldown\n\n-1 !== 198\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 413,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:413:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 413,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:413:pickup admission/retirement\n\n0 !== 1\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 413,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup"
+          ],
+          "error": "key-phase-0:413:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 414,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:414:keyInventory\n\n0 !== 2\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 414,
+          "actual": null,
+          "expected": 196,
+          "error": "key-phase-0:414:key sound admission tick\n\nnull !== 196\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 414,
+          "actual": -1,
+          "expected": 198,
+          "error": "key-phase-0:414:key sound cooldown\n\n-1 !== 198\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 414,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:414:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 414,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:414:pickup admission/retirement\n\n0 !== 1\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 414,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup"
+          ],
+          "error": "key-phase-0:414:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 415,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:415:keyInventory\n\n0 !== 2\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 415,
+          "actual": null,
+          "expected": 196,
+          "error": "key-phase-0:415:key sound admission tick\n\nnull !== 196\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 415,
+          "actual": -1,
+          "expected": 198,
+          "error": "key-phase-0:415:key sound cooldown\n\n-1 !== 198\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 415,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:415:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 415,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:415:pickup admission/retirement\n\n0 !== 1\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 415,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup"
+          ],
+          "error": "key-phase-0:415:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 416,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:416:keyInventory\n\n0 !== 2\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 416,
+          "actual": null,
+          "expected": 196,
+          "error": "key-phase-0:416:key sound admission tick\n\nnull !== 196\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 416,
+          "actual": -1,
+          "expected": 198,
+          "error": "key-phase-0:416:key sound cooldown\n\n-1 !== 198\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 416,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:416:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 416,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:416:pickup admission/retirement\n\n0 !== 1\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 416,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup"
+          ],
+          "error": "key-phase-0:416:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 417,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:417:keyInventory\n\n0 !== 2\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 417,
+          "actual": null,
+          "expected": 196,
+          "error": "key-phase-0:417:key sound admission tick\n\nnull !== 196\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 417,
+          "actual": -1,
+          "expected": 198,
+          "error": "key-phase-0:417:key sound cooldown\n\n-1 !== 198\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 417,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:417:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 417,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:417:pickup admission/retirement\n\n0 !== 1\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 417,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup"
+          ],
+          "error": "key-phase-0:417:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 418,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:418:keyInventory\n\n0 !== 2\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 418,
+          "actual": null,
+          "expected": 196,
+          "error": "key-phase-0:418:key sound admission tick\n\nnull !== 196\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 418,
+          "actual": -1,
+          "expected": 198,
+          "error": "key-phase-0:418:key sound cooldown\n\n-1 !== 198\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 418,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:418:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "pickup admission/retirement",
+          "presentation": 418,
+          "actual": 0,
+          "expected": 1,
+          "error": "key-phase-0:418:pickup admission/retirement\n\n0 !== 1\n"
+        },
+        {
+          "field": "native relative actor admission order",
+          "presentation": 418,
+          "actual": [
+            "player"
+          ],
+          "expected": [
+            "player",
+            "pickup"
+          ],
+          "error": "key-phase-0:418:native relative actor admission order\n+ actual - expected\n\n  [\n    'player',\n-   'pickup'\n  ]\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 419,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:419:keyInventory\n\n0 !== 2\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 419,
+          "actual": null,
+          "expected": 196,
+          "error": "key-phase-0:419:key sound admission tick\n\nnull !== 196\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 419,
+          "actual": -1,
+          "expected": 198,
+          "error": "key-phase-0:419:key sound cooldown\n\n-1 !== 198\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 419,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:419:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 420,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:420:keyInventory\n\n0 !== 2\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 420,
+          "actual": null,
+          "expected": 196,
+          "error": "key-phase-0:420:key sound admission tick\n\nnull !== 196\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 420,
+          "actual": -1,
+          "expected": 198,
+          "error": "key-phase-0:420:key sound cooldown\n\n-1 !== 198\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 420,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:420:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 421,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:421:keyInventory\n\n0 !== 2\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 421,
+          "actual": null,
+          "expected": 196,
+          "error": "key-phase-0:421:key sound admission tick\n\nnull !== 196\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 421,
+          "actual": -1,
+          "expected": 198,
+          "error": "key-phase-0:421:key sound cooldown\n\n-1 !== 198\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 421,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:421:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        },
+        {
+          "field": "keyInventory",
+          "presentation": 422,
+          "actual": 0,
+          "expected": 2,
+          "error": "key-phase-0:422:keyInventory\n\n0 !== 2\n"
+        },
+        {
+          "field": "key sound admission tick",
+          "presentation": 422,
+          "actual": null,
+          "expected": 196,
+          "error": "key-phase-0:422:key sound admission tick\n\nnull !== 196\n"
+        },
+        {
+          "field": "key sound cooldown",
+          "presentation": 422,
+          "actual": -1,
+          "expected": 198,
+          "error": "key-phase-0:422:key sound cooldown\n\n-1 !== 198\n"
+        },
+        {
+          "field": "key sound volume",
+          "presentation": 422,
+          "actual": 0,
+          "expected": 0.8500000238418579,
+          "error": "key-phase-0:422:key sound volume\n+ actual - expected\n\n+ 0\n- 0.8500000238418579\n"
+        }
+      ],
+      "seedReadback": {
+        "seedText": "JF2DSF92",
+        "seedValid": true,
+        "seededRun": true,
+        "runSeed": "JF2DSF92",
+        "runSeedValue": 1319061482
+      },
+      "comparedPresentations": 422,
+      "passedPresentations": 250,
+      "admittedKeys": 2,
+      "collections": [
+        {
+          "presentation": 353,
+          "amount": 1
+        },
+        {
+          "presentation": 393,
+          "amount": 1
+        }
+      ],
+      "detonation": 181,
+      "error": "AssertionError [ERR_ASSERTION]: Public movement must collect both original regular keys\n\n0 !== 2\n"
+    }
+  ],
+  "scenarios": "scenarios.json",
+  "production": {
+    "sha256": "fe25b4f1f58979957076f480c930f4ccae8aff07f057ec1c74107987f82b3633",
+    "files": 833,
+    "source": "/tmp/isaac-production-xMnX6a/dist",
+    "scope": "Recovered exact immutable failed artifact copy after interrupted obsolete replay; actual first-case failure retained"
+  },
+  "runtimeDefect": "Secret regular keys were rejected by ordinary-room-only admission filter",
+  "comparedPresentations": 422,
+  "nativeManifestSha256": "1e6a5f70e673c41049369aea21c34ac0d567b375d7727cef4c1f13e6d5ca7a77",
+  "browserTraceScope": "This first completed failure aborted at the final inventory assertion before full trace validation; actual manual seed flags were checked at start. It is failed historical evidence, not accepted input provenance."
+}
