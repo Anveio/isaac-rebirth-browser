@@ -44,15 +44,19 @@ const report={schema:1,status:'running',originalBinarySha256:ORIGINAL_SHA,scope:
 try {
  for(const scenario of cases){
   const directory=join(output,scenario.name);await mkdir(directory,{recursive:true});
+  let page;const states=[];let births=0;let comparisons=0;
+  const result={...scenario,status:'running'};report.cases.push(result);
+  try {
   const tape=await run('python3',[join(ROOT,'tools/original/weapons-scenarios.py'),'--seed',scenario.code,'--direction',scenario.direction,'--delay',String(scenario.delay)],{cwd:ROOT});
   await writeFile(join(directory,'tape.json'),tape.stdout);
   await run('bash',[join(ROOT,'tools/original/with-display.sh'),'python3',join(ROOT,'tools/original/foundation-clock-run.py'),'--seed',scenario.code,'--tape',join(directory,'tape.json'),'--observe-every-step','--state-observer',join(ROOT,'tools/original/foundation-physics-observer.py'),'--output',join(directory,'original')],{cwd:ROOT,timeout:180000,maxBuffer:1024*1024});
   const raw=await readFile(join(directory,'original/manifest.json'));const native=JSON.parse(raw);
+  result.nativeManifestSha256=createHash('sha256').update(raw).digest('hex');result.nativeManifest=join(directory,'original/manifest.json');
   assert.equal(native.status,'pass');assert.deepEqual(native.failures,[]);
   const baseline=native.debugObservations.find(row=>row.context.label==='gameplay-start');
   assert.ok(baseline&&baseline.observation.memoryWritten===false);
   assert.equal(baseline.observation.systemPhaseCounter%2,0,'Native normalized gameplay boundary must begin a full phase; do not fit a per-seed clock offset');
-  const page=await browser.newPage();const errors=[];page.on('pageerror',error=>errors.push(String(error)));
+  page=await browser.newPage();const errors=[];page.on('pageerror',error=>errors.push(String(error)));
   await page.goto(`${production.url}/?manual=1`);await waitForReady(page);
   const initialSeed=scenario.seedValue||native.seedValue;
   await page.evaluate(({initialSeed,epoch})=>{window.game.pause();window.game.reset(initialSeed,{trace:true,bootEpochSeed:epoch});},{initialSeed,epoch});
@@ -63,7 +67,7 @@ try {
   if(scenario.delay)await page.evaluate(()=>window.game.step(1));
   const key=`Arrow${scenario.direction}`;await page.keyboard.down(key);
   const rows=new Map(native.debugObservations.map(row=>[row.context.presentedFrame,row.observation]));
-  const seen=new Set();let births=0;let comparisons=0;const states=[];
+  const seen=new Set();
   for(let index=1;index<=54;index++){
    await page.evaluate(()=>window.game.step(1));const state=await page.evaluate(()=>window.game.snapshot());states.push(state);
    const nativeFrame=baseline.context.presentedFrame+scenario.delay+index;const observed=rows.get(nativeFrame);
@@ -90,10 +94,16 @@ try {
    comparisons++;
   }
   await page.keyboard.up(key);assert.deepEqual(errors,[]);
-  await writeFile(join(directory,'browser-states.json'),JSON.stringify({schema:1,states},null,2)+'\n');
-  report.cases.push({...scenario,status:'pass',nativeManifestSha256:createHash('sha256').update(raw).digest('hex'),nativeManifest:join(directory,'original/manifest.json'),comparedPresentations:comparisons,observedBirths:births});
-  await page.close();
+  result.status='pass';
+  } catch(error) {result.status='fail';result.error=String(error);}
+  finally {
+   result.comparedPresentations=comparisons;result.observedBirths=births;
+   await writeFile(join(directory,'browser-states.json'),JSON.stringify({schema:1,states},null,2)+'\n');
+   if(page)await page.close().catch(error=>{result.status='fail';result.cleanupError=String(error);});
+   await writeFile(join(output,'report.json'),JSON.stringify(report,null,2)+'\n');
+  }
  }
- report.status='pass';
+ report.status=report.cases.every(result=>result.status==='pass')?'pass':'fail';
+ if(report.status==='fail')throw new AggregateError(report.cases.filter(result=>result.status==='fail').map(result=>new Error(`${result.name}:${result.error}`)),'Selected live weapons cases failed; every case was attempted');
 } catch(error){report.status='fail';report.error=String(error);throw error;}
 finally{await writeFile(join(output,'report.json'),JSON.stringify(report,null,2)+'\n');await browser.close();await production.close();console.log(JSON.stringify({status:report.status,report:join(output,'report.json'),cases:report.cases.length}));}
