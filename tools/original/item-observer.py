@@ -53,9 +53,12 @@ def observe(pid,context):
     if count>128:raise ValueError('Animation name outside bound')
     return read(text,count).decode('ascii')
    def sprite(actor):
-    return {'animation':clip_name(actor),'animationFrame':f32(actor+0x120),
-            'animationPlaying':bools(actor+0x124,1)[0]==1,
-            'overlay':clip_name(actor,0x138),'overlayFrame':f32(actor+0x240)}
+    animation=clip_name(actor);overlay=clip_name(actor,0x138)
+    # Empty Sprite channels have no active clip/clock contract. Observe only
+    # meaningful active fields, as native Update40f920 tests the clip first.
+    return {'animation':animation,'animationFrame':f32(actor+0x120)if animation else None,
+            'animationPlaying':bools(actor+0x124,1)[0]==1 if animation else None,
+            'overlay':overlay,'overlayFrame':f32(actor+0x240)if overlay else None}
    system=u64(0x8ed560);report['systemState']=i32(system);report['systemCounter']=struct.unpack('<I',read(system+0x2efa0,4))[0]
    report['achievements']=bools(system+0x30,179)
    report['sharedMt']={'index':struct.unpack('<I',read(0x8e6b64,4))[0],
