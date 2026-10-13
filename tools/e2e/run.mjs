@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
-export const LIVE_SCRIPTS = ['test:e2e:paired', 'test:e2e:floor', 'test:e2e:weapons', 'test:e2e:boot-mt', 'test:e2e:traversal', 'test:e2e:pickups', 'test:e2e:audio', 'test:e2e:doors', 'test:e2e:regressions', 'test:e2e:tear-lifecycle'];
+export const LIVE_SCRIPTS = ['test:e2e:paired', 'test:e2e:floor', 'test:e2e:weapons', 'test:e2e:boot-mt', 'test:e2e:traversal', 'test:e2e:pickups', 'test:e2e:audio', 'test:e2e:doors', 'test:e2e:regressions', 'test:e2e:tear-lifecycle', 'test:e2e:rock-blast'];
 const { values } = parseArgs({ options: { output: { type: 'string' }, list: { type: 'boolean' }, suite: { type: 'string' } } });
 if (values.suite && !LIVE_SCRIPTS.includes(values.suite)) throw new Error(`Unknown live game suite: ${values.suite}`);
 const selectedScripts = values.suite ? [values.suite] : LIVE_SCRIPTS;
