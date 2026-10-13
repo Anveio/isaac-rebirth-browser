@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "scope": "Fresh ordinary Isaac free regular keys in ordinary rooms and source secret rooms, reached through actual public menu/seed/bomb/movement inputs",
+  "source": {
+    "init": "Pickup.Init4ff1e0 owns fresh RNG35 seeded by entity spawnSeed. 4ffcae..4ffd27 explicit subtype bypasses zero selection; without Humbling Bundle203, subtype0 defaults1 and Random50==0 selects golden2. Golden2 is not a double-key amount.",
+    "collection": "504ec8 dispatcher routes regular1 to AddKeys508710(1), double3 to AddKeys(2), golden2 to GoldenKey508730 bytebd0. AddKeys clamps0..99; this slice admits1/3 and leaves golden2 typed but unsupported.",
+    "scheduler": "Manager454df0 completes admission-fenced full actor updates before4545d0 entity contacts; Pickup Collect504b5a invokes504480 and final clip completion retires actor. Existing coin scheduling is reused.",
+    "audio": "504560/504720..504743 regular and double keys request Sound58 volume0.8500000238418579/pitch1/delay2/loopfalse. AudioState.admit owns real sampler draw at preincrement System counter; no placeholder shared-MT cursor advances.",
+    "context": "Secret Room7.11 authored raw5/30/0 pickups retain free regular key rules. Shop and other special-room contexts remain rejected; no blanket special-room admission."
+  },
+  "liveGate": {
+    "command": "npm run test:e2e:keys",
+    "producer": "tools/original/key-scenarios.py",
+    "observer": "tools/original/key-observer.py",
+    "comparator": "tools/e2e/keys.mjs",
+    "cohorts": "Both JF2DSF92 contrived phase offsets plus newly recorded OS2FE8EQ1V/FJRF6L1J. Discovery checks the complete authored two-key secret template, with no filtering of golden subtype rolls. No native observations enter WASM.",
+    "assertions": [
+      "Read-only pinned original executable, public input binding and seed readback",
+      "Complete independently declared reset/menu/manual-seed/gameplay command tape, inputTraceTruncated=false, all seed-entry flags; state-history cap separately disclosed",
+      "Every player XY/VXY/HP/inventory/immunity, door variant/state/class and bomb presented XY/VXY/fuse",
+      "Relative full-game-update count and native phase parity",
+      "All native Pickup membership, local seeds/subtypes, exact f32 world positions, authored animation/frame/playback, collection and retirement",
+      "Relative Player/Pickup admission order and live pickup handles",
+      "Both separate source collection contacts, source full-only timing, final inventory2 and retired Collect clips",
+      "Actual native SFX58 slot lastTick/nextAllowed relative public gameplay baseline and f32 volume"
+    ],
+    "firstFailure": "first-live-report.json",
+    "report": "live-report.json",
+    "failurePolicy": "Execute every selected case and retain functional differences before failing the gate.",
+    "result": "All4 selected cases pass1690 exact presentations with0 field differences; every source/browser pair is fresh and source hashes remained stable. Both contrived offsets and both recorded OS-random cases collect and retire2 regular keys. Input traces are complete and state histories did not cap.",
+    "proofArtifactSha256": "ea9bf33bca18cb662762ed93277f0e5027635a74628bb2826fcdc2dd229dabf4"
+  },
+  "unaccepted": [
+    "Golden key flag/spending and modified-item subtype selection",
+    "Double-key contact and cap99 production coverage (source-backed callbacks only)",
+    "Keeper17 admission/derived subtype and behavior; retained as separate mandatory secret-door regression",
+    "Key spending and room-return collection persistence",
+    "Exact SFX sample choice/backend playback and total shared MT alignment",
+    "Complete absolute intro/global clocks and full pixels"
+  ]
+}
