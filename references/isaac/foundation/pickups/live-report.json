@@ -1,0 +1,169 @@
+{
+  "schema": 1,
+  "status": "fail",
+  "scope": "Live public-seed natural coin-room admission, seeds/subtypes, full-phase animation/contact/collection, inventory and actor cleanup. Unsupported typed selectors remain with their owning systems.",
+  "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "production": {
+    "sha256": "3b7115c79452238278be5ff8c20078a9fd1df3c0c1dadbc847a9a646ca7f7103",
+    "files": 529,
+    "scope": "Immutable snapshot of production build bytes; source/native replay equality is checked separately"
+  },
+  "graphics": {
+    "requestedProfile": "mesa",
+    "actualProfile": "mesa",
+    "renderer": "ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL ES 3.2 Mesa 25.0.7-2+deb13u1)",
+    "vendor": "Google Inc. (Mesa)",
+    "version": "OpenGL ES 3.0 (ANGLE 2.1 git hash: unknown hash)",
+    "displayType": "ANGLE_OPENGL_EGL",
+    "devices": [
+      {
+        "vendorId": 0,
+        "deviceId": 0,
+        "vendorString": "Google Inc. (Mesa)",
+        "deviceString": "ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL ES 3.2 Mesa 25.0.7-2+deb13u1)",
+        "driverVendor": "Mesa",
+        "driverVersion": "25.0.7"
+      }
+    ],
+    "observedFrom": "Chromium SystemInfo.getInfo",
+    "scope": "Observed Chromium graphics backend; shader/pixel equality still requires the original reference comparisons"
+  },
+  "scenariosSha256": "2c6a4c082d3145ab3abe448cb507710c7eda5b9d75abc2e3edfd6d9b2d3953bd",
+  "replay": "bash tools/original/with-display.sh node tools/e2e/pickups.mjs --scenarios references/isaac/foundation/pickups/scenarios.json",
+  "freshRandomGate": "npm run test:e2e:pickups",
+  "cases": [
+    {
+      "name": "contact-phase-0",
+      "code": "PBW9YNC8",
+      "seedValue": 1737131469,
+      "delay": 0,
+      "entropy": "Contrived phase offset on a naturally generated coin room",
+      "cohort": "hazard-free-coin",
+      "status": "pass",
+      "comparedPresentations": 172,
+      "passedPresentations": 172,
+      "admittedPickups": 4,
+      "firstCollection": 139,
+      "nativeManifestSha256": "44217b5be896ee24470f00db76b67042e7a49c48130c39c97c040d64ce9ad6c0",
+      "failedFieldComparisons": 0,
+      "failuresByField": {},
+      "firstFailure": null,
+      "retainedArtifacts": ".cache/e2e/pickups/final-order/contact-phase-0"
+    },
+    {
+      "name": "contact-phase-1",
+      "code": "PBW9YNC8",
+      "seedValue": 1737131469,
+      "delay": 1,
+      "entropy": "Contrived phase offset on a naturally generated coin room",
+      "cohort": "hazard-free-coin",
+      "status": "pass",
+      "comparedPresentations": 173,
+      "passedPresentations": 173,
+      "admittedPickups": 4,
+      "firstCollection": 139,
+      "nativeManifestSha256": "697a8902a8bdbef8624195483534e1f5fce6d24fc81c41c6a9635e0a5aadd407",
+      "failedFieldComparisons": 0,
+      "failuresByField": {},
+      "firstFailure": null,
+      "retainedArtifacts": ".cache/e2e/pickups/final-order/contact-phase-1"
+    },
+    {
+      "name": "random-0",
+      "code": "9DSWNNTV",
+      "seedValue": 4144912847,
+      "delay": 0,
+      "entropy": "OS secrets",
+      "cohort": "hazard-free-coin",
+      "status": "pass",
+      "comparedPresentations": 172,
+      "passedPresentations": 172,
+      "admittedPickups": 4,
+      "firstCollection": 139,
+      "nativeManifestSha256": "61b0fdd05973e1efef5dbe1f1521c90eed76277e557369ee6423036ee33a8e18",
+      "failedFieldComparisons": 0,
+      "failuresByField": {},
+      "firstFailure": null,
+      "retainedArtifacts": ".cache/e2e/pickups/final-order/random-0",
+      "discoveryAttempts": 838
+    },
+    {
+      "name": "random-1",
+      "code": "7WLZLSTH",
+      "seedValue": 3816434367,
+      "delay": 1,
+      "entropy": "OS secrets",
+      "cohort": "hazard-free-coin",
+      "status": "pass",
+      "comparedPresentations": 173,
+      "passedPresentations": 173,
+      "admittedPickups": 4,
+      "firstCollection": 139,
+      "nativeManifestSha256": "2548c00708834dc809b60a1ee3375f63bc7ab690a81d9a1640fa3eb7491814d3",
+      "failedFieldComparisons": 0,
+      "failuresByField": {},
+      "firstFailure": null,
+      "retainedArtifacts": ".cache/e2e/pickups/final-order/random-1",
+      "discoveryAttempts": 901
+    },
+    {
+      "name": "regression-spike-approach",
+      "code": "22PFCSFS",
+      "seedValue": 3388288701,
+      "delay": 1,
+      "entropy": "Recorded OS secrets discovery from the first pickup gate",
+      "cohort": "hazard-regression",
+      "status": "fail",
+      "comparedPresentations": 173,
+      "passedPresentations": 130,
+      "admittedPickups": 4,
+      "firstCollection": 139,
+      "nativeManifestSha256": "318b6c147543a736c61d38d1720ceed87a074b20b842e606d6096b4f69b00999",
+      "failedFieldComparisons": 172,
+      "failuresByField": {
+        "redHp": 43,
+        "coinInventory": 8,
+        "pickup0:animation": 15,
+        "pickup0:animationFrame": 35,
+        "pickup0:collection flag": 15,
+        "pickup admission/retirement": 7,
+        "pickup0:spawnSeed": 7,
+        "pickup0:position": 7,
+        "pickup1:spawnSeed": 7,
+        "pickup1:position": 7,
+        "pickup2:spawnSeed": 7,
+        "pickup2:position": 7,
+        "native relative actor admission order": 7
+      },
+      "firstFailure": {
+        "field": "redHp",
+        "presentation": 131,
+        "actual": 6,
+        "expected": 4,
+        "error": "regression-spike-approach:131:redHp\n\n6 !== 4\n"
+      },
+      "retainedArtifacts": ".cache/e2e/pickups/final-order/regression-spike-approach"
+    }
+  ],
+  "isolatedCoinResult": {
+    "status": "pass",
+    "cases": 4,
+    "comparedPresentations": 690,
+    "failedFieldComparisons": 0
+  },
+  "mandatoryRegressionResult": {
+    "status": "fail",
+    "code": "22PFCSFS",
+    "comparedPresentations": 173,
+    "failedFieldComparisons": 172,
+    "firstMismatch": "Presentation131: original redHp4, browser6. Authored spike selector1930 at grid37 is retained; combat owns hazard admission/damage and its movement impulse. Later coin differences remain failures.",
+    "policy": "This case remains in the default cohort and causes a nonzero exit. No functional mismatch is waived."
+  },
+  "retention": "Full original manifests, input tapes, browser states, captures and individual failure records remain in the ignored local artifact directories identified per case. This portable summary retains their hashes, public replay cohort and actual outcome; observations never enter production WASM.",
+  "unaccepted": [
+    "Live99-coin cap boundary",
+    "Pickup reentry and collected persistence parity",
+    "Other pickup families and items",
+    "Grid hazards, full obstacle and complete pixel parity"
+  ]
+}
