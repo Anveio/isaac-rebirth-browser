@@ -171,7 +171,9 @@ function scopedState(source, actual, gameplay) {
     check('player.hp', player.redHp, actual.player.hp);
     check('damageCooldown', player.damageCountdown, actual.damageCooldown);
     const admitted = source.gameplay.entities.filter(entity => !entity.removed);
-    const activeTears = actual.tears.filter(tear => tear.motion === undefined || tear.motion.lifetime === 'alive');
+    for (const tear of actual.tears) assert.ok(['alive', 'dying', 'removed'].includes(tear.motion?.lifetime), 'Paired tears require a typed lifetime');
+    // Source +0x31f marks dying while the manager still retains the object.
+    const activeTears = actual.tears.filter(tear => tear.motion.lifetime === 'alive');
     check('tears.alive', admitted.filter(entity => entity.type === 2).length, activeTears.length);
     const livingBombs = actual.bombs.filter(bomb => bomb.motion === undefined || bomb.motion.lifetime === 'alive');
     check('bombs.alive', admitted.filter(entity => entity.type === 4).length, livingBombs.length);
