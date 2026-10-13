@@ -29,6 +29,7 @@ files.push('engine/src/player_items.rs', 'web/engine.ts', 'web/animation.ts', 'w
 files.push('web/scene-data.json', 'web/pickup-data.json');
 files.push('engine/src/combat.rs', 'engine/src/grid.rs', 'engine/src/room.rs');
 files.push('references/isaac/foundation/player-stat-cache/contrived.json', 'references/isaac/foundation/player-stat-cache/source-contracts.json', 'engine/src/phase.rs', 'engine/src/actors.rs', 'engine/src/player_stats.rs', 'engine/src/motion.rs', 'engine/src/projectiles.rs', 'engine/src/familiars.rs');
+files.push('tools/e2e/run.mjs', 'package.json');
 const hashes = async () => Object.fromEntries(await Promise.all(files.map(async path => [path, digest(await readFile(join(ROOT, path)))])));
 const before = await hashes();
 const value = flag => { const i = process.argv.indexOf(flag); return i < 0 ? undefined : process.argv[i + 1]; };
@@ -380,6 +381,7 @@ try {
           healthGrant: healthGrantObserved ? 'observed' : 'unaccepted: unchanged health does not prove helper boundaries',
           healthClampBoundaries: 'Unaccepted until required dedicated cap/parity cases are retained'},
         unresolvedScope: {cacheAndItemEffects: statCache ? 'Only mapped normal-Isaac14/27/28/143 shot-speed/range/speed callbacks are supported. Every source stat and post-grant motion mismatch remains required; pending flags expose unsupported owners. Damage/fire-delay and other effects remain separate work.' : 'Pending requested flags and native stat/familiar callbacks are not interchangeable; raw native/browser states preserve all differences',
+          tearAssociation: 'Stored tear velocities compare ordinal rows. Different counts or birth identities make them candidate comparisons, not proven same-actor motion defects; all required failures remain retained.',
           sharedMt: 'Complete624-word hashes are diagnostic until remaining real run/ambient/item callbacks are implemented; no cursor skips or native state inputs',
           stateHistory: 'Every presentation is independently retained in browserEvidence.states; bounded production trace truncation remains separately disclosed'},
         browserEvidence: {path: browserPath, encoding: 'gzip', rawSha256: digest(browserBytes), rawBytes: browserBytes.length},

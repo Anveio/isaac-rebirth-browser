@@ -130,5 +130,16 @@
     "recorded": "Previously unfiltered OS-secret active291 and passive48 codes retained unchanged; later declared consumer tail extends their fresh replay.",
     "random": "Two new recorded OS-secret upper authored treasure8 routes, never selected-item filtered.",
     "unaccepted": "Boss-only27/28 mapped speed branches have no natural boss acquisition acceptance in this leaf."
+  },
+  "temporaryOwners": {
+    "shotSpeed143": "513e48..513e78 checks the actual temporary143 count through5e3ed0 when permanent143 is zero; nonzero selects1.2.",
+    "speed143": "512d74..512de2 reads temporary143 through5e3ed0 and adds it before the source*.3 speed contribution.",
+    "ignoredTemporaryIds": [
+      14,
+      27,
+      28
+    ],
+    "ignoredScope": "Selected range/speed branches read permanent14/27/28 fields without temporary lookups for those IDs. Keeping these temporary paths unchanged follows the source branch, rather than supplying a permanent count.",
+    "liveAcceptance": "The eight-case gate has no public temporary-effect producer or repeated-copy acquisition; those paths remain source-qualified and live-unaccepted."
   }
 }
