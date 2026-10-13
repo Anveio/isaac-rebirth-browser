@@ -208,7 +208,6 @@ try {
         if (key) { await page.keyboard.up(key); expected.push({ type: 'key', code, down: false }); }
       }
       const trace = await page.evaluate(() => window.game.trace());
-      assertInputProvenance(trace, expected, `${item.name}: complete reset/menu/manual-seed/gameplay input tape`);
       const traceBytes = Buffer.from(JSON.stringify(trace) + '\n');
       const traceArchive = gzipSync(traceBytes, { level: 1 });
       await writeFile(join(directory, 'browser-trace.json.gz'), traceArchive);
@@ -219,6 +218,7 @@ try {
         backendEvents: trace.backendEvents.length, completeStateRecords: trace.states.length,
         archive: join(directory, 'browser-trace.json.gz'),
         uncompressedSha256: digest(traceBytes), archiveSha256: digest(traceArchive) };
+      assertInputProvenance(trace, expected, item.seedValue, scenarios.bootEpochSeed);
       assert.ok(admitted >= 1, 'Gate must observe naturally admitted Rock grids');
       assert.ok(destroyed >= 1, 'Gate must observe actual original Rock destruction');
       assert.ok(detonation !== undefined, 'Gate must detonate a player bomb through public input');
