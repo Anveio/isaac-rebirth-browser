@@ -37,8 +37,10 @@ export async function floorE2e({ sourceReport, output = join(ROOT, ".cache/found
       try {
         assert.equal(original.status, "pass", JSON.stringify(original.error ?? original.differences));
         assert.match(original.nativeBinarySha256, /^[a-f0-9]{64}$/);
+        assert.ok(Number.isInteger(original.bootEpochSeed) && original.bootEpochSeed >= 0 && original.bootEpochSeed <= 0xffffffff,
+          "Live floor comparison requires the original's recorded public boot input");
         let starting;
-        const run = await browserScenario(page, { initialSeed: original.runSeed, manualSeedText: original.seed,
+        const run = await browserScenario(page, { initialSeed: original.runSeed, bootEpochSeed: original.bootEpochSeed, manualSeedText: original.seed,
           onCheckpoint: async (frame) => { if (frame.label === "gameplay-start") starting = frame.state; } });
         const trace = await page.evaluate(() => window.game.trace());
         const caseDirectory = join(dirname(output), original.seed.replaceAll(" ", ""));
@@ -81,7 +83,7 @@ export async function floorE2e({ sourceReport, output = join(ROOT, ".cache/found
         Object.assign(result, { status: "pass", descriptorCount: starting.floor.descriptors.length,
           attempts: starting.floor.attempts, decorationSeed: current.decorationSeed,
           inputProvenance: { status: "pass", commands: trace.commands.length, initialSeed: trace.initialSeed,
-            bootEpochSeed: trace.bootEpochSeed, manualSeed: original.seed },
+            bootEpochSeed: trace.bootEpochSeed, originalBootEpochSeed: original.bootEpochSeed, manualSeed: original.seed },
           inputTransport: "actual DOM keyboard; production WASM; original public X11 tape" });
       } catch (error) { result.error = error.message; }
       report.cases.push(result);
