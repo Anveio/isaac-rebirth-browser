@@ -5,3 +5,5 @@ gfx/244.000_round worm.anm2
 gfx/009.000_projectile.anm2
 gfx/033.000_fireplace.anm2
 gfx/1000.066_ember particle.anm2
+gfx/020.000_monstro.anm2
+gfx/ui/boss/versusscreen.anm2

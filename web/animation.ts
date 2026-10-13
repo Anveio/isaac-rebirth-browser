@@ -6,6 +6,7 @@ import familiarData from "./familiar-data.json";
 const sceneData = { ...baseSceneData, ...doorData, ...gridData, ...npcData, ...familiarData };
 import fontData from "./font-data.json";
 import completionUrl from "./assets/completion_widget.png?url";
+const bossSceneUrls = import.meta.glob("./assets/boss-scene/*.png", { eager: true, query: "?url", import: "default" }) as Record<string, string>;
 import postitOverlapUrl from "./assets/gamemenu_postitoverlap.png?url";
 import { sampleFrame, overrideFrame, frameQuad, type SampledFrame, type Quad } from "./animation-math";
 
@@ -53,6 +54,7 @@ const urls = import.meta.glob([
   "../references/isaac/rebirth/resources/gfx/grid/effect_ember.png",
   "../references/isaac/rebirth/resources/gfx/effects/effect_poopspawn.png",
   "../references/isaac/rebirth/resources/gfx/monsters/classic/monster_010_fly.png",
+  "../references/isaac/rebirth/resources/gfx/bosses/classic/boss_004_monstro.png",
   "../references/isaac/rebirth/resources/gfx/effects/hangingguys.png",
   "../references/isaac/rebirth/resources/gfx/monsters/rebirth/monster_244_roundworm.png",
   "../references/isaac/rebirth/resources/gfx/familiar/familiar_270_leech.png",
@@ -90,6 +92,8 @@ export class Assets {
   static async load(): Promise<Assets> {
     const entries = Object.entries(urls).map(([path, url]) => [normalize(path.split("/resources/")[1]!), url] as const);
     entries.push(["gfx/ui/main menu/completion_widget.png", completionUrl], ["gfx/ui/main menu/gamemenu_postitoverlap.png", postitOverlapUrl]);
+    for (const [path, url] of Object.entries(bossSceneUrls))
+      entries.push([`gfx/ui/boss/${path.split("/").at(-1)!}`, url]);
     const loaded = await Promise.all(entries.map(async ([path, url]) => {
       const image = new Image(); image.src = url; await image.decode();
       return [path, image] as const;

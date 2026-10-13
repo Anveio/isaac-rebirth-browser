@@ -1,4 +1,4 @@
-//! Fresh flags-zero type9 produced by ordinary Round Worm FireProjectiles.
+//! Fresh flags-zero type9 from actual Round Worm and Monstro producers.
 //! Ground interpolation uses BaseRender4446a0; vertical motion is full-only.
 use crate::{
     audio::SoundRequest,
@@ -11,6 +11,20 @@ use crate::{
 };
 use serde::{Deserialize, Serialize};
 use std::sync::OnceLock;
+
+/// Actual initializer and post-spawn producer fields. A constructor draw can
+/// be overwritten by the producer without being omitted from the shared stream.
+#[derive(Clone, Copy)]
+pub struct ProjectileBirth {
+    pub position: WorldVector,
+    pub velocity: WorldVector,
+    pub spawn_seed: u32,
+    pub initial_falling_speed: f32,
+    pub parameter_angle: f32,
+    pub falling_speed: f32,
+    pub falling_acceleration: f32,
+    pub scale: f32,
+}
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -48,6 +62,24 @@ pub struct EnemyProjectile {
 
 impl EnemyProjectile {
     pub fn birth(id: u32, parent_npc: u32, shot: Shot) -> Self {
+        // Worm FireProjectiles(mode0) stores these post-spawn overrides.
+        Self::birth_with_parameters(
+            id,
+            parent_npc,
+            ProjectileBirth {
+                position: shot.position,
+                velocity: shot.velocity,
+                spawn_seed: shot.spawn_seed,
+                initial_falling_speed: shot.initial_falling_speed,
+                parameter_angle: shot.parameter_angle,
+                falling_speed: -3.0,
+                falling_acceleration: 0.1,
+                scale: 1.0,
+            },
+        )
+    }
+
+    pub fn birth_with_parameters(id: u32, parent_npc: u32, shot: ProjectileBirth) -> Self {
         Self {
             id,
             parent_npc,
@@ -56,15 +88,13 @@ impl EnemyProjectile {
             presented_position: shot.position,
             velocity: shot.velocity,
             height: -23.0,
-            // FireProjectiles49ec10 excludes only modes6..9 from this
-            // post-spawn override. Mode0 stores-3/.1 at49ec2f/49ec3a.
-            falling_speed: -3.0,
-            falling_acceleration: 0.1,
+            falling_speed: shot.falling_speed,
+            falling_acceleration: shot.falling_acceleration,
             initializer_falling_speed: shot.initial_falling_speed,
             source_parameter1: 1.0,
             source_parameter2: 0.005,
             parameter_angle: shot.parameter_angle,
-            scale: 1.0,
+            scale: shot.scale,
             collision_radius: content::NPC_9_COLLISIONRADIUS,
             collision_mass: content::NPC_9_COLLISIONMASS,
             grid_collision_class: 4,
@@ -95,9 +125,19 @@ impl EnemyProjectile {
             .full_updates
             .checked_add(1)
             .ok_or("projectile update count exhausted")?;
-        // Fresh variant0 plays authored RegularTear6, then common BaseUpdate.
-        self.animation = Some("RegularTear6".into());
-        self.animation_frame = self.full_updates % content::PROJECTILE_REGULAR6_FRAMES;
+        // Source536e37 selects a regular clip from actual scale every full.
+        // Fresh supported producers reach sizes5..7; Worm scale1 remains6.
+        let size = (self.scale * 3.0 + 3.0).trunc().min(13.0) as u32;
+        let frames = match size {
+            5 => content::PROJECTILE_REGULAR5_FRAMES,
+            6 => content::PROJECTILE_REGULAR6_FRAMES,
+            7 => content::PROJECTILE_REGULAR7_FRAMES,
+            _ => {
+                return Err("hostile projectile scale requires an unadmitted authored clip".into())
+            }
+        };
+        self.animation = Some(format!("RegularTear{size}"));
+        self.animation_frame = self.full_updates % frames;
         self.animation_clock = self.animation_frame as f32;
         self.animation_playing = true;
         self.position = self.position + self.velocity;
