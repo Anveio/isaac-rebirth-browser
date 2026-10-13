@@ -6,10 +6,10 @@
   "scope": "Host native render worker/wait budget only, plus public paired controller timeout option. No public tape, virtual clock intervals, selected phase counts, source observations or comparison assertions changed.",
   "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
   "resourceEvidence": {
-    "cpuMax": "400000100000 (four CPU-seconds per second)",
+    "cpuMax": "400000 100000",
     "effectiveCpuSet": "0-4",
     "intervalSeconds": 116.3,
-    "usedCpuSeconds": 466,
+    "usedCpuSeconds": 464.949193,
     "throttledPeriods": 1161,
     "periods": 1163,
     "observedNativeThreadsBeforeCap": [
@@ -20,12 +20,26 @@
       22,
       35
     ],
-    "interpretation": "Shared runner CPU quota was saturated under parallel native/browser workloads; independent native wait budget expired at New Run admission. Thread cap is only a default when caller leaves LP_NUM_THREADS unset."
+    "interpretation": "Shared runner CPU quota was saturated under parallel native/browser workloads; independent native wait budget expired at New Run admission. Thread cap is only a default when caller leaves LP_NUM_THREADS unset.",
+    "observedCpuStats": [
+      {
+        "usage_usec": 77868160439,
+        "nr_periods": 249789,
+        "nr_throttled": 143785,
+        "throttled_usec": 7509936710
+      },
+      {
+        "usage_usec": 78333109632,
+        "nr_periods": 250952,
+        "nr_throttled": 144946,
+        "throttled_usec": 7585712576
+      }
+    ]
   },
   "defaults": {
     "nativeFrameTimeoutSeconds": 60,
     "lpNumThreads": 2,
-    "override": "runPairedGate.nativeFrameTimeout and CLI --native-frame-timeout accept finite0<value<=300; explicit LP_NUM_THREADS remains unchanged"
+    "override": "runPairedGate.nativeFrameTimeout and CLI --native-frame-timeout accept finite 0 < value <= 300; explicit LP_NUM_THREADS remains unchanged"
   },
   "pairedLive": {
     "status": "pass",
@@ -110,7 +124,7 @@
   },
   "validation": [
     "Python/shell/Node syntax and diff checks passed",
-    "Fresh original and immutable production actual DOM pairs passed every37 functional checkpoint; strict RGBA remains diagnostic",
+    "Fresh original and immutable production actual DOM pairs passed all 37 functional checkpoint; strict RGBA remains diagnostic",
     "Actual explicit120 reached both original manifests; default60/LP2 reached recorded random retry and full original tape completed"
   ]
 }
