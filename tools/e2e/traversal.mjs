@@ -1,15 +1,14 @@
 // Live original and production-browser ordinary doorway/return contracts.
 import assert from 'node:assert/strict';
 import { execFile } from 'node:child_process';
-import { createHash } from 'node:crypto';
 import { promisify } from 'node:util';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { gzipSync } from 'node:zlib';
 import { chromium } from '@playwright/test';
 import { browserLaunchOptions, inspectBrowserGraphics } from '../foundation/browser.mjs';
 import { startProductionServer } from '../foundation/production-server.mjs';
+import { writeBrowserEvidence } from '../foundation/browser-evidence.mjs';
 import { assertInputProvenance, assertSeededRun, enterSeededRun, manualSeedCommands, waitForReady } from '../foundation/verify.mjs';
 import { compareCamera, captureCameraVisibility } from './camera-checks.mjs';
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
@@ -426,16 +425,8 @@ try {
           }
       }
       const trace = await page.evaluate(() => window.game.trace());
-      const browserBytes = Buffer.from(JSON.stringify({ schema: 1, states, trace, expectedCommands }, null, 2) + '\n');
-      const archive = gzipSync(browserBytes, { level: 1 });
       const archivePath = join(directory, 'browser-states.json.gz');
-      await writeFile(archivePath, archive);
-      row.browserEvidence = {
-        path: archivePath, encoding: 'gzip', rawBytes: browserBytes.length,
-        rawSha256: createHash('sha256').update(browserBytes).digest('hex'),
-        archiveBytes: archive.length, archiveSha256: createHash('sha256').update(archive).digest('hex'),
-        scope: 'Every selected phase retains its full actual browser snapshot, alongside selected native comparisons, complete public commands and backend callbacks. The separate trace history caps are disclosed in traceHistory; decompress before replay or inspection',
-      };
+      row.browserEvidence = await writeBrowserEvidence(archivePath, {states, trace, expectedCommands});
       assertInputProvenance(trace, expectedCommands, scenario.runSeed);
       row.traceHistory = { truncated: trace.truncated, inputTraceTruncated: trace.inputTraceTruncated,
         stateHistoryTruncated: trace.stateHistoryTruncated, retainedStates: trace.states.length,
