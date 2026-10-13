@@ -23,6 +23,7 @@ pub mod mt;
 pub mod phase;
 pub mod pickups;
 pub mod projectiles;
+pub mod rock_blast;
 mod room;
 pub mod room_assets;
 pub mod room_spawns;
@@ -269,6 +270,7 @@ pub struct State {
     pub menu_fade: MenuFade,
     pub system_clock: phase::Clock,
     pub run_tick: u32,
+    pub game_update_count: u32,
     pub screen: Screen,
     pub profile: u8,
     pub main_selection: u8,
@@ -360,6 +362,7 @@ impl Game {
                 // to that boundary, not the source's elapsed boot counter.
                 system_clock: phase::Clock::new(0, true),
                 run_tick: 0,
+                game_update_count: 0,
                 screen: Screen::Title,
                 profile: 1,
                 main_selection: 0,
@@ -760,6 +763,7 @@ impl Game {
         self.state.screen = Screen::Playing;
         self.state.paused = false;
         self.state.run_tick = 0;
+        self.state.game_update_count = 0;
         self.state.tears.clear();
         self.state.impacts.clear();
         self.state.next_tear = 1;
@@ -932,6 +936,12 @@ impl Game {
         grid_hazards::advance(&mut self.state, phase)?;
         let existing = self.state.actor_scheduler.full_phase();
         if phase == phase::Phase::Update {
+            self.state.game_update_count = self
+                .state
+                .game_update_count
+                .checked_add(1)
+                .ok_or("game update counter exhausted")?;
+            rock_blast::advance_markers(&mut self.state);
             for actor in existing.iter().copied() {
                 self.advance_actor(actor, phase, false, bomb_triggered)?;
             }

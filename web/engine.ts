@@ -108,7 +108,7 @@ export interface StageEffects {
   overlay: { asset: string; sourceCrop: Rect; offset: { x: number; y: number }; modulationRGBA: [number, number, number, number]; blend: Blend; simulationTick: number; motionEvidence: string };
 }
 export interface State {
-  schema: 1; tickRate: 60; tick: number; menuAnimationTick: number; runTick: number; screen: Screen;
+  schema: 1; tickRate: 60; tick: number; menuAnimationTick: number; runTick: number; gameUpdateCount: number; screen: Screen;
   titleAnimationFrame: number; menuFade: { active: boolean; alpha: number; color: [number, number, number, number] };
   systemClock: { systemCounter: number; interpolationEnabled: boolean };
   audio: AudioState;
