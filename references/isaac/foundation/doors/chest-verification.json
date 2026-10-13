@@ -1,0 +1,163 @@
+{
+  "schema": 1,
+  "status": "pass",
+  "runtimeCommit": "b64ff77",
+  "production": {
+    "sha256": "822d844d4ae2c49e7fe6a3e4cf5b77c4e2f5c87a36d0270be9c427b11d16070f",
+    "files": 921,
+    "source": "/workspace/isaac-worktrees/floor/dist",
+    "scope": "Immutable snapshot of production build bytes; source/native replay equality is checked separately"
+  },
+  "selectedPhases": 1843,
+  "requiredFailures": 0,
+  "scope": "Same-turn exact source-frozen original captures plus fresh actual production browser; constructor/Appear/Idle fields and previous geometry/lifecycle assertions. This is not a fresh-both-games CI pass.",
+  "nativeBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "runtimeInputs": "Generated run/stage seeds, authored Room/STB groups and positions only; no captured actor state or seed offsets. Raw subtype0 selectors remain unchanged.",
+  "cases": [
+    {
+      "seed": "WF82MYQ2",
+      "status": "pass",
+      "comparedPhases": 635,
+      "comparisonFailures": [],
+      "originalExecution": {
+        "mode": "same-turn-source-frozen-diagnostic",
+        "sourceManifest": "/workspace/isaac-worktrees/floor/.cache/e2e/large-rooms/fresh-native/WF82MYQ2/original/manifest.json",
+        "archiveManifest": "/workspace/isaac-worktrees/floor/.cache/e2e/large-rooms/fresh-native/WF82MYQ2/original/manifest.json.gz",
+        "archiveSha256": "7a6531826ebe640332351686f74abf6f77f86af3a18ba0088c25e1686fae6afa",
+        "nativeManifestSha256": "70ea3a31181d0dda1e5f7b2d7f99969267bfe28898625098bda46b8f8cff0ba4",
+        "defaultCiRemainsFresh": true
+      },
+      "browserEvidence": {
+        "path": "/workspace/isaac-worktrees/floor/.cache/e2e/chests/constructor-source-frozen/WF82MYQ2/browser-states.json.gz",
+        "encoding": "gzip",
+        "rawBytes": 427270552,
+        "rawSha256": "fd7afbecc4e5312c4c4acd0ed8b2ea93b55a5145c5dc12bbcaf7b7a5bb94bda1",
+        "archiveBytes": 25130603,
+        "archiveSha256": "91573759950edfa157b8ca5ff773372aa4fba027a62033df0d717929b032b96e",
+        "scope": "Every selected phase retains its full actual browser snapshot, alongside selected native comparisons, complete public commands and backend callbacks. The separate trace history caps are disclosed in traceHistory; decompress before replay or inspection"
+      },
+      "inputProvenance": {
+        "status": "pass",
+        "commands": 694,
+        "initialSeed": 2660432428,
+        "bootEpochSeed": 0,
+        "manualSeed": "WF82MYQ2"
+      },
+      "traceHistory": {
+        "truncated": true,
+        "inputTraceTruncated": false,
+        "stateHistoryTruncated": true,
+        "retainedStates": 245,
+        "stateEncodedBytes": 33490788,
+        "maxStateEncodedBytes": 33554432
+      }
+    },
+    {
+      "seed": "MT7N9MF3",
+      "status": "pass",
+      "comparedPhases": 572,
+      "comparisonFailures": [],
+      "originalExecution": {
+        "mode": "same-turn-source-frozen-diagnostic",
+        "sourceManifest": "/workspace/isaac-worktrees/floor/.cache/e2e/large-rooms/fresh-native/MT7N9MF3/original/manifest.json",
+        "archiveManifest": "/workspace/isaac-worktrees/floor/.cache/e2e/large-rooms/fresh-native/MT7N9MF3/original/manifest.json.gz",
+        "archiveSha256": "905f7f73f70cc75bcf02013c02453218fa87b87fa7cf407b4c75911b75360479",
+        "nativeManifestSha256": "48b5ead097d921eff3e0a5fd5c362d0134a08727da9197b550aa115813a58c63",
+        "defaultCiRemainsFresh": true
+      },
+      "browserEvidence": {
+        "path": "/workspace/isaac-worktrees/floor/.cache/e2e/chests/constructor-source-frozen/MT7N9MF3/browser-states.json.gz",
+        "encoding": "gzip",
+        "rawBytes": 384927163,
+        "rawSha256": "9040a3cde702fa8823a97afdc4767f52dd31e85542cdf712d54352f238a3a54b",
+        "archiveBytes": 22622358,
+        "archiveSha256": "95b7f595bb6cc3aa760a22db229ca4cac3a485cd0a39e28febe884343e70e9e5",
+        "scope": "Every selected phase retains its full actual browser snapshot, alongside selected native comparisons, complete public commands and backend callbacks. The separate trace history caps are disclosed in traceHistory; decompress before replay or inspection"
+      },
+      "inputProvenance": {
+        "status": "pass",
+        "commands": 633,
+        "initialSeed": 1402318929,
+        "bootEpochSeed": 0,
+        "manualSeed": "MT7N9MF3"
+      },
+      "traceHistory": {
+        "truncated": true,
+        "inputTraceTruncated": false,
+        "stateHistoryTruncated": true,
+        "retainedStates": 255,
+        "stateEncodedBytes": 33412349,
+        "maxStateEncodedBytes": 33554432
+      }
+    },
+    {
+      "seed": "C06MGLKV",
+      "status": "pass",
+      "comparedPhases": 636,
+      "comparisonFailures": [],
+      "originalExecution": {
+        "mode": "same-turn-source-frozen-diagnostic",
+        "sourceManifest": "/workspace/isaac-worktrees/floor/.cache/e2e/large-rooms/fresh-native/C06MGLKV/original/manifest.json",
+        "archiveManifest": "/workspace/isaac-worktrees/floor/.cache/e2e/large-rooms/fresh-native/C06MGLKV/original/manifest.json.gz",
+        "archiveSha256": "4cd54acbf15a4c8434df21f132b5466a1a5b95057d3c1726c7de28b32356fc5b",
+        "nativeManifestSha256": "c9fb07408b046a3b92d7b692844c12beb84e75279bbed5dc52289f9818ea8d99",
+        "defaultCiRemainsFresh": true
+      },
+      "browserEvidence": {
+        "path": "/workspace/isaac-worktrees/floor/.cache/e2e/chests/constructor-source-frozen/C06MGLKV/browser-states.json.gz",
+        "encoding": "gzip",
+        "rawBytes": 418558946,
+        "rawSha256": "cdfa3df214414634424437c98db4f8cb5c47417b1053c70a2de4e48238319d67",
+        "archiveBytes": 24502887,
+        "archiveSha256": "aef916d4768980bf970a8afd6300627eb1cdcdb583cb431c4fa60860774f3dee",
+        "scope": "Every selected phase retains its full actual browser snapshot, alongside selected native comparisons, complete public commands and backend callbacks. The separate trace history caps are disclosed in traceHistory; decompress before replay or inspection"
+      },
+      "inputProvenance": {
+        "status": "pass",
+        "commands": 697,
+        "initialSeed": 441961684,
+        "bootEpochSeed": 0,
+        "manualSeed": "C06MGLKV"
+      },
+      "traceHistory": {
+        "truncated": true,
+        "inputTraceTruncated": false,
+        "stateHistoryTruncated": true,
+        "retainedStates": 255,
+        "stateEncodedBytes": 33432540,
+        "maxStateEncodedBytes": 33554432
+      }
+    }
+  ],
+  "staticChecks": {
+    "check:build": "passed production build/assets/TypeScript/matrix/strictClippy without unit tests",
+    "log": "/workspace/isaac-worktrees/floor/.cache/door-mechanics/chest-build.log",
+    "logSha256": "1affbc085531c340497a925096a2f6bbe3387525abd0b38aba4d2945d5fc0ae1"
+  },
+  "sourceContract": {
+    "path": "/workspace/isaac-worktrees/floor/.cache/coordination/chest-research/source-contract.json",
+    "sha256": "a7e4574ccbb7c1c11586f766fdc074141cddab607dae87f2b2bc62de7075e412",
+    "rng30Readback": "Static producer mapping only; the archived source observer does not read the four words. Direct native acceptance is deferred to opening."
+  },
+  "comparator": {
+    "path": "/workspace/isaac-worktrees/floor/.cache/door-mechanics/chest-source-frozen.mjs",
+    "sha256": "d802add18b5e92864d4336f06ddd6e2a85f529397f7ef7428069d29da648dc53",
+    "requiredGate": "tools/e2e/large-rooms.mjs always runs both games fresh; no cached-reference bypass"
+  },
+  "report": {
+    "path": "/workspace/isaac-worktrees/floor/.cache/e2e/chests/constructor-source-frozen/report.json",
+    "sha256": "2480eea17d0661c039775d88b1c6e412164e918d8c31effcf8647a384ccf1430"
+  },
+  "historicalRequiredReds": {
+    "geometryEvidence": "references/isaac/foundation/doors/large-room-verification.json",
+    "sha256": "11e84855a86b6773524c3b5e46a26ed9c2031437925c3681f2dcf3610b0f4050",
+    "missingChestCount": 3
+  },
+  "exclusions": [
+    "Direct persistent RNG word acceptance",
+    "Chest contact/open/loot/DropSound and moving pickup callbacks",
+    "Rare51/360 and modifier/stage replacements",
+    "Actual saved/revisited actor reconstruction; whole-Room clone persistence is separate",
+    "Camera/backdrop and complete pixels"
+  ]
+}

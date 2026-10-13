@@ -94,7 +94,7 @@ def validate(path):
             raise ValueError('This selected tall-room route must remain free of hostile actors')
         chests = [entity for entity in contents['entities'] if entity['type'] == 5 and entity['variant'] == 50]
         if len(chests) != 1 or chests[0]['position'] != [320, 400]:
-            raise ValueError('Unsupported native Chest50 admission remains mandatory at its authored location')
+            raise ValueError('Concrete native Chest50 admission remains mandatory at its authored location')
     catalogs = {stage: traversal.source.decoder.decode_bytes(data, source=name)
                 for stage, (name, data) in enumerate(traversal.source.decoder.base_assets()) if stage in (0, 1)}
     provenance['authoredDoors'] = {}
@@ -117,7 +117,7 @@ def validate(path):
             for door in matches[0]['doors'] if door['enabled']]
     provenance['largeGeometry'] = {'shape': [13, 14], 'sourceGrid': [15, 16],
         'nativeBounds': [[60, 140], [580, 700]], 'lowerAndUpperPlanesExecuted': True,
-        'returnedToStartingDescriptor': True, 'mandatoryUnsupportedActor': 'Pickup5/50'}
+        'returnedToStartingDescriptor': True, 'mandatoryConcreteActor': 'Pickup5/50'}
     return provenance
 
 
