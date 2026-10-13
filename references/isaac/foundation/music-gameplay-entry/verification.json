@@ -1,0 +1,290 @@
+{
+  "schema": 1,
+  "status": "pass",
+  "scope": "Gate-only migration from zero-tick menu input to the declared native Title/menu/seed/Music run-entry intervals. Four explicit targeted replays verify contrived and recorded OS-random behavior on the latest aggregate; this is not a new complete four-key or nine-rock cohort proof. Runtime callbacks and required failing cases are unchanged.",
+  "sourceHead": "643b1e9",
+  "baseHead": "ef5f0f346d7a6d527115e0318ff446d30804c2cc",
+  "ownedRuntimeChanges": false,
+  "production": {
+    "sha256": "693aeaa98835944ab7a2e3010cc81802cecc163ada13d88459cb500168cfe5b0",
+    "files": 917,
+    "source": "/workspace/isaac-worktrees/inventory/dist",
+    "scope": "Immutable snapshot of production build bytes; source/native replay equality is checked separately"
+  },
+  "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "gateSources": {
+    "keys": {
+      "tools/e2e/keys.mjs": "a9969f06ab26873f1f62a96091f9eedc45d4f0d34481aa9fe073c8619b86c56b",
+      "tools/original/key-scenarios.py": "19e7c89700ad5d293daf68db8cbc76c0ed66421963421760022c7ee569e11797",
+      "tools/original/rock-blast-scenarios.py": "f896f63cc2f4e66487c7c75d68561b1efb46b989cf92dad09f687f3c4621ca65",
+      "tools/foundation/decode-rooms.py": "4640cce2c99d0ef09d6691cf42c021f012e16ed3752bace965ad18dca7250f1a",
+      "tools/original/foundation-seeds.py": "dd4633c955e7518e9bc0f0147ddfae46d356468238477a68dc06c86656ccba89",
+      "tools/original/foundation-pickup-observe.py": "db3fb995087575a039b77c8b87e07bbaa3cdef208adea166b8de07055754b90b",
+      "tools/original/foundation-clock-run.py": "0669849e55218ed984aaa95a9964bba05d20707ec7ed164c77dab689c5891fbc",
+      "tools/original/foundation-clock-gate.c": "f517f1fc0edf2bbe17021e529fb41652e991e286bef070b8aecefd32bfa62e75",
+      "tools/original/foundation-clock-verify.py": "c488100a187b44803c06374535715eaa5a7cde9d4513f6e866e090367d4f2054",
+      "tools/original/state-observer.py": "58e3b510abbe5ff57f05844efbdf764e2a02530cda4fa99f538d886d258af6f1",
+      "tools/original/with-display.sh": "af469210e803786a60d8632c28a6f2da77bc8ab02cc06be50016ddb25e95b848",
+      "tools/foundation/production-server.mjs": "e3152b58e2353319ba0963b30439e33c3cc65f84a8c6ebb765c2812486245952",
+      "tools/foundation/browser.mjs": "60c4bc851470f47e4dd0399148ce0c1edf351d41fbf7f7e15fa823af5948b4c8",
+      "tools/foundation/verify.mjs": "3743b773cf2ede253c6d78f2605eb43f34e9d7002284b6a1dd2c413d45835a5c",
+      "web/trace.ts": "2df69cfbbae14084baadacbcffbc9ecb7b6e363e61c1efb26f721475cfb198a9",
+      "tools/original/key-observer.py": "a440fb0667a5885e3f114aae6a315c7ad893c398c0398df156ddc4c0c7ae8170",
+      "tools/original/audio-observer.py": "448bc722f76f890c2dd07dc3635c65ceebe1fdcafe30a2ac0b828f59df491b0c"
+    },
+    "rock-blast": {
+      "tools/e2e/rock-blast.mjs": "4f241678470c0353ac29daef6d0c6e06ec1a4f8e377388ea7fc6880c0700e55a",
+      "tools/original/rock-blast-scenarios.py": "f896f63cc2f4e66487c7c75d68561b1efb46b989cf92dad09f687f3c4621ca65",
+      "tools/original/foundation-pickup-observe.py": "db3fb995087575a039b77c8b87e07bbaa3cdef208adea166b8de07055754b90b",
+      "tools/original/foundation-clock-run.py": "0669849e55218ed984aaa95a9964bba05d20707ec7ed164c77dab689c5891fbc",
+      "tools/original/foundation-clock-gate.c": "f517f1fc0edf2bbe17021e529fb41652e991e286bef070b8aecefd32bfa62e75",
+      "tools/original/foundation-clock-verify.py": "c488100a187b44803c06374535715eaa5a7cde9d4513f6e866e090367d4f2054",
+      "tools/original/state-observer.py": "58e3b510abbe5ff57f05844efbdf764e2a02530cda4fa99f538d886d258af6f1",
+      "tools/original/with-display.sh": "af469210e803786a60d8632c28a6f2da77bc8ab02cc06be50016ddb25e95b848",
+      "tools/foundation/production-server.mjs": "e3152b58e2353319ba0963b30439e33c3cc65f84a8c6ebb765c2812486245952",
+      "tools/foundation/browser.mjs": "60c4bc851470f47e4dd0399148ce0c1edf351d41fbf7f7e15fa823af5948b4c8",
+      "tools/foundation/verify.mjs": "3743b773cf2ede253c6d78f2605eb43f34e9d7002284b6a1dd2c413d45835a5c",
+      "web/trace.ts": "2df69cfbbae14084baadacbcffbc9ecb7b6e363e61c1efb26f721475cfb198a9",
+      "references/isaac/foundation/rock-blast/known-regressions.json": "b7767539c58478d2109bbac8c7de617f41ec92686a0e92d24d0067a71e674a22"
+    }
+  },
+  "cases": [
+    {
+      "driver": "keys",
+      "name": "key-phase-0",
+      "code": "JF2DSF92",
+      "seedValue": 1319061482,
+      "entropy": "Contrived public collection phase offset",
+      "status": "pass",
+      "comparedPresentations": 422,
+      "fieldMismatches": 0,
+      "seedReadback": {
+        "seedText": "JF2DSF92",
+        "seedValid": true,
+        "seededRun": true,
+        "runSeed": "JF2DSF92",
+        "runSeedValue": 1319061482
+      },
+      "report": ".cache/e2e/music-gameplay-entry/composite-key-contrived/report.json",
+      "reportSha256": "56e3a5c5cf58e2963541b6a7db9974cb8544a518b27c04a70d3a66e97a98fd5c",
+      "nativeManifest": ".cache/e2e/music-gameplay-entry/composite-key-contrived/key-phase-0/original/manifest.json",
+      "nativeManifestSha256": "6aa957584efc33f1710524311f81b342c24f8f03d14a20bf28d1cdddb0219ba9",
+      "nativeTape": ".cache/e2e/music-gameplay-entry/composite-key-contrived/key-phase-0/tape.json",
+      "nativeTapeSha256": "29fccc08d1403743d9edda35b93789399c4c50f7665615646a10bb10d31946b1",
+      "browserTrace": {
+        "inputTraceTruncated": false,
+        "stateHistoryTruncated": true,
+        "stateHistoryTruncationReason": "bytes",
+        "inputEncodedBytes": 12879,
+        "stateEncodedBytes": 33532174,
+        "backendEvents": 3,
+        "completeStateRecords": 479,
+        "archive": "/workspace/isaac-worktrees/inventory/.cache/e2e/music-gameplay-entry/composite-key-contrived/key-phase-0/browser-trace.json.gz",
+        "uncompressedSha256": "ce2483972a35e721a1993eda7176e00ed0b4968b75c63e7dcb9823ba41984d99",
+        "archiveSha256": "e39a56a3edbfff6c280b80a2d9718198b2cb3e9f88a0f78b95779ada4b86aa5b",
+        "publicCommandCount": 483,
+        "backendEventsWithState": 3
+      },
+      "gameplaySnapshots": {
+        "path": ".cache/e2e/music-gameplay-entry/composite-key-contrived/key-phase-0/browser-states.json",
+        "compressedPath": ".cache/e2e/music-gameplay-entry/composite-key-contrived/key-phase-0/browser-states.json.gz",
+        "records": 422,
+        "uncompressedBytes": 81371725,
+        "uncompressedSha256": "477ff7205be881c8b9095b5ef0fc8c27898909f171dc75c82c5d071ee2469b8b",
+        "archiveSha256": "7e3d70b28202b409beab029e528414619324de152d1bd68aad091cdefdacf945"
+      }
+    },
+    {
+      "driver": "keys",
+      "name": "random-key-1",
+      "code": "FJRF6L1J",
+      "seedValue": 636559831,
+      "entropy": "OS secrets",
+      "status": "pass",
+      "comparedPresentations": 423,
+      "fieldMismatches": 0,
+      "seedReadback": {
+        "seedText": "FJRF6L1J",
+        "seedValid": true,
+        "seededRun": true,
+        "runSeed": "FJRF6L1J",
+        "runSeedValue": 636559831
+      },
+      "report": ".cache/e2e/music-gameplay-entry/composite-key-recorded-random/report.json",
+      "reportSha256": "02a330a43c14d2a076fb46a276fa6d5d830377dbe5bd912046b854330afabb5a",
+      "nativeManifest": ".cache/e2e/music-gameplay-entry/composite-key-recorded-random/random-key-1/original/manifest.json",
+      "nativeManifestSha256": "b72baaa722f3a53721e529aa40e3586061f63f2f96461714561569c27b09518a",
+      "nativeTape": ".cache/e2e/music-gameplay-entry/composite-key-recorded-random/random-key-1/tape.json",
+      "nativeTapeSha256": "711f758f096ae3367c344b8a384f10ad680f78abd68f9950c00a1d5736817f62",
+      "browserTrace": {
+        "inputTraceTruncated": false,
+        "stateHistoryTruncated": true,
+        "stateHistoryTruncationReason": "bytes",
+        "inputEncodedBytes": 12906,
+        "stateEncodedBytes": 33483236,
+        "backendEvents": 3,
+        "completeStateRecords": 474,
+        "archive": "/workspace/isaac-worktrees/inventory/.cache/e2e/music-gameplay-entry/composite-key-recorded-random/random-key-1/browser-trace.json.gz",
+        "uncompressedSha256": "0d60e81df3584f65e267446a2e9a8f7c8611878ab8634e0a33a13f6df806b1a0",
+        "archiveSha256": "1ee2d1f21345ecba2e84ecfcbf2c1f00d6cf4a730fcf07ed3672245391ebe0ba",
+        "publicCommandCount": 484,
+        "backendEventsWithState": 3
+      },
+      "gameplaySnapshots": {
+        "path": ".cache/e2e/music-gameplay-entry/composite-key-recorded-random/random-key-1/browser-states.json",
+        "compressedPath": ".cache/e2e/music-gameplay-entry/composite-key-recorded-random/random-key-1/browser-states.json.gz",
+        "records": 423,
+        "uncompressedBytes": 82290022,
+        "uncompressedSha256": "54a607365947fc98debe4b57df74991f448edf5404f6c39fd958c5abacf26823",
+        "archiveSha256": "56ebf4d7a17d4fa90361585c8442c4ddf831ed58364c764c2516aa32c1a69305"
+      }
+    },
+    {
+      "driver": "rock-blast",
+      "name": "rock-phase-0",
+      "code": "YQ16XWHR",
+      "seedValue": 2889922101,
+      "entropy": "Contrived public bomb phase offset on a recorded natural rock room",
+      "status": "pass",
+      "comparedPresentations": 470,
+      "fieldMismatches": 0,
+      "seedReadback": {
+        "seedText": "YQ16XWHR",
+        "seedValid": true,
+        "seededRun": true,
+        "runSeed": "YQ16XWHR",
+        "runSeedValue": 2889922101
+      },
+      "report": ".cache/e2e/music-gameplay-entry/composite-rock-contrived/report.json",
+      "reportSha256": "2b05561226ce5dd9d4a5fb871762e0316cad9886b8d76ef91626735270dc1c99",
+      "nativeManifest": ".cache/e2e/music-gameplay-entry/composite-rock-contrived/rock-phase-0/original/manifest.json",
+      "nativeManifestSha256": "6eb75558d4ae59e584f164e3515143d4492b7dd3d1e9fa1e60e898e80d07dcc0",
+      "nativeTape": ".cache/e2e/music-gameplay-entry/composite-rock-contrived/rock-phase-0/tape.json",
+      "nativeTapeSha256": "02bd912fbcd2a43e5adb6848538f6e45a24c67e0073ceebf0fa14a848c206e5f",
+      "browserTrace": {
+        "inputTraceTruncated": false,
+        "stateHistoryTruncated": true,
+        "stateHistoryTruncationReason": "bytes",
+        "inputEncodedBytes": 14163,
+        "stateEncodedBytes": 33509823,
+        "backendEvents": 3,
+        "completeStateRecords": 433,
+        "archive": "/workspace/isaac-worktrees/inventory/.cache/e2e/music-gameplay-entry/composite-rock-contrived/rock-phase-0/browser-trace.json.gz",
+        "uncompressedSha256": "a5a6d415f64571f081db192f314ce903fd96d4d2d41e421ae7e24075ed55f6da",
+        "archiveSha256": "ba11f93f351439d81a4dac69c646593094552b9f2df932497af6a8dd43be703e",
+        "publicCommandCount": 533,
+        "backendEventsWithState": 3
+      },
+      "gameplaySnapshots": {
+        "path": ".cache/e2e/music-gameplay-entry/composite-rock-contrived/rock-phase-0/browser-states.json",
+        "compressedPath": ".cache/e2e/music-gameplay-entry/composite-rock-contrived/rock-phase-0/browser-states.json.gz",
+        "records": 470,
+        "uncompressedBytes": 104241446,
+        "uncompressedSha256": "0bfaf07297f0eb47618f328c80533cda69c7872e3ae7ad45aa7c141a63ce2ec3",
+        "archiveSha256": "fc683c67ac3c8e7273d08ef30e58d1b39e5d5031e4cadf88a3970c6e99cc3747"
+      }
+    },
+    {
+      "driver": "rock-blast",
+      "name": "random-rock-0",
+      "code": "Z6Y6PNT8",
+      "seedValue": 2697378127,
+      "entropy": "OS secrets",
+      "status": "pass",
+      "comparedPresentations": 355,
+      "fieldMismatches": 0,
+      "seedReadback": {
+        "seedText": "Z6Y6PNT8",
+        "seedValid": true,
+        "seededRun": true,
+        "runSeed": "Z6Y6PNT8",
+        "runSeedValue": 2697378127
+      },
+      "report": ".cache/e2e/music-gameplay-entry/composite-rock-recorded-random/report.json",
+      "reportSha256": "348f0ddf1011567ed2c4e5729fc0f109d49efba9c2f49f2a870a56cdf87a6fec",
+      "nativeManifest": ".cache/e2e/music-gameplay-entry/composite-rock-recorded-random/random-rock-0/original/manifest.json",
+      "nativeManifestSha256": "b1a488afa7935ffb26ffa812f98f3cc655f5b3c38a50a0f41db4e13baf6a49dc",
+      "nativeTape": ".cache/e2e/music-gameplay-entry/composite-rock-recorded-random/random-rock-0/tape.json",
+      "nativeTapeSha256": "6f0b7232eb937923c8b76bdcf04f4f84da6f864b7f625058f6d0d9c033b6008e",
+      "browserTrace": {
+        "inputTraceTruncated": false,
+        "stateHistoryTruncated": true,
+        "stateHistoryTruncationReason": "bytes",
+        "inputEncodedBytes": 11206,
+        "stateEncodedBytes": 33528715,
+        "backendEvents": 3,
+        "completeStateRecords": 398,
+        "archive": "/workspace/isaac-worktrees/inventory/.cache/e2e/music-gameplay-entry/composite-rock-recorded-random/random-rock-0/browser-trace.json.gz",
+        "uncompressedSha256": "a681259b4a5396a755a4ab2bd916eb051a8346cb04e47a57a03d26cbd28ce563",
+        "archiveSha256": "380bdb75174ccc8be05e8b3e92664f7a7f9239b4527461c57462acaa0777b842",
+        "publicCommandCount": 416,
+        "backendEventsWithState": 3
+      },
+      "gameplaySnapshots": {
+        "path": ".cache/e2e/music-gameplay-entry/composite-rock-recorded-random/random-rock-0/browser-states.json",
+        "compressedPath": ".cache/e2e/music-gameplay-entry/composite-rock-recorded-random/random-rock-0/browser-states.json.gz",
+        "records": 355,
+        "uncompressedBytes": 83767853,
+        "uncompressedSha256": "7d35f3646104306dadf6219261bc59d6af7c23c4c9a6763db7f689efaeade535",
+        "archiveSha256": "2185e9ae98e75251c6de24ae7dabb568041296f50d7e47449ee69a78ec96f972"
+      }
+    }
+  ],
+  "totalComparedPresentations": 1670,
+  "totalFieldMismatches": 0,
+  "traceScope": "Every reset/menu/seed/gameplay public command is independently expected and compared. Backend callbacks remain separate evidence and retain their states. The command-state history reached its 32 MiB cap in each dense run and is explicitly disclosed; independent per-presentation gameplay snapshots are complete and compared. No capped history is labeled complete.",
+  "unchangedMandatoryCohorts": {
+    "keys": "references/isaac/foundation/keys/scenarios.json",
+    "rockBlast": "references/isaac/foundation/rock-blast/scenarios.json",
+    "rockCallbacksStillUnsupported": [
+      "explosive Rock callback",
+      "tinted Rock callback",
+      "Troll Bomb pickup conversion/actor admission"
+    ],
+    "priorRejectedAndPassingReportsRetained": "references/isaac/foundation/rock-blast/known-regressions.json"
+  },
+  "historicalAttempts": [
+    {
+      "report": ".cache/e2e/music-gameplay-entry/key-contrived/report.json",
+      "reportSha256": "e27725f30236fdaa33305037adb55573d599f26d094766e2afe5b9efdc3cfb0a",
+      "status": "fail",
+      "productionSha256": "f050bf745a753793fd01cdc2c218b1c9e3fff1b945b03cc8a8e845f2768289ba",
+      "sourceHashesStable": true,
+      "case": "key-phase-0",
+      "comparedPresentations": 422,
+      "gameplayFieldMismatches": 0,
+      "verificationError": "AssertionError [ERR_ASSERTION]: The input trace must preserve the requested reset seed\n+ actual - expected\n\n+ 1319061482\n- 'key-phase-0: complete reset/menu/manual-seed/gameplay input tape'\n",
+      "scope": "Rejected provenance invocation before correction; gameplay equality is not accepted gate proof"
+    },
+    {
+      "report": ".cache/e2e/music-gameplay-entry/rock-contrived/report.json",
+      "reportSha256": "32d42a29a12bd11314955cd3d558590ee58a14ba10bf01e7830d11b29039cbff",
+      "status": "fail",
+      "productionSha256": "f050bf745a753793fd01cdc2c218b1c9e3fff1b945b03cc8a8e845f2768289ba",
+      "sourceHashesStable": true,
+      "case": "rock-phase-0",
+      "comparedPresentations": 470,
+      "gameplayFieldMismatches": 0,
+      "verificationError": "AssertionError [ERR_ASSERTION]: The input trace must preserve the requested reset seed\n+ actual - expected\n\n+ 2889922101\n- 'rock-phase-0: complete reset/menu/manual-seed/gameplay input tape'\n",
+      "scope": "Rejected provenance invocation before correction; gameplay equality is not accepted gate proof"
+    },
+    {
+      "report": ".cache/e2e/music-gameplay-entry/key-contrived-final/report.json",
+      "reportSha256": "8abb14891a4096bf0a8cd9059a2cb4bcc140aa7d12ca5e9b1ad7b31a2f89a1c1",
+      "status": "pass",
+      "productionSha256": "f050bf745a753793fd01cdc2c218b1c9e3fff1b945b03cc8a8e845f2768289ba",
+      "sourceHashesStable": true,
+      "case": "key-phase-0",
+      "comparedPresentations": 422,
+      "gameplayFieldMismatches": 0,
+      "verificationError": null,
+      "scope": "Accepted corrected helper proof before restacking on the latest weapon aggregate; separate production artifact"
+    }
+  ],
+  "replayCommands": [
+    "bash tools/original/with-display.sh node tools/e2e/keys.mjs --scenarios references/isaac/foundation/keys/scenarios.json --case key-phase-0",
+    "bash tools/original/with-display.sh node tools/e2e/keys.mjs --scenarios references/isaac/foundation/keys/scenarios.json --case random-key-1",
+    "bash tools/original/with-display.sh node tools/e2e/rock-blast.mjs --scenarios references/isaac/foundation/rock-blast/scenarios.json --case rock-phase-0",
+    "bash tools/original/with-display.sh node tools/e2e/rock-blast.mjs --scenarios references/isaac/foundation/rock-blast/scenarios.json --case random-rock-0"
+  ]
+}
