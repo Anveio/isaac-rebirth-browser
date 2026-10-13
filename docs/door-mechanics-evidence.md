@@ -11,6 +11,9 @@ The shared `combat::try_damage_player` admits damage only for a living fresh
 player with no active immunity. Callers supply their own health units and
 source-observed immunity, contact/impulse policy and flags. The helper does not
 infer a universal damage-to-cooldown rule.
+The port currently advances only hurt immunity at the recovered transition
+Player Update dispatch points. Other player callbacks still need a unified
+transition path; this gate does not claim those clocks or effects.
 
 ## Source boundaries
 
