@@ -26,6 +26,7 @@ pub mod grid_records;
 pub mod items;
 pub mod keepers;
 pub mod layout;
+pub mod level2_flies;
 pub mod menu_lifecycle;
 pub mod monstro;
 pub mod motion;
@@ -1125,6 +1126,9 @@ impl Game {
         for selector in selectors {
             let id = u32::try_from(npcs.len()).map_err(|_| "NPC identity exhausted")?;
             if let Some(mut npc) = npcs::Npc::from_selector(id, selector)? {
+                if let Some(fly) = &mut npc.level2_fly {
+                    fly.birth_game_update = self.state.game_update_count;
+                }
                 if let Some(monstro) = &mut npc.monstro {
                     monstro.birth_game_update = self.state.game_update_count;
                 }
@@ -1395,6 +1399,7 @@ impl Game {
                             _ => return Err("invalid authored room actor handle".into()),
                         }
                     }
+                    familiars::paint_background_effects(&mut self.state)?;
                     pickups::full_grid_contacts(&mut self.state)?;
                     chests::full_grid_contacts(&mut self.state)?;
                     npcs::post_contact_grid(&mut self.state)?;
@@ -1453,6 +1458,9 @@ impl Game {
         // before4545d0 admits entity contacts. Pickups can become idle in this
         // full phase and collect against the player's newly moved position.
         if phase == phase::Phase::Update {
+            // The independent render array paints flags8 at its current count,
+            // including births from the admission-fenced actor callbacks.
+            familiars::paint_background_effects(&mut self.state)?;
             let pickup_contacts = pickups::contact_candidates(&self.state)?;
             npcs::player_contacts(&mut self.state)?;
             npcs::nonplayer_contacts(&mut self.state)?;
@@ -1700,12 +1708,43 @@ impl Game {
         }
         pickups::advance_actor(&mut self.state, phase, id)
     }
+    fn admit_npc_blood(&mut self, index: usize, seed: u32) -> Result<(), String> {
+        let position = self.state.room.npcs[index].position;
+        // Fresh13/18/214 have the ordinary white color. Modifiers and tinted
+        // actor colors require their actual source owner before admission.
+        let id = familiars::admit_blood_splat(&mut self.state, seed, position, [1.0; 4], [0.0; 3])?;
+        familiars::advance_blood_initial(&mut self.state, id)
+    }
     fn advance_npc(&mut self, id: u32, phase: phase::Phase) -> Result<(), String> {
         let grid = grid::Grid::new(self.state.room.grid.clone().expect("admitted NPC has grid"))?;
         let player = bombs::player_world(&self.state);
         let Some(index) = self.state.room.npcs.iter().position(|npc| npc.id == id) else {
             return Ok(());
         };
+        if self.state.room.npcs[index].kind == 214 {
+            let produced = level2_flies::advance(
+                &mut self.state.room.npcs[index],
+                phase,
+                &mut self.state.boot_lifecycle.shared,
+                &mut level2_flies::World {
+                    game_counter: self.state.game_update_count,
+                    player,
+                    grid: &grid,
+                    audio: &mut self.state.audio,
+                    system_counter: self.state.system_clock.system_counter.wrapping_sub(1),
+                    poofs: familiars::PoofAdmission {
+                        game_update_count: self.state.game_update_count,
+                        next_effect: &mut self.state.next_effect,
+                        effects: &mut self.state.sprite_effects,
+                        scheduler: &mut self.state.actor_scheduler,
+                    },
+                },
+            )?;
+            if let Some(seed) = produced.blood_seed {
+                self.admit_npc_blood(index, seed)?;
+            }
+            return Ok(());
+        }
         if self.state.room.npcs[index].kind == 33 {
             let produced = fireplaces::advance(
                 &mut self.state.room.npcs[index],
@@ -1763,6 +1802,12 @@ impl Game {
                     grid: &grid,
                     audio: &mut self.state.audio,
                     system_counter: self.state.system_clock.system_counter.wrapping_sub(1),
+                    poofs: familiars::PoofAdmission {
+                        game_update_count: self.state.game_update_count,
+                        next_effect: &mut self.state.next_effect,
+                        effects: &mut self.state.sprite_effects,
+                        scheduler: &mut self.state.actor_scheduler,
+                    },
                 },
             )?;
             for birth in births {
@@ -1785,13 +1830,24 @@ impl Game {
             return Ok(());
         }
         if self.state.room.npcs[index].kind != 244 {
-            return self.state.room.npcs[index].advance(
+            let was_dead = self.state.room.npcs[index].dead;
+            self.state.room.npcs[index].advance(
                 phase,
-                self.state.game_update_count,
                 &mut self.state.boot_lifecycle.shared,
-                player,
-                &grid,
-            );
+                &mut npcs::World {
+                    game_counter: self.state.game_update_count,
+                    player,
+                    grid: &grid,
+                    audio: &mut self.state.audio,
+                    system_counter: self.state.system_clock.system_counter.wrapping_sub(1),
+                },
+            )?;
+            if !was_dead && self.state.room.npcs[index].dead {
+                if let Some(seed) = self.state.room.npcs[index].death_effect_seed {
+                    self.admit_npc_blood(index, seed)?;
+                }
+            }
+            return Ok(());
         }
         let mut occupied = vec![player];
         occupied.extend(

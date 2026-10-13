@@ -1,0 +1,326 @@
+{
+  "schema": 1,
+  "status": "fail",
+  "scope": "Source-supported runtime with completed fresh two-game captures. Direct actor/physical/seed/lifecycle mismatches and missing native executions remain required; no whole actor/boss/Blood-paint acceptance.",
+  "frozenSourceHead": "3d9f855744a4088f0e6542827323f1a480d6e830",
+  "ownedRuntimeCommit": "c9ce0375b11f122340fa2042fa8775941947f639",
+  "baseMain": "00a36c0416eaab529924d7e86d65b17e2af489d3",
+  "build": {
+    "schema": 1,
+    "sourceHead": "3d9f855",
+    "productionDirectory": "/workspace/isaac-worktrees/combat/.cache/e2e/level2-boss/frozen-production-v2",
+    "artifact": {
+      "sha256": "30183f3349db92c079794be8918ed0cae74bfdfd5c3fdc7c12bd2aa5eadd8ba0",
+      "files": 940
+    },
+    "wasmSha256": "fc4cc8b6be50466734d0b8045f6822289c9c869af7010188e2d029f23d17773a",
+    "runtimeUnchangedSince": "c9ce037"
+  },
+  "static": {
+    "status": "pass",
+    "parallelism": 1,
+    "checks": [
+      "cargo check --all-targets",
+      "strict all-target Clippy -D warnings",
+      "release WASM build",
+      "Vite production build",
+      "TypeScript",
+      "authored assets 2557",
+      "format",
+      "matrix",
+      "JS/Python syntax",
+      "git diff --check"
+    ],
+    "logs": {
+      "rust-check.log": "3104a8615e7473d787c70b8782cdaf51de01a1b6fdbb8a0b1225e9c31a031715",
+      "clippy.log": "db7021de1e72e80781e86b6f16a7173d680f334b34960efc46040d5f9b1251b4",
+      "wasm-build.log": "791a60d79985d2788943a30aadc65b9f6b4a697e782de314bb9d1dec263da1ba",
+      "vite-build-v2.log": "79af83e281e4c8d28f1a52d956a586c0c63dd082584cf841ac8eccbe37e92607",
+      "offline-reports.log": "087b03edcc7b1779bd4b5d22f67acdc4c3ce92327a7a6da2785d6404aeecc816"
+    }
+  },
+  "browserSmoke": {
+    "status": "pass",
+    "scope": "Only same public keys/counts, coalesced noncapture steps and trace disabled; no native acceptance",
+    "reportSha256": "e9703649d027deaa212cf4d393a2124c4d7a2e3d40c3b74de6d9c79b6239c17c"
+  },
+  "freshCaptures": {
+    "status": "pass",
+    "nativeProvenance": "both pass",
+    "nativeFrameTimeoutSeconds": 120,
+    "lpNumThreads": 2,
+    "cases": [
+      {
+        "id": "paired-level2-bll-admission",
+        "status": "fail",
+        "genericCheckpoints": 184,
+        "genericPassed": 184,
+        "requiredFields": 11692,
+        "requiredFailures": 576,
+        "comparatorExitCode": 1,
+        "comparatorSignal": null,
+        "executions": {
+          "native": {
+            "level2-admission": true,
+            "level2-poof": true,
+            "level2-poof-fence": true,
+            "level2-poof-retirement": true,
+            "level2-appearance": true,
+            "level2-active": true
+          },
+          "browser": {
+            "level2-admission": true,
+            "level2-poof": true,
+            "level2-poof-fence": true,
+            "level2-poof-retirement": true,
+            "level2-appearance": true,
+            "level2-active": true
+          }
+        },
+        "firstRequiredFailures": [
+          {
+            "label": "level2-room-arrival",
+            "field": "npc1156014891.position",
+            "expected": [
+              240,
+              280
+            ],
+            "actual": [
+              239.10865783691406,
+              282.22833251953125
+            ],
+            "status": "fail"
+          },
+          {
+            "label": "level2-room-arrival",
+            "field": "npc1156014891.velocity",
+            "expected": [
+              0,
+              0
+            ],
+            "actual": [
+              -0.8913376927375793,
+              2.228344202041626
+            ],
+            "status": "fail"
+          },
+          {
+            "label": "level2-room-arrival",
+            "field": "npc4011730281.position",
+            "expected": [
+              400,
+              280
+            ],
+            "actual": [
+              397.6119079589844,
+              280.2388000488281
+            ],
+            "status": "fail"
+          },
+          {
+            "label": "level2-room-arrival",
+            "field": "npc4011730281.velocity",
+            "expected": [
+              0,
+              0
+            ],
+            "actual": [
+              -2.388089418411255,
+              0.23880892992019653
+            ],
+            "status": "fail"
+          }
+        ],
+        "requiredFailureCounts": {
+          "npc.position": 234,
+          "npc.velocity": 234,
+          "poof.seedOrder": 86,
+          "npc.gridContact": 4,
+          "npc.gridNormal": 4,
+          "npc.previousGridVelocity": 14
+        },
+        "hashes": {
+          "case.json": "cd94d939fd583ffe31b6466a3939c9b55779d1d0f9453143c03dda2b42329b8c",
+          "tape.json": "638eb7f8a8b4c7dbc57e481cbf1253221e352b4bd6712e3e4516cb3e8e2e0e5c",
+          "original/manifest.json": "2e2b230d71f89d3282f8e8bede9c9eca2aeca523268c7806460ac934627c6b44",
+          "browser/manifest.json": "33fe6cf8141960c0bf72de7ff6485a87cd98f93d254a443949208ae98efa84b2",
+          "report.json": "cea72f8bab1e7de138d3214dd7f3fa8f5c56cdacd809492a8543f4ef64191d30",
+          "monstro-state.json": "adce318475c9db7b2e26016f8daf8702ae7f941512a9a11fc0a3932d863cf636"
+        }
+      },
+      {
+        "id": "paired-random-bll-monstro-route",
+        "status": "fail",
+        "genericCheckpoints": 714,
+        "genericPassed": 149,
+        "requiredFields": 22067,
+        "requiredFailures": 5145,
+        "comparatorExitCode": 1,
+        "comparatorSignal": null,
+        "executions": {
+          "native": {
+            "level2-admission": true,
+            "level2-poof": true,
+            "level2-poof-fence": true,
+            "level2-poof-retirement": true,
+            "level2-appearance": true,
+            "level2-active": true,
+            "level2-damage": true,
+            "level2-drain": true,
+            "level2-death": false,
+            "level2-retirement": false,
+            "prefix-clear-delay": false,
+            "prefix-clear-boundary": false,
+            "prefix-clear": false,
+            "boss-admission": false,
+            "boss-poof": false,
+            "boss-scene": false,
+            "boss-cleanup": false,
+            "boss-ai": false,
+            "boss-projectiles": false,
+            "boss-damage": false
+          },
+          "browser": {
+            "level2-admission": true,
+            "level2-poof": true,
+            "level2-poof-fence": true,
+            "level2-poof-retirement": true,
+            "level2-appearance": true,
+            "level2-active": true,
+            "level2-damage": true,
+            "level2-drain": true,
+            "level2-death": true,
+            "level2-retirement": true,
+            "prefix-clear-delay": true,
+            "prefix-clear-boundary": true,
+            "prefix-clear": true,
+            "boss-admission": true,
+            "boss-poof": true,
+            "boss-scene": true,
+            "boss-cleanup": true,
+            "boss-ai": true,
+            "boss-projectiles": true,
+            "boss-damage": true,
+            "boss-poof-fence": true
+          }
+        },
+        "firstRequiredFailures": [
+          {
+            "label": "level2-room-arrival",
+            "field": "npc1156014891.position",
+            "expected": [
+              240,
+              280
+            ],
+            "actual": [
+              239.10865783691406,
+              282.22833251953125
+            ],
+            "status": "fail"
+          },
+          {
+            "label": "level2-room-arrival",
+            "field": "npc1156014891.velocity",
+            "expected": [
+              0,
+              0
+            ],
+            "actual": [
+              -0.8913376927375793,
+              2.228344202041626
+            ],
+            "status": "fail"
+          },
+          {
+            "label": "level2-room-arrival",
+            "field": "npc4011730281.position",
+            "expected": [
+              400,
+              280
+            ],
+            "actual": [
+              397.6119079589844,
+              280.2388000488281
+            ],
+            "status": "fail"
+          },
+          {
+            "label": "level2-room-arrival",
+            "field": "npc4011730281.velocity",
+            "expected": [
+              0,
+              0
+            ],
+            "actual": [
+              -2.388089418411255,
+              0.23880892992019653
+            ],
+            "status": "fail"
+          }
+        ],
+        "requiredFailureCounts": {
+          "npc.position": 359,
+          "npc.velocity": 359,
+          "poof.seedOrder": 96,
+          "npc.pendingDamage": 7,
+          "npc.orderedDamageRecords": 7,
+          "npc.hp": 88,
+          "npc.gridContact": 16,
+          "npc.gridNormal": 16,
+          "npc.previousGridVelocity": 187,
+          "npc.feedback": 41,
+          "player.hp": 517,
+          "player.immunity": 489,
+          "npc.target": 185,
+          "npc.dead": 2,
+          "npc.authoredSeedOrder": 490,
+          "room.combatClearCountdown": 245,
+          "manager.countability": 245,
+          "room.combatClear": 235,
+          "door74.state": 435,
+          "door127.state": 435,
+          "door74.class": 234,
+          "door127.class": 234,
+          "room.identity": 200,
+          "projectile.seedOrder": 11,
+          "native.level2-death": 1,
+          "native.level2-retirement": 1,
+          "native.prefix-clear-delay": 1,
+          "native.prefix-clear-boundary": 1,
+          "native.prefix-clear": 1,
+          "native.boss-admission": 1,
+          "native.boss-poof": 1,
+          "native.boss-scene": 1,
+          "native.boss-cleanup": 1,
+          "native.boss-ai": 1,
+          "native.boss-projectiles": 1,
+          "native.boss-damage": 1
+        },
+        "hashes": {
+          "case.json": "e6c77672f0843e8b8d5bbc90e89189b645f94e90cb7ce136e5e2d0cd5b1dcfcb",
+          "tape.json": "9348fcda40f925d947b8f623e13bb41e85486b984ae48f900cd9474f52ffc2de",
+          "original/manifest.json": "462fdfdeceab712a83ce51a86ba61aaaff6c62129cf7856ef0ad828c5f8bd91a",
+          "browser/manifest.json": "431a2683d2c052daa92e2aafee5cb0229ebddeb4d53892b651cef0ea238d71ae",
+          "report.json": "fbce6f8aad40333058dbbceaaf78bfdcf3dc10c2a0e68129150cc55c90c372d1",
+          "monstro-state.json": "6d1e0990105fd897bd7980a426a1b95c5aa0df0e248c14366e022abf5c96cf68"
+        }
+      }
+    ]
+  },
+  "orchestration": {
+    "status": "fail",
+    "reason": "Original wrapper ended after both captures without second/final report or observed exit; old log/missing result preserved.",
+    "recovery": "Exact scopedState and unchanged direct comparator ran offline against closed immutable captures; all gate bytes verified against frozen source head. Capture-start in-memory hash was not persisted, so no recovered pixel summary or complete original wrapper success is claimed.",
+    "reportSha256": "5d51b175af8fffa14cacbb61a5ec4b025b1060e7bae5415339a3c7833fcbda10",
+    "pairedReportSha256": "a7f76f50632a2ed305e1093a2ac2dcedffb6ee56e835631bf12e28cd5c6f0313",
+    "offlineScriptSha256": "338ff32b788f0bf100f04476187b367252c707fbbfa2c8807276cdf2dd5a5fc2"
+  },
+  "requiredFollowups": [
+    "First-arrival214 position/velocity mismatch; causal initializer/Game counter/target scheduling remains unresolved",
+    "Actual Poof seed order differs; no RNG offset or captured seed injection",
+    "Native full public route remains uncleared descriptor9, so true death/retirement/delayed clear/Monstro Scene/cleanup/AI/projectile/damage executions are missing",
+    "Native Blood background paint and return persistence not acceptance-covered",
+    "214 flag4 blast/modifiers and complete boss blood/gibs/final heart/reward/Grid17/stage progression",
+    "Retained T1 HP/contact, H2/center, W0 and Worm required failures are unchanged"
+  ]
+}

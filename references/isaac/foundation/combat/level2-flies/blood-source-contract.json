@@ -1,0 +1,68 @@
+{
+  "schema": 1,
+  "status": "source-mapped; runtime preparation only",
+  "recordedAt": "2026-10-13T19:24:47.671632+00:00",
+  "factory": "Effect7 Init458a70 uses Base441c80; config defaultSize1BloodStains; flags318|=8,7d8true,bothcollisionclasses0,commoncontact22,timeToLive-1,state7d4=0,818=1. No shared Init draws. Caller supplies actualrawseed and colorcopy before explicit firstUpdate.",
+  "immediate": "445c60 zero-gib freshNPC path Sound30volume.8/2/1 thenrawseed44622e\u2192GameSpawn1000/7, actualNPCground, zeroV/no parent; copyEntitycolor, explicitvirtual+18 at4462a5.",
+  "firstUpdate": "45aa70 firstBase447190 advances default sprite/motion then7\u219245d2c8\u219245f49f. SaveincomingSpriteScaleX; setSpriteScale=[818,818]. SelectSize1(<.4),2(<.6),3(<.8),4(<1.2),5(<2),else6. FreshScale1 choosesSize4BloodStains with10frames. Actual sharedbounded(clipframes), manualSetFrame40fef0 stopsclip. Thenbounded2==0 setsflipX, independentbounded2==0 setsflipY. IfcopiedAlpha==1, consume bounded6 andAlpha=.5+.1*draw. No state7d4write.",
+  "manager": "Room.Insert5c6940\u21924524f0 checks flags8 at452554: flags8 skip the ordinary active array+68 and enter independent render-sorted array+80/count+8c; ordinary actors occupy BOTH arrays. Unsigned virtual+50 key ascends, equal-key new admission inserts before existing. Later4555b2 calls actualRender+28 on active flags8 in the current render array, including new births, then455600 callsRemove unlessflags0x2000/0x20000. FreshBlood flags8 paints/removes SAMEfullbirthpass after caller-owned immediateUpdate, before4545d0 contacts/lategrid. Subsequentframesretain roombackground texture, not a liveEffect actor.",
+  "renderer": "EffectRender458780 honorsvisible31d, drawsSprite40f740 with actualP+offset. No state7d4write. Currentroomstain texture/persistedRoom ownership remains a separate boundary to gate.",
+  "clips": [
+    {
+      "name": "Size1BloodStains",
+      "frames": 16,
+      "loop": false
+    },
+    {
+      "name": "Size2BloodStains",
+      "frames": 16,
+      "loop": false
+    },
+    {
+      "name": "Size3BloodStains",
+      "frames": 16,
+      "loop": false
+    },
+    {
+      "name": "Size4BloodStains",
+      "frames": 10,
+      "loop": false
+    },
+    {
+      "name": "Size5BloodStains",
+      "frames": 14,
+      "loop": false
+    },
+    {
+      "name": "Size6BloodStains",
+      "frames": 4,
+      "loop": false
+    }
+  ],
+  "sourceSha256": {
+    "function-458a70.txt": "814ed95058c6e37d2a8bec6a65ea9d035333c461a7574fc8dd7c8425415fc78a",
+    "function-45aa70.txt": "c83aa3b2a43373ee30cae85ee8b1a669d4e63ae984fd664bc574130a98eac3db",
+    "function-454df0.txt": "93984c8393b633602ab38b03534660685f84a1b90027f8b2677f4e2dc514b5c0",
+    "function-458780.txt": "3f33518557dc32c9d05ba8fd9ceeff17cfde23e57c89189c265d5d39e50323bd",
+    "animationJson": "dbf247e8b053014b4fe45e57c5e6f1787c1c47f012d6b0cf573e1f54a6135719",
+    "function-4524f0.txt": "37456dff4c5e60bc0cdcd3a278578b57af71e0011f3aebf4792fc455f7fbb46a",
+    "function-5c6940.txt": "fa3057d5ffeee1dc767fb9bc24c1eef012f972032ef76cc9f033a37506ad4a48"
+  },
+  "requiredLive": [
+    "Actualseed/defaultclass/flags and immediatefullcallback1 atbirth",
+    "Actualfirstsharedframe/flip/Alpha constraints and no extraInitdraws",
+    "Actual SAMEfull backgroundpaint/retirement; no ordinary effect/full birth fence applied to backgroundpool. Currentroomdraw remains after actorretirement.",
+    "No pairedseedorcolorequalityclaimwithoutactualsameproducerstream",
+    "Source/backgroundreturnpersistence is explicit unaccepteduntil captured"
+  ],
+  "mappingCorrections": [
+    {
+      "rejected": "454df0 flags8 without0x20000 skips ordinaryUpdate at454e9e\u21924552b0. Flag8 actors enter backgroundpass+80;4555b2\u2192Rendervirtual+28 paintsactualground sprite into room backgroundframebuffer. Unless flags0x2000/0x20000,455600 virtual+48 removesactive in samefullpass. Old-tail fence defers newborn from backgroundpass until nextfull; immediateUpdate iscaller-owned. Do not repeatedlyrollinitialization or removeonstoppedclip asPoof.",
+      "reason": "Actual Insert5c6940\u21924524f0 flags8 selects background array+80 immediately. Main-list old-tail does not govern this independent current-count background pass. No runtime/build/capture used rejected mapping."
+    },
+    {
+      "rejected": "Calling array+80 a background-only actor pool or assuming blood paints in birth order.",
+      "reason": "4524f0 flags0 main-list insertion also falls through into+80. The independent array sorts all rendered entities by unsigned virtual+50 and inserts before equal keys. Only flags8 take the manager background-paint branch. Corrected source preparation before compilation/capture."
+    }
+  ]
+}

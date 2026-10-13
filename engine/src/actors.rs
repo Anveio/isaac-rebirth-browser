@@ -39,17 +39,33 @@ pub struct Scheduler {
 }
 
 impl Scheduler {
-    pub fn admit(&mut self, actor: ActorRef) -> Result<(), String> {
-        if self.actors.contains(&actor) {
+    fn allocate_identity(&mut self, actor: ActorRef) -> Result<(), String> {
+        if self
+            .identities
+            .iter()
+            .any(|identity| identity.actor == actor)
+        {
             return Err("actor handle already admitted".into());
         }
-        self.actors.push(actor);
         self.identities.push(Identity {
             actor,
             sequence_id: self.room_next_sequence,
         });
         self.room_next_sequence = self.room_next_sequence.wrapping_add(1);
         Ok(())
+    }
+
+    pub fn admit(&mut self, actor: ActorRef) -> Result<(), String> {
+        self.allocate_identity(actor)?;
+        self.actors.push(actor);
+        Ok(())
+    }
+
+    /// Room5c6940 assigns Entity+8 before Manager4524f0 tests flags8. These
+    /// actual background births reserve an identity but never enter the
+    /// ordinary full-update array or live intermediate dispatch.
+    pub fn admit_background(&mut self, actor: ActorRef) -> Result<(), String> {
+        self.allocate_identity(actor)
     }
 
     pub fn sequence_id(&self, actor: ActorRef) -> Option<u32> {
@@ -77,8 +93,13 @@ impl Scheduler {
     }
 
     pub fn retain(&mut self, mut alive: impl FnMut(ActorRef) -> bool) {
-        self.actors.retain(|actor| alive(*actor));
-        self.identities
-            .retain(|identity| self.actors.contains(&identity.actor));
+        // Background membership is independent of ordinary update membership.
+        // Evaluate the actual alive predicate once for every admitted identity.
+        self.identities.retain(|identity| alive(identity.actor));
+        self.actors.retain(|actor| {
+            self.identities
+                .iter()
+                .any(|identity| identity.actor == *actor)
+        });
     }
 }

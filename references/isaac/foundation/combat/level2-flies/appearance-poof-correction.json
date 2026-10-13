@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "status": "source/static correction; no corrected production build or fresh live acceptance",
+  "immutablePriorHead": "3202d638e539b95370fec8caff010cd3e84f3b7e",
+  "ownedRuntimeCommit": "ce556291a078d58f12c628e6e0ae9b1b1b3273a9",
+  "reviewedDefect": "NPC appearance Poof was admitted by a post-advance adaptor using the later body position and sequence order, after BaseUpdate motion and possible damage-driven blood admission.",
+  "source": {
+    "binarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+    "NPCUpdate4f98e0": {
+      "sha256": "5f0ff9192cc17ce58e26064f31776e0c7fc959543c8441dbc9d44cf21d4351fa",
+      "law": "Incoming appearance counter1 branches4faf6e\u21924fbe4a; draw42e8c0 at4fbe85 then GameSpawn550a40 at4fbeb7 uses current NPC+448, zero velocity and actual NPC parent. Copy fresh render offset and height+1 at4fbee6/4fbef9, return4fbf0d\u21924f9ab3 before Base447190 at4f9eb8."
+    }
+  },
+  "implementation": [
+    "A typed PoofAdmission borrows only the effect identity/list, room scheduler and owned game counter.",
+    "Actual214 and Monstro counter1 branches draw once and immediately call the actual factory before sprite/motion/FIFO damage.",
+    "Poof constructor, explicit parent, fresh zero offset/height+1, zero velocity, init RNG and newborn full snapshot fence are retained. No explicit immediate Poof Update is added.",
+    "The post-advance Poof adaptor and returned Poof seed are removed. Ordinary non-NPC callers share the same factory implementation."
+  ],
+  "validation": {
+    "status": "pass",
+    "compilerJobs": 1,
+    "checks": [
+      "cargo check --locked --all-targets",
+      "cargo clippy --locked --all-targets -- -D warnings",
+      "cargo fmt --check",
+      "npm run matrix:check",
+      "git diff --check"
+    ],
+    "logs": {
+      "rustCheckSha256": "b1bb24c8fc035d9fdb166740f87af4b645c2a495c3a49f7a3d41f90a674de969",
+      "strictClippySha256": "817760cbcc3531f584e7e298d339895c0b0dd1e877a1f45e43c447776210966d"
+    },
+    "runtimeSources": {
+      "engine/src/familiars.rs": "3c5214560c13372d6e66db52ba73b1191aa07e32b45c717bd7fc2373d4ee0efc",
+      "engine/src/level2_flies.rs": "56b9cc4ff032709406c5b58eb62f71dfd2be6eb92d79dfb90c99659e1f994e3a",
+      "engine/src/lib.rs": "e424da23ac061cc9cf887df6c019a1c7a413a3762130505f7463267c5a545945",
+      "engine/src/monstro.rs": "9d9703ba06cd96f179c36d553f0af24c04f0d7fa17de10e2196cf325a3fb274f"
+    }
+  },
+  "retainedProof": {
+    "PR84Head": "33fb7cdc8def71c6a91ccce6c55e162a830de08f",
+    "PR87Head": "3202d638e539b95370fec8caff010cd3e84f3b7e",
+    "artifactSha256": "30183f3349db92c079794be8918ed0cae74bfdfd5c3fdc7c12bd2aa5eadd8ba0",
+    "status": "Original artifact and both failed captured games remain immutable required red. No acceptance is inherited from this correction."
+  },
+  "limits": [
+    "No corrected-artifact production build or fresh original/browser cohort has run.",
+    "Arbitrary NPC modifiers, sprite offsets/heights and unsupported appearance families remain unaccepted.",
+    "Required BLL seed/body/HP/contact/clear/boss execution failures and every existing direct comparator assertion remain unchanged."
+  ],
+  "publishedRuntimeCommit": "0f2495268ad5c66b31c48eebed0b0b63ba67975a"
+}

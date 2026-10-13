@@ -2,3 +2,4 @@
 gfx/003.056_leech.anm2
 gfx/1000.015_poof01.anm2
 gfx/1000.049_heart.anm2
+gfx/1000.007_blood splat.anm2
