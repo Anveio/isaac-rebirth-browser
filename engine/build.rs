@@ -75,7 +75,7 @@ fn frame_number(frame: &Value, name: &str) -> f64 {
     value
 }
 
-fn pickup_catalog(path: &Path, animations: &Path) -> String {
+fn pickup_catalog(path: &Path, animations: &Path, entities_xml: &str) -> String {
     let catalog: Value =
         serde_json::from_str(&fs::read_to_string(path).expect("read authored pickup catalog"))
             .expect("parse authored pickup catalog");
@@ -107,7 +107,11 @@ fn pickup_catalog(path: &Path, animations: &Path) -> String {
                     .expect("pickup loop flag missing")
             ));
         }
-        output.push_str(&format!("Definition {{ variant: {}, subtype: {}, actor: {actor:?}, collision_radius: {}_f32, shadow_size: {}_f64, clips: &[{clips}] }},\n",
+        let variant = u32::try_from(pickup["variant"].as_u64().expect("pickup variant"))
+            .expect("bounded variant");
+        let mass = entity_number(entities_xml, 5, variant, "collisionMass");
+        let friction = entity_number(entities_xml, 5, variant, "friction");
+        output.push_str(&format!("Definition {{ variant: {}, subtype: {}, actor: {actor:?}, collision_radius: {}_f32, collision_mass: {mass:?}_f32, friction: {friction:?}_f32, shadow_size: {}_f64, clips: &[{clips}] }},\n",
             pickup["variant"].as_u64().expect("pickup variant missing"),
             pickup["subtype"].as_u64().expect("pickup subtype missing"),
             pickup["collisionRadius"].as_f64().expect("pickup collision radius missing"),
@@ -319,7 +323,7 @@ fn main() {
     fs::write(output.join("shadow_catalog.rs"), generated).expect("write shadow catalog");
     fs::write(
         output.join("pickup_catalog.rs"),
-        pickup_catalog(&pickups, &animations),
+        pickup_catalog(&pickups, &animations, &xml),
     )
     .expect("write pickup catalog");
     let audio_path = manifest.parent().unwrap().join("web/audio-data.json");

@@ -10,9 +10,10 @@
       "581750 mark removed ID",
       "50a830 starts main Pickup at playback1 and copies PlayerPickupSparkle",
       "52f310 flush prior queue and stores actual config/charge/pre-contact touched",
-      "empty subtype0, overlay Empty; retain altar actor",
+      "subtype0; named SetFrame40fef0 selects main Empty frame0/stopped, preserves Alternates overlay; retain altar",
       "504480 admits SFX128 at gain0.5, delay2 in treasure4/library12"
-    ]
+    ],
+    "response": "Collection returns1 and vetoes445710 mass response. Subsequent free subtype0 returns0 and admits Player1/Pickup5 class4 contact."
   },
   "playerPhase": {
     "main": "447190 ->40f9f0 ->40f920 advances actual Sprite speed only on full callback; Pickup authored42 nonloop retains41 at finish",
@@ -65,6 +66,18 @@
       "name": "player-sprite-phase-contract.json",
       "sha256": "c8d41af3d453dd07641ed122998a70760e9c209bf7c6252eb3ad64c3d3ac709e",
       "bytes": 3373
+    },
+    {
+      "name": ".cache/coordination/item-research/acquisition-contact-correction/contract.json",
+      "sha256": "5e4046aff31419d1560b97d764d4f6079aa6e5009df14790189f3b664a1f71a3",
+      "bytes": 19109
     }
-  ]
+  ],
+  "altarMotion": {
+    "source": "506f70/507170;447190;4446a0;445370",
+    "full": "anchor-position ->velocity;current friction scales velocity, moves physical position;configured friction restored then multiplied0.965",
+    "prediction": "physical backup survives;presented=physical+(stored velocity*current friction)/2;no sprite/contact/anchor advancement",
+    "contact": "common445710 kernel;Player mass5/Pickup mass3,Player radius10/Pickup12,Player-only halfshare impulse and443b50 displacement grid query",
+    "unaccepted": "Altar grid-impact/prediction-correction and unusual collision scales need dedicated cases"
+  }
 }

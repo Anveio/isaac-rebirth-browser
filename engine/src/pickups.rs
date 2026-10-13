@@ -17,6 +17,8 @@ pub struct Definition {
     pub subtype: u32,
     pub actor: &'static str,
     pub collision_radius: f32,
+    pub collision_mass: f32,
+    pub friction: f32,
     pub shadow_size: f64,
     pub clips: &'static [Clip],
 }
@@ -87,6 +89,12 @@ pub struct Pickup {
     pub subtype: u32,
     pub spritesheet_item_id: u32,
     pub position: WorldVector,
+    pub presented_position: WorldVector,
+    pub anchor_position: WorldVector,
+    pub velocity: WorldVector,
+    pub configured_friction: f32,
+    pub current_friction: f32,
+    pub collision_mass: f32,
     pub x: f64,
     pub y: f64,
     pub actor: String,
@@ -186,6 +194,12 @@ impl Pickup {
             subtype,
             spritesheet_item_id: subtype,
             position,
+            presented_position: position,
+            anchor_position: position,
+            velocity: WorldVector { x: 0.0, y: 0.0 },
+            configured_friction: definition.friction,
+            current_friction: definition.friction,
+            collision_mass: definition.collision_mass,
             x: f64::from(position.x) * 0.65 + 32.0,
             y: f64::from(position.y) * 0.65 - 46.0,
             actor: definition.actor.into(),
@@ -210,8 +224,29 @@ impl Pickup {
 
     /// Base ANM2 playback is admitted only on full nonplayer update phases.
     pub fn advance(&mut self, phase: Phase, game_update: u32) {
+        if !self.removed && self.variant == 100 && phase == Phase::Interpolate {
+            // 4446a0 backs up the physical448 position, then predicts from
+            // stored velocity/current friction. Game550860 restores it before
+            // the next full update; this model keeps that physical owner intact.
+            self.presented_position = self.position + (self.velocity * self.current_friction) * 0.5;
+            self.project();
+            return;
+        }
         if self.removed || !phase.updates_nonplayers() {
             return;
+        }
+        if self.variant == 100 {
+            // Pickup507170 assigns anchor-position before Base447190 applies
+            // current friction to velocity and moves. Base restores configured
+            // friction, then507029 multiplies it by the actual source .965.
+            self.velocity = WorldVector {
+                x: self.anchor_position.x - self.position.x,
+                y: self.anchor_position.y - self.position.y,
+            } * self.current_friction;
+            self.position = self.position + self.velocity;
+            self.presented_position = self.position;
+            self.current_friction = self.configured_friction * 0.965;
+            self.project();
         }
         // 442b30 uses the Game clock minus the entity's creation clock. The
         // immediate Room::Update on admission advances ANM2, but does not
@@ -271,6 +306,11 @@ impl Pickup {
         let dy = py - self.position.y;
         let radius = self.collision_radius + crate::content::PLAYER_COLLISION_RADIUS_WORLD as f32;
         (dx * dx + dy * dy).sqrt() < radius
+    }
+
+    pub(crate) fn project(&mut self) {
+        self.x = f64::from(self.presented_position.x) * 0.65 + 32.0;
+        self.y = f64::from(self.presented_position.y) * 0.65 - 46.0;
     }
 
     /// Free regular coins, keys and bombs. Other families keep typed room selectors

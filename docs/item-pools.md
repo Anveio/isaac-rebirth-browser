@@ -54,8 +54,9 @@ overrides, and pixels remain unaccepted in this leaf.
 
 The following first-acquisition slice routes actual contact into the Player's
 deferred queue. Contact marks the pool's removed ID, starts `Pickup` at source
-speed1, copies the authored pickup presentation, and retains an empty altar
-with its `Empty` overlay. Treasure collection admits sound128 at volume0.5.
+speed1, copies the authored pickup presentation, and retains an empty altar.
+Source40fef0 sets its stopped main `Empty` frame0; the `Alternates` overlay stays
+at its saved frame. Treasure collection admits sound128 at volume0.5.
 Ordinary movement continues during the animation; the animation guard suppresses
 normal tear emission. Full updates advance the authored42-frame main clip and
 36-frame looping copied sprite. The same full update that finishes `Pickup`
@@ -91,3 +92,23 @@ empty-altar mass contact/home motion is absent in this producer. An integer/bool
 comparison also fails on the queued touched byte. All raw failed evidence and
 exact source hashes remain preserved. No health clamp or familiar/stat/cache
 effect acceptance follows from these cases; the active transition is observed.
+
+The following correction applies the actual retained-altar physics. Successful
+collection returns1 and vetoes mass response; a later free subtype0 callback
+returns0. The class4 Player/Pickup contact then uses the common445710 mass
+kernel, including its Player-only half-share velocity impulse and source grid
+displacement check. Each full pickup update sets velocity to anchor minus
+physical position, applies current friction, moves, restores configured friction
+and multiplies it by the source0.965. Intermediate prediction uses stored
+velocity/current friction without advancing the anchor, sprite or contact pass.
+The model retains physical and presented positions separately.
+
+`test:e2e:item-acquisition` is required by the suite registry. Its default generator
+declares the complete contact and grant intervals for both contrived offsets and
+new unfiltered OS cases, while the selection suite still stops before contact.
+`--replay-original DIR` is an explicitly labeled recovery mode for a new live
+browser replay against the exact earlier current-turn native recordings. It
+checks raw bytes, tape hashes, and the complete requested actions; required CI
+uses fresh original and browser runs. Original failures and source hashes remain
+unchanged. Altar grid impact, health clamp boundaries and later item callbacks
+still need independent required cases.
