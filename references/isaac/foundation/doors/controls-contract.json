@@ -1,0 +1,80 @@
+{
+  "schema": 1,
+  "scope": "Persistent Player.controls_enabled for already supported ordinary and boss-scene doorway transitions; no new transition timing or actor callback acceptance.",
+  "nativeBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "sourceField": {
+    "offset": "Player+0x7d4",
+    "port": "Player.controls_enabled",
+    "separateFrom": [
+      "Entity.visible+0x31d",
+      "Player main animation guard+0xbf4"
+    ]
+  },
+  "producers": [
+    {
+      "function": "0x5dcfc0",
+      "instruction": "0x5dd048",
+      "value": false,
+      "boundary": "Actual doorway request after zeroing player velocity; before the next full transition callback."
+    },
+    {
+      "function": "0x5dd1b0",
+      "instruction": "0x5dd1f5",
+      "value": true,
+      "boundary": "Immediately before Game.ChangeRoom550970 and its admitted Room.Update."
+    },
+    {
+      "function": "0x5dd1b0",
+      "instruction": "0x5dd260",
+      "value": false,
+      "boundary": "After room admission and velocity clear, before inbound leg or boss Scene."
+    },
+    {
+      "function": "0x5ddd30",
+      "instruction": "0x5ddecb",
+      "value": true,
+      "boundary": "After the final controls-disabled Player callback at5dde9e; before ordinary room callbacks resume."
+    }
+  ],
+  "sourcePins": [
+    {
+      "address": "0x5dcfc0",
+      "sha256": "8e2a5eeea2e5ccb40998b6e0bfff4109ac58f9ebe69c7e47d0457b0c29b1c671",
+      "bytes": 2475,
+      "researchPath": ".cache/coordination/traversal-controls-research/function-5dcfc0.txt"
+    },
+    {
+      "address": "0x5dd1b0",
+      "sha256": "3d269c0bd9cd85f90cb28afc4a90531667fc5f6e1d15508b71d74b727d60581d",
+      "bytes": 18513,
+      "researchPath": ".cache/coordination/traversal-controls-research/function-5dd1b0.txt"
+    },
+    {
+      "address": "0x5ddd30",
+      "sha256": "cf7a400931dc829b736ba2361f520fde447bd3038a6f0d71cd7c10b31f0390fe",
+      "bytes": 18563,
+      "researchPath": ".cache/coordination/traversal-controls-research/function-5ddd30.txt"
+    }
+  ],
+  "priorRequiredRegression": {
+    "cohort": "Actual Active45 public route w74/release60/w32/release100",
+    "selectedPhases": 333,
+    "mismatchedControlsPresentations": [
+      71,
+      88
+    ],
+    "nativeValue": false,
+    "browserValue": true,
+    "motionParity": "All selected player position/velocity fields matched; the outer traversal flow already froze movement.",
+    "sourceArchiveSha256": "a97c4f07f5e4926b2dcc47699b6dd07f7ba80dc0ade96586b58a250973273865",
+    "browserArchiveSha256": "9d93bfc63ff000289c26f075c3c2cf361ed39ab8990a68f61f19a87b4787490d"
+  },
+  "verification": {
+    "status": "pending-fresh-production-proof",
+    "requiredGate": "tools/e2e/traversal.mjs compares the directly observed native controls field on every selected phase, retaining all existing motion/identity/door assertions."
+  },
+  "exclusions": [
+    "Transition player callbacks currently approximated by immunity remain a separate mandatory gap.",
+    "Special transition modes, forced respawn, stage/death/pickup animation guards and controls producer policies outside admitted doorway transitions are not changed."
+  ]
+}
