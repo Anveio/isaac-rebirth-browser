@@ -7,8 +7,6 @@
 //! seed from the run follows the fresh-profile floor generator. FX stream
 //! assignments remain provisional.
 use crate::effects::{Rect, Viewport};
-#[cfg(test)]
-use crate::seed::stage1_seed;
 use crate::{content, motion, Player};
 use serde::{Deserialize, Serialize};
 
@@ -200,23 +198,6 @@ impl DecorationRng {
         self.state ^= self.state >> 7;
         self.state
     }
-}
-
-/// Build the generated starting-room template for a public run seed.
-///
-/// Native public GL submissions assemble the floor from four overlapping
-/// authored patches and the outer walls from forty-four quads. The recovered
-/// backdrop generator is verified given the room decoration seed. Deriving
-/// that room seed follows the source-derived fresh normal floor generator.
-/// Floor interiors have six valid patches; Basement walls use three of the
-/// four authored wall patches. Atlas row three
-/// contains checkerboard placeholders outside its floor interiors.
-/// Collision planes and authored door anchors do not depend on the seed.
-#[cfg(test)]
-pub fn generate_room(seed: u32) -> Room {
-    let floor = crate::floor::generate_basement(stage1_seed(seed))
-        .expect("fresh normal Basement source contract");
-    Room::from_starting_floor(&floor)
 }
 
 impl Room {
