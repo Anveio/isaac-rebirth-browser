@@ -19,8 +19,9 @@ tests an immutable production artifact against fresh original processes through
 public inputs. CI runs contrived interactions and recorded OS-random scenarios;
 selected source-observable functional contracts are blocking. Full-frame pixel
 comparisons remain explicit diagnostics with their actual pass/fail results.
-`test:e2e` runs paired, floor and weapons gates, retaining every suite's result
-before failing. Use `npm run test:e2e:paired -- --replay-cases PATH` to replay a recorded case. Standalone
+`test:e2e` runs every registered live suite, retaining every suite's result
+before failing. CI discovers that same registry and runs the suites in separate
+jobs with `fail-fast: false`; each job builds and checks its production artifact. Use `npm run test:e2e:paired -- --replay-cases PATH` to replay a recorded case. Standalone
 browser checks require a fresh build. Native Rust/WASM self-equality proves
 replay consistency, not original hidden-state or simulation-tick parity.
 
