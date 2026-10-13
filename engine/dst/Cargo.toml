@@ -1,0 +1,27 @@
+[package]
+name = "rebirth-dst"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "Antithesis deterministic simulation testing for the Rust/WASM engine core"
+
+# This crate is the only checked-in test code permitted by AGENTS.md: the
+# Antithesis DST harness. It stays outside the engine crate so the shipped
+# runtime and its lockfile never link the SDK.
+[dependencies]
+rebirth-cleanroom = { path = ".." }
+antithesis_sdk = { version = "=0.3.0", default-features = false, features = ["full"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["float_roundtrip"] }
+# Pure-Rust interpreter: replays tapes through the shipped engine.wasm.
+wasmi = { version = "2", default-features = false, features = ["std", "stable", "validate", "portable-dispatch", "deterministic"] }
+
+[profile.release]
+opt-level = 3
+# Engine panics are findings, not process aborts: unwind so each case's tape
+# and details are retained. Debug semantics (overflow checks and debug
+# assertions) apply to the engine under simulation.
+panic = "unwind"
+overflow-checks = true
+debug-assertions = true
+debug = "line-tables-only"
