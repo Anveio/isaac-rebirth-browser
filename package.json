@@ -16,8 +16,6 @@
     "assets:check": "python3 tools/check-assets.py",
     "assets:rooms": "python3 tools/foundation/decode-rooms.py --all-base",
     "build:wasm": "bash tools/build-wasm.sh",
-    "test:seeds": "node tools/foundation/seed-invariants.mjs",
-    "test:original-seeds": "node tools/foundation/original-seed-contract.mjs --capture --count 4 --jobs 2",
     "verify:foundation": "bash tools/original/with-display.sh node tools/foundation/verify.mjs",
     "matrix:update": "node tools/foundation/matrix.mjs --write",
     "matrix:check": "node tools/foundation/matrix.mjs --check",

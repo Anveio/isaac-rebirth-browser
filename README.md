@@ -88,8 +88,8 @@ stay red. Rust/WASM self-equality does not prove original-game state parity.
 | Independent screenshot gates and differences | [Comparator](tools/foundation/compare.mjs) |
 | Read-only original numeric-state probes | [Seed relationships](tools/original/state-observer-analyze.py), [position observation](tools/original/position-observer.py) |
 | Original captures and observed state | [Native capture](tools/original/foundation-capture.py), [analysis](tools/original/foundation-analyze.py), [fixtures](references/isaac/foundation/baseline/manifest.json) |
-| Random-seed invariants and replay | [Seed bank](tools/foundation/seeds.mjs), [native/WASM invariants](tools/foundation/seed-invariants.mjs), [browser tests](tools/tests/foundation.spec.ts) |
-| Original seed and input coverage | [Original/Rust/WASM seed contract](tools/foundation/original-seed-contract.mjs), [native probes](tools/original/foundation-random-seeds.py), [input catalogue](tools/verification/input-catalog.json) |
+| Random-seed invariants and replay | [Seed bank](tools/foundation/seeds.mjs), [browser scenario helpers](tools/foundation/seed-invariants.mjs), [browser tests](tools/tests/foundation.spec.ts) |
+| Original seed and input coverage | [Original seed evidence parser](tools/foundation/original-seed-contract.mjs), [native probes](tools/original/foundation-random-seeds.py), [input catalogue](tools/verification/input-catalog.json) |
 | Authored asset extraction | [Extractor](tools/foundation/extract-animations.py) |
 
 For each difference, identify the responsible system, record its task and failing
