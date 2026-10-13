@@ -45,7 +45,8 @@
     "test:e2e:level-descriptors": "bash tools/original/with-display.sh node tools/e2e/ordinary-run.mjs --level-descriptors --count 4",
     "test:e2e:roundworms": "bash tools/original/with-display.sh node tools/e2e/roundworms.mjs",
     "test:e2e:items": "cargo build --manifest-path engine/Cargo.toml --locked --bin floor && bash tools/original/with-display.sh node tools/e2e/items.mjs --count 2",
-    "test:e2e:bomb-pickups": "cargo build --manifest-path engine/Cargo.toml --locked --bin floor && bash tools/original/with-display.sh node tools/e2e/bomb-pickups.mjs --count 2"
+    "test:e2e:bomb-pickups": "cargo build --manifest-path engine/Cargo.toml --locked --bin floor && bash tools/original/with-display.sh node tools/e2e/bomb-pickups.mjs --count 2",
+    "test:e2e:fireplaces": "bash tools/original/with-display.sh node tools/e2e/fireplaces.mjs"
   },
   "devDependencies": {
     "@playwright/test": "1.64.0",

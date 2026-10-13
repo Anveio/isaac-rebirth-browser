@@ -59,8 +59,10 @@ playing state. Ordered queue amounts/flags/actual retained attackers, direct
 HP/classes/clip/cooldown/local RNG fields, source cell950/900 and null grid
 objects remain required; missing observations cannot skip them.
 
-No live acceptance report exists yet. Build/capture work is paused while the
-aggregate checkpoint is being validated and disk headroom is reclaimed.
+No live acceptance report exists yet. The two-worker production WASM/Vite
+build, typecheck, strict Clippy,2557-file asset inventory, matrix and formatter
+checks pass. Native captures are waiting for a slot after the aggregate and
+acquisition/save cohorts. No cached original is accepted as a fresh Fire pair.
 Exact shared MT/particle seeds, live loot, saved72 Fire reconstruction on
 room return, variant1/2/3 AI and rendering are unresolved. W0 treasure,
 T1 hostile return/HP, H2 and center-route failures remain mandatory in their

@@ -215,7 +215,7 @@ fn next30(word: &mut u32) -> u32 {
 /// Red/blue/purple Fire retain their authored selectors until admitted.
 pub(crate) fn from_selector(id: u32, selector: &SpawnSelector) -> Result<Option<Npc>, String> {
     let spawn_seed = match (selector.category, selector.entity_type) {
-        (SpawnCategory::Grid, 1400) if next7(selector.group_seed) % 40 != 0 => {
+        (SpawnCategory::Grid, 1400) if !next7(selector.group_seed).is_multiple_of(40) => {
             room_spawns::next35(selector.group_seed)
         }
         (SpawnCategory::Entity, 33) if selector.variant == 0 => selector.spawn_seed,

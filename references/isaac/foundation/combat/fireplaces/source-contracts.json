@@ -1,0 +1,67 @@
+{
+  "schema": 1,
+  "status": "live-not-run",
+  "base": "cb36018",
+  "nativeBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "artifact": {
+    "schema": 1,
+    "source": "/workspace/isaac-worktrees/combat/dist",
+    "sha256": "730b9d046f95faaaaff8ed1e4e560e4a0941f32560f1553620a270ce0f5bbfa1",
+    "files": 925,
+    "productionIdentityHelperSha256": "e3152b58e2353319ba0963b30439e33c3cc65f84a8c6ebb765c2812486245952",
+    "scope": "Same ordered path/length/bytes algorithm as production server buildIdentity; direct scan avoids an unnecessary second full artifact copy"
+  },
+  "staticSourceContracts": {
+    "fire": {
+      "path": "/workspace/isaac-rebirth-browser/.cache/coordination/fire-research/source-contract.json",
+      "sha256": "c9b1d5f336ad7fe97a420272e999e78ae0c6b0f9e998932ea2579d4a3149dcac",
+      "scope": "Read-only static source boundary map plus retained untouched native W0L0LYYM admission. No new Fire damage/extinguish live parity evidence or browser implementation claim."
+    },
+    "render": {
+      "path": "/workspace/isaac-rebirth-browser/.cache/coordination/combat/fire-render-research/contract.json",
+      "sha256": "025d15f74f6eb5e0bf5868417cb8f503ea2f81872098999c6616c4bead2c35ca",
+      "scope": "Read-only native source and authored ANM2 recovery; no builds, captures, checked-in edits or Git mutations."
+    },
+    "loot-ember": {
+      "path": "/workspace/isaac-rebirth-browser/.cache/coordination/combat/fire-loot-research/contract.json",
+      "sha256": "1a7d69ec2773c5ef4e75954f6e56588827587936eee1cce03e035b7d90e65de7",
+      "scope": "Read-only native source/asset recovery. No builds, native/browser captures, checked-in edits, Git mutations or new runtime parity claims."
+    }
+  },
+  "checks": {
+    "assets": {
+      "status": "pass",
+      "files": 2557
+    },
+    "matrix": "pass",
+    "typecheck": "pass",
+    "wasm-vite-build": "pass",
+    "strictClippy": "pass",
+    "formatter": "pass",
+    "parallelCompilerJobs": 2,
+    "initialClippyFailure": "manual is_multiple_of warning; preserved initial log; replaced with equivalent u32 divisibility predicate"
+  },
+  "logHashes": {
+    "check-build-initial.log": "97add36aafb62f88d708e5ff5a549b9f5385b09c49d163f805d341367a8361be",
+    "build-final.log": "f2ab65a067b1215b9719c43904568fa0be03d8ad5ce308b7e6869a1389e2aac7",
+    "clippy-final.log": "24f99a103ea16e97a27bb29753f9bdfc204e7674bbcbd3bd669365504ffc7658"
+  },
+  "ownedSources": {
+    "engine/src/fireplaces.rs": "ecd5b799c3df239ad42139d43aeef4ad1a80b2198a5b1322f82fed776a530907",
+    "tools/e2e/fireplaces.mjs": "79121b4f8848da67b615a8c8426e82110b54d92f6963c1ee8c7419174614f7b5",
+    "tools/foundation/fireplace-state-pair.mjs": "b134622bb4ea46fd98dd8859fc1f7e4e6479245ccdd5eeb35d14f90c1d7aff68",
+    "tools/original/fireplace-scenarios.py": "a0b96d7e2fb9c17a0ed7a60fdbe66134fcef5d78493c35e95db5aa53a5120451",
+    "tools/original/foundation-combat-observe.py": "57519cb5a5adc5d5215c4a6e833923fae70ac8a3876e82874d1c6cb081a7b8f7",
+    "web/npc-data.json": "dbd77756d4ba32f95d0498483aacfe3335d1acb28b4176fb85c98e944ab92921"
+  },
+  "live": "Fresh original/browser public routes are prepared but no new source process has been launched; this is not accepted gameplay parity.",
+  "remaining": [
+    "Variant1/2/3 AI",
+    "Heart collection and item/trinket loot modifiers",
+    "Live loot fixture",
+    "Saved72 Fire reconstruction on room return",
+    "Exact shared MT, particle seeds/trajectories",
+    "General actor depth/additive blend output",
+    "All prior W0/T1/H2/center mandatory failures"
+  ]
+}
