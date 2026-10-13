@@ -217,6 +217,7 @@ try {
           // Treasure routes also retain the native NPC33 fire admission
           // regression: raw1400 selectors have not yet resolved into actors.
           const rawMetadata = entity => entity.type === 244
+            || (['secret', 'key'].includes(scenario.doorContract) && entity.type === 17 && entity.variant !== 1)
             || (scenario.doorContract === 'free-treasure' && entity.type === 33);
           const supported = entity => rawMetadata(entity)
             || (['secret', 'key'].includes(scenario.doorContract) && entity.type === 17 && entity.variant === 1)

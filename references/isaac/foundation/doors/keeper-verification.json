@@ -1,0 +1,283 @@
+{
+  "schema": 1,
+  "status": "pass",
+  "sourceHead": "bf00109",
+  "nativeBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "production": {
+    "sha256": "6f0aa3bb6205255b81c2872f632d44e3e6e548426c2ed740c978021fce7823f3",
+    "files": 919,
+    "source": "/workspace/isaac-worktrees/floor/dist",
+    "scope": "Immutable snapshot of production build bytes; source/native replay equality is checked separately"
+  },
+  "scope": "Fresh Isaac enters real13x7 secret rooms through public bomb/movement inputs. Actual NPC17/1 constructor and anchored idle compare complete identity/seed/subtype, authored collision/health/countability, source state/flags/anchor/color, static and animated Guy clips, every full/intermediate/frozen phase and room/player/door/minimap joins. Damage/drop callbacks and other Keeper variants remain separate.",
+  "exclusions": [
+    "Keeper damage/death/drop callbacks and actor mutation persistence",
+    "Other Keeper variants, hostile secret policy, other room shapes and floor exits",
+    "Complete sprite/backdrop/pixel parity and total shared MT consumer alignment"
+  ],
+  "report": {
+    "path": ".cache/e2e/keepers/paired-composite-final/report.json",
+    "sha256": "269c140f58278edd60ab461912fe0da4727dab75326c4d18a87a406ee13bd589"
+  },
+  "testedComparators": {
+    "tools/e2e/keepers.mjs": "2661dc3a3bda6dfdd6b92ffe75b11afe8b8a08b35c765a6f98acb01a7bb5be0f",
+    "tools/e2e/traversal.mjs": "c696fb9cb5b2642d27f01f785635e2f76bf99ad8eca444384b6f0133a4304bd3",
+    "tools/original/keeper-scenarios.py": "86eb88eda09e127052757729f490188004c821677f492ff0992b709dce4a72c0",
+    "tools/original/foundation-pickup-observe.py": "2ce3a3f528259c876941d505e31981164a550ce1b2097f4ea136607e3bd365a5"
+  },
+  "currentComparatorOnlyAddition": "Preserve raw metadata fallback for unsupported Keeper variants0/2; tested variant1 path is unchanged.",
+  "authoredInputs": {
+    "web/npc-data.json": "1877ebb0544e5751e23b8b9f22862fbf5ff1645763364ebeaf2d8549c4909c58",
+    "tools/foundation/port-npc-animations.txt": "73ef5641d429077512d535d82a4e875d6faa059717df0ced1c9e45c5552f58e1",
+    "references/isaac/rebirth/resources/entities2.xml": "76408c1612ce7281d131c460cf3450eeae6bc602bc539805d53d76406432a936",
+    "references/isaac/rebirth/resources/gfx/effects/hangingguys.png": "d18453a4431aed24f8fd4ae93df87c9058b6fb95c042abed5051e8ccb14f3a3b"
+  },
+  "pinnedFirstAI": {
+    "contract": "c1b111d43cd6ab7abe4a54569c41ceab7b172b6243fdc298490b09404f2547ca",
+    "initializerDump": "a035c5a31b249292be0011839f6ac2ceff5a073e56ea58895df6f209f1ce26bd",
+    "subtype": "(spawnSeed%9)+1; no RNG Next",
+    "flags": "(flags&~4)|0x11; no Fly appearance draw"
+  },
+  "firstDecimalComparisonArtifact": {
+    "path": ".cache/e2e/keepers/paired-constructor-idle/report.json",
+    "sha256": "a64c69ea5d2eaa1a4c5d427ed4e3fed72f1132c56d6dde2b0a5c9fcc015bf2b1",
+    "status": "fail",
+    "reason": "Native f32 color versus shortest JSON decimal; production f32 bits were already correct. Final comparator compares exact Math.fround values."
+  },
+  "cases": [
+    {
+      "seed": "JF2DSF92",
+      "selection": "contrived opposite phase",
+      "phases": 329,
+      "keeperPresentPhases": 105,
+      "nativeManifest": "/workspace/isaac-worktrees/floor/.cache/e2e/keepers/fresh-native/JF2DSF92/original/manifest.json",
+      "provenance": {
+        "status": "pass",
+        "nativeBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+        "manifestSha256": "75509e67aa3bc843bf01851f089d5783e8742517b1532ad6167e5339ea88de89",
+        "originalLogSha256": "688402b35e35ba2cd953592324ad2e7ddf689bcd19ee11193cdc6ebb26948010",
+        "observations": 329
+      },
+      "inputProvenance": {
+        "status": "pass",
+        "commands": 384,
+        "initialSeed": 1319061482,
+        "bootEpochSeed": 0,
+        "manualSeed": "JF2DSF92"
+      },
+      "traceHistory": {
+        "truncated": false,
+        "inputTraceTruncated": false,
+        "stateHistoryTruncated": false,
+        "retainedStates": 385,
+        "stateEncodedBytes": 28063887,
+        "maxStateEncodedBytes": 33554432
+      },
+      "statesSha256": "3f6461c3eafe628238092efb38431146edc0d91eb92f4f202b9771894aae959d",
+      "inputSha256": "4a2503504f42d3494ee5a49104f200e5f46657a9592877a82d3062df65b6bc6d",
+      "nativeInitializedTuple": {
+        "variant": 1,
+        "subtype": 3,
+        "spawnSeed": 3364657625,
+        "position": [
+          240,
+          160
+        ],
+        "HP": 5,
+        "gridClass": 0,
+        "entityClass": 1,
+        "canShutDoors": false,
+        "boss": false,
+        "flags": 17,
+        "state": 3,
+        "stateFrame": 0,
+        "frameAge": 1,
+        "countdown": 4294967295,
+        "anchor": [
+          240,
+          160
+        ],
+        "color": [
+          0.20000000298023224,
+          0.20000000298023224,
+          0.20000000298023224,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0.20000000298023224,
+          0.20000000298023224,
+          0.20000000298023224
+        ],
+        "clip": "Guy3"
+      },
+      "nativeMatchesActual": "Complete real actor multiset and exact constructor/idle fields match at every selected phase. Colors match exact native float32 bits.",
+      "idleFrameTuple": "[label,nativeFrame,actualFrame]",
+      "firstIdleFrames": [
+        [
+          "keeper-idle-1",
+          0,
+          0
+        ],
+        [
+          "keeper-idle-2",
+          0,
+          0
+        ],
+        [
+          "keeper-idle-3",
+          0,
+          0
+        ],
+        [
+          "keeper-idle-4",
+          0,
+          0
+        ],
+        [
+          "keeper-idle-5",
+          0,
+          0
+        ],
+        [
+          "keeper-idle-6",
+          0,
+          0
+        ],
+        [
+          "keeper-idle-7",
+          0,
+          0
+        ],
+        [
+          "keeper-idle-8",
+          0,
+          0
+        ]
+      ],
+      "returnedActualNativeKeeperCounts": [
+        0,
+        0
+      ],
+      "failures": []
+    },
+    {
+      "seed": "WS03MPHH",
+      "selection": "Previously recorded OS-random secret cohort; retained before Keeper grading",
+      "phases": 329,
+      "keeperPresentPhases": 107,
+      "nativeManifest": "/workspace/isaac-worktrees/floor/.cache/e2e/keepers/fresh-native/WS03MPHH/original/manifest.json",
+      "provenance": {
+        "status": "pass",
+        "nativeBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+        "manifestSha256": "94ed6aa2faa2da64721df318683c575107a9d934c7fe20cdf7bb30c4814b1943",
+        "originalLogSha256": "21d551b69047e66d93a92b1249cfcc17ca5e200c4fe9298618e1a61a279133b8",
+        "observations": 329
+      },
+      "inputProvenance": {
+        "status": "pass",
+        "commands": 384,
+        "initialSeed": 2613242441,
+        "bootEpochSeed": 0,
+        "manualSeed": "WS03MPHH"
+      },
+      "traceHistory": {
+        "truncated": false,
+        "inputTraceTruncated": false,
+        "stateHistoryTruncated": false,
+        "retainedStates": 385,
+        "stateEncodedBytes": 28273833,
+        "maxStateEncodedBytes": 33554432
+      },
+      "statesSha256": "3c3b3e82c1f177f25a9f9c74da47b332d049257eabf9d8064e537fd916382b02",
+      "inputSha256": "3a7160a896eb798656cbe75d5c9b4c839b8ebfb1edd9f5b0cbfe19d905d08769",
+      "nativeInitializedTuple": {
+        "variant": 1,
+        "subtype": 7,
+        "spawnSeed": 442555422,
+        "position": [
+          240,
+          160
+        ],
+        "HP": 5,
+        "gridClass": 0,
+        "entityClass": 1,
+        "canShutDoors": false,
+        "boss": false,
+        "flags": 17,
+        "state": 3,
+        "stateFrame": 0,
+        "frameAge": 1,
+        "countdown": 4294967295,
+        "anchor": [
+          240,
+          160
+        ],
+        "color": [
+          0.20000000298023224,
+          0.20000000298023224,
+          0.20000000298023224,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0.20000000298023224,
+          0.20000000298023224,
+          0.20000000298023224
+        ],
+        "clip": "Guy7"
+      },
+      "nativeMatchesActual": "Complete real actor multiset and exact constructor/idle fields match at every selected phase. Colors match exact native float32 bits.",
+      "idleFrameTuple": "[label,nativeFrame,actualFrame]",
+      "firstIdleFrames": [
+        [
+          "keeper-idle-1",
+          1,
+          1
+        ],
+        [
+          "keeper-idle-2",
+          0,
+          0
+        ],
+        [
+          "keeper-idle-3",
+          0,
+          0
+        ],
+        [
+          "keeper-idle-4",
+          1,
+          1
+        ],
+        [
+          "keeper-idle-5",
+          1,
+          1
+        ],
+        [
+          "keeper-idle-6",
+          0,
+          0
+        ],
+        [
+          "keeper-idle-7",
+          0,
+          0
+        ],
+        [
+          "keeper-idle-8",
+          1,
+          1
+        ]
+      ],
+      "returnedActualNativeKeeperCounts": [
+        0,
+        0
+      ],
+      "failures": []
+    }
+  ]
+}
