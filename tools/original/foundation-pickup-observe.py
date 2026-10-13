@@ -105,6 +105,19 @@ def observe(pid, context):
                     result['npcStateFrame'] = struct.unpack_from('<I', more, 8)[0]
                     result['npcFrameAge'] = struct.unpack_from('<I', more, 0x10)[0]
                     result['npcCountdown'] = struct.unpack_from('<I', more, 0x1c)[0]
+                    if result['type'] == 17:
+                        result['npcEntityFlags'] = struct.unpack_from('<I', raw, 0x318)[0]
+                        result['npcAnchor'] = pair(0x440)
+                        result['npcColor'] = list(struct.unpack_from('<11f', raw, 0x3cc))
+                        result['canShutDoors'], result['boss'] = [bool(value) for value in read(address + 0x103c, 2)]
+                        actor = address + 0x28
+                        pointer = u64(actor + 0x18)
+                        text = u64(pointer)
+                        count = u64(text - 24)
+                        if count > 128: raise ValueError('Unexpected Keeper animation name length')
+                        result['animation'] = read(text, count).decode('ascii')
+                        result['animationFrame'] = struct.unpack('<f', read(actor + 0x120, 4))[0]
+                        result['animationPlaying'] = bool(read(actor + 0x124, 1)[0])
                 return result
 
             game = u64(0x8ecd30)
