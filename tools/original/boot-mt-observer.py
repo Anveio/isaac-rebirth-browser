@@ -64,7 +64,8 @@ def observe(pid,context):
     for index in [0,1,16,17,56,85,103,134,447]:
      level_words=struct.unpack('<7I',read(level_grid+index*0x1c,0x1c));saved_words=struct.unpack('<7I',read(saved_grid+index*0x1c,0x1c))
      pointer=pointers[index] if index<cells else 0
-     sample={'gridIndex':index,'levelSeeds':[level_words[4],level_words[6]],'savedSeeds':[saved_words[4],saved_words[6]],'occupancy':'padding' if index>=cells else 'occupied' if pointer else 'empty'}
+     def record(words):return {'kind':words[0],'variant':words[1],'state':words[2],'sourceWord14':words[3],'primarySeed':words[4],'initialized':bool(words[5]&255),'secondarySeed':words[6]}
+     sample={'gridIndex':index,'levelSeeds':[level_words[4],level_words[6]],'savedSeeds':[saved_words[4],saved_words[6]],'levelRecord':record(level_words),'savedRecord':record(saved_words),'occupancy':'padding' if index>=cells else 'occupied' if pointer else 'empty'}
      if pointer:sample['object']={'kind':u32(pointer+8),'variant':u32(pointer+0xc),'primarySeed':u32(pointer+0x18),'secondarySeed':u32(pointer+0x20)}
      current_samples.append(sample)
     pools=game+0x8bd0;weight_samples=[]

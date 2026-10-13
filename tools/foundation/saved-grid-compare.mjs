@@ -1,7 +1,7 @@
 // Source observations are comparisons only; this module never supplies runtime inputs.
 import assert from 'node:assert/strict';
 
-export function compareSavedRoomGrid(summary, grid, observed) {
+export function compareSavedRoomGrid(summary, grid, observed, { requireRecords = false } = {}) {
   assert.equal(summary.currentRoomRecord, observed.savedRun.currentRoomRecord,
     'Actual current descriptor row identity must match source');
   assert.equal(observed.currentRoomSeedSamples?.length, 9,
@@ -20,6 +20,19 @@ export function compareSavedRoomGrid(summary, grid, observed) {
         differences.push({ gridIndex: source.gridIndex, field,
           original: source[field], production: sample[field],
           sourceGridObject: source.object || null });
+      }
+    }
+    if (requireRecords && source.occupancy !== 'padding') {
+      assert.ok(source.levelRecord && source.savedRecord,
+        'Grid-record acceptance requires newly observed actual Level/Saved records');
+      assert.deepEqual(source.levelRecord, source.savedRecord,
+        'Actual source Level/Saved current-cell record ownership must match');
+      for (const field of ['kind', 'variant', 'state', 'sourceWord14', 'primarySeed', 'initialized', 'secondarySeed']) {
+        if (sample.record?.[field] !== source.savedRecord[field]) {
+          differences.push({ gridIndex: source.gridIndex, field: `record.${field}`,
+            original: source.savedRecord[field], production: sample.record?.[field] ?? null,
+            sourceGridObject: source.object || null });
+        }
       }
     }
   }

@@ -1,0 +1,322 @@
+{
+  "schema": 1,
+  "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "scope": "Actual supported fresh starting-room GridBase seed owners and Room.Save records. Capture parity remains blocking; additional decorations, other derived callbacks and durable continuation are outside this leaf.",
+  "functions": [
+    {
+      "address": "0x560ff0",
+      "fdeBytes": 69,
+      "rawCodeSha256": "452820c346a7c73a993963872ca04c734efd59f1e271e7a48877df71a766a209"
+    },
+    {
+      "address": "0x561040",
+      "fdeBytes": 46,
+      "rawCodeSha256": "2d4c1e9b283342f54a15a9d8f776ee85bfc8360505affe5ebc55c039d644c936"
+    },
+    {
+      "address": "0x561090",
+      "fdeBytes": 72,
+      "rawCodeSha256": "ee965c7142ef4da7fce273c22e28985e0e0200d6d089c97a6b02c955886d3f28"
+    },
+    {
+      "address": "0x561760",
+      "fdeBytes": 1151,
+      "rawCodeSha256": "70e99f12b1d81433301b867a478690f9f5e5ed1d9fbe6e2312f7a7d6a3f57336"
+    },
+    {
+      "address": "0x5c5520",
+      "fdeBytes": 341,
+      "rawCodeSha256": "21d86c96903d73ec9cf437ec52eb9ed961deb8667a7524df0a7c43df7d097301"
+    },
+    {
+      "address": "0x5c5680",
+      "fdeBytes": 310,
+      "rawCodeSha256": "a3bae458217d0889d95fa7d7de398db1d076ae8a62a04175ca159c15e1e66209"
+    },
+    {
+      "address": "0x5ce6b0",
+      "fdeBytes": 1542,
+      "rawCodeSha256": "fe3362b149c783c4592c7d8bc60151c555b76cbf3d1879786e9fa04605888048"
+    },
+    {
+      "address": "0x5cecc0",
+      "fdeBytes": 8315,
+      "rawCodeSha256": "e26a703ef5f01247f6af5b4c9a74dec1e83b0b3063ea1025b0b4b2e0b231714f"
+    },
+    {
+      "address": "0x5c2cb0",
+      "fdeBytes": 28,
+      "rawCodeSha256": "f4e4fc99fb566d238d85980e7f64bdfaa72a26f6079f72e644c1c503b1df1570"
+    },
+    {
+      "address": "0x5717e0",
+      "fdeBytes": 180,
+      "rawCodeSha256": "8b57034315a26df0d7f7e92b8eb0ad7a7c8248981e5177fd11ee539853c8257e"
+    },
+    {
+      "address": "0x5628e0",
+      "fdeBytes": 102,
+      "rawCodeSha256": "3efd32496518497891291a740e3670a6161c62286f50725f533e7c7c62e63694"
+    },
+    {
+      "address": "0x56ed00",
+      "fdeBytes": 2492,
+      "rawCodeSha256": "bb95b9a102c5aa38011e2b96feeabe2f5c5eed2d71b3ff6014172c0196622d4c"
+    },
+    {
+      "address": "0x5c5010",
+      "size": 82,
+      "label": "RoomGridFromRecord",
+      "codeSha256": "6a21b1e64e0ec1112fe32fe253a70b05bdc62177c138b6014c97d625ddfc3fc5"
+    },
+    {
+      "address": "0x40dc60",
+      "size": 308,
+      "label": "AnimationConstructor",
+      "codeSha256": "14a320ad68bf5774aaac17174cf75ca56638063ffb03efde690a6abf3bdd55a7"
+    },
+    {
+      "address": "0x565c40",
+      "size": 55,
+      "label": "DoorSetDirection",
+      "codeSha256": "e2da6e5b7e5f6ff3a06bb7273f2fa4a57074dae8109fcbdb9bd9786b7dd5afb1"
+    },
+    {
+      "address": "0x561e60",
+      "size": 2536,
+      "label": "GridDecorationInit",
+      "codeSha256": "5d16bb38cb9586edfaea28fedb8f57b49cf804f21a0efd3d386ee96d9f29093c"
+    }
+  ],
+  "constructor": {
+    "address": "0x560ff0",
+    "primary": {
+      "call": "0x561017",
+      "owner": "sharedMT42e8c0",
+      "store": "+0x18"
+    },
+    "secondary": {
+      "call": "0x561023",
+      "owner": "sharedMT42e8c0",
+      "store": "+0x20"
+    },
+    "localRng": {
+      "offset": "+0x2c",
+      "constructor": "0x5c2cb0",
+      "state": 2853650767,
+      "shifts": [
+        5,
+        9,
+        7
+      ],
+      "sharedDraws": 0
+    }
+  },
+  "initializers": {
+    "freshSeed": {
+      "address": "0x561040",
+      "overwrite": "primary+0x18 fromcallerESI; secondary preserved",
+      "call": "virtual+0x38 Init; increment+0x14; mark+0x1c; bornGameAge+0x28"
+    },
+    "record": {
+      "address": "0x561090",
+      "overwrite": "records+0x10\u2192primary+0x18; records+0x18\u2192secondary+0x20, plus actualtype/variant/state/frame fields",
+      "constructor": "actual base constructor executes before both raw fields are overwritten"
+    }
+  },
+  "roomOrder": [
+    {
+      "caller": "0x5cecc0",
+      "call": "0x5cf2df",
+      "owner": "0x5ce6b0",
+      "order": "Authored groups in indexorder, realweighted selection and occupied/restored-cell guard; supported grid factory at0x5ce8ba and fresh Init at0x5ce8d7"
+    },
+    {
+      "caller": "0x5cecc0",
+      "call": "0x5cf31f",
+      "owner": "0x5c5680",
+      "order": "enabled descriptordoor mask slots0..7 inascendingorder; factory16 at0x5c576b ifnoexistingDoor, then callerraw42e8c0 at0x5c5722 overridesprimary through freshInit0x5c572c"
+    },
+    {
+      "caller": "0x5cecc0",
+      "calls": [
+        "0x5cf347",
+        "0x5cf357"
+      ],
+      "owner": "0x5c5520",
+      "order": "column0..width\u22121: top y0 thenbottom yheight\u22121; constructoronlyifcellabsent"
+    },
+    {
+      "caller": "0x5cecc0",
+      "calls": [
+        "0x5cf377",
+        "0x5cf387"
+      ],
+      "owner": "0x5c5520",
+      "order": "row0..height\u22122: left x0 thenright xwidth\u22121; topduplicates are skipped byoccupiedcellguard"
+    }
+  ],
+  "ordinaryWalls": {
+    "factory": "type15 at0x5c55ad",
+    "callerPrimaryOverride": "actualraw42e8c0 at0x5c55bf\u2192freshInit0x5c55c9",
+    "roomType16": "special hardcoded grid1/19 replacement branches are separate/unimplemented, notordinarywallrules"
+  },
+  "recordFields": {
+    "0": "kind fromobject+8",
+    "4": "variant fromobject+c",
+    "8": "state fromobject+10",
+    "c": "opaque sourceWord14 fromobject+14",
+    "10": "primary seed fromobject+18",
+    "14": "initialized byte fromobject+1c; padding is not a semantic owner",
+    "18": "secondary seed fromobject+20"
+  },
+  "loadOrder": "Room5cecc0 loops nonzero records in ascending cell index;5cf008\u21925c5010\u2192factory561760\u2192InitRecord561090. Actual constructor consumes two raw seeds before record+10/+18 overwrite object+18/+20.",
+  "authoredDecorationPrimaryHandoff": [
+    {
+      "case": "zero-epoch",
+      "gridIndex": 56,
+      "authoredType": 0,
+      "authoredVariant": 20,
+      "nativeObjectKind": 1,
+      "nativeObjectVariant": 20,
+      "selectorSpawnSeed": 556789747,
+      "nativeObjectPrimarySeed": 556789747,
+      "status": "pass"
+    },
+    {
+      "case": "zero-epoch",
+      "gridIndex": 85,
+      "authoredType": 0,
+      "authoredVariant": 20,
+      "nativeObjectKind": 1,
+      "nativeObjectVariant": 20,
+      "selectorSpawnSeed": 2589511592,
+      "nativeObjectPrimarySeed": 2589511592,
+      "status": "pass"
+    },
+    {
+      "case": "fixed-epoch",
+      "gridIndex": 56,
+      "authoredType": 0,
+      "authoredVariant": 20,
+      "nativeObjectKind": 1,
+      "nativeObjectVariant": 20,
+      "selectorSpawnSeed": 3344069645,
+      "nativeObjectPrimarySeed": 3344069645,
+      "status": "pass"
+    },
+    {
+      "case": "fixed-epoch",
+      "gridIndex": 85,
+      "authoredType": 0,
+      "authoredVariant": 20,
+      "nativeObjectKind": 1,
+      "nativeObjectVariant": 20,
+      "selectorSpawnSeed": 3029961426,
+      "nativeObjectPrimarySeed": 3029961426,
+      "status": "pass"
+    },
+    {
+      "case": "random-0",
+      "gridIndex": 56,
+      "authoredType": 0,
+      "authoredVariant": 20,
+      "nativeObjectKind": 1,
+      "nativeObjectVariant": 20,
+      "selectorSpawnSeed": 80886014,
+      "nativeObjectPrimarySeed": 80886014,
+      "status": "pass"
+    },
+    {
+      "case": "random-0",
+      "gridIndex": 85,
+      "authoredType": 0,
+      "authoredVariant": 20,
+      "nativeObjectKind": 1,
+      "nativeObjectVariant": 20,
+      "selectorSpawnSeed": 4149259757,
+      "nativeObjectPrimarySeed": 4149259757,
+      "status": "pass"
+    },
+    {
+      "case": "random-1",
+      "gridIndex": 56,
+      "authoredType": 0,
+      "authoredVariant": 20,
+      "nativeObjectKind": 1,
+      "nativeObjectVariant": 20,
+      "selectorSpawnSeed": 2465595405,
+      "nativeObjectPrimarySeed": 2465595405,
+      "status": "pass"
+    },
+    {
+      "case": "random-1",
+      "gridIndex": 85,
+      "authoredType": 0,
+      "authoredVariant": 20,
+      "nativeObjectKind": 1,
+      "nativeObjectVariant": 20,
+      "selectorSpawnSeed": 2460782592,
+      "nativeObjectPrimarySeed": 2460782592,
+      "status": "pass"
+    },
+    {
+      "case": "random-2",
+      "gridIndex": 56,
+      "authoredType": 0,
+      "authoredVariant": 20,
+      "nativeObjectKind": 1,
+      "nativeObjectVariant": 20,
+      "selectorSpawnSeed": 3216124943,
+      "nativeObjectPrimarySeed": 3216124943,
+      "status": "pass"
+    },
+    {
+      "case": "random-2",
+      "gridIndex": 85,
+      "authoredType": 0,
+      "authoredVariant": 20,
+      "nativeObjectKind": 1,
+      "nativeObjectVariant": 20,
+      "selectorSpawnSeed": 3195222862,
+      "nativeObjectPrimarySeed": 3195222862,
+      "status": "pass"
+    },
+    {
+      "case": "random-3",
+      "gridIndex": 56,
+      "authoredType": 0,
+      "authoredVariant": 20,
+      "nativeObjectKind": 1,
+      "nativeObjectVariant": 20,
+      "selectorSpawnSeed": 3511525560,
+      "nativeObjectPrimarySeed": 3511525560,
+      "status": "pass"
+    },
+    {
+      "case": "random-3",
+      "gridIndex": 85,
+      "authoredType": 0,
+      "authoredVariant": 20,
+      "nativeObjectKind": 1,
+      "nativeObjectVariant": 20,
+      "selectorSpawnSeed": 1789818513,
+      "nativeObjectPrimarySeed": 1789818513,
+      "status": "pass"
+    }
+  ],
+  "acceptedHandoffChecks": 12,
+  "genericUpdate": {
+    "contractSha256": "38fde7ea6bc333badb9a0ace5a1fa97348296c9805fc982f1e72789521ce6247",
+    "scope": "Base virtual Update/Render/Init are empty408e00. Derived object+14 writes are not inferred."
+  },
+  "implementation": "Actual constructor first seed enters GridEntity.spawn_seed, second enters its source_owner; fresh caller InitSeed replaces only primary. The actual default local RNG retains four5/9/7 words. Null records own two fresh raw words; supported occupied records copy actual object fields and seeds into Level before Saved copy. Complete records remain internal, with eight actual-cell bounded samples plus padding seed pair observations. InitRecord API constructs before both seed overrides but durable restore is not routed/claimed.",
+  "remaining": [
+    "Variable additional GridDecoration1/0 admission remains an actual whole-grid occupancy failure",
+    "Other derived constructors and update/effect callbacks remain unadmitted; no sampler padding",
+    "Room transition mixed authored ordering needs its full NPC/pickup/grid owner route before broad grid seed claims",
+    "Post-update/continue/load and mapped PlayerItems Save/Load remain separate leaves",
+    "Complete postrun shared MT remains diagnostic; actual paired saved current-row seeds/occupancy and sampled record fields are blocking"
+  ],
+  "prohibitedInference": "No observed nativeMT state/index can seed port owners, reset cursors or determine skipped draw counts. Store/mutateactual grid objects on actual constructor/Init paths only."
+}

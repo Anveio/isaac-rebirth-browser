@@ -79,6 +79,7 @@ pub(crate) fn doorway_grid(room: &Room) -> crate::grid::Grid {
                 state: 2,
                 collision_class: 5,
                 spawn_seed: 0,
+                source_owner: None,
             });
         }
     }

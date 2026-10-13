@@ -32,10 +32,15 @@ pub struct SavedRun {
     pub player: Player,
     pub inventory: Inventory,
     pub item_pools: items::ItemPools,
+    pub grid_records: Vec<Option<crate::grid_records::GridRecord>>,
 }
 
 impl SavedRun {
-    pub fn copy_from(state: &State, item_pools: items::ItemPools) -> Self {
+    pub fn copy_from(
+        state: &State,
+        item_pools: items::ItemPools,
+        grid_records: Vec<Option<crate::grid_records::GridRecord>>,
+    ) -> Self {
         Self {
             run_seed: state.run_seed.clone(),
             seeded_run: state.seeded_run,
@@ -47,6 +52,7 @@ impl SavedRun {
             player: state.player.clone(),
             inventory: state.inventory.clone(),
             item_pools,
+            grid_records,
         }
     }
 
@@ -74,6 +80,7 @@ impl SavedRun {
                     Some(cell) if cell.entity.is_some() => GridOccupancy::Occupied,
                     Some(_) => GridOccupancy::Empty,
                 },
+                record: self.grid_records.get(grid_index).cloned().flatten(),
             });
         }
         Ok(SavedRunSummary {
@@ -108,8 +115,8 @@ pub struct SavedRunSummary {
     pub max_red_hp: u8,
     pub inventory: Inventory,
     pub empty_grid_cells_saved: usize,
-    /// Occupied cells also copy object+20, whose real 560ff0 constructor
-    /// admission is not yet routed. No substitute secondary seed is created.
+    /// Only actually constructed occupied owners supply secondary seeds.
+    /// Unsupported objects remain pending without a substitute descriptor seed.
     pub occupied_grid_seeds_pending: Vec<usize>,
     pub item_pools: SavedItemPoolsSummary,
     pub current_room_record: usize,
@@ -131,6 +138,7 @@ pub struct CurrentRoomSeedSample {
     pub level_seeds: [u32; 2],
     pub saved_seeds: [u32; 2],
     pub occupancy: GridOccupancy,
+    pub record: Option<crate::grid_records::GridRecord>,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
@@ -206,14 +214,20 @@ impl SavedItemPoolsSummary {
     }
 }
 
-/// Room.Save 5ce2d0 replaces empty cells in the active descriptor with two
-/// real raw MT seeds. Occupied grid records require their actual object state.
-pub fn save_empty_grid_cells(
+pub struct SavedGridCells {
+    pub empty: usize,
+    pub occupied_pending: Vec<usize>,
+    pub records: Vec<Option<crate::grid_records::GridRecord>>,
+}
+
+/// Room.Save 5ce2d0 stores two fresh raw words for null cells and copies actual
+/// supported occupied records. Unadmitted object owners remain explicit gaps.
+pub fn save_grid_cells(
     table: &mut mt::DescriptorSeeds,
     shared: &mut mt::Mt19937,
     room: &Room,
     descriptor: usize,
-) -> Result<(usize, Vec<usize>), String> {
+) -> Result<SavedGridCells, String> {
     let grid = room
         .grid
         .as_ref()
@@ -224,13 +238,26 @@ pub fn save_empty_grid_cells(
     }
     let mut empty = 0;
     let mut occupied = Vec::new();
+    let mut records = Vec::with_capacity(count);
     for (index, cell) in grid.cells.iter().enumerate() {
-        if cell.entity.is_none() {
-            table.replace(descriptor, index, [shared.next_u32(), shared.next_u32()])?;
-            empty += 1;
-        } else {
-            occupied.push(index);
+        let record = match &cell.entity {
+            None => {
+                empty += 1;
+                Some(crate::grid_records::GridRecord::empty(shared))
+            }
+            Some(entity) => entity.record().or_else(|| {
+                occupied.push(index);
+                None
+            }),
+        };
+        if let Some(record) = &record {
+            table.replace(descriptor, index, record.seed_pair())?;
         }
+        records.push(record);
     }
-    Ok((empty, occupied))
+    Ok(SavedGridCells {
+        empty,
+        occupied_pending: occupied,
+        records,
+    })
 }

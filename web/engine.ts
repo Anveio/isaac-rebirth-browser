@@ -22,6 +22,10 @@ export interface Impact { id: number; x: number; y: number; age: number; }
 export interface ActorRef { kind: "player" | "tear" | "bomb" | "pickup" | "npc" | "projectile" | "effect"; id: number; }
 export interface MtState { words: number[]; index: number; }
 export interface GridSeedSample { roomRecord: number; gridIndex: number; seeds: [number, number]; }
+export interface GridRecord {
+  kind: number; variant: number; state: number; sourceWord14: number;
+  primarySeed: number; initialized: boolean; secondarySeed: number;
+}
 export interface BootLifecycle {
   shared: MtState; savedPlayerSeed: number; savedGridSeedSamples: GridSeedSample[];
   levelGridSeedSamples: GridSeedSample[]; backdropSeed: number; menuRunSeed: number; menuSeedText: string; secretPoses: number[];
@@ -32,7 +36,8 @@ export interface SavedRunSummary {
   inventory: {coins: number; bombs: number; keys: number};
   emptyGridCellsSaved: number; occupiedGridSeedsPending: number[];
   currentRoomRecord: number; currentRoomSeedSamples: {gridIndex: number;
-    levelSeeds: [number, number]; savedSeeds: [number, number]; occupancy: "empty" | "occupied" | "padding"}[];
+    levelSeeds: [number, number]; savedSeeds: [number, number]; occupancy: "empty" | "occupied" | "padding";
+    record: GridRecord | null}[];
   itemPools: {poolSeed: number; rootRngSeed: number; secondaryRngSeed: number;
     specialFactor: number; specialCounters: number[]; removedSamples: {itemId: number; removed: boolean}[];
     pillEffects: number[]; weightSamples: {poolId: number; itemId: number; weight: number}[]};
