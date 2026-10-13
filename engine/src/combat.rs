@@ -116,7 +116,9 @@ pub fn resolve_tear_npc_contact(
     npc: &mut ContactBody,
 ) -> Result<ContactResolution, String> {
     if tear.entity_type != 2 || !matches!(npc.entity_type, 13 | 18 | 244) {
-        return Err("regular tear response requires admitted ordinary Fly types".into());
+        return Err(
+            "regular tear response requires an admitted Fly, AttackFly or Round Worm".into(),
+        );
     }
     resolve_contact(
         tear,
@@ -131,17 +133,18 @@ pub fn resolve_tear_npc_contact(
     )
 }
 
-/// Fresh ordinary Fly pairs have no callback veto. Regular Bomb callback
+/// Admitted Fly, AttackFly and Round Worm pairs have no callback veto.
+/// The first body may instead be a regular Bomb; its callback
 /// 456c20 damps NPC velocity0.2 and its own0.5 before the mass response.
 /// Source445710 sorts by entity type and retains its pre-callback overlap.
-pub fn resolve_fly_pair(
+pub fn resolve_npc_or_bomb_pair(
     first: &mut ContactBody,
     second: &mut ContactBody,
 ) -> Result<ContactResolution, String> {
     if !matches!(first.entity_type, 4 | 13 | 18 | 244)
         || !matches!(second.entity_type, 13 | 18 | 244)
     {
-        return Err("ordinary Fly pairs require admitted source actor types".into());
+        return Err("NPC pairs require admitted Fly, AttackFly or Round Worm types, with an optional first Bomb".into());
     }
     if first.entity_type > second.entity_type {
         resolve_contact(second, first, |_| false, bomb_pair_callback)

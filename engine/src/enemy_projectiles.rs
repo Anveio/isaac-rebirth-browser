@@ -175,7 +175,7 @@ pub fn player_contacts(state: &mut State) -> Result<(), String> {
     static COLLIDER: OnceLock<Collider> = OnceLock::new();
     let collider = COLLIDER.get_or_init(|| {
         Collider::new(CollisionGeometry {
-            radius: 10.0,
+            radius: content::PLAYER_COLLISION_RADIUS_WORLD as f32,
             scale: WorldVector { x: 1.0, y: 1.0 },
             points: 40,
         })
@@ -191,8 +191,8 @@ pub fn player_contacts(state: &mut State) -> Result<(), String> {
             entity_type: 1,
             position: bombs::player_world(state),
             velocity: bombs::player_velocity(state),
-            radius: 10.0,
-            mass: 5.0,
+            radius: content::PLAYER_COLLISION_RADIUS_WORLD as f32,
+            mass: content::PLAYER_COLLISION_MASS_WORLD as f32,
         };
         let mut projectile_body = combat::ContactBody {
             id: projectile.id,

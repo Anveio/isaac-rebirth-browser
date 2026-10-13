@@ -1,0 +1,8 @@
+{
+  "scope": "Formatting step only, before subsequent guard/quality metadata updates. Values and all object/array order were canonically equal before and after. Captured source hashes remain historical and unchanged.",
+  "changes": [
+    {"path": "references/isaac/foundation/combat/roundworms/hostile-return-tail.json", "beforeSha256": "e6138d9581515af4ccd98a158f68585878a6cfa61f7dc3562bcdfceee51c75f8", "afterSha256": "586580b056494fee78e4ccb810e1d82e214349837fcd685e65e2814c14e8da56", "beforeLines": 1418, "afterLines": 359, "semanticsAndObjectArrayOrderPreserved": true},
+    {"path": "references/isaac/foundation/combat/roundworms/random-selection.json", "beforeSha256": "e518d517fae01b958623d2f54465d4b034554c940c8d3166a7c6a198ead85875", "afterSha256": "b6170e8c7f5cc29254b9dba7a2b856e77ab1f5c30eb9928c3cd0fe2a2512274d", "beforeLines": 532, "afterLines": 299, "semanticsAndObjectArrayOrderPreserved": true},
+    {"path": "references/isaac/foundation/combat/roundworms/verification.json", "beforeSha256": "334792d3048d43489f772095b7bdd04a2a8cdbaa33f682aa0af84355891d93a6", "afterSha256": "60e8445564125c0116c7ca17ccb19aea9c41c12e0aec89b85b424a4fb3a89e40", "beforeLines": 1292, "afterLines": 715, "semanticsAndObjectArrayOrderPreserved": true}
+  ]
+}

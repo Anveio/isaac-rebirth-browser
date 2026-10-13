@@ -20,15 +20,18 @@ const checks = [], diagnostics = [];
 const check = (rows, label, field, expected, observed) => { assert.notEqual(expected, undefined, field); assert.notEqual(observed, undefined, field); rows.push({label,field,expected,actual:observed,status:JSON.stringify(expected)===JSON.stringify(observed)?'pass':'fail'}); };
 const execution = Object.fromEntries(['native', 'browser'].map(game => [game, Object.fromEntries(['admission','appearance','hidden','relocation','shoot','projectile-contact','locked','hostile-return'].map(name => [name,false]))]));
 const initial = {native:new Map(),browser:new Map()}, prior = {native:new Map(),browser:new Map()};
-let hostileDescriptor;
+assert.ok(replay.pairedTape.some(action=>action.type==='capture'&&action.label==='gameplay-start'),'Tape must declare its gameplay boundary');
+let hostileDescriptor, gameplayStarted=false;
 const bodies = [];
 for (const action of replay.pairedTape) {
   if (action.type !== 'capture') continue;
   const label = action.label, observation = observations.get(label), actual = frames.get(label)?.state;
+  if(label==='gameplay-start')gameplayStarted=true;
   assert.ok(observation && actual, `Missing required capture${label}`);
   assert.equal(observation.status, 'pass');
   const source = observation.gameplay;
   if (actual.screen !== 'playing') {
+    assert.equal(gameplayStarted,false,'Gameplay captures may not fall back to pre-game skipping');
     assert.equal(source.status, 'skip', 'Only explicitly pre-game observations may skip');
     continue;
   }

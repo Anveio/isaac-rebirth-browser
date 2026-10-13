@@ -13,30 +13,17 @@
       "artifactSha256": "e2f8eb250a1f815d5733f3bf89a5f08fcb513206a2a922ec33bfad2aeea66175",
       "originalTransport": "pass",
       "browserTransport": "pass",
-      "pairedCaptures": {
-        "pass": 71,
-        "total": 146
-      },
+      "pairedCaptures": {"pass": 71, "total": 146},
       "sourcesStableDuringCapture": true,
       "comparisonOnlyReplay": {
         "capturesUnchanged": true,
         "comparatorStable": true,
-        "capturedSources": {
-          "tools/e2e/roundworms.mjs": "83d6b23c946c80498256a281b76f37884fee76dcd7a5aef6848f8dbc8bf04ab7",
-          "tools/original/roundworm-scenarios.py": "4d7cba6e933439831380091591cc7a5e794f3a165c72717d4aa234d15e37aacf",
-          "tools/foundation/roundworm-state-pair.mjs": "56b556aca4abba157faa52c78b8a0d7b7041e50bf4c17d42c48921521533152a",
-          "references/isaac/foundation/combat/roundworms/random-selection.json": "e518d517fae01b958623d2f54465d4b034554c940c8d3166a7c6a198ead85875",
-          "references/isaac/foundation/combat/roundworms/hostile-return-tail.json": "e6138d9581515af4ccd98a158f68585878a6cfa61f7dc3562bcdfceee51c75f8"
-        },
+        "capturedSources": {"tools/e2e/roundworms.mjs": "83d6b23c946c80498256a281b76f37884fee76dcd7a5aef6848f8dbc8bf04ab7", "tools/original/roundworm-scenarios.py": "4d7cba6e933439831380091591cc7a5e794f3a165c72717d4aa234d15e37aacf", "tools/foundation/roundworm-state-pair.mjs": "56b556aca4abba157faa52c78b8a0d7b7041e50bf4c17d42c48921521533152a", "references/isaac/foundation/combat/roundworms/random-selection.json": "e518d517fae01b958623d2f54465d4b034554c940c8d3166a7c6a198ead85875", "references/isaac/foundation/combat/roundworms/hostile-return-tail.json": "e6138d9581515af4ccd98a158f68585878a6cfa61f7dc3562bcdfceee51c75f8"},
         "beforeComparatorReportSha256": "af975f3de7cb7aa3bc73e0a47bc6899e041997deff5d0e38193333e21443c7fa",
         "beforeCohortReportSha256": "7ccf45799ec6b41a332944c18109081e4b6469407f260604f4ffd13602dbcf66",
         "source": "Source sprite/default parameter assertions added; all former required failures remain required."
       },
-      "hostExecution": {
-        "frameTimeoutSeconds": 120.0,
-        "lpNumThreads": "2",
-        "scope": "Host-wall wait limit and requested software-renderer pool; public tape/virtual steps unchanged"
-      },
+      "hostExecution": {"frameTimeoutSeconds": 120.0, "lpNumThreads": "2", "scope": "Host-wall wait limit and requested software-renderer pool; public tape/virtual steps unchanged"},
       "requiredFields": 8549,
       "failedRequiredFields": 448,
       "failureGroups": {
@@ -53,58 +40,20 @@
       },
       "exactDiagnosticFields": 1064,
       "failedDiagnostics": 680,
-      "sourceHashes": {
-        "original": "fd26cd7a8a267ebc574ec28fc974f4675c64a900d25eb016d8709ee7c99fe581",
-        "browser": "ab4f98bd0a851f3a5e671f612fdfe2ee34197a4d3ca7991504096c7aa2c231d9",
-        "comparator": "f82c6d44bad28450cbbcddf41a9c80f042b15541de3f9e9ebc5e943e1d912b8e"
-      },
+      "sourceHashes": {"original": "fd26cd7a8a267ebc574ec28fc974f4675c64a900d25eb016d8709ee7c99fe581", "browser": "ab4f98bd0a851f3a5e671f612fdfe2ee34197a4d3ca7991504096c7aa2c231d9", "comparator": "d4a86c025c53e3b28557f1c1ac7ac754a4bb7f5c18b8b69c78f4158389f7e7a7"},
       "pairedReportSha256": "088e4e30a0399df8c04248fa1cb3f0e351f4a43aca003fe0624fce8437f2f4b3",
-      "cohortReportSha256": "6ee409cb29ce0d50e94a70ea34e85e4919435f4188f47a0429e796e57afcbb19",
-      "actorReportSha256": "45f30cc60f3c259c75e97a7479d9f319e4c32ffdc531edf1d736836144adfdef",
+      "cohortReportSha256": "caf69ade80a42ba9f9a28cfd5e3af4a538e52d5176991cafc3e98bd42742460d",
+      "actorReportSha256": "3e32bb141a1c5895957476833061154fe73e591518817b18214b3ef1bf9a16ce",
       "caseSha256": "5cc4213de7c9b9a0d51d81de100b8edb8bfcc1eb93a14ca17bde373a468067ec",
-      "independentProjectileLaws": {
-        "fields": 952,
-        "failures": 0,
-        "scope": "Actual native and browser flags-zero radius/mass/defaults, null stopped birth sprite, first-full four-frame sprite loop, full f32 falling speed/height, intermediate vertical freeze and same-full ground death."
-      },
+      "independentProjectileLaws": {"fields": 952, "failures": 0, "scope": "Actual native and browser flags-zero radius/mass/defaults, null stopped birth sprite, first-full four-frame sprite loop, full f32 falling speed/height, intermediate vertical freeze and same-full ground death."},
       "exactNpcMetadata": {
         "fields": 2882,
         "failures": 0,
-        "names": [
-          "animationSpeed",
-          "appearanceCounter",
-          "boss",
-          "canShutDoors",
-          "contactDamage",
-          "gridClass",
-          "hp",
-          "mass",
-          "maxHp",
-          "radius",
-          "savedInitializedState"
-        ]
+        "names": ["animationSpeed", "appearanceCounter", "boss", "canShutDoors", "contactDamage", "gridClass", "hp", "mass", "maxHp", "radius", "savedInitializedState"]
       },
       "execution": {
-        "native": {
-          "admission": true,
-          "appearance": true,
-          "hidden": true,
-          "relocation": true,
-          "shoot": true,
-          "projectile-contact": true,
-          "locked": true,
-          "hostile-return": false
-        },
-        "browser": {
-          "admission": true,
-          "appearance": true,
-          "hidden": true,
-          "relocation": true,
-          "shoot": true,
-          "projectile-contact": true,
-          "locked": true,
-          "hostile-return": false
-        }
+        "native": {"admission": true, "appearance": true, "hidden": true, "relocation": true, "shoot": true, "projectile-contact": true, "locked": true, "hostile-return": false},
+        "browser": {"admission": true, "appearance": true, "hidden": true, "relocation": true, "shoot": true, "projectile-contact": true, "locked": true, "hostile-return": false}
       },
       "acceptedProjectileDamage": [
         {
@@ -118,14 +67,8 @@
             "variant": 0,
             "raw1c": 244,
             "raw20": 0,
-            "position": [
-              89.21665954589844,
-              320.2011413574219
-            ],
-            "velocity": [
-              -6.853785514831543,
-              7.281869888305664
-            ],
+            "position": [89.21665954589844, 320.2011413574219],
+            "velocity": [-6.853785514831543, 7.281869888305664],
             "flags": 0,
             "activeActorSequenceId": 35,
             "activeActorSpawnSeed": 3753207682
@@ -133,14 +76,8 @@
           "joinedActualProjectile": {
             "id": 35,
             "seed": 3753207682,
-            "position": [
-              90.28064727783203,
-              319.0706787109375
-            ],
-            "velocity": [
-              -2.288818359375e-05,
-              -2.09808349609375e-05
-            ],
+            "position": [90.28064727783203, 319.0706787109375],
+            "velocity": [-2.288818359375e-05, -2.09808349609375e-05],
             "height": -19.568531036376953,
             "fallingSpeed": 1.5076147317886353,
             "fallingAcceleration": 0.10000000149011612,
@@ -175,14 +112,8 @@
               "fullUpdates": 15,
               "dead": true,
               "acceptedPlayerHit": true,
-              "position": {
-                "x": 93.405945,
-                "y": 332.50778
-              },
-              "velocity": {
-                "x": -6.0484056,
-                "y": -1.13429
-              }
+              "position": {"x": 93.405945, "y": 332.50778},
+              "velocity": {"x": -6.0484056, "y": -1.13429}
             }
           ],
           "stateSha256": "39d9b4554564097fdfef6f34296d5f8012f0920b693662b44c34b7e1ca642973"
@@ -201,14 +132,8 @@
               "variant": 0,
               "raw1c": 1,
               "raw20": 0,
-              "position": [
-                80,
-                329.9935302734375
-              ],
-              "velocity": [
-                4.42632287599537e-33,
-                -8.487994562089883e-29
-              ],
+              "position": [80, 329.9935302734375],
+              "velocity": [4.42632287599537e-33, -8.487994562089883e-29],
               "flags": 4,
               "activeActorSequenceId": 34,
               "activeActorSpawnSeed": 3190928724
@@ -228,14 +153,8 @@
               "variant": 0,
               "raw1c": 1,
               "raw20": 0,
-              "position": [
-                80,
-                329.9935302734375
-              ],
-              "velocity": [
-                4.42632287599537e-33,
-                -8.487994562089883e-29
-              ],
+              "position": [80, 329.9935302734375],
+              "velocity": [4.42632287599537e-33, -8.487994562089883e-29],
               "flags": 4,
               "activeActorSequenceId": null,
               "activeActorSpawnSeed": null
@@ -255,14 +174,8 @@
               "variant": 0,
               "raw1c": 1,
               "raw20": 0,
-              "position": [
-                80,
-                329.9935302734375
-              ],
-              "velocity": [
-                4.42632287599537e-33,
-                -8.487994562089883e-29
-              ],
+              "position": [80, 329.9935302734375],
+              "velocity": [4.42632287599537e-33, -8.487994562089883e-29],
               "flags": 4,
               "activeActorSequenceId": null,
               "activeActorSpawnSeed": null
@@ -270,7 +183,8 @@
           },
           "bodySha256": "160a76e5049ed9fc59c835368ad4720c5ef68045113cfb973cd4fbf1df12822e"
         }
-      ]
+      ],
+      "boundaryGuardOnlyReplay": {"capturesUnchanged": true, "comparatorStable": true, "beforeComparatorReportSha256": "45f30cc60f3c259c75e97a7479d9f319e4c32ffdc531edf1d736836144adfdef", "beforeCohortReportSha256": "6ee409cb29ce0d50e94a70ea34e85e4919435f4188f47a0429e796e57afcbb19", "scope": "Pre-game skips forbidden from declared gameplay-start onward; no gameplay assertions are removed."}
     },
     {
       "case": "paired-worm-t1-hostile-return",
@@ -279,90 +193,36 @@
       "artifactSha256": "c9f911edbfd9d35f82f967fa81bc040deaf63c6c674e634caa07de47d497aabd",
       "originalTransport": "pass",
       "browserTransport": "pass",
-      "pairedCaptures": {
-        "pass": 180,
-        "total": 180
-      },
+      "pairedCaptures": {"pass": 180, "total": 180},
       "sourcesStableDuringCapture": true,
       "comparisonOnlyReplay": {
         "capturesUnchanged": true,
         "comparatorStable": true,
-        "capturedSources": {
-          "tools/e2e/roundworms.mjs": "83d6b23c946c80498256a281b76f37884fee76dcd7a5aef6848f8dbc8bf04ab7",
-          "tools/original/roundworm-scenarios.py": "4d7cba6e933439831380091591cc7a5e794f3a165c72717d4aa234d15e37aacf",
-          "tools/foundation/roundworm-state-pair.mjs": "56b556aca4abba157faa52c78b8a0d7b7041e50bf4c17d42c48921521533152a",
-          "references/isaac/foundation/combat/roundworms/random-selection.json": "e518d517fae01b958623d2f54465d4b034554c940c8d3166a7c6a198ead85875",
-          "references/isaac/foundation/combat/roundworms/hostile-return-tail.json": "e6138d9581515af4ccd98a158f68585878a6cfa61f7dc3562bcdfceee51c75f8"
-        },
+        "capturedSources": {"tools/e2e/roundworms.mjs": "83d6b23c946c80498256a281b76f37884fee76dcd7a5aef6848f8dbc8bf04ab7", "tools/original/roundworm-scenarios.py": "4d7cba6e933439831380091591cc7a5e794f3a165c72717d4aa234d15e37aacf", "tools/foundation/roundworm-state-pair.mjs": "56b556aca4abba157faa52c78b8a0d7b7041e50bf4c17d42c48921521533152a", "references/isaac/foundation/combat/roundworms/random-selection.json": "e518d517fae01b958623d2f54465d4b034554c940c8d3166a7c6a198ead85875", "references/isaac/foundation/combat/roundworms/hostile-return-tail.json": "e6138d9581515af4ccd98a158f68585878a6cfa61f7dc3562bcdfceee51c75f8"},
         "beforeComparatorReportSha256": "1c6c632cb39afd624db9d57175ffac2548c5fccdaf9b539aacd951d631f7b44a",
         "beforeCohortReportSha256": "5a9d05935eb8f23fabcf024bb67b8ba66c8fd44b5d356882384764adeb425e1e",
         "source": "Source sprite/default parameter assertions added; all former required failures remain required."
       },
-      "hostExecution": {
-        "frameTimeoutSeconds": 120.0,
-        "lpNumThreads": "2",
-        "scope": "Host-wall wait limit and requested software-renderer pool; public tape/virtual steps unchanged"
-      },
+      "hostExecution": {"frameTimeoutSeconds": 120.0, "lpNumThreads": "2", "scope": "Host-wall wait limit and requested software-renderer pool; public tape/virtual steps unchanged"},
       "requiredFields": 6761,
       "failedRequiredFields": 4,
-      "failureGroups": {
-        "state": 2,
-        "visible": 2
-      },
+      "failureGroups": {"state": 2, "visible": 2},
       "exactDiagnosticFields": 940,
       "failedDiagnostics": 177,
-      "sourceHashes": {
-        "original": "256099a4194f89c58ef32113f5f43f4c8fd90a1d0fc7d4924473d91ec2dfae3d",
-        "browser": "4d63e517be432017d81a99b870e721e271d600e119433759a2e990baf3415b06",
-        "comparator": "f82c6d44bad28450cbbcddf41a9c80f042b15541de3f9e9ebc5e943e1d912b8e"
-      },
+      "sourceHashes": {"original": "256099a4194f89c58ef32113f5f43f4c8fd90a1d0fc7d4924473d91ec2dfae3d", "browser": "4d63e517be432017d81a99b870e721e271d600e119433759a2e990baf3415b06", "comparator": "d4a86c025c53e3b28557f1c1ac7ac754a4bb7f5c18b8b69c78f4158389f7e7a7"},
       "pairedReportSha256": "4da87c024ae7b5d95ecb760be31ba1c7999864effd3711982559dff1346b90e9",
-      "cohortReportSha256": "5512e2b7ea501b445ad4bcfa48f86dc4bf894032e2414b8628c17cf5ae1571c0",
-      "actorReportSha256": "5f74a64cbafeac918aa38ec190f0ca7ad6321ae1dc0853dd57873f4488654bd6",
+      "cohortReportSha256": "af17cd02e4d17b63cfdd7b5c086945238537cca5ca42c87748bd299be5b30fd8",
+      "actorReportSha256": "2af4950d0ef93757401efcc70fde9ac4aac76a265432f2f5f013a160b36cfc82",
       "caseSha256": "451f0894e721abd18381cfd15261848bc60e20cc6b3804d073df833997b9b0c4",
-      "independentProjectileLaws": {
-        "fields": 0,
-        "failures": 0,
-        "scope": "Actual native and browser flags-zero radius/mass/defaults, null stopped birth sprite, first-full four-frame sprite loop, full f32 falling speed/height, intermediate vertical freeze and same-full ground death."
-      },
+      "independentProjectileLaws": {"fields": 0, "failures": 0, "scope": "Actual native and browser flags-zero radius/mass/defaults, null stopped birth sprite, first-full four-frame sprite loop, full f32 falling speed/height, intermediate vertical freeze and same-full ground death."},
       "exactNpcMetadata": {
         "fields": 2178,
         "failures": 0,
-        "names": [
-          "animationSpeed",
-          "appearanceCounter",
-          "boss",
-          "canShutDoors",
-          "contactDamage",
-          "gridClass",
-          "hp",
-          "mass",
-          "maxHp",
-          "radius",
-          "savedInitializedState"
-        ]
+        "names": ["animationSpeed", "appearanceCounter", "boss", "canShutDoors", "contactDamage", "gridClass", "hp", "mass", "maxHp", "radius", "savedInitializedState"]
       },
       "execution": {
-        "native": {
-          "admission": true,
-          "appearance": true,
-          "hidden": true,
-          "relocation": true,
-          "shoot": false,
-          "projectile-contact": false,
-          "locked": true,
-          "hostile-return": true
-        },
-        "browser": {
-          "admission": true,
-          "appearance": true,
-          "hidden": true,
-          "relocation": false,
-          "shoot": false,
-          "projectile-contact": false,
-          "locked": true,
-          "hostile-return": true
-        }
+        "native": {"admission": true, "appearance": true, "hidden": true, "relocation": true, "shoot": false, "projectile-contact": false, "locked": true, "hostile-return": true},
+        "browser": {"admission": true, "appearance": true, "hidden": true, "relocation": false, "shoot": false, "projectile-contact": false, "locked": true, "hostile-return": true}
       },
       "acceptedProjectileDamage": [],
       "hostileReturnBoundary": [
@@ -371,54 +231,14 @@
           "sourceSystemCounter": 1397,
           "bodySha256": "83d3e404b2ed70a87f664b7cf61b855ae3164b91087d24e5ddcf3e938ce4b7a1",
           "fields": [
-            {
-              "field": "room.identity",
-              "expected": 6,
-              "actual": 6,
-              "status": "pass"
-            },
-            {
-              "field": "room.combatClear",
-              "expected": false,
-              "actual": false,
-              "status": "pass"
-            },
-            {
-              "field": "room.combatClearCountdown",
-              "expected": 10,
-              "actual": 10,
-              "status": "pass"
-            },
-            {
-              "field": "manager.countablePolicy",
-              "expected": true,
-              "actual": true,
-              "status": "pass"
-            },
-            {
-              "field": "door60.state",
-              "expected": 1,
-              "actual": 1,
-              "status": "pass"
-            },
-            {
-              "field": "door60.class",
-              "expected": 4,
-              "actual": 4,
-              "status": "pass"
-            },
-            {
-              "field": "door74.state",
-              "expected": 1,
-              "actual": 1,
-              "status": "pass"
-            },
-            {
-              "field": "door74.class",
-              "expected": 4,
-              "actual": 4,
-              "status": "pass"
-            }
+            {"field": "room.identity", "expected": 6, "actual": 6, "status": "pass"},
+            {"field": "room.combatClear", "expected": false, "actual": false, "status": "pass"},
+            {"field": "room.combatClearCountdown", "expected": 10, "actual": 10, "status": "pass"},
+            {"field": "manager.countablePolicy", "expected": true, "actual": true, "status": "pass"},
+            {"field": "door60.state", "expected": 1, "actual": 1, "status": "pass"},
+            {"field": "door60.class", "expected": 4, "actual": 4, "status": "pass"},
+            {"field": "door74.state", "expected": 1, "actual": 1, "status": "pass"},
+            {"field": "door74.class", "expected": 4, "actual": 4, "status": "pass"}
           ],
           "nativeNpc": [
             {
@@ -427,10 +247,7 @@
               "saved": 6,
               "age": 1,
               "animation": "Idle",
-              "position": [
-                80,
-                160
-              ]
+              "position": [80, 160]
             },
             {
               "seed": 1181157116,
@@ -438,10 +255,7 @@
               "saved": 6,
               "age": 1,
               "animation": "Idle",
-              "position": [
-                560,
-                400
-              ]
+              "position": [560, 400]
             }
           ],
           "browserNpc": [
@@ -451,10 +265,7 @@
               "saved": 6,
               "age": 1,
               "animation": "Idle",
-              "position": [
-                80,
-                160
-              ]
+              "position": [80, 160]
             },
             {
               "seed": 1181157116,
@@ -462,10 +273,7 @@
               "saved": 6,
               "age": 1,
               "animation": "Idle",
-              "position": [
-                560,
-                400
-              ]
+              "position": [560, 400]
             }
           ]
         },
@@ -474,54 +282,14 @@
           "sourceSystemCounter": 1435,
           "bodySha256": "6bfde38654bb1f7395631b975532a2ae1caed27c37964e388d31ef5b041d0f0d",
           "fields": [
-            {
-              "field": "room.identity",
-              "expected": 6,
-              "actual": 6,
-              "status": "pass"
-            },
-            {
-              "field": "room.combatClear",
-              "expected": false,
-              "actual": false,
-              "status": "pass"
-            },
-            {
-              "field": "room.combatClearCountdown",
-              "expected": 10,
-              "actual": 10,
-              "status": "pass"
-            },
-            {
-              "field": "manager.countablePolicy",
-              "expected": true,
-              "actual": true,
-              "status": "pass"
-            },
-            {
-              "field": "door60.state",
-              "expected": 1,
-              "actual": 1,
-              "status": "pass"
-            },
-            {
-              "field": "door60.class",
-              "expected": 4,
-              "actual": 4,
-              "status": "pass"
-            },
-            {
-              "field": "door74.state",
-              "expected": 1,
-              "actual": 1,
-              "status": "pass"
-            },
-            {
-              "field": "door74.class",
-              "expected": 4,
-              "actual": 4,
-              "status": "pass"
-            }
+            {"field": "room.identity", "expected": 6, "actual": 6, "status": "pass"},
+            {"field": "room.combatClear", "expected": false, "actual": false, "status": "pass"},
+            {"field": "room.combatClearCountdown", "expected": 10, "actual": 10, "status": "pass"},
+            {"field": "manager.countablePolicy", "expected": true, "actual": true, "status": "pass"},
+            {"field": "door60.state", "expected": 1, "actual": 1, "status": "pass"},
+            {"field": "door60.class", "expected": 4, "actual": 4, "status": "pass"},
+            {"field": "door74.state", "expected": 1, "actual": 1, "status": "pass"},
+            {"field": "door74.class", "expected": 4, "actual": 4, "status": "pass"}
           ],
           "nativeNpc": [
             {
@@ -530,10 +298,7 @@
               "saved": 6,
               "age": 12,
               "animation": "Appear",
-              "position": [
-                80,
-                160
-              ]
+              "position": [80, 160]
             },
             {
               "seed": 1181157116,
@@ -541,10 +306,7 @@
               "saved": 6,
               "age": 12,
               "animation": "Appear",
-              "position": [
-                560,
-                400
-              ]
+              "position": [560, 400]
             }
           ],
           "browserNpc": [
@@ -554,10 +316,7 @@
               "saved": 6,
               "age": 12,
               "animation": "Appear",
-              "position": [
-                80,
-                160
-              ]
+              "position": [80, 160]
             },
             {
               "seed": 1181157116,
@@ -565,10 +324,7 @@
               "saved": 6,
               "age": 12,
               "animation": "Appear",
-              "position": [
-                560,
-                400
-              ]
+              "position": [560, 400]
             }
           ]
         },
@@ -577,54 +333,14 @@
           "sourceSystemCounter": 1455,
           "bodySha256": "a465784e60a03b5bf0e8d5e1d906615d47a405b4ce0eee3f4403a42b44e39178",
           "fields": [
-            {
-              "field": "room.identity",
-              "expected": 6,
-              "actual": 6,
-              "status": "pass"
-            },
-            {
-              "field": "room.combatClear",
-              "expected": false,
-              "actual": false,
-              "status": "pass"
-            },
-            {
-              "field": "room.combatClearCountdown",
-              "expected": 10,
-              "actual": 10,
-              "status": "pass"
-            },
-            {
-              "field": "manager.countablePolicy",
-              "expected": true,
-              "actual": true,
-              "status": "pass"
-            },
-            {
-              "field": "door60.state",
-              "expected": 1,
-              "actual": 1,
-              "status": "pass"
-            },
-            {
-              "field": "door60.class",
-              "expected": 4,
-              "actual": 4,
-              "status": "pass"
-            },
-            {
-              "field": "door74.state",
-              "expected": 1,
-              "actual": 1,
-              "status": "pass"
-            },
-            {
-              "field": "door74.class",
-              "expected": 4,
-              "actual": 4,
-              "status": "pass"
-            }
+            {"field": "room.identity", "expected": 6, "actual": 6, "status": "pass"},
+            {"field": "room.combatClear", "expected": false, "actual": false, "status": "pass"},
+            {"field": "room.combatClearCountdown", "expected": 10, "actual": 10, "status": "pass"},
+            {"field": "manager.countablePolicy", "expected": true, "actual": true, "status": "pass"},
+            {"field": "door60.state", "expected": 1, "actual": 1, "status": "pass"},
+            {"field": "door60.class", "expected": 4, "actual": 4, "status": "pass"},
+            {"field": "door74.state", "expected": 1, "actual": 1, "status": "pass"},
+            {"field": "door74.class", "expected": 4, "actual": 4, "status": "pass"}
           ],
           "nativeNpc": [
             {
@@ -633,10 +349,7 @@
               "saved": 6,
               "age": 22,
               "animation": "DigIn",
-              "position": [
-                80,
-                160
-              ]
+              "position": [80, 160]
             },
             {
               "seed": 1181157116,
@@ -644,10 +357,7 @@
               "saved": 6,
               "age": 22,
               "animation": "DigIn",
-              "position": [
-                560,
-                400
-              ]
+              "position": [560, 400]
             }
           ],
           "browserNpc": [
@@ -657,10 +367,7 @@
               "saved": 6,
               "age": 22,
               "animation": "DigIn",
-              "position": [
-                80,
-                160
-              ]
+              "position": [80, 160]
             },
             {
               "seed": 1181157116,
@@ -668,10 +375,7 @@
               "saved": 6,
               "age": 22,
               "animation": "DigIn",
-              "position": [
-                560,
-                400
-              ]
+              "position": [560, 400]
             }
           ]
         },
@@ -680,54 +384,14 @@
           "sourceSystemCounter": 1493,
           "bodySha256": "bfcb2cf348cbf4314d8cb23eb8819bd21b6485196f52d8a4bb6d649b6069568e",
           "fields": [
-            {
-              "field": "room.identity",
-              "expected": 6,
-              "actual": 6,
-              "status": "pass"
-            },
-            {
-              "field": "room.combatClear",
-              "expected": false,
-              "actual": false,
-              "status": "pass"
-            },
-            {
-              "field": "room.combatClearCountdown",
-              "expected": 10,
-              "actual": 10,
-              "status": "pass"
-            },
-            {
-              "field": "manager.countablePolicy",
-              "expected": true,
-              "actual": true,
-              "status": "pass"
-            },
-            {
-              "field": "door60.state",
-              "expected": 1,
-              "actual": 1,
-              "status": "pass"
-            },
-            {
-              "field": "door60.class",
-              "expected": 4,
-              "actual": 4,
-              "status": "pass"
-            },
-            {
-              "field": "door74.state",
-              "expected": 1,
-              "actual": 1,
-              "status": "pass"
-            },
-            {
-              "field": "door74.class",
-              "expected": 4,
-              "actual": 4,
-              "status": "pass"
-            }
+            {"field": "room.identity", "expected": 6, "actual": 6, "status": "pass"},
+            {"field": "room.combatClear", "expected": false, "actual": false, "status": "pass"},
+            {"field": "room.combatClearCountdown", "expected": 10, "actual": 10, "status": "pass"},
+            {"field": "manager.countablePolicy", "expected": true, "actual": true, "status": "pass"},
+            {"field": "door60.state", "expected": 1, "actual": 1, "status": "pass"},
+            {"field": "door60.class", "expected": 4, "actual": 4, "status": "pass"},
+            {"field": "door74.state", "expected": 1, "actual": 1, "status": "pass"},
+            {"field": "door74.class", "expected": 4, "actual": 4, "status": "pass"}
           ],
           "nativeNpc": [
             {
@@ -736,10 +400,7 @@
               "saved": 6,
               "age": 22,
               "animation": "DigIn",
-              "position": [
-                400,
-                160
-              ]
+              "position": [400, 160]
             },
             {
               "seed": 1181157116,
@@ -747,10 +408,7 @@
               "saved": 6,
               "age": 22,
               "animation": "DigIn",
-              "position": [
-                560,
-                400
-              ]
+              "position": [560, 400]
             }
           ],
           "browserNpc": [
@@ -760,10 +418,7 @@
               "saved": 6,
               "age": 22,
               "animation": "DigIn",
-              "position": [
-                80,
-                160
-              ]
+              "position": [80, 160]
             },
             {
               "seed": 1181157116,
@@ -771,10 +426,7 @@
               "saved": 6,
               "age": 22,
               "animation": "DigIn",
-              "position": [
-                560,
-                400
-              ]
+              "position": [560, 400]
             }
           ]
         },
@@ -783,54 +435,14 @@
           "sourceSystemCounter": 1493,
           "bodySha256": "017c1b53a0dadc08059188d143b9dc6f5ac18e4d0432a4722de6f0a12255371a",
           "fields": [
-            {
-              "field": "room.identity",
-              "expected": 6,
-              "actual": 6,
-              "status": "pass"
-            },
-            {
-              "field": "room.combatClear",
-              "expected": false,
-              "actual": false,
-              "status": "pass"
-            },
-            {
-              "field": "room.combatClearCountdown",
-              "expected": 10,
-              "actual": 10,
-              "status": "pass"
-            },
-            {
-              "field": "manager.countablePolicy",
-              "expected": true,
-              "actual": true,
-              "status": "pass"
-            },
-            {
-              "field": "door60.state",
-              "expected": 1,
-              "actual": 1,
-              "status": "pass"
-            },
-            {
-              "field": "door60.class",
-              "expected": 4,
-              "actual": 4,
-              "status": "pass"
-            },
-            {
-              "field": "door74.state",
-              "expected": 1,
-              "actual": 1,
-              "status": "pass"
-            },
-            {
-              "field": "door74.class",
-              "expected": 4,
-              "actual": 4,
-              "status": "pass"
-            }
+            {"field": "room.identity", "expected": 6, "actual": 6, "status": "pass"},
+            {"field": "room.combatClear", "expected": false, "actual": false, "status": "pass"},
+            {"field": "room.combatClearCountdown", "expected": 10, "actual": 10, "status": "pass"},
+            {"field": "manager.countablePolicy", "expected": true, "actual": true, "status": "pass"},
+            {"field": "door60.state", "expected": 1, "actual": 1, "status": "pass"},
+            {"field": "door60.class", "expected": 4, "actual": 4, "status": "pass"},
+            {"field": "door74.state", "expected": 1, "actual": 1, "status": "pass"},
+            {"field": "door74.class", "expected": 4, "actual": 4, "status": "pass"}
           ],
           "nativeNpc": [
             {
@@ -839,10 +451,7 @@
               "saved": 6,
               "age": 22,
               "animation": "DigIn",
-              "position": [
-                400,
-                160
-              ]
+              "position": [400, 160]
             },
             {
               "seed": 1181157116,
@@ -850,10 +459,7 @@
               "saved": 6,
               "age": 22,
               "animation": "DigIn",
-              "position": [
-                560,
-                400
-              ]
+              "position": [560, 400]
             }
           ],
           "browserNpc": [
@@ -863,10 +469,7 @@
               "saved": 6,
               "age": 22,
               "animation": "DigIn",
-              "position": [
-                80,
-                160
-              ]
+              "position": [80, 160]
             },
             {
               "seed": 1181157116,
@@ -874,14 +477,12 @@
               "saved": 6,
               "age": 22,
               "animation": "DigIn",
-              "position": [
-                560,
-                400
-              ]
+              "position": [560, 400]
             }
           ]
         }
-      ]
+      ],
+      "boundaryGuardOnlyReplay": {"capturesUnchanged": true, "comparatorStable": true, "beforeComparatorReportSha256": "5f74a64cbafeac918aa38ec190f0ca7ad6321ae1dc0853dd57873f4488654bd6", "beforeCohortReportSha256": "5512e2b7ea501b445ad4bcfa48f86dc4bf894032e2414b8628c17cf5ae1571c0", "scope": "Pre-game skips forbidden from declared gameplay-start onward; no gameplay assertions are removed."}
     },
     {
       "case": "paired-random-worm-projectile",
@@ -890,96 +491,39 @@
       "artifactSha256": "c9f911edbfd9d35f82f967fa81bc040deaf63c6c674e634caa07de47d497aabd",
       "originalTransport": "pass",
       "browserTransport": "pass",
-      "pairedCaptures": {
-        "pass": 278,
-        "total": 278
-      },
+      "pairedCaptures": {"pass": 278, "total": 278},
       "sourcesStableDuringCapture": true,
       "comparisonOnlyReplay": {
         "capturesUnchanged": true,
         "comparatorStable": true,
-        "capturedSources": {
-          "tools/e2e/roundworms.mjs": "83d6b23c946c80498256a281b76f37884fee76dcd7a5aef6848f8dbc8bf04ab7",
-          "tools/original/roundworm-scenarios.py": "4d7cba6e933439831380091591cc7a5e794f3a165c72717d4aa234d15e37aacf",
-          "tools/foundation/roundworm-state-pair.mjs": "56b556aca4abba157faa52c78b8a0d7b7041e50bf4c17d42c48921521533152a",
-          "references/isaac/foundation/combat/roundworms/random-selection.json": "e518d517fae01b958623d2f54465d4b034554c940c8d3166a7c6a198ead85875",
-          "references/isaac/foundation/combat/roundworms/hostile-return-tail.json": "e6138d9581515af4ccd98a158f68585878a6cfa61f7dc3562bcdfceee51c75f8"
-        },
+        "capturedSources": {"tools/e2e/roundworms.mjs": "83d6b23c946c80498256a281b76f37884fee76dcd7a5aef6848f8dbc8bf04ab7", "tools/original/roundworm-scenarios.py": "4d7cba6e933439831380091591cc7a5e794f3a165c72717d4aa234d15e37aacf", "tools/foundation/roundworm-state-pair.mjs": "56b556aca4abba157faa52c78b8a0d7b7041e50bf4c17d42c48921521533152a", "references/isaac/foundation/combat/roundworms/random-selection.json": "e518d517fae01b958623d2f54465d4b034554c940c8d3166a7c6a198ead85875", "references/isaac/foundation/combat/roundworms/hostile-return-tail.json": "e6138d9581515af4ccd98a158f68585878a6cfa61f7dc3562bcdfceee51c75f8"},
         "beforeComparatorReportSha256": "cb1d9f30004189ce0e8d343d42d987df0455c7505946b414757f524fb5328edf",
         "beforeCohortReportSha256": "1160fbdc66539005cd96661dd388a29a4297bd7e185d822a1b290646fd8658f0",
         "source": "Source sprite/default parameter assertions added; all former required failures remain required."
       },
-      "hostExecution": {
-        "frameTimeoutSeconds": 120.0,
-        "lpNumThreads": "2",
-        "scope": "Host-wall wait limit and requested software-renderer pool; public tape/virtual steps unchanged"
-      },
+      "hostExecution": {"frameTimeoutSeconds": 120.0, "lpNumThreads": "2", "scope": "Host-wall wait limit and requested software-renderer pool; public tape/virtual steps unchanged"},
       "requiredFields": 17915,
       "failedRequiredFields": 72,
-      "failureGroups": {
-        "state": 10,
-        "visible": 10,
-        "animation": 10,
-        "animationFrame": 22,
-        "animationPlaying": 10,
-        "entityClass": 10
-      },
+      "failureGroups": {"state": 10, "visible": 10, "animation": 10, "animationFrame": 22, "animationPlaying": 10, "entityClass": 10},
       "exactDiagnosticFields": 2156,
       "failedDiagnostics": 1031,
-      "sourceHashes": {
-        "original": "2c616a4cf12c256b680859050380da78db97bae03249db38777ca5e7b168b253",
-        "browser": "8158aa534afdd8a33c536744dd0b934e6488808cb538df71960331e2d85609e6",
-        "comparator": "f82c6d44bad28450cbbcddf41a9c80f042b15541de3f9e9ebc5e943e1d912b8e"
-      },
+      "sourceHashes": {"original": "2c616a4cf12c256b680859050380da78db97bae03249db38777ca5e7b168b253", "browser": "8158aa534afdd8a33c536744dd0b934e6488808cb538df71960331e2d85609e6", "comparator": "d4a86c025c53e3b28557f1c1ac7ac754a4bb7f5c18b8b69c78f4158389f7e7a7"},
       "pairedReportSha256": "fc3390e5fb89766a5d5efe9f9a8e213a3ba4950d9b03e9cc496cf949c7894bb3",
-      "cohortReportSha256": "ec52e8ae064e735669ebdc7f5237edd3ac17faa17fdd840e47718f9c090ea4e9",
-      "actorReportSha256": "0d3f45ad41d765211ee44dc2fbe24a70bf605454b10f18f3ca86d37475da2197",
+      "cohortReportSha256": "051f0ae531d38e5bc0c5f4e1f1dfd3d377de58db7b809bf01347ae522bb96209",
+      "actorReportSha256": "1407d1fb3b6b8e53f1f0c6dfdabc58a75e80da90f7a12bb7476a4d3a0d47967a",
       "caseSha256": "8c025ef90c3436a90121c00bb6e25bd5972266f72fce48e4a8c4f218895c9df8",
-      "independentProjectileLaws": {
-        "fields": 3084,
-        "failures": 0,
-        "scope": "Actual native and browser flags-zero radius/mass/defaults, null stopped birth sprite, first-full four-frame sprite loop, full f32 falling speed/height, intermediate vertical freeze and same-full ground death."
-      },
+      "independentProjectileLaws": {"fields": 3084, "failures": 0, "scope": "Actual native and browser flags-zero radius/mass/defaults, null stopped birth sprite, first-full four-frame sprite loop, full f32 falling speed/height, intermediate vertical freeze and same-full ground death."},
       "exactNpcMetadata": {
         "fields": 5918,
         "failures": 0,
-        "names": [
-          "animationSpeed",
-          "appearanceCounter",
-          "boss",
-          "canShutDoors",
-          "contactDamage",
-          "gridClass",
-          "hp",
-          "mass",
-          "maxHp",
-          "radius",
-          "savedInitializedState"
-        ]
+        "names": ["animationSpeed", "appearanceCounter", "boss", "canShutDoors", "contactDamage", "gridClass", "hp", "mass", "maxHp", "radius", "savedInitializedState"]
       },
       "execution": {
-        "native": {
-          "admission": true,
-          "appearance": true,
-          "hidden": true,
-          "relocation": true,
-          "shoot": true,
-          "projectile-contact": false,
-          "locked": true,
-          "hostile-return": false
-        },
-        "browser": {
-          "admission": true,
-          "appearance": true,
-          "hidden": true,
-          "relocation": true,
-          "shoot": true,
-          "projectile-contact": false,
-          "locked": true,
-          "hostile-return": false
-        }
+        "native": {"admission": true, "appearance": true, "hidden": true, "relocation": true, "shoot": true, "projectile-contact": false, "locked": true, "hostile-return": false},
+        "browser": {"admission": true, "appearance": true, "hidden": true, "relocation": true, "shoot": true, "projectile-contact": false, "locked": true, "hostile-return": false}
       },
-      "acceptedProjectileDamage": []
+      "acceptedProjectileDamage": [],
+      "boundaryGuardOnlyReplay": {"capturesUnchanged": true, "comparatorStable": true, "beforeComparatorReportSha256": "0d3f45ad41d765211ee44dc2fbe24a70bf605454b10f18f3ca86d37475da2197", "beforeCohortReportSha256": "ec52e8ae064e735669ebdc7f5237edd3ac17faa17fdd840e47718f9c090ea4e9", "scope": "Pre-game skips forbidden from declared gameplay-start onward; no gameplay assertions are removed."}
     },
     {
       "case": "paired-random-worm-contact",
@@ -988,30 +532,17 @@
       "artifactSha256": "c9f911edbfd9d35f82f967fa81bc040deaf63c6c674e634caa07de47d497aabd",
       "originalTransport": "pass",
       "browserTransport": "pass",
-      "pairedCaptures": {
-        "pass": 231,
-        "total": 278
-      },
+      "pairedCaptures": {"pass": 231, "total": 278},
       "sourcesStableDuringCapture": true,
       "comparisonOnlyReplay": {
         "capturesUnchanged": true,
         "comparatorStable": true,
-        "capturedSources": {
-          "tools/e2e/roundworms.mjs": "83d6b23c946c80498256a281b76f37884fee76dcd7a5aef6848f8dbc8bf04ab7",
-          "tools/original/roundworm-scenarios.py": "4d7cba6e933439831380091591cc7a5e794f3a165c72717d4aa234d15e37aacf",
-          "tools/foundation/roundworm-state-pair.mjs": "56b556aca4abba157faa52c78b8a0d7b7041e50bf4c17d42c48921521533152a",
-          "references/isaac/foundation/combat/roundworms/random-selection.json": "e518d517fae01b958623d2f54465d4b034554c940c8d3166a7c6a198ead85875",
-          "references/isaac/foundation/combat/roundworms/hostile-return-tail.json": "e6138d9581515af4ccd98a158f68585878a6cfa61f7dc3562bcdfceee51c75f8"
-        },
+        "capturedSources": {"tools/e2e/roundworms.mjs": "83d6b23c946c80498256a281b76f37884fee76dcd7a5aef6848f8dbc8bf04ab7", "tools/original/roundworm-scenarios.py": "4d7cba6e933439831380091591cc7a5e794f3a165c72717d4aa234d15e37aacf", "tools/foundation/roundworm-state-pair.mjs": "56b556aca4abba157faa52c78b8a0d7b7041e50bf4c17d42c48921521533152a", "references/isaac/foundation/combat/roundworms/random-selection.json": "e518d517fae01b958623d2f54465d4b034554c940c8d3166a7c6a198ead85875", "references/isaac/foundation/combat/roundworms/hostile-return-tail.json": "e6138d9581515af4ccd98a158f68585878a6cfa61f7dc3562bcdfceee51c75f8"},
         "beforeComparatorReportSha256": "1516eb89ef201fdb702c99f931ee8f73db65313a86124c2ef43dcc05edc9564d",
         "beforeCohortReportSha256": "e0c9d4214e168e5fc56068256b5a647638d29a594e6966b847f120ac6c3cd6ba",
         "source": "Source sprite/default parameter assertions added; all former required failures remain required."
       },
-      "hostExecution": {
-        "frameTimeoutSeconds": 120.0,
-        "lpNumThreads": "2",
-        "scope": "Host-wall wait limit and requested software-renderer pool; public tape/virtual steps unchanged"
-      },
+      "hostExecution": {"frameTimeoutSeconds": 120.0, "lpNumThreads": "2", "scope": "Host-wall wait limit and requested software-renderer pool; public tape/virtual steps unchanged"},
       "requiredFields": 17675,
       "failedRequiredFields": 74,
       "failureGroups": {
@@ -1027,58 +558,20 @@
       },
       "exactDiagnosticFields": 2156,
       "failedDiagnostics": 1027,
-      "sourceHashes": {
-        "original": "ec5573e20ed95f2b0f7ebbeef22bf9d07dec498103d2d33207425dead4a914b0",
-        "browser": "f7a5e78f8bb0a1c60d060eef1e86672b09ea4a604db0f990760846bfbe27223c",
-        "comparator": "f82c6d44bad28450cbbcddf41a9c80f042b15541de3f9e9ebc5e943e1d912b8e"
-      },
+      "sourceHashes": {"original": "ec5573e20ed95f2b0f7ebbeef22bf9d07dec498103d2d33207425dead4a914b0", "browser": "f7a5e78f8bb0a1c60d060eef1e86672b09ea4a604db0f990760846bfbe27223c", "comparator": "d4a86c025c53e3b28557f1c1ac7ac754a4bb7f5c18b8b69c78f4158389f7e7a7"},
       "pairedReportSha256": "e83efddac3c5fca335774991f32c6dc5bd80521bbb9e9abba35d6a50bf82a1b4",
-      "cohortReportSha256": "87809f3115008126f3b024274b6192c35a98fdca6337f8d0c846e2846f8daac2",
-      "actorReportSha256": "53aa34330af6b3670b970319cc3c9a62a5edee6b0e153f82cd51ab3089fdafc5",
+      "cohortReportSha256": "2036a2addba5b5ecf6058e980e39ab824a7e84acf2022b645426841aedb4f8d0",
+      "actorReportSha256": "47e75e33b95bed0e8261a925abe0ef37b0c86f981772ee8c5d5fa700c941b68b",
       "caseSha256": "c3f0189d539ee762cd7caf0016b7d0e2035ef6707baa8f09e58e956e5ec9bdb6",
-      "independentProjectileLaws": {
-        "fields": 2844,
-        "failures": 0,
-        "scope": "Actual native and browser flags-zero radius/mass/defaults, null stopped birth sprite, first-full four-frame sprite loop, full f32 falling speed/height, intermediate vertical freeze and same-full ground death."
-      },
+      "independentProjectileLaws": {"fields": 2844, "failures": 0, "scope": "Actual native and browser flags-zero radius/mass/defaults, null stopped birth sprite, first-full four-frame sprite loop, full f32 falling speed/height, intermediate vertical freeze and same-full ground death."},
       "exactNpcMetadata": {
         "fields": 5918,
         "failures": 0,
-        "names": [
-          "animationSpeed",
-          "appearanceCounter",
-          "boss",
-          "canShutDoors",
-          "contactDamage",
-          "gridClass",
-          "hp",
-          "mass",
-          "maxHp",
-          "radius",
-          "savedInitializedState"
-        ]
+        "names": ["animationSpeed", "appearanceCounter", "boss", "canShutDoors", "contactDamage", "gridClass", "hp", "mass", "maxHp", "radius", "savedInitializedState"]
       },
       "execution": {
-        "native": {
-          "admission": true,
-          "appearance": true,
-          "hidden": true,
-          "relocation": true,
-          "shoot": true,
-          "projectile-contact": true,
-          "locked": true,
-          "hostile-return": false
-        },
-        "browser": {
-          "admission": true,
-          "appearance": true,
-          "hidden": true,
-          "relocation": true,
-          "shoot": true,
-          "projectile-contact": true,
-          "locked": true,
-          "hostile-return": false
-        }
+        "native": {"admission": true, "appearance": true, "hidden": true, "relocation": true, "shoot": true, "projectile-contact": true, "locked": true, "hostile-return": false},
+        "browser": {"admission": true, "appearance": true, "hidden": true, "relocation": true, "shoot": true, "projectile-contact": true, "locked": true, "hostile-return": false}
       },
       "acceptedProjectileDamage": [
         {
@@ -1092,14 +585,8 @@
             "variant": 0,
             "raw1c": 244,
             "raw20": 0,
-            "position": [
-              461.9917297363281,
-              274.97650146484375
-            ],
-            "velocity": [
-              8.879674911499023,
-              4.599063396453857
-            ],
+            "position": [461.9917297363281, 274.97650146484375],
+            "velocity": [8.879674911499023, 4.599063396453857],
             "flags": 0,
             "activeActorSequenceId": 7,
             "activeActorSpawnSeed": 1393658425
@@ -1107,14 +594,8 @@
           "joinedActualProjectile": {
             "id": 7,
             "seed": 1393658425,
-            "position": [
-              460.6060485839844,
-              274.2606506347656
-            ],
-            "velocity": [
-              5.462569236755371,
-              2.833742141723633
-            ],
+            "position": [460.6060485839844, 274.2606506347656],
+            "velocity": [5.462569236755371, 2.833742141723633],
             "height": -14.769457817077637,
             "fallingSpeed": 1.641051173210144,
             "fallingAcceleration": 0.10000000149011612,
@@ -1149,14 +630,8 @@
               "fullUpdates": 27,
               "dead": true,
               "acceptedPlayerHit": true,
-              "position": {
-                "x": 458.3585,
-                "y": 276.07462
-              },
-              "velocity": {
-                "x": 5.902676,
-                "y": 1.740166
-              }
+              "position": {"x": 458.3585, "y": 276.07462},
+              "velocity": {"x": 5.902676, "y": 1.740166}
             }
           ],
           "stateSha256": "ed4bd0c835ec47eb3d1fc9853108e7de61c3dcce4e994b0f7687bd0aa05c5de7"
@@ -1169,37 +644,14 @@
         "moduleSha256": "879b1c8da1da531976231bf35782a5e449de3888dc30b8d528e8b98fb4af4c8d",
         "recoveryScriptSha256": "30c5b1d202418b725c47effdd161e6887a68a90bcbd44710b5385dcbf8521aa8",
         "freshCapture": false,
-        "adaptations": [
-          "export visibility",
-          "absolute import/root resolution",
-          "omit CLI entrypoint"
-        ]
-      }
+        "adaptations": ["export visibility", "absolute import/root resolution", "omit CLI entrypoint"]
+      },
+      "boundaryGuardOnlyReplay": {"capturesUnchanged": true, "comparatorStable": true, "beforeComparatorReportSha256": "53aa34330af6b3670b970319cc3c9a62a5edee6b0e153f82cd51ab3089fdafc5", "beforeCohortReportSha256": "87809f3115008126f3b024274b6192c35a98fdca6337f8d0c846e2846f8daac2", "scope": "Pre-game skips forbidden from declared gameplay-start onward; no gameplay assertions are removed."}
     }
   ],
-  "totals": {
-    "requiredFields": 50900,
-    "failedRequiredFields": 598,
-    "independentProjectileFields": 6880,
-    "independentProjectileFailures": 0
-  },
-  "validation": {
-    "buildTypecheckAssetsStrictClippy": "pass",
-    "command": "npm run check:build",
-    "logSha256": "8def7d5bab3a59b1ad794fd894dee51076f8a527648f2643e45f33176355baa4",
-    "newComparatorSyntax": "node --check tools/foundation/roundworm-state-pair.mjs",
-    "liveSuiteRegistered": true,
-    "unitSuitesAdded": false
-  },
-  "browserAssetSmoke": {
-    "status": "pass",
-    "publicPresentations": 1516,
-    "actualWormAndProjectileObserved": true,
-    "pageErrors": 0,
-    "artifactSha256": "7726d1b85b224351d1f00adb43efd23e251193fcda2c0de0d04ffbd45bb5db4b",
-    "reportSha256": "8ec113c0099fdab5fe17d111bbac9c99485d9ec2cafcf10a99bd8dc09f87f025",
-    "scope": "Production-browser public input asset smoke only; separate from native acceptance."
-  },
+  "totals": {"requiredFields": 50900, "failedRequiredFields": 598, "independentProjectileFields": 6880, "independentProjectileFailures": 0},
+  "validation": {"buildTypecheckAssetsStrictClippy": "pass", "command": "npm run check:build", "logSha256": "8def7d5bab3a59b1ad794fd894dee51076f8a527648f2643e45f33176355baa4", "newComparatorSyntax": "node --check tools/foundation/roundworm-state-pair.mjs", "liveSuiteRegistered": true, "unitSuitesAdded": false},
+  "browserAssetSmoke": {"status": "pass", "publicPresentations": 1516, "actualWormAndProjectileObserved": true, "pageErrors": 0, "artifactSha256": "7726d1b85b224351d1f00adb43efd23e251193fcda2c0de0d04ffbd45bb5db4b", "reportSha256": "8ec113c0099fdab5fe17d111bbac9c99485d9ec2cafcf10a99bd8dc09f87f025", "scope": "Production-browser public input asset smoke only; separate from native acceptance."},
   "sourceDumpHashes": {
     "function-40d9e0.txt": "af9bc34fac2f08af16a45ff6bfa70532ddffad5bc9c3a0f278b5ffc9d6998e13",
     "function-40dc60.txt": "e2bee378e04d56102667b0cc98c2a1cf8a3182156c8808f8c8922f1b794bf2c7",
@@ -1237,44 +689,19 @@
     "function-5c7e50.txt": "98e606a3701935983b782b8bef028f27b4c9c509b80947b5a0f402020e3e6230",
     "function-5c7f30.txt": "4e3561ffc5b90c6f15bf7e31f4223b5cabaeca1d5d9f40baf8cbdf921a2732a2"
   },
-  "authoredAnimationHashes": {
-    "009.000_projectile.anm2": "c3a7a648a684834023c3aa33e41f4ca1d12595998c71f39111efcf98424c3bcc",
-    "013.000_fly.anm2": "b347752ba720be25626d9cd6a698234af4df6ffe0a1f5249c0be3a427e224135",
-    "018.000_attack fly.anm2": "6a5729cda5d2285b432c1652fa9625bc3458978e9197ed911326b24aa679abe6",
-    "244.000_round worm.anm2": "6bc82c0ec67a0c34c9139b65262b69876e423e5532922e94e40b36380a4c8a48"
-  },
+  "authoredAnimationHashes": {"009.000_projectile.anm2": "c3a7a648a684834023c3aa33e41f4ca1d12595998c71f39111efcf98424c3bcc", "013.000_fly.anm2": "b347752ba720be25626d9cd6a698234af4df6ffe0a1f5249c0be3a427e224135", "018.000_attack fly.anm2": "6a5729cda5d2285b432c1652fa9625bc3458978e9197ed911326b24aa679abe6", "244.000_round worm.anm2": "6bc82c0ec67a0c34c9139b65262b69876e423e5532922e94e40b36380a4c8a48"},
   "priorRejectedAttempts": [
-    {
-      "directory": ".cache/e2e/roundworms/initial-t1",
-      "reason": "Missing Worm PNG; completed source capture remains diagnostic."
-    },
-    {
-      "directory": ".cache/e2e/roundworms/final-cohort",
-      "reason": "Original T1 host30s timeout and browser missing enemybullets PNG; old constructor/sprite comparisons remain rejected."
-    }
+    {"directory": ".cache/e2e/roundworms/initial-t1", "reason": "Missing Worm PNG; completed source capture remains diagnostic."},
+    {"directory": ".cache/e2e/roundworms/final-cohort", "reason": "Original T1 host30s timeout and browser missing enemybullets PNG; old constructor/sprite comparisons remain rejected."}
   ],
   "unchangedMandatoryFlyRegressions": {
     "verification": "references/isaac/foundation/combat/npcs/verification.json",
     "sha256": "1ced4e1dd7a8f6a61661f186f536c16ea41bd8ae729be9fb6f18e193e71a4965",
-    "cases": [
-      "H2MBZRKH",
-      "center route"
-    ],
+    "cases": ["H2MBZRKH", "center route"],
     "status": "fail"
   },
-  "unaccepted": [
-    "Complete shared MT consumer routing and exact RNG-driven actor/projectile trajectories",
-    "Absolute native Game counter baseline and causal loader callback count",
-    "Full Poof15 and effect11 object construction/rendering and downstream factory consumers",
-    "Six-gib Worm effects and an actual244 death acceptance tape",
-    "Rewards, unsupported entity/pickup collisions and complete source NPC return reconstruction",
-    "Nonzero enemy projectile flags, alternate modes, characters, items and familiar/item213 contacts"
-  ],
-  "losslessBrowserArchive": {
-    "manifestSha256": "bf4ba2a68816f58557c10e5cdd1a89898395ff51f963e8a96f8147c9d7dcfcaa",
-    "restore": "python3 .cache/coordination/combat/compact-evidence.py --restore /absolute/path/to/browser/manifest.json",
-    "scope": "Raw browser manifest hashes above are verified after decompression. Originals remain unchanged."
-  },
+  "unaccepted": ["Complete shared MT consumer routing and exact RNG-driven actor/projectile trajectories", "Absolute native Game counter baseline and causal loader callback count", "Full Poof15 and effect11 object construction/rendering and downstream factory consumers", "Six-gib Worm effects and an actual244 death acceptance tape", "Rewards, unsupported entity/pickup collisions and complete source NPC return reconstruction", "Nonzero enemy projectile flags, alternate modes, characters, items and familiar/item213 contacts"],
+  "losslessBrowserArchive": {"manifestSha256": "bf4ba2a68816f58557c10e5cdd1a89898395ff51f963e8a96f8147c9d7dcfcaa", "restore": "python3 .cache/coordination/combat/compact-evidence.py --restore /absolute/path/to/browser/manifest.json", "scope": "Raw browser manifest hashes above are verified after decompression. Originals remain unchanged."},
   "restackedBase": "0f8a3633fdd4760ef2f64dad6f523a4a43ea872b",
   "restackedRuntimeHead": "def012e",
   "restackValidation": {
@@ -1288,5 +715,6 @@
     "clippyLogSha256": "70546c674dba404098c943ce0b2ebd9c47adf856b8715a24cc7bec5be6cd213e",
     "liveSuiteCount": 21,
     "scope": "Completed capture artifacts above are unchanged; restack validation does not claim a new capture on the integrated artifact."
-  }
+  },
+  "finalQualityValidation": {"wasmViteBuild": "pass", "strictClippy": "pass", "cargoFmt": "pass", "comparatorSyntax": "pass", "buildLogSha256": "6ed512ac1998e129ef68ba550ac5e7e3371df849829f09bff000350dbae7333c", "clippyLogSha256": "ebe5d3eea1df76f9367ebc7bbb130c6d5395c9abf2c4da1ba74b10107e0c7eae", "scope": "Contact function/error naming and XML radius/mass constants preserve the decoded law and values; no new native capture is claimed."}
 }

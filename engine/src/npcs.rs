@@ -254,7 +254,7 @@ pub fn nonplayer_contacts(state: &mut State) -> Result<(), String> {
             }
             let mut a = body(first);
             let mut b = body(second);
-            if combat::resolve_fly_pair(&mut a, &mut b)?.colliding {
+            if combat::resolve_npc_or_bomb_pair(&mut a, &mut b)?.colliding {
                 first.position = a.position;
                 first.presented_position = a.position;
                 first.velocity = a.velocity;
@@ -281,7 +281,7 @@ pub fn nonplayer_contacts(state: &mut State) -> Result<(), String> {
                 mass: 6.0,
             };
             let mut b = body(npc);
-            if combat::resolve_fly_pair(&mut a, &mut b)?.colliding {
+            if combat::resolve_npc_or_bomb_pair(&mut a, &mut b)?.colliding {
                 bomb.motion.position = a.position;
                 bomb.motion.presented_position = a.position;
                 bomb.motion.velocity = a.velocity;
