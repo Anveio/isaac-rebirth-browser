@@ -82,4 +82,12 @@ required. Later item RNG mutations, full shared-MT state, familiar actors and
 native cache flags remain explicit diagnostics until their actual callbacks
 are implemented. Requested cache bits are retained as `unevaluatedCacheFlags`,
 so an OR/clear operation cannot appear to implement native stat or familiar
-evaluation. Live acquisition acceptance is still pending.
+evaluation. The initial four-case acquisition cohort retained68,362 checks and
+3,075 mismatches, with all original transports/observations passing. Queue and
+grant boundaries, owned counts, Player/copy sprite phases and sound admission
+match, including recorded-random active291 at charge6. The complete paired gate
+is red: source40fef0 actually sets the stopped main `Empty` frame0, and later
+empty-altar mass contact/home motion is absent in this producer. An integer/bool
+comparison also fails on the queued touched byte. All raw failed evidence and
+exact source hashes remain preserved. No health clamp or familiar/stat/cache
+effect acceptance follows from these cases; the active transition is observed.

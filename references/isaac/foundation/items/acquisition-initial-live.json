@@ -1,0 +1,657 @@
+{
+  "schema": 1,
+  "status": "fail",
+  "production": {
+    "sha256": "86fe76caead24a06e195f7e759783745487715691b7534ff798f3b6d13e8311b",
+    "files": 921,
+    "source": "/workspace/isaac-worktrees/e2e-ci/dist",
+    "scope": "Immutable snapshot of production build bytes; source/native replay equality is checked separately"
+  },
+  "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "gateSources": {
+    "tools/e2e/items.mjs": "d391f49c01cb89773da37d3b020e91f62831d34e412eb9b1fe37ac758f3c893f",
+    "tools/original/item-scenarios.py": "9b383331732d58e7f6453cf6c4e5c182e48fe057c205e979d5280661b8006590",
+    "tools/original/item-observer.py": "02ae3b15c889e27b1468f69c0e9ddf9a3bfa41fe1b965b9f9276103d80be8fb0",
+    "tools/e2e/item-room-evidence.mjs": "3794ab422ca0c4f39ddbb9d4d90639f4a1dc2a8edb4c769850fe5f1ed8a4f17f",
+    "tools/foundation/item-catalog.py": "d1c009f1584faa63dde8737f1e8bb75c879b8df7a95fb587ed826fb4268a5671",
+    "tools/foundation/decode-rooms.py": "4640cce2c99d0ef09d6691cf42c021f012e16ed3752bace965ad18dca7250f1a",
+    "tools/original/foundation-seeds.py": "dd4633c955e7518e9bc0f0147ddfae46d356468238477a68dc06c86656ccba89",
+    "tools/original/foundation-clock-run.py": "8f2fa981fbe26073d5a5a34ff46fbc6e9c70c2d30f81784abded5e40b9110c5b",
+    "tools/original/foundation-clock-gate.c": "f517f1fc0edf2bbe17021e529fb41652e991e286bef070b8aecefd32bfa62e75",
+    "tools/original/foundation-clock-verify.py": "c488100a187b44803c06374535715eaa5a7cde9d4513f6e866e090367d4f2054",
+    "tools/original/foundation-pickup-observe.py": "2ce3a3f528259c876941d505e31981164a550ce1b2097f4ea136607e3bd365a5",
+    "tools/original/state-observer.py": "58e3b510abbe5ff57f05844efbdf764e2a02530cda4fa99f538d886d258af6f1",
+    "tools/original/with-display.sh": "4371efe64ae1639564b4a85292ff252e20bcfe84b5387927ecf7093c6b8d3dfb",
+    "tools/foundation/verify.mjs": "3743b773cf2ede253c6d78f2605eb43f34e9d7002284b6a1dd2c413d45835a5c",
+    "tools/foundation/browser.mjs": "60c4bc851470f47e4dd0399148ce0c1edf351d41fbf7f7e15fa823af5948b4c8",
+    "tools/foundation/production-server.mjs": "e3152b58e2353319ba0963b30439e33c3cc65f84a8c6ebb765c2812486245952",
+    "web/trace.ts": "2df69cfbbae14084baadacbcffbc9ecb7b6e363e61c1efb26f721475cfb198a9",
+    "engine/src/items.rs": "499883b8ffdd240c49b36055e7c19fb6d17dc811a0b30d75275a35f237950721",
+    "engine/src/seed.rs": "5b34052dfbc34facb7903d1aeae5b063934c7780902d4ccfe6ab2743597d98d3",
+    "engine/src/pickups.rs": "ea316371c79ac7c481d018332a3f64be17096aec564d86a63e156a2c01be14e3",
+    "engine/src/lib.rs": "6dc35ee7f69b1acb6ad8957f74c2235a95ace54f5b01a1df63acfd54d6d69633",
+    "engine/build.rs": "1badf3fa591e758ad5655923137c00a433bec0e9425a4d056406005e6d931ea0",
+    "engine/src/player_items.rs": "a7784b707153f6728d0566d8723641a5aff67bbb516215848402206433f4c63e",
+    "web/engine.ts": "a1547bf71a41db66e0faf0ba7c6f6bb65ec5796405bbc249d40d0f9ad5f05c7e",
+    "web/animation.ts": "bddcb27d1fc75f4fa12cd5637ed80b2431faf34958e2c61bb4fda5219d337488",
+    "web/pickups.ts": "2d790e261de4f6a58a010983458640cf2438610634ed349f878fa040572aeaab",
+    "web/renderer.ts": "227715f52a7630f29417f9cc91d661a0a495ba13cab84e619338107e6244645d",
+    "web/scene-data.json": "9424d7f9efdfee3cbd2b204a19a73bef9d265b8c1738d4cb19d3aca18be6cd1a",
+    "web/pickup-data.json": "b6a14059e82fcca8dabcdf98ba865ea5bc16a70706e18fca604fc6dcd378991b"
+  },
+  "sourceHashes": {
+    "items.xml": "4fbad99276eebf0ed5dcba7e88591c03673bbae44c4cd8b5dd3ead36caad68cc",
+    "itempools.xml": "8c3d8f04589992f1bac0c4f719c49068265d5fe134d29f414d90161e7bf95378"
+  },
+  "scope": "Natural first free collectible contact, real deferred Pickup animation/queue, all347 owned counts, authored inventory/health grants, first active ownership/charge, pool removal and collection sound admission. Baseline complete450 Player child RNGs are required. Actual stat/familiar/cache callbacks, later child RNG mutation, active swaps/use, achievements, paid/override contexts and pixels remain unaccepted; full MT/cache/child RNG differences are retained diagnostics.",
+  "sourceStability": {
+    "status": "pass",
+    "before": {
+      "tools/e2e/items.mjs": "d391f49c01cb89773da37d3b020e91f62831d34e412eb9b1fe37ac758f3c893f",
+      "tools/original/item-scenarios.py": "9b383331732d58e7f6453cf6c4e5c182e48fe057c205e979d5280661b8006590",
+      "tools/original/item-observer.py": "02ae3b15c889e27b1468f69c0e9ddf9a3bfa41fe1b965b9f9276103d80be8fb0",
+      "tools/e2e/item-room-evidence.mjs": "3794ab422ca0c4f39ddbb9d4d90639f4a1dc2a8edb4c769850fe5f1ed8a4f17f",
+      "tools/foundation/item-catalog.py": "d1c009f1584faa63dde8737f1e8bb75c879b8df7a95fb587ed826fb4268a5671",
+      "tools/foundation/decode-rooms.py": "4640cce2c99d0ef09d6691cf42c021f012e16ed3752bace965ad18dca7250f1a",
+      "tools/original/foundation-seeds.py": "dd4633c955e7518e9bc0f0147ddfae46d356468238477a68dc06c86656ccba89",
+      "tools/original/foundation-clock-run.py": "8f2fa981fbe26073d5a5a34ff46fbc6e9c70c2d30f81784abded5e40b9110c5b",
+      "tools/original/foundation-clock-gate.c": "f517f1fc0edf2bbe17021e529fb41652e991e286bef070b8aecefd32bfa62e75",
+      "tools/original/foundation-clock-verify.py": "c488100a187b44803c06374535715eaa5a7cde9d4513f6e866e090367d4f2054",
+      "tools/original/foundation-pickup-observe.py": "2ce3a3f528259c876941d505e31981164a550ce1b2097f4ea136607e3bd365a5",
+      "tools/original/state-observer.py": "58e3b510abbe5ff57f05844efbdf764e2a02530cda4fa99f538d886d258af6f1",
+      "tools/original/with-display.sh": "4371efe64ae1639564b4a85292ff252e20bcfe84b5387927ecf7093c6b8d3dfb",
+      "tools/foundation/verify.mjs": "3743b773cf2ede253c6d78f2605eb43f34e9d7002284b6a1dd2c413d45835a5c",
+      "tools/foundation/browser.mjs": "60c4bc851470f47e4dd0399148ce0c1edf351d41fbf7f7e15fa823af5948b4c8",
+      "tools/foundation/production-server.mjs": "e3152b58e2353319ba0963b30439e33c3cc65f84a8c6ebb765c2812486245952",
+      "web/trace.ts": "2df69cfbbae14084baadacbcffbc9ecb7b6e363e61c1efb26f721475cfb198a9",
+      "engine/src/items.rs": "499883b8ffdd240c49b36055e7c19fb6d17dc811a0b30d75275a35f237950721",
+      "engine/src/seed.rs": "5b34052dfbc34facb7903d1aeae5b063934c7780902d4ccfe6ab2743597d98d3",
+      "engine/src/pickups.rs": "ea316371c79ac7c481d018332a3f64be17096aec564d86a63e156a2c01be14e3",
+      "engine/src/lib.rs": "6dc35ee7f69b1acb6ad8957f74c2235a95ace54f5b01a1df63acfd54d6d69633",
+      "engine/build.rs": "1badf3fa591e758ad5655923137c00a433bec0e9425a4d056406005e6d931ea0",
+      "engine/src/player_items.rs": "a7784b707153f6728d0566d8723641a5aff67bbb516215848402206433f4c63e",
+      "web/engine.ts": "a1547bf71a41db66e0faf0ba7c6f6bb65ec5796405bbc249d40d0f9ad5f05c7e",
+      "web/animation.ts": "bddcb27d1fc75f4fa12cd5637ed80b2431faf34958e2c61bb4fda5219d337488",
+      "web/pickups.ts": "2d790e261de4f6a58a010983458640cf2438610634ed349f878fa040572aeaab",
+      "web/renderer.ts": "227715f52a7630f29417f9cc91d661a0a495ba13cab84e619338107e6244645d",
+      "web/scene-data.json": "9424d7f9efdfee3cbd2b204a19a73bef9d265b8c1738d4cb19d3aca18be6cd1a",
+      "web/pickup-data.json": "b6a14059e82fcca8dabcdf98ba865ea5bc16a70706e18fca604fc6dcd378991b"
+    },
+    "after": {
+      "tools/e2e/items.mjs": "d391f49c01cb89773da37d3b020e91f62831d34e412eb9b1fe37ac758f3c893f",
+      "tools/original/item-scenarios.py": "9b383331732d58e7f6453cf6c4e5c182e48fe057c205e979d5280661b8006590",
+      "tools/original/item-observer.py": "02ae3b15c889e27b1468f69c0e9ddf9a3bfa41fe1b965b9f9276103d80be8fb0",
+      "tools/e2e/item-room-evidence.mjs": "3794ab422ca0c4f39ddbb9d4d90639f4a1dc2a8edb4c769850fe5f1ed8a4f17f",
+      "tools/foundation/item-catalog.py": "d1c009f1584faa63dde8737f1e8bb75c879b8df7a95fb587ed826fb4268a5671",
+      "tools/foundation/decode-rooms.py": "4640cce2c99d0ef09d6691cf42c021f012e16ed3752bace965ad18dca7250f1a",
+      "tools/original/foundation-seeds.py": "dd4633c955e7518e9bc0f0147ddfae46d356468238477a68dc06c86656ccba89",
+      "tools/original/foundation-clock-run.py": "8f2fa981fbe26073d5a5a34ff46fbc6e9c70c2d30f81784abded5e40b9110c5b",
+      "tools/original/foundation-clock-gate.c": "f517f1fc0edf2bbe17021e529fb41652e991e286bef070b8aecefd32bfa62e75",
+      "tools/original/foundation-clock-verify.py": "c488100a187b44803c06374535715eaa5a7cde9d4513f6e866e090367d4f2054",
+      "tools/original/foundation-pickup-observe.py": "2ce3a3f528259c876941d505e31981164a550ce1b2097f4ea136607e3bd365a5",
+      "tools/original/state-observer.py": "58e3b510abbe5ff57f05844efbdf764e2a02530cda4fa99f538d886d258af6f1",
+      "tools/original/with-display.sh": "4371efe64ae1639564b4a85292ff252e20bcfe84b5387927ecf7093c6b8d3dfb",
+      "tools/foundation/verify.mjs": "3743b773cf2ede253c6d78f2605eb43f34e9d7002284b6a1dd2c413d45835a5c",
+      "tools/foundation/browser.mjs": "60c4bc851470f47e4dd0399148ce0c1edf351d41fbf7f7e15fa823af5948b4c8",
+      "tools/foundation/production-server.mjs": "e3152b58e2353319ba0963b30439e33c3cc65f84a8c6ebb765c2812486245952",
+      "web/trace.ts": "2df69cfbbae14084baadacbcffbc9ecb7b6e363e61c1efb26f721475cfb198a9",
+      "engine/src/items.rs": "499883b8ffdd240c49b36055e7c19fb6d17dc811a0b30d75275a35f237950721",
+      "engine/src/seed.rs": "5b34052dfbc34facb7903d1aeae5b063934c7780902d4ccfe6ab2743597d98d3",
+      "engine/src/pickups.rs": "ea316371c79ac7c481d018332a3f64be17096aec564d86a63e156a2c01be14e3",
+      "engine/src/lib.rs": "6dc35ee7f69b1acb6ad8957f74c2235a95ace54f5b01a1df63acfd54d6d69633",
+      "engine/build.rs": "1badf3fa591e758ad5655923137c00a433bec0e9425a4d056406005e6d931ea0",
+      "engine/src/player_items.rs": "a7784b707153f6728d0566d8723641a5aff67bbb516215848402206433f4c63e",
+      "web/engine.ts": "a1547bf71a41db66e0faf0ba7c6f6bb65ec5796405bbc249d40d0f9ad5f05c7e",
+      "web/animation.ts": "bddcb27d1fc75f4fa12cd5637ed80b2431faf34958e2c61bb4fda5219d337488",
+      "web/pickups.ts": "2d790e261de4f6a58a010983458640cf2438610634ed349f878fa040572aeaab",
+      "web/renderer.ts": "227715f52a7630f29417f9cc91d661a0a495ba13cab84e619338107e6244645d",
+      "web/scene-data.json": "9424d7f9efdfee3cbd2b204a19a73bef9d265b8c1738d4cb19d3aca18be6cd1a",
+      "web/pickup-data.json": "b6a14059e82fcca8dabcdf98ba865ea5bc16a70706e18fca604fc6dcd378991b"
+    }
+  },
+  "capturedProducer": "97049a778dffa329e3e4ea612fd8a6fc338e7f38",
+  "rawReport": {
+    "path": ".cache/e2e/item-acquisition/four-case-live-1/report.json",
+    "sha256": "2ebd87bd4ff90a77a2a71616de595e3befd356627a5edb5ebf9b656b666b1ad7",
+    "bytes": 1351910
+  },
+  "cases": [
+    {
+      "name": "pedestal-phase-0",
+      "code": "W0L0LYYM",
+      "seedValue": 2591693487,
+      "entropy": "Contrived public admission phase offset",
+      "actions": [
+        {
+          "key": "w",
+          "frames": 74
+        },
+        {
+          "key": null,
+          "frames": 60
+        },
+        {
+          "key": "w",
+          "frames": 32
+        },
+        {
+          "key": "Right",
+          "frames": 50
+        },
+        {
+          "key": null,
+          "frames": 50
+        }
+      ],
+      "status": "fail",
+      "checks": 17037,
+      "comparedPresentations": 267,
+      "passedPresentations": 165,
+      "queuedPresentations": 84,
+      "grantedPresentations": 18,
+      "selectedItemIds": [
+        270
+      ],
+      "grantCoverage": {
+        "nativeGrantedConfigs": [
+          {
+            "id": 270,
+            "kind": 4,
+            "inventory": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "maxCharges": 0
+          }
+        ],
+        "firstActiveGrant": "unaccepted: no active transition in this case",
+        "healthGrant": "unaccepted: unchanged health does not prove helper boundaries",
+        "healthClampBoundaries": "Unaccepted until required dedicated cap/parity cases are retained"
+      },
+      "inputProvenance": {
+        "status": "pass",
+        "commands": 321,
+        "stateHistoryTruncated": true,
+        "stateHistoryTruncationReason": "bytes",
+        "stateEncodedBytes": 33491737,
+        "maxStateEncodedBytes": 33554432,
+        "independentlyCapturedStates": 266,
+        "inputTraceTruncated": false,
+        "seedValue": 2591693487,
+        "bootEpochSeed": 1700000000
+      },
+      "browserEvidence": {
+        "path": "/workspace/isaac-worktrees/e2e-ci/.cache/e2e/item-acquisition/four-case-live-1/pedestal-phase-0/browser-states.json.gz",
+        "encoding": "gzip",
+        "rawSha256": "0b8cb6a4e7daf4c7d5013eac6baf48e57e5f41b4a59b7ff74150dfd64e29d655",
+        "rawBytes": 77993395
+      },
+      "nativeManifestSha256": "28d6ba0af86d8c7a77143f45648a9bac7019cc74b9f970f7f30301948346e97d",
+      "tapeSha256": "2073d57d1f09215a7a3511b45b045c86656c4ba681aa0db31656ac356303eb04",
+      "nativeEvidence": {
+        "path": "/workspace/isaac-worktrees/e2e-ci/.cache/e2e/item-acquisition/four-case-live-1/pedestal-phase-0/original/manifest.json.gz",
+        "encoding": "gzip",
+        "rawSha256": "28d6ba0af86d8c7a77143f45648a9bac7019cc74b9f970f7f30301948346e97d",
+        "rawBytes": 118568796,
+        "originalPath": "/workspace/isaac-worktrees/e2e-ci/.cache/e2e/item-acquisition/four-case-live-1/pedestal-phase-0/original/manifest.json",
+        "mode": 384,
+        "mtimeMs": 1791906455033.2627,
+        "scope": "Losslessly archived completed native capture; status/failures and every source observation preserved"
+      },
+      "nativeStatus": "pass",
+      "nativeFailures": [],
+      "failureCount": 767,
+      "failureFields": {
+        "active queue touched argument": 84,
+        "pedestal0:animation": 102,
+        "pedestal0:animationPlaying": 102,
+        "pedestal0:actual overlay": 102,
+        "ordinary motion through queued Pickup": 82,
+        "ordinary velocity through queued Pickup": 82,
+        "pedestal0:animationFrame": 98,
+        "pedestal0:world position": 15,
+        "pedestal0:actual overlay frame": 100
+      },
+      "firstFailures": [
+        {
+          "field": "active queue touched argument",
+          "presentation": 165,
+          "actual": false,
+          "expected": 0,
+          "error": "pedestal-phase-0:165:active queue touched argument\n\nfalse !== 0\n"
+        },
+        {
+          "field": "pedestal0:animation",
+          "presentation": 165,
+          "actual": "PlayerPickupSparkle",
+          "expected": "Empty",
+          "error": "pedestal-phase-0:165:pedestal0:animation\n+ actual - expected\n\n+ 'PlayerPickupSparkle'\n- 'Empty'\n"
+        },
+        {
+          "field": "pedestal0:animationPlaying",
+          "presentation": 165,
+          "actual": true,
+          "expected": false,
+          "error": "pedestal-phase-0:165:pedestal0:animationPlaying\n\ntrue !== false\n"
+        },
+        {
+          "field": "pedestal0:actual overlay",
+          "presentation": 165,
+          "actual": "Empty",
+          "expected": "Alternates",
+          "error": "pedestal-phase-0:165:pedestal0:actual overlay\n+ actual - expected\n\n+ 'Empty'\n- 'Alternates'\n"
+        }
+      ],
+      "diagnosticEntries": {
+        "callbacks": 19,
+        "completeMt": 231
+      }
+    },
+    {
+      "name": "pedestal-phase-1",
+      "code": "W0L0LYYM",
+      "seedValue": 2591693487,
+      "entropy": "Contrived public admission phase offset",
+      "actions": [
+        {
+          "key": "w",
+          "frames": 74
+        },
+        {
+          "key": null,
+          "frames": 61
+        },
+        {
+          "key": "w",
+          "frames": 32
+        },
+        {
+          "key": "Right",
+          "frames": 50
+        },
+        {
+          "key": null,
+          "frames": 50
+        }
+      ],
+      "status": "fail",
+      "checks": 17099,
+      "comparedPresentations": 268,
+      "passedPresentations": 167,
+      "queuedPresentations": 84,
+      "grantedPresentations": 17,
+      "selectedItemIds": [
+        270
+      ],
+      "grantCoverage": {
+        "nativeGrantedConfigs": [
+          {
+            "id": 270,
+            "kind": 4,
+            "inventory": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "maxCharges": 0
+          }
+        ],
+        "firstActiveGrant": "unaccepted: no active transition in this case",
+        "healthGrant": "unaccepted: unchanged health does not prove helper boundaries",
+        "healthClampBoundaries": "Unaccepted until required dedicated cap/parity cases are retained"
+      },
+      "inputProvenance": {
+        "status": "pass",
+        "commands": 322,
+        "stateHistoryTruncated": true,
+        "stateHistoryTruncationReason": "bytes",
+        "stateEncodedBytes": 33491372,
+        "maxStateEncodedBytes": 33554432,
+        "independentlyCapturedStates": 267,
+        "inputTraceTruncated": false,
+        "seedValue": 2591693487,
+        "bootEpochSeed": 1700000000
+      },
+      "browserEvidence": {
+        "path": "/workspace/isaac-worktrees/e2e-ci/.cache/e2e/item-acquisition/four-case-live-1/pedestal-phase-1/browser-states.json.gz",
+        "encoding": "gzip",
+        "rawSha256": "71b3c1bbc8b1c1acf5e3621cf6d81085259951650370ec374af279ac1b8dbe61",
+        "rawBytes": 78165529
+      },
+      "nativeManifestSha256": "98cdf6cc6b6ef0d6dac4357ce11dd9a022b7756fbf310934c7e87466505c9bc6",
+      "tapeSha256": "fd988980de9f3ab8178dd6e2209789ad109912a6ef7b0c534e1f2e135a6eada8",
+      "nativeEvidence": {
+        "path": "/workspace/isaac-worktrees/e2e-ci/.cache/e2e/item-acquisition/four-case-live-1/pedestal-phase-1/original/manifest.json.gz",
+        "encoding": "gzip",
+        "rawSha256": "98cdf6cc6b6ef0d6dac4357ce11dd9a022b7756fbf310934c7e87466505c9bc6",
+        "rawBytes": 119060594,
+        "originalPath": "/workspace/isaac-worktrees/e2e-ci/.cache/e2e/item-acquisition/four-case-live-1/pedestal-phase-1/original/manifest.json",
+        "mode": 384,
+        "mtimeMs": 1791906730203.3447,
+        "scope": "Losslessly archived completed native capture; status/failures and every source observation preserved"
+      },
+      "nativeStatus": "pass",
+      "nativeFailures": [],
+      "failureCount": 762,
+      "failureFields": {
+        "active queue touched argument": 84,
+        "pedestal0:animation": 101,
+        "pedestal0:animationPlaying": 101,
+        "pedestal0:actual overlay": 101,
+        "ordinary motion through queued Pickup": 82,
+        "ordinary velocity through queued Pickup": 82,
+        "pedestal0:animationFrame": 97,
+        "pedestal0:world position": 15,
+        "pedestal0:actual overlay frame": 99
+      },
+      "firstFailures": [
+        {
+          "field": "active queue touched argument",
+          "presentation": 167,
+          "actual": false,
+          "expected": 0,
+          "error": "pedestal-phase-1:167:active queue touched argument\n\nfalse !== 0\n"
+        },
+        {
+          "field": "pedestal0:animation",
+          "presentation": 167,
+          "actual": "PlayerPickupSparkle",
+          "expected": "Empty",
+          "error": "pedestal-phase-1:167:pedestal0:animation\n+ actual - expected\n\n+ 'PlayerPickupSparkle'\n- 'Empty'\n"
+        },
+        {
+          "field": "pedestal0:animationPlaying",
+          "presentation": 167,
+          "actual": true,
+          "expected": false,
+          "error": "pedestal-phase-1:167:pedestal0:animationPlaying\n\ntrue !== false\n"
+        },
+        {
+          "field": "pedestal0:actual overlay",
+          "presentation": 167,
+          "actual": "Empty",
+          "expected": "Alternates",
+          "error": "pedestal-phase-1:167:pedestal0:actual overlay\n+ actual - expected\n\n+ 'Empty'\n- 'Alternates'\n"
+        }
+      ],
+      "diagnosticEntries": {
+        "callbacks": 18,
+        "completeMt": 232
+      }
+    },
+    {
+      "name": "random-pedestal-0",
+      "code": "R74QYMYS",
+      "seedValue": 1889244627,
+      "entropy": "OS secrets",
+      "actions": [
+        {
+          "key": "w",
+          "frames": 74
+        },
+        {
+          "key": null,
+          "frames": 60
+        },
+        {
+          "key": "w",
+          "frames": 32
+        },
+        {
+          "key": null,
+          "frames": 100
+        }
+      ],
+      "status": "fail",
+      "checks": 17127,
+      "comparedPresentations": 267,
+      "passedPresentations": 165,
+      "queuedPresentations": 84,
+      "grantedPresentations": 18,
+      "selectedItemIds": [
+        291
+      ],
+      "grantCoverage": {
+        "nativeGrantedConfigs": [
+          {
+            "id": 291,
+            "kind": 3,
+            "inventory": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "maxCharges": 6
+          }
+        ],
+        "firstActiveGrant": "observed",
+        "healthGrant": "unaccepted: unchanged health does not prove helper boundaries",
+        "healthClampBoundaries": "Unaccepted until required dedicated cap/parity cases are retained"
+      },
+      "inputProvenance": {
+        "status": "pass",
+        "commands": 319,
+        "stateHistoryTruncated": true,
+        "stateHistoryTruncationReason": "bytes",
+        "stateEncodedBytes": 33469317,
+        "maxStateEncodedBytes": 33554432,
+        "independentlyCapturedStates": 266,
+        "inputTraceTruncated": false,
+        "seedValue": 1889244627,
+        "bootEpochSeed": 1700000000
+      },
+      "browserEvidence": {
+        "path": "/workspace/isaac-worktrees/e2e-ci/.cache/e2e/item-acquisition/four-case-live-1/random-pedestal-0/browser-states.json.gz",
+        "encoding": "gzip",
+        "rawSha256": "905bf0556fc98ac49f4e3799d14ec31ae70ba9a31d938f55cc6211845d2d08a1",
+        "rawBytes": 77744050
+      },
+      "nativeManifestSha256": "8d054fe4388da43ad612835e3d26b98fa1734178a7556304dbe132f3b09dd15f",
+      "tapeSha256": "500efa1471b21751478fb0564a76c35f80b0dad8759f5fef246f81735078e31f",
+      "nativeEvidence": {
+        "path": "/workspace/isaac-worktrees/e2e-ci/.cache/e2e/item-acquisition/four-case-live-1/random-pedestal-0/original/manifest.json.gz",
+        "encoding": "gzip",
+        "rawSha256": "8d054fe4388da43ad612835e3d26b98fa1734178a7556304dbe132f3b09dd15f",
+        "rawBytes": 119847593,
+        "originalPath": "/workspace/isaac-worktrees/e2e-ci/.cache/e2e/item-acquisition/four-case-live-1/random-pedestal-0/original/manifest.json",
+        "mode": 384,
+        "mtimeMs": 1791906999549.2886,
+        "scope": "Losslessly archived completed native capture; status/failures and every source observation preserved"
+      },
+      "nativeStatus": "pass",
+      "nativeFailures": [],
+      "failureCount": 784,
+      "failureFields": {
+        "active queue touched argument": 84,
+        "pedestal0:animation": 102,
+        "pedestal0:animationPlaying": 102,
+        "pedestal0:actual overlay": 102,
+        "ordinary motion through queued Pickup": 82,
+        "ordinary velocity through queued Pickup": 82,
+        "pedestal0:animationFrame": 98,
+        "pedestal0:world position": 15,
+        "pedestal0:actual overlay frame": 100,
+        "Player collection delay": 17
+      },
+      "firstFailures": [
+        {
+          "field": "active queue touched argument",
+          "presentation": 165,
+          "actual": false,
+          "expected": 0,
+          "error": "random-pedestal-0:165:active queue touched argument\n\nfalse !== 0\n"
+        },
+        {
+          "field": "pedestal0:animation",
+          "presentation": 165,
+          "actual": "PlayerPickupSparkle",
+          "expected": "Empty",
+          "error": "random-pedestal-0:165:pedestal0:animation\n+ actual - expected\n\n+ 'PlayerPickupSparkle'\n- 'Empty'\n"
+        },
+        {
+          "field": "pedestal0:animationPlaying",
+          "presentation": 165,
+          "actual": true,
+          "expected": false,
+          "error": "random-pedestal-0:165:pedestal0:animationPlaying\n\ntrue !== false\n"
+        },
+        {
+          "field": "pedestal0:actual overlay",
+          "presentation": 165,
+          "actual": "Empty",
+          "expected": "Alternates",
+          "error": "random-pedestal-0:165:pedestal0:actual overlay\n+ actual - expected\n\n+ 'Empty'\n- 'Alternates'\n"
+        }
+      ],
+      "diagnosticEntries": {
+        "callbacks": 19,
+        "completeMt": 201
+      }
+    },
+    {
+      "name": "random-pedestal-1",
+      "code": "VRQPT844",
+      "seedValue": 3560154886,
+      "entropy": "OS secrets",
+      "actions": [
+        {
+          "key": "w",
+          "frames": 74
+        },
+        {
+          "key": null,
+          "frames": 61
+        },
+        {
+          "key": "w",
+          "frames": 32
+        },
+        {
+          "key": null,
+          "frames": 100
+        }
+      ],
+      "status": "fail",
+      "checks": 17099,
+      "comparedPresentations": 268,
+      "passedPresentations": 167,
+      "queuedPresentations": 84,
+      "grantedPresentations": 17,
+      "selectedItemIds": [
+        48
+      ],
+      "grantCoverage": {
+        "nativeGrantedConfigs": [
+          {
+            "id": 48,
+            "kind": 1,
+            "inventory": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "maxCharges": 0
+          }
+        ],
+        "firstActiveGrant": "unaccepted: no active transition in this case",
+        "healthGrant": "unaccepted: unchanged health does not prove helper boundaries",
+        "healthClampBoundaries": "Unaccepted until required dedicated cap/parity cases are retained"
+      },
+      "inputProvenance": {
+        "status": "pass",
+        "commands": 320,
+        "stateHistoryTruncated": true,
+        "stateHistoryTruncationReason": "bytes",
+        "stateEncodedBytes": 33390520,
+        "maxStateEncodedBytes": 33554432,
+        "independentlyCapturedStates": 267,
+        "inputTraceTruncated": false,
+        "seedValue": 3560154886,
+        "bootEpochSeed": 1700000000
+      },
+      "browserEvidence": {
+        "path": "/workspace/isaac-worktrees/e2e-ci/.cache/e2e/item-acquisition/four-case-live-1/random-pedestal-1/browser-states.json.gz",
+        "encoding": "gzip",
+        "rawSha256": "b049888d5b5a9c477910a53428eae0120d055a5ed3125de8b059d09513bc467c",
+        "rawBytes": 77947437
+      },
+      "nativeManifestSha256": "8bb3a44cea832d834823b7ca416f91020a2ae7304ca7b953d92a39b8fa949041",
+      "tapeSha256": "f3c4a846e3c734003402cec5d4ef75b44c63e92648d94b1dea0095cf5a6d2b6d",
+      "nativeEvidence": {
+        "path": "/workspace/isaac-worktrees/e2e-ci/.cache/e2e/item-acquisition/four-case-live-1/random-pedestal-1/original/manifest.json.gz",
+        "encoding": "gzip",
+        "rawSha256": "8bb3a44cea832d834823b7ca416f91020a2ae7304ca7b953d92a39b8fa949041",
+        "rawBytes": 118582037,
+        "originalPath": "/workspace/isaac-worktrees/e2e-ci/.cache/e2e/item-acquisition/four-case-live-1/random-pedestal-1/original/manifest.json",
+        "mode": 384,
+        "mtimeMs": 1791907218138.1277,
+        "scope": "Losslessly archived completed native capture; status/failures and every source observation preserved"
+      },
+      "nativeStatus": "pass",
+      "nativeFailures": [],
+      "failureCount": 762,
+      "failureFields": {
+        "active queue touched argument": 84,
+        "pedestal0:animation": 101,
+        "pedestal0:animationPlaying": 101,
+        "pedestal0:actual overlay": 101,
+        "ordinary motion through queued Pickup": 82,
+        "ordinary velocity through queued Pickup": 82,
+        "pedestal0:animationFrame": 97,
+        "pedestal0:world position": 15,
+        "pedestal0:actual overlay frame": 99
+      },
+      "firstFailures": [
+        {
+          "field": "active queue touched argument",
+          "presentation": 167,
+          "actual": false,
+          "expected": 0,
+          "error": "random-pedestal-1:167:active queue touched argument\n\nfalse !== 0\n"
+        },
+        {
+          "field": "pedestal0:animation",
+          "presentation": 167,
+          "actual": "PlayerPickupSparkle",
+          "expected": "Empty",
+          "error": "random-pedestal-1:167:pedestal0:animation\n+ actual - expected\n\n+ 'PlayerPickupSparkle'\n- 'Empty'\n"
+        },
+        {
+          "field": "pedestal0:animationPlaying",
+          "presentation": 167,
+          "actual": true,
+          "expected": false,
+          "error": "random-pedestal-1:167:pedestal0:animationPlaying\n\ntrue !== false\n"
+        },
+        {
+          "field": "pedestal0:actual overlay",
+          "presentation": 167,
+          "actual": "Empty",
+          "expected": "Alternates",
+          "error": "random-pedestal-1:167:pedestal0:actual overlay\n+ actual - expected\n\n+ 'Empty'\n- 'Alternates'\n"
+        }
+      ],
+      "diagnosticEntries": {
+        "callbacks": 18,
+        "completeMt": 202
+      }
+    }
+  ]
+}
