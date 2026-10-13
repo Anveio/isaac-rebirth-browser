@@ -1,0 +1,17 @@
+# Host C libraries disagree with the wasm32 libm the browser runs; use the
+# crate::fmath wrappers so native and shipped arithmetic stay bit-identical.
+disallowed-methods = [
+  { path = "f32::sin", reason = "use crate::fmath::sin (wasm32-identical libm)" },
+  { path = "f32::cos", reason = "use crate::fmath::cos (wasm32-identical libm)" },
+  { path = "f32::sin_cos", reason = "use crate::fmath::{sin, cos} (wasm32-identical libm)" },
+  { path = "f32::tan", reason = "add a crate::fmath wrapper over libm" },
+  { path = "f32::powf", reason = "add a crate::fmath wrapper over libm" },
+  { path = "f32::exp", reason = "add a crate::fmath wrapper over libm" },
+  { path = "f32::ln", reason = "add a crate::fmath wrapper over libm" },
+  { path = "f32::atan2", reason = "add a crate::fmath wrapper over libm" },
+  { path = "f32::hypot", reason = "add a crate::fmath wrapper over libm" },
+  { path = "f64::sin", reason = "add a crate::fmath wrapper over libm" },
+  { path = "f64::cos", reason = "add a crate::fmath wrapper over libm" },
+  { path = "f64::powf", reason = "add a crate::fmath wrapper over libm" },
+  { path = "f64::atan2", reason = "add a crate::fmath wrapper over libm" },
+]
