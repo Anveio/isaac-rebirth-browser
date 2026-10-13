@@ -30,6 +30,8 @@ export interface SavedRunSummary {
   descriptorCount: number; copiedDescriptorCount: number; redHp: number; maxRedHp: number;
   inventory: {coins: number; bombs: number; keys: number};
   emptyGridCellsSaved: number; occupiedGridSeedsPending: number[];
+  currentRoomRecord: number; currentRoomSeedSamples: {gridIndex: number;
+    levelSeeds: [number, number]; savedSeeds: [number, number]; occupancy: "empty" | "occupied" | "padding"}[];
   itemPools: {poolSeed: number; rootRngSeed: number; secondaryRngSeed: number;
     specialFactor: number; specialCounters: number[]; removedSamples: {itemId: number; removed: boolean}[];
     pillEffects: number[]; weightSamples: {poolId: number; itemId: number; weight: number}[]};

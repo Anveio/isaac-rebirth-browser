@@ -55,8 +55,28 @@ impl SavedRun {
         empty_cells: usize,
         occupied_pending: Vec<usize>,
         copied_rows: usize,
-    ) -> SavedRunSummary {
-        SavedRunSummary {
+        level_seeds: &mt::DescriptorSeeds,
+        saved_seeds: &mt::DescriptorSeeds,
+    ) -> Result<SavedRunSummary, String> {
+        let grid = self
+            .room
+            .grid
+            .as_ref()
+            .ok_or("saved room requires its live grid")?;
+        let mut current_room_seed_samples = Vec::new();
+        for grid_index in [0, 1, 16, 17, 56, 85, 103, 134, 447] {
+            current_room_seed_samples.push(CurrentRoomSeedSample {
+                grid_index,
+                level_seeds: level_seeds.seed_pair(self.current_room, grid_index)?,
+                saved_seeds: saved_seeds.seed_pair(self.current_room, grid_index)?,
+                occupancy: match grid.cells.get(grid_index) {
+                    None => GridOccupancy::Padding,
+                    Some(cell) if cell.entity.is_some() => GridOccupancy::Occupied,
+                    Some(_) => GridOccupancy::Empty,
+                },
+            });
+        }
+        Ok(SavedRunSummary {
             run_seed: self.run_seed.clone(),
             seeded_run: self.seeded_run,
             stage: self.stage,
@@ -69,7 +89,9 @@ impl SavedRun {
             empty_grid_cells_saved: empty_cells,
             occupied_grid_seeds_pending: occupied_pending,
             item_pools: SavedItemPoolsSummary::from_pools(&self.item_pools),
-        }
+            current_room_record: self.current_room,
+            current_room_seed_samples,
+        })
     }
 }
 
@@ -90,6 +112,25 @@ pub struct SavedRunSummary {
     /// admission is not yet routed. No substitute secondary seed is created.
     pub occupied_grid_seeds_pending: Vec<usize>,
     pub item_pools: SavedItemPoolsSummary,
+    pub current_room_record: usize,
+    pub current_room_seed_samples: Vec<CurrentRoomSeedSample>,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "lowercase")]
+pub enum GridOccupancy {
+    Empty,
+    Occupied,
+    Padding,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct CurrentRoomSeedSample {
+    pub grid_index: usize,
+    pub level_seeds: [u32; 2],
+    pub saved_seeds: [u32; 2],
+    pub occupancy: GridOccupancy,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]

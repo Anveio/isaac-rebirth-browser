@@ -113,5 +113,21 @@
     "removed": "Root+4b0→Saved+eda8,347 bytes",
     "pillEffects": "Root+9b8→Saved+ef48,10 signed words",
     "unaccepted": "Trinket pool/identification flags are outside current ItemPools selection scope"
+  },
+  "currentRoomObservation": {
+    "identity": "Room pointer fromGame+8180; actual Descriptor pointer atRoom+8, record index atDescriptor+4; require exact addressGame+10+index*f0",
+    "cells": [
+      0,
+      1,
+      16,
+      17,
+      56,
+      85,
+      103,
+      134,
+      447
+    ],
+    "pairs": "Read actual current Level and Saved row+58 grid vectors, then seeds+10/+18 at1c stride. Read independent room pointer occupancy and object kind/variant/primary+18/secondary+20 where present.",
+    "scope": "Current-row Level/Saved ownership is mandatory within each game; all paired numeric/occupancy comparisons retain actual statuses. Untouched0/1/134 samples do not certify Room.Save mutation parity."
   }
 }

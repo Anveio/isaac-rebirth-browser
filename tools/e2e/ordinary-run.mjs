@@ -128,6 +128,17 @@ try {
         const pairDifferences = state.bootLifecycle.savedGridSeedSamples.flatMap((sample, index) => JSON.stringify(sample) === JSON.stringify(expectedPairs[index]) ? [] : [{ ...sample, original: expectedPairs[index].seeds }]);
         result.savedGridDiagnostic = { status: pairDifferences.length ? 'fail' : 'pass', comparedPairs: expectedPairs.length, differences: pairDifferences };
         const summary = state.savedRunSummary; assert.ok(summary && observed.savedRun);
+        assert.equal(summary.currentRoomRecord, observed.savedRun.currentRoomRecord, 'Actual current descriptor row identity must match source');
+        assert.ok(observed.currentRoomSeedSamples?.length === 9, 'Current Room.Save requires independently observed active-row samples');
+        const currentPairDifferences = [];
+        for (const [index, source] of observed.currentRoomSeedSamples.entries()) {
+          const sample = summary.currentRoomSeedSamples[index];
+          assert.equal(sample.gridIndex, source.gridIndex);
+          assert.deepEqual(sample.levelSeeds, sample.savedSeeds, 'Production current row must retain actual Level→Saved copy ownership');
+          assert.deepEqual(source.levelSeeds, source.savedSeeds, 'Native current row must retain actual Level→Saved copy ownership');
+          for (const field of ['levelSeeds', 'savedSeeds', 'occupancy']) if (JSON.stringify(sample[field]) !== JSON.stringify(source[field])) currentPairDifferences.push({gridIndex: source.gridIndex, field, original: source[field], production: sample[field], sourceGridObject: source.object || null});
+        }
+        result.currentRoomSeedDiagnostic = { status: currentPairDifferences.length ? 'fail' : 'pass', roomRecord: summary.currentRoomRecord, comparedCells: 9, differences: currentPairDifferences, reason: 'Actual current-row numerical/occupancy mismatches remain unaccepted; source samples never enter production' };
         const emptyIndices = state.room.grid.cells.flatMap((cell, index) => cell.entity ? [] : [index]);
         result.gridOccupancyDiagnostic = { status: JSON.stringify(emptyIndices) === JSON.stringify(observed.liveGrid.emptyIndices) ? 'pass' : 'fail', originalNullCells: observed.liveGrid.emptyIndices.length, productionNullCells: emptyIndices.length, originalOccupiedProductionNull: emptyIndices.filter(index => !observed.liveGrid.emptyIndices.includes(index)), originalNullProductionOccupied: observed.liveGrid.emptyIndices.filter(index => !emptyIndices.includes(index)), reason: 'Grid factory admission and secondary state remain incomplete; observed occupancy never changes production state' };
         assert.equal(summary.runSeed, observed.savedRun.seedText.replaceAll(' ', ''));

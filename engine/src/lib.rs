@@ -991,7 +991,13 @@ impl Game {
             .copy_rooms_from(&self.boot_level_grid, &rooms)?;
         self.saved_game.player_rng_seed = self.player_manager_secondary_rng.seed;
         let saved = saved_game::SavedRun::copy_from(&self.state, item_pools);
-        self.state.saved_run_summary = Some(saved.summary(empty, occupied_pending, rooms.len()));
+        self.state.saved_run_summary = Some(saved.summary(
+            empty,
+            occupied_pending,
+            rooms.len(),
+            &self.boot_level_grid,
+            &self.saved_game.descriptor_seeds,
+        )?);
         self.saved_run = Some(saved);
         self.state
             .boot_lifecycle
