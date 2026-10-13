@@ -1,0 +1,55 @@
+name: Antithesis deterministic simulation
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dst-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Engine core units under seeded DST, every game tape replayed through the
+  # shipped engine.wasm. Independent of the live original/browser registry.
+  dst:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Restore Rust build caches
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            engine/target
+            engine/dst/target
+          key: ${{ runner.os }}-dst-${{ hashFiles('engine/Cargo.lock', 'engine/dst/Cargo.lock', 'engine/src/**', 'engine/build.rs', 'engine/dst/src/**') }}
+          restore-keys: ${{ runner.os }}-dst-
+      - name: Install the Rust toolchain
+        run: bash tools/setup-rust.sh
+      - name: Format and lint the DST harness
+        run: |
+          cargo fmt --manifest-path engine/dst/Cargo.toml --check
+          cargo clippy --manifest-path engine/dst/Cargo.toml --locked --all-targets -- -D warnings
+      - name: Simulate every unit and replay through the shipped WASM
+        env:
+          DST_OUTPUT: .cache/dst/ci
+          DST_CASES: "12"
+          DST_STEPS: "1500"
+        run: bash tools/dst/run.sh
+      - name: Retain the DST report and violating tapes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dst-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .cache/dst/ci/
+          if-no-files-found: warn
+          retention-days: 14
