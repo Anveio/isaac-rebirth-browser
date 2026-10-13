@@ -11,12 +11,14 @@ import { chromium } from '@playwright/test';
 import { browserLaunchOptions, inspectBrowserGraphics } from '../foundation/browser.mjs';
 import { startProductionServer } from '../foundation/production-server.mjs';
 import { assertInputProvenance, assertSeededRun, enterSeededRun, manualSeedCommands, waitForReady } from '../foundation/verify.mjs';
+import { compareRoomContext } from './item-room-evidence.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const run = promisify(execFile);
 const PIN = '724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13';
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
 const files = ['tools/e2e/items.mjs', 'tools/original/item-scenarios.py', 'tools/original/item-observer.py',
+  'tools/e2e/item-room-evidence.mjs',
   'tools/foundation/item-catalog.py', 'tools/foundation/decode-rooms.py', 'tools/original/foundation-seeds.py',
   'tools/original/foundation-clock-run.py', 'tools/original/foundation-clock-gate.c',
   'tools/original/foundation-clock-verify.py', 'tools/original/foundation-pickup-observe.py',
@@ -87,7 +89,7 @@ try {
         inventory: item.inventory, maxCharges: item.maxCharges, cooldown: item.cooldown, special: item.special,
         eligible: item.achievement < 0 || Boolean(baseline.observation.achievements[item.achievement]),
       })), 'All 343 native configurations must match the independently pinned authored catalogue');
-      const rows = new Map(native.debugObservations.map(row => [row.context.presentedFrame, row.observation]));
+      const rows = new Map(native.debugObservations.map(row => [row.context.presentedFrame, row]));
       page = await browser.newPage();
       const errors = [], states = [];
       page.on('pageerror', error => errors.push(String(error)));
@@ -105,11 +107,13 @@ try {
         try { assert.deepEqual(actual, expected, `${item.name}:${presentation}:${field}`); }
         catch (error) { result.failures.push({ field, presentation, actual, expected, error: String(error.message) }); }
       };
-      const compare = (state, source, presentation) => {
+      const compare = (state, row, presentation) => {
+        const source = row.observation;
         assert.equal(source.status, 'pass'); assert.equal(source.memoryWritten, false);
         assert.equal(source.executableMappingsRead, false); assert.equal(source.nativeBinarySha256, PIN);
         assert.equal(source.gamePresent, true);
         const prior = result.failures.length;
+        for (const check of compareRoomContext(state, row)) equal(check.actual, check.expected, check.field, presentation);
         equal(state.systemClock.systemCounter % 2, source.systemCounter % 2, 'source phase', presentation);
         equal(state.profiles[state.profile - 1].achievements, source.achievements.map(Boolean), 'fresh eligibility bytes', presentation);
         equal(state.runSeeds, {startSeed: source.runSeeds.startSeed, streamState: source.runSeeds.rngWords[0],
@@ -150,7 +154,7 @@ try {
         }
         if (result.failures.length === prior) passedPresentations++;
       };
-      compare(start, baseline.observation, 0);
+      compare(start, baseline, 0);
       for (const {key, frames} of item.actions) {
         const code = key ? 'Key' + key.toUpperCase() : null;
         if (key) { await page.keyboard.down(key); expected.push({type: 'key', code, down: true}); }

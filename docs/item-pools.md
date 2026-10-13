@@ -34,6 +34,18 @@ presentation compares all pool entries/maps and the natural pedestal. The gate
 also requires the independent complete DOM command plan and actual manual-seed
 readback. Original state never supplies browser behavior.
 
+The retained complete cohort passed all four pairs across 542 presentations and
+10,296 captured checks. A separately hashed verifier replays those exact raw
+native manifests and full browser state archives with 7,588 additional required
+room-context checks. It joins actual native room type/dimensions and public
+variant/name/spawn seed to the current browser descriptor, and checks the port's
+descriptor/floor consistency. The live gate now requires those same checks.
+The original comparator and source hashes remain in the preserved report; no
+recapture or runtime modification was needed for the stronger assertions.
+Native descriptor index and appearance origin/backdrop were absent from these
+observations and remain unaccepted. The earlier rejected 3/4 cohort retains its
+inactive-queue observer failure and its actual captured bytes.
+
 This selection leaf stops before acquisition. The mapped normal acquisition
 plays the authored 42-frame `Pickup` animation and queues AddCollectible; it is
 not a fitted nine-frame `LiftItem` wait. Player acquisition, cache/stat effects,
