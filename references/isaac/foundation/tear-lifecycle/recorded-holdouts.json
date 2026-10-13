@@ -1,12 +1,12 @@
 {
   "schema": 1,
-  "status": "pass",
-  "scope": "Exact fresh original/production-browser functional checkpoints in previously failing recorded random lifecycle tapes. Pixel and complete shared-RNG state parity are separate.",
-  "report": ".cache/e2e/paired/lifecycle-holdouts-1/report.json",
-  "reportSha256": "a19ebb93ea4cc4ab1fde23cbdfc63a563ac6df48947ef25c3301f607c14a8259",
+  "status": "fail",
+  "scope": "Exact original/browser functional holdout replay after source TearMotion integration; every case executed, all failures retained. Complete RNG and pixel parity remain separate.",
+  "report": ".cache/e2e/paired/lifecycle-rebased-holdouts/report.json",
+  "reportSha256": "1d9b11ea70da7b112495a9fdfead3618f922a39453f340ef9b2bdf07b554b080",
   "production": {
-    "sha256": "1700a858d60549248ae24fb6e39cad29ea82e341bc98df3c850f0d44731d119d",
-    "files": 529,
+    "sha256": "4957001cf75e8754813707c8c058b149330747f5af3d5e531bd5cecd5a02ed6d",
+    "files": 531,
     "source": "/workspace/isaac-worktrees/weapons/dist",
     "scope": "Immutable snapshot of production build bytes; source/native replay equality is checked separately"
   },
@@ -15,14 +15,113 @@
     {
       "seed": "EQCA 3XZX",
       "status": "pass",
-      "exactCheckpoints": 18,
-      "caseDirectory": "/workspace/isaac-worktrees/weapons/.cache/e2e/paired/lifecycle-holdouts-1/00-paired-random-run"
+      "passedCheckpoints": 18,
+      "totalCheckpoints": 18,
+      "caseDirectory": "/workspace/isaac-worktrees/weapons/.cache/e2e/paired/lifecycle-rebased-holdouts/00-paired-random-run",
+      "failedFields": []
     },
     {
       "seed": "1E0W JX06",
       "status": "pass",
-      "exactCheckpoints": 18,
-      "caseDirectory": "/workspace/isaac-worktrees/weapons/.cache/e2e/paired/lifecycle-holdouts-1/01-paired-random-run"
+      "passedCheckpoints": 18,
+      "totalCheckpoints": 18,
+      "caseDirectory": "/workspace/isaac-worktrees/weapons/.cache/e2e/paired/lifecycle-rebased-holdouts/01-paired-random-run",
+      "failedFields": []
+    },
+    {
+      "seed": "W0L0 LYYM",
+      "status": "fail",
+      "passedCheckpoints": 16,
+      "totalCheckpoints": 18,
+      "caseDirectory": "/workspace/isaac-worktrees/weapons/.cache/e2e/paired/lifecycle-rebased-holdouts/02-paired-random-run",
+      "failedFields": [
+        {
+          "label": "random-resumed",
+          "field": "tears.length",
+          "expected": 0,
+          "actual": 1,
+          "status": "fail"
+        },
+        {
+          "label": "random-after-bomb",
+          "field": "player.y",
+          "expected": 214,
+          "actual": 28.022801589965823,
+          "status": "fail"
+        },
+        {
+          "label": "random-after-bomb",
+          "field": "player.vx",
+          "expected": 0,
+          "actual": 7.076459839079431e-25,
+          "status": "fail"
+        },
+        {
+          "label": "random-after-bomb",
+          "field": "player.vy",
+          "expected": 0,
+          "actual": -1.8597967982292176,
+          "status": "fail"
+        },
+        {
+          "label": "random-after-bomb",
+          "field": "damageCooldown",
+          "expected": 108,
+          "actual": 107,
+          "status": "fail"
+        }
+      ]
+    },
+    {
+      "seed": "T1PK6Y0W",
+      "status": "fail",
+      "passedCheckpoints": 25,
+      "totalCheckpoints": 28,
+      "caseDirectory": "/workspace/isaac-worktrees/weapons/.cache/e2e/paired/lifecycle-rebased-holdouts/03-paired-room-combat",
+      "failedFields": [
+        {
+          "label": "rock-bomb-explosion",
+          "field": "player.hp",
+          "expected": 3,
+          "actual": 4,
+          "status": "fail"
+        },
+        {
+          "label": "rock-after-bomb",
+          "field": "player.hp",
+          "expected": 3,
+          "actual": 4,
+          "status": "fail"
+        },
+        {
+          "label": "rock-former-cell-crossed",
+          "field": "player.y",
+          "expected": 219.99036254882816,
+          "actual": 168.4999008178711,
+          "status": "fail"
+        },
+        {
+          "label": "rock-former-cell-crossed",
+          "field": "player.vx",
+          "expected": 1.0445412115228005e-24,
+          "actual": 2.2154662104867384e-08,
+          "status": "fail"
+        },
+        {
+          "label": "rock-former-cell-crossed",
+          "field": "player.vy",
+          "expected": 2.42152578830719,
+          "actual": -0.03481050580739975,
+          "status": "fail"
+        },
+        {
+          "label": "rock-former-cell-crossed",
+          "field": "player.hp",
+          "expected": 3,
+          "actual": 4,
+          "status": "fail"
+        }
+      ]
     }
   ]
 }
