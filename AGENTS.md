@@ -28,3 +28,8 @@ replay consistency, not original hidden-state or simulation-tick parity.
 Coordinate file ownership across parallel agents. Shared temporary tooling and
 RE notes belong in ignored `.cache/coordination/`; persist reusable tools and
 the evidence needed to reproduce accepted behavior in the repository.
+
+Keep changes small and send short-lived PRs directly to `main`. The integration
+owner reviews exact PR heads, resolves conflicts and merges completed slices
+frequently. Retire merged or superseded branches after preserving any unique
+superseded commits; do not accumulate long-lived feature or aggregate branches.
