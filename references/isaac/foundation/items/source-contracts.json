@@ -1,0 +1,60 @@
+{
+  "schema": 1,
+  "scope": "Base fresh-profile ItemConfig, causal ItemPool initialization and natural free pedestal selection/admission. Player acquisition and effects remain a separate leaf.",
+  "nativeBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "sourceHashes": {
+    "items.xml": "4fbad99276eebf0ed5dcba7e88591c03673bbae44c4cd8b5dd3ead36caad68cc",
+    "itempools.xml": "8c3d8f04589992f1bac0c4f719c49068265d5fe134d29f414d90161e7bf95378"
+  },
+  "catalogue": {
+    "collectibles": 343,
+    "maximumCollectibleId": 346,
+    "nativeLookup": "57bea0: unsigned ID <=346, sparse pointer System+2dfe0+8*id",
+    "inventoryOrder": ["maxhearts", "hearts", "soulhearts", "blackhearts", "bombs", "keys", "coins"],
+    "cacheAll": 4294967295,
+    "familiarCacheBit": 512,
+    "authoredPools": 15,
+    "nativePools": 16,
+    "emptyNativeSlot": 7,
+    "orderedEntries": 497,
+    "freshAchievementBytes": 179,
+    "observedFreshAchievementBytes": "all zero; 257 eligible collectible configurations, including achievement<0 unconditional entries"
+  },
+  "initialization": {
+    "runOwner": "Game+a190; RNG27 at+a194",
+    "runSource": "5e1470 initializes shifts(3,23,25), draws12 fields at Seeds+14..40, then field+44; GameNewRun54ec0d calls this same owner for the ItemPool seed",
+    "poolSource": "583040 root+0 seed; RNG3(1,9,29) at+48c, first output seeds RNG2(1,5,19) at+49c",
+    "childSource": "582420 consumes two root RNG3 outputs per each16 slots to initialize RNG35(5,9,7)",
+    "pillSource": "583040 Fisher-Yates shuffles9 colors and28 effects, then9 without-replacement effect selections",
+    "sharedMtDraws": 0
+  },
+  "selection": {
+    "sources": ["581380", "581590"],
+    "localRng": "explicit nonzero seed; shift4(1,11,6); unsigned->f32 rounding before multiplication by2^-32",
+    "intervals": "strict cumulative immutable baseWeight > f32(sample*immutableTotal); accept when currentWeight*(special?factor:1) > interval residual and both ID maps are clear",
+    "rejection": "ten deterministic remaps using immutableTotal*distanceToUpper; then circular positive-currentWeight scan after rejected entry, excluding it",
+    "depletion": "subtract authored decreaseBy when decrease=true; strict resultingWeight<removeOn sets weight0 and removed-ID byte",
+    "specialProbability": "selected special entry halves factor when>0.5; otherwise max(0.01,factor*0.2), even without depletion",
+    "eligibility": "source counter19 decrements only on an ineligible redraw; preserve exact zero/-1 branches, including final ineligible result at-1",
+    "fallback": "non-treasure null recursively restarts localRNG4 in treasure with identical explicit seed/decrease; treasure null returns25 without a selected25 mark",
+    "bible": "mark original selected ID first; only when Bible33 removed/selected bytes clear, consume local bounded(trunc immutableTotal); strict draw<pool counter may return/mark33",
+    "bibleModifier": "Rosary72 acquisition52de55 adds5 to all16 counters through5823e0; acquisition remains outside this leaf"
+  },
+  "pedestal": {
+    "source": "Pickup.Init4ff1e0/4ff6b0: type5 variant100 subtype0, local RNG35 first Next -> local ItemPool selection with decrease=true",
+    "explicitSubtype": "nonzero bypasses selection; ItemConfig supplies actual initial charge",
+    "ageSource": "442b30: u32(Game+ce9f4)-u32(Entity+42c)",
+    "ageClock": "Game.Update54f910/54fa82 increments ce9f4 before584200->Room.Update5d12a0; transition54fc08 invokes callbacks and returns without increment",
+    "observerClock": "foundation-pickup-observe nativePhase.fullGameUpdates reads actual Game+ce9f4; it is not an instrumented Update-call tally",
+    "contextLimit": "free authored room admission; paid shop/devil/black-market and challenge/room override contexts retain typed selectors"
+  },
+  "unaccepted": [
+    "exceptional rejection/eligibility retry exhaustion and treasure fallback live boundaries",
+    "nonzero Bible modifier live outcome",
+    "queued player acquisition, inventory/health grants, active replacement/charge and item effects",
+    "cache/stat evaluation, costumes, familiars and their AI",
+    "active use, trinkets/pockets, persistent progression/unlocks",
+    "absolute Game counter agreement across omitted loading/cutscene lifecycle",
+    "paid contexts, room overrides and pixels"
+  ]
+}

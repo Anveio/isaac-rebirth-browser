@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "capturedProducerCommit": "ce24d64bbbcda654707fb242577dd65c35332359",
+  "capturedRawReportSha256": "5b985862f72b39e58dda587b3342f5e94c57be3c72328ff8ff1d00e323870853",
+  "roomVerifierSha256": "3794ab422ca0c4f39ddbb9d4d90639f4a1dc2a8edb4c769850fe5f1ed8a4f17f",
+  "roomSidecarSha256": "39487a8af78617b17e8ce412c109983de10cf10390a361e9710d135c9bf5010c",
+  "status": "pass",
+  "pairedCases": 4,
+  "comparedPresentations": 542,
+  "capturedChecks": 10296,
+  "additionalRoomContextChecks": 7588,
+  "sourceObjectVerification": {
+    "status": "pass",
+    "files": 21,
+    "scope": "All captured producer/gate SHA256 values independently match git show ce24d64:path; stronger gate/sidecar assertions are a separate follow-up"
+  },
+  "browserArchives": {
+    "status": "pass",
+    "files": 4,
+    "scope": "Every gzip-decoded full browser state/trace length and raw SHA verified; both history truncation flags false"
+  },
+  "preservedRejectedAttempt": {
+    "status": "fail",
+    "passedCases": 3,
+    "totalCases": 4,
+    "rawReportSha256": "1cfdf1dcce26c5a00ea0365ec7180f2b74f35e8b72bb63de8be2d6af05e83ea9",
+    "scope": "Phase0 stopped at native observer requiring a boolean inactive touched byte while queued config was null; original failed manifest plus captured source are retained. Three other actual gameplay pairs passed; the entire cohort remained red."
+  },
+  "wrongRoomNegativeControl": {
+    "status": "rejected",
+    "path": ".cache/coordination/item-research/wrong-room-negative-control.json",
+    "sha256": "e1ee41981195dbeec0a685aaeb1d6c1faac52a71dec4e617afe7136f6013d7e8"
+  },
+  "checks": [
+    "production build",
+    "TypeScript typecheck",
+    "strict all-target Clippy",
+    "assets2556",
+    "matrix consistency",
+    "Python/Node syntax"
+  ],
+  "unaccepted": [
+    "acquisition and actual item/cache/stat/familiar effects",
+    "exceptional selector retry/fallback and nonzero Bible live boundaries",
+    "native descriptor index and appearance origin/backdrop",
+    "absolute cutscene/run Game clock agreement",
+    "paid/override contexts and pixels"
+  ]
+}

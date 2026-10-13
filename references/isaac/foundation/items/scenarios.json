@@ -1,0 +1,77 @@
+{
+  "schema": 1,
+  "bootEpochSeed": 1700000000,
+  "source": "Public seeded menus/movement; full authored room discovery, no selected-item filtering",
+  "cases": [
+    {
+      "name": "pedestal-phase-0",
+      "code": "W0L0LYYM",
+      "seedValue": 2591693487,
+      "delay": 0,
+      "actions": [
+        {
+          "key": "w",
+          "frames": 74
+        },
+        {
+          "key": null,
+          "frames": 60
+        }
+      ],
+      "entropy": "Contrived public admission phase offset"
+    },
+    {
+      "name": "pedestal-phase-1",
+      "code": "W0L0LYYM",
+      "seedValue": 2591693487,
+      "delay": 1,
+      "actions": [
+        {
+          "key": "w",
+          "frames": 74
+        },
+        {
+          "key": null,
+          "frames": 61
+        }
+      ],
+      "entropy": "Contrived public admission phase offset"
+    },
+    {
+      "name": "random-pedestal-0",
+      "code": "ZGC4HY91",
+      "seedValue": 2792021038,
+      "delay": 0,
+      "actions": [
+        {
+          "key": "w",
+          "frames": 74
+        },
+        {
+          "key": null,
+          "frames": 60
+        }
+      ],
+      "entropy": "OS secrets",
+      "discoveryAttempts": 85
+    },
+    {
+      "name": "random-pedestal-1",
+      "code": "AQPJJK82",
+      "seedValue": 209058778,
+      "delay": 1,
+      "actions": [
+        {
+          "key": "w",
+          "frames": 74
+        },
+        {
+          "key": null,
+          "frames": 61
+        }
+      ],
+      "entropy": "OS secrets",
+      "discoveryAttempts": 263
+    }
+  ]
+}
