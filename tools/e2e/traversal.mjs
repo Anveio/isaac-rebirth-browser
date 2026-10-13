@@ -12,6 +12,7 @@ import { writeBrowserEvidence } from '../foundation/browser-evidence.mjs';
 import { assertInputProvenance, assertSeededRun, enterSeededRun, manualSeedCommands, waitForReady } from '../foundation/verify.mjs';
 import { compareCamera, captureCameraVisibility } from './camera-checks.mjs';
 import { compareChests } from './chest-checks.mjs';
+import { snapshot, step } from './lib/game.mjs';
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const run = promisify(execFile);
 const value = flag => { const index = process.argv.indexOf(flag); return index < 0 ? undefined : process.argv[index + 1]; };
@@ -134,7 +135,7 @@ try {
           return (...args) => { try { target[name](...args); }
             catch (error) { comparisonFailures.push({label, error: String(error)}); } };
         }});
-        const state = await page.evaluate(() => window.game.snapshot());
+        const state = await snapshot(page);
         const original = originals.get(label), observed = original.observation;
         const source = observed.floor, actor = observed.contents.players[0];
         phaseAssert.equal(state.screen, 'playing', `${label}:playable browser state`);
@@ -395,10 +396,10 @@ try {
           const code = keyCodes[action.key];
           assert.ok(code); await page.keyboard[action.down ? 'down' : 'up'](code);
         } else if (action.type === 'step') {
-          await page.evaluate(count => { window.game.step(count); }, action.frames);
+          await step(page, action.frames);
         } else {
           try { await compare(action.label); } catch (error) {
-            const state = await page.evaluate(() => window.game.snapshot());
+            const state = await snapshot(page);
             comparisonFailures.push({label: action.label, error: String(error)});
             states.push({label: action.label, currentRoom: state.currentRoom, descriptor: state.room.descriptor,
               position: [state.player.x, state.player.y], velocity: [state.player.vx, state.player.vy], transition: state.roomTransition, status: 'fail'});
@@ -464,7 +465,7 @@ try {
       assert.equal(trace.backendStateTruncated, false, 'Every actual callback state must fit its explicit bounded history');
       assert.ok(trace.backendEvents.every(event => event.state?.schema === 1),
         'Every actual asynchronous callback must retain its own complete state; phase snapshots cannot replace it');
-      assertSeededRun(await page.evaluate(() => window.game.snapshot()), scenario.code, scenario.runSeed);
+      assertSeededRun(await snapshot(page), scenario.code, scenario.runSeed);
       assert.deepEqual(errors, []);
       Object.assign(row, { status: comparisonFailures.length ? 'fail' : 'pass', sourceManifest, provenance, visitedRooms: [...observedRooms], comparisonFailures,
         inputProvenance: { status: 'pass', commands: trace.commands.length, initialSeed: trace.initialSeed,

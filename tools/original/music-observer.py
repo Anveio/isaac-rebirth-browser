@@ -15,6 +15,9 @@ import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[2]
 NATIVE_SHA = '724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13'
+identity_spec = importlib.util.spec_from_file_location('native_identity', ROOT / 'tools/original/native-identity.py')
+native_identity = importlib.util.module_from_spec(identity_spec)
+identity_spec.loader.exec_module(native_identity)
 MUSIC_SHA = '679d268e0c1fb9b57b079c6a1476d6ee6b6634a87d70a293bce1e518fcf1d92a'
 MAX_BYTES = 2 * 1024 * 1024
 static_image = (ROOT / '.cache/original-runtime/offline-depot/isaac.x64').read_bytes()
@@ -68,7 +71,7 @@ def observe(pid, context):
         parent = next(line.split(':', 1)[1].strip() for line in status.splitlines() if line.startswith('PPid:'))
         if int(parent) != os.getpid():
             raise PermissionError('Requires directly owned original child')
-        if hashlib.sha256(Path(f'/proc/{pid}/exe').read_bytes()).hexdigest() != NATIVE_SHA:
+        if native_identity.native_binary_sha256(pid) != NATIVE_SHA:
             raise ValueError('Unexpected original executable hash')
         if backend_owner != pid:
             backend_owner, backend_ids = pid, {}

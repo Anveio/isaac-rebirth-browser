@@ -10,6 +10,7 @@ import { tasksForRegion } from "./systems.mjs";
 import { browserLaunchOptions, inspectBrowserGraphics } from "./browser.mjs";
 import { startProductionServer } from "./production-server.mjs";
 import { CONTROLLED_BOMB_CHECKPOINTS } from "./mask-checkpoints.mjs";
+import { snapshot } from '../e2e/lib/game.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL("../..", import.meta.url)));
 export const FOUNDATION_SEED = "T1PK6Y0W";
@@ -97,7 +98,7 @@ export async function enterSeededRun(page, seedText, { onCommand, onTick, onChec
   };
   const press = async (code, settle) => { await key(code, true); await tick(12); await key(code, false); await tick(settle); };
   const checkpoint = async (label, screen) => {
-    const state = await page.evaluate(() => window.game.snapshot());
+    const state = await snapshot(page);
     assert.equal(state.screen, screen, `${label}: actual keyboard navigation must reach ${screen}`);
     if (onCheckpoint) await onCheckpoint(label, screen);
     return state;
@@ -148,12 +149,12 @@ export function assertInputProvenance(trace, commands, initialSeed, bootEpochSee
 export async function browserScenario(page, { initialSeed = FOUNDATION_REFERENCE_INITIAL_SEED, bootEpochSeed = 0, manualSeedText = FOUNDATION_SEED, onCheckpoint, bombCheckpoint } = {}) {
   await waitForReady(page);
   await page.evaluate(({ initialSeed, bootEpochSeed }) => { window.game.pause(); window.game.reset(initialSeed, { trace: true, bootEpochSeed }); window.game.pause(); }, { initialSeed, bootEpochSeed });
-  const commands = [], states = [await page.evaluate(() => window.game.snapshot())], frames = [], timings = [];
+  const commands = [], states = [await snapshot(page)], frames = [], timings = [];
   assert.equal(states[0].initialSeed, initialSeed, "Browser reset must use the requested initial seed, never a production preset");
   assert.equal(states[0].bootEpochSeed, bootEpochSeed, "Browser reset must preserve the independent boot RNG input");
   const record = async (command) => {
     commands.push(command);
-    states.push(await page.evaluate(() => window.game.snapshot()));
+    states.push(await snapshot(page));
   };
   const key = async (code, down) => {
     await page.keyboard[down ? "down" : "up"](code);

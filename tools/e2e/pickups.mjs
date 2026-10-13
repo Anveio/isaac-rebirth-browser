@@ -10,10 +10,11 @@ import { chromium } from '@playwright/test';
 import { browserLaunchOptions, inspectBrowserGraphics } from '../foundation/browser.mjs';
 import { startProductionServer } from '../foundation/production-server.mjs';
 import { assertInputProvenance, assertSeededRun, enterSeededRun, manualSeedCommands, waitForReady } from '../foundation/verify.mjs';
+import { snapshot, stepSnapshot } from './lib/game.mjs';
+import { ORIGINAL_SHA, assertOriginalBinary } from './lib/original.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const run = promisify(execFile);
-const ORIGINAL_SHA = '724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13';
 const value = flag => { const index = process.argv.indexOf(flag); return index < 0 ? undefined : process.argv[index + 1]; };
 const output = resolve(value('--output') || join(ROOT, '.cache/e2e/pickups', String(Date.now())));
 await mkdir(output, { recursive: true });
@@ -34,7 +35,7 @@ for (const item of scenarios.cases) {
   assert.ok([0, 1].includes(item.delay));
 }
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
-assert.equal(digest(await readFile(join(ROOT, '.cache/original-runtime/offline-depot/isaac.x64'))), ORIGINAL_SHA);
+await assertOriginalBinary();
 await writeFile(join(output, 'scenarios.json'), JSON.stringify(scenarios, null, 2) + '\n');
 const server = await startProductionServer();
 const browser = await chromium.launch(browserLaunchOptions());
@@ -99,8 +100,7 @@ try {
       for (const [held, frames] of route) {
         if (held) await page.keyboard.down('s');
         for (let index = 0; index < frames; index++) {
-          await page.evaluate(() => window.game.step(1));
-          const state = await page.evaluate(() => window.game.snapshot());
+          const state = await stepSnapshot(page);
           states.push(state);
           presentation++;
           const source = rows.get(baseline.context.presentedFrame + presentation);
@@ -142,7 +142,7 @@ try {
       assert.equal(states[firstCollection - 1].systemClock.systemCounter % 2, 1, 'Source pickup contact is full-only');
       const trace = await page.evaluate(() => window.game.trace());
       assertInputProvenance(trace, expected, item.seedValue, scenarios.bootEpochSeed);
-      assertSeededRun(await page.evaluate(() => window.game.snapshot()), item.code, item.seedValue);
+      assertSeededRun(await snapshot(page), item.code, item.seedValue);
       assert.deepEqual(errors, []);
       Object.assign(caseResult, { status: caseResult.failures.length ? 'fail' : 'pass', comparedPresentations: comparisons,
         passedPresentations, admittedPickups: admitted, firstCollection,

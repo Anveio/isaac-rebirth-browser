@@ -1,5 +1,4 @@
 """Bounded read-only Player/Familiar/effect ownership at actual public gates."""
-import hashlib
 import importlib.util
 import math
 import os
@@ -21,6 +20,7 @@ def load(name, path):
 
 maps_reader = load('familiar_maps', 'tools/original/state-observer.py')
 world_reader = load('familiar_world', 'tools/original/foundation-pickup-observe.py')
+native_identity = load('native_identity', 'tools/original/native-identity.py')
 
 
 def observe(pid, context):
@@ -35,7 +35,7 @@ def observe(pid, context):
                       if line.startswith('PPid:'))
         if int(parent) != os.getpid():
             raise PermissionError('Original is not a directly owned child')
-        if hashlib.sha256(Path(f'/proc/{pid}/exe').read_bytes()).hexdigest() != PIN:
+        if native_identity.native_binary_sha256(pid) != PIN:
             raise ValueError('Unexpected original executable')
         os.kill(pid, signal.SIGSTOP)
         stopped = True

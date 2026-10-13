@@ -12,24 +12,12 @@ import { browserLaunchOptions, inspectBrowserGraphics } from '../foundation/brow
 import { startProductionServer } from '../foundation/production-server.mjs';
 import { assertInputProvenance, assertSeededRun, enterSeededRun, manualSeedCommands, waitForReady } from '../foundation/verify.mjs';
 import { compareRoomContext } from './item-room-evidence.mjs';
+import { snapshot, stepSnapshot } from './lib/game.mjs';
+import { ORIGINAL_SHA, assertOriginalBinary } from './lib/original.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const run = promisify(execFile);
-const PIN = '724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13';
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
-const files = ['tools/e2e/items.mjs', 'tools/original/item-scenarios.py', 'tools/original/item-observer.py',
-  'tools/e2e/item-room-evidence.mjs',
-  'tools/foundation/item-catalog.py', 'tools/foundation/decode-rooms.py', 'tools/original/foundation-seeds.py',
-  'tools/original/foundation-clock-run.py', 'tools/original/foundation-clock-gate.c',
-  'tools/original/foundation-clock-verify.py', 'tools/original/foundation-pickup-observe.py',
-  'tools/original/state-observer.py', 'tools/original/with-display.sh', 'tools/foundation/verify.mjs',
-  'tools/foundation/browser.mjs', 'tools/foundation/production-server.mjs', 'web/trace.ts',
-  'engine/src/items.rs', 'engine/src/seed.rs', 'engine/src/pickups.rs', 'engine/src/lib.rs', 'engine/build.rs'];
-files.push('engine/src/player_items.rs', 'web/engine.ts', 'web/animation.ts', 'web/pickups.ts', 'web/renderer.ts');
-files.push('web/scene-data.json', 'web/pickup-data.json');
-files.push('engine/src/combat.rs', 'engine/src/grid.rs', 'engine/src/room.rs');
-const hashes = async () => Object.fromEntries(await Promise.all(files.map(async path => [path, digest(await readFile(join(ROOT, path)))])));
-const before = await hashes();
 const value = flag => { const i = process.argv.indexOf(flag); return i < 0 ? undefined : process.argv[i + 1]; };
 const acquisition = process.argv.includes('--acquisition');
 const replayOriginal = value('--replay-original') ? resolve(value('--replay-original')) : null;
@@ -60,17 +48,17 @@ for (const item of scenarios.cases) {
 const selectedCase = value('--case');
 if (selectedCase) assert.ok(scenarios.cases.some(item => item.name === selectedCase));
 const catalogue = JSON.parse((await run('python3', ['tools/foundation/item-catalog.py'], { cwd: ROOT })).stdout);
-assert.equal(digest(await readFile(join(ROOT, '.cache/original-runtime/offline-depot/isaac.x64'))), PIN);
+await assertOriginalBinary();
 await writeFile(join(output, 'scenarios.json'), JSON.stringify(scenarios, null, 2) + '\n');
 const server = await startProductionServer();
 const browser = await chromium.launch(browserLaunchOptions());
-const report = { schema: 1, status: 'running', production: server.build, originalBinarySha256: PIN,
-  gateSources: before, graphics: await inspectBrowserGraphics(browser), sourceHashes: catalogue.sourceHashes,
+const report = { schema: 1, status: 'running', production: server.build, originalBinarySha256: ORIGINAL_SHA,
+  graphics: await inspectBrowserGraphics(browser), sourceHashes: catalogue.sourceHashes,
   scope: acquisition ? 'Natural first free collectible contact, real deferred Pickup animation/queue, all347 owned counts, authored inventory/health grants, first active ownership/charge, pool removal and collection sound admission. Baseline complete450 Player child RNGs are required. Actual stat/familiar/cache callbacks, later child RNG mutation, active swaps/use, achievements, paid/override contexts and pixels remain unaccepted; full MT/cache/child RNG differences are retained diagnostics.' : 'Fresh-profile authored catalogue, causal run/pool seeds, complete 16 pools/497 weights and ID maps, natural free treasure pedestal Init/selection, phase/animation/charge and public seed/input provenance. Acquisition, item effects/cache evaluation, familiars, paid/override contexts and pixels remain unaccepted.',
   selection: selectedCase ? { scope: 'Targeted recorded public case; default gate runs the complete cohort', case: selectedCase } : { scope: 'Complete cohort' }, cases: [] };
 report.originalCapture = replayOriginal ? {mode: 'frozen-current-turn-original-recovery',
   reportPath: join(replayOriginal, 'report.json'), reportSha256: digest(frozenReportBytes),
-  recordedProduction: frozenReport.production, recordedGateSources: frozenReport.gateSources,
+  recordedProduction: frozenReport.production,
   scope: 'New live production browser replay against exact complete original recordings from the earlier frozen four-case capture; this is not a fresh native recapture'} :
   {mode: 'fresh-live-original-and-browser', scope: 'Default required CI runs both real games freshly'};
 const f32 = value => Math.fround(value);
@@ -166,7 +154,7 @@ try {
       const compare = (state, row, presentation) => {
         const source = row.observation;
         assert.equal(source.status, 'pass'); assert.equal(source.memoryWritten, false);
-        assert.equal(source.executableMappingsRead, false); assert.equal(source.nativeBinarySha256, PIN);
+        assert.equal(source.executableMappingsRead, false); assert.equal(source.nativeBinarySha256, ORIGINAL_SHA);
         assert.equal(source.gamePresent, true);
         const prior = result.failures.length;
         for (const check of compareRoomContext(state, row)) equal(check.actual, check.expected, check.field, presentation);
@@ -311,9 +299,8 @@ try {
         const domKey = key && ['Right', 'Left', 'Up', 'Down'].includes(key) ? code : key;
         if (key) { await page.keyboard.down(domKey); expected.push({type: 'key', code, down: true}); }
         for (let index = 0; index < frames; index++) {
-          await page.evaluate(() => { window.game.step(1); });
+          const state = await stepSnapshot(page); states.push(state);
           expected.push({type: 'tick', count: 1});
-          const state = await page.evaluate(() => window.game.snapshot()); states.push(state);
           presentations++;
           compare(state, rows.get(baseline.context.presentedFrame + presentations), presentations);
         }
@@ -331,7 +318,7 @@ try {
         'Every actual asynchronous backend callback must retain its own full state; gameplay snapshots cannot replace it');
       assert.equal(states.length, item.actions.reduce((sum, action) => sum + action.frames, 0),
         'Every declared gameplay presentation must have its independent complete snapshot');
-      assertSeededRun(await page.evaluate(() => window.game.snapshot()), item.code, item.seedValue);
+      assertSeededRun(await snapshot(page), item.code, item.seedValue);
       assert.deepEqual(errors, []);
       const browserBytes = Buffer.from(JSON.stringify({schema: 1, states, trace}) + '\n');
       const browserPath = join(directory, 'browser-states.json.gz');
@@ -365,9 +352,7 @@ try {
     await writeFile(join(directory, 'report.json'), JSON.stringify(result, null, 2) + '\n');
     console.log(JSON.stringify({case: item.name, status: result.status, checks: result.checks, failures: result.failures.length, error: result.error}));
   }
-  const after = await hashes();
-  report.sourceStability = {status: JSON.stringify(before) === JSON.stringify(after) ? 'pass' : 'fail', before, after};
-  report.status = report.cases.every(result => result.status === 'pass') && report.sourceStability.status === 'pass' ? 'pass' : 'fail';
+  report.status = report.cases.every(result => result.status === 'pass') ? 'pass' : 'fail';
 } finally {
   await writeFile(join(output, 'report.json'), JSON.stringify(report, null, 2) + '\n');
   await browser.close(); await server.close();

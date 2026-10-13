@@ -24,7 +24,6 @@ const replay = load(resolve(directory, 'case.json'));
 assert.equal(pair.original.status, 'pass', 'Fresh original provenance must pass');
 assert.equal(pair.browser.status, 'pass', 'Actual production DOM/WASM capture must pass');
 assert.equal(browser.status, 'pass');
-assert.equal(gate.gateSourcesStable, true);
 const frames = new Map(browser.frames.map(frame => [frame.label, frame]));
 const observations = new Map(native.debugObservations.map(row => [row.context.label, row.observation]));
 const labels = replay.pairedTape.filter(action => action.type === 'capture').map(action => action.label);

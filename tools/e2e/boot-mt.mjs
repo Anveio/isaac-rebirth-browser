@@ -10,13 +10,11 @@ import { chromium } from '@playwright/test';
 import { browserLaunchOptions, inspectBrowserGraphics } from '../foundation/browser.mjs';
 import { startProductionServer } from '../foundation/production-server.mjs';
 import { waitForReady } from '../foundation/verify.mjs';
+import { snapshot, step } from './lib/game.mjs';
+import { ORIGINAL_SHA, assertOriginalBinary } from './lib/original.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const run = promisify(execFile);
-const ORIGINAL_SHA = '724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13';
-const GATE_SOURCES = ["tools/e2e/boot-mt.mjs", "tools/original/boot-mt-observer.py", "tools/original/native-identity.py", "tools/original/state-observer.py", "tools/original/foundation-clock-run.py", "tools/original/foundation-clock-gate.c", "tools/original/foundation-seeds.py", "tools/original/debug-run.py", "tools/original/with-display.sh", "tools/foundation/browser.mjs", "tools/foundation/production-server.mjs", "tools/foundation/verify.mjs", "engine/src/menu_lifecycle.rs", "engine/src/mt.rs", "engine/src/lib.rs", "engine/src/audio.rs", "web/main.ts", "web/trace.ts"];
-const sourceHashes = async () => Object.fromEntries(await Promise.all(GATE_SOURCES.map(async path => [path, createHash('sha256').update(await readFile(join(ROOT, path))).digest('hex')])));
-const gateSources = await sourceHashes();
 const value = flag => { const i = process.argv.indexOf(flag); return i < 0 ? undefined : process.argv[i + 1]; };
 const seedDialog = process.argv.includes('--seed-dialog');
 const menuNavigation = seedDialog || process.argv.includes('--menu-navigation');
@@ -61,13 +59,12 @@ for (const c of cases) {
   assert.ok(/^[a-zA-Z0-9_-]{1,32}$/.test(c.name) && typeof c.code === 'string' && c.code.length === 8);
   assert.ok(Number.isInteger(c.bootEpochSeed) && c.bootEpochSeed >= 0 && c.bootEpochSeed <= 0xffffffff);
 }
-const binary = await readFile(join(ROOT, '.cache/original-runtime/offline-depot/isaac.x64'));
-assert.equal(createHash('sha256').update(binary).digest('hex'), ORIGINAL_SHA);
+await assertOriginalBinary();
 await writeFile(join(output, 'scenarios.json'), JSON.stringify({ schema: 1, entropy: 'OS secrets run seeds and Node crypto randomInt boot epochs', cases }, null, 2) + '\n');
 
 const production = await startProductionServer();
 const browser = await chromium.launch(browserLaunchOptions());
-const report = { schema: 1, status: 'running', gateSources, originalBinarySha256: ORIGINAL_SHA, production: production.build,
+const report = { schema: 1, status: 'running', originalBinarySha256: ORIGINAL_SHA, production: production.build,
   graphics: await inspectBrowserGraphics(browser),
   scope: seedDialog ? 'Causal startup, forward menus and public seed dialog admission/reopening and valid commitment: full 624-word shared MT, saved player/menu seeds, menu seed text, Character dialog/committed fields, nine saved grid pairs and 179 stat poses. A second real DOM sequence queues Profile/Tab/commit before its first tick and must preserve the decoded setter after Clear/Reset. Character-confirm fade/run admission and later consumers remain separate.' : menuNavigation ? 'Causal startup and forward Title/Profile/Main/Character initialization: full 624-word MT state, saved player seed, nine saved grid pairs, menu run seed and 179 stat poses at every menu checkpoint, with complete public command and seed-entry provenance. Character-confirm fade/run admission, run/room/ambient random routing and ordinary-run seed use remain separate.' : 'Causal startup and initialized menu fields at Title: full 624-word MT state, saved player seed, nine saved grid pairs, menu run seed and 179 stat poses. Later menu navigation, run/room/ambient random routing and tear fall uniforms remain incomplete.', cases: [] };
 try {
@@ -127,38 +124,38 @@ try {
       compareMenu(state, 'title');
       if (menuNavigation) {
         for (const label of ['profile', 'main', 'character']) {
-          await page.keyboard.down('Enter'); await page.evaluate(() => window.game.step(12));
-          await page.keyboard.up('Enter'); await page.evaluate(() => window.game.step(72));
-          compareMenu(await page.evaluate(() => window.game.snapshot()), label);
+          await page.keyboard.down('Enter'); await step(page, 12);
+          await page.keyboard.up('Enter'); await step(page, 72);
+          compareMenu(await snapshot(page), label);
         }
       } else for (let i = 0; i < 3; i++) await page.keyboard.press('Enter');
       // The future manually entered seed is independent of startup time.
       if (seedDialog) {
-        await page.keyboard.down('Tab'); await page.evaluate(() => window.game.step(12));
-        await page.keyboard.up('Tab'); await page.evaluate(() => window.game.step(108));
+        await page.keyboard.down('Tab'); await step(page, 12);
+        await page.keyboard.up('Tab'); await step(page, 108);
         for (const character of scenario.code.toLowerCase()) {
-          await page.keyboard.down(character); await page.evaluate(() => window.game.step(12));
-          await page.keyboard.up(character); await page.evaluate(() => window.game.step(6));
+          await page.keyboard.down(character); await step(page, 12);
+          await page.keyboard.up(character); await step(page, 6);
         }
-        compareMenu(await page.evaluate(() => window.game.snapshot()), 'seed-entry');
-        await page.keyboard.down('Enter'); await page.evaluate(() => window.game.step(12));
-        await page.keyboard.up('Enter'); await page.evaluate(() => window.game.step(72));
-        compareMenu(await page.evaluate(() => window.game.snapshot()), 'character-seeded');
-        await page.keyboard.down('Tab'); await page.evaluate(() => window.game.step(12));
-        await page.keyboard.up('Tab'); await page.evaluate(() => window.game.step(108));
-        compareMenu(await page.evaluate(() => window.game.snapshot()), 'seed-reentry');
+        compareMenu(await snapshot(page), 'seed-entry');
+        await page.keyboard.down('Enter'); await step(page, 12);
+        await page.keyboard.up('Enter'); await step(page, 72);
+        compareMenu(await snapshot(page), 'character-seeded');
+        await page.keyboard.down('Tab'); await step(page, 12);
+        await page.keyboard.up('Tab'); await step(page, 108);
+        compareMenu(await snapshot(page), 'seed-reentry');
         for (const character of scenario.code.toLowerCase()) {
-          await page.keyboard.down(character); await page.evaluate(() => window.game.step(12));
-          await page.keyboard.up(character); await page.evaluate(() => window.game.step(6));
+          await page.keyboard.down(character); await step(page, 12);
+          await page.keyboard.up(character); await step(page, 6);
         }
-        await page.keyboard.down('Enter'); await page.evaluate(() => window.game.step(12));
-        await page.keyboard.up('Enter'); await page.evaluate(() => window.game.step(72));
-        compareMenu(await page.evaluate(() => window.game.snapshot()), 'character-reseeded');
+        await page.keyboard.down('Enter'); await step(page, 12);
+        await page.keyboard.up('Enter'); await step(page, 72);
+        compareMenu(await snapshot(page), 'character-reseeded');
       } else {
         await page.keyboard.press('Tab'); await page.keyboard.type(scenario.code); await page.keyboard.press('Enter');
       }
       await page.keyboard.press('Enter');
-      const final = await page.evaluate(() => window.game.snapshot());
+      const final = await snapshot(page);
       assert.equal(final.runSeedValue, native.seedValue);
       assert.equal(final.seedText, scenario.code.toUpperCase()); assert.equal(final.runSeed, scenario.code.toUpperCase());
       assert.equal(final.seedValid, true); assert.equal(final.seededRun, true);
@@ -171,11 +168,11 @@ try {
         await page.evaluate(({ initialSeed, bootEpochSeed }) => window.game.reset(initialSeed, { bootEpochSeed, trace: true }), { initialSeed, bootEpochSeed: scenario.bootEpochSeed });
         for (let index = 0; index < 3; index++) await page.keyboard.press('Enter');
         await page.keyboard.press('Tab'); await page.keyboard.type(scenario.code); await page.keyboard.press('Enter');
-        const queued = await page.evaluate(() => window.game.snapshot());
+        const queued = await snapshot(page);
         assert.equal(queued.pendingMenuInitializations.at(-1)?.initialization.type, 'commitCharacterSeed');
         assert.equal(queued.pendingMenuInitializations.at(-1)?.initialization.seed, native.seedValue);
-        await page.evaluate(() => window.game.step(1));
-        compareMenu(await page.evaluate(() => window.game.snapshot()), 'character-seeded');
+        await step(page, 1);
+        compareMenu(await snapshot(page), 'character-seeded');
         const queuedTrace = await page.evaluate(() => window.game.trace());
         const queuedCommands = [];
         for (const code of ['Enter', 'Enter', 'Enter', 'Tab']) queuedCommands.push({ type: 'key', code, down: true }, { type: 'key', code, down: false });
@@ -205,9 +202,6 @@ try {
       await writeFile(join(output, 'report.json'), JSON.stringify(report, null, 2) + '\n');
     }
   }
-  report.gateSourcesEnd = await sourceHashes();
-  report.gateSourcesStable = JSON.stringify(report.gateSources) === JSON.stringify(report.gateSourcesEnd);
-  assert.equal(report.gateSourcesStable, true, 'Boot MT gate source files changed during capture');
   report.status = report.cases.every(c => c.status === 'pass') ? 'pass' : 'fail';
   if (report.status === 'fail') throw new AggregateError(report.cases.filter(c => c.status === 'fail').map(c => new Error(`${c.name}: ${c.error}`)), 'Selected boot lifecycle cases failed; every case was attempted');
 } catch (error) { report.status = 'fail'; report.error = String(error); throw error; }

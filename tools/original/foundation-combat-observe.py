@@ -3,7 +3,6 @@
 All reads are bounded writable data in a directly owned blocked original child.
 The ELF Game singleton and field offsets are reference tooling only.
 """
-import hashlib
 import importlib.util
 import math
 import os
@@ -17,6 +16,9 @@ spec = importlib.util.spec_from_file_location('reader', ROOT / 'tools/original/s
 reader = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(reader)
 NATIVE_SHA = '724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13'
+identity_spec = importlib.util.spec_from_file_location('native_identity', ROOT / 'tools/original/native-identity.py')
+native_identity = importlib.util.module_from_spec(identity_spec)
+identity_spec.loader.exec_module(native_identity)
 
 
 def observe(pid, context):
@@ -30,7 +32,7 @@ def observe(pid, context):
         parent = next(line.split(':', 1)[1].strip() for line in Path(f'/proc/{pid}/status').read_text().splitlines() if line.startswith('PPid:'))
         if int(parent) != os.getpid() or not context.get('gateBlocked'):
             raise PermissionError('Observation requires a blocked directly owned original')
-        if hashlib.sha256(Path(f'/proc/{pid}/exe').read_bytes()).hexdigest() != NATIVE_SHA:
+        if native_identity.native_binary_sha256(pid) != NATIVE_SHA:
             raise ValueError('Unexpected original executable')
         os.kill(pid, signal.SIGSTOP)
         stopped = True

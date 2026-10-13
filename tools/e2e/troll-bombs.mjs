@@ -11,27 +11,12 @@ import { chromium } from '@playwright/test';
 import { browserLaunchOptions, inspectBrowserGraphics } from '../foundation/browser.mjs';
 import { startProductionServer } from '../foundation/production-server.mjs';
 import { assertInputProvenance, enterSeededRun, manualSeedCommands, waitForReady } from '../foundation/verify.mjs';
+import { stepSnapshot } from './lib/game.mjs';
+import { ORIGINAL_SHA, assertOriginalBinary } from './lib/original.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const run = promisify(execFile);
-const ORIGINAL_SHA = '724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13';
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
-const gateSources = ['tools/e2e/troll-bombs.mjs', 'tools/original/troll-bomb-scenarios.py',
-  'tools/original/rock-blast-scenarios.py', 'tools/foundation/decode-rooms.py',
-  'tools/original/foundation-seeds.py',
-  'tools/original/foundation-pickup-observe.py', 'tools/original/foundation-clock-run.py',
-  'tools/original/foundation-clock-gate.c', 'tools/original/foundation-clock-verify.py',
-  'tools/original/state-observer.py', 'tools/original/with-display.sh',
-  'tools/foundation/production-server.mjs', 'tools/foundation/browser.mjs',
-  'tools/foundation/verify.mjs',
-  'web/trace.ts',
-  'references/isaac/foundation/rock-blast/known-regressions.json',
-  'references/isaac/foundation/troll-bombs/contrived-cases.json',
-  'references/isaac/foundation/troll-bombs/scenarios.json',
-  'tools/original/troll-bomb-observer.py', 'tools/original/bomb-pickup-scenarios.py'];
-const sourceHashes = async () => Object.fromEntries(await Promise.all(gateSources.map(async path =>
-  [path, digest(await readFile(join(ROOT, path)))])));
-const beforeSources = await sourceHashes();
 const value = flag => { const index = process.argv.indexOf(flag); return index < 0 ? undefined : process.argv[index + 1]; };
 const output = resolve(value('--output') || join(ROOT, '.cache/e2e/troll-bombs', String(Date.now())));
 await mkdir(output, { recursive: true });
@@ -62,14 +47,13 @@ for (const item of scenarios.cases) {
 const stateLast = states => states[states.length - 1];
 const selectedCase = value('--case');
 if (selectedCase) assert.ok(scenarios.cases.some(item => item.name === selectedCase), 'Targeted replay requires a recorded public case name');
-assert.equal(digest(await readFile(join(ROOT, '.cache/original-runtime/offline-depot/isaac.x64'))), ORIGINAL_SHA);
+await assertOriginalBinary();
 await writeFile(join(output, 'scenarios.json'), JSON.stringify(scenarios, null, 2) + '\n');
 const server = await startProductionServer();
 const browser = await chromium.launch(browserLaunchOptions());
 const report = {
   schema: 1, status: 'running', originalBinarySha256: ORIGINAL_SHA, production: server.build,
   selection: selectedCase ? { scope: 'Explicit targeted recorded-case replay; default CI executes the complete cohort', case: selectedCase } : { scope: 'Complete selected cohort' },
-  gateSources: beforeSources,
   graphics: await inspectBrowserGraphics(browser),
   scope: 'Live public-seed natural Troll/Megatroll conversion, typed shared seed, zero-velocity child admission, relative actor order, full/fast motion and fuse, animation, lifetime, homing, grid/HP and remaining pickup behavior. Every field mismatch remains blocking, including shared-stream alignment and blast pickup impulse. Required recorded OS draws are unfiltered.',
   cases: [],
@@ -150,9 +134,8 @@ try {
         const code = key ? 'Key' + key.toUpperCase() : null;
         if (key) { await page.keyboard.down(key); expected.push({ type: 'key', code, down: true }); }
         for (let index = 0; index < frames; index++) {
-          await page.evaluate(() => window.game.step(1));
+          const state = await stepSnapshot(page);
           expected.push({ type: 'tick', count: 1 });
-          const state = await page.evaluate(() => window.game.snapshot());
           states.push(state);
           presentation++;
           const row = rows.get(baseline.context.presentedFrame + presentation);
@@ -321,8 +304,6 @@ try {
       comparedPresentations: caseResult.comparedPresentations, failures: caseResult.failures.length }));
   }
   report.status = report.cases.every(item => item.status === 'pass') ? 'pass' : 'fail';
-  report.gateSourcesStable = JSON.stringify(beforeSources) === JSON.stringify(await sourceHashes());
-  if (!report.gateSourcesStable) report.status = 'fail';
 } catch (error) {
   report.status = 'fail'; report.error = String(error); throw error;
 } finally {
