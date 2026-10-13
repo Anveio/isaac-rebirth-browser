@@ -18,6 +18,7 @@ pub mod floor;
 pub mod grid;
 mod grid_hazards;
 pub mod layout;
+pub mod menu_lifecycle;
 pub mod motion;
 pub mod mt;
 pub mod phase;
@@ -284,6 +285,8 @@ pub struct State {
     pub boot_epoch_seed: u32,
     pub boot_lifecycle: mt::BootState,
     pub audio: audio::AudioState,
+    #[serde(default)]
+    pub pending_menu_initializations: Vec<menu_lifecycle::Pending>,
     pub run_seed_value: u32,
     pub stage: u32,
     pub stage_seed: u32,
@@ -376,6 +379,7 @@ impl Game {
                 boot_epoch_seed,
                 boot_lifecycle,
                 audio: audio::AudioState::default(),
+                pending_menu_initializations: Vec::new(),
                 run_seed_value: initial_seed,
                 stage: 1,
                 stage_seed: seed::stage1_seed(initial_seed),
@@ -538,6 +542,14 @@ impl Game {
             }
             Screen::Profile => match code {
                 "Enter" => {
+                    self.state
+                        .pending_menu_initializations
+                        .push(menu_lifecycle::Pending {
+                            after_audio_requests: self.state.audio.pending.len(),
+                            initialization: menu_lifecycle::Initialization::LoadFreshProfile {
+                                profile: self.state.profile,
+                            },
+                        });
                     self.state.character = self.state.profiles[usize::from(self.state.profile - 1)]
                         .selected_character
                         .clone();
@@ -678,6 +690,15 @@ impl Game {
                 looping: false,
                 pitch: 1.0,
             });
+        }
+        if previous_screen == Screen::Profile && self.state.screen == Screen::Main {
+            // SetMenu plays the forward confirmation before CharacterReset.
+            self.state
+                .pending_menu_initializations
+                .push(menu_lifecycle::Pending {
+                    after_audio_requests: self.state.audio.pending.len(),
+                    initialization: menu_lifecycle::Initialization::ResetCharacterSeed,
+                });
         }
         Ok(())
     }
@@ -857,12 +878,47 @@ impl Game {
         }
         Ok(())
     }
+    fn flush_menu_initializations(&mut self, audio_counter: u32) -> Result<(), String> {
+        menu_lifecycle::validate(
+            &self.state.pending_menu_initializations,
+            self.state.audio.pending.len(),
+        )?;
+        let requests = std::mem::take(&mut self.state.audio.pending);
+        let mut initializers = std::mem::take(&mut self.state.pending_menu_initializations)
+            .into_iter()
+            .peekable();
+        for boundary in 0..=requests.len() {
+            while initializers
+                .peek()
+                .is_some_and(|event| event.after_audio_requests == boundary)
+            {
+                match initializers
+                    .next()
+                    .expect("pending menu initializer")
+                    .initialization
+                {
+                    menu_lifecycle::Initialization::LoadFreshProfile { .. } => {
+                        self.boot_saved_grid = self.state.boot_lifecycle.clear_saved_game();
+                    }
+                    menu_lifecycle::Initialization::ResetCharacterSeed => {
+                        self.state.boot_lifecycle.reset_character_seed();
+                    }
+                }
+            }
+            if let Some(request) = requests.get(boundary) {
+                self.state.audio.admit(
+                    &mut self.state.boot_lifecycle.shared,
+                    audio_counter,
+                    *request,
+                );
+            }
+        }
+        Ok(())
+    }
     fn tick(&mut self) -> Result<(), String> {
         let audio_counter = self.state.system_clock.system_counter;
         let phase = self.state.system_clock.advance()?;
-        self.state
-            .audio
-            .flush_pending(&mut self.state.boot_lifecycle.shared, audio_counter);
+        self.flush_menu_initializations(audio_counter)?;
         let bomb_down = self.held("KeyE");
         let bomb_triggered = bomb_down && !self.state.bomb_action_was_down;
         self.state.bomb_action_was_down = bomb_down;
