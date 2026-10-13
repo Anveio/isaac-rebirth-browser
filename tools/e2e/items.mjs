@@ -44,7 +44,11 @@ for (const item of scenarios.cases) {
   assert.match(item.code, /^[A-Z0-9]{8}$/);
   assert.ok(Number.isInteger(item.seedValue) && item.seedValue > 0 && item.seedValue <= 0xffffffff);
   assert.ok([0, 1].includes(item.delay));
-  if (acquisition) item.actions.push({key: 'w', frames: 32}, {key: null, frames: 100});
+  if (acquisition) {
+    item.actions.push({key: 'w', frames: 32});
+    if (item.entropy.startsWith('Contrived')) item.actions.push({key: 'Right', frames: 50}, {key: null, frames: 50});
+    else item.actions.push({key: null, frames: 100});
+  }
 }
 const selectedCase = value('--case');
 if (selectedCase) assert.ok(scenarios.cases.some(item => item.name === selectedCase));
@@ -177,6 +181,9 @@ try {
           if (nativePlayer.queuedId !== null) {
             queuedPresentations++;
             equal(owner.queuedTouched, nativePlayer.queuedTouched, 'active queue touched argument', presentation);
+            equal(state.tears.filter(tear => tear.motion.lifetime === 'alive').length,
+              source.world.entities.filter(entity => entity.type === 2 && !entity.removed).length,
+              'actual normal tear emission while Pickup is queued', presentation);
           }
           if (nativePlayer.ownedCounts.some(count => count > 0)) grantedPresentations++;
           equal([state.player.maxHp, state.player.hp, state.player.soulHp, state.player.blackHeartMask], nativePlayer.health,
@@ -260,8 +267,9 @@ try {
       };
       compare(start, baseline, 0);
       for (const {key, frames} of item.actions) {
-        const code = key ? 'Key' + key.toUpperCase() : null;
-        if (key) { await page.keyboard.down(key); expected.push({type: 'key', code, down: true}); }
+        const code = key ? ['Right', 'Left', 'Up', 'Down'].includes(key) ? 'Arrow' + key : 'Key' + key.toUpperCase() : null;
+        const domKey = key && ['Right', 'Left', 'Up', 'Down'].includes(key) ? code : key;
+        if (key) { await page.keyboard.down(domKey); expected.push({type: 'key', code, down: true}); }
         for (let index = 0; index < frames; index++) {
           await page.evaluate(() => window.game.step(1));
           expected.push({type: 'tick', count: 1});
@@ -269,7 +277,7 @@ try {
           presentations++;
           compare(state, rows.get(baseline.context.presentedFrame + presentations), presentations);
         }
-        if (key) { await page.keyboard.up(key); expected.push({type: 'key', code, down: false}); }
+        if (key) { await page.keyboard.up(domKey); expected.push({type: 'key', code, down: false}); }
       }
       assert.ok(admitted > 0, 'Every case must naturally admit a source-selected pedestal');
       if (acquisition) {

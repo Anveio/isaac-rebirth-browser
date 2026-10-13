@@ -33,7 +33,7 @@ def tape(case):
     actions = [action for action in actions[:end + 1]
                if action['type'] != 'capture' or action['label'] == 'gameplay-start']
     for action in case['actions']:
-        if set(action) != {'key', 'frames'} or action['key'] not in (None, 'w', 'a', 's', 'd') \
+        if set(action) != {'key', 'frames'} or action['key'] not in (None, 'w', 'a', 's', 'd', 'Right', 'Left', 'Up', 'Down') \
                 or type(action['frames']) is not int or not 1 <= action['frames'] <= 200:
             raise ValueError('Pedestal tape requires declared bounded public inputs')
         if action['key']:
