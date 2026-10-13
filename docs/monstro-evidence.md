@@ -63,3 +63,19 @@ static checks for this draft. Fresh original plus production-browser boss
 admission, Scene freeze/cleanup, actual AI/shot callbacks, queued damage and
 boss death remain required before live acceptance. Previous T1 damage,
 hostile return, H2/center clear and W0 Fire failures remain unchanged.
+
+Read-only review of immutable draft `1cab1957` found three source seams.
+The follow-up uses reciprocal multiplication for normalized vectors
+(`612860`→`612820`), runs supported NPC full grid queries after entity contacts
+(`454b10`→`442b90`), and dispatches the real controls-disabled Player.Update
+during BossCleanup (`5dde9e`). Movement, sprite and collection timers therefore
+remain callback-owned while the outer Game counter and NPC pass stay frozen.
+Fast NPC prediction remains in the individual callback. The late grid hook
+also visits admitted newborn NPCs and dead active bosses; it preserves the
+separate Pickup hook owned by the inventory lane.
+
+`references/isaac/foundation/combat/monstro/review-corrections.json` pins the
+original draft, correction commits, source-dump and runtime hashes, and new
+one-job static checks. The original static proof and Fire artifact are intact.
+This correction does not establish live boss acceptance. Bomb/projectile full
+grid timing and the complete admission contact pass remain separate seams.
