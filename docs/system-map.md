@@ -142,19 +142,25 @@ required when observed and in the retained regressions.
 
 Ordinary 13×14 room admission and reciprocal extended doorway routing now
 match 1,843 selected geometry, player, grid, door and minimap phases across
-three source tapes. The separate same-turn source/fresh-browser comparison
-retains three required missing Chest50 actors. Camera/backdrop and chest
-interaction remain unaccepted; the registered large-room gate always launches
-both games fresh. [Large-room evidence](large-room-evidence.md) retains the
-actual capture, stopped duplicate attempt and recovery scopes.
+three source tapes. The geometry leaf retains three required missing Chest50
+actors. The following concrete Chest constructor leaf passes those same 1,843
+phases in a fresh actual browser, including identity, closed subtype,
+Appear/Idle clocks, radius and collision classes. Persistent Chest RNG words
+remain statically mapped; opening, loot, camera/backdrop and save/load remain
+unaccepted. The registered large-room gate always launches both games fresh.
+[Large-room evidence](large-room-evidence.md) and
+[Chest evidence](chest-evidence.md) retain the distinct capture and recovery scopes.
 
 CI discovers all twenty-five registered live suites and runs separate jobs with
 `fail-fast: false`, preserving each result and evidence. The first matrix run
 completed floors, weapons, boot MT and pickups successfully while retaining
 core and traversal failures. Build, typecheck, assets, matrix and strict Clippy
-pass at integrated runtime checkpoint `3cb34f6`, including the reviewed Level,
-RoundWorm, item-selection, bomb-pickup and large-room geometry leaves. The full 24-suite local run
-uses a detached source checkout and a separate immutable production artifact.
+pass at integrated checkpoint `beb24f2`, including the reviewed Level,
+RoundWorm, item-selection, bomb-pickup, large-room geometry, Chest constructor
+and bounded callback-history leaves. Its production artifact is
+`7abd642e881bf430398f73e2112d68d93f32214ea90e30f49c36e0e22e93d141`.
+The continuing full 24-suite local run uses detached checkpoint `cb36018` and
+its separate immutable production artifact; later leaves do not inherit its results.
 This is a build checkpoint, not a fresh all-suite passing result.
 Complete gameplay RNG, other floors/characters, persistence, later music
 callers/cutscenes and whole-game parity remain open. GitHub required-check
