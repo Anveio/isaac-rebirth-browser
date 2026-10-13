@@ -370,6 +370,7 @@ pub fn advance_actor(state: &mut State, phase: Phase, id: u32) -> Result<(), Str
                 state.damage_cooldown = DAMAGE_COOLDOWN_TICKS;
             }
         }
+        crate::rock_blast::destroy(state, position, BLAST_RADIUS)?;
         state.explosions.push(Explosion {
             id,
             x: f64::from(position.x) * WORLD_SCALE + 32.0,
