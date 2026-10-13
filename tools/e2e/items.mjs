@@ -128,6 +128,7 @@ try {
       const expected = [...manualSeedCommands(item.code)];
       let checks = 0, presentations = 0, passedPresentations = 0, admitted = 0, queuedPresentations = 0, grantedPresentations = 0;
       const selectedItemIds = new Set(), callbackDiagnostics = [], mtDiagnostics = [];
+      const grantedItemIds = new Set(); let activeGrantObserved = false, healthGrantObserved = false;
       let callbackDiagnosticSignature = null, mtDiagnosticSignature = null;
       const ageClockDiagnostics = [];
       const equal = (actual, expected, field, presentation) => {
@@ -185,7 +186,12 @@ try {
               source.world.entities.filter(entity => entity.type === 2 && !entity.removed).length,
               'actual normal tear emission while Pickup is queued', presentation);
           }
-          if (nativePlayer.ownedCounts.some(count => count > 0)) grantedPresentations++;
+          if (nativePlayer.ownedCounts.some(count => count > 0)) {
+            grantedPresentations++;
+            nativePlayer.ownedCounts.forEach((count, id) => { if (count > 0) grantedItemIds.add(id); });
+            activeGrantObserved ||= nativePlayer.activeId !== 0;
+            healthGrantObserved ||= JSON.stringify(nativePlayer.health) !== JSON.stringify(baseline.observation.players[0].health);
+          }
           equal([state.player.maxHp, state.player.hp, state.player.soulHp, state.player.blackHeartMask], nativePlayer.health,
             'authored normal Isaac health helpers', presentation);
           equal(state.inventory, nativePlayer.inventory, 'authored inventory helper grants', presentation);
@@ -299,6 +305,12 @@ try {
       Object.assign(result, {status: result.failures.length ? 'fail' : 'pass', checks, comparedPresentations: presentations + 1,
         passedPresentations, admittedPedestals: admitted, selectedItemIds: [...selectedItemIds],
         queuedPresentations, grantedPresentations, ageClockDiagnostics, callbackDiagnostics, mtDiagnostics,
+        grantCoverage: {nativeGrantedConfigs: [...grantedItemIds].map(id => {
+          const config = catalogue.collectibles.find(config => config.id === id);
+          return {id, kind: config.kind, inventory: config.inventory, maxCharges: config.maxCharges};
+        }), firstActiveGrant: activeGrantObserved ? 'observed' : 'unaccepted: no active transition in this case',
+          healthGrant: healthGrantObserved ? 'observed' : 'unaccepted: unchanged health does not prove helper boundaries',
+          healthClampBoundaries: 'Unaccepted until required dedicated cap/parity cases are retained'},
         unresolvedScope: {cacheAndItemEffects: 'Pending requested flags and native stat/familiar callbacks are not interchangeable; raw native/browser states preserve all differences',
           sharedMt: 'Complete624-word hashes are diagnostic until remaining real run/ambient/item callbacks are implemented; no cursor skips or native state inputs',
           stateHistory: 'Every presentation is independently retained in browserEvidence.states; bounded production trace truncation remains separately disclosed'},
