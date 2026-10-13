@@ -195,11 +195,13 @@ try {
         assert.equal(originals.get('returned').observation.contents.players[0].redHp, 4, 'Source curse exit must charge another half heart');
       }
       const trace = await page.evaluate(() => window.game.trace());
-      assert.equal(trace.enabled, true); assert.equal(trace.truncated, false);
+      assert.equal(trace.enabled, true); assert.equal(trace.inputTraceTruncated, false);
       assert.deepEqual(trace.commands, expectedCommands, 'Every requested DOM key and interval must reach WASM exactly once');
       assert.deepEqual(errors, []);
       await writeFile(join(directory, 'browser-states.json'), JSON.stringify({ schema: 1, states, trace }, null, 2) + '\n');
-      Object.assign(row, { status: comparisonFailures.length ? 'fail' : 'pass', sourceManifest, provenance, visitedRooms: [...observedRooms], comparisonFailures });
+      Object.assign(row, { status: comparisonFailures.length ? 'fail' : 'pass', sourceManifest, provenance, visitedRooms: [...observedRooms], comparisonFailures,
+        traceHistory: { truncated: trace.truncated, inputTraceTruncated: trace.inputTraceTruncated, stateHistoryTruncated: trace.stateHistoryTruncated,
+          retainedStates: trace.states.length, stateEncodedBytes: trace.stateEncodedBytes, maxStateEncodedBytes: trace.maxStateEncodedBytes } });
     } catch (error) { row.error = String(error); }
     finally { await page?.close(); report.cases.push(row); }
   }

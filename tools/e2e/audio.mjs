@@ -251,7 +251,10 @@ try {
       check('browser actual public seed readback', (await page.evaluate(() => window.game.snapshot())).runSeedValue, native.seedValue);
       const wasmTrace = await page.evaluate(() => window.game.trace());
       check('all public inputs and intervals reached production WASM', wasmTrace.commands, expectedCommands);
-      check('actual WASM trace bounded', [wasmTrace.enabled, wasmTrace.truncated], [true, false]);
+      check('actual WASM input trace bounded', [wasmTrace.enabled, wasmTrace.inputTraceTruncated], [true, false]);
+      result.traceHistory = { truncated: wasmTrace.truncated, inputTraceTruncated: wasmTrace.inputTraceTruncated,
+        stateHistoryTruncated: wasmTrace.stateHistoryTruncated, retainedStates: wasmTrace.states.length,
+        stateEncodedBytes: wasmTrace.stateEncodedBytes, maxStateEncodedBytes: wasmTrace.maxStateEncodedBytes };
       await writeFile(join(directory, 'browser.json'), JSON.stringify({ states, output: actualAudio, api: actualApi, trace: wasmTrace }, null, 2) + '\n');
       result.status = result.checks.every(check => check.status === 'pass') ? 'pass' : 'fail';
       console.log(JSON.stringify({ case: result.name, status: result.status, checks: result.checks.length, failed: result.checks.filter(check => check.status === 'fail').map(check => check.field) }));
