@@ -27,6 +27,7 @@ const gateSources = ['tools/e2e/troll-bombs.mjs', 'tools/original/troll-bomb-sce
   'web/trace.ts',
   'references/isaac/foundation/rock-blast/known-regressions.json',
   'references/isaac/foundation/troll-bombs/contrived-cases.json',
+  'references/isaac/foundation/troll-bombs/scenarios.json',
   'tools/original/troll-bomb-observer.py', 'tools/original/bomb-pickup-scenarios.py'];
 const sourceHashes = async () => Object.fromEntries(await Promise.all(gateSources.map(async path =>
   [path, digest(await readFile(join(ROOT, path)))])));
@@ -37,12 +38,14 @@ await mkdir(output, { recursive: true });
 let scenarios;
 if (value('--scenarios')) scenarios = JSON.parse(await readFile(resolve(value('--scenarios')), 'utf8'));
 else {
-  const result = await run('python3', ['tools/original/troll-bomb-scenarios.py', '--count', value('--count') || '2'], { cwd: ROOT, timeout: 600000 });
+  const args = ['tools/original/troll-bomb-scenarios.py'];
+  if (value('--count')) args.push('--count', value('--count'));
+  const result = await run('python3', args, { cwd: ROOT, timeout: 600000 });
   scenarios = JSON.parse(result.stdout);
 }
 assert.equal(scenarios.schema, 1);
 assert.equal(scenarios.bootEpochSeed, 1700000000);
-assert.ok(scenarios.cases.length >= 3 && scenarios.cases.length <= 8);
+assert.ok(scenarios.cases.length >= 3 && scenarios.cases.length <= 11);
 assert.equal(new Set(scenarios.cases.map(item => item.name)).size, scenarios.cases.length);
 for (const item of scenarios.cases) {
   assert.match(item.name, /^[a-zA-Z0-9_-]{1,32}$/);
@@ -275,6 +278,9 @@ try {
         uncompressedSha256: digest(traceBytes), archiveSha256: digest(traceArchive) };
       assertInputProvenance(trace, expected, item.seedValue, scenarios.bootEpochSeed);
       assert.equal(admissionFamilySize, 3, 'Every route must enter actual Room35 and admit all three authored bomb families, including converted children');
+      if (item.requiredNativePickupSubtypes)
+        assert.deepEqual([...admittedSource.values()].filter(actor => actor.variant === 40).map(actor => actor.subtype),
+          item.requiredNativePickupSubtypes, 'Source-disproved KPF fixtures must retain their actual complete regular pickup family');
       for (const variant of item.requiredVariants || []) assert.ok([...conversions.values()].some(event => event.variant === variant), `Public native route must admit naturally selected bomb variant ${variant}`);
       for (const event of conversions.values()) {
         assert.deepEqual(event.velocity, [0, 0], 'Conversion must admit a stationary native child');

@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "scope": "Gate-only source expectation correction. Static tape/syntax checks pass; no new native/browser acceptance or changed production artifact.",
+  "rejectedProducer": "6e5139c43e7b47ca12756721222df95b7e652ea0",
+  "rejectedProof": "first-cohort-verification.json",
+  "rejectedBank": "rejected-first-cohort-scenarios.json",
+  "retainedExactPublicTapes": 5,
+  "mandatoryDefaultCases": 7,
+  "kpfCorrection": "Both fresh original KPF sources prove three regular40/1 pickups; retain their exact tapes, complete regular-family assertion and required tinted Rock64 parity. Positive actual4/4 admission now belongs to the separately selected corrected QJ cases.",
+  "addedCandidates": [
+    {
+      "code": "QJRAQ3F3",
+      "frames": 416,
+      "delay": 0,
+      "requiredVariant": 4
+    },
+    {
+      "code": "QJRAQ3F3",
+      "frames": 417,
+      "delay": 1,
+      "requiredVariant": 4
+    }
+  ],
+  "retainedUnfilteredRandom": [
+    "Z7XVB7J9",
+    "2SA7J2Y1"
+  ],
+  "newRandomMode": "Explicit --count appends2..4 new unfiltered OS cases to every mandatory retained case. Default never replaces the discovered stairs/Troll regressions."
+}
