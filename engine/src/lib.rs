@@ -860,12 +860,12 @@ impl Game {
         let mut npcs = Vec::new();
         let mut order = Vec::new();
         let mut next = self.state.next_pickup;
-        let ordinary_room = self
+        let room_type = self
             .state
             .room
             .descriptor
             .as_ref()
-            .is_none_or(|descriptor| descriptor.template.room_type == 1);
+            .map_or(1, |descriptor| descriptor.template.room_type);
         for selector in selectors {
             let id = u32::try_from(npcs.len()).map_err(|_| "NPC identity exhausted")?;
             if let Some(npc) = npcs::Npc::from_selector(id, selector)? {
@@ -874,8 +874,10 @@ impl Game {
                     id,
                 });
                 npcs.push(npc);
-            } else if ordinary_room {
-                // Shops and special rooms add prices/pools/replacement rules.
+            } else if room_type == 1 || (room_type == 7 && selector.variant == 30) {
+                // Secret-room regular keys keep free-key Init/Collect rules.
+                // Other special contexts retain typed selectors until their
+                // prices, pools and replacements are admitted.
                 if let Some(pickup) = Pickup::from_selector(next, selector, true)? {
                     order.push(actors::ActorRef {
                         kind: actors::ActorKind::Pickup,
@@ -1092,7 +1094,7 @@ impl Game {
             }
         }
         // Source manager454df0 finishes its admission-fenced actor updates
-        // before4545d0 admits entity contacts. Coins can become idle in this
+        // before4545d0 admits entity contacts. Pickups can become idle in this
         // full phase and collect against the player's newly moved position.
         if phase == phase::Phase::Update {
             npcs::player_contacts(&mut self.state)?;
@@ -1115,8 +1117,23 @@ impl Game {
                 }
             }
             for pickup in &mut self.state.room.pickups {
-                if pickup.touches(&self.state.player) {
-                    pickup.try_collect(&mut self.state.inventory);
+                if pickup.touches(&self.state.player)
+                    && pickup.try_collect(&mut self.state.inventory)
+                    && pickup.variant == 30
+                {
+                    // Collect504480 ->504720 requests sound58 after AddKeys.
+                    // The caller runs before the System counter increment.
+                    self.state.audio.admit(
+                        &mut self.state.boot_lifecycle.shared,
+                        self.state.system_clock.system_counter - 1,
+                        audio::SoundRequest {
+                            id: 58,
+                            volume: 0.85,
+                            delay: 2,
+                            looping: false,
+                            pitch: 1.0,
+                        },
+                    );
                 }
             }
         }
