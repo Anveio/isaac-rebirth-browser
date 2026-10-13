@@ -3,7 +3,9 @@ name: Live original and browser game contracts
 on:
   pull_request:
   push:
-    branches: [main, codex/observed-systems-progress]
+    # Feature updates already run through pull_request; do not duplicate the
+    # complete original/browser matrix for the aggregate's branch push.
+    branches: [main]
   workflow_dispatch:
 
 permissions:
