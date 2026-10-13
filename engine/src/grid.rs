@@ -373,6 +373,44 @@ impl Grid {
         }
     }
 
+    /// The short CheckLine5c74a0(mode1,threshold0) rays used by Chest scatter.
+    /// Advance ten units before every single-point query, including overshoot.
+    /// Source also counts positive signed Room+e98 path costs: for these
+    /// at-most70-unit rays there are at most seven queries, so its <=8 budget
+    /// cannot fail regardless of the individual costs. Longer queries need
+    /// the actual cost owner and are outside this bounded helper's scope.
+    pub fn scatter_line_clear(&self, from: WorldVector, to: WorldVector) -> bool {
+        let delta = WorldVector {
+            x: from.x - to.x,
+            y: from.y - to.y,
+        };
+        let distance = (delta.x * delta.x + delta.y * delta.y).sqrt();
+        if !distance.is_finite() || distance > 70.0 {
+            return false;
+        }
+        if distance <= 0.0 {
+            return true;
+        }
+        let step = WorldVector {
+            x: delta.x / distance * 10.0,
+            y: delta.y / distance * 10.0,
+        };
+        let mut point = from;
+        let mut travelled = 0.0;
+        while travelled < distance {
+            point.x -= step.x;
+            point.y -= step.y;
+            let Some(index) = self.index(point) else {
+                return false;
+            };
+            if self.collision(index) != 0 {
+                return false;
+            }
+            travelled += 10.0;
+        }
+        true
+    }
+
     /// CheckLine5c74a0(mode3,threshold0): four corners at +/-5 for each
     /// ten-unit step. Class1 is exempt; other nonzero collision blocks.
     /// Empty-collision authored selectors contribute to the <=8 budget.

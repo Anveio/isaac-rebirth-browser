@@ -69,7 +69,7 @@ impl Rng {
         assert!(bound != 0, "native RNG bounded(0)");
         self.raw() % bound
     }
-    fn uniform(&mut self) -> f32 {
+    pub(crate) fn uniform(&mut self) -> f32 {
         // Native unsigned conversion rounds to f32 BEFORE multiplication.
         // A rounded result of 1.0 is permitted by the original implementation.
         self.raw() as f32 * 2.328_306_4e-10_f32

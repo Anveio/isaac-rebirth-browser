@@ -1365,6 +1365,7 @@ impl Game {
                         }
                     }
                     pickups::full_grid_contacts(&mut self.state)?;
+                    chests::full_grid_contacts(&mut self.state)?;
                     npcs::post_contact_grid(&mut self.state)?;
                     self.state.room.pickups.retain(|pickup| !pickup.removed);
                     let pickups = &self.state.room.pickups;
@@ -1435,6 +1436,10 @@ impl Game {
                     }
                     continue;
                 }
+                if self.state.room.pickups[index].chest.is_some() {
+                    chests::player_contact(&mut self.state, index)?;
+                    continue;
+                }
                 let pickup = &mut self.state.room.pickups[index];
                 if pickup.touches(&self.state.player)
                     && pickup.try_collect(&mut self.state.inventory)
@@ -1463,6 +1468,7 @@ impl Game {
             }
             pickups::nonplayer_contacts(&mut self.state, pickup_contacts)?;
             pickups::full_grid_contacts(&mut self.state)?;
+            chests::full_grid_contacts(&mut self.state)?;
             npcs::post_contact_grid(&mut self.state)?;
         }
         if phase == phase::Phase::Update {
@@ -1633,6 +1639,9 @@ impl Game {
         else {
             return Ok(());
         };
+        if self.state.room.pickups[index].chest.is_some() {
+            return chests::advance_actor(&mut self.state, phase, id);
+        }
         if phase.updates_nonplayers() {
             if let Some(variant) = self.state.room.pickups[index].bomb_conversion_variant() {
                 let position = self.state.room.pickups[index].position;
