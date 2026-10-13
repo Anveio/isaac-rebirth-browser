@@ -127,6 +127,7 @@ def observe(pid,context):
                      'activeStateD84':i32(player+0xd84),'reserveCharge':i32(player+0xd8c),
                      'activeFlag3076':bools(player+0x3076,1)[0]==1 if i32(player+0xd74)else None,
                      'controlsEnabled':bools(player+0x7d4,1)[0]==1,'inputCooldown':i32(player+0x7d8),
+                     'fireCooldown':i32(player+0xc74),'headTimer':i32(player+0xbb0),
                      'temporaryCollectibles':[]})
      temp_begin,temp_end=u64(player+0xd00),u64(player+0xd08)
      if temp_end<temp_begin or(temp_end-temp_begin)%16 or(temp_end-temp_begin)//16>347:raise ValueError('Temporary record array outside bound')

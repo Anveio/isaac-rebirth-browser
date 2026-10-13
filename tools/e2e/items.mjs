@@ -239,10 +239,15 @@ try {
           if (activeUse) {
             equal(state.player.controlsEnabled, nativePlayer.controlsEnabled, 'persistent7d4 controls', presentation);
             equal(state.player.inputCooldown, nativePlayer.inputCooldown, 'input7d8 cooldown', presentation);
+            equal(state.fireCooldown, nativePlayer.fireCooldown, 'actual guarded-shot fire timer', presentation);
+            equal(state.headTimer, nativePlayer.headTimer, 'actual guarded-shot head timer', presentation);
             equal(owner.temporaryCollectibles, nativePlayer.temporaryCollectibles, 'actual temporary use records', presentation);
             equal(playerWorld, nativeActor.position, 'public active-use stored position', presentation);
             equal(playerVelocity, nativeActor.velocity, 'public active-use stored velocity', presentation);
             if (nativePlayer.mainSprite.animation === 'UseItem' || state.playerAnimation.current === 'UseItem') {
+              equal(state.tears.filter(tear => tear.motion.lifetime === 'alive').length,
+                source.world.entities.filter(entity => entity.type === 2 && !entity.removed).length,
+                'actual guarded-shot emission', presentation);
               equal(state.playerAnimation.current, nativePlayer.mainSprite.animation, 'actual UseItem name', presentation);
               equal(state.playerAnimation.frame, nativePlayer.mainSprite.animationFrame, 'actual UseItem frame', presentation);
               equal(state.playerAnimation.playing, nativePlayer.mainSprite.animationPlaying, 'actual UseItem playing', presentation);
