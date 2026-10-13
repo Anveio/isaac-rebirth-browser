@@ -32,7 +32,7 @@ const report = { schema: 1, status: 'running', skipped: 0, selected: bank.cases.
         ? 'Fresh Isaac, no-hostile13x7 Basement secret bomb revelation/entry/return: complete hidden/open door objects, reciprocal persistence, source display flags and minimap routing, exact room/player/HP/immunity and authored admissions. Keeper/item callbacks, hostile secret closure, other shapes/items and complete pixels remain separate.'
         : 'Ordinary style0 13x7 doorway and no-hostile return; mandatory hostile-room lock/return regression; exact f32 player/descriptor phases, complete authored group accounting, supported actor admission and ordinary Rock metadata, visited-room restoration. NPC behavior, other grids/doors, large-room camera and complete pixels remain separate.',
   exclusions: bank.contract === 'secret'
-    ? ['Keeper17 metadata only; regular key admission remains a required regression', 'Later-stage surprise substitution and failed-open saved transitions', 'Actor/item/curse policies and door FX/animation pixels', 'Other room shapes and floor exits']
+    ? ['Keeper17 behavior remains separate; its derived subtype and regular key admission remain required regressions', 'Later-stage surprise substitution and failed-open saved transitions', 'Actor/item/curse policies and door FX/animation pixels', 'Other room shapes and floor exits']
     : ['curse', 'authored-doors'].includes(bank.contract) ? ['Undiscovered native door variant6', 'Actor behavior and item callbacks; NPC244 metadata only, raw1400 fire admission remains a required regression', 'Flight/items and other door policies', 'Complete rendered pixels'] : [],
   production: production.build, graphics: await inspectBrowserGraphics(browser), cases: [] };
 try {

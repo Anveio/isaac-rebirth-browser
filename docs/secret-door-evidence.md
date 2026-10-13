@@ -60,17 +60,24 @@ Assertions compare complete hidden/open door objects and endpoint assets,
 actual blown-open flags, generated surprise policy, every descriptor display
 flag, complete minimap cell routing, room/template/spawn identity, exact player
 motion/HP/immunity, independent nonempty authored groups and returned admission.
-Keeper17 selectors are metadata only; regular pickup admissions join the native
-multiset in both directions. Actual key collection belongs to inventory.
+Keeper17 selectors retain authored metadata; their native constructor subtype
+and regular pickup admissions join the native multiset in both directions as
+required unresolved comparisons. Actual key collection belongs to inventory.
 
 The retained JF2DSF92 source route has two natural regular keys at (280,280) and
 (360,280), spawn seeds 3966468430/2341774344. Its source and browser match all 269
 revelation/entry/return phases. A contrived curse return also matches 120/120.
-The only required mismatch is missing regular-key admission; it remains red
-until that owned inventory callback lands. The fresh opposite-phase JF2DSF92
-and OS-random WS03MPHH original pair executes 538 phases with the same two
-required key-admission failures. Source/browser values and earlier corrected
-map-refresh failures remain under ignored `.cache/e2e/secrets/`.
+The fresh opposite-phase JF2DSF92 and OS-random WS03MPHH original pair executes
+538 phases. Every door/player/display/minimap/return comparison passes. Each
+case retains a required admission failure: the two missing regular keys and
+Keeper17's native constructor subtype (3/7, versus authored subtype0). The gate
+remains red until those owned callbacks land. The final replay also checks the
+complete independently planned reset/menu/seed/route input trace and actual
+seeded-run flags/text/code/value. Compact immutable hashes, source lifecycle
+samples and the exact failures are checked in at
+`references/isaac/foundation/doors/secret-verification.json`; full source/browser
+values and earlier corrected map-refresh failures remain under ignored
+`.cache/e2e/secrets/`.
 
 The secret branch depends only on ordinary Rock blast dispatch. It does not
 include the broad unpublished NPC prototype. The existing W0L0LYYM fire
