@@ -29,7 +29,10 @@
     "report": "live-report.json",
     "failurePolicy": "Execute every selected case and retain functional differences before failing the gate.",
     "result": "All4 selected cases pass1690 exact presentations with0 field differences; every source/browser pair is fresh and source hashes remained stable. Both contrived offsets and both recorded OS-random cases collect and retire2 regular keys. Input traces are complete and state histories did not cap.",
-    "proofArtifactSha256": "ea9bf33bca18cb662762ed93277f0e5027635a74628bb2826fcdc2dd229dabf4"
+    "proofArtifactSha256": "ea9bf33bca18cb662762ed93277f0e5027635a74628bb2826fcdc2dd229dabf4",
+    "proofGitHead": "d56b70045e249be314f75edf6e625b6cc9651d1e",
+    "proofBranch": "codex/natural-key-proof",
+    "proofScope": "The1690-phase four-case proof is immutable on the pre-NPC restack artifact; fresh composite verification is recorded separately."
   },
   "unaccepted": [
     "Golden key flag/spending and modified-item subtype selection",
