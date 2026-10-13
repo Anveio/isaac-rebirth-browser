@@ -196,12 +196,16 @@ fields, with copy ownership passing separately. A separate fresh GridBase leaf
 now owns supported starting-room construction and seven-field Room.Save
 records. Its six pairs retain 254 required record/seed/occupancy failures while
 copy ownership and provenance pass; strict recorded W0 passes 18/18 on that
-leaf's artifact. Variable ambient decorations, other grid callbacks,
+leaf's artifact. A following normal-shape Ambient leaf admits variable grid
+decorations and the actual signed 448-word Room cost owner. Six fresh pairs
+match all 2,688 cost words, six complete occupancy sets and 360 semantic record
+fields; 228 seed/record failures remain blocking. Its strict W0 case passes
+18/18 on the same leaf artifact. Other backdrop/shape decorations and grid callbacks,
 post-acquisition Player state, load/continue and
 durable browser saves remain open. [SavedGame evidence](../references/isaac/foundation/saved-game/README.md)
 retains the original reports and the correction that made those gaps blocking.
 
-CI discovers all thirty-two registered live suites and runs separate jobs with
+CI discovers all thirty-three registered live suites and runs separate jobs with
 `fail-fast: false`, preserving each result and evidence. The first matrix run
 completed floors, weapons, boot MT and pickups successfully while retaining
 core and traversal failures. Build, typecheck, assets, matrix and strict Clippy

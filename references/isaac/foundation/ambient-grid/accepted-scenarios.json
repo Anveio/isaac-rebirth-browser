@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "entropy": "Node crypto OS entropy for independent boot epoch and browser reset seed; no requested run seed",
+  "cases": [
+    {
+      "name": "zero-epoch",
+      "bootEpochSeed": 0,
+      "initialSeed": 1
+    },
+    {
+      "name": "fixed-epoch",
+      "bootEpochSeed": 1700000000,
+      "initialSeed": 4294967295
+    },
+    {
+      "name": "random-0",
+      "bootEpochSeed": 2988990213,
+      "initialSeed": 3846854834
+    },
+    {
+      "name": "random-1",
+      "bootEpochSeed": 1901939540,
+      "initialSeed": 294623253
+    },
+    {
+      "name": "random-2",
+      "bootEpochSeed": 3795305435,
+      "initialSeed": 1274095651
+    },
+    {
+      "name": "random-3",
+      "bootEpochSeed": 2991455915,
+      "initialSeed": 3486913207
+    }
+  ]
+}

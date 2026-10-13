@@ -33,6 +33,9 @@ pub struct Room {
     pub combat_shut_door_slots: Vec<u8>,
     pub spawns: Option<crate::room_spawns::RoomSpawns>,
     pub grid: Option<crate::grid::GridDescriptor>,
+    /// The actual signed Room+e98 owner; absent until its source Init is admitted.
+    #[serde(default)]
+    pub path_costs: Option<crate::room_costs::RoomCosts>,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
@@ -477,6 +480,7 @@ impl Room {
             combat_shut_door_slots: Vec::new(),
             spawns: None,
             grid: None,
+            path_costs: None,
             left: left_plane + radius,
             right: right_plane - radius,
             top: top_plane + radius,

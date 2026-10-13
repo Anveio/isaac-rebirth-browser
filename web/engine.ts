@@ -158,6 +158,7 @@ export interface Floor {
 export interface Room {
   left: number; right: number; top: number; bottom: number; appearance: RoomAppearance;
   descriptor: RoomDescriptor | null;
+  pathCosts: number[] | null;
   spawns: {tintedRockIndex: number; finalSpawnState: number; selectors: {groupIndex: number; gridIndex: number; category: "entity" | "grid"; type: number; variant: number; subtype: number; position: {x: number; y: number}; groupSeed: number; spawnSeed: number}[]} | null;
   pickups: Pickup[];
   npcs: { id: number; kind: number; variant: number; subtype: number; spawnSeed: number;

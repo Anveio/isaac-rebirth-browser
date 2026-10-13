@@ -39,6 +39,7 @@ pub mod projectiles;
 pub mod rock_blast;
 mod room;
 pub mod room_assets;
+pub mod room_costs;
 pub mod room_spawns;
 pub mod room_templates;
 pub mod roundworm;
