@@ -140,6 +140,8 @@ def observe(pid, context):
                 raise ValueError('Unexpected room grid shape')
             descriptor = u64(room + 8)
             report['room'] = {'type': struct.unpack_from('<I', raw, 0x10)[0], 'gridWidth': width, 'gridHeight': height,
+                'descriptorIndex': u32(descriptor + 4), 'descriptorGridIndex': u32(descriptor),
+                'descriptorSpawnSeed': u32(descriptor + 0x4c),
                 'boundsTopLeft': list(struct.unpack_from('<ff', raw, 0x1c)),
                 'boundsBottomRight': list(struct.unpack_from('<ff', raw, 0x24)),
                 'combatClear': bool(read(descriptor + 0x3d, 1)[0]),

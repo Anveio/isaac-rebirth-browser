@@ -34,6 +34,7 @@ pub struct EnemyProjectile {
     pub full_updates: u32,
     pub animation_frame: u32,
     pub dead: bool,
+    pub accepted_player_hit: bool,
     pub removed: bool,
     pub impact_seed: Option<u32>,
     pub impact_rotation: Option<u32>,
@@ -61,6 +62,7 @@ impl EnemyProjectile {
             full_updates: 0,
             animation_frame: 0,
             dead: false,
+            accepted_player_hit: false,
             removed: false,
             impact_seed: None,
             impact_rotation: None,
@@ -195,13 +197,14 @@ pub fn player_contacts(state: &mut State) -> Result<(), String> {
         if !result.colliding {
             continue;
         }
-        combat::try_damage_player(state, 1, 60);
+        let accepted = combat::try_damage_player(state, 1, 60);
         state.player.x = f64::from(player.position.x) * 0.65 + 32.0;
         state.player.y = f64::from(player.position.y) * 0.65 - 46.0;
         state.player.vx = f64::from(player.velocity.x) * 0.65;
         state.player.vy = f64::from(player.velocity.y) * 0.65;
         let projectile = &mut state.enemy_projectiles[index];
         projectile.dead = true;
+        projectile.accepted_player_hit = accepted;
         projectile.position = projectile_body.position;
         projectile.presented_position = projectile_body.position;
         projectile.velocity = projectile_body.velocity;
