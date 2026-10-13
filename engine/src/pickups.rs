@@ -339,6 +339,12 @@ impl Pickup {
             self.current_friction = self.configured_friction * 0.965;
             self.project();
         } else if self.has_regular_physics() {
+            // Pickup506f9d compares the ordinary zero anchor before Base.
+            // The true branch5075d2 copies the current physical position;
+            // intermediate prediction never initializes this owner.
+            if self.anchor_position.x == 0.0 && self.anchor_position.y == 0.0 {
+                self.anchor_position = self.position;
+            }
             //506ff9 invokes Base447190 before507029 sets the next turn's
             //temporary friction. Velocity is physical; fast prediction never
             //feeds its presented position back into this full integration.
