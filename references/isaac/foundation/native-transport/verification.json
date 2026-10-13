@@ -1,0 +1,116 @@
+{
+  "schema": 1,
+  "status": "pass",
+  "implementationHead": "43ab7e6",
+  "runtimeBase": "2a2d6ab",
+  "scope": "Host native render worker/wait budget only, plus public paired controller timeout option. No public tape, virtual clock intervals, selected phase counts, source observations or comparison assertions changed.",
+  "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "resourceEvidence": {
+    "cpuMax": "400000100000 (four CPU-seconds per second)",
+    "effectiveCpuSet": "0-4",
+    "intervalSeconds": 116.3,
+    "usedCpuSeconds": 466,
+    "throttledPeriods": 1161,
+    "periods": 1163,
+    "observedNativeThreadsBeforeCap": [
+      16,
+      18
+    ],
+    "observedChromiumThreads": [
+      22,
+      35
+    ],
+    "interpretation": "Shared runner CPU quota was saturated under parallel native/browser workloads; independent native wait budget expired at New Run admission. Thread cap is only a default when caller leaves LP_NUM_THREADS unset."
+  },
+  "defaults": {
+    "nativeFrameTimeoutSeconds": 60,
+    "lpNumThreads": 2,
+    "override": "runPairedGate.nativeFrameTimeout and CLI --native-frame-timeout accept finite0<value<=300; explicit LP_NUM_THREADS remains unchanged"
+  },
+  "pairedLive": {
+    "status": "pass",
+    "sourceHashesStable": true,
+    "nativeFrameTimeout": 120,
+    "production": {
+      "sha256": "f050bf745a753793fd01cdc2c218b1c9e3fff1b945b03cc8a8e845f2768289ba",
+      "files": 917,
+      "source": "/workspace/isaac-worktrees/gate-review/dist",
+      "scope": "Immutable snapshot of production build bytes; source/native replay equality is checked separately"
+    },
+    "reportPath": "/workspace/isaac-rebirth-browser/.cache/e2e/native-transport/live-120/report.json",
+    "reportSha256": "4b8d5ab369f9f44f582c1d46763a3c25e71fa70ac494aa0ae0e7ff9b1722ff96",
+    "cases": [
+      {
+        "scenario": "paired-title-menu",
+        "seed": "T1PK6Y0W",
+        "status": "pass",
+        "original": "pass",
+        "browser": "pass",
+        "functionalPassed": 19,
+        "functionalSelected": 19,
+        "nativeHostExecution": {
+          "frameTimeoutSeconds": 120.0,
+          "lpNumThreads": "2",
+          "scope": "Host-wall wait limit and requested software-renderer pool; public tape/virtual steps unchanged"
+        },
+        "caseSha256": "e5055b92e6b599393a09157dc51b8f3e9d27511ef453d4963a98ea9eaecdcf3c",
+        "publicTapeSha256": "d2337efcb39d7db98a022bbe51f0931b148b7a0eee43418d26e5341808a0c8ff",
+        "originalManifestSha256": "912ea93c0376884d0710a9bd9af26758ec316709fc41fda5d93ff89369dc7c4e",
+        "browserManifestSha256": "9a471e88fd39b755565926b5428f9506bdfe92c6ba75ffa914df70433e6c51ed"
+      },
+      {
+        "scenario": "paired-random-run",
+        "seed": "1E0W JX06",
+        "status": "pass",
+        "original": "pass",
+        "browser": "pass",
+        "functionalPassed": 18,
+        "functionalSelected": 18,
+        "nativeHostExecution": {
+          "frameTimeoutSeconds": 120.0,
+          "lpNumThreads": "2",
+          "scope": "Host-wall wait limit and requested software-renderer pool; public tape/virtual steps unchanged"
+        },
+        "caseSha256": "23ce583e581aa45f0ec041978a070e7abc0ed042ed2975ac674b81361d70dd7c",
+        "publicTapeSha256": "a849ccef0305c1fb21ff082a5cf12306ef8e2517d7444200eb2eeffd96976532",
+        "originalManifestSha256": "55282946968c24f1325053dd756b5b0ee790fdc4db19b4d8da25c8d1ef418c8b",
+        "browserManifestSha256": "adc3e0f74a8232e9fc74f394c1e87ec80067aebcccfc610de9315256dca0dbd3"
+      }
+    ]
+  },
+  "recordedRandomDefaultRetry": {
+    "code": "YGNX7D4B",
+    "status": "pass",
+    "hostExecution": {
+      "frameTimeoutSeconds": 60,
+      "lpNumThreads": "2",
+      "scope": "Host-wall wait limit and requested software-renderer pool; public tape/virtual steps unchanged"
+    },
+    "manifestPath": "/workspace/isaac-rebirth-browser/.cache/e2e/native-transport/ygnx-default-60/manifest.json",
+    "manifestSha256": "dd12187129d6be373216e1a1233b441ade7523db19145d871f2cf52dd4882e2a",
+    "publicTapeSha256": "c8d4b1ef0dddc7477db65844a516c478f7739618389d2ee06b57bc9a956c4741",
+    "tapeExactlyMatchesRejectedAttempt": true,
+    "selectedFrames": 2,
+    "debugObservations": 206,
+    "rejectedAttempt": {
+      "manifest": "/workspace/isaac-rebirth-browser/.cache/e2e/menu-settlement/pickups/random-0/original/manifest.json",
+      "sha256": "9e80744a250b4cbfe293ebc7d8f78c1002bbafd2966ae32f8c786cfd44746e42",
+      "failures": [
+        "timed out"
+      ],
+      "lastAcknowledgedPresentation": 906,
+      "lastRequestedFrames": 12,
+      "scope": "Failed native setup remains retained, not reclassified as gameplay equality"
+    }
+  },
+  "sourceHashes": {
+    "tools/original/foundation-clock-run.py": "550a9dae2ebfa35f8f42e89de0f3a1f1f00f69eeacae04b76db27ab42770821f",
+    "tools/original/with-display.sh": "4371efe64ae1639564b4a85292ff252e20bcfe84b5387927ecf7093c6b8d3dfb",
+    "tools/foundation/paired-game.mjs": "879b1c8da1da531976231bf35782a5e449de3888dc30b8d528e8b98fb4af4c8d"
+  },
+  "validation": [
+    "Python/shell/Node syntax and diff checks passed",
+    "Fresh original and immutable production actual DOM pairs passed every37 functional checkpoint; strict RGBA remains diagnostic",
+    "Actual explicit120 reached both original manifests; default60/LP2 reached recorded random retry and full original tape completed"
+  ]
+}
