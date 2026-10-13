@@ -86,6 +86,9 @@ export async function captureCameraVisibility(page, native, label, contents, dir
   assert.ok(sourceSkin.pixels > 0, 'Selected original viewport must contain actual Isaac skin pixels');
   assert.ok(browserSkin.pixels >= sourceSkin.width,
     'Actual rendered browser viewport must contain Isaac at the source camera-projected position');
+  assert.ok(browserSkin.width >= actor.collisionRadius * source.width / 480
+    && browserSkin.height >= actor.collisionRadius * source.height / 270,
+    'Functional viewport requires a visible Isaac-sized component, including when native lighting leaves only small bright eye highlights');
   const browserPath = join(directory, label + '-camera.png');
   await writeFile(browserPath, browserBytes);
   return {label, sourcePath: frame.path, browserPath, nativeAnchor: anchor, sourceSkin, browserSkin,
