@@ -13,6 +13,8 @@ import { startProductionServer } from './production-server.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const SOURCE = 'tools/original/foundation-paired-scenarios.py';
+export const DEFAULT_PAIRED_SCENARIOS = ['paired-title-menu', 'paired-movement-fire', 'paired-pause-release', 'paired-bomb-moving-even', 'paired-bomb-moving-odd', 'paired-room-combat'];
+export const DEFAULT_RANDOM_CASE_COUNT = 2;
 const runProcess = promisify(execFile);
 const save = (path, value) => writeFileSync(path, JSON.stringify(value, null, 2) + '\n');
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
@@ -271,12 +273,11 @@ export async function runPairedGate({ output, selected, randomCount = 2, replayS
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   if (process.argv.includes('--list')) console.log(JSON.stringify(await pairedScenarioDeclarations(), null, 2));
   else {
-    const defaults = 'paired-title-menu,paired-movement-fire,paired-pause-release,paired-bomb-moving-even,paired-bomb-moving-odd,paired-room-combat';
     const replayCases = [...option('--replay-cases', '').split(',').filter(Boolean),
       ...option('--replay-case', '').split(',').filter(Boolean)].map(path => resolve(path));
-    const selected = option('--scenarios', replayCases.length ? '' : defaults).split(',').filter(Boolean);
+    const selected = option('--scenarios', replayCases.length ? '' : DEFAULT_PAIRED_SCENARIOS.join(',')).split(',').filter(Boolean);
     const replaySeeds = option('--random-seeds', '').split(',').filter(Boolean);
-    const randomCount = countOption('--random-count', replaySeeds.length || (replayCases.length ? 0 : 2), 0);
+    const randomCount = countOption('--random-count', replaySeeds.length || (replayCases.length ? 0 : DEFAULT_RANDOM_CASE_COUNT), 0);
     assert.ok(!replaySeeds.length || replaySeeds.length === randomCount, 'Replay seed count must match randomized case count');
     const output = resolve(option('--output', `.cache/foundation/paired-${Date.now()}`));
     const report = await runPairedGate({ output, selected, randomCount, replaySeeds, replayCases,

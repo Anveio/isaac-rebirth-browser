@@ -55,5 +55,8 @@ jobs:
             .cache/original-floor/**
             .cache/e2e/**
             test-results/
+            !.cache/foundation/paired-*/**/game/**
+            !.cache/original-floor/**/game/**
+            !.cache/e2e/**/game/**
           if-no-files-found: warn
           retention-days: 14

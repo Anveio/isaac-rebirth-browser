@@ -4,6 +4,7 @@ import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseSync } from "rolldown/utils";
 import { spawnSync } from "node:child_process";
+import { DEFAULT_PAIRED_SCENARIOS, DEFAULT_RANDOM_CASE_COUNT } from './paired-game.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL("../..", import.meta.url)));
 export const PAIRED_GAME_SOURCE = "tools/original/foundation-paired-scenarios.py";
@@ -75,6 +76,8 @@ export function discoverPairedGameScenarios({ root = ROOT, systemIds } = {}) {
     assert.equal(item.source, PAIRED_GAME_SOURCE);
   }
   assert.ok(cases.some(item => item.randomized), "Live gate must include a recorded randomized scenario");
+  assert.deepEqual([...DEFAULT_PAIRED_SCENARIOS].sort(), cases.filter(item => !item.randomized).map(item => item.id).sort(), 'Default live gate must execute every declared contrived scenario');
+  assert.equal(DEFAULT_RANDOM_CASE_COUNT, 2, 'Default live gate must execute two recorded OS-random cases');
   return cases;
 }
 
