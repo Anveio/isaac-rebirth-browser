@@ -1,0 +1,748 @@
+{
+  "schema": 1,
+  "status": "pass",
+  "seed": "22PFCSFS",
+  "entropy": "Recorded OS-random discovery from first pickup gate; retained regression code, no replacement seed",
+  "scope": "Source ordinary active Spike factory, static authored visual, strict radius21 full-grid-before-player damage/impulse/immunity and exact reverse-control f32 rounds. No original state injection. Other Spike contexts and nonplayer damage remain separate.",
+  "buildSha256": "9d54068c3656760d32fa6f48505083d1bbe5de39ba2b1b6283f982e3c9ff1070",
+  "sourceBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "gateSourcesStable": true,
+  "pairedReportSha256": "c288b384d5eef9905cb2071ebdf9430dd90d3221b10010cffa981ce44c3ec306",
+  "pairedCheckpoints": 143,
+  "pairedCases": [
+    {
+      "id": "paired-bomb-moving-even",
+      "seed": "T1PK6Y0W",
+      "status": "pass"
+    },
+    {
+      "id": "paired-bomb-moving-odd",
+      "seed": "T1PK6Y0W",
+      "status": "pass"
+    },
+    {
+      "id": "paired-pause-release",
+      "seed": "T1PK6Y0W",
+      "status": "pass"
+    },
+    {
+      "id": "paired-spike-22PFCSFS-offset-0",
+      "seed": "22PFCSFS",
+      "status": "pass"
+    },
+    {
+      "id": "paired-spike-22PFCSFS-offset-1",
+      "seed": "22PFCSFS",
+      "status": "pass"
+    }
+  ],
+  "exactGridFieldsAndPhaseChecks": 5049,
+  "cases": [
+    {
+      "offset": 0,
+      "status": "pass",
+      "caseSha256": "5c5f11369774a4df2ea37b99185b594cf3bfa2888c0edfa0f70d73fd0fce437b",
+      "originalManifestSha256": "ad9bea850f9f5782d17440a7bbd0fb56041640f42612124c42d70ae09d1ff84a",
+      "browserManifestSha256": "8c7aa6fc0c6ea7fc484a18d285e7648055412d482467f14432507f51bd00acff",
+      "pairedCheckpoints": 44,
+      "exactGridFieldsAndPhaseChecks": 2559,
+      "gridStateReportSha256": "a22b63fe48a72e2b51f255c879e490b421e0244ebd668e888de261ae4f822930",
+      "sourceSpikeDescriptors": [
+        {
+          "index": 17,
+          "type": 8,
+          "variant": 3,
+          "state": 0,
+          "varData": 1,
+          "spawnSeed": 3521083119,
+          "collisionClass": 0,
+          "position": [
+            120,
+            160
+          ]
+        },
+        {
+          "index": 27,
+          "type": 8,
+          "variant": 2,
+          "state": 0,
+          "varData": 1,
+          "spawnSeed": 832502614,
+          "collisionClass": 0,
+          "position": [
+            520,
+            160
+          ]
+        },
+        {
+          "index": 31,
+          "type": 8,
+          "variant": 4,
+          "state": 0,
+          "varData": 1,
+          "spawnSeed": 2254322303,
+          "collisionClass": 0,
+          "position": [
+            80,
+            200
+          ]
+        },
+        {
+          "index": 37,
+          "type": 8,
+          "variant": 3,
+          "state": 0,
+          "varData": 1,
+          "spawnSeed": 1133896553,
+          "collisionClass": 0,
+          "position": [
+            320,
+            200
+          ]
+        },
+        {
+          "index": 43,
+          "type": 8,
+          "variant": 1,
+          "state": 0,
+          "varData": 1,
+          "spawnSeed": 3941284023,
+          "collisionClass": 0,
+          "position": [
+            560,
+            200
+          ]
+        },
+        {
+          "index": 65,
+          "type": 8,
+          "variant": 2,
+          "state": 0,
+          "varData": 1,
+          "spawnSeed": 3020362859,
+          "collisionClass": 0,
+          "position": [
+            240,
+            280
+          ]
+        },
+        {
+          "index": 69,
+          "type": 8,
+          "variant": 3,
+          "state": 0,
+          "varData": 1,
+          "spawnSeed": 1979921976,
+          "collisionClass": 0,
+          "position": [
+            400,
+            280
+          ]
+        },
+        {
+          "index": 91,
+          "type": 8,
+          "variant": 2,
+          "state": 0,
+          "varData": 1,
+          "spawnSeed": 1108179103,
+          "collisionClass": 0,
+          "position": [
+            80,
+            360
+          ]
+        },
+        {
+          "index": 97,
+          "type": 8,
+          "variant": 4,
+          "state": 0,
+          "varData": 1,
+          "spawnSeed": 364265549,
+          "collisionClass": 0,
+          "position": [
+            320,
+            360
+          ]
+        },
+        {
+          "index": 103,
+          "type": 8,
+          "variant": 2,
+          "state": 0,
+          "varData": 1,
+          "spawnSeed": 2110363808,
+          "collisionClass": 0,
+          "position": [
+            560,
+            360
+          ]
+        },
+        {
+          "index": 107,
+          "type": 8,
+          "variant": 4,
+          "state": 0,
+          "varData": 1,
+          "spawnSeed": 1245603966,
+          "collisionClass": 0,
+          "position": [
+            120,
+            400
+          ]
+        },
+        {
+          "index": 117,
+          "type": 8,
+          "variant": 1,
+          "state": 0,
+          "varData": 1,
+          "spawnSeed": 4739940,
+          "collisionClass": 0,
+          "position": [
+            520,
+            400
+          ]
+        }
+      ],
+      "sourceHitNeighborhood": [
+        {
+          "label": "spike-phase-128",
+          "nativePhase": {
+            "systemIterations": 1334,
+            "fullGameUpdates": 97
+          },
+          "position": [
+            320.0,
+            177.5660858154297
+          ],
+          "velocity": [
+            0.0,
+            3.180101156234741
+          ],
+          "hp": 6,
+          "damageCooldown": 0
+        },
+        {
+          "label": "spike-phase-129",
+          "nativePhase": {
+            "systemIterations": 1335,
+            "fullGameUpdates": 98
+          },
+          "position": [
+            320.0,
+            180.74618530273438
+          ],
+          "velocity": [
+            0.0,
+            3.32777738571167
+          ],
+          "hp": 6,
+          "damageCooldown": 0
+        },
+        {
+          "label": "spike-phase-130",
+          "nativePhase": {
+            "systemIterations": 1336,
+            "fullGameUpdates": 98
+          },
+          "position": [
+            320.0,
+            184.07395935058594
+          ],
+          "velocity": [
+            0.0,
+            3.457782745361328
+          ],
+          "hp": 6,
+          "damageCooldown": 0
+        },
+        {
+          "label": "spike-phase-131",
+          "nativePhase": {
+            "systemIterations": 1337,
+            "fullGameUpdates": 99
+          },
+          "position": [
+            320.0,
+            183.53173828125
+          ],
+          "velocity": [
+            0.0,
+            0.06996197998523712
+          ],
+          "hp": 4,
+          "damageCooldown": 119
+        },
+        {
+          "label": "spike-phase-132",
+          "nativePhase": {
+            "systemIterations": 1338,
+            "fullGameUpdates": 99
+          },
+          "position": [
+            320.0,
+            183.60169982910156
+          ],
+          "velocity": [
+            0.0,
+            0.5897948741912842
+          ],
+          "hp": 4,
+          "damageCooldown": 118
+        },
+        {
+          "label": "spike-phase-133",
+          "nativePhase": {
+            "systemIterations": 1339,
+            "fullGameUpdates": 100
+          },
+          "position": [
+            320.0,
+            184.19149780273438
+          ],
+          "velocity": [
+            0.0,
+            1.0474250316619873
+          ],
+          "hp": 4,
+          "damageCooldown": 117
+        },
+        {
+          "label": "spike-phase-134",
+          "nativePhase": {
+            "systemIterations": 1340,
+            "fullGameUpdates": 100
+          },
+          "position": [
+            320.0,
+            185.23892211914062
+          ],
+          "velocity": [
+            0.0,
+            1.4502955675125122
+          ],
+          "hp": 4,
+          "damageCooldown": 116
+        },
+        {
+          "label": "spike-phase-135",
+          "nativePhase": {
+            "systemIterations": 1341,
+            "fullGameUpdates": 101
+          },
+          "position": [
+            320.0,
+            186.68922424316406
+          ],
+          "velocity": [
+            0.0,
+            1.8049589395523071
+          ],
+          "hp": 4,
+          "damageCooldown": 115
+        }
+      ],
+      "fullFrameRGBADiagnostic": {
+        "passed": 7,
+        "failed": 37,
+        "required": false,
+        "toleranceChanged": false
+      }
+    },
+    {
+      "offset": 1,
+      "status": "pass",
+      "caseSha256": "3622611d22b1df26183eb88d39aee6558746d06d5caf273497078dd7d9f3d3a1",
+      "originalManifestSha256": "e8f0f4a757c24ae96516a9f41378bfd15d78a05365c7fca474a0d2ffb81b5e56",
+      "browserManifestSha256": "5b69c063996dd2d0839ce577bdb83a10a5f5feaf69f0e6e57db8a845a07952a2",
+      "pairedCheckpoints": 45,
+      "exactGridFieldsAndPhaseChecks": 2490,
+      "gridStateReportSha256": "c772543fda3b3441600fdc3eed372ed4f97e943a65022362190f6dab501c3b81",
+      "sourceSpikeDescriptors": [
+        {
+          "index": 17,
+          "type": 8,
+          "variant": 3,
+          "state": 0,
+          "varData": 1,
+          "spawnSeed": 3521083119,
+          "collisionClass": 0,
+          "position": [
+            120,
+            160
+          ]
+        },
+        {
+          "index": 27,
+          "type": 8,
+          "variant": 2,
+          "state": 0,
+          "varData": 1,
+          "spawnSeed": 832502614,
+          "collisionClass": 0,
+          "position": [
+            520,
+            160
+          ]
+        },
+        {
+          "index": 31,
+          "type": 8,
+          "variant": 4,
+          "state": 0,
+          "varData": 1,
+          "spawnSeed": 2254322303,
+          "collisionClass": 0,
+          "position": [
+            80,
+            200
+          ]
+        },
+        {
+          "index": 37,
+          "type": 8,
+          "variant": 3,
+          "state": 0,
+          "varData": 1,
+          "spawnSeed": 1133896553,
+          "collisionClass": 0,
+          "position": [
+            320,
+            200
+          ]
+        },
+        {
+          "index": 43,
+          "type": 8,
+          "variant": 1,
+          "state": 0,
+          "varData": 1,
+          "spawnSeed": 3941284023,
+          "collisionClass": 0,
+          "position": [
+            560,
+            200
+          ]
+        },
+        {
+          "index": 65,
+          "type": 8,
+          "variant": 2,
+          "state": 0,
+          "varData": 1,
+          "spawnSeed": 3020362859,
+          "collisionClass": 0,
+          "position": [
+            240,
+            280
+          ]
+        },
+        {
+          "index": 69,
+          "type": 8,
+          "variant": 3,
+          "state": 0,
+          "varData": 1,
+          "spawnSeed": 1979921976,
+          "collisionClass": 0,
+          "position": [
+            400,
+            280
+          ]
+        },
+        {
+          "index": 91,
+          "type": 8,
+          "variant": 2,
+          "state": 0,
+          "varData": 1,
+          "spawnSeed": 1108179103,
+          "collisionClass": 0,
+          "position": [
+            80,
+            360
+          ]
+        },
+        {
+          "index": 97,
+          "type": 8,
+          "variant": 4,
+          "state": 0,
+          "varData": 1,
+          "spawnSeed": 364265549,
+          "collisionClass": 0,
+          "position": [
+            320,
+            360
+          ]
+        },
+        {
+          "index": 103,
+          "type": 8,
+          "variant": 2,
+          "state": 0,
+          "varData": 1,
+          "spawnSeed": 2110363808,
+          "collisionClass": 0,
+          "position": [
+            560,
+            360
+          ]
+        },
+        {
+          "index": 107,
+          "type": 8,
+          "variant": 4,
+          "state": 0,
+          "varData": 1,
+          "spawnSeed": 1245603966,
+          "collisionClass": 0,
+          "position": [
+            120,
+            400
+          ]
+        },
+        {
+          "index": 117,
+          "type": 8,
+          "variant": 1,
+          "state": 0,
+          "varData": 1,
+          "spawnSeed": 4739940,
+          "collisionClass": 0,
+          "position": [
+            520,
+            400
+          ]
+        }
+      ],
+      "sourceHitNeighborhood": [
+        {
+          "label": "spike-phase-128",
+          "nativePhase": {
+            "systemIterations": 1335,
+            "fullGameUpdates": 98
+          },
+          "position": [
+            320.0,
+            177.5660858154297
+          ],
+          "velocity": [
+            0.0,
+            3.180101156234741
+          ],
+          "hp": 6,
+          "damageCooldown": 0
+        },
+        {
+          "label": "spike-phase-129",
+          "nativePhase": {
+            "systemIterations": 1336,
+            "fullGameUpdates": 98
+          },
+          "position": [
+            320.0,
+            180.74618530273438
+          ],
+          "velocity": [
+            0.0,
+            3.32777738571167
+          ],
+          "hp": 6,
+          "damageCooldown": 0
+        },
+        {
+          "label": "spike-phase-130",
+          "nativePhase": {
+            "systemIterations": 1337,
+            "fullGameUpdates": 99
+          },
+          "position": [
+            320.0,
+            180.07395935058594
+          ],
+          "velocity": [
+            0.0,
+            -0.03990909084677696
+          ],
+          "hp": 4,
+          "damageCooldown": 119
+        },
+        {
+          "label": "spike-phase-131",
+          "nativePhase": {
+            "systemIterations": 1338,
+            "fullGameUpdates": 99
+          },
+          "position": [
+            320.0,
+            180.0340576171875
+          ],
+          "velocity": [
+            0.0,
+            0.4944762587547302
+          ],
+          "hp": 4,
+          "damageCooldown": 118
+        },
+        {
+          "label": "spike-phase-132",
+          "nativePhase": {
+            "systemIterations": 1339,
+            "fullGameUpdates": 100
+          },
+          "position": [
+            320.0,
+            180.52853393554688
+          ],
+          "velocity": [
+            0.0,
+            0.9635120630264282
+          ],
+          "hp": 4,
+          "damageCooldown": 117
+        },
+        {
+          "label": "spike-phase-133",
+          "nativePhase": {
+            "systemIterations": 1340,
+            "fullGameUpdates": 100
+          },
+          "position": [
+            320.0,
+            181.49205017089844
+          ],
+          "velocity": [
+            0.0,
+            1.3764234781265259
+          ],
+          "hp": 4,
+          "damageCooldown": 116
+        },
+        {
+          "label": "spike-phase-134",
+          "nativePhase": {
+            "systemIterations": 1341,
+            "fullGameUpdates": 101
+          },
+          "position": [
+            320.0,
+            182.86846923828125
+          ],
+          "velocity": [
+            0.0,
+            1.7399262189865112
+          ],
+          "hp": 4,
+          "damageCooldown": 115
+        },
+        {
+          "label": "spike-phase-135",
+          "nativePhase": {
+            "systemIterations": 1342,
+            "fullGameUpdates": 101
+          },
+          "position": [
+            320.0,
+            184.6083984375
+          ],
+          "velocity": [
+            0.0,
+            2.0599324703216553
+          ],
+          "hp": 4,
+          "damageCooldown": 114
+        }
+      ],
+      "fullFrameRGBADiagnostic": {
+        "passed": 7,
+        "failed": 38,
+        "required": false,
+        "toleranceChanged": false
+      }
+    }
+  ],
+  "gpuMasks": {
+    "reportSha256": "0f316e7600441e17b35f8265005536becd5b6a0984b3802b07c42738614ab750",
+    "cases": 9,
+    "completeTargets": 18,
+    "status": "pass",
+    "changedPixelBudget": 0,
+    "meanAbsoluteChannelErrorBudget": 0
+  },
+  "preservedFailures": {
+    "firstPickupHazard": {
+      "reportPath": ".cache/e2e/pickups/first-integrated/report.json",
+      "originalManifestSha256": "311f1ba19873b74de0370c8370c8e33a167429862811524c8e61bc6676c15158",
+      "status": "fail",
+      "firstMismatch": "source HP4 versus browser HP6 on retained approach"
+    },
+    "initialSourceControlGrouping": {
+      "reportPath": ".cache/foundation/grid-spike-live/report.json",
+      "sha256": "967fe77f27500a5e261876c918bb3c2fb2e8fce8f57d65d800364f745983480c",
+      "status": "fail",
+      "pairedPass": 85,
+      "pairedTotal": 89,
+      "failures": [
+        {
+          "label": "spike-phase-131",
+          "fields": [
+            {
+              "field": "player.vy",
+              "expected": 0.32140956819057465,
+              "actual": 0.3214095875620842,
+              "status": "fail"
+            }
+          ]
+        },
+        {
+          "label": "spike-phase-132",
+          "fields": [
+            {
+              "field": "player.vy",
+              "expected": 0.6262828409671783,
+              "actual": 0.6262829184532166,
+              "status": "fail"
+            }
+          ]
+        },
+        {
+          "label": "spike-phase-133",
+          "fields": [
+            {
+              "field": "player.vy",
+              "expected": 0.8946752607822418,
+              "actual": 0.89467533826828,
+              "status": "fail"
+            }
+          ]
+        },
+        {
+          "label": "spike-phase-134",
+          "fields": [
+            {
+              "field": "player.vy",
+              "expected": 1.1309520423412323,
+              "actual": 1.1309521198272705,
+              "status": "fail"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "checks": [
+    "production build",
+    "TypeScript",
+    "2461 original reference assets",
+    "generated matrix",
+    "strict all-target Clippy",
+    "fresh original+production public-input paired runs",
+    "exact native grid admission+phase fields",
+    "9 zero-budget mask cases/18 complete targets"
+  ],
+  "noCheckedInUnitSuite": true,
+  "gridPositionProvenance": "World centers derived from independently observed source grid index and room lattice; other selected grid metadata fields read from native writable grid objects",
+  "validatorNegativeCheck": "Ignored research confirms a failed selected gameplay observation throws instead of being omitted"
+}

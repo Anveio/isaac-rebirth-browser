@@ -51,12 +51,15 @@ export class Renderer {
       this.stage.ground(state.stageEffects);
       const grid = state.room.grid;
       if (grid) for (const [index, cell] of grid.cells.entries()) {
-        const rock = cell.entity;
-        if (rock?.kind !== 2 || rock.state !== 1) continue;
+        const entity = cell.entity;
+        if (!entity) continue;
         const x = (40 + index % grid.width * 40) * 0.65 + 32;
         const y = (120 + Math.floor(index / grid.width) * 40) * 0.65 - 46;
-        this.assets.draw(ctx, "gfx/grid/grid_rock.anm2", rock.variant >= 1000 ? "big" : "normal",
-          x, y, rock.variant >= 1000 ? rock.variant - 1000 : rock.variant);
+        if (entity.kind === 2 && entity.state === 1)
+          this.assets.draw(ctx, "gfx/grid/grid_rock.anm2", entity.variant >= 1000 ? "big" : "normal",
+            x, y, entity.variant >= 1000 ? entity.variant - 1000 : entity.variant);
+        else if (entity.kind === 8 && entity.state === 0)
+          this.assets.draw(ctx, "gfx/grid/grid_spikes.anm2", `Spikes${String(entity.variant).padStart(2, "0")}`, x, y);
       }
       this.pickups.draw(ctx, state);
       this.drawPlayer(ctx, state);

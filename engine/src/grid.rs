@@ -45,7 +45,7 @@ pub struct DoorCollision {
     pub open: bool,
 }
 
-/// Admit supported authored rocks with their actual local spawn seeds. The
+/// Admit supported authored rocks and spikes with their actual local spawn seeds. The
 /// boundary/door entries are collision profiles; their independent actor RNG
 /// and callbacks are not represented by those geometry-only spawn seeds.
 /// Unsupported selectors stay verbatim and use the source fallback query.
@@ -110,6 +110,17 @@ pub fn for_room(
             .get_mut(index)
             .ok_or("authored grid selector outside room")?;
         cell.selector = u32::from(spawn.entity_type);
+        if spawn.entity_type == 1930 && spawn.variant == 0 && spawn.subtype == 0 {
+            cell.entity = Some(GridEntity {
+                kind: 8,
+                // Spike graphics configuration 0x56f830 chooses 1..4 once from
+                // the actual grid spawn seed; active state0 has no blocker.
+                variant: crate::room_spawns::next35(spawn.spawn_seed) % 4 + 1,
+                state: 0,
+                collision_class: 0,
+                spawn_seed: spawn.spawn_seed,
+            });
+        }
         // Tinted/special rock callbacks are not ordinary Rock admission.
         if spawn.entity_type == 1000
             && spawn.variant == 0
