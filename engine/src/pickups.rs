@@ -3,7 +3,7 @@
 //! source admission order, including a pickup collected earlier in its phase.
 use crate::{motion::WorldVector, phase::Phase, Inventory, Player};
 use serde::{Deserialize, Serialize};
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
 
 #[derive(Debug)]
 pub struct Clip {
@@ -91,6 +91,21 @@ pub struct RegularCollision {
     pub entity_collision_class: u32,
 }
 
+/// Owned type5 projection of Room.Save's native 0x48-byte entity record.
+/// The browser handle joins the existing mixed order; it is not a source ID.
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct SavedRegularPickup {
+    pub handle: u32,
+    pub variant: u32,
+    pub subtype: u32,
+    pub position: WorldVector,
+    pub spawn_seed: u32,
+    pub rng_seed: u32,
+    pub charge: i32,
+    pub touched: bool,
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Pickup {
@@ -128,10 +143,25 @@ pub struct Pickup {
     #[serde(default)]
     pub regular_collision: Option<RegularCollision>,
     #[serde(default)]
+    pub regular_rng: Option<crate::items::Rng>,
+    #[serde(default)]
     pub chest: Option<crate::chests::Chest>,
 }
 
 impl Pickup {
+    /// Entity.Init441c80 seeds its persistent RNG30 without a shared draw.
+    /// The temporary Pickup.Init RNG35 remains a separate subtype owner.
+    pub(crate) fn initialize_spawn_seed(&mut self, seed: u32) -> Result<(), String> {
+        if seed == 0 {
+            return Err("pickup spawn seed must be nonzero".into());
+        }
+        self.spawn_seed = seed;
+        self.regular_rng = self
+            .has_regular_physics()
+            .then(|| crate::items::Rng::new(seed, [4, 3, 17]));
+        Ok(())
+    }
+
     /// Ordinary admitted pickups use the common free ground-motion branch.
     /// Collectible home return and Chest callbacks keep their own owners.
     pub(crate) fn has_regular_physics(&self) -> bool {
@@ -169,7 +199,7 @@ impl Pickup {
         };
         let mut pickup = Self::spawn(id, variant, definition_subtype, selector.position, appear)?;
         pickup.subtype = subtype;
-        pickup.spawn_seed = selector.spawn_seed;
+        pickup.initialize_spawn_seed(selector.spawn_seed)?;
         Ok(Some(pickup))
     }
 
@@ -243,7 +273,11 @@ impl Pickup {
             spritesheet_item_id: subtype,
             position,
             presented_position: position,
-            anchor_position: position,
+            anchor_position: if matches!(variant, 10 | 20 | 30 | 40) {
+                WorldVector { x: 0.0, y: 0.0 }
+            } else {
+                position
+            },
             velocity: WorldVector { x: 0.0, y: 0.0 },
             configured_friction: definition.friction,
             current_friction: definition.friction,
@@ -271,6 +305,7 @@ impl Pickup {
                 grid_collision_class: 5,
                 entity_collision_class: if animation == "Idle" { 4 } else { 0 },
             }),
+            regular_rng: None,
             chest: None,
         })
     }
@@ -427,6 +462,105 @@ impl Pickup {
         self.collected = true;
         true
     }
+}
+
+/// Room.Save5ce3d0 walks the live room list, excludes dead31f, then5c57c0
+/// accepts type5. Preserve only the regular families owned by this module.
+pub(crate) fn save_regular_records(state: &mut crate::State) -> Result<(), String> {
+    let mut records = Vec::new();
+    for actor in state.actor_scheduler.full_phase() {
+        if actor.kind != crate::actors::ActorKind::Pickup {
+            continue;
+        }
+        let Some(pickup) = state
+            .room
+            .pickups
+            .iter()
+            .find(|pickup| pickup.id == actor.id)
+        else {
+            return Err("scheduled pickup missing at room save".into());
+        };
+        if !pickup.has_regular_physics() || pickup.collected || pickup.removed {
+            continue;
+        }
+        let rng = pickup
+            .regular_rng
+            .ok_or("saved regular pickup has no persistent RNG30")?;
+        records.push(SavedRegularPickup {
+            handle: pickup.id,
+            variant: pickup.variant,
+            subtype: pickup.subtype,
+            position: pickup.position,
+            spawn_seed: pickup.spawn_seed,
+            rng_seed: rng.state,
+            charge: pickup.charge,
+            touched: pickup.touched,
+        });
+    }
+    state.room.saved_regular_pickups = records;
+    Ok(())
+}
+
+/// RoomLoad5cf585 calls5c5860 for Descriptor+70..78 saved records. Each
+/// GameSpawn receives stored position+20/seed+2c and explicit zero velocity.
+/// The distinct Descriptor+b8 additional-spawn vector is not this owner.
+pub(crate) fn readmit_regular_records(state: &mut crate::State) -> Result<Vec<u32>, String> {
+    let records = std::mem::take(&mut state.room.saved_regular_pickups);
+    let mut admitted = Vec::with_capacity(records.len());
+    let mut handles = BTreeSet::new();
+    for record in records {
+        if !matches!(record.variant, 10 | 20 | 30 | 40) || !handles.insert(record.handle) {
+            return Err("invalid saved regular pickup record".into());
+        }
+        // Saved subtype is concrete. Fresh normal Isaac has no modifier that
+        // rerolls it; initializing temporary RNG35 consumes no output here.
+        let subtype = regular_subtype(record.variant, record.subtype, record.spawn_seed)?;
+        let definition_subtype = if record.variant == 40 && matches!(subtype, 3 | 5) {
+            1
+        } else {
+            subtype
+        };
+        let mut pickup = Pickup::spawn(
+            record.handle,
+            record.variant,
+            definition_subtype,
+            record.position,
+            false,
+        )?;
+        pickup.subtype = subtype;
+        pickup.initialize_spawn_seed(record.spawn_seed)?;
+        pickup.regular_rng = Some(crate::items::Rng::new(record.rng_seed, [4, 3, 17]));
+        pickup.birth_game_update = state.game_update_count;
+        pickup.charge = record.charge;
+        pickup.touched = record.touched;
+        admitted.push(pickup);
+    }
+    let ids = admitted.iter().map(|pickup| pickup.id).collect();
+    let mut replacements: BTreeMap<_, _> = admitted
+        .into_iter()
+        .map(|pickup| (pickup.id, pickup))
+        .collect();
+    let old_pickups = std::mem::take(&mut state.room.pickups);
+    for pickup in old_pickups {
+        if !pickup.has_regular_physics() {
+            state.room.pickups.push(pickup);
+        } else if let Some(restored) = replacements.remove(&pickup.id) {
+            state.room.pickups.push(restored);
+        }
+    }
+    if !replacements.is_empty() {
+        return Err("saved pickup has no room handle".into());
+    }
+    state.room.authored_actor_order.retain(|actor| {
+        actor.kind != crate::actors::ActorKind::Pickup
+            || state
+                .room
+                .pickups
+                .iter()
+                .any(|pickup| pickup.id == actor.id)
+            || handles.contains(&actor.id)
+    });
+    Ok(ids)
 }
 
 /// Full Pickup Update owns motion/friction; the manager owns its later grid

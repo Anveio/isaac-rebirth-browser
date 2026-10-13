@@ -1320,6 +1320,15 @@ impl Game {
                 .is_some_and(|transition| {
                     transition.phase == traversal::TransitionPhase::BossCleanup
                 });
+        if phase == phase::Phase::Update
+            && self
+                .state
+                .room_transition
+                .as_ref()
+                .is_some_and(|transition| transition.phase == traversal::TransitionPhase::Out)
+        {
+            pickups::save_regular_records(&mut self.state)?;
+        }
         if traversal::advance_transition(&mut self.state, phase) {
             if boss_cleanup {
                 // State3 calls Player.Update at5dde9e before enabling controls
@@ -1341,7 +1350,23 @@ impl Game {
                 combat::advance_player_immunity(&mut self.state);
                 combat::advance_player_immunity(&mut self.state);
                 if restoring {
+                    let restored_pickups = pickups::readmit_regular_records(&mut self.state)?;
                     self.rebuild_room_actor_schedule()?;
+                    // The native Room.Update admission tail advances the new
+                    // actors once at the unchanged Game clock. Other saved
+                    // families keep their existing reconstruction owners.
+                    for id in restored_pickups {
+                        self.advance_pickup(id, phase)?;
+                    }
+                    let candidates = pickups::contact_candidates(&self.state)?;
+                    pickups::nonplayer_contacts(&mut self.state, candidates)?;
+                    pickups::full_grid_contacts(&mut self.state)?;
+                    self.state.room.pickups.retain(|pickup| !pickup.removed);
+                    let pickups = &self.state.room.pickups;
+                    self.state.actor_scheduler.retain(|actor| {
+                        actor.kind != actors::ActorKind::Pickup
+                            || pickups.iter().any(|pickup| pickup.id == actor.id)
+                    });
                 } else {
                     let selectors = self
                         .state
@@ -1695,7 +1720,7 @@ impl Game {
                 let subtype = fireplaces::loot_subtype(birth.variant, birth.spawn_seed)?;
                 let id = self.state.next_pickup;
                 let mut pickup = Pickup::spawn(id, birth.variant, subtype, birth.position, true)?;
-                pickup.spawn_seed = birth.spawn_seed;
+                pickup.initialize_spawn_seed(birth.spawn_seed)?;
                 pickup.birth_game_update = self.state.game_update_count;
                 self.state.next_pickup = id.checked_add(1).ok_or("Fire loot identity exhausted")?;
                 self.state.room.pickups.push(pickup);
