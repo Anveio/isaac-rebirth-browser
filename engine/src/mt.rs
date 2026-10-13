@@ -178,9 +178,9 @@ impl DescriptorSeeds {
         Ok(())
     }
 
-    /// Level.Save 58cd90 copies only allocated descriptors. The fresh Clear
-    /// table remains authoritative for unused room records, rather than being
-    /// replaced wholesale by the Level's constructor origin.
+    /// Level.Save 58cd90 copies every row except its special -3 sentinel.
+    /// Ordinary unused -1 rows are copied too. Full table copies preserve the
+    /// real origin/mutations compactly after the destination's actual Clear.
     pub fn copy_rooms_from(&mut self, source: &Self, rooms: &[usize]) -> Result<(), String> {
         let mut copied = [false; ROOM_DESCRIPTOR_CAPACITY];
         for &room in rooms {
@@ -188,6 +188,10 @@ impl DescriptorSeeds {
                 return Err("saved descriptor copy is outside the source table".into());
             }
             copied[room] = true;
+        }
+        if copied.into_iter().all(|copy| copy) {
+            *self = source.clone();
+            return Ok(());
         }
         let mut derived = source.origin.clone();
         for (room, copy) in copied.into_iter().enumerate() {

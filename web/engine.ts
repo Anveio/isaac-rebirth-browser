@@ -27,7 +27,7 @@ export interface BootLifecycle {
 }
 export interface SavedRunSummary {
   runSeed: string; seededRun: boolean; stage: number; gameUpdateCount: number;
-  descriptorCount: number; redHp: number; maxRedHp: number;
+  descriptorCount: number; copiedDescriptorCount: number; redHp: number; maxRedHp: number;
   inventory: {coins: number; bombs: number; keys: number};
   emptyGridCellsSaved: number; occupiedGridSeedsPending: number[];
   itemPools: {poolSeed: number; rootRngSeed: number; secondaryRngSeed: number;

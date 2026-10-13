@@ -43,7 +43,7 @@
       "address": "0x58cd90",
       "unwindSize": 965,
       "codeSha256": "13e022b7c8d4ff0655d0b5d906fddeb428e224a3ac1efe1ad45d3c3783e5a0ef",
-      "contract": "Level copy skips gridIndex−3; allocated descriptors copy all grid records, leaving Clear state in unused rows"
+      "contract": "Level copy skips only gridIndex−3; ordinary unused−1 records ARE copied. Fresh normal Level copies all135 generated descriptor seed rows."
     },
     {
       "address": "0x5bf400",
@@ -101,8 +101,8 @@
     "keys": "Player+bcc→Saved+88bc",
     "bombs": "Player+bd4→Saved+88c0"
   },
-  "internalOwnership": "SavedGameSeeds retains actual Clear-generated descriptor state; allocated rows copy actual Level seed pairs including null-cell mutations. SavedRun retains supported port Level/Room/Player/inventory state internally. Snapshots carry bounded seed pairs and summary only.",
-  "remaining": "actual occupied grid constructor state, broader room/effect admission and full MT/W0 numerical differences remain separately recorded.",
+  "internalOwnership": "SavedGameSeeds retains the actual Clear-generated destination, then copies actual Level seed state including modeled null-cell mutations. For the fresh normal scope, all135 rows (including unused−1) copy the real source table origin/mutations compactly. SavedRun retains actual modeled ItemPools plus Level/Room/Player/inventory internally; render snapshots carry bounded samples and summary only.",
+  "remaining": "Actual occupied grid admission, decorative additional occupancy, secondary constructor seeds, broader room/effect consumers, and full MT/W0 numerical differences remain explicit comparisons. Trinket/identification selection is outside current ItemPools scope.",
   "savedItemPoolFields": {
     "currentWeight": "Entry+8→Saved+9694+4*(poolId*347+itemId)",
     "specialCounters": "PoolRecord+40→Saved+ed54+4*poolId",

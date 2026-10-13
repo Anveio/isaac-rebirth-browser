@@ -50,13 +50,19 @@ impl SavedRun {
         }
     }
 
-    pub fn summary(&self, empty_cells: usize, occupied_pending: Vec<usize>) -> SavedRunSummary {
+    pub fn summary(
+        &self,
+        empty_cells: usize,
+        occupied_pending: Vec<usize>,
+        copied_rows: usize,
+    ) -> SavedRunSummary {
         SavedRunSummary {
             run_seed: self.run_seed.clone(),
             seeded_run: self.seeded_run,
             stage: self.stage,
             game_update_count: self.game_update_count,
             descriptor_count: self.floor.descriptors.len(),
+            copied_descriptor_count: copied_rows,
             red_hp: self.player.hp,
             max_red_hp: self.player.max_hp,
             inventory: self.inventory.clone(),
@@ -75,6 +81,7 @@ pub struct SavedRunSummary {
     pub stage: u32,
     pub game_update_count: u32,
     pub descriptor_count: usize,
+    pub copied_descriptor_count: usize,
     pub red_hp: u8,
     pub max_red_hp: u8,
     pub inventory: Inventory,

@@ -967,7 +967,7 @@ impl Game {
 
     /// Level.Init calls System.Save at 58c411 once the starting room is loaded.
     /// Game.Save clears the destination, updates Room grid records, then copies
-    /// allocated Level rows and PlayerManager state in that source order.
+    /// ordinary Level rows and PlayerManager state in that source order.
     fn save_supported_run(&mut self) -> Result<(), String> {
         self.saved_game = self.state.boot_lifecycle.clear_saved_game();
         // Game.Save 54f33b copies the actual modeled ItemPool before Room.Save.
@@ -983,19 +983,15 @@ impl Game {
             &self.state.room,
             self.state.current_room,
         )?;
-        let rooms: Vec<_> = self
-            .state
-            .floor
-            .descriptors
-            .iter()
-            .map(|room| room.index)
-            .collect();
+        // Constructor 587ec0 initializes unused grid indices to -1; 58ced0
+        // excludes only -3 special records. Fresh normal Level copies all135.
+        let rooms: Vec<_> = (0..mt::ROOM_DESCRIPTOR_CAPACITY).collect();
         self.saved_game
             .descriptor_seeds
             .copy_rooms_from(&self.boot_level_grid, &rooms)?;
         self.saved_game.player_rng_seed = self.player_manager_secondary_rng.seed;
         let saved = saved_game::SavedRun::copy_from(&self.state, item_pools);
-        self.state.saved_run_summary = Some(saved.summary(empty, occupied_pending));
+        self.state.saved_run_summary = Some(saved.summary(empty, occupied_pending, rooms.len()));
         self.saved_run = Some(saved);
         self.state
             .boot_lifecycle
