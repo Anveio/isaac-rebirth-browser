@@ -59,7 +59,7 @@ def observe(pid, context):
                     'type': struct.unpack_from('<I', raw, 0x10)[0],
                     'variant': struct.unpack_from('<I', raw, 0x14)[0],
                     'subtype': struct.unpack_from('<I', raw, 0x18)[0],
-                    'removed': bool(raw[0x31f]), 'position': pair(0x448), 'velocity': pair(0x464),
+                    'removed': bool(raw[0x31f]), 'active': bool(raw[0x31e]), 'visible': bool(raw[0x31d]), 'position': pair(0x448), 'velocity': pair(0x464),
                     'collisionRadius': struct.unpack_from('<f', raw, 0x474)[0],
                     'collisionScale': pair(0x478), 'collidedWithGrid': bool(raw[0x34c]),
                     'preGridCollisionVelocity': pair(0x350), 'gridCollisionNormal': pair(0x358),
@@ -72,6 +72,14 @@ def observe(pid, context):
                     'gridCollisionClass': struct.unpack_from('<I', raw, 0x340)[0],
                     'entityCollisionClass': struct.unpack_from('<I', raw, 0x344)[0],
                     'spawnSeed': struct.unpack_from('<I', raw, 0x7d0)[0]}
+                definition = struct.unpack_from('<Q', raw, 0x40)[0]
+                text_pointer = u64(definition) if definition else 0
+                length = u64(text_pointer - 24) if text_pointer else 0
+                if length > 128: raise ValueError('Unexpected entity animation name length')
+                result['animation'] = read(text_pointer, length).decode('ascii') if length else None
+                result['animationFrame'] = struct.unpack_from('<f', raw, 0x148)[0]
+                result['animationPlaying'] = bool(raw[0x14c])
+                result['animationSpeed'] = struct.unpack_from('<f', raw, 0x300)[0]
                 damage_begin, damage_end = struct.unpack_from('<QQ', raw, 0x360)
                 damage_count = (damage_end - damage_begin) // 0x30
                 if damage_end < damage_begin or (damage_end - damage_begin) % 0x30 or not 0 <= damage_count <= 128:
@@ -101,9 +109,18 @@ def observe(pid, context):
                     more = read(address + 0x7d4, 0x14)
                     result['bombFuseUpdatesRemaining'] = struct.unpack_from('<i', more, 0)[0]
                     result['bombExplosionDamage'] = struct.unpack_from('<f', more, 4)[0]
+                if result['type'] == 9:
+                    more = read(address + 0x7d4, 0x24)
+                    result['projectileHeight'], result['projectileFallingSpeed'], result['projectileFallingAcceleration'] = struct.unpack_from('<fff', more, 0)
+                    result['projectileScale'] = struct.unpack_from('<f', more, 0x10)[0]
+                    result['projectileParameter1'] = struct.unpack_from('<f', more, 0x14)[0]
+                    result['projectileParameter2'] = struct.unpack_from('<f', more, 0x18)[0]
+                    result['projectileFullUpdates'] = struct.unpack_from('<I', more, 0x1c)[0]
+                    result['projectileFlags'] = struct.unpack_from('<I', more, 0x20)[0]
                 if struct.unpack_from('<Q', raw, 0)[0] == 0x66ef30:
                     more = read(address + 0xf50, 0x138)
                     result['npcState'] = struct.unpack_from('<I', more, 0)[0]
+                    result['npcSavedInitializedState'] = struct.unpack_from('<I', more, 4)[0]
                     result['npcStateFrame'] = struct.unpack_from('<I', more, 8)[0]
                     result['npcFrameAge'] = struct.unpack_from('<I', more, 0x10)[0]
                     result['npcCountdown'] = struct.unpack_from('<I', more, 0x1c)[0]
@@ -123,6 +140,8 @@ def observe(pid, context):
                 raise ValueError('Unexpected room grid shape')
             descriptor = u64(room + 8)
             report['room'] = {'type': struct.unpack_from('<I', raw, 0x10)[0], 'gridWidth': width, 'gridHeight': height,
+                'boundsTopLeft': list(struct.unpack_from('<ff', raw, 0x1c)),
+                'boundsBottomRight': list(struct.unpack_from('<ff', raw, 0x24)),
                 'combatClear': bool(read(descriptor + 0x3d, 1)[0]),
                 'descriptorFlag40': bool(read(descriptor + 0x40, 1)[0]),
                 'combatClearCountdown': struct.unpack('<i', read(room + 0x1598, 4))[0],
