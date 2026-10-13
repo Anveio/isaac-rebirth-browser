@@ -1203,18 +1203,17 @@ impl Game {
                                 self.advance_npc(actor.id, phase)?;
                             }
                             actors::ActorKind::Pickup => {
-                                let pickup = self
-                                    .state
-                                    .room
-                                    .pickups
-                                    .iter_mut()
-                                    .find(|pickup| pickup.id == actor.id)
-                                    .ok_or("missing admitted pickup handle")?;
-                                pickup.advance(phase, self.state.game_update_count);
+                                self.advance_pickup(actor.id, phase)?;
                             }
                             _ => return Err("invalid authored room actor handle".into()),
                         }
                     }
+                    self.state.room.pickups.retain(|pickup| !pickup.removed);
+                    let pickups = &self.state.room.pickups;
+                    self.state.actor_scheduler.retain(|actor| {
+                        actor.kind != actors::ActorKind::Pickup
+                            || pickups.iter().any(|pickup| pickup.id == actor.id)
+                    });
                     npcs::admit_room_combat(&mut self.state);
                 }
             }
@@ -1385,15 +1384,7 @@ impl Game {
             }
             actors::ActorKind::Bomb => bombs::advance_actor(&mut self.state, phase, actor.id)?,
             actors::ActorKind::Pickup => {
-                if let Some(pickup) = self
-                    .state
-                    .room
-                    .pickups
-                    .iter_mut()
-                    .find(|pickup| pickup.id == actor.id)
-                {
-                    pickup.advance(phase, self.state.game_update_count);
-                }
+                self.advance_pickup(actor.id, phase)?;
             }
             actors::ActorKind::Npc => {
                 self.advance_npc(actor.id, phase)?;
@@ -1403,6 +1394,30 @@ impl Game {
             }
             _ => return Err("actor kind has no admitted runtime yet".into()),
         }
+        Ok(())
+    }
+    fn advance_pickup(&mut self, id: u32, phase: phase::Phase) -> Result<(), String> {
+        let Some(index) = self
+            .state
+            .room
+            .pickups
+            .iter()
+            .position(|pickup| pickup.id == id)
+        else {
+            return Ok(());
+        };
+        if phase.updates_nonplayers() {
+            if let Some(variant) = self.state.room.pickups[index].bomb_conversion_variant() {
+                let position = self.state.room.pickups[index].position;
+                // Update50757d/507cc0 calls the real shared-MT seed wrapper,
+                // Game::Spawn4/variant at the PU position, then PU::Remove.
+                let seed = self.state.boot_lifecycle.shared.next_u32();
+                bombs::admit_conversion(&mut self.state, variant, seed, position)?;
+                self.state.room.pickups[index].removed = true;
+                return Ok(());
+            }
+        }
+        self.state.room.pickups[index].advance(phase, self.state.game_update_count);
         Ok(())
     }
     fn advance_npc(&mut self, id: u32, phase: phase::Phase) -> Result<(), String> {

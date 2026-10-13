@@ -117,12 +117,36 @@ impl Pickup {
         }
         let variant = u32::from(selector.variant);
         let subtype = regular_subtype(variant, u32::from(selector.subtype), selector.spawn_seed)?;
-        if !matches!((variant, subtype), (20, 1..=4) | (30, 1 | 3) | (40, 1 | 2)) {
+        if !matches!(
+            (variant, subtype),
+            (20, 1..=4) | (30, 1 | 3) | (40, 1 | 2 | 3 | 5)
+        ) {
             return Ok(None);
         }
-        let mut pickup = Self::spawn(id, variant, subtype, selector.position, appear)?;
+        // Init can select transient Troll/Megatroll PU subtypes without an
+        // authored pickup actor. Their first full Update converts them before
+        // generic animation; use the bomb pickup's temporary visual definition.
+        let definition_subtype = if variant == 40 && matches!(subtype, 3 | 5) {
+            1
+        } else {
+            subtype
+        };
+        let mut pickup = Self::spawn(id, variant, definition_subtype, selector.position, appear)?;
+        pickup.subtype = subtype;
         pickup.spawn_seed = selector.spawn_seed;
         Ok(Some(pickup))
+    }
+
+    /// Update506f70 routes these two subtypes before BaseUpdate or animation.
+    pub fn bomb_conversion_variant(&self) -> Option<u32> {
+        if self.removed || self.variant != 40 {
+            return None;
+        }
+        match self.subtype {
+            3 => Some(3),
+            5 => Some(4),
+            _ => None,
+        }
     }
     /// Natural collectible Init owns the entity's local RNG35 seed; only its
     /// first raw output is handed to the independent ItemPool shift4 picker.
