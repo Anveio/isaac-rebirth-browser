@@ -80,7 +80,7 @@ pub(crate) fn check_departure(state: &mut State) {
         let destination = &state.floor.descriptors[target_room];
         // Large-room camera/backdrop and combat locks need their owning source
         // routes. Preserve those descriptors without claiming this small route.
-        if !matches!(destination.template.room_type, 1 | 4 | 10)
+        if !matches!(destination.template.room_type, 1 | 4 | 7 | 8 | 10)
             || (destination.template.width, destination.template.height) != (13, 7)
         {
             continue;

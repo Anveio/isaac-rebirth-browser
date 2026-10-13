@@ -301,6 +301,8 @@ pub struct State {
     pub floor: floor::Floor,
     pub current_room: usize,
     pub visited_rooms: BTreeSet<usize>,
+    pub room_display_flags: Vec<u32>,
+    pub revealed_secret_connections: BTreeSet<[usize; 2]>,
     pub persisted_rooms: BTreeMap<usize, Room>,
     pub room_transition: Option<traversal::RoomTransition>,
     pub stage_effects: StageEffects,
@@ -397,9 +399,11 @@ impl Game {
                 pressed: BTreeSet::new(),
                 player,
                 room,
+                room_display_flags: vec![0; floor.descriptors.len()],
                 floor,
                 current_room,
                 visited_rooms: BTreeSet::from([current_room]),
+                revealed_secret_connections: BTreeSet::new(),
                 persisted_rooms: BTreeMap::new(),
                 room_transition: None,
                 stage_effects,
@@ -714,19 +718,34 @@ impl Game {
             self.state.character.clone();
     }
     fn refresh_minimap(&mut self) {
-        let mut shown = self.state.visited_rooms.clone();
-        for index in &self.state.visited_rooms {
-            let descriptor = &self.state.floor.descriptors[*index];
-            for neighbor in descriptor.neighbors.iter().flatten() {
-                let target = &self.state.floor.descriptors[*neighbor];
-                if !matches!(target.template.room_type, 7 | 8) {
-                    shown.insert(*neighbor);
-                }
+        // Level.UpdateVisibility586940 retains descriptor flags. Fresh Isaac
+        // reveals adjacent rooms, but a secret endpoint requires an actually
+        // blown-open connection even when the current room is the secret.
+        self.state.room_display_flags[self.state.current_room] |= 5;
+        let current_type = self.state.floor.descriptors[self.state.current_room]
+            .template
+            .room_type;
+        for door in &self.state.room.appearance.doors {
+            let target = door.target_room as usize;
+            let target_type = self.state.floor.descriptors[target].template.room_type;
+            let secret = matches!(current_type, 7 | 8) || matches!(target_type, 7 | 8);
+            if secret && !door.blown_open {
+                continue;
             }
+            self.state.room_display_flags[target] |=
+                if secret || matches!(target_type, 2 | 6 | 12 | 13 | 18 | 19 | 20 | 21) {
+                    3
+                } else {
+                    5
+                };
         }
-        self.state.minimap.cells = shown
-            .into_iter()
-            .map(|index| {
+        self.state.minimap.cells = self
+            .state
+            .room_display_flags
+            .iter()
+            .enumerate()
+            .filter(|(_, flags)| **flags & 1 != 0)
+            .map(|(index, _)| {
                 let descriptor = &self.state.floor.descriptors[index];
                 MinimapCell {
                     x: descriptor.grid_index as i32 % 13 - 6,
@@ -811,6 +830,8 @@ impl Game {
         self.state.floor = floor::generate_basement(seed::stage1_seed(self.state.run_seed_value))?;
         self.state.current_room = self.state.floor.starting_descriptor;
         self.state.visited_rooms = BTreeSet::from([self.state.current_room]);
+        self.state.room_display_flags = vec![0; self.state.floor.descriptors.len()];
+        self.state.revealed_secret_connections.clear();
         self.state.persisted_rooms.clear();
         self.state.room_transition = None;
         self.state.room = Room::from_starting_floor(&self.state.floor);
@@ -1039,6 +1060,7 @@ impl Game {
         bombs::advance_explosions(&mut self.state, phase, explosion_fence);
         bombs::retire_removed(&mut self.state);
         self.state.room.pickups.retain(|pickup| !pickup.removed);
+        self.refresh_minimap();
         if phase.updates_nonplayers() {
             traversal::check_departure(&mut self.state);
         }

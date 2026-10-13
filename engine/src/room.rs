@@ -157,6 +157,7 @@ pub struct RoomDoor {
     pub target_room: u32,
     pub slot: u8,
     pub world_position: motion::WorldVector,
+    pub blown_open: bool,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
@@ -225,11 +226,8 @@ impl Room {
                 continue;
             };
             let destination = &floor.descriptors[*target];
-            if matches!(destination.template.room_type, 7 | 8) {
-                // Source Door.SetRoomTypes initializes gridstate6 and selects
-                // HoleInWall's invisible Hidden animation for secret targets.
-                continue;
-            }
+            let secret = matches!(descriptor.template.room_type, 7 | 8)
+                || matches!(destination.template.room_type, 7 | 8);
             let (side, inset_x, inset_y) = match slot % 4 {
                 0 => ("left", 15.0, 0.0),
                 1 => ("up", 0.0, 15.0),
@@ -248,13 +246,17 @@ impl Room {
             let row = f64::from(door.y + 1);
             room.appearance.doors.push(RoomDoor {
                 side: side.into(),
-                state: if matches!(destination.template.room_type, 2 | 12) {
+                state: if secret {
+                    "Hidden"
+                } else if matches!(destination.template.room_type, 2 | 12) {
                     "KeyClosed"
                 } else {
                     "Opened"
                 }
                 .into(),
-                asset: if descriptor.template.room_type == 10
+                asset: if secret {
+                    "gfx/grid/door_08_holeinwall.anm2"
+                } else if descriptor.template.room_type == 10
                     || destination.template.room_type == 10
                 {
                     "gfx/grid/door_04_selfsacrificeroomdoor.anm2"
@@ -273,6 +275,7 @@ impl Room {
                     x: (40.0 + 40.0 * column) as f32,
                     y: (120.0 + 40.0 * row) as f32,
                 },
+                blown_open: false,
             });
         }
         let doors = room
@@ -282,6 +285,7 @@ impl Room {
             .map(|door| crate::grid::DoorCollision {
                 slot: door.slot,
                 open: door.state == "Opened",
+                hidden: door.state == "Hidden",
             })
             .collect::<Vec<_>>();
         room.grid = Some(

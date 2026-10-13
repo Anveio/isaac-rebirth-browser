@@ -128,6 +128,8 @@ def observe(pid, context):
                     'varData': struct.unpack_from('<I', raw, 0x14)[0], 'spawnSeed': struct.unpack_from('<I', raw, 0x18)[0],
                     'collisionClass': struct.unpack_from('<I', raw, 0x3c)[0],
                     'position': [40 + index % width * 40, 120 + index // width * 40]})
+                if cells[-1]['type'] == 16:
+                    cells[-1]['blownOpen'] = bool(read(pointer + 0x611, 1)[0])
             report['grid'] = cells
             report['gridSelectors'] = list(struct.unpack('<' + 'I' * (width * height),
                 read(room + 0xe98, width * height * 4)))

@@ -40,15 +40,119 @@ pub(crate) fn advance(state: &mut State, phase: Phase) {
 }
 
 pub(crate) fn begin_room_admission(state: &mut State) {
+    restore_secret_connections(state);
     set_open_collision(state, 4);
 }
 
+fn connection(first: usize, second: usize) -> [usize; 2] {
+    [first.min(second), first.max(second)]
+}
+
+fn door_index(position: WorldVector, width: u16) -> usize {
+    ((position.x - 40.0) / 40.0) as usize
+        + ((position.y - 120.0) / 40.0) as usize * usize::from(width)
+}
+
+/// Door.TryBlowOpen564870 uncovers the reciprocal saved variant before opening
+/// the current hidden door. Fresh Basement's surprise-room flag stays clear;
+/// ordinary NPC countability does not block this source secret-door policy.
+/// Later surprise-room failure transitions and animated dust/rock effects
+/// remain separate from this first-floor callback.
+pub fn try_blow_open(state: &mut State, index: usize, _animated: bool) -> bool {
+    let Some(grid) = &state.room.grid else {
+        return false;
+    };
+    let Some(entity) = grid.cells.get(index).and_then(|cell| cell.entity.as_ref()) else {
+        return false;
+    };
+    if entity.kind != 16 || entity.variant != 6 || entity.state != 1 {
+        return false;
+    }
+    let Some(door) = state
+        .room
+        .appearance
+        .doors
+        .iter()
+        .position(|door| door_index(door.world_position, grid.width) == index)
+    else {
+        return false;
+    };
+    let target = state.room.appearance.doors[door].target_room as usize;
+    let current_type = state.floor.descriptors[state.current_room]
+        .template
+        .room_type;
+    let target_type = state.floor.descriptors[target].template.room_type;
+    if (!matches!(current_type, 7 | 8) && !matches!(target_type, 7 | 8))
+        || current_type == 5
+        || target_type == 5
+        // Later stages can substitute a surprise miniboss; that lifecycle
+        // remains outside this fresh Basement callback. Ordinary NPC counts
+        // are not the generated flag and do not prevent secret revelation.
+        || state.stage != 1
+        || state.floor.descriptors[state.current_room].surprise_miniboss
+    {
+        return false;
+    }
+    state
+        .revealed_secret_connections
+        .insert(connection(state.current_room, target));
+    let door = &mut state.room.appearance.doors[door];
+    door.state = "Opened".into();
+    door.blown_open = true;
+    let entity = state.room.grid.as_mut().expect("admitted door grid").cells[index]
+        .entity
+        .as_mut()
+        .expect("admitted hidden door");
+    entity.variant = 7;
+    entity.state = 2;
+    entity.collision_class = 4;
+    true
+}
+
+fn restore_secret_connections(state: &mut State) {
+    let Some(grid) = &mut state.room.grid else {
+        return;
+    };
+    for door in &mut state.room.appearance.doors {
+        if !state
+            .revealed_secret_connections
+            .contains(&connection(state.current_room, door.target_room as usize))
+        {
+            continue;
+        }
+        door.state = "Opened".into();
+        door.blown_open = true;
+        let index = door_index(door.world_position, grid.width);
+        if let Some(entity) = &mut grid.cells[index].entity {
+            entity.variant = 7;
+            entity.state = 2;
+            entity.collision_class = 5;
+        }
+    }
+}
+
 fn set_open_collision(state: &mut State, collision_class: u32) {
+    let blown = state
+        .room
+        .appearance
+        .doors
+        .iter()
+        .filter(|door| door.blown_open)
+        .map(|door| door.world_position)
+        .collect::<Vec<_>>();
     if let Some(grid) = &mut state.room.grid {
-        for cell in &mut grid.cells {
+        let width = grid.width;
+        for (index, cell) in grid.cells.iter_mut().enumerate() {
             if let Some(entity) = &mut cell.entity {
                 if entity.kind == 16 && entity.state == 2 {
-                    entity.collision_class = collision_class;
+                    entity.collision_class = if blown
+                        .iter()
+                        .any(|position| door_index(*position, width) == index)
+                    {
+                        5
+                    } else {
+                        collision_class
+                    };
                 }
             }
         }

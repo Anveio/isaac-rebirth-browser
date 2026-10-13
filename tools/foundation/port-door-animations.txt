@@ -1,3 +1,4 @@
 # Regenerate: python3 tools/foundation/extract-animations.py --select-file tools/foundation/port-door-animations.txt --out web/door-data.json
 gfx/grid/door_02_treasureroomdoor.anm2
 gfx/grid/door_04_selfsacrificeroomdoor.anm2
+gfx/grid/door_08_holeinwall.anm2
