@@ -18,6 +18,7 @@ concurrency:
 jobs:
   live-suites:
     runs-on: ubuntu-24.04
+    timeout-minutes: 35
     outputs:
       scripts: ${{ steps.suites.outputs.scripts }}
     steps:
@@ -27,6 +28,34 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
+          cache: npm
+      - name: Restore build downloads
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            engine/target
+          key: ${{ runner.os }}-live-games-${{ hashFiles('engine/Cargo.lock', 'engine/src/**', 'engine/build.rs', 'package-lock.json') }}
+          restore-keys: ${{ runner.os }}-live-games-
+      - name: Install toolchains and prepare the original runtime
+        env:
+          SKIP_PRODUCTION_BUILD: '1'
+        run: bash cloud/install.sh
+      - name: Check and build the shared production artifact
+        run: |
+          source cloud/env.sh
+          npm run check:build
+          node tools/e2e/shared-build.mjs --write
+      - name: Share the checked production artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-game-build-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            dist/
+            shared/
+          if-no-files-found: error
+          retention-days: 14
       - name: Discover every registered live game suite
         id: suites
         run: echo "scripts=$(node tools/e2e/run.mjs --list)" >> "$GITHUB_OUTPUT"
@@ -57,13 +86,21 @@ jobs:
           key: ${{ runner.os }}-live-games-${{ hashFiles('engine/Cargo.lock', 'engine/src/**', 'engine/build.rs', 'package-lock.json') }}
           restore-keys: ${{ runner.os }}-live-games-
       - name: Install toolchains and prepare both games
+        env:
+          SKIP_PRODUCTION_BUILD: '1'
         run: |
           bash cloud/install.sh
           npx playwright install --with-deps chromium
-      - name: Build and run live original/browser scenarios
+      - name: Receive the checked production artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: live-game-build-${{ github.run_id }}-${{ github.run_attempt }}
+      - name: Verify and place the shared build
+        run: |
+          node tools/e2e/shared-build.mjs --verify
+      - name: Run live original/browser scenarios
         run: |
           source cloud/env.sh
-          npm run check:build
           npm run test:e2e -- --suite '${{ matrix.script }}'
       - name: Retain replay tapes and comparison evidence
         if: always()
@@ -71,6 +108,7 @@ jobs:
         with:
           name: live-game-evidence-${{ strategy.job-index }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
+            shared/build-identity.json
             .cache/foundation/paired-*/
             .cache/foundation/floor-e2e*.json
             .cache/foundation/floor-browser-live.json

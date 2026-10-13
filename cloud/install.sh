@@ -39,8 +39,12 @@ if [[ ! -x /usr/bin/chromium ]] && [[ -z "${PLAYWRIGHT_CHROMIUM_EXECUTABLE:-}" ]
 fi
 python3 tools/restore-linux-depot.py
 bash tools/original/prepare-offline.sh
-npm run typecheck
-npm run build
+# Matrix jobs receive the checked production artifact from their build job.
+# Ordinary local setup still builds by default.
+if [[ "${SKIP_PRODUCTION_BUILD:-0}" != 1 ]]; then
+  npm run typecheck
+  npm run build
+fi
 python3 tools/original/check-dependencies.py
 bash tools/original/with-display.sh python3 tools/original/probe.py
 echo 'Dependencies, WASM build and display are ready. Run npm run check for all game verification scenarios.'
