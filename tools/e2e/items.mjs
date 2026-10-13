@@ -2,9 +2,9 @@
 import assert from 'node:assert/strict';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile, rm, stat } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
-import { gzipSync } from 'node:zlib';
+import { gzipSync, gunzipSync } from 'node:zlib';
 import { resolve, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from '@playwright/test';
@@ -63,6 +63,24 @@ const poolRows = pools => pools.map(pool => ({ ...pool, rng: undefined,
   rngWords: pool.rng.flatMap(words), baseWeightTotal: f32(pool.baseWeightTotal),
   entries: pool.entries.map(entry => ({ ...entry, baseWeight: f32(entry.baseWeight),
     currentWeight: f32(entry.currentWeight), decreaseBy: f32(entry.decreaseBy), removeOn: f32(entry.removeOn) })) }));
+const archiveCompletedNative = async directory => {
+  const path = join(directory, 'original/manifest.json');
+  const bytes = await readFile(path).catch(error => { if (error.code === 'ENOENT') return null; throw error; });
+  if (!bytes) return null;
+  // Capture/validation has finished. Keep exact failed or passing raw bytes,
+  // independently verify the lossless archive, then release its inactive JSON.
+  JSON.parse(bytes);
+  const metadata = await stat(path), archive = path + '.gz';
+  await writeFile(archive, gzipSync(bytes));
+  const restored = gunzipSync(await readFile(archive));
+  assert.equal(restored.length, bytes.length); assert.equal(digest(restored), digest(bytes));
+  const evidence = {path: archive, encoding: 'gzip', rawSha256: digest(bytes), rawBytes: bytes.length,
+    originalPath: path, mode: metadata.mode & 0o777, mtimeMs: metadata.mtimeMs,
+    scope: 'Losslessly archived completed native capture; status/failures and every source observation preserved'};
+  await writeFile(join(directory, 'native-manifest-archive.json'), JSON.stringify(evidence, null, 2) + '\n');
+  await rm(path);
+  return evidence;
+};
 try {
   for (const item of scenarios.cases) {
     if (selectedCase && item.name !== selectedCase) continue;
@@ -283,7 +301,13 @@ try {
           maxStateEncodedBytes: trace.maxStateEncodedBytes, independentlyCapturedStates: states.length,
           inputTraceTruncated: trace.inputTraceTruncated, seedValue: item.seedValue, bootEpochSeed: scenarios.bootEpochSeed}});
     } catch (error) { result.status = 'fail'; result.error = String(error); }
-    finally { if (page) await page.close(); }
+    finally {
+      if (page) await page.close();
+      if (acquisition) {
+        try { result.nativeEvidence = await archiveCompletedNative(directory); }
+        catch (error) { result.status = 'fail'; result.archiveError = String(error); }
+      }
+    }
     await writeFile(join(directory, 'report.json'), JSON.stringify(result, null, 2) + '\n');
     console.log(JSON.stringify({case: item.name, status: result.status, checks: result.checks, failures: result.failures.length, error: result.error}));
   }
