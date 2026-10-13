@@ -14,6 +14,9 @@ import { assertInputProvenance, assertSeededRun, enterSeededRun, manualSeedComma
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const run = promisify(execFile);
 const value = flag => { const index = process.argv.indexOf(flag); return index < 0 ? undefined : process.argv[index + 1]; };
+const nativeProcessTimeoutSeconds = Number(value('--native-process-timeout') || '600');
+assert.ok(Number.isInteger(nativeProcessTimeoutSeconds) && nativeProcessTimeoutSeconds > 0
+  && nativeProcessTimeoutSeconds <= 3600, 'Native process timeout must be 1..3600 host seconds');
 const output = resolve(value('--output') || join(ROOT, '.cache/e2e/traversal', String(Date.now())));
 const helper = value('--scenario-helper') || join(ROOT, 'tools/original/foundation-traversal-scenarios.py');
 const python = async args => JSON.parse((await run('python3', [helper, ...args], { cwd: ROOT, maxBuffer: 8 * 1024 * 1024 })).stdout);
@@ -43,7 +46,7 @@ const report = { schema: 1, status: 'running', skipped: 0, selected: bank.cases.
     ? ['Keeper17 constructor and regular keys are concrete actors; Keeper damage/drop callbacks remain separate', 'Later-stage surprise substitution and failed-open saved transitions', 'Actor/item/curse policies and door FX/animation pixels', 'Other room shapes and floor exits']
     : bank.contract === 'key' ? ['Keeper17 damage/death/drop callbacks remain separate', 'Golden keys, double-chain locks, item overrides and hostile special-door policy', 'Library collectibles/sacks/batteries and complete backdrop/door animation pixels', 'Other room shapes, later floors and exits']
     : ['curse', 'authored-doors'].includes(bank.contract) ? ['Undiscovered native door variant6', 'Actor behavior and item callbacks; NPC244 metadata only, raw1400 fire admission remains a required regression', 'Flight/items and other door policies', 'Complete rendered pixels'] : [],
-  production: production.build, graphics: await inspectBrowserGraphics(browser), cases: [] };
+  nativeProcessTimeoutSeconds, production: production.build, graphics: await inspectBrowserGraphics(browser), cases: [] };
 try {
   for (const scenario of bank.cases) {
     const row = { seed: scenario.code, status: 'fail', comparedPhases: 0 };
@@ -54,12 +57,20 @@ try {
       // bank carries a sourceManifest path. Every gate launches a fresh original.
       const tape = join(directory, 'tape.json');
       await writeFile(tape, JSON.stringify(scenario.tape, null, 2) + '\n');
-      await run('bash', [join(ROOT, 'tools/original/with-display.sh'), 'python3',
-        join(ROOT, 'tools/original/foundation-clock-run.py'), '--seed', scenario.code, '--tape', tape,
-        '--state-observer', value('--state-observer') || join(ROOT, 'tools/original/foundation-traversal-observe.py'),
-        '--output', join(directory, 'original')], { cwd: ROOT, timeout: 300_000, maxBuffer: 8 * 1024 * 1024 });
+      row.originalExecution = { mode: 'fresh-process', timeoutSeconds: nativeProcessTimeoutSeconds,
+        ignoredCachedReference: Boolean(scenario.sourceManifest) };
+      try {
+        await run('bash', [join(ROOT, 'tools/original/with-display.sh'), 'python3',
+          join(ROOT, 'tools/original/foundation-clock-run.py'), '--seed', scenario.code, '--tape', tape,
+          '--state-observer', value('--state-observer') || join(ROOT, 'tools/original/foundation-traversal-observe.py'),
+          '--output', join(directory, 'original')], { cwd: ROOT, timeout: nativeProcessTimeoutSeconds * 1000, maxBuffer: 8 * 1024 * 1024 });
+      } catch (error) {
+        row.originalExecution.failure = { code: error.code ?? null, signal: error.signal ?? null,
+          killed: Boolean(error.killed), message: String(error.message) };
+        throw error;
+      }
       const sourceManifest = join(directory, 'original/manifest.json');
-      row.originalExecution = { fresh: true, ignoredCachedReference: Boolean(scenario.sourceManifest) };
+      row.originalExecution.fresh = true;
       const provenance = await python(['--validate-original', sourceManifest]);
       assert.equal(provenance.status, 'pass');
       const native = JSON.parse(await readFile(sourceManifest, 'utf8'));
