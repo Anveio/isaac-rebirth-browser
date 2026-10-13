@@ -41,5 +41,6 @@
       "codeSha256": "b77be46739741e63296640bdc8f68e777acf6a6313f155bb5e5688ea0bd0b455",
       "contract": "Actual code decode writesseed+0; initializesRNG+4 withshiftindex27(3,23,25), stores12namedstage seeds andonefurtherinitializer output. The nextreal5c2d70 inGameNewRun seedsItemPool. SharedMT run/room/effect parity remains separate."
     }
-  ]
+  ],
+  "postRunOwner": "Native startup destroys MenuManager, so Character fields compare before admission. Actual Game+a1e0 run code and Game+10ecd0/System+11 seeded flags compare after admission; these addresses are explicit stores in54eb20/594620. The rejected observer report remains failed and all six selected cases executed."
 }

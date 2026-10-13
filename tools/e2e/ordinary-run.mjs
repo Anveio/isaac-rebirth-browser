@@ -92,11 +92,14 @@ try {
       assert.equal(state.runSeedValue, characterSeed, 'Actual generated Character seed must own run admission');
       assert.equal(state.runSeedValue, native.observedState.seedValue); assert.equal(state.runSeedValue, observed.gameRunSeed);
       assert.equal(state.runSeed.replaceAll(' ', ''), native.observedState.seed.replaceAll(' ', ''));
+      assert.equal(state.runSeed, observed.gameSeedText.replaceAll(' ', ''));
       assert.equal(state.stageSeed, native.observedState.stageSeed); assert.equal(state.stage, native.observedState.stage);
       assert.equal(state.seededRun, false); assert.equal(state.seedValid, false); assert.equal(state.seedText, '');
-      assert.equal(state.achievementEligibility, true); assert.equal(observed.title.characterSeedCommitted, false); assert.equal(observed.title.characterSeedInput, '');
-      assert.equal(state.bootLifecycle.menuRunSeed, observed.title.menuRunSeed);
-      assert.equal(state.bootLifecycle.menuSeedText, observed.title.menuSeedText.replaceAll(' ', ''));
+      assert.equal(state.achievementEligibility, true);
+      // Native startup destroys MenuManager. The live seeded flags now belong
+      // to Game/System, after Character's false committed flag was checked.
+      assert.equal(observed.title.loaded, false);
+      assert.equal(observed.gameSeededRun, false); assert.equal(observed.systemSeededRun, false);
       const actual = state.bootLifecycle.shared, differingWords = actual.words.flatMap((word, index) => word === observed.mtState[index] ? [] : [{ index, original: observed.mtState[index], production: word }]);
       result.runMtDiagnostic = { status: differingWords.length || actual.index !== observed.mtIndex ? 'fail' : 'pass', originalIndex: observed.mtIndex, productionIndex: actual.index, differingWords: differingWords.length, firstDifferences: differingWords.slice(0, 8), reason: 'Run/room/effect shared-stream consumers remain incomplete; source values and cursor adjustments are never supplied to production' };
       const trace = await page.evaluate(() => window.game.trace());
