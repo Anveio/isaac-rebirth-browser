@@ -43,6 +43,7 @@ pub mod room_costs;
 pub mod room_spawns;
 pub mod room_templates;
 pub mod roundworm;
+pub mod run_admission;
 pub mod saved_game;
 pub mod seed;
 pub mod traversal;
@@ -92,6 +93,8 @@ pub struct Player {
     pub head_frame: u8,
     pub shooting: bool,
     pub shooting_lock: u32,
+    /// Actual Player+7d4 input gate, distinct from Entity+31d visibility.
+    pub controls_enabled: bool,
     pub eye: projectiles::Eye,
     pub render_offset: Point,
 }
@@ -112,6 +115,7 @@ impl Player {
             head_frame: 0,
             shooting: false,
             shooting_lock: 0,
+            controls_enabled: true,
             eye: projectiles::Eye::Positive,
             // Authored sprite roots and shadow centers are one logical pixel
             // above the physical ground/light anchor in public GL submissions.
@@ -304,6 +308,7 @@ pub struct State {
     pub menu_fade: MenuFade,
     pub run_start_request: RunStartRequest,
     pub system_clock: phase::Clock,
+    pub run_admission: run_admission::RunAdmission,
     pub run_tick: u32,
     pub game_update_count: u32,
     pub screen: Screen,
@@ -385,6 +390,12 @@ pub enum Command {
     },
     Tick {
         count: u32,
+        #[serde(
+            default,
+            rename = "timestampMillis",
+            skip_serializing_if = "Option::is_none"
+        )]
+        timestamp_millis: Option<u64>,
     },
     AudioVolume {
         sfx_volume: f32,
@@ -435,6 +446,7 @@ impl Game {
                 // system iteration is a full update; this clock is relative
                 // to that boundary, not the source's elapsed boot counter.
                 system_clock: phase::Clock::new(0, true),
+                run_admission: run_admission::RunAdmission::new(boot_epoch_seed),
                 run_tick: 0,
                 game_update_count: 0,
                 screen: Screen::Title,
@@ -599,7 +611,18 @@ impl Game {
                 self.state.seed_text.push_str(&compact.to_ascii_uppercase());
                 self.state.seed_valid = seed::decode(&self.state.seed_text).is_ok();
             }
-            Command::Tick { count } => {
+            Command::Tick {
+                count,
+                timestamp_millis,
+            } => {
+                if timestamp_millis
+                    .is_some_and(|timestamp| timestamp > run_admission::MAX_SAFE_TIMESTAMP_MS)
+                {
+                    return Err("host timestamp exceeds the JavaScript safe integer range".into());
+                }
+                if timestamp_millis.is_some() && count != 1 {
+                    return Err("a host timestamp requires exactly one system iteration".into());
+                }
                 if count > MAX_COMMAND_TICKS {
                     return Err("tick command exceeds 36,000 steps".into());
                 }
@@ -627,7 +650,7 @@ impl Game {
                         .ok_or("tear IDs exhausted")?;
                 }
                 for _ in 0..count {
-                    self.tick()?;
+                    self.tick(timestamp_millis)?;
                 }
             }
         }
@@ -1028,6 +1051,11 @@ impl Game {
             self.state.music.room(id);
         }
         self.save_supported_run()?;
+        // Fresh54eb20 invokes54eaa0 after Level.Init/Save and the primary
+        // manager initialization; room factories see the prior control byte.
+        self.state
+            .run_admission
+            .initialize_fresh(&mut self.state.player)?;
         self.refresh_minimap();
         Ok(())
     }
@@ -1242,7 +1270,8 @@ impl Game {
         }
         Ok(())
     }
-    fn tick(&mut self) -> Result<(), String> {
+    fn tick(&mut self, timestamp_millis: Option<u64>) -> Result<(), String> {
+        self.state.run_admission.clock.advance(timestamp_millis)?;
         // Source 594a10 consumes the prior menu request before game dispatch.
         // Room construction and clock alignment happen here, after the f32
         // confirmation fade, rather than in the zero-tick DOM key callback.
@@ -1277,6 +1306,7 @@ impl Game {
                 request.input_pending = false;
                 request.fading = true;
                 self.state.music.crossfade(95);
+                self.state.run_admission.confirm_menu_request();
             }
         }
         self.state.tick += 1;
@@ -1384,16 +1414,30 @@ impl Game {
             }
             return Ok(());
         }
-        doors::advance(&mut self.state, phase);
-        let explosion_fence = self.state.explosions.len();
-        grid_hazards::advance(&mut self.state, phase)?;
-        let existing = self.state.actor_scheduler.full_phase();
+        if phase == phase::Phase::Update
+            && self
+                .state
+                .run_admission
+                .blocks_full_update(&mut self.state.player)?
+        {
+            // Fast5507f0 does not take this guard. Music belongs to System and
+            // continues while Game's full update and age are held.
+            self.state.music.advance();
+            return Ok(());
+        }
         if phase == phase::Phase::Update {
+            // Source54fa82 increments before PlayerManager/Room callbacks.
             self.state.game_update_count = self
                 .state
                 .game_update_count
                 .checked_add(1)
                 .ok_or("game update counter exhausted")?;
+        }
+        doors::advance(&mut self.state, phase);
+        let explosion_fence = self.state.explosions.len();
+        grid_hazards::advance(&mut self.state, phase)?;
+        let existing = self.state.actor_scheduler.full_phase();
+        if phase == phase::Phase::Update {
             rock_blast::advance_markers(&mut self.state);
             for actor in existing.iter().copied() {
                 self.advance_actor(actor, phase, false, bomb_triggered)?;
@@ -1806,6 +1850,7 @@ impl Game {
         bomb_triggered: bool,
         controls_enabled: bool,
     ) -> Result<(), String> {
+        let controls_enabled = controls_enabled && self.state.player.controls_enabled;
         player_items::advance_presentation(&mut self.state, phase);
         let dx = if controls_enabled {
             i32::from(self.held("KeyD")) - i32::from(self.held("KeyA"))

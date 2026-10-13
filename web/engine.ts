@@ -6,7 +6,7 @@ export interface Player {
   x: number; y: number; vx: number; vy: number; hp: number; maxHp: number;
   soulHp: number; blackHeartMask: number;
   facing: Direction; bodyFacing: Direction; walkFrame: number; headFrame: number; shooting: boolean; shootingLock: number;
-  renderOffset: { x: number; y: number };
+  renderOffset: { x: number; y: number }; controlsEnabled: boolean;
   eye: "negative" | "positive";
 }
 export interface Tear {
@@ -206,6 +206,9 @@ export interface State {
   titleAnimationFrame: number; menuFade: { active: boolean; alpha: number; color: [number, number, number, number] };
   runStartRequest: { inputPending: boolean; fading: boolean; fadeAlpha: number; systemPending: boolean };
   systemClock: { systemCounter: number; interpolationEnabled: boolean };
+  runAdmission: { clock: { milliseconds: number; subMillisecondNanoseconds: number; nanosecondsPerStep: number };
+    requestedTimeAnchorMs: number | null; initialFade: number; fadeRate: number;
+    completionCallbacksPending: boolean };
   audio: AudioState;
   music: MusicState;
   profile: number; mainSelection: number; characterSelection: number; character: string; difficulty: string;
@@ -249,7 +252,7 @@ export interface State {
   bombPlacementCooldown: { remainingUpdates: number }; bombActionWasDown: boolean;
   runIntroduction: RunIntroduction; pauseMenu: PauseMenu;
 }
-export type Command = { type: "key"; code: string; down: boolean } | { type: "text"; text: string } | { type: "tick"; count: number } | { type: "audioVolume"; sfx_volume: number } | { type: 'musicVolume'; volume: number } | MusicBackendCommand;
+export type Command = { type: "key"; code: string; down: boolean } | { type: "text"; text: string } | { type: "tick"; count: number; timestampMillis?: number } | { type: "audioVolume"; sfx_volume: number } | { type: 'musicVolume'; volume: number } | MusicBackendCommand;
 interface Exports extends WebAssembly.Exports {
   memory: WebAssembly.Memory; abi_version: () => number; reset: (initialSeed: number, bootEpochSeed: number) => number; request_ptr: (length: number) => number;
   command: () => number; snapshot_ptr: () => number; snapshot_len: () => number;

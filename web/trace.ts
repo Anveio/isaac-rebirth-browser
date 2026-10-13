@@ -16,6 +16,7 @@ export class ReplayTrace {
   private backendStateTruncationReason: "bytes" | "input" | null = null;
   private readonly initialSeed: number;
   private readonly bootEpochSeed: number;
+  private readonly clockInput: { initialTimestampMillis: number; initialSubMillisecondNanoseconds: number; presentationIntervalNanoseconds: number };
   private readonly enabled: boolean;
   private readonly maxBytes: number;
   private readonly maxCommands: number;
@@ -29,6 +30,9 @@ export class ReplayTrace {
       throw new Error('Trace budgets must be nonnegative safe integers');
     this.initialSeed = initialSeed;
     this.bootEpochSeed = initialState.bootEpochSeed ?? 0;
+    this.clockInput = { initialTimestampMillis: initialState.runAdmission.clock.milliseconds,
+      initialSubMillisecondNanoseconds: initialState.runAdmission.clock.subMillisecondNanoseconds,
+      presentationIntervalNanoseconds: initialState.runAdmission.clock.nanosecondsPerStep };
     this.enabled = enabled;
     this.maxBytes = maxBytes;
     this.maxCommands = maxCommands;
@@ -89,7 +93,8 @@ export class ReplayTrace {
   }
 
   snapshot() {
-    return { schema: 1, tickRate: 60, initialSeed: this.initialSeed, bootEpochSeed: this.bootEpochSeed, enabled: this.enabled,
+    return { schema: 1, tickRate: 60, initialSeed: this.initialSeed, bootEpochSeed: this.bootEpochSeed,
+      clockInput: { ...this.clockInput }, enabled: this.enabled,
       truncated: this.inputTruncationReason !== null || this.stateHistoryTruncationReason !== null || this.backendStateTruncationReason !== null,
       truncationReason: this.inputTruncationReason ?? (this.stateHistoryTruncationReason || this.backendStateTruncationReason ? 'bytes' : null),
       inputTraceTruncated: this.inputTruncationReason !== null, inputTruncationReason: this.inputTruncationReason,
