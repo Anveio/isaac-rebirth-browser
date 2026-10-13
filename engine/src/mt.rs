@@ -241,6 +241,14 @@ pub struct BootState {
 }
 
 impl BootState {
+    /// Level.Init 58be30 calls 587ec0 again at actual level admission. Replace
+    /// its real descriptor seed table; snapshots carry only bounded samples.
+    pub fn initialize_level_grid(&mut self) -> DescriptorSeeds {
+        let table = DescriptorSeeds::initialize(&mut self.shared);
+        self.level_grid_seed_samples = grid_seed_samples(&table);
+        table
+    }
+
     /// LoadProfile first clears the saved state even for an empty profile. Keep
     /// the generated descriptor seed state, rather than advancing a cursor.
     pub fn clear_saved_game(&mut self) -> DescriptorSeeds {

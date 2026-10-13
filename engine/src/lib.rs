@@ -909,6 +909,9 @@ impl Game {
         };
         self.state.pause_menu = PauseMenu::hidden();
         self.state.player = Player::starting();
+        // Source 58bea7 constructs every descriptor's padded grid seed pairs.
+        // floor::generate_basement owns the separate primary xorshift advance.
+        self.boot_level_grid = self.state.boot_lifecycle.initialize_level_grid();
         self.state.floor = floor::generate_basement(seed::stage1_seed(self.state.run_seed_value))?;
         self.state.current_room = self.state.floor.starting_descriptor;
         self.state.visited_rooms = BTreeSet::from([self.state.current_room]);

@@ -1,0 +1,15 @@
+{
+  "schema": 1,
+  "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "scope": "Fresh normal Level descriptor seed lifecycle at actual Game/run admission, separate from later room/effect consumers. Native fields are read-only comparisons, never production inputs.",
+  "sourceFunction": {
+    "address": "0x587ec0",
+    "unwindSize": 1484,
+    "codeSha256": "2e6b07e3280766e07fc0d400c47a3b8472fb750e01bd8de1ddaa20d0bb7ec9e3"
+  },
+  "caller": "Level.Init58be30 calls587ec0 at58bea7 before floor topology and starting-room loading.",
+  "storedState": "Each of135 descriptors owns448 seven-word grid records. Raw MT calls587fe0/587fec store real seeds at record+10/+18, room-major/grid-major. The loops are bounded by3100 bytes at587ff8 and135 rooms at588401. Level records begin+14, stridef0; grid vector begins+58.",
+  "runtime": "DescriptorSeeds retains the generated table as a real MT origin plus cell mutations, avoiding capacity tables in ordinary snapshots. Actual run admission replaces Game.boot_level_grid and updates nine bounded samples through the same named initialize algorithm. No cursor offsets or captured seeds supply production state.",
+  "independentStream": "floor.rs already advances the Level primary xorshift for587ee2 through Primary.next in generate_basement. This leaf does not duplicate that advance.",
+  "remaining": "Actual room loading and effects can consume or mutate additional state. Post-Game shared MT comparison and mandatory W0 replay preserve their exact differences."
+}

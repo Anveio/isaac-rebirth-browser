@@ -30,13 +30,20 @@ def observe(pid,context):
     if length>9:raise ValueError('Source menu seed text exceeds bounded public code')
     return read(pointer,length).decode('ascii') if length else ''
    manager=u64(0x8ed560);menus=u64(0x8ed570);game=u64(0x8ecd30);saved=manager+0x4a8;system_state=u32(manager)
-   samples=[]
+   samples=[];level_samples=[]
    for room in [0,1,134]:
     # GameState room record0 begins+f8, stridef0; gridvector starts+58.
     pointer=u64(saved+0xf8+room*0xf0+0x58)
     for slot in [0,1,447]:
      words=struct.unpack('<7I',read(pointer+slot*0x1c,0x1c))
      samples.append({'roomRecord':room,'gridIndex':slot,'seed10':words[4],'seed18':words[6]})
+   if game:
+    for room in [0,1,134]:
+     # Level records begin+14, stridef0; the same gridvector starts+58.
+     pointer=u64(game+0x14+room*0xf0+0x58)
+     for slot in [0,1,447]:
+      words=struct.unpack('<7I',read(pointer+slot*0x1c,0x1c))
+      level_samples.append({'roomRecord':room,'gridIndex':slot,'seed10':words[4],'seed18':words[6]})
    anm=menus+0x60d10+8
    loaded=bool(menus) and bool(read(anm+0x2dd,1)[0])
    title={'loaded':loaded,'menuScreen':u32(menus+0x38) if menus else None}
@@ -46,6 +53,6 @@ def observe(pid,context):
     'managerCounter':u32(manager+0x2efa0),'systemState':system_state,'systemSeededRun':bool(read(manager+0x11,1)[0]),
     'gameRunSeed':u32(game+0xa190) if game else None,'gameSeedText':seed_string(game+0xa1e0) if game and system_state==2 else None,
     'gameSeededRun':bool(read(game+0x10ecd0,1)[0]) if game and system_state==2 else None,
-    'stateSeed9688':u32(saved+0x9688),'gridSeedSamples':samples,'title':title}
+    'stateSeed9688':u32(saved+0x9688),'gridSeedSamples':samples,'levelGridSeedSamples':level_samples,'title':title}
   finally:os.close(fd)
  finally:os.kill(pid,signal.SIGCONT)
