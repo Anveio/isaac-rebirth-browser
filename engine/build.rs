@@ -198,6 +198,16 @@ fn main() {
         &fs::read_to_string(npc_animations).expect("read authored NPC animations"),
     )
     .expect("parse authored NPC animations");
+    let projectile_clip = npc_clips["gfx/009.000_projectile.anm2"]["Animations"]
+        .as_array()
+        .expect("projectile clips missing")
+        .iter()
+        .find(|clip| clip["Name"] == "RegularTear6")
+        .expect("regular projectile clip missing");
+    generated.push_str(&format!(
+        "pub const PROJECTILE_REGULAR6_FRAMES: u32 = {};\n",
+        projectile_clip["FrameNum"].as_u64().unwrap()
+    ));
     for clip in npc_clips["gfx/244.000_round worm.anm2"]["Animations"]
         .as_array()
         .expect("Round Worm clips missing")

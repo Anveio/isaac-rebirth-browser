@@ -36,6 +36,9 @@ pub struct EnemyProjectile {
     pub grid_contact: bool,
     pub full_updates: u32,
     pub animation_frame: u32,
+    pub animation: Option<String>,
+    pub animation_clock: f32,
+    pub animation_playing: bool,
     pub dead: bool,
     pub accepted_player_hit: bool,
     pub removed: bool,
@@ -69,6 +72,9 @@ impl EnemyProjectile {
             grid_contact: false,
             full_updates: 0,
             animation_frame: 0,
+            animation: None,
+            animation_clock: -1.0,
+            animation_playing: false,
             dead: false,
             accepted_player_hit: false,
             removed: false,
@@ -90,10 +96,10 @@ impl EnemyProjectile {
             .checked_add(1)
             .ok_or("projectile update count exhausted")?;
         // Fresh variant0 plays authored RegularTear6, then common BaseUpdate.
-        self.animation_frame = self
-            .animation_frame
-            .checked_add(1)
-            .ok_or("projectile animation exhausted")?;
+        self.animation = Some("RegularTear6".into());
+        self.animation_frame = self.full_updates % content::PROJECTILE_REGULAR6_FRAMES;
+        self.animation_clock = self.animation_frame as f32;
+        self.animation_playing = true;
         self.position = self.position + self.velocity;
         self.presented_position = self.position;
         if self.dead {

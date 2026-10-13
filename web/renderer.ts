@@ -79,8 +79,8 @@ export class Renderer {
         }
       }
       for (const projectile of state.enemyProjectiles)
-        if (!projectile.removed)
-          this.assets.draw(ctx, "gfx/009.000_projectile.anm2", "RegularTear6",
+        if (!projectile.removed && projectile.animation)
+          this.assets.draw(ctx, "gfx/009.000_projectile.anm2", projectile.animation,
             projectile.presentedPosition.x * 0.65 + 32, (projectile.presentedPosition.y + projectile.height) * 0.65 - 46, projectile.animationFrame, { scale:0.65 });
       this.drawPlayer(ctx, state);
       for (const tear of state.tears)
