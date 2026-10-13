@@ -99,14 +99,14 @@ passes 54 checkpoints, 33,696 complete MT words and 582 public commands.
 [Seed-dialog evidence](../references/isaac/foundation/seed-dialog-mt/accepted-report.json)
 retains the source/build identities and queued-input case. The preserved W0
 random tape still fails one tear-lifetime checkpoint; later shared consumers
-remain incomplete. Music and item implementation continue in small PRs.
+remain incomplete. Music now implements Title intro/loop, entry-jingle completion and floor main/layer playback through actual Web Audio. Its source-hashed four-case cohort passes 816 controller checks and 252 separately verified output checks; early decoder/prefetch and playback-onset differences remain explicit. [Music evidence](../references/isaac/foundation/music/live-report.json) distinguishes those contracts. Item-pool work continues in small PRs.
 
-CI discovers all sixteen registered live suites and runs separate jobs with
+CI discovers all seventeen registered live suites and runs separate jobs with
 `fail-fast: false`, preserving each result and evidence. The first matrix run
 completed floors, weapons, boot MT and pickups successfully while retaining
 core and traversal failures. Build, typecheck, assets, matrix and strict Clippy
 pass after the menu, secret, NPC and natural-key integration at `e63723a`. This is a build checkpoint, not a fresh all-suite passing result. Complete gameplay RNG, other floors/characters,
-persistence, music/cutscenes and whole-game parity remain open. GitHub required-check
+persistence, later music callers/cutscenes and whole-game parity remain open. GitHub required-check
 enforcement is unavailable for this private repository's current plan.
 
 ## Initial live paired verification after unit-suite removal
