@@ -1305,8 +1305,8 @@ impl Game {
             if request.input_pending {
                 request.input_pending = false;
                 request.fading = true;
-                self.state.run_admission.confirm_menu_request();
                 self.state.music.crossfade(95);
+                self.state.run_admission.confirm_menu_request();
             }
         }
         self.state.tick += 1;
