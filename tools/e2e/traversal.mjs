@@ -20,6 +20,10 @@ const declaredBootSeed = value('--boot-epoch-seed');
 const bootEpochSeed = Number(declaredBootSeed || '0');
 assert.ok(Number.isInteger(bootEpochSeed) && bootEpochSeed >= 0 && bootEpochSeed <= 0xffffffff,
   'Declared public boot time must be an unsigned32 value');
+const declaredSfxVolume = value('--sfx-volume');
+const sfxVolume = Number(declaredSfxVolume);
+assert.ok(declaredSfxVolume === undefined || Number.isFinite(sfxVolume) && sfxVolume >= 0 && sfxVolume <= 1,
+  'Declared public SFX volume must be within0..1');
 assert.ok(Number.isInteger(nativeProcessTimeoutSeconds) && nativeProcessTimeoutSeconds > 0
   && nativeProcessTimeoutSeconds <= 3600, 'Native process timeout must be 1..3600 host seconds');
 const output = resolve(value('--output') || join(ROOT, '.cache/e2e/traversal', String(Date.now())));
@@ -77,6 +81,7 @@ try {
           join(ROOT, 'tools/original/foundation-clock-run.py'), '--seed', scenario.code, '--tape', tape,
           '--state-observer', value('--state-observer') || join(ROOT, 'tools/original/foundation-traversal-observe.py'),
           ...(declaredBootSeed ? ['--boot-epoch-seed', String(bootEpochSeed)] : []),
+          ...(declaredSfxVolume !== undefined ? ['--sfx-volume', String(sfxVolume)] : []),
           '--output', join(directory, 'original')], { cwd: ROOT, timeout: nativeProcessTimeoutSeconds * 1000, maxBuffer: 8 * 1024 * 1024 });
       } catch (error) {
         row.originalExecution.failure = { code: error.code ?? null, signal: error.signal ?? null,
@@ -90,12 +95,15 @@ try {
       const native = JSON.parse(await readFile(sourceManifest, 'utf8'));
       assert.equal(native.seedValue, scenario.runSeed);
       if (declaredBootSeed) assert.equal(native.bootEpochSeed, bootEpochSeed, 'Both games use the independently declared public boot input');
+      if (declaredSfxVolume !== undefined) assert.equal(native.audioOptions.sfxVolume, sfxVolume,
+        'Original launch options must bind the independently declared public SFX volume');
       const originals = new Map(native.debugObservations.map(entry => [entry.context.label, entry]));
       const setup = scenario.setup || [{ type: 'step', frames: 60 }, ...(scenario.slot % 2 === 0
         ? [{ type: 'key', key: 'w', down: true }, { type: 'step', frames: 27 }, { type: 'key', key: 'w', down: false }, { type: 'step', frames: 30 }] : [])];
       const keyCodes = { a: 'KeyA', w: 'KeyW', d: 'KeyD', s: 'KeyS', e: 'KeyE', Up: 'ArrowUp',
         Down: 'ArrowDown', Left: 'ArrowLeft', Right: 'ArrowRight', Escape: 'Escape' };
       const expectedCommands = [...manualSeedCommands(scenario.code),
+        ...(declaredSfxVolume !== undefined ? [{ type: 'audioVolume', sfx_volume: sfxVolume }] : []),
         ...[...setup, ...scenario.actions].flatMap(action => {
           if (action.type === 'step') return [{ type: 'tick', count: action.frames }];
           if (action.type === 'capture') return [];
@@ -111,7 +119,9 @@ try {
       const errors = []; page.on('pageerror', error => errors.push(String(error)));
       await page.goto(production.url + '/?manual=1'); await waitForReady(page);
       await page.evaluate(({seed, bootEpochSeed}) => { window.game.pause(); window.game.reset(seed, { trace: true, bootEpochSeed }); }, {seed: scenario.runSeed, bootEpochSeed});
-      const seeded = await enterSeededRun(page, scenario.code);
+      let seeded = await enterSeededRun(page, scenario.code);
+      if (declaredSfxVolume !== undefined)
+        seeded = await page.evaluate(volume => window.game.command({ type: 'audioVolume', sfx_volume: volume }), sfxVolume);
       await writeFile(join(directory, 'browser-input.json'), JSON.stringify({ schema: 1, seeded,
         trace: await page.evaluate(() => window.game.trace()), expectedCommands }, null, 2) + '\n');
       assertSeededRun(seeded, scenario.code, scenario.runSeed);

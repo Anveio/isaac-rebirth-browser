@@ -23,5 +23,6 @@ def observe(pid, context):
         return dict(result, status='fail', error=sound.get('error', 'Native audio observation failed'))
     result['chestSounds'] = [slot for slot in sound['slots'] if slot['id'] in (21, 22)]
     result['audioSystemCounter'] = sound['systemCounter']
+    result['globalSfxVolume'] = sound['globalSfxVolume']
     result['sharedMt'] = {'index': sound['mtIndex'], 'words': sound['mtState']}
     return result

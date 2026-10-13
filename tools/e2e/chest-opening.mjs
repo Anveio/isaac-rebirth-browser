@@ -5,6 +5,8 @@ process.argv.push('--state-observer', fileURLToPath(new URL('../original/chest-o
 // This is the independently declared public time(NULL) input to both games,
 // matching the native runner's clock environment, not observed MT state.
 process.argv.push('--boot-epoch-seed', '1700000000');
+// Independently declared public preference; actual native readback is required.
+process.argv.push('--sfx-volume', '1');
 if (!process.argv.includes('--count')) process.argv.push('--count', '2');
 if (!process.argv.includes('--output'))
   process.argv.push('--output', fileURLToPath(new URL(`../../.cache/e2e/chest-opening/${Date.now()}-${process.pid}`, import.meta.url)));

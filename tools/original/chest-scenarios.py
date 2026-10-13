@@ -66,6 +66,8 @@ def validate(path):
         raise ValueError('Public Chest access begins with the natural single starting bomb')
     snapshots = [entry for entry in native['debugObservations']
                  if entry['observation']['floor']['descriptors'][entry['observation']['floor']['currentDescriptorIndex']]['template']['variant'] == 354]
+    if any(entry['observation'].get('globalSfxVolume') != 1 for entry in native['debugObservations']):
+        raise ValueError('Every source phase must read back the independently declared public SFX volume1')
     for entry in snapshots:
         chests = [entity for entity in entry['observation']['contents']['entities'] if entity['type'] == 5 and entity['variant'] == 50]
         if not chests or any('localRngWords' not in chest for chest in chests):

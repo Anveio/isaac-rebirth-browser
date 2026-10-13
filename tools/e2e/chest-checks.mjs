@@ -3,6 +3,9 @@ const vector = value => [Math.fround(value.x), Math.fround(value.y)];
 const sorted = values => values.map(value => JSON.stringify(value)).sort();
 
 export function compareChests(check, state, observed, baseline, seeded, label) {
+  check.equal(observed.globalSfxVolume, 1, `${label}:actual native public SFX preference readback`);
+  check.equal(Math.fround(state.audio.sfxVolume), observed.globalSfxVolume,
+    `${label}:both games bind the independently declared public SFX volume`);
   const room = observed.contents.room, playerBody = observed.contents.players[0];
   check.deepEqual([state.room.grid?.width, state.room.grid?.height, state.room.grid?.cells.length],
     [room.gridWidth, room.gridHeight, room.gridWidth * room.gridHeight], `${label}:complete native room dimensions`);
@@ -79,6 +82,7 @@ export function compareChests(check, state, observed, baseline, seeded, label) {
     [player.coinInventory, player.keyInventory, player.bombInventory, player.redHp, player.damageCountdown],
     `${label}:natural Chest route inventory/health/immunity`);
   return {nativePickups: native, nativeChestSounds: observed.chestSounds,
+    nativeGlobalSfxVolume: observed.globalSfxVolume,
     nativeSharedMt: observed.sharedMt,
     scope: 'Complete concrete pickup fields, persistent Chest RNG30, actor admission and real SFX21/22 are required. Shared MT is recorded diagnostically; no supplied cursor/vector or total-consumer acceptance.'};
 }
