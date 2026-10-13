@@ -1,0 +1,161 @@
+{
+  "schema": 1,
+  "status": "pass",
+  "scope": "Traversal-family gates require each actual backend callback state. Diagnostic traces retain callback states in a separate bounded 4MiB budget after ordinary 32MiB history fills; explicit callback/input cap remains a required failure. Actual trusted DOM/browser proof only, no native recapture or gameplay parity claim.",
+  "base": "fc7533766163fa152bc6c346d5081fa33aae2d25",
+  "budget": {
+    "ordinaryStateBytes": 33554432,
+    "callbackStateBytes": 4194304,
+    "inputMetadataBytes": 4194304,
+    "combinedEncodedBodyBytes": 41943040,
+    "scope": "Encoded record bodies, excluding headers and browser object overhead. Every enabled trace checks all three budgets; callback capture does not depend on the ordinary-state cap."
+  },
+  "publicPlan": {
+    "resetSeed": 2184569263,
+    "bootEpochSeed": 1700000000,
+    "commands": [
+      {
+        "type": "key",
+        "code": "Enter",
+        "down": true
+      },
+      {
+        "type": "tick",
+        "count": 12
+      },
+      {
+        "type": "key",
+        "code": "Enter",
+        "down": false
+      },
+      {
+        "type": "tick",
+        "count": 72
+      },
+      {
+        "repeat": 2000,
+        "command": {
+          "type": "tick",
+          "count": 1
+        }
+      }
+    ],
+    "count": 2004
+  },
+  "report": {
+    "ignoredPath": ".cache/coordination/traversal-backend-history/report.json",
+    "sha256": "fe957ca5005e556e7c94f2ca404e549bfa6b7ea9af95156486433289d7716e67",
+    "verifierSha256": "21b9bc0d67af878322dfaf200884ee42dc875a8786def738f92972c70b2cdc59"
+  },
+  "callbackFieldInventory": {
+    "sha256": "62cfa866f11caf96628a6b8f7e6d3bbb0495dd82035b338addb73ca19f9fe52d",
+    "actualCallbackFields": 66,
+    "scope": "All 66 actual top-level state fields are present in the retained callback; no field was reconstructed from phase snapshots."
+  },
+  "sourceHashes": {
+    "web/trace.ts": "e05eee6d02f687b3b5bf2d31f7eb59d5c3e1900a6c1a078e15f63b71b325fb38",
+    "tools/e2e/traversal.mjs": "ca28de26242a4a0a1f1a26fee47dfb0cd07161b3333abeff8b326696319a1e9a"
+  },
+  "wasmSha256": "22c19f034b6bc262c2fa7c8c5624ff5d42b4cf35f310933a92668044af58d003",
+  "cases": [
+    {
+      "name": "before",
+      "production": {
+        "sha256": "00a0f8ef1c3c6c2d1e475a77ae7a910d062c6923591c989b07846e539a89058d",
+        "files": 921,
+        "source": "/workspace/isaac-rebirth-browser/dist",
+        "scope": "Immutable snapshot of production build bytes; source/native replay equality is checked separately"
+      },
+      "status": "pass",
+      "guardError": "AssertionError [ERR_ASSERTION]: Every actual callback state must fit its explicit bounded history\n+ actual - expected\n\n+ undefined\n- false\n",
+      "guard": "reject",
+      "publicCommands": 2004,
+      "commandsSha256": "dc1ebdaeb3f0dfc0e3dbc48ba76b077f8c49380768f9d808cdc6e619859435d2",
+      "naturalAfterCapCallbacks": [
+        {
+          "type": "ended",
+          "node": 3,
+          "explicitlyStopped": false,
+          "audioTime": 39.37233560090703,
+          "commands": 2004,
+          "generalHistoryCapped": true,
+          "backendEvents": 1,
+          "latestBackend": {
+            "type": "musicBackend",
+            "channel": 1,
+            "generation": 0,
+            "event": "loop"
+          },
+          "latestBackendHasState": false
+        }
+      ],
+      "generalHistoryCapped": true,
+      "ordinaryBytes": 33553112,
+      "maxOrdinaryBytes": 33554432,
+      "backendEvents": 1,
+      "completeCallbackStates": 0,
+      "evidence": {
+        "path": "/workspace/isaac-rebirth-browser/.cache/coordination/traversal-backend-history/before-actual-browser.json.gz",
+        "rawSha256": "c2c39fdf54595e5639381f9e0e262bff77c0d5fdb360ca19446a580f980df9e6",
+        "rawBytes": 33861933,
+        "archiveSha256": "7233bef51903808763220df7bf9627aa6ab5935bdea11e4159fe334935261a82",
+        "archiveBytes": 5361700
+      }
+    },
+    {
+      "name": "after",
+      "production": {
+        "sha256": "6341554132807be3b5bb58fe66a2b7f11f341b2a40b4c4080dc0f07ef2389ac9",
+        "files": 921,
+        "source": "/workspace/isaac-rebirth-browser/.cache/coordination/traversal-backend-history/dist",
+        "scope": "Immutable snapshot of production build bytes; source/native replay equality is checked separately"
+      },
+      "status": "pass",
+      "negativeChecks": [
+        "Missing actual callback state rejects",
+        "Explicit callback-state cap rejects"
+      ],
+      "guard": "pass",
+      "publicCommands": 2004,
+      "commandsSha256": "dc1ebdaeb3f0dfc0e3dbc48ba76b077f8c49380768f9d808cdc6e619859435d2",
+      "naturalAfterCapCallbacks": [
+        {
+          "type": "ended",
+          "node": 3,
+          "explicitlyStopped": false,
+          "audioTime": 47.53124716553288,
+          "commands": 2004,
+          "generalHistoryCapped": true,
+          "backendEvents": 1,
+          "latestBackend": {
+            "type": "musicBackend",
+            "channel": 1,
+            "generation": 0,
+            "event": "loop"
+          },
+          "latestBackendHasState": true
+        }
+      ],
+      "generalHistoryCapped": true,
+      "ordinaryBytes": 33553112,
+      "maxOrdinaryBytes": 33554432,
+      "backendEvents": 1,
+      "completeCallbackStates": 1,
+      "callbackBytes": 65886,
+      "callbackByteCap": 4194304,
+      "evidence": {
+        "path": "/workspace/isaac-rebirth-browser/.cache/coordination/traversal-backend-history/after-actual-browser.json.gz",
+        "rawSha256": "b64ddd3b0c304a74ce3081ae7eeb5359fd809e875649a74a78118bd72ff55e5d",
+        "rawBytes": 33927929,
+        "archiveSha256": "eb6fa1d196b00a9c37b26bc21f1c12df9579d16f1d3792561172f25d40facbe5",
+        "archiveBytes": 5372100
+      }
+    }
+  ],
+  "limits": [
+    "Natural Title intro completion is observed through a forwarding public AudioBufferSourceNode ended listener and actual generation-scoped music feedback; no synthetic backend command or budget override.",
+    "AudioContext time at callback dispatch includes main-thread work. This does not claim an audible cursor or native decoder parity.",
+    "Missing-state and explicit-cap negative checks mutate only retained read-only evidence for guard validation; no actual callback-budget exhaustion claim.",
+    "WASM is unchanged from the integrated production artifact. Vite/type/syntax/whitespace checks pass; no Rust/unit suite or new native capture."
+  ]
+}
