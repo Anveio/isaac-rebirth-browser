@@ -5,7 +5,8 @@ use std::collections::BTreeMap;
 
 include!(concat!(env!("OUT_DIR"), "/audio_catalog.rs"));
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct SoundRequest {
     pub id: u32,
     pub volume: f32,
@@ -14,7 +15,7 @@ pub struct SoundRequest {
     pub pitch: f32,
 }
 
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct SampleSettings {
     pub looping: bool,
@@ -22,7 +23,7 @@ pub struct SampleSettings {
     pub pitch: f32,
 }
 
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct SoundSlot {
     // Virgin native lastTick bytes are not an admitted-event timestamp.
@@ -33,7 +34,7 @@ pub struct SoundSlot {
     pub samples: Vec<SampleSettings>,
 }
 
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct SoundEvent {
     pub sequence: u64,
@@ -46,7 +47,7 @@ pub struct SoundEvent {
     pub gain: f32,
 }
 
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(
     rename_all = "camelCase",
     deny_unknown_fields,
@@ -58,6 +59,7 @@ pub struct AudioState {
     pub next_sequence: u64,
     // The current command's admissions, consumed once by browser playback.
     pub events: Vec<SoundEvent>,
+    pub pending: Vec<SoundRequest>,
 }
 
 #[derive(Deserialize)]
@@ -67,6 +69,7 @@ struct SavedAudioState {
     slots: BTreeMap<u32, SoundSlot>,
     next_sequence: u64,
     events: Vec<SoundEvent>,
+    pending: Vec<SoundRequest>,
 }
 
 impl TryFrom<SavedAudioState> for AudioState {
@@ -110,11 +113,19 @@ impl TryFrom<SavedAudioState> for AudioState {
             }
             previous = Some(event.sequence);
         }
+        if saved
+            .pending
+            .iter()
+            .any(|request| !request.volume.is_finite() || !request.pitch.is_finite())
+        {
+            return Err("audio continuation has invalid pending requests".into());
+        }
         Ok(Self {
             sfx_volume: saved.sfx_volume,
             slots: saved.slots,
             next_sequence: saved.next_sequence,
             events: saved.events,
+            pending: saved.pending,
         })
     }
 }
@@ -150,6 +161,7 @@ impl Default for AudioState {
             slots,
             next_sequence: 0,
             events: Vec::new(),
+            pending: Vec::new(),
         }
     }
 }
@@ -203,5 +215,11 @@ impl AudioState {
 
     pub fn begin_command(&mut self) {
         self.events.clear();
+    }
+
+    pub fn flush_pending(&mut self, shared: &mut Mt19937, system_counter: u32) {
+        for request in std::mem::take(&mut self.pending) {
+            self.admit(shared, system_counter, request);
+        }
     }
 }
