@@ -17,31 +17,31 @@
     },
     {
       "name": "random-0",
-      "code": "MZV9M8L7",
+      "code": "7DLCLPMH",
       "direction": "Right",
       "delay": 0,
-      "seedValue": 1385728516
+      "seedValue": 3879426760
     },
     {
       "name": "random-1",
-      "code": "4CSFLNH8",
+      "code": "266ZPLBP",
       "direction": "Left",
       "delay": 1,
-      "seedValue": 3746507469
+      "seedValue": 3369478485
     },
     {
       "name": "random-2",
-      "code": "GJXFBA8R",
+      "code": "TD26PK8F",
       "direction": "Up",
       "delay": 0,
-      "seedValue": 1036595070
+      "seedValue": 2266937690
     },
     {
       "name": "random-3",
-      "code": "ED1338T8",
+      "code": "CC8ZCZW3",
       "direction": "Down",
       "delay": 1,
-      "seedValue": 788587271
+      "seedValue": 525479595
     }
   ]
 }

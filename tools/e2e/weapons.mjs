@@ -40,7 +40,7 @@ assert.equal(createHash('sha256').update(sourceBinary).digest('hex'),ORIGINAL_SH
 await writeFile(join(output,'scenarios.json'),JSON.stringify({schema:1,bootEpochSeed:epoch,source:'Contrived full/intermediate births plus OS-random recorded seed coverage',cases},null,2)+'\n');
 const production=await startProductionServer();
 const browser=await chromium.launch(browserLaunchOptions());
-const report={schema:1,status:'running',originalBinarySha256:ORIGINAL_SHA,scope:'Paired live original/browser weapon cooldown, head clock, shot births, actor birth fence and horizontal birth positions; projected height/range and shared MT routing remain separate work',production:production.build,graphics:await inspectBrowserGraphics(browser),cases:[]};
+const report={schema:1,status:'running',originalBinarySha256:ORIGINAL_SHA,scope:'Paired live original/browser weapon cooldown, held/released head clock, shot births, actor birth fence and horizontal birth positions; projected height/range and shared MT routing remain separate work',production:production.build,graphics:await inspectBrowserGraphics(browser),cases:[]};
 try {
  for(const scenario of cases){
   const directory=join(output,scenario.name);await mkdir(directory,{recursive:true});
@@ -68,7 +68,8 @@ try {
   const key=`Arrow${scenario.direction}`;await page.keyboard.down(key);
   const rows=new Map(native.debugObservations.map(row=>[row.context.presentedFrame,row.observation]));
   const seen=new Set();
-  for(let index=1;index<=54;index++){
+  for(let index=1;index<=80;index++){
+   if(index===55)await page.keyboard.up(key);
    await page.evaluate(()=>window.game.step(1));const state=await page.evaluate(()=>window.game.snapshot());states.push(state);
    const nativeFrame=baseline.context.presentedFrame+scenario.delay+index;const observed=rows.get(nativeFrame);
    assert.ok(observed&&observed.memoryWritten===false,`${scenario.name}:missing readonly native phase${nativeFrame}`);
@@ -93,11 +94,11 @@ try {
    assert.deepEqual(handles.filter(actor=>actor.kind==='tear').map(actor=>actor.id),state.tears.map(tear=>tear.id));
    comparisons++;
   }
-  await page.keyboard.up(key);assert.deepEqual(errors,[]);
+  assert.deepEqual(errors,[]);
   result.status='pass';
   } catch(error) {result.status='fail';result.error=String(error);}
   finally {
-   result.comparedPresentations=comparisons;result.observedBirths=births;
+   result.comparedPresentations=comparisons;result.comparedHeldPresentations=Math.min(comparisons,54);result.comparedReleasePresentations=Math.max(0,comparisons-54);result.observedBirths=births;
    await writeFile(join(directory,'browser-states.json'),JSON.stringify({schema:1,states},null,2)+'\n');
    if(page)await page.close().catch(error=>{result.status='fail';result.cleanupError=String(error);});
    await writeFile(join(output,'report.json'),JSON.stringify(report,null,2)+'\n');
