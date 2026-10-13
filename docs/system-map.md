@@ -11,7 +11,9 @@ independent reference evidence.
 ## Current live-game testing policy
 
 Checked-in Rust, Node and Python unit suites were removed at the user’s request.
-The current required gate is [paired-game.mjs](../tools/foundation/paired-game.mjs):
+The current required gate is [run.mjs](../tools/e2e/run.mjs), which executes
+paired gameplay, finalized floors and weapon scheduling even if an earlier suite
+fails. The [paired gameplay gate](../tools/foundation/paired-game.mjs) gives
 fresh original processes/profiles and an immutable production browser receive
 identical public input/presentation tails across contrived and recorded
 OS-random scenarios. Source-observable title/fader clocks, seed readback,
@@ -32,7 +34,34 @@ The Wave1/Wave2 snapshots below are historical results from the earlier test
 policy. Their removed unit/integrity suites are not current executable gates.
 Consult the latest paired report for current implementation outcomes.
 
-## Live paired verification after unit-suite removal
+## Current integrated runtime checkpoint
+
+Artifact `6b2bdce75556c3fb23f13dfcd49e89067737a1f6c8809bcc811ca290c9f8fff7`
+integrates general fresh normal Basement floors/descriptor routing, phased
+weapon admission, bomb motion/fuse/blasts and source pause dismissal. Build,
+typecheck, asset integrity, generated matrix and strict Clippy pass. No unit
+suites were run or added.
+
+All eight live original/browser transports pass. Functional checkpoints pass
+134/149: title 19/19, movement 12/12, pause 18/18 and both moving-bomb phases
+18/18 each. Adjacent-room/grid/combat integration still fails 14/28; random
+`1E0W JX06` fails only the active-tear count at `random-held-1` (17/18), while
+`33N6 SVFY` passes 18/18. Strict complete RGBA diagnostics remain 61/149 exact.
+
+Five finalized original/browser floors pass, including three real two-attempt
+retries and two fresh OS-random seeds. The gate checks every descriptor/grid
+cell/seed/attempt and the complete visible doorway set. Weapon scheduling
+passes six live cases, 324 presentations and 18 births. These scopes do not
+establish full tear lifetime, shared gameplay RNG, traversal, grid/NPC damage,
+pickups/items, other floors/characters, persistence or audio.
+
+[Compact evidence](../references/isaac/foundation/runtime-progress/verification.json)
+retains source/build hashes and failed fields; the recorded randomized holdout
+is [1E0WJX06.json](../references/isaac/foundation/runtime-progress/1E0WJX06.json).
+Main's live workflow executes, but GitHub reports required-check enforcement is
+unavailable for this private repository's current plan.
+
+## Initial live paired verification after unit-suite removal
 
 The reviewed paired gate replayed all eight recorded tapes against immutable artifact
 `d602ad5ecccf9880e204282353cb372e144acaec58c67e4a07bd170a610d48ff`.
