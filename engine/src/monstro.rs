@@ -165,7 +165,9 @@ fn divided(vector: WorldVector, denominator: f32) -> WorldVector {
 fn normalized(vector: WorldVector) -> WorldVector {
     let length = (vector.x * vector.x + vector.y * vector.y).sqrt();
     if length > 0.0 {
-        divided(vector, length)
+        // Native612860 ->612820 rounds the reciprocal before multiplying.
+        // Explicit component division belongs to the distinct612b30 helper.
+        vector * (1.0 / length)
     } else {
         vector
     }
