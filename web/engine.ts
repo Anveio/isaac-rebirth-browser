@@ -60,7 +60,7 @@ export interface RoomAppearance {
   floorQuads: RoomQuad[]; wallQuads: RoomQuad[]; tutorial: boolean;
   wallVariantCatalog: { sourcePatchIndex: number; name: string; weight: number; eligibility: string }[];
   wallGenerationEvidence: string;
-  doors: { side: Direction; state: string; asset: string; x: number; y: number; targetRoom: number; slot: number; worldPosition: {x: number; y: number} }[];
+  doors: { side: Direction; state: string; asset: string; x: number; y: number; targetRoom: number; slot: number; worldPosition: {x: number; y: number}; blownOpen: boolean }[];
   fx: { ambient: [number, number, number]; shading: string; overlay: string; overlayOrigin: { x: number; y: number }; overlayAnchor: { x: number; y: number }; overlayParallax: { x: number; y: number }; overlayMotionEvidence: string; overlayOpacity: number; actorTint: [number, number, number] };
   template: string; generation: string;
 }
@@ -119,6 +119,7 @@ export interface State {
   characterCatalog: { name: string; animation: string }[];
   paused: boolean; pressed: string[];
   floor: Floor; currentRoom: number; visitedRooms: number[];
+  roomDisplayFlags: number[]; revealedSecretConnections: [number, number][];
   persistedRooms: Record<string, Room>;
   roomTransition: {fromRoom: number; targetRoom: number; fromSlot: number; targetSlot: number; phase: "out" | "in"; fullUpdates: number} | null;
   player: Player; room: Room; stageEffects: StageEffects; inventory: { coins: number; bombs: number; keys: number };

@@ -28,7 +28,9 @@ const report = { schema: 1, status: 'running', skipped: 0, selected: bank.cases.
     ? 'Fresh ordinary Isaac, authored 13x7 no-hostile curse-room entry and exit; exact native half-heart charges, immunity/door collision/admission phases, descriptor/spawn identity and returned room persistence. Flight/items, other door styles, hostile callbacks and complete pixels remain separate.'
     : bank.contract === 'authored-doors'
       ? 'Fresh ordinary Isaac, authored13x7 curse and first-floor free treasure doors; recorded W0L0LYYM bomb-driven admission and raw1400 fire admission remain mandatory. Exact room/player/HP/immunity/visible door phases, complete authored groups and return metadata; actor/item callbacks and pixels remain separate.'
-      : 'Ordinary style0 13x7 doorway and no-hostile return; mandatory hostile-room lock/return regression; exact f32 player/descriptor phases, complete authored group accounting, supported actor admission and ordinary Rock metadata, visited-room restoration. NPC behavior, other grids/doors, large-room camera and complete pixels remain separate.',
+      : bank.contract === 'secret'
+        ? 'Fresh Isaac, no-hostile13x7 Basement secret bomb revelation/entry/return: complete hidden/open door objects, reciprocal persistence, source display flags and minimap routing, exact room/player/HP/immunity and authored admissions. Keeper/item callbacks, hostile secret closure, other shapes/items and complete pixels remain separate.'
+        : 'Ordinary style0 13x7 doorway and no-hostile return; mandatory hostile-room lock/return regression; exact f32 player/descriptor phases, complete authored group accounting, supported actor admission and ordinary Rock metadata, visited-room restoration. NPC behavior, other grids/doors, large-room camera and complete pixels remain separate.',
   exclusions: ['curse', 'authored-doors'].includes(bank.contract) ? ['Undiscovered native door variant6', 'Actor behavior and item callbacks; NPC244 metadata only, raw1400 fire admission remains a required regression', 'Flight/items and other door policies', 'Complete rendered pixels'] : [],
   production: production.build, graphics: await inspectBrowserGraphics(browser), cases: [] };
 try {
@@ -92,13 +94,14 @@ try {
         phaseAssert.deepEqual(state.floor.grid, source.grid, `${label}:floor topology`);
         phaseAssert.deepEqual([state.player.x, state.player.y, state.player.vx, state.player.vy],
           [actor.position[0] * .65 + 32, actor.position[1] * .65 - 46, actor.velocity[0] * .65, actor.velocity[1] * .65], `${label}:source f32 motion projection`);
-        if (['curse', 'free-treasure'].includes(scenario.doorContract)) {
+        if (['curse', 'free-treasure', 'secret'].includes(scenario.doorContract)) {
+          const includeHidden = scenario.doorContract === 'secret';
           phaseAssert.equal(state.player.hp, actor.redHp, `${label}:native door-route health state`);
           phaseAssert.equal(state.damageCooldown, actor.damageCountdown, `${label}:door-route immunity and transition dispatch`);
-          const sourceDoors = observed.contents.grid.filter(cell => cell.type === 16 && cell.variant !== 6);
-          const actualDoors = state.room.grid?.cells.flatMap((cell, index) => cell.entity?.kind === 16 && cell.entity.variant !== 6 ? [index] : []) || [];
+          const sourceDoors = observed.contents.grid.filter(cell => cell.type === 16 && (includeHidden || cell.variant !== 6));
+          const actualDoors = state.room.grid?.cells.flatMap((cell, index) => cell.entity?.kind === 16 && (includeHidden || cell.entity.variant !== 6) ? [index] : []) || [];
           phaseAssert.deepEqual(actualDoors, sourceDoors.map(door => door.index), `${label}:complete authored visible door objects`);
-          phaseAssert.deepEqual(state.room.appearance.doors.map(door => door.slot).sort((a, b) => a - b),
+          phaseAssert.deepEqual(state.room.appearance.doors.filter(door => includeHidden || door.state !== 'Hidden').map(door => door.slot).sort((a, b) => a - b),
             sourceDoors.map(door => [60, 7, 74, 127].indexOf(door.index)).sort((a, b) => a - b), `${label}:complete visible door appearances`);
           for (const door of sourceDoors) {
             const actual = state.room.grid?.cells[door.index]?.entity;
@@ -111,13 +114,25 @@ try {
             const targetType = source.descriptors[target]?.template.type;
             // Source LoadAnimation5629c0 chooses curse before treasure and
             // checks both independently observed native endpoint room types.
-            const asset = [descriptor.template.type, targetType].includes(10)
+            const types = [descriptor.template.type, targetType];
+            const asset = types.some(type => [7, 8].includes(type))
+              ? 'gfx/grid/door_08_holeinwall.anm2'
+              : types.includes(10)
               ? 'gfx/grid/door_04_selfsacrificeroomdoor.anm2'
               : [descriptor.template.type, targetType].includes(4)
                 ? 'gfx/grid/door_02_treasureroomdoor.anm2'
                 : 'gfx/grid/door_01_normaldoor.anm2';
             const appearance = state.room.appearance.doors.find(candidate => candidate.slot === slot);
             phaseAssert.deepEqual([appearance?.targetRoom, appearance?.asset], [target, asset], `${label}:source door endpoint/asset identity`);
+            if (includeHidden) phaseAssert.equal(appearance?.blownOpen, door.blownOpen, `${label}:actual source blown-open door flag`);
+          }
+          if (includeHidden) {
+            phaseAssert.deepEqual(state.roomDisplayFlags, source.descriptors.map(room => room.displayFlags), `${label}:complete source descriptor display flags`);
+            const cells = source.descriptors.filter(room => room.displayFlags & 1).map(room => ({
+              x: room.gridIndex % 13 - 6, y: Math.floor(room.gridIndex / 13) - 6,
+              visibility: room.index === source.currentDescriptorIndex ? 'current' : room.visited ? 'visited' : 'unvisited',
+            }));
+            phaseAssert.deepEqual(state.minimap.cells, cells, `${label}:complete native-visible minimap routing`);
           }
         }
         observedRooms.add(source.currentDescriptorIndex);
@@ -178,6 +193,8 @@ try {
         states.push({ label, currentRoom: state.currentRoom, descriptor: state.room.descriptor, spawns: admission,
           player: state.player, damageCooldown: state.damageCooldown, nativePosition: actor.position,
           nativeVelocity: actor.velocity, nativeHp: actor.redHp, nativeDamageCountdown: actor.damageCountdown,
+          roomDisplayFlags: state.roomDisplayFlags, minimap: state.minimap,
+          nativeRoomDisplayFlags: source.descriptors.map(room => room.displayFlags),
           doors: state.room.appearance.doors,
           rockMetadata: state.room.grid?.cells.flatMap((cell, index) => [2, 5, 6].includes(cell.entity?.kind)
             ? [{index, ...cell.entity}] : []) || [],
@@ -219,6 +236,15 @@ try {
         assert.equal(originals.get('neighbor').observation.contents.players[0].redHp, 5, 'Source curse entrance must charge half a heart');
         assert.equal(originals.get('cooled').observation.contents.players[0].damageCountdown, 0, 'Public wait must clear source entry immunity');
         assert.equal(originals.get('returned').observation.contents.players[0].redHp, 4, 'Source curse exit must charge another half heart');
+      }
+      if (scenario.doorContract === 'secret') {
+        const start = native.debugObservations[0].observation;
+        assert.equal(start.contents.grid.find(door => door.index === 127)?.variant, 6, 'Source must begin with an undiscovered secret doorway');
+        const blast = originals.get('blast-133').observation;
+        assert.deepEqual(blast.contents.grid.filter(door => door.index === 127).map(door => [door.variant, door.state, door.blownOpen]), [[7, 2, true]], 'Actual public bomb must reveal the source doorway');
+        const entered = originals.get('secret-entry').observation.floor;
+        assert.ok([7, 8].includes(entered.descriptors[entered.currentDescriptorIndex].template.type), 'Public source route must enter an actual secret room');
+        assert.ok(native.debugObservations.every(entry => entry.observation.contents.players[0].redHp === 6), 'Public retreat must avoid source blast damage');
       }
       const trace = await page.evaluate(() => window.game.trace());
       assert.equal(trace.enabled, true); assert.equal(trace.inputTraceTruncated, false);
