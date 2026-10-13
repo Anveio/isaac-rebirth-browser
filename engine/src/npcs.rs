@@ -1,4 +1,4 @@
-//! Admitted ordinary Fly13/AttackFly18 actors from authored room selectors.
+//! Supported NPC actors from authored room selectors.
 //! Full NPC Update owns AI, native BaseUpdate motion and FIFO damage drain.
 //! Intermediate presentation predicts half velocity without advancing AI.
 use crate::{
@@ -51,6 +51,7 @@ pub struct Npc {
     pub removed: bool,
     pub damage: combat::DamageQueue,
     pub keeper: Option<crate::keepers::KeeperState>,
+    pub fireplace: Option<crate::fireplaces::FireplaceState>,
 }
 
 const ZERO: WorldVector = WorldVector { x: 0.0, y: 0.0 };
@@ -255,6 +256,36 @@ pub fn nonplayer_contacts(state: &mut State) -> Result<(), String> {
             let mut a = body(first);
             let mut b = body(second);
             if combat::resolve_npc_or_bomb_pair(&mut a, &mut b)?.colliding {
+                // Fire49c249 first checks OTHER with the numeric NPC predicate
+                // 444800. Player, Tear and Bomb are excluded from this callback.
+                if first.kind == 33 {
+                    let health = second.health();
+                    second.damage.enqueue(
+                        health,
+                        combat::DamageEvent {
+                            amount: 16.0,
+                            kind: combat::DamageKind::FireContact,
+                            source: combat::DamageSource {
+                                id: first.id,
+                                entity_type: 33,
+                            },
+                        },
+                    )?;
+                }
+                if second.kind == 33 {
+                    let health = first.health();
+                    first.damage.enqueue(
+                        health,
+                        combat::DamageEvent {
+                            amount: 16.0,
+                            kind: combat::DamageKind::FireContact,
+                            source: combat::DamageSource {
+                                id: second.id,
+                                entity_type: 33,
+                            },
+                        },
+                    )?;
+                }
                 first.position = a.position;
                 first.presented_position = a.position;
                 first.velocity = a.velocity;
@@ -380,6 +411,9 @@ fn direction(random: &mut Mt19937) -> WorldVector {
 
 impl Npc {
     pub fn from_selector(id: u32, selector: &SpawnSelector) -> Result<Option<Self>, String> {
+        if let Some(fireplace) = crate::fireplaces::from_selector(id, selector)? {
+            return Ok(Some(fireplace));
+        }
         if selector.category == SpawnCategory::Entity
             && selector.entity_type == 17
             && selector.variant == 1
@@ -487,6 +521,7 @@ impl Npc {
             removed: false,
             damage: combat::DamageQueue::default(),
             keeper: None,
+            fireplace: None,
         }))
     }
 

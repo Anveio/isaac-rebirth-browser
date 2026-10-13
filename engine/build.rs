@@ -233,7 +233,40 @@ fn main() {
             ));
         }
     }
-    for kind in [9, 13, 18, 244] {
+    for name in ["Flickering", "NoFire", "Dissapear"] {
+        let clips = npc_clips["gfx/033.000_fireplace.anm2"]["Animations"]
+            .as_array()
+            .expect("ordinary Fire clips missing");
+        let clip = clips
+            .iter()
+            .find(|clip| clip["Name"] == name)
+            .expect("ordinary Fire clip missing");
+        let frames = clip["FrameNum"].as_u64().expect("Fire frame count missing");
+        for subtype in 2..=3 {
+            let suffix = format!("{name}{subtype}");
+            let sibling = clips
+                .iter()
+                .find(|clip| clip["Name"] == suffix)
+                .expect("Fire subtype clip missing");
+            assert_eq!(sibling["FrameNum"], clip["FrameNum"]);
+            assert_eq!(sibling["Loop"], clip["Loop"]);
+        }
+        generated.push_str(&format!(
+            "pub const FIRE_{}_FRAMES: u32 = {frames};\n",
+            name.to_uppercase()
+        ));
+    }
+    let ember = npc_clips["gfx/1000.066_ember particle.anm2"]["Animations"]
+        .as_array()
+        .expect("Ember clips missing")
+        .iter()
+        .find(|clip| clip["Name"] == "Idle")
+        .expect("Ember Idle missing");
+    generated.push_str(&format!(
+        "pub const EMBER_IDLE_FRAMES: u32 = {};\n",
+        ember["FrameNum"].as_u64().unwrap()
+    ));
+    for kind in [9, 13, 18, 33, 244] {
         let tag = xml
             .split("<entity ")
             .find(|tag| {

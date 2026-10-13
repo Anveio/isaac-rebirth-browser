@@ -139,6 +139,16 @@
           "references/isaac/rebirth/resources/sfx/unlock.wav",
           "references/isaac/rebirth/resources/sfx/vox death.wav"
         ]
+      },
+      {
+        "kind": "Authored ordinary Fireplace flame page absent from the initial filename inventory",
+        "extractor": "tools/foundation/extract-animations.py",
+        "decoder_sha256": "119af26ad7d962f9fed0b7efaec41962b805eee8154abac600fbae0bffc2cebb",
+        "archive": "graphics.a",
+        "archive_sha256": "b1286fcfc4f3dd899cd225d46db9132a787352b4169b9de56a5d2c65e43ee23e",
+        "output_paths": [
+          "references/isaac/rebirth/resources/gfx/grid/effect_005_fire.png"
+        ]
       }
     ]
   },
@@ -12922,6 +12932,11 @@
       "path": "references/isaac/rebirth/resources/sfx/vox death.wav",
       "bytes": 279136,
       "sha256": "29f5b9dc59b701fd482436a02bc01fa0e1e577da015f4b497d029c553728c498"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/gfx/grid/effect_005_fire.png",
+      "bytes": 19109,
+      "sha256": "56dbfc5dff2517dc3c192cee77849dbd1518d9267a67a8e5520e0c72c264a050"
     }
   ]
 }

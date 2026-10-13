@@ -68,6 +68,10 @@ def observe(pid, context):
                     'hp': struct.unpack_from('<f', raw, 0x484)[0],
                     'maxHp': struct.unpack_from('<f', raw, 0x488)[0],
                     'collisionDamage': struct.unpack_from('<f', raw, 0x48c)[0],
+                    'entityFlags': struct.unpack_from('<I', raw, 0x318)[0],
+                    'authoredGridIndex': struct.unpack_from('<i', raw, 0x430)[0],
+                    'renderOrderOffset': struct.unpack_from('<i', raw, 0x460)[0],
+                    'actorRngState': struct.unpack_from('<I', raw, 0x7c0)[0],
                     'pendingDamage': struct.unpack_from('<f', raw, 0x378)[0],
                     'gridCollisionClass': struct.unpack_from('<I', raw, 0x340)[0],
                     'entityCollisionClass': struct.unpack_from('<I', raw, 0x344)[0],
@@ -117,6 +121,12 @@ def observe(pid, context):
                     result['projectileParameter2'] = struct.unpack_from('<f', more, 0x18)[0]
                     result['projectileFullUpdates'] = struct.unpack_from('<I', more, 0x1c)[0]
                     result['projectileFlags'] = struct.unpack_from('<I', more, 0x20)[0]
+                if result['type'] == 1000 and result['variant'] == 66:
+                    more = read(address + 0x7d4, 0x24)
+                    result['effectLifetimeDivisor'] = struct.unpack_from('<i', more, 0)[0]
+                    result['effectTimeToLive'] = struct.unpack_from('<i', more, 0x1c)[0]
+                    result['effectBirthGameUpdate'] = struct.unpack_from('<I', raw, 0x42c)[0]
+                    result['parentType'], result['parentVariant'] = struct.unpack_from('<II', raw, 0x1c)
                 if struct.unpack_from('<Q', raw, 0)[0] == 0x66ef30:
                     more = read(address + 0xf50, 0x138)
                     result['npcState'] = struct.unpack_from('<I', more, 0)[0]
@@ -124,6 +134,8 @@ def observe(pid, context):
                     result['npcStateFrame'] = struct.unpack_from('<I', more, 8)[0]
                     result['npcFrameAge'] = struct.unpack_from('<I', more, 0x10)[0]
                     result['npcCountdown'] = struct.unpack_from('<I', more, 0x1c)[0]
+                    if result['type'] == 33:
+                        result['fireCountdown'] = struct.unpack_from('<i', more, 0x18)[0]
                     result['npcTarget'] = pair(0x440)
                     result['npcWanderVelocity'] = list(struct.unpack_from('<ff', more, 0x28))
                     result['canShutDoors'] = bool(more[0xec])
