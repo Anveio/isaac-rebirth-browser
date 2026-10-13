@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "scope": "Source functional regular fresh Isaac projectile integration. Native coordinates/RNG never enter production; post-Title/run/ambient/effect MT consumers and poof effects remain incomplete.",
+  "contracts": [
+    {
+      "function": "FireTear",
+      "referenceAddress": "0x5177f0",
+      "bytes": 839,
+      "sha256": "ad305965a6a2655add44649bde0ed24f1e00648eb294432283f7d635b4826810",
+      "contract": "Eye origin plus full velocity is passed to spawn; final falling uniform overrides initializer speed, immediate Tear.Update then subtract stored velocity."
+    },
+    {
+      "function": "TearInit",
+      "referenceAddress": "0x5423d0",
+      "bytes": 341,
+      "sha256": "70547f804d7d7232c7db08eeda83526c1de3d6ce86fe295f35c72118815ad821",
+      "contract": "Consumes discarded uniform followed by regular SFX153 admission; sample draw belongs exclusively to audio.admit."
+    },
+    {
+      "function": "TearUpdate",
+      "referenceAddress": "0x542530",
+      "bytes": 14667,
+      "sha256": "fb88a2df6a2c30a8abe9ff63c3c64dcf5d7597ef1117bd68a77bf8dabdc98440",
+      "contract": "PRE height strictly greater than -5 or prior gridContact marks dying; ground still advances full V, height freezes when dying; next full phase retires it."
+    },
+    {
+      "function": "TearRender",
+      "referenceAddress": "0x5414a0",
+      "bytes": 749,
+      "sha256": "2ae51c4ffb0f38a0ecf3991fa61feefe64f2dfe1c1667e1425a22df08e9291c1",
+      "contract": "Intermediate phase copies actual ground, predicts half stored V and height+fallingSpeed*.5 without changing authoritative height."
+    },
+    {
+      "function": "SetHeight",
+      "referenceAddress": "0x541790",
+      "bytes": 86,
+      "sha256": "1ab369970a44bbcde191b27ad098b44ad7f66989060524847c6bdbceb3358569",
+      "contract": "Fresh falling acceleration<=.001: height*.5-15+max(height+8.5,0)^2 with separate f32 operations."
+    },
+    {
+      "function": "EntityGridContact",
+      "referenceAddress": "0x442b90",
+      "bytes": 4021,
+      "sha256": "8597e1990a9052f595d4a9ec3c934fe4f6b74fd64ed020b33c76420eb68367f2",
+      "contract": "Regular tear grid class4 uses center ground cell after full update; admits collision classes2..5 and excludes grid kind7. Source flag is consumed on next full Tear.Update."
+    },
+    {
+      "function": "GetTearHitParams",
+      "referenceAddress": "0x50d090",
+      "bytes": 3444,
+      "sha256": "38494bad07257850c91a4047ce68cfb5f89bb48627dae41bfb175f4f8c2cc1d7",
+      "contract": "Damage3.5 uses f32 linear .04*damage+.6 followed by double sqrt term times f32 .15; authored radius8 yields8.164994239807129."
+    }
+  ]
+}
