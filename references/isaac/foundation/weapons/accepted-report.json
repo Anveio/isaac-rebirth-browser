@@ -1,14 +1,13 @@
 {
   "schema": 1,
   "status": "pass",
-  "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
-  "scope": "Paired live original/browser weapon cooldown, held/released head clock, shot births, actor birth fence and horizontal birth positions; projected height/range and shared MT routing remain separate work",
   "gateSources": {
-    "tools/e2e/weapons.mjs": "3e8e2352e8d2c76e7cb451cfd664a6985d20e76b3df5079c2a066577505d5f67",
-    "tools/original/foundation-physics-observer.py": "1a46622ef7a75e693ca64c265d6b63840eb5d69f706830daedc4fb891094680f",
+    "tools/e2e/weapons.mjs": "df25c1fc9b1e8c45334eb79aedd48f4cae408e75a8f9639ba8553eb8ab28c99e",
+    "tools/e2e/tear-contracts.mjs": "db3d2de0f2f98d1fdf28734ce020f58a5b15576b48e245869f463d71da7d184f",
+    "tools/original/foundation-physics-observer.py": "0a80c535949ab322bad388b263a93ffaced2b55f79026b97225c39b49cf5c2da",
     "tools/original/native-identity.py": "4fd5591be56fc4e9ad0486d0f2ec2828f6389786245ee09f9d0b3a395ae18acb",
     "tools/original/state-observer.py": "58e3b510abbe5ff57f05844efbdf764e2a02530cda4fa99f538d886d258af6f1",
-    "tools/original/foundation-clock-run.py": "43fb2bf3dd7cc1b6d6dade384184e7bbe9cc8f0bda13aa8ad701583742192afb",
+    "tools/original/foundation-clock-run.py": "b79997f1fdc983a6e6fac74d87c24d2036ea956021fa944d1c0bd7f04e15a243",
     "tools/original/foundation-clock-gate.c": "f517f1fc0edf2bbe17021e529fb41652e991e286bef070b8aecefd32bfa62e75",
     "tools/original/foundation-seeds.py": "dd4633c955e7518e9bc0f0147ddfae46d356468238477a68dc06c86656ccba89",
     "tools/original/debug-run.py": "d785d32c6cc557959be38880a3b046c4040b988fbe3d06d4a8c1f4aa2e833cf5",
@@ -16,27 +15,36 @@
     "tools/foundation/browser.mjs": "60c4bc851470f47e4dd0399148ce0c1edf351d41fbf7f7e15fa823af5948b4c8",
     "tools/foundation/production-server.mjs": "e3152b58e2353319ba0963b30439e33c3cc65f84a8c6ebb765c2812486245952",
     "tools/foundation/verify.mjs": "b28ed8af6bf50a7aa8b6b81f55fd29d0c963285f2d54500d61a4a58925de1d9f",
-    "tools/original/weapons-scenarios.py": "be68d7fe0d9c521d727f20275051abf5f6fc33c1b399fc70dd3837987f704f5c"
+    "tools/original/weapons-scenarios.py": "b63de8e94c600ab34fdad5026bcafee98836f08eacd382a56acba87a8c498085"
   },
-  "gateSourcesEnd": {
-    "tools/e2e/weapons.mjs": "3e8e2352e8d2c76e7cb451cfd664a6985d20e76b3df5079c2a066577505d5f67",
-    "tools/original/foundation-physics-observer.py": "1a46622ef7a75e693ca64c265d6b63840eb5d69f706830daedc4fb891094680f",
-    "tools/original/native-identity.py": "4fd5591be56fc4e9ad0486d0f2ec2828f6389786245ee09f9d0b3a395ae18acb",
-    "tools/original/state-observer.py": "58e3b510abbe5ff57f05844efbdf764e2a02530cda4fa99f538d886d258af6f1",
-    "tools/original/foundation-clock-run.py": "43fb2bf3dd7cc1b6d6dade384184e7bbe9cc8f0bda13aa8ad701583742192afb",
-    "tools/original/foundation-clock-gate.c": "f517f1fc0edf2bbe17021e529fb41652e991e286bef070b8aecefd32bfa62e75",
-    "tools/original/foundation-seeds.py": "dd4633c955e7518e9bc0f0147ddfae46d356468238477a68dc06c86656ccba89",
-    "tools/original/debug-run.py": "d785d32c6cc557959be38880a3b046c4040b988fbe3d06d4a8c1f4aa2e833cf5",
-    "tools/original/with-display.sh": "af469210e803786a60d8632c28a6f2da77bc8ab02cc06be50016ddb25e95b848",
-    "tools/foundation/browser.mjs": "60c4bc851470f47e4dd0399148ce0c1edf351d41fbf7f7e15fa823af5948b4c8",
-    "tools/foundation/production-server.mjs": "e3152b58e2353319ba0963b30439e33c3cc65f84a8c6ebb765c2812486245952",
-    "tools/foundation/verify.mjs": "b28ed8af6bf50a7aa8b6b81f55fd29d0c963285f2d54500d61a4a58925de1d9f",
-    "tools/original/weapons-scenarios.py": "be68d7fe0d9c521d727f20275051abf5f6fc33c1b399fc70dd3837987f704f5c"
+  "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "scope": "Paired live original/browser weapon cooldown, held/released head clock, shot births, actor birth fence and horizontal birth positions",
+  "production": {
+    "sha256": "de79f7ca50f150c88eaf955b6d3b02f8ba3950395ebd2aa38aa0af337d57be04",
+    "files": 832,
+    "source": "/workspace/isaac-worktrees/weapons/dist",
+    "scope": "Immutable snapshot of production build bytes; source/native replay equality is checked separately"
   },
-  "gateSourcesStable": true,
-  "productionSha256": "cf07af1694444b160c07994a81b5611a0d71e750aa1bac576121a65fb0aba594",
-  "reproduceFresh": "source cloud/env.sh && npm run build && npm run test:e2e:weapons",
-  "reproduceRecorded": "source cloud/env.sh && npm run build && npm run test:e2e:weapons -- --scenarios references/isaac/foundation/weapons/scenarios.json",
+  "graphics": {
+    "requestedProfile": "mesa",
+    "actualProfile": "mesa",
+    "renderer": "ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL ES 3.2 Mesa 25.0.7-2+deb13u1)",
+    "vendor": "Google Inc. (Mesa)",
+    "version": "OpenGL ES 3.0 (ANGLE 2.1 git hash: unknown hash)",
+    "displayType": "ANGLE_OPENGL_EGL",
+    "devices": [
+      {
+        "vendorId": 0,
+        "deviceId": 0,
+        "vendorString": "Google Inc. (Mesa)",
+        "deviceString": "ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL ES 3.2 Mesa 25.0.7-2+deb13u1)",
+        "driverVendor": "Mesa",
+        "driverVersion": "25.0.7"
+      }
+    ],
+    "observedFrom": "Chromium SystemInfo.getInfo",
+    "scope": "Observed Chromium graphics backend; shader/pixel equality still requires the original reference comparisons"
+  },
   "cases": [
     {
       "name": "full-first-shot",
@@ -44,7 +52,8 @@
       "direction": "Right",
       "delay": 0,
       "status": "pass",
-      "nativeManifestSha256": "9d3eac2f555c2d8bc4cf39231f8d8dd0fa730d50b742c6ae9882b8c470332149",
+      "nativeManifestSha256": "5cfa4d086dbe1d4f6fe2823ce348816a984bcdc4a0bc082d8bc4554a7593f384",
+      "nativeManifest": "/workspace/isaac-worktrees/weapons/.cache/e2e/weapons/tear-aggregate-final/full-first-shot/original/manifest.json",
       "comparedPresentations": 80,
       "comparedHeldPresentations": 54,
       "comparedReleasePresentations": 26,
@@ -56,7 +65,8 @@
       "direction": "Right",
       "delay": 1,
       "status": "pass",
-      "nativeManifestSha256": "6109ed53267f5fc2cb13a7282769bf3b1d94f9e6f2ed781721e69c117da0cfd2",
+      "nativeManifestSha256": "55e1e400c452c7ac2c12ad2fc53825e880f7d0f872ad268c768336c6e1c37fbb",
+      "nativeManifest": "/workspace/isaac-worktrees/weapons/.cache/e2e/weapons/tear-aggregate-final/intermediate-first-shot/original/manifest.json",
       "comparedPresentations": 80,
       "comparedHeldPresentations": 54,
       "comparedReleasePresentations": 26,
@@ -69,7 +79,8 @@
       "delay": 0,
       "seedValue": 995897653,
       "status": "pass",
-      "nativeManifestSha256": "6fd0fce26cba33dec8cc88925f2edc08085572a3d47c8a6ff3213e4f58017520",
+      "nativeManifestSha256": "b4c303f75ffb14aa61a1f91e2891066aee16f51eaee942c742654e90670af2e0",
+      "nativeManifest": "/workspace/isaac-worktrees/weapons/.cache/e2e/weapons/tear-aggregate-final/random-0/original/manifest.json",
       "comparedPresentations": 80,
       "comparedHeldPresentations": 54,
       "comparedReleasePresentations": 26,
@@ -82,7 +93,8 @@
       "delay": 1,
       "seedValue": 3541238428,
       "status": "pass",
-      "nativeManifestSha256": "443e1382c0659a54b816490cb6152c62f6c24f945333ad6e22835edcd6437af0",
+      "nativeManifestSha256": "49531dc0e7aa5d6b8a730a7d3f95a528d7e61c31653e4bb882732c4ca0ee34c0",
+      "nativeManifest": "/workspace/isaac-worktrees/weapons/.cache/e2e/weapons/tear-aggregate-final/random-1/original/manifest.json",
       "comparedPresentations": 80,
       "comparedHeldPresentations": 54,
       "comparedReleasePresentations": 26,
@@ -95,7 +107,8 @@
       "delay": 0,
       "seedValue": 1274196469,
       "status": "pass",
-      "nativeManifestSha256": "079b78ba22ec97aa1db681c7a1f892bb26f6240c719ea251a287d645686ab3d6",
+      "nativeManifestSha256": "bf77f900d37584e7428e839ed7d1118c47e2db914b13d78e921f1b5a1085afdc",
+      "nativeManifest": "/workspace/isaac-worktrees/weapons/.cache/e2e/weapons/tear-aggregate-final/random-2/original/manifest.json",
       "comparedPresentations": 80,
       "comparedHeldPresentations": 54,
       "comparedReleasePresentations": 26,
@@ -108,11 +121,29 @@
       "delay": 1,
       "seedValue": 3996815903,
       "status": "pass",
-      "nativeManifestSha256": "260d3a304793e279f382eb936cc472eedd4acc6f90ddefbc597ade06e9c077b2",
+      "nativeManifestSha256": "78ad181fa434d15cf9263361cef15a9004b73b632a77b30c247d1e687ba3ed89",
+      "nativeManifest": "/workspace/isaac-worktrees/weapons/.cache/e2e/weapons/tear-aggregate-final/random-3/original/manifest.json",
       "comparedPresentations": 80,
       "comparedHeldPresentations": 54,
       "comparedReleasePresentations": 26,
       "observedBirths": 3
     }
-  ]
+  ],
+  "gateSourcesEnd": {
+    "tools/e2e/weapons.mjs": "df25c1fc9b1e8c45334eb79aedd48f4cae408e75a8f9639ba8553eb8ab28c99e",
+    "tools/e2e/tear-contracts.mjs": "db3d2de0f2f98d1fdf28734ce020f58a5b15576b48e245869f463d71da7d184f",
+    "tools/original/foundation-physics-observer.py": "0a80c535949ab322bad388b263a93ffaced2b55f79026b97225c39b49cf5c2da",
+    "tools/original/native-identity.py": "4fd5591be56fc4e9ad0486d0f2ec2828f6389786245ee09f9d0b3a395ae18acb",
+    "tools/original/state-observer.py": "58e3b510abbe5ff57f05844efbdf764e2a02530cda4fa99f538d886d258af6f1",
+    "tools/original/foundation-clock-run.py": "b79997f1fdc983a6e6fac74d87c24d2036ea956021fa944d1c0bd7f04e15a243",
+    "tools/original/foundation-clock-gate.c": "f517f1fc0edf2bbe17021e529fb41652e991e286bef070b8aecefd32bfa62e75",
+    "tools/original/foundation-seeds.py": "dd4633c955e7518e9bc0f0147ddfae46d356468238477a68dc06c86656ccba89",
+    "tools/original/debug-run.py": "d785d32c6cc557959be38880a3b046c4040b988fbe3d06d4a8c1f4aa2e833cf5",
+    "tools/original/with-display.sh": "af469210e803786a60d8632c28a6f2da77bc8ab02cc06be50016ddb25e95b848",
+    "tools/foundation/browser.mjs": "60c4bc851470f47e4dd0399148ce0c1edf351d41fbf7f7e15fa823af5948b4c8",
+    "tools/foundation/production-server.mjs": "e3152b58e2353319ba0963b30439e33c3cc65f84a8c6ebb765c2812486245952",
+    "tools/foundation/verify.mjs": "b28ed8af6bf50a7aa8b6b81f55fd29d0c963285f2d54500d61a4a58925de1d9f",
+    "tools/original/weapons-scenarios.py": "b63de8e94c600ab34fdad5026bcafee98836f08eacd382a56acba87a8c498085"
+  },
+  "gateSourcesStable": true
 }

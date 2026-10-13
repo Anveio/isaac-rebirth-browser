@@ -2,11 +2,11 @@
   "schema": 1,
   "status": "fail",
   "scope": "Exact original/browser functional holdout replay after source TearMotion integration; every case executed, all failures retained. Complete RNG and pixel parity remain separate.",
-  "report": ".cache/e2e/paired/lifecycle-rebased-holdouts/report.json",
-  "reportSha256": "1d9b11ea70da7b112495a9fdfead3618f922a39453f340ef9b2bdf07b554b080",
+  "report": ".cache/e2e/paired/tear-aggregate-final/report.json",
+  "reportSha256": "3699fe18a9136e72733bdde524fae5485b549004c6e4ed1a70ea92f59e1f0cc6",
   "production": {
-    "sha256": "4957001cf75e8754813707c8c058b149330747f5af3d5e531bd5cecd5a02ed6d",
-    "files": 531,
+    "sha256": "de79f7ca50f150c88eaf955b6d3b02f8ba3950395ebd2aa38aa0af337d57be04",
+    "files": 832,
     "source": "/workspace/isaac-worktrees/weapons/dist",
     "scope": "Immutable snapshot of production build bytes; source/native replay equality is checked separately"
   },
@@ -17,7 +17,7 @@
       "status": "pass",
       "passedCheckpoints": 18,
       "totalCheckpoints": 18,
-      "caseDirectory": "/workspace/isaac-worktrees/weapons/.cache/e2e/paired/lifecycle-rebased-holdouts/00-paired-random-run",
+      "caseDirectory": "/workspace/isaac-worktrees/weapons/.cache/e2e/paired/tear-aggregate-final/00-paired-random-run",
       "failedFields": []
     },
     {
@@ -25,7 +25,7 @@
       "status": "pass",
       "passedCheckpoints": 18,
       "totalCheckpoints": 18,
-      "caseDirectory": "/workspace/isaac-worktrees/weapons/.cache/e2e/paired/lifecycle-rebased-holdouts/01-paired-random-run",
+      "caseDirectory": "/workspace/isaac-worktrees/weapons/.cache/e2e/paired/tear-aggregate-final/01-paired-random-run",
       "failedFields": []
     },
     {
@@ -33,7 +33,7 @@
       "status": "fail",
       "passedCheckpoints": 16,
       "totalCheckpoints": 18,
-      "caseDirectory": "/workspace/isaac-worktrees/weapons/.cache/e2e/paired/lifecycle-rebased-holdouts/02-paired-random-run",
+      "caseDirectory": "/workspace/isaac-worktrees/weapons/.cache/e2e/paired/tear-aggregate-final/02-paired-random-run",
       "failedFields": [
         {
           "label": "random-resumed",
@@ -77,7 +77,7 @@
       "status": "fail",
       "passedCheckpoints": 25,
       "totalCheckpoints": 28,
-      "caseDirectory": "/workspace/isaac-worktrees/weapons/.cache/e2e/paired/lifecycle-rebased-holdouts/03-paired-room-combat",
+      "caseDirectory": "/workspace/isaac-worktrees/weapons/.cache/e2e/paired/tear-aggregate-final/03-paired-room-combat",
       "failedFields": [
         {
           "label": "rock-bomb-explosion",
