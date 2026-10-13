@@ -1,0 +1,414 @@
+{
+  "schema": 1,
+  "status": "pass",
+  "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "production": {
+    "sha256": "9817476f242fead478b06fe853c6ca9c75e9d2d7c450c06e8ed99a1a2a41f2dc",
+    "files": 834,
+    "source": "/workspace/isaac-worktrees/ci-speed/dist",
+    "scope": "Immutable snapshot of production build bytes; source/native replay equality is checked separately"
+  },
+  "selection": {
+    "scope": "Complete selected cohort"
+  },
+  "gateSources": {
+    "tools/e2e/keys.mjs": "3dd3756fcf8fa07d2befc64cb10fee481a43a9eabe7f4c6cfbe80bd654923f61",
+    "tools/original/key-scenarios.py": "19e7c89700ad5d293daf68db8cbc76c0ed66421963421760022c7ee569e11797",
+    "tools/original/rock-blast-scenarios.py": "f896f63cc2f4e66487c7c75d68561b1efb46b989cf92dad09f687f3c4621ca65",
+    "tools/foundation/decode-rooms.py": "4640cce2c99d0ef09d6691cf42c021f012e16ed3752bace965ad18dca7250f1a",
+    "tools/original/foundation-seeds.py": "dd4633c955e7518e9bc0f0147ddfae46d356468238477a68dc06c86656ccba89",
+    "tools/original/foundation-pickup-observe.py": "db3fb995087575a039b77c8b87e07bbaa3cdef208adea166b8de07055754b90b",
+    "tools/original/foundation-clock-run.py": "b79997f1fdc983a6e6fac74d87c24d2036ea956021fa944d1c0bd7f04e15a243",
+    "tools/original/foundation-clock-gate.c": "f517f1fc0edf2bbe17021e529fb41652e991e286bef070b8aecefd32bfa62e75",
+    "tools/original/foundation-clock-verify.py": "c488100a187b44803c06374535715eaa5a7cde9d4513f6e866e090367d4f2054",
+    "tools/original/state-observer.py": "58e3b510abbe5ff57f05844efbdf764e2a02530cda4fa99f538d886d258af6f1",
+    "tools/original/with-display.sh": "af469210e803786a60d8632c28a6f2da77bc8ab02cc06be50016ddb25e95b848",
+    "tools/foundation/production-server.mjs": "e3152b58e2353319ba0963b30439e33c3cc65f84a8c6ebb765c2812486245952",
+    "tools/foundation/browser.mjs": "60c4bc851470f47e4dd0399148ce0c1edf351d41fbf7f7e15fa823af5948b4c8",
+    "web/trace.ts": "e6a92aa76585548546571c1eb05cdf44d7c9772ded14ef11f0f05144fb335961",
+    "tools/original/key-observer.py": "a440fb0667a5885e3f114aae6a315c7ad893c398c0398df156ddc4c0c7ae8170",
+    "tools/original/audio-observer.py": "448bc722f76f890c2dd07dc3635c65ceebe1fdcafe30a2ac0b828f59df491b0c"
+  },
+  "scope": "Live public-seed secret-room regular key admission, local subtype RNG, full-phase animation/contact/collection, inventory, actor cleanup and actual native key SFX slot admission. Golden keys, item modifiers, keeper NPC behavior, total shared MT/sample identity, key spending and pixels remain unaccepted.",
+  "cases": [
+    {
+      "name": "key-phase-0",
+      "code": "JF2DSF92",
+      "seedValue": 1319061482,
+      "delay": 0,
+      "actions": [
+        {
+          "key": null,
+          "frames": 60
+        },
+        {
+          "key": "e",
+          "frames": 1
+        },
+        {
+          "key": "w",
+          "frames": 35
+        },
+        {
+          "key": null,
+          "frames": 20
+        },
+        {
+          "key": null,
+          "frames": 78
+        },
+        {
+          "key": "s",
+          "frames": 45
+        },
+        {
+          "key": null,
+          "frames": 40
+        },
+        {
+          "key": "a",
+          "frames": 13
+        },
+        {
+          "key": null,
+          "frames": 20
+        },
+        {
+          "key": "s",
+          "frames": 25
+        },
+        {
+          "key": null,
+          "frames": 30
+        },
+        {
+          "key": "d",
+          "frames": 25
+        },
+        {
+          "key": null,
+          "frames": 30
+        }
+      ],
+      "entropy": "Contrived public collection phase offset",
+      "status": "pass",
+      "failures": [],
+      "seedReadback": {
+        "seedText": "JF2DSF92",
+        "seedValid": true,
+        "seededRun": true,
+        "runSeed": "JF2DSF92",
+        "runSeedValue": 1319061482
+      },
+      "trace": {
+        "inputTraceTruncated": false,
+        "stateHistoryTruncated": false,
+        "stateHistoryTruncationReason": null,
+        "inputEncodedBytes": 11738,
+        "stateEncodedBytes": 31401148
+      },
+      "comparedPresentations": 422,
+      "passedPresentations": 422,
+      "admittedKeys": 2,
+      "collections": [
+        {
+          "presentation": 353,
+          "amount": 1
+        },
+        {
+          "presentation": 393,
+          "amount": 1
+        }
+      ],
+      "detonation": 181,
+      "nativeManifestSha256": "d8d0a4a34d92c2c0a7809203958a3efba9c3261ae2ddab036895f1420cddca9a",
+      "nativeManifest": "/workspace/isaac-worktrees/ci-speed/.cache/e2e/aggregate-keys/key-phase-0/original/manifest.json"
+    },
+    {
+      "name": "key-phase-1",
+      "code": "JF2DSF92",
+      "seedValue": 1319061482,
+      "delay": 1,
+      "actions": [
+        {
+          "key": null,
+          "frames": 61
+        },
+        {
+          "key": "e",
+          "frames": 1
+        },
+        {
+          "key": "w",
+          "frames": 35
+        },
+        {
+          "key": null,
+          "frames": 20
+        },
+        {
+          "key": null,
+          "frames": 78
+        },
+        {
+          "key": "s",
+          "frames": 45
+        },
+        {
+          "key": null,
+          "frames": 40
+        },
+        {
+          "key": "a",
+          "frames": 13
+        },
+        {
+          "key": null,
+          "frames": 20
+        },
+        {
+          "key": "s",
+          "frames": 25
+        },
+        {
+          "key": null,
+          "frames": 30
+        },
+        {
+          "key": "d",
+          "frames": 25
+        },
+        {
+          "key": null,
+          "frames": 30
+        }
+      ],
+      "entropy": "Contrived public collection phase offset",
+      "status": "pass",
+      "failures": [],
+      "seedReadback": {
+        "seedText": "JF2DSF92",
+        "seedValid": true,
+        "seededRun": true,
+        "runSeed": "JF2DSF92",
+        "runSeedValue": 1319061482
+      },
+      "trace": {
+        "inputTraceTruncated": false,
+        "stateHistoryTruncated": false,
+        "stateHistoryTruncationReason": null,
+        "inputEncodedBytes": 11763,
+        "stateEncodedBytes": 31445898
+      },
+      "comparedPresentations": 423,
+      "passedPresentations": 423,
+      "admittedKeys": 2,
+      "collections": [
+        {
+          "presentation": 355,
+          "amount": 1
+        },
+        {
+          "presentation": 395,
+          "amount": 1
+        }
+      ],
+      "detonation": 181,
+      "nativeManifestSha256": "98adea32f69757c85b8f2754f057d3ea54524a3a71161b1e851550e109364256",
+      "nativeManifest": "/workspace/isaac-worktrees/ci-speed/.cache/e2e/aggregate-keys/key-phase-1/original/manifest.json"
+    },
+    {
+      "name": "random-key-0",
+      "code": "6XF1JKX1",
+      "seedValue": 3945008091,
+      "delay": 0,
+      "actions": [
+        {
+          "key": null,
+          "frames": 60
+        },
+        {
+          "key": "e",
+          "frames": 1
+        },
+        {
+          "key": "w",
+          "frames": 35
+        },
+        {
+          "key": null,
+          "frames": 20
+        },
+        {
+          "key": null,
+          "frames": 78
+        },
+        {
+          "key": "s",
+          "frames": 45
+        },
+        {
+          "key": null,
+          "frames": 40
+        },
+        {
+          "key": "a",
+          "frames": 13
+        },
+        {
+          "key": null,
+          "frames": 20
+        },
+        {
+          "key": "s",
+          "frames": 25
+        },
+        {
+          "key": null,
+          "frames": 30
+        },
+        {
+          "key": "d",
+          "frames": 25
+        },
+        {
+          "key": null,
+          "frames": 30
+        }
+      ],
+      "entropy": "OS secrets",
+      "discoveryAttempts": 41,
+      "status": "pass",
+      "failures": [],
+      "seedReadback": {
+        "seedText": "6XF1JKX1",
+        "seedValid": true,
+        "seededRun": true,
+        "runSeed": "6XF1JKX1",
+        "runSeedValue": 3945008091
+      },
+      "trace": {
+        "inputTraceTruncated": false,
+        "stateHistoryTruncated": false,
+        "stateHistoryTruncationReason": null,
+        "inputEncodedBytes": 11738,
+        "stateEncodedBytes": 31414450
+      },
+      "comparedPresentations": 422,
+      "passedPresentations": 422,
+      "admittedKeys": 2,
+      "collections": [
+        {
+          "presentation": 353,
+          "amount": 1
+        },
+        {
+          "presentation": 393,
+          "amount": 1
+        }
+      ],
+      "detonation": 181,
+      "nativeManifestSha256": "375d7c96725a781c4ed69335477e6d2e5e47748a1b8a4cada75fe466f120fdc7",
+      "nativeManifest": "/workspace/isaac-worktrees/ci-speed/.cache/e2e/aggregate-keys/random-key-0/original/manifest.json"
+    },
+    {
+      "name": "random-key-1",
+      "code": "T33GSE3T",
+      "seedValue": 2174556142,
+      "delay": 1,
+      "actions": [
+        {
+          "key": null,
+          "frames": 61
+        },
+        {
+          "key": "e",
+          "frames": 1
+        },
+        {
+          "key": "w",
+          "frames": 35
+        },
+        {
+          "key": null,
+          "frames": 20
+        },
+        {
+          "key": null,
+          "frames": 78
+        },
+        {
+          "key": "s",
+          "frames": 45
+        },
+        {
+          "key": null,
+          "frames": 40
+        },
+        {
+          "key": "a",
+          "frames": 13
+        },
+        {
+          "key": null,
+          "frames": 20
+        },
+        {
+          "key": "s",
+          "frames": 25
+        },
+        {
+          "key": null,
+          "frames": 30
+        },
+        {
+          "key": "d",
+          "frames": 25
+        },
+        {
+          "key": null,
+          "frames": 30
+        }
+      ],
+      "entropy": "OS secrets",
+      "discoveryAttempts": 339,
+      "status": "pass",
+      "failures": [],
+      "seedReadback": {
+        "seedText": "T33GSE3T",
+        "seedValid": true,
+        "seededRun": true,
+        "runSeed": "T33GSE3T",
+        "runSeedValue": 2174556142
+      },
+      "trace": {
+        "inputTraceTruncated": false,
+        "stateHistoryTruncated": false,
+        "stateHistoryTruncationReason": null,
+        "inputEncodedBytes": 11763,
+        "stateEncodedBytes": 31647150
+      },
+      "comparedPresentations": 423,
+      "passedPresentations": 423,
+      "admittedKeys": 2,
+      "collections": [
+        {
+          "presentation": 355,
+          "amount": 1
+        },
+        {
+          "presentation": 395,
+          "amount": 1
+        }
+      ],
+      "detonation": 181,
+      "nativeManifestSha256": "3293d20516a9ff50da382d773c0b02f9e17d1c9b3f5ac51b7e476836582b5daa",
+      "nativeManifest": "/workspace/isaac-worktrees/ci-speed/.cache/e2e/aggregate-keys/random-key-1/original/manifest.json"
+    }
+  ],
+  "gateSourcesStable": true,
+  "sourceCommit": "e63723ad0972f93e63606ec2b500465538e325c3",
+  "verificationScope": "Fresh complete selected natural-key cohort on menu+seed-dialog+NPC+secret composite e63723a: two contrived phases and two new recorded OS-random seeds. This build precedes Music controller and free treasure-coin integration; caps, golden keys, Keeper behavior and key spending remain separate.",
+  "reportPath": "/workspace/isaac-worktrees/ci-speed/.cache/e2e/aggregate-keys/report.json",
+  "reportSha256": "82c0fba800b748a93fff44c2712365b2f452146c9117e2cb4752a60140899721"
+}

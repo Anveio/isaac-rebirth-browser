@@ -280,6 +280,24 @@
       "passingCheckpoints": 35,
       "exactPixelCheckpoints": 14,
       "evidence": "history/9817476f242f-regressions.json"
+    },
+    {
+      "name": "menuNpcSecretKeysAggregateNaturalKeys",
+      "sourceCommit": "e63723ad0972f93e63606ec2b500465538e325c3",
+      "report": "/workspace/isaac-worktrees/ci-speed/.cache/e2e/aggregate-keys/report.json",
+      "reportSha256": "82c0fba800b748a93fff44c2712365b2f452146c9117e2cb4752a60140899721",
+      "status": "pass",
+      "production": {
+        "sha256": "9817476f242fead478b06fe853c6ca9c75e9d2d7c450c06e8ed99a1a2a41f2dc",
+        "files": 834,
+        "source": "/workspace/isaac-worktrees/ci-speed/dist",
+        "scope": "Immutable snapshot of production build bytes; source/native replay equality is checked separately"
+      },
+      "scope": "Fresh complete selected natural-key cohort on menu+seed-dialog+NPC+secret composite e63723a: two contrived phases and two new recorded OS-random seeds. This build precedes Music controller and free treasure-coin integration; caps, golden keys, Keeper behavior and key spending remain separate.",
+      "cases": 4,
+      "comparedPresentations": 1690,
+      "passingPresentations": 1690,
+      "evidence": "history/9817476f242f-natural-keys.json"
     }
   ]
 }
