@@ -1,0 +1,124 @@
+{
+  "schema": 1,
+  "status": "pass",
+  "mode": "retained-hosted-original/fresh-browser-recovery",
+  "scope": "Evidence writer and bookkeeping recovery only: both complete real hosted native captures compared with fresh DOM/browser runs on older source472b154 artifact01bac. No fresh-original/latest-main runtime acceptance. Default checked-in CI gate always launches both games fresh.",
+  "producerHead": "2e283758893f2cb35a799bc858daf30764624f4c",
+  "baseMainHead": "772a0768247d163cc59b615a4b2c94994805fec7",
+  "hosted": {
+    "runId": 38449613521,
+    "artifactId": 11840650851,
+    "producerHead": "1e2f538bfa2f4be8c612f0432db9441d9e3ec8e3",
+    "artifactSha256": "6bc8647cf5c73f06dba28ec22027f796541683c50570f659c4311753fe833057",
+    "url": "https://github.com/Anveio/isaac-rebirth-browser/actions/runs/38449613521/artifacts/11840650851",
+    "originalFailure": "W31 completed936 comparisons but RangeError Invalid string length prevented evidence writing and subsequent provenance/backend guards; absent comparisonFailures must not be read as zero field failures. OS7X completed750. Original failed report preserved.",
+    "report": {
+      "path": ".cache/e2e/key-door-evidence/hosted-38449613521/report.json",
+      "sha256": "7f697b3bcad56c154c9e04b6a802a8beeb692ccd3bada942519dba087330f59c"
+    },
+    "extractionJournal": {
+      "path": ".cache/coordination/key-door-evidence/hosted-extraction.json",
+      "sha256": "f926b3e6b201d79a527e4f939abef388b5faf4d6c62833845de237269219b4da"
+    }
+  },
+  "preservedFailedRecovery": {
+    "report": {
+      "path": ".cache/e2e/key-door-evidence/recovery-main-772/report.json",
+      "sha256": "472ff8fc07867979558d5493e8b80af132329def315998e9d4efa0b4dd8e50a3"
+    },
+    "scope": "Setup-only path rejection: hosted absolute frame paths are absent locally. Both cases failed validation before browser comparisons. Source manifest/tape/fields unchanged."
+  },
+  "pathRelocation": {
+    "wrapper": ".cache/coordination/key-door-evidence/relocated-validator.py",
+    "sha256": "f9da93b859ab5477359f72e9892fd1018871130917f455e100341b3984dfea84",
+    "scope": "Only Path.is_file for the exact hosted filesystem prefix is resolved to independently ZIP-verified retained files; no source manifest/tape/log/observation values or source validator change."
+  },
+  "report": {
+    "path": ".cache/e2e/key-door-evidence/recovery2-main-772/report.json",
+    "sha256": "08b99a06e3e860cb85ccc8ffd9adb410e6cf0d17605b80f95049d2abeb8b3d18"
+  },
+  "independentAudit": {
+    "path": ".cache/coordination/key-door-evidence/recovery-audit.json",
+    "sha256": "9ed3a4a2b7a1edb9c5bbe9abff97dd3edfd6bb3719d9a56e34c5f5db94a99498"
+  },
+  "independentVerifier": {
+    "path": ".cache/coordination/key-door-evidence/audit-recovery.py",
+    "sha256": "3e52088a86845eb9162a46c22b4e4b848b0240cde4a8d3c19d4653ce531b5871"
+  },
+  "comparators": {
+    "tools/e2e/traversal.mjs": "c5db62d36e8394dcccfd53bbc5f39ac8e288c6108ef775ee8c7b8e1cc5362b44",
+    "tools/foundation/browser-evidence.mjs": "883a7a122be591ca79bb9bd57b9f44425bc232b88c6b643392f39e2a2bb89978",
+    ".cache/coordination/key-door-evidence/recover.mjs": "e566922fa28bc8f8eb36620039b405dd7d2e5f14940167fc52abdf4e24f43006",
+    ".cache/coordination/key-door-evidence/pinned-server.mjs": "e744b41e623e83eb3301f2e2b5f696bd2e5a3f54131b6ab222f79f95fd315e93",
+    ".cache/coordination/key-door-evidence/relocated-validator.py": "f9da93b859ab5477359f72e9892fd1018871130917f455e100341b3984dfea84"
+  },
+  "production": {
+    "sha256": "01bac4e3fd8e11ecfd400ce205a29e939acba46dfa8d560a3440f9ccbf4c718e",
+    "files": 930,
+    "source": "/workspace/isaac-rebirth-browser/dist",
+    "sourceHead": "472b154",
+    "scope": "Root-owned closed older artifact, read-only recovery with exact before/end hashes; not latest-main runtime proof"
+  },
+  "artifactBeforeEnd": {
+    "status": "pass",
+    "pin": "01bac4e3fd8e11ecfd400ce205a29e939acba46dfa8d560a3440f9ccbf4c718e",
+    "before": {
+      "sha256": "01bac4e3fd8e11ecfd400ce205a29e939acba46dfa8d560a3440f9ccbf4c718e",
+      "files": 930
+    },
+    "after": {
+      "sha256": "01bac4e3fd8e11ecfd400ce205a29e939acba46dfa8d560a3440f9ccbf4c718e",
+      "files": 930
+    },
+    "sourceHead": "472b154"
+  },
+  "cases": [
+    {
+      "seed": "W31RQ6TH",
+      "phases": 936,
+      "commands": 1010,
+      "callbackStates": 3,
+      "stateHistoryTruncated": true,
+      "inputTraceTruncated": false,
+      "backendStateTruncated": false,
+      "nativeManifestSha256": "896f53cf1e835bc96255090a17535224e7a54fdba3ef5eabc6dd3072419c7020",
+      "browserEvidence": {
+        "path": "/workspace/isaac-worktrees/e2e-ci/.cache/e2e/key-door-evidence/recovery2-main-772/W31RQ6TH/browser-states.json.gz",
+        "encoding": "gzip",
+        "rawBytes": 207229599,
+        "rawSha256": "9e1b08b02f3f8e6a957c6379f04703dcca6ef8046e6efd5d33c348932a318036",
+        "archiveBytes": 25463955,
+        "archiveSha256": "43413f94f183154a99e3dc12d571f589ae4c6b95374141517f8abb9524c036ee",
+        "scope": "Every selected phase retains its full actual snapshot, native comparisons, complete public commands and backend callbacks. JSON is written in lossless chunks without truncating snapshots or creating one whole-cohort string. Separate trace caps are disclosed; decompress before replay or inspection"
+      }
+    },
+    {
+      "seed": "7XGY2Q9P",
+      "phases": 750,
+      "commands": 820,
+      "callbackStates": 3,
+      "stateHistoryTruncated": true,
+      "inputTraceTruncated": false,
+      "backendStateTruncated": false,
+      "nativeManifestSha256": "fa70a4cace151ffa5e66f3a6b036695784b42300fa4cced6e808aa87c815a373",
+      "browserEvidence": {
+        "path": "/workspace/isaac-worktrees/e2e-ci/.cache/e2e/key-door-evidence/recovery2-main-772/7XGY2Q9P/browser-states.json.gz",
+        "encoding": "gzip",
+        "rawBytes": 175510081,
+        "rawSha256": "23ab61b20704348e7254a953c0a5f0f0c0246aab311a91649d7b33e3d8a20948",
+        "archiveBytes": 21411846,
+        "archiveSha256": "bf7dcf0c5a272d5855feda974fedbcb4ecbca4b7c74782c86df83cc2418d9f33",
+        "scope": "Every selected phase retains its full actual snapshot, native comparisons, complete public commands and backend callbacks. JSON is written in lossless chunks without truncating snapshots or creating one whole-cohort string. Separate trace caps are disclosed; decompress before replay or inspection"
+      }
+    }
+  ],
+  "nativeArchiveJournal": {
+    "path": ".cache/coordination/key-door-evidence/closed-native-manifests-20261013.json",
+    "sha256": "23b862c903186a813e9df0f734e2c9c831c1965081df7f51f8e4785b01465c97"
+  },
+  "exclusions": [
+    "Latest-main runtime parity and a fresh original process are not established by this recovery.",
+    "Keeper damage/death/drop, other room shapes and later-floor/exits remain separate.",
+    "Selected full snapshots are complete; separate bounded generic state history remains explicitly truncated."
+  ]
+}
