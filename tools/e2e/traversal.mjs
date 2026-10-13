@@ -224,11 +224,18 @@ try {
             `${label}:complete supported native admission multiset with subtype/seed/position`);
         } else phaseAssert.deepEqual(admission, admissions.get(state.currentRoom), `${label}:return must retain the first selected authored groups`);
         states.push({ label, currentRoom: state.currentRoom, descriptor: state.room.descriptor, spawns: admission,
-          player: state.player, damageCooldown: state.damageCooldown, nativePosition: actor.position,
+          player: state.player, inventory: state.inventory, nativeKeys: actor.keyInventory,
+          combatClear: state.room.combatClear, nativeCombatClear: descriptor.combatClear,
+          damageCooldown: state.damageCooldown, nativePosition: actor.position,
           nativeVelocity: actor.velocity, nativeHp: actor.redHp, nativeDamageCountdown: actor.damageCountdown,
           roomDisplayFlags: state.roomDisplayFlags, minimap: state.minimap,
           nativeRoomDisplayFlags: source.descriptors.map(room => room.displayFlags),
           doors: state.room.appearance.doors,
+          doorMetadata: state.room.grid?.cells.flatMap((cell, index) => cell.entity?.kind === 16 ? [{index, ...cell.entity}] : []) || [],
+          nativeDoorMetadata: observed.contents.grid.filter(cell => cell.type === 16),
+          nativeBackdropType: observed.contents.room.backdropType,
+          unlockSound: scenario.doorContract === 'key' ? state.audio.slots[156] : undefined,
+          nativeUnlockSound: observed.doorSound,
           rockMetadata: state.room.grid?.cells.flatMap((cell, index) => [2, 5, 6].includes(cell.entity?.kind)
             ? [{index, ...cell.entity}] : []) || [],
           visitedRooms: state.visitedRooms, transition: state.roomTransition });
