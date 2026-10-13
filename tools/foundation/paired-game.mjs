@@ -236,7 +236,7 @@ function comparePair(caseData, native, browser, directory, exactPixels) {
 export async function runPairedGate({ output, selected, randomCount = 2, replaySeeds = [], replayCases = [], exactPixels = false, productionDirectory,
   nativeFrameTimeout = 60 }) {
   assert.ok(Number.isFinite(nativeFrameTimeout) && nativeFrameTimeout > 0 && nativeFrameTimeout <= 300,
-    'Native frame timeout must be more than0 and at most300 host-wall seconds');
+    'Native frame timeout must be more than 0 and at most 300 host-wall seconds');
   mkdirSync(output, { recursive: true });
   const declarations = await pairedScenarioDeclarations();
   const known = new Set(declarations.map(item => item.id));
