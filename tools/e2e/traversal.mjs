@@ -425,13 +425,21 @@ try {
         scope: 'Every selected phase retains its full actual browser snapshot, alongside selected native comparisons, complete public commands and backend callbacks. The separate trace history caps are disclosed in traceHistory; decompress before replay or inspection',
       };
       assertInputProvenance(trace, expectedCommands, scenario.runSeed);
+      row.traceHistory = { truncated: trace.truncated, inputTraceTruncated: trace.inputTraceTruncated,
+        stateHistoryTruncated: trace.stateHistoryTruncated, retainedStates: trace.states.length,
+        stateEncodedBytes: trace.stateEncodedBytes, maxStateEncodedBytes: trace.maxStateEncodedBytes,
+        backendEvents: trace.backendEvents.length, retainedCallbackStates: trace.backendEvents.filter(event => event.state).length,
+        backendStateTruncated: trace.backendStateTruncated, backendStateTruncationReason: trace.backendStateTruncationReason,
+        backendStateEncodedBytes: trace.backendStateEncodedBytes, maxBackendStateEncodedBytes: trace.maxBackendStateEncodedBytes };
+      assert.equal(trace.backendStateTruncated, false, 'Every actual callback state must fit its explicit bounded history');
+      assert.ok(trace.backendEvents.every(event => event.state?.schema === 1),
+        'Every actual asynchronous callback must retain its own complete state; phase snapshots cannot replace it');
       assertSeededRun(await page.evaluate(() => window.game.snapshot()), scenario.code, scenario.runSeed);
       assert.deepEqual(errors, []);
       Object.assign(row, { status: comparisonFailures.length ? 'fail' : 'pass', sourceManifest, provenance, visitedRooms: [...observedRooms], comparisonFailures,
         inputProvenance: { status: 'pass', commands: trace.commands.length, initialSeed: trace.initialSeed,
           bootEpochSeed: trace.bootEpochSeed, manualSeed: scenario.code },
-        traceHistory: { truncated: trace.truncated, inputTraceTruncated: trace.inputTraceTruncated, stateHistoryTruncated: trace.stateHistoryTruncated,
-          retainedStates: trace.states.length, stateEncodedBytes: trace.stateEncodedBytes, maxStateEncodedBytes: trace.maxStateEncodedBytes } });
+      });
     } catch (error) { row.error = String(error); }
     finally { await page?.close(); report.cases.push(row); }
   }
