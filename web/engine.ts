@@ -93,7 +93,7 @@ export interface Room {
     state: number; frameAge: number; animationFrame: number; shadowSize: number; dead: boolean; removed: boolean;
     damage: {pendingDamage: number; pendingFlags: number} }[];
   authoredActorOrder: {kind: "npc" | "pickup"; id: number}[];
-  combatClear: boolean; combatClearCountdown: number;
+  combatClear: boolean; combatClearCountdown: number; combatShutDoorSlots: number[];
   grid: { width: number; height: number; cells: {selector: number; entity: {kind: number; variant: number; state: number; collisionClass: number; spawnSeed: number} | null}[] } | null;
 }
 export interface Rect { x: number; y: number; width: number; height: number; }

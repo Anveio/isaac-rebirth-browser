@@ -322,11 +322,20 @@ fn change_doors(state: &mut State, open: bool) {
     for door in &mut state.room.appearance.doors {
         if !open && door.state == "Opened" {
             door.state = "Closed".into();
+            if !state.room.combat_shut_door_slots.contains(&door.slot) {
+                state.room.combat_shut_door_slots.push(door.slot);
+            }
             changed.push(door.world_position);
-        } else if open && door.state == "Closed" {
+        } else if open
+            && door.state == "Closed"
+            && state.room.combat_shut_door_slots.contains(&door.slot)
+        {
             door.state = "Opened".into();
             changed.push(door.world_position);
         }
+    }
+    if open {
+        state.room.combat_shut_door_slots.clear();
     }
     if let Some(grid) = &mut state.room.grid {
         for position in changed {
