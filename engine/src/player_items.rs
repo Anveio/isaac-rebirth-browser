@@ -315,7 +315,22 @@ fn normalize_black_hearts(player: &mut crate::Player) {
     }
 }
 
-fn add_soul_hearts(player: &mut crate::Player, delta: i32) {
+/// Normal-Isaac branch of5081b0, in native half-heart units.
+pub(crate) fn add_max_hearts(player: &mut crate::Player, delta: i32) {
+    player.max_hp = (i32::from(player.max_hp).wrapping_add(delta).clamp(0, 24)) as u8;
+    player.soul_hp = player.soul_hp.min(24 - i32::from(player.max_hp));
+    player.hp = player.hp.min(player.max_hp);
+    normalize_black_hearts(player);
+}
+
+/// Normal-Isaac branch of508230, in native half-heart units.
+pub(crate) fn add_red_hearts(player: &mut crate::Player, delta: i32) {
+    player.hp = i32::from(player.hp)
+        .wrapping_add(delta)
+        .clamp(0, i32::from(player.max_hp)) as u8;
+}
+
+pub(crate) fn add_soul_hearts(player: &mut crate::Player, delta: i32) {
     player.soul_hp = player
         .soul_hp
         .wrapping_add(delta)
@@ -323,7 +338,7 @@ fn add_soul_hearts(player: &mut crate::Player, delta: i32) {
     normalize_black_hearts(player);
 }
 
-fn add_black_hearts(player: &mut crate::Player, delta: i32) {
+pub(crate) fn add_black_hearts(player: &mut crate::Player, delta: i32) {
     // 508440 adjusts slots before5083b0 caps total health. The parity path
     // and full-cap recoloring path are distinct from ordinary soul grants.
     let odd_delta = delta & 1;
@@ -360,13 +375,8 @@ fn authored_grants(state: &mut State, config: &items::CollectibleDefinition) {
     state.inventory.keys = add_inventory(state.inventory.keys, keys);
     state.inventory.coins = add_inventory(state.inventory.coins, coins);
     let player = &mut state.player;
-    player.max_hp = (i32::from(player.max_hp).wrapping_add(max).clamp(0, 24)) as u8;
-    player.soul_hp = player.soul_hp.min(24 - i32::from(player.max_hp));
-    player.hp = player.hp.min(player.max_hp);
-    normalize_black_hearts(player);
-    player.hp = i32::from(player.hp)
-        .wrapping_add(red)
-        .clamp(0, i32::from(player.max_hp)) as u8;
+    add_max_hearts(player, max);
+    add_red_hearts(player, red);
     add_soul_hearts(player, soul);
     add_black_hearts(player, black);
 }
