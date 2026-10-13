@@ -21,6 +21,7 @@ pub mod layout;
 pub mod menu_lifecycle;
 pub mod motion;
 pub mod mt;
+pub mod music;
 pub mod npcs;
 pub mod phase;
 pub mod pickups;
@@ -195,6 +196,17 @@ pub struct MenuFade {
     pub alpha: f64,
     pub color: [f64; 4],
 }
+#[derive(Clone, Debug, Default, Deserialize, Serialize, PartialEq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct RunStartRequest {
+    /// DOM input awaits the next source menu dispatch; fade runs before input.
+    pub input_pending: bool,
+    /// MenuController +1 and the distinct fade-out alpha +4.
+    pub fading: bool,
+    pub fade_alpha: f32,
+    /// System pending request is consumed at the following system dispatch.
+    pub system_pending: bool,
+}
 impl MenuFade {
     fn first_title() -> Self {
         // MenuInit starts at 1, then its first rendered update subtracts .025.
@@ -270,6 +282,7 @@ pub struct State {
     pub menu_animation_tick: u32,
     pub title_animation_frame: u32,
     pub menu_fade: MenuFade,
+    pub run_start_request: RunStartRequest,
     pub system_clock: phase::Clock,
     pub run_tick: u32,
     pub game_update_count: u32,
@@ -288,6 +301,7 @@ pub struct State {
     pub audio: audio::AudioState,
     #[serde(default)]
     pub pending_menu_initializations: Vec<menu_lifecycle::Pending>,
+    pub music: music::MusicState,
     pub run_seed_value: u32,
     pub stage: u32,
     pub stage_seed: u32,
@@ -329,10 +343,27 @@ pub struct State {
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(tag = "type", rename_all = "camelCase", deny_unknown_fields)]
 pub enum Command {
-    Key { code: String, down: bool },
-    Text { text: String },
-    Tick { count: u32 },
-    AudioVolume { sfx_volume: f32 },
+    Key {
+        code: String,
+        down: bool,
+    },
+    Text {
+        text: String,
+    },
+    Tick {
+        count: u32,
+    },
+    AudioVolume {
+        sfx_volume: f32,
+    },
+    MusicVolume {
+        volume: f32,
+    },
+    MusicBackend {
+        channel: u8,
+        generation: u64,
+        event: music::BackendEvent,
+    },
 }
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 pub struct Game {
@@ -362,6 +393,7 @@ impl Game {
                 menu_animation_tick: 0,
                 title_animation_frame: 0,
                 menu_fade: MenuFade::first_title(),
+                run_start_request: RunStartRequest::default(),
                 // The public runtime starts at the first rendered Title,
                 // after the omitted native introductory cutscene. Its next
                 // system iteration is a full update; this clock is relative
@@ -383,6 +415,7 @@ impl Game {
                 boot_lifecycle,
                 audio: audio::AudioState::default(),
                 pending_menu_initializations: Vec::new(),
+                music: music::MusicState::default(),
                 run_seed_value: initial_seed,
                 stage: 1,
                 stage_seed: seed::stage1_seed(initial_seed),
@@ -453,7 +486,19 @@ impl Game {
     }
     fn apply(&mut self, command: Command) -> Result<(), String> {
         self.state.audio.begin_command();
+        self.state.music.begin_command();
         match command {
+            Command::MusicVolume { volume } => {
+                if !volume.is_finite() || !(0.0..=1.0).contains(&volume) {
+                    return Err("music volume must be finite and within 0..1".into());
+                }
+                self.state.music.set_volume(volume);
+            }
+            Command::MusicBackend {
+                channel,
+                generation,
+                event,
+            } => self.state.music.backend(channel, generation, event),
             Command::AudioVolume { sfx_volume } => {
                 if !sfx_volume.is_finite() || !(0.0..=1.0).contains(&sfx_volume) {
                     return Err("SFX volume must be finite and within 0..1".into());
@@ -538,6 +583,11 @@ impl Game {
         Ok(())
     }
     fn key_press(&mut self, code: &str) -> Result<(), String> {
+        if self.state.screen != Screen::Playing
+            && (self.state.run_start_request.input_pending || self.state.run_start_request.fading)
+        {
+            return Ok(());
+        }
         let previous_screen = self.state.screen;
         match self.state.screen {
             Screen::Title => {
@@ -609,7 +659,9 @@ impl Game {
                 }
                 "ArrowLeft" | "KeyA" => self.select_character(-1),
                 "ArrowRight" | "KeyD" => self.select_character(1),
-                "Enter" if self.state.difficulty == "normal" => self.start_run()?,
+                "Enter" if self.state.difficulty == "normal" => {
+                    self.state.run_start_request.input_pending = true;
+                }
                 "Enter" => {
                     return Err("only the observed normal-mode starting room is implemented".into())
                 }
@@ -865,6 +917,11 @@ impl Game {
         };
         self.state.next_pickup = 1;
         self.state.stage_seed = seed::stage1_seed(self.state.run_seed_value);
+        // Source Level generation loads the start room, then immediately calls
+        // RoomMusic. This runtime's Level contract is fresh normal Basement.
+        if let Some(id) = music::stage_track(self.state.stage, false) {
+            self.state.music.room(id);
+        }
         self.refresh_minimap();
         Ok(())
     }
@@ -990,8 +1047,18 @@ impl Game {
         Ok(())
     }
     fn tick(&mut self) -> Result<(), String> {
+        // Source 594a10 consumes the prior menu request before game dispatch.
+        // Room construction and clock alignment happen here, after the f32
+        // confirmation fade, rather than in the zero-tick DOM key callback.
+        if self.state.run_start_request.system_pending {
+            self.state.run_start_request.system_pending = false;
+            self.start_run()?;
+        }
         let audio_counter = self.state.system_clock.system_counter;
         let phase = self.state.system_clock.advance()?;
+        if phase != phase::Phase::Skipped {
+            self.state.music.flush_pending();
+        }
         self.flush_menu_initializations(audio_counter)?;
         let bomb_down = self.held("KeyE");
         let bomb_triggered = bomb_down && !self.state.bomb_action_was_down;
@@ -1000,6 +1067,22 @@ impl Game {
             self.state.title_animation_frame = (self.state.title_animation_frame + 1) % 40;
         }
         self.state.menu_fade.advance();
+        if phase != phase::Phase::Skipped && self.state.screen != Screen::Playing {
+            let request = &mut self.state.run_start_request;
+            if request.fading {
+                // Source 59b180 updates +4 before Character59d080 tests >=1.
+                // Forty f32 additions remain below one; the forty-first wins.
+                request.fade_alpha += 0.025_f32;
+                if request.fade_alpha >= 1.0_f32 {
+                    request.system_pending = true;
+                }
+            }
+            if request.input_pending {
+                request.input_pending = false;
+                request.fading = true;
+                self.state.music.crossfade(95);
+            }
+        }
         self.state.tick += 1;
         self.state.menu_animation_tick += 1;
         let gameplay_was_paused = self.state.paused;
@@ -1010,6 +1093,9 @@ impl Game {
             }
         }
         if self.state.screen != Screen::Playing || gameplay_was_paused {
+            if phase != phase::Phase::Skipped {
+                self.state.music.advance();
+            }
             return Ok(());
         }
         self.state.run_tick = self
@@ -1197,6 +1283,9 @@ impl Game {
             actors::ActorKind::Npc => self.state.room.npcs.iter().any(|npc| npc.id == actor.id),
             _ => true,
         });
+        if phase != phase::Phase::Skipped {
+            self.state.music.advance();
+        }
         Ok(())
     }
     fn advance_actor(

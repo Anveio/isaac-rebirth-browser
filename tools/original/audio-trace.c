@@ -58,9 +58,15 @@ static int begin_event(const char *api) {
     struct timespec stamp = {0};
     clock_gettime(CLOCK_MONOTONIC, &stamp);
     uint64_t ns = (uint64_t)stamp.tv_sec * UINT64_C(1000000000) + (uint64_t)stamp.tv_nsec;
+    /* Observer-only kernel time: do not change the game's gated clock. */
+    struct timespec host_stamp = {0};
+    int host_ok = syscall(SYS_clock_gettime, CLOCK_MONOTONIC, &host_stamp) == 0;
+    uint64_t host_ns = (uint64_t)host_stamp.tv_sec * UINT64_C(1000000000) + (uint64_t)host_stamp.tv_nsec;
     pid_t tid = (pid_t)syscall(SYS_gettid);
-    fprintf(events, "{\"schema\":1,\"seq\":%llu,\"api\":\"%s\",\"pid\":%d,\"tid\":%d,\"monotonicNs\":%llu,\"clockDomain\":\"%s\",\"virtualElapsedNs\":",
-            (unsigned long long)++sequence, api, owner_pid, tid, (unsigned long long)ns,
+    fprintf(events, "{\"schema\":1,\"seq\":%llu,\"api\":\"%s\",\"pid\":%d,\"tid\":%d,\"monotonicNs\":%llu,\"hostMonotonicNs\":",
+            (unsigned long long)++sequence, api, owner_pid, tid, (unsigned long long)ns);
+    if (host_ok) fprintf(events, "%llu", (unsigned long long)host_ns); else fputs("null", events);
+    fprintf(events, ",\"clockDomain\":\"%s\",\"virtualElapsedNs\":",
             tid == main_tid ? "gate-main-thread" : "real-worker-thread");
     if (tid == main_tid && ns >= UINT64_C(1000000000000))
         fprintf(events, "%llu", (unsigned long long)(ns - UINT64_C(1000000000000)));

@@ -1,5 +1,6 @@
 import catalogue from './audio-data.json';
 import type { SoundEvent } from './engine';
+import { MusicRuntime } from './music';
 
 const urls = import.meta.glob('../references/isaac/rebirth/resources/sfx/**/*.wav', {
   eager: true, query: '?url', import: 'default',
@@ -58,7 +59,7 @@ export class AudioRuntime {
   private traceEnabled = false;
   private trace: OutputEvent[] = [];
   private traceTruncated = false;
-  private constructor(private readonly context: AudioContext, private readonly samples: Map<string, Sample>) {}
+  private constructor(private readonly context: AudioContext, private readonly samples: Map<string, Sample>, readonly music: MusicRuntime) {}
 
   static async load(): Promise<AudioRuntime> {
     const context = new AudioContext({ sampleRate: 44100 });
@@ -70,12 +71,13 @@ export class AudioRuntime {
       await Promise.all(Array.from({ length: 8 }, async () => {
         while (next < paths.length) { const path = paths[next++]!; samples.set(path, await loadSample(context, path)); }
       }));
-      return new AudioRuntime(context, samples);
+      return new AudioRuntime(context, samples, await MusicRuntime.load(context));
     } catch (error) { await context.close(); throw error; }
   }
 
   async unlock(): Promise<void> {
     if (this.context.state !== 'running') await this.context.resume();
+    await this.music.unlock();
   }
 
   consume(events: readonly SoundEvent[]): void {
@@ -132,6 +134,7 @@ export class AudioRuntime {
     for (let i = 0; i < this.voices.length; i++) this.release(i);
     this.lastSequence = -1;
     this.traceEnabled = trace; this.trace = []; this.traceTruncated = false;
+    this.music.reset(trace);
   }
 
   snapshot() {
@@ -139,6 +142,6 @@ export class AudioRuntime {
       loadedSamples: this.samples.size, voiceCapacity: this.voices.length,
       waitingForUnlock: this.context.state === 'running' ? 0 : this.voices.filter(Boolean).length,
       activeVoices: this.voices.map((voice, index) => voice && { voice: index, path: voice.path }).filter(Boolean),
-      events: structuredClone(this.trace), truncated: this.traceTruncated };
+      events: structuredClone(this.trace), truncated: this.traceTruncated, music: this.music.snapshot() };
   }
 }

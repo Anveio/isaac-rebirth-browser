@@ -10,6 +10,7 @@ import { chromium } from '@playwright/test';
 import { browserLaunchOptions, inspectBrowserGraphics } from '../foundation/browser.mjs';
 import { startProductionServer } from '../foundation/production-server.mjs';
 import { waitForReady } from '../foundation/verify.mjs';
+import { installBrowserAudioObserver } from './audio-api-observer.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const run = promisify(execFile);
@@ -37,7 +38,7 @@ for (const c of cases) {
   assert.ok(Array.isArray(c.taps) && c.taps.length >= 2 && c.taps.length <= 32 && c.taps.every(key => ['Left', 'Right'].includes(key)));
 }
 const sources = ['tools/e2e/audio.mjs', 'tools/original/audio-observer.py', 'tools/original/audio-trace.c', 'tools/original/foundation-clock-run.py',
-  'tools/original/foundation-clock-gate.c', 'tools/original/state-observer.py', 'tools/original/foundation-seeds.py', 'tools/foundation/production-server.mjs', 'tools/foundation/browser.mjs'];
+  'tools/e2e/audio-api-observer.mjs', 'tools/original/foundation-clock-gate.c', 'tools/original/state-observer.py', 'tools/original/foundation-seeds.py', 'tools/foundation/production-server.mjs', 'tools/foundation/browser.mjs'];
 const sourceHashes = async () => Object.fromEntries(await Promise.all(sources.map(async path => [path, sha(await readFile(join(ROOT, path)))])));
 const catalogue = JSON.parse(await readFile(join(ROOT, 'web/audio-data.json')));
 const hashes = await sourceHashes();
@@ -85,59 +86,6 @@ function sampleStarts(calls) {
 // Forward the actual browser audio APIs and observe their submitted buffers.
 // This is independent of AudioRuntime's diagnostics and never changes inputs,
 // buffers, parameters, admission, random state, or output scheduling.
-function installBrowserAudioObserver() {
-  const nodes = new WeakMap(), gains = new WeakMap(), connections = new WeakMap(); let next = 0;
-  const trace = { events: [], pending: [], truncated: false };
-  const identify = node => { if (!nodes.has(node)) nodes.set(node, ++next); return nodes.get(node); };
-  const record = event => { if (trace.events.length >= 8192) trace.truncated = true; else trace.events.push(event); };
-  const connect = AudioNode.prototype.connect;
-  AudioNode.prototype.connect = function (...args) {
-    const result = connect.apply(this, args);
-    if (args[0] instanceof AudioNode) {
-      if (!connections.has(this)) connections.set(this, new Set());
-      connections.get(this).add(args[0]);
-    }
-    if (this instanceof AudioBufferSourceNode && args[0] instanceof GainNode) gains.set(this, args[0]);
-    return result;
-  };
-  const disconnect = AudioNode.prototype.disconnect;
-  AudioNode.prototype.disconnect = function (...args) {
-    const result = disconnect.apply(this, args);
-    if (args[0] instanceof AudioNode) connections.get(this)?.delete(args[0]);
-    else connections.delete(this);
-    return result;
-  };
-  const reachesDestination = source => {
-    const pending = [source], seen = new Set();
-    while (pending.length) {
-      const node = pending.pop();
-      if (node === source.context.destination) return true;
-      if (seen.has(node)) continue;
-      seen.add(node); pending.push(...(connections.get(node) || []));
-    }
-    return false;
-  };
-  const start = AudioBufferSourceNode.prototype.start, stop = AudioBufferSourceNode.prototype.stop;
-  AudioBufferSourceNode.prototype.start = function (...args) {
-    const result = start.apply(this, args), buffer = this.buffer;
-    if (!buffer) throw new Error('Actual Web Audio start has no sample buffer');
-    const bytes = new ArrayBuffer(buffer.length * buffer.numberOfChannels * 2), view = new DataView(bytes);
-    for (let channel = 0; channel < buffer.numberOfChannels; channel++) {
-      const samples = buffer.getChannelData(channel);
-      for (let frame = 0; frame < buffer.length; frame++) view.setInt16((frame * buffer.numberOfChannels + channel) * 2, Math.round(samples[frame] * 32768), true);
-    }
-    const event = { type: 'start', node: identify(this), frames: buffer.length, channels: buffer.numberOfChannels, sampleRate: buffer.sampleRate,
-      pitch: this.playbackRate.value, gain: gains.get(this)?.gain.value, looping: this.loop,
-      reachesDestination: reachesDestination(this), pcmSha256: null };
-    record(event);
-    trace.pending.push(crypto.subtle.digest('SHA-256', bytes).then(digest => {
-      event.pcmSha256 = Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('');
-    }));
-    return result;
-  };
-  AudioBufferSourceNode.prototype.stop = function (...args) { const result = stop.apply(this, args); record({ type: 'stop', node: identify(this) }); return result; };
-  window.__audioApi = trace;
-}
 
 const production = await startProductionServer();
 const browser = await chromium.launch(browserLaunchOptions());
@@ -231,7 +179,9 @@ try {
       }
       const actualAudio = await page.evaluate(() => window.game.audio());
       const actualApi = await page.evaluate(async () => { await Promise.all(window.__audioApi.pending); return { events: window.__audioApi.events, truncated: window.__audioApi.truncated }; });
-      const actualApiStarts = actualApi.events.filter(event => event.type === 'start');
+      // All authored base SFX are mono PCM16; music streams are stereo and
+      // have their own live controller/queue acceptance cohort.
+      const actualApiStarts = actualApi.events.filter(event => event.type === 'start' && event.channels === 1);
       check('actual browser output API trace bounded', actualApi.truncated, false);
       const traceBytes = await readFile(join(directory, 'original/audio-trace/calls.jsonl')); result.nativeTraceSha256 = sha(traceBytes);
       const calls = traceBytes.toString().trim().split('\n').map(line => JSON.parse(line));
@@ -261,6 +211,7 @@ try {
       check('browser runtime errors', errors, []);
       check('browser actual public seed readback', (await page.evaluate(() => window.game.snapshot())).runSeedValue, native.seedValue);
       const wasmTrace = await page.evaluate(() => window.game.trace());
+      check('actual reset/run and boot inputs recorded', [wasmTrace.initialSeed, wasmTrace.bootEpochSeed], [native.seedValue, scenario.bootEpochSeed]);
       check('all public inputs and intervals reached production WASM', wasmTrace.commands, expectedCommands);
       check('actual WASM input trace bounded', [wasmTrace.enabled, wasmTrace.inputTraceTruncated], [true, false]);
       result.traceHistory = { truncated: wasmTrace.truncated, inputTraceTruncated: wasmTrace.inputTraceTruncated,

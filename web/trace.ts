@@ -1,4 +1,4 @@
-import type { Command, State } from "./engine";
+import type { Command, MusicBackendCommand, State } from "./engine";
 
 // Traces are diagnostic replay evidence. Ordinary runs retain no history.
 // Budgets count encoded record bodies, excluding array/header punctuation and
@@ -6,6 +6,7 @@ import type { Command, State } from "./engine";
 export class ReplayTrace {
   private readonly commands: Command[] = [];
   private readonly states: State[] = [];
+  private readonly backendEvents: { afterCommandCount: number; command: MusicBackendCommand; audioTime: number; state?: State }[] = [];
   private inputEncodedBytes = 0;
   private stateEncodedBytes = 0;
   private inputTruncationReason: "commands" | "bytes" | null = null;
@@ -41,7 +42,7 @@ export class ReplayTrace {
 
   private reserveInput(metadata: unknown): boolean {
     if (!this.enabled || this.inputTruncationReason) return false;
-    if (this.commands.length >= this.maxCommands) this.inputTruncationReason = 'commands';
+    if (this.commands.length + this.backendEvents.length >= this.maxCommands) this.inputTruncationReason = 'commands';
     else {
       const bytes = this.bytes(metadata);
       if (this.inputEncodedBytes + bytes > this.maxInputBytes) this.inputTruncationReason = 'bytes';
@@ -61,6 +62,13 @@ export class ReplayTrace {
     return structuredClone(state);
   }
 
+  recordBackend(command: MusicBackendCommand, state: State, audioTime: number): void {
+    const event = { afterCommandCount: this.commands.length, command, audioTime };
+    if (!this.reserveInput(event)) return;
+    const recordedState = this.recordState(state);
+    this.backendEvents.push({ ...structuredClone(event), ...(recordedState ? { state: recordedState } : {}) });
+  }
+
   snapshot() {
     return { schema: 1, tickRate: 60, initialSeed: this.initialSeed, bootEpochSeed: this.bootEpochSeed, enabled: this.enabled,
       truncated: this.inputTruncationReason !== null || this.stateHistoryTruncationReason !== null,
@@ -70,7 +78,8 @@ export class ReplayTrace {
       inputEncodedBytes: this.inputEncodedBytes, maxInputEncodedBytes: this.maxInputBytes,
       stateEncodedBytes: this.stateEncodedBytes, maxStateEncodedBytes: this.maxBytes,
       encodedBytes: this.inputEncodedBytes + this.stateEncodedBytes, maxEncodedBytes: this.maxInputBytes + this.maxBytes,
-      maxCommands: this.maxCommands, commands: structuredClone(this.commands), states: structuredClone(this.states) };
+      maxCommands: this.maxCommands, commands: structuredClone(this.commands), states: structuredClone(this.states),
+      backendEvents: structuredClone(this.backendEvents) };
   }
 
   private bytes(value: unknown): number { return new TextEncoder().encode(JSON.stringify(value)).byteLength; }

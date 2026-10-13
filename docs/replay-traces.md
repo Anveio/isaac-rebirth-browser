@@ -2,9 +2,13 @@
 
 `window.game.reset(seed, { trace: true })` enables actual production command
 recording. Ordinary play keeps no history. The trace retains public commands
-independently of full state snapshots.
+and generation-scoped actual music backend completion/loop callbacks
+independently of full state snapshots. Backend metadata includes its position
+after a public command and real audio-device time. Replay inserts those actual
+callbacks at the recorded positions; it never synthesizes completions from ticks.
 
-Input metadata has a 4 MiB encoded-record budget and a 36,000 record limit.
+Public command and backend metadata share a 4 MiB encoded-record budget and a
+36,000 record limit.
 Full state snapshots have a separate
 32 MiB budget. Each budget counts JSON record bodies; snapshot headers, array
 punctuation and browser object overhead are outside those byte counters.

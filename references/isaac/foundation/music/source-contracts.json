@@ -1,0 +1,69 @@
+{
+  "schema": 1,
+  "nativeBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "managerRoot": "SystemManager=u64(0x8ed560); Music=SystemManager+0x114d0",
+  "record": "IDs 0..101: Music + 0xf8 + 56*id; u32 id +0, GNU strings name +8 / intro +0x10 / path +0x18 / layerintro +0x20 / layer +0x28, bool loop +0x30. All 45 configured IDs and paths verified against pinned XML.",
+  "controller": "i32 activeChannel +0 (0/1), main channels +8/+0x50, layer channel +0x98, bool layerEnabled +0xe0, i32 currentId +0xe4 / queuedId +0xe8, f32 pitch +0xec / targetPitch +0xf0, bool musicEnabled +0x1748 (System +0x12c18)",
+  "channel": "Sound wrapper at +0; f32 volume +0x30 / target +0x34 / fadeRate +0x38, bool playing +0x3c, i32 updatesSincePrepare +0x40. Main rate .08, layer rate .02.",
+  "backend": "Actual stream vtable 0x67d070: Play +0x58 = 5f2550 -> 62a530 suppresses an already playing stream; isPlaying +0x60 = 610cf0 reads OpenAL source ID +0x78; Stop +0x68 = 62a4f0; loop +0x70 = 610ed0 mutates decoder loop byte +9. Streaming source allocation is independent from the 16 SFX voices; four queued buffers per stream.",
+  "queue": "Source deque begin/end at backend +0x28/+0x48; begin/end block-node pointers +0x40/+0x60; 24 byte records with ordinary interned C path pointer +0, bool loop +8, decoded payload +0x10. Probe bounds to one block and up to eight records, with no writes.",
+  "functions": {
+    "play": "5b2a30: stop both main channels, set current ID and clear queue, prepare intro then queue authored loop; prepare layer at gain zero, start layer and active main.",
+    "crossfade": "5b2c40: same ID only adjusts target volume; different ID fades old main to zero, toggles active index, prepares intro/path and layer, starts both with target global music volume. Calls the old wrapper SetLoop(false) at5b2cc8..5b2cd1 before toggling; the queued decoder future-loop flag remains unchanged.",
+    "update": "5b2f30: channel updates, layer target from enable flag, pitch smoothing, backend completion then consume queued ID; source System 5950e0 calls after menu/game before counter increment.",
+    "fade": "5b28c0: poll backend isPlaying only when pre-age>10; if playing, increment age and compute f32 current += (target-current)*rate when |delta|>.001. Otherwise snap only if current differs from target. StopAtZero is tested only after that snap branch; equal current/target and equal applied gain returns early, so a stream already prepared at zero can remain playing. If playing is false but backend is loaded, unload it.",
+    "setQueue": "5b3190 writes pending ID; 5b3170 clears queue and fades active main to zero.",
+    "menuTitle": "59cd00 crossfades track 61.",
+    "menuGameStart": "59b110 crossfades track 95.",
+    "roomMusic": "5c4bf0 selects normal Basement track 1; while current track is 95, writes queue 1 instead of crossfading.",
+    "volumeGetter": "5b9730: return zero unless Music +0x1748 / System +0x12c18 is enabled, then Options +8 (System +0x2df90).",
+    "volumeSetter": "5b9750 stores Options +8, sets Music enabled iff volume>0, then 5b3220 sets active main current and target to raw volume.",
+    "layerEnable": "Room admission 5cecc0 at 5cfb64 sets Music +0xe0 when native Room +0x16ac/+0x16b0 sum exceeds five; smaller positive sums bypass this setter. Room update 5d12a0 sets countdown +0x1598 to10 while qualifying count is positive (or Game +0x10ecc0 flag); when counts reach zero it decrements existing positive countdown, then clears layer flag at 5d197e once pre-countdown<=0.",
+    "enemyCount": "EntityManager (Room +0x15d0) +0xdc pending net count: 452490/452700 add/remove when entity virtual +0x70 is true. Update454df0 counts active +0x31e qualifying actors, adds pending net count, stores current +0xe0 and resets pending +0xdc. NPC +0x70 callback4fd200 reads NPC byte+0x103c, independent from numeric NPC category."
+  },
+  "scope": "Source-located Music controller/backend and Character-to-Level caller contracts; runtime/native addresses remain separate",
+  "entrySequence": [
+    {
+      "at": "0x59b110",
+      "contract": "Character accept stores request fields, sets Menu+1 true at0x59b11f, crossfades music95 at0x59b146 and prepares public loading image. It does not initialize Game or Level."
+    },
+    {
+      "at": "0x59b180",
+      "contract": "Menu Update runs fade before selected child. While startRequested, f32 startFadeAlpha +=0.025f32 at0x59b2ab..0x59b2b8. This does not depend on device audio time."
+    },
+    {
+      "at": "0x59d080",
+      "contract": "Character Update reads Menu+1 and compares alpha>=1 at0x59d0aa..0x59d0c0. If reached, it normalizes the public seed and requests System new run at0x59d218 via0x594620."
+    },
+    {
+      "at": "0x594620",
+      "contract": "Stores character/challenge/seed/mode arguments, then sets System+0x2f2c8 true at0x594672."
+    },
+    {
+      "at": "0x5950e0",
+      "contract": "Next System Update calls0x594a10 at0x595108 before menu/game dispatch. Thus a request raised by menu child is consumed on the following System Update."
+    },
+    {
+      "at": "0x594a10",
+      "contract": "If pending run, destroys old menu, initializes Game if needed, sets System state2 at0x594a62, calls Game new run0x54eb20 at0x594ab8, then aligns an odd System counter upward at0x594bf0 and clears pending at0x594aef."
+    },
+    {
+      "at": "0x54eb20",
+      "contract": "Resets run seeds, pools and actual player/Level initializers. Calls Level generation0x58be30 at0x54ec47."
+    },
+    {
+      "at": "0x58be30",
+      "contract": "After successful floor generation and start/current/previous descriptor assignment, loads starting room via0x586c90 at0x58c357. Calls that actual Room Music at0x58c36a; no fitted music delay."
+    },
+    {
+      "at": "0x5c4bf0",
+      "contract": "Stage music uses actual Game stage+0 and alternate byte+4, read0x5c4bfd..0x5c4c09. Starting room descriptor asset stage0 is a special-room catalogue identity and is not the stage music selector."
+    },
+    {
+      "at": "0x5b2f30",
+      "contract": "Music controller advances channels before consuming queued ID. If previously stopped95 receives floor queue on loader phase, that phase prepares floor at age0; subsequent dispatches advance its ages. Natural backend completion remains host-clock dependent."
+    }
+  ],
+  "earlyDecoderScope": "5f25b0 detects decoder EOF while filling four65536-byte buffers;5f2b10 replaces queued decoder before audible EOF. Browser actualonended is a different boundary; early parity remains unimplemented.",
+  "entryScope": "Browser starts at firstTitle61; source100 video/voiceover tail is skipped explicitly. Source actualSystemstate, not capture names, establishes Playing."
+}
