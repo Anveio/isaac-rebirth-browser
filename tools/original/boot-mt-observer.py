@@ -46,7 +46,7 @@ def observe(pid,context):
       words=struct.unpack('<7I',read(pointer+slot*0x1c,0x1c))
       level_samples.append({'roomRecord':room,'gridIndex':slot,'seed10':words[4],'seed18':words[6]})
      level_rows.append({'roomRecord':room,'gridIndex':struct.unpack('<i',read(game+0x10+room*0xf0,4))[0]})
-   saved_run=None;live_grid=None
+   saved_run=None;live_grid=None;saved_pools=None
    if game and system_state==2:
     allocated=[room for room in range(135) if struct.unpack('<i',read(game+0x10+room*0xf0,4))[0]!=-3]
     saved_run={'seedText':seed_string(saved+0xef80),'seededRun':bool(read(saved+4,1)[0]),'stage':u32(saved+0x94),'gameUpdateCount':u32(saved+0x50),
@@ -55,6 +55,19 @@ def observe(pid,context):
     if not 0<cells<=448:raise ValueError('Live room grid exceeds source capacity')
     pointers=struct.unpack('<'+'Q'*cells,read(room+0x30,cells*8))
     live_grid={'width':width,'height':height,'emptyIndices':[index for index,pointer in enumerate(pointers) if not pointer]}
+    pools=game+0x8bd0;weight_samples=[]
+    for pool in [0,15]:
+     record=pools+8+pool*0x48;begin=u64(record+8);end=u64(record+0x10)
+     if end<begin or (end-begin)%24 or (end-begin)//24>1024:raise ValueError('Item pool weights exceed source bounds')
+     if begin!=end:
+      for pointer in sorted(set([begin,end-24])):
+       item_id=u32(pointer)
+       if item_id>=347:raise ValueError('Item pool ID exceeds source catalogue')
+       weight_samples.append({'poolId':pool,'itemId':item_id,'weight':f32(saved+0x9694+4*(pool*347+item_id)),'liveWeight':f32(pointer+8)})
+    saved_pools={'poolSeed':u32(saved+0xed94),'rootRngSeed':u32(saved+0xed9c),'secondaryRngSeed':u32(saved+0xeda0),'specialFactor':f32(saved+0xeda4),
+     'specialCounters':[struct.unpack('<i',read(saved+0xed54+4*pool,4))[0] for pool in range(16)],
+     'removedSamples':[{'itemId':item,'removed':bool(read(saved+0xeda8+item,1)[0])} for item in [0,1,346]],
+     'pillEffects':list(struct.unpack('<10i',read(saved+0xef48,40))),'weightSamples':weight_samples}
    anm=menus+0x60d10+8
    loaded=bool(menus) and bool(read(anm+0x2dd,1)[0])
    title={'loaded':loaded,'menuScreen':u32(menus+0x38) if menus else None}
@@ -64,6 +77,6 @@ def observe(pid,context):
     'managerCounter':u32(manager+0x2efa0),'systemState':system_state,'systemSeededRun':bool(read(manager+0x11,1)[0]),
     'gameRunSeed':u32(game+0xa190) if game else None,'gameSeedText':seed_string(game+0xa1e0) if game and system_state==2 else None,
     'gameSeededRun':bool(read(game+0x10ecd0,1)[0]) if game and system_state==2 else None,
-    'stateSeed9688':u32(saved+0x9688),'gridSeedSamples':samples,'levelGridSeedSamples':level_samples,'savedRows':saved_rows,'levelRows':level_rows,'savedRun':saved_run,'liveGrid':live_grid,'title':title}
+    'stateSeed9688':u32(saved+0x9688),'gridSeedSamples':samples,'levelGridSeedSamples':level_samples,'savedRows':saved_rows,'levelRows':level_rows,'savedRun':saved_run,'liveGrid':live_grid,'savedItemPools':saved_pools,'title':title}
   finally:os.close(fd)
  finally:os.kill(pid,signal.SIGCONT)

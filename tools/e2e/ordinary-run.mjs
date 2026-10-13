@@ -14,7 +14,7 @@ import { assertInputProvenance, waitForReady } from '../foundation/verify.mjs';
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const run = promisify(execFile);
 const ORIGINAL_SHA = '724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13';
-const GATE_SOURCES = ['tools/e2e/ordinary-run.mjs', 'tools/original/boot-mt-observer.py', 'tools/original/native-identity.py', 'tools/original/state-observer.py', 'tools/original/foundation-clock-run.py', 'tools/original/foundation-clock-gate.c', 'tools/original/foundation-seeds.py', 'tools/original/debug-run.py', 'tools/original/with-display.sh', 'tools/foundation/browser.mjs', 'tools/foundation/production-server.mjs', 'tools/foundation/verify.mjs', 'engine/src/lib.rs', 'engine/src/mt.rs', 'engine/src/saved_game.rs', 'engine/src/menu_lifecycle.rs', 'engine/src/seed.rs', 'engine/src/audio.rs', 'engine/src/music.rs', 'web/main.ts', 'web/trace.ts'];
+const GATE_SOURCES = ['tools/e2e/ordinary-run.mjs', 'tools/original/boot-mt-observer.py', 'tools/original/native-identity.py', 'tools/original/state-observer.py', 'tools/original/foundation-clock-run.py', 'tools/original/foundation-clock-gate.c', 'tools/original/foundation-seeds.py', 'tools/original/debug-run.py', 'tools/original/with-display.sh', 'tools/foundation/browser.mjs', 'tools/foundation/production-server.mjs', 'tools/foundation/verify.mjs', 'engine/src/lib.rs', 'engine/src/mt.rs', 'engine/src/saved_game.rs', 'engine/src/items.rs', 'engine/src/menu_lifecycle.rs', 'engine/src/seed.rs', 'engine/src/audio.rs', 'engine/src/music.rs', 'web/main.ts', 'web/trace.ts'];
 const hashes = async () => Object.fromEntries(await Promise.all(GATE_SOURCES.map(async path => [path, createHash('sha256').update(await readFile(join(ROOT, path))).digest('hex')])));
 const value = flag => { const index = process.argv.indexOf(flag); return index < 0 ? undefined : process.argv[index + 1]; };
 const savedGame = process.argv.includes('--saved-game');
@@ -120,6 +120,12 @@ try {
         assert.deepEqual(summary.inventory, observed.savedRun.inventory);
         assert.equal(summary.descriptorCount, observed.savedRun.allocatedRoomRecords.length);
         assert.equal(state.bootLifecycle.savedPlayerSeed, observed.stateSeed9688);
+        const savedPools = structuredClone(observed.savedItemPools); assert.ok(savedPools);
+        for (const sample of savedPools.weightSamples) {
+          assert.equal(sample.weight, sample.liveWeight, 'Source saved item weight must copy the actual live owner');
+          delete sample.liveWeight;
+        }
+        assert.deepEqual(summary.itemPools, savedPools, 'Actual saved ItemPool fields must equal source');
         const emptyIndices = state.room.grid.cells.flatMap((cell, index) => cell.entity ? [] : [index]);
         assert.deepEqual(emptyIndices, observed.liveGrid.emptyIndices);
         assert.equal(summary.emptyGridCellsSaved, emptyIndices.length);

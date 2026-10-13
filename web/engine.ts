@@ -30,6 +30,9 @@ export interface SavedRunSummary {
   descriptorCount: number; redHp: number; maxRedHp: number;
   inventory: {coins: number; bombs: number; keys: number};
   emptyGridCellsSaved: number; occupiedGridSeedsPending: number[];
+  itemPools: {poolSeed: number; rootRngSeed: number; secondaryRngSeed: number;
+    specialFactor: number; specialCounters: number[]; removedSamples: {itemId: number; removed: boolean}[];
+    pillEffects: number[]; weightSamples: {poolId: number; itemId: number; weight: number}[]};
 }
 export interface SoundEvent {
   sequence: number; id: number; sampleIndex: number; systemCounter: number; halfTick: number;

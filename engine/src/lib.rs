@@ -970,6 +970,13 @@ impl Game {
     /// allocated Level rows and PlayerManager state in that source order.
     fn save_supported_run(&mut self) -> Result<(), String> {
         self.saved_game = self.state.boot_lifecycle.clear_saved_game();
+        // Game.Save 54f33b copies the actual modeled ItemPool before Room.Save.
+        // Retain its owned vectors/RNGs; copying neither reseeds nor samples.
+        let item_pools = self
+            .state
+            .item_pools
+            .clone()
+            .ok_or("run save requires initialized item pools")?;
         let (empty, occupied_pending) = saved_game::save_empty_grid_cells(
             &mut self.boot_level_grid,
             &mut self.state.boot_lifecycle.shared,
@@ -987,7 +994,7 @@ impl Game {
             .descriptor_seeds
             .copy_rooms_from(&self.boot_level_grid, &rooms)?;
         self.saved_game.player_rng_seed = self.player_manager_secondary_rng.seed;
-        let saved = saved_game::SavedRun::copy_from(&self.state);
+        let saved = saved_game::SavedRun::copy_from(&self.state, item_pools);
         self.state.saved_run_summary = Some(saved.summary(empty, occupied_pending));
         self.saved_run = Some(saved);
         self.state

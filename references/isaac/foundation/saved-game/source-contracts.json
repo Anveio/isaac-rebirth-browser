@@ -28,6 +28,12 @@
       "contract": "Clear generates every135×448 raw seed pair and one raw player-manager seed into the actual saved state"
     },
     {
+      "address": "0x581ed0",
+      "unwindSize": 451,
+      "codeSha256": "28bf0c71bdb73395f82e511ee0c728afc5eccb264e6746a57a4ad04e2add1614",
+      "contract": "ItemPool.Save copies current entry weights, special counters, pool/root/secondary seed fields, special factor, removed flags and pill effects without drawing RNG"
+    },
+    {
       "address": "0x5ce2d0",
       "unwindSize": 977,
       "codeSha256": "12704f41da22f69b3bac72b684805520b384f74c6b4bf69245228d10b580a00f",
@@ -74,7 +80,7 @@
     "58c411→594810",
     "594891→54f230",
     "54f23f→55bd80 Clear",
-    "54f33b→581ed0 item-pool copy (not implemented in this leaf)",
+    "54f33b→581ed0 actual ItemPool copy",
     "54f347→5ce2d0 Room.Save",
     "54f352→58cd90 conditional Level copy",
     "54f382→5bf400 PlayerManager copy"
@@ -96,5 +102,16 @@
     "bombs": "Player+bd4→Saved+88c0"
   },
   "internalOwnership": "SavedGameSeeds retains actual Clear-generated descriptor state; allocated rows copy actual Level seed pairs including null-cell mutations. SavedRun retains supported port Level/Room/Player/inventory state internally. Snapshots carry bounded seed pairs and summary only.",
-  "remaining": "Item-pool copy, actual occupied grid constructor state, broader room/effect admission and full MT/W0 numerical differences remain separately recorded."
+  "remaining": "actual occupied grid constructor state, broader room/effect admission and full MT/W0 numerical differences remain separately recorded.",
+  "savedItemPoolFields": {
+    "currentWeight": "Entry+8→Saved+9694+4*(poolId*347+itemId)",
+    "specialCounters": "PoolRecord+40→Saved+ed54+4*poolId",
+    "poolSeed": "Root+0→Saved+ed94",
+    "rootRngSeed": "Root+48c→Saved+ed9c",
+    "secondaryRngSeed": "Root+49c→Saved+eda0",
+    "specialFactor": "Root+4ac→Saved+eda4",
+    "removed": "Root+4b0→Saved+eda8,347 bytes",
+    "pillEffects": "Root+9b8→Saved+ef48,10 signed words",
+    "unaccepted": "Trinket pool/identification flags are outside current ItemPools selection scope"
+  }
 }
