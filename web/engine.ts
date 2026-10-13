@@ -35,7 +35,7 @@ export interface RoomAppearance {
   floorQuads: RoomQuad[]; wallQuads: RoomQuad[]; tutorial: boolean;
   wallVariantCatalog: { sourcePatchIndex: number; name: string; weight: number; eligibility: string }[];
   wallGenerationEvidence: string;
-  doors: { side: Direction; state: string; asset: string; x: number; y: number; targetRoom: number }[];
+  doors: { side: Direction; state: string; asset: string; x: number; y: number; targetRoom: number; slot: number; worldPosition: {x: number; y: number} }[];
   fx: { ambient: [number, number, number]; shading: string; overlay: string; overlayOrigin: { x: number; y: number }; overlayAnchor: { x: number; y: number }; overlayParallax: { x: number; y: number }; overlayMotionEvidence: string; overlayOpacity: number; actorTint: [number, number, number] };
   template: string; generation: string;
 }
@@ -59,6 +59,7 @@ export interface Floor {
 export interface Room {
   left: number; right: number; top: number; bottom: number; appearance: RoomAppearance;
   descriptor: RoomDescriptor | null;
+  spawns: {tintedRockIndex: number; finalSpawnState: number; selectors: {groupIndex: number; gridIndex: number; category: "entity" | "grid"; type: number; variant: number; subtype: number; position: {x: number; y: number}; groupSeed: number; spawnSeed: number}[]} | null;
   projectileBounds: { left: number; right: number; top: number; bottom: number };
   pickups: Pickup[];
 }
@@ -92,6 +93,8 @@ export interface State {
   characterCatalog: { name: string; animation: string }[];
   paused: boolean; pressed: string[];
   floor: Floor; currentRoom: number; visitedRooms: number[];
+  persistedRooms: Record<string, Room>;
+  roomTransition: {fromRoom: number; targetRoom: number; fromSlot: number; targetSlot: number; phase: "out" | "in"; fullUpdates: number} | null;
   player: Player; room: Room; stageEffects: StageEffects; inventory: { coins: number; bombs: number; keys: number };
   nextPickup: number;
   minimap: { cells: { x: number; y: number; visibility: "unvisited" | "visited" | "current" }[] };
