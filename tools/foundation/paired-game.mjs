@@ -124,7 +124,7 @@ async function browserCapture(browser, server, caseData, directory) {
     }
     const trace = await page.evaluate(() => window.game.trace());
     save(join(directory, 'trace.json'), trace);
-    assert.equal(trace.enabled, true); assert.equal(trace.truncated, false);
+    assert.equal(trace.enabled, true); assert.equal(trace.inputTraceTruncated, false);
     assert.equal(trace.bootEpochSeed, caseData.bootEpochSeed);
     assert.equal(trace.initialSeed, caseData.initialSeed);
     assert.deepEqual(trace.commands, expectedCommands, 'Every intended DOM input/interval must reach the actual WASM trace');

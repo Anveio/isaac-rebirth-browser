@@ -1,46 +1,76 @@
 import type { Command, State } from "./engine";
 
 // Traces are diagnostic replay evidence. Ordinary runs retain no history.
-// The byte budget counts encoded evidence, not the browser's object overhead.
+// Budgets count encoded record bodies, excluding array/header punctuation and
+// browser object overhead. Input metadata survives a capped state history.
 export class ReplayTrace {
   private readonly commands: Command[] = [];
   private readonly states: State[] = [];
-  private encodedBytes = 0;
-  private truncationReason: "commands" | "bytes" | null = null;
+  private inputEncodedBytes = 0;
+  private stateEncodedBytes = 0;
+  private inputTruncationReason: "commands" | "bytes" | null = null;
+  private stateHistoryTruncationReason: "bytes" | "input" | null = null;
   private readonly initialSeed: number;
   private readonly bootEpochSeed: number;
   private readonly enabled: boolean;
   private readonly maxBytes: number;
   private readonly maxCommands: number;
+  private readonly maxInputBytes: number;
 
   constructor(initialSeed: number, enabled: boolean, initialState: State,
-    maxBytes = 32 * 1024 * 1024, maxCommands = 36_000) {
+    maxBytes = 32 * 1024 * 1024, maxCommands = 36_000, maxInputBytes = 4 * 1024 * 1024) {
+    if (![maxBytes, maxCommands, maxInputBytes].every(value => Number.isSafeInteger(value) && value >= 0))
+      throw new Error('Trace budgets must be nonnegative safe integers');
     this.initialSeed = initialSeed;
     this.bootEpochSeed = initialState.bootEpochSeed ?? 0;
     this.enabled = enabled;
     this.maxBytes = maxBytes;
     this.maxCommands = maxCommands;
+    this.maxInputBytes = maxInputBytes;
     if (!enabled) return;
-    const bytes = this.bytes(initialState);
-    if (bytes > maxBytes) this.truncationReason = "bytes";
-    else { this.states.push(structuredClone(initialState)); this.encodedBytes = bytes; }
+    const state = this.recordState(initialState);
+    if (state) this.states.push(state);
   }
 
   record(command: Command, state: State): void {
-    if (!this.enabled || this.truncationReason) return;
-    if (this.commands.length >= this.maxCommands) { this.truncationReason = "commands"; return; }
-    const bytes = this.bytes(command) + this.bytes(state);
-    if (this.encodedBytes + bytes > this.maxBytes) { this.truncationReason = "bytes"; return; }
+    if (!this.reserveInput(command)) return;
     this.commands.push(structuredClone(command));
-    this.states.push(structuredClone(state));
-    this.encodedBytes += bytes;
+    const recordedState = this.recordState(state);
+    if (recordedState) this.states.push(recordedState);
+  }
+
+  private reserveInput(metadata: unknown): boolean {
+    if (!this.enabled || this.inputTruncationReason) return false;
+    if (this.commands.length >= this.maxCommands) this.inputTruncationReason = 'commands';
+    else {
+      const bytes = this.bytes(metadata);
+      if (this.inputEncodedBytes + bytes > this.maxInputBytes) this.inputTruncationReason = 'bytes';
+      else { this.inputEncodedBytes += bytes; return true; }
+    }
+    this.stateHistoryTruncationReason ??= 'input';
+    return false;
+  }
+
+  private recordState(state: State): State | null {
+    if (this.stateHistoryTruncationReason) return null;
+    const bytes = this.bytes(state);
+    if (this.stateEncodedBytes + bytes > this.maxBytes) {
+      this.stateHistoryTruncationReason = 'bytes'; return null;
+    }
+    this.stateEncodedBytes += bytes;
+    return structuredClone(state);
   }
 
   snapshot() {
     return { schema: 1, tickRate: 60, initialSeed: this.initialSeed, bootEpochSeed: this.bootEpochSeed, enabled: this.enabled,
-      truncated: this.truncationReason !== null, truncationReason: this.truncationReason,
-      encodedBytes: this.encodedBytes, maxEncodedBytes: this.maxBytes,
-      commands: structuredClone(this.commands), states: structuredClone(this.states) };
+      truncated: this.inputTruncationReason !== null || this.stateHistoryTruncationReason !== null,
+      truncationReason: this.inputTruncationReason ?? (this.stateHistoryTruncationReason ? 'bytes' : null),
+      inputTraceTruncated: this.inputTruncationReason !== null, inputTruncationReason: this.inputTruncationReason,
+      stateHistoryTruncated: this.stateHistoryTruncationReason !== null, stateHistoryTruncationReason: this.stateHistoryTruncationReason,
+      inputEncodedBytes: this.inputEncodedBytes, maxInputEncodedBytes: this.maxInputBytes,
+      stateEncodedBytes: this.stateEncodedBytes, maxStateEncodedBytes: this.maxBytes,
+      encodedBytes: this.inputEncodedBytes + this.stateEncodedBytes, maxEncodedBytes: this.maxInputBytes + this.maxBytes,
+      maxCommands: this.maxCommands, commands: structuredClone(this.commands), states: structuredClone(this.states) };
   }
 
   private bytes(value: unknown): number { return new TextEncoder().encode(JSON.stringify(value)).byteLength; }
