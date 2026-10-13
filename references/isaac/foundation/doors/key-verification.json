@@ -1,0 +1,174 @@
+{
+  "schema": 1,
+  "status": "fail",
+  "keyDoorContracts": "pass",
+  "requiredRegression": "Actual Keeper17/1 constructor/idle actor is absent; raw authored subtype0 differs from native initialized3/4. Default live gate remains red.",
+  "production": {
+    "sha256": "ba29fbb5e38ade5e1ebbce7b1698b1cbad3befbab7e8a086c6f1707570956dfc",
+    "files": 918,
+    "source": "/workspace/isaac-worktrees/floor/dist",
+    "scope": "Immutable snapshot of production build bytes; source/native replay equality is checked separately"
+  },
+  "sourceHead": "c52ec1d",
+  "nativeBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "report": {
+    "path": ".cache/e2e/key-doors/timed-transient-final/report.json",
+    "sha256": "c1c9e08251aa1e29f1af0668e98563dce49b56a2d750973a1f5812a8a9649574"
+  },
+  "comparators": {
+    "tools/e2e/key-doors.mjs": "620f8b3424d341aec5aa1c0919cafcf973d623049ac56a9ba94e54fb75cee0f8",
+    "tools/e2e/traversal.mjs": "55ac62cc7b67122a2ca1e3f953d15b83c37f57fb8b94dd94f31d032d3ff33e40",
+    "tools/foundation/verify.mjs": "e41216c1ea6fc58b90ecbae62652b68b8ed6ff0b5653ad97c5058b3d4dbb6208",
+    "tools/original/key-door-scenarios.py": "a9b3bec14b4a949dfa4ca278d63f98c5dd1ca6064c627ea257ec602bc5056309",
+    "tools/original/key-door-observe.py": "a4e2f4e9f23b8c9d089decc2f53f3e4f11664842a52f21b3e15a5c9a93dc499a"
+  },
+  "scope": "Fresh Isaac, no-hostile13x7 natural secret keys and ordinary library lock: denied zero-key approach, actual collection/spending, full-only unlock/collision/SFX156, admission/return/revisit, exact player/HP/immunity, complete door/display/minimap/descriptor joins. Keeper constructor subtype remains required red; golden/double locks, library items and pixels remain separate.",
+  "exclusions": [
+    "Keeper17 constructor subtype remains a required regression",
+    "Golden keys, double-chain locks, item overrides and hostile special-door policy",
+    "Library collectibles/sacks/batteries and complete backdrop/door animation pixels",
+    "Other room shapes, later floors and exits"
+  ],
+  "cases": [
+    {
+      "seed": "W31RQ6TH",
+      "selection": "contrived opposite-phase zero-key denial",
+      "comparedPhases": 936,
+      "provenance": {
+        "status": "pass",
+        "nativeBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+        "manifestSha256": "40146b9a06d83d2b52e07c31b6574a4e6cc4a465fe699bdb7955a8d0545d8e5d",
+        "originalLogSha256": "9f43c06f647a21ec75a81c76e1c4b3813a54ab725c7c23771cec1df8a1604b6d",
+        "observations": 936
+      },
+      "inputProvenance": {
+        "status": "pass",
+        "commands": 1010,
+        "initialSeed": 2575403151,
+        "bootEpochSeed": 0,
+        "manualSeed": "W31RQ6TH"
+      },
+      "traceHistory": {
+        "truncated": true,
+        "inputTraceTruncated": false,
+        "stateHistoryTruncated": true,
+        "retainedStates": 492,
+        "stateEncodedBytes": 33543200,
+        "maxStateEncodedBytes": 33554432
+      },
+      "completePlannedMenuPrefixCommands": 49,
+      "seedReadback": {
+        "screen": "playing",
+        "seededRun": true,
+        "seedValid": true,
+        "seedText": "W31RQ6TH",
+        "runSeed": "W31RQ6TH",
+        "runSeedValue": 2575403151
+      },
+      "stateSha256": "d28fddfe9fddc57869404999e19c9035a8753e629123772c331bbc93692d4d16",
+      "inputSha256": "d5c4c8ed6cce8dcf4c60925eac4ae3d3ad296fe546d6bc84a8ec066aff6b2435",
+      "gameplayStartHalfTicks": [
+        488,
+        603
+      ],
+      "keyDoorFailureCount": 0,
+      "requiredFailures": [
+        {
+          "label": "entry-settle-7",
+          "error": "AssertionError [ERR_ASSERTION]: entry-settle-7:complete supported native admission multiset with subtype/seed/position\n+ actual - expected\n\n  [\n+   '[17,1,0,3080610470,240,160]',\n-   '[17,1,3,3080610470,240,160]',\n    '[5,30,1,3132953756,360,280]',\n    '[5,30,1,3240436833,280,280]'\n  ]\n"
+        }
+      ],
+      "events": [
+        {"label":"gameplay-start","room":[6,1,2],"actualNativeKeys":[0,0],"actualNativeHP":[6,6],"actualNativeClear":[true,true],"doorTuple":"[index,variant,state,collisionClass,blownOpen]","actualDoors":[[7,1,1,4,false],[60,7,2,5,false],[74,7,2,5,false],[127,6,1,4,false]],"nativeDoors":[[7,1,1,4,false],[60,7,2,5,false],[74,7,2,5,false],[127,6,1,4,false]],"nativeBackdrop":1,"spritesheets":[[0,null],[1,null],[2,null],[3,null]],"elapsedUnlockActualNative":null},
+        {"label":"no-key-approach-70","room":[6,1,2],"actualNativeKeys":[0,0],"actualNativeHP":[6,6],"actualNativeClear":[true,true],"doorTuple":"[index,variant,state,collisionClass,blownOpen]","actualDoors":[[7,1,1,4,false],[60,7,2,5,false],[74,7,2,5,false],[127,6,1,4,false]],"nativeDoors":[[7,1,1,4,false],[60,7,2,5,false],[74,7,2,5,false],[127,6,1,4,false]],"nativeBackdrop":1,"spritesheets":[[0,null],[1,null],[2,null],[3,null]],"elapsedUnlockActualNative":null},
+        {"label":"entry-settle-7","room":[5,7,11],"actualNativeKeys":[0,0],"actualNativeHP":[6,6],"actualNativeClear":[true,true],"doorTuple":"[index,variant,state,collisionClass,blownOpen]","actualDoors":[[7,7,2,5,true],[74,6,1,4,false],[127,6,1,4,false]],"nativeDoors":[[7,7,2,5,true],[74,6,1,4,false],[127,6,1,4,false]],"nativeBackdrop":18,"spritesheets":[[1,null],[2,null],[3,null]],"elapsedUnlockActualNative":null},
+        {"label":"key-route-2-settle-17","room":[5,7,11],"actualNativeKeys":[1,1],"actualNativeHP":[6,6],"actualNativeClear":[true,true],"doorTuple":"[index,variant,state,collisionClass,blownOpen]","actualDoors":[[7,7,2,5,true],[74,6,1,4,false],[127,6,1,4,false]],"nativeDoors":[[7,7,2,5,true],[74,6,1,4,false],[127,6,1,4,false]],"nativeBackdrop":18,"spritesheets":[[1,null],[2,null],[3,null]],"elapsedUnlockActualNative":null},
+        {"label":"key-route-3-settle-2","room":[5,7,11],"actualNativeKeys":[2,2],"actualNativeHP":[6,6],"actualNativeClear":[true,true],"doorTuple":"[index,variant,state,collisionClass,blownOpen]","actualDoors":[[7,7,2,5,true],[74,6,1,4,false],[127,6,1,4,false]],"nativeDoors":[[7,7,2,5,true],[74,6,1,4,false],[127,6,1,4,false]],"nativeBackdrop":18,"spritesheets":[[1,null],[2,null],[3,null]],"elapsedUnlockActualNative":null},
+        {"label":"secret-return-43","room":[6,1,2],"actualNativeKeys":[2,2],"actualNativeHP":[6,6],"actualNativeClear":[true,true],"doorTuple":"[index,variant,state,collisionClass,blownOpen]","actualDoors":[[7,1,1,4,false],[60,7,2,4,false],[74,7,2,4,false],[127,7,2,5,true]],"nativeDoors":[[7,1,1,4,false],[60,7,2,4,false],[74,7,2,4,false],[127,7,2,5,true]],"nativeBackdrop":1,"spritesheets":[[0,null],[1,null],[2,null],[3,null]],"elapsedUnlockActualNative":null},
+        {"label":"library-approach-63","room":[6,1,2],"actualNativeKeys":[1,1],"actualNativeHP":[6,6],"actualNativeClear":[true,true],"doorTuple":"[index,variant,state,collisionClass,blownOpen]","actualDoors":[[7,7,2,4,false],[60,7,2,5,false],[74,7,2,5,false],[127,7,2,5,true]],"nativeDoors":[[7,7,2,4,false],[60,7,2,5,false],[74,7,2,5,false],[127,7,2,5,true]],"nativeBackdrop":1,"spritesheets":[[0,null],[1,null],[2,null],[3,null]],"elapsedUnlockActualNative":[[402,404],[402,404]]},
+        {"label":"library-approach-64","room":[6,1,2],"actualNativeKeys":[1,1],"actualNativeHP":[6,6],"actualNativeClear":[true,true],"doorTuple":"[index,variant,state,collisionClass,blownOpen]","actualDoors":[[7,7,2,4,false],[60,7,2,5,false],[74,7,2,5,false],[127,7,2,5,true]],"nativeDoors":[[7,7,2,4,false],[60,7,2,5,false],[74,7,2,5,false],[127,7,2,5,true]],"nativeBackdrop":1,"spritesheets":[[0,null],[1,null],[2,null],[3,null]],"elapsedUnlockActualNative":[[402,404],[402,404]]},
+        {"label":"library-approach-66","room":[6,1,2],"actualNativeKeys":[1,1],"actualNativeHP":[6,6],"actualNativeClear":[true,true],"doorTuple":"[index,variant,state,collisionClass,blownOpen]","actualDoors":[[7,7,2,5,false],[60,7,2,5,false],[74,7,2,5,false],[127,7,2,5,true]],"nativeDoors":[[7,7,2,5,false],[60,7,2,5,false],[74,7,2,5,false],[127,7,2,5,true]],"nativeBackdrop":1,"spritesheets":[[0,null],[1,null],[2,null],[3,null]],"elapsedUnlockActualNative":[[402,404],[402,404]]},
+        {"label":"library-approach-79","room":[4,12,1],"actualNativeKeys":[1,1],"actualNativeHP":[6,6],"actualNativeClear":[true,true],"doorTuple":"[index,variant,state,collisionClass,blownOpen]","actualDoors":[[127,7,2,4,false]],"nativeDoors":[[127,7,2,4,false]],"nativeBackdrop":14,"spritesheets":[[3,"gfx/grid/door_13_librarydoor.png"]],"elapsedUnlockActualNative":[[402,404],[402,404]]},
+        {"label":"library-approach-80","room":[4,12,1],"actualNativeKeys":[1,1],"actualNativeHP":[6,6],"actualNativeClear":[true,true],"doorTuple":"[index,variant,state,collisionClass,blownOpen]","actualDoors":[[127,7,2,4,false]],"nativeDoors":[[127,7,2,4,false]],"nativeBackdrop":14,"spritesheets":[[3,"gfx/grid/door_13_librarydoor.png"]],"elapsedUnlockActualNative":[[402,404],[402,404]]},
+        {"label":"library-return-17","room":[6,1,2],"actualNativeKeys":[1,1],"actualNativeHP":[6,6],"actualNativeClear":[true,true],"doorTuple":"[index,variant,state,collisionClass,blownOpen]","actualDoors":[[7,7,2,4,false],[60,7,2,4,false],[74,7,2,4,false],[127,7,2,4,false]],"nativeDoors":[[7,7,2,4,false],[60,7,2,4,false],[74,7,2,4,false],[127,7,2,4,false]],"nativeBackdrop":1,"spritesheets":[[0,null],[1,null],[2,null],[3,null]],"elapsedUnlockActualNative":[[402,404],[402,404]]},
+        {"label":"library-return-settle-18","room":[6,1,2],"actualNativeKeys":[1,1],"actualNativeHP":[6,6],"actualNativeClear":[true,true],"doorTuple":"[index,variant,state,collisionClass,blownOpen]","actualDoors":[[7,7,2,5,false],[60,7,2,5,false],[74,7,2,5,false],[127,7,2,5,false]],"nativeDoors":[[7,7,2,5,false],[60,7,2,5,false],[74,7,2,5,false],[127,7,2,5,false]],"nativeBackdrop":1,"spritesheets":[[0,null],[1,null],[2,null],[3,null]],"elapsedUnlockActualNative":[[402,404],[402,404]]},
+        {"label":"library-revisit-17","room":[4,12,1],"actualNativeKeys":[1,1],"actualNativeHP":[6,6],"actualNativeClear":[true,true],"doorTuple":"[index,variant,state,collisionClass,blownOpen]","actualDoors":[[127,7,2,4,false]],"nativeDoors":[[127,7,2,4,false]],"nativeBackdrop":14,"spritesheets":[[3,"gfx/grid/door_13_librarydoor.png"]],"elapsedUnlockActualNative":[[402,404],[402,404]]},
+        {"label":"library-revisit-settle-18","room":[4,12,1],"actualNativeKeys":[1,1],"actualNativeHP":[6,6],"actualNativeClear":[true,true],"doorTuple":"[index,variant,state,collisionClass,blownOpen]","actualDoors":[[127,7,2,5,false]],"nativeDoors":[[127,7,2,5,false]],"nativeBackdrop":14,"spritesheets":[[3,"gfx/grid/door_13_librarydoor.png"]],"elapsedUnlockActualNative":[[402,404],[402,404]]},
+        {"label":"library-return-again-17","room":[6,1,2],"actualNativeKeys":[1,1],"actualNativeHP":[6,6],"actualNativeClear":[true,true],"doorTuple":"[index,variant,state,collisionClass,blownOpen]","actualDoors":[[7,7,2,4,false],[60,7,2,4,false],[74,7,2,4,false],[127,7,2,4,false]],"nativeDoors":[[7,7,2,4,false],[60,7,2,4,false],[74,7,2,4,false],[127,7,2,4,false]],"nativeBackdrop":1,"spritesheets":[[0,null],[1,null],[2,null],[3,null]],"elapsedUnlockActualNative":[[402,404],[402,404]]},
+        {"label":"library-return-again-settle-18","room":[6,1,2],"actualNativeKeys":[1,1],"actualNativeHP":[6,6],"actualNativeClear":[true,true],"doorTuple":"[index,variant,state,collisionClass,blownOpen]","actualDoors":[[7,7,2,5,false],[60,7,2,5,false],[74,7,2,5,false],[127,7,2,5,false]],"nativeDoors":[[7,7,2,5,false],[60,7,2,5,false],[74,7,2,5,false],[127,7,2,5,false]],"nativeBackdrop":1,"spritesheets":[[0,null],[1,null],[2,null],[3,null]],"elapsedUnlockActualNative":[[402,404],[402,404]]},
+        {"label":"returned","room":[6,1,2],"actualNativeKeys":[1,1],"actualNativeHP":[6,6],"actualNativeClear":[true,true],"doorTuple":"[index,variant,state,collisionClass,blownOpen]","actualDoors":[[7,7,2,5,false],[60,7,2,5,false],[74,7,2,5,false],[127,7,2,5,false]],"nativeDoors":[[7,7,2,5,false],[60,7,2,5,false],[74,7,2,5,false],[127,7,2,5,false]],"nativeBackdrop":1,"spritesheets":[[0,null],[1,null],[2,null],[3,null]],"elapsedUnlockActualNative":[[402,404],[402,404]]}
+      ]
+    },
+    {
+      "seed": "7XGY2Q9P",
+      "selection": "OS randomness discovery attempt20107",
+      "comparedPhases": 750,
+      "provenance": {
+        "status": "pass",
+        "nativeBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+        "manifestSha256": "7dea81468f7ced67a364f7d58589f42e3badc9a98ed7315801b57f3d971233ba",
+        "originalLogSha256": "1051240a9e935736496ebcd4c51816b140f2b50d472433cdee21716d5e8756d6",
+        "observations": 750
+      },
+      "inputProvenance": {
+        "status": "pass",
+        "commands": 820,
+        "initialSeed": 3810669510,
+        "bootEpochSeed": 0,
+        "manualSeed": "7XGY2Q9P"
+      },
+      "traceHistory": {
+        "truncated": true,
+        "inputTraceTruncated": false,
+        "stateHistoryTruncated": true,
+        "retainedStates": 452,
+        "stateEncodedBytes": 33507916,
+        "maxStateEncodedBytes": 33554432
+      },
+      "completePlannedMenuPrefixCommands": 49,
+      "seedReadback": {
+        "screen": "playing",
+        "seededRun": true,
+        "seedValid": true,
+        "seedText": "7XGY2Q9P",
+        "runSeed": "7XGY2Q9P",
+        "runSeedValue": 3810669510
+      },
+      "stateSha256": "9ea7fbefbbd10c06c68b6e8fad264edc07707671cfd5cc25b87a6f9a0734c2af",
+      "inputSha256": "f06d2c7f1692aa7c61c98e5536576d6e6afc1bfc4450c5674a707096266c64e2",
+      "gameplayStartHalfTicks": [
+        488,
+        603
+      ],
+      "keyDoorFailureCount": 0,
+      "requiredFailures": [
+        {
+          "label": "entry-settle-12",
+          "error": "AssertionError [ERR_ASSERTION]: entry-settle-12:complete supported native admission multiset with subtype/seed/position\n+ actual - expected\n\n  [\n+   '[17,1,0,3123124986,240,160]',\n-   '[17,1,4,3123124986,240,160]',\n    '[5,30,1,2926450441,280,280]',\n    '[5,30,1,3620763208,360,280]'\n  ]\n"
+        }
+      ],
+      "events": [
+        {"label":"gameplay-start","room":[6,1,2],"actualNativeKeys":[0,0],"actualNativeHP":[6,6],"actualNativeClear":[true,true],"doorTuple":"[index,variant,state,collisionClass,blownOpen]","actualDoors":[[7,1,1,4,false],[60,7,2,5,false],[74,7,2,5,false],[127,6,1,4,false]],"nativeDoors":[[7,1,1,4,false],[60,7,2,5,false],[74,7,2,5,false],[127,6,1,4,false]],"nativeBackdrop":1,"spritesheets":[[0,null],[1,null],[2,null],[3,null]],"elapsedUnlockActualNative":null},
+        {"label":"entry-settle-12","room":[5,7,11],"actualNativeKeys":[0,0],"actualNativeHP":[6,6],"actualNativeClear":[true,true],"doorTuple":"[index,variant,state,collisionClass,blownOpen]","actualDoors":[[7,7,2,5,true],[60,6,1,4,false],[127,6,1,4,false]],"nativeDoors":[[7,7,2,5,true],[60,6,1,4,false],[127,6,1,4,false]],"nativeBackdrop":18,"spritesheets":[[0,null],[1,null],[3,null]],"elapsedUnlockActualNative":null},
+        {"label":"key-route-2-settle-16","room":[5,7,11],"actualNativeKeys":[1,1],"actualNativeHP":[6,6],"actualNativeClear":[true,true],"doorTuple":"[index,variant,state,collisionClass,blownOpen]","actualDoors":[[7,7,2,5,true],[60,6,1,4,false],[127,6,1,4,false]],"nativeDoors":[[7,7,2,5,true],[60,6,1,4,false],[127,6,1,4,false]],"nativeBackdrop":18,"spritesheets":[[0,null],[1,null],[3,null]],"elapsedUnlockActualNative":null},
+        {"label":"key-route-3-settle-1","room":[5,7,11],"actualNativeKeys":[2,2],"actualNativeHP":[6,6],"actualNativeClear":[true,true],"doorTuple":"[index,variant,state,collisionClass,blownOpen]","actualDoors":[[7,7,2,5,true],[60,6,1,4,false],[127,6,1,4,false]],"nativeDoors":[[7,7,2,5,true],[60,6,1,4,false],[127,6,1,4,false]],"nativeBackdrop":18,"spritesheets":[[0,null],[1,null],[3,null]],"elapsedUnlockActualNative":null},
+        {"label":"secret-return-44","room":[6,1,2],"actualNativeKeys":[2,2],"actualNativeHP":[6,6],"actualNativeClear":[true,true],"doorTuple":"[index,variant,state,collisionClass,blownOpen]","actualDoors":[[7,1,1,4,false],[60,7,2,4,false],[74,7,2,4,false],[127,7,2,5,true]],"nativeDoors":[[7,1,1,4,false],[60,7,2,4,false],[74,7,2,4,false],[127,7,2,5,true]],"nativeBackdrop":1,"spritesheets":[[0,null],[1,null],[2,null],[3,null]],"elapsedUnlockActualNative":null},
+        {"label":"library-approach-64","room":[6,1,2],"actualNativeKeys":[1,1],"actualNativeHP":[6,6],"actualNativeClear":[true,true],"doorTuple":"[index,variant,state,collisionClass,blownOpen]","actualDoors":[[7,7,2,4,false],[60,7,2,5,false],[74,7,2,5,false],[127,7,2,5,true]],"nativeDoors":[[7,7,2,4,false],[60,7,2,5,false],[74,7,2,5,false],[127,7,2,5,true]],"nativeBackdrop":1,"spritesheets":[[0,null],[1,null],[2,null],[3,null]],"elapsedUnlockActualNative":[[309,311],[309,311]]},
+        {"label":"library-approach-66","room":[6,1,2],"actualNativeKeys":[1,1],"actualNativeHP":[6,6],"actualNativeClear":[true,true],"doorTuple":"[index,variant,state,collisionClass,blownOpen]","actualDoors":[[7,7,2,5,false],[60,7,2,5,false],[74,7,2,5,false],[127,7,2,5,true]],"nativeDoors":[[7,7,2,5,false],[60,7,2,5,false],[74,7,2,5,false],[127,7,2,5,true]],"nativeBackdrop":1,"spritesheets":[[0,null],[1,null],[2,null],[3,null]],"elapsedUnlockActualNative":[[309,311],[309,311]]},
+        {"label":"library-approach-80","room":[4,12,3],"actualNativeKeys":[1,1],"actualNativeHP":[6,6],"actualNativeClear":[true,true],"doorTuple":"[index,variant,state,collisionClass,blownOpen]","actualDoors":[[127,7,2,4,false]],"nativeDoors":[[127,7,2,4,false]],"nativeBackdrop":14,"spritesheets":[[3,"gfx/grid/door_13_librarydoor.png"]],"elapsedUnlockActualNative":[[309,311],[309,311]]},
+        {"label":"library-return-18","room":[6,1,2],"actualNativeKeys":[1,1],"actualNativeHP":[6,6],"actualNativeClear":[true,true],"doorTuple":"[index,variant,state,collisionClass,blownOpen]","actualDoors":[[7,7,2,4,false],[60,7,2,4,false],[74,7,2,4,false],[127,7,2,4,false]],"nativeDoors":[[7,7,2,4,false],[60,7,2,4,false],[74,7,2,4,false],[127,7,2,4,false]],"nativeBackdrop":1,"spritesheets":[[0,null],[1,null],[2,null],[3,null]],"elapsedUnlockActualNative":[[309,311],[309,311]]},
+        {"label":"library-return-settle-18","room":[6,1,2],"actualNativeKeys":[1,1],"actualNativeHP":[6,6],"actualNativeClear":[true,true],"doorTuple":"[index,variant,state,collisionClass,blownOpen]","actualDoors":[[7,7,2,5,false],[60,7,2,5,false],[74,7,2,5,false],[127,7,2,5,false]],"nativeDoors":[[7,7,2,5,false],[60,7,2,5,false],[74,7,2,5,false],[127,7,2,5,false]],"nativeBackdrop":1,"spritesheets":[[0,null],[1,null],[2,null],[3,null]],"elapsedUnlockActualNative":[[309,311],[309,311]]},
+        {"label":"library-revisit-18","room":[4,12,3],"actualNativeKeys":[1,1],"actualNativeHP":[6,6],"actualNativeClear":[true,true],"doorTuple":"[index,variant,state,collisionClass,blownOpen]","actualDoors":[[127,7,2,4,false]],"nativeDoors":[[127,7,2,4,false]],"nativeBackdrop":14,"spritesheets":[[3,"gfx/grid/door_13_librarydoor.png"]],"elapsedUnlockActualNative":[[309,311],[309,311]]},
+        {"label":"library-revisit-settle-18","room":[4,12,3],"actualNativeKeys":[1,1],"actualNativeHP":[6,6],"actualNativeClear":[true,true],"doorTuple":"[index,variant,state,collisionClass,blownOpen]","actualDoors":[[127,7,2,5,false]],"nativeDoors":[[127,7,2,5,false]],"nativeBackdrop":14,"spritesheets":[[3,"gfx/grid/door_13_librarydoor.png"]],"elapsedUnlockActualNative":[[309,311],[309,311]]},
+        {"label":"library-return-again-18","room":[6,1,2],"actualNativeKeys":[1,1],"actualNativeHP":[6,6],"actualNativeClear":[true,true],"doorTuple":"[index,variant,state,collisionClass,blownOpen]","actualDoors":[[7,7,2,4,false],[60,7,2,4,false],[74,7,2,4,false],[127,7,2,4,false]],"nativeDoors":[[7,7,2,4,false],[60,7,2,4,false],[74,7,2,4,false],[127,7,2,4,false]],"nativeBackdrop":1,"spritesheets":[[0,null],[1,null],[2,null],[3,null]],"elapsedUnlockActualNative":[[309,311],[309,311]]},
+        {"label":"library-return-again-settle-18","room":[6,1,2],"actualNativeKeys":[1,1],"actualNativeHP":[6,6],"actualNativeClear":[true,true],"doorTuple":"[index,variant,state,collisionClass,blownOpen]","actualDoors":[[7,7,2,5,false],[60,7,2,5,false],[74,7,2,5,false],[127,7,2,5,false]],"nativeDoors":[[7,7,2,5,false],[60,7,2,5,false],[74,7,2,5,false],[127,7,2,5,false]],"nativeBackdrop":1,"spritesheets":[[0,null],[1,null],[2,null],[3,null]],"elapsedUnlockActualNative":[[309,311],[309,311]]},
+        {"label":"returned","room":[6,1,2],"actualNativeKeys":[1,1],"actualNativeHP":[6,6],"actualNativeClear":[true,true],"doorTuple":"[index,variant,state,collisionClass,blownOpen]","actualDoors":[[7,7,2,5,false],[60,7,2,5,false],[74,7,2,5,false],[127,7,2,5,false]],"nativeDoors":[[7,7,2,5,false],[60,7,2,5,false],[74,7,2,5,false],[127,7,2,5,false]],"nativeBackdrop":1,"spritesheets":[[0,null],[1,null],[2,null],[3,null]],"elapsedUnlockActualNative":[[309,311],[309,311]]}
+      ]
+    }
+  ],
+  "retainedEarlierFailure": {
+    "path": ".cache/e2e/key-doors/paired-aggregate-final/report.json",
+    "sha256": "35bbe59a7c271681ca2c0f41107d8ec168d15e8def9c9ea8f094165cf4f770e3",
+    "scope": "Earlier immutable replay retains incorrect transient secret blown flags/class on library returns and zero-baseline SFX comparisons. Actual admission and elapsed-clock fixes preserve the selected public route."
+  }
+}
