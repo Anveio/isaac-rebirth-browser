@@ -1,0 +1,787 @@
+{
+  "schema": 1,
+  "sourceHead": "98c4ba68fbad29ee8147ded51b0eb5aa8d6deda8",
+  "base": "cb3601894107c95b7a911349d62cfba1fcee20d5",
+  "scope": "Actual supported fresh normal Game.Save ownership; numeric current-room grid, postrun shared MT and W0 acceptance remain incomplete. Native data are read-only comparisons and never production inputs.",
+  "status": "scoped-ownership-pass-with-required-numeric-failures",
+  "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "production": {
+    "sha256": "0454fdd751e17452e09b8b9162d4312747e84437d4782050a5d6580f77e6e8e8",
+    "files": 921,
+    "source": "/workspace/isaac-worktrees/weapons/dist",
+    "scope": "Immutable snapshot of production build bytes; source/native replay equality is checked separately"
+  },
+  "reportSha256": "e8afba47bb4f710086c9be8ba03b0280e58372544ce29069c1c5753dd042b3a8",
+  "gateSources": {
+    "tools/e2e/ordinary-run.mjs": "015a61f9a8bf70cfc2f9dad783107f9dcccdb067087eae895162c71fc5d97ac0",
+    "tools/original/boot-mt-observer.py": "7f444e39596c1ed93b825a055340866d187d6e0ed61d12131a9d5a4f51a321c5",
+    "tools/original/native-identity.py": "4fd5591be56fc4e9ad0486d0f2ec2828f6389786245ee09f9d0b3a395ae18acb",
+    "tools/original/state-observer.py": "58e3b510abbe5ff57f05844efbdf764e2a02530cda4fa99f538d886d258af6f1",
+    "tools/original/foundation-clock-run.py": "8f2fa981fbe26073d5a5a34ff46fbc6e9c70c2d30f81784abded5e40b9110c5b",
+    "tools/original/foundation-clock-gate.c": "f517f1fc0edf2bbe17021e529fb41652e991e286bef070b8aecefd32bfa62e75",
+    "tools/original/foundation-seeds.py": "dd4633c955e7518e9bc0f0147ddfae46d356468238477a68dc06c86656ccba89",
+    "tools/original/debug-run.py": "d785d32c6cc557959be38880a3b046c4040b988fbe3d06d4a8c1f4aa2e833cf5",
+    "tools/original/with-display.sh": "4371efe64ae1639564b4a85292ff252e20bcfe84b5387927ecf7093c6b8d3dfb",
+    "tools/foundation/browser.mjs": "60c4bc851470f47e4dd0399148ce0c1edf351d41fbf7f7e15fa823af5948b4c8",
+    "tools/foundation/production-server.mjs": "e3152b58e2353319ba0963b30439e33c3cc65f84a8c6ebb765c2812486245952",
+    "tools/foundation/verify.mjs": "3743b773cf2ede253c6d78f2605eb43f34e9d7002284b6a1dd2c413d45835a5c",
+    "engine/src/lib.rs": "24cd604b3c76038c7cd04cfcf8dc9274bcb295c1269c8eae3533b497b880c774",
+    "engine/src/mt.rs": "8a6814236c7aad63d744c86a55416c086648f1e88d41aa10dbcb1e24b1fcc933",
+    "engine/src/saved_game.rs": "e09d27d4c3111829d1c3fd210ef9a4ac9aa2ce824210fd4310126c04d277d38b",
+    "engine/src/items.rs": "499883b8ffdd240c49b36055e7c19fb6d17dc811a0b30d75275a35f237950721",
+    "engine/src/menu_lifecycle.rs": "2ccfe4da0f3213a43caa987f80d092a8ae21e03ad9e27120aa574fe9fad1c5e0",
+    "engine/src/seed.rs": "5b34052dfbc34facb7903d1aeae5b063934c7780902d4ccfe6ab2743597d98d3",
+    "engine/src/audio.rs": "d026fad8a0a4645061fa26061947dd5465d1e7e7a1edc86aae1fe733c1627110",
+    "engine/src/music.rs": "12ca1b7359622b16c54915e53e76ac87271dbd35f5a51a91b9801f54782c12dd",
+    "web/main.ts": "d1992ec663f1594f02beb660d33d35c5277423bbac00881ef6c18d772df80440",
+    "web/trace.ts": "2df69cfbbae14084baadacbcffbc9ecb7b6e363e61c1efb26f721475cfb198a9"
+  },
+  "gateSourcesStable": true,
+  "counts": {
+    "cases": 6,
+    "scopedOwnershipPasses": 6,
+    "nativeIdentityChecks": 36,
+    "menuCheckpoints": 24,
+    "menuMtWords": 14976,
+    "menuSavedPairs": 216,
+    "levelPairs": 270,
+    "statPoses": 4296,
+    "legacySavedPairs": 54,
+    "currentRowPairs": 54,
+    "currentRowInternalCopyComparisons": 108,
+    "publicCommands": 96,
+    "currentRowNumericFailures": 6,
+    "gridOccupancyFailures": 6,
+    "completePostrunMtFailures": 6
+  },
+  "currentCellColumns": ["gridIndex", "nativeSeed10", "nativeSeed18", "productionSeed10", "productionSeed18", "nativeOccupancy", "productionOccupancy", "nativeObjectKind", "nativeObjectVariant"],
+  "cases": [
+    {
+      "name": "zero-epoch",
+      "bootEpochSeed": 0,
+      "initialSeed": 1,
+      "status": "pass",
+      "nativeManifestSha256": "9605d520942639b2aebd64b994914958234eac3869738e5225d6346182897d49",
+      "actualRun": {
+        "seedValue": 893504905,
+        "code": "HL1ME7FN",
+        "stageSeed": 2132069013,
+        "seededRun": false,
+        "achievementEligibility": true
+      },
+      "inputProvenance": {
+        "status": "pass",
+        "expectedCommands": 16,
+        "observedCommands": 16,
+        "initialSeed": 1,
+        "bootEpochSeed": 0
+      },
+      "savedGameOwnership": {
+        "status": "pass",
+        "comparedPairs": 9,
+        "copiedPairs": 9,
+        "emptyCells": 91,
+        "occupiedSecondarySeedsPending": 44
+      },
+      "savedCounterDiagnostic": {
+        "status": "pass",
+        "original": 0,
+        "production": 0
+      },
+      "nativeStatus": "pass",
+      "nativeFinalPresentation": 858,
+      "nativeIdentityChecks": 6,
+      "currentRoomRecord": 6,
+      "currentRowOwnershipStatus": "pass",
+      "currentRowNumericalStatus": "fail",
+      "currentCells": [
+        [0, 3412930192, 1563928295, 730841750, 440580978, "occupied", "occupied", 15, 0],
+        [1, 77279613, 139078381, 1987859253, 606617689, "occupied", "occupied", 15, 0],
+        [16, 786766938, 3074586797, 165678007, 3319283743, "empty", "empty", null, null],
+        [17, 1755607213, 2216790959, 2276172727, 300470375, "empty", "empty", null, null],
+        [56, 556789747, 1784284412, 518542361, 2969041457, "occupied", "empty", 1, 20],
+        [85, 2589511592, 2851142752, 2435927618, 3369685601, "occupied", "empty", 1, 20],
+        [103, 1513581806, 3908906544, 1648990684, 1822058754, "occupied", "empty", 1, 0],
+        [134, 3265888411, 398359042, 2556302511, 1732846836, "occupied", "occupied", 15, 0],
+        [447, 1717885284, 603640583, 1717885284, 603640583, "padding", "padding", null, null]
+      ],
+      "gridOccupancyDiagnostic": {
+        "status": "fail",
+        "originalNullCells": 88,
+        "productionNullCells": 91,
+        "originalOccupiedProductionNull": [56, 85, 103],
+        "originalNullProductionOccupied": [],
+        "reason": "Grid factory admission and secondary state remain incomplete; observed occupancy never changes production state"
+      },
+      "runMtDiagnostic": {
+        "status": "fail",
+        "originalIndex": 459,
+        "productionIndex": 38,
+        "differingWords": 624,
+        "firstDifferences": [
+          {
+            "index": 0,
+            "original": 3340451949,
+            "production": 3028172626
+          },
+          {
+            "index": 1,
+            "original": 121460540,
+            "production": 1081561544
+          },
+          {
+            "index": 2,
+            "original": 838145477,
+            "production": 189944451
+          },
+          {
+            "index": 3,
+            "original": 261364067,
+            "production": 2786956363
+          },
+          {
+            "index": 4,
+            "original": 1352443946,
+            "production": 2112341070
+          },
+          {
+            "index": 5,
+            "original": 373631584,
+            "production": 2956085164
+          },
+          {
+            "index": 6,
+            "original": 3190102260,
+            "production": 2847013690
+          },
+          {
+            "index": 7,
+            "original": 427804612,
+            "production": 928434619
+          }
+        ],
+        "reason": "Run/room/effect shared-stream consumers remain incomplete; source values and cursor adjustments are never supplied to production"
+      },
+      "browserCheckpointsSha256": "dd54304e29668dd3bf9823b1f5bcb3783b84a478268aa98d677b5c0e6c88b426",
+      "canonicalTraceSha256": "b3f9f56098b3650f1b43f1652cad6349c83ee52621610c7a6035266380d2a12d"
+    },
+    {
+      "name": "fixed-epoch",
+      "bootEpochSeed": 1700000000,
+      "initialSeed": 4294967295,
+      "status": "pass",
+      "nativeManifestSha256": "1cf1f27420617048672216966cb839c538b4357e2ffa2391a42e67dca6e761ea",
+      "actualRun": {
+        "seedValue": 1953094013,
+        "code": "RQDLPAD0",
+        "stageSeed": 1134067221,
+        "seededRun": false,
+        "achievementEligibility": true
+      },
+      "inputProvenance": {
+        "status": "pass",
+        "expectedCommands": 16,
+        "observedCommands": 16,
+        "initialSeed": 4294967295,
+        "bootEpochSeed": 1700000000
+      },
+      "savedGameOwnership": {
+        "status": "pass",
+        "comparedPairs": 9,
+        "copiedPairs": 9,
+        "emptyCells": 91,
+        "occupiedSecondarySeedsPending": 44
+      },
+      "savedCounterDiagnostic": {
+        "status": "pass",
+        "original": 0,
+        "production": 0
+      },
+      "nativeStatus": "pass",
+      "nativeFinalPresentation": 858,
+      "nativeIdentityChecks": 6,
+      "currentRoomRecord": 6,
+      "currentRowOwnershipStatus": "pass",
+      "currentRowNumericalStatus": "fail",
+      "currentCells": [
+        [0, 464998756, 2131316215, 4003509903, 2563685892, "occupied", "occupied", 15, 0],
+        [1, 1000576515, 1578117218, 3484347568, 2924630827, "occupied", "occupied", 15, 0],
+        [16, 919001346, 3259564291, 1377002713, 535614622, "empty", "empty", null, null],
+        [17, 632889721, 2043128561, 3449951972, 385901610, "empty", "empty", null, null],
+        [56, 3344069645, 1856591170, 1305086777, 1778035624, "occupied", "empty", 1, 20],
+        [85, 3029961426, 2979629345, 2748592576, 35428814, "occupied", "empty", 1, 20],
+        [103, 1860392172, 34329873, 1508925375, 1596766453, "empty", "empty", null, null],
+        [134, 2405286670, 2115527868, 2437059328, 271850198, "occupied", "occupied", 15, 0],
+        [447, 1804993798, 3964007038, 1804993798, 3964007038, "padding", "padding", null, null]
+      ],
+      "gridOccupancyDiagnostic": {
+        "status": "fail",
+        "originalNullCells": 83,
+        "productionNullCells": 91,
+        "originalOccupiedProductionNull": [18, 28, 34, 55, 56, 57, 81, 85],
+        "originalNullProductionOccupied": [],
+        "reason": "Grid factory admission and secondary state remain incomplete; observed occupancy never changes production state"
+      },
+      "runMtDiagnostic": {
+        "status": "fail",
+        "originalIndex": 464,
+        "productionIndex": 38,
+        "differingWords": 624,
+        "firstDifferences": [
+          {
+            "index": 0,
+            "original": 3025920350,
+            "production": 4292702356
+          },
+          {
+            "index": 1,
+            "original": 1803947576,
+            "production": 356296661
+          },
+          {
+            "index": 2,
+            "original": 913377430,
+            "production": 2288379315
+          },
+          {
+            "index": 3,
+            "original": 1155432017,
+            "production": 4204612414
+          },
+          {
+            "index": 4,
+            "original": 3467819560,
+            "production": 832042049
+          },
+          {
+            "index": 5,
+            "original": 726306269,
+            "production": 2913394303
+          },
+          {
+            "index": 6,
+            "original": 2636645993,
+            "production": 103844579
+          },
+          {
+            "index": 7,
+            "original": 3957854490,
+            "production": 2018576364
+          }
+        ],
+        "reason": "Run/room/effect shared-stream consumers remain incomplete; source values and cursor adjustments are never supplied to production"
+      },
+      "browserCheckpointsSha256": "e364b9a6d83046c1c8fb1ed08611f2c93b13b7304c5f38466bd5470406126cda",
+      "canonicalTraceSha256": "305d276edcfb99b683b23beefa0bd9fc011d38e98e5df0d71bf19ebf1ffba763"
+    },
+    {
+      "name": "random-0",
+      "bootEpochSeed": 2988990213,
+      "initialSeed": 3846854834,
+      "status": "pass",
+      "nativeManifestSha256": "04ee51e217f7c0feb336884f8103bb014752c0de961d97099b1ab71132765a93",
+      "actualRun": {
+        "seedValue": 621718409,
+        "code": "FMS7J7G0",
+        "stageSeed": 3491402084,
+        "seededRun": false,
+        "achievementEligibility": true
+      },
+      "inputProvenance": {
+        "status": "pass",
+        "expectedCommands": 16,
+        "observedCommands": 16,
+        "initialSeed": 3846854834,
+        "bootEpochSeed": 2988990213
+      },
+      "savedGameOwnership": {
+        "status": "pass",
+        "comparedPairs": 9,
+        "copiedPairs": 9,
+        "emptyCells": 91,
+        "occupiedSecondarySeedsPending": 44
+      },
+      "savedCounterDiagnostic": {
+        "status": "pass",
+        "original": 0,
+        "production": 0
+      },
+      "nativeStatus": "pass",
+      "nativeFinalPresentation": 858,
+      "nativeIdentityChecks": 6,
+      "currentRoomRecord": 6,
+      "currentRowOwnershipStatus": "pass",
+      "currentRowNumericalStatus": "fail",
+      "currentCells": [
+        [0, 1505947049, 3290202013, 775336848, 524658996, "occupied", "occupied", 15, 0],
+        [1, 2144210067, 1003727415, 3846718522, 3409906070, "occupied", "occupied", 15, 0],
+        [16, 3104081651, 3075267634, 3801591732, 422997160, "empty", "empty", null, null],
+        [17, 551797731, 1264092574, 119761891, 3264332492, "empty", "empty", null, null],
+        [56, 80886014, 846520339, 3551729573, 2898469998, "occupied", "empty", 1, 20],
+        [85, 4149259757, 444426254, 2995935013, 2342266301, "occupied", "empty", 1, 20],
+        [103, 2087867670, 2687681640, 105083035, 3986449024, "empty", "empty", null, null],
+        [134, 47700668, 2046692238, 3651902545, 4138456275, "occupied", "occupied", 15, 0],
+        [447, 1543117858, 2245250662, 1543117858, 2245250662, "padding", "padding", null, null]
+      ],
+      "gridOccupancyDiagnostic": {
+        "status": "fail",
+        "originalNullCells": 88,
+        "productionNullCells": 91,
+        "originalOccupiedProductionNull": [56, 71, 85],
+        "originalNullProductionOccupied": [],
+        "reason": "Grid factory admission and secondary state remain incomplete; observed occupancy never changes production state"
+      },
+      "runMtDiagnostic": {
+        "status": "fail",
+        "originalIndex": 62,
+        "productionIndex": 38,
+        "differingWords": 624,
+        "firstDifferences": [
+          {
+            "index": 0,
+            "original": 1909881571,
+            "production": 2510348574
+          },
+          {
+            "index": 1,
+            "original": 1699927280,
+            "production": 2562157771
+          },
+          {
+            "index": 2,
+            "original": 625669200,
+            "production": 3278995210
+          },
+          {
+            "index": 3,
+            "original": 3973969853,
+            "production": 744117375
+          },
+          {
+            "index": 4,
+            "original": 4057912311,
+            "production": 4131497998
+          },
+          {
+            "index": 5,
+            "original": 4087458364,
+            "production": 555977538
+          },
+          {
+            "index": 6,
+            "original": 4006868703,
+            "production": 959274821
+          },
+          {
+            "index": 7,
+            "original": 1094523382,
+            "production": 1610426604
+          }
+        ],
+        "reason": "Run/room/effect shared-stream consumers remain incomplete; source values and cursor adjustments are never supplied to production"
+      },
+      "browserCheckpointsSha256": "0c611982263d884250c76360c5e730ef274e7ec692d02b209afb221e9a7c7ce7",
+      "canonicalTraceSha256": "20d0a2134af96abfaeec6e22e54edd6e4e7912881f9610c5990f10be651f5f2b"
+    },
+    {
+      "name": "random-1",
+      "bootEpochSeed": 1901939540,
+      "initialSeed": 294623253,
+      "status": "pass",
+      "nativeManifestSha256": "b75575add560b3ea641ae9749135ae89bf6d23d75cacdef515c5bb70b1e16692",
+      "actualRun": {
+        "seedValue": 1399508554,
+        "code": "MWCVDP67",
+        "stageSeed": 278357310,
+        "seededRun": false,
+        "achievementEligibility": true
+      },
+      "inputProvenance": {
+        "status": "pass",
+        "expectedCommands": 16,
+        "observedCommands": 16,
+        "initialSeed": 294623253,
+        "bootEpochSeed": 1901939540
+      },
+      "savedGameOwnership": {
+        "status": "pass",
+        "comparedPairs": 9,
+        "copiedPairs": 9,
+        "emptyCells": 91,
+        "occupiedSecondarySeedsPending": 44
+      },
+      "savedCounterDiagnostic": {
+        "status": "pass",
+        "original": 0,
+        "production": 0
+      },
+      "nativeStatus": "pass",
+      "nativeFinalPresentation": 858,
+      "nativeIdentityChecks": 6,
+      "currentRoomRecord": 6,
+      "currentRowOwnershipStatus": "pass",
+      "currentRowNumericalStatus": "fail",
+      "currentCells": [
+        [0, 3746718436, 2518405299, 1884166909, 819631096, "occupied", "occupied", 15, 0],
+        [1, 2386079578, 377661502, 2795119767, 2130887699, "occupied", "occupied", 15, 0],
+        [16, 4060548148, 3342135050, 2062184992, 3622707564, "empty", "empty", null, null],
+        [17, 4278157257, 1827061847, 370731730, 1092859092, "empty", "empty", null, null],
+        [56, 2465595405, 2044499155, 1579868833, 2171547084, "occupied", "empty", 1, 20],
+        [85, 2460782592, 4207070905, 1584604159, 938395816, "occupied", "empty", 1, 20],
+        [103, 3975895662, 439388331, 4041189682, 3336900559, "empty", "empty", null, null],
+        [134, 2290344357, 2215806502, 902648358, 804110769, "occupied", "occupied", 15, 0],
+        [447, 431291151, 2044495561, 431291151, 2044495561, "padding", "padding", null, null]
+      ],
+      "gridOccupancyDiagnostic": {
+        "status": "fail",
+        "originalNullCells": 85,
+        "productionNullCells": 91,
+        "originalOccupiedProductionNull": [56, 78, 83, 85, 97, 110],
+        "originalNullProductionOccupied": [],
+        "reason": "Grid factory admission and secondary state remain incomplete; observed occupancy never changes production state"
+      },
+      "runMtDiagnostic": {
+        "status": "fail",
+        "originalIndex": 462,
+        "productionIndex": 38,
+        "differingWords": 624,
+        "firstDifferences": [
+          {
+            "index": 0,
+            "original": 2728054550,
+            "production": 41885837
+          },
+          {
+            "index": 1,
+            "original": 2560755352,
+            "production": 3458265198
+          },
+          {
+            "index": 2,
+            "original": 1637979711,
+            "production": 117001936
+          },
+          {
+            "index": 3,
+            "original": 339724275,
+            "production": 2388049142
+          },
+          {
+            "index": 4,
+            "original": 2144236572,
+            "production": 1661880701
+          },
+          {
+            "index": 5,
+            "original": 1622707621,
+            "production": 965115313
+          },
+          {
+            "index": 6,
+            "original": 1291386230,
+            "production": 2381305428
+          },
+          {
+            "index": 7,
+            "original": 2486244996,
+            "production": 4167987336
+          }
+        ],
+        "reason": "Run/room/effect shared-stream consumers remain incomplete; source values and cursor adjustments are never supplied to production"
+      },
+      "browserCheckpointsSha256": "6e9597fac303b6ed1c614adb1b0b1b7071f9de80f272de5a2aad753d16d6bc4b",
+      "canonicalTraceSha256": "b05f75ecba41104f63de26c0ecc033a11b38afbb7966bd6e44ff26f76df36830"
+    },
+    {
+      "name": "random-2",
+      "bootEpochSeed": 3795305435,
+      "initialSeed": 1274095651,
+      "status": "pass",
+      "nativeManifestSha256": "a03751176f9d356d43d3ef1f942b655759a8a7eceb9039564cf7b24c9da6e521",
+      "actualRun": {
+        "seedValue": 1676712118,
+        "code": "PSR8QW3J",
+        "stageSeed": 3900660468,
+        "seededRun": false,
+        "achievementEligibility": true
+      },
+      "inputProvenance": {
+        "status": "pass",
+        "expectedCommands": 16,
+        "observedCommands": 16,
+        "initialSeed": 1274095651,
+        "bootEpochSeed": 3795305435
+      },
+      "savedGameOwnership": {
+        "status": "pass",
+        "comparedPairs": 9,
+        "copiedPairs": 9,
+        "emptyCells": 91,
+        "occupiedSecondarySeedsPending": 44
+      },
+      "savedCounterDiagnostic": {
+        "status": "pass",
+        "original": 0,
+        "production": 0
+      },
+      "nativeStatus": "pass",
+      "nativeFinalPresentation": 858,
+      "nativeIdentityChecks": 6,
+      "currentRoomRecord": 6,
+      "currentRowOwnershipStatus": "pass",
+      "currentRowNumericalStatus": "fail",
+      "currentCells": [
+        [0, 1137161963, 1558021080, 50193018, 1651266111, "occupied", "occupied", 15, 0],
+        [1, 1885493089, 3918423393, 3411791322, 760845911, "occupied", "occupied", 15, 0],
+        [16, 3099151371, 1823757203, 3566435721, 1202619760, "empty", "empty", null, null],
+        [17, 927402762, 1431345506, 2367087326, 2116001053, "empty", "empty", null, null],
+        [56, 3216124943, 1139634724, 2949448586, 2036465312, "occupied", "empty", 1, 20],
+        [85, 3195222862, 1256780980, 920268439, 710982954, "occupied", "empty", 1, 20],
+        [103, 4238169100, 3604931716, 2315995947, 1419889138, "empty", "empty", null, null],
+        [134, 117309959, 3002544781, 1490112534, 1986489838, "occupied", "occupied", 15, 0],
+        [447, 4111127765, 3490552249, 4111127765, 3490552249, "padding", "padding", null, null]
+      ],
+      "gridOccupancyDiagnostic": {
+        "status": "fail",
+        "originalNullCells": 86,
+        "productionNullCells": 91,
+        "originalOccupiedProductionNull": [31, 56, 81, 85, 102],
+        "originalNullProductionOccupied": [],
+        "reason": "Grid factory admission and secondary state remain incomplete; observed occupancy never changes production state"
+      },
+      "runMtDiagnostic": {
+        "status": "fail",
+        "originalIndex": 461,
+        "productionIndex": 38,
+        "differingWords": 624,
+        "firstDifferences": [
+          {
+            "index": 0,
+            "original": 1435739992,
+            "production": 2833475388
+          },
+          {
+            "index": 1,
+            "original": 3535535866,
+            "production": 1770295870
+          },
+          {
+            "index": 2,
+            "original": 3312224284,
+            "production": 2839167737
+          },
+          {
+            "index": 3,
+            "original": 506196360,
+            "production": 3117058481
+          },
+          {
+            "index": 4,
+            "original": 2037629984,
+            "production": 501082054
+          },
+          {
+            "index": 5,
+            "original": 1495569117,
+            "production": 1728053365
+          },
+          {
+            "index": 6,
+            "original": 4126319005,
+            "production": 1641657810
+          },
+          {
+            "index": 7,
+            "original": 2347648239,
+            "production": 1176598573
+          }
+        ],
+        "reason": "Run/room/effect shared-stream consumers remain incomplete; source values and cursor adjustments are never supplied to production"
+      },
+      "browserCheckpointsSha256": "8797cb13a970955d2a9ae47b2593774401876fcda41c256a02173954eff6f8ef",
+      "canonicalTraceSha256": "13c53ec4dfb082c298e040702b60d9df4bbad58551934bee8f0a3a4b62503bd7"
+    },
+    {
+      "name": "random-3",
+      "bootEpochSeed": 2991455915,
+      "initialSeed": 3486913207,
+      "status": "pass",
+      "nativeManifestSha256": "3b67f308f3760c4091079f2bf6394da2eab5e0417668f20173c90b211dfbfd29",
+      "actualRun": {
+        "seedValue": 440707883,
+        "code": "C0Z7KZYT",
+        "stageSeed": 4098734561,
+        "seededRun": false,
+        "achievementEligibility": true
+      },
+      "inputProvenance": {
+        "status": "pass",
+        "expectedCommands": 16,
+        "observedCommands": 16,
+        "initialSeed": 3486913207,
+        "bootEpochSeed": 2991455915
+      },
+      "savedGameOwnership": {
+        "status": "pass",
+        "comparedPairs": 9,
+        "copiedPairs": 9,
+        "emptyCells": 91,
+        "occupiedSecondarySeedsPending": 44
+      },
+      "savedCounterDiagnostic": {
+        "status": "pass",
+        "original": 0,
+        "production": 0
+      },
+      "nativeStatus": "pass",
+      "nativeFinalPresentation": 858,
+      "nativeIdentityChecks": 6,
+      "currentRoomRecord": 5,
+      "currentRowOwnershipStatus": "pass",
+      "currentRowNumericalStatus": "fail",
+      "currentCells": [
+        [0, 502840512, 2585150453, 1871443815, 3495399987, "occupied", "occupied", 15, 0],
+        [1, 421917554, 1808422251, 2900097957, 2758605837, "occupied", "occupied", 15, 0],
+        [16, 3642946550, 1309286939, 2104248091, 738004986, "empty", "empty", null, null],
+        [17, 2715893257, 1145350057, 3797864857, 1010829381, "empty", "empty", null, null],
+        [56, 3511525560, 975150005, 2018380802, 2987791756, "occupied", "empty", 1, 20],
+        [85, 1789818513, 788298454, 918213542, 2771068697, "occupied", "empty", 1, 20],
+        [103, 1853240508, 3588580417, 3793507944, 3558262176, "empty", "empty", null, null],
+        [134, 4161805566, 1151617358, 806721210, 445585824, "occupied", "occupied", 15, 0],
+        [447, 3217965872, 3936490325, 3217965872, 3936490325, "padding", "padding", null, null]
+      ],
+      "gridOccupancyDiagnostic": {
+        "status": "fail",
+        "originalNullCells": 87,
+        "productionNullCells": 91,
+        "originalOccupiedProductionNull": [31, 56, 78, 85],
+        "originalNullProductionOccupied": [],
+        "reason": "Grid factory admission and secondary state remain incomplete; observed occupancy never changes production state"
+      },
+      "runMtDiagnostic": {
+        "status": "fail",
+        "originalIndex": 460,
+        "productionIndex": 38,
+        "differingWords": 624,
+        "firstDifferences": [
+          {
+            "index": 0,
+            "original": 4212082116,
+            "production": 4016258869
+          },
+          {
+            "index": 1,
+            "original": 3136791858,
+            "production": 3555336059
+          },
+          {
+            "index": 2,
+            "original": 1143446238,
+            "production": 980180974
+          },
+          {
+            "index": 3,
+            "original": 3527225697,
+            "production": 4257484650
+          },
+          {
+            "index": 4,
+            "original": 2593066419,
+            "production": 1281451193
+          },
+          {
+            "index": 5,
+            "original": 3416594032,
+            "production": 1910566575
+          },
+          {
+            "index": 6,
+            "original": 3363252188,
+            "production": 2753695349
+          },
+          {
+            "index": 7,
+            "original": 4015764639,
+            "production": 3187508550
+          }
+        ],
+        "reason": "Run/room/effect shared-stream consumers remain incomplete; source values and cursor adjustments are never supplied to production"
+      },
+      "browserCheckpointsSha256": "4d1a05bdab2561a13742c69096474e249775bb1b64cd1940480d77a8e95396eb",
+      "canonicalTraceSha256": "16e8fd9f373752e0e248b8de9e986cc01bbde4e459bd564ad05a5ddf992829d6"
+    }
+  ],
+  "requiredW0": {
+    "status": "fail",
+    "reportSha256": "768d33ce8c71d78c5c13655277884f40161c1efe7854344681a1a25e0ba08360",
+    "caseReportSha256": "14d94a38bc50aa069702c39d9f237c7fbdee431cce176aa18edb84880218262a",
+    "productionSha256": "0454fdd751e17452e09b8b9162d4312747e84437d4782050a5d6580f77e6e8e8",
+    "gateSources": {
+      "tools/foundation/paired-game.mjs": "879b1c8da1da531976231bf35782a5e449de3888dc30b8d528e8b98fb4af4c8d",
+      "tools/foundation/production-server.mjs": "e3152b58e2353319ba0963b30439e33c3cc65f84a8c6ebb765c2812486245952",
+      "tools/foundation/compare.mjs": "007227c2431f837b347ec29dcbc3492f49eaeb71d08b84ead0b88cfeef98b534",
+      "tools/original/foundation-paired-scenarios.py": "8f6a4b5130b6d0c1b73d3dcde57382c6ad169ba31efd8b3a13a6502eebe835cf",
+      "tools/original/foundation-paired-observer.py": "b49cb171da79eabba8054c8338018ffa38e3a38305fbff2240d6631214dddacf",
+      "tools/original/foundation-menu-observer.py": "a5b8a91047f9bccee75e844c5eba59c8bbf96a84b6a1b7142b59e32bacc91315",
+      "tools/original/foundation-combat-observe.py": "6f559621708614503f150d1bdfa527cb255941ebe981588580ff209f891ff6bc",
+      "tools/original/foundation-clock-run.py": "8f2fa981fbe26073d5a5a34ff46fbc6e9c70c2d30f81784abded5e40b9110c5b",
+      "tools/original/foundation-clock-gate.c": "f517f1fc0edf2bbe17021e529fb41652e991e286bef070b8aecefd32bfa62e75",
+      "tools/original/foundation-clock-verify.py": "c488100a187b44803c06374535715eaa5a7cde9d4513f6e866e090367d4f2054",
+      "tools/original/foundation-clock-scenarios.py": "87316815cfa490d534fae5f9d27e55f16b17404a93df1b79e528b3f4b58391c5",
+      "tools/original/foundation-bomb-scenario.py": "4d8dacb4bbe7222c6bfa3ffe1c9f8ea69b76f304825a01db0e973f14ddddd090",
+      "tools/original/foundation-presentation-scenario.py": "530666412639fae6cb2d71f6f49e89a9de12377503d84541a73240bca0be3351",
+      "tools/original/foundation-title-scenario.py": "ea1bfb8b53a46a55f0c234ea75753775b70fd69e0b88f1be8021287a13adb4a9",
+      "tools/original/foundation-combat-scenario.py": "d125481add29d1032fb164741a8d3ab54da9e54e9e6c1d0581278bc255044420",
+      "tools/original/foundation-seeds.py": "dd4633c955e7518e9bc0f0147ddfae46d356468238477a68dc06c86656ccba89",
+      "tools/original/foundation-random-seeds.py": "6ce7e4309ee9492dc0c20c0bf1144394dd92e70aec2037d0db91bb0f2928f625",
+      "tools/original/state-observer.py": "58e3b510abbe5ff57f05844efbdf764e2a02530cda4fa99f538d886d258af6f1",
+      "tools/original/debug-run.py": "d785d32c6cc557959be38880a3b046c4040b988fbe3d06d4a8c1f4aa2e833cf5",
+      "tools/original/with-display.sh": "4371efe64ae1639564b4a85292ff252e20bcfe84b5387927ecf7093c6b8d3dfb",
+      "tools/foundation/browser.mjs": "60c4bc851470f47e4dd0399148ce0c1edf351d41fbf7f7e15fa823af5948b4c8"
+    },
+    "gateSourcesStable": true,
+    "originalTransport": {
+      "status": "pass",
+      "provenance": {
+        "status": "pass",
+        "failures": []
+      }
+    },
+    "browserTransport": {
+      "status": "pass",
+      "failures": []
+    },
+    "passedCheckpoints": 17,
+    "totalCheckpoints": 18,
+    "requiredFailures": [
+      {
+        "label": "random-resumed",
+        "field": "tears.alive",
+        "expected": 0,
+        "actual": 1,
+        "status": "fail"
+      }
+    ],
+    "pixelScope": "Whole-frame differences remain recorded in raw report; this leaf does not claim pixel parity."
+  },
+  "performance": {
+    "schema": 1,
+    "scope": "Performance only: actual built WASM public command+snapshot ABI under Node, including current internal Save clone. Concurrent native cohorts can affect timing. This is not original parity evidence.",
+    "samples": 256,
+    "snapshotJsonBytes": 135792,
+    "savedSummaryJsonBytes": 1901,
+    "meanTickSnapshotMs": 1.3659872812500002,
+    "medianTickSnapshotMs": 1.1514809999999898,
+    "p95TickSnapshotMs": 1.8100370000000794,
+    "maxTickSnapshotMs": 12.667232000000013,
+    "legacySavedSamples": 9,
+    "currentRowSamples": 9,
+    "copiedDescriptorRows": 135
+  },
+  "build": {
+    "command": "npm run check:build",
+    "status": "pass",
+    "logSha256": "a4d40d879f1e2a6acb88afbba91a6efbfc5ba8ee1cd9939a37e23daac061e568",
+    "wasmSha256": "3cf367bc277fcc1d8511a8eec306e5a37a58ec6b836865e7515250b765f29937"
+  }
+}
