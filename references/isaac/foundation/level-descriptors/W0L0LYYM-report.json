@@ -1,0 +1,1346 @@
+{
+  "schema": 1,
+  "status": "fail",
+  "mode": "fresh original process paired with immutable browser production artifact",
+  "build": {
+    "sha256": "ec45c7874d45e2db19e84b1d881f4a11ab6b729fdc065cfec8f7ee308c9bfde9",
+    "files": 919,
+    "source": "/workspace/isaac-worktrees/weapons/dist",
+    "scope": "Immutable snapshot of production build bytes; source/native replay equality is checked separately"
+  },
+  "gateSources": {
+    "tools/foundation/paired-game.mjs": "879b1c8da1da531976231bf35782a5e449de3888dc30b8d528e8b98fb4af4c8d",
+    "tools/foundation/production-server.mjs": "e3152b58e2353319ba0963b30439e33c3cc65f84a8c6ebb765c2812486245952",
+    "tools/foundation/compare.mjs": "007227c2431f837b347ec29dcbc3492f49eaeb71d08b84ead0b88cfeef98b534",
+    "tools/original/foundation-paired-scenarios.py": "8f6a4b5130b6d0c1b73d3dcde57382c6ad169ba31efd8b3a13a6502eebe835cf",
+    "tools/original/foundation-paired-observer.py": "b49cb171da79eabba8054c8338018ffa38e3a38305fbff2240d6631214dddacf",
+    "tools/original/foundation-menu-observer.py": "a5b8a91047f9bccee75e844c5eba59c8bbf96a84b6a1b7142b59e32bacc91315",
+    "tools/original/foundation-combat-observe.py": "e707be8aaa59d2e9c1bb937ec19dd58b4d5df4c11e06942e2640eb0fc9538037",
+    "tools/original/foundation-clock-run.py": "8f2fa981fbe26073d5a5a34ff46fbc6e9c70c2d30f81784abded5e40b9110c5b",
+    "tools/original/foundation-clock-gate.c": "f517f1fc0edf2bbe17021e529fb41652e991e286bef070b8aecefd32bfa62e75",
+    "tools/original/foundation-clock-verify.py": "c488100a187b44803c06374535715eaa5a7cde9d4513f6e866e090367d4f2054",
+    "tools/original/foundation-clock-scenarios.py": "87316815cfa490d534fae5f9d27e55f16b17404a93df1b79e528b3f4b58391c5",
+    "tools/original/foundation-bomb-scenario.py": "4d8dacb4bbe7222c6bfa3ffe1c9f8ea69b76f304825a01db0e973f14ddddd090",
+    "tools/original/foundation-presentation-scenario.py": "530666412639fae6cb2d71f6f49e89a9de12377503d84541a73240bca0be3351",
+    "tools/original/foundation-title-scenario.py": "ea1bfb8b53a46a55f0c234ea75753775b70fd69e0b88f1be8021287a13adb4a9",
+    "tools/original/foundation-combat-scenario.py": "d125481add29d1032fb164741a8d3ab54da9e54e9e6c1d0581278bc255044420",
+    "tools/original/foundation-seeds.py": "dd4633c955e7518e9bc0f0147ddfae46d356468238477a68dc06c86656ccba89",
+    "tools/original/foundation-random-seeds.py": "6ce7e4309ee9492dc0c20c0bf1144394dd92e70aec2037d0db91bb0f2928f625",
+    "tools/original/state-observer.py": "58e3b510abbe5ff57f05844efbdf764e2a02530cda4fa99f538d886d258af6f1",
+    "tools/original/debug-run.py": "d785d32c6cc557959be38880a3b046c4040b988fbe3d06d4a8c1f4aa2e833cf5",
+    "tools/original/with-display.sh": "4371efe64ae1639564b4a85292ff252e20bcfe84b5387927ecf7093c6b8d3dfb",
+    "tools/foundation/browser.mjs": "60c4bc851470f47e4dd0399148ce0c1edf351d41fbf7f7e15fa823af5948b4c8"
+  },
+  "browserGraphics": {
+    "requestedProfile": "mesa",
+    "actualProfile": "mesa",
+    "renderer": "ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL ES 3.2 Mesa 25.0.7-2+deb13u1)",
+    "vendor": "Google Inc. (Mesa)",
+    "version": "OpenGL ES 3.0 (ANGLE 2.1 git hash: unknown hash)",
+    "displayType": "ANGLE_OPENGL_EGL",
+    "devices": [
+      {
+        "vendorId": 0,
+        "deviceId": 0,
+        "vendorString": "Google Inc. (Mesa)",
+        "deviceString": "ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL ES 3.2 Mesa 25.0.7-2+deb13u1)",
+        "driverVendor": "Mesa",
+        "driverVersion": "25.0.7"
+      }
+    ],
+    "observedFrom": "Chromium SystemInfo.getInfo",
+    "scope": "Observed Chromium graphics backend; shader/pixel equality still requires the original reference comparisons"
+  },
+  "nativeFrameTimeout": 60,
+  "sourceBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "comparisons": {
+    "functional": "Real input/phase/readback and source title, fade, player motion, pause/controller, HP, immunity, active tear/bomb counts",
+    "pixels": "Strict full RGBA diagnostic; every difference remains a failure in its own pixel result",
+    "exactPixelsRequired": false,
+    "completeOriginalStateParity": false
+  },
+  "cases": [
+    {
+      "id": "paired-random-run",
+      "seed": "W0L0 LYYM",
+      "seedValue": 2591693487,
+      "bootEpochSeed": 1700000000,
+      "caseSha256": "182a03c01f8dadbd10c8f38c23ce55dde286a18c9252438a22e8b982ea545403",
+      "directory": "/workspace/isaac-worktrees/weapons/.cache/e2e/level-descriptors/w0-root-final-1/00-paired-random-run",
+      "original": {
+        "status": "pass",
+        "provenance": {
+          "status": "pass",
+          "failures": []
+        }
+      },
+      "browser": {
+        "status": "pass",
+        "failures": []
+      },
+      "checks": [
+        {
+          "label": "title-ready",
+          "status": "pass",
+          "pixels": {
+            "exactRGBA": true,
+            "changedPixels": 0,
+            "comparedPixels": 518400,
+            "changedFraction": 0,
+            "meanAbsoluteChannelError": 0,
+            "maxChannelError": 0,
+            "status": "pass",
+            "required": false
+          },
+          "sourcePNGHash": "f7b5edfcb7b9f645583f61738404429d9f07b1df95e1c206dc3b3f43b16edcf4",
+          "state": [
+            {
+              "field": "screen",
+              "expected": "title",
+              "actual": "title",
+              "status": "pass"
+            },
+            {
+              "field": "titleAnimationFrame",
+              "expected": 0,
+              "actual": 0,
+              "status": "pass"
+            },
+            {
+              "field": "menuFade.active",
+              "expected": true,
+              "actual": true,
+              "status": "pass"
+            },
+            {
+              "field": "menuFade.alpha",
+              "expected": 0.9750000238418579,
+              "actual": 0.9750000238418579,
+              "status": "pass"
+            },
+            {
+              "field": "menuFade.color",
+              "expected": [
+                1,
+                1,
+                1,
+                0.9500001668930054
+              ],
+              "actual": [
+                1,
+                1,
+                1,
+                0.9500001668930054
+              ],
+              "status": "pass"
+            }
+          ]
+        },
+        {
+          "label": "title",
+          "status": "pass",
+          "pixels": {
+            "exactRGBA": true,
+            "changedPixels": 0,
+            "comparedPixels": 518400,
+            "changedFraction": 0,
+            "meanAbsoluteChannelError": 0,
+            "maxChannelError": 0,
+            "status": "pass",
+            "required": false
+          },
+          "sourcePNGHash": "7cfa57e6d01df60f5f45d599f9b69ad03ed5e5a74f1d72c678cf889fabe573f9",
+          "state": [
+            {
+              "field": "screen",
+              "expected": "title",
+              "actual": "title",
+              "status": "pass"
+            },
+            {
+              "field": "titleAnimationFrame",
+              "expected": 32,
+              "actual": 32,
+              "status": "pass"
+            },
+            {
+              "field": "menuFade.active",
+              "expected": false,
+              "actual": false,
+              "status": "pass"
+            },
+            {
+              "field": "menuFade.alpha",
+              "expected": 0,
+              "actual": 0,
+              "status": "pass"
+            },
+            {
+              "field": "menuFade.color",
+              "expected": [
+                1,
+                1,
+                1,
+                0.9500001668930054
+              ],
+              "actual": [
+                1,
+                1,
+                1,
+                0.9500001668930054
+              ],
+              "status": "pass"
+            }
+          ]
+        },
+        {
+          "label": "profile",
+          "status": "pass",
+          "pixels": {
+            "exactRGBA": true,
+            "changedPixels": 0,
+            "comparedPixels": 518400,
+            "changedFraction": 0,
+            "meanAbsoluteChannelError": 0,
+            "maxChannelError": 0,
+            "status": "pass",
+            "required": false
+          },
+          "sourcePNGHash": "a0c969aacfe7b4b2bc90bb7d2ddf27f4dce45e6d815823382ae287618b77cb91",
+          "state": [
+            {
+              "field": "screen",
+              "expected": "profile",
+              "actual": "profile",
+              "status": "pass"
+            },
+            {
+              "field": "titleAnimationFrame",
+              "expected": 32,
+              "actual": 32,
+              "status": "pass"
+            },
+            {
+              "field": "menuFade.active",
+              "expected": false,
+              "actual": false,
+              "status": "pass"
+            },
+            {
+              "field": "menuFade.alpha",
+              "expected": 0,
+              "actual": 0,
+              "status": "pass"
+            },
+            {
+              "field": "menuFade.color",
+              "expected": [
+                1,
+                1,
+                1,
+                0.9500001668930054
+              ],
+              "actual": [
+                1,
+                1,
+                1,
+                0.9500001668930054
+              ],
+              "status": "pass"
+            }
+          ]
+        },
+        {
+          "label": "main",
+          "status": "pass",
+          "pixels": {
+            "exactRGBA": true,
+            "changedPixels": 0,
+            "comparedPixels": 518400,
+            "changedFraction": 0,
+            "meanAbsoluteChannelError": 0,
+            "maxChannelError": 0,
+            "status": "pass",
+            "required": false
+          },
+          "sourcePNGHash": "47587131c33c57f7b6041f739e53dcdb5f7296259484ed0b8776b37bb2295058",
+          "state": [
+            {
+              "field": "screen",
+              "expected": "main",
+              "actual": "main",
+              "status": "pass"
+            },
+            {
+              "field": "titleAnimationFrame",
+              "expected": 32,
+              "actual": 32,
+              "status": "pass"
+            },
+            {
+              "field": "menuFade.active",
+              "expected": false,
+              "actual": false,
+              "status": "pass"
+            },
+            {
+              "field": "menuFade.alpha",
+              "expected": 0,
+              "actual": 0,
+              "status": "pass"
+            },
+            {
+              "field": "menuFade.color",
+              "expected": [
+                1,
+                1,
+                1,
+                0.9500001668930054
+              ],
+              "actual": [
+                1,
+                1,
+                1,
+                0.9500001668930054
+              ],
+              "status": "pass"
+            }
+          ]
+        },
+        {
+          "label": "character",
+          "status": "pass",
+          "pixels": {
+            "exactRGBA": true,
+            "changedPixels": 0,
+            "comparedPixels": 518400,
+            "changedFraction": 0,
+            "meanAbsoluteChannelError": 0,
+            "maxChannelError": 0,
+            "status": "pass",
+            "required": false
+          },
+          "sourcePNGHash": "e4b3a42989e30f216ca1ba657354873c9e9174783b9a04d4f20a654d502dece0",
+          "state": [
+            {
+              "field": "characterMenuFamily",
+              "expected": true,
+              "actual": true,
+              "status": "pass"
+            },
+            {
+              "field": "titleAnimationFrame",
+              "expected": 32,
+              "actual": 32,
+              "status": "pass"
+            },
+            {
+              "field": "menuFade.active",
+              "expected": false,
+              "actual": false,
+              "status": "pass"
+            },
+            {
+              "field": "menuFade.alpha",
+              "expected": 0,
+              "actual": 0,
+              "status": "pass"
+            },
+            {
+              "field": "menuFade.color",
+              "expected": [
+                1,
+                1,
+                1,
+                0.9500001668930054
+              ],
+              "actual": [
+                1,
+                1,
+                1,
+                0.9500001668930054
+              ],
+              "status": "pass"
+            }
+          ]
+        },
+        {
+          "label": "seed-entry",
+          "status": "pass",
+          "pixels": {
+            "exactRGBA": true,
+            "changedPixels": 0,
+            "comparedPixels": 518400,
+            "changedFraction": 0,
+            "meanAbsoluteChannelError": 0,
+            "maxChannelError": 0,
+            "status": "pass",
+            "required": false
+          },
+          "sourcePNGHash": "fd527264a94a98338522882e0fb8b84b04764be275f8c6496dc4a5aade3a69d6",
+          "state": [
+            {
+              "field": "characterMenuFamily",
+              "expected": true,
+              "actual": true,
+              "status": "pass"
+            },
+            {
+              "field": "titleAnimationFrame",
+              "expected": 32,
+              "actual": 32,
+              "status": "pass"
+            },
+            {
+              "field": "menuFade.active",
+              "expected": false,
+              "actual": false,
+              "status": "pass"
+            },
+            {
+              "field": "menuFade.alpha",
+              "expected": 0,
+              "actual": 0,
+              "status": "pass"
+            },
+            {
+              "field": "menuFade.color",
+              "expected": [
+                1,
+                1,
+                1,
+                0.9500001668930054
+              ],
+              "actual": [
+                1,
+                1,
+                1,
+                0.9500001668930054
+              ],
+              "status": "pass"
+            }
+          ]
+        },
+        {
+          "label": "character-seeded",
+          "status": "pass",
+          "pixels": {
+            "exactRGBA": true,
+            "changedPixels": 0,
+            "comparedPixels": 518400,
+            "changedFraction": 0,
+            "meanAbsoluteChannelError": 0,
+            "maxChannelError": 0,
+            "status": "pass",
+            "required": false
+          },
+          "sourcePNGHash": "99996ad482412f3083893d8e3e81a8692b81c427532d13e1499e811f7ce7e708",
+          "state": [
+            {
+              "field": "characterMenuFamily",
+              "expected": true,
+              "actual": true,
+              "status": "pass"
+            },
+            {
+              "field": "titleAnimationFrame",
+              "expected": 32,
+              "actual": 32,
+              "status": "pass"
+            },
+            {
+              "field": "menuFade.active",
+              "expected": false,
+              "actual": false,
+              "status": "pass"
+            },
+            {
+              "field": "menuFade.alpha",
+              "expected": 0,
+              "actual": 0,
+              "status": "pass"
+            },
+            {
+              "field": "menuFade.color",
+              "expected": [
+                1,
+                1,
+                1,
+                0.9500001668930054
+              ],
+              "actual": [
+                1,
+                1,
+                1,
+                0.9500001668930054
+              ],
+              "status": "pass"
+            }
+          ]
+        },
+        {
+          "label": "gameplay-start",
+          "status": "pass",
+          "pixels": {
+            "exactRGBA": false,
+            "changedPixels": 236537,
+            "comparedPixels": 518400,
+            "changedFraction": 0.4562827932098765,
+            "meanAbsoluteChannelError": 3.181964699074074,
+            "maxChannelError": 254,
+            "status": "fail",
+            "required": false
+          },
+          "sourcePNGHash": "4899cf1da82ad34af2492f8163a3f98244a41555c81b5d1825e92fb03c09fee6",
+          "state": [
+            {
+              "field": "screen",
+              "expected": "playing",
+              "actual": "playing",
+              "status": "pass"
+            },
+            {
+              "field": "player.x",
+              "expected": 240,
+              "actual": 240,
+              "status": "pass"
+            },
+            {
+              "field": "player.y",
+              "expected": 214,
+              "actual": 214,
+              "status": "pass"
+            },
+            {
+              "field": "player.vx",
+              "expected": 0,
+              "actual": 0,
+              "status": "pass"
+            },
+            {
+              "field": "player.vy",
+              "expected": 0,
+              "actual": 0,
+              "status": "pass"
+            },
+            {
+              "field": "player.hp",
+              "expected": 6,
+              "actual": 6,
+              "status": "pass"
+            },
+            {
+              "field": "damageCooldown",
+              "expected": 0,
+              "actual": 0,
+              "status": "pass"
+            },
+            {
+              "field": "tears.alive",
+              "expected": 0,
+              "actual": 0,
+              "status": "pass"
+            },
+            {
+              "field": "bombs.alive",
+              "expected": 0,
+              "actual": 0,
+              "status": "pass"
+            },
+            {
+              "field": "paused",
+              "expected": false,
+              "actual": false,
+              "status": "pass"
+            }
+          ]
+        },
+        {
+          "label": "run-ready",
+          "status": "pass",
+          "pixels": {
+            "exactRGBA": false,
+            "changedPixels": 220458,
+            "comparedPixels": 518400,
+            "changedFraction": 0.4252662037037037,
+            "meanAbsoluteChannelError": 1.3570172646604939,
+            "maxChannelError": 219,
+            "status": "fail",
+            "required": false
+          },
+          "sourcePNGHash": "8e25d0220a38441f71f0ef205cd0eac54cb20dbbd71f75df964d37ed4ee940c5",
+          "state": [
+            {
+              "field": "screen",
+              "expected": "playing",
+              "actual": "playing",
+              "status": "pass"
+            },
+            {
+              "field": "player.x",
+              "expected": 240,
+              "actual": 240,
+              "status": "pass"
+            },
+            {
+              "field": "player.y",
+              "expected": 214,
+              "actual": 214,
+              "status": "pass"
+            },
+            {
+              "field": "player.vx",
+              "expected": 0,
+              "actual": 0,
+              "status": "pass"
+            },
+            {
+              "field": "player.vy",
+              "expected": 0,
+              "actual": 0,
+              "status": "pass"
+            },
+            {
+              "field": "player.hp",
+              "expected": 6,
+              "actual": 6,
+              "status": "pass"
+            },
+            {
+              "field": "damageCooldown",
+              "expected": 0,
+              "actual": 0,
+              "status": "pass"
+            },
+            {
+              "field": "tears.alive",
+              "expected": 0,
+              "actual": 0,
+              "status": "pass"
+            },
+            {
+              "field": "bombs.alive",
+              "expected": 0,
+              "actual": 0,
+              "status": "pass"
+            },
+            {
+              "field": "paused",
+              "expected": false,
+              "actual": false,
+              "status": "pass"
+            }
+          ]
+        },
+        {
+          "label": "random-held-0",
+          "status": "pass",
+          "pixels": {
+            "exactRGBA": false,
+            "changedPixels": 223546,
+            "comparedPixels": 518400,
+            "changedFraction": 0.4312229938271605,
+            "meanAbsoluteChannelError": 1.493070987654321,
+            "maxChannelError": 219,
+            "status": "fail",
+            "required": false
+          },
+          "sourcePNGHash": "d0e1abfe89c1517ea88d24b488400a8273607a3d894e2e581cc4138c3ce3360a",
+          "state": [
+            {
+              "field": "screen",
+              "expected": "playing",
+              "actual": "playing",
+              "status": "pass"
+            },
+            {
+              "field": "player.x",
+              "expected": 240,
+              "actual": 240,
+              "status": "pass"
+            },
+            {
+              "field": "player.y",
+              "expected": 220.49950408935547,
+              "actual": 220.49950408935547,
+              "status": "pass"
+            },
+            {
+              "field": "player.vx",
+              "expected": 1.9331747491690975e-8,
+              "actual": 1.9331747491690975e-8,
+              "status": "pass"
+            },
+            {
+              "field": "player.vy",
+              "expected": 0.34292275309562686,
+              "actual": 0.34292275309562686,
+              "status": "pass"
+            },
+            {
+              "field": "player.hp",
+              "expected": 6,
+              "actual": 6,
+              "status": "pass"
+            },
+            {
+              "field": "damageCooldown",
+              "expected": 0,
+              "actual": 0,
+              "status": "pass"
+            },
+            {
+              "field": "tears.alive",
+              "expected": 0,
+              "actual": 0,
+              "status": "pass"
+            },
+            {
+              "field": "bombs.alive",
+              "expected": 0,
+              "actual": 0,
+              "status": "pass"
+            },
+            {
+              "field": "paused",
+              "expected": false,
+              "actual": false,
+              "status": "pass"
+            }
+          ]
+        },
+        {
+          "label": "random-coasting-0",
+          "status": "pass",
+          "pixels": {
+            "exactRGBA": false,
+            "changedPixels": 222391,
+            "comparedPixels": 518400,
+            "changedFraction": 0.42899498456790125,
+            "meanAbsoluteChannelError": 1.3740330825617284,
+            "maxChannelError": 219,
+            "status": "fail",
+            "required": false
+          },
+          "sourcePNGHash": "d671925ecc671af0aa690c39888557e49fd0b4d209256c5efe9889196bbad8f4",
+          "state": [
+            {
+              "field": "screen",
+              "expected": "playing",
+              "actual": "playing",
+              "status": "pass"
+            },
+            {
+              "field": "player.x",
+              "expected": 240,
+              "actual": 240,
+              "status": "pass"
+            },
+            {
+              "field": "player.y",
+              "expected": 220.2384170532227,
+              "actual": 220.2384170532227,
+              "status": "pass"
+            },
+            {
+              "field": "player.vx",
+              "expected": 2.21446629922184e-9,
+              "actual": 2.21446629922184e-9,
+              "status": "pass"
+            },
+            {
+              "field": "player.vy",
+              "expected": -0.0035110180033370852,
+              "actual": -0.0035110180033370852,
+              "status": "pass"
+            },
+            {
+              "field": "player.hp",
+              "expected": 6,
+              "actual": 6,
+              "status": "pass"
+            },
+            {
+              "field": "damageCooldown",
+              "expected": 0,
+              "actual": 0,
+              "status": "pass"
+            },
+            {
+              "field": "tears.alive",
+              "expected": 0,
+              "actual": 0,
+              "status": "pass"
+            },
+            {
+              "field": "bombs.alive",
+              "expected": 0,
+              "actual": 0,
+              "status": "pass"
+            },
+            {
+              "field": "paused",
+              "expected": false,
+              "actual": false,
+              "status": "pass"
+            }
+          ]
+        },
+        {
+          "label": "random-held-1",
+          "status": "pass",
+          "pixels": {
+            "exactRGBA": false,
+            "changedPixels": 220035,
+            "comparedPixels": 518400,
+            "changedFraction": 0.4244502314814815,
+            "meanAbsoluteChannelError": 1.5788218557098765,
+            "maxChannelError": 219,
+            "status": "fail",
+            "required": false
+          },
+          "sourcePNGHash": "bcc807ff3d87c63989e78862fd37f8672e81042711feffbce1c39e18092566d5",
+          "state": [
+            {
+              "field": "screen",
+              "expected": "playing",
+              "actual": "playing",
+              "status": "pass"
+            },
+            {
+              "field": "player.x",
+              "expected": 240,
+              "actual": 240,
+              "status": "pass"
+            },
+            {
+              "field": "player.y",
+              "expected": 179.61319885253906,
+              "actual": 179.61319885253906,
+              "status": "pass"
+            },
+            {
+              "field": "player.vx",
+              "expected": 1.15233080022481e-11,
+              "actual": 1.15233080022481e-11,
+              "status": "pass"
+            },
+            {
+              "field": "player.vy",
+              "expected": -2.695654034614563,
+              "actual": -2.695654034614563,
+              "status": "pass"
+            },
+            {
+              "field": "player.hp",
+              "expected": 6,
+              "actual": 6,
+              "status": "pass"
+            },
+            {
+              "field": "damageCooldown",
+              "expected": 0,
+              "actual": 0,
+              "status": "pass"
+            },
+            {
+              "field": "tears.alive",
+              "expected": 1,
+              "actual": 1,
+              "status": "pass"
+            },
+            {
+              "field": "bombs.alive",
+              "expected": 0,
+              "actual": 0,
+              "status": "pass"
+            },
+            {
+              "field": "paused",
+              "expected": false,
+              "actual": false,
+              "status": "pass"
+            }
+          ]
+        },
+        {
+          "label": "random-coasting-1",
+          "status": "pass",
+          "pixels": {
+            "exactRGBA": false,
+            "changedPixels": 223557,
+            "comparedPixels": 518400,
+            "changedFraction": 0.43124421296296295,
+            "meanAbsoluteChannelError": 1.6913647762345678,
+            "maxChannelError": 219,
+            "status": "fail",
+            "required": false
+          },
+          "sourcePNGHash": "3a006527d46b2a6c81cf34912f335a539cc1281f8b167df90479ede54c6309a4",
+          "state": [
+            {
+              "field": "screen",
+              "expected": "playing",
+              "actual": "playing",
+              "status": "pass"
+            },
+            {
+              "field": "player.x",
+              "expected": 240,
+              "actual": 240,
+              "status": "pass"
+            },
+            {
+              "field": "player.y",
+              "expected": 157.905126953125,
+              "actual": 157.905126953125,
+              "status": "pass"
+            },
+            {
+              "field": "player.vx",
+              "expected": 4.1927502051827825e-13,
+              "actual": 4.1927502051827825e-13,
+              "status": "pass"
+            },
+            {
+              "field": "player.vy",
+              "expected": -0.09808123633265496,
+              "actual": -0.09808123633265496,
+              "status": "pass"
+            },
+            {
+              "field": "player.hp",
+              "expected": 6,
+              "actual": 6,
+              "status": "pass"
+            },
+            {
+              "field": "damageCooldown",
+              "expected": 0,
+              "actual": 0,
+              "status": "pass"
+            },
+            {
+              "field": "tears.alive",
+              "expected": 1,
+              "actual": 1,
+              "status": "pass"
+            },
+            {
+              "field": "bombs.alive",
+              "expected": 0,
+              "actual": 0,
+              "status": "pass"
+            },
+            {
+              "field": "paused",
+              "expected": false,
+              "actual": false,
+              "status": "pass"
+            }
+          ]
+        },
+        {
+          "label": "random-held-2",
+          "status": "pass",
+          "pixels": {
+            "exactRGBA": false,
+            "changedPixels": 223382,
+            "comparedPixels": 518400,
+            "changedFraction": 0.43090663580246913,
+            "meanAbsoluteChannelError": 1.7943778935185186,
+            "maxChannelError": 219,
+            "status": "fail",
+            "required": false
+          },
+          "sourcePNGHash": "40ef9c5ee84bc2fabc191f72883bf4d567f3e4ca39cb7434c9eb048eabbe0ddf",
+          "state": [
+            {
+              "field": "screen",
+              "expected": "playing",
+              "actual": "playing",
+              "status": "pass"
+            },
+            {
+              "field": "player.x",
+              "expected": 240,
+              "actual": 240,
+              "status": "pass"
+            },
+            {
+              "field": "player.y",
+              "expected": 116.53740158081055,
+              "actual": 116.53740158081055,
+              "status": "pass"
+            },
+            {
+              "field": "player.vx",
+              "expected": 2.1817610486975843e-15,
+              "actual": 2.1817610486975843e-15,
+              "status": "pass"
+            },
+            {
+              "field": "player.vy",
+              "expected": -2.7013830423355105,
+              "actual": -2.7013830423355105,
+              "status": "pass"
+            },
+            {
+              "field": "player.hp",
+              "expected": 6,
+              "actual": 6,
+              "status": "pass"
+            },
+            {
+              "field": "damageCooldown",
+              "expected": 0,
+              "actual": 0,
+              "status": "pass"
+            },
+            {
+              "field": "tears.alive",
+              "expected": 1,
+              "actual": 1,
+              "status": "pass"
+            },
+            {
+              "field": "bombs.alive",
+              "expected": 0,
+              "actual": 0,
+              "status": "pass"
+            },
+            {
+              "field": "paused",
+              "expected": false,
+              "actual": false,
+              "status": "pass"
+            }
+          ]
+        },
+        {
+          "label": "random-coasting-2",
+          "status": "pass",
+          "pixels": {
+            "exactRGBA": false,
+            "changedPixels": 223640,
+            "comparedPixels": 518400,
+            "changedFraction": 0.4314043209876543,
+            "meanAbsoluteChannelError": 1.5917616705246913,
+            "maxChannelError": 219,
+            "status": "fail",
+            "required": false
+          },
+          "sourcePNGHash": "2973cc1ce9006a7ea9939287c300add0745750359e33b1ec8a6a1d3f5c348ad8",
+          "state": [
+            {
+              "field": "screen",
+              "expected": "playing",
+              "actual": "playing",
+              "status": "pass"
+            },
+            {
+              "field": "player.x",
+              "expected": 240,
+              "actual": 240,
+              "status": "pass"
+            },
+            {
+              "field": "player.y",
+              "expected": 94.68488082885742,
+              "actual": 94.68488082885742,
+              "status": "pass"
+            },
+            {
+              "field": "player.vx",
+              "expected": 6.988433519182458e-17,
+              "actual": 6.988433519182458e-17,
+              "status": "pass"
+            },
+            {
+              "field": "player.vy",
+              "expected": -0.08652840703725816,
+              "actual": -0.08652840703725816,
+              "status": "pass"
+            },
+            {
+              "field": "player.hp",
+              "expected": 6,
+              "actual": 6,
+              "status": "pass"
+            },
+            {
+              "field": "damageCooldown",
+              "expected": 0,
+              "actual": 0,
+              "status": "pass"
+            },
+            {
+              "field": "tears.alive",
+              "expected": 1,
+              "actual": 1,
+              "status": "pass"
+            },
+            {
+              "field": "bombs.alive",
+              "expected": 0,
+              "actual": 0,
+              "status": "pass"
+            },
+            {
+              "field": "paused",
+              "expected": false,
+              "actual": false,
+              "status": "pass"
+            }
+          ]
+        },
+        {
+          "label": "random-paused",
+          "status": "pass",
+          "pixels": {
+            "exactRGBA": false,
+            "changedPixels": 110063,
+            "comparedPixels": 518400,
+            "changedFraction": 0.21231288580246913,
+            "meanAbsoluteChannelError": 0.5568494405864197,
+            "maxChannelError": 123,
+            "status": "fail",
+            "required": false
+          },
+          "sourcePNGHash": "b9dc95c8a465e15323a1552ebfe38357fe4ff181f6c679c0fead9f163c9b2704",
+          "state": [
+            {
+              "field": "screen",
+              "expected": "playing",
+              "actual": "playing",
+              "status": "pass"
+            },
+            {
+              "field": "player.x",
+              "expected": 240,
+              "actual": 240,
+              "status": "pass"
+            },
+            {
+              "field": "player.y",
+              "expected": 94.68488082885742,
+              "actual": 94.68488082885742,
+              "status": "pass"
+            },
+            {
+              "field": "player.vx",
+              "expected": 6.988433519182458e-17,
+              "actual": 6.988433519182458e-17,
+              "status": "pass"
+            },
+            {
+              "field": "player.vy",
+              "expected": -0.08652840703725816,
+              "actual": -0.08652840703725816,
+              "status": "pass"
+            },
+            {
+              "field": "player.hp",
+              "expected": 6,
+              "actual": 6,
+              "status": "pass"
+            },
+            {
+              "field": "damageCooldown",
+              "expected": 0,
+              "actual": 0,
+              "status": "pass"
+            },
+            {
+              "field": "tears.alive",
+              "expected": 1,
+              "actual": 1,
+              "status": "pass"
+            },
+            {
+              "field": "bombs.alive",
+              "expected": 0,
+              "actual": 0,
+              "status": "pass"
+            },
+            {
+              "field": "paused",
+              "expected": true,
+              "actual": true,
+              "status": "pass"
+            },
+            {
+              "field": "pauseMenu.selection",
+              "expected": 1,
+              "actual": 1,
+              "status": "pass"
+            },
+            {
+              "field": "pauseMenu.phase",
+              "expected": "idle",
+              "actual": "idle",
+              "status": "pass"
+            }
+          ]
+        },
+        {
+          "label": "random-resumed",
+          "status": "fail",
+          "pixels": {
+            "exactRGBA": false,
+            "changedPixels": 225021,
+            "comparedPixels": 518400,
+            "changedFraction": 0.43406828703703704,
+            "meanAbsoluteChannelError": 1.5872058256172838,
+            "maxChannelError": 219,
+            "status": "fail",
+            "required": false
+          },
+          "sourcePNGHash": "eca471a59adcb64d2197a8f35b779c388569a321efc7a6b29fbde4dd3652a658",
+          "state": [
+            {
+              "field": "screen",
+              "expected": "playing",
+              "actual": "playing",
+              "status": "pass"
+            },
+            {
+              "field": "player.x",
+              "expected": 240,
+              "actual": 240,
+              "status": "pass"
+            },
+            {
+              "field": "player.y",
+              "expected": 94.34412078857423,
+              "actual": 94.34412078857423,
+              "status": "pass"
+            },
+            {
+              "field": "player.vx",
+              "expected": 3.695166508581982e-17,
+              "actual": 3.695166508581982e-17,
+              "status": "pass"
+            },
+            {
+              "field": "player.vy",
+              "expected": -0.04575229957699776,
+              "actual": -0.04575229957699776,
+              "status": "pass"
+            },
+            {
+              "field": "player.hp",
+              "expected": 6,
+              "actual": 6,
+              "status": "pass"
+            },
+            {
+              "field": "damageCooldown",
+              "expected": 0,
+              "actual": 0,
+              "status": "pass"
+            },
+            {
+              "field": "tears.alive",
+              "expected": 0,
+              "actual": 1,
+              "status": "fail"
+            },
+            {
+              "field": "bombs.alive",
+              "expected": 0,
+              "actual": 0,
+              "status": "pass"
+            },
+            {
+              "field": "paused",
+              "expected": false,
+              "actual": false,
+              "status": "pass"
+            }
+          ]
+        },
+        {
+          "label": "random-after-bomb",
+          "status": "pass",
+          "pixels": {
+            "exactRGBA": false,
+            "changedPixels": 426663,
+            "comparedPixels": 518400,
+            "changedFraction": 0.8230381944444445,
+            "meanAbsoluteChannelError": 5.912080439814815,
+            "maxChannelError": 212,
+            "status": "fail",
+            "required": false
+          },
+          "sourcePNGHash": "b743925af170c109f93bf4e4ba6291ab518948fcfa2b576b8714164e7ccc785e",
+          "state": [
+            {
+              "field": "screen",
+              "expected": "playing",
+              "actual": "playing",
+              "status": "pass"
+            },
+            {
+              "field": "player.x",
+              "expected": 240,
+              "actual": 240,
+              "status": "pass"
+            },
+            {
+              "field": "player.y",
+              "expected": 214,
+              "actual": 214,
+              "status": "pass"
+            },
+            {
+              "field": "player.vx",
+              "expected": 0,
+              "actual": 0,
+              "status": "pass"
+            },
+            {
+              "field": "player.vy",
+              "expected": 0,
+              "actual": 0,
+              "status": "pass"
+            },
+            {
+              "field": "player.hp",
+              "expected": 4,
+              "actual": 4,
+              "status": "pass"
+            },
+            {
+              "field": "damageCooldown",
+              "expected": 108,
+              "actual": 108,
+              "status": "pass"
+            },
+            {
+              "field": "tears.alive",
+              "expected": 0,
+              "actual": 0,
+              "status": "pass"
+            },
+            {
+              "field": "bombs.alive",
+              "expected": 0,
+              "actual": 0,
+              "status": "pass"
+            },
+            {
+              "field": "paused",
+              "expected": false,
+              "actual": false,
+              "status": "pass"
+            }
+          ]
+        }
+      ],
+      "status": "fail"
+    }
+  ],
+  "exactOriginalPixels": false,
+  "gateSourcesStable": true
+}
