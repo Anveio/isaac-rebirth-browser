@@ -265,7 +265,7 @@ try {
           phaseAssert.ok(actualKeepers.every(npc => npc.appearanceEffectSeed === null && npc.deathEffectSeed === null),
             `${label}:Keeper initialization never uses Fly appearance/blood shared draws`);
         }
-        states.push({ label, currentRoom: state.currentRoom, descriptor: state.room.descriptor, spawns: admission,
+        states.push({ label, state, currentRoom: state.currentRoom, descriptor: state.room.descriptor, spawns: admission,
           keepers: state.room.npcs.filter(npc => npc.kind === 17),
           nativeKeepers: observed.contents.entities.filter(npc => npc.type === 17),
           player: state.player, inventory: state.inventory, nativeKeys: actor.keyInventory,
@@ -352,7 +352,7 @@ try {
         path: archivePath, encoding: 'gzip', rawBytes: browserBytes.length,
         rawSha256: createHash('sha256').update(browserBytes).digest('hex'),
         archiveBytes: archive.length, archiveSha256: createHash('sha256').update(archive).digest('hex'),
-        scope: 'Complete original JSON payload, including every gameplay state, public command and retained backend callback; decompress before replay or inspection',
+        scope: 'Every selected phase retains its full actual browser snapshot, alongside selected native comparisons, complete public commands and backend callbacks. The separate trace history caps are disclosed in traceHistory; decompress before replay or inspection',
       };
       assertInputProvenance(trace, expectedCommands, scenario.runSeed);
       assertSeededRun(await page.evaluate(() => window.game.snapshot()), scenario.code, scenario.runSeed);
