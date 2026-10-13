@@ -1,0 +1,267 @@
+{
+  "schema": 1,
+  "scope": "Fresh public-input original and immutable production WASM cohort. All five selected cases and every phase remain attempted and failed honestly. This does not accept complete gameplay parity or Megatroll behavior.",
+  "status": "fail",
+  "producerCommit": "6e5139c43e7b47ca12756721222df95b7e652ea0",
+  "runtimeCommit": "e228386",
+  "nativeBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "production": {
+    "sha256": "44f2a6767c0d39933cb1d8eacd50a86e4dfd827bd67a1661cdd7d33205f303be",
+    "files": 921,
+    "source": "/workspace/isaac-worktrees/inventory/dist",
+    "scope": "Immutable snapshot of production build bytes; source/native replay equality is checked separately"
+  },
+  "report": "/workspace/isaac-worktrees/inventory/.cache/e2e/troll-bombs/first-live/report.json",
+  "reportSha256": "4c3ccd08c8b36f753cdaf4b432aa6f6cd0521d0b591dd291847fdb69a3fe7d17",
+  "gateSourcesStable": true,
+  "gateSources": {
+    "tools/e2e/troll-bombs.mjs": "4a11bb1c73f16201f25beb6a9b8bdd2d1f53fc7562ed1ecd5a1b2808cae06821",
+    "tools/original/troll-bomb-scenarios.py": "e1e3132ecb2e52429dafdb1a17f83f22d57931debfd5c7521e21b6e10ae3cac5",
+    "tools/original/rock-blast-scenarios.py": "f896f63cc2f4e66487c7c75d68561b1efb46b989cf92dad09f687f3c4621ca65",
+    "tools/foundation/decode-rooms.py": "4640cce2c99d0ef09d6691cf42c021f012e16ed3752bace965ad18dca7250f1a",
+    "tools/original/foundation-seeds.py": "dd4633c955e7518e9bc0f0147ddfae46d356468238477a68dc06c86656ccba89",
+    "tools/original/foundation-pickup-observe.py": "2ce3a3f528259c876941d505e31981164a550ce1b2097f4ea136607e3bd365a5",
+    "tools/original/foundation-clock-run.py": "8f2fa981fbe26073d5a5a34ff46fbc6e9c70c2d30f81784abded5e40b9110c5b",
+    "tools/original/foundation-clock-gate.c": "f517f1fc0edf2bbe17021e529fb41652e991e286bef070b8aecefd32bfa62e75",
+    "tools/original/foundation-clock-verify.py": "c488100a187b44803c06374535715eaa5a7cde9d4513f6e866e090367d4f2054",
+    "tools/original/state-observer.py": "58e3b510abbe5ff57f05844efbdf764e2a02530cda4fa99f538d886d258af6f1",
+    "tools/original/with-display.sh": "4371efe64ae1639564b4a85292ff252e20bcfe84b5387927ecf7093c6b8d3dfb",
+    "tools/foundation/production-server.mjs": "e3152b58e2353319ba0963b30439e33c3cc65f84a8c6ebb765c2812486245952",
+    "tools/foundation/browser.mjs": "60c4bc851470f47e4dd0399148ce0c1edf351d41fbf7f7e15fa823af5948b4c8",
+    "tools/foundation/verify.mjs": "3743b773cf2ede253c6d78f2605eb43f34e9d7002284b6a1dd2c413d45835a5c",
+    "web/trace.ts": "2df69cfbbae14084baadacbcffbc9ecb7b6e363e61c1efb26f721475cfb198a9",
+    "references/isaac/foundation/rock-blast/known-regressions.json": "b7767539c58478d2109bbac8c7de617f41ec92686a0e92d24d0067a71e674a22",
+    "references/isaac/foundation/troll-bombs/contrived-cases.json": "f0958eb69ba81cf422a25479ec56ee1276f2de4f59c2b3367d847cdaaa331832",
+    "tools/original/troll-bomb-observer.py": "6698a9d95becada2a7029b5e48a14c41bcfbf2b7150fe076c3c8a1fef7d4fd76",
+    "tools/original/bomb-pickup-scenarios.py": "e2d48457eb8ad1c307c8ca98e467a6dbe8030e482d8b5d626362ecab9cbc1889"
+  },
+  "comparedPresentations": 2212,
+  "requiredFieldFailures": 3128,
+  "cases": [
+    {
+      "name": "retained-XD0-troll",
+      "code": "XD0VNH46",
+      "status": "fail",
+      "comparedPresentations": 375,
+      "passedPresentations": 50,
+      "requiredFieldFailures": 651,
+      "error": null,
+      "nativeManifestSha256": "17fee42a12767e510390489785762a8ff77414ad531c57103841ca90d4167dce",
+      "failureFields": {
+        "bomb0:causal shared spawn seed": 146,
+        "pickup0:position": 188,
+        "pickup1:position": 188,
+        "damage countdown": 43,
+        "rock35:destruction marker": 43,
+        "rock36:destruction marker": 43
+      },
+      "actualConversions": [
+        {
+          "presentation": 17,
+          "variant": 3,
+          "seed": 3342968520,
+          "position": [
+            360,
+            280
+          ],
+          "velocity": [
+            0,
+            0
+          ],
+          "fuse": 59,
+          "spawnerType": 0,
+          "spawnerVariant": 0
+        }
+      ],
+      "trace": {
+        "inputTraceTruncated": false,
+        "stateHistoryTruncated": true,
+        "stateHistoryTruncationReason": "bytes",
+        "inputEncodedBytes": 11542,
+        "stateEncodedBytes": 33539282,
+        "backendEvents": 3,
+        "completeStateRecords": 245,
+        "archive": "/workspace/isaac-worktrees/inventory/.cache/e2e/troll-bombs/first-live/retained-XD0-troll/browser-trace.json.gz",
+        "uncompressedSha256": "5aae993a6d564399888664b785af997d6971bde68157a569bbb6c9dc4f28ac85",
+        "archiveSha256": "cbcba7844de74b708ed9c639e356fd2e6b92fa4956178036bcaea730d115c121"
+      },
+      "gameplaySnapshots": {
+        "records": 375,
+        "uncompressedBytes": 57442190,
+        "uncompressedSha256": "c42fbacee6f7560ed7b14ed601d6e530bb662b9a064d4119a4dcf704dd25d309",
+        "archiveSha256": "2c959c944aaec6cdc6972a7d47086958d897d6f8406d18fb7edf1cb64bf33e23",
+        "archive": "/workspace/isaac-worktrees/inventory/.cache/e2e/troll-bombs/first-live/retained-XD0-troll/browser-states.json.gz"
+      }
+    },
+    {
+      "name": "natural-megatroll-phase-0",
+      "code": "KPFMQY6J",
+      "status": "fail",
+      "comparedPresentations": 473,
+      "passedPresentations": 72,
+      "requiredFieldFailures": 401,
+      "error": "AssertionError [ERR_ASSERTION]: Public native route must admit naturally selected bomb variant 4",
+      "nativeManifestSha256": "e9a44a27259c51c43b973c552c91afe5e4440153b6ce47ac9e01e5072929547f",
+      "failureFields": {
+        "rock admission/retirement": 401
+      },
+      "actualConversions": [],
+      "trace": {
+        "inputTraceTruncated": false,
+        "stateHistoryTruncated": true,
+        "stateHistoryTruncationReason": "bytes",
+        "inputEncodedBytes": 14234,
+        "stateEncodedBytes": 33428496,
+        "backendEvents": 3,
+        "completeStateRecords": 256,
+        "archive": "/workspace/isaac-worktrees/inventory/.cache/e2e/troll-bombs/first-live/natural-megatroll-phase-0/browser-trace.json.gz",
+        "uncompressedSha256": "2b8bacb9ca26ecb2f06ba8e26c8deae431aa4b5151c42f102b1d6d1a8abdd30c",
+        "archiveSha256": "f9ff4a5dd0392337fadd4ac29562e0574e7e93385be8105ae359d57ceb2137de"
+      },
+      "gameplaySnapshots": {
+        "records": 473,
+        "uncompressedBytes": 70535128,
+        "uncompressedSha256": "72a4f0cf022bcc296d0a478ff27712e27ab526f6cd2da094885129472702ec4d",
+        "archiveSha256": "23272d19b26c05c0e8296c49b24cd0d838fce89af0dbc632aa68a4f0673f9fcd",
+        "archive": "/workspace/isaac-worktrees/inventory/.cache/e2e/troll-bombs/first-live/natural-megatroll-phase-0/browser-states.json.gz"
+      }
+    },
+    {
+      "name": "natural-megatroll-phase-1",
+      "code": "KPFMQY6J",
+      "status": "fail",
+      "comparedPresentations": 474,
+      "passedPresentations": 74,
+      "requiredFieldFailures": 400,
+      "error": "AssertionError [ERR_ASSERTION]: Public native route must admit naturally selected bomb variant 4",
+      "nativeManifestSha256": "b0096a66f9f85dcbc70aaa9b8a9d0ad635c04faa15d6a83e8fded08c6ff14b2a",
+      "failureFields": {
+        "rock admission/retirement": 400
+      },
+      "actualConversions": [],
+      "trace": {
+        "inputTraceTruncated": false,
+        "stateHistoryTruncated": true,
+        "stateHistoryTruncationReason": "bytes",
+        "inputEncodedBytes": 14263,
+        "stateEncodedBytes": 33529391,
+        "backendEvents": 3,
+        "completeStateRecords": 257,
+        "archive": "/workspace/isaac-worktrees/inventory/.cache/e2e/troll-bombs/first-live/natural-megatroll-phase-1/browser-trace.json.gz",
+        "uncompressedSha256": "e897c237e95612f3df812ae71a89020418fe92a0a4568fe82e663fcf9d4030a2",
+        "archiveSha256": "d46c5f41177d45960f4cfbec5ad00f1ec79ddf05460cbfed8e1831e41e8fba90"
+      },
+      "gameplaySnapshots": {
+        "records": 474,
+        "uncompressedBytes": 70634824,
+        "uncompressedSha256": "763b25623df834bf257495fcbfd804f55e48165ab3588ceb5cc5a5a181daf066",
+        "archiveSha256": "4834390541d1b461b79db7f72489cf3ce6d4f3aa4e170b64a17e9466bd91cb30",
+        "archive": "/workspace/isaac-worktrees/inventory/.cache/e2e/troll-bombs/first-live/natural-megatroll-phase-1/browser-states.json.gz"
+      }
+    },
+    {
+      "name": "unfiltered-bomb-pickup-0",
+      "code": "Z7XVB7J9",
+      "status": "fail",
+      "comparedPresentations": 473,
+      "passedPresentations": 234,
+      "requiredFieldFailures": 239,
+      "error": null,
+      "nativeManifestSha256": "71e062f732aba158ef0e03cecb401ea93614130d5f0cc07876372779fdb50a07",
+      "failureFields": {
+        "rock admission/retirement": 239
+      },
+      "actualConversions": [],
+      "trace": {
+        "inputTraceTruncated": false,
+        "stateHistoryTruncated": true,
+        "stateHistoryTruncationReason": "bytes",
+        "inputEncodedBytes": 14235,
+        "stateEncodedBytes": 33513413,
+        "backendEvents": 3,
+        "completeStateRecords": 256,
+        "archive": "/workspace/isaac-worktrees/inventory/.cache/e2e/troll-bombs/first-live/unfiltered-bomb-pickup-0/browser-trace.json.gz",
+        "uncompressedSha256": "51ace7064cb0a864231f36d569b8737e385dee0d1f2a227f22aa8b5f86414a48",
+        "archiveSha256": "001c08d3bf8219c0fc4e44b6a265f389e2ee54a0897b9f4f3ce9f608168e1dc4"
+      },
+      "gameplaySnapshots": {
+        "records": 473,
+        "uncompressedBytes": 70746683,
+        "uncompressedSha256": "e92b60b5de68cdb3df97416ff76c39e6c4b8f127b6e1906f5464313fecfecdba",
+        "archiveSha256": "c655be5ece6c00858b36f3261cbf4c1b4a2cfdeb1a9b8842aec8713ec115904d",
+        "archive": "/workspace/isaac-worktrees/inventory/.cache/e2e/troll-bombs/first-live/unfiltered-bomb-pickup-0/browser-states.json.gz"
+      }
+    },
+    {
+      "name": "unfiltered-bomb-pickup-1",
+      "code": "2SA7J2Y1",
+      "status": "fail",
+      "comparedPresentations": 417,
+      "passedPresentations": 16,
+      "requiredFieldFailures": 1437,
+      "error": null,
+      "nativeManifestSha256": "4c3ba449e9191d6cb117700d3fec9f179c8eb808cc6d691be9e92f080d04871c",
+      "failureFields": {
+        "bomb0:causal shared spawn seed": 146,
+        "pickup0:position": 264,
+        "pickup1:position": 143,
+        "bombInventory": 153,
+        "pickup0:animation": 32,
+        "pickup0:animationPlaying": 32,
+        "pickup0:collection flag": 32,
+        "pickup0:animationFrame": 30,
+        "pickup admission/retirement": 121,
+        "pickup0:subtype": 121,
+        "pickup0:spawnSeed": 121,
+        "pickup1:collection delay": 121,
+        "native relative actor admission order": 121
+      },
+      "actualConversions": [
+        {
+          "presentation": 17,
+          "variant": 3,
+          "seed": 4099745213,
+          "position": [
+            280,
+            280
+          ],
+          "velocity": [
+            0,
+            0
+          ],
+          "fuse": 59,
+          "spawnerType": 0,
+          "spawnerVariant": 0
+        }
+      ],
+      "trace": {
+        "inputTraceTruncated": false,
+        "stateHistoryTruncated": true,
+        "stateHistoryTruncationReason": "bytes",
+        "inputEncodedBytes": 12835,
+        "stateEncodedBytes": 33442002,
+        "backendEvents": 3,
+        "completeStateRecords": 244,
+        "archive": "/workspace/isaac-worktrees/inventory/.cache/e2e/troll-bombs/first-live/unfiltered-bomb-pickup-1/browser-trace.json.gz",
+        "uncompressedSha256": "1474830ff16dee93b8d9bcba9644c777d82c505e4a6b21b91085c46070b47fab",
+        "archiveSha256": "4e326e81ede10d3f03996f3a7132a61fcb93fceff26ba2be2b616fc0774c26d5"
+      },
+      "gameplaySnapshots": {
+        "records": 417,
+        "uncompressedBytes": 63859242,
+        "uncompressedSha256": "6a6631109282376ad1a8db6c7dc736c0290b9e5d1f94d1ae9384cf7d7f3c52e1",
+        "archiveSha256": "71ab1bcc4e6b13c9bd018409ab88c71ca4adf9f1a68bc0475a042959b749aacb",
+        "archive": "/workspace/isaac-worktrees/inventory/.cache/e2e/troll-bombs/first-live/unfiltered-bomb-pickup-1/browser-states.json.gz"
+      }
+    }
+  ],
+  "findings": [
+    "XD0 and unfiltered2SA naturally admitted source Troll3. Variant, zero-velocity birth, fuse, animation, full/fast position and velocity, birth age, death and retirement produced no bomb-body mismatches; required raw shared seeds differed in both. The complete gate remains red.",
+    "KPF native sources enter the intended Room35 with three regular40/1 pickups and no Megatroll. Earlier static research mislabeled RNG11 group words as entity seeds and began Pickup RNG35 one word too early. Both original tapes, rejected fixture postconditions and immutable proofs are retained.",
+    "KPF contains missing tinted Rock64 admission. Unfiltered Z7 discovers actual ordinary Rock83 replacement with grid18 stairs at phase235; it remains a blocking unsupported callback.",
+    "Troll blasts move remaining native pickups. The static browser pickups then diverge in collection/inventory/order in2SA. XD0 also retains a one-step return immunity difference and two stale rock destruction markers.",
+    "Input traces are uncapped. Trace state histories explicitly hit their32MiB budget; independent375/473/474/473/417 direct snapshots are complete and gzip-hash retained.",
+    "Completed original manifests are losslessly gzip archived only after validation and comparison. RawSHA/bytes/archiveSHA and restore paths are retained in the owned archive journal."
+  ],
+  "archiveJournal": "/workspace/isaac-worktrees/inventory/.cache/inventory/archived-troll-native-evidence.json"
+}

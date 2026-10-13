@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "scope": "Source-backed implementation contracts. Live acceptance is pending; this document is not a kernel or gameplay proof.",
+  "scope": "Source-backed runtime contracts with a completed mandatory red2212-phase live cohort. Troll3 body observations are recorded; complete shared stream, Pickup impulse, rare grids and Megatroll live acceptance remain incomplete.",
   "nativeBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
   "contracts": [
     {
@@ -21,10 +21,13 @@
     }
   ],
   "unaccepted": [
+    "Megatroll live behavior is not accepted: both KPF research predictions were disproved by fresh sources. Corrected QJ discovery is research only until a public native/browser proof runs.",
     "Complete shared-MT consumer alignment; actual conversion raw seed is required by the live gate, with any mismatch blocking.",
     "Blast pickup impulse and motion remain unsupported and required in retained XD0.",
     "Selected explosive/tinted/alternate Rock callbacks and drops remain blocking rather than silently omitted.",
     "Additional bomb variants, modifiers, prices, room-exit persistence, active items and full pixels/sample identity are outside this conversion leaf.",
-    "Planted-bomb raw seed remains explicit null metadata until its source admission owner is recovered; no fabricated seed or cursor shift."
-  ]
+    "Planted-bomb raw seed remains explicit null metadata until its source admission owner is recovered; no fabricated seed or cursor shift.",
+    "Native grid18 replacement, tinted Rock64 admission, return immunity timing and destruction-marker cleanup remain required cohort failures."
+  ],
+  "liveEvidence": "first-cohort-verification.json"
 }
