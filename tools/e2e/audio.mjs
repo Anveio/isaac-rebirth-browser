@@ -169,18 +169,25 @@ try {
       check('initial autoplay suspended', (await page.evaluate(() => window.game.audio())).contextState, 'suspended');
       await page.locator('#game').click();
       await page.waitForFunction(() => window.game.audio().contextState === 'running');
-      const states = []; let previousTap; const expectedCommands = [{ type: 'audioVolume', sfx_volume: scenario.volume }];
+      const states = []; let previousTap, intendedSeedEntry = false;
+      const intendedPressed = new Set(), expectedCommands = [{ type: 'audioVolume', sfx_volume: scenario.volume }];
       for (const action of tape.browser) {
         if (action.type === 'step') { await page.evaluate(frames => window.game.step(frames), action.frames); expectedCommands.push({ type: 'tick', count: action.frames }); }
         else if (action.type === 'key') {
-          const before = await page.evaluate(() => window.game.snapshot());
           const code = ({ Return: 'Enter', Tab: 'Tab', Left: 'ArrowLeft', Right: 'ArrowRight' })[action.key] ||
             (/^[0-9]$/.test(action.key) ? 'Digit' + action.key : 'Key' + action.key.toUpperCase());
           await page.keyboard[action.down ? 'down' : 'up'](({ Return: 'Enter', Tab: 'Tab', Left: 'ArrowLeft', Right: 'ArrowRight' })[action.key] || action.key);
-          if (before.screen === 'seed' && /^[a-z0-9]$/i.test(action.key)) {
+          // Derive the expectation from the declared public seed-mode tape.
+          // A failed Tab transition must not rewrite intended text into keys.
+          if (intendedSeedEntry && /^[a-z0-9]$/i.test(action.key)) {
             if (action.down) expectedCommands.push({ type: 'text', text: action.key.toUpperCase() });
-            else if (before.pressed.includes(code)) expectedCommands.push({ type: 'key', code, down: false });
-          } else expectedCommands.push({ type: 'key', code, down: action.down });
+            else if (intendedPressed.delete(code)) expectedCommands.push({ type: 'key', code, down: false });
+          } else {
+            expectedCommands.push({ type: 'key', code, down: action.down });
+            if (action.down) intendedPressed.add(code); else intendedPressed.delete(code);
+          }
+          if (action.down && action.key === 'Tab') intendedSeedEntry = true;
+          else if (action.down && action.key === 'Return' && intendedSeedEntry) intendedSeedEntry = false;
         }
         else {
           const actual = await page.evaluate(() => ({ state: window.game.snapshot(), audio: window.game.audio() }));
@@ -192,6 +199,10 @@ try {
           check(`${action.label}: unique playing backend ownership`, new Set(actual.audio.activeVoices.map(voice => voice.path)).size, actual.audio.activeVoices.length);
           check(`${action.label}: source wrappers`, [expected.configuredSounds, expected.sampleReferences, expected.pathMismatches], [169, 303, []]);
           check(`${action.label}: system counter`, actual.state.systemClock.systemCounter, expected.systemCounter - origin);
+          if (action.label === 'character-seeded' || action.label === 'gameplay-start') check(`${action.label}: manual public seed committed`,
+            [actual.state.seededRun, actual.state.seedValid, actual.state.seedText.replaceAll(' ', '').toUpperCase(),
+              actual.state.runSeed.replaceAll(' ', '').toUpperCase(), actual.state.runSeedValue],
+            [true, true, scenario.code.toUpperCase(), scenario.code.toUpperCase(), native.seedValue]);
           if (action.label === 'title-ready') {
             check('all configured sounds loaded with authored samples', Object.entries(actual.state.audio.slots).map(([id, slot]) =>
               [Number(id), slot.loaded, slot.samples.length, slot.samples]), expected.slots.map(slot =>
