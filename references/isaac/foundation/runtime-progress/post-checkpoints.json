@@ -53,6 +53,55 @@
       "cases": 2,
       "checkpoints": 36,
       "passingCheckpoints": 36
+    },
+    {
+      "name": "currentCoreBeforeRockDestruction",
+      "sourceCommit": "55f850e55b2da4152ac6edbd62230ac7d40dbb96",
+      "report": ".cache/foundation/current-aggregate-core/report.json",
+      "reportSha256": "cbb289b5658f36c17bdeead8a36bbfec013db4627fc9b5dd49e21d832550d7c9",
+      "status": "fail",
+      "production": {
+        "sha256": "6fcd80f941f4e68e02673d64a949e898fc82c876a5f451ae5d9a9ba2002358ae",
+        "files": 832,
+        "source": "/workspace/isaac-worktrees/ci-speed/dist",
+        "scope": "Immutable snapshot of production build bytes; source/native replay equality is checked separately"
+      },
+      "scope": {
+        "functional": "Real input/phase/readback and source title, fade, player motion, pause/controller, HP, immunity, active tear/bomb counts",
+        "pixels": "Strict full RGBA diagnostic; every difference remains a failure in its own pixel result",
+        "exactPixelsRequired": false,
+        "completeOriginalStateParity": false
+      },
+      "cases": 8,
+      "checkpoints": 149,
+      "passingCheckpoints": 146,
+      "exactPixelCheckpoints": 61,
+      "evidence": "history/6fcd80f941f4-core.json"
+    },
+    {
+      "name": "rockIntegratedCoreAndSeedProvenance",
+      "sourceCommit": "d61a9aeed964c48035f4deed8f9db7051037f93a",
+      "report": ".cache/foundation/rock-integrated-provenance/report.json",
+      "reportSha256": "d3ea4add266e9a7a459bc7d73866e59d6f786e87d0cd074aa71715307dc724aa",
+      "status": "fail",
+      "production": {
+        "sha256": "61186ab300e0fdd92e172655f1a5a78d1404c95e72238eac921984f0db09022a",
+        "files": 832,
+        "source": "/workspace/isaac-rebirth-browser/dist",
+        "scope": "Immutable snapshot of production build bytes; source/native replay equality is checked separately"
+      },
+      "scope": {
+        "functional": "Real input/phase/readback and source title, fade, player motion, pause/controller, HP, immunity, active tear/bomb counts",
+        "pixels": "Strict full RGBA diagnostic; every difference remains a failure in its own pixel result",
+        "exactPixelsRequired": false,
+        "completeOriginalStateParity": false
+      },
+      "cases": 3,
+      "passingTransports": 3,
+      "checkpoints": 64,
+      "passingCheckpoints": 61,
+      "exactPixelCheckpoints": 21,
+      "evidence": "history/61186ab300e0-rock-core.json"
     }
   ]
 }

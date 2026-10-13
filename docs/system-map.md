@@ -38,44 +38,57 @@ Consult the latest paired report for current implementation outcomes.
 
 The latest completed six-suite run is commit `5b4901f`, immutable artifact
 `a7a5b4972a72c56cd07b33001295955596c9e8f7910e177f522ea037b25444ef`.
-It includes descriptor-driven ordinary traversal, shared room grid/Rock
-contacts, source spikes, coin collection, bomb phases and initialized-Title MT.
-All eight core original/browser transports pass; functional checks pass
-140/149. Title, movement, pause and both moving-bomb cohorts pass. Room combat
-passes 23/28; recorded random `W0L0LYYM` passes 14/18 and `4DKCYXY8` passes 18/18.
-All 149 frames retain strict pixel diagnostics, with 61 exact matches.
+At that checkpoint the core passed 140/149 functional checks, finalized floors
+5/5, weapons 480/480, initialized-Title MT 6/6 and coin/spike phases 863/863.
+All eight core transports passed, with 61/149 whole frames exact. Traversal
+executed all three routes and retained the hostile-room lock/return failure.
+The runner recorded every suite before returning failure.
 
-Finalized floors pass 5/5, including three real retries and two OS-random runs.
-Weapon scheduling passes480/480 presentations and 18 births. Boot lifecycle
-passes 6/6 originals, all 3744 MT words, 54 grid-seed pairs and 1074 stat poses.
-Coin/spike collection passes all 5 cases and 863 presentations, including the
-mandatory `22PFCSFS` regression. Traversal executes all 3 routes: both routes
-without enemies pass; `T1PK6Y0W` remains a required hostile-lock/return failure.
-The all-suite runner returns failure after recording every result.
+[Six-suite evidence](../references/isaac/foundation/runtime-progress/verification.json)
+retains exact failed fields and source/build/report hashes. The unchanged
+`1E0WJX06` and `W0L0LYYM` random tapes remain required regression inputs.
 
-[Compact evidence](../references/isaac/foundation/runtime-progress/verification.json)
-retains report/source/build hashes, exact failures and the six-suite exit
-statuses. The new random holdout is
-[W0L0LYYM.json](../references/isaac/foundation/runtime-progress/W0L0LYYM.json);
-previous checkpoint evidence and `1E0WJX06` remain available. Tear range/removal,
-rock destruction, NPC contact/clear and unlocked treasure admission have active
-small implementation PRs; none is inferred complete from the earlier cohort.
+A subsequent eight-case core run at commit `55f850e`, artifact
+`6fcd80f941f4e68e02673d64a949e898fc82c876a5f451ae5d9a9ba2002358ae`,
+passes 146/149 functional checkpoints. Both fresh OS-random runs and all eight
+original/browser transports pass. Whole-frame equality remains 61/149. The
+three remaining failures preserve exact HP and former-rock-cell movement
+differences in `T1PK6Y0W`; this run precedes ordinary rock destruction.
+[Core evidence](../references/isaac/foundation/runtime-progress/history/6fcd80f941f4-core.json)
+records each checkpoint and the immutable source commit.
 
-Subsequent reviewed integrations add source SFX admission and actual Web Audio
-playback, plus authored curse-door entry/exit damage. Their own paired cohorts
-pass 848 audio checks/36 submitted PCM starts and 240 curse-door phases. The
-central registry now requires both gates alongside the prior six, plus an
-unchanged replay of both checked-in random holdouts. New random discovery
-cannot replace those regression cases. Build,
-typecheck, assets, matrix and strict Clippy pass after integration; these scoped
-cohorts do not establish complete shared gameplay RNG, other item/actor systems,
-other floors/characters, persistence or music/cutscenes.
+After ordinary Rock integration, the known-room replay and two fresh random
+cases pass 61/64 checkpoints on artifact
+`61186ab300e0fdd92e172655f1a5a78d1404c95e72238eac921984f0db09022a`.
+All three transports pass complete command and committed-seed checks. The
+former-rock-cell XY/VXY now match exactly; the three remaining checkpoints
+fail only on source HP3 versus port4. This damage gap remains required.
+[Targeted evidence](../references/isaac/foundation/runtime-progress/history/61186ab300e0-rock-core.json)
+preserves the actual fields without attributing an unproved cause.
 
-CI discovers every registered suite and runs separate jobs with
+Subsequent scoped aggregate checks pass 848 audio checks with 36 actual PCM
+starts, 294 curse-door phases and both retained random regressions, 36/36
+checkpoints. Strengthened weapon and tear-lifecycle gates pass all 12 scenarios,
+including 1,440 complete command comparisons and 4,704 paired player XY/VXY
+fields. The 18 RNG-dependent tear differences remain explicit diagnostics.
+[Post-checkpoint evidence](../references/isaac/foundation/runtime-progress/post-checkpoints.json)
+retains each report hash and its actual build scope.
+
+Reviewed runtime now includes regular-tear range/grid death and removal, rare
+Rock factory metadata, free first-floor treasure doors and ordinary bomb-driven
+Rock destruction. The rock gate's historical eight-case cohort passes five
+cases and retains three explosive/tinted failures across 2,957 compared phases.
+Its current default adds the preserved troll-bomb case; every selected case
+remains blocking. NPC callbacks/clear, secret/key admission, music and item
+systems continue in small implementation PRs.
+
+CI discovers all eleven registered live suites and runs separate jobs with
 `fail-fast: false`, preserving each result and evidence. The first matrix run
-already completed floors, weapons, boot MT and pickups successfully while
-retaining traversal failure. Main's workflow executes; GitHub required-check
-enforcement remains unavailable for this private repository's current plan.
+completed floors, weapons, boot MT and pickups successfully while retaining
+core and traversal failures. Build, typecheck, assets, matrix and strict Clippy
+pass after the rock integration. Complete gameplay RNG, other floors/characters,
+persistence, music/cutscenes and whole-game parity remain open. GitHub required-check
+enforcement is unavailable for this private repository's current plan.
 
 ## Initial live paired verification after unit-suite removal
 
