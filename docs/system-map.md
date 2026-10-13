@@ -88,7 +88,7 @@ Secret blast discovery, reciprocal doorway persistence and minimap flags have
 538 paired phases of scoped evidence. Regular and double keys now admit and
 collect through real room actors: the four-case cohort passes 1,690 phases,
 followed by a contrived/recorded-random NPC-composite pair passing 845 phases.
-Keeper17 admission remains required and red; key spending is a separate slice.
+Ordinary library locks now spend one naturally collected regular key after actual room clearance, with persistent return/revisit state. The earlier key-door cohort compares1,686 phases and retains two Keeper admission failures. Keeper17/1 now has source-backed constructor and anchored idle behavior; a separate fresh pair passes658 phases, including subtype/seed, flags, collision classes, authored Guy clips and frozen/full/intermediate callbacks. A fresh key-door composite rerun remains pending; Keeper damage/death/drop callbacks remain separate.
 [Key evidence](../references/isaac/foundation/keys/npc-composite-live-report.json)
 and [NPC boundaries](../references/isaac/foundation/combat/npcs/verification.json)
 record each immutable build's scope.
@@ -111,12 +111,13 @@ verified output checks; early decoder/prefetch and playback-onset differences
 remain explicit. [Music evidence](../references/isaac/foundation/music/live-report.json)
 distinguishes those contracts. Item-pool work continues in small PRs.
 
-CI discovers all seventeen registered live suites and runs separate jobs with
+Normal run admission now uses the existing Character menu seed through the actual decoded setter. Six original/browser pairs pass24 menu checkpoints,14,976 MT words,216 descriptor pairs,4,296 Stats poses and96 public commands. All six post-run shared-MT comparisons remain red diagnostics. [Ordinary-run evidence](../references/isaac/foundation/ordinary-run/README.md) retains the rejected observer attempt and immutable accepted scope.
+
+CI discovers all twenty registered live suites and runs separate jobs with
 `fail-fast: false`, preserving each result and evidence. The first matrix run
 completed floors, weapons, boot MT and pickups successfully while retaining
 core and traversal failures. Build, typecheck, assets, matrix and strict Clippy
-pass after the menu, secret, NPC, natural-key, Music and treasure-coin
-integration. This is a build checkpoint, not a fresh all-suite passing result.
+pass at integrated checkpoint `0f8a363` after menu, secret, NPC, natural-key, Music, treasure-coin, key-door, ordinary-run and Keeper integration. This is a build checkpoint, not a fresh all-suite passing result.
 Complete gameplay RNG, other floors/characters, persistence, later music
 callers/cutscenes and whole-game parity remain open. GitHub required-check
 enforcement is unavailable for this private repository's current plan. The
