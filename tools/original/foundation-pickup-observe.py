@@ -79,6 +79,10 @@ def observe(pid, context):
                 samples = read(begin, sample_count * 8) if sample_count else b''
                 result['gridCollisionSamples'] = [list(struct.unpack_from('<ff', samples, i * 8)) for i in range(sample_count)]
                 if result['type'] == 5:
+                    # GenericInit441cb0/441cbf owns these actual persistent
+                    # RNG30 words. Read them directly, independently of the
+                    # entity spawn seed and Pickup Init's temporary RNG35.
+                    result['localRngWords'] = list(struct.unpack_from('<4I', raw, 0x7c0))
                     more = read(address + 0xac0, 0x18)
                     result['pickupPrice'] = struct.unpack_from('<i', more, 0)[0]
                     result['collectionDelay'] = struct.unpack_from('<i', more, 0xc)[0]
