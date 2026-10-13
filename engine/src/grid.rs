@@ -29,6 +29,8 @@ pub struct GridEntity {
     pub state: u32,
     pub collision_class: u32,
     pub spawn_seed: u32,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source_owner: Option<crate::grid_records::GridOwner>,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
@@ -77,6 +79,7 @@ pub fn for_room(
                 state: 0,
                 collision_class: 4,
                 spawn_seed: 0,
+                source_owner: None,
             });
         }
     }
@@ -108,6 +111,7 @@ pub fn for_room(
             state: if door.open { 2 } else { 1 },
             collision_class: if door.open { 5 } else { 4 },
             spawn_seed: 0,
+            source_owner: None,
         });
     }
     for spawn in &spawns.selectors {
@@ -128,6 +132,7 @@ pub fn for_room(
                 state: 0,
                 collision_class: 0,
                 spawn_seed: spawn.spawn_seed,
+                source_owner: None,
             });
         }
         // Tinted Rock admission/drops are still a separate callback. Source
@@ -152,6 +157,7 @@ pub fn for_room(
                 state: 1,
                 collision_class: 3,
                 spawn_seed: spawn.spawn_seed,
+                source_owner: None,
             });
         }
     }
@@ -241,6 +247,7 @@ impl Grid {
                         state: 0,
                         collision_class: 4,
                         spawn_seed: 0,
+                        source_owner: None,
                     }),
             })
             .collect();

@@ -1,7 +1,7 @@
 // Source observations are comparisons only; this module never supplies runtime inputs.
 import assert from 'node:assert/strict';
 
-export function compareSavedRoomGrid(summary, grid, observed) {
+export function compareSavedRoomGrid(summary, grid, observed, { requireRecords = false } = {}) {
   assert.equal(summary.currentRoomRecord, observed.savedRun.currentRoomRecord,
     'Actual current descriptor row identity must match source');
   assert.equal(observed.currentRoomSeedSamples?.length, 9,
@@ -22,6 +22,36 @@ export function compareSavedRoomGrid(summary, grid, observed) {
           sourceGridObject: source.object || null });
       }
     }
+    if (requireRecords && source.occupancy !== 'padding') {
+      assert.ok(source.levelRecord && source.savedRecord,
+        'Grid-record acceptance requires newly observed actual Level/Saved records');
+      assert.deepEqual(source.levelRecord, source.savedRecord,
+        'Actual source Level/Saved current-cell record ownership must match');
+      for (const field of ['kind', 'variant', 'state', 'sourceWord14', 'primarySeed', 'initialized', 'secondarySeed']) {
+        if (sample.record?.[field] !== source.savedRecord[field]) {
+          differences.push({ gridIndex: source.gridIndex, field: `record.${field}`,
+            original: source.savedRecord[field], production: sample.record?.[field] ?? null,
+            sourceGridObject: source.object || null });
+        }
+      }
+    }
+  }
+  if (requireRecords) {
+    assert.equal(observed.doorCellRecords?.length, 4,
+      'Grid-record acceptance requires actual saved door-cell observations');
+    assert.equal(summary.doorCellRecords?.length, 4);
+    for (const [index, source] of observed.doorCellRecords.entries()) {
+      const sample = summary.doorCellRecords[index];
+      assert.equal(sample.gridIndex, source.gridIndex);
+      assert.deepEqual(source.levelRecord, source.savedRecord,
+        'Actual source door-cell Level/Saved record ownership must match');
+      for (const field of ['kind', 'variant', 'state', 'sourceWord14', 'primarySeed', 'initialized', 'secondarySeed']) {
+        if (sample.record?.[field] !== source.savedRecord[field]) {
+          differences.push({ gridIndex: source.gridIndex, field: `record.${field}`, scope: 'doorCellRecords',
+            original: source.savedRecord[field], production: sample.record?.[field] ?? null });
+        }
+      }
+    }
   }
   const emptyIndices = grid.cells.flatMap((cell, index) => cell.entity ? [] : [index]);
   const originalOccupiedProductionNull = emptyIndices.filter(index => !observed.liveGrid.emptyIndices.includes(index));
@@ -33,7 +63,7 @@ export function compareSavedRoomGrid(summary, grid, observed) {
   const dimensionsMatch = JSON.stringify(dimensions.original) === JSON.stringify(dimensions.production);
   const currentRoomSeedDiagnostic = {
     status: differences.length ? 'fail' : 'pass', roomRecord: summary.currentRoomRecord,
-    comparedCells: 9, differences,
+    comparedCells: requireRecords ? 13 : 9, comparedRecordCells: requireRecords ? 12 : 0, differences,
     reason: 'Paired current-row seeds and occupancy are required; source samples never enter production',
   };
   const gridOccupancyDiagnostic = {
@@ -43,7 +73,7 @@ export function compareSavedRoomGrid(summary, grid, observed) {
     reason: 'Actual whole live-grid occupancy is required; observed occupancy never changes production state',
   };
   const savedGridRequiredFailures = differences.map(difference => ({
-    field: `currentRoomSeedSamples.${difference.field}`, gridIndex: difference.gridIndex,
+    field: `${difference.scope || 'currentRoomSeedSamples'}.${difference.field}`, gridIndex: difference.gridIndex,
     expected: difference.original, actual: difference.production,
   }));
   for (const [index, field] of ['room.grid.width', 'room.grid.height', 'room.grid.cells.length'].entries()) {

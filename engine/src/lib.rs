@@ -22,6 +22,7 @@ pub mod fireplaces;
 pub mod floor;
 pub mod grid;
 mod grid_hazards;
+pub mod grid_records;
 pub mod items;
 pub mod keepers;
 pub mod layout;
@@ -1015,6 +1016,11 @@ impl Game {
         };
         self.state.next_pickup = 1;
         self.state.stage_seed = seed::stage1_seed(self.state.run_seed_value);
+        grid_records::admit_fresh(
+            &mut self.state.room,
+            &mut self.state.boot_lifecycle.shared,
+            self.state.game_update_count,
+        )?;
         // Source Level generation loads the start room, then immediately calls
         // RoomMusic. This runtime's Level contract is fresh normal Basement.
         if let Some(id) = music::stage_track(self.state.stage, false) {
@@ -1037,7 +1043,7 @@ impl Game {
             .item_pools
             .clone()
             .ok_or("run save requires initialized item pools")?;
-        let (empty, occupied_pending) = saved_game::save_empty_grid_cells(
+        let grid_save = saved_game::save_grid_cells(
             &mut self.boot_level_grid,
             &mut self.state.boot_lifecycle.shared,
             &self.state.room,
@@ -1050,10 +1056,10 @@ impl Game {
             .descriptor_seeds
             .copy_rooms_from(&self.boot_level_grid, &rooms)?;
         self.saved_game.player_rng_seed = self.player_manager_secondary_rng.seed;
-        let saved = saved_game::SavedRun::copy_from(&self.state, item_pools);
+        let saved = saved_game::SavedRun::copy_from(&self.state, item_pools, grid_save.records);
         self.state.saved_run_summary = Some(saved.summary(
-            empty,
-            occupied_pending,
+            grid_save.empty,
+            grid_save.occupied_pending,
             rooms.len(),
             &self.boot_level_grid,
             &self.saved_game.descriptor_seeds,
