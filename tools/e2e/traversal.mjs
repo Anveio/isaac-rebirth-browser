@@ -290,7 +290,7 @@ try {
           const code = keyCodes[action.key];
           assert.ok(code); await page.keyboard[action.down ? 'down' : 'up'](code);
         } else if (action.type === 'step') {
-          await page.evaluate(count => window.game.step(count), action.frames);
+          await page.evaluate(count => { window.game.step(count); }, action.frames);
         } else {
           try { await compare(action.label); } catch (error) {
             const state = await page.evaluate(() => window.game.snapshot());
