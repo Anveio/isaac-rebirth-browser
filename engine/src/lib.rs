@@ -1231,21 +1231,27 @@ impl Game {
             for pickup in &mut self.state.room.pickups {
                 if pickup.touches(&self.state.player)
                     && pickup.try_collect(&mut self.state.inventory)
-                    && pickup.variant == 30
                 {
-                    // Collect504480 ->504720 requests sound58 after AddKeys.
-                    // The caller runs before the System counter increment.
-                    self.state.audio.admit(
-                        &mut self.state.boot_lifecycle.shared,
-                        self.state.system_clock.system_counter - 1,
-                        audio::SoundRequest {
-                            id: 58,
-                            volume: 0.85,
-                            delay: 2,
-                            looping: false,
-                            pitch: 1.0,
-                        },
-                    );
+                    // Collect504480 routes key ->504720 and bomb ->5046d0
+                    // after inventory mutation, before the System increment.
+                    let sound = match pickup.variant {
+                        30 => Some((58, 0.85)),
+                        40 => Some((201, 1.0)),
+                        _ => None,
+                    };
+                    if let Some((id, volume)) = sound {
+                        self.state.audio.admit(
+                            &mut self.state.boot_lifecycle.shared,
+                            self.state.system_clock.system_counter - 1,
+                            audio::SoundRequest {
+                                id,
+                                volume,
+                                delay: 2,
+                                looping: false,
+                                pitch: 1.0,
+                            },
+                        );
+                    }
                 }
             }
         }
