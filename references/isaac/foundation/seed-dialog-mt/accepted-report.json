@@ -16,14 +16,14 @@
     "tools/foundation/verify.mjs": "b28ed8af6bf50a7aa8b6b81f55fd29d0c963285f2d54500d61a4a58925de1d9f",
     "engine/src/menu_lifecycle.rs": "2ccfe4da0f3213a43caa987f80d092a8ae21e03ad9e27120aa574fe9fad1c5e0",
     "engine/src/mt.rs": "2fae0fc8dff620f766c40d4253d26dd65e9dbff05bf6e0ff85f5beb2e0e0f9d0",
-    "engine/src/lib.rs": "1d35cd84daf598f66802de13edb6d3c0353997f0964077e8febc338e42ca1a33",
+    "engine/src/lib.rs": "0fd6bad9e7e9948274a6e96f95182e794e6650d6059b5aec6be9e2ea4a264388",
     "engine/src/audio.rs": "d026fad8a0a4645061fa26061947dd5465d1e7e7a1edc86aae1fe733c1627110",
     "web/main.ts": "4935c7f8fece3fe50544289f011b6fe1825d35749fcf3cfd81c71153a477cef9",
     "web/trace.ts": "e6a92aa76585548546571c1eb05cdf44d7c9772ded14ef11f0f05144fb335961"
   },
   "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
   "production": {
-    "sha256": "cb1d361fffc07f8f4cfe88b2c2357eb9ba3c6330082a2aaf9ad3fac18a7bf624",
+    "sha256": "a8db35aac18ddee8dab9f89af8ee1c1f61fc081a3babe011113c8f1d38bd3376",
     "files": 832,
     "source": "/workspace/isaac-worktrees/weapons/dist",
     "scope": "Immutable snapshot of production build bytes; source/native replay equality is checked separately"
@@ -55,7 +55,7 @@
       "bootEpochSeed": 0,
       "code": "QSYVKMSE",
       "status": "pass",
-      "nativeManifestSha256": "1c9858e60479ae736c7737a05fceb6f9b268aec5ce3886aceec3e16634108a75",
+      "nativeManifestSha256": "9f3b23910d07b4526e6239b4c285d165ea1553ddad7194f9f0fdffdb1a84df39",
       "queuedInputProvenance": {
         "status": "pass",
         "commands": 19,
@@ -79,7 +79,7 @@
       "bootEpochSeed": 1700000000,
       "code": "ZG800TRJ",
       "status": "pass",
-      "nativeManifestSha256": "cbf6d3dbe1bc5b7ac7eca1246b9f26ffd975fcefb794481fc41f08ad0da03650",
+      "nativeManifestSha256": "cdea38ef729a965857529d74d79e926945dacd90d6b784134b5155cbce514056",
       "queuedInputProvenance": {
         "status": "pass",
         "commands": 19,
@@ -104,7 +104,7 @@
       "code": "FE27CW8J",
       "seedValue": 652127926,
       "status": "pass",
-      "nativeManifestSha256": "60b86193b48f339239716f360f01e770558d3393209ef18a8b4c1bd5d0e4ba1f",
+      "nativeManifestSha256": "482f84c968684cdad10b8d8f234efc7562b986ad12eb0eadab0c786444a72f4c",
       "queuedInputProvenance": {
         "status": "pass",
         "commands": 19,
@@ -129,7 +129,7 @@
       "code": "3MBVDNN2",
       "seedValue": 3308047948,
       "status": "pass",
-      "nativeManifestSha256": "33715539cf88d43522d2e626c66c764cd812d0c8240e49ad330d99a7236d6d70",
+      "nativeManifestSha256": "ab99bc02929fefc1ab4900691a03a927dadc117dc3c5d68a149be8e3c9f0e8d6",
       "queuedInputProvenance": {
         "status": "pass",
         "commands": 19,
@@ -154,7 +154,7 @@
       "code": "F0E06W1S",
       "seedValue": 577114551,
       "status": "pass",
-      "nativeManifestSha256": "f1f9b3ce68878418c2c762a3681dc17ca6326acb39d6e097452a685413c5377f",
+      "nativeManifestSha256": "ca7e62f718620880efb2aa37ede558021aed4b26ddee94e78670133aa06ff77c",
       "queuedInputProvenance": {
         "status": "pass",
         "commands": 19,
@@ -179,7 +179,7 @@
       "code": "EVZNZCCJ",
       "seedValue": 688239989,
       "status": "pass",
-      "nativeManifestSha256": "119a38e6a89277bd3251074e83fb7e94143163692da07ac02810eb6c1ca5232f",
+      "nativeManifestSha256": "dbc310a211cbd7ecedffbc950cbe3ce86e625db2005c11782a9f8bc721368a21",
       "queuedInputProvenance": {
         "status": "pass",
         "commands": 19,
@@ -214,7 +214,7 @@
     "tools/foundation/verify.mjs": "b28ed8af6bf50a7aa8b6b81f55fd29d0c963285f2d54500d61a4a58925de1d9f",
     "engine/src/menu_lifecycle.rs": "2ccfe4da0f3213a43caa987f80d092a8ae21e03ad9e27120aa574fe9fad1c5e0",
     "engine/src/mt.rs": "2fae0fc8dff620f766c40d4253d26dd65e9dbff05bf6e0ff85f5beb2e0e0f9d0",
-    "engine/src/lib.rs": "1d35cd84daf598f66802de13edb6d3c0353997f0964077e8febc338e42ca1a33",
+    "engine/src/lib.rs": "0fd6bad9e7e9948274a6e96f95182e794e6650d6059b5aec6be9e2ea4a264388",
     "engine/src/audio.rs": "d026fad8a0a4645061fa26061947dd5465d1e7e7a1edc86aae1fe733c1627110",
     "web/main.ts": "4935c7f8fece3fe50544289f011b6fe1825d35749fcf3cfd81c71153a477cef9",
     "web/trace.ts": "e6a92aa76585548546571c1eb05cdf44d7c9772ded14ef11f0f05144fb335961"

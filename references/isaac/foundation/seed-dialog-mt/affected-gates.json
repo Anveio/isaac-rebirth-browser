@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "scope": "Affected first-entry cohorts ran on immutable artifact af5fb97e9a9088b24dbf81f33b041dbaf182ab653221c26709382c3984354d15. Final cb1d361fffc07f8f4cfe88b2c2357eb9ba3c6330082a2aaf9ad3fac18a7bf624 removes only premature reentry committed/eligibility flag clearing and adds source reopening coverage; final six-case seed-dialog proof verifies that correction. Complete run/room/effect RNG routing remains open.",
+  "scope": "Affected initial-entry cohorts ran on immutable artifact af5fb97e9a9088b24dbf81f33b041dbaf182ab653221c26709382c3984354d15. Reentry correction was verified on cb1d361fffc07f8f4cfe88b2c2357eb9ba3c6330082a2aaf9ad3fac18a7bf624. After restacking only owned changes on aggregate b8b07aa, the complete six-case/nine-comparison seed-dialog cohort was rerun against final artifact a8db35aac18ddee8dab9f89af8ee1c1f61fc081a3babe011113c8f1d38bd3376. Captured affected and W0 diagnostic failures retain their original immutable artifact identities; complete run/room/effect MT routing remains open.",
   "gates": [
     {
       "gate": "audio",
