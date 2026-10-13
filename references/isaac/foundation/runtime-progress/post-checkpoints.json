@@ -1,0 +1,58 @@
+{
+  "schema": 1,
+  "scope": "Subsequent scoped aggregate runs. These do not replace the completed six-suite checkpoint or establish complete game parity.",
+  "checks": [
+    {
+      "name": "audio",
+      "report": ".cache/e2e/audio/1791885375445/report.json",
+      "reportSha256": "4250b44c47dd868049cda0393561984aaa967a07d3a7d5581c0b17a5b2f15eec",
+      "status": "pass",
+      "production": {
+        "sha256": "d637c226a8cc9a01e0b56712bd737c93a7b9c680463f1f773c5f27d37aa98590",
+        "files": 832,
+        "source": "/workspace/isaac-rebirth-browser/dist",
+        "scope": "Immutable snapshot of production build bytes; source/native replay equality is checked separately"
+      },
+      "scope": "All 169 configured SFX and 303 sample wrappers; actual forward menu/character sound admissions and native OpenAL/browser Web Audio PCM starts. Complete shared MT is gated at Title/profile; later Main initialization and run random routing remain explicit diagnostics. Stable character sound admissions must each consume exactly one shared draw. Music/gameplay SFX callers are separate work.",
+      "cases": 4,
+      "checks": 848
+    },
+    {
+      "name": "curseDoors",
+      "report": ".cache/e2e/doors/1791886105963-438785/report.json",
+      "reportSha256": "c5c94944ec3507edc18dd01a0eabea203feb46000f53d4f8f6a0e106364ad712",
+      "status": "pass",
+      "production": {
+        "sha256": "d637c226a8cc9a01e0b56712bd737c93a7b9c680463f1f773c5f27d37aa98590",
+        "files": 832,
+        "source": "/workspace/isaac-rebirth-browser/dist",
+        "scope": "Immutable snapshot of production build bytes; source/native replay equality is checked separately"
+      },
+      "scope": "Fresh ordinary Isaac, authored 13x7 no-hostile curse-room entry and exit; exact native half-heart charges, immunity/door collision/admission phases, descriptor/spawn identity and returned room persistence. Flight/items, other door styles, hostile callbacks and complete pixels remain separate.",
+      "cases": 2,
+      "comparedPhases": 294,
+      "failures": 0
+    },
+    {
+      "name": "randomRegressions",
+      "report": ".cache/foundation/paired-1791887310445/report.json",
+      "reportSha256": "e75b921870a2808de898b3ee772745b5af2705b1aa4dca81cc69fea3254548bc",
+      "status": "pass",
+      "production": {
+        "sha256": "6fcd80f941f4e68e02673d64a949e898fc82c876a5f451ae5d9a9ba2002358ae",
+        "files": 832,
+        "source": "/workspace/isaac-rebirth-browser/dist",
+        "scope": "Immutable snapshot of production build bytes; source/native replay equality is checked separately"
+      },
+      "scope": {
+        "functional": "Real input/phase/readback and source title, fade, player motion, pause/controller, HP, immunity, active tear/bomb counts",
+        "pixels": "Strict full RGBA diagnostic; every difference remains a failure in its own pixel result",
+        "exactPixelsRequired": false,
+        "completeOriginalStateParity": false
+      },
+      "cases": 2,
+      "checkpoints": 36,
+      "passingCheckpoints": 36
+    }
+  ]
+}
