@@ -184,8 +184,14 @@
   "failedNativeBoundary": {
     "scope": "Initial SWG and recorded YGNX native attempts used30-second frame timeout and stopped after acknowledged run Enter hold at906, before the300 released presentations completed. No assertions were waived. SWG identical public tape later passed173 source phases with60-second wall timeout.",
     "sourceFailures": [
-      "fresh-originals/traversal/SWG78RJL/original/manifest.json",
-      "pickups/random-0/original/manifest.json"
+      {
+        "manifest": "/workspace/isaac-rebirth-browser/.cache/e2e/menu-settlement/fresh-originals/traversal/SWG78RJL/original/manifest.json",
+        "sha256": "04f22df38a66ad8b71f4c6219482ce8f85aa14df869fba667eb83bfc91c061b5"
+      },
+      {
+        "manifest": "/workspace/isaac-rebirth-browser/.cache/e2e/menu-settlement/pickups/random-0/original/manifest.json",
+        "sha256": "9e80744a250b4cbfe293ebc7d8f78c1002bbafd2966ae32f8c786cfd44746e42"
+      }
     ]
   },
   "sourceHashes": {
@@ -209,5 +215,23 @@
     "restoreJournal": "/workspace/isaac-rebirth-browser/.cache/e2e/menu-settlement/compression.json",
     "restoreHelper": "/workspace/isaac-rebirth-browser/.cache/e2e/menu-settlement/restore-evidence.py",
     "scope": "Bulky successful phase/state arrays remain ignored lossless evidence; all reports, original manifests, tapes and failures remain raw"
-  }
+  },
+  "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "recordedPublicTapeBanks": [
+    {
+      "path": "/workspace/isaac-rebirth-browser/.cache/e2e/menu-settlement/traversal-scenarios.json",
+      "sha256": "efd478378d7d88659c51d76eb43f36d8d4d4d3cbd433a5474ae0b9d5e429aa53",
+      "scope": "Exact declared case bank retained with all public tape steps; original source paths identify current attempts"
+    },
+    {
+      "path": "/workspace/isaac-rebirth-browser/.cache/e2e/menu-settlement/doors-scenarios.json",
+      "sha256": "5590b682a712ebd1c96055b69d8a582ca9a0efa5e1bca68a6eed9a1fbe22dfd7",
+      "scope": "Exact declared case bank retained with all public tape steps; original source paths identify current attempts"
+    },
+    {
+      "path": "/workspace/isaac-rebirth-browser/.cache/e2e/menu-settlement/pickups-scenarios.json",
+      "sha256": "8fa90822ac3f3d252816f6cfe6afd1b098ec7c07e6dc591d7d98b26770a098a1",
+      "scope": "Exact declared case bank retained with all public tape steps; original source paths identify current attempts"
+    }
+  ]
 }
