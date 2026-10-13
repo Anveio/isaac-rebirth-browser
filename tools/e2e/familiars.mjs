@@ -115,6 +115,8 @@ try {
       const start = await enterSeededRun(page, item.code); assertSeededRun(start, item.code, item.seedValue);
       const expected = [...manualSeedCommands(item.code)]; let presentation = 0;
       let grants = 0, familiarPresentations = 0, poofPresentations = 0, lastMt = null;
+      const nativeCounters = new Set(), browserCounters = new Set();
+      let nativePoofSeen = false, browserPoofSeen = false, nativePoofRetired = false, browserPoofRetired = false;
       const equal = (actual, expected, field, tick) => {
         result.checks++;
         try { assert.deepEqual(actual, expected, `${item.name}:${tick}:${field}`); }
@@ -147,6 +149,13 @@ try {
         const familiars = source.actors.filter(actor => actor.type === 3 && !actor.removed);
         equal(state.familiars.filter(actor => !actor.removed).length, familiars.length, 'every actual Familiar including unsupported subclasses', tick);
         const effects = source.actors.filter(actor => actor.type === 1000 && !actor.removed);
+        const nativePoof = effects.some(actor => actor.variant === 15);
+        const browserPoof = state.spriteEffects.some(actor => actor.variant === 15 && !actor.removed);
+        if (nativePoofSeen && !nativePoof) nativePoofRetired = true;
+        if (browserPoofSeen && !browserPoof) browserPoofRetired = true;
+        nativePoofSeen ||= nativePoof; browserPoofSeen ||= browserPoof;
+        source.actors.filter(actor => actor.type === 3 && actor.variant === 56).forEach(actor => nativeCounters.add(actor.appearanceCounter));
+        state.familiars.filter(actor => actor.variant === 56).forEach(actor => browserCounters.add(actor.appearanceCounter));
         equal(state.spriteEffects.length + state.fireParticles.length, effects.length, 'every actual effect presence', tick);
         const consumed = new Set();
         for (const nativeActor of source.actors) {
@@ -171,7 +180,8 @@ try {
           equal(Boolean(actual), true, `${nativeActor.type}/${nativeActor.variant}:typed actor`, tick);
           if (!actual) continue;
           consumed.add(refKind + '/' + actual.id);
-          if (nativeActor.type === 3) familiarPresentations++; else poofPresentations++;
+          if (nativeActor.type === 3 && nativeActor.variant === 56) familiarPresentations++;
+          if (nativeActor.type === 1000 && nativeActor.variant === 15) poofPresentations++;
           const name = `${nativeActor.type}/${nativeActor.variant}/${nativeActor.sequenceId}`;
           const identity = state.actorScheduler.identities.find(identity => identity.actor.kind === refKind && identity.actor.id === actual.id);
           equal(identity?.sequenceId, nativeActor.sequenceId, `${name}:actual sequence`, tick);
@@ -232,18 +242,24 @@ try {
       assert.ok(grants > 0, 'Every unfiltered route must execute an actual natural grant');
       if (item.entropy.startsWith('Contrived')) {
         assert.ok(familiarPresentations > 0, 'Both contrived phases must observe actual Familiar admission');
-        assert.ok(poofPresentations > 0, 'Both contrived phases must observe the real appearance Poof');
+        assert.ok(poofPresentations > 0, 'Both contrived phases must observe the real appearance Poof15');
+        for (const counter of [4, 3, 2, 1, 0]) {
+          assert.ok(nativeCounters.has(counter), 'Native must observe every declared appearance counter including reveal');
+          assert.ok(browserCounters.has(counter), 'Browser must observe every declared appearance counter including reveal');
+        }
+        assert.ok(nativePoofRetired && browserPoofRetired, 'Both actual Poof15 actors must retire within the declared hold');
       }
       const trace = await page.evaluate(() => window.game.trace());
       assertInputProvenance(trace, expected, item.seedValue, scenarios.bootEpochSeed);
-      assert.ok(trace.backendEvents.every(event => event.state), 'Every real backend callback requires its full state');
+      assert.equal(trace.backendStateTruncated, false, 'Actual backend state evidence must remain complete');
+      assert.ok(trace.backendEvents.every(event => event.state?.schema === 1), 'Every real backend callback requires its full state');
       assert.equal(states.length, item.actions.reduce((total, action) => total + action.frames, 0));
       assertSeededRun(await page.evaluate(() => window.game.snapshot()), item.code, item.seedValue);
       assert.deepEqual(errors, []);
       const bytes = Buffer.from(JSON.stringify({schema: 1, baseline: start, states, trace}) + '\n');
       const path = join(directory, 'browser-states.json.gz'); await writeFile(path, gzipSync(bytes));
       Object.assign(result, {status: result.failures.length ? 'fail' : 'pass', comparedPresentations: presentation + 1,
-        grants, familiarPresentations, poofPresentations, nativeManifestSha256: digest(nativeBytes), tapeSha256: digest(Buffer.from(tape)),
+        grants, familiarPresentations, poofPresentations, appearanceCoverage: {nativeCounters: [...nativeCounters], browserCounters: [...browserCounters], nativePoofRetired, browserPoofRetired}, nativeManifestSha256: digest(nativeBytes), tapeSha256: digest(Buffer.from(tape)),
         browserEvidence: {path, encoding: 'gzip', rawSha256: digest(bytes), rawBytes: bytes.length},
         inputProvenance: {status: 'pass', commands: trace.commands.length, inputTraceTruncated: trace.inputTraceTruncated,
           stateHistoryTruncated: trace.stateHistoryTruncated, stateHistoryTruncationReason: trace.stateHistoryTruncationReason,
