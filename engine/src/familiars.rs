@@ -599,8 +599,12 @@ pub fn admit_blood_splat(
         sprite,
         full_updates: 0,
     });
-    // Native4524f0 routes flags8 directly to its separate background pool.
-    // This actor never joins the ordinary full-update scheduler snapshot.
+    // Room5c6940 assigns the actual sequence first; Manager4524f0 then routes
+    // flags8 to its separate background pool rather than the ordinary array.
+    state.actor_scheduler.admit_background(ActorRef {
+        kind: ActorKind::Effect,
+        id,
+    })?;
     Ok(id)
 }
 
