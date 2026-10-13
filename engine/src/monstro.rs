@@ -40,11 +40,12 @@ pub struct ProjectileBatch {
     pub parameter_angle: f32,
 }
 
-pub struct World<'a> {
+pub(crate) struct World<'a> {
     pub player: WorldVector,
     pub grid: &'a Grid,
     pub audio: &'a mut AudioState,
     pub system_counter: u32,
+    pub poofs: crate::familiars::PoofAdmission<'a>,
 }
 
 pub fn from_selector(id: u32, selector: &SpawnSelector) -> Result<Option<Npc>, String> {
@@ -412,7 +413,7 @@ pub(crate) fn post_contact_grid(npc: &mut Npc, grid: &Grid) -> Result<(), String
     collide(npc, grid, false)
 }
 
-pub fn advance(
+pub(crate) fn advance(
     npc: &mut Npc,
     phase: Phase,
     random: &mut Mt19937,
@@ -463,7 +464,11 @@ pub fn advance(
                 npc.state = 1;
                 npc.visible = false;
             }
-            1 => npc.appearance_effect_seed = Some(random.next_u32()),
+            1 => {
+                let seed = random.next_u32();
+                npc.appearance_effect_seed = Some(seed);
+                world.poofs.admit_npc(npc, 3, seed)?;
+            }
             4 => {
                 npc.visible = true;
                 play(npc, "Appear", true);

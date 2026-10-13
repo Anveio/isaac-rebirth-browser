@@ -1654,35 +1654,6 @@ impl Game {
         }
         pickups::advance_actor(&mut self.state, phase, id)
     }
-    fn admit_npc_poof(&mut self, index: usize, subtype: u32, seed: u32) -> Result<(), String> {
-        let npc = &self.state.room.npcs[index];
-        let position = npc.position;
-        let parent = familiars::Parent {
-            actor: actors::ActorRef {
-                kind: actors::ActorKind::Npc,
-                id: npc.id,
-            },
-            entity_type: npc.kind,
-            variant: npc.variant,
-        };
-        let id = familiars::admit_poof(
-            &mut self.state,
-            subtype,
-            seed,
-            position,
-            motion::WorldVector { x: 0.0, y: 0.0 },
-            Some(parent),
-        )?;
-        // Generic4fbef9 writes NPC height+1 after copying its render offset.
-        // The admitted fresh214/Monstro appearance has height/offset zero.
-        self.state
-            .sprite_effects
-            .iter_mut()
-            .find(|effect| effect.id == id)
-            .expect("newly admitted NPC Poof")
-            .raw_7f8 = 1.0;
-        Ok(())
-    }
     fn admit_npc_blood(&mut self, index: usize, seed: u32) -> Result<(), String> {
         let position = self.state.room.npcs[index].position;
         // Fresh13/18/214 have the ordinary white color. Modifiers and tinted
@@ -1707,11 +1678,14 @@ impl Game {
                     grid: &grid,
                     audio: &mut self.state.audio,
                     system_counter: self.state.system_clock.system_counter.wrapping_sub(1),
+                    poofs: familiars::PoofAdmission {
+                        game_update_count: self.state.game_update_count,
+                        next_effect: &mut self.state.next_effect,
+                        effects: &mut self.state.sprite_effects,
+                        scheduler: &mut self.state.actor_scheduler,
+                    },
                 },
             )?;
-            if let Some(seed) = produced.poof_seed {
-                self.admit_npc_poof(index, 2, seed)?;
-            }
             if let Some(seed) = produced.blood_seed {
                 self.admit_npc_blood(index, seed)?;
             }
@@ -1765,7 +1739,6 @@ impl Game {
             return Ok(());
         }
         if self.state.room.npcs[index].kind == 20 {
-            let prior_poof = self.state.room.npcs[index].appearance_effect_seed;
             let births = monstro::advance(
                 &mut self.state.room.npcs[index],
                 phase,
@@ -1775,13 +1748,14 @@ impl Game {
                     grid: &grid,
                     audio: &mut self.state.audio,
                     system_counter: self.state.system_clock.system_counter.wrapping_sub(1),
+                    poofs: familiars::PoofAdmission {
+                        game_update_count: self.state.game_update_count,
+                        next_effect: &mut self.state.next_effect,
+                        effects: &mut self.state.sprite_effects,
+                        scheduler: &mut self.state.actor_scheduler,
+                    },
                 },
             )?;
-            if self.state.room.npcs[index].appearance_effect_seed != prior_poof {
-                if let Some(seed) = self.state.room.npcs[index].appearance_effect_seed {
-                    self.admit_npc_poof(index, 3, seed)?;
-                }
-            }
             for birth in births {
                 let id = self.state.next_enemy_projectile;
                 self.state.next_enemy_projectile = id

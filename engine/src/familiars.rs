@@ -276,57 +276,114 @@ pub fn admit_poof(
     velocity: WorldVector,
     parent: Option<Parent>,
 ) -> Result<u32, String> {
-    if subtype > 3 || !position.is_finite() || !velocity.is_finite() {
-        return Err("Poof admission requires authored subtype0..3 and finite world vectors".into());
+    PoofAdmission {
+        game_update_count: state.game_update_count,
+        next_effect: &mut state.next_effect,
+        effects: &mut state.sprite_effects,
+        scheduler: &mut state.actor_scheduler,
     }
-    let config = definition(1000, 15).expect("authored Poof config");
-    let id = state.next_effect;
-    state.next_effect = id.checked_add(1).ok_or("effect handle exhausted")?;
-    let mut sprite = Sprite::new(config);
-    sprite.animation = match subtype {
-        1 => "Poof_Small",
-        3 => "Poof_Large",
-        _ => "Poof",
+    .admit(subtype, seed, position, velocity, parent)
+}
+
+/// The source NPC callback admits appearance effects before BaseUpdate moves
+/// its body or drains damage. Borrow only the actual factory owners so that
+/// admission occurs at that call site, while the NPC is still being updated.
+pub(crate) struct PoofAdmission<'a> {
+    pub game_update_count: u32,
+    pub next_effect: &'a mut u32,
+    pub effects: &'a mut Vec<SpriteEffect>,
+    pub scheduler: &'a mut crate::actors::Scheduler,
+}
+
+impl PoofAdmission<'_> {
+    pub(crate) fn admit_npc(
+        &mut self,
+        npc: &crate::npcs::Npc,
+        subtype: u32,
+        seed: u32,
+    ) -> Result<(), String> {
+        self.admit(
+            subtype,
+            seed,
+            npc.position,
+            ZERO,
+            Some(Parent {
+                actor: ActorRef {
+                    kind: ActorKind::Npc,
+                    id: npc.id,
+                },
+                entity_type: npc.kind,
+                variant: npc.variant,
+            }),
+        )?;
+        // Generic4fbee6 copies the NPC render offset and4fbef9 writes height+1.
+        // The supported fresh214/Monstro appearance has zero height/offset.
+        self.effects.last_mut().expect("new NPC Poof").raw_7f8 = 1.0;
+        Ok(())
     }
-    .into();
-    state.sprite_effects.push(SpriteEffect {
-        id,
-        variant: 15,
-        subtype,
-        spawn_seed: seed,
-        parent,
-        birth_game_update: state.game_update_count,
-        actor_rng: items::Rng::new(seed, [4, 3, 17]),
-        position,
-        presented_position: position,
-        velocity,
-        configured_friction: config.friction,
-        current_friction: config.friction,
-        collision_radius: config.collision_radius,
-        collision_mass: config.collision_mass,
-        // Common Effect.Init458b31 overrides authored0 to22 before subclass dispatch.
-        collision_damage: 22.0,
-        hp: config.base_hp,
-        max_hp: config.base_hp,
-        grid_collision_class: 0,
-        entity_collision_class: 0,
-        flags: 0,
-        visible: true,
-        active: true,
-        removed: false,
-        render_order_offset: if subtype == 0 { 8000 } else { 0 },
-        lifetime_divisor: 0,
-        time_to_live: -1,
-        raw_7f4: 1,
-        raw_7f8: 0.0,
-        sprite,
-        full_updates: 0,
-    });
-    state.actor_scheduler.admit(ActorRef {
-        kind: ActorKind::Effect,
-        id,
-    })?;
-    Ok(id)
+
+    fn admit(
+        &mut self,
+        subtype: u32,
+        seed: u32,
+        position: WorldVector,
+        velocity: WorldVector,
+        parent: Option<Parent>,
+    ) -> Result<u32, String> {
+        if subtype > 3 || !position.is_finite() || !velocity.is_finite() {
+            return Err(
+                "Poof admission requires authored subtype0..3 and finite world vectors".into(),
+            );
+        }
+        let config = definition(1000, 15).expect("authored Poof config");
+        let id = *self.next_effect;
+        *self.next_effect = id.checked_add(1).ok_or("effect handle exhausted")?;
+        let mut sprite = Sprite::new(config);
+        sprite.animation = match subtype {
+            1 => "Poof_Small",
+            3 => "Poof_Large",
+            _ => "Poof",
+        }
+        .into();
+        self.effects.push(SpriteEffect {
+            id,
+            variant: 15,
+            subtype,
+            spawn_seed: seed,
+            parent,
+            birth_game_update: self.game_update_count,
+            actor_rng: items::Rng::new(seed, [4, 3, 17]),
+            position,
+            presented_position: position,
+            velocity,
+            configured_friction: config.friction,
+            current_friction: config.friction,
+            collision_radius: config.collision_radius,
+            collision_mass: config.collision_mass,
+            // Common Effect.Init458b31 overrides authored0 to22 before subclass dispatch.
+            collision_damage: 22.0,
+            hp: config.base_hp,
+            max_hp: config.base_hp,
+            grid_collision_class: 0,
+            entity_collision_class: 0,
+            flags: 0,
+            visible: true,
+            active: true,
+            removed: false,
+            render_order_offset: if subtype == 0 { 8000 } else { 0 },
+            lifetime_divisor: 0,
+            time_to_live: -1,
+            raw_7f4: 1,
+            raw_7f8: 0.0,
+            sprite,
+            full_updates: 0,
+        });
+        self.scheduler.admit(ActorRef {
+            kind: ActorKind::Effect,
+            id,
+        })?;
+        Ok(id)
+    }
 }
 
 pub fn advance_effect(state: &mut State, phase: Phase, id: u32) -> Result<(), String> {

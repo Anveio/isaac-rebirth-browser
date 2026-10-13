@@ -22,16 +22,16 @@ pub struct Level2FlyState {
     pub grid_normal: WorldVector,
     pub previous_grid_velocity: WorldVector,
 }
-pub struct World<'a> {
+pub(crate) struct World<'a> {
     pub game_counter: u32,
     pub player: WorldVector,
     pub grid: &'a Grid,
     pub audio: &'a mut AudioState,
     pub system_counter: u32,
+    pub poofs: crate::familiars::PoofAdmission<'a>,
 }
 #[derive(Default)]
 pub struct Produced {
-    pub poof_seed: Option<u32>,
     pub blood_seed: Option<u32>,
 }
 pub fn from_selector(id: u32, selector: &SpawnSelector) -> Result<Option<Npc>, String> {
@@ -256,7 +256,7 @@ pub(crate) fn post_contact_grid(npc: &mut Npc, grid: &Grid) -> Result<(), String
     npc.presented_position = npc.position;
     Ok(())
 }
-pub fn advance(
+pub(crate) fn advance(
     npc: &mut Npc,
     phase: Phase,
     random: &mut Mt19937,
@@ -295,7 +295,7 @@ pub fn advance(
             1 => {
                 let seed = random.next_u32();
                 npc.appearance_effect_seed = Some(seed);
-                produced.poof_seed = Some(seed);
+                world.poofs.admit_npc(npc, 2, seed)?;
             }
             4 => {
                 npc.visible = true;
