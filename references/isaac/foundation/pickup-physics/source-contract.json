@@ -5,7 +5,7 @@
   "full": {
     "callers": ["Pickup::Update506f70 at506ff9", "Entity::Update447190", "Pickup507029"],
     "order": "Advance ANM2 once, multiply physical velocity by entering current friction, add it to physical position, restore configured XML friction, resolve ground collision, then set the next current friction to configured friction*.965.",
-    "collision": "Ground class5 uses authored collision radius/scale and entities2.xml numGridCollisionPoints. The supported ordinary families have radius12, mass3, friction1 and24 ordered collision samples. Collect504d30 clears velocity, sets grid class3 and entity class0, starts Collect, then sets dead31f."
+    "collision": "Ground class5 uses authored collision radius/scale and entities2.xml numGridCollisionPoints. The supported ordinary families have radius12, mass3, friction1 and24 ordered collision samples. Static Collect504d30 clears velocity, writes grid class3 and entity class0, starts Collect, then sets dead31f; actual ordinary BombPU collection boundaries retain grid class5. The caller/reset responsible for that class discrepancy is unresolved and remains a required live failure."
   },
   "fast": {
     "callers": ["Entity4446a0", "Game550860"],
