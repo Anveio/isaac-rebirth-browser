@@ -93,21 +93,36 @@ Keeper17 admission remains required and red; key spending is a separate slice.
 and [NPC boundaries](../references/isaac/foundation/combat/npcs/verification.json)
 record each immutable build's scope.
 
+A fresh full key cohort on the menu/seed-dialog/NPC/secret composite passes
+another 1,690 phases, including two new recorded OS-random seeds. Direct free
+treasure-room coins now admit without shop pricing; the retained N90GNCJW door
+case passes 175 phases while unsupported item329 remains outside that gate.
+
 Public seed-dialog opening, reopening and commitment now follow the source
 Character initializer and ordered decoded setter. A fresh six-case cohort
 passes 54 checkpoints, 33,696 complete MT words and 582 public commands.
 [Seed-dialog evidence](../references/isaac/foundation/seed-dialog-mt/accepted-report.json)
 retains the source/build identities and queued-input case. The preserved W0
 random tape still fails one tear-lifetime checkpoint; later shared consumers
-remain incomplete. Music now implements Title intro/loop, entry-jingle completion and floor main/layer playback through actual Web Audio. Its source-hashed four-case cohort passes 816 controller checks and 252 separately verified output checks; early decoder/prefetch and playback-onset differences remain explicit. [Music evidence](../references/isaac/foundation/music/live-report.json) distinguishes those contracts. Item-pool work continues in small PRs.
+remain incomplete. Music now implements Title intro/loop, entry-jingle
+completion and floor main/layer playback through actual Web Audio. Its
+source-hashed four-case cohort passes 816 controller checks and 252 separately
+verified output checks; early decoder/prefetch and playback-onset differences
+remain explicit. [Music evidence](../references/isaac/foundation/music/live-report.json)
+distinguishes those contracts. Item-pool work continues in small PRs.
 
 CI discovers all seventeen registered live suites and runs separate jobs with
 `fail-fast: false`, preserving each result and evidence. The first matrix run
 completed floors, weapons, boot MT and pickups successfully while retaining
 core and traversal failures. Build, typecheck, assets, matrix and strict Clippy
-pass after the menu, secret, NPC and natural-key integration at `e63723a`. This is a build checkpoint, not a fresh all-suite passing result. Complete gameplay RNG, other floors/characters,
-persistence, later music callers/cutscenes and whole-game parity remain open. GitHub required-check
-enforcement is unavailable for this private repository's current plan.
+pass after the menu, secret, NPC, natural-key, Music and treasure-coin
+integration. This is a build checkpoint, not a fresh all-suite passing result.
+Complete gameplay RNG, other floors/characters, persistence, later music
+callers/cutscenes and whole-game parity remain open. GitHub required-check
+enforcement is unavailable for this private repository's current plan. The
+hosted run at `7783e58` was refused before any job started because GitHub
+reported an account billing/spending-limit issue; local live verification
+continues with the same required contracts.
 
 ## Initial live paired verification after unit-suite removal
 
