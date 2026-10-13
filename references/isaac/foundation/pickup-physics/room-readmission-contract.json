@@ -68,6 +68,12 @@
       "unwindSize": 2192,
       "codeSha256": "5a926d0b748f6abd6599d51d5dca746a0fd5ff4cd1a2340833df6bcd4857e205",
       "contract": "Actor pass, then full entity contacts and later ground resolution"
+    },
+    {
+      "address": "0x442b30",
+      "unwindSize": 20,
+      "codeSha256": "070ce4d154bc80253ef1d05cc635a44b477c578f6dd344e22415a258988bec3d",
+      "contract": "Native age getter442b30 returns current Game counter minus creation clock+42c"
     }
   ],
   "save": {
@@ -99,7 +105,7 @@
     "suite": "test:e2e:troll-bombs",
     "cohort": "All seven retained cases, both opposite QJ offsets, both unfiltered OS-random draws and all3045 public phases stay mandatory. Only required native return metadata is added; actions/ticks/order are unchanged.",
     "newRequiredFields": [
-      "Constructor age against actual source birth/Game clocks",
+      "Pickup age against independently read source creation clock+42c and active Game counter, exactly the442b30 getter",
       "All four persistent RNG30 words",
       "Source base anchor with exact f32 decoding",
       "Actual native regular re-admissions on XD0 and both QJ public return routes; source birth positions/velocities, age, local RNG and null spawner are retained and paired fields stay strict after the real admission pass"

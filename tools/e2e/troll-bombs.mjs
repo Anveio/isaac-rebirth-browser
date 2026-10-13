@@ -28,6 +28,7 @@ const gateSources = ['tools/e2e/troll-bombs.mjs', 'tools/original/troll-bomb-sce
   'references/isaac/foundation/rock-blast/known-regressions.json',
   'references/isaac/foundation/troll-bombs/contrived-cases.json',
   'references/isaac/foundation/troll-bombs/scenarios.json',
+  'references/isaac/foundation/pickup-physics/room-readmission-contract.json',
   'tools/original/troll-bomb-observer.py', 'tools/original/bomb-pickup-scenarios.py'];
 const sourceHashes = async () => Object.fromEntries(await Promise.all(gateSources.map(async path =>
   [path, digest(await readFile(join(ROOT, path)))])));
@@ -259,7 +260,7 @@ try {
             }
             pickupBirths.set(original.spawnSeed, original.birthGameUpdate);
             if (!actual) continue;
-            equal(actual.age, age, `pickup${index}:constructor age`, presentation);
+            equal(actual.age, age, `pickup${index}:birth-clock age`, presentation);
             const rng = actual.regularRng;
             equal(rng ? [rng.state, rng.rightA, rng.left, rng.rightB] : null, original.pickupRng,
               `pickup${index}:persistent RNG30`, presentation);
