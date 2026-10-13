@@ -32,7 +32,7 @@
     "web/trace.ts": "2df69cfbbae14084baadacbcffbc9ecb7b6e363e61c1efb26f721475cfb198a9"
   },
   "scope": "Paired current-row levelSeeds/savedSeeds/occupancy and whole live-grid occupancy are blocking. Within-game copy ownership remains a separate result. Complete postrun shared MT remains a disclosed diagnostic.",
-  "graderSources": {"tools/e2e/regrade-saved-game.mjs": "6330f2f5f043ffa3fa49d55ca247c9491912d56b77b036c42873c55f3f52ac52", "tools/foundation/saved-grid-compare.mjs": "aff069a154f2b9ce595d186046bf5991825b8feb37905036eac7a4a75ed2a7fe", "tools/foundation/verify.mjs": "3743b773cf2ede253c6d78f2605eb43f34e9d7002284b6a1dd2c413d45835a5c"},
+  "graderSources": {"tools/e2e/regrade-saved-game.mjs": "6330f2f5f043ffa3fa49d55ca247c9491912d56b77b036c42873c55f3f52ac52", "tools/foundation/saved-grid-compare.mjs": "16bf6a8869b925c50e68d203caf3e0dc7157243e747c03044eed39c1b653ad3b", "tools/foundation/verify.mjs": "3743b773cf2ede253c6d78f2605eb43f34e9d7002284b6a1dd2c413d45835a5c"},
   "cases": [
     {
       "name": "zero-epoch",
@@ -40,7 +40,15 @@
       "bootEpochSeed": 0,
       "initialSeed": 1,
       "currentRoomSeedDiagnostic": {"status": "fail", "roomRecord": 6, "comparedCells": 9, "reason": "Paired current-row seeds and occupancy are required; source samples never enter production", "failedFieldCount": 19},
-      "gridOccupancyDiagnostic": {"status": "fail", "originalNullCells": 88, "productionNullCells": 91, "originalOccupiedProductionNull": [56, 85, 103], "originalNullProductionOccupied": [], "reason": "Actual whole live-grid occupancy is required; observed occupancy never changes production state"},
+      "gridOccupancyDiagnostic": {
+        "status": "fail",
+        "originalNullCells": 88,
+        "productionNullCells": 91,
+        "originalOccupiedProductionNull": [56, 85, 103],
+        "originalNullProductionOccupied": [],
+        "dimensions": {"original": [15, 9, 135], "production": [15, 9, 135]},
+        "reason": "Actual whole live-grid occupancy is required; observed occupancy never changes production state"
+      },
       "savedGridRequiredFailures": [
         {"field": "currentRoomSeedSamples.levelSeeds", "gridIndex": 0, "expected": [3412930192, 1563928295], "actual": [730841750, 440580978]},
         {"field": "currentRoomSeedSamples.savedSeeds", "gridIndex": 0, "expected": [3412930192, 1563928295], "actual": [730841750, 440580978]},
@@ -96,7 +104,15 @@
       "bootEpochSeed": 1700000000,
       "initialSeed": 4294967295,
       "currentRoomSeedDiagnostic": {"status": "fail", "roomRecord": 6, "comparedCells": 9, "reason": "Paired current-row seeds and occupancy are required; source samples never enter production", "failedFieldCount": 18},
-      "gridOccupancyDiagnostic": {"status": "fail", "originalNullCells": 83, "productionNullCells": 91, "originalOccupiedProductionNull": [18, 28, 34, 55, 56, 57, 81, 85], "originalNullProductionOccupied": [], "reason": "Actual whole live-grid occupancy is required; observed occupancy never changes production state"},
+      "gridOccupancyDiagnostic": {
+        "status": "fail",
+        "originalNullCells": 83,
+        "productionNullCells": 91,
+        "originalOccupiedProductionNull": [18, 28, 34, 55, 56, 57, 81, 85],
+        "originalNullProductionOccupied": [],
+        "dimensions": {"original": [15, 9, 135], "production": [15, 9, 135]},
+        "reason": "Actual whole live-grid occupancy is required; observed occupancy never changes production state"
+      },
       "savedGridRequiredFailures": [
         {"field": "currentRoomSeedSamples.levelSeeds", "gridIndex": 0, "expected": [464998756, 2131316215], "actual": [4003509903, 2563685892]},
         {"field": "currentRoomSeedSamples.savedSeeds", "gridIndex": 0, "expected": [464998756, 2131316215], "actual": [4003509903, 2563685892]},
@@ -151,7 +167,15 @@
       "bootEpochSeed": 2988990213,
       "initialSeed": 3846854834,
       "currentRoomSeedDiagnostic": {"status": "fail", "roomRecord": 6, "comparedCells": 9, "reason": "Paired current-row seeds and occupancy are required; source samples never enter production", "failedFieldCount": 18},
-      "gridOccupancyDiagnostic": {"status": "fail", "originalNullCells": 88, "productionNullCells": 91, "originalOccupiedProductionNull": [56, 71, 85], "originalNullProductionOccupied": [], "reason": "Actual whole live-grid occupancy is required; observed occupancy never changes production state"},
+      "gridOccupancyDiagnostic": {
+        "status": "fail",
+        "originalNullCells": 88,
+        "productionNullCells": 91,
+        "originalOccupiedProductionNull": [56, 71, 85],
+        "originalNullProductionOccupied": [],
+        "dimensions": {"original": [15, 9, 135], "production": [15, 9, 135]},
+        "reason": "Actual whole live-grid occupancy is required; observed occupancy never changes production state"
+      },
       "savedGridRequiredFailures": [
         {"field": "currentRoomSeedSamples.levelSeeds", "gridIndex": 0, "expected": [1505947049, 3290202013], "actual": [775336848, 524658996]},
         {"field": "currentRoomSeedSamples.savedSeeds", "gridIndex": 0, "expected": [1505947049, 3290202013], "actual": [775336848, 524658996]},
@@ -206,7 +230,15 @@
       "bootEpochSeed": 1901939540,
       "initialSeed": 294623253,
       "currentRoomSeedDiagnostic": {"status": "fail", "roomRecord": 6, "comparedCells": 9, "reason": "Paired current-row seeds and occupancy are required; source samples never enter production", "failedFieldCount": 18},
-      "gridOccupancyDiagnostic": {"status": "fail", "originalNullCells": 85, "productionNullCells": 91, "originalOccupiedProductionNull": [56, 78, 83, 85, 97, 110], "originalNullProductionOccupied": [], "reason": "Actual whole live-grid occupancy is required; observed occupancy never changes production state"},
+      "gridOccupancyDiagnostic": {
+        "status": "fail",
+        "originalNullCells": 85,
+        "productionNullCells": 91,
+        "originalOccupiedProductionNull": [56, 78, 83, 85, 97, 110],
+        "originalNullProductionOccupied": [],
+        "dimensions": {"original": [15, 9, 135], "production": [15, 9, 135]},
+        "reason": "Actual whole live-grid occupancy is required; observed occupancy never changes production state"
+      },
       "savedGridRequiredFailures": [
         {"field": "currentRoomSeedSamples.levelSeeds", "gridIndex": 0, "expected": [3746718436, 2518405299], "actual": [1884166909, 819631096]},
         {"field": "currentRoomSeedSamples.savedSeeds", "gridIndex": 0, "expected": [3746718436, 2518405299], "actual": [1884166909, 819631096]},
@@ -261,7 +293,15 @@
       "bootEpochSeed": 3795305435,
       "initialSeed": 1274095651,
       "currentRoomSeedDiagnostic": {"status": "fail", "roomRecord": 6, "comparedCells": 9, "reason": "Paired current-row seeds and occupancy are required; source samples never enter production", "failedFieldCount": 18},
-      "gridOccupancyDiagnostic": {"status": "fail", "originalNullCells": 86, "productionNullCells": 91, "originalOccupiedProductionNull": [31, 56, 81, 85, 102], "originalNullProductionOccupied": [], "reason": "Actual whole live-grid occupancy is required; observed occupancy never changes production state"},
+      "gridOccupancyDiagnostic": {
+        "status": "fail",
+        "originalNullCells": 86,
+        "productionNullCells": 91,
+        "originalOccupiedProductionNull": [31, 56, 81, 85, 102],
+        "originalNullProductionOccupied": [],
+        "dimensions": {"original": [15, 9, 135], "production": [15, 9, 135]},
+        "reason": "Actual whole live-grid occupancy is required; observed occupancy never changes production state"
+      },
       "savedGridRequiredFailures": [
         {"field": "currentRoomSeedSamples.levelSeeds", "gridIndex": 0, "expected": [1137161963, 1558021080], "actual": [50193018, 1651266111]},
         {"field": "currentRoomSeedSamples.savedSeeds", "gridIndex": 0, "expected": [1137161963, 1558021080], "actual": [50193018, 1651266111]},
@@ -316,7 +356,15 @@
       "bootEpochSeed": 2991455915,
       "initialSeed": 3486913207,
       "currentRoomSeedDiagnostic": {"status": "fail", "roomRecord": 5, "comparedCells": 9, "reason": "Paired current-row seeds and occupancy are required; source samples never enter production", "failedFieldCount": 18},
-      "gridOccupancyDiagnostic": {"status": "fail", "originalNullCells": 87, "productionNullCells": 91, "originalOccupiedProductionNull": [31, 56, 78, 85], "originalNullProductionOccupied": [], "reason": "Actual whole live-grid occupancy is required; observed occupancy never changes production state"},
+      "gridOccupancyDiagnostic": {
+        "status": "fail",
+        "originalNullCells": 87,
+        "productionNullCells": 91,
+        "originalOccupiedProductionNull": [31, 56, 78, 85],
+        "originalNullProductionOccupied": [],
+        "dimensions": {"original": [15, 9, 135], "production": [15, 9, 135]},
+        "reason": "Actual whole live-grid occupancy is required; observed occupancy never changes production state"
+      },
       "savedGridRequiredFailures": [
         {"field": "currentRoomSeedSamples.levelSeeds", "gridIndex": 0, "expected": [502840512, 2585150453], "actual": [1871443815, 3495399987]},
         {"field": "currentRoomSeedSamples.savedSeeds", "gridIndex": 0, "expected": [502840512, 2585150453], "actual": [1871443815, 3495399987]},
@@ -366,9 +414,9 @@
       "error": "19 required SavedGame current-row/grid comparisons failed"
     }
   ],
-  "graderSourcesEnd": {"tools/e2e/regrade-saved-game.mjs": "6330f2f5f043ffa3fa49d55ca247c9491912d56b77b036c42873c55f3f52ac52", "tools/foundation/saved-grid-compare.mjs": "aff069a154f2b9ce595d186046bf5991825b8feb37905036eac7a4a75ed2a7fe", "tools/foundation/verify.mjs": "3743b773cf2ede253c6d78f2605eb43f34e9d7002284b6a1dd2c413d45835a5c"},
+  "graderSourcesEnd": {"tools/e2e/regrade-saved-game.mjs": "6330f2f5f043ffa3fa49d55ca247c9491912d56b77b036c42873c55f3f52ac52", "tools/foundation/saved-grid-compare.mjs": "16bf6a8869b925c50e68d203caf3e0dc7157243e747c03044eed39c1b653ad3b", "tools/foundation/verify.mjs": "3743b773cf2ede253c6d78f2605eb43f34e9d7002284b6a1dd2c413d45835a5c"},
   "graderSourcesStable": true,
   "counts": {"selected": 6, "attempted": 6, "passed": 0, "failed": 6, "ownedCopyPasses": 6, "requiredFieldFailures": 115},
-  "fullRegradeReportSha256": "67027a59e47560fa45d250861da3b25838726f261ab472e5c898818c33f3d006",
+  "fullRegradeReportSha256": "48f7cbe0736f5a6288f45bf472cb23177ff6a6421028e307126c6f99fc9b8760",
   "retention": "Compact checked-in evidence retains every required field failure. Full original grader report is hash-bound and unchanged in the completed cohort."
 }

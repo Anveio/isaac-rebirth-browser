@@ -26,22 +26,32 @@ export function compareSavedRoomGrid(summary, grid, observed) {
   const emptyIndices = grid.cells.flatMap((cell, index) => cell.entity ? [] : [index]);
   const originalOccupiedProductionNull = emptyIndices.filter(index => !observed.liveGrid.emptyIndices.includes(index));
   const originalNullProductionOccupied = observed.liveGrid.emptyIndices.filter(index => !emptyIndices.includes(index));
+  const dimensions = {
+    original: [observed.liveGrid.width, observed.liveGrid.height, observed.liveGrid.width * observed.liveGrid.height],
+    production: [grid.width, grid.height, grid.cells.length],
+  };
+  const dimensionsMatch = JSON.stringify(dimensions.original) === JSON.stringify(dimensions.production);
   const currentRoomSeedDiagnostic = {
     status: differences.length ? 'fail' : 'pass', roomRecord: summary.currentRoomRecord,
     comparedCells: 9, differences,
     reason: 'Paired current-row seeds and occupancy are required; source samples never enter production',
   };
   const gridOccupancyDiagnostic = {
-    status: JSON.stringify(emptyIndices) === JSON.stringify(observed.liveGrid.emptyIndices) ? 'pass' : 'fail',
+    status: dimensionsMatch && JSON.stringify(emptyIndices) === JSON.stringify(observed.liveGrid.emptyIndices) ? 'pass' : 'fail',
     originalNullCells: observed.liveGrid.emptyIndices.length, productionNullCells: emptyIndices.length,
-    originalOccupiedProductionNull, originalNullProductionOccupied,
+    originalOccupiedProductionNull, originalNullProductionOccupied, dimensions,
     reason: 'Actual whole live-grid occupancy is required; observed occupancy never changes production state',
   };
   const savedGridRequiredFailures = differences.map(difference => ({
     field: `currentRoomSeedSamples.${difference.field}`, gridIndex: difference.gridIndex,
     expected: difference.original, actual: difference.production,
   }));
-  if (gridOccupancyDiagnostic.status === 'fail') {
+  for (const [index, field] of ['room.grid.width', 'room.grid.height', 'room.grid.cells.length'].entries()) {
+    if (dimensions.original[index] !== dimensions.production[index]) {
+      savedGridRequiredFailures.push({ field, expected: dimensions.original[index], actual: dimensions.production[index] });
+    }
+  }
+  if (JSON.stringify(emptyIndices) !== JSON.stringify(observed.liveGrid.emptyIndices)) {
     savedGridRequiredFailures.push({ field: 'liveGrid.emptyIndices',
       expected: observed.liveGrid.emptyIndices, actual: emptyIndices });
   }
