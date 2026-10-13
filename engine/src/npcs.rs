@@ -222,6 +222,74 @@ pub fn player_contacts(state: &mut State) -> Result<(), String> {
     Ok(())
 }
 
+/// Full manager contacts also separate ordinary NPC pairs and planted Bombs.
+/// Callback49b8f0 returns false for these uncharmed13/18 pairs; regular Bomb
+/// damps both entering velocities before the source mass response. Spatial candidate ordering remains diagnostic.
+pub fn nonplayer_contacts(state: &mut State) -> Result<(), String> {
+    let body = |npc: &Npc| combat::ContactBody {
+        id: npc.id,
+        entity_type: npc.kind,
+        position: npc.position,
+        velocity: npc.velocity,
+        radius: npc.collision_radius,
+        mass: npc.collision_mass,
+    };
+    for first in 0..state.room.npcs.len() {
+        for second in first + 1..state.room.npcs.len() {
+            let (left, right) = state.room.npcs.split_at_mut(second);
+            let first = &mut left[first];
+            let second = &mut right[0];
+            if first.dead
+                || second.dead
+                || first.entity_collision_class == 0
+                || second.entity_collision_class == 0
+            {
+                continue;
+            }
+            let mut a = body(first);
+            let mut b = body(second);
+            if combat::resolve_fly_pair(&mut a, &mut b)?.colliding {
+                first.position = a.position;
+                first.presented_position = a.position;
+                first.velocity = a.velocity;
+                second.position = b.position;
+                second.presented_position = b.position;
+                second.velocity = b.velocity;
+            }
+        }
+    }
+    for bomb in &mut state.bombs {
+        if bomb.motion.lifetime != bombs::BombLifetime::Alive {
+            continue;
+        }
+        for npc in &mut state.room.npcs {
+            if npc.dead || npc.entity_collision_class == 0 {
+                continue;
+            }
+            let mut a = combat::ContactBody {
+                id: bomb.id,
+                entity_type: 4,
+                position: bomb.motion.position,
+                velocity: bomb.motion.velocity,
+                radius: 16.0,
+                mass: 6.0,
+            };
+            let mut b = body(npc);
+            if combat::resolve_fly_pair(&mut a, &mut b)?.colliding {
+                bomb.motion.position = a.position;
+                bomb.motion.presented_position = a.position;
+                bomb.motion.velocity = a.velocity;
+                bomb.x = f64::from(a.position.x) * 0.65 + 32.0;
+                bomb.y = f64::from(a.position.y) * 0.65 - 46.0;
+                npc.position = b.position;
+                npc.presented_position = b.position;
+                npc.velocity = b.velocity;
+            }
+        }
+    }
+    Ok(())
+}
+
 /// Source Room::Update 5d149b resets countdown10 while countable actors
 /// remain. After retirement it decrements once per full pass; only a pass
 /// whose entry countdown is zero marks the descriptor clear and opens doors.

@@ -92,6 +92,7 @@ export interface Room {
     gridCollisionClass: number; entityCollisionClass: number; canShutDoors: boolean; boss: boolean;
     state: number; frameAge: number; animationFrame: number; shadowSize: number; dead: boolean; removed: boolean;
     damage: {pendingDamage: number; pendingFlags: number} }[];
+  authoredActorOrder: {kind: "npc" | "pickup"; id: number}[];
   combatClear: boolean; combatClearCountdown: number;
   grid: { width: number; height: number; cells: {selector: number; entity: {kind: number; variant: number; state: number; collisionClass: number; spawnSeed: number} | null}[] } | null;
 }
@@ -133,7 +134,7 @@ export interface State {
   minimap: { cells: { x: number; y: number; visibility: "unvisited" | "visited" | "current" }[] };
   tears: Tear[]; impacts: Impact[]; fireCooldown: number; nextTear: number;
   maxFireDelay: number; headTimer: number; actorScheduler: { actors: ActorRef[] };
-  bombs: Bomb[]; explosions: Explosion[]; nextBomb: number; fullGameUpdates: number; damageCooldown: number;
+  bombs: Bomb[]; explosions: Explosion[]; nextBomb: number; damageCooldown: number;
   bombPlacementCooldown: { remainingUpdates: number }; bombActionWasDown: boolean;
   runIntroduction: RunIntroduction; pauseMenu: PauseMenu;
 }

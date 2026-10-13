@@ -131,6 +131,30 @@ pub fn resolve_tear_npc_contact(
     )
 }
 
+/// Fresh ordinary Fly pairs have no callback veto. Regular Bomb callback
+/// 456c20 damps NPC velocity0.2 and its own0.5 before the mass response.
+/// Source445710 sorts by entity type and retains its pre-callback overlap.
+pub fn resolve_fly_pair(
+    first: &mut ContactBody,
+    second: &mut ContactBody,
+) -> Result<ContactResolution, String> {
+    if !matches!(first.entity_type, 4 | 13 | 18) || !matches!(second.entity_type, 13 | 18) {
+        return Err("ordinary Fly pairs require admitted source actor types".into());
+    }
+    if first.entity_type > second.entity_type {
+        resolve_contact(second, first, |_| false, bomb_pair_callback)
+    } else {
+        resolve_contact(first, second, |_| false, bomb_pair_callback)
+    }
+}
+
+fn bomb_pair_callback(first: &mut ContactBody, second: &mut ContactBody) {
+    if first.entity_type == 4 {
+        second.velocity = second.velocity * 0.2;
+        first.velocity = first.velocity * 0.5;
+    }
+}
+
 fn resolve_contact(
     player: &mut ContactBody,
     npc: &mut ContactBody,
@@ -148,16 +172,22 @@ fn resolve_contact(
         y: npc.position.y - player.position.y,
     };
     let mut distance = (delta.x * delta.x + delta.y * delta.y).sqrt();
-    callback(player, npc);
+    let mut next_player = *player;
+    let mut next_npc = *npc;
+    callback(&mut next_player, &mut next_npc);
+    next_player.validate()?;
+    next_npc.validate()?;
     if distance < 0.0001 {
+        *player = next_player;
+        *npc = next_npc;
         return Ok(ContactResolution {
             colliding: true,
             player_displacement_blocked: false,
         });
     }
     let relative = WorldVector {
-        x: player.velocity.x - npc.velocity.x,
-        y: player.velocity.y - npc.velocity.y,
+        x: next_player.velocity.x - next_npc.velocity.x,
+        y: next_player.velocity.y - next_npc.velocity.y,
     };
     let relative_speed = (relative.x * relative.x + relative.y * relative.y).sqrt();
     let radius = player.radius + npc.radius;
@@ -190,8 +220,6 @@ fn resolve_contact(
         player_share = 0.0;
         npc_share = 1.0;
     }
-    let mut next_player = *player;
-    let mut next_npc = *npc;
     next_player.position.x -= (delta.x * player_share) * overlap_ratio;
     next_player.position.y -= (delta.y * player_share) * overlap_ratio;
     next_npc.position = next_npc.position + (delta * npc_share) * overlap_ratio;
