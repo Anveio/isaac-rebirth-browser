@@ -51,6 +51,20 @@ export async function floorE2e({ sourceReport, output = join(ROOT, ".cache/found
         assert.deepEqual(starting.visitedRooms, [starting.currentRoom]);
         const current = starting.floor.descriptors[starting.currentRoom];
         assert.deepEqual(starting.room.descriptor, current);
+        const sourceCurrent = original.expected.descriptors[original.expected.startingDescriptor];
+        const expectedDoors = ["left", "up", "right", "down"].flatMap((side, slot) => {
+          if ((sourceCurrent.doorMask & (1 << slot)) === 0) return [];
+          const targetRoom = original.expected.grid[sourceCurrent.gridIndex + [-1, -13, 1, 13][slot]];
+          assert.ok(targetRoom >= 0, "A source connected slot must identify a destination");
+          const type = original.expected.descriptors[targetRoom].template.type;
+          if ([7, 8].includes(type)) return [];
+          return [{ side, targetRoom, state: [2, 12].includes(type) ? "KeyClosed" : "Opened",
+            asset: type === 4 ? "gfx/grid/door_02_treasureroomdoor.anm2" : type === 10
+              ? "gfx/grid/door_04_selfsacrificeroomdoor.anm2" : "gfx/grid/door_01_normaldoor.anm2" }];
+        });
+        assert.deepEqual(starting.room.appearance.doors.map(({side, targetRoom, state, asset}) =>
+          ({side, targetRoom, state, asset})), expectedDoors,
+          "The complete visible doorway set and authored room-type states must match source connections");
         for (const connection of starting.room.appearance.doors) {
           const slot = ["left", "up", "right", "down"].indexOf(connection.side);
           assert.equal(connection.targetRoom, current.neighbors[slot]);
