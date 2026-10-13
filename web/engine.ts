@@ -9,7 +9,15 @@ export interface Player {
 }
 export interface Tear { id: number; x: number; y: number; vx: number; vy: number; age: number; }
 export interface Impact { id: number; x: number; y: number; age: number; }
-export interface Bomb { id: number; x: number; y: number; age: number; }
+export interface Bomb {
+  id: number; x: number; y: number;
+  motion: {
+    position: { x: number; y: number }; presentedPosition: { x: number; y: number };
+    velocity: { x: number; y: number }; fuseUpdatesRemaining: number;
+    fullUpdates: number; animationFrame: number; lifetime: "alive" | "exploding" | "removed";
+  };
+}
+export interface Explosion { id: number; x: number; y: number; animationFrame: number; }
 export interface RunIntroduction { age: number; active: boolean; }
 export interface PauseMenu {
   phase: "hidden" | "appearing" | "idle" | "disappearing";
@@ -52,6 +60,7 @@ export interface State {
   schema: 1; tickRate: 60; tick: number; menuAnimationTick: number; runTick: number; screen: Screen;
   titleAnimationFrame: number; menuFade: { active: boolean; alpha: number; color: [number, number, number, number] };
   systemClock: { systemCounter: number; interpolationEnabled: boolean };
+  actorScheduler: { actors: { kind: "player" | "tear" | "bomb" | "pickup" | "npc" | "effect"; id: number }[] };
   profile: number; mainSelection: number; characterSelection: number; character: string; difficulty: string;
   seedText: string; seedValid: boolean; runSeed: string; initialSeed: number; runSeedValue: number; bootEpochSeed: number;
   stage: number; stageSeed: number; seededRun: boolean; achievementEligibility: boolean;
@@ -61,7 +70,8 @@ export interface State {
   player: Player; room: Room; stageEffects: StageEffects; inventory: { coins: number; bombs: number; keys: number };
   minimap: { cells: { x: number; y: number; visibility: "unvisited" | "visited" | "current" }[] };
   tears: Tear[]; impacts: Impact[]; fireCooldown: number; nextTear: number;
-  bombs: Bomb[]; explosions: Bomb[]; nextBomb: number; damageCooldown: number;
+  bombs: Bomb[]; explosions: Explosion[]; nextBomb: number; damageCooldown: number;
+  bombPlacementCooldown: { remainingUpdates: number }; bombActionWasDown: boolean;
   runIntroduction: RunIntroduction; pauseMenu: PauseMenu;
 }
 export type Command = { type: "key"; code: string; down: boolean } | { type: "text"; text: string } | { type: "tick"; count: number };

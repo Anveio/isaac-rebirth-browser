@@ -45,6 +45,37 @@ pub struct Grid {
 }
 
 impl Grid {
+    /// Collision geometry of the ordinary 1x1 room's boundary ring. This
+    /// profile has no admitted grid actors or random spawn seeds; floor/room
+    /// admission supplies those separately, including live door apertures.
+    pub fn closed_1x1_boundary() -> Self {
+        let width = 15;
+        let height = 9;
+        let cells = (0..width * height)
+            .map(|index| GridCell {
+                selector: 0,
+                entity: (index < width
+                    || index >= width * (height - 1)
+                    || index % width == 0
+                    || index % width == width - 1)
+                    .then_some(GridEntity {
+                        kind: 15,
+                        variant: 0,
+                        state: 0,
+                        collision_class: 4,
+                        spawn_seed: 0,
+                    }),
+            })
+            .collect();
+        Self {
+            descriptor: GridDescriptor {
+                width,
+                height,
+                cells,
+            },
+        }
+    }
+
     pub fn new(descriptor: GridDescriptor) -> Result<Self, String> {
         let count = usize::from(descriptor.width) * usize::from(descriptor.height);
         if descriptor.width == 0

@@ -3,7 +3,8 @@
 The port implements fresh normal-mode Isaac's planted bomb: E placement,
 one inventory debit, a paused fuse, authored Pulse/Explosion playback, one
 full-heart blast hit, strict radial contact, native knockback, and a damage
-countdown. Enemy/grid damage, moving/pushed bombs, variants and crater decals
+countdown. Moving births inherit source velocity and use the global full/intermediate
+phase. Enemy/grid damage, pushed bombs, variants and crater decals
 remain separate work. This does not establish native simulation-tick parity.
 
 ## Public original scenarios
@@ -27,10 +28,10 @@ Linux build's behavior. Native artifacts are under
 * In these starting-room tapes, the bomb appears for 120 presentations and the
   first explosion is presentation121 relative to E. A fresh traversal into
   Basement277 at seed `3BMB MFTE` instead produces its first blast at
-  presentation120. Native placement/update/render phase affects this boundary;
-  the current runtime preserves the calibrated starting-room phase. Authored
-  animation frames last two presentations. A general native phase adapter
-  remains unimplemented; these counts are presentation observations.
+  presentation120. Bomb Init stores timer59; the source checks zero before
+  decrement, so detonation takes60 full updates after admission. A birth in an
+  intermediate phase therefore detonates at120; a full-phase birth at121.
+  The production bomb runtime now uses this global phase and birth fence.
 * A stationary blast changes HP from 6 half-hearts to 4. W held for 50
   presentations escapes without damage. Pause preserves the fuse while the
   pause menu is displayed.
@@ -88,15 +89,11 @@ velocity = previousVelocity × 0.5 + impulse
 A zero-distance blast skips knockback. The port calculates the impulse in f32
 native units and projects back to logical coordinates. Knockback precedes the
 damage attempt and also applies while damage is blocked by immunity. The
-current calibrated port advances the bomb **before** player movement, so that
-presentation integrates the impulse and applies ordinary motion drag. This
-reproduces the accepted later coasting positions below. Fresh phase-aware
-source traces additionally establish that the native full actor array includes
-the player in admission order: a player admitted before its bomb updates first,
-then integrates the new blast impulse on the following intermediate phase.
-The general phase handoff must preserve that order; the legacy presentation
-cadence is not proof of the native full-update schedule. No extra player decay
-is added.
+production scheduler fences full-phase births and preserves admission order.
+The starting player updates before a bomb it later places, so its blast changes
+velocity immediately and the following player phase integrates that velocity.
+Intermediate bomb presentation predicts position plus half velocity without
+mutating actual position. No extra player decay is added.
 
 An independent controlled original seed `3BMB MFTE` supplies the complete
 D27/release30/E tape in
@@ -120,13 +117,44 @@ source mask gate owns the current pixel results and any remaining differences.
 
 ## Verification and limits
 
-Focused Rust cases cover fuse/damage timing, held E and empty inventory, pause,
-native near/far distances, strict equality and radial contacts, knockback during
-immunity and the complete coasting-blast trajectory, HP saturation and atomic
-ID exhaustion, new-run reset, and identical
-single-step/batched replay. Browser coverage exercises public input and HUD.
-Original images and memory probes supply evidence; self-equality does not prove
-full original state or pixel parity.
+Verification uses fresh original processes paired with the immutable production
+browser/WASM artifact. Public X11 and DOM events execute the same recorded
+presentation tapes. Even/odd moving births exercise held E, first blast,
+HP/countdown and the following player phases; pause/release and recorded
+OS-random tapes check controller freezing and resumed motion. Full RGBA
+differences remain separately reported failures. The existing nine GPU mask
+cases retain their zero-byte budgets. No bomb unit suite is checked in.
+
+DropBomb `0x509540` runs after PlayerUpdate's movement/control. Action8 uses
+the keyboard's rising-edge predicate at `0x62bb90`; spawn copies post-motion
+position and velocity multiplied by f32 .1. Placement cooldown starts30 and
+decrements only on full player updates; a decrementing update cannot admit
+another placement. Bomb motion integrates old velocity, rounds the .95 drag,
+then applies .5 drag when squared speed is below1. Its fuse, pulse, corpse and
+explosion clocks advance only in full phases; pause still advances the global
+clock while freezing gameplay.
+
+The odd moving-birth holdout also reaches the right wall after knockback.
+The production player now uses the existing40-sample source grid solver in
+both player phases against the collision-only 15x9 boundary ring. At the last
+holdout the native center is `569.9998779296875`, vx `0.18612265586853027`,
+and vy `-7.182904227964551e-8`; the old logical clamp retained excessive vx
+and discarded the lateral rounding. `motion::advance_in_grid` admits a real
+room grid for the subsequent floor integration. This boundary profile has no
+spawn RNG or admitted grid actors and does not establish door traversal.
+
+Recorded cases and artifact/source hashes are retained in
+`references/isaac/foundation/combat/bomb-runtime/verification.json`. All54
+contrived bomb/pause checkpoints pass; all18 complete original GPU mask targets
+pass. The full randomized gate remains failing: `EQCA3XZX` has three live tear
+count differences from the provisional tear lifetime, and `C7YPWS61` has a
+bottom-wall bomb contact difference. The native bomb moves from y409.993896 to
+y407.803467 through its separate nonplayer ground-collision path; that response
+is not implemented by this handoff, so the subsequent blast trajectory differs.
+Both complete input cases remain replayable with the paired gate's
+`--replay-cases` option. Raw original/browser observations and pixel differences
+remain under `.cache/foundation/bomb-handoff-contact-live/`; no failed result
+was replaced or weakened.
 
 The independent Fly-room probe at
 `.cache/coordination/combat/fly-bomb/manifest.json` records player HP6→4 at
@@ -135,9 +163,8 @@ is60 at presentations120/121; at122 their base update drains the damage queue
 to HP−57 and marks them removed, and by124 they leave the active list. Farther
 flies remain healthy. This confirms a native update/render phase distinction
 and queued enemy damage; it does not extend the current port's enemy support.
-The existing starting-room121 blast references remain unchanged. General phase
-alignment across placement, room transitions and pause requires further source
-proof before runtime changes.
+The existing starting-room121 blast references remain unchanged. Room-entry
+admission and enemy/grid damage still require production integration.
 
 The native initializer sets remaining fuse updates to59 at `0x456e35`.
 Bomb Update checks for zero at `0x457379` before decrementing at

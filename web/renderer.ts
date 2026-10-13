@@ -53,14 +53,14 @@ export class Renderer {
       for (const impact of state.impacts)
         this.assets.draw(ctx, "gfx/1000.012_tear poof_small.anm2", "Poof", impact.x, impact.y, impact.age);
       for (const bomb of state.bombs)
-        this.assets.draw(ctx, "gfx/004.000_bomb.anm2", "Pulse", bomb.x, bomb.y - 1, Math.min(58, Math.floor((Math.max(bomb.age, 1) - 1) / 2)), { pixelSnap: this.canvas.width / 480 / 2 });
+        if (bomb.motion.lifetime === "alive")
+          this.assets.draw(ctx, "gfx/004.000_bomb.anm2", "Pulse", bomb.x, bomb.y - 1, bomb.motion.animationFrame, { pixelSnap: this.canvas.width / 480 / 2 });
       for (const explosion of state.explosions) {
-        this.assets.draw(ctx, "gfx/1000.001_bomb explosion.anm2", "Explosion", explosion.x, explosion.y - 1, Math.floor(explosion.age / 2), { pixelSnap: this.canvas.width / 480 / 2 });
-        // The detonated bomb's authored fuse fragment persists for ten ANM2
-        // frames beside the explosion; it no longer owns a ground shadow.
-        if (explosion.age < 20)
-          this.assets.draw(ctx, "gfx/004.000_bomb.anm2", "Explode", explosion.x, explosion.y - 1, Math.floor(explosion.age / 2), { pixelSnap: this.canvas.width / 480 / 2 });
+        this.assets.draw(ctx, "gfx/1000.001_bomb explosion.anm2", "Explosion", explosion.x, explosion.y - 1, explosion.animationFrame, { pixelSnap: this.canvas.width / 480 / 2 });
       }
+      for (const bomb of state.bombs)
+        if (bomb.motion.lifetime === "exploding")
+          this.assets.draw(ctx, "gfx/004.000_bomb.anm2", "Explode", bomb.x, bomb.y - 1, bomb.motion.animationFrame, { pixelSnap: this.canvas.width / 480 / 2 });
       this.stage.foreground(state.stageEffects);
       this.presentation.introduction(ctx, state);
       this.hud(ctx, state);

@@ -6,7 +6,8 @@
 use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
 use std::collections::BTreeSet;
-mod bombs;
+pub mod actors;
+pub mod bombs;
 pub mod combat;
 mod content;
 mod effects;
@@ -208,22 +209,23 @@ impl PauseMenu {
             stat_frames: [2, 1, 2, 2, 2, 1],
         }
     }
-    fn advance(&mut self) {
+    fn advance(&mut self, phase: phase::Phase) {
+        if phase != phase::Phase::Update {
+            return;
+        }
         match self.phase {
             PausePhase::Appearing | PausePhase::Disappearing => {
-                self.age += 1;
-                let end = if self.phase == PausePhase::Appearing {
-                    26
-                } else {
-                    22
-                };
-                if self.age >= end {
+                // The source retains the final authored frame, then dispatches
+                // its completion on the following full controller update.
+                if self.age >= 22 {
                     self.phase = if self.phase == PausePhase::Appearing {
                         PausePhase::Idle
                     } else {
                         PausePhase::Hidden
                     };
                     self.age = 0;
+                } else {
+                    self.age += 2;
                 }
             }
             PausePhase::Hidden | PausePhase::Idle => {}
@@ -240,6 +242,7 @@ pub struct State {
     pub title_animation_frame: u32,
     pub menu_fade: MenuFade,
     pub system_clock: phase::Clock,
+    pub actor_scheduler: actors::Scheduler,
     pub run_tick: u32,
     pub screen: Screen,
     pub profile: u8,
@@ -274,6 +277,8 @@ pub struct State {
     pub explosions: Vec<Explosion>,
     pub next_bomb: u32,
     pub damage_cooldown: u32,
+    pub bomb_placement_cooldown: bombs::BombPlacementCooldown,
+    pub bomb_action_was_down: bool,
     pub run_introduction: RunIntroduction,
     pub pause_menu: PauseMenu,
 }
@@ -311,6 +316,7 @@ impl Game {
                 // system iteration is a full update; this clock is relative
                 // to that boundary, not the source's elapsed boot counter.
                 system_clock: phase::Clock::new(0, true),
+                actor_scheduler: actors::Scheduler::default(),
                 run_tick: 0,
                 screen: Screen::Title,
                 profile: 1,
@@ -355,6 +361,8 @@ impl Game {
                 explosions: Vec::new(),
                 next_bomb: 1,
                 damage_cooldown: 0,
+                bomb_placement_cooldown: bombs::BombPlacementCooldown::default(),
+                bomb_action_was_down: false,
                 run_introduction: RunIntroduction {
                     age: 0,
                     active: false,
@@ -449,7 +457,7 @@ impl Game {
                         .ok_or("tear IDs exhausted")?;
                 }
                 for _ in 0..count {
-                    self.tick();
+                    self.tick()?;
                 }
             }
         }
@@ -546,15 +554,14 @@ impl Game {
                         && code == "Enter"
                         && self.state.pause_menu.selection == 1)
                 {
-                    self.state.paused = !self.state.paused;
-                    self.state.pause_menu.phase = if self.state.paused {
-                        PausePhase::Appearing
-                    } else {
-                        PausePhase::Disappearing
-                    };
-                    self.state.pause_menu.age = 0;
-                    if self.state.paused {
+                    if !self.state.paused {
+                        self.state.paused = true;
+                        self.state.pause_menu.phase = PausePhase::Appearing;
+                        self.state.pause_menu.age = 0;
                         self.state.pause_menu.selection = 1;
+                    } else if self.state.pause_menu.phase != PausePhase::Disappearing {
+                        self.state.pause_menu.phase = PausePhase::Disappearing;
+                        self.state.pause_menu.age = 0;
                     }
                 } else if self.state.paused {
                     match code {
@@ -568,8 +575,6 @@ impl Game {
                         }
                         _ => {}
                     }
-                } else if code == "KeyE" {
-                    bombs::place(&mut self.state)?;
                 }
             }
         }
@@ -654,6 +659,13 @@ impl Game {
         self.state.explosions.clear();
         self.state.next_bomb = 1;
         self.state.damage_cooldown = 0;
+        self.state.bomb_placement_cooldown = bombs::BombPlacementCooldown::default();
+        self.state.bomb_action_was_down = self.held("KeyE");
+        self.state.actor_scheduler = actors::Scheduler::default();
+        self.state.actor_scheduler.admit(actors::ActorRef {
+            kind: actors::ActorKind::Player,
+            id: 0,
+        })?;
         self.state.run_introduction = RunIntroduction {
             age: 0,
             active: true,
@@ -673,23 +685,26 @@ impl Game {
     fn held(&self, code: &str) -> bool {
         self.state.pressed.contains(code)
     }
-    fn tick(&mut self) {
-        let phase = self
-            .state
-            .system_clock
-            .advance()
-            .expect("counter preflight");
+    fn tick(&mut self) -> Result<(), String> {
+        let phase = self.state.system_clock.advance()?;
+        let bomb_down = self.held("KeyE");
+        let bomb_triggered = bomb_down && !self.state.bomb_action_was_down;
+        self.state.bomb_action_was_down = bomb_down;
         if self.state.screen == Screen::Title && phase == phase::Phase::Update {
             self.state.title_animation_frame = (self.state.title_animation_frame + 1) % 40;
         }
         self.state.menu_fade.advance();
         self.state.tick += 1;
         self.state.menu_animation_tick += 1;
+        let gameplay_was_paused = self.state.paused;
         if self.state.screen == Screen::Playing {
-            self.state.pause_menu.advance();
+            self.state.pause_menu.advance(phase);
+            if gameplay_was_paused && self.state.pause_menu.phase == PausePhase::Hidden {
+                self.state.paused = false;
+            }
         }
-        if self.state.screen != Screen::Playing || self.state.paused {
-            return;
+        if self.state.screen != Screen::Playing || gameplay_was_paused {
+            return Ok(());
         }
         self.state.run_tick += 1;
         if self.state.run_introduction.active {
@@ -698,12 +713,16 @@ impl Game {
         }
         let dx = i32::from(self.held("KeyD")) - i32::from(self.held("KeyA"));
         let dy = i32::from(self.held("KeyS")) - i32::from(self.held("KeyW"));
-        // Native blast impulses apply before movement integration and drag in
-        // their first visible phase; stationary zero-separation blasts stay put.
-        bombs::tick(&mut self.state);
+        let actor_fence = self.state.actor_scheduler.full_phase();
+        let explosion_fence = self.state.explosions.len();
+        self.state.damage_cooldown = self.state.damage_cooldown.saturating_sub(1);
+        let bomb_admitted = self.state.bomb_placement_cooldown.advance(phase);
         // Shooting inherits the velocity entering this phase, before input acceleration.
         let inherited_velocity = (self.state.player.vx, self.state.player.vy);
         motion::advance(&mut self.state.player, &self.state.room, dx, dy);
+        if bomb_triggered && bomb_admitted {
+            bombs::place(&mut self.state, phase)?;
+        }
         let player = &mut self.state.player;
         if dx != 0 || dy != 0 {
             player.body_facing = if dx < 0 {
@@ -817,6 +836,26 @@ impl Game {
             }
         }
         self.state.tears = surviving;
+        bombs::advance_explosions(&mut self.state, phase, explosion_fence);
+        if phase == phase::Phase::Update {
+            for actor in actor_fence {
+                if actor.kind == actors::ActorKind::Bomb {
+                    bombs::advance_actor(&mut self.state, phase, actor.id)?;
+                }
+            }
+        } else if phase == phase::Phase::Interpolate {
+            // The intermediate list is live: a bomb admitted inside the
+            // player's own update can be predicted later in that same phase.
+            let mut index = 0;
+            while let Some(actor) = self.state.actor_scheduler.get(index) {
+                if actor.kind == actors::ActorKind::Bomb {
+                    bombs::advance_actor(&mut self.state, phase, actor.id)?;
+                }
+                index += 1;
+            }
+        }
+        bombs::retire_removed(&mut self.state);
+        Ok(())
     }
     pub fn snapshot(&self) -> State {
         self.state.clone()
