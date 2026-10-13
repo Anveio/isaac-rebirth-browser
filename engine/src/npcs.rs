@@ -52,6 +52,7 @@ pub struct Npc {
     pub damage: combat::DamageQueue,
     pub keeper: Option<crate::keepers::KeeperState>,
     pub fireplace: Option<crate::fireplaces::FireplaceState>,
+    pub monstro: Option<crate::monstro::MonstroState>,
 }
 
 const ZERO: WorldVector = WorldVector { x: 0.0, y: 0.0 };
@@ -339,6 +340,12 @@ pub fn admit_room_combat(state: &mut State) {
 }
 
 pub fn advance_room_clear(state: &mut State) {
+    state.room.boss_count = state
+        .room
+        .npcs
+        .iter()
+        .filter(|npc| npc.boss && !npc.removed)
+        .count() as u32;
     if state
         .room
         .npcs
@@ -411,6 +418,9 @@ fn direction(random: &mut Mt19937) -> WorldVector {
 
 impl Npc {
     pub fn from_selector(id: u32, selector: &SpawnSelector) -> Result<Option<Self>, String> {
+        if let Some(monstro) = crate::monstro::from_selector(id, selector)? {
+            return Ok(Some(monstro));
+        }
         if let Some(fireplace) = crate::fireplaces::from_selector(id, selector)? {
             return Ok(Some(fireplace));
         }
@@ -522,6 +532,7 @@ impl Npc {
             damage: combat::DamageQueue::default(),
             keeper: None,
             fireplace: None,
+            monstro: None,
         }))
     }
 

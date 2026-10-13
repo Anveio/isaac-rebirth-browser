@@ -63,7 +63,7 @@ export class Renderer {
       }
       this.pickups.draw(ctx, state);
       for (const npc of state.room.npcs) {
-        if (npc.dead || npc.removed || (!npc.keeper && !npc.visible)) continue;
+        if (npc.removed || (npc.dead && !npc.monstro) || (!npc.keeper && !npc.visible)) continue;
         const keeper = npc.keeper;
         if (keeper) {
           this.assets.draw(ctx, "gfx/017.002_secret room keeper.anm2", keeper.animation,
@@ -73,6 +73,13 @@ export class Renderer {
               AlphaTint: keeper.tint[3]! * 255, RedOffset: keeper.offsets[0]! * 255,
               GreenOffset: keeper.offsets[1]! * 255, BlueOffset: keeper.offsets[2]! * 255,
             } } });
+        } else if (npc.monstro) {
+          ctx.save();
+          ctx.translate(npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46);
+          ctx.scale(npc.monstro.flipX ? -1 : 1, 1);
+          this.assets.draw(ctx, "gfx/020.000_monstro.anm2", npc.animation,
+            0, 0, npc.animationClock, { scale: 0.65 });
+          ctx.restore();
         } else if (npc.fireplace) {
           this.assets.draw(ctx, "gfx/033.000_fireplace.anm2", npc.animation,
             npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46, npc.animationClock,
@@ -85,7 +92,7 @@ export class Renderer {
       for (const projectile of state.enemyProjectiles)
         if (!projectile.removed && projectile.animation)
           this.assets.draw(ctx, "gfx/009.000_projectile.anm2", projectile.animation,
-            projectile.presentedPosition.x * 0.65 + 32, (projectile.presentedPosition.y + projectile.height) * 0.65 - 46, projectile.animationFrame, { scale:0.65 });
+            projectile.presentedPosition.x * 0.65 + 32, (projectile.presentedPosition.y + projectile.height) * 0.65 - 46, projectile.animationFrame, { scale:0.65 * projectile.scale });
       for (const particle of state.fireParticles)
         if (!particle.removed && particle.visible)
           this.assets.draw(ctx, "gfx/1000.066_ember particle.anm2", "Idle",
@@ -107,6 +114,9 @@ export class Renderer {
       this.stage.foreground(state.stageEffects);
       this.presentation.introduction(ctx, state);
       this.hud(ctx, state);
+      const bossScene = state.roomTransition?.bossScene;
+      if (bossScene && state.roomTransition?.phase === "bossScene")
+        this.assets.draw(ctx, "gfx/ui/boss/versusscreen.anm2", "Scene", 240, 135, bossScene.animationFrame);
       this.presentation.pause(ctx, state);
     }
     gl.presentScreen(); gl.finish();

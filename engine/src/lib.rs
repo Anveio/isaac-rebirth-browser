@@ -24,6 +24,7 @@ pub mod items;
 pub mod keepers;
 pub mod layout;
 pub mod menu_lifecycle;
+pub mod monstro;
 pub mod motion;
 pub mod mt;
 pub mod music;
@@ -86,6 +87,7 @@ pub struct Player {
     pub walk_frame: u8,
     pub head_frame: u8,
     pub shooting: bool,
+    pub shooting_lock: u32,
     pub eye: projectiles::Eye,
     pub render_offset: Point,
 }
@@ -105,6 +107,7 @@ impl Player {
             walk_frame: 0,
             head_frame: 0,
             shooting: false,
+            shooting_lock: 0,
             eye: projectiles::Eye::Positive,
             // Authored sprite roots and shadow centers are one logical pixel
             // above the physical ground/light anchor in public GL submissions.
@@ -622,6 +625,23 @@ impl Game {
         {
             return Ok(());
         }
+        if self.state.screen == Screen::Playing
+            && self
+                .state
+                .room_transition
+                .as_ref()
+                .is_some_and(|transition| {
+                    matches!(
+                        transition.phase,
+                        traversal::TransitionPhase::BossScene
+                            | traversal::TransitionPhase::BossCleanup
+                    )
+                })
+        {
+            // Game54f760 returns while transition-active after its narrow
+            // Scene key handler. Physical action14 mapping remains unaccepted.
+            return Ok(());
+        }
         let previous_screen = self.state.screen;
         match self.state.screen {
             Screen::Title => {
@@ -1047,7 +1067,10 @@ impl Game {
             .map_or(1, |descriptor| descriptor.template.room_type);
         for selector in selectors {
             let id = u32::try_from(npcs.len()).map_err(|_| "NPC identity exhausted")?;
-            if let Some(npc) = npcs::Npc::from_selector(id, selector)? {
+            if let Some(mut npc) = npcs::Npc::from_selector(id, selector)? {
+                if let Some(monstro) = &mut npc.monstro {
+                    monstro.birth_game_update = self.state.game_update_count;
+                }
                 order.push(actors::ActorRef {
                     kind: actors::ActorKind::Npc,
                     id,
@@ -1099,6 +1122,14 @@ impl Game {
         }
         self.state.room.pickups = pickups;
         self.state.room.npcs = npcs;
+        self.state.room.boss_count =
+            self.state.room.npcs.iter().filter(|npc| npc.boss).count() as u32;
+        self.state.room.boss_presentation_index =
+            if room_type == 5 && self.state.room.npcs.iter().any(|npc| npc.kind == 20) {
+                1
+            } else {
+                0
+            };
         self.state.room.authored_actor_order = order;
         self.state.next_pickup = next;
         self.rebuild_room_actor_schedule()?;
@@ -1250,9 +1281,9 @@ impl Game {
         if traversal::advance_transition(&mut self.state, phase) {
             if room_before != self.state.current_room {
                 doors::begin_room_admission(&mut self.state);
-                // Transition state1 explicitly dispatches Player::Update at
-                // 5ddf87 before loading, then the admitted Room::Update at
-                // 5de048 dispatches it once more. Inbound phases stay frozen.
+                // Transition explicitly updates Player before loading; the
+                // GameChangeRoom5509f2 ->584200 ->Room.Update5d12a0 tail
+                // admits another update at unchanged Game counter.
                 combat::advance_player_immunity(&mut self.state);
                 combat::advance_player_immunity(&mut self.state);
                 if restoring {
@@ -1286,6 +1317,7 @@ impl Game {
                             || pickups.iter().any(|pickup| pickup.id == actor.id)
                     });
                     npcs::admit_room_combat(&mut self.state);
+                    traversal::begin_boss_scene(&mut self.state);
                 }
             }
             self.refresh_minimap();
@@ -1569,6 +1601,37 @@ impl Game {
             }
             return Ok(());
         }
+        if self.state.room.npcs[index].kind == 20 {
+            let births = monstro::advance(
+                &mut self.state.room.npcs[index],
+                phase,
+                &mut self.state.boot_lifecycle.shared,
+                &mut monstro::World {
+                    player,
+                    grid: &grid,
+                    audio: &mut self.state.audio,
+                    system_counter: self.state.system_clock.system_counter.wrapping_sub(1),
+                },
+            )?;
+            for birth in births {
+                let id = self.state.next_enemy_projectile;
+                self.state.next_enemy_projectile = id
+                    .checked_add(1)
+                    .ok_or("Monstro projectile identity exhausted")?;
+                self.state.enemy_projectiles.push(
+                    enemy_projectiles::EnemyProjectile::birth_with_parameters(
+                        id,
+                        self.state.room.npcs[index].id,
+                        birth,
+                    ),
+                );
+                self.state.actor_scheduler.admit(actors::ActorRef {
+                    kind: actors::ActorKind::Projectile,
+                    id,
+                })?;
+            }
+            return Ok(());
+        }
         if self.state.room.npcs[index].kind != 244 {
             return self.state.room.npcs[index].advance(
                 phase,
@@ -1674,8 +1737,9 @@ impl Game {
         } else {
             None
         };
-        self.state.player.shooting = aim.is_some();
-        if phase == phase::Phase::Update {
+        let shooting_locked = self.state.player.shooting_lock > 0;
+        self.state.player.shooting = aim.is_some() && !shooting_locked;
+        if phase == phase::Phase::Update && !shooting_locked {
             self.state.player.head_frame = if self.state.head_timer > 8 { 2 } else { 0 };
             if self.state.fire_cooldown >= 0 {
                 self.state.fire_cooldown -= 1;
@@ -1686,7 +1750,8 @@ impl Game {
         }
         if let Some(direction) = aim {
             self.state.player.facing = direction;
-            if self.state.fire_cooldown < 0
+            if !shooting_locked
+                && self.state.fire_cooldown < 0
                 && !self
                     .state
                     .player_items
@@ -1764,6 +1829,8 @@ impl Game {
             }
         }
         player_items::finish_player_update(&mut self.state, phase)?;
+        // Player531e9a decrements7dc after the shooting callback in both phases.
+        self.state.player.shooting_lock = self.state.player.shooting_lock.saturating_sub(1);
         Ok(())
     }
     pub fn snapshot(&self) -> State {
