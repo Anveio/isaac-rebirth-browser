@@ -129,7 +129,32 @@ def observe(pid, context):
             if not 1 <= width <= 28 or not 1 <= height <= 16 or width * height > 448:
                 raise ValueError('Unexpected room grid shape')
             report['room'] = {'type': struct.unpack_from('<I', raw, 0x10)[0], 'gridWidth': width, 'gridHeight': height,
-                              'backdropType': u32(room + 0x1ae0)}
+                              'backdropType': u32(room + 0x1ae0),
+                              'boundsMin': list(struct.unpack_from('<ff', raw, 0x1c)),
+                              'boundsMax': list(struct.unpack_from('<ff', raw, 0x24)),
+                              'renderOrigin': list(struct.unpack('<ff', read(room + 0x15b0, 8))),
+                              'renderScroll': list(struct.unpack('<ff', read(room + 0x15b8, 8))),
+                              'cameraStyle': u32(system + 0x2dfb4)}
+            if (width, height) == (15, 16):
+                # Source camera diagnostics are independent readbacks for the
+                # following camera leaf; they never supply runtime state.
+                camera = u64(room + 0x15a8)
+                if u64(camera + 0x98) != room:
+                    raise ValueError('Native camera controller must own the current room')
+                histories = []
+                for offset, expected in ((0, 60), (0x18, 90), (0x30, 300), (0x48, 60), (0x60, 4), (0x78, 120)):
+                    pointer, capacity, size, head = struct.unpack('<Qiii', read(camera + offset, 20))
+                    if capacity != expected or not 0 <= size <= capacity or not 0 <= head < capacity:
+                        raise ValueError('Unexpected source camera history bounds')
+                    data = read(pointer, capacity * 8)
+                    histories.append({'offset': offset, 'capacity': capacity, 'size': size, 'head': head,
+                        'samples': [list(struct.unpack_from('<ff', data, ((head + i) % capacity) * 8)) for i in range(size)]})
+                report['room']['cameraDiagnostics'] = {
+                    'lastPlayerPosition': list(struct.unpack('<ff', read(camera + 0x90, 8))),
+                    'position': list(struct.unpack('<ff', read(camera + 0xa0, 8))),
+                    'alternatePosition': list(struct.unpack('<ff', read(camera + 0xa8, 8))),
+                    'alternateVelocity': list(struct.unpack('<ff', read(camera + 0xb0, 8))),
+                    'specialTargetSupplied': bool(read(camera + 0xb8, 1)[0]), 'histories': histories}
             grid_pointers = struct.unpack('<' + 'Q' * (width * height), read(room + 0x30, width * height * 8))
             cells = []
             for index, pointer in enumerate(grid_pointers):
@@ -167,6 +192,11 @@ def observe(pid, context):
                 item['keyInventory'] = u32(pointer + 0xbcc)
                 item['coinInventory'] = u32(pointer + 0xbd8)
                 item['maxRedHp'] = u32(pointer + 0xbb4)
+                if (width, height) == (15, 16):
+                    item['cameraInputDiagnostics'] = {
+                        'vectorDa8': list(struct.unpack('<ff', read(pointer + 0xda8, 8))),
+                        'vectorDb4': list(struct.unpack('<ff', read(pointer + 0xdb4, 8))),
+                        'modeC08': u32(pointer + 0xc08), 'modeD80': u32(pointer + 0xd80)}
                 players.append(item)
             report['players'] = players
         finally:
