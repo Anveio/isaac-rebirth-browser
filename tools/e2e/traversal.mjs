@@ -50,16 +50,16 @@ try {
     let page;
     try {
       const directory = join(output, scenario.code); await mkdir(directory, { recursive: true });
-      let sourceManifest = scenario.sourceManifest && resolve(scenario.sourceManifest);
-      if (!sourceManifest) {
-        const tape = join(directory, 'tape.json');
-        await writeFile(tape, JSON.stringify(scenario.tape, null, 2) + '\n');
-        await run('bash', [join(ROOT, 'tools/original/with-display.sh'), 'python3',
-          join(ROOT, 'tools/original/foundation-clock-run.py'), '--seed', scenario.code, '--tape', tape,
-          '--state-observer', value('--state-observer') || join(ROOT, 'tools/original/foundation-traversal-observe.py'),
-          '--output', join(directory, 'original')], { cwd: ROOT, timeout: 300_000, maxBuffer: 8 * 1024 * 1024 });
-        sourceManifest = join(directory, 'original/manifest.json');
-      }
+      // Saved scenarios replay public inputs, including when an older research
+      // bank carries a sourceManifest path. Every gate launches a fresh original.
+      const tape = join(directory, 'tape.json');
+      await writeFile(tape, JSON.stringify(scenario.tape, null, 2) + '\n');
+      await run('bash', [join(ROOT, 'tools/original/with-display.sh'), 'python3',
+        join(ROOT, 'tools/original/foundation-clock-run.py'), '--seed', scenario.code, '--tape', tape,
+        '--state-observer', value('--state-observer') || join(ROOT, 'tools/original/foundation-traversal-observe.py'),
+        '--output', join(directory, 'original')], { cwd: ROOT, timeout: 300_000, maxBuffer: 8 * 1024 * 1024 });
+      const sourceManifest = join(directory, 'original/manifest.json');
+      row.originalExecution = { fresh: true, ignoredCachedReference: Boolean(scenario.sourceManifest) };
       const provenance = await python(['--validate-original', sourceManifest]);
       assert.equal(provenance.status, 'pass');
       const native = JSON.parse(await readFile(sourceManifest, 'utf8'));
