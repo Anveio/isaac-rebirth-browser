@@ -1353,7 +1353,16 @@ impl Game {
                     self.state.run_start_request = RunStartRequest::default();
                     self.state.paused = false;
                     self.state.pause_menu = PauseMenu::hidden();
-                    self.state.screen = Screen::Character;
+                    // Popup557650 queues menu3;59cac0 stores it in Menu+38,
+                    // the same native Main family observed by the paired gate.
+                    self.state.screen = Screen::Main;
+                    self.state.audio.pending.push(audio::SoundRequest {
+                        id: 8,
+                        volume: 1.0,
+                        delay: 0,
+                        looping: false,
+                        pitch: 1.0,
+                    });
                     self.state.music.crossfade(1);
                 }
             }

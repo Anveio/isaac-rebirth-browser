@@ -30,7 +30,7 @@ const GATE_SOURCES = [
   'tools/original/foundation-random-seeds.py', 'tools/original/state-observer.py',
   'tools/original/debug-run.py', 'tools/original/with-display.sh', 'tools/foundation/browser.mjs',
 ];
-const sourceHashes = () => Object.fromEntries(GATE_SOURCES.map(path => [path, digest(readFileSync(join(ROOT, path)))]));
+const sourceHashes = (additional = []) => Object.fromEntries([...new Set([...GATE_SOURCES, ...additional])].map(path => [path, digest(readFileSync(join(ROOT, path)))]));
 const option = (name, fallback) => {
   const at = process.argv.indexOf(name);
   if (at < 0) return fallback;
@@ -52,6 +52,7 @@ export async function pairedScenarioDeclarations() {
 }
 
 const namedKeys = { Return: 'Enter', Escape: 'Escape', Tab: 'Tab', BackSpace: 'Backspace',
+  space: 'Space',
   Up: 'ArrowUp', Down: 'ArrowDown', Left: 'ArrowLeft', Right: 'ArrowRight' };
 function keyCode(key) {
   if (namedKeys[key]) return namedKeys[key];
@@ -60,11 +61,11 @@ function keyCode(key) {
   throw new Error(`No public browser key transport for ${key}`);
 }
 
-async function nativeCapture(caseData, directory, nativeFrameTimeout) {
+async function nativeCapture(caseData, directory, nativeFrameTimeout, originalObserver) {
   mkdirSync(directory, { recursive: true });
   const args = ['tools/original/with-display.sh', 'python3', 'tools/original/foundation-clock-run.py',
     '--seed', caseData.seed, '--tape', join(dirname(directory), 'tape.json'),
-    '--state-observer', 'tools/original/foundation-paired-observer.py', '--frame-timeout', String(nativeFrameTimeout), '--output', directory];
+    '--state-observer', originalObserver, '--frame-timeout', String(nativeFrameTimeout), '--output', directory];
   let error;
   try {
     const result = await runProcess('bash', args, { cwd: ROOT, maxBuffer: 8 * 1024 * 1024 });
@@ -151,7 +152,7 @@ async function browserCapture(browser, server, caseData, directory) {
   return result;
 }
 
-function scopedState(source, actual, gameplay) {
+export function scopedState(source, actual, gameplay) {
   assert.equal(source?.status, 'pass', 'Every paired capture requires a successful typed source observation');
   assert.equal(source.memoryWritten, false, 'Source observations must remain read-only');
   const checks = [];
@@ -202,7 +203,7 @@ function scopedState(source, actual, gameplay) {
   return checks;
 }
 
-function comparePair(caseData, native, browser, directory, exactPixels) {
+function comparePair(caseData, native, browser, directory, exactPixels, stateComparator) {
   mkdirSync(directory, { recursive: true });
   const checks = [];
   const originals = new Map((native.manifest?.frames || []).map(frame => [frame.label, frame]));
@@ -224,7 +225,8 @@ function comparePair(caseData, native, browser, directory, exactPixels) {
       const { difference: ignoredImage, ...pixels } = difference;
       check.pixels = { ...pixels, status: pixels.exactRGBA ? 'pass' : 'fail', required: exactPixels };
       check.sourcePNGHash = digest(sourceBytes);
-      check.state = scopedState(observations.get(label), candidate.state, index >= gameplayStart);
+      check.state = stateComparator(observations.get(label), candidate.state, index >= gameplayStart);
+      assert.ok(Array.isArray(check.state) && check.state.length > 0, 'Every paired checkpoint requires typed state checks');
       check.status = (!exactPixels || pixels.exactRGBA) && check.state.every(field => field.status === 'pass') ? 'pass' : 'fail';
     } catch (error) { check.error = String(error.message); }
     checks.push(check);
@@ -234,7 +236,8 @@ function comparePair(caseData, native, browser, directory, exactPixels) {
 }
 
 export async function runPairedGate({ output, selected, randomCount = 2, replaySeeds = [], replayCases = [], exactPixels = false, productionDirectory,
-  nativeFrameTimeout = 60 }) {
+  nativeFrameTimeout = 60, originalObserver = 'tools/original/foundation-paired-observer.py',
+  stateComparator = scopedState, additionalSources = [] }) {
   assert.ok(Number.isFinite(nativeFrameTimeout) && nativeFrameTimeout > 0 && nativeFrameTimeout <= 300,
     'Native frame timeout must be more than 0 and at most 300 host-wall seconds');
   mkdirSync(output, { recursive: true });
@@ -244,7 +247,8 @@ export async function runPairedGate({ output, selected, randomCount = 2, replayS
   const server = await startProductionServer({ directory: productionDirectory });
   const browser = await chromium.launch({ ...browserLaunchOptions(), headless: false });
   const report = { schema: 1, status: 'running', mode: 'fresh original process paired with immutable browser production artifact',
-    build: server.build, gateSources: sourceHashes(), browserGraphics: await inspectBrowserGraphics(browser), nativeFrameTimeout,
+    build: server.build, gateSources: sourceHashes([originalObserver, ...additionalSources]), browserGraphics: await inspectBrowserGraphics(browser), nativeFrameTimeout,
+    originalObserver,
     sourceBinarySha256: digest(readFileSync(join(ROOT, '.cache/original-runtime/offline-depot/isaac.x64'))),
     comparisons: { functional: 'Real input/phase/readback and source title, fade, player motion, pause/controller, HP, immunity, active tear/bomb counts',
       pixels: 'Strict full RGBA diagnostic; every difference remains a failure in its own pixel result',
@@ -267,10 +271,10 @@ export async function runPairedGate({ output, selected, randomCount = 2, replayS
       process.stdout.write(`Paired ${definition.id} seed ${caseData.seed}\n`);
       // Original and Chromium use independent private displays/profiles.
       const [native, candidate] = await Promise.all([
-        nativeCapture(caseData, join(directory, 'original'), nativeFrameTimeout),
+        nativeCapture(caseData, join(directory, 'original'), nativeFrameTimeout, originalObserver),
         browserCapture(browser, server, caseData, join(directory, 'browser')),
       ]);
-      const checks = comparePair(caseData, native, candidate, join(directory, 'comparison'), exactPixels);
+      const checks = comparePair(caseData, native, candidate, join(directory, 'comparison'), exactPixels, stateComparator);
       const result = { id: definition.id, seed: caseData.seed, seedValue: caseData.seedValue, bootEpochSeed: caseData.bootEpochSeed,
         caseSha256: digest(readFileSync(join(directory, 'case.json'))),
         directory, original: { status: native.status, error: native.error, provenance: native.provenance },
@@ -281,7 +285,7 @@ export async function runPairedGate({ output, selected, randomCount = 2, replayS
     }
     report.status = report.cases.length > 0 && report.cases.every(item => item.status === 'pass') ? 'pass' : 'fail';
     report.exactOriginalPixels = report.cases.every(item => item.checks.every(check => check.pixels?.exactRGBA));
-    report.gateSourcesStable = JSON.stringify(report.gateSources) === JSON.stringify(sourceHashes());
+    report.gateSourcesStable = JSON.stringify(report.gateSources) === JSON.stringify(sourceHashes([originalObserver, ...additionalSources]));
     if (!report.gateSourcesStable) report.status = 'fail';
   } finally {
     save(join(output, 'report.json'), report);

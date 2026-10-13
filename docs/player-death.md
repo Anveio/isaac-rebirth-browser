@@ -13,7 +13,7 @@ black hearts, and complete diary content remain unimplemented.
 | Finish and GameOver | Player52e770; Manager5bf8f0; Popup558900 | Hide body, immediate Music93 and queue8, popup state2 | Pending |
 | Popup clock fence | Game550760 | Gameplay freezes; released System input and music continue | Pending |
 | Public actions14/15 | Keyboard62b520/620440/62bb90; Popup557650 | Per-key default Space/Return/Escape edges; deferred System requests | Pending |
-| Restart/Exit dispatch | System594710/594a10/5945f0/594cb0 | Normal seeded restart retains queued seed; unseeded restart uses own Shared; Exit selects character menu | Pending, including save/reset interactions |
+| Restart/Exit dispatch | System594710/594a10/5945f0/594cb0 | Normal seeded restart retains queued seed; unseeded restart uses own Shared; Exit selects Main menu | Pending, including save/reset interactions |
 
 RoomFast special-cases type1 Player: it sets entity flags318 bit0x4000, invokes
 virtual18 (531850), runs443d00(false), and clears the bit. The generic
