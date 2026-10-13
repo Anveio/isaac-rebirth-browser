@@ -2,6 +2,7 @@
 import assert from 'node:assert/strict';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
+import { gzipSync } from 'node:zlib';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { resolve, join } from 'node:path';
@@ -9,7 +10,7 @@ import { fileURLToPath } from 'node:url';
 import { chromium } from '@playwright/test';
 import { browserLaunchOptions, inspectBrowserGraphics } from '../foundation/browser.mjs';
 import { startProductionServer } from '../foundation/production-server.mjs';
-import { waitForReady } from '../foundation/verify.mjs';
+import { assertInputProvenance, enterSeededRun, manualSeedCommands, waitForReady } from '../foundation/verify.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const run = promisify(execFile);
@@ -20,6 +21,7 @@ const gateSources = ['tools/e2e/rock-blast.mjs', 'tools/original/rock-blast-scen
   'tools/original/foundation-clock-gate.c', 'tools/original/foundation-clock-verify.py',
   'tools/original/state-observer.py', 'tools/original/with-display.sh',
   'tools/foundation/production-server.mjs', 'tools/foundation/browser.mjs',
+  'tools/foundation/verify.mjs',
   'web/trace.ts',
   'references/isaac/foundation/rock-blast/known-regressions.json'];
 const sourceHashes = async () => Object.fromEntries(await Promise.all(gateSources.map(async path =>
@@ -114,20 +116,10 @@ try {
       await page.evaluate(({ seedValue, bootEpochSeed }) => {
         window.game.pause(); window.game.reset(seedValue, { trace: true, bootEpochSeed });
       }, { seedValue: item.seedValue, bootEpochSeed: scenarios.bootEpochSeed });
-      // Independently declared complete input tape, beginning at reset. A
-      // reset seed cannot stand in for actual manual seed entry/readback.
-      const press = code => [{ type: 'key', code, down: true }, { type: 'key', code, down: false }];
-      const expected = [
-        ...press('Enter'), ...press('Enter'), ...press('Enter'), ...press('Tab'),
-        ...[...item.code].map(text => ({ type: 'text', text })),
-        ...press('Enter'), ...press('Enter'),
-      ];
-      for (let index = 0; index < 3; index++) await page.keyboard.press('Enter');
-      await page.keyboard.press('Tab');
-      await page.keyboard.type(item.code);
-      await page.keyboard.press('Enter');
-      await page.keyboard.press('Enter');
-      const start = await page.evaluate(() => window.game.snapshot());
+      // Source-qualified menu/seed/run intervals and every tick are declared
+      // before execution; deferred Music run admission is never bypassed.
+      const expected = [...manualSeedCommands(item.code)];
+      const start = await enterSeededRun(page, item.code);
       assert.equal(start.screen, 'playing');
       assert.equal(start.seedText, item.code);
       assert.equal(start.seedValid, true);
@@ -215,18 +207,23 @@ try {
         }
         if (key) { await page.keyboard.up(key); expected.push({ type: 'key', code, down: false }); }
       }
+      const trace = await page.evaluate(() => window.game.trace());
+      assertInputProvenance(trace, expected, `${item.name}: complete reset/menu/manual-seed/gameplay input tape`);
+      const traceBytes = Buffer.from(JSON.stringify(trace) + '\n');
+      const traceArchive = gzipSync(traceBytes, { level: 1 });
+      await writeFile(join(directory, 'browser-trace.json.gz'), traceArchive);
+      caseResult.trace = { inputTraceTruncated: trace.inputTraceTruncated,
+        stateHistoryTruncated: trace.stateHistoryTruncated,
+        stateHistoryTruncationReason: trace.stateHistoryTruncationReason,
+        inputEncodedBytes: trace.inputEncodedBytes, stateEncodedBytes: trace.stateEncodedBytes,
+        backendEvents: trace.backendEvents.length, completeStateRecords: trace.states.length,
+        archive: join(directory, 'browser-trace.json.gz'),
+        uncompressedSha256: digest(traceBytes), archiveSha256: digest(traceArchive) };
       assert.ok(admitted >= 1, 'Gate must observe naturally admitted Rock grids');
       assert.ok(destroyed >= 1, 'Gate must observe actual original Rock destruction');
       assert.ok(detonation !== undefined, 'Gate must detonate a player bomb through public input');
       assert.equal(states[detonation - 1].systemClock.systemCounter % 2, 1, 'Actual bomb detonation is full-only');
       assert.equal(stateLast(states).inventory.bombs, 0, 'Public E action must consume the starting bomb');
-      const trace = await page.evaluate(() => window.game.trace());
-      assert.equal(trace.inputTraceTruncated, false, 'Every public command must remain recorded');
-      assert.deepEqual(trace.commands, expected, 'Complete reset/menu/manual-seed/gameplay input tape');
-      caseResult.trace = { inputTraceTruncated: trace.inputTraceTruncated,
-        stateHistoryTruncated: trace.stateHistoryTruncated,
-        stateHistoryTruncationReason: trace.stateHistoryTruncationReason,
-        inputEncodedBytes: trace.inputEncodedBytes, stateEncodedBytes: trace.stateEncodedBytes };
       assert.deepEqual(errors, []);
       Object.assign(caseResult, { status: caseResult.failures.length ? 'fail' : 'pass', comparedPresentations: comparisons,
         passedPresentations, admittedRocks: admitted, destroyedRocks: destroyed, detonation,
