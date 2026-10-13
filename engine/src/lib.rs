@@ -17,6 +17,7 @@ mod content;
 mod doors;
 mod effects;
 pub mod enemy_projectiles;
+pub mod familiars;
 pub mod fireplaces;
 pub mod floor;
 pub mod grid;
@@ -351,7 +352,10 @@ pub struct State {
     pub enemy_projectiles: Vec<enemy_projectiles::EnemyProjectile>,
     pub next_enemy_projectile: u32,
     pub fire_particles: Vec<fireplaces::Ember>,
-    pub next_fire_particle: u32,
+    pub next_effect: u32,
+    pub sprite_effects: Vec<familiars::SpriteEffect>,
+    pub familiars: Vec<familiars::Familiar>,
+    pub next_familiar: u32,
     pub impacts: Vec<Impact>,
     pub fire_cooldown: i32,
     pub max_fire_delay: i32,
@@ -488,7 +492,10 @@ impl Game {
                 enemy_projectiles: Vec::new(),
                 next_enemy_projectile: 1,
                 fire_particles: Vec::new(),
-                next_fire_particle: 1,
+                next_effect: 1,
+                sprite_effects: Vec::new(),
+                familiars: Vec::new(),
+                next_familiar: 1,
                 impacts: Vec::new(),
                 fire_cooldown: -1,
                 max_fire_delay: 10,
@@ -904,6 +911,9 @@ impl Game {
             self.state.run_tick,
         );
         self.state.stage_effects.add_bomb_shadows(&self.state.bombs);
+        self.state
+            .stage_effects
+            .add_familiar_shadows(&self.state.familiars);
         self.state.stage_effects.add_tear_shadows(&self.state.tears);
         self.state
             .stage_effects
@@ -959,7 +969,10 @@ impl Game {
         self.state.enemy_projectiles.clear();
         self.state.next_enemy_projectile = 1;
         self.state.fire_particles.clear();
-        self.state.next_fire_particle = 1;
+        self.state.next_effect = 1;
+        self.state.sprite_effects.clear();
+        self.state.familiars.clear();
+        self.state.next_familiar = 1;
         self.state.fire_cooldown = -1;
         self.state.max_fire_delay = 10;
         self.state.head_timer = -1;
@@ -992,6 +1005,9 @@ impl Game {
         self.state.room_transition = None;
         self.state.room = Room::from_starting_floor(&self.state.floor);
         self.state.camera = Some(camera::Camera::new(&self.state.room, None));
+        // PlayerManager.Init precedes Level.Init -> Room.Init. Room reset
+        // keeps its admitted Player pointer/ID and starts a new allocator.
+        self.state.actor_scheduler.clear_room();
         self.state.inventory = Inventory {
             coins: 0,
             bombs: 1,
@@ -1144,11 +1160,17 @@ impl Game {
     }
     /// Persisted Room clones retain supported actor handles in authored order.
     pub fn rebuild_room_actor_schedule(&mut self) -> Result<(), String> {
-        self.state.actor_scheduler = actors::Scheduler::default();
-        self.state.actor_scheduler.admit(actors::ActorRef {
+        self.state.actor_scheduler.clear_room();
+        self.state.fire_particles.clear();
+        self.state.sprite_effects.clear();
+        let player = actors::ActorRef {
             kind: actors::ActorKind::Player,
             id: 0,
-        })?;
+        };
+        if self.state.actor_scheduler.sequence_id(player).is_none() {
+            self.state.actor_scheduler.admit(player)?;
+            self.state.actor_scheduler.clear_room();
+        }
         for actor in self.state.room.authored_actor_order.iter().copied() {
             let admitted = match actor.kind {
                 actors::ActorKind::Npc => self
@@ -1435,6 +1457,9 @@ impl Game {
             pickups::full_grid_contacts(&mut self.state)?;
             npcs::post_contact_grid(&mut self.state)?;
         }
+        if phase == phase::Phase::Update {
+            familiars::grid_contacts(&mut self.state)?;
+        }
         for impact in &mut self.state.impacts {
             impact.age += 1;
         }
@@ -1457,6 +1482,8 @@ impl Game {
         bombs::retire_removed(&mut self.state);
         self.state.room.pickups.retain(|pickup| !pickup.removed);
         self.state.room.npcs.retain(|npc| !npc.removed);
+        self.state.familiars.retain(|familiar| !familiar.removed);
+        self.state.sprite_effects.retain(|effect| !effect.removed);
         self.state
             .enemy_projectiles
             .retain(|projectile| !projectile.removed);
@@ -1474,6 +1501,11 @@ impl Game {
         let surviving = &self.state.tears;
         let pickups = &self.state.room.pickups;
         self.state.actor_scheduler.retain(|actor| match actor.kind {
+            actors::ActorKind::Familiar => self
+                .state
+                .familiars
+                .iter()
+                .any(|familiar| familiar.id == actor.id),
             actors::ActorKind::Tear => surviving.iter().any(|tear| tear.id == actor.id),
             actors::ActorKind::Pickup => pickups.iter().any(|pickup| pickup.id == actor.id),
             actors::ActorKind::Npc => self.state.room.npcs.iter().any(|npc| npc.id == actor.id),
@@ -1482,11 +1514,17 @@ impl Game {
                 .enemy_projectiles
                 .iter()
                 .any(|projectile| projectile.id == actor.id),
-            actors::ActorKind::Effect => self
-                .state
-                .fire_particles
-                .iter()
-                .any(|particle| particle.id == actor.id),
+            actors::ActorKind::Effect => {
+                self.state
+                    .fire_particles
+                    .iter()
+                    .any(|particle| particle.id == actor.id)
+                    || self
+                        .state
+                        .sprite_effects
+                        .iter()
+                        .any(|effect| effect.id == actor.id)
+            }
             _ => true,
         });
         if phase != phase::Phase::Skipped {
@@ -1520,6 +1558,9 @@ impl Game {
     ) -> Result<(), String> {
         match actor.kind {
             actors::ActorKind::Player => self.update_player(phase, bomb_triggered, true)?,
+            actors::ActorKind::Familiar => {
+                familiars::advance_actor(&mut self.state, phase, actor.id)?
+            }
             actors::ActorKind::Tear => {
                 let grid = if phase == phase::Phase::Update && !newborn {
                     Some(
@@ -1561,6 +1602,7 @@ impl Game {
                 enemy_projectiles::advance_actor(&mut self.state, phase, actor.id)?
             }
             actors::ActorKind::Effect => {
+                familiars::advance_effect(&mut self.state, phase, actor.id)?;
                 if let Some(particle) = self
                     .state
                     .fire_particles
@@ -1619,9 +1661,8 @@ impl Game {
                 },
             )?;
             if let Some(birth) = produced.particle {
-                let id = self.state.next_fire_particle;
-                self.state.next_fire_particle =
-                    id.checked_add(1).ok_or("Ember identity exhausted")?;
+                let id = self.state.next_effect;
+                self.state.next_effect = id.checked_add(1).ok_or("Ember identity exhausted")?;
                 self.state.fire_particles.push(fireplaces::Ember::birth(
                     id,
                     birth,

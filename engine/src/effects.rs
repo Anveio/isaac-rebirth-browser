@@ -328,6 +328,21 @@ impl StageEffects {
         }
     }
 
+    pub fn add_familiar_shadows(&mut self, familiars: &[crate::familiars::Familiar]) {
+        for familiar in familiars
+            .iter()
+            .filter(|actor| actor.visible && actor.active && !actor.removed)
+        {
+            self.shadow_casters.push(ShadowCaster::authored(
+                familiar.id,
+                f64::from(familiar.presented_position.x) * crate::motion::WORLD_SCALE + 32.0,
+                f64::from(familiar.presented_position.y) * crate::motion::WORLD_SCALE - 47.0,
+                f64::from(familiar.shadow_size),
+                &self.mask_raster,
+            ));
+        }
+    }
+
     /// Light and sprite anchors remain separate in the current logical model.
     /// Observed raster geometry alone does not identify native physical units.
     pub fn basement(player: &Player, fx: &RoomFx, run_tick: u32) -> Self {
