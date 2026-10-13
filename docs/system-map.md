@@ -12,8 +12,8 @@ independent reference evidence.
 
 Checked-in Rust, Node and Python unit suites were removed at the user’s request.
 The current required gate is [run.mjs](../tools/e2e/run.mjs), which executes
-paired gameplay, finalized floors and weapon scheduling even if an earlier suite
-fails. The [paired gameplay gate](../tools/foundation/paired-game.mjs) gives
+every registered live original/browser suite, retaining all results even if an
+earlier suite fails. The [paired gameplay gate](../tools/foundation/paired-game.mjs) gives
 fresh original processes/profiles and an immutable production browser receive
 identical public input/presentation tails across contrived and recorded
 OS-random scenarios. Source-observable title/fader clocks, seed readback,
@@ -36,30 +36,44 @@ Consult the latest paired report for current implementation outcomes.
 
 ## Current integrated runtime checkpoint
 
-Artifact `6b2bdce75556c3fb23f13dfcd49e89067737a1f6c8809bcc811ca290c9f8fff7`
-integrates general fresh normal Basement floors/descriptor routing, phased
-weapon admission, bomb motion/fuse/blasts and source pause dismissal. Build,
-typecheck, asset integrity, generated matrix and strict Clippy pass. No unit
-suites were run or added.
+The latest completed six-suite run is commit `5b4901f`, immutable artifact
+`a7a5b4972a72c56cd07b33001295955596c9e8f7910e177f522ea037b25444ef`.
+It includes descriptor-driven ordinary traversal, shared room grid/Rock
+contacts, source spikes, coin collection, bomb phases and initialized-Title MT.
+All eight core original/browser transports pass; functional checks pass
+140/149. Title, movement, pause and both moving-bomb cohorts pass. Room combat
+passes23/28; recorded random `W0L0LYYM` passes14/18 and `4DKCYXY8` passes18/18.
+All149 frames retain strict pixel diagnostics, with61 exact matches.
 
-All eight live original/browser transports pass. Functional checkpoints pass
-134/149: title 19/19, movement 12/12, pause 18/18 and both moving-bomb phases
-18/18 each. Adjacent-room/grid/combat integration still fails 14/28; random
-`1E0W JX06` fails only the active-tear count at `random-held-1` (17/18), while
-`33N6 SVFY` passes 18/18. Strict complete RGBA diagnostics remain 61/149 exact.
-
-Five finalized original/browser floors pass, including three real two-attempt
-retries and two fresh OS-random seeds. The gate checks every descriptor/grid
-cell/seed/attempt and the complete visible doorway set. Weapon scheduling
-passes six live cases, 324 presentations and 18 births. These scopes do not
-establish full tear lifetime, shared gameplay RNG, traversal, grid/NPC damage,
-pickups/items, other floors/characters, persistence or audio.
+Finalized floors pass5/5, including three real retries and two OS-random runs.
+Weapon scheduling passes480/480 presentations and18 births. Boot lifecycle
+passes6/6 originals, all3744 MT words,54 grid-seed pairs and1074 stat poses.
+Coin/spike collection passes all5 cases and863 presentations, including the
+mandatory `22PFCSFS` regression. Traversal executes all3 routes: both routes
+without enemies pass; `T1PK6Y0W` remains a required hostile-lock/return failure.
+The all-suite runner returns failure after recording every result.
 
 [Compact evidence](../references/isaac/foundation/runtime-progress/verification.json)
-retains source/build hashes and failed fields; the recorded randomized holdout
-is [1E0WJX06.json](../references/isaac/foundation/runtime-progress/1E0WJX06.json).
-Main's live workflow executes, but GitHub reports required-check enforcement is
-unavailable for this private repository's current plan.
+retains report/source/build hashes, exact failures and the six-suite exit
+statuses. The new random holdout is
+[W0L0LYYM.json](../references/isaac/foundation/runtime-progress/W0L0LYYM.json);
+previous checkpoint evidence and `1E0WJX06` remain available. Tear range/removal,
+rock destruction, NPC contact/clear and unlocked treasure admission have active
+small implementation PRs; none is inferred complete from the earlier cohort.
+
+Subsequent reviewed integrations add source SFX admission and actual Web Audio
+playback, plus authored curse-door entry/exit damage. Their own paired cohorts
+pass848 audio checks/36 submitted PCM starts and240 curse-door phases. The
+central registry now requires both gates alongside the prior six. Build,
+typecheck, assets, matrix and strict Clippy pass after integration; these scoped
+cohorts do not establish complete shared gameplay RNG, other item/actor systems,
+other floors/characters, persistence or music/cutscenes.
+
+CI discovers every registered suite and runs separate jobs with
+`fail-fast: false`, preserving each result and evidence. The first matrix run
+already completed floors, weapons, boot MT and pickups successfully while
+retaining traversal failure. Main's workflow executes; GitHub required-check
+enforcement remains unavailable for this private repository's current plan.
 
 ## Initial live paired verification after unit-suite removal
 

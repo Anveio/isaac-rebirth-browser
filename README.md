@@ -17,8 +17,9 @@ The legacy title comparison remains a separate failing gate.
 
 All 13 base room archives can be decoded into 5,314 authored rooms. Backdrop
 selection matches independent original runs given an observed decoration seed;
-production run-to-room seed routing and floor topology remain unresolved.
-Enemies, traversal, item effects and progression still need runtime work. See
+normal Basement run-to-room routing, finalized floor topology and ordinary
+room traversal now have live original/browser coverage. NPCs, items, later floors
+and progression still need runtime work. See
 [the system map](docs/system-map.md) and [the test matrix](TEST_MATRIX.md).
 Room-growth and weighted-template kernels now have bounded diagnostic tools:
 44 template IDs match ten original runs with supplied native initialization
