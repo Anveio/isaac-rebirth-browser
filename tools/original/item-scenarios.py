@@ -22,8 +22,8 @@ clock = load('item_clock', 'tools/original/foundation-clock-run.py')
 
 def route(delay, acquisition=False, contrived=False):
     # An upper treasure room is reached through ordinary public movement.
-    # This leaf stops before collecting: selection and acquisition have
-    # different manager/animation boundaries and independent acceptance.
+    # Selection stops before contact; acquisition declares the complete
+    # contact, deferred animation and grant tail independently.
     actions = [{'key': 'w', 'frames': 74}, {'key': None, 'frames': 60 + delay}]
     if acquisition:
         actions.append({'key': 'w', 'frames': 32})
@@ -108,9 +108,20 @@ def main():
                   'seedValue': clock.codec.decode_seed(code), 'delay': delay,
                   'actions': route(delay, args.acquisition, True), 'entropy': 'Contrived public admission phase offset'}
                  for delay in (0, 1)]
+    recorded = []
+    if args.acquisition:
+        # These first unfiltered OS discoveries retain the observed active291
+        # and passive48 branches as required fresh-game replays. New discovery
+        # below remains unfiltered and cannot replace either recorded outcome.
+        for index, (code, delay, attempt) in enumerate([('R74QYMYS', 0, 3), ('VRQPT844', 1, 75)]):
+            recorded.append({'name': f'recorded-pedestal-{index}', 'code': code,
+                             'seedValue': clock.codec.decode_seed(code), 'delay': delay,
+                             'actions': route(delay, True), 'entropy': 'Recorded OS secrets',
+                             'discoveryAttempts': attempt,
+                             'recordedEvidence': 'references/isaac/foundation/items/acquisition-initial-live.json'})
     print(json.dumps({'schema': 1, 'bootEpochSeed': 1700000000, 'mode': 'acquisition' if args.acquisition else 'selection',
                       'source': 'Public seeded menus/movement; full authored room discovery, no selected-item filtering',
-                      'cases': contrived + random_cases(args.count, args.acquisition)}))
+                      'cases': contrived + recorded + random_cases(args.count, args.acquisition)}))
     return 0
 
 

@@ -69,7 +69,7 @@ RNG5 `(1,11,16)`:347 collectible,62 trinket, and41 pocket children initialize
 RNG35 owners, followed by the base entity's spawn seed. They consume no shared
 MT draws. Grant increments the actual permanent count, then applies the authored
 normal-Isaac inventory/health helpers in native order. A first active grant
-stores its ID/charge and source30-update collection delay. Rosary72 changes the
+stores its ID/charge and source30-callback collection delay. Rosary72 changes the
 16 Bible override counters. Active swaps and use remain separate callbacks.
 
 Use the same live gate with `--acquisition`. It requires an observed queue and a
@@ -112,3 +112,9 @@ checks raw bytes, tape hashes, and the complete requested actions; required CI
 uses fresh original and browser runs. Original failures and source hashes remain
 unchanged. Altar grid impact, health clamp boundaries and later item callbacks
 still need independent required cases.
+
+The positive Player collection delay decrements on both full and intermediate
+callbacks: the fast branch rejoins at `531e7f` before `531edb`, while only the
+later `531f01` test guards queue flushing. The first correction recovery retained
+the active291 timer failure at all17 post-grant presentations; its failed raw
+report and the earlier full-only mapping bytes remain unchanged.

@@ -281,11 +281,13 @@ try {
           for (const field of ['subtype', 'spawnSeed', 'animation', 'animationFrame', 'animationPlaying', 'collisionRadius']) {
             equal(actual[field], original[field], `pedestal${i}:${field}`, presentation);
           }
-          equal([actual.presentedPosition.x, actual.presentedPosition.y], original.position, `pedestal${i}:world position`, presentation);
+          // These native/Rust fields are binary32. Recover their exact f32
+          // values from serde's shortest decimal JSON; integers stay exact.
+          equal([f32(actual.presentedPosition.x), f32(actual.presentedPosition.y)], original.position, `pedestal${i}:world position`, presentation);
           if (acquisition) {
-            equal([actual.velocity.x, actual.velocity.y], original.velocity, `pedestal${i}:stored velocity`, presentation);
-            equal(actual.currentFriction, original.friction, `pedestal${i}:current friction`, presentation);
-            equal(actual.collisionMass, original.collisionMass, `pedestal${i}:authored mass`, presentation);
+            equal([f32(actual.velocity.x), f32(actual.velocity.y)], original.velocity, `pedestal${i}:stored velocity`, presentation);
+            equal(f32(actual.currentFriction), original.friction, `pedestal${i}:current friction`, presentation);
+            equal(f32(actual.collisionMass), original.collisionMass, `pedestal${i}:authored mass`, presentation);
           }
           equal(actual.charge, source.pedestals[i].charge, `pedestal${i}:authored charge`, presentation);
           equal(actual.touched, source.pedestals[i].touched, `pedestal${i}:touched`, presentation);
@@ -321,7 +323,7 @@ try {
       }
       assert.ok(admitted > 0, 'Every case must naturally admit a source-selected pedestal');
       if (replayOriginal) await rm(join(directory, 'frozen-original.json'), {force: true});
-      if (acquisition && !replayOriginal) {
+      if (acquisition) {
         assert.ok(queuedPresentations > 0, 'Every acquisition case must observe the actual deferred queue');
         assert.ok(grantedPresentations > 0, 'Every acquisition case must observe a later actual grant');
       }
@@ -358,7 +360,7 @@ try {
     } catch (error) { result.status = 'fail'; result.error = String(error); }
     finally {
       if (page) await page.close();
-      if (acquisition) {
+      if (acquisition && !replayOriginal) {
         try { result.nativeEvidence = await archiveCompletedNative(directory); }
         catch (error) { result.status = 'fail'; result.archiveError = String(error); }
       }

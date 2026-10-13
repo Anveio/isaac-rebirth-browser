@@ -125,17 +125,18 @@ pub(crate) fn advance_presentation(state: &mut State, phase: Phase) {
     }
 }
 
-/// 531edb decrements the Player collection delay before53261c flushes the
-/// queue. Natural contact happens later, after the admission-fenced actors.
+/// 531edb decrements collection delay on both Player callback paths. The
+/// fast branch rejoins at531e7f; only531f01 gates the later queue flush.
+/// Natural contact happens later, after the admission-fenced actors.
 pub(crate) fn finish_player_update(state: &mut State, phase: Phase) -> Result<(), String> {
-    if phase != Phase::Update {
-        return Ok(());
-    }
     let Some(items) = state.player_items.as_mut() else {
         return Ok(());
     };
     if items.collection_delay > 0 {
         items.collection_delay -= 1;
+    }
+    if phase != Phase::Update {
+        return Ok(());
     }
     if !items.pickup_animation_guard {
         flush_queued(state)?;
