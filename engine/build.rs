@@ -111,7 +111,8 @@ fn pickup_catalog(path: &Path, animations: &Path, entities_xml: &str) -> String 
             .expect("bounded variant");
         let mass = entity_number(entities_xml, 5, variant, "collisionMass");
         let friction = entity_number(entities_xml, 5, variant, "friction");
-        output.push_str(&format!("Definition {{ variant: {}, subtype: {}, actor: {actor:?}, collision_radius: {}_f32, collision_mass: {mass:?}_f32, friction: {friction:?}_f32, shadow_size: {}_f64, clips: &[{clips}] }},\n",
+        let points = entity_number(entities_xml, 5, variant, "numGridCollisionPoints") as u16;
+        output.push_str(&format!("Definition {{ variant: {}, subtype: {}, actor: {actor:?}, collision_radius: {}_f32, collision_mass: {mass:?}_f32, collision_points: {points}, friction: {friction:?}_f32, shadow_size: {}_f64, clips: &[{clips}] }},\n",
             pickup["variant"].as_u64().expect("pickup variant missing"),
             pickup["subtype"].as_u64().expect("pickup subtype missing"),
             pickup["collisionRadius"].as_f64().expect("pickup collision radius missing"),

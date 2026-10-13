@@ -1292,6 +1292,7 @@ impl Game {
                             _ => return Err("invalid authored room actor handle".into()),
                         }
                     }
+                    pickups::full_grid_contacts(&mut self.state)?;
                     self.state.room.pickups.retain(|pickup| !pickup.removed);
                     let pickups = &self.state.room.pickups;
                     self.state.actor_scheduler.retain(|actor| {
@@ -1385,6 +1386,7 @@ impl Game {
                     }
                 }
             }
+            pickups::full_grid_contacts(&mut self.state)?;
         }
         for impact in &mut self.state.impacts {
             impact.age += 1;
@@ -1545,8 +1547,7 @@ impl Game {
                 return Ok(());
             }
         }
-        self.state.room.pickups[index].advance(phase, self.state.game_update_count);
-        Ok(())
+        pickups::advance_actor(&mut self.state, phase, id)
     }
     fn advance_npc(&mut self, id: u32, phase: phase::Phase) -> Result<(), String> {
         let grid = grid::Grid::new(self.state.room.grid.clone().expect("admitted NPC has grid"))?;
