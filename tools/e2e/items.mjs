@@ -121,8 +121,7 @@ try {
         assert.equal(nativeBytes.length, evidence.rawBytes); assert.equal(digest(nativeBytes), evidence.rawSha256);
         assert.equal(digest(nativeBytes), recorded.nativeManifestSha256);
         result.originalRecording = evidence;
-        nativePath = join(directory, 'frozen-original.json');
-        await writeFile(nativePath, nativeBytes);
+        nativePath = evidence.path;
       } else {
         await run('bash', ['tools/original/with-display.sh', 'python3', 'tools/original/foundation-clock-run.py',
           '--seed', item.code, '--tape', join(directory, 'tape.json'), '--observe-every-step',
@@ -135,7 +134,6 @@ try {
       assert.equal(native.status, 'pass'); assert.deepEqual(native.failures, []);
       const provenance = JSON.parse((await run('python3', ['tools/original/item-scenarios.py', '--validate-original', nativePath], { cwd: ROOT })).stdout);
       assert.equal(provenance.status, 'pass'); assert.deepEqual(provenance.failures, []);
-      if (replayOriginal) await rm(nativePath);
       const baseline = native.debugObservations.find(row => row.context.label === 'gameplay-start');
       assert.equal(baseline?.observation.status, 'pass');
       assert.equal(baseline.context.publicLogState.seedValue, item.seedValue);
@@ -322,7 +320,6 @@ try {
         if (key) { await page.keyboard.up(domKey); expected.push({type: 'key', code, down: false}); }
       }
       assert.ok(admitted > 0, 'Every case must naturally admit a source-selected pedestal');
-      if (replayOriginal) await rm(join(directory, 'frozen-original.json'), {force: true});
       if (acquisition) {
         assert.ok(queuedPresentations > 0, 'Every acquisition case must observe the actual deferred queue');
         assert.ok(grantedPresentations > 0, 'Every acquisition case must observe a later actual grant');

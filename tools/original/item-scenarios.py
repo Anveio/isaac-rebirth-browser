@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Public routes to naturally selected treasure pedestals; record OS entropy."""
 import argparse
+import gzip
 import importlib.util
 import json
 from pathlib import Path
@@ -95,7 +96,10 @@ def main():
     args = parser.parse_args()
     if args.validate_original:
         verifier = load('item_transport', 'tools/original/foundation-clock-verify.py')
-        failures = verifier.validate_run(json.loads(args.validate_original.read_text()))
+        raw = args.validate_original.read_bytes()
+        if args.validate_original.suffix == '.gz':
+            raw = gzip.decompress(raw)
+        failures = verifier.validate_run(json.loads(raw))
         print(json.dumps({'status': 'fail' if failures else 'pass', 'failures': failures}))
         return 1 if failures else 0
     if args.case:
