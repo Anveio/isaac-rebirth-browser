@@ -39,8 +39,8 @@ def observe(pid,context):
      samples.append({'roomRecord':room,'gridIndex':slot,'seed10':words[4],'seed18':words[6]})
    if game:
     for room in [0,1,134]:
-     # Level records begin+14, stridef0; the same gridvector starts+58.
-     pointer=u64(game+0x14+room*0xf0+0x58)
+     # 5881b6: record base+10, stridef0; +14 is its room index field.
+     pointer=u64(game+0x10+room*0xf0+0x58)
      for slot in [0,1,447]:
       words=struct.unpack('<7I',read(pointer+slot*0x1c,0x1c))
       level_samples.append({'roomRecord':room,'gridIndex':slot,'seed10':words[4],'seed18':words[6]})
