@@ -115,7 +115,8 @@ def observe(pid, context):
             width, height = struct.unpack_from('<II', raw, 0x14)
             if not 1 <= width <= 28 or not 1 <= height <= 16 or width * height > 448:
                 raise ValueError('Unexpected room grid shape')
-            report['room'] = {'type': struct.unpack_from('<I', raw, 0x10)[0], 'gridWidth': width, 'gridHeight': height}
+            report['room'] = {'type': struct.unpack_from('<I', raw, 0x10)[0], 'gridWidth': width, 'gridHeight': height,
+                              'backdropType': u32(room + 0x1ae0)}
             grid_pointers = struct.unpack('<' + 'Q' * (width * height), read(room + 0x30, width * height * 8))
             cells = []
             for index, pointer in enumerate(grid_pointers):

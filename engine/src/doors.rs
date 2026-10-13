@@ -44,6 +44,75 @@ pub(crate) fn begin_room_admission(state: &mut State) {
     set_open_collision(state, 4);
 }
 
+/// Room.check_player_enter_door5c71c0 runs after full actor callbacks. Fresh
+/// keyboard movement selects its dominant input axis (vertical on ties) in
+/// Player52981f; an ordinary key lock requires the matching outward direction,
+/// a cleared room and distance strictly below60 from the displaced door point.
+/// Golden keys, double-chain locks and item overrides remain separate.
+pub(crate) fn check_unlock(state: &mut State, dx: i32, dy: i32) {
+    if state.room_transition.is_some() || !state.room.combat_clear {
+        return;
+    }
+    let slot = if dx.abs() > dy.abs() {
+        Some(if dx < 0 { 0 } else { 2 })
+    } else if dy < 0 {
+        Some(1)
+    } else if dy > 0 {
+        Some(3)
+    } else {
+        None
+    };
+    let Some(slot) = slot else { return };
+    let position = WorldVector {
+        x: ((state.player.x - 32.0) / 0.65) as f32,
+        y: ((state.player.y + 46.0) / 0.65) as f32,
+    };
+    for door in &mut state.room.appearance.doors {
+        if door.state != "KeyClosed" || door.slot % 4 != slot {
+            continue;
+        }
+        let normal = match slot {
+            0 => WorldVector { x: -1.0, y: 0.0 },
+            1 => WorldVector { x: 0.0, y: -1.0 },
+            2 => WorldVector { x: 1.0, y: 0.0 },
+            _ => WorldVector { x: 0.0, y: 1.0 },
+        };
+        let delta_x = door.world_position.x + normal.x * 18.0 - position.x;
+        let delta_y = door.world_position.y + normal.y * 18.0 - position.y;
+        if (delta_x * delta_x + delta_y * delta_y).sqrt() >= 60.0 || state.inventory.keys == 0 {
+            continue;
+        }
+        let Some(grid) = &mut state.room.grid else {
+            continue;
+        };
+        let index = door_index(door.world_position, grid.width);
+        let Some(entity) = grid.cells[index].entity.as_mut() else {
+            continue;
+        };
+        if entity.kind != 16 || entity.variant != 1 || entity.state != 1 {
+            continue;
+        }
+        // Player.TryUseKey5087f0 decrements one ordinary key; Door.TryUnlock
+        // 564d38 selects opened state2, then variant7 and SFX156/delay2.
+        state.inventory.keys -= 1;
+        door.state = "Opened".into();
+        entity.variant = 7;
+        entity.state = 2;
+        entity.collision_class = 4;
+        state.audio.admit(
+            &mut state.boot_lifecycle.shared,
+            state.system_clock.system_counter - 1,
+            crate::audio::SoundRequest {
+                id: 156,
+                volume: 1.0,
+                delay: 2,
+                looping: false,
+                pitch: 1.0,
+            },
+        );
+    }
+}
+
 fn connection(first: usize, second: usize) -> [usize; 2] {
     [first.min(second), first.max(second)]
 }
@@ -110,6 +179,10 @@ pub fn try_blow_open(state: &mut State, index: usize, _animated: bool) -> bool {
 }
 
 fn restore_secret_connections(state: &mut State) {
+    let from_room = state
+        .room_transition
+        .as_ref()
+        .map(|transition| transition.from_room);
     let Some(grid) = &mut state.room.grid else {
         return;
     };
@@ -121,12 +194,16 @@ fn restore_secret_connections(state: &mut State) {
             continue;
         }
         door.state = "Opened".into();
-        door.blown_open = true;
+        // Door constructor56292f clears the transient+611 byte. Saved variant7
+        // preserves discovery; Level.ChangeRoom58dba0 marks only the actual
+        // inbound secret connection again through TryBlowOpen. Other revealed
+        // doors follow ordinary admission collision4 until their next update.
+        door.blown_open = Some(door.target_room as usize) == from_room;
         let index = door_index(door.world_position, grid.width);
         if let Some(entity) = &mut grid.cells[index].entity {
             entity.variant = 7;
             entity.state = 2;
-            entity.collision_class = 5;
+            entity.collision_class = if door.blown_open { 5 } else { 4 };
         }
     }
 }

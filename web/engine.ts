@@ -77,7 +77,7 @@ export interface RoomAppearance {
   floorQuads: RoomQuad[]; wallQuads: RoomQuad[]; tutorial: boolean;
   wallVariantCatalog: { sourcePatchIndex: number; name: string; weight: number; eligibility: string }[];
   wallGenerationEvidence: string;
-  doors: { side: Direction; state: string; asset: string; x: number; y: number; targetRoom: number; slot: number; worldPosition: {x: number; y: number}; blownOpen: boolean }[];
+  doors: { side: Direction; state: string; asset: string; spritesheet: string | null; x: number; y: number; targetRoom: number; slot: number; worldPosition: {x: number; y: number}; blownOpen: boolean }[];
   fx: { ambient: [number, number, number]; shading: string; overlay: string; overlayOrigin: { x: number; y: number }; overlayAnchor: { x: number; y: number }; overlayParallax: { x: number; y: number }; overlayMotionEvidence: string; overlayOpacity: number; actorTint: [number, number, number] };
   template: string; generation: string;
 }
