@@ -172,8 +172,10 @@ export interface State {
   nextPickup: number;
   minimap: { cells: { x: number; y: number; visibility: "unvisited" | "visited" | "current" }[] };
   tears: Tear[]; impacts: Impact[]; fireCooldown: number; nextTear: number;
-  fireParticles: {id: number; parentNpc: number; parentVariant: number; spawnSeed: number; birthGameUpdate: number;
+  fireParticles: {id: number; parentNpc: number; parentType: number; parentVariant: number; spawnSeed: number; birthGameUpdate: number;
     position: {x: number; y: number}; presentedPosition: {x: number; y: number}; velocity: {x: number; y: number};
+    hp: number; maxHp: number; collisionRadius: number; collisionMass: number; collisionDamage: number; baseFriction: number;
+    gridCollisionClass: number; entityCollisionClass: number; visible: boolean;
     lifetimeDivisor: number; timeToLive: number; fullUpdates: number; animationClock: number; animationPlaying: boolean;
     dead: boolean; removed: boolean}[];
   maxFireDelay: number; headTimer: number; actorScheduler: { actors: ActorRef[] };

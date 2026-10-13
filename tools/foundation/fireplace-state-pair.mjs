@@ -171,8 +171,9 @@ for (const action of replay.pairedTape) {
     browser: { count: actual.gameUpdateCount, actors: browserEmbers.map(actor => ({ seed: actor.spawnSeed,
       position: vector(phase === 0 ? actor.presentedPosition : actor.position), velocity: vector(actor.velocity),
       divisor: actor.lifetimeDivisor, ttl: actor.timeToLive, active: !actor.removed, dead: actor.dead,
-      animation: 'Idle', frame: actor.animationClock, playing: actor.animationPlaying, parentType: 33, parentVariant: actor.parentVariant,
-      hp: 0, maxHp: 0, radius: 0, mass: 0, damage: 22, friction: 1, gridClass: 0, entityClass: 0 })) },
+      animation: 'Idle', frame: actor.animationClock, playing: actor.animationPlaying, parentType: actor.parentType, parentVariant: actor.parentVariant,
+      hp: actor.hp, maxHp: actor.maxHp, radius: actor.collisionRadius, mass: actor.collisionMass, damage: actor.collisionDamage,
+      friction: actor.baseFriction, gridClass: actor.gridCollisionClass, entityClass: actor.entityCollisionClass })) },
   };
   for (const [game, world] of Object.entries(emberGames)) {
     const present = new Set(world.actors.map(actor => actor.seed));

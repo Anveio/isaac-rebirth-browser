@@ -87,7 +87,7 @@ export class Renderer {
           this.assets.draw(ctx, "gfx/009.000_projectile.anm2", projectile.animation,
             projectile.presentedPosition.x * 0.65 + 32, (projectile.presentedPosition.y + projectile.height) * 0.65 - 46, projectile.animationFrame, { scale:0.65 });
       for (const particle of state.fireParticles)
-        if (!particle.removed)
+        if (!particle.removed && particle.visible)
           this.assets.draw(ctx, "gfx/1000.066_ember particle.anm2", "Idle",
             particle.presentedPosition.x * 0.65 + 32, particle.presentedPosition.y * 0.65 - 46, particle.animationClock, { scale: 0.65 });
       this.drawPlayer(ctx, state);

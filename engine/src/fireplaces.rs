@@ -75,12 +75,21 @@ pub(crate) fn loot_subtype(variant: u32, spawn_seed: u32) -> Result<u32, String>
 pub struct Ember {
     pub id: u32,
     pub parent_npc: u32,
+    pub parent_type: u32,
     pub parent_variant: u32,
     pub spawn_seed: u32,
     pub birth_game_update: u32,
     pub position: WorldVector,
     pub presented_position: WorldVector,
     pub velocity: WorldVector,
+    pub hp: f32,
+    pub max_hp: f32,
+    pub collision_radius: f32,
+    pub collision_mass: f32,
+    pub collision_damage: f32,
+    pub base_friction: f32,
+    pub grid_collision_class: u32,
+    pub entity_collision_class: u32,
     pub lifetime_divisor: i32,
     pub time_to_live: i32,
     pub full_updates: u32,
@@ -88,6 +97,7 @@ pub struct Ember {
     pub animation_playing: bool,
     pub dead: bool,
     pub removed: bool,
+    pub visible: bool,
 }
 
 impl Ember {
@@ -100,12 +110,23 @@ impl Ember {
         Self {
             id,
             parent_npc: birth.parent_id,
+            parent_type: 33,
             parent_variant,
             spawn_seed: birth.spawn_seed,
             birth_game_update: game_update,
             position: birth.position,
             presented_position: birth.position,
             velocity: birth.velocity,
+            hp: 0.0,
+            max_hp: 0.0,
+            collision_radius: 0.0,
+            collision_mass: 0.0,
+            //458b31 overrides the authored contactDamage0 to22 for common
+            //Effect.Init; class0 still excludes all entity collision dispatch.
+            collision_damage: 22.0,
+            base_friction: 1.0,
+            grid_collision_class: 0,
+            entity_collision_class: 0,
             lifetime_divisor: 0,
             time_to_live: -1,
             full_updates: 0,
@@ -113,6 +134,7 @@ impl Ember {
             animation_playing: true,
             dead: false,
             removed: false,
+            visible: true,
         }
     }
 
@@ -121,7 +143,7 @@ impl Ember {
             return Ok(());
         }
         if phase != Phase::Update {
-            self.presented_position = self.position + self.velocity * 0.5;
+            self.presented_position = self.position + (self.velocity * self.base_friction) * 0.5;
             return Ok(());
         }
         self.full_updates = self
@@ -139,6 +161,7 @@ impl Ember {
                 self.animation_playing = false;
             }
         }
+        self.velocity = self.velocity * self.base_friction;
         self.position = self.position + self.velocity;
         self.presented_position = self.position;
         if self.lifetime_divisor == 0 {

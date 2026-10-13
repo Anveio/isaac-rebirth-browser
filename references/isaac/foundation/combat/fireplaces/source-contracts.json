@@ -6,7 +6,7 @@
   "artifact": {
     "schema": 1,
     "source": "/workspace/isaac-worktrees/combat/dist",
-    "sha256": "730b9d046f95faaaaff8ed1e4e560e4a0941f32560f1553620a270ce0f5bbfa1",
+    "sha256": "3dbd3de19a114636752a8202cf54dca3a77f0acc1eed42fe5df63a973de45c23",
     "files": 925,
     "productionIdentityHelperSha256": "e3152b58e2353319ba0963b30439e33c3cc65f84a8c6ebb765c2812486245952",
     "scope": "Same ordered path/length/bytes algorithm as production server buildIdentity; direct scan avoids an unnecessary second full artifact copy"
@@ -44,12 +44,15 @@
   "logHashes": {
     "check-build-initial.log": "97add36aafb62f88d708e5ff5a549b9f5385b09c49d163f805d341367a8361be",
     "build-final.log": "f2ab65a067b1215b9719c43904568fa0be03d8ad5ce308b7e6869a1389e2aac7",
-    "clippy-final.log": "24f99a103ea16e97a27bb29753f9bdfc204e7674bbcbd3bd669365504ffc7658"
+    "clippy-final.log": "24f99a103ea16e97a27bb29753f9bdfc204e7674bbcbd3bd669365504ffc7658",
+    "typecheck-final.log": "4acfbc742d24f195285d16ff2bea2cd76d4c188e0c538f23d313701f774d524d",
+    "build-typed-defaults.log": "3435c6f939270effc531494f53ca5c20b1f670919ecb296f2be8cf967aa9b56a",
+    "clippy-typed-defaults.log": "d9d480fffbdc811de748794f36c7862a239277f90d9b5515d51a573ccee0844c"
   },
   "ownedSources": {
-    "engine/src/fireplaces.rs": "ecd5b799c3df239ad42139d43aeef4ad1a80b2198a5b1322f82fed776a530907",
+    "engine/src/fireplaces.rs": "ee57af805efca30237f7669c481a0fa70f7be137c88a4fa67292d8348ae7a6a3",
     "tools/e2e/fireplaces.mjs": "79121b4f8848da67b615a8c8426e82110b54d92f6963c1ee8c7419174614f7b5",
-    "tools/foundation/fireplace-state-pair.mjs": "b134622bb4ea46fd98dd8859fc1f7e4e6479245ccdd5eeb35d14f90c1d7aff68",
+    "tools/foundation/fireplace-state-pair.mjs": "593811c3e07948f1de1bed15ad8710ae7874e5195b6193ac133b6b78003f1bd7",
     "tools/original/fireplace-scenarios.py": "a0b96d7e2fb9c17a0ed7a60fdbe66134fcef5d78493c35e95db5aa53a5120451",
     "tools/original/foundation-combat-observe.py": "57519cb5a5adc5d5215c4a6e833923fae70ac8a3876e82874d1c6cb081a7b8f7",
     "web/npc-data.json": "dbd77756d4ba32f95d0498483aacfe3335d1acb28b4176fb85c98e944ab92921"
@@ -63,5 +66,14 @@
     "Exact shared MT, particle seeds/trajectories",
     "General actor depth/additive blend output",
     "All prior W0/T1/H2/center mandatory failures"
-  ]
+  ],
+  "previousBuildArtifact": {
+    "schema": 1,
+    "source": "/workspace/isaac-worktrees/combat/dist",
+    "sha256": "730b9d046f95faaaaff8ed1e4e560e4a0941f32560f1553620a270ce0f5bbfa1",
+    "files": 925,
+    "productionIdentityHelperSha256": "e3152b58e2353319ba0963b30439e33c3cc65f84a8c6ebb765c2812486245952",
+    "scope": "Same ordered path/length/bytes algorithm as production server buildIdentity; direct scan avoids an unnecessary second full artifact copy"
+  },
+  "readOnlyReview": "Source reviewer confirmed Ember BaseUpdate/lifetime/drift/manual-frame/playing/dead-retirement ordering and Fire initializer\u2192second-AI order; no live acceptance claim."
 }
