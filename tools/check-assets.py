@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Verify the original resources against the recorded extraction inventory."""
 import hashlib
+import importlib.util
 import json
 from pathlib import Path
 import xml.etree.ElementTree as ET
@@ -19,5 +20,9 @@ for name in ['players.xml', 'items.xml', 'entities2.xml', 'stages.xml']:
     ET.parse(resources / name)
 if errors:
     raise SystemExit('\n'.join(errors[:20]))
-print(f"Verified {len(manifest['files'])} original reference files and core XML tables.")
+audio_spec = importlib.util.spec_from_file_location('authored_audio_assets', root / 'tools/foundation/extract-audio.py')
+audio = importlib.util.module_from_spec(audio_spec)
+audio_spec.loader.exec_module(audio)
+audio.complete(check_only=True)
+print(f"Verified {len(manifest['files'])} original reference files and complete authored audio references.")
 
