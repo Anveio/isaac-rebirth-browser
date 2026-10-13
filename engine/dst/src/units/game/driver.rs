@@ -62,6 +62,8 @@ pub struct Driver {
     /// Browser frames tick once with `Date.now()`; this case's host clock.
     host_clock: Option<u64>,
     host_frames: bool,
+    /// Head for the boss room through the floor's door graph.
+    boss_seeker: bool,
 }
 
 #[derive(Clone, Copy)]
@@ -99,6 +101,7 @@ impl Driver {
             goal: None,
             host_clock: None,
             host_frames: e.chance(3, 4),
+            boss_seeker: e.chance(1, 3),
         }
     }
 
@@ -283,7 +286,13 @@ impl Driver {
             .filter(|npc| !npc.removed && npc.hp > 0.0)
             .map(|npc| npc.position)
             .min_by(|a, b| distance(player, *a).total_cmp(&distance(player, *b)));
-        match e.below(100) {
+        // Boss seekers spend most macros travelling.
+        let choice = if self.boss_seeker && e.chance(1, 2) {
+            5 + e.below(40)
+        } else {
+            e.below(100)
+        };
+        match choice {
             0..=4 if state.inventory.bombs > 0 => {
                 // Demolition: walk beside the nearest intact ordinary rock.
                 match nearest_rock(state, player) {
@@ -381,6 +390,11 @@ impl Driver {
             .filter(|door| door.state == "Opened")
             .map(|door| door.world_position)
             .collect();
+        if self.boss_seeker && e.chance(3, 4) {
+            if let Some(door) = toward_boss(state) {
+                return door;
+            }
+        }
         match e.below(10) {
             0..=6 if !pickups.is_empty() => *e.pick(&pickups),
             0..=7 if !doors.is_empty() => *e.pick(&doors),
@@ -521,6 +535,41 @@ fn seed_text(state: &State, e: &mut Entropy) -> String {
             .map(|_| *e.pick(GLYPHS) as char)
             .collect(),
     }
+}
+
+/// The open door on a shortest path to the boss room through rooms the
+/// traversal leaf admits (ordinary 13x7 types, tall normal rooms, 13x7 boss).
+fn toward_boss(state: &State) -> Option<WorldVector> {
+    let descriptors = &state.floor.descriptors;
+    let traversable = |room: usize| {
+        let template = &descriptors[room].template;
+        match (template.room_type, template.width, template.height) {
+            (1 | 4 | 7 | 8 | 10 | 12 | 5, 13, 7) | (1, 13, 14) => true,
+            _ => room == state.current_room,
+        }
+    };
+    let boss = descriptors
+        .iter()
+        .position(|descriptor| descriptor.template.room_type == 5)?;
+    let mut previous = vec![usize::MAX; descriptors.len()];
+    previous[boss] = boss;
+    let mut queue = VecDeque::from([boss]);
+    while let Some(room) = queue.pop_front() {
+        for neighbor in descriptors[room].neighbors.iter().flatten() {
+            if previous[*neighbor] == usize::MAX && traversable(*neighbor) {
+                previous[*neighbor] = room;
+                queue.push_back(*neighbor);
+            }
+        }
+    }
+    let next = previous.get(state.current_room).copied()?;
+    state
+        .room
+        .appearance
+        .doors
+        .iter()
+        .find(|door| door.state == "Opened" && door.target_room as usize == next)
+        .map(|door| door.world_position)
 }
 
 fn nearest_rock(state: &State, player: WorldVector) -> Option<WorldVector> {
