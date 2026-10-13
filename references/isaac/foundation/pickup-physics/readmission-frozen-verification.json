@@ -102,7 +102,7 @@
     "nativeProvenanceValidatedCases": 7
   },
   "correctedSource": {
-    "runtimeCommit": "54402c1",
+    "runtimeCommit": "54402c1c80e4cbbebf533a0770b97d5ff76fd52f",
     "originalOwnedCorrection": "3665517a3cbae3e863a202b61556478483472104",
     "scope": "Six source-derived lines initialize regular mode0 zero440/444 from physical448/44c before Base. This is composed with the reviewed readmission source on main7cd0; it has no newly passing live capture in this frozen proof. Existing exact artifact qualification and fresh CI always remain required.",
     "sourceReceipt": "anchor-init-contract.json",
