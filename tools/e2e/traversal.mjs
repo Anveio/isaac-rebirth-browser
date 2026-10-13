@@ -24,18 +24,22 @@ await writeFile(join(output, 'scenarios.json'), JSON.stringify(bank, null, 2) + 
 const production = await startProductionServer();
 const browser = await chromium.launch({ headless: true, ...browserLaunchOptions() });
 const report = { schema: 1, status: 'running', skipped: 0, selected: bank.cases.length,
-  scope: bank.contract === 'curse'
+  scope: bank.contract === 'keeper-idle'
+    ? 'Fresh Isaac enters real13x7 secret rooms through public bomb/movement inputs. Actual NPC17/1 constructor and anchored idle compare complete identity/seed/subtype, authored collision/health/countability, source state/flags/anchor/color, static and animated Guy clips, every full/intermediate/frozen phase and room/player/door/minimap joins. Damage/drop callbacks and other Keeper variants remain separate.'
+    : bank.contract === 'curse'
     ? 'Fresh ordinary Isaac, authored 13x7 no-hostile curse-room entry and exit; exact native half-heart charges, immunity/door collision/admission phases, descriptor/spawn identity and returned room persistence. Flight/items, other door styles, hostile callbacks and complete pixels remain separate.'
     : bank.contract === 'authored-doors'
       ? 'Fresh ordinary Isaac, authored13x7 curse and first-floor free treasure doors; recorded W0L0LYYM bomb-driven admission and raw1400 fire admission remain mandatory. Exact room/player/HP/immunity/visible door phases, complete authored groups and return metadata; actor/item callbacks and pixels remain separate.'
       : bank.contract === 'secret'
-        ? 'Fresh Isaac, no-hostile13x7 Basement secret bomb revelation/entry/return: complete hidden/open door objects, reciprocal persistence, source display flags and minimap routing, exact room/player/HP/immunity and authored admissions. Keeper/item callbacks, hostile secret closure, other shapes/items and complete pixels remain separate.'
+        ? 'Fresh Isaac, no-hostile13x7 Basement secret bomb revelation/entry/return: complete hidden/open door objects, reciprocal persistence, source display flags and minimap routing, exact room/player/HP/immunity and authored admissions. Keeper damage/drop and item callbacks, hostile secret closure, other shapes/items and complete pixels remain separate.'
         : bank.contract === 'key'
-          ? 'Fresh Isaac, no-hostile13x7 natural secret keys and ordinary library lock: denied zero-key approach, actual collection/spending, full-only unlock/collision/SFX156, admission/return/revisit, exact player/HP/immunity, complete door/display/minimap/descriptor joins. Keeper constructor subtype remains required red; golden/double locks, library items and pixels remain separate.'
+          ? 'Fresh Isaac, no-hostile13x7 natural secret keys and ordinary library lock: denied zero-key approach, actual collection/spending, full-only unlock/collision/SFX156, admission/return/revisit, exact player/HP/immunity, complete door/display/minimap/descriptor joins. Actual Keeper17 constructor admission remains required; golden/double locks, library items and pixels remain separate.'
         : 'Ordinary style0 13x7 doorway and no-hostile return; mandatory hostile-room lock/return regression; exact f32 player/descriptor phases, complete authored group accounting, supported actor admission and ordinary Rock metadata, visited-room restoration. NPC behavior, other grids/doors, large-room camera and complete pixels remain separate.',
-  exclusions: bank.contract === 'secret'
-    ? ['Keeper17 behavior remains separate; its derived subtype and regular key admission remain required regressions', 'Later-stage surprise substitution and failed-open saved transitions', 'Actor/item/curse policies and door FX/animation pixels', 'Other room shapes and floor exits']
-    : bank.contract === 'key' ? ['Keeper17 constructor subtype remains a required regression', 'Golden keys, double-chain locks, item overrides and hostile special-door policy', 'Library collectibles/sacks/batteries and complete backdrop/door animation pixels', 'Other room shapes, later floors and exits']
+  exclusions: bank.contract === 'keeper-idle'
+    ? ['Keeper damage/death/drop callbacks and actor mutation persistence', 'Other Keeper variants, hostile secret policy, other room shapes and floor exits', 'Complete sprite/backdrop/pixel parity and total shared MT consumer alignment']
+    : bank.contract === 'secret'
+    ? ['Keeper17 constructor and regular keys are concrete actors; Keeper damage/drop callbacks remain separate', 'Later-stage surprise substitution and failed-open saved transitions', 'Actor/item/curse policies and door FX/animation pixels', 'Other room shapes and floor exits']
+    : bank.contract === 'key' ? ['Keeper17 damage/death/drop callbacks remain separate', 'Golden keys, double-chain locks, item overrides and hostile special-door policy', 'Library collectibles/sacks/batteries and complete backdrop/door animation pixels', 'Other room shapes, later floors and exits']
     : ['curse', 'authored-doors'].includes(bank.contract) ? ['Undiscovered native door variant6', 'Actor behavior and item callbacks; NPC244 metadata only, raw1400 fire admission remains a required regression', 'Flight/items and other door policies', 'Complete rendered pixels'] : [],
   production: production.build, graphics: await inspectBrowserGraphics(browser), cases: [] };
 try {
@@ -213,18 +217,44 @@ try {
           // Treasure routes also retain the native NPC33 fire admission
           // regression: raw1400 selectors have not yet resolved into actors.
           const rawMetadata = entity => entity.type === 244
-            || (['secret', 'key'].includes(scenario.doorContract) && entity.type === 17)
+            || (['secret', 'key'].includes(scenario.doorContract) && entity.type === 17 && entity.variant !== 1)
             || (scenario.doorContract === 'free-treasure' && entity.type === 33);
-          const supported = entity => rawMetadata(entity) || (entity.type === 5 && ({10: [1, 2, 5], 20: [1, 2, 3, 4], 30: [1, 3], 40: [1, 2]})[entity.variant]?.includes(entity.subtype));
+          const supported = entity => rawMetadata(entity)
+            || (['secret', 'key'].includes(scenario.doorContract) && entity.type === 17 && entity.variant === 1)
+            || (entity.type === 5 && ({10: [1, 2, 5], 20: [1, 2, 3, 4], 30: [1, 3], 40: [1, 2]})[entity.variant]?.includes(entity.subtype));
           const tuple = entity => [entity.type, entity.variant, entity.subtype, entity.spawnSeed,
             ...(Array.isArray(entity.position) ? entity.position : [entity.position.x, entity.position.y])];
           const multiset = entities => entities.map(tuple).map(JSON.stringify).sort();
-          const actualEntities = [...selectors.filter(selector => selector.category === 'entity' && rawMetadata(selector)),
+          const actualEntities = [...selectors.filter(selector => selector.category === 'entity' && rawMetadata(selector)
+            && !(state.room.npcs || []).some(npc => npc.kind === selector.type && npc.variant === selector.variant && npc.spawnSeed === selector.spawnSeed)),
+            ...(state.room.npcs || []).map(npc => ({...npc, type: npc.kind})),
             ...(state.room.pickups || []).map(pickup => ({type: 5, ...pickup}))].filter(supported);
           phaseAssert.deepEqual(multiset(actualEntities), multiset(observed.contents.entities.filter(supported)),
             `${label}:complete supported native admission multiset with subtype/seed/position`);
         } else phaseAssert.deepEqual(admission, admissions.get(state.currentRoom), `${label}:return must retain the first selected authored groups`);
+        if (scenario.npcContract === 'keeper-idle') {
+          const actualKeepers = state.room.npcs.filter(npc => npc.kind === 17 && npc.variant === 1);
+          const nativeKeepers = observed.contents.entities.filter(npc => npc.type === 17 && npc.variant === 1);
+          const actual = npc => [npc.variant, npc.subtype, npc.spawnSeed, npc.position, npc.presentedPosition,
+            npc.velocity, npc.hp, npc.maxHp, npc.collisionRadius, npc.collisionMass, npc.collisionDamage,
+            npc.baseFriction, npc.gridCollisionClass, npc.entityCollisionClass, npc.canShutDoors, npc.boss,
+            npc.state, npc.frameAge, npc.keeper?.entityFlags, npc.keeper?.stateFrame, npc.keeper?.countdown,
+            npc.keeper?.anchor, npc.keeper?.animation, npc.keeper?.animationClock, npc.keeper?.animationPlaying,
+            npc.keeper?.tint.map(Math.fround), npc.keeper?.offsets.map(Math.fround), npc.damage.pendingDamage, npc.removed];
+          const vector = pair => ({x: pair[0], y: pair[1]});
+          const native = npc => [npc.variant, npc.subtype, npc.spawnSeed, vector(npc.position), vector(npc.position),
+            vector(npc.velocity), npc.hp, npc.maxHp, npc.collisionRadius, npc.collisionMass, npc.collisionDamage,
+            npc.friction, npc.gridCollisionClass, npc.entityCollisionClass, npc.canShutDoors, npc.boss,
+            npc.npcState, npc.npcFrameAge, npc.npcEntityFlags, npc.npcStateFrame, npc.npcCountdown,
+            vector(npc.npcAnchor), npc.animation, npc.animationFrame, npc.animationPlaying,
+            npc.npcColor.slice(0, 4), npc.npcColor.slice(8, 11), npc.pendingDamage, npc.removed];
+          phaseAssert.deepEqual(actualKeepers.map(actual), nativeKeepers.map(native), `${label}:complete actual Keeper constructor and anchored idle fields`);
+          phaseAssert.ok(actualKeepers.every(npc => npc.appearanceEffectSeed === null && npc.deathEffectSeed === null),
+            `${label}:Keeper initialization never uses Fly appearance/blood shared draws`);
+        }
         states.push({ label, currentRoom: state.currentRoom, descriptor: state.room.descriptor, spawns: admission,
+          keepers: state.room.npcs.filter(npc => npc.kind === 17),
+          nativeKeepers: observed.contents.entities.filter(npc => npc.type === 17),
           player: state.player, inventory: state.inventory, nativeKeys: actor.keyInventory,
           combatClear: state.room.combatClear, nativeCombatClear: descriptor.combatClear,
           damageCooldown: state.damageCooldown, nativePosition: actor.position,

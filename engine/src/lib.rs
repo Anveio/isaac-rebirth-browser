@@ -17,6 +17,7 @@ mod effects;
 pub mod floor;
 pub mod grid;
 mod grid_hazards;
+pub mod keepers;
 pub mod layout;
 pub mod menu_lifecycle;
 pub mod motion;
