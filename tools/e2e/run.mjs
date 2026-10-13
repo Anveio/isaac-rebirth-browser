@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
-export const LIVE_SCRIPTS = ['test:e2e:paired', 'test:e2e:floor', 'test:e2e:weapons', 'test:e2e:boot-mt'];
+export const LIVE_SCRIPTS = ['test:e2e:paired', 'test:e2e:floor', 'test:e2e:weapons', 'test:e2e:boot-mt', 'test:e2e:traversal', 'test:e2e:pickups'];
 const { values } = parseArgs({ options: { output: { type: 'string' }, list: { type: 'boolean' } } });
 
 if (values.list) {
