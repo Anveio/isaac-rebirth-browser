@@ -60,7 +60,8 @@ export interface ItemPool {
 }
 export type MusicBackendCommand = { type: 'musicBackend'; channel: number; generation: number; event: 'ended' | 'loop' };
 export interface Bomb {
-  id: number; x: number; y: number;
+  id: number; variant: number; spawnSeed: number | null; birthGameUpdate: number; friction: number;
+  animation: string; animationFrame: number; animationPlaying: boolean; x: number; y: number;
   motion: {
     position: { x: number; y: number }; presentedPosition: { x: number; y: number };
     velocity: { x: number; y: number }; fuseUpdatesRemaining: number;

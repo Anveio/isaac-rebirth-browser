@@ -289,7 +289,11 @@ impl StageEffects {
                 bomb.id,
                 bomb.x,
                 bomb.y - 1.0,
-                content::BOMB_SHADOW_PERCENT,
+                if matches!(bomb.variant, 3 | 4) {
+                    content::TROLL_BOMB_SHADOW_PERCENT
+                } else {
+                    content::BOMB_SHADOW_PERCENT
+                },
                 &self.mask_raster,
             ));
         }

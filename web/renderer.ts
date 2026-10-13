@@ -89,13 +89,13 @@ export class Renderer {
         this.assets.draw(ctx, "gfx/1000.012_tear poof_small.anm2", "Poof", impact.x, impact.y, impact.age);
       for (const bomb of state.bombs)
         if (bomb.motion.lifetime === "alive")
-          this.assets.draw(ctx, "gfx/004.000_bomb.anm2", "Pulse", bomb.x, bomb.y - 1, bomb.motion.animationFrame, { pixelSnap: this.canvas.width / 480 / 2 });
+          this.assets.draw(ctx, bomb.variant === 3 ? "gfx/004.003_troll bomb.anm2" : bomb.variant === 4 ? "gfx/004.004_megatroll bomb.anm2" : "gfx/004.000_bomb.anm2", bomb.animation, bomb.x, bomb.y - 1, bomb.animationFrame, { pixelSnap: this.canvas.width / 480 / 2 });
       for (const explosion of state.explosions) {
         this.assets.draw(ctx, "gfx/1000.001_bomb explosion.anm2", "Explosion", explosion.x, explosion.y - 1, explosion.animationFrame, { pixelSnap: this.canvas.width / 480 / 2 });
       }
       for (const bomb of state.bombs)
         if (bomb.motion.lifetime === "exploding")
-          this.assets.draw(ctx, "gfx/004.000_bomb.anm2", "Explode", bomb.x, bomb.y - 1, bomb.motion.animationFrame, { pixelSnap: this.canvas.width / 480 / 2 });
+          this.assets.draw(ctx, bomb.variant === 3 ? "gfx/004.003_troll bomb.anm2" : bomb.variant === 4 ? "gfx/004.004_megatroll bomb.anm2" : "gfx/004.000_bomb.anm2", bomb.animation, bomb.x, bomb.y - 1, bomb.animationFrame, { pixelSnap: this.canvas.width / 480 / 2 });
       this.stage.foreground(state.stageEffects);
       this.presentation.introduction(ctx, state);
       this.hud(ctx, state);

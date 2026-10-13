@@ -142,6 +142,7 @@ fn main() {
     let player = entity_number(&xml, 1, 0, "shadowSize");
     let tear = entity_number(&xml, 2, 0, "shadowSize");
     let bomb = entity_number(&xml, 4, 0, "shadowSize");
+    let troll_bomb = entity_number(&xml, 4, 3, "shadowSize");
     let collision_radius = entity_number(&xml, 1, 0, "collisionRadius");
     let collision_mass = entity_number(&xml, 1, 0, "collisionMass");
     let mut generated = format!(
@@ -150,6 +151,7 @@ fn main() {
          pub const PLAYER_SHADOW_PERCENT: f64 = {player:?};\n\
          pub const TEAR_SHADOW_PERCENT: f64 = {tear:?};\n\
          pub const BOMB_SHADOW_PERCENT: f64 = {bomb:?};\n\
+         pub const TROLL_BOMB_SHADOW_PERCENT: f64 = {troll_bomb:?};\n\
          pub const PLAYER_COLLISION_RADIUS_WORLD: f64 = {collision_radius:?};\n\
          pub const PLAYER_COLLISION_MASS_WORLD: f64 = {collision_mass:?};\n"
     );

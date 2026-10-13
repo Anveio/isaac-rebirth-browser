@@ -70,7 +70,7 @@ impl BombMotion {
             && self.velocity.is_finite()
     }
 
-    fn validate(&self) -> Result<(), String> {
+    fn validate(&self, corpse_frames: u8) -> Result<(), String> {
         if !self.is_finite() {
             return Err("bomb motion requires finite native vectors".into());
         }
@@ -83,12 +83,12 @@ impl BombMotion {
             BombLifetime::Exploding => {
                 self.fuse_updates_remaining == 0
                     && self.full_updates == INITIAL_FUSE_UPDATES + 1
-                    && self.animation_frame < CORPSE_FRAMES
+                    && self.animation_frame < corpse_frames
             }
             BombLifetime::Removed => {
                 self.fuse_updates_remaining == 0
                     && self.full_updates == INITIAL_FUSE_UPDATES + 1
-                    && self.animation_frame == CORPSE_FRAMES
+                    && self.animation_frame == corpse_frames
             }
         };
         if !valid_clock {
@@ -97,9 +97,10 @@ impl BombMotion {
         Ok(())
     }
 
-    fn predict(&mut self, phase: Phase) {
+    fn predict(&mut self, phase: Phase, friction: f32) {
         self.presented_position = if phase == Phase::Interpolate {
-            self.position + self.velocity * 0.5
+            // FastUpdate4446a0 rounds velocity*temporary-friction before /2.
+            self.position + (self.velocity * friction) * 0.5
         } else {
             self.position
         };
@@ -108,7 +109,7 @@ impl BombMotion {
     /// Newly admitted bombs are excluded from the current full update fence.
     /// An intermediate iteration can still predict a bomb born in player Update.
     pub fn present_birth(&mut self, phase: Phase) -> Result<(), String> {
-        self.validate()?;
+        self.validate(CORPSE_FRAMES)?;
         if self.full_updates != 0 || self.lifetime != BombLifetime::Alive {
             return Err("birth presentation requires a newly admitted bomb".into());
         }
@@ -116,7 +117,7 @@ impl BombMotion {
             return Err("bomb birth requires an admitted player phase".into());
         }
         let mut next = *self;
-        next.predict(phase);
+        next.predict(phase, 1.0);
         if !next.is_finite() {
             return Err("bomb birth prediction overflowed".into());
         }
@@ -127,13 +128,25 @@ impl BombMotion {
     /// Advance an already admitted actor. Return true only on detonation.
     /// Pause is caller-owned: advance the global Clock, but skip this method.
     pub fn advance(&mut self, phase: Phase) -> Result<bool, String> {
-        self.validate()?;
+        self.advance_variant(phase, 1.0, CORPSE_FRAMES)
+    }
+
+    fn advance_variant(
+        &mut self,
+        phase: Phase,
+        friction: f32,
+        corpse_frames: u8,
+    ) -> Result<bool, String> {
+        self.validate(corpse_frames)?;
         if phase == Phase::Skipped || self.lifetime == BombLifetime::Removed {
             return Ok(false);
         }
         let mut next = *self;
         let mut detonated = false;
         if phase == Phase::Update {
+            // BaseUpdate447190 applies the prior temporary friction before
+            // integration, then restores the authored friction for this turn.
+            next.velocity = next.velocity * friction;
             next.position = next.position + next.velocity;
             // BombUpdate rounds the .95 multiply before its low-speed .5.
             next.velocity = next.velocity * 0.95;
@@ -154,14 +167,14 @@ impl BombMotion {
                 }
                 BombLifetime::Exploding => {
                     next.animation_frame += 1;
-                    if next.animation_frame >= CORPSE_FRAMES {
+                    if next.animation_frame >= corpse_frames {
                         next.lifetime = BombLifetime::Removed;
                     }
                 }
                 BombLifetime::Removed => unreachable!(),
             }
         }
-        next.predict(phase);
+        next.predict(phase, friction);
         if !next.is_finite() {
             return Err("bomb motion or prediction overflowed".into());
         }
@@ -239,6 +252,15 @@ pub fn isaac_blast_velocity(
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Bomb {
     pub id: u32,
+    pub variant: u32,
+    /// Planted-bomb seed admission is separately unaccepted; conversions own
+    /// the actual shared stream draw made by Pickup::Update.
+    pub spawn_seed: Option<u32>,
+    pub birth_game_update: u32,
+    pub friction: f32,
+    pub animation: String,
+    pub animation_frame: u32,
+    pub animation_playing: bool,
     pub x: f64,
     pub y: f64,
     pub motion: BombMotion,
@@ -287,6 +309,13 @@ pub fn place(state: &mut State, phase: Phase) -> Result<(), String> {
     })?;
     state.bombs.push(Bomb {
         id: state.next_bomb,
+        variant: 0,
+        spawn_seed: None,
+        birth_game_update: state.game_update_count,
+        friction: 1.0,
+        animation: "Pulse".into(),
+        animation_frame: 0,
+        animation_playing: true,
         x: f64::from(motion.presented_position.x) * WORLD_SCALE + 32.0,
         y: f64::from(motion.presented_position.y) * WORLD_SCALE - 46.0,
         motion,
@@ -295,6 +324,73 @@ pub fn place(state: &mut State, phase: Phase) -> Result<(), String> {
     state.inventory.bombs -= 1;
     state.bomb_placement_cooldown.record_placement();
     Ok(())
+}
+
+/// Pickup::Update's Game::Spawn admits a child at the same ground position,
+/// with no player parent, no placement cost/cooldown and zero initial velocity.
+pub fn admit_conversion(
+    state: &mut State,
+    variant: u32,
+    spawn_seed: u32,
+    position: WorldVector,
+) -> Result<(), String> {
+    if !matches!(variant, 3 | 4) {
+        return Err("unsupported pickup bomb conversion".into());
+    }
+    let next = state.next_bomb.checked_add(1).ok_or("bomb IDs exhausted")?;
+    let motion = BombMotion::spawn(position, WorldVector { x: 0.0, y: 0.0 })?;
+    state.actor_scheduler.admit(crate::actors::ActorRef {
+        kind: crate::actors::ActorKind::Bomb,
+        id: state.next_bomb,
+    })?;
+    state.bombs.push(Bomb {
+        id: state.next_bomb,
+        variant,
+        spawn_seed: Some(spawn_seed),
+        birth_game_update: state.game_update_count,
+        friction: 1.0,
+        animation: "Appear".into(),
+        animation_frame: 0,
+        animation_playing: true,
+        x: f64::from(position.x) * WORLD_SCALE + 32.0,
+        y: f64::from(position.y) * WORLD_SCALE - 46.0,
+        motion,
+    });
+    state.next_bomb = next;
+    Ok(())
+}
+
+fn advance_animation(bomb: &mut Bomb, detonated: bool) {
+    if detonated {
+        bomb.animation = "Explode".into();
+        bomb.animation_frame = 0;
+        bomb.animation_playing = true;
+        return;
+    }
+    if !bomb.animation_playing && bomb.motion.lifetime == BombLifetime::Alive {
+        bomb.animation = "Pulse".into();
+        bomb.animation_frame = 0;
+        bomb.animation_playing = true;
+    }
+    if bomb.animation_playing {
+        let frames = match bomb.animation.as_str() {
+            "Appear" => 35,
+            "Pulse" => 59,
+            "Explode" => {
+                if matches!(bomb.variant, 3 | 4) {
+                    5
+                } else {
+                    10
+                }
+            }
+            _ => unreachable!("admitted bomb animation"),
+        };
+        bomb.animation_frame += 1;
+        if bomb.animation_frame >= frames {
+            bomb.animation_frame = frames - 1;
+            bomb.animation_playing = false;
+        }
+    }
 }
 
 /// Existing explosions advance only on full phases. Snapshot their count before
@@ -317,7 +413,50 @@ pub fn advance_actor(state: &mut State, phase: Phase, id: u32) -> Result<(), Str
     let Some(index) = state.bombs.iter().position(|bomb| bomb.id == id) else {
         return Ok(());
     };
-    let detonated = state.bombs[index].motion.advance(phase)?;
+    let corpse_frames = if matches!(state.bombs[index].variant, 3 | 4) {
+        5
+    } else {
+        CORPSE_FRAMES
+    };
+    let friction = state.bombs[index].friction;
+    let detonated = state.bombs[index]
+        .motion
+        .advance_variant(phase, friction, corpse_frames)?;
+    if phase == Phase::Update {
+        state.bombs[index].friction = 1.0;
+        advance_animation(&mut state.bombs[index], detonated);
+        // Update457bb0 targets the nearest player at position + velocity*5.
+        // The strict 270-world-unit envelope owns a normalized 1.5 impulse,
+        // followed by .8 velocity damping. Early age also sets next-turn drag.
+        if state.bombs[index].variant == 4 {
+            let target = player_world(state) + player_velocity(state) * 5.0;
+            let bomb = &mut state.bombs[index];
+            let delta = WorldVector {
+                x: target.x - bomb.motion.position.x,
+                y: target.y - bomb.motion.position.y,
+            };
+            let squared = delta.x * delta.x + delta.y * delta.y;
+            if squared < 72_900.0 {
+                let length = squared.sqrt();
+                let direction = if length == 0.0 {
+                    WorldVector { x: 0.0, y: 0.0 }
+                } else {
+                    // Normalize612820 rounds one reciprocal before multiplying
+                    // each component; direct component division differs in f32.
+                    delta * (1.0 / length)
+                };
+                bomb.motion.velocity = bomb.motion.velocity + direction * 1.5;
+            }
+            bomb.motion.velocity = bomb.motion.velocity * 0.8;
+            if state
+                .game_update_count
+                .saturating_sub(bomb.birth_game_update)
+                <= 19
+            {
+                bomb.friction = 0.8;
+            }
+        }
+    }
     if state.bombs[index].motion.lifetime == BombLifetime::Alive {
         use std::sync::OnceLock;
         static COLLIDER: OnceLock<crate::grid::Collider> = OnceLock::new();
