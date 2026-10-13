@@ -102,6 +102,8 @@ pub struct Pickup {
     pub birth_game_update: u32,
     pub charge: i32,
     pub touched: bool,
+    #[serde(default)]
+    pub chest: Option<crate::chests::Chest>,
 }
 
 impl Pickup {
@@ -112,6 +114,9 @@ impl Pickup {
         selector: &crate::room_spawns::SpawnSelector,
         appear: bool,
     ) -> Result<Option<Self>, String> {
+        if selector.entity_type == 5 && selector.variant == 50 {
+            return crate::chests::from_selector(id, selector, appear);
+        }
         if selector.entity_type != 5 || !matches!(selector.variant, 20 | 30 | 40) {
             return Ok(None);
         }
@@ -197,6 +202,7 @@ impl Pickup {
             birth_game_update: 0,
             charge: 0,
             touched: false,
+            chest: None,
         })
     }
 
@@ -233,6 +239,11 @@ impl Pickup {
             self.animation_frame = 0.0;
             self.animation_playing = true;
             self.can_collect = true;
+            if let Some(chest) = &mut self.chest {
+                // Pickup Update507115/50715a admits the closed Chest's Idle
+                // clip and player entity contacts after Appear finishes.
+                chest.entity_collision_class = 4;
+            }
         } else if !self.animation_playing && self.collected && self.variant != 100 {
             self.removed = true;
         }

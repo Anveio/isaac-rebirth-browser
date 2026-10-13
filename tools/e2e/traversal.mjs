@@ -30,7 +30,7 @@ const production = await startProductionServer();
 const browser = await chromium.launch({ headless: true, ...browserLaunchOptions() });
 const report = { schema: 1, status: 'running', skipped: 0, selected: bank.cases.length,
   scope: bank.contract === 'large-geometry'
-    ? 'Fresh Isaac enters an authored ordinary13x14 room through public movement, follows both radius-inset vertical boundary planes and returns. Exact full/intermediate player motion, native dimensions/bounds, complete authored door indices/positions/endpoints, source descriptor/spawn/visited/minimap joins and supported Rock state are required. Actual Chest5/50 admission remains a mandatory unsupported-actor regression. Source camera offsets are retained as diagnostics; camera/backdrop rendering and chest callbacks remain separate.'
+    ? 'Fresh Isaac enters an authored ordinary13x14 room through public movement, follows both radius-inset vertical boundary planes and returns. Exact full/intermediate player motion, native dimensions/bounds, complete authored door indices/positions/endpoints, source descriptor/spawn/visited/minimap joins and supported Rock state are required. Actual normal Chest5/50 constructor, Appear/Idle clocks, radius and collision classes are joined every selected phase. Source camera offsets are retained as diagnostics; camera/backdrop rendering and chest contact/loot callbacks remain separate.'
     : bank.contract === 'keeper-idle'
     ? 'Fresh Isaac enters real13x7 secret rooms through public bomb/movement inputs. Actual NPC17/1 constructor and anchored idle compare complete identity/seed/subtype, authored collision/health/countability, source state/flags/anchor/color, static and animated Guy clips, every full/intermediate/frozen phase and room/player/door/minimap joins. Damage/drop callbacks and other Keeper variants remain separate.'
     : bank.contract === 'curse'
@@ -43,7 +43,7 @@ const report = { schema: 1, status: 'running', skipped: 0, selected: bank.cases.
           ? 'Fresh Isaac, no-hostile13x7 natural secret keys and ordinary library lock: denied zero-key approach, actual collection/spending, full-only unlock/collision/SFX156, admission/return/revisit, exact player/HP/immunity, complete door/display/minimap/descriptor joins. Actual Keeper17 constructor admission remains required; golden/double locks, library items and pixels remain separate.'
         : 'Ordinary style0 13x7 doorway and no-hostile return; mandatory hostile-room lock/return regression; exact f32 player/descriptor phases, complete authored group accounting, supported actor admission and ordinary Rock metadata, visited-room restoration. NPC behavior, other grids/doors, large-room camera and complete pixels remain separate.',
   exclusions: bank.contract === 'large-geometry'
-    ? ['Default Style1 camera controller, large-room backdrop generation and rendered pixel parity', 'Chest5/50 constructor/animation/contact/drop behavior remains a required admission failure', 'Boss/shop and other special-door art/policy/traversal, hostile large-room lifecycle, other large shapes, later floors and exits']
+    ? ['Default Style1 camera controller, large-room backdrop generation and rendered pixel parity', 'Chest contact/loot, motion and rare51/360 replacements remain unsupported; historical missing normal Chest admissions stay retained', 'Chest persistent RNG30 initialization is statically mapped; this source observer does not read its four words', 'Boss/shop and other special-door art/policy/traversal, hostile large-room lifecycle, other large shapes, later floors and exits']
     : bank.contract === 'keeper-idle'
     ? ['Keeper damage/death/drop callbacks and actor mutation persistence', 'Other Keeper variants, hostile secret policy, other room shapes and floor exits', 'Complete sprite/backdrop/pixel parity and total shared MT consumer alignment']
     : bank.contract === 'secret'
@@ -174,6 +174,18 @@ try {
             visibility: room.index === source.currentDescriptorIndex ? 'current' : room.visited ? 'visited' : 'unvisited',
           }));
           phaseAssert.deepEqual(state.minimap.cells, cells, `${label}:complete tall-room descriptor minimap routing`);
+          const actualChests = state.room.pickups.filter(pickup => pickup.variant === 50);
+          const nativeChests = observed.contents.entities.filter(entity => entity.type === 5 && entity.variant === 50);
+          const chestTuple = pickup => [pickup.variant, pickup.subtype, pickup.spawnSeed,
+            [pickup.position.x, pickup.position.y], pickup.animation, pickup.animationFrame, pickup.animationPlaying,
+            pickup.collisionRadius, pickup.collectionDelay, pickup.chest?.gridCollisionClass,
+            pickup.chest?.entityCollisionClass, pickup.chest?.price, pickup.chest?.cooldown, pickup.removed];
+          const nativeChestTuple = pickup => [pickup.variant, pickup.subtype, pickup.spawnSeed,
+            pickup.position, pickup.animation, pickup.animationFrame, pickup.animationPlaying,
+            pickup.collisionRadius, pickup.collectionDelay, pickup.gridCollisionClass,
+            pickup.entityCollisionClass, pickup.pickupPrice, pickup.pickupCooldown, pickup.removed];
+          phaseAssert.deepEqual(actualChests.map(chestTuple), nativeChests.map(nativeChestTuple),
+            `${label}:complete concrete normal Chest constructor and Appear/Idle phases`);
         }
         if (['curse', 'free-treasure', 'secret', 'key'].includes(scenario.doorContract)) {
           const includeHidden = ['secret', 'key'].includes(scenario.doorContract);
