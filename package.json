@@ -23,7 +23,8 @@
     "test:original-clock": "python3 tools/original/foundation-clock-verify.py --count 2 --jobs 2",
     "lint": "cargo clippy --manifest-path engine/Cargo.toml --locked --all-targets -- -D warnings",
     "test:e2e": "bash tools/original/with-display.sh node tools/foundation/paired-game.mjs",
-    "test:e2e:floor": "cargo build --manifest-path engine/Cargo.toml --locked --bin floor && bash tools/original/with-display.sh node tools/foundation/floor-e2e.mjs --count 2"
+    "test:e2e:floor": "cargo build --manifest-path engine/Cargo.toml --locked --bin floor && bash tools/original/with-display.sh node tools/foundation/floor-e2e.mjs --count 2",
+    "test:e2e:weapons": "bash tools/original/with-display.sh node tools/e2e/weapons.mjs --count 4"
   },
   "devDependencies": {
     "@playwright/test": "1.64.0",

@@ -1,11 +1,13 @@
 //! A fresh, narrow foundation driven by observed base-Rebirth menu/run captures.
-//! World positions use logical pixels in a 480 × 270 viewport; simulation is 60 Hz.
+//! World positions use logical pixels in a 480 × 270 viewport; public stepping
+//! follows full/intermediate source phases at nominal 60 presentations per second.
 //! Sprite offsets and stage effects are explicit state separate from ground positions.
 //! Public seed encoding is supported; original room RNG routing and simulation
 //! ticks remain unverified. Scene descriptors are ordinary generated state.
 use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
 use std::collections::BTreeSet;
+pub mod actors;
 mod bombs;
 pub mod combat;
 mod content;
@@ -273,7 +275,10 @@ pub struct State {
     pub minimap: Minimap,
     pub tears: Vec<Tear>,
     pub impacts: Vec<Impact>,
-    pub fire_cooldown: u32,
+    pub fire_cooldown: i32,
+    pub max_fire_delay: i32,
+    pub head_timer: i32,
+    pub actor_scheduler: actors::Scheduler,
     pub next_tear: u32,
     pub bombs: Vec<Bomb>,
     pub explosions: Vec<Explosion>,
@@ -359,7 +364,10 @@ impl Game {
                 minimap: Minimap { cells: Vec::new() },
                 tears: Vec::new(),
                 impacts: Vec::new(),
-                fire_cooldown: 0,
+                fire_cooldown: -1,
+                max_fire_delay: 10,
+                head_timer: -1,
+                actor_scheduler: actors::Scheduler::default(),
                 next_tear: 1,
                 bombs: Vec::new(),
                 explosions: Vec::new(),
@@ -459,7 +467,7 @@ impl Game {
                         .ok_or("tear IDs exhausted")?;
                 }
                 for _ in 0..count {
-                    self.tick();
+                    self.tick()?;
                 }
             }
         }
@@ -659,7 +667,14 @@ impl Game {
         self.state.tears.clear();
         self.state.impacts.clear();
         self.state.next_tear = 1;
-        self.state.fire_cooldown = 0;
+        self.state.fire_cooldown = -1;
+        self.state.max_fire_delay = 10;
+        self.state.head_timer = -1;
+        self.state.actor_scheduler = actors::Scheduler::default();
+        self.state.actor_scheduler.admit(actors::ActorRef {
+            kind: actors::ActorKind::Player,
+            id: 0,
+        })?;
         self.state.bombs.clear();
         self.state.explosions.clear();
         self.state.next_bomb = 1;
@@ -686,7 +701,7 @@ impl Game {
     fn held(&self, code: &str) -> bool {
         self.state.pressed.contains(code)
     }
-    fn tick(&mut self) {
+    fn tick(&mut self) -> Result<(), String> {
         let phase = self
             .state
             .system_clock
@@ -702,18 +717,89 @@ impl Game {
             self.state.pause_menu.advance();
         }
         if self.state.screen != Screen::Playing || self.state.paused {
-            return;
+            return Ok(());
         }
-        self.state.run_tick += 1;
+        self.state.run_tick = self
+            .state
+            .run_tick
+            .checked_add(1)
+            .ok_or("run tick counter exhausted")?;
         if self.state.run_introduction.active {
             self.state.run_introduction.age += 1;
             self.state.run_introduction.active = self.state.run_introduction.age < 140;
         }
+        // Bombs keep their existing presentation contract until the separate
+        // bomb stream lands its source full-phase kernel and post-motion birth.
+        bombs::tick(&mut self.state);
+        let existing = self.state.actor_scheduler.full_phase();
+        if phase == phase::Phase::Update {
+            for actor in existing.iter().copied() {
+                self.advance_actor(actor, phase, false)?;
+            }
+        } else if phase == phase::Phase::Interpolate {
+            let mut index = 0;
+            while let Some(actor) = self.state.actor_scheduler.get(index) {
+                self.advance_actor(actor, phase, !existing.contains(&actor))?;
+                index += 1;
+            }
+        }
+        for impact in &mut self.state.impacts {
+            impact.age += 1;
+        }
+        self.state.impacts.retain(|impact| impact.age < 12);
+        let bounds = &self.state.room.projectile_bounds;
+        let mut surviving = Vec::new();
+        for tear in std::mem::take(&mut self.state.tears) {
+            if tear.age >= 45
+                || tear.x < bounds.left
+                || tear.x > bounds.right
+                || tear.y < bounds.top - 21.25
+                || tear.y > bounds.bottom
+            {
+                self.state.impacts.push(Impact {
+                    id: tear.id,
+                    x: tear.x.clamp(bounds.left, bounds.right),
+                    y: tear.y.clamp(bounds.top - 21.25, bounds.bottom),
+                    age: 0,
+                });
+            } else {
+                surviving.push(tear);
+            }
+        }
+        self.state.tears = surviving;
+        let surviving = &self.state.tears;
+        self.state.actor_scheduler.retain(|actor| {
+            actor.kind != actors::ActorKind::Tear
+                || surviving.iter().any(|tear| tear.id == actor.id)
+        });
+        Ok(())
+    }
+    fn advance_actor(
+        &mut self,
+        actor: actors::ActorRef,
+        phase: phase::Phase,
+        newborn: bool,
+    ) -> Result<(), String> {
+        match actor.kind {
+            actors::ActorKind::Player => self.update_player(phase)?,
+            actors::ActorKind::Tear => {
+                if let Some(tear) = self.state.tears.iter_mut().find(|tear| tear.id == actor.id) {
+                    // Projected height/range remains the existing provisional
+                    // representation; native ground/height kernels land next.
+                    tear.x += tear.vx;
+                    tear.y += tear.vy;
+                    if !newborn {
+                        tear.age = tear.age.checked_add(1).ok_or("tear age exhausted")?;
+                    }
+                }
+            }
+            _ => return Err("actor kind has no admitted runtime yet".into()),
+        }
+        Ok(())
+    }
+    fn update_player(&mut self, phase: phase::Phase) -> Result<(), String> {
         let dx = i32::from(self.held("KeyD")) - i32::from(self.held("KeyA"));
         let dy = i32::from(self.held("KeyS")) - i32::from(self.held("KeyW"));
-        // Native blast impulses apply before movement integration and drag in
-        // their first visible phase; stationary zero-separation blasts stay put.
-        bombs::tick(&mut self.state);
         // Shooting inherits the velocity entering this phase, before input acceleration.
         let inherited_velocity = (self.state.player.vx, self.state.player.vy);
         motion::advance(&mut self.state.player, &self.state.room, dx, dy);
@@ -735,7 +821,7 @@ impl Game {
         } else {
             player.walk_frame = 0;
             player.body_facing = Direction::Down;
-            if self.state.fire_cooldown == 0 {
+            if self.state.head_timer < 0 {
                 player.facing = Direction::Down;
             }
         }
@@ -751,16 +837,18 @@ impl Game {
             None
         };
         self.state.player.shooting = aim.is_some();
-        self.state.fire_cooldown = self.state.fire_cooldown.saturating_sub(1);
-        for tear in &mut self.state.tears {
-            tear.x += tear.vx;
-            tear.y += tear.vy;
-            tear.age += 1;
+        if phase == phase::Phase::Update {
+            self.state.player.head_frame = if self.state.head_timer > 8 { 2 } else { 0 };
+            if self.state.fire_cooldown >= 0 {
+                self.state.fire_cooldown -= 1;
+            }
+            if self.state.head_timer >= 0 {
+                self.state.head_timer -= 1;
+            }
         }
         if let Some(direction) = aim {
             self.state.player.facing = direction;
-            self.state.player.head_frame = if self.state.fire_cooldown < 5 { 2 } else { 0 };
-            if self.state.fire_cooldown == 0 {
+            if self.state.fire_cooldown < 0 {
                 let (dx, dy) = match direction {
                     Direction::Left => (-1.0, 0.0),
                     Direction::Right => (1.0, 0.0),
@@ -799,37 +887,21 @@ impl Game {
                     vy: ground_vy + 0.125,
                     age: 0,
                 });
-                self.state.next_tear += 1;
-                // Three observed spawns are about 22 nominal rendered samples apart.
-                self.state.fire_cooldown = 22;
-            }
-        } else {
-            self.state.player.head_frame = 0;
-        }
-        for impact in &mut self.state.impacts {
-            impact.age += 1;
-        }
-        self.state.impacts.retain(|impact| impact.age < 12);
-        let bounds = &self.state.room.projectile_bounds;
-        let mut surviving = Vec::new();
-        for tear in std::mem::take(&mut self.state.tears) {
-            if tear.age >= 45
-                || tear.x < bounds.left
-                || tear.x > bounds.right
-                || tear.y < bounds.top - 21.25
-                || tear.y > bounds.bottom
-            {
-                self.state.impacts.push(Impact {
-                    id: tear.id,
-                    x: tear.x.clamp(bounds.left, bounds.right),
-                    y: tear.y.clamp(bounds.top - 21.25, bounds.bottom),
-                    age: 0,
-                });
-            } else {
-                surviving.push(tear);
+                self.state.actor_scheduler.admit(actors::ActorRef {
+                    kind: actors::ActorKind::Tear,
+                    id: self.state.next_tear,
+                })?;
+                self.state.next_tear = self
+                    .state
+                    .next_tear
+                    .checked_add(1)
+                    .ok_or("tear IDs exhausted")?;
+                self.state.fire_cooldown = self.state.max_fire_delay;
+                self.state.head_timer =
+                    ((self.state.max_fire_delay as f32 * 0.45_f32) as i32 + 7).max(11);
             }
         }
-        self.state.tears = surviving;
+        Ok(())
     }
     pub fn snapshot(&self) -> State {
         self.state.clone()

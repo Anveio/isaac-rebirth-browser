@@ -1,0 +1,76 @@
+{
+  "schema": 1,
+  "status": "pass",
+  "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "scope": "Paired live original/browser weapon cooldown, head clock, shot births, actor birth fence and horizontal birth positions; projected height/range and shared MT routing remain separate work",
+  "productionSha256": "303f62a927400e44687528b312a25c1ecc5c43715df69ecdd4bb420f8e282830",
+  "comparison": "Exact source-located cooldown/head fields, boundary phase, cumulative live shot births and horizontal birth positions; all six cases are live independently captured originals and the production browser. No source state was supplied to WASM.",
+  "reproduceFresh": "source cloud/env.sh && npm run build && npm run test:e2e:weapons",
+  "reproduceRecorded": "source cloud/env.sh && npm run build && npm run test:e2e:weapons -- --scenarios references/isaac/foundation/weapons/scenarios.json",
+  "cases": [
+    {
+      "name": "full-first-shot",
+      "code": "QSYVKMSE",
+      "direction": "Right",
+      "delay": 0,
+      "status": "pass",
+      "nativeManifestSha256": "3a32bba1bf865d8d2e00bc2b7ce3a9bd26845035b71b38d593a30205cf0ed84d",
+      "comparedPresentations": 54,
+      "observedBirths": 3
+    },
+    {
+      "name": "intermediate-first-shot",
+      "code": "ZG800TRJ",
+      "direction": "Right",
+      "delay": 1,
+      "status": "pass",
+      "nativeManifestSha256": "a2c0a1d31be2faf6f9f8e83427d75c2981590ed88b955efb0075cffdab7ad1ea",
+      "comparedPresentations": 54,
+      "observedBirths": 3
+    },
+    {
+      "name": "random-0",
+      "code": "MZV9M8L7",
+      "direction": "Right",
+      "delay": 0,
+      "seedValue": 1385728516,
+      "status": "pass",
+      "nativeManifestSha256": "725d83a95a60d0771c2d204dcfece1bc5fa5a91fdd06ea423054d4f89320850b",
+      "comparedPresentations": 54,
+      "observedBirths": 3
+    },
+    {
+      "name": "random-1",
+      "code": "4CSFLNH8",
+      "direction": "Left",
+      "delay": 1,
+      "seedValue": 3746507469,
+      "status": "pass",
+      "nativeManifestSha256": "ac6846233bf67893595f95b54e40a86903d88037d93d104e19e98f044c467c74",
+      "comparedPresentations": 54,
+      "observedBirths": 3
+    },
+    {
+      "name": "random-2",
+      "code": "GJXFBA8R",
+      "direction": "Up",
+      "delay": 0,
+      "seedValue": 1036595070,
+      "status": "pass",
+      "nativeManifestSha256": "fef52268fb51abac790cf31335bb7f34a0cd28f9f44ccf659884bf72585c0164",
+      "comparedPresentations": 54,
+      "observedBirths": 3
+    },
+    {
+      "name": "random-3",
+      "code": "ED1338T8",
+      "direction": "Down",
+      "delay": 1,
+      "seedValue": 788587271,
+      "status": "pass",
+      "nativeManifestSha256": "d4c5c3bd866108b5d695a29084432584ef779e6eb76c52495bf9c62e5ca518e5",
+      "comparedPresentations": 54,
+      "observedBirths": 3
+    }
+  ]
+}
