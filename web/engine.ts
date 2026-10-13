@@ -114,6 +114,7 @@ export interface State {
   audio: AudioState;
   profile: number; mainSelection: number; characterSelection: number; character: string; difficulty: string;
   seedText: string; seedValid: boolean; runSeed: string; initialSeed: number; runSeedValue: number; bootEpochSeed: number; bootLifecycle: BootLifecycle;
+  pendingMenuInitializations: { afterAudioRequests: number; initialization: { type: "loadFreshProfile"; profile: number } | { type: "resetCharacterSeed" } }[];
   stage: number; stageSeed: number; seededRun: boolean; achievementEligibility: boolean;
   profiles: { slot: number; unlockedCharacters: string[]; selectedCharacter: string }[];
   characterCatalog: { name: string; animation: string }[];

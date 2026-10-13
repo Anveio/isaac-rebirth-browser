@@ -239,6 +239,23 @@ pub struct BootState {
     pub secret_poses: Vec<u8>,
 }
 
+impl BootState {
+    /// LoadProfile first clears the saved state even for an empty profile. Keep
+    /// the generated descriptor seed state, rather than advancing a cursor.
+    pub fn clear_saved_game(&mut self) -> DescriptorSeeds {
+        let saved = SavedGameSeeds::clear(&mut self.shared);
+        self.saved_player_seed = saved.player_rng_seed;
+        self.saved_grid_seed_samples = grid_seed_samples(&saved.descriptor_seeds);
+        saved.descriptor_seeds
+    }
+
+    /// CharacterReset clears its seed string before decoding it; the empty
+    /// string selects one fresh shared raw seed, replacing reserved zero by 1.
+    pub fn reset_character_seed(&mut self) {
+        self.menu_run_seed = self.shared.next_u32().max(1);
+    }
+}
+
 fn grid_seed_samples(table: &DescriptorSeeds) -> Vec<GridSeedSample> {
     [0, 1, ROOM_DESCRIPTOR_CAPACITY - 1]
         .into_iter()
