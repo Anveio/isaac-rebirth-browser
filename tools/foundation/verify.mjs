@@ -181,6 +181,9 @@ export async function browserScenario(page, { initialSeed = FOUNDATION_REFERENCE
   const finish = async () => {
     const actualTrace = await page.evaluate(() => window.game.trace());
     assertInputProvenance(actualTrace, commands, initialSeed, bootEpochSeed);
+    assert.equal(actualTrace.stateHistoryTruncated, false, "Replay comparison requires complete browser state history");
+    assert.equal(actualTrace.states.length, commands.length + 1, "Replay comparison must retain every public command state");
+    assert.ok(actualTrace.backendEvents.every(event => event.state), "Replay comparison must retain every actual music callback state");
     return { initialSeed, bootEpochSeed, commands, states: actualTrace.states, backendEvents: actualTrace.backendEvents,
       frames, timings, tickRate: 60, seed: states.at(-1).runSeed, inputTransport: "actual DOM keyboard; manually stepped WASM simulation; recorded audio backend callbacks" };
   };
