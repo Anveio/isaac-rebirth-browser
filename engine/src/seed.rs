@@ -14,6 +14,37 @@ pub fn startup_next(mut value: u32) -> u32 {
 pub fn stage1_seed(value: u32) -> u32 {
     startup_next(startup_next(value))
 }
+/// Seeds::SetStartSeed5e1470 initializes shift27, fills the twelve fields
+/// at +14..40 and one field at +44. GameNewRun then asks that same owner
+/// for the ItemPool initializer. No shared MT participates in this handoff.
+#[derive(Clone, Debug, serde::Deserialize, serde::Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct RunSeeds {
+    pub start_seed: u32,
+    pub stream_state: u32,
+    pub initialized_fields: [u32; 13],
+}
+impl RunSeeds {
+    pub fn new(start_seed: u32) -> Result<Self, String> {
+        if start_seed == 0 {
+            return Err("run seed zero is reserved".into());
+        }
+        let mut stream_state = start_seed;
+        let initialized_fields = std::array::from_fn(|_| {
+            stream_state = startup_next(stream_state);
+            stream_state
+        });
+        Ok(Self {
+            start_seed,
+            stream_state,
+            initialized_fields,
+        })
+    }
+    pub fn item_pool_seed(&mut self) -> u32 {
+        self.stream_state = startup_next(self.stream_state);
+        self.stream_state
+    }
+}
 fn checksum(mut seed: u32) -> u8 {
     let mut checksum: u32 = 0;
     while seed != 0 {

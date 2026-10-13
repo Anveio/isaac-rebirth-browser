@@ -294,7 +294,7 @@ must not silently turn a room object into a generic enemy or delete it.
 | `Entity_NPC`, `Entity_Familiar` | Authored entity definitions available; no runtime actors | Initial enemy behaviors, combat, bosses, champions, spawn/death rules and familiars |
 | `Entity_Bomb`, `Game::BombDamage` | E-only rising-edge placement, inventory debit, fuse/explosion, strict regular contact, native f32 self-knockback and damage countdown with pause freezing | Native radial/full-state holdouts, hurt visuals, craters, pushed bombs/variants and enemy/grid damage |
 | `Entity_Pickup`, grid entities | Authored entity/STB definitions available; no runtime pickups/grid obstacles | Hearts/coins/keys/bombs, shop/chest collection, rocks/pits/poops/fires and damage |
-| `ItemConfig`, `ItemPool`, player item evaluation | No item-effect or pool runtime; XML references available | Pool routing and depletion, passive/active/trinket/pocket effects, synergy cache and costumes |
+| `ItemConfig`, `ItemPool`, player item evaluation | Pinned343 collectible configurations/16 native pools, causal run/pool RNG owners, weighted depletion/eligibility/maps and natural free pedestal selection/admission; [scope and live gate](item-pools.md) | Queued acquisition, item/cache/stat effects, active use/replacement, familiars, trinkets/pockets, saved progression, paid/override contexts and exceptional selector live boundaries |
 | Graphics, `ANM2`, backdrop/shadow/FX | `web/animation.ts`, `web/gl-menu.ts`, `web/gl-stage.ts`, `engine/src/effects.rs`: authored animation and GPU masks | Full original pixels, all room/backdrop systems, native motion projection and effect selection |
 | `Music`, sound playback | Live paired SFX and Title/run/normal-floor music, source f32 controller fades/deferred run admission, original queued-path/output graph/PCM and real callback evidence | Early decoder/prefetch lifecycle, alternate floors, later jingles/layer/pitch callers, initial video/voiceover and broader gameplay sounds |
 | `PersistentGameData`, `GameState` | In-memory profiles and deterministic JSON replay | Durable browser profile/save/continue, achievements, completion marks, unlocks and co-op |
@@ -644,8 +644,12 @@ runtime or combat parity gate in the port yet.
 
 Content initialization, collectible configuration, weighted pool depletion,
 AddCollectible/use dispatch and persistent unlock/save consumers are mapped to
-concrete Linux boundaries in the ignored graph. Resource definitions alone still
-do not implement any item effects, room-clear progression or durable saves.
+concrete Linux boundaries. The [item pool selection leaf](item-pools.md) now
+routes real run-owned RNG consumers, fresh achievement eligibility, current
+weights/maps and natural free pedestals. Its live gate stops before acquisition;
+queued AddCollectible, cache/stat effects, familiars, use behavior and durable
+progression remain separate work. Internal Game age uses the actual `ce9f4`
+counter rather than a tally of animation callbacks during room loading.
 
 ## Introduction and pause presentation verified regions
 

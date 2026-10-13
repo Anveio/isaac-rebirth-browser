@@ -17,6 +17,7 @@ mod effects;
 pub mod floor;
 pub mod grid;
 mod grid_hazards;
+pub mod items;
 pub mod layout;
 pub mod menu_lifecycle;
 pub mod motion;
@@ -145,6 +146,7 @@ pub struct Profile {
     pub slot: u8,
     pub unlocked_characters: Vec<String>,
     pub selected_character: String,
+    pub achievements: Vec<bool>,
 }
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -303,6 +305,8 @@ pub struct State {
     pub pending_menu_initializations: Vec<menu_lifecycle::Pending>,
     pub music: music::MusicState,
     pub run_seed_value: u32,
+    pub run_seeds: Option<seed::RunSeeds>,
+    pub item_pools: Option<items::ItemPools>,
     pub stage: u32,
     pub stage_seed: u32,
     pub seeded_run: bool,
@@ -417,6 +421,8 @@ impl Game {
                 pending_menu_initializations: Vec::new(),
                 music: music::MusicState::default(),
                 run_seed_value: initial_seed,
+                run_seeds: None,
+                item_pools: None,
                 stage: 1,
                 stage_seed: seed::stage1_seed(initial_seed),
                 seeded_run: false,
@@ -426,6 +432,7 @@ impl Game {
                         slot,
                         unlocked_characters: vec!["Isaac".into()],
                         selected_character: "Isaac".into(),
+                        achievements: vec![false; 179],
                     })
                     .collect(),
                 character_catalog: character_catalog(),
@@ -874,6 +881,12 @@ impl Game {
             return Err("selected character runtime is not implemented".into());
         }
         self.state.character = chosen;
+        let mut run_seeds = seed::RunSeeds::new(self.state.run_seed_value)?;
+        self.state.item_pools = Some(items::ItemPools::new(
+            run_seeds.item_pool_seed(),
+            &self.state.profiles[usize::from(self.state.profile - 1)].achievements,
+        )?);
+        self.state.run_seeds = Some(run_seeds);
         self.state.system_clock.align_run_start()?;
         self.state.screen = Screen::Playing;
         self.state.paused = false;
@@ -953,12 +966,39 @@ impl Game {
                     id,
                 });
                 npcs.push(npc);
+            } else if selector.entity_type == 5
+                && selector.variant == 100
+                && !matches!(room_type, 2 | 3 | 14 | 22)
+            {
+                // Free natural pedestals use the run's actual ItemPool owner.
+                // Shop/devil pricing and challenge overrides remain separate.
+                if let Some(mut pickup) = Pickup::from_collectible_selector(
+                    next,
+                    selector,
+                    self.state
+                        .item_pools
+                        .as_mut()
+                        .ok_or("missing run item pools")?,
+                    room_type,
+                    &mut self.state.boot_lifecycle.shared,
+                )? {
+                    pickup.birth_game_update = self.state.game_update_count;
+                    order.push(actors::ActorRef {
+                        kind: actors::ActorKind::Pickup,
+                        id: next,
+                    });
+                    next = next
+                        .checked_add(1)
+                        .ok_or("pickup identity counter exhausted")?;
+                    pickups.push(pickup);
+                }
             } else if room_type == 1 || matches!((room_type, selector.variant), (4, 20) | (7, 30)) {
                 // Direct treasure-room coins and secret-room regular keys
                 // keep free pickup Init/Collect rules (no shop placeholder).
                 // Other special contexts retain typed selectors until their
                 // prices, pools and replacements are admitted.
-                if let Some(pickup) = Pickup::from_selector(next, selector, true)? {
+                if let Some(mut pickup) = Pickup::from_selector(next, selector, true)? {
+                    pickup.birth_game_update = self.state.game_update_count;
                     order.push(actors::ActorRef {
                         kind: actors::ActorKind::Pickup,
                         id: next,
@@ -1173,7 +1213,7 @@ impl Game {
                                     .iter_mut()
                                     .find(|pickup| pickup.id == actor.id)
                                     .ok_or("missing admitted pickup handle")?;
-                                pickup.advance(phase);
+                                pickup.advance(phase, self.state.game_update_count);
                             }
                             _ => return Err("invalid authored room actor handle".into()),
                         }
@@ -1337,7 +1377,7 @@ impl Game {
                     .iter_mut()
                     .find(|pickup| pickup.id == actor.id)
                 {
-                    pickup.advance(phase);
+                    pickup.advance(phase, self.state.game_update_count);
                 }
             }
             actors::ActorKind::Npc => {

@@ -51,6 +51,12 @@ export interface MusicState {
   layerEnabled: boolean; pitch: number; targetPitch: number; channels: [MusicChannel, MusicChannel, MusicChannel];
   nextGeneration: number; events: MusicEvent[]; pending: { type: 'crossfade' | 'room'; id: number }[];
 }
+export interface ItemRng { state: number; rightA: number; left: number; rightB: number; }
+export interface ItemPool {
+  id: number; name: string; baseWeightTotal: number; rng: [ItemRng, ItemRng]; specialCounter: number;
+  entries: {id: number; baseWeight: number; currentWeight: number; decreaseBy: number; removeOn: number;
+    eligible: boolean; special: boolean}[];
+}
 export type MusicBackendCommand = { type: 'musicBackend'; channel: number; generation: number; event: 'ended' | 'loop' };
 export interface Bomb {
   id: number; x: number; y: number;
@@ -65,6 +71,7 @@ export interface Pickup {
   id: number; spawnSeed: number; variant: number; subtype: number; position: { x: number; y: number };
   x: number; y: number; actor: string; animation: string; animationFrame: number; animationPlaying: boolean;
   canCollect: boolean; collected: boolean; removed: boolean; collisionRadius: number; shadowSize: number; collectionDelay: number;
+  age: number; birthGameUpdate: number; charge: number; touched: boolean;
 }
 export interface RunIntroduction { age: number; active: boolean; }
 export interface PauseMenu {
@@ -142,9 +149,12 @@ export interface State {
   music: MusicState;
   profile: number; mainSelection: number; characterSelection: number; character: string; difficulty: string;
   seedText: string; seedValid: boolean; runSeed: string; initialSeed: number; runSeedValue: number; bootEpochSeed: number; bootLifecycle: BootLifecycle;
+  runSeeds: {startSeed: number; streamState: number; initializedFields: number[]} | null;
+  itemPools: {seed: number; rootRng: ItemRng; secondaryRng: ItemRng; pools: ItemPool[];
+    specialFactor: number; removed: boolean[]; selected: boolean[]; roomRoutes: number[]; pillEffects: number[]} | null;
   pendingMenuInitializations: { afterAudioRequests: number; initialization: { type: "loadFreshProfile"; profile: number } | { type: "resetCharacterSeed" } | { type: "commitCharacterSeed"; seed: number } }[];
   stage: number; stageSeed: number; seededRun: boolean; achievementEligibility: boolean;
-  profiles: { slot: number; unlockedCharacters: string[]; selectedCharacter: string }[];
+  profiles: { slot: number; unlockedCharacters: string[]; selectedCharacter: string; achievements: boolean[] }[];
   characterCatalog: { name: string; animation: string }[];
   paused: boolean; pressed: string[];
   floor: Floor; currentRoom: number; visitedRooms: number[];

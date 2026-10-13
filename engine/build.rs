@@ -235,4 +235,27 @@ fn main() {
     }
     tracks.push_str("];\n");
     fs::write(output.join("music_catalog.rs"), tracks).expect("write authored music catalogue");
+    let item_decoder = manifest
+        .parent()
+        .unwrap()
+        .join("tools/foundation/item-catalog.py");
+    for path in [
+        &item_decoder,
+        &resources.join("items.xml"),
+        &resources.join("itempools.xml"),
+    ] {
+        println!("cargo:rerun-if-changed={}", path.display());
+    }
+    let items = std::process::Command::new("python3")
+        .arg(item_decoder)
+        .arg("--rust")
+        .output()
+        .expect("decode pinned base collectible resources");
+    assert!(
+        items.status.success(),
+        "collectible catalogue rejected: {}",
+        String::from_utf8_lossy(&items.stderr)
+    );
+    fs::write(output.join("item_catalog.rs"), items.stdout)
+        .expect("write authored collectible catalogue");
 }

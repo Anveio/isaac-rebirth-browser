@@ -86,6 +86,10 @@ pub struct Pickup {
     pub collision_radius: f32,
     pub shadow_size: f64,
     pub collection_delay: u32,
+    pub age: u32,
+    pub birth_game_update: u32,
+    pub charge: i32,
+    pub touched: bool,
 }
 
 impl Pickup {
@@ -106,6 +110,31 @@ impl Pickup {
         }
         let mut pickup = Self::spawn(id, variant, subtype, selector.position, appear)?;
         pickup.spawn_seed = selector.spawn_seed;
+        Ok(Some(pickup))
+    }
+    /// Natural collectible Init owns the entity's local RNG35 seed; only its
+    /// first raw output is handed to the independent ItemPool shift4 picker.
+    pub fn from_collectible_selector(
+        id: u32,
+        selector: &crate::room_spawns::SpawnSelector,
+        pools: &mut crate::items::ItemPools,
+        room_type: u32,
+        shared: &mut crate::mt::Mt19937,
+    ) -> Result<Option<Self>, String> {
+        if selector.entity_type != 5 || selector.variant != 100 {
+            return Ok(None);
+        }
+        let subtype = if selector.subtype == 0 {
+            let pool = pools.room_pool(room_type, shared);
+            pools.collectible(pool, true, crate::room_spawns::next35(selector.spawn_seed))?
+        } else {
+            u32::from(selector.subtype)
+        };
+        let config = crate::items::definition(subtype)
+            .ok_or("authored collectible subtype has no ItemConfig")?;
+        let mut pickup = Self::spawn(id, 100, subtype, selector.position, false)?;
+        pickup.spawn_seed = selector.spawn_seed;
+        pickup.charge = config.max_charges;
         Ok(Some(pickup))
     }
     /// Concrete subtype and authored world position come from room/loot routing.
@@ -152,14 +181,22 @@ impl Pickup {
             collision_radius: definition.collision_radius,
             shadow_size: definition.shadow_size,
             collection_delay: 0,
+            age: 0,
+            birth_game_update: 0,
+            charge: 0,
+            touched: false,
         })
     }
 
     /// Base ANM2 playback is admitted only on full nonplayer update phases.
-    pub fn advance(&mut self, phase: Phase) {
+    pub fn advance(&mut self, phase: Phase, game_update: u32) {
         if self.removed || !phase.updates_nonplayers() {
             return;
         }
+        // 442b30 uses the Game clock minus the entity's creation clock. The
+        // immediate Room::Update on admission advances ANM2, but does not
+        // invent a Game-clock tick or age while the transition is frozen.
+        self.age = game_update.saturating_sub(self.birth_game_update);
         if self.animation_playing {
             let clip = definition(self.variant, self.subtype)
                 .expect("admitted pickup definition")
@@ -184,7 +221,7 @@ impl Pickup {
             self.animation_frame = 0.0;
             self.animation_playing = true;
             self.can_collect = true;
-        } else if !self.animation_playing && self.collected {
+        } else if !self.animation_playing && self.collected && self.variant != 100 {
             self.removed = true;
         }
         self.collection_delay = self.collection_delay.saturating_sub(1);
