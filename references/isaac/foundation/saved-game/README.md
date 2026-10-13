@@ -20,7 +20,7 @@ OS-random cases, records entropy for replay, and checks complete public command
 plans and the owned native process executable SHA. The
 [fresh evidence](verification.json) uses source `98c4ba6` and immutable browser
 artifact `0454fdd751e17452e09b8b9162d4312747e84437d4782050a5d6580f77e6e8e8`.
-All six scoped ownership cases pass: saved seed/code/flags, supported Player
+All six scoped ownership checks pass: saved seed/code/flags, supported Player
 fields, actual modeled ItemPool fields, all 135 copied rows, 54 legacy saved
 pairs, and independent active-descriptor identity. The 54 active-row reads
 verify Level-to-Saved equality within both games. Menu checks compare 14,976 MT
@@ -32,8 +32,25 @@ counts are 88/83/88/85/86/87, versus 91 in production. The required cells includ
 does not yet admit the actual occupied grid constructors or their secondary
 seeds; its summary lists 44 pending occupied slots. Native values never supply
 these fields or change production occupancy. All six complete postrun MT states
-also differ. Neither untouched legacy rows nor within-game copy equality prove
+also differ as disclosed diagnostics. Neither untouched legacy rows nor within-game copy equality prove
 current-room numerical parity.
+
+The first gate recorded active-row and occupancy failures without making them
+block its case status. That policy error is corrected: actual paired
+`levelSeeds`, `savedSeeds`, per-sample occupancy and the complete live-grid
+occupancy now determine case status. A
+[required-comparison regrade](required-grid-regrade.json) preserves all six
+unchanged native manifests, browser checkpoints and canonical traces by hash.
+All six selected cases execute and fail, retaining 115 required field failures;
+the independent copy-ownership checks remain 6/6. The original scoped report
+and runtime artifact are preserved. The regrade invokes no game, supplies no
+observed state to production and exits nonzero. Reproduce it with:
+
+```sh
+node tools/e2e/regrade-saved-game.mjs \
+  --bank .cache/e2e/saved-game/current-row-final-1 \
+  --output .cache/e2e/saved-game/current-row-required-regrade.json
+```
 
 The strict W0L0LYYM replay remains a failure at 17/18 checkpoints: at
 `random-resumed`, the original has zero live tears and production has one. All
