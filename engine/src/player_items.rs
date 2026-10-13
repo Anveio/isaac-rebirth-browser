@@ -11,6 +11,7 @@ use serde::{Deserialize, Serialize};
 pub struct TemporaryCollectible {
     pub item_id: u32,
     pub count: i32,
+    pub cooldown: i32,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
@@ -157,7 +158,7 @@ pub(crate) fn finish_player_update(state: &mut State, phase: Phase) -> Result<()
     if phase != Phase::Update {
         return Ok(());
     }
-    if !items.pickup_animation_guard {
+    if !items.pickup_animation_guard && !state.player_animation.guard {
         flush_queued(state)?;
     }
     Ok(())
@@ -436,8 +437,6 @@ fn flush_queued(state: &mut State) -> Result<(), String> {
             0
         };
         let requested = charge + transferred;
-        let previous_charge = owner.active_charge;
-        owner.active_charge = requested.min(config.max_charges);
         owner.active_subordinate_charge = 0;
         owner.active_state_d80 = 0;
         owner.active_flag_3076 = false;
@@ -445,25 +444,7 @@ fn flush_queued(state: &mut State) -> Result<(), String> {
         if matches!(id, 130 | 181) {
             owner.unevaluated_cache_flags |= config.cache_flags;
         }
-        // 509e10 owns the charge sound. Full requested charge chooses218,
-        // partial charge171;164/289 bypass this increasing-charge request.
-        if owner.active_charge > previous_charge && !matches!(id, 164 | 289) {
-            state.audio.admit(
-                &mut state.boot_lifecycle.shared,
-                state.system_clock.system_counter - 1,
-                crate::audio::SoundRequest {
-                    id: if requested >= config.max_charges {
-                        218
-                    } else {
-                        171
-                    },
-                    volume: 1.0,
-                    delay: 2,
-                    looping: false,
-                    pitch: 1.0,
-                },
-            );
-        }
+        crate::active_items::set_charge(state, requested)?;
     } else {
         owner.unevaluated_cache_flags |= config.cache_flags;
     }

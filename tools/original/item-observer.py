@@ -64,7 +64,7 @@ def observe(pid,context):
    report['sharedMt']={'index':struct.unpack('<I',read(0x8e6b64,4))[0],
                        'words':list(struct.unpack('<624Q',read(0x8ed680,624*8)))}
    report['collectionSounds']=[]
-   for sound in (128,171,218):
+   for sound in (128,157,171,218):
     slot=system+0x12c20+sound*0x158
     report['collectionSounds'].append({'id':sound,'lastTick':i32(slot),'nextAllowed':i32(slot+4),
                                       'lastVolume':f32(slot+0x14c),'loaded':bools(slot+0x150,1)[0]==1})
@@ -125,7 +125,15 @@ def observe(pid,context):
                      'pickupSprite':sprite(player+0x7e0),
                      'activeSubordinateCharge':i32(player+0xd7c),'activeStateD80':i32(player+0xd80),
                      'activeStateD84':i32(player+0xd84),'reserveCharge':i32(player+0xd8c),
-                     'activeFlag3076':bools(player+0x3076,1)[0]==1 if i32(player+0xd74)else None})
+                     'activeFlag3076':bools(player+0x3076,1)[0]==1 if i32(player+0xd74)else None,
+                     'controlsEnabled':bools(player+0x7d4,1)[0]==1,'inputCooldown':i32(player+0x7d8),
+                     'temporaryCollectibles':[]})
+     temp_begin,temp_end=u64(player+0xd00),u64(player+0xd08)
+     if temp_end<temp_begin or(temp_end-temp_begin)%16 or(temp_end-temp_begin)//16>347:raise ValueError('Temporary record array outside bound')
+     for record in range(temp_begin,temp_end,16):
+      config=u64(record);item_id=i32(config+4)
+      if item_id not in expected:raise ValueError('Temporary record ItemConfig unknown')
+      players[-1]['temporaryCollectibles'].append({'itemId':item_id,'count':i32(record+8),'cooldown':i32(record+12)})
     report['players']=players
     room=u64(game+0x8180);manager=room+0x15d0
     count=struct.unpack('<I',read(manager+0x74,4))[0]

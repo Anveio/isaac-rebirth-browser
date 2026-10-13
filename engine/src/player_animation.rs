@@ -7,6 +7,7 @@ pub enum Clip {
     Trapdoor,
     Appear,
     Death,
+    UseItem,
 }
 
 impl Clip {
@@ -15,6 +16,7 @@ impl Clip {
             Self::Trapdoor => "Trapdoor",
             Self::Appear => "Appear",
             Self::Death => "Death",
+            Self::UseItem => "UseItem",
         }
     }
     fn frames(self) -> u32 {
@@ -22,6 +24,7 @@ impl Clip {
             Self::Trapdoor => crate::content::PLAYER_TRAPDOOR_FRAMES,
             Self::Appear => crate::content::PLAYER_APPEAR_FRAMES,
             Self::Death => crate::content::PLAYER_DEATH_FRAMES,
+            Self::UseItem => crate::content::PLAYER_USEITEM_FRAMES,
         }
     }
 }

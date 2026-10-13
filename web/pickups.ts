@@ -36,8 +36,10 @@ export class PickupRenderer {
   drawCarried(ctx: CanvasRenderingContext2D, state: State, x: number, y: number): void {
     const owner = state.playerItems;
     const presentation = owner?.pickupPresentation;
-    if (!owner?.pickupAnimationGuard || !presentation) return;
-    const attachment = this.assets.nullFrame("gfx/001.000_player.anm2", "Pickup", 0, owner.pickupAnimationFrame);
+    const using = state.playerAnimation.current === "UseItem";
+    if ((!owner?.pickupAnimationGuard && !using) || !presentation) return;
+    const attachment = this.assets.nullFrame("gfx/001.000_player.anm2", using ? "UseItem" : "Pickup", 0,
+      using ? state.playerAnimation.frame : owner!.pickupAnimationFrame);
     if (!attachment?.Visible) return;
     const item = catalog.items.find(item => item.id === presentation.itemId && item.kind !== "trinket");
     if (!item?.sprite) return;

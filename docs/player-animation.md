@@ -1,5 +1,5 @@
 The shared Player main-animation owner covers authored `Trapdoor`, `Appear`,
-and `Death` clips from `gfx/001.000_player.anm2`. Build-time extraction reads
+`Death`, and `UseItem` clips from `gfx/001.000_player.anm2`. Build-time extraction reads
 their frame counts and nonlooping flags from the same authored catalogue used
 by the renderer. No captured animation clock or fitted delay enters runtime.
 
@@ -11,6 +11,12 @@ guard, following Base447190, Sprite40f920, and Player531850. Intermediate
 updates retain the main frame. `is_finished(None)` queries the owned current
 clip. Walking and Pickup presentation are unowned here and cannot satisfy
 that query.
+
+The main guard is not a movement veto. Source529750 uses controls7d4 and
+input7d8; source52f370 separately suppresses shooting input while bf4 is set,
+continuing its full timer work. The concrete normal45 active caller owns
+UseItem and its copied item presentation. Its completed main clip returns to
+ordinary Player presentation in the full callback.
 
 `Player.visible` models Entity+31d independently of Player+7d4 controls.
 The renderer consumes this visibility and the selected authored main clip.

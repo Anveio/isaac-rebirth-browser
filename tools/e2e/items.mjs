@@ -25,33 +25,35 @@ const files = ['tools/e2e/items.mjs', 'tools/original/item-scenarios.py', 'tools
   'tools/original/state-observer.py', 'tools/original/with-display.sh', 'tools/foundation/verify.mjs',
   'tools/foundation/browser.mjs', 'tools/foundation/production-server.mjs', 'web/trace.ts',
   'engine/src/items.rs', 'engine/src/seed.rs', 'engine/src/pickups.rs', 'engine/src/lib.rs', 'engine/build.rs'];
-files.push('engine/src/player_items.rs', 'web/engine.ts', 'web/animation.ts', 'web/pickups.ts', 'web/renderer.ts');
+files.push('web/main.ts', 'engine/src/phase.rs', 'engine/src/run_admission.rs', 'engine/src/active_items.rs', 'engine/src/public_actions.rs', 'engine/src/player_animation.rs',
+  'tools/original/active-item-scenarios.py', 'engine/src/player_items.rs', 'web/engine.ts', 'web/animation.ts', 'web/pickups.ts', 'web/renderer.ts');
 files.push('web/scene-data.json', 'web/pickup-data.json');
 files.push('engine/src/combat.rs', 'engine/src/grid.rs', 'engine/src/room.rs');
 const hashes = async () => Object.fromEntries(await Promise.all(files.map(async path => [path, digest(await readFile(join(ROOT, path)))])));
 const before = await hashes();
 const value = flag => { const i = process.argv.indexOf(flag); return i < 0 ? undefined : process.argv[i + 1]; };
-const acquisition = process.argv.includes('--acquisition');
+const activeUse = process.argv.includes('--active-use');
+const acquisition = activeUse || process.argv.includes('--acquisition');
 const replayOriginal = value('--replay-original') ? resolve(value('--replay-original')) : null;
 assert.ok(!replayOriginal || acquisition, 'Frozen original recovery is a separately disclosed acquisition comparison');
-const output = resolve(value('--output') || join(ROOT, acquisition ? '.cache/e2e/item-acquisition' : '.cache/e2e/items', String(Date.now())));
+const output = resolve(value('--output') || join(ROOT, activeUse ? '.cache/e2e/active-item-use' : acquisition ? '.cache/e2e/item-acquisition' : '.cache/e2e/items', String(Date.now())));
 await mkdir(output, { recursive: true });
 const frozenReportBytes = replayOriginal ? await readFile(join(replayOriginal, 'report.json')) : null;
 const frozenReport = frozenReportBytes ? JSON.parse(frozenReportBytes) : null;
 const scenarios = replayOriginal ? JSON.parse(await readFile(join(replayOriginal, 'scenarios.json'), 'utf8')) :
   value('--scenarios') ? JSON.parse(await readFile(resolve(value('--scenarios')), 'utf8')) :
-  JSON.parse((await run('python3', ['tools/original/item-scenarios.py', '--count', value('--count') || '2',
-    ...(acquisition ? ['--acquisition'] : [])], { cwd: ROOT, timeout: 600000 })).stdout);
+  JSON.parse((await run('python3', [activeUse ? 'tools/original/active-item-scenarios.py' : 'tools/original/item-scenarios.py', '--count', value('--count') || '2',
+    ...(acquisition && !activeUse ? ['--acquisition'] : [])], { cwd: ROOT, timeout: 600000 })).stdout);
 assert.equal(scenarios.schema, 1);
 assert.equal(scenarios.bootEpochSeed, 1700000000);
-assert.ok(scenarios.cases.length >= 4 && scenarios.cases.length <= (acquisition ? 8 : 6));
+assert.ok(scenarios.cases.length >= 4 && scenarios.cases.length <= (activeUse ? 10 : acquisition ? 8 : 6));
 assert.equal(new Set(scenarios.cases.map(item => item.name)).size, scenarios.cases.length);
 for (const item of scenarios.cases) {
   assert.match(item.name, /^[a-zA-Z0-9_-]{1,32}$/);
   assert.match(item.code, /^[A-Z0-9]{8}$/);
   assert.ok(Number.isInteger(item.seedValue) && item.seedValue > 0 && item.seedValue <= 0xffffffff);
   assert.ok([0, 1].includes(item.delay));
-  if (acquisition && !replayOriginal && scenarios.mode !== 'acquisition') {
+  if (acquisition && !activeUse && !replayOriginal && scenarios.mode !== 'acquisition') {
     item.actions.push({key: 'w', frames: 32});
     if (item.entropy.startsWith('Contrived')) item.actions.push({key: 'Right', frames: 50}, {key: null, frames: 50});
     else item.actions.push({key: null, frames: 100});
@@ -66,7 +68,8 @@ const server = await startProductionServer();
 const browser = await chromium.launch(browserLaunchOptions());
 const report = { schema: 1, status: 'running', production: server.build, originalBinarySha256: PIN,
   gateSources: before, graphics: await inspectBrowserGraphics(browser), sourceHashes: catalogue.sourceHashes,
-  scope: acquisition ? 'Natural first free collectible contact, real deferred Pickup animation/queue, all347 owned counts, authored inventory/health grants, first active ownership/charge, pool removal and collection sound admission. Baseline complete450 Player child RNGs are required. Actual stat/familiar/cache callbacks, later child RNG mutation, active swaps/use, achievements, paid/override contexts and pixels remain unaccepted; full MT/cache/child RNG differences are retained diagnostics.' : 'Fresh-profile authored catalogue, causal run/pool seeds, complete 16 pools/497 weights and ID maps, natural free treasure pedestal Init/selection, phase/animation/charge and public seed/input provenance. Acquisition, item effects/cache evaluation, familiars, paid/override contexts and pixels remain unaccepted.',
+  scope: activeUse ? 'Natural independent original/browser acquisition and public active use; authored charge/count/temporary records/health/7d4/7d8/UseItem/motion/SFX admission are required. Full raw fields, inputs, backend histories and all random failures remain retained; pixels and complete shared MT stay diagnostics. Other active effects and charge modifiers remain explicitly unimplemented.' : acquisition ? 'Natural first free collectible contact, real deferred Pickup animation/queue, all347 owned counts, authored inventory/health grants, first active ownership/charge, pool removal and collection sound admission. Baseline complete450 Player child RNGs are required. Actual stat/familiar/cache callbacks, later child RNG mutation, active swaps/use, achievements, paid/override contexts and pixels remain unaccepted; full MT/cache/child RNG differences are retained diagnostics.' : 'Fresh-profile authored catalogue, causal run/pool seeds, complete 16 pools/497 weights and ID maps, natural free treasure pedestal Init/selection, phase/animation/charge and public seed/input provenance. Acquisition, item effects/cache evaluation, familiars, paid/override contexts and pixels remain unaccepted.',
+  activeUse: activeUse ? {scope: 'Public first acquisition and action9 use; native record/charge/health/ANM/input/motion and157 admission required. Other active leaves remain red when exercised, with every OS discovery retained.'} : null,
   selection: selectedCase ? { scope: 'Targeted recorded public case; default gate runs the complete cohort', case: selectedCase } : { scope: 'Complete cohort' }, cases: [] };
 report.originalCapture = replayOriginal ? {mode: 'frozen-current-turn-original-recovery',
   reportPath: join(replayOriginal, 'report.json'), reportSha256: digest(frozenReportBytes),
@@ -222,16 +225,28 @@ try {
           equal([state.player.maxHp, state.player.hp, state.player.soulHp, state.player.blackHeartMask], nativePlayer.health,
             'authored normal Isaac health helpers', presentation);
           equal(state.inventory, nativePlayer.inventory, 'authored inventory helper grants', presentation);
-          equal(owner.pickupAnimationGuard, nativePlayer.pickupAnimationGuard, 'actual animation guard', presentation);
+          equal(owner.pickupAnimationGuard || (activeUse && state.playerAnimation.guard), nativePlayer.pickupAnimationGuard, 'actual animation guard', presentation);
           equal(owner.collectionDelay, nativePlayer.pickupCooldown, 'Player collection delay', presentation);
           for (const field of ['activeId', 'activeCharge', 'activeSubordinateCharge', 'activeStateD80', 'activeStateD84', 'reserveCharge']) {
             equal(owner[field], nativePlayer[field], `Player:${field}`, presentation);
           }
           if (nativePlayer.activeId !== 0) equal(owner.activeFlag3076, nativePlayer.activeFlag3076, 'active replacement flag', presentation);
-          if (nativePlayer.pickupAnimationGuard) {
+          if (nativePlayer.pickupAnimationGuard && (!activeUse || nativePlayer.mainSprite.animation === 'Pickup')) {
             equal(nativePlayer.mainSprite.animation, 'Pickup', 'source authored Pickup clip', presentation);
             equal(owner.pickupAnimationFrame, nativePlayer.mainSprite.animationFrame, 'authored Pickup frame', presentation);
             equal(owner.pickupAnimationPlaying, nativePlayer.mainSprite.animationPlaying, 'authored Pickup playing', presentation);
+          }
+          if (activeUse) {
+            equal(state.player.controlsEnabled, nativePlayer.controlsEnabled, 'persistent7d4 controls', presentation);
+            equal(state.player.inputCooldown, nativePlayer.inputCooldown, 'input7d8 cooldown', presentation);
+            equal(owner.temporaryCollectibles, nativePlayer.temporaryCollectibles, 'actual temporary use records', presentation);
+            equal(playerWorld, nativeActor.position, 'public active-use stored position', presentation);
+            equal(playerVelocity, nativeActor.velocity, 'public active-use stored velocity', presentation);
+            if (nativePlayer.mainSprite.animation === 'UseItem' || state.playerAnimation.current === 'UseItem') {
+              equal(state.playerAnimation.current, nativePlayer.mainSprite.animation, 'actual UseItem name', presentation);
+              equal(state.playerAnimation.frame, nativePlayer.mainSprite.animationFrame, 'actual UseItem frame', presentation);
+              equal(state.playerAnimation.playing, nativePlayer.mainSprite.animationPlaying, 'actual UseItem playing', presentation);
+            }
           }
           if (owner.pickupPresentation) {
             equal(nativePlayer.pickupSprite.animation, 'PlayerPickupSparkle', 'actual copied presentation clip', presentation);
@@ -307,8 +322,8 @@ try {
       };
       compare(start, baseline, 0);
       for (const {key, frames} of item.actions) {
-        const code = key ? ['Right', 'Left', 'Up', 'Down'].includes(key) ? 'Arrow' + key : 'Key' + key.toUpperCase() : null;
-        const domKey = key && ['Right', 'Left', 'Up', 'Down'].includes(key) ? code : key;
+        const code = key === 'space' ? 'Space' : key ? ['Right', 'Left', 'Up', 'Down'].includes(key) ? 'Arrow' + key : 'Key' + key.toUpperCase() : null;
+        const domKey = key === 'space' ? 'Space' : key && ['Right', 'Left', 'Up', 'Down'].includes(key) ? code : key;
         if (key) { await page.keyboard.down(domKey); expected.push({type: 'key', code, down: true}); }
         for (let index = 0; index < frames; index++) {
           await page.evaluate(() => { window.game.step(1); });
@@ -323,6 +338,11 @@ try {
       if (acquisition) {
         assert.ok(queuedPresentations > 0, 'Every acquisition case must observe the actual deferred queue');
         assert.ok(grantedPresentations > 0, 'Every acquisition case must observe a later actual grant');
+      }
+      if (activeUse && item.expectedItemId !== undefined) {
+        assert.ok(grantedItemIds.has(item.expectedItemId), 'Contrived use requires actual independent native45 acquisition');
+        assert.ok(states.some(state => state.playerAnimation.current === 'UseItem'), 'Concrete browser use callback must execute');
+        assert.ok([...rows.values()].some(row => row.observation.players?.some(player => player.mainSprite.animation === 'UseItem')), 'Concrete original use callback must execute');
       }
       const trace = await page.evaluate(() => window.game.trace());
       assertInputProvenance(trace, expected, item.seedValue, scenarios.bootEpochSeed);

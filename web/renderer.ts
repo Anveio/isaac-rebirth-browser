@@ -204,6 +204,7 @@ export class Renderer {
     if (state.playerAnimation.current) {
       this.assets.draw(ctx, PLAYER, state.playerAnimation.current, x, y, state.playerAnimation.frame,
         { overrides: Object.fromEntries(Array.from({length: 5}, (_, layer) => [layer, {RedTint, GreenTint, BlueTint}])) });
+      if (state.playerAnimation.current === "UseItem") this.pickups.drawCarried(ctx, state, x, y);
       return;
     }
     if (state.playerItems?.pickupAnimationGuard) {

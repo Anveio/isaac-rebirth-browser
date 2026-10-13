@@ -250,7 +250,7 @@ fn main() {
             .as_u64()
             .expect("Pickup frame count")
     ));
-    for name in ["Trapdoor", "Appear", "Death"] {
+    for name in ["Trapdoor", "Appear", "Death", "UseItem"] {
         let clip = player_actors["gfx/001.000_player.anm2"]["Animations"]
             .as_array()
             .expect("authored player clips")
