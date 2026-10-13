@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "status": "source-mapped; live acquisition proof pending",
+  "status": "Scoped four-case frozen-original/live-browser recovery passes; required CI always captures both games freshly",
   "nativeBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
   "scope": "Fresh normal Isaac, first natural free collectible. Actual queued counts/authored inventory/health and first active ownership; separate item-specific stat/cache/familiar callbacks remain unaccepted.",
   "contact": {
@@ -87,5 +87,6 @@
     "prediction": "physical backup survives;presented=physical+(stored velocity*current friction)/2;no sprite/contact/anchor advancement",
     "contact": "common445710 kernel;Player mass5/Pickup mass3,Player radius10/Pickup12,Player-only halfshare impulse and443b50 displacement grid query",
     "unaccepted": "Altar grid-impact/prediction-correction and unusual collision scales need dedicated cases"
-  }
+  },
+  "verification": "acquisition-correction-live.json"
 }
