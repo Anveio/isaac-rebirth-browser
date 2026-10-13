@@ -1,0 +1,209 @@
+{
+  "schema": 1,
+  "status": "pass",
+  "gateSources": {
+    "tools/e2e/weapons.mjs": "33f304f9a538dd98862b6f62c060888d9c048679f1a9e3cb991864182a915686",
+    "tools/e2e/tear-contracts.mjs": "db3d2de0f2f98d1fdf28734ce020f58a5b15576b48e245869f463d71da7d184f",
+    "tools/original/foundation-physics-observer.py": "a55b80c9d6c6cf606484fc5aa1fee339cd455c9d8ae34eb02f4436baae432bc9",
+    "tools/original/native-identity.py": "4fd5591be56fc4e9ad0486d0f2ec2828f6389786245ee09f9d0b3a395ae18acb",
+    "tools/original/state-observer.py": "58e3b510abbe5ff57f05844efbdf764e2a02530cda4fa99f538d886d258af6f1",
+    "tools/original/foundation-clock-run.py": "0669849e55218ed984aaa95a9964bba05d20707ec7ed164c77dab689c5891fbc",
+    "tools/original/foundation-clock-gate.c": "f517f1fc0edf2bbe17021e529fb41652e991e286bef070b8aecefd32bfa62e75",
+    "tools/original/foundation-seeds.py": "dd4633c955e7518e9bc0f0147ddfae46d356468238477a68dc06c86656ccba89",
+    "tools/original/debug-run.py": "d785d32c6cc557959be38880a3b046c4040b988fbe3d06d4a8c1f4aa2e833cf5",
+    "tools/original/with-display.sh": "af469210e803786a60d8632c28a6f2da77bc8ab02cc06be50016ddb25e95b848",
+    "tools/foundation/browser.mjs": "60c4bc851470f47e4dd0399148ce0c1edf351d41fbf7f7e15fa823af5948b4c8",
+    "tools/foundation/production-server.mjs": "e3152b58e2353319ba0963b30439e33c3cc65f84a8c6ebb765c2812486245952",
+    "tools/foundation/verify.mjs": "829a29f4dba43469ca6931f4a0466b7115367deb0b8705fd9bef1e4a2b9fe01f",
+    "tools/original/weapons-scenarios.py": "b63de8e94c600ab34fdad5026bcafee98836f08eacd382a56acba87a8c498085"
+  },
+  "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "scope": "Paired live original/browser weapon cooldown, held/released head clock, shot births, actor birth fence and horizontal birth positions, with exact requested DOM/tick provenance, seed readback and paired player XY/VXY",
+  "production": {
+    "sha256": "f050bf745a753793fd01cdc2c218b1c9e3fff1b945b03cc8a8e845f2768289ba",
+    "files": 917,
+    "source": "/workspace/isaac-worktrees/weapons/dist",
+    "scope": "Immutable snapshot of production build bytes; source/native replay equality is checked separately"
+  },
+  "graphics": {
+    "requestedProfile": "mesa",
+    "actualProfile": "mesa",
+    "renderer": "ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL ES 3.2 Mesa 25.0.7-2+deb13u1)",
+    "vendor": "Google Inc. (Mesa)",
+    "version": "OpenGL ES 3.0 (ANGLE 2.1 git hash: unknown hash)",
+    "displayType": "ANGLE_OPENGL_EGL",
+    "devices": [
+      {
+        "vendorId": 0,
+        "deviceId": 0,
+        "vendorString": "Google Inc. (Mesa)",
+        "deviceString": "ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL ES 3.2 Mesa 25.0.7-2+deb13u1)",
+        "driverVendor": "Mesa",
+        "driverVersion": "25.0.7"
+      }
+    ],
+    "observedFrom": "Chromium SystemInfo.getInfo",
+    "scope": "Observed Chromium graphics backend; shader/pixel equality still requires the original reference comparisons"
+  },
+  "cases": [
+    {
+      "name": "full-first-shot",
+      "code": "QSYVKMSE",
+      "direction": "Right",
+      "delay": 0,
+      "status": "pass",
+      "inputProvenance": {
+        "status": "pass",
+        "expectedCommands": 130,
+        "observedCommands": 130,
+        "initialSeed": 2076625747,
+        "bootEpochSeed": 1700000000,
+        "runSeedValue": 2076625747
+      },
+      "nativeManifestSha256": "c48c3c6db86ec91ccbdd40c2dd35ebeea7cba9a74ad9a75ef009f226244055c7",
+      "nativeManifest": "/workspace/isaac-worktrees/weapons/.cache/e2e/weapons/music-root-final-1/full-first-shot/original/manifest.json",
+      "comparedPresentations": 80,
+      "comparedHeldPresentations": 54,
+      "comparedReleasePresentations": 26,
+      "observedBirths": 3,
+      "pairedPlayerCheckpoints": 81,
+      "pairedPlayerFields": 324
+    },
+    {
+      "name": "intermediate-first-shot",
+      "code": "ZG800TRJ",
+      "direction": "Right",
+      "delay": 1,
+      "status": "pass",
+      "inputProvenance": {
+        "status": "pass",
+        "expectedCommands": 131,
+        "observedCommands": 131,
+        "initialSeed": 2790397112,
+        "bootEpochSeed": 1700000000,
+        "runSeedValue": 2790397112
+      },
+      "nativeManifestSha256": "3c8be47cc993aae47cc8d1a5aee8513c2be22aa05d072173cff3d4911cab1e08",
+      "nativeManifest": "/workspace/isaac-worktrees/weapons/.cache/e2e/weapons/music-root-final-1/intermediate-first-shot/original/manifest.json",
+      "comparedPresentations": 80,
+      "comparedHeldPresentations": 54,
+      "comparedReleasePresentations": 26,
+      "observedBirths": 3,
+      "pairedPlayerCheckpoints": 82,
+      "pairedPlayerFields": 328
+    },
+    {
+      "name": "random-0",
+      "code": "W2VJCA44",
+      "direction": "Right",
+      "delay": 0,
+      "seedValue": 2581200638,
+      "status": "pass",
+      "inputProvenance": {
+        "status": "pass",
+        "expectedCommands": 130,
+        "observedCommands": 130,
+        "initialSeed": 2581200638,
+        "bootEpochSeed": 1700000000,
+        "runSeedValue": 2581200638
+      },
+      "nativeManifestSha256": "62740c7387671429ce05c19d67c32e7e09b301176b990c00ba41cd11978ed811",
+      "nativeManifest": "/workspace/isaac-worktrees/weapons/.cache/e2e/weapons/music-root-final-1/random-0/original/manifest.json",
+      "comparedPresentations": 80,
+      "comparedHeldPresentations": 54,
+      "comparedReleasePresentations": 26,
+      "observedBirths": 3,
+      "pairedPlayerCheckpoints": 81,
+      "pairedPlayerFields": 324
+    },
+    {
+      "name": "random-1",
+      "code": "H9H7P3BC",
+      "direction": "Left",
+      "delay": 1,
+      "seedValue": 807446809,
+      "status": "pass",
+      "inputProvenance": {
+        "status": "pass",
+        "expectedCommands": 131,
+        "observedCommands": 131,
+        "initialSeed": 807446809,
+        "bootEpochSeed": 1700000000,
+        "runSeedValue": 807446809
+      },
+      "nativeManifestSha256": "eb6ab91ea3673f489fdb8fb74fff6255069cc546d77b22ff152286fc17cb4e79",
+      "nativeManifest": "/workspace/isaac-worktrees/weapons/.cache/e2e/weapons/music-root-final-1/random-1/original/manifest.json",
+      "comparedPresentations": 80,
+      "comparedHeldPresentations": 54,
+      "comparedReleasePresentations": 26,
+      "observedBirths": 3,
+      "pairedPlayerCheckpoints": 82,
+      "pairedPlayerFields": 328
+    },
+    {
+      "name": "random-2",
+      "code": "KNDLZ9R4",
+      "direction": "Up",
+      "delay": 0,
+      "seedValue": 1156175104,
+      "status": "pass",
+      "inputProvenance": {
+        "status": "pass",
+        "expectedCommands": 130,
+        "observedCommands": 130,
+        "initialSeed": 1156175104,
+        "bootEpochSeed": 1700000000,
+        "runSeedValue": 1156175104
+      },
+      "nativeManifestSha256": "9ac48bd9a8bad113625cc3a4c4ae27ee7c4667a13a9938547705e0c04a2b7f77",
+      "nativeManifest": "/workspace/isaac-worktrees/weapons/.cache/e2e/weapons/music-root-final-1/random-2/original/manifest.json",
+      "comparedPresentations": 80,
+      "comparedHeldPresentations": 54,
+      "comparedReleasePresentations": 26,
+      "observedBirths": 3,
+      "pairedPlayerCheckpoints": 81,
+      "pairedPlayerFields": 324
+    },
+    {
+      "name": "random-3",
+      "code": "JLYJZ0K4",
+      "direction": "Down",
+      "delay": 1,
+      "seedValue": 1296561444,
+      "status": "pass",
+      "inputProvenance": {
+        "status": "pass",
+        "expectedCommands": 131,
+        "observedCommands": 131,
+        "initialSeed": 1296561444,
+        "bootEpochSeed": 1700000000,
+        "runSeedValue": 1296561444
+      },
+      "nativeManifestSha256": "f92049f33bfe8c662e03307c4c46b805baaa573ffb9091ae5912ee2b7f913035",
+      "nativeManifest": "/workspace/isaac-worktrees/weapons/.cache/e2e/weapons/music-root-final-1/random-3/original/manifest.json",
+      "comparedPresentations": 80,
+      "comparedHeldPresentations": 54,
+      "comparedReleasePresentations": 26,
+      "observedBirths": 3,
+      "pairedPlayerCheckpoints": 82,
+      "pairedPlayerFields": 328
+    }
+  ],
+  "gateSourcesEnd": {
+    "tools/e2e/weapons.mjs": "33f304f9a538dd98862b6f62c060888d9c048679f1a9e3cb991864182a915686",
+    "tools/e2e/tear-contracts.mjs": "db3d2de0f2f98d1fdf28734ce020f58a5b15576b48e245869f463d71da7d184f",
+    "tools/original/foundation-physics-observer.py": "a55b80c9d6c6cf606484fc5aa1fee339cd455c9d8ae34eb02f4436baae432bc9",
+    "tools/original/native-identity.py": "4fd5591be56fc4e9ad0486d0f2ec2828f6389786245ee09f9d0b3a395ae18acb",
+    "tools/original/state-observer.py": "58e3b510abbe5ff57f05844efbdf764e2a02530cda4fa99f538d886d258af6f1",
+    "tools/original/foundation-clock-run.py": "0669849e55218ed984aaa95a9964bba05d20707ec7ed164c77dab689c5891fbc",
+    "tools/original/foundation-clock-gate.c": "f517f1fc0edf2bbe17021e529fb41652e991e286bef070b8aecefd32bfa62e75",
+    "tools/original/foundation-seeds.py": "dd4633c955e7518e9bc0f0147ddfae46d356468238477a68dc06c86656ccba89",
+    "tools/original/debug-run.py": "d785d32c6cc557959be38880a3b046c4040b988fbe3d06d4a8c1f4aa2e833cf5",
+    "tools/original/with-display.sh": "af469210e803786a60d8632c28a6f2da77bc8ab02cc06be50016ddb25e95b848",
+    "tools/foundation/browser.mjs": "60c4bc851470f47e4dd0399148ce0c1edf351d41fbf7f7e15fa823af5948b4c8",
+    "tools/foundation/production-server.mjs": "e3152b58e2353319ba0963b30439e33c3cc65f84a8c6ebb765c2812486245952",
+    "tools/foundation/verify.mjs": "829a29f4dba43469ca6931f4a0466b7115367deb0b8705fd9bef1e4a2b9fe01f",
+    "tools/original/weapons-scenarios.py": "b63de8e94c600ab34fdad5026bcafee98836f08eacd382a56acba87a8c498085"
+  },
+  "gateSourcesStable": true
+}

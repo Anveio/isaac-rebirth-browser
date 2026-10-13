@@ -25,11 +25,11 @@ const heldPresentations=lifecycle?1:54,releasePresentations=lifecycle?110:26;
 // must fail even if the resulting state still satisfies a weaker tear contract.
 const requestedCommands=scenario=>{
  const commands=[];
- const press=code=>commands.push({type:'key',code,down:true},{type:'key',code,down:false});
- for(let index=0;index<3;index++)press('Enter');
- press('Tab');
- for(const character of scenario.code)commands.push({type:'text',text:character.toUpperCase()});
- press('Enter');press('Enter');
+ for(let index=0;index<3;index++)commands.push({type:'key',code:'Enter',down:true},{type:'tick',count:12},{type:'key',code:'Enter',down:false},{type:'tick',count:72});
+ commands.push({type:'key',code:'Tab',down:true},{type:'tick',count:12},{type:'key',code:'Tab',down:false},{type:'tick',count:108});
+ for(const character of scenario.code)commands.push({type:'text',text:character.toUpperCase()},{type:'tick',count:12},{type:'tick',count:6});
+ commands.push({type:'key',code:'Enter',down:true},{type:'tick',count:12},{type:'key',code:'Enter',down:false},{type:'tick',count:72});
+ commands.push({type:'key',code:'Enter',down:true},{type:'tick',count:12},{type:'key',code:'Enter',down:false},{type:'tick',count:300});
  if(scenario.delay)commands.push({type:'tick',count:1});
  if(lifecycle)commands.push({type:'key',code:'KeyA',down:true},{type:'tick',count:30},{type:'key',code:'KeyA',down:false},{type:'tick',count:30});
  const code=`Arrow${scenario.direction}`;commands.push({type:'key',code,down:true});
@@ -98,8 +98,22 @@ try {
   await page.goto(`${production.url}/?manual=1`);await waitForReady(page);
   initialSeed=scenario.seedValue??native.seedValue;seedValue=native.seedValue;
   await page.evaluate(({initialSeed,epoch})=>{window.game.pause();window.game.reset(initialSeed,{trace:true,bootEpochSeed:epoch});},{initialSeed,epoch});
-  for(let i=0;i<3;i++)await page.keyboard.press('Enter');
-  await page.keyboard.press('Tab');await page.keyboard.type(scenario.code);await page.keyboard.press('Enter');await page.keyboard.press('Enter');
+  // Match the declared native tape through the actual delayed run admission.
+  // These intervals are public inputs, never a fitted game/counter offset.
+  for(let i=0;i<3;i++){
+   await page.keyboard.down('Enter');await page.evaluate(()=>window.game.step(12));
+   await page.keyboard.up('Enter');await page.evaluate(()=>window.game.step(72));
+  }
+  await page.keyboard.down('Tab');await page.evaluate(()=>window.game.step(12));
+  await page.keyboard.up('Tab');await page.evaluate(()=>window.game.step(108));
+  for(const character of scenario.code.toLowerCase()){
+   await page.keyboard.down(character);await page.evaluate(()=>window.game.step(12));
+   await page.keyboard.up(character);await page.evaluate(()=>window.game.step(6));
+  }
+  await page.keyboard.down('Enter');await page.evaluate(()=>window.game.step(12));
+  await page.keyboard.up('Enter');await page.evaluate(()=>window.game.step(72));
+  await page.keyboard.down('Enter');await page.evaluate(()=>window.game.step(12));
+  await page.keyboard.up('Enter');await page.evaluate(()=>window.game.step(300));
   const start=await page.evaluate(()=>window.game.snapshot());assert.equal(start.screen,'playing');assert.equal(start.systemClock.systemCounter%2,0);
   checkSeed(start,scenario,seedValue);
   assert.equal(start.fireCooldown,baseline.observation.players[0].fireCooldown);

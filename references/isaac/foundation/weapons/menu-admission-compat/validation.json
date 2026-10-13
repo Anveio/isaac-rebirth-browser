@@ -1,0 +1,67 @@
+{
+  "schema": 1,
+  "scope": "Helper-only compatibility for actual delayed Character-to-run admission; no runtime changes, timing offsets or source-state injection. RNG-dependent tear numeric parity and mandatory W0L0LYYM holdout remain unresolved.",
+  "codeCommit": "cdfd1918634481f4037752ee85c833e9a30d6023",
+  "aggregateBase": "519e31cbd4ab1e9d2455f0959a6b44c95c7ab29b",
+  "declaredPublicIntervals": {
+    "menuConfirmations": {
+      "count": 3,
+      "down": 12,
+      "released": 72
+    },
+    "tab": {
+      "down": 12,
+      "released": 108
+    },
+    "seedGlyph": {
+      "down": 12,
+      "released": 6
+    },
+    "seedCommit": {
+      "down": 12,
+      "released": 72
+    },
+    "runConfirm": {
+      "down": 12,
+      "released": 300
+    }
+  },
+  "buildCheck": {
+    "command": "source cloud/env.sh; npm run check:build",
+    "status": "pass",
+    "log": "/workspace/isaac-worktrees/weapons/.cache/weapons-menu-admission-root-final-build.log",
+    "logSha256": "2f0a38eda0881c6e5dde17bcf32aafddd444d81957a9f6e8a4cca3ba841d91f2"
+  },
+  "cohorts": [
+    {
+      "gate": "weapons",
+      "status": "pass",
+      "artifact": "f050bf745a753793fd01cdc2c218b1c9e3fff1b945b03cc8a8e845f2768289ba",
+      "cases": 6,
+      "presentations": 480,
+      "exactCommands": 783,
+      "pairedPlayerFields": 1956,
+      "numericDiagnostics": 0,
+      "runningExecutableObservations": 729,
+      "runningExecutableSha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+      "reportSha256": "341181955ed25efd79561ffb34127449c8e74125701a6cd372b12bfed951498f",
+      "scenariosSha256": "cfd1c3783cf0c91ce32662995f7e0039b6383546f80264d815c06ce7015a351a",
+      "sourceHashesStable": true
+    },
+    {
+      "gate": "tear-lifecycle",
+      "status": "pass",
+      "artifact": "f050bf745a753793fd01cdc2c218b1c9e3fff1b945b03cc8a8e845f2768289ba",
+      "cases": 6,
+      "presentations": 666,
+      "exactCommands": 993,
+      "pairedPlayerFields": 2748,
+      "numericDiagnostics": 18,
+      "runningExecutableObservations": 927,
+      "runningExecutableSha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+      "reportSha256": "1e14895912bac202395af7437967b40a39008021ec97d5fd77f0243221f64623",
+      "scenariosSha256": "5c35ecea30943a4982b5afa89feff2ee60b5fcdd7837adfc6a9974d6d19519fb",
+      "sourceHashesStable": true
+    }
+  ]
+}
