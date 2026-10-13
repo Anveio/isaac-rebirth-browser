@@ -1,0 +1,65 @@
+{
+  "schema": 1,
+  "scope": "Actual production DOM omission diagnostics; the fresh original coast readback supplies comparison evidence only. The temporary negative harness remains ignored research and no native state enters WASM.",
+  "production": {
+    "sha256": "6fcd80f941f4e68e02673d64a949e898fc82c876a5f451ae5d9a9ba2002358ae",
+    "files": 832,
+    "source": "/workspace/isaac-worktrees/weapons/dist",
+    "scope": "Immutable snapshot of production build bytes; source/native replay equality is checked separately"
+  },
+  "cases": [
+    {
+      "omission": "movement-down",
+      "status": "rejected",
+      "commandTraceRejected": true,
+      "playerMotion": {
+        "source": {
+          "x": 154.4348731994629,
+          "y": 214,
+          "vx": -0.061333574727177625,
+          "vy": 0
+        },
+        "actual": {
+          "x": 240,
+          "y": 214,
+          "vx": 0,
+          "vy": 0
+        },
+        "status": "fail"
+      },
+      "seedReadback": {
+        "numericMatches": true,
+        "seededRun": true,
+        "seedValid": true,
+        "seedText": "QSYVKMSE"
+      }
+    },
+    {
+      "omission": "seed-character",
+      "status": "rejected",
+      "commandTraceRejected": true,
+      "playerMotion": {
+        "source": {
+          "x": 154.4348731994629,
+          "y": 214,
+          "vx": -0.061333574727177625,
+          "vy": 0
+        },
+        "actual": {
+          "x": 154.4348731994629,
+          "y": 214,
+          "vx": -0.061333574727177625,
+          "vy": 0
+        },
+        "status": "pass"
+      },
+      "seedReadback": {
+        "numericMatches": true,
+        "seededRun": false,
+        "seedValid": false,
+        "seedText": ""
+      }
+    }
+  ],
+  "status": "pass"
+}

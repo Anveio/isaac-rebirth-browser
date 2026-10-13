@@ -106,6 +106,7 @@ def observe(pid, context):
       if allowed(address+0xc7c,32) and allowed(address+0xd70,1):
        vals=struct.unpack('<8f',read(address+0xc7c,32))
        players.append({'referenceAddress':hex(address),'position':list(struct.unpack('<2f',read(address+0x448,8))),
+        'velocity':list(struct.unpack('<2f',read(address+0x464,8))),
         'fireCooldown':struct.unpack('<i',read(address+0xc74,4))[0], 'maxFireDelay':struct.unpack('<i',read(address+0xc78,4))[0],
         'headTimer':struct.unpack('<i',read(address+0xbb0,4))[0], 'headAnimationFrame':struct.unpack('<f',read(address+0x268,4))[0],
         'shotSpeed':vals[0], 'damage':vals[3], 'tearHeight':vals[4], 'fallingSpeed':vals[5], 'fallingAcceleration':vals[6],
