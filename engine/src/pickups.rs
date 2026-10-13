@@ -3,6 +3,19 @@
 //! source admission order, including a pickup collected earlier in its phase.
 use crate::{motion::WorldVector, phase::Phase, Inventory, Player};
 use serde::{Deserialize, Serialize};
+/// Normal Isaac's actual50c880 collection predicate. Supported guarded clips
+/// here are non-Hit clips; source Hit permits collection, and its explicit
+/// owner is a separate pending damage-presentation leaf. Controls7d4 is not
+/// a general collection veto.
+pub(crate) fn player_can_collect(state: &crate::State) -> bool {
+    !state.player.dead
+        && state.player_animation.current != Some(crate::player_animation::Clip::Death)
+        && !state.player_animation.guard
+        && !state
+            .player_items
+            .as_ref()
+            .is_some_and(|items| items.pickup_animation_guard)
+}
 use std::collections::{BTreeMap, BTreeSet};
 
 #[derive(Debug)]

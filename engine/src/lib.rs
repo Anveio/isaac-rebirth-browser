@@ -358,7 +358,6 @@ pub struct State {
     pub character_catalog: Vec<CharacterDefinition>,
     pub paused: bool,
     pub pressed: BTreeSet<String>,
-    pub public_actions: public_actions::PublicActions,
     pub player: Player,
     pub player_death: player_death::PlayerDeath,
     pub room: Room,
@@ -507,7 +506,6 @@ impl Game {
                 character_catalog: character_catalog(),
                 paused: false,
                 pressed: BTreeSet::new(),
-                public_actions: public_actions::PublicActions::default(),
                 player,
                 player_death: player_death::PlayerDeath::default(),
                 room,
@@ -609,8 +607,6 @@ impl Game {
                         | "KeyS"
                         | "KeyD"
                         | "KeyE"
-                        | "Space"
-                        | "KeyQ"
                 ) {
                     return Err(format!("unsupported key code: {code}"));
                 }
@@ -1141,6 +1137,9 @@ impl Game {
     /// The supported free regular callback is shared by ordinary full
     /// contacts and the actual Room.Update admission tail.
     fn collect_regular_pickup_at(&mut self, index: usize) {
+        if !pickups::player_can_collect(&self.state) {
+            return;
+        }
         let pickup = &mut self.state.room.pickups[index];
         if pickup.touches(&self.state.player) && pickup.try_collect(&mut self.state.inventory) {
             // Collect504480 routes key ->504720 and bomb ->5046d0
@@ -1620,6 +1619,9 @@ impl Game {
                 }
             }
             for index in 0..self.state.room.pickups.len() {
+                if !pickups::player_can_collect(&self.state) {
+                    continue;
+                }
                 if self.state.room.pickups[index].variant == 100 {
                     if !player_items::collect(&mut self.state, index)? {
                         player_items::empty_altar_contact(&mut self.state, index)?;
