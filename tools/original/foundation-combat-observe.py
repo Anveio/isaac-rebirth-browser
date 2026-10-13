@@ -72,6 +72,25 @@ def observe(pid, context):
                     'gridCollisionClass': struct.unpack_from('<I', raw, 0x340)[0],
                     'entityCollisionClass': struct.unpack_from('<I', raw, 0x344)[0],
                     'spawnSeed': struct.unpack_from('<I', raw, 0x7d0)[0]}
+                damage_begin, damage_end = struct.unpack_from('<QQ', raw, 0x360)
+                damage_count = (damage_end - damage_begin) // 0x30
+                if damage_end < damage_begin or (damage_end - damage_begin) % 0x30 or not 0 <= damage_count <= 128:
+                    raise ValueError('Unexpected ordered pending damage list')
+                result['pendingFlags'] = struct.unpack_from('<I', raw, 0x37c)[0]
+                result['pendingDamageRecords'] = []
+                records = read(damage_begin, damage_count * 0x30) if damage_count else b''
+                for index in range(damage_count):
+                    offset = index * 0x30
+                    attacker = struct.unpack_from('<Q', records, offset + 0x28)[0]
+                    identity = read(attacker, 0x1c) if attacker else None
+                    result['pendingDamageRecords'].append({
+                        'amount': struct.unpack_from('<f', records, offset)[0],
+                        'flags': struct.unpack_from('<I', records, offset + 4)[0],
+                        'sourceType': struct.unpack_from('<I', records, offset + 8)[0],
+                        'sourceVariant': struct.unpack_from('<I', records, offset + 12)[0],
+                        'sourceActorType': struct.unpack_from('<I', identity, 0x10)[0] if identity else None,
+                        'sourceActorSequenceId': struct.unpack_from('<I', identity, 8)[0] if identity else None,
+                        'sourceActorSpawnSeed': u32(attacker + 0x7d0) if attacker else None})
                 begin, end = struct.unpack_from('<QQ', raw, 0x328)
                 sample_count = (end - begin) // 8
                 if not 0 <= sample_count <= 128 or end < begin or (end - begin) % 8:
@@ -83,11 +102,15 @@ def observe(pid, context):
                     result['bombFuseUpdatesRemaining'] = struct.unpack_from('<i', more, 0)[0]
                     result['bombExplosionDamage'] = struct.unpack_from('<f', more, 4)[0]
                 if struct.unpack_from('<Q', raw, 0)[0] == 0x66ef30:
-                    more = read(address + 0xf50, 0x20)
+                    more = read(address + 0xf50, 0x138)
                     result['npcState'] = struct.unpack_from('<I', more, 0)[0]
                     result['npcStateFrame'] = struct.unpack_from('<I', more, 8)[0]
                     result['npcFrameAge'] = struct.unpack_from('<I', more, 0x10)[0]
                     result['npcCountdown'] = struct.unpack_from('<I', more, 0x1c)[0]
+                    result['npcTarget'] = pair(0x440)
+                    result['npcWanderVelocity'] = list(struct.unpack_from('<ff', more, 0x28))
+                    result['canShutDoors'] = bool(more[0xec])
+                    result['boss'] = bool(more[0xed])
                 return result
 
             game = u64(0x8ecd30)
@@ -98,7 +121,13 @@ def observe(pid, context):
             width, height = struct.unpack_from('<II', raw, 0x14)
             if not 1 <= width <= 28 or not 1 <= height <= 16 or width * height > 448:
                 raise ValueError('Unexpected room grid shape')
-            report['room'] = {'type': struct.unpack_from('<I', raw, 0x10)[0], 'gridWidth': width, 'gridHeight': height}
+            descriptor = u64(room + 8)
+            report['room'] = {'type': struct.unpack_from('<I', raw, 0x10)[0], 'gridWidth': width, 'gridHeight': height,
+                'combatClear': bool(read(descriptor + 0x3d, 1)[0]),
+                'descriptorFlag40': bool(read(descriptor + 0x40, 1)[0]),
+                'combatClearCountdown': struct.unpack('<i', read(room + 0x1598, 4))[0],
+                'countablePending': struct.unpack('<i', read(room + 0x16ac, 4))[0],
+                'countableCurrent': struct.unpack('<i', read(room + 0x16b0, 4))[0]}
             grid_pointers = struct.unpack('<' + 'Q' * (width * height), read(room + 0x30, width * height * 8))
             cells = []
             for index, pointer in enumerate(grid_pointers):
@@ -129,6 +158,18 @@ def observe(pid, context):
                 raw = read(pointer + 0xbb8, 0x44)
                 item['redHp'] = struct.unpack_from('<I', raw, 0)[0]
                 item['damageCountdown'] = struct.unpack_from('<I', raw, 0x40)[0]
+                damage = read(pointer + 0xde8, 0x2c)
+                attacker_pointer = struct.unpack_from('<Q', damage, 0x20)[0]
+                joined = next((actor for address, actor in zip([value for value in pointers if value], report['entities'])
+                               if address == attacker_pointer), None)
+                item['lastDamageSource'] = {'type': struct.unpack_from('<I', damage, 0)[0],
+                    'variant': struct.unpack_from('<I', damage, 4)[0],
+                    'raw1c': struct.unpack_from('<I', damage, 8)[0], 'raw20': struct.unpack_from('<I', damage, 12)[0],
+                    'position': list(struct.unpack_from('<ff', damage, 0x10)),
+                    'velocity': list(struct.unpack_from('<ff', damage, 0x18)),
+                    'flags': struct.unpack_from('<I', damage, 0x28)[0],
+                    'activeActorSequenceId': joined['sequenceId'] if joined else None,
+                    'activeActorSpawnSeed': joined['spawnSeed'] if joined else None}
                 players.append(item)
             report['players'] = players
         finally:
