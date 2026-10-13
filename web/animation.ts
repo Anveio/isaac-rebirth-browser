@@ -1,6 +1,7 @@
 import baseSceneData from "./scene-data.json";
 import doorData from "./door-data.json";
-const sceneData = { ...baseSceneData, ...doorData };
+import gridData from "./grid-data.json";
+const sceneData = { ...baseSceneData, ...doorData, ...gridData };
 import fontData from "./font-data.json";
 import completionUrl from "./assets/completion_widget.png?url";
 import postitOverlapUrl from "./assets/gamemenu_postitoverlap.png?url";
@@ -41,6 +42,7 @@ const urls = import.meta.glob([
   "../references/isaac/rebirth/resources/gfx/grid/door_01_normaldoor.png",
   "../references/isaac/rebirth/resources/gfx/grid/door_02_treasureroomdoor.png",
   "../references/isaac/rebirth/resources/gfx/grid/door_04_selfsacrificeroomdoor.png",
+  "../references/isaac/rebirth/resources/gfx/grid/rocks_basement.png",
   "../references/isaac/rebirth/resources/gfx/shadow.png",
   "../references/isaac/rebirth/resources/gfx/tears.png",
   "../references/isaac/rebirth/resources/gfx/effects/effect_015_tearpoof*.png",

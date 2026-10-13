@@ -320,9 +320,14 @@ pub fn advance_actor(state: &mut State, phase: Phase, id: u32) -> Result<(), Str
     let detonated = state.bombs[index].motion.advance(phase)?;
     if state.bombs[index].motion.lifetime == BombLifetime::Alive {
         use std::sync::OnceLock;
-        static BOUNDARY: OnceLock<crate::grid::Grid> = OnceLock::new();
         static COLLIDER: OnceLock<crate::grid::Collider> = OnceLock::new();
-        let grid = BOUNDARY.get_or_init(crate::grid::Grid::closed_1x1_boundary);
+        let grid = state
+            .room
+            .grid
+            .as_ref()
+            .map(|descriptor| crate::grid::Grid::new(descriptor.clone()))
+            .transpose()?
+            .unwrap_or_else(crate::grid::Grid::closed_1x1_boundary);
         let collider = COLLIDER.get_or_init(|| {
             crate::grid::Collider::new(crate::grid::CollisionGeometry {
                 radius: 16.0,
@@ -334,7 +339,7 @@ pub fn advance_actor(state: &mut State, phase: Phase, id: u32) -> Result<(), Str
         let motion = &mut state.bombs[index].motion;
         if phase == Phase::Update {
             collider.resolve_nonplayer_ground(
-                grid,
+                &grid,
                 &mut motion.position,
                 &mut motion.velocity,
                 false,
@@ -343,7 +348,7 @@ pub fn advance_actor(state: &mut State, phase: Phase, id: u32) -> Result<(), Str
         } else if phase == Phase::Interpolate {
             let mut preview_velocity = motion.velocity;
             collider.resolve_nonplayer_ground(
-                grid,
+                &grid,
                 &mut motion.presented_position,
                 &mut preview_velocity,
                 true,
