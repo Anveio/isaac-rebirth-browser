@@ -58,12 +58,14 @@ seed readback. A parent-owned, stopped original observer validates configured
 paths/counts/loading and source sound slots without writing memory. A forwarding
 OpenAL observer records actual native calls and PCM. An independent forwarding
 browser observer records actual AudioBufferSource start/stop, submitted PCM
-frames and gain/pitch/loop. The gate verifies the complete production WASM input
+frames, gain/pitch/loop and forwarded node connections. Every actual sample
+start must reach that AudioContext's destination through the observed graph.
+The gate verifies the complete production WASM input
 trace, original process identity, library/source/build hashes and bounded traces.
 Reports, tapes, screenshots, submitted PCM and source snapshots remain under
 `.cache/e2e/audio/**`; staged `game/` resource symlinks are excluded from CI upload.
 
-The reviewed four-case cohort passes 812 checks with 36 original/browser sample
+The reviewed four-case cohort passes 848 checks with 36 original/browser sample
 starts (3 confirmations per case, 4 taps per contrived case and 8 per random
 case). These menu sounds each have one sample. Variant SFX153's source admission
 callback belongs between the discarded tear initializer uniform and final
@@ -72,8 +74,10 @@ pool saturation, remaining gameplay sound callers and music intro/loop/layer
 controllers are not claimed by this menu gate.
 
 Complete shared MT state matches at Title and Profile. Source Profile-to-Main
-initialization consumes 531 total draws, including sound8 and 530 other menu
-draws not yet routed by the broader lifecycle implementation. Every later full
+initialization changes the MT cursor by 531 modulo 624, including sound8.
+The total draw count is unresolved: the saved-state Clear loop alone takes
+120961 draws, so a cursor delta cannot establish executed draw count. Causal
+menu routing remains incomplete in the broader lifecycle. Every later full
 624-word comparison remains an explicit failing diagnostic; stable character
 admissions must each advance both streams by one draw. No native RNG state is
 injected into browser input, and no compensating draws hide those differences.

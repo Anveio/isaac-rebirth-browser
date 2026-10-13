@@ -86,15 +86,36 @@ function sampleStarts(calls) {
 // This is independent of AudioRuntime's diagnostics and never changes inputs,
 // buffers, parameters, admission, random state, or output scheduling.
 function installBrowserAudioObserver() {
-  const nodes = new WeakMap(), gains = new WeakMap(); let next = 0;
+  const nodes = new WeakMap(), gains = new WeakMap(), connections = new WeakMap(); let next = 0;
   const trace = { events: [], pending: [], truncated: false };
   const identify = node => { if (!nodes.has(node)) nodes.set(node, ++next); return nodes.get(node); };
   const record = event => { if (trace.events.length >= 8192) trace.truncated = true; else trace.events.push(event); };
   const connect = AudioNode.prototype.connect;
   AudioNode.prototype.connect = function (...args) {
     const result = connect.apply(this, args);
+    if (args[0] instanceof AudioNode) {
+      if (!connections.has(this)) connections.set(this, new Set());
+      connections.get(this).add(args[0]);
+    }
     if (this instanceof AudioBufferSourceNode && args[0] instanceof GainNode) gains.set(this, args[0]);
     return result;
+  };
+  const disconnect = AudioNode.prototype.disconnect;
+  AudioNode.prototype.disconnect = function (...args) {
+    const result = disconnect.apply(this, args);
+    if (args[0] instanceof AudioNode) connections.get(this)?.delete(args[0]);
+    else connections.delete(this);
+    return result;
+  };
+  const reachesDestination = source => {
+    const pending = [source], seen = new Set();
+    while (pending.length) {
+      const node = pending.pop();
+      if (node === source.context.destination) return true;
+      if (seen.has(node)) continue;
+      seen.add(node); pending.push(...(connections.get(node) || []));
+    }
+    return false;
   };
   const start = AudioBufferSourceNode.prototype.start, stop = AudioBufferSourceNode.prototype.stop;
   AudioBufferSourceNode.prototype.start = function (...args) {
@@ -106,7 +127,8 @@ function installBrowserAudioObserver() {
       for (let frame = 0; frame < buffer.length; frame++) view.setInt16((frame * buffer.numberOfChannels + channel) * 2, Math.round(samples[frame] * 32768), true);
     }
     const event = { type: 'start', node: identify(this), frames: buffer.length, channels: buffer.numberOfChannels, sampleRate: buffer.sampleRate,
-      pitch: this.playbackRate.value, gain: gains.get(this)?.gain.value, looping: this.loop, pcmSha256: null };
+      pitch: this.playbackRate.value, gain: gains.get(this)?.gain.value, looping: this.loop,
+      reachesDestination: reachesDestination(this), pcmSha256: null };
     record(event);
     trace.pending.push(crypto.subtle.digest('SHA-256', bytes).then(digest => {
       event.pcmSha256 = Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('');
@@ -215,6 +237,7 @@ try {
         assert.ok(actual, 'Actual browser sample start is required');
         const pcmBytes = await readFile(join(directory, 'original/audio-trace', expected.upload.pcmArtifact));
         const submitted = actualApiStarts[i]; assert.ok(submitted, 'Actual Web Audio submitted buffer is required');
+        check(`start${i}: actual audio graph reaches device output`, submitted.reachesDestination, true);
         check(`start${i}: actual submitted PCM and parameters`, [submitted.pcmSha256, submitted.looping, submitted.pitch, submitted.gain],
           [sha(pcmBytes), expected.looping, expected.pitch, expected.gain]);
         check(`start${i}: runtime output diagnostic`, [actual.pcmSha256, actual.looping, actual.pitch, actual.gain],
