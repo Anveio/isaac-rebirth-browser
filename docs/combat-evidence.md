@@ -32,8 +32,57 @@ The browser displays those admitted rocks through the original
 `gfx/grid/grid_rock.anm2` normal/big clips and Basement sheet. Regenerate its
 catalogue with `extract-animations.py --archive PATH/animations.a --select-file
 tools/foundation/port-grid-animations.txt --json-output web/grid-data.json`.
-Rock destruction/drop/linked-frame updates, hazard callbacks, general enemy AI
+Rock destruction/drop/linked-frame updates, other hazard callbacks, general enemy AI
 and full frame pixels remain incomplete.
+
+## Ordinary active spikes
+
+Authored selector1930/variant0/subtype0 now admits native Spike kind8/state0,
+collision class0 and its actual local spawn seed. Graphics configuration
+`0x56f830` seeds RNG35 from that spawn seed and selects `Next()%4+1` once.
+The original `Spikes01` through `Spikes04` clips each contain one static
+15-frame layer exposure; the browser uses those authored clips and sheet.
+
+Spike update `0x56fb80` calls grid damage helper `0x561100` during the full grid
+pass before actor updates. Ordinary active contact compares the player's center
+against the grid center with strict squared radius21, without adding the player
+collision radius. Successful fresh-Isaac damage removes two red HP units,
+starts120 presentations of immunity, and adds the rounded normalized radial
+vector multiplied by4 to existing velocity. Player motion then integrates that
+velocity and decrements immunity in the same presentation. Intermediate
+presentations do not run spike contact.
+
+The recorded OS-random22PFCSFS route reaches Basement279, whose spike cell37
+is at world `(320,200)`. The original pre-hit presentation1336 has player
+`y=184.07395935058594`, `vy=3.457782745361328`; full presentation1337 applies
+the upward impulse before player motion, yielding `y=183.53173828125`,
+`vy=0.06996197998523712`, HP4 and immunity119. This retained failure originally
+had browser HP6. Its dense replay and a one-presentation offset are retained
+separately; original observations never enter production state.
+
+The offset replay also exposes source control precision after reverse
+knockback. `0x529926..0x529990` repeats the forward dot after transverse
+damping, computes `max(forward*-0.2,0)`, then rounds `+3`, `*0.4` and each input
+component's `*0.5` separately before velocity addition and drag. The previous
+algebraic collapse to `0.6 + max(-forward*0.04,0)` lost one ULP in four retained
+velocity comparisons; those failures remain preserved.
+
+The final immutable production artifact passes all143 functional checkpoints
+across both spike approaches and the contrived even/odd moving-bomb and pause
+cases. The grid comparator accepts all5049 selected spike metadata, derived
+world-center, room-dimension and phase checks. Existing nine mask cases retain
+all18 complete targets exactly, with zero budgets. Replay cases and the
+source-bound verification summary are in
+`references/isaac/foundation/combat/spikes/`. Run the actual two-game replay
+with `npm run test:e2e -- --random-count 0 --replay-cases
+references/isaac/foundation/combat/spikes/22PFCSFS-offset-0.json,references/isaac/foundation/combat/spikes/22PFCSFS-offset-1.json`.
+`tools/foundation/grid-state-pair.mjs --case CASE_DIRECTORY --kinds 8 --output
+REPORT.json` then checks each declared gameplay observation rather than
+silently omitting missing or failed source rows.
+
+This slice covers regular active spikes and fresh Isaac's ordinary damage.
+Retracting spikes, sacrifice-room rewards, flying/item exceptions, hurt
+presentation/audio and nonplayer spike damage need their separate mechanisms.
 
 ## Source and reproduction
 
@@ -110,7 +159,7 @@ around obstacles, so a direct chase approximation would not establish parity.
 | `0x554490`, grid branch `0x5548e2..0x554c63` | Bomb selection uses `ceil(radius*8/40)` rays, iterative f32 angles, 20-world-unit increments capped at the radius, sorted unique grid indices and a line check before virtual Destroy. Grid kind3 stops a ray. Center distance alone is insufficient. |
 | `0x5c74a0` | Mode2 line check advances10 world units: kind3 blocks; ordinary rocks are allowed; doors kind16 bypass the ordinary collision-class test. |
 | `0x446840`, `0x443d00` | Player collider caches40 samples with even angular indices first, then odd. Ground-player admission allows classes0/5. The aggregate blocked normal is normalized before source reflection and12 penetration refinements. Prediction corrects position without changing velocity. |
-| `0x5298f4`, `0x529998..0x5299b2` | Control rounds the perpendicular multiply by f32 `sqrt(0.8)` separately from the final `0.8803408145904541` drag. Combining those constants loses the strict tiny-contact holdout by one ULP. Players use this same law in full and intermediate phases. |
+| `0x5298f4`, `0x529926..0x5299b2` | Control rounds transverse damping, reversal dot/acceleration operations and final `0.8803408145904541` drag separately. Algebraic collapse loses the strict post-knockback holdout by one ULP. Players use this law in full and intermediate phases. |
 | `0x445710`, `0x4453a0` | Physical overlap is strict `sqrt(distanceSquared) < radiusSum` after broadphase. Both collision callbacks precede displacement. Source mass splitting halves only the player's velocity correction. A grid-blocked player transfers its displacement share to the NPC. |
 | `0x445af8..0x445b95`, `0x612860` → `0x612820` | Statically recovered fast-separating branch normalizes with rounded reciprocal multiplication, then uses `delta + (delta*dot)*2`. The later impulse operator `0x612b30` uses direct component division. This branch has no independent dynamic holdout yet. |
 | `0x49b8f0`, player branch `0x49c042..0x49c0aa` | NPC callback supplies native collision damage `+0x48c` to PlayerTakeDamage. Attack Fly18 has1, ordinary Fly13 has0; type alone is not an inferred damage table. |
@@ -128,7 +177,7 @@ not a recovered gameplay explosion tier.
 `Grid` accepts a supplied descriptor and exposes indexing, collision lookup
 and blast candidates. `Collider` caches source samples and resolves native
 world player contact. It does not implement the room bound clamp, all grid
-classes, special-grid damage or rock destruction side effects. The observed
+classes, every special-grid callback or rock destruction side effects. The observed
 ordinary Rock destroy boundary `0x56c670` moves live state1/class3 to
 state2/class0 and writes selector900, but drops, particles, linked variants
 and RNG draws need their full contract before production adoption.

@@ -14,6 +14,7 @@ mod content;
 mod effects;
 pub mod floor;
 pub mod grid;
+mod grid_hazards;
 pub mod layout;
 pub mod motion;
 pub mod mt;
@@ -852,6 +853,7 @@ impl Game {
             return Ok(());
         }
         let explosion_fence = self.state.explosions.len();
+        grid_hazards::advance(&mut self.state, phase)?;
         let existing = self.state.actor_scheduler.full_phase();
         if phase == phase::Phase::Update {
             for actor in existing.iter().copied() {

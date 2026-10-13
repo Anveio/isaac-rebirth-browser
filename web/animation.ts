@@ -43,6 +43,7 @@ const urls = import.meta.glob([
   "../references/isaac/rebirth/resources/gfx/grid/door_02_treasureroomdoor.png",
   "../references/isaac/rebirth/resources/gfx/grid/door_04_selfsacrificeroomdoor.png",
   "../references/isaac/rebirth/resources/gfx/grid/rocks_basement.png",
+  "../references/isaac/rebirth/resources/gfx/grid/grid_spikes.png",
   "../references/isaac/rebirth/resources/gfx/shadow.png",
   "../references/isaac/rebirth/resources/gfx/tears.png",
   "../references/isaac/rebirth/resources/gfx/effects/effect_015_tearpoof*.png",
