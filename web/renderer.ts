@@ -3,6 +3,7 @@ import { MenuRenderer } from "./menu";
 import { GLMenuContext, type GLSurface } from "./gl-menu";
 import { StageComposer, type StageTargets } from "./gl-stage";
 import { RunPresentation } from "./presentation";
+import { PickupRenderer } from "./pickups";
 import type { RoomAppearance, RoomQuad, State } from "./engine";
 
 const PLAYER = "gfx/001.000_player.anm2";
@@ -14,6 +15,7 @@ export class Renderer {
   private readonly menu: MenuRenderer;
   private readonly stage: StageComposer;
   private readonly presentation: RunPresentation;
+  private readonly pickups: PickupRenderer;
   private readonly floor: GLSurface;
   private readonly walls: GLSurface;
   private roomKey = "";
@@ -23,6 +25,7 @@ export class Renderer {
     this.menu = new MenuRenderer(assets);
     this.stage = new StageComposer(graphics, assets);
     this.presentation = new RunPresentation(assets);
+    this.pickups = new PickupRenderer(assets);
     this.floor = graphics.createTarget(1024, 512);
     this.walls = graphics.createTarget(1024, 512);
   }
@@ -46,6 +49,7 @@ export class Renderer {
     else {
       this.drawRoom(state.room.appearance);
       this.stage.ground(state.stageEffects);
+      this.pickups.draw(ctx, state);
       this.drawPlayer(ctx, state);
       for (const tear of state.tears)
         this.assets.draw(ctx, TEAR, "RegularTear6", Math.round(tear.x * 2) / 2, Math.round(tear.y * 2) / 2, tear.age);

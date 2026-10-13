@@ -25,6 +25,11 @@ export interface Bomb {
   };
 }
 export interface Explosion { id: number; x: number; y: number; animationFrame: number; }
+export interface Pickup {
+  id: number; spawnSeed: number; variant: number; subtype: number; position: { x: number; y: number };
+  x: number; y: number; actor: string; animation: string; animationFrame: number; animationPlaying: boolean;
+  canCollect: boolean; collected: boolean; removed: boolean; collisionRadius: number; shadowSize: number; collectionDelay: number;
+}
 export interface RunIntroduction { age: number; active: boolean; }
 export interface PauseMenu {
   phase: "hidden" | "appearing" | "idle" | "disappearing";
@@ -36,7 +41,7 @@ export interface RoomAppearance {
   floorQuads: RoomQuad[]; wallQuads: RoomQuad[]; tutorial: boolean;
   wallVariantCatalog: { sourcePatchIndex: number; name: string; weight: number; eligibility: string }[];
   wallGenerationEvidence: string;
-  doors: { side: Direction; state: string; asset: string; x: number; y: number; targetRoom: number }[];
+  doors: { side: Direction; state: string; asset: string; x: number; y: number; targetRoom: number; slot: number; worldPosition: {x: number; y: number} }[];
   fx: { ambient: [number, number, number]; shading: string; overlay: string; overlayOrigin: { x: number; y: number }; overlayAnchor: { x: number; y: number }; overlayParallax: { x: number; y: number }; overlayMotionEvidence: string; overlayOpacity: number; actorTint: [number, number, number] };
   template: string; generation: string;
 }
@@ -60,7 +65,10 @@ export interface Floor {
 export interface Room {
   left: number; right: number; top: number; bottom: number; appearance: RoomAppearance;
   descriptor: RoomDescriptor | null;
+  spawns: {tintedRockIndex: number; finalSpawnState: number; selectors: {groupIndex: number; gridIndex: number; category: "entity" | "grid"; type: number; variant: number; subtype: number; position: {x: number; y: number}; groupSeed: number; spawnSeed: number}[]} | null;
   projectileBounds: { left: number; right: number; top: number; bottom: number };
+  pickups: Pickup[];
+  grid: { width: number; height: number; cells: {selector: number; entity: {kind: number; variant: number; state: number; collisionClass: number; spawnSeed: number} | null}[] } | null;
 }
 export interface Rect { x: number; y: number; width: number; height: number; }
 export interface RoomQuad { sourcePatchIndex: number; sourceRect: Rect; destRect: Rect; flipX: boolean; flipY: boolean; }
@@ -92,7 +100,10 @@ export interface State {
   characterCatalog: { name: string; animation: string }[];
   paused: boolean; pressed: string[];
   floor: Floor; currentRoom: number; visitedRooms: number[];
+  persistedRooms: Record<string, Room>;
+  roomTransition: {fromRoom: number; targetRoom: number; fromSlot: number; targetSlot: number; phase: "out" | "in"; fullUpdates: number} | null;
   player: Player; room: Room; stageEffects: StageEffects; inventory: { coins: number; bombs: number; keys: number };
+  nextPickup: number;
   minimap: { cells: { x: number; y: number; visibility: "unvisited" | "visited" | "current" }[] };
   tears: Tear[]; impacts: Impact[]; fireCooldown: number; nextTear: number;
   maxFireDelay: number; headTimer: number; actorScheduler: { actors: ActorRef[] };

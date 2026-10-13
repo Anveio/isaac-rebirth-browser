@@ -98,9 +98,14 @@ pub fn advance_world(
 }
 
 pub fn advance(player: &mut Player, room: &Room, dx: i32, dy: i32) {
-    static BOUNDARY: OnceLock<crate::grid::Grid> = OnceLock::new();
     static COLLIDER: OnceLock<crate::grid::Collider> = OnceLock::new();
-    let grid = BOUNDARY.get_or_init(crate::grid::Grid::closed_1x1_boundary);
+    let grid = room
+        .grid
+        .clone()
+        .map(crate::grid::Grid::new)
+        .transpose()
+        .expect("admitted room grid retains bounded dimensions")
+        .unwrap_or_else(|| crate::traversal::doorway_grid(room));
     let collider = COLLIDER.get_or_init(|| {
         crate::grid::Collider::new(crate::grid::CollisionGeometry {
             radius: 10.0,
@@ -109,7 +114,7 @@ pub fn advance(player: &mut Player, room: &Room, dx: i32, dy: i32) {
         })
         .expect("authored Isaac collision geometry is valid")
     });
-    advance_in_grid(player, room, grid, collider, dx, dy)
+    advance_in_grid(player, room, &grid, collider, dx, dy)
         .expect("gameplay input and world vectors are bounded");
 }
 
@@ -117,7 +122,7 @@ pub fn advance(player: &mut Player, room: &Room, dx: i32, dy: i32) {
 /// solver. Room admission owns the grid and cached collision geometry.
 pub fn advance_in_grid(
     player: &mut Player,
-    room: &Room,
+    _room: &Room,
     grid: &crate::grid::Grid,
     collider: &crate::grid::Collider,
     dx: i32,
@@ -133,8 +138,9 @@ pub fn advance_in_grid(
     };
     let (mut position, mut velocity) = advance_world(position, velocity, dx, dy)?;
     collider.resolve_player(grid, &mut position, &mut velocity, false)?;
-    player.x = (f64::from(position.x) * WORLD_SCALE + WORLD_ORIGIN_X).clamp(room.left, room.right);
-    player.y = (f64::from(position.y) * WORLD_SCALE + WORLD_ORIGIN_Y).clamp(room.top, room.bottom);
+    player.x = f64::from(position.x) * WORLD_SCALE + WORLD_ORIGIN_X;
+    player.y = f64::from(position.y) * WORLD_SCALE + WORLD_ORIGIN_Y;
+
     player.vx = f64::from(velocity.x) * WORLD_SCALE;
     player.vy = f64::from(velocity.y) * WORLD_SCALE;
     Ok(())
