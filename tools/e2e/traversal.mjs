@@ -127,12 +127,14 @@ try {
             if (includeHidden) phaseAssert.equal(appearance?.blownOpen, door.blownOpen, `${label}:actual source blown-open door flag`);
           }
           if (includeHidden) {
+            phaseAssert.deepEqual(state.floor.descriptors.map(room => room.surpriseMiniboss),
+              source.descriptors.map(room => room.doorPolicyFlag ?? room.hasEnemies), `${label}:generated surprise-room policy flag`);
             phaseAssert.deepEqual(state.roomDisplayFlags, source.descriptors.map(room => room.displayFlags), `${label}:complete source descriptor display flags`);
             const cells = source.descriptors.filter(room => room.displayFlags & 1).map(room => ({
               x: room.gridIndex % 13 - 6, y: Math.floor(room.gridIndex / 13) - 6,
               visibility: room.index === source.currentDescriptorIndex ? 'current' : room.visited ? 'visited' : 'unvisited',
             }));
-            phaseAssert.deepEqual(state.minimap.cells, cells, `${label}:complete native-visible minimap routing`);
+            phaseAssert.deepEqual(state.minimap.cells, cells, `${label}:complete source descriptor-derived minimap routing`);
           }
         }
         observedRooms.add(source.currentDescriptorIndex);

@@ -54,9 +54,10 @@ fn door_index(position: WorldVector, width: u16) -> usize {
 }
 
 /// Door.TryBlowOpen564870 uncovers the reciprocal saved variant before opening
-/// the current hidden door. This slice admits fresh Basement secret endpoints
-/// in clear rooms; hostile secret closure and its failed-open saved variant
-/// remain a separate lifecycle. Animated dust/rock effects are not admitted.
+/// the current hidden door. Fresh Basement's surprise-room flag stays clear;
+/// ordinary NPC countability does not block this source secret-door policy.
+/// Later surprise-room failure transitions and animated dust/rock effects
+/// remain separate from this first-floor callback.
 pub fn try_blow_open(state: &mut State, index: usize, _animated: bool) -> bool {
     let Some(grid) = &state.room.grid else {
         return false;
@@ -84,9 +85,11 @@ pub fn try_blow_open(state: &mut State, index: usize, _animated: bool) -> bool {
     if (!matches!(current_type, 7 | 8) && !matches!(target_type, 7 | 8))
         || current_type == 5
         || target_type == 5
-        // This initial route supports cleared rooms. Source's broader policy
-        // also reads descriptor byte+40; its producer is still being recovered.
-        || !state.room.combat_clear
+        // Later stages can substitute a surprise miniboss; that lifecycle
+        // remains outside this fresh Basement callback. Ordinary NPC counts
+        // are not the generated flag and do not prevent secret revelation.
+        || state.stage != 1
+        || state.floor.descriptors[state.current_room].surprise_miniboss
     {
         return false;
     }

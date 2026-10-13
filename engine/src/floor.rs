@@ -24,6 +24,10 @@ pub struct Descriptor {
     pub decoration_seed: u32,
     pub spawn_seed: u32,
     pub following_seed: u32,
+    /// Descriptor+40 selects generated surprise-miniboss substitution. Source
+    /// constructors clear it; secret/shop producers require stage>4/>3, so
+    /// fresh Basement's ordinary generated descriptors retain false.
+    pub surprise_miniboss: bool,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
@@ -388,6 +392,7 @@ fn record(
         decoration_seed,
         spawn_seed,
         following_seed,
+        surprise_miniboss: false,
     });
 }
 fn optional(

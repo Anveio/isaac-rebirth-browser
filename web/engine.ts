@@ -71,6 +71,7 @@ export interface RoomTemplate {
 export interface RoomDescriptor {
   index: number; generatedIndex: number; gridIndex: number; assetStage: number; catalogIndex: number;
   template: RoomTemplate; doorMask: number; neighbors: (number | null)[];
+  surpriseMiniboss: boolean;
   roomInitSeed: number; decorationSeed: number; spawnSeed: number; followingSeed: number;
 }
 export interface Floor {
