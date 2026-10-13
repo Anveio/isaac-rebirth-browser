@@ -30,7 +30,7 @@ checkpoints, native counters, public input events and original manifest hashes.
 Run both games live after sourcing `cloud/env.sh`:
 
 ```sh
-npm run test:e2e -- --scenarios paired-room-combat --random-count 0
+npm run test:e2e:paired -- --scenarios paired-room-combat --random-count 0
 ```
 
 `tools/original/foundation-combat-scenario.py --case rock-held --output PATH`

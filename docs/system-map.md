@@ -50,7 +50,7 @@ The CI result is **failure**, with the actual gaps retained:
 | Pause/release |12/18 | Source remains paused at exit start; port resumes/coasts early |
 | Moving bomb, even phase |14/18 | Source and port blast/coasting position and velocity differ |
 | Moving bomb, odd phase |13/18 | Source blasts at phase120; port blasts one phase later, shifting HP/immunity and motion |
-| Adjacent room/rocks/combat |14/28 | Room relocation/collision and enemy health loss are absent from the port |
+| Adjacent room/rocks/combat |14/28 | Room relocation/collision and player health loss from room combat are absent from the port; enemy HP is not compared |
 | Random `KMAG B3XH` |16/18 | Source/port wall motion and active-tear count differ |
 | Random `E74E V3YT` |11/18 | Source/port tear count, resumed motion and immunity differ |
 
@@ -59,7 +59,7 @@ All 149 paired frames were compared as strict pixel diagnostics: 61 match exactl
 CI status. The report, actual original observations and each exact replayable
 `case.json`/public tape are under `.cache/foundation/paired-ci-reviewed/`.
 
-Run `npm run test:e2e -- --replay-case ABS_CASE_JSON --output NEW_DIRECTORY`
+Run `npm run test:e2e:paired -- --replay-case ABS_CASE_JSON --output NEW_DIRECTORY`
 to reproduce a scenario's recorded seed and controls. To exercise a subsystem
 branch's build without sharing its mutable files, add
 `--production-directory ABS_WORKTREE_DIST`; the harness snapshots and hashes

@@ -50,6 +50,10 @@ jobs:
           name: live-game-evidence-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
             .cache/foundation/paired-*/
+            .cache/foundation/floor-e2e*.json
+            .cache/foundation/floor-browser-live.json
+            .cache/original-floor/**
+            .cache/e2e/**
             test-results/
           if-no-files-found: warn
           retention-days: 14
