@@ -1,0 +1,213 @@
+{
+  "schema": 1,
+  "status": "scoped-proof-with-retained-native-timeouts-and-pending-route-replays",
+  "runtimeBase": "519e31cbd4ab1e9d2455f0959a6b44c95c7ab29b",
+  "menuHelperCaptureHead": "8c69c35",
+  "strictHistoryGuard": "bf1b8fc",
+  "scope": "Shared floor/pickup/traversal and inherited door entry only. All public commands originate in DOM inputs after reset; no native state/counter supplied to production. Source-required gameplay assertions are retained. No complete aggregate passing cohort claim.",
+  "requestedPrefix": {
+    "resetBoundary": "First rendered Title; native Intro remains outside this helper",
+    "titlePresentations": 63,
+    "menuConfirmations": {
+      "count": 3,
+      "held": 12,
+      "released": 72
+    },
+    "seedEntry": {
+      "tabHeld": 12,
+      "tabReleased": 108,
+      "glyphHeld": 12,
+      "glyphReleased": 6,
+      "commitHeld": 12,
+      "commitReleased": 72
+    },
+    "runConfirmation": {
+      "held": 12,
+      "released": 300
+    },
+    "publicCommandsForEightGlyphs": 49,
+    "expectation": "Declared independently of actual screens/trace; every intended glyph, interval, reset header and manual-seed flag/text/code/value must match."
+  },
+  "production": {
+    "sha256": "f050bf745a753793fd01cdc2c218b1c9e3fff1b945b03cc8a8e845f2768289ba",
+    "files": 917,
+    "source": "/workspace/isaac-worktrees/gate-review/dist",
+    "scope": "Immutable snapshot of production build bytes; source/native replay equality is checked separately"
+  },
+  "floor": {
+    "status": "pass",
+    "selected": 3,
+    "skipped": 0,
+    "reportPath": "/workspace/isaac-rebirth-browser/.cache/e2e/menu-settlement/floor/report.json",
+    "reportSha256": "f59df95cf7654d9167ee5952d143cabe7934dda00f536333370e63693de77446",
+    "nativeReportPath": "/workspace/isaac-rebirth-browser/.cache/e2e/menu-settlement/floor/source-report.json",
+    "nativeReportSha256": "1632fd8519cfb87a84327faba9c23f08f899dd0b10098e9f3522b13fd06580e7",
+    "cases": [
+      {
+        "seed": "QNXPTVT1",
+        "status": "pass",
+        "inputProvenance": {
+          "status": "pass",
+          "commands": 57,
+          "initialSeed": 2093590291,
+          "bootEpochSeed": 0,
+          "manualSeed": "QNXPTVT1"
+        },
+        "publicStates": 58,
+        "stateHistoryTruncated": false,
+        "backendCallbacks": 4,
+        "allBackendStatesPresent": true
+      },
+      {
+        "seed": "4AW2DNAJ",
+        "status": "pass",
+        "inputProvenance": {
+          "status": "pass",
+          "commands": 57,
+          "initialSeed": 3754622541,
+          "bootEpochSeed": 0,
+          "manualSeed": "4AW2DNAJ"
+        },
+        "publicStates": 58,
+        "stateHistoryTruncated": false,
+        "backendCallbacks": 2,
+        "allBackendStatesPresent": true
+      },
+      {
+        "seed": "2LNC3TEQ",
+        "status": "pass",
+        "inputProvenance": {
+          "status": "pass",
+          "commands": 57,
+          "initialSeed": 3447149369,
+          "bootEpochSeed": 0,
+          "manualSeed": "2LNC3TEQ"
+        },
+        "publicStates": 58,
+        "stateHistoryTruncated": false,
+        "backendCallbacks": 2,
+        "allBackendStatesPresent": true
+      }
+    ]
+  },
+  "pickups": {
+    "status": "fail",
+    "scope": "Four selected fresh original/production cases; three functional cases passed, recorded random native transport failed before gameplay. Final source retry/browser replay remains follow-up.",
+    "reportPath": "/workspace/isaac-rebirth-browser/.cache/e2e/menu-settlement/pickups/report.json",
+    "reportSha256": "c6a452d1e124ee48d40f3fcd43976e51a0d5a70c65c94ee309b9eabdba82b78f",
+    "cases": [
+      {
+        "name": "contact-phase-0",
+        "code": "PBW9YNC8",
+        "status": "pass",
+        "comparedPresentations": 172,
+        "passedPresentations": 172,
+        "inputProvenance": {
+          "status": "pass",
+          "commands": 225,
+          "initialSeed": 1737131469,
+          "bootEpochSeed": 1700000000,
+          "manualSeed": "PBW9YNC8"
+        },
+        "nativeManifestSha256": "be4334bb55ee6826f2c54149d49b9558d9f36f38a57d07d9ec720f1b5b3eceae"
+      },
+      {
+        "name": "contact-phase-1",
+        "code": "PBW9YNC8",
+        "status": "pass",
+        "comparedPresentations": 173,
+        "passedPresentations": 173,
+        "inputProvenance": {
+          "status": "pass",
+          "commands": 226,
+          "initialSeed": 1737131469,
+          "bootEpochSeed": 1700000000,
+          "manualSeed": "PBW9YNC8"
+        },
+        "nativeManifestSha256": "7cef12f2f3a6e1f14999be9c3fb94e531cefca52b26657f766f6d57902f16afa"
+      },
+      {
+        "name": "random-0",
+        "code": "YGNX7D4B",
+        "status": "fail",
+        "error": "Error: Command failed: bash tools/original/with-display.sh python3 tools/original/foundation-clock-run.py --seed YGNX7D4B --tape /workspace/isaac-worktrees/gate-review/.cache/e2e/menu-settlement/pickups/random-0/tape.json --observe-every-step --state-observer tools/original/foundation-pickup-observe.py --output /workspace/isaac-worktrees/gate-review/.cache/e2e/menu-settlement/pickups/random-0/original\n"
+      },
+      {
+        "name": "regression-spike-approach",
+        "code": "22PFCSFS",
+        "status": "pass",
+        "comparedPresentations": 173,
+        "passedPresentations": 173,
+        "inputProvenance": {
+          "status": "pass",
+          "commands": 226,
+          "initialSeed": 3388288701,
+          "bootEpochSeed": 1700000000,
+          "manualSeed": "22PFCSFS"
+        },
+        "nativeManifestSha256": "6f9d36ee2b61953887f96f6d0c508f52730c19607fbffc41295ef95222494eda"
+      }
+    ]
+  },
+  "traversal": {
+    "scope": "Fresh source transports only; production route replay pending.",
+    "sourceCases": [
+      {
+        "code": "CSTGNPJ8",
+        "sourceManifest": "/workspace/isaac-rebirth-browser/.cache/e2e/menu-settlement/fresh-originals/traversal/CSTGNPJ8/original/manifest.json",
+        "manifestSha256": "97ec56b87b94f58b9c3caa13975cd1d9fbd401ce87131e000dcd18e03d365e6f",
+        "sourceAttempts": []
+      },
+      {
+        "code": "T1PK6Y0W",
+        "sourceManifest": "/workspace/isaac-rebirth-browser/.cache/e2e/menu-settlement/fresh-originals/traversal/T1PK6Y0W/original/manifest.json",
+        "manifestSha256": "93b25f78d7b734881506af1530a6970aa149b4f3dcc12dfad6de9a78f8445230",
+        "sourceAttempts": []
+      },
+      {
+        "code": "SWG78RJL",
+        "sourceManifest": "/workspace/isaac-rebirth-browser/.cache/e2e/menu-settlement/fresh-originals/traversal/SWG78RJL-retry-60s/original/manifest.json",
+        "manifestSha256": "fd133b18ea4999fe7aa7b2fa327afa6b9ab4a4400285df6119a41918d2aecaee",
+        "sourceAttempts": [
+          {
+            "manifest": "/workspace/isaac-worktrees/gate-review/.cache/e2e/menu-settlement/fresh-originals/traversal/SWG78RJL/original/manifest.json",
+            "status": "fail",
+            "failures": [
+              "timed out"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "mandatoryGameplayFailures": "Unchanged assertions still require hostile traversal/return locks, raw1400 Fire33 admission, and N90 treasure coins. These old-head failures are retained in PR30 proof; no new pass claimed here.",
+  "failedNativeBoundary": {
+    "scope": "Initial SWG and recorded YGNX native attempts used30-second frame timeout and stopped after acknowledged run Enter hold at906, before the300 released presentations completed. No assertions were waived. SWG identical public tape later passed173 source phases with60-second wall timeout.",
+    "sourceFailures": [
+      "fresh-originals/traversal/SWG78RJL/original/manifest.json",
+      "pickups/random-0/original/manifest.json"
+    ]
+  },
+  "sourceHashes": {
+    "tools/foundation/verify.mjs": "3743b773cf2ede253c6d78f2605eb43f34e9d7002284b6a1dd2c413d45835a5c",
+    "tools/foundation/verify.d.mts": "97b28868aa15ef5f1be15cda869ff5b580399b51a36fc24818b96e7656a32715",
+    "tools/e2e/traversal.mjs": "17250656cc3f9979c30600df380e0de96ef4893f9c04cdcbf15b3d75dc497002",
+    "tools/e2e/pickups.mjs": "d3c51187aa1d5560830b94a7b981b4f9fef5ef1f4b898bbb9669caa9ddb891a7",
+    "tools/foundation/floor-e2e.mjs": "b409e55e533ef84d099ca145d3d1057aee4f271afe0e3ffbb45c4e5b455d189a",
+    "tools/original/foundation-clock-run.py": "0669849e55218ed984aaa95a9964bba05d20707ec7ed164c77dab689c5891fbc",
+    "tools/original/with-display.sh": "af469210e803786a60d8632c28a6f2da77bc8ab02cc06be50016ddb25e95b848",
+    "tools/original/foundation-traversal-observe.py": "a05fd4ec0cc39757867aea2c04886a6336cdd488623d4368090ea44d27644114",
+    "tools/original/foundation-pickup-observe.py": "db3fb995087575a039b77c8b87e07bbaa3cdef208adea166b8de07055754b90b"
+  },
+  "validation": [
+    "Production build and TypeScript checks passed on the immutable Music runtime base; helper-only changes leave production bytes unchanged",
+    "Native/browsers use the same declared key intervals and complete seeded flags/readback",
+    "Strict-history guard independently checked against every retained raw floor trace; full57 commands/58 public states and all actual callback states present"
+  ],
+  "retainedEvidence": {
+    "cache": "/workspace/isaac-rebirth-browser/.cache/e2e/menu-settlement",
+    "restoreJournal": "/workspace/isaac-rebirth-browser/.cache/e2e/menu-settlement/compression.json",
+    "restoreHelper": "/workspace/isaac-rebirth-browser/.cache/e2e/menu-settlement/restore-evidence.py",
+    "scope": "Bulky successful phase/state arrays remain ignored lossless evidence; all reports, original manifests, tapes and failures remain raw"
+  }
+}
