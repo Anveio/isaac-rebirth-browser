@@ -108,6 +108,19 @@ pub fn resolve_player_npc_contact(
     resolve_contact(player, npc, blocks_player_shift, |_, _| {})
 }
 
+/// A free empty collectible's callback returnsfalse. Its class4 type5 body
+/// then uses445710's ordinary mass split and Player-half-share impulse.
+pub fn resolve_player_pickup_contact(
+    player: &mut ContactBody,
+    pickup: &mut ContactBody,
+    blocks_player_shift: impl FnOnce(WorldVector) -> bool,
+) -> Result<ContactResolution, String> {
+    if player.entity_type != 1 || pickup.entity_type != 5 {
+        return Err("pickup contact requires Player1/Pickup5 bodies".into());
+    }
+    resolve_contact(player, pickup, blocks_player_shift, |_, _| {})
+}
+
 /// Fresh regular Tear callback5462a9 adds half incoming velocity to AttackFly,
 /// then54638a advances the Tear by0.8 of the NPC velocity. Generic445710
 /// retains its pre-callback overlap vector for mass separation afterward.

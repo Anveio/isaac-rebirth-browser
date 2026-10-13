@@ -76,6 +76,8 @@ export interface Pickup {
   age: number; birthGameUpdate: number; charge: number; touched: boolean;
   chest: {rng: ItemRng; gridCollisionClass: number; entityCollisionClass: number; price: number; cooldown: number} | null;
   spritesheetItemId: number;
+  presentedPosition: {x: number; y: number}; anchorPosition: {x: number; y: number};
+  velocity: {x: number; y: number}; configuredFriction: number; currentFriction: number; collisionMass: number;
 }
 export interface RunIntroduction { age: number; active: boolean; }
 export interface PauseMenu {

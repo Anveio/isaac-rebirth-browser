@@ -125,17 +125,18 @@ pub(crate) fn advance_presentation(state: &mut State, phase: Phase) {
     }
 }
 
-/// 531edb decrements the Player collection delay before53261c flushes the
-/// queue. Natural contact happens later, after the admission-fenced actors.
+/// 531edb decrements collection delay on both Player callback paths. The
+/// fast branch rejoins at531e7f; only531f01 gates the later queue flush.
+/// Natural contact happens later, after the admission-fenced actors.
 pub(crate) fn finish_player_update(state: &mut State, phase: Phase) -> Result<(), String> {
-    if phase != Phase::Update {
-        return Ok(());
-    }
     let Some(items) = state.player_items.as_mut() else {
         return Ok(());
     };
     if items.collection_delay > 0 {
         items.collection_delay -= 1;
+    }
+    if phase != Phase::Update {
+        return Ok(());
     }
     if !items.pickup_animation_guard {
         flush_queued(state)?;
@@ -157,7 +158,7 @@ fn enqueue(state: &mut State, id: u32, charge: i32, touched: bool) -> Result<(),
 }
 
 /// First free natural collectible, normal Isaac, with no active swap. The
-/// retained empty altar is an actor with Empty overlay, not a removed coin.
+/// retained empty altar is an actor with stopped Empty main frame0.
 pub(crate) fn collect(state: &mut State, index: usize) -> Result<bool, String> {
     let pickup = &state.room.pickups[index];
     let Some(owner) = state.player_items.as_ref() else {
@@ -203,9 +204,11 @@ pub(crate) fn collect(state: &mut State, index: usize) -> Result<bool, String> {
     enqueue(state, id, charge, touched)?;
     let pickup = &mut state.room.pickups[index];
     pickup.subtype = 0;
-    pickup.overlay = Some("Empty".into());
-    pickup.overlay_frame = 0.0;
-    pickup.overlay_playing = true;
+    // 40fef0 is named SetFrame, not PlayOverlay: it selects the main Empty
+    // clip, sets frame0 and clears main playing. Alternates remains untouched.
+    pickup.animation = "Empty".into();
+    pickup.animation_frame = 0.0;
+    pickup.animation_playing = false;
     pickup.collected = true;
     pickup.can_collect = false;
     let room_type = state
@@ -227,6 +230,64 @@ pub(crate) fn collect(state: &mut State, index: usize) -> Result<bool, String> {
         );
     }
     Ok(true)
+}
+
+/// Successful Collect returns1 and vetoes445710 mass response. The subsequent
+/// free subtype0 callback returns0, so the retained class4 altar separates from
+/// the Player using the same native impulse/position kernel as other bodies.
+pub(crate) fn empty_altar_contact(state: &mut State, index: usize) -> Result<(), String> {
+    use crate::{bombs, combat, grid, motion::WorldVector};
+    use std::sync::OnceLock;
+    let pickup = &state.room.pickups[index];
+    if pickup.variant != 100 || pickup.subtype != 0 || pickup.removed {
+        return Ok(());
+    }
+    let lattice = grid::Grid::new(
+        state
+            .room
+            .grid
+            .clone()
+            .ok_or("altar contact requires admitted room grid")?,
+    )?;
+    static PLAYER_COLLIDER: OnceLock<grid::Collider> = OnceLock::new();
+    let collider = PLAYER_COLLIDER.get_or_init(|| {
+        grid::Collider::new(grid::CollisionGeometry {
+            radius: crate::content::PLAYER_COLLISION_RADIUS_WORLD as f32,
+            scale: WorldVector { x: 1.0, y: 1.0 },
+            points: 40,
+        })
+        .expect("authored normal Isaac geometry")
+    });
+    let mut player = combat::ContactBody {
+        id: 0,
+        entity_type: 1,
+        position: bombs::player_world(state),
+        velocity: bombs::player_velocity(state),
+        radius: crate::content::PLAYER_COLLISION_RADIUS_WORLD as f32,
+        mass: 5.0,
+    };
+    let mut altar = combat::ContactBody {
+        id: pickup.id,
+        entity_type: 5,
+        position: pickup.position,
+        velocity: pickup.velocity,
+        radius: pickup.collision_radius,
+        mass: pickup.collision_mass,
+    };
+    let original_position = player.position;
+    combat::resolve_player_pickup_contact(&mut player, &mut altar, |shift| {
+        collider.blocks_player_shift(&lattice, original_position, shift)
+    })?;
+    state.player.x = f64::from(player.position.x) * 0.65 + 32.0;
+    state.player.y = f64::from(player.position.y) * 0.65 - 46.0;
+    state.player.vx = f64::from(player.velocity.x) * 0.65;
+    state.player.vy = f64::from(player.velocity.y) * 0.65;
+    let pickup = &mut state.room.pickups[index];
+    pickup.position = altar.position;
+    pickup.presented_position = altar.position;
+    pickup.velocity = altar.velocity;
+    pickup.project();
+    Ok(())
 }
 
 fn add_inventory(value: u32, delta: i32) -> u32 {

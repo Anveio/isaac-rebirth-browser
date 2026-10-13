@@ -27,14 +27,21 @@ const files = ['tools/e2e/items.mjs', 'tools/original/item-scenarios.py', 'tools
   'engine/src/items.rs', 'engine/src/seed.rs', 'engine/src/pickups.rs', 'engine/src/lib.rs', 'engine/build.rs'];
 files.push('engine/src/player_items.rs', 'web/engine.ts', 'web/animation.ts', 'web/pickups.ts', 'web/renderer.ts');
 files.push('web/scene-data.json', 'web/pickup-data.json');
+files.push('engine/src/combat.rs', 'engine/src/grid.rs', 'engine/src/room.rs');
 const hashes = async () => Object.fromEntries(await Promise.all(files.map(async path => [path, digest(await readFile(join(ROOT, path)))])));
 const before = await hashes();
 const value = flag => { const i = process.argv.indexOf(flag); return i < 0 ? undefined : process.argv[i + 1]; };
 const acquisition = process.argv.includes('--acquisition');
+const replayOriginal = value('--replay-original') ? resolve(value('--replay-original')) : null;
+assert.ok(!replayOriginal || acquisition, 'Frozen original recovery is a separately disclosed acquisition comparison');
 const output = resolve(value('--output') || join(ROOT, acquisition ? '.cache/e2e/item-acquisition' : '.cache/e2e/items', String(Date.now())));
 await mkdir(output, { recursive: true });
-const scenarios = value('--scenarios') ? JSON.parse(await readFile(resolve(value('--scenarios')), 'utf8')) :
-  JSON.parse((await run('python3', ['tools/original/item-scenarios.py', '--count', value('--count') || '2'], { cwd: ROOT, timeout: 600000 })).stdout);
+const frozenReportBytes = replayOriginal ? await readFile(join(replayOriginal, 'report.json')) : null;
+const frozenReport = frozenReportBytes ? JSON.parse(frozenReportBytes) : null;
+const scenarios = replayOriginal ? JSON.parse(await readFile(join(replayOriginal, 'scenarios.json'), 'utf8')) :
+  value('--scenarios') ? JSON.parse(await readFile(resolve(value('--scenarios')), 'utf8')) :
+  JSON.parse((await run('python3', ['tools/original/item-scenarios.py', '--count', value('--count') || '2',
+    ...(acquisition ? ['--acquisition'] : [])], { cwd: ROOT, timeout: 600000 })).stdout);
 assert.equal(scenarios.schema, 1);
 assert.equal(scenarios.bootEpochSeed, 1700000000);
 assert.ok(scenarios.cases.length >= 4 && scenarios.cases.length <= 6);
@@ -44,7 +51,7 @@ for (const item of scenarios.cases) {
   assert.match(item.code, /^[A-Z0-9]{8}$/);
   assert.ok(Number.isInteger(item.seedValue) && item.seedValue > 0 && item.seedValue <= 0xffffffff);
   assert.ok([0, 1].includes(item.delay));
-  if (acquisition) {
+  if (acquisition && !replayOriginal && scenarios.mode !== 'acquisition') {
     item.actions.push({key: 'w', frames: 32});
     if (item.entropy.startsWith('Contrived')) item.actions.push({key: 'Right', frames: 50}, {key: null, frames: 50});
     else item.actions.push({key: null, frames: 100});
@@ -61,6 +68,11 @@ const report = { schema: 1, status: 'running', production: server.build, origina
   gateSources: before, graphics: await inspectBrowserGraphics(browser), sourceHashes: catalogue.sourceHashes,
   scope: acquisition ? 'Natural first free collectible contact, real deferred Pickup animation/queue, all347 owned counts, authored inventory/health grants, first active ownership/charge, pool removal and collection sound admission. Baseline complete450 Player child RNGs are required. Actual stat/familiar/cache callbacks, later child RNG mutation, active swaps/use, achievements, paid/override contexts and pixels remain unaccepted; full MT/cache/child RNG differences are retained diagnostics.' : 'Fresh-profile authored catalogue, causal run/pool seeds, complete 16 pools/497 weights and ID maps, natural free treasure pedestal Init/selection, phase/animation/charge and public seed/input provenance. Acquisition, item effects/cache evaluation, familiars, paid/override contexts and pixels remain unaccepted.',
   selection: selectedCase ? { scope: 'Targeted recorded public case; default gate runs the complete cohort', case: selectedCase } : { scope: 'Complete cohort' }, cases: [] };
+report.originalCapture = replayOriginal ? {mode: 'frozen-current-turn-original-recovery',
+  reportPath: join(replayOriginal, 'report.json'), reportSha256: digest(frozenReportBytes),
+  recordedProduction: frozenReport.production, recordedGateSources: frozenReport.gateSources,
+  scope: 'New live production browser replay against exact complete original recordings from the earlier frozen four-case capture; this is not a fresh native recapture'} :
+  {mode: 'fresh-live-original-and-browser', scope: 'Default required CI runs both real games freshly'};
 const f32 = value => Math.fround(value);
 const words = rng => [rng.state, rng.rightA, rng.left, rng.rightB];
 const poolRows = pools => pools.map(pool => ({ ...pool, rng: undefined,
@@ -97,15 +109,30 @@ try {
       await writeFile(join(directory, 'case.json'), JSON.stringify(item, null, 2) + '\n');
       const tape = (await run('python3', ['tools/original/item-scenarios.py', '--case', join(directory, 'case.json')], { cwd: ROOT })).stdout;
       await writeFile(join(directory, 'tape.json'), tape);
-      await run('bash', ['tools/original/with-display.sh', 'python3', 'tools/original/foundation-clock-run.py',
-        '--seed', item.code, '--tape', join(directory, 'tape.json'), '--observe-every-step',
-        '--state-observer', 'tools/original/item-observer.py', '--sfx-volume', '1', '--music-volume', '1',
-        '--boot-epoch-seed', String(scenarios.bootEpochSeed), '--frame-timeout', '120',
-        '--output', join(directory, 'original')], { cwd: ROOT, timeout: 600000, maxBuffer: 2 * 1024 * 1024 });
-      const nativeBytes = await readFile(join(directory, 'original/manifest.json'));
+      let nativeBytes, nativePath;
+      if (replayOriginal) {
+        const recorded = frozenReport.cases.find(recorded => recorded.name === item.name);
+        assert.ok(recorded); assert.equal(recorded.code, item.code); assert.equal(recorded.seedValue, item.seedValue);
+        assert.deepEqual(recorded.actions, item.actions, 'Frozen recovery must replay the exact originally requested action plan');
+        assert.equal(digest(Buffer.from(tape)), recorded.tapeSha256, 'The complete original public tape must be unchanged');
+        const evidence = recorded.nativeEvidence;
+        assert.equal(evidence.encoding, 'gzip');
+        nativeBytes = gunzipSync(await readFile(evidence.path));
+        assert.equal(nativeBytes.length, evidence.rawBytes); assert.equal(digest(nativeBytes), evidence.rawSha256);
+        assert.equal(digest(nativeBytes), recorded.nativeManifestSha256);
+        result.originalRecording = evidence;
+        nativePath = evidence.path;
+      } else {
+        await run('bash', ['tools/original/with-display.sh', 'python3', 'tools/original/foundation-clock-run.py',
+          '--seed', item.code, '--tape', join(directory, 'tape.json'), '--observe-every-step',
+          '--state-observer', 'tools/original/item-observer.py', '--sfx-volume', '1', '--music-volume', '1',
+          '--boot-epoch-seed', String(scenarios.bootEpochSeed), '--frame-timeout', '120',
+          '--output', join(directory, 'original')], { cwd: ROOT, timeout: 600000, maxBuffer: 2 * 1024 * 1024 });
+        nativePath = join(directory, 'original/manifest.json'); nativeBytes = await readFile(nativePath);
+      }
       const native = JSON.parse(nativeBytes);
       assert.equal(native.status, 'pass'); assert.deepEqual(native.failures, []);
-      const provenance = JSON.parse((await run('python3', ['tools/original/item-scenarios.py', '--validate-original', join(directory, 'original/manifest.json')], { cwd: ROOT })).stdout);
+      const provenance = JSON.parse((await run('python3', ['tools/original/item-scenarios.py', '--validate-original', nativePath], { cwd: ROOT })).stdout);
       assert.equal(provenance.status, 'pass'); assert.deepEqual(provenance.failures, []);
       const baseline = native.debugObservations.find(row => row.context.label === 'gameplay-start');
       assert.equal(baseline?.observation.status, 'pass');
@@ -181,7 +208,7 @@ try {
           equal(owner.queuedCharge, nativePlayer.queuedCharge, 'deferred requested charge/reset', presentation);
           if (nativePlayer.queuedId !== null) {
             queuedPresentations++;
-            equal(owner.queuedTouched, nativePlayer.queuedTouched, 'active queue touched argument', presentation);
+            equal(owner.queuedTouched, Boolean(nativePlayer.queuedTouched), 'active queue touched argument', presentation);
             equal(state.tears.filter(tear => tear.motion.lifetime === 'alive').length,
               source.world.entities.filter(entity => entity.type === 2 && !entity.removed).length,
               'actual normal tear emission while Pickup is queued', presentation);
@@ -252,7 +279,14 @@ try {
           for (const field of ['subtype', 'spawnSeed', 'animation', 'animationFrame', 'animationPlaying', 'collisionRadius']) {
             equal(actual[field], original[field], `pedestal${i}:${field}`, presentation);
           }
-          equal([actual.position.x, actual.position.y], original.position, `pedestal${i}:world position`, presentation);
+          // These native/Rust fields are binary32. Recover their exact f32
+          // values from serde's shortest decimal JSON; integers stay exact.
+          equal([f32(actual.presentedPosition.x), f32(actual.presentedPosition.y)], original.position, `pedestal${i}:world position`, presentation);
+          if (acquisition) {
+            equal([f32(actual.velocity.x), f32(actual.velocity.y)], original.velocity, `pedestal${i}:stored velocity`, presentation);
+            equal(f32(actual.currentFriction), original.friction, `pedestal${i}:current friction`, presentation);
+            equal(f32(actual.collisionMass), original.collisionMass, `pedestal${i}:authored mass`, presentation);
+          }
           equal(actual.charge, source.pedestals[i].charge, `pedestal${i}:authored charge`, presentation);
           equal(actual.touched, source.pedestals[i].touched, `pedestal${i}:touched`, presentation);
           equal(actual.overlay, original.overlay, `pedestal${i}:actual overlay`, presentation);
@@ -323,7 +357,7 @@ try {
     } catch (error) { result.status = 'fail'; result.error = String(error); }
     finally {
       if (page) await page.close();
-      if (acquisition) {
+      if (acquisition && !replayOriginal) {
         try { result.nativeEvidence = await archiveCompletedNative(directory); }
         catch (error) { result.status = 'fail'; result.archiveError = String(error); }
       }

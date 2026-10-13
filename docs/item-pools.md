@@ -52,42 +52,55 @@ not a fitted nine-frame `LiftItem` wait. Player acquisition, cache/stat effects,
 familiars, active use, trinkets, saved unlock progression, paid contexts, room
 overrides, and pixels remain unaccepted in this leaf.
 
-The following first-acquisition slice routes actual contact into the Player's
-deferred queue. Contact marks the pool's removed ID, starts `Pickup` at source
-speed1, copies the authored pickup presentation, and retains an empty altar
-with its `Empty` overlay. Treasure collection admits sound128 at volume0.5.
-Ordinary movement continues during the animation; the animation guard suppresses
-normal tear emission. Full updates advance the authored42-frame main clip and
-36-frame looping copied sprite. The same full update that finishes `Pickup`
-clears the guard and later flushes the queued config, charge, and touched
-argument before the postactor contact pass. Fast phases advance none of these
-animation, queue, or collection-delay lifetimes.
+The first-acquisition slice routes actual free contact into the Player's deferred
+config queue. It copies `PlayerPickupSparkle`, plays the authored nonlooping
+42-frame `Pickup` clip, then grants permanent counts after the real full-update
+completion boundary. Ordinary motion continues and the animation guard suppresses
+normal shooting. Authored inventory and normal Isaac health helper calls retain
+native ordering; the observed first active item 291 retains charge 6. Health caps,
+parity and nonzero health grants remain unaccepted in this cohort.
 
-The Player's child streams derive from saved Seeds output13, through local
-RNG5 `(1,11,16)`:347 collectible,62 trinket, and41 pocket children initialize
-RNG35 owners, followed by the base entity's spawn seed. They consume no shared
-MT draws. Grant increments the actual permanent count, then applies the authored
-normal-Isaac inventory/health helpers in native order. A first active grant
-stores its ID/charge and source30-update collection delay. Rosary72 changes the
-16 Bible override counters. Active swaps and use remain separate callbacks.
+The stopped main `Empty` frame 0 preserves the old `Alternates` overlay. Successful
+collection returns 1 and vetoes mass response; later free subtype 0 returns 0 and
+uses the common class 4 Player/Pickup mass kernel. The retained altar has separate
+physical and presented positions. Full updates return it toward its authored
+anchor using current friction, restore configured friction, then multiply by
+native f32(0.965). Intermediate prediction uses stored velocity/current friction
+without advancing physical position, sprites or contacts. Positive Player
+collection delay decrements on both callback paths: the fast branch rejoins at
+`531e7f` before `531edb`; only the later `531f01` test guards queue flushing.
 
-Use the same live gate with `--acquisition`. It requires an observed queue and a
-later grant in every contrived/recorded case, compares all347 counts, inventory,
-health, active fields, actual sprites and collection sound admission, and checks
-ordinary motion through the queue. Every gameplay presentation has its own
-complete snapshot. Bounded production trace truncation is disclosed separately;
-the independent input tape must remain complete, and every actual asynchronous
-backend callback must retain its full state. The baseline450 child RNGs are
-required. Later item RNG mutations, full shared-MT state, familiar actors and
-native cache flags remain explicit diagnostics until their actual callbacks
-are implemented. Requested cache bits are retained as `unevaluatedCacheFlags`,
-so an OR/clear operation cannot appear to implement native stat or familiar
-evaluation. The initial four-case acquisition cohort retained68,362 checks and
-3,075 mismatches, with all original transports/observations passing. Queue and
-grant boundaries, owned counts, Player/copy sprite phases and sound admission
-match, including recorded-random active291 at charge6. The complete paired gate
-is red: source40fef0 actually sets the stopped main `Empty` frame0, and later
-empty-altar mass contact/home motion is absent in this producer. An integer/bool
-comparison also fails on the queued touched byte. All raw failed evidence and
-exact source hashes remain preserved. No health clamp or familiar/stat/cache
-effect acceptance follows from these cases; the active transition is observed.
+[The corrected four-case evidence](../references/isaac/foundation/items/acquisition-correction-live.json)
+passes all 70,696 required checks across 1,070 source/browser checkpoints. Both W0
+phase offsets and recorded OS cases `R74QYMYS` and `VRQPT844` observe an actual
+queue followed by grant. This is a new live production-browser recovery against
+the exact complete original recordings from the current-turn initial cohort,
+not a fresh native recapture. Raw SHA/byte counts, public tape/X11 provenance,
+complete intended browser commands and every asynchronous backend event's full
+state are required. Independent per-presentation snapshots remain complete even
+when bounded production state history is truthfully truncated.
+
+A separately hashed verifier recomputes 3,112 pedestal f32 comparisons and 5,350
+queue/count/guard/timer comparisons. Only native/Rust f32 position, velocity,
+friction and collision mass recover exact binary32 values from serde's shortest
+JSON decimals. Integer IDs, seeds, counts, counters and ages remain unchanged.
+The initial 0/4 actual paired report retains 3,075 failures; the following recovery
+retains 902 raw decimal-spelling differences and 17 real active-item timer errors.
+Those failed reports and original mapping bytes remain intact.
+
+`test:e2e:item-acquisition` is required by the live suite registry and runs both
+real games freshly. Its default bank declares complete contact/grant intervals
+for both contrived offsets, both retained unfiltered OS outcomes, and two newly
+recorded unfiltered OS treasure routes. Selection remains a separate gate that
+stops before contact. `--replay-original DIR` discloses frozen-original recovery
+and checks exact raw bytes and requested tape/action hashes; queue, grant,
+provenance and backend-state requirements are identical in both modes.
+
+All 450 initialized Player RNG children are checked before acquisition. Later
+item RNG mutations, complete shared-MT state, stat/familiar/cache callbacks and
+post-grant item effects remain explicit raw diagnostics. Requested cache bits
+stay `unevaluatedCacheFlags`; an OR/clear cannot stand in for actual evaluation.
+Rosary and authored helper code have mapped source boundaries, while exceptional
+selector/Bible, health clamp/parity, active swap/use, altar grid-impact/prediction
+correction, native-origin/backdrop and pixel acceptance still need their own
+required cases.
