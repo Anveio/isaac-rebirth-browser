@@ -1,0 +1,384 @@
+{
+  "schema": 1,
+  "status": "diagnostic-functional-mismatch-preserved",
+  "seed": "W0L0 LYYM",
+  "caseSha256": "182a03c01f8dadbd10c8f38c23ce55dde286a18c9252438a22e8b982ea545403",
+  "artifact": "cb1d361fffc07f8f4cfe88b2c2357eb9ba3c6330082a2aaf9ad3fac18a7bf624",
+  "scope": "Exact recorded public tape through random-resumed; gameplay intervals expanded to one released presentation, no additional inputs, source state read-only, actual DOM/tick trace required. This is causal comparison evidence, not an accepted complete RNG parity claim.",
+  "samples": 270,
+  "files": [
+    {
+      "path": "/workspace/isaac-worktrees/weapons/.cache/e2e/w0-phase-diagnostic/seed-dialog/paired-phase-state.json",
+      "bytes": 4414888,
+      "sha256": "9ce097c7147b0711163d5cfe39d812f5a6ba47de46e5a8eb9abb116e89eb6854"
+    },
+    {
+      "path": "/workspace/isaac-worktrees/weapons/.cache/e2e/w0-phase-diagnostic/seed-dialog/original/manifest.json",
+      "bytes": 5924698,
+      "sha256": "58830d5f3a2c9524218b69e34a0fac833d299bea4e8c5cc480ae4cdcde1bddae"
+    },
+    {
+      "path": "/workspace/isaac-worktrees/weapons/.cache/e2e/w0-phase-diagnostic/seed-dialog/input-proof.json",
+      "bytes": 17998,
+      "sha256": "e61c71e4b73f573f7f3111529cc06098943faae7a7467c9d5556c2201aa661ee"
+    },
+    {
+      "path": "/workspace/isaac-worktrees/weapons/.cache/e2e/w0-phase-diagnostic/seed-dialog/native-tape.json",
+      "bytes": 10484,
+      "sha256": "95efd0aab354e1cb8cde0ebe4049b75249b8e388cf5c37f0d19e92dfa4281929"
+    },
+    {
+      "path": "/workspace/isaac-worktrees/weapons/.cache/e2e/w0-phase-diagnostic/seed-dialog/browser-tape.json",
+      "bytes": 10280,
+      "sha256": "d60fb96204e3638c0ce687133fa38071d9f5f5c6713e91671db421e681eae1d8"
+    },
+    {
+      "path": "/workspace/isaac-worktrees/weapons/.cache/w0-dense.mjs",
+      "bytes": 4944,
+      "sha256": "c60534971496e6862e32f4fcb360b364a9e36c437c1619c0dabd2a7de353869a"
+    }
+  ],
+  "initialGameplay": {
+    "browserPresentation": 975,
+    "nativePresentation": 1206,
+    "sourceSystemCounter": 1206,
+    "portSystemCounter": 976,
+    "sourceGameUpdateCounter": 42,
+    "sourceMtIndex": 538,
+    "portMtIndex": 48
+  },
+  "births": [
+    {
+      "browserPresentation": 1033,
+      "nativePresentation": 1264,
+      "sourceSystemCounter": 1264,
+      "portSystemCounter": 1034,
+      "sourceMtIndex": 587,
+      "portMtIndex": 53,
+      "source": [
+        {
+          "spawnSeed": 1143223941,
+          "position": [
+            323.9629821777344,
+            415
+          ],
+          "velocity": [
+            0,
+            10
+          ],
+          "height": -23.50027847290039,
+          "fallingSpeed": 0.24972209334373474,
+          "fallingAcceleration": 0
+        }
+      ],
+      "port": [
+        {
+          "id": 1,
+          "spawnSeed": 3226457588,
+          "motion": {
+            "position": {
+              "x": 324.12558,
+              "y": 410
+            },
+            "presentedPosition": {
+              "x": 324.12558,
+              "y": 415
+            },
+            "velocity": {
+              "x": 0,
+              "y": 10
+            },
+            "height": -23.502636,
+            "fallingSpeed": 0.24736428,
+            "fallingAcceleration": 0,
+            "renderOffsetY": -26.689476,
+            "lifetime": "alive"
+          }
+        }
+      ]
+    },
+    {
+      "browserPresentation": 1068,
+      "nativePresentation": 1299,
+      "sourceSystemCounter": 1299,
+      "portSystemCounter": 1069,
+      "sourceMtIndex": 27,
+      "portMtIndex": 58,
+      "source": [
+        {
+          "spawnSeed": 1528757666,
+          "position": [
+            324.96759033203125,
+            399.585693359375
+          ],
+          "velocity": [
+            4.08824574194e-09,
+            -10.006482124328613
+          ],
+          "height": -23.539886474609375,
+          "fallingSpeed": 0.2101130187511444,
+          "fallingAcceleration": 0
+        }
+      ],
+      "port": [
+        {
+          "id": 2,
+          "spawnSeed": 1173574786,
+          "motion": {
+            "position": {
+              "x": 323.06128,
+              "y": 399.5857
+            },
+            "presentedPosition": {
+              "x": 323.06128,
+              "y": 399.5857
+            },
+            "velocity": {
+              "x": 4.0882457e-09,
+              "y": -10.006482
+            },
+            "height": -23.496809,
+            "fallingSpeed": 0.25319162,
+            "fallingAcceleration": 0,
+            "renderOffsetY": -26.748405,
+            "lifetime": "alive"
+          }
+        }
+      ]
+    },
+    {
+      "browserPresentation": 1116,
+      "nativePresentation": 1347,
+      "sourceSystemCounter": 1347,
+      "portSystemCounter": 1117,
+      "sourceMtIndex": 89,
+      "portMtIndex": 63,
+      "source": [
+        {
+          "spawnSeed": 751926053,
+          "position": [
+            329.9138488769531,
+            308.6101989746094
+          ],
+          "velocity": [
+            10,
+            -0.18107305467128754
+          ],
+          "height": -23.512340545654297,
+          "fallingSpeed": 0.23766005039215088,
+          "fallingAcceleration": 0
+        }
+      ],
+      "port": [
+        {
+          "id": 3,
+          "spawnSeed": 681275707,
+          "motion": {
+            "position": {
+              "x": 329.93387,
+              "y": 309.71564
+            },
+            "presentedPosition": {
+              "x": 329.93387,
+              "y": 309.71564
+            },
+            "velocity": {
+              "x": 10,
+              "y": -0.18107305
+            },
+            "height": -23.568327,
+            "fallingSpeed": 0.18167281,
+            "fallingAcceleration": 0,
+            "renderOffsetY": -26.784164,
+            "lifetime": "alive"
+          }
+        }
+      ]
+    }
+  ],
+  "firstAliveCountMismatch": {
+    "browserPresentation": 1120,
+    "nativePresentation": 1351,
+    "sourceAlive": 2,
+    "portAlive": 1
+  },
+  "phaseLandmarks": [
+    {
+      "browserPresentation": 1118,
+      "nativePresentation": 1349,
+      "source": [
+        {
+          "spawnSeed": 1528757666,
+          "height": -5.138521671295166,
+          "fallingSpeed": 0.9432942271232605,
+          "gridContact": false,
+          "active": true,
+          "dead": false
+        },
+        {
+          "spawnSeed": 751926053,
+          "height": -23.19844627380371,
+          "fallingSpeed": 0.31389403343200684,
+          "gridContact": false,
+          "active": true,
+          "dead": false
+        }
+      ],
+      "port": [
+        {
+          "id": 2,
+          "height": -4.735564,
+          "fallingSpeed": 0.9463868,
+          "gridContact": false,
+          "lifetime": "alive"
+        },
+        {
+          "id": 3,
+          "height": -23.304821,
+          "fallingSpeed": 0.26350552,
+          "gridContact": false,
+          "lifetime": "alive"
+        }
+      ]
+    },
+    {
+      "browserPresentation": 1120,
+      "nativePresentation": 1351,
+      "source": [
+        {
+          "spawnSeed": 1528757666,
+          "height": -4.189557075500488,
+          "fallingSpeed": 0.9489648342132568,
+          "gridContact": true,
+          "active": true,
+          "dead": false
+        },
+        {
+          "spawnSeed": 751926053,
+          "height": -22.815940856933594,
+          "fallingSpeed": 0.3825046122074127,
+          "gridContact": false,
+          "active": true,
+          "dead": false
+        }
+      ],
+      "port": [
+        {
+          "id": 2,
+          "height": -4.735564,
+          "fallingSpeed": 0.9463868,
+          "gridContact": true,
+          "lifetime": "dying"
+        },
+        {
+          "id": 3,
+          "height": -22.967667,
+          "fallingSpeed": 0.33715495,
+          "gridContact": false,
+          "lifetime": "alive"
+        }
+      ]
+    },
+    {
+      "browserPresentation": 1122,
+      "nativePresentation": 1353,
+      "source": [
+        {
+          "spawnSeed": 1528757666,
+          "height": -4.189557075500488,
+          "fallingSpeed": 0.9489648342132568,
+          "gridContact": true,
+          "active": true,
+          "dead": true
+        },
+        {
+          "spawnSeed": 751926053,
+          "height": -22.371686935424805,
+          "fallingSpeed": 0.4442541301250458,
+          "gridContact": false,
+          "active": true,
+          "dead": false
+        }
+      ],
+      "port": [
+        {
+          "id": 3,
+          "height": -22.564228,
+          "fallingSpeed": 0.40343943,
+          "gridContact": false,
+          "lifetime": "alive"
+        }
+      ]
+    },
+    {
+      "browserPresentation": 1232,
+      "nativePresentation": 1463,
+      "source": [
+        {
+          "spawnSeed": 751926053,
+          "height": -4.880844593048096,
+          "fallingSpeed": 0.9452717900276184,
+          "gridContact": false,
+          "active": true,
+          "dead": false
+        }
+      ],
+      "port": [
+        {
+          "id": 3,
+          "height": -5.404546,
+          "fallingSpeed": 0.9412525,
+          "gridContact": false,
+          "lifetime": "alive"
+        }
+      ]
+    },
+    {
+      "browserPresentation": 1234,
+      "nativePresentation": 1465,
+      "source": [
+        {
+          "spawnSeed": 751926053,
+          "height": -4.880844593048096,
+          "fallingSpeed": 0.9452717900276184,
+          "gridContact": true,
+          "active": true,
+          "dead": true
+        }
+      ],
+      "port": [
+        {
+          "id": 3,
+          "height": -4.4574184,
+          "fallingSpeed": 0.9471273,
+          "gridContact": true,
+          "lifetime": "alive"
+        }
+      ]
+    },
+    {
+      "browserPresentation": 1235,
+      "nativePresentation": 1466,
+      "source": [
+        {
+          "spawnSeed": 751926053,
+          "height": -4.880844593048096,
+          "fallingSpeed": 0.9452717900276184,
+          "gridContact": true,
+          "active": true,
+          "dead": true
+        }
+      ],
+      "port": [
+        {
+          "id": 3,
+          "height": -4.4574184,
+          "fallingSpeed": 0.9471273,
+          "gridContact": true,
+          "lifetime": "alive"
+        }
+      ]
+    }
+  ],
+  "conclusion": "All three shot admission presentations match (1033,1068,1116), while spawn seeds, eye positions and initial falling speed already differ at birth. The first alive-count mismatch is1120: tear2 port PRE height -4.735564 crosses -5 while source previous height -5.138521671295166 remains below it, so port dies one full update earlier. The required random-resumed mismatch first appears1234: tear3 source PRE height -4.880844593048096 crosses -5 while port previous height -5.404546 remains below it; source is Dying while port advances to height -4.4574184 Alive. Prior gridContact is false on both at1232. Actual shared run/room/effect consumption remains unresolved; the source initializer and death law are retained without cursor skips or fitted uniforms."
+}

@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 pub enum Initialization {
     LoadFreshProfile { profile: u8 },
     ResetCharacterSeed,
+    CommitCharacterSeed { seed: u32 },
 }
 
 /// The boundary counts actual pending sound requests, including requests that
@@ -26,6 +27,9 @@ pub fn validate(pending: &[Pending], audio_requests: usize) -> Result<(), String
         match event.initialization {
             Initialization::LoadFreshProfile { profile } if !(1..=3).contains(&profile) => {
                 return Err("menu initializer requires a real profile slot".into());
+            }
+            Initialization::CommitCharacterSeed { seed: 0 } => {
+                return Err("committed Character seed cannot be reserved zero".into());
             }
             _ => {}
         }

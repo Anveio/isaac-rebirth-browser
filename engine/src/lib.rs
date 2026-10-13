@@ -586,7 +586,19 @@ impl Game {
             },
             Screen::Character => match code {
                 "Escape" => self.state.screen = Screen::Main,
-                "Tab" => self.state.screen = Screen::Seed,
+                "Tab" => {
+                    // CharacterUpdate's dialog admission repeats the named
+                    // initializer's empty-code/nonzero raw seed field route.
+                    self.state.seed_text.clear();
+                    self.state.seed_valid = false;
+                    self.state
+                        .pending_menu_initializations
+                        .push(menu_lifecycle::Pending {
+                            after_audio_requests: self.state.audio.pending.len(),
+                            initialization: menu_lifecycle::Initialization::ResetCharacterSeed,
+                        });
+                    self.state.screen = Screen::Seed;
+                }
                 "ArrowUp" | "ArrowDown" | "KeyW" | "KeyS" => {
                     self.state.difficulty = if self.state.difficulty == "normal" {
                         "hard"
@@ -611,6 +623,16 @@ impl Game {
                 }
                 "Enter" if self.state.seed_valid => {
                     self.state.run_seed_value = seed::decode(&self.state.seed_text)?;
+                    // Keep the decoded setter after every earlier Clear/Reset
+                    // even when public inputs queue before the first tick.
+                    self.state
+                        .pending_menu_initializations
+                        .push(menu_lifecycle::Pending {
+                            after_audio_requests: self.state.audio.pending.len(),
+                            initialization: menu_lifecycle::Initialization::CommitCharacterSeed {
+                                seed: self.state.run_seed_value,
+                            },
+                        });
                     self.state.run_seed = seed::encode(self.state.run_seed_value)?;
                     self.state.stage_seed = seed::stage1_seed(self.state.run_seed_value);
                     self.state.seeded_run = true;
@@ -949,6 +971,9 @@ impl Game {
                     }
                     menu_lifecycle::Initialization::ResetCharacterSeed => {
                         self.state.boot_lifecycle.reset_character_seed();
+                    }
+                    menu_lifecycle::Initialization::CommitCharacterSeed { seed } => {
+                        self.state.boot_lifecycle.commit_character_seed(seed)?;
                     }
                 }
             }

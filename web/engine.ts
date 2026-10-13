@@ -23,7 +23,7 @@ export interface MtState { words: number[]; index: number; }
 export interface GridSeedSample { roomRecord: number; gridIndex: number; seeds: [number, number]; }
 export interface BootLifecycle {
   shared: MtState; savedPlayerSeed: number; savedGridSeedSamples: GridSeedSample[];
-  levelGridSeedSamples: GridSeedSample[]; backdropSeed: number; menuRunSeed: number; secretPoses: number[];
+  levelGridSeedSamples: GridSeedSample[]; backdropSeed: number; menuRunSeed: number; menuSeedText: string; secretPoses: number[];
 }
 export interface SoundEvent {
   sequence: number; id: number; sampleIndex: number; systemCounter: number; halfTick: number;
@@ -123,7 +123,7 @@ export interface State {
   audio: AudioState;
   profile: number; mainSelection: number; characterSelection: number; character: string; difficulty: string;
   seedText: string; seedValid: boolean; runSeed: string; initialSeed: number; runSeedValue: number; bootEpochSeed: number; bootLifecycle: BootLifecycle;
-  pendingMenuInitializations: { afterAudioRequests: number; initialization: { type: "loadFreshProfile"; profile: number } | { type: "resetCharacterSeed" } }[];
+  pendingMenuInitializations: { afterAudioRequests: number; initialization: { type: "loadFreshProfile"; profile: number } | { type: "resetCharacterSeed" } | { type: "commitCharacterSeed"; seed: number } }[];
   stage: number; stageSeed: number; seededRun: boolean; achievementEligibility: boolean;
   profiles: { slot: number; unlockedCharacters: string[]; selectedCharacter: string }[];
   characterCatalog: { name: string; animation: string }[];

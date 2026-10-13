@@ -25,6 +25,10 @@ def observe(pid,context):
    u32=lambda addr:struct.unpack('<I',read(addr,4))[0]
    u64=lambda addr:struct.unpack('<Q',read(addr,8))[0]
    f32=lambda addr:struct.unpack('<f',read(addr,4))[0]
+   def seed_string(addr):
+    pointer=u64(addr);length=u64(pointer-0x18)
+    if length>9:raise ValueError('Source menu seed text exceeds bounded public code')
+    return read(pointer,length).decode('ascii') if length else ''
    manager=u64(0x8ed560);menus=u64(0x8ed570);saved=manager+0x4a8
    samples=[]
    for room in [0,1,134]:
@@ -36,7 +40,7 @@ def observe(pid,context):
    anm=menus+0x60d10+8
    loaded=bool(menus) and bool(read(anm+0x2dd,1)[0])
    title={'loaded':loaded,'menuScreen':u32(menus+0x38) if menus else None}
-   if loaded:title.update({'position':f32(anm+0x120),'speed':f32(anm+0x2d8),'playing':bool(read(anm+0x124,1)[0]),'menuRunSeed':u32(menus+0x60d00),'statsSamples':[{'index':i,'pose':u32(menus+0x64488+0x310+4*i)} for i in range(179)]})
+   if loaded:title.update({'position':f32(anm+0x120),'speed':f32(anm+0x2d8),'playing':bool(read(anm+0x124,1)[0]),'menuRunSeed':u32(menus+0x60d00),'menuSeedText':seed_string(menus+0x60d08),'characterState':u32(menus+0x62440),'characterSeedInput':seed_string(menus+0x62440+0x1758),'characterSeedCommitted':bool(read(menus+0x62440+0xc,1)[0]),'statsSamples':[{'index':i,'pose':u32(menus+0x64488+0x310+4*i)} for i in range(179)]})
    return {'schema':1,'status':'pass','scope':'bounded original writable GameState seeds, MT state and source-located title animation clock; no memory writes or gameplay input',
     'nativeBinarySha256':native_sha,'memoryWritten':False,'executableMappingsRead':False,'mtIndex':u32(0x8e6b64),'mtState':list(struct.unpack('<624Q',read(0x8ed680,624*8))),
     'managerCounter':u32(manager+0x2efa0),'stateSeed9688':u32(saved+0x9688),'gridSeedSamples':samples,'title':title}

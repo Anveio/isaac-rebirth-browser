@@ -236,6 +236,7 @@ pub struct BootState {
     pub level_grid_seed_samples: Vec<GridSeedSample>,
     pub backdrop_seed: u32,
     pub menu_run_seed: u32,
+    pub menu_seed_text: String,
     pub secret_poses: Vec<u8>,
 }
 
@@ -253,6 +254,16 @@ impl BootState {
     /// string selects one fresh shared raw seed, replacing reserved zero by 1.
     pub fn reset_character_seed(&mut self) {
         self.menu_run_seed = self.shared.next_u32().max(1);
+        self.menu_seed_text = crate::seed::encode(self.menu_run_seed)
+            .expect("Character initializer produces a nonzero seed");
+    }
+
+    /// Valid dialog confirmation copies the public code and decodes it into
+    /// the same menu seed field. It consumes no shared sample.
+    pub fn commit_character_seed(&mut self, seed: u32) -> Result<(), String> {
+        self.menu_seed_text = crate::seed::encode(seed)?;
+        self.menu_run_seed = seed;
+        Ok(())
     }
 }
 
@@ -311,6 +322,8 @@ impl BootLifecycle {
             level_grid_seed_samples,
             backdrop_seed: self.backdrop_seed,
             menu_run_seed: self.menu_run_seed,
+            menu_seed_text: crate::seed::encode(self.menu_run_seed)
+                .expect("boot Character initializer produces a nonzero seed"),
             secret_poses: self.secret_poses,
         };
         (state, self.saved_game.descriptor_seeds, self.level_grid)
