@@ -1,0 +1,274 @@
+{
+  "clang-19": {
+    "Package": "clang-19",
+    "Version": "1:19.1.7-3+b1",
+    "Filename": "pool/main/l/llvm-toolchain-19/clang-19_19.1.7-3+b1_amd64.deb",
+    "SHA256": "bbb74458d782b7792b61b0eed92746df5e6d033778c045cf8c2b3835b7c4efc4",
+    "Depends": "libc6 (>= 2.34), libclang-cpp19 (>= 1:19.1.7), libgcc-s1 (>= 3.0), libllvm19 (= 1:19.1.7-3+b1), libstdc++6 (>= 11), libstdc++-14-dev, libgcc-14-dev, libobjc-14-dev, libclang-common-19-dev (= 1:19.1.7-3+b1), llvm-19-linker-tools (= 1:19.1.7-3+b1), libclang1-19 (= 1:19.1.7-3+b1), libc6-dev, binutils",
+    "Pre-Depends": null
+  },
+  "libclang-cpp19": {
+    "Package": "libclang-cpp19",
+    "Version": "1:19.1.7-3+b1",
+    "Filename": "pool/main/l/llvm-toolchain-19/libclang-cpp19_19.1.7-3+b1_amd64.deb",
+    "SHA256": "a7d2b6df51050834f6ea5c0d5e34869c2298b0bcdaa91eff17ba3db2cd545c47",
+    "Depends": "libc6 (>= 2.38), libgcc-s1 (>= 3.0), libllvm19 (= 1:19.1.7-3+b1), libstdc++6 (>= 12)",
+    "Pre-Depends": null
+  },
+  "libobjc-14-dev": {
+    "Package": "libobjc-14-dev",
+    "Version": "14.2.0-19",
+    "Filename": "pool/main/g/gcc-14/libobjc-14-dev_14.2.0-19_amd64.deb",
+    "SHA256": "60f8a34f94d46b0ae8d48335525bfaae3daef93c56d6b8bce0e76118e44a9136",
+    "Depends": "gcc-14-base (= 14.2.0-19), libgcc-14-dev (= 14.2.0-19), libobjc4 (>= 14.2.0-19)",
+    "Pre-Depends": null
+  },
+  "libobjc4": {
+    "Package": "libobjc4",
+    "Version": "14.2.0-19",
+    "Filename": "pool/main/g/gcc-14/libobjc4_14.2.0-19_amd64.deb",
+    "SHA256": "d48411ec79114d5941256dddb1720fc65cbe4733285b29d5ecc87eb452ab30d9",
+    "Depends": "gcc-14-base (= 14.2.0-19), libc6 (>= 2.38), libgc1 (>= 1:7.2d), libgcc-s1 (>= 3.0)",
+    "Pre-Depends": null
+  },
+  "libclang-common-19-dev": {
+    "Package": "libclang-common-19-dev",
+    "Version": "1:19.1.7-3+b1",
+    "Filename": "pool/main/l/llvm-toolchain-19/libclang-common-19-dev_19.1.7-3+b1_amd64.deb",
+    "SHA256": "4018e40e2d4144fe38c45822e68cca63c1bf6c7872c3073ebb262ad4b2f9b8bc",
+    "Depends": null,
+    "Pre-Depends": null
+  },
+  "llvm-19-linker-tools": {
+    "Package": "llvm-19-linker-tools",
+    "Version": "1:19.1.7-3+b1",
+    "Filename": "pool/main/l/llvm-toolchain-19/llvm-19-linker-tools_19.1.7-3+b1_amd64.deb",
+    "SHA256": "874a0a5cde797cda3e94e9310a0a9958608f526f177637414a8ce9620c804818",
+    "Depends": "libc6 (>= 2.38), libgcc-s1 (>= 3.0), libllvm19 (>= 1:19.1.0), libstdc++6 (>= 11)",
+    "Pre-Depends": null
+  },
+  "llvm-19": {
+    "Package": "llvm-19",
+    "Version": "1:19.1.7-3+b1",
+    "Filename": "pool/main/l/llvm-toolchain-19/llvm-19_19.1.7-3+b1_amd64.deb",
+    "SHA256": "0b1b7263f4f45e261099240fdbf00fc14b42b88410fd829e041bf83ea45866cb",
+    "Depends": "llvm-19-runtime (= 1:19.1.7-3+b1), llvm-19-linker-tools (= 1:19.1.7-3+b1), libc6 (>= 2.38), libcurl4t64 (>= 7.16.2), libgcc-s1 (>= 4.3), libllvm19 (>= 1:19.1.0), libpfm4, libstdc++6 (>= 13.1), libz3-4 (>= 4.13.3), libzstd1 (>= 1.5.5), zlib1g (>= 1:1.2.0)",
+    "Pre-Depends": null
+  },
+  "llvm-19-runtime": {
+    "Package": "llvm-19-runtime",
+    "Version": "1:19.1.7-3+b1",
+    "Filename": "pool/main/l/llvm-toolchain-19/llvm-19-runtime_19.1.7-3+b1_amd64.deb",
+    "SHA256": "84a9dfc277f0914cb84e6cb3d139d3eb3dfe19f06670bbdea4241e8e3d921a4e",
+    "Depends": "libc6 (>= 2.38), libgcc-s1 (>= 3.3), libllvm19 (>= 1:19.1.0), libstdc++6 (>= 12), libz3-4 (>= 4.13.3), libzstd1 (>= 1.5.5), zlib1g (>= 1:1.1.4)",
+    "Pre-Depends": null
+  },
+  "libpfm4": {
+    "Package": "libpfm4",
+    "Version": "4.13.0+git99-gc5587f9-1",
+    "Filename": "pool/main/libp/libpfm4/libpfm4_4.13.0+git99-gc5587f9-1_amd64.deb",
+    "SHA256": "55f0d470f5bdd63061593180c5b34bcb9cefdb09b4cfc9c67b3cb170b0162525",
+    "Depends": "libc6 (>= 2.14)",
+    "Pre-Depends": null
+  },
+  "lld-19": {
+    "Package": "lld-19",
+    "Version": "1:19.1.7-3+b1",
+    "Filename": "pool/main/l/llvm-toolchain-19/lld-19_19.1.7-3+b1_amd64.deb",
+    "SHA256": "756a805e8811d527dd2b5417f016c9342b8631fa9c1ddcd56265c13ae33bf3a4",
+    "Depends": "libc6 (>= 2.34), libgcc-s1 (>= 3.0), libllvm19 (= 1:19.1.7-3+b1), libstdc++6 (>= 12), libzstd1 (>= 1.5.5), zlib1g (>= 1:1.2.2)",
+    "Pre-Depends": null
+  },
+  "lldb-19": {
+    "Package": "lldb-19",
+    "Version": "1:19.1.7-3+b1",
+    "Filename": "pool/main/l/llvm-toolchain-19/lldb-19_19.1.7-3+b1_amd64.deb",
+    "SHA256": "028740706a156856f89f8aa292796b9d907b3ab762c229385855a3b39523cc89",
+    "Depends": "libc6 (>= 2.38), libclang-cpp19 (>= 1:19.1.7), libedit2 (>= 3.1-20140620-0), libgcc-s1 (>= 3.0), liblldb-19 (>= 1:19.1.0), libllvm19 (= 1:19.1.7-3+b1), libncurses6 (>= 6), libstdc++6 (>= 12), libtinfo6 (>= 6), libxml2 (>= 2.6.27), zlib1g (>= 1:1.1.4), python3-lldb-19",
+    "Pre-Depends": null
+  },
+  "liblldb-19": {
+    "Package": "liblldb-19",
+    "Version": "1:19.1.7-3+b1",
+    "Filename": "pool/main/l/llvm-toolchain-19/liblldb-19_19.1.7-3+b1_amd64.deb",
+    "SHA256": "1dca28a0b0f21d17dd5d7ee9f3f8a909e77ca283b745bd967648cae7bbff882e",
+    "Depends": "libc6 (>= 2.38), libclang-cpp19 (>= 1:19.1.7), libcurl4t64 (>= 7.16.2), libedit2 (>= 3.1-20140620-0), libgcc-s1 (>= 3.0), libipt2 (>= 2.0), libllvm19 (= 1:19.1.7-3+b1), libncurses6 (>= 6), libpython3.13 (>= 3.13.0~rc3), libstdc++6 (>= 13.1), libtinfo6 (>= 6), libxml2 (>= 2.7.4), zlib1g (>= 1:1.1.4)",
+    "Pre-Depends": null
+  },
+  "libipt2": {
+    "Package": "libipt2",
+    "Version": "2.1.2-1",
+    "Filename": "pool/main/i/intel-processor-trace/libipt2_2.1.2-1_amd64.deb",
+    "SHA256": "33cfc9090194a993bfab1da4a70a03b4a2d2863894c1d4b506dd4ac093a0073e",
+    "Depends": "libc6 (>= 2.34)",
+    "Pre-Depends": null
+  },
+  "python3-lldb-19": {
+    "Package": "python3-lldb-19",
+    "Version": "1:19.1.7-3+b1",
+    "Filename": "pool/main/l/llvm-toolchain-19/python3-lldb-19_19.1.7-3+b1_amd64.deb",
+    "SHA256": "d0988c599e7c1685602f51f09032fd039e6b712857b8017d04b0340c4c6c97c2",
+    "Depends": "liblldb-19 (= 1:19.1.7-3+b1)",
+    "Pre-Depends": null
+  },
+  "emscripten": {
+    "Package": "emscripten",
+    "Version": "3.1.69+dfsg-3",
+    "Filename": "pool/main/e/emscripten/emscripten_3.1.69+dfsg-3_all.deb",
+    "SHA256": "d2ac788b952c56ab6736b4db2ac0825aa63cfb4c08b8abaefe19e324779d1b2d",
+    "Depends": "binaryen, ccache, clang-19, lld-19, llvm-19, node-acorn, nodejs (>= 12), python3:any",
+    "Pre-Depends": null
+  },
+  "binaryen": {
+    "Package": "binaryen",
+    "Version": "120-4",
+    "Filename": "pool/main/b/binaryen/binaryen_120-4_amd64.deb",
+    "SHA256": "47be56009e56170f4338a0154fbff2028bd607bc3c8b6a5414658a985bef6470",
+    "Depends": "libc6 (>= 2.38), libgcc-s1 (>= 3.4), libstdc++6 (>= 14)",
+    "Pre-Depends": null
+  },
+  "ccache": {
+    "Package": "ccache",
+    "Version": "4.11.2-2",
+    "Filename": "pool/main/c/ccache/ccache_4.11.2-2_amd64.deb",
+    "SHA256": "08a3f49741c54a78325a85bfdce125e30026d697874b1bb37328916c47106506",
+    "Depends": "libc6 (>= 2.38), libfmt10 (>= 10.1.1+ds1), libgcc-s1 (>= 3.4), libhiredis1.1.0 (>= 1.2.0), libstdc++6 (>= 14), libxxhash0 (>= 0.8.0), libzstd1 (>= 1.5.5)",
+    "Pre-Depends": null
+  },
+  "libhiredis1.1.0": {
+    "Package": "libhiredis1.1.0",
+    "Version": "1.2.0-6+b3",
+    "Filename": "pool/main/h/hiredis/libhiredis1.1.0_1.2.0-6+b3_amd64.deb",
+    "SHA256": "dae3af5380cb0c12e170271f19d318529331cfa17b5fa47971837b3e2a49bb83",
+    "Depends": "libc6 (>= 2.14), libssl3t64 (>= 3.0.0)",
+    "Pre-Depends": null
+  },
+  "node-acorn": {
+    "Package": "node-acorn",
+    "Version": "8.8.1+ds+~cs25.17.7-2",
+    "Filename": "pool/main/a/acorn/node-acorn_8.8.1+ds+~cs25.17.7-2_all.deb",
+    "SHA256": "5c6814cf6536892b3a93cc72a0a3792beb0d3f6be3d69f499ca7d764583479a9",
+    "Depends": "node-xtend, nodejs:any | nodejs (<< 12.22.5~dfsg-4~)",
+    "Pre-Depends": null
+  },
+  "node-xtend": {
+    "Package": "node-xtend",
+    "Version": "4.0.2-3",
+    "Filename": "pool/main/n/node-xtend/node-xtend_4.0.2-3_all.deb",
+    "SHA256": "c64e37fbea40de012b59adbfa61e703b52c12713f34cbfd2d4049ebcc549f270",
+    "Depends": null,
+    "Pre-Depends": null
+  },
+  "nodejs": {
+    "Package": "nodejs",
+    "Version": "20.19.2+dfsg-1+deb13u2",
+    "Filename": "pool/main/n/nodejs/nodejs_20.19.2+dfsg-1+deb13u2_amd64.deb",
+    "SHA256": "3e2d151f46ae1f1ab644fa6d11d85e7cf30d9aa182935bc16b99bf9888be8a85",
+    "Depends": "libc6 (>= 2.34), libnode115 (= 20.19.2+dfsg-1+deb13u2), node-corepack",
+    "Pre-Depends": null
+  },
+  "libnode115": {
+    "Package": "libnode115",
+    "Version": "20.19.2+dfsg-1+deb13u2",
+    "Filename": "pool/main/n/nodejs/libnode115_20.19.2+dfsg-1+deb13u2_amd64.deb",
+    "SHA256": "76e19950d6f79d4a3fcba700573fad26df377169ea3fad6a3cefa2ba6a629911",
+    "Depends": "libbrotli1 (>= 1.0.0), libc6 (>= 2.38), libcares2 (>= 1.28.0), libgcc-s1 (>= 3.4), libicu76 (>= 76.1-1~), libnghttp2-14 (>= 1.41.0), libssl3t64 (>= 3.4.0), libstdc++6 (>= 13.1), libuv1t64 (>= 1.46.0), zlib1g (>= 1:1.1.4), node-acorn (>= 6.2.1~), node-cjs-module-lexer (>= 1.2.2~), node-minimatch (>= 9.0.3-5), node-undici (>= 5.0.0~)",
+    "Pre-Depends": null
+  },
+  "libcares2": {
+    "Package": "libcares2",
+    "Version": "1.34.5-1+deb13u1",
+    "Filename": "pool/main/c/c-ares/libcares2_1.34.5-1+deb13u1_amd64.deb",
+    "SHA256": "5034a2c34ea4730797df1a5f6a0ec142d7d09ce6923c06e167f08ad2e69a4218",
+    "Depends": "libc6 (>= 2.38)",
+    "Pre-Depends": null
+  },
+  "libuv1t64": {
+    "Package": "libuv1t64",
+    "Version": "1.50.0-2",
+    "Filename": "pool/main/libu/libuv1/libuv1t64_1.50.0-2_amd64.deb",
+    "SHA256": "5fec8035002e0c745b64d1c5b3e1dc42790d1a77574315b976cf3e4aab9ddc0a",
+    "Depends": "libc6 (>= 2.38)",
+    "Pre-Depends": null
+  },
+  "node-cjs-module-lexer": {
+    "Package": "node-cjs-module-lexer",
+    "Version": "1.2.3+dfsg-1",
+    "Filename": "pool/main/n/node-cjs-module-lexer/node-cjs-module-lexer_1.2.3+dfsg-1_all.deb",
+    "SHA256": "db5edbd534306c633cd8c0639adb9fc723ec5c6961eee9f9721475db74474959",
+    "Depends": null,
+    "Pre-Depends": null
+  },
+  "node-minimatch": {
+    "Package": "node-minimatch",
+    "Version": "9.0.3-6",
+    "Filename": "pool/main/n/node-minimatch/node-minimatch_9.0.3-6_all.deb",
+    "SHA256": "732998416eadffcdbf4e7e697200eb28d42963d1540fff2a3b485b5499805db6",
+    "Depends": "node-brace-expansion",
+    "Pre-Depends": null
+  },
+  "node-brace-expansion": {
+    "Package": "node-brace-expansion",
+    "Version": "2.0.1+~1.1.0-2",
+    "Filename": "pool/main/n/node-brace-expansion/node-brace-expansion_2.0.1+~1.1.0-2_all.deb",
+    "SHA256": "c06d940bf95617cfd5c5ccbf0bf2ea864f41f36f317f21b4c8b21a3bf9668821",
+    "Depends": "node-balanced-match",
+    "Pre-Depends": null
+  },
+  "node-balanced-match": {
+    "Package": "node-balanced-match",
+    "Version": "2.0.0-1",
+    "Filename": "pool/main/n/node-balanced-match/node-balanced-match_2.0.0-1_all.deb",
+    "SHA256": "98a1c466bff6baf6780c4b765ec665e684424bf7907439939b5fb1160ede039c",
+    "Depends": null,
+    "Pre-Depends": null
+  },
+  "node-undici": {
+    "Package": "node-undici",
+    "Version": "7.3.0+dfsg1+~cs24.12.11-1",
+    "Filename": "pool/main/n/node-undici/node-undici_7.3.0+dfsg1+~cs24.12.11-1_all.deb",
+    "SHA256": "7f10cf9c79cf4dae6c1117ca1c8181d2d4d184b82bbd59dd0eeec554994161c4",
+    "Depends": null,
+    "Pre-Depends": null
+  },
+  "node-corepack": {
+    "Package": "node-corepack",
+    "Version": "0.24.0-5",
+    "Filename": "pool/main/n/node-corepack/node-corepack_0.24.0-5_all.deb",
+    "SHA256": "76fc252799fe76c1dcd63d95cc556e11d5ac226902cf41c1963a2a45f830efa0",
+    "Depends": "nodejs:any",
+    "Pre-Depends": null
+  },
+  "cmake": {
+    "Package": "cmake",
+    "Version": "3.31.6-2",
+    "Filename": "pool/main/c/cmake/cmake_3.31.6-2_amd64.deb",
+    "SHA256": "dee2fc94973325240604ffbca677a3f16b462fb6520946bd81be1ecbac770a02",
+    "Depends": "cmake-data (= 3.31.6-2), procps, libarchive13t64 (>= 3.3.3), libc6 (>= 2.38), libcurl4t64 (>= 7.16.2), libexpat1 (>= 2.0.1), libgcc-s1 (>= 3.0), libjsoncpp26 (>= 1.9.6), librhash1 (>= 1.2.6), libstdc++6 (>= 14), libuv1t64 (>= 1.38.0), zlib1g (>= 1:1.1.4)",
+    "Pre-Depends": null
+  },
+  "cmake-data": {
+    "Package": "cmake-data",
+    "Version": "3.31.6-2",
+    "Filename": "pool/main/c/cmake/cmake-data_3.31.6-2_all.deb",
+    "SHA256": "d9060145be892f43cd1888024114ceab019c81479d4b0a3383fe14cebe2295cb",
+    "Depends": null,
+    "Pre-Depends": null
+  },
+  "librhash1": {
+    "Package": "librhash1",
+    "Version": "1.4.5-1",
+    "Filename": "pool/main/r/rhash/librhash1_1.4.5-1_amd64.deb",
+    "SHA256": "9bf56d7d8ce3e7680a0dd8e3cfe8acdf50e0aa3b98b0a907cf744a4d1711af72",
+    "Depends": "libc6 (>= 2.34)",
+    "Pre-Depends": null
+  },
+  "ninja-build": {
+    "Package": "ninja-build",
+    "Version": "1.12.1-1",
+    "Filename": "pool/main/n/ninja-build/ninja-build_1.12.1-1_amd64.deb",
+    "SHA256": "bc172ce9270bd6fcd6d5335a83ff9d3c7ba0d13ec624cfdfa1b5aa06901dc453",
+    "Depends": "libc6 (>= 2.38), libgcc-s1 (>= 3.3.1), libstdc++6 (>= 13.1)",
+    "Pre-Depends": null
+  }
+}

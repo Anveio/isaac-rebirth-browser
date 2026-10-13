@@ -1,9 +1,0 @@
-Set up a private cloud environment named "Isaac Rebirth Browser Port" for this repository, using my personal ChatGPT account and Who can use: Only me.
-
-The purpose is to develop a browser-based port of The Binding of Isaac: Rebirth using reference files from my installed Steam copy. The base Rebirth assets and macOS executable are already in references/isaac. Read AGENTS.md and cloud/SETUP.md. Keep base Rebirth distinct from Afterbirth and Afterbirth+ overlays.
-
-Use Node.js 24. Run bash cloud/install.sh to install the pinned Node and Python dependencies, Playwright Chromium, LLVM/Clang/LLDB, Emscripten/Binaryen, CMake/Ninja and FFmpeg. Preserve the managed executor's proxy and CA trust. Configure Package managers internet access and the additional download hosts listed in cloud/SETUP.md.
-
-Record bash cloud/install.sh as the install script and cloud/START_SKILL.md as the start instructions. Run bash cloud/verify.sh and bash cloud/start.sh. Verify resource hashes, native binary inspection, C-to-WebAssembly compilation, Chromium/WebGL rendering and HTTP readiness on port 5173. Diagnose and resolve failures in the actual cloud executor; the prior local Docker validation could not download Debian packages.
-
-Report the tested setup and any remaining issues before publication. This request prepares the environment; gameplay implementation will be a later task. Keep the environment and original game resources private.

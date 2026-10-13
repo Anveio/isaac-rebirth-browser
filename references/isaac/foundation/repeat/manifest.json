@@ -1,0 +1,335 @@
+{
+  "schema": 1,
+  "seed": "T1PK 6Y0W",
+  "status": "pass",
+  "frames": [
+    {
+      "label": "intro",
+      "path": "frames/intro.png",
+      "atMs": 5407.148874000995,
+      "width": 960,
+      "height": 540,
+      "processStopped": true,
+      "simulationTick": null
+    },
+    {
+      "label": "title",
+      "path": "frames/title.png",
+      "atMs": 7170.09672200038,
+      "width": 960,
+      "height": 540,
+      "processStopped": true,
+      "simulationTick": null
+    },
+    {
+      "label": "profile",
+      "path": "frames/profile.png",
+      "atMs": 8928.05040500025,
+      "width": 960,
+      "height": 540,
+      "processStopped": true,
+      "simulationTick": null
+    },
+    {
+      "label": "main",
+      "path": "frames/main.png",
+      "atMs": 10685.374066000804,
+      "width": 960,
+      "height": 540,
+      "processStopped": true,
+      "simulationTick": null
+    },
+    {
+      "label": "character",
+      "path": "frames/character.png",
+      "atMs": 12454.233410000597,
+      "width": 960,
+      "height": 540,
+      "processStopped": true,
+      "simulationTick": null
+    },
+    {
+      "label": "seed-entry",
+      "path": "frames/seed-entry.png",
+      "atMs": 17084.304856000017,
+      "width": 960,
+      "height": 540,
+      "processStopped": true,
+      "simulationTick": null
+    },
+    {
+      "label": "character-seeded",
+      "path": "frames/character-seeded.png",
+      "atMs": 18854.99854900081,
+      "width": 960,
+      "height": 540,
+      "processStopped": true,
+      "simulationTick": null
+    },
+    {
+      "label": "gameplay-start",
+      "path": "frames/gameplay-start.png",
+      "atMs": 24479.331960999843,
+      "width": 960,
+      "height": 540,
+      "processStopped": true,
+      "simulationTick": null
+    },
+    {
+      "label": "gameplay-repeat",
+      "path": "frames/gameplay-repeat.png",
+      "atMs": 25278.897293001137,
+      "width": 960,
+      "height": 540,
+      "processStopped": true,
+      "simulationTick": null
+    },
+    {
+      "label": "pause-seed",
+      "path": "frames/pause-seed.png",
+      "atMs": 26993.481467001402,
+      "width": 960,
+      "height": 540,
+      "processStopped": true,
+      "simulationTick": null
+    },
+    {
+      "label": "gameplay-unpaused",
+      "path": "frames/gameplay-unpaused.png",
+      "atMs": 28703.31995200104,
+      "width": 960,
+      "height": 540,
+      "processStopped": true,
+      "simulationTick": null
+    },
+    {
+      "label": "movement",
+      "path": "frames/movement.png",
+      "atMs": 30587.17450900076,
+      "width": 960,
+      "height": 540,
+      "processStopped": true,
+      "simulationTick": null
+    },
+    {
+      "label": "shooting",
+      "path": "frames/shooting.png",
+      "atMs": 32025.261868000598,
+      "width": 960,
+      "height": 540,
+      "processStopped": true,
+      "simulationTick": null
+    },
+    {
+      "label": "after-fire",
+      "path": "frames/after-fire.png",
+      "atMs": 32831.51413300038,
+      "width": 960,
+      "height": 540,
+      "processStopped": true,
+      "simulationTick": null
+    }
+  ],
+  "inputs": [
+    {
+      "key": "Return",
+      "phase": "menu",
+      "atMs": 5407.224317999862,
+      "requestedHoldMs": 180,
+      "releasedAtMs": 5622.245626000222,
+      "relativeVideoMs": null
+    },
+    {
+      "key": "Return",
+      "phase": "menu",
+      "atMs": 7170.203552999737,
+      "requestedHoldMs": 180,
+      "releasedAtMs": 7380.496042000232,
+      "relativeVideoMs": null
+    },
+    {
+      "key": "Return",
+      "phase": "menu",
+      "atMs": 8928.14103100136,
+      "requestedHoldMs": 180,
+      "releasedAtMs": 9138.059220000287,
+      "relativeVideoMs": null
+    },
+    {
+      "key": "Return",
+      "phase": "menu",
+      "atMs": 10685.448559001088,
+      "requestedHoldMs": 180,
+      "releasedAtMs": 10903.141630000391,
+      "relativeVideoMs": null
+    },
+    {
+      "key": "Tab",
+      "phase": "menu",
+      "atMs": 12454.326891000164,
+      "requestedHoldMs": 180,
+      "releasedAtMs": 12668.161567000425,
+      "relativeVideoMs": null
+    },
+    {
+      "key": "t",
+      "phase": "seed-entry",
+      "atMs": 14468.287389001489,
+      "requestedHoldMs": 180,
+      "releasedAtMs": 14680.740532001437,
+      "relativeVideoMs": null
+    },
+    {
+      "key": "1",
+      "phase": "seed-entry",
+      "atMs": 14750.861915001224,
+      "requestedHoldMs": 180,
+      "releasedAtMs": 14964.867661001335,
+      "relativeVideoMs": null
+    },
+    {
+      "key": "p",
+      "phase": "seed-entry",
+      "atMs": 15034.995760001038,
+      "requestedHoldMs": 180,
+      "releasedAtMs": 15248.55805200059,
+      "relativeVideoMs": null
+    },
+    {
+      "key": "k",
+      "phase": "seed-entry",
+      "atMs": 15318.680303000292,
+      "requestedHoldMs": 180,
+      "releasedAtMs": 15531.90282000105,
+      "relativeVideoMs": null
+    },
+    {
+      "key": "6",
+      "phase": "seed-entry",
+      "atMs": 15602.021124999737,
+      "requestedHoldMs": 180,
+      "releasedAtMs": 15814.178685001025,
+      "relativeVideoMs": null
+    },
+    {
+      "key": "y",
+      "phase": "seed-entry",
+      "atMs": 15884.306738000305,
+      "requestedHoldMs": 180,
+      "releasedAtMs": 16098.986461000095,
+      "relativeVideoMs": null
+    },
+    {
+      "key": "0",
+      "phase": "seed-entry",
+      "atMs": 16169.149463001304,
+      "requestedHoldMs": 180,
+      "releasedAtMs": 16382.767875000354,
+      "relativeVideoMs": null
+    },
+    {
+      "key": "w",
+      "phase": "seed-entry",
+      "atMs": 16452.888207000797,
+      "requestedHoldMs": 180,
+      "releasedAtMs": 16666.263095999966,
+      "relativeVideoMs": null
+    },
+    {
+      "key": "Return",
+      "phase": "menu",
+      "atMs": 17084.36936399994,
+      "requestedHoldMs": 180,
+      "releasedAtMs": 17307.477381000353,
+      "relativeVideoMs": null
+    },
+    {
+      "key": "Return",
+      "phase": "menu",
+      "atMs": 18966.00628899978,
+      "requestedHoldMs": 180,
+      "releasedAtMs": 19181.008199000644,
+      "relativeVideoMs": null
+    },
+    {
+      "key": "Escape",
+      "phase": "menu",
+      "atMs": 25278.982202000407,
+      "requestedHoldMs": 180,
+      "releasedAtMs": 25494.839179000337,
+      "relativeVideoMs": null
+    },
+    {
+      "key": "Escape",
+      "phase": "menu",
+      "atMs": 26994.103376000567,
+      "requestedHoldMs": 180,
+      "releasedAtMs": 27206.00492199992,
+      "relativeVideoMs": null
+    },
+    {
+      "key": "d",
+      "phase": "gameplay",
+      "atMs": 29304.662489999828,
+      "requestedHoldMs": 450,
+      "releasedAtMs": 29787.156844000492,
+      "relativeVideoMs": 601.1973379991105
+    },
+    {
+      "key": "Right",
+      "phase": "gameplay",
+      "atMs": 30787.320299001294,
+      "requestedHoldMs": 900,
+      "releasedAtMs": 31725.12251900116,
+      "relativeVideoMs": 2083.855147000577
+    }
+  ],
+  "captureClock": "wall clock; SIGSTOP-stable framebuffer checkpoints",
+  "simulationTicks": false,
+  "fullInternalState": false,
+  "logicalViewport": {
+    "width": 480,
+    "height": 270,
+    "scale": 2
+  },
+  "profile": {
+    "fresh": true,
+    "isolated": true
+  },
+  "failures": [],
+  "initialState": {
+    "seed": "T1PK 6Y0W",
+    "seedValue": 2184569263,
+    "playerVariant": 0,
+    "playerSubtype": 0,
+    "stage": 1,
+    "altStage": 0,
+    "stageSeed": 1427977769,
+    "rooms": 9,
+    "room": "1.2(Start Room)",
+    "spawnSeed": 1812552668
+  },
+  "finalLogState": {
+    "seed": "T1PK 6Y0W",
+    "seedValue": 2184569263,
+    "playerVariant": 0,
+    "playerSubtype": 0,
+    "stage": 1,
+    "altStage": 0,
+    "stageSeed": 1427977769,
+    "rooms": 9,
+    "room": "1.2(Start Room)",
+    "spawnSeed": 1812552668
+  },
+  "performance": {
+    "wallSeconds": 33.39852199900088,
+    "cpuUserSeconds": 36.35,
+    "cpuSystemSeconds": 1.72,
+    "rssBytes": 268013568,
+    "peakRssBytes": 269094912,
+    "scope": "native process lifetime including menu/capture waits; helper CPU excluded",
+    "perSimulationTickMs": null
+  },
+  "source": "offline-derived-original",
+  "captureId": "/workspace/isaac-rebirth-browser/.cache/foundation/native-repeat"
+}

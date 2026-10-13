@@ -1,0 +1,164 @@
+// Isolated offline host-services adapter for the owner's downloaded Linux depot.
+// Public Steamworks ABI only. No original binary/resources are patched.
+#include "steam_api.h"
+#include <algorithm>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cmath>
+#include <filesystem>
+#include <fstream>
+#include <iomanip>
+#include <map>
+#include <set>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <cerrno>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <unistd.h>
+namespace {
+bool pendingReceived=false,pendingStored=false;
+std::vector<std::pair<CCallbackBase*,int>> callbacks;
+struct LocalStat { bool floating=false; int32 integer=0; float real=0; };
+std::map<std::string,LocalStat> localStats;
+std::map<std::string,bool> localAchievements;
+std::set<std::string> changedAchievements;
+std::vector<std::string> pendingAchievements;
+bool validStatName(const char*name){
+  if(!name||!name[0]||std::strlen(name)>=k_cchStatNameMax)return false;
+  for(const unsigned char*p=reinterpret_cast<const unsigned char*>(name);*p;++p)if(*p<32)return false;
+  return true;
+}
+std::filesystem::path localPath(const char*name) {
+  const char* base=std::getenv("ISAAC_OFFLINE_CLOUD_DIR");
+  if(!base||!name||!name[0])return {};
+  std::filesystem::path p(name);
+  if(p.is_absolute()||p.has_parent_path())return {};
+  return std::filesystem::path(base)/p;
+}
+bool localExists(const char*name){auto p=localPath(name);return !p.empty()&&std::filesystem::is_regular_file(p);}
+int32 localSize(const char*name){auto p=localPath(name);if(p.empty()||!localExists(name))return 0;return std::min<uintmax_t>(std::filesystem::file_size(p),INT32_MAX);}
+int32 localRead(const char*name,void*buffer,int32 size){auto p=localPath(name);if(p.empty()||!buffer||size<0)return 0;std::ifstream f(p,std::ios::binary);if(!f)return 0;f.read(static_cast<char*>(buffer),size);return f.gcount();}
+bool localWrite(const char*name,const void*buffer,int32 size){auto p=localPath(name);if(p.empty()||(!buffer&&size)||size<0)return false;std::filesystem::create_directories(p.parent_path());std::ofstream f(p,std::ios::binary);if(!f)return false;f.write(static_cast<const char*>(buffer),size);return bool(f);}
+bool localDelete(const char*name){auto p=localPath(name);return !p.empty()&&std::filesystem::remove(p);}
+bool loadStats(){
+  localStats.clear();localAchievements.clear();changedAchievements.clear();pendingAchievements.clear();
+  auto path=localPath(".offline-host-stats");
+  if(path.empty())return true;
+  std::error_code error;
+  if(!std::filesystem::exists(path,error))return !error;
+  if(std::filesystem::file_size(path,error)>2*1024*1024||error)return false;
+  std::ifstream file(path);std::string header;
+  if(!std::getline(file,header)||header!="offline-host-stats 1")return false;
+  std::map<std::string,LocalStat> loadedStats;
+  std::map<std::string,bool> loadedAchievements;
+  std::string line;
+  while(std::getline(file,line)){
+    std::istringstream entry(line);char type;std::string name;
+    if(!(entry>>type>>std::quoted(name))||!validStatName(name.c_str())||name.size()!=std::strlen(name.c_str()))return false;
+    if(type=='I'){
+      int32 value;if(!(entry>>value)||loadedStats.count(name))return false;
+      loadedStats.emplace(name,LocalStat{false,value,0});
+    }else if(type=='F'){
+      uint32 bits;if(!(entry>>bits)||loadedStats.count(name))return false;
+      float value;std::memcpy(&value,&bits,sizeof(value));if(!std::isfinite(value))return false;
+      loadedStats.emplace(name,LocalStat{true,0,value});
+    }else if(type=='A'){
+      int value;if(!(entry>>value)||(value!=0&&value!=1)||loadedAchievements.count(name))return false;
+      loadedAchievements.emplace(name,value!=0);
+    }else return false;
+    entry>>std::ws;if(!entry.eof())return false;
+    if(loadedStats.size()+loadedAchievements.size()>16384)return false;
+  }
+  if(file.bad())return false;
+  localStats=std::move(loadedStats);localAchievements=std::move(loadedAchievements);return true;
+}
+bool saveStats(){
+  auto path=localPath(".offline-host-stats");if(path.empty())return false;
+  std::ostringstream data;data<<"offline-host-stats 1\n";
+  for(const auto&[name,stat]:localStats){
+    if(stat.floating){uint32 bits;std::memcpy(&bits,&stat.real,sizeof(bits));data<<"F "<<std::quoted(name)<<' '<<bits<<'\n';}
+    else data<<"I "<<std::quoted(name)<<' '<<stat.integer<<'\n';
+  }
+  for(const auto&[name,achieved]:localAchievements)data<<"A "<<std::quoted(name)<<' '<<int(achieved)<<'\n';
+  auto text=data.str();if(text.size()>2*1024*1024)return false;
+  std::error_code error;std::filesystem::create_directories(path.parent_path(),error);if(error)return false;
+  auto temporary=path;temporary+=".tmp."+std::to_string(::getpid());
+  int fd=::open(temporary.c_str(),O_WRONLY|O_CREAT|O_TRUNC|O_NOFOLLOW,0600);if(fd<0)return false;
+  bool okay=::fchmod(fd,0600)==0;size_t offset=0;
+  while(okay&&offset<text.size()){
+    ssize_t count=::write(fd,text.data()+offset,text.size()-offset);
+    if(count<0&&errno==EINTR)continue;
+    if(count<=0){okay=false;break;}offset+=size_t(count);
+  }
+  if(::close(fd)!=0)okay=false;
+  if(okay){std::filesystem::rename(temporary,path,error);okay=!error;}
+  if(!okay)std::filesystem::remove(temporary,error);
+  return okay;
+}
+bool getStat(const char*name,int32*value){
+  if(!validStatName(name)||!value)return false;
+  auto found=localStats.find(name);if(found!=localStats.end()&&found->second.floating)return false;
+  *value=found==localStats.end()?0:found->second.integer;return true;
+}
+bool getStat(const char*name,float*value){
+  if(!validStatName(name)||!value)return false;
+  auto found=localStats.find(name);if(found!=localStats.end()&&!found->second.floating)return false;
+  *value=found==localStats.end()?0:found->second.real;return true;
+}
+bool setStat(const char*name,int32 value){
+  if(!validStatName(name))return false;
+  auto found=localStats.find(name);if(found!=localStats.end()&&found->second.floating)return false;
+  if(found==localStats.end()&&localStats.size()+localAchievements.size()>=16384)return false;
+  localStats[name]=LocalStat{false,value,0};return true;
+}
+bool setStat(const char*name,float value){
+  if(!validStatName(name)||!std::isfinite(value))return false;
+  auto found=localStats.find(name);if(found!=localStats.end()&&!found->second.floating)return false;
+  if(found==localStats.end()&&localStats.size()+localAchievements.size()>=16384)return false;
+  localStats[name]=LocalStat{true,0,value};return true;
+}
+bool getAchievement(const char*name,bool*achieved){
+  if(!validStatName(name)||!achieved)return false;
+  auto found=localAchievements.find(name);*achieved=found!=localAchievements.end()&&found->second;return true;
+}
+bool setAchievement(const char*name,bool achieved){
+  if(!validStatName(name))return false;
+  if(!localAchievements.count(name)&&localStats.size()+localAchievements.size()>=16384)return false;
+  if(achieved&&!localAchievements[name])changedAchievements.insert(name);
+  if(!achieved)changedAchievements.erase(name);
+  localAchievements[name]=achieved;return true;
+}
+bool storeStats(){
+  if(!saveStats())return false;
+  pendingStored=true;pendingAchievements.insert(pendingAchievements.end(),changedAchievements.begin(),changedAchievements.end());
+  changedAchievements.clear();return true;
+}
+bool resetStats(bool achievementsToo){
+  for(auto&[name,stat]:localStats){stat.integer=0;stat.real=0;}
+  if(achievementsToo){for(auto&[name,achieved]:localAchievements)achieved=false;changedAchievements.clear();}
+  return true;
+}
+/* GENERATED_INTERFACES */
+OfflineUser user;OfflineUtils utils;OfflineStats stats;OfflineStorage storage;
+}
+extern "C" bool SteamAPI_Init(){pendingReceived=pendingStored=false;bool loaded=loadStats();std::fprintf(stderr,"[offline-host] local Steam ABI initialized; stats load %s; no Steam client/session\n",loaded?"okay":"failed");return loaded;}
+extern "C" void SteamAPI_Shutdown(){callbacks.clear();pendingReceived=pendingStored=false;changedAchievements.clear();pendingAchievements.clear();}
+extern "C" ISteamUser* SteamUser(){return &user;}
+extern "C" ISteamUtils* SteamUtils(){return &utils;}
+extern "C" ISteamUserStats* SteamUserStats(){return &stats;}
+extern "C" ISteamRemoteStorage* SteamRemoteStorage(){return &storage;}
+extern "C" void SteamAPI_RegisterCallback(CCallbackBase*cb,int id){callbacks.push_back({cb,id});std::fprintf(stderr,"[offline-host] register callback %d\n",id);}
+extern "C" void SteamAPI_UnregisterCallback(CCallbackBase*cb){callbacks.erase(std::remove_if(callbacks.begin(),callbacks.end(),[cb](auto item){return item.first==cb;}),callbacks.end());}
+extern "C" void SteamAPI_RunCallbacks(){
+  bool received=pendingReceived,stored=pendingStored;pendingReceived=pendingStored=false;
+  auto achievements=pendingAchievements;pendingAchievements.clear();
+  auto snapshot=callbacks;
+  for(auto [cb,id]:snapshot){
+    if(received&&id==UserStatsReceived_t::k_iCallback){UserStatsReceived_t event{};event.m_nGameID=250900;event.m_eResult=k_EResultOK;event.m_steamIDUser=CSteamID(uint64(0));cb->Run(&event);}
+    if(stored&&id==UserStatsStored_t::k_iCallback){UserStatsStored_t event{};event.m_nGameID=250900;event.m_eResult=k_EResultOK;cb->Run(&event);}
+    if(id==UserAchievementStored_t::k_iCallback)for(const auto&name:achievements){UserAchievementStored_t event{};event.m_nGameID=250900;std::strncpy(event.m_rgchAchievementName,name.c_str(),sizeof(event.m_rgchAchievementName)-1);cb->Run(&event);}
+  }
+}

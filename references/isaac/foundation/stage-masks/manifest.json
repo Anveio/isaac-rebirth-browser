@@ -1,0 +1,172 @@
+{
+  "schema": 1,
+  "format": "RGBA8-straight",
+  "origin": "top-left-logical",
+  "width": 512,
+  "height": 512,
+  "cases": [
+    {
+      "id": "8m72-neutral",
+      "initialSeed": 4246011870,
+      "seedText": "8M72 AJ9X",
+      "checkpoint": "gameplay-start",
+      "targets": {
+        "shadow": "8m72-neutral-shadow.rgba",
+        "lighting": "8m72-neutral-lighting.rgba"
+      },
+      "original": {
+        "captureId": "gl-native-8m72",
+        "profile": {
+          "fresh": true,
+          "isolated": true
+        },
+        "initialState": {
+          "seed": "8M72 AJ9X",
+          "seedValue": 4246011870,
+          "playerVariant": 0,
+          "playerSubtype": 0,
+          "stage": 1,
+          "altStage": 0,
+          "stageSeed": 3308301364,
+          "rooms": 8,
+          "room": "1.2(Start Room)",
+          "spawnSeed": 3309520058
+        },
+        "log": "8m72-original.log",
+        "rawTargets": "texture-final-{texture}-512x512.rgba",
+        "captureClock": "wall clock; SIGSTOP-stable framebuffer checkpoints",
+        "simulationTicks": false,
+        "fullInternalState": false,
+        "movementInput": null
+      },
+      "browserTape": {
+        "phase": "before movement"
+      }
+    },
+    {
+      "id": "j4g3-neutral",
+      "initialSeed": 1231216718,
+      "seedText": "J4G3 9N4Q",
+      "checkpoint": "gameplay-start",
+      "targets": {
+        "shadow": "j4g3-neutral-shadow.rgba",
+        "lighting": "j4g3-neutral-lighting.rgba"
+      },
+      "original": {
+        "captureId": "gl-menus-j4g3-v8",
+        "profile": {
+          "fresh": true,
+          "isolated": true
+        },
+        "initialState": {
+          "seed": "J4G3 9N4Q",
+          "seedValue": 1231216718,
+          "playerVariant": 0,
+          "playerSubtype": 0,
+          "stage": 1,
+          "altStage": 0,
+          "stageSeed": 2478271409,
+          "rooms": 8,
+          "room": "1.2(Start Room)",
+          "spawnSeed": 2786966973
+        },
+        "log": "j4g3-original.log",
+        "rawTargets": "texture-frame-11-epoch-2-{texture}-512x512.rgba",
+        "captureClock": "wall clock; SIGSTOP-stable framebuffer checkpoints",
+        "simulationTicks": false,
+        "fullInternalState": false,
+        "movementInput": null
+      },
+      "browserTape": {
+        "phase": "before movement"
+      }
+    },
+    {
+      "id": "3bmb-neutral",
+      "initialSeed": 3350817387,
+      "seedText": "3BMB MFTE",
+      "checkpoint": "gameplay-start",
+      "targets": {
+        "shadow": "3bmb-neutral-shadow.rgba",
+        "lighting": "3bmb-neutral-lighting.rgba"
+      },
+      "original": {
+        "captureId": "gl-full-3bmb-v10",
+        "profile": {
+          "fresh": true,
+          "isolated": true
+        },
+        "initialState": {
+          "seed": "3BMB MFTE",
+          "seedValue": 3350817387,
+          "playerVariant": 0,
+          "playerSubtype": 0,
+          "stage": 1,
+          "altStage": 0,
+          "stageSeed": 3049754554,
+          "rooms": 8,
+          "room": "1.2(Start Room)",
+          "spawnSeed": 1052094211
+        },
+        "log": "3bmb-original.log",
+        "rawTargets": "texture-frame-8-epoch-2-{texture}-512x512.rgba",
+        "captureClock": "wall clock; SIGSTOP-stable framebuffer checkpoints",
+        "simulationTicks": false,
+        "fullInternalState": false,
+        "movementInput": null
+      },
+      "browserTape": {
+        "phase": "before movement"
+      }
+    },
+    {
+      "id": "3bmb-moved",
+      "initialSeed": 3350817387,
+      "seedText": "3BMB MFTE",
+      "checkpoint": "movement",
+      "targets": {
+        "shadow": "3bmb-moved-shadow.rgba",
+        "lighting": "3bmb-moved-lighting.rgba"
+      },
+      "original": {
+        "captureId": "gl-full-3bmb-v10",
+        "profile": {
+          "fresh": true,
+          "isolated": true
+        },
+        "initialState": {
+          "seed": "3BMB MFTE",
+          "seedValue": 3350817387,
+          "playerVariant": 0,
+          "playerSubtype": 0,
+          "stage": 1,
+          "altStage": 0,
+          "stageSeed": 3049754554,
+          "rooms": 8,
+          "room": "1.2(Start Room)",
+          "spawnSeed": 1052094211
+        },
+        "log": "3bmb-original.log",
+        "rawTargets": "texture-frame-12-epoch-2-{texture}-512x512.rgba",
+        "captureClock": "wall clock; SIGSTOP-stable framebuffer checkpoints",
+        "simulationTicks": false,
+        "fullInternalState": false,
+        "movementInput": {
+          "key": "d",
+          "phase": "gameplay",
+          "atMs": 29893.89639199726,
+          "wallStartedMs": 1791852404944.3782,
+          "requestedHoldMs": 450,
+          "releasedAtMs": 30375.899443999515,
+          "wallReleasedMs": 1791852405426.3816,
+          "relativeVideoMs": 603.2754829975602
+        }
+      },
+      "browserTape": {
+        "movementHoldTicks": 27,
+        "movementReleaseTicks": 30
+      }
+    }
+  ],
+  "scope": "Actual public OpenGL target readbacks. Raw mask equality does not establish full-frame, complete original-state or simulation-tick parity."
+}
