@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { chromium } from "@playwright/test";
-import { spawn, spawnSync } from "node:child_process";
+import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -8,6 +8,8 @@ import { PNG } from "pngjs";
 import { actorForegroundComparison, compareProjectileSprites, compareReferenceSamples, decodePng, exactStateDifference, scaleNearest } from "./compare.mjs";
 import { tasksForRegion } from "./systems.mjs";
 import { browserLaunchOptions, inspectBrowserGraphics } from "./browser.mjs";
+import { startProductionServer } from "./production-server.mjs";
+import { CONTROLLED_BOMB_CHECKPOINTS } from "./mask-checkpoints.mjs";
 
 const ROOT = resolve(fileURLToPath(new URL("../..", import.meta.url)));
 export const FOUNDATION_SEED = "T1PK6Y0W";
@@ -60,9 +62,9 @@ export async function waitForReady(page) {
   const boot = await page.evaluate(() => ({ ready: document.body.dataset.ready, error: document.querySelector("#status")?.textContent }));
   assert.equal(boot.ready, "true", `Browser boot failed: ${boot.error}`);
 }
-export async function browserScenario(page, { initialSeed = FOUNDATION_REFERENCE_INITIAL_SEED, manualSeedText = FOUNDATION_SEED, onCheckpoint } = {}) {
+export async function browserScenario(page, { initialSeed = FOUNDATION_REFERENCE_INITIAL_SEED, manualSeedText = FOUNDATION_SEED, onCheckpoint, bombCheckpoint } = {}) {
   await waitForReady(page);
-  await page.evaluate((initialSeed) => { window.game.pause(); window.game.reset(initialSeed); window.game.pause(); }, initialSeed);
+  await page.evaluate((initialSeed) => { window.game.pause(); window.game.reset(initialSeed, { trace: true }); window.game.pause(); }, initialSeed);
   const commands = [], states = [await page.evaluate(() => window.game.snapshot())], frames = [], timings = [];
   assert.equal(states[0].initialSeed, initialSeed, "Browser reset must use the requested initial seed, never a production preset");
   const record = async (command) => {
@@ -93,6 +95,14 @@ export async function browserScenario(page, { initialSeed = FOUNDATION_REFERENCE
     frames.push(frame);
     if (onCheckpoint) await onCheckpoint(frame);
   };
+  const finish = async () => {
+    const actualTrace = await page.evaluate(() => window.game.trace());
+    assert.equal(actualTrace.enabled, true, "Verification must opt in to actual keyboard replay capture");
+    assert.equal(actualTrace.truncated, false, "Actual keyboard trace must preserve every command");
+    assert.equal(actualTrace.initialSeed, initialSeed, "Replays must contain the actual initial seed");
+    assert.deepEqual(actualTrace.commands, commands, "Browser DOM input delivery must match the canonical command tape");
+    return { initialSeed, commands, states, frames, timings, tickRate: 60, seed: states.at(-1).runSeed, inputTransport: "actual DOM keyboard; manually stepped WASM simulation" };
+  };
   await capture("title", "title");
   await press("Enter"); await capture("profile", "profile");
   await press("Enter"); await capture("main", "main");
@@ -106,20 +116,31 @@ export async function browserScenario(page, { initialSeed = FOUNDATION_REFERENCE
     await capture("seed-entry", "seed");
     await press("Enter"); await capture("character-seeded", "character");
   }
-  await press("Enter"); await capture("gameplay-start", "playing");
+  await press("Enter");
+  assert.equal(states.at(-1).screen, "playing", "Actual keyboard must start the run before advancing its introduction");
+  // Existing neutral original fixtures were captured after the authored stage
+  // banner. Advance the explicit transition instead of suppressing its draw.
+  for (let steps = 0; states.at(-1).runIntroduction.active; steps += 10) {
+    assert.ok(steps < 600, "Run introduction must reach its neutral state within ten simulation seconds");
+    await tick(10);
+  }
+  await capture("gameplay-start", "playing");
   if (manualSeedText !== null) assert.equal(states.at(-1).seedText.replaceAll(" ", ""), manualSeedText);
   await key("KeyD", true); await tick(27); await key("KeyD", false); await tick(30);
   await capture("movement", "playing");
+  if (bombCheckpoint !== undefined) {
+    const presentations = CONTROLLED_BOMB_CHECKPOINTS[bombCheckpoint];
+    assert.ok(presentations, "Bomb mask verification requires an explicit original checkpoint");
+    await key("KeyE", true); await tick(1); await key("KeyE", false); await tick(presentations - 1);
+    await capture(bombCheckpoint, "playing");
+    return finish();
+  }
   await key("ArrowRight", true); await tick(54); await key("ArrowRight", false);
   await capture("shooting", "playing");
   assert.ok(states.at(-1).tears.length > 0, "Held shooting must produce live tears");
   await tick(30);
   await capture("after-fire", "playing");
-  const actualTrace = await page.evaluate(() => window.game.trace());
-  assert.equal(actualTrace.truncated, false, "Actual keyboard trace must preserve every command");
-  assert.equal(actualTrace.initialSeed, initialSeed, "Replays must contain the actual initial seed");
-  assert.deepEqual(actualTrace.commands, commands, "Browser DOM input delivery must match the canonical command tape");
-  return { initialSeed, commands, states, frames, timings, tickRate: 60, seed: states.at(-1).runSeed, inputTransport: "actual DOM keyboard; manually stepped WASM simulation" };
+  return finish();
 }
 
 function regionsFor(frame) {
@@ -196,22 +217,20 @@ export function nativeReplay(initialSeed, commands) {
 }
 
 export async function verify({ references, output = join(ROOT, ".cache/foundation/verification/latest"), baseURL: providedURL } = {}) {
-  const baseURL = providedURL || process.env.FOUNDATION_BROWSER_URL || "http://127.0.0.1:5173";
+  let baseURL = providedURL || process.env.FOUNDATION_BROWSER_URL;
   mkdirSync(output, { recursive: true });
   const report = { schema: 1, status: "running", seed: FOUNDATION_SEED, checks: [], exactOriginalPixels: false, originalStateParity: false, originalSimulationTickDelivery: false };
   let server, browser;
   try {
     const original = readReferences(references || [join(ROOT, "references/isaac/foundation/baseline/manifest.json"), join(ROOT, "references/isaac/foundation/repeat/manifest.json")]);
-    let ready = false;
-    try { ready = (await fetch(baseURL)).ok; } catch {}
-    if (!ready) {
-      assert.ok(!providedURL && !process.env.FOUNDATION_BROWSER_URL, `Provided foundation browser server is unavailable: ${baseURL}`);
-      server = spawn("npm", ["run", "dev"], { cwd: ROOT, stdio: "ignore", detached: true });
-      for (let tries = 0; tries < 100 && !ready; tries++) {
-        await new Promise((done) => setTimeout(done, 100));
-        try { ready = (await fetch(baseURL)).ok; } catch {}
-      }
-      assert.ok(ready, "Foundation browser server did not become ready");
+    if (!baseURL) {
+      server = await startProductionServer();
+      baseURL = server.url;
+      report.browserArtifact = server.build;
+    } else {
+      const ready = await fetch(baseURL, { signal: AbortSignal.timeout(10_000) });
+      assert.ok(ready.ok, `Provided foundation browser server is unavailable: ${baseURL}`);
+      report.browserArtifact = { source: baseURL, scope: "Explicit external browser server; immutable production provenance is not established" };
     }
     browser = await chromium.launch({ headless: true, ...browserLaunchOptions() });
     report.graphics = await inspectBrowserGraphics(browser);
@@ -241,7 +260,7 @@ export async function verify({ references, output = join(ROOT, ".cache/foundatio
     report.checks.push({ id: "foundation-pipeline", status: "fail", error: error.message || String(error) });
   } finally {
     await browser?.close();
-    if (server) { try { process.kill(-server.pid, "SIGTERM"); } catch (error) { if (error.code !== "ESRCH") throw error; } }
+    await server?.close();
   }
   report.status = report.checks.length > 0 && report.checks.every((check) => check.status === "pass") ? "pass" : "fail";
   save(join(output, "report.json"), report);

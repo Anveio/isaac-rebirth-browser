@@ -366,12 +366,19 @@ def main():
     parser.add_argument('--filenames', type=Path, default=ROOT / 'references/isaac/resource-filenames.txt')
     parser.add_argument('--output', type=Path, default=ROOT / '.cache/foundation/assets')
     parser.add_argument('--select', action='append', help='Actor path/glob to export; repeat for multiple selections')
+    parser.add_argument('--select-file', type=Path, help='Newline-delimited actor paths/globs to export')
     parser.add_argument('--json-output', '--out', type=Path, help='Also write the selected actor map to this JSON file')
     parser.add_argument('--fonts', type=Path, default=ROOT / 'references/isaac/rebirth/resources/font')
     parser.add_argument('--fonts-only', action='store_true', help='Only export standard BMFont authored glyph metrics')
     parser.add_argument('--graphics', action='store_true', help='Extract selected animations\' actual Linux PNG sheets, backdrop, controls and fonts')
     parser.add_argument('--graphic', action='append', help='Additional specific gfx/... Linux PNG resource; repeat as needed')
     args = parser.parse_args()
+    if args.select_file:
+        selections = [line.strip() for line in args.select_file.read_text().splitlines()
+                      if line.strip() and not line.lstrip().startswith('#')]
+        if not selections:
+            raise ValueError('Animation selection file is empty')
+        args.select = (args.select or []) + selections
     fonts = write_fonts(args.output, args.fonts)
     if args.fonts_only:
         print(json.dumps({'fonts': fonts, 'output': str(args.output)}))

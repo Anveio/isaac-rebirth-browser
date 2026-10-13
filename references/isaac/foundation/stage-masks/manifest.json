@@ -125,11 +125,11 @@
       "seedText": "3BMB MFTE",
       "checkpoint": "movement",
       "targets": {
-        "shadow": "3bmb-moved-shadow.rgba",
-        "lighting": "3bmb-moved-lighting.rgba"
+        "shadow": "3bmb-controlled-moved-shadow.rgba",
+        "lighting": "3bmb-controlled-moved-lighting.rgba"
       },
       "original": {
-        "captureId": "gl-full-3bmb-v10",
+        "captureId": "controlled-clock-3bmb-mask-primary",
         "profile": {
           "fresh": true,
           "isolated": true
@@ -146,25 +146,279 @@
           "room": "1.2(Start Room)",
           "spawnSeed": 1052094211
         },
-        "log": "3bmb-original.log",
-        "rawTargets": "texture-frame-12-epoch-2-{texture}-512x512.rgba",
-        "captureClock": "wall clock; SIGSTOP-stable framebuffer checkpoints",
+        "captureClock": "main-thread virtual Linux clocks and blocking public GL presentation gate",
         "simulationTicks": false,
         "fullInternalState": false,
-        "movementInput": {
-          "key": "d",
-          "phase": "gameplay",
-          "atMs": 29893.89639199726,
-          "wallStartedMs": 1791852404944.3782,
-          "requestedHoldMs": 450,
-          "releasedAtMs": 30375.899443999515,
-          "wallReleasedMs": 1791852405426.3816,
-          "relativeVideoMs": 603.2754829975602
+        "log": "3bmb-controlled-original.log",
+        "controlledEvidence": {
+          "path": "3bmb-controlled-movement.json",
+          "sha256": "17d3770963fe2cad3d697fd720637272835a8a245752404e65ddb82024e37192"
+        },
+        "legacyTimingEvidence": {
+          "original": {
+            "captureId": "gl-full-3bmb-v10",
+            "profile": {
+              "fresh": true,
+              "isolated": true
+            },
+            "initialState": {
+              "seed": "3BMB MFTE",
+              "seedValue": 3350817387,
+              "playerVariant": 0,
+              "playerSubtype": 0,
+              "stage": 1,
+              "altStage": 0,
+              "stageSeed": 3049754554,
+              "rooms": 8,
+              "room": "1.2(Start Room)",
+              "spawnSeed": 1052094211
+            },
+            "log": "3bmb-original.log",
+            "rawTargets": "texture-frame-12-epoch-2-{texture}-512x512.rgba",
+            "captureClock": "wall clock; SIGSTOP-stable framebuffer checkpoints",
+            "simulationTicks": false,
+            "fullInternalState": false,
+            "movementInput": {
+              "key": "d",
+              "phase": "gameplay",
+              "atMs": 29893.89639199726,
+              "wallStartedMs": 1791852404944.3782,
+              "requestedHoldMs": 450,
+              "releasedAtMs": 30375.899443999515,
+              "wallReleasedMs": 1791852405426.3816,
+              "relativeVideoMs": 603.2754829975602
+            }
+          },
+          "targets": {
+            "shadow": "3bmb-moved-shadow.rgba",
+            "lighting": "3bmb-moved-lighting.rgba"
+          },
+          "scope": "Prior wall-clock movement capture is retained; its requested450ms did not establish the controlled D27/release30 presentation endpoint."
         }
       },
       "browserTape": {
         "movementHoldTicks": 27,
         "movementReleaseTicks": 30
+      }
+    },
+    {
+      "id": "3bmb-explosion-start",
+      "initialSeed": 3350817387,
+      "seedText": "3BMB MFTE",
+      "checkpoint": "explosion-start",
+      "targets": {
+        "shadow": "3bmb-controlled-explosion-start-shadow.rgba",
+        "lighting": "3bmb-controlled-explosion-start-lighting.rgba"
+      },
+      "original": {
+        "captureId": "controlled-clock-3bmb-explosion",
+        "profile": {
+          "fresh": true,
+          "isolated": true
+        },
+        "initialState": {
+          "seed": "3BMB MFTE",
+          "seedValue": 3350817387,
+          "playerVariant": 0,
+          "playerSubtype": 0,
+          "stage": 1,
+          "altStage": 0,
+          "stageSeed": 3049754554,
+          "rooms": 8,
+          "room": "1.2(Start Room)",
+          "spawnSeed": 1052094211
+        },
+        "captureClock": "main-thread virtual Linux clocks and blocking public GL presentation gate",
+        "simulationTicks": false,
+        "fullInternalState": false,
+        "log": "3bmb-controlled-explosion-original.log",
+        "controlledEvidence": {
+          "path": "3bmb-controlled-explosion-start.json",
+          "sha256": "9563baf8d6ae3e2a0bd0690341bd662c5d58d210aa3ce7cf2b832367f1d63ad4"
+        }
+      },
+      "browserTape": {
+        "movementHoldTicks": 27,
+        "movementReleaseTicks": 30,
+        "bombKey": "KeyE",
+        "bombHoldTicks": 1,
+        "bombPresentation": 121
+      }
+    },
+    {
+      "id": "3bmb-explosion-faded",
+      "initialSeed": 3350817387,
+      "seedText": "3BMB MFTE",
+      "checkpoint": "explosion-faded",
+      "targets": {
+        "shadow": "3bmb-controlled-explosion-faded-shadow.rgba",
+        "lighting": "3bmb-controlled-explosion-faded-lighting.rgba"
+      },
+      "original": {
+        "captureId": "controlled-clock-3bmb-explosion",
+        "profile": {
+          "fresh": true,
+          "isolated": true
+        },
+        "initialState": {
+          "seed": "3BMB MFTE",
+          "seedValue": 3350817387,
+          "playerVariant": 0,
+          "playerSubtype": 0,
+          "stage": 1,
+          "altStage": 0,
+          "stageSeed": 3049754554,
+          "rooms": 8,
+          "room": "1.2(Start Room)",
+          "spawnSeed": 1052094211
+        },
+        "captureClock": "main-thread virtual Linux clocks and blocking public GL presentation gate",
+        "simulationTicks": false,
+        "fullInternalState": false,
+        "log": "3bmb-controlled-explosion-original.log",
+        "controlledEvidence": {
+          "path": "3bmb-controlled-explosion-faded.json",
+          "sha256": "f8588217497346ff4f36e0080c3c7c6e3609ea8ddcb7e492b3cdec0a1d5daeab"
+        }
+      },
+      "browserTape": {
+        "movementHoldTicks": 27,
+        "movementReleaseTicks": 30,
+        "bombKey": "KeyE",
+        "bombHoldTicks": 1,
+        "bombPresentation": 123
+      }
+    },
+    {
+      "id": "3bmb-explosion-middle",
+      "initialSeed": 3350817387,
+      "seedText": "3BMB MFTE",
+      "checkpoint": "explosion-middle",
+      "targets": {
+        "shadow": "3bmb-controlled-explosion-middle-shadow.rgba",
+        "lighting": "3bmb-controlled-explosion-middle-lighting.rgba"
+      },
+      "original": {
+        "captureId": "controlled-clock-3bmb-explosion",
+        "profile": {
+          "fresh": true,
+          "isolated": true
+        },
+        "initialState": {
+          "seed": "3BMB MFTE",
+          "seedValue": 3350817387,
+          "playerVariant": 0,
+          "playerSubtype": 0,
+          "stage": 1,
+          "altStage": 0,
+          "stageSeed": 3049754554,
+          "rooms": 8,
+          "room": "1.2(Start Room)",
+          "spawnSeed": 1052094211
+        },
+        "captureClock": "main-thread virtual Linux clocks and blocking public GL presentation gate",
+        "simulationTicks": false,
+        "fullInternalState": false,
+        "log": "3bmb-controlled-explosion-original.log",
+        "controlledEvidence": {
+          "path": "3bmb-controlled-explosion-middle.json",
+          "sha256": "89092a2d7e28b20bf397365a904824e8121e053f12a5d2853bdc62b0d259b00b"
+        }
+      },
+      "browserTape": {
+        "movementHoldTicks": 27,
+        "movementReleaseTicks": 30,
+        "bombKey": "KeyE",
+        "bombHoldTicks": 1,
+        "bombPresentation": 127
+      }
+    },
+    {
+      "id": "3bmb-explosion-late",
+      "initialSeed": 3350817387,
+      "seedText": "3BMB MFTE",
+      "checkpoint": "explosion-late",
+      "targets": {
+        "shadow": "3bmb-controlled-explosion-late-shadow.rgba",
+        "lighting": "3bmb-controlled-explosion-late-lighting.rgba"
+      },
+      "original": {
+        "captureId": "controlled-clock-3bmb-explosion",
+        "profile": {
+          "fresh": true,
+          "isolated": true
+        },
+        "initialState": {
+          "seed": "3BMB MFTE",
+          "seedValue": 3350817387,
+          "playerVariant": 0,
+          "playerSubtype": 0,
+          "stage": 1,
+          "altStage": 0,
+          "stageSeed": 3049754554,
+          "rooms": 8,
+          "room": "1.2(Start Room)",
+          "spawnSeed": 1052094211
+        },
+        "captureClock": "main-thread virtual Linux clocks and blocking public GL presentation gate",
+        "simulationTicks": false,
+        "fullInternalState": false,
+        "log": "3bmb-controlled-explosion-original.log",
+        "controlledEvidence": {
+          "path": "3bmb-controlled-explosion-late.json",
+          "sha256": "e3a0476d125291bf8e087f6a41514f2fbe22388f14062e8e39da4f740ddddcd3"
+        }
+      },
+      "browserTape": {
+        "movementHoldTicks": 27,
+        "movementReleaseTicks": 30,
+        "bombKey": "KeyE",
+        "bombHoldTicks": 1,
+        "bombPresentation": 131
+      }
+    },
+    {
+      "id": "3bmb-explosion-removed",
+      "initialSeed": 3350817387,
+      "seedText": "3BMB MFTE",
+      "checkpoint": "explosion-removed",
+      "targets": {
+        "shadow": "3bmb-controlled-explosion-removed-shadow.rgba",
+        "lighting": "3bmb-controlled-explosion-removed-lighting.rgba"
+      },
+      "original": {
+        "captureId": "controlled-clock-3bmb-explosion",
+        "profile": {
+          "fresh": true,
+          "isolated": true
+        },
+        "initialState": {
+          "seed": "3BMB MFTE",
+          "seedValue": 3350817387,
+          "playerVariant": 0,
+          "playerSubtype": 0,
+          "stage": 1,
+          "altStage": 0,
+          "stageSeed": 3049754554,
+          "rooms": 8,
+          "room": "1.2(Start Room)",
+          "spawnSeed": 1052094211
+        },
+        "captureClock": "main-thread virtual Linux clocks and blocking public GL presentation gate",
+        "simulationTicks": false,
+        "fullInternalState": false,
+        "log": "3bmb-controlled-explosion-original.log",
+        "controlledEvidence": {
+          "path": "3bmb-controlled-explosion-removed.json",
+          "sha256": "4722e4514d5e0638e81542ea04992206bc0da4b03e1e3387270ddb7fc3ea19af"
+        }
+      },
+      "browserTape": {
+        "movementHoldTicks": 27,
+        "movementReleaseTicks": 30,
+        "bombKey": "KeyE",
+        "bombHoldTicks": 1,
+        "bombPresentation": 133
       }
     }
   ],

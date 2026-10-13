@@ -6,10 +6,13 @@
 use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
 use std::collections::BTreeSet;
+mod bombs;
 mod content;
 mod effects;
+mod motion;
 mod room;
 pub mod seed;
+pub use bombs::{Bomb, Explosion};
 pub use effects::{Point, StageEffects};
 pub use room::Room;
 
@@ -144,6 +147,59 @@ fn character_catalog() -> Vec<CharacterDefinition> {
 }
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct RunIntroduction {
+    pub age: u32,
+    pub active: bool,
+}
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "lowercase")]
+pub enum PausePhase {
+    Hidden,
+    Appearing,
+    Idle,
+    Disappearing,
+}
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct PauseMenu {
+    pub phase: PausePhase,
+    pub age: u32,
+    pub selection: u8,
+    pub stat_frames: [u8; 6],
+}
+impl PauseMenu {
+    fn hidden() -> Self {
+        Self {
+            phase: PausePhase::Hidden,
+            age: 0,
+            selection: 1,
+            stat_frames: [2, 1, 2, 2, 2, 1],
+        }
+    }
+    fn advance(&mut self) {
+        match self.phase {
+            PausePhase::Appearing | PausePhase::Disappearing => {
+                self.age += 1;
+                let end = if self.phase == PausePhase::Appearing {
+                    26
+                } else {
+                    22
+                };
+                if self.age >= end {
+                    self.phase = if self.phase == PausePhase::Appearing {
+                        PausePhase::Idle
+                    } else {
+                        PausePhase::Hidden
+                    };
+                    self.age = 0;
+                }
+            }
+            PausePhase::Hidden | PausePhase::Idle => {}
+        }
+    }
+}
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct State {
     pub schema: u32,
     pub tick_rate: u32,
@@ -178,6 +234,12 @@ pub struct State {
     pub impacts: Vec<Impact>,
     pub fire_cooldown: u32,
     pub next_tear: u32,
+    pub bombs: Vec<Bomb>,
+    pub explosions: Vec<Explosion>,
+    pub next_bomb: u32,
+    pub damage_cooldown: u32,
+    pub run_introduction: RunIntroduction,
+    pub pause_menu: PauseMenu,
 }
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(tag = "type", rename_all = "camelCase", deny_unknown_fields)]
@@ -242,6 +304,15 @@ impl Game {
                 impacts: Vec::new(),
                 fire_cooldown: 0,
                 next_tear: 1,
+                bombs: Vec::new(),
+                explosions: Vec::new(),
+                next_bomb: 1,
+                damage_cooldown: 0,
+                run_introduction: RunIntroduction {
+                    age: 0,
+                    active: false,
+                },
+                pause_menu: PauseMenu::hidden(),
             },
         };
         game.refresh_minimap();
@@ -275,6 +346,7 @@ impl Game {
                         | "KeyA"
                         | "KeyS"
                         | "KeyD"
+                        | "KeyE"
                 ) {
                     return Err(format!("unsupported key code: {code}"));
                 }
@@ -417,8 +489,35 @@ impl Game {
                 _ => {}
             },
             Screen::Playing => {
-                if code == "Escape" {
+                if code == "Escape"
+                    || (self.state.paused
+                        && code == "Enter"
+                        && self.state.pause_menu.selection == 1)
+                {
                     self.state.paused = !self.state.paused;
+                    self.state.pause_menu.phase = if self.state.paused {
+                        PausePhase::Appearing
+                    } else {
+                        PausePhase::Disappearing
+                    };
+                    self.state.pause_menu.age = 0;
+                    if self.state.paused {
+                        self.state.pause_menu.selection = 1;
+                    }
+                } else if self.state.paused {
+                    match code {
+                        "ArrowUp" | "KeyW" => {
+                            self.state.pause_menu.selection =
+                                (self.state.pause_menu.selection + 2) % 3
+                        }
+                        "ArrowDown" | "KeyS" => {
+                            self.state.pause_menu.selection =
+                                (self.state.pause_menu.selection + 1) % 3
+                        }
+                        _ => {}
+                    }
+                } else if code == "KeyE" {
+                    bombs::place(&mut self.state)?;
                 }
             }
         }
@@ -465,6 +564,10 @@ impl Game {
             &self.state.room.appearance.fx,
             self.state.run_tick,
         );
+        self.state.stage_effects.add_bomb_shadows(&self.state.bombs);
+        self.state
+            .stage_effects
+            .add_explosion_lights(&self.state.explosions);
     }
     fn start_run(&mut self) -> Result<(), String> {
         let unlocked =
@@ -494,6 +597,15 @@ impl Game {
         self.state.impacts.clear();
         self.state.next_tear = 1;
         self.state.fire_cooldown = 0;
+        self.state.bombs.clear();
+        self.state.explosions.clear();
+        self.state.next_bomb = 1;
+        self.state.damage_cooldown = 0;
+        self.state.run_introduction = RunIntroduction {
+            age: 0,
+            active: true,
+        };
+        self.state.pause_menu = PauseMenu::hidden();
         self.state.player = Self::new(self.state.run_seed_value)?.state.player;
         self.state.room = room::generate_room(self.state.run_seed_value);
         self.state.inventory = Inventory {
@@ -511,32 +623,26 @@ impl Game {
     fn tick(&mut self) {
         self.state.tick += 1;
         self.state.menu_animation_tick += 1;
+        if self.state.screen == Screen::Playing {
+            self.state.pause_menu.advance();
+        }
         if self.state.screen != Screen::Playing || self.state.paused {
             return;
         }
         self.state.run_tick += 1;
+        if self.state.run_introduction.active {
+            self.state.run_introduction.age += 1;
+            self.state.run_introduction.active = self.state.run_introduction.age < 140;
+        }
         let dx = i32::from(self.held("KeyD")) - i32::from(self.held("KeyA"));
         let dy = i32::from(self.held("KeyS")) - i32::from(self.held("KeyW"));
-        // Rendered-frame calibration: native-baseline/measurements.json.
-        // A .9 retention / 3-pixel target reproduces the observed +80-pixel
-        // movement after 27 held samples and settling. Native ticks are unknown.
-        let diagonal = if dx != 0 && dy != 0 {
-            std::f64::consts::FRAC_1_SQRT_2
-        } else {
-            1.0
-        };
-        let speed = 3.0;
+        // Native blast impulses apply before movement integration and drag in
+        // their first visible phase; stationary zero-separation blasts stay put.
+        bombs::tick(&mut self.state);
+        // Shooting inherits the velocity entering this phase, before input acceleration.
+        let inherited_velocity = (self.state.player.vx, self.state.player.vy);
+        motion::advance(&mut self.state.player, &self.state.room, dx, dy);
         let player = &mut self.state.player;
-        player.vx = player.vx * 0.9 + f64::from(dx) * diagonal * speed * 0.1;
-        player.vy = player.vy * 0.9 + f64::from(dy) * diagonal * speed * 0.1;
-        if player.vx.abs() < 0.05 && dx == 0 {
-            player.vx = 0.0;
-        }
-        if player.vy.abs() < 0.05 && dy == 0 {
-            player.vy = 0.0;
-        }
-        player.x = (player.x + player.vx).clamp(self.state.room.left, self.state.room.right);
-        player.y = (player.y + player.vy).clamp(self.state.room.top, self.state.room.bottom);
         if dx != 0 || dy != 0 {
             player.body_facing = if dx < 0 {
                 Direction::Left
@@ -571,6 +677,11 @@ impl Game {
         };
         self.state.player.shooting = aim.is_some();
         self.state.fire_cooldown = self.state.fire_cooldown.saturating_sub(1);
+        for tear in &mut self.state.tears {
+            tear.x += tear.vx;
+            tear.y += tear.vy;
+            tear.age += 1;
+        }
         if let Some(direction) = aim {
             self.state.player.facing = direction;
             self.state.player.head_frame = if self.state.fire_cooldown < 5 { 2 } else { 0 };
@@ -583,21 +694,34 @@ impl Game {
                 };
                 // The captured right-facing volleys alternate between two
                 // rendered eye heights about six logical pixels apart.
-                let eye_offset = if self.state.next_tear % 2 == 0 {
+                let eye_offset = if self.state.next_tear.is_multiple_of(2) {
                     6.0
                 } else {
                     0.0
                 };
+                // Native stored velocity projects at 0.65 logical pixels per
+                // world unit for the birth offset; observed presentation
+                // displacement uses half that amount. Moving shots recover 60% of
+                // the player's previous presentation velocity in its motion.
+                // Motion against the aim direction is excluded; sideways
+                // drift and forward motion are inherited. Independent native
+                // perpendicular and opposite-motion shots verify this rule.
+                let backward = (inherited_velocity.0 * dx + inherited_velocity.1 * dy).min(0.0);
+                let vx = dx * 3.25 + (inherited_velocity.0 - dx * backward) * 0.6;
+                let ground_vy = dy * 3.25 + (inherited_velocity.1 - dy * backward) * 0.6;
                 self.state.tears.push(Tear {
                     id: self.state.next_tear,
                     x: self.state.player.x
-                        + dx * 9.5
+                        + vx * 2.0
                         + if dy != 0.0 { eye_offset - 3.0 } else { 0.0 },
                     y: self.state.player.y + self.state.player.render_offset.y - 20.75
-                        + dy * 10.0
+                        + ground_vy * 2.0
                         + if dx != 0.0 { eye_offset } else { 0.0 },
-                    vx: dx * 3.25,
-                    vy: dy * 3.25 + 0.125,
+                    vx,
+                    // Height/range still uses the provisional projected drift.
+                    // The independently observed native ground/height/falling
+                    // fields are tracked for the next projectile workstream.
+                    vy: ground_vy + 0.125,
                     age: 0,
                 });
                 self.state.next_tear += 1;
@@ -611,24 +735,19 @@ impl Game {
             impact.age += 1;
         }
         self.state.impacts.retain(|impact| impact.age < 12);
-        for tear in &mut self.state.tears {
-            tear.x += tear.vx;
-            tear.y += tear.vy;
-            tear.age += 1;
-        }
-        let room = &self.state.room;
+        let bounds = &self.state.room.projectile_bounds;
         let mut surviving = Vec::new();
         for tear in std::mem::take(&mut self.state.tears) {
             if tear.age >= 45
-                || tear.x < room.left
-                || tear.x > room.right
-                || tear.y < room.top - 21.25
-                || tear.y > room.bottom
+                || tear.x < bounds.left
+                || tear.x > bounds.right
+                || tear.y < bounds.top - 21.25
+                || tear.y > bounds.bottom
             {
                 self.state.impacts.push(Impact {
                     id: tear.id,
-                    x: tear.x.clamp(room.left, room.right),
-                    y: tear.y.clamp(room.top - 21.25, room.bottom),
+                    x: tear.x.clamp(bounds.left, bounds.right),
+                    y: tear.y.clamp(bounds.top - 21.25, bounds.bottom),
                     age: 0,
                 });
             } else {
@@ -752,20 +871,6 @@ mod tests {
         for _ in 0..4 {
             press(&mut game, "Enter");
         }
-        game
-    }
-    fn observed_run() -> Game {
-        let mut game = Game::new(test_seeds::one("observed_run_boot")).unwrap();
-        for _ in 0..3 {
-            press(&mut game, "Enter");
-        }
-        press(&mut game, "Tab");
-        game.command(Command::Text {
-            text: "T1PK 6Y0W".into(),
-        })
-        .unwrap();
-        press(&mut game, "Enter");
-        press(&mut game, "Enter");
         game
     }
     #[test]
@@ -993,8 +1098,54 @@ mod tests {
             "released movement retains observed inertia"
         );
         game.command(Command::Tick { count: 60 }).unwrap();
-        assert_eq!(game.state.player.vx, 0.0);
+        assert!(
+            game.state.player.vx > 0.0 && game.state.player.vx < 0.001,
+            "native release preserves subpixel inertia"
+        );
         assert_eq!(game.state.player.facing, Direction::Down);
+    }
+    #[test]
+    fn introduction_allows_movement_and_freezes_while_pause_animation_advances() {
+        let mut game =
+            run("introduction_allows_movement_and_freezes_while_pause_animation_advances");
+        let initial = game.state.player.x;
+        game.command(Command::Key {
+            code: "KeyD".into(),
+            down: true,
+        })
+        .unwrap();
+        game.command(Command::Tick { count: 10 }).unwrap();
+        assert!(game.state.player.x > initial);
+        assert_eq!(
+            game.state.run_introduction,
+            RunIntroduction {
+                age: 10,
+                active: true
+            }
+        );
+        press(&mut game, "Escape");
+        let paused_run = game.state.run_tick;
+        game.command(Command::Tick { count: 26 }).unwrap();
+        assert_eq!(game.state.run_tick, paused_run);
+        assert_eq!(game.state.run_introduction.age, 10);
+        assert_eq!(game.state.pause_menu.phase, PausePhase::Idle);
+        assert_eq!(game.state.pause_menu.selection, 1);
+        press(&mut game, "ArrowDown");
+        assert_eq!(game.state.pause_menu.selection, 2);
+        press(&mut game, "ArrowUp");
+        press(&mut game, "Enter");
+        assert!(!game.state.paused);
+        assert_eq!(game.state.pause_menu.phase, PausePhase::Disappearing);
+        game.command(Command::Tick { count: 22 }).unwrap();
+        assert_eq!(game.state.pause_menu.phase, PausePhase::Hidden);
+        game.command(Command::Tick { count: 108 }).unwrap();
+        assert_eq!(
+            game.state.run_introduction,
+            RunIntroduction {
+                age: 140,
+                active: false
+            }
+        );
     }
     #[test]
     fn stage_effects_track_motion_and_freeze_with_the_paused_run() {
@@ -1064,47 +1215,177 @@ mod tests {
         assert!(game.state.tears.is_empty());
     }
     #[test]
-    fn observed_move_fire_checkpoints_remain_near_rendered_measurements() {
-        let mut game = observed_run();
+    fn native_shots_inherit_prior_forward_and_sideways_motion_but_exclude_backward_motion() {
+        // Independent moving/perpendicular/opposite-shot native captures on
+        // KGVM KYA2, YPL8 ERQD, and DXZX P818 respectively. Native tear
+        // velocity14.14933967590332 projects to4.598535394668579 per phase;
+        // perpendicular velocity4.14933967590332 projects to1.348535394668579.
+        for (movement, aim, expected_vx, expected_birth_x) in [
+            (
+                "KeyD",
+                "ArrowRight",
+                4.598535394668579,
+                Some(267.0927291870117),
+            ),
+            ("KeyD", "ArrowUp", 1.348535394668579, None),
+            ("KeyA", "ArrowRight", 3.25, Some(228.60435028076173)),
+        ] {
+            let mut game = run("native_shots_inherit_prior_forward_and_sideways_motion_but_exclude_backward_motion");
+            game.command(Command::Key {
+                code: movement.into(),
+                down: true,
+            })
+            .unwrap();
+            game.command(Command::Tick { count: 12 }).unwrap();
+            game.command(Command::Key {
+                code: aim.into(),
+                down: true,
+            })
+            .unwrap();
+            game.command(Command::Tick { count: 1 }).unwrap();
+            assert_eq!(game.state.tears.len(), 1);
+            let tear = &game.state.tears[0];
+            assert_eq!(
+                tear.age, 0,
+                "native new tears are born after live-tear integration"
+            );
+            assert!(
+                (tear.vx - expected_vx).abs() < 0.000001,
+                "movement {movement}, aim {aim}"
+            );
+            if let Some(expected) = expected_birth_x {
+                assert!(
+                    (tear.x - expected).abs() < 0.0001,
+                    "native moving-shot birth position"
+                );
+            }
+            let emitted_velocity = tear.vx;
+            let emitted_x = tear.x;
+            game.command(Command::Tick { count: 1 }).unwrap();
+            assert_eq!(game.state.tears[0].age, 1);
+            assert!((game.state.tears[0].x - emitted_x - emitted_velocity).abs() < 1e-10);
+            assert_eq!(
+                game.state.tears[0].vx, emitted_velocity,
+                "later player acceleration does not steer a fired tear"
+            );
+        }
+    }
+    #[test]
+    fn native_direction_length_holdout_matches_numeric_player_observations() {
+        // Independent native motion-holdout capture on seed 0DNW 1DMX,
+        // recorded again with a preferred read-only entity candidate. Values
+        // are world f32 positions projected to logical ground coordinates.
+        // The bound covers at most four native f32 ULPs, not sprite rounding.
+        for seed in test_seeds::samples(
+            "native_direction_length_holdout_matches_numeric_player_observations",
+            8,
+        ) {
+            let mut game = Game::new(seed).unwrap();
+            for _ in 0..4 {
+                press(&mut game, "Enter");
+            }
+            for (keys, held, expected) in [
+                (vec!["KeyA"], 40, [125.7505485534668, 214.0]),
+                (vec!["KeyW"], 20, [125.45559082031251, 157.09796295166015]),
+                (vec!["KeyD"], 30, [211.0206481933594, 156.82596588134766]),
+                (
+                    vec!["KeyD", "KeyS"],
+                    20,
+                    [251.65743103027344, 197.17250213623046],
+                ),
+            ] {
+                for code in &keys {
+                    game.command(Command::Key {
+                        code: (*code).into(),
+                        down: true,
+                    })
+                    .unwrap();
+                }
+                game.command(Command::Tick { count: held }).unwrap();
+                for code in &keys {
+                    game.command(Command::Key {
+                        code: (*code).into(),
+                        down: false,
+                    })
+                    .unwrap();
+                }
+                game.command(Command::Tick { count: 30 }).unwrap();
+                assert!(
+                    (game.state.player.x - expected[0]).abs() < 0.0001,
+                    "seed {seed}, keys {keys:?}: ground x {} vs {}",
+                    game.state.player.x,
+                    expected[0]
+                );
+                assert!(
+                    (game.state.player.y - expected[1]).abs() < 0.0001,
+                    "seed {seed}, keys {keys:?}: ground y {} vs {}",
+                    game.state.player.y,
+                    expected[1]
+                );
+            }
+        }
+    }
+    #[test]
+    fn native_immediate_direction_reversal_matches_independent_numeric_observations() {
+        // Fresh original ZVSW NLEY: D20/A20/release30, no settling between turns.
+        let mut game =
+            run("native_immediate_direction_reversal_matches_independent_numeric_observations");
         game.command(Command::Key {
             code: "KeyD".into(),
             down: true,
         })
         .unwrap();
-        game.command(Command::Tick { count: 27 }).unwrap();
+        game.command(Command::Tick { count: 20 }).unwrap();
         game.command(Command::Key {
             code: "KeyD".into(),
             down: false,
         })
         .unwrap();
-        game.command(Command::Tick { count: 30 }).unwrap();
-        assert!(
-            (game.state.player.x - 320.0).abs() < 0.5,
-            "native stable movement foot estimate: x=320 logical"
-        );
-        assert_eq!(game.state.player.facing, Direction::Down);
         game.command(Command::Key {
-            code: "ArrowRight".into(),
+            code: "KeyA".into(),
             down: true,
         })
         .unwrap();
-        game.command(Command::Tick { count: 54 }).unwrap();
+        game.command(Command::Tick { count: 1 }).unwrap();
+        assert!((game.state.player.x - 277.9258575439453).abs() < 0.0001);
+        assert!((game.state.player.vx - 1.892010533809662).abs() < 0.000001);
+        game.command(Command::Tick { count: 19 }).unwrap();
+        assert!((game.state.player.x - 258.5896270751953).abs() < 0.0001);
         game.command(Command::Key {
-            code: "ArrowRight".into(),
+            code: "KeyA".into(),
             down: false,
         })
         .unwrap();
-        assert_eq!(game.state.tears.len(), 1);
-        assert_eq!(game.state.impacts.len(), 1);
-        assert!(
-            (game.state.tears[0].x - 362.5).abs() < 1.0,
-            "native regular tear rendered estimate"
-        );
-        assert!((game.state.tears[0].y - 193.5).abs() < 0.5);
-        assert_eq!(game.state.player.facing, Direction::Right);
         game.command(Command::Tick { count: 30 }).unwrap();
-        assert_eq!(game.state.player.facing, Direction::Down);
-        assert!(game.state.tears.is_empty());
+        assert!((game.state.player.x - 238.45638885498047).abs() < 0.0001);
+        assert!((game.state.player.vx - -0.05382454320788383).abs() < 0.000001);
+    }
+    #[test]
+    fn native_player_position_uses_previous_velocity_and_release_preserves_inertia() {
+        let mut game =
+            run("native_player_position_uses_previous_velocity_and_release_preserves_inertia");
+        game.command(Command::Key {
+            code: "KeyD".into(),
+            down: true,
+        })
+        .unwrap();
+        game.command(Command::Tick { count: 1 }).unwrap();
+        assert_eq!(
+            game.state.player.x, 240.0,
+            "first native presentation updates velocity before displacement"
+        );
+        assert!((game.state.player.vx - 0.34333292543888094).abs() < 0.000001);
+        game.command(Command::Tick { count: 29 }).unwrap();
+        assert!((game.state.player.x - 302.62315979003906).abs() < 0.0001);
+        assert!((game.state.player.vx - 2.806_552_362_442_017).abs() < 0.000001);
+        game.command(Command::Key {
+            code: "KeyD".into(),
+            down: false,
+        })
+        .unwrap();
+        game.command(Command::Tick { count: 55 }).unwrap();
+        assert!((game.state.player.x - 326.0565246582031).abs() < 0.0001);
+        assert!((game.state.player.vx - 0.002534948627000212).abs() < 0.000001);
     }
     #[test]
     fn replay_and_serialized_continuation_are_deterministic() {

@@ -45,6 +45,11 @@ test("original scenario index rejects unknown systems and missing executable inp
   invalid(cases => { cases[0].inputEvents = 0; }, /must execute input events/);
   invalid(cases => { cases[0].source = "unused-script.py"; }, /executable tape source/);
   invalid(cases => { cases[1].id = cases[0].id; }, /nonempty and unique/);
+  for (const id of REQUIRED_ORIGINAL_CLOCK_SCENARIOS) {
+    const cases = registry().filter(scenario => scenario.id !== id);
+    assert.throws(() => validateOriginalClockScenarios(cases, { systemIds: ["locomotion"] }),
+      new RegExp(`Missing required original clock scenario ${id}`));
+  }
 });
 
 test("matrix checking rejects changes in executable native scenarios until the source-derived table is regenerated", (t) => {

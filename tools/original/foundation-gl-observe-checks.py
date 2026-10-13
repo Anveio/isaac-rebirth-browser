@@ -3,6 +3,7 @@
 import importlib.util
 import json
 from pathlib import Path
+import subprocess
 import tempfile
 import unittest
 
@@ -19,6 +20,15 @@ def draw(cache=False, valid=True):
 
 
 class GraphicsFrameContract(unittest.TestCase):
+    def test_complete_observer_builds_strictly_without_unresolved_symbols(self):
+        sources=Path(__file__).parent
+        with tempfile.TemporaryDirectory() as directory:
+            result=subprocess.run(['cc','-std=c11','-Wall','-Wextra','-Werror','-fPIC','-shared',
+                str(sources/'foundation-gl-trace.c'),str(sources/'foundation-gl-state.c'),
+                '-o',str(Path(directory)/'observer.so'),'-ldl','-Wl,--no-undefined'],
+                capture_output=True,text=True)
+            self.assertEqual(result.returncode,0,result.stderr)
+
     def observe(self, events):
         with tempfile.TemporaryDirectory() as directory:
             root=Path(directory);trace=root/'commands.jsonl';manifest=root/'manifest.json'

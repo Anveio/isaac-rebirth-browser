@@ -9,6 +9,12 @@ export interface Player {
 }
 export interface Tear { id: number; x: number; y: number; vx: number; vy: number; age: number; }
 export interface Impact { id: number; x: number; y: number; age: number; }
+export interface Bomb { id: number; x: number; y: number; age: number; }
+export interface RunIntroduction { age: number; active: boolean; }
+export interface PauseMenu {
+  phase: "hidden" | "appearing" | "idle" | "disappearing";
+  age: number; selection: number; statFrames: [number, number, number, number, number, number];
+}
 export interface RoomAppearance {
   backdrop: string; columns: number; rows: number; tileSize: number; origin: { x: number; y: number };
   backdropPatchSize: { width: number; height: number }; backdropPatchColumns: number;
@@ -19,7 +25,10 @@ export interface RoomAppearance {
   fx: { ambient: [number, number, number]; shading: string; overlay: string; overlayOrigin: { x: number; y: number }; overlayAnchor: { x: number; y: number }; overlayParallax: { x: number; y: number }; overlayMotionEvidence: string; overlayOpacity: number; actorTint: [number, number, number] };
   template: string; generation: string;
 }
-export interface Room { left: number; right: number; top: number; bottom: number; appearance: RoomAppearance; }
+export interface Room {
+  left: number; right: number; top: number; bottom: number; appearance: RoomAppearance;
+  projectileBounds: { left: number; right: number; top: number; bottom: number };
+}
 export interface Rect { x: number; y: number; width: number; height: number; }
 export interface RoomQuad { sourcePatchIndex: number; sourceRect: Rect; destRect: Rect; flipX: boolean; flipY: boolean; }
 export type BlendFactor = "one" | "zero" | "source-alpha" | "one-minus-source-alpha" | "destination-color";
@@ -30,7 +39,7 @@ export interface StageEffects {
   shadowCatalog: { asset: string; sourceSize: { width: number; height: number }; definitions: { entityType: number; variant: number; sizePercent: number }[] };
   ambientColor: [number, number, number, number];
   lightGradient: { asset: string; crop: Rect };
-  lights: { ownerId: number; x: number; y: number; radius: number; destinationRect: Rect }[];
+  lights: { ownerId: number; x: number; y: number; radius: number; alpha: number; destinationRect: Rect }[];
   shadowCasters: { ownerId: number; x: number; y: number; width: number; height: number; asset: string; authoredSizePercent: number; sourceSize: { width: number; height: number }; destinationRect: Rect }[];
   groundShadowMaskBlend: Blend; lightingMaskBlend: Blend; groundShadowCompositeBlend: Blend; lightingCompositeBlend: Blend;
   sampler: { filter: "nearest"; wrap: "clamp-to-edge" };
@@ -50,6 +59,8 @@ export interface State {
   player: Player; room: Room; stageEffects: StageEffects; inventory: { coins: number; bombs: number; keys: number };
   minimap: { cells: { x: number; y: number; visibility: "unvisited" | "visited" | "current" }[] };
   tears: Tear[]; impacts: Impact[]; fireCooldown: number; nextTear: number;
+  bombs: Bomb[]; explosions: Bomb[]; nextBomb: number; damageCooldown: number;
+  runIntroduction: RunIntroduction; pauseMenu: PauseMenu;
 }
 export type Command = { type: "key"; code: string; down: boolean } | { type: "text"; text: string } | { type: "tick"; count: number };
 interface Exports extends WebAssembly.Exports {

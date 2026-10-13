@@ -8,7 +8,10 @@ import { spawnSync } from "node:child_process";
 const ROOT = resolve(fileURLToPath(new URL("../..", import.meta.url)));
 export const NODE_TEST_GLOB = "tools/foundation/*.test.mjs";
 export const ORIGINAL_CLOCK_SOURCE = "tools/original/foundation-clock-scenarios.py";
-export const REQUIRED_ORIGINAL_CLOCK_SCENARIOS = ["menu-movement-fire", "motion-trajectory", "motion-holdout", "projectile-inheritance"];
+export const REQUIRED_ORIGINAL_CLOCK_SCENARIOS = [
+  "menu-movement-fire", "menu-run-introduction", "motion-trajectory", "motion-holdout", "projectile-inheritance",
+  "bomb-stationary", "bomb-escape", "bomb-pause", "run-pause-presentation",
+];
 
 // This indexes declarations, not cached test outcomes. Dynamic registrations
 // require an explicit index adapter so they cannot silently vanish from docs.

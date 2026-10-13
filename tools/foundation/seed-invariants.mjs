@@ -140,9 +140,15 @@ export function assertGameplayInvariants(initialSeed, commands, states, { manual
         directionChecks.push({ code, commandIndex: index - 1, newestTearId: newest.id });
       }
       if (before.pressed.includes("KeyA") && before.pressed.includes("KeyD")) {
-        assert.equal(before.player.vx, 0, "Opposing movement scenario must begin after horizontal inertia has settled");
-        assert.equal(state.player.x, before.player.x, "Opposing horizontal keys must cancel rather than choose one side");
-        assert.equal(state.player.vx, 0, "Opposing horizontal keys cannot create horizontal velocity");
+        // Native motion retains residual inertia after release. Cancelled
+        // inputs must therefore match an independently executed no-input coast
+        // from the same command prefix, rather than freeze a moving player.
+        const coast = nativeReplay(initialSeed, [
+          ...commands.slice(0, index - 1),
+          key("KeyA", false), key("KeyD", false), commands[index - 1],
+        ]).at(-1);
+        assert.equal(exactStateDifference(coast.player, state.player), null,
+          "Opposing horizontal keys must cancel and match the no-input coast, rather than choose one side");
         opposingChecks++;
       }
     }

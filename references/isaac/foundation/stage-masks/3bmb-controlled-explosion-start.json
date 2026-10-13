@@ -1,0 +1,1524 @@
+{
+  "schema": 1,
+  "captureId": "controlled-clock-3bmb-explosion",
+  "checkpoint": "explosion-start",
+  "initialState": {
+    "seed": "3BMB MFTE",
+    "seedValue": 3350817387,
+    "playerVariant": 0,
+    "playerSubtype": 0,
+    "stage": 1,
+    "altStage": 0,
+    "stageSeed": 3049754554,
+    "rooms": 8,
+    "room": "1.2(Start Room)",
+    "spawnSeed": 1052094211
+  },
+  "profile": {
+    "fresh": true,
+    "isolated": true
+  },
+  "captureClock": "main-thread virtual Linux clocks and blocking public GL presentation gate",
+  "simulationTicks": false,
+  "fullInternalState": false,
+  "format": "RGBA8-straight",
+  "origin": "top-left-logical",
+  "width": 512,
+  "height": 512,
+  "originalLog": "3bmb-controlled-explosion-original.log",
+  "publicPhase": {
+    "baselinePresentedFrame": 1206,
+    "movementHoldPresentations": 27,
+    "movementReleasePresentations": 30,
+    "movementCheckpointPresentedFrame": 1263,
+    "checkpointPresentedFrame": 1384,
+    "checkpointVirtualElapsedNs": 23067128000,
+    "consumedMovementEvents": [
+      {
+        "down": true,
+        "keysym": 100,
+        "presentedFramePhase": 1207,
+        "virtualElapsedNs": 20117069000
+      },
+      {
+        "down": false,
+        "keysym": 100,
+        "presentedFramePhase": 1234,
+        "virtualElapsedNs": 20567078000
+      }
+    ]
+  },
+  "inputTape": [
+    {
+      "type": "step",
+      "frames": 180
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 12
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 72
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 12
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 72
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 12
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 72
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 12
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 72
+    },
+    {
+      "type": "key",
+      "key": "Tab",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 12
+    },
+    {
+      "type": "key",
+      "key": "Tab",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 108
+    },
+    {
+      "type": "key",
+      "key": "3",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 12
+    },
+    {
+      "type": "key",
+      "key": "3",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 6
+    },
+    {
+      "type": "key",
+      "key": "b",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 12
+    },
+    {
+      "type": "key",
+      "key": "b",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 6
+    },
+    {
+      "type": "key",
+      "key": "m",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 12
+    },
+    {
+      "type": "key",
+      "key": "m",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 6
+    },
+    {
+      "type": "key",
+      "key": "b",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 12
+    },
+    {
+      "type": "key",
+      "key": "b",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 6
+    },
+    {
+      "type": "key",
+      "key": "m",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 12
+    },
+    {
+      "type": "key",
+      "key": "m",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 6
+    },
+    {
+      "type": "key",
+      "key": "f",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 12
+    },
+    {
+      "type": "key",
+      "key": "f",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 6
+    },
+    {
+      "type": "key",
+      "key": "t",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 12
+    },
+    {
+      "type": "key",
+      "key": "t",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 6
+    },
+    {
+      "type": "key",
+      "key": "e",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 12
+    },
+    {
+      "type": "key",
+      "key": "e",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 6
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 12
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 72
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 12
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 298
+    },
+    {
+      "type": "capture",
+      "label": "arm-gameplay-start"
+    },
+    {
+      "type": "step",
+      "frames": 2
+    },
+    {
+      "type": "capture",
+      "label": "gameplay-start"
+    },
+    {
+      "type": "key",
+      "key": "d",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 27
+    },
+    {
+      "type": "key",
+      "key": "d",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 28
+    },
+    {
+      "type": "capture",
+      "label": "arm-movement"
+    },
+    {
+      "type": "step",
+      "frames": 2
+    },
+    {
+      "type": "capture",
+      "label": "movement"
+    },
+    {
+      "type": "key",
+      "key": "e",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "key",
+      "key": "e",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "capture",
+      "label": "bomb-planted"
+    },
+    {
+      "type": "step",
+      "frames": 117
+    },
+    {
+      "type": "capture",
+      "label": "arm-explosion-start"
+    },
+    {
+      "type": "step",
+      "frames": 2
+    },
+    {
+      "type": "capture",
+      "label": "explosion-start"
+    },
+    {
+      "type": "step",
+      "frames": 2
+    },
+    {
+      "type": "capture",
+      "label": "explosion-faded"
+    },
+    {
+      "type": "step",
+      "frames": 2
+    },
+    {
+      "type": "capture",
+      "label": "arm-explosion-middle"
+    },
+    {
+      "type": "step",
+      "frames": 2
+    },
+    {
+      "type": "capture",
+      "label": "explosion-middle"
+    },
+    {
+      "type": "step",
+      "frames": 2
+    },
+    {
+      "type": "capture",
+      "label": "arm-explosion-late"
+    },
+    {
+      "type": "step",
+      "frames": 2
+    },
+    {
+      "type": "capture",
+      "label": "explosion-late"
+    },
+    {
+      "type": "step",
+      "frames": 2
+    },
+    {
+      "type": "capture",
+      "label": "explosion-removed"
+    }
+  ],
+  "inputEvents": [
+    {
+      "type": "key",
+      "key": "Return",
+      "down": true,
+      "keysym": 65293,
+      "presentedFrame": 210,
+      "virtualElapsedNs": 3500070000
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": false,
+      "keysym": 65293,
+      "presentedFrame": 222,
+      "virtualElapsedNs": 3700074000
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": true,
+      "keysym": 65293,
+      "presentedFrame": 294,
+      "virtualElapsedNs": 4900098000
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": false,
+      "keysym": 65293,
+      "presentedFrame": 306,
+      "virtualElapsedNs": 5100102000
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": true,
+      "keysym": 65293,
+      "presentedFrame": 378,
+      "virtualElapsedNs": 6300126000
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": false,
+      "keysym": 65293,
+      "presentedFrame": 390,
+      "virtualElapsedNs": 6500130000
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": true,
+      "keysym": 65293,
+      "presentedFrame": 462,
+      "virtualElapsedNs": 7700154000
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": false,
+      "keysym": 65293,
+      "presentedFrame": 474,
+      "virtualElapsedNs": 7900158000
+    },
+    {
+      "type": "key",
+      "key": "Tab",
+      "down": true,
+      "keysym": 65289,
+      "presentedFrame": 546,
+      "virtualElapsedNs": 9100182000
+    },
+    {
+      "type": "key",
+      "key": "Tab",
+      "down": false,
+      "keysym": 65289,
+      "presentedFrame": 558,
+      "virtualElapsedNs": 9300186000
+    },
+    {
+      "type": "key",
+      "key": "3",
+      "down": true,
+      "keysym": 51,
+      "presentedFrame": 666,
+      "virtualElapsedNs": 11100222000
+    },
+    {
+      "type": "key",
+      "key": "3",
+      "down": false,
+      "keysym": 51,
+      "presentedFrame": 678,
+      "virtualElapsedNs": 11300226000
+    },
+    {
+      "type": "key",
+      "key": "b",
+      "down": true,
+      "keysym": 98,
+      "presentedFrame": 684,
+      "virtualElapsedNs": 11400228000
+    },
+    {
+      "type": "key",
+      "key": "b",
+      "down": false,
+      "keysym": 98,
+      "presentedFrame": 696,
+      "virtualElapsedNs": 11600232000
+    },
+    {
+      "type": "key",
+      "key": "m",
+      "down": true,
+      "keysym": 109,
+      "presentedFrame": 702,
+      "virtualElapsedNs": 11700234000
+    },
+    {
+      "type": "key",
+      "key": "m",
+      "down": false,
+      "keysym": 109,
+      "presentedFrame": 714,
+      "virtualElapsedNs": 11900238000
+    },
+    {
+      "type": "key",
+      "key": "b",
+      "down": true,
+      "keysym": 98,
+      "presentedFrame": 720,
+      "virtualElapsedNs": 12000240000
+    },
+    {
+      "type": "key",
+      "key": "b",
+      "down": false,
+      "keysym": 98,
+      "presentedFrame": 732,
+      "virtualElapsedNs": 12200244000
+    },
+    {
+      "type": "key",
+      "key": "m",
+      "down": true,
+      "keysym": 109,
+      "presentedFrame": 738,
+      "virtualElapsedNs": 12300246000
+    },
+    {
+      "type": "key",
+      "key": "m",
+      "down": false,
+      "keysym": 109,
+      "presentedFrame": 750,
+      "virtualElapsedNs": 12500250000
+    },
+    {
+      "type": "key",
+      "key": "f",
+      "down": true,
+      "keysym": 102,
+      "presentedFrame": 756,
+      "virtualElapsedNs": 12600252000
+    },
+    {
+      "type": "key",
+      "key": "f",
+      "down": false,
+      "keysym": 102,
+      "presentedFrame": 768,
+      "virtualElapsedNs": 12800256000
+    },
+    {
+      "type": "key",
+      "key": "t",
+      "down": true,
+      "keysym": 116,
+      "presentedFrame": 774,
+      "virtualElapsedNs": 12900258000
+    },
+    {
+      "type": "key",
+      "key": "t",
+      "down": false,
+      "keysym": 116,
+      "presentedFrame": 786,
+      "virtualElapsedNs": 13100262000
+    },
+    {
+      "type": "key",
+      "key": "e",
+      "down": true,
+      "keysym": 101,
+      "presentedFrame": 792,
+      "virtualElapsedNs": 13200264000
+    },
+    {
+      "type": "key",
+      "key": "e",
+      "down": false,
+      "keysym": 101,
+      "presentedFrame": 804,
+      "virtualElapsedNs": 13400268000
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": true,
+      "keysym": 65293,
+      "presentedFrame": 810,
+      "virtualElapsedNs": 13500270000
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": false,
+      "keysym": 65293,
+      "presentedFrame": 822,
+      "virtualElapsedNs": 13700274000
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": true,
+      "keysym": 65293,
+      "presentedFrame": 894,
+      "virtualElapsedNs": 14900298000
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": false,
+      "keysym": 65293,
+      "presentedFrame": 906,
+      "virtualElapsedNs": 15100302000
+    },
+    {
+      "type": "key",
+      "key": "d",
+      "down": true,
+      "keysym": 100,
+      "presentedFrame": 1206,
+      "virtualElapsedNs": 20100402000
+    },
+    {
+      "type": "key",
+      "key": "d",
+      "down": false,
+      "keysym": 100,
+      "presentedFrame": 1233,
+      "virtualElapsedNs": 20550411000
+    },
+    {
+      "type": "key",
+      "key": "e",
+      "down": true,
+      "keysym": 101,
+      "presentedFrame": 1263,
+      "virtualElapsedNs": 21050421000
+    },
+    {
+      "type": "key",
+      "key": "e",
+      "down": false,
+      "keysym": 101,
+      "presentedFrame": 1264,
+      "virtualElapsedNs": 21067088000
+    }
+  ],
+  "presentationAcknowledgements": [
+    {
+      "presentedFrame": 0,
+      "virtualElapsedNs": 0,
+      "inputOverflow": false,
+      "consumedX11Events": [],
+      "consumedX11FocusEvents": []
+    },
+    {
+      "presentedFrame": 30,
+      "virtualElapsedNs": 500010000,
+      "inputOverflow": false,
+      "consumedX11Events": [],
+      "consumedX11FocusEvents": []
+    },
+    {
+      "presentedFrame": 210,
+      "virtualElapsedNs": 3500070000,
+      "inputOverflow": false,
+      "consumedX11Events": [],
+      "consumedX11FocusEvents": [
+        {
+          "focused": false,
+          "presentedFramePhase": 31,
+          "virtualElapsedNs": 516677000
+        },
+        {
+          "focused": true,
+          "presentedFramePhase": 31,
+          "virtualElapsedNs": 516677000
+        }
+      ]
+    },
+    {
+      "presentedFrame": 222,
+      "virtualElapsedNs": 3700074000,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": true,
+          "keysym": 65293,
+          "presentedFramePhase": 211,
+          "virtualElapsedNs": 3516737000
+        }
+      ],
+      "consumedX11FocusEvents": []
+    },
+    {
+      "presentedFrame": 294,
+      "virtualElapsedNs": 4900098000,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": false,
+          "keysym": 65293,
+          "presentedFramePhase": 223,
+          "virtualElapsedNs": 3716741000
+        }
+      ],
+      "consumedX11FocusEvents": []
+    },
+    {
+      "presentedFrame": 306,
+      "virtualElapsedNs": 5100102000,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": true,
+          "keysym": 65293,
+          "presentedFramePhase": 295,
+          "virtualElapsedNs": 4916765000
+        }
+      ],
+      "consumedX11FocusEvents": []
+    },
+    {
+      "presentedFrame": 378,
+      "virtualElapsedNs": 6300126000,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": false,
+          "keysym": 65293,
+          "presentedFramePhase": 307,
+          "virtualElapsedNs": 5116769000
+        }
+      ],
+      "consumedX11FocusEvents": []
+    },
+    {
+      "presentedFrame": 390,
+      "virtualElapsedNs": 6500130000,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": true,
+          "keysym": 65293,
+          "presentedFramePhase": 379,
+          "virtualElapsedNs": 6316793000
+        }
+      ],
+      "consumedX11FocusEvents": []
+    },
+    {
+      "presentedFrame": 462,
+      "virtualElapsedNs": 7700154000,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": false,
+          "keysym": 65293,
+          "presentedFramePhase": 391,
+          "virtualElapsedNs": 6516797000
+        }
+      ],
+      "consumedX11FocusEvents": []
+    },
+    {
+      "presentedFrame": 474,
+      "virtualElapsedNs": 7900158000,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": true,
+          "keysym": 65293,
+          "presentedFramePhase": 463,
+          "virtualElapsedNs": 7716821000
+        }
+      ],
+      "consumedX11FocusEvents": []
+    },
+    {
+      "presentedFrame": 546,
+      "virtualElapsedNs": 9100182000,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": false,
+          "keysym": 65293,
+          "presentedFramePhase": 475,
+          "virtualElapsedNs": 7916825000
+        }
+      ],
+      "consumedX11FocusEvents": []
+    },
+    {
+      "presentedFrame": 558,
+      "virtualElapsedNs": 9300186000,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": true,
+          "keysym": 65289,
+          "presentedFramePhase": 547,
+          "virtualElapsedNs": 9116849000
+        }
+      ],
+      "consumedX11FocusEvents": []
+    },
+    {
+      "presentedFrame": 666,
+      "virtualElapsedNs": 11100222000,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": false,
+          "keysym": 65289,
+          "presentedFramePhase": 559,
+          "virtualElapsedNs": 9316853000
+        }
+      ],
+      "consumedX11FocusEvents": []
+    },
+    {
+      "presentedFrame": 678,
+      "virtualElapsedNs": 11300226000,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": true,
+          "keysym": 51,
+          "presentedFramePhase": 667,
+          "virtualElapsedNs": 11116889000
+        }
+      ],
+      "consumedX11FocusEvents": []
+    },
+    {
+      "presentedFrame": 684,
+      "virtualElapsedNs": 11400228000,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": false,
+          "keysym": 51,
+          "presentedFramePhase": 679,
+          "virtualElapsedNs": 11316893000
+        }
+      ],
+      "consumedX11FocusEvents": []
+    },
+    {
+      "presentedFrame": 696,
+      "virtualElapsedNs": 11600232000,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": true,
+          "keysym": 98,
+          "presentedFramePhase": 685,
+          "virtualElapsedNs": 11416895000
+        }
+      ],
+      "consumedX11FocusEvents": []
+    },
+    {
+      "presentedFrame": 702,
+      "virtualElapsedNs": 11700234000,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": false,
+          "keysym": 98,
+          "presentedFramePhase": 697,
+          "virtualElapsedNs": 11616899000
+        }
+      ],
+      "consumedX11FocusEvents": []
+    },
+    {
+      "presentedFrame": 714,
+      "virtualElapsedNs": 11900238000,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": true,
+          "keysym": 109,
+          "presentedFramePhase": 703,
+          "virtualElapsedNs": 11716901000
+        }
+      ],
+      "consumedX11FocusEvents": []
+    },
+    {
+      "presentedFrame": 720,
+      "virtualElapsedNs": 12000240000,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": false,
+          "keysym": 109,
+          "presentedFramePhase": 715,
+          "virtualElapsedNs": 11916905000
+        }
+      ],
+      "consumedX11FocusEvents": []
+    },
+    {
+      "presentedFrame": 732,
+      "virtualElapsedNs": 12200244000,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": true,
+          "keysym": 98,
+          "presentedFramePhase": 721,
+          "virtualElapsedNs": 12016907000
+        }
+      ],
+      "consumedX11FocusEvents": []
+    },
+    {
+      "presentedFrame": 738,
+      "virtualElapsedNs": 12300246000,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": false,
+          "keysym": 98,
+          "presentedFramePhase": 733,
+          "virtualElapsedNs": 12216911000
+        }
+      ],
+      "consumedX11FocusEvents": []
+    },
+    {
+      "presentedFrame": 750,
+      "virtualElapsedNs": 12500250000,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": true,
+          "keysym": 109,
+          "presentedFramePhase": 739,
+          "virtualElapsedNs": 12316913000
+        }
+      ],
+      "consumedX11FocusEvents": []
+    },
+    {
+      "presentedFrame": 756,
+      "virtualElapsedNs": 12600252000,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": false,
+          "keysym": 109,
+          "presentedFramePhase": 751,
+          "virtualElapsedNs": 12516917000
+        }
+      ],
+      "consumedX11FocusEvents": []
+    },
+    {
+      "presentedFrame": 768,
+      "virtualElapsedNs": 12800256000,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": true,
+          "keysym": 102,
+          "presentedFramePhase": 757,
+          "virtualElapsedNs": 12616919000
+        }
+      ],
+      "consumedX11FocusEvents": []
+    },
+    {
+      "presentedFrame": 774,
+      "virtualElapsedNs": 12900258000,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": false,
+          "keysym": 102,
+          "presentedFramePhase": 769,
+          "virtualElapsedNs": 12816923000
+        }
+      ],
+      "consumedX11FocusEvents": []
+    },
+    {
+      "presentedFrame": 786,
+      "virtualElapsedNs": 13100262000,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": true,
+          "keysym": 116,
+          "presentedFramePhase": 775,
+          "virtualElapsedNs": 12916925000
+        }
+      ],
+      "consumedX11FocusEvents": []
+    },
+    {
+      "presentedFrame": 792,
+      "virtualElapsedNs": 13200264000,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": false,
+          "keysym": 116,
+          "presentedFramePhase": 787,
+          "virtualElapsedNs": 13116929000
+        }
+      ],
+      "consumedX11FocusEvents": []
+    },
+    {
+      "presentedFrame": 804,
+      "virtualElapsedNs": 13400268000,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": true,
+          "keysym": 101,
+          "presentedFramePhase": 793,
+          "virtualElapsedNs": 13216931000
+        }
+      ],
+      "consumedX11FocusEvents": []
+    },
+    {
+      "presentedFrame": 810,
+      "virtualElapsedNs": 13500270000,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": false,
+          "keysym": 101,
+          "presentedFramePhase": 805,
+          "virtualElapsedNs": 13416935000
+        }
+      ],
+      "consumedX11FocusEvents": []
+    },
+    {
+      "presentedFrame": 822,
+      "virtualElapsedNs": 13700274000,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": true,
+          "keysym": 65293,
+          "presentedFramePhase": 811,
+          "virtualElapsedNs": 13516937000
+        }
+      ],
+      "consumedX11FocusEvents": []
+    },
+    {
+      "presentedFrame": 894,
+      "virtualElapsedNs": 14900298000,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": false,
+          "keysym": 65293,
+          "presentedFramePhase": 823,
+          "virtualElapsedNs": 13716941000
+        }
+      ],
+      "consumedX11FocusEvents": []
+    },
+    {
+      "presentedFrame": 906,
+      "virtualElapsedNs": 15100302000,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": true,
+          "keysym": 65293,
+          "presentedFramePhase": 895,
+          "virtualElapsedNs": 14916965000
+        }
+      ],
+      "consumedX11FocusEvents": []
+    },
+    {
+      "presentedFrame": 1204,
+      "virtualElapsedNs": 20067068000,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": false,
+          "keysym": 65293,
+          "presentedFramePhase": 907,
+          "virtualElapsedNs": 15116969000
+        }
+      ],
+      "consumedX11FocusEvents": []
+    },
+    {
+      "presentedFrame": 1206,
+      "virtualElapsedNs": 20100402000,
+      "inputOverflow": false,
+      "consumedX11Events": [],
+      "consumedX11FocusEvents": []
+    },
+    {
+      "presentedFrame": 1233,
+      "virtualElapsedNs": 20550411000,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": true,
+          "keysym": 100,
+          "presentedFramePhase": 1207,
+          "virtualElapsedNs": 20117069000
+        }
+      ],
+      "consumedX11FocusEvents": []
+    },
+    {
+      "presentedFrame": 1261,
+      "virtualElapsedNs": 21017087000,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": false,
+          "keysym": 100,
+          "presentedFramePhase": 1234,
+          "virtualElapsedNs": 20567078000
+        }
+      ],
+      "consumedX11FocusEvents": []
+    },
+    {
+      "presentedFrame": 1263,
+      "virtualElapsedNs": 21050421000,
+      "inputOverflow": false,
+      "consumedX11Events": [],
+      "consumedX11FocusEvents": []
+    },
+    {
+      "presentedFrame": 1264,
+      "virtualElapsedNs": 21067088000,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": true,
+          "keysym": 101,
+          "presentedFramePhase": 1264,
+          "virtualElapsedNs": 21067088000
+        }
+      ],
+      "consumedX11FocusEvents": []
+    },
+    {
+      "presentedFrame": 1265,
+      "virtualElapsedNs": 21083755000,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": false,
+          "keysym": 101,
+          "presentedFramePhase": 1265,
+          "virtualElapsedNs": 21083755000
+        }
+      ],
+      "consumedX11FocusEvents": []
+    },
+    {
+      "presentedFrame": 1382,
+      "virtualElapsedNs": 23033794000,
+      "inputOverflow": false,
+      "consumedX11Events": [],
+      "consumedX11FocusEvents": []
+    },
+    {
+      "presentedFrame": 1384,
+      "virtualElapsedNs": 23067128000,
+      "inputOverflow": false,
+      "consumedX11Events": [],
+      "consumedX11FocusEvents": []
+    },
+    {
+      "presentedFrame": 1386,
+      "virtualElapsedNs": 23100462000,
+      "inputOverflow": false,
+      "consumedX11Events": [],
+      "consumedX11FocusEvents": []
+    },
+    {
+      "presentedFrame": 1388,
+      "virtualElapsedNs": 23133796000,
+      "inputOverflow": false,
+      "consumedX11Events": [],
+      "consumedX11FocusEvents": []
+    },
+    {
+      "presentedFrame": 1390,
+      "virtualElapsedNs": 23167130000,
+      "inputOverflow": false,
+      "consumedX11Events": [],
+      "consumedX11FocusEvents": []
+    },
+    {
+      "presentedFrame": 1392,
+      "virtualElapsedNs": 23200464000,
+      "inputOverflow": false,
+      "consumedX11Events": [],
+      "consumedX11FocusEvents": []
+    },
+    {
+      "presentedFrame": 1394,
+      "virtualElapsedNs": 23233798000,
+      "inputOverflow": false,
+      "consumedX11Events": [],
+      "consumedX11FocusEvents": []
+    },
+    {
+      "presentedFrame": 1396,
+      "virtualElapsedNs": 23267132000,
+      "inputOverflow": false,
+      "consumedX11Events": [],
+      "consumedX11FocusEvents": []
+    }
+  ],
+  "snapshotRequest": {
+    "label": "explosion-start",
+    "armedAfterPresentedFrame": 1382,
+    "expectedTargetPresentedFrame": 1384,
+    "expectedTargetVirtualElapsedNs": 23067128000
+  },
+  "graphicsFrame": 4,
+  "primitives": {
+    "shadow": [
+      {
+        "destination": [
+          317,
+          209,
+          337,
+          217
+        ],
+        "source": [
+          0,
+          0,
+          120.0,
+          49.0
+        ],
+        "flipX": false,
+        "flipY": false,
+        "color": [
+          [
+            1,
+            1,
+            1,
+            1
+          ],
+          [
+            1,
+            1,
+            1,
+            1
+          ],
+          [
+            1,
+            1,
+            1,
+            1
+          ],
+          [
+            1,
+            1,
+            1,
+            1
+          ]
+        ]
+      }
+    ],
+    "lighting": [
+      {
+        "destination": [
+          177,
+          64,
+          477,
+          364
+        ],
+        "source": [
+          100.0,
+          0,
+          400.0,
+          300.0
+        ],
+        "flipX": false,
+        "flipY": false,
+        "color": [
+          [
+            1,
+            1,
+            1,
+            1
+          ],
+          [
+            1,
+            1,
+            1,
+            1
+          ],
+          [
+            1,
+            1,
+            1,
+            1
+          ],
+          [
+            1,
+            1,
+            1,
+            1
+          ]
+        ]
+      },
+      {
+        "destination": [
+          92,
+          -11,
+          542,
+          440
+        ],
+        "source": [
+          100.0,
+          0,
+          400.0,
+          300.0
+        ],
+        "flipX": false,
+        "flipY": false,
+        "color": [
+          [
+            1,
+            1,
+            1,
+            1
+          ],
+          [
+            1,
+            1,
+            1,
+            1
+          ],
+          [
+            1,
+            1,
+            1,
+            1
+          ],
+          [
+            1,
+            1,
+            1,
+            1
+          ]
+        ]
+      }
+    ]
+  },
+  "numericPositionCandidates": [
+    {
+      "worldPairCandidate": [
+        454.18450927734375,
+        400.0
+      ],
+      "velocityPairCandidate": [
+        13.20511245727539,
+        0.0
+      ]
+    }
+  ],
+  "targets": {
+    "shadow": {
+      "path": "3bmb-controlled-explosion-start-shadow.rgba",
+      "sha256": "979610265689f999b54395ddc43096715b2c4db08dc805489c0686da86b00575",
+      "texture": 9,
+      "epoch": 2
+    },
+    "lighting": {
+      "path": "3bmb-controlled-explosion-start-lighting.rgba",
+      "sha256": "9168f289462e04a66c4e635e46c1dcca6ca0a469bdf8987f8afd8175816c9e7e",
+      "texture": 10,
+      "epoch": 2
+    }
+  },
+  "sourceHashes": {
+    "originalControllerManifestSha256": "c79e3212aa477253eacb2aad7b38613e225adc9f48c728dceef75f07332a90ed",
+    "originalPublicGlTraceSha256": "903d684a4f44ee4c07669fac8e981d5352dfa025ed047af085402ecb7e07086b"
+  },
+  "repeatability": {
+    "freshIsolatedOriginalRuns": 2,
+    "exactRGBA": true,
+    "publicPhaseEqual": true,
+    "publicPrimitivesEqual": true,
+    "numericCandidatesEqual": true,
+    "counterpartEvidence": "3bmb-controlled-explosion-start-repeat.json"
+  },
+  "scope": "Complete public GL target bytes paired to exact blocked presentation phases and X11 inputs; native gameplay tick delivery remains unknown",
+  "graphicsTrace": {
+    "path": "3bmb-controlled-explosion-start-gl.jsonl",
+    "sha256": "07af2aca6e266eb0415db74784f019b4fe46ffb3eb7a158f90c0ee3d9dd10aa2",
+    "scope": "Exact original public GL records from complete matched frameStart through target snapshots and frameEnd"
+  },
+  "controllerEvidence": {
+    "path": "3bmb-controlled-explosion-controller.json",
+    "sha256": "bce64f482e40e56d9a3a0d619e8a7072378e49d34fda197f317b17612cc11dcf",
+    "scope": "Actual original public input/presentation fields; host paths and native addresses omitted"
+  },
+  "clock": {
+    "scope": "main-thread wall-clock ABI; worker/CPU clocks unchanged",
+    "nominalStepsPerSecond": 60,
+    "stepNs": 16667000,
+    "mainThreadSleeps": "recorded then returned without host delay",
+    "realPerformance": "controller wall clock"
+  },
+  "bombPhase": {
+    "key": "e",
+    "pressedAfterPresentedFrame": 1263,
+    "releasedAfterPresentedFrame": 1264,
+    "checkpointBombPresentation": 121,
+    "consumedBombEvents": [
+      {
+        "down": true,
+        "keysym": 101,
+        "presentedFramePhase": 1264,
+        "virtualElapsedNs": 21067088000
+      },
+      {
+        "down": false,
+        "keysym": 101,
+        "presentedFramePhase": 1265,
+        "virtualElapsedNs": 21083755000
+      }
+    ]
+  }
+}

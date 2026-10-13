@@ -42,9 +42,11 @@ export class StageComposer {
     const crop = effects.lightGradient.crop;
     for (const light of effects.lights) {
       const rect = light.destinationRect;
+      gl.globalAlpha = light.alpha;
       gl.drawImage(this.assets.image(effects.lightGradient.asset), crop.x, crop.y, crop.width, crop.height,
         rect.x, rect.y, rect.width, rect.height);
     }
+    gl.globalAlpha = 1;
     gl.beginTarget(null); gl.resetTransform(); gl.globalAlpha = 1;
   }
   ground(effects: StageEffects): void {

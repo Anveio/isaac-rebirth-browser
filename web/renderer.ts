@@ -3,6 +3,7 @@ import { MenuRenderer } from "./menu";
 import { GLMenuContext, type GLSurface } from "./gl-menu";
 import { StageComposer, type StageTargets } from "./gl-stage";
 import { graphicsContracts } from "./graphics-contracts";
+import { RunPresentation } from "./presentation";
 import type { RoomAppearance, RoomQuad, State } from "./engine";
 
 const PLAYER = "gfx/001.000_player.anm2";
@@ -13,6 +14,7 @@ export class Renderer {
   private readonly context: CanvasRenderingContext2D;
   private readonly menu: MenuRenderer;
   private readonly stage: StageComposer;
+  private readonly presentation: RunPresentation;
   private readonly floor: GLSurface;
   private readonly walls: GLSurface;
   private roomKey = "";
@@ -21,6 +23,7 @@ export class Renderer {
     this.context = canvas.getContext("2d", { alpha: false })!;
     this.menu = new MenuRenderer(assets);
     this.stage = new StageComposer(graphics, assets);
+    this.presentation = new RunPresentation(assets);
     this.floor = graphics.createTarget(1024, 512);
     this.walls = graphics.createTarget(1024, 512);
   }
@@ -49,8 +52,19 @@ export class Renderer {
         this.assets.draw(ctx, TEAR, "RegularTear6", Math.round(tear.x * 2) / 2, Math.round(tear.y * 2) / 2, tear.age);
       for (const impact of state.impacts)
         this.assets.draw(ctx, "gfx/1000.012_tear poof_small.anm2", "Poof", impact.x, impact.y, impact.age);
+      for (const bomb of state.bombs)
+        this.assets.draw(ctx, "gfx/004.000_bomb.anm2", "Pulse", bomb.x, bomb.y - 1, Math.min(58, Math.floor((Math.max(bomb.age, 1) - 1) / 2)), { pixelSnap: this.canvas.width / 480 / 2 });
+      for (const explosion of state.explosions) {
+        this.assets.draw(ctx, "gfx/1000.001_bomb explosion.anm2", "Explosion", explosion.x, explosion.y - 1, Math.floor(explosion.age / 2), { pixelSnap: this.canvas.width / 480 / 2 });
+        // The detonated bomb's authored fuse fragment persists for ten ANM2
+        // frames beside the explosion; it no longer owns a ground shadow.
+        if (explosion.age < 20)
+          this.assets.draw(ctx, "gfx/004.000_bomb.anm2", "Explode", explosion.x, explosion.y - 1, Math.floor(explosion.age / 2), { pixelSnap: this.canvas.width / 480 / 2 });
+      }
       this.stage.foreground(state.stageEffects);
+      this.presentation.introduction(ctx, state);
       this.hud(ctx, state);
+      this.presentation.pause(ctx, state);
     }
     gl.presentScreen(); gl.finish();
     this.context.reset(); this.context.imageSmoothingEnabled = false;

@@ -10,6 +10,12 @@ ROOT = Path(__file__).resolve().parents[2]
 spec = importlib.util.spec_from_file_location('clock_runner', Path(__file__).with_name('foundation-clock-run.py'))
 runner = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(runner)
+spec = importlib.util.spec_from_file_location('bomb_scenarios', Path(__file__).with_name('foundation-bomb-scenario.py'))
+bombs = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(bombs)
+spec = importlib.util.spec_from_file_location('presentation_scenarios', Path(__file__).with_name('foundation-presentation-scenario.py'))
+presentation = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(presentation)
 
 SCENARIOS = [
     {'id': 'menu-movement-fire', 'description': 'Fresh menus and seeded run, movement, shooting and release checkpoints',
@@ -22,6 +28,13 @@ SCENARIOS = [
      'systems': ['locomotion', 'entity-animation', 'projectile-physics', 'projectile-height-range', 'graphics-composition']},
     {'id': 'projectile-inheritance', 'description': 'Compare stationary shots, shots during motion, and shots while coasting after release',
      'systems': ['locomotion', 'projectile-physics', 'projectile-height-range', 'entity-animation']},
+    {'id': 'bomb-stationary', 'description': 'Observe E inventory debit, dense native fuse/explosion checkpoints, stationary self-damage and empty-inventory retry',
+     'systems': ['bombs', 'health-inventory', 'entity-animation', 'input-determinism']},
+    {'id': 'bomb-escape', 'description': 'Observe E placement while moving upward, fuse/explosion and escaped health, then empty-inventory retry',
+     'systems': ['bombs', 'health-inventory', 'locomotion', 'entity-animation', 'input-determinism']},
+    {'id': 'bomb-pause', 'description': 'Pause during the native bomb fuse, capture the paused state, resume and observe explosion/health',
+     'systems': ['bombs', 'health-inventory', 'entity-animation', 'input-determinism']},
+    presentation.SCENARIO,
 ]
 
 
@@ -48,6 +61,10 @@ def run_prefix(seed):
 
 def build_scenario(identifier, seed):
     runner.codec.decode_seed(seed)
+    if identifier in ('bomb-stationary', 'bomb-escape', 'bomb-pause'):
+        return bombs.build_tape(seed, identifier.removeprefix('bomb-'))
+    if identifier == presentation.SCENARIO['id']:
+        return presentation.build_tape(seed)
     if identifier == 'menu-movement-fire':
         return runner.default_tape(seed)
     if identifier == 'menu-run-introduction':
