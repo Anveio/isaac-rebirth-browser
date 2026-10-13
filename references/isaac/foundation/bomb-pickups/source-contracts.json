@@ -1,0 +1,81 @@
+{
+  "schema": 1,
+  "scope": "Fresh normal Isaac free ordinary-room regular/double bomb pickups. Source-derived implementation is distinct from accepted live coverage; rare conversions and modifiers remain separate callbacks.",
+  "implementation": {
+    "variants": {
+      "40/1": {
+        "amount": 1
+      },
+      "40/2": {
+        "amount": 2
+      }
+    },
+    "inventoryCap": 99,
+    "inventoryCapBoundaryLiveProof": false,
+    "admissionContext": "Ordinary room type1; no blanket shop/special-room admission",
+    "subtype0": {
+      "rng": "Fresh local xorshift index35, seeded by concrete authored PU spawn seed",
+      "calls": [
+        {
+          "bound": 7,
+          "zeroSubtype": 2,
+          "otherwiseSubtype": 1
+        },
+        {
+          "bound": 50,
+          "zeroSubtype": 5,
+          "otherwise": "retain selection"
+        },
+        {
+          "bound": 10,
+          "zeroSubtype": 3,
+          "otherwise": "retain selection"
+        }
+      ],
+      "order": "Later draws override earlier selection; explicit nonzero subtype bypasses local selection",
+      "freshCharacterConditions": "Isaac has neither Humbling Bundle203 nor BOGO Bombs250; modifier callbacks unaccepted"
+    },
+    "animationAndContacts": "Existing admission-fenced full actor updates, full postactor collision, Collect clip and deferred actor retirement; all original clips/positions/handles compared in live gate",
+    "sound": {
+      "id": 201,
+      "volume": 1.0,
+      "delay": 2,
+      "looping": false,
+      "pitch": 1.0,
+      "caller": "Collect504480 routes40 to5046d0 after inventory mutation, before System counter increment",
+      "routing": "Actual AudioState.admit samples shared MT once through the existing source SoundRequest API; no placeholder draws"
+    }
+  },
+  "sourceLocations": {
+    "Pickup.Init": "4ff1e0;40 branch4ffd4e..4ffe01; BOGO250 branch500409..500442",
+    "Collect.dispatch": "5050b8..5050e3 double+2;5058b3..5058c7 regular+1 through Player.AddBombs5086f0",
+    "sound": "50449a..50449d\u21925046d0..5046ee; pinned readonly f32 constant664150=1.0",
+    "ordinaryRockAccess": "Production rock_blast ascending native candidates; public starting bomb120 world units from PU row opens the two surrounding rock rows without PU impulses in the accepted isolated source research"
+  },
+  "unimplementedConversions": {
+    "40/3": {
+      "actor": "4/3 Troll Bomb",
+      "source": "Update506f70 early branch507568..50756e\u2192507cc0;42e8c0 shared seed\u2192550a40 spawn then temporary PU virtual+48 removal"
+    },
+    "40/5": {
+      "actor": "4/4 Megatroll Bomb",
+      "source": "Update507574..5075bc;42e8c0 shared seed\u2192550a40 spawn then temporary PU virtual+48 removal"
+    },
+    "seedSource": "42e8c0\u2192shared MT5e4fe0; no golden inventory alias, supplied captured seeds or cursor shifts",
+    "acceptance": "Not implemented or live-accepted in this regular/double leaf; naturally selected unsupported actors remain blocking; mandatory XD0 regression retained elsewhere"
+  },
+  "coveragePolicy": {
+    "initialScope": "Original four-case grid/subtype-isolated bank retained unchanged on immutable a800edf, including both mid-Collect end assertion failures and the initial environmental partial report",
+    "defaultScope": "All four prior cases remain required as exact action prefixes with20 extra public release steps. Fresh OS-random authored PU subtype draws are unfiltered. Ordinary grid access can be selected independently; required rare-rock regressions remain elsewhere. Every selected native/production comparison is retained, including failures.",
+    "retirementContinuation": "Source and production regular Collect were both still playing at frame15 at original453/454-step random tape end; extra declared public release completes the clip instead of changing its runtime timing"
+  },
+  "notAccepted": [
+    "inventory99 boundary",
+    "item modifiers",
+    "Troll/Megatroll conversion and AI",
+    "blast pickup impulses",
+    "other room contexts/prices",
+    "total shared MT or selected sample identity",
+    "pixels"
+  ]
+}

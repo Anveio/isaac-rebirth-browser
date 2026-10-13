@@ -49,6 +49,18 @@ pub fn regular_subtype(variant: u32, subtype: u32, spawn_seed: u32) -> Result<u3
         // Pickup::Init4ffcae: ordinary Isaac owns no Humbling Bundle;
         // Random(50)==0 selects the golden key, never a double key.
         30 => Ok(if random(50) == 0 { 2 } else { 1 }),
+        // Pickup::Init4ffd4e: fresh Isaac owns neither Humbling Bundle nor
+        // BOGO Bombs. Later Megatroll/Troll draws override the regular/double roll.
+        40 => {
+            let mut selected = if random(7) == 0 { 2 } else { 1 };
+            if random(50) == 0 {
+                selected = 5;
+            }
+            if random(10) == 0 {
+                selected = 3;
+            }
+            Ok(selected)
+        }
         _ => Err(format!(
             "pickup selector {variant}/0 requires its owning pool or subtype resolver"
         )),
@@ -100,12 +112,12 @@ impl Pickup {
         selector: &crate::room_spawns::SpawnSelector,
         appear: bool,
     ) -> Result<Option<Self>, String> {
-        if selector.entity_type != 5 || !matches!(selector.variant, 20 | 30) {
+        if selector.entity_type != 5 || !matches!(selector.variant, 20 | 30 | 40) {
             return Ok(None);
         }
         let variant = u32::from(selector.variant);
         let subtype = regular_subtype(variant, u32::from(selector.subtype), selector.spawn_seed)?;
-        if !matches!((variant, subtype), (20, 1..=4) | (30, 1 | 3)) {
+        if !matches!((variant, subtype), (20, 1..=4) | (30, 1 | 3) | (40, 1 | 2)) {
             return Ok(None);
         }
         let mut pickup = Self::spawn(id, variant, subtype, selector.position, appear)?;
@@ -236,7 +248,7 @@ impl Pickup {
         (dx * dx + dy * dy).sqrt() < radius
     }
 
-    /// Free regular coins and keys. Other pickup families keep typed room selectors
+    /// Free regular coins, keys and bombs. Other families keep typed room selectors
     /// until their source collection rules and live gates are admitted.
     pub fn try_collect(&mut self, inventory: &mut Inventory) -> bool {
         if !self.can_collect || self.collected || self.removed || self.collection_delay != 0 {
@@ -250,6 +262,9 @@ impl Pickup {
             (30, 1 | 3) => {
                 let amount = if self.subtype == 3 { 2 } else { 1 };
                 inventory.keys = inventory.keys.saturating_add(amount).min(99);
+            }
+            (40, 1 | 2) => {
+                inventory.bombs = inventory.bombs.saturating_add(self.subtype).min(99);
             }
             _ => return false,
         }
