@@ -740,7 +740,11 @@ impl Collider {
                 *velocity + normal * (inward * 1.8 - 0.1)
             };
             let speed = (reflected.x * reflected.x + reflected.y * reflected.y).sqrt();
-            if !reflected.is_finite() || !speed.is_finite() || speed <= 0.0 {
+            // A preview keeps its velocity and reads speed only through
+            // max(speed, 2); a residual friction velocity can underflow its
+            // f32 square to zero there. The full update divides by a
+            // reflected speed whose normal component exceeds 0.1.
+            if !reflected.is_finite() || !speed.is_finite() || (!preview && speed <= 0.0) {
                 return Err("nonplayer collision reflection overflowed".into());
             }
             let scaled_normal = WorldVector {
