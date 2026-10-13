@@ -24,5 +24,10 @@ audio_spec = importlib.util.spec_from_file_location('authored_audio_assets', roo
 audio = importlib.util.module_from_spec(audio_spec)
 audio_spec.loader.exec_module(audio)
 audio.complete(check_only=True)
+catalog_spec = importlib.util.spec_from_file_location('runtime_audio_catalogue', root / 'tools/foundation/audio-catalog.py')
+catalog = importlib.util.module_from_spec(catalog_spec)
+catalog_spec.loader.exec_module(catalog)
+if json.loads((root / 'web/audio-data.json').read_text()) != catalog.generate():
+    raise SystemExit('Runtime audio catalogue is stale; run python3 tools/foundation/audio-catalog.py')
 print(f"Verified {len(manifest['files'])} original reference files and complete authored audio references.")
 

@@ -99,6 +99,9 @@ def main():
     parser.add_argument('--state-observer', type=Path, help='Optional parent-only reference debug module exposing observe(pid, context); never production game input')
     parser.add_argument('--observe-every-step', action='store_true', help='Observe at each tape step gate without screenshots; use one-frame steps for dense trajectories')
     parser.add_argument('--gl-trace', type=Path, help='Optional documented graphics API observer to chain; no game instructions/state')
+    parser.add_argument('--audio-trace', type=Path, help='Optional forwarding OpenAL API observer to chain; no game instructions/state')
+    parser.add_argument('--sfx-volume', type=float, default=0, help='Owned public SFXVolume option, 0..1; admission still occurs when muted')
+    parser.add_argument('--music-volume', type=float, default=0, help='Owned public MusicVolume option, 0..1')
     parser.add_argument('--trace-every-frame', action='store_true', help='Request graphics observer continuous draw/presentation tracing')
     parser.add_argument('--width', type=int, default=960, help='Original supported window width; larger values aid public subpixel diagnostics')
     parser.add_argument('--height', type=int, default=540, help='Original supported window height')
@@ -112,6 +115,8 @@ def main():
         raise SystemExit('--boot-epoch-seed must be a u32')
     if args.observe_every_step and not args.state_observer:
         raise SystemExit('--observe-every-step requires --state-observer')
+    if not 0 <= args.sfx_volume <= 1 or not 0 <= args.music_volume <= 1:
+        raise SystemExit('Owned public audio volumes must be 0..1')
     if not os.environ.get('DISPLAY'):
         raise SystemExit('Run through tools/original/with-display.sh')
     # X server autorepeat uses real host time; it must not invent input events
@@ -176,7 +181,7 @@ def main():
         directory.mkdir(parents=True, exist_ok=True)
     for name in ('isaac.x64', 'lib64', 'resources'):
         (out / 'game' / name).symlink_to(source / name)
-    (local / 'options.ini').write_text(f'[Options]\nFullscreen=0\nFilter=0\nVSync=0\nPauseOnFocusLost=0\nSteamCloud=1\nMouseControl=0\nWindowWidth={args.width}\nWindowHeight={args.height}\nWindowPosX=0\nWindowPosY=0\nMaxRenderScale={args.max_render_scale}\nMusicVolume=0\nSFXVolume=0\n')
+    (local / 'options.ini').write_text(f'[Options]\nFullscreen=0\nFilter=0\nVSync=0\nPauseOnFocusLost=0\nSteamCloud=1\nMouseControl=0\nWindowWidth={args.width}\nWindowHeight={args.height}\nWindowPosX=0\nWindowPosY=0\nMaxRenderScale={args.max_render_scale}\nMusicVolume={args.music_volume}\nSFXVolume={args.sfx_volume}\n')
     gate = out / 'clock-gate.so'
     subprocess.run(['cc', '-std=c11', '-Wall', '-Wextra', '-Werror', '-fPIC', '-shared',
                     str(Path(__file__).with_name('foundation-clock-gate.c')), '-o', str(gate), '-ldl'], check=True)
@@ -198,6 +203,11 @@ def main():
             env['ISAAC_GL_TRACE_EVERY_FRAME'] = '1'
     elif args.trace_every_frame:
         raise SystemExit('--trace-every-frame requires --gl-trace')
+    if args.audio_trace:
+        trace = out / 'audio-trace'
+        trace.mkdir(exist_ok=True)
+        env['LD_PRELOAD'] += ' ' + str(args.audio_trace.resolve())
+        env['ISAAC_AUDIO_TRACE_DIR'] = str(trace)
     observer = None
     if args.state_observer:
         spec = importlib.util.spec_from_file_location('original_reference_observer', args.state_observer.resolve())
@@ -211,6 +221,7 @@ def main():
               'bootEpochSeed': args.boot_epoch_seed,
               'requestedViewport': {'width': args.width, 'height': args.height, 'maxRenderScale': args.max_render_scale},
               'profile': {'fresh': True, 'isolated': True}, 'tape': tape, 'frames': frames,
+              'audioOptions': {'sfxVolume': args.sfx_volume, 'musicVolume': args.music_volume},
               'inputs': events, 'presentations': acknowledgements,
               'clock': {'scope': 'main-thread wall-clock ABI; worker/CPU clocks unchanged', 'nominalStepsPerSecond': args.fps, 'stepNs': args.step_ns,
                         'mainThreadSleeps': 'recorded then returned without host delay', 'realPerformance': 'controller wall clock'},
