@@ -10,6 +10,11 @@ export interface BrowserCapture {
 export interface BrowserRun { initialSeed: number; bootEpochSeed: number; commands: Command[]; states: State[]; backendEvents: { afterCommandCount: number; command: Command; audioTime: number; state: State }[]; frames: BrowserCapture[]; timings: Array<{ commandIndex: number; ticks: number; durationMs: number; scope: string }>; tickRate: number; seed: string; inputTransport: string; }
 export function waitForReady(page: Page): Promise<void>;
 export function manualSeedCommands(seedText: string | null): Command[];
+export function enterSeededRun(page: Page, seedText: string | null, options?: {
+  onCommand?: (command: Command) => Promise<void>;
+  onTick?: (count: number, durationMs: number) => void;
+  onCheckpoint?: (label: string, screen: State["screen"]) => Promise<void>;
+}): Promise<State>;
 export function assertSeededRun(state: State, seedText: string, seedValue?: number): void;
 export function assertInputProvenance(trace: { enabled: boolean; inputTraceTruncated: boolean; initialSeed: number;
   bootEpochSeed: number; commands: Command[] }, commands: Command[], initialSeed: number, bootEpochSeed?: number): void;

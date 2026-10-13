@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 import { chromium } from '@playwright/test';
 import { browserLaunchOptions, inspectBrowserGraphics } from '../foundation/browser.mjs';
 import { startProductionServer } from '../foundation/production-server.mjs';
-import { assertInputProvenance, assertSeededRun, manualSeedCommands, waitForReady } from '../foundation/verify.mjs';
+import { assertInputProvenance, assertSeededRun, enterSeededRun, manualSeedCommands, waitForReady } from '../foundation/verify.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const run = promisify(execFile);
@@ -84,12 +84,7 @@ try {
       await page.evaluate(({ seedValue, bootEpochSeed }) => {
         window.game.pause(); window.game.reset(seedValue, { trace: true, bootEpochSeed });
       }, { seedValue: item.seedValue, bootEpochSeed: scenarios.bootEpochSeed });
-      for (let index = 0; index < 3; index++) await page.keyboard.press('Enter');
-      await page.keyboard.press('Tab');
-      await page.keyboard.type(item.code);
-      await page.keyboard.press('Enter');
-      await page.keyboard.press('Enter');
-      const start = await page.evaluate(() => window.game.snapshot());
+      const start = await enterSeededRun(page, item.code);
       assert.equal(start.screen, 'playing');
       assert.equal(start.runSeedValue, item.seedValue);
       assertSeededRun(start, item.code, item.seedValue);
