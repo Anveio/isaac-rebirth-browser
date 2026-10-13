@@ -1,0 +1,122 @@
+{
+  "schema": 1,
+  "scope": "Historical complete attempts, separately corrected reruns and scoped later leaves; no whole current-main passing claim.",
+  "integratedMain": "5c8a9fb89578167998b859ec485289ef2c9b5168",
+  "registeredSuites": 31,
+  "lastCompletedBuild": {
+    "source": "472b1545922d620d12f9e59dc61eda3e5526ad13",
+    "artifactSha256": "01bac4e3fd8e11ecfd400ce205a29e939acba46dfa8d560a3440f9ccbf4c718e",
+    "scope": "Full build/static checkpoint predates Monstro, Familiar and Grid integration."
+  },
+  "localInitial24": {
+    "source": "cb3601894107c95b7a911349d62cfba1fcee20d5",
+    "reportSha256": "88f0d938ac5d5dd79cb32154ab90230edde0a1cbcfdaa6f81f7bc670935202db",
+    "artifactSha256": "633d605b1d131bf2271ac39243e0b876efd11877b0f94c525060c0c7711f199c",
+    "passingSuites": 14,
+    "failingSuites": 10,
+    "scope": "Five completed gameplay failures, floor pre-capture setup failure, and four disk-failed/mixed attempts including partial Worm gameplay failures; all attempts preserved."
+  },
+  "localCorrectedReruns": {
+    "source": "cb3601894107c95b7a911349d62cfba1fcee20d5",
+    "reportSha256": "7ee3c7f2b9d09e9f00271c2e3c72f6c25afc50e6f9f89c1711f78471623c3e36",
+    "passingCases": {
+      "floor": 5,
+      "levelDescriptors": 6,
+      "itemSelection": 4,
+      "bombPickups": 6
+    },
+    "worm": {
+      "cases": 4,
+      "status": "fail",
+      "fields": 50420,
+      "requiredFailures": 1821,
+      "passedCheckpoints": 651,
+      "checkpoints": 882,
+      "sourceStable": true,
+      "reportSha256": "f48ac298d443a8004247be498ad3712d0930c2efbeef1eae0a8311b42efb3ee3"
+    },
+    "equivalentCompletedCoverage": {
+      "passingSuites": 18,
+      "gameplayFailingSuites": 6
+    },
+    "scope": "Separate reruns at the same immutable checkpoint; initial14/10 unchanged, not a single new all-suite invocation."
+  },
+  "hosted": {
+    "url": "https://github.com/Anveio/isaac-rebirth-browser/actions/runs/38449613521",
+    "head": "83228caa6321f1a523ede114906d01e84e5159ad",
+    "actualCheckoutCommit": "1e2f538bfa2f4be8c612f0432db9441d9e3ec8e3",
+    "status": "failure",
+    "discovery": "pass",
+    "suiteCounts": {
+      "pass": 20,
+      "fail": 8,
+      "cancelled": 1
+    },
+    "gameplayFailures": [
+      "troll-bombs",
+      "roundworms",
+      "npcs",
+      "bomb-pickups",
+      "fireplaces",
+      "saved-game",
+      "regressions"
+    ],
+    "keyDoorToolingFailure": {
+      "suite": "key-doors",
+      "case": "W31RQ6TH",
+      "completedComparisonAttempts": 936,
+      "printedFailureCount": 0,
+      "printedCountIsUnverifiedFallback": true,
+      "comparisonOutcome": "unknown; local comparisonFailures is not attached to report before serialization fails",
+      "error": "RangeError: Invalid string length",
+      "postWriterProvenanceAndBackendGuards": "not established by the failed row",
+      "otherCase": "7XGY2Q9P750 phases pass"
+    },
+    "cancelledRockBlast": {
+      "suite": "rock-blast",
+      "fieldFailuresBeforeCancel": {
+        "explosive-phase-0": 1042,
+        "explosive-phase-1": 1059
+      },
+      "cancelReason": "unspecified; operation canceled in job logs"
+    },
+    "observedSummarySha256": "a9b30abaeb57308f9aa69082daa0a16449950b48bb249f5c0554ada0a904c2dd",
+    "scope": "29-suite former PR2 head; predates main integration. Earlier refused-before-jobs billing run remains historical."
+  },
+  "familiar": {
+    "capturedSource": "307701df0f717eb31b55eef33bcda090293408b9",
+    "artifactSha256": "ec40a42167b8418b5978d9624391046bc548fb609069a68955c8abfa65a20ed8",
+    "reportSha256": "540162cbde6f03b2605adaefb8ac9b7105b4347416fcb36a741c0a3b05cf556f",
+    "passingCases": 0,
+    "cases": 4,
+    "checks": 80878,
+    "requiredFailures": 25131,
+    "independentAuditSha256": "ff06422b2f9c91902a8cc60e2625b911bf628ff22af531e77a85eb7cc74b1853",
+    "scope": "Typed Leech/Poof birth/appearance and empty-room owner deadband; actual sequence/placement/shared-seed/presence gaps block. Ember ordinal candidates do not prove same-actor motion defects. Room-return update/grid and navigation remain unaccepted."
+  },
+  "grid": {
+    "capturedSource": "e7267ba41f2ce8492a4ff19a81de5a55a9e4dc3b",
+    "artifactSha256": "456b63031b0431f2bbdfc9f3198b4ec6c999c21e3d8beb60f7dbb88f9e5696fc",
+    "reportSha256": "32218b2df3420e4af95a787851a083be33b2e6d0b5a57abc48407d9cced4e150",
+    "passingCases": 0,
+    "cases": 6,
+    "requiredFailures": 254,
+    "ownedCopyPasses": 6,
+    "capturedSourceHashesVerified": 26,
+    "requiredW0": {
+      "status": "pass",
+      "checkpoints": 18,
+      "reportSha256": "3a1cb8ee0850bb3e7f26e9daf1c35278a001e13c565ddfed824976b798c6b8fd"
+    },
+    "scope": "Supported fresh starting-room GridBase construction and actual Room.Save records. Current-row seed pairs, all sampled semantic record fields and whole occupancy are blocking. Complete postrun shared MT remains diagnostic. No native input, cursor adjustment, variable decoration acceptance or durable load claim."
+  },
+  "streamedEvidenceWriter": {
+    "head": "108bb37158b229feda42724048c20c4ef38b05d7",
+    "writerSha256": "883a7a122be591ca79bb9bd57b9f44425bc232b88c6b643392f39e2a2bb89978",
+    "proofSha256": "0d1bf9b8fb892ee00ba2460a7acea2ad89411031657449f36c97b5f10c101edd",
+    "archiveAuditSha256": "8a86915929a02670508b9610703bbb4c3c0d4fbe9d0e45d04aca25df8bc41d55",
+    "actualSelectedSnapshots": 1814,
+    "actualBackendStates": 9,
+    "scope": "Frozen-native/fresh-browser storage proof; independent gzip/raw hash verification. Chest gameplay remains red; no hosted W31 reclassification."
+  }
+}
