@@ -1,4 +1,4 @@
-//! Ordinary 1x1 doorway admission and descriptor-owned room persistence.
+//! Ordinary 13x7/13x14 doorway admission and descriptor-owned room persistence.
 //! The public floor graph and authored doors are runtime inputs; source maps
 //! and captured room/actor geometry never enter the production route.
 use crate::{motion::WorldVector, phase::Phase, Player, Room, State};

@@ -43,7 +43,7 @@ const report = { schema: 1, status: 'running', skipped: 0, selected: bank.cases.
           ? 'Fresh Isaac, no-hostile13x7 natural secret keys and ordinary library lock: denied zero-key approach, actual collection/spending, full-only unlock/collision/SFX156, admission/return/revisit, exact player/HP/immunity, complete door/display/minimap/descriptor joins. Actual Keeper17 constructor admission remains required; golden/double locks, library items and pixels remain separate.'
         : 'Ordinary style0 13x7 doorway and no-hostile return; mandatory hostile-room lock/return regression; exact f32 player/descriptor phases, complete authored group accounting, supported actor admission and ordinary Rock metadata, visited-room restoration. NPC behavior, other grids/doors, large-room camera and complete pixels remain separate.',
   exclusions: bank.contract === 'large-geometry'
-    ? ['Default Style1 camera controller, large-room backdrop generation and rendered pixel parity', 'Chest5/50 constructor/animation/contact/drop behavior remains a required admission failure', 'Hostile large-room lifecycle, other large shapes, later floors and exits']
+    ? ['Default Style1 camera controller, large-room backdrop generation and rendered pixel parity', 'Chest5/50 constructor/animation/contact/drop behavior remains a required admission failure', 'Boss/shop and other special-door art/policy/traversal, hostile large-room lifecycle, other large shapes, later floors and exits']
     : bank.contract === 'keeper-idle'
     ? ['Keeper damage/death/drop callbacks and actor mutation persistence', 'Other Keeper variants, hostile secret policy, other room shapes and floor exits', 'Complete sprite/backdrop/pixel parity and total shared MT consumer alignment']
     : bank.contract === 'secret'
@@ -163,8 +163,10 @@ try {
               : types.includes(10) ? 'gfx/grid/door_04_selfsacrificeroomdoor.anm2'
               : types.includes(4) ? 'gfx/grid/door_02_treasureroomdoor.anm2' : 'gfx/grid/door_01_normaldoor.anm2';
             const appearance = state.room.appearance.doors.find(candidate => candidate.slot === authored.slot);
-            phaseAssert.deepEqual([appearance?.targetRoom, appearance?.asset, appearance?.worldPosition],
-              [target, asset, {x: authored.position[0], y: authored.position[1]}], `${label}:independent door endpoint/asset/world position`);
+            phaseAssert.deepEqual([appearance?.targetRoom, appearance?.worldPosition],
+              [target, {x: authored.position[0], y: authored.position[1]}], `${label}:independent door endpoint/world position`);
+            if (types.every(type => [1, 4, 7, 8, 10, 12].includes(type)))
+              phaseAssert.equal(appearance?.asset, asset, `${label}:source-supported door endpoint asset identity`);
           }
           phaseAssert.deepEqual(state.roomDisplayFlags, source.descriptors.map(room => room.displayFlags), `${label}:complete tall-room source display flags`);
           const cells = source.descriptors.filter(room => room.displayFlags & 1).map(room => ({
