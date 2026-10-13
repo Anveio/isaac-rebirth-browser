@@ -5,7 +5,7 @@ export type Direction = "left" | "right" | "up" | "down";
 export interface Player {
   visible: boolean; inputCooldown: number; dead: boolean;
   x: number; y: number; vx: number; vy: number; hp: number; maxHp: number;
-  soulHp: number; blackHeartMask: number;
+  soulHp: number; blackHeartMask: number; eternalHearts: number;
   facing: Direction; bodyFacing: Direction; walkFrame: number; headFrame: number; shooting: boolean; shootingLock: number;
   renderOffset: { x: number; y: number }; controlsEnabled: boolean;
   eye: "negative" | "positive";
