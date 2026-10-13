@@ -99,7 +99,13 @@ pub fn advance_world(
 
 pub fn advance(player: &mut Player, room: &Room, dx: i32, dy: i32) {
     static COLLIDER: OnceLock<crate::grid::Collider> = OnceLock::new();
-    let grid = crate::traversal::doorway_grid(room);
+    let grid = room
+        .grid
+        .clone()
+        .map(crate::grid::Grid::new)
+        .transpose()
+        .expect("admitted room grid retains bounded dimensions")
+        .unwrap_or_else(|| crate::traversal::doorway_grid(room));
     let collider = COLLIDER.get_or_init(|| {
         crate::grid::Collider::new(crate::grid::CollisionGeometry {
             radius: 10.0,

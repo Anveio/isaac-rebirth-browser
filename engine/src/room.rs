@@ -26,6 +26,7 @@ pub struct Room {
     pub descriptor: Option<crate::floor::Descriptor>,
     pub pickups: Vec<crate::pickups::Pickup>,
     pub spawns: Option<crate::room_spawns::RoomSpawns>,
+    pub grid: Option<crate::grid::GridDescriptor>,
 }
 
 /// Projected tear limits retained separately from verified player clearance.
@@ -282,6 +283,24 @@ impl Room {
                 },
             });
         }
+        let doors = room
+            .appearance
+            .doors
+            .iter()
+            .map(|door| crate::grid::DoorCollision {
+                slot: door.slot,
+                open: door.state == "Opened",
+            })
+            .collect::<Vec<_>>();
+        room.grid = Some(
+            crate::grid::for_room(
+                &authored,
+                room.spawns.as_ref().expect("authored groups were selected"),
+                descriptor.decoration_seed,
+                &doors,
+            )
+            .expect("authored ordinary grid admission"),
+        );
         room.appearance.generation =
             "source-fresh-normal-basement-floor;descriptor-decoration12;authored-spawn11;provisional-fx-route"
                 .into();
@@ -428,6 +447,7 @@ impl Room {
             descriptor: None,
             pickups: Vec::new(),
             spawns: None,
+            grid: None,
             left: left_plane + radius,
             right: right_plane - radius,
             top: top_plane + radius,
