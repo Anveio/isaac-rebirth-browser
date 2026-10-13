@@ -121,6 +121,59 @@ fn pickup_catalog(path: &Path, animations: &Path, entities_xml: &str) -> String 
     output
 }
 
+fn familiar_catalog(path: &Path, entities_xml: &str) -> String {
+    let actors: Value = serde_json::from_str(
+        &fs::read_to_string(path).expect("read authored Familiar/effect animations"),
+    )
+    .expect("parse authored Familiar/effect animations");
+    let mut output = String::from("pub static DEFINITIONS: &[Definition] = &[\n");
+    for (entity_type, variant, actor) in [
+        (3, 56, "gfx/003.056_leech.anm2"),
+        (1000, 15, "gfx/1000.015_poof01.anm2"),
+        (1000, 49, "gfx/1000.049_heart.anm2"),
+    ] {
+        let catalogue = &actors[actor];
+        let default = catalogue["DefaultAnimation"]
+            .as_str()
+            .expect("authored default clip");
+        output.push_str(&format!("Definition {{ entity_type: {entity_type}, variant: {variant}, actor: {actor:?}, default_clip: {default:?}, "));
+        for (field, attribute) in [
+            ("base_hp", "baseHP"),
+            ("collision_radius", "collisionRadius"),
+            ("collision_mass", "collisionMass"),
+            ("collision_damage", "collisionDamage"),
+            ("friction", "friction"),
+            ("shadow_size", "shadowSize"),
+        ] {
+            output.push_str(&format!(
+                "{field}: {:?}_f32, ",
+                entity_number(entities_xml, entity_type, variant, attribute)
+            ));
+        }
+        let points = entity_number(entities_xml, entity_type, variant, "numGridCollisionPoints");
+        assert_eq!(
+            points.fract(),
+            0.0,
+            "integer authored collision point count"
+        );
+        output.push_str(&format!("grid_points: {points:.0}, clips: &["));
+        for clip in catalogue["Animations"]
+            .as_array()
+            .expect("authored actor clips")
+        {
+            output.push_str(&format!(
+                "Clip {{ name: {:?}, frames: {}, looping: {} }},",
+                clip["Name"].as_str().expect("clip name"),
+                clip["FrameNum"].as_u64().expect("clip frame count"),
+                clip["Loop"].as_bool().expect("clip loop flag")
+            ));
+        }
+        output.push_str("] },\n");
+    }
+    output.push_str("];\n");
+    output
+}
+
 fn main() {
     let manifest = PathBuf::from(std::env::var_os("CARGO_MANIFEST_DIR").unwrap());
     let resources = manifest
@@ -424,6 +477,13 @@ fn main() {
         "collectible catalogue rejected: {}",
         String::from_utf8_lossy(&items.stderr)
     );
+    let familiar_path = manifest.parent().unwrap().join("web/familiar-data.json");
+    println!("cargo:rerun-if-changed={}", familiar_path.display());
+    fs::write(
+        output.join("familiar_catalog.rs"),
+        familiar_catalog(&familiar_path, &xml),
+    )
+    .expect("write authored Familiar/effect catalogue");
     fs::write(output.join("item_catalog.rs"), items.stdout)
         .expect("write authored collectible catalogue");
 }

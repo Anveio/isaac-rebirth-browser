@@ -87,6 +87,16 @@ export class Renderer {
             npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46, npc.animationFrame, { scale: 0.65 });
         }
       }
+      for (const familiar of state.familiars) {
+        if (!familiar.visible || !familiar.active || familiar.removed) continue;
+        ctx.save();
+        ctx.translate(familiar.presentedPosition.x * 0.65 + 32,
+          familiar.presentedPosition.y * 0.65 - 46);
+        ctx.scale(familiar.sprite.flipX ? -1 : 1, 1);
+        this.assets.draw(ctx, "gfx/003.056_leech.anm2", familiar.sprite.animation,
+          familiar.sprite.offset.x * 0.65, familiar.sprite.offset.y * 0.65, familiar.sprite.frame, { scale: 0.65 });
+        ctx.restore();
+      }
       for (const projectile of state.enemyProjectiles)
         if (!projectile.removed && projectile.animation)
           this.assets.draw(ctx, "gfx/009.000_projectile.anm2", projectile.animation,
@@ -109,6 +119,13 @@ export class Renderer {
       for (const bomb of state.bombs)
         if (bomb.motion.lifetime === "exploding")
           this.assets.draw(ctx, bomb.variant === 3 ? "gfx/004.003_troll bomb.anm2" : bomb.variant === 4 ? "gfx/004.004_megatroll bomb.anm2" : "gfx/004.000_bomb.anm2", bomb.animation, bomb.x, bomb.y - 1, bomb.animationFrame, { pixelSnap: this.canvas.width / 480 / 2 });
+      for (const effect of state.spriteEffects) {
+        if (!effect.visible || !effect.active || effect.removed) continue;
+        this.assets.draw(ctx, "gfx/1000.015_poof01.anm2", effect.sprite.animation,
+          (effect.presentedPosition.x + effect.sprite.offset.x) * 0.65 + 32,
+          (effect.presentedPosition.y + effect.sprite.offset.y) * 0.65 - 46,
+          effect.sprite.frame, { scale: 0.65 });
+      }
       ctx.restore();
       this.stage.foreground(state.stageEffects);
       this.presentation.introduction(ctx, state);

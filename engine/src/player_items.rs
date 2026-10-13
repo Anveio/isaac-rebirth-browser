@@ -4,6 +4,15 @@
 use crate::{items, phase::Phase, State};
 use serde::{Deserialize, Serialize};
 
+/// Source TemporaryEffects records own config references and counts separately
+/// from the Player's permanent347 counts. Fresh normal Isaac starts empty.
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct TemporaryCollectible {
+    pub item_id: u32,
+    pub count: i32,
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct PickupPresentation {
@@ -23,6 +32,7 @@ pub struct PlayerItems {
     pub pocket_rngs: Vec<items::Rng>,
     pub entity_spawn_seed: u32,
     pub owned_counts: Vec<i32>,
+    pub temporary_collectibles: Vec<TemporaryCollectible>,
     pub queued_id: Option<u32>,
     pub queued_charge: i32,
     pub queued_touched: bool,
@@ -70,6 +80,7 @@ impl PlayerItems {
             pocket_rngs,
             entity_spawn_seed,
             owned_counts: vec![0; 347],
+            temporary_collectibles: Vec::new(),
             queued_id: None,
             queued_charge: 0,
             queued_touched: false,
@@ -87,6 +98,14 @@ impl PlayerItems {
             active_flag_3076: false,
             unevaluated_cache_flags: 0,
         })
+    }
+
+    /// Actual getter5e3ed0 searches the temporary record owner; absence is zero.
+    pub fn temporary_count(&self, item_id: u32) -> i32 {
+        self.temporary_collectibles
+            .iter()
+            .find(|effect| effect.item_id == item_id)
+            .map_or(0, |effect| effect.count)
     }
 }
 
@@ -465,6 +484,9 @@ fn flush_queued(state: &mut State) -> Result<(), String> {
             pool.special_counter = pool.special_counter.wrapping_add(5);
         }
     }
+    // AddCollectible52d173 calls cache evaluation before52ee40 clears queue
+    // fields. The Familiar callback owns its actual local/shared consumers.
+    crate::familiars::evaluate_cache(state)?;
     let owner = state
         .player_items
         .as_mut()
