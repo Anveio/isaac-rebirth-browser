@@ -9,6 +9,10 @@ export interface BrowserCapture {
 }
 export interface BrowserRun { initialSeed: number; bootEpochSeed: number; commands: Command[]; states: State[]; frames: BrowserCapture[]; timings: Array<{ commandIndex: number; ticks: number; durationMs: number; scope: string }>; tickRate: number; seed: string; inputTransport: string; }
 export function waitForReady(page: Page): Promise<void>;
+export function manualSeedCommands(seedText: string | null): Command[];
+export function assertSeededRun(state: State, seedText: string, seedValue?: number): void;
+export function assertInputProvenance(trace: { enabled: boolean; inputTraceTruncated: boolean; initialSeed: number;
+  bootEpochSeed: number; commands: Command[] }, commands: Command[], initialSeed: number, bootEpochSeed?: number): void;
 export function compareCapturedFrames(frames: BrowserCapture[], original: unknown[], output: string): { checks: Array<{ id: string; status: string; error?: string }>; exactOriginalPixels: boolean };
 export function browserScenario(page: Page, options?: { initialSeed?: number; bootEpochSeed?: number; manualSeedText?: string | null; onCheckpoint?: (frame: BrowserCapture) => Promise<void>; bombCheckpoint?: string }): Promise<BrowserRun>;
 export function nativeReplay(initialSeed: number, commands: Command[], bootEpochSeed?: number): State[];

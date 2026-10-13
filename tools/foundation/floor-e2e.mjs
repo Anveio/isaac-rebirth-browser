@@ -6,7 +6,7 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { browserLaunchOptions, inspectBrowserGraphics } from "./browser.mjs";
 import { startProductionServer } from "./production-server.mjs";
-import { browserScenario } from "./verify.mjs";
+import { assertSeededRun, browserScenario } from "./verify.mjs";
 
 const ROOT = resolve(fileURLToPath(new URL("../..", import.meta.url)));
 const fields = ["gridIndex", "roomInitSeed", "decorationSeed", "spawnSeed", "followingSeed", "doorMask"];
@@ -38,10 +38,16 @@ export async function floorE2e({ sourceReport, output = join(ROOT, ".cache/found
         assert.equal(original.status, "pass", JSON.stringify(original.error ?? original.differences));
         assert.match(original.nativeBinarySha256, /^[a-f0-9]{64}$/);
         let starting;
-        await browserScenario(page, { initialSeed: original.runSeed, manualSeedText: original.seed,
+        const run = await browserScenario(page, { initialSeed: original.runSeed, manualSeedText: original.seed,
           onCheckpoint: async (frame) => { if (frame.label === "gameplay-start") starting = frame.state; } });
+        const trace = await page.evaluate(() => window.game.trace());
+        const caseDirectory = join(dirname(output), original.seed.replaceAll(" ", ""));
+        mkdirSync(caseDirectory, { recursive: true });
+        writeFileSync(join(caseDirectory, "browser-input.json"), JSON.stringify({ schema: 1, trace,
+          expectedCommands: run.commands, starting }, null, 2) + "\n");
         assert.equal(starting.screen, "playing");
         assert.equal(starting.runSeedValue, original.runSeed);
+        assertSeededRun(starting, original.seed, original.runSeed);
         assert.equal(starting.stageSeed, original.stageSeed);
         assert.deepEqual(descriptors(starting.floor.descriptors), original.expected.descriptors,
           "Live browser generated room identities, geometry, masks and all descriptor seeds must match the original");
@@ -62,10 +68,11 @@ export async function floorE2e({ sourceReport, output = join(ROOT, ".cache/found
             asset: type === 4 ? "gfx/grid/door_02_treasureroomdoor.anm2" : type === 10
               ? "gfx/grid/door_04_selfsacrificeroomdoor.anm2" : "gfx/grid/door_01_normaldoor.anm2" }];
         });
-        assert.deepEqual(starting.room.appearance.doors.map(({side, targetRoom, state, asset}) =>
+        const visibleDoors = starting.room.appearance.doors.filter(door => door.state !== "Hidden");
+        assert.deepEqual(visibleDoors.map(({side, targetRoom, state, asset}) =>
           ({side, targetRoom, state, asset})), expectedDoors,
           "The complete visible doorway set and authored room-type states must match source connections");
-        for (const connection of starting.room.appearance.doors) {
+        for (const connection of visibleDoors) {
           const slot = ["left", "up", "right", "down"].indexOf(connection.side);
           assert.equal(connection.targetRoom, current.neighbors[slot]);
           const destination = starting.floor.descriptors[connection.targetRoom];
@@ -73,6 +80,8 @@ export async function floorE2e({ sourceReport, output = join(ROOT, ".cache/found
         }
         Object.assign(result, { status: "pass", descriptorCount: starting.floor.descriptors.length,
           attempts: starting.floor.attempts, decorationSeed: current.decorationSeed,
+          inputProvenance: { status: "pass", commands: trace.commands.length, initialSeed: trace.initialSeed,
+            bootEpochSeed: trace.bootEpochSeed, manualSeed: original.seed },
           inputTransport: "actual DOM keyboard; production WASM; original public X11 tape" });
       } catch (error) { result.error = error.message; }
       report.cases.push(result);

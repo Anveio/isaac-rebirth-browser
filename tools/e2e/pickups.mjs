@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 import { chromium } from '@playwright/test';
 import { browserLaunchOptions, inspectBrowserGraphics } from '../foundation/browser.mjs';
 import { startProductionServer } from '../foundation/production-server.mjs';
-import { waitForReady } from '../foundation/verify.mjs';
+import { assertInputProvenance, assertSeededRun, manualSeedCommands, waitForReady } from '../foundation/verify.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const run = promisify(execFile);
@@ -92,15 +92,19 @@ try {
       const start = await page.evaluate(() => window.game.snapshot());
       assert.equal(start.screen, 'playing');
       assert.equal(start.runSeedValue, item.seedValue);
+      assertSeededRun(start, item.code, item.seedValue);
       assert.equal(start.systemClock.systemCounter % 2, 0);
-      const traceStart = (await page.evaluate(() => window.game.trace())).commands.length;
-      const expected = [];
+      const route = [[true, 17], [false, 100 + item.delay], [true, 25], [false, 30]];
+      const expected = [...manualSeedCommands(item.code), ...route.flatMap(([held, frames]) => [
+        ...(held ? [{ type: 'key', code: 'KeyS', down: true }] : []),
+        ...Array.from({ length: frames }, () => ({ type: 'tick', count: 1 })),
+        ...(held ? [{ type: 'key', code: 'KeyS', down: false }] : []),
+      ])];
       let presentation = 0;
-      for (const [held, frames] of [[true, 17], [false, 100 + item.delay], [true, 25], [false, 30]]) {
-        if (held) { await page.keyboard.down('s'); expected.push({ type: 'key', code: 'KeyS', down: true }); }
+      for (const [held, frames] of route) {
+        if (held) await page.keyboard.down('s');
         for (let index = 0; index < frames; index++) {
           await page.evaluate(() => window.game.step(1));
-          expected.push({ type: 'tick', count: 1 });
           const state = await page.evaluate(() => window.game.snapshot());
           states.push(state);
           presentation++;
@@ -136,18 +140,23 @@ try {
           if (caseResult.failures.length === beforeFailures) passedPresentations++;
           comparisons++;
         }
-        if (held) { await page.keyboard.up('s'); expected.push({ type: 'key', code: 'KeyS', down: false }); }
+        if (held) await page.keyboard.up('s');
       }
       assert.ok(admitted >= 1, 'Gate must observe naturally admitted pickups');
       assert.ok(firstCollection !== undefined, 'Gate must collect a natural coin through public movement');
       assert.equal(states[firstCollection - 1].systemClock.systemCounter % 2, 1, 'Source pickup contact is full-only');
-      assert.deepEqual((await page.evaluate(() => window.game.trace())).commands.slice(traceStart), expected);
+      const trace = await page.evaluate(() => window.game.trace());
+      assertInputProvenance(trace, expected, item.seedValue, scenarios.bootEpochSeed);
+      assertSeededRun(await page.evaluate(() => window.game.snapshot()), item.code, item.seedValue);
       assert.deepEqual(errors, []);
       Object.assign(caseResult, { status: caseResult.failures.length ? 'fail' : 'pass', comparedPresentations: comparisons,
         passedPresentations, admittedPickups: admitted, firstCollection,
+        inputProvenance: { status: 'pass', commands: trace.commands.length, initialSeed: trace.initialSeed,
+          bootEpochSeed: trace.bootEpochSeed, manualSeed: item.code },
         nativeManifestSha256: digest(manifestBytes), nativeManifest: join(directory, 'original/manifest.json') });
     } finally {
-      await writeFile(join(directory, 'browser-states.json'), JSON.stringify({ schema: 1, states }, null, 2) + '\n');
+      await writeFile(join(directory, 'browser-states.json'), JSON.stringify({ schema: 1, states,
+        trace: await page.evaluate(() => window.game.trace()) }, null, 2) + '\n');
       await page.close();
     }
     } catch (error) {

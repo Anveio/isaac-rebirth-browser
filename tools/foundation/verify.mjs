@@ -62,6 +62,38 @@ export async function waitForReady(page) {
   const boot = await page.evaluate(() => ({ ready: document.body.dataset.ready, error: document.querySelector("#status")?.textContent }));
   assert.equal(boot.ready, "true", `Browser boot failed: ${boot.error}`);
 }
+
+// The requested setup is independent of the observed trace and browser screen.
+export function manualSeedCommands(seedText) {
+  const commands = [];
+  const press = code => commands.push({ type: "key", code, down: true }, { type: "key", code, down: false });
+  for (let index = 0; index < 3; index++) press("Enter");
+  if (seedText !== null) {
+    press("Tab");
+    for (const text of seedText) commands.push({ type: "text", text: text.toUpperCase() });
+    press("Enter");
+  }
+  press("Enter");
+  return commands;
+}
+
+export function assertSeededRun(state, seedText, seedValue) {
+  const code = seedText.replaceAll(" ", "").toUpperCase();
+  assert.equal(state.seededRun, true, "Browser must commit the public manual seed entry");
+  assert.equal(state.seedValid, true, "Browser must validate the entered seed");
+  assert.equal(state.seedText.replaceAll(" ", "").toUpperCase(), code, "Browser must read back every entered seed character");
+  assert.equal(state.runSeed.replaceAll(" ", "").toUpperCase(), code, "The committed run code must match the public seed entry");
+  if (seedValue !== undefined) assert.equal(state.runSeedValue, seedValue, "The committed run seed must match the declared case");
+}
+
+export function assertInputProvenance(trace, commands, initialSeed, bootEpochSeed = 0) {
+  assert.equal(trace.enabled, true, "Live verification requires actual input capture");
+  assert.equal(trace.inputTraceTruncated, false, "Every requested command from reset must be retained");
+  assert.equal(trace.initialSeed, initialSeed, "The input trace must preserve the requested reset seed");
+  assert.equal(trace.bootEpochSeed, bootEpochSeed, "The input trace must preserve the independent boot input");
+  assert.deepEqual(trace.commands, commands, "Every requested DOM key/text and interval from reset must reach WASM exactly once");
+}
+
 export async function browserScenario(page, { initialSeed = FOUNDATION_REFERENCE_INITIAL_SEED, bootEpochSeed = 0, manualSeedText = FOUNDATION_SEED, onCheckpoint, bombCheckpoint } = {}) {
   await waitForReady(page);
   await page.evaluate(({ initialSeed, bootEpochSeed }) => { window.game.pause(); window.game.reset(initialSeed, { trace: true, bootEpochSeed }); window.game.pause(); }, { initialSeed, bootEpochSeed });
@@ -98,11 +130,7 @@ export async function browserScenario(page, { initialSeed = FOUNDATION_REFERENCE
   };
   const finish = async () => {
     const actualTrace = await page.evaluate(() => window.game.trace());
-    assert.equal(actualTrace.enabled, true, "Verification must opt in to actual keyboard replay capture");
-    assert.equal(actualTrace.truncated, false, "Actual keyboard trace must preserve every command");
-    assert.equal(actualTrace.initialSeed, initialSeed, "Replays must contain the actual initial seed");
-    assert.equal(actualTrace.bootEpochSeed, bootEpochSeed, "Replays must contain the independent boot RNG input");
-    assert.deepEqual(actualTrace.commands, commands, "Browser DOM input delivery must match the canonical command tape");
+    assertInputProvenance(actualTrace, commands, initialSeed, bootEpochSeed);
     return { initialSeed, bootEpochSeed, commands, states, frames, timings, tickRate: 60, seed: states.at(-1).runSeed, inputTransport: "actual DOM keyboard; manually stepped WASM simulation" };
   };
   // The native tape reaches its settled Title checkpoint 63 presentations
@@ -121,8 +149,11 @@ export async function browserScenario(page, { initialSeed = FOUNDATION_REFERENCE
     }
     await capture("seed-entry", "seed");
     await press("Enter"); await capture("character-seeded", "character");
+    assertSeededRun(states.at(-1), manualSeedText);
   }
   await press("Enter");
+  const setup = [{ type: "tick", count: 63 }, ...manualSeedCommands(manualSeedText)];
+  assert.deepEqual(commands, setup, "The complete menu setup must follow the declared command plan");
   assert.equal(states.at(-1).screen, "playing", "Actual keyboard must start the run before advancing its introduction");
   // Existing neutral original fixtures were captured after the authored stage
   // banner. Advance the explicit transition instead of suppressing its draw.
@@ -131,7 +162,7 @@ export async function browserScenario(page, { initialSeed = FOUNDATION_REFERENCE
     await tick(10);
   }
   await capture("gameplay-start", "playing");
-  if (manualSeedText !== null) assert.equal(states.at(-1).seedText.replaceAll(" ", ""), manualSeedText);
+  if (manualSeedText !== null) assertSeededRun(states.at(-1), manualSeedText);
   await key("KeyD", true); await tick(27); await key("KeyD", false); await tick(30);
   await capture("movement", "playing");
   if (bombCheckpoint !== undefined) {
