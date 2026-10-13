@@ -52,7 +52,6 @@ const FORWARD_RETENTION: f32 = 0.880_340_8;
 // The source damps the perpendicular component first, then the recombined
 // velocity. Precombining these factors loses a native f32 rounding step.
 const TRANSVERSE_RETENTION: f32 = 0.894_427_2;
-const ACCELERATION: f32 = 0.6;
 
 /// Player control runs in both full and intermediate phases. Grid/contact
 /// solvers operate on the returned native f32 state before projection.
@@ -79,13 +78,16 @@ pub fn advance_world(
         let forward = vx * ux + vy * uy;
         let sideways_x = vx - forward * ux;
         let sideways_y = vy - forward * uy;
-        // The original counteracts velocity opposite the requested heading
-        // with extra acceleration, independently verified by immediate turns.
-        let acceleration = ACCELERATION + (-forward * 0.04).max(0.0);
         let adjusted_x = forward * ux + sideways_x * TRANSVERSE_RETENTION;
         let adjusted_y = forward * uy + sideways_y * TRANSVERSE_RETENTION;
-        vx = (adjusted_x + acceleration * ux) * FORWARD_RETENTION;
-        vy = (adjusted_y + acceleration * uy) * FORWARD_RETENTION;
+        // Source 0x529926..0x529990 repeats the dot after transverse damping,
+        // then rounds the -0.2, +3, *0.4 and input *0.5 operations separately.
+        // Collapsing this to 0.6 + max(-forward*0.04, 0) loses reverse control
+        // precision immediately after independently observed spike knockback.
+        let adjusted_forward = adjusted_x * ux + adjusted_y * uy;
+        let acceleration = ((adjusted_forward * -0.2).max(0.0) + 3.0) * 0.4;
+        vx = (adjusted_x + (ux * 0.5) * acceleration) * FORWARD_RETENTION;
+        vy = (adjusted_y + (uy * 0.5) * acceleration) * FORWARD_RETENTION;
     } else {
         vx *= FORWARD_RETENTION;
         vy *= FORWARD_RETENTION;
