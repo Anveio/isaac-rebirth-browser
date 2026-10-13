@@ -1,0 +1,80 @@
+{
+  "schema": 1,
+  "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "scope": "Supported fresh normal shape0 variable grid decoration and actual signed Room+e98 Init/Wall/Door stores. Weighted-path/decay/other callbacks and transition admission remain separate owners.",
+  "functions": [
+    {
+      "address": "0x5cecc0",
+      "bytes": 8315,
+      "label": "Room.Init and variable decoration producer",
+      "codeSha256": "e26a703ef5f01247f6af5b4c9a74dec1e83b0b3063ea1025b0b4b2e0b231714f"
+    },
+    {
+      "address": "0x5c5070",
+      "bytes": 191,
+      "label": "Room.GridSpawnCell cost guard/factory/InitSeed",
+      "codeSha256": "cae0c19dfbe18de20cc5641e5c5a591772d8e394ed9bbe1daac798c361114f03"
+    },
+    {
+      "address": "0x5c2dd0",
+      "bytes": 47,
+      "label": "Local RNG bounded",
+      "codeSha256": "79c4d619a5baf7f5d9b3ce5bda1c752c6f03c2e260e538b20e89e6446eb604ae"
+    },
+    {
+      "address": "0x5717e0",
+      "bytes": 180,
+      "label": "Wall.Init collision and actual cost store",
+      "codeSha256": "8b57034315a26df0d7f7e92b8eb0ad7a7c8248981e5177fd11ee539853c8257e"
+    },
+    {
+      "address": "0x5628e0",
+      "bytes": 102,
+      "label": "Door.Init state and actual cost store",
+      "codeSha256": "3efd32496518497891291a740e3670a6161c62286f50725f533e7c7c62e63694"
+    }
+  ],
+  "gridBasePrerequisite": {
+    "sourceContracts": "../grid-records/source-contracts.json",
+    "immutablePublishedHead": "a2aa4a4227f2c4759cd15580be760e8215525f4f"
+  },
+  "pathCosts": {
+    "owner": "actual signed448 words at Room+e98, separate from authored GridCell.selector and collision classes",
+    "zeroing": "Room.Init5cef43..5cef9c zeroes0x700 bytes before grid admission",
+    "wallStore": "Wall.Init571801 stores1000 at actual cell; collision class4 is a separate store5717f3",
+    "doorStore": "Door.Init56290c stores1000 at actual cell;5628e0 maps state0/2 to1 at5628e8",
+    "runtimeApi": "Room.path_costs:Option<room_costs::RoomCosts>, owning[i32;448]; zeroed/get/store/entries/entries_mut. None means unsupported admission; no inferred map.",
+    "observation": "Whole448 live signed words are independently read at blocked actual Game checkpoints and compared as required fields. Later callback differences remain blocking."
+  },
+  "producer": {
+    "sourceOrder": "After enabled doors and ordered walls, before all-grid PostInit, RoomMusic and Game.Save",
+    "localSeed": "(descriptor.decorationSeed &0x7fffffff)+descriptor.listIndex with32-bit wrapping, constructor RNG35 at5cf493",
+    "normalShape0": "13x7 authored size is shape0; attempts=2*(bounded4 at5cf4a0+bounded5 at5cf4af)",
+    "largerShapes": "Source shapes1/2 addbounded9; shape3 addsbounded9+18 before doubling. Those shapes are outside this fresh leaf.",
+    "excludedBackdrops": "Actual Room+1ae0 values11 or13 skip this producer. Fresh normal Basement scope admits neither; gate independently checks actual context.",
+    "candidate": "5cf4f3 bounded(width*height); an occupied actual pointer skips with counter+1",
+    "nullCandidate": "5cf504 consumes one shared raw caller seed before5c5070 checks signedcost>900; rejected null attempts still counter+2",
+    "admittedObject": "5c50f5 factory kind1 constructs actual GridBase with two more shared raws, then variant0 and InitSeed(primary=caller raw), preserving actual constructor secondary",
+    "randomOwners": "The room-loop RNG35 is scratch/local, each actual GridBase has its separate default RNG owner, and all three raw birth draws use the single real shared MT. No cursor compensation."
+  },
+  "offlineDiagnosis": {
+    "scope": "Preserved PR56 six-case original bank only; does not validate new fields or a new runtime",
+    "reportSha256": "bc33119012ad573ddf3403ba09b7a44a50a7d9498074517bdad55ba6ab4bbf57",
+    "matchingWholeOccupancySets": 6,
+    "nativeNullCounts": [
+      88,
+      83,
+      88,
+      85,
+      86,
+      87
+    ],
+    "earlierWrongShapeResearch": "Incorrect shape1 extra draw and selector property were rejected; original failed ignored report retained."
+  },
+  "remaining": [
+    "Door post-Init updates and other derived cost stores are unaccepted unless independently implemented",
+    "Weighted actor reservations and third-full decay remain CI cost-consumer scope",
+    "Mixed transition admission, broader backdrops/shapes and PlayerItems Save/Load remain separate source gaps",
+    "Complete postrun shared MT remains diagnostic; actual grid seeds, semantic records, occupancy and whole live cost table are blocking"
+  ]
+}

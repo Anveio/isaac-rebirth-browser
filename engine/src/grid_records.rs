@@ -1,6 +1,6 @@
 //! Actual GridBase seed owners and the supported fresh-room record path.
 //! Geometry-only/unsupported objects retain no invented secondary seed.
-use crate::{grid::GridEntity, items::Rng, mt::Mt19937, Room};
+use crate::{grid::GridEntity, items::Rng, mt::Mt19937, room_costs::RoomCosts, Room};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
@@ -75,10 +75,38 @@ impl GridEntity {
         Ok(())
     }
 
-    /// InitSeed561040 changes only the primary owner. Supported derived Init
-    /// callbacks retain their existing modeled collision/animation profile.
-    fn init_seed(&mut self, primary: u32, game_update: u32) -> Result<(), String> {
+    fn init_supported(&mut self, costs: &mut RoomCosts, index: usize) -> Result<(), String> {
+        match self.kind {
+            15 => {
+                // Wall.Init5717e0 writes class4 and actual path cost1000.
+                self.collision_class = 4;
+                costs.store(index, 1000)?;
+            }
+            16 => {
+                // Door.Init5628e0 maps state0/2 to1, then stores1000. These
+                // actual stores are separate from later door animation updates.
+                if matches!(self.state, 0 | 2) {
+                    self.state = 1;
+                }
+                costs.store(index, 1000)?;
+            }
+            1 => {} // Supported Decoration.Init has no direct path-cost store.
+            _ => return Err("derived grid Init is outside supported ownership".into()),
+        }
+        Ok(())
+    }
+
+    /// InitSeed561040 changes only primary, invokes the actual supported
+    /// derived stores, then completes its initialized word and birth counter.
+    fn init_seed(
+        &mut self,
+        primary: u32,
+        game_update: u32,
+        costs: &mut RoomCosts,
+        index: usize,
+    ) -> Result<(), String> {
         self.spawn_seed = primary;
+        self.init_supported(costs, index)?;
         self.finish_init(game_update)
     }
 
@@ -101,10 +129,13 @@ impl GridEntity {
         shared: &mut Mt19937,
         record: &GridRecord,
         game_update: u32,
+        costs: &mut RoomCosts,
+        index: usize,
     ) -> Result<(), String> {
         if !matches!(record.kind, 1 | 15 | 16) {
             return Err("record factory kind is outside supported object ownership".into());
         }
+        costs.get(index)?;
         self.construct_owner(shared)?;
         self.kind = record.kind;
         self.variant = record.variant;
@@ -114,13 +145,15 @@ impl GridEntity {
         owner.secondary_seed = record.secondary_seed;
         owner.source_word14 = record.source_word14;
         owner.initialized = record.initialized;
+        self.init_supported(costs, index)?;
         self.finish_init(game_update)
     }
 }
 
 /// Supported fresh normal room admission5cecc0: authored groups first, enabled
 /// door slots ascending, top/bottom columns, then left/right rows. Additional
-/// room/effect decoration and other derived constructors remain unadmitted.
+/// normal shape0 decoration follows the walls. Other derived constructors and
+/// post-admission path-cost callbacks remain unadmitted.
 pub fn admit_fresh(room: &mut Room, shared: &mut Mt19937, game_update: u32) -> Result<(), String> {
     let descriptor = room
         .descriptor
@@ -128,6 +161,12 @@ pub fn admit_fresh(room: &mut Room, shared: &mut Mt19937, game_update: u32) -> R
         .ok_or("grid admission requires descriptor")?;
     if descriptor.template.room_type == 16 {
         return Err("special room wall replacements are outside fresh grid ownership".into());
+    }
+    if descriptor.asset_stage != 0 || descriptor.template.shape_index() != 0 {
+        return Err("ambient grid admission requires the fresh normal starting room".into());
+    }
+    if room.path_costs.is_some() {
+        return Err("fresh Room.Init path costs already admitted".into());
     }
     let spawns = room
         .spawns
@@ -139,9 +178,18 @@ pub fn admit_fresh(room: &mut Room, shared: &mut Mt19937, game_update: u32) -> R
         .ok_or("grid admission requires live geometry")?;
     let width = usize::from(grid.width);
     let height = usize::from(grid.height);
-    if width < 3 || height < 3 || width * height != grid.cells.len() {
+    if width < 3
+        || height < 3
+        || width * height != grid.cells.len()
+        || grid.cells.len() > crate::grid::MAX_GRID_CELLS
+    {
         return Err("grid admission dimensions disagree with actual cells".into());
     }
+    room.path_costs = Some(RoomCosts::zeroed());
+    let costs = room
+        .path_costs
+        .as_mut()
+        .expect("source Room.Init path costs");
     for selector in &spawns.selectors {
         // Source5ce858/5ce8b0 maps raw0 to GridDecoration1 and keeps variant.
         if selector.entity_type != 0 {
@@ -167,7 +215,12 @@ pub fn admit_fresh(room: &mut Room, shared: &mut Mt19937, game_update: u32) -> R
             source_owner: None,
         };
         entity.construct_owner(shared)?;
-        entity.init_seed(selector.spawn_seed, game_update)?;
+        entity.init_seed(
+            selector.spawn_seed,
+            game_update,
+            costs,
+            usize::from(selector.grid_index),
+        )?;
         cell.entity = Some(entity);
     }
     for slot in 0..8 {
@@ -182,29 +235,38 @@ pub fn admit_fresh(room: &mut Room, shared: &mut Mt19937, game_update: u32) -> R
             .ok_or("enabled source door mask lacks authored position")?;
         let column = ((door.world_position.x - 40.0) / 40.0) as usize;
         let row = ((door.world_position.y - 120.0) / 40.0) as usize;
+        let index = column + row * width;
         let entity = grid
             .cells
-            .get_mut(column + row * width)
+            .get_mut(index)
             .and_then(|cell| cell.entity.as_mut())
             .filter(|entity| entity.kind == 16)
             .ok_or("enabled door lacks actual door geometry")?;
         entity.construct_owner(shared)?;
         // Room5c5722 draws a fresh caller seed after actual construction.
-        entity.init_seed(shared.next_u32(), game_update)?;
+        entity.init_seed(shared.next_u32(), game_update, costs, index)?;
     }
     for column in 0..width {
-        admit_wall(grid, shared, column, game_update)?;
-        admit_wall(grid, shared, column + (height - 1) * width, game_update)?;
+        admit_wall(grid, costs, shared, column, game_update)?;
+        admit_wall(
+            grid,
+            costs,
+            shared,
+            column + (height - 1) * width,
+            game_update,
+        )?;
     }
     for row in 0..height - 1 {
-        admit_wall(grid, shared, row * width, game_update)?;
-        admit_wall(grid, shared, row * width + width - 1, game_update)?;
+        admit_wall(grid, costs, shared, row * width, game_update)?;
+        admit_wall(grid, costs, shared, row * width + width - 1, game_update)?;
     }
+    admit_ambient_shape0(grid, costs, shared, descriptor, game_update)?;
     Ok(())
 }
 
 fn admit_wall(
     grid: &mut crate::grid::GridDescriptor,
+    costs: &mut RoomCosts,
     shared: &mut Mt19937,
     index: usize,
     game_update: u32,
@@ -220,5 +282,45 @@ fn admit_wall(
     }
     entity.construct_owner(shared)?;
     // Room5c55bf overwrites only the constructor primary after its two draws.
-    entity.init_seed(shared.next_u32(), game_update)
+    entity.init_seed(shared.next_u32(), game_update, costs, index)
+}
+
+/// Room5cf473..5cf532: the normal shape0 producer owns an independent RNG35
+/// seeded from descriptor decoration+list index. Candidate occupancy, signed
+/// path costs and each admitted constructor decide actual shared draws.
+fn admit_ambient_shape0(
+    grid: &mut crate::grid::GridDescriptor,
+    costs: &mut RoomCosts,
+    shared: &mut Mt19937,
+    descriptor: &crate::floor::Descriptor,
+    game_update: u32,
+) -> Result<(), String> {
+    let seed = (descriptor.decoration_seed & 0x7fff_ffff).wrapping_add(descriptor.index as u32);
+    let mut rng = Rng::new(seed, [5, 9, 7]);
+    let attempts = 2 * (rng.bounded(4) + rng.bounded(5));
+    let mut attempt = 0;
+    while attempt < attempts {
+        let index = rng.bounded(grid.cells.len() as u32) as usize;
+        if grid.cells[index].entity.is_none() {
+            // Caller5cf504 consumes its seed before factory5c5070 checks cost.
+            // A rejected null-cell attempt still advances the loop twice.
+            let primary = shared.next_u32();
+            if costs.get(index)? <= 900 {
+                let mut entity = GridEntity {
+                    kind: 1,
+                    variant: 0,
+                    state: 0,
+                    collision_class: 0,
+                    spawn_seed: 0,
+                    source_owner: None,
+                };
+                entity.construct_owner(shared)?;
+                entity.init_seed(primary, game_update, costs, index)?;
+                grid.cells[index].entity = Some(entity);
+            }
+            attempt += 1;
+        }
+        attempt += 1;
+    }
+    Ok(())
 }

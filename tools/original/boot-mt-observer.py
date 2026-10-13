@@ -46,7 +46,7 @@ def observe(pid,context):
       words=struct.unpack('<7I',read(pointer+slot*0x1c,0x1c))
       level_samples.append({'roomRecord':room,'gridIndex':slot,'seed10':words[4],'seed18':words[6]})
      level_rows.append({'roomRecord':room,'gridIndex':struct.unpack('<i',read(game+0x10+room*0xf0,4))[0]})
-   saved_run=None;live_grid=None;saved_pools=None;current_samples=[];door_cell_records=[]
+   saved_run=None;live_grid=None;saved_pools=None;current_samples=[];door_cell_records=[];path_costs=None;path_cost_context=None
    if game and system_state==2:
     indices=[struct.unpack('<i',read(game+0x10+room*0xf0,4))[0] for room in range(135)]
     allocated=[room for room,index in enumerate(indices) if index>=0]
@@ -60,6 +60,8 @@ def observe(pid,context):
     descriptor=u64(room+8);current_record=u32(descriptor+4)
     if current_record>=135 or descriptor!=game+0x10+current_record*0xf0:raise ValueError('Current room descriptor identity is outside the source Level table')
     saved_run['currentRoomRecord']=current_record
+    path_costs=list(struct.unpack('<448i',read(room+0xe98,448*4)))
+    path_cost_context={'shapeIndex':u32(u64(descriptor+8)+0x3c),'backdropType':u32(room+0x1ae0)}
     level_grid=u64(descriptor+0x58);saved_grid=u64(saved+0xf8+current_record*0xf0+0x58)
     for index in [0,1,16,17,56,85,103,134,447]:
      level_words=struct.unpack('<7I',read(level_grid+index*0x1c,0x1c));saved_words=struct.unpack('<7I',read(saved_grid+index*0x1c,0x1c))
@@ -94,6 +96,6 @@ def observe(pid,context):
     'managerCounter':u32(manager+0x2efa0),'systemState':system_state,'systemSeededRun':bool(read(manager+0x11,1)[0]),
     'gameRunSeed':u32(game+0xa190) if game else None,'gameSeedText':seed_string(game+0xa1e0) if game and system_state==2 else None,
     'gameSeededRun':bool(read(game+0x10ecd0,1)[0]) if game and system_state==2 else None,
-    'stateSeed9688':u32(saved+0x9688),'gridSeedSamples':samples,'levelGridSeedSamples':level_samples,'savedRows':saved_rows,'levelRows':level_rows,'savedRun':saved_run,'liveGrid':live_grid,'savedItemPools':saved_pools,'currentRoomSeedSamples':current_samples,'doorCellRecords':door_cell_records,'title':title}
+    'stateSeed9688':u32(saved+0x9688),'gridSeedSamples':samples,'levelGridSeedSamples':level_samples,'savedRows':saved_rows,'levelRows':level_rows,'savedRun':saved_run,'liveGrid':live_grid,'savedItemPools':saved_pools,'currentRoomSeedSamples':current_samples,'doorCellRecords':door_cell_records,'pathCosts':path_costs,'pathCostContext':path_cost_context,'title':title}
   finally:os.close(fd)
  finally:os.kill(pid,signal.SIGCONT)
