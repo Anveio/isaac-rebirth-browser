@@ -97,12 +97,20 @@ synchronization pass. No unit/schema suites were added.
 
 ## Reference material
 
-The extracted base archive inventory contains 2,459 resource files: 21 XML,
+The original macOS base archive extraction contains 2,459 resource files: 21 XML,
 2,116 PNG, 82 OGG, 207 WAV, 17 OGV, 10 bitmap fonts, three room STB files and three
 text files. [The manifest](../references/isaac/manifest.json) records extraction
 provenance and hashes; [the Linux manifest](../references/isaac/linux/manifest.json)
 pins depot 250903 manifest `367036646469636831`. The installed build also has DLC,
 but the reference resources here use the eight base archives only.
+
+Supplementary extraction from those same pinned Linux base archives restores
+94 missing authored WAV samples and the secret-room music jingle. All 301 SFX
+and 83 music paths referenced by the XML now exist and are pinned individually
+in the resource manifest. [The audio extractor](../tools/foundation/extract-audio.py)
+records archive/decoder hashes and validates complete references with `--check`;
+`npm run assets:check` also requires this coverage. This establishes resource
+availability, while playback and event parity require live game evidence.
 
 Packed base assets contain more information than that unpacked inventory:
 
@@ -155,7 +163,7 @@ are not playable-content or parity percentages.
 | Pocket items | `pocketitems.xml`: 33 cards, eight runes and 28 pill effects | Effects, identification, per-run pill assignment and eligibility |
 | Rooms and stages | `stages.xml`: 13 stage sets; STB records include room weights, difficulty, doors, weighted spawn groups and interior dimensions | Floor graph generation, shape selection, entity spawning, persistence and room transitions |
 | Presentation | 21 backdrops, 223 costumes, 56 boss portraits, 25 boss color entries, 34 giantbook entries, nine nightmares, 19 cutscene entries | Layer timing, selection, camera, animation clocks, lighting and transitions |
-| Audio | 45 music tracks and 169 sound entries; 82 OGG and 207 WAV resources | Playback events, variants, loops, transitions, volume, pause and browser audio unlock |
+| Audio | 45 music tracks and 169 sound entries; all 83 OGG and 301 WAV references pinned | Playback events, variants, loops, transitions, volume, pause and browser audio unlock |
 | Metagame | 178 achievement entries, 20 challenge definitions and 203 baby definitions | Save state, unlock conditions, completion marks, challenge rules and co-op |
 
 `ambush.xml` and `fxlayers.xml` contain multiple top-level fragments. A single-root
