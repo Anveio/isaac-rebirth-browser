@@ -167,14 +167,31 @@ unaccepted. The registered large-room gate always launches both games fresh.
 [Large-room evidence](large-room-evidence.md) and
 [Chest evidence](chest-evidence.md) retain the distinct capture and recovery scopes.
 
-CI discovers all twenty-seven registered live suites and runs separate jobs with
+Ordinary Fire33 now admits real actors, drains queued Tear/Bomb damage,
+extinguishes to persistent HP1 and produces independently scheduled Ember66
+effects. Three fresh pairs execute those paths; 110,642 own-actor fields pass
+while 8,525 of 191,217 required paired fields remain red. The required Fire
+gate preserves shared-seed, cooldown, lifetime and physical differences.
+[Fire evidence](fireplace-evidence.md) records the bounded accepted scope.
+
+Fresh-run save admission now owns destination Clear, ItemPool copy, supported
+Room.Save mutation, all 135 ordinary Level rows and supported Player fields.
+The required SavedGame gate checks actual current-row seeds and complete live
+grid occupancy. Its corrected six-case comparison remains red on 115 required
+fields, with copy ownership passing separately. Occupied grid constructors,
+variable ambient decorations, post-acquisition Player state, load/continue and
+durable browser saves remain open. [SavedGame evidence](../references/isaac/foundation/saved-game/README.md)
+retains the original reports and the correction that made those gaps blocking.
+
+CI discovers all twenty-nine registered live suites and runs separate jobs with
 `fail-fast: false`, preserving each result and evidence. The first matrix run
 completed floors, weapons, boot MT and pickups successfully while retaining
 core and traversal failures. Build, typecheck, assets, matrix and strict Clippy
-pass at integrated checkpoint `4015374`, including the reviewed Level,
+pass at integrated checkpoint `7b71ea4`, including the reviewed Level,
 RoundWorm, item-selection, bomb-pickup, large-room geometry, Chest constructor
-bounded callback-history, first-acquisition and Troll conversion leaves. Its production artifact is
-`9a923754d3ce5335de53b87328fc0f18b6bad5e5b37c4f67ae90f5c1b02302b5`.
+bounded callback-history, first-acquisition, Troll conversion, Fire/Ember,
+shared health helpers and scoped save-ownership leaves. Its production artifact is
+`088cb786d920f22a91989a31fba240609b9db365662ec7bb34718e46469df0eb`.
 The continuing full 24-suite local run uses detached checkpoint `cb36018` and
 its separate immutable production artifact; later leaves do not inherit its results.
 This is a build checkpoint, not a fresh all-suite passing result.
