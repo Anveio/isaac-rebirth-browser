@@ -60,6 +60,7 @@ indexes each one's declared properties from source.
 | `phase` | update/interpolate/skip phases | a counter model; two player and one nonplayer update per two-phase window regardless of interpolation; exhaustion without mutation |
 | `actors` | actor admission order and room identities | an independent list model under random admit/retain/reset |
 | `floor` | Basement generation and room admission | determinism; footprints; reciprocal edge-adjacent neighbors; reachability; exactly one boss/super secret/shop/treasure (the source retry rule); retry continuity; every descriptor admits as a `Room` |
+| `grid` | grid queries and both ground-collision solvers on generated rooms | resolution never fails for bounded motion (including residual speeds whose squares underflow); previews keep velocity; correction moves only out along the contact normal; full nonplayer reflections leave the wall; blast candidate ordering and bounds |
 | `game` | the whole engine through public commands | per-step state invariants, per-command transition contracts, exact rejection semantics, tape replay, serialized-midpoint continuation, C ABI and shipped-WASM differentials |
 | `abi` | the exported C ABI the browser bridge drives | framing bounds, malformed requests, failed resets, pre-reset commands on a fresh thread |
 
@@ -67,8 +68,10 @@ The `game` driver ([driver.rs](../engine/dst/src/units/game/driver.rs)) only
 emits commands the browser bridge can send, plus adversarial variants of them
 (unsupported keys, malformed seed text, out-of-range volumes, over-budget
 ticks, stale music callbacks, key repeats and releases). Each case follows one
-persona (direct play, menu explorer or seeded run) and steers by the published
-state: shortest grid routes to doors and reachable pickups, demolishing rocks
+persona (direct play, menu explorer or seeded run), sends browser-style
+host-timestamped frames (with jitter, hitches and rollbacks) or controlled
+steps, and steers by the published state: shortest grid routes to doors and
+reachable pickups, a door-graph route toward the boss room, demolishing rocks
 with bombs, aiming at NPCs and pausing. This makes ordinary local budgets reach
 room traversal, combat, rock destruction and collection; Antithesis explores
 further from the same decisions.
@@ -113,13 +116,14 @@ the same change.
 
 ## Findings and engine refactors
 
-Each finding below was fixed in the engine and keeps a corpus regression tape
-that fails without the fix.
+Each finding below was fixed in the engine and keeps a guard that fails
+without the fix: a corpus regression tape, or a kernel property when a tape's
+trajectory cannot stay pinned while the engine evolves.
 
-| Regression tape | Finding | Engine change |
+| Guard | Finding | Engine change |
 | --- | --- | --- |
 | `regression-locked-character-start` | Confirming a locked or unimplemented character queued a run whose start failed inside the transactional tick, so every later tick failed. In the browser the throwing tick stops the frame loop: the game froze permanently. | Character confirmation validates the selection and rejects the input, like the existing hard-mode rejection ([lib.rs](../engine/src/lib.rs)). |
-| `regression-preview-collision-underflow` | A bomb coasting into a wall with a ~1e-26 residual velocity underflowed its f32 squared speed to zero in an interpolation preview, which the reflection guard reported as overflow, failing the tick. The preview never divides by that speed. | The zero-speed guard applies only to the full update, which divides by a reflected speed provably above 0.1 ([grid.rs](../engine/src/grid.rs)). |
+| `grid: nonplayer ground resolution never fails for bounded motion` | A bomb coasting into a wall with a ~1e-26 residual velocity underflowed its f32 squared speed to zero in an interpolation preview, which the reflection guard reported as overflow, failing the tick. The preview never divides by that speed. The original game tape stopped reaching the contact once main added the run-start hold; the `grid` unit now drives the solver directly. | The zero-speed guard applies only to the full update, which divides by a reflected speed provably above 0.1 ([grid.rs](../engine/src/grid.rs)). |
 | `regression-native-wasm-trig` | Native `f32::sin/cos` call the host C library, which disagrees with wasm32's libm on about 1.9% of inputs (77,065 of 3,992,186 sampled); a game tape diverged from the shipped WASM at step 665. | [fmath.rs](../engine/src/fmath.rs) routes all engine trigonometry through the `libm` crate, bit-identical to wasm32 std on every sampled input, so the shipped artifact is unchanged while native builds (DST, replay, floor tools) now agree with it. [clippy.toml](../engine/clippy.toml) rejects the host methods. |
 
 ## Running on Antithesis
