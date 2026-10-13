@@ -105,6 +105,8 @@ try {
         trace: await page.evaluate(() => window.game.trace()), expectedCommands }, null, 2) + '\n');
       assertSeededRun(seeded, scenario.code, scenario.runSeed);
       const observedRooms = new Set(), admissions = new Map(), states = [], comparisonFailures = [];
+      // Later evidence/transport failures must not erase field comparisons.
+      Object.assign(row, { sourceManifest, provenance, comparisonFailures });
       const compare = async label => {
         const phaseAssert = new Proxy(assert, { get(target, name) {
           if (typeof target[name] !== 'function') return target[name];
@@ -425,15 +427,16 @@ try {
           }
       }
       const trace = await page.evaluate(() => window.game.trace());
-      const archivePath = join(directory, 'browser-states.json.gz');
-      row.browserEvidence = await writeBrowserEvidence(archivePath, {states, trace, expectedCommands});
-      assertInputProvenance(trace, expectedCommands, scenario.runSeed);
+      row.visitedRooms = [...observedRooms];
       row.traceHistory = { truncated: trace.truncated, inputTraceTruncated: trace.inputTraceTruncated,
         stateHistoryTruncated: trace.stateHistoryTruncated, retainedStates: trace.states.length,
         stateEncodedBytes: trace.stateEncodedBytes, maxStateEncodedBytes: trace.maxStateEncodedBytes,
         backendEvents: trace.backendEvents.length, retainedCallbackStates: trace.backendEvents.filter(event => event.state).length,
         backendStateTruncated: trace.backendStateTruncated, backendStateTruncationReason: trace.backendStateTruncationReason,
         backendStateEncodedBytes: trace.backendStateEncodedBytes, maxBackendStateEncodedBytes: trace.maxBackendStateEncodedBytes };
+      const archivePath = join(directory, 'browser-states.json.gz');
+      row.browserEvidence = await writeBrowserEvidence(archivePath, {states, trace, expectedCommands});
+      assertInputProvenance(trace, expectedCommands, scenario.runSeed);
       assert.equal(trace.backendStateTruncated, false, 'Every actual callback state must fit its explicit bounded history');
       assert.ok(trace.backendEvents.every(event => event.state?.schema === 1),
         'Every actual asynchronous callback must retain its own complete state; phase snapshots cannot replace it');
