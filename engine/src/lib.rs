@@ -1076,6 +1076,34 @@ impl Game {
     fn held(&self, code: &str) -> bool {
         self.state.pressed.contains(code)
     }
+    /// The supported free regular callback is shared by ordinary full
+    /// contacts and the actual Room.Update admission tail.
+    fn collect_regular_pickup_at(&mut self, index: usize) {
+        let pickup = &mut self.state.room.pickups[index];
+        if pickup.touches(&self.state.player) && pickup.try_collect(&mut self.state.inventory) {
+            // Collect504480 routes key ->504720 and bomb ->5046d0
+            // after inventory mutation, before the System increment.
+            let sound = match pickup.variant {
+                30 => Some((58, 0.85)),
+                40 => Some((201, 1.0)),
+                _ => None,
+            };
+            if let Some((id, volume)) = sound {
+                self.state.audio.admit(
+                    &mut self.state.boot_lifecycle.shared,
+                    self.state.system_clock.system_counter - 1,
+                    audio::SoundRequest {
+                        id,
+                        volume,
+                        delay: 2,
+                        looping: false,
+                        pitch: 1.0,
+                    },
+                );
+            }
+        }
+    }
+
     /// The native list admits Player first, then supported selectors in their
     /// authored order. Persist that order with the room rather than regrouping
     /// NPCs and pickups when rebuilding the shared actor scheduler.
@@ -1355,10 +1383,24 @@ impl Game {
                     // The native Room.Update admission tail advances the new
                     // actors once at the unchanged Game clock. Other saved
                     // families keep their existing reconstruction owners.
-                    for id in restored_pickups {
+                    for id in restored_pickups.iter().copied() {
                         self.advance_pickup(id, phase)?;
                     }
                     let candidates = pickups::contact_candidates(&self.state)?;
+                    //454a0a dispatches Player/PU callbacks before453340's
+                    //PU self-pairs. Disabled transition controls do not veto
+                    //the fresh living Player's ordinary pickup callback.
+                    for id in restored_pickups {
+                        if let Some(index) = self
+                            .state
+                            .room
+                            .pickups
+                            .iter()
+                            .position(|pickup| pickup.id == id)
+                        {
+                            self.collect_regular_pickup_at(index);
+                        }
+                    }
                     pickups::nonplayer_contacts(&mut self.state, candidates)?;
                     pickups::full_grid_contacts(&mut self.state)?;
                     self.state.room.pickups.retain(|pickup| !pickup.removed);
@@ -1465,31 +1507,7 @@ impl Game {
                     chests::player_contact(&mut self.state, index)?;
                     continue;
                 }
-                let pickup = &mut self.state.room.pickups[index];
-                if pickup.touches(&self.state.player)
-                    && pickup.try_collect(&mut self.state.inventory)
-                {
-                    // Collect504480 routes key ->504720 and bomb ->5046d0
-                    // after inventory mutation, before the System increment.
-                    let sound = match pickup.variant {
-                        30 => Some((58, 0.85)),
-                        40 => Some((201, 1.0)),
-                        _ => None,
-                    };
-                    if let Some((id, volume)) = sound {
-                        self.state.audio.admit(
-                            &mut self.state.boot_lifecycle.shared,
-                            self.state.system_clock.system_counter - 1,
-                            audio::SoundRequest {
-                                id,
-                                volume,
-                                delay: 2,
-                                looping: false,
-                                pitch: 1.0,
-                            },
-                        );
-                    }
-                }
+                self.collect_regular_pickup_at(index);
             }
             pickups::nonplayer_contacts(&mut self.state, pickup_contacts)?;
             pickups::full_grid_contacts(&mut self.state)?;
