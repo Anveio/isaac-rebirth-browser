@@ -1,0 +1,714 @@
+{
+  "schema": 1,
+  "status": "fail",
+  "skipped": 0,
+  "selected": 4,
+  "scope": "Fresh ordinary Isaac, authored13x7 curse and first-floor free treasure doors; recorded W0L0LYYM bomb-driven admission and raw1400 fire admission remain mandatory. Exact room/player/HP/immunity/visible door phases, complete authored groups and return metadata; actor/item callbacks and pixels remain separate.",
+  "exclusions": [
+    "Undiscovered native door variant6",
+    "Actor behavior and item callbacks; NPC244 metadata only, raw1400 fire admission remains a required regression",
+    "Flight/items and other door policies",
+    "Complete rendered pixels"
+  ],
+  "production": {
+    "sha256": "db84333435eb5dbff62e67532327995055b3e04260c2f6664c9b21747ce278f5",
+    "files": 834,
+    "source": "/workspace/isaac-worktrees/inventory/dist",
+    "scope": "Immutable snapshot of production build bytes; source/native replay equality is checked separately"
+  },
+  "graphics": {
+    "requestedProfile": "mesa",
+    "actualProfile": "mesa",
+    "renderer": "ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL ES 3.2 Mesa 25.0.7-2+deb13u1)",
+    "vendor": "Google Inc. (Mesa)",
+    "version": "OpenGL ES 3.0 (ANGLE 2.1 git hash: unknown hash)",
+    "displayType": "ANGLE_OPENGL_EGL",
+    "devices": [
+      {
+        "vendorId": 0,
+        "deviceId": 0,
+        "vendorString": "Google Inc. (Mesa)",
+        "deviceString": "ANGLE (Mesa, llvmpipe (LLVM 19.1.7 256 bits), OpenGL ES 3.2 Mesa 25.0.7-2+deb13u1)",
+        "driverVendor": "Mesa",
+        "driverVersion": "25.0.7"
+      }
+    ],
+    "observedFrom": "Chromium SystemInfo.getInfo",
+    "scope": "Observed Chromium graphics backend; shader/pixel equality still requires the original reference comparisons"
+  },
+  "cases": [
+    {
+      "seed": "63B9JKF8",
+      "status": "pass",
+      "comparedPhases": 120,
+      "sourceManifest": "/workspace/isaac-worktrees/inventory/.cache/e2e/treasure-coins/retained-doors-live/63B9JKF8/original/manifest.json",
+      "provenance": {
+        "status": "pass",
+        "nativeBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+        "manifestSha256": "54613a5ce6f7c4436d3bc815a2ed3e84789198131dac7bf8c2389ae6eb1dfd83",
+        "originalLogSha256": "73ee8917409f2842123427e2299f37e8b6a345726049273f6e9072b48bcb21d5",
+        "observations": 120,
+        "authoredGroups": {
+          "4": [
+            {
+              "groupIndex": 0,
+              "x": 5,
+              "y": 3,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 50,
+                  "subtype": 0,
+                  "weight": 1
+                }
+              ]
+            },
+            {
+              "groupIndex": 1,
+              "x": 7,
+              "y": 3,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 50,
+                  "subtype": 0,
+                  "weight": 1
+                }
+              ]
+            }
+          ],
+          "6": [
+            {
+              "groupIndex": 0,
+              "x": 10,
+              "y": 2,
+              "entries": [
+                {
+                  "type": 0,
+                  "variant": 20,
+                  "subtype": 0,
+                  "weight": 1
+                }
+              ]
+            },
+            {
+              "groupIndex": 1,
+              "x": 9,
+              "y": 4,
+              "entries": [
+                {
+                  "type": 0,
+                  "variant": 20,
+                  "subtype": 0,
+                  "weight": 1
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "visitedRooms": [
+        6,
+        4
+      ],
+      "comparisonFailures": [],
+      "inputProvenance": {
+        "status": "pass",
+        "commands": 143,
+        "initialSeed": 3920399321,
+        "bootEpochSeed": 0,
+        "manualSeed": "63B9JKF8"
+      },
+      "traceHistory": {
+        "truncated": false,
+        "inputTraceTruncated": false,
+        "stateHistoryTruncated": false,
+        "retainedStates": 144,
+        "stateEncodedBytes": 10584425,
+        "maxStateEncodedBytes": 33554432
+      }
+    },
+    {
+      "seed": "W0L0LYYM",
+      "status": "fail",
+      "comparedPhases": 144,
+      "sourceManifest": "/workspace/isaac-worktrees/inventory/.cache/e2e/treasure-coins/retained-doors-live/W0L0LYYM/original/manifest.json",
+      "provenance": {
+        "status": "pass",
+        "nativeBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+        "manifestSha256": "24507637da87e2d89128d231c0be15f5632ee8a6476e346b0a1716d1da29de38",
+        "originalLogSha256": "a1a4cbf0141337287b2179e064c480d04a787f78a520db301f2241581fab0433",
+        "observations": 144,
+        "authoredGroups": {
+          "3": [
+            {
+              "groupIndex": 0,
+              "x": 3,
+              "y": 0,
+              "entries": [
+                {
+                  "type": 1000,
+                  "variant": 0,
+                  "subtype": 0,
+                  "weight": 1
+                }
+              ]
+            },
+            {
+              "groupIndex": 1,
+              "x": 4,
+              "y": 0,
+              "entries": [
+                {
+                  "type": 1000,
+                  "variant": 0,
+                  "subtype": 0,
+                  "weight": 1
+                }
+              ]
+            },
+            {
+              "groupIndex": 2,
+              "x": 5,
+              "y": 0,
+              "entries": [
+                {
+                  "type": 1000,
+                  "variant": 0,
+                  "subtype": 0,
+                  "weight": 1
+                }
+              ]
+            },
+            {
+              "groupIndex": 3,
+              "x": 6,
+              "y": 0,
+              "entries": [
+                {
+                  "type": 1000,
+                  "variant": 0,
+                  "subtype": 0,
+                  "weight": 1
+                }
+              ]
+            },
+            {
+              "groupIndex": 4,
+              "x": 7,
+              "y": 0,
+              "entries": [
+                {
+                  "type": 1000,
+                  "variant": 0,
+                  "subtype": 0,
+                  "weight": 1
+                }
+              ]
+            },
+            {
+              "groupIndex": 5,
+              "x": 8,
+              "y": 0,
+              "entries": [
+                {
+                  "type": 1000,
+                  "variant": 0,
+                  "subtype": 0,
+                  "weight": 1
+                }
+              ]
+            },
+            {
+              "groupIndex": 6,
+              "x": 9,
+              "y": 0,
+              "entries": [
+                {
+                  "type": 1000,
+                  "variant": 0,
+                  "subtype": 0,
+                  "weight": 1
+                }
+              ]
+            },
+            {
+              "groupIndex": 7,
+              "x": 3,
+              "y": 1,
+              "entries": [
+                {
+                  "type": 1000,
+                  "variant": 0,
+                  "subtype": 0,
+                  "weight": 1
+                }
+              ]
+            },
+            {
+              "groupIndex": 8,
+              "x": 4,
+              "y": 1,
+              "entries": [
+                {
+                  "type": 1000,
+                  "variant": 0,
+                  "subtype": 0,
+                  "weight": 1
+                }
+              ]
+            },
+            {
+              "groupIndex": 9,
+              "x": 5,
+              "y": 1,
+              "entries": [
+                {
+                  "type": 1002,
+                  "variant": 0,
+                  "subtype": 0,
+                  "weight": 1
+                }
+              ]
+            },
+            {
+              "groupIndex": 10,
+              "x": 6,
+              "y": 1,
+              "entries": [
+                {
+                  "type": 1400,
+                  "variant": 0,
+                  "subtype": 0,
+                  "weight": 1
+                }
+              ]
+            },
+            {
+              "groupIndex": 11,
+              "x": 7,
+              "y": 1,
+              "entries": [
+                {
+                  "type": 1002,
+                  "variant": 0,
+                  "subtype": 0,
+                  "weight": 1
+                }
+              ]
+            },
+            {
+              "groupIndex": 12,
+              "x": 8,
+              "y": 1,
+              "entries": [
+                {
+                  "type": 1000,
+                  "variant": 0,
+                  "subtype": 0,
+                  "weight": 1
+                }
+              ]
+            },
+            {
+              "groupIndex": 13,
+              "x": 9,
+              "y": 1,
+              "entries": [
+                {
+                  "type": 1000,
+                  "variant": 0,
+                  "subtype": 0,
+                  "weight": 1
+                }
+              ]
+            },
+            {
+              "groupIndex": 14,
+              "x": 11,
+              "y": 1,
+              "entries": [
+                {
+                  "type": 0,
+                  "variant": 10,
+                  "subtype": 0,
+                  "weight": 1
+                }
+              ]
+            },
+            {
+              "groupIndex": 15,
+              "x": 3,
+              "y": 2,
+              "entries": [
+                {
+                  "type": 1002,
+                  "variant": 0,
+                  "subtype": 0,
+                  "weight": 1
+                }
+              ]
+            },
+            {
+              "groupIndex": 16,
+              "x": 4,
+              "y": 2,
+              "entries": [
+                {
+                  "type": 1400,
+                  "variant": 0,
+                  "subtype": 0,
+                  "weight": 1
+                }
+              ]
+            },
+            {
+              "groupIndex": 17,
+              "x": 8,
+              "y": 2,
+              "entries": [
+                {
+                  "type": 1400,
+                  "variant": 0,
+                  "subtype": 0,
+                  "weight": 1
+                }
+              ]
+            },
+            {
+              "groupIndex": 18,
+              "x": 9,
+              "y": 2,
+              "entries": [
+                {
+                  "type": 1002,
+                  "variant": 0,
+                  "subtype": 0,
+                  "weight": 1
+                }
+              ]
+            },
+            {
+              "groupIndex": 19,
+              "x": 6,
+              "y": 3,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 100,
+                  "subtype": 0,
+                  "weight": 1
+                }
+              ]
+            },
+            {
+              "groupIndex": 20,
+              "x": 11,
+              "y": 4,
+              "entries": [
+                {
+                  "type": 0,
+                  "variant": 10,
+                  "subtype": 0,
+                  "weight": 1
+                }
+              ]
+            }
+          ],
+          "6": [
+            {
+              "groupIndex": 0,
+              "x": 10,
+              "y": 2,
+              "entries": [
+                {
+                  "type": 0,
+                  "variant": 20,
+                  "subtype": 0,
+                  "weight": 1
+                }
+              ]
+            },
+            {
+              "groupIndex": 1,
+              "x": 9,
+              "y": 4,
+              "entries": [
+                {
+                  "type": 0,
+                  "variant": 20,
+                  "subtype": 0,
+                  "weight": 1
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "visitedRooms": [
+        6,
+        3
+      ],
+      "comparisonFailures": [
+        {
+          "label": "bomb-door-132",
+          "error": "AssertionError [ERR_ASSERTION]: bomb-door-132:complete supported native admission multiset with subtype/seed/position\n+ actual - expected\n\n+ []\n- [\n-   '[33,0,0,2659702953,400,240]',\n-   '[33,0,1,3393345672,320,200]',\n-   '[33,0,2,4165951145,240,240]'\n- ]\n"
+        }
+      ],
+      "inputProvenance": {
+        "status": "pass",
+        "commands": 184,
+        "initialSeed": 2591693487,
+        "bootEpochSeed": 0,
+        "manualSeed": "W0L0LYYM"
+      },
+      "traceHistory": {
+        "truncated": false,
+        "inputTraceTruncated": false,
+        "stateHistoryTruncated": false,
+        "retainedStates": 185,
+        "stateEncodedBytes": 11627651,
+        "maxStateEncodedBytes": 33554432
+      }
+    },
+    {
+      "seed": "ZPN8KWAC",
+      "status": "pass",
+      "comparedPhases": 174,
+      "sourceManifest": "/workspace/isaac-worktrees/inventory/.cache/e2e/treasure-coins/retained-doors-live/ZPN8KWAC/original/manifest.json",
+      "provenance": {
+        "status": "pass",
+        "nativeBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+        "manifestSha256": "d477573d8a790fb2d4b6ea291ee5e98d1435ff6ac035bf5de79635efadb78d4f",
+        "originalLogSha256": "e7370ac8c5a1dfb089833b5bf5fb7e4b41ebe7ac5492b8e429145587b1ad88e8",
+        "observations": 174,
+        "authoredGroups": {
+          "4": [
+            {
+              "groupIndex": 0,
+              "x": 4,
+              "y": 3,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 50,
+                  "subtype": 0,
+                  "weight": 1
+                }
+              ]
+            },
+            {
+              "groupIndex": 1,
+              "x": 8,
+              "y": 3,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 50,
+                  "subtype": 0,
+                  "weight": 1
+                }
+              ]
+            }
+          ],
+          "6": [
+            {
+              "groupIndex": 0,
+              "x": 10,
+              "y": 2,
+              "entries": [
+                {
+                  "type": 0,
+                  "variant": 20,
+                  "subtype": 0,
+                  "weight": 1
+                }
+              ]
+            },
+            {
+              "groupIndex": 1,
+              "x": 9,
+              "y": 4,
+              "entries": [
+                {
+                  "type": 0,
+                  "variant": 20,
+                  "subtype": 0,
+                  "weight": 1
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "visitedRooms": [
+        6,
+        4
+      ],
+      "comparisonFailures": [],
+      "inputProvenance": {
+        "status": "pass",
+        "commands": 201,
+        "initialSeed": 2763430709,
+        "bootEpochSeed": 0,
+        "manualSeed": "ZPN8KWAC"
+      },
+      "traceHistory": {
+        "truncated": false,
+        "inputTraceTruncated": false,
+        "stateHistoryTruncated": false,
+        "retainedStates": 202,
+        "stateEncodedBytes": 14077645,
+        "maxStateEncodedBytes": 33554432
+      }
+    },
+    {
+      "seed": "N90GNCJW",
+      "status": "pass",
+      "comparedPhases": 175,
+      "sourceManifest": "/workspace/isaac-worktrees/inventory/.cache/e2e/treasure-coins/retained-doors-live/N90GNCJW/original/manifest.json",
+      "provenance": {
+        "status": "pass",
+        "nativeBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+        "manifestSha256": "f3731d7b9761b8f2c6781c4ba56e22d9c462671b1cda4ec396967def812e4439",
+        "originalLogSha256": "40b6f5432134c6f8db4a370cc2b331456fcabb6a8f2b8601b788be254399035e",
+        "observations": 175,
+        "authoredGroups": {
+          "3": [
+            {
+              "groupIndex": 0,
+              "x": 11,
+              "y": 1,
+              "entries": [
+                {
+                  "type": 0,
+                  "variant": 10,
+                  "subtype": 0,
+                  "weight": 1
+                }
+              ]
+            },
+            {
+              "groupIndex": 1,
+              "x": 4,
+              "y": 3,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 20,
+                  "subtype": 1,
+                  "weight": 1
+                }
+              ]
+            },
+            {
+              "groupIndex": 2,
+              "x": 6,
+              "y": 3,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 100,
+                  "subtype": 0,
+                  "weight": 1
+                }
+              ]
+            },
+            {
+              "groupIndex": 3,
+              "x": 8,
+              "y": 3,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 20,
+                  "subtype": 1,
+                  "weight": 1
+                }
+              ]
+            },
+            {
+              "groupIndex": 4,
+              "x": 11,
+              "y": 4,
+              "entries": [
+                {
+                  "type": 0,
+                  "variant": 10,
+                  "subtype": 0,
+                  "weight": 1
+                }
+              ]
+            }
+          ],
+          "6": [
+            {
+              "groupIndex": 0,
+              "x": 10,
+              "y": 2,
+              "entries": [
+                {
+                  "type": 0,
+                  "variant": 20,
+                  "subtype": 0,
+                  "weight": 1
+                }
+              ]
+            },
+            {
+              "groupIndex": 1,
+              "x": 9,
+              "y": 4,
+              "entries": [
+                {
+                  "type": 0,
+                  "variant": 20,
+                  "subtype": 0,
+                  "weight": 1
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "visitedRooms": [
+        6,
+        3
+      ],
+      "comparisonFailures": [],
+      "inputProvenance": {
+        "status": "pass",
+        "commands": 198,
+        "initialSeed": 1745033716,
+        "bootEpochSeed": 0,
+        "manualSeed": "N90GNCJW"
+      },
+      "traceHistory": {
+        "truncated": false,
+        "inputTraceTruncated": false,
+        "stateHistoryTruncated": false,
+        "retainedStates": 199,
+        "stateEncodedBytes": 14159774,
+        "maxStateEncodedBytes": 33554432
+      }
+    }
+  ],
+  "proofGitHead": "1c543d5",
+  "proofBaseGitHead": "e63723a",
+  "proofScope": "Fresh original/production four-case retained door cohort on the pre-Music composition. This proof is not relabelled as a later Music-helper result.",
+  "gateSourcesAfterRun": {
+    "tools/e2e/doors.mjs": "db9c650c4d4dafbe5c4f817a562416827b06918d93d463e168492df363f2350b",
+    "tools/e2e/traversal.mjs": "49cc2b68064021991a295eb5333c2d0452cd7da4ad9643f3f047784fde53571a",
+    "tools/original/door-scenarios.py": "1060ada62ecd4bc50058c9b6baa9f17da2ed22d968dac148cabffd5d3cf2489e",
+    "tools/original/foundation-traversal-scenarios.py": "3a907c3a8d66a3b9f5142cb60d0d0c932643cc5f4618601a17b10a966f935e4b",
+    "tools/original/foundation-traversal-observe.py": "a05fd4ec0cc39757867aea2c04886a6336cdd488623d4368090ea44d27644114",
+    "tools/original/foundation-pickup-observe.py": "db3fb995087575a039b77c8b87e07bbaa3cdef208adea166b8de07055754b90b",
+    "tools/original/foundation-clock-run.py": "b79997f1fdc983a6e6fac74d87c24d2036ea956021fa944d1c0bd7f04e15a243",
+    "tools/original/foundation-clock-verify.py": "c488100a187b44803c06374535715eaa5a7cde9d4513f6e866e090367d4f2054",
+    "tools/original/state-observer.py": "58e3b510abbe5ff57f05844efbdf764e2a02530cda4fa99f538d886d258af6f1",
+    "tools/original/with-display.sh": "af469210e803786a60d8632c28a6f2da77bc8ab02cc06be50016ddb25e95b848",
+    "tools/foundation/verify.mjs": "d88d303bab69ee608fd9390e71683832d76279d21117695b96a21699f3726c08",
+    "web/trace.ts": "e6a92aa76585548546571c1eb05cdf44d7c9772ded14ef11f0f05144fb335961"
+  },
+  "gateSourcesScope": "After-run hashes of unchanged checked-in gate files; this older shared door driver did not record an independent before-run source map."
+}

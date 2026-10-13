@@ -953,8 +953,9 @@ impl Game {
                     id,
                 });
                 npcs.push(npc);
-            } else if room_type == 1 || (room_type == 7 && selector.variant == 30) {
-                // Secret-room regular keys keep free-key Init/Collect rules.
+            } else if room_type == 1 || matches!((room_type, selector.variant), (4, 20) | (7, 30)) {
+                // Direct treasure-room coins and secret-room regular keys
+                // keep free pickup Init/Collect rules (no shop placeholder).
                 // Other special contexts retain typed selectors until their
                 // prices, pools and replacements are admitted.
                 if let Some(pickup) = Pickup::from_selector(next, selector, true)? {
