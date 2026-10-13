@@ -161,11 +161,18 @@ match 1,843 selected geometry, player, grid, door and minimap phases across
 three source tapes. The geometry leaf retains three required missing Chest50
 actors. The following concrete Chest constructor leaf passes those same 1,843
 phases in a fresh actual browser, including identity, closed subtype,
-Appear/Idle clocks, radius and collision classes. Persistent Chest RNG words
-remain statically mapped; opening, loot, camera/backdrop and save/load remain
+Appear/Idle clocks, radius and collision classes. The following CameraStyle1
+leaf passes 1,843 fresh paired geometry, motion and camera-bound phases, nine
+actual viewport checks and complete native histories on all 1,545 tall-room
+phases. Ordinary-room histories were not observed. Interior scroll differences
+remain diagnostics; complete backdrop/pixel parity remains open. Persistent
+Chest RNG words remain statically mapped; opening, loot and save/load remain
 unaccepted. The registered large-room gate always launches both games fresh.
 [Large-room evidence](large-room-evidence.md) and
 [Chest evidence](chest-evidence.md) retain the distinct capture and recovery scopes.
+[Camera evidence](large-room-camera.md) records the separate fresh scope.
+The authored Familiar catalogue includes Leech, Poof and Heart resources;
+resource admission does not establish Familiar gameplay behavior.
 
 Ordinary Fire33 now admits real actors, drains queued Tear/Bomb damage,
 extinguishes to persistent HP1 and produces independently scheduled Ember66
@@ -187,13 +194,19 @@ CI discovers all twenty-nine registered live suites and runs separate jobs with
 `fail-fast: false`, preserving each result and evidence. The first matrix run
 completed floors, weapons, boot MT and pickups successfully while retaining
 core and traversal failures. Build, typecheck, assets, matrix and strict Clippy
-pass at integrated checkpoint `7b71ea4`, including the reviewed Level,
+pass at integrated checkpoint `472b154`, including the reviewed Level,
 RoundWorm, item-selection, bomb-pickup, large-room geometry, Chest constructor
 bounded callback-history, first-acquisition, Troll conversion, Fire/Ember,
-shared health helpers and scoped save-ownership leaves. Its production artifact is
-`088cb786d920f22a91989a31fba240609b9db365662ec7bb34718e46469df0eb`.
-The continuing full 24-suite local run uses detached checkpoint `cb36018` and
-its separate immutable production artifact; later leaves do not inherit its results.
+shared health helpers, scoped save ownership, default tall-room camera and
+authored Familiar resource leaves. Its production artifact is
+`01bac4e3fd8e11ecfd400ce205a29e939acba46dfa8d560a3440f9ccbf4c718e`.
+The full 24-suite local run at detached checkpoint `cb36018` finished with
+14 passing suites and five completed gameplay failures. Floor setup failed before capture;
+disk exhaustion interrupted RoundWorm grading and prevented the final Level,
+item and bomb-pickup suites from capturing. Partial RoundWorm comparisons also
+retain gameplay failures. These environmental attempts remain recorded, with
+separate corrected reruns planned. This run uses its own immutable production
+artifact; later leaves do not inherit its results.
 This is a build checkpoint, not a fresh all-suite passing result.
 Complete gameplay RNG, other floors/characters, persistence, later music
 callers/cutscenes and whole-game parity remain open. GitHub required-check
