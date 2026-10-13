@@ -32,7 +32,9 @@
     "proofArtifactSha256": "ea9bf33bca18cb662762ed93277f0e5027635a74628bb2826fcdc2dd229dabf4",
     "proofGitHead": "d56b70045e249be314f75edf6e625b6cc9651d1e",
     "proofBranch": "codex/natural-key-proof",
-    "proofScope": "The1690-phase four-case proof is immutable on the pre-NPC restack artifact; fresh composite verification is recorded separately."
+    "proofScope": "The1690-phase four-case proof is immutable on the pre-NPC restack artifact; fresh composite verification is recorded separately.",
+    "compositeProof": "npc-composite-live-report.json",
+    "compositeResult": "Fresh JFphase0 plus recorded OSFJRF6L1J phase1 pass845 exact presentations after preserving mixed NPC/pickup authored admission on d212a3b."
   },
   "unaccepted": [
     "Golden key flag/spending and modified-item subtype selection",
