@@ -101,10 +101,17 @@ try {
         '--output', join(directory, 'original')], {cwd: ROOT, timeout: 900000, maxBuffer: 2 * 1024 * 1024});
       const nativePath = join(directory, 'original/manifest.json'); nativeBytes = await readFile(nativePath);
       const native = JSON.parse(nativeBytes); assert.equal(native.status, 'pass'); assert.deepEqual(native.failures, []);
+      assert.deepEqual(native.tape, JSON.parse(tape), 'Original must execute the independently requested complete public tape');
+      assert.equal(native.seed, item.code); assert.equal(native.seedValue, item.seedValue);
+      assert.equal(native.bootEpochSeed, scenarios.bootEpochSeed);
+      assert.equal(native.observedState.seed.replaceAll(' ', ''), item.code);
+      assert.equal(native.observedState.seedValue, item.seedValue);
       const transport = JSON.parse((await run('python3', ['tools/original/familiar-scenarios.py', '--validate-original', nativePath], {cwd: ROOT})).stdout);
       assert.equal(transport.status, 'pass'); assert.deepEqual(transport.failures, []);
       const baseline = native.debugObservations.find(row => row.context.label === 'gameplay-start');
       assert.equal(baseline?.observation.status, 'pass');
+      assert.equal(baseline.context.seedValue, item.seedValue);
+      assert.equal(baseline.context.publicLogState.seedValue, item.seedValue);
       const rows = new Map(native.debugObservations.map(row => [row.context.presentedFrame, row]));
       page = await browser.newPage(); const errors = [], states = [];
       page.on('pageerror', error => errors.push(String(error)));
@@ -128,10 +135,17 @@ try {
         assert.equal(source.status, 'pass'); assert.equal(source.memoryWritten, false);
         assert.equal(source.executableMappingsRead, false); assert.equal(source.nativeBinarySha256, PIN);
         assert.equal(source.gamePresent, true); assert.equal(source.systemState, 2);
+        equal(source.actorOrder.length, source.actorCount, 'complete counted native actor list', tick);
         for (const check of compareRoomContext(state, row)) equal(check.actual, check.expected, check.field, tick);
         equal(state.systemClock.systemCounter % 2, source.systemCounter % 2, 'source full/fast phase', tick);
         equal(source.players.length, 1, 'single normal Isaac owner', tick);
         const owner = state.playerItems, nativeOwner = source.players[0];
+        const nativePlayer = source.world.players.find(actor => actor.type === 1 && actor.variant === 0);
+        assert.ok(nativePlayer, 'Actual original normal Isaac actor is required');
+        equal([f32((state.player.x - 32) / 0.65), f32((state.player.y + 46) / 0.65)], nativePlayer.position,
+          'actual Player world pose through grant and Familiar contacts', tick);
+        equal([f32(state.player.vx / 0.65), f32(state.player.vy / 0.65)], nativePlayer.velocity,
+          'actual Player stored velocity through grant and Familiar contacts', tick);
         equal(owner.ownedCounts, nativeOwner.ownedCounts, 'all347 permanent counts', tick);
         equal(owner.temporaryCollectibles, nativeOwner.temporaryCollectibles, 'actual temporary owner records', tick);
         equal(owner.queuedId, nativeOwner.queuedId, 'actual deferred queue', tick);

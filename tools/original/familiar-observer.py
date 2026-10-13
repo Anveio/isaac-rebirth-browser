@@ -113,12 +113,15 @@ def observe(pid, context):
                 if count > 512:
                     raise ValueError('Actor list outside bound')
                 pointers = list(struct.unpack('<' + 'Q' * count, read(u64(manager + 0x68), count * 8))) if count else []
+                if any(pointer == 0 for pointer in pointers) or len(set(pointers)) != count:
+                    raise ValueError('Counted active actor list contains null or duplicate pointers')
+                report['actorCount'] = count
                 report['actorOrder'] = [{'type': u32(pointer + 0x10), 'variant': u32(pointer + 0x14),
                     'subtype': u32(pointer + 0x18), 'spawnSeed': u32(pointer + 0x7d0), 'sequenceId': u32(pointer + 8)}
-                    for pointer in pointers if pointer]
+                    for pointer in pointers]
                 report['actors'] = []
                 for pointer in pointers:
-                    if not pointer or u32(pointer + 0x10) not in (3, 1000):
+                    if u32(pointer + 0x10) not in (3, 1000):
                         continue
                     kind = u32(pointer + 0x10)
                     raw = read(pointer, 0xfcc if kind == 3 else 0x81c)
