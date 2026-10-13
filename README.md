@@ -36,6 +36,7 @@ npm run check                         # Build and gate fresh original/browser ga
 npm run test:e2e                      # Run every registered live suite; retain every result
 npm run test:e2e:paired               # Six contrived + two recorded OS-random runs
 npm run test:e2e:paired -- --replay-cases PATH # Replay a recorded case.json
+npm run test:dst                      # Antithesis DST of engine core units (docs/dst.md)
 npm run verify:foundation             # Strict legacy PNG/state diagnostics; mismatches exit nonzero
 npm run assets:rooms                  # Decode all base room records
 npm run matrix:check
@@ -56,7 +57,8 @@ runs each suite in a separate job with `fail-fast: false`, so a failed suite
 cannot cancel the other system checks. Recorded random tapes can be replayed unchanged.
 Checked-in unit suites and component-only harnesses have been removed;
 validators stay in runtime/e2e tools, while temporary probes belong in ignored
-research cache. See [the live-game workflow](.github/workflows/live-games.yml).
+research cache. The sole exception is the [Antithesis DST harness](docs/dst.md)
+in `engine/dst/`, which simulates engine core units deterministically. See [the live-game workflow](.github/workflows/live-games.yml).
 
 Ordinary play retains no command/state history. To capture diagnostic evidence,
 pause automatic stepping and call `game.reset(seed, { trace: true })` in the
