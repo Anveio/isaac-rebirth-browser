@@ -27,8 +27,10 @@ def observed(count, prefix, stride=2):
 
 
 def prefix():
-    # Source-supported ordinary13x7 up/up graph. Passive Fly13 cannot shut doors.
+    # Passive Fly13 has no contact damage, but its normal config shuts doors.
+    # The first prepared route omitted this real kill; retain that smoke/tape.
     result = step(60) + [key('w', True)] + step(74, 'fly-room-arrival') + [key('w', False)] + step(40, 'fly-room-ready')
+    result += [key('Up', True)] + observed(90, 'fly-prefix-shoot', 2) + [key('Up', False)] + observed(24, 'fly-prefix-clear', 2)
     result += [key('w', True)] + step(74, 'level2-room-arrival') + [key('w', False)]
     result += observed(44, 'level2-appearance', 1)
     return result
@@ -48,6 +50,7 @@ def case(identifier, tail, required, randomized):
                                 'selectionRule': bank['selectionRule'], 'allCandidatesRetained': route['allCandidatesRetained']}
     result['publicRoute'] = 'Start6 → up7/Room18(passiveFly13) → up9/Room185(two214) → right0/Monstro1012. Inputs only; no expected actor/HP/RNG state is supplied to either game.'
     result['unacceptedRequiredFollowups'] = ['Complete boss blood/gibs/final heart/reward/trapdoor callbacks and actual stage-controller exit',
+                                           'Blood background render/return, inherited colors, Fly13 appearance FX and214 flag4 blast acceptance',
                                            'Source run-loader/global shared-stream alignment; no native42 offset', 'Inherited modifiers and source action14 physical skip binding']
     for name in ('tape', 'pairedTape'):
         end = next(index for index, action in enumerate(result[name]) if action.get('label') == 'gameplay-start')

@@ -35,6 +35,13 @@ then real boss admission/Scene/cleanup/AI/projectiles. Every differing body,
 seed, health, state or execution remains a required failure. Inputs never carry
 expected actor state into either game.
 
+The first browser smoke caught missing production PNG whitelist entries and
+the initial public tape's omitted Fly13 kill. Passive means contact damage0;
+its default config still shuts doors. The revised tape shoots through that
+first room before continuing the same recorded seed/graph. The rejected smoke,
+original public tape and hash remain preserved; neither received native or
+paired acceptance.
+
 Compilation, the frozen production artifact and fresh original/browser proof
 are pending. Syntax, TypeScript, authored assets, formatting and matrix checks
 are preparation evidence only. Complete boss blood/gibs, final heart/reward,
