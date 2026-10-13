@@ -37,7 +37,8 @@
     "test:e2e:secrets": "cargo build --manifest-path engine/Cargo.toml --locked --bin floor && bash tools/original/with-display.sh node tools/e2e/secrets.mjs --count 1",
     "test:e2e:npcs": "bash tools/original/with-display.sh node tools/e2e/npcs.mjs",
     "test:e2e:seed-dialog-mt": "bash tools/original/with-display.sh node tools/e2e/boot-mt.mjs --seed-dialog --count 4",
-    "test:e2e:keys": "cargo build --manifest-path engine/Cargo.toml --locked --bin floor && bash tools/original/with-display.sh node tools/e2e/keys.mjs --count 2"
+    "test:e2e:keys": "cargo build --manifest-path engine/Cargo.toml --locked --bin floor && bash tools/original/with-display.sh node tools/e2e/keys.mjs --count 2",
+    "test:e2e:music": "bash tools/original/with-display.sh node tools/e2e/music.mjs --count 2"
   },
   "devDependencies": {
     "@playwright/test": "1.64.0",
