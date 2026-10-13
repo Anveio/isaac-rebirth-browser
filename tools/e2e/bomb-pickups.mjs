@@ -25,6 +25,7 @@ const gateSources = ['tools/e2e/bomb-pickups.mjs', 'tools/original/bomb-pickup-s
   'tools/foundation/production-server.mjs', 'tools/foundation/browser.mjs',
   'tools/foundation/verify.mjs',
   'web/trace.ts',
+  'references/isaac/foundation/bomb-pickups/scoped-scenarios.json',
   'tools/original/bomb-pickup-observer.py', 'tools/original/audio-observer.py'];
 const sourceHashes = async () => Object.fromEntries(await Promise.all(gateSources.map(async path =>
   [path, digest(await readFile(join(ROOT, path)))])));
@@ -40,7 +41,7 @@ else {
 }
 assert.equal(scenarios.schema, 1);
 assert.equal(scenarios.bootEpochSeed, 1700000000);
-assert.ok(scenarios.cases.length >= 4 && scenarios.cases.length <= 6);
+assert.ok(scenarios.cases.length >= 4 && scenarios.cases.length <= 8);
 assert.equal(new Set(scenarios.cases.map(item => item.name)).size, scenarios.cases.length);
 for (const item of scenarios.cases) {
   assert.match(item.name, /^[a-zA-Z0-9_-]{1,32}$/);
@@ -66,7 +67,7 @@ const report = {
   selection: selectedCase ? { scope: 'Explicit targeted recorded-case replay; default CI executes the complete cohort', case: selectedCase } : { scope: 'Complete selected cohort' },
   gateSources: beforeSources,
   graphics: await inspectBrowserGraphics(browser),
-  scope: 'Live public-seed ordinary-room regular/double bomb pickup admission, local subtype RNG, full-phase animation/contact/collection, inventory increments, actor cleanup and native SFX201 admission after real rock access. Inventory cap boundary, golden/Troll conversions, item modifiers, blast pickup impulses, special-room prices, total shared MT/sample identity and pixels remain unaccepted. Existing mandatory rare-rock/Troll regressions remain blocking in rock-blast.',
+  scope: 'Live public-seed ordinary-room bomb pickup admission with unfiltered source subtype draws, local RNG, full-phase animation/contact/collection, inventory increments, actor cleanup and native SFX201 admission after real rock access. Regular/double callbacks are implemented; observed unsupported Troll/Megatroll conversions remain blocking. Inventory cap boundary, item modifiers, blast pickup impulses, special-room prices, total shared MT/sample identity and pixels remain unaccepted. Existing mandatory rare-rock/Troll regressions remain blocking in rock-blast.',
   cases: [],
 };
 try {

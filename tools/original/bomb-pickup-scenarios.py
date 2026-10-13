@@ -30,10 +30,10 @@ def route(delay, slot):
         (entry, 74 if slot == 1 else 17), (None, 40 + delay),
         ('e', 1), ('d', 25), (None, 95), ('a', 25), (None, 30),
         (inward, 35), (None, 30), ('a', 13), (None, 30),
-        ('d', 25), (None, 30)]]
+        ('d', 25), (None, 30), (None, 20)]]
 
 
-def isolated_regular_room(descriptor, groups):
+def ordinary_rock_access(descriptor, groups):
     state = rock.next11(descriptor['spawnSeed'])
     x = state % 13 + 1
     state = rock.next11(state)
@@ -47,15 +47,6 @@ def isolated_regular_room(descriptor, groups):
         for entry in group['entries']:
             if entry['type'] == 1000 and rock.next35(state) % 1001 < 16:
                 return False
-            if entry['type'] == 5:
-                pickup_state = rock.next35(state)
-                subtype = 1
-                for bound, selected in ((7, 2), (50, 5), (10, 3)):
-                    pickup_state = rock.next35(pickup_state)
-                    if pickup_state % bound == 0:
-                        subtype = selected
-                if subtype not in (1, 2):
-                    return False
     return True
 
 
@@ -88,10 +79,12 @@ def random_cases(count):
             descriptor = floor['descriptors'][index]
             if descriptor['assetStage'] != 1 or descriptor['catalogIndex'] != candidates[0]:
                 continue
-            if not isolated_regular_room(descriptor, rooms[candidates[0]]['spawns']):
+            # Only grid access is isolated. Every authored PU subtype draw is
+            # unfiltered; unsupported conversion remains a blocking mismatch.
+            if not ordinary_rock_access(descriptor, rooms[candidates[0]]['spawns']):
                 continue
             delay = len(found) % 2
-            found.append({'name': f'random-bomb-pickup-{len(found)}',
+            found.append({'name': f'unfiltered-bomb-pickup-{len(found)}',
                           'code': rock.clock.codec.encode_seed(seed), 'seedValue': seed,
                           'slot': slot, 'delay': delay, 'actions': route(delay, slot),
                           'entropy': 'OS secrets', 'discoveryAttempts': attempt})
@@ -117,16 +110,20 @@ def main():
         return 0
     if not 2 <= args.count <= 4:
         raise ValueError('Natural bomb pickup coverage requires 2..4 newly recorded OS-random seeds')
-    code = 'AFB84GAH'
-    contrived = [{'name': f'bomb-pickup-phase-{delay}', 'code': code,
-                  'seedValue': rock.clock.codec.decode_seed(code), 'slot': 1,
-                  'delay': delay, 'actions': route(delay, 1),
-                  'entropy': 'Contrived public collection offset; seed originally recorded from OS secrets at attempt624'}
-                 for delay in (0, 1)]
+    scoped = json.loads((ROOT / 'references/isaac/foundation/bomb-pickups/scoped-scenarios.json').read_text())
+    retained = []
+    for case in scoped['cases']:
+        # Preserve every selected seed and original public interval as an exact
+        # prefix. Regular Collect is still playing at the old tape's end; the
+        # explicit 20-step public release continuation observes its retirement.
+        retained.append({**case, 'name': 'retained-' + case['name'],
+                         'originalActions': case['actions'],
+                         'actions': case['actions'] + [{'key': None, 'frames': 20}],
+                         'continuationScope': 'Original scoped case unchanged as prefix; source-required Collect completion wait'})
     print(json.dumps({'schema': 1, 'bootEpochSeed': 1700000000,
                       'source': 'Public seed and held-key intervals only; authored discovery never enters WASM',
-                      'scope': 'Isolated fresh Isaac regular/double bomb callbacks with ordinary-rock access. Source-local factory/subtype predicates select this cohort before native capture; selected comparisons are never replaced. Already-selected explosive/tinted/Troll failures remain mandatory in the separate rock-blast cohort.',
-                      'cases': contrived + random_cases(args.count)}))
+                      'scope': 'Fresh Isaac ordinary-rock access with unfiltered authored bomb pickup subtype draws. All four prior scoped cases remain required with exact original public prefixes plus a declared completion wait. Newly selected unsupported rare/Troll conversions remain blocking failures; no subtype filtering or case replacement. Already-selected rare-rock regressions also remain required in rock-blast.',
+                      'cases': retained + random_cases(args.count)}))
     return 0
 
 

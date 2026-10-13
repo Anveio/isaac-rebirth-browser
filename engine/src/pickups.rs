@@ -50,7 +50,7 @@ pub fn regular_subtype(variant: u32, subtype: u32, spawn_seed: u32) -> Result<u3
         // Random(50)==0 selects the golden key, never a double key.
         30 => Ok(if random(50) == 0 { 2 } else { 1 }),
         // Pickup::Init4ffd4e: fresh Isaac owns neither Humbling Bundle nor
-        // BOGO Bombs. Later golden/troll draws override the regular/double roll.
+        // BOGO Bombs. Later Megatroll/Troll draws override the regular/double roll.
         40 => {
             let mut selected = if random(7) == 0 { 2 } else { 1 };
             if random(50) == 0 {

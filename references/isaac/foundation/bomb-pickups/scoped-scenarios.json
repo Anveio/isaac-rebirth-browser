@@ -1,0 +1,12 @@
+{
+  "schema": 1,
+  "bootEpochSeed": 1700000000,
+  "source": "Public seed and held-key intervals only; authored discovery never enters WASM",
+  "scope": "Isolated fresh Isaac regular/double bomb callbacks with ordinary-rock access. Source-local factory/subtype predicates select this cohort before native capture; selected comparisons are never replaced. Already-selected explosive/tinted/Troll failures remain mandatory in the separate rock-blast cohort.",
+  "cases": [
+    {"name":"bomb-pickup-phase-0","code":"AFB84GAH","seedValue":246190821,"slot":1,"delay":0,"actions":[{"key":"w","frames":74},{"key":null,"frames":40},{"key":"e","frames":1},{"key":"d","frames":25},{"key":null,"frames":95},{"key":"a","frames":25},{"key":null,"frames":30},{"key":"w","frames":35},{"key":null,"frames":30},{"key":"a","frames":13},{"key":null,"frames":30},{"key":"d","frames":25},{"key":null,"frames":30}],"entropy":"Contrived public collection offset; seed originally recorded from OS secrets at attempt624"},
+    {"name":"bomb-pickup-phase-1","code":"AFB84GAH","seedValue":246190821,"slot":1,"delay":1,"actions":[{"key":"w","frames":74},{"key":null,"frames":41},{"key":"e","frames":1},{"key":"d","frames":25},{"key":null,"frames":95},{"key":"a","frames":25},{"key":null,"frames":30},{"key":"w","frames":35},{"key":null,"frames":30},{"key":"a","frames":13},{"key":null,"frames":30},{"key":"d","frames":25},{"key":null,"frames":30}],"entropy":"Contrived public collection offset; seed originally recorded from OS secrets at attempt624"},
+    {"name":"random-bomb-pickup-0","code":"R0L47A89","seedValue":1920651646,"slot":1,"delay":0,"actions":[{"key":"w","frames":74},{"key":null,"frames":40},{"key":"e","frames":1},{"key":"d","frames":25},{"key":null,"frames":95},{"key":"a","frames":25},{"key":null,"frames":30},{"key":"w","frames":35},{"key":null,"frames":30},{"key":"a","frames":13},{"key":null,"frames":30},{"key":"d","frames":25},{"key":null,"frames":30}],"entropy":"OS secrets","discoveryAttempts":1869},
+    {"name":"random-bomb-pickup-1","code":"BHBV3289","seedValue":103596830,"slot":1,"delay":1,"actions":[{"key":"w","frames":74},{"key":null,"frames":41},{"key":"e","frames":1},{"key":"d","frames":25},{"key":null,"frames":95},{"key":"a","frames":25},{"key":null,"frames":30},{"key":"w","frames":35},{"key":null,"frames":30},{"key":"a","frames":13},{"key":null,"frames":30},{"key":"d","frames":25},{"key":null,"frames":30}],"entropy":"OS secrets","discoveryAttempts":5617}
+  ]
+}
