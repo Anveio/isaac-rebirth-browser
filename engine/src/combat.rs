@@ -121,6 +121,18 @@ pub fn resolve_player_pickup_contact(
     resolve_contact(player, pickup, blocks_player_shift, |_, _| {})
 }
 
+/// Free regular Pickup5 pairs with unit collision scale use445710. Their
+///504820 callbacks return false in both modes, preserving the circle response.
+pub(crate) fn resolve_pickup_pair(
+    first: &mut ContactBody,
+    second: &mut ContactBody,
+) -> Result<ContactResolution, String> {
+    if first.entity_type != 5 || second.entity_type != 5 {
+        return Err("pickup pair requires two admitted Pickup5 bodies".into());
+    }
+    resolve_contact(first, second, |_| false, |_, _| {})
+}
+
 /// Fresh regular Tear callback5462a9 adds half incoming velocity to AttackFly,
 /// then54638a advances the Tear by0.8 of the NPC velocity. Generic445710
 /// retains its pre-callback overlap vector for mass separation afterward.
