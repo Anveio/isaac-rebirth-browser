@@ -2376,335 +2376,750 @@
   "assets": {
     "music/ambush.ogg": {
       "bytes": 6502620,
-      "sha256": "99586e41e357eac5e43e800e478f0695d02003bd5fe3cddebc1f128d16d215b3"
+      "sha256": "99586e41e357eac5e43e800e478f0695d02003bd5fe3cddebc1f128d16d215b3",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 5644800,
+      "trailingBytes": 3
     },
     "music/angel room intro.ogg": {
       "bytes": 491792,
-      "sha256": "c5ad338ffec6fe57eeff2dee2a97310ca237572003e8bc580afc0928779286a5"
+      "sha256": "c5ad338ffec6fe57eeff2dee2a97310ca237572003e8bc580afc0928779286a5",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 529216,
+      "trailingBytes": 3
     },
     "music/angel room.ogg": {
       "bytes": 2666872,
-      "sha256": "41cdf9da9ef4aa141034e15db4ff437cc56ce548823052215bc09187db605ec9"
+      "sha256": "41cdf9da9ef4aa141034e15db4ff437cc56ce548823052215bc09187db605ec9",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 2963520,
+      "trailingBytes": 0
     },
     "music/catacombs intro.ogg": {
       "bytes": 423084,
-      "sha256": "d000d395ea19b13fd506393fc62dcb259c47c3e4b8da6664abc1604d339bf49c"
+      "sha256": "d000d395ea19b13fd506393fc62dcb259c47c3e4b8da6664abc1604d339bf49c",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 352832,
+      "trailingBytes": 1
     },
     "music/catacombs layer intro.ogg": {
       "bytes": 4940,
-      "sha256": "8206b42181d875aa1330c68de1234cbbc0552e7636b6bb8b094ab09ce2cc67ca"
+      "sha256": "8206b42181d875aa1330c68de1234cbbc0552e7636b6bb8b094ab09ce2cc67ca",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 352832,
+      "trailingBytes": 2
     },
     "music/catacombs layer.ogg": {
       "bytes": 1846928,
-      "sha256": "fcba2e696306cc1a32ad39b91c5d7ee0abadafba6c810afbe2983d108900eb1a"
+      "sha256": "fcba2e696306cc1a32ad39b91c5d7ee0abadafba6c810afbe2983d108900eb1a",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 5644800,
+      "trailingBytes": 1
     },
     "music/catacombs.ogg": {
       "bytes": 6873332,
-      "sha256": "e133a8e6bb08e9e71d979f15124348778814fed84563184be3e1a65ff0f4a98d"
+      "sha256": "e133a8e6bb08e9e71d979f15124348778814fed84563184be3e1a65ff0f4a98d",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 5644800,
+      "trailingBytes": 0
     },
     "music/cathedral chant.ogg": {
       "bytes": 3552044,
-      "sha256": "25203ec21496b39114e6cdee8ffc096f54d10e94f2d2ea0be3169a3e8ec0d576"
+      "sha256": "25203ec21496b39114e6cdee8ffc096f54d10e94f2d2ea0be3169a3e8ec0d576",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 3598592,
+      "trailingBytes": 1
     },
     "music/cathedral intro.ogg": {
       "bytes": 621296,
-      "sha256": "19549dfe8464ac9357b25fc6a4ced47a8ad6a2b8f6ca3c794f110a72c77696da"
+      "sha256": "19549dfe8464ac9357b25fc6a4ced47a8ad6a2b8f6ca3c794f110a72c77696da",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 635072,
+      "trailingBytes": 2
     },
     "music/cathedral layer intro.ogg": {
       "bytes": 5520,
-      "sha256": "3974a13df685f983e0faeabec2af6cd062963d2dc818f95e633a73c4f23fc181"
+      "sha256": "3974a13df685f983e0faeabec2af6cd062963d2dc818f95e633a73c4f23fc181",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 635072,
+      "trailingBytes": 3
     },
     "music/cathedral layer.ogg": {
       "bytes": 1329704,
-      "sha256": "4fe37c7c028f55aad1e43a162f7d10ce2dbbb6cfbdeb3a8439d14a047c631145"
+      "sha256": "4fe37c7c028f55aad1e43a162f7d10ce2dbbb6cfbdeb3a8439d14a047c631145",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 3598592,
+      "trailingBytes": 0
     },
     "music/chest layer intro.ogg": {
       "bytes": 4412,
-      "sha256": "e5cda4a344228a2b85f4f32acd87a1b93f0b94c233fb77f62e17df63e472a5fa"
+      "sha256": "e5cda4a344228a2b85f4f32acd87a1b93f0b94c233fb77f62e17df63e472a5fa",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 96256,
+      "trailingBytes": 2
     },
     "music/chest layer.ogg": {
       "bytes": 2245168,
-      "sha256": "834969cfbd6e928f03fa52f098e7df380d6fde97c19d4a2f8f877cc6900a4030"
+      "sha256": "834969cfbd6e928f03fa52f098e7df380d6fde97c19d4a2f8f877cc6900a4030",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 6158033,
+      "trailingBytes": 3
     },
     "music/chest room chapter 6.ogg": {
       "bytes": 6546344,
-      "sha256": "0d0b3a2218bfeda5fcc90f049751187bfdfb1b3013da45089e257b1b0b08c527"
+      "sha256": "0d0b3a2218bfeda5fcc90f049751187bfdfb1b3013da45089e257b1b0b08c527",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 6158033,
+      "trailingBytes": 1
     },
     "music/chest room intro.ogg": {
       "bytes": 103944,
-      "sha256": "41bc63f35b08de41d7bc66630c0189367b09dd39d99b41d2d45ed0a915b308f9"
+      "sha256": "41bc63f35b08de41d7bc66630c0189367b09dd39d99b41d2d45ed0a915b308f9",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 96256,
+      "trailingBytes": 1
     },
     "music/credits roll.ogg": {
       "bytes": 2399880,
-      "sha256": "0c4028bcace90394ad4288ee30fadd743419b82727b910d53db61f4febe46d10"
+      "sha256": "0c4028bcace90394ad4288ee30fadd743419b82727b910d53db61f4febe46d10",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 2352000,
+      "trailingBytes": 3
     },
     "music/dark room alt chapter 6 intro.ogg": {
       "bytes": 2173040,
-      "sha256": "1ab30be50f0e5fbef71726172c419a486b56906f44dc17662d4109c80b5b19f5"
+      "sha256": "1ab30be50f0e5fbef71726172c419a486b56906f44dc17662d4109c80b5b19f5",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 1881600,
+      "trailingBytes": 0
     },
     "music/dark room alt chapter 6.ogg": {
       "bytes": 8457932,
-      "sha256": "7d018318d63e301fedc2ad010828bf28557ac0cf3f7ee861077484b7d01399e8"
+      "sha256": "7d018318d63e301fedc2ad010828bf28557ac0cf3f7ee861077484b7d01399e8",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 7526400,
+      "trailingBytes": 2
     },
     "music/deal with the devil.ogg": {
       "bytes": 2167456,
-      "sha256": "aee8f55039d7fbb909bca885da02486d53cd7e3d6d75950a57a69872d7e48dad"
+      "sha256": "aee8f55039d7fbb909bca885da02486d53cd7e3d6d75950a57a69872d7e48dad",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 2469632,
+      "trailingBytes": 2
     },
     "music/diptera layer intro.ogg": {
       "bytes": 5440,
-      "sha256": "3742333c142fbcd11c142803f6c0b05b620fd34c5f1293485e3e4b81cd494366"
+      "sha256": "3742333c142fbcd11c142803f6c0b05b620fd34c5f1293485e3e4b81cd494366",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 604881,
+      "trailingBytes": 0
     },
     "music/diptera layer.ogg": {
       "bytes": 1669200,
-      "sha256": "bd5341e5d9f72686a7dbc21a98bf4662970d7339b10bcea211ea085276528498"
+      "sha256": "bd5341e5d9f72686a7dbc21a98bf4662970d7339b10bcea211ea085276528498",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 5140800,
+      "trailingBytes": 3
     },
     "music/diptera sonata intro.ogg": {
       "bytes": 562176,
-      "sha256": "eca2b3cdfffe6d88ba97ce4d8b626acedc8b8bed76874edf0335c7109e7f87b0"
+      "sha256": "eca2b3cdfffe6d88ba97ce4d8b626acedc8b8bed76874edf0335c7109e7f87b0",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 604881,
+      "trailingBytes": 1
     },
     "music/diptera sonata(basement).ogg": {
       "bytes": 4936976,
-      "sha256": "7e5197d041bf037061f526ec3b4c5611339a43ca8e7c54681f7f1034a2e4b7f1"
+      "sha256": "7e5197d041bf037061f526ec3b4c5611339a43ca8e7c54681f7f1034a2e4b7f1",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 5140800,
+      "trailingBytes": 2
     },
     "music/epilogue_01m.ogg": {
       "bytes": 1223992,
-      "sha256": "d4de035d04d1ac63e5c2bece0c8cd2f6e9b2ac2ded618091e74b9e0e00662054"
+      "sha256": "d4de035d04d1ac63e5c2bece0c8cd2f6e9b2ac2ded618091e74b9e0e00662054",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 1948001,
+      "trailingBytes": 0
     },
     "music/fight ogg/basic boss fight.ogg": {
       "bytes": 6030908,
-      "sha256": "db77cf05222ae2c07704ec3dc995dd796b8ff49a347c932728ed2542473df0f4"
+      "sha256": "db77cf05222ae2c07704ec3dc995dd796b8ff49a347c932728ed2542473df0f4",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 5644800,
+      "trailingBytes": 0
     },
     "music/fight ogg/chest fight.ogg": {
       "bytes": 4711824,
-      "sha256": "95b0b847c97eaafc2576917b4ad8d02d35624935d81b43f743629a0a54eba3a5"
+      "sha256": "95b0b847c97eaafc2576917b4ad8d02d35624935d81b43f743629a0a54eba3a5",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 4522320,
+      "trailingBytes": 0
     },
     "music/fight ogg/dark room fight.ogg": {
       "bytes": 5789856,
-      "sha256": "68628bac9ca6e4a4fb3734fde5c0160ec9d6163a2c8cce528f91ce64ea61ff6f"
+      "sha256": "68628bac9ca6e4a4fb3734fde5c0160ec9d6163a2c8cce528f91ce64ea61ff6f",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 4980736,
+      "trailingBytes": 0
     },
     "music/fight ogg/isaac fight.ogg": {
       "bytes": 7482032,
-      "sha256": "9fb4a8faa2ac583ae801412c196ac12cca3b687b7cb0a9d4dd91976076388146"
+      "sha256": "9fb4a8faa2ac583ae801412c196ac12cca3b687b7cb0a9d4dd91976076388146",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 7056000,
+      "trailingBytes": 3
     },
     "music/fight ogg/mom fight.ogg": {
       "bytes": 6388312,
-      "sha256": "0051b8c9c9390679c0cbd38ddf193e140281ba53160b16928b36b0622380f7b5"
+      "sha256": "0051b8c9c9390679c0cbd38ddf193e140281ba53160b16928b36b0622380f7b5",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 5556608,
+      "trailingBytes": 1
     },
     "music/fight ogg/satan fight.ogg": {
       "bytes": 5579524,
-      "sha256": "ccf973b8c7bd7a09e2aea0cc5b2dafa27329166388b4e01266283f93572c3286"
+      "sha256": "ccf973b8c7bd7a09e2aea0cc5b2dafa27329166388b4e01266283f93572c3286",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 5131648,
+      "trailingBytes": 3
     },
     "music/fight ogg/womb fight.ogg": {
       "bytes": 5570484,
-      "sha256": "1146804ffd1b9cb17eb7224fa8e298037c19385dde25f4a30a92c6c88be466c5"
+      "sha256": "1146804ffd1b9cb17eb7224fa8e298037c19385dde25f4a30a92c6c88be466c5",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 5292032,
+      "trailingBytes": 1
     },
     "music/introvoiceover.ogg": {
       "bytes": 4577776,
-      "sha256": "2f2db2dd3c25749416cd151ff583fa62a79a42216454086be1adf52ed0957589"
+      "sha256": "2f2db2dd3c25749416cd151ff583fa62a79a42216454086be1adf52ed0957589",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 48000,
+      "frames": 7410298,
+      "trailingBytes": 0
     },
     "music/jingle ogg/ambush jingle.v2_01.ogg": {
       "bytes": 315952,
-      "sha256": "906f872f6d9887ca27d1786e15be28dfca79c382014fb0b347249ed8c307087f"
+      "sha256": "906f872f6d9887ca27d1786e15be28dfca79c382014fb0b347249ed8c307087f",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 329472,
+      "trailingBytes": 1
     },
     "music/jingle ogg/ambush jinle outro v3_04.ogg": {
       "bytes": 281064,
-      "sha256": "a9b276b4e5dbf60aa81ea8c07632c4aabf2a3a3ad8c4856ceb6689a99df55cb4"
+      "sha256": "a9b276b4e5dbf60aa81ea8c07632c4aabf2a3a3ad8c4856ceb6689a99df55cb4",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 267264,
+      "trailingBytes": 2
     },
     "music/jingle ogg/angel room appear v2_07.ogg": {
       "bytes": 170004,
-      "sha256": "d1982ec3dcb7d766d0654c6ef9c11f99d82f22c75cfad45356ba0dacd4f4d2f6"
+      "sha256": "d1982ec3dcb7d766d0654c6ef9c11f99d82f22c75cfad45356ba0dacd4f4d2f6",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 222336,
+      "trailingBytes": 0
     },
     "music/jingle ogg/boss fight intro jingle v2.1.ogg": {
       "bytes": 258612,
-      "sha256": "e335f0613098a741949c615a3729604b8d89acd9f192537da6ee1465e74499b2"
+      "sha256": "e335f0613098a741949c615a3729604b8d89acd9f192537da6ee1465e74499b2",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 289152,
+      "trailingBytes": 0
     },
     "music/jingle ogg/boss fight intro jingle_01.ogg": {
       "bytes": 250052,
-      "sha256": "0783307d206b4ff1e039fa04ce649b2c15372a5b6b793db759d3bc53d0ad4176"
+      "sha256": "0783307d206b4ff1e039fa04ce649b2c15372a5b6b793db759d3bc53d0ad4176",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 284544,
+      "trailingBytes": 3
     },
     "music/jingle ogg/boss fight jingle outro v2_12.ogg": {
       "bytes": 295148,
-      "sha256": "4966c227784a51e19bb3dd96a29409a3aa4b5f11ba1b160f461cb45506009a71"
+      "sha256": "4966c227784a51e19bb3dd96a29409a3aa4b5f11ba1b160f461cb45506009a71",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 337536,
+      "trailingBytes": 3
     },
     "music/jingle ogg/isaac died_02.ogg": {
       "bytes": 203064,
-      "sha256": "b654e6dc609675d596047c994e66f7e0441fcb2b82d6f9de2c34a41f68e9bd56"
+      "sha256": "b654e6dc609675d596047c994e66f7e0441fcb2b82d6f9de2c34a41f68e9bd56",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 220288,
+      "trailingBytes": 2
     },
     "music/jingle ogg/satan room appear v2_01.ogg": {
       "bytes": 169964,
-      "sha256": "c820324f7055617f340f173c68f34bcf1dcea3032a121c89136ff8a8207ad56e"
+      "sha256": "c820324f7055617f340f173c68f34bcf1dcea3032a121c89136ff8a8207ad56e",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 210816,
+      "trailingBytes": 0
     },
     "music/jingle ogg/secret room find #2_07.ogg": {
       "bytes": 182897,
-      "sha256": "15a607e6fe1f0940c20cd285a7e02712079dc05d57a46e3051a026278263da35"
+      "sha256": "15a607e6fe1f0940c20cd285a7e02712079dc05d57a46e3051a026278263da35",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 213568,
+      "trailingBytes": 0
     },
     "music/jingle ogg/title screen jingle v1_01.ogg": {
       "bytes": 222020,
-      "sha256": "874e6b45c65e751c533520d8e7603e18dddaabacd7a5f90b267529aad545d5c5"
+      "sha256": "874e6b45c65e751c533520d8e7603e18dddaabacd7a5f90b267529aad545d5c5",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 200157,
+      "trailingBytes": 2
     },
     "music/jingle ogg/treasure room discover_03.ogg": {
       "bytes": 142492,
-      "sha256": "e8a10e3a125b53d3680a3d03e8f8d1e2fd8d904fc8f2a4421c91d04fb4f6777f"
+      "sha256": "e8a10e3a125b53d3680a3d03e8f8d1e2fd8d904fc8f2a4421c91d04fb4f6777f",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 196672,
+      "trailingBytes": 2
     },
     "music/jingle ogg/treasure room discovera.ogg": {
       "bytes": 128624,
-      "sha256": "66385a0cea037210ce11f6092ba26d2bfe9728fa41f6e69dd9a88dc8805f9220"
+      "sha256": "66385a0cea037210ce11f6092ba26d2bfe9728fa41f6e69dd9a88dc8805f9220",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 173120,
+      "trailingBytes": 0
     },
     "music/jingle ogg/treasure room discoverb.ogg": {
       "bytes": 138096,
-      "sha256": "df317a72e1f89bf6dc1673b8ec6d94a2608dfa65edb15439c5b0453349b2ad8f"
+      "sha256": "df317a72e1f89bf6dc1673b8ec6d94a2608dfa65edb15439c5b0453349b2ad8f",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 174080,
+      "trailingBytes": 1
     },
     "music/jingle ogg/treasure room discoverc.ogg": {
       "bytes": 143780,
-      "sha256": "f724448335bdf89041556c5a938ab6abb449fa6c6a9817e4a291e87d1d85ca34"
+      "sha256": "f724448335bdf89041556c5a938ab6abb449fa6c6a9817e4a291e87d1d85ca34",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 180672,
+      "trailingBytes": 2
     },
     "music/library intro.ogg": {
       "bytes": 172000,
-      "sha256": "4328c44a214b9eb81a4bb7cff471a1a073508c9eaa63ccfef195f1a7ab022086"
+      "sha256": "4328c44a214b9eb81a4bb7cff471a1a073508c9eaa63ccfef195f1a7ab022086",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 192448,
+      "trailingBytes": 1
     },
     "music/library.ogg": {
       "bytes": 2855864,
-      "sha256": "23037c242c5a6ddad38683d3d78e5494964cef5915f1def125b897ba20d0e4cf"
+      "sha256": "23037c242c5a6ddad38683d3d78e5494964cef5915f1def125b897ba20d0e4cf",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 3079040,
+      "trailingBytes": 2
     },
     "music/necropolis intro.ogg": {
       "bytes": 446876,
-      "sha256": "af597e82b0d0cf13ad868f202a4a4dc1a9ac1270b4ce7a65b25dc290d3e6477b"
+      "sha256": "af597e82b0d0cf13ad868f202a4a4dc1a9ac1270b4ce7a65b25dc290d3e6477b",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 352832,
+      "trailingBytes": 0
     },
     "music/necropolis layer intro.ogg": {
       "bytes": 4920,
-      "sha256": "c99e0c64f2f7b6ab1240aab4114590d1d40d9e841494198d485bb0cedb32068a"
+      "sha256": "c99e0c64f2f7b6ab1240aab4114590d1d40d9e841494198d485bb0cedb32068a",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 352832,
+      "trailingBytes": 1
     },
     "music/necropolis layer.ogg": {
       "bytes": 1806844,
-      "sha256": "f20b0b265b3e9cfe77c48548adf2293caeeb8a18d8d27e792eb9a42c8f0e56ff"
+      "sha256": "f20b0b265b3e9cfe77c48548adf2293caeeb8a18d8d27e792eb9a42c8f0e56ff",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 5292032,
+      "trailingBytes": 2
     },
     "music/necropolis.ogg": {
       "bytes": 6564884,
-      "sha256": "2ba9e765844e5f2c8aa78b48f843f37544d2002f386e4c192c4d03f3634ac752"
+      "sha256": "2ba9e765844e5f2c8aa78b48f843f37544d2002f386e4c192c4d03f3634ac752",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 5292032,
+      "trailingBytes": 3
     },
     "music/retro beats 8-6-14.ogg": {
       "bytes": 1924204,
-      "sha256": "38e6ece8085b525cf83ac635445e24a76d0a23d480e4eccd9419c46ab40ddc78"
+      "sha256": "38e6ece8085b525cf83ac635445e24a76d0a23d480e4eccd9419c46ab40ddc78",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 2279680,
+      "trailingBytes": 1
     },
     "music/retro beats intro 8-6-14.ogg": {
       "bytes": 702104,
-      "sha256": "98f6fe9e40a913d4fa320642fa70a1bd55357bbf08e78e4ddedbaf1d6c6eecc5"
+      "sha256": "98f6fe9e40a913d4fa320642fa70a1bd55357bbf08e78e4ddedbaf1d6c6eecc5",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 926080,
+      "trailingBytes": 1
     },
     "music/secret to everyone intro.ogg": {
       "bytes": 456356,
-      "sha256": "1f5f3ec769c0691ea42c94b4b227bebd2e85de366e5cd7cc9a6d5ac5d9db1dae"
+      "sha256": "1f5f3ec769c0691ea42c94b4b227bebd2e85de366e5cd7cc9a6d5ac5d9db1dae",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 529216,
+      "trailingBytes": 2
     },
     "music/secret to everyone.ogg": {
       "bytes": 2035988,
-      "sha256": "aaa32766ec8cc2d0b8d7243e187733799c849a83f550b3ecb44357f6c2f3146a"
+      "sha256": "aaa32766ec8cc2d0b8d7243e187733799c849a83f550b3ecb44357f6c2f3146a",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 2249168,
+      "trailingBytes": 2
     },
     "music/sheol intro.ogg": {
       "bytes": 822956,
-      "sha256": "412466b18b079aa73ace1c596bd9c943d826dc6fb32c830a2dc539d6e6ac552a"
+      "sha256": "412466b18b079aa73ace1c596bd9c943d826dc6fb32c830a2dc539d6e6ac552a",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 769792,
+      "trailingBytes": 1
     },
     "music/sheol layer intro.ogg": {
       "bytes": 5784,
-      "sha256": "2f1cac8e234a5b6b215e33b1a3970f498247746a72551abbc64bb221845c14ef"
+      "sha256": "2f1cac8e234a5b6b215e33b1a3970f498247746a72551abbc64bb221845c14ef",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 769792,
+      "trailingBytes": 3
     },
     "music/sheol layer.ogg": {
       "bytes": 2255444,
-      "sha256": "175a29c8c238a5569b9717fa29e9be490ad3ebcb5e80f641d2b7b523c2c70035"
+      "sha256": "175a29c8c238a5569b9717fa29e9be490ad3ebcb5e80f641d2b7b523c2c70035",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 5773120,
+      "trailingBytes": 3
     },
     "music/sheol.ogg": {
       "bytes": 5975552,
-      "sha256": "e307261c3b0243c0f053e86e4cc9e8dc6ca2b2598cc67884c60fd9beeb39cc34"
+      "sha256": "e307261c3b0243c0f053e86e4cc9e8dc6ca2b2598cc67884c60fd9beeb39cc34",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 5773120,
+      "trailingBytes": 1
     },
     "music/store loop intro.ogg": {
       "bytes": 315116,
-      "sha256": "55219b2dbc50b66ba946cd807a428ba89335ca9f6bebd73781070859c45070e8"
+      "sha256": "55219b2dbc50b66ba946cd807a428ba89335ca9f6bebd73781070859c45070e8",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 363840,
+      "trailingBytes": 1
     },
     "music/store loop.ogg": {
       "bytes": 2553660,
-      "sha256": "213c91aa20d73e1080c99719046b3543dd76a378092fa59b5c8821724ddd94be"
+      "sha256": "213c91aa20d73e1080c99719046b3543dd76a378092fa59b5c8821724ddd94be",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 2910656,
+      "trailingBytes": 0
     },
     "music/the calm intro.ogg": {
       "bytes": 316144,
-      "sha256": "87030bd76708696beed772b3103e3d7b23251d3a2b403818308c6b1f4a46696c"
+      "sha256": "87030bd76708696beed772b3103e3d7b23251d3a2b403818308c6b1f4a46696c",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 373568,
+      "trailingBytes": 0
     },
     "music/the calm.ogg": {
       "bytes": 4233516,
-      "sha256": "eb74920d6498126a9c5d386db8d163ec5d552077603de033ec8156a2719b5db4"
+      "sha256": "eb74920d6498126a9c5d386db8d163ec5d552077603de033ec8156a2719b5db4",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 5136384,
+      "trailingBytes": 0
     },
     "music/the caves intro.ogg": {
       "bytes": 186900,
-      "sha256": "d43ec77dac83c27efe0d2e4605f67b3033338e653dc1353950c5de1c6f900195"
+      "sha256": "d43ec77dac83c27efe0d2e4605f67b3033338e653dc1353950c5de1c6f900195",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 176448,
+      "trailingBytes": 3
     },
     "music/the caves layer intro.ogg": {
       "bytes": 4548,
-      "sha256": "37f2434d3fd8c81f6bd5da89e2d6403a22190bfaaf72c5f9fba30099c0170361"
+      "sha256": "37f2434d3fd8c81f6bd5da89e2d6403a22190bfaaf72c5f9fba30099c0170361",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 176448,
+      "trailingBytes": 0
     },
     "music/the caves layer.ogg": {
       "bytes": 4836256,
-      "sha256": "1d63863e14dc422f45a021bb806e97570ee5ba361fd3a722bcf2514f4c3bb438"
+      "sha256": "1d63863e14dc422f45a021bb806e97570ee5ba361fd3a722bcf2514f4c3bb438",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 4939200,
+      "trailingBytes": 1
     },
     "music/the caves.ogg": {
       "bytes": 5305180,
-      "sha256": "fd71d4a8aed9bed5f5238fb1460df2fca5ebd5a78a0665482af632e77599a328"
+      "sha256": "fd71d4a8aed9bed5f5238fb1460df2fca5ebd5a78a0665482af632e77599a328",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 4939200,
+      "trailingBytes": 1
     },
     "music/the cellar alt intro.ogg": {
       "bytes": 1188132,
-      "sha256": "61b765b3addd7d1ad6452440b15e588d2299c4c0d4078294fc760f2e0a53e228"
+      "sha256": "61b765b3addd7d1ad6452440b15e588d2299c4c0d4078294fc760f2e0a53e228",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 1209681,
+      "trailingBytes": 3
     },
     "music/the cellar alt.ogg": {
       "bytes": 4772472,
-      "sha256": "7f1493bfde5cc1e65ba038f7a986e3522082d93836aa8d1c1744f3d053fa0a41"
+      "sha256": "7f1493bfde5cc1e65ba038f7a986e3522082d93836aa8d1c1744f3d053fa0a41",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 4838400,
+      "trailingBytes": 0
     },
     "music/the cellar layer intro.ogg": {
       "bytes": 6676,
-      "sha256": "1a5cd9ea206f8b2fd57083ed1b8a7304697b55996b758a624485d306c422eace"
+      "sha256": "1a5cd9ea206f8b2fd57083ed1b8a7304697b55996b758a624485d306c422eace",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 1209681,
+      "trailingBytes": 2
     },
     "music/the cellar layer.ogg": {
       "bytes": 3260652,
-      "sha256": "327e585e8863db7b839c608ff97eb16aeee55f17c9726c383382e6dc66e17a17"
+      "sha256": "327e585e8863db7b839c608ff97eb16aeee55f17c9726c383382e6dc66e17a17",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 4838400,
+      "trailingBytes": 1
     },
     "music/the depths intro.ogg": {
       "bytes": 431812,
-      "sha256": "c8808160dd1311785f9f8e25a3bc13878d44ea0f02e2642d3ff96f36a1e1c34f"
+      "sha256": "c8808160dd1311785f9f8e25a3bc13878d44ea0f02e2642d3ff96f36a1e1c34f",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 459584,
+      "trailingBytes": 2
     },
     "music/the depths layer intro.ogg": {
       "bytes": 5148,
-      "sha256": "4386cdc34b4eb4d41f7d2d69e45fc7f2c1e0fa1463aa0f36cf8fb802e282bbc2"
+      "sha256": "4386cdc34b4eb4d41f7d2d69e45fc7f2c1e0fa1463aa0f36cf8fb802e282bbc2",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 459584,
+      "trailingBytes": 0
     },
     "music/the depths layer.ogg": {
       "bytes": 2470072,
-      "sha256": "ece19537ab5fcb3b22b73cd27a258e15d0c1c0e398fcae9942beae04e8a91d94"
+      "sha256": "ece19537ab5fcb3b22b73cd27a258e15d0c1c0e398fcae9942beae04e8a91d94",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 4902080,
+      "trailingBytes": 1
     },
     "music/the depths.ogg": {
       "bytes": 4896208,
-      "sha256": "69ebea6c8a1371a7a2bfb4ab9d0f4a0693190b1c9494f758caef10278c9e4721"
+      "sha256": "69ebea6c8a1371a7a2bfb4ab9d0f4a0693190b1c9494f758caef10278c9e4721",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 4902080,
+      "trailingBytes": 0
     },
     "music/the womb chapter four intro.ogg": {
       "bytes": 683264,
-      "sha256": "e3408b8b6b486ad2459f6b47d0195d0e4d60d00ea5ff63108d68db55a2b2b51c"
+      "sha256": "e3408b8b6b486ad2459f6b47d0195d0e4d60d00ea5ff63108d68db55a2b2b51c",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 558672,
+      "trailingBytes": 2
     },
     "music/the womb chapter four.ogg": {
       "bytes": 4666596,
-      "sha256": "7f77ffc41694e757310c0b128469c464a438d93d950bd8fbaac8bc7621f565fa"
+      "sha256": "7f77ffc41694e757310c0b128469c464a438d93d950bd8fbaac8bc7621f565fa",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 3763200,
+      "trailingBytes": 1
     },
     "music/the womb layer intro.ogg": {
       "bytes": 5368,
-      "sha256": "918123031bec8112ae3fb9a518152c72d86feb9dea17f55ec1698dcf2862e8af"
+      "sha256": "918123031bec8112ae3fb9a518152c72d86feb9dea17f55ec1698dcf2862e8af",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 558672,
+      "trailingBytes": 1
     },
     "music/the womb layer.ogg": {
       "bytes": 3040092,
-      "sha256": "ddce252b7afe226f64aabc3d0135abce62fb90f186ce4d190dc81f441e85f460"
+      "sha256": "ddce252b7afe226f64aabc3d0135abce62fb90f186ce4d190dc81f441e85f460",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 3763200,
+      "trailingBytes": 1
     },
     "music/title screen intro.ogg": {
       "bytes": 643876,
-      "sha256": "356f82df3253568cd2239e62f5f54d30ee54c032cde8f4eda91b4ac9c134ae12"
+      "sha256": "356f82df3253568cd2239e62f5f54d30ee54c032cde8f4eda91b4ac9c134ae12",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 610624,
+      "trailingBytes": 0
     },
     "music/title screen.ogg": {
       "bytes": 2627320,
-      "sha256": "5b2fa7c3124956f002141ddb7a8ef03e2c4f4c76ea918961bfa92bfecc2a30a0"
+      "sha256": "5b2fa7c3124956f002141ddb7a8ef03e2c4f4c76ea918961bfa92bfecc2a30a0",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 2931024,
+      "trailingBytes": 0
     },
     "music/you died.ogg": {
       "bytes": 4417720,
-      "sha256": "2d4a96a000fd514cf7bd69c74d298aeca317297eb98be54717da3ddc079cbc1e"
+      "sha256": "2d4a96a000fd514cf7bd69c74d298aeca317297eb98be54717da3ddc079cbc1e",
+      "codec": "vorbis",
+      "channels": 2,
+      "sampleRate": 44100,
+      "frames": 4669440,
+      "trailingBytes": 1
     },
     "sfx/1 up theremin.wav": {
       "bytes": 25626,

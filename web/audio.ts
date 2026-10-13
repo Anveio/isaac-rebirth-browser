@@ -18,7 +18,7 @@ async function sha256(bytes: ArrayBuffer): Promise<string> {
 // browser compressed-audio decoders and output device rates do not select SFX.
 async function loadSample(context: AudioContext, path: string): Promise<Sample> {
   const metadata = catalogue.assets[path as keyof typeof catalogue.assets];
-  if (!metadata || !('frames' in metadata)) throw new Error(`Missing authored WAV metadata: ${path}`);
+  if (!metadata || !('sampleBytes' in metadata)) throw new Error(`Missing authored WAV metadata: ${path}`);
   const url = urls[RESOURCE_PREFIX + path];
   if (!url) throw new Error(`Missing authored SFX URL: ${path}`);
   const response = await fetch(url);

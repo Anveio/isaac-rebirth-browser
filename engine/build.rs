@@ -218,4 +218,21 @@ fn main() {
         format!("pub const SOUND_COUNTS: [u8; 324] = {counts:?};\n"),
     )
     .expect("write authored audio catalogue");
+    let mut tracks = String::from("pub const MUSIC_TRACKS: &[MusicTrack] = &[\n");
+    for track in audio["music"].as_array().expect("music catalogue missing") {
+        let id = track["id"].as_u64().expect("music ID missing");
+        assert!(id <= 101, "invalid authored music ID");
+        let path = track["path"].as_str().expect("music path missing");
+        let optional = |field: &str| match track[field].as_str() {
+            Some(path) => format!("Some({path:?})"),
+            None => "None".into(),
+        };
+        tracks.push_str(&format!(
+            "MusicTrack {{ id: {id}, path: {path:?}, intro: {}, layer: {}, layer_intro: {}, looping: {} }},\n",
+            optional("intro"), optional("layer"), optional("layerintro"),
+            track["loop"].as_bool().expect("music loop missing"),
+        ));
+    }
+    tracks.push_str("];\n");
+    fs::write(output.join("music_catalog.rs"), tracks).expect("write authored music catalogue");
 }
