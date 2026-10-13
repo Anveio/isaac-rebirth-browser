@@ -2,7 +2,8 @@ import baseSceneData from "./scene-data.json";
 import doorData from "./door-data.json";
 import gridData from "./grid-data.json";
 import npcData from "./npc-data.json";
-const sceneData = { ...baseSceneData, ...doorData, ...gridData, ...npcData };
+import familiarData from "./familiar-data.json";
+const sceneData = { ...baseSceneData, ...doorData, ...gridData, ...npcData, ...familiarData };
 import fontData from "./font-data.json";
 import completionUrl from "./assets/completion_widget.png?url";
 import postitOverlapUrl from "./assets/gamemenu_postitoverlap.png?url";
@@ -54,6 +55,9 @@ const urls = import.meta.glob([
   "../references/isaac/rebirth/resources/gfx/monsters/classic/monster_010_fly.png",
   "../references/isaac/rebirth/resources/gfx/effects/hangingguys.png",
   "../references/isaac/rebirth/resources/gfx/monsters/rebirth/monster_244_roundworm.png",
+  "../references/isaac/rebirth/resources/gfx/familiar/familiar_270_leech.png",
+  "../references/isaac/rebirth/resources/gfx/effects/effect_009_poof01*.png",
+  "../references/isaac/rebirth/resources/gfx/effects/effect_006_hearteffect.png",
   "../references/isaac/rebirth/resources/gfx/shadow.png",
   "../references/isaac/rebirth/resources/gfx/tears.png",
   "../references/isaac/rebirth/resources/gfx/enemybullets.png",
