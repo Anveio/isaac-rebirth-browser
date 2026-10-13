@@ -63,7 +63,7 @@ export class Renderer {
       }
       this.pickups.draw(ctx, state);
       for (const npc of state.room.npcs) {
-        if (npc.dead || npc.removed) continue;
+        if (npc.dead || npc.removed || (!npc.keeper && !npc.visible)) continue;
         const keeper = npc.keeper;
         if (keeper) {
           this.assets.draw(ctx, "gfx/017.002_secret room keeper.anm2", keeper.animation,
@@ -74,10 +74,14 @@ export class Renderer {
               GreenOffset: keeper.offsets[1]! * 255, BlueOffset: keeper.offsets[2]! * 255,
             } } });
         } else {
-          this.assets.draw(ctx, npc.kind === 13 ? "gfx/013.000_fly.anm2" : "gfx/018.000_attack fly.anm2", "Fly",
+          this.assets.draw(ctx, npc.kind === 13 ? "gfx/013.000_fly.anm2" : npc.kind === 18 ? "gfx/018.000_attack fly.anm2" : "gfx/244.000_round worm.anm2", npc.animation,
             npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46, npc.animationFrame, { scale: 0.65 });
         }
       }
+      for (const projectile of state.enemyProjectiles)
+        if (!projectile.removed)
+          this.assets.draw(ctx, "gfx/009.000_projectile.anm2", "RegularTear6",
+            projectile.presentedPosition.x * 0.65 + 32, (projectile.presentedPosition.y + projectile.height) * 0.65 - 46, projectile.animationFrame, { scale:0.65 });
       this.drawPlayer(ctx, state);
       for (const tear of state.tears)
         this.assets.draw(ctx, TEAR, "RegularTear6", Math.round(tear.x * 2) / 2, Math.round(tear.y * 2) / 2, tear.age);

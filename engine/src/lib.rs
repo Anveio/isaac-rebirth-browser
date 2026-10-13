@@ -14,6 +14,7 @@ pub mod combat;
 mod content;
 mod doors;
 mod effects;
+pub mod enemy_projectiles;
 pub mod floor;
 pub mod grid;
 mod grid_hazards;
@@ -32,6 +33,7 @@ mod room;
 pub mod room_assets;
 pub mod room_spawns;
 pub mod room_templates;
+pub mod roundworm;
 pub mod seed;
 pub mod traversal;
 pub use bombs::{Bomb, Explosion};
@@ -326,6 +328,8 @@ pub struct State {
     pub next_pickup: u32,
     pub minimap: Minimap,
     pub tears: Vec<Tear>,
+    pub enemy_projectiles: Vec<enemy_projectiles::EnemyProjectile>,
+    pub next_enemy_projectile: u32,
     pub impacts: Vec<Impact>,
     pub fire_cooldown: i32,
     pub max_fire_delay: i32,
@@ -450,6 +454,8 @@ impl Game {
                 next_pickup: 1,
                 minimap: Minimap { cells: Vec::new() },
                 tears: Vec::new(),
+                enemy_projectiles: Vec::new(),
+                next_enemy_projectile: 1,
                 impacts: Vec::new(),
                 fire_cooldown: -1,
                 max_fire_delay: 10,
@@ -889,6 +895,8 @@ impl Game {
         self.state.tears.clear();
         self.state.impacts.clear();
         self.state.next_tear = 1;
+        self.state.enemy_projectiles.clear();
+        self.state.next_enemy_projectile = 1;
         self.state.fire_cooldown = -1;
         self.state.max_fire_delay = 10;
         self.state.head_timer = -1;
@@ -1145,32 +1153,11 @@ impl Game {
                         .selectors
                         .clone();
                     self.admit_room_pickups(&selectors)?;
-                    let grid = grid::Grid::new(
-                        self.state
-                            .room
-                            .grid
-                            .clone()
-                            .expect("admitted room has grid"),
-                    )?;
-                    let player = bombs::player_world(&self.state);
                     // The admitted Room::Update follows authored mixed order.
-                    for actor in self.state.room.authored_actor_order.iter().copied() {
+                    for actor in self.state.room.authored_actor_order.clone() {
                         match actor.kind {
                             actors::ActorKind::Npc => {
-                                let npc = self
-                                    .state
-                                    .room
-                                    .npcs
-                                    .iter_mut()
-                                    .find(|npc| npc.id == actor.id)
-                                    .ok_or("missing admitted NPC handle")?;
-                                npc.advance(
-                                    phase,
-                                    self.state.game_update_count,
-                                    &mut self.state.boot_lifecycle.shared,
-                                    player,
-                                    &grid,
-                                )?;
+                                self.advance_npc(actor.id, phase)?;
                             }
                             actors::ActorKind::Pickup => {
                                 let pickup = self
@@ -1218,6 +1205,7 @@ impl Game {
         if phase == phase::Phase::Update {
             npcs::player_contacts(&mut self.state)?;
             npcs::nonplayer_contacts(&mut self.state)?;
+            enemy_projectiles::player_contacts(&mut self.state)?;
             // Actual full manager contact pass uses typed ground coordinates.
             let tears: Vec<_> = self
                 .state
@@ -1278,6 +1266,9 @@ impl Game {
         bombs::retire_removed(&mut self.state);
         self.state.room.pickups.retain(|pickup| !pickup.removed);
         self.state.room.npcs.retain(|npc| !npc.removed);
+        self.state
+            .enemy_projectiles
+            .retain(|projectile| !projectile.removed);
         self.refresh_minimap();
         if phase.updates_nonplayers() {
             npcs::advance_room_clear(&mut self.state);
@@ -1292,6 +1283,11 @@ impl Game {
             actors::ActorKind::Tear => surviving.iter().any(|tear| tear.id == actor.id),
             actors::ActorKind::Pickup => pickups.iter().any(|pickup| pickup.id == actor.id),
             actors::ActorKind::Npc => self.state.room.npcs.iter().any(|npc| npc.id == actor.id),
+            actors::ActorKind::Projectile => self
+                .state
+                .enemy_projectiles
+                .iter()
+                .any(|projectile| projectile.id == actor.id),
             _ => true,
         });
         if phase != phase::Phase::Skipped {
@@ -1351,31 +1347,78 @@ impl Game {
                 }
             }
             actors::ActorKind::Npc => {
-                let grid = grid::Grid::new(
-                    self.state
-                        .room
-                        .grid
-                        .clone()
-                        .expect("admitted room has grid"),
-                )?;
-                let player = bombs::player_world(&self.state);
-                if let Some(npc) = self
-                    .state
-                    .room
-                    .npcs
-                    .iter_mut()
-                    .find(|npc| npc.id == actor.id)
-                {
-                    npc.advance(
-                        phase,
-                        self.state.game_update_count,
-                        &mut self.state.boot_lifecycle.shared,
-                        player,
-                        &grid,
-                    )?;
-                }
+                self.advance_npc(actor.id, phase)?;
+            }
+            actors::ActorKind::Projectile => {
+                enemy_projectiles::advance_actor(&mut self.state, phase, actor.id)?
             }
             _ => return Err("actor kind has no admitted runtime yet".into()),
+        }
+        Ok(())
+    }
+    fn advance_npc(&mut self, id: u32, phase: phase::Phase) -> Result<(), String> {
+        let grid = grid::Grid::new(self.state.room.grid.clone().expect("admitted NPC has grid"))?;
+        let player = bombs::player_world(&self.state);
+        let Some(index) = self.state.room.npcs.iter().position(|npc| npc.id == id) else {
+            return Ok(());
+        };
+        if self.state.room.npcs[index].kind != 244 {
+            return self.state.room.npcs[index].advance(
+                phase,
+                self.state.game_update_count,
+                &mut self.state.boot_lifecycle.shared,
+                player,
+                &grid,
+            );
+        }
+        let mut occupied = vec![player];
+        occupied.extend(
+            self.state
+                .room
+                .npcs
+                .iter()
+                .filter(|npc| !npc.removed)
+                .map(|npc| npc.position),
+        );
+        occupied.extend(
+            self.state
+                .room
+                .pickups
+                .iter()
+                .filter(|pickup| !pickup.removed)
+                .map(|pickup| pickup.position),
+        );
+        occupied.extend(self.state.bombs.iter().map(|bomb| bomb.motion.position));
+        let player_velocity = bombs::player_velocity(&self.state);
+        let shot = roundworm::advance(
+            &mut self.state.room.npcs[index],
+            phase,
+            &mut self.state.boot_lifecycle.shared,
+            &mut roundworm::World {
+                player,
+                player_velocity,
+                occupied: &occupied,
+                grid: &grid,
+                audio: &mut self.state.audio,
+                system_counter: self.state.system_clock.system_counter.wrapping_sub(1),
+            },
+        )?;
+        if let Some(shot) = shot {
+            let id = self.state.next_enemy_projectile;
+            self.state.next_enemy_projectile = id
+                .checked_add(1)
+                .ok_or("enemy projectile identity exhausted")?;
+            self.state
+                .enemy_projectiles
+                .push(enemy_projectiles::EnemyProjectile::birth(
+                    id,
+                    self.state.room.npcs[index].id,
+                    shot,
+                ));
+            self.state.actor_scheduler.admit(actors::ActorRef {
+                kind: actors::ActorKind::Projectile,
+                id,
+            })?;
         }
         Ok(())
     }

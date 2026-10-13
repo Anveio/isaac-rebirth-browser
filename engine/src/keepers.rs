@@ -48,6 +48,11 @@ pub(crate) fn from_selector(id: u32, selector: &SpawnSelector) -> Result<Npc, St
         state: 1,
         frame_age: 0,
         animation_frame: 0,
+        animation: String::new(),
+        animation_clock: 0.0,
+        animation_playing: true,
+        visible: true,
+        saved_initialized_state: 0,
         appearance_effect_seed: None,
         death_effect_seed: None,
         dead: false,
@@ -98,6 +103,9 @@ pub(crate) fn advance(npc: &mut Npc, phase: Phase) -> Result<(), String> {
         let frames = content::KEEPER_ANIMATION_FRAMES[(npc.subtype - 1) as usize];
         keeper.animation_clock = (keeper.animation_clock + 1.0) % frames as f32;
         npc.animation_frame = keeper.animation_clock as u32;
+        npc.animation = keeper.animation.clone();
+        npc.animation_clock = keeper.animation_clock;
+        npc.animation_playing = keeper.animation_playing;
     }
     npc.presented_position = npc.position;
     Ok(())

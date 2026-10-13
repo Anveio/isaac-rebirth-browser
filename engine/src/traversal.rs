@@ -164,6 +164,7 @@ pub(crate) fn advance_transition(state: &mut State, phase: Phase) -> bool {
     state.player.vx = 0.0;
     state.player.vy = 0.0;
     state.tears.clear();
+    state.enemy_projectiles.clear();
     state.impacts.clear();
     state.bombs.clear();
     state.explosions.clear();

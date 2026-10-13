@@ -9,6 +9,7 @@ pub enum ActorKind {
     Bomb,
     Pickup,
     Npc,
+    Projectile,
     Effect,
 }
 

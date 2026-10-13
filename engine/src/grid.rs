@@ -330,6 +330,72 @@ impl Grid {
         }
     }
 
+    /// RoomLoad5cedf0 derives these bounds from the authored interior size,
+    /// using GridPosition(width+1) minus (20,20), then size times40.
+    pub fn clamp_room(&self, point: WorldVector, margin: f32) -> WorldVector {
+        WorldVector {
+            x: point.x.clamp(
+                60.0 + margin,
+                60.0 + f32::from(self.descriptor.width - 2) * 40.0 - margin,
+            ),
+            y: point.y.clamp(
+                140.0 + margin,
+                140.0 + f32::from(self.descriptor.height - 2) * 40.0 - margin,
+            ),
+        }
+    }
+
+    pub fn room_center(&self) -> WorldVector {
+        WorldVector {
+            x: (60.0 + (60.0 + f32::from(self.descriptor.width - 2) * 40.0)) * 0.5,
+            y: (140.0 + (140.0 + f32::from(self.descriptor.height - 2) * 40.0)) * 0.5,
+        }
+    }
+
+    /// CheckLine5c74a0(mode3,threshold0): four corners at +/-5 for each
+    /// ten-unit step. Class1 is exempt; other nonzero collision blocks.
+    /// Empty-collision authored selectors contribute to the <=8 budget.
+    pub fn projectile_line_clear(&self, from: WorldVector, to: WorldVector) -> bool {
+        let delta = WorldVector {
+            x: from.x - to.x,
+            y: from.y - to.y,
+        };
+        let distance = (delta.x * delta.x + delta.y * delta.y).sqrt();
+        if distance <= 0.0 {
+            return true;
+        }
+        let step = WorldVector {
+            x: delta.x / distance * 10.0,
+            y: delta.y / distance * 10.0,
+        };
+        let mut point = from;
+        let mut travelled = 0.0;
+        let mut selectors = 0;
+        while travelled < distance {
+            point = WorldVector {
+                x: point.x - step.x,
+                y: point.y - step.y,
+            };
+            for offset in [
+                WorldVector { x: -5.0, y: -5.0 },
+                WorldVector { x: -5.0, y: 5.0 },
+                WorldVector { x: 5.0, y: 5.0 },
+                WorldVector { x: 5.0, y: -5.0 },
+            ] {
+                let Some(index) = self.index(point + offset) else {
+                    return false;
+                };
+                match self.collision(index) {
+                    1 => {}
+                    0 => selectors += u32::from(self.descriptor.cells[index].selector > 0),
+                    _ => return false,
+                }
+            }
+            travelled += 10.0;
+        }
+        selectors <= 8
+    }
+
     /// Source CheckLine(mode=2): ordinary rocks permit the line; kind3 blocks
     /// it, kind16 doors bypass collision-class rejection, and walls block it.
     /// The source advances ten units before testing, including the final step
