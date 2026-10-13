@@ -1,0 +1,79 @@
+{
+  "schema": 1,
+  "status": "pass",
+  "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "production": {
+    "sha256": "cf07af1694444b160c07994a81b5611a0d71e750aa1bac576121a65fb0aba594",
+    "files": 99,
+    "scope": "Immutable snapshot of production build bytes; source/native replay equality is checked separately"
+  },
+  "scope": "Causal startup and initialized menu fields at Title: full 624-word MT state, saved player seed, nine saved grid pairs, menu run seed and 179 stat poses. Later menu navigation, run/room/ambient random routing and tear fall uniforms remain incomplete.",
+  "cases": [
+    {
+      "name": "zero-epoch",
+      "bootEpochSeed": 0,
+      "code": "QSYVKMSE",
+      "status": "pass",
+      "nativeManifestSha256": "9d989f3dbbe0343af167a7660fd22893837bee40e3563420152511d3e0eda787",
+      "comparedStateWords": 624,
+      "comparedGridPairs": 9,
+      "comparedStatPoses": 179
+    },
+    {
+      "name": "fixed-epoch",
+      "bootEpochSeed": 1700000000,
+      "code": "ZG800TRJ",
+      "status": "pass",
+      "nativeManifestSha256": "fb67fcc6492ca9505b679ad67463e348cdacbddf68e0614f47b22422458b8398",
+      "comparedStateWords": 624,
+      "comparedGridPairs": 9,
+      "comparedStatPoses": 179
+    },
+    {
+      "name": "random-0",
+      "bootEpochSeed": 3801070503,
+      "code": "T20QG7BK",
+      "seedValue": 2177080457,
+      "status": "pass",
+      "nativeManifestSha256": "8d98ed3ee779e64fe18722e134178f39db2a2260d83015e03dca09a7701474a5",
+      "comparedStateWords": 624,
+      "comparedGridPairs": 9,
+      "comparedStatPoses": 179
+    },
+    {
+      "name": "random-1",
+      "bootEpochSeed": 3787175623,
+      "code": "P68G9ZVX",
+      "seedValue": 1624444970,
+      "status": "pass",
+      "nativeManifestSha256": "5efd80b4705965d21f9ea0a937ef3ca696a19e966393cf5ee1d2a90c62c59529",
+      "comparedStateWords": 624,
+      "comparedGridPairs": 9,
+      "comparedStatPoses": 179
+    },
+    {
+      "name": "random-2",
+      "bootEpochSeed": 2452192892,
+      "code": "11HXZWEF",
+      "seedValue": 2988459317,
+      "status": "pass",
+      "nativeManifestSha256": "75fe92e779c7d52bde950eb75ec212f435fb03d431a4189762aa9ffcb92b76c1",
+      "comparedStateWords": 624,
+      "comparedGridPairs": 9,
+      "comparedStatPoses": 179
+    },
+    {
+      "name": "random-3",
+      "bootEpochSeed": 459941506,
+      "code": "PAS2JN2X",
+      "seedValue": 1741618126,
+      "status": "pass",
+      "nativeManifestSha256": "1dcb1dad02803b4d6db8205e754a019395cb9bb9d14afe75c9af6d07ba88d500",
+      "comparedStateWords": 624,
+      "comparedGridPairs": 9,
+      "comparedStatPoses": 179
+    }
+  ],
+  "reproduceFresh": "source cloud/env.sh && npm run build && npm run test:e2e:boot-mt",
+  "reproduceRecorded": "source cloud/env.sh && npm run build && npm run test:e2e:boot-mt -- --scenarios references/isaac/foundation/boot-mt/scenarios.json"
+}

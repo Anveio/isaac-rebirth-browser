@@ -10,6 +10,12 @@ export interface Player {
 export interface Tear { id: number; x: number; y: number; vx: number; vy: number; age: number; }
 export interface Impact { id: number; x: number; y: number; age: number; }
 export interface ActorRef { kind: "player" | "tear" | "bomb" | "pickup" | "npc" | "effect"; id: number; }
+export interface MtState { words: number[]; index: number; }
+export interface GridSeedSample { roomRecord: number; gridIndex: number; seeds: [number, number]; }
+export interface BootLifecycle {
+  shared: MtState; savedPlayerSeed: number; savedGridSeedSamples: GridSeedSample[];
+  levelGridSeedSamples: GridSeedSample[]; backdropSeed: number; menuRunSeed: number; secretPoses: number[];
+}
 export interface Bomb {
   id: number; x: number; y: number;
   motion: {
@@ -80,7 +86,7 @@ export interface State {
   titleAnimationFrame: number; menuFade: { active: boolean; alpha: number; color: [number, number, number, number] };
   systemClock: { systemCounter: number; interpolationEnabled: boolean };
   profile: number; mainSelection: number; characterSelection: number; character: string; difficulty: string;
-  seedText: string; seedValid: boolean; runSeed: string; initialSeed: number; runSeedValue: number; bootEpochSeed: number;
+  seedText: string; seedValid: boolean; runSeed: string; initialSeed: number; runSeedValue: number; bootEpochSeed: number; bootLifecycle: BootLifecycle;
   stage: number; stageSeed: number; seededRun: boolean; achievementEligibility: boolean;
   profiles: { slot: number; unlockedCharacters: string[]; selectedCharacter: string }[];
   characterCatalog: { name: string; animation: string }[];

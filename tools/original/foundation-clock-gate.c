@@ -30,12 +30,21 @@ static struct InputEvent input_events[2048];
 static unsigned input_event_count;
 static int input_overflow;
 static const uint64_t monotonic_base = UINT64_C(1000000000000);
-static const uint64_t realtime_base = UINT64_C(1700000000000000000);
+static uint64_t realtime_base = UINT64_C(1700000000000000000);
 static int main_thread(void) { return enabled && (pid_t)syscall(SYS_gettid) == owner; }
 
 __attribute__((constructor)) static void start_gate(void) {
     const char *path = getenv("ISAAC_CLOCK_GATE_SOCKET");
     if (!path || !*path) return;
+    const char *epoch = getenv("ISAAC_CLOCK_GATE_EPOCH_SEED");
+    if (epoch) {
+        char *end = NULL;
+        unsigned long long requested = strtoull(epoch, &end, 10);
+        if (!*epoch || *end || requested > UINT32_MAX) {
+            fprintf(stderr, "clock gate epoch seed must be a u32\n"); _exit(90);
+        }
+        realtime_base = (uint64_t)requested * UINT64_C(1000000000);
+    }
     owner = (pid_t)syscall(SYS_gettid);
     const char *rate = getenv("ISAAC_CLOCK_GATE_FPS");
     if (rate) { unsigned requested = (unsigned)strtoul(rate, NULL, 10); if (requested >= 1 && requested <= 1000) fps = requested; }
