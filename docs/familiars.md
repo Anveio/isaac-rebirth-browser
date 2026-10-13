@@ -8,7 +8,7 @@ Regenerate the metadata with `python3 tools/foundation/extract-animations.py
 web/familiar-data.json`. The recorded catalogue in
 `references/isaac/foundation/familiars/authored-catalogue.json` pins the archive,
 extractor, metadata, sheets, clip lengths and loop flags. Leech defaults to
-Move Hori12 loop, Poof43 is nonlooping, and Heart8 is nonlooping.
+Move Hori (12 frames, looping), Poof (43 frames) is nonlooping, and Heart (8 frames) is nonlooping.
 
 This resource prerequisite does not accept Familiar admission, appearance,
 movement, contact or healing parity. Those require actual native/browser
@@ -18,14 +18,14 @@ The first runtime leaf routes AddCollectible52d173 into the supported Familiar
 cache callback. The Player has separate permanent and temporary count owners;
 the temporary getter searches actual records without sampling RNG. Each
 Leech deficit consumes child270 once, samples one shared direction, clamps
-world placement with the source20-unit inset, admits the actor and explicitly
+world placement with the source 20-unit inset, admits the actor and explicitly
 updates it once. The manager's captured old tail prevents another full update
 in that same pass. Source room sequence IDs are allocated separately from
 browser handles and survive ordinary room-clear retention for Player/Familiar
 pointers; restored ordinary records receive new IDs.
 
-The generic5-frame appearance counter owns visibility. Birth takes5 to4; the
-next full callback takes4 to3, samples a separate shared raw seed, creates the
+The generic 5-frame appearance counter owns visibility. Birth takes 5 to 4; the
+next full callback takes 4 to 3, samples a separate shared raw seed, creates the
 real Poof15 and explicitly advances its authored frame0 to1. Fast callbacks
 predict motion without advancing sprite/countdown/AI. Full nonplayer grid
 responses run after entity contacts; fast prediction owns its preview response.
@@ -36,7 +36,7 @@ its TTL branch is a separate dead-only law.
 `unevaluatedCacheFlags` remains a port diagnostic: only the supported Familiar
 request is consumed. Native511f10 clears its entire word only after all requested
 callbacks. Other stat/cache requests and unsupported familiar ownership remain
-pending. After reveal, the empty-room Player80-unit deadband uses the actual
+pending. After reveal, the empty-room Player 80-unit deadband uses the actual
 friction/frame law; target/path work is counted as unresolved, with no fitted
 direction, shared draw, state injection or skipped counter.
 
@@ -50,9 +50,25 @@ state. Sequence, placement and Poof seed mismatches are blocking. Complete
 shared MT words and absolute internal birth/current Game ages remain recorded;
 the source cutscene/run age gap never enters production. Every gameplay snapshot
 and actual backend callback retains its full state independently of any truthful
-32MiB state-history truncation.
+32 MiB state-history truncation.
 
-The initial Familiar live cohort is pending. Navigation/target/contact/healing,
+The initial live cohort completed all four original/browser pairs, with complete
+transport/input/source observations and immutable source hashes. Its required
+gate remains 0/4: 80,878 checks retain 25,131 failures. Both W0 phase offsets show
+235 joined Leech presentations, all appearance counters/reveal, and 168 Poof
+presentations with actual retirement. The local child/RNG30, owner/parent,
+classes/flags/health/friction and main Sprite fields match. Actual Player motion
+and all 347 child/count/temporary/queue fields match across 1,470 compared phases.
+
+Required reds expose the absent initial LightBeam33 and OS-grant Effect68,
+Ember presence/motion/shared seed differences, source actor order/sequence,
+Leech shared-direction placement, and Poof shared seed/RNG30/placement/sequence.
+`references/isaac/foundation/familiars/initial-live.json` pins the full failing
+report, immutable production artifact, complete tape, native/browser gzip bytes
+and restoration journals. No failing source capture has been replaced or called
+passing. The compiler/build check passed; the fresh game gate did not.
+
+Navigation/target/contact/healing,
 other Familiar subclasses/modifiers, missing real shared/spawn consumers,
 complete stat/cache completion, room-return reinitialization and pixels remain
 unaccepted. Exact source admission/read-only review hashes are retained with the
