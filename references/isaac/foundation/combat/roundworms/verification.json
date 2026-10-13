@@ -1274,5 +1274,19 @@
     "manifestSha256": "bf4ba2a68816f58557c10e5cdd1a89898395ff51f963e8a96f8147c9d7dcfcaa",
     "restore": "python3 .cache/coordination/combat/compact-evidence.py --restore /absolute/path/to/browser/manifest.json",
     "scope": "Raw browser manifest hashes above are verified after decompression. Originals remain unchanged."
+  },
+  "restackedBase": "0f8a3633fdd4760ef2f64dad6f523a4a43ea872b",
+  "restackedRuntimeHead": "def012e",
+  "restackValidation": {
+    "wasmViteBuild": "pass",
+    "typecheck": "pass",
+    "assets": "pass (2556 authored source files)",
+    "matrix": "pass",
+    "strictClippy": "pass",
+    "cargoFmt": "pass",
+    "workers": 1,
+    "clippyLogSha256": "70546c674dba404098c943ce0b2ebd9c47adf856b8715a24cc7bec5be6cd213e",
+    "liveSuiteCount": 21,
+    "scope": "Completed capture artifacts above are unchanged; restack validation does not claim a new capture on the integrated artifact."
   }
 }
