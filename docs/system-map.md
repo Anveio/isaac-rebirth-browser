@@ -146,6 +146,16 @@ Natural regular/double bomb pickups pass 2,727 phases across four retained tapes
 and two fresh unfiltered OS-random cases. Troll/Megatroll conversions remain
 required when observed and in the retained regressions.
 
+Troll pickup conversions now create real Bomb4/3 actors before generic pickup
+animation, with source fuse, motion, animation and retirement. Mega4/4 targeting
+and friction are implemented from the binary but remain unaccepted live. The
+required conversion gate retains all seven cases: the original five public
+tapes, both unfiltered random regressions and two corrected Mega candidates.
+The initial five-case proof remains red across 2,212 phases with 3,128 required
+mismatches in shared seeds, pickup blast motion and grid restoration. The
+disproved KPF Mega expectation is corrected from actual source captures while
+its tapes and field checks remain mandatory.
+
 Ordinary 13×14 room admission and reciprocal extended doorway routing now
 match 1,843 selected geometry, player, grid, door and minimap phases across
 three source tapes. The geometry leaf retains three required missing Chest50
@@ -157,14 +167,14 @@ unaccepted. The registered large-room gate always launches both games fresh.
 [Large-room evidence](large-room-evidence.md) and
 [Chest evidence](chest-evidence.md) retain the distinct capture and recovery scopes.
 
-CI discovers all twenty-six registered live suites and runs separate jobs with
+CI discovers all twenty-seven registered live suites and runs separate jobs with
 `fail-fast: false`, preserving each result and evidence. The first matrix run
 completed floors, weapons, boot MT and pickups successfully while retaining
 core and traversal failures. Build, typecheck, assets, matrix and strict Clippy
-pass at integrated checkpoint `96a86d8`, including the reviewed Level,
+pass at integrated checkpoint `4015374`, including the reviewed Level,
 RoundWorm, item-selection, bomb-pickup, large-room geometry, Chest constructor
-bounded callback-history and first-acquisition leaves. Its production artifact is
-`c1753096efacacf002f623d4bfc9cd337908e7b7d55f668d53a9e91c44573651`.
+bounded callback-history, first-acquisition and Troll conversion leaves. Its production artifact is
+`9a923754d3ce5335de53b87328fc0f18b6bad5e5b37c4f67ae90f5c1b02302b5`.
 The continuing full 24-suite local run uses detached checkpoint `cb36018` and
 its separate immutable production artifact; later leaves do not inherit its results.
 This is a build checkpoint, not a fresh all-suite passing result.
