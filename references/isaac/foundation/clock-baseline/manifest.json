@@ -1,0 +1,2044 @@
+{
+  "schema": 1,
+  "status": "pass",
+  "captureClock": "main-thread virtual Linux clocks and blocking public GL presentation gate; simulation ticks unknown",
+  "seed": "T1PK6Y0W",
+  "seedValue": 2184569263,
+  "requestedViewport": {
+    "width": 960,
+    "height": 540,
+    "maxRenderScale": 2
+  },
+  "profile": {
+    "fresh": true,
+    "isolated": true
+  },
+  "tape": [
+    {
+      "type": "step",
+      "frames": 180
+    },
+    {
+      "type": "capture",
+      "label": "intro"
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 12
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 72
+    },
+    {
+      "type": "capture",
+      "label": "title"
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 12
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 72
+    },
+    {
+      "type": "capture",
+      "label": "profile"
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 12
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 72
+    },
+    {
+      "type": "capture",
+      "label": "main"
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 12
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 72
+    },
+    {
+      "type": "capture",
+      "label": "character"
+    },
+    {
+      "type": "key",
+      "key": "Tab",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 12
+    },
+    {
+      "type": "key",
+      "key": "Tab",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 108
+    },
+    {
+      "type": "key",
+      "key": "t",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 12
+    },
+    {
+      "type": "key",
+      "key": "t",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 6
+    },
+    {
+      "type": "key",
+      "key": "1",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 12
+    },
+    {
+      "type": "key",
+      "key": "1",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 6
+    },
+    {
+      "type": "key",
+      "key": "p",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 12
+    },
+    {
+      "type": "key",
+      "key": "p",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 6
+    },
+    {
+      "type": "key",
+      "key": "k",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 12
+    },
+    {
+      "type": "key",
+      "key": "k",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 6
+    },
+    {
+      "type": "key",
+      "key": "6",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 12
+    },
+    {
+      "type": "key",
+      "key": "6",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 6
+    },
+    {
+      "type": "key",
+      "key": "y",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 12
+    },
+    {
+      "type": "key",
+      "key": "y",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 6
+    },
+    {
+      "type": "key",
+      "key": "0",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 12
+    },
+    {
+      "type": "key",
+      "key": "0",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 6
+    },
+    {
+      "type": "key",
+      "key": "w",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 12
+    },
+    {
+      "type": "key",
+      "key": "w",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 6
+    },
+    {
+      "type": "capture",
+      "label": "seed-entry"
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 12
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 72
+    },
+    {
+      "type": "capture",
+      "label": "character-seeded"
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 12
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 300
+    },
+    {
+      "type": "capture",
+      "label": "gameplay-start"
+    },
+    {
+      "type": "step",
+      "frames": 57
+    },
+    {
+      "type": "capture",
+      "label": "gameplay-unpaused"
+    },
+    {
+      "type": "key",
+      "key": "d",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 27
+    },
+    {
+      "type": "key",
+      "key": "d",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 30
+    },
+    {
+      "type": "capture",
+      "label": "movement"
+    },
+    {
+      "type": "key",
+      "key": "Right",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 54
+    },
+    {
+      "type": "key",
+      "key": "Right",
+      "down": false
+    },
+    {
+      "type": "capture",
+      "label": "shooting"
+    },
+    {
+      "type": "step",
+      "frames": 30
+    },
+    {
+      "type": "capture",
+      "label": "after-fire"
+    }
+  ],
+  "frames": [
+    {
+      "label": "intro",
+      "path": "frames/intro.png",
+      "width": 960,
+      "height": 540,
+      "presentedFrame": 210,
+      "virtualElapsedNs": 3500070000,
+      "simulationTick": null,
+      "gateBlocked": true,
+      "x11Focus": {
+        "window": 2097158,
+        "revertTo": 2
+      },
+      "targetWindow": 2097158
+    },
+    {
+      "label": "title",
+      "path": "frames/title.png",
+      "width": 960,
+      "height": 540,
+      "presentedFrame": 294,
+      "virtualElapsedNs": 4900098000,
+      "simulationTick": null,
+      "gateBlocked": true,
+      "x11Focus": {
+        "window": 2097158,
+        "revertTo": 2
+      },
+      "targetWindow": 2097158
+    },
+    {
+      "label": "profile",
+      "path": "frames/profile.png",
+      "width": 960,
+      "height": 540,
+      "presentedFrame": 378,
+      "virtualElapsedNs": 6300126000,
+      "simulationTick": null,
+      "gateBlocked": true,
+      "x11Focus": {
+        "window": 2097158,
+        "revertTo": 2
+      },
+      "targetWindow": 2097158
+    },
+    {
+      "label": "main",
+      "path": "frames/main.png",
+      "width": 960,
+      "height": 540,
+      "presentedFrame": 462,
+      "virtualElapsedNs": 7700154000,
+      "simulationTick": null,
+      "gateBlocked": true,
+      "x11Focus": {
+        "window": 2097158,
+        "revertTo": 2
+      },
+      "targetWindow": 2097158
+    },
+    {
+      "label": "character",
+      "path": "frames/character.png",
+      "width": 960,
+      "height": 540,
+      "presentedFrame": 546,
+      "virtualElapsedNs": 9100182000,
+      "simulationTick": null,
+      "gateBlocked": true,
+      "x11Focus": {
+        "window": 2097158,
+        "revertTo": 2
+      },
+      "targetWindow": 2097158
+    },
+    {
+      "label": "seed-entry",
+      "path": "frames/seed-entry.png",
+      "width": 960,
+      "height": 540,
+      "presentedFrame": 810,
+      "virtualElapsedNs": 13500270000,
+      "simulationTick": null,
+      "gateBlocked": true,
+      "x11Focus": {
+        "window": 2097158,
+        "revertTo": 2
+      },
+      "targetWindow": 2097158
+    },
+    {
+      "label": "character-seeded",
+      "path": "frames/character-seeded.png",
+      "width": 960,
+      "height": 540,
+      "presentedFrame": 894,
+      "virtualElapsedNs": 14900298000,
+      "simulationTick": null,
+      "gateBlocked": true,
+      "x11Focus": {
+        "window": 2097158,
+        "revertTo": 2
+      },
+      "targetWindow": 2097158
+    },
+    {
+      "label": "gameplay-start",
+      "path": "frames/gameplay-start.png",
+      "width": 960,
+      "height": 540,
+      "presentedFrame": 1206,
+      "virtualElapsedNs": 20100402000,
+      "simulationTick": null,
+      "gateBlocked": true,
+      "x11Focus": {
+        "window": 2097158,
+        "revertTo": 2
+      },
+      "targetWindow": 2097158
+    },
+    {
+      "label": "gameplay-unpaused",
+      "path": "frames/gameplay-unpaused.png",
+      "width": 960,
+      "height": 540,
+      "presentedFrame": 1263,
+      "virtualElapsedNs": 21050421000,
+      "simulationTick": null,
+      "gateBlocked": true,
+      "x11Focus": {
+        "window": 2097158,
+        "revertTo": 2
+      },
+      "targetWindow": 2097158
+    },
+    {
+      "label": "movement",
+      "path": "frames/movement.png",
+      "width": 960,
+      "height": 540,
+      "presentedFrame": 1320,
+      "virtualElapsedNs": 22000440000,
+      "simulationTick": null,
+      "gateBlocked": true,
+      "x11Focus": {
+        "window": 2097158,
+        "revertTo": 2
+      },
+      "targetWindow": 2097158
+    },
+    {
+      "label": "shooting",
+      "path": "frames/shooting.png",
+      "width": 960,
+      "height": 540,
+      "presentedFrame": 1374,
+      "virtualElapsedNs": 22900458000,
+      "simulationTick": null,
+      "gateBlocked": true,
+      "x11Focus": {
+        "window": 2097158,
+        "revertTo": 2
+      },
+      "targetWindow": 2097158
+    },
+    {
+      "label": "after-fire",
+      "path": "frames/after-fire.png",
+      "width": 960,
+      "height": 540,
+      "presentedFrame": 1404,
+      "virtualElapsedNs": 23400468000,
+      "simulationTick": null,
+      "gateBlocked": true,
+      "x11Focus": {
+        "window": 2097158,
+        "revertTo": 2
+      },
+      "targetWindow": 2097158
+    }
+  ],
+  "inputs": [
+    {
+      "type": "key",
+      "key": "Return",
+      "down": true,
+      "keysym": 65293,
+      "presentedFrame": 210,
+      "virtualElapsedNs": 3500070000
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": false,
+      "keysym": 65293,
+      "presentedFrame": 222,
+      "virtualElapsedNs": 3700074000
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": true,
+      "keysym": 65293,
+      "presentedFrame": 294,
+      "virtualElapsedNs": 4900098000
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": false,
+      "keysym": 65293,
+      "presentedFrame": 306,
+      "virtualElapsedNs": 5100102000
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": true,
+      "keysym": 65293,
+      "presentedFrame": 378,
+      "virtualElapsedNs": 6300126000
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": false,
+      "keysym": 65293,
+      "presentedFrame": 390,
+      "virtualElapsedNs": 6500130000
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": true,
+      "keysym": 65293,
+      "presentedFrame": 462,
+      "virtualElapsedNs": 7700154000
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": false,
+      "keysym": 65293,
+      "presentedFrame": 474,
+      "virtualElapsedNs": 7900158000
+    },
+    {
+      "type": "key",
+      "key": "Tab",
+      "down": true,
+      "keysym": 65289,
+      "presentedFrame": 546,
+      "virtualElapsedNs": 9100182000
+    },
+    {
+      "type": "key",
+      "key": "Tab",
+      "down": false,
+      "keysym": 65289,
+      "presentedFrame": 558,
+      "virtualElapsedNs": 9300186000
+    },
+    {
+      "type": "key",
+      "key": "t",
+      "down": true,
+      "keysym": 116,
+      "presentedFrame": 666,
+      "virtualElapsedNs": 11100222000
+    },
+    {
+      "type": "key",
+      "key": "t",
+      "down": false,
+      "keysym": 116,
+      "presentedFrame": 678,
+      "virtualElapsedNs": 11300226000
+    },
+    {
+      "type": "key",
+      "key": "1",
+      "down": true,
+      "keysym": 49,
+      "presentedFrame": 684,
+      "virtualElapsedNs": 11400228000
+    },
+    {
+      "type": "key",
+      "key": "1",
+      "down": false,
+      "keysym": 49,
+      "presentedFrame": 696,
+      "virtualElapsedNs": 11600232000
+    },
+    {
+      "type": "key",
+      "key": "p",
+      "down": true,
+      "keysym": 112,
+      "presentedFrame": 702,
+      "virtualElapsedNs": 11700234000
+    },
+    {
+      "type": "key",
+      "key": "p",
+      "down": false,
+      "keysym": 112,
+      "presentedFrame": 714,
+      "virtualElapsedNs": 11900238000
+    },
+    {
+      "type": "key",
+      "key": "k",
+      "down": true,
+      "keysym": 107,
+      "presentedFrame": 720,
+      "virtualElapsedNs": 12000240000
+    },
+    {
+      "type": "key",
+      "key": "k",
+      "down": false,
+      "keysym": 107,
+      "presentedFrame": 732,
+      "virtualElapsedNs": 12200244000
+    },
+    {
+      "type": "key",
+      "key": "6",
+      "down": true,
+      "keysym": 54,
+      "presentedFrame": 738,
+      "virtualElapsedNs": 12300246000
+    },
+    {
+      "type": "key",
+      "key": "6",
+      "down": false,
+      "keysym": 54,
+      "presentedFrame": 750,
+      "virtualElapsedNs": 12500250000
+    },
+    {
+      "type": "key",
+      "key": "y",
+      "down": true,
+      "keysym": 121,
+      "presentedFrame": 756,
+      "virtualElapsedNs": 12600252000
+    },
+    {
+      "type": "key",
+      "key": "y",
+      "down": false,
+      "keysym": 121,
+      "presentedFrame": 768,
+      "virtualElapsedNs": 12800256000
+    },
+    {
+      "type": "key",
+      "key": "0",
+      "down": true,
+      "keysym": 48,
+      "presentedFrame": 774,
+      "virtualElapsedNs": 12900258000
+    },
+    {
+      "type": "key",
+      "key": "0",
+      "down": false,
+      "keysym": 48,
+      "presentedFrame": 786,
+      "virtualElapsedNs": 13100262000
+    },
+    {
+      "type": "key",
+      "key": "w",
+      "down": true,
+      "keysym": 119,
+      "presentedFrame": 792,
+      "virtualElapsedNs": 13200264000
+    },
+    {
+      "type": "key",
+      "key": "w",
+      "down": false,
+      "keysym": 119,
+      "presentedFrame": 804,
+      "virtualElapsedNs": 13400268000
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": true,
+      "keysym": 65293,
+      "presentedFrame": 810,
+      "virtualElapsedNs": 13500270000
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": false,
+      "keysym": 65293,
+      "presentedFrame": 822,
+      "virtualElapsedNs": 13700274000
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": true,
+      "keysym": 65293,
+      "presentedFrame": 894,
+      "virtualElapsedNs": 14900298000
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": false,
+      "keysym": 65293,
+      "presentedFrame": 906,
+      "virtualElapsedNs": 15100302000
+    },
+    {
+      "type": "key",
+      "key": "d",
+      "down": true,
+      "keysym": 100,
+      "presentedFrame": 1263,
+      "virtualElapsedNs": 21050421000
+    },
+    {
+      "type": "key",
+      "key": "d",
+      "down": false,
+      "keysym": 100,
+      "presentedFrame": 1290,
+      "virtualElapsedNs": 21500430000
+    },
+    {
+      "type": "key",
+      "key": "Right",
+      "down": true,
+      "keysym": 65363,
+      "presentedFrame": 1320,
+      "virtualElapsedNs": 22000440000
+    },
+    {
+      "type": "key",
+      "key": "Right",
+      "down": false,
+      "keysym": 65363,
+      "presentedFrame": 1374,
+      "virtualElapsedNs": 22900458000
+    }
+  ],
+  "presentations": [
+    {
+      "schema": 1,
+      "presentedFrame": 0,
+      "virtualElapsedNs": 0,
+      "virtualFps": 60,
+      "monotonicCalls": 52,
+      "realtimeCalls": 1,
+      "sleepCalls": 0,
+      "simulationTick": null,
+      "fullInternalState": false,
+      "inputOverflow": false,
+      "consumedX11Events": [],
+      "consumedX11FocusEvents": [],
+      "controllerElapsedMs": 86.899228997936
+    },
+    {
+      "schema": 1,
+      "presentedFrame": 30,
+      "virtualElapsedNs": 500010000,
+      "virtualFps": 60,
+      "monotonicCalls": 173,
+      "realtimeCalls": 590,
+      "sleepCalls": 0,
+      "simulationTick": null,
+      "fullInternalState": false,
+      "inputOverflow": false,
+      "consumedX11Events": [],
+      "consumedX11FocusEvents": [],
+      "controllerElapsedMs": 1216.7712139998912
+    },
+    {
+      "schema": 1,
+      "presentedFrame": 210,
+      "virtualElapsedNs": 3500070000,
+      "virtualFps": 60,
+      "monotonicCalls": 893,
+      "realtimeCalls": 4212,
+      "sleepCalls": 0,
+      "simulationTick": null,
+      "fullInternalState": false,
+      "inputOverflow": false,
+      "consumedX11Events": [],
+      "consumedX11FocusEvents": [
+        {
+          "focused": false,
+          "presentedFramePhase": 31,
+          "virtualElapsedNs": 516677000
+        },
+        {
+          "focused": true,
+          "presentedFramePhase": 31,
+          "virtualElapsedNs": 516677000
+        }
+      ],
+      "controllerElapsedMs": 3166.4753219993145,
+      "requestedPresentationFrames": 180,
+      "advanceHostWallMs": 1936.164867001935,
+      "advancePerformance": {
+        "cpuUserMs": 3639.9999999999995,
+        "cpuSystemMs": 80.00000000000001,
+        "nativeCpuMsPerPresentedFrame": 20.666666666666664,
+        "hostWallMsPerPresentedFrame": 10.756471483344082,
+        "scope": "native process CPU / controller wall time during released presentations; excludes checkpoint waits, includes observer cost"
+      }
+    },
+    {
+      "schema": 1,
+      "presentedFrame": 222,
+      "virtualElapsedNs": 3700074000,
+      "virtualFps": 60,
+      "monotonicCalls": 943,
+      "realtimeCalls": 4470,
+      "sleepCalls": 0,
+      "simulationTick": null,
+      "fullInternalState": false,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": true,
+          "keysym": 65293,
+          "presentedFramePhase": 211,
+          "virtualElapsedNs": 3516737000
+        }
+      ],
+      "consumedX11FocusEvents": [],
+      "controllerElapsedMs": 3549.48033799883,
+      "requestedPresentationFrames": 12,
+      "advanceHostWallMs": 141.5647399990121,
+      "advancePerformance": {
+        "cpuUserMs": 250.0,
+        "cpuSystemMs": 20.000000000000018,
+        "nativeCpuMsPerPresentedFrame": 22.5,
+        "hostWallMsPerPresentedFrame": 11.79706166658434,
+        "scope": "native process CPU / controller wall time during released presentations; excludes checkpoint waits, includes observer cost"
+      }
+    },
+    {
+      "schema": 1,
+      "presentedFrame": 294,
+      "virtualElapsedNs": 4900098000,
+      "virtualFps": 60,
+      "monotonicCalls": 1233,
+      "realtimeCalls": 5635,
+      "sleepCalls": 0,
+      "simulationTick": null,
+      "fullInternalState": false,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": false,
+          "keysym": 65293,
+          "presentedFramePhase": 223,
+          "virtualElapsedNs": 3716741000
+        }
+      ],
+      "consumedX11FocusEvents": [],
+      "controllerElapsedMs": 4386.779925000155,
+      "requestedPresentationFrames": 72,
+      "advanceHostWallMs": 806.2154990002455,
+      "advancePerformance": {
+        "cpuUserMs": 1520.0000000000005,
+        "cpuSystemMs": 79.99999999999996,
+        "nativeCpuMsPerPresentedFrame": 22.22222222222223,
+        "hostWallMsPerPresentedFrame": 11.19743748611452,
+        "scope": "native process CPU / controller wall time during released presentations; excludes checkpoint waits, includes observer cost"
+      }
+    },
+    {
+      "schema": 1,
+      "presentedFrame": 306,
+      "virtualElapsedNs": 5100102000,
+      "virtualFps": 60,
+      "monotonicCalls": 1283,
+      "realtimeCalls": 5900,
+      "sleepCalls": 0,
+      "simulationTick": null,
+      "fullInternalState": false,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": true,
+          "keysym": 65293,
+          "presentedFramePhase": 295,
+          "virtualElapsedNs": 4916765000
+        }
+      ],
+      "consumedX11FocusEvents": [],
+      "controllerElapsedMs": 4808.83158999859,
+      "requestedPresentationFrames": 12,
+      "advanceHostWallMs": 128.1038829984027,
+      "advancePerformance": {
+        "cpuUserMs": 280.0000000000002,
+        "cpuSystemMs": 0.0,
+        "nativeCpuMsPerPresentedFrame": 23.333333333333353,
+        "hostWallMsPerPresentedFrame": 10.675323583200225,
+        "scope": "native process CPU / controller wall time during released presentations; excludes checkpoint waits, includes observer cost"
+      }
+    },
+    {
+      "schema": 1,
+      "presentedFrame": 378,
+      "virtualElapsedNs": 6300126000,
+      "virtualFps": 60,
+      "monotonicCalls": 1571,
+      "realtimeCalls": 8137,
+      "sleepCalls": 0,
+      "simulationTick": null,
+      "fullInternalState": false,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": false,
+          "keysym": 65293,
+          "presentedFramePhase": 307,
+          "virtualElapsedNs": 5116769000
+        }
+      ],
+      "consumedX11FocusEvents": [],
+      "controllerElapsedMs": 5700.550519999524,
+      "requestedPresentationFrames": 72,
+      "advanceHostWallMs": 859.6639679999498,
+      "advancePerformance": {
+        "cpuUserMs": 1650.0000000000005,
+        "cpuSystemMs": 100.00000000000003,
+        "nativeCpuMsPerPresentedFrame": 24.30555555555556,
+        "hostWallMsPerPresentedFrame": 11.939777333332636,
+        "scope": "native process CPU / controller wall time during released presentations; excludes checkpoint waits, includes observer cost"
+      }
+    },
+    {
+      "schema": 1,
+      "presentedFrame": 390,
+      "virtualElapsedNs": 6500130000,
+      "virtualFps": 60,
+      "monotonicCalls": 1621,
+      "realtimeCalls": 8411,
+      "sleepCalls": 0,
+      "simulationTick": null,
+      "fullInternalState": false,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": true,
+          "keysym": 65293,
+          "presentedFramePhase": 379,
+          "virtualElapsedNs": 6316793000
+        }
+      ],
+      "consumedX11FocusEvents": [],
+      "controllerElapsedMs": 6108.261921999656,
+      "requestedPresentationFrames": 12,
+      "advanceHostWallMs": 120.0659820024157,
+      "advancePerformance": {
+        "cpuUserMs": 229.99999999999864,
+        "cpuSystemMs": 0.0,
+        "nativeCpuMsPerPresentedFrame": 19.166666666666554,
+        "hostWallMsPerPresentedFrame": 10.005498500201307,
+        "scope": "native process CPU / controller wall time during released presentations; excludes checkpoint waits, includes observer cost"
+      }
+    },
+    {
+      "schema": 1,
+      "presentedFrame": 462,
+      "virtualElapsedNs": 7700154000,
+      "virtualFps": 60,
+      "monotonicCalls": 1909,
+      "realtimeCalls": 10096,
+      "sleepCalls": 0,
+      "simulationTick": null,
+      "fullInternalState": false,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": false,
+          "keysym": 65293,
+          "presentedFramePhase": 391,
+          "virtualElapsedNs": 6516797000
+        }
+      ],
+      "consumedX11FocusEvents": [],
+      "controllerElapsedMs": 6773.76081300099,
+      "requestedPresentationFrames": 72,
+      "advanceHostWallMs": 640.2360190004401,
+      "advancePerformance": {
+        "cpuUserMs": 1280.0000000000011,
+        "cpuSystemMs": 40.000000000000036,
+        "nativeCpuMsPerPresentedFrame": 18.33333333333335,
+        "hostWallMsPerPresentedFrame": 8.892166930561668,
+        "scope": "native process CPU / controller wall time during released presentations; excludes checkpoint waits, includes observer cost"
+      }
+    },
+    {
+      "schema": 1,
+      "presentedFrame": 474,
+      "virtualElapsedNs": 7900158000,
+      "virtualFps": 60,
+      "monotonicCalls": 1957,
+      "realtimeCalls": 10558,
+      "sleepCalls": 0,
+      "simulationTick": null,
+      "fullInternalState": false,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": true,
+          "keysym": 65293,
+          "presentedFramePhase": 463,
+          "virtualElapsedNs": 7716821000
+        }
+      ],
+      "consumedX11FocusEvents": [],
+      "controllerElapsedMs": 7174.150669998198,
+      "requestedPresentationFrames": 12,
+      "advanceHostWallMs": 114.2432260021451,
+      "advancePerformance": {
+        "cpuUserMs": 199.9999999999993,
+        "cpuSystemMs": 19.999999999999908,
+        "nativeCpuMsPerPresentedFrame": 18.333333333333268,
+        "hostWallMsPerPresentedFrame": 9.520268833512091,
+        "scope": "native process CPU / controller wall time during released presentations; excludes checkpoint waits, includes observer cost"
+      }
+    },
+    {
+      "schema": 1,
+      "presentedFrame": 546,
+      "virtualElapsedNs": 9100182000,
+      "virtualFps": 60,
+      "monotonicCalls": 2245,
+      "realtimeCalls": 14531,
+      "sleepCalls": 0,
+      "simulationTick": null,
+      "fullInternalState": false,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": false,
+          "keysym": 65293,
+          "presentedFramePhase": 475,
+          "virtualElapsedNs": 7916825000
+        }
+      ],
+      "consumedX11FocusEvents": [],
+      "controllerElapsedMs": 8011.571275997994,
+      "requestedPresentationFrames": 72,
+      "advanceHostWallMs": 813.2953720014484,
+      "advancePerformance": {
+        "cpuUserMs": 1490.0000000000002,
+        "cpuSystemMs": 60.00000000000006,
+        "nativeCpuMsPerPresentedFrame": 21.527777777777782,
+        "hostWallMsPerPresentedFrame": 11.295769055575672,
+        "scope": "native process CPU / controller wall time during released presentations; excludes checkpoint waits, includes observer cost"
+      }
+    },
+    {
+      "schema": 1,
+      "presentedFrame": 558,
+      "virtualElapsedNs": 9300186000,
+      "virtualFps": 60,
+      "monotonicCalls": 2293,
+      "realtimeCalls": 15173,
+      "sleepCalls": 0,
+      "simulationTick": null,
+      "fullInternalState": false,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": true,
+          "keysym": 65289,
+          "presentedFramePhase": 547,
+          "virtualElapsedNs": 9116849000
+        }
+      ],
+      "consumedX11FocusEvents": [],
+      "controllerElapsedMs": 8460.627354997996,
+      "requestedPresentationFrames": 12,
+      "advanceHostWallMs": 155.50057200016454,
+      "advancePerformance": {
+        "cpuUserMs": 259.9999999999998,
+        "cpuSystemMs": 20.000000000000018,
+        "nativeCpuMsPerPresentedFrame": 23.333333333333314,
+        "hostWallMsPerPresentedFrame": 12.958381000013711,
+        "scope": "native process CPU / controller wall time during released presentations; excludes checkpoint waits, includes observer cost"
+      }
+    },
+    {
+      "schema": 1,
+      "presentedFrame": 666,
+      "virtualElapsedNs": 11100222000,
+      "virtualFps": 60,
+      "monotonicCalls": 2725,
+      "realtimeCalls": 19206,
+      "sleepCalls": 0,
+      "simulationTick": null,
+      "fullInternalState": false,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": false,
+          "keysym": 65289,
+          "presentedFramePhase": 559,
+          "virtualElapsedNs": 9316853000
+        }
+      ],
+      "consumedX11FocusEvents": [],
+      "controllerElapsedMs": 9591.667448999942,
+      "requestedPresentationFrames": 108,
+      "advanceHostWallMs": 1093.5954699998547,
+      "advancePerformance": {
+        "cpuUserMs": 2140.0000000000005,
+        "cpuSystemMs": 59.99999999999994,
+        "nativeCpuMsPerPresentedFrame": 20.370370370370374,
+        "hostWallMsPerPresentedFrame": 10.125883981480136,
+        "scope": "native process CPU / controller wall time during released presentations; excludes checkpoint waits, includes observer cost"
+      }
+    },
+    {
+      "schema": 1,
+      "presentedFrame": 678,
+      "virtualElapsedNs": 11300226000,
+      "virtualFps": 60,
+      "monotonicCalls": 2773,
+      "realtimeCalls": 19650,
+      "sleepCalls": 0,
+      "simulationTick": null,
+      "fullInternalState": false,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": true,
+          "keysym": 116,
+          "presentedFramePhase": 667,
+          "virtualElapsedNs": 11116889000
+        }
+      ],
+      "consumedX11FocusEvents": [],
+      "controllerElapsedMs": 9709.126760997606,
+      "requestedPresentationFrames": 12,
+      "advanceHostWallMs": 100.00915500131669,
+      "advancePerformance": {
+        "cpuUserMs": 209.9999999999991,
+        "cpuSystemMs": 10.000000000000009,
+        "nativeCpuMsPerPresentedFrame": 18.333333333333258,
+        "hostWallMsPerPresentedFrame": 8.334096250109724,
+        "scope": "native process CPU / controller wall time during released presentations; excludes checkpoint waits, includes observer cost"
+      }
+    },
+    {
+      "schema": 1,
+      "presentedFrame": 684,
+      "virtualElapsedNs": 11400228000,
+      "virtualFps": 60,
+      "monotonicCalls": 2797,
+      "realtimeCalls": 19865,
+      "sleepCalls": 0,
+      "simulationTick": null,
+      "fullInternalState": false,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": false,
+          "keysym": 116,
+          "presentedFramePhase": 679,
+          "virtualElapsedNs": 11316893000
+        }
+      ],
+      "consumedX11FocusEvents": [],
+      "controllerElapsedMs": 9796.333015998243,
+      "requestedPresentationFrames": 6,
+      "advanceHostWallMs": 59.69634000211954,
+      "advancePerformance": {
+        "cpuUserMs": 89.99999999999986,
+        "cpuSystemMs": 10.000000000000009,
+        "nativeCpuMsPerPresentedFrame": 16.666666666666647,
+        "hostWallMsPerPresentedFrame": 9.949390000353256,
+        "scope": "native process CPU / controller wall time during released presentations; excludes checkpoint waits, includes observer cost"
+      }
+    },
+    {
+      "schema": 1,
+      "presentedFrame": 696,
+      "virtualElapsedNs": 11600232000,
+      "virtualFps": 60,
+      "monotonicCalls": 2845,
+      "realtimeCalls": 20286,
+      "sleepCalls": 0,
+      "simulationTick": null,
+      "fullInternalState": false,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": true,
+          "keysym": 49,
+          "presentedFramePhase": 685,
+          "virtualElapsedNs": 11416895000
+        }
+      ],
+      "consumedX11FocusEvents": [],
+      "controllerElapsedMs": 9918.688824000128,
+      "requestedPresentationFrames": 12,
+      "advanceHostWallMs": 102.5043720001122,
+      "advancePerformance": {
+        "cpuUserMs": 200.00000000000108,
+        "cpuSystemMs": 10.000000000000009,
+        "nativeCpuMsPerPresentedFrame": 17.50000000000009,
+        "hostWallMsPerPresentedFrame": 8.54203100000935,
+        "scope": "native process CPU / controller wall time during released presentations; excludes checkpoint waits, includes observer cost"
+      }
+    },
+    {
+      "schema": 1,
+      "presentedFrame": 702,
+      "virtualElapsedNs": 11700234000,
+      "virtualFps": 60,
+      "monotonicCalls": 2869,
+      "realtimeCalls": 20496,
+      "sleepCalls": 0,
+      "simulationTick": null,
+      "fullInternalState": false,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": false,
+          "keysym": 49,
+          "presentedFramePhase": 697,
+          "virtualElapsedNs": 11616899000
+        }
+      ],
+      "consumedX11FocusEvents": [],
+      "controllerElapsedMs": 9999.453362997883,
+      "requestedPresentationFrames": 6,
+      "advanceHostWallMs": 55.642639999859966,
+      "advancePerformance": {
+        "cpuUserMs": 119.99999999999922,
+        "cpuSystemMs": 0.0,
+        "nativeCpuMsPerPresentedFrame": 19.99999999999987,
+        "hostWallMsPerPresentedFrame": 9.273773333309995,
+        "scope": "native process CPU / controller wall time during released presentations; excludes checkpoint waits, includes observer cost"
+      }
+    },
+    {
+      "schema": 1,
+      "presentedFrame": 714,
+      "virtualElapsedNs": 11900238000,
+      "virtualFps": 60,
+      "monotonicCalls": 2917,
+      "realtimeCalls": 20928,
+      "sleepCalls": 0,
+      "simulationTick": null,
+      "fullInternalState": false,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": true,
+          "keysym": 112,
+          "presentedFramePhase": 703,
+          "virtualElapsedNs": 11716901000
+        }
+      ],
+      "consumedX11FocusEvents": [],
+      "controllerElapsedMs": 10135.92804899963,
+      "requestedPresentationFrames": 12,
+      "advanceHostWallMs": 118.21017900001607,
+      "advancePerformance": {
+        "cpuUserMs": 220.00000000000063,
+        "cpuSystemMs": 10.000000000000009,
+        "nativeCpuMsPerPresentedFrame": 19.166666666666718,
+        "hostWallMsPerPresentedFrame": 9.85084825000134,
+        "scope": "native process CPU / controller wall time during released presentations; excludes checkpoint waits, includes observer cost"
+      }
+    },
+    {
+      "schema": 1,
+      "presentedFrame": 720,
+      "virtualElapsedNs": 12000240000,
+      "virtualFps": 60,
+      "monotonicCalls": 2941,
+      "realtimeCalls": 21144,
+      "sleepCalls": 0,
+      "simulationTick": null,
+      "fullInternalState": false,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": false,
+          "keysym": 112,
+          "presentedFramePhase": 715,
+          "virtualElapsedNs": 11916905000
+        }
+      ],
+      "consumedX11FocusEvents": [],
+      "controllerElapsedMs": 10210.450208000111,
+      "requestedPresentationFrames": 6,
+      "advanceHostWallMs": 48.651688997779274,
+      "advancePerformance": {
+        "cpuUserMs": 89.99999999999986,
+        "cpuSystemMs": 0.0,
+        "nativeCpuMsPerPresentedFrame": 14.999999999999977,
+        "hostWallMsPerPresentedFrame": 8.108614832963212,
+        "scope": "native process CPU / controller wall time during released presentations; excludes checkpoint waits, includes observer cost"
+      }
+    },
+    {
+      "schema": 1,
+      "presentedFrame": 732,
+      "virtualElapsedNs": 12200244000,
+      "virtualFps": 60,
+      "monotonicCalls": 2989,
+      "realtimeCalls": 21582,
+      "sleepCalls": 0,
+      "simulationTick": null,
+      "fullInternalState": false,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": true,
+          "keysym": 107,
+          "presentedFramePhase": 721,
+          "virtualElapsedNs": 12016907000
+        }
+      ],
+      "consumedX11FocusEvents": [],
+      "controllerElapsedMs": 10397.264835999522,
+      "requestedPresentationFrames": 12,
+      "advanceHostWallMs": 160.2750179990835,
+      "advancePerformance": {
+        "cpuUserMs": 250.0,
+        "cpuSystemMs": 20.000000000000018,
+        "nativeCpuMsPerPresentedFrame": 22.5,
+        "hostWallMsPerPresentedFrame": 13.356251499923625,
+        "scope": "native process CPU / controller wall time during released presentations; excludes checkpoint waits, includes observer cost"
+      }
+    },
+    {
+      "schema": 1,
+      "presentedFrame": 738,
+      "virtualElapsedNs": 12300246000,
+      "virtualFps": 60,
+      "monotonicCalls": 3013,
+      "realtimeCalls": 21798,
+      "sleepCalls": 0,
+      "simulationTick": null,
+      "fullInternalState": false,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": false,
+          "keysym": 107,
+          "presentedFramePhase": 733,
+          "virtualElapsedNs": 12216911000
+        }
+      ],
+      "consumedX11FocusEvents": [],
+      "controllerElapsedMs": 10484.718171999702,
+      "requestedPresentationFrames": 6,
+      "advanceHostWallMs": 68.37993199951597,
+      "advancePerformance": {
+        "cpuUserMs": 130.0000000000008,
+        "cpuSystemMs": 0.0,
+        "nativeCpuMsPerPresentedFrame": 21.6666666666668,
+        "hostWallMsPerPresentedFrame": 11.396655333252662,
+        "scope": "native process CPU / controller wall time during released presentations; excludes checkpoint waits, includes observer cost"
+      }
+    },
+    {
+      "schema": 1,
+      "presentedFrame": 750,
+      "virtualElapsedNs": 12500250000,
+      "virtualFps": 60,
+      "monotonicCalls": 3061,
+      "realtimeCalls": 22242,
+      "sleepCalls": 0,
+      "simulationTick": null,
+      "fullInternalState": false,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": true,
+          "keysym": 54,
+          "presentedFramePhase": 739,
+          "virtualElapsedNs": 12316913000
+        }
+      ],
+      "consumedX11FocusEvents": [],
+      "controllerElapsedMs": 10629.18585800071,
+      "requestedPresentationFrames": 12,
+      "advanceHostWallMs": 117.4011610019079,
+      "advancePerformance": {
+        "cpuUserMs": 259.9999999999998,
+        "cpuSystemMs": 20.000000000000018,
+        "nativeCpuMsPerPresentedFrame": 23.333333333333314,
+        "hostWallMsPerPresentedFrame": 9.783430083492325,
+        "scope": "native process CPU / controller wall time during released presentations; excludes checkpoint waits, includes observer cost"
+      }
+    },
+    {
+      "schema": 1,
+      "presentedFrame": 756,
+      "virtualElapsedNs": 12600252000,
+      "virtualFps": 60,
+      "monotonicCalls": 3085,
+      "realtimeCalls": 22464,
+      "sleepCalls": 0,
+      "simulationTick": null,
+      "fullInternalState": false,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": false,
+          "keysym": 54,
+          "presentedFramePhase": 751,
+          "virtualElapsedNs": 12516917000
+        }
+      ],
+      "consumedX11FocusEvents": [],
+      "controllerElapsedMs": 10723.088648999692,
+      "requestedPresentationFrames": 6,
+      "advanceHostWallMs": 69.96897099816124,
+      "advancePerformance": {
+        "cpuUserMs": 129.999999999999,
+        "cpuSystemMs": 0.0,
+        "nativeCpuMsPerPresentedFrame": 21.6666666666665,
+        "hostWallMsPerPresentedFrame": 11.661495166360206,
+        "scope": "native process CPU / controller wall time during released presentations; excludes checkpoint waits, includes observer cost"
+      }
+    },
+    {
+      "schema": 1,
+      "presentedFrame": 768,
+      "virtualElapsedNs": 12800256000,
+      "virtualFps": 60,
+      "monotonicCalls": 3133,
+      "realtimeCalls": 22917,
+      "sleepCalls": 0,
+      "simulationTick": null,
+      "fullInternalState": false,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": true,
+          "keysym": 121,
+          "presentedFramePhase": 757,
+          "virtualElapsedNs": 12616919000
+        }
+      ],
+      "consumedX11FocusEvents": [],
+      "controllerElapsedMs": 10868.133891999605,
+      "requestedPresentationFrames": 12,
+      "advanceHostWallMs": 119.09344699961366,
+      "advancePerformance": {
+        "cpuUserMs": 270.00000000000136,
+        "cpuSystemMs": 19.999999999999908,
+        "nativeCpuMsPerPresentedFrame": 24.16666666666677,
+        "hostWallMsPerPresentedFrame": 9.924453916634471,
+        "scope": "native process CPU / controller wall time during released presentations; excludes checkpoint waits, includes observer cost"
+      }
+    },
+    {
+      "schema": 1,
+      "presentedFrame": 774,
+      "virtualElapsedNs": 12900258000,
+      "virtualFps": 60,
+      "monotonicCalls": 3157,
+      "realtimeCalls": 23139,
+      "sleepCalls": 0,
+      "simulationTick": null,
+      "fullInternalState": false,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": false,
+          "keysym": 121,
+          "presentedFramePhase": 769,
+          "virtualElapsedNs": 12816923000
+        }
+      ],
+      "consumedX11FocusEvents": [],
+      "controllerElapsedMs": 10920.607885000209,
+      "requestedPresentationFrames": 6,
+      "advanceHostWallMs": 34.50442999746883,
+      "advancePerformance": {
+        "cpuUserMs": 109.99999999999943,
+        "cpuSystemMs": 10.000000000000009,
+        "nativeCpuMsPerPresentedFrame": 19.999999999999908,
+        "hostWallMsPerPresentedFrame": 5.750738332911472,
+        "scope": "native process CPU / controller wall time during released presentations; excludes checkpoint waits, includes observer cost"
+      }
+    },
+    {
+      "schema": 1,
+      "presentedFrame": 786,
+      "virtualElapsedNs": 13100262000,
+      "virtualFps": 60,
+      "monotonicCalls": 3205,
+      "realtimeCalls": 23595,
+      "sleepCalls": 0,
+      "simulationTick": null,
+      "fullInternalState": false,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": true,
+          "keysym": 48,
+          "presentedFramePhase": 775,
+          "virtualElapsedNs": 12916925000
+        }
+      ],
+      "consumedX11FocusEvents": [],
+      "controllerElapsedMs": 11001.015527999698,
+      "requestedPresentationFrames": 12,
+      "advanceHostWallMs": 62.96505499994964,
+      "advancePerformance": {
+        "cpuUserMs": 239.99999999999844,
+        "cpuSystemMs": 0.0,
+        "nativeCpuMsPerPresentedFrame": 19.99999999999987,
+        "hostWallMsPerPresentedFrame": 5.24708791666247,
+        "scope": "native process CPU / controller wall time during released presentations; excludes checkpoint waits, includes observer cost"
+      }
+    },
+    {
+      "schema": 1,
+      "presentedFrame": 792,
+      "virtualElapsedNs": 13200264000,
+      "virtualFps": 60,
+      "monotonicCalls": 3229,
+      "realtimeCalls": 23823,
+      "sleepCalls": 0,
+      "simulationTick": null,
+      "fullInternalState": false,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": false,
+          "keysym": 48,
+          "presentedFramePhase": 787,
+          "virtualElapsedNs": 13116929000
+        }
+      ],
+      "consumedX11FocusEvents": [],
+      "controllerElapsedMs": 11059.56486499781,
+      "requestedPresentationFrames": 6,
+      "advanceHostWallMs": 40.90872000233503,
+      "advancePerformance": {
+        "cpuUserMs": 120.000000000001,
+        "cpuSystemMs": 0.0,
+        "nativeCpuMsPerPresentedFrame": 20.000000000000167,
+        "hostWallMsPerPresentedFrame": 6.818120000389172,
+        "scope": "native process CPU / controller wall time during released presentations; excludes checkpoint waits, includes observer cost"
+      }
+    },
+    {
+      "schema": 1,
+      "presentedFrame": 804,
+      "virtualElapsedNs": 13400268000,
+      "virtualFps": 60,
+      "monotonicCalls": 3277,
+      "realtimeCalls": 24291,
+      "sleepCalls": 0,
+      "simulationTick": null,
+      "fullInternalState": false,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": true,
+          "keysym": 119,
+          "presentedFramePhase": 793,
+          "virtualElapsedNs": 13216931000
+        }
+      ],
+      "consumedX11FocusEvents": [],
+      "controllerElapsedMs": 11159.720185998594,
+      "requestedPresentationFrames": 12,
+      "advanceHostWallMs": 82.51702699999441,
+      "advancePerformance": {
+        "cpuUserMs": 239.99999999999844,
+        "cpuSystemMs": 20.000000000000018,
+        "nativeCpuMsPerPresentedFrame": 21.66666666666654,
+        "hostWallMsPerPresentedFrame": 6.876418916666201,
+        "scope": "native process CPU / controller wall time during released presentations; excludes checkpoint waits, includes observer cost"
+      }
+    },
+    {
+      "schema": 1,
+      "presentedFrame": 810,
+      "virtualElapsedNs": 13500270000,
+      "virtualFps": 60,
+      "monotonicCalls": 3301,
+      "realtimeCalls": 24524,
+      "sleepCalls": 0,
+      "simulationTick": null,
+      "fullInternalState": false,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": false,
+          "keysym": 119,
+          "presentedFramePhase": 805,
+          "virtualElapsedNs": 13416935000
+        }
+      ],
+      "consumedX11FocusEvents": [],
+      "controllerElapsedMs": 11264.942272999178,
+      "requestedPresentationFrames": 6,
+      "advanceHostWallMs": 81.1359569997876,
+      "advancePerformance": {
+        "cpuUserMs": 120.000000000001,
+        "cpuSystemMs": 0.0,
+        "nativeCpuMsPerPresentedFrame": 20.000000000000167,
+        "hostWallMsPerPresentedFrame": 13.522659499964599,
+        "scope": "native process CPU / controller wall time during released presentations; excludes checkpoint waits, includes observer cost"
+      }
+    },
+    {
+      "schema": 1,
+      "presentedFrame": 822,
+      "virtualElapsedNs": 13700274000,
+      "virtualFps": 60,
+      "monotonicCalls": 3349,
+      "realtimeCalls": 25189,
+      "sleepCalls": 0,
+      "simulationTick": null,
+      "fullInternalState": false,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": true,
+          "keysym": 65293,
+          "presentedFramePhase": 811,
+          "virtualElapsedNs": 13516937000
+        }
+      ],
+      "consumedX11FocusEvents": [],
+      "controllerElapsedMs": 11699.58681099888,
+      "requestedPresentationFrames": 12,
+      "advanceHostWallMs": 142.1020599991607,
+      "advancePerformance": {
+        "cpuUserMs": 230.00000000000043,
+        "cpuSystemMs": 30.00000000000003,
+        "nativeCpuMsPerPresentedFrame": 21.666666666666703,
+        "hostWallMsPerPresentedFrame": 11.841838333263391,
+        "scope": "native process CPU / controller wall time during released presentations; excludes checkpoint waits, includes observer cost"
+      }
+    },
+    {
+      "schema": 1,
+      "presentedFrame": 894,
+      "virtualElapsedNs": 14900298000,
+      "virtualFps": 60,
+      "monotonicCalls": 3637,
+      "realtimeCalls": 29508,
+      "sleepCalls": 0,
+      "simulationTick": null,
+      "fullInternalState": false,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": false,
+          "keysym": 65293,
+          "presentedFramePhase": 823,
+          "virtualElapsedNs": 13716941000
+        }
+      ],
+      "consumedX11FocusEvents": [],
+      "controllerElapsedMs": 12547.984003998863,
+      "requestedPresentationFrames": 72,
+      "advanceHostWallMs": 825.8973800002423,
+      "advancePerformance": {
+        "cpuUserMs": 1599.999999999998,
+        "cpuSystemMs": 99.99999999999997,
+        "nativeCpuMsPerPresentedFrame": 23.611111111111082,
+        "hostWallMsPerPresentedFrame": 11.470796944447809,
+        "scope": "native process CPU / controller wall time during released presentations; excludes checkpoint waits, includes observer cost"
+      }
+    },
+    {
+      "schema": 1,
+      "presentedFrame": 906,
+      "virtualElapsedNs": 15100302000,
+      "virtualFps": 60,
+      "monotonicCalls": 3685,
+      "realtimeCalls": 30237,
+      "sleepCalls": 0,
+      "simulationTick": null,
+      "fullInternalState": false,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": true,
+          "keysym": 65293,
+          "presentedFramePhase": 895,
+          "virtualElapsedNs": 14916965000
+        }
+      ],
+      "consumedX11FocusEvents": [],
+      "controllerElapsedMs": 12961.198204000539,
+      "requestedPresentationFrames": 12,
+      "advanceHostWallMs": 120.20503600069787,
+      "advancePerformance": {
+        "cpuUserMs": 289.99999999999915,
+        "cpuSystemMs": 10.000000000000009,
+        "nativeCpuMsPerPresentedFrame": 24.99999999999993,
+        "hostWallMsPerPresentedFrame": 10.01708633339149,
+        "scope": "native process CPU / controller wall time during released presentations; excludes checkpoint waits, includes observer cost"
+      }
+    },
+    {
+      "schema": 1,
+      "presentedFrame": 1206,
+      "virtualElapsedNs": 20100402000,
+      "virtualFps": 60,
+      "monotonicCalls": 4903,
+      "realtimeCalls": 65117,
+      "sleepCalls": 0,
+      "simulationTick": null,
+      "fullInternalState": false,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": false,
+          "keysym": 65293,
+          "presentedFramePhase": 907,
+          "virtualElapsedNs": 15116969000
+        }
+      ],
+      "consumedX11FocusEvents": [],
+      "controllerElapsedMs": 17845.92923799937,
+      "requestedPresentationFrames": 300,
+      "advanceHostWallMs": 4866.5422609992675,
+      "advancePerformance": {
+        "cpuUserMs": 8100.000000000002,
+        "cpuSystemMs": 490.0,
+        "nativeCpuMsPerPresentedFrame": 28.63333333333334,
+        "hostWallMsPerPresentedFrame": 16.221807536664226,
+        "scope": "native process CPU / controller wall time during released presentations; excludes checkpoint waits, includes observer cost"
+      }
+    },
+    {
+      "schema": 1,
+      "presentedFrame": 1263,
+      "virtualElapsedNs": 21050421000,
+      "virtualFps": 60,
+      "monotonicCalls": 5131,
+      "realtimeCalls": 72770,
+      "sleepCalls": 0,
+      "simulationTick": null,
+      "fullInternalState": false,
+      "inputOverflow": false,
+      "consumedX11Events": [],
+      "consumedX11FocusEvents": [],
+      "controllerElapsedMs": 18870.19668100038,
+      "requestedPresentationFrames": 57,
+      "advanceHostWallMs": 798.1721680007468,
+      "advancePerformance": {
+        "cpuUserMs": 1410.0000000000002,
+        "cpuSystemMs": 90.00000000000009,
+        "nativeCpuMsPerPresentedFrame": 26.315789473684216,
+        "hostWallMsPerPresentedFrame": 14.003020491241172,
+        "scope": "native process CPU / controller wall time during released presentations; excludes checkpoint waits, includes observer cost"
+      }
+    },
+    {
+      "schema": 1,
+      "presentedFrame": 1290,
+      "virtualElapsedNs": 21500430000,
+      "virtualFps": 60,
+      "monotonicCalls": 5239,
+      "realtimeCalls": 76334,
+      "sleepCalls": 0,
+      "simulationTick": null,
+      "fullInternalState": false,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": true,
+          "keysym": 100,
+          "presentedFramePhase": 1264,
+          "virtualElapsedNs": 21067088000
+        }
+      ],
+      "consumedX11FocusEvents": [],
+      "controllerElapsedMs": 19444.632883998565,
+      "requestedPresentationFrames": 27,
+      "advanceHostWallMs": 322.1766540009412,
+      "advancePerformance": {
+        "cpuUserMs": 550.0000000000007,
+        "cpuSystemMs": 40.000000000000036,
+        "nativeCpuMsPerPresentedFrame": 21.851851851851876,
+        "hostWallMsPerPresentedFrame": 11.932468666701526,
+        "scope": "native process CPU / controller wall time during released presentations; excludes checkpoint waits, includes observer cost"
+      }
+    },
+    {
+      "schema": 1,
+      "presentedFrame": 1320,
+      "virtualElapsedNs": 22000440000,
+      "virtualFps": 60,
+      "monotonicCalls": 5359,
+      "realtimeCalls": 80299,
+      "sleepCalls": 0,
+      "simulationTick": null,
+      "fullInternalState": false,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": false,
+          "keysym": 100,
+          "presentedFramePhase": 1291,
+          "virtualElapsedNs": 21517097000
+        }
+      ],
+      "consumedX11FocusEvents": [],
+      "controllerElapsedMs": 19857.431821998034,
+      "requestedPresentationFrames": 30,
+      "advanceHostWallMs": 395.1350659990567,
+      "advancePerformance": {
+        "cpuUserMs": 649.9999999999986,
+        "cpuSystemMs": 79.99999999999984,
+        "nativeCpuMsPerPresentedFrame": 24.333333333333282,
+        "hostWallMsPerPresentedFrame": 13.171168866635222,
+        "scope": "native process CPU / controller wall time during released presentations; excludes checkpoint waits, includes observer cost"
+      }
+    },
+    {
+      "schema": 1,
+      "presentedFrame": 1374,
+      "virtualElapsedNs": 22900458000,
+      "virtualFps": 60,
+      "monotonicCalls": 5575,
+      "realtimeCalls": 87845,
+      "sleepCalls": 0,
+      "simulationTick": null,
+      "fullInternalState": false,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": true,
+          "keysym": 65363,
+          "presentedFramePhase": 1321,
+          "virtualElapsedNs": 22017107000
+        }
+      ],
+      "consumedX11FocusEvents": [],
+      "controllerElapsedMs": 20789.186287998746,
+      "requestedPresentationFrames": 54,
+      "advanceHostWallMs": 689.6814930005348,
+      "advancePerformance": {
+        "cpuUserMs": 1220.0000000000025,
+        "cpuSystemMs": 60.00000000000006,
+        "nativeCpuMsPerPresentedFrame": 23.70370370370375,
+        "hostWallMsPerPresentedFrame": 12.771879500009904,
+        "scope": "native process CPU / controller wall time during released presentations; excludes checkpoint waits, includes observer cost"
+      }
+    },
+    {
+      "schema": 1,
+      "presentedFrame": 1404,
+      "virtualElapsedNs": 23400468000,
+      "virtualFps": 60,
+      "monotonicCalls": 5695,
+      "realtimeCalls": 92138,
+      "sleepCalls": 0,
+      "simulationTick": null,
+      "fullInternalState": false,
+      "inputOverflow": false,
+      "consumedX11Events": [
+        {
+          "down": false,
+          "keysym": 65363,
+          "presentedFramePhase": 1375,
+          "virtualElapsedNs": 22917125000
+        }
+      ],
+      "consumedX11FocusEvents": [],
+      "controllerElapsedMs": 21346.42966699903,
+      "requestedPresentationFrames": 30,
+      "advanceHostWallMs": 320.1205799996387,
+      "advancePerformance": {
+        "cpuUserMs": 820.0000000000002,
+        "cpuSystemMs": 40.000000000000036,
+        "nativeCpuMsPerPresentedFrame": 28.666666666666675,
+        "hostWallMsPerPresentedFrame": 10.670685999987958,
+        "scope": "native process CPU / controller wall time during released presentations; excludes checkpoint waits, includes observer cost"
+      }
+    }
+  ],
+  "clock": {
+    "scope": "main-thread wall-clock ABI; worker/CPU clocks unchanged",
+    "nominalStepsPerSecond": 60,
+    "stepNs": 16667000,
+    "mainThreadSleeps": "recorded then returned without host delay",
+    "realPerformance": "controller wall clock"
+  },
+  "inputDelivery": {
+    "api": "public X11 key events",
+    "serverAutoRepeat": false
+  },
+  "simulationTicks": false,
+  "fullInternalState": false,
+  "failures": [],
+  "bootstrapPresentedFrames": 30,
+  "initialState": {
+    "seed": "T1PK 6Y0W",
+    "seedValue": 2184569263,
+    "playerVariant": 0,
+    "playerSubtype": 0,
+    "stage": 1,
+    "altStage": 0,
+    "stageSeed": 1427977769,
+    "rooms": 9,
+    "room": "1.2(Start Room)",
+    "spawnSeed": 1812552668
+  },
+  "observedState": {
+    "seed": "T1PK 6Y0W",
+    "seedValue": 2184569263,
+    "playerVariant": 0,
+    "playerSubtype": 0,
+    "stage": 1,
+    "altStage": 0,
+    "stageSeed": 1427977769,
+    "rooms": 9,
+    "room": "1.2(Start Room)",
+    "spawnSeed": 1812552668
+  },
+  "seedReadbackMatchesCodec": true,
+  "graphicsTrace": {
+    "path": "/workspace/isaac-rebirth-browser/.cache/foundation/clock-foundation-baseline/gl-trace/commands.jsonl",
+    "continuous": true,
+    "scope": "public graphics submitted data; hidden state unknown"
+  },
+  "performance": {
+    "wallSeconds": 21.615280324000196,
+    "cpuUserSeconds": 31.86,
+    "cpuSystemSeconds": 1.79,
+    "rssBytes": 271089664,
+    "peakRssBytes": 271814656,
+    "scope": "native process lifetime including menu/capture waits; helper CPU excluded",
+    "perSimulationTickMs": null,
+    "controlledAdvances": {
+      "presentedFrames": 1374,
+      "hostWallMs": 16610.54638900532,
+      "nativeCpuMs": 32160.0,
+      "scope": "released presentation intervals only; simulation ticks unknown; observer cost included"
+    }
+  },
+  "controllerElapsedMs": 21631.149516000733,
+  "source": "offline-derived-original",
+  "captureId": "/workspace/isaac-rebirth-browser/.cache/foundation/clock-foundation-baseline"
+}

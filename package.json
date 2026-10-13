@@ -8,20 +8,30 @@
   },
   "scripts": {
     "dev": "vite --host 0.0.0.0 --port 5173 --strictPort",
-    "build": "vite build",
+    "build": "npm run build:wasm && vite build",
     "typecheck": "tsc --noEmit",
-    "test:browser": "playwright test",
-    "check": "npm run typecheck && npm run build && npm run test:browser",
-    "assets:check": "python3 tools/check-assets.py"
-  },
-  "dependencies": {
-    "pixi.js": "8.22.0"
+    "test:browser": "bash tools/original/with-display.sh node node_modules/@playwright/test/cli.js test",
+    "check": "npm run matrix:check && npm run typecheck && npm run build && npm run test:engine && npm run test:browser && npm run test:verification && npm run test:clock && npm run test:graphics-observer && npm run test:original-contracts && npm run test:original-clock && npm run test:original-seeds && npm run verify:foundation",
+    "assets:check": "python3 tools/check-assets.py",
+    "build:wasm": "bash tools/build-wasm.sh",
+    "test:engine": "cargo test --manifest-path engine/Cargo.toml --locked",
+    "test:seeds": "node tools/foundation/seed-invariants.mjs",
+    "test:original-seeds": "node tools/foundation/original-seed-contract.mjs --capture --count 4 --jobs 2",
+    "test:verification": "node --test tools/foundation/*.test.mjs",
+    "test:host": "bash tools/original/compat/test-host.sh",
+    "verify:foundation": "bash tools/original/with-display.sh node tools/foundation/verify.mjs",
+    "matrix:update": "node tools/foundation/matrix.mjs --write",
+    "matrix:check": "node tools/foundation/matrix.mjs --check",
+    "test:clock": "python3 tools/original/foundation-clock-gate-checks.py && python3 tools/original/foundation-clock-verify-checks.py",
+    "test:original-clock": "python3 tools/original/foundation-clock-verify.py --count 2 --jobs 2",
+    "test:graphics-observer": "python3 tools/original/foundation-gl-observe-checks.py",
+    "test:original-contracts": "python3 tools/original/foundation-seeds-checks.py && python3 tools/original/foundation-random-seeds-checks.py && python3 tools/original/debug-smoke-checks.py && python3 tools/original/foundation-descriptor-observer-checks.py"
   },
   "devDependencies": {
     "@playwright/test": "1.64.0",
     "@types/node": "24.19.2",
+    "pngjs": "7.0.0",
     "typescript": "7.0.2",
-    "vite": "8.3.4",
-    "vitest": "5.0.4"
+    "vite": "8.3.4"
   }
 }

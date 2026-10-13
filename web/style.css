@@ -1,0 +1,7 @@
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 100%; height: 100%; background: #000; }
+body { display: grid; place-items: center; overflow: hidden; }
+main { width: min(100vw, calc(100vh * 16 / 9)); position: relative; }
+canvas { display: block; width: 100%; aspect-ratio: 16 / 9; image-rendering: pixelated; outline: none; }
+#status { position: absolute; left: 0; right: 0; top: 45%; color: #d7ceba; text-align: center; font: 16px monospace; }
+#status[hidden] { display: none; }

@@ -1,0 +1,145 @@
+{
+  "schema": 1,
+  "seed": "T1PK 6Y0W",
+  "seedSource": "Captured from base Rebirth v1.05 native pause UI/RNG Start Seed logs and verified using fresh-profile seed entry; not clone seed encoding.",
+  "debugEnvironment": {
+    "freshProfile": true,
+    "profileSlot": 1,
+    "character": "Isaac",
+    "mode": "normal",
+    "windowWidth": 960,
+    "windowHeight": 540,
+    "wallClockInput": true,
+    "internalDebugConsole": false,
+    "simulationTickControl": false
+  },
+  "timing": {
+    "bootMs": 5000,
+    "keyHoldMs": 180,
+    "menuSettleMs": 1200,
+    "seedSettleMs": 1800,
+    "startSettleMs": 5000
+  },
+  "cases": {
+    "movement-fire": [
+      {
+        "action": "move_right",
+        "holdMs": 500,
+        "waitMs": 200,
+        "capture": "movement"
+      },
+      {
+        "action": "shoot_right",
+        "holdMs": 500,
+        "waitMs": 0,
+        "capture": "shooting"
+      }
+    ],
+    "core-keys": [
+      {
+        "action": "move_up",
+        "holdMs": 200,
+        "waitMs": 100,
+        "capture": "move-up"
+      },
+      {
+        "action": "move_left",
+        "holdMs": 200,
+        "waitMs": 100,
+        "capture": "move-left"
+      },
+      {
+        "action": "move_down",
+        "holdMs": 200,
+        "waitMs": 100,
+        "capture": "move-down"
+      },
+      {
+        "action": "move_right",
+        "holdMs": 200,
+        "waitMs": 100,
+        "capture": "move-right"
+      },
+      {
+        "action": "shoot_up",
+        "holdMs": 400,
+        "waitMs": 0,
+        "capture": "shoot-up"
+      },
+      {
+        "action": "shoot_left",
+        "holdMs": 400,
+        "waitMs": 0,
+        "capture": "shoot-left"
+      },
+      {
+        "action": "shoot_down",
+        "holdMs": 400,
+        "waitMs": 0,
+        "capture": "shoot-down"
+      },
+      {
+        "action": "shoot_right",
+        "holdMs": 400,
+        "waitMs": 0,
+        "capture": "shoot-right"
+      },
+      {
+        "action": "bomb",
+        "holdMs": 180,
+        "waitMs": 1500,
+        "capture": "bomb"
+      },
+      {
+        "action": "active_item",
+        "holdMs": 180,
+        "waitMs": 100,
+        "capture": "active-item-empty"
+      },
+      {
+        "action": "consumable",
+        "holdMs": 180,
+        "waitMs": 100,
+        "capture": "pill-card-empty"
+      },
+      {
+        "action": "drop_or_swap",
+        "holdMs": 2000,
+        "waitMs": 100,
+        "capture": "drop-empty"
+      },
+      {
+        "action": "map",
+        "holdMs": 500,
+        "waitMs": 0,
+        "capture": "map"
+      }
+    ]
+  },
+  "knownSeeds": {
+    "T1PK 6Y0W": {
+      "seed": "T1PK 6Y0W",
+      "seedValue": 2184569263,
+      "playerVariant": 0,
+      "playerSubtype": 0,
+      "stage": 1,
+      "altStage": 0,
+      "stageSeed": 1427977769,
+      "rooms": 9,
+      "room": "1.2(Start Room)",
+      "spawnSeed": 1812552668
+    },
+    "FXSW JZBM": {
+      "seed": "FXSW JZBM",
+      "seedValue": 588143529,
+      "playerVariant": 0,
+      "playerSubtype": 0,
+      "stage": 1,
+      "altStage": 0,
+      "stageSeed": 868377342,
+      "rooms": 9,
+      "room": "1.2(Start Room)",
+      "spawnSeed": 2157210254
+    }
+  }
+}

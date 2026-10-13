@@ -1,0 +1,262 @@
+{
+  "schema": 1,
+  "actions": [
+    {
+      "id": "move_left",
+      "context": "gameplay",
+      "keys": [
+        "KeyA"
+      ],
+      "x11": "a",
+      "clone": true
+    },
+    {
+      "id": "move_right",
+      "context": "gameplay",
+      "keys": [
+        "KeyD"
+      ],
+      "x11": "d",
+      "clone": true
+    },
+    {
+      "id": "move_up",
+      "context": "gameplay",
+      "keys": [
+        "KeyW"
+      ],
+      "x11": "w",
+      "clone": true
+    },
+    {
+      "id": "move_down",
+      "context": "gameplay",
+      "keys": [
+        "KeyS"
+      ],
+      "x11": "s",
+      "clone": true
+    },
+    {
+      "id": "shoot_left",
+      "context": "gameplay",
+      "keys": [
+        "ArrowLeft"
+      ],
+      "x11": "Left",
+      "clone": true
+    },
+    {
+      "id": "shoot_right",
+      "context": "gameplay",
+      "keys": [
+        "ArrowRight"
+      ],
+      "x11": "Right",
+      "clone": true
+    },
+    {
+      "id": "shoot_up",
+      "context": "gameplay",
+      "keys": [
+        "ArrowUp"
+      ],
+      "x11": "Up",
+      "clone": true
+    },
+    {
+      "id": "shoot_down",
+      "context": "gameplay",
+      "keys": [
+        "ArrowDown"
+      ],
+      "x11": "Down",
+      "clone": true
+    },
+    {
+      "id": "bomb",
+      "context": "gameplay",
+      "keys": [
+        "KeyE",
+        "ShiftLeft",
+        "ShiftRight"
+      ],
+      "x11": "e",
+      "clone": false
+    },
+    {
+      "id": "active_item",
+      "context": "gameplay",
+      "keys": [
+        "Space"
+      ],
+      "x11": "space",
+      "clone": false
+    },
+    {
+      "id": "consumable",
+      "context": "gameplay",
+      "keys": [
+        "KeyQ"
+      ],
+      "x11": "q",
+      "clone": false
+    },
+    {
+      "id": "drop_or_swap",
+      "context": "gameplay",
+      "keys": [
+        "ControlLeft",
+        "ControlRight"
+      ],
+      "x11": "Control_L",
+      "clone": false
+    },
+    {
+      "id": "map",
+      "context": "gameplay",
+      "keys": [
+        "Tab"
+      ],
+      "x11": "Tab",
+      "clone": false
+    },
+    {
+      "id": "restart",
+      "context": "gameplay",
+      "keys": [
+        "KeyR"
+      ],
+      "x11": "r",
+      "clone": false
+    },
+    {
+      "id": "pause",
+      "context": "gameplay",
+      "keys": [
+        "Escape"
+      ],
+      "x11": "Escape",
+      "clone": true
+    },
+    {
+      "id": "menu_confirm",
+      "context": "menu",
+      "keys": [
+        "Enter"
+      ],
+      "x11": "Return",
+      "clone": true
+    },
+    {
+      "id": "menu_confirm_space",
+      "context": "menu",
+      "keys": [
+        "Space"
+      ],
+      "x11": "space",
+      "clone": false
+    },
+    {
+      "id": "menu_back",
+      "context": "menu",
+      "keys": [
+        "Escape"
+      ],
+      "x11": "Escape",
+      "clone": true
+    },
+    {
+      "id": "menu_left",
+      "context": "menu",
+      "keys": [
+        "ArrowLeft",
+        "KeyA"
+      ],
+      "x11": "Left",
+      "clone": true
+    },
+    {
+      "id": "menu_right",
+      "context": "menu",
+      "keys": [
+        "ArrowRight",
+        "KeyD"
+      ],
+      "x11": "Right",
+      "clone": true
+    },
+    {
+      "id": "menu_up",
+      "context": "menu",
+      "keys": [
+        "ArrowUp",
+        "KeyW"
+      ],
+      "x11": "Up",
+      "clone": true
+    },
+    {
+      "id": "menu_down",
+      "context": "menu",
+      "keys": [
+        "ArrowDown",
+        "KeyS"
+      ],
+      "x11": "Down",
+      "clone": true
+    },
+    {
+      "id": "seed_entry",
+      "context": "character-selection",
+      "keys": [
+        "Tab"
+      ],
+      "x11": "Tab",
+      "clone": true
+    },
+    {
+      "id": "text",
+      "context": "seed-entry",
+      "keys": [],
+      "clone": true
+    },
+    {
+      "id": "fullscreen",
+      "context": "display",
+      "keys": [
+        "KeyF"
+      ],
+      "x11": "f",
+      "clone": false
+    }
+  ],
+  "transports": {
+    "clone": {
+      "keyboard": true,
+      "controller": false,
+      "mouse": false,
+      "text": true
+    },
+    "original": {
+      "keyboard": true,
+      "controller": false,
+      "mouse": false,
+      "text": true
+    }
+  },
+  "deviceRequirements": [
+    {
+      "id": "controller",
+      "description": "Movement/shooting sticks, action buttons, menu navigation, hotplug, deadzones and remapping"
+    },
+    {
+      "id": "mouse",
+      "description": "MouseControl option, aim position/buttons and focus behavior"
+    },
+    {
+      "id": "remapping",
+      "description": "Original keyboard/controller remapping, overlapping bindings and alternate layouts"
+    }
+  ]
+}

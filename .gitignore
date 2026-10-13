@@ -13,3 +13,11 @@ ResourceExtractor_log.txt
 
 references/isaac/linux/depot_250903/
 references/isaac/linux/depot_250903.tar.gz
+
+engine/target/
+web/generated/
+
+.venv.previous*/
+
+__pycache__/
+*.pyc
