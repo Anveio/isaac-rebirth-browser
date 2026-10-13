@@ -10,6 +10,7 @@ use std::collections::{BTreeMap, BTreeSet};
 pub mod actors;
 pub mod audio;
 pub mod bombs;
+pub mod camera;
 pub mod chests;
 pub mod combat;
 mod content;
@@ -327,6 +328,8 @@ pub struct State {
     pub pressed: BTreeSet<String>,
     pub player: Player,
     pub room: Room,
+    #[serde(default)]
+    pub camera: Option<camera::Camera>,
     pub floor: floor::Floor,
     pub current_room: usize,
     pub visited_rooms: BTreeSet<usize>,
@@ -400,6 +403,7 @@ impl Game {
         let floor = floor::generate_basement(seed::stage1_seed(initial_seed))?;
         let current_room = floor.starting_descriptor;
         let room = Room::from_starting_floor(&floor);
+        let camera = Some(camera::Camera::new(&room, None));
         let stage_effects = StageEffects::basement(&player, &room.appearance.fx, 0);
         let mut game = Self {
             state: State {
@@ -453,6 +457,7 @@ impl Game {
                 pressed: BTreeSet::new(),
                 player,
                 room,
+                camera,
                 room_display_flags: vec![0; floor.descriptors.len()],
                 floor,
                 current_room,
@@ -952,6 +957,7 @@ impl Game {
         self.state.persisted_rooms.clear();
         self.state.room_transition = None;
         self.state.room = Room::from_starting_floor(&self.state.floor);
+        self.state.camera = Some(camera::Camera::new(&self.state.room, None));
         self.state.inventory = Inventory {
             coins: 0,
             bombs: 1,
@@ -1189,6 +1195,13 @@ impl Game {
             });
         if traversal::advance_transition(&mut self.state, phase) {
             if room_before != self.state.current_room {
+                self.state.camera = Some(camera::Camera::new(
+                    &self.state.room,
+                    self.state
+                        .room_transition
+                        .as_ref()
+                        .map(|transition| transition.target_slot),
+                ));
                 doors::begin_room_admission(&mut self.state);
                 // Transition state1 explicitly dispatches Player::Update at
                 // 5ddf87 before loading, then the admitted Room::Update at
@@ -1230,6 +1243,9 @@ impl Game {
                 }
             }
             self.refresh_minimap();
+            if self.state.room_transition.is_none() {
+                self.advance_camera(phase);
+            }
             return Ok(());
         }
         doors::advance(&mut self.state, phase);
@@ -1360,7 +1376,24 @@ impl Game {
         if phase != phase::Phase::Skipped {
             self.state.music.advance();
         }
+        self.advance_camera(phase);
         Ok(())
+    }
+    fn advance_camera(&mut self, phase: phase::Phase) {
+        if self.state.run_introduction.active || self.state.room_transition.is_some() {
+            return;
+        }
+        let aim = motion::WorldVector {
+            x: f32::from(u8::from(self.held("ArrowRight")))
+                - f32::from(u8::from(self.held("ArrowLeft"))),
+            y: f32::from(u8::from(self.held("ArrowDown")))
+                - f32::from(u8::from(self.held("ArrowUp"))),
+        };
+        let camera = self
+            .state
+            .camera
+            .get_or_insert_with(|| camera::Camera::new(&self.state.room, None));
+        camera.advance(&self.state.room, &self.state.player, aim, phase);
     }
     fn advance_actor(
         &mut self,

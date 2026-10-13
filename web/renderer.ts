@@ -38,7 +38,7 @@ export class Renderer {
     const gl = this.graphics;
     if (state.screen === "playing") {
       this.prepareRoom(state.room.appearance);
-      this.stage.prepare(state.stageEffects);
+      this.stage.prepare(state.stageEffects, state.camera?.scroll);
     }
     gl.beginScreen(); gl.resetTransform(); gl.globalAlpha = 1; gl.imageSmoothingEnabled = false;
     gl.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -47,8 +47,13 @@ export class Renderer {
     const ctx = gl.asCanvasContext();
     if (state.screen !== "playing") this.menu.draw(ctx, state);
     else {
+      ctx.save();
+      if (state.camera) ctx.translate(state.camera.scroll.x, state.camera.scroll.y);
       this.drawRoom(state.room.appearance);
+      ctx.restore();
       this.stage.ground(state.stageEffects);
+      ctx.save();
+      if (state.camera) ctx.translate(state.camera.scroll.x, state.camera.scroll.y);
       const grid = state.room.grid;
       if (grid) for (const [index, cell] of grid.cells.entries()) {
         const entity = cell.entity;
@@ -96,6 +101,7 @@ export class Renderer {
       for (const bomb of state.bombs)
         if (bomb.motion.lifetime === "exploding")
           this.assets.draw(ctx, "gfx/004.000_bomb.anm2", "Explode", bomb.x, bomb.y - 1, bomb.motion.animationFrame, { pixelSnap: this.canvas.width / 480 / 2 });
+      ctx.restore();
       this.stage.foreground(state.stageEffects);
       this.presentation.introduction(ctx, state);
       this.hud(ctx, state);
