@@ -1,0 +1,86 @@
+{
+  "schema": 1,
+  "status": "pass",
+  "verifierSha256": "5e04a0f2ff9e8602835a3fb3627556d335913cebd9d945a3b2eed74a248ec244",
+  "productionArtifact": "633d605b1d131bf2271ac39243e0b876efd11877b0f94c525060c0c7711f199c",
+  "originalRawSha256": "6ed4c9dee1dd0d2e74dc8a36a3c1ff385f756dda13677ecb00ab63a9b2e6d50c",
+  "comparisonBodySha256": "cf59fdb6f0d4164bc4cc7ff2652bf5d697d8df0a5b2e43cdee7b25d766eadf8f",
+  "negativeChecks": [
+    {
+      "mutation": "Omit one actual manual seed glyph command",
+      "result": "rejected"
+    },
+    {
+      "mutation": "Omit the final selected actual snapshot",
+      "result": "rejected"
+    },
+    {
+      "mutation": "Omit one asynchronous callback state",
+      "result": "rejected"
+    }
+  ],
+  "limits": [
+    "Single sequential case per variant; timing includes host contention and is not a whole-suite speed claim.",
+    "Gameplay step return transport only changed; dispatch, structured cloning, independent selected snapshots, complete commands and asynchronous callback capture remain unchanged.",
+    "The earlier baseline attempt failed before browser commands because the private native copy initially lacked original.log; its failed report remains retained."
+  ],
+  "scope": "Two-line live browser tooling change discards unused step RPC returns while preserving independent snapshots, all public commands and backend states. Completed original reference replay, not native recapture; actual production artifact unchanged.",
+  "recordedPublicCase": {
+    "code": "CSTGNPJ8",
+    "value": 466426312,
+    "bootEpochSeed": 0,
+    "scenarioBankSha256": "de0f0684cc0da083317c7ebad5d4a62b90019ea81ccef4df01b78bb3a63feebd"
+  },
+  "verification": {
+    "ignoredPath": ".cache/coordination/live-step-rpc-proof/verification.json",
+    "sha256": "c071056225a5dd2d8749cd77a3e072ff763a4e0f346054554bf9d5a28d4d1639"
+  },
+  "priorAttempt": {
+    "status": "fail",
+    "beforeBrowserCommands": true,
+    "reason": "Private retained native manifest initially lacked sibling original.log; exact failure report retained",
+    "reportSha256": "1e306131185d16aef5659bbbd22c47209b96cb87d2500b0a9b7899a8a5a1b7ac"
+  },
+  "variants": [
+    {
+      "variant": "baseline",
+      "reportSha256": "3b81f525fb7c72e259c4e23242a8c9288f7f21ce2386fc6b70376f8943c8a750",
+      "gateSourceSha256": "7b78adbbf19388f9422c3748afec9d0a37f25b725f712a5d47dcfee4be7e6cf9",
+      "ignoredRunnerSha256": "a51c48891edc5ca83db6b29ed8678b1332c91c50b4db63a81113aae942fdf624",
+      "selectedPhases": 173,
+      "completeActualSnapshots": 173,
+      "completePublicCommands": 228,
+      "commandSha256": "ff8b796f337b47ac3526b57eb956b7d791ed82aeeed6fcf627f965590bc8065a",
+      "callbackEvents": 3,
+      "completeCallbackStates": 3,
+      "rawBrowserSha256": "6dba73496c9926bdf8e2fb093888cdd71bfe6e7ef22e7eaaf2b88d5a87585e46",
+      "rawBrowserBytes": 150122992,
+      "archiveSha256": "6309f3a471b617190ae80b66bff5c924a96237c93b648cec1c7de73587bbf863",
+      "gameplayStepRpcCalls": 173,
+      "returnedBytes": 23611600,
+      "accumulatedRpcWallMs": 35655.384429999925,
+      "medianRpcWallMs": 200.72185100000206,
+      "p95RpcWallMs": 301.317283999997
+    },
+    {
+      "variant": "discard-return",
+      "reportSha256": "125bf8cc61c639a4deeccf77d42fab6d80479bf6fe3c69129944f0fd3ae33898",
+      "gateSourceSha256": "83274eb24eb54610d3a6ca979a41646c5b11fe9fc85433b4dfd5e63507c9e085",
+      "ignoredRunnerSha256": "4174f0fb2f9a56827604f7290e5ce776bd167d806b708886c97f0fb155c88c86",
+      "selectedPhases": 173,
+      "completeActualSnapshots": 173,
+      "completePublicCommands": 228,
+      "commandSha256": "ff8b796f337b47ac3526b57eb956b7d791ed82aeeed6fcf627f965590bc8065a",
+      "callbackEvents": 3,
+      "completeCallbackStates": 3,
+      "rawBrowserSha256": "ba0054a2d70bb15ce8ce49b4af272a8e72a4d6f451b010b3b291f195fb9366c0",
+      "rawBrowserBytes": 150126242,
+      "archiveSha256": "024a96c8d31ae4419f89ac68705e4ca148edeb2f81e4b83350647931d7f74b0e",
+      "gameplayStepRpcCalls": 173,
+      "returnedBytes": 0,
+      "accumulatedRpcWallMs": 3147.006676000052,
+      "medianRpcWallMs": 14.306036000001768,
+      "p95RpcWallMs": 31.617512999997416
+    }
+  ]
+}

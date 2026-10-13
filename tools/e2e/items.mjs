@@ -159,7 +159,7 @@ try {
         const code = key ? 'Key' + key.toUpperCase() : null;
         if (key) { await page.keyboard.down(key); expected.push({type: 'key', code, down: true}); }
         for (let index = 0; index < frames; index++) {
-          await page.evaluate(() => window.game.step(1));
+          await page.evaluate(() => { window.game.step(1); });
           expected.push({type: 'tick', count: 1});
           const state = await page.evaluate(() => window.game.snapshot()); states.push(state);
           presentations++;
