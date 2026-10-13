@@ -95,7 +95,9 @@ pub fn for_room(
         }
         cells[column + row * usize::from(width)].entity = Some(GridEntity {
             kind: 16,
-            variant: 0,
+            // Fresh stage1 ordinary/curse/treasure doors use variant7 when
+            // opened; the admitted key-closed target2/12 branch uses variant1.
+            variant: if door.open { 7 } else { 1 },
             state: if door.open { 2 } else { 1 },
             collision_class: if door.open { 5 } else { 4 },
             spawn_seed: 0,

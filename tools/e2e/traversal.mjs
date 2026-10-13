@@ -18,7 +18,7 @@ const python = async args => JSON.parse((await run('python3', [helper, ...args],
 await mkdir(output, { recursive: true });
 const bank = value('--scenarios') ? JSON.parse(await readFile(resolve(value('--scenarios')), 'utf8')) : await python(['--count', value('--count') || '1']);
 assert.equal(bank.schema, 1);
-assert.ok(bank.cases.length >= 2 && bank.cases.length <= 4, 'Require contrived and independently recorded source routes');
+assert.ok(bank.cases.length >= 2 && bank.cases.length <= 6, 'Require contrived and independently recorded source routes');
 assert.equal(new Set(bank.cases.map(entry => entry.runSeed)).size, bank.cases.length);
 await writeFile(join(output, 'scenarios.json'), JSON.stringify(bank, null, 2) + '\n');
 const production = await startProductionServer();
@@ -26,8 +26,10 @@ const browser = await chromium.launch({ headless: true, ...browserLaunchOptions(
 const report = { schema: 1, status: 'running', skipped: 0, selected: bank.cases.length,
   scope: bank.contract === 'curse'
     ? 'Fresh ordinary Isaac, authored 13x7 no-hostile curse-room entry and exit; exact native half-heart charges, immunity/door collision/admission phases, descriptor/spawn identity and returned room persistence. Flight/items, other door styles, hostile callbacks and complete pixels remain separate.'
-    : 'Ordinary style0 13x7 doorway and no-hostile return; mandatory hostile-room lock/return regression; exact f32 player/descriptor phases, complete authored group accounting, supported actor admission and ordinary Rock metadata, visited-room restoration. NPC behavior, other grids/doors, large-room camera and complete pixels remain separate.',
-  exclusions: bank.contract === 'curse' ? ['Undiscovered native door variant6', 'Red chest callbacks and unsupported actors', 'Flight/items and other door policies', 'Complete rendered pixels'] : [],
+    : bank.contract === 'authored-doors'
+      ? 'Fresh ordinary Isaac, authored13x7 curse and first-floor free treasure doors; recorded W0L0LYYM bomb-driven admission and raw1400 fire admission remain mandatory. Exact room/player/HP/immunity/visible door phases, complete authored groups and return metadata; actor/item callbacks and pixels remain separate.'
+      : 'Ordinary style0 13x7 doorway and no-hostile return; mandatory hostile-room lock/return regression; exact f32 player/descriptor phases, complete authored group accounting, supported actor admission and ordinary Rock metadata, visited-room restoration. NPC behavior, other grids/doors, large-room camera and complete pixels remain separate.',
+  exclusions: ['curse', 'authored-doors'].includes(bank.contract) ? ['Undiscovered native door variant6', 'Actor behavior and item callbacks; NPC244 metadata only, raw1400 fire admission remains a required regression', 'Flight/items and other door policies', 'Complete rendered pixels'] : [],
   production: production.build, graphics: await inspectBrowserGraphics(browser), cases: [] };
 try {
   for (const scenario of bank.cases) {
@@ -90,15 +92,32 @@ try {
         phaseAssert.deepEqual(state.floor.grid, source.grid, `${label}:floor topology`);
         phaseAssert.deepEqual([state.player.x, state.player.y, state.player.vx, state.player.vy],
           [actor.position[0] * .65 + 32, actor.position[1] * .65 - 46, actor.velocity[0] * .65, actor.velocity[1] * .65], `${label}:source f32 motion projection`);
-        if (scenario.doorContract === 'curse') {
-          phaseAssert.equal(state.player.hp, actor.redHp, `${label}:curse-door native half-heart state`);
-          phaseAssert.equal(state.damageCooldown, actor.damageCountdown, `${label}:curse-door immunity and transition dispatch`);
+        if (['curse', 'free-treasure'].includes(scenario.doorContract)) {
+          phaseAssert.equal(state.player.hp, actor.redHp, `${label}:native door-route health state`);
+          phaseAssert.equal(state.damageCooldown, actor.damageCountdown, `${label}:door-route immunity and transition dispatch`);
           const sourceDoors = observed.contents.grid.filter(cell => cell.type === 16 && cell.variant !== 6);
           const actualDoors = state.room.grid?.cells.flatMap((cell, index) => cell.entity?.kind === 16 && cell.entity.variant !== 6 ? [index] : []) || [];
-          phaseAssert.deepEqual(actualDoors, sourceDoors.map(door => door.index), `${label}:complete authored curse-route door objects`);
+          phaseAssert.deepEqual(actualDoors, sourceDoors.map(door => door.index), `${label}:complete authored visible door objects`);
+          phaseAssert.deepEqual(state.room.appearance.doors.map(door => door.slot).sort((a, b) => a - b),
+            sourceDoors.map(door => [60, 7, 74, 127].indexOf(door.index)).sort((a, b) => a - b), `${label}:complete visible door appearances`);
           for (const door of sourceDoors) {
             const actual = state.room.grid?.cells[door.index]?.entity;
-            phaseAssert.deepEqual([actual?.kind, actual?.state, actual?.collisionClass], [door.type, door.state, door.collisionClass], `${label}:curse-route door collision phase`);
+            phaseAssert.deepEqual([actual?.kind, actual?.variant, actual?.state, actual?.collisionClass],
+              [door.type, door.variant, door.state, door.collisionClass], `${label}:door variant/collision phase`);
+            const slot = [60, 7, 74, 127].indexOf(door.index);
+            phaseAssert.ok(slot >= 0, `${label}:supported 13x7 source doorway slot`);
+            const target = source.grid[descriptor.gridIndex + [-1, -13, 1, 13][slot]];
+            phaseAssert.ok(Number.isInteger(target), `${label}:source door has a descriptor neighbor`);
+            const targetType = source.descriptors[target]?.template.type;
+            // Source LoadAnimation5629c0 chooses curse before treasure and
+            // checks both independently observed native endpoint room types.
+            const asset = [descriptor.template.type, targetType].includes(10)
+              ? 'gfx/grid/door_04_selfsacrificeroomdoor.anm2'
+              : [descriptor.template.type, targetType].includes(4)
+                ? 'gfx/grid/door_02_treasureroomdoor.anm2'
+                : 'gfx/grid/door_01_normaldoor.anm2';
+            const appearance = state.room.appearance.doors.find(candidate => candidate.slot === slot);
+            phaseAssert.deepEqual([appearance?.targetRoom, appearance?.asset], [target, asset], `${label}:source door endpoint/asset identity`);
           }
         }
         observedRooms.add(source.currentDescriptorIndex);
@@ -143,14 +162,15 @@ try {
         }
         if (!admissions.has(state.currentRoom)) {
           admissions.set(state.currentRoom, admission);
-          // Admission metadata for raw stationary NPC244 and resolved regular
-          // pickups is complete in both directions. Ambient effects, chest
-          // callbacks and other unsupported actors have no runtime claim here.
-          const supported = entity => entity.type === 244 || (entity.type === 5 && ({10: [1, 2, 5], 20: [1, 2, 3, 4], 30: [1, 3], 40: [1, 2]})[entity.variant]?.includes(entity.subtype));
+          // Stationary NPC244 and regular pickup admission join both ways.
+          // Treasure routes also retain the native NPC33 fire admission
+          // regression: raw1400 selectors have not yet resolved into actors.
+          const rawMetadata = entity => entity.type === 244 || (scenario.doorContract === 'free-treasure' && entity.type === 33);
+          const supported = entity => rawMetadata(entity) || (entity.type === 5 && ({10: [1, 2, 5], 20: [1, 2, 3, 4], 30: [1, 3], 40: [1, 2]})[entity.variant]?.includes(entity.subtype));
           const tuple = entity => [entity.type, entity.variant, entity.subtype, entity.spawnSeed,
             ...(Array.isArray(entity.position) ? entity.position : [entity.position.x, entity.position.y])];
           const multiset = entities => entities.map(tuple).map(JSON.stringify).sort();
-          const actualEntities = [...selectors.filter(selector => selector.category === 'entity' && selector.type === 244),
+          const actualEntities = [...selectors.filter(selector => selector.category === 'entity' && rawMetadata(selector)),
             ...(state.room.pickups || []).map(pickup => ({type: 5, ...pickup}))].filter(supported);
           phaseAssert.deepEqual(multiset(actualEntities), multiset(observed.contents.entities.filter(supported)),
             `${label}:complete supported native admission multiset with subtype/seed/position`);
@@ -158,12 +178,16 @@ try {
         states.push({ label, currentRoom: state.currentRoom, descriptor: state.room.descriptor, spawns: admission,
           player: state.player, damageCooldown: state.damageCooldown, nativePosition: actor.position,
           nativeVelocity: actor.velocity, nativeHp: actor.redHp, nativeDamageCountdown: actor.damageCountdown,
+          doors: state.room.appearance.doors,
+          rockMetadata: state.room.grid?.cells.flatMap((cell, index) => [2, 5, 6].includes(cell.entity?.kind)
+            ? [{index, ...cell.entity}] : []) || [],
           visitedRooms: state.visitedRooms, transition: state.roomTransition });
         row.comparedPhases++;
       };
       const deliver = async action => {
         if (action.type === 'key') {
-          const code = { a: 'KeyA', w: 'KeyW', d: 'KeyD', s: 'KeyS' }[action.key];
+          const code = { a: 'KeyA', w: 'KeyW', d: 'KeyD', s: 'KeyS', e: 'KeyE', Up: 'ArrowUp',
+            Down: 'ArrowDown', Left: 'ArrowLeft', Right: 'ArrowRight', Escape: 'Escape' }[action.key];
           assert.ok(code); await page.keyboard[action.down ? 'down' : 'up'](code);
           expectedCommands.push({ type: 'key', code, down: action.down });
         } else if (action.type === 'step') {
@@ -182,10 +206,12 @@ try {
       await compare('gameplay-start');
       for (const action of setup) await deliver(action);
       for (const action of scenario.actions) await deliver(action);
-      assert.equal(observedRooms.size, 2, 'A complete ordinary route must enter one neighbor and return');
+      assert.equal(observedRooms.size, 2, 'A complete declared route must reach exactly one authored neighbor');
       const expectedFinal = originals.get(scenario.actions.filter(action => action.type === 'capture').at(-1).label).observation.floor;
       if (scenario.mode === 'blocked-return') assert.notEqual(expectedFinal.currentDescriptorIndex, native.debugObservations[0].observation.floor.currentDescriptorIndex,
         'Mandatory source hostile-room regression must actually keep its attempted return locked');
+      else if (scenario.mode === 'entry-only') assert.equal(expectedFinal.descriptors[expectedFinal.currentDescriptorIndex].template.type, scenario.goalRoomType,
+        'The recorded public route must actually reach its declared native room kind');
       else assert.equal(expectedFinal.currentDescriptorIndex, native.debugObservations[0].observation.floor.currentDescriptorIndex,
         'Independent ordinary return route must actually reach the starting descriptor');
       if (scenario.doorContract === 'curse') {
