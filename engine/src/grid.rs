@@ -525,4 +525,84 @@ impl Collider {
             velocity_changed,
         }))
     }
+
+    /// Source ordinary nonplayer ground class5. Unlike the player solver,
+    /// position correction only runs for inward motion. Full collision first
+    /// reflects the normal component, then scales the entire velocity using
+    /// the original inward dot and reflected speed. Prediction preserves it.
+    pub fn resolve_nonplayer_ground(
+        &self,
+        grid: &Grid,
+        position: &mut WorldVector,
+        velocity: &mut WorldVector,
+        preview: bool,
+    ) -> Result<Option<GridContact>, String> {
+        if !position.is_finite() || !velocity.is_finite() {
+            return Err("nonplayer collision requires finite world vectors".into());
+        }
+        let mut normal = WorldVector { x: 0.0, y: 0.0 };
+        for &sample in &self.samples {
+            if grid.collision_at(*position + sample) != 0 {
+                normal = normal + sample;
+            }
+        }
+        if normal.x == 0.0 && normal.y == 0.0 {
+            return Ok(None);
+        }
+        let squared = normal.x * normal.x + normal.y * normal.y;
+        if !squared.is_finite() || squared <= 0.0 {
+            return Err("nonplayer collision normal overflowed".into());
+        }
+        normal = normal * (1.0 / squared.sqrt());
+        let previous_velocity = *velocity;
+        let inward = -normal.x * velocity.x - normal.y * velocity.y;
+        if !inward.is_finite() {
+            return Err("nonplayer collision speed overflowed".into());
+        }
+        let changed = inward < 0.0;
+        if changed {
+            let reflected = if preview {
+                *velocity
+            } else {
+                *velocity + normal * (inward * 1.8 - 0.1)
+            };
+            let speed = (reflected.x * reflected.x + reflected.y * reflected.y).sqrt();
+            if !reflected.is_finite() || !speed.is_finite() || speed <= 0.0 {
+                return Err("nonplayer collision reflection overflowed".into());
+            }
+            let scaled_normal = WorldVector {
+                x: normal.x * self.geometry.scale.x,
+                y: normal.y * self.geometry.scale.y,
+            };
+            let radius = (scaled_normal.x * scaled_normal.x + scaled_normal.y * scaled_normal.y)
+                .sqrt()
+                * self.geometry.radius;
+            let mut upper = radius;
+            let mut lower = radius - speed.max(2.0);
+            for _ in 0..12 {
+                let middle = (upper - lower) * 0.5 + lower;
+                if grid.collision_at(*position + normal * middle) == 0 {
+                    lower = middle;
+                } else {
+                    upper = middle;
+                }
+            }
+            let next_position = *position + normal * (lower - radius);
+            let next_velocity = if preview {
+                *velocity
+            } else {
+                reflected * (1.0 + (inward / speed) * 0.5)
+            };
+            if !next_position.is_finite() || !next_velocity.is_finite() {
+                return Err("nonplayer collision response overflowed".into());
+            }
+            *position = next_position;
+            *velocity = next_velocity;
+        }
+        Ok(Some(GridContact {
+            normal,
+            previous_velocity,
+            velocity_changed: changed && !preview,
+        }))
+    }
 }

@@ -1,0 +1,93 @@
+{
+  "schema": 1,
+  "status": "pass",
+  "sourceBase": "d2f0be6",
+  "scope": "Native ordinary nonplayer ground class5 and regular-bomb boundary contact; authored grid admission follows separately.",
+  "build": {
+    "sha256": "8b56e00305678f3f47ddcc516dcda5867121c426655ffeaf11f1ee68c9fb9239",
+    "files": 99,
+    "scope": "Immutable snapshot of production build bytes; source/native replay equality is checked separately"
+  },
+  "sourceBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "gateSourcesStable": true,
+  "pairedCheckpoints": 42,
+  "pairedStatus": "pass",
+  "bombStateFields": 125,
+  "bombStateStatus": "pass",
+  "bombStateSources": {
+    "buildSha256": "8b56e00305678f3f47ddcc516dcda5867121c426655ffeaf11f1ee68c9fb9239",
+    "sourceBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+    "originalManifestSha256": "c2030284aaf39bffa43d2e5e7e76f81910b25030008a6e0ca2a5db0024b63a5b",
+    "browserManifestSha256": "0a17a679cebc42beab06168b6491319f686e6a7a39b6adf60fa4dbd44d684553",
+    "caseSha256": "6affa97845c5de00f06d61b9be1612e72109b12cdfaa7bc0fa24c50732e12f47"
+  },
+  "retainedReports": {
+    "pairedSha256": "d152b447c06d5017bc5d34fdc28a5809f58a8026a08f832fcc840a72b86fe1ab",
+    "bombStateSha256": "f220ef288e306012d09ffaab6a265877a98d7fa80690b97ba93557588fae7d43",
+    "priorIncorrectResponseSha256": "c910d93f083f6cfacd5ab2f602e365b011564296befbaabe8030496b5cf7ca70"
+  },
+  "masks": {
+    "cases": [
+      {
+        "id": "8m72-neutral",
+        "status": "pass",
+        "checkpoint": "gameplay-start"
+      },
+      {
+        "id": "j4g3-neutral",
+        "status": "pass",
+        "checkpoint": "gameplay-start"
+      },
+      {
+        "id": "3bmb-neutral",
+        "status": "pass",
+        "checkpoint": "gameplay-start"
+      },
+      {
+        "id": "3bmb-moved",
+        "status": "pass",
+        "checkpoint": "movement"
+      },
+      {
+        "id": "3bmb-explosion-start",
+        "status": "pass",
+        "checkpoint": "explosion-start"
+      },
+      {
+        "id": "3bmb-explosion-faded",
+        "status": "pass",
+        "checkpoint": "explosion-faded"
+      },
+      {
+        "id": "3bmb-explosion-middle",
+        "status": "pass",
+        "checkpoint": "explosion-middle"
+      },
+      {
+        "id": "3bmb-explosion-late",
+        "status": "pass",
+        "checkpoint": "explosion-late"
+      },
+      {
+        "id": "3bmb-explosion-removed",
+        "status": "pass",
+        "checkpoint": "explosion-removed"
+      }
+    ],
+    "selected": 9,
+    "skipped": 0,
+    "originalStateParity": false,
+    "originalSimulationTickDelivery": false
+  },
+  "replayCase": "C7YPWS61-dense-wall.json",
+  "validation": {
+    "productionWasmBuild": "pass",
+    "typecheck": "pass",
+    "clippyAllTargetsDenyWarnings": "pass"
+  },
+  "limits": [
+    "Full original frame RGBA diagnostics remain failing.",
+    "Other nonplayer collision classes, type-specific response exceptions, grid destruction and NPC AI are separate work.",
+    "Known tear lifetime/count failures from EQCA3XZX remain retained in verification.json."
+  ]
+}
