@@ -121,14 +121,21 @@ pub fn for_room(
                 spawn_seed: spawn.spawn_seed,
             });
         }
-        // Tinted/special rock callbacks are not ordinary Rock admission.
+        // Tinted Rock admission/drops are still a separate callback. Source
+        // factory5ceba5 nevertheless classifies other raw1000 rocks before
+        // Init can link ordinary neighbors: a new RNG35 Random1001 chooses
+        // explosive kind5 on0..9, alternate kind6 on10..15, otherwise kind2.
         if spawn.entity_type == 1000
             && spawn.variant == 0
             && spawn.subtype == 0
             && spawn.grid_index != spawns.tinted_rock_index
         {
             cell.entity = Some(GridEntity {
-                kind: 2,
+                kind: match crate::room_spawns::next35(spawn.spawn_seed) % 1001 {
+                    0..=9 => 5,
+                    10..=15 => 6,
+                    _ => 2,
+                },
                 // Rock normal has three authored frames. Native SetType(-1)
                 // seeds RNG35 with (decoration seed + grid index) | 1.
                 variant: crate::room_spawns::next35(decoration_seed.wrapping_add(index as u32) | 1)
