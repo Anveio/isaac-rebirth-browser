@@ -31,7 +31,9 @@ const report = { schema: 1, status: 'running', skipped: 0, selected: bank.cases.
       : bank.contract === 'secret'
         ? 'Fresh Isaac, no-hostile13x7 Basement secret bomb revelation/entry/return: complete hidden/open door objects, reciprocal persistence, source display flags and minimap routing, exact room/player/HP/immunity and authored admissions. Keeper/item callbacks, hostile secret closure, other shapes/items and complete pixels remain separate.'
         : 'Ordinary style0 13x7 doorway and no-hostile return; mandatory hostile-room lock/return regression; exact f32 player/descriptor phases, complete authored group accounting, supported actor admission and ordinary Rock metadata, visited-room restoration. NPC behavior, other grids/doors, large-room camera and complete pixels remain separate.',
-  exclusions: ['curse', 'authored-doors'].includes(bank.contract) ? ['Undiscovered native door variant6', 'Actor behavior and item callbacks; NPC244 metadata only, raw1400 fire admission remains a required regression', 'Flight/items and other door policies', 'Complete rendered pixels'] : [],
+  exclusions: bank.contract === 'secret'
+    ? ['Keeper17 metadata only; regular key admission remains a required regression', 'Later-stage surprise substitution and failed-open saved transitions', 'Actor/item/curse policies and door FX/animation pixels', 'Other room shapes and floor exits']
+    : ['curse', 'authored-doors'].includes(bank.contract) ? ['Undiscovered native door variant6', 'Actor behavior and item callbacks; NPC244 metadata only, raw1400 fire admission remains a required regression', 'Flight/items and other door policies', 'Complete rendered pixels'] : [],
   production: production.build, graphics: await inspectBrowserGraphics(browser), cases: [] };
 try {
   for (const scenario of bank.cases) {
@@ -182,7 +184,9 @@ try {
           // Stationary NPC244 and regular pickup admission join both ways.
           // Treasure routes also retain the native NPC33 fire admission
           // regression: raw1400 selectors have not yet resolved into actors.
-          const rawMetadata = entity => entity.type === 244 || (scenario.doorContract === 'free-treasure' && entity.type === 33);
+          const rawMetadata = entity => entity.type === 244
+            || (scenario.doorContract === 'secret' && entity.type === 17)
+            || (scenario.doorContract === 'free-treasure' && entity.type === 33);
           const supported = entity => rawMetadata(entity) || (entity.type === 5 && ({10: [1, 2, 5], 20: [1, 2, 3, 4], 30: [1, 3], 40: [1, 2]})[entity.variant]?.includes(entity.subtype));
           const tuple = entity => [entity.type, entity.variant, entity.subtype, entity.spawnSeed,
             ...(Array.isArray(entity.position) ? entity.position : [entity.position.x, entity.position.y])];
