@@ -67,3 +67,12 @@ orchestration limits. Original PNGs and difference PNGs remain retained; no
 recovered full pixel summary or complete wrapper success is claimed. Complete boss blood/gibs, final heart/reward,
 Trapdoor and stage progression require subsequent causal callbacks. Existing
 T1 damage, W0, H2/center clearance and shared-stream failures remain required.
+
+A subsequent source review found that the frozen Blood factory omitted actual
+Room sequence allocation while excluding flags8 from the ordinary scheduler.
+Room5c6940 allocates Entity+8 before Manager4524f0 routes that object. The
+separate correction reserves the identity without ordinary full/fast membership
+and retires it using actual liveness. One-job Rust/strict Clippy and formatting
+pass; no corrected-artifact live acceptance is inferred. Original PR84 heads,
+artifact and all failed captures remain immutable. Exact source/log hashes are
+in `blood-sequence-correction.json` beside the original verification.

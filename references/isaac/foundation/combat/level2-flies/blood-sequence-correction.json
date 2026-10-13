@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "status": "source/static correction; no corrected-artifact live acceptance",
+  "immutablePriorHead": "33fb7cdc8def71c6a91ccce6c55e162a830de08f",
+  "ownedRuntimeCommit": "ae1881b333d52982de6872c99c1ad1f61618effd",
+  "reviewedDefect": "Blood7 skipped the actual Room Entity+8 sequence allocation because it was excluded from ordinary full/fast scheduler membership. Native allocates sequence before flags8 routing.",
+  "source": {
+    "binarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+    "Room5c6940": {
+      "sha256": "fa3057d5ffeee1dc767fb9bc24c1eef012f972032ef76cc9f033a37506ad4a48",
+      "law": "Load old Room+15c8, increment at5c6949, assign Entity+8 at5c694f, then tail-call Manager4524f0 at5c6959."
+    },
+    "Manager4524f0": {
+      "sha256": "37456dff4c5e60bc0cdcd3a278578b57af71e0011f3aebf4792fc455f7fbb46a",
+      "law": "Flags8 skip ordinary array+68 but still enter the independently sorted render array+80."
+    }
+  },
+  "implementation": [
+    "Scheduler.admit_background allocates one real identity without joining the ordinary full snapshot or live intermediate array.",
+    "Regular Scheduler.admit uses the same allocator, then joins ordinary membership.",
+    "Retain evaluates actual liveness once per identity, including backgrounds; ordinary membership follows surviving identities.",
+    "Blood7 reserves its actual sequence after factory Init, before returning admission; immediate Update and same-full sorted paint/retirement remain unchanged."
+  ],
+  "validation": {
+    "status": "pass",
+    "compilerJobs": 1,
+    "checks": [
+      "cargo check --locked --all-targets",
+      "cargo clippy --locked --all-targets -- -D warnings",
+      "cargo fmt --check",
+      "git diff --check"
+    ],
+    "logs": {
+      "rustCheckSha256": "acdda2cd789dbb889c6a97419f13deef2d3482a02bfb54c060f2bb304fa3e2c9",
+      "strictClippySha256": "acece8da5e6e43b7929e62bcfbf26abac8ccf02ad42332b08147c26e8148b54b"
+    },
+    "sources": {
+      "engine/src/actors.rs": "ae8fb5658a55b3cca302d2304b0f1d2329e9b260c0d5dc978043f0a94d486ec9",
+      "engine/src/familiars.rs": "ccfcba5aa809670f26dfad4a175b5493c2c84f7664a11b67d5ee0f5fcd23b9cf"
+    }
+  },
+  "retainedProof": "Prior artifact30183f and both complete original/browser captures remain immutable and required red. No new build, recapture or sequence equality acceptance is inferred from this static correction.",
+  "unchanged": [
+    "Shared RNG draws",
+    "214 AI and physical contacts",
+    "Blood immediate Update and sorted same-full paint",
+    "Direct comparator assertions",
+    "All mandatory T1/W0/H2/center/Worm/BLL failures"
+  ]
+}
