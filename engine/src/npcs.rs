@@ -452,8 +452,8 @@ pub(crate) fn direction(random: &mut Mt19937) -> WorldVector {
     // SharedDirection 0x42e8d0 rounds the sampled f32 angle before sinf/cosf.
     let radians = (f64::from(random.uniform()) * std::f64::consts::TAU) as f32;
     WorldVector {
-        x: radians.cos(),
-        y: radians.sin(),
+        x: crate::fmath::cos(radians),
+        y: crate::fmath::sin(radians),
     }
 }
 
