@@ -1,0 +1,1019 @@
+{
+  "schema": 1,
+  "status": "scoped-functional-proof-with-blocking-regressions",
+  "defaultCohortStatus": "fail",
+  "runtimeCommit": "e195c29e356b7b1d37f35b9c2176d7550db8e33b",
+  "sourceBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "scope": "Actual source and production browser/WASM public-input Fly13/AttackFly18 admission/contact/deferred damage/death/retirement plus independent exact zero-count clear and enabled ordinary door boundaries. No actor/native-state injection or captured MT/counter offset.",
+  "finalDenseReplay": {
+    "buildSha256": "571d15667e0924df4487806525f110cb27d3a180f5065c2f43ff6c9df3af7946",
+    "sourcesStable": true,
+    "cohortReportSha256": "b5882cbeeb2bc297df030bcb50c23cc5746f58d6dd28faffbc1eeaf8deec7132",
+    "pairedReportSha256": "a307cc0ab5bbf448848d176d595789d497c78012b4ffd6e91ec766ee7e06ac7b",
+    "npcReportSha256": "a4dffd607718978995a85ca52d6d0eca3ba898098dfabb301620d588e4e5eff8",
+    "originalManifestSha256": "e66cdfc663c57bef2d6210487defcd36c88df2ab97d72fad91d71f88cc258aa0",
+    "browserManifestSha256": "9256764feaa6e455e0827ada239e80db57bcd249deaf9e7bf6cb72a68f90c442",
+    "caseSha256": "a9e8365a109dfd435a277ecef4eca674d0c2e6f94762608ef8b79779b885eea0",
+    "capturedComparisonSources": {
+      "tools/e2e/npcs.mjs": "09bdcc00b968ce995af7fba35026bec7c9355607982d415ec1bb284831ac6b4e",
+      "tools/original/npc-scenarios.py": "eced323de4bd8afeeeb330a4abea42be757564802274d0b09ee9f33d0d6d9371",
+      "tools/foundation/npc-state-pair.mjs": "778a91996f8e403da0a717ff00349d1b43237065335342dab3c0c51bf1902ffb",
+      "references/isaac/foundation/combat/npcs/random-selection.json": "1792008acedd6b937545dd9431f666d0050d32263fcbc68f0c5ebd35752996ff"
+    },
+    "pairedCaptureSources": {
+      "tools/foundation/paired-game.mjs": "220132d10116ee4f11dc115e40bf9c9a85adc40948b60ee4f3f4303722f472c3",
+      "tools/foundation/production-server.mjs": "e3152b58e2353319ba0963b30439e33c3cc65f84a8c6ebb765c2812486245952",
+      "tools/foundation/compare.mjs": "007227c2431f837b347ec29dcbc3492f49eaeb71d08b84ead0b88cfeef98b534",
+      "tools/original/foundation-paired-scenarios.py": "8f6a4b5130b6d0c1b73d3dcde57382c6ad169ba31efd8b3a13a6502eebe835cf",
+      "tools/original/foundation-paired-observer.py": "b49cb171da79eabba8054c8338018ffa38e3a38305fbff2240d6631214dddacf",
+      "tools/original/foundation-menu-observer.py": "a5b8a91047f9bccee75e844c5eba59c8bbf96a84b6a1b7142b59e32bacc91315",
+      "tools/original/foundation-combat-observe.py": "e707be8aaa59d2e9c1bb937ec19dd58b4d5df4c11e06942e2640eb0fc9538037",
+      "tools/original/foundation-clock-run.py": "b79997f1fdc983a6e6fac74d87c24d2036ea956021fa944d1c0bd7f04e15a243",
+      "tools/original/foundation-clock-gate.c": "f517f1fc0edf2bbe17021e529fb41652e991e286bef070b8aecefd32bfa62e75",
+      "tools/original/foundation-clock-verify.py": "c488100a187b44803c06374535715eaa5a7cde9d4513f6e866e090367d4f2054",
+      "tools/original/foundation-clock-scenarios.py": "87316815cfa490d534fae5f9d27e55f16b17404a93df1b79e528b3f4b58391c5",
+      "tools/original/foundation-bomb-scenario.py": "4d8dacb4bbe7222c6bfa3ffe1c9f8ea69b76f304825a01db0e973f14ddddd090",
+      "tools/original/foundation-presentation-scenario.py": "530666412639fae6cb2d71f6f49e89a9de12377503d84541a73240bca0be3351",
+      "tools/original/foundation-title-scenario.py": "ea1bfb8b53a46a55f0c234ea75753775b70fd69e0b88f1be8021287a13adb4a9",
+      "tools/original/foundation-combat-scenario.py": "d125481add29d1032fb164741a8d3ab54da9e54e9e6c1d0581278bc255044420",
+      "tools/original/foundation-seeds.py": "dd4633c955e7518e9bc0f0147ddfae46d356468238477a68dc06c86656ccba89",
+      "tools/original/foundation-random-seeds.py": "6ce7e4309ee9492dc0c20c0bf1144394dd92e70aec2037d0db91bb0f2928f625",
+      "tools/original/state-observer.py": "58e3b510abbe5ff57f05844efbdf764e2a02530cda4fa99f538d886d258af6f1",
+      "tools/original/debug-run.py": "d785d32c6cc557959be38880a3b046c4040b988fbe3d06d4a8c1f4aa2e833cf5",
+      "tools/original/with-display.sh": "af469210e803786a60d8632c28a6f2da77bc8ab02cc06be50016ddb25e95b848",
+      "tools/foundation/browser.mjs": "60c4bc851470f47e4dd0399148ce0c1edf351d41fbf7f7e15fa823af5948b4c8"
+    },
+    "requiredFields": 10301,
+    "failedRequiredFields": 399,
+    "pairedCheckpoints": {
+      "passed": 8,
+      "total": 371
+    },
+    "execution": {
+      "admission": true,
+      "contact": false,
+      "bomb": false,
+      "tear": true,
+      "drain": true,
+      "death": true,
+      "retirement": true,
+      "clear": true,
+      "clear-delay": true,
+      "door-clear": true
+    },
+    "boundaries": {
+      "native": {
+        "status": "pass",
+        "boundary": [
+          {
+            "label": "random-clear-2-81",
+            "counter": 2049,
+            "count": 0,
+            "countdown": 9,
+            "clear": false,
+            "doors": [
+              {
+                "index": 7,
+                "state": 1,
+                "collisionClass": 4
+              },
+              {
+                "index": 60,
+                "state": 1,
+                "collisionClass": 4
+              },
+              {
+                "index": 74,
+                "state": 1,
+                "collisionClass": 4
+              },
+              {
+                "index": 127,
+                "state": 1,
+                "collisionClass": 4
+              }
+            ],
+            "bodySha256": "cfc8a042732282199bb59c14fcc866a71ba431c139faeaf6dd1308b897098ea1"
+          },
+          {
+            "label": "random-clear-2-83",
+            "counter": 2051,
+            "count": 0,
+            "countdown": 8,
+            "clear": false,
+            "doors": [
+              {
+                "index": 7,
+                "state": 1,
+                "collisionClass": 4
+              },
+              {
+                "index": 60,
+                "state": 1,
+                "collisionClass": 4
+              },
+              {
+                "index": 74,
+                "state": 1,
+                "collisionClass": 4
+              },
+              {
+                "index": 127,
+                "state": 1,
+                "collisionClass": 4
+              }
+            ],
+            "bodySha256": "268de86c61cdee7b86cf91b1c682c0e915562c16a06f24b9eb4d9c7427d652e8"
+          },
+          {
+            "label": "random-clear-2-85",
+            "counter": 2053,
+            "count": 0,
+            "countdown": 7,
+            "clear": false,
+            "doors": [
+              {
+                "index": 7,
+                "state": 1,
+                "collisionClass": 4
+              },
+              {
+                "index": 60,
+                "state": 1,
+                "collisionClass": 4
+              },
+              {
+                "index": 74,
+                "state": 1,
+                "collisionClass": 4
+              },
+              {
+                "index": 127,
+                "state": 1,
+                "collisionClass": 4
+              }
+            ],
+            "bodySha256": "7073e1e113e8e0f766ab0d1658ab8d5a9a2e04e9bea877d41105ee18f3bb7d58"
+          },
+          {
+            "label": "random-clear-2-87",
+            "counter": 2055,
+            "count": 0,
+            "countdown": 6,
+            "clear": false,
+            "doors": [
+              {
+                "index": 7,
+                "state": 1,
+                "collisionClass": 4
+              },
+              {
+                "index": 60,
+                "state": 1,
+                "collisionClass": 4
+              },
+              {
+                "index": 74,
+                "state": 1,
+                "collisionClass": 4
+              },
+              {
+                "index": 127,
+                "state": 1,
+                "collisionClass": 4
+              }
+            ],
+            "bodySha256": "d33216425629735b69577013ef870abd49362322aae1997fe6b3766e1ecb226b"
+          },
+          {
+            "label": "random-clear-2-89",
+            "counter": 2057,
+            "count": 0,
+            "countdown": 5,
+            "clear": false,
+            "doors": [
+              {
+                "index": 7,
+                "state": 1,
+                "collisionClass": 4
+              },
+              {
+                "index": 60,
+                "state": 1,
+                "collisionClass": 4
+              },
+              {
+                "index": 74,
+                "state": 1,
+                "collisionClass": 4
+              },
+              {
+                "index": 127,
+                "state": 1,
+                "collisionClass": 4
+              }
+            ],
+            "bodySha256": "aed818aa5c02342d6e9002c7c7100c35ff13c27c725231934fa25768fd858652"
+          },
+          {
+            "label": "random-clear-2-91",
+            "counter": 2059,
+            "count": 0,
+            "countdown": 4,
+            "clear": false,
+            "doors": [
+              {
+                "index": 7,
+                "state": 1,
+                "collisionClass": 4
+              },
+              {
+                "index": 60,
+                "state": 1,
+                "collisionClass": 4
+              },
+              {
+                "index": 74,
+                "state": 1,
+                "collisionClass": 4
+              },
+              {
+                "index": 127,
+                "state": 1,
+                "collisionClass": 4
+              }
+            ],
+            "bodySha256": "724c5b5c5dbea5e079a343efd5cd2eb0cd522a4d7b93dd284937658ba41b59bf"
+          },
+          {
+            "label": "random-clear-2-93",
+            "counter": 2061,
+            "count": 0,
+            "countdown": 3,
+            "clear": false,
+            "doors": [
+              {
+                "index": 7,
+                "state": 1,
+                "collisionClass": 4
+              },
+              {
+                "index": 60,
+                "state": 1,
+                "collisionClass": 4
+              },
+              {
+                "index": 74,
+                "state": 1,
+                "collisionClass": 4
+              },
+              {
+                "index": 127,
+                "state": 1,
+                "collisionClass": 4
+              }
+            ],
+            "bodySha256": "c91750d881c9dbb3640e9c7e102bf1df307fbb4a47d18358e75ab88712b1fae5"
+          },
+          {
+            "label": "random-clear-2-95",
+            "counter": 2063,
+            "count": 0,
+            "countdown": 2,
+            "clear": false,
+            "doors": [
+              {
+                "index": 7,
+                "state": 1,
+                "collisionClass": 4
+              },
+              {
+                "index": 60,
+                "state": 1,
+                "collisionClass": 4
+              },
+              {
+                "index": 74,
+                "state": 1,
+                "collisionClass": 4
+              },
+              {
+                "index": 127,
+                "state": 1,
+                "collisionClass": 4
+              }
+            ],
+            "bodySha256": "212d04c986d0dd0c94dd71ed29d99f1d5bd098a12812335ad40170aa0d55b2e1"
+          },
+          {
+            "label": "random-clear-2-97",
+            "counter": 2065,
+            "count": 0,
+            "countdown": 1,
+            "clear": false,
+            "doors": [
+              {
+                "index": 7,
+                "state": 1,
+                "collisionClass": 4
+              },
+              {
+                "index": 60,
+                "state": 1,
+                "collisionClass": 4
+              },
+              {
+                "index": 74,
+                "state": 1,
+                "collisionClass": 4
+              },
+              {
+                "index": 127,
+                "state": 1,
+                "collisionClass": 4
+              }
+            ],
+            "bodySha256": "16aca0c7824dd8d86d5c7f639ad8bbf6750ae4d50d213949c5c0f86472b39877"
+          },
+          {
+            "label": "random-clear-2-99",
+            "counter": 2067,
+            "count": 0,
+            "countdown": 0,
+            "clear": false,
+            "doors": [
+              {
+                "index": 7,
+                "state": 1,
+                "collisionClass": 4
+              },
+              {
+                "index": 60,
+                "state": 1,
+                "collisionClass": 4
+              },
+              {
+                "index": 74,
+                "state": 1,
+                "collisionClass": 4
+              },
+              {
+                "index": 127,
+                "state": 1,
+                "collisionClass": 4
+              }
+            ],
+            "bodySha256": "dd16d9935abda3aa0c3f836cc6e0194e2aff7b46aec93814db302001dc7a9489"
+          },
+          {
+            "label": "random-clear-2-101",
+            "counter": 2069,
+            "count": 0,
+            "countdown": 0,
+            "clear": true,
+            "doors": [
+              {
+                "index": 7,
+                "state": 1,
+                "collisionClass": 4
+              },
+              {
+                "index": 60,
+                "state": 2,
+                "collisionClass": 4
+              },
+              {
+                "index": 74,
+                "state": 2,
+                "collisionClass": 4
+              },
+              {
+                "index": 127,
+                "state": 1,
+                "collisionClass": 4
+              }
+            ],
+            "bodySha256": "8be85661afcb362d3827cd83516ab1a64b0ca67b272dad576771c98717b28bc1"
+          }
+        ],
+        "doorTransitions": [
+          {
+            "index": 60,
+            "before": {
+              "index": 60,
+              "state": 1,
+              "collisionClass": 4
+            },
+            "cleared": {
+              "index": 60,
+              "state": 2,
+              "collisionClass": 4
+            },
+            "following": {
+              "index": 60,
+              "state": 2,
+              "collisionClass": 5
+            }
+          },
+          {
+            "index": 74,
+            "before": {
+              "index": 74,
+              "state": 1,
+              "collisionClass": 4
+            },
+            "cleared": {
+              "index": 74,
+              "state": 2,
+              "collisionClass": 4
+            },
+            "following": {
+              "index": 74,
+              "state": 2,
+              "collisionClass": 5
+            }
+          }
+        ]
+      },
+      "browser": {
+        "status": "pass",
+        "boundary": [
+          {
+            "label": "random-clear-2-43",
+            "counter": 1781,
+            "count": 0,
+            "countdown": 9,
+            "clear": false,
+            "doors": [
+              {
+                "index": 7,
+                "state": 1,
+                "collisionClass": 4
+              },
+              {
+                "index": 60,
+                "state": 1,
+                "collisionClass": 4
+              },
+              {
+                "index": 74,
+                "state": 1,
+                "collisionClass": 4
+              }
+            ],
+            "bodySha256": "51b618c699721b3c0cefa4f2e1823389cbd54e8e2b37345d3cfe272f5a36b147"
+          },
+          {
+            "label": "random-clear-2-45",
+            "counter": 1783,
+            "count": 0,
+            "countdown": 8,
+            "clear": false,
+            "doors": [
+              {
+                "index": 7,
+                "state": 1,
+                "collisionClass": 4
+              },
+              {
+                "index": 60,
+                "state": 1,
+                "collisionClass": 4
+              },
+              {
+                "index": 74,
+                "state": 1,
+                "collisionClass": 4
+              }
+            ],
+            "bodySha256": "0f9a442d6fd3f11d30557b727a7fefa9f6e6c845a17f4d0e44aab108c98d929f"
+          },
+          {
+            "label": "random-clear-2-47",
+            "counter": 1785,
+            "count": 0,
+            "countdown": 7,
+            "clear": false,
+            "doors": [
+              {
+                "index": 7,
+                "state": 1,
+                "collisionClass": 4
+              },
+              {
+                "index": 60,
+                "state": 1,
+                "collisionClass": 4
+              },
+              {
+                "index": 74,
+                "state": 1,
+                "collisionClass": 4
+              }
+            ],
+            "bodySha256": "51d852a49dc85cace9c8a41fd64f3ba5667e62ca27f510361579fa65d2350f0e"
+          },
+          {
+            "label": "random-clear-2-49",
+            "counter": 1787,
+            "count": 0,
+            "countdown": 6,
+            "clear": false,
+            "doors": [
+              {
+                "index": 7,
+                "state": 1,
+                "collisionClass": 4
+              },
+              {
+                "index": 60,
+                "state": 1,
+                "collisionClass": 4
+              },
+              {
+                "index": 74,
+                "state": 1,
+                "collisionClass": 4
+              }
+            ],
+            "bodySha256": "6af6b45ed7c7914a98e3f7c43633aed077718d573babd528ad943e0e40697db3"
+          },
+          {
+            "label": "random-clear-2-51",
+            "counter": 1789,
+            "count": 0,
+            "countdown": 5,
+            "clear": false,
+            "doors": [
+              {
+                "index": 7,
+                "state": 1,
+                "collisionClass": 4
+              },
+              {
+                "index": 60,
+                "state": 1,
+                "collisionClass": 4
+              },
+              {
+                "index": 74,
+                "state": 1,
+                "collisionClass": 4
+              }
+            ],
+            "bodySha256": "36ad2aaa2b9e2a90c8ed0a822018fd6d4bfaf5aa291e917899df4ce16e296c5b"
+          },
+          {
+            "label": "random-clear-2-53",
+            "counter": 1791,
+            "count": 0,
+            "countdown": 4,
+            "clear": false,
+            "doors": [
+              {
+                "index": 7,
+                "state": 1,
+                "collisionClass": 4
+              },
+              {
+                "index": 60,
+                "state": 1,
+                "collisionClass": 4
+              },
+              {
+                "index": 74,
+                "state": 1,
+                "collisionClass": 4
+              }
+            ],
+            "bodySha256": "0c16d60ec84d26384c81acb5dc605797d59bcc3cc9daed21b89b0993da83f434"
+          },
+          {
+            "label": "random-clear-2-55",
+            "counter": 1793,
+            "count": 0,
+            "countdown": 3,
+            "clear": false,
+            "doors": [
+              {
+                "index": 7,
+                "state": 1,
+                "collisionClass": 4
+              },
+              {
+                "index": 60,
+                "state": 1,
+                "collisionClass": 4
+              },
+              {
+                "index": 74,
+                "state": 1,
+                "collisionClass": 4
+              }
+            ],
+            "bodySha256": "4306366a623d37075265c300114a3129e79860f2209b8bf9edb09c54ea21df6b"
+          },
+          {
+            "label": "random-clear-2-57",
+            "counter": 1795,
+            "count": 0,
+            "countdown": 2,
+            "clear": false,
+            "doors": [
+              {
+                "index": 7,
+                "state": 1,
+                "collisionClass": 4
+              },
+              {
+                "index": 60,
+                "state": 1,
+                "collisionClass": 4
+              },
+              {
+                "index": 74,
+                "state": 1,
+                "collisionClass": 4
+              }
+            ],
+            "bodySha256": "56f55642d408830414fdba0bc0bb3b667be34d1c3d0a5708bd127c0ad52d5c8c"
+          },
+          {
+            "label": "random-clear-2-59",
+            "counter": 1797,
+            "count": 0,
+            "countdown": 1,
+            "clear": false,
+            "doors": [
+              {
+                "index": 7,
+                "state": 1,
+                "collisionClass": 4
+              },
+              {
+                "index": 60,
+                "state": 1,
+                "collisionClass": 4
+              },
+              {
+                "index": 74,
+                "state": 1,
+                "collisionClass": 4
+              }
+            ],
+            "bodySha256": "55fdfdbe86b33ce5c47edd8ebfde006e18bc838d896d74215d06aa14a04031fe"
+          },
+          {
+            "label": "random-clear-2-61",
+            "counter": 1799,
+            "count": 0,
+            "countdown": 0,
+            "clear": false,
+            "doors": [
+              {
+                "index": 7,
+                "state": 1,
+                "collisionClass": 4
+              },
+              {
+                "index": 60,
+                "state": 1,
+                "collisionClass": 4
+              },
+              {
+                "index": 74,
+                "state": 1,
+                "collisionClass": 4
+              }
+            ],
+            "bodySha256": "2d26106da2f314a16e9d3fe17aa5a2185ffee22fe362e481fd48751d54ae8c22"
+          },
+          {
+            "label": "random-clear-2-63",
+            "counter": 1801,
+            "count": 0,
+            "countdown": 0,
+            "clear": true,
+            "doors": [
+              {
+                "index": 7,
+                "state": 1,
+                "collisionClass": 4
+              },
+              {
+                "index": 60,
+                "state": 2,
+                "collisionClass": 4
+              },
+              {
+                "index": 74,
+                "state": 2,
+                "collisionClass": 4
+              }
+            ],
+            "bodySha256": "f0bdc2ae345464e91f4a5fcd337e1b1f1f0f4c762d8aeb413d5d770d689fc528"
+          }
+        ],
+        "doorTransitions": [
+          {
+            "index": 60,
+            "before": {
+              "index": 60,
+              "state": 1,
+              "collisionClass": 4
+            },
+            "cleared": {
+              "index": 60,
+              "state": 2,
+              "collisionClass": 4
+            },
+            "following": {
+              "index": 60,
+              "state": 2,
+              "collisionClass": 5
+            }
+          },
+          {
+            "index": 74,
+            "before": {
+              "index": 74,
+              "state": 1,
+              "collisionClass": 4
+            },
+            "cleared": {
+              "index": 74,
+              "state": 2,
+              "collisionClass": 4
+            },
+            "following": {
+              "index": 74,
+              "state": 2,
+              "collisionClass": 5
+            }
+          }
+        ]
+      }
+    }
+  },
+  "focusedDamageCohort": {
+    "runtimeCommit": "ebcc79de6da13c2d7d476aa77957f2a97c63ab6f",
+    "buildSha256": "3ecd76dd36db823683d20837d774935c61dde78fc622ee16da562e856580a9d1",
+    "reportSha256": "c35702c32b57645f69a8a987faba08a4a2683388c95d3cb9e45c10de9cf1f60b",
+    "captureHashes": {
+      "/workspace/isaac-worktrees/combat/.cache/e2e/npcs/final-dense-queue/report.json": "1f93359391043749c7b1d6cb3e60ed9a2c45d3d0874cd3525b77d3092d78738b",
+      "/workspace/isaac-worktrees/combat/.cache/e2e/npcs/final-dense-queue/scenarios.json": "a0a3dc66509014ca2b332dddf660421a72943074703b3dd523be3ef0789f9e96",
+      "/workspace/isaac-worktrees/combat/.cache/e2e/npcs/final-dense-queue/paired/report.json": "8ac3486df6e8b7e2dbd8a27b8ca7ae952c4ec7c1d1b27315ccd87978b19f5637",
+      "/workspace/isaac-worktrees/combat/.cache/e2e/npcs/final-dense-queue/paired/00-paired-attackfly-contact/original/manifest.json": "7f8ba915e64c724fa3b975f7a8f54c7b5cfb4bdfc54812140c9363a78358f931",
+      "/workspace/isaac-worktrees/combat/.cache/e2e/npcs/final-dense-queue/paired/00-paired-attackfly-contact/browser/manifest.json": "d532b97cf532d37ac74079714afe8541d13596dabde3b7af2de06a0ccda29db3",
+      "/workspace/isaac-worktrees/combat/.cache/e2e/npcs/final-dense-queue/paired/00-paired-attackfly-contact/case.json": "3f0d3c36ee58fa2de72cac6cd61a15ea6a7f76cb4b1750f119ffe39e850c7364",
+      "/workspace/isaac-worktrees/combat/.cache/e2e/npcs/final-dense-queue/paired/01-paired-fly-bomb-queue/original/manifest.json": "640eeb84957c2a084bfce0c99b8692f19045664b40d5c37af75744daadf80cfa",
+      "/workspace/isaac-worktrees/combat/.cache/e2e/npcs/final-dense-queue/paired/01-paired-fly-bomb-queue/browser/manifest.json": "368c5c8f6215bffa6f5b8b9da12c3de5b1f0e0c6b261b0f692a1e7172bc8864a",
+      "/workspace/isaac-worktrees/combat/.cache/e2e/npcs/final-dense-queue/paired/01-paired-fly-bomb-queue/case.json": "9817236a35e8fa70a86b1bfdf60a07d487e76c4b4b489256b39b28a5dac122c9",
+      "/workspace/isaac-worktrees/combat/.cache/e2e/npcs/final-dense-queue/paired/02-paired-attackfly-tear/original/manifest.json": "17645e88b2c782d38c9bf451644113051c199e85d029f333650c1c8eac8e34a2",
+      "/workspace/isaac-worktrees/combat/.cache/e2e/npcs/final-dense-queue/paired/02-paired-attackfly-tear/browser/manifest.json": "39625863982dcfc132721c547598bbb39e9fe31de160553ccd5a305fd2794abe",
+      "/workspace/isaac-worktrees/combat/.cache/e2e/npcs/final-dense-queue/paired/02-paired-attackfly-tear/case.json": "2bd635eeebbea7aec5c18756c529f43fec13ab069b2a06e85fcb46ddfe01bb02",
+      "/workspace/isaac-worktrees/combat/.cache/e2e/npcs/final-dense-queue/paired/03-paired-random-attackfly-clear/original/manifest.json": "188e094ffa7f0afa478e52ca23ddf759a6510bb1fbd4f4a2126f41a54b4996ae",
+      "/workspace/isaac-worktrees/combat/.cache/e2e/npcs/final-dense-queue/paired/03-paired-random-attackfly-clear/browser/manifest.json": "a8a057732cda0563be47b07c9c9010275bbe34b61cc2d4d220292019930f96dd",
+      "/workspace/isaac-worktrees/combat/.cache/e2e/npcs/final-dense-queue/paired/03-paired-random-attackfly-clear/case.json": "a8d93d44b4b5429f842ddb53b3187bff5e11dc727e1af065046cae2d70435f71",
+      "/workspace/isaac-worktrees/combat/.cache/e2e/npcs/final-dense-queue/paired/04-paired-fly-center-bomb/original/manifest.json": "091252724f50ee6c0372fe87adea46d7a89947554fae83b92a7fd1456f3a53c9",
+      "/workspace/isaac-worktrees/combat/.cache/e2e/npcs/final-dense-queue/paired/04-paired-fly-center-bomb/browser/manifest.json": "3d9e356235e7e166c1af7463ae45df7092c5fb8d91aa9dafaf5b352efb2b6ea8",
+      "/workspace/isaac-worktrees/combat/.cache/e2e/npcs/final-dense-queue/paired/04-paired-fly-center-bomb/case.json": "99219325971373c06e27e3aa84783df40417fb7e2be154d61b6ca67716b3ebd4"
+    },
+    "retainedCapturesUnchanged": true,
+    "originalComparisonSources": {
+      "tools/e2e/npcs.mjs": "a19168f3ef4c1643fd214bf3a41f07a17a1583957075471752a3034d64dd0226",
+      "tools/original/npc-scenarios.py": "dfc17de9957d8bd62d7b524c21cd86825de8b2ba5cb4f581bb79b0d1f43b23ec",
+      "tools/foundation/npc-state-pair.mjs": "55c77d730b8f1ce34e2b36ebc20e29adcb79978ebc0596d4218b63f2c7881c7f",
+      "references/isaac/foundation/combat/npcs/random-selection.json": "1792008acedd6b937545dd9431f666d0050d32263fcbc68f0c5ebd35752996ff"
+    },
+    "correctedComparisonSources": {
+      "tools/e2e/npcs.mjs": "2f187ab26874570a5a97720b5e703c99c0a2a36497ca31c8142772c47825ffac",
+      "tools/foundation/npc-state-pair.mjs": "778a91996f8e403da0a717ff00349d1b43237065335342dab3c0c51bf1902ffb",
+      "tools/original/npc-scenarios.py": "eced323de4bd8afeeeb330a4abea42be757564802274d0b09ee9f33d0d6d9371"
+    },
+    "cases": [
+      {
+        "id": "paired-attackfly-contact",
+        "status": "pass",
+        "fields": 2432,
+        "failures": 0,
+        "diagnosticFields": 701,
+        "diagnosticFailures": 119,
+        "unsupportedDiagnostics": 0,
+        "execution": {
+          "admission": true,
+          "contact": true,
+          "bomb": false,
+          "tear": false,
+          "drain": false,
+          "death": false,
+          "retirement": false,
+          "clear": false,
+          "clear-delay": false,
+          "door-clear": false
+        },
+        "required": [
+          "admission",
+          "contact"
+        ],
+        "comparatorExitCode": 0,
+        "comparatorSignal": null
+      },
+      {
+        "id": "paired-fly-bomb-queue",
+        "status": "pass",
+        "fields": 1259,
+        "failures": 0,
+        "diagnosticFields": 371,
+        "diagnosticFailures": 167,
+        "unsupportedDiagnostics": 4,
+        "execution": {
+          "admission": true,
+          "contact": false,
+          "bomb": true,
+          "tear": false,
+          "drain": true,
+          "death": true,
+          "retirement": true,
+          "clear": false,
+          "clear-delay": false,
+          "door-clear": false
+        },
+        "required": [
+          "admission",
+          "bomb"
+        ],
+        "comparatorExitCode": 0,
+        "comparatorSignal": null
+      },
+      {
+        "id": "paired-attackfly-tear",
+        "status": "pass",
+        "fields": 5653,
+        "failures": 0,
+        "diagnosticFields": 1661,
+        "diagnosticFailures": 445,
+        "unsupportedDiagnostics": 0,
+        "execution": {
+          "admission": true,
+          "contact": false,
+          "bomb": false,
+          "tear": true,
+          "drain": true,
+          "death": true,
+          "retirement": true,
+          "clear": false,
+          "clear-delay": false,
+          "door-clear": false
+        },
+        "required": [
+          "admission",
+          "tear"
+        ],
+        "comparatorExitCode": 0,
+        "comparatorSignal": null
+      },
+      {
+        "id": "paired-random-attackfly-clear",
+        "status": "fail",
+        "fields": 10301,
+        "failures": 399,
+        "diagnosticFields": 4984,
+        "diagnosticFailures": 2513,
+        "unsupportedDiagnostics": 0,
+        "execution": {
+          "admission": true,
+          "contact": false,
+          "bomb": false,
+          "tear": true,
+          "drain": true,
+          "death": true,
+          "retirement": true,
+          "clear": true,
+          "clear-delay": true,
+          "door-clear": true
+        },
+        "required": [
+          "admission",
+          "clear",
+          "clear-delay",
+          "door-clear"
+        ],
+        "comparatorExitCode": 1,
+        "comparatorSignal": null
+      },
+      {
+        "id": "paired-fly-center-bomb",
+        "status": "fail",
+        "fields": 1999,
+        "failures": 95,
+        "diagnosticFields": 711,
+        "diagnosticFailures": 368,
+        "unsupportedDiagnostics": 2,
+        "execution": {
+          "admission": true,
+          "contact": false,
+          "bomb": true,
+          "tear": false,
+          "drain": true,
+          "death": true,
+          "retirement": true,
+          "clear": false,
+          "clear-delay": false,
+          "door-clear": false
+        },
+        "required": [
+          "admission",
+          "clear"
+        ],
+        "comparatorExitCode": 1,
+        "comparatorSignal": null
+      }
+    ],
+    "focusedRequiredFields": 9344,
+    "focusedFailures": 0,
+    "pairedCheckpoints": {
+      "contact": [
+        30,
+        32
+      ],
+      "bomb": [
+        26,
+        26
+      ],
+      "tear": [
+        68,
+        68
+      ],
+      "randomClear": [
+        8,
+        371
+      ],
+      "mandatoryCenter": [
+        17,
+        58
+      ]
+    }
+  },
+  "mandatoryRegressions": [
+    {
+      "case": "paired-random-attackfly-clear",
+      "failedRequiredFields": 399,
+      "requiredFields": 10301,
+      "reason": "Synchronized queued damage/HP/death/retirement/clear phases differ; exact shared loader-counter/consumer/AI trajectory alignment remains unresolved. Both real games execute the required clear and door boundaries."
+    },
+    {
+      "case": "paired-fly-center-bomb",
+      "failedRequiredFields": 95,
+      "requiredFields": 1999,
+      "reason": "Natural center route encounters unsupported authored grid kinds3/14 and retains real player/actor/HP/clear failures."
+    }
+  ],
+  "unacceptedFields": [
+    "Absolute native Game counter origin and complete shared MT consumers",
+    "Complete native spatial candidate ordering and exact AI world trajectories",
+    "Regular Bomb spawn-seed production (six explicitly named diagnostics in the retained cohort)",
+    "Mixed NPC/coin-room live parity (runtime retains authored order, current cohort has no mixed room)",
+    "Simultaneous multiple-record FIFO acceptance",
+    "Conditional passive-Fly poop/type33 target callbacks and complete Poof/BloodSplat constructors",
+    "Other NPC/projectile/boss state machines, live hostile save/reentry, rewards/loot, other door/grid policies and complete graphics parity"
+  ],
+  "sourceBodyHashes": {
+    ".cache/coordination/combat/function-446cf0.txt": "fb9ef9996bfd5a37b6b7d0ee60d7abffa3ec0d4ba9ed62bb02959859774d2f9b",
+    ".cache/coordination/combat/function-447190.txt": "add141f46cfe7c3bd9068c6c6ba0d0416f9d5001c7f44cb8f4b11568d20a8273",
+    ".cache/coordination/combat/function-49b8f0.txt": "5ebf665bbd03d8a690123ea5b3c204f743230ee2d1a2034f9183200db22b443a",
+    ".cache/coordination/combat/function-445710.txt": "14119fd7c92632be061f15129cf5d5b9cbaf92c7ab1c3165e73adb0628405266",
+    ".cache/coordination/combat/function-554490.txt": "ab2726a5aeb9d9ab30c0b768510dd9b2f998a0cbf23442fcfd036f9643a3d149",
+    ".cache/coordination/combat/function-4f98e0.txt": "5f0ff9192cc17ce58e26064f31776e0c7fc959543c8441dbc9d44cf21d4351fa",
+    ".cache/coordination/combat/collector/function-4536f0.txt": "910dc77ddccf08658800aee02cf7c6576d988ed6929f859bd83e60c7f73b139b",
+    ".cache/coordination/combat/tear-contact/function-545e80.txt": "32bd9d71f5204aec9d293c145cdefcf27fa2d239fd51b9186caa4ae79acb172c",
+    ".cache/coordination/combat/npc-final-source/function-456c20.txt": "50ec7c6fb80f64f9e5d6c3c0f932c6967fbdc28819140c18a0a1dfb5a78f8b55",
+    ".cache/coordination/combat/npc-final-source/function-4ef880.txt": "4c03315796c17664b40df5d2f6cc637f457c538f2e875ba256892ea4d913c70d",
+    ".cache/coordination/combat/npc-final-source/function-5d12a0.txt": "448624bbdb03fda62bbe6b0c1a89dfdf256cac55255253b63158a0ea2ab11010"
+  },
+  "runtimeSourceHashes": {
+    "engine/src/npcs.rs": "82fddb0f6d79a81e67a768d12bd5dfdaed9644f3bf23576670fcb26faef3fc7b",
+    "engine/src/combat.rs": "c02f28f191d21b362ed3fa8d534f806b3fb42b929f15f00027d22580e76f7a21",
+    "engine/src/lib.rs": "81157038442939960214b50e5a06b62923d5b0e3b9af1bb24ed4bbb3220744bd",
+    "engine/src/room.rs": "80010e345cad2295add8e27b321c953e2b8237a911e04154cfab570dea148652",
+    "engine/src/bombs.rs": "2fe6771c1efc661c7f5445e47f3f32eb29bf9b47c9f106b8b41597a1e637624c",
+    "engine/build.rs": "0c69b3e65cbca3310d52b0ec35563dc24a5b59a3e7a31bfd9b25d3a3e2db9928",
+    "web/renderer.ts": "6b9dabb9f321161142fe47cbb7192a4929d0f2e70d3bb5c747214a0cdc5cca2c",
+    "web/npc-data.json": "a484bf5d70d404c008c2e5ca471bf1b88564a716e531073009beefa766b52388"
+  },
+  "checks": {
+    "productionBuild": "pass",
+    "typecheck": "pass",
+    "strictClippy": "pass",
+    "format": "pass",
+    "assetFiles": 2556,
+    "generatedMatrix": "pass",
+    "noCheckedInUnitSuitesAdded": true
+  },
+  "rejectedEvidence": {
+    "zeroNpcBombClear": "Ignored npc-first-live tapes stayed in the starting room; rejected as NPC execution coverage.",
+    "descriptorFlag40": "Rejected inferred hasEnemies field was removed; source +40 is a separately generated surprise-miniboss substitution flag.",
+    "oldComparatorReportSha256": "1f93359391043749c7b1d6cb3e60ed9a2c45d3d0874cd3525b77d3092d78738b",
+    "oldComparatorError": "Bomb spawnSeed was undefined and aborted the direct comparator. Corrected replay preserves that rejected report and all capture hashes."
+  }
+}

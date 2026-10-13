@@ -62,6 +62,10 @@ export class Renderer {
           this.assets.draw(ctx, "gfx/grid/grid_spikes.anm2", `Spikes${String(entity.variant).padStart(2, "0")}`, x, y);
       }
       this.pickups.draw(ctx, state);
+      for (const npc of state.room.npcs)
+        if (!npc.dead && !npc.removed)
+          this.assets.draw(ctx, npc.kind === 13 ? "gfx/013.000_fly.anm2" : "gfx/018.000_attack fly.anm2", "Fly",
+            npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46, npc.animationFrame, { scale: 0.65 });
       this.drawPlayer(ctx, state);
       for (const tear of state.tears)
         this.assets.draw(ctx, TEAR, "RegularTear6", Math.round(tear.x * 2) / 2, Math.round(tear.y * 2) / 2, tear.age);

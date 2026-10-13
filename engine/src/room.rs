@@ -24,6 +24,11 @@ pub struct Room {
     pub appearance: RoomAppearance,
     pub descriptor: Option<crate::floor::Descriptor>,
     pub pickups: Vec<crate::pickups::Pickup>,
+    pub npcs: Vec<crate::npcs::Npc>,
+    pub authored_actor_order: Vec<crate::actors::ActorRef>,
+    pub combat_clear: bool,
+    pub combat_clear_countdown: u32,
+    pub combat_shut_door_slots: Vec<u8>,
     pub spawns: Option<crate::room_spawns::RoomSpawns>,
     pub grid: Option<crate::grid::GridDescriptor>,
 }
@@ -442,6 +447,11 @@ impl Room {
         Room {
             descriptor: None,
             pickups: Vec::new(),
+            npcs: Vec::new(),
+            authored_actor_order: Vec::new(),
+            combat_clear: true,
+            combat_clear_countdown: 0,
+            combat_shut_door_slots: Vec::new(),
             spawns: None,
             grid: None,
             left: left_plane + radius,

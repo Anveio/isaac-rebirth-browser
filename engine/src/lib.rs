@@ -21,6 +21,7 @@ pub mod layout;
 pub mod menu_lifecycle;
 pub mod motion;
 pub mod mt;
+pub mod npcs;
 pub mod phase;
 pub mod pickups;
 pub mod projectiles;
@@ -848,53 +849,78 @@ impl Game {
     fn held(&self, code: &str) -> bool {
         self.state.pressed.contains(code)
     }
-    /// Fresh coin-room observations retain the existing player before the
-    /// authored pickups. Unsupported selectors stay with the room generator.
+    /// The native list admits Player first, then supported selectors in their
+    /// authored order. Persist that order with the room rather than regrouping
+    /// NPCs and pickups when rebuilding the shared actor scheduler.
     pub fn admit_room_pickups(
         &mut self,
         selectors: &[room_spawns::SpawnSelector],
     ) -> Result<(), String> {
-        let mut admitted = Vec::new();
+        let mut pickups = Vec::new();
+        let mut npcs = Vec::new();
+        let mut order = Vec::new();
         let mut next = self.state.next_pickup;
+        let ordinary_room = self
+            .state
+            .room
+            .descriptor
+            .as_ref()
+            .is_none_or(|descriptor| descriptor.template.room_type == 1);
         for selector in selectors {
-            // Shops and special rooms add prices/pools/replacement rules. Their
-            // selectors remain typed until those owners admit that context.
-            if self
-                .state
-                .room
-                .descriptor
-                .as_ref()
-                .is_some_and(|descriptor| descriptor.template.room_type != 1)
-            {
-                continue;
-            }
-            if let Some(pickup) = Pickup::from_selector(next, selector, true)? {
-                next = next
-                    .checked_add(1)
-                    .ok_or("pickup identity counter exhausted")?;
-                admitted.push(pickup);
+            let id = u32::try_from(npcs.len()).map_err(|_| "NPC identity exhausted")?;
+            if let Some(npc) = npcs::Npc::from_selector(id, selector)? {
+                order.push(actors::ActorRef {
+                    kind: actors::ActorKind::Npc,
+                    id,
+                });
+                npcs.push(npc);
+            } else if ordinary_room {
+                // Shops and special rooms add prices/pools/replacement rules.
+                if let Some(pickup) = Pickup::from_selector(next, selector, true)? {
+                    order.push(actors::ActorRef {
+                        kind: actors::ActorKind::Pickup,
+                        id: next,
+                    });
+                    next = next
+                        .checked_add(1)
+                        .ok_or("pickup identity counter exhausted")?;
+                    pickups.push(pickup);
+                }
             }
         }
-        self.state.room.pickups = admitted;
+        self.state.room.pickups = pickups;
+        self.state.room.npcs = npcs;
+        self.state.room.authored_actor_order = order;
         self.state.next_pickup = next;
         self.rebuild_room_actor_schedule()?;
         self.refresh_stage_effects();
         Ok(())
     }
-    /// Restored Room clones retain the collected animation and removed state;
-    /// their source handles follow Player0 just as on initial coin admission.
+    /// Persisted Room clones retain supported actor handles in authored order.
     pub fn rebuild_room_actor_schedule(&mut self) -> Result<(), String> {
         self.state.actor_scheduler = actors::Scheduler::default();
         self.state.actor_scheduler.admit(actors::ActorRef {
             kind: actors::ActorKind::Player,
             id: 0,
         })?;
-        for pickup in &self.state.room.pickups {
-            if !pickup.removed {
-                self.state.actor_scheduler.admit(actors::ActorRef {
-                    kind: actors::ActorKind::Pickup,
-                    id: pickup.id,
-                })?;
+        for actor in self.state.room.authored_actor_order.iter().copied() {
+            let admitted = match actor.kind {
+                actors::ActorKind::Npc => self
+                    .state
+                    .room
+                    .npcs
+                    .iter()
+                    .any(|npc| npc.id == actor.id && !npc.removed),
+                actors::ActorKind::Pickup => self
+                    .state
+                    .room
+                    .pickups
+                    .iter()
+                    .any(|pickup| pickup.id == actor.id && !pickup.removed),
+                _ => return Err("invalid authored room actor handle".into()),
+            };
+            if admitted {
+                self.state.actor_scheduler.admit(actor)?;
             }
         }
         Ok(())
@@ -998,11 +1024,47 @@ impl Game {
                         .selectors
                         .clone();
                     self.admit_room_pickups(&selectors)?;
-                    // Source load_room admits one full room update before the
-                    // inbound transition freezes nonplayer animation.
-                    for pickup in &mut self.state.room.pickups {
-                        pickup.advance(phase);
+                    let grid = grid::Grid::new(
+                        self.state
+                            .room
+                            .grid
+                            .clone()
+                            .expect("admitted room has grid"),
+                    )?;
+                    let player = bombs::player_world(&self.state);
+                    // The admitted Room::Update follows authored mixed order.
+                    for actor in self.state.room.authored_actor_order.iter().copied() {
+                        match actor.kind {
+                            actors::ActorKind::Npc => {
+                                let npc = self
+                                    .state
+                                    .room
+                                    .npcs
+                                    .iter_mut()
+                                    .find(|npc| npc.id == actor.id)
+                                    .ok_or("missing admitted NPC handle")?;
+                                npc.advance(
+                                    phase,
+                                    self.state.game_update_count,
+                                    &mut self.state.boot_lifecycle.shared,
+                                    player,
+                                    &grid,
+                                )?;
+                            }
+                            actors::ActorKind::Pickup => {
+                                let pickup = self
+                                    .state
+                                    .room
+                                    .pickups
+                                    .iter_mut()
+                                    .find(|pickup| pickup.id == actor.id)
+                                    .ok_or("missing admitted pickup handle")?;
+                                pickup.advance(phase);
+                            }
+                            _ => return Err("invalid authored room actor handle".into()),
+                        }
                     }
+                    npcs::admit_room_combat(&mut self.state);
                 }
             }
             self.refresh_minimap();
@@ -1033,6 +1095,25 @@ impl Game {
         // before4545d0 admits entity contacts. Coins can become idle in this
         // full phase and collect against the player's newly moved position.
         if phase == phase::Phase::Update {
+            npcs::player_contacts(&mut self.state)?;
+            npcs::nonplayer_contacts(&mut self.state)?;
+            // Actual full manager contact pass uses typed ground coordinates.
+            let tears: Vec<_> = self
+                .state
+                .tears
+                .iter()
+                .filter(|tear| tear.motion.lifetime == projectiles::Lifetime::Alive)
+                .map(|tear| (tear.id, tear.motion, tear.collision_radius))
+                .collect();
+            for (id, mut motion, radius) in tears {
+                if npcs::tear_hit(&mut self.state, &mut motion, radius, id, 3.5)?.is_some() {
+                    if let Some(tear) = self.state.tears.iter_mut().find(|tear| tear.id == id) {
+                        motion.lifetime = projectiles::Lifetime::Dying;
+                        tear.motion = motion;
+                        tear.project();
+                    }
+                }
+            }
             for pickup in &mut self.state.room.pickups {
                 if pickup.touches(&self.state.player) {
                     pickup.try_collect(&mut self.state.inventory);
@@ -1060,8 +1141,10 @@ impl Game {
         bombs::advance_explosions(&mut self.state, phase, explosion_fence);
         bombs::retire_removed(&mut self.state);
         self.state.room.pickups.retain(|pickup| !pickup.removed);
+        self.state.room.npcs.retain(|npc| !npc.removed);
         self.refresh_minimap();
         if phase.updates_nonplayers() {
+            npcs::advance_room_clear(&mut self.state);
             traversal::check_departure(&mut self.state);
         }
         let surviving = &self.state.tears;
@@ -1069,6 +1152,7 @@ impl Game {
         self.state.actor_scheduler.retain(|actor| match actor.kind {
             actors::ActorKind::Tear => surviving.iter().any(|tear| tear.id == actor.id),
             actors::ActorKind::Pickup => pickups.iter().any(|pickup| pickup.id == actor.id),
+            actors::ActorKind::Npc => self.state.room.npcs.iter().any(|npc| npc.id == actor.id),
             _ => true,
         });
         Ok(())
@@ -1122,6 +1206,31 @@ impl Game {
                     .find(|pickup| pickup.id == actor.id)
                 {
                     pickup.advance(phase);
+                }
+            }
+            actors::ActorKind::Npc => {
+                let grid = grid::Grid::new(
+                    self.state
+                        .room
+                        .grid
+                        .clone()
+                        .expect("admitted room has grid"),
+                )?;
+                let player = bombs::player_world(&self.state);
+                if let Some(npc) = self
+                    .state
+                    .room
+                    .npcs
+                    .iter_mut()
+                    .find(|npc| npc.id == actor.id)
+                {
+                    npc.advance(
+                        phase,
+                        self.state.game_update_count,
+                        &mut self.state.boot_lifecycle.shared,
+                        player,
+                        &grid,
+                    )?;
                 }
             }
             _ => return Err("actor kind has no admitted runtime yet".into()),
