@@ -1,0 +1,1188 @@
+{
+  "schema": 1,
+  "status": "fail",
+  "sourceHead": "ed8f2b1aa013526909b925eede0544c41f93524f",
+  "base": "5c8a9fb89578167998b859ec485289ef2c9b5168",
+  "scope": "Supported fresh normal shape0 ambient grid decorations use actual descriptor RNG35 and actual occupancy/cost decisions before caller seed and GridBase construction. Every bounded current-row seed/semantic record, whole occupancy and all448 signed live Room costs are blocking. Complete postrun MT remains diagnostic; no offsets/native inputs or durable load claim.",
+  "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "production": {
+    "sha256": "70d5c86399a987d9c5f62526da1b44a35d07d18201efc35ab14bf6d8ac77e379",
+    "files": 938,
+    "source": "/workspace/isaac-worktrees/weapons/dist",
+    "scope": "Immutable snapshot of production build bytes; source/native replay equality is checked separately"
+  },
+  "reportSha256": "d0e8c59cf9ea320e883fc77d1d23015b3a7d326fc716c70f0380a57ff242e8ff",
+  "rawBank": ".cache/e2e/ambient-grid/fresh-ambient-1",
+  "gateSources": {
+    "tools/e2e/ordinary-run.mjs": "96ba91da606a25035b3ccad65efa6e3e042d694ffc3cd89289b104dd17a1b7a4",
+    "tools/foundation/saved-grid-compare.mjs": "89d05e584cc21d8f7abc6f86627d9569c513a3fd9dd17b4a552fa1e6c83cd08b",
+    "tools/original/boot-mt-observer.py": "4e70d1645a9424827bfd28324c2893c71ce8797b73a6ac172fedb5a791a14d34",
+    "tools/original/native-identity.py": "4fd5591be56fc4e9ad0486d0f2ec2828f6389786245ee09f9d0b3a395ae18acb",
+    "tools/original/state-observer.py": "58e3b510abbe5ff57f05844efbdf764e2a02530cda4fa99f538d886d258af6f1",
+    "tools/original/foundation-clock-run.py": "8f2fa981fbe26073d5a5a34ff46fbc6e9c70c2d30f81784abded5e40b9110c5b",
+    "tools/original/foundation-clock-gate.c": "f517f1fc0edf2bbe17021e529fb41652e991e286bef070b8aecefd32bfa62e75",
+    "tools/original/foundation-seeds.py": "dd4633c955e7518e9bc0f0147ddfae46d356468238477a68dc06c86656ccba89",
+    "tools/original/debug-run.py": "d785d32c6cc557959be38880a3b046c4040b988fbe3d06d4a8c1f4aa2e833cf5",
+    "tools/original/with-display.sh": "4371efe64ae1639564b4a85292ff252e20bcfe84b5387927ecf7093c6b8d3dfb",
+    "tools/foundation/browser.mjs": "60c4bc851470f47e4dd0399148ce0c1edf351d41fbf7f7e15fa823af5948b4c8",
+    "tools/foundation/production-server.mjs": "e3152b58e2353319ba0963b30439e33c3cc65f84a8c6ebb765c2812486245952",
+    "tools/foundation/verify.mjs": "3743b773cf2ede253c6d78f2605eb43f34e9d7002284b6a1dd2c413d45835a5c",
+    "engine/src/lib.rs": "a04589b30896c519faa3771e59d364aa328059fdbb3334b1a8f7c4b19073ce24",
+    "engine/src/mt.rs": "8a6814236c7aad63d744c86a55416c086648f1e88d41aa10dbcb1e24b1fcc933",
+    "engine/src/saved_game.rs": "ba791070e6d89fb4225c427c3420c5cc9c2a07f836ea1a390818d2881aa4b522",
+    "engine/src/grid_records.rs": "d19638a0620454d560a32881b1427bb1b2404bbc4cfab56dcc3568e8884f414e",
+    "engine/src/room_costs.rs": "be865ae1f1db88bac2d160b3a9d1759cff78b76a15d5da3ff089f0057a9a39f1",
+    "engine/src/grid.rs": "535da57a9de33213ac0f22dce8edf74f43409dce11014328d2a9e1cbdd71e3cf",
+    "engine/src/room.rs": "b88aead6bbb5d519ecb4e2bb4d373ba5c528617539e82f4a415691650ca9aa2c",
+    "engine/src/items.rs": "499883b8ffdd240c49b36055e7c19fb6d17dc811a0b30d75275a35f237950721",
+    "engine/src/menu_lifecycle.rs": "2ccfe4da0f3213a43caa987f80d092a8ae21e03ad9e27120aa574fe9fad1c5e0",
+    "engine/src/seed.rs": "5b34052dfbc34facb7903d1aeae5b063934c7780902d4ccfe6ab2743597d98d3",
+    "engine/src/audio.rs": "d026fad8a0a4645061fa26061947dd5465d1e7e7a1edc86aae1fe733c1627110",
+    "engine/src/music.rs": "12ca1b7359622b16c54915e53e76ac87271dbd35f5a51a91b9801f54782c12dd",
+    "web/main.ts": "d1992ec663f1594f02beb660d33d35c5277423bbac00881ef6c18d772df80440",
+    "web/trace.ts": "e05eee6d02f687b3b5bf2d31f7eb59d5c3e1900a6c1a078e15f63b71b325fb38"
+  },
+  "gateSourcesStable": true,
+  "counts": {
+    "selected": 6,
+    "attempted": 6,
+    "overallPasses": 0,
+    "ownedCopyPasses": 6,
+    "requiredFieldFailures": 228,
+    "nativeIdentityChecks": 36,
+    "menuMtWords": 14976,
+    "menuSavedPairs": 216,
+    "levelPairs": 270,
+    "statPoses": 4296,
+    "publicCommands": 96,
+    "currentRowSeedPairs": 54,
+    "pairedPhysicalRecords": 72,
+    "pairedRecordFields": 504,
+    "matchingPairedRecordFields": 372,
+    "authoredPrimaryMatches": 12,
+    "doorRecordsObserved": 16,
+    "postrunMtDiagnosticFailures": 6,
+    "pathCostWords": 2688,
+    "matchingPathCostWords": 2688,
+    "wholeOccupancyPasses": 6,
+    "pairedRecordMatchesByField": {
+      "kind": 72,
+      "variant": 72,
+      "state": 72,
+      "sourceWord14": 72,
+      "primarySeed": 12,
+      "initialized": 72,
+      "secondarySeed": 0
+    }
+  },
+  "cases": [
+    {
+      "name": "zero-epoch",
+      "bootEpochSeed": 0,
+      "initialSeed": 1,
+      "status": "fail",
+      "nativeStatus": "pass",
+      "nativeFinalPresentation": 858,
+      "nativeManifestSha256": "1eb60bbb0713603624f05d53ccde2f9066510b5d1095c8af353917456786f0d4",
+      "browserCheckpointsSha256": "27f161590638c80f91f06883a06d94f76c3fa773a9a432c36d521bcc572b270f",
+      "canonicalTraceSha256": "5ea320c7954a9c249e25e43c4296ef99dba865dcb5db4532d4c16f0e389203c9",
+      "actualRun": {
+        "seedValue": 893504905,
+        "code": "HL1ME7FN",
+        "stageSeed": 2132069013,
+        "seededRun": false,
+        "achievementEligibility": true
+      },
+      "inputProvenance": {
+        "status": "pass",
+        "expectedCommands": 16,
+        "observedCommands": 16,
+        "initialSeed": 1,
+        "bootEpochSeed": 0
+      },
+      "savedGameOwnership": {
+        "status": "pass",
+        "comparedPairs": 9,
+        "copiedPairs": 9,
+        "currentRowCopyStatus": "pass",
+        "currentRowComparedPairs": 9,
+        "currentRowComparedRecords": 12,
+        "emptyCells": 88,
+        "occupiedSecondarySeedsPending": 0
+      },
+      "gridOccupancy": {
+        "status": "pass",
+        "originalNullCells": 88,
+        "productionNullCells": 88,
+        "originalOccupiedProductionNull": [],
+        "originalNullProductionOccupied": [],
+        "dimensions": {
+          "original": [15,9,135],
+          "production": [15,9,135]
+        },
+        "reason": "Actual whole live-grid occupancy is required; observed occupancy never changes production state"
+      },
+      "pathCostContext": {
+        "shapeIndex": 0,
+        "backdropType": 1
+      },
+      "pathCosts": {
+        "status": "pass",
+        "comparedWords": 448,
+        "differences": [],
+        "reason": "Whole actual signed Room+e98 table is blocking; no selectors, collision labels or native values supply production costs"
+      },
+      "records": [
+        {"gridIndex":0,"source":{"kind":15,"variant":0,"state":0,"sourceWord14":1,"primarySeed":3412930192,"initialized":true,"secondarySeed":1563928295},"production":{"kind":15,"variant":0,"state":0,"sourceWord14":1,"primarySeed":2428870055,"initialized":true,"secondarySeed":3773039118}},
+        {"gridIndex":1,"source":{"kind":15,"variant":0,"state":0,"sourceWord14":1,"primarySeed":77279613,"initialized":true,"secondarySeed":139078381},"production":{"kind":15,"variant":0,"state":0,"sourceWord14":1,"primarySeed":1371805895,"initialized":true,"secondarySeed":436747888}},
+        {"gridIndex":16,"source":{"kind":0,"variant":0,"state":0,"sourceWord14":0,"primarySeed":786766938,"initialized":false,"secondarySeed":3074586797},"production":{"kind":0,"variant":0,"state":0,"sourceWord14":0,"primarySeed":20548824,"initialized":false,"secondarySeed":590569829}},
+        {"gridIndex":17,"source":{"kind":0,"variant":0,"state":0,"sourceWord14":0,"primarySeed":1755607213,"initialized":false,"secondarySeed":2216790959},"production":{"kind":0,"variant":0,"state":0,"sourceWord14":0,"primarySeed":1762128722,"initialized":false,"secondarySeed":3329948919}},
+        {"gridIndex":56,"source":{"kind":1,"variant":20,"state":0,"sourceWord14":1,"primarySeed":556789747,"initialized":true,"secondarySeed":1784284412},"production":{"kind":1,"variant":20,"state":0,"sourceWord14":1,"primarySeed":556789747,"initialized":true,"secondarySeed":1278829540}},
+        {"gridIndex":85,"source":{"kind":1,"variant":20,"state":0,"sourceWord14":1,"primarySeed":2589511592,"initialized":true,"secondarySeed":2851142752},"production":{"kind":1,"variant":20,"state":0,"sourceWord14":1,"primarySeed":2589511592,"initialized":true,"secondarySeed":385885892}},
+        {"gridIndex":103,"source":{"kind":1,"variant":0,"state":0,"sourceWord14":1,"primarySeed":1513581806,"initialized":true,"secondarySeed":3908906544},"production":{"kind":1,"variant":0,"state":0,"sourceWord14":1,"primarySeed":2300893396,"initialized":true,"secondarySeed":1149675758}},
+        {"gridIndex":134,"source":{"kind":15,"variant":0,"state":0,"sourceWord14":1,"primarySeed":3265888411,"initialized":true,"secondarySeed":398359042},"production":{"kind":15,"variant":0,"state":0,"sourceWord14":1,"primarySeed":2201412252,"initialized":true,"secondarySeed":2842730020}},
+        {"gridIndex":7,"source":{"kind":16,"variant":7,"state":1,"sourceWord14":1,"primarySeed":1417822544,"initialized":true,"secondarySeed":3138086264},"production":{"kind":16,"variant":7,"state":1,"sourceWord14":1,"primarySeed":3745982741,"initialized":true,"secondarySeed":3407663308}},
+        {"gridIndex":60,"source":{"kind":16,"variant":7,"state":1,"sourceWord14":1,"primarySeed":3158855847,"initialized":true,"secondarySeed":3519750744},"production":{"kind":16,"variant":7,"state":1,"sourceWord14":1,"primarySeed":1846002690,"initialized":true,"secondarySeed":1402403440}},
+        {"gridIndex":74,"source":{"kind":15,"variant":0,"state":0,"sourceWord14":1,"primarySeed":3069357400,"initialized":true,"secondarySeed":3156538385},"production":{"kind":15,"variant":0,"state":0,"sourceWord14":1,"primarySeed":3139407380,"initialized":true,"secondarySeed":1470749285}},
+        {"gridIndex":127,"source":{"kind":15,"variant":0,"state":0,"sourceWord14":1,"primarySeed":3405995524,"initialized":true,"secondarySeed":1734843636},"production":{"kind":15,"variant":0,"state":0,"sourceWord14":1,"primarySeed":645222093,"initialized":true,"secondarySeed":238749063}}
+      ],
+      "requiredFailures": [
+        {"field":"currentRoomSeedSamples.levelSeeds","gridIndex":0,"expected":[3412930192,1563928295],"actual":[2428870055,3773039118]},
+        {"field":"currentRoomSeedSamples.savedSeeds","gridIndex":0,"expected":[3412930192,1563928295],"actual":[2428870055,3773039118]},
+        {"field":"currentRoomSeedSamples.record.primarySeed","gridIndex":0,"expected":3412930192,"actual":2428870055},
+        {"field":"currentRoomSeedSamples.record.secondarySeed","gridIndex":0,"expected":1563928295,"actual":3773039118},
+        {"field":"currentRoomSeedSamples.levelSeeds","gridIndex":1,"expected":[77279613,139078381],"actual":[1371805895,436747888]},
+        {"field":"currentRoomSeedSamples.savedSeeds","gridIndex":1,"expected":[77279613,139078381],"actual":[1371805895,436747888]},
+        {"field":"currentRoomSeedSamples.record.primarySeed","gridIndex":1,"expected":77279613,"actual":1371805895},
+        {"field":"currentRoomSeedSamples.record.secondarySeed","gridIndex":1,"expected":139078381,"actual":436747888},
+        {"field":"currentRoomSeedSamples.levelSeeds","gridIndex":16,"expected":[786766938,3074586797],"actual":[20548824,590569829]},
+        {"field":"currentRoomSeedSamples.savedSeeds","gridIndex":16,"expected":[786766938,3074586797],"actual":[20548824,590569829]},
+        {"field":"currentRoomSeedSamples.record.primarySeed","gridIndex":16,"expected":786766938,"actual":20548824},
+        {"field":"currentRoomSeedSamples.record.secondarySeed","gridIndex":16,"expected":3074586797,"actual":590569829},
+        {"field":"currentRoomSeedSamples.levelSeeds","gridIndex":17,"expected":[1755607213,2216790959],"actual":[1762128722,3329948919]},
+        {"field":"currentRoomSeedSamples.savedSeeds","gridIndex":17,"expected":[1755607213,2216790959],"actual":[1762128722,3329948919]},
+        {"field":"currentRoomSeedSamples.record.primarySeed","gridIndex":17,"expected":1755607213,"actual":1762128722},
+        {"field":"currentRoomSeedSamples.record.secondarySeed","gridIndex":17,"expected":2216790959,"actual":3329948919},
+        {"field":"currentRoomSeedSamples.levelSeeds","gridIndex":56,"expected":[556789747,1784284412],"actual":[556789747,1278829540]},
+        {"field":"currentRoomSeedSamples.savedSeeds","gridIndex":56,"expected":[556789747,1784284412],"actual":[556789747,1278829540]},
+        {"field":"currentRoomSeedSamples.record.secondarySeed","gridIndex":56,"expected":1784284412,"actual":1278829540},
+        {"field":"currentRoomSeedSamples.levelSeeds","gridIndex":85,"expected":[2589511592,2851142752],"actual":[2589511592,385885892]},
+        {"field":"currentRoomSeedSamples.savedSeeds","gridIndex":85,"expected":[2589511592,2851142752],"actual":[2589511592,385885892]},
+        {"field":"currentRoomSeedSamples.record.secondarySeed","gridIndex":85,"expected":2851142752,"actual":385885892},
+        {"field":"currentRoomSeedSamples.levelSeeds","gridIndex":103,"expected":[1513581806,3908906544],"actual":[2300893396,1149675758]},
+        {"field":"currentRoomSeedSamples.savedSeeds","gridIndex":103,"expected":[1513581806,3908906544],"actual":[2300893396,1149675758]},
+        {"field":"currentRoomSeedSamples.record.primarySeed","gridIndex":103,"expected":1513581806,"actual":2300893396},
+        {"field":"currentRoomSeedSamples.record.secondarySeed","gridIndex":103,"expected":3908906544,"actual":1149675758},
+        {"field":"currentRoomSeedSamples.levelSeeds","gridIndex":134,"expected":[3265888411,398359042],"actual":[2201412252,2842730020]},
+        {"field":"currentRoomSeedSamples.savedSeeds","gridIndex":134,"expected":[3265888411,398359042],"actual":[2201412252,2842730020]},
+        {"field":"currentRoomSeedSamples.record.primarySeed","gridIndex":134,"expected":3265888411,"actual":2201412252},
+        {"field":"currentRoomSeedSamples.record.secondarySeed","gridIndex":134,"expected":398359042,"actual":2842730020},
+        {"field":"doorCellRecords.record.primarySeed","gridIndex":7,"expected":1417822544,"actual":3745982741},
+        {"field":"doorCellRecords.record.secondarySeed","gridIndex":7,"expected":3138086264,"actual":3407663308},
+        {"field":"doorCellRecords.record.primarySeed","gridIndex":60,"expected":3158855847,"actual":1846002690},
+        {"field":"doorCellRecords.record.secondarySeed","gridIndex":60,"expected":3519750744,"actual":1402403440},
+        {"field":"doorCellRecords.record.primarySeed","gridIndex":74,"expected":3069357400,"actual":3139407380},
+        {"field":"doorCellRecords.record.secondarySeed","gridIndex":74,"expected":3156538385,"actual":1470749285},
+        {"field":"doorCellRecords.record.primarySeed","gridIndex":127,"expected":3405995524,"actual":645222093},
+        {"field":"doorCellRecords.record.secondarySeed","gridIndex":127,"expected":1734843636,"actual":238749063}
+      ],
+      "runMtDiagnostic": {
+        "status": "fail",
+        "originalIndex": 459,
+        "productionIndex": 171,
+        "differingWords": 624,
+        "firstDifferences": [
+          {
+            "index": 0,
+            "original": 3340451949,
+            "production": 3028172626
+          },
+          {
+            "index": 1,
+            "original": 121460540,
+            "production": 1081561544
+          },
+          {
+            "index": 2,
+            "original": 838145477,
+            "production": 189944451
+          },
+          {
+            "index": 3,
+            "original": 261364067,
+            "production": 2786956363
+          },
+          {
+            "index": 4,
+            "original": 1352443946,
+            "production": 2112341070
+          },
+          {
+            "index": 5,
+            "original": 373631584,
+            "production": 2956085164
+          },
+          {
+            "index": 6,
+            "original": 3190102260,
+            "production": 2847013690
+          },
+          {
+            "index": 7,
+            "original": 427804612,
+            "production": 928434619
+          }
+        ],
+        "reason": "Run/room/effect shared-stream consumers remain incomplete; source values and cursor adjustments are never supplied to production"
+      },
+      "savedCounterDiagnostic": {
+        "status": "pass",
+        "original": 0,
+        "production": 0
+      }
+    },
+    {
+      "name": "fixed-epoch",
+      "bootEpochSeed": 1700000000,
+      "initialSeed": 4294967295,
+      "status": "fail",
+      "nativeStatus": "pass",
+      "nativeFinalPresentation": 858,
+      "nativeManifestSha256": "eae1c63c66352e11547841c0562513f1766bd83ac753a97c1b5f59235ca449f7",
+      "browserCheckpointsSha256": "02aef899a5184cc604748362e1901da22bce890225e1351d2088562794ea4463",
+      "canonicalTraceSha256": "aad2151614733cb170688f9507e5d9da5a8b2f0aa539368f93dc4dce19a3831d",
+      "actualRun": {
+        "seedValue": 1953094013,
+        "code": "RQDLPAD0",
+        "stageSeed": 1134067221,
+        "seededRun": false,
+        "achievementEligibility": true
+      },
+      "inputProvenance": {
+        "status": "pass",
+        "expectedCommands": 16,
+        "observedCommands": 16,
+        "initialSeed": 4294967295,
+        "bootEpochSeed": 1700000000
+      },
+      "savedGameOwnership": {
+        "status": "pass",
+        "comparedPairs": 9,
+        "copiedPairs": 9,
+        "currentRowCopyStatus": "pass",
+        "currentRowComparedPairs": 9,
+        "currentRowComparedRecords": 12,
+        "emptyCells": 83,
+        "occupiedSecondarySeedsPending": 0
+      },
+      "gridOccupancy": {
+        "status": "pass",
+        "originalNullCells": 83,
+        "productionNullCells": 83,
+        "originalOccupiedProductionNull": [],
+        "originalNullProductionOccupied": [],
+        "dimensions": {
+          "original": [15,9,135],
+          "production": [15,9,135]
+        },
+        "reason": "Actual whole live-grid occupancy is required; observed occupancy never changes production state"
+      },
+      "pathCostContext": {
+        "shapeIndex": 0,
+        "backdropType": 1
+      },
+      "pathCosts": {
+        "status": "pass",
+        "comparedWords": 448,
+        "differences": [],
+        "reason": "Whole actual signed Room+e98 table is blocking; no selectors, collision labels or native values supply production costs"
+      },
+      "records": [
+        {"gridIndex":0,"source":{"kind":15,"variant":0,"state":0,"sourceWord14":1,"primarySeed":464998756,"initialized":true,"secondarySeed":2131316215},"production":{"kind":15,"variant":0,"state":0,"sourceWord14":1,"primarySeed":2967510468,"initialized":true,"secondarySeed":3699567757}},
+        {"gridIndex":1,"source":{"kind":15,"variant":0,"state":0,"sourceWord14":1,"primarySeed":1000576515,"initialized":true,"secondarySeed":1578117218},"production":{"kind":15,"variant":0,"state":0,"sourceWord14":1,"primarySeed":400143065,"initialized":true,"secondarySeed":533808732}},
+        {"gridIndex":16,"source":{"kind":0,"variant":0,"state":0,"sourceWord14":0,"primarySeed":919001346,"initialized":false,"secondarySeed":3259564291},"production":{"kind":0,"variant":0,"state":0,"sourceWord14":0,"primarySeed":1508925375,"initialized":false,"secondarySeed":1596766453}},
+        {"gridIndex":17,"source":{"kind":0,"variant":0,"state":0,"sourceWord14":0,"primarySeed":632889721,"initialized":false,"secondarySeed":2043128561},"production":{"kind":0,"variant":0,"state":0,"sourceWord14":0,"primarySeed":2054592034,"initialized":false,"secondarySeed":296126608}},
+        {"gridIndex":56,"source":{"kind":1,"variant":20,"state":0,"sourceWord14":1,"primarySeed":3344069645,"initialized":true,"secondarySeed":1856591170},"production":{"kind":1,"variant":20,"state":0,"sourceWord14":1,"primarySeed":3344069645,"initialized":true,"secondarySeed":3058882008}},
+        {"gridIndex":85,"source":{"kind":1,"variant":20,"state":0,"sourceWord14":1,"primarySeed":3029961426,"initialized":true,"secondarySeed":2979629345},"production":{"kind":1,"variant":20,"state":0,"sourceWord14":1,"primarySeed":3029961426,"initialized":true,"secondarySeed":3037264576}},
+        {"gridIndex":103,"source":{"kind":0,"variant":0,"state":0,"sourceWord14":0,"primarySeed":1860392172,"initialized":false,"secondarySeed":34329873},"production":{"kind":0,"variant":0,"state":0,"sourceWord14":0,"primarySeed":4240896441,"initialized":false,"secondarySeed":2550955284}},
+        {"gridIndex":134,"source":{"kind":15,"variant":0,"state":0,"sourceWord14":1,"primarySeed":2405286670,"initialized":true,"secondarySeed":2115527868},"production":{"kind":15,"variant":0,"state":0,"sourceWord14":1,"primarySeed":3276794847,"initialized":true,"secondarySeed":3466767619}},
+        {"gridIndex":7,"source":{"kind":16,"variant":7,"state":1,"sourceWord14":1,"primarySeed":3633961468,"initialized":true,"secondarySeed":2140775152},"production":{"kind":16,"variant":7,"state":1,"sourceWord14":1,"primarySeed":3196757781,"initialized":true,"secondarySeed":3224722425}},
+        {"gridIndex":60,"source":{"kind":16,"variant":7,"state":1,"sourceWord14":1,"primarySeed":3391583234,"initialized":true,"secondarySeed":1986835945},"production":{"kind":16,"variant":7,"state":1,"sourceWord14":1,"primarySeed":3874804653,"initialized":true,"secondarySeed":1588437071}},
+        {"gridIndex":74,"source":{"kind":15,"variant":0,"state":0,"sourceWord14":1,"primarySeed":43553153,"initialized":true,"secondarySeed":443730932},"production":{"kind":15,"variant":0,"state":0,"sourceWord14":1,"primarySeed":2710167321,"initialized":true,"secondarySeed":2244116048}},
+        {"gridIndex":127,"source":{"kind":16,"variant":7,"state":1,"sourceWord14":1,"primarySeed":646137680,"initialized":true,"secondarySeed":3622501143},"production":{"kind":16,"variant":7,"state":1,"sourceWord14":1,"primarySeed":3507986295,"initialized":true,"secondarySeed":458255823}}
+      ],
+      "requiredFailures": [
+        {"field":"currentRoomSeedSamples.levelSeeds","gridIndex":0,"expected":[464998756,2131316215],"actual":[2967510468,3699567757]},
+        {"field":"currentRoomSeedSamples.savedSeeds","gridIndex":0,"expected":[464998756,2131316215],"actual":[2967510468,3699567757]},
+        {"field":"currentRoomSeedSamples.record.primarySeed","gridIndex":0,"expected":464998756,"actual":2967510468},
+        {"field":"currentRoomSeedSamples.record.secondarySeed","gridIndex":0,"expected":2131316215,"actual":3699567757},
+        {"field":"currentRoomSeedSamples.levelSeeds","gridIndex":1,"expected":[1000576515,1578117218],"actual":[400143065,533808732]},
+        {"field":"currentRoomSeedSamples.savedSeeds","gridIndex":1,"expected":[1000576515,1578117218],"actual":[400143065,533808732]},
+        {"field":"currentRoomSeedSamples.record.primarySeed","gridIndex":1,"expected":1000576515,"actual":400143065},
+        {"field":"currentRoomSeedSamples.record.secondarySeed","gridIndex":1,"expected":1578117218,"actual":533808732},
+        {"field":"currentRoomSeedSamples.levelSeeds","gridIndex":16,"expected":[919001346,3259564291],"actual":[1508925375,1596766453]},
+        {"field":"currentRoomSeedSamples.savedSeeds","gridIndex":16,"expected":[919001346,3259564291],"actual":[1508925375,1596766453]},
+        {"field":"currentRoomSeedSamples.record.primarySeed","gridIndex":16,"expected":919001346,"actual":1508925375},
+        {"field":"currentRoomSeedSamples.record.secondarySeed","gridIndex":16,"expected":3259564291,"actual":1596766453},
+        {"field":"currentRoomSeedSamples.levelSeeds","gridIndex":17,"expected":[632889721,2043128561],"actual":[2054592034,296126608]},
+        {"field":"currentRoomSeedSamples.savedSeeds","gridIndex":17,"expected":[632889721,2043128561],"actual":[2054592034,296126608]},
+        {"field":"currentRoomSeedSamples.record.primarySeed","gridIndex":17,"expected":632889721,"actual":2054592034},
+        {"field":"currentRoomSeedSamples.record.secondarySeed","gridIndex":17,"expected":2043128561,"actual":296126608},
+        {"field":"currentRoomSeedSamples.levelSeeds","gridIndex":56,"expected":[3344069645,1856591170],"actual":[3344069645,3058882008]},
+        {"field":"currentRoomSeedSamples.savedSeeds","gridIndex":56,"expected":[3344069645,1856591170],"actual":[3344069645,3058882008]},
+        {"field":"currentRoomSeedSamples.record.secondarySeed","gridIndex":56,"expected":1856591170,"actual":3058882008},
+        {"field":"currentRoomSeedSamples.levelSeeds","gridIndex":85,"expected":[3029961426,2979629345],"actual":[3029961426,3037264576]},
+        {"field":"currentRoomSeedSamples.savedSeeds","gridIndex":85,"expected":[3029961426,2979629345],"actual":[3029961426,3037264576]},
+        {"field":"currentRoomSeedSamples.record.secondarySeed","gridIndex":85,"expected":2979629345,"actual":3037264576},
+        {"field":"currentRoomSeedSamples.levelSeeds","gridIndex":103,"expected":[1860392172,34329873],"actual":[4240896441,2550955284]},
+        {"field":"currentRoomSeedSamples.savedSeeds","gridIndex":103,"expected":[1860392172,34329873],"actual":[4240896441,2550955284]},
+        {"field":"currentRoomSeedSamples.record.primarySeed","gridIndex":103,"expected":1860392172,"actual":4240896441},
+        {"field":"currentRoomSeedSamples.record.secondarySeed","gridIndex":103,"expected":34329873,"actual":2550955284},
+        {"field":"currentRoomSeedSamples.levelSeeds","gridIndex":134,"expected":[2405286670,2115527868],"actual":[3276794847,3466767619]},
+        {"field":"currentRoomSeedSamples.savedSeeds","gridIndex":134,"expected":[2405286670,2115527868],"actual":[3276794847,3466767619]},
+        {"field":"currentRoomSeedSamples.record.primarySeed","gridIndex":134,"expected":2405286670,"actual":3276794847},
+        {"field":"currentRoomSeedSamples.record.secondarySeed","gridIndex":134,"expected":2115527868,"actual":3466767619},
+        {"field":"doorCellRecords.record.primarySeed","gridIndex":7,"expected":3633961468,"actual":3196757781},
+        {"field":"doorCellRecords.record.secondarySeed","gridIndex":7,"expected":2140775152,"actual":3224722425},
+        {"field":"doorCellRecords.record.primarySeed","gridIndex":60,"expected":3391583234,"actual":3874804653},
+        {"field":"doorCellRecords.record.secondarySeed","gridIndex":60,"expected":1986835945,"actual":1588437071},
+        {"field":"doorCellRecords.record.primarySeed","gridIndex":74,"expected":43553153,"actual":2710167321},
+        {"field":"doorCellRecords.record.secondarySeed","gridIndex":74,"expected":443730932,"actual":2244116048},
+        {"field":"doorCellRecords.record.primarySeed","gridIndex":127,"expected":646137680,"actual":3507986295},
+        {"field":"doorCellRecords.record.secondarySeed","gridIndex":127,"expected":3622501143,"actual":458255823}
+      ],
+      "runMtDiagnostic": {
+        "status": "fail",
+        "originalIndex": 464,
+        "productionIndex": 176,
+        "differingWords": 624,
+        "firstDifferences": [
+          {
+            "index": 0,
+            "original": 3025920350,
+            "production": 4292702356
+          },
+          {
+            "index": 1,
+            "original": 1803947576,
+            "production": 356296661
+          },
+          {
+            "index": 2,
+            "original": 913377430,
+            "production": 2288379315
+          },
+          {
+            "index": 3,
+            "original": 1155432017,
+            "production": 4204612414
+          },
+          {
+            "index": 4,
+            "original": 3467819560,
+            "production": 832042049
+          },
+          {
+            "index": 5,
+            "original": 726306269,
+            "production": 2913394303
+          },
+          {
+            "index": 6,
+            "original": 2636645993,
+            "production": 103844579
+          },
+          {
+            "index": 7,
+            "original": 3957854490,
+            "production": 2018576364
+          }
+        ],
+        "reason": "Run/room/effect shared-stream consumers remain incomplete; source values and cursor adjustments are never supplied to production"
+      },
+      "savedCounterDiagnostic": {
+        "status": "pass",
+        "original": 0,
+        "production": 0
+      }
+    },
+    {
+      "name": "random-0",
+      "bootEpochSeed": 2988990213,
+      "initialSeed": 3846854834,
+      "status": "fail",
+      "nativeStatus": "pass",
+      "nativeFinalPresentation": 858,
+      "nativeManifestSha256": "c022a39c29c6b41038045d5f67e5214e715b963eb0596d0e7328e20522037c51",
+      "browserCheckpointsSha256": "525ed988cdc5d653fac6e66701485d616e688a6850565bc36e5999c0b89a6b84",
+      "canonicalTraceSha256": "de78f4f181bed1a761258775a359e09c937eaee735bb3ca7eb7b036d00a03c20",
+      "actualRun": {
+        "seedValue": 621718409,
+        "code": "FMS7J7G0",
+        "stageSeed": 3491402084,
+        "seededRun": false,
+        "achievementEligibility": true
+      },
+      "inputProvenance": {
+        "status": "pass",
+        "expectedCommands": 16,
+        "observedCommands": 16,
+        "initialSeed": 3846854834,
+        "bootEpochSeed": 2988990213
+      },
+      "savedGameOwnership": {
+        "status": "pass",
+        "comparedPairs": 9,
+        "copiedPairs": 9,
+        "currentRowCopyStatus": "pass",
+        "currentRowComparedPairs": 9,
+        "currentRowComparedRecords": 12,
+        "emptyCells": 88,
+        "occupiedSecondarySeedsPending": 0
+      },
+      "gridOccupancy": {
+        "status": "pass",
+        "originalNullCells": 88,
+        "productionNullCells": 88,
+        "originalOccupiedProductionNull": [],
+        "originalNullProductionOccupied": [],
+        "dimensions": {
+          "original": [15,9,135],
+          "production": [15,9,135]
+        },
+        "reason": "Actual whole live-grid occupancy is required; observed occupancy never changes production state"
+      },
+      "pathCostContext": {
+        "shapeIndex": 0,
+        "backdropType": 1
+      },
+      "pathCosts": {
+        "status": "pass",
+        "comparedWords": 448,
+        "differences": [],
+        "reason": "Whole actual signed Room+e98 table is blocking; no selectors, collision labels or native values supply production costs"
+      },
+      "records": [
+        {"gridIndex":0,"source":{"kind":15,"variant":0,"state":0,"sourceWord14":1,"primarySeed":1505947049,"initialized":true,"secondarySeed":3290202013},"production":{"kind":15,"variant":0,"state":0,"sourceWord14":1,"primarySeed":751694203,"initialized":true,"secondarySeed":2496096402}},
+        {"gridIndex":1,"source":{"kind":15,"variant":0,"state":0,"sourceWord14":1,"primarySeed":2144210067,"initialized":true,"secondarySeed":1003727415},"production":{"kind":15,"variant":0,"state":0,"sourceWord14":1,"primarySeed":1026103499,"initialized":true,"secondarySeed":2479709784}},
+        {"gridIndex":16,"source":{"kind":0,"variant":0,"state":0,"sourceWord14":0,"primarySeed":3104081651,"initialized":false,"secondarySeed":3075267634},"production":{"kind":0,"variant":0,"state":0,"sourceWord14":0,"primarySeed":3168228336,"initialized":false,"secondarySeed":2992306692}},
+        {"gridIndex":17,"source":{"kind":0,"variant":0,"state":0,"sourceWord14":0,"primarySeed":551797731,"initialized":false,"secondarySeed":1264092574},"production":{"kind":0,"variant":0,"state":0,"sourceWord14":0,"primarySeed":3561430763,"initialized":false,"secondarySeed":2272751300}},
+        {"gridIndex":56,"source":{"kind":1,"variant":20,"state":0,"sourceWord14":1,"primarySeed":80886014,"initialized":true,"secondarySeed":846520339},"production":{"kind":1,"variant":20,"state":0,"sourceWord14":1,"primarySeed":80886014,"initialized":true,"secondarySeed":3902269428}},
+        {"gridIndex":85,"source":{"kind":1,"variant":20,"state":0,"sourceWord14":1,"primarySeed":4149259757,"initialized":true,"secondarySeed":444426254},"production":{"kind":1,"variant":20,"state":0,"sourceWord14":1,"primarySeed":4149259757,"initialized":true,"secondarySeed":651450314}},
+        {"gridIndex":103,"source":{"kind":0,"variant":0,"state":0,"sourceWord14":0,"primarySeed":2087867670,"initialized":false,"secondarySeed":2687681640},"production":{"kind":0,"variant":0,"state":0,"sourceWord14":0,"primarySeed":1784991701,"initialized":false,"secondarySeed":800709566}},
+        {"gridIndex":134,"source":{"kind":15,"variant":0,"state":0,"sourceWord14":1,"primarySeed":47700668,"initialized":true,"secondarySeed":2046692238},"production":{"kind":15,"variant":0,"state":0,"sourceWord14":1,"primarySeed":2619594039,"initialized":true,"secondarySeed":4213450705}},
+        {"gridIndex":7,"source":{"kind":16,"variant":7,"state":1,"sourceWord14":1,"primarySeed":4223706882,"initialized":true,"secondarySeed":2297765275},"production":{"kind":16,"variant":7,"state":1,"sourceWord14":1,"primarySeed":4152334835,"initialized":true,"secondarySeed":2558313731}},
+        {"gridIndex":60,"source":{"kind":15,"variant":0,"state":0,"sourceWord14":1,"primarySeed":194002697,"initialized":true,"secondarySeed":1463782351},"production":{"kind":15,"variant":0,"state":0,"sourceWord14":1,"primarySeed":4200210330,"initialized":true,"secondarySeed":1794395543}},
+        {"gridIndex":74,"source":{"kind":16,"variant":7,"state":1,"sourceWord14":1,"primarySeed":2979158856,"initialized":true,"secondarySeed":98529902},"production":{"kind":16,"variant":7,"state":1,"sourceWord14":1,"primarySeed":2733828925,"initialized":true,"secondarySeed":3847756807}},
+        {"gridIndex":127,"source":{"kind":15,"variant":0,"state":0,"sourceWord14":1,"primarySeed":3026037959,"initialized":true,"secondarySeed":1388155287},"production":{"kind":15,"variant":0,"state":0,"sourceWord14":1,"primarySeed":2067047643,"initialized":true,"secondarySeed":3005897679}}
+      ],
+      "requiredFailures": [
+        {"field":"currentRoomSeedSamples.levelSeeds","gridIndex":0,"expected":[1505947049,3290202013],"actual":[751694203,2496096402]},
+        {"field":"currentRoomSeedSamples.savedSeeds","gridIndex":0,"expected":[1505947049,3290202013],"actual":[751694203,2496096402]},
+        {"field":"currentRoomSeedSamples.record.primarySeed","gridIndex":0,"expected":1505947049,"actual":751694203},
+        {"field":"currentRoomSeedSamples.record.secondarySeed","gridIndex":0,"expected":3290202013,"actual":2496096402},
+        {"field":"currentRoomSeedSamples.levelSeeds","gridIndex":1,"expected":[2144210067,1003727415],"actual":[1026103499,2479709784]},
+        {"field":"currentRoomSeedSamples.savedSeeds","gridIndex":1,"expected":[2144210067,1003727415],"actual":[1026103499,2479709784]},
+        {"field":"currentRoomSeedSamples.record.primarySeed","gridIndex":1,"expected":2144210067,"actual":1026103499},
+        {"field":"currentRoomSeedSamples.record.secondarySeed","gridIndex":1,"expected":1003727415,"actual":2479709784},
+        {"field":"currentRoomSeedSamples.levelSeeds","gridIndex":16,"expected":[3104081651,3075267634],"actual":[3168228336,2992306692]},
+        {"field":"currentRoomSeedSamples.savedSeeds","gridIndex":16,"expected":[3104081651,3075267634],"actual":[3168228336,2992306692]},
+        {"field":"currentRoomSeedSamples.record.primarySeed","gridIndex":16,"expected":3104081651,"actual":3168228336},
+        {"field":"currentRoomSeedSamples.record.secondarySeed","gridIndex":16,"expected":3075267634,"actual":2992306692},
+        {"field":"currentRoomSeedSamples.levelSeeds","gridIndex":17,"expected":[551797731,1264092574],"actual":[3561430763,2272751300]},
+        {"field":"currentRoomSeedSamples.savedSeeds","gridIndex":17,"expected":[551797731,1264092574],"actual":[3561430763,2272751300]},
+        {"field":"currentRoomSeedSamples.record.primarySeed","gridIndex":17,"expected":551797731,"actual":3561430763},
+        {"field":"currentRoomSeedSamples.record.secondarySeed","gridIndex":17,"expected":1264092574,"actual":2272751300},
+        {"field":"currentRoomSeedSamples.levelSeeds","gridIndex":56,"expected":[80886014,846520339],"actual":[80886014,3902269428]},
+        {"field":"currentRoomSeedSamples.savedSeeds","gridIndex":56,"expected":[80886014,846520339],"actual":[80886014,3902269428]},
+        {"field":"currentRoomSeedSamples.record.secondarySeed","gridIndex":56,"expected":846520339,"actual":3902269428},
+        {"field":"currentRoomSeedSamples.levelSeeds","gridIndex":85,"expected":[4149259757,444426254],"actual":[4149259757,651450314]},
+        {"field":"currentRoomSeedSamples.savedSeeds","gridIndex":85,"expected":[4149259757,444426254],"actual":[4149259757,651450314]},
+        {"field":"currentRoomSeedSamples.record.secondarySeed","gridIndex":85,"expected":444426254,"actual":651450314},
+        {"field":"currentRoomSeedSamples.levelSeeds","gridIndex":103,"expected":[2087867670,2687681640],"actual":[1784991701,800709566]},
+        {"field":"currentRoomSeedSamples.savedSeeds","gridIndex":103,"expected":[2087867670,2687681640],"actual":[1784991701,800709566]},
+        {"field":"currentRoomSeedSamples.record.primarySeed","gridIndex":103,"expected":2087867670,"actual":1784991701},
+        {"field":"currentRoomSeedSamples.record.secondarySeed","gridIndex":103,"expected":2687681640,"actual":800709566},
+        {"field":"currentRoomSeedSamples.levelSeeds","gridIndex":134,"expected":[47700668,2046692238],"actual":[2619594039,4213450705]},
+        {"field":"currentRoomSeedSamples.savedSeeds","gridIndex":134,"expected":[47700668,2046692238],"actual":[2619594039,4213450705]},
+        {"field":"currentRoomSeedSamples.record.primarySeed","gridIndex":134,"expected":47700668,"actual":2619594039},
+        {"field":"currentRoomSeedSamples.record.secondarySeed","gridIndex":134,"expected":2046692238,"actual":4213450705},
+        {"field":"doorCellRecords.record.primarySeed","gridIndex":7,"expected":4223706882,"actual":4152334835},
+        {"field":"doorCellRecords.record.secondarySeed","gridIndex":7,"expected":2297765275,"actual":2558313731},
+        {"field":"doorCellRecords.record.primarySeed","gridIndex":60,"expected":194002697,"actual":4200210330},
+        {"field":"doorCellRecords.record.secondarySeed","gridIndex":60,"expected":1463782351,"actual":1794395543},
+        {"field":"doorCellRecords.record.primarySeed","gridIndex":74,"expected":2979158856,"actual":2733828925},
+        {"field":"doorCellRecords.record.secondarySeed","gridIndex":74,"expected":98529902,"actual":3847756807},
+        {"field":"doorCellRecords.record.primarySeed","gridIndex":127,"expected":3026037959,"actual":2067047643},
+        {"field":"doorCellRecords.record.secondarySeed","gridIndex":127,"expected":1388155287,"actual":3005897679}
+      ],
+      "runMtDiagnostic": {
+        "status": "fail",
+        "originalIndex": 62,
+        "productionIndex": 171,
+        "differingWords": 624,
+        "firstDifferences": [
+          {
+            "index": 0,
+            "original": 1909881571,
+            "production": 2510348574
+          },
+          {
+            "index": 1,
+            "original": 1699927280,
+            "production": 2562157771
+          },
+          {
+            "index": 2,
+            "original": 625669200,
+            "production": 3278995210
+          },
+          {
+            "index": 3,
+            "original": 3973969853,
+            "production": 744117375
+          },
+          {
+            "index": 4,
+            "original": 4057912311,
+            "production": 4131497998
+          },
+          {
+            "index": 5,
+            "original": 4087458364,
+            "production": 555977538
+          },
+          {
+            "index": 6,
+            "original": 4006868703,
+            "production": 959274821
+          },
+          {
+            "index": 7,
+            "original": 1094523382,
+            "production": 1610426604
+          }
+        ],
+        "reason": "Run/room/effect shared-stream consumers remain incomplete; source values and cursor adjustments are never supplied to production"
+      },
+      "savedCounterDiagnostic": {
+        "status": "pass",
+        "original": 0,
+        "production": 0
+      }
+    },
+    {
+      "name": "random-1",
+      "bootEpochSeed": 1901939540,
+      "initialSeed": 294623253,
+      "status": "fail",
+      "nativeStatus": "pass",
+      "nativeFinalPresentation": 858,
+      "nativeManifestSha256": "a658155e5651553f4afb08868c5034619306adafab9c63a746b332ed0a174de0",
+      "browserCheckpointsSha256": "5376c3f42eec2e70494146328cbfe0e0133fdfe8e49db2ee35f95a10ac9ad1f3",
+      "canonicalTraceSha256": "d9dbedc0c430d4fe520d69ce5eac0986669290b509403a6c1892199cace51e63",
+      "actualRun": {
+        "seedValue": 1399508554,
+        "code": "MWCVDP67",
+        "stageSeed": 278357310,
+        "seededRun": false,
+        "achievementEligibility": true
+      },
+      "inputProvenance": {
+        "status": "pass",
+        "expectedCommands": 16,
+        "observedCommands": 16,
+        "initialSeed": 294623253,
+        "bootEpochSeed": 1901939540
+      },
+      "savedGameOwnership": {
+        "status": "pass",
+        "comparedPairs": 9,
+        "copiedPairs": 9,
+        "currentRowCopyStatus": "pass",
+        "currentRowComparedPairs": 9,
+        "currentRowComparedRecords": 12,
+        "emptyCells": 85,
+        "occupiedSecondarySeedsPending": 0
+      },
+      "gridOccupancy": {
+        "status": "pass",
+        "originalNullCells": 85,
+        "productionNullCells": 85,
+        "originalOccupiedProductionNull": [],
+        "originalNullProductionOccupied": [],
+        "dimensions": {
+          "original": [15,9,135],
+          "production": [15,9,135]
+        },
+        "reason": "Actual whole live-grid occupancy is required; observed occupancy never changes production state"
+      },
+      "pathCostContext": {
+        "shapeIndex": 0,
+        "backdropType": 1
+      },
+      "pathCosts": {
+        "status": "pass",
+        "comparedWords": 448,
+        "differences": [],
+        "reason": "Whole actual signed Room+e98 table is blocking; no selectors, collision labels or native values supply production costs"
+      },
+      "records": [
+        {"gridIndex":0,"source":{"kind":15,"variant":0,"state":0,"sourceWord14":1,"primarySeed":3746718436,"initialized":true,"secondarySeed":2518405299},"production":{"kind":15,"variant":0,"state":0,"sourceWord14":1,"primarySeed":3415639437,"initialized":true,"secondarySeed":394384903}},
+        {"gridIndex":1,"source":{"kind":15,"variant":0,"state":0,"sourceWord14":1,"primarySeed":2386079578,"initialized":true,"secondarySeed":377661502},"production":{"kind":15,"variant":0,"state":0,"sourceWord14":1,"primarySeed":1674141965,"initialized":true,"secondarySeed":4055899594}},
+        {"gridIndex":16,"source":{"kind":0,"variant":0,"state":0,"sourceWord14":0,"primarySeed":4060548148,"initialized":false,"secondarySeed":3342135050},"production":{"kind":0,"variant":0,"state":0,"sourceWord14":0,"primarySeed":3477358949,"initialized":false,"secondarySeed":337862262}},
+        {"gridIndex":17,"source":{"kind":0,"variant":0,"state":0,"sourceWord14":0,"primarySeed":4278157257,"initialized":false,"secondarySeed":1827061847},"production":{"kind":0,"variant":0,"state":0,"sourceWord14":0,"primarySeed":505166377,"initialized":false,"secondarySeed":1340042417}},
+        {"gridIndex":56,"source":{"kind":1,"variant":20,"state":0,"sourceWord14":1,"primarySeed":2465595405,"initialized":true,"secondarySeed":2044499155},"production":{"kind":1,"variant":20,"state":0,"sourceWord14":1,"primarySeed":2465595405,"initialized":true,"secondarySeed":1050452387}},
+        {"gridIndex":85,"source":{"kind":1,"variant":20,"state":0,"sourceWord14":1,"primarySeed":2460782592,"initialized":true,"secondarySeed":4207070905},"production":{"kind":1,"variant":20,"state":0,"sourceWord14":1,"primarySeed":2460782592,"initialized":true,"secondarySeed":4113228455}},
+        {"gridIndex":103,"source":{"kind":0,"variant":0,"state":0,"sourceWord14":0,"primarySeed":3975895662,"initialized":false,"secondarySeed":439388331},"production":{"kind":0,"variant":0,"state":0,"sourceWord14":0,"primarySeed":867171609,"initialized":false,"secondarySeed":3334799313}},
+        {"gridIndex":134,"source":{"kind":15,"variant":0,"state":0,"sourceWord14":1,"primarySeed":2290344357,"initialized":true,"secondarySeed":2215806502},"production":{"kind":15,"variant":0,"state":0,"sourceWord14":1,"primarySeed":3162009520,"initialized":true,"secondarySeed":2252770025}},
+        {"gridIndex":7,"source":{"kind":16,"variant":7,"state":1,"sourceWord14":1,"primarySeed":1328510361,"initialized":true,"secondarySeed":3340036678},"production":{"kind":16,"variant":7,"state":1,"sourceWord14":1,"primarySeed":2476821586,"initialized":true,"secondarySeed":109986243}},
+        {"gridIndex":60,"source":{"kind":16,"variant":7,"state":1,"sourceWord14":1,"primarySeed":2811420675,"initialized":true,"secondarySeed":627491804},"production":{"kind":16,"variant":7,"state":1,"sourceWord14":1,"primarySeed":2016860074,"initialized":true,"secondarySeed":3776950682}},
+        {"gridIndex":74,"source":{"kind":16,"variant":7,"state":1,"sourceWord14":1,"primarySeed":2998571506,"initialized":true,"secondarySeed":1769983753},"production":{"kind":16,"variant":7,"state":1,"sourceWord14":1,"primarySeed":398377288,"initialized":true,"secondarySeed":1724126445}},
+        {"gridIndex":127,"source":{"kind":15,"variant":0,"state":0,"sourceWord14":1,"primarySeed":3675902520,"initialized":true,"secondarySeed":1525442497},"production":{"kind":15,"variant":0,"state":0,"sourceWord14":1,"primarySeed":2780249589,"initialized":true,"secondarySeed":3268452814}}
+      ],
+      "requiredFailures": [
+        {"field":"currentRoomSeedSamples.levelSeeds","gridIndex":0,"expected":[3746718436,2518405299],"actual":[3415639437,394384903]},
+        {"field":"currentRoomSeedSamples.savedSeeds","gridIndex":0,"expected":[3746718436,2518405299],"actual":[3415639437,394384903]},
+        {"field":"currentRoomSeedSamples.record.primarySeed","gridIndex":0,"expected":3746718436,"actual":3415639437},
+        {"field":"currentRoomSeedSamples.record.secondarySeed","gridIndex":0,"expected":2518405299,"actual":394384903},
+        {"field":"currentRoomSeedSamples.levelSeeds","gridIndex":1,"expected":[2386079578,377661502],"actual":[1674141965,4055899594]},
+        {"field":"currentRoomSeedSamples.savedSeeds","gridIndex":1,"expected":[2386079578,377661502],"actual":[1674141965,4055899594]},
+        {"field":"currentRoomSeedSamples.record.primarySeed","gridIndex":1,"expected":2386079578,"actual":1674141965},
+        {"field":"currentRoomSeedSamples.record.secondarySeed","gridIndex":1,"expected":377661502,"actual":4055899594},
+        {"field":"currentRoomSeedSamples.levelSeeds","gridIndex":16,"expected":[4060548148,3342135050],"actual":[3477358949,337862262]},
+        {"field":"currentRoomSeedSamples.savedSeeds","gridIndex":16,"expected":[4060548148,3342135050],"actual":[3477358949,337862262]},
+        {"field":"currentRoomSeedSamples.record.primarySeed","gridIndex":16,"expected":4060548148,"actual":3477358949},
+        {"field":"currentRoomSeedSamples.record.secondarySeed","gridIndex":16,"expected":3342135050,"actual":337862262},
+        {"field":"currentRoomSeedSamples.levelSeeds","gridIndex":17,"expected":[4278157257,1827061847],"actual":[505166377,1340042417]},
+        {"field":"currentRoomSeedSamples.savedSeeds","gridIndex":17,"expected":[4278157257,1827061847],"actual":[505166377,1340042417]},
+        {"field":"currentRoomSeedSamples.record.primarySeed","gridIndex":17,"expected":4278157257,"actual":505166377},
+        {"field":"currentRoomSeedSamples.record.secondarySeed","gridIndex":17,"expected":1827061847,"actual":1340042417},
+        {"field":"currentRoomSeedSamples.levelSeeds","gridIndex":56,"expected":[2465595405,2044499155],"actual":[2465595405,1050452387]},
+        {"field":"currentRoomSeedSamples.savedSeeds","gridIndex":56,"expected":[2465595405,2044499155],"actual":[2465595405,1050452387]},
+        {"field":"currentRoomSeedSamples.record.secondarySeed","gridIndex":56,"expected":2044499155,"actual":1050452387},
+        {"field":"currentRoomSeedSamples.levelSeeds","gridIndex":85,"expected":[2460782592,4207070905],"actual":[2460782592,4113228455]},
+        {"field":"currentRoomSeedSamples.savedSeeds","gridIndex":85,"expected":[2460782592,4207070905],"actual":[2460782592,4113228455]},
+        {"field":"currentRoomSeedSamples.record.secondarySeed","gridIndex":85,"expected":4207070905,"actual":4113228455},
+        {"field":"currentRoomSeedSamples.levelSeeds","gridIndex":103,"expected":[3975895662,439388331],"actual":[867171609,3334799313]},
+        {"field":"currentRoomSeedSamples.savedSeeds","gridIndex":103,"expected":[3975895662,439388331],"actual":[867171609,3334799313]},
+        {"field":"currentRoomSeedSamples.record.primarySeed","gridIndex":103,"expected":3975895662,"actual":867171609},
+        {"field":"currentRoomSeedSamples.record.secondarySeed","gridIndex":103,"expected":439388331,"actual":3334799313},
+        {"field":"currentRoomSeedSamples.levelSeeds","gridIndex":134,"expected":[2290344357,2215806502],"actual":[3162009520,2252770025]},
+        {"field":"currentRoomSeedSamples.savedSeeds","gridIndex":134,"expected":[2290344357,2215806502],"actual":[3162009520,2252770025]},
+        {"field":"currentRoomSeedSamples.record.primarySeed","gridIndex":134,"expected":2290344357,"actual":3162009520},
+        {"field":"currentRoomSeedSamples.record.secondarySeed","gridIndex":134,"expected":2215806502,"actual":2252770025},
+        {"field":"doorCellRecords.record.primarySeed","gridIndex":7,"expected":1328510361,"actual":2476821586},
+        {"field":"doorCellRecords.record.secondarySeed","gridIndex":7,"expected":3340036678,"actual":109986243},
+        {"field":"doorCellRecords.record.primarySeed","gridIndex":60,"expected":2811420675,"actual":2016860074},
+        {"field":"doorCellRecords.record.secondarySeed","gridIndex":60,"expected":627491804,"actual":3776950682},
+        {"field":"doorCellRecords.record.primarySeed","gridIndex":74,"expected":2998571506,"actual":398377288},
+        {"field":"doorCellRecords.record.secondarySeed","gridIndex":74,"expected":1769983753,"actual":1724126445},
+        {"field":"doorCellRecords.record.primarySeed","gridIndex":127,"expected":3675902520,"actual":2780249589},
+        {"field":"doorCellRecords.record.secondarySeed","gridIndex":127,"expected":1525442497,"actual":3268452814}
+      ],
+      "runMtDiagnostic": {
+        "status": "fail",
+        "originalIndex": 462,
+        "productionIndex": 174,
+        "differingWords": 624,
+        "firstDifferences": [
+          {
+            "index": 0,
+            "original": 2728054550,
+            "production": 41885837
+          },
+          {
+            "index": 1,
+            "original": 2560755352,
+            "production": 3458265198
+          },
+          {
+            "index": 2,
+            "original": 1637979711,
+            "production": 117001936
+          },
+          {
+            "index": 3,
+            "original": 339724275,
+            "production": 2388049142
+          },
+          {
+            "index": 4,
+            "original": 2144236572,
+            "production": 1661880701
+          },
+          {
+            "index": 5,
+            "original": 1622707621,
+            "production": 965115313
+          },
+          {
+            "index": 6,
+            "original": 1291386230,
+            "production": 2381305428
+          },
+          {
+            "index": 7,
+            "original": 2486244996,
+            "production": 4167987336
+          }
+        ],
+        "reason": "Run/room/effect shared-stream consumers remain incomplete; source values and cursor adjustments are never supplied to production"
+      },
+      "savedCounterDiagnostic": {
+        "status": "pass",
+        "original": 0,
+        "production": 0
+      }
+    },
+    {
+      "name": "random-2",
+      "bootEpochSeed": 3795305435,
+      "initialSeed": 1274095651,
+      "status": "fail",
+      "nativeStatus": "pass",
+      "nativeFinalPresentation": 858,
+      "nativeManifestSha256": "1a7c424cfd8faabf620407e35fdf6362d4ad2e78c12066582c5c5e5ceb0c3af5",
+      "browserCheckpointsSha256": "896290936abbad72f4878e6b8294bd92da44e8eefebbf5faac1d885c27965b33",
+      "canonicalTraceSha256": "7ece6fa39a5c65aee16bc53d77e3620f5f7e93c2b9698a5b490786cfd05cccb7",
+      "actualRun": {
+        "seedValue": 1676712118,
+        "code": "PSR8QW3J",
+        "stageSeed": 3900660468,
+        "seededRun": false,
+        "achievementEligibility": true
+      },
+      "inputProvenance": {
+        "status": "pass",
+        "expectedCommands": 16,
+        "observedCommands": 16,
+        "initialSeed": 1274095651,
+        "bootEpochSeed": 3795305435
+      },
+      "savedGameOwnership": {
+        "status": "pass",
+        "comparedPairs": 9,
+        "copiedPairs": 9,
+        "currentRowCopyStatus": "pass",
+        "currentRowComparedPairs": 9,
+        "currentRowComparedRecords": 12,
+        "emptyCells": 86,
+        "occupiedSecondarySeedsPending": 0
+      },
+      "gridOccupancy": {
+        "status": "pass",
+        "originalNullCells": 86,
+        "productionNullCells": 86,
+        "originalOccupiedProductionNull": [],
+        "originalNullProductionOccupied": [],
+        "dimensions": {
+          "original": [15,9,135],
+          "production": [15,9,135]
+        },
+        "reason": "Actual whole live-grid occupancy is required; observed occupancy never changes production state"
+      },
+      "pathCostContext": {
+        "shapeIndex": 0,
+        "backdropType": 1
+      },
+      "pathCosts": {
+        "status": "pass",
+        "comparedWords": 448,
+        "differences": [],
+        "reason": "Whole actual signed Room+e98 table is blocking; no selectors, collision labels or native values supply production costs"
+      },
+      "records": [
+        {"gridIndex":0,"source":{"kind":15,"variant":0,"state":0,"sourceWord14":1,"primarySeed":1137161963,"initialized":true,"secondarySeed":1558021080},"production":{"kind":15,"variant":0,"state":0,"sourceWord14":1,"primarySeed":3224020458,"initialized":true,"secondarySeed":1317318310}},
+        {"gridIndex":1,"source":{"kind":15,"variant":0,"state":0,"sourceWord14":1,"primarySeed":1885493089,"initialized":true,"secondarySeed":3918423393},"production":{"kind":15,"variant":0,"state":0,"sourceWord14":1,"primarySeed":3248751601,"initialized":true,"secondarySeed":3505942101}},
+        {"gridIndex":16,"source":{"kind":0,"variant":0,"state":0,"sourceWord14":0,"primarySeed":3099151371,"initialized":false,"secondarySeed":1823757203},"production":{"kind":0,"variant":0,"state":0,"sourceWord14":0,"primarySeed":131069279,"initialized":false,"secondarySeed":3062831250}},
+        {"gridIndex":17,"source":{"kind":0,"variant":0,"state":0,"sourceWord14":0,"primarySeed":927402762,"initialized":false,"secondarySeed":1431345506},"production":{"kind":0,"variant":0,"state":0,"sourceWord14":0,"primarySeed":3583366533,"initialized":false,"secondarySeed":3036046663}},
+        {"gridIndex":56,"source":{"kind":1,"variant":20,"state":0,"sourceWord14":1,"primarySeed":3216124943,"initialized":true,"secondarySeed":1139634724},"production":{"kind":1,"variant":20,"state":0,"sourceWord14":1,"primarySeed":3216124943,"initialized":true,"secondarySeed":2873523216}},
+        {"gridIndex":85,"source":{"kind":1,"variant":20,"state":0,"sourceWord14":1,"primarySeed":3195222862,"initialized":true,"secondarySeed":1256780980},"production":{"kind":1,"variant":20,"state":0,"sourceWord14":1,"primarySeed":3195222862,"initialized":true,"secondarySeed":203297207}},
+        {"gridIndex":103,"source":{"kind":0,"variant":0,"state":0,"sourceWord14":0,"primarySeed":4238169100,"initialized":false,"secondarySeed":3604931716},"production":{"kind":0,"variant":0,"state":0,"sourceWord14":0,"primarySeed":874774324,"initialized":false,"secondarySeed":1027961323}},
+        {"gridIndex":134,"source":{"kind":15,"variant":0,"state":0,"sourceWord14":1,"primarySeed":117309959,"initialized":true,"secondarySeed":3002544781},"production":{"kind":15,"variant":0,"state":0,"sourceWord14":1,"primarySeed":784194431,"initialized":true,"secondarySeed":2366118215}},
+        {"gridIndex":7,"source":{"kind":16,"variant":7,"state":1,"sourceWord14":1,"primarySeed":4117291272,"initialized":true,"secondarySeed":4138710421},"production":{"kind":16,"variant":7,"state":1,"sourceWord14":1,"primarySeed":3896778605,"initialized":true,"secondarySeed":251833131}},
+        {"gridIndex":60,"source":{"kind":16,"variant":7,"state":1,"sourceWord14":1,"primarySeed":2490674029,"initialized":true,"secondarySeed":619400205},"production":{"kind":16,"variant":7,"state":1,"sourceWord14":1,"primarySeed":1058008351,"initialized":true,"secondarySeed":905763869}},
+        {"gridIndex":74,"source":{"kind":15,"variant":0,"state":0,"sourceWord14":1,"primarySeed":1615810037,"initialized":true,"secondarySeed":102151225},"production":{"kind":15,"variant":0,"state":0,"sourceWord14":1,"primarySeed":1487632141,"initialized":true,"secondarySeed":462948006}},
+        {"gridIndex":127,"source":{"kind":16,"variant":7,"state":1,"sourceWord14":1,"primarySeed":1197325742,"initialized":true,"secondarySeed":2795748731},"production":{"kind":16,"variant":7,"state":1,"sourceWord14":1,"primarySeed":990539119,"initialized":true,"secondarySeed":319494076}}
+      ],
+      "requiredFailures": [
+        {"field":"currentRoomSeedSamples.levelSeeds","gridIndex":0,"expected":[1137161963,1558021080],"actual":[3224020458,1317318310]},
+        {"field":"currentRoomSeedSamples.savedSeeds","gridIndex":0,"expected":[1137161963,1558021080],"actual":[3224020458,1317318310]},
+        {"field":"currentRoomSeedSamples.record.primarySeed","gridIndex":0,"expected":1137161963,"actual":3224020458},
+        {"field":"currentRoomSeedSamples.record.secondarySeed","gridIndex":0,"expected":1558021080,"actual":1317318310},
+        {"field":"currentRoomSeedSamples.levelSeeds","gridIndex":1,"expected":[1885493089,3918423393],"actual":[3248751601,3505942101]},
+        {"field":"currentRoomSeedSamples.savedSeeds","gridIndex":1,"expected":[1885493089,3918423393],"actual":[3248751601,3505942101]},
+        {"field":"currentRoomSeedSamples.record.primarySeed","gridIndex":1,"expected":1885493089,"actual":3248751601},
+        {"field":"currentRoomSeedSamples.record.secondarySeed","gridIndex":1,"expected":3918423393,"actual":3505942101},
+        {"field":"currentRoomSeedSamples.levelSeeds","gridIndex":16,"expected":[3099151371,1823757203],"actual":[131069279,3062831250]},
+        {"field":"currentRoomSeedSamples.savedSeeds","gridIndex":16,"expected":[3099151371,1823757203],"actual":[131069279,3062831250]},
+        {"field":"currentRoomSeedSamples.record.primarySeed","gridIndex":16,"expected":3099151371,"actual":131069279},
+        {"field":"currentRoomSeedSamples.record.secondarySeed","gridIndex":16,"expected":1823757203,"actual":3062831250},
+        {"field":"currentRoomSeedSamples.levelSeeds","gridIndex":17,"expected":[927402762,1431345506],"actual":[3583366533,3036046663]},
+        {"field":"currentRoomSeedSamples.savedSeeds","gridIndex":17,"expected":[927402762,1431345506],"actual":[3583366533,3036046663]},
+        {"field":"currentRoomSeedSamples.record.primarySeed","gridIndex":17,"expected":927402762,"actual":3583366533},
+        {"field":"currentRoomSeedSamples.record.secondarySeed","gridIndex":17,"expected":1431345506,"actual":3036046663},
+        {"field":"currentRoomSeedSamples.levelSeeds","gridIndex":56,"expected":[3216124943,1139634724],"actual":[3216124943,2873523216]},
+        {"field":"currentRoomSeedSamples.savedSeeds","gridIndex":56,"expected":[3216124943,1139634724],"actual":[3216124943,2873523216]},
+        {"field":"currentRoomSeedSamples.record.secondarySeed","gridIndex":56,"expected":1139634724,"actual":2873523216},
+        {"field":"currentRoomSeedSamples.levelSeeds","gridIndex":85,"expected":[3195222862,1256780980],"actual":[3195222862,203297207]},
+        {"field":"currentRoomSeedSamples.savedSeeds","gridIndex":85,"expected":[3195222862,1256780980],"actual":[3195222862,203297207]},
+        {"field":"currentRoomSeedSamples.record.secondarySeed","gridIndex":85,"expected":1256780980,"actual":203297207},
+        {"field":"currentRoomSeedSamples.levelSeeds","gridIndex":103,"expected":[4238169100,3604931716],"actual":[874774324,1027961323]},
+        {"field":"currentRoomSeedSamples.savedSeeds","gridIndex":103,"expected":[4238169100,3604931716],"actual":[874774324,1027961323]},
+        {"field":"currentRoomSeedSamples.record.primarySeed","gridIndex":103,"expected":4238169100,"actual":874774324},
+        {"field":"currentRoomSeedSamples.record.secondarySeed","gridIndex":103,"expected":3604931716,"actual":1027961323},
+        {"field":"currentRoomSeedSamples.levelSeeds","gridIndex":134,"expected":[117309959,3002544781],"actual":[784194431,2366118215]},
+        {"field":"currentRoomSeedSamples.savedSeeds","gridIndex":134,"expected":[117309959,3002544781],"actual":[784194431,2366118215]},
+        {"field":"currentRoomSeedSamples.record.primarySeed","gridIndex":134,"expected":117309959,"actual":784194431},
+        {"field":"currentRoomSeedSamples.record.secondarySeed","gridIndex":134,"expected":3002544781,"actual":2366118215},
+        {"field":"doorCellRecords.record.primarySeed","gridIndex":7,"expected":4117291272,"actual":3896778605},
+        {"field":"doorCellRecords.record.secondarySeed","gridIndex":7,"expected":4138710421,"actual":251833131},
+        {"field":"doorCellRecords.record.primarySeed","gridIndex":60,"expected":2490674029,"actual":1058008351},
+        {"field":"doorCellRecords.record.secondarySeed","gridIndex":60,"expected":619400205,"actual":905763869},
+        {"field":"doorCellRecords.record.primarySeed","gridIndex":74,"expected":1615810037,"actual":1487632141},
+        {"field":"doorCellRecords.record.secondarySeed","gridIndex":74,"expected":102151225,"actual":462948006},
+        {"field":"doorCellRecords.record.primarySeed","gridIndex":127,"expected":1197325742,"actual":990539119},
+        {"field":"doorCellRecords.record.secondarySeed","gridIndex":127,"expected":2795748731,"actual":319494076}
+      ],
+      "runMtDiagnostic": {
+        "status": "fail",
+        "originalIndex": 461,
+        "productionIndex": 173,
+        "differingWords": 624,
+        "firstDifferences": [
+          {
+            "index": 0,
+            "original": 1435739992,
+            "production": 2833475388
+          },
+          {
+            "index": 1,
+            "original": 3535535866,
+            "production": 1770295870
+          },
+          {
+            "index": 2,
+            "original": 3312224284,
+            "production": 2839167737
+          },
+          {
+            "index": 3,
+            "original": 506196360,
+            "production": 3117058481
+          },
+          {
+            "index": 4,
+            "original": 2037629984,
+            "production": 501082054
+          },
+          {
+            "index": 5,
+            "original": 1495569117,
+            "production": 1728053365
+          },
+          {
+            "index": 6,
+            "original": 4126319005,
+            "production": 1641657810
+          },
+          {
+            "index": 7,
+            "original": 2347648239,
+            "production": 1176598573
+          }
+        ],
+        "reason": "Run/room/effect shared-stream consumers remain incomplete; source values and cursor adjustments are never supplied to production"
+      },
+      "savedCounterDiagnostic": {
+        "status": "pass",
+        "original": 0,
+        "production": 0
+      }
+    },
+    {
+      "name": "random-3",
+      "bootEpochSeed": 2991455915,
+      "initialSeed": 3486913207,
+      "status": "fail",
+      "nativeStatus": "pass",
+      "nativeFinalPresentation": 858,
+      "nativeManifestSha256": "b2c804c0bdca8d9f7213d816e623ab6d8fbad1119fae72b3270deb04458930fb",
+      "browserCheckpointsSha256": "24e547649051ce6e6636fe77078b511617222cb323c9d4b34b56466a2bf91216",
+      "canonicalTraceSha256": "25b5cbe9dce259d56626ca6bb4d0f1e88d7209bf028e81340738e7c9e4e47351",
+      "actualRun": {
+        "seedValue": 440707883,
+        "code": "C0Z7KZYT",
+        "stageSeed": 4098734561,
+        "seededRun": false,
+        "achievementEligibility": true
+      },
+      "inputProvenance": {
+        "status": "pass",
+        "expectedCommands": 16,
+        "observedCommands": 16,
+        "initialSeed": 3486913207,
+        "bootEpochSeed": 2991455915
+      },
+      "savedGameOwnership": {
+        "status": "pass",
+        "comparedPairs": 9,
+        "copiedPairs": 9,
+        "currentRowCopyStatus": "pass",
+        "currentRowComparedPairs": 9,
+        "currentRowComparedRecords": 12,
+        "emptyCells": 87,
+        "occupiedSecondarySeedsPending": 0
+      },
+      "gridOccupancy": {
+        "status": "pass",
+        "originalNullCells": 87,
+        "productionNullCells": 87,
+        "originalOccupiedProductionNull": [],
+        "originalNullProductionOccupied": [],
+        "dimensions": {
+          "original": [15,9,135],
+          "production": [15,9,135]
+        },
+        "reason": "Actual whole live-grid occupancy is required; observed occupancy never changes production state"
+      },
+      "pathCostContext": {
+        "shapeIndex": 0,
+        "backdropType": 1
+      },
+      "pathCosts": {
+        "status": "pass",
+        "comparedWords": 448,
+        "differences": [],
+        "reason": "Whole actual signed Room+e98 table is blocking; no selectors, collision labels or native values supply production costs"
+      },
+      "records": [
+        {"gridIndex":0,"source":{"kind":15,"variant":0,"state":0,"sourceWord14":1,"primarySeed":502840512,"initialized":true,"secondarySeed":2585150453},"production":{"kind":15,"variant":0,"state":0,"sourceWord14":1,"primarySeed":642347541,"initialized":true,"secondarySeed":3676727751}},
+        {"gridIndex":1,"source":{"kind":15,"variant":0,"state":0,"sourceWord14":1,"primarySeed":421917554,"initialized":true,"secondarySeed":1808422251},"production":{"kind":15,"variant":0,"state":0,"sourceWord14":1,"primarySeed":3148458164,"initialized":true,"secondarySeed":3146577944}},
+        {"gridIndex":16,"source":{"kind":0,"variant":0,"state":0,"sourceWord14":0,"primarySeed":3642946550,"initialized":false,"secondarySeed":1309286939},"production":{"kind":0,"variant":0,"state":0,"sourceWord14":0,"primarySeed":3427172665,"initialized":false,"secondarySeed":3671244732}},
+        {"gridIndex":17,"source":{"kind":0,"variant":0,"state":0,"sourceWord14":0,"primarySeed":2715893257,"initialized":false,"secondarySeed":1145350057},"production":{"kind":0,"variant":0,"state":0,"sourceWord14":0,"primarySeed":467064231,"initialized":false,"secondarySeed":1624534541}},
+        {"gridIndex":56,"source":{"kind":1,"variant":20,"state":0,"sourceWord14":1,"primarySeed":3511525560,"initialized":true,"secondarySeed":975150005},"production":{"kind":1,"variant":20,"state":0,"sourceWord14":1,"primarySeed":3511525560,"initialized":true,"secondarySeed":3151780597}},
+        {"gridIndex":85,"source":{"kind":1,"variant":20,"state":0,"sourceWord14":1,"primarySeed":1789818513,"initialized":true,"secondarySeed":788298454},"production":{"kind":1,"variant":20,"state":0,"sourceWord14":1,"primarySeed":1789818513,"initialized":true,"secondarySeed":2572855574}},
+        {"gridIndex":103,"source":{"kind":0,"variant":0,"state":0,"sourceWord14":0,"primarySeed":1853240508,"initialized":false,"secondarySeed":3588580417},"production":{"kind":0,"variant":0,"state":0,"sourceWord14":0,"primarySeed":1516671959,"initialized":false,"secondarySeed":4225819005}},
+        {"gridIndex":134,"source":{"kind":15,"variant":0,"state":0,"sourceWord14":1,"primarySeed":4161805566,"initialized":true,"secondarySeed":1151617358},"production":{"kind":15,"variant":0,"state":0,"sourceWord14":1,"primarySeed":169661047,"initialized":true,"secondarySeed":1850629864}},
+        {"gridIndex":7,"source":{"kind":16,"variant":7,"state":1,"sourceWord14":1,"primarySeed":369919717,"initialized":true,"secondarySeed":2332110461},"production":{"kind":16,"variant":7,"state":1,"sourceWord14":1,"primarySeed":781175667,"initialized":true,"secondarySeed":3357103225}},
+        {"gridIndex":60,"source":{"kind":16,"variant":7,"state":1,"sourceWord14":1,"primarySeed":4181806501,"initialized":true,"secondarySeed":732583565},"production":{"kind":16,"variant":7,"state":1,"sourceWord14":1,"primarySeed":2778247246,"initialized":true,"secondarySeed":69948254}},
+        {"gridIndex":74,"source":{"kind":16,"variant":7,"state":1,"sourceWord14":1,"primarySeed":799169706,"initialized":true,"secondarySeed":2185573326},"production":{"kind":16,"variant":7,"state":1,"sourceWord14":1,"primarySeed":101460050,"initialized":true,"secondarySeed":2884946769}},
+        {"gridIndex":127,"source":{"kind":15,"variant":0,"state":0,"sourceWord14":1,"primarySeed":367681351,"initialized":true,"secondarySeed":3984280456},"production":{"kind":15,"variant":0,"state":0,"sourceWord14":1,"primarySeed":2747083167,"initialized":true,"secondarySeed":3519152713}}
+      ],
+      "requiredFailures": [
+        {"field":"currentRoomSeedSamples.levelSeeds","gridIndex":0,"expected":[502840512,2585150453],"actual":[642347541,3676727751]},
+        {"field":"currentRoomSeedSamples.savedSeeds","gridIndex":0,"expected":[502840512,2585150453],"actual":[642347541,3676727751]},
+        {"field":"currentRoomSeedSamples.record.primarySeed","gridIndex":0,"expected":502840512,"actual":642347541},
+        {"field":"currentRoomSeedSamples.record.secondarySeed","gridIndex":0,"expected":2585150453,"actual":3676727751},
+        {"field":"currentRoomSeedSamples.levelSeeds","gridIndex":1,"expected":[421917554,1808422251],"actual":[3148458164,3146577944]},
+        {"field":"currentRoomSeedSamples.savedSeeds","gridIndex":1,"expected":[421917554,1808422251],"actual":[3148458164,3146577944]},
+        {"field":"currentRoomSeedSamples.record.primarySeed","gridIndex":1,"expected":421917554,"actual":3148458164},
+        {"field":"currentRoomSeedSamples.record.secondarySeed","gridIndex":1,"expected":1808422251,"actual":3146577944},
+        {"field":"currentRoomSeedSamples.levelSeeds","gridIndex":16,"expected":[3642946550,1309286939],"actual":[3427172665,3671244732]},
+        {"field":"currentRoomSeedSamples.savedSeeds","gridIndex":16,"expected":[3642946550,1309286939],"actual":[3427172665,3671244732]},
+        {"field":"currentRoomSeedSamples.record.primarySeed","gridIndex":16,"expected":3642946550,"actual":3427172665},
+        {"field":"currentRoomSeedSamples.record.secondarySeed","gridIndex":16,"expected":1309286939,"actual":3671244732},
+        {"field":"currentRoomSeedSamples.levelSeeds","gridIndex":17,"expected":[2715893257,1145350057],"actual":[467064231,1624534541]},
+        {"field":"currentRoomSeedSamples.savedSeeds","gridIndex":17,"expected":[2715893257,1145350057],"actual":[467064231,1624534541]},
+        {"field":"currentRoomSeedSamples.record.primarySeed","gridIndex":17,"expected":2715893257,"actual":467064231},
+        {"field":"currentRoomSeedSamples.record.secondarySeed","gridIndex":17,"expected":1145350057,"actual":1624534541},
+        {"field":"currentRoomSeedSamples.levelSeeds","gridIndex":56,"expected":[3511525560,975150005],"actual":[3511525560,3151780597]},
+        {"field":"currentRoomSeedSamples.savedSeeds","gridIndex":56,"expected":[3511525560,975150005],"actual":[3511525560,3151780597]},
+        {"field":"currentRoomSeedSamples.record.secondarySeed","gridIndex":56,"expected":975150005,"actual":3151780597},
+        {"field":"currentRoomSeedSamples.levelSeeds","gridIndex":85,"expected":[1789818513,788298454],"actual":[1789818513,2572855574]},
+        {"field":"currentRoomSeedSamples.savedSeeds","gridIndex":85,"expected":[1789818513,788298454],"actual":[1789818513,2572855574]},
+        {"field":"currentRoomSeedSamples.record.secondarySeed","gridIndex":85,"expected":788298454,"actual":2572855574},
+        {"field":"currentRoomSeedSamples.levelSeeds","gridIndex":103,"expected":[1853240508,3588580417],"actual":[1516671959,4225819005]},
+        {"field":"currentRoomSeedSamples.savedSeeds","gridIndex":103,"expected":[1853240508,3588580417],"actual":[1516671959,4225819005]},
+        {"field":"currentRoomSeedSamples.record.primarySeed","gridIndex":103,"expected":1853240508,"actual":1516671959},
+        {"field":"currentRoomSeedSamples.record.secondarySeed","gridIndex":103,"expected":3588580417,"actual":4225819005},
+        {"field":"currentRoomSeedSamples.levelSeeds","gridIndex":134,"expected":[4161805566,1151617358],"actual":[169661047,1850629864]},
+        {"field":"currentRoomSeedSamples.savedSeeds","gridIndex":134,"expected":[4161805566,1151617358],"actual":[169661047,1850629864]},
+        {"field":"currentRoomSeedSamples.record.primarySeed","gridIndex":134,"expected":4161805566,"actual":169661047},
+        {"field":"currentRoomSeedSamples.record.secondarySeed","gridIndex":134,"expected":1151617358,"actual":1850629864},
+        {"field":"doorCellRecords.record.primarySeed","gridIndex":7,"expected":369919717,"actual":781175667},
+        {"field":"doorCellRecords.record.secondarySeed","gridIndex":7,"expected":2332110461,"actual":3357103225},
+        {"field":"doorCellRecords.record.primarySeed","gridIndex":60,"expected":4181806501,"actual":2778247246},
+        {"field":"doorCellRecords.record.secondarySeed","gridIndex":60,"expected":732583565,"actual":69948254},
+        {"field":"doorCellRecords.record.primarySeed","gridIndex":74,"expected":799169706,"actual":101460050},
+        {"field":"doorCellRecords.record.secondarySeed","gridIndex":74,"expected":2185573326,"actual":2884946769},
+        {"field":"doorCellRecords.record.primarySeed","gridIndex":127,"expected":367681351,"actual":2747083167},
+        {"field":"doorCellRecords.record.secondarySeed","gridIndex":127,"expected":3984280456,"actual":3519152713}
+      ],
+      "runMtDiagnostic": {
+        "status": "fail",
+        "originalIndex": 460,
+        "productionIndex": 172,
+        "differingWords": 624,
+        "firstDifferences": [
+          {
+            "index": 0,
+            "original": 4212082116,
+            "production": 4016258869
+          },
+          {
+            "index": 1,
+            "original": 3136791858,
+            "production": 3555336059
+          },
+          {
+            "index": 2,
+            "original": 1143446238,
+            "production": 980180974
+          },
+          {
+            "index": 3,
+            "original": 3527225697,
+            "production": 4257484650
+          },
+          {
+            "index": 4,
+            "original": 2593066419,
+            "production": 1281451193
+          },
+          {
+            "index": 5,
+            "original": 3416594032,
+            "production": 1910566575
+          },
+          {
+            "index": 6,
+            "original": 3363252188,
+            "production": 2753695349
+          },
+          {
+            "index": 7,
+            "original": 4015764639,
+            "production": 3187508550
+          }
+        ],
+        "reason": "Run/room/effect shared-stream consumers remain incomplete; source values and cursor adjustments are never supplied to production"
+      },
+      "savedCounterDiagnostic": {
+        "status": "pass",
+        "original": 0,
+        "production": 0
+      }
+    }
+  ],
+  "requiredW0": {
+    "status": "pass",
+    "reportSha256": "5f53bd1bfede62144296ec8f658dae93653798a00c5633f440703e844a222eee",
+    "rawBank": ".cache/e2e/ambient-grid/w0-fresh-ambient-1",
+    "productionSha256": "70d5c86399a987d9c5f62526da1b44a35d07d18201efc35ab14bf6d8ac77e379",
+    "gateSources": {
+      "tools/foundation/paired-game.mjs": "879b1c8da1da531976231bf35782a5e449de3888dc30b8d528e8b98fb4af4c8d",
+      "tools/foundation/production-server.mjs": "e3152b58e2353319ba0963b30439e33c3cc65f84a8c6ebb765c2812486245952",
+      "tools/foundation/compare.mjs": "007227c2431f837b347ec29dcbc3492f49eaeb71d08b84ead0b88cfeef98b534",
+      "tools/original/foundation-paired-scenarios.py": "8f6a4b5130b6d0c1b73d3dcde57382c6ad169ba31efd8b3a13a6502eebe835cf",
+      "tools/original/foundation-paired-observer.py": "b49cb171da79eabba8054c8338018ffa38e3a38305fbff2240d6631214dddacf",
+      "tools/original/foundation-menu-observer.py": "a5b8a91047f9bccee75e844c5eba59c8bbf96a84b6a1b7142b59e32bacc91315",
+      "tools/original/foundation-combat-observe.py": "7b70f4ecfd3f452ad74064806ba5ffd89d09a599192a2daeedfc5535b258cc10",
+      "tools/original/foundation-clock-run.py": "8f2fa981fbe26073d5a5a34ff46fbc6e9c70c2d30f81784abded5e40b9110c5b",
+      "tools/original/foundation-clock-gate.c": "f517f1fc0edf2bbe17021e529fb41652e991e286bef070b8aecefd32bfa62e75",
+      "tools/original/foundation-clock-verify.py": "c488100a187b44803c06374535715eaa5a7cde9d4513f6e866e090367d4f2054",
+      "tools/original/foundation-clock-scenarios.py": "87316815cfa490d534fae5f9d27e55f16b17404a93df1b79e528b3f4b58391c5",
+      "tools/original/foundation-bomb-scenario.py": "4d8dacb4bbe7222c6bfa3ffe1c9f8ea69b76f304825a01db0e973f14ddddd090",
+      "tools/original/foundation-presentation-scenario.py": "530666412639fae6cb2d71f6f49e89a9de12377503d84541a73240bca0be3351",
+      "tools/original/foundation-title-scenario.py": "ea1bfb8b53a46a55f0c234ea75753775b70fd69e0b88f1be8021287a13adb4a9",
+      "tools/original/foundation-combat-scenario.py": "d125481add29d1032fb164741a8d3ab54da9e54e9e6c1d0581278bc255044420",
+      "tools/original/foundation-seeds.py": "dd4633c955e7518e9bc0f0147ddfae46d356468238477a68dc06c86656ccba89",
+      "tools/original/foundation-random-seeds.py": "6ce7e4309ee9492dc0c20c0bf1144394dd92e70aec2037d0db91bb0f2928f625",
+      "tools/original/state-observer.py": "58e3b510abbe5ff57f05844efbdf764e2a02530cda4fa99f538d886d258af6f1",
+      "tools/original/debug-run.py": "d785d32c6cc557959be38880a3b046c4040b988fbe3d06d4a8c1f4aa2e833cf5",
+      "tools/original/with-display.sh": "4371efe64ae1639564b4a85292ff252e20bcfe84b5387927ecf7093c6b8d3dfb",
+      "tools/foundation/browser.mjs": "60c4bc851470f47e4dd0399148ce0c1edf351d41fbf7f7e15fa823af5948b4c8"
+    },
+    "gateSourcesStable": true,
+    "caseSha256": "182a03c01f8dadbd10c8f38c23ce55dde286a18c9252438a22e8b982ea545403",
+    "nativeManifestSha256": "574356c8b91eb77427c3bfc2056fe117058d2a8710831cb2723d3b7a1366be06",
+    "canonicalTraceSha256": "5ef88d264f639f9a4246eff55dcd73848ba866595cdd002cb1d8e52a207219a0",
+    "actualPublicCommands": 80,
+    "seed": "W0L0 LYYM",
+    "checks": 18,
+    "passed": 18,
+    "failures": [],
+    "sourceTransport": {
+      "status": "pass",
+      "provenance": {
+        "status": "pass",
+        "failures": []
+      }
+    },
+    "browserTransport": {
+      "status": "pass",
+      "failures": []
+    },
+    "exactPixels": {
+      "status": "fail",
+      "matchingFrames": 7,
+      "totalFrames": 18,
+      "required": false
+    }
+  },
+  "staticCodePins": {
+    "schema": 1,
+    "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+    "functions": [
+      {
+        "address": "0x5cecc0",
+        "bytes": 8315,
+        "sha256": "e26a703ef5f01247f6af5b4c9a74dec1e83b0b3063ea1025b0b4b2e0b231714f",
+        "status": "pass"
+      },
+      {
+        "address": "0x5c5070",
+        "bytes": 191,
+        "sha256": "cae0c19dfbe18de20cc5641e5c5a591772d8e394ed9bbe1daac798c361114f03",
+        "status": "pass"
+      },
+      {
+        "address": "0x5c2dd0",
+        "bytes": 47,
+        "sha256": "79c4d619a5baf7f5d9b3ce5bda1c752c6f03c2e260e538b20e89e6446eb604ae",
+        "status": "pass"
+      },
+      {
+        "address": "0x5717e0",
+        "bytes": 180,
+        "sha256": "8b57034315a26df0d7f7e92b8eb0ad7a7c8248981e5177fd11ee539853c8257e",
+        "status": "pass"
+      },
+      {
+        "address": "0x5628e0",
+        "bytes": 102,
+        "sha256": "3efd32496518497891291a740e3670a6161c62286f50725f533e7c7c62e63694",
+        "status": "pass"
+      }
+    ],
+    "status": "pass"
+  },
+  "buildAttempts": [
+    {
+      "sourceHead": "ed8f2b1aa013526909b925eede0544c41f93524f",
+      "status": "pass",
+      "command": "CARGO_BUILD_JOBS=1 npm run check:build",
+      "logSha256": "4f3c1998e98d04be56cb758d092de725a62e06e59fb57f5b06b571d987f30550"
+    }
+  ],
+  "productionCost": {
+    "schema": 1,
+    "scope": "Actual production WASM public ordinary admission and performance measurement only; no original parity acceptance",
+    "sourceHead": "ed8f2b1aa013526909b925eede0544c41f93524f",
+    "wasmSha256": "9bb1170bb40e164d63dac8015c41f436a1928d3633b81286a382adcda97af605",
+    "snapshotJsonBytes": 192255,
+    "savedSummaryJsonBytes": 3436,
+    "pathCostsJsonBytes": 1029,
+    "pathCostWords": 448,
+    "ownedGridObjects": 47,
+    "emptyGridCellsSaved": 88,
+    "pendingOccupied": [],
+    "summaryRecordCount": 12,
+    "medianTickSnapshotMs": 2.254238000000008,
+    "p95TickSnapshotMs": 2.6807629999999847,
+    "samples": 64,
+    "measurementSha256": "abdb6eb6bafaf35756c8ad3b97a960427e02c8d4074111238cc45138e4f81fe4"
+  }
+}
