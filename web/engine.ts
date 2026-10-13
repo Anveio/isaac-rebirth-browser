@@ -3,6 +3,7 @@ import wasmUrl from "./generated/engine.wasm?url";
 export type Screen = "title" | "profile" | "main" | "character" | "seed" | "playing";
 export type Direction = "left" | "right" | "up" | "down";
 export interface Player {
+  visible: boolean;
   x: number; y: number; vx: number; vy: number; hp: number; maxHp: number;
   soulHp: number; blackHeartMask: number;
   facing: Direction; bodyFacing: Direction; walkFrame: number; headFrame: number; shooting: boolean; shootingLock: number;
@@ -232,6 +233,7 @@ export interface State {
   persistedRooms: Record<string, Room>;
   roomTransition: {fromRoom: number; targetRoom: number; fromSlot: number; targetSlot: number; phase: "out" | "in" | "bossScene" | "bossCleanup"; fullUpdates: number; bossScene: {presentationIndex: number; animationFrame: number; animationPlaying: boolean} | null} | null;
   player: Player; room: Room; stageEffects: StageEffects; inventory: { coins: number; bombs: number; keys: number };
+  playerAnimation: { current: "Trapdoor" | "Appear" | "Death" | null; frame: number; playing: boolean; guard: boolean };
   camera: {scroll: {x: number; y: number}; lastPlayerPosition: {x: number; y: number};
     histories: {capacity: number; head: number; samples: {x: number; y: number}[]}[]} | null;
   nextPickup: number;

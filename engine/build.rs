@@ -250,6 +250,21 @@ fn main() {
             .as_u64()
             .expect("Pickup frame count")
     ));
+    for name in ["Trapdoor", "Appear", "Death"] {
+        let clip = player_actors["gfx/001.000_player.anm2"]["Animations"]
+            .as_array()
+            .expect("authored player clips")
+            .iter()
+            .find(|clip| clip["Name"] == name)
+            .expect("authored guarded player clip");
+        assert_eq!(clip["Loop"], false, "guarded Player clip is nonlooping");
+        let frames = clip["FrameNum"].as_u64().expect("Player clip frames");
+        assert!(frames > 0 && frames <= u64::from(u32::MAX));
+        generated.push_str(&format!(
+            "pub const PLAYER_{}_FRAMES: u32 = {frames};\n",
+            name.to_uppercase()
+        ));
+    }
     let keeper_tag = xml
         .split("<entity ")
         .find(|tag| attribute(tag, "id") == Some("17") && attribute(tag, "variant") == Some("1"))

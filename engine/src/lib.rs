@@ -34,6 +34,7 @@ pub mod music;
 pub mod npcs;
 pub mod phase;
 pub mod pickups;
+pub mod player_animation;
 pub mod player_items;
 pub mod projectiles;
 pub mod rock_blast;
@@ -78,6 +79,8 @@ pub enum Direction {
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Player {
+    /// Entity+31d; distinct from the persistent Player+7d4 controls field.
+    pub visible: bool,
     pub x: f64,
     pub y: f64,
     pub vx: f64,
@@ -98,6 +101,7 @@ pub struct Player {
 impl Player {
     fn starting() -> Self {
         Self {
+            visible: true,
             x: 240.0,
             y: 214.0,
             vx: 0.0,
@@ -327,6 +331,7 @@ pub struct State {
     pub run_seeds: Option<seed::RunSeeds>,
     pub item_pools: Option<items::ItemPools>,
     pub player_items: Option<player_items::PlayerItems>,
+    pub player_animation: player_animation::PlayerAnimation,
     pub stage: u32,
     pub stage_seed: u32,
     pub seeded_run: bool,
@@ -457,6 +462,7 @@ impl Game {
                 run_seeds: None,
                 item_pools: None,
                 player_items: None,
+                player_animation: player_animation::PlayerAnimation::default(),
                 stage: 1,
                 stage_seed: seed::stage1_seed(initial_seed),
                 seeded_run: false,
@@ -995,6 +1001,7 @@ impl Game {
         };
         self.state.pause_menu = PauseMenu::hidden();
         self.state.player = Player::starting();
+        self.state.player_animation = player_animation::PlayerAnimation::default();
         // Source 58bea7 constructs every descriptor's padded grid seed pairs.
         // floor::generate_basement owns the separate primary xorshift advance.
         self.boot_level_grid = self.state.boot_lifecycle.initialize_level_grid();
@@ -1806,7 +1813,11 @@ impl Game {
         bomb_triggered: bool,
         controls_enabled: bool,
     ) -> Result<(), String> {
+        if phase == phase::Phase::Update {
+            self.state.player_animation.advance_full();
+        }
         player_items::advance_presentation(&mut self.state, phase);
+        let controls_enabled = controls_enabled && !self.state.player_animation.guard;
         let dx = if controls_enabled {
             i32::from(self.held("KeyD")) - i32::from(self.held("KeyA"))
         } else {
