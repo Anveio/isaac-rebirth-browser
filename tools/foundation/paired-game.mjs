@@ -90,6 +90,8 @@ async function browserCapture(browser, server, caseData, directory) {
   const context = await browser.newContext({ viewport: { width: 960, height: 540 } });
   const page = await context.newPage();
   const frames = [], inputs = [], expectedCommands = [];
+  const expectedPressed = new Set();
+  let expectedSeedDialog = false;
   const failures = [];
   try {
     await page.goto(server.url + '/?manual=1');
@@ -105,14 +107,21 @@ async function browserCapture(browser, server, caseData, directory) {
         presentations += action.frames;
         expectedCommands.push({ type: 'tick', count: action.frames });
       } else if (action.type === 'key') {
-        const before = await page.evaluate(() => window.game.snapshot());
         const code = keyCode(action.key);
-        const text = before.screen === 'seed' && /^[a-z0-9]$/i.test(action.key);
+        // Derive the requested seed-entry protocol from the public tape. The
+        // browser's actual screen must not redefine a missed input as expected.
+        const text = expectedSeedDialog && /^[a-z0-9]$/i.test(action.key);
         await page.keyboard[action.down ? 'down' : 'up'](namedKeys[action.key] || action.key);
         if (text) {
           if (action.down) expectedCommands.push({ type: 'text', text: action.key.toUpperCase() });
-          else if (before.pressed.includes(code)) expectedCommands.push({ type: 'key', code, down: false });
-        } else expectedCommands.push({ type: 'key', code, down: action.down });
+          else if (expectedPressed.delete(code)) expectedCommands.push({ type: 'key', code, down: false });
+        } else {
+          expectedCommands.push({ type: 'key', code, down: action.down });
+          const newlyPressed = action.down && !expectedPressed.has(code);
+          if (action.down) expectedPressed.add(code); else expectedPressed.delete(code);
+          if (newlyPressed && code === 'Tab') expectedSeedDialog = !expectedSeedDialog;
+          else if (newlyPressed && (code === 'Enter' || code === 'Escape')) expectedSeedDialog = false;
+        }
         inputs.push({ ...action, normalizedCode: code, browserPresentation: presentations });
       } else {
         const captured = await page.evaluate(() => window.game.capture());
@@ -130,6 +139,11 @@ async function browserCapture(browser, server, caseData, directory) {
     assert.deepEqual(trace.commands, expectedCommands, 'Every intended DOM input/interval must reach the actual WASM trace');
     const final = frames.at(-1)?.state;
     assert.equal(final?.runSeedValue, caseData.seedValue, 'Browser must read back the public manually entered run seed');
+    const requestedSeed = caseData.seed.replaceAll(' ', '').toUpperCase();
+    assert.equal(final?.seedText, requestedSeed, 'Browser must read back every requested seed character');
+    assert.equal(final?.seedValid, true, 'Browser must validate the requested seed');
+    assert.equal(final?.seededRun, true, 'Browser must commit the public manual seed entry');
+    assert.equal(final?.runSeed, requestedSeed, 'Browser must read back the committed public run code');
   } catch (error) { failures.push(String(error.message)); }
   finally { await context.close(); }
   const result = { status: failures.length ? 'fail' : 'pass', failures, frames, inputs };
