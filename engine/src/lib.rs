@@ -18,6 +18,7 @@ pub mod layout;
 pub mod motion;
 pub mod mt;
 pub mod phase;
+pub mod pickups;
 pub mod projectiles;
 mod room;
 pub mod room_assets;
@@ -26,6 +27,7 @@ pub mod room_templates;
 pub mod seed;
 pub use bombs::{Bomb, Explosion};
 pub use effects::{Point, StageEffects};
+pub use pickups::Pickup;
 pub use room::Room;
 
 pub const TICK_RATE: u32 = 60;
@@ -274,6 +276,7 @@ pub struct State {
     pub visited_rooms: BTreeSet<usize>,
     pub stage_effects: StageEffects,
     pub inventory: Inventory,
+    pub next_pickup: u32,
     pub minimap: Minimap,
     pub tears: Vec<Tear>,
     pub impacts: Vec<Impact>,
@@ -365,6 +368,7 @@ impl Game {
                     bombs: 1,
                     keys: 0,
                 },
+                next_pickup: 1,
                 minimap: Minimap { cells: Vec::new() },
                 tears: Vec::new(),
                 impacts: Vec::new(),
@@ -640,6 +644,9 @@ impl Game {
         self.state.stage_effects.add_bomb_shadows(&self.state.bombs);
         self.state
             .stage_effects
+            .add_pickup_shadows(&self.state.room.pickups);
+        self.state
+            .stage_effects
             .add_explosion_lights(&self.state.explosions);
     }
     fn start_run(&mut self) -> Result<(), String> {
@@ -699,12 +706,87 @@ impl Game {
             bombs: 1,
             keys: 0,
         };
+        self.state.next_pickup = 1;
         self.state.stage_seed = seed::stage1_seed(self.state.run_seed_value);
         self.refresh_minimap();
         Ok(())
     }
     fn held(&self, code: &str) -> bool {
         self.state.pressed.contains(code)
+    }
+    /// The room/loot generator supplies a concrete authored selector. This is
+    /// an internal gameplay admission API, not a browser debug-spawn command.
+    pub fn admit_pickup(
+        &mut self,
+        variant: u32,
+        subtype: u32,
+        position: motion::WorldVector,
+        appear: bool,
+    ) -> Result<u32, String> {
+        let id = self.state.next_pickup;
+        let next = id
+            .checked_add(1)
+            .ok_or("pickup identity counter exhausted")?;
+        let pickup = Pickup::spawn(id, variant, subtype, position, appear)?;
+        self.state.room.pickups.push(pickup);
+        self.state.actor_scheduler.admit(actors::ActorRef {
+            kind: actors::ActorKind::Pickup,
+            id,
+        })?;
+        self.state.next_pickup = next;
+        self.refresh_stage_effects();
+        Ok(id)
+    }
+    /// Fresh authored contents admit before the player, preserving the native
+    /// room's actor order. Unsupported selectors stay with the room generator.
+    pub fn admit_room_pickups(
+        &mut self,
+        selectors: &[room_spawns::SpawnSelector],
+    ) -> Result<(), String> {
+        let mut admitted = Vec::new();
+        let mut next = self.state.next_pickup;
+        for selector in selectors {
+            // Shops and special rooms add prices/pools/replacement rules. Their
+            // selectors remain typed until those owners admit that context.
+            if self
+                .state
+                .room
+                .descriptor
+                .as_ref()
+                .is_some_and(|descriptor| descriptor.template.room_type != 1)
+            {
+                continue;
+            }
+            if let Some(pickup) = Pickup::from_selector(next, selector, true)? {
+                next = next
+                    .checked_add(1)
+                    .ok_or("pickup identity counter exhausted")?;
+                admitted.push(pickup);
+            }
+        }
+        self.state.room.pickups = admitted;
+        self.state.next_pickup = next;
+        self.rebuild_room_actor_schedule()?;
+        self.refresh_stage_effects();
+        Ok(())
+    }
+    /// Restored Room clones retain the collected animation and removed state;
+    /// their source handles precede Player0 just as on initial admission.
+    pub fn rebuild_room_actor_schedule(&mut self) -> Result<(), String> {
+        self.state.actor_scheduler = actors::Scheduler::default();
+        for pickup in &self.state.room.pickups {
+            if !pickup.removed {
+                self.state.actor_scheduler.admit(actors::ActorRef {
+                    kind: actors::ActorKind::Pickup,
+                    id: pickup.id,
+                })?;
+            }
+        }
+        self.state.actor_scheduler.admit(actors::ActorRef {
+            kind: actors::ActorKind::Player,
+            id: 0,
+        })?;
+        Ok(())
     }
     fn tick(&mut self) -> Result<(), String> {
         let phase = self.state.system_clock.advance()?;
@@ -775,10 +857,13 @@ impl Game {
         self.state.tears = surviving;
         bombs::advance_explosions(&mut self.state, phase, explosion_fence);
         bombs::retire_removed(&mut self.state);
+        self.state.room.pickups.retain(|pickup| !pickup.removed);
         let surviving = &self.state.tears;
-        self.state.actor_scheduler.retain(|actor| {
-            actor.kind != actors::ActorKind::Tear
-                || surviving.iter().any(|tear| tear.id == actor.id)
+        let pickups = &self.state.room.pickups;
+        self.state.actor_scheduler.retain(|actor| match actor.kind {
+            actors::ActorKind::Tear => surviving.iter().any(|tear| tear.id == actor.id),
+            actors::ActorKind::Pickup => pickups.iter().any(|pickup| pickup.id == actor.id),
+            _ => true,
         });
         Ok(())
     }
@@ -803,6 +888,17 @@ impl Game {
                 }
             }
             actors::ActorKind::Bomb => bombs::advance_actor(&mut self.state, phase, actor.id)?,
+            actors::ActorKind::Pickup => {
+                if let Some(pickup) = self
+                    .state
+                    .room
+                    .pickups
+                    .iter_mut()
+                    .find(|pickup| pickup.id == actor.id)
+                {
+                    pickup.advance(phase);
+                }
+            }
             _ => return Err("actor kind has no admitted runtime yet".into()),
         }
         Ok(())

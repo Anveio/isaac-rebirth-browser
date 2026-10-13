@@ -24,6 +24,7 @@ pub struct Room {
     pub projectile_bounds: ProjectileBounds,
     pub appearance: RoomAppearance,
     pub descriptor: Option<crate::floor::Descriptor>,
+    pub pickups: Vec<crate::pickups::Pickup>,
 }
 
 /// Projected tear limits retained separately from verified player clearance.
@@ -400,6 +401,7 @@ impl Room {
             - render_offset.y;
         Room {
             descriptor: None,
+            pickups: Vec::new(),
             left: left_plane + radius,
             right: right_plane - radius,
             top: top_plane + radius,

@@ -295,6 +295,21 @@ impl StageEffects {
         }
     }
 
+    pub fn add_pickup_shadows(&mut self, pickups: &[crate::Pickup]) {
+        for pickup in pickups
+            .iter()
+            .filter(|pickup| !pickup.collected && !pickup.removed && pickup.shadow_size > 0.0)
+        {
+            self.shadow_casters.push(ShadowCaster::authored(
+                pickup.id,
+                pickup.x,
+                pickup.y - 1.0,
+                pickup.shadow_size,
+                &self.mask_raster,
+            ));
+        }
+    }
+
     /// Light and sprite anchors remain separate in the current logical model.
     /// Observed raster geometry alone does not identify native physical units.
     pub fn basement(player: &Player, fx: &RoomFx, run_tick: u32) -> Self {

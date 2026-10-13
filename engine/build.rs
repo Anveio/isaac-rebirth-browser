@@ -75,6 +75,48 @@ fn frame_number(frame: &Value, name: &str) -> f64 {
     value
 }
 
+fn pickup_catalog(path: &Path, animations: &Path) -> String {
+    let catalog: Value =
+        serde_json::from_str(&fs::read_to_string(path).expect("read authored pickup catalog"))
+            .expect("parse authored pickup catalog");
+    let actors: Value = serde_json::from_str(
+        &fs::read_to_string(animations).expect("read authored animation catalog"),
+    )
+    .expect("parse authored animation catalog");
+    let mut output = String::from("pub static DEFINITIONS: &[Definition] = &[\n");
+    for pickup in catalog["pickups"]
+        .as_array()
+        .expect("pickup definitions missing")
+    {
+        let actor = pickup["actor"].as_str().expect("pickup actor missing");
+        let mut clips = String::new();
+        for animation in actors[actor]["Animations"]
+            .as_array()
+            .expect("authored pickup actor missing")
+        {
+            clips.push_str(&format!(
+                "Clip {{ name: {:?}, frames: {}, looping: {} }},",
+                animation["Name"]
+                    .as_str()
+                    .expect("pickup clip name missing"),
+                animation["FrameNum"]
+                    .as_u64()
+                    .expect("pickup frame count missing"),
+                animation["Loop"]
+                    .as_bool()
+                    .expect("pickup loop flag missing")
+            ));
+        }
+        output.push_str(&format!("Definition {{ variant: {}, subtype: {}, actor: {actor:?}, collision_radius: {}_f32, shadow_size: {}_f64, clips: &[{clips}] }},\n",
+            pickup["variant"].as_u64().expect("pickup variant missing"),
+            pickup["subtype"].as_u64().expect("pickup subtype missing"),
+            pickup["collisionRadius"].as_f64().expect("pickup collision radius missing"),
+            pickup["shadowSize"].as_f64().expect("pickup shadow size missing")));
+    }
+    output.push_str("];\n");
+    output
+}
+
 fn main() {
     let manifest = PathBuf::from(std::env::var_os("CARGO_MANIFEST_DIR").unwrap());
     let resources = manifest
@@ -84,9 +126,11 @@ fn main() {
     let entities = resources.join("entities2.xml");
     let image = resources.join("gfx/shadow.png");
     let animations = manifest.parent().unwrap().join("web/scene-data.json");
+    let pickups = manifest.parent().unwrap().join("web/pickup-data.json");
     println!("cargo:rerun-if-changed={}", entities.display());
     println!("cargo:rerun-if-changed={}", image.display());
     println!("cargo:rerun-if-changed={}", animations.display());
+    println!("cargo:rerun-if-changed={}", pickups.display());
     let xml = fs::read_to_string(entities).expect("read authored entity definitions");
     let (width, height) = png_dimensions(&image);
     let player = entity_number(&xml, 1, 0, "shadowSize");
@@ -117,4 +161,9 @@ fn main() {
     }
     let output = PathBuf::from(std::env::var_os("OUT_DIR").unwrap());
     fs::write(output.join("shadow_catalog.rs"), generated).expect("write shadow catalog");
+    fs::write(
+        output.join("pickup_catalog.rs"),
+        pickup_catalog(&pickups, &animations),
+    )
+    .expect("write pickup catalog");
 }

@@ -19,6 +19,11 @@ export interface Bomb {
   };
 }
 export interface Explosion { id: number; x: number; y: number; animationFrame: number; }
+export interface Pickup {
+  id: number; spawnSeed: number; variant: number; subtype: number; position: { x: number; y: number };
+  x: number; y: number; actor: string; animation: string; animationFrame: number; animationPlaying: boolean;
+  canCollect: boolean; collected: boolean; removed: boolean; collisionRadius: number; shadowSize: number; collectionDelay: number;
+}
 export interface RunIntroduction { age: number; active: boolean; }
 export interface PauseMenu {
   phase: "hidden" | "appearing" | "idle" | "disappearing";
@@ -55,6 +60,7 @@ export interface Room {
   left: number; right: number; top: number; bottom: number; appearance: RoomAppearance;
   descriptor: RoomDescriptor | null;
   projectileBounds: { left: number; right: number; top: number; bottom: number };
+  pickups: Pickup[];
 }
 export interface Rect { x: number; y: number; width: number; height: number; }
 export interface RoomQuad { sourcePatchIndex: number; sourceRect: Rect; destRect: Rect; flipX: boolean; flipY: boolean; }
@@ -87,6 +93,7 @@ export interface State {
   paused: boolean; pressed: string[];
   floor: Floor; currentRoom: number; visitedRooms: number[];
   player: Player; room: Room; stageEffects: StageEffects; inventory: { coins: number; bombs: number; keys: number };
+  nextPickup: number;
   minimap: { cells: { x: number; y: number; visibility: "unvisited" | "visited" | "current" }[] };
   tears: Tear[]; impacts: Impact[]; fireCooldown: number; nextTear: number;
   maxFireDelay: number; headTimer: number; actorScheduler: { actors: ActorRef[] };

@@ -15,7 +15,7 @@ export interface Frame {
 }
 interface Animation { Name: string; FrameNum: number; Loop: boolean; RootAnimation: Frame[]; LayerAnimations: { LayerId: number; Visible: boolean; Frames: Frame[] }[]; }
 interface Actor { BaseSpritesheetPath: string; Spritesheets: { Id: number; Path: string }[]; Layers: { Id: number; SpritesheetId: number; Name: string }[]; Animations: Animation[]; }
-export interface DrawOptions { scale?: number; layers?: number[]; overrides?: Record<number, Partial<Frame>>; pixelSnap?: number; }
+export interface DrawOptions { scale?: number; layers?: number[]; overrides?: Record<number, Partial<Frame>>; spritesheets?: Record<number, string>; pixelSnap?: number; }
 interface Glyph { x: number; y: number; width: number; height: number; xoffset: number; yoffset: number; xadvance: number; page: number; }
 interface Font { lineHeight: number; pages: string[]; chars: Record<string, Glyph>; kernings: { first: number; second: number; amount: number }[]; }
 const normalize = (path: string) => path.replaceAll("\\", "/").replace(/\/\.\//g, "/").replace(/\/\.$/, "").replace(/^resources\//i, "").toLowerCase();
@@ -46,6 +46,10 @@ const urls = import.meta.glob([
   "../references/isaac/rebirth/resources/gfx/effects/effect_015_tearpoof*.png",
   "../references/isaac/rebirth/resources/gfx/effects/effect_029_explosion.png",
   "../references/isaac/rebirth/resources/gfx/items/pick ups/pickup_016_bomb.png",
+  "../references/isaac/rebirth/resources/gfx/items/**/*.png",
+  "../references/isaac/rebirth/resources/gfx/effects/effect_023_starflash.png",
+  "../references/isaac/rebirth/resources/gfx/effects/effect_052_dust cloud.png",
+  "../references/isaac/rebirth/resources/gfx/ui/ui_chargebar.png",
   "../references/isaac/rebirth/resources/font/*_0.png",
 ], { eager: true, query: "?url", import: "default" }) as Record<string, string>;
 
@@ -106,7 +110,7 @@ export class Assets {
       const frame = overrideFrame(found, options.overrides?.[layer.LayerId]); if (!frame.Visible || frame.AlphaTint <= 0) continue;
       const definition = actor.Layers.find(definition => definition.Id === layer.LayerId)!;
       const sheet = actor.Spritesheets.find(sheet => sheet.Id === definition.SpritesheetId)!;
-      const imagePath = normalize(`${actor.BaseSpritesheetPath}/${sheet.Path}`);
+      const imagePath = normalize(options.spritesheets?.[sheet.Id] ?? `${actor.BaseSpritesheetPath}/${sheet.Path}`);
       ctx.save(); ctx.globalAlpha *= Math.fround(root.AlphaTint * frame.AlphaTint);
       const backend = ctx as unknown as {
         drawTintedImage?: (source: CanvasImageSource, tint: number[], offsets: number[], ...args: number[]) => void;

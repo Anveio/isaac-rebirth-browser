@@ -2,6 +2,7 @@
 gfx/001.000_player.anm2
 gfx/002.000_tear.anm2
 gfx/004.000_bomb.anm2
+gfx/005.*
 gfx/1000.001_bomb explosion.anm2
 gfx/1000.012_tear poof_small.anm2
 gfx/1000.012_tear poofa.anm2
@@ -34,4 +35,5 @@ gfx/ui/minimap1.anm2
 gfx/ui/pausescreen.anm2
 gfx/ui/pausescreenstats.anm2
 gfx/ui/ui_hearts.anm2
+gfx/ui/ui_chargebar.anm2
 gfx/ui/ui_streak.anm2
