@@ -6,7 +6,7 @@
 //! ticks remain unverified. Scene descriptors are ordinary generated state.
 use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
 pub mod actors;
 pub mod bombs;
 pub mod combat;
@@ -25,6 +25,7 @@ pub mod room_assets;
 pub mod room_spawns;
 pub mod room_templates;
 pub mod seed;
+pub mod traversal;
 pub use bombs::{Bomb, Explosion};
 pub use effects::{Point, StageEffects};
 pub use pickups::Pickup;
@@ -274,6 +275,8 @@ pub struct State {
     pub floor: floor::Floor,
     pub current_room: usize,
     pub visited_rooms: BTreeSet<usize>,
+    pub persisted_rooms: BTreeMap<usize, Room>,
+    pub room_transition: Option<traversal::RoomTransition>,
     pub stage_effects: StageEffects,
     pub inventory: Inventory,
     pub next_pickup: u32,
@@ -362,6 +365,8 @@ impl Game {
                 floor,
                 current_room,
                 visited_rooms: BTreeSet::from([current_room]),
+                persisted_rooms: BTreeMap::new(),
+                room_transition: None,
                 stage_effects,
                 inventory: Inventory {
                     coins: 0,
@@ -612,29 +617,36 @@ impl Game {
             self.state.character.clone();
     }
     fn refresh_minimap(&mut self) {
-        let mut cells = vec![MinimapCell {
-            x: 0,
-            y: 0,
-            visibility: "current".into(),
-        }];
-        for door in &self.state.room.appearance.doors {
-            let (x, y) = match door.side.as_str() {
-                "left" => (-1, 0),
-                "right" => (1, 0),
-                "up" => (0, -1),
-                "down" => (0, 1),
-                _ => continue,
-            };
-            if !cells.iter().any(|cell| cell.x == x && cell.y == y) {
-                cells.push(MinimapCell {
-                    x,
-                    y,
-                    visibility: "unvisited".into(),
-                });
+        let mut shown = self.state.visited_rooms.clone();
+        for index in &self.state.visited_rooms {
+            let descriptor = &self.state.floor.descriptors[*index];
+            for neighbor in descriptor.neighbors.iter().flatten() {
+                let target = &self.state.floor.descriptors[*neighbor];
+                if !matches!(target.template.room_type, 7 | 8) {
+                    shown.insert(*neighbor);
+                }
             }
         }
-        self.state.minimap.cells = cells;
+        self.state.minimap.cells = shown
+            .into_iter()
+            .map(|index| {
+                let descriptor = &self.state.floor.descriptors[index];
+                MinimapCell {
+                    x: descriptor.grid_index as i32 % 13 - 6,
+                    y: descriptor.grid_index as i32 / 13 - 6,
+                    visibility: if index == self.state.current_room {
+                        "current"
+                    } else if self.state.visited_rooms.contains(&index) {
+                        "visited"
+                    } else {
+                        "unvisited"
+                    }
+                    .into(),
+                }
+            })
+            .collect();
     }
+
     fn refresh_stage_effects(&mut self) {
         self.state.stage_effects = StageEffects::basement(
             &self.state.player,
@@ -700,6 +712,8 @@ impl Game {
         self.state.floor = floor::generate_basement(seed::stage1_seed(self.state.run_seed_value))?;
         self.state.current_room = self.state.floor.starting_descriptor;
         self.state.visited_rooms = BTreeSet::from([self.state.current_room]);
+        self.state.persisted_rooms.clear();
+        self.state.room_transition = None;
         self.state.room = Room::from_starting_floor(&self.state.floor);
         self.state.inventory = Inventory {
             coins: 0,
@@ -818,6 +832,40 @@ impl Game {
             self.state.run_introduction.age += 1;
             self.state.run_introduction.active = self.state.run_introduction.age < 140;
         }
+        let room_before = self.state.current_room;
+        let restoring = self
+            .state
+            .room_transition
+            .as_ref()
+            .is_some_and(|transition| {
+                self.state
+                    .persisted_rooms
+                    .contains_key(&transition.target_room)
+            });
+        if traversal::advance_transition(&mut self.state, phase) {
+            if room_before != self.state.current_room {
+                if restoring {
+                    self.rebuild_room_actor_schedule()?;
+                } else {
+                    let selectors = self
+                        .state
+                        .room
+                        .spawns
+                        .as_ref()
+                        .expect("first entered descriptor has authored admission")
+                        .selectors
+                        .clone();
+                    self.admit_room_pickups(&selectors)?;
+                    // Source load_room admits one full room update before the
+                    // inbound transition freezes nonplayer animation.
+                    for pickup in &mut self.state.room.pickups {
+                        pickup.advance(phase);
+                    }
+                }
+            }
+            self.refresh_minimap();
+            return Ok(());
+        }
         let explosion_fence = self.state.explosions.len();
         let existing = self.state.actor_scheduler.full_phase();
         if phase == phase::Phase::Update {
@@ -858,6 +906,9 @@ impl Game {
         bombs::advance_explosions(&mut self.state, phase, explosion_fence);
         bombs::retire_removed(&mut self.state);
         self.state.room.pickups.retain(|pickup| !pickup.removed);
+        if phase.updates_nonplayers() {
+            traversal::check_departure(&mut self.state);
+        }
         let surviving = &self.state.tears;
         let pickups = &self.state.room.pickups;
         self.state.actor_scheduler.retain(|actor| match actor.kind {

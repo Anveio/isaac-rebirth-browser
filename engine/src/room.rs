@@ -25,6 +25,7 @@ pub struct Room {
     pub appearance: RoomAppearance,
     pub descriptor: Option<crate::floor::Descriptor>,
     pub pickups: Vec<crate::pickups::Pickup>,
+    pub spawns: Option<crate::room_spawns::RoomSpawns>,
 }
 
 /// Projected tear limits retained separately from verified player clearance.
@@ -166,6 +167,8 @@ pub struct RoomDoor {
     pub x: f64,
     pub y: f64,
     pub target_room: u32,
+    pub slot: u8,
+    pub world_position: motion::WorldVector,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
@@ -203,7 +206,13 @@ impl DecorationRng {
 
 impl Room {
     pub fn from_starting_floor(floor: &crate::floor::Floor) -> Self {
-        let descriptor = &floor.descriptors[floor.starting_descriptor];
+        Self::from_floor_descriptor(floor, floor.starting_descriptor)
+    }
+
+    /// Admit the authored configuration once. Mutable fields on Room persist
+    /// with its descriptor when the player leaves and later returns.
+    pub fn from_floor_descriptor(floor: &crate::floor::Floor, index: usize) -> Self {
+        let descriptor = &floor.descriptors[index];
         let mut room = Self::from_decoration_seed(descriptor.decoration_seed);
         room.descriptor = Some(descriptor.clone());
         room.appearance.doors.clear();
@@ -212,7 +221,18 @@ impl Room {
         // common sprite Y−1. Normal door setup adds the source 15px inset.
         let authored = crate::room_assets::for_descriptor(descriptor)
             .expect("generated starting descriptor identifies authored STB");
-        for (slot, target) in descriptor.neighbors.iter().enumerate().take(4) {
+        room.spawns = Some(
+            crate::room_spawns::select(&authored, descriptor.spawn_seed)
+                .expect("generated descriptor identifies bounded authored spawns"),
+        );
+        room.appearance.tutorial = descriptor.asset_stage == 0
+            && descriptor.template.room_type == 1
+            && descriptor.template.variant == 2;
+        room.appearance.template = format!(
+            "{}.{}({})",
+            descriptor.template.room_type, descriptor.template.variant, descriptor.template.name
+        );
+        for (slot, target) in descriptor.neighbors.iter().enumerate() {
             let Some(target) = target else {
                 continue;
             };
@@ -222,7 +242,7 @@ impl Room {
                 // HoleInWall's invisible Hidden animation for secret targets.
                 continue;
             }
-            let (side, inset_x, inset_y) = match slot {
+            let (side, inset_x, inset_y) = match slot % 4 {
                 0 => ("left", 15.0, 0.0),
                 1 => ("up", 0.0, 15.0),
                 2 => ("right", -15.0, 0.0),
@@ -255,10 +275,15 @@ impl Room {
                 x: (40.0 + 40.0 * column) * motion::WORLD_SCALE + 32.0 + inset_x,
                 y: (120.0 + 40.0 * row) * motion::WORLD_SCALE - 46.0 - 1.0 + inset_y,
                 target_room: *target as u32,
+                slot: slot as u8,
+                world_position: motion::WorldVector {
+                    x: (40.0 + 40.0 * column) as f32,
+                    y: (120.0 + 40.0 * row) as f32,
+                },
             });
         }
         room.appearance.generation =
-            "source-fresh-normal-basement-floor;descriptor-decoration12;provisional-fx-route"
+            "source-fresh-normal-basement-floor;descriptor-decoration12;authored-spawn11;provisional-fx-route"
                 .into();
         room
     }
@@ -402,6 +427,7 @@ impl Room {
         Room {
             descriptor: None,
             pickups: Vec::new(),
+            spawns: None,
             left: left_plane + radius,
             right: right_plane - radius,
             top: top_plane + radius,
@@ -431,24 +457,7 @@ impl Room {
                 "recovered-decoration35-conditional-variant-draws;heldout-original-gl-cache"
                     .into(),
             tutorial: true,
-            doors: vec![
-                RoomDoor {
-                    side: "left".into(),
-                    state: "Opened".into(),
-                    asset: "gfx/grid/door_01_normaldoor.anm2".into(),
-                    x: 62.0,
-                    y: 135.0,
-                    target_room: 1,
-                },
-                RoomDoor {
-                    side: "right".into(),
-                    state: "Opened".into(),
-                    asset: "gfx/grid/door_01_normaldoor.anm2".into(),
-                    x: 418.0,
-                    y: 135.0,
-                    target_room: 2,
-                },
-            ],
+            doors: Vec::new(),
             fx: RoomFx {
                 ambient: [255, 255, 255],
                 shading: "gfx/backdrop/shading.png".into(),
