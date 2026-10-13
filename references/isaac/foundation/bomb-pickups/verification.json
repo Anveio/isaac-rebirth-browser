@@ -1,0 +1,393 @@
+{
+  "schema": 1,
+  "status": "pass",
+  "sourceHead": "f0e788b",
+  "baseHead": "259aae7",
+  "productionSha256": "66ba567cd61dbe7449f8f1b313bdecadf22e050978ee4a3e2442029dabde9042",
+  "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "report": ".cache/e2e/bomb-pickups/unfiltered-final/report.json",
+  "reportSha256": "47b8a6617555afa52af9c65275a0bb6a730992136d836f6d6774a8bb42d28e15",
+  "sourceHashesStable": true,
+  "comparedPresentations": 2727,
+  "gameplayFieldMismatches": 0,
+  "cases": [
+    {
+      "name": "retained-bomb-pickup-phase-0",
+      "code": "AFB84GAH",
+      "seedValue": 246190821,
+      "entropy": "Contrived public collection offset; seed originally recorded from OS secrets at attempt624",
+      "comparedPresentations": 473,
+      "admittedSource": [
+        {
+          "spawnSeed": 853596972,
+          "variant": 40,
+          "subtype": 2,
+          "position": [
+            280,
+            280
+          ],
+          "price": 0
+        },
+        {
+          "spawnSeed": 1666781845,
+          "variant": 40,
+          "subtype": 1,
+          "position": [
+            320,
+            280
+          ],
+          "price": 0
+        },
+        {
+          "spawnSeed": 2812925877,
+          "variant": 40,
+          "subtype": 2,
+          "position": [
+            360,
+            280
+          ],
+          "price": 0
+        }
+      ],
+      "collections": [
+        {
+          "presentation": 321,
+          "amount": 1
+        },
+        {
+          "presentation": 367,
+          "amount": 2
+        },
+        {
+          "presentation": 423,
+          "amount": 2
+        }
+      ],
+      "placements": [
+        {
+          "presentation": 115,
+          "amount": 1
+        }
+      ],
+      "detonation": 235,
+      "destroyedRocks": 8,
+      "nativeManifestSha256": "03518b6cab02fdeb85fc6a0f6b62f6000ea219aa9a9f38c01c011b79b2832e56"
+    },
+    {
+      "name": "retained-bomb-pickup-phase-1",
+      "code": "AFB84GAH",
+      "seedValue": 246190821,
+      "entropy": "Contrived public collection offset; seed originally recorded from OS secrets at attempt624",
+      "comparedPresentations": 474,
+      "admittedSource": [
+        {
+          "spawnSeed": 853596972,
+          "variant": 40,
+          "subtype": 2,
+          "position": [
+            280,
+            280
+          ],
+          "price": 0
+        },
+        {
+          "spawnSeed": 1666781845,
+          "variant": 40,
+          "subtype": 1,
+          "position": [
+            320,
+            280
+          ],
+          "price": 0
+        },
+        {
+          "spawnSeed": 2812925877,
+          "variant": 40,
+          "subtype": 2,
+          "position": [
+            360,
+            280
+          ],
+          "price": 0
+        }
+      ],
+      "collections": [
+        {
+          "presentation": 323,
+          "amount": 1
+        },
+        {
+          "presentation": 367,
+          "amount": 2
+        },
+        {
+          "presentation": 423,
+          "amount": 2
+        }
+      ],
+      "placements": [
+        {
+          "presentation": 116,
+          "amount": 1
+        }
+      ],
+      "detonation": 235,
+      "destroyedRocks": 8,
+      "nativeManifestSha256": "1432b7eac5140b7cc605fa0b8baa99490a575a707ac31adc3f9a4b909ce35939"
+    },
+    {
+      "name": "retained-random-bomb-pickup-0",
+      "code": "R0L47A89",
+      "seedValue": 1920651646,
+      "entropy": "OS secrets",
+      "comparedPresentations": 473,
+      "admittedSource": [
+        {
+          "spawnSeed": 4040206992,
+          "variant": 40,
+          "subtype": 1,
+          "position": [
+            280,
+            280
+          ],
+          "price": 0
+        },
+        {
+          "spawnSeed": 3404882497,
+          "variant": 40,
+          "subtype": 1,
+          "position": [
+            320,
+            280
+          ],
+          "price": 0
+        },
+        {
+          "spawnSeed": 3933486506,
+          "variant": 40,
+          "subtype": 1,
+          "position": [
+            360,
+            280
+          ],
+          "price": 0
+        }
+      ],
+      "collections": [
+        {
+          "presentation": 321,
+          "amount": 1
+        },
+        {
+          "presentation": 367,
+          "amount": 1
+        },
+        {
+          "presentation": 423,
+          "amount": 1
+        }
+      ],
+      "placements": [
+        {
+          "presentation": 115,
+          "amount": 1
+        }
+      ],
+      "detonation": 235,
+      "destroyedRocks": 8,
+      "nativeManifestSha256": "ea35b2612ef3750298d2ed92145e212ac4e0805584297614f57ccf9bb37af7c7"
+    },
+    {
+      "name": "retained-random-bomb-pickup-1",
+      "code": "BHBV3289",
+      "seedValue": 103596830,
+      "entropy": "OS secrets",
+      "comparedPresentations": 474,
+      "admittedSource": [
+        {
+          "spawnSeed": 2274468291,
+          "variant": 40,
+          "subtype": 1,
+          "position": [
+            280,
+            280
+          ],
+          "price": 0
+        },
+        {
+          "spawnSeed": 242072465,
+          "variant": 40,
+          "subtype": 1,
+          "position": [
+            320,
+            280
+          ],
+          "price": 0
+        },
+        {
+          "spawnSeed": 1404724981,
+          "variant": 40,
+          "subtype": 1,
+          "position": [
+            360,
+            280
+          ],
+          "price": 0
+        }
+      ],
+      "collections": [
+        {
+          "presentation": 323,
+          "amount": 1
+        },
+        {
+          "presentation": 367,
+          "amount": 1
+        },
+        {
+          "presentation": 423,
+          "amount": 1
+        }
+      ],
+      "placements": [
+        {
+          "presentation": 116,
+          "amount": 1
+        }
+      ],
+      "detonation": 235,
+      "destroyedRocks": 8,
+      "nativeManifestSha256": "7a05c29122429f244dca7afdf1592639ef92854c1950feb26ff4896f10bdaa77"
+    },
+    {
+      "name": "unfiltered-bomb-pickup-0",
+      "code": "NB7AFY6C",
+      "seedValue": 1872067886,
+      "entropy": "OS secrets",
+      "comparedPresentations": 416,
+      "admittedSource": [
+        {
+          "spawnSeed": 1688469188,
+          "variant": 40,
+          "subtype": 1,
+          "position": [
+            280,
+            280
+          ],
+          "price": 0
+        },
+        {
+          "spawnSeed": 514256034,
+          "variant": 40,
+          "subtype": 1,
+          "position": [
+            320,
+            280
+          ],
+          "price": 0
+        },
+        {
+          "spawnSeed": 4202842816,
+          "variant": 40,
+          "subtype": 1,
+          "position": [
+            360,
+            280
+          ],
+          "price": 0
+        }
+      ],
+      "collections": [
+        {
+          "presentation": 265,
+          "amount": 1
+        },
+        {
+          "presentation": 309,
+          "amount": 1
+        },
+        {
+          "presentation": 365,
+          "amount": 1
+        }
+      ],
+      "placements": [
+        {
+          "presentation": 58,
+          "amount": 1
+        }
+      ],
+      "detonation": 177,
+      "destroyedRocks": 8,
+      "nativeManifestSha256": "17e8f5acdf017cb082b8470e8879bc771c3131598eb2e0ad9e02c7f386cb53cc"
+    },
+    {
+      "name": "unfiltered-bomb-pickup-1",
+      "code": "2SQNK4C4",
+      "seedValue": 3421747989,
+      "entropy": "OS secrets",
+      "comparedPresentations": 417,
+      "admittedSource": [
+        {
+          "spawnSeed": 3052084591,
+          "variant": 40,
+          "subtype": 1,
+          "position": [
+            280,
+            280
+          ],
+          "price": 0
+        },
+        {
+          "spawnSeed": 3253481971,
+          "variant": 40,
+          "subtype": 1,
+          "position": [
+            320,
+            280
+          ],
+          "price": 0
+        },
+        {
+          "spawnSeed": 1739034674,
+          "variant": 40,
+          "subtype": 1,
+          "position": [
+            360,
+            280
+          ],
+          "price": 0
+        }
+      ],
+      "collections": [
+        {
+          "presentation": 265,
+          "amount": 1
+        },
+        {
+          "presentation": 311,
+          "amount": 1
+        },
+        {
+          "presentation": 367,
+          "amount": 1
+        }
+      ],
+      "placements": [
+        {
+          "presentation": 59,
+          "amount": 1
+        }
+      ],
+      "detonation": 179,
+      "destroyedRocks": 8,
+      "nativeManifestSha256": "72133f45cc970a69bc725a830c4a68f060885267f5f56d9e8f07413b1e64ea48"
+    }
+  ],
+  "inputScope": "Independent full reset/menu/seed/gameplay public tape plus exact seeded flag/text/code/value readback; input history is complete for all six cases",
+  "stateScope": "Command-state histories hit the disclosed32 MiB cap; separate full gameplay snapshots are complete verified gzip archives. Full input/backend traces are retained, not sliced after seed entry.",
+  "subtypeScope": "The two newly discovered default OS cases were unfiltered; actual native outcomes happened to be three regular bombs in each. This proves no Troll/Megatroll conversion. The original contrived pair exercises two double bombs and one regular bomb.",
+  "previousAttempts": "initial-scope-reports.json retains the original environmental partial and both exact-body mid-Collect end assertions; scoped-scenarios.json remains unchanged on remote codex/natural-bomb-scoped-proof at a800edf",
+  "notAccepted": "Inventory99 boundary, modifiers, special prices, Troll/Megatroll actors/AI, blast pickup impulses, total shared MT/sample identity and pixels",
+  "mandatoryRegressions": "All prior four routes remain required as exact public prefixes plus20 declared release steps; every new unfiltered subtype remains blocking if unsupported. Existing XD0 Troll and rare-rock regressions remain registered separately."
+}
