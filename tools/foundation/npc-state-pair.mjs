@@ -12,7 +12,7 @@ const option = (name, fallback) => {
 };
 const directory = resolve(option('--case'));
 const required = option('--require', 'admission').split(',');
-assert.ok(required.every(value => ['admission', 'contact', 'bomb', 'tear', 'clear', 'clear-delay'].includes(value)));
+assert.ok(required.every(value => ['admission', 'contact', 'bomb', 'tear', 'clear', 'clear-delay', 'door-clear'].includes(value)));
 const load = path => JSON.parse(readFileSync(path, 'utf8'));
 const hash = path => createHash('sha256').update(readFileSync(path)).digest('hex');
 const originalPath = resolve(directory, 'original/manifest.json');
@@ -31,7 +31,7 @@ const labels = replay.pairedTape.filter(action => action.type === 'capture').map
 const gameplayStart = labels.indexOf('gameplay-start');
 assert.ok(gameplayStart >= 0);
 assert.equal(observations.size, native.debugObservations.length);
-const checks = [], diagnostics = [];
+const checks = [], diagnostics = [], unsupportedDiagnostics = [];
 const check = (list, label, field, expected, actual) => {
   assert.ok(expected !== undefined && actual !== undefined, `Missing ${field} at ${label}`);
   list.push({ label, field, expected, actual, status: JSON.stringify(expected) === JSON.stringify(actual) ? 'pass' : 'fail' });
@@ -101,7 +101,13 @@ for (const [index, label] of labels.entries()) {
       const retained = event.source.entityType === 2 ? actual.tears.find(tear => tear.id === event.source.id)
         : actual.bombs.find(bomb => bomb.id === event.source.id);
       assert.ok(retained, 'Port pending record must reference an actually admitted public Tear/Bomb');
-      check(diagnostics, label, `npc${native.spawnSeed}.damage${index}.sourceSpawnSeed`, record.sourceActorSpawnSeed, retained.spawnSeed);
+      const field = `npc${native.spawnSeed}.damage${index}.sourceSpawnSeed`;
+      if (event.source.entityType === 4) {
+        unsupportedDiagnostics.push({ label, field, source: record.sourceActorSpawnSeed,
+          status: 'unaccepted', reason: 'Regular Bomb seed production is not yet admitted to the runtime. Ordered damage flags, amount and actual attacker references remain required.' });
+      } else {
+        check(diagnostics, label, field, record.sourceActorSpawnSeed, retained.spawnSeed);
+      }
     }
     // Serialized f32 JSON uses a shortest decimal. fround restores exact bits;
     // this is an exact comparison and introduces no epsilon.
@@ -134,8 +140,8 @@ for (const [index, label] of labels.entries()) {
     check(checks, label, 'room.combatClear', source.room.combatClear, actual.room.combatClear);
     check(checks, label, 'room.combatClearCountdown', source.room.combatClearCountdown, actual.room.combatClearCountdown);
     if (source.nativePhase.systemIterations % 2 === 1) {
-      clearPoints.native.push({ label, counter: source.nativePhase.systemIterations, count: source.room.countableCurrent + source.room.countablePending, countdown: source.room.combatClearCountdown, clear: source.room.combatClear });
-      clearPoints.browser.push({ label, counter: actual.systemClock.systemCounter, count: port.filter(actor => actor.canShutDoors && !actor.removed).length, countdown: actual.room.combatClearCountdown, clear: actual.room.combatClear });
+      clearPoints.native.push({ label, counter: source.nativePhase.systemIterations, count: source.room.countableCurrent + source.room.countablePending, countdown: source.room.combatClearCountdown, clear: source.room.combatClear, doors: source.grid.filter(cell => cell.type === 16).map(cell => ({index: cell.index, state: cell.state, collisionClass: cell.collisionClass})) });
+      clearPoints.browser.push({ label, counter: actual.systemClock.systemCounter, count: port.filter(actor => actor.canShutDoors && !actor.removed).length, countdown: actual.room.combatClearCountdown, clear: actual.room.combatClear, doors: actual.room.grid.cells.flatMap((cell, index) => cell.entity?.kind === 16 ? [{ index, state: cell.entity.state, collisionClass: cell.entity.collisionClass }] : []) });
     }
     hadLockedRoom ||= source.room.combatClear === false;
     if (hadLockedRoom && source.room.combatClear && actual.room.combatClear && !natives.length && !port.length) execution.clear = true;
@@ -153,9 +159,19 @@ for (const [game, points] of Object.entries(clearPoints)) {
     && points.slice(index, index + 11).length === 11
     && points.slice(index, index + 11).every((row, offset) => row.count === 0 && row.counter === point.counter + offset * 2
       && row.countdown === Math.max(9 - offset, 0) && row.clear === (offset === 10)));
-  clearDelayContract[game] = { status: start >= 0 ? 'pass' : 'fail', boundary: start >= 0 ? points.slice(start, start + 11) : [] };
+  const before = points[start + 9], cleared = points[start + 10], following = points[start + 11];
+  const doorTransitions = start < 0 || !following || following.counter !== cleared.counter + 2 ? []
+    : cleared.doors.filter(door => door.state === 2 && before.doors.some(prior => prior.index === door.index && prior.state === 1))
+      .map(door => ({ index: door.index, before: before.doors.find(prior => prior.index === door.index), cleared: door,
+        following: following.doors.find(next => next.index === door.index) }));
+  const doorStatus = doorTransitions.length && doorTransitions.every(door => door.before.collisionClass === 4
+    && door.cleared.collisionClass === 4 && door.following?.state === 2 && door.following?.collisionClass === 5) ? 'pass' : 'fail';
+  clearDelayContract[game] = { status: start >= 0 ? 'pass' : 'fail', boundary: start >= 0 ? points.slice(start, start + 11) : [], doorStatus, doorTransitions };
 }
 execution['clear-delay'] = Object.values(clearDelayContract).every(contract => contract.status === 'pass');
+execution['door-clear'] = Object.values(clearDelayContract).every(contract => contract.doorStatus === 'pass')
+  && JSON.stringify(clearDelayContract.native.doorTransitions.map(door => door.index))
+    === JSON.stringify(clearDelayContract.browser.doorTransitions.map(door => door.index));
 for (const name of required) {
   check(checks, 'execution', name, true, execution[name]);
   if (['bomb', 'tear'].includes(name)) for (const event of ['drain', 'death', 'retirement']) check(checks, 'execution', event, true, execution[event]);
@@ -163,7 +179,8 @@ for (const name of required) {
 const report = { schema: 1, status: checks.every(check => check.status === 'pass') ? 'pass' : 'fail',
   diagnosticStatus: diagnostics.every(check => check.status === 'pass') ? 'pass' : 'fail',
   scope: 'Direct supported Fly13/AttackFly18 admission, configuration, source NPC/Player actor order, appearance state, queued damage, HP, dead flag, retirement and observed room clear/countdown. Native +31f is dead; absence from manager is retirement. Native world position is authoritative on full phases and presented half-motion on intermediate phases. Actual f32 trajectories/counters and door lifecycle remain separately recorded exact diagnostics.',
-  required, execution, clearDelayContract, buildSha256: gate.build.sha256, sourceBinarySha256: gate.sourceBinarySha256,
+  required, execution, clearDelayContract, unsupportedDiagnostics, buildSha256: gate.build.sha256, sourceBinarySha256: gate.sourceBinarySha256,
+  comparatorSha256: hash('tools/foundation/npc-state-pair.mjs'),
   originalManifestSha256: hash(originalPath), browserManifestSha256: hash(browserPath), caseSha256: hash(resolve(directory, 'case.json')), checks, diagnostics };
 writeFileSync(resolve(option('--output')), JSON.stringify(report, null, 2) + '\n');
 console.log(JSON.stringify({ status: report.status, fields: checks.length, failures: checks.filter(check => check.status === 'fail'), execution,

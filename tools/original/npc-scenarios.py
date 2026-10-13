@@ -65,7 +65,7 @@ def cohort():
         random += step(1) + [key(aim, False)]
     random += step(40, 'random-npc-cleared') + step(120, 'random-npc-clear-settled')
     selection = json.loads((ROOT / 'references/isaac/foundation/combat/npcs/random-selection.json').read_text())
-    random_case = case('paired-random-attackfly-clear', selection['code'], random, ['admission', 'clear', 'clear-delay'], True)
+    random_case = case('paired-random-attackfly-clear', selection['code'], random, ['admission', 'clear', 'clear-delay', 'door-clear'], True)
     random_case['randomSelection'] = selection
     regression = case('paired-fly-center-bomb', '3BMBMFTE', center, ['admission', 'clear'])
     regression['knownRegression'] = 'Natural center approach crosses unsupported authored grid kinds3/14; retain the exact original actor/HP and room-clear failure.'

@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { runPairedGate } from '../foundation/paired-game.mjs';
 
@@ -20,6 +20,11 @@ const sources = ['tools/e2e/npcs.mjs', 'tools/original/npc-scenarios.py', 'tools
 const hashes = () => Object.fromEntries(sources.map(path => [path, createHash('sha256').update(readFileSync(path)).digest('hex')]));
 const before = hashes();
 const scenarios = JSON.parse(execFileSync('python3', ['tools/original/npc-scenarios.py'], { encoding: 'utf8' }));
+const selected = option('--case', undefined);
+if (selected) {
+  scenarios.cases = scenarios.cases.filter(scenario => scenario.scenario.id === selected);
+  assert.equal(scenarios.cases.length, 1, `Unknown NPC case ${selected}`);
+}
 save(resolve(output, 'scenarios.json'), scenarios);
 const tapes = scenarios.cases.map((scenario, index) => {
   const path = resolve(output, `replay-${index}.json`);
@@ -31,17 +36,20 @@ const paired = await runPairedGate({ output: resolve(output, 'paired'), selected
 const cases = scenarios.cases.map((scenario, index) => {
   const directory = resolve(output, 'paired', `${String(index).padStart(2, '0')}-${scenario.scenario.id}`);
   const target = resolve(directory, 'npc-state.json');
+  rmSync(target, { force: true });
   const process = spawnSync('node', ['tools/foundation/npc-state-pair.mjs', '--case', directory,
     '--require', scenario.npcRequired.join(','), '--output', target], { encoding: 'utf8' });
   writeFileSync(resolve(directory, 'npc-state-output.txt'), process.stdout + process.stderr);
   let report;
   try { report = JSON.parse(readFileSync(target, 'utf8')); }
   catch { report = { status: 'fail', error: process.stderr || 'NPC comparator did not produce its required report' }; }
-  return { id: scenario.scenario.id, required: scenario.npcRequired, status: report.status,
+  return { id: scenario.scenario.id, required: scenario.npcRequired,
+    status: process.status === 0 && !process.signal && report.status === 'pass' ? 'pass' : 'fail',
+    comparatorExitCode: process.status, comparatorSignal: process.signal,
     fields: report.checks?.length || 0, failures: report.checks?.filter(check => check.status === 'fail').length || 0,
     diagnosticFields: report.diagnostics?.length || 0,
     diagnosticFailures: report.diagnostics?.filter(check => check.status === 'fail').length || 0,
-    execution: report.execution, error: report.error, report: target };
+    execution: report.execution, error: report.error || process.error?.message, report: target };
 });
 assert.deepEqual(hashes(), before, 'NPC cohort and comparison sources must remain stable');
 const report = { schema: 1, status: paired.status === 'pass' && cases.every(row => row.status === 'pass') ? 'pass' : 'fail',
