@@ -8,6 +8,7 @@ use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
 use std::collections::{BTreeMap, BTreeSet};
 pub mod actors;
+pub mod audio;
 pub mod bombs;
 pub mod combat;
 mod content;
@@ -263,6 +264,7 @@ pub struct State {
     pub initial_seed: u32,
     pub boot_epoch_seed: u32,
     pub boot_lifecycle: mt::BootState,
+    pub audio: audio::AudioState,
     pub run_seed_value: u32,
     pub stage: u32,
     pub stage_seed: u32,
@@ -305,6 +307,7 @@ pub enum Command {
     Key { code: String, down: bool },
     Text { text: String },
     Tick { count: u32 },
+    AudioVolume { sfx_volume: f32 },
 }
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 pub struct Game {
@@ -352,6 +355,7 @@ impl Game {
                 initial_seed,
                 boot_epoch_seed,
                 boot_lifecycle,
+                audio: audio::AudioState::default(),
                 run_seed_value: initial_seed,
                 stage: 1,
                 stage_seed: seed::stage1_seed(initial_seed),
@@ -419,7 +423,14 @@ impl Game {
         Ok(())
     }
     fn apply(&mut self, command: Command) -> Result<(), String> {
+        self.state.audio.begin_command();
         match command {
+            Command::AudioVolume { sfx_volume } => {
+                if !sfx_volume.is_finite() || !(0.0..=1.0).contains(&sfx_volume) {
+                    return Err("SFX volume must be finite and within 0..1".into());
+                }
+                self.state.audio.sfx_volume = sfx_volume;
+            }
             Command::Key { code, down } => {
                 if !matches!(
                     code.as_str(),
@@ -498,6 +509,7 @@ impl Game {
         Ok(())
     }
     fn key_press(&mut self, code: &str) -> Result<(), String> {
+        let previous_screen = self.state.screen;
         match self.state.screen {
             Screen::Title => {
                 if code == "Enter" {
@@ -611,6 +623,37 @@ impl Game {
                     }
                 }
             }
+        }
+        let menu_sound = if previous_screen == Screen::Character {
+            match code {
+                "ArrowLeft" | "KeyA" => Some(194),
+                "ArrowRight" | "KeyD" => Some(195),
+                _ => None,
+            }
+        } else {
+            None
+        };
+        let menu_sound = if code == "Enter"
+            && matches!(
+                (previous_screen, &self.state.screen),
+                (Screen::Title, Screen::Profile)
+                    | (Screen::Profile, Screen::Main)
+                    | (Screen::Main, Screen::Character)
+            ) {
+            Some(8)
+        } else {
+            menu_sound
+        };
+        if let Some(id) = menu_sound {
+            // Source forward confirmations and character-selection sounds.
+            // Public input is consumed in the following released system phase.
+            self.state.audio.pending.push(audio::SoundRequest {
+                id,
+                volume: 1.0,
+                delay: 0,
+                looping: false,
+                pitch: 1.0,
+            });
         }
         Ok(())
     }
@@ -789,7 +832,11 @@ impl Game {
         Ok(())
     }
     fn tick(&mut self) -> Result<(), String> {
+        let audio_counter = self.state.system_clock.system_counter;
         let phase = self.state.system_clock.advance()?;
+        self.state
+            .audio
+            .flush_pending(&mut self.state.boot_lifecycle.shared, audio_counter);
         let bomb_down = self.held("KeyE");
         let bomb_triggered = bomb_down && !self.state.bomb_action_was_down;
         self.state.bomb_action_was_down = bomb_down;

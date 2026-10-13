@@ -2,6 +2,7 @@ import './style.css';
 import { Engine, type Command } from './engine';
 import { Renderer } from './renderer';
 import { ReplayTrace } from './trace';
+import { AudioRuntime } from './audio';
 
 const canvas = document.querySelector<HTMLCanvasElement>('#game')!;
 const status = document.querySelector<HTMLElement>('#status')!;
@@ -15,7 +16,7 @@ async function boot() {
   };
   let initialSeed = randomSeed();
   const bootEpochSeed = Math.floor(Date.now() / 1000) >>> 0;
-  const [engine, renderer] = await Promise.all([Engine.create(initialSeed, bootEpochSeed), Renderer.load(canvas)]);
+  const [engine, renderer, audio] = await Promise.all([Engine.create(initialSeed, bootEpochSeed), Renderer.load(canvas), AudioRuntime.load()]);
   let automaticPaused = false;
   let lifecyclePaused = !document.hasFocus() || document.hidden;
   let accumulator = 0;
@@ -25,12 +26,14 @@ async function boot() {
   const dispatch = (command: Command, render = true) => {
     const state = engine.command(command);
     currentState = state;
+    audio.consume(state.audio.events);
     trace.record(command, state);
     if (render) renderer.draw(state);
     return state;
   };
   const supported = new Set(['Enter', 'Escape', 'Tab', 'Backspace', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyE']);
   function keyboard(event: KeyboardEvent, down: boolean) {
+    if (down && event.isTrusted) void audio.unlock().catch(console.error);
     if (down && (event.ctrlKey || event.altKey || event.metaKey)) return;
     const seedText = currentState.screen === 'seed' && /^[a-z0-9]$/i.test(event.key);
     if (!supported.has(event.code) && !seedText) return;
@@ -65,7 +68,10 @@ async function boot() {
     accumulator = 0;
     previous = performance.now();
   });
-  canvas.addEventListener('pointerdown', () => { canvas.focus(); });
+  canvas.addEventListener('pointerdown', (event) => {
+    canvas.focus();
+    if (event.isTrusted) void audio.unlock().catch(console.error);
+  });
   function frame(now: number) {
     const elapsed = Math.min(now - previous, 250);
     previous = now;
@@ -82,12 +88,14 @@ async function boot() {
   const game = {
     snapshot: () => engine.snapshot(),
     rendererTargets: () => renderer.debugTargets(),
+    audio: () => audio.snapshot(),
     command: (command: Command) => structuredClone(dispatch(command)),
     step: (count = 1) => structuredClone(dispatch({ type: 'tick', count })),
     pause: () => { automaticPaused = true; accumulator = 0; },
     resume: () => { automaticPaused = false; accumulator = 0; previous = performance.now(); },
     reset: (seed = randomSeed(), options: { trace?: boolean; bootEpochSeed?: number } = {}) => {
       currentState = engine.reset(seed, options.bootEpochSeed ?? 0);
+      audio.reset(options.trace === true);
       initialSeed = seed;
       trace = new ReplayTrace(initialSeed, options.trace === true, currentState);
       accumulator = 0;

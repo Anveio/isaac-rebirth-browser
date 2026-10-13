@@ -16,6 +16,16 @@ export interface BootLifecycle {
   shared: MtState; savedPlayerSeed: number; savedGridSeedSamples: GridSeedSample[];
   levelGridSeedSamples: GridSeedSample[]; backdropSeed: number; menuRunSeed: number; secretPoses: number[];
 }
+export interface SoundEvent {
+  sequence: number; id: number; sampleIndex: number; systemCounter: number; halfTick: number;
+  looping: boolean; pitch: number; gain: number;
+}
+export interface AudioState {
+  sfxVolume: number; nextSequence: number; events: SoundEvent[];
+  pending: { id: number; volume: number; delay: number; looping: boolean; pitch: number }[];
+  slots: Record<string, { lastTick: number | null; nextAllowed: number; lastVolume: number; loaded: boolean;
+    samples: { looping: boolean; gain: number; pitch: number }[] }>;
+}
 export interface Bomb {
   id: number; x: number; y: number;
   motion: {
@@ -93,6 +103,7 @@ export interface State {
   schema: 1; tickRate: 60; tick: number; menuAnimationTick: number; runTick: number; screen: Screen;
   titleAnimationFrame: number; menuFade: { active: boolean; alpha: number; color: [number, number, number, number] };
   systemClock: { systemCounter: number; interpolationEnabled: boolean };
+  audio: AudioState;
   profile: number; mainSelection: number; characterSelection: number; character: string; difficulty: string;
   seedText: string; seedValid: boolean; runSeed: string; initialSeed: number; runSeedValue: number; bootEpochSeed: number; bootLifecycle: BootLifecycle;
   stage: number; stageSeed: number; seededRun: boolean; achievementEligibility: boolean;
@@ -111,7 +122,7 @@ export interface State {
   bombPlacementCooldown: { remainingUpdates: number }; bombActionWasDown: boolean;
   runIntroduction: RunIntroduction; pauseMenu: PauseMenu;
 }
-export type Command = { type: "key"; code: string; down: boolean } | { type: "text"; text: string } | { type: "tick"; count: number };
+export type Command = { type: "key"; code: string; down: boolean } | { type: "text"; text: string } | { type: "tick"; count: number } | { type: "audioVolume"; sfx_volume: number };
 interface Exports extends WebAssembly.Exports {
   memory: WebAssembly.Memory; abi_version: () => number; reset: (initialSeed: number, bootEpochSeed: number) => number; request_ptr: (length: number) => number;
   command: () => number; snapshot_ptr: () => number; snapshot_len: () => number;
