@@ -1,0 +1,404 @@
+{
+  "schema": 1,
+  "status": "fail",
+  "scope": "Same-turn fresh original processes, subsequently frozen by exact source hashes, compared against a fresh actual DOM production browser. All1843 selected geometry/lifecycle fields match; exactly three required actual Chest50 admissions remain red. This post-capture diagnostic does not claim a passing fresh paired CI invocation.",
+  "runtimeCommit": "b371033",
+  "build": {
+    "sha256": "00a0f8ef1c3c6c2d1e475a77ae7a910d062c6923591c989b07846e539a89058d",
+    "files": 921,
+    "source": "/workspace/isaac-worktrees/floor/dist",
+    "scope": "Immutable snapshot of production build bytes; source/native replay equality is checked separately"
+  },
+  "selectedPhases": 1843,
+  "geometryLifecycleStatus": "pass",
+  "requiredFailureCount": 3,
+  "requiredCiExecution": "tools/e2e/large-rooms.mjs --count 2 launches both games fresh and ignores sourceManifest",
+  "report": {
+    "path": "/workspace/isaac-worktrees/floor/.cache/e2e/large-rooms/paired-source-frozen-final/report.json",
+    "sha256": "d6a190a5be312f4ec249b35e75c1d72ca8a8f309516c77cd9e8c6622685c210b"
+  },
+  "sourceBank": {
+    "path": "/workspace/isaac-worktrees/floor/.cache/e2e/large-rooms/fresh-native/retained-scenarios.json",
+    "sha256": "8a93a608e3d17a5389f4cc68bbaaa020d76c2b93d187abe3207d40d3d37bfb7b"
+  },
+  "postCaptureDiagnostic": {
+    "path": "/workspace/isaac-worktrees/floor/.cache/door-mechanics/large-source-frozen.mjs",
+    "sha256": "1a83840d54746c6dc79f972074c2a641062bcdd4d6c125913d705fde059e3bc2",
+    "ignoredResearchOnly": true,
+    "nativeHashGuard": true,
+    "fullSelectedBrowserSnapshotsRetained": true
+  },
+  "nativeStorageJournal": {
+    "path": "/workspace/isaac-worktrees/floor/.cache/e2e/large-rooms/lossless-native-storage.json",
+    "sha256": "bb62fea1007353955100e872ea6bc6a1a9ec5a13ae3fc58af6c8c1606df7700c",
+    "verifiedLossless": true
+  },
+  "duplicateAttempt": {
+    "directory": "/workspace/isaac-worktrees/floor/.cache/e2e/large-rooms/paired-geometry-final",
+    "stopReasonSha256": "7d96e0bec4ab1f55b3277812f8000f1937a973994f197e9a231c27e2e879a418",
+    "acceptedAsParityEvidence": false
+  },
+  "staticBuild": {
+    "log": "/workspace/isaac-worktrees/floor/.cache/door-mechanics/large-room-build.log",
+    "sha256": "1cd1488f88f8cdb213511862ccb1540521875af453d524677fef399fa63e8a8a",
+    "status": "pass"
+  },
+  "exclusions": [
+    "Default Style1 camera controller, large-room backdrop generation and rendered pixel parity",
+    "Chest5/50 constructor/animation/contact/drop behavior remains a required admission failure",
+    "Boss/shop and other special-door art/policy/traversal, hostile large-room lifecycle, other large shapes, later floors and exits"
+  ],
+  "cases": [
+    {
+      "seed": "WF82MYQ2",
+      "phases": 635,
+      "status": "fail",
+      "requiredFailures": [
+        {
+          "label": "large-enter-18",
+          "error": "AssertionError [ERR_ASSERTION]: large-enter-18:complete supported native admission multiset with subtype/seed/position\n+ actual - expected\n\n+ []\n- [\n-   '[5,50,1,1653328029,320,400]'\n- ]\n"
+        }
+      ],
+      "native": {
+        "path": "/workspace/isaac-worktrees/floor/.cache/e2e/large-rooms/fresh-native/WF82MYQ2/original/manifest.json",
+        "compressedPath": "/workspace/isaac-worktrees/floor/.cache/e2e/large-rooms/fresh-native/WF82MYQ2/original/manifest.json.gz",
+        "sha256": "70ea3a31181d0dda1e5f7b2d7f99969267bfe28898625098bda46b8f8cff0ba4",
+        "bytes": 86913174,
+        "compressedSha256": "7a6531826ebe640332351686f74abf6f77f86af3a18ba0088c25e1686fae6afa",
+        "compressedBytes": 7171842,
+        "mtimeNs": 1791904966968439374,
+        "verifiedLossless": true
+      },
+      "nativeInputTapeSha256": "e52f5517d6ea1925b0dc729d637182cfc7d0c63cd773d47ec98f98a93161e6cb",
+      "nativeLogSha256": "31fb1d2c1bb51204f7c26891f9cd9d45752757a998b43de1cdf0c3395ff47434",
+      "sourceProvenance": {
+        "nativeBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+        "manifestSha256": "70ea3a31181d0dda1e5f7b2d7f99969267bfe28898625098bda46b8f8cff0ba4",
+        "observations": 635,
+        "largeGeometry": {
+          "shape": [
+            13,
+            14
+          ],
+          "sourceGrid": [
+            15,
+            16
+          ],
+          "nativeBounds": [
+            [
+              60,
+              140
+            ],
+            [
+              580,
+              700
+            ]
+          ],
+          "lowerAndUpperPlanesExecuted": true,
+          "returnedToStartingDescriptor": true,
+          "mandatoryUnsupportedActor": "Pickup5/50"
+        }
+      },
+      "firstLargeAdmission": {
+        "label": "large-enter-18",
+        "playerWorldPosition": [
+          320.0,
+          160.0
+        ],
+        "template": {
+          "assetStage": 1,
+          "type": 1,
+          "variant": 354,
+          "name": "New Room",
+          "width": 13,
+          "height": 14,
+          "shapeIndex": 1
+        },
+        "nativeBounds": [
+          [
+            60.0,
+            140.0
+          ],
+          [
+            580.0,
+            700.0
+          ]
+        ]
+      },
+      "nativeChestTuples": [
+        [
+          5,
+          50,
+          1,
+          1653328029,
+          320.0,
+          400.0
+        ]
+      ],
+      "browserEvidence": {
+        "path": "/workspace/isaac-worktrees/floor/.cache/e2e/large-rooms/paired-source-frozen-final/WF82MYQ2/browser-states.json.gz",
+        "encoding": "gzip",
+        "rawBytes": 426276821,
+        "rawSha256": "87148b1e128bbad6704e5f3e58a12c49ba23d971562bcdac0e5c95dd11cd8232",
+        "archiveBytes": 24817972,
+        "archiveSha256": "d17215099aff9b0e1f9b0cd8e37f3ea0d46a9df41b6ddc690bf3cf1d17642c13",
+        "scope": "Every selected phase retains its full actual browser snapshot, alongside selected native comparisons, complete public commands and backend callbacks. The separate trace history caps are disclosed in traceHistory; decompress before replay or inspection"
+      },
+      "inputProvenance": {
+        "status": "pass",
+        "commands": 694,
+        "initialSeed": 2660432428,
+        "bootEpochSeed": 0,
+        "manualSeed": "WF82MYQ2"
+      },
+      "traceHistory": {
+        "truncated": true,
+        "inputTraceTruncated": false,
+        "stateHistoryTruncated": true,
+        "retainedStates": 246,
+        "stateEncodedBytes": 33509697,
+        "maxStateEncodedBytes": 33554432
+      },
+      "sourceExecutionScope": {
+        "mode": "same-turn-source-frozen-diagnostic",
+        "sourceManifest": "/workspace/isaac-worktrees/floor/.cache/e2e/large-rooms/fresh-native/WF82MYQ2/original/manifest.json",
+        "nativeManifestSha256": "70ea3a31181d0dda1e5f7b2d7f99969267bfe28898625098bda46b8f8cff0ba4",
+        "defaultCiRemainsFresh": true
+      }
+    },
+    {
+      "seed": "MT7N9MF3",
+      "phases": 572,
+      "status": "fail",
+      "requiredFailures": [
+        {
+          "label": "large-enter-settle-2",
+          "error": "AssertionError [ERR_ASSERTION]: large-enter-settle-2:complete supported native admission multiset with subtype/seed/position\n+ actual - expected\n\n+ []\n- [\n-   '[5,50,1,3784406233,320,400]'\n- ]\n"
+        }
+      ],
+      "native": {
+        "path": "/workspace/isaac-worktrees/floor/.cache/e2e/large-rooms/fresh-native/MT7N9MF3/original/manifest.json",
+        "compressedPath": "/workspace/isaac-worktrees/floor/.cache/e2e/large-rooms/fresh-native/MT7N9MF3/original/manifest.json.gz",
+        "sha256": "48b5ead097d921eff3e0a5fd5c362d0134a08727da9197b550aa115813a58c63",
+        "bytes": 66643056,
+        "compressedSha256": "905f7f73f70cc75bcf02013c02453218fa87b87fa7cf407b4c75911b75360479",
+        "compressedBytes": 5447795,
+        "mtimeNs": 1791905140724274437,
+        "verifiedLossless": true
+      },
+      "nativeInputTapeSha256": "638e4a2ab40773397d29e298a2a6e2a08cb8f18be1c99969c2792b108b4c13e2",
+      "nativeLogSha256": "6f46ce0c9f338346dd1e32848623263d3c28c3e087dafaddd4b239ae52ca8cd4",
+      "sourceProvenance": {
+        "nativeBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+        "manifestSha256": "48b5ead097d921eff3e0a5fd5c362d0134a08727da9197b550aa115813a58c63",
+        "observations": 572,
+        "largeGeometry": {
+          "shape": [
+            13,
+            14
+          ],
+          "sourceGrid": [
+            15,
+            16
+          ],
+          "nativeBounds": [
+            [
+              60,
+              140
+            ],
+            [
+              580,
+              700
+            ]
+          ],
+          "lowerAndUpperPlanesExecuted": true,
+          "returnedToStartingDescriptor": true,
+          "mandatoryUnsupportedActor": "Pickup5/50"
+        }
+      },
+      "firstLargeAdmission": {
+        "label": "large-enter-settle-2",
+        "playerWorldPosition": [
+          560.0,
+          280.0
+        ],
+        "template": {
+          "assetStage": 1,
+          "type": 1,
+          "variant": 354,
+          "name": "New Room",
+          "width": 13,
+          "height": 14,
+          "shapeIndex": 1
+        },
+        "nativeBounds": [
+          [
+            60.0,
+            140.0
+          ],
+          [
+            580.0,
+            700.0
+          ]
+        ]
+      },
+      "nativeChestTuples": [
+        [
+          5,
+          50,
+          1,
+          3784406233,
+          320.0,
+          400.0
+        ]
+      ],
+      "browserEvidence": {
+        "path": "/workspace/isaac-worktrees/floor/.cache/e2e/large-rooms/paired-source-frozen-final/MT7N9MF3/browser-states.json.gz",
+        "encoding": "gzip",
+        "rawBytes": 384252560,
+        "rawSha256": "f32055554dade7e50e57f5febc34bd77401d0f98817aa8b737cfdb39f90e68f5",
+        "archiveBytes": 22382506,
+        "archiveSha256": "a8b0105e44c27fed681fd048d5496f77389b34e20419ec09f0a894dae38b90e9",
+        "scope": "Every selected phase retains its full actual browser snapshot, alongside selected native comparisons, complete public commands and backend callbacks. The separate trace history caps are disclosed in traceHistory; decompress before replay or inspection"
+      },
+      "inputProvenance": {
+        "status": "pass",
+        "commands": 633,
+        "initialSeed": 1402318929,
+        "bootEpochSeed": 0,
+        "manualSeed": "MT7N9MF3"
+      },
+      "traceHistory": {
+        "truncated": true,
+        "inputTraceTruncated": false,
+        "stateHistoryTruncated": true,
+        "retainedStates": 256,
+        "stateEncodedBytes": 33473623,
+        "maxStateEncodedBytes": 33554432
+      },
+      "sourceExecutionScope": {
+        "mode": "same-turn-source-frozen-diagnostic",
+        "sourceManifest": "/workspace/isaac-worktrees/floor/.cache/e2e/large-rooms/fresh-native/MT7N9MF3/original/manifest.json",
+        "nativeManifestSha256": "48b5ead097d921eff3e0a5fd5c362d0134a08727da9197b550aa115813a58c63",
+        "defaultCiRemainsFresh": true
+      }
+    },
+    {
+      "seed": "C06MGLKV",
+      "phases": 636,
+      "status": "fail",
+      "requiredFailures": [
+        {
+          "label": "large-enter-settle-2",
+          "error": "AssertionError [ERR_ASSERTION]: large-enter-settle-2:complete supported native admission multiset with subtype/seed/position\n+ actual - expected\n\n+ []\n- [\n-   '[5,50,1,934774219,320,400]'\n- ]\n"
+        }
+      ],
+      "native": {
+        "path": "/workspace/isaac-worktrees/floor/.cache/e2e/large-rooms/fresh-native/C06MGLKV/original/manifest.json",
+        "compressedPath": "/workspace/isaac-worktrees/floor/.cache/e2e/large-rooms/fresh-native/C06MGLKV/original/manifest.json.gz",
+        "sha256": "c9fb07408b046a3b92d7b692844c12beb84e75279bbed5dc52289f9818ea8d99",
+        "bytes": 81751932,
+        "compressedSha256": "4cd54acbf15a4c8434df21f132b5466a1a5b95057d3c1726c7de28b32356fc5b",
+        "compressedBytes": 6717852,
+        "mtimeNs": 1791905371493393040,
+        "verifiedLossless": true
+      },
+      "nativeInputTapeSha256": "af3a2d2f42a7422f508c1f2bcf333770e52bb3511a3b3d5c72a8fc88f380d297",
+      "nativeLogSha256": "c245012245a166bfd7505b37c21c749009f837bdec45264a38c3095472b2e806",
+      "sourceProvenance": {
+        "nativeBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+        "manifestSha256": "c9fb07408b046a3b92d7b692844c12beb84e75279bbed5dc52289f9818ea8d99",
+        "observations": 636,
+        "largeGeometry": {
+          "shape": [
+            13,
+            14
+          ],
+          "sourceGrid": [
+            15,
+            16
+          ],
+          "nativeBounds": [
+            [
+              60,
+              140
+            ],
+            [
+              580,
+              700
+            ]
+          ],
+          "lowerAndUpperPlanesExecuted": true,
+          "returnedToStartingDescriptor": true,
+          "mandatoryUnsupportedActor": "Pickup5/50"
+        }
+      },
+      "firstLargeAdmission": {
+        "label": "large-enter-settle-2",
+        "playerWorldPosition": [
+          80.0,
+          560.0
+        ],
+        "template": {
+          "assetStage": 1,
+          "type": 1,
+          "variant": 354,
+          "name": "New Room",
+          "width": 13,
+          "height": 14,
+          "shapeIndex": 1
+        },
+        "nativeBounds": [
+          [
+            60.0,
+            140.0
+          ],
+          [
+            580.0,
+            700.0
+          ]
+        ]
+      },
+      "nativeChestTuples": [
+        [
+          5,
+          50,
+          1,
+          934774219,
+          320.0,
+          400.0
+        ]
+      ],
+      "browserEvidence": {
+        "path": "/workspace/isaac-worktrees/floor/.cache/e2e/large-rooms/paired-source-frozen-final/C06MGLKV/browser-states.json.gz",
+        "encoding": "gzip",
+        "rawBytes": 417766912,
+        "rawSha256": "b8727785b9e1b4ba69c65d4893e65e9eb3de84d9436e9fe26982379bc07893cd",
+        "archiveBytes": 24234275,
+        "archiveSha256": "99d4a4ebe5e801585a8bd12e322be36c5c274d10a00db8d42dacd779f56fc970",
+        "scope": "Every selected phase retains its full actual browser snapshot, alongside selected native comparisons, complete public commands and backend callbacks. The separate trace history caps are disclosed in traceHistory; decompress before replay or inspection"
+      },
+      "inputProvenance": {
+        "status": "pass",
+        "commands": 697,
+        "initialSeed": 441961684,
+        "bootEpochSeed": 0,
+        "manualSeed": "C06MGLKV"
+      },
+      "traceHistory": {
+        "truncated": true,
+        "inputTraceTruncated": false,
+        "stateHistoryTruncated": true,
+        "retainedStates": 256,
+        "stateEncodedBytes": 33493429,
+        "maxStateEncodedBytes": 33554432
+      },
+      "sourceExecutionScope": {
+        "mode": "same-turn-source-frozen-diagnostic",
+        "sourceManifest": "/workspace/isaac-worktrees/floor/.cache/e2e/large-rooms/fresh-native/C06MGLKV/original/manifest.json",
+        "nativeManifestSha256": "c9fb07408b046a3b92d7b692844c12beb84e75279bbed5dc52289f9818ea8d99",
+        "defaultCiRemainsFresh": true
+      }
+    }
+  ]
+}

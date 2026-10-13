@@ -46,8 +46,8 @@ impl Mul<f32> for WorldVector {
 }
 
 pub(crate) const WORLD_SCALE: f64 = 0.65;
-const WORLD_ORIGIN_X: f64 = 32.0;
-const WORLD_ORIGIN_Y: f64 = -46.0;
+pub(crate) const WORLD_ORIGIN_X: f64 = 32.0;
+pub(crate) const WORLD_ORIGIN_Y: f64 = -46.0;
 const FORWARD_RETENTION: f32 = 0.880_340_8;
 // The source damps the perpendicular component first, then the recombined
 // velocity. Precombining these factors loses a native f32 rounding step.

@@ -1,4 +1,4 @@
-//! Ordinary 1x1 doorway admission and descriptor-owned room persistence.
+//! Ordinary 13x7/13x14 doorway admission and descriptor-owned room persistence.
 //! The public floor graph and authored doors are runtime inputs; source maps
 //! and captured room/actor geometry never enter the production route.
 use crate::{motion::WorldVector, phase::Phase, Player, Room, State};
@@ -35,6 +35,27 @@ fn world(player: &Player) -> WorldVector {
     WorldVector {
         x: ((player.x - 32.0) / 0.65) as f32,
         y: ((player.y + 46.0) / 0.65) as f32,
+    }
+}
+
+/// The generated floor grid identifies the precise doorway cell along a
+/// rectangular room edge. Extended slots use the second cell on that edge;
+/// selecting only the first reciprocal direction loses those connections.
+fn slot_cell(descriptor: &crate::floor::Descriptor, slot: u8) -> (i32, i32) {
+    let x = (descriptor.grid_index % 13) as i32;
+    let y = (descriptor.grid_index / 13) as i32;
+    let width = i32::from(descriptor.template.width / 13);
+    let height = i32::from(descriptor.template.height / 7);
+    match slot {
+        0 => (x - 1, y),
+        1 => (x, y - 1),
+        2 => (x + width, y),
+        3 => (x, y + height),
+        4 => (x - 1, y + 1),
+        5 => (x + 1, y - 1),
+        6 => (x + width, y + 1),
+        7 => (x + 1, y + height),
+        _ => unreachable!("authored rectangle has eight door slots"),
     }
 }
 
@@ -78,11 +99,13 @@ pub(crate) fn check_departure(state: &mut State) {
         }
         let target_room = door.target_room as usize;
         let destination = &state.floor.descriptors[target_room];
-        // Large-room camera/backdrop and combat locks need their owning source
-        // routes. Preserve those descriptors without claiming this small route.
-        if !matches!(destination.template.room_type, 1 | 4 | 7 | 8 | 10 | 12)
-            || (destination.template.width, destination.template.height) != (13, 7)
-        {
+        let ordinary = matches!(destination.template.room_type, 1 | 4 | 7 | 8 | 10 | 12)
+            && (destination.template.width, destination.template.height) == (13, 7);
+        let tall = destination.template.room_type == 1
+            && (destination.template.width, destination.template.height) == (13, 14);
+        // This leaf admits ordinary tall-room geometry/lifecycle. Default
+        // camera/backdrop, other large shapes and actors keep separate gates.
+        if !ordinary && !tall {
             continue;
         }
         let normal = outward(door.slot);
@@ -92,13 +115,20 @@ pub(crate) fn check_departure(state: &mut State) {
             continue;
         }
         let opposite = (door.slot + 2) % 4;
+        let destination_cell = slot_cell(&state.floor.descriptors[state.current_room], door.slot);
+        let source_cell = (
+            destination_cell.0 - normal.x as i32,
+            destination_cell.1 - normal.y as i32,
+        );
         let Some(target_slot) =
             destination
                 .neighbors
                 .iter()
                 .enumerate()
                 .find_map(|(slot, value)| {
-                    (*value == Some(state.current_room) && slot % 4 == usize::from(opposite))
+                    (*value == Some(state.current_room)
+                        && slot % 4 == usize::from(opposite)
+                        && slot_cell(destination, slot as u8) == source_cell)
                         .then_some(slot as u8)
                 })
         else {

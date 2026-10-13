@@ -29,7 +29,9 @@ await writeFile(join(output, 'scenarios.json'), JSON.stringify(bank, null, 2) + 
 const production = await startProductionServer();
 const browser = await chromium.launch({ headless: true, ...browserLaunchOptions() });
 const report = { schema: 1, status: 'running', skipped: 0, selected: bank.cases.length,
-  scope: bank.contract === 'keeper-idle'
+  scope: bank.contract === 'large-geometry'
+    ? 'Fresh Isaac enters an authored ordinary13x14 room through public movement, follows both radius-inset vertical boundary planes and returns. Exact full/intermediate player motion, native dimensions/bounds, complete authored door indices/positions/endpoints, source descriptor/spawn/visited/minimap joins and supported Rock state are required. Actual Chest5/50 admission remains a mandatory unsupported-actor regression. Source camera offsets are retained as diagnostics; camera/backdrop rendering and chest callbacks remain separate.'
+    : bank.contract === 'keeper-idle'
     ? 'Fresh Isaac enters real13x7 secret rooms through public bomb/movement inputs. Actual NPC17/1 constructor and anchored idle compare complete identity/seed/subtype, authored collision/health/countability, source state/flags/anchor/color, static and animated Guy clips, every full/intermediate/frozen phase and room/player/door/minimap joins. Damage/drop callbacks and other Keeper variants remain separate.'
     : bank.contract === 'curse'
     ? 'Fresh ordinary Isaac, authored 13x7 no-hostile curse-room entry and exit; exact native half-heart charges, immunity/door collision/admission phases, descriptor/spawn identity and returned room persistence. Flight/items, other door styles, hostile callbacks and complete pixels remain separate.'
@@ -40,7 +42,9 @@ const report = { schema: 1, status: 'running', skipped: 0, selected: bank.cases.
         : bank.contract === 'key'
           ? 'Fresh Isaac, no-hostile13x7 natural secret keys and ordinary library lock: denied zero-key approach, actual collection/spending, full-only unlock/collision/SFX156, admission/return/revisit, exact player/HP/immunity, complete door/display/minimap/descriptor joins. Actual Keeper17 constructor admission remains required; golden/double locks, library items and pixels remain separate.'
         : 'Ordinary style0 13x7 doorway and no-hostile return; mandatory hostile-room lock/return regression; exact f32 player/descriptor phases, complete authored group accounting, supported actor admission and ordinary Rock metadata, visited-room restoration. NPC behavior, other grids/doors, large-room camera and complete pixels remain separate.',
-  exclusions: bank.contract === 'keeper-idle'
+  exclusions: bank.contract === 'large-geometry'
+    ? ['Default Style1 camera controller, large-room backdrop generation and rendered pixel parity', 'Chest5/50 constructor/animation/contact/drop behavior remains a required admission failure', 'Boss/shop and other special-door art/policy/traversal, hostile large-room lifecycle, other large shapes, later floors and exits']
+    : bank.contract === 'keeper-idle'
     ? ['Keeper damage/death/drop callbacks and actor mutation persistence', 'Other Keeper variants, hostile secret policy, other room shapes and floor exits', 'Complete sprite/backdrop/pixel parity and total shared MT consumer alignment']
     : bank.contract === 'secret'
     ? ['Keeper17 constructor and regular keys are concrete actors; Keeper damage/drop callbacks remain separate', 'Later-stage surprise substitution and failed-open saved transitions', 'Actor/item/curse policies and door FX/animation pixels', 'Other room shapes and floor exits']
@@ -123,6 +127,54 @@ try {
         phaseAssert.deepEqual(state.floor.grid, source.grid, `${label}:floor topology`);
         phaseAssert.deepEqual([state.player.x, state.player.y, state.player.vx, state.player.vy],
           [actor.position[0] * .65 + 32, actor.position[1] * .65 - 46, actor.velocity[0] * .65, actor.velocity[1] * .65], `${label}:source f32 motion projection`);
+        if (scenario.doorContract === 'large-geometry') {
+          const nativeRoom = observed.contents.room;
+          phaseAssert.deepEqual([state.room.grid?.width, state.room.grid?.height, state.room.grid?.cells.length],
+            [nativeRoom.gridWidth, nativeRoom.gridHeight, nativeRoom.gridWidth * nativeRoom.gridHeight], `${label}:complete native padded room dimensions`);
+          phaseAssert.deepEqual([state.room.left, state.room.right, state.room.top, state.room.bottom],
+            [(nativeRoom.boundsMin[0] + actor.collisionRadius) * .65 + 32,
+              (nativeRoom.boundsMax[0] - actor.collisionRadius) * .65 + 32,
+              (nativeRoom.boundsMin[1] + actor.collisionRadius) * .65 - 46,
+              (nativeRoom.boundsMax[1] - actor.collisionRadius) * .65 - 46], `${label}:authored radius-inset room bounds`);
+          phaseAssert.equal(state.player.hp, actor.redHp, `${label}:native tall-room route health`);
+          phaseAssert.equal(state.damageCooldown, actor.damageCountdown, `${label}:native tall-room transition dispatch`);
+          const sourceDoors = observed.contents.grid.filter(cell => cell.type === 16);
+          const actualDoorIndices = state.room.grid?.cells.flatMap((cell, index) => cell.entity?.kind === 16 ? [index] : []) || [];
+          phaseAssert.deepEqual(actualDoorIndices, sourceDoors.map(door => door.index).sort((a, b) => a - b), `${label}:complete authored tall-room door grid objects`);
+          const authoredDoors = provenance.authoredDoors[source.currentDescriptorIndex];
+          const connected = authoredDoors.filter(door => descriptor.doorMask & (1 << door.slot));
+          phaseAssert.deepEqual(sourceDoors.map(door => door.index).sort((a, b) => a - b),
+            connected.map(door => door.index).sort((a, b) => a - b), `${label}:independent complete source-connected authored door set`);
+          phaseAssert.deepEqual(state.room.appearance.doors.map(door => door.slot).sort((a, b) => a - b),
+            connected.map(door => door.slot).sort((a, b) => a - b), `${label}:complete authored tall-room door appearances`);
+          const width = descriptor.template.width / 13, height = descriptor.template.height / 7;
+          const neighborOffsets = [-1, -13, width, 13 * height, 12, -12, width + 13, 13 * height + 1];
+          for (const door of sourceDoors) {
+            const authored = authoredDoors.find(candidate => candidate.index === door.index);
+            phaseAssert.ok(authored, `${label}:native door must have one independently authored boundary coordinate`);
+            if (!authored) continue;
+            const actual = state.room.grid?.cells[door.index]?.entity;
+            phaseAssert.deepEqual([actual?.kind, actual?.variant, actual?.state, actual?.collisionClass],
+              [door.type, door.variant, door.state, door.collisionClass], `${label}:native tall-room door variant/state/class`);
+            const target = source.grid[descriptor.gridIndex + neighborOffsets[authored.slot]];
+            phaseAssert.ok(Number.isInteger(target), `${label}:authored extended slot has a source floor neighbor`);
+            const types = [descriptor.template.type, source.descriptors[target]?.template.type];
+            const asset = types.some(type => [7, 8].includes(type)) ? 'gfx/grid/door_08_holeinwall.anm2'
+              : types.includes(10) ? 'gfx/grid/door_04_selfsacrificeroomdoor.anm2'
+              : types.includes(4) ? 'gfx/grid/door_02_treasureroomdoor.anm2' : 'gfx/grid/door_01_normaldoor.anm2';
+            const appearance = state.room.appearance.doors.find(candidate => candidate.slot === authored.slot);
+            phaseAssert.deepEqual([appearance?.targetRoom, appearance?.worldPosition],
+              [target, {x: authored.position[0], y: authored.position[1]}], `${label}:independent door endpoint/world position`);
+            if (types.every(type => [1, 4, 7, 8, 10, 12].includes(type)))
+              phaseAssert.equal(appearance?.asset, asset, `${label}:source-supported door endpoint asset identity`);
+          }
+          phaseAssert.deepEqual(state.roomDisplayFlags, source.descriptors.map(room => room.displayFlags), `${label}:complete tall-room source display flags`);
+          const cells = source.descriptors.filter(room => room.displayFlags & 1).map(room => ({
+            x: room.gridIndex % 13 - 6, y: Math.floor(room.gridIndex / 13) - 6,
+            visibility: room.index === source.currentDescriptorIndex ? 'current' : room.visited ? 'visited' : 'unvisited',
+          }));
+          phaseAssert.deepEqual(state.minimap.cells, cells, `${label}:complete tall-room descriptor minimap routing`);
+        }
         if (['curse', 'free-treasure', 'secret', 'key'].includes(scenario.doorContract)) {
           const includeHidden = ['secret', 'key'].includes(scenario.doorContract);
           phaseAssert.equal(state.player.hp, actor.redHp, `${label}:native door-route health state`);
@@ -234,6 +286,7 @@ try {
             || (scenario.doorContract === 'free-treasure' && entity.type === 33);
           const supported = entity => rawMetadata(entity)
             || (['secret', 'key'].includes(scenario.doorContract) && entity.type === 17 && entity.variant === 1)
+            || (scenario.doorContract === 'large-geometry' && entity.type === 5 && entity.variant === 50)
             || (entity.type === 5 && ({10: [1, 2, 5], 20: [1, 2, 3, 4], 30: [1, 3], 40: [1, 2]})[entity.variant]?.includes(entity.subtype));
           const tuple = entity => [entity.type, entity.variant, entity.subtype, entity.spawnSeed,
             ...(Array.isArray(entity.position) ? entity.position : [entity.position.x, entity.position.y])];
@@ -272,6 +325,11 @@ try {
           combatClear: state.room.combatClear, nativeCombatClear: descriptor.combatClear,
           damageCooldown: state.damageCooldown, nativePosition: actor.position,
           nativeVelocity: actor.velocity, nativeHp: actor.redHp, nativeDamageCountdown: actor.damageCountdown,
+          roomGeometry: scenario.doorContract === 'large-geometry' ? {
+            actualBounds: [state.room.left, state.room.right, state.room.top, state.room.bottom],
+            actualGridDimensions: [state.room.grid?.width, state.room.grid?.height], source: observed.contents.room,
+            nativeChests: observed.contents.entities.filter(entity => entity.type === 5 && entity.variant === 50),
+          } : undefined,
           roomDisplayFlags: state.roomDisplayFlags, minimap: state.minimap,
           nativeRoomDisplayFlags: source.descriptors.map(room => room.displayFlags),
           doors: state.room.appearance.doors,
