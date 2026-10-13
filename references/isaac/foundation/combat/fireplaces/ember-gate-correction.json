@@ -4,7 +4,7 @@
   "runtimeHeadFrozen": "c6811a04e2e23b85181cee7643525546c42fbe38",
   "artifactFrozen": "3dbd3de19a114636752a8202cf54dca3a77f0acc1eed42fe5df63a973de45c23",
   "previousComparatorSha256": "593811c3e07948f1de1bed15ad8710ae7874e5195b6193ac133b6b78003f1bd7",
-  "newComparatorSha256": "d34a2e620bcda2d910f21faa332bfa966b17c73e2cc1637db285942e26c9a686",
+  "newComparatorSha256": "0b83a281603f9d013db43e651cbe5fd945e8aa65cfa901232068dabdfa0e27d4",
   "reviewFinding": "Aggregate Ember count plus independent full lifetime checks omitted fast freeze/motion/playing, full birth fence and paired birth/lifetime/retirement linkage. Old comparator preserved verbatim; there are no fresh Fire captures or old accepted live reports to rewrite.",
   "correction": [
     "Consecutive own-actor frozen TTL/divisor/frame/playing/dead/active/velocity in unchanged full counter",

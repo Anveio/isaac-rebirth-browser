@@ -52,7 +52,7 @@
   "ownedSources": {
     "engine/src/fireplaces.rs": "ee57af805efca30237f7669c481a0fa70f7be137c88a4fa67292d8348ae7a6a3",
     "tools/e2e/fireplaces.mjs": "79121b4f8848da67b615a8c8426e82110b54d92f6963c1ee8c7419174614f7b5",
-    "tools/foundation/fireplace-state-pair.mjs": "d34a2e620bcda2d910f21faa332bfa966b17c73e2cc1637db285942e26c9a686",
+    "tools/foundation/fireplace-state-pair.mjs": "0b83a281603f9d013db43e651cbe5fd945e8aa65cfa901232068dabdfa0e27d4",
     "tools/original/fireplace-scenarios.py": "a0b96d7e2fb9c17a0ed7a60fdbe66134fcef5d78493c35e95db5aa53a5120451",
     "tools/original/foundation-combat-observe.py": "57519cb5a5adc5d5215c4a6e833923fae70ac8a3876e82874d1c6cb081a7b8f7",
     "web/npc-data.json": "dbd77756d4ba32f95d0498483aacfe3335d1acb28b4176fb85c98e944ab92921"

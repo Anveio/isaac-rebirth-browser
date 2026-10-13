@@ -39,6 +39,7 @@ const prior = { native: new Map(), browser: new Map() };
 const priorEmbers = { native: new Map(), browser: new Map() };
 const emberBirths = { native: new Map(), browser: new Map() };
 const parentOrdinals = { native: new Map(), browser: new Map() };
+const previousWorldCount = { native: undefined, browser: undefined };
 const emberCoverage = Object.fromEntries(['native', 'browser'].map(game => [game,
   { fastFreeze: 0, fastMotion: 0, fullMotion: 0, birthFence: 0, retirement: 0 }]));
 let presentation = 0, previousCapturePresentation, previousRoom, segment = 0;
@@ -257,7 +258,12 @@ for (const action of replay.pairedTape) {
         for (const field of ['ttl', 'divisor', 'frame', 'playing', 'dead', 'active', 'velocity'])
           check(checks, label, `${game}.ember${actor.id}.fastFrozen.${field}`, previous.actor[field], actor[field]);
       }
-      let ground = phase === 1 ? actor.position : previous?.ground;
+      //An odd system presentation can still be a frozen pause-clear or room
+      //transition phase. Only an observed full Game pass or an unadvanced
+      //full-phase birth establishes ground; a frozen predicted pose does not.
+      let ground = previous?.ground;
+      if (phase === 1 && !world.paused &&
+        (world.count > previousWorldCount[game] || (!previous && actor.divisor === 0))) ground = actor.position;
       const activeFull = previous && dense && !world.paused && phase === 1 && world.count === previous.count + 1;
       if (activeFull && previous.ground && previous.actor.active) {
         emberCoverage[game].fullMotion += 1;
@@ -282,6 +288,7 @@ for (const action of replay.pairedTape) {
       if (link) currentLinked[game].set(link, actor);
       priorEmbers[game].set(actor.id, { count: world.count, actor, ground, activeFullSeen, link });
     }
+    previousWorldCount[game] = world.count;
   }
   for (const link of new Set([...currentLinked.native.keys(), ...currentLinked.browser.keys()])) {
     const native = currentLinked.native.get(link), browser = currentLinked.browser.get(link);
