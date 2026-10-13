@@ -17,7 +17,7 @@ import sys
 import time
 
 ROOT = Path(__file__).resolve().parents[2]
-spec = importlib.util.spec_from_file_location('floor_source_contracts', ROOT / 'tools/original/foundation-layout-verify.py')
+spec = importlib.util.spec_from_file_location('floor_source_contracts', ROOT / 'tools/original/foundation-floor-source.py')
 source = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(source)
 FIELDS = ('gridIndex', 'roomInitSeed', 'decorationSeed', 'spawnSeed', 'followingSeed', 'doorMask')
@@ -63,7 +63,9 @@ def compare(case, generator, catalogs):
     source.validate_case(case, catalogs, allow_non_labyrinth_curses=True)
     observed = case['observation']
     public = observed['actualPublicLog']
-    predicted = source.run_kernel(generator, {'stageSeed': public['stageSeed']})
+    process = subprocess.run([str(generator.resolve())], input=json.dumps({'stageSeed': public['stageSeed']}),
+        text=True, capture_output=True, timeout=20, check=True)
+    predicted = json.loads(process.stdout)
     native_descriptors = descriptors(observed['descriptors'])
     generated_descriptors = descriptors(predicted['descriptors'])
     loops = re.findall(r'^Map Generated in (\d+) Loops$', case['originalLogText'], re.MULTILINE)
