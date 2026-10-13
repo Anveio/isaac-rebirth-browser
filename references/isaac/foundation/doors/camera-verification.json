@@ -181,7 +181,14 @@
           "sourceSha256": "2802f158b1802dfd730d663e0642541a39d4b40e5898af6183b70568c03e04c5",
           "browserSha256": "90930fc9ed7b7ccefceefa96757a9267c482b585f4a292cafd87cf3f80134f88"
         }
-      ]
+      ],
+      "nativeHistoryScope": {
+        "seed": "WF82MYQ2",
+        "allPhases": 635,
+        "completeHistoryPhases": 571,
+        "firstHistoryLabel": "large-enter-18",
+        "lastHistoryLabel": "large-return-13"
+      }
     },
     {
       "seed": "MT7N9MF3",
@@ -291,7 +298,14 @@
           "sourceSha256": "90366a6c647e0180337f84dca82eb07214d2595323a2846045d12b1135c547d7",
           "browserSha256": "ce78b9656e7a8ae001b31cfc6aa9b67e9b0e7d81166f596af080b4658df3f983"
         }
-      ]
+      ],
+      "nativeHistoryScope": {
+        "seed": "MT7N9MF3",
+        "allPhases": 572,
+        "completeHistoryPhases": 455,
+        "firstHistoryLabel": "large-enter-settle-2",
+        "lastHistoryLabel": "large-return-16"
+      }
     },
     {
       "seed": "C06MGLKV",
@@ -401,7 +415,14 @@
           "sourceSha256": "fa5d1236949486ebbf52195aaa0d9b0e07d3c7431328ab4463aafec65305eec4",
           "browserSha256": "3cc4cec0d2ae1db84616607277d5b03963ff4f1050b81498ba98665b14f789a8"
         }
-      ]
+      ],
+      "nativeHistoryScope": {
+        "seed": "C06MGLKV",
+        "allPhases": 636,
+        "completeHistoryPhases": 519,
+        "firstHistoryLabel": "large-enter-settle-2",
+        "lastHistoryLabel": "large-return-16"
+      }
     }
   ],
   "interiorDiagnostics": [
@@ -467,6 +488,9 @@
     "Special player/item focus, co-op, shooting lookahead, camera shake, hostile camera behavior and alternate CameraStyle2 are not accepted by this fresh no-shooting/no-hostile tape",
     "Chest contact/loot, motion and rare51/360 replacements remain unsupported; historical missing normal Chest admissions stay retained",
     "Chest persistent RNG30 initialization is statically mapped; this source observer does not read its four words",
-    "Boss/shop and other special-door art/policy/traversal, hostile large-room lifecycle, other large shapes, later floors and exits"
-  ]
+    "Boss/shop and other special-door art/policy/traversal, hostile large-room lifecycle, other large shapes, later floors and exits",
+    "Complete camera histories in starting/returned15x9 rooms were not observed; only their scalar scroll/bounds/endpoints are accepted here"
+  ],
+  "completeNativeHistoryPhases": 1545,
+  "historyAcceptanceScope": "All1843 phases require numeric geometry/motion/camera bounds/endpoints; complete native history readback exists only on the tall-room portion, not starting/returned15x9 rooms"
 }

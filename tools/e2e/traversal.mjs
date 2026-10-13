@@ -132,6 +132,7 @@ try {
         if (scenario.doorContract === 'large-geometry') {
           const nativeRoom = observed.contents.room;
           cameraComparison = compareCamera(phaseAssert, state, observed.contents, label);
+          if (cameraComparison?.completeHistoryCompared) row.cameraHistoryPhases = (row.cameraHistoryPhases || 0) + 1;
           if (['large-admitted', 'lower-boundary-settle-30', 'upper-boundary-settle-30'].includes(label)) {
             try {
               (row.cameraFrames ||= []).push(await captureCameraVisibility(page, native, label, observed.contents, directory));
