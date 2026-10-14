@@ -468,6 +468,27 @@ engine work in M1–M5 does not.
       - the "ISAAC VS GLUTTONY" streak and the boss HP bar (presentation);
       - Super Gluttony 49.1 needs lob projectiles 48d5c0;
       - laser render quads are approximated.
+  - Dingle 261.0 (boss, first boss-route user): **about 60 minutes
+    wall-clock** from opening `ai_dingle` to the first paired boss-route run.
+    The boss-route harness itself (router library, recorder, original
+    validation) took about 2 hours on top.
+    - About 15 minutes of source reading, done by a research agent in
+      parallel with the harness work.
+    - About 30 minutes of code. New shared pieces: clip events from anm2
+      triggers, `Birth::Npc` for mid-room spawns, the shared
+      `find_free_position`, `Occupancy` modes and the runtime grid spawn
+      (`GridEntity::spawn`, poop Init).
+    - One live `entity-dingle` run of about 20 minutes with two contrived
+      routes.
+    - Verified: route, boss-room arrival, appear schedule, idle counter and
+      the state-3 timing match the original exactly. Both cases then diverge
+      at the first shared-MT consumer: a co-spawned Dip's direction, or the
+      Idle attack roll (#162).
+    - Open:
+      - Spit, whistle, slide and the poop drop are unverified against the
+        original until #162;
+      - runtime poops draw no spritesheet roll yet (grid admission PR);
+      - the boss death sequence goes through the generic NPC death.
 - [x] Room shapes (coordinator priority 2): one generic admission gate
   (`traversal::admitted_shape`) opens ordinary type-1 rooms in all four
   authored shapes (13x7, 13x14, 26x7, 26x14). Geometry, eight door slots and
