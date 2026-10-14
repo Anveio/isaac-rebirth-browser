@@ -595,6 +595,8 @@ impl Game {
                 if !matches!(
                     code.as_str(),
                     "Enter"
+                        | "Space"
+                        | "KeyQ"
                         | "Escape"
                         | "Tab"
                         | "Backspace"
