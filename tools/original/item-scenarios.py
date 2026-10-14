@@ -101,6 +101,7 @@ def main():
     parser.add_argument('--validate-original', type=Path)
     parser.add_argument('--acquisition', action='store_true')
     parser.add_argument('--stat-cache', action='store_true')
+    parser.add_argument('--damage-fire-delay', action='store_true')
     args = parser.parse_args()
     if args.validate_original:
         verifier = load('item_transport', 'tools/original/foundation-clock-verify.py')
@@ -115,12 +116,16 @@ def main():
         return 0
     if not 2 <= args.count <= 4:
         raise ValueError('Pedestal gate requires 2..4 newly recorded OS-random cases')
-    if args.stat_cache:
+    if args.stat_cache and args.damage_fire_delay:
+        raise ValueError('Choose one complete cache cohort')
+    if args.stat_cache or args.damage_fire_delay:
         if args.count != 2:
             raise ValueError('Stat cache requires four contrived, two retained and two fresh OS-random cases')
-        fixtures = json.loads((ROOT / 'references/isaac/foundation/player-stat-cache/contrived.json').read_text())
+        directory = 'player-damage-fire-delay' if args.damage_fire_delay else 'player-stat-cache'
+        fixtures = json.loads((ROOT / f'references/isaac/foundation/{directory}/contrived.json').read_text())
+        expected = {(1, 0), (1, 1), (4, 0), (4, 1)} if args.damage_fire_delay else {(14, 0), (14, 1), (143, 0), (143, 1)}
         if len(fixtures['cases']) != 4 or {(case['expectedItemId'], case['delay']) for case in fixtures['cases']} \
-                != {(14, 0), (14, 1), (143, 0), (143, 1)}:
+                != expected:
             raise ValueError('Both admission phases of each treasure-eligible mapped passive are required')
         cases = []
         for fixture in fixtures['cases']:
@@ -138,7 +143,8 @@ def main():
         random = random_cases(args.count, True)
         for case in random:
             case['actions'] = stat_route(case['delay'])
-        print(json.dumps({'schema': 1, 'bootEpochSeed': 1700000000, 'mode': 'stat-cache',
+        print(json.dumps({'schema': 1, 'bootEpochSeed': 1700000000,
+                          'mode': 'damage-fire-delay' if args.damage_fire_delay else 'stat-cache',
                           'source': 'Declared public acquisition/motion/shooting; fresh OS discovery never filters item identity',
                           'cases': cases + random}))
         return 0

@@ -52,6 +52,12 @@ def observe(pid, context):
                 return value
             def u64(address): return struct.unpack('<Q', read(address, 8))[0]
             def u32(address): return struct.unpack('<I', read(address, 4))[0]
+            def clip_name(pointer):
+                if not pointer: return None
+                text = u64(pointer)
+                count = u64(text - 24)
+                if count > 128: raise ValueError('Unexpected animation name length')
+                return read(text, count).decode('ascii')
             def entity(address):
                 raw = read(address, 0x7d4)
                 pair = lambda offset: list(struct.unpack_from('<ff', raw, offset))
@@ -78,6 +84,22 @@ def observe(pid, context):
                     raise ValueError('Unexpected collision sample list')
                 samples = read(begin, sample_count * 8) if sample_count else b''
                 result['gridCollisionSamples'] = [list(struct.unpack_from('<ff', samples, i * 8)) for i in range(sample_count)]
+                if result['type'] == 2:
+                    if struct.unpack_from('<Q', raw, 0)[0] != 0x671270:
+                        raise ValueError('Unexpected original Tear class')
+                    # Current manager pointer membership is the owner of this
+                    # list. Entity+31f is a separate death flag, not that list.
+                    result['managerMember'] = True
+                    result['dead'] = bool(raw[0x31f])
+                    more = read(address + 0x7d4, 0x6c)
+                    result['shotOrdinal'] = struct.unpack_from('<I', more, 0x64)[0]
+                    result['baseDamage'] = struct.unpack_from('<f', more, 0x68)[0]
+                    result['tearScale'] = struct.unpack_from('<f', more, 0x10)[0]
+                    parent = struct.unpack_from('<Q', raw, 0x498)[0]
+                    result['tearOwner'] = ({'type': u32(parent + 0x10), 'variant': u32(parent + 0x14),
+                                           'sequenceId': u32(parent + 8)} if parent else None)
+                    actor = address + 0x28
+                    result['animation'] = clip_name(u64(actor + 0x18))
                 if result['type'] == 5:
                     # GenericInit441cb0/441cbf owns these actual persistent
                     # RNG30 words. Read them directly, independently of the
@@ -88,12 +110,6 @@ def observe(pid, context):
                     result['collectionDelay'] = struct.unpack_from('<i', more, 0xc)[0]
                     result['pickupCooldown'] = struct.unpack_from('<i', more, 0x10)[0]
                     actor = address + 0x28
-                    def clip_name(pointer):
-                        if not pointer: return None
-                        text = u64(pointer)
-                        count = u64(text - 24)
-                        if count > 128: raise ValueError('Unexpected animation name length')
-                        return read(text, count).decode('ascii')
                     result['animation'] = clip_name(u64(actor + 0x18))
                     result['animationFrame'] = struct.unpack('<f', read(actor + 0x120, 4))[0]
                     result['animationPlaying'] = bool(read(actor + 0x124, 1)[0])

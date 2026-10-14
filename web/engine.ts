@@ -8,10 +8,12 @@ export interface Player {
   facing: Direction; bodyFacing: Direction; walkFrame: number; headFrame: number; shooting: boolean; shootingLock: number;
   renderOffset: { x: number; y: number }; controlsEnabled: boolean;
   eye: "negative" | "positive";
+  shotsFired: number;
 }
 export interface Tear {
   id: number; x: number; y: number; vx: number; vy: number; age: number;
   spawnSeed: number; collisionRadius: number; gridContact: boolean;
+  shotOrdinal: number; collisionDamage: number; baseDamage: number; scale: number; animationTier: number;
   motion: {
     position: {x: number; y: number}; presentedPosition: {x: number; y: number};
     velocity: {x: number; y: number}; height: number; fallingSpeed: number;

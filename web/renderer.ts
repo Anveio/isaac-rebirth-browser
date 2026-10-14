@@ -114,7 +114,7 @@ export class Renderer {
             particle.presentedPosition.x * 0.65 + 32, particle.presentedPosition.y * 0.65 - 46, particle.animationClock, { scale: 0.65 });
       this.drawPlayer(ctx, state);
       for (const tear of state.tears)
-        this.assets.draw(ctx, TEAR, "RegularTear6", Math.round(tear.x * 2) / 2, Math.round(tear.y * 2) / 2, tear.age);
+        this.assets.draw(ctx, TEAR, `RegularTear${tear.animationTier}`, Math.round(tear.x * 2) / 2, Math.round(tear.y * 2) / 2, tear.age);
       for (const impact of state.impacts)
         this.assets.draw(ctx, "gfx/1000.012_tear poof_small.anm2", "Poof", impact.x, impact.y, impact.age);
       for (const bomb of state.bombs)

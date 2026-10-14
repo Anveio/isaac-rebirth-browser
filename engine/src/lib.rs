@@ -98,6 +98,8 @@ pub struct Player {
     /// Actual Player+7d4 input gate, distinct from Entity+31d visibility.
     pub controls_enabled: bool,
     pub eye: projectiles::Eye,
+    /// Actual Player+c84, independent of manager tear handles.
+    pub shots_fired: u32,
     pub render_offset: Point,
 }
 impl Player {
@@ -119,6 +121,7 @@ impl Player {
             shooting_lock: 0,
             controls_enabled: true,
             eye: projectiles::Eye::Positive,
+            shots_fired: 0,
             // Authored sprite roots and shadow centers are one logical pixel
             // above the physical ground/light anchor in public GL submissions.
             render_offset: Point { x: 0.0, y: -1.0 },
@@ -135,6 +138,13 @@ pub struct Tear {
     pub vy: f64,
     pub age: u32,
     pub spawn_seed: u32,
+    /// Actual Tear+838, copied from Player+c84 before its increment.
+    pub shot_ordinal: u32,
+    /// Source setter5411e0 writes collision48c and base83c at birth.
+    pub collision_damage: f32,
+    pub base_damage: f32,
+    pub scale: f32,
+    pub animation_tier: u8,
     pub collision_radius: f32,
     pub grid_contact: bool,
     pub motion: projectiles::TearMotion,
@@ -1551,10 +1561,17 @@ impl Game {
                 .tears
                 .iter()
                 .filter(|tear| tear.motion.lifetime == projectiles::Lifetime::Alive)
-                .map(|tear| (tear.id, tear.motion, tear.collision_radius))
+                .map(|tear| {
+                    (
+                        tear.id,
+                        tear.motion,
+                        tear.collision_radius,
+                        tear.collision_damage,
+                    )
+                })
                 .collect();
-            for (id, mut motion, radius) in tears {
-                if npcs::tear_hit(&mut self.state, &mut motion, radius, id, 3.5)?.is_some() {
+            for (id, mut motion, radius, damage) in tears {
+                if npcs::tear_hit(&mut self.state, &mut motion, radius, id, damage)?.is_some() {
                     if let Some(tear) = self.state.tears.iter_mut().find(|tear| tear.id == id) {
                         motion.lifetime = projectiles::Lifetime::Dying;
                         tear.motion = motion;
@@ -2085,6 +2102,8 @@ impl Game {
                     },
                 );
                 let final_uniform = self.state.boot_lifecycle.shared.uniform();
+                let damage = self.state.player_stats.damage;
+                let scale = projectiles::scale(damage)?;
                 let mut tear = Tear {
                     id: self.state.next_tear,
                     x: 0.0,
@@ -2093,7 +2112,12 @@ impl Game {
                     vy: 0.0,
                     age: 0,
                     spawn_seed,
-                    collision_radius: projectiles::collision_radius(3.5, 8.0)?,
+                    shot_ordinal: self.state.player.shots_fired,
+                    collision_damage: damage,
+                    base_damage: damage,
+                    scale,
+                    animation_tier: projectiles::regular_animation_tier(scale)?,
+                    collision_radius: projectiles::collision_radius(scale, 8.0)?,
                     grid_contact: false,
                     motion: projectiles::TearMotion::spawn(
                         origin,
@@ -2108,6 +2132,7 @@ impl Game {
                     kind: actors::ActorKind::Tear,
                     id: self.state.next_tear,
                 })?;
+                self.state.player.shots_fired = self.state.player.shots_fired.wrapping_add(1);
                 self.state.next_tear = self
                     .state
                     .next_tear

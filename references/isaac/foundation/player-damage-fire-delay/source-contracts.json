@@ -1,0 +1,137 @@
+{
+  "schema": 1,
+  "scope": "Source-derived preparation for normal Isaac/regular weapon cache1/2 and birth-owned ordinary tear fields. No build or original/browser gameplay acceptance yet. Native observations are comparison outputs only.",
+  "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "functions": [
+    {
+      "address": "0x511f10",
+      "bytes": 16344,
+      "sha256": "8eff2fba2271885f321af5c5757e0ee68eabba755ea4f195c1ee9da89aee2086"
+    },
+    {
+      "address": "0x50d090",
+      "bytes": 3444,
+      "sha256": "38494bad07257850c91a4047ce68cfb5f89bb48627dae41bfb175f4f8c2cc1d7"
+    },
+    {
+      "address": "0x5177f0",
+      "bytes": 839,
+      "sha256": "ad305965a6a2655add44649bde0ed24f1e00648eb294432283f7d635b4826810"
+    },
+    {
+      "address": "0x5411e0",
+      "bytes": 17,
+      "sha256": "a5c66585ce1aeff7e9b9a1c477028f681edc9d79d46a4efa05c7b18d726bf8ef"
+    },
+    {
+      "address": "0x541ff0",
+      "bytes": 52,
+      "sha256": "a9610a3f439a250c9439a9bd63e7db2addfcef0c5490a744f890c7bef0aea0c5"
+    },
+    {
+      "address": "0x5418e0",
+      "bytes": 1804,
+      "sha256": "79e04f648948a51dcd96692133d98cfdae537273ef6a0c8af1b69a602fb990f5"
+    },
+    {
+      "address": "0x519350",
+      "bytes": 3170,
+      "sha256": "71493af21a7b08cde60511500ca09f9ec0a2dea5749c2ae3e4a157fd9fe7f02b"
+    },
+    {
+      "address": "0x545e80",
+      "bytes": 3083,
+      "sha256": "d9f0a0139f0baba29c9dd1dea005f6d64b6a1d6d4697ff38e09591b18ba786e2"
+    },
+    {
+      "address": "0x447fc0",
+      "bytes": 121,
+      "sha256": "8d72105ecb29e5db988e512138b24c86ca9f015f0e9130f8279668ae1ae2f6bf"
+    }
+  ],
+  "tables": [
+    {
+      "address": "0x670da0",
+      "bytes": 8,
+      "sha256": "42b215bc5c10e8a6453db424667de747070305824b7e67e63df3aca31215898f"
+    },
+    {
+      "address": "0x670960",
+      "bytes": 44,
+      "sha256": "a883af4b4a6966d570f0a4cb049ca165f900bca15880d43613ba8765c1185f99"
+    },
+    {
+      "address": "0x671320",
+      "bytes": 52,
+      "sha256": "66d54a9a32d84aedcf23f71dbde24933e885aee7f2958aa0db205b40525c7fdd"
+    },
+    {
+      "address": "0x66c1c0",
+      "bytes": 4,
+      "sha256": "0d66bd808e9247acb560fe33efaa62ad6f11ee6f85cc4f61bd17673263de04ee"
+    },
+    {
+      "address": "0x670d98",
+      "bytes": 8,
+      "sha256": "b2f8d4de234f76837319db57cb439e64fbfe6344e60f116528d64a5382756acb"
+    }
+  ],
+  "dispatchOrder": [
+    2,
+    4,
+    1,
+    8,
+    16,
+    512
+  ],
+  "fireDelay": {
+    "SadOnion1": "512354/512373 convert permanent1 and temporary1 separately to f32, then add and multiply .7 at5123d3. q=f32(f32(1.3*u)+1), max0, f32sqrt, f32(16-f32(6*sqrt)); for u<=0 subtractf32(6*u). Lower bound5 at512562..578 precedes later modifiers. Final51279c truncates to i32 and clamps at least1.",
+    "AntiGravity222": "Actual permanent Has222 at512666..512685 subtracts2 once after the lower bound. Temporary222 is ignored here. Only cache2 is mapped; tear flag32/held tear update and every other requested owner remain pending."
+  },
+  "damage": "Cricket Head4 permanent count contributes f32(count*.5) at513628/513644. f32(f32(1.2*tier)+1) max0 then f64sqrt*exactdouble3.5 rounds to f32; normalIsaac character factor1. HasCollectible4 at513a20 multiplies1.5 once regardless of copies. Final minimum.5. Temporary4 is ignored by these selected permanent/presence branches; its public producer and repeated copies have no new live proof.",
+  "tearBirth": {
+    "damage": "50d0b7 copies PlayerC88 into parameter38;51791c calls setter5411e0 to store independently owned collision48c and base83c. NPC contact5467d8 reads that tear48c; existing FIFO admission consumes the amount without consulting later Player cache.",
+    "scale": "50d13f f32(damage*.04+.6) is added in f64 to sqrt(damage)*exactdouble670d98=double(f32(.15)), then rounded to f32.541ff0 clamps scale at f32(.01), writes7e4/7e8 and calls5418e0. Normal radius is authored8*that scale.",
+    "clip": "5418e0 starts regular tier1 for scale<=.3; otherwise tier2 compares each next671320 threshold plus f32(.05), stopping at tier13. Actual nonregular variants/flag overrides remain separate owners.",
+    "ordinal": "PlayerInit519881 resets C84=0. FireTear5179c9..5179db copies preincrement C84 into Tear838, then increments PlayerC84. Player count and manager handles are separate production fields. Only normal single-Player regular tears are admitted as this join scope.",
+    "parent": "517974 calls447fc0 with actual Player; linked pointer498 is separately observed and joined through the native Player sequence identity. Multiple/familiar/alternate-weapon producers are not silently associated."
+  },
+  "observationOwners": {
+    "death": "Tear31f is the actual death flag; the legacy observer removed alias remains unchanged.",
+    "manager": "Typed Tear rows come directly from current room manager pointer array68/count74, including dying rows. This is separate from31f and from raw allocated-pool scans. All old stat-cache ordinal/cardinality assertions remain unchanged.",
+    "required": "New mode requires exact PlayerC84/cooldown/head timer, all cached fields, Player XY/VXY, manager count and birth ordinal sets, unique ordinals/linked Player, death, collision/base damage, scale/radius/clip and birth-joined stored VXY; every prior pool/count/queue/grant/public-input contract stays blocking."
+  },
+  "cohort": {
+    "cases": 8,
+    "contrived": [
+      [
+        1,
+        0
+      ],
+      [
+        1,
+        1
+      ],
+      [
+        4,
+        0
+      ],
+      [
+        4,
+        1
+      ]
+    ],
+    "retainedCodes": [
+      "R74QYMYS",
+      "VRQPT844"
+    ],
+    "freshUnfilteredOsCases": 2,
+    "discovery": "Only declared treasure-room route geometry is filtered, never item identity or outcomes. Contrived original selection/grant is independently required."
+  },
+  "unaccepted": [
+    "Current build and all fresh original/browser fields are pending. No historical f613/93330 or latest-main acceptance is inherited.",
+    "Public scaled NPC damage/contact/overkill after Cricket grant remains unaccepted; the amount route is source-derived.",
+    "Temporary/repeated-copy acquisition, other damage/delay callbacks, trinkets/pills/characters, alternate/multi/familiar weapons and damage-changing flags.",
+    "AntiGravity flag32/held tears, TinyPlanet orbital/piercing/range owners, shared MT and full pixel/background/lifecycle parity."
+  ]
+}

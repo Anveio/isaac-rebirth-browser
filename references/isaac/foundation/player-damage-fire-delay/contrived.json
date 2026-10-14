@@ -1,0 +1,10 @@
+{
+  "schema": 1,
+  "scope": "Historical port-only public-route predictions. Fresh original selection and later grant of Sad Onion1 and Cricket Head4 at both phase offsets are required; no original or current-build acceptance is inferred from these fixtures.",
+  "cases": [
+    {"code": "B91XK7GP", "seedValue": 19209, "expectedItemId": 1, "delay": 0},
+    {"code": "B91XK7GP", "seedValue": 19209, "expectedItemId": 1, "delay": 1},
+    {"code": "B91X1BV8", "seedValue": 17530, "expectedItemId": 4, "delay": 0},
+    {"code": "B91X1BV8", "seedValue": 17530, "expectedItemId": 4, "delay": 1}
+  ]
+}
