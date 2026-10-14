@@ -30,7 +30,7 @@ const manifest = JSON.parse(await readFile(join(BUNDLE, 'manifest.json'), 'utf8'
 
 // Mirror the Artifact host: the page fragment is wrapped in a document skeleton
 // and every other file is served next to it.
-const TYPES = { '.js': 'text/javascript', '.bin': 'application/octet-stream', '.ogg': 'audio/ogg', '.html': 'text/html' };
+const TYPES = { '.js': 'text/javascript', '.wasm': 'application/wasm', '.ogg': 'audio/ogg', '.html': 'text/html' };
 const page = await readFile(join(BUNDLE, 'index.html'), 'utf8');
 const server = createServer(async (request, response) => {
   const path = decodeURIComponent(new URL(request.url, 'http://local').pathname);

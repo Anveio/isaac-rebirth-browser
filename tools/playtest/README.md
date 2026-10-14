@@ -18,9 +18,10 @@ limits: page ≤16MB, files ≤15MB, ≤511 files, ≤64MB per publish call and
 ≤256MB per version.
 
 - SFX WAVs, PNGs and the WASM engine (~30MB, ~920 files) are concatenated into
-  three ~12MB packs. The inline `loader.js` fetches them, then serves the
-  original bytes through `fetch()` and `<img>.src`, so the runtime's pinned
-  byte checks see the authored assets.
+  three ~12MB packs, named `.wasm` because Artifacts serve only web media
+  types. The inline `loader.js` fetches them, then serves the original bytes
+  through `fetch()` and `<img>.src`, so the runtime's pinned byte checks see
+  the authored assets.
 - The 83 music tracks stay the authored Vorbis files (~183MB). Re-encoding
   was rejected: decoders disagree on Vorbis end trimming and the runtime pins
   each track's bytes and decoded length. The bundle is ~216MB in 88 files, so

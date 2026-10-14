@@ -95,7 +95,8 @@ let current = null;
 for (const name of packed) {
   const bytes = await readFile(join(viteOut, 'assets', name));
   if (!current || current.size + bytes.length > PACK_BYTES) {
-    current = { name: `assets/pack-${packs.length}.bin`, parts: [], size: 0 };
+    // Artifacts serve only web media types; .wasm carries opaque bytes.
+    current = { name: `assets/pack-${packs.length}.wasm`, parts: [], size: 0 };
     packs.push(current);
   }
   const type = TYPES[name.split('.').pop()];
