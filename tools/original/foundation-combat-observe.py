@@ -204,6 +204,10 @@ def observe(pid, context):
 
             game = u64(0x8ecd30)
             system = u64(0x8ed560)
+            # HUD at Game+2b578: boss-bar fill +61894 (-1 hidden), flash +61898.
+            hud = game + 0x2b578
+            report['bossBar'] = {'fill': struct.unpack('<f', read(hud + 0x61894, 4))[0],
+                'flash': struct.unpack('<i', read(hud + 0x61898, 4))[0]}
             # Actual Level is embedded at Game+0; its flags are distinct from
             # the retained boss-family Game+10eae0 word.
             report['levelProgress'] = {'flags': u64(game + 0x81b0),

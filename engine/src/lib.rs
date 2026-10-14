@@ -1772,7 +1772,6 @@ impl Game {
                         self.count_updated_room_actor(actor, &mut counted);
                     }
                     self.state.room.manager_counts.finish_full(counted);
-                    self.update_boss_bar();
                     familiars::paint_background_effects(&mut self.state)?;
                     blood_effects::clear_retired_links(&mut self.state);
                     pickups::full_grid_contacts(&mut self.state)?;
@@ -1852,6 +1851,7 @@ impl Game {
                 self.count_updated_room_actor(actor, &mut counted);
             }
             self.state.room.manager_counts.finish_full(counted);
+            self.update_boss_bar();
         } else if phase == phase::Phase::Interpolate {
             let mut index = 0;
             while let Some(actor) = self.state.actor_scheduler.get(index) {

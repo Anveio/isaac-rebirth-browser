@@ -49,6 +49,8 @@ export function roomRows(rows, source, actual) {
   check(rows, 'room.grid', [source.room.gridWidth, source.room.gridHeight], actual.room.grid && [actual.room.grid.width, actual.room.grid.height]);
   check(rows, 'room.combatClear', source.room.combatClear, actual.room.combatClear);
   check(rows, 'room.combatClearCountdown', source.room.combatClearCountdown, actual.room.combatClearCountdown);
+  check(rows, 'hud.bossBarFill', f32(source.bossBar?.fill), f32(actual.bossBar?.fill));
+  check(rows, 'hud.bossBarFlash', source.bossBar?.flash, actual.bossBar?.flash);
   for (const field of ['countablePending', 'countableCurrent', 'bossPending', 'bossCurrent'])
     check(rows, `manager.${field}`, source.room[field], actual.room.managerCounts?.[field]);
   for (const door of source.grid.filter(cell => cell.type === 16)) {
