@@ -28,7 +28,7 @@
     "caller": "4fb885 invokes4f2d10 after IsFinished(empty) with active31e true and BEFORE common Base447190/motion",
     "retire": "4f2d10 boss103d invokes Room5c8430 at4f2d61 then tailcalls actual v+48Remove; callback must not return from ordinary Base/motion tail",
     "flags": "5c849d OR0x100000 into sole MonstroState.entity_flags (actual Entity318)",
-    "count": "5c84c1..5c84ca actual Room2490 decrement; return until final boss. Replace current recomputation from live NPCs with actual callback ownership."
+    "count": "5c84c1..5c84ca decrements actual Room2490 and returns until final boss. Native Room5d1423/5d1454 separately refreshes2490 from signed manager e4+e8 BEFORE454df0. This leaf preserves admitted single-Monstro2490 and its actual callback decrement; complete manager-counter lifecycle is pending. The removed post-full NPC-vector recount was at the wrong native boundary."
   },
   "ordinaryFinalHeart": {
     "scope": "Fresh normal Isaac, ordinary uncolored Monstro20/0/0 in actualRoomtype5, difficulty0, no special collectible/trinket branches",

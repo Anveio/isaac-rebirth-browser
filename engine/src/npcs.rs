@@ -386,7 +386,9 @@ pub fn admit_room_combat(state: &mut State) {
 }
 
 pub fn advance_room_clear(state: &mut State) {
-    // Actual boss count2490 is decremented only by Room5c8430, before Remove.
+    // The final callback decrements2490 before Remove. Native Room5d1454
+    // also refreshes it from manager e4+e8 BEFORE the full actor pass; do not
+    // replace that boundary with a post-retirement NPC-vector recount.
     if state
         .room
         .npcs
