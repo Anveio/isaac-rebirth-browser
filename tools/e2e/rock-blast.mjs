@@ -12,7 +12,7 @@ await runRoomFrameSuite({
   scope: 'Ordinary Rock admission, movement blockage, bomb placement/detonation, sorted destruction/link repair, marker aging and passage through former cells. Tinted Rock admission/drops remain blocking regressions; cosmetic effect actors, shared MT alignment and pixels are out of scope.',
 
   compare({ track, ...frame }) {
-    const rocks = compareRocks(frame);
+    const rocks = compareRocks(frame, { marker: 'pathCost' });
     track.admitted = Math.max(track.admitted ?? 0, rocks.length);
     track.destroyed = Math.max(track.destroyed ?? 0, rocks.filter(rock => rock.state === 2).length);
   },

@@ -178,6 +178,8 @@ def observe(pid, context):
             report['grid'] = cells
             report['gridSelectors'] = list(struct.unpack('<' + 'I' * (width * height),
                 read(room + 0xe98, width * height * 4)))
+            report['pathCosts'] = list(struct.unpack('<' + 'i' * 448,
+                read(room + 0xe98, 0x700)))
             manager = room + 0x15d0
             count = u32(manager + 0x74)
             if count > 512: raise ValueError('Active entity budget exceeded')

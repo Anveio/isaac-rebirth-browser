@@ -11,10 +11,11 @@ pub fn advance_markers(state: &mut State) {
     if !state.game_update_count.is_multiple_of(3) {
         return;
     }
-    if let Some(grid) = &mut state.room.grid {
-        for cell in &mut grid.cells {
-            if (1..=900).contains(&cell.selector) {
-                cell.selector = cell.selector.saturating_sub(100);
+    if let Some(costs) = &mut state.room.path_costs {
+        let count = state.room.grid.as_ref().map_or(0, |grid| grid.cells.len());
+        for cost in &mut costs.entries_mut()[..count] {
+            if (1..=900).contains(cost) {
+                *cost = (*cost - 100).max(0);
             }
         }
     }
@@ -61,7 +62,12 @@ pub fn destroy(state: &mut State, origin: WorldVector, radius: f32) -> Result<()
         let rock = grid.cells[index].entity.as_mut().expect("selected rock");
         rock.state = 2;
         rock.collision_class = 0;
-        grid.cells[index].selector = 900;
+        state
+            .room
+            .path_costs
+            .as_mut()
+            .ok_or("Rock destruction requires source Room.Init path costs")?
+            .store(index, 900)?;
         for &(offset, frame) in repairs {
             let Some(neighbor) = index.checked_add_signed(offset) else {
                 continue;
