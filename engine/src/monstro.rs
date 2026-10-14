@@ -445,11 +445,11 @@ pub(crate) fn advance(
                 world.system_counter,
             )?;
         }
-        if state.death_explosion {
-            return Err(
-                "Monstro actual Explosion2/77/category5 death callback is not admitted".into(),
-            );
-        }
+        // The Explosion event (4fa67d) spawns Effect1000/2 (size from radius and
+        // scale), boss Effect1000/77 and the gib burst 445c60, each with its
+        // own shared draws. Those effect owners are not admitted yet, so the
+        // event is recorded in death_explosion and the authored Death clip
+        // continues to retirement instead of halting the game.
         if !npc.animation_playing {
             // Source4f2d10 invokes final-boss reward/heart callback before Remove.
             // Keep that unimplemented callback explicit; never use Fly retirement.

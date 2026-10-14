@@ -33,6 +33,18 @@ pub struct BossScene {
     pub animation_playing: bool,
 }
 
+/// Authored room shapes whose geometry, doors and CameraStyle1 scrolling are
+/// shape-generic: every 1x1 ordinary-family room, and the tall (13x14), wide
+/// (26x7) and large (26x14) ordinary type-1 rooms. Their actors follow
+/// ordinary admission; special large rooms keep their own gates.
+fn admitted_shape(template: &crate::room_templates::AuthoredTemplate) -> bool {
+    match (template.width, template.height) {
+        (13, 7) => matches!(template.room_type, 1 | 4 | 7 | 8 | 10 | 12),
+        (13, 14) | (26, 7) | (26, 14) => template.room_type == 1,
+        _ => false,
+    }
+}
+
 /// A 1x1 boss room (type 5) or miniboss room (type 6) is admitted once a
 /// registered family constructs its authored boss. Boss rooms also need a
 /// bossportraits.xml presentation for their VS scene; minibosses enter without
@@ -161,13 +173,7 @@ pub(crate) fn check_departure(state: &mut State) {
         }
         let target_room = door.target_room as usize;
         let destination = &state.floor.descriptors[target_room];
-        let ordinary = matches!(destination.template.room_type, 1 | 4 | 7 | 8 | 10 | 12)
-            && (destination.template.width, destination.template.height) == (13, 7);
-        let tall = destination.template.room_type == 1
-            && (destination.template.width, destination.template.height) == (13, 14);
-        // This leaf admits ordinary tall-room geometry/lifecycle. Default
-        // camera/backdrop, other large shapes and actors keep separate gates.
-        if !ordinary && !tall && !supported_boss(destination) {
+        if !admitted_shape(&destination.template) && !supported_boss(destination) {
             continue;
         }
         let normal = outward(door.slot);

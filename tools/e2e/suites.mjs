@@ -30,7 +30,8 @@ const traversal = e2e('traversal');
 const pass = (flag, values) => values.flatMap(value => [flag, String(value)]);
 const entitySuite = spec => suite(`entity-${spec.name}`, statePair, [
   '--scenario-helper', helper('entity-scenarios.py'),
-  ...pass('--helper-arg', ['--type', spec.type, '--variant', spec.variant, '--count', spec.count,
+  ...pass('--helper-arg', [...(spec.type === undefined ? [] : ['--type', spec.type, '--variant', spec.variant]),
+    ...(spec.shape ? ['--shape', spec.shape.join('x')] : []), '--count', spec.count,
     ...spec.contrived.flatMap(route => ['--contrived', route])]),
   '--comparator', 'tools/foundation/entity-state-pair.mjs', ...pass('--comparator-arg', ['--entity', spec.name]),
   '--native-frame-timeout', '120',
@@ -43,9 +44,10 @@ export const SUITES = [
     'Recorded paired runs that previously regressed'),
   suite('floor', 'tools/foundation/floor-e2e.mjs', ['--count', '2'],
     'Complete Basement floor generation: descriptors, topology, retries and starting doors'),
-  suite('boot-mt', e2e('boot-mt'), ['--count', '4'], 'Boot-time shared MT state through title and menus'),
-  suite('menu-mt', e2e('boot-mt'), ['--menu-navigation', '--count', '4'], 'Menu navigation draws from the shared MT stream'),
-  suite('seed-dialog-mt', e2e('boot-mt'), ['--seed-dialog', '--count', '4'], 'Seed dialog entry and its MT consumption'),
+  // One fresh original per case grades the title-only, menu-navigation and
+  // seed-dialog browser modes (--modes boot,menu,seed-dialog).
+  suite('boot-mt', e2e('boot-mt'), ['--count', '4'],
+    'Boot-time shared MT state at Title, through menu navigation and through seed dialog entry/reopening'),
   // --ambient-grid also enables the level-descriptor, saved-game and grid-record
   // checks; the tapes and cases are identical with or without them.
   suite('ordinary-run', e2e('ordinary-run'), ['--ambient-grid', '--count', '4'],
