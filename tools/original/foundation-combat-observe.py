@@ -77,7 +77,10 @@ def observe(pid, context):
                     'entityCollisionClass': struct.unpack_from('<I', raw, 0x344)[0],
                     'spawnSeed': struct.unpack_from('<I', raw, 0x7d0)[0],
                     'birthGameUpdate': struct.unpack_from('<I', raw, 0x42c)[0],
-                    'spriteFlipX': bool(raw[0x2fc])}
+                    'spriteFlipX': bool(raw[0x2fc]), 'spriteFlipY': bool(raw[0x2fd]),
+                    'spriteScale': pair(0x2c4),
+                    'spriteTint': list(struct.unpack_from('<ffff', raw, 0x2d0)),
+                    'spriteOffsets': list(struct.unpack_from('<fff', raw, 0x2e0))}
                 definition = struct.unpack_from('<Q', raw, 0x40)[0]
                 text_pointer = u64(definition) if definition else 0
                 length = u64(text_pointer - 24) if text_pointer else 0
@@ -127,12 +130,17 @@ def observe(pid, context):
                     result['projectileParameter2'] = struct.unpack_from('<f', more, 0x18)[0]
                     result['projectileFullUpdates'] = struct.unpack_from('<I', more, 0x1c)[0]
                     result['projectileFlags'] = struct.unpack_from('<I', more, 0x20)[0]
-                if result['type'] == 1000 and result['variant'] == 66:
+                if result['type'] == 1000 and result['variant'] in (7, 15, 66):
                     more = read(address + 0x7d4, 0x24)
                     result['effectLifetimeDivisor'] = struct.unpack_from('<i', more, 0)[0]
                     result['effectTimeToLive'] = struct.unpack_from('<i', more, 0x1c)[0]
+                    result['effectRaw7f4'] = struct.unpack_from('<i', more, 0x20)[0]
+                    result['effectRaw7f8'] = struct.unpack('<f', read(address + 0x7f8, 4))[0]
                     result['effectBirthGameUpdate'] = struct.unpack_from('<I', raw, 0x42c)[0]
                     result['parentType'], result['parentVariant'] = struct.unpack_from('<II', raw, 0x1c)
+                    parent = struct.unpack_from('<Q', raw, 0x498)[0]
+                    result['effectParent'] = ({'type': u32(parent + 0x10), 'variant': u32(parent + 0x14),
+                        'spawnSeed': u32(parent + 0x7d0), 'sequenceId': u32(parent + 8)} if parent else None)
                 if struct.unpack_from('<Q', raw, 0)[0] == 0x66ef30:
                     more = read(address + 0xf50, 0x138)
                     result['npcState'] = struct.unpack_from('<I', more, 0)[0]
@@ -146,6 +154,7 @@ def observe(pid, context):
                         result['fireCountdown'] = struct.unpack_from('<i', more, 0x18)[0]
                     result['npcTarget'] = pair(0x440)
                     result['npcWanderVelocity'] = list(struct.unpack_from('<ff', more, 0x28))
+                    result['npcGridFeedbackVelocity'] = list(struct.unpack_from('<ff', more, 0x30))
                     result['canShutDoors'] = bool(more[0xec])
                     result['boss'] = bool(more[0xed])
                 return result
@@ -197,6 +206,11 @@ def observe(pid, context):
             if count > 512: raise ValueError('Active entity budget exceeded')
             pointers = struct.unpack('<' + 'Q' * count, read(u64(manager + 0x68), count * 8)) if count else []
             report['entities'] = [entity(pointer) for pointer in pointers if pointer]
+            render_count = u32(manager + 0x8c)
+            if render_count > 512: raise ValueError('Render-sorted entity budget exceeded')
+            render_pointers = struct.unpack('<' + 'Q' * render_count,
+                read(u64(manager + 0x80), render_count * 8)) if render_count else []
+            report['renderSortedEntities'] = [entity(pointer) for pointer in render_pointers if pointer]
             player_begin, player_end = u64(game + 0xa148), u64(game + 0xa150)
             count = (player_end - player_begin) // 8
             if not 0 <= count <= 4 or player_end < player_begin or (player_end - player_begin) % 8:

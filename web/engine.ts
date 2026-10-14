@@ -21,7 +21,8 @@ export interface Tear {
 }
 export interface ActorSprite {
   animation: string; frame: number; playing: boolean; speed: number; scale: {x: number; y: number};
-  offset: {x: number; y: number}; flipX: boolean;
+  offset: {x: number; y: number}; flipX: boolean; flipY: boolean;
+  tint: [number, number, number, number]; offsets: [number, number, number];
 }
 export interface Familiar {
   id: number; variant: number; subtype: number; spawnSeed: number; owner: ActorRef; parent: ActorRef;
@@ -119,6 +120,7 @@ export interface Pickup {
   chest: {rng: ItemRng; gridCollisionClass: number; entityCollisionClass: number; price: number; cooldown: number;
     lootBirths: {variant: number; spawnSeed: number; position: {x: number; y: number}; velocity: {x: number; y: number}; spriteScaleMultiplier: number | null}[]} | null;
   regularCollision: {gridCollisionClass: number; entityCollisionClass: number} | null;
+  regularRng: ItemRng | null;
   spritesheetItemId: number;
   presentedPosition: {x: number; y: number}; anchorPosition: {x: number; y: number};
   velocity: {x: number; y: number}; configuredFriction: number; currentFriction: number; collisionMass: number;
@@ -162,6 +164,10 @@ export interface Room {
   pathCosts: number[] | null;
   spawns: {tintedRockIndex: number; finalSpawnState: number; selectors: {groupIndex: number; gridIndex: number; category: "entity" | "grid"; type: number; variant: number; subtype: number; position: {x: number; y: number}; groupSeed: number; spawnSeed: number}[]} | null;
   pickups: Pickup[];
+  backgroundStains: {sourceEffectId: number; spawnSeed: number; birthGameUpdate: number;
+    position: {x: number; y: number}; sprite: ActorSprite}[];
+  savedRegularPickups: {handle: number; variant: number; subtype: number; position: {x: number; y: number};
+    spawnSeed: number; rngSeed: number; charge: number; touched: boolean}[];
   npcs: { id: number; kind: number; variant: number; subtype: number; spawnSeed: number;
     position: {x: number; y: number}; presentedPosition: {x: number; y: number}; velocity: {x: number; y: number};
     hp: number; maxHp: number; collisionRadius: number; collisionMass: number; collisionDamage: number;
@@ -170,6 +176,8 @@ export interface Room {
     damage: {pendingDamage: number; pendingFlags: number};
     keeper: {anchor: {x: number; y: number}; entityFlags: number; stateFrame: number; countdown: number;
       animation: string; animationClock: number; animationPlaying: boolean; tint: number[]; offsets: number[]} | null;
+    level2Fly: {entityFlags: number; birthGameUpdate: number; feedbackVelocity: {x: number; y: number};
+      gridContact: boolean; gridNormal: {x: number; y: number}; previousGridVelocity: {x: number; y: number}} | null;
     monstro: {stateFrame: number; choice: number; entityFlags: number; flipX: boolean; birthGameUpdate: number;
       projectileBirthCount: number; lastProjectileBatch: {count: number; target: {x: number; y: number}; parameterAngle: number} | null;
       deathBloodStart: boolean; deathExplosion: boolean; finalBossCallbackPending: boolean} | null;
@@ -235,6 +243,7 @@ export interface State {
   roomDisplayFlags: number[]; revealedSecretConnections: [number, number][];
   persistedRooms: Record<string, Room>;
   roomTransition: {fromRoom: number; targetRoom: number; fromSlot: number; targetSlot: number; phase: "out" | "in" | "bossScene" | "bossCleanup"; fullUpdates: number; bossScene: {presentationIndex: number; animationFrame: number; animationPlaying: boolean} | null} | null;
+  playerStats: {shotSpeed: number; damage: number; tearHeight: number; tearFallingSpeed: number; tearFallingAcceleration: number; moveSpeed: number};
   player: Player; room: Room; stageEffects: StageEffects; inventory: { coins: number; bombs: number; keys: number };
   publicActions: { menuConfirm: boolean; menuBack: boolean; activePressed: boolean; activeTriggered: boolean; pocketPressed: boolean; pocketTriggered: boolean; enterWasDown: boolean; spaceWasDown: boolean; escapeWasDown: boolean; pocketWasDown: boolean };
   playerAnimation: { current: "Trapdoor" | "Appear" | "Death" | "UseItem" | null; frame: number; playing: boolean; guard: boolean };

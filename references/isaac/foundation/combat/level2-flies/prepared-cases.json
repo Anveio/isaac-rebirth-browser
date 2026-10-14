@@ -1,0 +1,77 @@
+{
+  "schema": 1,
+  "status": "Revised public inputs before any original grading; v1 resource/blocked-prefix smoke and tapes preserved, no acceptance",
+  "cases": [
+    {
+      "id": "paired-level2-bll-admission",
+      "randomized": false,
+      "presentations": 1453,
+      "captures": 184,
+      "publicTapeCanonicalSha256": "3c3de49d119cd2222f6596e358bbfc91c6d07c52f009b1cefd7e9989182b7b9a",
+      "requiredExecution": [
+        "level2-admission",
+        "level2-poof",
+        "level2-poof-fence",
+        "level2-poof-retirement",
+        "level2-appearance",
+        "level2-active"
+      ],
+      "randomSelection": {
+        "recordedAt": "2026-10-13T16:49:52.282764+00:00",
+        "source": "os.urandom(4), entire bank persisted before any floor grading",
+        "selected": {
+          "ordinal": 6,
+          "entropyHex": "1fc07a05",
+          "runSeed": 91930655,
+          "code": "BLLV920M",
+          "stageSeed": 2276404057
+        },
+        "selectionRule": "First sampled candidate whose naturally generated13x7 boss template is1010,1012 or1014; route supportedness is examined only afterward and does not replace it",
+        "allCandidatesRetained": 640
+      }
+    },
+    {
+      "id": "paired-random-bll-monstro-route",
+      "randomized": true,
+      "presentations": 2834,
+      "captures": 714,
+      "publicTapeCanonicalSha256": "1982ed8a1fa325b44b021494edd801809f29b26aabd73ea23058f2d69e348917",
+      "requiredExecution": [
+        "level2-admission",
+        "level2-poof",
+        "level2-poof-fence",
+        "level2-poof-retirement",
+        "level2-appearance",
+        "level2-active",
+        "level2-damage",
+        "level2-drain",
+        "level2-death",
+        "level2-retirement",
+        "prefix-clear-delay",
+        "prefix-clear-boundary",
+        "prefix-clear",
+        "boss-admission",
+        "boss-poof",
+        "boss-scene",
+        "boss-cleanup",
+        "boss-ai",
+        "boss-projectiles",
+        "boss-damage"
+      ],
+      "randomSelection": {
+        "recordedAt": "2026-10-13T16:49:52.282764+00:00",
+        "source": "os.urandom(4), entire bank persisted before any floor grading",
+        "selected": {
+          "ordinal": 6,
+          "entropyHex": "1fc07a05",
+          "runSeed": 91930655,
+          "code": "BLLV920M",
+          "stageSeed": 2276404057
+        },
+        "selectionRule": "First sampled candidate whose naturally generated13x7 boss template is1010,1012 or1014; route supportedness is examined only afterward and does not replace it",
+        "allCandidatesRetained": 640
+      }
+    }
+  ],
+  "version": 2
+}

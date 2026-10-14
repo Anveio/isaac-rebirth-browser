@@ -27,6 +27,7 @@ pub mod grid_records;
 pub mod items;
 pub mod keepers;
 pub mod layout;
+pub mod level2_flies;
 pub mod menu_lifecycle;
 pub mod monstro;
 pub mod motion;
@@ -37,6 +38,7 @@ pub mod phase;
 pub mod pickups;
 pub mod player_animation;
 pub mod player_items;
+pub mod player_stats;
 pub mod projectiles;
 pub mod public_actions;
 pub mod rock_blast;
@@ -343,6 +345,8 @@ pub struct State {
     pub player_items: Option<player_items::PlayerItems>,
     pub player_animation: player_animation::PlayerAnimation,
     pub public_actions: public_actions::PublicActions,
+    #[serde(default)]
+    pub player_stats: player_stats::PlayerStats,
     pub stage: u32,
     pub stage_seed: u32,
     pub seeded_run: bool,
@@ -482,6 +486,7 @@ impl Game {
                 player_items: None,
                 player_animation: player_animation::PlayerAnimation::default(),
                 public_actions: public_actions::PublicActions::default(),
+                player_stats: player_stats::PlayerStats::default(),
                 stage: 1,
                 stage_seed: seed::stage1_seed(initial_seed),
                 seeded_run: false,
@@ -1015,6 +1020,7 @@ impl Game {
         self.state.next_familiar = 1;
         self.state.fire_cooldown = -1;
         self.state.max_fire_delay = 10;
+        self.state.player_stats = player_stats::PlayerStats::default();
         self.state.head_timer = -1;
         self.state.actor_scheduler = actors::Scheduler::default();
         self.state.actor_scheduler.admit(actors::ActorRef {
@@ -1121,6 +1127,34 @@ impl Game {
     fn held(&self, code: &str) -> bool {
         self.state.pressed.contains(code)
     }
+    /// The supported free regular callback is shared by ordinary full
+    /// contacts and the actual Room.Update admission tail.
+    fn collect_regular_pickup_at(&mut self, index: usize) {
+        let pickup = &mut self.state.room.pickups[index];
+        if pickup.touches(&self.state.player) && pickup.try_collect(&mut self.state.inventory) {
+            // Collect504480 routes key ->504720 and bomb ->5046d0
+            // after inventory mutation, before the System increment.
+            let sound = match pickup.variant {
+                30 => Some((58, 0.85)),
+                40 => Some((201, 1.0)),
+                _ => None,
+            };
+            if let Some((id, volume)) = sound {
+                self.state.audio.admit(
+                    &mut self.state.boot_lifecycle.shared,
+                    self.state.system_clock.system_counter - 1,
+                    audio::SoundRequest {
+                        id,
+                        volume,
+                        delay: 2,
+                        looping: false,
+                        pitch: 1.0,
+                    },
+                );
+            }
+        }
+    }
+
     /// The native list admits Player first, then supported selectors in their
     /// authored order. Persist that order with the room rather than regrouping
     /// NPCs and pickups when rebuilding the shared actor scheduler.
@@ -1141,6 +1175,9 @@ impl Game {
         for selector in selectors {
             let id = u32::try_from(npcs.len()).map_err(|_| "NPC identity exhausted")?;
             if let Some(mut npc) = npcs::Npc::from_selector(id, selector)? {
+                if let Some(fly) = &mut npc.level2_fly {
+                    fly.birth_game_update = self.state.game_update_count;
+                }
                 if let Some(monstro) = &mut npc.monstro {
                     monstro.birth_game_update = self.state.game_update_count;
                 }
@@ -1370,6 +1407,15 @@ impl Game {
                 .is_some_and(|transition| {
                     transition.phase == traversal::TransitionPhase::BossCleanup
                 });
+        if phase == phase::Phase::Update
+            && self
+                .state
+                .room_transition
+                .as_ref()
+                .is_some_and(|transition| transition.phase == traversal::TransitionPhase::Out)
+        {
+            pickups::save_regular_records(&mut self.state)?;
+        }
         if traversal::advance_transition(&mut self.state, phase) {
             if boss_cleanup {
                 // State3 calls Player.Update at5dde9e before enabling controls
@@ -1391,7 +1437,37 @@ impl Game {
                 combat::advance_player_immunity(&mut self.state);
                 combat::advance_player_immunity(&mut self.state);
                 if restoring {
+                    let restored_pickups = pickups::readmit_regular_records(&mut self.state)?;
                     self.rebuild_room_actor_schedule()?;
+                    // The native Room.Update admission tail advances the new
+                    // actors once at the unchanged Game clock. Other saved
+                    // families keep their existing reconstruction owners.
+                    for id in restored_pickups.iter().copied() {
+                        self.advance_pickup(id, phase)?;
+                    }
+                    let candidates = pickups::contact_candidates(&self.state)?;
+                    //454a0a dispatches Player/PU callbacks before453340's
+                    //PU self-pairs. Disabled transition controls do not veto
+                    //the fresh living Player's ordinary pickup callback.
+                    for id in restored_pickups {
+                        if let Some(index) = self
+                            .state
+                            .room
+                            .pickups
+                            .iter()
+                            .position(|pickup| pickup.id == id)
+                        {
+                            self.collect_regular_pickup_at(index);
+                        }
+                    }
+                    pickups::nonplayer_contacts(&mut self.state, candidates)?;
+                    pickups::full_grid_contacts(&mut self.state)?;
+                    self.state.room.pickups.retain(|pickup| !pickup.removed);
+                    let pickups = &self.state.room.pickups;
+                    self.state.actor_scheduler.retain(|actor| {
+                        actor.kind != actors::ActorKind::Pickup
+                            || pickups.iter().any(|pickup| pickup.id == actor.id)
+                    });
                 } else {
                     let selectors = self
                         .state
@@ -1414,6 +1490,7 @@ impl Game {
                             _ => return Err("invalid authored room actor handle".into()),
                         }
                     }
+                    familiars::paint_background_effects(&mut self.state)?;
                     pickups::full_grid_contacts(&mut self.state)?;
                     chests::full_grid_contacts(&mut self.state)?;
                     npcs::post_contact_grid(&mut self.state)?;
@@ -1424,11 +1501,19 @@ impl Game {
                             || pickups.iter().any(|pickup| pickup.id == actor.id)
                     });
                     npcs::admit_room_combat(&mut self.state);
+                }
+                // ChangeRoom5dd260 restores Player+7d4=false after the
+                // admitted Room.Update, before the incoming leg or Scene.
+                self.state.player.controls_enabled = false;
+                if !restoring {
                     traversal::begin_boss_scene(&mut self.state);
                 }
             }
             self.refresh_minimap();
             if self.state.room_transition.is_none() {
+                // State3 dispatches its final Player callback at5dde9e with
+                // controls disabled, then5ddecb enables the persistent field.
+                self.state.player.controls_enabled = true;
                 self.advance_camera(phase);
             }
             return Ok(());
@@ -1472,6 +1557,9 @@ impl Game {
         // before4545d0 admits entity contacts. Pickups can become idle in this
         // full phase and collect against the player's newly moved position.
         if phase == phase::Phase::Update {
+            // The independent render array paints flags8 at its current count,
+            // including births from the admission-fenced actor callbacks.
+            familiars::paint_background_effects(&mut self.state)?;
             let pickup_contacts = pickups::contact_candidates(&self.state)?;
             npcs::player_contacts(&mut self.state)?;
             npcs::nonplayer_contacts(&mut self.state)?;
@@ -1504,31 +1592,7 @@ impl Game {
                     chests::player_contact(&mut self.state, index)?;
                     continue;
                 }
-                let pickup = &mut self.state.room.pickups[index];
-                if pickup.touches(&self.state.player)
-                    && pickup.try_collect(&mut self.state.inventory)
-                {
-                    // Collect504480 routes key ->504720 and bomb ->5046d0
-                    // after inventory mutation, before the System increment.
-                    let sound = match pickup.variant {
-                        30 => Some((58, 0.85)),
-                        40 => Some((201, 1.0)),
-                        _ => None,
-                    };
-                    if let Some((id, volume)) = sound {
-                        self.state.audio.admit(
-                            &mut self.state.boot_lifecycle.shared,
-                            self.state.system_clock.system_counter - 1,
-                            audio::SoundRequest {
-                                id,
-                                volume,
-                                delay: 2,
-                                looping: false,
-                                pitch: 1.0,
-                            },
-                        );
-                    }
-                }
+                self.collect_regular_pickup_at(index);
             }
             pickups::nonplayer_contacts(&mut self.state, pickup_contacts)?;
             pickups::full_grid_contacts(&mut self.state)?;
@@ -1719,12 +1783,43 @@ impl Game {
         }
         pickups::advance_actor(&mut self.state, phase, id)
     }
+    fn admit_npc_blood(&mut self, index: usize, seed: u32) -> Result<(), String> {
+        let position = self.state.room.npcs[index].position;
+        // Fresh13/18/214 have the ordinary white color. Modifiers and tinted
+        // actor colors require their actual source owner before admission.
+        let id = familiars::admit_blood_splat(&mut self.state, seed, position, [1.0; 4], [0.0; 3])?;
+        familiars::advance_blood_initial(&mut self.state, id)
+    }
     fn advance_npc(&mut self, id: u32, phase: phase::Phase) -> Result<(), String> {
         let grid = grid::Grid::new(self.state.room.grid.clone().expect("admitted NPC has grid"))?;
         let player = bombs::player_world(&self.state);
         let Some(index) = self.state.room.npcs.iter().position(|npc| npc.id == id) else {
             return Ok(());
         };
+        if self.state.room.npcs[index].kind == 214 {
+            let produced = level2_flies::advance(
+                &mut self.state.room.npcs[index],
+                phase,
+                &mut self.state.boot_lifecycle.shared,
+                &mut level2_flies::World {
+                    game_counter: self.state.game_update_count,
+                    player,
+                    grid: &grid,
+                    audio: &mut self.state.audio,
+                    system_counter: self.state.system_clock.system_counter.wrapping_sub(1),
+                    poofs: familiars::PoofAdmission {
+                        game_update_count: self.state.game_update_count,
+                        next_effect: &mut self.state.next_effect,
+                        effects: &mut self.state.sprite_effects,
+                        scheduler: &mut self.state.actor_scheduler,
+                    },
+                },
+            )?;
+            if let Some(seed) = produced.blood_seed {
+                self.admit_npc_blood(index, seed)?;
+            }
+            return Ok(());
+        }
         if self.state.room.npcs[index].kind == 33 {
             let produced = fireplaces::advance(
                 &mut self.state.room.npcs[index],
@@ -1759,7 +1854,7 @@ impl Game {
                 let subtype = fireplaces::loot_subtype(birth.variant, birth.spawn_seed)?;
                 let id = self.state.next_pickup;
                 let mut pickup = Pickup::spawn(id, birth.variant, subtype, birth.position, true)?;
-                pickup.spawn_seed = birth.spawn_seed;
+                pickup.initialize_spawn_seed(birth.spawn_seed)?;
                 pickup.birth_game_update = self.state.game_update_count;
                 self.state.next_pickup = id.checked_add(1).ok_or("Fire loot identity exhausted")?;
                 self.state.room.pickups.push(pickup);
@@ -1782,6 +1877,12 @@ impl Game {
                     grid: &grid,
                     audio: &mut self.state.audio,
                     system_counter: self.state.system_clock.system_counter.wrapping_sub(1),
+                    poofs: familiars::PoofAdmission {
+                        game_update_count: self.state.game_update_count,
+                        next_effect: &mut self.state.next_effect,
+                        effects: &mut self.state.sprite_effects,
+                        scheduler: &mut self.state.actor_scheduler,
+                    },
                 },
             )?;
             for birth in births {
@@ -1804,13 +1905,24 @@ impl Game {
             return Ok(());
         }
         if self.state.room.npcs[index].kind != 244 {
-            return self.state.room.npcs[index].advance(
+            let was_dead = self.state.room.npcs[index].dead;
+            self.state.room.npcs[index].advance(
                 phase,
-                self.state.game_update_count,
                 &mut self.state.boot_lifecycle.shared,
-                player,
-                &grid,
-            );
+                &mut npcs::World {
+                    game_counter: self.state.game_update_count,
+                    player,
+                    grid: &grid,
+                    audio: &mut self.state.audio,
+                    system_counter: self.state.system_clock.system_counter.wrapping_sub(1),
+                },
+            )?;
+            if !was_dead && self.state.room.npcs[index].dead {
+                if let Some(seed) = self.state.room.npcs[index].death_effect_seed {
+                    self.admit_npc_blood(index, seed)?;
+                }
+            }
+            return Ok(());
         }
         let mut occupied = vec![player];
         occupied.extend(
@@ -1899,7 +2011,13 @@ impl Game {
         let bomb_admitted = self.state.bomb_placement_cooldown.advance(phase);
         // Shooting inherits the velocity entering this phase, before input acceleration.
         let inherited_velocity = (self.state.player.vx, self.state.player.vy);
-        motion::advance(&mut self.state.player, &self.state.room, dx, dy);
+        motion::advance(
+            &mut self.state.player,
+            &self.state.room,
+            dx,
+            dy,
+            self.state.player_stats.move_speed,
+        );
         if controls_enabled && bomb_triggered && bomb_admitted {
             bombs::place(&mut self.state, phase)?;
         }
@@ -1971,7 +2089,11 @@ impl Game {
                     x: (inherited_velocity.0 / motion::WORLD_SCALE) as f32,
                     y: (inherited_velocity.1 / motion::WORLD_SCALE) as f32,
                 };
-                let velocity = projectiles::stored_velocity(aim, inherited)?;
+                let velocity = projectiles::stored_velocity(
+                    aim,
+                    inherited,
+                    self.state.player_stats.shot_speed,
+                )?;
                 self.state.player.eye = self.state.player.eye.flipped();
                 let eye_uniform = self.state.boot_lifecycle.shared.uniform();
                 let origin = projectiles::eye_origin(
@@ -2010,7 +2132,7 @@ impl Game {
                     motion: projectiles::TearMotion::spawn(
                         origin,
                         velocity,
-                        projectiles::Parameters::FRESH_ISAAC,
+                        self.state.player_stats.parameters(),
                         final_uniform,
                     )?,
                 };

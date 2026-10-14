@@ -1,0 +1,119 @@
+{
+  "schema": 1,
+  "status": "Source-supported runtime preparation; compilation and fresh original/browser acceptance pending",
+  "recordedAt": "2026-10-13T19:09:52.073985+00:00",
+  "binarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "config": {
+    "id": "214",
+    "variant": "0",
+    "name": "lvl2 Fly",
+    "baseHP": "10",
+    "stageHP": "0",
+    "boss": "0",
+    "champion": "0",
+    "collisionDamage": "1",
+    "collisionMass": "6",
+    "collisionRadius": "13",
+    "friction": "1",
+    "numGridCollisionPoints": "8",
+    "shadowSize": "14",
+    "portrait": "82",
+    "anm2path": "213.000_Level2Fly.anm2",
+    "gridCollision": "walls"
+  },
+  "gibs": [
+    {
+      "amount": "0",
+      "blood": "1",
+      "bone": "0",
+      "eye": "0",
+      "gut": "0",
+      "large": "0"
+    }
+  ],
+  "asset": {
+    "path": "gfx/213.000_level2fly.anm2",
+    "anm2Sha256": "69443f804ffed2a1e72b00a43903379bf46e1391d9196fb705f7c62ef579104c",
+    "animationJsonSha256": "d0ce57eebb8ca757b49f52d7707e1fca6bc52994390dda087576c3ec4d754787",
+    "clips": [
+      {
+        "name": "Idle",
+        "frames": 2,
+        "loop": true
+      }
+    ],
+    "warning": "Entity215 uses214.000_level2spider.anm2; that path is not NPC214"
+  },
+  "dispatch": "4f9670 sharedFly family selects4ef880. Fresh214/0/0, one Isaac, no Skatole9/fear/confusion/champion or special player modifiers.",
+  "initialization": "4f0510 writes gridclass3, feedbackf80ZERO,state3 and branchesback4ef8a0 into activeAI in SAME callback. Genericappearance flag4 incomingstate1/counter0 temporarily dampensfriction*.01, initializesAI then savesrealstate3/hides. Incomingcounter1 admitsPoof15/subtype2 with actual shared rawseed and no explicitbirthUpdate. Incomingcounter4 enablesvisible and attempts authoredAppear; actual213asset has noAppear, so failedPlay retainsIdle. Incomingcounter>19 missingAppear fallback restores savedstate3/configuredfriction then runs activeAI samefull. Idleloop stoppeddefaultframe0 restartsvia40fd80 when stopped.",
+  "ai": {
+    "clip": "4f01e1 PlayIdle(false) for214. NoFly13 poop1000/wanderingtarget/fire-target100 draws.",
+    "target": "444890(3,0) tests actual Game+ce9f4 plusoffset modulo3 unlessflags0x4000. Fresh214 selectsnearestactualPlayer via480320(0).",
+    "steer": "If targetnonzero and globalcountereven, delta=target-position. Source214 withoutSkatole adds CCW tangent[-dy,dx] (4f0d38), THEN scalesY*.5. Actualdistance=sqrt(x*x+y*y); positive distance divides components with612bb0, not reciprocal helper. Source spriteScale1 range25; if distance>25, impulse=min((distance-25)*.08,1.2), doubleit(4f0c08), multiplyunitdelta then dividecomponents bycurrentfriction612b30 and addvelocity. Freshbyte320=0 skips additional.9 drag.",
+    "feedback": "Aftersteering, priorfullgridContact34c always consumesbounded3. Draw0 and !fear0x800 consumesshareduniform, magnitude=-1.5*u-2, SetLength6128e0(normal358,magnitude) roundsfactor=magnitude/length then multiplies; storesf80. LengthSquaredf80<=1 resetsZERO, otherwise iffriction!=0 adds f80/friction toV then scalesf80*.9.",
+    "noTarget": "TargetZERO consumesbounded10. Draw0 uses normalized612860 nearestPlayer-position *.5 and addsV. NoTarget predicate source612bf0 equality.",
+    "wander": "ActualGamecounter%4==1: sharedDirection42e8d0 *.6, wanderf78=(wander+sample)*.4. Counter%3==2: y<230 adds.06,y>420 subtracts.06;x>540 subtracts.06,x<80 adds.06. Then add(wander*2)/friction toV; friction*=.6.",
+    "counter": "Use sole natural game_update_count; never insert captured native42 or a modulo/RNG offset. Source loader baseline gap remains required."
+  },
+  "grid": {
+    "source": "442b90 fullmanager454b10 AFTERcontacts; fastBase4446a0 calls previewtrue insidefastcallback",
+    "profile": "Class3 firstclampscenter toRoombounds zero margin. Eight samples use sourcecached evenindices thenoddindices order; only actualGridclasses4/5 block, ordinaryRockclass3 doesnot.",
+    "response": "Sumblocked samples, normalize via612820 reciprocal. Fullwritesnormal358 evenzero; fullcontact34c startsfalse then true when clampedposition equals any exactRoombound or inwarddot<0. PreviousV350 storesonlyinwardresponse. Reflection=V+N*(inward*1.8-.1); reflectedspeed. Sourceclass3 binarysearch6, class5 is12. Correctiononlyinwardmotion; fullV*=1+(inward/reflectedspeed)*.5. FastpreservesactualV and priorcontact/normal/previousV.",
+    "consumers": "AI reads PREVIOUS fullgridfeedback before latecontacts/grid update. Do not move querybackinsideNPCUpdate."
+  },
+  "contact": {
+    "source": "49b8f0 mode0 targetPlayer; self214\u219249c117 checksfirstPlayerHasCollectible9. Freshfalse returns49c042 damage1/rawflags0/countdownArg30, actualPlayerimmunity60. Skatole suppression remainsmodifierdependency. Uncharmed ordinary214 NPC/NPC callbackfalse and common445710 physicalresponse.",
+    "tearBomb": "Generic ordered deferredDamage FIFO. Add214 admittedtypeguard without usingAttackFly-only tearimpulse. Actual Tear3.5flags0/Bomb60flags4 mustgate."
+  },
+  "death": "Fresh zero-gib13/18/214: Sound30 volume0.8 delay2 pitch1, then external shared raw seed and actual Blood7 Init. Caller-owned immediate Update selects an actual size/frame/flip/alpha; flags8 skip the main Update array and enter the render-sorted array. Same full pass paints/removes stains before entity contacts. Native render-paint/return acceptance remains unaccepted.",
+  "publicRoute": {
+    "seed": "BLLV920M",
+    "bankSample": 6,
+    "retainedBeforeGrading": true,
+    "graph": [
+      "Start6/up7 Room18(Fly13)",
+      "up9 Room185(two214)",
+      "right0 Monstro1012"
+    ],
+    "actual214Seeds": [
+      1156014891,
+      4011730281
+    ],
+    "positions": [
+      [
+        240,
+        280
+      ],
+      [
+        400,
+        280
+      ]
+    ],
+    "status": "generated authored identities only; no original live boss admission"
+  },
+  "requiredLive": [
+    "Nonempty actualnative/browser214 actors joinedbyauthoredseed/order and config",
+    "Generic appearance missingAppear fallback plus Poof subtype2/newbornfence",
+    "Per-game actualglobalmodulo AI/fullfast laws and priorgridnormal feedback; required pairedHP/classes/death/clear",
+    "Production renderer actual213asset smoke before originalcapture",
+    "PublicBLL prefix clearance andboss doorway admission; no debugspawn/native injection",
+    "All true sharedseed/trajectory/contacttiming mismatches retained"
+  ],
+  "sourceSha256": {
+    "entities2.xml": "76408c1612ce7281d131c460cf3450eeae6bc602bc539805d53d76406432a936",
+    "function-4ef880.txt": "4c03315796c17664b40df5d2f6cc637f457c538f2e875ba256892ea4d913c70d",
+    "function-4f98e0.txt": "5f0ff9192cc17ce58e26064f31776e0c7fc959543c8441dbc9d44cf21d4351fa",
+    "function-442b90.txt": "101532d02edb8bc67fb3a3b6c530123d928b65bd4a32eef3e33d98d634ea2656",
+    "function-49b8f0.txt": "5ebf665bbd03d8a690123ea5b3c204f743230ee2d1a2034f9183200db22b443a",
+    "function-445c60.txt": "5f03d67075fa97eb3f6a4148f50f1bd0dec663a765ffa347745468ecfd237f51",
+    "function-6128e0.txt": "e43dc537b0ba5ff58bde5b3f59dc2ba263d64c946daaf0f9a3bfb5b33d48a4f7",
+    "function-612950.txt": "5984da160dd7f578f51ad8e32361ee3700d59095c451724d13dd9cddb8fc5d5a",
+    "function-444890.txt": "0541c49c054be373b92330cacf8dacc9a26de17efe6efaaed61c6040614d349d",
+    "function-612bb0.txt": "6a5603c32a55f1eb0f224e8c1dba1f25124e81ddd6b08f63d95c24f231a6f832",
+    "function-612af0.txt": "291fb05e7afb461d89e499d58d6d95a488dd12bb4a7133cfeab765a7124ab647"
+  },
+  "dependencies": {
+    "mainPoofApi": "e7d67b7800c78ce7edfb86dc4c90970608083344",
+    "immutableMonstroCorrections": "4fce6ef3b1f3725f133df2811356aae05b779a53"
+  }
+}

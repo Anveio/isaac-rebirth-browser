@@ -44,17 +44,33 @@ The source was built before its runtime commit; those identical bytes and
 the later gate-only commit are pinned separately. The audit accepts evidence
 integrity; the paired runtime gate remains red.
 
+The corrected clean `7a07e98` source passed a full production build, strict
+Clippy, TypeScript, authored asset checks and the floor-helper build. Its
+production `64b08be5` then ran the complete unchanged eight-case public input
+bank in a fresh browser against the retained original captures. This attempt
+launched no new original process; default CI continues to run both games
+freshly. All3068 phases and232578 checks completed, retaining607 required
+failures and no capture errors. The132 copied-frame failures in the earlier
+bank are resolved. An independent audit verifies all16 raw archives, the
+unchanged original bank, complete input/DOM/backend states,39 before/end gate
+hashes,93 frozen source files and stable production/WASM/floor identities.
+[The compact verification receipt](../references/isaac/foundation/items/active-use-verification.json)
+keeps the original739-failure attempt and corrected607-failure replay distinct.
+
 All four45 routes match actual charge/discharge, temporary count/cooldown,
 healing/full-health clamping, authored main UseItem, guarded shooting and157
-sound admission. The retained failures include persistent traversal controls,
-copied-sprite ordering, the missing Hit guard and collectible blast response,
-unsupported291 use and randomized222 fire delay. The new unfiltered OS
-routes acquired257 and222; neither was discarded. Copied-sprite advancement
-now follows late `531e6f`, after active/pocket/shot callbacks and before the
-common cooldown tail. A full-phase use advances the newly reset copy in that
-same callback; a fast-phase use waits for the next full callback. This narrow
-source-order correction still requires a fresh build and paired acceptance.
-Source pins, reports and temporary research are retained in ignored
+sound admission. Remaining failures cover persistent traversal controls,
+missing Hit guard and collectible blast response, unsupported291 use and
+randomized222 fire delay. The unfiltered OS routes acquired257 and222;
+neither was discarded. Copied-sprite advancement follows late `531e6f`, after
+active/pocket/shot callbacks and before the common cooldown tail. A full-phase
+use advances the newly reset copy immediately; a fast-phase use waits for the
+next full callback.
+
+This bank does not cover held shooting during the legacy Pickup guard. Its
+source-confirmed aim-boundary correction is tracked separately; no acceptance
+for that case or latest-main composition is inherited from the replay. Source
+pins, complete reports and temporary research remain in ignored
 `.cache/coordination/active-items-research` and `.cache/e2e/active-item-use`.
 Flush291, other active effects, active swaps, modifier/reserve charge effects,
 the actual room-clear recharge producer, equipped pockets, cards, pills and

@@ -197,6 +197,9 @@ pub(crate) fn check_departure(state: &mut State) {
         });
         state.player.vx = 0.0;
         state.player.vy = 0.0;
+        // Transition request5dcfc0 writes Player+7d4 at5dd048. Fast room
+        // callbacks stay frozen without rewriting the persistent field.
+        state.player.controls_enabled = false;
         break;
     }
 }
@@ -253,6 +256,9 @@ pub(crate) fn advance_transition(state: &mut State, phase: Phase) -> bool {
         crate::combat::advance_player_immunity(state);
         return true;
     }
+    // ChangeRoom5dd1b0 enables Player+7d4 before550970, whose admitted
+    // Room.Update observes it. Game restores the incoming freeze afterward.
+    state.player.controls_enabled = true;
     state
         .persisted_rooms
         .insert(state.current_room, state.room.clone());

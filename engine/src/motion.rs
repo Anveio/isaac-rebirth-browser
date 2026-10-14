@@ -60,11 +60,14 @@ pub fn advance_world(
     velocity: WorldVector,
     dx: i32,
     dy: i32,
+    move_speed: f32,
 ) -> Result<(WorldVector, WorldVector), String> {
     if !(-1..=1).contains(&dx)
         || !(-1..=1).contains(&dy)
         || !position.is_finite()
         || !velocity.is_finite()
+        || !move_speed.is_finite()
+        || !(0.1..=2.0).contains(&move_speed)
     {
         return Err("player motion requires finite world vectors and digital input signs".into());
     }
@@ -73,8 +76,10 @@ pub fn advance_world(
     let mut vy = velocity.y;
     if dx != 0 || dy != 0 {
         let length = ((dx * dx + dy * dy) as f32).sqrt();
-        let ux = dx as f32 / length;
-        let uy = dy as f32 / length;
+        // Source529801..529835 scales input before its repeated dots.
+        let input_scale = 0.25_f32 * move_speed + 0.75_f32;
+        let ux = (dx as f32 / length) * input_scale;
+        let uy = (dy as f32 / length) * input_scale;
         let forward = vx * ux + vy * uy;
         let sideways_x = vx - forward * ux;
         let sideways_y = vy - forward * uy;
@@ -85,7 +90,7 @@ pub fn advance_world(
         // Collapsing this to 0.6 + max(-forward*0.04, 0) loses reverse control
         // precision immediately after independently observed spike knockback.
         let adjusted_forward = adjusted_x * ux + adjusted_y * uy;
-        let acceleration = ((adjusted_forward * -0.2).max(0.0) + 3.0) * 0.4;
+        let acceleration = ((adjusted_forward * -0.2).max(0.0) / move_speed + 3.0) * 0.4;
         vx = (adjusted_x + (ux * 0.5) * acceleration) * FORWARD_RETENTION;
         vy = (adjusted_y + (uy * 0.5) * acceleration) * FORWARD_RETENTION;
     } else {
@@ -99,7 +104,7 @@ pub fn advance_world(
     Ok((position, velocity))
 }
 
-pub fn advance(player: &mut Player, room: &Room, dx: i32, dy: i32) {
+pub fn advance(player: &mut Player, room: &Room, dx: i32, dy: i32, move_speed: f32) {
     static COLLIDER: OnceLock<crate::grid::Collider> = OnceLock::new();
     let grid = room
         .grid
@@ -116,7 +121,7 @@ pub fn advance(player: &mut Player, room: &Room, dx: i32, dy: i32) {
         })
         .expect("authored Isaac collision geometry is valid")
     });
-    advance_in_grid(player, room, &grid, collider, dx, dy)
+    advance_in_grid(player, room, &grid, collider, dx, dy, move_speed)
         .expect("gameplay input and world vectors are bounded");
 }
 
@@ -129,6 +134,7 @@ pub fn advance_in_grid(
     collider: &crate::grid::Collider,
     dx: i32,
     dy: i32,
+    move_speed: f32,
 ) -> Result<(), String> {
     let position = WorldVector {
         x: ((player.x - WORLD_ORIGIN_X) / WORLD_SCALE) as f32,
@@ -138,7 +144,7 @@ pub fn advance_in_grid(
         x: (player.vx / WORLD_SCALE) as f32,
         y: (player.vy / WORLD_SCALE) as f32,
     };
-    let (mut position, mut velocity) = advance_world(position, velocity, dx, dy)?;
+    let (mut position, mut velocity) = advance_world(position, velocity, dx, dy, move_speed)?;
     collider.resolve_player(grid, &mut position, &mut velocity, false)?;
     player.x = f64::from(position.x) * WORLD_SCALE + WORLD_ORIGIN_X;
     player.y = f64::from(position.y) * WORLD_SCALE + WORLD_ORIGIN_Y;

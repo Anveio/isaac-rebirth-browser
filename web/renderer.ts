@@ -4,7 +4,7 @@ import { GLMenuContext, type GLSurface } from "./gl-menu";
 import { StageComposer, type StageTargets } from "./gl-stage";
 import { RunPresentation } from "./presentation";
 import { PickupRenderer } from "./pickups";
-import type { RoomAppearance, RoomQuad, State } from "./engine";
+import type { Room, RoomAppearance, RoomQuad, State } from "./engine";
 
 const PLAYER = "gfx/001.000_player.anm2";
 const TEAR = "gfx/002.000_tear.anm2";
@@ -37,7 +37,7 @@ export class Renderer {
   draw(state: State): void {
     const gl = this.graphics;
     if (state.screen === "playing") {
-      this.prepareRoom(state.room.appearance);
+      this.prepareRoom(state.room);
       this.stage.prepare(state.stageEffects, state.camera?.scroll);
     }
     gl.beginScreen(); gl.resetTransform(); gl.globalAlpha = 1; gl.imageSmoothingEnabled = false;
@@ -90,7 +90,7 @@ export class Renderer {
             npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46, npc.animationClock,
             { scale: 0.65, layerScales: { 1: [npc.fireplace.flameScale, npc.fireplace.flameScale] } });
         } else {
-          this.assets.draw(ctx, npc.kind === 13 ? "gfx/013.000_fly.anm2" : npc.kind === 18 ? "gfx/018.000_attack fly.anm2" : "gfx/244.000_round worm.anm2", npc.animation,
+          this.assets.draw(ctx, npc.kind === 13 ? "gfx/013.000_fly.anm2" : npc.kind === 18 ? "gfx/018.000_attack fly.anm2" : npc.kind === 214 ? "gfx/213.000_level2fly.anm2" : "gfx/244.000_round worm.anm2", npc.animation,
             npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46, npc.animationFrame, { scale: 0.65 });
         }
       }
@@ -159,10 +159,12 @@ export class Renderer {
       gl.restore();
     }
   }
-  private prepareRoom(appearance: RoomAppearance): void {
+  private prepareRoom(room: Room): void {
+    const appearance = room.appearance;
     const key = JSON.stringify({ backdrop: appearance.backdrop, patchSize: appearance.backdropPatchSize,
       patchColumns: appearance.backdropPatchColumns, floor: appearance.floorQuads, walls: appearance.wallQuads,
-      columns: appearance.columns, rows: appearance.rows, tileSize: appearance.tileSize, tutorial: appearance.tutorial });
+      columns: appearance.columns, rows: appearance.rows, tileSize: appearance.tileSize, tutorial: appearance.tutorial,
+      backgroundStains: room.backgroundStains });
     if (key === this.roomKey) return;
     const gl = this.graphics, width = appearance.columns * appearance.tileSize, height = appearance.rows * appearance.tileSize;
     gl.beginTarget(this.floor, width, height); gl.resetTransform(); gl.globalAlpha = 1; gl.imageSmoothingEnabled = false;
@@ -172,6 +174,23 @@ export class Renderer {
       const controls = this.assets.image("gfx/backdrop/controls.png");
       gl.blendFactors("srcAlpha", "oneMinusSrcAlpha");
       gl.drawImage(controls, Math.round(width / 2 - controls.width / 2), Math.round(height / 2 - controls.height / 2));
+    }
+    gl.blendFactors("srcAlpha", "oneMinusSrcAlpha");
+    const ctx = gl.asCanvasContext();
+    for (const stain of room.backgroundStains) {
+      const sprite = stain.sprite;
+      ctx.save();
+      ctx.translate((stain.position.x + sprite.offset.x) * 0.65 + 32 - appearance.origin.x,
+        (stain.position.y + sprite.offset.y) * 0.65 - 46 - appearance.origin.y);
+      ctx.scale(sprite.flipX ? -1 : 1, sprite.flipY ? -1 : 1);
+      this.assets.draw(ctx, "gfx/1000.007_blood splat.anm2", sprite.animation, 0, 0, sprite.frame,
+        { scale: 0.65, overrides: { 0: {
+          RedTint: sprite.tint[0] * 255, GreenTint: sprite.tint[1] * 255,
+          BlueTint: sprite.tint[2] * 255, AlphaTint: sprite.tint[3] * 255,
+          RedOffset: sprite.offsets[0] * 255, GreenOffset: sprite.offsets[1] * 255,
+          BlueOffset: sprite.offsets[2] * 255,
+        } } });
+      ctx.restore();
     }
     gl.beginTarget(this.walls, width, height); gl.resetTransform();
     gl.clearRect(0, 0, this.walls.width, this.walls.height); gl.blendFactors("one", "zero");

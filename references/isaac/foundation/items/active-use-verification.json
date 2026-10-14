@@ -1,0 +1,70 @@
+{
+  "schema": 1,
+  "qualification": "Required CI captures both real games freshly. Corrected postcapture comparison reuses all eight exact earlier original recordings, launches a fresh browser against clean7a production, and launches no new original process. Source observations only provide comparisons.",
+  "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "initialFreshBothGames": {
+    "gateCommit": "bcbbe2d0108b4b01703c20794094d0567e4bd895",
+    "runtimeCommit": "2e5ac948f665abe9e0961951d5383e7e157987d9",
+    "productionSha256": "7e5af319d73e13825ce0cce94aebddc19bcb8e2a979dc4849da12d654a4f7dfa",
+    "reportSha256": "57a2b3328bdc1f0021a5c6b0d3fe734ce3bb676920b79c05444832365b4dc98d",
+    "auditSha256": "14b050b6224657c9740d17fc52f7d4dc9fe524ec080e1625693bd6b27a56efa5",
+    "requiredFailures": 739,
+    "buildQualification": "Build used source bytes subsequently committed unchanged as2e5; bcb adds only gate checks. This is not a cleanbcb build claim."
+  },
+  "correctedRetainedOriginalFreshBrowser": {
+    "sourceCommit": "7a07e98ee77d9f778b9e2e44e2fa86b93ef41d49",
+    "runtimeCorrection": "417f5ea5e5cc6f72a4ea9bd745b0049f7db3b248",
+    "productionSha256": "64b08be594d7e27257b356143901540d28aeec0c4cee7ec928781c6a1f04b351",
+    "wasmSha256": "f96ef35f97cef997099b7e6867a639b18e104a45486a5a101b792d8dae161ecb",
+    "floorSha256": "1b91224f8579d50227779bf8807eb51e8b4942716d5ea1d7269109a5417bd16c",
+    "reportSha256": "5ced9506673be6308180ec6b93fa506c8c1b5bc7ca10d457c59cbb2fc330521e",
+    "auditSha256": "8af0f09d845c6b4430ea01417a338a7932fa44a84218ee0b3264503cbcb6e471",
+    "supervisorReceiptSha256": "bca2cbd237a641368f9244eec167b5a4dd70e3b0ed8c76d7c49c8d797d1de2ea",
+    "requiredFailures": 607,
+    "resolvedCopiedFrameFailures": 132,
+    "staticValidation": [
+      "full production build",
+      "strict all-target Clippy",
+      "TypeScript",
+      "authored asset checks",
+      "floor helper build"
+    ],
+    "metadataCaveat": "The frozen replay tool scope string says four-case; actual immutable input bank and replay contain eight. Subsequent composition fixes the scope string without editing historical evidence."
+  },
+  "completeCohort": {
+    "cases": 8,
+    "comparedPresentations": 3068,
+    "checks": 232578,
+    "captureErrors": 0,
+    "evidenceAudit": "pass",
+    "runtimeGate": "fail",
+    "sourceStability": "39 gate hashes and93 source files before=end",
+    "originalBank": "All eight native archives and public input tapes preserved unchanged",
+    "generalHistory": "32MiB general history cap disclosed; complete independent per-phase states and actual backend snapshots retained"
+  },
+  "remainingRequiredFailures": {
+    "persistentControls7d4": 144,
+    "animationGuard": 68,
+    "collectibleBlastVelocity": 4,
+    "collectibleBlastPosition": 2,
+    "unsupported291Charge": 66,
+    "unsupported291TemporaryRecords": 66,
+    "unsupported291UseItemName": 36,
+    "unsupported291UseItemPlaying": 36,
+    "unsupported291UseItemFrame": 34,
+    "unsupported291CopiedFrame": 66,
+    "fireTimer": 43,
+    "headTimer": 24,
+    "guardedEmission": 18
+  },
+  "unsupportedAndUnaccepted": [
+    "Flush291 and real NPC245 conversion",
+    "other active dispatches",
+    "active swaps and modifier/reserve charge",
+    "actual room-clear recharge producer",
+    "equipped pockets/cards/pills",
+    "held shooting during legacy Pickup guard",
+    "latest-main composition live acceptance"
+  ],
+  "retainedArtifacts": "Ignored .cache/coordination/active-items-research and .cache/e2e/active-item-use contain complete frozen source receipts, raw lossless archives, reports, input tapes, audits and both production artifacts."
+}

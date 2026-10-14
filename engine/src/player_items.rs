@@ -498,6 +498,7 @@ fn flush_queued(state: &mut State) -> Result<(), String> {
     }
     // AddCollectible52d173 calls cache evaluation before52ee40 clears queue
     // fields. The Familiar callback owns its actual local/shared consumers.
+    crate::player_stats::evaluate_cache(state)?;
     crate::familiars::evaluate_cache(state)?;
     let owner = state
         .player_items
