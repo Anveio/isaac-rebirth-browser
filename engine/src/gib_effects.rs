@@ -253,9 +253,13 @@ fn initialize(effect: &mut SpriteEffect, shared: &mut crate::mt::Mt19937) -> Res
         } else {
             shared.bounded(choices.len() as u32) as usize
         };
-        effect.sprite.animation = choices[choice].into();
-        effect.sprite.frame = 0.0;
-        effect.sprite.playing = true;
+        //40fd80 Play(force=false) preserves the current nonloop clip.
+        //Choosing the default BloodGib01 keeps Base's already advanced frame.
+        if effect.sprite.animation != choices[choice] {
+            effect.sprite.animation = choices[choice].into();
+            effect.sprite.frame = 0.0;
+            effect.sprite.playing = true;
+        }
         particle.vertical_velocity = -(shared.uniform() * 30.0) + 5.0;
     }
     particle.state = 1;
