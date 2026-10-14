@@ -492,8 +492,11 @@ pub fn state(state: &State) {
         json!({ "introduction": introduction })
     );
     let admission = &state.run_admission;
-    let controls_follow_fade = if state.screen == Screen::Playing {
-        state.player.controls_enabled == (admission.initial_fade == 0.0)
+    // Player+7d4 is cleared by the run-start fade and by every doorway or
+    // boss-scene transition, and set again when both have finished.
+    let controls_follow_holds = if state.screen == Screen::Playing {
+        state.player.controls_enabled
+            == (admission.initial_fade == 0.0 && state.room_transition.is_none())
             && admission.requested_time_anchor_ms.is_some()
     } else {
         state.player.controls_enabled && admission.initial_fade == 0.0
@@ -502,9 +505,9 @@ pub fn state(state: &State) {
         (0.0..=1.0).contains(&admission.initial_fade)
             && (admission.fade_rate == 0.0 || admission.fade_rate == 0.04)
             && admission.clock.sub_millisecond_nanoseconds < 1_000_000
-            && controls_follow_fade,
-        "game: player controls are disabled exactly while the run-start fade holds",
-        json!({ "admission": admission, "controls": state.player.controls_enabled })
+            && controls_follow_holds,
+        "game: player controls are disabled exactly while the run-start fade or a room transition holds",
+        json!({ "admission": admission, "controls": state.player.controls_enabled, "transition": state.room_transition })
     );
     let request = &state.run_start_request;
     props::always!(

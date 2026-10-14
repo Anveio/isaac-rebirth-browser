@@ -332,7 +332,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Always | game: pause state agrees with the pause menu phase | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: volumes stay within the unit interval | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: the run introduction lasts at most 140 ticks | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
-| Always | game: player controls are disabled exactly while the run-start fade holds | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: player controls are disabled exactly while the run-start fade or a room transition holds | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: no run-start request is pending during gameplay | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: player motion is finite and health is bounded | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: consumables are capped at 99 | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
