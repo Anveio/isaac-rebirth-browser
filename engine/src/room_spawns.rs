@@ -49,6 +49,51 @@ fn next11(mut state: u32) -> u32 {
     state
 }
 
+fn next7(mut state: u32) -> u32 {
+    state ^= state >> 1;
+    state ^= state << 21;
+    state ^= state >> 20;
+    state
+}
+
+/// Room spawnConfig5c5240's alternate-variant rolls for NPC types 14..88. A
+/// local RNG7 on the group seed may promote the authored entry, e.g. Pooter
+/// to Super Pooter. The pickup, slot, trapdoor and fire rewrites of the same
+/// routine belong to their owning systems.
+fn alternate_variant(entity_type: u16, variant: u16, group_seed: u32) -> u16 {
+    // 0x67aae0, 0x67ab40 and 0x67aba0 flag tables, indexed by type-14.
+    const PRIMARY: [u16; 6] = [14, 16, 24, 25, 26, 27];
+    const SECONDARY: [u16; 4] = [41, 53, 55, 60];
+    const TERTIARY: [u16; 9] = [29, 30, 38, 39, 42, 44, 57, 61, 88];
+    let mut state = group_seed;
+    let mut bounded = |range: u32| {
+        state = next7(state);
+        state % range
+    };
+    let mut variant = variant;
+    if matches!(entity_type, 15 | 16 | 26 | 30 | 39 | 55 | 88) && bounded(100) == 0 {
+        variant = 2;
+    }
+    let primary = PRIMARY.contains(&entity_type);
+    let secondary = SECONDARY.contains(&entity_type);
+    let tertiary = TERTIARY.contains(&entity_type);
+    // 5c530a, 5c5320 and 5c5336: one, two or three escalating chances.
+    let first = (primary && !secondary) || (!primary && !secondary && tertiary);
+    if !(primary || secondary || tertiary) {
+        return variant;
+    }
+    if first && bounded(21) == 0 {
+        return 1;
+    }
+    if !tertiary && bounded(25) == 0 {
+        return 1;
+    }
+    if bounded(100) == 0 {
+        return 1;
+    }
+    variant
+}
+
 /// Fresh room Init 0x5cf190..0x5cf2ee admits groups in authored order. The
 /// two initial draws choose the tinted-rock candidate, even without rocks.
 pub fn select(asset: &RoomAsset, spawn_seed: u32) -> Result<RoomSpawns, String> {
@@ -105,12 +150,19 @@ pub fn select(asset: &RoomAsset, spawn_seed: u32) -> Result<RoomSpawns, String> 
         } else {
             SpawnCategory::Grid
         };
+        // SpawnEntity5ce6b0 applies spawnConfig5c5240 before Game::Spawn.
+        let variant = if category == SpawnCategory::Entity && (14..=88).contains(&entry.entity_type)
+        {
+            alternate_variant(entry.entity_type, entry.variant, state)
+        } else {
+            entry.variant
+        };
         selectors.push(SpawnSelector {
             group_index: group_index as u16,
             grid_index: (group.x + 1) as u16 + (group.y + 1) as u16 * grid_width,
             category,
             entity_type: entry.entity_type,
-            variant: entry.variant,
+            variant,
             subtype: entry.subtype,
             position: WorldVector {
                 x: 80.0 + f32::from(group.x) * 40.0,
