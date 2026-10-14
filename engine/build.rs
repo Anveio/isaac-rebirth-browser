@@ -370,6 +370,35 @@ fn entity_catalog(xml: &str) -> String {
     output
 }
 
+/// bossportraits.xml: VS-screen presentation id, boss type/variant (encoded
+/// in the authored portrait name `Portrait_<type>.<variant>_...`) and portrait.
+fn boss_catalog(xml: &str) -> String {
+    let mut output = String::from("pub const BOSS_PRESENTATIONS: &[BossPresentation] = &[\n");
+    for tag in xml.split("<boss ").skip(1) {
+        let id: u32 = attribute(tag, "id")
+            .expect("boss id")
+            .parse()
+            .expect("boss id number");
+        let portrait = attribute(tag, "portrait").expect("boss portrait");
+        // The final Isaac boss reuses PlayerPortrait_01; its entity is not
+        // encoded in the name, so it has no row until that boss is admitted.
+        let Some(identity) = portrait
+            .strip_prefix("Portrait_")
+            .and_then(|rest| rest.split('_').next())
+        else {
+            continue;
+        };
+        let (kind, variant) = identity.split_once('.').expect("portrait type.variant");
+        output.push_str(&format!(
+            "BossPresentation {{ id: {id}, entity_type: {kind}, variant: {variant}, portrait: {portrait:?} }},\n",
+            kind = kind.parse::<u32>().expect("portrait type"),
+            variant = variant.parse::<u32>().expect("portrait variant"),
+        ));
+    }
+    output.push_str("];\n");
+    output
+}
+
 fn main() {
     let manifest = PathBuf::from(std::env::var_os("CARGO_MANIFEST_DIR").unwrap());
     let resources = manifest
@@ -668,6 +697,13 @@ fn main() {
     fs::write(output.join("shadow_catalog.rs"), generated).expect("write shadow catalog");
     fs::write(output.join("entity_catalog.rs"), entity_catalog(&xml))
         .expect("write entity catalog");
+    let portraits = resources.join("bossportraits.xml");
+    println!("cargo:rerun-if-changed={}", portraits.display());
+    fs::write(
+        output.join("boss_catalog.rs"),
+        boss_catalog(&fs::read_to_string(portraits).expect("read authored boss portraits")),
+    )
+    .expect("write boss catalog");
     fs::write(
         output.join("pickup_catalog.rs"),
         pickup_catalog(&pickups, &animations, &xml),
