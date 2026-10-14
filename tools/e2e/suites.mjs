@@ -12,7 +12,8 @@
 //   args    default driver arguments (caller flags of the same name replace them)
 //   about   one line describing what the suite proves
 //   replay  flag that replays the suite's recorded scenarios.json
-//           (default --scenarios; paired-game suites replay case.json tapes)
+//           (default --scenarios; paired-game suites replay case.json tapes;
+//           false when the driver has no replay input yet)
 
 const suite = (id, entry, args, about, extra = {}) => ({ id, entry, args, about, ...extra });
 const paired = 'tools/foundation/paired-game.mjs';
@@ -55,10 +56,12 @@ export const SUITES = [
   suite('active-item-use', e2e('items'), ['--active-use', '--count', '2'],
     'Acquiring and using an active item (Yum Heart): charge, health, animation and SFX'),
   suite('familiars', e2e('familiars'), ['--count', '2'], 'Familiar admission, appearance and following'),
-  suite('npcs', e2e('npcs'), [], 'Fly/AttackFly/Gaper construction, AI and contact'),
-  suite('roundworms', e2e('roundworms'), [], 'Round Worm actors, projectiles and room locks'),
-  suite('fireplaces', e2e('fireplaces'), [], 'Fireplace damage, extinguish and Ember effects'),
-  suite('monstro', e2e('monstro'), [], 'Level2 Fly route into Monstro: admission, AI, projectiles and scene cleanup'),
+  suite('npcs', e2e('npcs'), [], 'Fly/AttackFly/Gaper construction, AI and contact', { replay: false }),
+  suite('roundworms', e2e('roundworms'), [], 'Round Worm actors, projectiles and room locks', { replay: false }),
+  suite('fireplaces', e2e('fireplaces'), [], 'Fireplace damage, extinguish and Ember effects', { replay: false }),
+  suite('monstro', e2e('monstro'), [], 'Level2 Fly route into Monstro: admission, AI, projectiles and scene cleanup', { replay: false }),
+  suite('dips', e2e('dips'), ['--count', '2'], 'Dip admission, AI, poop explosions and death callbacks', { replay: false }),
+  suite('blood-start', e2e('blood-start'), [], 'Blood effect start-up and background admission', { replay: false }),
   suite('health-damage', e2e('health-damage'), ['--count', '2'],
     'Red/Soul/Black health damage, Hit and Black-heart callbacks', { replay: '--scenario-file' }),
   suite('player-death', e2e('player-death'), ['--count', '2'],

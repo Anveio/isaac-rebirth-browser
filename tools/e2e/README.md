@@ -33,15 +33,13 @@ npm run test:e2e -- keys --scenarios .cache/e2e/run-…/keys/scenarios.json
 npm run test:e2e -- paired --replay-cases .cache/e2e/run-…/paired/<case>/case.json
 ```
 
-## CI
+## No CI
 
-Pull requests run only `npm run check:build` (`.github/workflows/build.yml`).
-Live suites run after every push to main, every six hours (fresh fuzz seeds
-while main is quiet) and on manual dispatch. These runs are in
-`.github/workflows/live-games.yml`, which builds once and runs one job per
-suite. A run in progress is never cancelled: the newest main commit queues
-behind it. Each job's summary lists the replay command for any failure, and
-the job uploads the run directory as an artifact.
+There is deliberately no CI (see [AGENTS.md](../../AGENTS.md)). Before you open
+or merge a change, run `npm run check:build` and the suites it touches, and
+compare their results against main. A dedicated agent workstream runs the
+suites on main and fixes regressions, but it is a backstop, not a substitute
+for checking your own change.
 
 ## Adding or changing a suite
 

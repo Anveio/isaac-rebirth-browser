@@ -16,6 +16,7 @@ const INPUT_PINS = new Set([
   'tools/original/foundation-layout-observer.py',
   'tools/original/foundation-pickup-observe.py',
   'tools/original/item-observer.py',
+  'tools/original/blood-start-observer.py',
   'tools/foundation/item-catalog.py',
   'tools/foundation/stage-masks.mjs',
 ]);

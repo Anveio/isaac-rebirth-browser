@@ -61,6 +61,7 @@ pub(crate) fn from_selector(id: u32, selector: &SpawnSelector) -> Result<Npc, St
         fireplace: None,
         monstro: None,
         level2_fly: None,
+        dip: None,
         keeper: Some(KeeperState {
             anchor: selector.position,
             entity_flags: 4,
