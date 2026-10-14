@@ -2082,7 +2082,9 @@ impl Game {
             phase,
             &mut self.state.boot_lifecycle.shared,
             &mut entities::NpcWorld {
-                game_counter: self.state.game_update_count,
+                // Native Game+ce9f4 is one more than game_update_count (the
+                // run-loader origin); AI frame gates read the native value.
+                game_counter: self.state.game_update_count.wrapping_add(1),
                 player,
                 player_velocity,
                 grid: &grid,
