@@ -110,7 +110,7 @@ All paired captures retain strict decoded-RGBA diagnostics. Their pixel failures
 
 ## Required live paired-game scenarios
 
-The definitions below are discovered by executing the actual tape builder. By default the paired suite executes all six contrived cases plus two fresh OS-random seed/action tapes. Random tapes sample three movement/fire direction pairs with replacement; they do not guarantee every direction or birth phase. Contrived moving-bomb tapes cover both birth phases. \`--replay-cases PATH,...\` reruns the exact saved seed **and** all random action choices. Seed-only replay creates new action choices and is discovery.
+The definitions below are discovered by executing the actual tape builder. By default the paired suite executes all ${pairedCases.filter(item => !item.randomized).length} contrived cases plus two fresh OS-random seed/action tapes. Random tapes sample three movement/fire direction pairs with replacement; they do not guarantee every direction or birth phase. Contrived moving-bomb tapes cover both birth phases. \`--replay-cases PATH,...\` reruns the exact saved seed **and** all random action choices. Seed-only replay creates new action choices and is discovery.
 
 | Paired scenario | Behavior / systems | Shared bootstrap / captures | Presentation intervals |
 | --- | --- | --- | --- |
@@ -200,7 +200,7 @@ Pixel gates compare decoded RGBA over the whole frame, HUD, actor and projectile
 
 ## Antithesis deterministic simulation units
 
-The only checked-in unit-level verification is the [Antithesis DST harness](docs/dst.md) in \`engine/dst/\` (owner-authorized exception; see [AGENTS.md](AGENTS.md)). It is an inner-loop regression tool, not a merge gate: neither \`check:build\` nor any pre-merge check runs it. \`npm run test:dst\` drives each registered unit with seeded entropy, checks every property after each step and replays the corpus tapes through the game unit; \`--entropy antithesis\` hands every decision to the Antithesis platform. Units and properties below are discovered from [the registry](${DST_REGISTRY}) and source; a run's report, not this list, is the outcome. DST establishes engine safety, determinism and documented contracts only, never original-game parity.
+The only checked-in unit-level verification is the [Antithesis DST harness](docs/dst.md) in \`engine/dst/\` (owner-authorized exception; see [AGENTS.md](AGENTS.md)). It is an inner-loop regression tool, not a merge gate: neither \`check:build\` nor any pre-merge check runs it. \`npm run test:dst\` drives each registered unit with seeded entropy, checks every property after each step, replays the corpus tapes through the game unit and checks every game tape against the shipped \`engine.wasm\`; \`--entropy antithesis\` hands every decision to the Antithesis platform. Units and properties below are discovered from [the registry](${DST_REGISTRY}) and source; a run's report, not this list, is the outcome. DST establishes engine safety, determinism, native/WASM agreement and documented contracts only, never original-game parity.
 
 | DST unit | Scope | Always | Sometimes | Reachability |
 | --- | --- | ---: | ---: | ---: |

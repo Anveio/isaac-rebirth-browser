@@ -541,8 +541,8 @@ impl Grid {
             }
             angle += angle_step;
             direction = WorldVector {
-                x: angle.cos(),
-                y: angle.sin(),
+                x: crate::fmath::cos(angle),
+                y: crate::fmath::sin(angle),
             };
         }
         Ok(selected
@@ -605,8 +605,8 @@ impl Collider {
             let angle =
                 (f64::from(doubled) * std::f64::consts::PI / f64::from(geometry.points)) as f32;
             let sample = WorldVector {
-                x: angle.cos() * (geometry.radius * geometry.scale.x),
-                y: angle.sin() * (geometry.radius * geometry.scale.y),
+                x: crate::fmath::cos(angle) * (geometry.radius * geometry.scale.x),
+                y: crate::fmath::sin(angle) * (geometry.radius * geometry.scale.y),
             };
             if !sample.is_finite() {
                 return Err("collision point geometry overflowed".into());

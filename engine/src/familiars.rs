@@ -488,7 +488,7 @@ pub(crate) fn evaluate_cache(state: &mut State) -> Result<(), String> {
             .raw();
         let angle =
             (f64::from(state.boot_lifecycle.shared.uniform()) * std::f64::consts::PI * 2.0) as f32;
-        let (sin, cos) = angle.sin_cos();
+        let (sin, cos) = (crate::fmath::sin(angle), crate::fmath::cos(angle));
         let position = crate::bombs::player_world(state) + WorldVector { x: cos, y: sin } * 20.0;
         let grid = Grid::new(
             state

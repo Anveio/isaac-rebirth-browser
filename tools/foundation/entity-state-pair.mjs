@@ -20,6 +20,7 @@ assert.equal(native.status, 'pass', 'Fresh original capture must pass');
 assert.equal(browser.status, 'pass', 'Production browser capture must pass');
 const observations = new Map(native.debugObservations.map(row => [row.context.label, row.observation]));
 const states = new Map(browser.frames.map(frame => [frame.label, frame.state]));
+const renders = new Map(browser.frames.map(frame => [frame.label, frame.render]));
 const checks = [];
 let started = false;
 for (const [label, observation] of observations) {
@@ -29,7 +30,7 @@ for (const [label, observation] of observations) {
   assert.equal(observation.gameplay?.status, 'pass', `Gameplay observation must pass at ${label}`);
   assert.equal(observation.gameplay.memoryWritten, false);
   const rows = [];
-  entityRows(rows, observation.gameplay, actual, spec);
+  entityRows(rows, observation.gameplay, actual, spec, renders.get(label));
   for (const row of rows) checks.push({ label, ...row });
 }
 assert.ok(checks.length, 'A case must compare at least one gameplay capture');
@@ -39,7 +40,7 @@ for (const [side, reached] of Object.entries(execution))
     status: reached[name] ? 'pass' : 'fail' });
 const status = checks.every(row => row.status === 'pass') ? 'pass' : 'fail';
 writeFileSync(resolve(option('--output')), JSON.stringify({ schema: 1, entity: spec.name, status, required: spec.required, execution,
-  scope: `Every authored NPC identity in the room, ${spec.name}'s shared and spec fields, room/door/manager state and enemy projectile seeds are exact and required at every gameplay capture; both games must reach the required lifecycle markers.`,
+  scope: `Every authored NPC identity in the room, ${spec.name}'s shared and spec fields, its drawn sprite scale, room/door/manager state and enemy projectile seeds are exact and required at every gameplay capture; both games must reach the required lifecycle markers.`,
   checks }, null, 2) + '\n');
 console.log(JSON.stringify({ status, checks: checks.length, failures: checks.filter(row => row.status === 'fail').length, execution }));
 process.exitCode = status === 'pass' ? 0 : 1;
