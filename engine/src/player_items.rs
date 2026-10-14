@@ -34,6 +34,8 @@ pub struct PlayerItems {
     pub entity_spawn_seed: u32,
     pub owned_counts: Vec<i32>,
     pub temporary_collectibles: Vec<TemporaryCollectible>,
+    ///Actual held trinket slots E14/E18; normal fresh constructor initializes0.
+    pub trinket_slots: [u32; 2],
     pub queued_id: Option<u32>,
     pub queued_charge: i32,
     pub queued_touched: bool,
@@ -85,6 +87,7 @@ impl PlayerItems {
             entity_spawn_seed,
             owned_counts: vec![0; 347],
             temporary_collectibles: Vec::new(),
+            trinket_slots: [0; 2],
             queued_id: None,
             queued_charge: 0,
             queued_touched: false,
@@ -488,7 +491,25 @@ pub(crate) fn flush_queued(state: &mut State) -> Result<(), String> {
         return Ok(());
     };
     let (charge, touched) = (owner.queued_charge, owner.queued_touched);
-    let config = items::definition(id).ok_or("queued collectible config absent")?;
+    add_collectible(state, id, charge, touched)?;
+    let owner = state
+        .player_items
+        .as_mut()
+        .expect("checked Player item owner");
+    owner.queued_id = None;
+    owner.queued_charge = 0;
+    Ok(())
+}
+
+///Actual52cc90 common grant callback, shared by queued pickup and Challenge
+///Player52e1a0. Queue and pool-removal fields remain owned by the caller.
+pub(crate) fn add_collectible(
+    state: &mut State,
+    id: u32,
+    charge: i32,
+    touched: bool,
+) -> Result<(), String> {
+    let config = items::definition(id).ok_or("granted collectible config absent")?;
     let owner = state
         .player_items
         .as_mut()
@@ -546,11 +567,5 @@ pub(crate) fn flush_queued(state: &mut State) -> Result<(), String> {
     // fields. The Familiar callback owns its actual local/shared consumers.
     crate::player_stats::evaluate_cache(state)?;
     crate::familiars::evaluate_cache(state)?;
-    let owner = state
-        .player_items
-        .as_mut()
-        .expect("checked Player item owner");
-    owner.queued_id = None;
-    owner.queued_charge = 0;
     Ok(())
 }

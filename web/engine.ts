@@ -1,8 +1,9 @@
 import wasmUrl from "./generated/engine.wasm?url";
 
-export type Screen = "title" | "profile" | "main" | "character" | "seed" | "playing";
+export type Screen = "title" | "profile" | "main" | "character" | "challenge" | "seed" | "playing";
 export type Direction = "left" | "right" | "up" | "down";
 export interface Player {
+  canShoot: boolean; initialized3074: boolean;
   visible: boolean; inputCooldown: number; dead: boolean;
   x: number; y: number; vx: number; vy: number; hp: number; maxHp: number;
   soulHp: number; blackHeartMask: number; eternalHearts: number;
@@ -11,10 +12,12 @@ export interface Player {
   eye: "negative" | "positive";
   shotsFired: number;
 }
+export interface AttackColor { tint: [number,number,number,number]; sourceMiddle: [number,number,number,number]; offsets: [number,number,number]; }
 export interface Tear {
   id: number; x: number; y: number; vx: number; vy: number; age: number;
   spawnSeed: number; collisionRadius: number; gridContact: boolean;
   shotOrdinal: number; collisionDamage: number; baseDamage: number; scale: number; animationTier: number;
+  attackFlags: [number,number]; sourceColor: AttackColor;
   motion: {
     position: {x: number; y: number}; presentedPosition: {x: number; y: number};
     velocity: {x: number; y: number}; height: number; fallingSpeed: number;
@@ -162,6 +165,7 @@ export interface RoomDescriptor {
   roomInitSeed: number; decorationSeed: number; spawnSeed: number; followingSeed: number;
 }
 export interface Floor {
+  challengeCurse: {initialLocalState: number; finalLocalState: number; threshold: number; thresholdResult: number | null; selectionResult: number | null; selectedMask: number; filteredMask: number; roomAdjustmentResult: number; localDraws: number} | null;
   contract: string; stage: number; stageSeed: number; additionalRooms: number; attempts: number;
   descriptors: RoomDescriptor[]; grid: number[]; startingDescriptor: number;
   primaryState: number; primaryDraws: number; generatorState: number; gameFlags: number;
@@ -228,19 +232,21 @@ export interface StageEffects {
   overlay: { asset: string; sourceCrop: Rect; offset: { x: number; y: number }; modulationRGBA: [number, number, number, number]; blend: Blend; simulationTick: number; motionEvidence: string };
 }
 export interface State {
+  weaponCache: {primary: number; flagsC98: [number,number]; colorCa0: AttackColor; colorCcc: AttackColor};
+  weaponAdmission: {sourcePlayerType: number|null; c18IsKnownEmpty: boolean; pendingPrimaryCleanup: {fromPrimary:number;toPrimary:number}|null; unadmittedController: {primary:number;channel:string}|null};
   lasers: {id:number; position:{x:number;y:number}; presentedPosition:{x:number;y:number}; positionOffset:{x:number;y:number}; length:number; rotation:number; scale:{x:number;y:number}; actor:string; animation:string; animationClock:number; removed:boolean;
     impact: {position:{x:number;y:number}; positionOffset:{x:number;y:number}; scale:{x:number;y:number}; rotation:number; actor:string; animation:string; animationClock:number; removed:boolean} | null}[];
   enemyProjectiles: {id:number; spawnSeed:number; position:{x:number;y:number}; presentedPosition:{x:number;y:number}; velocity:{x:number;y:number}; height:number; scale:number; animation:string|null; animationFrame:number; dead:boolean; removed:boolean}[];
   schema: 1; tickRate: 60; tick: number; menuAnimationTick: number; runTick: number; gameUpdateCount: number; screen: Screen;
   titleAnimationFrame: number; menuFade: { active: boolean; alpha: number; color: [number, number, number, number] };
-  runStartRequest: { inputPending: boolean; fading: boolean; fadeAlpha: number; systemPending: boolean };
+  runStartRequest: { inputPending: boolean; fading: boolean; fadeAlpha: number; systemPending: boolean; challengeId: number | null };
   systemClock: { systemCounter: number; interpolationEnabled: boolean };
   runAdmission: { clock: { milliseconds: number; subMillisecondNanoseconds: number; nanosecondsPerStep: number };
     requestedTimeAnchorMs: number | null; initialFade: number; fadeRate: number;
     completionCallbacksPending: boolean };
   audio: AudioState;
   music: MusicState;
-  profile: number; mainSelection: number; characterSelection: number; character: string; difficulty: string;
+  profile: number; challengeSelection: number | null; challengeUnlocked: boolean[]; challengeId: number; challengeRunParameters: {sourceR8: number; sourceR9: boolean} | null; mainSelection: number; characterSelection: number; character: string; difficulty: string;
   seedText: string; seedValid: boolean; runSeed: string; initialSeed: number; runSeedValue: number; bootEpochSeed: number; bootLifecycle: BootLifecycle;
   runSeeds: {startSeed: number; streamState: number; initializedFields: number[]} | null;
   itemPools: {seed: number; rootRng: ItemRng; secondaryRng: ItemRng; pools: ItemPool[];
@@ -262,7 +268,7 @@ export interface State {
   nightmares: {order: number[]; pathIndex: number; currentActor: string | null; requestPending: boolean; systemActive: boolean;
     active: boolean; definitionLoaded: boolean; progressDefinitionLoaded: boolean; stageResources: number[];
     counter: number; frame: number; playing: boolean; stageIndex: number; alternate: boolean};
-  profiles: { slot: number; unlockedCharacters: string[]; selectedCharacter: string; achievements: boolean[] }[];
+  profiles: { slot: number; unlockedCharacters: string[]; selectedCharacter: string; achievements: boolean[]; counters: number[] }[];
   characterCatalog: { name: string; animation: string }[];
   paused: boolean; pressed: string[];
   floor: Floor; currentRoom: number; visitedRooms: number[];
@@ -292,9 +298,11 @@ export interface State {
   runIntroduction: RunIntroduction; pauseMenu: PauseMenu;
   playerDeath: { lastDamageFlags: number; gameOver: { state: number; damageFlags: number; diaryFrame: number; diaryPlaying: boolean } | null; systemPending: "restart" | "exit" | null };
 }
+export interface ResourceInputs { challengesXml: string; }
 export type Command = { type: "key"; code: string; down: boolean } | { type: "text"; text: string } | { type: "tick"; count: number; timestampMillis?: number } | { type: "audioVolume"; sfx_volume: number } | { type: 'musicVolume'; volume: number } | MusicBackendCommand;
 interface Exports extends WebAssembly.Exports {
   memory: WebAssembly.Memory; abi_version: () => number; reset: (initialSeed: number, bootEpochSeed: number) => number; request_ptr: (length: number) => number;
+  reset_with_resources: (initialSeed: number, bootEpochSeed: number) => number;
   command: () => number; snapshot_ptr: () => number; snapshot_len: () => number;
   error_ptr: () => number; error_len: () => number; public_keys_ptr: () => number; public_keys_len: () => number;
 }
@@ -314,7 +322,7 @@ export class Engine {
       throw new Error("WASM public key surface must be a nonempty array of unique strings");
     this.publicKeys = new Set(keys as string[]);
   }
-  static async create(initialSeed: number, bootEpochSeed = 0) {
+  static async create(initialSeed: number, bootEpochSeed = 0, resources?: ResourceInputs) {
     Engine.validateSeed(initialSeed);
     Engine.validateBootSeed(bootEpochSeed);
     const response = await fetch(wasmUrl);
@@ -323,7 +331,7 @@ export class Engine {
     if (typeof instance.exports.abi_version !== "function" || instance.exports.abi_version() !== 2
       || typeof instance.exports.public_keys_ptr !== "function" || typeof instance.exports.public_keys_len !== "function")
       throw new Error("WASM engine ABI is stale; rebuild with npm run build:wasm");
-    const engine = new Engine(instance.exports as Exports); engine.reset(initialSeed, bootEpochSeed); return engine;
+    const engine = new Engine(instance.exports as Exports); engine.reset(initialSeed, bootEpochSeed, resources); return engine;
   }
   private static validateSeed(initialSeed: number) {
     if (!Number.isInteger(initialSeed) || initialSeed < 1 || initialSeed > 0xffffffff)
@@ -333,10 +341,22 @@ export class Engine {
     if (!Number.isInteger(bootEpochSeed) || bootEpochSeed < 0 || bootEpochSeed > 0xffffffff)
       throw new Error("Boot epoch seed must be an unsigned 32-bit value");
   }
-  reset(initialSeed: number, bootEpochSeed = 0): State {
+  reset(initialSeed: number, bootEpochSeed = 0, resources?: ResourceInputs): State {
     Engine.validateSeed(initialSeed);
     Engine.validateBootSeed(bootEpochSeed);
-    if (this.wasm.reset(initialSeed, bootEpochSeed) !== 0) throw new Error(this.read(this.wasm.error_ptr(), this.wasm.error_len()));
+    let result: number;
+    if (resources === undefined) result = this.wasm.reset(initialSeed, bootEpochSeed);
+    else {
+      if (typeof this.wasm.reset_with_resources !== "function")
+        throw new Error("WASM resource ingress is stale; rebuild with npm run build:wasm");
+      const bytes = new TextEncoder().encode(JSON.stringify(resources));
+      if (bytes.length > 65_536) throw new Error("Boot resource input exceeds 64 KiB");
+      const ptr = this.wasm.request_ptr(bytes.length);
+      if (ptr === 0) throw new Error("WASM resource allocation failed");
+      new Uint8Array(this.wasm.memory.buffer, ptr, bytes.length).set(bytes);
+      result = this.wasm.reset_with_resources(initialSeed, bootEpochSeed);
+    }
+    if (result !== 0) throw new Error(this.read(this.wasm.error_ptr(), this.wasm.error_len()));
     return this.snapshot();
   }
   command(command: Command): State {

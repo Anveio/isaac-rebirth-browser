@@ -416,14 +416,21 @@ pub fn advance_room_clear(state: &mut State) {
         state.room.combat_clear_countdown = 10;
     } else if state.room.combat_clear_countdown > 0 {
         state.room.combat_clear_countdown -= 1;
-    } else if !state.room.combat_clear {
-        state.room.combat_clear = true;
+    } else {
+        //5d1988 calls5659f0 before the descriptor-clear predicate. An
+        //already-clear empty start room still opens on this actual Full.
         change_doors(state, true);
+        if !state.room.combat_clear {
+            state.room.combat_clear = true;
+        }
     }
 }
 
 fn change_doors(state: &mut State, open: bool) {
     let mut changed = Vec::new();
+    let source_type = state.floor.descriptors[state.current_room]
+        .template
+        .room_type;
     for door in &mut state.room.appearance.doors {
         if !open && door.state == "Opened" {
             door.state = "Closed".into();
@@ -431,12 +438,43 @@ fn change_doors(state: &mut State, open: bool) {
                 state.room.combat_shut_door_slots.push(door.slot);
             }
             changed.push(door.world_position);
-        } else if open
-            && door.state == "Closed"
-            && state.room.combat_shut_door_slots.contains(&door.slot)
-        {
-            door.state = "Opened".into();
-            changed.push(door.world_position);
+        } else if open {
+            //565b00 binds44/48 to the real current/neighbor room types.
+            //5659f0 refuses either zero, hidden config6 and already-state2.
+            let destination_type = state.floor.descriptors[door.target_room as usize]
+                .template
+                .room_type;
+            //Type11 takes separate586300/5cc800/TEMP175 callbacks before
+            //the normal config branch; retain its current state unadmitted.
+            if source_type == 0
+                || destination_type == 0
+                || source_type == 11
+                || destination_type == 11
+            {
+                continue;
+            }
+            let Some(grid) = &mut state.room.grid else {
+                continue;
+            };
+            let column = ((door.world_position.x - 40.0) / 40.0 + 0.5).floor() as usize;
+            let row = ((door.world_position.y - 120.0) / 40.0 + 0.5).floor() as usize;
+            let Some(entity) = grid
+                .cells
+                .get_mut(column + row * usize::from(grid.width))
+                .and_then(|cell| cell.entity.as_mut())
+                .filter(|entity| entity.kind == 16)
+            else {
+                continue;
+            };
+            if entity.state == 2 || !matches!(entity.variant, 7 | 4) {
+                continue;
+            }
+            //Admitted normal configs7/4 store FSM2. Graphics refresh and
+            //other locked configs remain separate; no collision-class store.
+            entity.state = 2;
+            if door.state == "Closed" && state.room.combat_shut_door_slots.contains(&door.slot) {
+                door.state = "Opened".into();
+            }
         }
     }
     if open {
@@ -451,8 +489,7 @@ fn change_doors(state: &mut State, open: bool) {
                 .get_mut(column + row * usize::from(grid.width))
                 .and_then(|cell| cell.entity.as_mut())
             {
-                entity.state = if open { 2 } else { 1 };
-                // The next full Door::Update admits opened-door class5.
+                entity.state = 1;
                 entity.collision_class = 4;
             }
         }

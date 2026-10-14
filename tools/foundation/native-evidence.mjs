@@ -42,7 +42,7 @@ export async function readNativeEvidence(manifestPath) {
       else if (kind === 'advanceComplete') {
         assert.equal(manifest.presentations.at(-1).presentedFrame, value.presentedFrame);
         manifest.presentations[manifest.presentations.length - 1] = value;
-      } else if (kind === 'field' && ['bootstrapPresentedFrames', 'initialState'].includes(value.name)) manifest[value.name] = value.value;
+      } else if (kind === 'field' && ['bootstrapPresentedFrames', 'declaredOptionsKept', 'initialState'].includes(value.name)) manifest[value.name] = value.value;
       else if (['debugObservation', 'input', 'capture', 'audioHold', 'focusHandoff'].includes(kind)) {
         const field = { debugObservation: 'debugObservations', input: 'inputs', capture: 'frames',
           audioHold: 'hostAudioHolds', focusHandoff: 'focusHandoffs' }[kind];
