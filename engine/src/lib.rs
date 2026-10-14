@@ -838,7 +838,9 @@ impl Game {
                 _ => {}
             },
             Screen::Playing => {
-                if code == "Escape"
+                if code == "Escape" && !self.state.paused && self.state.room_transition.is_some() {
+                    // The original refuses to pause while a room transition is in progress.
+                } else if code == "Escape"
                     || (self.state.paused
                         && code == "Enter"
                         && self.state.pause_menu.selection == 1)
