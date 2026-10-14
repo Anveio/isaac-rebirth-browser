@@ -36,6 +36,7 @@ npm run check                         # Build and gate fresh original/browser ga
 npm run test:e2e                      # Run every registered live suite; retain every result
 npm run test:e2e:paired               # Six contrived + two recorded OS-random runs
 npm run test:e2e:paired -- --replay-cases PATH # Replay a recorded case.json
+npm run test:e2e:paired -- --archive-native-evidence # Stream complete native evidence to gzip
 npm run verify:foundation             # Strict legacy PNG/state diagnostics; mismatches exit nonzero
 npm run assets:rooms                  # Decode all base room records
 npm run matrix:check
@@ -100,6 +101,12 @@ Production seeds are ordinary inputs; invariants use random seeds recorded for
 replay. Live paired cases retain their OS-random seed and complete action tape in
 `case.json` and `tape.json`; `--replay-cases` uses the recorded choices. Fixed
 seeds belong in contrived interactions and reference fixtures.
+
+`--archive-native-evidence` retains the complete native manifest as
+`manifest.json.gz` with decompressed and archive hashes. Its separate
+progress journal commits each actual input, acknowledgement, observation and
+capture in a closed gzip member. Interrupted journals retain their uncommitted
+tail and identify the verified byte prefix; they cannot pass as complete runs.
 
 Update the matrix with `npm run matrix:update` when checkpoints or system tasks
 change. Pixel reports distinguish exact equality from measured native capture

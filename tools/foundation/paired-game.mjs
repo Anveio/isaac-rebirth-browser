@@ -9,6 +9,7 @@ import { chromium } from '@playwright/test';
 import { PNG } from 'pngjs';
 import { browserLaunchOptions, inspectBrowserGraphics } from './browser.mjs';
 import { writeJsonEvidence } from './browser-evidence.mjs';
+import { readNativeEvidence } from './native-evidence.mjs';
 import { pixelDifference } from './compare.mjs';
 import { startProductionServer } from './production-server.mjs';
 
@@ -30,6 +31,8 @@ const GATE_SOURCES = [
   'tools/original/foundation-combat-scenario.py', 'tools/original/foundation-seeds.py',
   'tools/original/foundation-random-seeds.py', 'tools/original/state-observer.py',
   'tools/original/debug-run.py', 'tools/original/with-display.sh', 'tools/foundation/browser.mjs',
+  'tools/original/native-evidence.py',
+  'tools/foundation/native-evidence.mjs',
 ];
 const sourceHashes = (additional = []) => Object.fromEntries([...new Set([...GATE_SOURCES, ...additional])].map(path => [path, digest(readFileSync(join(ROOT, path)))]));
 const option = (name, fallback) => {
@@ -62,11 +65,12 @@ function keyCode(key) {
   throw new Error(`No public browser key transport for ${key}`);
 }
 
-async function nativeCapture(caseData, directory, nativeFrameTimeout, originalObserver) {
+async function nativeCapture(caseData, directory, nativeFrameTimeout, originalObserver, archiveNativeEvidence) {
   mkdirSync(directory, { recursive: true });
   const args = ['tools/original/with-display.sh', 'python3', 'tools/original/foundation-clock-run.py',
     '--seed', caseData.seed, '--tape', join(dirname(directory), 'tape.json'),
     '--state-observer', originalObserver, '--frame-timeout', String(nativeFrameTimeout), '--output', directory];
+  if (archiveNativeEvidence) args.push('--archive-evidence');
   let error;
   try {
     const result = await runProcess('bash', args, { cwd: ROOT, maxBuffer: 8 * 1024 * 1024 });
@@ -76,15 +80,21 @@ async function nativeCapture(caseData, directory, nativeFrameTimeout, originalOb
     writeFileSync(join(directory, 'controller-output.txt'), String(failure.stdout || '') + String(failure.stderr || '') + error);
   }
   let manifest;
-  try { manifest = JSON.parse(readFileSync(join(directory, 'manifest.json'), 'utf8')); }
-  catch (failure) { return { status: 'fail', error: error || String(failure.message), directory }; }
+  const manifestPath = join(directory, archiveNativeEvidence ? 'manifest.json.gz' : 'manifest.json');
+  let evidence;
+  try {
+    if (archiveNativeEvidence) {
+      ({ manifest, evidence } = await readNativeEvidence(manifestPath));
+    } else manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
+  }
+  catch (failure) { return { status: 'fail', error: error || String(failure.message), directory, manifestPath }; }
   let provenance;
-  try { provenance = await python(['--validate-original', join(directory, 'manifest.json')]); }
+  try { provenance = await python(['--validate-original', manifestPath]); }
   catch (failure) {
     try { provenance = JSON.parse(failure.stdout); }
     catch { provenance = { status: 'fail', failures: [String(failure.message)] }; }
   }
-  return { status: error || provenance.status !== 'pass' ? 'fail' : 'pass', error, provenance, directory, manifest };
+  return { status: error || provenance.status !== 'pass' ? 'fail' : 'pass', error, provenance, directory, manifest, manifestPath, evidence };
 }
 
 async function browserCapture(browser, server, caseData, directory, archiveBrowserEvidence, captureBrowserAudio) {
@@ -254,14 +264,14 @@ function comparePair(caseData, native, browser, directory, exactPixels, stateCom
 
 export async function runPairedGate({ output, selected, randomCount = 2, replaySeeds = [], replayCases = [], exactPixels = false, productionDirectory,
   nativeFrameTimeout = 60, originalObserver = 'tools/original/foundation-paired-observer.py',
-  stateComparator = scopedState, additionalSources = [], archiveBrowserEvidence = false, captureBrowserAudio = false }) {
+  stateComparator = scopedState, additionalSources = [], archiveBrowserEvidence = false, archiveNativeEvidence = false, captureBrowserAudio = false }) {
   assert.ok(Number.isFinite(nativeFrameTimeout) && nativeFrameTimeout > 0 && nativeFrameTimeout <= 300,
     'Native frame timeout must be more than 0 and at most 300 host-wall seconds');
   mkdirSync(output, { recursive: true });
   let server, browser;
   const report = { schema: 1, status: 'starting', mode: 'fresh original process paired with immutable browser production artifact',
     nativeFrameTimeout,
-    originalObserver, archiveBrowserEvidence, captureBrowserAudio,
+    originalObserver, archiveBrowserEvidence, archiveNativeEvidence, captureBrowserAudio,
     comparisons: { functional: 'Real input/phase/readback and source title, fade, player motion, pause/controller, HP, immunity, active tear/bomb counts',
       pixels: 'Strict full RGBA diagnostic; every difference remains a failure in its own pixel result',
       exactPixelsRequired: exactPixels, completeOriginalStateParity: false },
@@ -295,7 +305,7 @@ export async function runPairedGate({ output, selected, randomCount = 2, replayS
         // Await both independent captures even if one transport/archive fails.
         // Remaining declared cases still run; failed capture evidence stays red.
         const captures = await Promise.allSettled([
-          nativeCapture(caseData, join(directory, 'original'), nativeFrameTimeout, originalObserver),
+          nativeCapture(caseData, join(directory, 'original'), nativeFrameTimeout, originalObserver, archiveNativeEvidence),
           browserCapture(browser, server, caseData, join(directory, 'browser'), archiveBrowserEvidence, captureBrowserAudio),
         ]);
         native = captures[0].status === 'fulfilled' ? captures[0].value
@@ -305,7 +315,8 @@ export async function runPairedGate({ output, selected, randomCount = 2, replayS
         const checks = comparePair(caseData, native, candidate, join(directory, 'comparison'), exactPixels, stateComparator);
         result = { id: definition.id, seed: caseData.seed, seedValue: caseData.seedValue, bootEpochSeed: caseData.bootEpochSeed,
           caseSha256: digest(readFileSync(join(directory, 'case.json'))),
-          directory, original: { status: native.status, error: native.error, provenance: native.provenance },
+          directory, original: { status: native.status, error: native.error, provenance: native.provenance,
+            manifestPath: native.manifestPath, evidence: native.evidence },
           browser: { status: candidate.status, failures: candidate.failures }, checks,
           status: native.status === 'pass' && candidate.status === 'pass' && checks.every(check => check.status === 'pass') ? 'pass' : 'fail' };
       } catch (error) {
@@ -348,6 +359,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
     const output = resolve(option('--output', `.cache/foundation/paired-${Date.now()}`));
     const report = await runPairedGate({ output, selected, randomCount, replaySeeds, replayCases,
       exactPixels: process.argv.includes('--require-exact-pixels'), productionDirectory: option('--production-directory'),
+      archiveNativeEvidence: process.argv.includes('--archive-native-evidence'),
       nativeFrameTimeout: Number(option('--native-frame-timeout', 60)) });
     console.log(JSON.stringify({ status: report.status, report: join(output, 'report.json'), artifact: report.build.sha256 }));
     process.exitCode = report.status === 'pass' ? 0 : 1;
