@@ -30,7 +30,11 @@ The gate retains the earlier unfiltered291/48/257/222 discoveries and adds
 two new OS-random treasure routes without filtering item identities. Its
 complete twelve-case cohort keeps every original eight-case input and adds
 both held-Pickup routes plus two independent new OS discoveries. Complete
-inputs, original observations, production snapshots and every functional
+fixed seed/phase/action declarations and the new OS use tails are required
+even when a recorded scenario file is supplied; removing a witness flag or
+shortening a use tape cannot remove required coverage. Completed browser
+captures are retained before coverage and provenance assertions run.
+Complete inputs, original observations, production snapshots and every functional
 failure remain in the report. Use of an unsupported random active remains
 red. Comparisons require charge/count/temporary records, health, input fields,
 UseItem frame/playing/guard, post-acquisition motion and actual SFX admission.
