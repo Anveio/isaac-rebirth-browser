@@ -249,6 +249,8 @@ pub struct SpriteEffect {
     /// Player footprint Blood7 whose floor-sampled color offsets are unknown.
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     pub footprint: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub critter: Option<crate::critters::Critter>,
 }
 
 impl SpriteEffect {
@@ -409,6 +411,7 @@ impl NpcEffectAdmission<'_> {
             poop_effect: None,
             blood_effect: None,
             footprint: false,
+            critter: None,
         });
         self.scheduler.admit(ActorRef {
             kind: ActorKind::Effect,
@@ -419,6 +422,13 @@ impl NpcEffectAdmission<'_> {
 }
 
 pub fn advance_effect(state: &mut State, phase: Phase, id: u32) -> Result<(), String> {
+    if state
+        .sprite_effects
+        .iter()
+        .any(|effect| effect.id == id && effect.critter.is_some())
+    {
+        return crate::critters::advance(state, phase, id);
+    }
     if state
         .sprite_effects
         .iter()
@@ -776,6 +786,7 @@ impl NpcEffectAdmission<'_> {
             poop_effect: None,
             blood_effect: None,
             footprint: false,
+            critter: None,
         });
         // Room5c6940 assigns the actual sequence first; Manager4524f0 then routes
         // flags8 to its separate background pool rather than the ordinary array.

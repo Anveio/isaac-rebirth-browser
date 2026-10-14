@@ -55,7 +55,6 @@ export interface SpriteEffect {
   bloodEffect?: {kind: "poof04" | "bloodGush"};
   footprint?: boolean;
 }
-export interface Impact { id: number; x: number; y: number; age: number; }
 export interface ActorRef { kind: "player" | "familiar" | "tear" | "bomb" | "pickup" | "npc" | "projectile" | "effect"; id: number; }
 export interface MtState { words: number[]; index: number; }
 export interface GridSeedSample { roomRecord: number; gridIndex: number; seeds: [number, number]; }
@@ -286,7 +285,7 @@ export interface State {
     histories: {capacity: number; head: number; samples: {x: number; y: number}[]}[]} | null;
   nextPickup: number;
   minimap: { cells: { x: number; y: number; visibility: "unvisited" | "visited" | "current" }[] };
-  tears: Tear[]; impacts: Impact[]; fireCooldown: number; nextTear: number;
+  tears: Tear[]; fireCooldown: number; nextTear: number;
   fireParticles: {id: number; parentNpc: number; parentType: number; parentVariant: number; spawnSeed: number; birthGameUpdate: number;
     position: {x: number; y: number}; presentedPosition: {x: number; y: number}; velocity: {x: number; y: number};
     hp: number; maxHp: number; collisionRadius: number; collisionMass: number; collisionDamage: number; baseFriction: number;

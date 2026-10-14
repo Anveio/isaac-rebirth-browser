@@ -147,6 +147,7 @@ impl Admission<'_> {
             poop_effect: Some(controller),
             blood_effect: None,
             footprint: false,
+            critter: None,
         });
         // Real Room sequence and manager append precede any caller Update.
         self.scheduler.admit(ActorRef {
