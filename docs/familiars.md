@@ -40,7 +40,7 @@ pending. After reveal, the empty-room Player 80-unit deadband uses the actual
 friction/frame law; target/path work is counted as unresolved, with no fitted
 direction, shared draw, state injection or skipped counter.
 
-Run `npm run test:e2e:familiars`. The default bank captures both real games
+Run `npm run test:e2e -- familiars`. The default bank captures both real games
 freshly through public commands: W0 opposite phase offsets and two unfiltered
 OS-random treasure rooms, selected by room identity before item outcomes. Each
 executes a declared idle hold sufficient to observe the appearance Poof lifetime.

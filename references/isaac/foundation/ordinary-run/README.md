@@ -11,5 +11,5 @@ All six complete run MT comparisons still fail, with 624 differing words per cas
 Reproduce sequentially after `source cloud/env.sh` and `npm run check:build`:
 
 ```sh
-npm run test:e2e:ordinary-run -- --scenarios references/isaac/foundation/ordinary-run/accepted-scenarios.json
+npm run test:e2e -- ordinary-run --scenarios references/isaac/foundation/ordinary-run/accepted-scenarios.json
 ```

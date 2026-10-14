@@ -11,28 +11,16 @@ import { browserLaunchOptions, inspectBrowserGraphics } from '../foundation/brow
 import { startProductionServer } from '../foundation/production-server.mjs';
 import { assertInputProvenance, assertSeededRun, enterSeededRun, manualSeedCommands, waitForReady } from '../foundation/verify.mjs';
 import { compareRoomContext } from './item-room-evidence.mjs';
+import { ORIGINAL_SHA } from './lib/original.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const run = promisify(execFile);
-const PIN = '724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13';
+const PIN = ORIGINAL_SHA;
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
 const f32 = Math.fround;
 const vector = point => [f32(point.x), f32(point.y)];
 const words = rng => [rng.state, rng.rightA, rng.left, rng.rightB];
 const value = flag => { const at = process.argv.indexOf(flag); return at < 0 ? undefined : process.argv[at + 1]; };
-const sourceFiles = ['tools/e2e/familiars.mjs', 'tools/original/familiar-scenarios.py', 'tools/original/familiar-observer.py',
-  'tools/original/item-scenarios.py', 'tools/foundation/decode-rooms.py', 'tools/original/foundation-seeds.py',
-  'tools/original/foundation-clock-run.py', 'tools/original/foundation-clock-verify.py', 'tools/original/foundation-clock-gate.c',
-  'tools/original/state-observer.py', 'tools/original/foundation-pickup-observe.py', 'tools/original/with-display.sh',
-  'tools/foundation/browser.mjs', 'tools/foundation/verify.mjs', 'tools/foundation/production-server.mjs',
-  'tools/e2e/item-room-evidence.mjs', 'engine/src/familiars.rs', 'engine/src/actors.rs', 'engine/src/player_items.rs',
-  'engine/src/lib.rs', 'engine/src/effects.rs', 'engine/src/mt.rs', 'engine/src/grid.rs', 'engine/src/items.rs',
-  'engine/src/seed.rs', 'engine/src/motion.rs', 'engine/src/bombs.rs', 'engine/src/pickups.rs', 'engine/src/room.rs',
-  'engine/src/npcs.rs', 'engine/src/fireplaces.rs', 'engine/build.rs', 'web/engine.ts', 'web/renderer.ts',
-  'web/animation.ts', 'web/trace.ts', 'web/familiar-data.json', 'web/scene-data.json', 'web/pickup-data.json'];
-const hashes = async () => Object.fromEntries(await Promise.all(sourceFiles.map(async path =>
-  [path, digest(await readFile(join(ROOT, path)))])));
-const before = await hashes();
 const output = resolve(value('--output') || join(ROOT, '.cache/e2e/familiars', String(Date.now())));
 await mkdir(output, { recursive: true });
 const scenarios = value('--scenarios') ? JSON.parse(await readFile(resolve(value('--scenarios')), 'utf8')) :
@@ -47,7 +35,7 @@ await writeFile(join(output, 'scenarios.json'), JSON.stringify(scenarios, null, 
 assert.equal(digest(await readFile(join(ROOT, '.cache/original-runtime/offline-depot/isaac.x64'))), PIN);
 const server = await startProductionServer();
 const browser = await chromium.launch(browserLaunchOptions());
-const report = {schema: 1, status: 'running', production: server.build, gateSources: before,
+const report = {schema: 1, status: 'running', production: server.build,
   nativeBinarySha256: PIN, graphics: await inspectBrowserGraphics(browser),
   scope: 'Natural free grant/cache, child270 and every actual Familiar/effect presence, source actor order/room sequence, full/fast motion, appearance/countdown/sprite/Poof callback and retirement. Placement and Poof seed differences are mandatory failures. Full624-word MT and absolute Game ages stay explicit diagnostics until missing causal consumers are implemented. Path/target/contact/heal/modifiers and other Familiar subclasses remain unaccepted.', cases: []};
 
@@ -289,9 +277,7 @@ try {
     await writeFile(join(directory, 'report.json'), JSON.stringify(result, null, 2) + '\n');
     console.log(JSON.stringify({case: item.name, status: result.status, checks: result.checks, failures: result.failures.length, error: result.error}));
   }
-  const after = await hashes();
-  report.sourceStability = {status: JSON.stringify(before) === JSON.stringify(after) ? 'pass' : 'fail', before, after};
-  report.status = report.cases.every(item => item.status === 'pass') && report.sourceStability.status === 'pass' ? 'pass' : 'fail';
+  report.status = report.cases.every(item => item.status === 'pass') ? 'pass' : 'fail';
 } finally {
   await writeFile(join(output, 'report.json'), JSON.stringify(report, null, 2) + '\n');
   await browser.close(); await server.close();

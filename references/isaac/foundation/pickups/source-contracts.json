@@ -50,7 +50,7 @@
     ]
   },
   "liveGate": {
-    "command": "npm run test:e2e:pickups",
+    "command": "npm run test:e2e -- pickups",
     "producer": "tools/original/pickup-scenarios.py",
     "observer": "tools/original/foundation-pickup-observe.py",
     "comparator": "tools/e2e/pickups.mjs",

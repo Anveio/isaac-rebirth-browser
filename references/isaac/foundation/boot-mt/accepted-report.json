@@ -103,6 +103,6 @@
     "tools/foundation/verify.mjs": "b28ed8af6bf50a7aa8b6b81f55fd29d0c963285f2d54500d61a4a58925de1d9f"
   },
   "gateSourcesStable": true,
-  "reproduceFresh": "source cloud/env.sh && npm run build && npm run test:e2e:boot-mt",
-  "reproduceRecorded": "source cloud/env.sh && npm run build && npm run test:e2e:boot-mt -- --scenarios references/isaac/foundation/boot-mt/scenarios.json"
+  "reproduceFresh": "source cloud/env.sh && npm run build && npm run test:e2e -- boot-mt",
+  "reproduceRecorded": "source cloud/env.sh && npm run build && npm run test:e2e -- boot-mt --scenarios references/isaac/foundation/boot-mt/scenarios.json"
 }

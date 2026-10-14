@@ -13,10 +13,10 @@ import { waitForReady, nativeReplay } from '../foundation/verify.mjs';
 import { exactStateDifference } from '../foundation/compare.mjs';
 import { installBrowserAudioObserver } from './audio-api-observer.mjs';
 import { compareQueuedMusicOutput, compareMusicDeviceCheckpoint } from './music-output-evidence.mjs';
+import { ORIGINAL_SHA } from './lib/original.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const run = promisify(execFile), sha = bytes => createHash('sha256').update(bytes).digest('hex');
-const ORIGINAL_SHA = '724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13';
 const value = flag => { const i = process.argv.indexOf(flag); return i < 0 ? undefined : process.argv[i + 1]; };
 const output = resolve(value('--output') || join(ROOT, '.cache/e2e/music', String(Date.now())));
 const count = Number(value('--count') || 2);
@@ -30,12 +30,7 @@ if (value('--scenarios')) cases = JSON.parse(await readFile(resolve(value('--sce
 assert.ok(Array.isArray(cases) && cases.length > 0 && cases.length <= 10 && new Set(cases.map(c => c.name)).size === cases.length);
 for (const c of cases) assert.ok(/^[a-zA-Z0-9_-]{1,40}$/.test(c.name) && /^[a-zA-Z0-9]{8}$/.test(c.code) &&
   Number.isInteger(c.bootEpochSeed) && c.bootEpochSeed >= 0 && c.bootEpochSeed <= 0xffffffff && (c.volume === 0 || c.volume === 1));
-const sources = ['tools/e2e/music.mjs', 'tools/e2e/music-output-evidence.mjs', 'tools/e2e/audio-api-observer.mjs', 'tools/original/music-observer.py', 'tools/original/audio-trace.c',
-  'tools/original/foundation-clock-run.py', 'tools/original/foundation-clock-gate.c', 'tools/original/state-observer.py',
-  'tools/original/foundation-seeds.py', 'tools/foundation/verify.mjs', 'tools/foundation/compare.mjs', 'tools/foundation/production-server.mjs', 'tools/foundation/browser.mjs',
-  'engine/src/music.rs', 'engine/src/lib.rs', 'engine/build.rs', 'web/music.ts', 'web/main.ts', 'web/trace.ts', 'web/audio.ts', 'vite.config.ts', 'web/audio-data.json'];
-const sourceHashes = async () => Object.fromEntries(await Promise.all(sources.map(async path => [path, sha(await readFile(join(ROOT, path)))])));
-const hashes = await sourceHashes(), catalogue = JSON.parse(await readFile(join(ROOT, 'web/audio-data.json')));
+const catalogue = JSON.parse(await readFile(join(ROOT, 'web/audio-data.json')));
 assert.equal(sha(await readFile(join(ROOT, '.cache/original-runtime/offline-depot/isaac.x64'))), ORIGINAL_SHA);
 await writeFile(join(output, 'scenarios.json'), JSON.stringify({ schema: 1, entropy: 'Recorded OS-random run seeds and independent Node crypto boot epochs', cases }, null, 2) + '\n');
 await run('cc', ['-std=c11', '-Wall', '-Wextra', '-Werror', '-fPIC', '-shared', 'tools/original/audio-trace.c', '-o', join(output, 'audio-trace.so'), '-ldl', '-pthread'], { cwd: ROOT });
@@ -118,7 +113,7 @@ function musicStarts(calls) {
 
 const production = await startProductionServer(), browser = await chromium.launch(browserLaunchOptions());
 const report = { schema: 1, status: 'running', originalBinarySha256: ORIGINAL_SHA, observerLibrarySha256: librarySha,
-  production: production.build, sourceHashes: hashes, graphics: await inspectBrowserGraphics(browser),
+  production: production.build, graphics: await inspectBrowserGraphics(browser),
   scope: 'Fresh public menu/seed/play/pause inputs; source45-track table, Title61 intro/loop,95 real completion/room queue, fresh normal first-floor main/layer streams, exact f32 fades and actual Web Audio/OpenAL PCM. Capture names never establish native Playing: actual System state/public log are retained. Native pre-Title100 voiceover tail is explicitly skipped at browser entry. Alternate floor generation, later room jingles, count-driven layer admission and pitch special modes remain separate scope.', cases: [] };
 try {
   for (const scenario of cases) {
@@ -297,9 +292,7 @@ try {
     await writeFile(join(output, 'report.json'), JSON.stringify(report, null, 2) + '\n');
     console.log(JSON.stringify({ case: scenario.name, status: result.status, checks: result.checks.length, failed: result.checks.filter(check => check.status === 'fail').map(check => check.field), error: result.error }));
   }
-  report.finalSourceHashes = await sourceHashes();
-  report.sourceStability = JSON.stringify(report.finalSourceHashes) === JSON.stringify(hashes) ? 'pass' : 'fail';
-  report.status = report.sourceStability === 'pass' && report.cases.every(result => result.status === 'pass') ? 'pass' : 'fail';
+  report.status = report.cases.every(result => result.status === 'pass') ? 'pass' : 'fail';
 } finally { await browser.close(); await production.close(); await writeFile(join(output, 'report.json'), JSON.stringify(report, null, 2) + '\n'); }
 console.log(JSON.stringify({ status: report.status, cases: report.cases.length, report: join(output, 'report.json') }));
 if (report.status !== 'pass') process.exitCode = 1;

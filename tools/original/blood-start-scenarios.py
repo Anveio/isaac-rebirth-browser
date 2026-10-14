@@ -49,8 +49,6 @@ def contrived():
     result = paired.build('paired-room-combat', 'B9112M6H')
     result['bloodStartSelection'] = {
         'kind': 'contrived deterministic identity-only source fixture', 'seedValue': 978,
-        'ruleSha256': '357ef7ca20c7a2974c6060af3ceda3c42a730925f2cc8c969d32e814c0b18f11',
-        'selectionSha256': '3788935b0c231b2433946ee83f4fd48764c195cea6e305d42e287e934343090a',
         'route': [6, 8, 9, 11, 0], 'bossSeed': 2321890733,
         'scope': 'First deterministic978 selected before actual game grading; never OS-random or a reachability guarantee.',
     }

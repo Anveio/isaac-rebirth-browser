@@ -1,5 +1,5 @@
 import './style.css';
-import { Engine, type Command } from './engine';
+import { Engine, type Command, type State } from './engine';
 import { Renderer } from './renderer';
 import { ReplayTrace } from './trace';
 import { AudioRuntime } from './audio';
@@ -23,6 +23,10 @@ async function boot() {
   let previous = performance.now();
   let currentState = engine.snapshot();
   let trace = new ReplayTrace(initialSeed, false, currentState);
+  // Drawing is a pure function of state, so the frame loop only redraws after
+  // the state changes; a paused or idle game does not re-render every frame.
+  let drawnState: State | null = null;
+  const draw = (state: State) => { renderer.draw(state); drawnState = state; };
   const dispatch = (command: Command, render = true, backendAudioTime?: number) => {
     const state = engine.command(command);
     currentState = state;
@@ -31,7 +35,7 @@ async function boot() {
     if (backendAudioTime === undefined) trace.record(command, state);
     else if (command.type === 'musicBackend') trace.recordBackend(command, state, backendAudioTime);
     else throw new Error('Backend event metadata requires an actual music callback');
-    if (render) renderer.draw(state);
+    if (render) draw(state);
     return state;
   };
   audio.music.onBackend((command, audioTime) => dispatch(command, false, audioTime));
@@ -87,11 +91,12 @@ async function boot() {
         accumulator -= 1000 / 60;
       }
     }
-    renderer.draw(currentState);
+    if (drawnState !== currentState) draw(currentState);
     requestAnimationFrame(frame);
   }
   const game = {
     snapshot: () => engine.snapshot(),
+    // The engine's own JSON text: cheap for automation to transfer and parse.
     snapshotJson: () => engine.snapshotJson(),
     rendererTargets: () => renderer.debugTargets(),
     audio: () => audio.snapshot(),
@@ -106,7 +111,7 @@ async function boot() {
       trace = new ReplayTrace(initialSeed, options.trace === true, currentState);
       audio.music.consume(currentState.music);
       accumulator = 0;
-      renderer.draw(currentState);
+      draw(currentState);
       return engine.snapshot();
     },
     trace: () => trace.snapshot(),
@@ -114,7 +119,7 @@ async function boot() {
       const start = performance.now();
       const state = engine.snapshot();
       const serialized = performance.now();
-      renderer.draw(state);
+      draw(state);
       const rendered = performance.now();
       const output = document.createElement('canvas');
       output.width = 960; output.height = 540;
@@ -126,7 +131,7 @@ async function boot() {
     },
   };
   Object.assign(window, { game });
-  renderer.draw(currentState);
+  draw(currentState);
   status.hidden = true;
   document.body.dataset.ready = 'true';
   canvas.focus();

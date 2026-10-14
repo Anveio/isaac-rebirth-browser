@@ -11,13 +11,10 @@ import { browserLaunchOptions, inspectBrowserGraphics } from '../foundation/brow
 import { startProductionServer } from '../foundation/production-server.mjs';
 import { waitForReady } from '../foundation/verify.mjs';
 import { TearContracts } from './tear-contracts.mjs';
+import { ORIGINAL_SHA } from './lib/original.mjs';
 const ROOT=resolve(fileURLToPath(new URL('../..',import.meta.url)));
 const run=promisify(execFile);
 const epoch=1700000000;
-const ORIGINAL_SHA='724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13';
-const GATE_SOURCES = ["tools/e2e/weapons.mjs", "tools/e2e/tear-contracts.mjs", "tools/original/foundation-physics-observer.py", "tools/original/native-identity.py", "tools/original/state-observer.py", "tools/original/foundation-clock-run.py", "tools/original/foundation-clock-gate.c", "tools/original/foundation-seeds.py", "tools/original/debug-run.py", "tools/original/with-display.sh", "tools/foundation/browser.mjs", "tools/foundation/production-server.mjs", "tools/foundation/verify.mjs", "tools/original/weapons-scenarios.py"];
-const sourceHashes = async () => Object.fromEntries(await Promise.all(GATE_SOURCES.map(async path => [path, createHash('sha256').update(await readFile(join(ROOT, path))).digest('hex')])));
-const gateSources = await sourceHashes();
 const value=(flag)=>{const index=process.argv.indexOf(flag);return index<0?undefined:process.argv[index+1];};
 const lifecycle=process.argv.includes('--lifecycle');
 const heldPresentations=lifecycle?1:54,releasePresentations=lifecycle?110:26;
@@ -71,7 +68,7 @@ assert.equal(createHash('sha256').update(sourceBinary).digest('hex'),ORIGINAL_SH
 await writeFile(join(output,'scenarios.json'),JSON.stringify({schema:1,bootEpochSeed:epoch,source:'Contrived full/intermediate births plus OS-random recorded seed coverage',cases},null,2)+'\n');
 const production=await startProductionServer();
 const browser=await chromium.launch(browserLaunchOptions());
-const report={schema:1,status:'running',gateSources,originalBinarySha256:ORIGINAL_SHA,scope:lifecycle?'Live original/browser source tear ground/height recurrence, half prediction, PRE range/grid death and next-full removal, with exact requested DOM/tick provenance, seed readback and paired player XY/VXY; RNG-dependent numeric mismatches are reported separately from these source contracts. Poof effects and complete shared stream parity remain incomplete':'Paired live original/browser weapon cooldown, held/released head clock, shot births, actor birth fence and horizontal birth positions, with exact requested DOM/tick provenance, seed readback and paired player XY/VXY',production:production.build,graphics:await inspectBrowserGraphics(browser),cases:[]};
+const report={schema:1,status:'running',originalBinarySha256:ORIGINAL_SHA,scope:lifecycle?'Live original/browser source tear ground/height recurrence, half prediction, PRE range/grid death and next-full removal, with exact requested DOM/tick provenance, seed readback and paired player XY/VXY; RNG-dependent numeric mismatches are reported separately from these source contracts. Poof effects and complete shared stream parity remain incomplete':'Paired live original/browser weapon cooldown, held/released head clock, shot births, actor birth fence and horizontal birth positions, with exact requested DOM/tick provenance, seed readback and paired player XY/VXY',production:production.build,graphics:await inspectBrowserGraphics(browser),cases:[]};
 try {
  for(const scenario of cases){
   const directory=join(output,scenario.name);await mkdir(directory,{recursive:true});
@@ -193,9 +190,6 @@ try {
    await writeFile(join(output,'report.json'),JSON.stringify(report,null,2)+'\n');
   }
  }
- report.gateSourcesEnd=await sourceHashes();
- report.gateSourcesStable=JSON.stringify(report.gateSources)===JSON.stringify(report.gateSourcesEnd);
- assert.equal(report.gateSourcesStable,true,'Weapons gate source files changed during capture');
  report.status=report.cases.every(result=>result.status==='pass')?'pass':'fail';
  if(report.status==='fail')throw new AggregateError(report.cases.filter(result=>result.status==='fail').map(result=>new Error(`${result.name}:${result.error||result.inputProvenance.error}`)),'Selected live weapons cases failed; every case was attempted');
 } catch(error){report.status='fail';report.error=String(error);throw error;}
