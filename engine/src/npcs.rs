@@ -196,6 +196,11 @@ pub fn player_contacts(state: &mut State) -> Result<(), String> {
         .expect("authored Isaac geometry is valid")
     });
     for index in 0..state.room.npcs.len() {
+        //4453a0 rejects either actual dead31f before the next callback.
+        //The contact entered alive still completes its physical response.
+        if state.player.dead {
+            break;
+        }
         let npc = &state.room.npcs[index];
         if npc.dead || npc.removed || npc.entity_collision_class == 0 {
             continue;
@@ -221,7 +226,7 @@ pub fn player_contacts(state: &mut State) -> Result<(), String> {
         }
         let contact_damage = npc.collision_damage;
         if contact_damage > 0.0 {
-            combat::try_damage_player(state, contact_damage as u8, 60);
+            combat::try_damage_player(state, contact_damage as u8, 60, 0)?;
         }
         let original_position = player_body.position;
         combat::resolve_player_npc_contact(&mut player_body, &mut npc_body, |shift| {
