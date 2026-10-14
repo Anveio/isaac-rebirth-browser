@@ -18,8 +18,10 @@ inputs without discovery filters or grading rerolls. Every failure and complete
 input/backend history stays retained. The first bank was written before live
 grading; it has not been executed. Source predictions never enter WASM state.
 
-One-job all-target Rust/strict Clippy, TypeScript, formatting, matrix, syntax and
-whitespace checks pass. No production build or paired Heart acceptance has run.
+The first owned runtime624cf52 passed one-job all-target Rust/strict Clippy,
+TypeScript and formatting. Its restack on main695e991 passes TypeScript, matrix,
+syntax and whitespace checks; a final Rust check after guard integration is
+pending. No production build or paired Heart acceptance has run.
 Actual Player50c880 dead/Hit/Death guard integration awaits the concrete
 Death/shared animation dependency. Soul/Black damage priority52b080, constructor
 modifiers, Eternal information queue13 and NewStage carryover, saved10/440/ad4

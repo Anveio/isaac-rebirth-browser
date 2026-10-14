@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "status": "source/static implementation; no production artifact or fresh original/browser acceptance",
+  "status": "Source implementation; first static proof pinned before main restack. No production artifact or fresh live acceptance.",
   "binarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
   "scope": "Normal single-player Isaac free Heart10 with concrete subtypes1..6, owned max/red/soul/black/Eternal fields. Fresh unmodified subtype0 factory shares previously mapped Fire loot Init.",
   "factory": "500150 local35 rolls2,50,10; Soul branch rolls20. No direct shared MT draw. Humbling Bundle, Eternal and Soul/Black trinket/collectible replacement consumers remain separate.",
@@ -30,7 +30,6 @@
     "function-504d30.txt": "50c2a2de4aeb5c92b20620e68af323b0234d7c98f720a37ed0f5e497edcdd797",
     "function-50e6b0.txt": "51a79400195095b877ded3aa248748f08cdc42769d535f4aa6399992ae63484a"
   },
-  "ownedRuntimeCommit": "624cf52a258f929ba6a55b8935f2bffa2b97e08a",
   "validation": {
     "status": "pass",
     "compilerJobs": 1,
@@ -56,5 +55,14 @@
       "web/engine.ts": "51fc96bdcecdfe82043384835d0321907398031d3e4aaa622d7aad38dbe66aca",
       "web/renderer.ts": "f3fe71ad32c364c77316d423905637236b27367183eb604bdb05fde26295c962"
     }
+  },
+  "firstValidatedRuntimeCommit": "624cf52a258f929ba6a55b8935f2bffa2b97e08a",
+  "restackedRuntimeCommit": "ef41ec78d0417777cfadcf21fb3f76901a893de0",
+  "postRestackValidation": {
+    "TypeScript": "pass",
+    "matrix": "pass",
+    "NodeAndPythonSyntax": "pass",
+    "whitespace": "pass",
+    "RustAndStrictClippy": "pending concrete guard integration and scheduled static turn"
   }
 }
