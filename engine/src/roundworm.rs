@@ -210,7 +210,10 @@ fn ai(
             npc.entity_collision_class = 4;
             if npc.animation_frame == content::WORM_SHOOT_FRAME && npc.animation_playing {
                 let target = world.player + world.player_velocity * 10.0;
-                if world.grid.projectile_line_clear(npc.position, target) {
+                if world
+                    .grid
+                    .projectile_line_clear(npc.position, target, world.path_costs)
+                {
                     world.audio.admit(
                         random,
                         world.system_counter,
