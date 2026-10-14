@@ -33,8 +33,12 @@ distinct from the sprite offset and the stored controller height.
 
 `npm run test:e2e:blood-particles` runs both actual games freshly, one case at a
 time. It retains both0/1 phase offsets of the mandatory T1 route and the existing
-recorded OS-selected244 route, adds declared cardinal firing and tail intervals,
-and requires an actual244 death and5 particles in both games. No observed target
+recorded OS-selected244 route. Every initial failed public action and capture
+remains an exact prefix; the default bank appends two fixed boundary movement
+and cardinal-firing laps, plus32 dense tail observations. Odd25-presentation
+samples alternate full/fast during movement. The newly declared default bank
+passes preparation and awaits a separate fresh execution. The gate
+requires an actual244 death and5 particles in both games. No observed target
 position drives input. Real particle seed/order, source room sequence, body,
 initialized controller, color, clip and full/fast fields are blocking. Source
 storage before the first actual5 Update is retained as raw bits without claiming
@@ -55,8 +59,8 @@ retains every case and report hash.
 
 The complete native/browser manifests total1,730,631,504 raw bytes and are
 retained as88,413,976 gzip bytes. Independent streamed readback checks all eight
-archives against their original raw hashes. A subsequent movement/shooting bank
-must be separately declared and preserve this complete failed execution.
+archives against their original raw hashes. The subsequent default movement bank
+preserves this complete failed execution and every initial input/capture prefix.
 
 Status/champion/inherited-color modifiers, perks225/234, the exact full
 per-record transient-color damage path, other gibs categories and later stages
