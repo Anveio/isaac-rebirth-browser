@@ -280,10 +280,16 @@ pub(crate) fn advance_transition(state: &mut State, phase: Phase) -> bool {
         .persisted_rooms
         .insert(state.current_room, state.room.clone());
     state.current_room = transition.target_room;
-    state.room = state
-        .persisted_rooms
-        .remove(&state.current_room)
-        .unwrap_or_else(|| Room::from_floor_descriptor(&state.floor, state.current_room));
+    state.room = match state.persisted_rooms.remove(&state.current_room) {
+        Some(room) => room,
+        None => {
+            let mut room = Room::from_floor_descriptor(&state.floor, state.current_room);
+            if let Some(grid) = room.grid.as_mut() {
+                crate::grid::link_pits(grid, &mut state.boot_lifecycle.shared);
+            }
+            room
+        }
+    };
     state.room.initialize_path_costs();
     state.visited_rooms.insert(state.current_room);
     let door = state

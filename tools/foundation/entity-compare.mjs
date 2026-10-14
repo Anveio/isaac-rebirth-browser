@@ -51,6 +51,12 @@ export function roomRows(rows, source, actual) {
   check(rows, 'room.combatClearCountdown', source.room.combatClearCountdown, actual.room.combatClearCountdown);
   for (const field of ['countablePending', 'countableCurrent', 'bossPending', 'bossCurrent'])
     check(rows, `manager.${field}`, source.room[field], actual.room.managerCounts?.[field]);
+  // Admitted grid objects: Block3, Tinted Rock4 and Pit7 (autotile frame).
+  for (const cell of source.grid.filter(cell => [3, 4, 7].includes(cell.type))) {
+    const port = actual.room.grid?.cells[cell.index]?.entity;
+    check(rows, `grid${cell.index}`, [cell.type, cell.variant, cell.state, cell.collisionClass],
+      port && [port.kind, port.variant, port.state, port.collisionClass]);
+  }
   for (const door of source.grid.filter(cell => cell.type === 16)) {
     const port = actual.room.grid?.cells[door.index]?.entity;
     check(rows, `door${door.index}.state`, door.state, port?.state);

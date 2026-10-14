@@ -139,6 +139,31 @@ pub fn for_room(
                 source_owner: None,
             });
         }
+        if spawn.variant == 0 && spawn.subtype == 0 {
+            let rock_frame =
+                crate::room_spawns::next35(decoration_seed.wrapping_add(index as u32) | 1) % 3;
+            let admitted = match spawn.entity_type {
+                // Rock-family Init56ed00 (state0 -> intact state1, frame drawn
+                // like an ordinary rock): Block1900 is kind3, the room's
+                // tinted rock kind4. Tinted drops remain a separate callback.
+                1900 => Some((3, rock_frame, 1, 3)),
+                1000 if spawn.grid_index == spawns.tinted_rock_index => Some((4, rock_frame, 1, 3)),
+                // Pit3000 Init568990 collides as class1; its autotile frame is
+                // linked after admission by `link_pits`.
+                3000 => Some((7, 0, 0, 1)),
+                _ => None,
+            };
+            if let Some((kind, variant, state, collision_class)) = admitted {
+                cell.entity = Some(GridEntity {
+                    kind,
+                    variant,
+                    state,
+                    collision_class,
+                    spawn_seed: spawn.spawn_seed,
+                    source_owner: None,
+                });
+            }
+        }
         // Tinted Rock admission/drops are still a separate callback. Source
         // factory5ceba5 nevertheless classifies other raw1000 rocks before
         // Init can link ordinary neighbors: a new RNG35 Random1001 chooses
@@ -224,6 +249,71 @@ pub fn for_room(
         height,
         cells,
     })
+}
+
+/// GridEntity_Pit slot2 5684c0, run by Room.Init 5cf550 over every grid
+/// entity in index order: the pit frame from its orthogonal pit neighbours
+/// (L1|U2|R4|D8) and, for corners, the diagonals. An isolated pit draws its
+/// frame from the shared MT (Random(2) << 4).
+pub fn link_pits(grid: &mut GridDescriptor, shared: &mut crate::mt::Mt19937) {
+    let width = i64::from(grid.width);
+    let height = i64::from(grid.height);
+    let pit = |cells: &[GridCell], column: i64, row: i64| {
+        column >= 0
+            && row >= 0
+            && column < width
+            && row < height
+            && cells[(column + row * width) as usize]
+                .entity
+                .as_ref()
+                .is_some_and(|entity| entity.kind == 7)
+    };
+    for index in 0..grid.cells.len() {
+        if !pit(&grid.cells, index as i64 % width, index as i64 / width) {
+            continue;
+        }
+        let (column, row) = (index as i64 % width, index as i64 / width);
+        let at = |dx: i64, dy: i64| pit(&grid.cells, column + dx, row + dy);
+        let (up_left, up_right, down_left, down_right) =
+            (at(-1, -1), at(1, -1), at(-1, 1), at(1, 1));
+        let mask = u32::from(at(-1, 0))
+            | u32::from(at(0, -1)) << 1
+            | u32::from(at(1, 0)) << 2
+            | u32::from(at(0, 1)) << 3;
+        let frame = match mask {
+            0 => shared.bounded(2) << 4,
+            3 => if up_left { 3 } else { 17 },
+            6 => if up_right { 6 } else { 18 },
+            9 => if down_left { 9 } else { 19 },
+            12 => if down_right { 12 } else { 20 },
+            11 => if up_left { 11 } else { 26 },
+            14 => if up_right { 14 } else { 25 },
+            7 => match (up_left, up_right) {
+                (true, true) => 7,
+                (true, false) => 27,
+                (false, true) => 28,
+                (false, false) => 29,
+            },
+            13 => match (down_left, down_right) {
+                (true, true) => 13,
+                (true, false) => 30,
+                (false, true) => 31,
+                (false, false) => 32,
+            },
+            15 => match (up_left, up_right) {
+                (true, true) => if down_right || down_left { 15 } else { 24 },
+                (false, true) => 21,
+                (true, false) => 22,
+                (false, false) => 23,
+            },
+            mask => mask,
+        };
+        grid.cells[index]
+            .entity
+            .as_mut()
+            .expect("checked pit")
+            .variant = frame;
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
