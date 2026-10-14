@@ -85,7 +85,7 @@ export class Renderer {
         if (keeper) {
           this.assets.draw(ctx, "gfx/017.002_secret room keeper.anm2", keeper.animation,
             npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46, keeper.animationClock,
-            { scale: 0.65, overrides: { 0: {
+            { overrides: { 0: {
               RedTint: keeper.tint[0]! * 255, GreenTint: keeper.tint[1]! * 255, BlueTint: keeper.tint[2]! * 255,
               AlphaTint: keeper.tint[3]! * 255, RedOffset: keeper.offsets[0]! * 255,
               GreenOffset: keeper.offsets[1]! * 255, BlueOffset: keeper.offsets[2]! * 255,
@@ -95,14 +95,14 @@ export class Renderer {
           ctx.translate(npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46);
           ctx.scale(npc.monstro.flipX ? -1 : 1, 1);
           this.assets.draw(ctx, "gfx/020.000_monstro.anm2", npc.animation,
-            0, 0, npc.animationClock, { scale: 0.65 });
+            0, 0, npc.animationClock);
           ctx.restore();
         } else if (npc.dip) {
           ctx.save();
           ctx.translate(npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46);
           ctx.scale(npc.dip.flipX ? -1 : 1, 1);
           this.assets.draw(ctx, "gfx/216.000_dip.anm2", npc.animation, 0, 0, npc.animationClock,
-            { scale: 0.65, overrides: { 0: {
+            { overrides: { 0: {
               RedTint: npc.dip.tint[0]! * 255, GreenTint: npc.dip.tint[1]! * 255,
               BlueTint: npc.dip.tint[2]! * 255, AlphaTint: npc.dip.tint[3]! * 255,
               RedOffset: npc.dip.offsets[0]! * 255, GreenOffset: npc.dip.offsets[1]! * 255,
@@ -112,7 +112,7 @@ export class Renderer {
         } else if (npc.fireplace) {
           this.assets.draw(ctx, "gfx/033.000_fireplace.anm2", npc.animation,
             npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46, npc.animationClock,
-            { scale: 0.65, layerScales: { 1: [npc.fireplace.flameScale, npc.fireplace.flameScale] } });
+            { layerScales: { 1: [npc.fireplace.flameScale, npc.fireplace.flameScale] } });
         } else if (npc.actor) {
           // Catalogue-driven families: the engine names the authored actor.
           ctx.save();
@@ -121,12 +121,12 @@ export class Renderer {
           // Champions draw with their table Color and the ×1.15 sprite scale.
           const champion = npc.champion;
           this.assets.draw(ctx, npc.actor, npc.animation, 0, 0, npc.animationClock, champion
-            ? { scale: Math.fround(0.65 * champion.scale), color: CHAMPION_COLORS[champion.color] }
-            : { scale: 0.65 });
+            ? { scale: champion.scale, color: CHAMPION_COLORS[champion.color] }
+            : {});
           ctx.restore();
         } else {
           this.assets.draw(ctx, npc.kind === 13 ? "gfx/013.000_fly.anm2" : npc.kind === 18 ? "gfx/018.000_attack fly.anm2" : npc.kind === 214 ? "gfx/213.000_level2fly.anm2" : "gfx/244.000_round worm.anm2", npc.animation,
-            npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46, npc.animationFrame, { scale: 0.65 });
+            npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46, npc.animationFrame);
         }
       }
       for (const familiar of state.familiars) {
@@ -136,7 +136,7 @@ export class Renderer {
           familiar.presentedPosition.y * 0.65 - 46);
         ctx.scale(familiar.sprite.flipX ? -1 : 1, 1);
         this.assets.draw(ctx, "gfx/003.056_leech.anm2", familiar.sprite.animation,
-          familiar.sprite.offset.x * 0.65, familiar.sprite.offset.y * 0.65, familiar.sprite.frame, { scale: 0.65 });
+          familiar.sprite.offset.x * 0.65, familiar.sprite.offset.y * 0.65, familiar.sprite.frame);
         ctx.restore();
       }
       for (const laser of state.lasers) {
@@ -161,18 +161,18 @@ export class Renderer {
           ctx.translate((impact.position.x + impact.positionOffset.x) * 0.65 + 32, (impact.position.y + impact.positionOffset.y) * 0.65 - 46);
           ctx.rotate(impact.rotation * Math.PI / 180);
           ctx.scale(impact.scale.x, impact.scale.y);
-          this.assets.draw(ctx, impact.actor, impact.animation, 0, 0, impact.animationClock, { scale: 0.65 });
+          this.assets.draw(ctx, impact.actor, impact.animation, 0, 0, impact.animationClock);
           ctx.restore();
         }
       }
       for (const projectile of state.enemyProjectiles)
         if (!projectile.removed && projectile.animation)
           this.assets.draw(ctx, "gfx/009.000_projectile.anm2", projectile.animation,
-            projectile.presentedPosition.x * 0.65 + 32, (projectile.presentedPosition.y + projectile.height) * 0.65 - 46, projectile.animationFrame, { scale:0.65 * projectile.scale });
+            projectile.presentedPosition.x * 0.65 + 32, (projectile.presentedPosition.y + projectile.height) * 0.65 - 46, projectile.animationFrame, { scale: projectile.scale });
       for (const particle of state.fireParticles)
         if (!particle.removed && particle.visible)
           this.assets.draw(ctx, "gfx/1000.066_ember particle.anm2", "Idle",
-            particle.presentedPosition.x * 0.65 + 32, particle.presentedPosition.y * 0.65 - 46, particle.animationClock, { scale: 0.65 });
+            particle.presentedPosition.x * 0.65 + 32, particle.presentedPosition.y * 0.65 - 46, particle.animationClock);
       this.drawPlayer(ctx, state);
       for (const tear of state.tears)
         this.assets.draw(ctx, TEAR, `RegularTear${tear.animationTier}`, Math.round(tear.x * 2) / 2, Math.round(tear.y * 2) / 2, tear.age);
@@ -199,7 +199,7 @@ export class Renderer {
             (effect.presentedPosition.y + effect.renderOffset.y + sprite.offset.y) * 0.65 - 46);
           ctx.scale(sprite.flipX ? -1 : 1, sprite.flipY ? -1 : 1);
           this.assets.draw(ctx, effect.variant === 58 ? "gfx/1000.058_poop particle.anm2" : "gfx/1000.043_poop explosion.anm2",
-            sprite.animation, 0, 0, sprite.frame, { scale: 0.65, layerScales: {0: [sprite.scale.x, sprite.scale.y]}, overrides: {0: {
+            sprite.animation, 0, 0, sprite.frame, { layerScales: {0: [sprite.scale.x, sprite.scale.y]}, overrides: {0: {
               Rotation: rotation, RedTint: sprite.tint[0] * 255, GreenTint: sprite.tint[1] * 255,
               BlueTint: sprite.tint[2] * 255, AlphaTint: sprite.tint[3] * 255,
               RedOffset: sprite.offsets[0] * 255, GreenOffset: sprite.offsets[1] * 255, BlueOffset: sprite.offsets[2] * 255,
@@ -260,7 +260,7 @@ export class Renderer {
     const layerScales = Object.fromEntries(Object.entries(sprite.layerFlips).map(([layer, flips]) =>
       [layer, [flips[0] ? -1 : 1, flips[1] ? -1 : 1] as const]));
     this.assets.draw(ctx, actor, sprite.animation, 0, 0, sprite.frame,
-      { scale: 0.65, layerScales, overrides: { 0: {
+      { layerScales, overrides: { 0: {
         RedTint: sprite.tint[0] * 255, GreenTint: sprite.tint[1] * 255,
         BlueTint: sprite.tint[2] * 255, AlphaTint: sprite.tint[3] * 255,
         RedOffset: sprite.offsets[0] * 255, GreenOffset: sprite.offsets[1] * 255,
@@ -295,7 +295,7 @@ export class Renderer {
         const actor = stain.variant === 58 ? "gfx/1000.058_poop particle.anm2" :
           stain.variant === 43 ? "gfx/1000.043_poop explosion.anm2" : "gfx/1000.007_blood splat.anm2";
         this.assets.draw(ctx, actor, sprite.animation, 0, 0, sprite.frame,
-          { scale: 0.65, layerScales: {0: [sprite.scale.x, sprite.scale.y]}, overrides: { 0: {
+          { layerScales: {0: [sprite.scale.x, sprite.scale.y]}, overrides: { 0: {
             ...(stain.layerRotation === null ? {} : {Rotation: stain.layerRotation}),
             RedTint: sprite.tint[0] * 255, GreenTint: sprite.tint[1] * 255,
             BlueTint: sprite.tint[2] * 255, AlphaTint: sprite.tint[3] * 255,
