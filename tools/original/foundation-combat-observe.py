@@ -173,6 +173,8 @@ def observe(pid, context):
                     result['npcAux2'] = struct.unpack_from('<I', more, 0x3c)[0]
                     result['npcFrameAge'] = struct.unpack_from('<I', more, 0x10)[0]
                     result['npcCountdown'] = struct.unpack_from('<I', more, 0x1c)[0]
+                    # Entity_NPC projectile cooldown +f68 and delay +f6c (init 0/-1).
+                    result['npcProjectileCooldown'], result['npcProjectileDelay'] = struct.unpack_from('<ii', more, 0x18)
                     if result['type'] == 33:
                         result['fireCountdown'] = struct.unpack_from('<i', more, 0x18)[0]
                     result['npcTarget'] = pair(0x440)
