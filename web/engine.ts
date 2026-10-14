@@ -152,7 +152,7 @@ export interface RoomDescriptor {
   roomInitSeed: number; decorationSeed: number; spawnSeed: number; followingSeed: number;
 }
 export interface Floor {
-  contract: string; stageSeed: number; additionalRooms: number; attempts: number;
+  contract: string; stage: number; stageSeed: number; additionalRooms: number; attempts: number;
   descriptors: RoomDescriptor[]; grid: number[]; startingDescriptor: number;
   primaryState: number; primaryDraws: number; generatorState: number; gameFlags: number;
   specialWeights: number[]; basementWeights: number[];
