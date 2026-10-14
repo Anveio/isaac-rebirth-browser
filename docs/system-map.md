@@ -36,13 +36,21 @@ Consult the latest paired report for current implementation outcomes.
 
 ## Current integrated runtime checkpoint
 
-Current main `7492adba` registers36 required live suites. This is a source
-checkpoint, with separate cached effect spawner words and an actual null linked
-parent for the generic NPC Poof callers. The corrected stat-cache cohort retains
-158 required failures over212,485 checks; its earlier609-failure capture remains
-separate. The last complete consolidated production build is still f793/0f343,
-described below. [Current source and interrupted death scope](../references/isaac/foundation/runtime-progress/history/20261014-main36-source-and-death-abort.json)
-records these boundaries without claiming current-main live acceptance.
+Main source checkpoint `2d2174e6` registers37 required live suites, adding active
+item use and preserving the signed Room-cost/line-query and separate effect
+spawner/linked-parent owners. The corrected stat-cache cohort retains158
+required failures over212,485 checks; its earlier609-failure capture remains
+separate. The historical consolidated f793/0f343 build and its33-suite invocation
+are described below. [Earlier source and interrupted death scope](../references/isaac/foundation/runtime-progress/history/20261014-main36-source-and-death-abort.json)
+retains the prior36-suite checkpoint without claiming later-main live acceptance.
+
+The separate Blood Particle5 leaf builds checkpoint1e9d02f with38 suites and
+artifact4e0a8762. Its four fresh native/browser pairs all fail, with58 scoped
+failures over7090 room/phase/presence/execution checks and648/2386 core
+checkpoints passing. Native244 death/5 presence is absent in all four, while
+one browser pair reaches both. No matched particle body or controller parity is
+accepted. [Blood Particle evidence](../references/isaac/foundation/combat/blood-particles/first-live-1e9d02f.json)
+preserves the complete failed cohort, source/artifact hashes and lossless archives.
 
 The root normal-death draft captured two complete failing aggregate cases at
 source `1cc127e8` and artifact d0a6: restart733/740 failed checks and exit734/741.
@@ -222,7 +230,7 @@ post-acquisition Player state, load/continue and
 durable browser saves remain open. [SavedGame evidence](../references/isaac/foundation/saved-game/README.md)
 retains the original reports and the correction that made those gaps blocking.
 
-CI discovers all thirty-six registered live suites and runs separate jobs with
+CI discovers every registered live suite and runs separate jobs with
 `fail-fast: false`, preserving each result and evidence. The first matrix run
 completed floors, weapons, boot MT and pickups successfully while retaining
 core and traversal failures. Historical build, typecheck, assets, matrix and strict Clippy

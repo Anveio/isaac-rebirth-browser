@@ -403,7 +403,7 @@ fn update(state: &mut State, effect: &mut SpriteEffect) -> Result<(), String> {
                     .find(|clip| clip.name == effect.sprite.animation)
                     .ok_or("particle landing clip absent")?;
                 effect.sprite.frame = clip.frames as f32 - 1.0;
-                //46206c ->40ff50 ->40fa20 ->40ea30 seeks the final pose
+                //45e579 ->40ff50 ->40fa20 ->40ea30 seeks the final pose
                 //without writing the current animation's playing byte.
                 effect.velocity = ZERO;
                 effect.raw_7d8 = true;

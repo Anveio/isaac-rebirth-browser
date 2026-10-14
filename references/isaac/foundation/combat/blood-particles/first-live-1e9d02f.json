@@ -1,0 +1,120 @@
+{
+  "schema": 1,
+  "status": "fail",
+  "source": "1e9d02f6954e4296a9864ee5f0b9b61d1225c100",
+  "base": "2d2174e63901acbfc209fc40018418cded26223e",
+  "artifactSha256": "4e0a87622c0910c0df920fa017a591d6d74e89c15579d1ee4e51f896df1c7e68",
+  "artifactFiles": 941,
+  "artifactBytes": 214140971,
+  "artifactBeforeEndStable": true,
+  "sourceStability": "pass",
+  "cases": [
+    {
+      "id": "contrived-t1-gibs-0",
+      "randomized": false,
+      "status": "fail",
+      "presentations": 523,
+      "checks": 1573,
+      "scopedFailures": 4,
+      "execution": {
+        "native-death": false,
+        "browser-death": false,
+        "native-particles": false,
+        "browser-particles": false
+      },
+      "corePassed": 79,
+      "coreChecks": 530,
+      "originalStatus": "pass",
+      "browserStatus": "pass",
+      "pairedSourcesStable": true,
+      "fieldReportSha256": "28ac0270092257bab34b1fdba605de3d17d8b8634265c60fd49cb9b7d6d1092e",
+      "caseSha256": "99170c8c17d1a256a4f14479a88c3cefb0e1afe4e9fba9777a9b21785e38bd19"
+    },
+    {
+      "id": "contrived-t1-gibs-1",
+      "randomized": false,
+      "status": "fail",
+      "presentations": 524,
+      "checks": 1576,
+      "scopedFailures": 46,
+      "execution": {
+        "native-death": false,
+        "browser-death": true,
+        "native-particles": false,
+        "browser-particles": true
+      },
+      "corePassed": 79,
+      "coreChecks": 531,
+      "originalStatus": "pass",
+      "browserStatus": "pass",
+      "pairedSourcesStable": true,
+      "fieldReportSha256": "c868cfd857f3f718634ddc79e01950385557696502454204a2ac40a6f23c3f8b",
+      "caseSha256": "83f83f26564642806809dd09d3c4705aecd879f3553f78fec77259bd33cef4e9"
+    },
+    {
+      "id": "recorded-os-gibs-0",
+      "randomized": true,
+      "status": "fail",
+      "presentations": 655,
+      "checks": 1969,
+      "scopedFailures": 4,
+      "execution": {
+        "native-death": false,
+        "browser-death": false,
+        "native-particles": false,
+        "browser-particles": false
+      },
+      "corePassed": 245,
+      "coreChecks": 662,
+      "originalStatus": "pass",
+      "browserStatus": "pass",
+      "pairedSourcesStable": true,
+      "fieldReportSha256": "de72c5594423e2db3b6c2371736e812fed2977c3dbb3ddbfef160a2c47a6c1f2",
+      "caseSha256": "0a8835a57890be411df9b012cae87dc0cdf9609f0cb9ad134de28edfdf470b51"
+    },
+    {
+      "id": "recorded-os-gibs-1",
+      "randomized": true,
+      "status": "fail",
+      "presentations": 656,
+      "checks": 1972,
+      "scopedFailures": 4,
+      "execution": {
+        "native-death": false,
+        "browser-death": false,
+        "native-particles": false,
+        "browser-particles": false
+      },
+      "corePassed": 245,
+      "coreChecks": 663,
+      "originalStatus": "pass",
+      "browserStatus": "pass",
+      "pairedSourcesStable": true,
+      "fieldReportSha256": "de859e66e782c2b0a5fe3e72b0b92f10ef847da8898e4a2f29a2d40097c000f7",
+      "caseSha256": "1229ccf022bb11dcfd8ac25ec0c68772f3f4a2287fcf252d9d6da5a21cb935fc"
+    }
+  ],
+  "totalScopedChecks": 7090,
+  "totalScopedFailures": 58,
+  "totalScopedPresentations": 2358,
+  "totalCoreChecks": 2386,
+  "totalCorePasses": 648,
+  "nativeDeathCases": 0,
+  "browserDeathCases": 1,
+  "nativeParticleCases": 0,
+  "browserParticleCases": 1,
+  "matchedNativeParticleBodies": 0,
+  "reportSha256": "d7814b5a8195e654d8116a1967e474f6c9caf4f9d2606ba360e2baf96975f2ae",
+  "archiveReadbackSha256": "ed60f201dbbc4c1d7115d145ac8b82898f93a5091275c69e1b96f1353c34690b",
+  "rawManifestBytes": 1730631504,
+  "archiveManifestBytes": 88413976,
+  "scope": "Four complete fresh original/immutable production cases. All actual core/scoped failures retained. Scope checks cover room/phase/ordered presence and execution; zero native5 births means no matched particle-body or controller parity acceptance. Both recorded OS offsets retained.",
+  "unaccepted": [
+    "Native244 death/5 producer execution",
+    "Matched5 body/controller/color/sequence/RNG fields",
+    "Whole background ordering/persistence",
+    "Monstro2/42/77 and boss rewards"
+  ],
+  "reportPath": ".cache/e2e/blood-particles/first-live-1e9d02f/report.json",
+  "archiveReadbackPath": ".cache/coordination/boss-effects-research/first-four-archive-readback.json"
+}
