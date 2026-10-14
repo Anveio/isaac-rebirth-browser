@@ -84,7 +84,7 @@ for (const [index, label] of labels.entries()) {
       ['pendingDamage', f32(native.pendingDamage), f32(actor.damage.pendingDamage)],
       ['pendingFlags', native.pendingFlags, actor.damage.pendingFlags],
       ['orderedDamageRecords', native.pendingDamageRecords.map(record => [f32(record.amount), record.flags, record.sourceType]),
-        actor.damage.events.map(event => [f32(event.amount), { tear: 0, bomb: 4 }[event.kind], event.source.entityType])],
+        actor.damage.events.map(event => [f32(event.amount), { tear: 0, bomb: 4, roomEffect: 0 }[event.kind], event.source.entityType])],
       ['dead', native.removed, actor.dead], ['retired', false, actor.removed],
       ['collisionRadius', f32(native.collisionRadius), f32(actor.collisionRadius)],
       ['collisionMass', f32(native.collisionMass), f32(actor.collisionMass)],
@@ -95,9 +95,17 @@ for (const [index, label] of labels.entries()) {
       ['state', native.npcState, actor.state], ['frameAge', native.npcFrameAge, actor.frameAge],
     ]) check(checks, label, `npc${native.spawnSeed}.${field}`, expected, observed);
     for (const [index, record] of native.pendingDamageRecords.entries()) {
-      assert.equal(record.sourceActorType, record.sourceType, 'Native pending record must join its actual retained attacker');
       const event = actor.damage.events[index];
       if (!event) continue;
+      if (event.kind === 'roomEffect') {
+        // Black-heart Use35 passes a real blank source, not an actor reference.
+        check(checks, label, `npc${native.spawnSeed}.damage${index}.nativeBlankSource`, [0, 0, null, null, null],
+          [record.sourceType, record.sourceVariant, record.sourceActorType, record.sourceActorSequenceId, record.sourceActorSpawnSeed]);
+        check(checks, label, `npc${native.spawnSeed}.damage${index}.browserBlankSource`, [0, 0],
+          [event.source.entityType, event.source.id]);
+        continue;
+      }
+      assert.equal(record.sourceActorType, record.sourceType, 'Native pending record must join its actual retained attacker');
       const retained = event.source.entityType === 2 ? actual.tears.find(tear => tear.id === event.source.id)
         : actual.bombs.find(bomb => bomb.id === event.source.id);
       assert.ok(retained, 'Port pending record must reference an actually admitted public Tear/Bomb');

@@ -1,0 +1,60 @@
+{
+  "schema": 1,
+  "binarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "scope": "Source-qualified shared GiantBook13/16 request/full-host/render API. No runtime artifact or live acceptance. Health owns the concrete Black depletion caller; Stage owns the later Eternal NewStage caller.",
+  "blackHeart": {
+    "scope": "Static source/authored mapping and pending callback API only; no compiled artifact, game process or live acceptance.",
+    "sourceDamageDumpSha256": "89052e2fd8d3fed0431249d9e7c3fac8374dfe607180268f6a94472dc2020809",
+    "request": "Black slot consumer52c137 selects16;52c135 clearsEDXdelay0;52c143 calls5805c0(Game+a1e8,16,0), BEFORE forced35at52c15d(r8=1,ecx=1,edx=0).",
+    "authored": {
+      "linuxConfigSha256": "8b2ded7dee1b177af71b292895fc0f92eb47c62ccf26b41c038384ac36b80d12",
+      "id": 16,
+      "actor": "gfx/ui/giantbook/giantbook.anm2",
+      "clip": "Shake",
+      "frames": 35,
+      "loop": false,
+      "triggers": [],
+      "gfx": "gfx/ui/giantbook/giantbook_rebirth_002_blackheart.png",
+      "spritesheetId": 0,
+      "selectedAnimationSha256": "a0048d12332218906dc3979d733c912d263a46ec6356c8a9561edc430dea9f54"
+    },
+    "interruption": "5805c0 always4117b0 reloads, resetting main and overlay channels; sets configuredsheet0thenLoadGraphicsandPlay(forcefalse). A Black request replaces an existingEternal orBlack book withclock0/state1/delay0; no queue, elapsed-time fit, shared draw or capturedstate.",
+    "dispatch": "Same580330 state1 signed-delay predecrement\u21922withoutANM; state2 queriesfinishedbeforeSprite.Update.35authoredfulladvances stopclock34; nextfullprecheck clearsstate0while retainingdefinition/clip/finalclock. Current clips haveNOHealevents; unknownconfiguredbooks remainunadmitted. Both fastGame andcamera550760freezeanynonzeromanagerstate, full54fb88blocksRoomonlyresultstate2.",
+    "api": "InformationAnimation::request_black_heart usesactualparsedBook16definition; Health caller owns52c143 invocation andforced35. Eternal13 NewStage callback remains unchanged.",
+    "acceptance": "API/source ready only; soleHealthfield and realHealthcallsite dependency not yet composed or compiled."
+  },
+  "eternal": {
+    "playerCallback": "52a260 initialized ordinary Isaac branch tests signed Player+bbc>0 at52a30f; clears count at52a327, calls5805c0(13,0) at52a338, then508540(+2) at52a345 and508230(+2) at52a352. Floor placement has already used pre-conversion current/max/soul health;58c411 Save observes the converted Player.",
+    "healthOwner": "Reuse sole Player.eternal_hearts and existing normal-Isaac add_max_hearts/add_red_hearts.508540 clamps MAX red to0..24, trims soul and current red to the new cap, then5082d0 normalizes Black slots; special PlayerTypes4/10 and coop caps remain excluded.",
+    "definition": {
+      "linuxConfigSha256": "8b2ded7dee1b177af71b292895fc0f92eb47c62ccf26b41c038384ac36b80d12",
+      "id": 13,
+      "actor": "gfx/ui/giantbook/giantbook_eternalheart.anm2",
+      "clip": "Appear",
+      "frames": 62,
+      "loop": false,
+      "triggers": [],
+      "selectedAnimationSha256": "bf6238c9a8df486d8de72c64870a1270db8b0b3fbaa4f6dced9b238c95499a1c"
+    },
+    "request": "GiantBook580670 reads resources/giantbook.xml and stores authored rows by id atmanager+2f0+id*32.5805c0 requires id<=34,4117b0 definition loads rowANM, optionally substitutes its gfx sheet,4117a0 loads graphics,40fd80 plays configured clip(forcefalse), sets managerstate1 and actual caller delay at+748. Definition readiness comes from own successful asset load.",
+    "fullUpdate": "580330 state1 decrements signed delay then setsstate2 when<=0 and returns without ANM advance. State2 queries IsFinished(current) BEFORE Sprite.Update: finished setsstate0 but still executes Sprite.Update/event check on that callback. This precheck law differs from Player bf4 post-Base queries. Other states/Heal-event clips remain separately scoped.",
+    "stageOrder": "Stage5e38b0 state4 calls Player full Update, then580330(Game+a1e8), then tests50a5b0 and clears stage/re-enables7d4. Main Game54f910 first handles activeStage, then roomTransition, then active giantbook;54fb88 calls580330 and freezes ordinaryRoom dispatch only if resultingstate==2. State0 completion therefore permits ordinaryGameAge/Room.Update on the same full callback. Fast/camera550760 separately blocks any nonzero giantbook state.",
+    "noHealEvent": "Linux authored EternalHeart Appear contains no triggers, so58037d generic Heal query cannot refill on this admitted clip; immediate +2 red remains distinct from unrelated Heal-event Info animations.",
+    "effectOwnership": "50a750(Appear) and50a820(Trapdoor) are10-byte name-to50a5c0 tail wrappers and have no direct effect spawn.52a260 has no direct GameSpawn. NPC death Effects5/2/42 are separate factory/callsite dependencies, not Stage aliases.",
+    "acceptance": "Pinned source/authored mapping and observer only. No native capture, production artifact or live progression acceptance; health helper and concrete boss/Grid17 dependencies must compose before runtime publication.",
+    "render": "580560 draws only when managerstate>1, at actual viewportdimensions*.5 with zero extra offsets. State0 completion retains definition/lastclip but hides the book. Full pixels remain diagnostic.",
+    "clear": "Game stop/restart54f3f0/54f5e0 calls580310. It invokes Sprite40d9e0 Clear then managerstate0, preserving caller delay+748; NewStage itself does not clear the book."
+  },
+  "dumpSha256": {
+    "function-4117b0.txt": "53a869069499693fe7fc779e3306145ccc992e1b134bfddf01f98df0313da703",
+    "function-54f910.txt": "28f4b4c5bae3920b1f066ed069f62a7477b6ebed0647fdcceed6aa5daded6146",
+    "function-5507f0.txt": "3199f3b340007c1f24b8ba7df80c9f38f4784d99d92baa0094b5fa60320f1eff",
+    "function-5805c0.txt": "7649d4f5c0cad63533776743c93109a2af6f04c757ad74cc38b79bc609ee09fb",
+    "function-580330.txt": "cce5e557222b9c524f8ea5f521442743de1af466db215d1b1d6074904ea0a26d",
+    "function-580670.txt": "01f305b12daa2ee1e3b81b5fdc0f9267342e53b3faf3b70a57d9c3ee5b39a489",
+    "function-580560.txt": "0857eaac1262d08f75e427f4f078ba87a6be182f4a492ea0899ff15cb76bde89",
+    "function-580310.txt": "5fbcfc50e2c6ccf3d65f31ce4913a93bd4869062ff628503305721d76c996bd2"
+  },
+  "host": "Source54f910 actualpriority: entrylock/pause beforeStage and roomTransition;54fb88 calls580330 onlyafterthoseactivebranches return. Info blocks ordinaryGamecount/Room iff resultingstate2. Port insertion follows existingtransition return andexistingentryguard beforeGamecount; preexistingentrylock/transition approximation remains separately scoped. Fast550760/camera550760 freezeanynonzeroInfo; no inferredcontrols/bf4 mutation.",
+  "producerDependency": "Shared request_black_heart API is consumed immediately byHealth52c143 BEFOREforced35. Standalone prerequisite is unbuilt/source-qualified; main merge requires concreteHealthcaller and its required fresh public gate. Stage generation/controller/EternalNewStage consumer are not inthis shared leaf."
+}

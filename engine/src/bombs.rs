@@ -295,7 +295,9 @@ pub fn place(state: &mut State, phase: Phase) -> Result<(), String> {
     if state.screen != Screen::Playing
         || state.paused
         || state.inventory.bombs == 0
-        || state.player.hp == 0
+        // Player5318a5's actual dead branch encloses509540. That action
+        // checks controls/input/inventory/cooldown, without a red-health veto.
+        || state.player.dead
         || phase == Phase::Skipped
     {
         return Ok(());
@@ -506,13 +508,9 @@ pub fn advance_actor(state: &mut State, phase: Phase, id: u32) -> Result<(), Str
         {
             state.player.vx = f64::from(velocity.x) * WORLD_SCALE;
             state.player.vy = f64::from(velocity.y) * WORLD_SCALE;
-            if state.damage_cooldown == 0 && !state.player.dead {
-                state.player.hp = state.player.hp.saturating_sub(PLAYER_DAMAGE);
-                state.damage_cooldown = DAMAGE_COOLDOWN_TICKS;
-                // Bomb555300 supplies actual incoming DamageFlags4 via
-                // r9d to Game554490; its Player virtual38 forwards esi.
-                crate::player_death::after_damage(state, 4)?;
-            }
+            // Bomb555300 supplies actual incoming DamageFlags4 via
+            // r9d to Game554490; its Player virtual38 forwards esi.
+            crate::combat::try_damage_player(state, PLAYER_DAMAGE, DAMAGE_COOLDOWN_TICKS, 4)?;
         }
         crate::rock_blast::destroy(state, position, BLAST_RADIUS)?;
         state.explosions.push(Explosion {

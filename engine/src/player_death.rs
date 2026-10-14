@@ -78,7 +78,7 @@ pub fn advance(state: &mut State, phase: Phase) -> bool {
     if phase != Phase::Skipped {
         if state.player_animation.current != Some(Clip::Death) {
             state.player.visible = true;
-            state.player_animation.force_play(Clip::Death);
+            crate::player_animation::force_play(state, Clip::Death);
         }
         state.player.vx = 0.0;
         state.player.vy = 0.0;

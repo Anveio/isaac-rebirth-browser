@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "binarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "scope": "Authored System state4 scene owner and renderer prerequisite for ordinary floor progression. Public Grid17/controller producer and full original/production progression acceptance remain pending; no public scene command or native-state injection.",
+  "nightmare": {
+    "init": "System constructor5983e0 calls5b83e0 at5985e1, before any Level/room admission. Read nightmares.xml ordered9paths and progressAnm2, load actual progress definition; if loaded, shuffle paths with libc rand@GLIBC2.2.5, forward Fisher-Yates i1..count-1, j=rand()%(i+1). No srand dynamic import; only other direct rand callers58d160/58d900 belong to GameChangeRoom550970 after System init. External-library pre-init rand remains a live-readback prerequisite, not an observed permutation fixture.",
+    "start": "5b8120 clears main sprite, loads chosen nightmare definition, replaces sheet2 with the actual Player portrait, LoadGraphics, Play(Scene,false), state1/counter0, advances path cursor modulo9, stores stageIndex-1 and alternate; requests Music96.",
+    "advance": "5b7590 returns when state0 or own definition not loaded. Otherwise increment presentationcounter; on even old counter Sprite.Update, on odd old counter keepframe. Current-clip IsFinished or actual action14 trigger clears sprite/graphics andstate0. Called each System presentation, not every full Game update.",
+    "authoredScenes": {
+      "gfx/ui/stage/nightmare1.anm2": 178,
+      "gfx/ui/stage/nightmare2.anm2": 178,
+      "gfx/ui/stage/nightmare3.anm2": 178,
+      "gfx/ui/stage/nightmare4.anm2": 211,
+      "gfx/ui/stage/nightmare5.anm2": 181,
+      "gfx/ui/stage/nightmare6.anm2": 211,
+      "gfx/ui/stage/nightmare7.anm2": 181,
+      "gfx/ui/stage/nightmare8.anm2": 211,
+      "gfx/ui/stage/nightmare9.anm2": 181
+    }
+  },
+  "systemDispatch": {
+    "config": "System5983fc configbase+2df88 ->5b9ca0 defaults+4c at5b9cd3 and readsEnableInterpolation679186 fallback1 at5b9dd8..5b9de5, storesconfig+4c at5b9def = System+2dfd4.",
+    "poll": "5950e0 odd5951c0 branches595105 ifEnabled, admitting common5950a0 and60ffe0 poll595139 before state4 update5b7590; normalGamefull/fast chooseslater59549c/5954a5. Disabledinterpolationodd skipscommonpoll/update."
+  },
+  "systemPoll": {
+    "config": "5983fc configBase=System+2df88.5b9ca0 defaults+4c=true at5b9cd3; reads EnableInterpolation679186 fallback1 at5b9dd8..5b9de5, writes+4c at5b9def = System+2dfd4.",
+    "dispatch": "5951c0 on odd System counter tests2dfd4; enabled branches595105, executes5950a0 and60ffe0 at595139. Systemstate4 then invokes5b7590 at5952fd. Only normal Game branch later59549c/5954a5 selects full/fast. Disabled setting skips odd polls. Public setting readback remains a fresh gate requirement."
+  },
+  "nightmareClear": "Constructor40dc60 callsClear40d9e0. Clear40da09 nulls current main clip,40da3e writes main frame-1,40da48 clears playing,40dbdb clears definition-loaded. Called5b7643 at authored Scene completion or actual action14 skip; no last-frame retention after Clear.",
+  "stageResourceRouting": "NightmareInit5b83e0 initializes twelve manager+5ec words to12 at5b8448. Level585600 tailcalls5b8340 after writing actual numeric stage/alternate; normalstages1/2 route0 by((stage-1)&~1)+alternate. NewRun54ec3f callsLevel585620; Stage2 counter49 invokes the same real selector. System resource array is retained independently of the run and read directly by the new observer; progress rendering remains outside functional acceptance.",
+  "dataSha256": "4cffa517b449b9ff151a7761eb5c1e625772768a98918299febd692e26e0404b",
+  "dataValidation": "Own re-extraction from the original animation archive is byte-identical to web/stage-data.json;9 Scene clips plus authored progress definition.",
+  "originalDumps": {
+    "function-40dc60.txt": "55908a83d822864cec2e0df589c17b06c83b6ca2db4ce73e3acb8e9769210de3",
+    "function-4117b0.txt": "53a869069499693fe7fc779e3306145ccc992e1b134bfddf01f98df0313da703",
+    "function-5950a0.txt": "5600177190b0b5063d71ff936c389477dc6b17d13fa52aa6bcc2906c23599c52",
+    "function-5950e0.txt": "f2e08d14863ec9a9dc05d81d614497d80a0f15ec24412f2123e8a16eed6b143b",
+    "function-5b7590.txt": "508515c9d7fd7a3af5dc0e673b2d27a781b1b5ce42bb82a25c672c279873907b",
+    "function-5b8120.txt": "31a7e4cdd9bf71590d3abc064f86a907e10c98f72386a98113e102fe5af3ba81",
+    "function-5b8340.txt": "99a2567c0e0b18e16e2b80613b811d00aafdf8dc37102c7dc2f832329612f375",
+    "function-5b83e0.txt": "eb9d91cc74c622537828be5c0bac5bb7f525558d2995789acf5e03058084c31e"
+  },
+  "remaining": [
+    "External-library rand consumption before System construction and exact native path order require live readback.",
+    "Actual floor exit/Grid17/Stage5e38b0 producer follows as a separate small slice.",
+    "Progress rendering and alternate/profile paths remain unaccepted.",
+    "Fresh actual-original and immutable production public progression gate is pending."
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "scope": "Source-qualified Info clear at actual deferred System old-state2 boundary before supported Restart/Exit. No fresh compiler/production/public clear acceptance.",
+  "functions": [
+    {
+      "address": "0x54f3f0",
+      "bytes": 490,
+      "rawSha256": "cdc35d95bef17e272d1367cf026d0f62a81b1dea3efefc0e7b55968acee7f426"
+    },
+    {
+      "address": "0x54f5e0",
+      "bytes": 384,
+      "rawSha256": "1a8b927fa06b392917d32851cfb6ea9b9ea70c059a827504760b952c6b0cda30"
+    },
+    {
+      "address": "0x580310",
+      "bytes": 21,
+      "rawSha256": "cda2b907c4c7e77fc62743418cb27d31d6419b66b9260822aa8422b4f8825365"
+    },
+    {
+      "address": "0x5949a0",
+      "bytes": 98,
+      "rawSha256": "c1ab4e54116ba7e426ad65c64866baf3ec9eeb605d5c7c068bb22f362e841105"
+    },
+    {
+      "address": "0x594a10",
+      "bytes": 662,
+      "rawSha256": "2b7a5498ffe78f500cab0232e0f05e1e1599d6e89969de641e7cb23e9c860de3"
+    },
+    {
+      "address": "0x594cb0",
+      "bytes": 208,
+      "rawSha256": "484020612250563ad82d29bb08fb1bf7b6cd3aded0ab8d148347deade97743e5"
+    }
+  ],
+  "source": "5949a0 reads OLD Systemstate; old2 always calls54f3f0 at5949bb regardless nextrequestedstate. Restart594a48 andExit594ce0 call it before newstate2/1 and beforeNewRun/menu load.54f588 calls580310 afterStage/transition/secondary reset and beforeLevel/PlayerManager reset. Sprite.Clear/state0 preserves delay+748.",
+  "runtime": "One clear in supported player_death.system_pending dispatch BEFORE matching Restart/Exit, representing actual oldPlaying state2 transition. Generic start_run remains untouched because54eb20 has no InfoClear call. No Stage/transition/full Stop reset semantics are inferred.",
+  "limits": "This leaf implements only the mapped Info clear. Full Game Stop/restart save/room/UI reset semantics, charged active states and actual black-book death/restart public coverage remain separately pending.",
+  "correction": "Historical d65/910 placed clear in shared start_run and labeled54f5e0 as accepted UI Restart. That placement/label is corrected.54f5e0 has a mapped clear but no discovered static direct refs; lack of such refs alone does not prove it unreachable. Actual UI boundary is proven by5949a0/594a10/594cb0.",
+  "floorIndependentContractSha256": "068608b1e3bb8a8931f6014b23648b6ecd0237586c1105bde7779421418ec9ef"
+}

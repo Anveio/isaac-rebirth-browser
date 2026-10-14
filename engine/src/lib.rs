@@ -24,16 +24,20 @@ pub mod floor;
 pub mod grid;
 mod grid_hazards;
 pub mod grid_records;
+mod health_damage;
+pub mod information_animation;
 pub mod input;
 pub mod items;
 pub mod keepers;
 pub mod layout;
 pub mod level2_flies;
+pub mod level_progress;
 pub mod menu_lifecycle;
 pub mod monstro;
 pub mod motion;
 pub mod mt;
 pub mod music;
+pub mod nightmares;
 pub mod npcs;
 pub mod phase;
 pub mod pickups;
@@ -354,8 +358,11 @@ pub struct State {
     pub public_actions: public_actions::PublicActions,
     #[serde(default)]
     pub player_stats: player_stats::PlayerStats,
+    pub information_animation: information_animation::InformationAnimation,
     pub stage: u32,
     pub stage_seed: u32,
+    pub level_progress: level_progress::LevelProgress,
+    pub nightmares: nightmares::Nightmares,
     pub seeded_run: bool,
     pub achievement_eligibility: bool,
     pub profiles: Vec<Profile>,
@@ -495,8 +502,11 @@ impl Game {
                 player_animation: player_animation::PlayerAnimation::default(),
                 public_actions: public_actions::PublicActions::default(),
                 player_stats: player_stats::PlayerStats::default(),
+                information_animation: information_animation::InformationAnimation::default(),
                 stage: 1,
                 stage_seed: seed::stage1_seed(initial_seed),
+                level_progress: level_progress::LevelProgress::default(),
+                nightmares: nightmares::Nightmares::new()?,
                 seeded_run: false,
                 achievement_eligibility: true,
                 profiles: (1..=3)
@@ -691,7 +701,10 @@ impl Game {
             // Scene key handler. Physical action14 mapping remains unaccepted.
             return Ok(());
         }
-        if self.state.player_death.game_over.is_some() {
+        if self.state.player_death.game_over.is_some()
+            || self.state.nightmares.system_active
+            || self.state.nightmares.request_pending
+        {
             return Ok(());
         }
         let previous_screen = self.state.screen;
@@ -1063,6 +1076,7 @@ impl Game {
         self.state.player_animation = player_animation::PlayerAnimation::default();
         // Source 58bea7 constructs every descriptor's padded grid seed pairs.
         // floor::generate_basement owns the separate primary xorshift advance.
+        self.state.level_progress.begin_level();
         self.boot_level_grid = self.state.boot_lifecycle.initialize_level_grid();
         self.state.floor = floor::generate_basement(seed::stage1_seed(self.state.run_seed_value))?;
         self.state.current_room = self.state.floor.starting_descriptor;
@@ -1083,6 +1097,8 @@ impl Game {
         };
         self.state.next_pickup = 1;
         self.state.stage_seed = seed::stage1_seed(self.state.run_seed_value);
+        // Level585600 ->5b8340 records the selected ordinary stage resource.
+        self.state.nightmares.select_normal_basement(1)?;
         grid_records::admit_fresh(
             &mut self.state.room,
             &mut self.state.boot_lifecycle.shared,
@@ -1167,7 +1183,11 @@ impl Game {
         let pickup = &mut self.state.room.pickups[index];
         if pickup.touches(&self.state.player)
             && (if pickup.variant == 10 {
-                pickup.try_collect_heart(&mut self.state.player, red_multiplier)
+                pickup.try_collect_heart(
+                    &mut self.state.player,
+                    red_multiplier,
+                    &mut self.state.level_progress,
+                )
             } else {
                 pickup.try_collect(&mut self.state.inventory)
             })
@@ -1391,6 +1411,10 @@ impl Game {
         // Room construction and clock alignment happen here, after the f32
         // confirmation fade, rather than in the zero-tick DOM key callback.
         if let Some(request) = self.state.player_death.system_pending.take() {
+            //5949a0 sees old Systemstate2 before either deferred dispatch,
+            // including2->2 Restart, and54f588 clears the shared Info owner.
+            // NewRun54eb20 itself has no clear; delay remains unchanged.
+            self.state.information_animation.clear();
             match request {
                 player_death::Request::Restart => {
                     if !self.state.seeded_run {
@@ -1425,6 +1449,9 @@ impl Game {
         }
         let audio_counter = self.state.system_clock.system_counter;
         let phase = self.state.system_clock.advance()?;
+        if phase != phase::Phase::Skipped && self.state.nightmares.apply_request(self.state.stage) {
+            self.state.music.room(96);
+        }
         if phase != phase::Phase::Skipped {
             self.state.public_actions.advance(&self.state.pressed);
         }
@@ -1458,6 +1485,20 @@ impl Game {
         }
         self.state.tick += 1;
         self.state.menu_animation_tick += 1;
+        let nightmare_dispatch = if phase == phase::Phase::Skipped {
+            // Disabled interpolation skips System polling but keeps state4.
+            self.state.nightmares.system_active
+        } else {
+            self.state
+                .nightmares
+                .advance_system(self.state.public_actions.menu_confirm)
+        };
+        if nightmare_dispatch {
+            if phase != phase::Phase::Skipped {
+                self.state.music.advance();
+            }
+            return Ok(());
+        }
         let gameplay_was_paused = self.state.paused;
         if self.state.screen == Screen::Playing {
             self.state.pause_menu.advance(phase);
@@ -1631,6 +1672,23 @@ impl Game {
             self.state.music.advance();
             return Ok(());
         }
+
+        // Game54fb88 invokes580330 after its active transition branches.
+        // Full dispatch freezes only when the resulting manager state is2;
+        // completion resumes ordinaryRoom on this same full. Fast550760
+        // freezes any nonzero information state without advancing its ANM.
+        if self.state.information_animation.active() {
+            if phase == phase::Phase::Update {
+                self.state.information_animation.advance_full()?;
+            }
+            if phase != phase::Phase::Update || self.state.information_animation.state == 2 {
+                if phase != phase::Phase::Skipped {
+                    self.state.music.advance();
+                }
+                return Ok(());
+            }
+        }
+
         if phase == phase::Phase::Update {
             // Source54fa82 increments before PlayerManager/Room callbacks.
             self.state.game_update_count = self
@@ -1782,7 +1840,10 @@ impl Game {
         Ok(())
     }
     fn advance_camera(&mut self, phase: phase::Phase) {
-        if self.state.run_introduction.active || self.state.room_transition.is_some() {
+        if self.state.run_introduction.active
+            || self.state.room_transition.is_some()
+            || self.state.information_animation.active()
+        {
             return;
         }
         let aim = motion::WorldVector {
@@ -2129,13 +2190,13 @@ impl Game {
     ) -> Result<(), String> {
         if phase == phase::Phase::Update {
             self.state.player_animation.advance_full();
-            if self
-                .state
-                .player_animation
-                .is_finished(Some(player_animation::Clip::UseItem))
+            if matches!(
+                self.state.player_animation.current,
+                Some(player_animation::Clip::UseItem | player_animation::Clip::Hit)
+            ) && self.state.player_animation.is_finished(None)
             {
-                // Full Player presentation resumes its ordinary main owner
-                // after the actual UseItem clip completes.
+                // Current-main completion returns ordinary presentation; an
+                // interrupted Pickup never resumes its obsolete main clock.
                 self.state.player_animation.current = None;
             }
         }

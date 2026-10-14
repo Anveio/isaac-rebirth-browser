@@ -235,9 +235,15 @@ export interface State {
     collectionDelay: number; activeId: number; activeCharge: number; activeSubordinateCharge: number;
     activeStateD80: number; activeStateD84: number; reserveCharge: number; activeFlag3076: boolean;
     unevaluatedCacheFlags: number} | null;
+  informationAnimation: {state: number; delay: number; currentActor: string | null;
+    currentClip: string | null; spritesheet: string | null; definitionLoaded: boolean; frame: number; playing: boolean};
   savedRunSummary: SavedRunSummary | null;
   pendingMenuInitializations: { afterAudioRequests: number; initialization: { type: "loadFreshProfile"; profile: number } | { type: "resetCharacterSeed" } | { type: "commitCharacterSeed"; seed: number } }[];
   stage: number; stageSeed: number; seededRun: boolean; achievementEligibility: boolean;
+  levelProgress: {flags: number; heartCollected: boolean; lastPenaltyStage: number | null};
+  nightmares: {order: number[]; pathIndex: number; currentActor: string | null; requestPending: boolean; systemActive: boolean;
+    active: boolean; definitionLoaded: boolean; progressDefinitionLoaded: boolean; stageResources: number[];
+    counter: number; frame: number; playing: boolean; stageIndex: number; alternate: boolean};
   profiles: { slot: number; unlockedCharacters: string[]; selectedCharacter: string; achievements: boolean[] }[];
   characterCatalog: { name: string; animation: string }[];
   paused: boolean; pressed: string[];
@@ -248,7 +254,8 @@ export interface State {
   playerStats: {shotSpeed: number; damage: number; tearHeight: number; tearFallingSpeed: number; tearFallingAcceleration: number; moveSpeed: number};
   player: Player; room: Room; stageEffects: StageEffects; inventory: { coins: number; bombs: number; keys: number };
   publicActions: { menuConfirm: boolean; menuBack: boolean; activePressed: boolean; activeTriggered: boolean; pocketPressed: boolean; pocketTriggered: boolean; enterWasDown: boolean; spaceWasDown: boolean; escapeWasDown: boolean; pocketWasDown: boolean };
-  playerAnimation: { current: "Trapdoor" | "Appear" | "Death" | "UseItem" | null; frame: number; playing: boolean; guard: boolean };
+  playerAnimation: { current: "Trapdoor" | "Appear" | "Death" | "UseItem" | "Hit" | null; frame: number; playing: boolean; guard: boolean };
+
   camera: {scroll: {x: number; y: number}; lastPlayerPosition: {x: number; y: number};
     histories: {capacity: number; head: number; samples: {x: number; y: number}[]}[]} | null;
   nextPickup: number;
@@ -327,6 +334,7 @@ export class Engine {
   key(code: string, down: boolean): State { return this.command({ type: "key", code, down }); }
   text(text: string): State { return this.command({ type: "text", text }); }
   tick(count = 1): State { return this.command({ type: "tick", count }); }
-  snapshot(): State { const ptr = this.wasm.snapshot_ptr(); return JSON.parse(this.read(ptr, this.wasm.snapshot_len())) as State; }
+  snapshot(): State { return JSON.parse(this.snapshotJson()) as State; }
+  snapshotJson(): string { const ptr = this.wasm.snapshot_ptr(); return this.read(ptr, this.wasm.snapshot_len()); }
   private read(ptr: number, length: number) { return new TextDecoder().decode(new Uint8Array(this.wasm.memory.buffer, ptr, length)); }
 }
