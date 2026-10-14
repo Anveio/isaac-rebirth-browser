@@ -199,11 +199,11 @@ Pixel gates compare decoded RGBA over the whole frame, HUD, actor and projectile
 
 ## Antithesis deterministic simulation units
 
-The only checked-in unit-level verification is the [Antithesis DST harness](docs/dst.md) in \`engine/dst/\` (owner-authorized exception; see [AGENTS.md](AGENTS.md)). It is an inner-loop regression tool, not a merge gate: neither \`check:build\` nor any pre-merge check runs it. \`npm run test:dst\` drives each registered unit with seeded entropy and checks every property after each step; \`--entropy antithesis\` hands every decision to the Antithesis platform. Units and properties below are discovered from [the registry](${DST_REGISTRY}) and source; a run's report, not this list, is the outcome. DST establishes engine safety, determinism and documented contracts only, never original-game parity.
+The only checked-in unit-level verification is the [Antithesis DST harness](docs/dst.md) in \`engine/dst/\` (owner-authorized exception; see [AGENTS.md](AGENTS.md)). It is an inner-loop regression tool, not a merge gate: neither \`check:build\` nor any pre-merge check runs it. \`npm run test:dst\` drives each registered unit with seeded entropy, checks every property after each step and replays the corpus tapes through the game unit; \`--entropy antithesis\` hands every decision to the Antithesis platform. Units and properties below are discovered from [the registry](${DST_REGISTRY}) and source; a run's report, not this list, is the outcome. DST establishes engine safety, determinism and documented contracts only, never original-game parity.
 
-| DST unit | Scope | Always | Sometimes | Unreachable |
+| DST unit | Scope | Always | Sometimes | Reachability |
 | --- | --- | ---: | ---: | ---: |
-${dstUnits.map(unit => `| \`${unit.name}\` | ${unit.summary} | ${unit.properties.filter(property => property.kind.startsWith('Always')).length} | ${unit.properties.filter(property => property.kind === 'Sometimes').length} | ${unit.properties.filter(property => property.kind === 'Unreachable').length} |`).join('\n')}
+${dstUnits.map(unit => `| \`${unit.name}\` | ${unit.summary} | ${unit.properties.filter(property => property.kind.startsWith('Always')).length} | ${unit.properties.filter(property => property.kind === 'Sometimes').length} | ${unit.properties.filter(property => ['Reachable', 'Unreachable'].includes(property.kind)).length} |`).join('\n')}
 
 <details><summary>Every declared DST property</summary>
 
