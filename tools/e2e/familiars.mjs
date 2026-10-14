@@ -11,11 +11,11 @@ import { browserLaunchOptions, inspectBrowserGraphics } from '../foundation/brow
 import { startProductionServer } from '../foundation/production-server.mjs';
 import { assertInputProvenance, assertSeededRun, enterSeededRun, manualSeedCommands, waitForReady } from '../foundation/verify.mjs';
 import { compareRoomContext } from './item-room-evidence.mjs';
-import { ORIGINAL_SHA } from './lib/original.mjs';
+import { snapshot, stepSnapshot } from './lib/game.mjs';
+import { ORIGINAL_SHA, assertOriginalBinary } from './lib/original.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const run = promisify(execFile);
-const PIN = ORIGINAL_SHA;
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
 const f32 = Math.fround;
 const vector = point => [f32(point.x), f32(point.y)];
@@ -32,11 +32,11 @@ assert.ok(scenarios.cases.length >= 4 && scenarios.cases.length <= 6);
 assert.equal(new Set(scenarios.cases.map(item => item.name)).size, scenarios.cases.length);
 assert.ok(scenarios.cases.filter(item => item.entropy === 'OS secrets').length >= 2);
 await writeFile(join(output, 'scenarios.json'), JSON.stringify(scenarios, null, 2) + '\n');
-assert.equal(digest(await readFile(join(ROOT, '.cache/original-runtime/offline-depot/isaac.x64'))), PIN);
+await assertOriginalBinary();
 const server = await startProductionServer();
 const browser = await chromium.launch(browserLaunchOptions());
 const report = {schema: 1, status: 'running', production: server.build,
-  nativeBinarySha256: PIN, graphics: await inspectBrowserGraphics(browser),
+  nativeBinarySha256: ORIGINAL_SHA, graphics: await inspectBrowserGraphics(browser),
   scope: 'Natural free grant/cache, child270 and every actual Familiar/effect presence, source actor order/room sequence, full/fast motion, appearance/countdown/sprite/Poof callback and retirement. Placement and Poof seed differences are mandatory failures. Full624-word MT and absolute Game ages stay explicit diagnostics until missing causal consumers are implemented. Path/target/contact/heal/modifiers and other Familiar subclasses remain unaccepted.', cases: []};
 
 const modelActor = (state, ref) => {
@@ -121,7 +121,7 @@ try {
         assert.ok(row, 'Every browser presentation requires an independently retained original phase');
         const source = row.observation;
         assert.equal(source.status, 'pass'); assert.equal(source.memoryWritten, false);
-        assert.equal(source.executableMappingsRead, false); assert.equal(source.nativeBinarySha256, PIN);
+        assert.equal(source.executableMappingsRead, false); assert.equal(source.nativeBinarySha256, ORIGINAL_SHA);
         assert.equal(source.gamePresent, true); assert.equal(source.systemState, 2);
         equal(source.actorOrder.length, source.actorCount, 'complete counted native actor list', tick);
         for (const check of compareRoomContext(state, row)) equal(check.actual, check.expected, check.field, tick);
@@ -234,9 +234,9 @@ try {
         const code = key ? arrow ? 'Arrow' + key : 'Key' + key.toUpperCase() : null;
         const domKey = arrow ? code : key;
         if (key) { await page.keyboard.down(domKey); expected.push({type: 'key', code, down: true}); }
-        for (let step = 0; step < frames; step++) {
-          await page.evaluate(() => window.game.step(1)); expected.push({type: 'tick', count: 1});
-          const state = await page.evaluate(() => window.game.snapshot()); states.push(state); presentation++;
+        for (let frame = 0; frame < frames; frame++) {
+          const state = await stepSnapshot(page); expected.push({type: 'tick', count: 1});
+          states.push(state); presentation++;
           compare(state, rows.get(baseline.context.presentedFrame + presentation), presentation);
         }
         if (key) { await page.keyboard.up(domKey); expected.push({type: 'key', code, down: false}); }
@@ -256,7 +256,7 @@ try {
       assert.equal(trace.backendStateTruncated, false, 'Actual backend state evidence must remain complete');
       assert.ok(trace.backendEvents.every(event => event.state?.schema === 1), 'Every real backend callback requires its full state');
       assert.equal(states.length, item.actions.reduce((total, action) => total + action.frames, 0));
-      assertSeededRun(await page.evaluate(() => window.game.snapshot()), item.code, item.seedValue);
+      assertSeededRun(await snapshot(page), item.code, item.seedValue);
       assert.deepEqual(errors, []);
       const bytes = Buffer.from(JSON.stringify({schema: 1, baseline: start, states, trace}) + '\n');
       const path = join(directory, 'browser-states.json.gz'); await writeFile(path, gzipSync(bytes));
