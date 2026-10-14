@@ -393,6 +393,17 @@ try {
         }
         if (key) { await page.keyboard.up(domKey); expected.push({type: 'key', code, down: false}); }
       }
+      // Keep the completed real browser capture even when a coverage or
+      // provenance requirement below fails. Failure is not an evidence veto.
+      const trace = await page.evaluate(() => window.game.trace());
+      const browserBytes = Buffer.from(JSON.stringify({schema: 1, states, trace}) + '\n');
+      const browserPath = join(directory, 'browser-states.json.gz');
+      await writeFile(browserPath, gzipSync(browserBytes));
+      Object.assign(result, {checks, comparedPresentations: presentations + 1,
+        passedPresentations, admittedPedestals: admitted, selectedItemIds: [...selectedItemIds],
+        queuedPresentations, grantedPresentations, pickupShotGuardPhases: [...pickupShotGuardPhases].sort(),
+        browserEvidence: {path: browserPath, encoding: 'gzip', rawSha256: digest(browserBytes), rawBytes: browserBytes.length},
+        nativeManifestSha256: digest(nativeBytes), tapeSha256: digest(Buffer.from(tape))});
       assert.ok(admitted > 0, 'Every case must naturally admit a source-selected pedestal');
       if (acquisition) {
         assert.ok(queuedPresentations > 0, 'Every acquisition case must observe the actual deferred queue');
@@ -411,7 +422,6 @@ try {
         equal([...selectedItemIds], [item.expectedItemId], 'declared natural passive selection', presentations);
         equal([...grantedItemIds], [item.expectedItemId], 'declared natural passive grant', presentations);
       }
-      const trace = await page.evaluate(() => window.game.trace());
       assertInputProvenance(trace, expected, item.seedValue, scenarios.bootEpochSeed);
       if (!acquisition) assert.equal(trace.stateHistoryTruncated, false, 'Selection requires the complete bounded state history');
       assert.ok(trace.backendEvents.every(event => event.state),
@@ -420,9 +430,6 @@ try {
         'Every declared gameplay presentation must have its independent complete snapshot');
       assertSeededRun(await page.evaluate(() => window.game.snapshot()), item.code, item.seedValue);
       assert.deepEqual(errors, []);
-      const browserBytes = Buffer.from(JSON.stringify({schema: 1, states, trace}) + '\n');
-      const browserPath = join(directory, 'browser-states.json.gz');
-      await writeFile(browserPath, gzipSync(browserBytes));
       Object.assign(result, {status: result.failures.length ? 'fail' : 'pass', checks, comparedPresentations: presentations + 1,
         passedPresentations, admittedPedestals: admitted, selectedItemIds: [...selectedItemIds],
         queuedPresentations, grantedPresentations, ageClockDiagnostics, callbackDiagnostics, mtDiagnostics,
