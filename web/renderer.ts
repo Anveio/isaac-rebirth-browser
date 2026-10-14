@@ -4,7 +4,7 @@ import { GLMenuContext, type GLSurface } from "./gl-menu";
 import { StageComposer, type StageTargets } from "./gl-stage";
 import { RunPresentation } from "./presentation";
 import { PickupRenderer } from "./pickups";
-import type { Room, RoomAppearance, RoomQuad, State } from "./engine";
+import type { ActorSprite, Room, RoomAppearance, RoomQuad, State } from "./engine";
 
 const PLAYER = "gfx/001.000_player.anm2";
 const TEAR = "gfx/002.000_tear.anm2";
@@ -161,10 +161,9 @@ export class Renderer {
           ctx.restore();
           continue;
         }
-        this.assets.draw(ctx, "gfx/1000.015_poof01.anm2", effect.sprite.animation,
+        this.drawEffect(ctx, effect.variant, effect.sprite,
           (effect.presentedPosition.x + effect.sprite.offset.x) * 0.65 + 32,
-          (effect.presentedPosition.y + effect.sprite.offset.y) * 0.65 - 46,
-          effect.sprite.frame, { scale: 0.65 });
+          (effect.presentedPosition.y + effect.sprite.offset.y) * 0.65 - 46);
       }
       ctx.restore();
       this.stage.foreground(state.stageEffects);
@@ -205,6 +204,23 @@ export class Renderer {
       gl.restore();
     }
   }
+  private drawEffect(ctx: CanvasRenderingContext2D, variant: number, sprite: ActorSprite, x: number, y: number): void {
+    const actors: Record<number, string> = { 7: "gfx/1000.007_blood splat.anm2", 15: "gfx/1000.015_poof01.anm2",
+      17: "gfx/1000.017_poof04.anm2", 42: "gfx/1000.042_blood gush.anm2" };
+    const actor = actors[variant];
+    if (!actor) throw new Error(`Unadmitted effect renderer ${variant}`);
+    ctx.save(); ctx.translate(x, y); ctx.rotate(sprite.rotation * Math.PI / 180);
+    ctx.scale(sprite.scale.x * (sprite.flipX ? -1 : 1), sprite.scale.y * (sprite.flipY ? -1 : 1));
+    const layerScales = Object.fromEntries(Object.entries(sprite.layerFlips).map(([layer, flips]) =>
+      [layer, [flips[0] ? -1 : 1, flips[1] ? -1 : 1] as const]));
+    this.assets.draw(ctx, actor, sprite.animation, 0, 0, sprite.frame,
+      { scale: 0.65, layerScales, overrides: { 0: {
+        RedTint: sprite.tint[0] * 255, GreenTint: sprite.tint[1] * 255,
+        BlueTint: sprite.tint[2] * 255, AlphaTint: sprite.tint[3] * 255,
+        RedOffset: sprite.offsets[0] * 255, GreenOffset: sprite.offsets[1] * 255,
+        BlueOffset: sprite.offsets[2] * 255 } } });
+    ctx.restore();
+  }
   private prepareRoom(room: Room): void {
     const appearance = room.appearance;
     const key = JSON.stringify({ backdrop: appearance.backdrop, patchSize: appearance.backdropPatchSize,
@@ -225,21 +241,27 @@ export class Renderer {
     const ctx = gl.asCanvasContext();
     for (const stain of room.backgroundStains) {
       const sprite = stain.sprite;
-      ctx.save();
-      ctx.translate((stain.position.x + stain.renderOffset.x + sprite.offset.x) * 0.65 + 32 - appearance.origin.x,
-        (stain.position.y + stain.renderOffset.y + sprite.offset.y) * 0.65 - 46 - appearance.origin.y);
-      ctx.scale(sprite.flipX ? -1 : 1, sprite.flipY ? -1 : 1);
-      const actor = stain.variant === 58 ? "gfx/1000.058_poop particle.anm2" :
-        stain.variant === 43 ? "gfx/1000.043_poop explosion.anm2" : "gfx/1000.007_blood splat.anm2";
-      this.assets.draw(ctx, actor, sprite.animation, 0, 0, sprite.frame,
-        { scale: 0.65, layerScales: {0: [sprite.scale.x, sprite.scale.y]}, overrides: { 0: {
-          ...(stain.layerRotation === null ? {} : {Rotation: stain.layerRotation}),
-          RedTint: sprite.tint[0] * 255, GreenTint: sprite.tint[1] * 255,
-          BlueTint: sprite.tint[2] * 255, AlphaTint: sprite.tint[3] * 255,
-          RedOffset: sprite.offsets[0] * 255, GreenOffset: sprite.offsets[1] * 255,
-          BlueOffset: sprite.offsets[2] * 255,
-        } } });
-      ctx.restore();
+      if (stain.variant === 58 || stain.variant === 43) {
+        ctx.save();
+        ctx.translate((stain.position.x + stain.renderOffset.x + sprite.offset.x) * 0.65 + 32 - appearance.origin.x,
+          (stain.position.y + stain.renderOffset.y + sprite.offset.y) * 0.65 - 46 - appearance.origin.y);
+        ctx.scale(sprite.flipX ? -1 : 1, sprite.flipY ? -1 : 1);
+        const actor = stain.variant === 58 ? "gfx/1000.058_poop particle.anm2" :
+          stain.variant === 43 ? "gfx/1000.043_poop explosion.anm2" : "gfx/1000.007_blood splat.anm2";
+        this.assets.draw(ctx, actor, sprite.animation, 0, 0, sprite.frame,
+          { scale: 0.65, layerScales: {0: [sprite.scale.x, sprite.scale.y]}, overrides: { 0: {
+            ...(stain.layerRotation === null ? {} : {Rotation: stain.layerRotation}),
+            RedTint: sprite.tint[0] * 255, GreenTint: sprite.tint[1] * 255,
+            BlueTint: sprite.tint[2] * 255, AlphaTint: sprite.tint[3] * 255,
+            RedOffset: sprite.offsets[0] * 255, GreenOffset: sprite.offsets[1] * 255,
+            BlueOffset: sprite.offsets[2] * 255,
+          } } });
+        ctx.restore();
+      } else {
+        this.drawEffect(ctx, stain.variant, sprite,
+          (stain.position.x + sprite.offset.x) * 0.65 + 32 - appearance.origin.x,
+          (stain.position.y + sprite.offset.y) * 0.65 - 46 - appearance.origin.y);
+      }
     }
     gl.beginTarget(this.walls, width, height); gl.resetTransform();
     gl.clearRect(0, 0, this.walls.width, this.walls.height); gl.blendFactors("one", "zero");

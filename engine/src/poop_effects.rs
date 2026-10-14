@@ -145,6 +145,7 @@ impl Admission<'_> {
             sprite: Sprite::new(config),
             full_updates: 0,
             poop_effect: Some(controller),
+            blood_effect: None,
         });
         // Real Room sequence and manager append precede any caller Update.
         self.scheduler.admit(ActorRef {

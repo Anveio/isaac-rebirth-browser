@@ -10,6 +10,7 @@ use std::collections::{BTreeMap, BTreeSet};
 pub mod active_items;
 pub mod actors;
 pub mod audio;
+pub mod blood_effects;
 pub mod bombs;
 pub mod camera;
 pub mod chests;
@@ -1640,6 +1641,7 @@ impl Game {
                     }
                     self.state.room.manager_counts.finish_full(counted);
                     familiars::paint_background_effects(&mut self.state)?;
+                    blood_effects::clear_retired_links(&mut self.state);
                     pickups::full_grid_contacts(&mut self.state)?;
                     chests::full_grid_contacts(&mut self.state)?;
                     npcs::post_contact_grid(&mut self.state)?;
@@ -1730,6 +1732,7 @@ impl Game {
             // The independent render array paints flags8 at its current count,
             // including births from the admission-fenced actor callbacks.
             familiars::paint_background_effects(&mut self.state)?;
+            blood_effects::clear_retired_links(&mut self.state);
             let pickup_contacts = pickups::contact_candidates(&self.state)?;
             npcs::player_contacts(&mut self.state)?;
             npcs::nonplayer_contacts(&mut self.state)?;
@@ -1814,7 +1817,8 @@ impl Game {
         self.state.room.pickups.retain(|pickup| !pickup.removed);
         self.state.room.npcs.retain(|npc| !npc.removed);
         self.state.familiars.retain(|familiar| !familiar.removed);
-        self.state.sprite_effects.retain(|effect| !effect.removed);
+        //454df0 retires actual31e inactive actors;31f alone is not removal.
+        self.state.sprite_effects.retain(|effect| effect.active);
         self.state
             .enemy_projectiles
             .retain(|projectile| !projectile.removed);

@@ -1,0 +1,117 @@
+{
+  "schema": 1,
+  "scope": "Private native Rust metadata check/Clippy only, not production/WASM/game acceptance",
+  "reviewedSource": "d28154f2f6cd806ad4f353a8b78770e1c0fbc9e0",
+  "actualMainBase": "19906c4e28199059d27e3ca90caa6d6861c66f2e",
+  "sourceInputsStable": true,
+  "sourceInputPins": 89,
+  "sourceInputReceiptSha256": "4a245db25551a2f03007d96f2adef9ea9565be5bcf700547a9a74d62f0b46804",
+  "check": {
+    "status": "pass",
+    "exitCode": 0,
+    "seconds": 21.11,
+    "logSha256": "225dbd659f16c7a68f3ec1656d3ec888c94f16d9c212104b4fadb55490d634e6"
+  },
+  "clippy": {
+    "status": "pass",
+    "exitCode": 0,
+    "seconds": 10.58,
+    "strictWarnings": true,
+    "logSha256": "94a30d99bc386216542f2621e05ceecc341d0f9d130e35b73ba8ac83f76a3253"
+  },
+  "generatedHeaderPins": [
+    {
+      "name": "audio_catalog.rs",
+      "bytes": 1010,
+      "sha256": "bc3ec174225695020b19d80eef59f758068ff0121ebfe02a7f9b3c80fbae25fa"
+    },
+    {
+      "name": "familiar_catalog.rs",
+      "bytes": 2746,
+      "sha256": "ba1f8bc9e8c8ea3b4e633c0fa214cc5867f15876aaccab957a28520e3422eb86"
+    },
+    {
+      "name": "information_catalog.rs",
+      "bytes": 406,
+      "sha256": "9045c8a5b44ed6f30cdc8ad04c3e2b042e9e3bff4fa700da1525a08be81dc4d6"
+    },
+    {
+      "name": "item_catalog.rs",
+      "bytes": 171534,
+      "sha256": "dae131b73142fb629b1a64cc95d694580cda3bbaad582ebe0570bf0dfb674dc5"
+    },
+    {
+      "name": "music_catalog.rs",
+      "bytes": 6838,
+      "sha256": "62719ed04ba3e5707a457adf8a8c3cf368c102cd60868dacb3a6ae4897e736f8"
+    },
+    {
+      "name": "nightmare_catalog.rs",
+      "bytes": 820,
+      "sha256": "840ebbbbf86c8b4a689de4ad25a053767a6f71dd1f8db88b9547b7927f7a62bb"
+    },
+    {
+      "name": "pickup_catalog.rs",
+      "bytes": 14828,
+      "sha256": "f809e99812293cf1cf69394e1e56275f955ad010319e47152bd7c9cdd00ec046"
+    },
+    {
+      "name": "shadow_catalog.rs",
+      "bytes": 6663,
+      "sha256": "d9500d1b646242649ba1d165b61c546bada874d879ea1ab6301b31c6df749c87"
+    },
+    {
+      "name": "audio_catalog.rs",
+      "bytes": 1010,
+      "sha256": "bc3ec174225695020b19d80eef59f758068ff0121ebfe02a7f9b3c80fbae25fa"
+    },
+    {
+      "name": "familiar_catalog.rs",
+      "bytes": 2746,
+      "sha256": "ba1f8bc9e8c8ea3b4e633c0fa214cc5867f15876aaccab957a28520e3422eb86"
+    },
+    {
+      "name": "information_catalog.rs",
+      "bytes": 406,
+      "sha256": "9045c8a5b44ed6f30cdc8ad04c3e2b042e9e3bff4fa700da1525a08be81dc4d6"
+    },
+    {
+      "name": "item_catalog.rs",
+      "bytes": 171534,
+      "sha256": "dae131b73142fb629b1a64cc95d694580cda3bbaad582ebe0570bf0dfb674dc5"
+    },
+    {
+      "name": "music_catalog.rs",
+      "bytes": 6838,
+      "sha256": "62719ed04ba3e5707a457adf8a8c3cf368c102cd60868dacb3a6ae4897e736f8"
+    },
+    {
+      "name": "nightmare_catalog.rs",
+      "bytes": 820,
+      "sha256": "840ebbbbf86c8b4a689de4ad25a053767a6f71dd1f8db88b9547b7927f7a62bb"
+    },
+    {
+      "name": "pickup_catalog.rs",
+      "bytes": 14828,
+      "sha256": "f809e99812293cf1cf69394e1e56275f955ad010319e47152bd7c9cdd00ec046"
+    },
+    {
+      "name": "shadow_catalog.rs",
+      "bytes": 6663,
+      "sha256": "d9500d1b646242649ba1d165b61c546bada874d879ea1ab6301b31c6df749c87"
+    }
+  ],
+  "closedPrivateReceiptSha256": "4518cbd26583aa59a87d754dd1965d64920eed53b64846075afa7bfa34183656",
+  "compilerClosed": true,
+  "productionBuilt": false,
+  "originalBrowserGamesStarted": 0,
+  "sourcePeer": {
+    "coreReceiptSha256": "04d400746f69066d9bfc2739699c6a4633542432619cb401f070d084008ae4d4",
+    "scope": "Core17/42 emission/controller source pass. Final frozen typed-link/comparator source review requested; no actual Monstro body, native producer or renderer equality acceptance."
+  },
+  "unaccepted": [
+    "Fresh immutable production plus original/browser paired cohort",
+    "Explosion2/77/category5/final7/final-heart/clear/Grid17",
+    "All unreached producer/body requirements and complete shared-stream/render parity"
+  ]
+}
