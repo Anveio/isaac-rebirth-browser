@@ -1,0 +1,259 @@
+{
+  "schema": 1,
+  "scope": "Source-composed normal container/Hit/Info16/action runtime on complete reviewed Root Death5afa and final Heartf782 APIs. Exclusive main transfer and collectible-specific item-clip selection are source-qualified. Frozen b68 static receipt is historical only; current composed all-target check/strict Clippy pass; no production/fresh health acceptance.",
+  "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "functions": [
+    {
+      "address": "0x52b080",
+      "bytes": 7175,
+      "label": "Player health/damage dispatch",
+      "rawSha256": "f5b9ad4be3fb16bc157fa0656e93fd57c6d8b780c1a5d27dfe060caea8566d6e"
+    },
+    {
+      "address": "0x508230",
+      "bytes": 41,
+      "label": "Signed red helper",
+      "rawSha256": "f42c151dcbe3567ef72219b175baa064efd5238f6ac10f42a08d0ed921e467a2"
+    },
+    {
+      "address": "0x508260",
+      "bytes": 36,
+      "label": "Consumed Black slot clear",
+      "rawSha256": "72a583e08bc8f8e59050c1105465d14c584d2235639b97fa76d62ceccac42fc0"
+    },
+    {
+      "address": "0x508290",
+      "bytes": 49,
+      "label": "Odd-position Black predicate",
+      "rawSha256": "32d0402a3c291c978555f34a7de494c27072d760110c69b6a321165ebb96c4d4"
+    },
+    {
+      "address": "0x522250",
+      "bytes": 19291,
+      "label": "Forced35 dispatch",
+      "rawSha256": "38a92bae7b10b374a7b06198beaf8ec70b4fb9ab66a1ee682b613fbff59c654e"
+    },
+    {
+      "address": "0x594530",
+      "bytes": 120,
+      "label": "Sound source admission",
+      "rawSha256": "616453a9d7e04868ffdb1d07832cd3d53d1f0ec34390ab14223689dee5389b6e"
+    },
+    {
+      "address": "0x5e4140",
+      "bytes": 210,
+      "label": "Temporary record arithmetic",
+      "rawSha256": "5b109df13f60a512c9a11eef7e9c3ae6f8fd29c1d574c317a18d470d94350b77"
+    },
+    {
+      "address": "0x444800",
+      "bytes": 15,
+      "label": "Numeric NPC predicate",
+      "rawSha256": "a61d1504e20db765efa9b463161e45691e755f90a5ead806618df15029200da6"
+    },
+    {
+      "address": "0x446cf0",
+      "bytes": 515,
+      "label": "Ordinary NPC queued receiver",
+      "rawSha256": "a48280d96650297f7ce8627f21016529a3087e00ee2c4954cb0af15fa85c9f8d"
+    },
+    {
+      "address": "0x441c80",
+      "bytes": 713,
+      "label": "Initial Entity flags clear",
+      "rawSha256": "fdb3091280e32986d66c18d256250eb01b68ea9b03f6a60e0863252b35d545ba"
+    },
+    {
+      "address": "0x47ed20",
+      "bytes": 452,
+      "label": "Ordinary NPC initial flags4",
+      "rawSha256": "db896b351018b8e5688c3187ddf5b45fc252bb365324c5b4e4d4b852cebe977e"
+    },
+    {
+      "address": "0x50a5c0",
+      "bytes": 187,
+      "label": "Player force main clip and bf4",
+      "rawSha256": "95c240132b2b69161b7ff962005d89f24957b4e794bb2598f0ecc4d205927df8"
+    },
+    {
+      "address": "0x510510",
+      "bytes": 56,
+      "label": "Ordinary active-state cancellation",
+      "rawSha256": "9077d362b105b7d0ac73d93412556f95bdc050061929df5c922eccc4ccdf5d49"
+    },
+    {
+      "address": "0x50c880",
+      "bytes": 243,
+      "label": "Actual Player collection eligibility",
+      "rawSha256": "bc60f143f370adb42072cc2166c854d92025a0e19465c7e9ea8096dc39f2373f"
+    },
+    {
+      "address": "0x50c780",
+      "bytes": 250,
+      "label": "Guarded item clip-name predicate",
+      "rawSha256": "d03137d1fa55d58b1d271a50870711350f0ee6587be7f27f3a217eeac2a191c5"
+    },
+    {
+      "address": "0x509540",
+      "bytes": 341,
+      "label": "Actual bomb input action",
+      "rawSha256": "564ff5c3102d301e233fd6de7b5c3395cf098ab85477b4f3c468bd6f92640d2a"
+    },
+    {
+      "address": "0x504820",
+      "bytes": 8329,
+      "label": "Player pickup collision dispatch",
+      "rawSha256": "2737d0683e5bd89e4e68a811d2154a41b8c7a7b1f73038b6174169b51e1d3f2f"
+    },
+    {
+      "address": "0x531850",
+      "bytes": 13012,
+      "label": "Player full/fast callback and real dead branch",
+      "rawSha256": "afc91e017a8190f954b8859c4cb46cabdc2996f64432f099ba8d7e9163c7c20f"
+    }
+  ],
+  "healthDispatch": {
+    "incomingFlags": "esi captured as r12d at52b0bb; amount f32 captured separately. Normal initial integer amount trunc(amount+0.5) at52b1a4..52b1af; incoming amount remains available for admission.",
+    "ordinary": "52bdf4 readsBC0. Positive Soul and absent flag32 branches52c0f4. Store52c181 is direct BC0 decrement by min(Soul,integerDamage), without red spill or5082d0 mask normalization.",
+    "redFlag32": "With positive Soul, flag32 chooses red only when red>2 OR red==2 AND integerDamage<=1. red<=1 or red==2 and damage>1 branchesSoul.",
+    "red": "52be2a..52be46 subtracts positive EternalBBC from integer damage, clearsBBC, clamps negative remainder0;52be52 invokes508230(-remaining).",
+    "black": "Descending index startsSoul and walks down while index>Soul-damage.508290 only recognizes positive odd positions<=Soul and bit((position-1)/2).508260 clears bit(position/2).Each consumed odd Black position dispatchesinfo16 thenUse35 before health decrement.",
+    "noKill": "52c668 testsSoul after red depleted;only if both red<=0 andSoul<=0 does flags1 restore red=min(maxRed,1);otherwise virtual40 Kill path52cbc9. Existing rootDeath helper owns real Kill callbacks.",
+    "damageSound": "Normal primary Isaac without temporary83:52b7d0\u219252c0b6\u219252c0e0 emits55 volume1 pitch1 delay2 before health fields. Sound55 has3 authored samples; real AudioState admission owns random draw/throttle."
+  },
+  "blackDispatch": {
+    "entry": "Use35 jump table66fc18+(35-33)*8\u2192523e5a. Params animate=false, force=true bypass53e5e veto; no UseItem main clip.",
+    "order": "52c143 requests shared authored Info16 before forced35. Config35 has no costume2 match/cache/cooldown attrs. Temporary record, Sound33, NPC queued effects, then actual3076=true; ordinary Room callbacks pause through Book16.",
+    "targets": "Numeric NPC10..999 plus actual Entity318mask0x10 skip, typed existing subclass flag view. Actual receiver446cf0 positive40/maxHP>0 queues flags0/blankSource. Normal unchanged ordinary NPC Init clears flags then ORs4; charm/other modifier lifecycle remains pending.",
+    "informationQueue": "5805c0(16,0) loads actual GiantBook/Shake35 nonloop/no events with BlackHeart sheet override. The shared580330 host freezes ordinary Room only while resulting state2; fast/camera freeze any active state. Completion checks finish before update and resumes Room on its state0 full callback.",
+    "receiver": "446cf0 supports flags0 without periodic cooldown branches. Positive amount and maximumHP>0 admit queued40HP; original dead/currentHP/removed are not global receiver vetoes. Actor scheduler/vector membership owns visit/retirement."
+  },
+  "boundaries": [
+    "Modifiers/alternate Player characters/co-op/hard stage damage, invincibility, HolyMantle and temporary shields are separate true admission paths, pending.",
+    "Source-only priority mapping does not accept a branch that no fresh public source input actually executes.",
+    "No native fields, elapsed counters, RNG state or manifest bytes supply runtime.",
+    "No checked-in unit tests. Required game-level comparator retains all mismatches/aborts and original/browser public input/audio/backend provenance."
+  ],
+  "sharedPrerequisites": {
+    "normalDeath": "5afa7ddb1a6d5c2031b6648905478e80d78fa6d9",
+    "temporaryMethod": "417f5ea5e5cc6f72a4ea9bd745b0049f7db3b248",
+    "eternalField": "ef41ec78d0417777cfadcf21fb3f76901a893de0",
+    "informationAnimation": "9c05c4e3b0567b3b14fd72ab8fbd16069702ec95",
+    "naturalHearts": "f782d64d8bd5207bf5cfeeeeb296863db1cb4f58",
+    "sharedPickupEntry": "main98 collect_regular_pickup_at; Root sole name-based player_can_collect retained unchanged"
+  },
+  "authored": {
+    "items.xml": {
+      "sha256": "4fbad99276eebf0ed5dcba7e88591c03673bbae44c4cd8b5dd3ead36caad68cc",
+      "collectible35": {
+        "achievement": "36",
+        "description": "Mass room damage",
+        "gfx": "Collectibles_035_TheNecronomicon.png",
+        "id": "35",
+        "maxcharges": "6",
+        "name": "The Necronomicon"
+      }
+    },
+    "costumes2.xml": {
+      "sha256": "663f4653e1f753a1e16e5db6ee3ea4d9fedaca9df5c4f02f9a473e47b840c808",
+      "collectible35Matches": []
+    },
+    "sounds.xml": {
+      "sha256": "8e4a4ce10de0835c86df68006b156a62ce3b9d2a9be40ee8b9b541a30b42e30d",
+      "sound55": [
+        {
+          "weight": "1",
+          "path": "hurt grunt .wav"
+        },
+        {
+          "weight": "1",
+          "path": "hurt grunt 1.wav"
+        },
+        {
+          "weight": "1",
+          "path": "hurt grunt 2.wav"
+        }
+      ]
+    }
+  },
+  "staticValidation": {
+    "allTargetCheck": {
+      "status": "pass",
+      "seconds": 13.19
+    },
+    "strictAllTargetClippy": {
+      "status": "pass",
+      "seconds": 22.05,
+      "target": "fresh private host metadata"
+    },
+    "sharedTargetClippyFirstFailure": "Preserved missing generated clip constants; not gameplay failure or acceptance. Fresh private generation has all four constants and the same Rust source passes.",
+    "rootFrozenArtifactsUnchanged": true,
+    "privateReceiptSha256": "227cc1cf4ee9cdddafe6351dcd4c6ceac6b501a1eb9c7548e38fabba29f48457",
+    "scope": "Historical b68 receipt applies only to that frozen initial slice. Complete composed runtime06e409 has its separate own-private static receipt below. Production and fresh paired results remain pending.",
+    "composedStatic": {
+      "head": "06e4093818cac74bc8e9960d6ebe454d72ea210c",
+      "allTargetCheck": {
+        "status": "pass",
+        "seconds": 11.52
+      },
+      "strictAllTargetClippy": {
+        "status": "pass",
+        "seconds": 11.33
+      },
+      "privateReceiptSha256": "a673698b888dfdec1d4e3c4490a7842680dc647778a0cba5be763dcad5082c59",
+      "generatedInformationCatalogSha256": "9045c8a5b44ed6f30cdc8ad04c3e2b042e9e3bff4fa700da1525a08be81dc4d6",
+      "generatedFrames": {
+        "Hit": 8,
+        "UseItem": 18,
+        "Death": 57,
+        "Trapdoor": 16,
+        "Appear": 40
+      },
+      "sourcePinsStable": true,
+      "corpusTreeUnchanged": true,
+      "scope": "Own worktree metadata only; nice10, jobs1, incremental0. No shared target/borrowed generated headers, production build or fresh paired health execution."
+    }
+  },
+  "hit": {
+    "selection": "Normal initial52bf96 sets stack40=true. At52bedd the selected branch jumps52c4f0, after health/NO_KILL/Kill and immunity storage. Cartridge8/Gamekid93 and CursedEye316 selection modifiers remain pending.",
+    "call": "52c4f8 calls50a5c0(Hit): speed1, clears overlay, forceplays current main and setsbf4. Authored player Hit is8frames nonloop; no movement/control/velocity mutation.",
+    "activeCancellation": "52c500 calls510510: always clearsD80. Charged49 D80==2 first removes costume49 through510420; that Active callback remains tracked separately. Ordinary supported45 entersD80zero.",
+    "fatalOrdering": "Fatal admission still requests Hit. The next actual Player callback selects Death, including the fast virtual18 branch; a Grid-before-Player death can overwriteHit in the samefull, while a Bomb-after-Player death leavesHit until the next callback.",
+    "completion": "Full Base advances the sole authored Player clock;531850 tests IsFinished(current) and clearsbf4. FinishedHit/UseItem return ordinary main presentation without a movement veto.",
+    "exclusiveMain": "State-aware force_play transfers away legacy Pickup guard/playing without touching queued3058/3060/3064, delay30d4 or independent copiedSprite7e0. Natural50a830 reverse transfer replaces concrete main with existing Pickup representation. Exact current/main finish and latecopy/full queueflush order are in main-presentation-owner.json."
+  },
+  "gate": {
+    "script": "test:e2e:health-damage",
+    "status": "declared/source-checked; exact six-case bank f3765cd1 retained without reroll; no fresh original/browser capture",
+    "contrived": [
+      {
+        "seed": "B91XHWCZ",
+        "scope": "Retained selection fixture predicts Rosary72 treasure; fresh original must select/acquire it before mandatory damage coverage. Initial own bomb after acquisition."
+      },
+      {
+        "seed": "B9119QA3",
+        "scope": "Source-only Floor69 discovery predicts Cellar Room213 center Heart6; public movement acquires then crosses spikes. UnsupportedNPC217 remains required."
+      }
+    ],
+    "cohort": "Both contrived phase offsets plus two unfiltered OS secrets seeds drawn and recorded before fixture construction/grading. Every predeclared attempt retained, including acquisition misses/transport failures/unsupported actors.",
+    "required": "Source/browser health containers, incoming admitted flags, cooldown, all347counts, actual temp records/D80/3076, Hit/Death clocks/guards, Info state/delay/actor/Shake/frame/readiness, Game age/Player freeze, NPC membership/HP/maxHP/pending damage/flags, SFX33/55 sample wrappers/volume and actual browser audio output owner. Public commands/seed/input/bootstrap/provenance are mandatory baseline. Actual queued id/charge/touched/delay, exclusive Pickup/concrete main ownership and independent copied item clock are additionally required.",
+    "evidence": "Full selected original snapshots; full production browser manifests/traces streamed to lossless gzip with verified raw/archive hashes. Actual native backend identities/callbacks retained; complete original output PCM parity is separate. Contrived coverage cannot be replaced by source-only predictions.",
+    "pending": "Fresh production, actual original fixture execution, whole-game required differences and live main composition."
+  },
+  "actionAdmission": {
+    "bomb": "5318a5 tests actual31f, whose branch531b24 returns the normal dead presentation before509540 at5318ce.509540 checks7d4,7d8,action8,bombsBD4 and placementcooldownD90; there is no red or Soul HP veto. Existing normal input/cooldown semantics retain their owners.",
+    "chest": "5049ca calls50c880 before504aa7 invokes500e80. No redHP read in that eligibility predicate. try_open consumes the sole Player collection API, retaining all actual Chest/player-item constraints.",
+    "collection": "50c880 rejects real31f/dead and current main nameDeath. bf4 permits nameHit directly; otherwise50c780 permits Pickup/LiftItem/HideItem/UseItem. The sole Root generic helper has no blanket legacy queued-Pickup veto. Collectible504820 separately calls50c780 at5054ca and rejects those item names regardless of bf4; actual supported UseItem cannot admit a second collectible after exclusive main transfer. LiftItem/HideItem presentation and extra queue/D80 ownership remain pending.",
+    "acceptance": "Exact source-qualified small action leaf. No living-red0/Soul-positive public original/browser execution yet; actual producers and branch coverage remain tracked. No native state injection or unit tests."
+  },
+  "composition": {
+    "base": "Final Heartf782 (runtimec16) contains complete reviewed Root5afa and current main2d2174e; exact two-parent source-only compositions90c95/1b8ad preserve both ancestries and immutable corpus tree.",
+    "information": "ef8d52f composed only shared9c05 API",
+    "container": "8d101d5 only missing b68 runtime, no duplicate BBC/temp helper",
+    "exclusiveMain": "37f33497a1df7a97fec77584bc8873dd4f676753",
+    "soulActions": "dd50fbf consumes Root sole eligibility",
+    "bookClear": "910708e corrected by actual deferred System oldstate2 source leaf; genericNewRun does not clearInfo",
+    "browserAudioHook": "83713a2 preserves Root archiveBrowserEvidence=false/default raw and all transport closure handling; Health explicitly opts into gzip and audio",
+    "collectibleSelection": "504820 ->5054ca ->50c780 name-based rejection at natural collectible collect only; generic Heart/regular/Chest eligibility and physical altar admission preserve Root ownership."
+  }
+}
