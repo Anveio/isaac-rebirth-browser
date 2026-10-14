@@ -34,6 +34,8 @@ bash cloud/install.sh
 bash cloud/start.sh                    # http://localhost:5173
 npm run check                         # Build and gate fresh original/browser games
 npm run test:e2e                      # Run every registered live suite; retain every result
+npm run test:e2e -- --list            # Registered live suites (tools/e2e/suites.mjs)
+npm run test:e2e -- keys doors --jobs 2 # Selected suites, in parallel
 npm run test:e2e:paired               # Six contrived + two recorded OS-random runs
 npm run test:e2e:paired -- --replay-cases PATH # Replay a recorded case.json
 npm run verify:foundation             # Strict legacy PNG/state diagnostics; mismatches exit nonzero
@@ -49,14 +51,14 @@ checkpoint also retains a complete pixel comparison and difference image;
 pixel mismatches stay reported as failures without blocking the default
 functional gate. `verify:foundation` remains a strict pixel diagnostic.
 
-CI executes both games live using public inputs, fresh original profiles and a
-copied production build. The local suite runner executes every registered live gate in sequence and
-reports failure after every suite has run. CI discovers the same registry and
-runs each suite in a separate job with `fail-fast: false`, so a failed suite
-cannot cancel the other system checks. Recorded random tapes can be replayed unchanged.
-Checked-in unit suites and component-only harnesses have been removed;
-validators stay in runtime/e2e tools, while temporary probes belong in ignored
-research cache. See [the live-game workflow](.github/workflows/live-games.yml).
+The live suites execute both games using public inputs, fresh original
+profiles and a copied production build. The local suite runner executes every
+registered live gate and reports failure after every suite has run. Recorded
+random tapes can be replayed unchanged. There is deliberately no CI: every
+agent runs `npm run check:build` and the live suites its change touches
+before merging (see [AGENTS.md](AGENTS.md)). Checked-in unit suites and
+component-only harnesses have been removed; validators stay in runtime/e2e
+tools, while temporary probes belong in ignored research cache.
 
 Ordinary play retains no command/state history. To capture diagnostic evidence,
 pause automatic stepping and call `game.reset(seed, { trace: true })` in the

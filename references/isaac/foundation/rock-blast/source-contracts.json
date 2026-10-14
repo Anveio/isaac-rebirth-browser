@@ -14,7 +14,7 @@
     "clockScope": "GameUpdateCount is relative to the playable boundary (nativebaseline42 in all selected tapes), not the complete absolute intro/global clock. Other loading-phase and rock reentry clock contracts remain unaccepted."
   },
   "liveGate": {
-    "command": "npm run test:e2e:rock-blast",
+    "command": "npm run test:e2e -- rock-blast",
     "producer": "tools/original/rock-blast-scenarios.py",
     "observer": "tools/original/foundation-pickup-observe.py",
     "comparator": "tools/e2e/rock-blast.mjs",

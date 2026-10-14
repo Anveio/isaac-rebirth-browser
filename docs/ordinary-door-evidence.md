@@ -51,7 +51,7 @@ After a fresh build, run:
 ```sh
 source cloud/env.sh
 npm run build
-npm run test:e2e:traversal
+npm run test:e2e -- traversal
 ```
 
 The gate records an ordinary no-hostile return, a mandatory hostile rock-room
