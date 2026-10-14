@@ -63,16 +63,29 @@
     "matrix": "pass",
     "NodeAndPythonSyntax": "pass",
     "whitespace": "pass",
-    "RustAndStrictClippy": "not run on current guarded composition; scheduled static turn pending"
+    "RustAndStrictClippy": "pass at guarded composition1d166003; fresh full production and paired Heart acceptance remain pending"
   },
   "currentOwnedPayload": {
     "baseMain": "2d2174e63901acbfc209fc40018418cded26223e",
-    "concretePrerequisite": "ef78acc8c5028ed249711f7c15be15c7c3b72b7b",
+    "concretePrerequisite": "6b7d1d3543635f65aa11582871294d4cd9980b09",
     "runtime": "f1bccc634a44f4ec058948f99e492625fac22b1a",
     "sharedEntry": "Extends main98 Game.collect_regular_pickup_at used by full and saved-readmission callbacks; preserves initialize_spawn_seed/persistent regular_rng, current anchor owner, and the prerequisite sole player_can_collect predicate unchanged.",
     "schema": "Eternal field/default/TypeScript matches b68 byte-for-byte; one field and no duplicated health-damage arithmetic.",
     "eligibility": "Actual Player.dead/Death and owned Hit/UseItem main-name exceptions are read only through prerequisite player_can_collect. Controls7d4 is not a collection veto. Legacy queued Pickup veto stays explicitly incomplete.",
-    "RustAndStrictClippy": "not run for guarded composition; initial624 proof remains separately pinned",
+    "RustAndStrictClippy": {
+      "status": "pass",
+      "checkedHead": "1d166003e9d73ae7188b29832f483b10e0067ae0",
+      "checkSeconds": 9.56,
+      "clippySeconds": 9.49,
+      "compilerJobs": 1,
+      "incremental": false,
+      "privateTarget": "/workspace/isaac-worktrees/combat/engine/target",
+      "logs": {
+        "metadata": "7187ad8a172f0d3ae0bf72fd5ad85404e9033b2697e0c29b6d81eb44121855f0",
+        "clippy": "30c9e06592bc9d15c18404438c60856d8e5c6bf8bbdac06e5a6b0b8890514ee2"
+      },
+      "receiptSha256": "9b24606cb9dca4cb5f740e17fffd8214d658a131ed1b288cc31622bb26bab315"
+    },
     "productionAndLive": "not run",
     "retainedCaseBankSha256": "6860834fd32322bf690d01e33f5b78a3db4fc4ad3e5e897831c15e37fa55e76e",
     "sourcePreflight": {
@@ -82,7 +95,9 @@
       "matrix": "pass",
       "whitespace": "pass",
       "registryCount": 39
-    }
+    },
+    "initialConcretePrerequisite": "ef78acc8c5028ed249711f7c15be15c7c3b72b7b",
+    "composition": "1d166003e9d73ae7188b29832f483b10e0067ae0"
   },
   "previousOwnedPayload": {
     "baseMain": "7492adba9b256e5767e28906289e89ca6faa2655",
