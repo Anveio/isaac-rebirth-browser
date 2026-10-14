@@ -17,7 +17,7 @@ const save = (path, value) => writeFileSync(path, JSON.stringify(value, null, 2)
 const sources = ['tools/e2e/blood-particles.mjs', 'tools/original/blood-particle-scenarios.py',
   'tools/original/roundworm-scenarios.py', 'tools/original/foundation-combat-observe.py',
   'tools/foundation/blood-particle-state-pair.mjs', 'tools/foundation/paired-game.mjs',
-  'tools/foundation/verify.mjs', 'tools/foundation/production-server.mjs',
+  'tools/foundation/verify.mjs', 'tools/foundation/production-server.mjs', 'tools/foundation/browser-evidence.mjs',
   'references/isaac/foundation/combat/roundworms/random-selection.json',
   'references/isaac/foundation/combat/roundworms/hostile-return-tail.json',
   'engine/build.rs', 'engine/src/gib_effects.rs', 'engine/src/familiars.rs', 'engine/src/roundworm.rs',
@@ -38,7 +38,16 @@ const report = {schema: 1, status: 'running', startedAt: new Date().toISOString(
   scope: 'Fresh original+immutable production DOM/WASM, all four declared public cases. Actual244 lethal5 producer and every matched real5 field required; core paired failures retained. No source state/time/RNG/aim enters production.'};
 save(reportPath, report);
 const archive = path => {
-  if (!existsSync(path)) return null;
+  if (!existsSync(path)) {
+    if (!existsSync(path + '.gz')) return null;
+    const metadataPath = resolve(path, '..', 'manifest-archive.json');
+    const metadata = JSON.parse(readFileSync(metadataPath, 'utf8'));
+    const bytes = readFileSync(path + '.gz');
+    assert.equal(resolve(metadata.path), path + '.gz');
+    assert.equal(bytes.length, metadata.archiveBytes); assert.equal(sha(bytes), metadata.archiveSha256);
+    return {...metadata, metadataPath, metadataSha256: sha(readFileSync(metadataPath)),
+      scope: 'Complete browser manifest streamed directly to gzip; checksum receipt retained. Comparator independently verifies raw/compressed bytes before field comparisons; failures remain blocking.'};
+  }
   const raw = readFileSync(path); JSON.parse(raw);
   const info = statSync(path), compressed = path + '.gz'; assert.equal(existsSync(compressed), false);
   const bytes = gzipSync(raw); writeFileSync(compressed, bytes, {flag: 'wx'});
@@ -57,7 +66,7 @@ for (const item of bank.cases) {
   const pairDirectory = resolve(directory, 'paired'), caseDirectory = resolve(pairDirectory, '00-' + id);
   try {
     const paired = await runPairedGate({output: pairDirectory, selected: [], randomCount: 0, replayCases: [tape],
-      productionDirectory: option('--production-directory'), nativeFrameTimeout: 120});
+      productionDirectory: option('--production-directory'), nativeFrameTimeout: 120, archiveBrowserEvidence: true});
     row.production = paired.build; row.pairedStatus = paired.status; row.pairedSourcesStable = paired.gateSourcesStable;
     const target = resolve(directory, 'blood-particle-fields.json');
     const result = spawnSync('node', ['tools/foundation/blood-particle-state-pair.mjs', '--case', caseDirectory, '--output', target], {encoding: 'utf8'});

@@ -37,7 +37,12 @@ recorded OS-selected244 route. Every initial failed public action and capture
 remains an exact prefix; the default bank appends two fixed boundary movement
 and cardinal-firing laps, plus32 dense tail observations. Odd25-presentation
 samples alternate full/fast during movement. The newly declared default bank
-passes preparation and awaits a separate fresh execution. The gate
+passes preparation and awaits a separate fresh execution. Browser manifests and
+traces use the reviewed shared streaming gzip writer, retaining every selected
+snapshot, input and complete backend callback state with raw/archive hashes and
+byte counts. Other paired consumers retain their default raw evidence format.
+The comparator checks both compressed and decompressed checksum receipts before
+applying the unchanged gameplay assertions. The gate
 requires an actual244 death and5 particles in both games. No observed target
 position drives input. Real particle seed/order, source room sequence, body,
 initialized controller, color, clip and full/fast fields are blocking. Source
@@ -61,6 +66,9 @@ The complete native/browser manifests total1,730,631,504 raw bytes and are
 retained as88,413,976 gzip bytes. Independent streamed readback checks all eight
 archives against their original raw hashes. The subsequent default movement bank
 preserves this complete failed execution and every initial input/capture prefix.
+The gzip-aware verifier separately reread all four retained pairs: the7090 checks
+and58 failures are identical. This validates evidence transport; the new default
+bank still requires fresh games, and the built1e9d02f runtime remains unchanged.
 
 Status/champion/inherited-color modifiers, perks225/234, the exact full
 per-record transient-color damage path, other gibs categories and later stages

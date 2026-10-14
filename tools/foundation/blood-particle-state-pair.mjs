@@ -1,15 +1,31 @@
 // Compare actual original fields against production snapshots from public tapes.
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { gunzipSync } from 'node:zlib';
 
 const option = name => { const at = process.argv.indexOf(name); assert.ok(at >= 0 && process.argv[at + 1]); return process.argv[at + 1]; };
 const directory = resolve(option('--case'));
 const load = path => JSON.parse(readFileSync(path, 'utf8'));
 const hash = path => createHash('sha256').update(readFileSync(path)).digest('hex');
-const nativePath = resolve(directory, 'original/manifest.json'), browserPath = resolve(directory, 'browser/manifest.json');
-const native = load(nativePath), browser = load(browserPath), tape = load(resolve(directory, 'case.json'));
+function manifest(path) {
+  if (existsSync(path)) return { document: load(path), evidence: {path, sha256: hash(path), encoding: 'json'} };
+  const archivePath = path + '.gz', bytes = readFileSync(archivePath), raw = gunzipSync(bytes);
+  const digest = value => createHash('sha256').update(value).digest('hex');
+  const metadataPath = existsSync(path + '.archive.json') ? path + '.archive.json'
+    : resolve(path, '..', 'manifest-archive.json');
+  const metadata = load(metadataPath);
+  assert.equal(bytes.length, metadata.archiveBytes, 'Every archived manifest must retain complete compressed bytes');
+  assert.equal(digest(bytes), metadata.archiveSha256);
+  assert.equal(raw.length, metadata.rawBytes, 'Every archived manifest must retain complete original JSON bytes');
+  assert.equal(digest(raw), metadata.rawSha256);
+  return { document: JSON.parse(raw.toString('utf8')), evidence: {path: archivePath, sha256: digest(bytes),
+    encoding: 'gzip', rawBytes: raw.length, rawSha256: digest(raw), metadataPath, metadataSha256: hash(metadataPath)} };
+}
+const nativeCapture = manifest(resolve(directory, 'original/manifest.json'));
+const browserCapture = manifest(resolve(directory, 'browser/manifest.json'));
+const native = nativeCapture.document, browser = browserCapture.document, tape = load(resolve(directory, 'case.json'));
 const pair = load(resolve(directory, 'report.json'));
 assert.equal(native.status, 'pass'); assert.equal(browser.status, 'pass');
 assert.equal(pair.original.status, 'pass'); assert.equal(pair.browser.status, 'pass');
@@ -93,7 +109,7 @@ for (const action of tape.pairedTape) {
 }
 for (const [field, actual] of Object.entries(execution)) check('execution', field, true, actual);
 const report = {schema: 1, status: failures.length ? 'fail' : 'pass', presentations, checks, failures, execution, uninitialized,
-  sourceManifest: {path: nativePath, sha256: hash(nativePath)}, browserManifest: {path: browserPath, sha256: hash(browserPath)},
+  sourceManifest: nativeCapture.evidence, browserManifest: browserCapture.evidence,
   verifierSha256: hash('tools/foundation/blood-particle-state-pair.mjs'),
   scope: 'Actual244death/5presence and matched real seed bodies, sequence, cached spawner/NULL parent, initialized controller, full/fast motion, color and clips are required. No original value enters WASM.',
   unaccepted: ['Monstro2/42/77 chain', 'Status/champion/perk/color modifiers', 'Full background render-array ordering/persistence', 'Controller storage before first Update', 'Full-frame pixels and whole sharedMT']};
