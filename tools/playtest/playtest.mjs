@@ -12,6 +12,7 @@ import { parseArgs } from 'node:util';
 import { chromium } from 'playwright';
 import { PNG } from 'pngjs';
 import { browserLaunchOptions } from '../foundation/browser.mjs';
+import { doorKeys as routeDoorKeys, toward as routeToward, waypoint as routeWaypoint } from '../e2e/lib/route.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const { values } = parseArgs({ options: {
@@ -262,35 +263,8 @@ try {
     // Choose keys.
     const p = state.player;
     const keys = [];
-    // Breadth-first route over the room grid (cell centre = col*40+40, row*40+120);
-    // returns a waypoint two cells ahead, or the goal itself when no grid/route exists.
-    const waypoint = (x, y) => {
-      const grid = state.grid;
-      if (!grid) return { x, y };
-      const cell = (wx, wy) => [Math.round((wx - 40) / 40), Math.round((wy - 120) / 40)];
-      const [sc, sr] = cell(p.x, p.y), [gc, gr] = cell(x, y);
-      const inside = (c, r) => c >= 0 && r >= 0 && c < grid.w && r < grid.h;
-      if (!inside(sc, sr) || !inside(gc, gr)) return { x, y };
-      const key = (c, r) => r * grid.w + c, previous = new Map([[key(sc, sr), -1]]), queue = [[sc, sr]];
-      while (queue.length) {
-        const [c, r] = queue.shift();
-        if (c === gc && r === gr) break;
-        for (const [dc, dr] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
-          const nc = c + dc, nr = r + dr, k = key(nc, nr);
-          if (!inside(nc, nr) || previous.has(k) || (grid.solid[k] === '1' && !(nc === gc && nr === gr))) continue;
-          previous.set(k, key(c, r)); queue.push([nc, nr]);
-        }
-      }
-      if (!previous.has(key(gc, gr))) return { x, y };
-      const path = [];
-      for (let k = key(gc, gr); k !== -1; k = previous.get(k)) path.unshift(k);
-      const next = path[Math.min(2, path.length - 1)];
-      return next === key(gc, gr) ? { x, y } : { x: (next % grid.w) * 40 + 40, y: Math.floor(next / grid.w) * 40 + 120 };
-    };
-    const toward = (x, y, slack = 8) => {
-      if (x < p.x - slack) keys.push('KeyA'); else if (x > p.x + slack) keys.push('KeyD');
-      if (y < p.y - slack) keys.push('KeyW'); else if (y > p.y + slack) keys.push('KeyS');
-    };
+    const waypoint = (x, y) => routeWaypoint(state.grid, p, { x, y });
+    const toward = (x, y, slack = 8) => keys.push(...routeToward(p, { x, y }, slack));
     segment++;
     if (wiggle && now < wiggle.until) keys.push(...wiggle.keys);
     else if (state.npcs.length) {
@@ -328,14 +302,7 @@ try {
         doorGoal = door && { room: state.room, target: door.target, until: now + 15_000 };
       }
       const choice = doorGoal && open.find(d => d.target === doorGoal.target);
-      const step = choice && waypoint(choice.x, choice.y);
-      if (choice && (step.x !== choice.x || step.y !== choice.y)) toward(step.x, step.y, 4);
-      else if (choice) {
-        // Slide along the wall into the doorway: align the cross axis while pushing outward.
-        const horizontal = choice.side === 'left' || choice.side === 'right';
-        if (horizontal) { if (Math.abs(choice.y - p.y) > 6) keys.push(choice.y < p.y ? 'KeyW' : 'KeyS'); keys.push(choice.side === 'left' ? 'KeyA' : 'KeyD'); }
-        else { if (Math.abs(choice.x - p.x) > 6) keys.push(choice.x < p.x ? 'KeyA' : 'KeyD'); keys.push(choice.side === 'up' ? 'KeyW' : 'KeyS'); }
-      }
+      if (choice) keys.push(...routeDoorKeys(state.grid, p, choice));
       else keys.push(['KeyW', 'KeyA', 'KeyS', 'KeyD'][Math.floor(segment / 8) % 4]);
       // Semi-random shooting and occasional bombs while exploring.
       if (segment % 7 < 3) keys.push(['ArrowUp', 'ArrowRight', 'ArrowDown', 'ArrowLeft'][segment % 4]);

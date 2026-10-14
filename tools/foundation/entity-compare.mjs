@@ -103,7 +103,7 @@ export function loadManifest(directory, side) {
   return JSON.parse(gunzipSync(readFileSync(resolve(directory, side, 'manifest.json.gz'))));
 }
 
-export const MARKERS = ['admission', 'damage', 'death', 'retirement', 'clear', 'shape'];
+export const MARKERS = ['admission', 'damage', 'death', 'retirement', 'clear', 'shape', 'bossRoom'];
 
 /** Lifecycle markers each game reaches on its own over a whole case. */
 export function markers(directory, spec) {
@@ -124,6 +124,8 @@ export function markers(directory, spec) {
       // The spec's authored shape plus the one-cell wall border.
       const grid = side === 'original' ? [row.room.gridWidth, row.room.gridHeight] : row.room.grid && [row.room.grid.width, row.room.grid.height];
       seen.shape ||= Boolean(spec.shape && grid && grid[0] === spec.shape[0] + 2 && grid[1] === spec.shape[1] + 2);
+      // Boss routes: the player stands in a type-5 boss room.
+      seen.bossRoom ||= (side === 'original' ? row.room.type : row.room.descriptor?.template?.type) === 5;
       seen.admission ||= actors.length > 0;
       seen.damage ||= actors.some(actor => actor.pending > 0 || actor.hp < actor.maxHp);
       for (const actor of actors) if (actor.dead) { dead.add(actor.seed); seen.death = true; }

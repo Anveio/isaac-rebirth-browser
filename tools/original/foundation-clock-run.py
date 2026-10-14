@@ -186,14 +186,21 @@ def main():
             if not x11.XGetWindowAttributes(display, int(window), attributes):
                 raise RuntimeError('X11 capture could not read window geometry')
             width, height = attributes[2], attributes[3]
+            if width <= 0 or height <= 0:
+                raise RuntimeError('X11 capture requires positive window dimensions')
             root = x11.XDefaultRootWindow(display)
             x, y, child = ctypes.c_int(), ctypes.c_int(), ctypes.c_ulong()
-            x11.XTranslateCoordinates(display, int(window), root, 0, 0, ctypes.byref(x), ctypes.byref(y), ctypes.byref(child))
+            if not x11.XTranslateCoordinates(display, int(window), root, 0, 0, ctypes.byref(x), ctypes.byref(y), ctypes.byref(child)):
+                raise RuntimeError('X11 capture could not translate the window origin')
             image = x11.XGetImage(display, root, x.value, y.value, width, height, 0xFFFFFFFF, 2)
             if not image:
                 raise RuntimeError('X11 capture XGetImage failed')
             try:
                 frame = image.contents
+                if (frame.width, frame.height) != (width, height) or frame.xoffset != 0:
+                    raise RuntimeError('X11 capture image geometry differs from the requested window')
+                if frame.bytes_per_line < width * 4 or not frame.data:
+                    raise RuntimeError('X11 capture image has an invalid pixel buffer or row stride')
                 if frame.bits_per_pixel != 32 or frame.byte_order != 0 or (frame.red_mask, frame.green_mask, frame.blue_mask) != (0xff0000, 0xff00, 0xff):
                     raise RuntimeError('X11 capture expects a little-endian 32-bit BGRX root visual')
                 stride = frame.bytes_per_line
