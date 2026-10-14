@@ -222,6 +222,8 @@ export interface StageEffects {
   overlay: { asset: string; sourceCrop: Rect; offset: { x: number; y: number }; modulationRGBA: [number, number, number, number]; blend: Blend; simulationTick: number; motionEvidence: string };
 }
 export interface State {
+  lasers: {id:number; position:{x:number;y:number}; presentedPosition:{x:number;y:number}; positionOffset:{x:number;y:number}; length:number; rotation:number; scale:{x:number;y:number}; actor:string; animation:string; animationClock:number; removed:boolean;
+    impact: {position:{x:number;y:number}; positionOffset:{x:number;y:number}; scale:{x:number;y:number}; rotation:number; actor:string; animation:string; animationClock:number; removed:boolean} | null}[];
   enemyProjectiles: {id:number; spawnSeed:number; position:{x:number;y:number}; presentedPosition:{x:number;y:number}; velocity:{x:number;y:number}; height:number; scale:number; animation:string|null; animationFrame:number; dead:boolean; removed:boolean}[];
   schema: 1; tickRate: 60; tick: number; menuAnimationTick: number; runTick: number; gameUpdateCount: number; screen: Screen;
   titleAnimationFrame: number; menuFade: { active: boolean; alpha: number; color: [number, number, number, number] };

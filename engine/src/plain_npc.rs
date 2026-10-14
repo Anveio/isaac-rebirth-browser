@@ -59,6 +59,29 @@ pub(crate) fn play(npc: &mut Npc, name: &str, force: bool) {
     }
 }
 
+/// Sprite.SetFrame40fef0: select the clip, seek the frame and stop.
+pub(crate) fn set_frame(npc: &mut Npc, name: &str, frame: u32) {
+    npc.animation = name.into();
+    npc.animation_frame = frame;
+    npc.animation_clock = frame as f32;
+    npc.animation_playing = false;
+}
+
+/// anim_walkframe4807e0 for unchampioned walkers: below `threshold` speed the
+/// vertical clip holds frame 0; otherwise the dominant axis picks the clip and
+/// horizontal walking faces the velocity.
+pub(crate) fn walk_frame(npc: &mut Npc, horizontal: &str, vertical: &str, threshold: f32) {
+    let speed = (npc.velocity.x * npc.velocity.x + npc.velocity.y * npc.velocity.y).sqrt();
+    if threshold > speed {
+        set_frame(npc, vertical, 0);
+    } else if npc.velocity.x.abs() > npc.velocity.y.abs() {
+        play(npc, horizontal, false);
+        npc.flip_x = npc.velocity.x < 0.0;
+    } else {
+        play(npc, vertical, false);
+    }
+}
+
 /// IsFinished40fba0 for the current clip.
 pub(crate) fn finished(npc: &Npc) -> bool {
     !npc.animation_playing
@@ -177,7 +200,7 @@ pub(crate) fn advance(
 }
 
 /// is_frame444890: Game+ce9f4 plus the actor's manager sequence, modulo n.
-fn on_frame(npc: &Npc, world: &NpcWorld, period: u32) -> Result<bool, String> {
+pub(crate) fn on_frame(npc: &Npc, world: &NpcWorld, period: u32) -> Result<bool, String> {
     let sequence = world
         .effects
         .scheduler

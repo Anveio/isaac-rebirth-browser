@@ -49,6 +49,7 @@ pub(crate) enum Birth {
     Shot(Shot),
     Ember(ParticleBirth),
     Loot(LootBirth),
+    Laser(crate::lasers::LaserBirth),
 }
 
 pub(crate) type Advance =
@@ -95,6 +96,7 @@ pub(crate) static FAMILIES: &[&Family] = &[
     &crate::dips::FAMILY,
     &crate::roundworm::FAMILY,
     &crate::horfs::FAMILY,
+    &crate::gluttony::FAMILY,
 ];
 
 pub(crate) fn family(kind: u32) -> Option<&'static Family> {

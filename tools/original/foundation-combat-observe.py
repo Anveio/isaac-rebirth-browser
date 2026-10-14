@@ -122,6 +122,16 @@ def observe(pid, context):
                     more = read(address + 0x7d4, 0x14)
                     result['bombFuseUpdatesRemaining'] = struct.unpack_from('<i', more, 0)[0]
                     result['bombExplosionDamage'] = struct.unpack_from('<f', more, 4)[0]
+                if result['type'] == 7:
+                    # Entity_Laser: follow offset +7d4, angle +7dc, depth +7e4,
+                    # timeout +7f0, shrinking +7f6, length +7f8, endpoint +8a0.
+                    more = read(address + 0x7d4, 0x28)
+                    result['laserFollowOffset'] = list(struct.unpack_from('<ff', more, 0))
+                    result['laserAngle'], result['laserDepth'] = struct.unpack_from('<f', more, 8)[0], struct.unpack_from('<f', more, 0x10)[0]
+                    result['laserTimeout'] = struct.unpack_from('<i', more, 0x1c)[0]
+                    result['laserShrinking'] = bool(more[0x22])
+                    result['laserLength'] = struct.unpack_from('<f', more, 0x24)[0]
+                    result['laserEndpoint'] = list(struct.unpack('<ff', read(address + 0x8a0, 8)))
                 if result['type'] == 9:
                     more = read(address + 0x7d4, 0x24)
                     result['projectileHeight'], result['projectileFallingSpeed'], result['projectileFallingAcceleration'] = struct.unpack_from('<fff', more, 0)
@@ -183,6 +193,10 @@ def observe(pid, context):
                         result['fireCountdown'] = struct.unpack_from('<i', more, 0x18)[0]
                     result['npcTarget'] = pair(0x440)
                     result['npcWanderVelocity'] = list(struct.unpack_from('<ff', more, 0x28))
+                    # NPCAI_Pathfinder +7d8: target +8, direction +18, stuck +1c.
+                    path = read(address + 0x7d8, 0x24)
+                    result['npcPathTarget'] = list(struct.unpack_from('<ff', path, 8))
+                    result['npcPathDirection'], result['npcPathStuck'] = struct.unpack_from('<ii', path, 0x18)
                     result['npcGridFeedbackVelocity'] = list(struct.unpack_from('<ff', more, 0x30))
                     result['canShutDoors'] = bool(more[0xec])
                     result['boss'] = bool(more[0xed])

@@ -13,3 +13,6 @@ gfx/216.000_dip.anm2
 gfx/012.000_horf.anm2
 gfx/014.000_pooter.anm2
 gfx/014.001_super pooter.anm2
+gfx/049.000_gluttony.anm2
+gfx/007.001_thick red laser.anm2
+gfx/1000.050_brimstoneimpact.anm2

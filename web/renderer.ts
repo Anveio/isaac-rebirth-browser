@@ -127,6 +127,32 @@ export class Renderer {
           familiar.sprite.offset.x * 0.65, familiar.sprite.offset.y * 0.65, familiar.sprite.frame, { scale: 0.65 });
         ctx.restore();
       }
+      for (const laser of state.lasers) {
+        if (laser.removed) continue;
+        // Render479c20's quad builder is not decoded: tile the beam layer from
+        // pos+offset along the sprite rotation and cap it with the tip layer.
+        const start = { x: laser.presentedPosition.x + laser.positionOffset.x, y: laser.presentedPosition.y + laser.positionOffset.y };
+        const body = this.assets.layerFrame(laser.actor, laser.animation, 1, laser.animationClock);
+        const tile = body?.Height ? body.Height : 0;
+        if (laser.length > 15 && tile > 0) {
+          ctx.save();
+          ctx.translate(start.x * 0.65 + 32, start.y * 0.65 - 46);
+          ctx.rotate(laser.rotation * Math.PI / 180);
+          for (let along = 0; along < laser.length; along += tile)
+            this.assets.draw(ctx, laser.actor, laser.animation, 0, along * 0.65, laser.animationClock, { scale: 0.65, layers: [1], layerScales: { 1: [laser.scale.x, 1] } });
+          this.assets.draw(ctx, laser.actor, laser.animation, 0, laser.length * 0.65, laser.animationClock, { scale: 0.65, layers: [0], layerScales: { 0: [laser.scale.x, 1] } });
+          ctx.restore();
+        }
+        const impact = laser.impact;
+        if (impact && !impact.removed) {
+          ctx.save();
+          ctx.translate((impact.position.x + impact.positionOffset.x) * 0.65 + 32, (impact.position.y + impact.positionOffset.y) * 0.65 - 46);
+          ctx.rotate(impact.rotation * Math.PI / 180);
+          ctx.scale(impact.scale.x, impact.scale.y);
+          this.assets.draw(ctx, impact.actor, impact.animation, 0, 0, impact.animationClock, { scale: 0.65 });
+          ctx.restore();
+        }
+      }
       for (const projectile of state.enemyProjectiles)
         if (!projectile.removed && projectile.animation)
           this.assets.draw(ctx, "gfx/009.000_projectile.anm2", projectile.animation,

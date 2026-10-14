@@ -46,9 +46,7 @@ pub fn from_selector(id: u32, selector: &SpawnSelector, stage: u32) -> Result<Op
     if !selector.position.is_finite() || selector.spawn_seed == 0 || stage == 0 {
         return Err("Dip requires bounded authored position, source seed and actual stage".into());
     }
-    //446b18..446b3f: stage is capped before the later-stage f32 factor.
-    let scale = stage.min(10) as f32 * if stage > 4 { 0.8 } else { 1.0 };
-    let hp = scale * CONFIG.stage_hp + CONFIG.base_hp;
+    let hp = crate::content::initial_hp(CONFIG, stage);
     Ok(Some(Npc {
         hp,
         max_hp: hp,

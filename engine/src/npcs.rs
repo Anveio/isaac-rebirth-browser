@@ -64,6 +64,11 @@ pub struct Npc {
     pub shooter: Option<crate::plain_npc::ShooterTimers>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub champion: Option<crate::champions::Champion>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub gluttony: Option<crate::gluttony::GluttonyState>,
+    /// NPCAI_Pathfinder (+7d8) for families that walk the grid.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pathfinder: Option<crate::pathfinder::Pathfinder>,
     /// Sprite FlipX (+2fc) for families that face their target.
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     pub flip_x: bool,
@@ -523,6 +528,8 @@ impl Npc {
             shooter: None,
             champion: None,
             flip_x: false,
+            pathfinder: None,
+            gluttony: None,
         }
     }
 
