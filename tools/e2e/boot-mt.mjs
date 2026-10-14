@@ -16,10 +16,19 @@ import { ORIGINAL_SHA, assertOriginalBinary } from './lib/original.mjs';
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const run = promisify(execFile);
 const value = flag => { const i = process.argv.indexOf(flag); return i < 0 ? undefined : process.argv[i + 1]; };
-const seedDialog = process.argv.includes('--seed-dialog');
-const menuNavigation = seedDialog || process.argv.includes('--menu-navigation');
-const output = resolve(value('--output') || join(ROOT, `.cache/e2e/${seedDialog ? 'seed-dialog-mt' : menuNavigation ? 'menu-mt' : 'boot-mt'}`, String(Date.now())));
-const requestedCommands = scenario => {
+// Browser modes graded against one fresh original per case. The native tape is
+// the same default boot/menu tape in every mode; seed-dialog only appends the
+// reopen captures after character-seeded, so one launch serves all three.
+//   boot         Title initialization (instant Enter/Tab/seed presses afterwards)
+//   menu         forward Title/Profile/Main/Character navigation
+//   seed-dialog  menu navigation plus seed dialog entry and reopening
+const MODES = ['boot', 'menu', 'seed-dialog'];
+const modes = value('--modes')?.split(',') ?? (process.argv.includes('--seed-dialog') ? ['seed-dialog']
+  : process.argv.includes('--menu-navigation') ? ['menu'] : MODES);
+assert.ok(modes.length && modes.every(mode => MODES.includes(mode)), `--modes takes ${MODES.join(',')}`);
+const output = resolve(value('--output') || join(ROOT, '.cache/e2e/boot-mt', String(Date.now())));
+const requestedCommands = (scenario, mode) => {
+  const seedDialog = mode === 'seed-dialog', menuNavigation = mode !== 'boot';
   const commands = [], press = code => commands.push({ type: 'key', code, down: true }, { type: 'key', code, down: false });
   for (let index = 0; index < 3; index++) {
     if (menuNavigation) commands.push({ type: 'key', code: 'Enter', down: true }, { type: 'tick', count: 12 }, { type: 'key', code: 'Enter', down: false }, { type: 'tick', count: 72 });
@@ -62,37 +71,46 @@ for (const c of cases) {
 await assertOriginalBinary();
 await writeFile(join(output, 'scenarios.json'), JSON.stringify({ schema: 1, entropy: 'OS secrets run seeds and Node crypto randomInt boot epochs', cases }, null, 2) + '\n');
 
+const SCOPES = {
+  boot: 'Causal startup and initialized menu fields at Title: full 624-word MT state, saved player seed, nine saved grid pairs, menu run seed and 179 stat poses. Later menu navigation, run/room/ambient random routing and tear fall uniforms remain incomplete.',
+  menu: 'Causal startup and forward Title/Profile/Main/Character initialization: full 624-word MT state, saved player seed, nine saved grid pairs, menu run seed and 179 stat poses at every menu checkpoint, with complete public command and seed-entry provenance. Character-confirm fade/run admission, run/room/ambient random routing and ordinary-run seed use remain separate.',
+  'seed-dialog': 'Causal startup, forward menus and public seed dialog admission/reopening and valid commitment: full 624-word shared MT, saved player/menu seeds, menu seed text, Character dialog/committed fields, nine saved grid pairs and 179 stat poses. A second real DOM sequence queues Profile/Tab/commit before its first tick and must preserve the decoded setter after Clear/Reset. Character-confirm fade/run admission and later consumers remain separate.',
+};
 const production = await startProductionServer();
 const browser = await chromium.launch(browserLaunchOptions());
-const report = { schema: 1, status: 'running', originalBinarySha256: ORIGINAL_SHA, production: production.build,
-  graphics: await inspectBrowserGraphics(browser),
-  scope: seedDialog ? 'Causal startup, forward menus and public seed dialog admission/reopening and valid commitment: full 624-word shared MT, saved player/menu seeds, menu seed text, Character dialog/committed fields, nine saved grid pairs and 179 stat poses. A second real DOM sequence queues Profile/Tab/commit before its first tick and must preserve the decoded setter after Clear/Reset. Character-confirm fade/run admission and later consumers remain separate.' : menuNavigation ? 'Causal startup and forward Title/Profile/Main/Character initialization: full 624-word MT state, saved player seed, nine saved grid pairs, menu run seed and 179 stat poses at every menu checkpoint, with complete public command and seed-entry provenance. Character-confirm fade/run admission, run/room/ambient random routing and ordinary-run seed use remain separate.' : 'Causal startup and initialized menu fields at Title: full 624-word MT state, saved player seed, nine saved grid pairs, menu run seed and 179 stat poses. Later menu navigation, run/room/ambient random routing and tear fall uniforms remain incomplete.', cases: [] };
-try {
-  for (const scenario of cases) {
-    const directory = join(output, scenario.name); await mkdir(directory, { recursive: true });
-    const result = { ...scenario, status: 'running' }; report.cases.push(result);
-    let page; const menuStates = [], expectedCommands = requestedCommands(scenario);
-    try {
-      const tapeResult = await run('python3', ['-c', "import importlib.util,json,sys;from pathlib import Path;p=Path('tools/original/foundation-clock-run.py');s=importlib.util.spec_from_file_location('clock',p);m=importlib.util.module_from_spec(s);s.loader.exec_module(m);t=m.default_tape(sys.argv[1]);print(json.dumps(t[:next(i for i,a in enumerate(t) if a.get('label')=='gameplay-start')+1]))", scenario.code], { cwd: ROOT });
-      const nativeTape = JSON.parse(tapeResult.stdout);
-      if (seedDialog) {
-        const reopen = [
-          { type: 'key', key: 'Tab', down: true }, { type: 'step', frames: 12 },
-          { type: 'key', key: 'Tab', down: false }, { type: 'step', frames: 108 },
-          { type: 'capture', label: 'seed-reentry' },
-        ];
-        for (const key of scenario.code.toLowerCase()) reopen.push({ type: 'key', key, down: true }, { type: 'step', frames: 12 }, { type: 'key', key, down: false }, { type: 'step', frames: 6 });
-        reopen.push({ type: 'key', key: 'Return', down: true }, { type: 'step', frames: 12 }, { type: 'key', key: 'Return', down: false }, { type: 'step', frames: 72 }, { type: 'capture', label: 'character-reseeded' });
-        nativeTape.splice(nativeTape.findIndex(action => action.label === 'character-seeded') + 1, 0, ...reopen);
-      }
-      await writeFile(join(directory, 'tape.json'), JSON.stringify(nativeTape) + '\n');
-      await run('bash', [join(ROOT, 'tools/original/with-display.sh'), 'python3', join(ROOT, 'tools/original/foundation-clock-run.py'),
-        '--seed', scenario.code, '--boot-epoch-seed', String(scenario.bootEpochSeed), '--tape', join(directory, 'tape.json'),
-        '--state-observer', join(ROOT, 'tools/original/boot-mt-observer.py'), '--output', join(directory, 'original')], { cwd: ROOT, timeout: 180000, maxBuffer: 1024 * 1024 });
-      const bytes = await readFile(join(directory, 'original/manifest.json')); const native = JSON.parse(bytes);
-      result.nativeManifestSha256 = createHash('sha256').update(bytes).digest('hex');
-      assert.equal(native.status, 'pass'); assert.deepEqual(native.failures, []);
-      assert.equal(native.bootEpochSeed, scenario.bootEpochSeed); assert.equal(native.seedReadbackMatchesCodec, true);
+const report = { schema: 2, status: 'running', originalBinarySha256: ORIGINAL_SHA, production: production.build,
+  graphics: await inspectBrowserGraphics(browser), modes, scope: Object.fromEntries(modes.map(mode => [mode, SCOPES[mode]])), cases: [] };
+
+// One fresh original per case, on the default tape plus (for seed-dialog) the
+// reopen captures. Every mode is then graded against the same native manifest.
+async function originalRun(scenario, directory) {
+  const tapeResult = await run('python3', ['-c', "import importlib.util,json,sys;from pathlib import Path;p=Path('tools/original/foundation-clock-run.py');s=importlib.util.spec_from_file_location('clock',p);m=importlib.util.module_from_spec(s);s.loader.exec_module(m);t=m.default_tape(sys.argv[1]);print(json.dumps(t[:next(i for i,a in enumerate(t) if a.get('label')=='gameplay-start')+1]))", scenario.code], { cwd: ROOT });
+  const nativeTape = JSON.parse(tapeResult.stdout);
+  if (modes.includes('seed-dialog')) {
+    const reopen = [
+      { type: 'key', key: 'Tab', down: true }, { type: 'step', frames: 12 },
+      { type: 'key', key: 'Tab', down: false }, { type: 'step', frames: 108 },
+      { type: 'capture', label: 'seed-reentry' },
+    ];
+    for (const key of scenario.code.toLowerCase()) reopen.push({ type: 'key', key, down: true }, { type: 'step', frames: 12 }, { type: 'key', key, down: false }, { type: 'step', frames: 6 });
+    reopen.push({ type: 'key', key: 'Return', down: true }, { type: 'step', frames: 12 }, { type: 'key', key: 'Return', down: false }, { type: 'step', frames: 72 }, { type: 'capture', label: 'character-reseeded' });
+    nativeTape.splice(nativeTape.findIndex(action => action.label === 'character-seeded') + 1, 0, ...reopen);
+  }
+  await writeFile(join(directory, 'tape.json'), JSON.stringify(nativeTape) + '\n');
+  await run('bash', [join(ROOT, 'tools/original/with-display.sh'), 'python3', join(ROOT, 'tools/original/foundation-clock-run.py'),
+    '--seed', scenario.code, '--boot-epoch-seed', String(scenario.bootEpochSeed), '--tape', join(directory, 'tape.json'),
+    '--state-observer', join(ROOT, 'tools/original/boot-mt-observer.py'), '--output', join(directory, 'original')], { cwd: ROOT, timeout: 180000, maxBuffer: 1024 * 1024 });
+  const bytes = await readFile(join(directory, 'original/manifest.json')); const native = JSON.parse(bytes);
+  assert.equal(native.status, 'pass'); assert.deepEqual(native.failures, []);
+  assert.equal(native.bootEpochSeed, scenario.bootEpochSeed); assert.equal(native.seedReadbackMatchesCodec, true);
+  return { native, sha256: createHash('sha256').update(bytes).digest('hex') };
+}
+
+async function gradeMode(scenario, mode, native, directory, result) {
+  const seedDialog = mode === 'seed-dialog', menuNavigation = mode !== 'boot';
+  let page; const menuStates = [], expectedCommands = requestedCommands(scenario, mode);
+  await mkdir(directory, { recursive: true });
+  try {
       const observations = new Map(native.debugObservations.map(row => [row.context.label, row.observation]));
       page = await browser.newPage(); const errors = []; page.on('pageerror', error => errors.push(String(error)));
       await page.goto(`${production.url}/?manual=1`); await waitForReady(page);
@@ -199,8 +217,25 @@ try {
         await page.evaluate(() => window.game.trace()).then(trace => writeFile(join(directory, 'last-trace.json'), JSON.stringify(trace) + '\n')).catch(error => { result.status = 'fail'; result.traceCaptureError = String(error); });
       }
       if (page) await page.close().catch(error => { result.status = 'fail'; result.cleanupError = String(error); });
-      await writeFile(join(output, 'report.json'), JSON.stringify(report, null, 2) + '\n');
     }
+}
+
+try {
+  for (const scenario of cases) {
+    const directory = join(output, scenario.name); await mkdir(directory, { recursive: true });
+    const caseResult = { ...scenario, status: 'running', modes: {} }; report.cases.push(caseResult);
+    try {
+      const { native, sha256 } = await originalRun(scenario, directory);
+      caseResult.nativeManifestSha256 = sha256;
+      for (const mode of modes) {
+        const result = caseResult.modes[mode] = { status: 'running' };
+        await gradeMode(scenario, mode, native, join(directory, mode), result);
+      }
+      const failed = modes.filter(mode => caseResult.modes[mode].status !== 'pass');
+      caseResult.status = failed.length ? 'fail' : 'pass';
+      if (failed.length) caseResult.error = failed.map(mode => `${mode}: ${caseResult.modes[mode].error ?? caseResult.modes[mode].traceCaptureError ?? caseResult.modes[mode].cleanupError}`).join('; ');
+    } catch (error) { caseResult.status = 'fail'; caseResult.error = String(error); }
+    finally { await writeFile(join(output, 'report.json'), JSON.stringify(report, null, 2) + '\n'); }
   }
   report.status = report.cases.every(c => c.status === 'pass') ? 'pass' : 'fail';
   if (report.status === 'fail') throw new AggregateError(report.cases.filter(c => c.status === 'fail').map(c => new Error(`${c.name}: ${c.error}`)), 'Selected boot lifecycle cases failed; every case was attempted');

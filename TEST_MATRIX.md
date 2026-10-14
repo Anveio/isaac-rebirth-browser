@@ -85,9 +85,7 @@ Generated from [the suite registry](tools/e2e/suites.mjs). Each suite runs the f
 | `paired` | Title/menu, movement/fire, pause, bombs and combat rooms; six contrived + two OS-random runs | [paired-game.mjs](tools/foundation/paired-game.mjs) |
 | `regressions` | Recorded paired runs that previously regressed | [paired-game.mjs](tools/foundation/paired-game.mjs) `--replay-cases references/isaac/foundation/runtime-progress/1E0WJX06.json,references/isaac/foundation/runtime-progress/W0L0LYYM.json` |
 | `floor` | Complete Basement floor generation: descriptors, topology, retries and starting doors | [floor-e2e.mjs](tools/foundation/floor-e2e.mjs) `--count 2` |
-| `boot-mt` | Boot-time shared MT state through title and menus | [boot-mt.mjs](tools/e2e/boot-mt.mjs) `--count 4` |
-| `menu-mt` | Menu navigation draws from the shared MT stream | [boot-mt.mjs](tools/e2e/boot-mt.mjs) `--menu-navigation --count 4` |
-| `seed-dialog-mt` | Seed dialog entry and its MT consumption | [boot-mt.mjs](tools/e2e/boot-mt.mjs) `--seed-dialog --count 4` |
+| `boot-mt` | Boot-time shared MT state at Title, through menu navigation and through seed dialog entry/reopening | [boot-mt.mjs](tools/e2e/boot-mt.mjs) `--count 4` |
 | `ordinary-run` | No-dialog run admission, level descriptors, Game.Save stores, grid records and ambient Room costs | [ordinary-run.mjs](tools/e2e/ordinary-run.mjs) `--ambient-grid --count 4` |
 | `weapons` | Tear cadence, direction and inherited motion | [weapons.mjs](tools/e2e/weapons.mjs) `--count 4` |
 | `tear-lifecycle` | Tear birth, flight and death phases | [weapons.mjs](tools/e2e/weapons.mjs) `--lifecycle --count 4` |
