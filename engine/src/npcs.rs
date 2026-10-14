@@ -528,89 +528,7 @@ impl Npc {
         }
     }
 
-    pub(crate) fn advance(
-        &mut self,
-        phase: Phase,
-        random: &mut Mt19937,
-        world: &mut NpcWorld<'_>,
-    ) -> Result<(), String> {
-        if self.removed {
-            return Ok(());
-        }
-        if phase != Phase::Update {
-            self.presented_position = self.position + self.velocity * 0.5;
-            return Ok(());
-        }
-        if self.dead {
-            // Native ordinary flies retain negative HP/dead state through the
-            // next intermediate presentation, then retire at the next full pass.
-            self.removed = true;
-            return Ok(());
-        }
-        let mut friction = self.base_friction;
-        if self.state == 1 {
-            if self.frame_age == 0 {
-                // First Appear update temporarily sets AI state0 and executes
-                // its initializer at4f9a41 before the real Poof15 seed.
-                friction = self.fly_ai(
-                    world.game_counter,
-                    random,
-                    world.player,
-                    world.grid,
-                    friction * 0.01,
-                );
-                self.appearance_effect_seed = Some(random.next_u32());
-            }
-            self.frame_age += 1;
-            if self.frame_age > 1 {
-                friction *= 0.01;
-            }
-            if self.frame_age == 21 {
-                self.state = 3;
-                friction = self.base_friction;
-            }
-        } else {
-            friction = self.fly_ai(
-                world.game_counter,
-                random,
-                world.player,
-                world.grid,
-                friction,
-            );
-        }
-        self.velocity = self.velocity * friction;
-        self.position = self.position + self.velocity;
-        self.presented_position = self.position;
-        self.animation_frame = self
-            .animation_frame
-            .checked_add(1)
-            .ok_or("NPC animation clock exhausted")?;
-        let mut health = self.health();
-        self.damage.advance(&mut health, phase)?;
-        self.hp = health.hp;
-        if self.hp < 0.0 {
-            self.dead = true;
-            // Source44641d zero-gib sound precedes the real Blood Splat seed.
-            world.audio.admit(
-                random,
-                world.system_counter,
-                crate::audio::SoundRequest {
-                    id: 30,
-                    volume: 0.8,
-                    delay: 2,
-                    looping: false,
-                    pitch: 1.0,
-                },
-            );
-            self.death_effect_seed = Some(random.next_u32());
-        }
-        if !self.position.is_finite() || !self.velocity.is_finite() {
-            return Err("NPC source motion overflowed native world vectors".into());
-        }
-        Ok(())
-    }
-
-    fn fly_ai(
+    fn fly_movement(
         &mut self,
         counter: u32,
         random: &mut Mt19937,
@@ -712,14 +630,12 @@ fn spawn_fly(id: u32, selector: &SpawnSelector, _: &SpawnContext) -> Result<Opti
             "NPC admission requires bounded authored position and nonzero spawn seed".into(),
         );
     }
+    let config = content::entity(u32::from(selector.entity_type), 0);
     Ok(Some(Npc {
+        // Config47f573 SetFrame(default,0) leaves the default clip stopped.
         animation: "Fly".into(),
-        animation_playing: true,
-        ..Npc::authored(
-            id,
-            content::entity(u32::from(selector.entity_type), 0),
-            selector,
-        )
+        actor: config.actor.into(),
+        ..Npc::authored(id, config, selector)
     }))
 }
 
@@ -730,10 +646,30 @@ fn advance_fly(
     world: &mut NpcWorld,
     births: &mut Vec<Birth>,
 ) -> Result<(), String> {
-    let was_dead = npc.dead;
-    npc.advance(phase, random, world)?;
-    if !was_dead && npc.dead {
-        births.extend(npc.death_effect_seed.map(Birth::Blood));
+    crate::plain_npc::advance(npc, phase, random, world, births, fly_ai)
+}
+
+/// ai_fly4ef880 for Fly13/AttackFly18.
+fn fly_ai(
+    npc: &mut Npc,
+    random: &mut Mt19937,
+    world: &mut NpcWorld,
+    _: &mut Vec<Birth>,
+    friction: &mut f32,
+) -> Result<(), String> {
+    if npc.state == 0 {
+        // 4f0510: grid class3, cleared target store, state3.
+        npc.grid_collision_class = 3;
+        npc.state = 3;
     }
+    // 4ef941 plays the looping Fly clip without forcing a restart.
+    crate::plain_npc::play(npc, "Fly", false);
+    *friction = npc.fly_movement(
+        world.game_counter,
+        random,
+        world.player,
+        world.grid,
+        *friction,
+    );
     Ok(())
 }
