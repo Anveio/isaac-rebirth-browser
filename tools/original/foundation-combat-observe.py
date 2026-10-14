@@ -206,7 +206,10 @@ def observe(pid, context):
             system = u64(0x8ed560)
             # HUD at Game+2b578: boss-bar fill +61894 (-1 hidden), flash +61898.
             hud = game + 0x2b578
-            report['bossBar'] = {'fill': struct.unpack('<f', read(hud + 0x61894, 4))[0],
+            fill_bits = u32(hud + 0x61894)
+            fill = struct.unpack('<f', struct.pack('<I', fill_bits))[0]
+            # Keep JSON exact: a non-finite fill is retained only as its bits.
+            report['bossBar'] = {'fill': fill if math.isfinite(fill) else None, 'fillBits': fill_bits,
                 'flash': struct.unpack('<i', read(hud + 0x61898, 4))[0]}
             # Actual Level is embedded at Game+0; its flags are distinct from
             # the retained boss-family Game+10eae0 word.

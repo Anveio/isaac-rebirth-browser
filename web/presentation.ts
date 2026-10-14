@@ -26,7 +26,9 @@ export class RunPresentation {
    * a fill of fill*110 pixels from (20, 0), dimmed to 0.6 on even flash ticks. */
   bossBar(ctx: CanvasRenderingContext2D, state: State): void {
     const bar = state.bossBar;
-    if (bar.fill < 0) return;
+    // A 0/0 fill (bosses present, none summed yet) serializes as null and,
+    // like a hidden -1 bar, draws nothing in the original.
+    if (bar.fill === null || !(bar.fill >= 0)) return;
     const image = this.assets.image(BOSS_BAR);
     const backend = ctx as unknown as { drawTintedImage?: (source: CanvasImageSource, tint: number[], offsets: number[], ...args: number[]) => void };
     const draw = (tint: number, ...args: number[]) => backend.drawTintedImage

@@ -139,7 +139,7 @@ export interface Pickup {
   velocity: {x: number; y: number}; configuredFriction: number; currentFriction: number; collisionMass: number;
 }
 export interface RunIntroduction { age: number; active: boolean; title: string; stage: boolean; }
-export interface BossBar { fill: number; flash: number; maximum: number; }
+export interface BossBar { fill: number | null; flash: number; maximum: number; }
 export interface PauseMenu {
   phase: "hidden" | "appearing" | "idle" | "disappearing";
   age: number; selection: number; statFrames: [number, number, number, number, number, number];

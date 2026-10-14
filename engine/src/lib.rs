@@ -295,9 +295,24 @@ impl RunIntroduction {
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct BossBar {
+    #[serde(with = "nan_as_null")]
     pub fill: f32,
     pub flash: i32,
     pub maximum: f32,
+}
+/// JSON has no NaN: serde_json writes it as null, so read null back as NaN.
+mod nan_as_null {
+    use serde::{Deserialize, Deserializer, Serializer};
+    pub fn serialize<S: Serializer>(value: &f32, serializer: S) -> Result<S::Ok, S::Error> {
+        if value.is_nan() {
+            serializer.serialize_none()
+        } else {
+            serializer.serialize_f32(*value)
+        }
+    }
+    pub fn deserialize<'de, D: Deserializer<'de>>(deserializer: D) -> Result<f32, D::Error> {
+        Ok(Option::<f32>::deserialize(deserializer)?.unwrap_or(f32::NAN))
+    }
 }
 impl Default for BossBar {
     fn default() -> Self {
@@ -2144,7 +2159,7 @@ impl Game {
     }
 
     /// EntityManager update 454df0 sums HP over boss actors that are not
-    /// final-flagged (0x100000) and have aged past their spawn frame, against
+    /// final-flagged (0x100000) and are past their second frame, against
     /// the larger of their max HP and the retained maximum. HUD::Update
     /// 572d48 counts the flash down; SetFill 5732a0 restarts it at 8 whenever
     /// the fill drops. No boss hides the bar and forgets the maximum.
@@ -2159,20 +2174,20 @@ impl Game {
                 .monstro
                 .as_ref()
                 .is_some_and(|owner| owner.entity_flags & 0x100000 != 0);
-            if npc.removed || !npc.boss || final_flag || npc.frame_age == 0 {
+            if npc.removed || !npc.boss || final_flag {
                 continue;
             }
-            hp += npc.hp;
-            maximum += npc.max_hp;
             any = true;
+            // Only actors past their first two frames contribute HP; before
+            // that the original divides 0 by 0 and the bar draws nothing.
+            if npc.frame_age > 1 {
+                hp += npc.hp;
+                maximum += npc.max_hp;
+            }
         }
         let fill = if any {
             bar.maximum = bar.maximum.max(maximum);
-            if bar.maximum > 0.0 {
-                hp / bar.maximum
-            } else {
-                -1.0
-            }
+            hp / bar.maximum
         } else {
             bar.maximum = 0.0;
             -1.0
