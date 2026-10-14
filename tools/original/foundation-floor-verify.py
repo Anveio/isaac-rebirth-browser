@@ -95,15 +95,15 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('manifests', type=Path, nargs='*')
     parser.add_argument('--capture', action='store_true')
-    parser.add_argument('--count', type=int, default=2, help='Independent OS-random source seeds')
+    parser.add_argument('--count', type=int, default=2, help='Independent OS-random source seeds (0 replays only --seed codes)')
     parser.add_argument('--seed', action='append', default=[], help='Additional public contrived seed code')
     parser.add_argument('--jobs', type=int, default=2)
     parser.add_argument('--generator', type=Path, default=ROOT / 'engine/target/debug/floor')
     parser.add_argument('--output', type=Path, default=ROOT / '.cache/original-floor' / str(time.time_ns()))
     parser.add_argument('--report', type=Path, default=ROOT / '.cache/foundation/floor-native.json')
     args = parser.parse_args()
-    if not 1 <= args.count <= 16 or not 1 <= args.jobs <= 2:
-        parser.error('Random source count must be 1..16 and capture jobs 1..2')
+    if not 0 <= args.count <= 16 or not 1 <= args.jobs <= 2:
+        parser.error('Random source count must be 0..16 and capture jobs 1..2')
     catalogs, _ = source.authored_catalogs()
     paths = list(args.manifests)
     if args.capture:

@@ -49,7 +49,7 @@ inventory with its real hash, without a filename alias.
 
 Read-only source contracts and hashes are retained in ignored coordination
 notes under fire-research, fire-render-research and fire-loot-research. The
-live runner is `npm run test:e2e:fireplaces -- --production-directory PATH`.
+live runner is `npm run test:e2e -- fireplaces --production-directory PATH`.
 It runs the mandatory recorded OS-random W0L0LYYM controls, followed by public
 idle observations, plus contrived natural-door Tear and Bomb routes. Both
 games must admit nonempty actual33 sets and execute their declared queue,

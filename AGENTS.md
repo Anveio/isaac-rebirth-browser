@@ -13,6 +13,14 @@ Keep checked-in verification at the game level. Do not add Rust unit modules,
 Node unit suites, Python schema suites or standalone component test harnesses.
 Validators belong in runtime and live e2e tools. Put temporary kernel probes,
 negative checks and reverse-engineering harnesses in ignored research cache.
+Do not check in scripts that assert checksums of outputs or fixtures; the
+original binary pin lives in `tools/e2e/lib/original.mjs`. `npm run
+test:policy` (part of `check:build`) rejects unit tests and stray checksums.
+
+Every live suite is registered in `tools/e2e/suites.mjs` and mixes contrived
+cases with OS-random fuzz cases; read `tools/e2e/README.md` before adding or
+changing one. Run `npm run test:e2e -- <suite>` for the suites your change
+touches; a failed suite prints the command that replays its recorded cases.
 
 Use `source cloud/env.sh` for the installed toolchain. `npm run check` builds and
 tests an immutable production artifact against fresh original processes through
