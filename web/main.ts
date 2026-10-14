@@ -101,7 +101,10 @@ async function boot() {
     rendererTargets: () => renderer.debugTargets(),
     audio: () => audio.snapshot(),
     command: (command: Command) => structuredClone(dispatch(command)),
-    step: (count = 1) => structuredClone(dispatch({ type: 'tick', count })),
+    // Automation steps leave drawing to the animation-frame loop (and to
+    // capture(), which draws the state it encodes): one software-GL draw per
+    // stepped frame dominated live suite time.
+    step: (count = 1) => structuredClone(dispatch({ type: 'tick', count }, false)),
     pause: () => { automaticPaused = true; accumulator = 0; },
     resume: () => { automaticPaused = false; accumulator = 0; previous = performance.now(); },
     reset: (seed = randomSeed(), options: { trace?: boolean; bootEpochSeed?: number } = {}) => {

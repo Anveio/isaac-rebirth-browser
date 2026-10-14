@@ -100,9 +100,11 @@ writeJson(reportPath, report);
 
 // Retention (tools/e2e/lib/retention.mjs): older runs keep their reports,
 // scenarios, cases, logs and small files; killed suites' dist copies go.
-for (const directory of sweepProductionSnapshots()) console.log(`swept stale production snapshot ${directory}`);
-for (const run of await pruneRuns(join(ROOT, '.cache/e2e'), keepRuns, runDirectory))
-  console.log(`slimmed ${relative(ROOT, run.directory)}: ${run.files} files, ${Math.round(run.bytes / 2 ** 20)} MB`);
+if (!keepEvidence) {
+  for (const directory of sweepProductionSnapshots()) console.log(`swept stale production snapshot ${directory}`);
+  for (const run of await pruneRuns(join(ROOT, '.cache/e2e'), keepRuns, runDirectory))
+    console.log(`slimmed ${relative(ROOT, run.directory)}: ${run.files} files, ${Math.round(run.bytes / 2 ** 20)} MB`);
+}
 
 // Paired-game suites replay recorded case.json tapes; every other driver
 // replays its scenarios.json through the suite's replay flag.
