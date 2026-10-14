@@ -102,6 +102,8 @@ try {
     const collections = [];
     const admittedSource = new Map();
     const conversions = new Map();
+    const pickupBirths = new Map();
+    const pickupReadmissions = [];
     let previousBombs = 1;
     const placements = [];
     let destroyedRocks = 0;
@@ -229,7 +231,23 @@ try {
             const original = pickups[index], actual = state.room.pickups[index];
             equal(original.pickupPrice, 0, `pickup${index}:native free price`, presentation);
             equal(actual?.collectionDelay, original.collectionDelay, `pickup${index}:collection delay`, presentation);
+            const age = source.nativePhase.fullGameUpdates - original.birthGameUpdate;
+            const previousBirth = pickupBirths.get(original.spawnSeed);
+            if (previousBirth !== undefined && previousBirth !== original.birthGameUpdate) {
+              pickupReadmissions.push({ presentation, spawnSeed: original.spawnSeed,
+                birthGameUpdate: original.birthGameUpdate, age, position: original.position,
+                velocity: original.velocity, rng: original.pickupRng,
+                spawnerType: original.spawnerType, spawnerVariant: original.spawnerVariant });
+              equal(original.spawnerType, 0, `pickup${index}:native saved-record null spawner`, presentation);
+            }
+            pickupBirths.set(original.spawnSeed, original.birthGameUpdate);
             if (!actual) continue;
+            equal(actual.age, age, `pickup${index}:birth-clock age`, presentation);
+            const rng = actual.regularRng;
+            equal(rng ? [rng.state, rng.rightA, rng.left, rng.rightB] : null, original.pickupRng,
+              `pickup${index}:persistent RNG30`, presentation);
+            equal([Math.fround(actual.anchorPosition.x), Math.fround(actual.anchorPosition.y)],
+              original.pickupAnchor, `pickup${index}:base anchor`, presentation);
             for (const field of ['variant', 'subtype', 'spawnSeed', 'animation', 'animationFrame', 'animationPlaying', 'collisionRadius']) {
               equal(actual[field], original[field], `pickup${index}:${field}`, presentation);
             }
@@ -280,14 +298,16 @@ try {
         assert.equal(event.fuse, 59, 'Conversion starts the native Bomb initializer fuse');
       }
       if (item.retainedTrollRegression) assert.ok(detonation !== undefined && destroyedRocks >= 1, 'Retained natural Troll route must execute the original blast and rock destruction');
+      if (item.requiredRegularReadmissions) assert.ok(pickupReadmissions.length >= item.requiredRegularReadmissions,
+        'The declared public return route must actually reconstruct its required native regular pickups');
       assert.deepEqual(errors, []);
       Object.assign(caseResult, { status: caseResult.failures.length ? 'fail' : 'pass', comparedPresentations: comparisons,
         passedPresentations, admittedBombPickups: admitted, admissionFamilySize, admittedSource: [...admittedSource.values()],
-        collections, placements, conversions: [...conversions.values()], detonation, destroyedRocks,
+        collections, placements, conversions: [...conversions.values()], pickupReadmissions, detonation, destroyedRocks,
         nativeManifestSha256: digest(manifestBytes), nativeManifest: join(directory, 'original/manifest.json') });
     } finally {
       Object.assign(caseResult, { comparedPresentations: comparisons, passedPresentations,
-        admittedBombPickups: admitted, admissionFamilySize, admittedSource: [...admittedSource.values()], collections, placements, conversions: [...conversions.values()], detonation, destroyedRocks });
+        admittedBombPickups: admitted, admissionFamilySize, admittedSource: [...admittedSource.values()], collections, placements, conversions: [...conversions.values()], pickupReadmissions, detonation, destroyedRocks });
       const snapshotBytes = Buffer.from(JSON.stringify({ schema: 1, states }) + '\n');
       const snapshotArchive = gzipSync(snapshotBytes, { level: 1 });
       await writeFile(join(directory, 'browser-states.json.gz'), snapshotArchive);

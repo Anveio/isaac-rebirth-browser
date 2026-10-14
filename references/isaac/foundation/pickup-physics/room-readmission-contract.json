@@ -1,0 +1,144 @@
+{
+  "schema": 1,
+  "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "scope": "Owned free regular Pickup10/20/30/40 projection of ordinary Room.Save/Load records. Source reconstruction and regular mode0 anchor initialization are implemented. Frozen f7 capture completes seven cases3045 phases with11346 field failures and two required-return assertion failures; the corrected source has separate pending live qualification. Other actors, paid/modifier contexts and durable save/continue remain separate.",
+  "functions": [
+    {
+      "address": "0x5ce2d0",
+      "unwindSize": 977,
+      "codeSha256": "12704f41da22f69b3bac72b684805520b384f74c6b4bf69245228d10b580a00f",
+      "contract": "Room.Save writes grid records and ordinary entity records"
+    },
+    {
+      "address": "0x5c57c0",
+      "unwindSize": 148,
+      "codeSha256": "0ae20bca943f8848e623441290711d4554de6e555a92525563c74fa39caf75c2",
+      "contract": "Saved-actor eligibility accepts type5"
+    },
+    {
+      "address": "0x5c5860",
+      "unwindSize": 644,
+      "codeSha256": "65426fe7e414011be2c2e2c2c8b9877a058903f6f82f503d3f06d7227d0ce5ce",
+      "contract": "Reconstruct ordinary saved entity vector before additional admissions"
+    },
+    {
+      "address": "0x5cecc0",
+      "unwindSize": 8315,
+      "codeSha256": "e26a703ef5f01247f6af5b4c9a74dec1e83b0b3063ea1025b0b4b2e0b231714f",
+      "contract": "RoomLoad dispatches ordinary saved reconstruction at5cf585"
+    },
+    {
+      "address": "0x550a40",
+      "unwindSize": 225,
+      "codeSha256": "d383eb855e6c18e25704875091b29c8bf1bdd8600a66ed0a4cb8a9b90d94eeff",
+      "contract": "Factory/Init, explicit position/velocity, null-spawner admission"
+    },
+    {
+      "address": "0x441c80",
+      "unwindSize": 713,
+      "codeSha256": "fdb3091280e32986d66c18d256250eb01b68ea9b03f6a60e0863252b35d545ba",
+      "contract": "Base Init seeds persistent RNG30 and resets creation/physics state"
+    },
+    {
+      "address": "0x4ff1e0",
+      "unwindSize": 6184,
+      "codeSha256": "614bd66a83fa583da245ad10d641fb85fe3308927657060390067a81c41fe515",
+      "contract": "Fresh Pickup Init subtype/XML/Appear-or-Idle routing"
+    },
+    {
+      "address": "0x5c2d40",
+      "unwindSize": 33,
+      "codeSha256": "7491b92747c96e2ffc9689d396782ceb0f33f568881cf58f9da473424a15833d",
+      "contract": "Explicit local RNG seed/shifts, without shared sampling"
+    },
+    {
+      "address": "0x5c6940",
+      "unwindSize": 30,
+      "codeSha256": "30b38e156dec29720bd3a8e89e9ec289279083487e858e58aa96cf269a91ceea",
+      "contract": "Real Room actor sequence allocation and manager append"
+    },
+    {
+      "address": "0x5d12a0",
+      "unwindSize": 1902,
+      "codeSha256": "338c9cc7f8a51f7d3a5ce8503529347ac6af538be47072ced32275e13034c751",
+      "contract": "Room.Update admission tail calls manager454df0"
+    },
+    {
+      "address": "0x454df0",
+      "unwindSize": 2192,
+      "codeSha256": "5a926d0b748f6abd6599d51d5dca746a0fd5ff4cd1a2340833df6bcd4857e205",
+      "contract": "Actor pass, then full entity contacts and later ground resolution"
+    },
+    {
+      "address": "0x442b30",
+      "unwindSize": 20,
+      "codeSha256": "070ce4d154bc80253ef1d05cc635a44b477c578f6dd344e22415a258988bec3d",
+      "contract": "Native age getter442b30 returns current Game counter minus creation clock+42c"
+    },
+    {
+      "address": "0x4545d0",
+      "unwindSize": 2066,
+      "codeSha256": "340e37a6abedcd7a2618835f27c30fea6d7163b1067c4829017b5140bc1d24dc",
+      "contract": "Contact pool snapshots, Player/PU callbacks before self-pairs and later ground pass"
+    },
+    {
+      "address": "0x504820",
+      "unwindSize": 8329,
+      "codeSha256": "2737d0683e5bd89e4e68a811d2154a41b8c7a7b1f73038b6174169b51e1d3f2f",
+      "contract": "Actual Pickup callback on Player supports regular free collection"
+    },
+    {
+      "address": "0x50c880",
+      "unwindSize": 243,
+      "codeSha256": "bc60f143f370adb42072cc2166c854d92025a0e19465c7e9ea8096dc39f2373f",
+      "contract": "Player pickup eligibility guards Hit/Death/dead state, with no transition/controls-disabled exclusion"
+    }
+  ],
+  "save": {
+    "caller": "Game room departure, before old Room reset",
+    "walk": "Room+1638 live nonplayer list in admission order, count+1644",
+    "eligibility": "Skip Entity+31f (including a still-visible collected actor);5c57c0 accepts type5",
+    "destination": "Descriptor+70..78 vector, native stride48; +80 is capacity",
+    "fields": {
+      "type": "Entity+10 \u2192 record+0",
+      "variant": "Entity+14 \u2192 record+4",
+      "subtype": "Entity+18 \u2192 record+8",
+      "position": "Entity+448/+44c \u2192 record+20/+24",
+      "spawnSeed": "Entity+7d0 \u2192 record+2c",
+      "rngSeed": "Entity+7c0 \u2192 record+30",
+      "charge": "Pickup+ab8 \u2192 record+10",
+      "touched": "Pickup+abc \u2192 record+1c"
+    },
+    "projection": "The runtime stores only its currently owned regular fields. Browser handle is an internal join to the existing mixed actor order, not a native saved field. Price/shop metadata and other-family records are not invented."
+  },
+  "load": {
+    "order": "RoomLoad5cf585 \u21925c5860, before the distinct Descriptor+b8..c0 additional-admission vector",
+    "constructor": "5c58ba..5c58e0 passes concrete type/variant/subtype, saved position+20, saved spawnSeed+2c, explicit934c00 zero velocity and null spawner to550a40",
+    "restore": "5c58e5..5c58f7 restores record+30 through local RNG30 Init.5c5921..5c5956 restores owned PU metadata.5c5970 consumes the ordinary record vector.",
+    "newState": "Base441c80 initializes velocity/anchor to zero, creation clock to the active Game counter, configured friction and alive classes. Pickup Init selects Idle on saved-room construction; the actual immediate Room.Update advances that clip and .965 friction at the unchanged Game counter.",
+    "admissionTail": "Supported restored regular actors advance in saved order. The fixed candidate snapshot is taken before the shared existing Player/regular collection/SFX callback, then the PU self-pair pass and later live-list grid pass run.454a0a precedes453340/454b10. Mixed browser handles retain their existing relative order; other saved owners remain untouched.",
+    "rng": "Every supported record has an actual nonzero spawn seed and concrete subtype. Persistent RNG30 initializes from that seed, then restores its saved state with shifts4/3/17. Temporary subtype RNG35 is separate; the fresh Normal Isaac nonzero-subtype path draws no output. GameSpawn receives an explicit saved seed and introduces no fitted shared draw or cursor correction.",
+    "ordinaryAnchor": "Source506fa4\u21925075d2 initializes the regular zero440/444 from physical448/44c before BaseUpdate. Explicit active-swap/door-away ad4mode1\u21922 producer and5075ee/5075f3 reset remain mapped but unimplemented."
+  },
+  "gate": {
+    "suite": "test:e2e:troll-bombs",
+    "cohort": "All seven retained cases, both opposite QJ offsets, both unfiltered OS-random draws and all3045 public phases stay mandatory. Only required native return metadata is added; actions/ticks/order are unchanged.",
+    "newRequiredFields": [
+      "Pickup age against independently read source creation clock+42c and active Game counter, exactly the442b30 getter",
+      "All four persistent RNG30 words",
+      "Source base anchor with exact f32 decoding",
+      "Actual native regular re-admissions on XD0 and both QJ public return routes; source birth positions/velocities, age, local RNG and null spawner are retained and paired fields stay strict after the real admission pass"
+    ],
+    "historical": "The immutable c133/f04 pair proof remains red5543 and unchanged. Its XD0 return observations expose native zero velocity and new Idle0 while the clone retained motion. New constructor/RNG fields require fresh original capture; no offline surrogate is called live proof.",
+    "unacceptedEntryBoundary": "The seven retained routes reconstruct pickups away from the entering Player. They cannot accept Player/PU overlap at immediate restored admission, even with source-correct callback dispatch. A natural public overlap witness is still required; no fabricated saved actor or final position is supplied.",
+    "frozenProof": "readmission-frozen-verification.json preserves exact f7/ee225a before/end source/artifact, seven complete-case scopes, the aborted segment, full3045 selected snapshots, all3480 planned commands and21 actual backend states. The fidelity audit retains every11346 field failure and both missing QJ return assertions; it does not grant new gameplay parity."
+  },
+  "excluded": [
+    "Other actor saved reconstruction and NPC/Bomb/Chest/collectible motion reset",
+    "Source paid/shop metadata, pickup/item modifiers and alternate characters",
+    "Complete Room.Save grid seed draws and whole shared consumer alignment",
+    "Durable profiles/continue, later stage reconstruction, additional-spawn+b8 records",
+    "Rare grid callbacks, exact converted birth seeds and return immunity differences remain blocking",
+    "Player/regular PU physical response on collection denial and Hit/Death pickup eligibility remain broader callback gaps; no whole entry-contact acceptance is claimed."
+  ]
+}

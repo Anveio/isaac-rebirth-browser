@@ -87,7 +87,7 @@ async function boot() {
     if (!automaticPaused && !lifecyclePaused) {
       accumulator += elapsed;
       while (accumulator >= 1000 / 60) {
-        dispatch({ type: 'tick', count: 1 }, false);
+        dispatch({ type: 'tick', count: 1, timestampMillis: Date.now() }, false);
         accumulator -= 1000 / 60;
       }
     }

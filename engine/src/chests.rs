@@ -254,7 +254,7 @@ fn admit_child(
     let id = *next_pickup;
     let mut pickup = Pickup::spawn(id, birth.variant, definition_subtype, birth.position, true)?;
     pickup.subtype = subtype;
-    pickup.spawn_seed = birth.spawn_seed;
+    pickup.initialize_spawn_seed(birth.spawn_seed)?;
     pickup.velocity = birth.velocity;
     pickup.birth_game_update = game_update;
     *next_pickup = id.checked_add(1).ok_or("Chest child identity exhausted")?;

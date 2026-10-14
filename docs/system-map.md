@@ -205,10 +205,10 @@ post-acquisition Player state, load/continue and
 durable browser saves remain open. [SavedGame evidence](../references/isaac/foundation/saved-game/README.md)
 retains the original reports and the correction that made those gaps blocking.
 
-CI discovers all thirty-three registered live suites and runs separate jobs with
+CI discovers all thirty-five registered live suites and runs separate jobs with
 `fail-fast: false`, preserving each result and evidence. The first matrix run
 completed floors, weapons, boot MT and pickups successfully while retaining
-core and traversal failures. Build, typecheck, assets, matrix and strict Clippy
+core and traversal failures. Historical build, typecheck, assets, matrix and strict Clippy
 pass at integrated checkpoint `472b154`, including the reviewed Level,
 RoundWorm, item-selection, bomb-pickup, large-room geometry, Chest constructor
 bounded callback-history, first-acquisition, Troll conversion, Fire/Ember,
@@ -226,8 +226,14 @@ fields, 1,821 failures and 651/882 passing paired checkpoints. Combining these
 separate completed scopes gives 18 passing and six gameplay-failing suites;
 the original 14/10 attempt stays unchanged. Later leaves do not inherit those
 results, and no complete current-main acceptance is claimed.
-The current main also contains reviewed Monstro source corrections, typed
-Familiar and Grid leaves; the `472b154` build artifact predates those changes.
+The latest completed consolidated build/static pass is main `f79338a6`, with
+33 registered suites and 938 production files. Its artifact is
+`0f3432b0038e4a9dc36a491f312be05c8999096b153e7ed5d3b2e361f03e784b`;
+it includes the reviewed Monstro corrections, Familiar, Grid, Chest and ambient
+leaves. The subsequent [run-admission leaf](run-admission.md) has its own
+frozen build and four fresh pairs: 1,368 phases and 12,504 checks retain 640
+blocking clock/fade/control/age differences. Later integrations do not inherit
+the f793 build or a complete live-suite acceptance.
 Complete gameplay RNG, other floors/characters, persistence, later music
 callers/cutscenes and whole-game parity remain open. GitHub required-check
 enforcement is unavailable for this private repository's current plan. The
@@ -406,21 +412,21 @@ must not silently turn a room object into a generic enemy or delete it.
 
 | Native symbol family | Port location / present contract | Reachable missing contract |
 | --- | --- | --- |
-| `Manager`, `Game`, menus | ABI 2 preserves independent bootEpochSeed in Rust/WASM and browser/native replay; retained title animation/f32 fade uses normalized systemClock; state-driven profiles/run/introduction/pause | Shared MT lifecycle/routing, complete transitions, settings, challenges, continue, game-over, restart and all other modes |
-| `Seeds`, `RNG`, global MT19937 | `engine/src/seed.rs`: general seed codec and original-log-verified Stage 1 startup seed; recovered backdrop index-35 stream | Special seed effects, distinct generation/spawn/decoration/item streams, global MT initialization/routing and exact draw consumption |
-| `LevelGenerator`, `Level`, `RoomConfig` | `engine/src/room.rs`: recovered supplied-seed backdrop; `engine/src/layout.rs` and `room_templates.rs`: supplied-input growth/expansion and weighted selection kernels, separate from gameplay | Full stage/profile/challenge routing, special fitting/retries, runtime spawning, connected doors, room persistence and floor progression |
-| `Room`, `RoomTransition`, `StageTransition` | Room descriptors, initial adjacent minimap cells, authored room composition | Crossing doors, combat locks, discovery, transitions, stage banners and camera behavior |
-| `Entity_Player` | Observed previous-velocity motion law, coasting, projection, pause and facing/head/body animation; starting red HP/counters and regular-bomb damage | Original update cadence/full state, item stats, health containers, consumables, death and transformations |
-| `Entity_Tear`, `Entity_Projectile`, `Entity_Laser`, `Entity_Knife` | Four-direction regular tears with inherited velocity and corrected emission origins/order; provisional boundary impacts and expiry | Original ground/height/range separation, initial RNG/eye routing, proper projectile bounds, collision damage, enemy shots and weapon families |
-| `Entity_NPC` | Typed authored Fly/AttackFly/RoundWorm/Keeper/Fire actors and source contact/damage callbacks are implemented in their scoped live leaves | Broader enemy behaviors, bosses, champions and exceptional spawn/death contexts |
-| `Entity_Familiar` | Source Leech cache/child270 admission, separate room sequence owner, appearance and real Poof15 are implemented. First four-case fresh gate remains 0/4 with 25,131 mandatory failures; local/sprite/reveal/retirement contracts match. [Scope and required live gate](familiars.md) | Missing real shared/actor consumers and placement/sequence/Poof seeds, path/targets/contact/heal, modifiers/other subclasses, full cache completion and room-return lifecycle |
-| `Entity_Bomb`, `Game::BombDamage` | E-only rising-edge placement, inventory debit, fuse/explosion, strict regular contact, native f32 self-knockback and damage countdown with pause freezing | Native radial/full-state holdouts, hurt visuals, craters, pushed bombs/variants and enemy/grid damage |
-| `Entity_Pickup`, grid entities | Authored entity/STB definitions available; no runtime pickups/grid obstacles | Hearts/coins/keys/bombs, shop/chest collection, rocks/pits/poops/fires and damage |
-| `ItemConfig`, `ItemPool`, player item evaluation | Pinned343 configurations/16 native pools, causal run/pool/Player RNG owners, weighted selection and natural pedestal admission. Source first-acquisition queue/count/inventory/health/active-charge and retained empty-altar physics are implemented; four-case frozen-original/live-browser recovery passes 70,696 scoped checks. Required CI captures both games freshly. [Scope and live gate](item-pools.md) | Item-specific cache/stat/health transformations/costumes, active swap/use, familiars and later RNG consumers, trinket/pocket semantics, saved progression, paid/override contexts and exceptional selector live boundaries |
-| Graphics, `ANM2`, backdrop/shadow/FX | `web/animation.ts`, `web/gl-menu.ts`, `web/gl-stage.ts`, `engine/src/effects.rs`: authored animation and GPU masks | Full original pixels, all room/backdrop systems, native motion projection and effect selection |
-| `Music`, sound playback | Live paired SFX and Title/run/normal-floor music, source f32 controller fades/deferred run admission, original queued-path/output graph/PCM and real callback evidence | Early decoder/prefetch lifecycle, alternate floors, later jingles/layer/pitch callers, initial video/voiceover and broader gameplay sounds |
-| `PersistentGameData`, `GameState` | In-memory profiles and deterministic JSON replay | Durable browser profile/save/continue, achievements, completion marks, unlocks and co-op |
-| Controller/button maps, host input | Actual DOM keyboard commands and text; original consumed X11 keys | Controller/mouse/remapping, focus device parity, fullscreen and unsupported action keys |
+| `Manager`, `Game`, menus | ABI2, causal boot/Profile/Main/Character/seed-dialog initialization, normalized System phases, source music fade and deferred run admission. The owned clock now drives the initial run fade and distinct Player controls field; its four fresh pairs retain640 required differences. | Complete shared consumers, early pause/initial-fade ordering,593660 input reset, other transitions/settings/challenges/continue/game-over and restart |
+| `Seeds`, `RNG`, global MT19937 | General seed codec, source run/stage/descriptor streams, authored weighted floor/room draws, independent ItemPool and Player child RNGs, and one shared MT owner for boot/menu/audio/tear/admitted actors | Special seeds, later floors and all missing actual spawn/effect consumers; complete post-run MT equality remains unaccepted |
+| `LevelGenerator`, `Level`, `RoomConfig` | Fresh normal Basement generation uses authored weights, source retries/fitting/secrets and complete descriptors; runtime rooms consume their descriptor selectors. Live floors verify full ordered descriptors and169 cells. | Other stages/profiles/challenges/curses and unsupported shapes/selectors; a passing source kernel does not accept its missing gameplay caller |
+| `Room`, `RoomTransition`, `StageTransition` | Reciprocal normal/curse/free treasure/secret and ordinary key doors, visited minimap, supported room persistence, tall-room geometry and scoped camera bounds have runtime owners and required public-route gates | Hostile/special lock rules, complete actor reentry, floor exits, alternate door styles, complete transition/camera/backdrop pixels |
+| `Entity_Player` | Native f32 movement, phase-aware motion/fire/bomb controls, inventory/health helpers, damage/immunity and an actual controlsEnabled field distinct from native Entity visibility | Item stat aggregation, broader health containers/caps and damage sources, death/transformations and complete Player callback/animation order |
+| `Entity_Tear`, `Entity_Projectile`, `Entity_Laser`, `Entity_Knife` | Regular tears own source ground/height/full/fast prediction, ordered birth RNG/audio admission and next-full removal; RoundWorm has a typed type9 projectile | Complete RNG-dependent numerical parity, other weapons, tear Poof/death effects, broader projectile contacts and downstream callbacks |
+| `Entity_NPC` | Authored Fly/AttackFly/RoundWorm/Keeper/Fire and ordinary Monstro have typed source admission/update/contact/damage paths. Scoped paired failures remain required; implemented AI is not a whole-NPC parity claim. | Unsupported subclasses/champions, exact shared seeds/trajectories, final-boss rewards/death effects and exceptional spawn contexts |
+| `Entity_Familiar` | Leech cache/child270 admission, separate room sequence owner, appearance and real Poof15. Four fresh pairs retain25,131 mandatory failures despite matching scoped local/sprite/reveal/retirement fields. [Evidence](familiars.md) | Missing spawn/shared consumers and placement/sequence/Poof seeds, path/target/contact/heal, other subclasses, full cache completion and room-return lifecycle |
+| `Entity_Bomb`, `Game::BombDamage` | Rising-edge E placement, source full/fast regular motion/fuse/blast, inventory debit, self/NPC/grid damage and typed Troll/Mega conversion paths | Exact converted shared birth seeds, broader variant/grid/radial holdouts, craters and complete hurt/explosion rendering |
+| `Entity_Pickup`, grid entities | Natural coin/key/bomb actors, collection and scoped persistence; deferred collectible grant and empty-altar motion; Chest constructor/opening source path; actual grid occupancy, rock/spike/door response and fresh signed448-word Room costs | Regular saved readmission and anchor corrections remain separately reviewed; hearts/other families, paid/modifier contexts, Chest loot/live completion, weighted path costs and other grid callbacks |
+| `ItemConfig`, `ItemPool`, player item evaluation | Pinned343 configurations/16 pools, independent source RNG owners, weighted depletion/eligibility, natural selection and first queued acquisition/charge. Four frozen-original/fresh-browser acquisition recoveries pass70,696 scoped checks; required CI captures both games fresh. [Evidence](item-pools.md) | Item-specific cache/stat/costumes, active use/swaps, pocket/trinket effects, broader familiars, progression/paid/override and exceptional selectors |
+| Graphics, `ANM2`, backdrop/shadow/FX | Authored sprite playback, actual source f32 transforms and scoped GPU light/shadow masks; supported actor/room renderers consume runtime state | Complete room/backdrop/sprite pixels, broader effects and native projection/composition edges |
+| `Music`, sound playback | Paired SFX and Title/run/normal-floor music, source fades/deferred admission, original queued-path/output graph/PCM and actual callback evidence | Early decoder/prefetch lifecycle, alternate floors, later jingles/layer/pitch callers, intro video/voiceover and broader gameplay sounds |
+| `PersistentGameData`, `GameState` | Fresh-run SavedGame Clear, ItemPool copy,135 owned Level rows and supported Room/grid/Player save fields. Save/grid gates retain their required seed/record failures. | Durable browser profile/load/continue, complete post-acquisition Player/actor state, achievements/completion/unlocks and co-op |
+| Controller/button maps, host input | Actual DOM commands/text and consumed native X11; complete planned input/backend evidence survives capped state history, with explicit truncation flags | Controller/mouse/remapping, focus/device parity, fullscreen and unsupported action keys |
 
 ## Original tick and state observation gap
 
@@ -741,11 +747,13 @@ Full phases revert interpolated positions and call game update; intermediate
 phases call game fast-update `0x5507f0` → room fast-update `0x5cd920`. Players
 update in both phases, while nonplayer simulation updates occur on full phases
 and intermediate tear work uses its render/interpolation virtual slot. The
-observed 60-presentation cadence advances players 60 times and nonplayer
-simulation 30 times; there is no universal entity tick. Independent typed tear
-traces now verify 215 phase points across five entropy seeds. This is source
-discovery; production still has its prior tear drift/expiry and lacks the shared
-MT routing. The original adapter still emits `simulationTick: null` and does not
+ordinary RoomFast path dispatches Player1 through its actual virtual Update
+slot531850 on both presentations; Base animation advancement still branches on
+phase. Generic Entity fast callback4446a0 cannot substitute for this Player
+call. There is no universal entity tick. Independent typed tear traces retain
+215 source phase points across five entropy seeds; production now routes the
+typed ground/height/full/fast lifecycle and ordered shared birth calls.
+Remaining RNG-dependent differences stay required in its live gate. The original adapter still emits `simulationTick: null` and does not
 serialize complete source state.
 
 Pending run dispatch at `0x594a10` also aligns an odd System counter to an even
@@ -761,8 +769,9 @@ state 2/class 0 after a blast, and passage through the former cell is observed.
 Independent vertical and horizontal blast traces recover source ray/cell/line
 checks. Native grid index conversion uses 40-world-unit cells with a padded 15×9
 grid, distinct from the 13×7 authored interior. The private source traces and
-contract tooling are in `.cache/coordination/combat/`; there is no grid/enemy
-runtime or combat parity gate in the port yet.
+contract tooling are in `.cache/coordination/combat/`. Those early source traces
+now have typed grid/NPC runtime consumers and required live combat gates; their
+scoped results do not establish complete shared-seed or enemy parity.
 
 Content initialization, collectible configuration, weighted pool depletion,
 AddCollectible/use dispatch and persistent unlock/save consumers are mapped to
@@ -811,9 +820,10 @@ An immutable ABI 2 artifact with digest
 `a98a29f426a8c8f58174b02f31cedf94528b78513c4261486af5e021597e72ad`
 matches all seven selected complete original title frames with zero changed
 pixels and zero channel error. All ten scoped title/fade state checkpoints also
-match. The [browser contract](../tools/tests/title.spec.ts) keeps the three menu
-transition captures as source-state checks until their rendering is implemented.
-The focused presentation/generic-GL suite passes five cases. This scoped result
+match. The former browser contract kept the three menu transition captures as
+source-state checks until their rendering was implemented. That historical
+component suite was removed; current `test:e2e:paired` captures both real games.
+The historical focused presentation/generic-GL suite passed five cases. This scoped result
 does not replace the legacy references, full gameplay comparisons or original
 complete-state requirements.
 
@@ -823,7 +833,7 @@ scenario index. Introduction age, pause appearance/idle/disappearance, cursor
 selection and stat-frame state live in the engine snapshot, so pause freezes
 gameplay while its menu presentation clock advances independently.
 
-## Verification snapshot for the Wave1 checkpoint
+## Historical verification snapshot for the Wave1 checkpoint
 
 Required cloud verification completed against immutable production artifact
 `6f87ca918d1e0da3eb191822065a2da5aa4a84038e5dd48839fcae291daff7c7`.

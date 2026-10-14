@@ -1,0 +1,171 @@
+{
+  "schema": 1,
+  "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "scope": "Narrow source-derived ordinary regular Pickup10/20/30/40 mode0 anchor initialization before existing full BaseUpdate. No newly passing live cohort is claimed by this source correction.",
+  "functions": [
+    {
+      "address": "0x4ff1e0",
+      "unwindBytes": 6184,
+      "rawSha256": "614bd66a83fa583da245ad10d641fb85fe3308927657060390067a81c41fe515",
+      "dumpSha256": "c736f00b53fc6969bf5c9ac3ea3d01ecf9669a9d6e640a3b92e0368b1c496e83",
+      "scope": "Pickup Init clears actualad4 at4ff236"
+    },
+    {
+      "address": "0x504820",
+      "unwindBytes": 8329,
+      "rawSha256": "2737d0683e5bd89e4e68a811d2154a41b8c7a7b1f73038b6174169b51e1d3f2f",
+      "dumpSha256": "50c2a2de4aeb5c92b20620e68af323b0234d7c98f720a37ed0f5e497edcdd797",
+      "scope": "Actual active swap writes1 near a real Door"
+    },
+    {
+      "address": "0x506f70",
+      "unwindBytes": 4427,
+      "rawSha256": "b61a8942f69a482194a27796c81dd3b459d45ce6efff2960cc392ac879a9af5e",
+      "dumpSha256": "db385b4da8d8e26a8e7bba538eacaf3d7ed5a0d287d3bc6991e01446626bd2dd",
+      "scope": "Ordinary anchor zero/reset branches precede Base motion"
+    },
+    {
+      "address": "0x612bf0",
+      "unwindBytes": 35,
+      "rawSha256": "8eb10a47da3863cb7e046e6bbb5f492c8beab457ffe835abfc16d9c38dfa61c6",
+      "dumpSha256": "9c65fef54185be7d163b5106d7867fed6929715ce7b416cb3cecfcb0aedb0fda",
+      "scope": "Exact vector equality, unordered comparisons are false"
+    },
+    {
+      "address": "0x612c50",
+      "unwindBytes": 14,
+      "rawSha256": "9e6831e8072e2ab8d0407ee68781acd023f7e96a2fb93d6e267f27ef39f89413",
+      "dumpSha256": "435a50dba069ba5fa799ba982e0d16285cf85e5a065fce3cda031a16fcbee5fd",
+      "scope": "Copies the two rawf32 words without conversion"
+    },
+    {
+      "address": "0x447190",
+      "unwindBytes": 3489,
+      "rawSha256": "b7fc8a1713cd9a376279973dc2f7f5a74eeae7486d24b79a6eebad6ae7acc19c",
+      "dumpSha256": "add141f46cfe7c3bd9068c6c6ba0d0416f9d5001c7f44cb8f4b11568d20a8273",
+      "scope": "Existing Base full motion/ANM2 owner"
+    }
+  ],
+  "literalAd4Receipt": {
+    "path": ".cache/coordination/pickup-anchor-research/ad4-xrefs.json",
+    "sha256": "cd568ffbf0d3295f297f204dec596ce1725dd1cf2de6f269fdde7d891c02b187",
+    "referenceCount": 10,
+    "excludedStackLocals": [
+      "0x424efa",
+      "0x424f50"
+    ],
+    "references": [
+      {
+        "address": "0x424efa",
+        "function": "0x424440",
+        "unwindBytes": 11631,
+        "mnemonic": "lea",
+        "operands": "rdx, [rsp + 0xad4]",
+        "operandIndex": 1,
+        "access": 1
+      },
+      {
+        "address": "0x424f50",
+        "function": "0x424440",
+        "unwindBytes": 11631,
+        "mnemonic": "movss",
+        "operands": "dword ptr [rsp + 0xad4], xmm1",
+        "operandIndex": 0,
+        "access": 2
+      },
+      {
+        "address": "0x4ff236",
+        "function": "0x4ff1e0",
+        "unwindBytes": 6184,
+        "mnemonic": "mov",
+        "operands": "dword ptr [rdi + 0xad4], 0",
+        "operandIndex": 0,
+        "access": 2
+      },
+      {
+        "address": "0x50631a",
+        "function": "0x504820",
+        "unwindBytes": 8329,
+        "mnemonic": "mov",
+        "operands": "dword ptr [r12 + 0xad4], 1",
+        "operandIndex": 0,
+        "access": 2
+      },
+      {
+        "address": "0x506faa",
+        "function": "0x506f70",
+        "unwindBytes": 4427,
+        "mnemonic": "cmp",
+        "operands": "dword ptr [rbx + 0xad4], 2",
+        "operandIndex": 0,
+        "access": 1
+      },
+      {
+        "address": "0x506fdc",
+        "function": "0x506f70",
+        "unwindBytes": 4427,
+        "mnemonic": "cmp",
+        "operands": "dword ptr [rbx + 0xad4], 1",
+        "operandIndex": 0,
+        "access": 1
+      },
+      {
+        "address": "0x50719c",
+        "function": "0x506f70",
+        "unwindBytes": 4427,
+        "mnemonic": "cmp",
+        "operands": "dword ptr [rbx + 0xad4], 1",
+        "operandIndex": 0,
+        "access": 1
+      },
+      {
+        "address": "0x507316",
+        "function": "0x506f70",
+        "unwindBytes": 4427,
+        "mnemonic": "mov",
+        "operands": "dword ptr [rbx + 0xad4], 2",
+        "operandIndex": 0,
+        "access": 2
+      },
+      {
+        "address": "0x5075d7",
+        "function": "0x506f70",
+        "unwindBytes": 4427,
+        "mnemonic": "cmp",
+        "operands": "dword ptr [rbx + 0xad4], 2",
+        "operandIndex": 0,
+        "access": 1
+      },
+      {
+        "address": "0x5075f3",
+        "function": "0x506f70",
+        "unwindBytes": 4427,
+        "mnemonic": "mov",
+        "operands": "dword ptr [rbx + 0xad4], 0",
+        "operandIndex": 0,
+        "access": 2
+      }
+    ]
+  },
+  "implemented": {
+    "zeroAnchor": "506f8e aliasesPickup440/444;506f9d calls612bf0 against the sourcezero vector. Equal branch506fa4\u21925075c8 calls612c50 at5075d2 to copy physical448/44c, before Base447190 at506ff9. f32 equality includes signedzero equality and rejects NaN.",
+    "phase": "Only actual regular full Update executes this initializer.4446a0 intermediate presentation preserves the anchor and predicts from stored physical position/velocity/friction.",
+    "retainedOwners": "Constructor initializes regular anchor0; saved-room fresh Init and current Game birthage/RNG/ID/contact owners remain unchanged. Variant100 home and Chest owners are separate."
+  },
+  "mappedNotImplemented": {
+    "mode1Producer": "504820 active swap at50621d first flushes the actual pending grant, replaces/morphs the old active pedestal and at50631a writes1 only if the Player is within squared4900 of a real Door. Active swap remains unadmitted.",
+    "mode1Consumer": "506fdc/50719c route1 to actual first Player and first nearby Door;507301 adjusts real velocity and507316 writes2. No invented door-away path is added.",
+    "mode2Consumer": "506faa or5075d7 sees2\u21925075ee copies current physical position to anchor then5075f3 clearsad4 to0. This reset needs its actual1\u21922 producer; the present correction does not fabricate it."
+  },
+  "preservedFailingCohort": {
+    "producer": "f7b5b18fd1cf9fae52dd89bfd068b22a0032ec39",
+    "artifactSha256": "ee225a956ced2d016d32627b8a3d127a7a474f142d0e58b933db7039fc93e57b",
+    "path": "/workspace/isaac-worktrees/inventory/.cache/e2e/pickup-readmission/recovery-after-environment-reset/report.json",
+    "sha256": "3d15370404bf97470de445806cfceea79e08b5b5f4c61512eef250c9214faeb7",
+    "distinctCompleteCases": 7,
+    "presentations": 3045,
+    "fieldFailures": 11346,
+    "requiredReturnAssertions": 2,
+    "scope": "First four completed fresh pairs are unchanged; three unchanged cases were captured freshly after environment reset. Aborted old2SA execution is separately hashed and not counted as complete. All seed/return/field failures remain blocking."
+  }
+}

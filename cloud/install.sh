@@ -39,8 +39,9 @@ if [[ ! -x /usr/bin/chromium ]] && [[ -z "${PLAYWRIGHT_CHROMIUM_EXECUTABLE:-}" ]
 fi
 python3 tools/restore-linux-depot.py
 bash tools/original/prepare-offline.sh
-# CI e2e jobs download one shared production build instead of rebuilding it.
-if [[ -z "${SKIP_PRODUCTION_BUILD:-}" ]]; then
+# Matrix jobs receive the checked production artifact from their build job.
+# Ordinary local setup still builds by default.
+if [[ "${SKIP_PRODUCTION_BUILD:-0}" != 1 ]]; then
   npm run typecheck
   npm run build
 fi
