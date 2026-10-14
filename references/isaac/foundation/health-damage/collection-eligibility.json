@@ -21,7 +21,7 @@
     "mainGuard": "50c89f testsbf4. Ifclear, dead/Death are the only predicates. Ifset,50c8e8 comparescurrentnameHit and permits it directly; otherwise50c8fc calls50c780.",
     "itemClipExceptions": "Generic helper permits actual source names Hit/Pickup/LiftItem/HideItem/UseItem while bf4 is set. Current concrete enum has UseItem; Health separately adds Hit and exclusive legacy Pickup transfer.",
     "legacyLimit": "Legacy queued Pickup represents a source-permitted Pickup name and is not a generic veto. Existing collectible queue admission remains separately guarded. Full main/copy ownership still awaits its separate transfer leaf.",
-    "consumer": "Root collect_regular_pickup_at, collectible/Chest contact and Combat Heart all consume one shared helper; no duplicate pickup predicate."
+    "consumer": "One shared helper scopes ordinary/restored regular collection, collectible queue admission and separately composed Heart collection. Chest contact retains its own existing rules. Empty altar physical response is independent of collection/queue guards and rejects actual Player.dead within the admitted fixed class4 scope."
   },
   "historicalHealthHelperFile": {
     "producer": "9eb9956d320e9c8b8b7cf0457666037664af1f63",
@@ -31,5 +31,16 @@
     "path": "engine/src/pickups.rs",
     "sha256": "5b25b383ccd0e9ec26386e06d8b6ad8aa2d5c9d01fc92ad21ca58806b1f967c7",
     "scope": "Actual current Clip.name predicate; no second helper. The separate Health Hit callback has not been composed into this Death-only leaf."
+  },
+  "physicalContact": {
+    "scope": "Admitted living normal class4 Player and retained active free subtype0 class4 altar; no general removed/dead equivalence claimed.",
+    "collectionFalse": "504820 returns pickup.price != 0 when Player.CanCollect is false; a free pickup returns0, permitting the physical response after callback OR.",
+    "eligibility": "4453a0 checks actual +344 compatible classes and either Entity+31f separately before445710 callback veto. Actual Player.dead rejects altar mass response; main/queue guards do not.",
+    "runtimeConsumers": {
+      "collect": "engine/src/player_items.rs::collect",
+      "physical": "engine/src/player_items.rs::empty_altar_contact",
+      "callOrder": "Attempt collectible collection, then physical altar contact on returnedfalse."
+    },
+    "runtimeFileSha256": "dc7c9413ab2ecea24e2a7b69a911c95e22f6bc58aa4306aac0bb9ca569fa30de"
   }
 }
