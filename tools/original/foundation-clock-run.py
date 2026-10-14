@@ -27,6 +27,7 @@ def module(name, filename):
 
 codec = module('foundation_seeds', 'foundation-seeds.py')
 debug = module('debug_run', 'debug-run.py')
+evidence = module('native_evidence', 'native-evidence.py')
 
 
 def default_tape(seed):
@@ -107,6 +108,7 @@ def main():
     parser.add_argument('--focus-handoff', action='append', default=[], help='At named capture, generate public X11 focus out/in and release one presentation before capture; diagnostic tape alteration is recorded')
     parser.add_argument('--state-observer', type=Path, help='Optional parent-only reference debug module exposing observe(pid, context); never production game input')
     parser.add_argument('--observe-every-step', action='store_true', help='Observe at each tape step gate without screenshots; use one-frame steps for dense trajectories')
+    parser.add_argument('--archive-evidence', action='store_true', help='Lossless gzip manifest plus committed native progress journal; public observations and clock unchanged')
     parser.add_argument('--gl-trace', type=Path, help='Optional documented graphics API observer to chain; no game instructions/state')
     parser.add_argument('--audio-trace', type=Path, help='Optional forwarding OpenAL API observer to chain; no game instructions/state')
     parser.add_argument('--sfx-volume', type=float, default=0, help='Owned public SFXVolume option, 0..1; admission still occurs when muted')
@@ -248,6 +250,11 @@ def main():
         report['debugObserver'] = {'module': str(args.state_observer.resolve()), 'everyTapeStep': args.observe_every_step, 'scope': 'reference-only parent debug observations at blocked presentation checkpoints; no hidden-state parity claim'}
         report['debugObservations'] = []
     (out / 'tape.json').write_text(json.dumps(tape, indent=2) + '\n')
+    progress = evidence.Progress(out) if args.archive_evidence else None
+    def record(kind, value):
+        if progress:
+            progress.append(kind, value)
+    record('start', report)
     proc = None
     started = time.monotonic()
     try:
@@ -278,11 +285,13 @@ def main():
                     raise RuntimeError('Public X11 observation buffer overflowed')
                 status['controllerElapsedMs'] = (time.monotonic() - started) * 1000
                 acknowledgements.append(status)
+                record('acknowledgement', status)
                 return status
             current = acknowledgement()
             connection.sendall(b'step 30\n')
             current = acknowledgement()
             report['bootstrapPresentedFrames'] = 30
+            record('field', {'name': 'bootstrapPresentedFrames', 'value': 30})
             windows = subprocess.check_output(['xdotool', 'search', '--onlyvisible', '--name', '(Isaac|Rebirth)'], text=True)
             window = windows.splitlines()[-1]
             subprocess.run(['xdotool', 'windowfocus', '--sync', window], check=True)
@@ -293,7 +302,9 @@ def main():
                     'output': str(out), 'publicLogState': current_log, 'gateBlocked': True,
                     'scope': 'reference debug data only; simulation ticks and full internal state not established'}
                 observed = checked_observation(observer, proc.pid, context)
-                report['debugObservations'].append({'context': context, 'observation': observed})
+                observation = {'context': context, 'observation': observed}
+                report['debugObservations'].append(observation)
+                record('debugObservation', observation)
             if args.observe_every_step:
                 observe_current('bootstrap-'+str(current['presentedFrame']))
             for action in tape:
@@ -315,6 +326,7 @@ def main():
                         'scope': 'native process CPU / controller wall time during released presentations; excludes checkpoint waits, includes observer cost'}
                     if current['presentedFrame'] != before + action['frames']:
                         raise RuntimeError('Presentation acknowledgement count diverged from requested tape')
+                    record('advanceComplete', current)
                     if args.observe_every_step:
                         observe_current('step-'+str(current['presentedFrame']))
                 elif kind == 'key':
@@ -324,6 +336,7 @@ def main():
                     subprocess.run(['xdotool', 'keydown' if action['down'] else 'keyup', '--window', window, action['key']], check=True)
                     subprocess.run(['xdotool', 'getwindowfocus'], check=True, stdout=subprocess.DEVNULL)
                     events.append({**action, 'keysym': keysym, 'presentedFrame': current['presentedFrame'], 'virtualElapsedNs': current['virtualElapsedNs']})
+                    record('input', events[-1])
                 elif kind == 'audioHold':
                     hold_started = time.monotonic()
                     time.sleep(action['seconds'])
@@ -332,6 +345,7 @@ def main():
                         'presentedFrame': current['presentedFrame'], 'virtualElapsedNs': current['virtualElapsedNs'],
                         'mainThreadGateBlocked': True, 'scope': 'Real worker/audio-device time; no presentations or synthetic completion events',
                     })
+                    record('audioHold', report['hostAudioHolds'][-1])
                 else:
                     focus_before = x11_focus()
                     if action['label'] in args.focus_handoff:
@@ -339,8 +353,10 @@ def main():
                         connection.sendall(b'step 1\n')
                         current = acknowledgement()
                         report.setdefault('focusHandoffs', []).append({'label': action['label'], 'before': focus_before, 'after': focus_after, 'releasedPresentations': 1, 'presentedFrame': current['presentedFrame']})
+                        record('focusHandoff', report['focusHandoffs'][-1])
                     if action['label'] == 'gameplay-start':
                         report['initialState'] = debug.observed_state((local / 'log.txt').read_text())
+                        record('field', {'name': 'initialState', 'value': report['initialState']})
                     if observer:
                         observe_current(action['label'])
                     geometry = subprocess.check_output(['xdotool', 'getwindowgeometry', '--shell', window], text=True)
@@ -352,6 +368,7 @@ def main():
                     frames.append({'label': action['label'], 'path': str(path), 'width': int(values['WIDTH']), 'height': int(values['HEIGHT']),
                                    'presentedFrame': current['presentedFrame'], 'virtualElapsedNs': current['virtualElapsedNs'],
                                    'simulationTick': None, 'gateBlocked': True, 'x11Focus': x11_focus(), 'targetWindow': int(window)})
+                    record('capture', frames[-1])
             report['observedState'] = debug.observed_state((local / 'log.txt').read_text()) if (local / 'log.txt').exists() else {}
             if args.ordinary_run:
                 observed = report['observedState']
@@ -389,8 +406,15 @@ def main():
         if (local / 'log.txt').exists():
             (out / 'original.log').write_text((local / 'log.txt').read_text())
         report['controllerElapsedMs'] = (time.monotonic() - started) * 1000
-        (out / 'manifest.json').write_text(json.dumps(report, indent=2) + '\n')
-    print(json.dumps({'status': report['status'], 'manifest': str(out / 'manifest.json'), 'failures': report['failures']}))
+        manifest = out / ('manifest.json.gz' if args.archive_evidence else 'manifest.json')
+        if progress:
+            record('finish', {key: value for key, value in report.items()
+                              if key not in ('debugObservations', 'presentations', 'inputs', 'frames', 'tape')})
+            progress.close()
+            evidence.write_manifest(manifest, report)
+        else:
+            manifest.write_text(json.dumps(report, indent=2) + '\n')
+    print(json.dumps({'status': report['status'], 'manifest': str(manifest), 'failures': report['failures']}))
     return 0 if report['status'] == 'pass' else 1
 
 if __name__ == '__main__':
