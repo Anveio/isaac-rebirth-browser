@@ -12,6 +12,7 @@ use rebirth_cleanroom::input::{self, PUBLIC_KEYS};
 use rebirth_cleanroom::motion::WorldVector;
 use rebirth_cleanroom::music::BackendEvent;
 use rebirth_cleanroom::run_admission::MAX_SAFE_TIMESTAMP_MS;
+use rebirth_cleanroom::traversal;
 use rebirth_cleanroom::{Command, PausePhase, Screen, State, MAX_COMMAND_TICKS};
 use std::cmp::Reverse;
 use std::collections::{BinaryHeap, VecDeque};
@@ -49,8 +50,20 @@ pub struct Driver {
     /// Browser frames tick once with `Date.now()`; this case's host clock.
     host_clock: Option<u64>,
     host_frames: bool,
-    /// Head for the boss room through the floor's door graph.
-    boss_seeker: bool,
+    /// Where this case travels through the floor's door graph, if anywhere.
+    travel: Option<Travel>,
+    /// The engine's doorway admission per descriptor, for the floor it was
+    /// computed on (boss and miniboss checks decode authored room assets).
+    admitted: Option<((u32, u32), Vec<bool>)>,
+}
+
+#[derive(Clone, Copy, PartialEq)]
+enum Travel {
+    /// The boss room.
+    Boss,
+    /// The nearest unvisited room the player may enter: special, large and
+    /// miniboss rooms are otherwise never on a route.
+    Explore,
 }
 
 #[derive(Clone, Copy)]
@@ -106,7 +119,12 @@ impl Driver {
             goal: None,
             host_clock: None,
             host_frames: e.chance(3, 4),
-            boss_seeker: e.chance(1, 3),
+            travel: match e.below(3) {
+                0 => Some(Travel::Boss),
+                1 => Some(Travel::Explore),
+                _ => None,
+            },
+            admitted: None,
         }
     }
 
@@ -301,8 +319,8 @@ impl Driver {
             .filter(|npc| !npc.removed && npc.hp > 0.0)
             .map(|npc| npc.position)
             .min_by(|a, b| distance(player, *a).total_cmp(&distance(player, *b)));
-        // Boss seekers spend most macros travelling.
-        let choice = if self.boss_seeker && e.chance(1, 2) {
+        // Travellers spend most macros travelling.
+        let choice = if self.travel.is_some() && e.chance(1, 2) {
             5 + e.below(40)
         } else {
             e.below(100)
@@ -380,7 +398,7 @@ impl Driver {
     }
 
     /// A reachable consumable pickup, an open door or a random point.
-    fn target(&self, state: &State, player: WorldVector, e: &mut Entropy) -> WorldVector {
+    fn target(&mut self, state: &State, player: WorldVector, e: &mut Entropy) -> WorldVector {
         let pickups: Vec<WorldVector> = state
             .room
             .pickups
@@ -407,8 +425,8 @@ impl Driver {
             .filter(|door| door.state == "Opened")
             .map(|door| door.world_position)
             .collect();
-        if self.boss_seeker && e.chance(3, 4) {
-            if let Some(door) = toward_boss(state) {
+        if let Some(travel) = self.travel.filter(|_| e.chance(3, 4)) {
+            if let Some(door) = self.toward(state, travel) {
                 return door;
             }
         }
@@ -554,39 +572,72 @@ fn seed_text(state: &State, e: &mut Entropy) -> String {
     }
 }
 
-/// The open door on a shortest path to the boss room through rooms the
-/// traversal leaf admits (ordinary 13x7 types, tall normal rooms, 13x7 boss).
-fn toward_boss(state: &State) -> Option<WorldVector> {
-    let descriptors = &state.floor.descriptors;
-    let traversable = |room: usize| {
-        let template = &descriptors[room].template;
-        match (template.room_type, template.width, template.height) {
-            (1 | 4 | 7 | 8 | 10 | 12 | 5, 13, 7) | (1, 13, 14) => true,
-            _ => room == state.current_room,
+impl Driver {
+    /// Doorway admission for every descriptor of the current floor, asked of
+    /// the engine's own rule so routes follow it as rooms are admitted.
+    fn admitted(&mut self, state: &State) -> &[bool] {
+        let floor = (state.floor.stage, state.floor.stage_seed);
+        if self.admitted.as_ref().map(|(key, _)| *key) != Some(floor) {
+            let admitted = state
+                .floor
+                .descriptors
+                .iter()
+                .map(traversal::admits)
+                .collect();
+            self.admitted = Some((floor, admitted));
         }
-    };
-    let boss = descriptors
-        .iter()
-        .position(|descriptor| descriptor.template.room_type == 5)?;
-    let mut previous = vec![usize::MAX; descriptors.len()];
-    previous[boss] = boss;
-    let mut queue = VecDeque::from([boss]);
+        &self.admitted.as_ref().expect("computed above").1
+    }
+
+    /// The open door on a shortest path through admitted rooms to the
+    /// nearest room `travel` seeks; explorers without one head for the boss.
+    fn toward(&mut self, state: &State, travel: Travel) -> Option<WorldVector> {
+        let admitted = self.admitted(state).to_vec();
+        let descriptors = &state.floor.descriptors;
+        let boss = |room: usize| descriptors[room].template.room_type == 5;
+        let unvisited = |room: usize| !state.visited_rooms.contains(&room);
+        let next = match travel {
+            Travel::Boss => first_step(state, &admitted, boss),
+            Travel::Explore => first_step(state, &admitted, unvisited)
+                .or_else(|| first_step(state, &admitted, boss)),
+        }?;
+        state
+            .room
+            .appearance
+            .doors
+            .iter()
+            .find(|door| door.state == "Opened" && door.target_room as usize == next)
+            .map(|door| door.world_position)
+    }
+}
+
+/// The neighbour of the current room that starts a shortest path through
+/// admitted rooms to the nearest room satisfying `goal`.
+fn first_step(state: &State, admitted: &[bool], goal: impl Fn(usize) -> bool) -> Option<usize> {
+    let descriptors = &state.floor.descriptors;
+    let start = state.current_room;
+    let mut first = vec![None; descriptors.len()];
+    let mut seen = vec![false; descriptors.len()];
+    seen[start] = true;
+    let mut queue = VecDeque::from([start]);
     while let Some(room) = queue.pop_front() {
-        for neighbor in descriptors[room].neighbors.iter().flatten() {
-            if previous[*neighbor] == usize::MAX && traversable(*neighbor) {
-                previous[*neighbor] = room;
-                queue.push_back(*neighbor);
+        for neighbor in descriptors[room].neighbors.iter().flatten().copied() {
+            if seen[neighbor] || !admitted[neighbor] {
+                continue;
             }
+            seen[neighbor] = true;
+            first[neighbor] = if room == start {
+                Some(neighbor)
+            } else {
+                first[room]
+            };
+            if goal(neighbor) {
+                return first[neighbor];
+            }
+            queue.push_back(neighbor);
         }
     }
-    let next = previous.get(state.current_room).copied()?;
-    state
-        .room
-        .appearance
-        .doors
-        .iter()
-        .find(|door| door.state == "Opened" && door.target_room as usize == next)
-        .map(|door| door.world_position)
+    None
 }
 
 fn nearest_rock(state: &State, player: WorldVector) -> Option<WorldVector> {
