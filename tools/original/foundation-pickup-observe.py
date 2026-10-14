@@ -196,6 +196,7 @@ def observe(pid, context):
                 item['keyInventory'] = u32(pointer + 0xbcc)
                 item['coinInventory'] = u32(pointer + 0xbd8)
                 item['maxRedHp'] = u32(pointer + 0xbb4)
+                item['controlsEnabled'] = bool(read(pointer + 0x7d4, 1)[0])
                 if (width, height) == (15, 16):
                     item['cameraInputDiagnostics'] = {
                         'vectorDa8': list(struct.unpack('<ff', read(pointer + 0xda8, 8))),

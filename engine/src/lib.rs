@@ -1477,11 +1477,19 @@ impl Game {
                             || pickups.iter().any(|pickup| pickup.id == actor.id)
                     });
                     npcs::admit_room_combat(&mut self.state);
+                }
+                // ChangeRoom5dd260 restores Player+7d4=false after the
+                // admitted Room.Update, before the incoming leg or Scene.
+                self.state.player.controls_enabled = false;
+                if !restoring {
                     traversal::begin_boss_scene(&mut self.state);
                 }
             }
             self.refresh_minimap();
             if self.state.room_transition.is_none() {
+                // State3 dispatches its final Player callback at5dde9e with
+                // controls disabled, then5ddecb enables the persistent field.
+                self.state.player.controls_enabled = true;
                 self.advance_camera(phase);
             }
             return Ok(());
