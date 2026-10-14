@@ -277,7 +277,7 @@ impl Room {
                 side: side.into(),
                 state: if secret {
                     "Hidden"
-                } else if matches!(destination.template.room_type, 2 | 12) {
+                } else if matches!(destination.template.room_type, 2 | 12 | 21) {
                     "KeyClosed"
                 } else {
                     "Opened"
@@ -321,6 +321,10 @@ impl Room {
                 slot: door.slot,
                 open: door.state == "Opened",
                 hidden: door.state == "Hidden",
+                double_lock: floor.descriptors[door.target_room as usize]
+                    .template
+                    .room_type
+                    == 21,
             })
             .collect::<Vec<_>>();
         room.grid = Some(
