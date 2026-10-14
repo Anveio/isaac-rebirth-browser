@@ -1,0 +1,294 @@
+//! The whole engine through its public command boundary (`engine/src/lib.rs`
+//! and every system it dispatches).
+//!
+//! Each case boots a game from entropy-chosen seeds, drives public commands,
+//! and checks state invariants, transition contracts and rejection
+//! semantics after every step. At the end it replays the tape for
+//! determinism, resumes from a serialized midpoint for snapshot completeness,
+//! and drives the C ABI used by the browser.
+mod driver;
+mod invariants;
+
+use crate::entropy::Entropy;
+use crate::harness::{self, Case};
+use crate::props;
+use crate::tape::Tape;
+use rebirth_cleanroom::{Command, Game, State};
+use serde_json::json;
+use std::hash::{DefaultHasher, Hash, Hasher};
+use std::panic::{self, AssertUnwindSafe};
+
+pub fn run(case: &mut Case) {
+    let replay = case.replay.take();
+    let replaying = replay.is_some();
+    let tape = match replay {
+        Some(tape) => tape,
+        None => {
+            let e = &mut *case.entropy;
+            let initial_seed = e.nonzero_u32();
+            let boot_epoch_seed = match e.below(4) {
+                0 => 0,
+                1 => 1_700_000_000 + e.range(0, 200_000_000),
+                _ => e.u32(),
+            };
+            Tape::new(initial_seed, boot_epoch_seed)
+        }
+    };
+    let violations = props::violations();
+    let Some(mut simulation) = Simulation::boot(tape.initial_seed, tape.boot_epoch_seed) else {
+        return;
+    };
+    let mut driver = driver::Driver::new(case.entropy);
+    let budget = if replaying {
+        tape.commands.len()
+    } else {
+        case.steps as usize
+    };
+    for step in 0..budget {
+        props::set_step(step as u64);
+        let command = if replaying {
+            tape.commands[step].clone()
+        } else {
+            driver.next(&simulation.game.state, case.entropy)
+        };
+        if !simulation.step(command, case.entropy) {
+            case.retain(&simulation.tape, "panic");
+            return;
+        }
+    }
+    simulation.finish(case);
+    if props::violations() != violations {
+        case.retain(&simulation.tape, "violation");
+    } else if case.retain_all && !replaying {
+        case.retain(&simulation.tape, "case");
+    }
+}
+
+struct Simulation {
+    game: Game,
+    tape: Tape,
+    /// Ok/Err outcome and state digest after each command.
+    trace: Vec<(bool, u64)>,
+}
+
+fn digest(state: &State) -> u64 {
+    let mut hasher = DefaultHasher::new();
+    serde_json::to_vec(state)
+        .expect("state serializes")
+        .hash(&mut hasher);
+    hasher.finish()
+}
+
+fn command_engine(game: &mut Game, command: Command) -> Result<Result<(), String>, String> {
+    panic::catch_unwind(AssertUnwindSafe(|| game.command(command)))
+        .map_err(|_| harness::take_panic())
+}
+
+impl Simulation {
+    fn boot(initial_seed: u32, boot_epoch_seed: u32) -> Option<Self> {
+        let booted =
+            panic::catch_unwind(|| Game::new_with_boot_epoch(initial_seed, boot_epoch_seed));
+        let details = json!({ "initialSeed": initial_seed, "bootEpochSeed": boot_epoch_seed });
+        match booted {
+            Ok(Ok(game)) => {
+                props::always!(true, "game: every nonzero seed and epoch boots to Title");
+                props::always!(
+                    game.state.screen == rebirth_cleanroom::Screen::Title
+                        && game.state.initial_seed == initial_seed
+                        && game.state.boot_epoch_seed == boot_epoch_seed,
+                    "game: boot publishes the first Title with its seeds",
+                    details
+                );
+                let again = Game::new_with_boot_epoch(initial_seed, boot_epoch_seed);
+                props::always!(
+                    again.as_ref().ok() == Some(&game),
+                    "game: boot is a pure function of its seeds"
+                );
+                invariants::state(&game.state);
+                Some(Self {
+                    game,
+                    tape: Tape::new(initial_seed, boot_epoch_seed),
+                    trace: Vec::new(),
+                })
+            }
+            Ok(Err(error)) => {
+                props::always!(
+                    false,
+                    "game: every nonzero seed and epoch boots to Title",
+                    json!({ "initialSeed": initial_seed, "bootEpochSeed": boot_epoch_seed, "error": error })
+                );
+                None
+            }
+            Err(_) => {
+                props::unreachable!(
+                    "game: public commands never panic the engine",
+                    json!({ "initialSeed": initial_seed, "panic": harness::take_panic(), "command": "boot" })
+                );
+                None
+            }
+        }
+    }
+
+    /// Applies one command with every per-step check; false ends the case.
+    fn step(&mut self, command: Command, e: &mut Entropy) -> bool {
+        let before = self.game.clone();
+        self.tape.commands.push(command.clone());
+        let result = match command_engine(&mut self.game, command.clone()) {
+            Ok(result) => result,
+            Err(panic) => {
+                props::unreachable!(
+                    "game: public commands never panic the engine",
+                    json!({ "command": command, "panic": panic, "screen": before.state.screen })
+                );
+                return false;
+            }
+        };
+        invariants::outcome(&before.state, &command, &result);
+        match &result {
+            Ok(()) => invariants::transition(&before.state, &command, &self.game.state),
+            Err(_) => props::always!(
+                self.game == before,
+                "game: a rejected command leaves the whole game unchanged",
+                json!({ "command": command })
+            ),
+        }
+        invariants::state(&self.game.state);
+        if e.chance(1, 50) {
+            self.snapshot_round_trip();
+        }
+        self.trace.push((result.is_ok(), digest(&self.game.state)));
+        true
+    }
+
+    /// The browser reads states only through JSON; it must be lossless and
+    /// pass the engine's own deserialization validators.
+    fn snapshot_round_trip(&self) {
+        let text = self.game.json();
+        let restored = serde_json::from_str::<State>(&text);
+        let stable = restored
+            .as_ref()
+            .ok()
+            .map(|state| serde_json::to_string(state).ok() == Some(text.clone()));
+        props::always!(
+            restored.as_ref().ok() == Some(&self.game.state) && stable == Some(true),
+            "game: published states round-trip losslessly through their validators",
+            json!({ "error": restored.err().map(|error| error.to_string()) })
+        );
+        let game_text = serde_json::to_string(&self.game).expect("game serializes");
+        let restored = serde_json::from_str::<Game>(&game_text);
+        props::always!(
+            restored.as_ref().ok() == Some(&self.game),
+            "game: complete games round-trip losslessly through their validators",
+            json!({ "error": restored.err().map(|error| error.to_string()) })
+        );
+    }
+
+    fn finish(&mut self, case: &mut Case) {
+        self.snapshot_round_trip();
+        self.replay_matches();
+        self.continuation_matches(case.entropy);
+        self.abi_matches();
+        if self.game.state.screen == rebirth_cleanroom::Screen::Playing {
+            props::sometimes!(
+                self.game.state.run_tick > 3_000,
+                "game: a run lasts more than 3,000 ticks"
+            );
+        }
+    }
+
+    /// The same tape on a fresh boot reproduces every outcome and state.
+    fn replay_matches(&self) {
+        let Ok(mut game) =
+            Game::new_with_boot_epoch(self.tape.initial_seed, self.tape.boot_epoch_seed)
+        else {
+            return;
+        };
+        let mut divergence = None;
+        for (index, command) in self.tape.commands.iter().enumerate() {
+            let outcome = matches!(command_engine(&mut game, command.clone()), Ok(Ok(())));
+            if (outcome, digest(&game.state)) != self.trace[index] {
+                divergence = Some(index);
+                break;
+            }
+        }
+        let equal = divergence.is_none() && game == self.game;
+        props::always!(
+            equal,
+            "game: replaying a tape reproduces every outcome and state",
+            json!({ "firstDivergence": divergence, "commands": self.tape.commands.len() })
+        );
+    }
+
+    /// Resuming from a serialized midpoint reaches the same final game, so
+    /// no simulation state lives outside the serialized game.
+    fn continuation_matches(&self, e: &mut Entropy) {
+        let commands = &self.tape.commands;
+        let Ok(mut game) =
+            Game::new_with_boot_epoch(self.tape.initial_seed, self.tape.boot_epoch_seed)
+        else {
+            return;
+        };
+        let midpoint = if commands.is_empty() {
+            0
+        } else {
+            e.index(commands.len() + 1)
+        };
+        for command in &commands[..midpoint] {
+            let _ = command_engine(&mut game, command.clone());
+        }
+        let saved = serde_json::to_string(&game).expect("game serializes");
+        let Ok(mut resumed) = serde_json::from_str::<Game>(&saved) else {
+            props::always!(
+                false,
+                "game: a game resumed from its serialized midpoint reaches the same end",
+                json!({ "midpoint": midpoint, "error": "midpoint does not deserialize" })
+            );
+            return;
+        };
+        for command in &commands[midpoint..] {
+            let _ = command_engine(&mut resumed, command.clone());
+        }
+        let equal = resumed == self.game;
+        props::always!(
+            equal,
+            "game: a game resumed from its serialized midpoint reaches the same end",
+            json!({ "midpoint": midpoint, "commands": commands.len() })
+        );
+    }
+
+    /// The exported C ABI (what the WASM bridge calls) agrees with direct
+    /// dispatch on every outcome and on the final published snapshot.
+    fn abi_matches(&self) {
+        use rebirth_cleanroom as abi;
+        if abi::reset(self.tape.initial_seed, self.tape.boot_epoch_seed) != 0 {
+            props::always!(false, "game: the C ABI agrees with direct dispatch");
+            return;
+        }
+        let mut divergence = None;
+        for (index, command) in self.tape.commands.iter().enumerate() {
+            let bytes = serde_json::to_vec(command).expect("command serializes");
+            let pointer = abi::request_ptr(bytes.len());
+            if pointer.is_null() {
+                divergence = Some((index, "request allocation"));
+                break;
+            }
+            // SAFETY: request_ptr returned a buffer of exactly bytes.len().
+            unsafe { std::ptr::copy_nonoverlapping(bytes.as_ptr(), pointer, bytes.len()) };
+            let failed = abi::command() != 0;
+            let error_published = abi::error_len() > 0;
+            if failed == self.trace[index].0 || failed != error_published {
+                divergence = Some((index, "outcome"));
+                break;
+            }
+        }
+        let pointer = abi::snapshot_ptr();
+        // SAFETY: snapshot_ptr/snapshot_len describe the thread-local buffer.
+        let snapshot = unsafe { std::slice::from_raw_parts(pointer, abi::snapshot_len()) };
+        let equal = divergence.is_none() && snapshot == self.game.json().as_bytes();
+        props::always!(
+            equal,
+            "game: the C ABI agrees with direct dispatch",
+            json!({ "divergence": divergence })
+        );
+    }
+}

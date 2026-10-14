@@ -7,6 +7,7 @@
 mod entropy;
 mod harness;
 mod props;
+mod tape;
 mod units;
 
 use entropy::Mode;
@@ -17,8 +18,9 @@ use std::path::PathBuf;
 use std::process::ExitCode;
 
 const USAGE: &str = "usage: rebirth-dst [--units all|a,b] [--cases N] [--steps N] [--seed U64]
-                   [--case-seed U64] [--entropy seeded|antithesis] [--report PATH]
-                   [--allow-unmet] [--list] [--setup-complete]";
+                   [--case-seed U64] [--entropy seeded|antithesis] [--tapes DIR]
+                   [--replay TAPE.json] [--corpus DIR] [--report PATH] [--allow-unmet] [--retain-all] [--list]
+                   [--setup-complete]";
 
 struct Options {
     units: Vec<String>,
@@ -27,10 +29,14 @@ struct Options {
     seed: Option<u64>,
     case_seed: Option<u64>,
     mode: Mode,
+    tapes: Option<PathBuf>,
+    replay: Option<PathBuf>,
+    corpus: Option<PathBuf>,
     report: Option<PathBuf>,
     allow_unmet: bool,
     list: bool,
     setup_complete: bool,
+    retain_all: bool,
 }
 
 fn parse() -> Result<Options, String> {
@@ -41,10 +47,14 @@ fn parse() -> Result<Options, String> {
         seed: None,
         case_seed: None,
         mode: Mode::Seeded,
+        tapes: None,
+        replay: None,
+        corpus: None,
         report: None,
         allow_unmet: false,
         list: false,
         setup_complete: false,
+        retain_all: false,
     };
     let mut arguments = std::env::args().skip(1);
     while let Some(flag) = arguments.next() {
@@ -66,10 +76,14 @@ fn parse() -> Result<Options, String> {
                     other => return Err(format!("unknown entropy source {other}")),
                 }
             }
+            "--tapes" => options.tapes = Some(value()?.into()),
+            "--replay" => options.replay = Some(value()?.into()),
+            "--corpus" => options.corpus = Some(value()?.into()),
             "--report" => options.report = Some(value()?.into()),
             "--allow-unmet" => options.allow_unmet = true,
             "--list" => options.list = true,
             "--setup-complete" => options.setup_complete = true,
+            "--retain-all" => options.retain_all = true,
             "--help" | "-h" => return Err(USAGE.into()),
             other => return Err(format!("unknown argument {other}\n{USAGE}")),
         }
@@ -83,6 +97,39 @@ fn parse_seed(text: &str) -> Result<u64, String> {
         None => text.parse(),
     };
     parsed.map_err(|_| format!("invalid seed {text}"))
+}
+
+/// `--replay` names one tape; `--corpus` adds every tape in a directory
+/// (regression and coverage tapes), replayed after the generated game cases.
+fn load_replays(options: &Options) -> Result<Vec<(String, tape::Tape)>, String> {
+    let mut paths = Vec::new();
+    if let Some(path) = &options.replay {
+        paths.push(path.clone());
+    }
+    if let Some(directory) = &options.corpus {
+        let mut entries: Vec<PathBuf> = std::fs::read_dir(directory)
+            .map_err(|error| format!("{}: {error}", directory.display()))?
+            .filter_map(|entry| entry.ok().map(|entry| entry.path()))
+            .filter(|path| {
+                path.extension()
+                    .is_some_and(|extension| extension == "json")
+            })
+            .collect();
+        entries.sort();
+        paths.extend(entries);
+    }
+    paths
+        .into_iter()
+        .map(|path| {
+            let name = path
+                .file_stem()
+                .map(|stem| stem.to_string_lossy().into_owned())
+                .unwrap_or_default();
+            tape::Tape::read(&path)
+                .map(|tape| (name, tape))
+                .map_err(|error| format!("{}: {error}", path.display()))
+        })
+        .collect()
 }
 
 fn os_seed() -> u64 {
@@ -117,7 +164,9 @@ fn main() -> ExitCode {
     }
     harness::install_panic_hook();
     let mut selected = Vec::new();
-    let names: Vec<&str> = if options.units.iter().any(|unit| unit == "all") {
+    let names: Vec<&str> = if options.replay.is_some() {
+        vec!["game"]
+    } else if options.units.iter().any(|unit| unit == "all") {
         units::UNITS.iter().map(|unit| unit.name).collect()
     } else {
         options.units.iter().map(String::as_str).collect()
@@ -131,17 +180,30 @@ fn main() -> ExitCode {
             }
         }
     }
+    let replays = match load_replays(&options) {
+        Ok(replays) => replays,
+        Err(error) => {
+            eprintln!("cannot read replay tapes: {error}");
+            return ExitCode::from(2);
+        }
+    };
     let master_seed = options.seed.unwrap_or_else(os_seed);
+    let replaying = options.replay.is_some();
     let plan = Plan {
         mode: options.mode,
         master_seed,
         case_seed: options.case_seed,
-        cases: if options.case_seed.is_some() {
+        cases: if replaying {
+            0
+        } else if options.case_seed.is_some() {
             1
         } else {
             options.cases
         },
         steps: options.steps,
+        tapes: options.tapes.clone(),
+        replays,
+        retain_all: options.retain_all,
     };
     eprintln!(
         "rebirth-dst: entropy={} seed=0x{master_seed:016x} units={} cases={} steps={}",
@@ -162,8 +224,10 @@ fn main() -> ExitCode {
         .count();
     // Antithesis judges must-hit properties across its whole exploration, so
     // one driver invocation never fails merely for leaving some unmet.
-    let allow_unmet =
-        options.allow_unmet || options.case_seed.is_some() || plan.mode == Mode::Antithesis;
+    let allow_unmet = options.allow_unmet
+        || replaying
+        || options.case_seed.is_some()
+        || plan.mode == Mode::Antithesis;
     let passed = failed == 0 && (allow_unmet || unmet == 0);
     for result in &results {
         if result.status != Status::Passed {
@@ -195,6 +259,7 @@ fn main() -> ExitCode {
             "steps": plan.steps,
             "allowUnmet": allow_unmet,
             "cases": records,
+            "retainedTapes": harness::retained_tapes(),
             "properties": results,
         });
         if let Some(parent) = path.parent() {

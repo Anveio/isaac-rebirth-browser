@@ -16,8 +16,8 @@ serde_json = { version = "1", features = ["float_roundtrip"] }
 
 [profile.release]
 opt-level = 3
-# Engine panics are findings, not process aborts: unwind so each case's
-# details are reported. Debug semantics (overflow checks and debug
+# Engine panics are findings, not process aborts: unwind so each case's tape
+# and details are retained. Debug semantics (overflow checks and debug
 # assertions) apply to the engine under simulation.
 panic = "unwind"
 overflow-checks = true

@@ -1,9 +1,11 @@
 //! Case scheduling, panic capture and the shared harness properties.
 use crate::entropy::{splitmix64, Entropy, Mode};
 use crate::props::{self, Context};
+use crate::tape::Tape;
 use serde_json::json;
 use std::cell::RefCell;
 use std::panic::{self, AssertUnwindSafe};
+use std::path::PathBuf;
 
 /// One logical engine unit under simulation.
 pub struct Unit {
@@ -12,11 +14,43 @@ pub struct Unit {
     pub run: fn(&mut Case),
 }
 
-/// What a unit's case receives: its entropy and budget.
+/// What a unit's case receives: its entropy, budget and replay inputs.
 pub struct Case<'a> {
     pub entropy: &'a mut Entropy,
-    /// Step budget; each unit scales its iterations from it.
+    /// Game-command budget for stateful units; kernels scale from it.
     pub steps: u32,
+    pub tapes: Option<PathBuf>,
+    /// Replays this tape instead of generating commands (game unit only).
+    pub replay: Option<Tape>,
+    pub label: String,
+    /// Retain every game tape (corpus harvesting), not only violating ones.
+    pub retain_all: bool,
+}
+
+impl Case<'_> {
+    /// Retains `tape` under the configured directory, if any.
+    pub fn retain(&self, tape: &Tape, suffix: &str) -> Option<String> {
+        let directory = self.tapes.as_ref()?;
+        match tape.retain(directory, &format!("{}-{suffix}", self.label)) {
+            Ok(path) => {
+                let path = path.display().to_string();
+                eprintln!("retained tape: {path}");
+                RETAINED.lock().expect("retained tapes").push(path.clone());
+                props::set_tape(Some(path.clone()));
+                Some(path)
+            }
+            Err(error) => {
+                eprintln!("could not retain tape: {error}");
+                None
+            }
+        }
+    }
+}
+
+static RETAINED: std::sync::Mutex<Vec<String>> = std::sync::Mutex::new(Vec::new());
+
+pub fn retained_tapes() -> Vec<String> {
+    RETAINED.lock().expect("retained tapes").clone()
 }
 
 thread_local! {
@@ -62,9 +96,13 @@ pub struct Plan {
     pub mode: Mode,
     pub master_seed: u64,
     pub case_seed: Option<u64>,
-    /// Entropy-driven cases per unit.
+    /// Entropy-driven cases per unit; zero when only replaying.
     pub cases: u64,
     pub steps: u32,
+    pub tapes: Option<PathBuf>,
+    /// Named tapes the game unit replays after its generated cases.
+    pub replays: Vec<(String, Tape)>,
+    pub retain_all: bool,
 }
 
 #[derive(serde::Serialize)]
@@ -73,6 +111,8 @@ pub struct CaseRecord {
     pub unit: &'static str,
     pub case: u64,
     pub case_seed: Option<u64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub replay: Option<String>,
     pub draws: u64,
 }
 
@@ -85,13 +125,26 @@ pub fn case_seed(master: u64, unit_index: usize, case: u64) -> u64 {
 pub fn run(plan: &Plan, units: &[(usize, &Unit)]) -> Vec<CaseRecord> {
     let mut records = Vec::new();
     for (unit_index, unit) in units {
-        for case in 0..plan.cases {
-            let seed = match plan.mode {
-                Mode::Seeded => Some(
+        let replays: &[(String, Tape)] = if unit.name == "game" {
+            &plan.replays
+        } else {
+            &[]
+        };
+        let generated = (0..plan.cases).map(|case| (case, None));
+        let replayed = replays
+            .iter()
+            .enumerate()
+            .map(|(index, (name, tape))| (plan.cases + index as u64, Some((name, tape))));
+        for (case, replay) in generated.chain(replayed) {
+            // Replays take their commands from the tape; their remaining
+            // choices (e.g. the continuation midpoint) stay seeded.
+            let seed = match (plan.mode, replay) {
+                (Mode::Seeded, None) => Some(
                     plan.case_seed
                         .unwrap_or_else(|| case_seed(plan.master_seed, *unit_index, case)),
                 ),
-                Mode::Antithesis => None,
+                (_, Some(_)) => Some(case_seed(plan.master_seed, *unit_index, case)),
+                (Mode::Antithesis, None) => None,
             };
             let mut entropy = match seed {
                 Some(seed) => Entropy::seeded(seed),
@@ -102,16 +155,28 @@ pub fn run(plan: &Plan, units: &[(usize, &Unit)]) -> Vec<CaseRecord> {
                 entropy: plan.mode.to_string(),
                 case,
                 case_seed: seed,
+                step: 0,
+                tape: replay.map(|(name, _)| name.clone()),
             });
+            let label = match (replay, seed) {
+                (Some((name, _)), _) => format!("{}-replay-{name}", unit.name),
+                (None, Some(seed)) => format!("{}-{seed:016x}", unit.name),
+                (None, None) => format!("{}-antithesis-{case}", unit.name),
+            };
             let mut context = Case {
                 entropy: &mut entropy,
                 steps: plan.steps,
+                tapes: plan.tapes.clone(),
+                replay: replay.map(|(_, tape)| tape.clone()),
+                label,
+                retain_all: plan.retain_all,
             };
             guarded(|| (unit.run)(&mut context));
             records.push(CaseRecord {
                 unit: unit.name,
                 case,
                 case_seed: seed,
+                replay: replay.map(|(name, _)| name.clone()),
                 draws: entropy.draws(),
             });
         }
