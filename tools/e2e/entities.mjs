@@ -7,7 +7,7 @@
 //     type: 12, variant: 0,                 // entities2.xml identity (omit for a room-shape spec)
 //     shape: [26, 7],                       // authored room size to enter (default 13x7)
 //     boss: true,                           // walk a recorded route into the floor's boss room
-//                                           // (tools/original/boss-scenarios.py; contrived entries are bare CODEs)
+//                                           // (tools/original/boss-scenarios.py; contrived entries are CODE or CODE:FIGHT)
 //     about: 'one line for the suite list',
 //     contrived: ['CODE:SLOT'],             // fixed seed + starting-room door slot (optional)
 //     count: 2,                             // OS-random rooms discovered per run
