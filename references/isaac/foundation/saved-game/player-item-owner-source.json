@@ -50,6 +50,24 @@
       "fullFdeBytes": 226,
       "rawSha256": "bc1d18976b4150add89bf3811452860bf47c0d8cc6d41b008947efd6fbef058a",
       "dumpSha256": "8954aad8f35852d3e125febf95c13d663e7a4a86259bd5a2080c8271fc7a1639"
+    },
+    {
+      "address": "0x517580",
+      "fullFdeBytes": 612,
+      "rawSha256": "9e6131f8484b9eb11d172545d86065d8ceb51f9a5742bd6540cce1d7c74451de",
+      "dumpSha256": "defe4f074ea5256194d9c76858b56a18dbc76613c88c446ed8d8cfd5f8b1c055"
+    },
+    {
+      "address": "0x5e4370",
+      "fullFdeBytes": 66,
+      "rawSha256": "160327c0782441eb933fc42df18e7d8fd7351b82ba1619e605ad9469cb5913b2",
+      "dumpSha256": "ef12bd21742fe2c62b3a0182935f8e403b723b71a2cdb0b2744bb43ea3c41de4"
+    },
+    {
+      "address": "0x5e4140",
+      "fullFdeBytes": 210,
+      "rawSha256": "5b109df13f60a512c9a11eef7e9c3ae6f8fd29c1d574c317a18d470d94350b77",
+      "dumpSha256": "7522b6f4a968897f5eed93f33bae123dea50912deaeb4273c2cf16a54c830d5f"
     }
   ],
   "copyOrder": "Game54f230 copies ItemPool/Room/Level before queuedPlayer grant52ee40 and Manager5bf400\u2192Player518350. Runtime capture follows that real existing Level.Init Save seam. No public synthetic Save/Restore action added.",
@@ -93,7 +111,7 @@
   "restore": "Existing constructed Player item owner receives346 saved counts,450 current RNG states through real shift35=[5,9,7] initialization withno Next draws, then saved active/reserve fields. The restore store helper is available for later actual Saved dispatch; it is not called during NewRun and has no current public execution claim.",
   "normalization": {
     "native": "518350 first capturesBF5, then518120 calls5180d0/5e3f80 to remove temporary records and request their config cache flags; invokes511f10 ifrequested; removesactive/pill costumes andclearsD80/D84/BF5 before remaining stores.",
-    "supported": "Current real save callback accepts only empty temporary records, active0/45 andneutralD80/D84, where the mapped normalization stores preserve current neutral owners. Nonneutral/unmapped owners fail explicitly. No missingBF5/presentation/costume state is initialized from a guessed default."
+    "supported": "Real queued-grant flush first; neutral active0/45 accepted. Typed temporary35/45 records are erased through the proven costume-only517580 branch, independent of count/cooldown; their pinned kind3/cache0 configs introduce no fresh RNG draw. Other temporary/active/presentation owners fail explicitly before deletion. Existing requested cache/familiar work is dispatched at5180d0 seam. No missingBF5/appearance/update-byte owner is guessed."
   },
   "requiredGate": {
     "suite": "test:e2e:saved-game",
@@ -117,6 +135,10 @@
     {
       "sha256": "645d164227b46fadc34aa833ab4e357eb3d1663e0536a456ed614d9ca9c48361",
       "name": "continue-research/owned-restore-fields-player/save-normalization-extraction-receipt.json"
+    },
+    {
+      "sha256": "5a2038db6599e134fd7f2650dcedf8ab5911e5f27ee55ff3d096c84891f73a86",
+      "name": "continue-research/owned-restore-fields-player/temporary-clear-extraction-receipt.json"
     }
   ]
 }
