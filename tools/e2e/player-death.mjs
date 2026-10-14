@@ -38,11 +38,15 @@ function compare(source,actual,gameplay){
 const report=await runPairedGate({output:resolve(output,'paired'),selected:[],randomCount:0,replayCases:paths,
  originalObserver:'tools/original/player-death-observe.py',stateComparator:compare,additionalSources:sources});
 const coverage=scenarios.cases.map((c,n)=>{
+ try {
  const native=JSON.parse(readFileSync(resolve(report.cases[n].directory,'original/manifest.json'),'utf8'));
  const settled=native.debugObservations.find(r=>r.context.label==='death-settled')?.observation.death;
  const candidate=JSON.parse(readFileSync(resolve(report.cases[n].directory,'browser/manifest.json'),'utf8')).frames.find(r=>r.label==='death-settled')?.state;
  const complete=settled?.dead===true&&settled.popupState===2&&candidate?.player.dead===true&&candidate.playerDeath.gameOver?.state===2;
  return {id:c.scenario.id,required:c.deathRequired,actualSource:settled,executedInBoth:complete,status:!c.deathRequired||complete?'pass':'fail'};
+ } catch (error) {
+  return {id:c.scenario.id,required:c.deathRequired,executedInBoth:false,status:'fail',error:String(error)};
+ }
 });
 const stable=JSON.stringify(hashes())===JSON.stringify(before);
 const result={schema:1,status:report.status==='pass'&&stable&&coverage.every(c=>c.status==='pass')?'pass':'fail',pairedStatus:report.status,sourcesStable:stable,sources:before,coverage,scope:'Normal Isaac death/57-frame authored clip, GameOver freeze and public deferred popup actions. Contrived death coverage and all source/player/menu/audio fields are blocking; full pixels remain diagnostics. Every unfiltered OS outcome and original/backend/input evidence retained; complete revival/diary/other-character acceptance pending.'};
