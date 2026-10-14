@@ -46,6 +46,12 @@ for (const action of replay.pairedTape) {
   check(diagnostics,label,'game.fullUpdates',source.nativePhase.fullGameUpdates,actual.gameUpdateCount);
   check(checks,label,'bounds.topLeft',source.room.boundsTopLeft,[60,140]);
   check(checks,label,'bounds.bottomRight',source.room.boundsBottomRight,[60+(source.room.gridWidth-2)*40,140+(source.room.gridHeight-2)*40]);
+  assert.ok(Array.isArray(source.pathCosts) && Array.isArray(actual.room.pathCosts));
+  assert.equal(source.pathCosts.length, 448);
+  assert.equal(actual.room.pathCosts.length, 448);
+  assert.ok(source.pathCosts.every(Number.isInteger));
+  assert.ok(actual.room.pathCosts.every(Number.isInteger));
+  check(checks,label,'room.pathCosts',source.pathCosts,actual.room.pathCosts);
   for (const native of natives) {
     const actor=port.find(actor=>actor.spawnSeed===native.spawnSeed); if(!actor)continue;
     for(const [field,expected,observed]of [

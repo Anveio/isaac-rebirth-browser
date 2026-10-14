@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "scope": "Separate necessary consumer correction to PR99. Only actual ordinary Worm mode3 CheckLine receives the sole signed RoomCosts owner; other modes and geometry/sample operations stay unchanged. No broader Leech LOS inference, new original capture or production/live acceptance.",
+  "binarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "sourcePins": {
+    "checkLine": {
+      "path": ".cache/coordination/combat/roundworm-research/function-5c74a0.txt",
+      "sha256": "a3671842a830dbdab1e167d568b95ff47b0acaa559d33b57ea6d082ca0dc5e6b"
+    },
+    "wormCaller": {
+      "path": ".cache/coordination/combat/roundworm-research/function-4b4f60.txt",
+      "sha256": "9c7572e2348a95beaaaaaad4b9ea15ec4231ed7c3893ae66f96f609974a2de94"
+    }
+  },
+  "caller": "Worm4b55e4 setsr8threshold0,4b55e7 setsmode3 and4b55f6 invokes5c74a0 using actualNPC.P and predictedPlayer.P+V*10.",
+  "costRead": "5c76df compares signedr13 threshold with actual Room+e98[wordindex];5c76e7 setl adds1 onlywhen cost>threshold. Legacy authored selector is not read.",
+  "budget": "5c77b0 compares the repeated four-corner sample count against8,5c77b4setle returns <=8. Collision1 bypasses count; collision0 samples costs, otherclassesreject.",
+  "reviewedDefect": "PR99 moved destruction/aging to actualRoomCosts; legacyselectors therefore retained rawRock1000 orFireadapter900 after actual900 marker aged0. Readingselectors in the mode3budget made the line remain blocked after actualcostcleared.",
+  "runtime": "Grid.projectile_line_clear takes actualRoomCosts reference and counts signedcost>0, called through existingRoundworm.World.path_costs. No sampled offset/distance/vector/step/geometry or existing assertion changes.",
+  "runtimeCommit": "bd5422ae29a83608fd12ad4cfef5cc55da1760bf",
+  "preservedHeads": [
+    "de7a73681ba2dbe90003c7f9709292fa1aae431d",
+    "a609851beccd12e3912bd57213b30df8b4ceaea6",
+    "3314913f5f5e2cf12c5087b6bf06c292aba27723",
+    "7730a1bae3c7ca94c3756160c7cb96e11c0c39f1"
+  ],
+  "requiredE2e": "All448 actual source/port signedcostwords remain required; T1 destroy/aging/shoot and every retainedWormcase/failedbody stays in current real original/browser gate. No unit tests added.",
+  "validation": {
+    "formatting": "pass",
+    "diff": "pass",
+    "rust": "pass; exact80b own-target all-target check/jobs1/incremental0,7.64s",
+    "productionBuild": "not run",
+    "freshOriginalBrowser": "not run",
+    "strictClippy": "pass; own-target/all-targets/-D warnings/jobs1/incremental0,8.17s",
+    "checkedHead": "80b0107a9cbd7d3e7dc950eba3b54c3b7a835601",
+    "receiptSha256": "e6b3f7e3165520b40ad05ce435fb10d1b2d634737997f252ac5b48d51762f4d3",
+    "codeHashes": {
+      "engine/src/grid.rs": "6811df5a4b4aac9f6e17b3e85f26b25295fcee3e09a49985119b808393dbe4c3",
+      "engine/src/roundworm.rs": "3f94e1b250d4146dd0f69bc5ed3a8af9f7a760ff232bed75df532eaa021c9e63"
+    }
+  }
+}

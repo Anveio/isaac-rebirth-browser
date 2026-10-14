@@ -7,6 +7,7 @@
 use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
 use std::collections::{BTreeMap, BTreeSet};
+pub mod active_items;
 pub mod actors;
 pub mod audio;
 pub mod bombs;
@@ -35,9 +36,11 @@ pub mod music;
 pub mod npcs;
 pub mod phase;
 pub mod pickups;
+pub mod player_animation;
 pub mod player_items;
 pub mod player_stats;
 pub mod projectiles;
+pub mod public_actions;
 pub mod rock_blast;
 mod room;
 pub mod room_assets;
@@ -81,6 +84,10 @@ pub enum Direction {
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Player {
+    /// Entity+31d; distinct from the persistent Player+7d4 controls field.
+    pub visible: bool,
+    /// Source Player+7d8, separate from pickup collection delay.
+    pub input_cooldown: i32,
     pub x: f64,
     pub y: f64,
     pub vx: f64,
@@ -105,6 +112,8 @@ pub struct Player {
 impl Player {
     fn starting() -> Self {
         Self {
+            visible: true,
+            input_cooldown: 0,
             x: 240.0,
             y: 214.0,
             vx: 0.0,
@@ -344,6 +353,8 @@ pub struct State {
     pub run_seeds: Option<seed::RunSeeds>,
     pub item_pools: Option<items::ItemPools>,
     pub player_items: Option<player_items::PlayerItems>,
+    pub player_animation: player_animation::PlayerAnimation,
+    pub public_actions: public_actions::PublicActions,
     #[serde(default)]
     pub player_stats: player_stats::PlayerStats,
     pub stage: u32,
@@ -483,6 +494,8 @@ impl Game {
                 run_seeds: None,
                 item_pools: None,
                 player_items: None,
+                player_animation: player_animation::PlayerAnimation::default(),
+                public_actions: public_actions::PublicActions::default(),
                 player_stats: player_stats::PlayerStats::default(),
                 stage: 1,
                 stage_seed: seed::stage1_seed(initial_seed),
@@ -599,6 +612,8 @@ impl Game {
                         | "KeyS"
                         | "KeyD"
                         | "KeyE"
+                        | "Space"
+                        | "KeyQ"
                 ) {
                     return Err(format!("unsupported key code: {code}"));
                 }
@@ -1034,6 +1049,7 @@ impl Game {
         };
         self.state.pause_menu = PauseMenu::hidden();
         self.state.player = Player::starting();
+        self.state.player_animation = player_animation::PlayerAnimation::default();
         // Source 58bea7 constructs every descriptor's padded grid seed pairs.
         // floor::generate_basement owns the separate primary xorshift advance.
         self.boot_level_grid = self.state.boot_lifecycle.initialize_level_grid();
@@ -1328,6 +1344,9 @@ impl Game {
         }
         let audio_counter = self.state.system_clock.system_counter;
         let phase = self.state.system_clock.advance()?;
+        if phase != phase::Phase::Skipped {
+            self.state.public_actions.advance(&self.state.pressed);
+        }
         if phase != phase::Phase::Skipped {
             self.state.music.flush_pending();
         }
@@ -1830,6 +1849,12 @@ impl Game {
                         .grid
                         .as_mut()
                         .expect("admitted Fire has grid"),
+                    path_costs: self
+                        .state
+                        .room
+                        .path_costs
+                        .as_mut()
+                        .ok_or("Fire requires source Room.Init path costs")?,
                     audio: &mut self.state.audio,
                     system_counter: self.state.system_clock.system_counter.wrapping_sub(1),
                 },
@@ -1950,6 +1975,12 @@ impl Game {
                 player_velocity,
                 occupied: &occupied,
                 grid: &grid,
+                path_costs: self
+                    .state
+                    .room
+                    .path_costs
+                    .as_ref()
+                    .ok_or("Round Worm requires source Room.Init path costs")?,
                 audio: &mut self.state.audio,
                 system_counter: self.state.system_clock.system_counter.wrapping_sub(1),
             },
@@ -1979,7 +2010,21 @@ impl Game {
         bomb_triggered: bool,
         controls_enabled: bool,
     ) -> Result<(), String> {
-        let controls_enabled = controls_enabled && self.state.player.controls_enabled;
+        if phase == phase::Phase::Update {
+            self.state.player_animation.advance_full();
+            if self
+                .state
+                .player_animation
+                .is_finished(Some(player_animation::Clip::UseItem))
+            {
+                // Full Player presentation resumes its ordinary main owner
+                // after the actual UseItem clip completes.
+                self.state.player_animation.current = None;
+            }
+        }
+        let controls_enabled = controls_enabled
+            && self.state.player.controls_enabled
+            && self.state.player.input_cooldown <= 0;
         player_items::advance_presentation(&mut self.state, phase);
         let dx = if controls_enabled {
             i32::from(self.held("KeyD")) - i32::from(self.held("KeyA"))
@@ -2005,6 +2050,7 @@ impl Game {
         if controls_enabled && bomb_triggered && bomb_admitted {
             bombs::place(&mut self.state, phase)?;
         }
+        active_items::advance(&mut self.state, controls_enabled)?;
         let player = &mut self.state.player;
         if dx != 0 || dy != 0 {
             player.body_facing = if dx < 0 {
@@ -2027,7 +2073,7 @@ impl Game {
                 player.facing = Direction::Down;
             }
         }
-        let aim = if !controls_enabled {
+        let aim = if !controls_enabled || self.state.player_animation.guard {
             None
         } else if self.held("ArrowLeft") {
             Some(Direction::Left)
@@ -2142,6 +2188,10 @@ impl Game {
                 self.state.head_timer =
                     ((self.state.max_fire_delay as f32 * 0.45_f32) as i32 + 7).max(11);
             }
+        }
+        player_items::advance_item_sprite(&mut self.state, phase);
+        if self.state.player.input_cooldown > 0 {
+            self.state.player.input_cooldown -= 1;
         }
         player_items::finish_player_update(&mut self.state, phase)?;
         // Player531e9a decrements7dc after the shooting callback in both phases.

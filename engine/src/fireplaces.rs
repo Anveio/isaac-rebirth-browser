@@ -215,6 +215,7 @@ pub struct FireplaceState {
 
 pub struct World<'a> {
     pub grid: &'a mut GridDescriptor,
+    pub path_costs: &'a mut crate::room_costs::RoomCosts,
     pub audio: &'a mut AudioState,
     pub system_counter: u32,
 }
@@ -345,16 +346,14 @@ fn update_sprite(npc: &mut Npc) {
     }
 }
 
-fn set_selector(
-    grid: &mut GridDescriptor,
-    position: WorldVector,
-    selector: u32,
-) -> Result<(), String> {
-    let index = Grid::new(grid.clone())?
+fn set_path_cost(world: &mut World<'_>, position: WorldVector, cost: i32) -> Result<(), String> {
+    let index = Grid::new(world.grid.clone())?
         .index(position)
         .ok_or("Fire lies outside admitted room grid")?;
-    grid.cells[index].selector = selector;
-    Ok(())
+    // The existing geometry adapter uses this value to remove raw1400 grid
+    // blocking while the actual Fire remains an NPC contact actor.
+    world.grid.cells[index].selector = cost as u32;
+    world.path_costs.store(index, cost)
 }
 
 fn initialize(
@@ -372,14 +371,14 @@ fn initialize(
     fire.flame_render_mode = 2;
     if npc.hp > 1.5 {
         npc.state = 8;
-        set_selector(world.grid, npc.position, 950)?;
+        set_path_cost(world, npc.position, 950)?;
         play(npc, "Flickering");
         fire.flame_scale = npc.hp / npc.max_hp;
     } else {
         npc.state = 3;
         npc.entity_collision_class = 0;
         npc.grid_collision_class = 0;
-        set_selector(world.grid, npc.position, 900)?;
+        set_path_cost(world, npc.position, 900)?;
         play(npc, "NoFire");
         fire.render_order_offset = -1000;
     }
@@ -392,7 +391,7 @@ fn extinguish(
     random: &mut Mt19937,
     world: &mut World<'_>,
 ) -> Result<(), String> {
-    set_selector(world.grid, npc.position, 900)?;
+    set_path_cost(world, npc.position, 900)?;
     npc.hp = 1.0;
     npc.state = 3;
     npc.entity_collision_class = 0;

@@ -3,6 +3,7 @@ import wasmUrl from "./generated/engine.wasm?url";
 export type Screen = "title" | "profile" | "main" | "character" | "seed" | "playing";
 export type Direction = "left" | "right" | "up" | "down";
 export interface Player {
+  visible: boolean; inputCooldown: number;
   x: number; y: number; vx: number; vy: number; hp: number; maxHp: number;
   soulHp: number; blackHeartMask: number;
   facing: Direction; bodyFacing: Direction; walkFrame: number; headFrame: number; shooting: boolean; shootingLock: number;
@@ -229,7 +230,7 @@ export interface State {
     specialFactor: number; removed: boolean[]; selected: boolean[]; roomRoutes: number[]; pillEffects: number[]} | null;
   playerItems: {initializerSeed: number; managerRng: ItemRng; initializerRng: ItemRng;
     itemRngs: ItemRng[]; trinketRngs: ItemRng[]; pocketRngs: ItemRng[]; entitySpawnSeed: number;
-    ownedCounts: number[]; temporaryCollectibles: {itemId: number; count: number}[]; queuedId: number | null; queuedCharge: number; queuedTouched: boolean;
+    ownedCounts: number[]; temporaryCollectibles: {itemId: number; count: number; cooldown: number}[]; queuedId: number | null; queuedCharge: number; queuedTouched: boolean;
     pickupAnimationFrame: number; pickupAnimationPlaying: boolean; pickupAnimationGuard: boolean;
     pickupPresentation: {itemId: number; animationFrame: number; animationPlaying: boolean} | null;
     collectionDelay: number; activeId: number; activeCharge: number; activeSubordinateCharge: number;
@@ -247,6 +248,8 @@ export interface State {
   roomTransition: {fromRoom: number; targetRoom: number; fromSlot: number; targetSlot: number; phase: "out" | "in" | "bossScene" | "bossCleanup"; fullUpdates: number; bossScene: {presentationIndex: number; animationFrame: number; animationPlaying: boolean} | null} | null;
   playerStats: {shotSpeed: number; damage: number; tearHeight: number; tearFallingSpeed: number; tearFallingAcceleration: number; moveSpeed: number};
   player: Player; room: Room; stageEffects: StageEffects; inventory: { coins: number; bombs: number; keys: number };
+  publicActions: { menuConfirm: boolean; menuBack: boolean; activePressed: boolean; activeTriggered: boolean; pocketPressed: boolean; pocketTriggered: boolean; enterWasDown: boolean; spaceWasDown: boolean; escapeWasDown: boolean; pocketWasDown: boolean };
+  playerAnimation: { current: "Trapdoor" | "Appear" | "Death" | "UseItem" | null; frame: number; playing: boolean; guard: boolean };
   camera: {scroll: {x: number; y: number}; lastPlayerPosition: {x: number; y: number};
     histories: {capacity: number; head: number; samples: {x: number; y: number}[]}[]} | null;
   nextPickup: number;
