@@ -18,9 +18,6 @@ const ZERO: WorldVector = WorldVector { x: 0.0, y: 0.0 };
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct BloodParticle {
-    /// GameSpawn550ac8 caches the caller's type/variant in Entity+1c/+20.
-    /// The browser caller handle is contextual; Entity.parent+498 stays NULL.
-    pub spawner: Option<Parent>,
     pub state: i32,
     pub height: f32,
     pub vertical_velocity: f32,
@@ -201,6 +198,8 @@ impl Admission<'_> {
             variant: 5,
             subtype: birth.subtype,
             spawn_seed: birth.seed,
+            spawner_type: birth.spawner.map_or(0, |caller| caller.entity_type),
+            spawner_variant: birth.spawner.map_or(0, |caller| caller.variant),
             parent: None,
             birth_game_update: self.game_update_count,
             actor_rng: items::Rng::new(birth.seed, [4, 3, 17]),
@@ -230,7 +229,6 @@ impl Admission<'_> {
             sprite: Sprite::new(config),
             full_updates: 0,
             blood_particle: Some(BloodParticle {
-                spawner: birth.spawner,
                 state: 0,
                 height: 0.0,
                 vertical_velocity: 0.0,
@@ -330,18 +328,14 @@ fn advance_base(effect: &mut SpriteEffect) -> Result<(), String> {
 }
 
 fn initialize(effect: &mut SpriteEffect, shared: &mut crate::mt::Mt19937) -> Result<(), String> {
-    let source_parent = effect
-        .blood_particle
-        .as_ref()
-        .and_then(|particle| particle.spawner.as_ref())
-        .map(|parent| (parent.entity_type, parent.variant));
+    let source_parent = (effect.spawner_type, effect.spawner_variant);
     let particle = effect
         .blood_particle
         .as_mut()
         .ok_or("particle controller owner absent")?;
     particle.gravity = 1.3;
     particle.height = -23.0;
-    if source_parent == Some((1000, 5)) {
+    if source_parent == (1000, 5) {
         //464e1d: child particles use a stopped authored13-frame pose.
         effect.sprite.animation = "Particle".into();
         effect.sprite.frame = shared.bounded(13) as f32;
@@ -384,11 +378,7 @@ fn update(state: &mut State, effect: &mut SpriteEffect) -> Result<(), String> {
         initialize(effect, &mut state.boot_lifecycle.shared)?;
     } else {
         let config = familiars::definition(1000, 5).ok_or("Blood Particle animation absent")?;
-        let source_parent = effect
-            .blood_particle
-            .as_ref()
-            .and_then(|particle| particle.spawner.as_ref())
-            .map(|parent| (parent.entity_type, parent.variant));
+        let source_parent_type = effect.spawner_type;
         let particle = effect
             .blood_particle
             .as_mut()
@@ -397,7 +387,7 @@ fn update(state: &mut State, effect: &mut SpriteEffect) -> Result<(), String> {
         particle.height += particle.vertical_velocity;
         effect.render_offset.y = particle.height;
         if particle.height > -5.0 {
-            if source_parent.is_some_and(|parent| parent.0 == 1000) {
+            if source_parent_type == 1000 {
                 //464024 only retires source frames4..10 directly.
                 if (4..=10).contains(&(effect.sprite.frame.floor() as u32)) {
                     effect.active = false;
@@ -419,7 +409,7 @@ fn update(state: &mut State, effect: &mut SpriteEffect) -> Result<(), String> {
                 effect.render_order_offset = 90;
                 effect.flags |= 8;
             }
-        } else if !source_parent.is_some_and(|parent| parent.0 == 1000) {
+        } else if source_parent_type != 1000 {
             //463406 executes every airborne ordinary-parent full callback.
             if state.boot_lifecycle.shared.bounded(3) == 0 {
                 let seed = state.boot_lifecycle.shared.next_u32();
