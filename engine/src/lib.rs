@@ -21,6 +21,8 @@ mod doors;
 mod effects;
 pub mod enemy_projectiles;
 mod entities;
+mod horfs;
+mod plain_npc;
 pub mod familiars;
 pub mod fireplaces;
 pub mod floor;
