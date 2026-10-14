@@ -323,7 +323,7 @@ pub(crate) fn advance(
     let mut health = npc.health();
     npc.damage.advance(&mut health, phase)?;
     npc.hp = health.hp;
-    if npc.hp <= 0.0 {
+    if npc.hp < 0.0 {
         npc.dead = true;
         // Zero-gib445c60 path admits sound before real BloodSplat7 seed.
         world.audio.admit(

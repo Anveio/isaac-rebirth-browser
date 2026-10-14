@@ -39,7 +39,11 @@ for(const action of replay.pairedTape){
   check(checks,label,'room.combatClear',source.room.combatClear,actual.room.combatClear);
   check(checks,label,'room.combatClearCountdown',source.room.combatClearCountdown,actual.room.combatClearCountdown);
   assert.ok(Number.isInteger(source.room.countableCurrent)&&Number.isInteger(source.room.countablePending));
-  check(checks,label,'manager.countability',source.room.countableCurrent+source.room.countablePending>0,actual.room.npcs.some(a=>a.canShutDoors&&!a.removed));
+  check(checks,label,'manager.countability',source.room.countableCurrent+source.room.countablePending>0,actual.room.managerCounts.countableCurrent+actual.room.managerCounts.countablePending>0);
+  for(const field of ['countablePending','countableCurrent','bossPending','bossCurrent']){
+    assert.ok(Number.isInteger(source.room[field]), `actual signed manager ${field} must be observed`);
+    check(checks,label,`manager.${field}`,source.room[field],actual.room.managerCounts[field]);
+  }
   for(const door of source.grid.filter(cell=>cell.type===16)){const portDoor=actual.room.grid.cells[door.index]?.entity;assert.ok(portDoor);check(checks,label,`door${door.index}.state`,door.state,portDoor.state);check(checks,label,`door${door.index}.class`,door.collisionClass,portDoor.collisionClass);}
   for(const native of natives){
     const npc=port.find(actor=>actor.kind===native.type&&actor.spawnSeed===native.spawnSeed);if(!npc)continue;
