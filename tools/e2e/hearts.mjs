@@ -12,11 +12,28 @@ const save=(p,v)=>writeFileSync(p,JSON.stringify(v,null,2)+'\n');
 const digest=p=>createHash('sha256').update(readFileSync(p)).digest('hex');
 const artifactBytes=p=>existsSync(p)?readFileSync(p):gunzipSync(readFileSync(p+'.gz'));
 const artifactDigest=p=>createHash('sha256').update(artifactBytes(p)).digest('hex');
-const sources=['tools/e2e/hearts.mjs','tools/original/heart-scenarios.py','tools/original/foundation-combat-observe.py','engine/src/pickups.rs','engine/src/player_items.rs','engine/src/fireplaces.rs','engine/src/lib.rs','web/engine.ts','web/renderer.ts'];
+const sources=['tools/e2e/hearts.mjs','tools/original/heart-scenarios.py','tools/original/foundation-combat-observe.py','engine/src/pickups.rs','engine/src/player_items.rs','engine/src/fireplaces.rs','engine/src/lib.rs','references/isaac/foundation/hearts/first-prepared-cases.json','web/engine.ts','web/renderer.ts'];
 const hashes=()=>Object.fromEntries(sources.map(p=>[p,digest(p)])),before=hashes();
 const prepared=option('--scenarios');
 const scenarios=prepared?JSON.parse(readFileSync(resolve(prepared),'utf8')):JSON.parse(execFileSync('python3',['tools/original/heart-scenarios.py','--count',option('--count','2')],{encoding:'utf8'}));
-assert.equal(scenarios.schema,1);assert.ok(scenarios.cases.length>=5&&scenarios.cases.length<=8);
+assert.equal(scenarios.schema,1);assert.ok(Array.isArray(scenarios.cases)&&scenarios.cases.length>=6&&scenarios.cases.length<=8);
+const fixedBankPath='references/isaac/foundation/hearts/first-prepared-cases.json';
+assert.equal(digest(fixedBankPath),'6860834fd32322bf690d01e33f5b78a3db4fc4ad3e5e897831c15e37fa55e76e','The original prepared bank must remain immutable');
+const fixedBank=JSON.parse(readFileSync(fixedBankPath,'utf8'));
+const mandatory=new Map(['red','soul'].flatMap(kind=>[0,1].map(phase=>{
+ const id=`paired-heart-${kind}-${phase}`,fixture=fixedBank.cases.find(c=>c.scenario.id===id);
+ assert.ok(fixture,'Missing sealed mandatory Heart fixture');return[id,fixture];
+})));
+const ids=scenarios.cases.map(c=>c.scenario.id);assert.equal(new Set(ids).size,ids.length,'Heart case IDs must be unique');
+for(const[id,fixture]of mandatory){
+ const selected=scenarios.cases.find(c=>c.scenario.id===id);assert.ok(selected,`Missing mandatory ${id}`);
+ for(const field of ['seed','seedValue','initialSeed','bootEpochSeed','bootstrap','tape','pairedTape'])
+  assert.deepEqual(selected[field],fixture[field],`${id}: immutable fixture identity and declared phase-offset tape`);
+ assert.equal(selected.scenario.randomized,false,`${id}: fixed cases cannot become random diagnostics`);
+}
+const osCases=scenarios.cases.filter(c=>!mandatory.has(c.scenario.id));
+assert.ok(osCases.length>=2&&osCases.length<=4&&osCases.every(c=>c.scenario.randomized===true),'Every bank requires at least two recorded OS cases');
+assert.deepEqual(scenarios.unfilteredOsSeedValues,osCases.map(c=>c.seedValue),'Every recorded unfiltered OS outcome must be retained');
 save(resolve(output,'scenarios.json'),scenarios);
 const tapes=scenarios.cases.map((c,i)=>{const p=resolve(output,`replay-${i}.json`);save(p,c);return p;});
 const paired=await runPairedGate({output:resolve(output,'paired'),selected:[],randomCount:0,replayCases:tapes,productionDirectory:option('--production-directory'),nativeFrameTimeout:Number(option('--native-frame-timeout','60'))});
@@ -56,7 +73,7 @@ for(const [index,c] of scenarios.cases.entries()){
    if(prior){execution.native.damage ||=hpNative[1]+hpNative[2]<prior.native[1]+prior.native[2];execution.browser.damage ||=hpBrowser[1]+hpBrowser[2]<prior.browser[1]+prior.browser[2];}
    prior={native:hpNative,browser:hpBrowser};
   }
-  for(const name of ['native','browser'])for(const required of c.heartRequired)check('execution',`${name}.${required}`,true,execution[name][required]);
+  for(const name of ['native','browser'])for(const required of mandatory.has(c.scenario.id)?['admission','damage','collection']:c.heartRequired)check('execution',`${name}.${required}`,true,execution[name][required]);
  }catch(failure){error=String(failure.stack??failure);}
  const result={id:c.scenario.id,status:!error&&checks.length>0&&checks.every(r=>r.status==='pass')?'pass':'fail',execution,checks,error,manifestHashes:{original:()=>artifactDigest(originalPath),browser:()=>artifactDigest(browserPath)}};
  // A failed or missing manifest must remain a report, not abort later cases.
@@ -64,5 +81,5 @@ for(const [index,c] of scenarios.cases.entries()){
  save(resolve(directory,'heart-state.json'),result);results.push({id:result.id,status:result.status,fields:checks.length,failures:checks.filter(r=>r.status==='fail').length,execution,error,report:resolve(directory,'heart-state.json')});
 }
 const stable=JSON.stringify(before)===JSON.stringify(hashes());
-const report={schema:1,status:stable&&paired.status==='pass'&&results.every(r=>r.status==='pass')?'pass':'fail',pairedStatus:paired.status,sourcesStable:stable,sources:before,cases:results,scope:'Required paired healthcontainer/immunity/room/Heartbody-seed-class-animation-collection fields, contrived actualadmission/damage/collection and2unfilteredrecordedOScases. Modifier-completefactory, wholeHUD/informationqueue13, readmission andsoul/blackdamagepriority remain explicit source-qualified follow-ups.'};
+const report={schema:1,status:stable&&paired.status==='pass'&&results.every(r=>r.status==='pass')?'pass':'fail',pairedStatus:paired.status,sourcesStable:stable,sources:before,cases:results,scope:'Required paired healthcontainer/immunity/room/Heartbody-spawn-seed-identity-class-animation-collection fields, contrived actualadmission/damage/collection and2unfilteredrecordedOScases. Modifier-completefactory, wholeHUD/informationqueue13, readmission andsoul/blackdamagepriority remain explicit source-qualified follow-ups. Local30 four-word state and source collection SFX are not compared by this leaf.'};
 save(resolve(output,'report.json'),report);console.log(JSON.stringify(report));process.exitCode=report.status==='pass'?0:1;

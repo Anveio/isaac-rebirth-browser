@@ -66,3 +66,14 @@ byte-identical after the provider main merge. The previous `1d166003` receipt
 remains separate. No Heart production artifact or original/browser acceptance
 is inherited from main's Death cohort; the same six prepared Heart cases remain
 mandatory and unexecuted.
+
+
+The gate now seals all four fixed seed and phase tapes independently of replay
+metadata, rejects duplicate or missing IDs, and requires two to four retained OS
+outcomes in order. Fixed IDs require actual admission, damage and collection in
+both games even when a replay supplies an empty requirement list. Eleven ignored
+no-game preflight checks pass, including malformed banks and unchanged default
+six-case tapes using the previously recorded OS words. The Rust-checked runtime
+is unchanged. The gate compares spawn-seed identity; local30's four-word state
+and collection SFX remain source-qualified follow-ups. No original/browser
+acceptance is inferred from this gate correction.

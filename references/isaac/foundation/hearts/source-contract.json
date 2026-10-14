@@ -130,5 +130,22 @@
     "RustAndStrictClippy": "not run for currentpayload; initial624 proof remains separately pinned",
     "productionAndLive": "not run",
     "retainedCaseBankSha256": "6860834fd32322bf690d01e33f5b78a3db4fc4ad3e5e897831c15e37fa55e76e"
+  },
+  "requiredBankIntegrity": {
+    "fixedCases": [
+      "paired-heart-red-0",
+      "paired-heart-red-1",
+      "paired-heart-soul-0",
+      "paired-heart-soul-1"
+    ],
+    "canonicalBankSha256": "6860834fd32322bf690d01e33f5b78a3db4fc4ad3e5e897831c15e37fa55e76e",
+    "invariants": "Unique case IDs; all four sealed seed/bootstrap/phase-offset public tapes; two to four retained OS outcomes in order. Fixed IDs require admission, damage and collection in each game independently of supplied heartRequired flags. Generator count is2..4; default six cases/tapes unchanged.",
+    "noGamePreflight": {
+      "receiptPath": ".cache/coordination/combat/heart-main-static/bank-preflight/receipt.json",
+      "receiptSha256": "a48928a160f24baea8623d6968ce80b49341131c1b66bb07019e98ec3f37b283",
+      "checks": 11,
+      "scope": "Gate-only validation/control-flow preflight; no new entropy, compiler, production build or native/browser execution."
+    },
+    "gateFieldScope": "Spawn-seed identity and declared health/body lifecycle fields are compared. Local30 four-word state and source collection SFX are source-qualified follow-ups, not live acceptance by this leaf."
   }
 }
