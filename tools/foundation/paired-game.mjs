@@ -167,7 +167,9 @@ async function browserCapture(browser, server, caseData, directory, archiveBrows
   if (archiveBrowserEvidence) {
     const evidence = await writeJsonEvidence(join(directory, 'manifest.json.gz'), result);
     save(join(directory, 'manifest-archive.json'), evidence);
-  } else save(join(directory, 'manifest.json'), result);
+  // Compact JSON: long routes hold hundreds of full snapshots, and indented
+  // output can exceed V8's maximum string length before it is written.
+  } else writeFileSync(join(directory, 'manifest.json'), JSON.stringify(result) + '\n');
   return result;
 }
 
