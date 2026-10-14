@@ -13,7 +13,8 @@ import { waitForReady, nativeReplay } from '../foundation/verify.mjs';
 import { exactStateDifference } from '../foundation/compare.mjs';
 import { installBrowserAudioObserver } from './audio-api-observer.mjs';
 import { compareQueuedMusicOutput, compareMusicDeviceCheckpoint } from './music-output-evidence.mjs';
-import { ORIGINAL_SHA } from './lib/original.mjs';
+import { step } from './lib/game.mjs';
+import { ORIGINAL_SHA, assertOriginalBinary } from './lib/original.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const run = promisify(execFile), sha = bytes => createHash('sha256').update(bytes).digest('hex');
@@ -31,7 +32,7 @@ assert.ok(Array.isArray(cases) && cases.length > 0 && cases.length <= 10 && new 
 for (const c of cases) assert.ok(/^[a-zA-Z0-9_-]{1,40}$/.test(c.name) && /^[a-zA-Z0-9]{8}$/.test(c.code) &&
   Number.isInteger(c.bootEpochSeed) && c.bootEpochSeed >= 0 && c.bootEpochSeed <= 0xffffffff && (c.volume === 0 || c.volume === 1));
 const catalogue = JSON.parse(await readFile(join(ROOT, 'web/audio-data.json')));
-assert.equal(sha(await readFile(join(ROOT, '.cache/original-runtime/offline-depot/isaac.x64'))), ORIGINAL_SHA);
+await assertOriginalBinary();
 await writeFile(join(output, 'scenarios.json'), JSON.stringify({ schema: 1, entropy: 'Recorded OS-random run seeds and independent Node crypto boot epochs', cases }, null, 2) + '\n');
 await run('cc', ['-std=c11', '-Wall', '-Wextra', '-Werror', '-fPIC', '-shared', 'tools/original/audio-trace.c', '-o', join(output, 'audio-trace.so'), '-ldl', '-pthread'], { cwd: ROOT });
 const librarySha = sha(await readFile(join(output, 'audio-trace.so')));
@@ -149,7 +150,7 @@ try {
       const commands = [{ type: 'audioVolume', sfx_volume: 0 }, ...(scenario.volume === 0 ? [{ type: 'musicVolume', volume: 0 }] : [])], states = [];
       let intendedSeedEntry = false; const intendedPressed = new Set();
       for (const action of tape.browser) {
-        if (action.type === 'step') { await page.evaluate(frames => window.game.step(frames), action.frames); commands.push({ type: 'tick', count: action.frames }); }
+        if (action.type === 'step') { await step(page, action.frames); commands.push({ type: 'tick', count: action.frames }); }
         else if (action.type === 'audioHold') {
           if ((await page.evaluate(() => window.game.audio())).contextState !== 'running') { await page.locator('#game').click(); await page.waitForFunction(() => window.game.audio().contextState === 'running'); }
           await page.waitForTimeout(action.seconds * 1000);

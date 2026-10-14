@@ -12,11 +12,11 @@ import { browserLaunchOptions, inspectBrowserGraphics } from '../foundation/brow
 import { startProductionServer } from '../foundation/production-server.mjs';
 import { assertInputProvenance, assertSeededRun, enterSeededRun, manualSeedCommands, waitForReady } from '../foundation/verify.mjs';
 import { compareRoomContext } from './item-room-evidence.mjs';
-import { ORIGINAL_SHA } from './lib/original.mjs';
+import { snapshot, stepSnapshot } from './lib/game.mjs';
+import { ORIGINAL_SHA, assertOriginalBinary } from './lib/original.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const run = promisify(execFile);
-const PIN = ORIGINAL_SHA;
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
 const value = flag => { const i = process.argv.indexOf(flag); return i < 0 ? undefined : process.argv[i + 1]; };
 const activeUse = process.argv.includes('--active-use');
@@ -62,11 +62,11 @@ for (const item of scenarios.cases) {
 const selectedCase = value('--case');
 if (selectedCase) assert.ok(scenarios.cases.some(item => item.name === selectedCase));
 const catalogue = JSON.parse((await run('python3', ['tools/foundation/item-catalog.py'], { cwd: ROOT })).stdout);
-assert.equal(digest(await readFile(join(ROOT, '.cache/original-runtime/offline-depot/isaac.x64'))), PIN);
+await assertOriginalBinary();
 await writeFile(join(output, 'scenarios.json'), JSON.stringify(scenarios, null, 2) + '\n');
 const server = await startProductionServer();
 const browser = await chromium.launch(browserLaunchOptions());
-const report = { schema: 1, status: 'running', production: server.build, originalBinarySha256: PIN,
+const report = { schema: 1, status: 'running', production: server.build, originalBinarySha256: ORIGINAL_SHA,
   graphics: await inspectBrowserGraphics(browser), sourceHashes: catalogue.sourceHashes,
   scope: activeUse ? 'Natural independent original/browser acquisition and public active use; authored charge/count/temporary records/health/7d4/7d8/UseItem/motion/SFX admission are required. Full raw fields, inputs, backend histories and all random failures remain retained; pixels and complete shared MT stay diagnostics. Other active effects and charge modifiers remain explicitly unimplemented.' : statCache ? 'Natural public acquisition of Roid Rage14 and Speed Ball143 at both phase offsets, plus retained and fresh unfiltered OS outcomes. Spoon27/Belt28 are source-mapped but boss-only and have no live acquisition acceptance here. All actual cached stats/fire delay, player XY/VXY before and after grant, emitted tear velocity, grant/count/pool/queue fields and complete public seed/DOM provenance are blocking. Other item effects remain unsupported with every comparison failure retained; complete MT, unfamiliar callbacks and later child RNG states are explicit diagnostics.' : acquisition ? 'Natural first free collectible contact, real deferred Pickup animation/queue, all347 owned counts, authored inventory/health grants, first active ownership/charge, pool removal and collection sound admission. Baseline complete450 Player child RNGs are required. Actual stat/familiar/cache callbacks, later child RNG mutation, active swaps/use, achievements, paid/override contexts and pixels remain unaccepted; full MT/cache/child RNG differences are retained diagnostics.' : 'Fresh-profile authored catalogue, causal run/pool seeds, complete 16 pools/497 weights and ID maps, natural free treasure pedestal Init/selection, phase/animation/charge and public seed/input provenance. Acquisition, item effects/cache evaluation, familiars, paid/override contexts and pixels remain unaccepted.',
   activeUse: activeUse ? {scope: 'Public first acquisition and action9 use; native record/charge/health/ANM/input/motion and157 admission required. Other active leaves remain red when exercised, with every OS discovery retained.'} : null,
@@ -169,7 +169,7 @@ try {
       const compare = (state, row, presentation) => {
         const source = row.observation;
         assert.equal(source.status, 'pass'); assert.equal(source.memoryWritten, false);
-        assert.equal(source.executableMappingsRead, false); assert.equal(source.nativeBinarySha256, PIN);
+        assert.equal(source.executableMappingsRead, false); assert.equal(source.nativeBinarySha256, ORIGINAL_SHA);
         assert.equal(source.gamePresent, true);
         const prior = result.failures.length;
         for (const check of compareRoomContext(state, row)) equal(check.actual, check.expected, check.field, presentation);
@@ -349,9 +349,8 @@ try {
         const domKey = key === 'space' ? 'Space' : key && ['Right', 'Left', 'Up', 'Down'].includes(key) ? code : key;
         if (key) { await page.keyboard.down(domKey); expected.push({type: 'key', code, down: true}); }
         for (let index = 0; index < frames; index++) {
-          await page.evaluate(() => { window.game.step(1); });
+          const state = await stepSnapshot(page); states.push(state);
           expected.push({type: 'tick', count: 1});
-          const state = await page.evaluate(() => window.game.snapshot()); states.push(state);
           presentations++;
           compare(state, rows.get(baseline.context.presentedFrame + presentations), presentations);
         }
@@ -378,7 +377,7 @@ try {
         'Every actual asynchronous backend callback must retain its own full state; gameplay snapshots cannot replace it');
       assert.equal(states.length, item.actions.reduce((sum, action) => sum + action.frames, 0),
         'Every declared gameplay presentation must have its independent complete snapshot');
-      assertSeededRun(await page.evaluate(() => window.game.snapshot()), item.code, item.seedValue);
+      assertSeededRun(await snapshot(page), item.code, item.seedValue);
       assert.deepEqual(errors, []);
       const browserBytes = Buffer.from(JSON.stringify({schema: 1, states, trace}) + '\n');
       const browserPath = join(directory, 'browser-states.json.gz');

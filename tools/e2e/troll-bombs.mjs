@@ -11,7 +11,8 @@ import { chromium } from '@playwright/test';
 import { browserLaunchOptions, inspectBrowserGraphics } from '../foundation/browser.mjs';
 import { startProductionServer } from '../foundation/production-server.mjs';
 import { assertInputProvenance, enterSeededRun, manualSeedCommands, waitForReady } from '../foundation/verify.mjs';
-import { ORIGINAL_SHA } from './lib/original.mjs';
+import { stepSnapshot } from './lib/game.mjs';
+import { ORIGINAL_SHA, assertOriginalBinary } from './lib/original.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const run = promisify(execFile);
@@ -46,7 +47,7 @@ for (const item of scenarios.cases) {
 const stateLast = states => states[states.length - 1];
 const selectedCase = value('--case');
 if (selectedCase) assert.ok(scenarios.cases.some(item => item.name === selectedCase), 'Targeted replay requires a recorded public case name');
-assert.equal(digest(await readFile(join(ROOT, '.cache/original-runtime/offline-depot/isaac.x64'))), ORIGINAL_SHA);
+await assertOriginalBinary();
 await writeFile(join(output, 'scenarios.json'), JSON.stringify(scenarios, null, 2) + '\n');
 const server = await startProductionServer();
 const browser = await chromium.launch(browserLaunchOptions());
@@ -135,9 +136,8 @@ try {
         const code = key ? 'Key' + key.toUpperCase() : null;
         if (key) { await page.keyboard.down(key); expected.push({ type: 'key', code, down: true }); }
         for (let index = 0; index < frames; index++) {
-          await page.evaluate(() => window.game.step(1));
+          const state = await stepSnapshot(page);
           expected.push({ type: 'tick', count: 1 });
-          const state = await page.evaluate(() => window.game.snapshot());
           states.push(state);
           presentation++;
           const row = rows.get(baseline.context.presentedFrame + presentation);

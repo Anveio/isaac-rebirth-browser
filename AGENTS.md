@@ -53,6 +53,12 @@ not a substitute for checking your own change. Use `npm run test:e2e:paired -- -
 browser checks require a fresh build. Native Rust/WASM self-equality proves
 replay consistency, not original hidden-state or simulation-tick parity.
 
+Lint and format are not CI or `npm run check` gates. A scheduled upkeep agent
+runs `npm run upkeep:check` on latest `main` and opens a PR with the fixes,
+settling each lint finding with the agent that introduced it; see
+`docs/lint-upkeep.md`. Prefer fixing over allowing; a deliberate exception is a
+narrow `#[expect(clippy::..., reason = "...")]` naming its evidence.
+
 Coordinate file ownership across parallel agents. Shared temporary tooling and
 RE notes belong in ignored `.cache/coordination/`; persist reusable tools and
 the evidence needed to reproduce accepted behavior in the repository.
