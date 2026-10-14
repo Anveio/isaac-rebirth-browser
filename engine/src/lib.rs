@@ -35,6 +35,7 @@ mod health_damage;
 mod horfs;
 pub mod information_animation;
 pub mod input;
+mod item_pipeline;
 pub mod items;
 pub mod keepers;
 pub mod lasers;
@@ -71,6 +72,7 @@ pub mod run_admission;
 pub mod saved_game;
 pub mod seed;
 pub mod traversal;
+mod weapon_plan;
 pub use bombs::{Bomb, Explosion};
 pub use effects::{Point, StageEffects};
 pub use pickups::Pickup;
@@ -2342,11 +2344,11 @@ impl Game {
                     x: (inherited_velocity.0 / motion::WORLD_SCALE) as f32,
                     y: (inherited_velocity.1 / motion::WORLD_SCALE) as f32,
                 };
-                let velocity = projectiles::stored_velocity(
-                    aim,
-                    inherited,
-                    self.state.player_stats.shot_speed,
+                let plan = weapon_plan::RegularTearPlan::resolve(
+                    self.state.player_stats,
+                    self.state.max_fire_delay,
                 )?;
+                let velocity = projectiles::stored_velocity(aim, inherited, plan.shot_speed)?;
                 self.state.player.eye = self.state.player.eye.flipped();
                 let eye_uniform = self.state.boot_lifecycle.shared.uniform();
                 let origin = projectiles::eye_origin(
@@ -2372,8 +2374,6 @@ impl Game {
                     },
                 );
                 let final_uniform = self.state.boot_lifecycle.shared.uniform();
-                let damage = self.state.player_stats.damage;
-                let scale = projectiles::scale(damage)?;
                 let mut tear = Tear {
                     id: self.state.next_tear,
                     x: 0.0,
@@ -2383,16 +2383,16 @@ impl Game {
                     age: 0,
                     spawn_seed,
                     shot_ordinal: self.state.player.shots_fired,
-                    collision_damage: damage,
-                    base_damage: damage,
-                    scale,
-                    animation_tier: projectiles::regular_animation_tier(scale)?,
-                    collision_radius: projectiles::collision_radius(scale, 8.0)?,
+                    collision_damage: plan.damage,
+                    base_damage: plan.damage,
+                    scale: plan.scale,
+                    animation_tier: plan.animation_tier,
+                    collision_radius: plan.collision_radius,
                     grid_contact: false,
                     motion: projectiles::TearMotion::spawn(
                         origin,
                         velocity,
-                        self.state.player_stats.parameters(),
+                        plan.parameters,
                         final_uniform,
                     )?,
                 };
@@ -2408,9 +2408,8 @@ impl Game {
                     .next_tear
                     .checked_add(1)
                     .ok_or("tear IDs exhausted")?;
-                self.state.fire_cooldown = self.state.max_fire_delay;
-                self.state.head_timer =
-                    ((self.state.max_fire_delay as f32 * 0.45_f32) as i32 + 7).max(11);
+                self.state.fire_cooldown = plan.fire_delay;
+                self.state.head_timer = plan.head_timer;
             }
         }
         player_items::advance_item_sprite(&mut self.state, phase);
