@@ -455,6 +455,9 @@ pub struct Game {
     pub boot_level_grid: mt::DescriptorSeeds,
     pub saved_run: Option<saved_game::SavedRun>,
     pub player_manager_secondary_rng: saved_game::PlayerManagerSecondaryRng,
+    /// Process-lifetime GetRoomByIdx static; later runs reuse it.
+    #[serde(default)]
+    pub room_lookup_dummy_constructed: bool,
 }
 
 impl Game {
@@ -578,6 +581,7 @@ impl Game {
             boot_level_grid,
             saved_run: None,
             player_manager_secondary_rng: saved_game::PlayerManagerSecondaryRng::default(),
+            room_lookup_dummy_constructed: false,
         };
         game.refresh_minimap();
         Ok(game)
@@ -1087,6 +1091,12 @@ impl Game {
         // floor::generate_basement owns the separate primary xorshift advance.
         self.state.level_progress.begin_level();
         self.boot_level_grid = self.state.boot_lifecycle.initialize_level_grid();
+        // Level generation's first GetRoomByIdx (58a13f) constructs its
+        // static dummy descriptor once per process, after the grid init.
+        if !self.room_lookup_dummy_constructed {
+            mt::DescriptorSeeds::construct_lookup_dummy(&mut self.state.boot_lifecycle.shared);
+            self.room_lookup_dummy_constructed = true;
+        }
         self.state.floor = floor::generate_basement(seed::stage1_seed(self.state.run_seed_value))?;
         self.state.current_room = self.state.floor.starting_descriptor;
         self.state.visited_rooms = BTreeSet::from([self.state.current_room]);
@@ -1108,6 +1118,8 @@ impl Game {
         self.state.stage_seed = seed::stage1_seed(self.state.run_seed_value);
         // Level585600 ->5b8340 records the selected ordinary stage resource.
         self.state.nightmares.select_normal_basement(1)?;
+        // Room.Init's backdrop setup loads the FX rays before its grid records.
+        room::load_fx_rays(&self.state.room, &mut self.state.boot_lifecycle.shared);
         grid_records::admit_fresh(
             &mut self.state.room,
             &mut self.state.boot_lifecycle.shared,

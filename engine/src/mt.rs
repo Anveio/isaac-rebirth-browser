@@ -151,6 +151,17 @@ impl DescriptorSeeds {
         table
     }
 
+    /// Level::GetRoomByIdx 585f20 owns a function-local static dummy
+    /// RoomDescriptor (guard 8ed3c0), returned for absent indices. Its first
+    /// call in the process constructs all 448 grid descriptions with the same
+    /// two raw seeds each (586080/58608c). No supported path reads the dummy's
+    /// seeds, so only its draws are kept.
+    pub fn construct_lookup_dummy(shared: &mut Mt19937) {
+        for _cell in 0..PADDED_GRID_CELLS {
+            let _seed_pair = [shared.next_u32(), shared.next_u32()];
+        }
+    }
+
     fn key(room: usize, cell: usize) -> Result<u16, String> {
         if room >= ROOM_DESCRIPTOR_CAPACITY || cell >= PADDED_GRID_CELLS {
             return Err("descriptor seed query is outside the source grid".into());
