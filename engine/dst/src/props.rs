@@ -5,8 +5,8 @@
 //! process by itself; locally each call site also records into a ledger and
 //! [`verdict`] applies Antithesis' property semantics to the SDK's own
 //! registration catalog: an `always` must be hit and never false, a
-//! `sometimes` must be true at least once and an `unreachable` must never be
-//! hit.
+//! `sometimes` must be true at least once, a `reachable` must be hit and an
+//! `unreachable` must never be hit.
 //!
 //! Details are built only when the SDK would emit them (the first pass and the
 //! first failure of each call site), keeping per-step checks cheap.
@@ -23,6 +23,7 @@ pub static NO_DETAILS: Value = Value::Null;
 pub enum Kind {
     Always,
     Sometimes,
+    Reachable,
     Unreachable,
 }
 
@@ -36,6 +37,13 @@ pub struct Site {
 }
 
 static SITES: Mutex<Vec<&'static Site>> = Mutex::new(Vec::new());
+static VIOLATIONS: AtomicU64 = AtomicU64::new(0);
+
+/// Total `always`/`unreachable` failures so far; a case compares it before
+/// and after to decide whether to retain its tape.
+pub fn violations() -> u64 {
+    VIOLATIONS.load(Ordering::Relaxed)
+}
 
 impl Site {
     pub const fn new(message: &'static str, kind: Kind) -> Self {
@@ -70,6 +78,7 @@ impl Site {
         if self.kind == Kind::Sometimes {
             return;
         }
+        VIOLATIONS.fetch_add(1, Ordering::Relaxed);
         if previous != 0 {
             return;
         }
@@ -94,6 +103,8 @@ pub struct Context {
     pub entropy: String,
     pub case: u64,
     pub case_seed: Option<u64>,
+    pub step: u64,
+    pub tape: Option<String>,
 }
 
 thread_local! {
@@ -102,6 +113,14 @@ thread_local! {
 
 pub fn set_context(context: Context) {
     CONTEXT.with(|current| *current.borrow_mut() = context);
+}
+
+pub fn set_step(step: u64) {
+    CONTEXT.with(|current| current.borrow_mut().step = step);
+}
+
+pub fn set_tape(path: Option<String>) {
+    CONTEXT.with(|current| current.borrow_mut().tape = path);
 }
 
 pub fn context() -> Context {
@@ -157,6 +176,25 @@ macro_rules! sometimes {
     };
 }
 
+macro_rules! reachable {
+    ($message:literal $(,)?) => {
+        $crate::props::reachable!($message, ::serde_json::Value::Null)
+    };
+    ($message:literal, $details:expr $(,)?) => {{
+        static SITE: $crate::props::Site =
+            $crate::props::Site::new($message, $crate::props::Kind::Reachable);
+        let owned;
+        let details: &::serde_json::Value = if SITE.would_emit(true) {
+            owned = $crate::props::with_context($details);
+            &owned
+        } else {
+            &$crate::props::NO_DETAILS
+        };
+        ::antithesis_sdk::assert_reachable!($message, details);
+        SITE.record(true, details);
+    }};
+}
+
 macro_rules! unreachable {
     ($message:literal $(,)?) => {
         $crate::props::unreachable!($message, ::serde_json::Value::Null)
@@ -176,7 +214,7 @@ macro_rules! unreachable {
     }};
 }
 
-pub(crate) use {always, property, sometimes, unreachable};
+pub(crate) use {always, property, reachable, sometimes, unreachable};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]

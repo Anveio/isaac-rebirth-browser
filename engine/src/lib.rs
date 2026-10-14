@@ -55,6 +55,7 @@ mod plain_npc;
 pub mod player_animation;
 pub mod player_death;
 pub mod player_items;
+pub mod player_save;
 pub mod player_stats;
 pub mod poop_effects;
 pub mod projectiles;
@@ -742,15 +743,7 @@ impl Game {
                                 profile: self.state.profile,
                             },
                         });
-                    self.state.character = self.state.profiles[usize::from(self.state.profile - 1)]
-                        .selected_character
-                        .clone();
-                    self.state.character_selection = self
-                        .state
-                        .character_catalog
-                        .iter()
-                        .position(|character| character.name == self.state.character)
-                        .unwrap_or(0) as u8;
+                    self.load_menu_character();
                     self.state.main_selection = 0;
                     self.state.screen = Screen::Main;
                 }
@@ -942,6 +935,19 @@ impl Game {
             }
         }
         Ok(())
+    }
+    /// The menus show the profile's selected character, including Random,
+    /// not the character a run resolved it to.
+    fn load_menu_character(&mut self) {
+        self.state.character = self.state.profiles[usize::from(self.state.profile - 1)]
+            .selected_character
+            .clone();
+        self.state.character_selection = self
+            .state
+            .character_catalog
+            .iter()
+            .position(|character| character.name == self.state.character)
+            .unwrap_or(0) as u8;
     }
     fn select_character(&mut self, direction: i32) {
         self.state.character_selection = (i32::from(self.state.character_selection) + direction)
@@ -1182,8 +1188,16 @@ impl Game {
         self.saved_game
             .descriptor_seeds
             .copy_rooms_from(&self.boot_level_grid, &rooms)?;
+        //54f373→5bf400→518350 follows the actual Level copy, flushes the
+        //owned grant queue and applies the supported Player save boundary.
+        let player_items = player_save::capture_at_manager_save(&mut self.state)?;
         self.saved_game.player_rng_seed = self.player_manager_secondary_rng.seed;
-        let saved = saved_game::SavedRun::copy_from(&self.state, item_pools, grid_save.records);
+        let saved = saved_game::SavedRun::copy_from(
+            &self.state,
+            item_pools,
+            grid_save.records,
+            player_items,
+        );
         self.state.saved_run_summary = Some(saved.summary(
             grid_save.empty,
             grid_save.occupied_pending,
@@ -1483,6 +1497,9 @@ impl Game {
                     // Popup557650 queues menu3;59cac0 stores it in Menu+38,
                     // the same native Main family observed by the paired gate.
                     self.state.screen = Screen::Main;
+                    // A Random run stored its resolved character; the menus
+                    // return to the profile's own selection.
+                    self.load_menu_character();
                     self.state.audio.pending.push(audio::SoundRequest {
                         id: 8,
                         volume: 1.0,

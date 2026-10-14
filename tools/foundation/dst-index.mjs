@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 export const DST_REGISTRY = 'engine/dst/src/units/mod.rs';
-const KINDS = { always: 'Always', sometimes: 'Sometimes', unreachable: 'Unreachable' };
+const KINDS = { always: 'Always', sometimes: 'Sometimes', reachable: 'Reachable', unreachable: 'Unreachable' };
 
 // Indexes the Antithesis DST registry and every declared property from
 // source. These are declarations, not results; a run's report is the outcome.
@@ -17,7 +17,7 @@ export function discoverDstUnits({ root = ROOT } = {}) {
   const seen = new Set();
   for (const source of [...globSync('engine/dst/src/**/*.rs', { cwd: root })].sort()) {
     const text = readFileSync(resolve(root, source), 'utf8');
-    for (const match of text.matchAll(/props::(always|sometimes|unreachable)!\([\s\S]*?"([a-z_]+): ([^"]+)"/g)) {
+    for (const match of text.matchAll(/props::(always|sometimes|reachable|unreachable)!\([\s\S]*?"([a-z_]+): ([^"]+)"/g)) {
       const [, macro, owner, claim] = match;
       const key = `${owner}: ${claim}`;
       if (seen.has(key)) continue;
