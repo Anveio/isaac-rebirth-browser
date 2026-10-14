@@ -305,12 +305,22 @@ pub fn transition(before: &State, command: &Command, after: &State) {
                 && !boss_scene
                 && before.player_death.game_over.is_none()
             {
-                props::always!(
-                    after.paused && after.pause_menu.phase == PausePhase::Appearing,
-                    "game: Escape opens the pause menu",
-                    json!({ "transition": before.room_transition, "pause": after.pause_menu })
-                );
-                props::sometimes!(true, "game: the pause menu opens");
+                if before.room_transition.is_some() {
+                    // The original ignores Escape until the transition ends (#168).
+                    props::always!(
+                        !after.paused && after.pause_menu == before.pause_menu,
+                        "game: Escape during a room transition does not pause",
+                        json!({ "transition": before.room_transition, "pause": after.pause_menu })
+                    );
+                    props::sometimes!(true, "game: Escape arrives during a room transition");
+                } else {
+                    props::always!(
+                        after.paused && after.pause_menu.phase == PausePhase::Appearing,
+                        "game: Escape opens the pause menu",
+                        json!({ "pause": after.pause_menu })
+                    );
+                    props::sometimes!(true, "game: the pause menu opens");
+                }
             }
         }
         Command::Text { text } => {

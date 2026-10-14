@@ -241,7 +241,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | `actors` | actor admission order and room identities against a list model | 4 | 2 | 0 |
 | `floor` | Basement generation structure, retries and per-descriptor room admission | 18 | 4 | 0 |
 | `grid` | grid queries and ground-collision solvers on generated rooms | 14 | 3 | 0 |
-| `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 54 | 40 | 2 |
+| `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 55 | 41 | 2 |
 | `abi` | the exported C ABI transport the browser bridge drives | 11 | 1 | 0 |
 
 <details><summary>Every declared DST property</summary>
@@ -364,6 +364,8 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Sometimes | game: a key arrives during the run-start fade | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: key presses during a boss scene are ignored | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: a key arrives during a boss scene | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: Escape during a room transition does not pause | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Sometimes | game: Escape arrives during a room transition | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: Escape opens the pause menu | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: the pause menu opens | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: seed text appends its uppercase compact glyphs | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
