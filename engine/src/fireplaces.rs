@@ -43,28 +43,13 @@ pub(crate) struct Produced {
 }
 
 /// Ordinary unmodified Isaac Pickup.Init500150 uses a separate local RNG35.
-/// This admits the real drop identity/animation; heart collection and item or
-/// trinket modifiers belong to the inventory owner's health slice.
+/// Fire and natural heart actors share the actual Pickup.Init subtype owner.
+/// Collectible/trinket replacement consumers remain separate.
 pub(crate) fn loot_subtype(variant: u32, spawn_seed: u32) -> Result<u32, String> {
-    if variant == 20 {
-        return crate::pickups::regular_subtype(variant, 0, spawn_seed);
-    }
-    if variant != 10 || spawn_seed == 0 {
+    if !matches!(variant, 10 | 20) || spawn_seed == 0 {
         return Err("Fire loot requires a real ordinary coin/heart seed".into());
     }
-    let mut word = spawn_seed;
-    let mut bounded = |bound| {
-        word = room_spawns::next35(word);
-        word % bound
-    };
-    let mut subtype = if bounded(2) == 0 { 2 } else { 1 };
-    if bounded(50) == 0 {
-        subtype = 4;
-    }
-    if bounded(10) == 0 {
-        subtype = if bounded(20) == 0 { 6 } else { 3 };
-    }
-    Ok(subtype)
+    crate::pickups::regular_subtype(variant, 0, spawn_seed)
 }
 
 /// Ordinary Effect1000/66 follows BaseUpdate before its own full-only drift,

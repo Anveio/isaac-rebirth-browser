@@ -35,6 +35,7 @@ pub mod monstro;
 pub mod motion;
 pub mod mt;
 pub mod music;
+pub mod nightmares;
 pub mod npcs;
 pub mod phase;
 pub mod pickups;
@@ -100,6 +101,8 @@ pub struct Player {
     pub max_hp: u8,
     pub soul_hp: i32,
     pub black_heart_mask: u32,
+    /// Actual normal-Isaac Player+bbc Eternal half-heart owner.
+    pub eternal_hearts: i32,
     pub facing: Direction,
     pub body_facing: Direction,
     pub walk_frame: u8,
@@ -125,6 +128,7 @@ impl Player {
             max_hp: 6,
             soul_hp: 0,
             black_heart_mask: 0,
+            eternal_hearts: 0,
             facing: Direction::Down,
             body_facing: Direction::Down,
             walk_frame: 0,
@@ -354,6 +358,7 @@ pub struct State {
     pub player_stats: player_stats::PlayerStats,
     pub stage: u32,
     pub stage_seed: u32,
+    pub nightmares: nightmares::Nightmares,
     pub seeded_run: bool,
     pub achievement_eligibility: bool,
     pub profiles: Vec<Profile>,
@@ -495,6 +500,7 @@ impl Game {
                 player_stats: player_stats::PlayerStats::default(),
                 stage: 1,
                 stage_seed: seed::stage1_seed(initial_seed),
+                nightmares: nightmares::Nightmares::new()?,
                 seeded_run: false,
                 achievement_eligibility: true,
                 profiles: (1..=3)
@@ -689,7 +695,10 @@ impl Game {
             // Scene key handler. Physical action14 mapping remains unaccepted.
             return Ok(());
         }
-        if self.state.player_death.game_over.is_some() {
+        if self.state.player_death.game_over.is_some()
+            || self.state.nightmares.system_active
+            || self.state.nightmares.request_pending
+        {
             return Ok(());
         }
         let previous_screen = self.state.screen;
@@ -1081,6 +1090,8 @@ impl Game {
         };
         self.state.next_pickup = 1;
         self.state.stage_seed = seed::stage1_seed(self.state.run_seed_value);
+        // Level585600 ->5b8340 records the selected ordinary stage resource.
+        self.state.nightmares.select_normal_basement(1)?;
         grid_records::admit_fresh(
             &mut self.state.room,
             &mut self.state.boot_lifecycle.shared,
@@ -1152,11 +1163,35 @@ impl Game {
         if !pickups::player_can_collect(&self.state) {
             return;
         }
+        let red_multiplier = if self
+            .state
+            .player_items
+            .as_ref()
+            .is_some_and(|items| items.owned_counts[312] > 0)
+        {
+            2
+        } else {
+            1
+        };
         let pickup = &mut self.state.room.pickups[index];
-        if pickup.touches(&self.state.player) && pickup.try_collect(&mut self.state.inventory) {
+        if pickup.touches(&self.state.player)
+            && (if pickup.variant == 10 {
+                pickup.try_collect_heart(&mut self.state.player, red_multiplier)
+            } else {
+                pickup.try_collect(&mut self.state.inventory)
+            })
+        {
             // Collect504480 routes key ->504720 and bomb ->5046d0
             // after inventory mutation, before the System increment.
             let sound = match pickup.variant {
+                10 => Some((
+                    match pickup.subtype {
+                        3 => 54,
+                        4 => 266,
+                        _ => 185,
+                    },
+                    1.0,
+                )),
                 30 => Some((58, 0.85)),
                 40 => Some((201, 1.0)),
                 _ => None,
@@ -1402,6 +1437,9 @@ impl Game {
         }
         let audio_counter = self.state.system_clock.system_counter;
         let phase = self.state.system_clock.advance()?;
+        if phase != phase::Phase::Skipped && self.state.nightmares.apply_request(self.state.stage) {
+            self.state.music.room(96);
+        }
         if phase != phase::Phase::Skipped {
             self.state.public_actions.advance(&self.state.pressed);
         }
@@ -1435,6 +1473,20 @@ impl Game {
         }
         self.state.tick += 1;
         self.state.menu_animation_tick += 1;
+        let nightmare_dispatch = if phase == phase::Phase::Skipped {
+            // Disabled interpolation skips System polling but keeps state4.
+            self.state.nightmares.system_active
+        } else {
+            self.state
+                .nightmares
+                .advance_system(self.state.public_actions.menu_confirm)
+        };
+        if nightmare_dispatch {
+            if phase != phase::Phase::Skipped {
+                self.state.music.advance();
+            }
+            return Ok(());
+        }
         let gameplay_was_paused = self.state.paused;
         if self.state.screen == Screen::Playing {
             self.state.pause_menu.advance(phase);

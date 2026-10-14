@@ -224,6 +224,10 @@ def observe(pid, context):
                 item = entity(pointer)
                 raw = read(pointer + 0xbb8, 0x44)
                 item['redHp'] = struct.unpack_from('<I', raw, 0)[0]
+                item['maxRedHp'] = u32(pointer + 0xbb4)
+                item['eternalHp'] = struct.unpack_from('<i', raw, 4)[0]
+                item['soulHp'] = struct.unpack_from('<i', raw, 8)[0]
+                item['blackHeartMask'] = struct.unpack_from('<I', raw, 12)[0]
                 item['shootingLock'] = u32(pointer + 0x7dc)
                 item['controlsEnabled'] = bool(read(pointer + 0x7d4, 1)[0])
                 item['damageCountdown'] = struct.unpack_from('<I', raw, 0x40)[0]
