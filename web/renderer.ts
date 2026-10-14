@@ -190,8 +190,6 @@ export class Renderer {
       this.drawPlayer(ctx, state);
       for (const tear of state.tears)
         this.assets.draw(ctx, TEAR, `RegularTear${tear.animationTier}`, Math.round(tear.x * 2) / 2, Math.round(tear.y * 2) / 2, tear.age);
-      for (const impact of state.impacts)
-        this.assets.draw(ctx, "gfx/1000.012_tear poof_small.anm2", "Poof", impact.x, impact.y, impact.age);
       for (const bomb of state.bombs)
         if (bomb.motion.lifetime === "alive")
           this.assets.draw(ctx, bomb.variant === 3 ? "gfx/004.003_troll bomb.anm2" : bomb.variant === 4 ? "gfx/004.004_megatroll bomb.anm2" : "gfx/004.000_bomb.anm2", bomb.animation, bomb.x, bomb.y - 1, bomb.animationFrame, { pixelSnap: this.canvas.width / 480 / 2 });
@@ -267,8 +265,11 @@ export class Renderer {
     }
   }
   private drawEffect(ctx: CanvasRenderingContext2D, variant: number, sprite: ActorSprite, x: number, y: number): void {
-    const actors: Record<number, string> = { 7: "gfx/1000.007_blood splat.anm2", 15: "gfx/1000.015_poof01.anm2",
-      17: "gfx/1000.017_poof04.anm2", 42: "gfx/1000.042_blood gush.anm2" };
+    const actors: Record<number, string> = { 2: "gfx/1000.002_blood explosion.anm2", 7: "gfx/1000.007_blood splat.anm2",
+      12: "gfx/1000.012_tear poofa.anm2", 13: "gfx/1000.013_tear poofb.anm2", 15: "gfx/1000.015_poof01.anm2",
+      17: "gfx/1000.017_poof04.anm2", 21: "gfx/1000.021_tiny bug.anm2", 33: "gfx/1000.033_tiny fly.anm2",
+      42: "gfx/1000.042_blood gush.anm2", 68: "gfx/1000.021_tiny bug.anm2",
+      79: "gfx/1000.012_tear poof_small.anm2", 80: "gfx/1000.012_tear poof_verysmall.anm2" };
     const actor = actors[variant];
     if (!actor) throw new Error(`Unadmitted effect renderer ${variant}`);
     ctx.save(); ctx.translate(x, y); ctx.rotate(sprite.rotation * Math.PI / 180);
