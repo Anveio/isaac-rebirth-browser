@@ -244,6 +244,11 @@ pub fn admit_fresh(room: &mut Room, shared: &mut Mt19937, game_update: u32) -> R
         entity.construct_owner(shared)?;
         // Room5c5722 draws a fresh caller seed after actual construction.
         entity.init_seed(shared.next_u32(), game_update, costs, index)?;
+        // Door.Init leaves state1; the cleared start room's opened doors are
+        // state2 again by gameplay start, as the original reports there.
+        if door.state == "Opened" {
+            entity.state = 2;
+        }
     }
     for column in 0..width {
         admit_wall(grid, costs, shared, column, game_update)?;
