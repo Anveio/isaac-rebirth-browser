@@ -110,10 +110,10 @@ Generated from [the suite registry](tools/e2e/suites.mjs). Each suite runs the f
 | `stat-cache` | Player stat cache after acquiring Roid Rage and Speed Ball: stats, motion and tear velocity | [items.mjs](tools/e2e/items.mjs) `--stat-cache --count 2` |
 | `active-item-use` | Acquiring and using an active item (Yum Heart): charge, health, animation and SFX | [items.mjs](tools/e2e/items.mjs) `--active-use --count 2` |
 | `familiars` | Familiar admission, appearance and following | [familiars.mjs](tools/e2e/familiars.mjs) `--count 2` |
-| `npcs` | Fly/AttackFly/Gaper construction, AI and contact | [npcs.mjs](tools/e2e/npcs.mjs) |
-| `roundworms` | Round Worm actors, projectiles and room locks | [roundworms.mjs](tools/e2e/roundworms.mjs) |
-| `fireplaces` | Fireplace damage, extinguish and Ember effects | [fireplaces.mjs](tools/e2e/fireplaces.mjs) |
-| `monstro` | Level2 Fly route into Monstro: admission, AI, projectiles and scene cleanup | [monstro.mjs](tools/e2e/monstro.mjs) |
+| `npcs` | Fly/AttackFly/Gaper construction, AI and contact | [state-pair.mjs](tools/e2e/state-pair.mjs) `--scenario-helper tools/original/npc-scenarios.py --comparator tools/foundation/npc-state-pair.mjs --require-from-case npcRequired` |
+| `roundworms` | Round Worm actors, projectiles and room locks | [state-pair.mjs](tools/e2e/state-pair.mjs) `--scenario-helper tools/original/roundworm-scenarios.py --comparator tools/foundation/roundworm-state-pair.mjs --native-frame-timeout 120` |
+| `fireplaces` | Fireplace damage, extinguish and Ember effects | [state-pair.mjs](tools/e2e/state-pair.mjs) `--scenario-helper tools/original/fireplace-scenarios.py --comparator tools/foundation/fireplace-state-pair.mjs` |
+| `monstro` | Level2 Fly route into Monstro: admission, AI, projectiles and scene cleanup | [state-pair.mjs](tools/e2e/state-pair.mjs) `--scenario-helper tools/original/monstro-scenarios.py --comparator tools/foundation/monstro-state-pair.mjs --native-frame-timeout 120` |
 | `dips` | Dip admission, AI, poop explosions and death callbacks | [dips.mjs](tools/e2e/dips.mjs) `--count 2` |
 | `blood-start` | Blood effect start-up and background admission | [blood-start.mjs](tools/e2e/blood-start.mjs) |
 | `health-damage` | Red/Soul/Black health damage, Hit and Black-heart callbacks | [health-damage.mjs](tools/e2e/health-damage.mjs) `--count 2` |
