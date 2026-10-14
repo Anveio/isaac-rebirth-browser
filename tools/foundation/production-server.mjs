@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { createReadStream, rmSync } from "node:fs";
-import { cp, mkdtemp, readdir, readFile, rm, stat } from "node:fs/promises";
+import { cp, mkdtemp, readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { createServer } from "node:http";
 import { tmpdir } from "node:os";
 import { extname, join, relative, resolve, sep } from "node:path";
@@ -50,6 +50,8 @@ export async function startProductionServer({ directory = join(ROOT, "dist"), po
   const snapshot = join(scratch, "dist");
   let server;
   try {
+    // Lets the e2e runner sweep snapshots whose process was killed.
+    await writeFile(join(scratch, "owner.pid"), String(process.pid));
     await cp(source, snapshot, { recursive: true });
     const identity = await buildIdentity(snapshot);
     server = createServer(async (request, response) => {
