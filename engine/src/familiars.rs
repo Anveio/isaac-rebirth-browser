@@ -853,10 +853,7 @@ pub fn paint_background_effects(state: &mut State) -> Result<(), String> {
         .iter()
         .enumerate()
         .filter(|(_, effect)| {
-            matches!(effect.variant, 7 | 17 | 43 | 58)
-                && effect.flags & 8 != 0
-                && effect.active
-                && !effect.removed
+            matches!(effect.variant, 7 | 17 | 43 | 58) && effect.flags & 8 != 0 && effect.active
         })
         .map(|(index, effect)| {
             let key =
