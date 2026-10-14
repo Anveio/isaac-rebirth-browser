@@ -88,6 +88,8 @@ export const SUITES = [
     about: 'Level2 Fly route into Monstro: admission, AI, projectiles and scene cleanup' },
   { id: 'run-admission', entry: 'tools/e2e/run-admission.mjs', args: ['--count', '2'],
     about: 'Initial run admission: menu confirmation clock anchor and Player control enable timing' },
+  { id: 'player-death', entry: 'tools/e2e/player-death.mjs', args: ['--count', '2'],
+    about: 'Normal Isaac death clip, GameOver freeze and deferred popup restart/exit actions' },
   { id: 'audio', entry: 'tools/e2e/audio.mjs', args: ['--count', '2'],
     about: 'SFX admission and Web Audio output' },
   { id: 'music', entry: 'tools/e2e/music.mjs', args: ['--count', '2'],

@@ -21,6 +21,64 @@ pub struct ActorRef {
     pub id: u32,
 }
 
+/// Actual EntityManager dc/e0/e4/e8 (Room16ac/16b0/16b4/16b8).
+/// Admission adds pending words; the full pass counts its fenced active actors
+/// after their callback, then folds pending into current before contacts.
+#[derive(Clone, Copy, Debug, Default, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct ManagerCounts {
+    pub countable_pending: i32,
+    pub countable_current: i32,
+    pub boss_pending: i32,
+    pub boss_current: i32,
+}
+
+#[derive(Clone, Copy, Debug, Default)]
+pub(crate) struct FullCounts {
+    countable: i32,
+    bosses: i32,
+}
+
+impl FullCounts {
+    pub(crate) fn observe(&mut self, countable: bool, boss_without_final_flag: bool) {
+        if countable {
+            self.countable = self.countable.wrapping_add(1);
+            if boss_without_final_flag {
+                self.bosses = self.bosses.wrapping_add(1);
+            }
+        }
+    }
+}
+
+impl ManagerCounts {
+    ///4524f0->452490 on actual manager admission; virtual70 and78 are distinct.
+    pub(crate) fn admit(&mut self, countable: bool, boss: bool) {
+        if countable {
+            self.countable_pending = self.countable_pending.wrapping_add(1);
+            if boss {
+                self.boss_pending = self.boss_pending.wrapping_add(1);
+            }
+        }
+    }
+
+    ///454f98..454fc6. Pending admission is not deduplicated against the fenced
+    /// callback count: both source words enter the real addition.
+    pub(crate) fn finish_full(&mut self, counted: FullCounts) {
+        self.countable_current = counted.countable.wrapping_add(self.countable_pending);
+        self.boss_current = counted.bosses.wrapping_add(self.boss_pending);
+        self.countable_pending = 0;
+        self.boss_pending = 0;
+    }
+
+    pub(crate) fn countable_total(&self) -> i32 {
+        self.countable_pending.wrapping_add(self.countable_current)
+    }
+
+    pub(crate) fn boss_total(&self) -> i32 {
+        self.boss_pending.wrapping_add(self.boss_current)
+    }
+}
+
 /// Source Entity+8 is assigned by Room5c6940, independently of the browser
 /// handle. IDs can coincide after a room reset retains Player/Familiar pointers.
 #[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]

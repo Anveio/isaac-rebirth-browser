@@ -181,7 +181,9 @@ def observe(pid, context):
                 'descriptorFlag40': bool(read(descriptor + 0x40, 1)[0]),
                 'combatClearCountdown': struct.unpack('<i', read(room + 0x1598, 4))[0],
                 'countablePending': struct.unpack('<i', read(room + 0x16ac, 4))[0],
-                'countableCurrent': struct.unpack('<i', read(room + 0x16b0, 4))[0]}
+                'countableCurrent': struct.unpack('<i', read(room + 0x16b0, 4))[0],
+                'bossPending': struct.unpack('<i', read(room + 0x16b4, 4))[0],
+                'bossCurrent': struct.unpack('<i', read(room + 0x16b8, 4))[0]}
             transition = game + 0x95c0
             report['roomTransition'] = {'state': u32(transition), 'counter': u32(transition + 4),
                 'duration': u32(transition + 8), 'bossIntroduction': bool(read(transition + 0x3f8, 1)[0])}

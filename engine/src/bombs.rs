@@ -506,9 +506,12 @@ pub fn advance_actor(state: &mut State, phase: Phase, id: u32) -> Result<(), Str
         {
             state.player.vx = f64::from(velocity.x) * WORLD_SCALE;
             state.player.vy = f64::from(velocity.y) * WORLD_SCALE;
-            if state.damage_cooldown == 0 {
+            if state.damage_cooldown == 0 && !state.player.dead {
                 state.player.hp = state.player.hp.saturating_sub(PLAYER_DAMAGE);
                 state.damage_cooldown = DAMAGE_COOLDOWN_TICKS;
+                // Bomb555300 supplies actual incoming DamageFlags4 via
+                // r9d to Game554490; its Player virtual38 forwards esi.
+                crate::player_death::after_damage(state, 4)?;
             }
         }
         crate::rock_blast::destroy(state, position, BLAST_RADIUS)?;

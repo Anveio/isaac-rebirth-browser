@@ -74,7 +74,7 @@ world-center, room-dimension and phase checks. Existing nine mask cases retain
 all18 complete targets exactly, with zero budgets. Replay cases and the
 source-bound verification summary are in
 `references/isaac/foundation/combat/spikes/`. Run the actual two-game replay
-with `npm run test:e2e -- --random-count 0 --replay-cases
+with `npm run test:e2e -- paired --random-count 0 --replay-cases
 references/isaac/foundation/combat/spikes/22PFCSFS-offset-0.json,references/isaac/foundation/combat/spikes/22PFCSFS-offset-1.json`.
 `tools/foundation/grid-state-pair.mjs --case CASE_DIRECTORY --kinds 8 --output
 REPORT.json` then checks each declared gameplay observation rather than
@@ -173,6 +173,18 @@ presentations) protect reusable tooling. Radius4096 is an admission limit,
 not a recovered gameplay explosion tier.
 
 ## Implementation and remaining scope
+
+Nonplayer class5 preview preserves its position and velocity at the solver
+boundary when the finite f32 velocity length underflows to zero. Source
+`0x442b90` computes that length through `0x612790`; `0x443117` branches to
+`0x44346c`, which returns from preview before the penetration refinement.
+The caller's earlier room clamp and existing contact feedback remain owned by
+the caller. Full-phase zero-speed rejection and all finite checks remain.
+The source FDEs are 4021 and 50 bytes, SHA256
+`8597e1990a9052f595d4a9ec3c934fe4f6b74fd64ed020b33c76420eb68367f2`
+and `650344255cbf804738906a2e11eb676c963acc99e4038cbd473625e860cf0f46`.
+This narrow correction has source evidence; a fresh two-game witness for the
+underflow branch remains pending. Earlier collision captures do not prove it.
 
 `Grid` accepts a supplied descriptor and exposes indexing, collision lookup
 and blast candidates. `Collider` caches source samples and resolves native

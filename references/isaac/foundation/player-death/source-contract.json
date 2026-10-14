@@ -1,0 +1,419 @@
+{
+  "schema": 1,
+  "scope": "Exact bounded normal-Isaac death source mapping plus two fresh public source-only spike probes. No port runtime or paired death acceptance.",
+  "binarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "functions": {
+    "0x531850": {
+      "bytes": 13012,
+      "rawSha256": "afc91e017a8190f954b8859c4cb46cabdc2996f64432f099ba8d7e9163c7c20f",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/death-research/exact/function-531850.txt",
+      "dumpSha256": "7920b0cd93cb5be4abab9747824db90c0fb46b70ca6fd578e41bdc281734edbe"
+    },
+    "0x52b080": {
+      "bytes": 7175,
+      "rawSha256": "f5b9ad4be3fb16bc157fa0656e93fd57c6d8b780c1a5d27dfe060caea8566d6e",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/death-research/exact/function-52b080.txt",
+      "dumpSha256": "89052e2fd8d3fed0431249d9e7c3fac8374dfe607180268f6a94472dc2020809"
+    },
+    "0x444800": {
+      "bytes": 15,
+      "rawSha256": "a61d1504e20db765efa9b463161e45691e755f90a5ead806618df15029200da6",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/death-research/exact/function-444800.txt",
+      "dumpSha256": "0a1bf070ad2784efad7efe2c3fcd69e43c767474089364d39079a11828fed7af"
+    },
+    "0x445c60": {
+      "bytes": 2130,
+      "rawSha256": "ea3c9f8ca72b6db67f34600d14de408e219139b32352ec579dc761d4251bd696",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/death-research/exact/function-445c60.txt",
+      "dumpSha256": "5f03d67075fa97eb3f6a4148f50f1bd0dec663a765ffa347745468ecfd237f51"
+    },
+    "0x52e770": {
+      "bytes": 1738,
+      "rawSha256": "ac2b60aea557807bfd6f1dace1bea269267bfd518e630b93a05dc81e7e8edc62",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/death-research/exact/function-52e770.txt",
+      "dumpSha256": "fbf41c203b454aebbab1c2b5ce3aee3be5f027ef7282f9065168275e255566c0"
+    },
+    "0x557430": {
+      "bytes": 530,
+      "rawSha256": "016f34ccd489adba5ff16659be437cde2ae8d74d7e796d5917d2768862f0488f",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/death-research/exact/function-557430.txt",
+      "dumpSha256": "7d6736b7a43213b881d93c93acdb5fc4e0ec812e71ce508fd03797c514ca2569"
+    },
+    "0x448140": {
+      "bytes": 3,
+      "rawSha256": "251447ee91a9067dcd6ab96703133f617565974cd6c4819021760c4688c91abf",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/death-research/exact/function-448140.txt",
+      "dumpSha256": "14bda0f986c451b599aa60cf8fd37fff24fa91fc7fba90a3787a3f7384e418d7"
+    },
+    "0x5bf8f0": {
+      "bytes": 328,
+      "rawSha256": "d9484995ca79c9c53220c7d41e05a05aa200c101d64f4870cc99e82f7c108946",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/death-research/exact/function-5bf8f0.txt",
+      "dumpSha256": "52bbb53566fe1147b42f695b09fd2d7de837e912f9ec4e77440b997465fadf12"
+    },
+    "0x5588d0": {
+      "bytes": 37,
+      "rawSha256": "295df86e992109172325e40303b55e048aa7ffa3458f652e36ce2682b57f4953",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/death-research/exact/function-5588d0.txt",
+      "dumpSha256": "7ffac916daa6d610157c443fb0bb65f9a2978703e89b2e6ccdcb70fb0bc6dbc7"
+    },
+    "0x4464c0": {
+      "bytes": 42,
+      "rawSha256": "ba65678eb196cb791af1dc7e3a0c06ef004a6c96c4e1cc6131d6dac798f86943",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/death-research/exact/function-4464c0.txt",
+      "dumpSha256": "193239a2ac230904a65a88940344f5a4b5f940f22b03c1bf238bf35b825cde7b"
+    },
+    "0x557650": {
+      "bytes": 733,
+      "rawSha256": "9b8db264f36b503a8c99dc5baa965cea216506098cfcc8ee50cf50e3061a7c5c",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/death-research/exact/function-557650.txt",
+      "dumpSha256": "1c1f8d6dc57a3edc5c9d0dd250f52dd640e919d2668c88efdf6556c642d629fc"
+    },
+    "0x558900": {
+      "bytes": 4131,
+      "rawSha256": "7db30042ecc11a8eea1622b88262d34154512c85913d930fa158360584f95eb9",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/death-research/exact/function-558900.txt",
+      "dumpSha256": "7587bc8a524b2a10adeb3d0e7ef490fcb46f751ee4d8ebf063fa00af786b32dc"
+    },
+    "0x557060": {
+      "bytes": 431,
+      "rawSha256": "f5875c9587a4cc004026c94eab385c919abd46566ad1aa31ecb7379cd588d452",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/death-research/exact/function-557060.txt",
+      "dumpSha256": "b31b50a178c950039d565daeeebcd3264e613efb99a119aaa6e01917857bb42e"
+    },
+    "0x510510": {
+      "bytes": 56,
+      "rawSha256": "9077d362b105b7d0ac73d93412556f95bdc050061929df5c922eccc4ccdf5d49",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/death-research/exact/function-510510.txt",
+      "dumpSha256": "289a3fd7b49b2aa9d3aade725a955ea2448a3be717fd8d5a7ad478909e34618f"
+    },
+    "0x557e10": {
+      "bytes": 2751,
+      "rawSha256": "e06d743dc1bdb935f4e7aeb08832a65bc937170368f53c61a42aa2a914616a72",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/death-research/exact/function-557e10.txt",
+      "dumpSha256": "3e913ca7b2302990a96dff0d6afc0596480df8660c0fa50c44921e9977a890b2"
+    },
+    "0x50a5c0": {
+      "bytes": 187,
+      "rawSha256": "95c240132b2b69161b7ff962005d89f24957b4e794bb2598f0ecc4d205927df8",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/death-research/exact/function-50a5c0.txt",
+      "dumpSha256": "0b9f5e8ab277874e955693d6b4a80205140db2e437c13b639cd14305aa9d5172"
+    },
+    "0x508230": {
+      "bytes": 41,
+      "rawSha256": "f42c151dcbe3567ef72219b175baa064efd5238f6ac10f42a08d0ed921e467a2",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/death-research/exact/function-508230.txt",
+      "dumpSha256": "3b079e817b27dcbeeb5b3579d30ae9cff2b43eb3b93de6f056216610d7ba9c51"
+    },
+    "0x557930": {
+      "bytes": 1234,
+      "rawSha256": "26ea4fb12d6bd1233faecacc47f4f987a1c75d292b928e4833fbf608000e298c",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/death-research/exact/function-557930.txt",
+      "dumpSha256": "8dfe4948d65d0d6bcc03594a028330d0d08e1e95d402a605f86b15d6bbd3969b"
+    },
+    "0x557210": {
+      "bytes": 295,
+      "rawSha256": "2c08e4f927e8df22cef66dd5a96b96e1fdb5f384b628066a231c85ddb5e80004",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/death-research/exact/function-557210.txt",
+      "dumpSha256": "ea7705086793642c36626d05f9fc4cc05969304e682cb4fef4840ecdc6ebad12"
+    },
+    "0x557340": {
+      "bytes": 228,
+      "rawSha256": "9dbb9d765d1d63b65a597b078fba5801e18b8e6246e792e791ab0c95dbfda8cf",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/death-research/exact/function-557340.txt",
+      "dumpSha256": "ff1ad48e0e9bb55af42753719b98a768a9dd8d6cd6600215056f6bd337becb54"
+    },
+    "0x594710": {
+      "bytes": 209,
+      "rawSha256": "a1a4142a2790ccf81015a887933bd17702abb65a50cce89e79406d68b4a024e1",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/death-research/exact/function-594710.txt",
+      "dumpSha256": "16e95fc0d8292579b9c22faa4d80a82e6503e808846ec349299c06a3e798e51e"
+    },
+    "0x5945f0": {
+      "bytes": 35,
+      "rawSha256": "f0b2fcd16db8d694dc8e1889c9a570b62193bf3560a405b8d2201fbda31df9b7",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/death-research/exact/function-5945f0.txt",
+      "dumpSha256": "7395b24a69303393ee478fdd5ef4d9d55c00118a67cc78a28576411a90da0d7c"
+    },
+    "0x593b60": {
+      "bytes": 174,
+      "rawSha256": "acdb706369ec46bb2c9b95d0bd855eb371b7645592c66b00b842faf013a2c3bb",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/death-research/exact/function-593b60.txt",
+      "dumpSha256": "457f9c859ccf0ace425df70033ee2bc40f2a5db7718c60459d9760a95b654c7b"
+    },
+    "0x550760": {
+      "bytes": 140,
+      "rawSha256": "c553f89487c1654d6b34b7087dcd18b176c4d8827693de71e477cb90f3f05b71",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/death-research/exact/function-550760.txt",
+      "dumpSha256": "d003de88acefaeefe9fc59b418d34c1b80b854354cb414b5d09d01d04f3c7c8a"
+    },
+    "0x454df0": {
+      "bytes": 2192,
+      "rawSha256": "5a926d0b748f6abd6599d51d5dca746a0fd5ff4cd1a2340833df6bcd4857e205",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/death-research/exact/function-454df0.txt",
+      "dumpSha256": "93984c8393b633602ab38b03534660685f84a1b90027f8b2677f4e2dc514b5c0"
+    },
+    "0x5098d0": {
+      "bytes": 1334,
+      "rawSha256": "b4c48aaa8da13819bbe2c2d85a9765557144e0e26e610853ef42f2c1c40640d5",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/death-research/exact/function-5098d0.txt",
+      "dumpSha256": "1a922663750cfdd7ee147ff6211e1853e503ff27d6fb86c50f52ca999df10b04"
+    },
+    "0x447190": {
+      "bytes": 3489,
+      "rawSha256": "b7fc8a1713cd9a376279973dc2f7f5a74eeae7486d24b79a6eebad6ae7acc19c",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/death-research/exact/function-447190.txt",
+      "dumpSha256": "add141f46cfe7c3bd9068c6c6ba0d0416f9d5001c7f44cb8f4b11568d20a8273"
+    },
+    "0x4446a0": {
+      "bytes": 352,
+      "rawSha256": "49ec68194879591e78e7f14714148d0b96e52a036358cf27f4755cae3293039e",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/death-research/exact/function-4446a0.txt",
+      "dumpSha256": "ee05e42ab814dafb8e2cd9316be6dca23df71a6384ed73af4d11d9d8da4b1030"
+    },
+    "0x620850": {
+      "bytes": 186,
+      "rawSha256": "fbb80c31a835aaa002fad33e9b7340a15a8ce70d12d34bb8b1be7c25768de1cf",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/death-research/exact/function-620850.txt",
+      "dumpSha256": "ddaab2e2339af1ad4ce82cac2bbc19d2393b39b07e6c8d82e78ac4086940086b"
+    },
+    "0x594cb0": {
+      "bytes": 208,
+      "rawSha256": "484020612250563ad82d29bb08fb1bf7b6cd3aded0ab8d148347deade97743e5",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/death-research/exact/function-594cb0.txt",
+      "dumpSha256": "b8078e853d9e6bd2232542e1a511bfa8c840a26f19d3f890700cebc0e34c5c31"
+    },
+    "0x5950e0": {
+      "bytes": 1180,
+      "rawSha256": "a636b96ce2448547236a17212700569d9f48daedc2759937ac027e1678f9c560",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/death-research/exact/function-5950e0.txt",
+      "dumpSha256": "8ce42ce93472eacf091046cd1bb05066dcc0b2473c6e05115245abe846bd9367"
+    },
+    "0x620160": {
+      "bytes": 479,
+      "rawSha256": "486f832c04f7ecd056b47894bb136c23c6f4d239087d397f506f169dc2f80149",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/death-research/exact/function-620160.txt",
+      "dumpSha256": "e3ace88d8661ed2574907aa92166c571b36f01e7dc62d27c703dfd3ba8505095"
+    },
+    "0x5949a0": {
+      "bytes": 98,
+      "rawSha256": "c1ab4e54116ba7e426ad65c64866baf3ec9eeb605d5c7c068bb22f362e841105",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/death-research/exact/function-5949a0.txt",
+      "dumpSha256": "3c4fa7fc77083d9b493309c923534e40f76b8224344e8ce225c64d3dafd5702c"
+    },
+    "0x5ef160": {
+      "bytes": 101,
+      "rawSha256": "ffc152d810dcb07419ffe07bbe2bfdb9343f7168078662277044adfd821739a4",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/death-research/exact/function-5ef160.txt",
+      "dumpSha256": "ac6346d774462fb2d2df96e2de88b8fcd6833149db9d64f4d1d4758e0d862d06"
+    },
+    "0x5e1170": {
+      "bytes": 275,
+      "rawSha256": "8f5ed4856b4df427089ee8d0c1144105598b4c126fc13a4f1e042831a787f036",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/death-research/exact/function-5e1170.txt",
+      "dumpSha256": "0f41bf8038a357831bd437d004a5f9bb361353c787e77dc61e5e720d08025acf"
+    },
+    "0x620360": {
+      "bytes": 89,
+      "rawSha256": "6df194afe48e9ac439adad8e029dc87b23bdb74a5d1abf0999fbe5e0f29fb3d9",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/death-research/exact/function-620360.txt",
+      "dumpSha256": "954bda7daef4327c583f3f20f1322ebcb53d319633c212aade4c2ac726d3da35"
+    },
+    "0x620440": {
+      "bytes": 123,
+      "rawSha256": "e18dc12b52bb62175ac17c136c19bd8624c02cc65586fcd76ce0ae6e7746befe",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/death-research/exact/function-620440.txt",
+      "dumpSha256": "0d4d7daf8b6a9e95ef2b629059cdedee5db7190e7698121634977721abd773cc"
+    },
+    "0x54f3f0": {
+      "bytes": 490,
+      "rawSha256": "cdc35d95bef17e272d1367cf026d0f62a81b1dea3efefc0e7b55968acee7f426",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/death-research/exact/function-54f3f0.txt",
+      "dumpSha256": "877704527c8340f049f28d241856bf2a0ce24f40a4aecdb398d77bb6d5629028"
+    },
+    "0x5efa20": {
+      "bytes": 313,
+      "rawSha256": "1b76db3c470220ef67e3e7d3a4a9f4601e6590cf74967c0f95ab4fa34b20a85b",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/death-research/exact/function-5efa20.txt",
+      "dumpSha256": "2d0cc78dc1e0acd05372b4fd27d553bbaff69e724d87bbf9923152e53d006713"
+    },
+    "0x62b520": {
+      "bytes": 1554,
+      "rawSha256": "199c9c44f55fbe0fb68f377eccdda1544b6622f5010bbf7379b072a8adf0424b",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/death-research/exact/function-62b520.txt",
+      "dumpSha256": "51bfbfc3c790a89b31a58f967ba6be8ccf736322d6e60ae5cb7ab944138f2668"
+    },
+    "0x61fda0": {
+      "bytes": 184,
+      "rawSha256": "1742db3b23f141c447cd83950f832f3477d9e92f59b5c807a05d1e88ba2074d1",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/death-research/exact/function-61fda0.txt",
+      "dumpSha256": "664654950f70be2a01b4b500b99c688c1330fdec5891a67e675ab625a102ec1c"
+    },
+    "0x620150": {
+      "bytes": 12,
+      "rawSha256": "571c5bf753f2cbbb83ef5e38693209c7c45c4226c209dc1d2013c667be201f34",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/death-research/exact/function-620150.txt",
+      "dumpSha256": "71c778406295816c666fd0fc0a9eaed9b01147b158cdac64e52e2798e9fc95e9"
+    },
+    "0x594410": {
+      "bytes": 283,
+      "rawSha256": "1adf4d34b90078ed605b6ee4de56875bf494a883bcbe38045af0629f9a66e77d",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/death-research/exact/function-594410.txt",
+      "dumpSha256": "f09475230fe265cce9f10ad6df986ff40364a09a6c3c7f1ad76b12b883fe7d43"
+    },
+    "0x62bc30": {
+      "bytes": 18,
+      "rawSha256": "b71df1ec86fa8134bda07f87c0f88b8495e8bcc4b14d859d78538aa548ca11f3",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/death-research/exact/function-62bc30.txt",
+      "dumpSha256": "c37c7fac64c691ef1c0b857786ec8d2f6ab11271b6f4299352b9c3321f5dda8e"
+    },
+    "0x594d80": {
+      "bytes": 54,
+      "rawSha256": "aa6e0dcabba813af14b52763266501d8467ba549b60815dafbb2d602f68173bf",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/death-research/exact/function-594d80.txt",
+      "dumpSha256": "e0c5b2e637380657f573a61a52f61a0154f03b23409ced33d96c44c44e51f55e"
+    },
+    "0x594a10": {
+      "bytes": 662,
+      "rawSha256": "2b7a5498ffe78f500cab0232e0f05e1e1599d6e89969de641e7cb23e9c860de3",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/death-research/exact/function-594a10.txt",
+      "dumpSha256": "ed9d8a30f7bf3b7f21164da0a954c4298e74e813e7803e07147a0b356b16c280"
+    },
+    "0x5efca0": {
+      "bytes": 356,
+      "rawSha256": "19b465e22afdf081d7649c9555a8a744fd97495ea40a9aa87d6be5ec320ac061",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/death-research/exact/function-5efcc0.txt",
+      "dumpSha256": "0b82145041c9a5251b1b4af7ae2acc3e004ea60078ecd8c862049cc13c396399"
+    },
+    "0x5950a0": {
+      "bytes": 55,
+      "rawSha256": "7d3d7ec98650d3709f848a6ff6fc46119bfd0d159c8165492a66edca02089c3e",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/death-research/exact/function-5950a0.txt",
+      "dumpSha256": "5600177190b0b5063d71ff936c389477dc6b17d13fa52aa6bcc2906c23599c52"
+    },
+    "0x43bc70": {
+      "bytes": 552,
+      "rawSha256": "2b7d65e65a3801b4003848f596b800d597c52ba7166051cbf0312adfc200d164",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/death-research/exact/function-43bc70.txt",
+      "dumpSha256": "90ba53fb11389305452949e50258ee3499055c56409e1e39e3dc286c6ad6fd35"
+    },
+    "0x620a60": {
+      "bytes": 173,
+      "rawSha256": "d5f0f70109bb234762524ba2432320563adfc52945cca78478d7bddba837f42b",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/death-research/exact/function-620a60.txt",
+      "dumpSha256": "afaad2cc0bb0b032f204889cf1d651dae128965702be249319ed11ccf382bf41"
+    },
+    "0x62bb90": {
+      "bytes": 42,
+      "rawSha256": "6bf8dbfe878f6713fec39587177ac6c244bb82b393283ea531f47dfc0e8e773a",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/death-research/exact/function-62bb90.txt",
+      "dumpSha256": "4071a8f296af030fd404e4ba17a58b0858945f5efce559dcca6a84b263d5fb14"
+    },
+    "0x5e13d0": {
+      "bytes": 153,
+      "rawSha256": "afb210f41314faed28b802c98889f50cf187b24b086448b73337ba97daf971e8",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/death-research/exact/function-5e13d0.txt",
+      "dumpSha256": "f925fee62c65c53e39e14f0bc009ec9b5e41ecea02645a213a3202368940496a"
+    },
+    "0x6209a0": {
+      "bytes": 182,
+      "rawSha256": "7aaf94d5fb027aff16135304a6d5e3c787d83d881db91bd88a52240c47786cc4",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/death-research/exact/function-620a00.txt",
+      "dumpSha256": "a99efca31a232743ff7fecbe0406e5fab321b98fd12f726633aab3c0df7f2da8"
+    },
+    "0x5cd920": {
+      "bytes": 132,
+      "rawSha256": "957e3d31cfb93181c22cf135b0e7ee1645197bc031e5554de39d930899e4eab1",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/death-research/exact/function-5cd920.txt",
+      "dumpSha256": "c1de2d53ef889bc58255eab0c0b2c97b31c1afd34aeb88fce6a227f6fc2daeb6"
+    },
+    "0x555300": {
+      "bytes": 902,
+      "rawSha256": "89f0b6a5944b231cc703206c65859a4706d7ac46cf9b27cb7765e07046981357",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/death-research/exact/function-555300.txt",
+      "dumpSha256": "805de75478959abc44cae50de1a1c0b37389230ec7d989b92c1681ffd77efdf4"
+    },
+    "0x554490": {
+      "bytes": 3690,
+      "rawSha256": "ad4d99fb2b5caf2c7ad38d870104eed462ce7f278fbcf980ecc1081245acd636",
+      "dumpPath": "/workspace/isaac-rebirth-browser/.cache/coordination/death-research/exact/function-554490.txt",
+      "dumpSha256": "ab2726a5aeb9d9ab30c0b768510dd9b2f998a0cbf23442fcfd036f9643a3d149"
+    }
+  },
+  "playerVtable": {
+    "address": "0x670c90",
+    "rawSha256": "3e3618ffabce33bc19f12fba05fa55db9b6e926205aaf0f2f5ea1785eec59e07",
+    "virtual40": "0x4464c0",
+    "virtual78": "0x448140 (returns false)",
+    "fullUpdate18": "0x531850",
+    "intermediate20": "0x4446a0 is the generic virtual20 slot. Actual RoomFast5cd920 dispatch special-cases type1: set flags318 bit0x4000 at5cd965, invoke virtual18=531850 at5cd975,443d00(false),clear4000 at5cd982. Do not infer Player fast dispatch from vtable slot20.",
+    "render28": "0x5098d0 (render path, not the intermediate callback)"
+  },
+  "vanillaDamageDeathAdmission": "52b080 stores incoming esi DamageFlags in r12d at52b0bb. After red and soul health are depleted,52c675 tests incoming DamageFlags bit1 (NO_KILL), not entity flags. If clear,52cbc9 invokes actual virtual40; if set,red HP is restored to min(maxRedHP,1). Item/character/other flag branches remain distinct.",
+  "baseKill": "4464c0 returns if already dead, otherwise stores31f=1, invokesvirtual78; actual Player false path445c60 normal zero-gib emits SFX30 f32.8 delay2 and callerSharedRaw seeded Blood7 with immediate Update. RootDeath implements this source-qualified producer; no browser/audio acceptance yet.",
+  "deathClip": "531850 executes BaseUpdate447190 before checking entity+31f; normal Death branch531b24 selects Death via50a5c0 if needed, marks31d, tests actual IsPlaying40fae0 and IsFinished40fba0, then531bf7 invokes52e770. Exact full/fast and input/motion fences still require a real public death capture.",
+  "noItemFinish": "52e770 normal no-item/Isaac branch requests Music93 at52e8ee then loop8 at52e906, calls PlayerManager5bf8f0 at52e91c. Primary player variant0 path5bfa00 queues source action9 and calls558900 with Game+a938.",
+  "popupUi": "The shared popup object is constructed at557210;557430 initializes GenericPopup, not the death screen.558900 writes state2, loads actual Death Screen.anm2/Diary and Exit/Restart BackSelectWidget clips.557650 input actions14/15 and system request3 are mapped calls but final exit/restart semantics are not yet accepted.5588d0 hides/reset state0.",
+  "remaining": [
+    "Normal admitted Hit sprite/SFX callbacks",
+    "Complete diary portrait/stage/cause/item selectors",
+    "Soul/black-heart damage priority, revival items, other characters and cooperative players",
+    "Fresh public paired death/restart/exit/save/audio acceptance"
+  ],
+  "authoredDeath": {
+    "actor": "gfx/001.000_player.anm2",
+    "clip": "Death",
+    "frames": 57,
+    "loop": false,
+    "resourceScope": "Existing authored resource only; full/intermediate live clock acceptance pending"
+  },
+  "animationOwner": "Room full and fast Player both invoke531850. Base447190 advances main ANM except flags3184000; actual fast Player skips ANM while still executing the subclass dead/control/active path. Dead+31f re-enables guarded animation at447a81. Source50a5c0 resets speed1, forces Play(name,true) and sets bf4; bf4 does not blanket-disable movement. Death531b24 only selects Death if actual current name differs.",
+  "popupFreeze": "Game550760 treats Game+a938 nonzero as gameplay frozen, alongside source explicit freeze counter, BossScene, RoomTransition, other scene/pause and actual System screen2 predicate. Popup state2 is produced by558900 after no-item primary Player finish; system and popup input must keep running while actor/game clocks are frozen.",
+  "systemRequests": "5950e0 defaultinterpolationtrue follows5951c0\u2192595105 also on odd presentations, dispatching594a10/594cb0/594d80 before input poll. Disabledinterpolation skipsodd. Requests therefore execute on the next released System dispatcher, not inherently on the next full game update.",
+  "priorStaticContractSha256": "f33be092736b0f26a8e4346ac0d32845291299d76ba43c54ef0da2c60ac70570",
+  "normalCommonDeath": "Fresh actual Player1/0 has +400 soundGate0 and config gibAmount0/gibFlags0 in both source probes.445c60 therefore routes44641d\u2192SFX30 volumef32.8,pitch1,delay2, skips gib loops, then44622e callerSharedRaw seed\u2192Blood7 zeroV/nullSpawner/colorcopy/immediateUpdate. Audio backend sample/gain is not accepted: probes did not enable API tracing.",
+  "deathMotion": "Normal dead branch531bb6 clears velocity464 with934c00 on both full and actual fast Player callbacks, then returns before countdown/active/shot callbacks. Source-only dense probe observesDeath0 atP1601/Game231,0 fastP1602,1 fullP1603/Game232. Hurt countdown120 remains120 through death and popup; controls7d4 remainstrue, active31e true,visible31d becomesfalse only at finish. These probes do not accept browser behavior.",
+  "sourceOnlyProbes": [
+    {
+      "directory": "/workspace/isaac-rebirth-browser/.cache/coordination/death-research/spike-native-1",
+      "observations": 165,
+      "summarySha256": "36447a5bc65d37515ba6f8796d49eceb9c145b4dbd42e1ea1d9f161ea70da8b2"
+    },
+    {
+      "directory": "/workspace/isaac-rebirth-browser/.cache/coordination/death-research/spike-native-dense-2",
+      "observations": 1028,
+      "summarySha256": "965fd56090599dd59c35afe608400051e1fa4bb6b2ca05afa9751c89459f92b7"
+    }
+  ],
+  "sourceOnlyScope": "Original executable hashes verified through /proc/pid/exe and source-before/end identical. Both exact public spike tapes reach redHP0/dead/Death and popup2. Dense-tape observer runs at every selected step, not every presentation inside multi-frame steps. First observed popupP1777/Game288 lies after an unobserved90-frame gap; exact popup admission phase within that gap is not established. Every captured PNG/raw manifest retained, gzip restoration indexed centrally.",
+  "defaultKeyboard": {
+    "tablePath": "/workspace/isaac-rebirth-browser/.cache/coordination/death-research/default-keyboard-table.json",
+    "tableSha256": "6477236317e0199b5a762ceee1746e55e0679b4464205fe734e2a402ccd0331f",
+    "keyboardVtable": "0x6919d0",
+    "vtableRawSha256": "39d00a96254f67d75ae24833a1d2d5c20e66003b965855d516d9209604f7ea4b",
+    "law": "Actual Keyboard62b520 assigns static table8e6880/count25 then Base620160 allocates action bindings. VirtualD0=61fda0 clears each slot to -1 and fills first empty per table entry:14 has Space32 then Return257 in separate slots;15 has Escape256. Manager5efa20 invokes Device virtual50=620440, which calls Keyboard virtual38=62bb90: current936380 button true and previous9360c0 false. A saved input configuration can override; live public binding acceptance remains pending."
+  },
+  "restartExitDispatcher": "Popup557650 action14 invokes593b60 then594710. The latter sets pendingFresh2f2c8; next real System full5950e0 invokes594a10, exits/reset54f3f0 then sets System2 and calls freshGame54eb20 with own queued seed descriptor. Popup action15 queues5945f0 request3 into2f300/pendingMenu2f2fc; next full594cb0 exits/reset then sets System1, creates MenuController if needed, selects observed Main menu family3 via59cac0 and passes the actual seed descriptor to59b0f0. This is source control flow, not accepted live behavior.",
+  "restartSeed": "For normal Isaac and empty descriptor,594710 tests actual queued seededRun2f2e4 and challenge2f2d0: seeded+challenge0 reuses queued descriptor with no SharedRaw; otherwise42e8c0 samples new SharedRaw and zero maps to1. Nonempty valid seed strings are assigned directly. Live saved/challenge/exit/new-run outcomes remain unaccepted.",
+  "toolLimit": "The older temporary MachO disassembler reads the encrypted reference image; attempted symbol dumps in input-macho-mapping.txt are invalid decoding and are not semantic evidence. All keyboard/restart facts above use exact Linux FDE bytes and actual RTTI/table references.",
+  "priorKeyboardContractSha256": "41f975d2579a0361324e9f0f033a6bb699a812c19438a572d731e4466080d379",
+  "bombDamageCause": "BombUpdate45776a invokes555300. At55536c r9d=4 entersGame554490;5544bc stores it tostack44 andPlayer virtual38 forwardsit inesi at554e1b. Ordinary explosion amount>=50 supplies2health units. Actual death cause mustretainDamageFlags4, notguessfromhealth.",
+  "popupWidgetPositions": "Source557e10 viewport-dependent positions: Exit(10,height\u221255),Restart(width\u221280,height\u221275);SourceDiary(width/2+16,height/2+16). At480x270 theseare(10,215),(400,195),(256,151); pixelprojectionunaccepted.",
+  "priorPlayerDispatchContractSha256": "7ea599fa87ff0316b8ae64862ba7009e2d91d7babbfd4832c5a6a2fd93e8e3ae",
+  "storedShootingBoundary": {
+    "scope": "Dead531b24 returns before the ordinary52f370 shooting-input owner. Preserve stored db0; suppress ordinary shot callbacks by returning, without inventing a stored-value clear. Held-arrow death public gameplay remains unaccepted.",
+    "writeOwner": "52f73d",
+    "checkedNoStoreCallers": [
+      "Player dead branch531b24",
+      "Player main ForcePlay50a5c0",
+      "Base447190",
+      "common Kill4464c0",
+      "dead-path50c000"
+    ],
+    "additionalSourceFunction": {
+      "address": "0x50c000",
+      "bytes": 1220,
+      "rawSha256": "6358d6eff95b38b268c1ba0dc22c9a735177faa453e1983f4bb9df67b6a9322a"
+    }
+  }
+}

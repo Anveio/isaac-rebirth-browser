@@ -141,6 +141,15 @@ export class Renderer {
       if (bossScene && state.roomTransition?.phase === "bossScene")
         this.assets.draw(ctx, "gfx/ui/boss/versusscreen.anm2", "Scene", 240, 135, bossScene.animationFrame);
       this.presentation.pause(ctx, state);
+      if (state.playerDeath.gameOver) {
+        gl.fillRectRGBA(0, 0, 480, 270, [0, 0, 0, 128 / 255]);
+        this.assets.draw(ctx, "gfx/ui/death screen.anm2", "Diary", 256, 151, 0,
+          { layers: [0, 1, 2, 4] });
+        if (state.playerDeath.gameOver.damageFlags & 0x80)
+          this.assets.draw(ctx, "gfx/ui/death screen.anm2", "Diary", 256, 151, 66, { layers: [5] });
+        this.assets.draw(ctx, "gfx/ui/backselectwidget.anm2", "Exit", 10, 215, 0);
+        this.assets.draw(ctx, "gfx/ui/backselectwidget.anm2", "Restart", 400, 195, 0);
+      }
     }
     gl.presentScreen(); gl.finish();
     this.context.reset(); this.context.imageSmoothingEnabled = false;
