@@ -13,7 +13,7 @@
   "stage": "Floor source52a30f continuingNewStage afterRoomadmission beforeSave: ifBBC>0 clearBBC then queueinfo13, addmax2 thenred2. Stage consumer awaits actualfield/API commit.",
   "limits": [
     "No actualpairedheartacceptance.",
-    "Current source composition consumes the concrete ef78 Death/shared ANM and sole player_can_collect entry; retained legacy queued Pickup/LiftItem/HideItem ownership remains explicitly incomplete.",
+    "Final111 concrete player_can_collect is reused unchanged; legacy queued Pickup veto no longer restricts generic regular/restored pickup contacts. Remaining collectible queue/chest scope and full Pickup/LiftItem/HideItem presentation remain separately qualified.",
     "Damage52b080 soul/black priority andcomplete healthcontainer damage remain tracked withRootDeath owner.",
     "Heart Room.Save readmission usessamef7 actualrecords and CI-owned440/ad4 correction; no clone-basedacceptance inferred.",
     "WholeHUD placement/animation, information queue13 andmodifier-completeheartfactory remain unaccepted."
@@ -63,16 +63,29 @@
     "matrix": "pass",
     "NodeAndPythonSyntax": "pass",
     "whitespace": "pass",
-    "RustAndStrictClippy": "pass at guarded composition1d166003; fresh full production and paired Heart acceptance remain pending"
+    "RustAndStrictClippy": "exact1d pass preserved; final5afa composition metadata turn pending"
   },
   "currentOwnedPayload": {
     "baseMain": "2d2174e63901acbfc209fc40018418cded26223e",
-    "concretePrerequisite": "6b7d1d3543635f65aa11582871294d4cd9980b09",
+    "concretePrerequisite": "5afa7ddb1a6d5c2031b6648905478e80d78fa6d9",
     "runtime": "f1bccc634a44f4ec058948f99e492625fac22b1a",
     "sharedEntry": "Extends main98 Game.collect_regular_pickup_at used by full and saved-readmission callbacks; preserves initialize_spawn_seed/persistent regular_rng, current anchor owner, and the prerequisite sole player_can_collect predicate unchanged.",
     "schema": "Eternal field/default/TypeScript matches b68 byte-for-byte; one field and no duplicated health-damage arithmetic.",
-    "eligibility": "Actual Player.dead/Death and owned Hit/UseItem main-name exceptions are read only through prerequisite player_can_collect. Controls7d4 is not a collection veto. Legacy queued Pickup veto stays explicitly incomplete.",
-    "RustAndStrictClippy": {
+    "eligibility": "Sole final111 player_can_collect permits known legacy Pickup through the unchanged shared normal/restored regular entry. Generic legacy queued-Pickup veto removed; collectible/chest own pending-queue rules remain separate. Physical touches reads actual Player.dead and accepts redHP0 with SoulHP. Owned Hit/UseItem main-name exceptions, dead/Death rejection, no controls7d4 proxy.",
+    "RustAndStrictClippy": "pending scheduled metadata validation of final5afa composition; exact1d check/Clippy receipt remains separately preserved",
+    "productionAndLive": "not run",
+    "retainedCaseBankSha256": "6860834fd32322bf690d01e33f5b78a3db4fc4ad3e5e897831c15e37fa55e76e",
+    "sourcePreflight": {
+      "TypeScript": "pass",
+      "formatting": "pass",
+      "NodeAndPythonSyntax": "pass",
+      "matrix": "pass",
+      "whitespace": "pass",
+      "registryCount": 39
+    },
+    "initialConcretePrerequisite": "ef78acc8c5028ed249711f7c15be15c7c3b72b7b",
+    "composition": "c16c1630977b4ee3d47c72fd80a2a96c24377419",
+    "previousRustAndStrictClippy": {
       "status": "pass",
       "checkedHead": "1d166003e9d73ae7188b29832f483b10e0067ae0",
       "checkSeconds": 9.56,
@@ -86,18 +99,7 @@
       },
       "receiptSha256": "9b24606cb9dca4cb5f740e17fffd8214d658a131ed1b288cc31622bb26bab315"
     },
-    "productionAndLive": "not run",
-    "retainedCaseBankSha256": "6860834fd32322bf690d01e33f5b78a3db4fc4ad3e5e897831c15e37fa55e76e",
-    "sourcePreflight": {
-      "TypeScript": "pass",
-      "formatting": "pass",
-      "NodeAndPythonSyntax": "pass",
-      "matrix": "pass",
-      "whitespace": "pass",
-      "registryCount": 39
-    },
-    "initialConcretePrerequisite": "ef78acc8c5028ed249711f7c15be15c7c3b72b7b",
-    "composition": "1d166003e9d73ae7188b29832f483b10e0067ae0"
+    "previousConcretePrerequisite": "6b7d1d3543635f65aa11582871294d4cd9980b09"
   },
   "previousOwnedPayload": {
     "baseMain": "7492adba9b256e5767e28906289e89ca6faa2655",
