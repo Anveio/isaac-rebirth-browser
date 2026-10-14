@@ -375,11 +375,11 @@ fn boss(primary: &mut Primary, flags: &mut u64, stage: u32) -> u32 {
         primary.random(10);
         primary.random(3);
         primary.random(4);
-        if primary.random(5) == 0 {
+        if primary.random(5) == 0 && stage == 1 {
             return 2010;
         }
         primary.random(2);
-        if primary.random(4) == 0 {
+        if primary.random(4) == 0 && stage == 1 {
             return 2050;
         }
         primary.random(2);

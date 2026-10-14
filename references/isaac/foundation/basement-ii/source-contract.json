@@ -60,7 +60,8 @@
     "source": "584240",
     "horsemen": "5842be consumes R4. On even stage2, 5842e4 reads retained flag0x100000 and the normal-stage jump table chooses5020 when false,5140 when true, without odd-floor R2 or a new flag write.",
     "normalFamily": "The source candidate/profile branch draws remain in order. Stage2 tail5849f1..584a0c uses retained flag0x10: false selects Monstro1010, true selects Duke1020. It does not take odd-floor final R2 or overwrite the flag.",
-    "unavailableFamilies": "Profile unlocks remain fresh/default; collecting items/trinkets or changing unlock state is excluded."
+    "unavailableFamilies": "Profile unlocks remain fresh/default; collecting items/trinkets or changing unlock state is excluded.",
+    "oddFloorEarlyReturns": "584875 R5 is consumed on both floors;58487e/584ac9 accepts2010 only stage1 in this bounded path.5848c0 R4 is likewise consumed, but5848c9/5848d2 gates2050 to stage1/3. Stage2 falls through both branches, even when either random result is zero, and takes the continuing candidate draws before the saved-family tail."
   },
   "optionalRooms": {
     "source": "5897e0",
