@@ -67,9 +67,9 @@
   },
   "e2e": {
     "commands": [
-      "npm run test:e2e:roundworms",
-      "npm run test:e2e:rock-blast",
-      "npm run test:e2e:fireplaces"
+      "npm run test:e2e -- roundworms",
+      "npm run test:e2e -- rock-blast",
+      "npm run test:e2e -- fireplaces"
     ],
     "required": "Both games run by public inputs. Worm requires all448 signed Room cost words including unused tail; Rock/Fire require actual source/port per-cell costs. Complete retained contrived/OS-random cases remain mandatory.",
     "liveStatus": "pending; no fresh original or production artifact for this correction",

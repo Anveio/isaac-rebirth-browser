@@ -10,7 +10,7 @@
 // The production build is rebuilt first when web/ or engine/ sources are newer
 // than dist/ (skip with --no-build). Failed suites print how to replay them.
 import { spawn, spawnSync } from 'node:child_process';
-import { appendFileSync, createWriteStream, existsSync, mkdirSync, readdirSync, statSync } from 'node:fs';
+import { appendFileSync, createWriteStream, existsSync, mkdirSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative, resolve } from 'node:path';
 import { ROOT, writeJson } from './lib/cli.mjs';
 import { SUITES, suiteById } from './suites.mjs';
@@ -39,7 +39,12 @@ if (list) {
   process.exit(0);
 }
 const selected = ids.length ? ids.map(id => suiteById.get(id)) : SUITES;
-if (suiteArgs.length && selected.length > 1) console.warn(`Passing ${suiteArgs.join(' ')} to every selected suite`);
+// Drivers take different flags (e.g. paired counts with --random-count), so
+// suite flags only make sense for one named suite.
+if (suiteArgs.length && selected.length !== 1) {
+  console.error(`Suite flags (${suiteArgs.join(' ')}) need exactly one suite: npm run test:e2e -- <suite> ${suiteArgs.join(' ')}`);
+  process.exit(2);
+}
 
 // Caller flags replace the registry's flag of the same name rather than
 // relying on each driver's parser to prefer the last occurrence.
@@ -84,6 +89,19 @@ const reportPath = join(runDirectory, 'report.json');
 mkdirSync(runDirectory, { recursive: true });
 writeJson(reportPath, report);
 
+// Paired-game suites replay recorded case.json tapes; every other driver
+// replays its scenarios.json.
+function replayCommand(suite, directory) {
+  if (suite.entry === 'tools/foundation/paired-game.mjs') {
+    let cases = [];
+    try { cases = JSON.parse(readFileSync(join(directory, 'report.json'), 'utf8')).cases ?? []; } catch {}
+    const failed = cases.filter(item => item.status !== 'pass' && item.directory).map(item => relative(ROOT, join(item.directory, 'case.json')));
+    return failed.length ? `npm run test:e2e -- ${suite.id} --replay-cases ${failed.join(',')}` : undefined;
+  }
+  return existsSync(join(directory, 'scenarios.json'))
+    ? `npm run test:e2e -- ${suite.id} --scenarios ${relative(ROOT, join(directory, 'scenarios.json'))}` : undefined;
+}
+
 function runSuite(suite) {
   const directory = join(runDirectory, suite.id);
   const args = [...mergeArgs(suite.args, suiteArgs), '--output', directory];
@@ -101,8 +119,7 @@ function runSuite(suite) {
       log.end();
       const result = { id: suite.id, status: exitCode === 0 && !signal ? 'pass' : 'fail', exitCode, signal, error,
         seconds: Math.round((Date.now() - startedAt) / 1000), log: logPath, output: directory };
-      if (result.status === 'fail' && existsSync(join(directory, 'scenarios.json')))
-        result.replay = `npm run test:e2e -- ${suite.id} --scenarios ${relative(ROOT, join(directory, 'scenarios.json'))}`;
+      if (result.status === 'fail') result.replay = replayCommand(suite, directory);
       report.suites.push(result);
       writeJson(reportPath, report);
       console.log(`${result.status === 'pass' ? '✔' : '✘'} ${suite.id} (${result.seconds}s)${result.status === 'fail' ? ` log: ${relative(ROOT, logPath)}` : ''}`);

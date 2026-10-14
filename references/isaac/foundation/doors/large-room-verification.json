@@ -12,7 +12,7 @@
   "selectedPhases": 1843,
   "geometryLifecycleStatus": "pass",
   "requiredFailureCount": 3,
-  "requiredCiExecution": "tools/e2e/large-rooms.mjs --count 2 launches both games fresh and ignores sourceManifest",
+  "requiredCiExecution": "npm run test:e2e -- large-rooms launches both games fresh and ignores sourceManifest",
   "report": {
     "path": "/workspace/isaac-worktrees/floor/.cache/e2e/large-rooms/paired-source-frozen-final/report.json",
     "sha256": "d6a190a5be312f4ec249b35e75c1d72ca8a8f309516c77cd9e8c6622685c210b"

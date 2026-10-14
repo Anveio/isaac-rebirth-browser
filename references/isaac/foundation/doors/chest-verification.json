@@ -142,7 +142,7 @@
   "comparator": {
     "path": "/workspace/isaac-worktrees/floor/.cache/door-mechanics/chest-source-frozen.mjs",
     "sha256": "d802add18b5e92864d4336f06ddd6e2a85f529397f7ef7428069d29da648dc53",
-    "requiredGate": "tools/e2e/large-rooms.mjs always runs both games fresh; no cached-reference bypass"
+    "requiredGate": "npm run test:e2e -- large-rooms always runs both games fresh; no cached-reference bypass"
   },
   "report": {
     "path": "/workspace/isaac-worktrees/floor/.cache/e2e/chests/constructor-source-frozen/report.json",
