@@ -46,3 +46,23 @@ pub const fn entity(id: u32, variant: u32) -> &'static EntityConfig {
     }
     panic!("entity is not authored in entities2.xml");
 }
+
+/// One bossportraits.xml VS-screen presentation.
+#[allow(dead_code)]
+#[derive(Clone, Copy, Debug)]
+pub struct BossPresentation {
+    pub id: u32,
+    pub entity_type: u32,
+    pub variant: u32,
+    pub portrait: &'static str,
+}
+
+include!(concat!(env!("OUT_DIR"), "/boss_catalog.rs"));
+
+/// The authored VS-screen presentation id for a boss entity.
+pub fn boss_presentation(entity_type: u32, variant: u32) -> Option<u32> {
+    BOSS_PRESENTATIONS
+        .iter()
+        .find(|boss| boss.entity_type == entity_type && boss.variant == variant)
+        .map(|boss| boss.id)
+}
