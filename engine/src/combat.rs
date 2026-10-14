@@ -316,6 +316,8 @@ pub enum DamageKind {
     Bomb,
     FireContact,
     RoomEffect,
+    /// Entity_Laser do_damage476760 passes DAMAGE_LASER.
+    Laser,
 }
 
 impl DamageKind {
@@ -324,6 +326,7 @@ impl DamageKind {
             Self::Tear => 0,
             Self::Bomb => 4,
             Self::FireContact => 2,
+            Self::Laser => 8,
             Self::RoomEffect => 0,
         }
     }

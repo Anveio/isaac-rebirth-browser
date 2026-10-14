@@ -33,6 +33,13 @@ pub struct EntityConfig {
 
 include!(concat!(env!("OUT_DIR"), "/entity_catalog.rs"));
 
+/// Entity::Init446b03 initial HP: stage is capped at 10 before the later-stage
+/// f32 factor, and stage HP adds to the base (a zero stage HP keeps the base).
+pub fn initial_hp(config: &EntityConfig, stage: u32) -> f32 {
+    let scale = stage.min(10) as f32 * if stage > 4 { 0.8 } else { 1.0 };
+    scale * config.stage_hp + config.base_hp
+}
+
 /// The first authored row for (id, variant). Evaluated at compile time where
 /// a constant needs it; an unauthored pair is a build error there.
 pub const fn entity(id: u32, variant: u32) -> &'static EntityConfig {

@@ -15,7 +15,7 @@ export function check(rows, field, expected, actual) {
     status: expected !== undefined && actual !== undefined && JSON.stringify(expected) === JSON.stringify(actual) ? 'pass' : 'fail' });
 }
 
-const DAMAGE_FLAGS = { tear: 0, bomb: 4, fireContact: 2, roomEffect: 0 };
+const DAMAGE_FLAGS = { tear: 0, bomb: 4, fireContact: 2, roomEffect: 0, laser: 8 };
 
 /** Fields every authored NPC shares, as [name, native, port] pairs. Native
  * position is authoritative on full phases and presented half-motion on
@@ -73,6 +73,21 @@ export function entityRows(rows, source, actual, spec) {
     const name = `${spec.name}${native.spawnSeed}`;
     for (const [field, expected, observed] of [...npcFields(native, actor, phase), ...(spec.fields?.(native, actor, phase) ?? [])])
       check(rows, `${name}.${field}`, expected, observed);
+  }
+  // Entity_Laser beams in room order, by spawn seed, with their source fields.
+  const beams = source.entities.filter(actor => actor.type === 7 && !actor.removed);
+  const ported = (actual.lasers ?? []).filter(laser => !laser.removed);
+  check(rows, 'laser.seeds', beams.map(actor => actor.spawnSeed), ported.map(laser => laser.spawnSeed));
+  for (const beam of beams) {
+    const laser = ported.find(candidate => candidate.spawnSeed === beam.spawnSeed);
+    if (!laser) continue;
+    const name = `laser${beam.spawnSeed}`;
+    for (const [field, expected, observed] of [
+      ['position', vector(beam.position), vector(phase === 0 ? laser.presentedPosition : laser.position)],
+      ['angle', f32(beam.laserAngle), f32(laser.angle)], ['timeout', beam.laserTimeout, laser.timeout],
+      ['shrinking', beam.laserShrinking, laser.shrinking], ['length', f32(beam.laserLength), f32(laser.length)],
+      ['endpoint', vector(beam.laserEndpoint), vector(laser.endpoint)], ['scaleX', f32(beam.spriteScale?.[0]), f32(laser.scale.x)],
+    ]) check(rows, `${name}.${field}`, expected, observed);
   }
   const shots = source.entities.filter(actor => actor.type === 9 && !actor.removed);
   check(rows, 'projectile.seeds', shots.map(actor => actor.spawnSeed),

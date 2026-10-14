@@ -89,7 +89,8 @@ def admitting_slots(generated, entity):
             continue
         descriptor, spawns = generated['descriptors'][index], generated['spawns'][index]
         template = descriptor['template']
-        if template['type'] != 1 or (template['width'], template['height']) != (13, 7) or not spawns:
+        # Ordinary (1) and miniboss (6) 13x7 rooms; boss rooms are never adjacent to the start.
+        if template['type'] not in (1, 6) or (template['width'], template['height']) != (13, 7) or not spawns:
             continue
         # A dropped co-spawn changes the room's actor order and with it every
         # (counter + sequence) frame gate, so only fully admitted rooms qualify.
