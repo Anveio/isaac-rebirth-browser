@@ -73,7 +73,7 @@ retained in the evidence and remains required. The first six-case cohort's
 [rejected allocated-row inference](rejected-copy-predicate-report.json) is also
 preserved; it was corrected from actual source stores and observations.
 
-The actual WASM ordinary snapshot is 135,792 JSON bytes, including a 1,901-byte
+The historical WASM ordinary snapshot was 135,792 JSON bytes, including a 1,901-byte
 saved summary with nine legacy and nine current-row samples. The full tables
 and ItemPool copy stay internal. In a 256-sample Node measurement under host
 load, a tick plus snapshot took median 1.151 ms and p95 1.810 ms. This measures

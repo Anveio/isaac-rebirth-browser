@@ -111,7 +111,8 @@
   "restore": "Existing constructed Player item owner receives346 saved counts,450 current RNG states through real shift35=[5,9,7] initialization withno Next draws, then saved active/reserve fields. The restore store helper is available for later actual Saved dispatch; it is not called during NewRun and has no current public execution claim.",
   "normalization": {
     "native": "518350 first capturesBF5, then518120 calls5180d0/5e3f80 to remove temporary records and request their config cache flags; invokes511f10 ifrequested; removesactive/pill costumes andclearsD80/D84/BF5 before remaining stores.",
-    "supported": "Real queued-grant flush first; neutral active0/45 accepted. Typed temporary35/45 records are erased through the proven costume-only517580 branch, independent of count/cooldown; their pinned kind3/cache0 configs introduce no fresh RNG draw. Other temporary/active/presentation owners fail explicitly before deletion. Existing requested cache/familiar work is dispatched at5180d0 seam. No missingBF5/appearance/update-byte owner is guessed."
+    "supported": "Real queued-grant flush first; neutral active0/45 accepted. Typed temporary35/45 records are erased through the proven costume-only517580 branch, independent of count/cooldown; their pinned kind3/cache0 configs introduce no fresh RNG draw. Other temporary/active/presentation owners fail explicitly before deletion. Existing requested cache/familiar work is dispatched at5180d0 seam. No missingBF5/appearance/update-byte owner is guessed.",
+    "sharedApi": "player_save::normalize_player(&mutState) owns actual518120 only. Save caller separately invokes52ee40 queue flush; Stage5508d0 caller must not inherit that save-specific flush. WhenD6C0 no evaluator or RNG work is added."
   },
   "requiredGate": {
     "suite": "test:e2e:saved-game",
