@@ -66,3 +66,22 @@ Early pause remains unaccepted: the current zero-tick Escape handler can open
 pause before the initial full guard, whereas the source fade guard precedes
 pause admission. The pending `593660` reset also prevents claiming general
 held movement/aim semantics at the completion boundary from controls alone.
+
+## Unsupported character requests
+
+The public command API rejects a locked or unsupported character when normal
+Enter is confirmed, before setting `run_start_request.input_pending`. Invalid
+commands already leave state and held keys unchanged. Delaying this rejection
+until `start_run` would retain the deferred request in each rejected tick; an
+exception there stops the browser RAF callback before it schedules the next
+frame. A keyboard callback already catches a rejected confirmation input.
+
+Random admission requires a nonempty unlocked list whose possible choices
+all have supported runtimes. Pending menu initializers can change the seed
+between confirmation and deferred startup, so validating just the choice from
+the current seed would not guarantee a startable request. The deferred-start
+validation remains in place. Fresh profiles support Isaac.
+
+This is API error recovery, with static validation only. It does not establish
+the original locked-character menu behavior, other character gameplay, Random
+selection parity, or a passing fresh two-game recovery scenario.

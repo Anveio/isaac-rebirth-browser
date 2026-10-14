@@ -779,6 +779,7 @@ impl Game {
                 "ArrowLeft" | "KeyA" => self.select_character(-1),
                 "ArrowRight" | "KeyD" => self.select_character(1),
                 "Enter" if self.state.difficulty == "normal" => {
+                    self.validate_run_character()?;
                     self.state.run_start_request.input_pending = true;
                 }
                 "Enter" => {
@@ -897,6 +898,30 @@ impl Game {
                     after_audio_requests: self.state.audio.pending.len(),
                     initialization: menu_lifecycle::Initialization::ResetCharacterSeed,
                 });
+        }
+        Ok(())
+    }
+    /// Reject unsupported requests before the deferred start flag can persist
+    /// across failing ticks. Queued menu initializers may still change the seed,
+    /// so Random requires a supported runtime for every possible choice.
+    fn validate_run_character(&self) -> Result<(), String> {
+        let unlocked =
+            &self.state.profiles[usize::from(self.state.profile - 1)].unlocked_characters;
+        let candidates = if self.state.character == "Random" {
+            unlocked.as_slice()
+        } else {
+            std::slice::from_ref(&self.state.character)
+        };
+        if candidates.is_empty() {
+            return Err("profile has no unlocked character".into());
+        }
+        for character in candidates {
+            if !unlocked.contains(character) {
+                return Err("selected character is locked in this profile".into());
+            }
+            if character != "Isaac" {
+                return Err("selected character runtime is not implemented".into());
+            }
         }
         Ok(())
     }
