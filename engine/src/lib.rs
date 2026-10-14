@@ -2215,8 +2215,20 @@ impl Game {
                 enemy_projectiles::EnemyProjectile::birth(id, parent, shot)
             }),
             entities::Birth::Npc(selector) => {
-                let id = u32::try_from(self.state.room.npcs.len())
-                    .map_err(|_| "NPC identity exhausted")?;
+                // Retired NPCs leave the room list, so its length can name a
+                // live handle; take one past every id still held anywhere.
+                let id = self
+                    .state
+                    .room
+                    .npcs
+                    .iter()
+                    .map(|npc| npc.id.checked_add(1))
+                    .chain([self
+                        .state
+                        .actor_scheduler
+                        .next_free_id(actors::ActorKind::Npc)])
+                    .try_fold(0_u32, |next, id| id.map(|id| next.max(id)))
+                    .ok_or("NPC identity exhausted")?;
                 let context = entities::SpawnContext {
                     stage: self.state.stage,
                     game_update_count: self.state.game_update_count,
