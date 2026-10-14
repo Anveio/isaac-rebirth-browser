@@ -52,6 +52,7 @@ mod plain_npc;
 pub mod player_animation;
 pub mod player_death;
 pub mod player_items;
+pub mod player_save;
 pub mod player_stats;
 pub mod poop_effects;
 pub mod projectiles;
@@ -1176,8 +1177,16 @@ impl Game {
         self.saved_game
             .descriptor_seeds
             .copy_rooms_from(&self.boot_level_grid, &rooms)?;
+        //54f373→5bf400→518350 follows the actual Level copy, flushes the
+        //owned grant queue and applies the supported Player save boundary.
+        let player_items = player_save::capture_at_manager_save(&mut self.state)?;
         self.saved_game.player_rng_seed = self.player_manager_secondary_rng.seed;
-        let saved = saved_game::SavedRun::copy_from(&self.state, item_pools, grid_save.records);
+        let saved = saved_game::SavedRun::copy_from(
+            &self.state,
+            item_pools,
+            grid_save.records,
+            player_items,
+        );
         self.state.saved_run_summary = Some(saved.summary(
             grid_save.empty,
             grid_save.occupied_pending,

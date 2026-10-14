@@ -45,6 +45,9 @@ pub struct PlayerItems {
     pub active_id: u32,
     pub active_charge: i32,
     pub active_subordinate_charge: i32,
+    /// Opaque saved Player+D88 word, distinct from subordinate charge D7C.
+    /// Actual constructor5196c1 initializes0;511aaf restores this word.
+    pub save_word_d88: i32,
     pub active_state_d80: i32,
     pub active_state_d84: i32,
     pub reserve_charge: i32,
@@ -93,6 +96,7 @@ impl PlayerItems {
             active_id: 0,
             active_charge: 0,
             active_subordinate_charge: 0,
+            save_word_d88: 0,
             active_state_d80: 0,
             active_state_d84: 0,
             reserve_charge: 0,
@@ -128,6 +132,27 @@ impl PlayerItems {
             });
         }
         Ok(())
+    }
+
+    /// Save518120→5180d0→5e3f80 erases real temporary records before the
+    /// Player stores. For35/45,517580 has only the costume-removal callback;
+    /// both pinned configs are costume-free and cache0. Other record kinds
+    /// retain their actual state until their removal effects are implemented.
+    pub(crate) fn clear_save_temporary_effects(&mut self) -> Result<u32, String> {
+        let mut cache_flags = 0;
+        for entry in &self.temporary_collectibles {
+            let config = items::definition(entry.item_id)
+                .ok_or("saved temporary record requires its actual ItemConfig")?;
+            if !matches!(entry.item_id, 35 | 45) || config.kind != 3 || config.cache_flags != 0 {
+                return Err("Player save requires an unmapped temporary removal callback".into());
+            }
+            //5e3f80 ORs every removed record's config+24, independent of
+            //its count/cooldown. No fitted use count controls this removal.
+            cache_flags |= config.cache_flags;
+        }
+        self.temporary_collectibles.clear();
+        self.unevaluated_cache_flags |= cache_flags;
+        Ok(cache_flags)
     }
 }
 
@@ -455,7 +480,7 @@ fn authored_grants(state: &mut State, config: &items::CollectibleDefinition) {
 
 /// 52ee40 clears pointer/charge only after52cc90. The stored touched argument
 /// remains; it is meaningful only while an actual queued config exists.
-fn flush_queued(state: &mut State) -> Result<(), String> {
+pub(crate) fn flush_queued(state: &mut State) -> Result<(), String> {
     let Some(owner) = state.player_items.as_ref() else {
         return Ok(());
     };
