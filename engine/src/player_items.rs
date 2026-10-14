@@ -387,6 +387,18 @@ pub(crate) fn add_red_hearts(player: &mut crate::Player, delta: i32) {
         .clamp(0, i32::from(player.max_hp)) as u8;
 }
 
+/// Normal-Isaac Eternal508640 health fields. The information
+/// queue5805c0(13) is a separate presentation owner, not an audio draw.
+pub(crate) fn add_eternal_hearts(player: &mut crate::Player, delta: i32) {
+    player.eternal_hearts = player.eternal_hearts.wrapping_add(delta);
+    if player.eternal_hearts > 1 {
+        let paired = player.eternal_hearts & !1;
+        add_max_hearts(player, paired);
+        add_red_hearts(player, paired);
+        player.eternal_hearts %= 2;
+    }
+}
+
 pub(crate) fn add_soul_hearts(player: &mut crate::Player, delta: i32) {
     player.soul_hp = player
         .soul_hp

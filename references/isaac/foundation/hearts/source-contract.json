@@ -1,0 +1,151 @@
+{
+  "schema": 1,
+  "status": "Source implementation; first static proof pinned before main restack. No production artifact or fresh live acceptance.",
+  "binarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "scope": "Normal single-player Isaac free Heart10 with concrete subtypes1..6, owned max/red/soul/black/Eternal fields. Fresh unmodified subtype0 factory shares previously mapped Fire loot Init.",
+  "factory": "500150 local35 rolls2,50,10; Soul branch rolls20. No direct shared MT draw. Humbling Bundle, Eternal and Soul/Black trinket/collectible replacement consumers remain separate.",
+  "contact": "504820\u219250c880 actualdead31f/Death/specialHit predicate precedes subtype callbacks. Caller guard must reuse RootDeath/sharedANM; no HP==0 substitute or broad transition gate. Capacity and actualphysicalcontacts then route health helpers before sourceSound504480 and Collect504d30.",
+  "red": "504db0 subtype1/2/5 maps2/1/4, permanent312 doublesamount. ActualfirstPlayer redHp<max andnotdead admits.",
+  "soul": "5054eb admits2 iff maxRed+soul<=23.",
+  "eternal": "505828 permits1 unless maxRed>23 andheldEternal!=0. 508640 adds signedBBC, if>1 pairs into max/red thenBBC%2. Information queue5805c0(13) remains explicit presentation dependency.",
+  "black": "50e6b0 allows capacity<24 or any full soul pair notblack;508440 marksactualslots before5083b0 cap, including full-cap recolor.",
+  "sound": "504480 routes54Soul,266Eternal,185otherhearts, volume1/pitch1/delay2. No added helper draw before these actualSoundRequest consumers.",
+  "stage": "Floor source52a30f continuingNewStage afterRoomadmission beforeSave: ifBBC>0 clearBBC then queueinfo13, addmax2 thenred2. Stage consumer awaits actualfield/API commit.",
+  "limits": [
+    "No actualpairedheartacceptance.",
+    "Final111 concrete player_can_collect is reused unchanged; legacy queued Pickup veto no longer restricts generic regular/restored pickup contacts. Remaining collectible queue/chest scope and full Pickup/LiftItem/HideItem presentation remain separately qualified.",
+    "Damage52b080 soul/black priority andcomplete healthcontainer damage remain tracked withRootDeath owner.",
+    "Heart Room.Save readmission usessamef7 actualrecords and CI-owned440/ad4 correction; no clone-basedacceptance inferred.",
+    "WholeHUD placement/animation, information queue13 andmodifier-completeheartfactory remain unaccepted."
+  ],
+  "sourceDumpSha256": {
+    "function-5082e0.txt": "450b1fb59f8a968140edca07d171f5be54d64f835f4a100901ff36411ef4e7c8",
+    "function-5083b0.txt": "230180974d9f67eb4a7e8791e2c9df35ac3518a81399ab71174541dbea128e10",
+    "function-508640.txt": "05b0529fca4a91f1039b180427ce57fe4b293428558d9ebd04d0fcd3e72657b3",
+    "function-508440.txt": "9d7cdb2d99fcfc045a04656e6348a0c8ce4342ed8caa8ced2f16e063b76cbc4c",
+    "function-504480.txt": "36a50da7840881eda171b2d12d1f2dbce23c1e7e0dc1347f96522e9eb6e5c314",
+    "function-50c880.txt": "ecdc85baf40672016342b1f375f0a21d107dfcf35d83b705efda80601074d6c1",
+    "function-508230.txt": "3b079e817b27dcbeeb5b3579d30ae9cff2b43eb3b93de6f056216610d7ba9c51",
+    "function-508540.txt": "54cb5f9123d9806240b9d33caf24facb7e0a6f3d87b297402d2d65e90b8706f0",
+    "function-504d30.txt": "50c2a2de4aeb5c92b20620e68af323b0234d7c98f720a37ed0f5e497edcdd797",
+    "function-50e6b0.txt": "51a79400195095b877ded3aa248748f08cdc42769d535f4aa6399992ae63484a"
+  },
+  "validation": {
+    "status": "pass",
+    "compilerJobs": 1,
+    "checks": [
+      "cargo check --locked --all-targets",
+      "cargo clippy --locked --all-targets -- -D warnings",
+      "TypeScript",
+      "cargo fmt --check",
+      "matrix registry consistency",
+      "node --check",
+      "Python syntax",
+      "git diff --check"
+    ],
+    "logs": {
+      "rust-check.log": "1b437aae01c189cf7abe056495535e1e48f8f39e9bed74c7563e27c897d6a951",
+      "clippy.log": "7d1198aa07702b54dd17c8b8259dd0d8d470fb10caa44e6a4cc9eca91930323c"
+    },
+    "runtimeSources": {
+      "engine/src/fireplaces.rs": "64b43ad1e33728f25c8f138f99bd180ade1f2e182131021e4867970591c49c02",
+      "engine/src/lib.rs": "e787b5cfe44a636525b73ac00ab0f0abb066f873511c3979a12631395e51d653",
+      "engine/src/pickups.rs": "c0b61cd50c0f288ed2079ac0c404879643803bd617f996ed55971f77588b7b02",
+      "engine/src/player_items.rs": "ea3b0563c92dd0cda160bc09d8594784338c8887dc66397422b3238ff3e9ac6b",
+      "web/engine.ts": "51fc96bdcecdfe82043384835d0321907398031d3e4aaa622d7aad38dbe66aca",
+      "web/renderer.ts": "f3fe71ad32c364c77316d423905637236b27367183eb604bdb05fde26295c962"
+    }
+  },
+  "firstValidatedRuntimeCommit": "624cf52a258f929ba6a55b8935f2bffa2b97e08a",
+  "restackedRuntimeCommit": "ef41ec78d0417777cfadcf21fb3f76901a893de0",
+  "postRestackValidation": {
+    "TypeScript": "pass",
+    "matrix": "pass",
+    "NodeAndPythonSyntax": "pass",
+    "whitespace": "pass",
+    "RustAndStrictClippy": "pass on exactcbbd1735 runtime; provider main-merge tree unchanged"
+  },
+  "currentOwnedPayload": {
+    "baseMain": "efaed66b020b4b14c83a103a5b90815aeac74bfc",
+    "concretePrerequisite": "5afa7ddb1a6d5c2031b6648905478e80d78fa6d9",
+    "runtime": "f1bccc634a44f4ec058948f99e492625fac22b1a",
+    "sharedEntry": "Extends main98 Game.collect_regular_pickup_at used by full and saved-readmission callbacks; preserves initialize_spawn_seed/persistent regular_rng, current anchor owner, and the prerequisite sole player_can_collect predicate unchanged.",
+    "schema": "Eternal field/default/TypeScript matches b68 byte-for-byte; one field and no duplicated health-damage arithmetic.",
+    "eligibility": "Sole final111 player_can_collect permits known legacy Pickup through the unchanged shared normal/restored regular entry. Generic legacy queued-Pickup veto removed; collectible/chest own pending-queue rules remain separate. Physical touches reads actual Player.dead and accepts redHP0 with SoulHP. Owned Hit/UseItem main-name exceptions, dead/Death rejection, no controls7d4 proxy.",
+    "RustAndStrictClippy": "pass on exact cbbd1735 composition; runtime/web/tools tree unchanged after current-main provider merge",
+    "productionAndLive": "not run",
+    "retainedCaseBankSha256": "6860834fd32322bf690d01e33f5b78a3db4fc4ad3e5e897831c15e37fa55e76e",
+    "sourcePreflight": {
+      "TypeScript": "pass",
+      "formatting": "pass",
+      "NodeAndPythonSyntax": "pass",
+      "matrix": "pass",
+      "whitespace": "pass",
+      "registryCount": 39
+    },
+    "initialConcretePrerequisite": "ef78acc8c5028ed249711f7c15be15c7c3b72b7b",
+    "composition": "c16c1630977b4ee3d47c72fd80a2a96c24377419",
+    "previousRustAndStrictClippy": {
+      "status": "pass",
+      "checkedHead": "1d166003e9d73ae7188b29832f483b10e0067ae0",
+      "checkSeconds": 9.56,
+      "clippySeconds": 9.49,
+      "compilerJobs": 1,
+      "incremental": false,
+      "privateTarget": "/workspace/isaac-worktrees/combat/engine/target",
+      "logs": {
+        "metadata": "7187ad8a172f0d3ae0bf72fd5ad85404e9033b2697e0c29b6d81eb44121855f0",
+        "clippy": "30c9e06592bc9d15c18404438c60856d8e5c6bf8bbdac06e5a6b0b8890514ee2"
+      },
+      "receiptSha256": "9b24606cb9dca4cb5f740e17fffd8214d658a131ed1b288cc31622bb26bab315"
+    },
+    "previousConcretePrerequisite": "6b7d1d3543635f65aa11582871294d4cd9980b09",
+    "previousBaseMain": "2d2174e63901acbfc209fc40018418cded26223e",
+    "restackSourceHead": "9c081dd307ed04b157bc173a4f718605ba982d51",
+    "restackQualification": "Preserves complete current main Death111, continuation floor114, clock121, class5 preview118, character admission120, manager counts119, strict NPC HP123 and keyboard122. Current composition static proof separate from prior1d; all old cases/proofs retained.",
+    "currentStaticProof": {
+      "checkedHead": "cbbd17353ce7ab98d269bcdced0e4bd1a32c1bfa",
+      "checkSeconds": 26.18,
+      "clippySeconds": 13.05,
+      "compilerJobs": 1,
+      "incremental": false,
+      "debug": 0,
+      "privateTarget": "/workspace/isaac-worktrees/hearts/engine/target",
+      "ownGeneratedHeaders": 12,
+      "receiptPath": ".cache/coordination/combat/heart-main-static/receipt-cbbd1735.json",
+      "receiptSha256": "e27048edc697d5375b23e730b4ba794609c47a88472a989a4434e24a20160fd5",
+      "logs": {
+        "metadata": "4169b7da55457e438f4cfade8f7b7ca76b5b8d4a7b0549dbd021b7b435b0d974",
+        "clippy": "61392b8ce69ecad750f310d6e71951847f47c2e90e1282b2245cfa6320edc6f6"
+      },
+      "scope": "Current-main composition with Root111, actual counts119, HP strict123 and keyboard122; metadata only. No production artifact or fresh Heart original/browser acceptance."
+    }
+  },
+  "previousOwnedPayload": {
+    "baseMain": "7492adba9b256e5767e28906289e89ca6faa2655",
+    "runtime": "61e15e9ebc0a4881b00242ac9ba89c4b55cef20d",
+    "sharedEntry": "Extends main98 Game.collect_regular_pickup_at used by full and saved-readmission callbacks; preserves initialize_spawn_seed/persistentregular_rng and currentanchor owner.",
+    "schema": "Eternal field/default/TS matches b68 byte-for-byte; no duplicatedhealthdamage arithmetic.",
+    "eligibility": "Actual91/sharedANM thenRootDeath233+9eb9956 soleplayer_can_collect prerequisite awaits main composition. No dormantDead/guard owner added.",
+    "RustAndStrictClippy": "not run for currentpayload; initial624 proof remains separately pinned",
+    "productionAndLive": "not run",
+    "retainedCaseBankSha256": "6860834fd32322bf690d01e33f5b78a3db4fc4ad3e5e897831c15e37fa55e76e"
+  },
+  "requiredBankIntegrity": {
+    "fixedCases": [
+      "paired-heart-red-0",
+      "paired-heart-red-1",
+      "paired-heart-soul-0",
+      "paired-heart-soul-1"
+    ],
+    "canonicalBankSha256": "6860834fd32322bf690d01e33f5b78a3db4fc4ad3e5e897831c15e37fa55e76e",
+    "invariants": "Unique case IDs; all four sealed seed/bootstrap/phase-offset public tapes; two to four retained OS outcomes in order. Fixed IDs require admission, damage and collection in each game independently of supplied heartRequired flags. Generator count is2..4; default six cases/tapes unchanged.",
+    "noGamePreflight": {
+      "receiptPath": ".cache/coordination/combat/heart-main-static/bank-preflight/receipt.json",
+      "receiptSha256": "a48928a160f24baea8623d6968ce80b49341131c1b66bb07019e98ec3f37b283",
+      "checks": 11,
+      "scope": "Gate-only validation/control-flow preflight; no new entropy, compiler, production build or native/browser execution."
+    },
+    "gateFieldScope": "Spawn-seed identity and declared health/body lifecycle fields are compared. Local30 four-word state and source collection SFX are source-qualified follow-ups, not live acceptance by this leaf."
+  }
+}
