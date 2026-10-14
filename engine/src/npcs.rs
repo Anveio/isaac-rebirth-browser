@@ -463,6 +463,23 @@ pub(crate) fn direction(random: &mut Mt19937) -> WorldVector {
 }
 
 impl Npc {
+    /// Actual Entity+318 view for the supported typed NPC owners. Normal
+    /// Fly/AttackFly/RoundWorm Init441c80 clears flags then47ed20 ORs4;
+    /// concrete subclasses preserve their own later flag writes.
+    pub(crate) fn entity_flags(&self) -> u32 {
+        if let Some(fire) = &self.fireplace {
+            fire.entity_flags
+        } else if let Some(keeper) = &self.keeper {
+            keeper.entity_flags
+        } else if let Some(monstro) = &self.monstro {
+            monstro.entity_flags
+        } else if let Some(fly) = &self.level2_fly {
+            fly.entity_flags
+        } else {
+            4
+        }
+    }
+
     pub fn from_selector(id: u32, selector: &SpawnSelector) -> Result<Option<Self>, String> {
         if let Some(fly) = crate::level2_flies::from_selector(id, selector)? {
             return Ok(Some(fly));
