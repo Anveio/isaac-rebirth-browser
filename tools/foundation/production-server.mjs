@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { createReadStream } from "node:fs";
+import { createReadStream, rmSync } from "node:fs";
 import { cp, mkdtemp, readdir, readFile, rm, stat } from "node:fs/promises";
 import { createServer } from "node:http";
 import { tmpdir } from "node:os";
@@ -44,6 +44,9 @@ export async function startProductionServer({ directory = join(ROOT, "dist"), po
   const source = resolve(directory);
   assert.ok((await stat(join(source, "index.html")).catch(() => null))?.isFile(), `Missing production build ${source}/index.html; run npm run build`);
   const scratch = await mkdtemp(join(tmpdir(), "isaac-production-"));
+  // A suite that throws or exits without close() must not leak a dist copy.
+  const removeScratch = () => rmSync(scratch, { recursive: true, force: true });
+  process.once("exit", removeScratch);
   const snapshot = join(scratch, "dist");
   let server;
   try {
@@ -79,11 +82,13 @@ export async function startProductionServer({ directory = join(ROOT, "dist"), po
       build: { ...identity, source, scope: "Immutable snapshot of production build bytes; source/native replay equality is checked separately" },
       close: async () => {
         await new Promise((done, reject) => server.close((error) => error ? reject(error) : done()));
+        process.off("exit", removeScratch);
         await rm(scratch, { recursive: true, force: true });
       },
     };
   } catch (error) {
     if (server?.listening) await new Promise((done) => server.close(done));
+    process.off("exit", removeScratch);
     await rm(scratch, { recursive: true, force: true });
     throw error;
   }
