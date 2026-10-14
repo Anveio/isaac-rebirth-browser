@@ -26,9 +26,11 @@ def use_tail(damaged=False):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--count', type=int, default=2)
+    parser.add_argument('--fixed-only', action='store_true',
+                        help='Declare the required fixed public cases without discovering OS seeds')
     args = parser.parse_args()
-    if not 2 <= args.count <= 4:
-        raise ValueError('Active use gate requires 2..4 new unfiltered OS cases')
+    if args.count != 2:
+        raise ValueError('The complete twelve-case active gate requires two new unfiltered OS cases')
     # Source-owned port selection predicts this contrived public route. The
     # gate independently requires original acquisition45; prediction is not
     # original evidence. No random discovery selects on an item identity.
@@ -41,6 +43,15 @@ def main():
                           'delay': delay, 'expectedItemId': 45,
                           'actions': items.route(delay, True) + use_tail(damaged),
                           'entropy': 'Contrived public acquisition/use and admission phase offset'})
+    # Hold public shooting through the real naturally acquired Pickup guard.
+    # Both offsets retain the ordinary contact/movement and complete use tail;
+    # these are additional contrived cases, not filtered random discoveries.
+    for delay in (0, 1):
+        cases.append({'name': f'yum-pickup-aim-phase-{delay}', 'code': code,
+                      'seedValue': items.clock.codec.decode_seed(code), 'delay': delay,
+                      'expectedItemId': 45, 'requirePickupShotGuard': True,
+                      'actions': items.route(delay, True, True) + use_tail(),
+                      'entropy': 'Contrived public held shooting during natural Pickup'})
     # Preserve earlier unfiltered active291/passive48 discoveries, including
     # the unsupported active291 use outcome as a real blocking comparison.
     for index, (recorded, delay, attempt) in enumerate([('R74QYMYS', 0, 3), ('VRQPT844', 1, 75)]):
@@ -49,10 +60,20 @@ def main():
                       'actions': items.route(delay, True) + use_tail(),
                       'entropy': 'Recorded OS secrets', 'discoveryAttempts': attempt,
                       'recordedEvidence': 'references/isaac/foundation/items/acquisition-initial-live.json'})
-    for case in items.random_cases(args.count, True):
-        case['actions'] += use_tail()
-        cases.append(case)
-    print(json.dumps({'schema': 1, 'mode': 'active-use', 'bootEpochSeed': 1700000000,
+    # Preserve the initial fresh OS outcomes as real regression inputs too.
+    # Their unfiltered discovery has already happened; new random discoveries
+    # below remain independent and are never selected on item identity.
+    for index, (recorded, delay, attempt) in enumerate([('DN8RQDXC', 0, 19), ('98C1GNPZ', 1, 139)]):
+        cases.append({'name': f'retained-random-pedestal-{index}', 'code': recorded,
+                      'seedValue': items.clock.codec.decode_seed(recorded), 'delay': delay,
+                      'actions': items.route(delay, True) + use_tail(),
+                      'entropy': 'Recorded OS secrets', 'discoveryAttempts': attempt,
+                      'recordedEvidence': 'references/isaac/foundation/items/active-use-verification.json'})
+    if not args.fixed_only:
+        for case in items.random_cases(args.count, True):
+            case['actions'] += use_tail()
+            cases.append(case)
+    print(json.dumps({'schema': 1, 'mode': 'active-use-fixed' if args.fixed_only else 'active-use', 'bootEpochSeed': 1700000000,
                       'source': 'Public input/own bomb damage; every OS item outcome retained',
                       'cases': cases}))
     return 0

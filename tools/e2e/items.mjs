@@ -35,8 +35,35 @@ const scenarios = replayOriginal ? JSON.parse(await readFile(join(replayOriginal
     ...(statCache ? ['--stat-cache'] : acquisition && !activeUse ? ['--acquisition'] : [])], { cwd: ROOT, timeout: 600000 })).stdout);
 assert.equal(scenarios.schema, 1);
 assert.equal(scenarios.bootEpochSeed, 1700000000);
-assert.ok(scenarios.cases.length >= 4 && scenarios.cases.length <= (activeUse ? 10 : acquisition ? 8 : 6));
+assert.ok(scenarios.cases.length >= 4 && scenarios.cases.length <= (activeUse ? 12 : acquisition ? 8 : 6));
 assert.equal(new Set(scenarios.cases.map(item => item.name)).size, scenarios.cases.length);
+if (activeUse && !replayOriginal) {
+  assert.equal(scenarios.cases.length, 12, 'Active use requires the complete twelve-case fresh cohort');
+  const fixed = JSON.parse((await run('python3', ['tools/original/active-item-scenarios.py', '--fixed-only'],
+    { cwd: ROOT })).stdout);
+  assert.equal(fixed.cases.length, 10);
+  for (const required of fixed.cases) {
+    assert.deepEqual(scenarios.cases.find(item => item.name === required.name), required,
+      `Active use requires the unchanged public seed/phase/actions and witnesses for ${required.name}`);
+  }
+  const fresh = scenarios.cases.filter(item => item.entropy === 'OS secrets');
+  assert.deepEqual(fresh.map(item => [item.name, item.delay]).sort(),
+    [['random-pedestal-0', 0], ['random-pedestal-1', 1]], 'Both fresh OS admission phases are required');
+  for (const item of fresh) {
+    const required = fixed.cases.find(fixed => fixed.name === `recorded-active-use-${item.delay}`);
+    assert.deepEqual(item.actions, required.actions, 'Every new unfiltered OS outcome requires the complete acquisition/use tape');
+    assert.equal(item.expectedItemId, undefined, 'Fresh OS outcomes cannot request a filtered item identity');
+    assert.equal(item.requirePickupShotGuard, undefined, 'The held-Pickup witnesses belong to their fixed public cases');
+  }
+  assert.deepEqual(scenarios.cases.filter(item => item.requirePickupShotGuard).map(item => item.delay).sort(),
+    [0, 1], 'Both held-Pickup admission phases are required');
+  assert.deepEqual(scenarios.cases.filter(item => item.entropy === 'Recorded OS secrets').map(item => item.code).sort(),
+    ['98C1GNPZ', 'DN8RQDXC', 'R74QYMYS', 'VRQPT844'], 'Every earlier unfiltered OS outcome is required');
+  assert.equal(scenarios.cases.filter(item => item.entropy === 'OS secrets').length, 2,
+    'Two new unfiltered OS outcomes are required');
+}
+
+
 if (statCache) {
   assert.equal(scenarios.cases.length, 8, 'Stat cache requires the complete eight-case cohort');
   assert.deepEqual(scenarios.cases.filter(item => item.expectedItemId !== undefined)
@@ -64,7 +91,7 @@ if (selectedCase) assert.ok(scenarios.cases.some(item => item.name === selectedC
 const catalogue = JSON.parse((await run('python3', ['tools/foundation/item-catalog.py'], { cwd: ROOT })).stdout);
 await assertOriginalBinary();
 await writeFile(join(output, 'scenarios.json'), JSON.stringify(scenarios, null, 2) + '\n');
-const server = await startProductionServer();
+const server = await startProductionServer({ directory: value('--production-directory') });
 const browser = await chromium.launch(browserLaunchOptions());
 const report = { schema: 1, status: 'running', production: server.build, originalBinarySha256: ORIGINAL_SHA,
   graphics: await inspectBrowserGraphics(browser), sourceHashes: catalogue.sourceHashes,
@@ -108,6 +135,14 @@ try {
     const result = { ...item, status: 'running', failures: [] };
     report.cases.push(result);
     let page;
+    const states = [];
+    const archiveBrowser = async (trace, captureStatus, traceError) => {
+      const browserBytes = Buffer.from(JSON.stringify({schema: 1, states, trace, captureStatus, traceError}) + '\n');
+      const browserPath = join(directory, 'browser-states.json.gz');
+      await writeFile(browserPath, gzipSync(browserBytes));
+      result.browserEvidence = {path: browserPath, encoding: 'gzip', rawSha256: digest(browserBytes),
+        rawBytes: browserBytes.length, captureStatus, traceError};
+    };
     try {
       await writeFile(join(directory, 'case.json'), JSON.stringify(item, null, 2) + '\n');
       const tape = (await run('python3', ['tools/original/item-scenarios.py', '--case', join(directory, 'case.json')], { cwd: ROOT })).stdout;
@@ -147,7 +182,7 @@ try {
       })), 'All 343 native configurations must match the independently pinned authored catalogue');
       const rows = new Map(native.debugObservations.map(row => [row.context.presentedFrame, row]));
       page = await browser.newPage();
-      const errors = [], states = [];
+      const errors = [];
       page.on('pageerror', error => errors.push(String(error)));
       await page.goto(server.url + '/?manual=1'); await waitForReady(page);
       await page.evaluate(({ seedValue, bootEpochSeed }) => {
@@ -159,6 +194,7 @@ try {
       let checks = 0, presentations = 0, passedPresentations = 0, admitted = 0, queuedPresentations = 0, grantedPresentations = 0;
       const selectedItemIds = new Set(), callbackDiagnostics = [], mtDiagnostics = [];
       const grantedItemIds = new Set(); let activeGrantObserved = false, healthGrantObserved = false;
+      const pickupShotGuardPhases = new Set();
       let callbackDiagnosticSignature = null, mtDiagnosticSignature = null;
       const ageClockDiagnostics = [];
       const equal = (actual, expected, field, presentation) => {
@@ -259,6 +295,17 @@ try {
             equal(state.player.inputCooldown, nativePlayer.inputCooldown, 'input7d8 cooldown', presentation);
             equal(state.fireCooldown, nativePlayer.fireCooldown, 'actual guarded-shot fire timer', presentation);
             equal(state.headTimer, nativePlayer.headTimer, 'actual guarded-shot head timer', presentation);
+            if (item.requirePickupShotGuard) {
+              assert.equal(typeof nativePlayer.shootingPressed, 'boolean', 'Held Pickup shooting requires actual native db0 readback');
+              equal(state.player.shooting, nativePlayer.shootingPressed, 'actual guarded-shot held input', presentation);
+              if (state.pressed.includes('ArrowRight') && nativePlayer.mainSprite.animation === 'Pickup'
+                  && nativePlayer.pickupAnimationGuard) {
+                pickupShotGuardPhases.add(source.systemCounter % 2);
+                equal(state.tears.filter(tear => tear.motion.lifetime === 'alive').length,
+                  source.world.entities.filter(entity => entity.type === 2 && !entity.removed).length,
+                  'actual Pickup-guard emission', presentation);
+              }
+            }
             equal(owner.temporaryCollectibles, nativePlayer.temporaryCollectibles, 'actual temporary use records', presentation);
             equal(playerWorld, nativeActor.position, 'public active-use stored position', presentation);
             equal(playerVelocity, nativeActor.velocity, 'public active-use stored velocity', presentation);
@@ -356,10 +403,21 @@ try {
         }
         if (key) { await page.keyboard.up(domKey); expected.push({type: 'key', code, down: false}); }
       }
+      // Preserve the completed independent browser capture before a required
+      // coverage or provenance assertion can fail.
+      const trace = await page.evaluate(() => window.game.trace());
+      await archiveBrowser(trace, 'complete');
+      Object.assign(result, {checks, comparedPresentations: presentations + 1,
+        passedPresentations, admittedPedestals: admitted, selectedItemIds: [...selectedItemIds],
+        queuedPresentations, grantedPresentations, pickupShotGuardPhases: [...pickupShotGuardPhases].sort(), nativeManifestSha256: digest(nativeBytes), tapeSha256: digest(Buffer.from(tape))});
       assert.ok(admitted > 0, 'Every case must naturally admit a source-selected pedestal');
       if (acquisition) {
         assert.ok(queuedPresentations > 0, 'Every acquisition case must observe the actual deferred queue');
         assert.ok(grantedPresentations > 0, 'Every acquisition case must observe a later actual grant');
+      }
+      if (item.requirePickupShotGuard) {
+        assert.deepEqual([...pickupShotGuardPhases].sort(), [0, 1],
+          'Public held shooting must exercise the actual original Pickup guard on both presentations');
       }
       if (activeUse && item.expectedItemId !== undefined) {
         assert.ok(grantedItemIds.has(item.expectedItemId), 'Contrived use requires actual independent native45 acquisition');
@@ -370,7 +428,6 @@ try {
         equal([...selectedItemIds], [item.expectedItemId], 'declared natural passive selection', presentations);
         equal([...grantedItemIds], [item.expectedItemId], 'declared natural passive grant', presentations);
       }
-      const trace = await page.evaluate(() => window.game.trace());
       assertInputProvenance(trace, expected, item.seedValue, scenarios.bootEpochSeed);
       if (!acquisition) assert.equal(trace.stateHistoryTruncated, false, 'Selection requires the complete bounded state history');
       assert.ok(trace.backendEvents.every(event => event.state),
@@ -379,9 +436,6 @@ try {
         'Every declared gameplay presentation must have its independent complete snapshot');
       assertSeededRun(await snapshot(page), item.code, item.seedValue);
       assert.deepEqual(errors, []);
-      const browserBytes = Buffer.from(JSON.stringify({schema: 1, states, trace}) + '\n');
-      const browserPath = join(directory, 'browser-states.json.gz');
-      await writeFile(browserPath, gzipSync(browserBytes));
       Object.assign(result, {status: result.failures.length ? 'fail' : 'pass', checks, comparedPresentations: presentations + 1,
         passedPresentations, admittedPedestals: admitted, selectedItemIds: [...selectedItemIds],
         queuedPresentations, grantedPresentations, ageClockDiagnostics, callbackDiagnostics, mtDiagnostics,
@@ -395,7 +449,6 @@ try {
           tearAssociation: 'Stored tear velocities compare ordinal rows. Different counts or birth identities make them candidate comparisons, not proven same-actor motion defects; all required failures remain retained.',
           sharedMt: 'Complete624-word hashes are diagnostic until remaining real run/ambient/item callbacks are implemented; no cursor skips or native state inputs',
           stateHistory: 'Every presentation is independently retained in browserEvidence.states; bounded production trace truncation remains separately disclosed'},
-        browserEvidence: {path: browserPath, encoding: 'gzip', rawSha256: digest(browserBytes), rawBytes: browserBytes.length},
         nativeManifestSha256: digest(nativeBytes), tapeSha256: digest(Buffer.from(tape)),
         inputProvenance: {status: 'pass', commands: trace.commands.length, stateHistoryTruncated: trace.stateHistoryTruncated,
           stateHistoryTruncationReason: trace.stateHistoryTruncationReason, stateEncodedBytes: trace.stateEncodedBytes,
@@ -403,6 +456,13 @@ try {
           inputTraceTruncated: trace.inputTraceTruncated, seedValue: item.seedValue, bootEpochSeed: scenarios.bootEpochSeed}});
     } catch (error) { result.status = 'fail'; result.error = String(error); }
     finally {
+      if (page && !result.browserEvidence) {
+        let trace = null, traceError;
+        try { trace = await page.evaluate(() => window.game.trace()); }
+        catch (error) { traceError = String(error); }
+        try { await archiveBrowser(trace, 'partial', traceError); }
+        catch (error) { result.status = 'fail'; result.browserArchiveError = String(error); }
+      }
       if (page) await page.close();
       if (acquisition && !replayOriginal) {
         try { result.nativeEvidence = await archiveCompletedNative(directory); }
