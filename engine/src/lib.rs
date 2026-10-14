@@ -20,12 +20,14 @@ pub mod champions;
 pub mod chests;
 pub mod combat;
 mod content;
+pub mod critters;
 pub mod dingle;
 pub mod dips;
 mod doors;
 mod effects;
 pub mod enemy_projectiles;
 mod entities;
+pub mod tear_deaths;
 pub use entities::supports_npc_selector;
 pub mod familiars;
 pub mod fireplaces;
@@ -209,14 +211,6 @@ impl Tear {
         self.vx = f64::from(self.motion.velocity.x) * motion::WORLD_SCALE;
         self.vy = f64::from(self.motion.velocity.y) * motion::WORLD_SCALE;
     }
-}
-#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub struct Impact {
-    pub id: u32,
-    pub x: f64,
-    pub y: f64,
-    pub age: u32,
 }
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -507,7 +501,6 @@ pub struct State {
     pub next_laser: u32,
     pub familiars: Vec<familiars::Familiar>,
     pub next_familiar: u32,
-    pub impacts: Vec<Impact>,
     pub fire_cooldown: i32,
     pub max_fire_delay: i32,
     pub head_timer: i32,
@@ -694,7 +687,6 @@ impl Game {
                 next_laser: 1,
                 familiars: Vec::new(),
                 next_familiar: 1,
-                impacts: Vec::new(),
                 fire_cooldown: -1,
                 max_fire_delay: 10,
                 head_timer: -1,
@@ -1272,7 +1264,6 @@ impl Game {
         self.state.run_tick = 0;
         self.state.game_update_count = 0;
         self.state.tears.clear();
-        self.state.impacts.clear();
         self.state.next_tear = 1;
         self.state.enemy_projectiles.clear();
         self.state.next_enemy_projectile = 1;
@@ -1364,6 +1355,9 @@ impl Game {
             &mut self.state.boot_lifecycle.shared,
             self.state.game_update_count,
         )?;
+        // Room.Init's ambient critters follow; Game+ce9f4 still reads0.
+        let counter = self.state.game_update_count;
+        critters::spawn(&mut self.state, counter, true)?;
         // Source Level generation loads the start room, then immediately calls
         // RoomMusic. This runtime's Level contract is fresh normal Basement.
         if let Some(id) = music::stage_track(self.state.stage, false) {
@@ -1647,6 +1641,10 @@ impl Game {
         self.state.room.authored_actor_order = order;
         self.state.next_pickup = next;
         self.rebuild_room_actor_schedule()?;
+        // First-visit ambient critters close Room.Init5cf64f inside this full
+        // update, after the selector entities took their manager sequences.
+        let counter = self.state.game_update_count.wrapping_add(1);
+        critters::spawn(&mut self.state, counter, false)?;
         self.state.room.boss_count = self.state.room.manager_counts.boss_total().max(0) as u32;
         self.refresh_stage_effects();
         Ok(())
@@ -1982,6 +1980,18 @@ impl Game {
                         }
                         self.count_updated_room_actor(actor, &mut counted);
                     }
+                    // The same Room::Update reaches the critters Room.Init just
+                    // spawned, after the selector entities, at this counter.
+                    let critters: Vec<u32> = self
+                        .state
+                        .sprite_effects
+                        .iter()
+                        .filter(|effect| effect.critter.is_some() && effect.active)
+                        .map(|effect| effect.id)
+                        .collect();
+                    for id in critters {
+                        critters::advance(&mut self.state, phase, id)?;
+                    }
                     self.state.room.manager_counts.finish_full(counted);
                     // The admitting manager pass also sets the bar: a fresh
                     // boss is present but not yet summed, so the fill is 0/0.
@@ -2051,6 +2061,7 @@ impl Game {
                 .game_update_count
                 .checked_add(1)
                 .ok_or("game update counter exhausted")?;
+            critters::replay_loader_update(&mut self.state)?;
         }
         doors::advance(&mut self.state, phase)?;
         let explosion_fence = self.state.explosions.len();
@@ -2150,24 +2161,9 @@ impl Game {
                 }
             }
         }
-        for impact in &mut self.state.impacts {
-            impact.age += 1;
-        }
-        self.state.impacts.retain(|impact| impact.age < 12);
-        let mut surviving = Vec::new();
-        for tear in std::mem::take(&mut self.state.tears) {
-            if tear.motion.lifetime == projectiles::Lifetime::Removed {
-                self.state.impacts.push(Impact {
-                    id: tear.id,
-                    x: f64::from(tear.motion.position.x) * motion::WORLD_SCALE + 32.0,
-                    y: f64::from(tear.motion.position.y) * motion::WORLD_SCALE - 46.0,
-                    age: 0,
-                });
-            } else {
-                surviving.push(tear);
-            }
-        }
-        self.state.tears = surviving;
+        self.state
+            .tears
+            .retain(|tear| tear.motion.lifetime != projectiles::Lifetime::Removed);
         bombs::advance_explosions(&mut self.state, phase, explosion_fence);
         bombs::retire_removed(&mut self.state);
         self.state.room.pickups.retain(|pickup| !pickup.removed);
@@ -2277,11 +2273,22 @@ impl Game {
                 } else {
                     None
                 };
+                let mut death = None;
                 if let Some(tear) = self.state.tears.iter_mut().find(|tear| tear.id == actor.id) {
                     if newborn {
                         tear.motion.present_birth(phase)?;
                     } else {
-                        tear.motion.advance(phase, tear.grid_contact)?;
+                        let dying = tear.motion.lifetime == projectiles::Lifetime::Dying;
+                        if tear.motion.advance(phase, tear.grid_contact)?
+                            == projectiles::Lifetime::Removed
+                            && dying
+                        {
+                            death = Some(tear_deaths::Death {
+                                position: tear.motion.position,
+                                height: tear.motion.height,
+                                scale: tear.scale,
+                            });
+                        }
                         if phase == phase::Phase::Update {
                             tear.age = tear.age.checked_add(1).ok_or("tear age exhausted")?;
                             tear.grid_contact = grid
@@ -2291,6 +2298,9 @@ impl Game {
                         }
                     }
                     tear.project();
+                }
+                if let Some(death) = death {
+                    tear_deaths::emit(&mut self.state, death)?;
                 }
             }
             actors::ActorKind::Bomb => bombs::advance_actor(&mut self.state, phase, actor.id)?,
