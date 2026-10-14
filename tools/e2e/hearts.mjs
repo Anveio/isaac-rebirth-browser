@@ -2,13 +2,16 @@
 import assert from 'node:assert/strict';
 import {execFileSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
-import {mkdirSync,readFileSync,writeFileSync} from 'node:fs';
+import {existsSync,mkdirSync,readFileSync,writeFileSync} from 'node:fs';
 import {resolve} from 'node:path';
+import {gunzipSync} from 'node:zlib';
 import {runPairedGate} from '../foundation/paired-game.mjs';
 const option=(name,fallback)=>{const at=process.argv.indexOf(name);if(at<0)return fallback;assert.ok(process.argv[at+1]);return process.argv[at+1];};
 const output=resolve(option('--output','.cache/e2e/hearts'));mkdirSync(output,{recursive:true});
 const save=(p,v)=>writeFileSync(p,JSON.stringify(v,null,2)+'\n');
 const digest=p=>createHash('sha256').update(readFileSync(p)).digest('hex');
+const artifactBytes=p=>existsSync(p)?readFileSync(p):gunzipSync(readFileSync(p+'.gz'));
+const artifactDigest=p=>createHash('sha256').update(artifactBytes(p)).digest('hex');
 const sources=['tools/e2e/hearts.mjs','tools/original/heart-scenarios.py','tools/original/foundation-combat-observe.py','engine/src/pickups.rs','engine/src/player_items.rs','engine/src/fireplaces.rs','engine/src/lib.rs','web/engine.ts','web/renderer.ts'];
 const hashes=()=>Object.fromEntries(sources.map(p=>[p,digest(p)])),before=hashes();
 const prepared=option('--scenarios');
@@ -22,7 +25,7 @@ for(const [index,c] of scenarios.cases.entries()){
  const directory=resolve(output,'paired',`${String(index).padStart(2,'0')}-${c.scenario.id}`),checks=[],execution={native:{admission:false,damage:false,collection:false},browser:{admission:false,damage:false,collection:false}};
  let error;const originalPath=resolve(directory,'original/manifest.json'),browserPath=resolve(directory,'browser/manifest.json');
  try{
-  const original=JSON.parse(readFileSync(originalPath,'utf8')),browser=JSON.parse(readFileSync(browserPath,'utf8'));
+  const original=JSON.parse(artifactBytes(originalPath)),browser=JSON.parse(artifactBytes(browserPath));
   const caseReport=JSON.parse(readFileSync(resolve(directory,'report.json'),'utf8'));
   assert.equal(caseReport.original.status,'pass');assert.equal(caseReport.browser.status,'pass');
   assert.equal(original.status,'pass');assert.equal(browser.status,'pass');assert.equal(paired.gateSourcesStable,true);
@@ -55,7 +58,7 @@ for(const [index,c] of scenarios.cases.entries()){
   }
   for(const name of ['native','browser'])for(const required of c.heartRequired)check('execution',`${name}.${required}`,true,execution[name][required]);
  }catch(failure){error=String(failure.stack??failure);}
- const result={id:c.scenario.id,status:!error&&checks.length>0&&checks.every(r=>r.status==='pass')?'pass':'fail',execution,checks,error,manifestHashes:{original:()=>digest(originalPath),browser:()=>digest(browserPath)}};
+ const result={id:c.scenario.id,status:!error&&checks.length>0&&checks.every(r=>r.status==='pass')?'pass':'fail',execution,checks,error,manifestHashes:{original:()=>artifactDigest(originalPath),browser:()=>artifactDigest(browserPath)}};
  // A failed or missing manifest must remain a report, not abort later cases.
  result.manifestHashes=Object.fromEntries(Object.entries(result.manifestHashes).map(([name,read])=>{try{return[name,read()];}catch{return[name,null];}}));
  save(resolve(directory,'heart-state.json'),result);results.push({id:result.id,status:result.status,fields:checks.length,failures:checks.filter(r=>r.status==='fail').length,execution,error,report:resolve(directory,'heart-state.json')});

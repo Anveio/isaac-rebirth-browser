@@ -64,5 +64,15 @@
     "NodeAndPythonSyntax": "pass",
     "whitespace": "pass",
     "RustAndStrictClippy": "pending concrete guard integration and scheduled static turn"
+  },
+  "currentOwnedPayload": {
+    "baseMain": "7492adba9b256e5767e28906289e89ca6faa2655",
+    "runtime": "61e15e9ebc0a4881b00242ac9ba89c4b55cef20d",
+    "sharedEntry": "Extends main98 Game.collect_regular_pickup_at used by full and saved-readmission callbacks; preserves initialize_spawn_seed/persistentregular_rng and currentanchor owner.",
+    "schema": "Eternal field/default/TS matches b68 byte-for-byte; no duplicatedhealthdamage arithmetic.",
+    "eligibility": "Actual91/sharedANM thenRootDeath233+9eb9956 soleplayer_can_collect prerequisite awaits main composition. No dormantDead/guard owner added.",
+    "RustAndStrictClippy": "not run for currentpayload; initial624 proof remains separately pinned",
+    "productionAndLive": "not run",
+    "retainedCaseBankSha256": "6860834fd32322bf690d01e33f5b78a3db4fc4ad3e5e897831c15e37fa55e76e"
   }
 }
