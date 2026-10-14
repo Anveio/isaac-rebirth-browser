@@ -9,6 +9,10 @@ import { runPairedGate } from '../foundation/paired-game.mjs';
 import { flag, outputDirectory, writeJson } from './lib/cli.mjs';
 
 const helper = flag('--scenario-helper');
+// Repeatable pass-through arguments, e.g. `--helper-arg --type --helper-arg 10`,
+// let one registry line drive a generic helper and comparator per entity.
+const repeated = name => process.argv.flatMap((arg, index) => arg === name ? [process.argv[index + 1]] : []);
+const helperArgs = repeated('--helper-arg'), comparatorArgs = repeated('--comparator-arg');
 const comparator = flag('--comparator');
 assert.ok(helper && comparator, 'state-pair requires --scenario-helper and --comparator');
 const name = basename(comparator, '.mjs');
@@ -16,7 +20,7 @@ const output = outputDirectory(name);
 
 const recorded = flag('--scenarios');
 const scenarios = recorded ? JSON.parse(readFileSync(resolve(recorded), 'utf8'))
-  : JSON.parse(execFileSync('python3', [helper], { encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 }));
+  : JSON.parse(execFileSync('python3', [helper, ...helperArgs], { encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 }));
 const selected = flag('--case');
 if (selected) {
   scenarios.cases = scenarios.cases.filter(item => item.scenario.id === selected);
@@ -33,7 +37,7 @@ const cases = scenarios.cases.map((scenario, index) => {
   const directory = resolve(output, 'paired', `${String(index).padStart(2, '0')}-${scenario.scenario.id}`);
   const target = resolve(directory, `${name}.json`);
   rmSync(target, { force: true });
-  const args = [comparator, '--case', directory, '--output', target];
+  const args = [comparator, ...comparatorArgs, '--case', directory, '--output', target];
   if (requireKey) args.push('--require', scenario[requireKey].join(','));
   const child = spawnSync('node', args, { encoding: 'utf8' });
   writeFileSync(resolve(directory, `${name}-output.txt`), child.stdout + child.stderr);
