@@ -130,7 +130,7 @@ impl Admission<'_> {
                     seed,
                     position,
                     velocity,
-                    parent: Some(death.parent.clone()),
+                    parent: Some(death.parent),
                     tint: death.tint,
                     offsets: death.offsets,
                 })?;

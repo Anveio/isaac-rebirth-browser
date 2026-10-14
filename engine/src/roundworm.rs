@@ -329,9 +329,12 @@ pub fn advance(
     npc.position = npc.position + npc.velocity;
     npc.presented_position = npc.position;
     let mut health = npc.health();
-    npc.damage.advance(&mut health, phase)?;
-    npc.hp = health.hp;
-    if npc.hp <= 0.0 {
+    let applied = npc.damage.advance(&mut health, phase)?;
+    for damage in applied {
+        npc.hp = damage.hp_after;
+        if !damage.lethal || npc.dead {
+            continue;
+        }
         if world.stage != 1 || npc.variant != 0 || npc.subtype != 0 {
             return Err("Worm death requires the admitted ordinary Stage1 context".into());
         }
@@ -361,6 +364,7 @@ pub fn advance(
             world.system_counter,
         )?;
     }
+    npc.hp = health.hp;
     if !npc.position.is_finite() || !npc.velocity.is_finite() {
         return Err("Worm source motion overflowed".into());
     }
