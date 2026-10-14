@@ -196,6 +196,11 @@ pub fn player_contacts(state: &mut State) -> Result<(), String> {
         .expect("authored Isaac geometry is valid")
     });
     for index in 0..state.room.npcs.len() {
+        //4453a0 rejects either actual dead31f before the next callback.
+        //The contact entered alive still completes its physical response.
+        if state.player.dead {
+            break;
+        }
         let npc = &state.room.npcs[index];
         if npc.dead || npc.removed || npc.entity_collision_class == 0 {
             continue;

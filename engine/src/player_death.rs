@@ -82,7 +82,6 @@ pub fn advance(state: &mut State, phase: Phase) -> bool {
         }
         state.player.vx = 0.0;
         state.player.vy = 0.0;
-        state.player.shooting = false;
         if !state.player_animation.is_playing(Clip::Death)
             && state.player_animation.is_finished(Some(Clip::Death))
         {

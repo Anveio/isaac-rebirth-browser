@@ -211,6 +211,9 @@ fn enqueue(state: &mut State, id: u32, charge: i32, touched: bool) -> Result<(),
 /// First free natural collectible, normal Isaac, with no active swap. The
 /// retained empty altar is an actor with stopped Empty main frame0.
 pub(crate) fn collect(state: &mut State, index: usize) -> Result<bool, String> {
+    if !crate::pickups::player_can_collect(state) {
+        return Ok(false);
+    }
     let pickup = &state.room.pickups[index];
     let Some(owner) = state.player_items.as_ref() else {
         return Ok(false);
@@ -290,7 +293,10 @@ pub(crate) fn empty_altar_contact(state: &mut State, index: usize) -> Result<(),
     use crate::{bombs, combat, grid, motion::WorldVector};
     use std::sync::OnceLock;
     let pickup = &state.room.pickups[index];
-    if pickup.variant != 100 || pickup.subtype != 0 || pickup.removed {
+    //4453e7..4453fe vetoes a dead body independently of the collection
+    //callback. A living Player's collection/queue guard still permits the
+    //retained free class4 altar's physical response after504820 returns0.
+    if state.player.dead || pickup.variant != 100 || pickup.subtype != 0 || pickup.removed {
         return Ok(());
     }
     let lattice = grid::Grid::new(

@@ -30,12 +30,13 @@ readmission and complete HUD presentation remain explicit follow-ups. Source,
 helper and static-log hashes are in `references/isaac/foundation/hearts`.
 
 The current source-only payload `f1bccc6` is composed on the concrete Death
-prerequisite `6b7d1d3` (preserving `ef78acc`) and main `2d2174e`. It extends main98's shared regular
+prerequisite `5afa7dd` (preserving `6b7d1d3` and `ef78acc`) and main `2d2174e`. It extends main98's shared regular
 collection entry for full updates and saved readmission, retaining its unchanged
 `player_can_collect` guard, persistent RNG initialization and anchor owner. The
 Eternal field/default/TypeScript matches the health-damage prerequisite; each
 composition keeps one owner. The main-name predicate permits owned Hit/UseItem;
-its legacy queued Pickup veto remains explicitly incomplete.
+generic queued Pickup no longer vetoes regular collection. Collectible/chest
+queue rules and complete Pickup/LiftItem/HideItem presentation remain separate.
 
 Exact guarded composition `1d166003` passes its own one-job all-target Rust
 check (9.56s) and strict Clippy (9.49s), with incremental compilation disabled
@@ -44,3 +45,12 @@ has run for this composition. The required registry retains Active Item, Player 
 suites. The six-case bank stays unchanged; the comparator reads lossless archived
 manifests and hashes their decoded original bytes. No new seed discovery or game
 run occurred.
+
+
+Current composition `c16c163` consumes all final111 fixes: Space/Q transport,
+held-shooting preservation, dead physical/collection eligibility, retained-case
+transport failures and the removed generic legacy-Pickup veto. The unchanged
+shared entry now permits regular pickups with redHP0/SoulHP and during legacy
+Pickup presentation. The earlier `1d166003` Rust/Clippy receipt is retained;
+metadata validation of this latest composition is pending. No new production
+or paired Heart acceptance is inherited from the Death prerequisite.

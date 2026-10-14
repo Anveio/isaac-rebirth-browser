@@ -6,21 +6,18 @@ use serde::{Deserialize, Serialize};
 /// Normal Isaac's actual50c880 collection predicate. Supported guarded clips
 /// include the actual Hit and UseItem names admitted by50c880/50c780. The Hit
 /// callback is composed separately; its name uses this same predicate.
-/// Controls7d4 is not a general collection veto. The retained legacy queued
-/// Pickup veto is an incomplete deferred-grant approximation:50c780 permits
-/// actual Pickup/LiftItem/HideItem too, whose main-clip ownership is pending.
+/// Controls7d4 and the legacy queued Pickup guard are not general collection
+/// vetoes. Collectible queue admission keeps its separate existing rule.
 pub(crate) fn player_can_collect(state: &crate::State) -> bool {
     !state.player.dead
         && state.player_animation.current != Some(crate::player_animation::Clip::Death)
         && (!state.player_animation.guard
-            || state
-                .player_animation
-                .current
-                .is_some_and(|clip| matches!(clip.name(), "Hit" | "UseItem")))
-        && !state
-            .player_items
-            .as_ref()
-            .is_some_and(|items| items.pickup_animation_guard)
+            || state.player_animation.current.is_some_and(|clip| {
+                matches!(
+                    clip.name(),
+                    "Hit" | "Pickup" | "LiftItem" | "HideItem" | "UseItem"
+                )
+            }))
 }
 use std::collections::{BTreeMap, BTreeSet};
 
