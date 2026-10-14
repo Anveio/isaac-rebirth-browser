@@ -52,12 +52,18 @@ for(const action of replay.pairedTape){
       ['state',native.npcState,npc.state],['appearance',native.npcFrameAge,npc.frameAge],['savedInitialization',native.npcSavedInitializedState,npc.savedInitializedState],['gridClass',native.gridCollisionClass,npc.gridCollisionClass],['entityClass',native.entityCollisionClass,npc.entityCollisionClass],
       ['canShutDoors',native.canShutDoors,npc.canShutDoors],['boss',native.boss,npc.boss],['dead',native.removed,npc.dead],['active',native.active,!npc.removed],['visible',native.visible,npc.visible],
       ['animation',native.animation,npc.animation],['frame',f32(native.animationFrame),f32(npc.animationClock)],['playing',native.animationPlaying,npc.animationPlaying],['pendingDamage',f32(native.pendingDamage),f32(npc.damage.pendingDamage)],['pendingFlags',native.pendingFlags,npc.damage.pendingFlags],
-      ['orderedDamageRecords',native.pendingDamageRecords.map(row=>[f32(row.amount),row.flags,row.sourceType]),npc.damage.events.map(row=>[f32(row.amount),{tear:0,bomb:4,fireContact:2}[row.kind],row.source.entityType])],
+      ['orderedDamageRecords',native.pendingDamageRecords.map(row=>[f32(row.amount),row.flags,row.sourceType]),npc.damage.events.map(row=>[f32(row.amount),{tear:0,bomb:4,fireContact:2,roomEffect:0}[row.kind],row.source.entityType])],
       ['position',vector(native.position),vector(phase===0?npc.presentedPosition:npc.position)],['velocity',vector(native.velocity),vector(npc.velocity)],['target',vector(native.npcTarget),vector(npc.target)]
     ])check(checks,label,`npc${native.spawnSeed}.${field}`,expected,observed);
     for(const [index,record] of native.pendingDamageRecords.entries()){
-      assert.equal(record.sourceActorType,record.sourceType,'Native ordered damage must retain its actual attacker');
       const event=npc.damage.events[index];if(!event)continue;
+      if(event.kind==='roomEffect'){
+        // Black-heart Use35 passes a real blank source, not an actor reference.
+        check(checks,label,`npc${native.spawnSeed}.damage${index}.nativeBlankSource`,[0,0,null,null,null],[record.sourceType,record.sourceVariant,record.sourceActorType,record.sourceActorSequenceId,record.sourceActorSpawnSeed]);
+        check(checks,label,`npc${native.spawnSeed}.damage${index}.browserBlankSource`,[0,0],[event.source.entityType,event.source.id]);
+        continue;
+      }
+      assert.equal(record.sourceActorType,record.sourceType,'Native ordered damage must retain its actual attacker');
       const retained=event.source.entityType===2?actual.tears.find(a=>a.id===event.source.id)
         :event.source.entityType===4?actual.bombs.find(a=>a.id===event.source.id)
         :actual.room.npcs.find(a=>a.id===event.source.id);
