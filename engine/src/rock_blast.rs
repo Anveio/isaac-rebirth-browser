@@ -80,6 +80,9 @@ pub fn advance_bomb_rocks(state: &mut State) -> Result<(), String> {
                 entity_type: 0,
             },
         )?;
+        // Rock.Destroy56c8ec/56ca46: the same crater and explosion spawns as
+        // a bomb. The explosion's light owner is keyed apart from bomb ids.
+        crate::bombs::spawn_blast_effects(state, 0x8000_0000 | cell as u32, position);
     }
     Ok(())
 }
