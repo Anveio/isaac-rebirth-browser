@@ -21,6 +21,8 @@ const e2e = name => `tools/e2e/${name}.mjs`;
 const helper = name => `tools/original/${name}`;
 // A scenario helper's tapes graded by a state comparator (see state-pair.mjs).
 const statePair = e2e('state-pair');
+// Multi-room routes from a scenario helper (see traversal.mjs).
+const traversal = e2e('traversal');
 
 export const SUITES = [
   suite('paired', paired, [], 'Title/menu, movement/fire, pause, bombs and combat rooms; six contrived + two OS-random runs'),
@@ -32,25 +34,31 @@ export const SUITES = [
   suite('boot-mt', e2e('boot-mt'), ['--count', '4'], 'Boot-time shared MT state through title and menus'),
   suite('menu-mt', e2e('boot-mt'), ['--menu-navigation', '--count', '4'], 'Menu navigation draws from the shared MT stream'),
   suite('seed-dialog-mt', e2e('boot-mt'), ['--seed-dialog', '--count', '4'], 'Seed dialog entry and its MT consumption'),
-  suite('ordinary-run', e2e('ordinary-run'), ['--count', '4'], 'No-dialog ordinary run admission'),
-  suite('level-descriptors', e2e('ordinary-run'), ['--level-descriptors', '--count', '4'], 'Ordinary-run level descriptors'),
-  suite('saved-game', e2e('ordinary-run'), ['--saved-game', '--count', '4'], 'Game.Save stores after an ordinary run starts'),
-  suite('grid-records', e2e('ordinary-run'), ['--grid-records', '--count', '4'], 'Starting-room GridBase records'),
-  suite('ambient-grid', e2e('ordinary-run'), ['--ambient-grid', '--count', '4'], 'Ambient Room path costs and decorations'),
+  // --ambient-grid also enables the level-descriptor, saved-game and grid-record
+  // checks; the tapes and cases are identical with or without them.
+  suite('ordinary-run', e2e('ordinary-run'), ['--ambient-grid', '--count', '4'],
+    'No-dialog run admission, level descriptors, Game.Save stores, grid records and ambient Room costs'),
   suite('weapons', e2e('weapons'), ['--count', '4'], 'Tear cadence, direction and inherited motion'),
   suite('tear-lifecycle', e2e('weapons'), ['--lifecycle', '--count', '4'], 'Tear birth, flight and death phases'),
-  suite('traversal', e2e('traversal'), [], 'Ordinary doorway exit/return and hostile-room locks'),
-  suite('doors', e2e('doors'), ['--count', '1'], 'Curse and free treasure-room doors'),
-  suite('secrets', e2e('secrets'), ['--count', '1'], 'Bomb-revealed secret doors, entry and return'),
-  suite('keepers', e2e('keepers'), ['--count', '1'], 'Keeper construction and anchored idle in secret rooms'),
-  suite('key-doors', e2e('key-doors'), ['--count', '1'], 'Key collection, library unlock and revisit'),
-  suite('large-rooms', e2e('large-rooms'), ['--count', '2'], 'Tall-room bounds, doors and camera'),
-  suite('chest-opening', e2e('chest-opening'), ['--count', '2'], 'Free normal Chest opening and loot'),
+  suite('traversal', traversal, [], 'Ordinary doorway exit/return and hostile-room locks'),
+  suite('doors', traversal, ['--scenario-helper', helper('door-scenarios.py'), '--count', '1'], 'Curse and free treasure-room doors'),
+  suite('secrets', traversal, ['--scenario-helper', helper('secret-door-scenarios.py'), '--count', '1'],
+    'Bomb-revealed secret doors, entry and return'),
+  suite('keepers', traversal, ['--scenario-helper', helper('keeper-scenarios.py'), '--count', '1'],
+    'Keeper construction and anchored idle in secret rooms'),
+  suite('key-doors', traversal, ['--scenario-helper', helper('key-door-scenarios.py'),
+    '--state-observer', helper('key-door-observe.py'), '--count', '1'], 'Key collection, library unlock and revisit'),
+  suite('large-rooms', traversal, ['--scenario-helper', helper('large-room-scenarios.py'), '--count', '2'],
+    'Tall-room bounds, doors and camera'),
+  suite('chest-opening', traversal, ['--scenario-helper', helper('chest-scenarios.py'),
+    '--state-observer', helper('chest-observe.py'),
+    // Public time(NULL) and SFX preference given to both games.
+    '--boot-epoch-seed', '1700000000', '--sfx-volume', '1', '--count', '2'], 'Free normal Chest opening and loot'),
   suite('pickups', e2e('pickups'), ['--count', '2'], 'Natural authored pickups: admission, animation and collection'),
   suite('keys', e2e('keys'), ['--count', '2'], 'Natural secret-room keys: admission and collection'),
   suite('bomb-pickups', e2e('bomb-pickups'), ['--count', '2'], 'Regular/double bomb pickup admission and collection'),
   suite('hearts', e2e('hearts'), ['--count', '2'], 'Natural Heart pickups through the shared collection guard'),
-  suite('troll-bombs', e2e('troll-bombs'), [], 'Troll/Megatroll conversion and lifetime'),
+  suite('troll-bombs', e2e('troll-bombs'), ['--count', '2'], 'Troll/Megatroll conversion and lifetime'),
   suite('rock-blast', e2e('rock-blast'), ['--count', '2'], 'Ordinary rock destruction by bombs'),
   suite('items', e2e('items'), ['--count', '2'], 'Item pools and treasure-room pedestals'),
   suite('item-acquisition', e2e('items'), ['--acquisition', '--count', '2'], 'First collectible acquisition'),

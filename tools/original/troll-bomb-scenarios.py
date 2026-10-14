@@ -28,10 +28,13 @@ def main():
     if args.count is not None and not 2 <= args.count <= 4:
         raise ValueError('Conversion coverage requires 2..4 new unfiltered OS-random draws')
     recorded = json.loads((ROOT / 'references/isaac/foundation/troll-bombs/scenarios.json').read_text())
+    # Fresh draws reuse the bomb-pickup route names, which the retained cohort
+    # already holds; prefix them so every case name stays unique.
+    fresh = [dict(case, name='fresh-' + case['name']) for case in pickups.random_cases(args.count)] if args.count is not None else []
     print(json.dumps({'schema': 1, 'bootEpochSeed': 1700000000,
                       'source': 'Actual public seeds and held-key intervals; no captured state enters production',
                       'scope': recorded['scope'],
-                      'cases': recorded['cases'] + (pickups.random_cases(args.count) if args.count is not None else [])}))
+                      'cases': recorded['cases'] + fresh}))
     return 0
 
 
