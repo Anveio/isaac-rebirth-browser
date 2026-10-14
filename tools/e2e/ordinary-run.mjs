@@ -11,7 +11,8 @@ import { browserLaunchOptions, inspectBrowserGraphics } from '../foundation/brow
 import { startProductionServer } from '../foundation/production-server.mjs';
 import { assertInputProvenance, waitForReady } from '../foundation/verify.mjs';
 import { compareSavedRoomGrid } from '../foundation/saved-grid-compare.mjs';
-import { ORIGINAL_SHA } from './lib/original.mjs';
+import { snapshot, step } from './lib/game.mjs';
+import { ORIGINAL_SHA, assertOriginalBinary } from './lib/original.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const run = promisify(execFile);
@@ -43,7 +44,7 @@ const nativeTape = [{ type: 'step', frames: 180 }, { type: 'capture', label: 'in
 for (const [index, label] of ['profile', 'main', 'character', 'gameplay-start'].entries()) nativeTape.push({ type: 'key', key: 'Return', down: true }, { type: 'step', frames: 12 }, { type: 'key', key: 'Return', down: false }, { type: 'step', frames: index === 3 ? 300 : 72 }, { type: 'capture', label });
 await mkdir(output, { recursive: true });
 await writeFile(join(output, 'scenarios.json'), JSON.stringify({ schema: 1, entropy: 'Node crypto OS entropy for independent boot epoch and browser reset seed; no requested run seed', cases }, null, 2) + '\n');
-assert.equal(createHash('sha256').update(await readFile(join(ROOT, '.cache/original-runtime/offline-depot/isaac.x64'))).digest('hex'), ORIGINAL_SHA);
+await assertOriginalBinary();
 const production = await startProductionServer();
 const browser = await chromium.launch(browserLaunchOptions());
 const report = { schema: 1, status: 'running', originalBinarySha256: ORIGINAL_SHA, production: production.build, graphics: await inspectBrowserGraphics(browser), scope: 'Ordinary public no-dialog Character-to-run admission uses the generated menu seed, preserving unseeded eligibility. Complete shared MT, saved/menu fields, nine grid pairs and179 stat poses compare through Character; actual run seed/code/stage and System admission are blocking. Run shared-MT differences remain explicit diagnostics; no original state becomes browser input.', cases: [] };
@@ -81,7 +82,7 @@ try {
       // Both browser inputs come only from the saved public case, never native.
       await page.evaluate(({ initialSeed, bootEpochSeed }) => { window.game.pause(); window.game.reset(initialSeed, { trace: true, bootEpochSeed }); }, scenario);
       const compareMenu = async label => {
-        const state = await page.evaluate(() => window.game.snapshot()), observed = observations.get(label), boot = state.bootLifecycle;
+        const state = await snapshot(page), observed = observations.get(label), boot = state.bootLifecycle;
         checkpoints.push({ label, state }); assert.ok(observed && observed.status === 'pass');
         assert.equal(state.screen, label); assert.equal(observed.systemState, 1);
         assert.equal(observed.title.menuScreen, { title: 1, profile: 2, main: 3, character: 4 }[label]);
@@ -99,14 +100,14 @@ try {
       };
       await compareMenu('title');
       for (const label of ['profile', 'main', 'character']) {
-        await page.keyboard.down('Enter'); await page.evaluate(() => window.game.step(12));
-        await page.keyboard.up('Enter'); await page.evaluate(() => window.game.step(72));
+        await page.keyboard.down('Enter'); await step(page, 12);
+        await page.keyboard.up('Enter'); await step(page, 72);
         await compareMenu(label);
       }
       const characterSeed = checkpoints.at(-1).state.bootLifecycle.menuRunSeed;
-      await page.keyboard.down('Enter'); await page.evaluate(() => window.game.step(12));
-      await page.keyboard.up('Enter'); await page.evaluate(() => window.game.step(300));
-      const state = await page.evaluate(() => window.game.snapshot()), observed = observations.get('gameplay-start');
+      await page.keyboard.down('Enter'); await step(page, 12);
+      await page.keyboard.up('Enter'); await step(page, 300);
+      const state = await snapshot(page), observed = observations.get('gameplay-start');
       checkpoints.push({ label: 'gameplay-start', state });
       assert.equal(state.screen, 'playing'); assert.equal(observed.systemState, 2);
       assert.equal(state.runSeedValue, characterSeed, 'Actual generated Character seed must own run admission');
