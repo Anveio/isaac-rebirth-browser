@@ -27,6 +27,7 @@ pub mod familiars;
 pub mod fireplaces;
 pub mod floor;
 pub mod gib_counts;
+pub mod gluttony;
 pub mod grid;
 mod grid_hazards;
 pub mod grid_records;
@@ -36,6 +37,7 @@ pub mod information_animation;
 pub mod input;
 pub mod items;
 pub mod keepers;
+pub mod lasers;
 pub mod layout;
 pub mod level2_flies;
 pub mod level_progress;
@@ -46,6 +48,7 @@ pub mod mt;
 pub mod music;
 pub mod nightmares;
 pub mod npcs;
+pub mod pathfinder;
 pub mod phase;
 pub mod pickups;
 mod plain_npc;
@@ -411,6 +414,10 @@ pub struct State {
     pub fire_particles: Vec<fireplaces::Ember>,
     pub next_effect: u32,
     pub sprite_effects: Vec<familiars::SpriteEffect>,
+    #[serde(default)]
+    pub lasers: Vec<lasers::Laser>,
+    #[serde(default)]
+    pub next_laser: u32,
     pub familiars: Vec<familiars::Familiar>,
     pub next_familiar: u32,
     pub impacts: Vec<Impact>,
@@ -565,6 +572,8 @@ impl Game {
                 fire_particles: Vec::new(),
                 next_effect: 1,
                 sprite_effects: Vec::new(),
+                lasers: Vec::new(),
+                next_laser: 1,
                 familiars: Vec::new(),
                 next_familiar: 1,
                 impacts: Vec::new(),
@@ -1074,6 +1083,8 @@ impl Game {
         self.state.fire_particles.clear();
         self.state.next_effect = 1;
         self.state.sprite_effects.clear();
+        self.state.lasers.clear();
+        self.state.next_laser = 1;
         self.state.familiars.clear();
         self.state.next_familiar = 1;
         self.state.fire_cooldown = -1;
@@ -1892,6 +1903,7 @@ impl Game {
         self.state
             .fire_particles
             .retain(|particle| !particle.removed);
+        lasers::retire(&mut self.state);
         self.refresh_minimap();
         if phase.updates_nonplayers() {
             npcs::advance_room_clear(&mut self.state);
@@ -1926,7 +1938,14 @@ impl Game {
                         .sprite_effects
                         .iter()
                         .any(|effect| effect.id == actor.id)
+                    || self.state.lasers.iter().any(|laser| {
+                        laser
+                            .impact
+                            .as_ref()
+                            .is_some_and(|impact| impact.id == actor.id)
+                    })
             }
+            actors::ActorKind::Laser => self.state.lasers.iter().any(|laser| laser.id == actor.id),
             _ => true,
         });
         if phase != phase::Phase::Skipped {
@@ -2006,7 +2025,9 @@ impl Game {
             actors::ActorKind::Projectile => {
                 enemy_projectiles::advance_actor(&mut self.state, phase, actor.id)?
             }
+            actors::ActorKind::Laser => lasers::advance_actor(&mut self.state, phase, actor.id)?,
             actors::ActorKind::Effect => {
+                lasers::advance_impact(&mut self.state, phase, actor.id)?;
                 familiars::advance_effect(&mut self.state, phase, actor.id)?;
                 if let Some(particle) = self
                     .state
@@ -2148,6 +2169,7 @@ impl Game {
         let parent = self.state.room.npcs[index].id;
         match birth {
             entities::Birth::Blood(seed) => self.admit_npc_blood(index, seed),
+            entities::Birth::Laser(birth) => lasers::admit(&mut self.state, parent, birth),
             entities::Birth::Ember(birth) => {
                 let id = self.state.next_effect;
                 self.state.next_effect = id.checked_add(1).ok_or("Ember identity exhausted")?;

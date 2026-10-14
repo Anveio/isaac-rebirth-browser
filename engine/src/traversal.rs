@@ -33,11 +33,13 @@ pub struct BossScene {
     pub animation_playing: bool,
 }
 
-/// A 1x1 boss room is admitted once a registered family constructs its
-/// authored boss and that boss has a bossportraits.xml presentation. Other
-/// authored NPCs follow ordinary-room admission.
+/// A 1x1 boss room (type 5) or miniboss room (type 6) is admitted once a
+/// registered family constructs its authored boss. Boss rooms also need a
+/// bossportraits.xml presentation for their VS scene; minibosses enter without
+/// one. Other authored NPCs follow ordinary-room admission.
 fn supported_boss(descriptor: &crate::floor::Descriptor) -> bool {
-    if descriptor.template.room_type != 5
+    let room_type = descriptor.template.room_type;
+    if !matches!(room_type, 5 | 6)
         || (descriptor.template.width, descriptor.template.height) != (13, 7)
     {
         return false;
@@ -54,7 +56,9 @@ fn supported_boss(descriptor: &crate::floor::Descriptor) -> bool {
     };
     spawns.selectors.iter().any(|spawn| {
         matches!(crate::entities::spawn(0, spawn, &context), Ok(Some(npc))
-            if npc.boss && crate::content::boss_presentation(npc.kind, npc.variant).is_some())
+            if npc.boss
+                && (room_type == 6
+                    || crate::content::boss_presentation(npc.kind, npc.variant).is_some()))
     })
 }
 
@@ -290,6 +294,7 @@ pub(crate) fn advance_transition(state: &mut State, phase: Phase) -> bool {
     state.player.vy = 0.0;
     state.tears.clear();
     state.enemy_projectiles.clear();
+    state.lasers.clear();
     state.fire_particles.clear();
     state.impacts.clear();
     state.bombs.clear();

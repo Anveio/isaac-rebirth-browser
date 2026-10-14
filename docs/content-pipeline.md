@@ -376,7 +376,7 @@ engine work in M1–M5 does not.
 - [x] M1 entity catalogue (#145)
 - [x] M2 family registry and birth sink (#152)
 - [x] M3 registry-derived contact admission (the Dip fix itself landed in #146)
-- [ ] M4 clip and appear primitives: `plain_npc` (source generic appear, sprite clock, BaseUpdate, death) and `try_shoot_player` (FireProjectiles modes 0 and 1) are in; Horf, Fly, AttackFly and Pooter/Super Pooter use them (#164 and this slice); the remaining legacy families still use their own copies
+- [ ] M4 clip and appear primitives: `plain_npc` (source generic appear, sprite clock, BaseUpdate, death) and `try_shoot_player` (FireProjectiles modes 0 and 1) are in; Horf, Fly, AttackFly, Pooter/Super Pooter and Gluttony use them; `walk_frame`/`set_frame` and the NPCAI pathfinder are shared too; the remaining legacy families still use their own copies
 - [ ] M5 generic renderer and asset wiring: NPCs carrying `actor` draw from the catalogue, the generated clip catalogue covers every NPC actor, and every monster/boss sheet is globbed (only referenced ones decode); legacy families keep their renderer branches
 - [x] M6 shared entity comparator (legacy comparators keep their own field sets for now)
 - [x] M7 scenario finder, entity specs and the update_ai source index
@@ -421,5 +421,29 @@ engine work in M1–M5 does not.
       evidence yet. The only 13x7 Basement room that authors it is 1/534
       (difficulty 10). A 25-minute OS-random search found no seed that puts it
       next to the start room. Live checks wait for large rooms or later stages.
+  - Gluttony 49.0 (miniboss, #147): **about 35 minutes wall-clock** from the
+    coordinator's go-ahead to a full paired run with every mechanic
+    source-faithful. Most of that went on new shared foundations rather than
+    on Gluttony's own AI (about 250 lines):
+    - `pathfinder.rs`: NPCAI_Pathfinder MoveRandomly 5b4d40, including a
+      native out-of-bounds stack read in the first side probe.
+    - `lasers.rs`: Entity_Laser (ShootAngle, init/update, room-bounds endpoint,
+      slab hit test, timeout shrink, the Brimstone Impact child). A subagent
+      reverse-engineered it in parallel into `laser-notes.md`.
+    - FireProjectiles mode 8.
+    - A generic boss/miniboss room gate: type 6 rooms open once a registered
+      family constructs the boss; there is no VS screen.
+    - Shared stage HP (`content::initial_hp`).
+    - Observer fields for the pathfinder and lasers, plus a generic laser
+      comparison in `entity-compare.mjs`.
+    - Verified against the original: Gluttony's first pathfinder choice is
+      exact (target, direction, stuck counts and velocities). The laser
+      lifecycle (timeout, endpoint and length, the shrink sequence and the
+      impact scale) matches the original's beam frame for frame.
+    - Open:
+      - attack timing follows shared-MT draws, so it diverges until #162;
+      - the "ISAAC VS GLUTTONY" streak and the boss HP bar (presentation);
+      - Super Gluttony 49.1 needs lob projectiles 48d5c0;
+      - laser render quads are approximated.
 - [ ] M10 stages
 - [ ] M11 characters

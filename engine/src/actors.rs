@@ -12,6 +12,8 @@ pub enum ActorKind {
     Npc,
     Projectile,
     Effect,
+    /// Entity_Laser (type 7).
+    Laser,
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
