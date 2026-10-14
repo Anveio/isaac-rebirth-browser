@@ -14,12 +14,16 @@ def tail(delay,action):
  result += [{'type':'capture','label':'death-settled'},key(action,True)]+dense(1,'request')+[key(action,False)]+dense(80,'dispatch')
  return result
 def build(identifier,seed,delay,action,required):
+ entropy=None
+ if seed is None:
+  entropy=paired.runner.codec.random_vector();seed=entropy['code'].replace(' ','')
  case=paired.build('paired-room-combat',seed)
  case['scenario']={'id':identifier,'description':'Public spike movement then deferred death popup action','systems':['player-death','damage-pipeline','input-clock','audio','menus'],'randomized':not required}
  for name in ['tape','pairedTape']:
   at=next(i for i,a in enumerate(case[name]) if a.get('label')=='gameplay-start')
   case[name]=case[name][:at+1]+tail(delay,action)
  case['deathRequired']=required;case['deathAction']=action
+ if entropy is not None:case['entropy']={'source':'OS secrets; unfiltered nonzero32-bit public seed','draw':entropy}
  case['deathScope']='Normal no-revival Isaac. Original death/finish/request execution is mandatory for contrived cases; every random outcome is retained. No observed source state is supplied to the browser.'
  paired.runner.validate_tape(case['tape']);return case
 if __name__=='__main__':
