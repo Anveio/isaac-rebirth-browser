@@ -9,6 +9,8 @@ use std::cell::RefCell;
 use std::collections::{BTreeMap, BTreeSet};
 pub mod active_items;
 pub mod actors;
+pub mod attack_color;
+pub mod attack_flags;
 pub mod audio;
 pub mod blood_effects;
 pub mod bombs;
@@ -179,6 +181,9 @@ pub struct Tear {
     /// Source setter5411e0 writes collision48c and base83c at birth.
     pub collision_damage: f32,
     pub base_damage: f32,
+    ///Actual kind1 birth copies flags7F0 and permanent ColorMod3A0.
+    pub attack_flags: attack_flags::AttackFlags,
+    pub source_color: attack_color::AttackColor,
     pub scale: f32,
     pub animation_tier: u8,
     pub collision_radius: f32,
@@ -384,6 +389,10 @@ pub struct State {
     pub public_actions: public_actions::PublicActions,
     #[serde(default)]
     pub player_stats: player_stats::PlayerStats,
+    #[serde(default)]
+    pub weapon_cache: weapon_plan::WeaponCache,
+    #[serde(default)]
+    pub weapon_admission: weapon_plan::WeaponAdmission,
     pub information_animation: information_animation::InformationAnimation,
     pub stage: u32,
     pub stage_seed: u32,
@@ -532,6 +541,8 @@ impl Game {
                 player_animation: player_animation::PlayerAnimation::default(),
                 public_actions: public_actions::PublicActions::default(),
                 player_stats: player_stats::PlayerStats::default(),
+                weapon_cache: weapon_plan::WeaponCache::fresh_player(),
+                weapon_admission: weapon_plan::WeaponAdmission::default(),
                 information_animation: information_animation::InformationAnimation::default(),
                 stage: 1,
                 stage_seed: seed::stage1_seed(initial_seed),
@@ -1095,6 +1106,8 @@ impl Game {
         self.state.fire_cooldown = -1;
         self.state.max_fire_delay = 10;
         self.state.player_stats = player_stats::PlayerStats::default();
+        self.state.weapon_cache = weapon_plan::WeaponCache::fresh_player();
+        self.state.weapon_admission = weapon_plan::WeaponAdmission::fresh_isaac();
         self.state.head_timer = -1;
         self.state.actor_scheduler = actors::Scheduler::default();
         self.state.actor_scheduler.admit(actors::ActorRef {
@@ -2331,9 +2344,27 @@ impl Game {
                 self.state.head_timer -= 1;
             }
         }
+        let regular_dispatch = if controls_enabled && !animation_guard && !shooting_locked {
+            match weapon_plan::resolve_dispatch_admission(
+                self.state.weapon_cache,
+                self.state.weapon_admission.source_player_type,
+                self.state.player_stats,
+                self.state.weapon_admission.pending_primary_cleanup,
+            )? {
+                weapon_plan::DispatchAdmission::Regular => true,
+                weapon_plan::DispatchAdmission::Unadmitted(channel) => {
+                    self.state
+                        .weapon_admission
+                        .record_unadmitted(self.state.weapon_cache.primary, channel);
+                    false
+                }
+            }
+        } else {
+            false
+        };
         if let Some(direction) = aim {
             self.state.player.facing = direction;
-            if !shooting_locked && self.state.fire_cooldown < 0 {
+            if regular_dispatch && !shooting_locked && self.state.fire_cooldown < 0 {
                 let (dx, dy) = match direction {
                     Direction::Left => (-1.0, 0.0),
                     Direction::Right => (1.0, 0.0),
@@ -2348,6 +2379,7 @@ impl Game {
                 let plan = weapon_plan::RegularTearPlan::resolve(
                     self.state.player_stats,
                     self.state.max_fire_delay,
+                    self.state.weapon_cache,
                 )?;
                 let velocity = projectiles::stored_velocity(aim, inherited, plan.shot_speed)?;
                 self.state.player.eye = self.state.player.eye.flipped();
@@ -2386,6 +2418,8 @@ impl Game {
                     shot_ordinal: self.state.player.shots_fired,
                     collision_damage: plan.damage,
                     base_damage: plan.damage,
+                    attack_flags: plan.flags,
+                    source_color: plan.color,
                     scale: plan.scale,
                     animation_tier: plan.animation_tier,
                     collision_radius: plan.collision_radius,
