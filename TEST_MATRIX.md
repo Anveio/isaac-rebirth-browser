@@ -2,7 +2,7 @@
 
 Generated from live paired-game declarations, actual browser e2e scenarios and retained strict pixel diagnostics. Run `npm run matrix:update` after adding a scenario or checkpoint; `npm run matrix:check` rejects drift. The previous port and its scenarios have been removed.
 
-`npm run check` builds the Rust/WASM port and runs every live suite registered in [suites.mjs](tools/e2e/suites.mjs), retaining every exit status before failing. There is deliberately no CI: every agent runs `check:build` (assets, matrix synchronization, types, build and strict Clippy) and the live suites its change touches before merging. The paired gate gives a fresh original process and immutable production browser the same public tape after an explicit first-Title bootstrap boundary. The live gates check actual input delivery, seed readback and declared source-observable functional state across contrived and recorded OS-random cases. Every selected case executes; failures remain failures. Checked-in unit suites and the legacy Rust/WASM self-equality browser suite have been removed by user instruction. Original GPU mask comparisons remain in the presentation suite.
+`npm run check` builds the Rust/WASM port and runs every live suite registered in [suites.mjs](tools/e2e/suites.mjs), retaining every exit status before failing. There is deliberately no CI: every agent runs `check:build` (assets, matrix synchronization, types, build and strict Clippy) and the live suites its change touches before merging. The paired gate gives a fresh original process and immutable production browser the same public tape after an explicit first-Title bootstrap boundary. The live gates check actual input delivery, seed readback and declared source-observable functional state across contrived and recorded OS-random cases. Every selected case executes; failures remain failures. Checked-in unit suites and the legacy Rust/WASM self-equality browser suite have been removed by user instruction; the only exception is the Antithesis deterministic simulation testing harness indexed below. Original GPU mask comparisons remain in the presentation suite.
 
 All paired captures retain strict decoded-RGBA diagnostics. Their pixel failures remain failures in the report; tiny visual differences do not determine the default functional result. `--require-exact-pixels` opts into full-frame equality. The retained `verify:foundation` gate remains strict and optional, with its five known legacy full-frame failures. Earlier supplied-input physics/layout/combat diagnostic CLIs are now ignored research; their retained evidence remains separate from live browser gameplay acceptance.
 
@@ -85,35 +85,31 @@ Generated from [the suite registry](tools/e2e/suites.mjs). Each suite runs the f
 | `boot-mt` | Boot-time shared MT state through title and menus | [boot-mt.mjs](tools/e2e/boot-mt.mjs) `--count 4` |
 | `menu-mt` | Menu navigation draws from the shared MT stream | [boot-mt.mjs](tools/e2e/boot-mt.mjs) `--menu-navigation --count 4` |
 | `seed-dialog-mt` | Seed dialog entry and its MT consumption | [boot-mt.mjs](tools/e2e/boot-mt.mjs) `--seed-dialog --count 4` |
-| `ordinary-run` | No-dialog ordinary run admission | [ordinary-run.mjs](tools/e2e/ordinary-run.mjs) `--count 4` |
-| `level-descriptors` | Ordinary-run level descriptors | [ordinary-run.mjs](tools/e2e/ordinary-run.mjs) `--level-descriptors --count 4` |
-| `saved-game` | Game.Save stores after an ordinary run starts | [ordinary-run.mjs](tools/e2e/ordinary-run.mjs) `--saved-game --count 4` |
-| `grid-records` | Starting-room GridBase records | [ordinary-run.mjs](tools/e2e/ordinary-run.mjs) `--grid-records --count 4` |
-| `ambient-grid` | Ambient Room path costs and decorations | [ordinary-run.mjs](tools/e2e/ordinary-run.mjs) `--ambient-grid --count 4` |
+| `ordinary-run` | No-dialog run admission, level descriptors, Game.Save stores, grid records and ambient Room costs | [ordinary-run.mjs](tools/e2e/ordinary-run.mjs) `--ambient-grid --count 4` |
 | `weapons` | Tear cadence, direction and inherited motion | [weapons.mjs](tools/e2e/weapons.mjs) `--count 4` |
 | `tear-lifecycle` | Tear birth, flight and death phases | [weapons.mjs](tools/e2e/weapons.mjs) `--lifecycle --count 4` |
 | `traversal` | Ordinary doorway exit/return and hostile-room locks | [traversal.mjs](tools/e2e/traversal.mjs) |
-| `doors` | Curse and free treasure-room doors | [doors.mjs](tools/e2e/doors.mjs) `--count 1` |
-| `secrets` | Bomb-revealed secret doors, entry and return | [secrets.mjs](tools/e2e/secrets.mjs) `--count 1` |
-| `keepers` | Keeper construction and anchored idle in secret rooms | [keepers.mjs](tools/e2e/keepers.mjs) `--count 1` |
-| `key-doors` | Key collection, library unlock and revisit | [key-doors.mjs](tools/e2e/key-doors.mjs) `--count 1` |
-| `large-rooms` | Tall-room bounds, doors and camera | [large-rooms.mjs](tools/e2e/large-rooms.mjs) `--count 2` |
-| `chest-opening` | Free normal Chest opening and loot | [chest-opening.mjs](tools/e2e/chest-opening.mjs) `--count 2` |
+| `doors` | Curse and free treasure-room doors | [traversal.mjs](tools/e2e/traversal.mjs) `--scenario-helper tools/original/door-scenarios.py --count 1` |
+| `secrets` | Bomb-revealed secret doors, entry and return | [traversal.mjs](tools/e2e/traversal.mjs) `--scenario-helper tools/original/secret-door-scenarios.py --count 1` |
+| `keepers` | Keeper construction and anchored idle in secret rooms | [traversal.mjs](tools/e2e/traversal.mjs) `--scenario-helper tools/original/keeper-scenarios.py --count 1` |
+| `key-doors` | Key collection, library unlock and revisit | [traversal.mjs](tools/e2e/traversal.mjs) `--scenario-helper tools/original/key-door-scenarios.py --state-observer tools/original/key-door-observe.py --count 1` |
+| `large-rooms` | Tall-room bounds, doors and camera | [traversal.mjs](tools/e2e/traversal.mjs) `--scenario-helper tools/original/large-room-scenarios.py --count 2` |
+| `chest-opening` | Free normal Chest opening and loot | [traversal.mjs](tools/e2e/traversal.mjs) `--scenario-helper tools/original/chest-scenarios.py --state-observer tools/original/chest-observe.py --boot-epoch-seed 1700000000 --sfx-volume 1 --count 2` |
 | `pickups` | Natural authored pickups: admission, animation and collection | [pickups.mjs](tools/e2e/pickups.mjs) `--count 2` |
 | `keys` | Natural secret-room keys: admission and collection | [keys.mjs](tools/e2e/keys.mjs) `--count 2` |
 | `bomb-pickups` | Regular/double bomb pickup admission and collection | [bomb-pickups.mjs](tools/e2e/bomb-pickups.mjs) `--count 2` |
 | `hearts` | Natural Heart pickups through the shared collection guard | [hearts.mjs](tools/e2e/hearts.mjs) `--count 2` |
-| `troll-bombs` | Troll/Megatroll conversion and lifetime | [troll-bombs.mjs](tools/e2e/troll-bombs.mjs) |
+| `troll-bombs` | Troll/Megatroll conversion and lifetime | [troll-bombs.mjs](tools/e2e/troll-bombs.mjs) `--count 2` |
 | `rock-blast` | Ordinary rock destruction by bombs | [rock-blast.mjs](tools/e2e/rock-blast.mjs) `--count 2` |
 | `items` | Item pools and treasure-room pedestals | [items.mjs](tools/e2e/items.mjs) `--count 2` |
 | `item-acquisition` | First collectible acquisition | [items.mjs](tools/e2e/items.mjs) `--acquisition --count 2` |
 | `stat-cache` | Player stat cache after acquiring Roid Rage and Speed Ball: stats, motion and tear velocity | [items.mjs](tools/e2e/items.mjs) `--stat-cache --count 2` |
 | `active-item-use` | Acquiring and using an active item (Yum Heart): charge, health, animation and SFX | [items.mjs](tools/e2e/items.mjs) `--active-use --count 2` |
 | `familiars` | Familiar admission, appearance and following | [familiars.mjs](tools/e2e/familiars.mjs) `--count 2` |
-| `npcs` | Fly/AttackFly/Gaper construction, AI and contact | [npcs.mjs](tools/e2e/npcs.mjs) |
-| `roundworms` | Round Worm actors, projectiles and room locks | [roundworms.mjs](tools/e2e/roundworms.mjs) |
-| `fireplaces` | Fireplace damage, extinguish and Ember effects | [fireplaces.mjs](tools/e2e/fireplaces.mjs) |
-| `monstro` | Level2 Fly route into Monstro: admission, AI, projectiles and scene cleanup | [monstro.mjs](tools/e2e/monstro.mjs) |
+| `npcs` | Fly/AttackFly/Gaper construction, AI and contact | [state-pair.mjs](tools/e2e/state-pair.mjs) `--scenario-helper tools/original/npc-scenarios.py --comparator tools/foundation/npc-state-pair.mjs --require-from-case npcRequired` |
+| `roundworms` | Round Worm actors, projectiles and room locks | [state-pair.mjs](tools/e2e/state-pair.mjs) `--scenario-helper tools/original/roundworm-scenarios.py --comparator tools/foundation/roundworm-state-pair.mjs --native-frame-timeout 120` |
+| `fireplaces` | Fireplace damage, extinguish and Ember effects | [state-pair.mjs](tools/e2e/state-pair.mjs) `--scenario-helper tools/original/fireplace-scenarios.py --comparator tools/foundation/fireplace-state-pair.mjs` |
+| `monstro` | Level2 Fly route into Monstro: admission, AI, projectiles and scene cleanup | [state-pair.mjs](tools/e2e/state-pair.mjs) `--scenario-helper tools/original/monstro-scenarios.py --comparator tools/foundation/monstro-state-pair.mjs --native-frame-timeout 120` |
 | `dips` | Dip admission, AI, poop explosions and death callbacks | [dips.mjs](tools/e2e/dips.mjs) `--count 2` |
 | `blood-start` | Blood effect start-up and background admission | [blood-start.mjs](tools/e2e/blood-start.mjs) |
 | `health-damage` | Red/Soul/Black health damage, Hit and Black-heart callbacks | [health-damage.mjs](tools/e2e/health-damage.mjs) `--count 2` |
@@ -154,15 +150,15 @@ Generated from [the suite registry](tools/e2e/suites.mjs). Each suite runs the f
 | `original-weapons-cadence` | Live original and immutable production browser receive the declared Enter12/72, Tab12/108, glyph12/6, commit12/72 and run12/300 releases through actual run admission, then fire DOM/X11 input; verify the complete requested browser command trace, committed seed and paired source player XY/VXY, then compare every cooldown/head/phase and shot admission over 54 held and26 released presentations in full/intermediate birth cases and four newly recorded OS-random directions. Native memory is read-only and never enters WASM. | [live gate](tools/e2e/weapons.mjs), [public tapes](tools/original/weapons-scenarios.py), [read-only fields](tools/original/foundation-physics-observer.py), [source proof](references/isaac/foundation/weapons/source-contracts.json) |
 | `original-tear-lifecycle` | Live original and immutable production browser enter through the same declared released menu/seed/run intervals, then receive coasting movement plus one full/intermediate regular shot across contrived and recorded OS-random directions; require the complete requested browser command trace, committed seed and exact source player XY/VXY at movement/coast endpoints and every flight phase, then check every ground/height recurrence, half prediction, PRE range/grid death and next-full removal. RNG-dependent numerical differences remain explicit; native state never enters WASM. | [live gate](tools/e2e/weapons.mjs), [phase comparison](tools/e2e/tear-contracts.mjs), [source contracts](references/isaac/foundation/tear-lifecycle/source-contracts.json) |
 | `original-ordinary-door-return` | Contrived no-hostile return/hostile Rock-room return-lock regression plus recorded OS-random actual X11/DOM routes compare every source room/player phase, native entity/Rock seed joins and return admission persistence | [live gate](tools/e2e/traversal.mjs), [source tapes/provenance](tools/original/foundation-traversal-scenarios.py) |
-| `original-curse-door-contact` | Contrived opposite-phase curse, mandatory recorded W0L0LYYM bomb-driven treasure entry and fresh OS-random curse/treasure returns compare exact player/room/health/immunity, visible door variant/state/class and endpoint assets, admission; raw1400 fire admission remains mandatory red | [live gate](tools/e2e/doors.mjs), [public source tapes](tools/original/door-scenarios.py), [source proof](docs/door-mechanics-evidence.md) |
+| `original-curse-door-contact` | Contrived opposite-phase curse, mandatory recorded W0L0LYYM bomb-driven treasure entry and fresh OS-random curse/treasure returns compare exact player/room/health/immunity, visible door variant/state/class and endpoint assets, admission; raw1400 fire admission remains mandatory red | [live gate](tools/e2e/traversal.mjs) (suite `doors`), [public source tapes](tools/original/door-scenarios.py), [source proof](docs/door-mechanics-evidence.md) |
 | `original-rock-blast` | Public original X11 and production DOM entry/movement/E routes compare every player/inventory/immunity, bomb motion/fuse, relative full-update clock, Rock-family admission/frames/state/class/seed/marker and pickup phase; contrived and OS-random ordinary-only source rooms plus all retained explosive/tinted regressions execute and fail on any mismatch | [live gate](tools/e2e/rock-blast.mjs), [public tapes](tools/original/rock-blast-scenarios.py), [source proof](references/isaac/foundation/rock-blast/source-contracts.json), [actual results](references/isaac/foundation/rock-blast/live-report.json) |
-| `original-secret-revelation` | Public starting-bomb retreat, opposite-phase plus OS-random secret entry/return compare complete hidden/open door metadata, reciprocal persistence, every descriptor display flag and minimap routing; natural regular-key collection has a separate accepted live gate; Historical Keeper constructor failures are retained; actual NPC17/1 admission is required and covered by its658-phase live constructor/idle gate | [live gate](tools/e2e/secrets.mjs), [public source tapes](tools/original/secret-door-scenarios.py), [source proof](docs/secret-door-evidence.md) |
-| `original-keeper-idle` | Public opposite-phase and retained OS-random secret entry/idle/return require actual NPC17/1 seed/subtype, authored health/collision/countability, state/flags/anchor/color and static/animated full-phase clips; raw STB subtype remains unchanged | [live gate](tools/e2e/keepers.mjs), [public source tapes](tools/original/keeper-scenarios.py), [source proof](docs/keeper-evidence.md) |
-| `original-key-library-unlock` | Public zero-key denial, natural secret-key collection, one-key library unlock and repeated return compare exact inventory/player/clear/door/display/minimap and SFX156 fields; historical raw-selector Keeper failures remain retained; current comparisons join the actual NPC17/1 | [live gate](tools/e2e/key-doors.mjs), [public source tapes](tools/original/key-door-scenarios.py), [source proof](docs/key-door-evidence.md) |
+| `original-secret-revelation` | Public starting-bomb retreat, opposite-phase plus OS-random secret entry/return compare complete hidden/open door metadata, reciprocal persistence, every descriptor display flag and minimap routing; natural regular-key collection has a separate accepted live gate; Historical Keeper constructor failures are retained; actual NPC17/1 admission is required and covered by its658-phase live constructor/idle gate | [live gate](tools/e2e/traversal.mjs) (suite `secrets`), [public source tapes](tools/original/secret-door-scenarios.py), [source proof](docs/secret-door-evidence.md) |
+| `original-keeper-idle` | Public opposite-phase and retained OS-random secret entry/idle/return require actual NPC17/1 seed/subtype, authored health/collision/countability, state/flags/anchor/color and static/animated full-phase clips; raw STB subtype remains unchanged | [live gate](tools/e2e/traversal.mjs) (suite `keepers`), [public source tapes](tools/original/keeper-scenarios.py), [source proof](docs/keeper-evidence.md) |
+| `original-key-library-unlock` | Public zero-key denial, natural secret-key collection, one-key library unlock and repeated return compare exact inventory/player/clear/door/display/minimap and SFX156 fields; historical raw-selector Keeper failures remain retained; current comparisons join the actual NPC17/1 | [live gate](tools/e2e/traversal.mjs) (suite `key-doors`), [public source tapes](tools/original/key-door-scenarios.py), [source proof](docs/key-door-evidence.md) |
 | `original-finalized-floor` | Three contrived native retries plus two OS-random runs compare all ordered descriptors, 169 grid cells, seeds and actual attempts with production WASM entered through DOM keys; all selected cases execute | [live gate](tools/foundation/floor-e2e.mjs), [native capture/comparison](tools/original/foundation-floor-verify.py) |
-| `original-large-room-geometry` | One opposite-phase and two recorded OS-random public routes require actual13x14 admission, both native vertical boundary planes, exact reciprocal extendedslot4, complete padded dimensions/door endpoints/Rock metadata and return; historical Chest50 reds remain retained and the subsequent constructor leaf requires actual Chest identity/Appear/Idle/classes | [fresh live gate](tools/e2e/large-rooms.mjs), [public source tapes](tools/original/large-room-scenarios.py), [post-capture diagnostic proof](docs/large-room-evidence.md) |
-| `original-normal-chest-constructor` | Actual ordinary Chest50 admission/closed subtype/seed/position and full/intermediate/frozen Appear22→Idle2 clocks/classes/price/delay/cooldown are required every selected phase;1843 source-frozen/fresh-browser phases pass, direct persistent RNG words and open/loot/save callbacks remain separate | [fresh live gate](tools/e2e/large-rooms.mjs), [constructor proof](docs/chest-evidence.md) |
-| `original-large-room-camera` | Fresh3 original/production routes require finite bounded defaultStyle1 scrolling, exact native clamp endpoints across1843 geometry/motion phases and complete history/admission/freeze state on all1545 tall-room phases with native readback; nine actual viewport PNGs retain Isaac at the independent source projection. Interior float details/backdrops remain diagnostic | [fresh live gate](tools/e2e/large-rooms.mjs), [camera checks](tools/e2e/camera-checks.mjs), [camera proof](docs/large-room-camera.md) |
+| `original-large-room-geometry` | One opposite-phase and two recorded OS-random public routes require actual13x14 admission, both native vertical boundary planes, exact reciprocal extendedslot4, complete padded dimensions/door endpoints/Rock metadata and return; historical Chest50 reds remain retained and the subsequent constructor leaf requires actual Chest identity/Appear/Idle/classes | [fresh live gate](tools/e2e/traversal.mjs) (suite `large-rooms`), [public source tapes](tools/original/large-room-scenarios.py), [post-capture diagnostic proof](docs/large-room-evidence.md) |
+| `original-normal-chest-constructor` | Actual ordinary Chest50 admission/closed subtype/seed/position and full/intermediate/frozen Appear22→Idle2 clocks/classes/price/delay/cooldown are required every selected phase;1843 source-frozen/fresh-browser phases pass, direct persistent RNG words and open/loot/save callbacks remain separate | [fresh live gate](tools/e2e/traversal.mjs) (suite `large-rooms`), [constructor proof](docs/chest-evidence.md) |
+| `original-large-room-camera` | Fresh3 original/production routes require finite bounded defaultStyle1 scrolling, exact native clamp endpoints across1843 geometry/motion phases and complete history/admission/freeze state on all1545 tall-room phases with native readback; nine actual viewport PNGs retain Isaac at the independent source projection. Interior float details/backdrops remain diagnostic | [fresh live gate](tools/e2e/traversal.mjs) (suite `large-rooms`), [camera checks](tools/e2e/camera-checks.mjs), [camera proof](docs/large-room-camera.md) |
 | `original-player-stat-cache` | Natural public free-pedestal acquisition followed by declared movement/release/shooting requires source cached fields/max delay, exact Player motion after grant and actual stored tear velocities; two treasure-eligible common passives at both phases plus retained and fresh unfiltered OS cases all execute. Pending unsupported owners and complete shared MT remain explicitly separate; no native stat/RNG inputs enter WASM | [runtime](engine/src/player_stats.rs), [live gate](tools/e2e/items.mjs), [source readback](tools/original/item-observer.py) |
 | `original-public-input-provenance` | Traversal/doors, pickups, boot MT and floor require complete actual DOM commands from reset, an independently declared menu/seed prefix, bounded input history, reset seed/boot metadata and committed manual seed flags/text/code/value; original state never supplies browser inputs | [live helpers](tools/foundation/verify.mjs), [traversal/doors](tools/e2e/traversal.mjs), [pickups](tools/e2e/pickups.mjs), [boot](tools/e2e/boot-mt.mjs), [floor](tools/foundation/floor-e2e.mjs) |
 | `original-random-seed-contract` | Live paired games enter contrived and recorded OS-random seed codes through public keys and require original/browser seed readback; original log/PNG parsers remain evidence validators | [paired gate](tools/foundation/paired-game.mjs), [evidence parser](tools/foundation/original-seed-contract.mjs) |
@@ -224,6 +220,125 @@ Combat routes replay their retained source seed; arbitrary-seed overrides are di
 The original uses seed **T1PK 6Y0W**, fresh profiles, and a 960×540 window. Captures and observed log/input metadata live in [baseline](references/isaac/foundation/baseline/manifest.json) and [repeat](references/isaac/foundation/repeat/manifest.json). They are comparison evidence; the renderer composes authored sprites and never draws a captured game frame. [Capture](tools/original/foundation-capture.py) and [save-reference.py](tools/foundation/save-reference.py) refresh these fixtures from the runnable original.
 
 Pixel gates compare decoded RGBA over the whole frame, HUD, actor and projectile regions. Any tolerance is measured from the independent native captures; it is not a freely chosen similarity threshold. Reports distinguish exact pixels from native capture variability. Legacy screenshot fixtures use wall-clock keys/SIGSTOP. The newer clock adapter controls presented frames and main-thread time, disables X11 autorepeat and records actual consumed key events; neither adapter proves native simulation ticks or hidden-state parity. Native process CPU/RSS and browser draw/encoding timings remain separate.
+
+## Antithesis deterministic simulation units
+
+The only checked-in unit-level verification is the [Antithesis DST harness](docs/dst.md) in `engine/dst/` (owner-authorized exception; see [AGENTS.md](AGENTS.md)). It is an inner-loop regression tool, not a merge gate: neither `check:build` nor any pre-merge check runs it. `npm run test:dst` drives each registered unit with seeded entropy and checks every property after each step; `--entropy antithesis` hands every decision to the Antithesis platform. Units and properties below are discovered from [the registry](engine/dst/src/units/mod.rs) and source; a run's report, not this list, is the outcome. DST establishes engine safety, determinism and documented contracts only, never original-game parity.
+
+| DST unit | Scope | Always | Sometimes | Unreachable |
+| --- | --- | ---: | ---: | ---: |
+| `seed_codec` | public seed codes, canonical decoding and the run-seed xorshift handoff | 11 | 2 | 0 |
+| `mt` | shared MT19937 stream, lazy descriptor seed tables and boot lifecycle | 19 | 1 | 0 |
+| `phase` | system update/interpolation phases against a counter model | 6 | 2 | 0 |
+| `actors` | actor admission order and room identities against a list model | 4 | 2 | 0 |
+| `floor` | Basement generation structure, retries and per-descriptor room admission | 18 | 4 | 0 |
+| `grid` | grid queries and ground-collision solvers on generated rooms | 14 | 3 | 0 |
+| `abi` | the exported C ABI transport the browser bridge drives | 11 | 1 | 0 |
+
+<details><summary>Every declared DST property</summary>
+
+| Kind | Property | Source |
+| --- | --- | --- |
+| Always | seed_codec: reserved seed zero never encodes | [seed_codec.rs](engine/dst/src/units/seed_codec.rs) |
+| Always | seed_codec: every nonzero seed encodes | [seed_codec.rs](engine/dst/src/units/seed_codec.rs) |
+| Always | seed_codec: codes are eight public alphabet glyphs | [seed_codec.rs](engine/dst/src/units/seed_codec.rs) |
+| Always | seed_codec: decode inverts encode | [seed_codec.rs](engine/dst/src/units/seed_codec.rs) |
+| Always | seed_codec: decode ignores case and spaces | [seed_codec.rs](engine/dst/src/units/seed_codec.rs) |
+| Sometimes | seed_codec: a random code passes its checksum | [seed_codec.rs](engine/dst/src/units/seed_codec.rs) |
+| Always | seed_codec: every accepted code is the canonical encoding of its seed | [seed_codec.rs](engine/dst/src/units/seed_codec.rs) |
+| Sometimes | seed_codec: a random code is rejected | [seed_codec.rs](engine/dst/src/units/seed_codec.rs) |
+| Always | seed_codec: a substituted glyph never aliases the original seed | [seed_codec.rs](engine/dst/src/units/seed_codec.rs) |
+| Always | seed_codec: codes with glyphs outside the alphabet are rejected | [seed_codec.rs](engine/dst/src/units/seed_codec.rs) |
+| Always | seed_codec: codes without exactly eight glyphs are rejected | [seed_codec.rs](engine/dst/src/units/seed_codec.rs) |
+| Always | seed_codec: run-seed derivation never yields reserved zero | [seed_codec.rs](engine/dst/src/units/seed_codec.rs) |
+| Always | seed_codec: run seed fields and item-pool seed are nonzero | [seed_codec.rs](engine/dst/src/units/seed_codec.rs) |
+| Always | mt: serialized state continues the identical stream | [mt.rs](engine/dst/src/units/mt.rs) |
+| Always | mt: deserialization rejects invalid word counts and cursors | [mt.rs](engine/dst/src/units/mt.rs) |
+| Always | mt: Random(0) returns zero without consuming the stream | [mt.rs](engine/dst/src/units/mt.rs) |
+| Always | mt: bounded draws lie below their bound | [mt.rs](engine/dst/src/units/mt.rs) |
+| Always | mt: uniform draws lie in the closed unit interval | [mt.rs](engine/dst/src/units/mt.rs) |
+| Always | mt: default seed reproduces the C++ standard mt19937 outputs | [mt.rs](engine/dst/src/units/mt.rs) |
+| Always | mt: descriptor initialization consumes exactly two draws per padded cell | [mt.rs](engine/dst/src/units/mt.rs) |
+| Always | mt: in-range descriptor replacement succeeds | [mt.rs](engine/dst/src/units/mt.rs) |
+| Always | mt: in-range descriptor room copies succeed | [mt.rs](engine/dst/src/units/mt.rs) |
+| Sometimes | mt: a complete descriptor table copy is exercised | [mt.rs](engine/dst/src/units/mt.rs) |
+| Always | mt: lazy descriptor seed pairs equal the eager source table | [mt.rs](engine/dst/src/units/mt.rs) |
+| Always | mt: descriptor queries outside the source grid are rejected | [mt.rs](engine/dst/src/units/mt.rs) |
+| Always | mt: descriptor tables round-trip through JSON | [mt.rs](engine/dst/src/units/mt.rs) |
+| Always | mt: descriptor tables reject mutations outside the source grid | [mt.rs](engine/dst/src/units/mt.rs) |
+| Always | mt: boot lifecycle is a pure function of the epoch seed | [mt.rs](engine/dst/src/units/mt.rs) |
+| Always | mt: boot owns 179 authored secret poses and a nonzero menu seed | [mt.rs](engine/dst/src/units/mt.rs) |
+| Always | mt: the menu seed text decodes to the menu seed | [mt.rs](engine/dst/src/units/mt.rs) |
+| Always | mt: Character reset consumes one shared draw for a nonzero menu seed | [mt.rs](engine/dst/src/units/mt.rs) |
+| Always | mt: committing a dialog seed consumes no shared draw | [mt.rs](engine/dst/src/units/mt.rs) |
+| Always | mt: committing reserved zero is rejected without mutation | [mt.rs](engine/dst/src/units/mt.rs) |
+| Always | phase: exhausted run-start alignment fails without mutation | [phase.rs](engine/dst/src/units/phase.rs) |
+| Always | phase: run start aligns to the next full phase without rewinding | [phase.rs](engine/dst/src/units/phase.rs) |
+| Always | phase: an aligned clock's next phase is a full update | [phase.rs](engine/dst/src/units/phase.rs) |
+| Always | phase: even counters run full updates and odd counters interpolate or skip | [phase.rs](engine/dst/src/units/phase.rs) |
+| Always | phase: every two-phase window runs two player and one nonplayer update | [phase.rs](engine/dst/src/units/phase.rs) |
+| Sometimes | phase: a window without interpolation is exercised | [phase.rs](engine/dst/src/units/phase.rs) |
+| Always | phase: only an exhausted counter fails, without mutation | [phase.rs](engine/dst/src/units/phase.rs) |
+| Sometimes | phase: counter exhaustion is exercised | [phase.rs](engine/dst/src/units/phase.rs) |
+| Always | actors: admission rejects exactly the already-admitted handles | [actors.rs](engine/dst/src/units/actors.rs) |
+| Sometimes | actors: a duplicate admission is attempted | [actors.rs](engine/dst/src/units/actors.rs) |
+| Sometimes | actors: a room reset retains Player or Familiar handles | [actors.rs](engine/dst/src/units/actors.rs) |
+| Always | actors: the scheduler round-trips through JSON | [actors.rs](engine/dst/src/units/actors.rs) |
+| Always | actors: dispatch order equals admission order minus retired handles | [actors.rs](engine/dst/src/units/actors.rs) |
+| Always | actors: room sequence identities follow admission and reset with the room | [actors.rs](engine/dst/src/units/actors.rs) |
+| Always | floor: requests outside stages 1 and 2 or with stage seed zero are rejected | [floor.rs](engine/dst/src/units/floor.rs) |
+| Always | floor: the first-floor entry is the normal generator with fresh run inputs | [floor.rs](engine/dst/src/units/floor.rs) |
+| Always | floor: generation is a pure function of its request | [floor.rs](engine/dst/src/units/floor.rs) |
+| Always | floor: every reachable normal Basement request generates a floor | [floor.rs](engine/dst/src/units/floor.rs) |
+| Sometimes | floor: a Basement II floor is generated | [floor.rs](engine/dst/src/units/floor.rs) |
+| Always | floor: a floor records its request's stage and stage seed | [floor.rs](engine/dst/src/units/floor.rs) |
+| Always | floor: the starting descriptor occupies the grid centre | [floor.rs](engine/dst/src/units/floor.rs) |
+| Always | floor: grid cells and descriptors index the descriptor table | [floor.rs](engine/dst/src/units/floor.rs) |
+| Always | floor: every descriptor owns exactly its shape's footprint at its origin | [floor.rs](engine/dst/src/units/floor.rs) |
+| Always | floor: neighbor links are reciprocal edge adjacencies | [floor.rs](engine/dst/src/units/floor.rs) |
+| Always | floor: every descriptor is reachable from the starting room | [floor.rs](engine/dst/src/units/floor.rs) |
+| Always | floor: exactly one boss, super secret, shop and treasure room | [floor.rs](engine/dst/src/units/floor.rs) |
+| Always | floor: normal rooms stay within the stage's difficulty band | [floor.rs](engine/dst/src/units/floor.rs) |
+| Always | floor: an even floor's boss comes from the retained family without rewriting it | [floor.rs](engine/dst/src/units/floor.rs) |
+| Sometimes | floor: a secret room is placed | [floor.rs](engine/dst/src/units/floor.rs) |
+| Sometimes | floor: a large room shape is placed | [floor.rs](engine/dst/src/units/floor.rs) |
+| Always | floor: attempts are bounded, contiguous and end with a placement | [floor.rs](engine/dst/src/units/floor.rs) |
+| Sometimes | floor: a generation retry is exercised | [floor.rs](engine/dst/src/units/floor.rs) |
+| Always | floor: floors round-trip through JSON | [floor.rs](engine/dst/src/units/floor.rs) |
+| Always | floor: every descriptor resolves authored layout and spawns | [floor.rs](engine/dst/src/units/floor.rs) |
+| Always | floor: every descriptor admits as a room without panicking | [floor.rs](engine/dst/src/units/floor.rs) |
+| Always | floor: admitted rooms have one door per neighbor and bounded geometry | [floor.rs](engine/dst/src/units/floor.rs) |
+| Always | grid: admitted room grids are valid grids | [grid.rs](engine/dst/src/units/grid.rs) |
+| Always | grid: every cell centre indexes back to its cell | [grid.rs](engine/dst/src/units/grid.rs) |
+| Always | grid: nonplayer ground resolution never fails for bounded motion | [grid.rs](engine/dst/src/units/grid.rs) |
+| Sometimes | grid: an underflowing inward preview skips refinement | [grid.rs](engine/dst/src/units/grid.rs) |
+| Always | grid: nonplayer resolution keeps finite vectors | [grid.rs](engine/dst/src/units/grid.rs) |
+| Always | grid: a nonplayer preview never changes velocity | [grid.rs](engine/dst/src/units/grid.rs) |
+| Always | grid: nonplayer resolution without contact changes nothing | [grid.rs](engine/dst/src/units/grid.rs) |
+| Always | grid: nonplayer correction moves only out along the contact normal | [grid.rs](engine/dst/src/units/grid.rs) |
+| Always | grid: a full nonplayer reflection leaves the wall | [grid.rs](engine/dst/src/units/grid.rs) |
+| Sometimes | grid: a residual-speed preview contact is resolved | [grid.rs](engine/dst/src/units/grid.rs) |
+| Always | grid: player ground resolution never fails for bounded motion | [grid.rs](engine/dst/src/units/grid.rs) |
+| Always | grid: player resolution keeps finite vectors and previews keep velocity | [grid.rs](engine/dst/src/units/grid.rs) |
+| Always | grid: player resolution without contact changes nothing | [grid.rs](engine/dst/src/units/grid.rs) |
+| Always | grid: player correction moves only out along the contact normal | [grid.rs](engine/dst/src/units/grid.rs) |
+| Sometimes | grid: a player wall contact changes velocity | [grid.rs](engine/dst/src/units/grid.rs) |
+| Always | grid: blast candidates are ascending, unique cells of the room | [grid.rs](engine/dst/src/units/grid.rs) |
+| Always | grid: blast queries reject non-positive, oversized and non-finite radii | [grid.rs](engine/dst/src/units/grid.rs) |
+| Always | abi: the exported ABI version is current | [abi.rs](engine/dst/src/units/abi.rs) |
+| Always | abi: commands before reset fail and snapshots publish null | [abi.rs](engine/dst/src/units/abi.rs) |
+| Always | abi: the public_keys export publishes exactly the engine's key surface | [abi.rs](engine/dst/src/units/abi.rs) |
+| Always | abi: reset with a nonzero seed succeeds and clears the error | [abi.rs](engine/dst/src/units/abi.rs) |
+| Always | abi: the published snapshot is a valid state of the reset seed | [abi.rs](engine/dst/src/units/abi.rs) |
+| Always | abi: a failed reset reports an error and keeps the previous game | [abi.rs](engine/dst/src/units/abi.rs) |
+| Always | abi: request buffers are bounded at 64 KiB | [abi.rs](engine/dst/src/units/abi.rs) |
+| Always | abi: malformed requests fail with an error and leave the snapshot unchanged | [abi.rs](engine/dst/src/units/abi.rs) |
+| Always | abi: the return code and error buffer agree | [abi.rs](engine/dst/src/units/abi.rs) |
+| Always | abi: rejected commands leave the snapshot unchanged | [abi.rs](engine/dst/src/units/abi.rs) |
+| Always | abi: every published snapshot is a valid state | [abi.rs](engine/dst/src/units/abi.rs) |
+| Sometimes | abi: a well-formed command is rejected | [abi.rs](engine/dst/src/units/abi.rs) |
+
+</details>
 
 ## Divergence tasks by game system
 

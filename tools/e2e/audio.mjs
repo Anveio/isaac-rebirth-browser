@@ -11,7 +11,8 @@ import { browserLaunchOptions, inspectBrowserGraphics } from '../foundation/brow
 import { startProductionServer } from '../foundation/production-server.mjs';
 import { waitForReady } from '../foundation/verify.mjs';
 import { installBrowserAudioObserver } from './audio-api-observer.mjs';
-import { ORIGINAL_SHA } from './lib/original.mjs';
+import { snapshot, step } from './lib/game.mjs';
+import { ORIGINAL_SHA, assertOriginalBinary } from './lib/original.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const run = promisify(execFile);
@@ -38,7 +39,7 @@ for (const c of cases) {
   assert.ok(Array.isArray(c.taps) && c.taps.length >= 2 && c.taps.length <= 32 && c.taps.every(key => ['Left', 'Right'].includes(key)));
 }
 const catalogue = JSON.parse(await readFile(join(ROOT, 'web/audio-data.json')));
-assert.equal(sha(await readFile(join(ROOT, '.cache/original-runtime/offline-depot/isaac.x64'))), ORIGINAL_SHA);
+await assertOriginalBinary();
 await writeFile(join(output, 'scenarios.json'), JSON.stringify({ schema: 1, entropy: 'OS secrets run seeds and Node crypto boot epochs/menu taps', cases }, null, 2) + '\n');
 await run('cc', ['-std=c11', '-Wall', '-Wextra', '-Werror', '-fPIC', '-shared', 'tools/original/audio-trace.c', '-o', join(output, 'audio-trace.so'), '-ldl', '-pthread'], { cwd: ROOT });
 const observerLibrarySha256 = sha(await readFile(join(output, 'audio-trace.so')));
@@ -116,7 +117,7 @@ try {
       const states = []; let previousTap, intendedSeedEntry = false;
       const intendedPressed = new Set(), expectedCommands = [{ type: 'audioVolume', sfx_volume: scenario.volume }];
       for (const action of tape.browser) {
-        if (action.type === 'step') { await page.evaluate(frames => window.game.step(frames), action.frames); expectedCommands.push({ type: 'tick', count: action.frames }); }
+        if (action.type === 'step') { await step(page, action.frames); expectedCommands.push({ type: 'tick', count: action.frames }); }
         else if (action.type === 'key') {
           const code = ({ Return: 'Enter', Tab: 'Tab', Left: 'ArrowLeft', Right: 'ArrowRight' })[action.key] ||
             (/^[0-9]$/.test(action.key) ? 'Digit' + action.key : 'Key' + action.key.toUpperCase());
@@ -205,7 +206,7 @@ try {
           [1, 44100, catalogue.assets[actual.path].frames]);
       }
       check('browser runtime errors', errors, []);
-      check('browser actual public seed readback', (await page.evaluate(() => window.game.snapshot())).runSeedValue, native.seedValue);
+      check('browser actual public seed readback', (await snapshot(page)).runSeedValue, native.seedValue);
       const wasmTrace = await page.evaluate(() => window.game.trace());
       check('actual reset/run and boot inputs recorded', [wasmTrace.initialSeed, wasmTrace.bootEpochSeed], [native.seedValue, scenario.bootEpochSeed]);
       check('all public inputs and intervals reached production WASM', wasmTrace.commands, expectedCommands);
