@@ -125,19 +125,48 @@ pub fn height_offset(height: f32, acceleration: f32) -> f32 {
     height * 0.5 - 15.0 + bend * bend
 }
 
-/// Native hit parameters round the linear term to f32 before the double sqrt.
-pub fn collision_radius(damage: f32, authored_radius: f32) -> Result<f32, String> {
-    if !damage.is_finite() || damage < 0.0 || !authored_radius.is_finite() || authored_radius < 0.0
-    {
-        return Err("tear collision size requires finite nonnegative parameters".into());
+/// GetTearParams50d090 rounds the linear term before the double sqrt;
+/// setter541ff0 clamps the resulting scale to .01 before hit-parameter update.
+pub fn scale(damage: f32) -> Result<f32, String> {
+    if !damage.is_finite() || damage < 0.0 {
+        return Err("tear scale requires finite nonnegative damage".into());
     }
     let linear = damage * 0.04 + 0.6;
     let scale = (f64::from(linear) + f64::from(damage).sqrt() * f64::from(0.15_f32)) as f32;
+    if !scale.is_finite() {
+        return Err("tear scale overflowed".into());
+    }
+    Ok(scale.max(0.01))
+}
+
+pub fn collision_radius(scale: f32, authored_radius: f32) -> Result<f32, String> {
+    if !scale.is_finite() || scale < 0.01 || !authored_radius.is_finite() || authored_radius < 0.0 {
+        return Err("tear collision size requires finite nonnegative parameters".into());
+    }
     let radius = authored_radius * scale;
     if !radius.is_finite() {
         return Err("tear collision radius overflowed".into());
     }
     Ok(radius)
+}
+
+/// Actual5418e0 regular variant0 clip thresholds; other variants/flags own
+/// their separate sprite selection. The comparison addition is binary32.
+pub fn regular_animation_tier(scale: f32) -> Result<u8, String> {
+    if !scale.is_finite() || scale < 0.01 {
+        return Err("regular tear animation requires finite source scale".into());
+    }
+    if scale <= 0.3 {
+        return Ok(1);
+    }
+    const THRESHOLDS: [f32; 12] = [
+        0.5, 0.625, 0.75, 0.875, 1.0, 1.125, 1.375, 1.625, 1.875, 2.125, 2.5, 2.75,
+    ];
+    let mut tier = 2;
+    while tier < 13 && scale > THRESHOLDS[usize::from(tier - 2)] + 0.05_f32 {
+        tier += 1;
+    }
+    Ok(tier)
 }
 
 impl TearMotion {

@@ -1,0 +1,65 @@
+{
+  "schema": 1,
+  "at": "2026-10-14T14:36:57.748759+00:00",
+  "status": "CLOSED scoped stats/regular born-damage consumer comparisons; allactualdifferences retained. No lost comparison or previously accepted regular-clip regression observed.",
+  "sources": {
+    "baseline": "3fbd27f9179409623a006562c2412242fbc6b6f0",
+    "proposal": "ba0ae5e241b4fc5fbd09dfe86a05072025836479",
+    "scalar": "3b3b2f9ad0783fd881b9461af21e8c8b00b4830a"
+  },
+  "casesPerBrowser": 8,
+  "reportedChecks": {
+    "baseline": 229231,
+    "proposal": 231387,
+    "scalar": 231387
+  },
+  "actualArchivedComparisonWitnesses": {
+    "baseline": 229223,
+    "proposal": 231379,
+    "scalar": 231379
+  },
+  "reportedRequiredDifferences": {
+    "baseline": 4057,
+    "proposal": 24,
+    "scalar": 24
+  },
+  "caseCaptureErrors": 0,
+  "historicalWitnessGap": {
+    "perBrowser": 8,
+    "why": "ExactfrozenH2 archivedbeforetwo finalselection/grant checks ineachfixed1/4case. Oldcaptures/reports/audits unchanged; missing execution tuples never synthesized.",
+    "newIndependentReadbackPerBrowser": 8,
+    "newIndependentReadbackStatus": "PASS native+browser literaldeclaredID from actualpedestal subtype and347counts; distinctnewreadback origin."
+  },
+  "lostActualExecutedComparisonFields": 0,
+  "newlyExposedUnsupportedClipDifferences": {
+    "countPerCandidate": 24,
+    "case": "random-pedestal-0",
+    "actualGrantedId": 257,
+    "native": "MoveHori",
+    "proposalAndScalar": "RegularTear6",
+    "baseline": "ActualretainedTearbodyexistsinall24rows but lacksserializedclip/ordinal; actualbaseline renderer3fbd selectsliteralRegularTear6. No previous executed authored-clip pass is claimed; this remains an unimplemented actualtransform/family outcome."
+  },
+  "localProposalScalarTearIdentitySeedHeightFalling": "All8 retained real-game phasearraysPASS",
+  "remainingUnaccepted": {
+    "nativeTearSeed": "New616 comparisons /616 differences retained; completeSharedMT/factoryRNGparity remainsunaccepted.",
+    "nativeP": "ExactregularTear448 versusphysical/presented fieldbinding sourceunclosed; bothaliasesdiagnostic.",
+    "nativeVertical": "H2didnotreadheight/falling fields; localnonregressiondoesnotestablishoriginalverticalparity.",
+    "currentMain": "Source-pathclassifierlatest678 fortapesonly; no broaderlivewhole-main/GameOverExit/NPCcatalogue proof.",
+    "OS": "Port-only treasure-route-conditionedtwoacceptedOSseeds; notunfiltered. Rejectedseedswerenotjournaledbyfrozenproducer andremainunavailable."
+  },
+  "futureWitnessToolFix": {
+    "sourceSha256": "620f2821610d733041cb5b3a62b505ac83d64bc07a73fa6373468c4597c6519a",
+    "sourcePeer": "RootPASS actual livewitnesscollection+latefinalarchive,9+/3\u2212; next actualsuite mustverifynewoutput.",
+    "path": ".cache/coordination/quality-main/stats8/items-complete-coverage-fix.mjs"
+  },
+  "evidence": {
+    ".cache/coordination/quality-main/stats8/proposal-additive-readback.json": "afe80d0de47a497921661580d71212e56f93cefbb42eefa8fcc91686cd4b39f4",
+    ".cache/coordination/quality-main/stats8/scalar-additive-readback.json": "1b513ec27b87a51aab604a1f4fe5c4a063c4ef842104fd8b2e130709234ad5f9",
+    ".cache/coordination/quality-main/stats8/regular-tear-supplement-readback.json": "b9054e1447b692b12f1c58a1d007077abf92862061e476f47252871691ad547d",
+    ".cache/coordination/quality-main/stats8/os257-existing-clip-source-exposure.json": "9b77329cb4cadeebe7bacce8b57dab39c807ff6538a6c0436b42f7ddf092f915",
+    ".cache/coordination/quality-main/stats8/latest678-stats-source-path-classification-v2.json": "be1e8f35c09c75aa69a0153b33d68d6bf3ff68933c8ce0176add2462a7733f90",
+    ".cache/coordination/quality-main/stats8/items-complete-coverage-witness-source-fix.json": "97cf56a6cd63c2d99cc2213b447a5a23adaf39424ba7df9cc926b2b1b18c33a7"
+  },
+  "allNativeAndBrowserProcesses": "CLOSED; evidenceCPUreadbackonly",
+  "originalIgnoredClosureSha256": "1f2dca4bb3e4da8985da7f5569d3a72c6ef642a18cc990618d2b3eea6f240a19"
+}
