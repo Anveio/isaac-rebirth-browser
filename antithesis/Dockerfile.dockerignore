@@ -1,0 +1,11 @@
+# Build context for antithesis/Dockerfile (BuildKit reads this file in place
+# of the root .dockerignore): only the engine build's inputs, without local
+# build output.
+*
+!engine
+engine/target
+engine/dst/target
+!tools/foundation/item-catalog.py
+!web/*.json
+!references/isaac/rebirth/resources
+!antithesis

@@ -135,7 +135,9 @@ fix must follow source evidence rather than merely silence the property.
 
 [antithesis/](../antithesis) packages the harness for the platform:
 `docker build -f antithesis/Dockerfile -t rebirth-dst .` builds the harness
-and the production `engine.wasm`; the entrypoint signals `setup_complete` and
+and the production `engine.wasm` from a context that
+[Dockerfile.dockerignore](../antithesis/Dockerfile.dockerignore) limits to the
+engine build's inputs; the entrypoint signals `setup_complete` and
 Test Composer runs the [drivers](../antithesis/test/v1/rebirth-engine) with
 `--entropy antithesis`: the kernel units, and one whole-engine game per
 invocation checked against the shipped WASM. Under Antithesis, must-hit
