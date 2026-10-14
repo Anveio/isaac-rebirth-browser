@@ -34,9 +34,12 @@ pub(crate) fn roll(npc: &mut Npc, shared: &mut Mt19937, context: &Roll) -> Resul
         return Ok(false);
     }
     let mut rng = items::Rng::new(npc.spawn_seed, SHIFTS);
-    let belt = context
-        .player_items
-        .is_some_and(|items| items.owned_counts.get(CHAMPION_BELT).is_some_and(|count| *count > 0));
+    let belt = context.player_items.is_some_and(|items| {
+        items
+            .owned_counts
+            .get(CHAMPION_BELT)
+            .is_some_and(|count| *count > 0)
+    });
     // 47f5a9/47f710: 0.2 with Champion Belt, otherwise 0.05. Hard mode and the
     // Purple Heart trinket are not admitted runtime states.
     let chance = if belt { 0.2 } else { 0.05 };
