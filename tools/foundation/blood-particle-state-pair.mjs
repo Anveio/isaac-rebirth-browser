@@ -18,7 +18,11 @@ const actuals = new Map(browser.frames.map(row => [row.label, row.state]));
 // Normalize only source f32 values: physical/presented P/V, radii, mass,
 // friction, HP/damage, sprite clock/speed/scale/tint/offset and particle floats.
 // IDs, seeds, sequence, flags, enums and counters always retain integer equality.
-const f32 = value => Math.fround(value), vector = value => [f32(value.x ?? value[0]), f32(value.y ?? value[1])];
+const f32 = value => {
+  assert.ok(typeof value === 'number' && Number.isFinite(value), 'Required f32 field must be a finite number');
+  return Math.fround(value);
+};
+const vector = value => [f32(value.x ?? value[0]), f32(value.y ?? value[1])];
 const failures = [], uninitialized = [], execution = Object.fromEntries(tape.bloodParticleRequired.map(name => [name, false]));
 let checks = 0, presentations = 0, started = false;
 const check = (label, field, expected, actual) => {

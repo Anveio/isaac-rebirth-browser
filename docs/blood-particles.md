@@ -25,7 +25,8 @@ spawner words select the controller's ordinary versus child path.
 The first5 Update advances Base before initializing height/gravity/vertical
 velocity and the selected authored clip. Later ordinary airborne callbacks
 sample actual Blood7 drops and re-evaluate the bounded child count after each
-birth. Landing moves the supported actor into the background-paint path.
+birth. Landing seeks the last authored pose while preserving the current
+playing flag, then moves the actor into the background-paint path.
 Full updates own physical motion, animation and controller draws; fast updates
 predict the presented position and wall query. Entity render offset remains
 distinct from the sprite offset and the stored controller height.
