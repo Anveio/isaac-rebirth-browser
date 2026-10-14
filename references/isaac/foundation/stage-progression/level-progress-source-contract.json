@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "nativeBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "base": "19906c4e28199059d27e3ca90caa6d6861c66f2e",
+  "scope": "Actual per-level accepted heart and supported ordinary damage writers. Source/static prerequisite; fresh production/original live acceptance remains pending. Existing Heart e2e gate compares the supported bits and accepted-heart owner without changing its mandatory bank.",
+  "owners": {
+    "flags": "Level+81b0 qword, separate from retained Game+10eae0 boss-family word; this leaf implements supported damage bits2/5 only.",
+    "heartCollected": "Level+c byte.",
+    "lastPenaltyStage": "Game+10ecdc; None denotes unadmitted initial/restore ownership, never an asserted native sentinel."
+  },
+  "source": [
+    {
+      "address": "0x52b080",
+      "fdeBytes": 7175,
+      "rawSha256": "f5b9ad4be3fb16bc157fa0656e93fd57c6d8b780c1a5d27dfe060caea8566d6e",
+      "dumpSha256": "9ab36b7720c381d685ef5a73aca78a3627fb87b1dbe1af79633f411cb76e5203"
+    },
+    {
+      "address": "0x534b30",
+      "fdeBytes": 78,
+      "rawSha256": "5c9b01313c3ae4baf141623874cb629dcba290876eaae3dd0a892ef75d7780ff",
+      "dumpSha256": "a62a50ed4e9602185f1f41aa26354fa53b6ebc5a1f087b5268e0c6cafd30c8cd"
+    },
+    {
+      "address": "0x58be30",
+      "fdeBytes": 2402,
+      "rawSha256": "4ffdd2b7ed2d9b833e1e8a02b1066a7a75317308870d961684366de95536e326",
+      "dumpSha256": "8fc4f720f2819650991ed82757e8cf222f8f2113778bcecac3bab99b8140c988"
+    },
+    {
+      "address": "0x504820",
+      "fdeBytes": 8329,
+      "rawSha256": "2737d0683e5bd89e4e68a811d2154a41b8c7a7b1f73038b6174169b51e1d3f2f",
+      "dumpSha256": "50c2a2de4aeb5c92b20620e68af323b0234d7c98f720a37ed0f5e497edcdd797"
+    }
+  ],
+  "writers": {
+    "generation": "58be4e clears Level+81b0;58be59 clears Level+c. begin_level follows the actual fresh generation admission. Stage transition generation is a separate producer.",
+    "acceptedHeart": "Supported normal-Isaac type10 subtypes1/2/5,3,4,6 all converge through BL=true to504e67. Write heartCollected after successful health grant and before Collect504480/finish_collect. Rejected/capacity-denied/dead/delayed contacts do not set it.",
+    "admittedDamage": "Sound55 at52c0e0 precedes52c4d7. Incoming flags&0x20==0 sets Level bit5 and stores actual Level.stage at52c4e5, before health routing. HP loss is not the admission predicate.",
+    "redDamage": "After508230 at52be52, flags&0x20==0 selects52c6cd and helper534b30(index2,true) at52c6de, including Eternal absorption. Soul routing does not set bit2. Room+15c0 companion remains a separate unimplemented consumer."
+  },
+  "verification": "Required test:e2e:hearts observes actual Level flags/heart byte/companion stage read-only in the original. Every gameplay capture compares flags&0x24 and heartCollected; native bit5 requires matching lastPenaltyStage even when the browser value is absent. Original fields never supply browser state or inputs.",
+  "remaining": [
+    "Fresh immutable production/original Heart/damage acceptance of this leaf.",
+    "Other Level bits0/1/3/4/6..10 and modifier-complete damage admission.",
+    "Room+15c0 red-damage companion and saved Level booleans/restoration.",
+    "Game+10ecdc initial/restore ownership.",
+    "Actual stage-clear counter producers/achievement eligibility, Grid17 exit and full progression gate."
+  ],
+  "ignoredReceiptSha256": {
+    "damage-streak-writer-contract-v2.json": "51ab96527d8ce47ceed928d46889269fb0eaa78c29212cc7471ffb3f2cc9c05d",
+    "game-plus0c-setters-source.json": "3f90586666415955412da9d221281e3211d7d54421f60df76fff0d30fe11338a"
+  }
+}

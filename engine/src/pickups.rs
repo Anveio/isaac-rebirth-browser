@@ -489,7 +489,12 @@ impl Pickup {
     /// Free normal-Isaac Heart10 branches504db0..504fdf. The caller owns
     /// actual Player50c880 eligibility and contacts; health capacity is tested
     /// here before mutation. Existing health helpers retain black-slot order.
-    pub(crate) fn try_collect_heart(&mut self, player: &mut Player, red_multiplier: i32) -> bool {
+    pub(crate) fn try_collect_heart(
+        &mut self,
+        player: &mut Player,
+        red_multiplier: i32,
+        level_progress: &mut crate::level_progress::LevelProgress,
+    ) -> bool {
         if self.variant != 10
             || !self.can_collect
             || self.collected
@@ -524,6 +529,8 @@ impl Pickup {
             }
             _ => return false,
         }
+        //504e67 precedes the actual Collect504480 callback.
+        level_progress.heart_collected = true;
         self.finish_collect();
         true
     }

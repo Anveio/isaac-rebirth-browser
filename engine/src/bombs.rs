@@ -295,7 +295,9 @@ pub fn place(state: &mut State, phase: Phase) -> Result<(), String> {
     if state.screen != Screen::Playing
         || state.paused
         || state.inventory.bombs == 0
-        || state.player.hp == 0
+        // Player5318a5's actual dead branch encloses509540. That action
+        // checks controls/input/inventory/cooldown, without a red-health veto.
+        || state.player.dead
         || phase == Phase::Skipped
     {
         return Ok(());
