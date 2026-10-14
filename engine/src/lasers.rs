@@ -95,8 +95,8 @@ pub(crate) struct LaserBirth {
 fn direction(angle: f32) -> WorldVector {
     let radians = angle * DEGREES_TO_RADIANS;
     WorldVector {
-        x: radians.cos(),
-        y: radians.sin(),
+        x: crate::fmath::cos(radians),
+        y: crate::fmath::sin(radians),
     }
 }
 

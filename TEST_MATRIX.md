@@ -231,7 +231,7 @@ Pixel gates compare decoded RGBA over the whole frame, HUD, actor and projectile
 
 ## Antithesis deterministic simulation units
 
-The only checked-in unit-level verification is the [Antithesis DST harness](docs/dst.md) in `engine/dst/` (owner-authorized exception; see [AGENTS.md](AGENTS.md)). It is an inner-loop regression tool, not a merge gate: neither `check:build` nor any pre-merge check runs it. `npm run test:dst` drives each registered unit with seeded entropy, checks every property after each step and replays the corpus tapes through the game unit; `--entropy antithesis` hands every decision to the Antithesis platform. Units and properties below are discovered from [the registry](engine/dst/src/units/mod.rs) and source; a run's report, not this list, is the outcome. DST establishes engine safety, determinism and documented contracts only, never original-game parity.
+The only checked-in unit-level verification is the [Antithesis DST harness](docs/dst.md) in `engine/dst/` (owner-authorized exception; see [AGENTS.md](AGENTS.md)). It is an inner-loop regression tool, not a merge gate: neither `check:build` nor any pre-merge check runs it. `npm run test:dst` drives each registered unit with seeded entropy, checks every property after each step, replays the corpus tapes through the game unit and checks every game tape against the shipped `engine.wasm`; `--entropy antithesis` hands every decision to the Antithesis platform. Units and properties below are discovered from [the registry](engine/dst/src/units/mod.rs) and source; a run's report, not this list, is the outcome. DST establishes engine safety, determinism, native/WASM agreement and documented contracts only, never original-game parity.
 
 | DST unit | Scope | Always | Sometimes | Reachability |
 | --- | --- | ---: | ---: | ---: |
@@ -241,7 +241,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | `actors` | actor admission order and room identities against a list model | 4 | 2 | 0 |
 | `floor` | Basement generation structure, retries and per-descriptor room admission | 18 | 4 | 0 |
 | `grid` | grid queries and ground-collision solvers on generated rooms | 14 | 3 | 0 |
-| `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 54 | 40 | 2 |
+| `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 56 | 41 | 2 |
 | `abi` | the exported C ABI transport the browser bridge drives | 11 | 1 | 0 |
 
 <details><summary>Every declared DST property</summary>
@@ -364,6 +364,8 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Sometimes | game: a key arrives during the run-start fade | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: key presses during a boss scene are ignored | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: a key arrives during a boss scene | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: Escape during a room transition does not pause | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Sometimes | game: Escape arrives during a room transition | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: Escape opens the pause menu | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: the pause menu opens | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: seed text appends its uppercase compact glyphs | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
@@ -430,6 +432,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Always | game: replaying a tape reproduces every outcome and state | [mod.rs](engine/dst/src/units/game/mod.rs) |
 | Always | game: a game resumed from its serialized midpoint reaches the same end | [mod.rs](engine/dst/src/units/game/mod.rs) |
 | Always | game: the C ABI agrees with direct dispatch | [mod.rs](engine/dst/src/units/game/mod.rs) |
+| Always | wasm: the shipped engine agrees with native dispatch | [wasm.rs](engine/dst/src/wasm.rs) |
 | Always | abi: the exported ABI version is current | [abi.rs](engine/dst/src/units/abi.rs) |
 | Always | abi: commands before reset fail and snapshots publish null | [abi.rs](engine/dst/src/units/abi.rs) |
 | Always | abi: the public_keys export publishes exactly the engine's key surface | [abi.rs](engine/dst/src/units/abi.rs) |

@@ -7,6 +7,9 @@ edition = "2021"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
+# wasm32 std's own sinf/cosf implementation, used on every target so native
+# builds compute the shipped artifact's results (engine/src/fmath.rs).
+libm = "0.2"
 serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1", features = ["float_roundtrip"] }
 

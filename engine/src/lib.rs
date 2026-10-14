@@ -26,6 +26,7 @@ pub use entities::supports_npc_selector;
 pub mod familiars;
 pub mod fireplaces;
 pub mod floor;
+mod fmath;
 pub mod gib_counts;
 pub mod gluttony;
 pub mod grid;
