@@ -8,7 +8,7 @@ All paired captures retain strict decoded-RGBA diagnostics. Their pixel failures
 
 ## Required live paired-game scenarios
 
-The definitions below are discovered by executing the actual tape builder. By default the paired suite executes all six contrived cases plus two fresh OS-random seed/action tapes. Random tapes sample three movement/fire direction pairs with replacement; they do not guarantee every direction or birth phase. Contrived moving-bomb tapes cover both birth phases. `--replay-cases PATH,...` reruns the exact saved seed **and** all random action choices. Seed-only replay creates new action choices and is discovery.
+The definitions below are discovered by executing the actual tape builder. By default the paired suite executes all 8 contrived cases plus two fresh OS-random seed/action tapes. Random tapes sample three movement/fire direction pairs with replacement; they do not guarantee every direction or birth phase. Contrived moving-bomb tapes cover both birth phases. `--replay-cases PATH,...` reruns the exact saved seed **and** all random action choices. Seed-only replay creates new action choices and is discovery.
 
 | Paired scenario | Behavior / systems | Shared bootstrap / captures | Presentation intervals |
 | --- | --- | --- | --- |
@@ -82,7 +82,7 @@ Generated from [the suite registry](tools/e2e/suites.mjs). Each suite runs the f
 
 | Suite | Proves | Driver |
 | --- | --- | --- |
-| `paired` | Title/menu, movement/fire, pause, bombs and combat rooms; six contrived + two OS-random runs | [paired-game.mjs](tools/foundation/paired-game.mjs) |
+| `paired` | Title/menu, movement/fire, pause, bombs and combat rooms; all declared contrived + OS-random runs | [paired-game.mjs](tools/foundation/paired-game.mjs) |
 | `regressions` | Recorded paired runs that previously regressed | [paired-game.mjs](tools/foundation/paired-game.mjs) `--replay-cases references/isaac/foundation/runtime-progress/1E0WJX06.json,references/isaac/foundation/runtime-progress/W0L0LYYM.json` |
 | `floor` | Complete Basement floor generation: descriptors, topology, retries and starting doors | [floor-e2e.mjs](tools/foundation/floor-e2e.mjs) `--count 2` |
 | `boot-mt` | Boot-time shared MT state at Title, through menu navigation and through seed dialog entry/reopening | [boot-mt.mjs](tools/e2e/boot-mt.mjs) `--count 4` |
@@ -120,11 +120,13 @@ Generated from [the suite registry](tools/e2e/suites.mjs). Each suite runs the f
 | `audio` | SFX admission and Web Audio output | [audio.mjs](tools/e2e/audio.mjs) `--count 2` |
 | `music` | Music channels, fades and queued tracks | [music.mjs](tools/e2e/music.mjs) `--count 2` |
 | `entity-attack-fly` | Attack Fly rooms: admission, chase AI, tear damage, death and room clear | [state-pair.mjs](tools/e2e/state-pair.mjs) `--scenario-helper tools/original/entity-scenarios.py --helper-arg --type --helper-arg 18 --helper-arg --variant --helper-arg 0 --helper-arg --count --helper-arg 2 --helper-arg --contrived --helper-arg 3BMBMFTE:3 --comparator tools/foundation/entity-state-pair.mjs --comparator-arg --entity --comparator-arg attack-fly --native-frame-timeout 120` |
+| `entity-dingle` | Dingle boss rooms reached by a recorded route: Scene, spit fan, whistled Dips, slides with poop, splat trail and damage | [state-pair.mjs](tools/e2e/state-pair.mjs) `--scenario-helper tools/original/boss-scenarios.py --helper-arg --type --helper-arg 261 --helper-arg --variant --helper-arg 0 --helper-arg --count --helper-arg 1 --helper-arg --contrived --helper-arg G66GMA3N --comparator tools/foundation/entity-state-pair.mjs --comparator-arg --entity --comparator-arg dingle --native-frame-timeout 120` |
 | `entity-gluttony` | Gluttony miniboss rooms: entry, pathfinder walk, FatAttack burst, laser, damage, death and room clear | [state-pair.mjs](tools/e2e/state-pair.mjs) `--scenario-helper tools/original/entity-scenarios.py --helper-arg --type --helper-arg 49 --helper-arg --variant --helper-arg 0 --helper-arg --count --helper-arg 1 --helper-arg --contrived --helper-arg 1X37ZP4V:2 --comparator tools/foundation/entity-state-pair.mjs --comparator-arg --entity --comparator-arg gluttony --native-frame-timeout 120` |
 | `entity-horf` | Horf rooms: appear, delayed aimed shots, damage, death and room clear | [state-pair.mjs](tools/e2e/state-pair.mjs) `--scenario-helper tools/original/entity-scenarios.py --helper-arg --type --helper-arg 12 --helper-arg --variant --helper-arg 0 --helper-arg --count --helper-arg 1 --helper-arg --contrived --helper-arg V1XCDXXL:0 --comparator tools/foundation/entity-state-pair.mjs --comparator-arg --entity --comparator-arg horf --native-frame-timeout 120` |
 | `entity-pooter` | Pooter rooms: fly wander, aimed shots facing the player, damage, death and room clear | [state-pair.mjs](tools/e2e/state-pair.mjs) `--scenario-helper tools/original/entity-scenarios.py --helper-arg --type --helper-arg 14 --helper-arg --variant --helper-arg 0 --helper-arg --count --helper-arg 2 --helper-arg --contrived --helper-arg J3D7ZC49:2 --comparator tools/foundation/entity-state-pair.mjs --comparator-arg --entity --comparator-arg pooter --native-frame-timeout 120` |
 | `entity-room-26x14` | Ordinary 26x14 rooms: admission, geometry, player motion and CameraStyle1 scrolling | [state-pair.mjs](tools/e2e/state-pair.mjs) `--scenario-helper tools/original/entity-scenarios.py --helper-arg --shape --helper-arg 26x14 --helper-arg --count --helper-arg 2 --comparator tools/foundation/entity-state-pair.mjs --comparator-arg --entity --comparator-arg room-26x14 --native-frame-timeout 120` |
 | `entity-room-26x7` | Ordinary 26x7 rooms: admission, geometry, player motion and CameraStyle1 scrolling | [state-pair.mjs](tools/e2e/state-pair.mjs) `--scenario-helper tools/original/entity-scenarios.py --helper-arg --shape --helper-arg 26x7 --helper-arg --count --helper-arg 2 --comparator tools/foundation/entity-state-pair.mjs --comparator-arg --entity --comparator-arg room-26x7 --native-frame-timeout 120` |
+| `entity-super-pooter` | Super Pooter rooms, mostly Pooters promoted by the spawnConfig 5c5240 alternate-variant roll: identity, paired shots, damage and death | [state-pair.mjs](tools/e2e/state-pair.mjs) `--scenario-helper tools/original/entity-scenarios.py --helper-arg --type --helper-arg 14 --helper-arg --variant --helper-arg 1 --helper-arg --count --helper-arg 1 --helper-arg --contrived --helper-arg MAJH9R4E:3 --comparator tools/foundation/entity-state-pair.mjs --comparator-arg --entity --comparator-arg super-pooter --native-frame-timeout 120` |
 
 ## Executable coverage
 
@@ -231,7 +233,7 @@ Pixel gates compare decoded RGBA over the whole frame, HUD, actor and projectile
 
 ## Antithesis deterministic simulation units
 
-The only checked-in unit-level verification is the [Antithesis DST harness](docs/dst.md) in `engine/dst/` (owner-authorized exception; see [AGENTS.md](AGENTS.md)). It is an inner-loop regression tool, not a merge gate: neither `check:build` nor any pre-merge check runs it. `npm run test:dst` drives each registered unit with seeded entropy, checks every property after each step and replays the corpus tapes through the game unit; `--entropy antithesis` hands every decision to the Antithesis platform. Units and properties below are discovered from [the registry](engine/dst/src/units/mod.rs) and source; a run's report, not this list, is the outcome. DST establishes engine safety, determinism and documented contracts only, never original-game parity.
+The only checked-in unit-level verification is the [Antithesis DST harness](docs/dst.md) in `engine/dst/` (owner-authorized exception; see [AGENTS.md](AGENTS.md)). It is an inner-loop regression tool, not a merge gate: neither `check:build` nor any pre-merge check runs it. `npm run test:dst` drives each registered unit with seeded entropy, checks every property after each step, replays the corpus tapes through the game unit and checks every game tape against the shipped `engine.wasm`; `--entropy antithesis` hands every decision to the Antithesis platform. Units and properties below are discovered from [the registry](engine/dst/src/units/mod.rs) and source; a run's report, not this list, is the outcome. DST establishes engine safety, determinism, native/WASM agreement and documented contracts only, never original-game parity.
 
 | DST unit | Scope | Always | Sometimes | Reachability |
 | --- | --- | ---: | ---: | ---: |
@@ -241,7 +243,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | `actors` | actor admission order and room identities against a list model | 4 | 2 | 0 |
 | `floor` | Basement generation structure, retries and per-descriptor room admission | 18 | 4 | 0 |
 | `grid` | grid queries and ground-collision solvers on generated rooms | 14 | 3 | 0 |
-| `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 54 | 40 | 2 |
+| `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 56 | 41 | 2 |
 | `abi` | the exported C ABI transport the browser bridge drives | 11 | 1 | 0 |
 
 <details><summary>Every declared DST property</summary>
@@ -364,6 +366,8 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Sometimes | game: a key arrives during the run-start fade | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: key presses during a boss scene are ignored | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: a key arrives during a boss scene | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: Escape during a room transition does not pause | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Sometimes | game: Escape arrives during a room transition | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: Escape opens the pause menu | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: the pause menu opens | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: seed text appends its uppercase compact glyphs | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
@@ -430,6 +434,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Always | game: replaying a tape reproduces every outcome and state | [mod.rs](engine/dst/src/units/game/mod.rs) |
 | Always | game: a game resumed from its serialized midpoint reaches the same end | [mod.rs](engine/dst/src/units/game/mod.rs) |
 | Always | game: the C ABI agrees with direct dispatch | [mod.rs](engine/dst/src/units/game/mod.rs) |
+| Always | wasm: the shipped engine agrees with native dispatch | [wasm.rs](engine/dst/src/wasm.rs) |
 | Always | abi: the exported ABI version is current | [abi.rs](engine/dst/src/units/abi.rs) |
 | Always | abi: commands before reset fail and snapshots publish null | [abi.rs](engine/dst/src/units/abi.rs) |
 | Always | abi: the public_keys export publishes exactly the engine's key surface | [abi.rs](engine/dst/src/units/abi.rs) |

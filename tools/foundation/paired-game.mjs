@@ -100,7 +100,9 @@ async function browserCapture(browser, server, caseData, directory, archiveBrows
     let presentations = 0;
     for (const action of caseData.pairedTape) {
       if (action.type === 'step') {
-        await page.evaluate(count => window.game.step(count), action.frames);
+        // Steps transfer no state: serializing a full snapshot per step costs
+        // several times the step itself (see tools/e2e/lib/game.mjs).
+        await page.evaluate(count => { window.game.step(count); }, action.frames);
         presentations += action.frames;
         expectedCommands.push({ type: 'tick', count: action.frames });
       } else if (action.type === 'key') {
@@ -121,11 +123,15 @@ async function browserCapture(browser, server, caseData, directory, archiveBrows
         }
         inputs.push({ ...action, normalizedCode: code, browserPresentation: presentations });
       } else {
+        // capture() renders and encodes the snapshot it takes first; the state
+        // crosses the page boundary as that snapshot's own engine JSON text.
         const captured = await page.evaluate(includeAudio => {
-          const result = window.game.capture();
+          const stateJson = window.game.snapshotJson();
+          const { state: ignoredState, ...result } = window.game.capture();
           if (includeAudio) result.browserAudio = window.game.audio();
-          return result;
+          return { ...result, stateJson };
         }, captureBrowserAudio);
+        captured.state = JSON.parse(captured.stateJson);
         const bytes = Buffer.from(captured.png, 'base64');
         const path = join(directory, action.label + '.png');
         writeFileSync(path, bytes);

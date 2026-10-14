@@ -72,6 +72,25 @@ pub struct Npc {
     /// Sprite FlipX (+2fc) for families that face their target.
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     pub flip_x: bool,
+    /// Sprite layer event masks (+118 this step, +11c since the last restart),
+    /// one bit per trigger of the current clip.
+    #[serde(default, skip_serializing_if = "SpriteEvents::is_empty")]
+    pub sprite_events: SpriteEvents,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub dingle: Option<crate::dingle::DingleState>,
+}
+
+#[derive(Clone, Copy, Debug, Default, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct SpriteEvents {
+    pub now: u32,
+    pub seen: u32,
+}
+
+impl SpriteEvents {
+    fn is_empty(&self) -> bool {
+        self.now == 0 && self.seen == 0
+    }
 }
 
 const ZERO: WorldVector = WorldVector { x: 0.0, y: 0.0 };
@@ -449,8 +468,8 @@ pub(crate) fn direction(random: &mut Mt19937) -> WorldVector {
     // SharedDirection 0x42e8d0 rounds the sampled f32 angle before sinf/cosf.
     let radians = (f64::from(random.uniform()) * std::f64::consts::TAU) as f32;
     WorldVector {
-        x: radians.cos(),
-        y: radians.sin(),
+        x: crate::fmath::cos(radians),
+        y: crate::fmath::sin(radians),
     }
 }
 
@@ -530,6 +549,8 @@ impl Npc {
             flip_x: false,
             pathfinder: None,
             gluttony: None,
+            sprite_events: SpriteEvents::default(),
+            dingle: None,
         }
     }
 
@@ -631,7 +652,7 @@ pub(crate) const FLY_FAMILY: Family = Family {
     advance: advance_fly,
     post_contact_grid: crate::entities::clamp_walls,
     entity_flags: crate::entities::ordinary_flags,
-    needs_occupancy: false,
+    occupancy: crate::entities::Occupancy::None,
 };
 
 fn spawn_fly(id: u32, selector: &SpawnSelector, _: &SpawnContext) -> Result<Option<Npc>, String> {

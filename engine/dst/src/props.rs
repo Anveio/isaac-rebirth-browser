@@ -239,8 +239,9 @@ pub struct PropertyResult {
 }
 
 /// Applies Antithesis property semantics to every SDK catalog entry declared
-/// by a selected module: `rebirth_dst::units::<unit>` and the shared harness.
-pub fn verdict(units: &[&str]) -> Vec<PropertyResult> {
+/// by a selected module: `rebirth_dst::units::<unit>`, the shared harness and,
+/// when enabled, the WASM differential.
+pub fn verdict(units: &[&str], wasm: bool) -> Vec<PropertyResult> {
     // Antithesis identifies a property by its message, so call sites sharing
     // a message (e.g. the pass and fail arms of one check) aggregate.
     let mut sites: BTreeMap<&'static str, (u64, u64, Option<Value>)> = BTreeMap::new();
@@ -254,6 +255,7 @@ pub fn verdict(units: &[&str]) -> Vec<PropertyResult> {
     }
     let selected = |class: &str| {
         class == "rebirth_dst::harness"
+            || (wasm && class == "rebirth_dst::wasm")
             || units.iter().any(|unit| {
                 let module = format!("rebirth_dst::units::{unit}");
                 class == module || class.starts_with(&format!("{module}::"))

@@ -370,16 +370,48 @@ fn entity_catalog(xml: &str) -> String {
     output
 }
 
-/// Every clip of every authored NPC actor: frame count and loop flag.
+/// Every clip of every authored NPC actor: frame count, loop flag and the
+/// (event name, frame) triggers its anm2 authors.
 fn clip_catalog(actors: &Value) -> String {
     let mut output = String::from("pub const CLIPS: &[Clip] = &[\n");
     for (actor, definition) in actors.as_object().expect("NPC actor map") {
+        let names: std::collections::BTreeMap<u64, &str> = definition["Events"]
+            .as_array()
+            .map(|events| {
+                events
+                    .iter()
+                    .map(|event| {
+                        (
+                            event["Id"].as_u64().expect("event id"),
+                            event["Name"].as_str().expect("event name"),
+                        )
+                    })
+                    .collect()
+            })
+            .unwrap_or_default();
         for clip in definition["Animations"].as_array().expect("actor clips") {
+            let events: Vec<String> = clip["Triggers"]
+                .as_array()
+                .map(|triggers| {
+                    triggers
+                        .iter()
+                        .map(|trigger| {
+                            let id = trigger["EventId"].as_u64().expect("trigger event");
+                            format!(
+                                "({:?}, {})",
+                                names.get(&id).expect("trigger names an authored event"),
+                                trigger["AtFrame"].as_u64().expect("trigger frame")
+                            )
+                        })
+                        .collect()
+                })
+                .unwrap_or_default();
             output.push_str(&format!(
-                "Clip {{ actor: {actor:?}, name: {:?}, frames: {}, looping: {} }},\n",
+                "Clip {{ actor: {actor:?}, name: {:?}, frames: {}, looping: {}, events: &[{}] }},\n",
                 clip["Name"].as_str().expect("clip name"),
                 clip["FrameNum"].as_u64().expect("clip frames"),
                 clip["Loop"].as_bool().expect("clip loop flag"),
+                events.join(", "),
             ));
         }
     }

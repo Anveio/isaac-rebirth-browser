@@ -7,14 +7,15 @@ standing rule against Rust/Node/Python unit suites and component harnesses
 (see [AGENTS.md](../AGENTS.md)) has exactly this one owner-authorized
 exception. Nothing else may use it as precedent.
 
-DST establishes engine safety, determinism and documented input contracts. It
+DST establishes engine safety, determinism, native/WASM agreement and
+documented input contracts. It
 is not original-game evidence: parity with base Rebirth remains the job of the
 live e2e suites, and no DST result may be cited as a parity result. It is an
 inner-loop regression tool, not a merge gate: neither `check:build` nor any
 pre-merge check runs it. Run it while changing engine core code.
 
 ```sh
-npm run test:dst                                  # build the harness, run every unit
+npm run test:dst                                  # build engine.wasm + harness, run every unit
 DST_CASES=48 DST_STEPS=4000 npm run test:dst      # a longer local soak
 npm run test:dst -- --seed 0x1f2e3d4c5b6a7988     # rerun a whole recorded run
 engine/dst/target/release/rebirth-dst --units game --case-seed 7233388093878974408 --steps 5000
@@ -63,7 +64,7 @@ indexes each one's declared properties from source.
 | `actors` | actor admission order and room identities | an independent list model under random admit/retain/reset |
 | `floor` | Basement generation and room admission | determinism; footprints; reciprocal edge-adjacent neighbors; reachability; exactly one boss/super secret/shop/treasure (the source retry rule); retry continuity; every descriptor admits as a `Room` |
 | `grid` | grid queries and both ground-collision solvers on generated rooms | resolution never fails for bounded motion (including residual speeds whose squares underflow); previews keep velocity; an underflowing inward preview skips refinement (source 443117 → 44346c); correction moves only out along the contact normal; full nonplayer reflections leave the wall; blast candidate ordering and bounds |
-| `game` | the whole engine through public commands | per-step state invariants, per-command transition contracts (menus, run-start hold, pause, boss scenes, death and GameOver), exact rejection semantics, tape replay, serialized-midpoint continuation, the C ABI |
+| `game` | the whole engine through public commands | per-step state invariants, per-command transition contracts (menus, run-start hold, pause, boss scenes, death and GameOver), exact rejection semantics, tape replay, serialized-midpoint continuation, the C ABI, the shipped WASM |
 | `abi` | the exported C ABI the browser bridge drives | framing bounds, malformed requests, failed resets, pre-reset commands on a fresh thread, the published key surface |
 
 The `game` driver ([driver.rs](../engine/dst/src/units/game/driver.rs)) only
@@ -88,6 +89,13 @@ Beyond its invariants, every `game` tape is checked by:
   through JSON and the engine's own deserialization validators.
 * **C ABI differential.** The tape drives the exported `reset`/`request_ptr`/
   `command`/`snapshot_*` functions exactly as `web/engine.ts` does.
+* **Shipped-WASM differential.** With `--wasm web/generated/engine.wasm` (the
+  default in `npm run test:dst`) each tape also runs through the production
+  artifact in the deterministic `wasmi` interpreter; every outcome, the
+  published key surface and sampled snapshots must equal native dispatch.
+  A differing snapshot is reported with the JSON pointer of its first
+  differing value and both sides' values. Native-only properties therefore
+  speak for the artifact browsers run.
 
 ### Tapes and the corpus
 
@@ -120,21 +128,30 @@ fix must follow source evidence rather than merely silence the property.
 | Dip217 room actors (#127) are NPC collision class 4, but the NPC-pair and tear contact responses rejected type 217, so any room whose Dips touch (authored Basement rooms place them 40 px apart) failed every tick and stopped the browser's frame loop. | Fixed on main (#146): Dips take the normal-class `49b8f0` callback and `445710` mass response recorded in the Dip source contract. | `regression-dip-contact-freeze` |
 | A Random run stores its resolved character in the menu's selected character. Since the GameOver popup can exit to the menus (#111), the Character menu then highlighted Random while confirming started the previous run's character, and the menu invariant failed. Latent while only Isaac is implemented. | The Exit path reloads the menus' character from the profile's selection, as Profile → Main already does. | `regression-random-run-exit-menu-character` |
 | A bomb coasting into a wall with a ~1e-26 residual velocity underflowed its f32 squared speed to zero in an interpolation preview, which the reflection guard reported as overflow, failing the tick. | Fixed on main (#118), following the native early return: a zero-speed preview skips refinement. An earlier guard-only fix kept the tick alive but continued into refinement, unlike the original. | `grid: nonplayer ground resolution never fails for bounded motion` fails without any fix; `grid: an underflowing inward preview skips refinement` goes unmet under the guard-only fix. |
-| Native `f32::sin/cos` call the host C library, which disagrees with wasm32's libm on about 1.9% of sampled inputs (77,065 of 3,992,186). On current main a generated tape diverges from the shipped WASM at step 499 by one ulp of a Fly's velocity (`npcs.rs` trigonometry). | Open. Native replay and the shipped WASM can disagree wherever engine trigonometry runs; the WASM differential lands with a fix routing engine trig through one implementation. | The shipped-WASM differential (next slice). |
+| Native std float functions call the host C library, while wasm32 std uses Rust's `libm`. Against `libm`, glibc 2.39 disagreed on 162,416 of 10,405,090 sampled `f32` `sin`/`cos` inputs and on 446,514 of 10,000,000 sampled `f64` `atan2` pairs. Generated tapes diverged from the shipped WASM by one ulp of NPC motion; the corpus tape's first difference is an Attack Fly's wander velocity (`npcs.rs`) at step 749, so native replay and tools could disagree with the artifact. | [fmath.rs](../engine/src/fmath.rs) routes the engine's `sin`, `cos` and `atan2` through the `libm` crate. wasm32 std matched it on every sampled input under Rust 1.97 and 1.99, so the shipped artifact computes the same results while native builds now agree with it. [engine/clippy.toml](../engine/clippy.toml) disallows every std float function whose precision Rust leaves unspecified, so `npm run lint` flags new host calls; a newly needed function gets a `libm` wrapper in `fmath.rs`. This makes no original-game parity claim. | `regression-native-wasm-fly-trig`, the shipped-WASM differential on every tape, and the lint rule |
 | Engine validation, the browser and DST each kept their own copy of the accepted key list, so new keys drifted. | Fixed on main (#122): `rebirth_cleanroom::input::PUBLIC_KEYS` is the single owner, published through the `public_keys` exports. | `abi: the public_keys export publishes exactly the engine's key surface`. |
 
-## Roadmap
+## Running on Antithesis
 
-The harness lands in small slices. Still to come:
+[antithesis/](../antithesis) packages the harness for the platform:
+`docker build -f antithesis/Dockerfile -t rebirth-dst .` builds the harness
+and the production `engine.wasm` from a context that
+[Dockerfile.dockerignore](../antithesis/Dockerfile.dockerignore) limits to the
+engine build's inputs; the entrypoint signals `setup_complete` and
+Test Composer runs the [drivers](../antithesis/test/v1/rebirth-engine) with
+`--entropy antithesis`: the kernel units, and one whole-engine game per
+invocation checked against the shipped WASM. Under Antithesis, must-hit
+properties are judged across the whole exploration, so a single driver
+invocation never fails for leaving some unmet. `--build-arg INSTRUMENT=1` adds
+Antithesis coverage instrumentation and needs the platform's `libvoidstar.so`
+at `antithesis/libvoidstar.so`.
 
-* **Native/WASM agreement**: every game tape also replays through the
-  production `engine.wasm` in a deterministic interpreter and must agree with
-  native dispatch, together with a fix for the open trigonometry finding.
-* **Antithesis packaging**: an image whose entrypoint signals
-  `setup_complete` and Test Composer drivers running `--entropy antithesis`.
-  The binary embeds data compiled from the private original resources, so
-  pushing an image to any external registry, Antithesis included, requires
-  the repository owner's explicit approval.
+The binary embeds data compiled from the private original resources (room
+layouts and catalogues). Pushing the image to any external registry,
+Antithesis included, requires the repository owner's explicit approval. The
+entrypoint and both drivers run cleanly in the SDK's local mode
+(`ANTITHESIS_SDK_LOCAL_OUTPUT`); the platform's own evaluation remains to be
+done.
 
 ## Extending
 

@@ -305,12 +305,22 @@ pub fn transition(before: &State, command: &Command, after: &State) {
                 && !boss_scene
                 && before.player_death.game_over.is_none()
             {
-                props::always!(
-                    after.paused && after.pause_menu.phase == PausePhase::Appearing,
-                    "game: Escape opens the pause menu",
-                    json!({ "transition": before.room_transition, "pause": after.pause_menu })
-                );
-                props::sometimes!(true, "game: the pause menu opens");
+                if before.room_transition.is_some() {
+                    // The original ignores Escape until the transition ends (#168).
+                    props::always!(
+                        !after.paused && after.pause_menu == before.pause_menu,
+                        "game: Escape during a room transition does not pause",
+                        json!({ "transition": before.room_transition, "pause": after.pause_menu })
+                    );
+                    props::sometimes!(true, "game: Escape arrives during a room transition");
+                } else {
+                    props::always!(
+                        after.paused && after.pause_menu.phase == PausePhase::Appearing,
+                        "game: Escape opens the pause menu",
+                        json!({ "pause": after.pause_menu })
+                    );
+                    props::sometimes!(true, "game: the pause menu opens");
+                }
             }
         }
         Command::Text { text } => {
@@ -635,12 +645,14 @@ pub fn state(state: &State) {
                 state.familiars.iter().map(|familiar| familiar.id),
                 state.next_familiar
             )
+            && allocated(state.lasers.iter().map(|laser| laser.id), state.next_laser)
             && allocated(
                 state
                     .fire_particles
                     .iter()
                     .map(|particle| particle.id)
-                    .chain(state.sprite_effects.iter().map(|effect| effect.id)),
+                    .chain(state.sprite_effects.iter().map(|effect| effect.id))
+                    .chain(laser_impacts(state)),
                 state.next_effect
             ),
         "game: entity identities are unique and below their allocators",
@@ -682,6 +694,7 @@ pub fn state(state: &State) {
             .enemy_projectiles
             .iter()
             .any(|projectile| projectile.id == actor.id),
+        ActorKind::Laser => state.lasers.iter().any(|laser| laser.id == actor.id),
         ActorKind::Effect => {
             state
                 .fire_particles
@@ -691,6 +704,7 @@ pub fn state(state: &State) {
                     .sprite_effects
                     .iter()
                     .any(|effect| effect.id == actor.id)
+                || laser_impacts(state).any(|id| id == actor.id)
         }
     });
     let player_scheduled = scheduled
@@ -811,4 +825,12 @@ pub fn state(state: &State) {
         }),
         "game: a bomb destroys an ordinary rock"
     );
+}
+
+/// Laser impacts are effects whose handles come from the effect allocator.
+fn laser_impacts(state: &State) -> impl Iterator<Item = u32> + '_ {
+    state
+        .lasers
+        .iter()
+        .filter_map(|laser| laser.impact.as_ref().map(|impact| impact.id))
 }

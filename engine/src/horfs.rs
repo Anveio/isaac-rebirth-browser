@@ -16,7 +16,7 @@ pub(crate) const FAMILY: Family = Family {
     advance,
     post_contact_grid: crate::entities::clamp_walls,
     entity_flags: crate::entities::ordinary_flags,
-    needs_occupancy: false,
+    occupancy: crate::entities::Occupancy::None,
 };
 
 fn spawn(id: u32, selector: &SpawnSelector, _: &SpawnContext) -> Result<Option<Npc>, String> {

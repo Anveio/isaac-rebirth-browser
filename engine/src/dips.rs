@@ -378,7 +378,7 @@ pub(crate) const FAMILY: Family = Family {
     advance,
     post_contact_grid,
     entity_flags: family_flags,
-    needs_occupancy: false,
+    occupancy: crate::entities::Occupancy::None,
 };
 
 fn spawn_family(

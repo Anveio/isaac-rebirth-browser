@@ -61,6 +61,8 @@ pub struct Clip {
     pub name: &'static str,
     pub frames: u32,
     pub looping: bool,
+    /// anm2 Triggers: (event name, AtFrame).
+    pub events: &'static [(&'static str, u32)],
 }
 
 include!(concat!(env!("OUT_DIR"), "/clip_catalog.rs"));

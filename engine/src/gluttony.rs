@@ -22,7 +22,7 @@ pub(crate) const FAMILY: Family = Family {
     advance,
     post_contact_grid: crate::entities::clamp_walls,
     entity_flags: crate::entities::ordinary_flags,
-    needs_occupancy: false,
+    occupancy: crate::entities::Occupancy::None,
 };
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
@@ -242,7 +242,7 @@ fn fire_laser(
 ) -> Result<(), String> {
     let heading = state.direction;
     let depth = if heading.y < -0.5 { -10.0 } else { 3000.0 };
-    let angle = (f64::from(heading.y).atan2(f64::from(heading.x)) as f32) * 57.295_776;
+    let angle = (crate::fmath::atan2(f64::from(heading.y), f64::from(heading.x)) as f32) * 57.295_776;
     let spawn_seed = random.next_u32();
     births.push(Birth::Laser(LaserBirth {
         variant: 1,

@@ -13,9 +13,11 @@ import os
 from pathlib import Path
 import signal
 import socket
+import struct
 import subprocess
 import tempfile
 import time
+import zlib
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -156,6 +158,69 @@ def main():
         x11.XSync(display, 0)
     finally:
         x11.XCloseDisplay(display)
+    # Window captures read the X framebuffer in process: the same pixels the
+    # former per-capture ffmpeg x11grab subprocess wrote, without ~0.3 s of
+    # process start-up per capture.
+    class XImage(ctypes.Structure):
+        _fields_ = [('width', ctypes.c_int), ('height', ctypes.c_int), ('xoffset', ctypes.c_int), ('format', ctypes.c_int),
+                    ('data', ctypes.POINTER(ctypes.c_ubyte)), ('byte_order', ctypes.c_int), ('bitmap_unit', ctypes.c_int),
+                    ('bitmap_bit_order', ctypes.c_int), ('bitmap_pad', ctypes.c_int), ('depth', ctypes.c_int),
+                    ('bytes_per_line', ctypes.c_int), ('bits_per_pixel', ctypes.c_int),
+                    ('red_mask', ctypes.c_ulong), ('green_mask', ctypes.c_ulong), ('blue_mask', ctypes.c_ulong)]
+    x11.XDefaultRootWindow.argtypes = [ctypes.c_void_p]
+    x11.XDefaultRootWindow.restype = ctypes.c_ulong
+    x11.XGetImage.argtypes = [ctypes.c_void_p, ctypes.c_ulong, ctypes.c_int, ctypes.c_int, ctypes.c_uint, ctypes.c_uint, ctypes.c_ulong, ctypes.c_int]
+    x11.XGetImage.restype = ctypes.POINTER(XImage)
+    x11.XGetWindowAttributes.argtypes = [ctypes.c_void_p, ctypes.c_ulong, ctypes.c_void_p]
+    x11.XTranslateCoordinates.argtypes = [ctypes.c_void_p, ctypes.c_ulong, ctypes.c_ulong, ctypes.c_int, ctypes.c_int,
+                                          ctypes.POINTER(ctypes.c_int), ctypes.POINTER(ctypes.c_int), ctypes.POINTER(ctypes.c_ulong)]
+    x11.XFree.argtypes = [ctypes.c_void_p]
+
+    def x11_grab(window, path):
+        display = x11.XOpenDisplay(None)
+        if not display:
+            raise RuntimeError('X11 capture could not open display')
+        try:
+            # XWindowAttributes begins with x, y, width, height (ints).
+            attributes = (ctypes.c_int * 64)()
+            if not x11.XGetWindowAttributes(display, int(window), attributes):
+                raise RuntimeError('X11 capture could not read window geometry')
+            width, height = attributes[2], attributes[3]
+            if width <= 0 or height <= 0:
+                raise RuntimeError('X11 capture requires positive window dimensions')
+            root = x11.XDefaultRootWindow(display)
+            x, y, child = ctypes.c_int(), ctypes.c_int(), ctypes.c_ulong()
+            if not x11.XTranslateCoordinates(display, int(window), root, 0, 0, ctypes.byref(x), ctypes.byref(y), ctypes.byref(child)):
+                raise RuntimeError('X11 capture could not translate the window origin')
+            image = x11.XGetImage(display, root, x.value, y.value, width, height, 0xFFFFFFFF, 2)
+            if not image:
+                raise RuntimeError('X11 capture XGetImage failed')
+            try:
+                frame = image.contents
+                if (frame.width, frame.height) != (width, height) or frame.xoffset != 0:
+                    raise RuntimeError('X11 capture image geometry differs from the requested window')
+                if frame.bytes_per_line < width * 4 or not frame.data:
+                    raise RuntimeError('X11 capture image has an invalid pixel buffer or row stride')
+                if frame.bits_per_pixel != 32 or frame.byte_order != 0 or (frame.red_mask, frame.green_mask, frame.blue_mask) != (0xff0000, 0xff00, 0xff):
+                    raise RuntimeError('X11 capture expects a little-endian 32-bit BGRX root visual')
+                stride = frame.bytes_per_line
+                raw = ctypes.string_at(frame.data, stride * height)
+            finally:
+                x11.XFree(image.contents.data)
+                x11.XFree(image)
+        finally:
+            x11.XCloseDisplay(display)
+        rows = []
+        for row in range(height):
+            line = raw[row * stride:row * stride + width * 4]
+            rgb = bytearray(width * 3)
+            rgb[0::3], rgb[1::3], rgb[2::3] = line[2::4], line[1::4], line[0::4]
+            rows.append(b'\0' + bytes(rgb))
+        chunk = lambda kind, data: struct.pack('>I', len(data)) + kind + data + struct.pack('>I', zlib.crc32(kind + data))
+        path.write_bytes(b'\x89PNG\r\n\x1a\n' + chunk(b'IHDR', struct.pack('>IIBBBBB', width, height, 8, 2, 0, 0, 0))
+                         + chunk(b'IDAT', zlib.compress(b''.join(rows), 6)) + chunk(b'IEND', b''))
+        return width, height
+
     def x11_focus(window=None):
         display = x11.XOpenDisplay(None)
         if not display:
@@ -376,13 +441,9 @@ def main():
                         record('field', {'name': 'initialState', 'value': report['initialState']})
                     if observer:
                         observe_current(action['label'])
-                    geometry = subprocess.check_output(['xdotool', 'getwindowgeometry', '--shell', window], text=True)
-                    values = dict(line.split('=', 1) for line in geometry.splitlines() if '=' in line)
                     path = out / 'frames' / f"{action['label']}.png"
-                    subprocess.run(['ffmpeg', '-hide_banner', '-loglevel', 'error', '-y', '-f', 'x11grab', '-draw_mouse', '0',
-                                    '-video_size', f"{values['WIDTH']}x{values['HEIGHT']}", '-i',
-                                    f"{os.environ['DISPLAY']}+{values['X']},{values['Y']}", '-frames:v', '1', str(path)], check=True, timeout=15)
-                    frames.append({'label': action['label'], 'path': str(path), 'width': int(values['WIDTH']), 'height': int(values['HEIGHT']),
+                    width, height = x11_grab(window, path)
+                    frames.append({'label': action['label'], 'path': str(path), 'width': width, 'height': height,
                                    'presentedFrame': current['presentedFrame'], 'virtualElapsedNs': current['virtualElapsedNs'],
                                    'simulationTick': None, 'gateBlocked': True, 'x11Focus': x11_focus(), 'targetWindow': int(window)})
                     record('capture', frames[-1])

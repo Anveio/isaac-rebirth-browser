@@ -8,7 +8,7 @@ use crate::{
     entities::{Birth, NpcWorld},
     motion::WorldVector,
     mt::Mt19937,
-    npcs::Npc,
+    npcs::{Npc, SpriteEvents},
     phase::Phase,
     roundworm::Shot,
 };
@@ -56,7 +56,41 @@ pub(crate) fn play(npc: &mut Npc, name: &str, force: bool) {
         npc.animation_frame = 0;
         npc.animation_clock = 0.0;
         npc.animation_playing = true;
+        // 40f8a0 restart clears both event masks, then scans frame 0.
+        let now = triggers_at(npc, 0);
+        npc.sprite_events = SpriteEvents { now, seen: now };
     }
+}
+
+/// 40e9b0: the current clip's triggers authored at `frame`, as mask bits.
+fn triggers_at(npc: &Npc, frame: u32) -> u32 {
+    content::clip(&npc.actor, &npc.animation).map_or(0, |clip| {
+        clip.events
+            .iter()
+            .enumerate()
+            .filter(|(_, (_, at))| *at == frame)
+            .fold(0, |mask, (bit, _)| mask | (1 << bit))
+    })
+}
+
+fn event_mask(npc: &Npc, event: &str) -> u32 {
+    content::clip(&npc.actor, &npc.animation).map_or(0, |clip| {
+        clip.events
+            .iter()
+            .enumerate()
+            .filter(|(_, (name, _))| *name == event)
+            .fold(0, |mask, (bit, _)| mask | (1 << bit))
+    })
+}
+
+/// IsEventTriggered410790: the last sprite step landed on the event's frame.
+pub(crate) fn event_triggered(npc: &Npc, event: &str) -> bool {
+    npc.sprite_events.now & event_mask(npc, event) != 0
+}
+
+/// WasEventTriggered4107b0: the event's frame was reached since the restart.
+pub(crate) fn event_was_triggered(npc: &Npc, event: &str) -> bool {
+    npc.sprite_events.seen & event_mask(npc, event) != 0
 }
 
 /// Sprite.SetFrame40fef0: select the clip, seek the frame and stop.
@@ -96,8 +130,14 @@ fn update_sprite(npc: &mut Npc) -> Result<(), String> {
     let next = npc.animation_clock + 1.0;
     if next.floor() < clip.frames as f32 {
         npc.animation_clock = next;
+        // 40ea30 scans each newly reached integer frame.
+        let now = triggers_at(npc, next.floor() as u32);
+        npc.sprite_events.now = now;
+        npc.sprite_events.seen |= now;
     } else if clip.looping {
         npc.animation_clock = 0.0;
+        let now = triggers_at(npc, 0);
+        npc.sprite_events = SpriteEvents { now, seen: now };
     } else {
         npc.animation_clock = (clip.frames - 1) as f32;
         npc.animation_playing = false;
