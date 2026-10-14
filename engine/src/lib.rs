@@ -2030,6 +2030,7 @@ impl Game {
                     ((self.state.max_fire_delay as f32 * 0.45_f32) as i32 + 7).max(11);
             }
         }
+        player_items::advance_item_sprite(&mut self.state, phase);
         if self.state.player.input_cooldown > 0 {
             self.state.player.input_cooldown -= 1;
         }

@@ -61,7 +61,8 @@ pub(crate) fn advance(state: &mut State, controls_enabled: bool) -> Result<(), S
     let Some(owner) = state.player_items.as_ref() else {
         return Ok(());
     };
-    //52a640 reads held/triggered action9 even on the flags319&40 fast path.
+    //52a640 reads held/triggered action9 even on the Entity+318 word bit4000
+    // fast path (the same little-endian byte+319 bit40 predicate).
     // Normal45 has no held-use or frame-recharge leaf; an actual new edge is
     // required. Its guards are7d4/7d8, not the bf4 main-animation guard.
     if !state.public_actions.active_triggered
@@ -80,22 +81,7 @@ pub(crate) fn advance(state: &mut State, controls_enabled: bool) -> Result<(), S
     // a temporary record before the dispatch leaf; a zero authored cooldown
     // is persistent, not an immediately expired effect.
     let owner = state.player_items.as_mut().expect("checked owner");
-    if let Some(effect) = owner
-        .temporary_collectibles
-        .iter_mut()
-        .find(|effect| effect.item_id == 45)
-    {
-        effect.count = effect.count.wrapping_add(1);
-        effect.cooldown = effect.cooldown.wrapping_add(config.cooldown);
-    } else {
-        owner
-            .temporary_collectibles
-            .push(player_items::TemporaryCollectible {
-                item_id: 45,
-                count: 1,
-                cooldown: config.cooldown,
-            });
-    }
+    owner.add_temporary_collectible(45)?;
     //524084->52598b requests157 before508230 heals two native half-hearts.
     // This succeeds and discharges even when red health is already full.
     state.audio.admit(

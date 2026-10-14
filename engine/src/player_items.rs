@@ -108,6 +108,27 @@ impl PlayerItems {
             .find(|effect| effect.item_id == item_id)
             .map_or(0, |effect| effect.count)
     }
+
+    /// 5e4140 creates or increments the separate temporary count/cooldown
+    /// record. Costume admission and cache evaluation remain caller-owned.
+    pub(crate) fn add_temporary_collectible(&mut self, item_id: u32) -> Result<(), String> {
+        let config = items::definition(item_id).ok_or("temporary collectible ItemConfig absent")?;
+        if let Some(effect) = self
+            .temporary_collectibles
+            .iter_mut()
+            .find(|effect| effect.item_id == item_id)
+        {
+            effect.count = effect.count.wrapping_add(1);
+            effect.cooldown = effect.cooldown.wrapping_add(config.cooldown);
+        } else {
+            self.temporary_collectibles.push(TemporaryCollectible {
+                item_id,
+                count: 1,
+                cooldown: config.cooldown,
+            });
+        }
+        Ok(())
+    }
 }
 
 /// The base actor advances the authored main clip before Player.Update tests
@@ -129,8 +150,18 @@ pub(crate) fn advance_presentation(state: &mut State, phase: Phase) {
     if items.pickup_animation_guard && !items.pickup_animation_playing {
         items.pickup_animation_guard = false;
     }
-    // Player531e6f advances the copied pickup sprite independently after its
-    // base sprite. The copy keeps the acquired item's original spritesheet.
+}
+
+/// Player531e6f advances the copied item sprite after active/pocket/shot
+/// callbacks, so a full-phase use advances its newly reset sprite immediately.
+/// The fast branch skips this work and rejoins at531e7f.
+pub(crate) fn advance_item_sprite(state: &mut State, phase: Phase) {
+    if phase != Phase::Update {
+        return;
+    }
+    let Some(items) = state.player_items.as_mut() else {
+        return;
+    };
     if let Some(presentation) = &mut items.pickup_presentation {
         let clip = crate::pickups::definition(100, presentation.item_id)
             .expect("authored collectible actor")
