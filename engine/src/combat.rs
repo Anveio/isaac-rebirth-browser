@@ -14,13 +14,16 @@ pub fn try_damage_player(
     state: &mut crate::State,
     health_units: u8,
     immunity_presentations: u32,
-) -> bool {
-    if health_units == 0 || state.player.hp == 0 || state.damage_cooldown != 0 {
-        return false;
+    flags: u32,
+) -> Result<bool, String> {
+    if health_units == 0 || state.player.dead || state.player.hp == 0 || state.damage_cooldown != 0
+    {
+        return Ok(false);
     }
     state.player.hp = state.player.hp.saturating_sub(health_units);
     state.damage_cooldown = immunity_presentations;
-    true
+    crate::player_death::after_damage(state, flags)?;
+    Ok(true)
 }
 
 /// Player Update and its intermediate counterpart each advance admitted hurt

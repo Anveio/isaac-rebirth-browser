@@ -1,0 +1,2 @@
+gfx/ui/death screen.anm2
+gfx/ui/backselectwidget.anm2
