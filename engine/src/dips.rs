@@ -2,7 +2,7 @@
 use crate::{
     actors::{ActorKind, ActorRef},
     audio::{AudioState, SoundRequest},
-    combat, content,
+    content,
     familiars::{NpcEffectAdmission, Parent},
     gib_counts::{self, AmountScale},
     grid::{Collider, CollisionGeometry, Grid},
@@ -42,6 +42,8 @@ pub(crate) struct World<'a> {
     pub effects: NpcEffectAdmission<'a>,
 }
 
+const CONFIG: &content::EntityConfig = content::entity(217, 0);
+
 pub fn from_selector(id: u32, selector: &SpawnSelector, stage: u32) -> Result<Option<Npc>, String> {
     if selector.category != SpawnCategory::Entity
         || selector.entity_type != 217
@@ -55,56 +57,23 @@ pub fn from_selector(id: u32, selector: &SpawnSelector, stage: u32) -> Result<Op
     }
     //446b18..446b3f: stage is capped before the later-stage f32 factor.
     let scale = stage.min(10) as f32 * if stage > 4 { 0.8 } else { 1.0 };
-    let hp = scale * content::NPC_217_STAGEHP + content::NPC_217_BASEHP;
+    let hp = scale * CONFIG.stage_hp + CONFIG.base_hp;
     Ok(Some(Npc {
-        id,
-        kind: 217,
-        variant: 0,
-        subtype: 0,
-        spawn_seed: selector.spawn_seed,
-        position: selector.position,
-        presented_position: selector.position,
-        velocity: ZERO,
-        target: ZERO,
-        wander_velocity: ZERO,
         hp,
         max_hp: hp,
-        collision_radius: content::NPC_217_COLLISIONRADIUS,
-        collision_mass: content::NPC_217_COLLISIONMASS,
-        collision_damage: content::NPC_217_COLLISIONDAMAGE,
-        base_friction: content::NPC_217_FRICTION,
-        shadow_size: content::NPC_217_SHADOWSIZE,
-        grid_collision_class: content::NPC_217_GRID_CLASS,
-        entity_collision_class: 4,
-        can_shut_doors: content::NPC_217_CAN_SHUT_DOORS,
-        boss: content::NPC_217_BOSS,
-        state: 1,
-        frame_age: 0,
-        animation_frame: 0,
         animation: "Idle".into(),
-        animation_clock: 0.0,
         animation_playing: false, // Config47f573 SetFrame(default,0).
-        visible: true,
-        saved_initialized_state: 0,
-        appearance_effect_seed: None,
-        death_effect_seed: None,
-        dead: false,
-        removed: false,
-        damage: combat::DamageQueue::default(),
-        keeper: None,
-        fireplace: None,
-        monstro: None,
-        level2_fly: None,
         dip: Some(DipState {
             entity_flags: 4,
             birth_game_update: 0,
-            current_friction: content::NPC_217_FRICTION,
+            current_friction: CONFIG.friction,
             flip_x: false,
             tint: [1.0; 4],
             offsets: [0.0; 3],
             render_offset: ZERO,
             status_countdown: 0,
         }),
+        ..Npc::authored(id, CONFIG, selector)
     }))
 }
 
@@ -247,8 +216,8 @@ fn die(npc: &mut Npc, random: &mut Mt19937, world: &mut World<'_>) -> Result<(),
     // This caller is admitted by the existing normal-run menu. Challenge23
     // and other death modifiers require their actual run/actor owner.
     let counts = gib_counts::sample(
-        content::NPC_217_GIB_AMOUNT,
-        content::NPC_217_GIB_FLAGS,
+        CONFIG.gib_amount,
+        CONFIG.gib_flags,
         AmountScale::Ordinary,
         random,
     )?;
@@ -298,9 +267,9 @@ fn collider() -> &'static Collider {
     static COLLIDER: OnceLock<Collider> = OnceLock::new();
     COLLIDER.get_or_init(|| {
         Collider::new(CollisionGeometry {
-            radius: content::NPC_217_COLLISIONRADIUS,
+            radius: CONFIG.collision_radius,
             scale: WorldVector { x: 1.0, y: 1.0 },
-            points: content::NPC_217_GRID_POINTS,
+            points: CONFIG.grid_points,
         })
         .expect("authored Dip collision geometry")
     })

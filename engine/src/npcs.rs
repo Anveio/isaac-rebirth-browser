@@ -511,86 +511,56 @@ impl Npc {
                 "NPC admission requires bounded authored position and nonzero spawn seed".into(),
             );
         }
-        let (hp, radius, mass, collision_damage, base_friction, shadow_size) =
-            if selector.entity_type == 13 {
-                (
-                    content::NPC_13_BASEHP,
-                    content::NPC_13_COLLISIONRADIUS,
-                    content::NPC_13_COLLISIONMASS,
-                    content::NPC_13_COLLISIONDAMAGE,
-                    content::NPC_13_FRICTION,
-                    content::NPC_13_SHADOWSIZE,
-                )
-            } else if selector.entity_type == 18 {
-                (
-                    content::NPC_18_BASEHP,
-                    content::NPC_18_COLLISIONRADIUS,
-                    content::NPC_18_COLLISIONMASS,
-                    content::NPC_18_COLLISIONDAMAGE,
-                    content::NPC_18_FRICTION,
-                    content::NPC_18_SHADOWSIZE,
-                )
-            } else {
-                (
-                    content::NPC_244_BASEHP,
-                    content::NPC_244_COLLISIONRADIUS,
-                    content::NPC_244_COLLISIONMASS,
-                    content::NPC_244_COLLISIONDAMAGE,
-                    content::NPC_244_FRICTION,
-                    content::NPC_244_SHADOWSIZE,
-                )
-            };
+        let config = content::entity(u32::from(selector.entity_type), 0);
         Ok(Some(Self {
-            id,
-            kind: u32::from(selector.entity_type),
-            variant: 0,
-            subtype: 0,
-            spawn_seed: selector.spawn_seed,
-            position: selector.position,
-            presented_position: selector.position,
-            velocity: ZERO,
-            target: ZERO,
-            wander_velocity: ZERO,
-            hp,
-            max_hp: hp,
-            collision_radius: radius,
-            collision_mass: mass,
-            collision_damage,
-            base_friction,
-            shadow_size,
-            grid_collision_class: match selector.entity_type {
-                13 => content::NPC_13_GRID_CLASS,
-                18 => content::NPC_18_GRID_CLASS,
-                _ => content::NPC_244_GRID_CLASS,
-            },
-            entity_collision_class: 4,
-            can_shut_doors: if selector.entity_type == 13 {
-                content::NPC_13_CAN_SHUT_DOORS
-            } else if selector.entity_type == 18 {
-                content::NPC_18_CAN_SHUT_DOORS
-            } else {
-                content::NPC_244_CAN_SHUT_DOORS
-            },
-            boss: if selector.entity_type == 13 {
-                content::NPC_13_BOSS
-            } else if selector.entity_type == 18 {
-                content::NPC_18_BOSS
-            } else {
-                content::NPC_244_BOSS
-            },
-            state: 1,
-            frame_age: 0,
-            animation_frame: 0,
             animation: if selector.entity_type == 244 {
                 "Idle"
             } else {
                 "Fly"
             }
             .into(),
-            animation_clock: 0.0,
             // NPC config47f573 uses Sprite.SetFrame(default,0), which stops
             // playback. Worm waits for the staged forced Appear at counter4.
             animation_playing: selector.entity_type != 244,
+            ..Self::authored(id, config, selector)
+        }))
+    }
+
+    /// Generic actor fields from the authored entities2.xml row, before the
+    /// family constructor applies what its source config sets differently.
+    pub(crate) fn authored(
+        id: u32,
+        config: &content::EntityConfig,
+        selector: &SpawnSelector,
+    ) -> Self {
+        Self {
+            id,
+            kind: config.id,
+            variant: config.variant,
+            subtype: u32::from(selector.subtype),
+            spawn_seed: selector.spawn_seed,
+            position: selector.position,
+            presented_position: selector.position,
+            velocity: ZERO,
+            target: ZERO,
+            wander_velocity: ZERO,
+            hp: config.base_hp,
+            max_hp: config.base_hp,
+            collision_radius: config.collision_radius,
+            collision_mass: config.collision_mass,
+            collision_damage: config.collision_damage,
+            base_friction: config.friction,
+            shadow_size: config.shadow_size,
+            grid_collision_class: config.grid_class,
+            entity_collision_class: 4,
+            can_shut_doors: config.can_shut_doors,
+            boss: config.boss,
+            state: 1,
+            frame_age: 0,
+            animation_frame: 0,
+            animation: String::new(),
+            animation_clock: 0.0,
+            animation_playing: false,
             visible: true,
             saved_initialized_state: 0,
             appearance_effect_seed: None,
@@ -603,7 +573,7 @@ impl Npc {
             monstro: None,
             level2_fly: None,
             dip: None,
-        }))
+        }
     }
 
     pub fn health(&self) -> combat::ActorHealth {

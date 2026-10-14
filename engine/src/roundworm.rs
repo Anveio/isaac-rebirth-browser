@@ -15,9 +15,9 @@ fn collide(npc: &mut Npc, grid: &Grid, preview: bool) -> Result<(), String> {
     static COLLIDER: OnceLock<crate::grid::Collider> = OnceLock::new();
     let collider = COLLIDER.get_or_init(|| {
         crate::grid::Collider::new(crate::grid::CollisionGeometry {
-            radius: content::NPC_244_COLLISIONRADIUS,
+            radius: content::entity(244, 0).collision_radius,
             scale: WorldVector { x: 1.0, y: 1.0 },
-            points: content::NPC_244_GRID_POINTS,
+            points: content::entity(244, 0).grid_points,
         })
         .expect("authored Worm collision geometry")
     });

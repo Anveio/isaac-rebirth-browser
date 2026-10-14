@@ -22,46 +22,11 @@ pub(crate) fn from_selector(id: u32, selector: &SpawnSelector) -> Result<Npc, St
             "Keeper admission requires bounded authored position and nonzero spawn seed".into(),
         );
     }
-    let zero = WorldVector { x: 0.0, y: 0.0 };
     Ok(Npc {
-        id,
-        kind: 17,
-        variant: 1,
-        subtype: u32::from(selector.subtype),
-        spawn_seed: selector.spawn_seed,
-        position: selector.position,
-        presented_position: selector.position,
-        velocity: zero,
         target: selector.position,
-        wander_velocity: zero,
-        hp: content::KEEPER_BASEHP,
-        max_hp: content::KEEPER_BASEHP,
-        collision_radius: content::KEEPER_COLLISIONRADIUS,
-        collision_mass: content::KEEPER_COLLISIONMASS,
-        collision_damage: content::KEEPER_COLLISIONDAMAGE,
-        base_friction: content::KEEPER_FRICTION,
-        shadow_size: content::KEEPER_SHADOWSIZE,
         grid_collision_class: 0,
         entity_collision_class: 1,
-        can_shut_doors: content::KEEPER_CAN_SHUT_DOORS,
-        boss: content::KEEPER_BOSS,
-        state: 1,
-        frame_age: 0,
-        animation_frame: 0,
-        animation: String::new(),
-        animation_clock: 0.0,
         animation_playing: true,
-        visible: true,
-        saved_initialized_state: 0,
-        appearance_effect_seed: None,
-        death_effect_seed: None,
-        dead: false,
-        removed: false,
-        damage: crate::combat::DamageQueue::default(),
-        fireplace: None,
-        monstro: None,
-        level2_fly: None,
-        dip: None,
         keeper: Some(KeeperState {
             anchor: selector.position,
             entity_flags: 4,
@@ -73,6 +38,7 @@ pub(crate) fn from_selector(id: u32, selector: &SpawnSelector) -> Result<Npc, St
             tint: [1.0; 4],
             offsets: [0.0; 3],
         }),
+        ..Npc::authored(id, content::entity(17, 1), selector)
     })
 }
 

@@ -1,7 +1,7 @@
 //! Fresh214/0/0 source4ef880, generic missing-Appear and prior full grid feedback.
 use crate::{
     audio::{AudioState, SoundRequest},
-    combat, content,
+    content,
     grid::{Collider, CollisionGeometry, Grid},
     motion::WorldVector,
     mt::Mt19937,
@@ -46,44 +46,7 @@ pub fn from_selector(id: u32, selector: &SpawnSelector) -> Result<Option<Npc>, S
         return Err("lvl2 Fly requires bounded authored position and nonzero source seed".into());
     }
     Ok(Some(Npc {
-        id,
-        kind: 214,
-        variant: 0,
-        subtype: 0,
-        spawn_seed: selector.spawn_seed,
-        position: selector.position,
-        presented_position: selector.position,
-        velocity: ZERO,
-        target: ZERO,
-        wander_velocity: ZERO,
-        hp: content::NPC_214_BASEHP,
-        max_hp: content::NPC_214_BASEHP,
-        collision_radius: content::NPC_214_COLLISIONRADIUS,
-        collision_mass: content::NPC_214_COLLISIONMASS,
-        collision_damage: content::NPC_214_COLLISIONDAMAGE,
-        base_friction: content::NPC_214_FRICTION,
-        shadow_size: content::NPC_214_SHADOWSIZE,
-        grid_collision_class: content::NPC_214_GRID_CLASS,
-        entity_collision_class: 4,
-        can_shut_doors: content::NPC_214_CAN_SHUT_DOORS,
-        boss: content::NPC_214_BOSS,
-        state: 1,
-        frame_age: 0,
-        animation_frame: 0,
         animation: "Idle".into(),
-        animation_clock: 0.0,
-        animation_playing: false,
-        visible: true,
-        saved_initialized_state: 0,
-        appearance_effect_seed: None,
-        death_effect_seed: None,
-        dead: false,
-        removed: false,
-        damage: combat::DamageQueue::default(),
-        keeper: None,
-        fireplace: None,
-        monstro: None,
-        dip: None,
         level2_fly: Some(Level2FlyState {
             entity_flags: 4,
             birth_game_update: 0,
@@ -92,6 +55,7 @@ pub fn from_selector(id: u32, selector: &SpawnSelector) -> Result<Option<Npc>, S
             grid_normal: ZERO,
             previous_grid_velocity: ZERO,
         }),
+        ..Npc::authored(id, content::entity(214, 0), selector)
     }))
 }
 fn difference(a: WorldVector, b: WorldVector) -> WorldVector {
@@ -218,9 +182,9 @@ fn collider() -> &'static Collider {
     static COLLIDER: OnceLock<Collider> = OnceLock::new();
     COLLIDER.get_or_init(|| {
         Collider::new(CollisionGeometry {
-            radius: content::NPC_214_COLLISIONRADIUS,
+            radius: content::entity(214, 0).collision_radius,
             scale: WorldVector { x: 1.0, y: 1.0 },
-            points: content::NPC_214_GRID_POINTS,
+            points: content::entity(214, 0).grid_points,
         })
         .expect("authored lvl2 Fly collision geometry")
     })
