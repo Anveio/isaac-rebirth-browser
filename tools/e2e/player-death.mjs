@@ -13,7 +13,11 @@ const manifest=p=>JSON.parse((existsSync(p)?readFileSync(p):gunzipSync(readFileS
 const sources=['tools/e2e/player-death.mjs','tools/original/player-death-observe.py','tools/original/player-death-scenarios.py','tools/original/audio-observer.py','references/isaac/foundation/player-death/source-contract.json'];
 const hashes=()=>Object.fromEntries(sources.map(p=>[p,createHash('sha256').update(readFileSync(p)).digest('hex')]));
 const before=hashes();
-const scenarios=JSON.parse(execFileSync('python3',['tools/original/player-death-scenarios.py','--count',option('--count','2')],{encoding:'utf8',maxBuffer:8*1024*1024}));
+const scenarioFile=option('--scenario-file',undefined);
+const scenarioInput=scenarioFile?readFileSync(resolve(scenarioFile)):undefined;
+const scenarios=JSON.parse(scenarioInput||execFileSync('python3',['tools/original/player-death-scenarios.py','--count',option('--count','2')],{encoding:'utf8',maxBuffer:8*1024*1024}));
+assert.ok(Array.isArray(scenarios.cases)&&scenarios.cases.length>=4,'Death gate requires both contrived routes and at least two recorded random cases');
+assert.ok(scenarios.cases.some(c=>c.scenario.id==='death-spikes-restart')&&scenarios.cases.some(c=>c.scenario.id==='death-spikes-exit'),'Both mandatory public popup actions must remain in the cohort');
 save(resolve(output,'scenarios.json'),scenarios);
 const paths=scenarios.cases.map((c,n)=>{const p=resolve(output,`replay-${n}.json`);save(p,c);return p;});
 function compare(source,actual,gameplay){
@@ -38,7 +42,7 @@ function compare(source,actual,gameplay){
  return checks;
 }
 const report=await runPairedGate({output:resolve(output,'paired'),selected:[],randomCount:0,replayCases:paths,
- originalObserver:'tools/original/player-death-observe.py',stateComparator:compare,additionalSources:sources});
+ originalObserver:'tools/original/player-death-observe.py',stateComparator:compare,additionalSources:sources,archiveBrowserEvidence:true});
 const coverage=scenarios.cases.map((c,n)=>{
  try {
  const native=manifest(resolve(report.cases[n].directory,'original/manifest.json'));
@@ -52,4 +56,5 @@ const coverage=scenarios.cases.map((c,n)=>{
 });
 const stable=JSON.stringify(hashes())===JSON.stringify(before);
 const result={schema:1,status:report.status==='pass'&&stable&&coverage.every(c=>c.status==='pass')?'pass':'fail',pairedStatus:report.status,sourcesStable:stable,sources:before,coverage,scope:'Normal Isaac death/57-frame authored clip, GameOver freeze and public deferred popup actions. Contrived death coverage and all source/player/menu/audio fields are blocking; full pixels remain diagnostics. Every unfiltered OS outcome and original/backend/input evidence retained; complete revival/diary/other-character acceptance pending.'};
+if(scenarioInput)result.scenarioInput={path:resolve(scenarioFile),sha256:createHash('sha256').update(scenarioInput).digest('hex'),bytes:scenarioInput.length};
 save(resolve(output,'report.json'),result);console.log(JSON.stringify(result));process.exitCode=result.status==='pass'?0:1;

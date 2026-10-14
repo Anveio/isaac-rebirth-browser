@@ -87,7 +87,7 @@ async function nativeCapture(caseData, directory, nativeFrameTimeout, originalOb
   return { status: error || provenance.status !== 'pass' ? 'fail' : 'pass', error, provenance, directory, manifest };
 }
 
-async function browserCapture(browser, server, caseData, directory) {
+async function browserCapture(browser, server, caseData, directory, archiveBrowserEvidence) {
   mkdirSync(directory, { recursive: true });
   const context = await browser.newContext({ viewport: { width: 960, height: 540 } });
   const page = await context.newPage();
@@ -134,8 +134,10 @@ async function browserCapture(browser, server, caseData, directory) {
       }
     }
     const trace = await page.evaluate(() => window.game.trace());
-    const evidence = await writeJsonEvidence(join(directory, 'trace.json.gz'), trace);
-    save(join(directory, 'trace-archive.json'), evidence);
+    if (archiveBrowserEvidence) {
+      const evidence = await writeJsonEvidence(join(directory, 'trace.json.gz'), trace);
+      save(join(directory, 'trace-archive.json'), evidence);
+    } else save(join(directory, 'trace.json'), trace);
     assert.equal(trace.enabled, true); assert.equal(trace.inputTraceTruncated, false);
     assert.equal(trace.bootEpochSeed, caseData.bootEpochSeed);
     assert.equal(trace.initialSeed, caseData.initialSeed);
@@ -150,8 +152,10 @@ async function browserCapture(browser, server, caseData, directory) {
   } catch (error) { failures.push(String(error.message)); }
   finally { await context.close(); }
   const result = { status: failures.length ? 'fail' : 'pass', failures, frames, inputs };
-  const evidence = await writeJsonEvidence(join(directory, 'manifest.json.gz'), result);
-  save(join(directory, 'manifest-archive.json'), evidence);
+  if (archiveBrowserEvidence) {
+    const evidence = await writeJsonEvidence(join(directory, 'manifest.json.gz'), result);
+    save(join(directory, 'manifest-archive.json'), evidence);
+  } else save(join(directory, 'manifest.json'), result);
   return result;
 }
 
@@ -240,7 +244,7 @@ function comparePair(caseData, native, browser, directory, exactPixels, stateCom
 
 export async function runPairedGate({ output, selected, randomCount = 2, replaySeeds = [], replayCases = [], exactPixels = false, productionDirectory,
   nativeFrameTimeout = 60, originalObserver = 'tools/original/foundation-paired-observer.py',
-  stateComparator = scopedState, additionalSources = [] }) {
+  stateComparator = scopedState, additionalSources = [], archiveBrowserEvidence = false }) {
   assert.ok(Number.isFinite(nativeFrameTimeout) && nativeFrameTimeout > 0 && nativeFrameTimeout <= 300,
     'Native frame timeout must be more than 0 and at most 300 host-wall seconds');
   mkdirSync(output, { recursive: true });
@@ -251,7 +255,7 @@ export async function runPairedGate({ output, selected, randomCount = 2, replayS
   const browser = await chromium.launch({ ...browserLaunchOptions(), headless: false });
   const report = { schema: 1, status: 'running', mode: 'fresh original process paired with immutable browser production artifact',
     build: server.build, gateSources: sourceHashes([originalObserver, ...additionalSources]), browserGraphics: await inspectBrowserGraphics(browser), nativeFrameTimeout,
-    originalObserver,
+    originalObserver, archiveBrowserEvidence,
     sourceBinarySha256: digest(readFileSync(join(ROOT, '.cache/original-runtime/offline-depot/isaac.x64'))),
     comparisons: { functional: 'Real input/phase/readback and source title, fade, player motion, pause/controller, HP, immunity, active tear/bomb counts',
       pixels: 'Strict full RGBA diagnostic; every difference remains a failure in its own pixel result',
@@ -275,7 +279,7 @@ export async function runPairedGate({ output, selected, randomCount = 2, replayS
       // Original and Chromium use independent private displays/profiles.
       const [native, candidate] = await Promise.all([
         nativeCapture(caseData, join(directory, 'original'), nativeFrameTimeout, originalObserver),
-        browserCapture(browser, server, caseData, join(directory, 'browser')),
+        browserCapture(browser, server, caseData, join(directory, 'browser'), archiveBrowserEvidence),
       ]);
       const checks = comparePair(caseData, native, candidate, join(directory, 'comparison'), exactPixels, stateComparator);
       const result = { id: definition.id, seed: caseData.seed, seedValue: caseData.seedValue, bootEpochSeed: caseData.bootEpochSeed,
