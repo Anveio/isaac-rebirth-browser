@@ -1043,6 +1043,9 @@ impl Game {
         self.state
             .stage_effects
             .add_familiar_shadows(&self.state.familiars);
+        self.state
+            .stage_effects
+            .add_npc_shadows(&self.state.room.npcs);
         self.state.stage_effects.add_tear_shadows(&self.state.tears);
         self.state
             .stage_effects
