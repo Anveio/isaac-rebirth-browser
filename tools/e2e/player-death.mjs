@@ -38,7 +38,15 @@ function compare(source,actual,gameplay){
  }
  assert.equal(source.deathSound?.status,'pass','SFX30 needs actual original wrapper observation');
  const slot=source.deathSound.slot30,port=actual.audio.slots['30'];
- if(slot?.loaded||port?.loaded){check('SFX30.loaded',slot?.loaded,port?.loaded);check('SFX30.lastVolume',slot?.lastVolume,port?.lastVolume);}
+ if(slot?.loaded||port?.loaded){
+  check('SFX30.loaded',slot?.loaded,port?.loaded);
+  // Both source lastVolume and the owned port field are binary32. Rust's
+  // shortest f32 JSON text and Python's widened memory read serialize it
+  // differently; compare the exact original field domain, with no tolerance.
+  const values=[slot?.lastVolume,port?.lastVolume];
+  assert.ok(values.every(v=>typeof v==='number'&&Number.isFinite(v)),'SFX30 requires two actual finite numeric lastVolume values');
+  check('SFX30.lastVolume',Math.fround(values[0]),Math.fround(values[1]));
+ }
  return checks;
 }
 const report=await runPairedGate({output:resolve(output,'paired'),selected:[],randomCount:0,replayCases:paths,
