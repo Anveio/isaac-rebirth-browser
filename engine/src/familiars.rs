@@ -724,7 +724,7 @@ impl NpcEffectAdmission<'_> {
             time_to_live: -1,
             raw_7f4: 1,
             raw_7f8: 0.0,
-            raw_7d8: false,
+            raw_7d8: true,
             sprite,
             full_updates: 0,
             poop_effect: None,
