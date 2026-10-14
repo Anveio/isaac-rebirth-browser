@@ -46,6 +46,8 @@ pub struct DoorCollision {
     pub slot: u8,
     pub open: bool,
     pub hidden: bool,
+    /// Dice-room doorways are closed with the double-lock variant2.
+    pub double_lock: bool,
 }
 
 /// Admit supported authored rocks and spikes with their actual local spawn seeds. The
@@ -105,6 +107,8 @@ pub fn for_room(
                 6
             } else if door.open {
                 7
+            } else if door.double_lock {
+                2
             } else {
                 1
             },
