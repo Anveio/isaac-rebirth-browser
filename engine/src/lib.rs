@@ -24,6 +24,7 @@ pub mod floor;
 pub mod grid;
 mod grid_hazards;
 pub mod grid_records;
+pub mod input;
 pub mod items;
 pub mod keepers;
 pub mod layout;
@@ -592,24 +593,7 @@ impl Game {
                 self.state.audio.sfx_volume = sfx_volume;
             }
             Command::Key { code, down } => {
-                if !matches!(
-                    code.as_str(),
-                    "Enter"
-                        | "Space"
-                        | "KeyQ"
-                        | "Escape"
-                        | "Tab"
-                        | "Backspace"
-                        | "ArrowUp"
-                        | "ArrowDown"
-                        | "ArrowLeft"
-                        | "ArrowRight"
-                        | "KeyW"
-                        | "KeyA"
-                        | "KeyS"
-                        | "KeyD"
-                        | "KeyE"
-                ) {
+                if !input::is_public_key(&code) {
                     return Err(format!("unsupported key code: {code}"));
                 }
                 if down {
@@ -2314,6 +2298,8 @@ thread_local! {
     static REQUEST: RefCell<Vec<u8>> = const { RefCell::new(Vec::new()) };
     static SNAPSHOT: RefCell<Vec<u8>> = const { RefCell::new(Vec::new()) };
     static ERROR: RefCell<Vec<u8>> = const { RefCell::new(Vec::new()) };
+    static PUBLIC_KEYS_JSON: Vec<u8> =
+        serde_json::to_vec(&input::PUBLIC_KEYS).expect("key codes serialize");
 }
 #[no_mangle]
 pub extern "C" fn abi_version() -> u32 {
@@ -2391,4 +2377,13 @@ pub extern "C" fn error_ptr() -> *const u8 {
 #[no_mangle]
 pub extern "C" fn error_len() -> usize {
     ERROR.with(|error| error.borrow().len())
+}
+/// The public key surface as a JSON array of key codes; needs no reset.
+#[no_mangle]
+pub extern "C" fn public_keys_ptr() -> *const u8 {
+    PUBLIC_KEYS_JSON.with(|keys| keys.as_ptr())
+}
+#[no_mangle]
+pub extern "C" fn public_keys_len() -> usize {
+    PUBLIC_KEYS_JSON.with(Vec::len)
 }
