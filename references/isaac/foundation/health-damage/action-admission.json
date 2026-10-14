@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "scope": "Source-qualified normal bomb/Chest action guards composed onto concrete Death/Heart APIs; no living-red0/positive-Soul public acceptance.",
+  "functions": [
+    {
+      "address": "0x50c880",
+      "bytes": 243,
+      "label": "Actual Player collection eligibility",
+      "rawSha256": "bc60f143f370adb42072cc2166c854d92025a0e19465c7e9ea8096dc39f2373f"
+    },
+    {
+      "address": "0x509540",
+      "bytes": 341,
+      "label": "Actual bomb input action",
+      "rawSha256": "564ff5c3102d301e233fd6de7b5c3395cf098ab85477b4f3c468bd6f92640d2a"
+    },
+    {
+      "address": "0x504820",
+      "bytes": 8329,
+      "label": "Player pickup collision dispatch",
+      "rawSha256": "2737d0683e5bd89e4e68a811d2154a41b8c7a7b1f73038b6174169b51e1d3f2f"
+    },
+    {
+      "address": "0x531850",
+      "bytes": 13012,
+      "label": "Player full/fast callback and real dead branch",
+      "rawSha256": "afc91e017a8190f954b8859c4cb46cabdc2996f64432f099ba8d7e9163c7c20f"
+    }
+  ],
+  "actionAdmission": {
+    "bomb": "5318a5 tests actual31f, whose branch531b24 returns the normal dead presentation before509540 at5318ce.509540 checks7d4,7d8,action8,bombsBD4 and placementcooldownD90; there is no red or Soul HP veto. Existing normal input/cooldown semantics retain their owners.",
+    "chest": "5049ca calls50c880 before504aa7 invokes500e80. No redHP read in that eligibility predicate. try_open consumes the sole Player collection API, retaining all actual Chest/player-item constraints.",
+    "collection": "50c880 rejects real31f/dead and current main nameDeath. bf4 permits nameHit directly; otherwise50c780 permits Pickup/LiftItem/HideItem/UseItem. The sole Root generic helper has no blanket legacy queued-Pickup veto. Collectible504820 separately calls50c780 at5054ca and rejects those item names regardless of bf4; actual supported UseItem cannot admit a second collectible after exclusive main transfer. LiftItem/HideItem presentation and extra queue/D80 ownership remain pending.",
+    "acceptance": "Exact source-qualified small action leaf. No living-red0/Soul-positive public original/browser execution yet; actual producers and branch coverage remain tracked. No native state injection or unit tests."
+  },
+  "composition": "The Root sole name-based player_can_collect is retained unchanged; concrete Hit is admitted by that same API. Heart BBC and main98 shared pickup entry are not duplicated."
+}

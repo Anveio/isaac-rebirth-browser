@@ -154,7 +154,9 @@ pub(crate) fn try_open(state: &mut State, index: usize) -> Result<bool, String> 
         || chest.price != 0
         || chest.cooldown != 0
         || !pickup.touches(&state.player)
-        || state.player.hp == 0
+        // Collect5049ca uses50c880 before504aa7 callsTryOpen500e80.
+        // A living Soul-only Player remains eligible under that sole owner.
+        || !crate::pickups::player_can_collect(state)
     {
         return Ok(false);
     }
