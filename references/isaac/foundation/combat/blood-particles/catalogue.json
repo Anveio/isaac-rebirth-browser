@@ -1,0 +1,96 @@
+{
+  "schema": 1,
+  "scope": "Authored Blood Particle1000/5 catalogue prerequisite only. Actual factory/controller/scheduler/renderer callbacks and original/browser proof are separate; Rock Particle1000/4 is not mislabeled as boss blood.",
+  "actor": "gfx/1000.005_blood particle.anm2",
+  "entity": {
+    "anm2path": "1000.005_Blood Particle.anm2",
+    "baseHP": "0",
+    "boss": "0",
+    "champion": "0",
+    "collisionDamage": "0",
+    "collisionMass": "0",
+    "collisionRadius": "9",
+    "friction": "1",
+    "id": "1000",
+    "name": "Blood Particle",
+    "numGridCollisionPoints": "6",
+    "shadowSize": "0",
+    "stageHP": "0",
+    "variant": "5"
+  },
+  "defaultAnimation": "BloodGib01",
+  "events": [],
+  "clips": [
+    {
+      "name": "BloodGib01",
+      "frames": 39,
+      "looping": false
+    },
+    {
+      "name": "BloodGib02",
+      "frames": 39,
+      "looping": false
+    },
+    {
+      "name": "BloodGib03",
+      "frames": 39,
+      "looping": false
+    },
+    {
+      "name": "Bone01",
+      "frames": 15,
+      "looping": false
+    },
+    {
+      "name": "Bone02",
+      "frames": 15,
+      "looping": false
+    },
+    {
+      "name": "Eye",
+      "frames": 15,
+      "looping": false
+    },
+    {
+      "name": "Liver",
+      "frames": 15,
+      "looping": false
+    },
+    {
+      "name": "Guts01",
+      "frames": 15,
+      "looping": false
+    },
+    {
+      "name": "Guts02",
+      "frames": 15,
+      "looping": false
+    },
+    {
+      "name": "Particle",
+      "frames": 13,
+      "looping": false
+    }
+  ],
+  "pins": {
+    "references/isaac/rebirth/resources/entities2.xml": {
+      "bytes": 174558,
+      "sha256": "76408c1612ce7281d131c460cf3450eeae6bc602bc539805d53d76406432a936"
+    },
+    "references/isaac/rebirth/resources/gfx/effects/effect_030_bloodgibs.png": {
+      "bytes": 4248,
+      "sha256": "828d534e5748439c69fdf48dad78b02f51ee0e808cc2482d28f7267b2442493c"
+    },
+    ".cache/coordination/system-map/animations/gfx/1000.005_blood particle.anm2": {
+      "bytes": 20005,
+      "sha256": "10cae641ae815a2db47934cef0a850c33a0b50d3327cdcc630b4ee4d73371f94"
+    },
+    "tools/foundation/extract-animations.py": {
+      "bytes": 20525,
+      "sha256": "119af26ad7d962f9fed0b7efaec41962b805eee8154abac600fbae0bffc2cebb"
+    }
+  },
+  "sourceOnly": true,
+  "oldActorsPreserved": true,
+  "liveAcceptance": "None from this catalogue change. No actual effect admission or new production artifact is inferred."
+}

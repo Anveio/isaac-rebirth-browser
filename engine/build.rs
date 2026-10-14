@@ -154,6 +154,7 @@ fn familiar_catalog(path: &Path, entities_xml: &str) -> String {
     let mut output = String::from("pub static DEFINITIONS: &[Definition] = &[\n");
     for (entity_type, variant, actor) in [
         (3, 56, "gfx/003.056_leech.anm2"),
+        (1000, 5, "gfx/1000.005_blood particle.anm2"),
         (1000, 7, "gfx/1000.007_blood splat.anm2"),
         (1000, 15, "gfx/1000.015_poof01.anm2"),
         (1000, 49, "gfx/1000.049_heart.anm2"),
