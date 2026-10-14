@@ -79,10 +79,33 @@ next full callback.
 This eight-case bank does not cover held shooting during the legacy Pickup
 guard. A separate source correction now joins both owned bf4 representations
 at the shooting-input boundary; the twelve-case fresh CI cohort adds both held
-Pickup routes. These new routes and latest-main composition await live
-acceptance. Actual da8 aim-vector ownership and positive7dc callback semantics
-remain separate follow-ups; db0 readback alone does not accept those fields. Source
-pins, complete reports and temporary research remain in ignored
+Pickup routes. Frozen source `984c393` over canonical main `c7e418e` builds
+production `158b4a6f` (944 files). Its complete fresh original/browser cohort
+performs 333,152 required checks and remains **FAIL** with 463 mismatches and no
+case errors: damaged phases 19+19 (Hit guard and collectible blast motion),
+Flush291 with 404 and Anti-Gravity222 with 21 fire-timer mismatches. The eight passing
+cases include both held-Pickup phases and new unfiltered OS discoveries
+`0SZMH27F`/item4 and `4FHEEKJK`/item167; these passes accept the declared Active
+gate fields and do not accept every effect of those items.
+
+Each held-Pickup case retains 50 public ArrowRight / actual native Pickup+bf4
+rows, 25 per source phase. Both native and browser have shooting false, no alive
+tears, matching clip/frame/playing and timers -1/-1. These rows contain no
+concurrent movement key, so positive-timer decrement and nonzero movement
+specifically during Pickup remain source-preserved branches without live
+acceptance here. Actual da8 aim-vector ownership and positive7dc callback
+semantics remain separate follow-ups; db0 readback alone does not accept them.
+The full byte/input/backend readback audit passes for all 12 native/browser
+archives. Complete shared-MT remains diagnostic (297/298 held-case differences),
+the 230 counter offset establishes phase alignment only, and independent
+332/333-state arrays remain complete despite bounded 205-state traces.
+
+The checked-in `pickup-guard-first-complete-live.json` records the actual
+results and immutable evidence hashes. `pickup-guard-full12-cases.json` retains
+the exact complete public input bank for `--scenarios` replay without rerolling
+either new OS outcome. The native host watchdog stayed 120 seconds with LP2,
+preserving the exact frozen runner; it does not change the source clock.
+Source pins, complete reports and temporary research remain in ignored
 `.cache/coordination/active-items-research` and `.cache/e2e/active-item-use`.
 Flush291, other active effects, active swaps, modifier/reserve charge effects,
 the actual room-clear recharge producer, equipped pockets, cards, pills and
