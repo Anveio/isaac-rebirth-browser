@@ -30,6 +30,7 @@ pub struct SavedRun {
     pub floor: floor::Floor,
     pub room: Room,
     pub player: Player,
+    pub player_items: crate::player_save::SavedPlayerItems,
     pub inventory: Inventory,
     pub item_pools: items::ItemPools,
     pub grid_records: Vec<Option<crate::grid_records::GridRecord>>,
@@ -40,6 +41,7 @@ impl SavedRun {
         state: &State,
         item_pools: items::ItemPools,
         grid_records: Vec<Option<crate::grid_records::GridRecord>>,
+        player_items: crate::player_save::SavedPlayerItems,
     ) -> Self {
         Self {
             run_seed: state.run_seed.clone(),
@@ -50,6 +52,7 @@ impl SavedRun {
             floor: state.floor.clone(),
             room: state.room.clone(),
             player: state.player.clone(),
+            player_items,
             inventory: state.inventory.clone(),
             item_pools,
             grid_records,
@@ -92,6 +95,7 @@ impl SavedRun {
             copied_descriptor_count: copied_rows,
             red_hp: self.player.hp,
             max_red_hp: self.player.max_hp,
+            player_items: self.player_items.clone(),
             inventory: self.inventory.clone(),
             empty_grid_cells_saved: empty_cells,
             occupied_grid_seeds_pending: occupied_pending,
@@ -120,6 +124,7 @@ pub struct SavedRunSummary {
     pub copied_descriptor_count: usize,
     pub red_hp: u8,
     pub max_red_hp: u8,
+    pub player_items: crate::player_save::SavedPlayerItems,
     pub inventory: Inventory,
     pub empty_grid_cells_saved: usize,
     /// Only actually constructed occupied owners supply secondary seeds.

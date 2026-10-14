@@ -76,6 +76,8 @@ export const SUITES = [
   suite('item-acquisition', e2e('items'), ['--acquisition', '--count', '2'], 'First collectible acquisition'),
   suite('stat-cache', e2e('items'), ['--stat-cache', '--count', '2'],
     'Player stat cache after acquiring Roid Rage and Speed Ball: stats, motion and tear velocity'),
+  suite('damage-fire-delay', e2e('items'), ['--damage-fire-delay', '--count', '2'],
+    'Sad Onion and Cricket Head damage/fire delay, born tear properties and actual contacts'),
   suite('active-item-use', e2e('items'), ['--active-use', '--count', '2'],
     'Acquiring and using an active item (Yum Heart): charge, health, animation and SFX'),
   suite('familiars', e2e('familiars'), ['--count', '2'], 'Familiar admission, appearance and following'),

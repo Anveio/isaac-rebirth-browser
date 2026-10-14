@@ -121,6 +121,7 @@ def observe(pid,context):
                      'pocketRngWords':[list(struct.unpack('<4I',read(player+0x2db4+16*i,16)))for i in range(41)],
                      'managerRngWords':list(struct.unpack('<4I',read(game+0xa138,16))),
                      'entitySpawnSeed':struct.unpack('<I',read(player+0x7d0,4))[0],
+                     'shotsFired':struct.unpack('<I',read(player+0xc84,4))[0],
                      'cachedStats':{'maxFireDelay':i32(player+0xc78),'shotSpeed':f32(player+0xc7c),
                                     'damage':f32(player+0xc88),'tearHeight':f32(player+0xc8c),
                                     'tearFallingSpeed':f32(player+0xc90),'tearFallingAcceleration':f32(player+0xc94),

@@ -9,10 +9,12 @@ export interface Player {
   facing: Direction; bodyFacing: Direction; walkFrame: number; headFrame: number; shooting: boolean; shootingLock: number;
   renderOffset: { x: number; y: number }; controlsEnabled: boolean;
   eye: "negative" | "positive";
+  shotsFired: number;
 }
 export interface Tear {
   id: number; x: number; y: number; vx: number; vy: number; age: number;
   spawnSeed: number; collisionRadius: number; gridContact: boolean;
+  shotOrdinal: number; collisionDamage: number; baseDamage: number; scale: number; animationTier: number;
   motion: {
     position: {x: number; y: number}; presentedPosition: {x: number; y: number};
     velocity: {x: number; y: number}; height: number; fallingSpeed: number;
@@ -65,6 +67,9 @@ export interface SavedRunSummary {
   runSeed: string; seededRun: boolean; stage: number; gameUpdateCount: number;
   descriptorCount: number; copiedDescriptorCount: number; redHp: number; maxRedHp: number;
   inventory: {coins: number; bombs: number; keys: number};
+  playerItems: {ownedCounts: number[]; itemRngStates: number[];
+    trinketRngStates: number[]; pocketRngStates: number[]; activeId: number;
+    activeCharge: number; saveWordD88: number; reserveCharge: number};
   emptyGridCellsSaved: number; occupiedGridSeedsPending: number[];
   currentRoomRecord: number; currentRoomSeedSamples: {gridIndex: number;
     levelSeeds: [number, number]; savedSeeds: [number, number]; occupancy: "empty" | "occupied" | "padding";
@@ -242,7 +247,7 @@ export interface State {
     ownedCounts: number[]; temporaryCollectibles: {itemId: number; count: number; cooldown: number}[]; queuedId: number | null; queuedCharge: number; queuedTouched: boolean;
     pickupAnimationFrame: number; pickupAnimationPlaying: boolean; pickupAnimationGuard: boolean;
     pickupPresentation: {itemId: number; animationFrame: number; animationPlaying: boolean} | null;
-    collectionDelay: number; activeId: number; activeCharge: number; activeSubordinateCharge: number;
+    collectionDelay: number; activeId: number; activeCharge: number; activeSubordinateCharge: number; saveWordD88: number;
     activeStateD80: number; activeStateD84: number; reserveCharge: number; activeFlag3076: boolean;
     unevaluatedCacheFlags: number} | null;
   informationAnimation: {state: number; delay: number; currentActor: string | null;
