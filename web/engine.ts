@@ -240,6 +240,7 @@ export interface State {
   savedRunSummary: SavedRunSummary | null;
   pendingMenuInitializations: { afterAudioRequests: number; initialization: { type: "loadFreshProfile"; profile: number } | { type: "resetCharacterSeed" } | { type: "commitCharacterSeed"; seed: number } }[];
   stage: number; stageSeed: number; seededRun: boolean; achievementEligibility: boolean;
+  levelProgress: {flags: number; heartCollected: boolean; lastPenaltyStage: number | null};
   nightmares: {order: number[]; pathIndex: number; currentActor: string | null; requestPending: boolean; systemActive: boolean;
     active: boolean; definitionLoaded: boolean; progressDefinitionLoaded: boolean; stageResources: number[];
     counter: number; frame: number; playing: boolean; stageIndex: number; alternate: boolean};
