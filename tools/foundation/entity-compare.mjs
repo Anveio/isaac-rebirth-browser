@@ -15,6 +15,7 @@ export function check(rows, field, expected, actual) {
     status: expected !== undefined && actual !== undefined && JSON.stringify(expected) === JSON.stringify(actual) ? 'pass' : 'fail' });
 }
 
+const ROCK_ANIMATIONS = { 2: 'normal', 3: 'black', 4: 'tinted', 5: 'bombrock', 6: 'alt' };
 const DAMAGE_FLAGS = { tear: 0, bomb: 4, fireContact: 2, roomEffect: 0, laser: 8 };
 
 /** Fields every authored NPC shares, as [name, native, port] pairs. Native
@@ -59,7 +60,7 @@ export function roomRows(rows, source, actual) {
 
 /** Every authored NPC in the room, by identity and spawn seed, then each
  * selected actor's shared fields plus the spec's own rows. */
-export function entityRows(rows, source, actual, spec) {
+export function entityRows(rows, source, actual, spec, render) {
   const phase = source.nativePhase.systemIterations % 2;
   const npcs = source.entities.filter(actor => actor.type >= 10 && actor.type < 1000);
   const port = actual.room.npcs.filter(actor => !actor.removed);
@@ -67,6 +68,16 @@ export function entityRows(rows, source, actual, spec) {
     port.map(actor => [actor.kind, actor.variant, actor.spawnSeed]));
   check(rows, 'system.phase', phase, actual.systemClock.systemCounter % 2);
   roomRows(rows, source, actual);
+  // The browser's own draw record for this capture: what it actually drew.
+  check(rows, 'render.recorded', true, render !== undefined);
+  // Intact rock-family grid entities: native Rock Render 56bf80 sets frame
+  // variant of its type's grid_rock.anm2 animation (Init 56ed00). Destroyed
+  // rubble needs per-piece offsets the engine does not model yet, and the
+  // other grid kinds' render rules are not decoded; neither is claimed here.
+  const rock = cell => ROCK_ANIMATIONS[cell.type] && cell.state === 1 &&
+    (cell.type === 2 && cell.variant >= 1000 ? [cell.index, cell.type, 'big', cell.variant - 1000] : [cell.index, cell.type, ROCK_ANIMATIONS[cell.type], cell.variant]);
+  check(rows, 'render.rocks', source.grid.map(rock).filter(Boolean),
+    render?.grid.map(drawn => [drawn.index, drawn.kind, drawn.animation, drawn.frame]));
   for (const [field, expected, observed] of spec.roomFields?.(source, actual, phase) ?? []) check(rows, field, expected, observed);
   const selected = npcs.filter(actor => spec.matches(actor.type, actor.variant));
   for (const native of selected) {
@@ -75,6 +86,10 @@ export function entityRows(rows, source, actual, spec) {
     const name = `${spec.name}${native.spawnSeed}`;
     for (const [field, expected, observed] of [...npcFields(native, actor, phase), ...(spec.fields?.(native, actor, phase) ?? [])])
       check(rows, `${name}.${field}`, expected, observed);
+    // Every drawn NPC uses the source sprite Scale (+2c4), 1:1 in logical
+    // pixels; only positions take the 0.65 world projection.
+    const drawn = render?.npcs.find(candidate => candidate.kind === native.type && candidate.spawnSeed === native.spawnSeed);
+    if (drawn) check(rows, `${name}.spriteScale`, vector(native.spriteScale), vector(drawn.scale));
   }
   // Entity_Laser beams in room order, by spawn seed, with their source fields.
   const beams = source.entities.filter(actor => actor.type === 7 && !actor.removed);
