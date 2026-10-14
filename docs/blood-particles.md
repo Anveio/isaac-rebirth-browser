@@ -32,7 +32,7 @@ predict the presented position and wall query. Entity render offset remains
 distinct from the sprite offset and the stored controller height.
 
 `npm run test:e2e:blood-particles` runs both actual games freshly, one case at a
-time. It retains both0/1 phase offsets of the mandatory T1 route and the existing
+time. It retains both0/1 phase offsets of the fixed T1 route and the existing
 recorded OS-selected244 route. Every initial failed public action and capture
 remains an exact prefix; the default bank appends two fixed boundary movement
 and cardinal-firing laps, plus32 dense tail observations. Odd25-presentation
@@ -50,7 +50,9 @@ initialized controller, color, clip and full/fast fields are blocking. Source
 storage before the first actual5 Update is retained as raw bits without claiming
 that pooled bytes are initialized. Each closed native/browser manifest is
 losslessly gzipped with raw/archive SHA and byte counts; its sidecar gives the
-original restoration path. Default CI includes the same suite.
+original restoration path. This local comparison remains available after the
+user removed CI and merge-blocking test requirements; actual failures stay in
+the reports.
 
 The frozen1e9d02f source passes the full build, strict all-target Clippy and
 separate floor build. Its production artifact is
@@ -104,7 +106,7 @@ the four complete browser traces retain every input and backend snapshot without
 truncation. Source, artifact, bank and every original partial-file byte remain
 stable. Documentation publication and any later restack onto main are separate
 source heads: they do not qualify a new main production artifact or fresh game
-execution. The source implementation and mandatory failing gate are recorded
+execution. The source implementation and failing local comparison are recorded
 separately from live acceptance.
 
 Status/champion/inherited-color modifiers, perks225/234, the exact full

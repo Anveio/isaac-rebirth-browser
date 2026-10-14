@@ -11,9 +11,11 @@ independent reference evidence.
 ## Current live-game testing policy
 
 Checked-in Rust, Node and Python unit suites were removed at the user’s request.
-The current required gate is [run.mjs](../tools/e2e/run.mjs), which executes
-every registered live original/browser suite, retaining all results even if an
-earlier suite fails. The [paired gameplay gate](../tools/foundation/paired-game.mjs) gives
+The user has removed CI and merge-blocking test requirements. Each PR is reviewed
+for regressions and runs relevant available local tools before merging, with
+actual results and failures reported. [run.mjs](../tools/e2e/run.mjs) remains an
+available local runner for every registered original/browser suite, retaining
+all results even if an earlier suite fails. The [paired gameplay comparison](../tools/foundation/paired-game.mjs) gives
 fresh original processes/profiles and an immutable production browser receive
 identical public input/presentation tails across contrived and recorded
 OS-random scenarios. Source-observable title/fader clocks, seed readback,
@@ -36,9 +38,10 @@ Consult the latest paired report for current implementation outcomes.
 
 ## Current integrated runtime checkpoint
 
-Main base `c7e418e3` registers 39 required live suites, including the integrated
-normal-death and required natural-heart banks. Its Room manager counts, strict
-NPC HP<0 boundary and engine-owned keyboard surface are source integrations;
+Main base `7603839d` registers 40 available live suites, including the integrated
+normal-death, natural-heart and health-damage banks. Its Room manager counts, strict
+NPC HP<0 boundary, Level progress writers and engine-owned keyboard surface are
+source integrations;
 there is no complete production/live qualification for this main checkpoint.
 The stat-cache cohort still retains 158 required failures over 212,485 checks,
 and its earlier 609-failure capture remains separate. The historical consolidated
@@ -46,8 +49,8 @@ f793/0f343 build and interrupted 33-suite invocation are described below.
 [Earlier source and interrupted death scope](../references/isaac/foundation/runtime-progress/history/20261014-main36-source-and-death-abort.json)
 retains its exact prior 36-suite checkpoint.
 
-The separate Blood Particle branch adds its mandatory gate to this main base,
-registering 40 suites as a source-only composition. Its captured producer remains
+The separate Blood Particle branch adds its local comparison to this main base,
+registering 41 suites as a source-only composition. Its captured producer remains
 archived source e0b9 with immutable runtime1e9/artifact4e0a, not this restacked
 head. The initial four cases retain 7,090 checks/58 failures. The completed
 moving bank retains 8,242 scoped checks/103 required failures and 652/2,770 core
@@ -239,8 +242,9 @@ post-acquisition Player state, load/continue and
 durable browser saves remain open. [SavedGame evidence](../references/isaac/foundation/saved-game/README.md)
 retains the original reports and the correction that made those gaps blocking.
 
-CI discovers every registered live suite and runs separate jobs with
-`fail-fast: false`, preserving each result and evidence. The first matrix run
+The former CI discovered every registered live suite and ran separate jobs with
+`fail-fast: false`, preserving each result and evidence. That scheduling policy
+is historical; local tests remain available. The first matrix run
 completed floors, weapons, boot MT and pickups successfully while retaining
 core and traversal failures. Historical build, typecheck, assets, matrix and strict Clippy
 pass at integrated checkpoint `472b154`, including the reviewed Level,
