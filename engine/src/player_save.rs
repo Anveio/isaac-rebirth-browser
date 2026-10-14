@@ -58,6 +58,10 @@ impl SavedPlayerItems {
             || owner.item_rngs.len() != 347
             || owner.trinket_rngs.len() != 62
             || owner.pocket_rngs.len() != 41
+            || owner.queued_id.is_some()
+            || !owner.temporary_collectibles.is_empty()
+            || owner.active_state_d80 != 0
+            || owner.active_state_d84 != 0
         {
             return Err("Player restore requires its complete saved and live owned tables".into());
         }
@@ -91,21 +95,33 @@ impl SavedPlayerItems {
 }
 
 ///54f373 flushes52ee40 before Manager5bf400 calls Player518350. Normal
-///518120 has no temporary/costume mutations when those owners are absent.
-/// Their real clear/evaluation callbacks remain required before wider saves.
+///518120 clears mapped temporary owners and cancels neutral costume-free
+/// active state. Other actual removal/presentation callbacks remain required.
 pub(crate) fn capture_at_manager_save(state: &mut State) -> Result<SavedPlayerItems, String> {
     crate::player_items::flush_queued(state)?;
     let owner = state
         .player_items
         .as_mut()
         .ok_or("Player save requires the actual first Player item owner")?;
-    if !owner.temporary_collectibles.is_empty()
-        || !matches!(owner.active_id, 0 | 45)
+    if !matches!(owner.active_id, 0 | 45)
         || owner.active_state_d80 != 0
         || owner.active_state_d84 != 0
     {
         return Err("Player save normalization requires an unmapped temporary/active owner".into());
     }
+    if !owner.temporary_collectibles.is_empty() {
+        owner.clear_save_temporary_effects()?;
+        //5180d0 tests the OR of removed config flags and existingD6C.
+        //Real supported cache/familiar callbacks own any requested work.
+        if owner.unevaluated_cache_flags != 0 {
+            crate::player_stats::evaluate_cache(state)?;
+            crate::familiars::evaluate_cache(state)?;
+        }
+    }
+    let owner = state
+        .player_items
+        .as_mut()
+        .expect("checked first Player owner");
     //5182c3/5182cd store zero after cancellation. This supported owner is
     //already neutral; no transient owner or missing BF5 value is invented.
     owner.active_state_d80 = 0;

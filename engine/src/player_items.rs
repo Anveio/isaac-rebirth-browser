@@ -129,6 +129,27 @@ impl PlayerItems {
         }
         Ok(())
     }
+
+    /// Save518120→5180d0→5e3f80 erases real temporary records before the
+    /// Player stores. For35/45,517580 has only the costume-removal callback;
+    /// both pinned configs are costume-free and cache0. Other record kinds
+    /// retain their actual state until their removal effects are implemented.
+    pub(crate) fn clear_save_temporary_effects(&mut self) -> Result<u32, String> {
+        let mut cache_flags = 0;
+        for entry in &self.temporary_collectibles {
+            let config = items::definition(entry.item_id)
+                .ok_or("saved temporary record requires its actual ItemConfig")?;
+            if !matches!(entry.item_id, 35 | 45) || config.kind != 3 || config.cache_flags != 0 {
+                return Err("Player save requires an unmapped temporary removal callback".into());
+            }
+            //5e3f80 ORs every removed record's config+24, independent of
+            //its count/cooldown. No fitted use count controls this removal.
+            cache_flags |= config.cache_flags;
+        }
+        self.temporary_collectibles.clear();
+        self.unevaluated_cache_flags |= cache_flags;
+        Ok(cache_flags)
+    }
 }
 
 /// The base actor advances the authored main clip before Player.Update tests
