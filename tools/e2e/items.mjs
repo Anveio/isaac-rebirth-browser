@@ -222,7 +222,8 @@ try {
             equal(state.maxFireDelay, nativePlayer.cachedStats.maxFireDelay, 'cached fire delay', presentation);
             for (const field of ['shotSpeed', 'damage', 'tearHeight', 'tearFallingSpeed', 'tearFallingAcceleration', 'moveSpeed'])
               equal(f32(state.playerStats[field]), nativePlayer.cachedStats[field], `cached ${field}`, presentation);
-            // Native Entity+31f marks removal, not the preceding dying phase.
+            // Retain this comparison; native +31f death and port pool membership
+            // are distinct owners pending typed observation.
             const actualTears = state.tears.filter(tear => tear.motion.lifetime !== 'removed');
             const nativeTears = source.world.entities.filter(entity => entity.type === 2 && !entity.removed);
             equal(actualTears.length, nativeTears.length, 'actual regular tear cardinality', presentation);
