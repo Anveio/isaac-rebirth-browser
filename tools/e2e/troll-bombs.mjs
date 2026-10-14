@@ -177,7 +177,9 @@ try {
               ['collisionClass', rock.collisionClass], ['spawnSeed', rock.spawnSeed]]) {
               equal(actual[field], value, `rock${rock.index}:${field}`, presentation);
             }
-            equal(grid.cells[rock.index].selector, source.gridSelectors[rock.index], `rock${rock.index}:destruction marker`, presentation);
+            // The destruction marker lives in the signed Room path costs (Room+e98).
+            assert.ok(Array.isArray(state.room.pathCosts) && Array.isArray(source.pathCosts), 'Rock markers require actual signed Room path costs');
+            equal(state.room.pathCosts[rock.index], source.pathCosts[rock.index], `rock${rock.index}:destruction marker`, presentation);
           }
           const doors = source.grid.filter(cell => cell.type === 16);
           equal(grid.cells.flatMap((cell, index) => cell.entity?.kind === 16 ? [index] : []),
