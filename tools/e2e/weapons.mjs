@@ -11,7 +11,8 @@ import { browserLaunchOptions, inspectBrowserGraphics } from '../foundation/brow
 import { startProductionServer } from '../foundation/production-server.mjs';
 import { waitForReady } from '../foundation/verify.mjs';
 import { TearContracts } from './tear-contracts.mjs';
-import { ORIGINAL_SHA } from './lib/original.mjs';
+import { snapshot, step, stepSnapshot } from './lib/game.mjs';
+import { ORIGINAL_SHA, assertOriginalBinary } from './lib/original.mjs';
 const ROOT=resolve(fileURLToPath(new URL('../..',import.meta.url)));
 const run=promisify(execFile);
 const epoch=1700000000;
@@ -63,8 +64,7 @@ for(const scenario of cases){
  assert.ok(typeof scenario.code==='string'&&scenario.code.length===8);
  assert.ok(directions.includes(scenario.direction)&&[0,1].includes(scenario.delay));
 }
-const sourceBinary=await readFile(join(ROOT,'.cache/original-runtime/offline-depot/isaac.x64'));
-assert.equal(createHash('sha256').update(sourceBinary).digest('hex'),ORIGINAL_SHA,'Original executable differs from the source-located observer contract');
+await assertOriginalBinary();
 await writeFile(join(output,'scenarios.json'),JSON.stringify({schema:1,bootEpochSeed:epoch,source:'Contrived full/intermediate births plus OS-random recorded seed coverage',cases},null,2)+'\n');
 const production=await startProductionServer();
 const browser=await chromium.launch(browserLaunchOptions());
@@ -98,20 +98,20 @@ try {
   // Match the declared native tape through the actual delayed run admission.
   // These intervals are public inputs, never a fitted game/counter offset.
   for(let i=0;i<3;i++){
-   await page.keyboard.down('Enter');await page.evaluate(()=>window.game.step(12));
-   await page.keyboard.up('Enter');await page.evaluate(()=>window.game.step(72));
+   await page.keyboard.down('Enter');await step(page, 12);
+   await page.keyboard.up('Enter');await step(page, 72);
   }
-  await page.keyboard.down('Tab');await page.evaluate(()=>window.game.step(12));
-  await page.keyboard.up('Tab');await page.evaluate(()=>window.game.step(108));
+  await page.keyboard.down('Tab');await step(page, 12);
+  await page.keyboard.up('Tab');await step(page, 108);
   for(const character of scenario.code.toLowerCase()){
-   await page.keyboard.down(character);await page.evaluate(()=>window.game.step(12));
-   await page.keyboard.up(character);await page.evaluate(()=>window.game.step(6));
+   await page.keyboard.down(character);await step(page, 12);
+   await page.keyboard.up(character);await step(page, 6);
   }
-  await page.keyboard.down('Enter');await page.evaluate(()=>window.game.step(12));
-  await page.keyboard.up('Enter');await page.evaluate(()=>window.game.step(72));
-  await page.keyboard.down('Enter');await page.evaluate(()=>window.game.step(12));
-  await page.keyboard.up('Enter');await page.evaluate(()=>window.game.step(300));
-  const start=await page.evaluate(()=>window.game.snapshot());assert.equal(start.screen,'playing');assert.equal(start.systemClock.systemCounter%2,0);
+  await page.keyboard.down('Enter');await step(page, 12);
+  await page.keyboard.up('Enter');await step(page, 72);
+  await page.keyboard.down('Enter');await step(page, 12);
+  await page.keyboard.up('Enter');await step(page, 300);
+  const start=await snapshot(page);assert.equal(start.screen,'playing');assert.equal(start.systemClock.systemCounter%2,0);
   checkSeed(start,scenario,seedValue);
   assert.equal(start.fireCooldown,baseline.observation.players[0].fireCooldown);
   const rows=new Map(native.debugObservations.map(row=>[row.context.presentedFrame,row.observation]));
@@ -128,18 +128,18 @@ try {
    assert.deepEqual(actual,expected,`${scenario.name}:${label}:paired source player XY/VXY`);
   };
   comparePlayer(start,baseline.context.presentedFrame,'gameplay-start');
-  if(scenario.delay){await page.evaluate(()=>window.game.step(1));comparePlayer(await page.evaluate(()=>window.game.snapshot()),baseline.context.presentedFrame+1,'birth-phase-delay');}
+  if(scenario.delay){comparePlayer(await stepSnapshot(page),baseline.context.presentedFrame+1,'birth-phase-delay');}
   if(lifecycle){
-   await page.keyboard.down('KeyA');await page.evaluate(()=>window.game.step(30));
-   comparePlayer(await page.evaluate(()=>window.game.snapshot()),baseline.context.presentedFrame+scenario.delay+30,'movement-end');
-   await page.keyboard.up('KeyA');await page.evaluate(()=>window.game.step(30));
-   comparePlayer(await page.evaluate(()=>window.game.snapshot()),baseline.context.presentedFrame+scenario.delay+60,'coast-end');
+   await page.keyboard.down('KeyA');await step(page, 30);
+   comparePlayer(await snapshot(page),baseline.context.presentedFrame+scenario.delay+30,'movement-end');
+   await page.keyboard.up('KeyA');await step(page, 30);
+   comparePlayer(await snapshot(page),baseline.context.presentedFrame+scenario.delay+60,'coast-end');
   }
   const key=`Arrow${scenario.direction}`;await page.keyboard.down(key);
   const seen=new Set();
   for(let index=1;index<=heldPresentations+releasePresentations;index++){
    if(index===heldPresentations+1)await page.keyboard.up(key);
-   await page.evaluate(()=>window.game.step(1));const state=await page.evaluate(()=>window.game.snapshot());states.push(state);
+   const state=await stepSnapshot(page);states.push(state);
    const nativeFrame=baseline.context.presentedFrame+scenario.delay+(lifecycle?60:0)+index;const observed=rows.get(nativeFrame);
    assert.ok(observed&&observed.memoryWritten===false,`${scenario.name}:missing readonly native phase${nativeFrame}`);
    assert.equal(observed.nativeBinarySha256,ORIGINAL_SHA,`${scenario.name}:${index}:running executable`);

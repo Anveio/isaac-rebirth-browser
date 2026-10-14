@@ -12,6 +12,7 @@ import { browserLaunchOptions, inspectBrowserGraphics } from '../foundation/brow
 import { startProductionServer } from '../foundation/production-server.mjs';
 import { assertInputProvenance, assertSeededRun, manualSeedCommands, waitForReady } from '../foundation/verify.mjs';
 import { writeBrowserEvidence } from '../foundation/browser-evidence.mjs';
+import { snapshot, step } from './lib/game.mjs';
 import { ORIGINAL_SHA } from './lib/original.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
@@ -93,12 +94,12 @@ try {
       await page.goto(production.url + '/?manual=1'); await waitForReady(page);
       await page.evaluate(c => { window.game.pause(); window.game.reset(c.runSeed, {trace: true, bootEpochSeed: c.bootEpochSeed}); }, c);
       const deliver = async command => {
-        if (command.type === 'tick') await page.evaluate(count => window.game.step(count), command.count);
+        if (command.type === 'tick') await step(page, command.count);
         else if (command.type === 'key') await page.keyboard[command.down ? 'down' : 'up'](command.code);
         else { await page.keyboard.down(command.text.toLowerCase()); await page.keyboard.up(command.text.toLowerCase()); }
       };
       for (const command of prefix) await deliver(command);
-      const seeded = await page.evaluate(() => window.game.snapshot());
+      const seeded = await snapshot(page);
       assert.equal(seeded.screen, 'character'); assertSeededRun(seeded, c.code, c.runSeed);
       assert.equal(seeded.runAdmission.requestedTimeAnchorMs, null,
         'Zero-tick public Enter does not initialize the actual MenuController request clock');
@@ -113,7 +114,7 @@ try {
         await deliver(action.type === 'step' ? {type: 'tick', count: action.frames}
           : {type: 'key', code: keyCodes[action.key], down: action.down});
         if (action.type !== 'step') continue;
-        const state = await page.evaluate(() => window.game.snapshot());
+        const state = await snapshot(page);
         const original = nativeRows[result.comparedPhases++];
         const source = original.observation;
         const label = `run-step-${result.comparedPhases}`;
