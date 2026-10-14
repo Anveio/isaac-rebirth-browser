@@ -865,6 +865,7 @@ pub(crate) fn resolve_grid(
 pub(crate) fn bomb_hit(
     state: &mut crate::State,
     center: WorldVector,
+    blast_radius: f32,
     line_clear: &dyn Fn(WorldVector) -> bool,
 ) -> Result<(), String> {
     if !center.is_finite() {
@@ -886,7 +887,7 @@ pub(crate) fn bomb_hit(
             y: pickup.position.y - center.y,
         };
         let squared = delta.x * delta.x + delta.y * delta.y;
-        let radius = 75.0 + pickup.collision_radius;
+        let radius = blast_radius + pickup.collision_radius;
         if !squared.is_finite() || !radius.is_finite() {
             return Err("pickup blast geometry overflowed".into());
         }
