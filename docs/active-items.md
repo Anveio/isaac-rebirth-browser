@@ -20,7 +20,7 @@ authored nonlooping18-frame UseItem with the copied item sprite, and calls
 and a new press while exhausted do not create a second effect. Temporary45
 has authored cooldown0, which persists rather than immediately expiring.
 
-`test:e2e:active-item-use` is a required registry/CI suite that runs both real
+`test:e2e:active-item-use` is a local paired suite that runs both real
 games freshly. Four contrived natural45 routes cover both public admission
 phases and full/damaged health; damage is caused by an ordinary own bomb.
 The gate also retains the earlier unfiltered291/48 discoveries and adds two
@@ -48,7 +48,7 @@ The corrected clean `7a07e98` source passed a full production build, strict
 Clippy, TypeScript, authored asset checks and the floor-helper build. Its
 production `64b08be5` then ran the complete unchanged eight-case public input
 bank in a fresh browser against the retained original captures. This attempt
-launched no new original process; default CI continues to run both games
+launched no new original process; the default local paired invocation runs both games
 freshly. All3068 phases and232578 checks completed, retaining607 required
 failures and no capture errors. The132 copied-frame failures in the earlier
 bank are resolved. An independent audit verifies all16 raw archives, the

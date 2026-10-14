@@ -128,5 +128,5 @@ backend-state histories are complete. Artifact hashes match before and after.
 The [recovery record](../references/isaac/foundation/doors/key-evidence-recovery.json)
 pins the report, verifier, original failed attempt, path-only frame relocation
 and lossless native archive journal. This establishes the evidence repair on
-that older artifact. The required CI gate still launches both games fresh;
+that older artifact. The local paired tool launches both games fresh;
 latest-main runtime acceptance requires its own fresh run.

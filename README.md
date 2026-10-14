@@ -32,7 +32,7 @@ playable build and status; [publish source](tools/sites/push.mjs) preserves its 
 ```sh
 bash cloud/install.sh
 bash cloud/start.sh                    # http://localhost:5173
-npm run check                         # Build and gate fresh original/browser games
+npm run check                         # Build and compare fresh original/browser games locally
 npm run test:e2e                      # Run every registered live suite; retain every result
 npm run test:e2e:paired               # Six contrived + two recorded OS-random runs
 npm run test:e2e:paired -- --replay-cases PATH # Replay a recorded case.json
@@ -49,14 +49,17 @@ checkpoint also retains a complete pixel comparison and difference image;
 pixel mismatches stay reported as failures without blocking the default
 functional gate. `verify:foundation` remains a strict pixel diagnostic.
 
-CI executes both games live using public inputs, fresh original profiles and a
-copied production build. The local suite runner executes every registered live gate in sequence and
-reports failure after every suite has run. CI discovers the same registry and
-runs each suite in a separate job with `fail-fast: false`, so a failed suite
-cannot cancel the other system checks. Recorded random tapes can be replayed unchanged.
+Each agent runs relevant available checks before merging and reports actual
+results, regressions and remaining coverage. CI and automated merge gates are
+not required. Local paired tools execute both games using public inputs, fresh
+original profiles and a copied production build. The full local suite runner
+retains every suite's result before reporting failure. Recorded random tapes
+can be replayed unchanged; existing failures and original evidence remain intact.
 Checked-in unit suites and component-only harnesses have been removed;
 validators stay in runtime/e2e tools, while temporary probes belong in ignored
-research cache. See [the live-game workflow](.github/workflows/live-games.yml).
+research cache. The user's Claude workflow owns bulk monster, level and
+character imports and associated import/testing refactors; other workstreams
+coordinate compatibility with that workflow and the main integration owner.
 
 Ordinary play retains no command/state history. To capture diagnostic evidence,
 pause automatic stepping and call `game.reset(seed, { trace: true })` in the

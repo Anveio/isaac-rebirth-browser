@@ -16,18 +16,25 @@ negative checks and reverse-engineering harnesses in ignored research cache.
 
 Use `source cloud/env.sh` for the installed toolchain. `npm run check` builds and
 tests an immutable production artifact against fresh original processes through
-public inputs. CI runs contrived interactions and recorded OS-random scenarios;
-selected source-observable functional contracts are blocking. Full-frame pixel
-comparisons remain explicit diagnostics with their actual pass/fail results.
+public inputs. Each agent must run relevant available tooling before merging,
+check the affected behavior for regressions, and report the actual results and
+remaining gaps. CI and automated merge gates are not required. Source/static
+checks do not establish live original/browser acceptance. Selected paired runs
+retain every predeclared contrived and recorded OS-random case and mismatch;
+full-frame pixels remain explicit diagnostics with actual pass/fail results.
 `test:e2e` runs every registered live suite, retaining every suite's result
-before failing. CI discovers that same registry and runs the suites in separate
-jobs with `fail-fast: false`; each job builds and checks its production artifact. Use `npm run test:e2e:paired -- --replay-cases PATH` to replay a recorded case. Standalone
+before failing. Use `npm run test:e2e:paired -- --replay-cases PATH` to replay a recorded case. Standalone
 browser checks require a fresh build. Native Rust/WASM self-equality proves
 replay consistency, not original hidden-state or simulation-tick parity.
 
 Coordinate file ownership across parallel agents. Shared temporary tooling and
 RE notes belong in ignored `.cache/coordination/`; persist reusable tools and
 the evidence needed to reproduce accepted behavior in the repository.
+
+The user's Claude workflow owns bulk monster, level and character imports and
+the associated import/testing refactors. Coordinate compatibility and source
+contracts with that workflow and the integration owner; do not duplicate those
+imports or start parallel catalogue/framework rewrites.
 
 Keep changes small and send short-lived PRs directly to `main`. The integration
 owner reviews exact PR heads, resolves conflicts and merges completed slices
