@@ -271,17 +271,32 @@ export type Command = { type: "key"; code: string; down: boolean } | { type: "te
 interface Exports extends WebAssembly.Exports {
   memory: WebAssembly.Memory; abi_version: () => number; reset: (initialSeed: number, bootEpochSeed: number) => number; request_ptr: (length: number) => number;
   command: () => number; snapshot_ptr: () => number; snapshot_len: () => number;
-  error_ptr: () => number; error_len: () => number;
+  error_ptr: () => number; error_len: () => number; public_keys_ptr: () => number; public_keys_len: () => number;
 }
 export class Engine {
-  private constructor(private readonly wasm: Exports) {}
+  /** The engine-owned key surface: the only codes `key` commands accept. */
+  readonly publicKeys: ReadonlySet<string>;
+  private constructor(private readonly wasm: Exports) {
+    const ptr = wasm.public_keys_ptr(), length = wasm.public_keys_len();
+    const size = wasm.memory.buffer.byteLength;
+    if (!Number.isSafeInteger(ptr) || ptr < 0 || !Number.isSafeInteger(length) || length <= 0
+      || ptr > size || length > size - ptr)
+      throw new Error("WASM public key surface has invalid bounds");
+    const keys: unknown = JSON.parse(this.read(ptr, length));
+    if (!Array.isArray(keys) || keys.length === 0
+      || !keys.every((key: unknown) => typeof key === "string" && key.length > 0)
+      || new Set(keys).size !== keys.length)
+      throw new Error("WASM public key surface must be a nonempty array of unique strings");
+    this.publicKeys = new Set(keys as string[]);
+  }
   static async create(initialSeed: number, bootEpochSeed = 0) {
     Engine.validateSeed(initialSeed);
     Engine.validateBootSeed(bootEpochSeed);
     const response = await fetch(wasmUrl);
     if (!response.ok) throw new Error(`WASM load failed: ${response.status}`);
     const { instance } = await WebAssembly.instantiate(await response.arrayBuffer());
-    if (typeof instance.exports.abi_version !== "function" || instance.exports.abi_version() !== 2)
+    if (typeof instance.exports.abi_version !== "function" || instance.exports.abi_version() !== 2
+      || typeof instance.exports.public_keys_ptr !== "function" || typeof instance.exports.public_keys_len !== "function")
       throw new Error("WASM engine ABI is stale; rebuild with npm run build:wasm");
     const engine = new Engine(instance.exports as Exports); engine.reset(initialSeed, bootEpochSeed); return engine;
   }
