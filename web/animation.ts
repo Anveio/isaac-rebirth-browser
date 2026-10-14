@@ -111,11 +111,18 @@ export class Assets {
     entries.push(["gfx/ui/main menu/completion_widget.png", completionUrl], ["gfx/ui/main menu/gamemenu_postitoverlap.png", postitOverlapUrl]);
     for (const [path, url] of Object.entries(bossSceneUrls))
       entries.push([`gfx/ui/boss/${path.split("/").at(-1)!}`, url]);
-    const loaded = await Promise.all(entries.map(async ([path, url]) => {
-      const image = new Image(); image.src = url; await image.decode();
-      return [path, image] as const;
+    // Chromium rejects decode() with EncodingError when a few hundred decodes
+    // are in flight, so keep a bounded number of decoders busy.
+    const images: HTMLImageElement[] = [];
+    let next = 0;
+    await Promise.all(Array.from({ length: 16 }, async () => {
+      while (next < entries.length) {
+        const index = next++, image = new Image();
+        image.src = entries[index]![1]; await image.decode();
+        images[index] = image;
+      }
     }));
-    return new Assets(new Map(loaded));
+    return new Assets(new Map(entries.map(([path], index) => [path, images[index]!])));
   }
   image(path: string): HTMLImageElement {
     const image = this.images.get(normalize(path)); if (!image) throw new Error(`Missing original asset: ${path}`); return image;

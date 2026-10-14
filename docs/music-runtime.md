@@ -6,6 +6,12 @@ Vorbis rate/channel count and final granule frame count are validated before
 playback. Original trailing archive padding remains part of the hash. The
 bundler emits exact file bytes through a virtual asset map so the literal `#`
 in the secret-room jingle filename does not become an import URL fragment.
+Decoding ends at that final granule position, as the original's vorbisfile
+decoder does. Some browser decoders (Chromium 141) ignore Vorbis end trimming
+and return the whole last block, so the runtime trims at most one long block
+(8192 frames) and rejects any other length difference. The browser observer
+attributes a trimmed buffer to its pinned decode input only when its PCM16
+frames exactly reproduce that decode's leading frames.
 
 The source controller has two alternating main channels and one independent
 layer channel, outside the 16 SFX voices. Crossfade changes the old main's
