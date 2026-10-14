@@ -130,7 +130,7 @@ async function browserCapture(browser, server, caseData, directory, archiveBrows
         const path = join(directory, action.label + '.png');
         writeFileSync(path, bytes);
         frames.push({ label: action.label, path, sha256: digest(bytes), browserPresentation: presentations,
-          state: captured.state, ...(captureBrowserAudio ? {browserAudio: captured.browserAudio} : {}) });
+          state: captured.state, render: captured.render, ...(captureBrowserAudio ? {browserAudio: captured.browserAudio} : {}) });
       }
     }
     const trace = await page.evaluate(() => window.game.trace());

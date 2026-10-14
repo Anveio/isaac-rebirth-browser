@@ -59,7 +59,7 @@ export function roomRows(rows, source, actual) {
 
 /** Every authored NPC in the room, by identity and spawn seed, then each
  * selected actor's shared fields plus the spec's own rows. */
-export function entityRows(rows, source, actual, spec) {
+export function entityRows(rows, source, actual, spec, render) {
   const phase = source.nativePhase.systemIterations % 2;
   const npcs = source.entities.filter(actor => actor.type >= 10 && actor.type < 1000);
   const port = actual.room.npcs.filter(actor => !actor.removed);
@@ -67,6 +67,8 @@ export function entityRows(rows, source, actual, spec) {
     port.map(actor => [actor.kind, actor.variant, actor.spawnSeed]));
   check(rows, 'system.phase', phase, actual.systemClock.systemCounter % 2);
   roomRows(rows, source, actual);
+  // The browser's own draw record for this capture: what it actually drew.
+  check(rows, 'render.recorded', true, render !== undefined);
   for (const [field, expected, observed] of spec.roomFields?.(source, actual, phase) ?? []) check(rows, field, expected, observed);
   const selected = npcs.filter(actor => spec.matches(actor.type, actor.variant));
   for (const native of selected) {
@@ -75,6 +77,10 @@ export function entityRows(rows, source, actual, spec) {
     const name = `${spec.name}${native.spawnSeed}`;
     for (const [field, expected, observed] of [...npcFields(native, actor, phase), ...(spec.fields?.(native, actor, phase) ?? [])])
       check(rows, `${name}.${field}`, expected, observed);
+    // Every drawn NPC uses the source sprite Scale (+2c4), 1:1 in logical
+    // pixels; only positions take the 0.65 world projection.
+    const drawn = render?.npcs.find(candidate => candidate.kind === native.type && candidate.spawnSeed === native.spawnSeed);
+    if (drawn) check(rows, `${name}.spriteScale`, vector(native.spriteScale), vector(drawn.scale));
   }
   // Entity_Laser beams in room order, by spawn seed, with their source fields.
   const beams = source.entities.filter(actor => actor.type === 7 && !actor.removed);

@@ -27,6 +27,8 @@ export class Renderer {
   private readonly floor: GLSurface;
   private readonly walls: GLSurface;
   private roomKey = "";
+  // Sprite scale of every NPC the latest frame drew, for live render contracts.
+  private drawnNpcs: { kind: number; spawnSeed: number; scale: [number, number] }[] = [];
   private constructor(private readonly canvas: HTMLCanvasElement, private readonly assets: Assets,
     private readonly graphics: GLMenuContext) {
     this.context = canvas.getContext("2d", { alpha: false })!;
@@ -43,6 +45,7 @@ export class Renderer {
     return new Renderer(canvas, assets, graphics);
   }
   draw(state: State): void {
+    this.drawnNpcs = [];
     const gl = this.graphics;
     if (state.screen === "playing") {
       this.prepareRoom(state.room);
@@ -81,11 +84,14 @@ export class Renderer {
       this.pickups.draw(ctx, state);
       for (const npc of state.room.npcs) {
         if (npc.removed || (npc.dead && !npc.monstro && !npc.dip) || (!npc.keeper && !npc.visible)) continue;
+        // Sprite Scale (+2c4): 1.15 for champions, otherwise the fresh 1.
+        const scale = npc.champion?.scale ?? 1;
+        this.drawnNpcs.push({ kind: npc.kind, spawnSeed: npc.spawnSeed, scale: [scale, scale] });
         const keeper = npc.keeper;
         if (keeper) {
           this.assets.draw(ctx, "gfx/017.002_secret room keeper.anm2", keeper.animation,
             npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46, keeper.animationClock,
-            { overrides: { 0: {
+            { scale, overrides: { 0: {
               RedTint: keeper.tint[0]! * 255, GreenTint: keeper.tint[1]! * 255, BlueTint: keeper.tint[2]! * 255,
               AlphaTint: keeper.tint[3]! * 255, RedOffset: keeper.offsets[0]! * 255,
               GreenOffset: keeper.offsets[1]! * 255, BlueOffset: keeper.offsets[2]! * 255,
@@ -95,14 +101,14 @@ export class Renderer {
           ctx.translate(npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46);
           ctx.scale(npc.monstro.flipX ? -1 : 1, 1);
           this.assets.draw(ctx, "gfx/020.000_monstro.anm2", npc.animation,
-            0, 0, npc.animationClock);
+            0, 0, npc.animationClock, { scale });
           ctx.restore();
         } else if (npc.dip) {
           ctx.save();
           ctx.translate(npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46);
           ctx.scale(npc.dip.flipX ? -1 : 1, 1);
           this.assets.draw(ctx, "gfx/216.000_dip.anm2", npc.animation, 0, 0, npc.animationClock,
-            { overrides: { 0: {
+            { scale, overrides: { 0: {
               RedTint: npc.dip.tint[0]! * 255, GreenTint: npc.dip.tint[1]! * 255,
               BlueTint: npc.dip.tint[2]! * 255, AlphaTint: npc.dip.tint[3]! * 255,
               RedOffset: npc.dip.offsets[0]! * 255, GreenOffset: npc.dip.offsets[1]! * 255,
@@ -112,21 +118,19 @@ export class Renderer {
         } else if (npc.fireplace) {
           this.assets.draw(ctx, "gfx/033.000_fireplace.anm2", npc.animation,
             npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46, npc.animationClock,
-            { layerScales: { 1: [npc.fireplace.flameScale, npc.fireplace.flameScale] } });
+            { scale, layerScales: { 1: [npc.fireplace.flameScale, npc.fireplace.flameScale] } });
         } else if (npc.actor) {
           // Catalogue-driven families: the engine names the authored actor.
           ctx.save();
           ctx.translate(npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46);
           ctx.scale(npc.flipX ? -1 : 1, 1);
           // Champions draw with their table Color and the ×1.15 sprite scale.
-          const champion = npc.champion;
-          this.assets.draw(ctx, npc.actor, npc.animation, 0, 0, npc.animationClock, champion
-            ? { scale: champion.scale, color: CHAMPION_COLORS[champion.color] }
-            : {});
+          this.assets.draw(ctx, npc.actor, npc.animation, 0, 0, npc.animationClock,
+            { scale, color: npc.champion && CHAMPION_COLORS[npc.champion.color] });
           ctx.restore();
         } else {
           this.assets.draw(ctx, npc.kind === 13 ? "gfx/013.000_fly.anm2" : npc.kind === 18 ? "gfx/018.000_attack fly.anm2" : npc.kind === 214 ? "gfx/213.000_level2fly.anm2" : "gfx/244.000_round worm.anm2", npc.animation,
-            npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46, npc.animationFrame);
+            npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46, npc.animationFrame, { scale });
         }
       }
       for (const familiar of state.familiars) {
@@ -238,6 +242,7 @@ export class Renderer {
     this.context.drawImage(gl.canvas, 0, 0);
   }
   debugTargets(): StageTargets { return this.stage.debugTargets(); }
+  drawRecord() { return { npcs: structuredClone(this.drawnNpcs) }; }
   private drawQuads(appearance: RoomAppearance, quads: RoomQuad[]): void {
     const gl = this.graphics, image = this.assets.image(appearance.backdrop);
     for (const quad of quads) {

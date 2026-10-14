@@ -127,7 +127,7 @@ async function boot() {
       context.imageSmoothingEnabled = false;
       context.drawImage(canvas, 0, 0, output.width, output.height);
       const png = output.toDataURL('image/png').split(',')[1];
-      return { state, png, timingMs: { snapshot: serialized - start, render: rendered - serialized, captureEncoding: performance.now() - rendered }, timingScope: 'Snapshot; WebGL draw and finish plus Canvas copy submission; PNG encoding. Excludes simulation, deferred Canvas raster work before encoding, and browser presentation.' };
+      return { state, png, render: renderer.drawRecord(), timingMs: { snapshot: serialized - start, render: rendered - serialized, captureEncoding: performance.now() - rendered }, timingScope: 'Snapshot; WebGL draw and finish plus Canvas copy submission; PNG encoding. Excludes simulation, deferred Canvas raster work before encoding, and browser presentation.' };
     },
   };
   Object.assign(window, { game });
