@@ -25,6 +25,8 @@ pub mod floor;
 pub mod grid;
 mod grid_hazards;
 pub mod grid_records;
+mod health_damage;
+pub mod information_animation;
 pub mod input;
 pub mod items;
 pub mod keepers;
@@ -356,6 +358,7 @@ pub struct State {
     pub public_actions: public_actions::PublicActions,
     #[serde(default)]
     pub player_stats: player_stats::PlayerStats,
+    pub information_animation: information_animation::InformationAnimation,
     pub stage: u32,
     pub stage_seed: u32,
     pub nightmares: nightmares::Nightmares,
@@ -498,6 +501,7 @@ impl Game {
                 player_animation: player_animation::PlayerAnimation::default(),
                 public_actions: public_actions::PublicActions::default(),
                 player_stats: player_stats::PlayerStats::default(),
+                information_animation: information_animation::InformationAnimation::default(),
                 stage: 1,
                 stage_seed: seed::stage1_seed(initial_seed),
                 nightmares: nightmares::Nightmares::new()?,
@@ -1403,6 +1407,10 @@ impl Game {
         // Room construction and clock alignment happen here, after the f32
         // confirmation fade, rather than in the zero-tick DOM key callback.
         if let Some(request) = self.state.player_death.system_pending.take() {
+            //5949a0 sees old Systemstate2 before either deferred dispatch,
+            // including2->2 Restart, and54f588 clears the shared Info owner.
+            // NewRun54eb20 itself has no clear; delay remains unchanged.
+            self.state.information_animation.clear();
             match request {
                 player_death::Request::Restart => {
                     if !self.state.seeded_run {
@@ -1660,6 +1668,23 @@ impl Game {
             self.state.music.advance();
             return Ok(());
         }
+
+        // Game54fb88 invokes580330 after its active transition branches.
+        // Full dispatch freezes only when the resulting manager state is2;
+        // completion resumes ordinaryRoom on this same full. Fast550760
+        // freezes any nonzero information state without advancing its ANM.
+        if self.state.information_animation.active() {
+            if phase == phase::Phase::Update {
+                self.state.information_animation.advance_full()?;
+            }
+            if phase != phase::Phase::Update || self.state.information_animation.state == 2 {
+                if phase != phase::Phase::Skipped {
+                    self.state.music.advance();
+                }
+                return Ok(());
+            }
+        }
+
         if phase == phase::Phase::Update {
             // Source54fa82 increments before PlayerManager/Room callbacks.
             self.state.game_update_count = self
@@ -1811,7 +1836,10 @@ impl Game {
         Ok(())
     }
     fn advance_camera(&mut self, phase: phase::Phase) {
-        if self.state.run_introduction.active || self.state.room_transition.is_some() {
+        if self.state.run_introduction.active
+            || self.state.room_transition.is_some()
+            || self.state.information_animation.active()
+        {
             return;
         }
         let aim = motion::WorldVector {
@@ -2177,13 +2205,13 @@ impl Game {
     ) -> Result<(), String> {
         if phase == phase::Phase::Update {
             self.state.player_animation.advance_full();
-            if self
-                .state
-                .player_animation
-                .is_finished(Some(player_animation::Clip::UseItem))
+            if matches!(
+                self.state.player_animation.current,
+                Some(player_animation::Clip::UseItem | player_animation::Clip::Hit)
+            ) && self.state.player_animation.is_finished(None)
             {
-                // Full Player presentation resumes its ordinary main owner
-                // after the actual UseItem clip completes.
+                // Current-main completion returns ordinary presentation; an
+                // interrupted Pickup never resumes its obsolete main clock.
                 self.state.player_animation.current = None;
             }
         }

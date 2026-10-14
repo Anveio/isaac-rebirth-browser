@@ -237,6 +237,8 @@ export interface State {
     collectionDelay: number; activeId: number; activeCharge: number; activeSubordinateCharge: number;
     activeStateD80: number; activeStateD84: number; reserveCharge: number; activeFlag3076: boolean;
     unevaluatedCacheFlags: number} | null;
+  informationAnimation: {state: number; delay: number; currentActor: string | null;
+    currentClip: string | null; spritesheet: string | null; definitionLoaded: boolean; frame: number; playing: boolean};
   savedRunSummary: SavedRunSummary | null;
   pendingMenuInitializations: { afterAudioRequests: number; initialization: { type: "loadFreshProfile"; profile: number } | { type: "resetCharacterSeed" } | { type: "commitCharacterSeed"; seed: number } }[];
   stage: number; stageSeed: number; seededRun: boolean; achievementEligibility: boolean;
@@ -253,7 +255,8 @@ export interface State {
   playerStats: {shotSpeed: number; damage: number; tearHeight: number; tearFallingSpeed: number; tearFallingAcceleration: number; moveSpeed: number};
   player: Player; room: Room; stageEffects: StageEffects; inventory: { coins: number; bombs: number; keys: number };
   publicActions: { menuConfirm: boolean; menuBack: boolean; activePressed: boolean; activeTriggered: boolean; pocketPressed: boolean; pocketTriggered: boolean; enterWasDown: boolean; spaceWasDown: boolean; escapeWasDown: boolean; pocketWasDown: boolean };
-  playerAnimation: { current: "Trapdoor" | "Appear" | "Death" | "UseItem" | null; frame: number; playing: boolean; guard: boolean };
+  playerAnimation: { current: "Trapdoor" | "Appear" | "Death" | "UseItem" | "Hit" | null; frame: number; playing: boolean; guard: boolean };
+
   camera: {scroll: {x: number; y: number}; lastPlayerPosition: {x: number; y: number};
     histories: {capacity: number; head: number; samples: {x: number; y: number}[]}[]} | null;
   nextPickup: number;

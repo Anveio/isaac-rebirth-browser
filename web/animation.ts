@@ -1,11 +1,12 @@
 import baseSceneData from "./scene-data.json";
+import informationData from "./information-data.json";
 import doorData from "./door-data.json";
 import gridData from "./grid-data.json";
 import npcData from "./npc-data.json";
 import familiarData from "./familiar-data.json";
 import gameOverData from "./gameover-data.json";
 import stageData from "./stage-data.json";
-const sceneData = { ...baseSceneData, ...doorData, ...gridData, ...npcData, ...familiarData, ...gameOverData, ...stageData };
+const sceneData = { ...informationData, ...baseSceneData, ...doorData, ...gridData, ...npcData, ...familiarData, ...gameOverData, ...stageData };
 import fontData from "./font-data.json";
 import completionUrl from "./assets/completion_widget.png?url";
 const bossSceneUrls = import.meta.glob("./assets/boss-scene/*.png", { eager: true, query: "?url", import: "default" }) as Record<string, string>;
@@ -34,6 +35,7 @@ const urls = import.meta.glob([
   "../references/isaac/rebirth/resources/gfx/ui/minimap1.png",
   "../references/isaac/rebirth/resources/gfx/ui/minimap2.png",
   "../references/isaac/rebirth/resources/gfx/ui/bgblack.png",
+  "../references/isaac/rebirth/resources/gfx/ui/giantbook/**/*.png",
   "../references/isaac/rebirth/resources/gfx/ui/stage/**/*.png",
   "../references/isaac/rebirth/resources/gfx/ui/pausescreen.png",
   "../references/isaac/rebirth/resources/gfx/ui/menu_mystuff.png",

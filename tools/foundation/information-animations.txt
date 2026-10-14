@@ -1,0 +1,3 @@
+# Regenerate through extract-animations.py into web/information-data.json
+gfx/ui/giantbook/giantbook.anm2
+gfx/ui/giantbook/giantbook_eternalheart.anm2
