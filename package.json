@@ -58,7 +58,8 @@
     "test:e2e:run-admission": "bash tools/original/with-display.sh node tools/e2e/run-admission.mjs --count 2",
     "test:e2e:monstro": "bash tools/original/with-display.sh node tools/e2e/monstro.mjs",
     "test:e2e:stat-cache": "cargo build --manifest-path engine/Cargo.toml --locked --bin floor && bash tools/original/with-display.sh node tools/e2e/items.mjs --stat-cache --count 2",
-    "test:e2e:active-item-use": "cargo build --manifest-path engine/Cargo.toml --locked --bin floor && bash tools/original/with-display.sh node tools/e2e/items.mjs --active-use --count 2"
+    "test:e2e:active-item-use": "cargo build --manifest-path engine/Cargo.toml --locked --bin floor && bash tools/original/with-display.sh node tools/e2e/items.mjs --active-use --count 2",
+    "test:e2e:blood-particles": "bash tools/original/with-display.sh node tools/e2e/blood-particles.mjs"
   },
   "devDependencies": {
     "@playwright/test": "1.64.0",

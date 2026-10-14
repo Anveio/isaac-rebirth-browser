@@ -130,7 +130,7 @@ def observe(pid, context):
                     result['projectileParameter2'] = struct.unpack_from('<f', more, 0x18)[0]
                     result['projectileFullUpdates'] = struct.unpack_from('<I', more, 0x1c)[0]
                     result['projectileFlags'] = struct.unpack_from('<I', more, 0x20)[0]
-                if result['type'] == 1000 and result['variant'] in (7, 15, 66):
+                if result['type'] == 1000 and result['variant'] in (5, 7, 15, 66):
                     more = read(address + 0x7d4, 0x24)
                     result['effectLifetimeDivisor'] = struct.unpack_from('<i', more, 0)[0]
                     result['effectTimeToLive'] = struct.unpack_from('<i', more, 0x1c)[0]
@@ -141,6 +141,26 @@ def observe(pid, context):
                     parent = struct.unpack_from('<Q', raw, 0x498)[0]
                     result['effectParent'] = ({'type': u32(parent + 0x10), 'variant': u32(parent + 0x14),
                         'spawnSeed': u32(parent + 0x7d0), 'sequenceId': u32(parent + 8)} if parent else None)
+                    if result['variant'] == 5:
+                        state = struct.unpack_from('<i', more, 0)[0]
+                        result['bloodParticleState'] = state
+                        result['effectRaw7d8'] = bool(more[4])
+                        result['bloodParticleControllerBits'] = more[8:20].hex()
+                        # Init does not establish7dc/7e0/7e4. Read their actual
+                        # storage bits before the first5 Update without assigning
+                        # meaning to uninitialized pooled values.
+                        if state != 0:
+                            values = struct.unpack_from('<fff', more, 8)
+                            if not all(math.isfinite(value) for value in values):
+                                raise ValueError('Nonfinite initialized Blood Particle controller')
+                            result['bloodParticleHeight'], result['bloodParticleVerticalVelocity'], result['bloodParticleGravity'] = values
+                        layer_count = struct.unpack_from('<i', raw, 0x298)[0]
+                        if layer_count != 1:
+                            raise ValueError('Unexpected authored Blood Particle layer count')
+                        layer = struct.unpack_from('<Q', raw, 0x290)[0]
+                        result['bloodParticleLayer0Rotation'] = struct.unpack('<f', read(layer + 0x2c, 4))[0]
+                        result['entityRenderOffset'] = pair(0x458)
+                        result['inheritedColor'] = list(struct.unpack_from('<11f', raw, 0x3cc))
                 if struct.unpack_from('<Q', raw, 0)[0] == 0x66ef30:
                     more = read(address + 0xf50, 0x138)
                     result['npcState'] = struct.unpack_from('<I', more, 0)[0]
