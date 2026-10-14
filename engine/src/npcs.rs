@@ -386,18 +386,9 @@ pub fn admit_room_combat(state: &mut State) {
 }
 
 pub fn advance_room_clear(state: &mut State) {
-    state.room.boss_count = state
-        .room
-        .npcs
-        .iter()
-        .filter(|npc| npc.boss && !npc.removed)
-        .count() as u32;
-    if state
-        .room
-        .npcs
-        .iter()
-        .any(|npc| !npc.removed && npc.can_shut_doors)
-    {
+    // Room5d1487 checks signed dc+e0 after the full manager/contact pass.
+    // It is independent of HP, visible actor count and current boss_count2490.
+    if state.room.manager_counts.countable_total() > 0 {
         state.room.combat_clear_countdown = 10;
     } else if state.room.combat_clear_countdown > 0 {
         state.room.combat_clear_countdown -= 1;
@@ -656,7 +647,7 @@ impl Npc {
         let mut health = self.health();
         self.damage.advance(&mut health, phase)?;
         self.hp = health.hp;
-        if self.hp <= 0.0 {
+        if self.hp < 0.0 {
             self.dead = true;
             // Source44641d zero-gib sound precedes the real Blood Splat seed.
             world.audio.admit(

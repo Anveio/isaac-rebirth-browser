@@ -24,7 +24,7 @@ def case(identifier,code,delay,randomized):
  return result
 def main():
  parser=argparse.ArgumentParser();parser.add_argument('--count',type=int,default=2);args=parser.parse_args()
- if not 1<=args.count<=4:raise ValueError('Unfiltered OS count must be1..4')
+ if not 2<=args.count<=4:raise ValueError('Required unfiltered OS count must be2..4')
  cases=[case(f'paired-heart-{kind}-{phase}',code,phase,False) for kind,code in [('red','B9118AJA'),('soul','B9119YPW')] for phase in (0,1)]
  # Record every OS draw before either game or a selector grade runs.
  draws=[secrets.randbelow(0xffffffff)+1 for _ in range(args.count)]
