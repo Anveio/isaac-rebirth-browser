@@ -1,6 +1,6 @@
 // Independent forwarding observation of actual public Web Audio calls.
 export function installBrowserAudioObserver() {
-  const nodes = new WeakMap(), gains = new WeakMap(), connections = new WeakMap(), decodedInputs = new WeakMap(), contexts = new Set(); let next = 0;
+  const nodes = new WeakMap(), gains = new WeakMap(), connections = new WeakMap(), decodedInputs = new WeakMap(), decodedBuffers = [], contexts = new Set(); let next = 0;
   const trace = { events: [], pending: [], truncated: false };
   trace.contextTimes = () => [...contexts].map(context => ({ state: context.state, sampleRate: context.sampleRate, currentTime: context.currentTime }));
   const identify = node => { if (!nodes.has(node)) nodes.set(node, ++next); return nodes.get(node); };
@@ -11,8 +11,26 @@ export function installBrowserAudioObserver() {
     contexts.add(this);
     const input = args[0].slice(0), identity = digest(input).then(sha256 => ({ sha256, bytes: input.byteLength }));
     const result = decode.apply(this, args);
-    trace.pending.push(result.then(buffer => { decodedInputs.set(buffer, identity); }));
+    trace.pending.push(result.then(buffer => { decodedInputs.set(buffer, identity); decodedBuffers.push(buffer); }));
     return result;
+  };
+  // A producer may trim a decoder's output to the stream's end position.
+  // Such a buffer names the decode input whose leading frames it exactly
+  // reproduces after PCM16 quantization; nothing else is attributed.
+  const quantized = value => Math.max(-32768, Math.min(32767, Math.round(value * 32768)));
+  const trimmedInput = buffer => {
+    for (const decoded of decodedBuffers) {
+      if (decoded === buffer || decoded.length <= buffer.length || decoded.sampleRate !== buffer.sampleRate ||
+          decoded.numberOfChannels !== buffer.numberOfChannels) continue;
+      let equal = true;
+      for (let channel = 0; equal && channel < buffer.numberOfChannels; channel++) {
+        const source = decoded.getChannelData(channel), samples = buffer.getChannelData(channel);
+        for (let frame = 0; frame < buffer.length; frame++)
+          if (quantized(source[frame]) !== quantized(samples[frame])) { equal = false; break; }
+      }
+      if (equal) return decodedInputs.get(decoded).then(input => ({ ...input, trimmedFromFrames: decoded.length }));
+    }
+    return undefined;
   };
   const loop = Object.getOwnPropertyDescriptor(AudioBufferSourceNode.prototype, 'loop');
   Object.defineProperty(AudioBufferSourceNode.prototype, 'loop', { ...loop,
@@ -70,7 +88,7 @@ export function installBrowserAudioObserver() {
       }
       event.pcmSha256 = await digest(bytes);
       if (buffer.numberOfChannels === 2) {
-        event.encodedInput = await decodedInputs.get(buffer);
+        event.encodedInput = await (decodedInputs.get(buffer) ?? trimmedInput(buffer));
         const data = new Uint8Array(bytes), pieces = [];
         for (let i = 0; i < data.length; i += 32768) pieces.push(String.fromCharCode(...data.subarray(i, i + 32768)));
         event.pcmBase64 = btoa(pieces.join(''));

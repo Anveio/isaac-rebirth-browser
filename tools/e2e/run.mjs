@@ -6,6 +6,8 @@
 //   npm run test:e2e -- keys --count 4       extra flags override the suite's defaults
 //   npm run test:e2e -- keys --scenarios .cache/e2e/<run>/keys/scenarios.json
 //   npm run test:e2e -- --list               suite ids as JSON (CI matrix)
+//   npm run test:e2e -- --keep-evidence      keep every artifact of passing suites too
+//   npm run test:e2e -- --keep-runs 5        slim runs older than the newest 5 (default 3)
 //
 // The production build is rebuilt first when web/ or engine/ sources are newer
 // than dist/ (skip with --no-build). Failed suites print how to replay them.
@@ -13,6 +15,7 @@ import { spawn, spawnSync } from 'node:child_process';
 import { appendFileSync, createWriteStream, existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { pruneRuns, slimSuite, sweepProductionSnapshots } from './lib/retention.mjs';
 import { SUITES, suiteById } from './suites.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
@@ -20,18 +23,21 @@ const writeJson = (path, value) => writeFileSync(path, JSON.stringify(value, nul
 
 const argv = process.argv.slice(2);
 const ids = [], suiteArgs = [];
-let jobs = 1, output, list = false, build = true;
+let jobs = 1, output, list = false, build = true, keepEvidence = false, keepRuns = 3;
 for (let index = 0; index < argv.length; index++) {
   const arg = argv[index];
   if (arg === '--jobs') jobs = Number(argv[++index]);
   else if (arg === '--output') output = resolve(argv[++index]);
   else if (arg === '--list') list = true;
   else if (arg === '--no-build') build = false;
+  else if (arg === '--keep-evidence') keepEvidence = true;
+  else if (arg === '--keep-runs') keepRuns = Number(argv[++index]);
   else if (arg === '--suite') ids.push(...argv[++index].split(','));
   else if (!arg.startsWith('--') && !suiteArgs.length) ids.push(...arg.split(','));
   else suiteArgs.push(arg);
 }
 if (!Number.isInteger(jobs) || jobs < 1) { console.error('--jobs must be a positive integer'); process.exit(2); }
+if (!Number.isInteger(keepRuns) || keepRuns < 1) { console.error('--keep-runs must be a positive integer'); process.exit(2); }
 const unknown = ids.filter(id => !suiteById.has(id));
 if (unknown.length) {
   console.error(`Unknown suite ${unknown.join(', ')}; known: ${SUITES.map(suite => suite.id).join(', ')}`);
@@ -92,6 +98,14 @@ const reportPath = join(runDirectory, 'report.json');
 mkdirSync(runDirectory, { recursive: true });
 writeJson(reportPath, report);
 
+// Retention (tools/e2e/lib/retention.mjs): older runs keep their reports,
+// scenarios, cases, logs and small files; killed suites' dist copies go.
+if (!keepEvidence) {
+  for (const directory of sweepProductionSnapshots()) console.log(`swept stale production snapshot ${directory}`);
+  for (const run of await pruneRuns(join(ROOT, '.cache/e2e'), keepRuns, runDirectory))
+    console.log(`slimmed ${relative(ROOT, run.directory)}: ${run.files} files, ${Math.round(run.bytes / 2 ** 20)} MB`);
+}
+
 // Paired-game suites replay recorded case.json tapes; every other driver
 // replays its scenarios.json through the suite's replay flag.
 function replayCommand(suite, directory) {
@@ -119,11 +133,13 @@ function runSuite(suite) {
       log.write(chunk);
       if (jobs === 1) process.stdout.write(chunk);
     });
-    const finish = (exitCode, signal, error) => {
+    const finish = async (exitCode, signal, error) => {
       log.end();
       const result = { id: suite.id, status: exitCode === 0 && !signal ? 'pass' : 'fail', exitCode, signal, error,
         seconds: Math.round((Date.now() - startedAt) / 1000), log: logPath, output: directory };
       if (result.status === 'fail') result.replay = replayCommand(suite, directory);
+      // A passing suite keeps what replay and triage need; a failing one keeps everything.
+      else if (!keepEvidence) result.retention = await slimSuite(directory);
       report.suites.push(result);
       writeJson(reportPath, report);
       console.log(`${result.status === 'pass' ? '✔' : '✘'} ${suite.id} (${result.seconds}s)${result.status === 'fail' ? ` log: ${relative(ROOT, logPath)}` : ''}`);

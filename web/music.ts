@@ -51,16 +51,26 @@ export class MusicRuntime {
         const bytes = await response.arrayBuffer();
         const hash = Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', bytes)), byte => byte.toString(16).padStart(2, '0')).join('');
         if (bytes.byteLength !== metadata.bytes || hash !== metadata.sha256) throw new Error(`Music bytes differ from the pinned original: ${path}`);
-        const buffer = await this.context.decodeAudioData(bytes);
-        if (buffer.numberOfChannels !== metadata.channels ||
-            Math.abs(buffer.duration - metadata.frames / metadata.sampleRate) > 1 / buffer.sampleRate)
+        const decoded = await this.context.decodeAudioData(bytes);
+        // Vorbis end trimming: the final Ogg granule position counts the
+        // stream's audio frames, and the original's vorbisfile decoder stops
+        // there. The pinned catalogue holds that granule for these exact
+        // bytes. Some browser decoders (Chromium 141) return the whole last
+        // block instead; trim at most one long Vorbis block (8192 frames).
+        const frames = Math.round(metadata.frames * decoded.sampleRate / metadata.sampleRate);
+        const excess = decoded.length - frames;
+        if (decoded.numberOfChannels !== metadata.channels || excess < -1 ||
+            excess > Math.ceil(8192 * decoded.sampleRate / metadata.sampleRate))
           throw new Error(`Decoded original music format differs: ${path}`);
+        const buffer = excess > 0
+          ? new AudioBuffer({ length: frames, numberOfChannels: decoded.numberOfChannels, sampleRate: decoded.sampleRate })
+          : decoded;
         // The original streaming backend submits AL_FORMAT_STEREO16. Preserve
         // its clipped PCM16 representation before applying channel gain/pitch.
         for (let channel = 0; channel < buffer.numberOfChannels; channel++) {
-          const samples = buffer.getChannelData(channel);
+          const source = decoded.getChannelData(channel), samples = buffer.getChannelData(channel);
           for (let frame = 0; frame < samples.length; frame++)
-            samples[frame] = Math.max(-32768, Math.min(32767, Math.round(samples[frame]! * 32768))) / 32768;
+            samples[frame] = Math.max(-32768, Math.min(32767, Math.round(source[frame]! * 32768))) / 32768;
         }
         return buffer;
       })();

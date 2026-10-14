@@ -33,6 +33,24 @@ npm run test:e2e -- keys --scenarios .cache/e2e/run-…/keys/scenarios.json
 npm run test:e2e -- paired --replay-cases .cache/e2e/run-…/paired/<case>/case.json
 ```
 
+### Disk retention
+
+A full run captures several GB. When a suite passes, the runner slims its
+output ([`lib/retention.mjs`](lib/retention.mjs)):
+
+- **Kept:** `report.json`, `scenarios.json`, `case.json`, logs and every file of
+  at most 1 MB. Every recorded case therefore still replays.
+- **Gzipped:** recorded traces.
+- **Dropped:** frames and other large evidence.
+
+A failing suite keeps everything. At start, the runner slims every suite of the
+runner-created `.cache/e2e/run-*` directories older than the newest
+`--keep-runs` runs (default 3). It also removes `/tmp/isaac-production-*`
+snapshots whose process is gone.
+
+Pass `--keep-evidence` to retain everything, for example to inspect frames of
+a passing suite.
+
 ## No CI
 
 There is deliberately no CI (see [AGENTS.md](../../AGENTS.md)). Before you open

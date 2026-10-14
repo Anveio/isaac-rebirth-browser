@@ -19,6 +19,7 @@ const { values } = parseArgs({ options: {
   out: { type: 'string' },
   seconds: { type: 'string', default: '180' },
   'initial-seed': { type: 'string' },
+  'run-seed': { type: 'string' },
   'boot-epoch-seed': { type: 'string' },
   headed: { type: 'boolean', default: false },
 } });
@@ -105,6 +106,9 @@ const observe = () => tab.evaluate(() => {
     bounds: { left: s.room.left, right: s.room.right, top: s.room.top, bottom: s.room.bottom },
     npcs: npcs.map(n => ({ x: n.position.x, y: n.position.y, boss: n.boss, kind: n.kind })),
     pickups: s.room.pickups.filter(p => !p.collected && !p.removed).map(p => ({ x: p.position.x, y: p.position.y, variant: p.variant })),
+    // Solid grid cells (walls, rocks, pits); door cells stay walkable for routing.
+    grid: s.room.grid && { w: s.room.grid.width, h: s.room.grid.height,
+      solid: s.room.grid.cells.map(c => (c.entity && c.entity.collisionClass !== 0 && c.entity.kind !== 16 ? 1 : 0)).join('') },
     doors: s.room.appearance.doors.map(d => ({ side: d.side, state: d.state, target: d.targetRoom, x: d.worldPosition.x, y: d.worldPosition.y })),
     tears: s.tears.length, bombs: s.bombs.length, explosions: s.explosions.length,
     inventory: s.inventory, items: s.playerItems ? s.playerItems.ownedCounts.reduce((a, b) => a + b, 0) : 0,
@@ -148,15 +152,26 @@ try {
   if (titleShot.litFraction < 0.05) fail('Title screen renders black');
 
   // Menus: Enter through title, profile, main menu and character select.
+  // With --run-seed, type it on the character screen the way a player does (Tab, code, Enter).
+  let seedTyped = !values['run-seed'];
   for (let attempt = 0; attempt < 20; attempt++) {
     const state = await observe();
     if (state.screen === 'playing') break;
-    if (state.screen === 'seed') await tap('Escape'); else await tap('Enter');
+    if (state.screen === 'character' && !seedTyped) {
+      await tap('Tab'); await tab.waitForTimeout(1800);
+      for (const character of values['run-seed'].replace(/\s/g, '').toLowerCase()) { await tap(character, 200); await tab.waitForTimeout(100); }
+      await tap('Enter'); await tab.waitForTimeout(1200);
+      seedTyped = true;
+      continue;
+    }
+    if (state.screen === 'seed' && seedTyped) await tap('Escape'); else await tap('Enter');
     await tab.waitForTimeout(900);
     if (attempt === 1) await shot('menu');
   }
   let state = await observe();
   if (state.screen !== 'playing') throw new Error(`Menus did not reach a run; stuck on ${state.screen}`);
+  if (values['run-seed'] && state.runSeed.replace(/\s/g, '') !== values['run-seed'].replace(/\s/g, '').toUpperCase())
+    throw new Error(`Typed run seed ${values['run-seed']} but the run started with ${state.runSeed}`);
   for (let i = 0; i < 50 && (state.introduction || !state.player.controls); i++) { await tab.waitForTimeout(200); state = await observe(); }
   const startRoom = state.room;
   stats.roomsEntered.add(startRoom);
@@ -247,6 +262,31 @@ try {
     // Choose keys.
     const p = state.player;
     const keys = [];
+    // Breadth-first route over the room grid (cell centre = col*40+40, row*40+120);
+    // returns a waypoint two cells ahead, or the goal itself when no grid/route exists.
+    const waypoint = (x, y) => {
+      const grid = state.grid;
+      if (!grid) return { x, y };
+      const cell = (wx, wy) => [Math.round((wx - 40) / 40), Math.round((wy - 120) / 40)];
+      const [sc, sr] = cell(p.x, p.y), [gc, gr] = cell(x, y);
+      const inside = (c, r) => c >= 0 && r >= 0 && c < grid.w && r < grid.h;
+      if (!inside(sc, sr) || !inside(gc, gr)) return { x, y };
+      const key = (c, r) => r * grid.w + c, previous = new Map([[key(sc, sr), -1]]), queue = [[sc, sr]];
+      while (queue.length) {
+        const [c, r] = queue.shift();
+        if (c === gc && r === gr) break;
+        for (const [dc, dr] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+          const nc = c + dc, nr = r + dr, k = key(nc, nr);
+          if (!inside(nc, nr) || previous.has(k) || (grid.solid[k] === '1' && !(nc === gc && nr === gr))) continue;
+          previous.set(k, key(c, r)); queue.push([nc, nr]);
+        }
+      }
+      if (!previous.has(key(gc, gr))) return { x, y };
+      const path = [];
+      for (let k = key(gc, gr); k !== -1; k = previous.get(k)) path.unshift(k);
+      const next = path[Math.min(2, path.length - 1)];
+      return next === key(gc, gr) ? { x, y } : { x: (next % grid.w) * 40 + 40, y: Math.floor(next / grid.w) * 40 + 120 };
+    };
     const toward = (x, y, slack = 8) => {
       if (x < p.x - slack) keys.push('KeyA'); else if (x > p.x + slack) keys.push('KeyD');
       if (y < p.y - slack) keys.push('KeyW'); else if (y > p.y + slack) keys.push('KeyS');
@@ -264,7 +304,8 @@ try {
     } else if (state.pickups.length && (pickupsAtStart.get(state.room) ?? 0) < 60) {
       pickupsAtStart.set(state.room, (pickupsAtStart.get(state.room) ?? 0) + 1);
       const target = state.pickups.reduce((a, b) => Math.hypot(a.x - p.x, a.y - p.y) < Math.hypot(b.x - p.x, b.y - p.y) ? a : b);
-      toward(target.x, target.y, 2);
+      const step = waypoint(target.x, target.y);
+      toward(step.x, step.y, 2);
     } else {
       const open = state.doors.filter(d => /^open/i.test(d.state));
       const back = open.find(d => d.target === cameFromDoor);
@@ -287,7 +328,9 @@ try {
         doorGoal = door && { room: state.room, target: door.target, until: now + 15_000 };
       }
       const choice = doorGoal && open.find(d => d.target === doorGoal.target);
-      if (choice) {
+      const step = choice && waypoint(choice.x, choice.y);
+      if (choice && (step.x !== choice.x || step.y !== choice.y)) toward(step.x, step.y, 4);
+      else if (choice) {
         // Slide along the wall into the doorway: align the cross axis while pushing outward.
         const horizontal = choice.side === 'left' || choice.side === 'right';
         if (horizontal) { if (Math.abs(choice.y - p.y) > 6) keys.push(choice.y < p.y ? 'KeyW' : 'KeyS'); keys.push(choice.side === 'left' ? 'KeyA' : 'KeyD'); }
