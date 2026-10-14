@@ -200,6 +200,11 @@ pub struct SpriteEffect {
     pub variant: u32,
     pub subtype: u32,
     pub spawn_seed: u32,
+    /// GameSpawn's cached caller identity, distinct from linkedEntity.parent.
+    #[serde(default)]
+    pub spawner_type: u32,
+    #[serde(default)]
+    pub spawner_variant: u32,
     pub parent: Option<Parent>,
     pub birth_game_update: u32,
     pub actor_rng: items::Rng,
@@ -274,7 +279,7 @@ pub fn admit_poof(
     seed: u32,
     position: WorldVector,
     velocity: WorldVector,
-    parent: Option<Parent>,
+    spawner: Option<Parent>,
 ) -> Result<u32, String> {
     PoofAdmission {
         game_update_count: state.game_update_count,
@@ -282,7 +287,7 @@ pub fn admit_poof(
         effects: &mut state.sprite_effects,
         scheduler: &mut state.actor_scheduler,
     }
-    .admit(subtype, seed, position, velocity, parent)
+    .admit(subtype, seed, position, velocity, spawner)
 }
 
 /// The source NPC callback admits appearance effects before BaseUpdate moves
@@ -328,7 +333,7 @@ impl PoofAdmission<'_> {
         seed: u32,
         position: WorldVector,
         velocity: WorldVector,
-        parent: Option<Parent>,
+        spawner: Option<Parent>,
     ) -> Result<u32, String> {
         if subtype > 3 || !position.is_finite() || !velocity.is_finite() {
             return Err(
@@ -350,7 +355,11 @@ impl PoofAdmission<'_> {
             variant: 15,
             subtype,
             spawn_seed: seed,
-            parent,
+            spawner_type: spawner.map_or(0, |caller| caller.entity_type),
+            spawner_variant: spawner.map_or(0, |caller| caller.variant),
+            // Game.Spawn550acd copies only cached1c/20. This appearance
+            // caller never invokes447fc0, so actual Entity.parent498 is NULL.
+            parent: None,
             birth_game_update: self.game_update_count,
             actor_rng: items::Rng::new(seed, [4, 3, 17]),
             position,
@@ -629,6 +638,8 @@ pub fn admit_blood_splat(
         variant: 7,
         subtype: 0,
         spawn_seed: seed,
+        spawner_type: 0,
+        spawner_variant: 0,
         parent: None,
         birth_game_update: state.game_update_count,
         actor_rng: items::Rng::new(seed, [4, 3, 17]),
