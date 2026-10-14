@@ -18,6 +18,9 @@
 const suite = (id, entry, args, about, extra = {}) => ({ id, entry, args, about, ...extra });
 const paired = 'tools/foundation/paired-game.mjs';
 const e2e = name => `tools/e2e/${name}.mjs`;
+const helper = name => `tools/original/${name}`;
+// A scenario helper's tapes graded by a state comparator (see state-pair.mjs).
+const statePair = e2e('state-pair');
 
 export const SUITES = [
   suite('paired', paired, [], 'Title/menu, movement/fire, pause, bombs and combat rooms; six contrived + two OS-random runs'),
@@ -56,10 +59,15 @@ export const SUITES = [
   suite('active-item-use', e2e('items'), ['--active-use', '--count', '2'],
     'Acquiring and using an active item (Yum Heart): charge, health, animation and SFX'),
   suite('familiars', e2e('familiars'), ['--count', '2'], 'Familiar admission, appearance and following'),
-  suite('npcs', e2e('npcs'), [], 'Fly/AttackFly/Gaper construction, AI and contact', { replay: false }),
-  suite('roundworms', e2e('roundworms'), [], 'Round Worm actors, projectiles and room locks', { replay: false }),
-  suite('fireplaces', e2e('fireplaces'), [], 'Fireplace damage, extinguish and Ember effects', { replay: false }),
-  suite('monstro', e2e('monstro'), [], 'Level2 Fly route into Monstro: admission, AI, projectiles and scene cleanup', { replay: false }),
+  suite('npcs', statePair, ['--scenario-helper', helper('npc-scenarios.py'), '--comparator', 'tools/foundation/npc-state-pair.mjs',
+    '--require-from-case', 'npcRequired'], 'Fly/AttackFly/Gaper construction, AI and contact'),
+  suite('roundworms', statePair, ['--scenario-helper', helper('roundworm-scenarios.py'), '--comparator',
+    'tools/foundation/roundworm-state-pair.mjs', '--native-frame-timeout', '120'], 'Round Worm actors, projectiles and room locks'),
+  suite('fireplaces', statePair, ['--scenario-helper', helper('fireplace-scenarios.py'), '--comparator',
+    'tools/foundation/fireplace-state-pair.mjs'], 'Fireplace damage, extinguish and Ember effects'),
+  suite('monstro', statePair, ['--scenario-helper', helper('monstro-scenarios.py'), '--comparator',
+    'tools/foundation/monstro-state-pair.mjs', '--native-frame-timeout', '120'],
+    'Level2 Fly route into Monstro: admission, AI, projectiles and scene cleanup'),
   suite('dips', e2e('dips'), ['--count', '2'], 'Dip admission, AI, poop explosions and death callbacks', { replay: false }),
   suite('blood-start', e2e('blood-start'), [], 'Blood effect start-up and background admission', { replay: false }),
   suite('health-damage', e2e('health-damage'), ['--count', '2'],
