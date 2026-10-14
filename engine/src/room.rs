@@ -213,6 +213,26 @@ impl DecorationRng {
     }
 }
 
+/// Room backdrop setup 5c5b30 reloads fxlayers.xml (5c5be3 -> 5489b0) on
+/// every Room init. Each authored `fxRay`, in every ray group whatever its
+/// stages, draws one phase uniform()*pi at 54a16d. Crawlspace rooms (type 16)
+/// and backdrop 13 (boss RoomData 5000) clear the layers instead. The browser
+/// does not draw rays yet, so only the draws are kept.
+pub fn load_fx_rays(room: &Room, shared: &mut crate::mt::Mt19937) {
+    if let Some(descriptor) = &room.descriptor {
+        let template = &descriptor.template;
+        if template.room_type == 16 || (template.room_type == 5 && template.variant == 5000) {
+            return;
+        }
+    }
+    let rays = include_str!("../../references/isaac/rebirth/resources/fxlayers.xml")
+        .matches("<fxRay ")
+        .count();
+    for _ray in 0..rays {
+        let _phase = (f64::from(shared.uniform()) * std::f64::consts::PI) as f32;
+    }
+}
+
 impl Room {
     pub fn from_starting_floor(floor: &crate::floor::Floor) -> Self {
         Self::from_floor_descriptor(floor, floor.starting_descriptor)

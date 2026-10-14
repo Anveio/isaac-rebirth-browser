@@ -507,10 +507,7 @@ pub fn advance_actor(state: &mut State, phase: Phase, id: u32) -> Result<(), Str
             position,
             BLAST_RADIUS,
             60.0,
-            crate::combat::DamageSource {
-                id,
-                entity_type: 4,
-            },
+            crate::combat::DamageSource { id, entity_type: 4 },
         )?;
         state.explosions.push(Explosion {
             id,
@@ -546,7 +543,12 @@ pub(crate) fn explode(
     crate::npcs::bomb_hit(state, position, radius, damage, source, &clear)?;
     crate::pickups::bomb_hit(state, position, radius, &clear)?;
     let player_velocity = if clear(player_world(state)) {
-        isaac_blast_velocity(player_world(state), player_velocity(state), position, radius)?
+        isaac_blast_velocity(
+            player_world(state),
+            player_velocity(state),
+            position,
+            radius,
+        )?
     } else {
         None
     };
