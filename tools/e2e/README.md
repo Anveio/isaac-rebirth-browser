@@ -46,12 +46,18 @@ for checking your own change.
 1. Register it in [`suites.mjs`](suites.mjs): an id, a driver, default args and
    a one-line `about`. That is the whole registry: the runner, CI and
    `--list` all read it.
-2. Reuse an existing driver where one fits: `traversal.mjs` (or a thin
-   wrapper such as `doors.mjs`) with a scenario helper for multi-room routes,
-   `runPairedGate` from `tools/foundation/paired-game.mjs` for paired tapes, or
-   a mode flag on an existing driver (`items.mjs --stat-cache`).
-3. Read browser state with `window.game.snapshotJson()`: one round trip
-   carrying the engine's own JSON text.
+2. Reuse an existing driver where one fits:
+   - [`lib/room-frames.mjs`](lib/room-frames.mjs) for routes compared on
+     every frame. The suite supplies only its own `compare` and `finish`
+     checks; [`keys.mjs`](keys.mjs) is the smallest example;
+   - `traversal.mjs` (or a thin wrapper such as `doors.mjs`) with a scenario
+     helper for multi-room routes;
+   - `runPairedGate` from `tools/foundation/paired-game.mjs` for paired tapes,
+     or a mode flag on an existing driver (`items.mjs --stat-cache`).
+3. Drive the page through [`lib/game.mjs`](lib/game.mjs): `stepSnapshot(page)`
+   for per-frame comparisons (one round trip carrying the engine's JSON),
+   `step(page, n)` when no state is needed. Use [`lib/cli.mjs`](lib/cli.mjs)
+   for flags and output directories.
 4. Give it contrived cases and a `--count` of fuzz cases. Write
    `scenarios.json` to the output directory and accept `--scenarios` to replay
    it.
