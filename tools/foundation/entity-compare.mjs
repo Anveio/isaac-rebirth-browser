@@ -45,6 +45,7 @@ export function npcFields(native, actor, phase) {
 /** Room lock, manager counts and door states. */
 export function roomRows(rows, source, actual) {
   check(rows, 'room.identity', source.room.descriptorIndex, actual.currentRoom);
+  check(rows, 'room.grid', [source.room.gridWidth, source.room.gridHeight], actual.room.grid && [actual.room.grid.width, actual.room.grid.height]);
   check(rows, 'room.combatClear', source.room.combatClear, actual.room.combatClear);
   check(rows, 'room.combatClearCountdown', source.room.combatClearCountdown, actual.room.combatClearCountdown);
   for (const field of ['countablePending', 'countableCurrent', 'bossPending', 'bossCurrent'])
@@ -66,6 +67,7 @@ export function entityRows(rows, source, actual, spec) {
     port.map(actor => [actor.kind, actor.variant, actor.spawnSeed]));
   check(rows, 'system.phase', phase, actual.systemClock.systemCounter % 2);
   roomRows(rows, source, actual);
+  for (const [field, expected, observed] of spec.roomFields?.(source, actual, phase) ?? []) check(rows, field, expected, observed);
   const selected = npcs.filter(actor => spec.matches(actor.type, actor.variant));
   for (const native of selected) {
     const actor = port.find(candidate => candidate.kind === native.type && candidate.spawnSeed === native.spawnSeed);
@@ -101,7 +103,7 @@ export function loadManifest(directory, side) {
   return JSON.parse(gunzipSync(readFileSync(resolve(directory, side, 'manifest.json.gz'))));
 }
 
-export const MARKERS = ['admission', 'damage', 'death', 'retirement', 'clear'];
+export const MARKERS = ['admission', 'damage', 'death', 'retirement', 'clear', 'shape'];
 
 /** Lifecycle markers each game reaches on its own over a whole case. */
 export function markers(directory, spec) {
@@ -119,6 +121,9 @@ export function markers(directory, spec) {
         ? row.entities.filter(actor => spec.matches(actor.type, actor.variant)).map(actor => ({ seed: actor.spawnSeed, hp: actor.hp, maxHp: actor.maxHp, pending: actor.pendingDamage, dead: actor.removed }))
         : row.room.npcs.filter(actor => !actor.removed && spec.matches(actor.kind, actor.variant)).map(actor => ({ seed: actor.spawnSeed, hp: actor.hp, maxHp: actor.maxHp, pending: actor.damage.pendingDamage, dead: actor.dead }));
       const clear = side === 'original' ? row.room.combatClear : row.room.combatClear;
+      // The spec's authored shape plus the one-cell wall border.
+      const grid = side === 'original' ? [row.room.gridWidth, row.room.gridHeight] : row.room.grid && [row.room.grid.width, row.room.grid.height];
+      seen.shape ||= Boolean(spec.shape && grid && grid[0] === spec.shape[0] + 2 && grid[1] === spec.shape[1] + 2);
       seen.admission ||= actors.length > 0;
       seen.damage ||= actors.some(actor => actor.pending > 0 || actor.hp < actor.maxHp);
       for (const actor of actors) if (actor.dead) { dead.add(actor.seed); seen.death = true; }
