@@ -150,8 +150,9 @@ try {
           bootEpochSeed: trace.bootEpochSeed, manualSeed: item.code },
         nativeManifestSha256: digest(manifestBytes), nativeManifest: join(directory, 'original/manifest.json') });
     } finally {
-      await writeFile(join(directory, 'browser-states.json'), JSON.stringify({ schema: 1, states,
-        trace: await page.evaluate(() => window.game.trace()) }, null, 2) + '\n');
+      // Evidence capture must not replace the case's real error with its own.
+      const trace = await page.evaluate(() => window.game.trace()).catch(error => ({ unavailable: String(error) }));
+      await writeFile(join(directory, 'browser-states.json'), JSON.stringify({ schema: 1, states, trace }, null, 2) + '\n');
       await page.close();
     }
     } catch (error) {
