@@ -306,7 +306,10 @@ interface Exports extends WebAssembly.Exports {
   reset_with_resources: (initialSeed: number, bootEpochSeed: number) => number;
   command: () => number; snapshot_ptr: () => number; snapshot_len: () => number;
   error_ptr: () => number; error_len: () => number; public_keys_ptr: () => number; public_keys_len: () => number;
+  mt_draws_enable: (enabled: number) => void; mt_draws_ptr: () => number;
 }
+/** One shared-MT draw from the opt-in diagnostic log (e2e `--mt-draws`). */
+export interface MtDraw { counter: number; index: number; kind: "B" | "U" | "R"; site: string; }
 export class Engine {
   /** The engine-owned key surface: the only codes `key` commands accept. */
   readonly publicKeys: ReadonlySet<string>;
@@ -375,5 +378,9 @@ export class Engine {
   tick(count = 1): State { return this.command({ type: "tick", count }); }
   snapshot(): State { return JSON.parse(this.snapshotJson()) as State; }
   snapshotJson(): string { const ptr = this.wasm.snapshot_ptr(); return this.read(ptr, this.wasm.snapshot_len()); }
+  /** Diagnostic only: turn the shared-MT draw log on (cleared) or off. */
+  setMtDrawLog(enabled: boolean): void { this.wasm.mt_draws_enable(enabled ? 1 : 0); }
+  /** Diagnostic only: the draws logged since the previous call. */
+  takeMtDraws(): MtDraw[] { const ptr = this.wasm.mt_draws_ptr(); return JSON.parse(this.read(ptr, this.wasm.snapshot_len())) as MtDraw[]; }
   private read(ptr: number, length: number) { return new TextDecoder().decode(new Uint8Array(this.wasm.memory.buffer, ptr, length)); }
 }

@@ -1263,6 +1263,7 @@ impl Game {
         self.state.paused = false;
         self.state.run_tick = 0;
         self.state.game_update_count = 0;
+        mt::note_update(0);
         self.state.tears.clear();
         self.state.next_tear = 1;
         self.state.enemy_projectiles.clear();
@@ -2060,6 +2061,7 @@ impl Game {
                 .game_update_count
                 .checked_add(1)
                 .ok_or("game update counter exhausted")?;
+            mt::note_update(self.state.game_update_count);
             critters::replay_loader_update(&mut self.state)?;
         }
         doors::advance(&mut self.state, phase)?;
@@ -2955,6 +2957,21 @@ pub extern "C" fn error_ptr() -> *const u8 {
 #[no_mangle]
 pub extern "C" fn error_len() -> usize {
     ERROR.with(|error| error.borrow().len())
+}
+/// Diagnostic shared-MT draw log for the e2e `--mt-draws` comparator.
+/// Nonzero enables (and clears) it; zero disables it. Off by default.
+#[no_mangle]
+pub extern "C" fn mt_draws_enable(enabled: u32) {
+    mt::set_draw_log(enabled != 0);
+}
+/// JSON array of the draws logged since the previous call; empty when off.
+#[no_mangle]
+pub extern "C" fn mt_draws_ptr() -> *const u8 {
+    SNAPSHOT.with(|snapshot| {
+        *snapshot.borrow_mut() =
+            serde_json::to_vec(&mt::take_draws()).expect("draw log serializes");
+        snapshot.borrow().as_ptr()
+    })
 }
 /// The public key surface as a JSON array of key codes; needs no reset.
 #[no_mangle]
