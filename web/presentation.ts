@@ -3,6 +3,7 @@ import type { SampledFrame } from "./animation-math";
 import type { State } from "./engine";
 
 const STREAK = "gfx/ui/ui_streak.anm2";
+const BOSS_BAR = "gfx/ui/ui_bosshealthbar.png";
 const PAUSE = "gfx/ui/pausescreen.anm2";
 const STATS = "gfx/ui/pausescreenstats.anm2";
 
@@ -17,8 +18,23 @@ export class RunPresentation {
     const frame = this.assets.layerFrame(STREAK, "Text", 0, tick);
     if (!frame?.Visible) return;
     this.attached(ctx, frame, 240, 48, () => {
-      this.assets.font(ctx, "upheaval", "BASEMENT I", 0, -9, { align: "center", pixelSnap: true });
+      this.assets.font(ctx, "upheaval", state.runIntroduction.title, 0, -9, { align: "center", pixelSnap: true });
     });
+  }
+
+  /** HUD boss bar (5746a9): ui_bosshealthbar.png background at (166, 8) and
+   * a fill of fill*110 pixels from (20, 0), dimmed to 0.6 on even flash ticks. */
+  bossBar(ctx: CanvasRenderingContext2D, state: State): void {
+    const bar = state.bossBar;
+    if (bar.fill < 0) return;
+    const image = this.assets.image(BOSS_BAR);
+    const backend = ctx as unknown as { drawTintedImage?: (source: CanvasImageSource, tint: number[], offsets: number[], ...args: number[]) => void };
+    const draw = (tint: number, ...args: number[]) => backend.drawTintedImage
+      ? backend.drawTintedImage(image, [tint, tint, tint, 1], [0, 0, 0], ...args)
+      : ctx.drawImage(image, ...args as [number, number, number, number, number, number, number, number]);
+    draw(1, 0, 32, 148, 32, 166, 8, 148, 32);
+    const width = Math.fround(bar.fill * 110);
+    if (width > 0) draw(bar.flash >= 0 && bar.flash % 2 === 0 ? 0.6 : 1, 20, 0, width, 32, 186, 8, width, 32);
   }
 
   pause(ctx: CanvasRenderingContext2D, state: State): void {

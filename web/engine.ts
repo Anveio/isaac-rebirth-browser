@@ -138,7 +138,8 @@ export interface Pickup {
   presentedPosition: {x: number; y: number}; anchorPosition: {x: number; y: number};
   velocity: {x: number; y: number}; configuredFriction: number; currentFriction: number; collisionMass: number;
 }
-export interface RunIntroduction { age: number; active: boolean; }
+export interface RunIntroduction { age: number; active: boolean; title: string; stage: boolean; }
+export interface BossBar { fill: number; flash: number; maximum: number; }
 export interface PauseMenu {
   phase: "hidden" | "appearing" | "idle" | "disappearing";
   age: number; selection: number; statFrames: [number, number, number, number, number, number];
@@ -293,7 +294,7 @@ export interface State {
   maxFireDelay: number; headTimer: number; actorScheduler: { actors: ActorRef[]; identities: {actor: ActorRef; sequenceId: number}[]; roomNextSequence: number };
   bombs: Bomb[]; explosions: Explosion[]; nextBomb: number; damageCooldown: number;
   bombPlacementCooldown: { remainingUpdates: number }; bombActionWasDown: boolean;
-  runIntroduction: RunIntroduction; pauseMenu: PauseMenu;
+  runIntroduction: RunIntroduction; bossBar: BossBar; pauseMenu: PauseMenu;
   playerDeath: { lastDamageFlags: number; gameOver: { state: number; damageFlags: number; diaryFrame: number; diaryPlaying: boolean } | null; systemPending: "restart" | "exit" | null };
 }
 export type Command = { type: "key"; code: string; down: boolean } | { type: "text"; text: string } | { type: "tick"; count: number; timestampMillis?: number } | { type: "audioVolume"; sfx_volume: number } | { type: 'musicVolume'; volume: number } | MusicBackendCommand;

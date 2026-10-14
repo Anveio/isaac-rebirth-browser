@@ -84,6 +84,7 @@ const urls = import.meta.glob([
   "../references/isaac/rebirth/resources/gfx/effects/effect_023_starflash.png",
   "../references/isaac/rebirth/resources/gfx/effects/effect_052_dust cloud.png",
   "../references/isaac/rebirth/resources/gfx/ui/ui_chargebar.png",
+  "../references/isaac/rebirth/resources/gfx/ui/ui_bosshealthbar.png",
   "../references/isaac/rebirth/resources/font/*_0.png",
 ], { eager: true, query: "?url", import: "default" }) as Record<string, string>;
 
