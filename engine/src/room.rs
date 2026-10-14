@@ -321,6 +321,10 @@ impl Room {
                 slot: door.slot,
                 open: door.state == "Opened",
                 hidden: door.state == "Hidden",
+                double_lock: floor.descriptors[door.target_room as usize]
+                    .template
+                    .room_type
+                    == 21,
             })
             .collect::<Vec<_>>();
         room.grid = Some(
