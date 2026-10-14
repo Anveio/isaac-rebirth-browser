@@ -3,6 +3,7 @@
 //! Application initialization supplies the startup epoch explicitly. Real
 //! lifecycle, audio and entity consumers must all use this same state in order.
 use serde::{Deserialize, Serialize};
+use std::cell::{Cell, RefCell};
 use std::collections::BTreeMap;
 
 pub const STATE_WORDS: usize = 624;
@@ -36,6 +37,43 @@ impl TryFrom<State> for Mt19937 {
     }
 }
 
+/// One shared draw in the opt-in diagnostic log read by the e2e MT draw
+/// comparator (`--mt-draws`). `counter` is the port's game update count when
+/// the draw happened; `index` is the stream index before it.
+#[derive(Clone, Debug, Serialize, PartialEq, Eq)]
+pub struct Draw {
+    pub counter: u32,
+    pub index: u16,
+    /// `B` bounded, `U` uniform, `R` raw u32.
+    pub kind: char,
+    pub site: String,
+}
+
+thread_local! {
+    static DRAW_LOG: RefCell<Option<Vec<Draw>>> = const { RefCell::new(None) };
+    static DRAW_COUNTER: Cell<u32> = const { Cell::new(0) };
+}
+
+/// Turns the diagnostic draw log on (clearing it) or off. Off by default.
+pub fn set_draw_log(enabled: bool) {
+    DRAW_LOG.with(|log| *log.borrow_mut() = enabled.then(Vec::new));
+}
+
+/// Removes and returns the draws logged since the previous call.
+pub fn take_draws() -> Vec<Draw> {
+    DRAW_LOG.with(|log| {
+        log.borrow_mut()
+            .as_mut()
+            .map(std::mem::take)
+            .unwrap_or_default()
+    })
+}
+
+/// Records the game update count that subsequent logged draws belong to.
+pub fn note_update(counter: u32) {
+    DRAW_COUNTER.with(|cell| cell.set(counter));
+}
+
 impl Mt19937 {
     pub fn new(boot_epoch_seed: u32) -> Self {
         let mut words = vec![0; STATE_WORDS];
@@ -58,7 +96,25 @@ impl Mt19937 {
         usize::from(self.index)
     }
 
+    #[track_caller]
     pub fn next_u32(&mut self) -> u32 {
+        self.draw('R')
+    }
+
+    #[track_caller]
+    fn draw(&mut self, kind: char) -> u32 {
+        // Read outside the closure, which does not inherit #[track_caller].
+        let site = std::panic::Location::caller();
+        DRAW_LOG.with(|log| {
+            if let Some(log) = log.borrow_mut().as_mut() {
+                log.push(Draw {
+                    counter: DRAW_COUNTER.with(Cell::get),
+                    index: self.index,
+                    kind,
+                    site: format!("{}:{}", site.file(), site.line()),
+                });
+            }
+        });
         if self.index() == STATE_WORDS {
             for i in 0..STATE_WORDS {
                 let y = (self.words[i] & 0x8000_0000)
@@ -79,16 +135,18 @@ impl Mt19937 {
     }
 
     /// The source rounds to f32 before scaling; the largest uints can yield1.
+    #[track_caller]
     pub fn uniform(&mut self) -> f32 {
-        uint_to_uniform(self.next_u32())
+        uint_to_uniform(self.draw('U'))
     }
 
     /// Source Random(0) returns zero without consuming the shared stream.
+    #[track_caller]
     pub fn bounded(&mut self, bound: u32) -> u32 {
         if bound == 0 {
             0
         } else {
-            self.next_u32() % bound
+            self.draw('B') % bound
         }
     }
 }
