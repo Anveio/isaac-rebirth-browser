@@ -65,7 +65,7 @@ pub struct Sprite {
 }
 
 impl Sprite {
-    fn new(config: &Definition) -> Self {
+    pub(crate) fn new(config: &Definition) -> Self {
         Self {
             animation: config.default_clip.into(),
             frame: 0.0,
@@ -79,7 +79,7 @@ impl Sprite {
             offsets: [0.0; 3],
         }
     }
-    fn advance(&mut self, config: &Definition) -> Result<(), String> {
+    pub(crate) fn advance(&mut self, config: &Definition) -> Result<(), String> {
         if !self.playing {
             return Ok(());
         }
@@ -210,6 +210,7 @@ pub struct SpriteEffect {
     pub actor_rng: items::Rng,
     pub position: WorldVector,
     pub presented_position: WorldVector,
+    pub render_offset: WorldVector,
     pub velocity: WorldVector,
     pub configured_friction: f32,
     pub current_friction: f32,
@@ -229,8 +230,11 @@ pub struct SpriteEffect {
     pub time_to_live: i32,
     pub raw_7f4: i32,
     pub raw_7f8: f32,
+    pub raw_7d8: bool,
     pub sprite: Sprite,
     pub full_updates: u32,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub poop_effect: Option<crate::poop_effects::Controller>,
 }
 
 impl SpriteEffect {
@@ -364,6 +368,7 @@ impl NpcEffectAdmission<'_> {
             actor_rng: items::Rng::new(seed, [4, 3, 17]),
             position,
             presented_position: position,
+            render_offset: ZERO,
             velocity,
             configured_friction: config.friction,
             current_friction: config.friction,
@@ -384,8 +389,10 @@ impl NpcEffectAdmission<'_> {
             time_to_live: -1,
             raw_7f4: 1,
             raw_7f8: 0.0,
+            raw_7d8: false,
             sprite,
             full_updates: 0,
+            poop_effect: None,
         });
         self.scheduler.admit(ActorRef {
             kind: ActorKind::Effect,
@@ -401,7 +408,29 @@ pub fn advance_effect(state: &mut State, phase: Phase, id: u32) -> Result<(), St
         .iter_mut()
         .find(|effect| effect.id == id)
     {
-        effect.advance(phase)?;
+        if effect.poop_effect.is_some() {
+            match phase {
+                Phase::Update => crate::poop_effects::advance_full(
+                    effect,
+                    &mut state.boot_lifecycle.shared,
+                    &mut state.audio,
+                    state.system_clock.system_counter.wrapping_sub(1),
+                )?,
+                Phase::Interpolate => {
+                    let grid = Grid::new(
+                        state
+                            .room
+                            .grid
+                            .clone()
+                            .ok_or("poop effect requires actual grid")?,
+                    )?;
+                    crate::poop_effects::advance_fast(effect, &grid)?;
+                }
+                Phase::Skipped => {}
+            }
+        } else {
+            effect.advance(phase)?;
+        }
     }
     Ok(())
 }
@@ -612,6 +641,9 @@ pub struct BackgroundStain {
     pub spawn_seed: u32,
     pub birth_game_update: u32,
     pub position: WorldVector,
+    pub variant: u32,
+    pub render_offset: WorldVector,
+    pub layer_rotation: Option<f32>,
     pub sprite: Sprite,
 }
 
@@ -672,6 +704,7 @@ impl NpcEffectAdmission<'_> {
             actor_rng: items::Rng::new(seed, [4, 3, 17]),
             position,
             presented_position: position,
+            render_offset: ZERO,
             velocity: ZERO,
             configured_friction: config.friction,
             current_friction: config.friction,
@@ -691,8 +724,10 @@ impl NpcEffectAdmission<'_> {
             time_to_live: -1,
             raw_7f4: 1,
             raw_7f8: 0.0,
+            raw_7d8: false,
             sprite,
             full_updates: 0,
+            poop_effect: None,
         });
         // Room5c6940 assigns the actual sequence first; Manager4524f0 then routes
         // flags8 to its separate background pool rather than the ordinary array.
@@ -796,7 +831,12 @@ pub fn paint_background_effects(state: &mut State) -> Result<(), String> {
         .sprite_effects
         .iter()
         .enumerate()
-        .filter(|(_, effect)| effect.variant == 7 && effect.active && !effect.removed)
+        .filter(|(_, effect)| {
+            matches!(effect.variant, 7 | 43 | 58)
+                && effect.flags & 8 != 0
+                && effect.active
+                && !effect.removed
+        })
         .map(|(index, effect)| {
             let key = ((100.0_f32 * effect.position.y + 10030.0) + 0.5).floor() as u32;
             (
@@ -809,7 +849,7 @@ pub fn paint_background_effects(state: &mut State) -> Result<(), String> {
     pending.sort_by(|a, b| a.1.cmp(&b.1).then_with(|| b.2.cmp(&a.2)));
     for (index, _, _) in pending {
         let effect = &mut state.sprite_effects[index];
-        if effect.full_updates != 1 {
+        if effect.variant == 7 && effect.full_updates != 1 {
             return Err("Blood background paint requires the explicit initial Update".into());
         }
         state.room.background_stains.push(BackgroundStain {
@@ -817,6 +857,12 @@ pub fn paint_background_effects(state: &mut State) -> Result<(), String> {
             spawn_seed: effect.spawn_seed,
             birth_game_update: effect.birth_game_update,
             position: effect.position,
+            variant: effect.variant,
+            render_offset: effect.render_offset,
+            layer_rotation: effect
+                .poop_effect
+                .as_ref()
+                .and_then(|controller| controller.layer_rotation()),
             sprite: effect.sprite.clone(),
         });
         // Remove441bb0 clears active and marks dead; visibility stays unchanged.

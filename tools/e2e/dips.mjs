@@ -18,7 +18,8 @@ mkdirSync(output, {recursive: true});
 const save = (path, value) => writeFileSync(path, JSON.stringify(value, null, 2) + '\n');
 const sources = ['tools/e2e/dips.mjs', 'tools/original/dip-scenarios.py', 'tools/original/foundation-combat-observe.py',
   'engine/src/dips.rs', 'engine/src/npcs.rs', 'engine/src/familiars.rs', 'engine/src/lib.rs', 'engine/build.rs',
-  'web/engine.ts', 'web/renderer.ts', 'web/npc-data.json', 'docs/dip-source-contract.json'];
+  'engine/src/poop_effects.rs', 'engine/src/gib_counts.rs', 'web/engine.ts', 'web/renderer.ts',
+  'web/npc-data.json', 'web/familiar-data.json', 'docs/dip-source-contract.json', 'docs/poop-effects-source-contract.json'];
 const hashes = () => Object.fromEntries(sources.map(path => [path, createHash('sha256').update(readFileSync(path)).digest('hex')]));
 const before = hashes();
 const scenarios = JSON.parse(execFileSync('python3', ['tools/original/dip-scenarios.py', '--count', option('--count', '2')],
@@ -82,14 +83,61 @@ function compare(source, actual, gameplay) {
         port.damage.events.map(event => [f32(event.amount), {tear: 0, bomb: 4, fireContact: 2, roomEffect: 0}[event.kind], event.source.entityType])],
       ['position', vector(npc.position), vector(phase === 0 ? port.presentedPosition : port.position)],
       ['velocity', vector(npc.velocity), vector(port.velocity)],
+      ['renderOffset', vector(npc.entityRenderOffset), vector(port.dip?.renderOffset)],
+      ['statusCountdown', npc.statusCountdown, port.dip?.statusCountdown],
       ['tint', npc.spriteTint.map(f32), port.dip?.tint.map(f32)], ['offsets', npc.spriteOffsets.map(f32), port.dip?.offsets.map(f32)],
     ]) check(rows, `Dip${index}.${name}`, expected, observed);
   }
-  // Poop58/43 are actual source actors. Missing implementation stays blocking.
+  // Every actual58/43 body remains required; zero category5 count is legal.
   const poop = original.entities.filter(actor => actor.type === 1000 && [58, 43].includes(actor.variant));
   const effects = actual.spriteEffects.filter(actor => actor.active && !actor.removed && [58, 43].includes(actor.variant));
   check(rows, 'poopEffects.births', poop.map(actor => [actor.variant, actor.subtype, actor.spawnSeed]),
     effects.map(actor => [actor.variant, actor.subtype, actor.spawnSeed]));
+  for (const [index, effect] of poop.entries()) {
+    const port = effects.find(actor => actor.variant === effect.variant && actor.spawnSeed === effect.spawnSeed);
+    if (!port) continue;
+    const controller = port.poopEffect;
+    const particle = controller?.particle58;
+    const flight = typeof particle === 'object' ? particle.flying : undefined;
+    const state = effect.variant === 58 ? (particle === 'initializing' ? 0 : flight ? 1 : undefined)
+      : controller?.explosion43?.frameTarget;
+    for (const [field, expected, observed] of [
+      ['state', effect.poopEffectState, state],
+      ['position', vector(effect.position), vector(phase === 0 ? port.presentedPosition : port.position)],
+      ['velocity', vector(effect.velocity), vector(port.velocity)],
+      ['renderOffset', vector(effect.entityRenderOffset), vector(port.renderOffset)],
+      ['spawner', [effect.parentType, effect.parentVariant], [port.spawnerType, port.spawnerVariant]],
+      ['linkedParent', effect.effectParent, port.parent], ['flags', effect.entityFlags, port.flags],
+      ['radius', f32(effect.collisionRadius), f32(port.collisionRadius)],
+      ['mass', f32(effect.collisionMass), f32(port.collisionMass)],
+      ['damage', f32(effect.collisionDamage), f32(port.collisionDamage)],
+      ['gridClass', effect.gridCollisionClass, port.gridCollisionClass],
+      ['entityClass', effect.entityCollisionClass, port.entityCollisionClass],
+      ['friction', f32(effect.friction), f32(port.currentFriction)],
+      ['hp', f32(effect.hp), f32(port.hp)], ['maxHp', f32(effect.maxHp), f32(port.maxHp)],
+      ['animation', effect.animation, port.sprite.animation],
+      ['frame', f32(effect.animationFrame), f32(port.sprite.frame)],
+      ['playing', effect.animationPlaying, port.sprite.playing],
+      ['speed', f32(effect.animationSpeed), f32(port.sprite.speed)],
+      ['flip', [effect.spriteFlipX, effect.spriteFlipY], [port.sprite.flipX, port.sprite.flipY]],
+      ['scale', vector(effect.spriteScale), vector(port.sprite.scale)],
+      ['tint', effect.spriteTint.map(f32), port.sprite.tint.map(f32)],
+      ['offsets', effect.spriteOffsets.map(f32), port.sprite.offsets.map(f32)],
+      ['raw7d8', effect.effectRaw7d8, port.raw7d8],
+      ['ttl', effect.effectTimeToLive, port.timeToLive],
+      ['raw7f4', effect.effectRaw7f4, port.raw7f4],
+      ['raw7f8', f32(effect.effectRaw7f8), f32(port.raw7f8)],
+      ['depth', effect.renderOrderOffset, port.renderOrderOffset],
+    ]) check(rows, `poopEffects${index}.${field}`, expected, observed);
+    if (effect.variant === 58 && effect.poopEffectState !== 0) {
+      for (const [field, expected, observed] of [
+        ['height', effect.poopParticleHeight, flight?.height],
+        ['verticalVelocity', effect.poopParticleVerticalVelocity, flight?.verticalVelocity],
+        ['gravity', effect.poopParticleGravity, flight?.gravity],
+        ['layerRotation', effect.poopParticleLayer0Rotation, flight?.layerRotation],
+      ]) check(rows, `poopEffects${index}.${field}`, f32(expected), f32(observed));
+    }
+  }
   for (const field of ['countablePending', 'countableCurrent', 'bossPending', 'bossCurrent']) {
     check(rows, `manager.${field}`, original.room[field], actual.room.managerCounts[field]);
   }
@@ -116,7 +164,7 @@ const execution = scenarios.cases.map((scenario, n) => {
   const directory = resolve(output, 'paired', `${String(n).padStart(2, '0')}-${scenario.scenario.id}`);
   const markers = {};
   for (const side of ['original', 'browser']) {
-    const seen = {admission: false, full: false, fast: false, poof: false, idle: false, move: false, death: false, retirement: false};
+    const seen = {admission: false, full: false, fast: false, poof: false, idle: false, move: false, death: false, retirement: false, explosion43: false};
     try {
       const manifest = loadManifest(directory, side);
       let rows;
@@ -125,6 +173,8 @@ const execution = scenarios.cases.map((scenario, n) => {
       let previousDead = false;
       for (const row of rows) {
         if (!row) continue;
+        seen.explosion43 ||= side === 'original' ? row.entities?.some(actor => actor.type === 1000 && actor.variant === 43)
+          : row.spriteEffects?.some(actor => actor.variant === 43);
         const actors = side === 'original' ? row.entities?.filter(actor => actor.type === 217) : row.room?.npcs.filter(actor => actor.kind === 217 && !actor.removed);
         if (!actors) continue;
         seen.poof ||= side === 'original' ? row.entities.some(actor => actor.type === 1000 && actor.variant === 15 && actor.parentType === 217)

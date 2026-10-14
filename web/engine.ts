@@ -33,15 +33,18 @@ export interface Familiar {
   flags: number; visible: boolean; active: boolean; removed: boolean; followerIndex: number; appearanceCounter: number;
   sprite: ActorSprite; fullUpdates: number; unresolvedAiUpdates: number;
 }
+export type PoopEffect = { particle58: "initializing" | {flying: {height: number; verticalVelocity: number; gravity: number; layerRotation: number}} } | { explosion43: {frameTarget: number} };
 export interface SpriteEffect {
   id: number; variant: number; subtype: number; spawnSeed: number;
   spawnerType: number; spawnerVariant: number;
   parent: {actor: ActorRef; entityType: number; variant: number} | null;
   birthGameUpdate: number; actorRng: ItemRng; position: {x: number; y: number}; presentedPosition: {x: number; y: number};
+  renderOffset: {x: number; y: number};
   velocity: {x: number; y: number}; configuredFriction: number; currentFriction: number;
   collisionRadius: number; collisionMass: number; collisionDamage: number; hp: number; maxHp: number;
   gridCollisionClass: number; entityCollisionClass: number; flags: number; visible: boolean; active: boolean; removed: boolean;
   renderOrderOffset: number; lifetimeDivisor: number; timeToLive: number; raw7f4: number; raw7f8: number;
+  raw7d8: boolean; poopEffect?: PoopEffect;
   sprite: ActorSprite; fullUpdates: number;
 }
 export interface Impact { id: number; x: number; y: number; age: number; }
@@ -166,7 +169,7 @@ export interface Room {
   spawns: {tintedRockIndex: number; finalSpawnState: number; selectors: {groupIndex: number; gridIndex: number; category: "entity" | "grid"; type: number; variant: number; subtype: number; position: {x: number; y: number}; groupSeed: number; spawnSeed: number}[]} | null;
   pickups: Pickup[];
   backgroundStains: {sourceEffectId: number; spawnSeed: number; birthGameUpdate: number;
-    position: {x: number; y: number}; sprite: ActorSprite}[];
+    position: {x: number; y: number}; variant: number; renderOffset: {x: number; y: number}; layerRotation: number | null; sprite: ActorSprite}[];
   savedRegularPickups: {handle: number; variant: number; subtype: number; position: {x: number; y: number};
     spawnSeed: number; rngSeed: number; charge: number; touched: boolean}[];
   npcs: { id: number; kind: number; variant: number; subtype: number; spawnSeed: number;
@@ -178,7 +181,7 @@ export interface Room {
     keeper: {anchor: {x: number; y: number}; entityFlags: number; stateFrame: number; countdown: number;
       animation: string; animationClock: number; animationPlaying: boolean; tint: number[]; offsets: number[]} | null;
     dip: {entityFlags: number; birthGameUpdate: number; currentFriction: number; flipX: boolean;
-      tint: number[]; offsets: number[]} | null;
+      tint: number[]; offsets: number[]; renderOffset: {x: number; y: number}; statusCountdown: number} | null;
     level2Fly: {entityFlags: number; birthGameUpdate: number; feedbackVelocity: {x: number; y: number};
       gridContact: boolean; gridNormal: {x: number; y: number}; previousGridVelocity: {x: number; y: number}} | null;
     monstro: {stateFrame: number; choice: number; entityFlags: number; flipX: boolean; birthGameUpdate: number;

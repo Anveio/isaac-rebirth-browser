@@ -1,13 +1,17 @@
 //! Ordinary Dip217: source4949c0, missing-Appear staging and Blood7 trail.
 use crate::{
+    actors::{ActorKind, ActorRef},
     audio::{AudioState, SoundRequest},
     combat, content,
-    familiars::NpcEffectAdmission,
+    familiars::{NpcEffectAdmission, Parent},
+    gib_counts::{self, AmountScale},
     grid::{Collider, CollisionGeometry, Grid},
     motion::WorldVector,
     mt::Mt19937,
     npcs::Npc,
     phase::Phase,
+    player_items::PlayerItems,
+    poop_effects,
     room_spawns::{SpawnCategory, SpawnSelector},
 };
 use serde::{Deserialize, Serialize};
@@ -24,6 +28,9 @@ pub struct DipState {
     pub flip_x: bool,
     pub tint: [f32; 4],
     pub offsets: [f32; 3],
+    /// Base441d81/441e66 per-spawn owners, not permanent eligibility constants.
+    pub render_offset: WorldVector,
+    pub status_countdown: i32,
 }
 
 pub(crate) struct World<'a> {
@@ -31,6 +38,7 @@ pub(crate) struct World<'a> {
     pub grid: &'a Grid,
     pub audio: &'a mut AudioState,
     pub system_counter: u32,
+    pub player_items: &'a PlayerItems,
     pub effects: NpcEffectAdmission<'a>,
 }
 
@@ -94,6 +102,8 @@ pub fn from_selector(id: u32, selector: &SpawnSelector, stage: u32) -> Result<Op
             flip_x: false,
             tint: [1.0; 4],
             offsets: [0.0; 3],
+            render_offset: ZERO,
+            status_countdown: 0,
         }),
     }))
 }
@@ -208,6 +218,82 @@ fn advance_sprite(npc: &mut Npc) {
     }
 }
 
+/// First dead31f transition4464c0 calls445c60 before the next FIFO record.
+fn die(npc: &mut Npc, random: &mut Mt19937, world: &mut World<'_>) -> Result<(), String> {
+    if [225, 234]
+        .iter()
+        .any(|&id| world.player_items.owned_counts[id] != 0)
+    {
+        return Err("Dip death requires the owned225/234 source callbacks".into());
+    }
+    let dip = npc.dip.as_ref().unwrap();
+    if dip.status_countdown > 0 {
+        return Err(
+            "Dip death with positive Entity400 requires the actual status/SFX137 owner".into(),
+        );
+    }
+    npc.dead = true;
+    world.audio.admit(
+        random,
+        world.system_counter,
+        SoundRequest {
+            id: 30,
+            volume: 1.0,
+            delay: 2,
+            looping: false,
+            pitch: 1.0,
+        },
+    );
+    // This caller is admitted by the existing normal-run menu. Challenge23
+    // and other death modifiers require their actual run/actor owner.
+    let counts = gib_counts::sample(
+        content::NPC_217_GIB_AMOUNT,
+        content::NPC_217_GIB_FLAGS,
+        AmountScale::Ordinary,
+        random,
+    )?;
+    for _ in 0..counts[5] {
+        let speed = random.uniform() * 4.0 + 2.0;
+        let seed = random.next_u32();
+        let direction = crate::npcs::direction(random);
+        let velocity = WorldVector {
+            x: direction.x,
+            y: direction.y * 0.5,
+        } * speed;
+        let offset = (crate::npcs::direction(random) * 0.5) * npc.collision_radius;
+        let mut admission = poop_effects::Admission {
+            game_update_count: world.effects.game_update_count,
+            next_effect: world.effects.next_effect,
+            effects: world.effects.effects,
+            scheduler: world.effects.scheduler,
+        };
+        let id = admission.admit_particle(poop_effects::ParticleBirth {
+            seed,
+            position: npc.position + offset,
+            velocity,
+            spawner: Some(Parent {
+                actor: ActorRef {
+                    kind: ActorKind::Npc,
+                    id: npc.id,
+                },
+                entity_type: 217,
+                variant: npc.variant,
+            }),
+        })?;
+        admission.advance_particle_initial(id, random)?;
+    }
+    if dip.entity_flags & 0x10000 == 0 {
+        let seed = random.next_u32();
+        npc.death_effect_seed = Some(seed);
+        //446287 copies the inherited color BEFORE the explicit7 Update.
+        let id = world
+            .effects
+            .admit_blood(seed, npc.position, dip.tint, dip.offsets)?;
+        world.effects.advance_blood_initial(id, random)?;
+    }
+    Ok(())
+}
+
 fn collider() -> &'static Collider {
     static COLLIDER: OnceLock<Collider> = OnceLock::new();
     COLLIDER.get_or_init(|| {
@@ -251,6 +337,9 @@ pub(crate) fn advance(
         )?;
         return Ok(());
     }
+    if npc.dip.as_ref().unwrap().status_countdown > 0 {
+        return Err("Dip Entity400 countdown/expiry needs its actual status callback".into());
+    }
     if npc.state == 1 {
         npc.dip.as_mut().unwrap().current_friction *= 0.01;
         match npc.frame_age {
@@ -283,7 +372,17 @@ pub(crate) fn advance(
         ai(npc, random, world)?;
     }
     if npc.dead {
-        //Real Poop43 admission before Remove remains required and unimplemented.
+        //4fc0a3: family AI has finished; factory gets physicalP+458, V0,
+        //NULL spawner and no initial Update. The captured old tail stays fixed.
+        let seed = random.next_u32();
+        let position = npc.position + npc.dip.as_ref().unwrap().render_offset;
+        poop_effects::Admission {
+            game_update_count: world.effects.game_update_count,
+            next_effect: world.effects.next_effect,
+            effects: world.effects.effects,
+            scheduler: world.effects.scheduler,
+        }
+        .admit_explosion(seed, position)?;
         npc.removed = true;
     }
     advance_sprite(npc);
@@ -294,13 +393,12 @@ pub(crate) fn advance(
     dip.current_friction = npc.base_friction;
     //44773a skips remaining records once the actual death byte is set. All
     //ordered flags currently represented by DamageKind use ordinary HP<0.
-    for event in npc.damage.events() {
+    for index in 0..npc.damage.events().len() {
+        let amount = npc.damage.events()[index].amount;
         if !npc.dead && npc.max_hp > 0.0 {
-            npc.hp -= event.amount;
+            npc.hp -= amount;
             if npc.hp < 0.0 {
-                npc.dead = true;
-                //445c60's five-poop-gib58 + Blood7 death consumer is a tracked
-                //required gap. Never substitute Fly's zero-gib Splat or draws.
+                die(npc, random, world)?;
             }
         }
     }

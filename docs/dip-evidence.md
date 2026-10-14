@@ -29,11 +29,18 @@ All native actor identities, queued damage, AI/clip/geometry/trajectory and
 actual Poop58/43 births remain required comparisons. Selected failures, aborted
 captures, inputs, complete observations and decoded-RGBA differences are retained.
 
-This first actor leaf has no production or live-game acceptance yet. The actual
-five-poop-gib58, final Blood7/SFX30 death consumer and next-full Poop43 admission
-remain unfinished required callbacks. They are not replaced by Fly's zero-gib
-splat or artificial shared draws. Their source-prepared Effect58/43 prerequisite
-is tracked separately and must be completed promptly. Native Blood background
+The follow-up implements the actual authored poop-gib58, final Blood7/SFX30
+death consumer and next-full Poop43 admission. Category sampling finishes before
+births; zero particles is valid. Each58 completes its explicit initial callback
+before the next birth. Final7 copies Dip color before its callback, while43 has
+no immediate callback. Typed58/43 full/fast/grid/flags8 paint and real authored
+sprites are shared effect consumers, with source pins in
+[the effect contract](poop-effects-source-contract.json).
+
+Neither actor nor effect leaf has production or live-game acceptance yet.
+The unchanged four public tapes now require actual58/43 body fields and43
+execution in both contrived games. Positive Entity400 status and owned225/234
+kill callbacks fail explicitly until their actual owners exist. Native Blood background
 paint/return, inherited status/color/fear/charm modifiers, saved-room rebuilding,
 later-stage HP witnesses and complete causal shared-stream alignment also remain
 unaccepted. Static validation cannot establish those game-level outcomes.

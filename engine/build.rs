@@ -200,6 +200,8 @@ fn familiar_catalog(path: &Path, entities_xml: &str) -> String {
         (1000, 7, "gfx/1000.007_blood splat.anm2"),
         (1000, 15, "gfx/1000.015_poof01.anm2"),
         (1000, 49, "gfx/1000.049_heart.anm2"),
+        (1000, 58, "gfx/1000.058_poop particle.anm2"),
+        (1000, 43, "gfx/1000.043_poop explosion.anm2"),
     ] {
         let catalogue = &actors[actor];
         let default = catalogue["DefaultAnimation"]
@@ -590,6 +592,23 @@ fn main() {
                 "pub const NPC_217_STAGEHP: f32 = {:?}_f32;\n",
                 entity_number(&xml, 217, 0, "stageHP")
             ));
+            let gibs = tag.split("<gibs ").nth(1).expect("Dip authored gibs");
+            let amount: u32 = attribute(gibs, "amount").unwrap().parse().unwrap();
+            let mut flags = 0;
+            for (name, bit) in [
+                ("blood", 1),
+                ("bone", 2),
+                ("gut", 4),
+                ("eye", 8),
+                ("large", 16),
+                ("poop", 32),
+            ] {
+                if attribute(gibs, name) == Some("1") {
+                    flags |= bit;
+                }
+            }
+            assert_eq!(flags, 32, "ordinary Dip has only real poop gibs");
+            generated.push_str(&format!("pub const NPC_217_GIB_AMOUNT: u32 = {amount};\npub const NPC_217_GIB_FLAGS: u32 = {flags};\n"));
         }
         for field in [
             "baseHP",
