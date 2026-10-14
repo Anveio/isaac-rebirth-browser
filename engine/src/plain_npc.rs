@@ -48,10 +48,13 @@ fn poof_subtype(npc: &Npc) -> u32 {
     }
 }
 
-/// Sprite.Play40fd80: a forced play restarts; otherwise only a different or
-/// stopped clip restarts.
+/// Sprite.Play40fd80: a forced play restarts; otherwise only a different
+/// clip, or the same looping clip while stopped (+124 clear, e.g. after
+/// SetFrame), restarts. A finished nonlooping clip stays finished.
 pub(crate) fn play(npc: &mut Npc, name: &str, force: bool) {
-    if force || npc.animation != name || !npc.animation_playing {
+    let stopped_loop = !npc.animation_playing
+        && content::clip(&npc.actor, name).is_some_and(|clip| clip.looping);
+    if force || npc.animation != name || stopped_loop {
         npc.animation = name.into();
         npc.animation_frame = 0;
         npc.animation_clock = 0.0;

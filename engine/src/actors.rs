@@ -128,6 +128,17 @@ impl Scheduler {
         self.allocate_identity(actor)
     }
 
+    /// One past the largest admitted handle id of `kind`: a fresh handle that
+    /// cannot collide with any actor the scheduler still holds.
+    pub fn next_free_id(&self, kind: ActorKind) -> Option<u32> {
+        self.identities
+            .iter()
+            .filter(|identity| identity.actor.kind == kind)
+            .map(|identity| identity.actor.id)
+            .max()
+            .map_or(Some(0), |id| id.checked_add(1))
+    }
+
     pub fn sequence_id(&self, actor: ActorRef) -> Option<u32> {
         self.identities
             .iter()
