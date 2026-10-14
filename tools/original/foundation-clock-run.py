@@ -197,13 +197,21 @@ def main():
         directory.mkdir(parents=True, exist_ok=True)
     for name in ('isaac.x64', 'lib64', 'resources'):
         (out / 'game' / name).symlink_to(source / name)
-    (local / 'options.ini').write_text(f'[Options]\nFullscreen=0\nFilter=0\nVSync=0\nPauseOnFocusLost=0\nSteamCloud=1\nMouseControl=0\nWindowWidth={args.width}\nWindowHeight={args.height}\nWindowPosX=0\nWindowPosY=0\nMaxRenderScale={args.max_render_scale}\nMusicVolume={args.music_volume}\nSFXVolume={args.sfx_volume}\n')
+    declared_options = {'Fullscreen': 0, 'Filter': 0, 'VSync': 0, 'PauseOnFocusLost': 0, 'SteamCloud': 1, 'MouseControl': 0,
+                        'WindowWidth': args.width, 'WindowHeight': args.height, 'WindowPosX': 0, 'WindowPosY': 0,
+                        'MaxRenderScale': args.max_render_scale, 'MusicVolume': args.music_volume, 'SFXVolume': args.sfx_volume}
+    (local / 'options.ini').write_text('[Options]\n' + ''.join(f'{key}={value}\n' for key, value in declared_options.items()))
     gate = out / 'clock-gate.so'
     subprocess.run(['cc', '-std=c11', '-Wall', '-Wextra', '-Werror', '-fPIC', '-shared',
                     str(Path(__file__).with_name('foundation-clock-gate.c')), '-o', str(gate), '-ldl'], check=True)
+    # The original silently ignores options.ini (falling back to defaults for
+    # volumes, VSync and focus pause) when the profile path is long. Hand it a
+    # short symlink to the retained profile so the declared options apply.
+    short = Path(tempfile.mkdtemp(prefix='isaac-')) / 'p'
+    short.symlink_to(out / 'profile', target_is_directory=True)
     env = os.environ.copy()
-    env.update({'HOME': str(out / 'profile'), 'XDG_DATA_HOME': str(out / 'profile/data'),
-                'XDG_CONFIG_HOME': str(out / 'profile/config'), 'ISAAC_OFFLINE_CLOUD_DIR': str(out / 'profile/cloud'),
+    env.update({'HOME': str(short), 'XDG_DATA_HOME': str(short / 'data'),
+                'XDG_CONFIG_HOME': str(short / 'config'), 'ISAAC_OFFLINE_CLOUD_DIR': str(short / 'cloud'),
                 'ALSOFT_DRIVERS': 'null', 'LD_PRELOAD': str(gate) + (' ' + env['LD_PRELOAD'] if env.get('LD_PRELOAD') else ''),
                 'LD_LIBRARY_PATH': str(source / 'lib64') + (':' + env['LD_LIBRARY_PATH'] if env.get('LD_LIBRARY_PATH') else ''),
                 'ISAAC_CLOCK_GATE_FPS': str(args.fps), 'ISAAC_CLOCK_GATE_STEP_NS': str(args.step_ns),
@@ -292,6 +300,15 @@ def main():
             current = acknowledgement()
             report['bootstrapPresentedFrames'] = 30
             record('field', {'name': 'bootstrapPresentedFrames', 'value': 30})
+            # A discarded options.ini is rewritten with defaults at boot; never
+            # let the original silently run on options other than the declared ones.
+            kept = dict(line.split('=', 1) for line in (local / 'options.ini').read_text().splitlines() if '=' in line)
+            differing = {key: kept.get(key) for key, value in declared_options.items()
+                         if key in ('VSync', 'PauseOnFocusLost', 'WindowWidth', 'WindowHeight', 'MusicVolume', 'SFXVolume')
+                         and (kept.get(key) is None or float(kept[key]) != float(value))}
+            if differing:
+                raise RuntimeError(f'Original discarded the declared options.ini after boot: {differing}')
+            report['declaredOptionsKept'] = True
             windows = subprocess.check_output(['xdotool', 'search', '--onlyvisible', '--name', '(Isaac|Rebirth)'], text=True)
             window = windows.splitlines()[-1]
             subprocess.run(['xdotool', 'windowfocus', '--sync', window], check=True)
