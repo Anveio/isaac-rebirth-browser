@@ -38,6 +38,7 @@ export function npcFields(native, actor, phase) {
       actor.damage.events.map(row => [f32(row.amount), DAMAGE_FLAGS[row.kind], row.source.entityType])],
     ['position', vector(native.position), vector(phase === 0 ? actor.presentedPosition : actor.position)],
     ['velocity', vector(native.velocity), vector(actor.velocity)], ['target', vector(native.npcTarget), vector(actor.target)],
+    ['championColor', native.npcChampionColor, actor.champion?.color ?? -1],
   ];
 }
 

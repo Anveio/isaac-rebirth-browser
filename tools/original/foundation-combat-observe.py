@@ -175,6 +175,10 @@ def observe(pid, context):
                     result['npcCountdown'] = struct.unpack_from('<I', more, 0x1c)[0]
                     # Entity_NPC projectile cooldown +f68 and delay +f6c (init 0/-1).
                     result['npcProjectileCooldown'], result['npcProjectileDelay'] = struct.unpack_from('<ii', more, 0x18)
+                    # Champion flag +103f, color +1040 (-1 none), speed +f74, timers +f70/+1044.
+                    result['npcChampion'] = bool(more[0x103f - 0xf50])
+                    result['npcChampionColor'] = struct.unpack_from('<i', more, 0x1040 - 0xf50)[0]
+                    result['npcSpeed'] = struct.unpack_from('<f', more, 0xf74 - 0xf50)[0]
                     if result['type'] == 33:
                         result['fireCountdown'] = struct.unpack_from('<i', more, 0x18)[0]
                     result['npcTarget'] = pair(0x440)
@@ -198,7 +202,7 @@ def observe(pid, context):
             if not 1 <= width <= 28 or not 1 <= height <= 16 or width * height > 448:
                 raise ValueError('Unexpected room grid shape')
             descriptor = u64(room + 8)
-            report['room'] = {'type': struct.unpack_from('<I', raw, 0x10)[0], 'gridWidth': width, 'gridHeight': height,
+            report['room'] = {'type': struct.unpack_from('<I', raw, 0x10)[0], 'byte0': raw[0], 'byte1': raw[1], 'gridWidth': width, 'gridHeight': height,
                 'descriptorIndex': u32(descriptor + 4), 'descriptorGridIndex': u32(descriptor),
                 'descriptorSpawnSeed': u32(descriptor + 0x4c),
                 'boundsTopLeft': list(struct.unpack_from('<ff', raw, 0x1c)),

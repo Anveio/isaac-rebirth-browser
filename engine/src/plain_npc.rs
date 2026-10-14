@@ -186,7 +186,11 @@ fn on_frame(npc: &Npc, world: &NpcWorld, period: u32) -> Result<bool, String> {
             id: npc.id,
         })
         .ok_or("NPC frame gate requires its manager sequence")?;
-    Ok(world.game_counter.wrapping_add(sequence) % period == 0)
+    // Native Game+ce9f4 reads one more than game_update_count: every paired
+    // entity-horf capture shows fullGameUpdates = gameUpdateCount + 1 (the
+    // run-loader origin recorded as absoluteCounterPendingLoader).
+    let native_counter = world.game_counter.wrapping_add(1);
+    Ok(native_counter.wrapping_add(sequence) % period == 0)
 }
 
 pub(crate) struct ShotParameters {

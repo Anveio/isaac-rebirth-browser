@@ -379,10 +379,17 @@ engine work in M1–M5 does not.
 - [x] M7 scenario finder, entity specs and the update_ai source index
 - [ ] M8 scaffold
 - [ ] M9 first import batch
-  - Horf 12: one source-reading pass (ai_horf 207 instructions,
-    try_shoot_player, generic appear) and one live fix iteration. All
-    Horf-owned fields match the original. The remaining failures are the
-    shared tear-trajectory gap, the start-room door state and death gibs that
-    have no admission yet.
+  - Horf 12: **about 30 minutes wall-clock** from opening `ai_horf` to every
+    Horf-owned field matching the original.
+    - About 7 minutes went on reading the source (ai_horf is 207
+      instructions, plus try_shoot_player and the generic appear) and writing
+      the code.
+    - Two live `entity-horf` runs took about 11 minutes each, with one fix in
+      between (registry-derived contact admission).
+    - Remaining failures:
+      - the shared tear-trajectory gap;
+      - the start-room door state;
+      - death gibs, which have no admission yet;
+      - champion rolls, which this branch adds.
 - [ ] M10 stages
 - [ ] M11 characters
