@@ -31,6 +31,7 @@ pub mod items;
 pub mod keepers;
 pub mod layout;
 pub mod level2_flies;
+pub mod level_progress;
 pub mod menu_lifecycle;
 pub mod monstro;
 pub mod motion;
@@ -360,6 +361,7 @@ pub struct State {
     pub information_animation: information_animation::InformationAnimation,
     pub stage: u32,
     pub stage_seed: u32,
+    pub level_progress: level_progress::LevelProgress,
     pub nightmares: nightmares::Nightmares,
     pub seeded_run: bool,
     pub achievement_eligibility: bool,
@@ -503,6 +505,7 @@ impl Game {
                 information_animation: information_animation::InformationAnimation::default(),
                 stage: 1,
                 stage_seed: seed::stage1_seed(initial_seed),
+                level_progress: level_progress::LevelProgress::default(),
                 nightmares: nightmares::Nightmares::new()?,
                 seeded_run: false,
                 achievement_eligibility: true,
@@ -1073,6 +1076,7 @@ impl Game {
         self.state.player_animation = player_animation::PlayerAnimation::default();
         // Source 58bea7 constructs every descriptor's padded grid seed pairs.
         // floor::generate_basement owns the separate primary xorshift advance.
+        self.state.level_progress.begin_level();
         self.boot_level_grid = self.state.boot_lifecycle.initialize_level_grid();
         self.state.floor = floor::generate_basement(seed::stage1_seed(self.state.run_seed_value))?;
         self.state.current_room = self.state.floor.starting_descriptor;
@@ -1179,7 +1183,11 @@ impl Game {
         let pickup = &mut self.state.room.pickups[index];
         if pickup.touches(&self.state.player)
             && (if pickup.variant == 10 {
-                pickup.try_collect_heart(&mut self.state.player, red_multiplier)
+                pickup.try_collect_heart(
+                    &mut self.state.player,
+                    red_multiplier,
+                    &mut self.state.level_progress,
+                )
             } else {
                 pickup.try_collect(&mut self.state.inventory)
             })

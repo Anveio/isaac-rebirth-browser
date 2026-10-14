@@ -25,6 +25,8 @@ pub(crate) fn apply_admitted(
             pitch: 1.0,
         },
     );
+    //52c0e0 Sound55 precedes52c4d7; the flag still precedes health routing.
+    state.level_progress.admitted_damage(flags, state.stage);
     let damage = i32::from(health_units);
     let soul = state.player.soul_hp;
     let red = state.player.hp;
@@ -54,6 +56,9 @@ pub(crate) fn apply_admitted(
             state.player.eternal_hearts = 0;
         }
         player_items::add_red_hearts(&mut state.player, -remaining);
+        //52be55..52be60 selects52c6cd after508230 even when Eternal
+        //absorbed the health amount. RED_HEARTS bypasses this penalty.
+        state.level_progress.red_damage(flags);
     }
     //52c668's actual NO_KILL/virtual40 branch remains owned by PlayerDeath.
     Ok(())
