@@ -165,9 +165,6 @@ pub fn admit_fresh(room: &mut Room, shared: &mut Mt19937, game_update: u32) -> R
     if descriptor.asset_stage != 0 || descriptor.template.shape_index() != 0 {
         return Err("ambient grid admission requires the fresh normal starting room".into());
     }
-    if room.path_costs.is_some() {
-        return Err("fresh Room.Init path costs already admitted".into());
-    }
     let spawns = room
         .spawns
         .as_ref()
@@ -185,7 +182,9 @@ pub fn admit_fresh(room: &mut Room, shared: &mut Mt19937, game_update: u32) -> R
     {
         return Err("grid admission dimensions disagree with actual cells".into());
     }
-    room.path_costs = Some(RoomCosts::zeroed());
+    // Geometry already owns recovered Rock/Spike Init stores. This source
+    // constructor path extends that same Room.Init owner for decoration,
+    // walls and doors, rather than introducing a second selector proxy.
     let costs = room
         .path_costs
         .as_mut()

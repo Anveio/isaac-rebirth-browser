@@ -1,6 +1,6 @@
 //! Actual signed Room+e98 path costs, separate from authored grid selectors.
 //! Only source-admitted producers mutate this fixed-capacity owner.
-use crate::grid::MAX_GRID_CELLS;
+use crate::grid::{GridDescriptor, MAX_GRID_CELLS};
 use serde::{de::Error, Deserialize, Deserializer, Serialize, Serializer};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -14,6 +14,28 @@ impl RoomCosts {
         Self {
             words: [0; MAX_GRID_CELLS],
         }
+    }
+
+    /// Geometry admission owns these recovered Init stores independently of
+    /// the still-unadmitted derived grid constructors and their RNG consumers.
+    pub(crate) fn for_supported_grid(grid: &GridDescriptor) -> Result<Self, String> {
+        let mut costs = Self::zeroed();
+        for (index, cell) in grid.cells.iter().enumerate() {
+            let Some(entity) = &cell.entity else {
+                continue;
+            };
+            let cost = match entity.kind {
+                // Rock.Init56ed00 writes1000 for state1 and zero otherwise.
+                2 | 5 | 6 => i32::from(entity.state == 1) * 1000,
+                // Ordinary Spike.Init56f830 always stores999.
+                8 => 999,
+                // Wall5717e0 and Door5628e0 Init each store1000.
+                15 | 16 => 1000,
+                _ => continue,
+            };
+            costs.store(index, cost)?;
+        }
+        Ok(costs)
     }
 
     pub fn get(&self, index: usize) -> Result<i32, String> {

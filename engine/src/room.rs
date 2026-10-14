@@ -328,6 +328,12 @@ impl Room {
             )
             .expect("authored ordinary grid admission"),
         );
+        room.path_costs = Some(
+            crate::room_costs::RoomCosts::for_supported_grid(
+                room.grid.as_ref().expect("authored room grid"),
+            )
+            .expect("authored grid fits source Room.Init path costs"),
+        );
         room.appearance.generation =
             "source-fresh-normal-basement-floor;descriptor-decoration12;authored-spawn11;provisional-fx-route"
                 .into();
