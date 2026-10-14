@@ -12,6 +12,10 @@ agreement and documented input contracts. It is not original-game evidence:
 parity with base Rebirth remains the job of the live e2e suites, and no DST
 result may be cited as a parity result.
 
+DST is an inner-loop regression tool, not a merge gate. Pull-request CI does
+not run it: run `npm run test:dst` while changing engine core code, and
+[dst.yml](../.github/workflows/dst.yml) runs the same command on demand.
+
 ```sh
 npm run test:dst                      # build engine.wasm + harness, run every unit
 DST_CASES=48 DST_STEPS=4000 npm run test:dst     # a longer local soak
@@ -111,8 +115,9 @@ through the full `game` property set on every run, after the generated cases:
   covering set.
 
 When an engine change legitimately alters a documented contract (for example
-a newly implemented character runtime), update the unit's contract model in
-the same change.
+a newly implemented character runtime or a new public key), `test:dst` reports
+the drift as a violation; update the unit's contract model to follow the
+engine.
 
 ## Findings and engine refactors
 

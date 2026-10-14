@@ -20,8 +20,9 @@ may hold per-unit engine workloads and Antithesis properties; it never adds
 `#[cfg(test)]` modules to `engine/src` and admits no other unit suite or
 component harness anywhere. DST checks engine safety, determinism, snapshot
 completeness, native/WASM agreement and documented contracts. It is not
-original-game evidence and never replaces live e2e parity. Fix or record
-every DST violation; never weaken a property or its workload to pass.
+original-game evidence and never replaces live e2e parity. It is an inner-loop
+regression tool, not a merge gate. Fix or record every DST violation; never
+weaken a property or its workload to pass.
 
 Use `source cloud/env.sh` for the installed toolchain. `npm run check` builds and
 tests an immutable production artifact against fresh original processes through
