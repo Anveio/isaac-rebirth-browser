@@ -38,9 +38,13 @@ pub fn expected_rejection(state: &State, command: &Command) -> Option<&'static s
                 return None;
             }
             match (state.screen, code.as_str()) {
-                (Screen::Main, "Enter") if state.main_selection != 0 => {
+                (Screen::Main, "Enter") if !matches!(state.main_selection, 0 | 2) => {
                     Some("unimplemented main menu action")
                 }
+                // This workload boots the authored catalogue without resource
+                // overrides. Its Challenge1 filters exceed the implemented
+                // neutral scope, and the other authored IDs are unimplemented.
+                (Screen::Challenge, "Enter") => Some("unimplemented authored Challenge"),
                 (Screen::Character, "Enter") if state.difficulty != "normal" => {
                     Some("unimplemented hard mode")
                 }
@@ -103,6 +107,12 @@ pub fn outcome(state: &State, command: &Command, result: &Result<(), String>) {
             Some("unimplemented main menu action") => {
                 props::sometimes!(true, "game: an unimplemented main menu action is rejected")
             }
+            Some("unimplemented authored Challenge") => {
+                props::sometimes!(
+                    true,
+                    "game: an unimplemented authored Challenge is rejected"
+                )
+            }
             Some("unimplemented hard mode") => {
                 props::sometimes!(true, "game: an unimplemented hard-mode run is rejected")
             }
@@ -131,6 +141,8 @@ fn menu_edge(from: Screen, to: Screen) -> bool {
             | (Screen::Profile, Screen::Title)
             | (Screen::Main, Screen::Profile)
             | (Screen::Main, Screen::Character)
+            | (Screen::Main, Screen::Challenge)
+            | (Screen::Challenge, Screen::Main)
             | (Screen::Character, Screen::Main)
             | (Screen::Character, Screen::Seed)
             | (Screen::Seed, Screen::Character)

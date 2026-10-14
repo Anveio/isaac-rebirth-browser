@@ -216,7 +216,7 @@ impl Driver {
                     }
                 } else {
                     match e.below(20) {
-                        // Unimplemented menu actions are rejected inputs.
+                        // Challenge opens a menu; the other actions are rejected.
                         0..=1 => self.press("Enter", 0),
                         2..=13 => self.press(e.pick(&["ArrowUp", "ArrowDown"]), 0),
                         14 => self.press("Escape", 0),
@@ -224,6 +224,12 @@ impl Driver {
                     }
                 }
             }
+            Screen::Challenge => match e.below(20) {
+                0..=5 => self.press("Enter", 0),
+                6..=13 => self.press(e.pick(&["ArrowUp", "ArrowDown", "KeyW", "KeyS"]), 0),
+                14..=16 => self.press("Escape", 0),
+                _ => self.ticks(e),
+            },
             Screen::Character if self.persona == Persona::Seeded && !state.seeded_run => {
                 match e.below(10) {
                     0..=6 => self.press("Tab", 0),

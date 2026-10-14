@@ -374,6 +374,7 @@ def main():
             if differing:
                 raise RuntimeError(f'Original discarded the declared options.ini after boot: {differing}')
             report['declaredOptionsKept'] = True
+            record('field', {'name': 'declaredOptionsKept', 'value': True})
             windows = subprocess.check_output(['xdotool', 'search', '--onlyvisible', '--name', '(Isaac|Rebirth)'], text=True)
             window = windows.splitlines()[-1]
             subprocess.run(['xdotool', 'windowfocus', '--sync', window], check=True)

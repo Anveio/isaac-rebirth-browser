@@ -15,6 +15,7 @@ pub mod audio;
 pub mod blood_effects;
 pub mod bombs;
 pub mod camera;
+pub mod challenges;
 pub mod champions;
 pub mod chests;
 pub mod combat;
@@ -95,6 +96,7 @@ pub enum Screen {
     Profile,
     Main,
     Character,
+    Challenge,
     Seed,
     Playing,
 }
@@ -109,6 +111,10 @@ pub enum Direction {
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Player {
+    ///Actual Player+3074 final starting-grant callback completion.
+    pub initialized_3074: bool,
+    ///Actual Player+3075 constructor byte, then Challenge Config+98 override.
+    pub can_shoot: bool,
     /// Entity+31d; distinct from the persistent Player+7d4 controls field.
     pub visible: bool,
     /// Source Player+7d8, separate from pickup collection delay.
@@ -140,6 +146,8 @@ pub struct Player {
 impl Player {
     fn starting() -> Self {
         Self {
+            initialized_3074: false,
+            can_shoot: true,
             visible: true,
             input_cooldown: 0,
             dead: false,
@@ -223,6 +231,8 @@ pub struct Profile {
     pub unlocked_characters: Vec<String>,
     pub selected_character: String,
     pub achievements: Vec<bool>,
+    ///Actual Persistent+D4 array, initialized by5bc520 for a fresh profile.
+    pub counters: Vec<i32>,
 }
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -284,6 +294,8 @@ pub struct RunStartRequest {
     pub fade_alpha: f32,
     /// System pending request is consumed at the following system dispatch.
     pub system_pending: bool,
+    ///594620 actual challenge argument; None is the existing New Run route.
+    pub challenge_id: Option<u32>,
 }
 impl MenuFade {
     fn first_title() -> Self {
@@ -368,6 +380,11 @@ pub struct State {
     pub screen: Screen,
     pub profile: u8,
     pub main_selection: u8,
+    pub challenge_selection: Option<u32>,
+    ///Real Config achievement requirements queried for the fresh menu rows.
+    pub challenge_unlocked: Vec<bool>,
+    pub challenge_id: u32,
+    pub challenge_run_parameters: Option<challenges::RunParameters>,
     pub character_selection: u8,
     pub character: String,
     pub difficulty: String,
@@ -486,6 +503,7 @@ pub struct Game {
     pub boot_level_grid: mt::DescriptorSeeds,
     pub saved_run: Option<saved_game::SavedRun>,
     pub player_manager_secondary_rng: saved_game::PlayerManagerSecondaryRng,
+    pub challenge_catalog: challenges::Catalog,
 }
 
 impl Game {
@@ -493,6 +511,24 @@ impl Game {
         Self::new_with_boot_epoch(initial_seed, 0)
     }
     pub fn new_with_boot_epoch(initial_seed: u32, boot_epoch_seed: u32) -> Result<Self, String> {
+        Self::new_with_challenges(
+            initial_seed,
+            boot_epoch_seed,
+            challenges::Catalog::authored()?,
+        )
+    }
+    pub fn new_with_resources(
+        initial_seed: u32,
+        boot_epoch_seed: u32,
+        resources: challenges::ResourceInputs,
+    ) -> Result<Self, String> {
+        Self::new_with_challenges(initial_seed, boot_epoch_seed, resources.catalog()?)
+    }
+    fn new_with_challenges(
+        initial_seed: u32,
+        boot_epoch_seed: u32,
+        challenge_catalog: challenges::Catalog,
+    ) -> Result<Self, String> {
         let run_seed = seed::encode(initial_seed)?;
         let (boot_lifecycle, saved_game, boot_level_grid) =
             mt::BootLifecycle::new(boot_epoch_seed).into_parts();
@@ -522,6 +558,10 @@ impl Game {
                 screen: Screen::Title,
                 profile: 1,
                 main_selection: 0,
+                challenge_selection: None,
+                challenge_unlocked: Vec::new(),
+                challenge_id: 0,
+                challenge_run_parameters: None,
                 character_selection: 0,
                 character: "Isaac".into(),
                 difficulty: "normal".into(),
@@ -557,6 +597,7 @@ impl Game {
                         unlocked_characters: vec!["Isaac".into()],
                         selected_character: "Isaac".into(),
                         achievements: vec![false; 179],
+                        counters: vec![0; 95],
                     })
                     .collect(),
                 character_catalog: character_catalog(),
@@ -613,6 +654,7 @@ impl Game {
             boot_level_grid,
             saved_run: None,
             player_manager_secondary_rng: saved_game::PlayerManagerSecondaryRng::default(),
+            challenge_catalog,
         };
         game.refresh_minimap();
         Ok(game)
@@ -780,13 +822,69 @@ impl Game {
             Screen::Main => match code {
                 "Escape" => self.state.screen = Screen::Profile,
                 "ArrowUp" | "KeyW" => {
-                    self.state.main_selection = (self.state.main_selection + 4) % 5
+                    self.state.main_selection = (self.state.main_selection + 4) % 5;
+                    if self.state.main_selection == 1 && self.saved_run.is_none() {
+                        self.state.main_selection = 0;
+                    }
                 }
                 "ArrowDown" | "KeyS" => {
-                    self.state.main_selection = (self.state.main_selection + 1) % 5
+                    self.state.main_selection = (self.state.main_selection + 1) % 5;
+                    if self.state.main_selection == 1 && self.saved_run.is_none() {
+                        self.state.main_selection = 2;
+                    }
                 }
                 "Enter" if self.state.main_selection == 0 => self.state.screen = Screen::Character,
+                "Enter" if self.state.main_selection == 2 => {
+                    //59cef0 initializes selectedID1/counter0 when Menu5 opens.
+                    self.state.challenge_selection = Some(1);
+                    self.state.challenge_unlocked = (1..=20)
+                        .map(|id| {
+                            self.challenge_catalog.get(id).map(|definition| {
+                                definition.is_unlocked(
+                                    &self.state.profiles[usize::from(self.state.profile - 1)]
+                                        .achievements,
+                                )
+                            })
+                        })
+                        .collect::<Result<Vec<_>, _>>()?;
+                    self.state.screen = Screen::Challenge;
+                }
                 "Enter" => return Err("this foundation implements the New Run menu action".into()),
+                _ => {}
+            },
+            Screen::Challenge => match code {
+                "Escape" => self.state.screen = Screen::Main,
+                "ArrowUp" | "ArrowDown" | "KeyW" | "KeyS" => {
+                    let direction = if matches!(code, "ArrowUp" | "KeyW") {
+                        -1
+                    } else {
+                        1
+                    };
+                    self.state.challenge_selection = Some(
+                        self.challenge_catalog.adjacent_unlocked(
+                            self.state
+                                .challenge_selection
+                                .ok_or("Challenge menu is uninitialized")?,
+                            direction,
+                            &self.state.profiles[usize::from(self.state.profile - 1)].achievements,
+                        )?,
+                    );
+                }
+                "Enter" => {
+                    let id = self
+                        .state
+                        .challenge_selection
+                        .ok_or("Challenge menu is uninitialized")?;
+                    let definition = self.challenge_catalog.get(id)?;
+                    if !definition.is_unlocked(
+                        &self.state.profiles[usize::from(self.state.profile - 1)].achievements,
+                    ) {
+                        return Err("selected Challenge is locked".into());
+                    }
+                    definition.validate_initial_scope()?;
+                    self.state.run_start_request.challenge_id = Some(id);
+                    self.state.run_start_request.input_pending = true;
+                }
                 _ => {}
             },
             Screen::Character => match code {
@@ -816,6 +914,7 @@ impl Game {
                 "ArrowRight" | "KeyD" => self.select_character(1),
                 "Enter" if self.state.difficulty == "normal" => {
                     self.validate_run_character()?;
+                    self.state.run_start_request.challenge_id = None;
                     self.state.run_start_request.input_pending = true;
                 }
                 "Enter" => {
@@ -912,6 +1011,7 @@ impl Game {
                 (Screen::Title, Screen::Profile)
                     | (Screen::Profile, Screen::Main)
                     | (Screen::Main, Screen::Character)
+                    | (Screen::Main, Screen::Challenge)
             ) {
             Some(8)
         } else {
@@ -1043,6 +1143,9 @@ impl Game {
         self.state
             .stage_effects
             .add_familiar_shadows(&self.state.familiars);
+        self.state
+            .stage_effects
+            .add_npc_shadows(&self.state.room.npcs);
         self.state.stage_effects.add_tear_shadows(&self.state.tears);
         self.state
             .stage_effects
@@ -1056,6 +1159,21 @@ impl Game {
         // request; Game 54eb20 decodes that code into its startup stream. This
         // also applies when no public seed dialog was entered: the real
         // Character initializer owns the generated seed, not reset entropy.
+        let challenge = self
+            .state
+            .run_start_request
+            .challenge_id
+            .map(|id| self.challenge_catalog.get(id).cloned())
+            .transpose()?;
+        self.state.challenge_id = challenge.as_ref().map_or(0, |definition| definition.id);
+        self.state.challenge_run_parameters = challenge
+            .as_ref()
+            .map(|_| challenges::RunParameters::CHALLENGE_MENU);
+        if let Some(definition) = &challenge {
+            definition.validate_initial_scope()?;
+            self.state.character = "Isaac".into();
+            self.state.difficulty = "normal".into();
+        }
         self.state.run_seed_value = self.state.boot_lifecycle.menu_run_seed;
         self.state.run_seed = seed::encode(self.state.run_seed_value)?;
         let unlocked =
@@ -1127,13 +1245,33 @@ impl Game {
         };
         self.state.pause_menu = PauseMenu::hidden();
         self.state.player = Player::starting();
+        if let Some(definition) = &challenge {
+            challenges::configure_player(&mut self.state, definition)?;
+        }
         self.state.player_death = player_death::PlayerDeath::default();
         self.state.player_animation = player_animation::PlayerAnimation::default();
         // Source 58bea7 constructs every descriptor's padded grid seed pairs.
         // floor::generate_basement owns the separate primary xorshift advance.
         self.state.level_progress.begin_level();
         self.boot_level_grid = self.state.boot_lifecycle.initialize_level_grid();
-        self.state.floor = floor::generate_basement(seed::stage1_seed(self.state.run_seed_value))?;
+        self.state.floor = if let Some(definition) = &challenge {
+            //The real curse/local-RNG owner is passed at this Level boundary,
+            //before room placement; its sampler cannot be skipped by filter127.
+            floor::generate_challenge_basement(
+                seed::stage1_seed(self.state.run_seed_value),
+                definition,
+                &self.state.profiles[usize::from(self.state.profile - 1)],
+                item_pipeline::ItemInputs::new(
+                    self.state
+                        .player_items
+                        .as_ref()
+                        .ok_or("Level requires actual Player item owner")?,
+                )?
+                .positive_owned_count(260),
+            )?
+        } else {
+            floor::generate_basement(seed::stage1_seed(self.state.run_seed_value))?
+        };
         self.state.current_room = self.state.floor.starting_descriptor;
         self.state.visited_rooms = BTreeSet::from([self.state.current_room]);
         self.state.room_display_flags = vec![0; self.state.floor.descriptors.len()];
@@ -1165,24 +1303,13 @@ impl Game {
             self.state.music.room(id);
         }
         self.save_supported_run()?;
-        // The save keeps Door.Init's state1 records; the cleared start room's
-        // opened doors are state2 again by gameplay start in the original.
-        if let Some(grid) = &mut self.state.room.grid {
-            for door in &self.state.room.appearance.doors {
-                if door.state != "Opened" {
-                    continue;
-                }
-                let column = ((door.world_position.x - 40.0) / 40.0) as usize;
-                let row = ((door.world_position.y - 120.0) / 40.0) as usize;
-                if let Some(entity) = grid
-                    .cells
-                    .get_mut(column + row * usize::from(grid.width))
-                    .and_then(|cell| cell.entity.as_mut())
-                    .filter(|entity| entity.kind == 16)
-                {
-                    entity.state = 2;
-                }
-            }
+        if let Some(definition) = &challenge {
+            challenges::initialize_player(&mut self.state, definition)?;
+        } else {
+            //52e340/final3074 store also runs on the ordinary Challenge0 route.
+            player_stats::evaluate_cache(&mut self.state)?;
+            familiars::evaluate_cache(&mut self.state)?;
+            self.state.player.initialized_3074 = true;
         }
         // Fresh54eb20 invokes54eaa0 after Level.Init/Save and the primary
         // manager initialization; room factories see the prior control byte.
@@ -1570,6 +1697,14 @@ impl Game {
                 // Forty f32 additions remain below one; the forty-first wins.
                 request.fade_alpha += 0.025_f32;
                 if request.fade_alpha >= 1.0_f32 {
+                    if request.challenge_id.is_some() && !request.system_pending {
+                        //59d080 explicitly assigns the empty seed code, decodes0,
+                        //then takes sharedRaw(max1), re-encodes and queues594620.
+                        self.state.seed_text.clear();
+                        self.state.seed_valid = false;
+                        let seed = self.state.boot_lifecycle.shared.next_u32().max(1);
+                        self.state.boot_lifecycle.commit_character_seed(seed)?;
+                    }
                     request.system_pending = true;
                 }
             }
@@ -2228,8 +2363,20 @@ impl Game {
                 enemy_projectiles::EnemyProjectile::birth(id, parent, shot)
             }),
             entities::Birth::Npc(selector) => {
-                let id = u32::try_from(self.state.room.npcs.len())
-                    .map_err(|_| "NPC identity exhausted")?;
+                // Retired NPCs leave the room list, so its length can name a
+                // live handle; take one past every id still held anywhere.
+                let id = self
+                    .state
+                    .room
+                    .npcs
+                    .iter()
+                    .map(|npc| npc.id.checked_add(1))
+                    .chain([self
+                        .state
+                        .actor_scheduler
+                        .next_free_id(actors::ActorKind::Npc)])
+                    .try_fold(0_u32, |next, id| id.map(|id| next.max(id)))
+                    .ok_or("NPC identity exhausted")?;
                 let context = entities::SpawnContext {
                     stage: self.state.stage,
                     game_update_count: self.state.game_update_count,
@@ -2501,6 +2648,28 @@ pub extern "C" fn abi_version() -> u32 {
 #[no_mangle]
 pub extern "C" fn reset(initial_seed: u32, boot_epoch_seed: u32) -> u32 {
     match Game::new_with_boot_epoch(initial_seed, boot_epoch_seed) {
+        Ok(game) => {
+            GAME.with(|state| *state.borrow_mut() = Some(game));
+            ERROR.with(|error| error.borrow_mut().clear());
+            0
+        }
+        Err(message) => {
+            ERROR.with(|error| *error.borrow_mut() = message.into_bytes());
+            1
+        }
+    }
+}
+///Additive boot-only resource ingress. REQUEST contains authored XML bytes,
+///not a Command, inventory/stat DTO or captured native simulation state.
+#[no_mangle]
+pub extern "C" fn reset_with_resources(initial_seed: u32, boot_epoch_seed: u32) -> u32 {
+    let result = REQUEST
+        .with(|request| {
+            serde_json::from_slice::<challenges::ResourceInputs>(&request.borrow())
+                .map_err(|error| error.to_string())
+        })
+        .and_then(|resources| Game::new_with_resources(initial_seed, boot_epoch_seed, resources));
+    match result {
         Ok(game) => {
             GAME.with(|state| *state.borrow_mut() = Some(game));
             ERROR.with(|error| error.borrow_mut().clear());
