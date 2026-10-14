@@ -7,7 +7,7 @@ runtime state.
 The first concrete use leaf is normal Isaac with Yum Heart45 and no modifiers.
 The released System input poll owns action9 Space and action10 Q edges. With
 default interpolation enabled, RoomFast `5cd920` invokes the actual Player
-callback `531850` with flags4000, so the active input callback runs in both
+callback `531850` with Entity+318 word bit4000 (byte+319 bit40), so the active input callback runs in both
 presentations. Its guards are controls7d4 and input cooldown7d8. The main
 animation guard bf4 suppresses shooting input, while ordinary movement and
 the full-only fire/head timer work continue. It is not a blanket controls veto.
@@ -30,12 +30,32 @@ failure remain in the report. Use of an unsupported random active remains
 red. Comparisons require charge/count/temporary records, health, input fields,
 UseItem frame/playing/guard, post-acquisition motion and actual SFX admission.
 Pixel and complete shared-MT differences retain their disclosed diagnostic
-scope. The contrived public seed B911XGSG is a port-only prediction until the
-independent original gate confirms its actual45 acquisition.
+scope. The independent original captures confirm that the public seed
+B911XGSG naturally acquires45 in all four declared contrived routes.
 
 Initial production build, strict Clippy, TypeScript and authored asset checks
-pass. Fresh original/browser use acceptance is pending. Source pins and
-temporary research are in ignored `.cache/coordination/active-items-research`.
+pass. The frozen `bcbbe2d` gate with runtime `2e5ac948` and production
+`7e5af319` completed eight fresh original/browser cases:3068 joined
+presentations,232578 checks,739 required failures and no capture errors.
+An independent byte/input audit verifies all16 lossless archives, complete
+public tapes/DOM commands/backend states,39 before/end gate source hashes,
+93 frozen source files and the unchanged production/WASM/floor identities.
+The source was built before its runtime commit; those identical bytes and
+the later gate-only commit are pinned separately. The audit accepts evidence
+integrity; the paired runtime gate remains red.
+
+All four45 routes match actual charge/discharge, temporary count/cooldown,
+healing/full-health clamping, authored main UseItem, guarded shooting and157
+sound admission. The retained failures include persistent traversal controls,
+copied-sprite ordering, the missing Hit guard and collectible blast response,
+unsupported291 use and randomized222 fire delay. The new unfiltered OS
+routes acquired257 and222; neither was discarded. Copied-sprite advancement
+now follows late `531e6f`, after active/pocket/shot callbacks and before the
+common cooldown tail. A full-phase use advances the newly reset copy in that
+same callback; a fast-phase use waits for the next full callback. This narrow
+source-order correction still requires a fresh build and paired acceptance.
+Source pins, reports and temporary research are retained in ignored
+`.cache/coordination/active-items-research` and `.cache/e2e/active-item-use`.
 Flush291, other active effects, active swaps, modifier/reserve charge effects,
 the actual room-clear recharge producer, equipped pockets, cards, pills and
 their identification/swap/drop behavior remain separate implementation work.

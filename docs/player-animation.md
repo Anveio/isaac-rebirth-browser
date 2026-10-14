@@ -18,6 +18,11 @@ continuing its full timer work. The concrete normal45 active caller owns
 UseItem and its copied item presentation. Its completed main clip returns to
 ordinary Player presentation in the full callback.
 
+The copied item sprite has a separate late full-update owner at531e6f,
+after active/pocket/shot callbacks. Main Pickup playback still advances in
+the early Base portion. Resetting the copy on a full-phase use therefore
+advances it in the same callback; fast updates retain the copy frame.
+
 `Player.visible` models Entity+31d independently of Player+7d4 controls.
 The renderer consumes this visibility and the selected authored main clip.
 New-run initialization resets the shared animation owner. Pickup acquisition
