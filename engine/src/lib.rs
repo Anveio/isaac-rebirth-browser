@@ -1674,7 +1674,9 @@ impl Game {
                 self.state.information_animation.advance_full()?;
             }
             if phase != phase::Phase::Update || self.state.information_animation.state == 2 {
-                self.state.music.advance();
+                if phase != phase::Phase::Skipped {
+                    self.state.music.advance();
+                }
                 return Ok(());
             }
         }
