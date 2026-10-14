@@ -284,5 +284,16 @@
     "compactPreparedReceipt": "combat/boss-exit-research/boss-clear-gate-prep/compact-v2/source-receipt.json",
     "scope": "Two unchanged mandatory BLLcases plus fixed independent978 oppositephase cases,962captures each. All publicinputs fixedbeforegrade; no newOSdraw oractualgame execution. Bothgames mustrealprefixadmit/retire/clear, bossadmit/damage/death/retire,count0,realfinalHeartseed/body/identity/cache1c20 andlinked498NULL. Exact0framefullbirthfence blockswhenobserved; otherwise pendingunobserved, never inferred."
   },
-  "productionAndLive": "notrun; initialSourceStatic/Death/C5proofs do notaccept this checkpoint"
+  "productionAndLive": "notrun; initialSourceStatic/Death/C5proofs do notaccept this checkpoint",
+  "compositionPrerequisites": {
+    "guardedHeartHead": "f782d64d8bd5207bf5cfeeeeb296863db1cb4f58",
+    "reviewedDeathHead": "5afa7ddb1a6d5c2031b6648905478e80d78fa6d9",
+    "sourceMerge": "23f7357fcfdd016fabfb406f744a56860c8b69fc",
+    "scope": "Complete final Death physical/collection/keys/held-shooting/transport corrections consumed as source. Prior Heart1d/Root/C5 static and production proofs do not accept this composition."
+  },
+  "placementMechanicalReview": {
+    "receipt": ".cache/coordination/boss-effects-research/combat-room-placement-mechanical-review.json",
+    "sha256": "5c0598abb927d9ea5ca6284f9be0d0bec76feb7ef523260d969ab51109fd97e8",
+    "status": "Read-only literal Worm extraction review; no compiler or live boss proof."
+  }
 }
