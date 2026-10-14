@@ -243,5 +243,24 @@ bomb defect. Dense original replays of the recorded tapes, with captures every
   leftward motion. The port spawns no NPCs in this room, so the bomb's 2-HP hit
   lands.
 
-The `CheckLine` admission and bomb-rock secondary explosions are not
-implemented in the port. No recorded case exercises them yet.
+Both are now implemented (issue #206) and exercised by `rock-blast`:
+
+* **CheckLine.** Every circle target (player, NPCs, pickups) passes
+  `Grid::blast_line_clear(blast, target, ignoreWalls=true)` before knockback or
+  damage. Authored Block selectors 1900 count as native type3, which also stops
+  the grid-candidate rays and the candidate line. In the contrived `block-line`
+  route (seed `286TWPAC`, Room283 above the start room) the bomb sits in the
+  bottom notch beside Block(5,4) and Isaac waits in the notch above it, 77.2
+  native units away. The original keeps red6, countdown0 and velocity unchanged
+  at the presentation301 blast and destroys no Rock. `random-block-line` repeats
+  the route on a fresh OS-random seed with the same room above the start.
+* **Bomb rocks.** A blasted type5 rock enters state3 with countdown3 (Init
+  stores `state==1 ? 3 : -1` at `0x56efc0`). Rock Update `0x56bf00` runs
+  before marker aging every full update, post-decrements, and on the fourth
+  update calls Destroy, which sets state2, collision0 and marker900 and calls
+  `0x554490` with damage40 (`0x665460`), radius60 (`0x668968`), line check on,
+  flags4 and no source. In `regression-rock-phase-0/1` (seed `26T688VM`) the
+  original enters state3 at full update140 and explodes at144; the port now
+  matches every presentation of both cases. The secondary blast's 1000/1 and
+  particle spawns, and their two shared-stream draws (`0x42e8c0`), remain
+  unadmitted like ordinary rock debris.
