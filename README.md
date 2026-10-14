@@ -89,7 +89,7 @@ stay red. Rust/WASM self-equality does not prove original-game state parity.
 | Independent screenshot gates and differences | [Comparator](tools/foundation/compare.mjs) |
 | Read-only original numeric-state probes | [Seed relationships](tools/original/state-observer-analyze.py), [position observation](tools/original/position-observer.py) |
 | Original captures and observed state | [Native capture](tools/original/foundation-capture.py), [analysis](tools/original/foundation-analyze.py), [fixtures](references/isaac/foundation/baseline/manifest.json) |
-| Random-seed invariants and replay | [Seed bank](tools/foundation/seeds.mjs), [browser scenario helpers](tools/foundation/seed-invariants.mjs), [browser tests](tools/tests/foundation.spec.ts) |
+| Contrived and recorded OS-random game comparisons | [Required live suite registry](tools/e2e/run.mjs), [original/browser paired gate](tools/foundation/paired-game.mjs), [public tape builder](tools/original/foundation-paired-scenarios.py) |
 | Original seed and input coverage | [Original seed evidence parser](tools/foundation/original-seed-contract.mjs), [native probes](tools/original/foundation-random-seeds.py), [input catalogue](tools/verification/input-catalog.json) |
 | Authored asset extraction | [Extractor](tools/foundation/extract-animations.py) |
 
