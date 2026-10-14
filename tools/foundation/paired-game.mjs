@@ -309,9 +309,14 @@ export async function runPairedGate({ output, selected, randomCount = 2, replayS
     report.exactOriginalPixels = report.cases.every(item => item.checks.length > 0 && item.checks.every(check => check.pixels?.exactRGBA));
     report.gateSourcesStable = JSON.stringify(report.gateSources) === JSON.stringify(sourceHashes([originalObserver, ...additionalSources]));
     if (!report.gateSourcesStable) report.status = 'fail';
+  } catch (error) {
+    report.status = 'fail'; report.fatalError = String(error);
+    throw error;
   } finally {
-    try { save(join(output, 'report.json'), report); }
-    finally { await Promise.allSettled([browser.close(), server.close()]); }
+    const closed = await Promise.allSettled([browser.close(), server.close()]);
+    const failures = closed.filter(result => result.status === 'rejected').map(result => String(result.reason));
+    if (failures.length) { report.status = 'fail'; report.cleanupFailures = failures; }
+    save(join(output, 'report.json'), report);
   }
   return report;
 }
