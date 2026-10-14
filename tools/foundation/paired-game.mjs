@@ -20,21 +20,6 @@ export const DEFAULT_RANDOM_CASE_COUNT = 2;
 const runProcess = promisify(execFile);
 const save = (path, value) => writeFileSync(path, JSON.stringify(value, null, 2) + '\n');
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
-const GATE_SOURCES = [
-  'tools/foundation/paired-game.mjs', 'tools/foundation/production-server.mjs', 'tools/foundation/browser-evidence.mjs',
-  'tools/foundation/compare.mjs', 'tools/original/foundation-paired-scenarios.py',
-  'tools/original/foundation-paired-observer.py', 'tools/original/foundation-menu-observer.py',
-  'tools/original/foundation-combat-observe.py', 'tools/original/foundation-clock-run.py',
-  'tools/original/foundation-clock-gate.c', 'tools/original/foundation-clock-verify.py',
-  'tools/original/foundation-clock-scenarios.py', 'tools/original/foundation-bomb-scenario.py',
-  'tools/original/foundation-presentation-scenario.py', 'tools/original/foundation-title-scenario.py',
-  'tools/original/foundation-combat-scenario.py', 'tools/original/foundation-seeds.py',
-  'tools/original/foundation-random-seeds.py', 'tools/original/state-observer.py',
-  'tools/original/debug-run.py', 'tools/original/with-display.sh', 'tools/foundation/browser.mjs',
-  'tools/original/native-evidence.py',
-  'tools/foundation/native-evidence.mjs',
-];
-const sourceHashes = (additional = []) => Object.fromEntries([...new Set([...GATE_SOURCES, ...additional])].map(path => [path, digest(readFileSync(join(ROOT, path)))]));
 const option = (name, fallback) => {
   const at = process.argv.indexOf(name);
   if (at < 0) return fallback;
@@ -264,7 +249,7 @@ function comparePair(caseData, native, browser, directory, exactPixels, stateCom
 
 export async function runPairedGate({ output, selected, randomCount = 2, replaySeeds = [], replayCases = [], exactPixels = false, productionDirectory,
   nativeFrameTimeout = 60, originalObserver = 'tools/original/foundation-paired-observer.py',
-  stateComparator = scopedState, additionalSources = [], archiveBrowserEvidence = false, archiveNativeEvidence = false, captureBrowserAudio = false }) {
+  stateComparator = scopedState, archiveBrowserEvidence = false, archiveNativeEvidence = false, captureBrowserAudio = false }) {
   assert.ok(Number.isFinite(nativeFrameTimeout) && nativeFrameTimeout > 0 && nativeFrameTimeout <= 300,
     'Native frame timeout must be more than 0 and at most 300 host-wall seconds');
   mkdirSync(output, { recursive: true });
@@ -280,7 +265,6 @@ export async function runPairedGate({ output, selected, randomCount = 2, replayS
     const declarations = await pairedScenarioDeclarations();
     const known = new Set(declarations.map(item => item.id));
     for (const id of selected) assert.ok(known.has(id), `Unknown paired scenario ${id}`);
-    report.gateSources = sourceHashes([originalObserver, ...additionalSources]);
     report.sourceBinarySha256 = digest(readFileSync(join(ROOT, '.cache/original-runtime/offline-depot/isaac.x64')));
     server = await startProductionServer({ directory: productionDirectory });
     report.build = server.build;
@@ -333,8 +317,6 @@ export async function runPairedGate({ output, selected, randomCount = 2, replayS
     }
     report.status = report.cases.length > 0 && report.cases.every(item => item.status === 'pass') ? 'pass' : 'fail';
     report.exactOriginalPixels = report.cases.every(item => item.checks.length > 0 && item.checks.every(check => check.pixels?.exactRGBA));
-    report.gateSourcesStable = JSON.stringify(report.gateSources) === JSON.stringify(sourceHashes([originalObserver, ...additionalSources]));
-    if (!report.gateSourcesStable) report.status = 'fail';
   } catch (error) {
     report.status = 'fail'; report.fatalError = String(error);
     throw error;

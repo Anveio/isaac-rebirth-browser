@@ -15,6 +15,7 @@ references/isaac/linux/depot_250903/
 references/isaac/linux/depot_250903.tar.gz
 
 engine/target/
+engine/dst/target/
 web/generated/
 
 .venv.previous*/

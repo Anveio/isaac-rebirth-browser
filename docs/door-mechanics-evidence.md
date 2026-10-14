@@ -53,7 +53,7 @@ Linux v1.05 plaintext SHA-256
 ```sh
 source cloud/env.sh
 npm run build
-npm run test:e2e:doors
+npm run test:e2e -- doors
 ```
 
 The gate selects a contrived opposite-phase curse entry/exit, retains the
@@ -99,4 +99,4 @@ failure. Compact source hashes and final joins are recorded in
 Secret discovery, key locks, hostile NPC room-clear locks, other door styles,
 large-room camera/backdrops, floor exits, mutable actor/grid callbacks and
 complete transition pixels remain tracked by their owning gates. The
-mandatory T1PK6Y0W hostile return regression in `test:e2e:traversal` stays required.
+mandatory T1PK6Y0W hostile return regression in e2e suite `traversal` stays required.

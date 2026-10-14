@@ -63,7 +63,7 @@ start must reach that AudioContext's destination through the observed graph.
 The gate verifies the complete production WASM input
 trace, original process identity, library/source/build hashes and bounded traces.
 Reports, tapes, screenshots, submitted PCM and source snapshots remain under
-`.cache/e2e/audio/**`; staged `game/` resource symlinks are excluded from CI upload.
+`.cache/e2e/audio/**`; staged `game/` resource symlinks are excluded from evidence archives.
 
 The reviewed four-case cohort passes 848 checks with 36 original/browser sample
 starts (3 confirmations per case, 4 taps per contrived case and 8 per random

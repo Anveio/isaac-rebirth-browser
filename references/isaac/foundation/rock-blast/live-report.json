@@ -45,7 +45,7 @@
   },
   "scenariosSha256": "a0b6ebec52734909a540b33d0eb49f426f9358710134f487c0a1ea929f72950b",
   "replay": "bash tools/original/with-display.sh node tools/e2e/rock-blast.mjs --scenarios references/isaac/foundation/rock-blast/scenarios-eight-case.json",
-  "freshRandomGate": "npm run test:e2e:rock-blast",
+  "freshRandomGate": "npm run test:e2e -- rock-blast",
   "cases": [
     {
       "name": "rock-phase-0",

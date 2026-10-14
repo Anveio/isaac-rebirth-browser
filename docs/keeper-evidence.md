@@ -45,7 +45,7 @@ After a fresh production build:
 source cloud/env.sh
 npm run build
 cargo build --manifest-path engine/Cargo.toml --locked --bin floor
-bash tools/original/with-display.sh node tools/e2e/keepers.mjs --count 1
+npm run test:e2e -- keepers
 ```
 
 Complete rendered pixels, contact/damage/drop callbacks and total shared MT

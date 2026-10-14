@@ -1,5 +1,4 @@
 """Bounded read-only Player/Familiar/effect ownership at actual public gates."""
-import hashlib
 import importlib.util
 import math
 import os
@@ -9,6 +8,9 @@ import struct
 import time
 
 ROOT = Path(__file__).resolve().parents[2]
+identity_spec = importlib.util.spec_from_file_location('native_identity', ROOT / 'tools/original/native-identity.py')
+native_identity = importlib.util.module_from_spec(identity_spec)
+identity_spec.loader.exec_module(native_identity)
 PIN = '724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13'
 
 
@@ -35,7 +37,7 @@ def observe(pid, context):
                       if line.startswith('PPid:'))
         if int(parent) != os.getpid():
             raise PermissionError('Original is not a directly owned child')
-        if hashlib.sha256(Path(f'/proc/{pid}/exe').read_bytes()).hexdigest() != PIN:
+        if native_identity.native_binary_sha256(pid) != PIN:
             raise ValueError('Unexpected original executable')
         os.kill(pid, signal.SIGSTOP)
         stopped = True

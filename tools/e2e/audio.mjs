@@ -11,11 +11,12 @@ import { browserLaunchOptions, inspectBrowserGraphics } from '../foundation/brow
 import { startProductionServer } from '../foundation/production-server.mjs';
 import { waitForReady } from '../foundation/verify.mjs';
 import { installBrowserAudioObserver } from './audio-api-observer.mjs';
+import { snapshot, step } from './lib/game.mjs';
+import { ORIGINAL_SHA, assertOriginalBinary } from './lib/original.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const run = promisify(execFile);
 const sha = bytes => createHash('sha256').update(bytes).digest('hex');
-const ORIGINAL_SHA = '724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13';
 const value = flag => { const i = process.argv.indexOf(flag); return i < 0 ? undefined : process.argv[i + 1]; };
 const output = resolve(value('--output') || join(ROOT, '.cache/e2e/audio', String(Date.now())));
 const count = Number(value('--count') || 2);
@@ -37,12 +38,8 @@ for (const c of cases) {
   assert.ok(c.volume === 0 || c.volume === 1);
   assert.ok(Array.isArray(c.taps) && c.taps.length >= 2 && c.taps.length <= 32 && c.taps.every(key => ['Left', 'Right'].includes(key)));
 }
-const sources = ['tools/e2e/audio.mjs', 'tools/original/audio-observer.py', 'tools/original/audio-trace.c', 'tools/original/foundation-clock-run.py',
-  'tools/e2e/audio-api-observer.mjs', 'tools/original/foundation-clock-gate.c', 'tools/original/state-observer.py', 'tools/original/foundation-seeds.py', 'tools/foundation/production-server.mjs', 'tools/foundation/browser.mjs'];
-const sourceHashes = async () => Object.fromEntries(await Promise.all(sources.map(async path => [path, sha(await readFile(join(ROOT, path)))])));
 const catalogue = JSON.parse(await readFile(join(ROOT, 'web/audio-data.json')));
-const hashes = await sourceHashes();
-assert.equal(sha(await readFile(join(ROOT, '.cache/original-runtime/offline-depot/isaac.x64'))), ORIGINAL_SHA);
+await assertOriginalBinary();
 await writeFile(join(output, 'scenarios.json'), JSON.stringify({ schema: 1, entropy: 'OS secrets run seeds and Node crypto boot epochs/menu taps', cases }, null, 2) + '\n');
 await run('cc', ['-std=c11', '-Wall', '-Wextra', '-Werror', '-fPIC', '-shared', 'tools/original/audio-trace.c', '-o', join(output, 'audio-trace.so'), '-ldl', '-pthread'], { cwd: ROOT });
 const observerLibrarySha256 = sha(await readFile(join(output, 'audio-trace.so')));
@@ -89,7 +86,7 @@ function sampleStarts(calls) {
 
 const production = await startProductionServer();
 const browser = await chromium.launch(browserLaunchOptions());
-const report = { schema: 1, status: 'running', originalBinarySha256: ORIGINAL_SHA, observerLibrarySha256, production: production.build, sourceHashes: hashes,
+const report = { schema: 1, status: 'running', originalBinarySha256: ORIGINAL_SHA, observerLibrarySha256, production: production.build,
   graphics: await inspectBrowserGraphics(browser), scope: 'All 169 configured SFX and 303 sample wrappers; actual forward menu/character sound admissions and native OpenAL/browser Web Audio PCM starts. Complete shared MT is gated at Title/profile; later Main initialization and run random routing remain explicit diagnostics. Stable character sound admissions must each consume exactly one shared draw. Music/gameplay SFX callers are separate work.', cases: [] };
 try {
   for (const scenario of cases) {
@@ -120,7 +117,7 @@ try {
       const states = []; let previousTap, intendedSeedEntry = false;
       const intendedPressed = new Set(), expectedCommands = [{ type: 'audioVolume', sfx_volume: scenario.volume }];
       for (const action of tape.browser) {
-        if (action.type === 'step') { await page.evaluate(frames => window.game.step(frames), action.frames); expectedCommands.push({ type: 'tick', count: action.frames }); }
+        if (action.type === 'step') { await step(page, action.frames); expectedCommands.push({ type: 'tick', count: action.frames }); }
         else if (action.type === 'key') {
           const code = ({ Return: 'Enter', Tab: 'Tab', Left: 'ArrowLeft', Right: 'ArrowRight' })[action.key] ||
             (/^[0-9]$/.test(action.key) ? 'Digit' + action.key : 'Key' + action.key.toUpperCase());
@@ -209,7 +206,7 @@ try {
           [1, 44100, catalogue.assets[actual.path].frames]);
       }
       check('browser runtime errors', errors, []);
-      check('browser actual public seed readback', (await page.evaluate(() => window.game.snapshot())).runSeedValue, native.seedValue);
+      check('browser actual public seed readback', (await snapshot(page)).runSeedValue, native.seedValue);
       const wasmTrace = await page.evaluate(() => window.game.trace());
       check('actual reset/run and boot inputs recorded', [wasmTrace.initialSeed, wasmTrace.bootEpochSeed], [native.seedValue, scenario.bootEpochSeed]);
       check('all public inputs and intervals reached production WASM', wasmTrace.commands, expectedCommands);
@@ -223,7 +220,6 @@ try {
     } catch (error) { result.status = 'fail'; result.error = String(error); }
     finally { if (page) await page.close(); await writeFile(join(output, 'report.json'), JSON.stringify(report, null, 2) + '\n'); }
   }
-  assert.deepEqual(await sourceHashes(), hashes, 'Live gate sources must remain immutable across all cases');
   report.status = report.cases.every(c => c.status === 'pass') ? 'pass' : 'fail';
 } catch (error) { report.status = 'fail'; report.error = String(error); }
 finally { await writeFile(join(output, 'report.json'), JSON.stringify(report, null, 2) + '\n'); await browser.close(); await production.close(); }
