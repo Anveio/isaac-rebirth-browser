@@ -17,7 +17,7 @@ pub struct SavedPlayerItems {
     /// Saved+8908/890c/8904/8910; D80/D84 are not saved fields.
     pub active_id: u32,
     pub active_charge: i32,
-    pub active_subordinate_charge: i32,
+    pub save_word_d88: i32,
     pub reserve_charge: i32,
 }
 
@@ -44,7 +44,7 @@ impl SavedPlayerItems {
             pocket_rng_states: current_states(&owner.pocket_rngs, 41)?,
             active_id: owner.active_id,
             active_charge: owner.active_charge,
-            active_subordinate_charge: owner.active_subordinate_charge,
+            save_word_d88: owner.save_word_d88,
             reserve_charge: owner.reserve_charge,
         })
     }
@@ -86,7 +86,7 @@ impl SavedPlayerItems {
                 *rng = Rng::new(*state, CHILD_SHIFTS);
             }
         }
-        owner.active_subordinate_charge = self.active_subordinate_charge;
+        owner.save_word_d88 = self.save_word_d88;
         owner.active_id = self.active_id;
         owner.active_charge = self.active_charge;
         owner.reserve_charge = self.reserve_charge;

@@ -45,6 +45,9 @@ pub struct PlayerItems {
     pub active_id: u32,
     pub active_charge: i32,
     pub active_subordinate_charge: i32,
+    /// Opaque saved Player+D88 word, distinct from subordinate charge D7C.
+    /// Actual constructor5196c1 initializes0;511aaf restores this word.
+    pub save_word_d88: i32,
     pub active_state_d80: i32,
     pub active_state_d84: i32,
     pub reserve_charge: i32,
@@ -93,6 +96,7 @@ impl PlayerItems {
             active_id: 0,
             active_charge: 0,
             active_subordinate_charge: 0,
+            save_word_d88: 0,
             active_state_d80: 0,
             active_state_d84: 0,
             reserve_charge: 0,

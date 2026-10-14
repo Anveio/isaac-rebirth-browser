@@ -150,7 +150,7 @@ try {
             });
           }
         }
-        for (const field of ['activeId', 'activeCharge', 'activeSubordinateCharge', 'reserveCharge']) {
+        for (const field of ['activeId', 'activeCharge', 'saveWordD88', 'reserveCharge']) {
           const expected = savedPlayer[field], actual = browserPlayer[field];
           assert.ok(Number.isInteger(expected) && Number.isInteger(actual));
           playerChecks++;

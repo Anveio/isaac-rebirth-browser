@@ -68,6 +68,12 @@
       "fullFdeBytes": 210,
       "rawSha256": "5b109df13f60a512c9a11eef7e9c3ae6f8fd29c1d574c317a18d470d94350b77",
       "dumpSha256": "7522b6f4a968897f5eed93f33bae123dea50912deaeb4273c2cf16a54c830d5f"
+    },
+    {
+      "address": "0x519350",
+      "fullFdeBytes": 3170,
+      "rawSha256": "71493af21a7b08cde60511500ca09f9ec0a2dea5749c2ae3e4a157fd9fe7f02b",
+      "dumpSha256": "51024e04f4556503551f105a2219e7288e243861d2f34e68d5222e5b4e676d08"
     }
   ],
   "copyOrder": "Game54f230 copies ItemPool/Room/Level before queuedPlayer grant52ee40 and Manager5bf400\u2192Player518350. Runtime capture follows that real existing Level.Init Save seam. No public synthetic Save/Restore action added.",
@@ -99,13 +105,14 @@
       "savedOffset": "0x890c",
       "playerOffset": "0xd78"
     },
-    "activeSubordinateCharge": {
-      "savedOffset": "0x8904",
-      "playerOffset": "0xd88"
-    },
     "reserveCharge": {
       "savedOffset": "0x8910",
       "playerOffset": "0xd8c"
+    },
+    "saveWordD88": {
+      "savedOffset": "0x8904",
+      "playerOffset": "0xd88",
+      "meaning": "Opaque actualPlayer+D88 signed word; distinct from existing subordinate chargeD7C"
     }
   },
   "restore": "Existing constructed Player item owner receives346 saved counts,450 current RNG states through real shift35=[5,9,7] initialization withno Next draws, then saved active/reserve fields. The restore store helper is available for later actual Saved dispatch; it is not called during NewRun and has no current public execution claim.",
@@ -140,6 +147,16 @@
     {
       "sha256": "5a2038db6599e134fd7f2650dcedf8ab5911e5f27ee55ff3d096c84891f73a86",
       "name": "continue-research/owned-restore-fields-player/temporary-clear-extraction-receipt.json"
+    },
+    {
+      "sha256": "1f42ec92415832a2273c61e2e733d2525936a0efadde011fb29ac2eb896ae566",
+      "name": "continue-research/owned-restore-fields-player/d88-initializer-extraction-receipt.json"
     }
-  ]
+  ],
+  "d88OwnerCorrection": {
+    "initializer": "5196c1 storesPlayer+D88=0; distinctD7C initializesat5198a9 andD8C at5196cd. ExistingD7C producer/acquisition/readback remains unchanged.",
+    "save": "51851e readsD88;518524 storesSaved8904.",
+    "restore": "511aa9 readsSaved8904;511aaf storesPlayerD88.",
+    "correction": "EarlierPR131d251 incorrectlyaliasedSaved8904 toexistingD7C subordinate charge. Corrected with distinctmutableD88 owner andmatchinggate schema; allfreshzero equalitywasinsufficientproof."
+  }
 }

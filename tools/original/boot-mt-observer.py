@@ -59,7 +59,7 @@ def observe(pid,context):
      'trinketRngStates':list(struct.unpack('<62I',read(saved+0x941c,62*4))),
      'pocketRngStates':list(struct.unpack('<41I',read(saved+0x9514,41*4))),
      'activeId':u32(saved+0x8908),'activeCharge':struct.unpack('<i',read(saved+0x890c,4))[0],
-     'activeSubordinateCharge':struct.unpack('<i',read(saved+0x8904,4))[0],
+     'saveWordD88':struct.unpack('<i',read(saved+0x8904,4))[0],
      'reserveCharge':struct.unpack('<i',read(saved+0x8910,4))[0]}
     room=u64(game+0x8180);width=u32(room+0x14);height=u32(room+0x18);cells=width*height
     if not 0<cells<=448:raise ValueError('Live room grid exceeds source capacity')
