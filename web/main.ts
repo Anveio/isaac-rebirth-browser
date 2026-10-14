@@ -92,6 +92,7 @@ async function boot() {
   }
   const game = {
     snapshot: () => engine.snapshot(),
+    snapshotJson: () => engine.snapshotJson(),
     rendererTargets: () => renderer.debugTargets(),
     audio: () => audio.snapshot(),
     command: (command: Command) => structuredClone(dispatch(command)),
