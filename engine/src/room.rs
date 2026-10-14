@@ -30,6 +30,8 @@ pub struct Room {
     #[serde(default)]
     pub background_stains: Vec<crate::familiars::BackgroundStain>,
     pub authored_actor_order: Vec<crate::actors::ActorRef>,
+    #[serde(default)]
+    pub manager_counts: crate::actors::ManagerCounts,
     pub boss_count: u32,
     pub boss_presentation_index: u32,
     pub combat_clear: bool,
@@ -490,6 +492,7 @@ impl Room {
             npcs: Vec::new(),
             background_stains: Vec::new(),
             authored_actor_order: Vec::new(),
+            manager_counts: crate::actors::ManagerCounts::default(),
             boss_count: 0,
             boss_presentation_index: 0,
             combat_clear: true,
