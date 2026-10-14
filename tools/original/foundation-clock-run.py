@@ -201,9 +201,14 @@ def main():
     gate = out / 'clock-gate.so'
     subprocess.run(['cc', '-std=c11', '-Wall', '-Wextra', '-Werror', '-fPIC', '-shared',
                     str(Path(__file__).with_name('foundation-clock-gate.c')), '-o', str(gate), '-ldl'], check=True)
+    # The original silently ignores options.ini (falling back to defaults for
+    # volumes, VSync and focus pause) when the profile path is long. Hand it a
+    # short symlink to the retained profile so the declared options apply.
+    short = Path(tempfile.mkdtemp(prefix='isaac-')) / 'p'
+    short.symlink_to(out / 'profile', target_is_directory=True)
     env = os.environ.copy()
-    env.update({'HOME': str(out / 'profile'), 'XDG_DATA_HOME': str(out / 'profile/data'),
-                'XDG_CONFIG_HOME': str(out / 'profile/config'), 'ISAAC_OFFLINE_CLOUD_DIR': str(out / 'profile/cloud'),
+    env.update({'HOME': str(short), 'XDG_DATA_HOME': str(short / 'data'),
+                'XDG_CONFIG_HOME': str(short / 'config'), 'ISAAC_OFFLINE_CLOUD_DIR': str(short / 'cloud'),
                 'ALSOFT_DRIVERS': 'null', 'LD_PRELOAD': str(gate) + (' ' + env['LD_PRELOAD'] if env.get('LD_PRELOAD') else ''),
                 'LD_LIBRARY_PATH': str(source / 'lib64') + (':' + env['LD_LIBRARY_PATH'] if env.get('LD_LIBRARY_PATH') else ''),
                 'ISAAC_CLOCK_GATE_FPS': str(args.fps), 'ISAAC_CLOCK_GATE_STEP_NS': str(args.step_ns),
