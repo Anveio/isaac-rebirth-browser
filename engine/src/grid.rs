@@ -413,8 +413,14 @@ impl Grid {
 
     /// CheckLine5c74a0(mode3,threshold0): four corners at +/-5 for each
     /// ten-unit step. Class1 is exempt; other nonzero collision blocks.
-    /// Empty-collision authored selectors contribute to the <=8 budget.
-    pub fn projectile_line_clear(&self, from: WorldVector, to: WorldVector) -> bool {
+    /// Empty-collision samples with actual signed Room costs>0 contribute
+    /// to the <=8 budget; authored selectors are not this mutable owner.
+    pub fn projectile_line_clear(
+        &self,
+        from: WorldVector,
+        to: WorldVector,
+        costs: &crate::room_costs::RoomCosts,
+    ) -> bool {
         let delta = WorldVector {
             x: from.x - to.x,
             y: from.y - to.y,
@@ -429,7 +435,7 @@ impl Grid {
         };
         let mut point = from;
         let mut travelled = 0.0;
-        let mut selectors = 0;
+        let mut marked_samples = 0;
         while travelled < distance {
             point = WorldVector {
                 x: point.x - step.x,
@@ -446,13 +452,13 @@ impl Grid {
                 };
                 match self.collision(index) {
                     1 => {}
-                    0 => selectors += u32::from(self.descriptor.cells[index].selector > 0),
+                    0 => marked_samples += u32::from(costs.entries()[index] > 0),
                     _ => return false,
                 }
             }
             travelled += 10.0;
         }
-        selectors <= 8
+        marked_samples <= 8
     }
 
     /// Source CheckLine(mode=2): ordinary rocks permit the line; kind3 blocks

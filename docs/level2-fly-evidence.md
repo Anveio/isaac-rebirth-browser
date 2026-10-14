@@ -7,7 +7,7 @@ Idle. Entity215 owns `214.000_Level2Spider`; that asset is unrelated.
 
 Pinned AI4ef880 initializes state3 and continues active AI in that callback.
 The generic appearance path saves this real initialized state, produces a
-parented Poof2 at incoming counter1, and restores state3 after the missing
+Poof2 with cached NPC spawner metadata at incoming counter1, and restores state3 after the missing
 Appear fallback. Target/wander guards use the single natural Game counter;
 there is no native42 offset. Steering adds the counterclockwise tangent before
 halving Y, retains source component division, and reads the previous full grid
@@ -83,8 +83,19 @@ NPC+448 position before447190 moves the NPC or drains queued damage. The old
 post-advance adaptor used the later position and could allocate the effect
 after a damage-driven blood birth. A typed factory context now borrows the
 effect ID, effect array and room sequence owner inside the counter1 callback.
-It retains the actual parent, zero initial velocity, fresh zero offset/height+1
+It retains the cached spawner type/variant, zero initial velocity, fresh zero offset/height+1
 and newborn fence, with no immediate Poof Update. The caller consumes one
 shared seed; Init consumes none. This narrow correction has source/static
 validation only. Artifact30183f, both failed captures and every required
 comparison remain retained; corrected live parity is pending.
+
+The source-corrected Poof keeps its linked parent pointer null. Game.Spawn
+`550acd..550ada` copies the caller's type and variant into cached fields
+`+1c/+20`; this appearance caller never invokes `447fc0` to link `+498`.
+The prior adapter incorrectly used the cached caller as a linked parent.
+All 172 retained native214 Poof observations have that pointer null. The gate
+now requires the cached fields and linked pointer separately. The separate
+`poof-spawner-correction.json` pins this evidence without rewriting the old
+source contract, captures or failed reports. The correction passes its own-target
+all-target Rust check and strict Clippy; current production/build/live acceptance
+is still pending.
