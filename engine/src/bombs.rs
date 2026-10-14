@@ -501,11 +501,26 @@ pub fn advance_actor(state: &mut State, phase: Phase, id: u32) -> Result<(), Str
     state.bombs[index].x = f64::from(presented.x) * WORLD_SCALE + 32.0;
     state.bombs[index].y = f64::from(presented.y) * WORLD_SCALE - 46.0;
     if detonated {
-        crate::npcs::bomb_hit(state, position, id)?;
-        crate::pickups::bomb_hit(state, position)?;
-        if let Some(velocity) =
+        // Bomb555300 enables Game554490's Room::CheckLine(mode2, ignoreWalls)
+        // admission; a blocked line skips knockback and damage alike.
+        let line = state
+            .room
+            .grid
+            .as_ref()
+            .map(|descriptor| crate::grid::Grid::new(descriptor.clone()))
+            .transpose()?;
+        let clear = |target: WorldVector| {
+            line.as_ref()
+                .is_none_or(|grid| grid.blast_line_clear(position, target, true))
+        };
+        crate::npcs::bomb_hit(state, position, id, &clear)?;
+        crate::pickups::bomb_hit(state, position, &clear)?;
+        let player_velocity = if clear(player_world(state)) {
             isaac_blast_velocity(player_world(state), player_velocity(state), position)?
-        {
+        } else {
+            None
+        };
+        if let Some(velocity) = player_velocity {
             state.player.vx = f64::from(velocity.x) * WORLD_SCALE;
             state.player.vy = f64::from(velocity.y) * WORLD_SCALE;
             // Bomb555300 supplies actual incoming DamageFlags4 via
