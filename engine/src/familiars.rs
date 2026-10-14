@@ -65,7 +65,7 @@ pub struct Sprite {
 }
 
 impl Sprite {
-    fn new(config: &Definition) -> Self {
+    pub(crate) fn new(config: &Definition) -> Self {
         Self {
             animation: config.default_clip.into(),
             frame: 0.0,
@@ -79,7 +79,7 @@ impl Sprite {
             offsets: [0.0; 3],
         }
     }
-    fn advance(&mut self, config: &Definition) -> Result<(), String> {
+    pub(crate) fn advance(&mut self, config: &Definition) -> Result<(), String> {
         if !self.playing {
             return Ok(());
         }
@@ -210,6 +210,7 @@ pub struct SpriteEffect {
     pub actor_rng: items::Rng,
     pub position: WorldVector,
     pub presented_position: WorldVector,
+    pub render_offset: WorldVector,
     pub velocity: WorldVector,
     pub configured_friction: f32,
     pub current_friction: f32,
@@ -229,8 +230,11 @@ pub struct SpriteEffect {
     pub time_to_live: i32,
     pub raw_7f4: i32,
     pub raw_7f8: f32,
+    pub raw_7d8: bool,
     pub sprite: Sprite,
     pub full_updates: u32,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub poop_effect: Option<crate::poop_effects::Controller>,
 }
 
 impl SpriteEffect {
@@ -281,7 +285,7 @@ pub fn admit_poof(
     velocity: WorldVector,
     spawner: Option<Parent>,
 ) -> Result<u32, String> {
-    PoofAdmission {
+    NpcEffectAdmission {
         game_update_count: state.game_update_count,
         next_effect: &mut state.next_effect,
         effects: &mut state.sprite_effects,
@@ -293,14 +297,14 @@ pub fn admit_poof(
 /// The source NPC callback admits appearance effects before BaseUpdate moves
 /// its body or drains damage. Borrow only the actual factory owners so that
 /// admission occurs at that call site, while the NPC is still being updated.
-pub(crate) struct PoofAdmission<'a> {
+pub(crate) struct NpcEffectAdmission<'a> {
     pub game_update_count: u32,
     pub next_effect: &'a mut u32,
     pub effects: &'a mut Vec<SpriteEffect>,
     pub scheduler: &'a mut crate::actors::Scheduler,
 }
 
-impl PoofAdmission<'_> {
+impl NpcEffectAdmission<'_> {
     pub(crate) fn admit_npc(
         &mut self,
         npc: &crate::npcs::Npc,
@@ -364,6 +368,7 @@ impl PoofAdmission<'_> {
             actor_rng: items::Rng::new(seed, [4, 3, 17]),
             position,
             presented_position: position,
+            render_offset: ZERO,
             velocity,
             configured_friction: config.friction,
             current_friction: config.friction,
@@ -384,8 +389,10 @@ impl PoofAdmission<'_> {
             time_to_live: -1,
             raw_7f4: 1,
             raw_7f8: 0.0,
+            raw_7d8: false,
             sprite,
             full_updates: 0,
+            poop_effect: None,
         });
         self.scheduler.admit(ActorRef {
             kind: ActorKind::Effect,
@@ -401,7 +408,29 @@ pub fn advance_effect(state: &mut State, phase: Phase, id: u32) -> Result<(), St
         .iter_mut()
         .find(|effect| effect.id == id)
     {
-        effect.advance(phase)?;
+        if effect.poop_effect.is_some() {
+            match phase {
+                Phase::Update => crate::poop_effects::advance_full(
+                    effect,
+                    &mut state.boot_lifecycle.shared,
+                    &mut state.audio,
+                    state.system_clock.system_counter.wrapping_sub(1),
+                )?,
+                Phase::Interpolate => {
+                    let grid = Grid::new(
+                        state
+                            .room
+                            .grid
+                            .clone()
+                            .ok_or("poop effect requires actual grid")?,
+                    )?;
+                    crate::poop_effects::advance_fast(effect, &grid)?;
+                }
+                Phase::Skipped => {}
+            }
+        } else {
+            effect.advance(phase)?;
+        }
     }
     Ok(())
 }
@@ -612,6 +641,9 @@ pub struct BackgroundStain {
     pub spawn_seed: u32,
     pub birth_game_update: u32,
     pub position: WorldVector,
+    pub variant: u32,
+    pub render_offset: WorldVector,
+    pub layer_rotation: Option<f32>,
     pub sprite: Sprite,
 }
 
@@ -624,102 +656,169 @@ pub fn admit_blood_splat(
     tint: [f32; 4],
     offsets: [f32; 3],
 ) -> Result<u32, String> {
-    if !position.is_finite() || tint.iter().chain(offsets.iter()).any(|v| !v.is_finite()) {
-        return Err("Blood Splat requires finite ground and copied color".into());
+    NpcEffectAdmission {
+        game_update_count: state.game_update_count,
+        next_effect: &mut state.next_effect,
+        effects: &mut state.sprite_effects,
+        scheduler: &mut state.actor_scheduler,
     }
-    let config = definition(1000, 7).expect("authored Blood Splat config");
-    let id = state.next_effect;
-    state.next_effect = id.checked_add(1).ok_or("effect handle exhausted")?;
-    let mut sprite = Sprite::new(config);
-    sprite.tint = tint;
-    sprite.offsets = offsets;
-    state.sprite_effects.push(SpriteEffect {
-        id,
-        variant: 7,
-        subtype: 0,
-        spawn_seed: seed,
-        spawner_type: 0,
-        spawner_variant: 0,
-        parent: None,
-        birth_game_update: state.game_update_count,
-        actor_rng: items::Rng::new(seed, [4, 3, 17]),
-        position,
-        presented_position: position,
-        velocity: ZERO,
-        configured_friction: config.friction,
-        current_friction: config.friction,
-        collision_radius: config.collision_radius,
-        collision_mass: config.collision_mass,
-        collision_damage: 22.0,
-        hp: config.base_hp,
-        max_hp: config.base_hp,
-        grid_collision_class: 0,
-        entity_collision_class: 0,
-        flags: 8,
-        visible: true,
-        active: true,
-        removed: false,
-        render_order_offset: 0,
-        lifetime_divisor: 0,
-        time_to_live: -1,
-        raw_7f4: 1,
-        raw_7f8: 0.0,
-        sprite,
-        full_updates: 0,
-    });
-    // Room5c6940 assigns the actual sequence first; Manager4524f0 then routes
-    // flags8 to its separate background pool rather than the ordinary array.
-    state.actor_scheduler.admit_background(ActorRef {
-        kind: ActorKind::Effect,
-        id,
-    })?;
-    Ok(id)
+    .admit_blood(seed, position, tint, offsets)
 }
 
 pub fn advance_blood_initial(state: &mut State, id: u32) -> Result<(), String> {
-    let Some(effect) = state.sprite_effects.iter_mut().find(|e| e.id == id) else {
-        return Err("Blood initial callback requires admitted effect".into());
-    };
-    if effect.variant != 7 || effect.full_updates != 0 {
-        return Err("Blood explicit initial callback must execute once".into());
+    NpcEffectAdmission {
+        game_update_count: state.game_update_count,
+        next_effect: &mut state.next_effect,
+        effects: &mut state.sprite_effects,
+        scheduler: &mut state.actor_scheduler,
     }
-    let config = definition(1000, 7).expect("authored Blood Splat config");
-    // BaseUpdate runs before the first7-specific manual pose and shared draws.
-    effect.sprite.advance(config)?;
-    effect.velocity = effect.velocity * effect.current_friction;
-    effect.position = effect.position + effect.velocity;
-    effect.presented_position = effect.position;
-    effect.current_friction = effect.configured_friction;
-    let incoming_scale = effect.sprite.scale.x;
-    let name = if incoming_scale < 0.4 {
-        "Size1BloodStains"
-    } else if incoming_scale < 0.6 {
-        "Size2BloodStains"
-    } else if incoming_scale < 0.8 {
-        "Size3BloodStains"
-    } else if incoming_scale < 1.2 {
-        "Size4BloodStains"
-    } else if incoming_scale < 2.0 {
-        "Size5BloodStains"
-    } else {
-        "Size6BloodStains"
-    };
-    let clip = config
-        .clips
-        .iter()
-        .find(|c| c.name == name)
-        .expect("authored stain size");
-    effect.sprite.scale = WorldVector { x: 1.0, y: 1.0 };
-    effect.sprite.animation = name.into();
-    effect.sprite.frame = state.boot_lifecycle.shared.bounded(clip.frames) as f32;
-    effect.sprite.playing = false;
-    effect.sprite.flip_x = state.boot_lifecycle.shared.bounded(2) == 0;
-    effect.sprite.flip_y = state.boot_lifecycle.shared.bounded(2) == 0;
-    if effect.sprite.tint[3] == 1.0 {
-        effect.sprite.tint[3] = (state.boot_lifecycle.shared.bounded(6) as f32 * 0.1) + 0.5;
+    .advance_blood_initial(id, &mut state.boot_lifecycle.shared)
+}
+
+impl NpcEffectAdmission<'_> {
+    pub(crate) fn admit_blood(
+        &mut self,
+        seed: u32,
+        position: WorldVector,
+        tint: [f32; 4],
+        offsets: [f32; 3],
+    ) -> Result<u32, String> {
+        if !position.is_finite() || tint.iter().chain(offsets.iter()).any(|v| !v.is_finite()) {
+            return Err("Blood Splat requires finite ground and copied color".into());
+        }
+        let config = definition(1000, 7).expect("authored Blood Splat config");
+        let id = *self.next_effect;
+        *self.next_effect = id.checked_add(1).ok_or("effect handle exhausted")?;
+        let mut sprite = Sprite::new(config);
+        sprite.tint = tint;
+        sprite.offsets = offsets;
+        self.effects.push(SpriteEffect {
+            id,
+            variant: 7,
+            subtype: 0,
+            spawn_seed: seed,
+            spawner_type: 0,
+            spawner_variant: 0,
+            parent: None,
+            birth_game_update: self.game_update_count,
+            actor_rng: items::Rng::new(seed, [4, 3, 17]),
+            position,
+            presented_position: position,
+            render_offset: ZERO,
+            velocity: ZERO,
+            configured_friction: config.friction,
+            current_friction: config.friction,
+            collision_radius: config.collision_radius,
+            collision_mass: config.collision_mass,
+            collision_damage: 22.0,
+            hp: config.base_hp,
+            max_hp: config.base_hp,
+            grid_collision_class: 0,
+            entity_collision_class: 0,
+            flags: 8,
+            visible: true,
+            active: true,
+            removed: false,
+            render_order_offset: 0,
+            lifetime_divisor: 0,
+            time_to_live: -1,
+            raw_7f4: 1,
+            raw_7f8: 0.0,
+            raw_7d8: true,
+            sprite,
+            full_updates: 0,
+            poop_effect: None,
+        });
+        // Room5c6940 assigns the actual sequence first; Manager4524f0 then routes
+        // flags8 to its separate background pool rather than the ordinary array.
+        self.scheduler.admit_background(ActorRef {
+            kind: ActorKind::Effect,
+            id,
+        })?;
+        Ok(id)
     }
-    effect.full_updates = 1;
-    Ok(())
+
+    pub(crate) fn set_blood_scale(&mut self, id: u32, scale: f32) -> Result<(), String> {
+        if !scale.is_finite() || scale <= 0.0 {
+            return Err("Blood scale must be positive and finite".into());
+        }
+        let effect = self
+            .effects
+            .iter_mut()
+            .find(|e| e.id == id && e.variant == 7)
+            .ok_or("Blood scale requires an admitted actual7")?;
+        effect.sprite.scale = WorldVector { x: scale, y: scale };
+        Ok(())
+    }
+
+    pub(crate) fn set_blood_color(
+        &mut self,
+        id: u32,
+        tint: [f32; 4],
+        offsets: [f32; 3],
+    ) -> Result<(), String> {
+        if tint.iter().chain(offsets.iter()).any(|v| !v.is_finite()) {
+            return Err("Blood color must be finite".into());
+        }
+        let effect = self
+            .effects
+            .iter_mut()
+            .find(|e| e.id == id && e.variant == 7)
+            .ok_or("Blood color requires an admitted actual7")?;
+        effect.sprite.tint = tint;
+        effect.sprite.offsets = offsets;
+        Ok(())
+    }
+
+    pub(crate) fn advance_blood_initial(
+        &mut self,
+        id: u32,
+        random: &mut crate::mt::Mt19937,
+    ) -> Result<(), String> {
+        let Some(effect) = self.effects.iter_mut().find(|e| e.id == id) else {
+            return Err("Blood initial callback requires admitted effect".into());
+        };
+        if effect.variant != 7 || effect.full_updates != 0 {
+            return Err("Blood explicit initial callback must execute once".into());
+        }
+        let config = definition(1000, 7).expect("authored Blood Splat config");
+        // BaseUpdate runs before the first7-specific manual pose and shared draws.
+        effect.sprite.advance(config)?;
+        effect.velocity = effect.velocity * effect.current_friction;
+        effect.position = effect.position + effect.velocity;
+        effect.presented_position = effect.position;
+        effect.current_friction = effect.configured_friction;
+        let incoming_scale = effect.sprite.scale.x;
+        let name = if incoming_scale < 0.4 {
+            "Size1BloodStains"
+        } else if incoming_scale < 0.6 {
+            "Size2BloodStains"
+        } else if incoming_scale < 0.8 {
+            "Size3BloodStains"
+        } else if incoming_scale < 1.2 {
+            "Size4BloodStains"
+        } else if incoming_scale < 2.0 {
+            "Size5BloodStains"
+        } else {
+            "Size6BloodStains"
+        };
+        let clip = config
+            .clips
+            .iter()
+            .find(|c| c.name == name)
+            .expect("authored stain size");
+        effect.sprite.scale = WorldVector { x: 1.0, y: 1.0 };
+        effect.sprite.animation = name.into();
+        effect.sprite.frame = random.bounded(clip.frames) as f32;
+        effect.sprite.playing = false;
+        effect.sprite.flip_x = random.bounded(2) == 0;
+        effect.sprite.flip_y = random.bounded(2) == 0;
+        if effect.sprite.tint[3] == 1.0 {
+            effect.sprite.tint[3] = (random.bounded(6) as f32 * 0.1) + 0.5;
+        }
+        effect.full_updates = 1;
+        Ok(())
+    }
 }
 
 /// Actual454df0 current-count background pass follows actor callbacks and
@@ -732,7 +831,12 @@ pub fn paint_background_effects(state: &mut State) -> Result<(), String> {
         .sprite_effects
         .iter()
         .enumerate()
-        .filter(|(_, effect)| effect.variant == 7 && effect.active && !effect.removed)
+        .filter(|(_, effect)| {
+            matches!(effect.variant, 7 | 43 | 58)
+                && effect.flags & 8 != 0
+                && effect.active
+                && !effect.removed
+        })
         .map(|(index, effect)| {
             let key = ((100.0_f32 * effect.position.y + 10030.0) + 0.5).floor() as u32;
             (
@@ -745,7 +849,7 @@ pub fn paint_background_effects(state: &mut State) -> Result<(), String> {
     pending.sort_by(|a, b| a.1.cmp(&b.1).then_with(|| b.2.cmp(&a.2)));
     for (index, _, _) in pending {
         let effect = &mut state.sprite_effects[index];
-        if effect.full_updates != 1 {
+        if effect.variant == 7 && effect.full_updates != 1 {
             return Err("Blood background paint requires the explicit initial Update".into());
         }
         state.room.background_stains.push(BackgroundStain {
@@ -753,6 +857,12 @@ pub fn paint_background_effects(state: &mut State) -> Result<(), String> {
             spawn_seed: effect.spawn_seed,
             birth_game_update: effect.birth_game_update,
             position: effect.position,
+            variant: effect.variant,
+            render_offset: effect.render_offset,
+            layer_rotation: effect
+                .poop_effect
+                .as_ref()
+                .and_then(|controller| controller.layer_rotation()),
             sprite: effect.sprite.clone(),
         });
         // Remove441bb0 clears active and marks dead; visibility stays unchanged.

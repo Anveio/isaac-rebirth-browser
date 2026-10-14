@@ -273,6 +273,7 @@ pub(crate) fn from_selector(id: u32, selector: &SpawnSelector) -> Result<Option<
         keeper: None,
         monstro: None,
         level2_fly: None,
+        dip: None,
         fireplace: Some(FireplaceState {
             anchor: ZERO,
             authored_grid_index: selector.grid_index,
