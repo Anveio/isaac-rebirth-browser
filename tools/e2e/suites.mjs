@@ -38,7 +38,7 @@ const entitySuite = spec => suite(`entity-${spec.name}`, statePair, [
 ], spec.about);
 
 export const SUITES = [
-  suite('paired', paired, [], 'Title/menu, movement/fire, pause, bombs and combat rooms; six contrived + two OS-random runs'),
+  suite('paired', paired, [], 'Title/menu, movement/fire, pause, bombs and combat rooms; all declared contrived + OS-random runs'),
   suite('regressions', paired,
     ['--replay-cases', 'references/isaac/foundation/runtime-progress/1E0WJX06.json,references/isaac/foundation/runtime-progress/W0L0LYYM.json'],
     'Recorded paired runs that previously regressed'),
