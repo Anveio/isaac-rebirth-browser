@@ -53,6 +53,14 @@ def observe(pid,context):
     copied=[room for room,index in enumerate(indices) if index!=-3]
     saved_run={'seedText':seed_string(saved+0xef80),'seededRun':bool(read(saved+4,1)[0]),'stage':u32(saved+0x94),'gameUpdateCount':u32(saved+0x50),
      'redHp':u32(saved+0x88a0),'maxRedHp':u32(saved+0x88a4),'inventory':{'coins':u32(saved+0x88b8),'bombs':u32(saved+0x88c0),'keys':u32(saved+0x88bc)},'allocatedRoomRecords':allocated,'copiedRoomRecords':copied}
+    # Actual518350 owned stores; current child states are not fresh seeds.
+    saved_run['playerItems']={'ownedCounts':list(struct.unpack('<347i',read(saved+0x893c,347*4))),
+     'itemRngStates':list(struct.unpack('<347I',read(saved+0x8eb0,347*4))),
+     'trinketRngStates':list(struct.unpack('<62I',read(saved+0x941c,62*4))),
+     'pocketRngStates':list(struct.unpack('<41I',read(saved+0x9514,41*4))),
+     'activeId':u32(saved+0x8908),'activeCharge':struct.unpack('<i',read(saved+0x890c,4))[0],
+     'activeSubordinateCharge':struct.unpack('<i',read(saved+0x8904,4))[0],
+     'reserveCharge':struct.unpack('<i',read(saved+0x8910,4))[0]}
     room=u64(game+0x8180);width=u32(room+0x14);height=u32(room+0x18);cells=width*height
     if not 0<cells<=448:raise ValueError('Live room grid exceeds source capacity')
     pointers=struct.unpack('<'+'Q'*cells,read(room+0x30,cells*8))

@@ -60,6 +60,9 @@ export interface SavedRunSummary {
   runSeed: string; seededRun: boolean; stage: number; gameUpdateCount: number;
   descriptorCount: number; copiedDescriptorCount: number; redHp: number; maxRedHp: number;
   inventory: {coins: number; bombs: number; keys: number};
+  playerItems: {ownedCounts: number[]; itemRngStates: number[];
+    trinketRngStates: number[]; pocketRngStates: number[]; activeId: number;
+    activeCharge: number; activeSubordinateCharge: number; reserveCharge: number};
   emptyGridCellsSaved: number; occupiedGridSeedsPending: number[];
   currentRoomRecord: number; currentRoomSeedSamples: {gridIndex: number;
     levelSeeds: [number, number]; savedSeeds: [number, number]; occupancy: "empty" | "occupied" | "padding";

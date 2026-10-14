@@ -1,0 +1,122 @@
+{
+  "schema": 1,
+  "scope": "Source-only bounded firstPlayer item save/restore stores. Actual run-admission save callback integrated; no production/live acceptance or public Continue/profile loading implementation. Historical saved-game6/6 FAIL115 required fields remain unchanged.",
+  "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "functions": [
+    {
+      "address": "0x54f230",
+      "fullFdeBytes": 437,
+      "rawSha256": "042f744f1420b440becb2e252f05f432d524f30bf1b9e667e08a72ad5d2c9f2d",
+      "dumpSha256": "62dc86be0e5353e39d4e560bec621feffce0d542ed62386bb6d922de681d4d28"
+    },
+    {
+      "address": "0x5bf400",
+      "fullFdeBytes": 146,
+      "rawSha256": "b074d85020841575b19dc69102243813382ca127a01ce86d22fa46b66e0ee739",
+      "dumpSha256": "f966290874e2040bada2e0f8b9be6a8e7702f906e896cf4c59a4ea7509db32a3"
+    },
+    {
+      "address": "0x518350",
+      "fullFdeBytes": 1337,
+      "rawSha256": "13172dd6b26357c2d24b994a24bb08abad9042b9a51b4e1dc9f974aafbd92127",
+      "dumpSha256": "21363f654cd06c75df8a1136af72d85e1c8c638f53d6c129a585257f31c7a8c3"
+    },
+    {
+      "address": "0x5116b0",
+      "fullFdeBytes": 1242,
+      "rawSha256": "8b6d05db294a9774be4c4e1582e1723090536875d25dc229c89e2ba2b40bc1bd",
+      "dumpSha256": "50ccec8e2169623e66dc6dcf5d0222fc3074d6db4c46dfa3a67a9e3ddbf91620"
+    },
+    {
+      "address": "0x518120",
+      "fullFdeBytes": 558,
+      "rawSha256": "991731539fb620eb59ef0edbd950c9e1b4b6958a8c537c632155acd0394735da",
+      "dumpSha256": "eaa4800a92a90332ca9229f7ff3ad5f5c517f4875540b2929f92502c3fb8579f"
+    },
+    {
+      "address": "0x5180d0",
+      "fullFdeBytes": 75,
+      "rawSha256": "5ed10b2640ebb65e39197cd0a1918ac1d6453ae2c3b91beecdd19a153fd34365",
+      "dumpSha256": "566d3590d97607928e47c48d3ca64aa2f737bf5301222419d4aa3e4e8dcccc41"
+    },
+    {
+      "address": "0x5e3f80",
+      "fullFdeBytes": 110,
+      "rawSha256": "c9d8fb08679e53fb3afa2bab0e77cfffff97dfbf27a1c607bec0c3831c92c740",
+      "dumpSha256": "43ee6912644b23b9ad5a49a3434af78efd33275be7718c78dab2c3157795eff9"
+    },
+    {
+      "address": "0x510420",
+      "fullFdeBytes": 226,
+      "rawSha256": "bc1d18976b4150add89bf3811452860bf47c0d8cc6d41b008947efd6fbef058a",
+      "dumpSha256": "8954aad8f35852d3e125febf95c13d663e7a4a86259bd5a2080c8271fc7a1639"
+    }
+  ],
+  "copyOrder": "Game54f230 copies ItemPool/Room/Level before queuedPlayer grant52ee40 and Manager5bf400\u2192Player518350. Runtime capture follows that real existing Level.Init Save seam. No public synthetic Save/Restore action added.",
+  "fields": {
+    "ownedCounts": {
+      "savedOffset": "0x893c",
+      "sourcePlayerOffset": "0xe1c",
+      "slots": 347,
+      "saveBytes": 1388,
+      "restore": "511710 restores only IDs1..346, leaving constructed dummyID0 untouched"
+    },
+    "itemRngStates": {
+      "savedOffset": "0x8eb0",
+      "slots": 347
+    },
+    "trinketRngStates": {
+      "savedOffset": "0x941c",
+      "slots": 62
+    },
+    "pocketRngStates": {
+      "savedOffset": "0x9514",
+      "slots": 41
+    },
+    "activeId": {
+      "savedOffset": "0x8908",
+      "playerOffset": "0xd74"
+    },
+    "activeCharge": {
+      "savedOffset": "0x890c",
+      "playerOffset": "0xd78"
+    },
+    "activeSubordinateCharge": {
+      "savedOffset": "0x8904",
+      "playerOffset": "0xd88"
+    },
+    "reserveCharge": {
+      "savedOffset": "0x8910",
+      "playerOffset": "0xd8c"
+    }
+  },
+  "restore": "Existing constructed Player item owner receives346 saved counts,450 current RNG states through real shift35=[5,9,7] initialization withno Next draws, then saved active/reserve fields. The restore store helper is available for later actual Saved dispatch; it is not called during NewRun and has no current public execution claim.",
+  "normalization": {
+    "native": "518350 first capturesBF5, then518120 calls5180d0/5e3f80 to remove temporary records and request their config cache flags; invokes511f10 ifrequested; removesactive/pill costumes andclearsD80/D84/BF5 before remaining stores.",
+    "supported": "Current real save callback accepts only empty temporary records, active0/45 andneutralD80/D84, where the mapped normalization stores preserve current neutral owners. Nonneutral/unmapped owners fail explicitly. No missingBF5/presentation/costume state is initialized from a guessed default."
+  },
+  "requiredGate": {
+    "suite": "test:e2e:saved-game",
+    "entry": "tools/e2e/ordinary-run.mjs",
+    "checksPerCase": 801,
+    "fields": "All347 count slots, all450 current child RNG states, and4 active/reserve words compare against owned read-only nativeSavedState. Every numeric mismatch appends to required failure records; source inputs/commands remain public-only.",
+    "runtimeRestoreExercised": false
+  },
+  "pending": [
+    "Real ExitSave/profile validity anddurable parse/backend lifecycle",
+    "Actual Level+81b0/+c Saved owner independent fromPlayer",
+    "Full temporary-effect removal, costume/presentation/BF5 andotherPlayer scalar stores",
+    "Post-load full cache/familiar evaluator515f20\u2192511f10",
+    "Full manager/Seeds/visitedRoom restoration andfreshpublic Continue/reload required bank"
+  ],
+  "ignoredSourceReceipts": [
+    {
+      "sha256": "652742473242b4ac20495d5d6ac7b33761d91ebca745f116e2fdbf22de13b1fb",
+      "name": "continue-research/source-contract-v2.json"
+    },
+    {
+      "sha256": "645d164227b46fadc34aa833ab4e357eb3d1663e0536a456ed614d9ca9c48361",
+      "name": "continue-research/owned-restore-fields-player/save-normalization-extraction-receipt.json"
+    }
+  ]
+}
