@@ -1305,12 +1305,18 @@ impl Game {
         }
         self.state.room.pickups = pickups;
         self.state.room.npcs = npcs;
-        self.state.room.boss_presentation_index =
-            if room_type == 5 && self.state.room.npcs.iter().any(|npc| npc.kind == 20) {
-                1
-            } else {
-                0
-            };
+        // Game551a10: the authored bossportraits.xml presentation of the
+        // room's boss (Monstro20/0 is presentation1).
+        self.state.room.boss_presentation_index = if room_type == 5 {
+            self.state
+                .room
+                .npcs
+                .iter()
+                .find_map(|npc| content::boss_presentation(npc.kind, npc.variant))
+                .unwrap_or(0)
+        } else {
+            0
+        };
         self.state.room.authored_actor_order = order;
         self.state.next_pickup = next;
         self.rebuild_room_actor_schedule()?;

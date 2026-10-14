@@ -33,6 +33,9 @@ pub struct BossScene {
     pub animation_playing: bool,
 }
 
+/// A 1x1 boss room is admitted once a registered family constructs its
+/// authored boss and that boss has a bossportraits.xml presentation. Other
+/// authored NPCs follow ordinary-room admission.
 fn supported_boss(descriptor: &crate::floor::Descriptor) -> bool {
     if descriptor.template.room_type != 5
         || (descriptor.template.width, descriptor.template.height) != (13, 7)
@@ -45,26 +48,30 @@ fn supported_boss(descriptor: &crate::floor::Descriptor) -> bool {
     let Ok(spawns) = crate::room_spawns::select(&asset, descriptor.spawn_seed) else {
         return false;
     };
+    let context = crate::entities::SpawnContext {
+        stage: 1,
+        game_update_count: 0,
+    };
     spawns.selectors.iter().any(|spawn| {
-        spawn.category == crate::room_spawns::SpawnCategory::Entity
-            && (spawn.entity_type, spawn.variant, spawn.subtype) == (20, 0, 0)
+        matches!(crate::entities::spawn(0, spawn, &context), Ok(Some(npc))
+            if npc.boss && crate::content::boss_presentation(npc.kind, npc.variant).is_some())
     })
 }
 
-/// Game551a10 returns presentation index1 for actual Monstro20/0. Source
+/// Game551a10 supplies the room's authored boss presentation. Source
 /// TransitionChange starts Scene only after the admitted immediate Room.Update.
 pub(crate) fn begin_boss_scene(state: &mut State) {
-    if !state.room.combat_clear
-        && state
-            .room
-            .npcs
-            .iter()
-            .any(|npc| npc.kind == 20 && !npc.removed)
+    let presentation_index = state.room.boss_presentation_index;
+    if presentation_index != 0
+        && !state.room.combat_clear
+        && state.room.npcs.iter().any(|npc| {
+            !npc.removed && crate::content::boss_presentation(npc.kind, npc.variant).is_some()
+        })
     {
         if let Some(transition) = &mut state.room_transition {
             transition.phase = TransitionPhase::BossScene;
             transition.boss_scene = Some(BossScene {
-                presentation_index: 1,
+                presentation_index,
                 animation_frame: 0,
                 animation_playing: true,
             });
