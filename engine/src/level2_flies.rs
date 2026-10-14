@@ -1,6 +1,7 @@
 //! Fresh214/0/0 source4ef880, generic missing-Appear and prior full grid feedback.
+use crate::entities::{Birth, Family, NpcWorld, SpawnContext};
 use crate::{
-    audio::{AudioState, SoundRequest},
+    audio::SoundRequest,
     content,
     grid::{Collider, CollisionGeometry, Grid},
     motion::WorldVector,
@@ -21,14 +22,6 @@ pub struct Level2FlyState {
     pub grid_contact: bool,
     pub grid_normal: WorldVector,
     pub previous_grid_velocity: WorldVector,
-}
-pub(crate) struct World<'a> {
-    pub game_counter: u32,
-    pub player: WorldVector,
-    pub grid: &'a Grid,
-    pub audio: &'a mut AudioState,
-    pub system_counter: u32,
-    pub poofs: crate::familiars::NpcEffectAdmission<'a>,
 }
 #[derive(Default)]
 pub struct Produced {
@@ -83,7 +76,7 @@ fn direction(random: &mut Mt19937) -> WorldVector {
 fn ai(
     npc: &mut Npc,
     random: &mut Mt19937,
-    world: &World<'_>,
+    world: &NpcWorld<'_>,
     friction: &mut f32,
 ) -> Result<(), String> {
     if npc.state == 0 {
@@ -225,7 +218,7 @@ pub(crate) fn advance(
     npc: &mut Npc,
     phase: Phase,
     random: &mut Mt19937,
-    world: &mut World<'_>,
+    world: &mut NpcWorld<'_>,
 ) -> Result<Produced, String> {
     let mut produced = Produced::default();
     if npc.removed || phase == Phase::Skipped {
@@ -260,7 +253,7 @@ pub(crate) fn advance(
             1 => {
                 let seed = random.next_u32();
                 npc.appearance_effect_seed = Some(seed);
-                world.poofs.admit_npc(npc, 2, seed)?;
+                world.effects.admit_npc(npc, 2, seed)?;
             }
             4 => {
                 npc.visible = true;
@@ -310,4 +303,44 @@ pub(crate) fn advance(
         return Err("lvl2 Fly source motion overflowed".into());
     }
     Ok(produced)
+}
+
+pub(crate) const FAMILY: Family = Family {
+    kinds: &[214],
+    spawn: spawn_family,
+    advance: advance_family,
+    post_contact_grid,
+    entity_flags: family_flags,
+    needs_occupancy: false,
+};
+
+fn spawn_family(
+    id: u32,
+    selector: &SpawnSelector,
+    context: &SpawnContext,
+) -> Result<Option<Npc>, String> {
+    let mut npc = from_selector(id, selector)?;
+    if let Some(fly) = npc.as_mut().and_then(|npc| npc.level2_fly.as_mut()) {
+        fly.birth_game_update = context.game_update_count;
+    }
+    Ok(npc)
+}
+
+fn advance_family(
+    npc: &mut Npc,
+    phase: Phase,
+    random: &mut Mt19937,
+    world: &mut NpcWorld,
+    births: &mut Vec<Birth>,
+) -> Result<(), String> {
+    births.extend(
+        advance(npc, phase, random, world)?
+            .blood_seed
+            .map(Birth::Blood),
+    );
+    Ok(())
+}
+
+fn family_flags(npc: &Npc) -> u32 {
+    npc.level2_fly.as_ref().map_or(4, |fly| fly.entity_flags)
 }

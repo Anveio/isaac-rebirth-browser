@@ -1,6 +1,7 @@
 //! Supported NPC actors from authored room selectors.
 //! Full NPC Update owns AI, native BaseUpdate motion and FIFO damage drain.
 //! Intermediate presentation predicts half velocity without advancing AI.
+use crate::entities::{Birth, Family, NpcWorld, SpawnContext};
 use crate::{
     bombs, combat, content,
     grid::Grid,
@@ -12,14 +13,6 @@ use crate::{
 };
 use serde::{Deserialize, Serialize};
 use std::sync::OnceLock;
-
-pub struct World<'a> {
-    pub game_counter: u32,
-    pub player: WorldVector,
-    pub grid: &'a Grid,
-    pub audio: &'a mut crate::audio::AudioState,
-    pub system_counter: u32,
-}
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -359,18 +352,8 @@ pub(crate) fn post_contact_grid(state: &mut State) -> Result<(), String> {
         if npc.removed || npc.grid_collision_class == 0 {
             continue;
         }
-        match npc.kind {
-            20 => crate::monstro::post_contact_grid(npc, &grid)?,
-            214 => crate::level2_flies::post_contact_grid(npc, &grid)?,
-            217 => crate::dips::post_contact_grid(npc, &grid)?,
-            244 => crate::roundworm::post_contact_grid(npc, &grid)?,
-            // Source class3 clamps the center first. These authored families
-            // have zero grid collision points, so their sample loop is empty.
-            13 | 18 | 33 if npc.grid_collision_class == 3 => {
-                npc.position = grid.clamp_room(npc.position, 0.0);
-                npc.presented_position = npc.position;
-            }
-            _ => {}
+        if let Some(family) = crate::entities::family(npc.kind) {
+            (family.post_contact_grid)(npc, &grid)?;
         }
     }
     Ok(())
@@ -460,19 +443,7 @@ impl Npc {
     /// Fly/AttackFly/RoundWorm Init441c80 clears flags then47ed20 ORs4;
     /// concrete subclasses preserve their own later flag writes.
     pub(crate) fn entity_flags(&self) -> u32 {
-        if let Some(dip) = &self.dip {
-            dip.entity_flags
-        } else if let Some(fire) = &self.fireplace {
-            fire.entity_flags
-        } else if let Some(keeper) = &self.keeper {
-            keeper.entity_flags
-        } else if let Some(monstro) = &self.monstro {
-            monstro.entity_flags
-        } else if let Some(fly) = &self.level2_fly {
-            fly.entity_flags
-        } else {
-            4
-        }
+        crate::entities::family(self.kind).map_or(4, |family| (family.entity_flags)(self))
     }
 
     pub fn from_selector(
@@ -480,50 +451,14 @@ impl Npc {
         selector: &SpawnSelector,
         stage: u32,
     ) -> Result<Option<Self>, String> {
-        if let Some(dip) = crate::dips::from_selector(id, selector, stage)? {
-            return Ok(Some(dip));
-        }
-        if let Some(fly) = crate::level2_flies::from_selector(id, selector)? {
-            return Ok(Some(fly));
-        }
-        if let Some(monstro) = crate::monstro::from_selector(id, selector)? {
-            return Ok(Some(monstro));
-        }
-        if let Some(fireplace) = crate::fireplaces::from_selector(id, selector)? {
-            return Ok(Some(fireplace));
-        }
-        if selector.category == SpawnCategory::Entity
-            && selector.entity_type == 17
-            && selector.variant == 1
-            && selector.subtype == 0
-        {
-            return crate::keepers::from_selector(id, selector).map(Some);
-        }
-        if selector.category != SpawnCategory::Entity
-            || !matches!(selector.entity_type, 13 | 18 | 244)
-            || selector.variant != 0
-            || selector.subtype != 0
-        {
-            return Ok(None);
-        }
-        if !selector.position.is_finite() || selector.spawn_seed == 0 {
-            return Err(
-                "NPC admission requires bounded authored position and nonzero spawn seed".into(),
-            );
-        }
-        let config = content::entity(u32::from(selector.entity_type), 0);
-        Ok(Some(Self {
-            animation: if selector.entity_type == 244 {
-                "Idle"
-            } else {
-                "Fly"
-            }
-            .into(),
-            // NPC config47f573 uses Sprite.SetFrame(default,0), which stops
-            // playback. Worm waits for the staged forced Appear at counter4.
-            animation_playing: selector.entity_type != 244,
-            ..Self::authored(id, config, selector)
-        }))
+        crate::entities::spawn(
+            id,
+            selector,
+            &crate::entities::SpawnContext {
+                stage,
+                game_update_count: 0,
+            },
+        )
     }
 
     /// Generic actor fields from the authored entities2.xml row, before the
@@ -583,15 +518,12 @@ impl Npc {
         }
     }
 
-    pub fn advance(
+    pub(crate) fn advance(
         &mut self,
         phase: Phase,
         random: &mut Mt19937,
-        world: &mut World<'_>,
+        world: &mut NpcWorld<'_>,
     ) -> Result<(), String> {
-        if self.kind == 17 {
-            return crate::keepers::advance(self, phase);
-        }
         if self.removed {
             return Ok(());
         }
@@ -746,4 +678,52 @@ impl Npc {
         }
         friction
     }
+}
+
+pub(crate) const FLY_FAMILY: Family = Family {
+    kinds: &[13, 18],
+    spawn: spawn_fly,
+    advance: advance_fly,
+    post_contact_grid: crate::entities::clamp_walls,
+    entity_flags: crate::entities::ordinary_flags,
+    needs_occupancy: false,
+};
+
+fn spawn_fly(id: u32, selector: &SpawnSelector, _: &SpawnContext) -> Result<Option<Npc>, String> {
+    if selector.category != SpawnCategory::Entity
+        || !matches!(selector.entity_type, 13 | 18)
+        || selector.variant != 0
+        || selector.subtype != 0
+    {
+        return Ok(None);
+    }
+    if !selector.position.is_finite() || selector.spawn_seed == 0 {
+        return Err(
+            "NPC admission requires bounded authored position and nonzero spawn seed".into(),
+        );
+    }
+    Ok(Some(Npc {
+        animation: "Fly".into(),
+        animation_playing: true,
+        ..Npc::authored(
+            id,
+            content::entity(u32::from(selector.entity_type), 0),
+            selector,
+        )
+    }))
+}
+
+fn advance_fly(
+    npc: &mut Npc,
+    phase: Phase,
+    random: &mut Mt19937,
+    world: &mut NpcWorld,
+    births: &mut Vec<Birth>,
+) -> Result<(), String> {
+    let was_dead = npc.dead;
+    npc.advance(phase, random, world)?;
+    if !was_dead && npc.dead {
+        births.extend(npc.death_effect_seed.map(Birth::Blood));
+    }
+    Ok(())
 }

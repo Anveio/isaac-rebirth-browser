@@ -1,4 +1,5 @@
 //! Ordinary244 AI4b4f60, staged generic appearance and source free-position.
+use crate::entities::{Birth, Family, NpcWorld, SpawnContext};
 use crate::{
     audio::{AudioState, SoundRequest},
     content,
@@ -8,6 +9,7 @@ use crate::{
     npcs::Npc,
     phase::Phase,
     room_costs::RoomCosts,
+    room_spawns::{SpawnCategory, SpawnSelector},
 };
 use std::sync::OnceLock;
 
@@ -338,4 +340,67 @@ pub fn advance(
         return Err("Worm source motion overflowed".into());
     }
     Ok(shot)
+}
+
+fn from_selector(
+    id: u32,
+    selector: &SpawnSelector,
+    _: &SpawnContext,
+) -> Result<Option<Npc>, String> {
+    if selector.category != SpawnCategory::Entity
+        || selector.entity_type != 244
+        || selector.variant != 0
+        || selector.subtype != 0
+    {
+        return Ok(None);
+    }
+    if !selector.position.is_finite() || selector.spawn_seed == 0 {
+        return Err(
+            "NPC admission requires bounded authored position and nonzero spawn seed".into(),
+        );
+    }
+    Ok(Some(Npc {
+        animation: "Idle".into(),
+        // NPC config47f573 uses Sprite.SetFrame(default,0), which stops
+        // playback. Worm waits for the staged forced Appear at counter4.
+        animation_playing: false,
+        ..Npc::authored(id, content::entity(244, 0), selector)
+    }))
+}
+
+pub(crate) const FAMILY: Family = Family {
+    kinds: &[244],
+    spawn: from_selector,
+    advance: advance_family,
+    post_contact_grid,
+    entity_flags: crate::entities::ordinary_flags,
+    needs_occupancy: true,
+};
+
+fn advance_family(
+    npc: &mut Npc,
+    phase: Phase,
+    random: &mut Mt19937,
+    world: &mut NpcWorld,
+    births: &mut Vec<Birth>,
+) -> Result<(), String> {
+    let shot = advance(
+        npc,
+        phase,
+        random,
+        &mut World {
+            player: world.player,
+            player_velocity: world.player_velocity,
+            occupied: world.occupied,
+            grid: world.grid,
+            path_costs: world
+                .path_costs
+                .as_deref()
+                .ok_or("Round Worm requires source Room.Init path costs")?,
+            audio: world.audio,
+            system_counter: world.system_counter,
+        },
+    )?;
+    births.extend(shot.map(Birth::Shot));
+    Ok(())
 }

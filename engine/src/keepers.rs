@@ -1,5 +1,13 @@
 //! Authored secret Keeper17/1 first-AI initialization and anchored idle.
-use crate::{content, motion::WorldVector, npcs::Npc, phase::Phase, room_spawns::SpawnSelector};
+use crate::entities::{Birth, Family, NpcWorld, SpawnContext};
+use crate::{
+    content,
+    motion::WorldVector,
+    mt::Mt19937,
+    npcs::Npc,
+    phase::Phase,
+    room_spawns::{SpawnCategory, SpawnSelector},
+};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
@@ -79,4 +87,42 @@ pub(crate) fn advance(npc: &mut Npc, phase: Phase) -> Result<(), String> {
     }
     npc.presented_position = npc.position;
     Ok(())
+}
+
+pub(crate) const FAMILY: Family = Family {
+    kinds: &[17],
+    spawn: spawn_family,
+    advance: advance_family,
+    post_contact_grid: crate::entities::no_grid_query,
+    entity_flags: family_flags,
+    needs_occupancy: false,
+};
+
+fn spawn_family(
+    id: u32,
+    selector: &SpawnSelector,
+    _: &SpawnContext,
+) -> Result<Option<Npc>, String> {
+    if selector.category == SpawnCategory::Entity
+        && selector.entity_type == 17
+        && selector.variant == 1
+        && selector.subtype == 0
+    {
+        return from_selector(id, selector).map(Some);
+    }
+    Ok(None)
+}
+
+fn advance_family(
+    npc: &mut Npc,
+    phase: Phase,
+    _: &mut Mt19937,
+    _: &mut NpcWorld,
+    _: &mut Vec<Birth>,
+) -> Result<(), String> {
+    advance(npc, phase)
+}
+
+fn family_flags(npc: &Npc) -> u32 {
+    npc.keeper.as_ref().map_or(4, |keeper| keeper.entity_flags)
 }
