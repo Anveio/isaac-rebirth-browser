@@ -53,7 +53,7 @@ pub fn after_damage(state: &mut State, flags: u32) -> Result<(), String> {
         state.system_clock.system_counter.saturating_sub(1),
         audio::SoundRequest {
             id: 30,
-            volume: f64::from(0.8_f32),
+            volume: 0.8_f32,
             delay: 2,
             looping: false,
             pitch: 1.0,

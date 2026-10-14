@@ -20,8 +20,8 @@ grading; it has not been executed. Source predictions never enter WASM state.
 
 The first owned runtime624cf52 passed one-job all-target Rust/strict Clippy,
 TypeScript and formatting. Its restack on main695e991 passes TypeScript, matrix,
-syntax and whitespace checks; a final Rust check after guard integration is
-pending. No production build or paired Heart acceptance has run.
+syntax and whitespace checks. The guarded composition now passes its own
+all-target Rust check and strict Clippy. No production build or paired Heart acceptance has run.
 The current source composition uses the concrete Player50c880 predicate from
 Death/shared animation through the sole shared collection entry. Soul/Black
 damage priority52b080, constructor
@@ -30,15 +30,17 @@ readmission and complete HUD presentation remain explicit follow-ups. Source,
 helper and static-log hashes are in `references/isaac/foundation/hearts`.
 
 The current source-only payload `f1bccc6` is composed on the concrete Death
-prerequisite `ef78acc` and main `2d2174e`. It extends main98's shared regular
+prerequisite `6b7d1d3` (preserving `ef78acc`) and main `2d2174e`. It extends main98's shared regular
 collection entry for full updates and saved readmission, retaining its unchanged
 `player_can_collect` guard, persistent RNG initialization and anchor owner. The
 Eternal field/default/TypeScript matches the health-damage prerequisite; each
 composition keeps one owner. The main-name predicate permits owned Hit/UseItem;
 its legacy queued Pickup veto remains explicitly incomplete.
 
-No Rust check, production build or live Heart acceptance has run for this
-composition. The required registry retains Active Item, Player Death and Heart
+Exact guarded composition `1d166003` passes its own one-job all-target Rust
+check (9.56s) and strict Clippy (9.49s), with incremental compilation disabled
+and private generated headers. No production build or live Heart acceptance
+has run for this composition. The required registry retains Active Item, Player Death and Heart
 suites. The six-case bank stays unchanged; the comparator reads lossless archived
 manifests and hashes their decoded original bytes. No new seed discovery or game
 run occurred.
