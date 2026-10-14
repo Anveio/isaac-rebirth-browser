@@ -16,7 +16,7 @@ const floats = values => values.map(f32);
 const freshExecution = () => Object.fromEntries(['bossAdmission', 'bossDamage', 'bossDeath',
   'poof04', 'bloodGush', 'sound72', 'matchedPoof04', 'matchedBloodGush', 'full', 'fast', 'gushCleanup'].map(key => [key, false]));
 
-export function bloodStartComparator({ scenario }) {
+export function bloodStartComparator({ scenario, bossIdentity }) {
   const execution = { native: freshExecution(), browser: freshExecution() };
   const counts = { snapshots: 0, matchedPoof04: 0, matchedBloodGush: 0, bodyFields: 0 };
   const prior = { native: new Map(), browser: new Map() };
@@ -43,6 +43,16 @@ export function bloodStartComparator({ scenario }) {
       const nativeBosses = source.gameplay.entities.filter(actor => actor.type === 20 && actor.variant === 0 && actor.subtype === 0);
       const portBosses = actual.room.npcs.filter(actor => actor.kind === 20 && actor.variant === 0 && !actor.removed);
       append(checks, 'blood.boss.seedOrder', nativeBosses.map(actor => actor.spawnSeed), portBosses.map(actor => actor.spawnSeed));
+      if (nativeBosses.length || portBosses.length) {
+        append(checks, 'blood.nativeBoss.expectedSeed', [bossIdentity.spawnSeed], nativeBosses.map(actor => actor.spawnSeed));
+        append(checks, 'blood.browserBoss.expectedSeed', [bossIdentity.spawnSeed], portBosses.map(actor => actor.spawnSeed));
+        append(checks, 'blood.nativeBoss.expectedRoom', [bossIdentity.type, bossIdentity.descriptorIndex, bossIdentity.gridIndex],
+          [source.gameplay.room.type, source.gameplay.room.descriptorIndex, source.gameplay.room.descriptorGridIndex]);
+        const descriptor = actual.room.descriptor;
+        append(checks, 'blood.browserBoss.expectedRoom', [bossIdentity.type, bossIdentity.descriptorIndex, bossIdentity.gridIndex,
+          bossIdentity.variant, bossIdentity.name], [descriptor.template.type, descriptor.index, descriptor.gridIndex,
+          descriptor.template.variant, descriptor.template.name]);
+      }
       for (const [name, bosses] of [['native', nativeBosses], ['browser', portBosses]]) {
         if (bosses.length) execution[name].bossAdmission = true;
         if (bosses.some(actor => actor.hp < 250 || (name === 'native' ? actor.pendingDamage : actor.damage.pendingDamage) > 0)) execution[name].bossDamage = true;

@@ -39,7 +39,7 @@ if (process.argv.includes('--list')) {
     const directory = resolve(output, `${String(index).padStart(2, '0')}-${definition.scenario.id}`);
     mkdirSync(directory, { recursive: true });
     const tape = resolve(directory, 'replay.json'); save(tape, definition);
-    const comparator = bloodStartComparator({ scenario: definition.scenario.id });
+    const comparator = bloodStartComparator({ scenario: definition.scenario.id, bossIdentity: definition.bloodStartBossIdentity });
     const row = { id: definition.scenario.id, seed: definition.seed, status: 'fail' };
     try {
       const paired = await runPairedGate({ output: resolve(directory, 'paired'), selected: [], randomCount: 0,

@@ -81,6 +81,12 @@ def cohort():
                 'systems': ['enemies-bosses', 'damage-pipeline', 'sprite-effects', 'audio'],
             }
             case['bloodStartInputPhaseOffset'] = offset
+            case['bloodStartBossIdentity'] = {
+                'descriptorIndex': 0, 'gridIndex': 110 if kind == 'contrived978' else 59,
+                'type': 5, 'variant': 1010 if kind == 'contrived978' else 1012, 'name': 'Monstro',
+                'spawnSeed': 2321890733 if kind == 'contrived978' else 1050413383,
+                'scope': 'Independent source-selected fixture identity; gate-only expectation, never a runtime input.',
+            }
             case['bloodStartRequired'] = ['bossAdmission', 'bossDamage', 'bossDeath', 'poof04', 'bloodGush',
                                           'sound72', 'matchedPoof04', 'matchedBloodGush', 'full', 'fast', 'gushCleanup']
             for name in ('tape', 'pairedTape'):
