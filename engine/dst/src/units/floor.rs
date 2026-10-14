@@ -1,8 +1,11 @@
-//! Fresh normal Basement generation (`engine/src/floor.rs`, `layout.rs`,
-//! `room_templates.rs`) and per-descriptor room admission (`room.rs`).
+//! Normal Basement I and II generation (`engine/src/floor.rs`, `layout.rs`,
+//! `room_templates.rs`) for fresh and continuing runs, and per-descriptor room
+//! admission (`room.rs`). Stage-2 contracts follow
+//! `references/isaac/foundation/basement-ii/source-contract.json`.
+use crate::entropy::Entropy;
 use crate::harness::{self, Case};
 use crate::props;
-use rebirth_cleanroom::floor::{self, Floor};
+use rebirth_cleanroom::floor::{self, Floor, NormalBasementRequest};
 use rebirth_cleanroom::layout::{GRID_CELLS, GRID_WIDTH};
 use rebirth_cleanroom::{room_assets, room_spawns, seed, Room};
 use serde_json::json;
@@ -12,11 +15,37 @@ use std::panic::{self, AssertUnwindSafe};
 /// The 13x13 level grid's centre cell holds the starting room.
 const START_CELL: usize = 84;
 
+/// Game flags the generator reads: library (0x100), curse room (64), the
+/// saved Monstro/Duke family (16) and the saved horseman family (0x100000).
+const READ_FLAGS: [u64; 4] = [0x100, 64, 16, 0x100000];
+
 pub fn run(case: &mut Case) {
     let e = &mut *case.entropy;
+    let fresh = |stage_seed| NormalBasementRequest {
+        stage: 1,
+        stage_seed,
+        game_flags: 0,
+        red_hp: 6,
+        max_red_hp: 6,
+        soul_hp: 0,
+        coins: 0,
+    };
+    let stage = *e.pick(&[0, 3, 4, 13, u32::MAX]);
     props::always!(
-        floor::generate_basement(0).is_err(),
-        "floor: reserved stage seed zero is rejected"
+        floor::generate_basement(0).is_err()
+            && floor::generate_normal_basement(NormalBasementRequest {
+                stage_seed: 0,
+                stage: 2,
+                ..fresh(1)
+            })
+            .is_err()
+            && floor::generate_normal_basement(NormalBasementRequest {
+                stage,
+                ..fresh(e.nonzero_u32())
+            })
+            .is_err(),
+        "floor: requests outside stages 1 and 2 or with stage seed zero are rejected",
+        json!({ "stage": stage })
     );
     for _ in 0..(case.steps / 300).max(4) {
         // Production derives the stage seed from a run seed; raw stage seeds
@@ -32,26 +61,84 @@ pub fn run(case: &mut Case) {
             1..=4 => seed::stage1_seed(run_seed),
             _ => e.nonzero_u32(),
         };
-        let generated = floor::generate_basement(stage_seed);
-        let again = floor::generate_basement(stage_seed);
         props::always!(
-            generated == again,
-            "floor: generation is a pure function of the stage seed",
+            floor::generate_basement(stage_seed)
+                == floor::generate_normal_basement(fresh(stage_seed)),
+            "floor: the first-floor entry is the normal generator with fresh run inputs",
             json!({ "stageSeed": stage_seed })
         );
-        match generated {
-            Ok(floor) => {
-                props::always!(true, "floor: every nonzero stage seed generates a floor");
-                structure(stage_seed, &floor);
-                admission(stage_seed, &floor);
-            }
-            Err(error) => {
-                props::always!(
-                    false,
-                    "floor: every nonzero stage seed generates a floor",
-                    json!({ "stageSeed": stage_seed, "error": error })
-                );
-            }
+        let Some(first) = generate(fresh(stage_seed)) else {
+            continue;
+        };
+        if e.chance(1, 2) {
+            generate(continuing(e, &first));
+        }
+    }
+}
+
+/// A Basement II request as the continuing run supplies it: the retained
+/// stage-2 seed, the first floor's resulting flags with the bits the
+/// generator reads varied as other events may set them, and in-game health
+/// and coins.
+fn continuing(e: &mut Entropy, first: &Floor) -> NormalBasementRequest {
+    let mut game_flags = first.game_flags;
+    for flag in READ_FLAGS {
+        if e.chance(1, 3) {
+            game_flags ^= flag;
+        }
+    }
+    let max_red_hp = 2 * e.range(0, 12) as u8;
+    NormalBasementRequest {
+        stage: 2,
+        stage_seed: e.nonzero_u32(),
+        game_flags,
+        red_hp: e.range(0, u32::from(max_red_hp)) as u8,
+        max_red_hp,
+        soul_hp: e.range(0, 24) as i32,
+        coins: e.range(0, 99),
+    }
+}
+
+fn describe(request: &NormalBasementRequest) -> serde_json::Value {
+    json!({
+        "stage": request.stage,
+        "stageSeed": request.stage_seed,
+        "gameFlags": request.game_flags,
+        "redHp": request.red_hp,
+        "maxRedHp": request.max_red_hp,
+        "soulHp": request.soul_hp,
+        "coins": request.coins,
+    })
+}
+
+fn generate(request: NormalBasementRequest) -> Option<Floor> {
+    let generated = floor::generate_normal_basement(request);
+    props::always!(
+        generated == floor::generate_normal_basement(request),
+        "floor: generation is a pure function of its request",
+        describe(&request)
+    );
+    match generated {
+        Ok(floor) => {
+            props::always!(
+                true,
+                "floor: every reachable normal Basement request generates a floor"
+            );
+            props::sometimes!(
+                request.stage == 2,
+                "floor: a Basement II floor is generated"
+            );
+            structure(&request, &floor);
+            admission(request.stage_seed, &floor);
+            Some(floor)
+        }
+        Err(error) => {
+            props::always!(
+                false,
+                "floor: every reachable normal Basement request generates a floor",
+                json!({ "request": describe(&request), "error": error })
+            );
+            None
         }
     }
 }
@@ -66,9 +153,15 @@ fn footprint(width: u8, height: u8) -> Option<(i32, i32)> {
     }
 }
 
-fn structure(stage_seed: u32, floor: &Floor) {
-    let details = || json!({ "stageSeed": stage_seed });
+fn structure(request: &NormalBasementRequest, floor: &Floor) {
+    let stage_seed = request.stage_seed;
+    let details = || describe(request);
     let count = floor.descriptors.len();
+    props::always!(
+        floor.stage == request.stage && floor.stage_seed == stage_seed,
+        "floor: a floor records its request's stage and stage seed",
+        details()
+    );
     props::always!(
         floor.grid.len() == GRID_CELLS
             && floor.grid[START_CELL] >= 0
@@ -159,7 +252,7 @@ fn structure(stage_seed: u32, floor: &Floor) {
     props::always!(
         reached.len() == count,
         "floor: every descriptor is reachable from the starting room",
-        json!({ "stageSeed": stage_seed, "reached": reached.len(), "descriptors": count })
+        json!({ "request": details(), "reached": reached.len(), "descriptors": count })
     );
 
     // 58c260 retries until boss, super secret, shop and treasure all fit.
@@ -179,8 +272,53 @@ fn structure(stage_seed: u32, floor: &Floor) {
     props::always!(
         mandatory.iter().all(|(_, rooms)| *rooms == 1),
         "floor: exactly one boss, super secret, shop and treasure room",
-        json!({ "stageSeed": stage_seed, "counts": mandatory })
+        json!({ "request": details(), "counts": mandatory })
     );
+
+    // 58c100..58c130: normal rooms draw from difficulty 1..5 on stage 1 and
+    // 5..10 on stage 2; the starting room is chosen separately.
+    let band = if request.stage == 1 { 1..=5 } else { 5..=10 };
+    props::always!(
+        floor
+            .descriptors
+            .iter()
+            .all(|room| room.index == floor.starting_descriptor
+                || room.template.room_type != 1
+                || band.contains(&room.template.difficulty)),
+        "floor: normal rooms stay within the stage's difficulty band",
+        details()
+    );
+
+    // 584240 on an even floor: the boss comes from the family the first
+    // floor saved (horseman 0x100000: 5020/5140; 16: Monstro/Duke), and
+    // neither family flag is rewritten.
+    if request.stage == 2 {
+        let horseman = if request.game_flags & 0x100000 == 0 {
+            5020
+        } else {
+            5140
+        };
+        let family = if request.game_flags & 16 == 0 {
+            1010
+        } else {
+            1020
+        };
+        let bosses: Vec<u32> = floor
+            .descriptors
+            .iter()
+            .filter(|room| room.template.room_type == 5)
+            .map(|room| room.template.variant)
+            .collect();
+        let retained = 16 | 0x100000;
+        props::always!(
+            bosses.iter().all(|variant| [horseman, family]
+                .iter()
+                .any(|base| (*base..*base + 10).contains(variant)))
+                && floor.game_flags & retained == request.game_flags & retained,
+            "floor: an even floor's boss comes from the retained family without rewriting it",
+            json!({ "request": details(), "bosses": bosses, "flags": floor.game_flags })
+        );
+    }
     props::sometimes!(rooms_of(7) == 1, "floor: a secret room is placed");
     props::sometimes!(
         floor
@@ -202,9 +340,11 @@ fn structure(stage_seed: u32, floor: &Floor) {
             && reports.len() == floor.attempts as usize
             && reports.last().is_some_and(|last| last.outcome == "placed")
             && continuous
-            && (8..=9).contains(&floor.additional_rooms),
+            // min(20, stage*10/3 + 5 + bounded35(2)): stage 1 8..9, stage 2 11..12.
+            && (request.stage * 10 / 3 + 5..=request.stage * 10 / 3 + 6)
+                .contains(&u32::from(floor.additional_rooms)),
         "floor: attempts are bounded, contiguous and end with a placement",
-        json!({ "stageSeed": stage_seed, "attempts": floor.attempts })
+        json!({ "request": details(), "attempts": floor.attempts, "additionalRooms": floor.additional_rooms })
     );
     props::sometimes!(floor.attempts > 1, "floor: a generation retry is exercised");
 

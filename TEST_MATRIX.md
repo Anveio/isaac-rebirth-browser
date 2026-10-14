@@ -188,7 +188,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | `mt` | shared MT19937 stream, lazy descriptor seed tables and boot lifecycle | 19 | 1 | 0 |
 | `phase` | system update/interpolation phases against a counter model | 6 | 2 | 0 |
 | `actors` | actor admission order and room identities against a list model | 4 | 2 | 0 |
-| `floor` | Basement generation structure, retries and per-descriptor room admission | 14 | 3 | 0 |
+| `floor` | Basement generation structure, retries and per-descriptor room admission | 18 | 4 | 0 |
 | `grid` | grid queries and ground-collision solvers on generated rooms | 14 | 2 | 0 |
 | `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 52 | 36 | 2 |
 | `abi` | the exported C ABI transport the browser bridge drives | 11 | 1 | 0 |
@@ -244,15 +244,20 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Always | actors: the scheduler round-trips through JSON | [actors.rs](engine/dst/src/units/actors.rs) |
 | Always | actors: dispatch order equals admission order minus retired handles | [actors.rs](engine/dst/src/units/actors.rs) |
 | Always | actors: room sequence identities follow admission and reset with the room | [actors.rs](engine/dst/src/units/actors.rs) |
-| Always | floor: reserved stage seed zero is rejected | [floor.rs](engine/dst/src/units/floor.rs) |
-| Always | floor: generation is a pure function of the stage seed | [floor.rs](engine/dst/src/units/floor.rs) |
-| Always | floor: every nonzero stage seed generates a floor | [floor.rs](engine/dst/src/units/floor.rs) |
+| Always | floor: requests outside stages 1 and 2 or with stage seed zero are rejected | [floor.rs](engine/dst/src/units/floor.rs) |
+| Always | floor: the first-floor entry is the normal generator with fresh run inputs | [floor.rs](engine/dst/src/units/floor.rs) |
+| Always | floor: generation is a pure function of its request | [floor.rs](engine/dst/src/units/floor.rs) |
+| Always | floor: every reachable normal Basement request generates a floor | [floor.rs](engine/dst/src/units/floor.rs) |
+| Sometimes | floor: a Basement II floor is generated | [floor.rs](engine/dst/src/units/floor.rs) |
+| Always | floor: a floor records its request's stage and stage seed | [floor.rs](engine/dst/src/units/floor.rs) |
 | Always | floor: the starting descriptor occupies the grid centre | [floor.rs](engine/dst/src/units/floor.rs) |
 | Always | floor: grid cells and descriptors index the descriptor table | [floor.rs](engine/dst/src/units/floor.rs) |
 | Always | floor: every descriptor owns exactly its shape's footprint at its origin | [floor.rs](engine/dst/src/units/floor.rs) |
 | Always | floor: neighbor links are reciprocal edge adjacencies | [floor.rs](engine/dst/src/units/floor.rs) |
 | Always | floor: every descriptor is reachable from the starting room | [floor.rs](engine/dst/src/units/floor.rs) |
 | Always | floor: exactly one boss, super secret, shop and treasure room | [floor.rs](engine/dst/src/units/floor.rs) |
+| Always | floor: normal rooms stay within the stage's difficulty band | [floor.rs](engine/dst/src/units/floor.rs) |
+| Always | floor: an even floor's boss comes from the retained family without rewriting it | [floor.rs](engine/dst/src/units/floor.rs) |
 | Sometimes | floor: a secret room is placed | [floor.rs](engine/dst/src/units/floor.rs) |
 | Sometimes | floor: a large room shape is placed | [floor.rs](engine/dst/src/units/floor.rs) |
 | Always | floor: attempts are bounded, contiguous and end with a placement | [floor.rs](engine/dst/src/units/floor.rs) |
