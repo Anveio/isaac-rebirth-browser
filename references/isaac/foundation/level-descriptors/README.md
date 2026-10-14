@@ -9,7 +9,7 @@ The earlier six-case observer-offset report remains failed. The writable-map gua
 Reproduce sequentially after `source cloud/env.sh` and `npm run check:build`:
 
 ```sh
-npm run test:e2e -- level-descriptors --scenarios references/isaac/foundation/level-descriptors/accepted-scenarios.json
+npm run test:e2e -- ordinary-run --scenarios references/isaac/foundation/level-descriptors/accepted-scenarios.json
 npm run test:e2e:paired -- --replay-cases references/isaac/foundation/runtime-progress/W0L0LYYM.json
 ```
 

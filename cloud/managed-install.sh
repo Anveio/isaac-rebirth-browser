@@ -46,7 +46,7 @@ set -euo pipefail
 cd /workspace/isaac-rebirth-browser
 printf 'Acquire::https::CaInfo "/run/isaac-ca.pem";\nAcquire::http::Proxy "%s";\nAcquire::https::Proxy "%s";\n' "$HTTP_PROXY" "$HTTPS_PROXY" > /tmp/isaac-apt.conf
 source .cache/cloud-env.sh
-# CI Playwright requires a free port. Stop only this repository's fixture.
+# Local Playwright requires a free port. Stop only this repository's fixture.
 if pgrep -f '^node /workspace/isaac-rebirth-browser/node_modules/.bin/vite --host 0.0.0.0 --port 5173 --strictPort$' >/dev/null; then
   pkill -f '^node /workspace/isaac-rebirth-browser/node_modules/.bin/vite --host 0.0.0.0 --port 5173 --strictPort$'
 fi
