@@ -33,8 +33,7 @@ function compare(source,actual,gameplay){
  if(d.systemState===2){
   check('player.dead',d.dead,actual.player.dead);check('player.visible',d.visible,actual.player.visible);
   check('player.controls7d4',d.controlsEnabled,actual.player.controlsEnabled);
-  // Native Game+ce9f4 starts at the run loader's 1; game_update_count is 0.
-  check('Game.fullUpdates',d.fullGameUpdates,actual.gameUpdateCount+1);
+  check('Game.fullUpdates',d.fullGameUpdates,actual.gameUpdateCount);
   if(d.mainAnimation.name==='Death'){
    check('Death.current','Death',actual.playerAnimation.current);check('Death.frame',d.mainAnimation.frame,actual.playerAnimation.frame);
    check('Death.playing',d.mainAnimation.playing,actual.playerAnimation.playing);check('Death.guard',d.animationGuard,actual.playerAnimation.guard);
