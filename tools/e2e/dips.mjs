@@ -195,12 +195,12 @@ const execution = scenarios.cases.map((scenario, n) => {
   }
   return {id: scenario.scenario.id, required: scenario.dipRequired, markers,
     status: Object.values(markers).every(side => !side.error && (!scenario.dipRequired ||
-      ['admission', 'full', 'fast', 'poof', 'idle', 'move', 'death', 'retirement'].every(key => side[key]))) ? 'pass' : 'fail'};
+      ['admission', 'full', 'fast', 'poof', 'idle', 'move', 'death', 'retirement', 'explosion43'].every(key => side[key]))) ? 'pass' : 'fail'};
 });
 assert.deepEqual(hashes(), before, 'Dip source and comparison must remain frozen');
 const report = {schema: 1, status: paired.status === 'pass' && execution.every(row => row.status === 'pass') ? 'pass' : 'fail',
   pairedStatus: paired.status, declaredCaseCount: scenarios.cases.length, randomVectors: scenarios.randomVectors, sourcesStable: true, sources: before, execution,
-  scope: 'Both games execute the same public tapes. All actor/HP/AI/geometry/queue/Poop58/43 comparisons remain required; random seeds are unfiltered. Death effects and inherited modifiers/colors remain incomplete, with their actual failures retained.'};
+  scope: 'Both games execute the same public tapes. All actor/HP/AI/geometry/queue/Poop58/43 comparisons remain required; contrived43 execution is mandatory and random seeds are unfiltered. Source-backed death effects require fresh game acceptance; inherited modifiers/colors remain incomplete, with all actual failures retained.'};
 save(resolve(output, 'report.json'), report);
 console.log(JSON.stringify(report));
 process.exitCode = report.status === 'pass' ? 0 : 1;
