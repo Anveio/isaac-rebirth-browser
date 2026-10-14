@@ -51,6 +51,10 @@ pub struct Room {
     /// Rock+348 countdowns of type5 bomb rocks a blast moved to state3.
     #[serde(default)]
     pub bomb_rock_fuses: Vec<crate::rock_blast::BombRockFuse>,
+    /// Grid17 boss-room exit spawned by the clear award; its grid cell holds
+    /// the identity, this owns the TrapDoor state and sprite clock.
+    #[serde(default)]
+    pub trapdoor: Option<crate::stage_transition::Trapdoor>,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
@@ -539,6 +543,7 @@ impl Room {
             grid: None,
             path_costs: None,
             bomb_rock_fuses: Vec::new(),
+            trapdoor: None,
             left: left_plane + radius,
             right: right_plane - radius,
             top: top_plane + radius,

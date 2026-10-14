@@ -440,7 +440,7 @@ pub(crate) fn initialize_startup_clear(state: &mut State) {
     }
 }
 
-pub fn advance_room_clear(state: &mut State) {
+pub fn advance_room_clear(state: &mut State) -> Result<(), String> {
     // Room5d1487 checks signed dc+e0 after the full manager/contact pass.
     // It is independent of HP, visible actor count and current boss_count2490.
     if state.room.manager_counts.countable_total() > 0 {
@@ -453,8 +453,23 @@ pub fn advance_room_clear(state: &mut State) {
         change_doors(state, true);
         if !state.room.combat_clear {
             state.room.combat_clear = true;
+            // 5d19cb..5d19e9 PlaySound(36 door heavy open, volume1, delay2) before
+            // SpawnClearAward5c9240. Ordinary-room pickup awards remain separate.
+            state.audio.admit(
+                &mut state.boot_lifecycle.shared,
+                state.system_clock.system_counter - 1,
+                crate::audio::SoundRequest {
+                    id: 36,
+                    volume: 1.0,
+                    delay: 2,
+                    looping: false,
+                    pitch: 1.0,
+                },
+            );
+            crate::stage_transition::spawn_boss_award(state)?;
         }
     }
+    Ok(())
 }
 
 fn change_doors(state: &mut State, open: bool) {

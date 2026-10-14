@@ -98,6 +98,10 @@ export class Renderer {
       const bossScene = state.roomTransition?.bossScene;
       if (bossScene && state.roomTransition?.phase === "bossScene")
         this.assets.draw(ctx, "gfx/ui/boss/versusscreen.anm2", "Scene", 240, 135, bossScene.animationFrame);
+      // StageTransition::Render5e3bd0: black quad, alpha counter/50 then 1-counter/50.
+      const transition = state.stageTransition;
+      if (transition.state === 2 || transition.state === 3)
+        gl.fillRectRGBA(0, 0, 480, 270, [0, 0, 0, transition.state === 2 ? transition.counter / 50 : 1 - transition.counter / 50]);
       this.presentation.pause(ctx, state);
       if (state.playerDeath.gameOver) {
         gl.fillRectRGBA(0, 0, 480, 270, [0, 0, 0, 128 / 255]);
@@ -186,6 +190,11 @@ export class Renderer {
       } else if (entity.kind === 8 && entity.state === 0)
         this.assets.draw(ctx, "gfx/grid/grid_spikes.anm2", `Spikes${String(entity.variant).padStart(2, "0")}`, x, y);
     }
+    const trapdoor = state.room.trapdoor;
+    if (grid && trapdoor)
+      this.assets.draw(ctx, "gfx/grid/door_11_trapdoor.anm2", trapdoor.clip === "closed" ? "Closed" : "Open Animation",
+        (40 + trapdoor.gridIndex % grid.width * 40) * 0.65 + 32,
+        (120 + Math.floor(trapdoor.gridIndex / grid.width) * 40) * 0.65 - 47, Math.floor(trapdoor.frame));
     this.pickups.draw(ctx, state);
     for (const npc of state.room.npcs) {
       if (npc.removed || (npc.dead && !npc.monstro && !npc.dip) || (!npc.keeper && !npc.visible)) continue;
