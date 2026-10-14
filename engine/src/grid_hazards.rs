@@ -46,6 +46,7 @@ pub fn advance(state: &mut State, phase: Phase) -> Result<(), String> {
         }
         state.player.hp = state.player.hp.saturating_sub(2);
         state.damage_cooldown = 120;
+        crate::player_death::after_damage(state, crate::player_death::DAMAGE_SPIKES)?;
         state.player.vx = f64::from(velocity.x) * 0.65;
         state.player.vy = f64::from(velocity.y) * 0.65;
         break;
