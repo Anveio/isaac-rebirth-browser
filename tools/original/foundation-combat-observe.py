@@ -221,6 +221,7 @@ def observe(pid, context):
                 'descriptorSpawnSeed': u32(descriptor + 0x4c),
                 'boundsTopLeft': list(struct.unpack_from('<ff', raw, 0x1c)),
                 'boundsBottomRight': list(struct.unpack_from('<ff', raw, 0x24)),
+                'renderScroll': list(struct.unpack('<ff', read(room + 0x15b8, 8))),
                 'combatClear': bool(read(descriptor + 0x3d, 1)[0]),
                 'bossCount': u32(room + 0x2490),
                 'bossPresentationIndex': u32(room + 0x17c8),
