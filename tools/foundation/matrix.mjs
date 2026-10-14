@@ -177,7 +177,7 @@ Pixel gates compare decoded RGBA over the whole frame, HUD, actor and projectile
 
 ## Antithesis deterministic simulation units
 
-The only checked-in unit-level verification is the [Antithesis DST harness](docs/dst.md) in \`engine/dst/\` (user-authorized exception; see [AGENTS.md](AGENTS.md)). \`npm run test:dst\` drives each registered unit with seeded entropy, checks every property after each step and replays the game tapes through the shipped \`engine.wasm\`; \`--entropy antithesis\` hands every decision to the Antithesis platform. Units and properties below are discovered from [the registry](${DST_REGISTRY}) and source; a run's report, not this list, is the outcome. DST establishes engine safety, determinism, snapshot completeness and native/WASM agreement only, never original-game parity.
+The only checked-in unit-level verification is the [Antithesis DST harness](docs/dst.md) in \`engine/dst/\` (user-authorized exception; see [AGENTS.md](AGENTS.md)). It is an inner-loop regression tool, not a merge gate: pull-request CI does not run it. \`npm run test:dst\` drives each registered unit with seeded entropy, checks every property after each step and replays the game tapes through the shipped \`engine.wasm\`; \`--entropy antithesis\` hands every decision to the Antithesis platform. Units and properties below are discovered from [the registry](${DST_REGISTRY}) and source; a run's report, not this list, is the outcome. DST establishes engine safety, determinism, snapshot completeness and native/WASM agreement only, never original-game parity.
 
 | DST unit | Scope | Always | Sometimes | Reachability |
 | --- | --- | ---: | ---: | ---: |
