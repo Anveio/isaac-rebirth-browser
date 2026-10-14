@@ -63,16 +63,16 @@
     "matrix": "pass",
     "NodeAndPythonSyntax": "pass",
     "whitespace": "pass",
-    "RustAndStrictClippy": "exact1d pass preserved; final5afa composition metadata turn pending"
+    "RustAndStrictClippy": "prior exact1d pass retained; current-main composition pending"
   },
   "currentOwnedPayload": {
-    "baseMain": "2d2174e63901acbfc209fc40018418cded26223e",
+    "baseMain": "382f5ea167fb4b539e1e0ab7f3af261a7b90b18c",
     "concretePrerequisite": "5afa7ddb1a6d5c2031b6648905478e80d78fa6d9",
     "runtime": "f1bccc634a44f4ec058948f99e492625fac22b1a",
     "sharedEntry": "Extends main98 Game.collect_regular_pickup_at used by full and saved-readmission callbacks; preserves initialize_spawn_seed/persistent regular_rng, current anchor owner, and the prerequisite sole player_can_collect predicate unchanged.",
     "schema": "Eternal field/default/TypeScript matches b68 byte-for-byte; one field and no duplicated health-damage arithmetic.",
     "eligibility": "Sole final111 player_can_collect permits known legacy Pickup through the unchanged shared normal/restored regular entry. Generic legacy queued-Pickup veto removed; collectible/chest own pending-queue rules remain separate. Physical touches reads actual Player.dead and accepts redHP0 with SoulHP. Owned Hit/UseItem main-name exceptions, dead/Death rejection, no controls7d4 proxy.",
-    "RustAndStrictClippy": "pending scheduled metadata validation of final5afa composition; exact1d check/Clippy receipt remains separately preserved",
+    "RustAndStrictClippy": "pending coordinated own-target check of current-main source composition",
     "productionAndLive": "not run",
     "retainedCaseBankSha256": "6860834fd32322bf690d01e33f5b78a3db4fc4ad3e5e897831c15e37fa55e76e",
     "sourcePreflight": {
@@ -99,7 +99,10 @@
       },
       "receiptSha256": "9b24606cb9dca4cb5f740e17fffd8214d658a131ed1b288cc31622bb26bab315"
     },
-    "previousConcretePrerequisite": "6b7d1d3543635f65aa11582871294d4cd9980b09"
+    "previousConcretePrerequisite": "6b7d1d3543635f65aa11582871294d4cd9980b09",
+    "previousBaseMain": "2d2174e63901acbfc209fc40018418cded26223e",
+    "restackSourceHead": "ffea39815989064ac43d94d3eab7995e95105e5b",
+    "restackQualification": "Source merge on current main after Death111, BasementII114, clock121, class5 preview118, character admission120 and actual manager counts119. Complete latest Death runtime/mandatory gates retained. No new Rust/production/live acceptance inherited from prior1d static or main Death proof."
   },
   "previousOwnedPayload": {
     "baseMain": "7492adba9b256e5767e28906289e89ca6faa2655",

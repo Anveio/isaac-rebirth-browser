@@ -54,3 +54,12 @@ shared entry now permits regular pickups with redHP0/SoulHP and during legacy
 Pickup presentation. The earlier `1d166003` Rust/Clippy receipt is retained;
 metadata validation of this latest composition is pending. No new production
 or paired Heart acceptance is inherited from the Death prerequisite.
+
+
+The current source restack includes main `382f5ea1`, preserving the complete
+latest Death111 behavior and mandatory public fields, the continuation-floor
+generator, clock, class5 preview, character admission and actual manager-count
+changes. The previous `1d166003` static receipt remains a separate historical
+result. This composition still needs its own private Rust/Clippy check; no
+Heart production artifact or original/browser acceptance is inherited from
+main's Death cohort. The same six prepared Heart cases remain mandatory.
