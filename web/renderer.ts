@@ -251,6 +251,15 @@ export class Renderer {
       const remaining = state.player.hp - heart * 2;
       this.assets.draw(ctx, "gfx/ui/ui_hearts.anm2", remaining >= 2 ? "RedHeartFull" : remaining === 1 ? "RedHeartHalf" : "EmptyHeart", 68 + heart * 12, 24);
     }
+    const redSlots = Math.ceil(state.player.maxHp / 2);
+    for (let heart = 0; heart < Math.ceil(state.player.soulHp / 2); heart++) {
+      const color = state.player.blackHeartMask & (1 << heart) ? "Black" : "Blue";
+      const amount = state.player.soulHp - heart * 2 >= 2 ? "Full" : "Half";
+      this.assets.draw(ctx, "gfx/ui/ui_hearts.anm2", `${color}Heart${amount}`, 68 + (redSlots + heart) * 12, 24);
+    }
+    if (state.player.eternalHearts > 0) {
+      this.assets.draw(ctx, "gfx/ui/ui_hearts.anm2", redSlots ? "WhiteHeartOverlay" : "WhiteHeartHalf", 68 + Math.max(0, redSlots - 1) * 12, 24);
+    }
     const counts = [state.inventory.coins, state.inventory.bombs, state.inventory.keys];
     for (let pickup = 0; pickup < 3; pickup++) {
       this.assets.draw(ctx, "gfx/ui/hudpickups.anm2", "Idle", 20, 44 + pickup * 12, [0, 2, 1][pickup]!);

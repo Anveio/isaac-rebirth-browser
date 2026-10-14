@@ -99,6 +99,8 @@ pub struct Player {
     pub max_hp: u8,
     pub soul_hp: i32,
     pub black_heart_mask: u32,
+    /// Actual normal-Isaac Player+bbc Eternal half-heart owner.
+    pub eternal_hearts: i32,
     pub facing: Direction,
     pub body_facing: Direction,
     pub walk_frame: u8,
@@ -124,6 +126,7 @@ impl Player {
             max_hp: 6,
             soul_hp: 0,
             black_heart_mask: 0,
+            eternal_hearts: 0,
             facing: Direction::Down,
             body_facing: Direction::Down,
             walk_frame: 0,
@@ -1151,11 +1154,35 @@ impl Game {
         if !pickups::player_can_collect(&self.state) {
             return;
         }
+        let red_multiplier = if self
+            .state
+            .player_items
+            .as_ref()
+            .is_some_and(|items| items.owned_counts[312] > 0)
+        {
+            2
+        } else {
+            1
+        };
         let pickup = &mut self.state.room.pickups[index];
-        if pickup.touches(&self.state.player) && pickup.try_collect(&mut self.state.inventory) {
+        if pickup.touches(&self.state.player)
+            && (if pickup.variant == 10 {
+                pickup.try_collect_heart(&mut self.state.player, red_multiplier)
+            } else {
+                pickup.try_collect(&mut self.state.inventory)
+            })
+        {
             // Collect504480 routes key ->504720 and bomb ->5046d0
             // after inventory mutation, before the System increment.
             let sound = match pickup.variant {
+                10 => Some((
+                    match pickup.subtype {
+                        3 => 54,
+                        4 => 266,
+                        _ => 185,
+                    },
+                    1.0,
+                )),
                 30 => Some((58, 0.85)),
                 40 => Some((201, 1.0)),
                 _ => None,
