@@ -1,0 +1,9 @@
+# One compiler for every engine build, lint and DST run, locally, in CI and in
+# the Antithesis image. Clippy lints and wasm codegen change between releases;
+# upgrade deliberately in its own change and re-run `npm run lint` and
+# `npm run lint:dst`.
+[toolchain]
+channel = "1.99.0"
+components = ["rustfmt", "clippy"]
+targets = ["wasm32-unknown-unknown"]
+profile = "minimal"

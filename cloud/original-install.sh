@@ -12,14 +12,16 @@ UV_NATIVE_TLS=true .venv/bin/uv python install 3.13.9
 py="$(UV_NATIVE_TLS=true .venv/bin/uv python find 3.13.9)"
 ln -sfn "$py" /usr/local/bin/python3
 python3 tools/restore-linux-depot.py
+# rust-toolchain.toml owns the pinned compiler, components and wasm target.
+toolchain="$(sed -n 's/^channel = "\(.*\)"$/\1/p' rust-toolchain.toml)"
+test -n "$toolchain"
 if ! test -x /root/.cargo/bin/rustup; then
   curl --fail --silent --show-error https://sh.rustup.rs -o /tmp/isaac-rustup.sh
-  sh /tmp/isaac-rustup.sh -y --profile minimal --default-toolchain 1.99.0
+  sh /tmp/isaac-rustup.sh -y --profile minimal --default-toolchain "$toolchain"
 fi
 export PATH=/root/.cargo/bin:$PATH
-rustup toolchain install 1.99.0 --profile minimal
-rustup default 1.99.0
-rustup target add wasm32-unknown-unknown
+rustup toolchain install
+rustup default "$toolchain"
 depot="$PWD/references/isaac/linux/depot_250903"
 LD_LIBRARY_PATH="$depot/lib64" ldd "$depot/isaac.x64" > .cache/original-ldd.txt
 if rg -q 'not found' .cache/original-ldd.txt; then cat .cache/original-ldd.txt >&2; exit 1; fi

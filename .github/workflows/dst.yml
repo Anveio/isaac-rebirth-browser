@@ -30,7 +30,7 @@ jobs:
             ~/.cargo/git
             engine/target
             engine/dst/target
-          key: ${{ runner.os }}-dst-${{ hashFiles('engine/Cargo.lock', 'engine/dst/Cargo.lock', 'engine/src/**', 'engine/build.rs', 'engine/dst/src/**') }}
+          key: ${{ runner.os }}-dst-${{ hashFiles('rust-toolchain.toml', 'engine/Cargo.lock', 'engine/dst/Cargo.lock', 'engine/src/**', 'engine/build.rs', 'engine/dst/src/**') }}
           restore-keys: ${{ runner.os }}-dst-
       - name: Install the Rust toolchain
         run: bash tools/setup-rust.sh

@@ -42,6 +42,11 @@ npm run assets:rooms                  # Decode all base room records
 npm run matrix:check
 ```
 
+[rust-toolchain.toml](rust-toolchain.toml) pins the Rust compiler, rustfmt,
+clippy and the wasm target for every build, lint and DST run, so local lint
+and CI agree; `bash tools/setup-rust.sh` installs it. Upgrade it deliberately
+in its own change.
+
 Browser tests and the default verifier serve an immutable copy of the built
 production artifact on an isolated loopback server. Run `npm run build` before
 standalone browser tests. Reports identify the artifact by SHA256.

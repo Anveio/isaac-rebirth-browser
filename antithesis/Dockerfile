@@ -5,11 +5,14 @@
 #
 # INSTRUMENT=1 adds Antithesis coverage instrumentation and requires the
 # platform's libvoidstar.so in the build context at antithesis/libvoidstar.so.
-FROM rust:1.97-bookworm AS build
+# rust-toolchain.toml selects the compiler; a matching base image only avoids
+# a second download.
+FROM rust:1.99-bookworm AS build
 ARG INSTRUMENT=0
 RUN apt-get update && apt-get install -y --no-install-recommends python3 && rm -rf /var/lib/apt/lists/*
-RUN rustup target add wasm32-unknown-unknown
 WORKDIR /src
+COPY rust-toolchain.toml rust-toolchain.toml
+RUN rustup toolchain install
 COPY engine engine
 COPY tools/foundation/item-catalog.py tools/foundation/item-catalog.py
 COPY web/*.json web/
