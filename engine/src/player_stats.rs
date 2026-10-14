@@ -3,6 +3,8 @@
 use crate::{items, player_items::PlayerItems, projectiles::Parameters, State};
 use serde::{Deserialize, Serialize};
 
+const DAMAGE: u32 = 1;
+const FIRE_DELAY: u32 = 2;
 const SHOT_SPEED: u32 = 4;
 const RANGE: u32 = 8;
 const MOVE_SPEED: u32 = 16;
@@ -12,7 +14,7 @@ const MOVE_SPEED: u32 = 16;
 pub struct PlayerStats {
     /// Source Player+c7c.
     pub shot_speed: f32,
-    /// Source Player+c88. Damage callbacks remain a following slice.
+    /// Source Player+c88, copied into regular tears at actual birth.
     pub damage: f32,
     /// Source Player+c8c/c90/c94, used by actual regular tear birth.
     pub tear_height: f32,
@@ -79,7 +81,7 @@ fn has_unmapped_owner(owner: &PlayerItems, flag: u32, supported: &[u32]) -> bool
 }
 
 /// AddCollectible52d173 invokes511f10 before clearing the deferred queue.
-/// These selected callbacks follow source order4 ->8 ->16 before Familiar bit0x200.
+/// These callbacks follow source order2 ->4 ->1 ->8 ->16 before Familiar bit0x200.
 /// The real partial result is retained when another owner is unmapped; its
 /// pending bit is not presented as completed native cache evaluation.
 pub(crate) fn evaluate_cache(state: &mut State) -> Result<(), String> {
@@ -91,6 +93,27 @@ pub(crate) fn evaluate_cache(state: &mut State) -> Result<(), String> {
     }
     let flags = owner.unevaluated_cache_flags;
     let mut handled = 0;
+    if flags & FIRE_DELAY != 0 {
+        // 512354/512373 add permanent/temporary SadOnion1 as separate
+        // binary32 values before5123d3's .7 term. Preserve source rounding.
+        let tier = (count(owner, 1) as f32 + owner.temporary_count(1) as f32) * 0.7_f32;
+        let root = (1.3_f32 * tier + 1.0_f32).max(0.0).sqrt();
+        let mut delay = 16.0_f32 - 6.0_f32 * root;
+        if tier <= 0.0 {
+            delay -= 6.0_f32 * tier;
+        }
+        // 512562..512578 lower bound5 is before later item modifiers;
+        // actual Has222 at512666 subtracts2 once for permanent presence.
+        delay = delay.max(5.0_f32);
+        if count(owner, 222) > 0 {
+            delay -= 2.0_f32;
+        }
+        state.max_fire_delay = (delay as i32).max(1);
+        // Anti-Gravity tear flag32/update is a separate unimplemented owner.
+        if !has_unmapped_owner(owner, FIRE_DELAY, &[1, 222]) {
+            handled |= FIRE_DELAY;
+        }
+    }
     if flags & SHOT_SPEED != 0 {
         // 511f68/513e48 select1.2 on permanent or temporary SpeedBall143
         // presence, otherwise1.0. Multiple copies do not repeat this override.
@@ -101,8 +124,23 @@ pub(crate) fn evaluate_cache(state: &mut State) -> Result<(), String> {
             1.0
         };
         state.player_stats.shot_speed = state.player_stats.shot_speed.max(0.6);
-        if !has_unmapped_owner(owner, SHOT_SPEED, &[143]) {
+        if !has_unmapped_owner(owner, SHOT_SPEED, &[4, 143]) {
             handled |= SHOT_SPEED;
+        }
+    }
+    if flags & DAMAGE != 0 {
+        // 513628/513644: permanent CricketHead4 contributes .5 per copy
+        // before f32(1.2*tier+1), double sqrt*3.5 and the f32 round.
+        let tier = count(owner, 4) as f32 * 0.5_f32;
+        let linear = (1.2_f32 * tier + 1.0_f32).max(0.0);
+        let mut damage = (f64::from(linear).sqrt() * 3.5_f64) as f32;
+        // 513a20 Has4 selects one1.5 multiplier, regardless of copies.
+        if count(owner, 4) > 0 {
+            damage *= 1.5_f32;
+        }
+        state.player_stats.damage = damage.max(0.5_f32);
+        if !has_unmapped_owner(owner, DAMAGE, &[4]) {
+            handled |= DAMAGE;
         }
     }
     if flags & RANGE != 0 {

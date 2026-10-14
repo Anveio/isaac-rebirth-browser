@@ -1,0 +1,191 @@
+{
+  "schema": 1,
+  "scope": "Source-only projection of the exact current678 changes onto the reached owners of the old immutable all8 Stats cohort. No fresh current-main game/artifact, original factory parity or general NPC/room acceptance is asserted.",
+  "projectionSource": "67897997d408e5e5a29e568adf13c685cb052149",
+  "capturedBaselineSource": "3fbd27f9179409623a006562c2412242fbc6b6f0",
+  "capturedProposalSource": "ba0ae5e241b4fc5fbd09dfe86a05072025836479",
+  "actualReadbackPath": ".cache/coordination/root-stats678-projection/actual-reached-owner-readback.json",
+  "actualReadbackSha256": "571797084e1a82e25f92bc19a7d9f1ca9ab82ff91d7057ab4bf0c82bca03d5eb",
+  "sourceSha256": "70840d07a149992731b0f13aaa6ec8fce8a07a1891b728f7df70a176f5e3a192",
+  "actualReadbackCounts": {
+    "nativeWorldRows": 2812,
+    "browserDomStatesAcrossThreeVariants": 8364,
+    "actualBackendStatesAcrossThreeVariants": 72
+  },
+  "unchangedReachedFiles": {
+    "engine/src/fireplaces.rs": {
+      "oldSource": "3fbd27f9179409623a006562c2412242fbc6b6f0",
+      "projectionSource": "67897997d408e5e5a29e568adf13c685cb052149",
+      "sha256": "ea6d01878bf55c1c1d7d69d101b86badb50d48d55374e281be9e8fc443eefa1b"
+    },
+    "engine/src/combat.rs": {
+      "oldSource": "3fbd27f9179409623a006562c2412242fbc6b6f0",
+      "projectionSource": "67897997d408e5e5a29e568adf13c685cb052149",
+      "sha256": "2f7651c34d67cbb38df600c5c6df2776719ee8b57912087b949a78b8ae23947c"
+    },
+    "engine/src/audio.rs": {
+      "oldSource": "3fbd27f9179409623a006562c2412242fbc6b6f0",
+      "projectionSource": "67897997d408e5e5a29e568adf13c685cb052149",
+      "sha256": "d026fad8a0a4645061fa26061947dd5465d1e7e7a1edc86aae1fe733c1627110"
+    },
+    "engine/src/actors.rs": {
+      "oldSource": "3fbd27f9179409623a006562c2412242fbc6b6f0",
+      "projectionSource": "67897997d408e5e5a29e568adf13c685cb052149",
+      "sha256": "704bde896794b09ceab2b2845ebcdbe22ce7dc7ab43d710dba5bccc86edafbe4"
+    },
+    "engine/src/room_spawns.rs": {
+      "oldSource": "3fbd27f9179409623a006562c2412242fbc6b6f0",
+      "projectionSource": "67897997d408e5e5a29e568adf13c685cb052149",
+      "sha256": "6b6551b87b74900b981792b622c9f0aa3d7347d447a012997525f0426f3f529b"
+    },
+    "engine/src/floor.rs": {
+      "oldSource": "3fbd27f9179409623a006562c2412242fbc6b6f0",
+      "projectionSource": "67897997d408e5e5a29e568adf13c685cb052149",
+      "sha256": "07e2d3d871c97f44ab0e8d4c168b2c212e9558abf9c8db24ca24ce992f2c95dc"
+    },
+    "references/isaac/rebirth/resources/entities2.xml": {
+      "oldSource": "3fbd27f9179409623a006562c2412242fbc6b6f0",
+      "projectionSource": "67897997d408e5e5a29e568adf13c685cb052149",
+      "sha256": "76408c1612ce7281d131c460cf3450eeae6bc602bc539805d53d76406432a936"
+    }
+  },
+  "changedSourceFilePins": {
+    "engine/src/champions.rs": {
+      "sha256": "5d9414aadaabb0206b6e96976f64a52be49d0e6fedae12714b65aea89e54e2ba"
+    },
+    "engine/src/entities.rs": {
+      "sha256": "64504c0b9f39bafaab7bbfa4f6edfe0b5bf799dd73d61afa0490da1f4eee7f64"
+    },
+    "engine/src/npcs.rs": {
+      "sha256": "088540c0a0bce02dcac0fa90cadcb2d9d90b7cd6d6eed86576f357054544ffbc"
+    },
+    "engine/src/plain_npc.rs": {
+      "sha256": "5faa3f6f7aebb81db725f20fa6c94cf4443d55e09fd7e9fea4d858dae70f484f"
+    },
+    "engine/src/rock_blast.rs": {
+      "sha256": "beb78611e229dca6f1713b6c71c9582174ef7b6f96d9bbc1be41045e43295101"
+    },
+    "engine/src/lib.rs": {
+      "sha256": "066b827cfed25ecdb281417df72cbe28dbdcd9645f40fe2b69fd8bcccfd1a001"
+    },
+    "web/renderer.ts": {
+      "sha256": "b23821b9cd69093c56e15319e52cd5b8f954a3b33b3a820911aaf63cf60768e6"
+    },
+    "engine/build.rs": {
+      "sha256": "be4700c08d6ce46bbab9acf70130338c8d87a2af47d683d351d84ce9c7b97408"
+    }
+  },
+  "literalFireChampionConfigs": [
+    {
+      "anm2path": "033.000_Fireplace.anm2",
+      "baseHP": "5",
+      "boss": "0",
+      "champion": "0",
+      "collisionDamage": "1",
+      "collisionMass": "100",
+      "collisionRadius": "13",
+      "friction": "0.5",
+      "id": "33",
+      "name": "Fire Place",
+      "numGridCollisionPoints": "0",
+      "shadowSize": "0",
+      "stageHP": "0",
+      "variant": "0",
+      "shutdoors": "false",
+      "portrait": "68"
+    },
+    {
+      "anm2path": "033.001_Red Fireplace.anm2",
+      "baseHP": "5",
+      "boss": "0",
+      "champion": "0",
+      "collisionDamage": "1",
+      "collisionMass": "100",
+      "collisionRadius": "13",
+      "friction": "0.5",
+      "id": "33",
+      "name": "Fire Place (attacking)",
+      "numGridCollisionPoints": "0",
+      "shadowSize": "0",
+      "stageHP": "0",
+      "variant": "1",
+      "shutdoors": "false",
+      "portrait": "68"
+    },
+    {
+      "anm2path": "033.002_Blue Fireplace.anm2",
+      "baseHP": "5",
+      "boss": "0",
+      "champion": "0",
+      "collisionDamage": "1",
+      "collisionMass": "100",
+      "collisionRadius": "13",
+      "friction": "0.5",
+      "id": "33",
+      "name": "Blue Fire Place",
+      "numGridCollisionPoints": "0",
+      "shadowSize": "0",
+      "stageHP": "0",
+      "variant": "2",
+      "shutdoors": "false",
+      "portrait": "68"
+    },
+    {
+      "anm2path": "033.003_Purple Fireplace.anm2",
+      "baseHP": "5",
+      "boss": "0",
+      "champion": "0",
+      "collisionDamage": "1",
+      "collisionMass": "100",
+      "collisionRadius": "13",
+      "friction": "0.5",
+      "id": "33",
+      "name": "Purple Fire Place (attacking)",
+      "numGridCollisionPoints": "0",
+      "shadowSize": "0",
+      "stageHP": "0",
+      "variant": "3",
+      "shutdoors": "false",
+      "portrait": "68"
+    }
+  ],
+  "changes": [
+    {
+      "pr": 160,
+      "reached": "champions::roll is called for the constructed Fire33 actors; every authored Fire33 config has champion=0, so the actual guard returns before local/shared RNG or HP/color mutation. This is a scoped reached-but-neutral callback, not universal champion acceptance."
+    },
+    {
+      "pr": 163,
+      "reached": "NpcWorld.game_counter changes, but only Fire33 families occur in every observed native manager and every captured browser roster. Unchanged Fire advance_family copies world.system_counter, audio/grid/path owners and does not read game_counter. No general run-loader counter origin or causal alignment law is proved."
+    },
+    {
+      "pr": 164,
+      "reached": "Fly13/18 callback relocation and generic death path are not reached. Npc::authored additionally initializes champion=None and flip_x=false, both default-suppressed fields. Actual Fire owner/factory/motion/damage source is unchanged."
+    },
+    {
+      "pr": 166,
+      "reached": "No actual Pooter14 or Horf12 selector/manager actor in this bank. ShotMode/Pair and Fly/Pooter target clearing are not reached. Fire renderer takes its preceding fireplace branch rather than the changed generic actor flipX branch."
+    },
+    {
+      "pr": 165,
+      "reached": "Rockkind2 actors exist, but every DOM/backend/native current path-cost snapshot has no entries1..900. The changed every-third-full marker gate therefore makes no reached marker mutation. No general aging-clock equivalence is inferred."
+    },
+    {
+      "pr": 155,
+      "reached": "DST tooling is not gameplay. The GameOverExit helper is not reached by the declared public boot/grant/shoot tapes and captured playing states. Profile/Main helper extraction copies its prior selection assignments without RNG/actor mutation."
+    },
+    {
+      "pr": 108,
+      "reached": "The held pickup guard fix is already in captured proposal ba0 and firstscalar3b; current-main projection retains it. Its original guard acceptance remains separately scoped to the Active12 paired campaign."
+    }
+  ],
+  "reviewDisposition": "No reached tested-field behavior delta was identified among160/163/164/165/166/155. Own110/131 deltas still need their current-union build/source review; this classifier supplies no latest-main live verdict.",
+  "retainedFailedResearchAttempt": "The first classifier invocation included a nonexistent standalone fire_particles.rs path and failed before producing a receipt. That exact script/log remain retained. Actual Ember code is in the unchanged fireplaces.rs; no game/source/evidence mutation occurred.",
+  "retainedFailuresAndLimits": [
+    "All24 newly exposed OSitem257 authored-clip mismatches remain red; baseline literal RegularTear6 source was already wrong, but that authored field was not dynamically executed there.",
+    "New native Tear seed comparisons remain616/616 different across proposal/scalar combined; original shared-MT/factory routing is unaccepted. Native448 position aliases and native vertical fields remain unqualified.",
+    "Historical missing8 late selection/grant witnesses per bank stay disclosed; new independent raw selection/grant readback is distinct and does not synthesize old tuples.",
+    "Backend archive contains exactly3 actual state events per case/variant in addition to348/349 DOM snapshots; this readback does not invent independent per-Tick backend witnesses.",
+    "Observed native roster absence does not prove no transient actor between checkpoints; no native mutation or data import into the port was performed."
+  ]
+}
