@@ -49,3 +49,14 @@ required Worm comparison now read all448 signed words, including unused tail.
 This exact runtime passes one-job all-target Rust check and strict Clippy in its
 own target. First admission Room.Update order remains approximate, and no new
 live acceptance is attributed to either cost correction.
+
+The mode3 projectile line budget also reads the actual signed cost owner.
+The Worm caller sets threshold0 at `4b55e4`; `5c76df/5c76e7` counts a sample
+only when Room+e98 is positive, and `5c77b0/5c77b4` requires at most8. The
+prior query read the authored selector, so raw Rock1000 or Fire900 could keep
+blocking after the actual destruction cost aged0. This separate correction
+passes the existing World cost reference into the query. Four corners,
+ten-unit stepping, f32 geometry and collision predicates stay unchanged.
+`projectile-line-cost-correction.json` pins the full query and actual caller.
+Its Rust check and current build/live acceptance remain pending; every prior
+proof and failure is retained.
