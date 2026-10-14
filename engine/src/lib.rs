@@ -34,6 +34,7 @@ pub mod monstro;
 pub mod motion;
 pub mod mt;
 pub mod music;
+pub mod nightmares;
 pub mod npcs;
 pub mod phase;
 pub mod pickups;
@@ -356,6 +357,7 @@ pub struct State {
     pub player_stats: player_stats::PlayerStats,
     pub stage: u32,
     pub stage_seed: u32,
+    pub nightmares: nightmares::Nightmares,
     pub seeded_run: bool,
     pub achievement_eligibility: bool,
     pub profiles: Vec<Profile>,
@@ -497,6 +499,7 @@ impl Game {
                 player_stats: player_stats::PlayerStats::default(),
                 stage: 1,
                 stage_seed: seed::stage1_seed(initial_seed),
+                nightmares: nightmares::Nightmares::new()?,
                 seeded_run: false,
                 achievement_eligibility: true,
                 profiles: (1..=3)
@@ -691,7 +694,10 @@ impl Game {
             // Scene key handler. Physical action14 mapping remains unaccepted.
             return Ok(());
         }
-        if self.state.player_death.game_over.is_some() {
+        if self.state.player_death.game_over.is_some()
+            || self.state.nightmares.system_active
+            || self.state.nightmares.request_pending
+        {
             return Ok(());
         }
         let previous_screen = self.state.screen;
@@ -1083,6 +1089,8 @@ impl Game {
         };
         self.state.next_pickup = 1;
         self.state.stage_seed = seed::stage1_seed(self.state.run_seed_value);
+        // Level585600 ->5b8340 records the selected ordinary stage resource.
+        self.state.nightmares.select_normal_basement(1)?;
         grid_records::admit_fresh(
             &mut self.state.room,
             &mut self.state.boot_lifecycle.shared,
@@ -1425,6 +1433,9 @@ impl Game {
         }
         let audio_counter = self.state.system_clock.system_counter;
         let phase = self.state.system_clock.advance()?;
+        if phase != phase::Phase::Skipped && self.state.nightmares.apply_request(self.state.stage) {
+            self.state.music.room(96);
+        }
         if phase != phase::Phase::Skipped {
             self.state.public_actions.advance(&self.state.pressed);
         }
@@ -1458,6 +1469,20 @@ impl Game {
         }
         self.state.tick += 1;
         self.state.menu_animation_tick += 1;
+        let nightmare_dispatch = if phase == phase::Phase::Skipped {
+            // Disabled interpolation skips System polling but keeps state4.
+            self.state.nightmares.system_active
+        } else {
+            self.state
+                .nightmares
+                .advance_system(self.state.public_actions.menu_confirm)
+        };
+        if nightmare_dispatch {
+            if phase != phase::Phase::Skipped {
+                self.state.music.advance();
+            }
+            return Ok(());
+        }
         let gameplay_was_paused = self.state.paused;
         if self.state.screen == Screen::Playing {
             self.state.pause_menu.advance(phase);

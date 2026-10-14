@@ -75,6 +75,49 @@ fn frame_number(frame: &Value, name: &str) -> f64 {
     value
 }
 
+fn nightmare_catalog(xml: &str, path: &Path) -> String {
+    let actors: Value =
+        serde_json::from_str(&fs::read_to_string(path).expect("read authored stage animations"))
+            .expect("parse authored stage animations");
+    let root_tag = xml.split("<nightmares ").nth(1).expect("nightmares root");
+    let root = attribute(root_tag, "root")
+        .expect("nightmares resources root")
+        .trim_start_matches("resources/");
+    let progress = format!(
+        "{root}{}",
+        attribute(root_tag, "progressAnm2").expect("progress actor")
+    );
+    let progress_frames = actors[&progress]["Animations"]
+        .as_array()
+        .expect("authored progress definition")
+        .iter()
+        .find(|clip| clip["Name"] == "Levels")
+        .and_then(|clip| clip["FrameNum"].as_u64())
+        .expect("authored progress Levels clip");
+    assert!(progress_frames > 0 && progress_frames <= u64::from(u32::MAX));
+    let mut output = format!(
+        "pub const PROGRESS_ACTOR: &str = {progress:?};\npub static PROGRESS_DEFINITION: Definition = Definition {{ actor: {progress:?}, frames: {progress_frames} }};\n"
+    );
+    output.push_str("pub static DEFINITIONS: &[Definition] = &[\n");
+    for tag in xml.split("<nightmare ").skip(1) {
+        let actor = format!("{root}{}", attribute(tag, "anm2").expect("nightmare actor"));
+        let clip = actors[&actor]["Animations"]
+            .as_array()
+            .expect("authored nightmare clips")
+            .iter()
+            .find(|clip| clip["Name"] == "Scene")
+            .expect("authored nightmare Scene");
+        let frames = clip["FrameNum"].as_u64().expect("Scene frames");
+        assert!(frames > 0 && frames <= u64::from(u32::MAX));
+        assert_eq!(clip["Loop"], false, "nightmare Scene is nonlooping");
+        output.push_str(&format!(
+            "Definition {{ actor: {actor:?}, frames: {frames} }},\n"
+        ));
+    }
+    output.push_str("];");
+    output
+}
+
 fn pickup_catalog(path: &Path, animations: &Path, entities_xml: &str) -> String {
     let catalog: Value =
         serde_json::from_str(&fs::read_to_string(path).expect("read authored pickup catalog"))
@@ -211,6 +254,10 @@ fn main() {
     let animations = manifest.parent().unwrap().join("web/scene-data.json");
     let pickups = manifest.parent().unwrap().join("web/pickup-data.json");
     let npcs = manifest.parent().unwrap().join("web/npc-data.json");
+    let stage_animations = manifest.parent().unwrap().join("web/stage-data.json");
+    let nightmares = resources.join("nightmares.xml");
+    println!("cargo:rerun-if-changed={}", stage_animations.display());
+    println!("cargo:rerun-if-changed={}", nightmares.display());
     println!("cargo:rerun-if-changed={}", entities.display());
     println!("cargo:rerun-if-changed={}", image.display());
     println!("cargo:rerun-if-changed={}", animations.display());
@@ -498,6 +545,15 @@ fn main() {
         ));
     }
     let output = PathBuf::from(std::env::var_os("OUT_DIR").unwrap());
+    fs::write(
+        output.join("nightmare_catalog.rs"),
+        nightmare_catalog(
+            &fs::read_to_string(nightmares).expect("read authored nightmare selection"),
+            &stage_animations,
+        ),
+    )
+    .expect("write authored nightmare definitions");
+
     fs::write(output.join("shadow_catalog.rs"), generated).expect("write shadow catalog");
     fs::write(
         output.join("pickup_catalog.rs"),

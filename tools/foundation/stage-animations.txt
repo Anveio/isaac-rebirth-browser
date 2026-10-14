@@ -1,0 +1,3 @@
+# Regenerate with extract-animations.py --select-file this file --json-output web/stage-data.json
+gfx/ui/stage/nightmare*.anm2
+gfx/ui/stage/progress.anm2
