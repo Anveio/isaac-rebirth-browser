@@ -34,6 +34,10 @@ The Wave1/Wave2 snapshots below are historical results from the earlier test
 policy. Their removed unit/integrity suites are not current executable gates.
 Consult the latest paired report for current implementation outcomes.
 
+## Monstro BloodStart source leaf
+
+The new partial producer routes ordinary Monstro’s real BloodStart random branches through Effect17, SFX72 and Effect42 in their original order. It preserves the actual authored NullId0 guide, separate cached spawner/link fields, signed scales and layer flips, and distinct active/dead lifecycle. The required `test:e2e:blood-start` gate retains contrived978 and recorded OSBLL routes with both input phases; it requires actual Death-interval execution and matched bodies. This checkpoint has source/static qualification only. Explosion2/77/category5 remains an explicit runtime error before any final reward, and existing native-prefix failures remain blocking. The final-heart/delayed-clear/Grid17 owners are separate; no boss-clear or stage-completion claim follows from this leaf.
+
 ## Current integrated runtime checkpoint
 
 Current main `7492adba` registers36 required live suites. This is a source

@@ -22,6 +22,7 @@ export interface Tear {
 export interface ActorSprite {
   animation: string; frame: number; playing: boolean; speed: number; scale: {x: number; y: number};
   offset: {x: number; y: number}; flipX: boolean; flipY: boolean;
+  rotation: number; layerFlips: Record<string, [boolean, boolean]>;
   tint: [number, number, number, number]; offsets: [number, number, number];
 }
 export interface Familiar {
@@ -43,6 +44,7 @@ export interface SpriteEffect {
   gridCollisionClass: number; entityCollisionClass: number; flags: number; visible: boolean; active: boolean; removed: boolean;
   renderOrderOffset: number; lifetimeDivisor: number; timeToLive: number; raw7f4: number; raw7f8: number;
   sprite: ActorSprite; fullUpdates: number;
+  bloodEffect?: {kind: "poof04" | "bloodGush"};
 }
 export interface Impact { id: number; x: number; y: number; age: number; }
 export interface ActorRef { kind: "player" | "familiar" | "tear" | "bomb" | "pickup" | "npc" | "projectile" | "effect"; id: number; }
@@ -166,7 +168,7 @@ export interface Room {
   spawns: {tintedRockIndex: number; finalSpawnState: number; selectors: {groupIndex: number; gridIndex: number; category: "entity" | "grid"; type: number; variant: number; subtype: number; position: {x: number; y: number}; groupSeed: number; spawnSeed: number}[]} | null;
   pickups: Pickup[];
   backgroundStains: {sourceEffectId: number; spawnSeed: number; birthGameUpdate: number;
-    position: {x: number; y: number}; sprite: ActorSprite}[];
+    position: {x: number; y: number}; variant: number; sprite: ActorSprite}[];
   savedRegularPickups: {handle: number; variant: number; subtype: number; position: {x: number; y: number};
     spawnSeed: number; rngSeed: number; charge: number; touched: boolean}[];
   npcs: { id: number; kind: number; variant: number; subtype: number; spawnSeed: number;
