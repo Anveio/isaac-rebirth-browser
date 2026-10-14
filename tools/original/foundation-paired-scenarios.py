@@ -37,6 +37,10 @@ SCENARIOS = [
      'systems': ['bombs', 'health-inventory', 'locomotion', 'input-determinism']},
     {'id': 'paired-room-combat', 'description': 'Enter adjacent room, shoot rocks, blast them and cross destroyed cells',
      'systems': ['room-connectivity', 'grid-entities', 'locomotion', 'health-inventory', 'bombs', 'projectile-physics', 'input-determinism']},
+    {'id': 'paired-pause-before-transition', 'description': 'Walk into the upper doorway and pause just before the room transition starts',
+     'systems': ['menu-navigation', 'room-connectivity', 'locomotion', 'input-determinism']},
+    {'id': 'paired-pause-transition', 'description': 'Escape during the upper room transition is refused; the next Escape pauses',
+     'systems': ['menu-navigation', 'room-connectivity', 'locomotion', 'input-determinism']},
     {'id': 'paired-random-run', 'description': 'Fresh OS-random run seed and recorded randomized movement, firing, coasting, pause and bomb actions',
      'systems': ['locomotion', 'projectile-physics', 'bombs', 'menu-navigation', 'input-determinism'],
      'randomized': True},
@@ -53,7 +57,15 @@ def advance(tape, count, label=None):
         tape.append({'type': 'capture', 'label': label})
 
 
+# Contrived room-transition pause cases own a seed whose start room has an
+# ordinary room above the spawn point (#168).
+TRANSITION_SEED = '0EWL B4FT'
+TRANSITION_ESCAPE_FRAMES = {'paired-pause-before-transition': 30, 'paired-pause-transition': 40}
+
+
 def build(identifier, seed):
+    if identifier in TRANSITION_ESCAPE_FRAMES:
+        seed = TRANSITION_SEED
     if identifier == 'paired-title-menu':
         tape = scenarios.build_scenario('title-animation-fade', seed)
         boundary = 'title-first'
@@ -92,6 +104,14 @@ def build(identifier, seed):
                 for label in ('bomb-phase-120', 'bomb-phase-121', 'bomb-phase-122', 'bomb-phase-123'):
                     advance(tail, 1, label)
                 advance(tail, 10, 'bomb-after-blast')
+            elif identifier in TRANSITION_ESCAPE_FRAMES:
+                key(tail, 'w', True); key(tail, 'Down', True); advance(tail, 38, 'transition-approach')
+                key(tail, 'w', False); key(tail, 'Down', False); advance(tail, 36, 'transition-coasting')
+                key(tail, 'w', True); advance(tail, TRANSITION_ESCAPE_FRAMES[identifier])
+                key(tail, 'Escape', True); advance(tail, 1); key(tail, 'Escape', False); key(tail, 'w', False)
+                advance(tail, 40, 'transition-escape-1')
+                key(tail, 'Escape', True); advance(tail, 1); key(tail, 'Escape', False)
+                advance(tail, 30, 'transition-escape-2')
             elif identifier == 'paired-random-run':
                 draw = random.Random(f'paired-random-run:{seed}')
                 for index in range(3):
