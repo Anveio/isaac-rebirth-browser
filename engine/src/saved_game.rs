@@ -262,6 +262,14 @@ pub fn save_grid_cells(
     let mut records = Vec::with_capacity(count);
     for (index, cell) in grid.cells.iter().enumerate() {
         let record = match &cell.entity {
+            // An authored GridBase object without a runtime owner still
+            // occupies its cell; Room.Save copies its record without draws.
+            None if cell.selector != 0
+                && crate::grid_records::constructs_grid_object(cell.selector as u16) =>
+            {
+                occupied.push(index);
+                None
+            }
             None => {
                 empty += 1;
                 Some(crate::grid_records::GridRecord::empty(shared))

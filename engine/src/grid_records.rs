@@ -104,6 +104,9 @@ impl GridEntity {
                 owner.local_rng = Rng::new(self.spawn_seed, [5, 9, 7]);
                 owner.local_rng.bounded(2);
             }
+            // Rock (2/5/6) and Spike (8) Init stores are owned by the
+            // recovered room geometry and path costs.
+            2 | 5 | 6 | 8 => {}
             _ => return Err("derived grid Init is outside supported ownership".into()),
         }
         Ok(())
@@ -191,11 +194,101 @@ impl GridEntity {
     }
 }
 
-/// Supported fresh normal room admission5cecc0: authored groups first, enabled
-/// door slots ascending, top/bottom columns, then left/right rows. Additional
-/// normal shape0 decoration follows the walls. Other derived constructors and
-/// post-admission path-cost callbacks remain unadmitted.
+/// Raw grid types whose Room.Init factory builds a GridBase object, so its
+/// constructor 560ff0 draws two raw words. Raw1400 Fire becomes an NPC.
+pub fn constructs_grid_object(entity_type: u16) -> bool {
+    matches!(
+        entity_type,
+        0 | 1000..=1002 | 1300 | 1490..=1500 | 1900 | 1930 | 1931 | 1940 | 3000 | 4000 | 4500
+    )
+}
+
+/// Fresh room admission5cecc0: authored groups first, enabled door slots
+/// ascending, top/bottom columns, then left/right rows. Additional normal
+/// shape0 decoration follows the walls. The starting room has no NPCs.
 pub fn admit_fresh(room: &mut Room, shared: &mut Mt19937, game_update: u32) -> Result<(), String> {
+    let selectors = room
+        .spawns
+        .as_ref()
+        .ok_or("grid admission requires authored selectors")?
+        .selectors
+        .clone();
+    for selector in &selectors {
+        admit_selector(room, shared, selector, game_update)?;
+    }
+    admit_boundary(room, shared, game_update)
+}
+
+/// One authored grid selector of the 5cecc0 selector pass. Decorations and
+/// the rocks/spikes recovered by room geometry own their constructor seeds;
+/// other GridBase objects keep the two constructor draws without an owner.
+pub fn admit_selector(
+    room: &mut Room,
+    shared: &mut Mt19937,
+    selector: &crate::room_spawns::SpawnSelector,
+    game_update: u32,
+) -> Result<(), String> {
+    if selector.category != crate::room_spawns::SpawnCategory::Grid
+        || !constructs_grid_object(selector.entity_type)
+    {
+        return Ok(());
+    }
+    let grid = room
+        .grid
+        .as_mut()
+        .ok_or("grid admission requires live geometry")?;
+    let costs = room
+        .path_costs
+        .as_mut()
+        .expect("source Room.Init path costs");
+    let index = usize::from(selector.grid_index);
+    let cell = grid
+        .cells
+        .get_mut(index)
+        .ok_or("authored grid selector outside grid")?;
+    if cell
+        .entity
+        .as_ref()
+        .is_some_and(|entity| entity.source_owner.is_some())
+    {
+        return Ok(());
+    }
+    if selector.entity_type == 0 {
+        // Source5ce858/5ce8b0 maps raw0 to GridDecoration1 and keeps variant.
+        let mut entity = GridEntity {
+            kind: 1,
+            variant: u32::from(selector.variant),
+            state: 0,
+            collision_class: 0,
+            spawn_seed: 0,
+            source_owner: None,
+        };
+        entity.construct_owner(shared)?;
+        entity.init_seed(selector.spawn_seed, game_update, costs, index)?;
+        cell.entity = Some(entity);
+        return Ok(());
+    }
+    match cell.entity.as_mut() {
+        Some(entity) if matches!(entity.kind, 2 | 5 | 6 | 8) => {
+            entity.construct_owner(shared)?;
+            entity.init_seed(selector.spawn_seed, game_update, costs, index)
+        }
+        _ => {
+            // Tinted rocks, poop, blocks, pits and other GridBase objects
+            // have no runtime object yet; their constructor still draws.
+            let _primary = shared.next_u32();
+            let _secondary = shared.next_u32();
+            Ok(())
+        }
+    }
+}
+
+/// Doors, walls and normal shape0 ambient decoration after the selectors.
+pub fn admit_boundary(
+    room: &mut Room,
+    shared: &mut Mt19937,
+    game_update: u32,
+) -> Result<(), String> {
     let descriptor = room
         .descriptor
         .as_ref()
@@ -203,13 +296,11 @@ pub fn admit_fresh(room: &mut Room, shared: &mut Mt19937, game_update: u32) -> R
     if descriptor.template.room_type == 16 {
         return Err("special room wall replacements are outside fresh grid ownership".into());
     }
-    if descriptor.asset_stage != 0 || descriptor.template.shape_index() != 0 {
-        return Err("ambient grid admission requires the fresh normal starting room".into());
+    // Catalogue0 (special STB, holding the start room) and1 (Basement) share
+    // the stage1 Basement backdrop and its shape0 ambient producer.
+    if descriptor.asset_stage > 1 || descriptor.template.shape_index() != 0 {
+        return Err("ambient grid admission requires a fresh Basement shape0 room".into());
     }
-    let spawns = room
-        .spawns
-        .as_ref()
-        .ok_or("grid admission requires authored selectors")?;
     let grid = room
         .grid
         .as_mut()
@@ -223,46 +314,10 @@ pub fn admit_fresh(room: &mut Room, shared: &mut Mt19937, game_update: u32) -> R
     {
         return Err("grid admission dimensions disagree with actual cells".into());
     }
-    // Geometry already owns recovered Rock/Spike Init stores. This source
-    // constructor path extends that same Room.Init owner for decoration,
-    // walls and doors, rather than introducing a second selector proxy.
     let costs = room
         .path_costs
         .as_mut()
         .expect("source Room.Init path costs");
-    for selector in &spawns.selectors {
-        // Source5ce858/5ce8b0 maps raw0 to GridDecoration1 and keeps variant.
-        if selector.entity_type != 0 {
-            continue;
-        }
-        let cell = grid
-            .cells
-            .get_mut(usize::from(selector.grid_index))
-            .ok_or("authored decoration outside grid")?;
-        if cell
-            .entity
-            .as_ref()
-            .is_some_and(|entity| entity.source_owner.is_some())
-        {
-            continue;
-        }
-        let mut entity = GridEntity {
-            kind: 1,
-            variant: u32::from(selector.variant),
-            state: 0,
-            collision_class: 0,
-            spawn_seed: 0,
-            source_owner: None,
-        };
-        entity.construct_owner(shared)?;
-        entity.init_seed(
-            selector.spawn_seed,
-            game_update,
-            costs,
-            usize::from(selector.grid_index),
-        )?;
-        cell.entity = Some(entity);
-    }
     for slot in 0..8 {
         if descriptor.door_mask & (1 << slot) == 0 {
             continue;

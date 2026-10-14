@@ -1387,6 +1387,25 @@ impl Game {
         Ok(())
     }
 
+    /// ChangeRoom5509eb saves the room being left (5182c3 -> 58d921 ->
+    /// Room.Save5ce2d0), then the next Room.Init loads its backdrop FX rays.
+    /// Selector, door and wall constructors follow in fresh admission.
+    fn change_room_shared_draws(&mut self, room_before: usize) -> Result<(), String> {
+        let left = self
+            .state
+            .persisted_rooms
+            .get(&room_before)
+            .ok_or("room change requires the persisted room it left")?;
+        saved_game::save_grid_cells(
+            &mut self.boot_level_grid,
+            &mut self.state.boot_lifecycle.shared,
+            left,
+            room_before,
+        )?;
+        room::load_fx_rays(&self.state.room, &mut self.state.boot_lifecycle.shared);
+        Ok(())
+    }
+
     /// Level.Init calls System.Save at 58c411 once the starting room is loaded.
     /// Game.Save clears the destination, updates Room grid records, then copies
     /// ordinary Level rows and PlayerManager state in that source order.
@@ -1517,6 +1536,13 @@ impl Game {
             .as_ref()
             .map_or(1, |descriptor| descriptor.template.room_type);
         for selector in selectors {
+            // Room.Init5cecc0 constructs grid objects in the same selector pass.
+            grid_records::admit_selector(
+                &mut self.state.room,
+                &mut self.state.boot_lifecycle.shared,
+                selector,
+                self.state.game_update_count,
+            )?;
             let id = u32::try_from(npcs.len()).map_err(|_| "NPC identity exhausted")?;
             let context = entities::SpawnContext {
                 stage: self.state.stage,
@@ -1579,6 +1605,29 @@ impl Game {
                     pickups.push(pickup);
                 }
             }
+        }
+        // Doors, walls and shape0 ambient decoration follow the selectors.
+        // Other shapes and backdrops keep their boundary draws unadmitted.
+        if self
+            .state
+            .room
+            .descriptor
+            .as_ref()
+            .is_some_and(|descriptor| {
+                descriptor.asset_stage <= 1
+                    && descriptor.template.shape_index() == 0
+                    && descriptor.template.room_type != 16
+            })
+        {
+            grid_records::admit_boundary(
+                &mut self.state.room,
+                &mut self.state.boot_lifecycle.shared,
+                self.state.game_update_count,
+            )?;
+        }
+        // Room.Init5cf550 then links pits over every grid entity in order.
+        if let Some(grid) = self.state.room.grid.as_mut() {
+            grid::link_pits(grid, &mut self.state.boot_lifecycle.shared);
         }
         self.state.room.pickups = pickups;
         self.state.room.npcs = npcs;
@@ -1861,6 +1910,7 @@ impl Game {
                 self.update_player(phase, false, false)?;
             }
             if room_before != self.state.current_room {
+                self.change_room_shared_draws(room_before)?;
                 self.state.camera = Some(camera::Camera::new(
                     &self.state.room,
                     self.state
