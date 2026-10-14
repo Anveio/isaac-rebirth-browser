@@ -6,9 +6,9 @@ use crate::{combat, motion::WorldVector, phase::Phase, State};
 /// half-heart within a strict 15-world-unit radius of the grid door position.
 /// The native callback supplies damage flag 0x10000, an empty entity reference
 /// and countdown argument30; its observed player immunity is60 presentations.
-pub(crate) fn advance(state: &mut State, phase: Phase) {
+pub(crate) fn advance(state: &mut State, phase: Phase) -> Result<(), String> {
     if !phase.updates_nonplayers() {
-        return;
+        return Ok(());
     }
     // Fresh Door Init starts with class4. The first active full grid update
     // admits opened-door class5 after the inbound transition releases players.
@@ -35,8 +35,9 @@ pub(crate) fn advance(state: &mut State, phase: Phase) {
         dx * dx + dy * dy < 225.0
     });
     if curse_contact {
-        combat::try_damage_player(state, 1, 60);
+        combat::try_damage_player(state, 1, 60, 0x10000)?;
     }
+    Ok(())
 }
 
 pub(crate) fn begin_room_admission(state: &mut State) {

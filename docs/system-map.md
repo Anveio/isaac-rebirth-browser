@@ -36,30 +36,39 @@ Consult the latest paired report for current implementation outcomes.
 
 ## Current integrated runtime checkpoint
 
-Main source checkpoint `2d2174e6` registers37 required live suites, adding active
-item use and preserving the signed Room-cost/line-query and separate effect
-spawner/linked-parent owners. The corrected stat-cache cohort retains158
-required failures over212,485 checks; its earlier609-failure capture remains
-separate. The historical consolidated f793/0f343 build and its33-suite invocation
-are described below. [Earlier source and interrupted death scope](../references/isaac/foundation/runtime-progress/history/20261014-main36-source-and-death-abort.json)
-retains the prior36-suite checkpoint without claiming later-main live acceptance.
+Main base `c7e418e3` registers 39 required live suites, including the integrated
+normal-death and required natural-heart banks. Its Room manager counts, strict
+NPC HP<0 boundary and engine-owned keyboard surface are source integrations;
+there is no complete production/live qualification for this main checkpoint.
+The stat-cache cohort still retains 158 required failures over 212,485 checks,
+and its earlier 609-failure capture remains separate. The historical consolidated
+f793/0f343 build and interrupted 33-suite invocation are described below.
+[Earlier source and interrupted death scope](../references/isaac/foundation/runtime-progress/history/20261014-main36-source-and-death-abort.json)
+retains its exact prior 36-suite checkpoint.
 
-The separate Blood Particle5 leaf builds checkpoint1e9d02f with38 suites and
-artifact4e0a8762. Its four fresh native/browser pairs all fail, with58 scoped
-failures over7090 room/phase/presence/execution checks and648/2386 core
-checkpoints passing. Native244 death/5 presence is absent in all four, while
-one browser pair reaches both. No matched particle body or controller parity is
-accepted. [Blood Particle evidence](../references/isaac/foundation/combat/blood-particles/first-live-1e9d02f.json)
-preserves the complete failed cohort, source/artifact hashes and lossless archives.
+The separate Blood Particle branch adds its mandatory gate to this main base,
+registering 40 suites as a source-only composition. Its captured producer remains
+archived source e0b9 with immutable runtime1e9/artifact4e0a, not this restacked
+head. The initial four cases retain 7,090 checks/58 failures. The completed
+moving bank retains 8,242 scoped checks/103 required failures and 652/2,770 core
+checkpoints passing, across one prior closed case plus three exact continuation
+cases. The original partial second attempt stays preserved. Every moving case
+observes real native5 cached244/0 and selfchild1000/5 rows with NULL linked parents,
+but no removed244 row or matched native/browser seed bodies. Native death remains
+red and no body/controller parity fields execute. [Moving Blood Particle evidence](../references/isaac/foundation/combat/blood-particles/moving-live-e0b9.json)
+retains all 103 scoped failure records, core report hashes and full manifest/trace
+readbacks without qualifying a new main artifact.
 
-The root normal-death draft captured two complete failing aggregate cases at
-source `1cc127e8` and artifact d0a6: restart733/740 failed checks and exit734/741.
-Its third actual native/browser segment reached capture but comparison stopped
-with ENOSPC; the fourth selected public OS input was unattempted. Both OS draws
-and all raw partial evidence are retained. The supervisor is terminal failure;
-the immutable interrupted nested paired report still says running. Later
-graphics/streaming/menu-owner source fixes are unbuilt, and no completed
-four-case death acceptance or main death integration is claimed.
+The historical normal-death draft captured two complete failing aggregate cases
+at source1cc127e8/artifactd0a6; its third comparison stopped with ENOSPC and the
+fourth OS input remained unattempted. Those outcomes and partial bytes remain
+retained. A separate fresh source5afa/artifactc468 cohort subsequently closed all
+four cases, with both mandatory death/popup routes executing in both games and
+both unfiltered OS outcomes remaining alive. All 4,226 required age, Y/VY and
+Exit-title/fade differences remain red. Eight complete manifest streams passed
+independent full decompression readback. [Completed normal-death evidence](../references/isaac/foundation/player-death/first-complete-live.json)
+records the captured scope separately from source integration by PR111 and from
+whole-main acceptance.
 
 The latest completed six-suite run is commit `5b4901f`, immutable artifact
 `a7a5b4972a72c56cd07b33001295955596c9e8f7910e177f522ea037b25444ef`.

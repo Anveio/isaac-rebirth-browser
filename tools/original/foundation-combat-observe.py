@@ -200,7 +200,9 @@ def observe(pid, context):
                 'descriptorFlag40': bool(read(descriptor + 0x40, 1)[0]),
                 'combatClearCountdown': struct.unpack('<i', read(room + 0x1598, 4))[0],
                 'countablePending': struct.unpack('<i', read(room + 0x16ac, 4))[0],
-                'countableCurrent': struct.unpack('<i', read(room + 0x16b0, 4))[0]}
+                'countableCurrent': struct.unpack('<i', read(room + 0x16b0, 4))[0],
+                'bossPending': struct.unpack('<i', read(room + 0x16b4, 4))[0],
+                'bossCurrent': struct.unpack('<i', read(room + 0x16b8, 4))[0]}
             transition = game + 0x95c0
             report['roomTransition'] = {'state': u32(transition), 'counter': u32(transition + 4),
                 'duration': u32(transition + 8), 'bossIntroduction': bool(read(transition + 0x3f8, 1)[0])}
@@ -243,6 +245,10 @@ def observe(pid, context):
                 item = entity(pointer)
                 raw = read(pointer + 0xbb8, 0x44)
                 item['redHp'] = struct.unpack_from('<I', raw, 0)[0]
+                item['maxRedHp'] = u32(pointer + 0xbb4)
+                item['eternalHp'] = struct.unpack_from('<i', raw, 4)[0]
+                item['soulHp'] = struct.unpack_from('<i', raw, 8)[0]
+                item['blackHeartMask'] = struct.unpack_from('<I', raw, 12)[0]
                 item['shootingLock'] = u32(pointer + 0x7dc)
                 item['controlsEnabled'] = bool(read(pointer + 0x7d4, 1)[0])
                 item['damageCountdown'] = struct.unpack_from('<I', raw, 0x40)[0]

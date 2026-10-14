@@ -222,6 +222,10 @@ pub fn player_contacts(state: &mut State) -> Result<(), String> {
         .expect("authored player geometry")
     });
     for index in 0..state.enemy_projectiles.len() {
+        //4453a0 rejects either actual dead31f before the next callback.
+        if state.player.dead {
+            break;
+        }
         let projectile = &state.enemy_projectiles[index];
         if projectile.dead || projectile.removed || projectile.entity_collision_class == 0 {
             continue;
@@ -251,7 +255,7 @@ pub fn player_contacts(state: &mut State) -> Result<(), String> {
         if !result.colliding {
             continue;
         }
-        let accepted = combat::try_damage_player(state, 1, 60);
+        let accepted = combat::try_damage_player(state, 1, 60, 0)?;
         state.player.x = f64::from(player.position.x) * 0.65 + 32.0;
         state.player.y = f64::from(player.position.y) * 0.65 - 46.0;
         state.player.vx = f64::from(player.velocity.x) * 0.65;

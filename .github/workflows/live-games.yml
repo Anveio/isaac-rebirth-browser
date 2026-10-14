@@ -13,7 +13,8 @@ permissions:
 
 concurrency:
   group: live-games-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  # Keep the running main matrix; PR revisions cancel their older runs.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   live-suites:

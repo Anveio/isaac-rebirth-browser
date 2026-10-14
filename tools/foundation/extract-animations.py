@@ -389,6 +389,8 @@ def main():
             names[path_hash(path)] = path.removeprefix('resources/')
     # Base v1.05 authored name, listed publicly by Gibbed; newer inventories moved it.
     names[path_hash('resources/gfx/ui/main menu/completion_widget.anm2')] = 'gfx/ui/main menu/completion_widget.anm2'
+    for path in ['gfx/ui/death screen.anm2', 'gfx/ui/backselectwidget.anm2']:
+        names[path_hash('resources/' + path)] = path
     binary = load_archive(args.archive)
     reader = Reader(binary)
     actors = {}

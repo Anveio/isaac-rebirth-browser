@@ -3,6 +3,22 @@
 //! source admission order, including a pickup collected earlier in its phase.
 use crate::{motion::WorldVector, phase::Phase, Inventory, Player};
 use serde::{Deserialize, Serialize};
+/// Normal Isaac's actual50c880 collection predicate. Supported guarded clips
+/// include the actual Hit and UseItem names admitted by50c880/50c780. The Hit
+/// callback is composed separately; its name uses this same predicate.
+/// Controls7d4 and the legacy queued Pickup guard are not general collection
+/// vetoes. Collectible queue admission keeps its separate existing rule.
+pub(crate) fn player_can_collect(state: &crate::State) -> bool {
+    !state.player.dead
+        && state.player_animation.current != Some(crate::player_animation::Clip::Death)
+        && (!state.player_animation.guard
+            || state.player_animation.current.is_some_and(|clip| {
+                matches!(
+                    clip.name(),
+                    "Hit" | "Pickup" | "LiftItem" | "HideItem" | "UseItem"
+                )
+            }))
+}
 use std::collections::{BTreeMap, BTreeSet};
 
 #[derive(Debug)]
@@ -43,6 +59,18 @@ pub fn regular_subtype(variant: u32, subtype: u32, spawn_seed: u32) -> Result<u3
         state % bound
     };
     match variant {
+        // Ordinary Isaac500150: independent local35 rolls retain their order.
+        // Collectible/trinket replacements belong to their actual owners.
+        10 => {
+            let mut selected = if random(2) == 0 { 2 } else { 1 };
+            if random(50) == 0 {
+                selected = 4;
+            }
+            if random(10) == 0 {
+                selected = if random(20) == 0 { 6 } else { 3 };
+            }
+            Ok(selected)
+        }
         20 => {
             let mut selected = if random(20) == 0 { 2 } else { 1 };
             if random(100) == 0 {
@@ -178,14 +206,14 @@ impl Pickup {
         if selector.entity_type == 5 && selector.variant == 50 {
             return crate::chests::from_selector(id, selector, appear);
         }
-        if selector.entity_type != 5 || !matches!(selector.variant, 20 | 30 | 40) {
+        if selector.entity_type != 5 || !matches!(selector.variant, 10 | 20 | 30 | 40) {
             return Ok(None);
         }
         let variant = u32::from(selector.variant);
         let subtype = regular_subtype(variant, u32::from(selector.subtype), selector.spawn_seed)?;
         if !matches!(
             (variant, subtype),
-            (20, 1..=4) | (30, 1 | 3) | (40, 1 | 2 | 3 | 5)
+            (10, 1..=6) | (20, 1..=4) | (30, 1 | 3) | (40, 1 | 2 | 3 | 5)
         ) {
             return Ok(None);
         }
@@ -454,6 +482,53 @@ impl Pickup {
             }
             _ => return false,
         }
+        self.finish_collect();
+        true
+    }
+
+    /// Free normal-Isaac Heart10 branches504db0..504fdf. The caller owns
+    /// actual Player50c880 eligibility and contacts; health capacity is tested
+    /// here before mutation. Existing health helpers retain black-slot order.
+    pub(crate) fn try_collect_heart(&mut self, player: &mut Player, red_multiplier: i32) -> bool {
+        if self.variant != 10
+            || !self.can_collect
+            || self.collected
+            || self.removed
+            || self.collection_delay != 0
+        {
+            return false;
+        }
+        match self.subtype {
+            1 | 2 | 5 if player.hp < player.max_hp => {
+                let amount = match self.subtype {
+                    1 => 2,
+                    2 => 1,
+                    _ => 4,
+                };
+                crate::player_items::add_red_hearts(player, amount * red_multiplier);
+            }
+            3 if i32::from(player.max_hp) + player.soul_hp <= 23 => {
+                crate::player_items::add_soul_hearts(player, 2);
+            }
+            //505828 permits one Eternal even at max containers; a second
+            //at that capacity is rejected by5058d6 while the first is held.
+            4 if player.max_hp <= 23 || player.eternal_hearts == 0 => {
+                crate::player_items::add_eternal_hearts(player, 1);
+            }
+            6 if i32::from(player.max_hp) + player.soul_hp <= 23
+                || (1..player.soul_hp)
+                    .step_by(2)
+                    .any(|half| player.black_heart_mask & (1 << (half / 2)) == 0) =>
+            {
+                crate::player_items::add_black_hearts(player, 2);
+            }
+            _ => return false,
+        }
+        self.finish_collect();
+        true
+    }
+
+    fn finish_collect(&mut self) {
         // Collect504d30 clears physical velocity before playing Collect,
         // changes the ground class to3, then sets the dead31f flag.
         self.velocity = WorldVector { x: 0.0, y: 0.0 };
@@ -466,7 +541,6 @@ impl Pickup {
         self.animation_playing = true;
         self.can_collect = false;
         self.collected = true;
-        true
     }
 }
 

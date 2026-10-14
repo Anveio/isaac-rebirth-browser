@@ -8,7 +8,7 @@ import {runPairedGate} from '../foundation/paired-game.mjs';
 const option=(name,fallback)=>{const at=process.argv.indexOf(name);if(at<0)return fallback;assert.ok(process.argv[at+1]);return process.argv[at+1];};
 const output=resolve(option('--output','.cache/e2e/monstro'));mkdirSync(output,{recursive:true});
 const save=(path,data)=>writeFileSync(path,JSON.stringify(data,null,2)+'\n');
-const sources=['tools/e2e/monstro.mjs','tools/original/monstro-scenarios.py','tools/foundation/monstro-state-pair.mjs','tools/original/foundation-combat-observe.py','engine/src/level2_flies.rs','engine/src/grid.rs','engine/src/familiars.rs','engine/src/npcs.rs','engine/src/monstro.rs','engine/src/lib.rs','web/npc-data.json','web/familiar-data.json','references/isaac/foundation/combat/monstro/public-route-plan.json'];
+const sources=['tools/e2e/monstro.mjs','tools/original/monstro-scenarios.py','tools/foundation/monstro-state-pair.mjs','tools/original/foundation-combat-observe.py','engine/src/level2_flies.rs','engine/src/grid.rs','engine/src/familiars.rs','engine/src/npcs.rs','engine/src/monstro.rs','engine/src/actors.rs','engine/src/room.rs','engine/src/lib.rs','web/npc-data.json','web/familiar-data.json','references/isaac/foundation/combat/monstro/public-route-plan.json'];
 const hashes=()=>Object.fromEntries(sources.map(path=>[path,createHash('sha256').update(readFileSync(path)).digest('hex')]));
 const before=hashes();
 const scenarios=JSON.parse(execFileSync('python3',['tools/original/monstro-scenarios.py'],{encoding:'utf8'}));

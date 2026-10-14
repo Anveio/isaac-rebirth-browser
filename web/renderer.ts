@@ -154,6 +154,15 @@ export class Renderer {
       if (bossScene && state.roomTransition?.phase === "bossScene")
         this.assets.draw(ctx, "gfx/ui/boss/versusscreen.anm2", "Scene", 240, 135, bossScene.animationFrame);
       this.presentation.pause(ctx, state);
+      if (state.playerDeath.gameOver) {
+        gl.fillRectRGBA(0, 0, 480, 270, [0, 0, 0, 128 / 255]);
+        this.assets.draw(ctx, "gfx/ui/death screen.anm2", "Diary", 256, 151, 0,
+          { layers: [0, 1, 2, 4] });
+        if (state.playerDeath.gameOver.damageFlags & 0x80)
+          this.assets.draw(ctx, "gfx/ui/death screen.anm2", "Diary", 256, 151, 66, { layers: [5] });
+        this.assets.draw(ctx, "gfx/ui/backselectwidget.anm2", "Exit", 10, 215, 0);
+        this.assets.draw(ctx, "gfx/ui/backselectwidget.anm2", "Restart", 400, 195, 0);
+      }
     }
     gl.presentScreen(); gl.finish();
     this.context.reset(); this.context.imageSmoothingEnabled = false;
@@ -255,6 +264,15 @@ export class Renderer {
     for (let heart = 0; heart < Math.ceil(state.player.maxHp / 2); heart++) {
       const remaining = state.player.hp - heart * 2;
       this.assets.draw(ctx, "gfx/ui/ui_hearts.anm2", remaining >= 2 ? "RedHeartFull" : remaining === 1 ? "RedHeartHalf" : "EmptyHeart", 68 + heart * 12, 24);
+    }
+    const redSlots = Math.ceil(state.player.maxHp / 2);
+    for (let heart = 0; heart < Math.ceil(state.player.soulHp / 2); heart++) {
+      const color = state.player.blackHeartMask & (1 << heart) ? "Black" : "Blue";
+      const amount = state.player.soulHp - heart * 2 >= 2 ? "Full" : "Half";
+      this.assets.draw(ctx, "gfx/ui/ui_hearts.anm2", `${color}Heart${amount}`, 68 + (redSlots + heart) * 12, 24);
+    }
+    if (state.player.eternalHearts > 0) {
+      this.assets.draw(ctx, "gfx/ui/ui_hearts.anm2", redSlots ? "WhiteHeartOverlay" : "WhiteHeartHalf", 68 + Math.max(0, redSlots - 1) * 12, 24);
     }
     const counts = [state.inventory.coins, state.inventory.bombs, state.inventory.keys];
     for (let pickup = 0; pickup < 3; pickup++) {

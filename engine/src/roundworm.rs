@@ -332,6 +332,7 @@ pub fn advance(
     let applied = npc.damage.advance(&mut health, phase)?;
     for damage in applied {
         npc.hp = damage.hp_after;
+        // AppliedDamage.lethal preserves Base447190's strict HP<0 law.
         if !damage.lethal || npc.dead {
             continue;
         }

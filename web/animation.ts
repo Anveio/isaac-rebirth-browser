@@ -3,7 +3,8 @@ import doorData from "./door-data.json";
 import gridData from "./grid-data.json";
 import npcData from "./npc-data.json";
 import familiarData from "./familiar-data.json";
-const sceneData = { ...baseSceneData, ...doorData, ...gridData, ...npcData, ...familiarData };
+import gameOverData from "./gameover-data.json";
+const sceneData = { ...baseSceneData, ...doorData, ...gridData, ...npcData, ...familiarData, ...gameOverData };
 import fontData from "./font-data.json";
 import completionUrl from "./assets/completion_widget.png?url";
 const bossSceneUrls = import.meta.glob("./assets/boss-scene/*.png", { eager: true, query: "?url", import: "default" }) as Record<string, string>;
@@ -26,6 +27,7 @@ const normalize = (path: string) => path.replaceAll("\\", "/").replace(/\/\.\//g
 const urls = import.meta.glob([
   "../references/isaac/rebirth/resources/gfx/ui/main menu/**/*.png",
   "../references/isaac/rebirth/resources/gfx/ui/backselectwidget.png",
+  "../references/isaac/rebirth/resources/gfx/ui/death *.png",
   "../references/isaac/rebirth/resources/gfx/ui/ui_hearts.png",
   "../references/isaac/rebirth/resources/gfx/ui/hudpickups.png",
   "../references/isaac/rebirth/resources/gfx/ui/minimap1.png",

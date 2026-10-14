@@ -25,6 +25,7 @@ pub mod gib_effects;
 pub mod grid;
 mod grid_hazards;
 pub mod grid_records;
+pub mod input;
 pub mod items;
 pub mod keepers;
 pub mod layout;
@@ -38,6 +39,7 @@ pub mod npcs;
 pub mod phase;
 pub mod pickups;
 pub mod player_animation;
+pub mod player_death;
 pub mod player_items;
 pub mod player_stats;
 pub mod projectiles;
@@ -89,6 +91,7 @@ pub struct Player {
     pub visible: bool,
     /// Source Player+7d8, separate from pickup collection delay.
     pub input_cooldown: i32,
+    pub dead: bool,
     pub x: f64,
     pub y: f64,
     pub vx: f64,
@@ -97,6 +100,8 @@ pub struct Player {
     pub max_hp: u8,
     pub soul_hp: i32,
     pub black_heart_mask: u32,
+    /// Actual normal-Isaac Player+bbc Eternal half-heart owner.
+    pub eternal_hearts: i32,
     pub facing: Direction,
     pub body_facing: Direction,
     pub walk_frame: u8,
@@ -113,6 +118,7 @@ impl Player {
         Self {
             visible: true,
             input_cooldown: 0,
+            dead: false,
             x: 240.0,
             y: 214.0,
             vx: 0.0,
@@ -121,6 +127,7 @@ impl Player {
             max_hp: 6,
             soul_hp: 0,
             black_heart_mask: 0,
+            eternal_hearts: 0,
             facing: Direction::Down,
             body_facing: Direction::Down,
             walk_frame: 0,
@@ -357,6 +364,7 @@ pub struct State {
     pub paused: bool,
     pub pressed: BTreeSet<String>,
     pub player: Player,
+    pub player_death: player_death::PlayerDeath,
     pub room: Room,
     #[serde(default)]
     pub camera: Option<camera::Camera>,
@@ -504,6 +512,7 @@ impl Game {
                 paused: false,
                 pressed: BTreeSet::new(),
                 player,
+                player_death: player_death::PlayerDeath::default(),
                 room,
                 camera,
                 room_display_flags: vec![0; floor.descriptors.len()],
@@ -588,24 +597,7 @@ impl Game {
                 self.state.audio.sfx_volume = sfx_volume;
             }
             Command::Key { code, down } => {
-                if !matches!(
-                    code.as_str(),
-                    "Enter"
-                        | "Escape"
-                        | "Tab"
-                        | "Backspace"
-                        | "ArrowUp"
-                        | "ArrowDown"
-                        | "ArrowLeft"
-                        | "ArrowRight"
-                        | "KeyW"
-                        | "KeyA"
-                        | "KeyS"
-                        | "KeyD"
-                        | "KeyE"
-                        | "Space"
-                        | "KeyQ"
-                ) {
+                if !input::is_public_key(&code) {
                     return Err(format!("unsupported key code: {code}"));
                 }
                 if down {
@@ -700,6 +692,9 @@ impl Game {
             // Scene key handler. Physical action14 mapping remains unaccepted.
             return Ok(());
         }
+        if self.state.player_death.game_over.is_some() {
+            return Ok(());
+        }
         let previous_screen = self.state.screen;
         match self.state.screen {
             Screen::Title => {
@@ -772,6 +767,7 @@ impl Game {
                 "ArrowLeft" | "KeyA" => self.select_character(-1),
                 "ArrowRight" | "KeyD" => self.select_character(1),
                 "Enter" if self.state.difficulty == "normal" => {
+                    self.validate_run_character()?;
                     self.state.run_start_request.input_pending = true;
                 }
                 "Enter" => {
@@ -890,6 +886,30 @@ impl Game {
                     after_audio_requests: self.state.audio.pending.len(),
                     initialization: menu_lifecycle::Initialization::ResetCharacterSeed,
                 });
+        }
+        Ok(())
+    }
+    /// Reject unsupported requests before the deferred start flag can persist
+    /// across failing ticks. Queued menu initializers may still change the seed,
+    /// so Random requires a supported runtime for every possible choice.
+    fn validate_run_character(&self) -> Result<(), String> {
+        let unlocked =
+            &self.state.profiles[usize::from(self.state.profile - 1)].unlocked_characters;
+        let candidates = if self.state.character == "Random" {
+            unlocked.as_slice()
+        } else {
+            std::slice::from_ref(&self.state.character)
+        };
+        if candidates.is_empty() {
+            return Err("profile has no unlocked character".into());
+        }
+        for character in candidates {
+            if !unlocked.contains(character) {
+                return Err("selected character is locked in this profile".into());
+            }
+            if character != "Isaac" {
+                return Err("selected character runtime is not implemented".into());
+            }
         }
         Ok(())
     }
@@ -1040,6 +1060,7 @@ impl Game {
         };
         self.state.pause_menu = PauseMenu::hidden();
         self.state.player = Player::starting();
+        self.state.player_death = player_death::PlayerDeath::default();
         self.state.player_animation = player_animation::PlayerAnimation::default();
         // Source 58bea7 constructs every descriptor's padded grid seed pairs.
         // floor::generate_basement owns the separate primary xorshift advance.
@@ -1131,11 +1152,38 @@ impl Game {
     /// The supported free regular callback is shared by ordinary full
     /// contacts and the actual Room.Update admission tail.
     fn collect_regular_pickup_at(&mut self, index: usize) {
+        if !pickups::player_can_collect(&self.state) {
+            return;
+        }
+        let red_multiplier = if self
+            .state
+            .player_items
+            .as_ref()
+            .is_some_and(|items| items.owned_counts[312] > 0)
+        {
+            2
+        } else {
+            1
+        };
         let pickup = &mut self.state.room.pickups[index];
-        if pickup.touches(&self.state.player) && pickup.try_collect(&mut self.state.inventory) {
+        if pickup.touches(&self.state.player)
+            && (if pickup.variant == 10 {
+                pickup.try_collect_heart(&mut self.state.player, red_multiplier)
+            } else {
+                pickup.try_collect(&mut self.state.inventory)
+            })
+        {
             // Collect504480 routes key ->504720 and bomb ->5046d0
             // after inventory mutation, before the System increment.
             let sound = match pickup.variant {
+                10 => Some((
+                    match pickup.subtype {
+                        3 => 54,
+                        4 => 266,
+                        _ => 185,
+                    },
+                    1.0,
+                )),
                 30 => Some((58, 0.85)),
                 40 => Some((201, 1.0)),
                 _ => None,
@@ -1233,8 +1281,6 @@ impl Game {
         }
         self.state.room.pickups = pickups;
         self.state.room.npcs = npcs;
-        self.state.room.boss_count =
-            self.state.room.npcs.iter().filter(|npc| npc.boss).count() as u32;
         self.state.room.boss_presentation_index =
             if room_type == 5 && self.state.room.npcs.iter().any(|npc| npc.kind == 20) {
                 1
@@ -1244,12 +1290,15 @@ impl Game {
         self.state.room.authored_actor_order = order;
         self.state.next_pickup = next;
         self.rebuild_room_actor_schedule()?;
+        self.state.room.boss_count = self.state.room.manager_counts.boss_total().max(0) as u32;
         self.refresh_stage_effects();
         Ok(())
     }
     /// Persisted Room clones retain supported actor handles in authored order.
     pub fn rebuild_room_actor_schedule(&mut self) -> Result<(), String> {
         self.state.actor_scheduler.clear_room();
+        //453ec0 resets all four actual manager count words on Room replacement.
+        self.state.room.manager_counts = actors::ManagerCounts::default();
         self.state.fire_particles.clear();
         self.state.sprite_effects.clear();
         let player = actors::ActorRef {
@@ -1278,6 +1327,19 @@ impl Game {
             };
             if admitted {
                 self.state.actor_scheduler.admit(actor)?;
+                if actor.kind == actors::ActorKind::Npc {
+                    let npc = self
+                        .state
+                        .room
+                        .npcs
+                        .iter()
+                        .find(|npc| npc.id == actor.id)
+                        .expect("checked admitted NPC");
+                    self.state
+                        .room
+                        .manager_counts
+                        .admit(npc.can_shut_doors, npc.boss);
+                }
             }
         }
         Ok(())
@@ -1329,6 +1391,35 @@ impl Game {
         // Source 594a10 consumes the prior menu request before game dispatch.
         // Room construction and clock alignment happen here, after the f32
         // confirmation fade, rather than in the zero-tick DOM key callback.
+        if let Some(request) = self.state.player_death.system_pending.take() {
+            match request {
+                player_death::Request::Restart => {
+                    if !self.state.seeded_run {
+                        let seed = self.state.boot_lifecycle.shared.next_u32().max(1);
+                        self.state.boot_lifecycle.commit_character_seed(seed)?;
+                    }
+                    self.state.stage = 1;
+                    self.start_run()?;
+                }
+                player_death::Request::Exit => {
+                    self.state.player_death = player_death::PlayerDeath::default();
+                    self.state.run_start_request = RunStartRequest::default();
+                    self.state.paused = false;
+                    self.state.pause_menu = PauseMenu::hidden();
+                    // Popup557650 queues menu3;59cac0 stores it in Menu+38,
+                    // the same native Main family observed by the paired gate.
+                    self.state.screen = Screen::Main;
+                    self.state.audio.pending.push(audio::SoundRequest {
+                        id: 8,
+                        volume: 1.0,
+                        delay: 0,
+                        looping: false,
+                        pitch: 1.0,
+                    });
+                    self.state.music.crossfade(1);
+                }
+            }
+        }
         if self.state.run_start_request.system_pending {
             self.state.run_start_request.system_pending = false;
             self.start_run()?;
@@ -1377,6 +1468,13 @@ impl Game {
         }
         if self.state.screen != Screen::Playing || gameplay_was_paused {
             if phase != phase::Phase::Skipped {
+                self.state.music.advance();
+            }
+            return Ok(());
+        }
+        if self.state.player_death.game_over.is_some() {
+            if phase != phase::Phase::Skipped {
+                player_death::poll_popup(&mut self.state);
                 self.state.music.advance();
             }
             return Ok(());
@@ -1480,6 +1578,8 @@ impl Game {
                         .clone();
                     self.admit_room_pickups(&selectors)?;
                     // The admitted Room::Update follows authored mixed order.
+                    self.refresh_room_boss_count();
+                    let mut counted = actors::FullCounts::default();
                     for actor in self.state.room.authored_actor_order.clone() {
                         match actor.kind {
                             actors::ActorKind::Npc => {
@@ -1490,7 +1590,9 @@ impl Game {
                             }
                             _ => return Err("invalid authored room actor handle".into()),
                         }
+                        self.count_updated_room_actor(actor, &mut counted);
                     }
+                    self.state.room.manager_counts.finish_full(counted);
                     familiars::paint_background_effects(&mut self.state)?;
                     pickups::full_grid_contacts(&mut self.state)?;
                     chests::full_grid_contacts(&mut self.state)?;
@@ -1539,15 +1641,19 @@ impl Game {
                 .checked_add(1)
                 .ok_or("game update counter exhausted")?;
         }
-        doors::advance(&mut self.state, phase);
+        doors::advance(&mut self.state, phase)?;
         let explosion_fence = self.state.explosions.len();
         grid_hazards::advance(&mut self.state, phase)?;
         let existing = self.state.actor_scheduler.full_phase();
         if phase == phase::Phase::Update {
             rock_blast::advance_markers(&mut self.state);
+            self.refresh_room_boss_count();
+            let mut counted = actors::FullCounts::default();
             for actor in existing.iter().copied() {
                 self.advance_actor(actor, phase, false, bomb_triggered)?;
+                self.count_updated_room_actor(actor, &mut counted);
             }
+            self.state.room.manager_counts.finish_full(counted);
         } else if phase == phase::Phase::Interpolate {
             let mut index = 0;
             while let Some(actor) = self.state.actor_scheduler.get(index) {
@@ -1760,6 +1866,34 @@ impl Game {
         }
         Ok(())
     }
+    /// Room5d1423/5d1454 refresh2490 before the full manager callbacks. The
+    /// final boss callback can decrement it later in that same pass.
+    fn refresh_room_boss_count(&mut self) {
+        self.state.room.boss_count = self.state.room.manager_counts.boss_total().max(0) as u32;
+    }
+
+    ///454eb9 counts only callbacks whose active31e remains true. NPC70/78
+    /// read103c/103d, with no HP/dead predicate; boss flags100000 exclude only
+    /// the boss subtotal. Other currently admitted entity families have v70false.
+    fn count_updated_room_actor(&self, actor: actors::ActorRef, counted: &mut actors::FullCounts) {
+        if actor.kind != actors::ActorKind::Npc {
+            return;
+        }
+        if let Some(npc) = self
+            .state
+            .room
+            .npcs
+            .iter()
+            .find(|npc| npc.id == actor.id && !npc.removed)
+        {
+            let final_flag = npc
+                .monstro
+                .as_ref()
+                .is_some_and(|owner| owner.entity_flags & 0x100000 != 0);
+            counted.observe(npc.can_shut_doors, npc.boss && !final_flag);
+        }
+    }
+
     fn advance_pickup(&mut self, id: u32, phase: phase::Phase) -> Result<(), String> {
         let Some(index) = self
             .state
@@ -2015,6 +2149,9 @@ impl Game {
                 self.state.player_animation.current = None;
             }
         }
+        if player_death::advance(&mut self.state, phase) {
+            return Ok(());
+        }
         let controls_enabled = controls_enabled
             && self.state.player.controls_enabled
             && self.state.player.input_cooldown <= 0;
@@ -2196,6 +2333,8 @@ thread_local! {
     static REQUEST: RefCell<Vec<u8>> = const { RefCell::new(Vec::new()) };
     static SNAPSHOT: RefCell<Vec<u8>> = const { RefCell::new(Vec::new()) };
     static ERROR: RefCell<Vec<u8>> = const { RefCell::new(Vec::new()) };
+    static PUBLIC_KEYS_JSON: Vec<u8> =
+        serde_json::to_vec(&input::PUBLIC_KEYS).expect("key codes serialize");
 }
 #[no_mangle]
 pub extern "C" fn abi_version() -> u32 {
@@ -2273,4 +2412,13 @@ pub extern "C" fn error_ptr() -> *const u8 {
 #[no_mangle]
 pub extern "C" fn error_len() -> usize {
     ERROR.with(|error| error.borrow().len())
+}
+/// The public key surface as a JSON array of key codes; needs no reset.
+#[no_mangle]
+pub extern "C" fn public_keys_ptr() -> *const u8 {
+    PUBLIC_KEYS_JSON.with(|keys| keys.as_ptr())
+}
+#[no_mangle]
+pub extern "C" fn public_keys_len() -> usize {
+    PUBLIC_KEYS_JSON.with(Vec::len)
 }
