@@ -200,6 +200,11 @@ pub struct SpriteEffect {
     pub variant: u32,
     pub subtype: u32,
     pub spawn_seed: u32,
+    /// GameSpawn's cached caller identity, distinct from linkedEntity.parent.
+    #[serde(default)]
+    pub spawner_type: u32,
+    #[serde(default)]
+    pub spawner_variant: u32,
     pub parent: Option<Parent>,
     pub birth_game_update: u32,
     pub actor_rng: items::Rng,
@@ -350,6 +355,8 @@ impl PoofAdmission<'_> {
             variant: 15,
             subtype,
             spawn_seed: seed,
+            spawner_type: parent.map_or(0, |caller| caller.entity_type),
+            spawner_variant: parent.map_or(0, |caller| caller.variant),
             parent,
             birth_game_update: self.game_update_count,
             actor_rng: items::Rng::new(seed, [4, 3, 17]),
@@ -629,6 +636,8 @@ pub fn admit_blood_splat(
         variant: 7,
         subtype: 0,
         spawn_seed: seed,
+        spawner_type: 0,
+        spawner_variant: 0,
         parent: None,
         birth_game_update: state.game_update_count,
         actor_rng: items::Rng::new(seed, [4, 3, 17]),
