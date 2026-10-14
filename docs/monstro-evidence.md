@@ -79,3 +79,15 @@ original draft, correction commits, source-dump and runtime hashes, and new
 one-job static checks. The original static proof and Fire artifact are intact.
 This correction does not establish live boss acceptance. Bomb/projectile full
 grid timing and the complete admission contact pass remain separate seams.
+
+
+A separate source checkpoint owns the actual four signed EntityManager words
+`dc/e0/e4/e8`. Real admission contributes pending counts. The full fenced loop
+counts active actors after each callback, folds pending into current before
+contacts and late-grid, and refreshes Room2490 before the next full manager
+pass. The existing clear countdown reads the actual signed post-manager total.
+This preserves the native first-full addition, even when an admission also
+appears in the callback count. Remove does not get an invented subtraction.
+The required Monstro pairs compare all four original words exactly. Source
+checks pass; Rust/build/live parity and remaining countability writers, saved
+NPC admission and the Game10ecc0 predicate remain pending.
