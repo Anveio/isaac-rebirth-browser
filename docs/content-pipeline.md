@@ -256,62 +256,92 @@ being copied by hand.
   `player_stats.rs` become per-character data. `character_catalog()` and menu
   admission accept every character with a def.
 
-### 2.6 Generic content e2e harness
+### 2.6 Generic content e2e harness (built)
 
-This builds on the suite registry in #137 (`tools/e2e/suites.mjs`).
+This runs on the suite registry (`tools/e2e/suites.mjs`) and the shared
+`state-pair` driver.
 
-- `tools/foundation/entity-compare.mjs` provides:
-  - `loadPair`
-  - `forEachGameplayCapture`
-  - `joinBySpawnSeed`
-  - one declarative `COMMON_NPC_FIELDS` native→port map
-  - room, door, player, Poof and projectile check sets
-  - `ExecutionMarkers` with standard predicates: admission, appear, damage,
-    drain, death, retirement, clear
-  - one report writer
-- `tools/e2e/entities/<name>.mjs` is a short spec: the type/variant filter, the
-  browser family key, extra field pairs, extra marker predicates and the
-  required markers. The registry discovers every spec as a suite id
-  `entity:<name>`. No npm script, `LIVE_SCRIPTS` edit or matrix row is needed.
-- `tools/original/content_scenarios.py` provides:
-  - shared `key/step/observed/splice` helpers;
-  - `find_seeds(type, variant, room_kind)`. It runs rejection sampling over
-    fresh OS seeds, using the port floor generator (`engine/src/bin/floor.rs`)
-    and the STB decode. Every accepted seed is written into `case.json`, so
-    replay is exact.
-  - a route template: walk from the start room to the target room (neighbour
-    or boss room), dense entry captures, a shoot sweep, then the clear tail.
+- **Specs.** `tools/e2e/entities/<name>.mjs` is a short spec. It gives:
+  - the entities2.xml type/variant;
+  - an `about` line;
+  - optional contrived `CODE:SLOT` routes;
+  - the number of OS-random rooms per run;
+  - the lifecycle markers both games must reach;
+  - optional extra `[field, native, port]` rows.
 
-  Each spec yields contrived cases (a fixed seed bank) and OS-random cases (a
-  fresh draw that contains the entity) on every run.
-- **Native offsets** move into one shared table module. The five observers that
-  re-declare the entity layout import it, and type-specific extras become table
-  rows.
+  `suites.mjs` turns every spec into one `entity-<name>` state-pair suite. No
+  other registration exists.
+- **Scenarios.** `tools/original/entity-scenarios.py --type T --variant V`
+  draws OS-random run seeds. It keeps those where a room next to the start
+  admits the entity. "Admits" means the port's own floor generator and authored
+  spawn selection pick that entity in the room; the `floor` binary reports this
+  with `{"spawns": true}`.
 
-## 3. Recipe: add a new boss (target state)
+  Both games then play the same public route:
+  1. the traversal door walk for that slot;
+  2. dense entry captures;
+  3. a four-direction shoot sweep;
+  4. idle.
 
-1. `npm run content:new -- 19.0 larry_jr` scaffolds three things:
-   - `engine/src/entities/larry_jr.rs` (`FAMILY` with spawn/advance stubs);
-   - the registry line;
-   - `tools/e2e/entities/larry-jr.mjs`.
+  It took about 10–40 seeds per room for Horf and Gaper. A recorded
+  `scenarios.json` replays exactly with `--scenarios`.
+- **Comparator.** `tools/foundation/entity-state-pair.mjs` and the shared
+  `entity-compare.mjs` check these at every gameplay capture:
+  - every authored NPC identity and spawn seed in the room;
+  - the spec entity's shared NPC fields (identity, HP, collision,
+    state/age/saved state, dead/active/visible, clip/frame/playing, the queued
+    damage FIFO, and position/velocity/target);
+  - the spec's extra rows;
+  - room clear and countdown;
+  - manager counts;
+  - doors;
+  - enemy projectile seeds.
 
-   Stats, collider, clips, sprites, portrait and boss-room variants already
-   come from `entities2.xml`, the ANM2 cache, `bossportraits.xml` and the STB.
-2. Write the behavior in `larry_jr.rs` using the shared primitives. Keep the
-   source draw order and cite the original function addresses in comments, as
-   today.
-3. If the boss is new to the stage pool, set its variant base in the
-   `StageDef` boss table. The `boss()` replay already draws it.
-4. Run `npm run test:e2e -- entity:larry-jr`. The harness finds OS seeds whose
-   boss room is Larry Jr., builds the public route to it, and compares the
-   common NPC, room, door and player fields. It also compares the boss's
-   segments, which share spawn seeds in both games.
-5. Add only the boss-specific extra fields and markers to the spec. Iterate on
-   steps 2 and 4. `--replay-cases` replays any failing case exactly.
-6. Run `npm run matrix:update`, write the evidence doc, and open a small PR.
+  Each game must also reach the spec's required markers on its own. The
+  markers are admission, damage, death, retirement and clear. All rows are
+  exact.
+- **Source index.** `tools/original/ai-dispatch.py` reads the original's
+  `Entity_NPC::update_ai` jump table (0x4f9670 → 0x66e390). It prints each
+  type's Linux AI routine and the types that share it: 160 types, 107 routines.
+  For example, Pooter shares `ai_fly` and Fatty shares `ai_gaper`.
 
-An ordinary enemy is the same without step 3. Its scenarios come from normal
-rooms that contain the type.
+## 3. Recipe: add an enemy or boss
+
+1. Find its source:
+
+   ```sh
+   python3 tools/original/ai-dispatch.py --type N
+   ```
+
+   This gives the AI routine and its sharers. Read that routine in the pinned
+   Linux binary. Families that share a routine share one port.
+2. Write `engine/src/<family>.rs`. It needs:
+   - a `FAMILY` entry (kinds, spawn, advance, grid query, flags);
+   - the AI routine itself.
+
+   The constructor starts from `Npc::authored(id, content::entity(t, v),
+   selector)`. Stats, collider, gibs and actor come from entities2.xml. A plain
+   `Entity_NPC` uses the source-faithful `plain_npc::advance` base, which
+   provides appear, sprite clock, BaseUpdate, damage drain, death and
+   retirement. Its family then supplies only its AI routine, built from shared
+   primitives such as `try_shoot_player` and `play`/`finished`. Keep the
+   source draw order and cite the source addresses.
+3. Add one line to `entities::FAMILIES`.
+4. Add the actor's ANM2 to `tools/foundation/port-npc-animations.txt` and
+   `web/npc-data.json`. Clip lengths and loop flags then come from the
+   generated clip catalogue. The renderer draws any NPC that carries `actor`,
+   and every monster/boss sheet is already globbed.
+5. Add `tools/e2e/entities/<name>.mjs`, then run:
+
+   ```sh
+   npm run test:e2e -- entity-<name>
+   ```
+
+   Iterate on step 2. Replay a failing run exactly with `--scenarios`.
+6. Run `npm run matrix:update` and open a small PR.
+
+Bosses also need their room type admitted and their VS-screen data. That work
+is tracked under M10 and #147.
 
 ## 4. Migration order
 
@@ -340,14 +370,19 @@ engine work in M1–M5 does not.
 ## 5. Checklist
 
 - [x] Survey and design (this document)
-- [ ] M1 entity catalogue
-- [ ] M2 family registry and birth sink
-- [ ] M3 registry contact whitelist and Dip contact fix
-- [ ] M4 clip and appear primitives
-- [ ] M5 generic renderer and asset wiring
-- [ ] M6 shared comparator library
-- [ ] M7 scenario finder and entity specs
+- [x] M1 entity catalogue (#145)
+- [x] M2 family registry and birth sink (#152)
+- [x] M3 registry-derived contact admission (the Dip fix itself landed in #146)
+- [ ] M4 clip and appear primitives: `plain_npc` (source generic appear, sprite clock, BaseUpdate, death) and `try_shoot_player` are in; existing families still use their own copies
+- [ ] M5 generic renderer and asset wiring: NPCs carrying `actor` draw from the catalogue, the generated clip catalogue covers every NPC actor, and every monster/boss sheet is globbed (only referenced ones decode); legacy families keep their renderer branches
+- [x] M6 shared entity comparator (legacy comparators keep their own field sets for now)
+- [x] M7 scenario finder, entity specs and the update_ai source index
 - [ ] M8 scaffold
-- [ ] M9 first import batch (time per entity: —)
+- [ ] M9 first import batch
+  - Horf 12: one source-reading pass (ai_horf 207 instructions,
+    try_shoot_player, generic appear) and one live fix iteration. All
+    Horf-owned fields match the original. The remaining failures are the
+    shared tear-trajectory gap, the start-room door state and death gibs that
+    have no admission yet.
 - [ ] M10 stages
 - [ ] M11 characters

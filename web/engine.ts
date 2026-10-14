@@ -182,6 +182,8 @@ export interface Room {
     damage: {pendingDamage: number; pendingFlags: number};
     keeper: {anchor: {x: number; y: number}; entityFlags: number; stateFrame: number; countdown: number;
       animation: string; animationClock: number; animationPlaying: boolean; tint: number[]; offsets: number[]} | null;
+    actor?: string;
+    shooter?: {cooldown: number; delay: number};
     dip: {entityFlags: number; birthGameUpdate: number; currentFriction: number; flipX: boolean;
       tint: number[]; offsets: number[]; renderOffset: {x: number; y: number}; statusCountdown: number} | null;
     level2Fly: {entityFlags: number; birthGameUpdate: number; feedbackVelocity: {x: number; y: number};

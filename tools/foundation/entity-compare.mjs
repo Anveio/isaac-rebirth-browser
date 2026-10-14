@@ -1,0 +1,116 @@
+// Shared original/browser field sets for authored room entities.
+// Native observations come from foundation-combat-observe.py; browser rows
+// are the engine's own snapshot. Every row is exact: f32 values are restored
+// with Math.fround from shortest-decimal JSON, never compared with epsilons.
+import { existsSync, readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { gunzipSync } from 'node:zlib';
+
+export const f32 = value => typeof value === 'number' && Number.isFinite(value) ? Math.fround(value) : undefined;
+export const vector = value => value ? [f32(value.x ?? value[0]), f32(value.y ?? value[1])] : undefined;
+
+/** One exact field row; a missing value on either side is a failure. */
+export function check(rows, field, expected, actual) {
+  rows.push({ field, expected, actual,
+    status: expected !== undefined && actual !== undefined && JSON.stringify(expected) === JSON.stringify(actual) ? 'pass' : 'fail' });
+}
+
+const DAMAGE_FLAGS = { tear: 0, bomb: 4, fireContact: 2, roomEffect: 0 };
+
+/** Fields every authored NPC shares, as [name, native, port] pairs. Native
+ * position is authoritative on full phases and presented half-motion on
+ * intermediate phases. Native +31f is dead; +31e is active. */
+export function npcFields(native, actor, phase) {
+  return [
+    ['identity', [native.type, native.variant, native.subtype], [actor.kind, actor.variant, actor.subtype]],
+    ['hp', f32(native.hp), f32(actor.hp)], ['maxHp', f32(native.maxHp), f32(actor.maxHp)],
+    ['radius', f32(native.collisionRadius), f32(actor.collisionRadius)], ['mass', f32(native.collisionMass), f32(actor.collisionMass)],
+    ['contactDamage', f32(native.collisionDamage), f32(actor.collisionDamage)],
+    ['gridClass', native.gridCollisionClass, actor.gridCollisionClass], ['entityClass', native.entityCollisionClass, actor.entityCollisionClass],
+    ['canShutDoors', native.canShutDoors, actor.canShutDoors], ['boss', native.boss, actor.boss],
+    ['state', native.npcState, actor.state], ['frameAge', native.npcFrameAge, actor.frameAge],
+    ['savedInitializedState', native.npcSavedInitializedState, actor.savedInitializedState],
+    ['dead', native.removed, actor.dead], ['active', native.active, !actor.removed], ['visible', native.visible, actor.visible],
+    ['animation', native.animation, actor.animation], ['animationFrame', f32(native.animationFrame), f32(actor.animationClock)],
+    ['animationPlaying', native.animationPlaying, actor.animationPlaying],
+    ['pendingDamage', f32(native.pendingDamage), f32(actor.damage.pendingDamage)], ['pendingFlags', native.pendingFlags, actor.damage.pendingFlags],
+    ['orderedDamage', native.pendingDamageRecords?.map(row => [f32(row.amount), row.flags, row.sourceType]),
+      actor.damage.events.map(row => [f32(row.amount), DAMAGE_FLAGS[row.kind], row.source.entityType])],
+    ['position', vector(native.position), vector(phase === 0 ? actor.presentedPosition : actor.position)],
+    ['velocity', vector(native.velocity), vector(actor.velocity)], ['target', vector(native.npcTarget), vector(actor.target)],
+  ];
+}
+
+/** Room lock, manager counts and door states. */
+export function roomRows(rows, source, actual) {
+  check(rows, 'room.identity', source.room.descriptorIndex, actual.currentRoom);
+  check(rows, 'room.combatClear', source.room.combatClear, actual.room.combatClear);
+  check(rows, 'room.combatClearCountdown', source.room.combatClearCountdown, actual.room.combatClearCountdown);
+  for (const field of ['countablePending', 'countableCurrent', 'bossPending', 'bossCurrent'])
+    check(rows, `manager.${field}`, source.room[field], actual.room.managerCounts?.[field]);
+  for (const door of source.grid.filter(cell => cell.type === 16)) {
+    const port = actual.room.grid?.cells[door.index]?.entity;
+    check(rows, `door${door.index}.state`, door.state, port?.state);
+    check(rows, `door${door.index}.class`, door.collisionClass, port?.collisionClass);
+  }
+}
+
+/** Every authored NPC in the room, by identity and spawn seed, then each
+ * selected actor's shared fields plus the spec's own rows. */
+export function entityRows(rows, source, actual, spec) {
+  const phase = source.nativePhase.systemIterations % 2;
+  const npcs = source.entities.filter(actor => actor.type >= 10 && actor.type < 1000);
+  const port = actual.room.npcs.filter(actor => !actor.removed);
+  check(rows, 'npc.identities', npcs.map(actor => [actor.type, actor.variant, actor.spawnSeed]),
+    port.map(actor => [actor.kind, actor.variant, actor.spawnSeed]));
+  check(rows, 'system.phase', phase, actual.systemClock.systemCounter % 2);
+  roomRows(rows, source, actual);
+  const selected = npcs.filter(actor => spec.matches(actor.type, actor.variant));
+  for (const native of selected) {
+    const actor = port.find(candidate => candidate.kind === native.type && candidate.spawnSeed === native.spawnSeed);
+    if (!actor) continue; // The identity row already records the missing actor.
+    const name = `${spec.name}${native.spawnSeed}`;
+    for (const [field, expected, observed] of [...npcFields(native, actor, phase), ...(spec.fields?.(native, actor, phase) ?? [])])
+      check(rows, `${name}.${field}`, expected, observed);
+  }
+  const shots = source.entities.filter(actor => actor.type === 9 && !actor.removed);
+  check(rows, 'projectile.seeds', shots.map(actor => actor.spawnSeed),
+    actual.enemyProjectiles.filter(actor => !actor.dead && !actor.removed).map(actor => actor.spawnSeed));
+}
+
+/** Read a side's manifest, raw or from its archived receipt. */
+export function loadManifest(directory, side) {
+  const raw = resolve(directory, side, 'manifest.json');
+  if (existsSync(raw)) return JSON.parse(readFileSync(raw, 'utf8'));
+  return JSON.parse(gunzipSync(readFileSync(resolve(directory, side, 'manifest.json.gz'))));
+}
+
+export const MARKERS = ['admission', 'damage', 'death', 'retirement', 'clear'];
+
+/** Lifecycle markers each game reaches on its own over a whole case. */
+export function markers(directory, spec) {
+  const result = {};
+  for (const side of ['original', 'browser']) {
+    const seen = Object.fromEntries(MARKERS.map(name => [name, false]));
+    const manifest = loadManifest(directory, side);
+    const rows = side === 'original' ? manifest.debugObservations.map(row => row.observation?.gameplay)
+      : manifest.frames.map(row => row.state);
+    const dead = new Set();
+    let locked = false;
+    for (const row of rows) {
+      if (!row || (side === 'original' ? row.status !== 'pass' : row.screen !== 'playing')) continue;
+      const actors = side === 'original'
+        ? row.entities.filter(actor => spec.matches(actor.type, actor.variant)).map(actor => ({ seed: actor.spawnSeed, hp: actor.hp, maxHp: actor.maxHp, pending: actor.pendingDamage, dead: actor.removed }))
+        : row.room.npcs.filter(actor => !actor.removed && spec.matches(actor.kind, actor.variant)).map(actor => ({ seed: actor.spawnSeed, hp: actor.hp, maxHp: actor.maxHp, pending: actor.damage.pendingDamage, dead: actor.dead }));
+      const clear = side === 'original' ? row.room.combatClear : row.room.combatClear;
+      seen.admission ||= actors.length > 0;
+      seen.damage ||= actors.some(actor => actor.pending > 0 || actor.hp < actor.maxHp);
+      for (const actor of actors) if (actor.dead) { dead.add(actor.seed); seen.death = true; }
+      seen.retirement ||= [...dead].some(seed => !actors.some(actor => actor.seed === seed));
+      locked ||= seen.admission && clear === false;
+      seen.clear ||= locked && clear === true;
+    }
+    result[side] = seen;
+  }
+  return result;
+}

@@ -105,6 +105,10 @@ export class Renderer {
           this.assets.draw(ctx, "gfx/033.000_fireplace.anm2", npc.animation,
             npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46, npc.animationClock,
             { scale: 0.65, layerScales: { 1: [npc.fireplace.flameScale, npc.fireplace.flameScale] } });
+        } else if (npc.actor) {
+          // Catalogue-driven families: the engine names the authored actor.
+          this.assets.draw(ctx, npc.actor, npc.animation, npc.presentedPosition.x * 0.65 + 32,
+            npc.presentedPosition.y * 0.65 - 46, npc.animationClock, { scale: 0.65 });
         } else {
           this.assets.draw(ctx, npc.kind === 13 ? "gfx/013.000_fly.anm2" : npc.kind === 18 ? "gfx/018.000_attack fly.anm2" : npc.kind === 214 ? "gfx/213.000_level2fly.anm2" : "gfx/244.000_round worm.anm2", npc.animation,
             npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46, npc.animationFrame, { scale: 0.65 });

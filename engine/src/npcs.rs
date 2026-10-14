@@ -56,6 +56,11 @@ pub struct Npc {
     pub monstro: Option<crate::monstro::MonstroState>,
     pub level2_fly: Option<crate::level2_flies::Level2FlyState>,
     pub dip: Option<crate::dips::DipState>,
+    /// Authored actor for families drawn from the entity catalogue.
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub actor: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub shooter: Option<crate::plain_npc::ShooterTimers>,
 }
 
 const ZERO: WorldVector = WorldVector { x: 0.0, y: 0.0 };
@@ -508,6 +513,8 @@ impl Npc {
             monstro: None,
             level2_fly: None,
             dip: None,
+            actor: String::new(),
+            shooter: None,
         }
     }
 
