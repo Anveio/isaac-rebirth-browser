@@ -740,8 +740,13 @@ impl Collider {
                 *velocity + normal * (inward * 1.8 - 0.1)
             };
             let speed = (reflected.x * reflected.x + reflected.y * reflected.y).sqrt();
-            if !reflected.is_finite() || !speed.is_finite() || speed <= 0.0 {
+            if !reflected.is_finite() || !speed.is_finite() || (!preview && speed <= 0.0) {
                 return Err("nonplayer collision reflection overflowed".into());
+            }
+            // Source 443117 -> 44346c skips refinement for zero-speed preview.
+            // Tiny finite inward velocity can underflow the f32 squared length.
+            if preview && speed <= 0.0 {
+                return Ok(None);
             }
             let scaled_normal = WorldVector {
                 x: normal.x * self.geometry.scale.x,

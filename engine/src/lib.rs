@@ -26,6 +26,7 @@ mod grid_hazards;
 pub mod grid_records;
 mod health_damage;
 pub mod information_animation;
+pub mod input;
 pub mod items;
 pub mod keepers;
 pub mod layout;
@@ -35,6 +36,7 @@ pub mod monstro;
 pub mod motion;
 pub mod mt;
 pub mod music;
+pub mod nightmares;
 pub mod npcs;
 pub mod phase;
 pub mod pickups;
@@ -358,6 +360,7 @@ pub struct State {
     pub information_animation: information_animation::InformationAnimation,
     pub stage: u32,
     pub stage_seed: u32,
+    pub nightmares: nightmares::Nightmares,
     pub seeded_run: bool,
     pub achievement_eligibility: bool,
     pub profiles: Vec<Profile>,
@@ -500,6 +503,7 @@ impl Game {
                 information_animation: information_animation::InformationAnimation::default(),
                 stage: 1,
                 stage_seed: seed::stage1_seed(initial_seed),
+                nightmares: nightmares::Nightmares::new()?,
                 seeded_run: false,
                 achievement_eligibility: true,
                 profiles: (1..=3)
@@ -599,24 +603,7 @@ impl Game {
                 self.state.audio.sfx_volume = sfx_volume;
             }
             Command::Key { code, down } => {
-                if !matches!(
-                    code.as_str(),
-                    "Enter"
-                        | "Space"
-                        | "KeyQ"
-                        | "Escape"
-                        | "Tab"
-                        | "Backspace"
-                        | "ArrowUp"
-                        | "ArrowDown"
-                        | "ArrowLeft"
-                        | "ArrowRight"
-                        | "KeyW"
-                        | "KeyA"
-                        | "KeyS"
-                        | "KeyD"
-                        | "KeyE"
-                ) {
+                if !input::is_public_key(&code) {
                     return Err(format!("unsupported key code: {code}"));
                 }
                 if down {
@@ -711,7 +698,10 @@ impl Game {
             // Scene key handler. Physical action14 mapping remains unaccepted.
             return Ok(());
         }
-        if self.state.player_death.game_over.is_some() {
+        if self.state.player_death.game_over.is_some()
+            || self.state.nightmares.system_active
+            || self.state.nightmares.request_pending
+        {
             return Ok(());
         }
         let previous_screen = self.state.screen;
@@ -786,6 +776,7 @@ impl Game {
                 "ArrowLeft" | "KeyA" => self.select_character(-1),
                 "ArrowRight" | "KeyD" => self.select_character(1),
                 "Enter" if self.state.difficulty == "normal" => {
+                    self.validate_run_character()?;
                     self.state.run_start_request.input_pending = true;
                 }
                 "Enter" => {
@@ -904,6 +895,30 @@ impl Game {
                     after_audio_requests: self.state.audio.pending.len(),
                     initialization: menu_lifecycle::Initialization::ResetCharacterSeed,
                 });
+        }
+        Ok(())
+    }
+    /// Reject unsupported requests before the deferred start flag can persist
+    /// across failing ticks. Queued menu initializers may still change the seed,
+    /// so Random requires a supported runtime for every possible choice.
+    fn validate_run_character(&self) -> Result<(), String> {
+        let unlocked =
+            &self.state.profiles[usize::from(self.state.profile - 1)].unlocked_characters;
+        let candidates = if self.state.character == "Random" {
+            unlocked.as_slice()
+        } else {
+            std::slice::from_ref(&self.state.character)
+        };
+        if candidates.is_empty() {
+            return Err("profile has no unlocked character".into());
+        }
+        for character in candidates {
+            if !unlocked.contains(character) {
+                return Err("selected character is locked in this profile".into());
+            }
+            if character != "Isaac" {
+                return Err("selected character runtime is not implemented".into());
+            }
         }
         Ok(())
     }
@@ -1078,6 +1093,8 @@ impl Game {
         };
         self.state.next_pickup = 1;
         self.state.stage_seed = seed::stage1_seed(self.state.run_seed_value);
+        // Level585600 ->5b8340 records the selected ordinary stage resource.
+        self.state.nightmares.select_normal_basement(1)?;
         grid_records::admit_fresh(
             &mut self.state.room,
             &mut self.state.boot_lifecycle.shared,
@@ -1275,8 +1292,6 @@ impl Game {
         }
         self.state.room.pickups = pickups;
         self.state.room.npcs = npcs;
-        self.state.room.boss_count =
-            self.state.room.npcs.iter().filter(|npc| npc.boss).count() as u32;
         self.state.room.boss_presentation_index =
             if room_type == 5 && self.state.room.npcs.iter().any(|npc| npc.kind == 20) {
                 1
@@ -1286,12 +1301,15 @@ impl Game {
         self.state.room.authored_actor_order = order;
         self.state.next_pickup = next;
         self.rebuild_room_actor_schedule()?;
+        self.state.room.boss_count = self.state.room.manager_counts.boss_total().max(0) as u32;
         self.refresh_stage_effects();
         Ok(())
     }
     /// Persisted Room clones retain supported actor handles in authored order.
     pub fn rebuild_room_actor_schedule(&mut self) -> Result<(), String> {
         self.state.actor_scheduler.clear_room();
+        //453ec0 resets all four actual manager count words on Room replacement.
+        self.state.room.manager_counts = actors::ManagerCounts::default();
         self.state.fire_particles.clear();
         self.state.sprite_effects.clear();
         let player = actors::ActorRef {
@@ -1320,6 +1338,19 @@ impl Game {
             };
             if admitted {
                 self.state.actor_scheduler.admit(actor)?;
+                if actor.kind == actors::ActorKind::Npc {
+                    let npc = self
+                        .state
+                        .room
+                        .npcs
+                        .iter()
+                        .find(|npc| npc.id == actor.id)
+                        .expect("checked admitted NPC");
+                    self.state
+                        .room
+                        .manager_counts
+                        .admit(npc.can_shut_doors, npc.boss);
+                }
             }
         }
         Ok(())
@@ -1410,6 +1441,9 @@ impl Game {
         }
         let audio_counter = self.state.system_clock.system_counter;
         let phase = self.state.system_clock.advance()?;
+        if phase != phase::Phase::Skipped && self.state.nightmares.apply_request(self.state.stage) {
+            self.state.music.room(96);
+        }
         if phase != phase::Phase::Skipped {
             self.state.public_actions.advance(&self.state.pressed);
         }
@@ -1443,6 +1477,20 @@ impl Game {
         }
         self.state.tick += 1;
         self.state.menu_animation_tick += 1;
+        let nightmare_dispatch = if phase == phase::Phase::Skipped {
+            // Disabled interpolation skips System polling but keeps state4.
+            self.state.nightmares.system_active
+        } else {
+            self.state
+                .nightmares
+                .advance_system(self.state.public_actions.menu_confirm)
+        };
+        if nightmare_dispatch {
+            if phase != phase::Phase::Skipped {
+                self.state.music.advance();
+            }
+            return Ok(());
+        }
         let gameplay_was_paused = self.state.paused;
         if self.state.screen == Screen::Playing {
             self.state.pause_menu.advance(phase);
@@ -1562,6 +1610,8 @@ impl Game {
                         .clone();
                     self.admit_room_pickups(&selectors)?;
                     // The admitted Room::Update follows authored mixed order.
+                    self.refresh_room_boss_count();
+                    let mut counted = actors::FullCounts::default();
                     for actor in self.state.room.authored_actor_order.clone() {
                         match actor.kind {
                             actors::ActorKind::Npc => {
@@ -1572,7 +1622,9 @@ impl Game {
                             }
                             _ => return Err("invalid authored room actor handle".into()),
                         }
+                        self.count_updated_room_actor(actor, &mut counted);
                     }
+                    self.state.room.manager_counts.finish_full(counted);
                     familiars::paint_background_effects(&mut self.state)?;
                     pickups::full_grid_contacts(&mut self.state)?;
                     chests::full_grid_contacts(&mut self.state)?;
@@ -1622,7 +1674,9 @@ impl Game {
                 self.state.information_animation.advance_full()?;
             }
             if phase != phase::Phase::Update || self.state.information_animation.state == 2 {
-                self.state.music.advance();
+                if phase != phase::Phase::Skipped {
+                    self.state.music.advance();
+                }
                 return Ok(());
             }
         }
@@ -1641,9 +1695,13 @@ impl Game {
         let existing = self.state.actor_scheduler.full_phase();
         if phase == phase::Phase::Update {
             rock_blast::advance_markers(&mut self.state);
+            self.refresh_room_boss_count();
+            let mut counted = actors::FullCounts::default();
             for actor in existing.iter().copied() {
                 self.advance_actor(actor, phase, false, bomb_triggered)?;
+                self.count_updated_room_actor(actor, &mut counted);
             }
+            self.state.room.manager_counts.finish_full(counted);
         } else if phase == phase::Phase::Interpolate {
             let mut index = 0;
             while let Some(actor) = self.state.actor_scheduler.get(index) {
@@ -1858,6 +1916,34 @@ impl Game {
         }
         Ok(())
     }
+    /// Room5d1423/5d1454 refresh2490 before the full manager callbacks. The
+    /// final boss callback can decrement it later in that same pass.
+    fn refresh_room_boss_count(&mut self) {
+        self.state.room.boss_count = self.state.room.manager_counts.boss_total().max(0) as u32;
+    }
+
+    ///454eb9 counts only callbacks whose active31e remains true. NPC70/78
+    /// read103c/103d, with no HP/dead predicate; boss flags100000 exclude only
+    /// the boss subtotal. Other currently admitted entity families have v70false.
+    fn count_updated_room_actor(&self, actor: actors::ActorRef, counted: &mut actors::FullCounts) {
+        if actor.kind != actors::ActorKind::Npc {
+            return;
+        }
+        if let Some(npc) = self
+            .state
+            .room
+            .npcs
+            .iter()
+            .find(|npc| npc.id == actor.id && !npc.removed)
+        {
+            let final_flag = npc
+                .monstro
+                .as_ref()
+                .is_some_and(|owner| owner.entity_flags & 0x100000 != 0);
+            counted.observe(npc.can_shut_doors, npc.boss && !final_flag);
+        }
+    }
+
     fn advance_pickup(&mut self, id: u32, phase: phase::Phase) -> Result<(), String> {
         let Some(index) = self
             .state
@@ -2290,6 +2376,8 @@ thread_local! {
     static REQUEST: RefCell<Vec<u8>> = const { RefCell::new(Vec::new()) };
     static SNAPSHOT: RefCell<Vec<u8>> = const { RefCell::new(Vec::new()) };
     static ERROR: RefCell<Vec<u8>> = const { RefCell::new(Vec::new()) };
+    static PUBLIC_KEYS_JSON: Vec<u8> =
+        serde_json::to_vec(&input::PUBLIC_KEYS).expect("key codes serialize");
 }
 #[no_mangle]
 pub extern "C" fn abi_version() -> u32 {
@@ -2367,4 +2455,13 @@ pub extern "C" fn error_ptr() -> *const u8 {
 #[no_mangle]
 pub extern "C" fn error_len() -> usize {
     ERROR.with(|error| error.borrow().len())
+}
+/// The public key surface as a JSON array of key codes; needs no reset.
+#[no_mangle]
+pub extern "C" fn public_keys_ptr() -> *const u8 {
+    PUBLIC_KEYS_JSON.with(|keys| keys.as_ptr())
+}
+#[no_mangle]
+pub extern "C" fn public_keys_len() -> usize {
+    PUBLIC_KEYS_JSON.with(Vec::len)
 }
