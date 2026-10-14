@@ -491,6 +491,10 @@ pub struct State {
     pub revealed_secret_connections: BTreeSet<[usize; 2]>,
     pub persisted_rooms: BTreeMap<usize, Room>,
     pub room_transition: Option<traversal::RoomTransition>,
+    /// The player's velocity when a door transition began, before departure
+    /// cleared it; the post-ChangeRoom admitted update's footprint reads it.
+    #[serde(skip)]
+    pub departure_velocity: Option<motion::WorldVector>,
     pub stage_effects: StageEffects,
     pub inventory: Inventory,
     pub next_pickup: u32,
@@ -676,6 +680,7 @@ impl Game {
                 revealed_secret_connections: BTreeSet::new(),
                 persisted_rooms: BTreeMap::new(),
                 room_transition: None,
+                departure_velocity: None,
                 stage_effects,
                 inventory: Inventory {
                     coins: 0,
@@ -1387,6 +1392,25 @@ impl Game {
         Ok(())
     }
 
+    /// ChangeRoom5509eb saves the room being left (5182c3 -> 58d921 ->
+    /// Room.Save5ce2d0), then the next Room.Init loads its backdrop FX rays.
+    /// Selector, door and wall constructors follow in fresh admission.
+    fn change_room_shared_draws(&mut self, room_before: usize) -> Result<(), String> {
+        let left = self
+            .state
+            .persisted_rooms
+            .get(&room_before)
+            .ok_or("room change requires the persisted room it left")?;
+        saved_game::save_grid_cells(
+            &mut self.boot_level_grid,
+            &mut self.state.boot_lifecycle.shared,
+            left,
+            room_before,
+        )?;
+        room::load_fx_rays(&self.state.room, &mut self.state.boot_lifecycle.shared);
+        Ok(())
+    }
+
     /// Level.Init calls System.Save at 58c411 once the starting room is loaded.
     /// Game.Save clears the destination, updates Room grid records, then copies
     /// ordinary Level rows and PlayerManager state in that source order.
@@ -1502,6 +1526,17 @@ impl Game {
     /// The native list admits Player first, then supported selectors in their
     /// authored order. Persist that order with the room rather than regrouping
     /// NPCs and pickups when rebuilding the shared actor scheduler.
+    /// The ChangeRoom Room.Update5d12a0 tail updates the Player first at the
+    /// unchanged counter. It leaves position and velocity unchanged; its only
+    /// shared draws are the 50c000 footprint, gated by the departing velocity.
+    fn admitted_update_footprint(&mut self, phase: phase::Phase) -> Result<(), String> {
+        if let (phase::Phase::Update, Some(velocity)) =
+            (phase, self.state.departure_velocity.take())
+        {
+            player_footprints::advance(&mut self.state, velocity)?;
+        }
+        Ok(())
+    }
     pub fn admit_room_pickups(
         &mut self,
         selectors: &[room_spawns::SpawnSelector],
@@ -1517,6 +1552,13 @@ impl Game {
             .as_ref()
             .map_or(1, |descriptor| descriptor.template.room_type);
         for selector in selectors {
+            // Room.Init5cecc0 constructs grid objects in the same selector pass.
+            grid_records::admit_selector(
+                &mut self.state.room,
+                &mut self.state.boot_lifecycle.shared,
+                selector,
+                self.state.game_update_count,
+            )?;
             let id = u32::try_from(npcs.len()).map_err(|_| "NPC identity exhausted")?;
             let context = entities::SpawnContext {
                 stage: self.state.stage,
@@ -1579,6 +1621,29 @@ impl Game {
                     pickups.push(pickup);
                 }
             }
+        }
+        // Doors, walls and shape0 ambient decoration follow the selectors.
+        // Other shapes and backdrops keep their boundary draws unadmitted.
+        if self
+            .state
+            .room
+            .descriptor
+            .as_ref()
+            .is_some_and(|descriptor| {
+                descriptor.asset_stage <= 1
+                    && descriptor.template.shape_index() == 0
+                    && descriptor.template.room_type != 16
+            })
+        {
+            grid_records::admit_boundary(
+                &mut self.state.room,
+                &mut self.state.boot_lifecycle.shared,
+                self.state.game_update_count,
+            )?;
+        }
+        // Room.Init5cf550 then links pits over every grid entity in order.
+        if let Some(grid) = self.state.room.grid.as_mut() {
+            grid::link_pits(grid, &mut self.state.boot_lifecycle.shared);
         }
         self.state.room.pickups = pickups;
         self.state.room.npcs = npcs;
@@ -1861,6 +1926,7 @@ impl Game {
                 self.update_player(phase, false, false)?;
             }
             if room_before != self.state.current_room {
+                self.change_room_shared_draws(room_before)?;
                 self.state.camera = Some(camera::Camera::new(
                     &self.state.room,
                     self.state
@@ -1876,6 +1942,7 @@ impl Game {
                 combat::advance_player_immunity(&mut self.state);
                 if restoring {
                     let restored_pickups = pickups::readmit_regular_records(&mut self.state)?;
+                    self.admitted_update_footprint(phase)?;
                     self.rebuild_room_actor_schedule()?;
                     // The native Room.Update admission tail advances the new
                     // actors once at the unchanged Game clock. Other saved
@@ -1916,6 +1983,7 @@ impl Game {
                         .selectors
                         .clone();
                     self.admit_room_pickups(&selectors)?;
+                    self.admitted_update_footprint(phase)?;
                     // The admitted Room::Update follows authored mixed order.
                     self.refresh_room_boss_count();
                     let mut counted = actors::FullCounts::default();

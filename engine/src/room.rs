@@ -37,6 +37,9 @@ pub struct Room {
     pub combat_clear: bool,
     pub combat_clear_countdown: u32,
     pub combat_shut_door_slots: Vec<u8>,
+    /// Game update on which combat played the doors' Close animation.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub combat_shut_update: Option<u32>,
     pub spawns: Option<crate::room_spawns::RoomSpawns>,
     pub grid: Option<crate::grid::GridDescriptor>,
     /// The actual signed Room+e98 owner; absent until its source Init is admitted.
@@ -525,6 +528,7 @@ impl Room {
             combat_clear: true,
             combat_clear_countdown: 0,
             combat_shut_door_slots: Vec::new(),
+            combat_shut_update: None,
             spawns: None,
             grid: None,
             path_costs: None,

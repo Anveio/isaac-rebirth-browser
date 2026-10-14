@@ -219,6 +219,7 @@ pub(crate) fn check_departure(state: &mut State) {
             full_updates: 0,
             boss_scene: None,
         });
+        state.departure_velocity = Some(crate::bombs::player_velocity(state));
         state.player.vx = 0.0;
         state.player.vy = 0.0;
         // Transition request5dcfc0 writes Player+7d4 at5dd048. Fast room
@@ -289,13 +290,9 @@ pub(crate) fn advance_transition(state: &mut State, phase: Phase) -> bool {
     state.current_room = transition.target_room;
     state.room = match state.persisted_rooms.remove(&state.current_room) {
         Some(room) => room,
-        None => {
-            let mut room = Room::from_floor_descriptor(&state.floor, state.current_room);
-            if let Some(grid) = room.grid.as_mut() {
-                crate::grid::link_pits(grid, &mut state.boot_lifecycle.shared);
-            }
-            room
-        }
+        // Room.Init's pit linking (5cf550) follows its grid construction in
+        // admit_room_pickups.
+        None => Room::from_floor_descriptor(&state.floor, state.current_room),
     };
     state.room.initialize_path_costs();
     state.visited_rooms.insert(state.current_room);

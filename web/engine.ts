@@ -211,7 +211,7 @@ export interface Room {
   authoredActorOrder: {kind: "npc" | "pickup"; id: number}[];
   managerCounts: { countablePending: number; countableCurrent: number; bossPending: number; bossCurrent: number };
   bossCount: number; bossPresentationIndex: number;
-  combatClear: boolean; combatClearCountdown: number; combatShutDoorSlots: number[];
+  combatClear: boolean; combatClearCountdown: number; combatShutDoorSlots: number[]; combatShutUpdate?: number;
   grid: { width: number; height: number; cells: {selector: number; entity: {kind: number; variant: number; state: number; collisionClass: number; spawnSeed: number} | null}[] } | null;
 }
 export interface Rect { x: number; y: number; width: number; height: number; }
