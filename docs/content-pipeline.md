@@ -372,12 +372,17 @@ engine work in M1–M5 does not.
 - [x] Survey and design (this document)
 - [x] M1 entity catalogue (#145)
 - [x] M2 family registry and birth sink (#152)
-- [ ] M3 registry contact whitelist and Dip contact fix
-- [ ] M4 clip and appear primitives
-- [ ] M5 generic renderer and asset wiring
+- [x] M3 registry-derived contact admission (the Dip fix itself landed in #146)
+- [ ] M4 clip and appear primitives: `plain_npc` (source generic appear, sprite clock, BaseUpdate, death) and `try_shoot_player` are in; existing families still use their own copies
+- [ ] M5 generic renderer and asset wiring: NPCs carrying `actor` draw from the catalogue, the generated clip catalogue covers every NPC actor, and every monster/boss sheet is globbed (only referenced ones decode); legacy families keep their renderer branches
 - [x] M6 shared entity comparator (legacy comparators keep their own field sets for now)
 - [x] M7 scenario finder, entity specs and the update_ai source index
 - [ ] M8 scaffold
-- [ ] M9 first import batch (time per entity: —)
+- [ ] M9 first import batch
+  - Horf 12: one source-reading pass (ai_horf 207 instructions,
+    try_shoot_player, generic appear) and one live fix iteration. All
+    Horf-owned fields match the original. The remaining failures are the
+    shared tear-trajectory gap, the start-room door state and death gibs that
+    have no admission yet.
 - [ ] M10 stages
 - [ ] M11 characters

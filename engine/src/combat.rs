@@ -143,11 +143,8 @@ pub fn resolve_tear_npc_contact(
     tear: &mut ContactBody,
     npc: &mut ContactBody,
 ) -> Result<ContactResolution, String> {
-    if tear.entity_type != 2 || !matches!(npc.entity_type, 13 | 18 | 20 | 33 | 214 | 217 | 244) {
-        return Err(
-            "regular tear response requires an admitted Fly, AttackFly, Monstro, Fireplace, lvl2 Fly, Dip or Round Worm"
-                .into(),
-        );
+    if tear.entity_type != 2 || crate::entities::family(npc.entity_type).is_none() {
+        return Err("regular tear response requires an NPC with a registered family".into());
     }
     resolve_contact(
         tear,
@@ -162,7 +159,7 @@ pub fn resolve_tear_npc_contact(
     )
 }
 
-/// Admitted Fly, AttackFly, Monstro, Fireplace, lvl2 Fly, Dip and Round Worm pairs have no callback veto.
+/// Pairs of NPCs with a registered family have no callback veto.
 /// The caller admits Fireplace's NPC-only queued damage alongside this response.
 /// The first body may instead be a regular Bomb; its callback
 /// 456c20 damps NPC velocity0.2 and its own0.5 before the mass response.
@@ -171,10 +168,12 @@ pub fn resolve_npc_or_bomb_pair(
     first: &mut ContactBody,
     second: &mut ContactBody,
 ) -> Result<ContactResolution, String> {
-    if !matches!(first.entity_type, 4 | 13 | 18 | 20 | 33 | 214 | 217 | 244)
-        || !matches!(second.entity_type, 13 | 18 | 20 | 33 | 214 | 217 | 244)
+    let registered = |kind| crate::entities::family(kind).is_some();
+    if !(first.entity_type == 4 || registered(first.entity_type)) || !registered(second.entity_type)
     {
-        return Err("NPC pairs require admitted Fly, AttackFly, Monstro, Fireplace, lvl2 Fly, Dip or Round Worm types, with an optional first Bomb".into());
+        return Err(
+            "NPC pairs require registered NPC families, with an optional first Bomb".into(),
+        );
     }
     if first.entity_type > second.entity_type {
         resolve_contact(second, first, |_| false, bomb_pair_callback)

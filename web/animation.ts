@@ -61,13 +61,10 @@ const urls = import.meta.glob([
   "../references/isaac/rebirth/resources/gfx/effects/effect_poopspawn.png",
   "../references/isaac/rebirth/resources/gfx/effects/effect_002b_shitpoof.png",
   "../references/isaac/rebirth/resources/gfx/effects/effect_poopgibs.png",
-  "../references/isaac/rebirth/resources/gfx/monsters/classic/monster_010_fly.png",
-  "../references/isaac/rebirth/resources/gfx/monsters/rebirth/monster_213_level2fly.png",
-  "../references/isaac/rebirth/resources/gfx/monsters/rebirth/monster_216_dip.png",
+  "../references/isaac/rebirth/resources/gfx/monsters/**/*.png",
+  "../references/isaac/rebirth/resources/gfx/bosses/**/*.png",
   "../references/isaac/rebirth/resources/gfx/effects/effect_032_bloodstains.png",
-  "../references/isaac/rebirth/resources/gfx/bosses/classic/boss_004_monstro.png",
   "../references/isaac/rebirth/resources/gfx/effects/hangingguys.png",
-  "../references/isaac/rebirth/resources/gfx/monsters/rebirth/monster_244_roundworm.png",
   "../references/isaac/rebirth/resources/gfx/familiar/familiar_270_leech.png",
   "../references/isaac/rebirth/resources/gfx/effects/effect_009_poof01*.png",
   "../references/isaac/rebirth/resources/gfx/effects/effect_012_poof04.png",
@@ -103,7 +100,12 @@ export class Assets {
   private readonly tinted = new Map<string, HTMLCanvasElement>();
   private constructor(private readonly images: Map<string, HTMLImageElement>) {}
   static async load(): Promise<Assets> {
-    const entries = Object.entries(urls).map(([path, url]) => [normalize(path.split("/resources/")[1]!), url] as const);
+    // Monster and boss sheets are globbed whole; decode only the ones an
+    // authored actor in the loaded animation data actually references.
+    const referenced = new Set(Object.values(sceneData as Record<string, Actor>).flatMap(actor =>
+      actor.Spritesheets.map(sheet => normalize(`${actor.BaseSpritesheetPath}/${sheet.Path}`))));
+    const entries = Object.entries(urls).map(([path, url]) => [normalize(path.split("/resources/")[1]!), url] as const)
+      .filter(([path]) => !/^gfx\/(monsters|bosses)\//.test(path) || referenced.has(path));
     entries.push(["gfx/ui/main menu/completion_widget.png", completionUrl], ["gfx/ui/main menu/gamemenu_postitoverlap.png", postitOverlapUrl]);
     for (const [path, url] of Object.entries(bossSceneUrls))
       entries.push([`gfx/ui/boss/${path.split("/").at(-1)!}`, url]);

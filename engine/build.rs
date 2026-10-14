@@ -370,6 +370,23 @@ fn entity_catalog(xml: &str) -> String {
     output
 }
 
+/// Every clip of every authored NPC actor: frame count and loop flag.
+fn clip_catalog(actors: &Value) -> String {
+    let mut output = String::from("pub const CLIPS: &[Clip] = &[\n");
+    for (actor, definition) in actors.as_object().expect("NPC actor map") {
+        for clip in definition["Animations"].as_array().expect("actor clips") {
+            output.push_str(&format!(
+                "Clip {{ actor: {actor:?}, name: {:?}, frames: {}, looping: {} }},\n",
+                clip["Name"].as_str().expect("clip name"),
+                clip["FrameNum"].as_u64().expect("clip frames"),
+                clip["Loop"].as_bool().expect("clip loop flag"),
+            ));
+        }
+    }
+    output.push_str("];\n");
+    output
+}
+
 /// bossportraits.xml: VS-screen presentation id, boss type/variant (encoded
 /// in the authored portrait name `Portrait_<type>.<variant>_...`) and portrait.
 fn boss_catalog(xml: &str) -> String {
@@ -697,6 +714,8 @@ fn main() {
     fs::write(output.join("shadow_catalog.rs"), generated).expect("write shadow catalog");
     fs::write(output.join("entity_catalog.rs"), entity_catalog(&xml))
         .expect("write entity catalog");
+    fs::write(output.join("clip_catalog.rs"), clip_catalog(&npc_clips))
+        .expect("write clip catalog");
     let portraits = resources.join("bossportraits.xml");
     println!("cargo:rerun-if-changed={}", portraits.display());
     fs::write(

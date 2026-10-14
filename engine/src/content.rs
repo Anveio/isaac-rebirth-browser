@@ -47,6 +47,23 @@ pub const fn entity(id: u32, variant: u32) -> &'static EntityConfig {
     panic!("entity is not authored in entities2.xml");
 }
 
+/// One authored ANM2 clip of an NPC actor.
+#[derive(Clone, Copy, Debug)]
+pub struct Clip {
+    pub actor: &'static str,
+    pub name: &'static str,
+    pub frames: u32,
+    pub looping: bool,
+}
+
+include!(concat!(env!("OUT_DIR"), "/clip_catalog.rs"));
+
+pub fn clip(actor: &str, name: &str) -> Option<&'static Clip> {
+    CLIPS
+        .iter()
+        .find(|clip| clip.actor == actor && clip.name == name)
+}
+
 /// One bossportraits.xml VS-screen presentation.
 #[allow(dead_code)]
 #[derive(Clone, Copy, Debug)]

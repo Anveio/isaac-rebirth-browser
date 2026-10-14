@@ -93,6 +93,7 @@ pub(crate) static FAMILIES: &[&Family] = &[
     &crate::level2_flies::FAMILY,
     &crate::dips::FAMILY,
     &crate::roundworm::FAMILY,
+    &crate::horfs::FAMILY,
 ];
 
 pub(crate) fn family(kind: u32) -> Option<&'static Family> {

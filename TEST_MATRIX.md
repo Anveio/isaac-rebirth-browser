@@ -118,6 +118,7 @@ Generated from [the suite registry](tools/e2e/suites.mjs). Each suite runs the f
 | `audio` | SFX admission and Web Audio output | [audio.mjs](tools/e2e/audio.mjs) `--count 2` |
 | `music` | Music channels, fades and queued tracks | [music.mjs](tools/e2e/music.mjs) `--count 2` |
 | `entity-attack-fly` | Attack Fly rooms: admission, chase AI, tear damage, death and room clear | [state-pair.mjs](tools/e2e/state-pair.mjs) `--scenario-helper tools/original/entity-scenarios.py --helper-arg --type --helper-arg 18 --helper-arg --variant --helper-arg 0 --helper-arg --count --helper-arg 2 --helper-arg --contrived --helper-arg 3BMBMFTE:3 --comparator tools/foundation/entity-state-pair.mjs --comparator-arg --entity --comparator-arg attack-fly --native-frame-timeout 120` |
+| `entity-horf` | Horf rooms: appear, delayed aimed shots, damage, death and room clear | [state-pair.mjs](tools/e2e/state-pair.mjs) `--scenario-helper tools/original/entity-scenarios.py --helper-arg --type --helper-arg 12 --helper-arg --variant --helper-arg 0 --helper-arg --count --helper-arg 2 --comparator tools/foundation/entity-state-pair.mjs --comparator-arg --entity --comparator-arg horf --native-frame-timeout 120` |
 
 ## Executable coverage
 
