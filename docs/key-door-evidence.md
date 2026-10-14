@@ -66,7 +66,7 @@ After a fresh build, the original plus actual-DOM production-WASM gate is:
 source cloud/env.sh
 npm run build
 cargo build --manifest-path engine/Cargo.toml --locked --bin floor
-bash tools/original/with-display.sh node tools/e2e/key-doors.mjs --count 1
+npm run test:e2e -- key-doors
 ```
 
 The gate independently plans the complete reset/menu/seed/route command trace
@@ -128,5 +128,5 @@ backend-state histories are complete. Artifact hashes match before and after.
 The [recovery record](../references/isaac/foundation/doors/key-evidence-recovery.json)
 pins the report, verifier, original failed attempt, path-only frame relocation
 and lossless native archive journal. This establishes the evidence repair on
-that older artifact. The required CI gate still launches both games fresh;
+that older artifact. The local paired tool launches both games fresh;
 latest-main runtime acceptance requires its own fresh run.

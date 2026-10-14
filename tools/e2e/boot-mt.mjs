@@ -10,7 +10,8 @@ import { chromium } from '@playwright/test';
 import { browserLaunchOptions, inspectBrowserGraphics } from '../foundation/browser.mjs';
 import { startProductionServer } from '../foundation/production-server.mjs';
 import { waitForReady } from '../foundation/verify.mjs';
-import { ORIGINAL_SHA } from './lib/original.mjs';
+import { snapshot, step } from './lib/game.mjs';
+import { ORIGINAL_SHA, assertOriginalBinary } from './lib/original.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const run = promisify(execFile);
@@ -58,8 +59,7 @@ for (const c of cases) {
   assert.ok(/^[a-zA-Z0-9_-]{1,32}$/.test(c.name) && typeof c.code === 'string' && c.code.length === 8);
   assert.ok(Number.isInteger(c.bootEpochSeed) && c.bootEpochSeed >= 0 && c.bootEpochSeed <= 0xffffffff);
 }
-const binary = await readFile(join(ROOT, '.cache/original-runtime/offline-depot/isaac.x64'));
-assert.equal(createHash('sha256').update(binary).digest('hex'), ORIGINAL_SHA);
+await assertOriginalBinary();
 await writeFile(join(output, 'scenarios.json'), JSON.stringify({ schema: 1, entropy: 'OS secrets run seeds and Node crypto randomInt boot epochs', cases }, null, 2) + '\n');
 
 const production = await startProductionServer();
@@ -124,38 +124,38 @@ try {
       compareMenu(state, 'title');
       if (menuNavigation) {
         for (const label of ['profile', 'main', 'character']) {
-          await page.keyboard.down('Enter'); await page.evaluate(() => window.game.step(12));
-          await page.keyboard.up('Enter'); await page.evaluate(() => window.game.step(72));
-          compareMenu(await page.evaluate(() => window.game.snapshot()), label);
+          await page.keyboard.down('Enter'); await step(page, 12);
+          await page.keyboard.up('Enter'); await step(page, 72);
+          compareMenu(await snapshot(page), label);
         }
       } else for (let i = 0; i < 3; i++) await page.keyboard.press('Enter');
       // The future manually entered seed is independent of startup time.
       if (seedDialog) {
-        await page.keyboard.down('Tab'); await page.evaluate(() => window.game.step(12));
-        await page.keyboard.up('Tab'); await page.evaluate(() => window.game.step(108));
+        await page.keyboard.down('Tab'); await step(page, 12);
+        await page.keyboard.up('Tab'); await step(page, 108);
         for (const character of scenario.code.toLowerCase()) {
-          await page.keyboard.down(character); await page.evaluate(() => window.game.step(12));
-          await page.keyboard.up(character); await page.evaluate(() => window.game.step(6));
+          await page.keyboard.down(character); await step(page, 12);
+          await page.keyboard.up(character); await step(page, 6);
         }
-        compareMenu(await page.evaluate(() => window.game.snapshot()), 'seed-entry');
-        await page.keyboard.down('Enter'); await page.evaluate(() => window.game.step(12));
-        await page.keyboard.up('Enter'); await page.evaluate(() => window.game.step(72));
-        compareMenu(await page.evaluate(() => window.game.snapshot()), 'character-seeded');
-        await page.keyboard.down('Tab'); await page.evaluate(() => window.game.step(12));
-        await page.keyboard.up('Tab'); await page.evaluate(() => window.game.step(108));
-        compareMenu(await page.evaluate(() => window.game.snapshot()), 'seed-reentry');
+        compareMenu(await snapshot(page), 'seed-entry');
+        await page.keyboard.down('Enter'); await step(page, 12);
+        await page.keyboard.up('Enter'); await step(page, 72);
+        compareMenu(await snapshot(page), 'character-seeded');
+        await page.keyboard.down('Tab'); await step(page, 12);
+        await page.keyboard.up('Tab'); await step(page, 108);
+        compareMenu(await snapshot(page), 'seed-reentry');
         for (const character of scenario.code.toLowerCase()) {
-          await page.keyboard.down(character); await page.evaluate(() => window.game.step(12));
-          await page.keyboard.up(character); await page.evaluate(() => window.game.step(6));
+          await page.keyboard.down(character); await step(page, 12);
+          await page.keyboard.up(character); await step(page, 6);
         }
-        await page.keyboard.down('Enter'); await page.evaluate(() => window.game.step(12));
-        await page.keyboard.up('Enter'); await page.evaluate(() => window.game.step(72));
-        compareMenu(await page.evaluate(() => window.game.snapshot()), 'character-reseeded');
+        await page.keyboard.down('Enter'); await step(page, 12);
+        await page.keyboard.up('Enter'); await step(page, 72);
+        compareMenu(await snapshot(page), 'character-reseeded');
       } else {
         await page.keyboard.press('Tab'); await page.keyboard.type(scenario.code); await page.keyboard.press('Enter');
       }
       await page.keyboard.press('Enter');
-      const final = await page.evaluate(() => window.game.snapshot());
+      const final = await snapshot(page);
       assert.equal(final.runSeedValue, native.seedValue);
       assert.equal(final.seedText, scenario.code.toUpperCase()); assert.equal(final.runSeed, scenario.code.toUpperCase());
       assert.equal(final.seedValid, true); assert.equal(final.seededRun, true);
@@ -168,11 +168,11 @@ try {
         await page.evaluate(({ initialSeed, bootEpochSeed }) => window.game.reset(initialSeed, { bootEpochSeed, trace: true }), { initialSeed, bootEpochSeed: scenario.bootEpochSeed });
         for (let index = 0; index < 3; index++) await page.keyboard.press('Enter');
         await page.keyboard.press('Tab'); await page.keyboard.type(scenario.code); await page.keyboard.press('Enter');
-        const queued = await page.evaluate(() => window.game.snapshot());
+        const queued = await snapshot(page);
         assert.equal(queued.pendingMenuInitializations.at(-1)?.initialization.type, 'commitCharacterSeed');
         assert.equal(queued.pendingMenuInitializations.at(-1)?.initialization.seed, native.seedValue);
-        await page.evaluate(() => window.game.step(1));
-        compareMenu(await page.evaluate(() => window.game.snapshot()), 'character-seeded');
+        await step(page, 1);
+        compareMenu(await snapshot(page), 'character-seeded');
         const queuedTrace = await page.evaluate(() => window.game.trace());
         const queuedCommands = [];
         for (const code of ['Enter', 'Enter', 'Enter', 'Tab']) queuedCommands.push({ type: 'key', code, down: true }, { type: 'key', code, down: false });
