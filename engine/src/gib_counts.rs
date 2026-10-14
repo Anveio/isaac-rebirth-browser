@@ -28,7 +28,7 @@ pub fn sample(
             AmountScale::Ordinary => 1,
             AmountScale::Challenge23 => 8,
         })
-        .filter(|amount| *amount <= i32::MAX as u32 - 1)
+        .filter(|amount| *amount < i32::MAX as u32)
         .ok_or("gib amount exceeds the source signed domain")?;
     //445cde..445d36: B2 is consumed even when a category later samples zero.
     let budget = (amount + shared.bounded(2)) / divisor + 1;
