@@ -1,0 +1,306 @@
+{
+  "schema": 1,
+  "status": "Source-backed normal217/0/0 room actor; production/fresh original-browser validation pending. Real58/43 death callbacks remain required gaps.",
+  "binarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "functions": [
+    {
+      "address": "0x4f9670",
+      "fdeBytes": 618,
+      "rawSha256": "9eaa1520cb28f2ce4c64acfdfaa1d43c0493c745cace9c6e2211263084cc4afd",
+      "dumpSha256": "d64bebcfbe3de8e6305dde7d0185fdda8bff971a424aa2d8c2abd12f3bce6794"
+    },
+    {
+      "address": "0x4949c0",
+      "fdeBytes": 1259,
+      "rawSha256": "0904b843729256a3e04da0627ac4f1bd6faee14f44dc3f97c7073dc8dfc6e320",
+      "dumpSha256": "64542ad3e619af6546f8fa0a1f5e279938eecb1d57fe8fa705fdd343cef9aa79"
+    },
+    {
+      "address": "0x42e8a0",
+      "fdeBytes": 30,
+      "rawSha256": "7ce4a5c68453b010c32b419cce659b537eaf72ef381e45f9de24e97de451b870",
+      "dumpSha256": "26dc6918382adfd64eb0566b9b687172850516e0cc5956a58e21c1c0d28000de"
+    },
+    {
+      "address": "0x42e850",
+      "fdeBytes": 66,
+      "rawSha256": "5ab734c03c397932a397e9b618cb9bd60a3e7e1186506695a81e424bced7b4fc",
+      "dumpSha256": "a17c53a10c28c14974768873ec039669a5029b360e328539ef789358a4e8badd"
+    },
+    {
+      "address": "0x42e8d0",
+      "fdeBytes": 83,
+      "rawSha256": "e7f789c835b0e768ad8fb5c069b90e7a8cd532bb53960bcd06ffa3965fa3baa7",
+      "dumpSha256": "cec7969619a5312f895eacd795bf04ad87ab9eaa46171572552f079b2d858b9d"
+    },
+    {
+      "address": "0x480fe0",
+      "fdeBytes": 164,
+      "rawSha256": "2470999cefbacd6028cdec42373834fdbbd9a46f398256e492a16b97c070bfd2",
+      "dumpSha256": "d0a670ee8a7db47a1bc3654b8768a261f376976849eac048cb1ba40448711416"
+    },
+    {
+      "address": "0x47fef0",
+      "fdeBytes": 1070,
+      "rawSha256": "b824341494128279f3380c20636667ea7bfb80fced631a801a6f9bc4bb1d28b9",
+      "dumpSha256": "84023602ef8e9e77b5c17695293215f767a473bf56de7028df969b0ac881d0f0"
+    },
+    {
+      "address": "0x612950",
+      "fdeBytes": 22,
+      "rawSha256": "bfb3092cb90e851b4ca3000f63a9724f6b8f6b0ca12ed0629639cd3a4bd66739",
+      "dumpSha256": "5984da160dd7f578f51ad8e32361ee3700d59095c451724d13dd9cddb8fc5d5a"
+    },
+    {
+      "address": "0x6129d0",
+      "fdeBytes": 57,
+      "rawSha256": "07075c0964a92747c8b005f1a56248182b0a311e36acea0cc3a509a327cf0da4",
+      "dumpSha256": "ef6086762d75ae7c3b78536252bd96ea9de2015a87be67a1aaffa117fde2f8e7"
+    },
+    {
+      "address": "0x612860",
+      "fdeBytes": 29,
+      "rawSha256": "28642b2f41a4d6ab337d599e0d0b6cdc2e6a082fde3a158fb274281773ca8d31",
+      "dumpSha256": "86a9472521cb3a7a743573db5406cc39731a1654ffc47bc7ab41a9bad5af9720"
+    },
+    {
+      "address": "0x612a70",
+      "fdeBytes": 56,
+      "rawSha256": "19f5f9ffb00b214a59d1fe536acc9a0701acb79752572cd978e1578896c63ba0",
+      "dumpSha256": "8875d6764219a2b1a50e2f13d238712851daa2342e467ed7d997aa0770cef024"
+    },
+    {
+      "address": "0x612b30",
+      "fdeBytes": 60,
+      "rawSha256": "7fe6298de486f630f9f7cfb0a61da13fd7928f11f124c5251f39a1c2155ad6be",
+      "dumpSha256": "c950284c0dcec4777dd880f44316e335a4f2a4912ed444a758f7766c840e3c49"
+    },
+    {
+      "address": "0x6129b0",
+      "fdeBytes": 31,
+      "rawSha256": "7f6574b3d59b064a3b39c3a4e63810450ab9d81bb1a3fdd1f70980201b3be45f",
+      "dumpSha256": "cf3fc9f71711de09c7e3113c7ec55f3485d64214c66e6a76f1b89010c9a3ea41"
+    },
+    {
+      "address": "0x42f450",
+      "fdeBytes": 40,
+      "rawSha256": "6e8c4b355085795cd595df7fa04d4b974e306c7b6d3515d0cfb0cda3e25f8d83",
+      "dumpSha256": "d54f7d55b1a9f6559c9b1dd0a6502ccd67646922c95827b412585af972280cab"
+    },
+    {
+      "address": "0x42f4a0",
+      "fdeBytes": 61,
+      "rawSha256": "cec69bd037d6f46edb80450b6c52ae298393d3c17f725cf355ce1eb8349d7274",
+      "dumpSha256": "33d655417f0266821761ec4b73adc34f98edbee2e39ebfcc0cc10d4e3702236b"
+    },
+    {
+      "address": "0x42f510",
+      "fdeBytes": 48,
+      "rawSha256": "fa4f0f3735d3a18b46c6a8087a7411f57bd1a6b17167c7482b3950834914ad04",
+      "dumpSha256": "cfc98c06170f17c53ac2655b816658f65ae2e08fd6babca2253068997503315c"
+    },
+    {
+      "address": "0x555700",
+      "fdeBytes": 3053,
+      "rawSha256": "7b6347306c2281e437195201754cb667877a2e9238ee2c4279dbc948bfe7831c",
+      "dumpSha256": "a80efa7b9a9abf97ec3c68bc71cf0115913b9fd4fac12c809e65d4fc1db2a40c"
+    },
+    {
+      "address": "0x550a40",
+      "fdeBytes": 225,
+      "rawSha256": "d383eb855e6c18e25704875091b29c8bf1bdd8600a66ed0a4cb8a9b90d94eeff",
+      "dumpSha256": "465a4e1f5a235720aa988de144d66d3af2b268937c3552ab8879d2d9a24098a4"
+    },
+    {
+      "address": "0x446a90",
+      "fdeBytes": 601,
+      "rawSha256": "8064c7587aedae4e38170eb55f56506d2cb46b414b0820da2ad3ff9ae268ccd6",
+      "dumpSha256": "45f871a2994bc659f6d7e358cd71dbe263c419a49631b62e0c414f5a9f0503fc"
+    },
+    {
+      "address": "0x441c80",
+      "fdeBytes": 713,
+      "rawSha256": "fdb3091280e32986d66c18d256250eb01b68ea9b03f6a60e0863252b35d545ba",
+      "dumpSha256": "5072c61e3b7e3d1d9ab2e8ef0dd9d9f2f508c69a58737a69b0e8b0b5d8c0f239"
+    },
+    {
+      "address": "0x47ed20",
+      "fdeBytes": 452,
+      "rawSha256": "db896b351018b8e5688c3187ddf5b45fc252bb365324c5b4e4d4b852cebe977e",
+      "dumpSha256": "b10c52ed22e0e928cf8cfb93639c6701752440cf0bd9949e29e486bc1e773641"
+    },
+    {
+      "address": "0x47f500",
+      "fdeBytes": 1918,
+      "rawSha256": "711a75107e8974143b0a4a957a8f3b1bf56703216a2fd14ebaa186d85e649679",
+      "dumpSha256": "39f79381dc820516d6448e9ebb22bc249a01f5379bb2104910b9f12f3ee8a38a"
+    },
+    {
+      "address": "0x4f98e0",
+      "fdeBytes": 14621,
+      "rawSha256": "e4c38ce935a4ee7e5791e7b5974fcfbf5c24e6e83afd3ee99b3ed1765d46c441",
+      "dumpSha256": "52b58d13e1846559cbb9a979f65a3a30bbcd6acb1add935854d000860725c890"
+    },
+    {
+      "address": "0x446f00",
+      "fdeBytes": 525,
+      "rawSha256": "af66670abd166b64c73340cdafbe4cbfbae964ec4efe6a0869869b41090a96d4",
+      "dumpSha256": "9f936f67e3cfff31d4f085d5b271d30d7777177ca5a25042c8d93b186f03ba44"
+    },
+    {
+      "address": "0x612820",
+      "fdeBytes": 54,
+      "rawSha256": "a4f8cb70c6760a06740a807afb2b583fe5b992bed2ede3cd8581769f61921c89",
+      "dumpSha256": "253eaa942f78d220238f0da82980c6f256ff5f273aea6cc0b868071bd7a623b7"
+    },
+    {
+      "address": "0x4fd200",
+      "fdeBytes": 8,
+      "rawSha256": "79fd91642f37c1a8238644b6b12133fa4402d870a8c24e2122829945fa03ccaa",
+      "dumpSha256": "c0b00affb606130c1ee4e89150f1123136b3b1f1a34b97561ba8c11ed64338b6"
+    },
+    {
+      "address": "0x4fd210",
+      "fdeBytes": 8,
+      "rawSha256": "d1e2d3c224fce48249911cbbcfa1aec169ba791ac962ef986d364119ef803743",
+      "dumpSha256": "bafdd7070e99bf5b1294807835f9e566f3480cf9d1357762f8ac69bfb77ec958"
+    },
+    {
+      "address": "0x47fc80",
+      "fdeBytes": 619,
+      "rawSha256": "051a0fef0b650bcf07fe16f6a41ba226bf5beb767122e7a7a1a3ddd6a24a2b52",
+      "dumpSha256": "98d295510256457a4cc4e7f9f9e160e0e1fab9135f86bb1b276bbb6ce4536cba"
+    },
+    {
+      "address": "0x4464c0",
+      "fdeBytes": 42,
+      "rawSha256": "ba65678eb196cb791af1dc7e3a0c06ef004a6c96c4e1cc6131d6dac798f86943",
+      "dumpSha256": "43c08eaf2995ec5f3cf19237868aa2b8c1dc30fe99849ac44fcebfc02048894f"
+    },
+    {
+      "address": "0x445c60",
+      "fdeBytes": 2130,
+      "rawSha256": "ea3c9f8ca72b6db67f34600d14de408e219139b32352ec579dc761d4251bd696",
+      "dumpSha256": "98626a3f5e99853c1d91d7a57a1aac4798e3d6835035e8111b6c7a15e0b717a3"
+    },
+    {
+      "address": "0x49b8f0",
+      "fdeBytes": 4422,
+      "rawSha256": "7bcf08483eb9b871432508d361873221d59b789538e29134c1ea5cf9bc992971",
+      "dumpSha256": "9a702c38b0db89f601c4adbc82a1330dd6c2d2c5ec9882afab822c540c05109d"
+    },
+    {
+      "address": "0x447190",
+      "fdeBytes": 3489,
+      "rawSha256": "b7fc8a1713cd9a376279973dc2f7f5a74eeae7486d24b79a6eebad6ae7acc19c",
+      "dumpSha256": "716f5923b8b20fe4c15082aecdeb7126ff035ea762f2230e65796f1344519de4"
+    },
+    {
+      "address": "0x4446a0",
+      "fdeBytes": 352,
+      "rawSha256": "49ec68194879591e78e7f14714148d0b96e52a036358cf27f4755cae3293039e",
+      "dumpSha256": "8a090076fa6380e3d572b36e5205188680b45d6149b0b9410eae58f3f8ad0c3a"
+    },
+    {
+      "address": "0x447110",
+      "fdeBytes": 121,
+      "rawSha256": "102af6e96b13b5bf3e3538f16f8eff7e9c85fa78cbc31c1d46cd0856637e2101",
+      "dumpSha256": "ea22f55b243c0a24963fc98adceed26340f42ef5823aede4fdcf088587c8648b"
+    },
+    {
+      "address": "0x446cf0",
+      "fdeBytes": 515,
+      "rawSha256": "a48280d96650297f7ce8627f21016529a3087e00ee2c4954cb0af15fa85c9f8d",
+      "dumpSha256": "296e75137debb0a3498f27846c02662706b06f7f944fc28bdf72f2de32aad8a8"
+    },
+    {
+      "address": "0x4f2d10",
+      "fdeBytes": 99,
+      "rawSha256": "11d8832bbb51540cb4571f61534eb34084e7f6fdba2645794a8ba5e136c7d987",
+      "dumpSha256": "96587d6daaf34c6b96b63cbb01bdda13aa48583809f6814a255ad1c4bd784187"
+    },
+    {
+      "address": "0x49e9f0",
+      "fdeBytes": 452,
+      "rawSha256": "0fad77770ce55a5c1122f4033bfd6cb7683526298b7569eef9fb88cb86743b16",
+      "dumpSha256": "7812a7ba6a5256324330eae01a6593b7aff598f86ff49bb0da1fab35b76090c5"
+    }
+  ],
+  "dispatch": {
+    "schema": 1,
+    "kind": 217,
+    "tableAddress": "0x66e390",
+    "index": 207,
+    "entryAddress": "0x66ea08",
+    "targetAddress": "0x4f9725",
+    "entrySha256": "1d51e65e5a6b886123b307587e0ed65bc92b42a4b6287a9aacee77b311b88831",
+    "binarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+    "status": "source-only"
+  },
+  "authored": {
+    "type": 217,
+    "variant": 0,
+    "subtype": 0,
+    "name": "Dip",
+    "baseHP": 3,
+    "stageHP": 1,
+    "radius": 9,
+    "mass": 6,
+    "contactDamage": 1,
+    "friction": 1,
+    "points": 12,
+    "shadow": 12,
+    "boss": false,
+    "champion": false,
+    "gibs": {
+      "amount": 5,
+      "flags": 32
+    },
+    "clips": [
+      {
+        "name": "Idle",
+        "frames": 10,
+        "looping": true
+      },
+      {
+        "name": "Move",
+        "frames": 25,
+        "looping": true
+      }
+    ],
+    "default": "Idle",
+    "appearClip": false,
+    "events": []
+  },
+  "factory": {
+    "pool": "555700:217>9 and not1000/9001 =>555738 ordinary preallocatedNPC pool;49e9f0 allocation class66ef30 is distinct from perSpawn47ed20.550a40 virtual10 Init precedes P/V assignments and5c6940 Room sequence/manager append. No immediate217 Update.",
+    "HP": "446a90@446b18..446b3f: baseHP+min(actualStage,10)*factor*stageHP, f32 factor1 ifstage<=4 else.8;441d40 copies configuredmaxHP488 to currentHP484. Stage1 Dip4HP is authored source law, not a captured value.",
+    "state": "Init47ed20 sets318bit4/f50state1/f54saved0/f60counter0;47f500 uses actualSetFrame(default,0), stopping Idle at0. BaseInit storesactual470=config46c and allrawSpawners1c/200/raw494false/parent498null/deadfalse/activetrue.",
+    "flags": "Only fresh normal/no-champion configuration is qualified. Sole mutable Dip.entity_flags extends upcoming Npc::entity_flags typed view; never duplicate or fabricate HaveFlag."
+  },
+  "full": {
+    "appearance": "Generic4f98e0 incomingcounter0:current470*.01,temporary state0\u21924949c0 initializer\u2192state3,color3cc blackRGBA[0,0,0,1] offsets[65,41,35]*(float1/255), then saved3/state1/invisible;incoming1SharedRaw\u21921000/15/1 due radius9/shadow12 (no immediateUpdate);incoming4 visible and PlayAppear true cannot select missing clip;incoming>19 returns saved3/current=config then familyAI beforeBase in samefull;f60 increments once perappearance callback.",
+    "state3": "494b70 PlayIdle(false);SharedBounded10!=0 skipsburst; ==0 sets4,Uniform*5+5 speed, normalflags callSharedDirection42e8d0 thenV+=direction*speed/current470 ifcurrent!=0. Fear800 instead normalizes(P-target) using47fef0 target. Regardless current470*=.8; no immediateMove switch on statechange.",
+    "state4": "494be0 PlayMove(false),current470*=.95,612950 squared incomingvelocity<1 sets3;currentfull remains Move until next familycallback.",
+    "tail": "4949ef actual464X<0\u2192spriteFlipX2fc. SharedBounded10==0:Uniform*.5+.2 scale,480fe0 drawsSharedRaw\u2192real1000/7/0 currentP/V0/nullparent, setscale, immediatev18. WhiteBloodinitial consumes actual sizeclip/pose/flipX/flipY/alpha6 draws; onlythen494a6d virtual58 copies Dipcolor. No fake cursor padding. pendingDamage378>0\u2192Bounded2==0\u2192SFX60 volume.8/delay15/pitch1, beforeBase drain. Initialstate0 returns beforeentiretail.",
+    "Base": "447190 advancesmain ANM beforeV*=current470/P+=V, thenreset470=config46c. QueueFIFO checks dead31f beforeeachrecord; ordinary flags0/2/4 HP<0 death, HP==0 remainsalive. After firstdeath remainingrecords skipped, actualpendingDamage378/flags37c/list clears late.",
+    "retirement": "Next-full217 has no dead earlyreturn: generic still familydispatch4949c0 before dead-stage. Generic4fb083/4fbf7b poopflag32\u21924fc0a3 SharedRaw\u2192real1000/43/0 atP+authoredgroundoffset, no immediateUpdate;4fb652\u21924f2d10\u2192Remove441bb0 setsinactive/dead. Common Base continues afterRemove."
+  },
+  "fast": "Actualv20=4446a0 skips ANM/AI/damage.318bit2 clearsandreturns;otherwise predictionP+=(V*current470)/2, groundclass5 preview collision;source manager fence/lifetime owns eligibility.",
+  "contacts": "Real XML9radius/6mass/12points groundclass5; existing source4453a0 Player/NPC,445710 mass and442b90/442e60 ground contact. Callback49b8f0 fresh217 normalclass nofamily projectile attack. Tear/Bomb/RoomEffect retain source queue identity.",
+  "deathGap": "445c60 authored5+SharedBounded2 categorysampling thenreal58 particles(each actualbirth plus immediateUpdate) and finalrealBlood7;next-fullreal43. This concrete consumer remains unimplemented in firstalive leaf; noFlySplat or draw substitution. Shared immutable poop245/effects-slice c9f3c101\u2026/integrationindex558f8c69\u2026 is source-only reusable prerequisite.",
+  "unaccepted": [
+    "No production or live Dip actor acceptance yet",
+    "Required missing58/43/SFX30 death consumer and resulting causalstream mismatches",
+    "Full original state parity, Blood7 paint/return and nativecallback witness",
+    "Inheritedfear/charm/champion/status/timedcolors/modifier callbacks",
+    "Saved hostile-room reconstruction and later-stage liveHP scaling",
+    "Exact spatial candidate collection/order and generic run-loader sharedstream origin"
+  ],
+  "assetHashes": {
+    "references/isaac/rebirth/resources/entities2.xml": "76408c1612ce7281d131c460cf3450eeae6bc602bc539805d53d76406432a936",
+    ".cache/coordination/npc217-research/authored/gfx/216.000_dip.anm2": "9f9967fe834780cf661f81dd2c587d675cfc1df7038936484c45679ac72d1760",
+    ".cache/coordination/npc217-research/dip-data.json": "e8aefed800ad235e249cb00028e414bbc52c45546ba651875cb03b52b303104a",
+    "references/isaac/rebirth/resources/gfx/monsters/rebirth/monster_216_dip.png": "2bc7986a039a2e16bbb6f727e637a7aa685f8ebba3bb2d5db3a57cacdc17a1b3"
+  }
+}

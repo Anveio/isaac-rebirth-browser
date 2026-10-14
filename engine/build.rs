@@ -452,6 +452,20 @@ fn main() {
         "pub const LEVEL2_FLY_IDLE_FRAMES: u32 = {};\n",
         level2["FrameNum"].as_u64().unwrap()
     ));
+    for clip in npc_clips["gfx/216.000_dip.anm2"]["Animations"]
+        .as_array()
+        .expect("Dip clips missing")
+    {
+        let name = clip["Name"].as_str().unwrap();
+        assert!(matches!(name, "Idle" | "Move"));
+        assert_eq!(clip["Loop"], true);
+        assert_eq!(clip["Triggers"].as_array().unwrap().len(), 0);
+        generated.push_str(&format!(
+            "pub const DIP_{}_FRAMES: u32 = {};\n",
+            name.to_uppercase(),
+            clip["FrameNum"].as_u64().unwrap()
+        ));
+    }
     for clip in npc_clips["gfx/020.000_monstro.anm2"]["Animations"]
         .as_array()
         .expect("Monstro clips missing")
@@ -535,7 +549,7 @@ fn main() {
         "pub const EMBER_IDLE_FRAMES: u32 = {};\n",
         ember["FrameNum"].as_u64().unwrap()
     ));
-    for kind in [9, 13, 18, 20, 33, 214, 244] {
+    for kind in [9, 13, 18, 20, 33, 214, 217, 244] {
         let tag = xml
             .split("<entity ")
             .find(|tag| {
@@ -565,11 +579,17 @@ fn main() {
             generated.push_str(&format!(
                 "pub const NPC_{kind}_GRID_CLASS: u32 = {class};\n"
             ));
-            if matches!(kind, 20 | 214 | 244) {
+            if matches!(kind, 20 | 214 | 217 | 244) {
                 generated.push_str(&format!(
                     "pub const NPC_{kind}_GRID_POINTS: u16 = {points};\n"
                 ));
             }
+        }
+        if kind == 217 {
+            generated.push_str(&format!(
+                "pub const NPC_217_STAGEHP: f32 = {:?}_f32;\n",
+                entity_number(&xml, 217, 0, "stageHP")
+            ));
         }
         for field in [
             "baseHP",
