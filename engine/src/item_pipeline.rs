@@ -95,13 +95,6 @@ impl<'a> ItemInputs<'a> {
         self.owner.temporary_count(id)
     }
 
-    ///5e3d70 presence is independent of the record count.
-    pub(crate) fn temporary_record_present(self, id: u32) -> bool {
-        self.owner
-            .temporary_collectibles
-            .iter()
-            .any(|record| record.item_id == id)
-    }
     /// Exact per-callback cache32/64 proof: other modifier and trinket owners
     /// remain outside this scope. Future property operators extend their own
     /// cache reads instead of widening controller/contact admission.
@@ -198,8 +191,8 @@ pub(crate) fn resolve_scalars(
                 &[1, 222]
             }
             CacheStage::ShotSpeed => {
-                // Preserve the existing110 count predicate in this extraction;
-                // actual record-presence edge correction is a separate slice.
+                // 511f68/513e48 test raw permanent and temporary143 counts
+                // for nonzero. Presence and signed-positive getters are distinct.
                 values.stats.shot_speed =
                     if inputs.owned_count(143) != 0 || inputs.temporary_count(143) != 0 {
                         1.2_f32
@@ -243,12 +236,7 @@ pub(crate) fn resolve_scalars(
             _ => continue,
         };
         if !inputs.has_unmapped_owner(flag, supported) {
-            let unknown_143 = stage == CacheStage::ShotSpeed
-                && (inputs.owned_count(143) < 0
-                    || (inputs.temporary_record_present(143) && inputs.temporary_count(143) == 0));
-            if !unknown_143 {
-                completed |= flag;
-            }
+            completed |= flag;
         }
     }
     values.stats.validate()?;
