@@ -1,0 +1,124 @@
+{
+  "scope": "Fresh ordinary public initial Save only; actual old3fbd/4006 versusba0/4d. Latest678 sourceprojection separate, no latestwholemain/PublicContinue/restore acceptance.",
+  "capturedBaselineSource": "3fbd27f9179409623a006562c2412242fbc6b6f0",
+  "capturedProposalSource": "ba0ae5e241b4fc5fbd09dfe86a05072025836479",
+  "baselineArtifact": {
+    "sha256": "4006c8871c8914fa800c4ff77aae1ed5152641807f91f7b73d92340b1f40c1de",
+    "files": 1220,
+    "bytes": 218398610
+  },
+  "proposalArtifact": {
+    "sha256": "4d4b7c1da59d9faa54f9374e1622472cf72c9a562598cade02d5a2a76327916f",
+    "files": 1220,
+    "bytes": 218404435
+  },
+  "bank": {
+    "schema": 1,
+    "entropy": "OS secrets declared once before original/browser execution; independent boot epoch and browser reset seed; never native admittedseed",
+    "scope": "Publicordinary Character no-dialog6cases foractual SavedGame owner comparison; no publicContinue execution",
+    "cases": [
+      {
+        "name": "zero-epoch",
+        "bootEpochSeed": 0,
+        "initialSeed": 1
+      },
+      {
+        "name": "fixed-epoch",
+        "bootEpochSeed": 1700000000,
+        "initialSeed": 4294967295
+      },
+      {
+        "name": "random-0",
+        "bootEpochSeed": 4035354577,
+        "initialSeed": 1105025848
+      },
+      {
+        "name": "random-1",
+        "bootEpochSeed": 1758035760,
+        "initialSeed": 600726671
+      },
+      {
+        "name": "random-2",
+        "bootEpochSeed": 2732893944,
+        "initialSeed": 3202571306
+      },
+      {
+        "name": "random-3",
+        "bootEpochSeed": 1439660727,
+        "initialSeed": 1746781205
+      }
+    ]
+  },
+  "bankSha256": "607757f7c68cb48f6ffed73946af8362b683e5fc0af3913533ea5800eb4ace01",
+  "harnessFreezeSha256": "9b03bc7e67e225ba3d74594d4e77ae0e3c02da6f52f528c614c9d4995b68f830",
+  "caseResults": [
+    {
+      "name": "zero-epoch",
+      "commonRequiredDifferences": 38,
+      "sameFailureFieldsExpectedActual": true,
+      "sameActualOriginalManifest": true,
+      "proposal801checks": 801,
+      "proposal801differences": 0
+    },
+    {
+      "name": "fixed-epoch",
+      "commonRequiredDifferences": 38,
+      "sameFailureFieldsExpectedActual": true,
+      "sameActualOriginalManifest": true,
+      "proposal801checks": 801,
+      "proposal801differences": 0
+    },
+    {
+      "name": "random-0",
+      "commonRequiredDifferences": 38,
+      "sameFailureFieldsExpectedActual": true,
+      "sameActualOriginalManifest": true,
+      "proposal801checks": 801,
+      "proposal801differences": 0
+    },
+    {
+      "name": "random-1",
+      "commonRequiredDifferences": 38,
+      "sameFailureFieldsExpectedActual": true,
+      "sameActualOriginalManifest": true,
+      "proposal801checks": 801,
+      "proposal801differences": 0
+    },
+    {
+      "name": "random-2",
+      "commonRequiredDifferences": 38,
+      "sameFailureFieldsExpectedActual": true,
+      "sameActualOriginalManifest": true,
+      "proposal801checks": 801,
+      "proposal801differences": 0
+    },
+    {
+      "name": "random-3",
+      "commonRequiredDifferences": 38,
+      "sameFailureFieldsExpectedActual": true,
+      "sameActualOriginalManifest": true,
+      "proposal801checks": 801,
+      "proposal801differences": 0
+    }
+  ],
+  "proposalPlayerChecks": 4806,
+  "proposalPlayerDifferences": 0,
+  "baselineMissingPlayerOwnerErrors": 6,
+  "baselinePlayerChecks": 0,
+  "existingGridDifferencesBaseline": 228,
+  "existingGridDifferencesProposal": 228,
+  "newOrLostCommonExecutedFields": 0,
+  "readbackAuditSha256": {
+    "baseline": "3d6a695e1e7aa47fdfdaeb8bc18efe30c46fb53b84d24bccf1867397f8bc81fd",
+    "proposal": "e3d5342ab1f8281e0312f5a5d2bb5e0ecabdd7848e6034f4e8ad52e95e7dffb5",
+    "pair": "4bebf507dc128e46207c3b3e821cf57e98e4ce66cc795c478fa76c143e3a368d",
+    "latest678SourceProjection": "1786d946b3d37ea9b32d149747e319c79d0c922bb16c999f4c8226e44a0a7b97"
+  },
+  "honestLimits": [
+    "347owned slots andfouractive/reservewords allzero;450currentRNGstates nonzero ineachcase, but no preSave acquisition/RNGadvancement witness",
+    "Baseline schema lacks actualPlayerSaved owner; all6 assertionfailures retained, not waived or counted801",
+    "Proposal4806 savedfields match, cohort remainsFAIL with228 actualcurrentroom/grid differences unchanged",
+    "Sparse read-only native6captures/all50producedprogressrecords each andbrowser5checkpoints/inputtraces lossless; backendEvents0 withfalse/null guards, not independentCAPI body/lifecycle coverage",
+    "No durablePublicContinue/restore executed, no nonzeroTEMP normalization or broadermain/item/actor/render acceptance"
+  ]
+}

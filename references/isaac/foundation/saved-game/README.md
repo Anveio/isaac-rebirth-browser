@@ -6,6 +6,26 @@ calls Room.Save, copies ordinary Level descriptors, then copies PlayerManager
 state. The production route retains actual Level/Room/Player/inventory and
 ItemPool data internally. Snapshots expose bounded samples and a summary.
 
+The [Player item owner](player-item-owner-source.json) now runs
+`54f373 → 5bf400 → 518350` at that save boundary: it flushes the real queued
+grant and stores 347 counts, 450 current child RNG states, and four active or
+reserve fields. The restore store helper targets an already constructed Player
+owner, skips dummy count ID 0, and restores current RNG35 states without drawing
+new seeds. It does not enable or execute public Continue. Temporary effects,
+active cancellation and costume normalization are explicitly bounded; wider
+owners fail until their actual callbacks are implemented.
+
+The folded `ordinary-run --ambient-grid` comparison requires all 801 item-owner
+fields against read-only original SavedState observations. The
+[current six-case proof](player-owner-current-pair.json) retains 4,806 passing
+saved-field comparisons, including 450 nonzero current RNG states per case.
+The baseline lacks this owner and retains six missing-owner assertions; both
+artifacts retain the same 228 grid differences. All owned counts and active
+words were zero in this cohort. The captured sources are 3fbd27f and ba0ae5e;
+the current source projection is separately reviewed. Public Continue, restore,
+nonzero count/active bindings and independent backend callback coverage remain
+unaccepted. The historical failures below remain preserved.
+
 Clear generates the actual 135×448 seed-pair table plus the saved manager seed.
 Room.Save consumes two shared MT words for each null cell in the supported live
 room grid. Level copy excludes only descriptor index −3; ordinary unused −1
@@ -59,7 +79,7 @@ retained in the evidence and remains required. The first six-case cohort's
 [rejected allocated-row inference](rejected-copy-predicate-report.json) is also
 preserved; it was corrected from actual source stores and observations.
 
-The actual WASM ordinary snapshot is 135,792 JSON bytes, including a 1,901-byte
+The historical WASM ordinary snapshot was 135,792 JSON bytes, including a 1,901-byte
 saved summary with nine legacy and nine current-row samples. The full tables
 and ItemPool copy stay internal. In a 256-sample Node measurement under host
 load, a tick plus snapshot took median 1.151 ms and p95 1.810 ms. This measures
