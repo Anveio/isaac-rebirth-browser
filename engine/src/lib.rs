@@ -17,6 +17,7 @@ pub mod champions;
 pub mod chests;
 pub mod combat;
 mod content;
+pub mod dingle;
 pub mod dips;
 mod doors;
 mod effects;
@@ -2116,7 +2117,7 @@ impl Game {
         let family = entities::family(self.state.room.npcs[index].kind)
             .ok_or("admitted NPC has no registered family")?;
         let mut occupied = Vec::new();
-        if family.needs_occupancy {
+        if family.occupancy == entities::Occupancy::Actors {
             occupied.push(player);
             occupied.extend(
                 self.state
@@ -2126,6 +2127,8 @@ impl Game {
                     .filter(|npc| !npc.removed)
                     .map(|npc| npc.position),
             );
+        }
+        if family.occupancy != entities::Occupancy::None {
             occupied.extend(
                 self.state
                     .room
@@ -2152,6 +2155,7 @@ impl Game {
                 grid_descriptor: self.state.room.grid.as_mut(),
                 path_costs: self.state.room.path_costs.as_mut(),
                 occupied: &occupied,
+                countable_total: self.state.room.manager_counts.countable_total(),
                 audio: &mut self.state.audio,
                 system_counter: self.state.system_clock.system_counter.wrapping_sub(1),
                 player_items: self.state.player_items.as_ref(),
@@ -2210,6 +2214,24 @@ impl Game {
             entities::Birth::Shot(shot) => self.admit_enemy_projectile(|id| {
                 enemy_projectiles::EnemyProjectile::birth(id, parent, shot)
             }),
+            entities::Birth::Npc(selector) => {
+                let id = u32::try_from(self.state.room.npcs.len())
+                    .map_err(|_| "NPC identity exhausted")?;
+                let context = entities::SpawnContext {
+                    stage: self.state.stage,
+                    game_update_count: self.state.game_update_count,
+                };
+                let npc = entities::spawn(id, &selector, &context)?
+                    .ok_or("NPC birth requires a registered family")?;
+                let (countable, boss) = (npc.can_shut_doors, npc.boss);
+                self.state.room.npcs.push(npc);
+                self.state.actor_scheduler.admit(actors::ActorRef {
+                    kind: actors::ActorKind::Npc,
+                    id,
+                })?;
+                self.state.room.manager_counts.admit(countable, boss);
+                Ok(())
+            }
         }
     }
     fn admit_enemy_projectile(

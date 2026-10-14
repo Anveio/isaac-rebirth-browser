@@ -22,7 +22,7 @@ pub(crate) const FAMILY: Family = Family {
     advance,
     post_contact_grid: crate::entities::clamp_walls,
     entity_flags: crate::entities::ordinary_flags,
-    needs_occupancy: false,
+    occupancy: crate::entities::Occupancy::None,
 };
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]

@@ -300,6 +300,25 @@ This runs on the suite registry (`tools/e2e/suites.mjs`) and the shared
   Each game must also reach the spec's required markers on its own. The
   markers are admission, damage, death, retirement and clear. All rows are
   exact.
+- **Boss routes.** A spec with `boss: true` draws its cases from
+  `tools/original/boss-scenarios.py` instead. Discovery keeps OS-random floors
+  whose boss room holds the spec's boss and is reachable from the start
+  through ordinary rooms with no hostile spawns (about 1 floor in 80; Dingle
+  takes about 1 in 500 seeds).
+  1. The production build records the route closed-loop and frame-stepped
+     (`tools/e2e/boss-route-record.mjs`). It routes with the playtest bot's
+     router, now shared as `tools/e2e/lib/route.mjs`, around rocks, poops,
+     spikes and fireplaces, door to door.
+  2. A fresh original replays the same keys. The seed is kept only if the
+     original stays on the port's path at every `route-N` checkpoint and stands
+     in the boss room at `boss-room-arrival`. Rejected seeds are listed with
+     their reason and counted in the output's `discovery` block; contrived
+     seeds that fail stop the run.
+  3. The fight segment after `boss-room-arrival` is a Scene wait, a shoot
+     sweep along every axis and idle. Later progression tapes (boss kill,
+     trapdoor) start from the same arrival checkpoint.
+
+  The comparator adds a `bossRoom` marker that both games must reach.
 - **Source index.** `tools/original/ai-dispatch.py` reads the original's
   `Entity_NPC::update_ai` jump table (0x4f9670 → 0x66e390). It prints each
   type's Linux AI routine and the types that share it: 160 types, 107 routines.
@@ -343,8 +362,12 @@ This runs on the suite registry (`tools/e2e/suites.mjs`) and the shared
    Iterate on step 2. Replay a failing run exactly with `--scenarios`.
 6. Run `npm run matrix:update` and open a small PR.
 
-Bosses also need their room type admitted and their VS-screen data. That work
-is tracked under M10 and #147.
+Boss rooms open through the generic boss gate once a registered family
+constructs a boss that has a `bossportraits.xml` presentation (minibosses need
+none). A boss spec adds `boss: true` and contrived entries are bare seed codes.
+Clip events (`IsEventTriggered`/`WasEventTriggered`) come from the anm2
+triggers in the clip catalogue: use `plain_npc::event_triggered` and
+`event_was_triggered`.
 
 ## 4. Migration order
 
@@ -445,6 +468,27 @@ engine work in M1–M5 does not.
       - the "ISAAC VS GLUTTONY" streak and the boss HP bar (presentation);
       - Super Gluttony 49.1 needs lob projectiles 48d5c0;
       - laser render quads are approximated.
+  - Dingle 261.0 (boss, first boss-route user): **about 60 minutes
+    wall-clock** from opening `ai_dingle` to the first paired boss-route run.
+    The boss-route harness itself (router library, recorder, original
+    validation) took about 2 hours on top.
+    - About 15 minutes of source reading, done by a research agent in
+      parallel with the harness work.
+    - About 30 minutes of code. New shared pieces: clip events from anm2
+      triggers, `Birth::Npc` for mid-room spawns, the shared
+      `find_free_position`, `Occupancy` modes and the runtime grid spawn
+      (`GridEntity::spawn`, poop Init).
+    - One live `entity-dingle` run of about 20 minutes with two contrived
+      routes.
+    - Verified: route, boss-room arrival, appear schedule, idle counter and
+      the state-3 timing match the original exactly. Both cases then diverge
+      at the first shared-MT consumer: a co-spawned Dip's direction, or the
+      Idle attack roll (#162).
+    - Open:
+      - Spit, whistle, slide and the poop drop are unverified against the
+        original until #162;
+      - runtime poops draw no spritesheet roll yet (grid admission PR);
+      - the boss death sequence goes through the generic NPC death.
 - [x] Room shapes (coordinator priority 2): one generic admission gate
   (`traversal::admitted_shape`) opens ordinary type-1 rooms in all four
   authored shapes (13x7, 13x14, 26x7, 26x14). Geometry, eight door slots and

@@ -91,6 +91,19 @@ impl GridEntity {
                 costs.store(index, 1000)?;
             }
             1 => {} // Supported Decoration.Init has no direct path-cost store.
+            14 if self.variant == 0 && self.state <= 3 => {
+                // Poop.Init569600: an ordinary unbroken poop blocks (class3)
+                // and stores path cost1500. Its local RNG5/9/7 owns the
+                // cosmetic +314 draw.
+                self.collision_class = 3;
+                costs.store(index, 1500)?;
+                let owner = self
+                    .source_owner
+                    .as_mut()
+                    .ok_or("Poop Init requires its constructor")?;
+                owner.local_rng = Rng::new(self.spawn_seed, [5, 9, 7]);
+                owner.local_rng.bounded(2);
+            }
             _ => return Err("derived grid Init is outside supported ownership".into()),
         }
         Ok(())
@@ -108,6 +121,34 @@ impl GridEntity {
         self.spawn_seed = primary;
         self.init_supported(costs, index)?;
         self.finish_init(game_update)
+    }
+
+    /// Room5c5070 runtime spawn: refused when the cell's path cost exceeds
+    /// 900; otherwise the factory constructor draws its two raw words and
+    /// InitSeed runs the derived Init. The caller replaces the cell's entity.
+    pub(crate) fn spawn(
+        kind: u32,
+        variant: u32,
+        seed: u32,
+        shared: &mut Mt19937,
+        game_update: u32,
+        costs: &mut RoomCosts,
+        index: usize,
+    ) -> Result<Option<Self>, String> {
+        if costs.get(index)? > 900 {
+            return Ok(None);
+        }
+        let mut entity = Self {
+            kind,
+            variant,
+            state: 0,
+            collision_class: 0,
+            spawn_seed: 0,
+            source_owner: None,
+        };
+        entity.construct_owner(shared)?;
+        entity.init_seed(seed, game_update, costs, index)?;
+        Ok(Some(entity))
     }
 
     pub fn record(&self) -> Option<GridRecord> {
@@ -132,7 +173,7 @@ impl GridEntity {
         costs: &mut RoomCosts,
         index: usize,
     ) -> Result<(), String> {
-        if !matches!(record.kind, 1 | 15 | 16) {
+        if !matches!(record.kind, 1 | 14 | 15 | 16) {
             return Err("record factory kind is outside supported object ownership".into());
         }
         costs.get(index)?;

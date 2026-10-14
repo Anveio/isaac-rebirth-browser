@@ -1,11 +1,13 @@
 // Entity specs: one small module per authored room entity in ./entities/.
 // suites.mjs turns each into a live state-pair suite `entity-<name>`, graded
 // by tools/foundation/entity-state-pair.mjs over rooms that
-// tools/original/entity-scenarios.py finds for it.
+// tools/original/entity-scenarios.py (or boss-scenarios.py) finds for it.
 //
 //   export default {
 //     type: 12, variant: 0,                 // entities2.xml identity (omit for a room-shape spec)
 //     shape: [26, 7],                       // authored room size to enter (default 13x7)
+//     boss: true,                           // walk a recorded route into the floor's boss room
+//                                           // (tools/original/boss-scenarios.py; contrived entries are bare CODEs)
 //     about: 'one line for the suite list',
 //     contrived: ['CODE:SLOT'],             // fixed seed + starting-room door slot (optional)
 //     count: 2,                             // OS-random rooms discovered per run
@@ -22,7 +24,7 @@ export const specNames = () => readdirSync(directory).filter(file => file.endsWi
 export async function loadSpec(name) {
   if (!specNames().includes(name)) throw new Error(`Unknown entity spec ${name}`);
   const spec = (await import(new URL(`${name}.mjs`, directory))).default;
-  return { contrived: [], count: 2, required: ['admission'], ...spec, name,
+  return { contrived: [], count: spec.boss ? 1 : 2, required: spec.boss ? ['bossRoom', 'admission'] : ['admission'], ...spec, name,
     matches: (type, variant) => spec.type !== undefined && type === spec.type && variant === spec.variant };
 }
 

@@ -34,8 +34,10 @@ pub(crate) struct NpcWorld<'a> {
     pub grid: &'a Grid,
     pub grid_descriptor: Option<&'a mut GridDescriptor>,
     pub path_costs: Option<&'a mut RoomCosts>,
-    /// FreePosition(mode1) occupancy, gathered only for families that ask.
+    /// FreePosition occupancy, gathered only for families that ask.
     pub occupied: &'a [WorldVector],
+    /// Room+16ac plus Room+16b0: pending and current countable actors.
+    pub countable_total: i32,
     pub audio: &'a mut AudioState,
     pub system_counter: u32,
     pub player_items: Option<&'a PlayerItems>,
@@ -50,6 +52,8 @@ pub(crate) enum Birth {
     Ember(ParticleBirth),
     Loot(LootBirth),
     Laser(crate::lasers::LaserBirth),
+    /// Spawn550a40 of an NPC mid-room (no champion roll in a live room).
+    Npc(SpawnSelector),
 }
 
 pub(crate) type Advance =
@@ -63,7 +67,19 @@ pub(crate) struct Family {
     pub post_contact_grid: fn(&mut Npc, &Grid) -> Result<(), String>,
     /// Actual Entity+318 view of the family's own flag owner.
     pub entity_flags: fn(&Npc) -> u32,
-    pub needs_occupancy: bool,
+    /// Which actors FindFreePosition5c7f30 must avoid for this family.
+    pub occupancy: Occupancy,
+}
+
+/// FindFreePosition occupancy, gathered into `NpcWorld::occupied` only for
+/// families that ask.
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub(crate) enum Occupancy {
+    None,
+    /// avoidAll=false: bombs, pickups and slots.
+    Items,
+    /// avoidAll=true: also the player and every NPC.
+    Actors,
 }
 
 /// Families without a subclass flag owner keep Init441c80's cleared flags
@@ -97,6 +113,7 @@ pub(crate) static FAMILIES: &[&Family] = &[
     &crate::roundworm::FAMILY,
     &crate::horfs::FAMILY,
     &crate::gluttony::FAMILY,
+    &crate::dingle::FAMILY,
 ];
 
 pub(crate) fn family(kind: u32) -> Option<&'static Family> {
