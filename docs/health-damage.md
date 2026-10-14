@@ -73,3 +73,22 @@ resume an interrupted Pickup. The gate additionally reads and compares
 actual queued fields, copied clocks and exclusive ownership. All six tapes
 and the two OS outcomes are retained unchanged; the composed private Rust
 checks pass, while production and fresh paired acceptance remain pending.
+
+
+Current source integration includes merged main Health115/Info/Hit and
+Nightmare124, with actual room counts119, strict negative NPC death123,
+Heart109 and the public keyboard122 preserved. Private Rust check9.51s and
+strict Clippy10.36s qualify exact composition `defb1091`; the final narrow
+skipped-music guard and Soul-only action restack have source/type/format/matrix
+qualification separately. Production and fresh health execution remain pending.
+
+The health gate requires all four sealed Soul72/Black6 phase tapes and two to
+four recorded OS outcomes before either game starts. It rejects empty/missing
+cohorts, duplicate IDs, altered fixed seeds/phase tapes and changed OS routes.
+Mandatory coverage is chosen by the sealed ID even when replay requirements
+are empty. Fourteen ignored no-game checks pass; all original six inputs are
+byte-identical when rebuilt with their recorded words, with no new entropy.
+NPC membership follows active31e and compares dead31f independently, preserving
+dead active actors until retirement. Unsupported217, missing58/43 callbacks
+and actual living-red0/Soul-positive actions remain required future coverage;
+no source or preflight result is live acceptance.

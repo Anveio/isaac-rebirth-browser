@@ -255,5 +255,33 @@
     "bookClear": "910708e corrected by actual deferred System oldstate2 source leaf; genericNewRun does not clearInfo",
     "browserAudioHook": "83713a2 preserves Root archiveBrowserEvidence=false/default raw and all transport closure handling; Health explicitly opts into gzip and audio",
     "collectibleSelection": "504820 ->5054ca ->50c780 name-based rejection at natural collectible collect only; generic Heart/regular/Chest eligibility and physical altar admission preserve Root ownership."
+  },
+  "currentMainIntegration": {
+    "mainBeforeGate": "19906c4e28199059d27e3ca90caa6d6861c66f2e",
+    "healthHead": "fcd557cd9d5d3ab5034f66279000eacf4dc3318b",
+    "healthMerge": "b58daa2994a7088142c0b4ae86ec7d858de9bc1a",
+    "checkedComposition": "defb1091b567ae2463fd3e35de439d8f6f3f415f",
+    "checkSeconds": 9.51,
+    "clippySeconds": 10.36,
+    "receiptPath": ".cache/coordination/combat/health-nightmare-main-static/receipt-defb1091.json",
+    "receiptSha256": "91efadb78ccfcfcbc8c4bc633ef3fabe4918b687fa5eec352fb12ed407b20781",
+    "qualification": "Private metadata check covers composed health/Nightmare before the three-line source-reviewed Info skipped-music guard. Final guard and Soul-only action restack have type/format/matrix/diff qualification only. Historical06e409 receipt remains separate. No production/fresh health execution or acceptance."
+  },
+  "requiredBankIntegrity": {
+    "canonicalFirstBankSha256": "f3765cd1fbbd91386d2871e39416d15f05e72e38be36e31304c88e577e41c894",
+    "fixedIds": [
+      "health-soul-phase0",
+      "health-soul-phase1",
+      "health-black-phase0",
+      "health-black-phase1"
+    ],
+    "invariants": "All four sealed seed/bootstrap/both public phase tapes, uniqueIDs and2..4 recorded OS vectors in order are required before either game. Recorded OS tapes are rebuilt from submitted words with the source-only public builder, without new entropy. Mandatory coverage family comes from the sealed ID regardless supplied healthRequired metadata. Default six cases/inputs remain exact.",
+    "noGamePreflight": {
+      "checks": 14,
+      "receiptPath": ".cache/coordination/combat/health-nightmare-main-static/health-bank-preflight/receipt.json",
+      "receiptSha256": "bdfb8ee8dd1dac23d8bca1f9b370f12133c5ec005ff235f1cd02da779257ca8a",
+      "scope": "Ignored no-game gate control-flow/admission only; no fresh entropy, original/browser/compiler/production run or health acceptance."
+    },
+    "npcLifecycle": "Membership uses actual Entity.active31e; dead31f is independently compared. Dead active NPCs remain required until actual retirement, including unsupported217."
   }
 }

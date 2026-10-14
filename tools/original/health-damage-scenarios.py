@@ -65,7 +65,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--count', type=int, default=2)
     args = parser.parse_args()
-    if not 0 <= args.count <= 16: raise ValueError('Count must be0..16')
+    if not 2 <= args.count <= 4: raise ValueError('Required OS count must be2..4')
     # Draw the entire unfiltered cohort once, before fixture construction or
     # any original/port grading. Its cardinality and values remain explicit.
     vectors = [paired.runner.codec.random_vector() for _ in range(args.count)]

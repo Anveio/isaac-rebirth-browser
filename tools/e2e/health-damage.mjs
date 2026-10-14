@@ -21,6 +21,7 @@ const sources = ['tools/e2e/health-damage.mjs', 'tools/original/health-damage-ob
   'references/isaac/foundation/health-damage/source-contract.json',
   'references/isaac/foundation/health-damage/main-presentation-owner.json',
   'references/isaac/foundation/health-damage/action-admission.json',
+  'references/isaac/foundation/health-damage/first-prepared-cases.json',
   'references/isaac/foundation/information-animation/clear-source.json',
   'references/isaac/foundation/information-animation/source-contract.json'];
 const hashes = () => Object.fromEntries(sources.map(path => [path, sha(readFileSync(path))]));
@@ -30,6 +31,36 @@ const scenarioFile = option('--scenario-file', undefined);
 const scenarios = scenarioFile ? JSON.parse(readFileSync(resolve(scenarioFile))) :
   JSON.parse(execFileSync('python3', ['tools/original/health-damage-scenarios.py', '--count', option('--count', '2')],
     {encoding: 'utf8', maxBuffer: 8 * 1024 * 1024}));
+assert.equal(scenarios.schema, 1);
+assert.ok(Array.isArray(scenarios.cases) && scenarios.cases.length >= 6 && scenarios.cases.length <= 8);
+const fixedBankPath = 'references/isaac/foundation/health-damage/first-prepared-cases.json';
+assert.equal(sha(readFileSync(fixedBankPath)), 'f3765cd1fbbd91386d2871e39416d15f05e72e38be36e31304c88e577e41c894', 'The first prepared health bank remains immutable');
+const fixedBank = JSON.parse(readFileSync(fixedBankPath));
+const mandatory = new Map(['soul', 'black'].flatMap(family => [0, 1].map(phase => {
+  const id = `health-${family}-phase${phase}`, fixture = fixedBank.cases.find(c => c.scenario.id === id);
+  assert.ok(fixture); return [id, fixture];
+})));
+const ids = scenarios.cases.map(c => c.scenario.id);
+assert.equal(new Set(ids).size, ids.length, 'Health case IDs must be unique');
+const identityFields = ['seed', 'seedValue', 'initialSeed', 'bootEpochSeed', 'bootstrap', 'tape', 'pairedTape', 'healthRoute', 'phaseOffset'];
+for (const [id, fixture] of mandatory) {
+  const selected = scenarios.cases.find(c => c.scenario.id === id); assert.ok(selected, `Missing mandatory ${id}`);
+  for (const field of identityFields) assert.deepEqual(selected[field], fixture[field], `${id}: sealed identity and public phase tape`);
+  assert.equal(selected.scenario.randomized, false);
+}
+const osCases = scenarios.cases.filter(c => !mandatory.has(c.scenario.id));
+assert.ok(Array.isArray(scenarios.randomVectors) && scenarios.randomVectors.length >= 2 && scenarios.randomVectors.length <= 4);
+assert.equal(osCases.length, scenarios.randomVectors.length, 'Retain every recorded OS outcome');
+// Build declared OS tapes from recorded words without drawing new entropy or running either game.
+const declaredOs = JSON.parse(execFileSync('python3', ['-c',
+  "import json,runpy,sys; m=runpy.run_path('tools/original/health-damage-scenarios.py',run_name='declared_health'); print(json.dumps([m['build'](f'health-unfiltered-{n}',v['code'],'soul' if n%2==0 else 'black',n%2,False) for n,v in enumerate(json.loads(sys.argv[1]))]))",
+  JSON.stringify(scenarios.randomVectors)], {encoding: 'utf8', maxBuffer: 8 * 1024 * 1024}));
+for (const [index, selected] of osCases.entries()) {
+  assert.equal(selected.scenario.id, declaredOs[index].scenario.id);
+  assert.equal(selected.scenario.randomized, true);
+  assert.equal(selected.seedValue, scenarios.randomVectors[index].seedValue);
+  for (const field of identityFields) assert.deepEqual(selected[field], declaredOs[index][field], 'Recorded OS identity and declared public tape');
+}
 save(resolve(output, 'scenarios.json'), scenarios);
 const pathIdentity = value => value?.replaceAll('\\', '/').replace(/^resources\//i, '').toLowerCase() ?? null;
 
@@ -87,7 +118,9 @@ function compare(source, actual, gameplay, capture) {
     // Every actual NPC participates, including unsupported217 in the Black
     // fixture. Match authored identities by type/variant/subtype occurrence;
     // missing identities/cardinality never become an omitted comparison.
-    const npcs = source.gameplay.entities.filter(entity => entity.type >= 10 && entity.type < 1000 && !entity.removed);
+    const actualNpcs = source.gameplay.entities.filter(entity => entity.type >= 10 && entity.type < 1000);
+    for (const npc of actualNpcs) assert.equal(typeof npc.active, 'boolean', 'Every NPC needs its actual manager-active flag');
+    const npcs = actualNpcs.filter(entity => entity.active);
     const candidates = actual.room.npcs.filter(npc => !npc.removed);
     const identity = npc => [npc.type ?? npc.kind, npc.variant, npc.subtype].join('/');
     check('NPC.identities', npcs.map(identity), candidates.map(identity));
@@ -96,6 +129,7 @@ function compare(source, actual, gameplay, capture) {
       const at = candidates.findIndex((candidate, n) => !used.has(n) && identity(candidate) === identity(npc));
       if (at >= 0) used.add(at);
       const candidate = candidates[at];
+      check(`NPC${index}.dead`, npc.removed, candidate?.dead);
       check(`NPC${index}.hp`, npc.hp, candidate?.hp);
       check(`NPC${index}.maxHp`, npc.maxHp, candidate?.maxHp);
       check(`NPC${index}.pendingDamage`, npc.pendingDamage, candidate?.damage.pendingDamage);
@@ -150,7 +184,7 @@ function coverage(definition, directory) {
   const source = manifest(directory, false), browser = manifest(directory, true);
   const original = source.document.debugObservations.map(row => ({label: row.context.label, ...row.observation}));
   const candidates = browser.document.frames;
-  const required = definition.healthRequired;
+  const required = mandatory.get(definition.scenario.id)?.healthRequired ?? null;
   const sourceAcquired = original.some(row => row.health?.containers?.[2] > 0 &&
     (required === 'black' ? row.health.containers[3] !== 0 : row.health.ownedCounts[72] > 0));
   const browserAcquired = candidates.some(row => row.state.player.soulHp > 0 &&
@@ -210,7 +244,7 @@ save(resolve(output, 'report.json'), result);
 for (const [index, definition] of scenarios.cases.entries()) {
   const root = resolve(output, `case-${index}`), replay = resolve(output, `replay-${index}.json`);
   save(replay, definition);
-  const row = {id: definition.scenario.id, seed: definition.seed, required: definition.healthRequired, status: 'fail'};
+  const row = {id: definition.scenario.id, seed: definition.seed, required: mandatory.get(definition.scenario.id)?.healthRequired ?? null, status: 'fail'};
   try {
     // Isolate each invocation so a case-level storage/transport abort does not
     // hide the remaining predeclared OS/contrived attempts.
