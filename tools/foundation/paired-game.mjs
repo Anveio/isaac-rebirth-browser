@@ -269,34 +269,49 @@ export async function runPairedGate({ output, selected, randomCount = 2, replayS
       const directory = join(output, `${String(index).padStart(2, '0')}-${definition.id}`);
       const args = ['--scenario', definition.id, '--output', directory];
       if (definition.seed) args.push('--seed', definition.seed);
-      let caseData;
-      if (definition.replayCase) {
-        caseData = JSON.parse(readFileSync(definition.replayCase, 'utf8'));
-        mkdirSync(directory, { recursive: true });
-        save(join(directory, 'case.json'), caseData); save(join(directory, 'tape.json'), caseData.tape);
-      } else caseData = await python(args);
-      process.stdout.write(`Paired ${definition.id} seed ${caseData.seed}\n`);
-      // Original and Chromium use independent private displays/profiles.
-      const [native, candidate] = await Promise.all([
-        nativeCapture(caseData, join(directory, 'original'), nativeFrameTimeout, originalObserver),
-        browserCapture(browser, server, caseData, join(directory, 'browser'), archiveBrowserEvidence),
-      ]);
-      const checks = comparePair(caseData, native, candidate, join(directory, 'comparison'), exactPixels, stateComparator);
-      const result = { id: definition.id, seed: caseData.seed, seedValue: caseData.seedValue, bootEpochSeed: caseData.bootEpochSeed,
-        caseSha256: digest(readFileSync(join(directory, 'case.json'))),
-        directory, original: { status: native.status, error: native.error, provenance: native.provenance },
-        browser: { status: candidate.status, failures: candidate.failures }, checks,
-        status: native.status === 'pass' && candidate.status === 'pass' && checks.every(check => check.status === 'pass') ? 'pass' : 'fail' };
-      report.cases.push(result); save(join(directory, 'report.json'), result);
-      process.stdout.write(`${result.status}: ${checks.filter(check => check.status === 'pass').length}/${checks.length} paired checkpoints\n`);
+      let caseData, result, native, candidate;
+      try {
+        if (definition.replayCase) {
+          caseData = JSON.parse(readFileSync(definition.replayCase, 'utf8'));
+          mkdirSync(directory, { recursive: true });
+          save(join(directory, 'case.json'), caseData); save(join(directory, 'tape.json'), caseData.tape);
+        } else caseData = await python(args);
+        process.stdout.write(`Paired ${definition.id} seed ${caseData.seed}\n`);
+        // Await both independent captures even if one transport/archive fails.
+        // Remaining declared cases still run; failed capture evidence stays red.
+        const captures = await Promise.allSettled([
+          nativeCapture(caseData, join(directory, 'original'), nativeFrameTimeout, originalObserver),
+          browserCapture(browser, server, caseData, join(directory, 'browser'), archiveBrowserEvidence),
+        ]);
+        native = captures[0].status === 'fulfilled' ? captures[0].value
+          : {status: 'fail', error: String(captures[0].reason), directory: join(directory, 'original')};
+        candidate = captures[1].status === 'fulfilled' ? captures[1].value
+          : {status: 'fail', failures: [String(captures[1].reason)], frames: []};
+        const checks = comparePair(caseData, native, candidate, join(directory, 'comparison'), exactPixels, stateComparator);
+        result = { id: definition.id, seed: caseData.seed, seedValue: caseData.seedValue, bootEpochSeed: caseData.bootEpochSeed,
+          caseSha256: digest(readFileSync(join(directory, 'case.json'))),
+          directory, original: { status: native.status, error: native.error, provenance: native.provenance },
+          browser: { status: candidate.status, failures: candidate.failures }, checks,
+          status: native.status === 'pass' && candidate.status === 'pass' && checks.every(check => check.status === 'pass') ? 'pass' : 'fail' };
+      } catch (error) {
+        result = {id: definition.id, seed: caseData?.seed, seedValue: caseData?.seedValue,
+          directory, status: 'fail', error: String(error), checks: [],
+          original: {status: native?.status || 'fail', error: native?.error},
+          browser: {status: candidate?.status || 'fail', failures: candidate?.failures},
+          scope: 'Declared case aborted; retained raw/partial captures have no complete paired acceptance'};
+      }
+      report.cases.push(result);
+      try { save(join(directory, 'report.json'), result); }
+      catch (error) { result.status = 'fail'; result.evidenceWriteError = String(error); }
+      process.stdout.write(`${result.status}: ${result.checks.filter(check => check.status === 'pass').length}/${result.checks.length} paired checkpoints\n`);
     }
     report.status = report.cases.length > 0 && report.cases.every(item => item.status === 'pass') ? 'pass' : 'fail';
-    report.exactOriginalPixels = report.cases.every(item => item.checks.every(check => check.pixels?.exactRGBA));
+    report.exactOriginalPixels = report.cases.every(item => item.checks.length > 0 && item.checks.every(check => check.pixels?.exactRGBA));
     report.gateSourcesStable = JSON.stringify(report.gateSources) === JSON.stringify(sourceHashes([originalObserver, ...additionalSources]));
     if (!report.gateSourcesStable) report.status = 'fail';
   } finally {
-    save(join(output, 'report.json'), report);
-    await browser.close(); await server.close();
+    try { save(join(output, 'report.json'), report); }
+    finally { await Promise.allSettled([browser.close(), server.close()]); }
   }
   return report;
 }
