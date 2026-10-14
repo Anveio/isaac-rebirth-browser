@@ -16,7 +16,7 @@ const output = resolve(option('--output', `.cache/e2e/fireplaces/${Date.now()}-$
 mkdirSync(output, { recursive: true });
 const save = (path, value) => writeFileSync(path, JSON.stringify(value, null, 2) + '\n');
 const sources = ['tools/e2e/fireplaces.mjs', 'tools/original/fireplace-scenarios.py', 'tools/original/door-scenarios.py',
-  'tools/foundation/fireplace-state-pair.mjs', 'references/isaac/foundation/runtime-progress/W0L0LYYM.json'];
+  'tools/original/foundation-combat-observe.py', 'tools/foundation/fireplace-state-pair.mjs', 'references/isaac/foundation/runtime-progress/W0L0LYYM.json'];
 const hashes = () => Object.fromEntries(sources.map(path => [path, createHash('sha256').update(readFileSync(path)).digest('hex')]));
 const before = hashes();
 const scenarios = JSON.parse(execFileSync('python3', ['tools/original/fireplace-scenarios.py'], { encoding: 'utf8' }));

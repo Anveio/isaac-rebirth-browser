@@ -78,21 +78,23 @@ for(const action of replay.pairedTape){
     for(const[field,expected,observed]of[['height',f32(shot.projectileHeight),f32(p.height)],['fallingSpeed',f32(shot.projectileFallingSpeed),f32(p.fallingSpeed)],['fallingAcceleration',f32(shot.projectileFallingAcceleration),f32(p.fallingAcceleration)],['scale',f32(shot.projectileScale),f32(p.scale)],['dead',shot.removed,p.dead],['position',vector(shot.position),vector(phase===0?p.presentedPosition:p.position)],['velocity',vector(shot.velocity),vector(p.velocity)],['animation',shot.animation,p.animation]])check(checks,label,`projectile${shot.spawnSeed}.${field}`,expected,observed);
   }
   const nativePoofs=source.entities.filter(a=>a.type===1000&&a.variant===15&&[214,20].includes(a.parentType));
-  const portPoofs=actual.spriteEffects.filter(a=>a.variant===15&&a.active&&!a.removed&&[214,20].includes(a.parent?.entityType));
+  const portPoofs=actual.spriteEffects.filter(a=>a.variant===15&&a.active&&!a.removed&&[214,20].includes(a.spawnerType));
   check(checks,label,'poof.seedOrder',nativePoofs.map(a=>a.spawnSeed),portPoofs.map(a=>a.spawnSeed));
   for(const poof of nativePoofs){
     const effect=portPoofs.find(a=>a.spawnSeed===poof.spawnSeed);if(!effect)continue;
-    assert.ok(poof.effectParent&&effect.parent,'NPC Poof must retain its actual parent');
-    const parent=actual.room.npcs.find(a=>a.id===effect.parent.actor.id);assert.ok(parent);
+    assert.ok(Object.hasOwn(poof,'effectParent')&&Object.hasOwn(effect,'parent'),'Both games must expose the actual linked-parent field');
+    assert.ok(Number.isInteger(poof.parentType)&&Number.isInteger(poof.parentVariant)&&Number.isInteger(effect.spawnerType)&&Number.isInteger(effect.spawnerVariant),'Both games must expose actual cached spawner metadata');
+    check(checks,label,`poof${poof.spawnSeed}.nativeLinkedParent`,null,poof.effectParent);
+    check(checks,label,`poof${poof.spawnSeed}.browserLinkedParent`,null,effect.parent);
     for(const[field,expected,observed]of[
-      ['subtype',poof.subtype,effect.subtype],['parentIdentity',[poof.effectParent.type,poof.effectParent.variant,poof.effectParent.spawnSeed],[parent.kind,parent.variant,parent.spawnSeed]],
+      ['subtype',poof.subtype,effect.subtype],['spawnerMetadata',[poof.parentType,poof.parentVariant],[effect.spawnerType,effect.spawnerVariant]],
       ['raw7f8',f32(poof.effectRaw7f8),f32(effect.raw7f8)],['animation',poof.animation,effect.sprite.animation],['frame',f32(poof.animationFrame),f32(effect.sprite.frame)],['playing',poof.animationPlaying,effect.sprite.playing],
       ['position',vector(poof.position),vector(phase===0?effect.presentedPosition:effect.position)],['velocity',vector(poof.velocity),vector(effect.velocity)],['active',poof.active,effect.active],['flags',poof.entityFlags,effect.flags]
     ])check(checks,label,`poof${poof.spawnSeed}.${field}`,expected,observed);
   }
   for(const[name,effects,counter,system]of[
     ['native',nativePoofs.map(a=>({seed:a.spawnSeed,parentType:a.parentType,born:a.birthGameUpdate,frame:f32(a.animationFrame),playing:a.animationPlaying,position:vector(a.position),velocity:vector(a.velocity)})),source.nativePhase.fullGameUpdates,source.nativePhase.systemIterations],
-    ['browser',portPoofs.map(a=>({seed:a.spawnSeed,parentType:a.parent.entityType,born:a.birthGameUpdate,frame:f32(a.sprite.frame),playing:a.sprite.playing,position:vector(phase===0?a.presentedPosition:a.position),velocity:vector(a.velocity)})),actual.gameUpdateCount,actual.systemClock.systemCounter]
+    ['browser',portPoofs.map(a=>({seed:a.spawnSeed,parentType:a.spawnerType,born:a.birthGameUpdate,frame:f32(a.sprite.frame),playing:a.sprite.playing,position:vector(phase===0?a.presentedPosition:a.position),velocity:vector(a.velocity)})),actual.gameUpdateCount,actual.systemClock.systemCounter]
   ]){
     const old=previousPoofs[name];
     for(const effect of effects){

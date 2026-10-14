@@ -35,6 +35,7 @@ export interface Familiar {
 }
 export interface SpriteEffect {
   id: number; variant: number; subtype: number; spawnSeed: number;
+  spawnerType: number; spawnerVariant: number;
   parent: {actor: ActorRef; entityType: number; variant: number} | null;
   birthGameUpdate: number; actorRng: ItemRng; position: {x: number; y: number}; presentedPosition: {x: number; y: number};
   velocity: {x: number; y: number}; configuredFriction: number; currentFriction: number;

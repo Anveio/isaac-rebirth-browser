@@ -4,7 +4,7 @@ This slice admits authored `244/0/0` selectors, not observed actor state. XML su
 
 Generic appearance `4f98e0` initializes the Worm AI once in state0, saves its result6 in `+f54`, and retains appearance state1. Counter1 executes and retains the source Poof15 spawn seed; its effect object, rendering and remaining constructor consumers are unaccepted. Counter4 forces the authored17-frame Appear clip; completion restores saved state6 and source friction. This produces counter22 through source control flow, without a captured age or playback-speed offset. Source sprites use speed1 and BaseUpdate advances their clips only on full updates.
 
-AI `4b4f60` executes DigIn6, hidden relocation4 and DigOut8. Relocation uses the source shared uniform/radius/direction, clamped room bounds and the exact free-position retry order `5c7f30`: zero candidate and invalid saved index,100-attempt budget, radius increments5, selector/collision guards, grid-center snap, and active numeric actor exclusions. Accepted positions require the independent bounded2 draw0 and strict10000<distance²<1000000. These are actual runtime draws and geometry queries. No native target, actor position or MT cursor is installed.
+AI `4b4f60` executes DigIn6, hidden relocation4 and DigOut8. Relocation uses the source shared uniform/radius/direction, clamped room bounds and the exact free-position retry order `5c7f30`: zero candidate and invalid saved index,100-attempt budget, radius increments5, signed path-cost/collision guards, grid-center snap, and active numeric actor exclusions. Accepted positions require the independent bounded2 draw0 and strict10000<distance²<1000000. These are actual runtime draws and geometry queries. No native target, actor position or MT cursor is installed.
 
 RoomLoad `5cedf0` derives ordinary13×7 bounds from GridPosition(width+1) minus20, then adds authored dimensions times40. Live direct bounds readback is `(60,140)..(580,420)`. Shoot at authored DigOut event frame38 predicts Player position plus velocity times10, uses source CheckLine mode3 four-corner/ten-unit stepping, admits SFX318 through the shared audio API, constructs actual ProjectileParams and emits mode0 type9.
 
@@ -25,3 +25,39 @@ The default cohort remains red: 598 of 50,900 required actor/health/phase fields
 The J0 contact captures completed before an ENOSPC comparison error. Recovery revalidates original provenance and executes the unchanged hash-pinned paired comparison body against those same captures; the rejected report remains preserved. New sprite/default-parameter assertions were then replayed against all four immutable captures, with the original comparator reports and both comparator hashes retained. Failed source transport and missing-image attempts remain unaccepted. Large completed browser traces/manifests are losslessly gzipped with verified raw hashes; the ignored archive manifest and restore tool preserve their exact bytes. No unit suite is added.
 
 The owned leaf is restacked on aggregate `0f8a363`, preserving the actual Keeper adapter, sprites and existing live suites. Keeper sprite fields mirror its existing typed state. The final single-worker WASM/Vite build, typecheck, asset/matrix checks and strict Clippy pass after integration; no additional original capture is attributed to that restack.
+
+The current source correction uses the sole signed `Room.path_costs` owner for
+`5c7f30` eligibility. Rock/Spike/wall/door geometry admits the recovered Init
+stores; ordinary room admission now provides that owner beyond the starting
+room. Rock destruction writes900, Fire writes950/900, and Room ages positive
+costs up to900 by100 every third full update. This prevents an authored
+selector or a separate marker copy from changing placement retries and Shared
+RNG draw order. Rock and Fire live gates read the actual signed original cost
+array and the port owner. The exact runtime `de7a736` passes one-job all-target Rust check and strict
+all-target Clippy, with TypeScript, syntax, formatting and matrix checks. This
+correction has no fresh production/original acceptance yet; the historical 598/50,900 required failures remain unchanged.
+Complete derived grid constructors, unsupported cost callbacks, whole shared
+stream alignment and boss free placement remain pending.
+
+The separate readmission correction `3314913` resets transient costs when
+traversal replaces the room, before restored actors run. Destroyed Rock2 state2
+therefore starts at cost0; old destruction markers cannot leak through the
+cached Room clone. Known Grid.Init stores follow the same recovered owner.
+Cached NPC/Fire reinitialization and its source cost writers remain pending; no
+Fire marker is synthesized from a cached HP value. The original observer and
+required Worm comparison now read all448 signed words, including unused tail.
+This exact runtime passes one-job all-target Rust check and strict Clippy in its
+own target. First admission Room.Update order remains approximate, and no new
+live acceptance is attributed to either cost correction.
+
+The mode3 projectile line budget also reads the actual signed cost owner.
+The Worm caller sets threshold0 at `4b55e4`; `5c76df/5c76e7` counts a sample
+only when Room+e98 is positive, and `5c77b0/5c77b4` requires at most8. The
+prior query read the authored selector, so raw Rock1000 or Fire900 could keep
+blocking after the actual destruction cost aged0. This separate correction
+passes the existing World cost reference into the query. Four corners,
+ten-unit stepping, f32 geometry and collision predicates stay unchanged.
+`projectile-line-cost-correction.json` pins the full query and actual caller.
+Its own-target all-target Rust check passes7.64s and strict Clippy passes8.17s.
+Current build/live acceptance remains pending; every prior proof and failure
+is retained.
