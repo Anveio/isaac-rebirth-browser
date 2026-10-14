@@ -328,16 +328,21 @@ impl Room {
             )
             .expect("authored ordinary grid admission"),
         );
-        room.path_costs = Some(
-            crate::room_costs::RoomCosts::for_supported_grid(
-                room.grid.as_ref().expect("authored room grid"),
-            )
-            .expect("authored grid fits source Room.Init path costs"),
-        );
+        room.initialize_path_costs();
         room.appearance.generation =
             "source-fresh-normal-basement-floor;descriptor-decoration12;authored-spawn11;provisional-fx-route"
                 .into();
         room
+    }
+
+    /// Room.Init5cecc0 clears its transient0x700-byte cost array on every
+    /// admission. Saved room geometry then runs recovered Grid.Init stores;
+    /// destruction markers themselves are never restored from the old room.
+    pub(crate) fn initialize_path_costs(&mut self) {
+        self.path_costs = self.grid.as_ref().map(|grid| {
+            crate::room_costs::RoomCosts::for_supported_grid(grid)
+                .expect("admitted geometry fits source Room.Init path costs")
+        });
     }
 
     /// Assemble the starting-room backdrop from its independently supplied room

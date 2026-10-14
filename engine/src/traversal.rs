@@ -261,6 +261,7 @@ pub(crate) fn advance_transition(state: &mut State, phase: Phase) -> bool {
         .persisted_rooms
         .remove(&state.current_room)
         .unwrap_or_else(|| Room::from_floor_descriptor(&state.floor, state.current_room));
+    state.room.initialize_path_costs();
     state.visited_rooms.insert(state.current_room);
     let door = state
         .room
