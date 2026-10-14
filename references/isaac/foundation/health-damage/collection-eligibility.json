@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
-  "scope": "Sole source collection predicate composed on main regular pickup callbacks. Actual UseItem exemption is representable; source Hit exemption uses the same name API and awaits its separate Health callback. Source/static only; no current compiler or fresh game acceptance. Legacy queued-Pickup veto remains explicitly incomplete.",
+  "scope": "Sole source collection predicate for ordinary/restored regular pickup and Heart callbacks. Actual dead/Death and bf4 name rules apply. Known legacy Pickup does not veto generic regular collection; collectible queue admission retains its separate existing rule. Source-only qualification, fresh gameplay pending.",
   "functions": [
     {
       "address": "0x50c880",
@@ -19,8 +19,8 @@
   "predicate": {
     "dead": "50c8aa tests Entity+31f and returnsfalse when set.50c8d0 rejects mainclip nameDeath regardlessbf4. There is no red or Soul HP read and no controls7d4 predicate.",
     "mainGuard": "50c89f testsbf4. Ifclear, dead/Death are the only predicates. Ifset,50c8e8 comparescurrentnameHit and permits it directly; otherwise50c8fc calls50c780.",
-    "itemClipExceptions": "50c780 permits actual Pickup/LiftItem/HideItem/UseItem. The shared helper recognizes source names Hit and UseItem; current main has UseItem and Health separately adds Hit. Pickup/LiftItem/HideItem main-clock ownership remains pending.",
-    "legacyLimit": "player_items.pickup_animation_guard remains a veto because actual Pickup/LiftItem/HideItem main-clock/queued ownership has not been composed. This is a retained port approximation, not evidence that source50c880 rejects Pickup; actual source permits those names. Full natural grant/copy semantics and these exceptions require the owning item callback.",
+    "itemClipExceptions": "Generic helper permits actual source names Hit/Pickup/LiftItem/HideItem/UseItem while bf4 is set. Current concrete enum has UseItem; Health separately adds Hit and exclusive legacy Pickup transfer.",
+    "legacyLimit": "Legacy queued Pickup represents a source-permitted Pickup name and is not a generic veto. Existing collectible queue admission remains separately guarded. Full main/copy ownership still awaits its separate transfer leaf.",
     "consumer": "Root collect_regular_pickup_at, collectible/Chest contact and Combat Heart all consume one shared helper; no duplicate pickup predicate."
   },
   "historicalHealthHelperFile": {
@@ -29,7 +29,7 @@
   },
   "currentRuntime": {
     "path": "engine/src/pickups.rs",
-    "sha256": "8eddaa687184dd066aafbc5768d38a357e47ac6d37ef5edcc20dd3b135ac39c5",
+    "sha256": "5b25b383ccd0e9ec26386e06d8b6ad8aa2d5c9d01fc92ad21ca58806b1f967c7",
     "scope": "Actual current Clip.name predicate; no second helper. The separate Health Hit callback has not been composed into this Death-only leaf."
   }
 }
