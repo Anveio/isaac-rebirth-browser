@@ -329,7 +329,7 @@ pub fn advance(
     let mut health = npc.health();
     npc.damage.advance(&mut health, phase)?;
     npc.hp = health.hp;
-    if npc.hp <= 0.0 {
+    if npc.hp < 0.0 {
         npc.dead = true;
         // The real six-gib producer remains a separate unaccepted FX path;
         // do not substitute the Fly zero-gib BloodSplat seed or a fake draw.
