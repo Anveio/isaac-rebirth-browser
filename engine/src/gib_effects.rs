@@ -18,6 +18,9 @@ const ZERO: WorldVector = WorldVector { x: 0.0, y: 0.0 };
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct BloodParticle {
+    /// GameSpawn550ac8 caches the caller's type/variant in Entity+1c/+20.
+    /// The browser caller handle is contextual; Entity.parent+498 stays NULL.
+    pub spawner: Option<Parent>,
     pub state: i32,
     pub height: f32,
     pub vertical_velocity: f32,
@@ -34,7 +37,7 @@ pub struct Birth {
     pub seed: u32,
     pub position: WorldVector,
     pub velocity: WorldVector,
-    pub parent: Option<Parent>,
+    pub spawner: Option<Parent>,
     pub tint: [f32; 4],
     pub offsets: [f32; 3],
 }
@@ -130,7 +133,7 @@ impl Admission<'_> {
                     seed,
                     position,
                     velocity,
-                    parent: Some(death.parent),
+                    spawner: Some(death.parent),
                     tint: death.tint,
                     offsets: death.offsets,
                 })?;
@@ -198,7 +201,7 @@ impl Admission<'_> {
             variant: 5,
             subtype: birth.subtype,
             spawn_seed: birth.seed,
-            parent: birth.parent,
+            parent: None,
             birth_game_update: self.game_update_count,
             actor_rng: items::Rng::new(birth.seed, [4, 3, 17]),
             position: birth.position,
@@ -227,6 +230,7 @@ impl Admission<'_> {
             sprite: Sprite::new(config),
             full_updates: 0,
             blood_particle: Some(BloodParticle {
+                spawner: birth.spawner,
                 state: 0,
                 height: 0.0,
                 vertical_velocity: 0.0,
@@ -327,8 +331,9 @@ fn advance_base(effect: &mut SpriteEffect) -> Result<(), String> {
 
 fn initialize(effect: &mut SpriteEffect, shared: &mut crate::mt::Mt19937) -> Result<(), String> {
     let source_parent = effect
-        .parent
+        .blood_particle
         .as_ref()
+        .and_then(|particle| particle.spawner.as_ref())
         .map(|parent| (parent.entity_type, parent.variant));
     let particle = effect
         .blood_particle
@@ -380,8 +385,9 @@ fn update(state: &mut State, effect: &mut SpriteEffect) -> Result<(), String> {
     } else {
         let config = familiars::definition(1000, 5).ok_or("Blood Particle animation absent")?;
         let source_parent = effect
-            .parent
+            .blood_particle
             .as_ref()
+            .and_then(|particle| particle.spawner.as_ref())
             .map(|parent| (parent.entity_type, parent.variant));
         let particle = effect
             .blood_particle
@@ -448,7 +454,7 @@ fn update(state: &mut State, effect: &mut SpriteEffect) -> Result<(), String> {
                             seed,
                             position: effect.position,
                             velocity,
-                            parent: Some(Parent {
+                            spawner: Some(Parent {
                                 actor: ActorRef {
                                     kind: ActorKind::Effect,
                                     id: effect.id,

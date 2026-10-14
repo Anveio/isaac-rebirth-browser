@@ -44,7 +44,8 @@ export interface SpriteEffect {
   gridCollisionClass: number; entityCollisionClass: number; flags: number; visible: boolean; active: boolean; removed: boolean;
   renderOrderOffset: number; lifetimeDivisor: number; timeToLive: number; raw7f4: number; raw7f8: number;
   raw7d8: boolean;
-  bloodParticle?: {state: number; height: number; verticalVelocity: number; gravity: number; layerRotation: number;
+  bloodParticle?: {spawner: {actor: ActorRef; entityType: number; variant: number} | null;
+    state: number; height: number; verticalVelocity: number; gravity: number; layerRotation: number;
     gridContact: boolean; gridNormal: {x: number; y: number}; previousVelocity: {x: number; y: number}};
   sprite: ActorSprite; fullUpdates: number;
 }
