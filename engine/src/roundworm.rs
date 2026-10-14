@@ -76,19 +76,34 @@ fn free_position(
     random: &mut Mt19937,
     world: &World<'_>,
 ) -> Result<WorldVector, String> {
+    find_free_position(anchor, 0.0, random, world.grid, world.path_costs, world.occupied)
+}
+
+/// Room::FindFreePosition5c7f30: up to 100 random candidates on a ring that
+/// grows by 5 from `radius`, each snapped to a cell centre that is open, cheap
+/// (cost <= 599) and at least 20 from every `occupied` actor; otherwise the
+/// anchor's clamped cell. The first pass is always rejected, so every call
+/// draws at least one shared float.
+pub(crate) fn find_free_position(
+    anchor: WorldVector,
+    mut radius: f32,
+    random: &mut Mt19937,
+    grid: &Grid,
+    path_costs: &RoomCosts,
+    occupied: &[WorldVector],
+) -> Result<WorldVector, String> {
     let mut candidate = ZERO;
     let mut index: Option<usize> = None;
     let mut budget = 100_i32;
-    let mut radius = 0.0_f32;
     loop {
-        let admissible = world.grid.collision_at(candidate) == 0
-            && world.grid.index(candidate).is_none_or(|at| {
-                !world.grid.descriptor().cells[at]
+        let admissible = grid.collision_at(candidate) == 0
+            && grid.index(candidate).is_none_or(|at| {
+                !grid.descriptor().cells[at]
                     .entity
                     .as_ref()
                     .is_some_and(|entity| matches!(entity.kind, 17 | 18))
             })
-            && index.is_some_and(|at| world.path_costs.entries()[at] <= 599);
+            && index.is_some_and(|at| path_costs.entries()[at] <= 599);
         if admissible {
             if budget > 0 {
                 return Ok(candidate);
@@ -101,18 +116,18 @@ fn free_position(
         }
         radius = (if radius <= 500.0 { radius } else { 0.0 }) + 5.0;
         candidate = anchor + direction(random) * radius;
-        if world.grid.clamp_room(candidate, 0.0) != candidate {
+        if grid.clamp_room(candidate, 0.0) != candidate {
             continue;
         }
-        index = world.grid.index(candidate);
+        index = grid.index(candidate);
         let Some(at) = index else {
             continue;
         };
-        if world.path_costs.get(at)? > 599 {
+        if path_costs.get(at)? > 599 {
             continue;
         }
-        candidate = world.grid.position(at).expect("valid grid center");
-        for actor in world.occupied {
+        candidate = grid.position(at).expect("valid grid center");
+        for actor in occupied {
             let delta = WorldVector {
                 x: actor.x - candidate.x,
                 y: actor.y - candidate.y,
@@ -122,11 +137,10 @@ fn free_position(
             }
         }
     }
-    let original = world.grid.clamp_room(anchor, 20.0);
-    Ok(world
-        .grid
+    let original = grid.clamp_room(anchor, 20.0);
+    Ok(grid
         .index(original)
-        .and_then(|at| world.grid.position(at))
+        .and_then(|at| grid.position(at))
         .expect("clamped room anchor has a grid center"))
 }
 
@@ -374,7 +388,7 @@ pub(crate) const FAMILY: Family = Family {
     advance: advance_family,
     post_contact_grid,
     entity_flags: crate::entities::ordinary_flags,
-    needs_occupancy: true,
+    occupancy: crate::entities::Occupancy::Actors,
 };
 
 fn advance_family(

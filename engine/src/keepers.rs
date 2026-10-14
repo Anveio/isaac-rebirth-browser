@@ -95,7 +95,7 @@ pub(crate) const FAMILY: Family = Family {
     advance: advance_family,
     post_contact_grid: crate::entities::no_grid_query,
     entity_flags: family_flags,
-    needs_occupancy: false,
+    occupancy: crate::entities::Occupancy::None,
 };
 
 fn spawn_family(
