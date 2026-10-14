@@ -63,6 +63,11 @@ Coordinate file ownership across parallel agents. Shared temporary tooling and
 RE notes belong in ignored `.cache/coordination/`; persist reusable tools and
 the evidence needed to reproduce accepted behavior in the repository.
 
+The user's Claude workflow owns bulk monster, level and character imports and
+the associated import/testing refactors. Coordinate compatibility and source
+contracts with that workflow and the integration owner; do not duplicate those
+imports or start parallel catalogue/framework rewrites.
+
 Keep changes small and send short-lived PRs directly to `main`. The integration
 owner reviews exact PR heads, resolves conflicts and merges completed slices
 frequently. Retire merged or superseded branches after preserving any unique

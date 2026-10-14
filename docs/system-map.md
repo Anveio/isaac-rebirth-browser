@@ -237,8 +237,10 @@ post-acquisition Player state, load/continue and
 durable browser saves remain open. [SavedGame evidence](../references/isaac/foundation/saved-game/README.md)
 retains the original reports and the correction that made those gaps blocking.
 
-CI discovers all thirty-six registered live suites and runs separate jobs with
-`fail-fast: false`, preserving each result and evidence. The first matrix run
+The historical CI matrix discovered thirty-six live suites and ran separate
+jobs with `fail-fast: false`, preserving each result and evidence. Agents now
+own relevant local regression checks before merging; there is no automated
+merge gate. The first historical matrix run
 completed floors, weapons, boot MT and pickups successfully while retaining
 core and traversal failures. Historical build, typecheck, assets, matrix and strict Clippy
 pass at integrated checkpoint `472b154`, including the reviewed Level,
@@ -292,7 +294,7 @@ traces and seed readbacks completed successfully; the gate source hashes stayed
 unchanged during execution. Every capture now requires typed menu or gameplay
 observations; gameplay also requires the browser's playing screen. Functional
 assertions pass 111 of 149 checkpoints.
-The CI result is **failure**, with the actual gaps retained:
+That historical CI result is **failure**, with the actual gaps retained:
 
 | Live scenario | Functional checkpoints | Result / observed gap |
 | --- | ---: | --- |
@@ -454,7 +456,7 @@ must not silently turn a room object into a generic enemy or delete it.
 | `Entity_Familiar` | Leech cache/child270 admission, separate room sequence owner, appearance and real Poof15. Reviewed NPC Poof source now separates cached spawner words from its null linked parent; this correction has no new production/live acceptance. Four earlier fresh pairs retain25,131 mandatory failures despite matching scoped local/sprite/reveal/retirement fields. [Evidence](familiars.md) | Missing spawn/shared consumers and placement/sequence/Poof seeds, path/target/contact/heal, other subclasses, full cache completion and room-return lifecycle |
 | `Entity_Bomb`, `Game::BombDamage` | Rising-edge E placement, source full/fast regular motion/fuse/blast, inventory debit, self/NPC/grid damage and typed Troll/Mega conversion paths | Exact converted shared birth seeds, broader variant/grid/radial holdouts, craters and complete hurt/explosion rendering |
 | `Entity_Pickup`, grid entities | Natural coin/key/bomb actors, collection and scoped persistence; deferred collectible grant and empty-altar motion; Chest constructor/opening source path; actual grid occupancy, rock/spike/door response and fresh signed448-word Room costs | Regular saved readmission and anchor corrections remain separately reviewed; hearts/other families, paid/modifier contexts, Chest loot/live completion, weighted path costs and other grid callbacks |
-| `ItemConfig`, `ItemPool`, player item evaluation | Pinned343 configurations/16 pools, independent source RNG owners, weighted depletion/eligibility, natural selection and first queued acquisition/charge. Four frozen-original/fresh-browser acquisition recoveries pass70,696 scoped checks; required CI captures both games fresh. [Evidence](item-pools.md) | Item-specific cache/stat/costumes, active use/swaps, pocket/trinket effects, broader familiars, progression/paid/override and exceptional selectors |
+| `ItemConfig`, `ItemPool`, player item evaluation | Pinned343 configurations/16 pools, independent source RNG owners, weighted depletion/eligibility, natural selection and first queued acquisition/charge. Four frozen-original/fresh-browser acquisition recoveries pass70,696 scoped checks; the default local paired tool captures both games fresh. [Evidence](item-pools.md) | Item-specific cache/stat/costumes, active use/swaps, pocket/trinket effects, broader familiars, progression/paid/override and exceptional selectors |
 | Graphics, `ANM2`, backdrop/shadow/FX | Authored sprite playback, actual source f32 transforms and scoped GPU light/shadow masks; supported actor/room renderers consume runtime state | Complete room/backdrop/sprite pixels, broader effects and native projection/composition edges |
 | `Music`, sound playback | Paired SFX and Title/run/normal-floor music, source fades/deferred admission, original queued-path/output graph/PCM and actual callback evidence | Early decoder/prefetch lifecycle, alternate floors, later jingles/layer/pitch callers, intro video/voiceover and broader gameplay sounds |
 | `PersistentGameData`, `GameState` | Fresh-run SavedGame Clear, ItemPool copy,135 owned Level rows and supported Room/grid/Player save fields. Save/grid gates retain their required seed/record failures. | Durable browser profile/load/continue, complete post-acquisition Player/actor state, achievements/completion/unlocks and co-op |
@@ -812,7 +814,7 @@ routes real run-owned RNG consumers, fresh achievement eligibility, current
 weights/maps and natural free pedestals. Selection retains its separate live
 gate. First free acquisition now routes the actual Pickup queue/grant, owned
 counts, first active charge and retained empty-altar motion. Required acquisition
-CI captures both games freshly; scoped frozen-original/live-browser recovery
+The default local paired invocation captures both games freshly; scoped frozen-original/live-browser recovery
 passes all four recorded cases while preserving initial failures. Item-specific
 cache/stat effects, familiars, use behavior and durable progression remain open. Internal Game age uses the actual `ce9f4`
 counter rather than a tally of animation callbacks during room loading.
