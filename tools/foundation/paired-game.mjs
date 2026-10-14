@@ -8,6 +8,7 @@ import { promisify } from 'node:util';
 import { chromium } from '@playwright/test';
 import { PNG } from 'pngjs';
 import { browserLaunchOptions, inspectBrowserGraphics } from './browser.mjs';
+import { writeJsonEvidence } from './browser-evidence.mjs';
 import { pixelDifference } from './compare.mjs';
 import { startProductionServer } from './production-server.mjs';
 
@@ -19,7 +20,7 @@ const runProcess = promisify(execFile);
 const save = (path, value) => writeFileSync(path, JSON.stringify(value, null, 2) + '\n');
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
 const GATE_SOURCES = [
-  'tools/foundation/paired-game.mjs', 'tools/foundation/production-server.mjs',
+  'tools/foundation/paired-game.mjs', 'tools/foundation/production-server.mjs', 'tools/foundation/browser-evidence.mjs',
   'tools/foundation/compare.mjs', 'tools/original/foundation-paired-scenarios.py',
   'tools/original/foundation-paired-observer.py', 'tools/original/foundation-menu-observer.py',
   'tools/original/foundation-combat-observe.py', 'tools/original/foundation-clock-run.py',
@@ -133,7 +134,8 @@ async function browserCapture(browser, server, caseData, directory) {
       }
     }
     const trace = await page.evaluate(() => window.game.trace());
-    save(join(directory, 'trace.json'), trace);
+    const evidence = await writeJsonEvidence(join(directory, 'trace.json.gz'), trace);
+    save(join(directory, 'trace-archive.json'), evidence);
     assert.equal(trace.enabled, true); assert.equal(trace.inputTraceTruncated, false);
     assert.equal(trace.bootEpochSeed, caseData.bootEpochSeed);
     assert.equal(trace.initialSeed, caseData.initialSeed);
@@ -148,7 +150,8 @@ async function browserCapture(browser, server, caseData, directory) {
   } catch (error) { failures.push(String(error.message)); }
   finally { await context.close(); }
   const result = { status: failures.length ? 'fail' : 'pass', failures, frames, inputs };
-  save(join(directory, 'manifest.json'), result);
+  const evidence = await writeJsonEvidence(join(directory, 'manifest.json.gz'), result);
+  save(join(directory, 'manifest-archive.json'), evidence);
   return result;
 }
 
