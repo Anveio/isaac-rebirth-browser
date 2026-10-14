@@ -66,11 +66,11 @@ indexes each one's declared properties from source.
 | `floor` | Basement generation and room admission | determinism; footprints; reciprocal edge-adjacent neighbors; reachability; exactly one boss/super secret/shop/treasure (the source retry rule); retry continuity; every descriptor admits as a `Room` |
 | `grid` | grid queries and both ground-collision solvers on generated rooms | resolution never fails for bounded motion (including residual speeds whose squares underflow); previews keep velocity; correction moves only out along the contact normal; full nonplayer reflections leave the wall; blast candidate ordering and bounds |
 | `game` | the whole engine through public commands | per-step state invariants, per-command transition contracts, exact rejection semantics, tape replay, serialized-midpoint continuation, C ABI and shipped-WASM differentials |
-| `abi` | the exported C ABI the browser bridge drives | framing bounds, malformed requests, failed resets, pre-reset commands on a fresh thread |
+| `abi` | the exported C ABI the browser bridge drives | framing bounds, malformed requests, failed resets, pre-reset commands on a fresh thread, the published key surface |
 
 The `game` driver ([driver.rs](../engine/dst/src/units/game/driver.rs)) only
 emits commands the browser bridge can send, plus adversarial variants of them
-(unsupported keys, malformed seed text, out-of-range volumes, over-budget
+(near misses of public keys and unrelated keys, malformed seed text, out-of-range volumes, over-budget
 ticks, stale music callbacks, key repeats and releases). Each case follows one
 persona (direct play, menu explorer or seeded run), sends browser-style
 host-timestamped frames (with jitter, hitches and rollbacks) or controlled
@@ -114,10 +114,14 @@ through the full `game` property set on every run, after the generated cases:
   `--retain-all`, replay each with `--replay … --report …`, and keep a small
   covering set.
 
-When an engine change legitimately alters a documented contract (for example
-a newly implemented character runtime or a new public key), `test:dst` reports
-the drift as a violation; update the unit's contract model to follow the
-engine.
+Declarative engine surfaces come from the engine itself, so they cannot
+drift: the public key list is `rebirth_cleanroom::input::PUBLIC_KEYS`, which
+the engine validates against, the browser reads through the `public_keys`
+export and DST draws and checks keys from. Behavioural contracts (which inputs
+are rejected and why, the run-start hold, boss-scene key handling) are modelled
+independently. When an engine change legitimately alters one (for example a
+newly implemented character runtime), `test:dst` reports the drift as a
+violation; update the unit's contract model to follow the engine.
 
 ## Findings and engine refactors
 

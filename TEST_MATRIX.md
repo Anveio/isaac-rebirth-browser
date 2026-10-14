@@ -191,7 +191,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | `floor` | Basement generation structure, retries and per-descriptor room admission | 14 | 3 | 0 |
 | `grid` | grid queries and ground-collision solvers on generated rooms | 14 | 2 | 0 |
 | `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 52 | 36 | 2 |
-| `abi` | the exported C ABI transport the browser bridge drives | 10 | 1 | 0 |
+| `abi` | the exported C ABI transport the browser bridge drives | 11 | 1 | 0 |
 
 <details><summary>Every declared DST property</summary>
 
@@ -369,6 +369,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Always | wasm: the shipped engine agrees with native dispatch | [wasm.rs](engine/dst/src/wasm.rs) |
 | Always | abi: the exported ABI version is current | [abi.rs](engine/dst/src/units/abi.rs) |
 | Always | abi: commands before reset fail and snapshots publish null | [abi.rs](engine/dst/src/units/abi.rs) |
+| Always | abi: the public_keys export publishes exactly the engine's key surface | [abi.rs](engine/dst/src/units/abi.rs) |
 | Always | abi: reset with a nonzero seed succeeds and clears the error | [abi.rs](engine/dst/src/units/abi.rs) |
 | Always | abi: the published snapshot is a valid state of the reset seed | [abi.rs](engine/dst/src/units/abi.rs) |
 | Always | abi: a failed reset reports an error and keeps the previous game | [abi.rs](engine/dst/src/units/abi.rs) |

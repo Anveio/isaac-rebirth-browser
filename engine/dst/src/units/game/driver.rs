@@ -8,6 +8,7 @@
 use crate::entropy::Entropy;
 use rebirth_cleanroom::bombs::player_world;
 use rebirth_cleanroom::grid::Grid;
+use rebirth_cleanroom::input::{self, PUBLIC_KEYS};
 use rebirth_cleanroom::motion::WorldVector;
 use rebirth_cleanroom::music::BackendEvent;
 use rebirth_cleanroom::run_admission::MAX_SAFE_TIMESTAMP_MS;
@@ -15,32 +16,16 @@ use rebirth_cleanroom::{Command, PausePhase, Screen, State, MAX_COMMAND_TICKS};
 use std::cmp::Reverse;
 use std::collections::{BinaryHeap, VecDeque};
 
-pub const SUPPORTED_KEYS: [&str; 15] = [
-    "Enter",
-    "Escape",
-    "Tab",
-    "Backspace",
-    "ArrowUp",
-    "ArrowDown",
-    "ArrowLeft",
-    "ArrowRight",
-    "KeyW",
-    "KeyA",
-    "KeyS",
-    "KeyD",
-    "KeyE",
-    "Space",
-    "KeyQ",
-];
-const FOREIGN_KEYS: [&str; 8] = [
+/// Unrelated browser key codes; `foreign_key` keeps only those outside the
+/// engine's public surface.
+const OTHER_KEYS: [&str; 7] = [
     "KeyR",
     "Spacebar",
     "ShiftLeft",
     "",
-    "enter",
     "F5",
     "Digit1",
-    "Enter ",
+    "Numpad0",
 ];
 const MOVES: [&str; 4] = ["KeyW", "KeyA", "KeyS", "KeyD"];
 const AIMS: [&str; 4] = ["ArrowUp", "ArrowLeft", "ArrowDown", "ArrowRight"];
@@ -83,6 +68,24 @@ fn key(code: &str, down: bool) -> Command {
 }
 
 /// A controlled step without a host clock, as test harnesses send.
+/// A code outside the engine's public key surface: a near miss of a public
+/// key (case, whitespace) or an unrelated key, derived from the engine's own
+/// declaration so new public keys never become "foreign".
+fn foreign_key(e: &mut Entropy) -> String {
+    let public = *e.pick(&PUBLIC_KEYS);
+    let candidates: Vec<String> = [
+        public.to_lowercase(),
+        public.to_uppercase(),
+        format!("{public} "),
+        format!(" {public}"),
+        (*e.pick(&OTHER_KEYS)).to_owned(),
+    ]
+    .into_iter()
+    .filter(|code| !input::is_public_key(code))
+    .collect();
+    e.pick(&candidates).clone()
+}
+
 fn tick(count: u32) -> Command {
     Command::Tick {
         count,
@@ -169,7 +172,7 @@ impl Driver {
         {
             // Inputs queued during the confirmation fade must be ignored.
             if e.chance(1, 6) {
-                let code = *e.pick(&SUPPORTED_KEYS);
+                let code = *e.pick(&PUBLIC_KEYS);
                 return self.press(code, 0);
             }
             return self.queue.push_back(tick(e.range(1, 24)));
@@ -480,10 +483,10 @@ impl Driver {
 
     fn adversarial(&mut self, state: &State, e: &mut Entropy) {
         match e.below(9) {
-            0 => self.press(e.pick(&FOREIGN_KEYS), 0),
+            0 => self.press(&foreign_key(e), 0),
             1 => {
                 // Releases and repeats never re-trigger handlers.
-                let code = *e.pick(&SUPPORTED_KEYS);
+                let code = *e.pick(&PUBLIC_KEYS);
                 self.queue.push_back(key(code, e.chance(1, 2)));
             }
             2 => self.queue.push_back(Command::Text {

@@ -26,6 +26,8 @@ struct Exports {
     snapshot_ptr: TypedFunc<(), u32>,
     snapshot_len: TypedFunc<(), u32>,
     error_len: TypedFunc<(), u32>,
+    public_keys_ptr: TypedFunc<(), u32>,
+    public_keys_len: TypedFunc<(), u32>,
 }
 
 /// Snapshots compared per tape besides the final one; interpretation is
@@ -81,6 +83,8 @@ impl Module {
             snapshot_ptr: export!("snapshot_ptr"),
             snapshot_len: export!("snapshot_len"),
             error_len: export!("error_len"),
+            public_keys_ptr: export!("public_keys_ptr"),
+            public_keys_len: export!("public_keys_len"),
             store,
         })
     }
@@ -112,6 +116,20 @@ impl Module {
     fn run(&self, tape: &Tape, trace: &[(bool, u64)]) -> Result<Option<serde_json::Value>, String> {
         let mut wasm = self.instantiate()?;
         let trap = |error: wasmi::Error| format!("engine.wasm trapped: {error}");
+        // The browser reads its key surface from this export before reset.
+        let keys = wasm.read(wasm.public_keys_ptr, wasm.public_keys_len)?;
+        // SAFETY: public_keys_ptr/public_keys_len describe a thread-local buffer.
+        let native = unsafe {
+            std::slice::from_raw_parts(
+                rebirth_cleanroom::public_keys_ptr(),
+                rebirth_cleanroom::public_keys_len(),
+            )
+        };
+        if keys != native {
+            return Ok(Some(
+                json!({ "step": "publicKeys", "wasm": String::from_utf8_lossy(&keys) }),
+            ));
+        }
         if wasm
             .reset
             .call(&mut wasm.store, (tape.initial_seed, tape.boot_epoch_seed))
@@ -145,7 +163,7 @@ impl Module {
                 ));
             }
             if index % stride == stride - 1 || index + 1 == count {
-                let snapshot = snapshot(&mut wasm)?;
+                let snapshot = wasm.read(wasm.snapshot_ptr, wasm.snapshot_len)?;
                 let mut hasher = DefaultHasher::new();
                 snapshot.hash(&mut hasher);
                 if hasher.finish() != native_digest {
@@ -159,13 +177,20 @@ impl Module {
     }
 }
 
-fn snapshot(wasm: &mut Exports) -> Result<Vec<u8>, String> {
-    let trap = |error: wasmi::Error| format!("engine.wasm trapped: {error}");
-    let pointer = wasm.snapshot_ptr.call(&mut wasm.store, ()).map_err(trap)?;
-    let length = wasm.snapshot_len.call(&mut wasm.store, ()).map_err(trap)?;
-    let mut bytes = vec![0; length as usize];
-    wasm.memory
-        .read(&wasm.store, pointer as usize, &mut bytes)
-        .map_err(|error| error.to_string())?;
-    Ok(bytes)
+impl Exports {
+    /// Reads a buffer the module describes with a pointer and a length export.
+    fn read(
+        &mut self,
+        pointer: TypedFunc<(), u32>,
+        length: TypedFunc<(), u32>,
+    ) -> Result<Vec<u8>, String> {
+        let trap = |error: wasmi::Error| format!("engine.wasm trapped: {error}");
+        let pointer = pointer.call(&mut self.store, ()).map_err(trap)?;
+        let length = length.call(&mut self.store, ()).map_err(trap)?;
+        let mut bytes = vec![0; length as usize];
+        self.memory
+            .read(&self.store, pointer as usize, &mut bytes)
+            .map_err(|error| error.to_string())?;
+        Ok(bytes)
+    }
 }

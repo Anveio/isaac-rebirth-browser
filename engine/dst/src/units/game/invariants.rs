@@ -1,7 +1,7 @@
 //! Per-step state invariants and per-command transition contracts.
-use super::driver::SUPPORTED_KEYS;
 use crate::props;
 use rebirth_cleanroom::actors::ActorKind;
+use rebirth_cleanroom::input;
 use rebirth_cleanroom::run_admission::{MAX_SAFE_TIMESTAMP_MS, PRESENTATION_INTERVAL_NS};
 use rebirth_cleanroom::traversal::TransitionPhase;
 use rebirth_cleanroom::{seed, Command, PausePhase, Screen, State, MAX_COMMAND_TICKS};
@@ -27,9 +27,7 @@ pub fn expected_rejection(state: &State, command: &Command) -> Option<&'static s
         Command::AudioVolume { sfx_volume: volume } | Command::MusicVolume { volume } => {
             (!volume.is_finite() || !(0.0..=1.0).contains(volume)).then_some("volume range")
         }
-        Command::Key { code, .. } if !SUPPORTED_KEYS.contains(&code.as_str()) => {
-            Some("unsupported key")
-        }
+        Command::Key { code, .. } if !input::is_public_key(code) => Some("unsupported key"),
         Command::Key { code, down } => {
             if !*down || state.pressed.contains(code) {
                 return None;
@@ -460,10 +458,7 @@ pub fn state(state: &State) {
         json!({ "runSeed": state.run_seed, "value": state.run_seed_value, "stage": state.stage_seed })
     );
     props::always!(
-        state
-            .pressed
-            .iter()
-            .all(|code| SUPPORTED_KEYS.contains(&code.as_str())),
+        state.pressed.iter().all(|code| input::is_public_key(code)),
         "game: only supported keys are ever held",
         json!({ "pressed": state.pressed })
     );

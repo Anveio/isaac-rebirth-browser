@@ -27,6 +27,11 @@ fn snapshot() -> Vec<u8> {
     unsafe { std::slice::from_raw_parts(pointer, abi::snapshot_len()) }.to_vec()
 }
 
+fn public_keys() -> Vec<u8> {
+    // SAFETY: public_keys_ptr/public_keys_len describe the thread-local buffer.
+    unsafe { std::slice::from_raw_parts(abi::public_keys_ptr(), abi::public_keys_len()) }.to_vec()
+}
+
 fn error() -> String {
     // SAFETY: error_ptr/error_len describe the thread-local buffer.
     let bytes = unsafe { std::slice::from_raw_parts(abi::error_ptr(), abi::error_len()) };
@@ -60,15 +65,26 @@ pub fn run(case: &mut Case) {
         "abi: the exported ABI version is current"
     );
 
-    // A fresh thread has no engine: commands fail and snapshots publish null.
+    // A fresh thread has no engine: commands fail and snapshots publish null,
+    // while the key surface the browser reads before reset is available.
     let unset = std::thread::spawn(|| {
         let result = send(br#"{"type":"tick","count":1}"#);
-        (result, error(), snapshot())
+        (result, error(), snapshot(), public_keys())
     })
     .join();
     props::always!(
-        matches!(&unset, Ok((Some(1), message, snapshot)) if !message.is_empty() && snapshot == b"null"),
+        matches!(&unset, Ok((Some(1), message, snapshot, _)) if !message.is_empty() && snapshot == b"null"),
         "abi: commands before reset fail and snapshots publish null"
+    );
+    let published = public_keys();
+    let decoded: Result<Vec<String>, _> = serde_json::from_slice(&published);
+    props::always!(
+        decoded
+            .as_ref()
+            .is_ok_and(|keys| keys.iter().map(String::as_str).eq(abi::input::PUBLIC_KEYS))
+            && matches!(&unset, Ok((.., before_reset)) if *before_reset == published),
+        "abi: the public_keys export publishes exactly the engine's key surface",
+        json!({ "published": String::from_utf8_lossy(&published) })
     );
 
     let e = &mut *case.entropy;
