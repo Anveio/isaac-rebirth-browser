@@ -17,6 +17,16 @@ Do not check in scripts that assert checksums of outputs or fixtures; the
 original binary pin lives in `tools/e2e/lib/original.mjs`. `npm run
 test:policy` (part of `check:build`) rejects unit tests and stray checksums.
 
+The only exception, authorized by the repository owner, is the Antithesis
+deterministic simulation testing (DST) harness in `engine/dst/`
+(`npm run test:dst`, `docs/dst.md`). Only that crate may hold per-unit engine
+workloads and Antithesis properties; it never adds test attributes to
+`engine/src` and admits no other unit suite or component harness anywhere. DST
+checks engine safety, determinism and documented contracts. It is not
+original-game evidence, never replaces live e2e parity and is an inner-loop
+regression tool, not a merge gate: `check:build` does not run it. Fix or
+record every DST violation; never weaken a property or its workload to pass.
+
 Every live suite is registered in `tools/e2e/suites.mjs` and mixes contrived
 cases with OS-random fuzz cases; read `tools/e2e/README.md` before adding or
 changing one. Run `npm run test:e2e -- <suite>` for the suites your change

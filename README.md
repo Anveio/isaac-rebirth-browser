@@ -41,6 +41,7 @@ npm run test:e2e:paired -- --replay-cases PATH # Replay a recorded case.json
 npm run verify:foundation             # Strict legacy PNG/state diagnostics; mismatches exit nonzero
 npm run assets:rooms                  # Decode all base room records
 npm run matrix:check
+npm run test:dst                      # Antithesis DST of engine core units (docs/dst.md)
 ```
 
 Browser tests and the default verifier serve an immutable copy of the built
@@ -58,7 +59,10 @@ random tapes can be replayed unchanged. There is deliberately no CI: every
 agent runs `npm run check:build` and the live suites its change touches
 before merging (see [AGENTS.md](AGENTS.md)). Checked-in unit suites and
 component-only harnesses have been removed; validators stay in runtime/e2e
-tools, while temporary probes belong in ignored research cache.
+tools, while temporary probes belong in ignored research cache. The sole,
+owner-authorized exception is the [Antithesis DST harness](docs/dst.md) in
+`engine/dst/`, an inner-loop tool that simulates engine core units
+deterministically and never gates a merge.
 
 Ordinary play retains no command/state history. To capture diagnostic evidence,
 pause automatic stepping and call `game.reset(seed, { trace: true })` in the
