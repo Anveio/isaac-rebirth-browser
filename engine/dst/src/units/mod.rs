@@ -6,6 +6,7 @@ use crate::harness::Unit;
 mod abi;
 mod actors;
 mod floor;
+mod game;
 mod grid;
 mod mt;
 mod phase;
@@ -41,6 +42,11 @@ pub const UNITS: &[Unit] = &[
         name: "grid",
         summary: "grid queries and ground-collision solvers on generated rooms",
         run: grid::run,
+    },
+    Unit {
+        name: "game",
+        summary: "the whole engine through public commands: invariants, contracts, replay, ABI",
+        run: game::run,
     },
     Unit {
         name: "abi",

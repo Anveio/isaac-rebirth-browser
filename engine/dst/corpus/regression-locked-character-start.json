@@ -1,0 +1,104 @@
+{
+ "initialSeed": 1234567,
+ "bootEpochSeed": 0,
+ "commands": [
+  {
+   "type": "tick",
+   "count": 5
+  },
+  {
+   "type": "key",
+   "code": "Enter",
+   "down": true
+  },
+  {
+   "type": "key",
+   "code": "Enter",
+   "down": false
+  },
+  {
+   "type": "tick",
+   "count": 1
+  },
+  {
+   "type": "key",
+   "code": "Enter",
+   "down": true
+  },
+  {
+   "type": "key",
+   "code": "Enter",
+   "down": false
+  },
+  {
+   "type": "tick",
+   "count": 1
+  },
+  {
+   "type": "key",
+   "code": "Enter",
+   "down": true
+  },
+  {
+   "type": "key",
+   "code": "Enter",
+   "down": false
+  },
+  {
+   "type": "tick",
+   "count": 1
+  },
+  {
+   "type": "key",
+   "code": "ArrowRight",
+   "down": true
+  },
+  {
+   "type": "key",
+   "code": "ArrowRight",
+   "down": false
+  },
+  {
+   "type": "tick",
+   "count": 1
+  },
+  {
+   "type": "key",
+   "code": "Enter",
+   "down": true
+  },
+  {
+   "type": "key",
+   "code": "Enter",
+   "down": false
+  },
+  {
+   "type": "tick",
+   "count": 60
+  },
+  {
+   "type": "key",
+   "code": "ArrowLeft",
+   "down": true
+  },
+  {
+   "type": "key",
+   "code": "ArrowLeft",
+   "down": false
+  },
+  {
+   "type": "key",
+   "code": "Enter",
+   "down": true
+  },
+  {
+   "type": "key",
+   "code": "Enter",
+   "down": false
+  },
+  {
+   "type": "tick",
+   "count": 60
+  }
+ ]
+}
