@@ -1,0 +1,130 @@
+{
+  "status": "Source-mapped runtime prerequisite; no second-floor production artifact or fresh two-game progression acceptance.",
+  "nativeBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "scope": "Fresh profile, one continuing normal Isaac run, numeric stages 1 and 2, normal difficulty, no alternate/Labyrinth/challenge/equipped modifiers.",
+  "runtime": {
+    "path": "engine/src/floor.rs",
+    "entry": "generate_normal_basement(NormalBasementRequest)",
+    "firstFloor": "Existing generate_basement(stage_seed) delegates with the same fresh flags/health/coins. The game entry remains the first-floor caller; no stage command is introduced.",
+    "inputs": [
+      "actual numeric stage",
+      "retained RunSeeds stage seed",
+      "retained Game flags",
+      "current red HP",
+      "maximum red HP",
+      "Soul HP",
+      "coin count"
+    ]
+  },
+  "seedCarryover": {
+    "source": "58be30 reads Game+a1a4[stage]; Seeds5e1470 initializes this twelve-word array once in NewRun54eb20. Stage2 uses retained field2, without reseeding RunSeeds or ItemPool.",
+    "localStreams": "Level587ec0/58be30 and generation keep RNG35 primary separate from the layout generator and local RNG7 selectors. This module does not consume shared MT constructor draws; actual new-floor admission owns those separately."
+  },
+  "growth": {
+    "additionalRooms": "min(20, stage*10/3 + 5 + bounded35(2)); integer truncation gives stage1 8..9 and stage2 11..12.",
+    "minimumDeadEnds": "58c09f..58c0b6 sets 5 + (stage != 1), plus a separate excluded Labyrinth increment.",
+    "normalDifficulty": "58c100..58c130 sets stage1 1..5 and stage2 5..10.",
+    "shapeEligibility": "58c18d obtains compatible normal templates; 58c1f0 counts authored shapes and 58c20f..58c250 admits each shape only when its count exceeds four.",
+    "authoredCatalog": {
+      "source": "resources/rooms/01.basement.stb",
+      "sourceSha256": "8664dae14cfafef6beb7b662edad3b64d9941eb4f5c53220139e2d380cf7bc78",
+      "stages": {
+        "1": {
+          "difficulty": [
+            1,
+            5
+          ],
+          "shapeCounts": {
+            "(13, 7)": 264,
+            "(13, 14)": 48,
+            "(26, 7)": 48,
+            "(26, 14)": 24
+          }
+        },
+        "2": {
+          "difficulty": [
+            5,
+            10
+          ],
+          "shapeCounts": {
+            "(13, 7)": 267,
+            "(13, 14)": 48,
+            "(26, 7)": 47,
+            "(26, 14)": 25
+          }
+        }
+      }
+    }
+  },
+  "boss": {
+    "source": "584240",
+    "horsemen": "5842be consumes R4. On even stage2, 5842e4 reads retained flag0x100000 and the normal-stage jump table chooses5020 when false,5140 when true, without odd-floor R2 or a new flag write.",
+    "normalFamily": "The source candidate/profile branch draws remain in order. Stage2 tail5849f1..584a0c uses retained flag0x10: false selects Monstro1010, true selects Duke1020. It does not take odd-floor final R2 or overwrite the flag.",
+    "unavailableFamilies": "Profile unlocks remain fresh/default; collecting items/trinkets or changing unlock state is excluded.",
+    "oddFloorEarlyReturns": "584875 R5 is consumed on both floors;58487e/584ac9 accepts2010 only stage1 in this bounded path.5848c0 R4 is likewise consumed, but5848c9/5848d2 gates2050 to stage1/3. Stage2 falls through both branches, even when either random result is zero, and takes the continuing candidate draws before the saved-family tail."
+  },
+  "optionalRooms": {
+    "source": "5897e0",
+    "healthFields": "Player+bb4 maximum red, +bb8 current red, +bc0 Soul, +bd8 coins. These inputs are read before Player52a260 performs Eternal conversion on the new floor.",
+    "sacrifice": "R7==0, otherwise R4==0 and maximum red <= current red + Soul.",
+    "miniboss": "R4==0; failed R4 still consumes R3, but its fallback accepts only stage1.",
+    "challenge": "R2==0, stage>1 and maximum red <= current red + Soul.",
+    "arcade": "Normal stage2 and coins>4; native selection/gate draws occur before the admission predicate.",
+    "lowHealthRoom": "R50==0, otherwise R5==0 and ((Soul<=0 && current red<=1) || (Soul<=2 && maximum red<=0))."
+  },
+  "retry": "Authored weights reset once per floor. Primary/generator state and actual generated flags survive attempts. Post-placement58c337 consumes the next primary word before room admission.",
+  "requiredNextSlices": [
+    "Actual Combat-owned boss clear/reward/Grid17 callback, preserving unsupported prerequisite failures",
+    "Concrete stage/Scene controller with own authored resource readiness and public action14 input",
+    "Continuing run admission and Player/Eternal callbacks using sole shared owners",
+    "Required fresh-original and production-browser public progression gate joining every generated second-floor descriptor, seeds/flags and actual control/animation phases"
+  ],
+  "limits": [
+    "No native layout, ready/counter/time inputs or fitted delays",
+    "No alternate stages, Labyrinth, challenges, equipped modifiers or later-stage profile producers",
+    "Generator output is not acceptance of room actor/grid/camera or stage lifecycle parity",
+    "No new unit or standalone component suite"
+  ],
+  "sourcePins": [
+    {
+      "address": "0x584240",
+      "fde": "Function 0x584240, FDE bytes 2423",
+      "sha256": "7b376357b33bf22d3fe0b77aabf1fe3e61722a19d2291b278485182d6bea6965"
+    },
+    {
+      "address": "0x587ec0",
+      "fde": "Function 0x587ec0, FDE bytes 1484",
+      "sha256": "71c2dc95e53ca9c3bbde781b1889137a86f31b716c0f74dd5bc0b2228f6a5d7e"
+    },
+    {
+      "address": "0x5897e0",
+      "fde": "Function 0x5897e0, FDE bytes 9807",
+      "sha256": "9a637a7f165831357912d614ae84d43b2c9332e0874a9720b421096606f5b085"
+    },
+    {
+      "address": "0x58be30",
+      "fde": "Function 0x58be30, FDE bytes 2402",
+      "sha256": "8fc4f720f2819650991ed82757e8cf222f8f2113778bcecac3bab99b8140c988"
+    },
+    {
+      "address": "0x5d49b0",
+      "fde": "Function 0x5d49b0, FDE bytes 21",
+      "sha256": "e950e6ed96c22c0bfd44fa6aa3252a284554aa79f74801823bc03c48fac9552f"
+    },
+    {
+      "address": "0x52a260",
+      "fde": "Function 0x52a260, FDE bytes 990",
+      "sha256": "b1b1c483b586fe01ad83f8499de0583aef0d952920e684e2f3137a83278c286c"
+    },
+    {
+      "address": "0x5e1470",
+      "fde": "Function 0x5e1470, FDE bytes 258",
+      "sha256": "5ac82d232d1d932fd2794d56b5b1ced996878190b1254b5758f3fbc7561d961f"
+    },
+    {
+      "address": "0x54eb20",
+      "fde": "Function 0x54eb20, FDE bytes 437",
+      "sha256": "f367ce0f2bed360ca4e65e44777fc991adf49aeb2a36f318ddd52cf3c6cf5452"
+    }
+  ]
+}

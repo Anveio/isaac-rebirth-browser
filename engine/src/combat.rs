@@ -423,7 +423,8 @@ impl DamageQueue {
             applied.push(AppliedDamage {
                 event,
                 hp_after: hp,
-                lethal: hp <= 0.0,
+                // Source4478b4 enters Kill only below zero; equality continues Hit.
+                lethal: hp < 0.0,
             });
         }
         health.hp = hp;
