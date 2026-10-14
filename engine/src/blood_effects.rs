@@ -158,6 +158,8 @@ impl PoofAdmission<'_> {
             effect.sprite.offsets = offsets;
             let volume = shared.uniform() * 0.2 + 0.5;
             audio.admit(
+                shared,
+                system_counter,
                 SoundRequest {
                     id: 72,
                     volume,
@@ -165,9 +167,7 @@ impl PoofAdmission<'_> {
                     looping: false,
                     pitch: 1.0,
                 },
-                system_counter,
-                shared,
-            )?;
+            );
         }
         //4fc641 rejoins here after the complete17/SFX path. Both outcomes draw.
         if shared.bounded(5) == 0 {
