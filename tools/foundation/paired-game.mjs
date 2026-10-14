@@ -253,20 +253,25 @@ export async function runPairedGate({ output, selected, randomCount = 2, replayS
   assert.ok(Number.isFinite(nativeFrameTimeout) && nativeFrameTimeout > 0 && nativeFrameTimeout <= 300,
     'Native frame timeout must be more than 0 and at most 300 host-wall seconds');
   mkdirSync(output, { recursive: true });
-  const declarations = await pairedScenarioDeclarations();
-  const known = new Set(declarations.map(item => item.id));
-  for (const id of selected) assert.ok(known.has(id), `Unknown paired scenario ${id}`);
-  const server = await startProductionServer({ directory: productionDirectory });
-  const browser = await chromium.launch({ ...browserLaunchOptions(), headless: false });
-  const report = { schema: 1, status: 'running', mode: 'fresh original process paired with immutable browser production artifact',
-    build: server.build, gateSources: sourceHashes([originalObserver, ...additionalSources]), browserGraphics: await inspectBrowserGraphics(browser), nativeFrameTimeout,
+  let server, browser;
+  const report = { schema: 1, status: 'starting', mode: 'fresh original process paired with immutable browser production artifact',
+    nativeFrameTimeout,
     originalObserver, archiveBrowserEvidence,
-    sourceBinarySha256: digest(readFileSync(join(ROOT, '.cache/original-runtime/offline-depot/isaac.x64'))),
     comparisons: { functional: 'Real input/phase/readback and source title, fade, player motion, pause/controller, HP, immunity, active tear/bomb counts',
       pixels: 'Strict full RGBA diagnostic; every difference remains a failure in its own pixel result',
       exactPixelsRequired: exactPixels, completeOriginalStateParity: false },
     cases: [] };
   try {
+    const declarations = await pairedScenarioDeclarations();
+    const known = new Set(declarations.map(item => item.id));
+    for (const id of selected) assert.ok(known.has(id), `Unknown paired scenario ${id}`);
+    report.gateSources = sourceHashes([originalObserver, ...additionalSources]);
+    report.sourceBinarySha256 = digest(readFileSync(join(ROOT, '.cache/original-runtime/offline-depot/isaac.x64')));
+    server = await startProductionServer({ directory: productionDirectory });
+    report.build = server.build;
+    browser = await chromium.launch({ ...browserLaunchOptions(), headless: false });
+    report.browserGraphics = await inspectBrowserGraphics(browser);
+    report.status = 'running';
     const definitions = selected.map(id => ({ id, seed: 'T1PK6Y0W' }));
     for (let index = 0; index < randomCount; index++) definitions.push({ id: 'paired-random-run', seed: replaySeeds[index] });
     for (const path of replayCases) definitions.push({ id: JSON.parse(readFileSync(path, 'utf8')).scenario.id, replayCase: path });
@@ -318,7 +323,7 @@ export async function runPairedGate({ output, selected, randomCount = 2, replayS
     report.status = 'fail'; report.fatalError = String(error);
     throw error;
   } finally {
-    const closed = await Promise.allSettled([browser.close(), server.close()]);
+    const closed = await Promise.allSettled([browser?.close(), server?.close()]);
     const failures = closed.filter(result => result.status === 'rejected').map(result => String(result.reason));
     if (failures.length) { report.status = 'fail'; report.cleanupFailures = failures; }
     save(join(output, 'report.json'), report);
