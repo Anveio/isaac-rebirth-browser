@@ -279,7 +279,7 @@ pub fn admit_poof(
     seed: u32,
     position: WorldVector,
     velocity: WorldVector,
-    parent: Option<Parent>,
+    spawner: Option<Parent>,
 ) -> Result<u32, String> {
     PoofAdmission {
         game_update_count: state.game_update_count,
@@ -287,7 +287,7 @@ pub fn admit_poof(
         effects: &mut state.sprite_effects,
         scheduler: &mut state.actor_scheduler,
     }
-    .admit(subtype, seed, position, velocity, parent)
+    .admit(subtype, seed, position, velocity, spawner)
 }
 
 /// The source NPC callback admits appearance effects before BaseUpdate moves
@@ -333,7 +333,7 @@ impl PoofAdmission<'_> {
         seed: u32,
         position: WorldVector,
         velocity: WorldVector,
-        parent: Option<Parent>,
+        spawner: Option<Parent>,
     ) -> Result<u32, String> {
         if subtype > 3 || !position.is_finite() || !velocity.is_finite() {
             return Err(
@@ -355,9 +355,11 @@ impl PoofAdmission<'_> {
             variant: 15,
             subtype,
             spawn_seed: seed,
-            spawner_type: parent.map_or(0, |caller| caller.entity_type),
-            spawner_variant: parent.map_or(0, |caller| caller.variant),
-            parent,
+            spawner_type: spawner.map_or(0, |caller| caller.entity_type),
+            spawner_variant: spawner.map_or(0, |caller| caller.variant),
+            // Game.Spawn550acd copies only cached1c/20. This appearance
+            // caller never invokes447fc0, so actual Entity.parent498 is NULL.
+            parent: None,
             birth_game_update: self.game_update_count,
             actor_rng: items::Rng::new(seed, [4, 3, 17]),
             position,
