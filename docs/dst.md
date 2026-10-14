@@ -131,15 +131,27 @@ fix must follow source evidence rather than merely silence the property.
 | Native std float functions call the host C library, while wasm32 std uses Rust's `libm`. Against `libm`, glibc 2.39 disagreed on 162,416 of 10,405,090 sampled `f32` `sin`/`cos` inputs and on 446,514 of 10,000,000 sampled `f64` `atan2` pairs. Generated tapes diverged from the shipped WASM by one ulp of NPC motion; the corpus tape's first difference is an Attack Fly's wander velocity (`npcs.rs`) at step 749, so native replay and tools could disagree with the artifact. | [fmath.rs](../engine/src/fmath.rs) routes the engine's `sin`, `cos` and `atan2` through the `libm` crate. wasm32 std matched it on every sampled input under Rust 1.97 and 1.99, so the shipped artifact computes the same results while native builds now agree with it. [engine/clippy.toml](../engine/clippy.toml) disallows every std float function whose precision Rust leaves unspecified, so `npm run lint` flags new host calls; a newly needed function gets a `libm` wrapper in `fmath.rs`. This makes no original-game parity claim. | `regression-native-wasm-fly-trig`, the shipped-WASM differential on every tape, and the lint rule |
 | Engine validation, the browser and DST each kept their own copy of the accepted key list, so new keys drifted. | Fixed on main (#122): `rebirth_cleanroom::input::PUBLIC_KEYS` is the single owner, published through the `public_keys` exports. | `abi: the public_keys export publishes exactly the engine's key surface`. |
 
-## Roadmap
+## Running on Antithesis
 
-The harness lands in small slices. Still to come:
+[antithesis/](../antithesis) packages the harness for the platform:
+`docker build -f antithesis/Dockerfile -t rebirth-dst .` builds the harness
+and the production `engine.wasm` from a context that
+[Dockerfile.dockerignore](../antithesis/Dockerfile.dockerignore) limits to the
+engine build's inputs; the entrypoint signals `setup_complete` and
+Test Composer runs the [drivers](../antithesis/test/v1/rebirth-engine) with
+`--entropy antithesis`: the kernel units, and one whole-engine game per
+invocation checked against the shipped WASM. Under Antithesis, must-hit
+properties are judged across the whole exploration, so a single driver
+invocation never fails for leaving some unmet. `--build-arg INSTRUMENT=1` adds
+Antithesis coverage instrumentation and needs the platform's `libvoidstar.so`
+at `antithesis/libvoidstar.so`.
 
-* **Antithesis packaging**: an image whose entrypoint signals
-  `setup_complete` and Test Composer drivers running `--entropy antithesis`.
-  The binary embeds data compiled from the private original resources, so
-  pushing an image to any external registry, Antithesis included, requires
-  the repository owner's explicit approval.
+The binary embeds data compiled from the private original resources (room
+layouts and catalogues). Pushing the image to any external registry,
+Antithesis included, requires the repository owner's explicit approval. The
+entrypoint and both drivers run cleanly in the SDK's local mode
+(`ANTITHESIS_SDK_LOCAL_OUTPUT`); the platform's own evaluation remains to be
+done.
 
 ## Extending
 
