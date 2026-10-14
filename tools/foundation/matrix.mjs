@@ -7,6 +7,7 @@ import { TASKS } from './systems.mjs';
 import { SUITES } from '../e2e/suites.mjs';
 import { readStageMaskCases } from './stage-masks.mjs';
 import { discoverPairedGameScenarios, discoverTestCases, discoverOriginalClockScenarios, validateOriginalClockScenarios, ORIGINAL_CLOCK_SOURCE } from './scenario-index.mjs';
+import { discoverDstUnits, DST_REGISTRY } from './dst-index.mjs';
 const root = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const target = resolve(root, 'TEST_MATRIX.md');
 const labels = {
@@ -94,6 +95,7 @@ function renderMatrixText({ originalClockScenarios } = {}) {
   const browserCases = discoverTestCases({ root, pattern: 'tools/tests/**/*.spec.ts' });
   const pairedCases = discoverPairedGameScenarios({ root, systemIds: TASKS.map(task => task.id) });
   const maskCases = readStageMaskCases();
+  const dstUnits = discoverDstUnits({ root });
   const clockCases = originalClockScenarios === undefined
     ? discoverOriginalClockScenarios({ root, systemIds: TASKS.map(task => task.id) })
     : validateOriginalClockScenarios(originalClockScenarios, { systemIds: TASKS.map(task => task.id) });
@@ -101,7 +103,7 @@ function renderMatrixText({ originalClockScenarios } = {}) {
 
 Generated from live paired-game declarations, actual browser e2e scenarios and retained strict pixel diagnostics. Run \`npm run matrix:update\` after adding a scenario or checkpoint; \`npm run matrix:check\` rejects drift. The previous port and its scenarios have been removed.
 
-\`npm run check\` builds the Rust/WASM port and runs every live suite registered in [suites.mjs](tools/e2e/suites.mjs), retaining every exit status before failing. There is deliberately no CI: every agent runs \`check:build\` (assets, matrix synchronization, types, build and strict Clippy) and the live suites its change touches before merging. The paired gate gives a fresh original process and immutable production browser the same public tape after an explicit first-Title bootstrap boundary. The live gates check actual input delivery, seed readback and declared source-observable functional state across contrived and recorded OS-random cases. Every selected case executes; failures remain failures. Checked-in unit suites and the legacy Rust/WASM self-equality browser suite have been removed by user instruction. Original GPU mask comparisons remain in the presentation suite.
+\`npm run check\` builds the Rust/WASM port and runs every live suite registered in [suites.mjs](tools/e2e/suites.mjs), retaining every exit status before failing. There is deliberately no CI: every agent runs \`check:build\` (assets, matrix synchronization, types, build and strict Clippy) and the live suites its change touches before merging. The paired gate gives a fresh original process and immutable production browser the same public tape after an explicit first-Title bootstrap boundary. The live gates check actual input delivery, seed readback and declared source-observable functional state across contrived and recorded OS-random cases. Every selected case executes; failures remain failures. Checked-in unit suites and the legacy Rust/WASM self-equality browser suite have been removed by user instruction; the only exception is the Antithesis deterministic simulation testing harness indexed below. Original GPU mask comparisons remain in the presentation suite.
 
 All paired captures retain strict decoded-RGBA diagnostics. Their pixel failures remain failures in the report; tiny visual differences do not determine the default functional result. \`--require-exact-pixels\` opts into full-frame equality. The retained \`verify:foundation\` gate remains strict and optional, with its five known legacy full-frame failures. Earlier supplied-input physics/layout/combat diagnostic CLIs are now ignored research; their retained evidence remains separate from live browser gameplay acceptance.
 
@@ -194,6 +196,22 @@ Combat routes replay their retained source seed; arbitrary-seed overrides are di
 The original uses seed **T1PK 6Y0W**, fresh profiles, and a 960×540 window. Captures and observed log/input metadata live in [baseline](references/isaac/foundation/baseline/manifest.json) and [repeat](references/isaac/foundation/repeat/manifest.json). They are comparison evidence; the renderer composes authored sprites and never draws a captured game frame. [Capture](tools/original/foundation-capture.py) and [save-reference.py](tools/foundation/save-reference.py) refresh these fixtures from the runnable original.
 
 Pixel gates compare decoded RGBA over the whole frame, HUD, actor and projectile regions. Any tolerance is measured from the independent native captures; it is not a freely chosen similarity threshold. Reports distinguish exact pixels from native capture variability. Legacy screenshot fixtures use wall-clock keys/SIGSTOP. The newer clock adapter controls presented frames and main-thread time, disables X11 autorepeat and records actual consumed key events; neither adapter proves native simulation ticks or hidden-state parity. Native process CPU/RSS and browser draw/encoding timings remain separate.
+
+## Antithesis deterministic simulation units
+
+The only checked-in unit-level verification is the [Antithesis DST harness](docs/dst.md) in \`engine/dst/\` (owner-authorized exception; see [AGENTS.md](AGENTS.md)). It is an inner-loop regression tool, not a merge gate: neither \`check:build\` nor any pre-merge check runs it. \`npm run test:dst\` drives each registered unit with seeded entropy and checks every property after each step; \`--entropy antithesis\` hands every decision to the Antithesis platform. Units and properties below are discovered from [the registry](${DST_REGISTRY}) and source; a run's report, not this list, is the outcome. DST establishes engine safety, determinism and documented contracts only, never original-game parity.
+
+| DST unit | Scope | Always | Sometimes | Unreachable |
+| --- | --- | ---: | ---: | ---: |
+${dstUnits.map(unit => `| \`${unit.name}\` | ${unit.summary} | ${unit.properties.filter(property => property.kind.startsWith('Always')).length} | ${unit.properties.filter(property => property.kind === 'Sometimes').length} | ${unit.properties.filter(property => property.kind === 'Unreachable').length} |`).join('\n')}
+
+<details><summary>Every declared DST property</summary>
+
+| Kind | Property | Source |
+| --- | --- | --- |
+${dstUnits.flatMap(unit => unit.properties).map(property => `| ${property.kind} | ${property.message.replaceAll('|', '\\|')} | [${property.source.split('/').at(-1)}](${property.source}) |`).join('\n')}
+
+</details>
 
 ## Divergence tasks by game system
 
