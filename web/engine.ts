@@ -188,6 +188,7 @@ export interface Room {
     keeper: {anchor: {x: number; y: number}; entityFlags: number; stateFrame: number; countdown: number;
       animation: string; animationClock: number; animationPlaying: boolean; tint: number[]; offsets: number[]} | null;
     actor?: string;
+    champion?: {color: number; scale: number; speed: number; timer: number | null};
     shooter?: {cooldown: number; delay: number};
     flipX?: boolean;
     dip: {entityFlags: number; birthGameUpdate: number; currentFriction: number; flipX: boolean;

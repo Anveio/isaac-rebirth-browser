@@ -22,7 +22,9 @@ export interface Frame {
 }
 interface Animation { Name: string; FrameNum: number; Loop: boolean; RootAnimation: Frame[]; LayerAnimations: { LayerId: number; Visible: boolean; Frames: Frame[] }[]; NullAnimations?: { NullId: number; Visible: boolean; Frames: Frame[] }[]; }
 interface Actor { BaseSpritesheetPath: string; Spritesheets: { Id: number; Path: string }[]; Layers: { Id: number; SpritesheetId: number; Name: string }[]; Animations: Animation[]; }
-export interface DrawOptions { scale?: number; layers?: number[]; overrides?: Record<number, Partial<Frame>>; layerScales?: Record<number, readonly [number, number]>; spritesheets?: Record<number, string>; pixelSnap?: number; }
+/** Sprite color (tint RGBA, offset RGB in 0..1), combined with each keyframe as Color::operator*= 42f590 does. */
+export interface SpriteColor { tint: readonly number[]; offsets: readonly number[]; }
+export interface DrawOptions { color?: SpriteColor; scale?: number; layers?: number[]; overrides?: Record<number, Partial<Frame>>; layerScales?: Record<number, readonly [number, number]>; spritesheets?: Record<number, string>; pixelSnap?: number; }
 interface Glyph { x: number; y: number; width: number; height: number; xoffset: number; yoffset: number; xadvance: number; page: number; }
 interface Font { lineHeight: number; pages: string[]; chars: Record<string, Glyph>; kernings: { first: number; second: number; amount: number }[]; }
 const normalize = (path: string) => path.replaceAll("\\", "/").replace(/\/\.\//g, "/").replace(/\/\.$/, "").replace(/^resources\//i, "").toLowerCase();
@@ -161,7 +163,16 @@ export class Assets {
     for (const layer of animation.LayerAnimations) {
       if (!layer.Visible || options.layers && !options.layers.includes(layer.LayerId)) continue;
       const found = sampleFrame(layer.Frames, tick, animation.Loop); if (!found) continue;
-      const frame = overrideFrame(found, options.overrides?.[layer.LayerId]); if (!frame.Visible || frame.AlphaTint <= 0) continue;
+      const frame = overrideFrame(found, options.overrides?.[layer.LayerId]);
+      const color = options.color;
+      if (color) {
+        // Tints multiply and offsets add; colorize is zero for every caller.
+        frame.RedTint = Math.fround(frame.RedTint * color.tint[0]!); frame.GreenTint = Math.fround(frame.GreenTint * color.tint[1]!);
+        frame.BlueTint = Math.fround(frame.BlueTint * color.tint[2]!); frame.AlphaTint = Math.fround(frame.AlphaTint * color.tint[3]!);
+        frame.RedOffset = Math.fround(frame.RedOffset + color.offsets[0]!); frame.GreenOffset = Math.fround(frame.GreenOffset + color.offsets[1]!);
+        frame.BlueOffset = Math.fround(frame.BlueOffset + color.offsets[2]!);
+      }
+      if (!frame.Visible || frame.AlphaTint <= 0) continue;
       const layerScale = options.layerScales?.[layer.LayerId];
       if (layerScale) {
         frame.XScale = Math.fround(frame.XScale * layerScale[0]);
