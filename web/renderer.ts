@@ -128,6 +128,19 @@ export class Renderer {
           this.assets.draw(ctx, bomb.variant === 3 ? "gfx/004.003_troll bomb.anm2" : bomb.variant === 4 ? "gfx/004.004_megatroll bomb.anm2" : "gfx/004.000_bomb.anm2", bomb.animation, bomb.x, bomb.y - 1, bomb.animationFrame, { pixelSnap: this.canvas.width / 480 / 2 });
       for (const effect of state.spriteEffects) {
         if (!effect.visible || !effect.active || effect.removed) continue;
+        if (effect.variant === 5) {
+          const sprite = effect.sprite;
+          this.assets.draw(ctx, "gfx/1000.005_blood particle.anm2", sprite.animation,
+            (effect.presentedPosition.x + effect.renderOffset.x + sprite.offset.x) * 0.65 + 32,
+            (effect.presentedPosition.y + effect.renderOffset.y + sprite.offset.y) * 0.65 - 46,
+            sprite.frame, { scale: 0.65, layerScales: {0: [sprite.scale.x, sprite.scale.y]}, overrides: {0: {
+              Rotation: effect.bloodParticle!.layerRotation,
+              RedTint: sprite.tint[0] * 255, GreenTint: sprite.tint[1] * 255, BlueTint: sprite.tint[2] * 255,
+              AlphaTint: sprite.tint[3] * 255, RedOffset: sprite.offsets[0] * 255,
+              GreenOffset: sprite.offsets[1] * 255, BlueOffset: sprite.offsets[2] * 255,
+            }} });
+          continue;
+        }
         this.assets.draw(ctx, "gfx/1000.015_poof01.anm2", effect.sprite.animation,
           (effect.presentedPosition.x + effect.sprite.offset.x) * 0.65 + 32,
           (effect.presentedPosition.y + effect.sprite.offset.y) * 0.65 - 46,
@@ -180,11 +193,12 @@ export class Renderer {
     for (const stain of room.backgroundStains) {
       const sprite = stain.sprite;
       ctx.save();
-      ctx.translate((stain.position.x + sprite.offset.x) * 0.65 + 32 - appearance.origin.x,
-        (stain.position.y + sprite.offset.y) * 0.65 - 46 - appearance.origin.y);
+      ctx.translate((stain.position.x + stain.renderOffset.x + sprite.offset.x) * 0.65 + 32 - appearance.origin.x,
+        (stain.position.y + stain.renderOffset.y + sprite.offset.y) * 0.65 - 46 - appearance.origin.y);
       ctx.scale(sprite.flipX ? -1 : 1, sprite.flipY ? -1 : 1);
-      this.assets.draw(ctx, "gfx/1000.007_blood splat.anm2", sprite.animation, 0, 0, sprite.frame,
-        { scale: 0.65, overrides: { 0: {
+      this.assets.draw(ctx, stain.variant === 5 ? "gfx/1000.005_blood particle.anm2" : "gfx/1000.007_blood splat.anm2", sprite.animation, 0, 0, sprite.frame,
+        { scale: 0.65, layerScales: {0: [sprite.scale.x, sprite.scale.y]}, overrides: { 0: {
+          ...(stain.layerRotation === null ? {} : {Rotation: stain.layerRotation}),
           RedTint: sprite.tint[0] * 255, GreenTint: sprite.tint[1] * 255,
           BlueTint: sprite.tint[2] * 255, AlphaTint: sprite.tint[3] * 255,
           RedOffset: sprite.offsets[0] * 255, GreenOffset: sprite.offsets[1] * 255,

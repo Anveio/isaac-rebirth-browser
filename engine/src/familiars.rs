@@ -12,6 +12,12 @@ use serde::{Deserialize, Serialize};
 use std::sync::OnceLock;
 
 const ZERO: WorldVector = WorldVector { x: 0.0, y: 0.0 };
+fn zero() -> WorldVector {
+    ZERO
+}
+fn blood_variant() -> u32 {
+    7
+}
 fn white() -> [f32; 4] {
     [1.0; 4]
 }
@@ -65,7 +71,7 @@ pub struct Sprite {
 }
 
 impl Sprite {
-    fn new(config: &Definition) -> Self {
+    pub(crate) fn new(config: &Definition) -> Self {
         Self {
             animation: config.default_clip.into(),
             frame: 0.0,
@@ -79,7 +85,7 @@ impl Sprite {
             offsets: [0.0; 3],
         }
     }
-    fn advance(&mut self, config: &Definition) -> Result<(), String> {
+    pub(crate) fn advance(&mut self, config: &Definition) -> Result<(), String> {
         if !self.playing {
             return Ok(());
         }
@@ -210,6 +216,8 @@ pub struct SpriteEffect {
     pub actor_rng: items::Rng,
     pub position: WorldVector,
     pub presented_position: WorldVector,
+    #[serde(default = "zero")]
+    pub render_offset: WorldVector,
     pub velocity: WorldVector,
     pub configured_friction: f32,
     pub current_friction: f32,
@@ -229,8 +237,12 @@ pub struct SpriteEffect {
     pub time_to_live: i32,
     pub raw_7f4: i32,
     pub raw_7f8: f32,
+    #[serde(default)]
+    pub raw_7d8: bool,
     pub sprite: Sprite,
     pub full_updates: u32,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub blood_particle: Option<crate::gib_effects::BloodParticle>,
 }
 
 impl SpriteEffect {
@@ -364,6 +376,7 @@ impl PoofAdmission<'_> {
             actor_rng: items::Rng::new(seed, [4, 3, 17]),
             position,
             presented_position: position,
+            render_offset: ZERO,
             velocity,
             configured_friction: config.friction,
             current_friction: config.friction,
@@ -384,8 +397,10 @@ impl PoofAdmission<'_> {
             time_to_live: -1,
             raw_7f4: 1,
             raw_7f8: 0.0,
+            raw_7d8: false,
             sprite,
             full_updates: 0,
+            blood_particle: None,
         });
         self.scheduler.admit(ActorRef {
             kind: ActorKind::Effect,
@@ -396,6 +411,13 @@ impl PoofAdmission<'_> {
 }
 
 pub fn advance_effect(state: &mut State, phase: Phase, id: u32) -> Result<(), String> {
+    if state
+        .sprite_effects
+        .iter()
+        .any(|effect| effect.id == id && effect.blood_particle.is_some())
+    {
+        return crate::gib_effects::advance(state, phase, id);
+    }
     if let Some(effect) = state
         .sprite_effects
         .iter_mut()
@@ -612,6 +634,12 @@ pub struct BackgroundStain {
     pub spawn_seed: u32,
     pub birth_game_update: u32,
     pub position: WorldVector,
+    #[serde(default = "blood_variant")]
+    pub variant: u32,
+    #[serde(default = "zero")]
+    pub render_offset: WorldVector,
+    #[serde(default)]
+    pub layer_rotation: Option<f32>,
     pub sprite: Sprite,
 }
 
@@ -645,6 +673,7 @@ pub fn admit_blood_splat(
         actor_rng: items::Rng::new(seed, [4, 3, 17]),
         position,
         presented_position: position,
+        render_offset: ZERO,
         velocity: ZERO,
         configured_friction: config.friction,
         current_friction: config.friction,
@@ -664,8 +693,10 @@ pub fn admit_blood_splat(
         time_to_live: -1,
         raw_7f4: 1,
         raw_7f8: 0.0,
+        raw_7d8: true,
         sprite,
         full_updates: 0,
+        blood_particle: None,
     });
     // Room5c6940 assigns the actual sequence first; Manager4524f0 then routes
     // flags8 to its separate background pool rather than the ordinary array.
@@ -732,7 +763,12 @@ pub fn paint_background_effects(state: &mut State) -> Result<(), String> {
         .sprite_effects
         .iter()
         .enumerate()
-        .filter(|(_, effect)| effect.variant == 7 && effect.active && !effect.removed)
+        .filter(|(_, effect)| {
+            matches!(effect.variant, 5 | 7)
+                && effect.flags & 8 != 0
+                && effect.active
+                && !effect.removed
+        })
         .map(|(index, effect)| {
             let key = ((100.0_f32 * effect.position.y + 10030.0) + 0.5).floor() as u32;
             (
@@ -745,7 +781,7 @@ pub fn paint_background_effects(state: &mut State) -> Result<(), String> {
     pending.sort_by(|a, b| a.1.cmp(&b.1).then_with(|| b.2.cmp(&a.2)));
     for (index, _, _) in pending {
         let effect = &mut state.sprite_effects[index];
-        if effect.full_updates != 1 {
+        if effect.variant == 7 && effect.full_updates != 1 {
             return Err("Blood background paint requires the explicit initial Update".into());
         }
         state.room.background_stains.push(BackgroundStain {
@@ -753,6 +789,12 @@ pub fn paint_background_effects(state: &mut State) -> Result<(), String> {
             spawn_seed: effect.spawn_seed,
             birth_game_update: effect.birth_game_update,
             position: effect.position,
+            variant: effect.variant,
+            render_offset: effect.render_offset,
+            layer_rotation: effect
+                .blood_particle
+                .as_ref()
+                .map(|particle| particle.layer_rotation),
             sprite: effect.sprite.clone(),
         });
         // Remove441bb0 clears active and marks dead; visibility stays unchanged.

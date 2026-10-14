@@ -21,6 +21,7 @@ pub mod enemy_projectiles;
 pub mod familiars;
 pub mod fireplaces;
 pub mod floor;
+pub mod gib_effects;
 pub mod grid;
 mod grid_hazards;
 pub mod grid_records;
