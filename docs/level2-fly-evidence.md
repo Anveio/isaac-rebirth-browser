@@ -96,5 +96,6 @@ The prior adapter incorrectly used the cached caller as a linked parent.
 All 172 retained native214 Poof observations have that pointer null. The gate
 now requires the cached fields and linked pointer separately. The separate
 `poof-spawner-correction.json` pins this evidence without rewriting the old
-source contract, captures or failed reports. Current build/live acceptance is
-still pending.
+source contract, captures or failed reports. The correction passes its own-target
+all-target Rust check and strict Clippy; current production/build/live acceptance
+is still pending.

@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "scope": "Separate narrow source correction to PR89 using unchanged immutable original84 proof. Runtime and required direct comparator are corrected; formatting, TypeScript, comparator syntax, matrix and diff checks pass. No new Rust/build/live acceptance. Historical bodies and failed reports remain unchanged.",
+  "scope": "Separate narrow source/static correction to PR89 using unchanged immutable original84 proof. Runtime and required comparator are corrected; own-target Rust all-target check and strict Clippy pass, plus formatting/TypeScript/syntax/matrix/diff checks. No new production build or original/browser acceptance. Historical bodies and failed reports remain unchanged.",
   "binarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
   "sourcePins": {
     ".cache/coordination/combat/function-441c80.txt": "b78d3740dbf3a012360714957e11615bf82401f86c9060e01207faad3d6ed741",
@@ -86,7 +86,7 @@
     "Direct comparator selects NPC Poofs by cached fields and requires each actual linked pointerNULL, preserving all seed/body/ANM and execution assertions."
   ],
   "validation": {
-    "rust": "not run; compiler lease required",
+    "rust": "pass; own warmed target/all-targets/jobs1/incremental0,9.04s",
     "productionBuild": "not run",
     "freshPairedOriginalBrowser": "not run",
     "historicalNativeNullParentObservations": 172,
@@ -94,6 +94,15 @@
     "typeScript": "pass",
     "comparatorSyntax": "pass",
     "matrix": "pass",
-    "diff": "pass"
+    "diff": "pass",
+    "strictClippy": "pass; own warmed target/all-targets/-D warnings/jobs1/incremental0,8.95s",
+    "checkedHead": "ec9efa5d8493de8eba2cb7607c1e76ed22229859",
+    "runtime": "e168e6016babbb39ef24af4f951cce81b321c877",
+    "receiptSha256": "c28f6ad2d0992db8ded47c81f37e4a9f2afaae7ad40df006a034a824237c80eb",
+    "codeHashes": {
+      "engine/src/familiars.rs": "338ec26333f7fd58fabb472b2761f391696bca1cb65768e5dc92ec8444a51275",
+      "web/engine.ts": "9debef8f18da976a024d1eaa775e4ab378766eda2040f758d820d13f704311fd",
+      "tools/foundation/monstro-state-pair.mjs": "ef26a86d756827b61485d748b5f9b551bff208dad5b5c780516f43c205e8c090"
+    }
   }
 }
