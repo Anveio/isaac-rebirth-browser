@@ -94,11 +94,11 @@ impl SavedPlayerItems {
     }
 }
 
-///54f373 flushes52ee40 before Manager5bf400 calls Player518350. Normal
-///518120 clears mapped temporary owners and cancels neutral costume-free
-/// active state. Other actual removal/presentation callbacks remain required.
-pub(crate) fn capture_at_manager_save(state: &mut State) -> Result<SavedPlayerItems, String> {
-    crate::player_items::flush_queued(state)?;
+/// Actual518120 is shared by Player Save518350 and stage request5508d0.
+/// Its caller separately owns queued-grant admission. This bounded callback
+/// clears mapped temporary records and neutral costume-free active state;
+/// other removal, appearance andBF5 owners remain explicit source gaps.
+pub(crate) fn normalize_player(state: &mut State) -> Result<(), String> {
     let owner = state
         .player_items
         .as_mut()
@@ -126,5 +126,18 @@ pub(crate) fn capture_at_manager_save(state: &mut State) -> Result<SavedPlayerIt
     //already neutral; no transient owner or missing BF5 value is invented.
     owner.active_state_d80 = 0;
     owner.active_state_d84 = 0;
-    SavedPlayerItems::copy_from(owner)
+    Ok(())
+}
+
+///54f373 flushes52ee40 before Manager5bf400 calls Player518350. A stage
+///request must not inherit this save-specific queue flush from normalization.
+pub(crate) fn capture_at_manager_save(state: &mut State) -> Result<SavedPlayerItems, String> {
+    crate::player_items::flush_queued(state)?;
+    normalize_player(state)?;
+    SavedPlayerItems::copy_from(
+        state
+            .player_items
+            .as_ref()
+            .expect("checked first Player owner"),
+    )
 }
