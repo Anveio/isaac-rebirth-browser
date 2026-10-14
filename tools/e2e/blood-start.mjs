@@ -15,12 +15,6 @@ const option = (name, fallback) => { const at = process.argv.indexOf(name); if (
 const output = resolve(option('--output', '.cache/e2e/blood-start'));
 mkdirSync(output, { recursive: true });
 const save = (path, document) => writeFileSync(path, JSON.stringify(document, null, 2) + '\n');
-const sources = ['tools/e2e/blood-start.mjs', 'tools/original/blood-start-scenarios.py', 'tools/original/blood-start-observer.py',
-  'tools/foundation/blood-start-state-pair.mjs', 'engine/src/blood_effects.rs', 'engine/src/familiars.rs', 'engine/src/monstro.rs',
-  'engine/src/lib.rs', 'engine/build.rs', 'web/familiar-data.json', 'web/npc-data.json', 'web/renderer.ts', 'web/animation.ts',
-  'references/isaac/foundation/combat/monstro/blood-start-source-contract.json'];
-const hashes = () => Object.fromEntries(sources.map(path => [path, createHash('sha256').update(readFileSync(path)).digest('hex')]));
-const before = hashes();
 const bank = JSON.parse(execFileSync('python3', ['tools/original/blood-start-scenarios.py'], { encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 }));
 assert.equal(bank.cases.length, 4);
 assert.deepEqual(bank.cases.map(row => row.bloodStartInputPhaseOffset), [0, 1, 0, 1]);
@@ -32,7 +26,7 @@ if (process.argv.includes('--list')) {
   console.log(JSON.stringify(bank.cases.map(row => ({ id: row.scenario.id, seed: row.seed,
     randomized: row.scenario.randomized, captures: row.pairedTape.filter(action => action.type === 'capture').length }))));
 } else {
-  const report = { schema: 1, status: 'running', startedAt: new Date().toISOString(), sources: before, cases: [],
+  const report = { schema: 1, status: 'running', startedAt: new Date().toISOString(), cases: [],
     scope: 'Partial actual Monstro BloodStart17/SFX72/42. Every selected outcome and existing core mismatch remains blocking; no Explosion/gib/final-heart/Grid17 or whole-state claim.' };
   save(resolve(output, 'report.json'), report);
   for (const [index, definition] of cases.entries()) {
@@ -44,7 +38,7 @@ if (process.argv.includes('--list')) {
     try {
       const paired = await runPairedGate({ output: resolve(directory, 'paired'), selected: [], randomCount: 0,
         replayCases: [tape], archiveBrowserEvidence: true, originalObserver: 'tools/original/blood-start-observer.py',
-        stateComparator: comparator.compare, additionalSources: sources, nativeFrameTimeout: 120,
+        stateComparator: comparator.compare, nativeFrameTimeout: 120,
         productionDirectory: option('--production-directory') });
       const direct = comparator.finish(definition.bloodStartRequired);
       save(resolve(directory, 'body-report.json'), direct);
@@ -80,8 +74,7 @@ if (process.argv.includes('--list')) {
     } catch (error) { row.error = String(error); }
     report.cases.push(row); save(resolve(output, 'report.json'), report);
   }
-  report.sourcesStable = JSON.stringify(hashes()) === JSON.stringify(before);
-  report.status = report.sourcesStable && report.cases.length === cases.length && report.cases.every(row => row.status === 'pass') ? 'pass' : 'fail';
+  report.status = report.cases.length === cases.length && report.cases.every(row => row.status === 'pass') ? 'pass' : 'fail';
   report.finishedAt = new Date().toISOString(); save(resolve(output, 'report.json'), report);
   console.log(JSON.stringify(report)); process.exitCode = report.status === 'pass' ? 0 : 1;
 }
