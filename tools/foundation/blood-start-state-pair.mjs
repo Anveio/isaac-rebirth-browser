@@ -63,10 +63,13 @@ export function bloodStartComparator({ scenario }) {
         if (!port) continue;
         const start = checks.length;
         const parent = port.parent ? actual.room.npcs.find(actor => actor.id === port.parent.actor.id) : null;
+        const linkedParent = !port.parent ? null : parent
+          ? { type: parent.kind, variant: parent.variant, spawnSeed: parent.spawnSeed }
+          : { unresolvedActorRef: port.parent.actor };
         const fields = {
           subtype: [native.subtype, port.subtype], cachedSpawner: [native.spawner, [port.spawnerType, port.spawnerVariant]],
           birthGameUpdate: [native.birthGameUpdate, port.birthGameUpdate],
-          linkedParent: [native.parent, parent ? { type: parent.kind, variant: parent.variant, spawnSeed: parent.spawnSeed } : null],
+          linkedParent: [native.parent, linkedParent],
           active: [native.active, port.active], dead: [native.dead, port.removed], visible: [native.visible, port.visible],
           position: [vector(native.position), vector(phase === 0 ? port.presentedPosition : port.position)],
           velocity: [vector(native.velocity), vector(port.velocity)], offset: [vector(native.spriteOffset), vector(port.sprite.offset)],

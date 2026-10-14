@@ -57,6 +57,10 @@
     "0x458a70": {
       "fdeBytes": 6405,
       "rawSha256": "be2ca9ea49b61472d00640d3a1c587d10df08116f626b23abc9f922b170e0569"
+    },
+    "0x410810": {
+      "fdeBytes": 80,
+      "rawSha256": "405f8608d8a8cf59b31009d0bac553dd7fa20cca5344f49011daa91a64becb39"
     }
   },
   "callerFunction": {
@@ -126,6 +130,7 @@
     "NativeMonstro/config/color/guide/body proof",
     "Complete render ordering/backgroundreturn/RGBA",
     "Remaining shared run/ambient RNG producers; no padding",
-    "Existing failed public-game histories"
+    "Existing failed public-game histories",
+    "Actual parent+4b0 registered-link cleanup on retirement/destruction. A stale serialized ActorRef is a required comparator mismatch, not silently mapped to native NULL."
   ]
 }
