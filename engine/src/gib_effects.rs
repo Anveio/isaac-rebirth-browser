@@ -39,6 +39,18 @@ pub struct Birth {
     pub offsets: [f32; 3],
 }
 
+/// Fresh ordinary nonboss445c60 caller. Status/champion/large and the special
+/// category58/63 callbacks have separate producers and are not admitted here.
+pub struct OrdinaryDeath {
+    pub parent: Parent,
+    pub position: WorldVector,
+    pub radius: f32,
+    pub amount: u32,
+    pub flags: u32,
+    pub tint: [f32; 4],
+    pub offsets: [f32; 3],
+}
+
 /// Borrow the existing factory owners at a pre-Base callback boundary.
 pub struct Admission<'a> {
     pub game_update_count: u32,
@@ -48,6 +60,97 @@ pub struct Admission<'a> {
 }
 
 impl Admission<'_> {
+    /// Exact ordinary Stage1 category sampling and explicit initializer order.
+    /// The caller invokes this inside its actual lethal Base damage callback.
+    pub fn ordinary_death(
+        &mut self,
+        death: OrdinaryDeath,
+        shared: &mut crate::mt::Mt19937,
+        audio: &mut crate::audio::AudioState,
+        system_counter: u32,
+    ) -> Result<(), String> {
+        let categories = death.flags & (1 | 2 | 4 | 32);
+        if death.flags & !0xf != 0
+            || (death.amount > 0 && categories == 0)
+            || !death.radius.is_finite()
+            || death.radius < 0.0
+        {
+            return Err("ordinary gibs require actual supported category flags and radius".into());
+        }
+        //44641d: the positive authored amount selects volume1; a zero-gib
+        //caller selects .8. Audio admission remains the sole SFX sampler.
+        audio.admit(
+            shared,
+            system_counter,
+            crate::audio::SoundRequest {
+                id: 30,
+                volume: if death.amount > 0 { 1.0 } else { 0.8 },
+                delay: 2,
+                looping: false,
+                pitch: 1.0,
+            },
+        );
+        let mut counts = [0; 4];
+        if death.amount > 0 {
+            let budget = death
+                .amount
+                .checked_add(shared.bounded(2))
+                .ok_or("gib budget exhausted")?
+                / categories.count_ones()
+                + 1;
+            //445d39..446418 samples every category count BEFORE any birth.
+            if death.flags & 1 != 0 {
+                counts[0] = shared.bounded(budget) + shared.bounded(budget);
+            }
+            if death.flags & 2 != 0 {
+                counts[1] = budget / 2 + shared.bounded(budget / 2);
+            }
+            if death.flags & 4 != 0 {
+                counts[2] = shared.bounded(budget);
+            }
+            if death.flags & 8 != 0 {
+                counts[3] = shared.bounded(budget.min(3));
+            }
+        }
+        for (subtype, count) in counts.into_iter().enumerate() {
+            for _ in 0..count {
+                //445f40->445da8->445dcd->445e22: speed, raw seed,
+                //elliptical velocity direction, then independent birth offset.
+                let speed = shared.uniform() * 4.0 + 2.0;
+                let seed = shared.next_u32();
+                let direction = crate::npcs::direction(shared);
+                let velocity = WorldVector {
+                    x: direction.x,
+                    y: direction.y * 0.5,
+                } * speed;
+                let position =
+                    death.position + (crate::npcs::direction(shared) * 0.5) * death.radius;
+                let id = self.admit(Birth {
+                    subtype: subtype as u32,
+                    seed,
+                    position,
+                    velocity,
+                    parent: Some(death.parent.clone()),
+                    tint: death.tint,
+                    offsets: death.offsets,
+                })?;
+                //445ed5 copied inherited color before445f32 immediateUpdate.
+                self.advance_initial(id, shared)?;
+            }
+        }
+        //44622e/446241: final Blood7 has the actual NPC ground position,
+        //zero velocity and NULL parent, then its separate immediate Update.
+        let seed = shared.next_u32();
+        let mut blood = familiars::BloodAdmission {
+            game_update_count: self.game_update_count,
+            next_effect: self.next_effect,
+            effects: self.effects,
+            scheduler: self.scheduler,
+        };
+        let id = blood.admit(seed, death.position, death.tint, death.offsets)?;
+        blood.advance_initial(id, shared)
+    }
+
     /// The real445f32 caller invokes this after inherited color copy.
     /// Other caller sites that omit immediate Update must omit this call.
     pub fn advance_initial(
@@ -392,6 +495,11 @@ fn finish_update(effect: &mut SpriteEffect) -> Result<(), String> {
 
 /// Manager's full class3 ground pass follows actor/background callbacks.
 pub fn full_grid_contacts(state: &mut State) -> Result<(), String> {
+    if !state.sprite_effects.iter().any(|effect| {
+        effect.variant == 5 && effect.active && !effect.removed && effect.flags & 8 == 0
+    }) {
+        return Ok(());
+    }
     let grid = Grid::new(
         state
             .room

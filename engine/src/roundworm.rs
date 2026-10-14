@@ -46,8 +46,10 @@ pub struct World<'a> {
     pub occupied: &'a [WorldVector],
     pub grid: &'a Grid,
     pub path_costs: &'a RoomCosts,
+    pub stage: u32,
     pub audio: &'a mut AudioState,
     pub system_counter: u32,
+    pub gibs: crate::gib_effects::Admission<'a>,
 }
 
 #[derive(Clone, Copy)]
@@ -330,9 +332,34 @@ pub fn advance(
     npc.damage.advance(&mut health, phase)?;
     npc.hp = health.hp;
     if npc.hp <= 0.0 {
+        if world.stage != 1 || npc.variant != 0 || npc.subtype != 0 {
+            return Err("Worm death requires the admitted ordinary Stage1 context".into());
+        }
         npc.dead = true;
-        // The real six-gib producer remains a separate unaccepted FX path;
-        // do not substitute the Fly zero-gib BloodSplat seed or a fake draw.
+        // Base447850->virtual40=47fc80->4464c0 marks31f and calls445c60
+        // for this nonboss in the same lethal FIFO drain. The ordinary
+        // fresh color/status scope inherits EntityInit's actual white ctor.
+        world.gibs.ordinary_death(
+            crate::gib_effects::OrdinaryDeath {
+                parent: crate::familiars::Parent {
+                    actor: crate::actors::ActorRef {
+                        kind: crate::actors::ActorKind::Npc,
+                        id: npc.id,
+                    },
+                    entity_type: npc.kind,
+                    variant: npc.variant,
+                },
+                position: npc.position,
+                radius: npc.collision_radius,
+                amount: content::NPC_244_GIB_AMOUNT,
+                flags: content::NPC_244_GIB_FLAGS,
+                tint: [1.0; 4],
+                offsets: [0.0; 3],
+            },
+            random,
+            world.audio,
+            world.system_counter,
+        )?;
     }
     if !npc.position.is_finite() || !npc.velocity.is_finite() {
         return Err("Worm source motion overflowed".into());

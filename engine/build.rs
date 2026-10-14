@@ -441,6 +441,34 @@ fn main() {
             })
             .expect("admitted NPC config is authored");
         if kind != 9 {
+            if kind == 244 {
+                // Config44bd90 parses the gibs child; its amount is not an
+                // entity-root attribute. Lookup449590 exposes +48/+50.
+                let child = tag
+                    .split("<gibs ")
+                    .nth(1)
+                    .and_then(|child| child.split('>').next())
+                    .expect("authored Round Worm gibs child absent");
+                let amount = attribute(child, "amount")
+                    .unwrap_or("0")
+                    .parse::<u32>()
+                    .expect("invalid authored Round Worm gib amount");
+                let mut flags = 0;
+                for (name, bit) in [
+                    ("blood", 1),
+                    ("bone", 2),
+                    ("gut", 4),
+                    ("eye", 8),
+                    ("large", 16),
+                ] {
+                    if attribute(child, name).unwrap_or("0") != "0" {
+                        flags |= bit;
+                    }
+                }
+                generated.push_str(&format!(
+                    "pub const NPC_244_GIB_AMOUNT: u32 = {amount};\npub const NPC_244_GIB_FLAGS: u32 = {flags};\n"
+                ));
+            }
             let can_shut_doors = attribute(tag, "shutdoors").unwrap_or("true") == "true";
             let boss = entity_number(&xml, kind, 0, "boss") != 0.0;
             generated.push_str(&format!("pub const NPC_{kind}_CAN_SHUT_DOORS: bool = {can_shut_doors};\npub const NPC_{kind}_BOSS: bool = {boss};\n"));

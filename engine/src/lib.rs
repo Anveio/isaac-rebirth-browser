@@ -1495,6 +1495,7 @@ impl Game {
                     pickups::full_grid_contacts(&mut self.state)?;
                     chests::full_grid_contacts(&mut self.state)?;
                     npcs::post_contact_grid(&mut self.state)?;
+                    gib_effects::full_grid_contacts(&mut self.state)?;
                     self.state.room.pickups.retain(|pickup| !pickup.removed);
                     let pickups = &self.state.room.pickups;
                     self.state.actor_scheduler.retain(|actor| {
@@ -1599,6 +1600,7 @@ impl Game {
             pickups::full_grid_contacts(&mut self.state)?;
             chests::full_grid_contacts(&mut self.state)?;
             npcs::post_contact_grid(&mut self.state)?;
+            gib_effects::full_grid_contacts(&mut self.state)?;
         }
         if phase == phase::Phase::Update {
             familiars::grid_contacts(&mut self.state)?;
@@ -1965,8 +1967,15 @@ impl Game {
                     .path_costs
                     .as_ref()
                     .ok_or("Round Worm requires source Room.Init path costs")?,
+                stage: self.state.stage,
                 audio: &mut self.state.audio,
                 system_counter: self.state.system_clock.system_counter.wrapping_sub(1),
+                gibs: gib_effects::Admission {
+                    game_update_count: self.state.game_update_count,
+                    next_effect: &mut self.state.next_effect,
+                    effects: &mut self.state.sprite_effects,
+                    scheduler: &mut self.state.actor_scheduler,
+                },
             },
         )?;
         if let Some(shot) = shot {
