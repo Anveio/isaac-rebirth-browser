@@ -1,0 +1,258 @@
+{
+  "schema": 1,
+  "scope": "Complete first frozen source e59 fresh eight-case original/browser comparison, before the two subsequent source corrections. Every required failure remains recorded; it is historical evidence and does not certify the corrected runtime or current main.",
+  "sourceHead": "e59cac0e35e387293b374dee084a64607fc1571a",
+  "production": {
+    "sha256": "18c99a6a3f9b3766f6461ec08359a7deda92231a213a6f154b864edb6d3e2449",
+    "files": 938
+  },
+  "wasm": {
+    "sha256": "6cc8acb19d74643106c3e86bab0d8fa00aaf793d42fa3e9079ba91cb4a7a5a84",
+    "bytes": 1391124
+  },
+  "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "scenarioSha256": "32f874c6b1b305cc56c3810e0fa8db5306573dc18709af909afabdbedfc576ea",
+  "reportSha256": "b8d6250ebe216926490d5ed40637ea9cfdfe0483c5d3550c64f8ee019914a3a3",
+  "evidenceAuditSha256": "1afb0897da620e2ff179692df01013ba42f77bc86c152722e3ce3df817f543eb",
+  "sourceStability": {
+    "status": "pass",
+    "capturedSourceFiles": 40,
+    "beforeSha256": "1528f86250170957ce6d76f50592c55baa9137a63b4644d33bed160766e7e83e",
+    "afterSha256": "1528f86250170957ce6d76f50592c55baa9137a63b4644d33bed160766e7e83e",
+    "scope": "Complete before/end maps are retained in the immutable report; both equal the single gateSources map below."
+  },
+  "gateSources": {
+    "tools/e2e/items.mjs": "e898bc6f59a709199ee426cd7f25462e0f85ac1656265492411e148a323d31d6",
+    "tools/original/item-scenarios.py": "8e933cb0a2e445a398519001043cf676762636f0769bf5c7b445ecf7ded71b36",
+    "tools/original/item-observer.py": "6ac7c9c2e6b0db309ea7cf42f729e1d5ca82ee883a721281bf4f5425bef4b807",
+    "tools/e2e/item-room-evidence.mjs": "3794ab422ca0c4f39ddbb9d4d90639f4a1dc2a8edb4c769850fe5f1ed8a4f17f",
+    "tools/foundation/item-catalog.py": "d1c009f1584faa63dde8737f1e8bb75c879b8df7a95fb587ed826fb4268a5671",
+    "tools/foundation/decode-rooms.py": "4640cce2c99d0ef09d6691cf42c021f012e16ed3752bace965ad18dca7250f1a",
+    "tools/original/foundation-seeds.py": "dd4633c955e7518e9bc0f0147ddfae46d356468238477a68dc06c86656ccba89",
+    "tools/original/foundation-clock-run.py": "8f2fa981fbe26073d5a5a34ff46fbc6e9c70c2d30f81784abded5e40b9110c5b",
+    "tools/original/foundation-clock-gate.c": "f517f1fc0edf2bbe17021e529fb41652e991e286bef070b8aecefd32bfa62e75",
+    "tools/original/foundation-clock-verify.py": "c488100a187b44803c06374535715eaa5a7cde9d4513f6e866e090367d4f2054",
+    "tools/original/foundation-pickup-observe.py": "44de79cf98ff0de86508b37ba15e694af74e7f237e824eaf4d090056cf884f4a",
+    "tools/original/state-observer.py": "58e3b510abbe5ff57f05844efbdf764e2a02530cda4fa99f538d886d258af6f1",
+    "tools/original/with-display.sh": "4371efe64ae1639564b4a85292ff252e20bcfe84b5387927ecf7093c6b8d3dfb",
+    "tools/foundation/verify.mjs": "3743b773cf2ede253c6d78f2605eb43f34e9d7002284b6a1dd2c413d45835a5c",
+    "tools/foundation/browser.mjs": "60c4bc851470f47e4dd0399148ce0c1edf351d41fbf7f7e15fa823af5948b4c8",
+    "tools/foundation/production-server.mjs": "e3152b58e2353319ba0963b30439e33c3cc65f84a8c6ebb765c2812486245952",
+    "web/trace.ts": "e05eee6d02f687b3b5bf2d31f7eb59d5c3e1900a6c1a078e15f63b71b325fb38",
+    "engine/src/items.rs": "611d8a8af157b2a5b0541c569227baf73198a725c744f10213c5425b70123db1",
+    "engine/src/seed.rs": "5b34052dfbc34facb7903d1aeae5b063934c7780902d4ccfe6ab2743597d98d3",
+    "engine/src/pickups.rs": "53df71e1054a8c2a33b2fe005f2996e8ff39ed6e8a437d312d881309224569f1",
+    "engine/src/lib.rs": "acbc77b7bf591ce5034afcb950661063485824544ce7a8d5d0338249e95a3fd6",
+    "engine/build.rs": "ffd0925562376c16d96804c27df097a91cdaead7812017de13905caa54abe85e",
+    "engine/src/player_items.rs": "5dfb8d98e07ad1aa7d0817d66e674822be489ffeffd660b3c4cf158f85093e9b",
+    "web/engine.ts": "f4f1371c52b956d3c32d81698edfd17977f1754610e1624deb1ada20c777cbce",
+    "web/animation.ts": "d6d746017674a1b26a2a8097f5f86d953b970e501047fca717bbb3983399bbd0",
+    "web/pickups.ts": "2d790e261de4f6a58a010983458640cf2438610634ed349f878fa040572aeaab",
+    "web/renderer.ts": "78d096230690336bf2ebe380814b139e006115fcaee0eebe688b24276cc70fcc",
+    "web/scene-data.json": "457667d62b58d5bc584cba3cccf48471d58a9f068e4277fa4d5bee90d59c2484",
+    "web/pickup-data.json": "b6a14059e82fcca8dabcdf98ba865ea5bc16a70706e18fca604fc6dcd378991b",
+    "engine/src/combat.rs": "367d0d56124da55e944c86934000dbab6fc3bac8c1b6ed0110dd616b43e547b0",
+    "engine/src/grid.rs": "bc4d3b5123f5042b67f7fc17fd301031da8085705460e34ef13060148f559531",
+    "engine/src/room.rs": "b88aead6bbb5d519ecb4e2bb4d373ba5c528617539e82f4a415691650ca9aa2c",
+    "references/isaac/foundation/player-stat-cache/contrived.json": "6550916f213216fd2190fe16e26d78c39a78778e5246488c6b72d6cdf061c287",
+    "references/isaac/foundation/player-stat-cache/source-contracts.json": "1a3d6f8f1c5bd0accf56d898c065d143dae1559d252750b3ba9d80acb575af14",
+    "engine/src/phase.rs": "0344db696df4f465f421b0f0a6a6b4b94b843b056363d4324d3d7dc9f49b3766",
+    "engine/src/actors.rs": "f40cff1bf83d5290cf3d1d4d38a2a3ef869740be6f70fdd0ce5fdd7c46b27e0b",
+    "engine/src/player_stats.rs": "ddf44404ffdf8f1897db9fed0e4c66fa9df2ef1f21a0cc4bd698801a4ec1c54c",
+    "engine/src/motion.rs": "17aa1c9d7a40fd9cf649383ae91cec629fb5b0c98087fb687c860e2e9ba3df86",
+    "engine/src/projectiles.rs": "68a646f73b13a7795076e92da3b5a567caf4b5f9f336743b2f79fc836a41ed65",
+    "engine/src/familiars.rs": "3fd948beaa2b4da0ae49fef96fe300410c7ea86b99f4d786e0e8052753752f0c"
+  },
+  "gameplayStatus": "fail",
+  "evidenceIntegrityAndInputProvenance": "pass",
+  "phases": 2796,
+  "checks": 212485,
+  "failures": 609,
+  "passedCases": 0,
+  "cases": [
+    {
+      "name": "passive-14-phase-0",
+      "code": "B91W8E0B",
+      "status": "fail",
+      "phases": 349,
+      "checks": 26493,
+      "failures": 202,
+      "failureFields": {
+        "cached tearHeight": 100,
+        "cached tearFallingSpeed": 100,
+        "actual regular tear cardinality": 2
+      },
+      "actualNativeGrantedIds": [
+        14
+      ],
+      "commands": 405,
+      "backendStates": 3,
+      "nativeRawSha256": "92f0697bdba32b857b5f1ad3b67108ad39911447997982f72c199bc1276644a3",
+      "browserRawSha256": "fc89f20bb1935ac1d96743ee32ea02d0114ede70a7fd01b51e604a53d5024b53",
+      "scopedReportSha256": "e6520905b0d4211283671df02c87701a4daa2d7bc0d07b2a192f0fca8de89a0d",
+      "tapeSha256": "d23340c2d419b354122290e5a65187c082636a1bc86dafee9eecfcac30a15910",
+      "provenanceAndEvidence": "pass"
+    },
+    {
+      "name": "passive-14-phase-1",
+      "code": "B91W8E0B",
+      "status": "fail",
+      "phases": 350,
+      "checks": 26583,
+      "failures": 204,
+      "failureFields": {
+        "cached tearHeight": 99,
+        "cached tearFallingSpeed": 99,
+        "actual regular tear cardinality": 4,
+        "tear0:actual stored velocity": 2
+      },
+      "actualNativeGrantedIds": [
+        14
+      ],
+      "commands": 406,
+      "backendStates": 3,
+      "nativeRawSha256": "c1dff965c43619fba983b875484e5bbd956e1528334f2ed555ed5a5da77f9912",
+      "browserRawSha256": "f2983d37100b60ea207c079b2c7d5b1178cf41ed0c01b7b5c7122ebcf738e007",
+      "scopedReportSha256": "8ac5ede054d17463e02fb48e2da7196e29046bc36cb12385f6f6cc1d9627468c",
+      "tapeSha256": "a272f24726412315ddb147878dfcf9c855bd1543b3dfc55c0f696d9482c54979",
+      "provenanceAndEvidence": "pass"
+    },
+    {
+      "name": "passive-143-phase-0",
+      "code": "B9119H6R",
+      "status": "fail",
+      "phases": 349,
+      "checks": 26489,
+      "failures": 20,
+      "failureFields": {
+        "tear0:actual stored velocity": 18,
+        "actual regular tear cardinality": 2
+      },
+      "actualNativeGrantedIds": [
+        143
+      ],
+      "commands": 405,
+      "backendStates": 3,
+      "nativeRawSha256": "e9acfca1233e69f163db480088c19e956b4e8f00294ab4e6d2fa6895283b9261",
+      "browserRawSha256": "cab8a61291a0196fa7a89fb080ee57c879083a47150432cadde91ed30581e3c4",
+      "scopedReportSha256": "3ed525c9b51e2390a922835a8e185973a90afc0f99c0267c1b9758027f9ecd54",
+      "tapeSha256": "d336ff80c6d5f5df71644039336f22b0f61d0affa68cca29d57c1f4b37eeb33b",
+      "provenanceAndEvidence": "pass"
+    },
+    {
+      "name": "passive-143-phase-1",
+      "code": "B9119H6R",
+      "status": "fail",
+      "phases": 350,
+      "checks": 26575,
+      "failures": 39,
+      "failureFields": {
+        "tear0:actual stored velocity": 35,
+        "actual regular tear cardinality": 4
+      },
+      "actualNativeGrantedIds": [
+        143
+      ],
+      "commands": 406,
+      "backendStates": 3,
+      "nativeRawSha256": "b8455f3f8bc565a407559eb943bc4a9e6779d2f3daed8fc8d4af20b9bdf5771c",
+      "browserRawSha256": "67c45135c7f8d8419c98e7e50590158b740383e24bc734ceb1794a8a44d1d988",
+      "scopedReportSha256": "b7c0764d58af0ec69c2c768f0bb6d4dab471460fb6b38360f9103aa461382b26",
+      "tapeSha256": "11bf6ece3773d3919d0e5788fa97a18e44783656973d7b1980ee5619f08d2958",
+      "provenanceAndEvidence": "pass"
+    },
+    {
+      "name": "recorded-pedestal-0",
+      "code": "R74QYMYS",
+      "status": "fail",
+      "phases": 349,
+      "checks": 26791,
+      "failures": 2,
+      "failureFields": {
+        "actual regular tear cardinality": 2
+      },
+      "actualNativeGrantedIds": [
+        291
+      ],
+      "commands": 405,
+      "backendStates": 3,
+      "nativeRawSha256": "7c7bd9eb702450da423732f3a3ee9a84349460ee33e81e7d5eed6b847e237068",
+      "browserRawSha256": "27d0773ae403fe167acdbf9eea9c1c5da9af0761f81159fb39c205af00abae68",
+      "scopedReportSha256": "6a76a483f6b505f878cff4f5e6cfe819ef850fe1f2e377f378bd606bf77b9c90",
+      "tapeSha256": "5d3547ab848161383700afe5c0a3db17c8fc9c6f554fead3cf9b8ef05596ec8e",
+      "provenanceAndEvidence": "pass"
+    },
+    {
+      "name": "recorded-pedestal-1",
+      "code": "VRQPT844",
+      "status": "fail",
+      "phases": 350,
+      "checks": 26383,
+      "failures": 6,
+      "failureFields": {
+        "actual regular tear cardinality": 4,
+        "tear0:actual stored velocity": 2
+      },
+      "actualNativeGrantedIds": [
+        48
+      ],
+      "commands": 406,
+      "backendStates": 3,
+      "nativeRawSha256": "72981e966409ad4c039228391ea76f11d351eb8ffd34ec42f958e698d148c47d",
+      "browserRawSha256": "1b7114aa5cce494b68b0c1879c02eeeb23280359ded424bcadc4acaece4795f0",
+      "scopedReportSha256": "ad82b2cafa236955e22f7c71e8a18ccc62df2cee856e68b6ce445776f314a143",
+      "tapeSha256": "f548f5bd29f89e9beb56d24150e664272ce1df1b6d0cd87c4bc89736b2cd6bba",
+      "provenanceAndEvidence": "pass"
+    },
+    {
+      "name": "random-pedestal-0",
+      "code": "VHV90KXF",
+      "status": "fail",
+      "phases": 349,
+      "checks": 26293,
+      "failures": 130,
+      "failureFields": {
+        "cached tearFallingSpeed": 100,
+        "tear0:actual stored velocity": 24,
+        "actual regular tear cardinality": 6
+      },
+      "actualNativeGrantedIds": [
+        233
+      ],
+      "commands": 405,
+      "backendStates": 3,
+      "nativeRawSha256": "514929c2a9901bfb5b73848ea0446c343743f95203fd0d04a2b92dea1aa33faa",
+      "browserRawSha256": "fa133a21978afff2984e8e071f9c0648d911971eaad77f09cdee2bdaf36c82be",
+      "scopedReportSha256": "b04c0d1eaf8fba7ffca0c8b71f109862e63d56adba27658156fbf086a52eb205",
+      "tapeSha256": "ec4692e60923d5d2defa28a687b0bd951bc912697d5d4e618ef5f9505b009bc1",
+      "provenanceAndEvidence": "pass"
+    },
+    {
+      "name": "random-pedestal-1",
+      "code": "VFW4ZN1S",
+      "status": "fail",
+      "phases": 350,
+      "checks": 26878,
+      "failures": 6,
+      "failureFields": {
+        "actual regular tear cardinality": 4,
+        "tear0:actual stored velocity": 2
+      },
+      "actualNativeGrantedIds": [
+        285
+      ],
+      "commands": 406,
+      "backendStates": 3,
+      "nativeRawSha256": "a7a9996636db7f7677c914eda22a039e90378ba2c8ede9cae675c95a9fd15c8c",
+      "browserRawSha256": "c5a2b31f8b4ddc4f466954ba9e391679254d6d67f9132e0d09f2e3da9922bd82",
+      "scopedReportSha256": "f3e7a84afd61a6f64cfd0223000d2ecd5ea27c64d0d3987979190063ebf20c2a",
+      "tapeSha256": "a7600db3870bf4c2b02a5d3c97ca8d4846b0bb810240301cea3fb8d778978c37",
+      "provenanceAndEvidence": "pass"
+    }
+  ],
+  "knownSourceCorrections": {
+    "range14": "512a10/512a85 falling-speed aggregate and512b0d half-fall height adjustment",
+    "shotSpeed143": "51bd71 multiplies the complete aimed+inherited vector"
+  },
+  "pending": "Corrected source production build and fresh cohort; actual tear31f retirement/effects; Tiny Planet233 range/orbital projectiles; other unsupported cache/effect owners; natural boss-only27/28 acquisition."
+}

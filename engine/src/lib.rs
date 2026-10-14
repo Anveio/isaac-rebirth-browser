@@ -36,6 +36,7 @@ pub mod npcs;
 pub mod phase;
 pub mod pickups;
 pub mod player_items;
+pub mod player_stats;
 pub mod projectiles;
 pub mod rock_blast;
 mod room;
@@ -333,6 +334,8 @@ pub struct State {
     pub run_seeds: Option<seed::RunSeeds>,
     pub item_pools: Option<items::ItemPools>,
     pub player_items: Option<player_items::PlayerItems>,
+    #[serde(default)]
+    pub player_stats: player_stats::PlayerStats,
     pub stage: u32,
     pub stage_seed: u32,
     pub seeded_run: bool,
@@ -470,6 +473,7 @@ impl Game {
                 run_seeds: None,
                 item_pools: None,
                 player_items: None,
+                player_stats: player_stats::PlayerStats::default(),
                 stage: 1,
                 stage_seed: seed::stage1_seed(initial_seed),
                 seeded_run: false,
@@ -1001,6 +1005,7 @@ impl Game {
         self.state.next_familiar = 1;
         self.state.fire_cooldown = -1;
         self.state.max_fire_delay = 10;
+        self.state.player_stats = player_stats::PlayerStats::default();
         self.state.head_timer = -1;
         self.state.actor_scheduler = actors::Scheduler::default();
         self.state.actor_scheduler.admit(actors::ActorRef {
@@ -1477,11 +1482,19 @@ impl Game {
                             || pickups.iter().any(|pickup| pickup.id == actor.id)
                     });
                     npcs::admit_room_combat(&mut self.state);
+                }
+                // ChangeRoom5dd260 restores Player+7d4=false after the
+                // admitted Room.Update, before the incoming leg or Scene.
+                self.state.player.controls_enabled = false;
+                if !restoring {
                     traversal::begin_boss_scene(&mut self.state);
                 }
             }
             self.refresh_minimap();
             if self.state.room_transition.is_none() {
+                // State3 dispatches its final Player callback at5dde9e with
+                // controls disabled, then5ddecb enables the persistent field.
+                self.state.player.controls_enabled = true;
                 self.advance_camera(phase);
             }
             return Ok(());
@@ -1965,7 +1978,13 @@ impl Game {
         let bomb_admitted = self.state.bomb_placement_cooldown.advance(phase);
         // Shooting inherits the velocity entering this phase, before input acceleration.
         let inherited_velocity = (self.state.player.vx, self.state.player.vy);
-        motion::advance(&mut self.state.player, &self.state.room, dx, dy);
+        motion::advance(
+            &mut self.state.player,
+            &self.state.room,
+            dx,
+            dy,
+            self.state.player_stats.move_speed,
+        );
         if controls_enabled && bomb_triggered && bomb_admitted {
             bombs::place(&mut self.state, phase)?;
         }
@@ -2036,7 +2055,11 @@ impl Game {
                     x: (inherited_velocity.0 / motion::WORLD_SCALE) as f32,
                     y: (inherited_velocity.1 / motion::WORLD_SCALE) as f32,
                 };
-                let velocity = projectiles::stored_velocity(aim, inherited)?;
+                let velocity = projectiles::stored_velocity(
+                    aim,
+                    inherited,
+                    self.state.player_stats.shot_speed,
+                )?;
                 self.state.player.eye = self.state.player.eye.flipped();
                 let eye_uniform = self.state.boot_lifecycle.shared.uniform();
                 let origin = projectiles::eye_origin(
@@ -2075,7 +2098,7 @@ impl Game {
                     motion: projectiles::TearMotion::spawn(
                         origin,
                         velocity,
-                        projectiles::Parameters::FRESH_ISAAC,
+                        self.state.player_stats.parameters(),
                         final_uniform,
                     )?,
                 };

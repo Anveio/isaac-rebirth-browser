@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "scope": "Port-only public-route fixture prediction; both original selection and later grant are required. Two phase offsets for each treasure-eligible14/143. Boss-only27/28 are not claimed as live coverage.",
+  "predictionWasmSha256": "9bb1170bb40e164d63dac8015c41f436a1928d3633b81286a382adcda97af605",
+  "cases": [
+    {
+      "code": "B91W8E0B",
+      "seedValue": 20719,
+      "expectedItemId": 14,
+      "delay": 0
+    },
+    {
+      "code": "B91W8E0B",
+      "seedValue": 20719,
+      "expectedItemId": 14,
+      "delay": 1
+    },
+    {
+      "code": "B9119H6R",
+      "seedValue": 98,
+      "expectedItemId": 143,
+      "delay": 0
+    },
+    {
+      "code": "B9119H6R",
+      "seedValue": 98,
+      "expectedItemId": 143,
+      "delay": 1
+    }
+  ]
+}

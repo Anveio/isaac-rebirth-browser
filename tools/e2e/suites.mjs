@@ -68,6 +68,8 @@ export const SUITES = [
     about: 'Item pools and treasure-room pedestals' },
   { id: 'item-acquisition', entry: 'tools/e2e/items.mjs', args: ['--acquisition', '--count', '2'],
     about: 'First collectible acquisition' },
+  { id: 'stat-cache', entry: 'tools/e2e/items.mjs', args: ['--stat-cache', '--count', '2'],
+    about: 'Player stat cache after acquiring Roid Rage and Speed Ball: stats, motion and tear velocity' },
   { id: 'familiars', entry: 'tools/e2e/familiars.mjs', args: ['--count', '2'],
     about: 'Familiar admission, appearance and following' },
   { id: 'npcs', entry: 'tools/e2e/state-pair.mjs',

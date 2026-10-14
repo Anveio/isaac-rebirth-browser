@@ -151,6 +151,8 @@ try {
         phaseAssert.deepEqual(state.floor.grid, source.grid, `${label}:floor topology`);
         phaseAssert.deepEqual([state.player.x, state.player.y, state.player.vx, state.player.vy],
           [actor.position[0] * .65 + 32, actor.position[1] * .65 - 46, actor.velocity[0] * .65, actor.velocity[1] * .65], `${label}:source f32 motion projection`);
+        phaseAssert.equal(state.player.controlsEnabled, actor.controlsEnabled,
+          `${label}:source Player controls field throughout departure/admission/completion`);
         let cameraComparison, chestComparison;
         if (scenario.doorContract === 'chest-opening')
           chestComparison = compareChests(phaseAssert, state, observed, native.debugObservations[0].observation, seeded, label);

@@ -33,6 +33,13 @@ def route(delay, acquisition=False, contrived=False):
     return actions
 
 
+def stat_route(delay):
+    # Complete public contact/grant, followed by actual speed/release and shot
+    # consumers. These intervals are declared before either game is observed.
+    return route(delay, True) + [{'key': 'a', 'frames': 14}, {'key': None, 'frames': 16},
+                                 {'key': 'Down', 'frames': 22}, {'key': None, 'frames': 30}]
+
+
 def tape(case):
     actions = clock.default_tape(case['code'])
     end = next(index for index, action in enumerate(actions) if action.get('label') == 'gameplay-start')
@@ -93,6 +100,7 @@ def main():
     parser.add_argument('--case', type=Path)
     parser.add_argument('--validate-original', type=Path)
     parser.add_argument('--acquisition', action='store_true')
+    parser.add_argument('--stat-cache', action='store_true')
     args = parser.parse_args()
     if args.validate_original:
         verifier = load('item_transport', 'tools/original/foundation-clock-verify.py')
@@ -107,6 +115,33 @@ def main():
         return 0
     if not 2 <= args.count <= 4:
         raise ValueError('Pedestal gate requires 2..4 newly recorded OS-random cases')
+    if args.stat_cache:
+        if args.count != 2:
+            raise ValueError('Stat cache requires four contrived, two retained and two fresh OS-random cases')
+        fixtures = json.loads((ROOT / 'references/isaac/foundation/player-stat-cache/contrived.json').read_text())
+        if len(fixtures['cases']) != 4 or {(case['expectedItemId'], case['delay']) for case in fixtures['cases']} \
+                != {(14, 0), (14, 1), (143, 0), (143, 1)}:
+            raise ValueError('Both admission phases of each treasure-eligible mapped passive are required')
+        cases = []
+        for fixture in fixtures['cases']:
+            code = fixture['code']
+            delay = fixture['delay']
+            cases.append({'name': f'passive-{fixture["expectedItemId"]}-phase-{delay}', 'code': code,
+                          'seedValue': clock.codec.decode_seed(code), 'delay': delay,
+                          'expectedItemId': fixture['expectedItemId'], 'actions': stat_route(delay),
+                          'entropy': 'Contrived port-only public-route prediction; actual native selection is required'})
+        for index, (code, delay, attempt) in enumerate([('R74QYMYS', 0, 3), ('VRQPT844', 1, 75)]):
+            cases.append({'name': f'recorded-pedestal-{index}', 'code': code,
+                          'seedValue': clock.codec.decode_seed(code), 'delay': delay, 'actions': stat_route(delay),
+                          'entropy': 'Recorded OS secrets', 'discoveryAttempts': attempt,
+                          'recordedEvidence': 'references/isaac/foundation/items/acquisition-initial-live.json'})
+        random = random_cases(args.count, True)
+        for case in random:
+            case['actions'] = stat_route(case['delay'])
+        print(json.dumps({'schema': 1, 'bootEpochSeed': 1700000000, 'mode': 'stat-cache',
+                          'source': 'Declared public acquisition/motion/shooting; fresh OS discovery never filters item identity',
+                          'cases': cases + random}))
+        return 0
     code = 'W0L0LYYM'
     contrived = [{'name': f'pedestal-phase-{delay}', 'code': code,
                   'seedValue': clock.codec.decode_seed(code), 'delay': delay,
