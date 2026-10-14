@@ -16,6 +16,14 @@ const CHAMPION_COLORS: readonly SpriteColor[] = [
   [1, 1, 1, 1, CHAMPION_OFFSET], [.5, .5, .5, 1], [1, 1, 1, .3, CHAMPION_OFFSET], [0, 0, 0, 1],
   [1, 0, 1, 1], [.75, 0, 1, 1], [.5, 0, 0, 1], [.5, .5, 1, 1],
 ].map(([r, g, b, a, offset = 0]) => ({ tint: [r!, g!, b!, a!].map(Math.fround), offsets: [offset, offset, offset].map(Math.fround) }));
+// Rock Init 56ed00 / Render 56bf80: an intact (state 1) rock-family grid
+// entity sets frame variant of its type's grid_rock.anm2 animation.
+const ROCK_ANIMATIONS: Record<number, string> = { 2: "normal", 3: "black", 4: "tinted", 5: "bombrock", 6: "alt" };
+function rockSprite(kind: number, variant: number): { animation: string; frame: number } | undefined {
+  const animation = ROCK_ANIMATIONS[kind];
+  if (!animation) return undefined;
+  return kind === 2 && variant >= 1000 ? { animation: "big", frame: variant - 1000 } : { animation, frame: variant };
+}
 const directionName = (direction: string) => direction[0]!.toUpperCase() + direction.slice(1);
 
 export class Renderer {
@@ -29,6 +37,7 @@ export class Renderer {
   private roomKey = "";
   // Sprite scale of every NPC the latest frame drew, for live render contracts.
   private drawnNpcs: { kind: number; spawnSeed: number; scale: [number, number] }[] = [];
+  private drawnGrid: { index: number; kind: number; animation: string; frame: number }[] = [];
   private constructor(private readonly canvas: HTMLCanvasElement, private readonly assets: Assets,
     private readonly graphics: GLMenuContext) {
     this.context = canvas.getContext("2d", { alpha: false })!;
@@ -45,7 +54,7 @@ export class Renderer {
     return new Renderer(canvas, assets, graphics);
   }
   draw(state: State): void {
-    this.drawnNpcs = [];
+    this.drawnNpcs = []; this.drawnGrid = [];
     const gl = this.graphics;
     if (state.screen === "playing") {
       this.prepareRoom(state.room);
@@ -75,10 +84,11 @@ export class Renderer {
         if (!entity) continue;
         const x = (40 + index % grid.width * 40) * 0.65 + 32;
         const y = (120 + Math.floor(index / grid.width) * 40) * 0.65 - 46;
-        if (entity.kind === 2 && entity.state === 1)
-          this.assets.draw(ctx, "gfx/grid/grid_rock.anm2", entity.variant >= 1000 ? "big" : "normal",
-            x, y, entity.variant >= 1000 ? entity.variant - 1000 : entity.variant);
-        else if (entity.kind === 8 && entity.state === 0)
+        const rock = entity.state === 1 ? rockSprite(entity.kind, entity.variant) : undefined;
+        if (rock) {
+          this.assets.draw(ctx, "gfx/grid/grid_rock.anm2", rock.animation, x, y, rock.frame);
+          this.drawnGrid.push({ index, kind: entity.kind, ...rock });
+        } else if (entity.kind === 8 && entity.state === 0)
           this.assets.draw(ctx, "gfx/grid/grid_spikes.anm2", `Spikes${String(entity.variant).padStart(2, "0")}`, x, y);
       }
       this.pickups.draw(ctx, state);
@@ -242,7 +252,7 @@ export class Renderer {
     this.context.drawImage(gl.canvas, 0, 0);
   }
   debugTargets(): StageTargets { return this.stage.debugTargets(); }
-  drawRecord() { return { npcs: structuredClone(this.drawnNpcs) }; }
+  drawRecord() { return { npcs: structuredClone(this.drawnNpcs), grid: structuredClone(this.drawnGrid) }; }
   private drawQuads(appearance: RoomAppearance, quads: RoomQuad[]): void {
     const gl = this.graphics, image = this.assets.image(appearance.backdrop);
     for (const quad of quads) {
