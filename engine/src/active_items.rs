@@ -104,6 +104,6 @@ pub(crate) fn advance(state: &mut State, controls_enabled: bool) -> Result<(), S
     });
     owner.unevaluated_cache_flags |= config.cache_flags;
     owner.active_flag_3076 = true;
-    state.player_animation.force_play(Clip::UseItem);
+    crate::player_animation::force_play(state, Clip::UseItem);
     discharge(state)
 }

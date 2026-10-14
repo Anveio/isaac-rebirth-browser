@@ -2,12 +2,38 @@
 //! death caller. Pickup and ordinary walking presentation retain their owners.
 use serde::{Deserialize, Serialize};
 
+///50a5c0 force-plays the one native main Sprite+28 and sets bf4. Transfer
+/// ownership away from the legacy Pickup main clock; it cannot keep an old
+/// guard alive or resume after the new clip finishes. Queued config/charge/
+/// touched, collection delay and copied item Sprite+7e0 are independent and
+/// are untouched by this callback.
+pub(crate) fn force_play(state: &mut crate::State, clip: Clip) {
+    if let Some(items) = state.player_items.as_mut() {
+        items.pickup_animation_playing = false;
+        items.pickup_animation_guard = false;
+    }
+    state.player_animation.force_clip(clip);
+}
+
+///50a830 calls50a5c0(Pickup) before copying the item Sprite into+7e0.
+/// Pickup retains its existing representation, exclusively replacing any
+/// owned Hit/UseItem main clock. Its caller owns the new copied item and queue.
+pub(crate) fn force_pickup(state: &mut crate::State) {
+    state.player_animation = PlayerAnimation::default();
+    if let Some(items) = state.player_items.as_mut() {
+        items.pickup_animation_frame = 0.0;
+        items.pickup_animation_playing = true;
+        items.pickup_animation_guard = true;
+    }
+}
+
 #[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
 pub enum Clip {
     Trapdoor,
     Appear,
     Death,
     UseItem,
+    Hit,
 }
 
 impl Clip {
@@ -17,6 +43,7 @@ impl Clip {
             Self::Appear => "Appear",
             Self::Death => "Death",
             Self::UseItem => "UseItem",
+            Self::Hit => "Hit",
         }
     }
     fn frames(self) -> u32 {
@@ -25,6 +52,7 @@ impl Clip {
             Self::Appear => crate::content::PLAYER_APPEAR_FRAMES,
             Self::Death => crate::content::PLAYER_DEATH_FRAMES,
             Self::UseItem => crate::content::PLAYER_USEITEM_FRAMES,
+            Self::Hit => crate::content::PLAYER_HIT_FRAMES,
         }
     }
 }
@@ -44,7 +72,7 @@ impl PlayerAnimation {
     /// Player50a5c0 sets speed1, clears the overlay, force-plays the selected
     /// main clip and sets bf4. Controls, visibility and velocity belong to
     /// its caller; this admitted slice has no overlay presentation owner.
-    pub fn force_play(&mut self, clip: Clip) {
+    fn force_clip(&mut self, clip: Clip) {
         self.current = Some(clip);
         self.frame = 0.0;
         self.playing = true;

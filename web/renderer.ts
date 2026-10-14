@@ -141,6 +141,10 @@ export class Renderer {
       this.stage.foreground(state.stageEffects);
       this.presentation.introduction(ctx, state);
       this.hud(ctx, state);
+      const info = state.informationAnimation;
+      if (info.state === 2 && info.definitionLoaded && info.currentActor && info.currentClip)
+        this.assets.draw(ctx, info.currentActor, info.currentClip, 240, 135, info.frame,
+          { spritesheets: info.spritesheet ? { 0: info.spritesheet } : {} });
       const bossScene = state.roomTransition?.bossScene;
       if (bossScene && state.roomTransition?.phase === "bossScene")
         this.assets.draw(ctx, "gfx/ui/boss/versusscreen.anm2", "Scene", 240, 135, bossScene.animationFrame);

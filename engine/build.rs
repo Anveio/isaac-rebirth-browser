@@ -243,12 +243,70 @@ fn familiar_catalog(path: &Path, entities_xml: &str) -> String {
     output
 }
 
+fn information_catalog(xml: &str, path: &Path) -> String {
+    let actors: Value =
+        serde_json::from_str(&fs::read_to_string(path).expect("read authored stage animations"))
+            .expect("parse authored stage animations");
+    let root_tag = xml.split("<giantbook ").nth(1).expect("giantbook root");
+    let root = attribute(root_tag, "anm2root")
+        .expect("giantbook authored root")
+        .trim_start_matches("resources/");
+    let mut output = String::new();
+    for (id, constant) in [("13", "ETERNAL"), ("16", "BLACK_HEART")] {
+        let entry = xml
+            .split("<entry ")
+            .find(|entry| attribute(entry, "id") == Some(id))
+            .expect("authored information entry");
+        let actor = format!(
+            "{root}{}",
+            attribute(entry, "anm2").expect("information actor")
+        )
+        .to_lowercase();
+        let spritesheet = format!(
+            "{root}{}",
+            attribute(entry, "gfx").expect("information graphics")
+        )
+        .to_lowercase();
+        let name = attribute(entry, "anim").expect("information clip");
+        let clip = actors[&actor]["Animations"]
+            .as_array()
+            .expect("authored information definition")
+            .iter()
+            .find(|clip| clip["Name"] == name)
+            .expect("authored information clip");
+        let frames = clip["FrameNum"].as_u64().expect("information frames");
+        assert!(frames > 0 && frames <= u64::from(u32::MAX));
+        assert_eq!(
+            clip["Loop"], false,
+            "admitted information clip is nonlooping"
+        );
+        assert!(
+            clip["Triggers"]
+                .as_array()
+                .expect("information triggers")
+                .is_empty(),
+            "information event callbacks require their actual owner"
+        );
+        output.push_str(&format!(
+            "pub static {constant}_DEFINITION: Definition = Definition {{ actor: {actor:?}, clip: {name:?}, frames: {frames}, spritesheet: {spritesheet:?} }};\n"
+        ));
+    }
+    output
+}
+
 fn main() {
     let manifest = PathBuf::from(std::env::var_os("CARGO_MANIFEST_DIR").unwrap());
     let resources = manifest
         .parent()
         .unwrap()
         .join("references/isaac/rebirth/resources");
+    let giantbook = resources.join("giantbook.xml");
+    let information_animations = manifest.parent().unwrap().join("web/information-data.json");
+    println!("cargo:rerun-if-changed={}", giantbook.display());
+    println!(
+        "cargo:rerun-if-changed={}",
+        information_animations.display()
+    );
     let entities = resources.join("entities2.xml");
     let image = resources.join("gfx/shadow.png");
     let animations = manifest.parent().unwrap().join("web/scene-data.json");
@@ -298,7 +356,7 @@ fn main() {
             .as_u64()
             .expect("Pickup frame count")
     ));
-    for name in ["Trapdoor", "Appear", "Death", "UseItem"] {
+    for name in ["Trapdoor", "Appear", "Death", "UseItem", "Hit"] {
         let clip = player_actors["gfx/001.000_player.anm2"]["Animations"]
             .as_array()
             .expect("authored player clips")
@@ -545,6 +603,14 @@ fn main() {
         ));
     }
     let output = PathBuf::from(std::env::var_os("OUT_DIR").unwrap());
+    fs::write(
+        output.join("information_catalog.rs"),
+        information_catalog(
+            &fs::read_to_string(giantbook).expect("read authored information selection"),
+            &information_animations,
+        ),
+    )
+    .expect("write authored information definition");
     fs::write(
         output.join("nightmare_catalog.rs"),
         nightmare_catalog(
