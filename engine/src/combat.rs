@@ -169,7 +169,8 @@ pub fn resolve_npc_or_bomb_pair(
     second: &mut ContactBody,
 ) -> Result<ContactResolution, String> {
     let registered = |kind| crate::entities::family(kind).is_some();
-    if !(first.entity_type == 4 || registered(first.entity_type)) || !registered(second.entity_type) {
+    if !(first.entity_type == 4 || registered(first.entity_type)) || !registered(second.entity_type)
+    {
         return Err(
             "NPC pairs require registered NPC families, with an optional first Bomb".into(),
         );
