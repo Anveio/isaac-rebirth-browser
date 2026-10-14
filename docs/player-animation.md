@@ -14,7 +14,10 @@ that query.
 
 The main guard is not a movement veto. Source529750 uses controls7d4 and
 input7d8; source52f370 separately suppresses shooting input while bf4 is set,
-continuing its full timer work. The concrete normal45 active caller owns
+continuing its full timer work. Both the owned main guard and the legacy
+Pickup guard enter that shooting-input predicate; a final tear-birth veto
+alone would leave held-shot/head behavior incorrect during Pickup. The
+concrete normal45 active caller owns
 UseItem and its copied item presentation. Its completed main clip returns to
 ordinary Player presentation in the full callback.
 

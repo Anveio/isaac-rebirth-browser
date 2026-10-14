@@ -52,6 +52,15 @@ assert.equal(scenarios.schema, 1);
 assert.equal(scenarios.bootEpochSeed, 1700000000);
 assert.ok(scenarios.cases.length >= 4 && scenarios.cases.length <= (activeUse ? 10 : acquisition ? 8 : 6));
 assert.equal(new Set(scenarios.cases.map(item => item.name)).size, scenarios.cases.length);
+if (activeUse && !replayOriginal) {
+  assert.equal(scenarios.cases.length, 10, 'Active use requires the complete ten-case fresh cohort');
+  assert.deepEqual(scenarios.cases.filter(item => item.requirePickupShotGuard).map(item => item.delay).sort(),
+    [0, 1], 'Both held-Pickup admission phases are required');
+  assert.equal(scenarios.cases.filter(item => item.entropy === 'Recorded OS secrets').length, 2,
+    'Both retained unfiltered outcomes are required');
+  assert.equal(scenarios.cases.filter(item => item.entropy === 'OS secrets').length, 2,
+    'Two new unfiltered OS outcomes are required');
+}
 if (statCache) {
   assert.equal(scenarios.cases.length, 8, 'Stat cache requires the complete eight-case cohort');
   assert.deepEqual(scenarios.cases.filter(item => item.expectedItemId !== undefined)
@@ -174,6 +183,7 @@ try {
       let checks = 0, presentations = 0, passedPresentations = 0, admitted = 0, queuedPresentations = 0, grantedPresentations = 0;
       const selectedItemIds = new Set(), callbackDiagnostics = [], mtDiagnostics = [];
       const grantedItemIds = new Set(); let activeGrantObserved = false, healthGrantObserved = false;
+      const pickupShotGuardPhases = new Set();
       let callbackDiagnosticSignature = null, mtDiagnosticSignature = null;
       const ageClockDiagnostics = [];
       const equal = (actual, expected, field, presentation) => {
@@ -274,6 +284,17 @@ try {
             equal(state.player.inputCooldown, nativePlayer.inputCooldown, 'input7d8 cooldown', presentation);
             equal(state.fireCooldown, nativePlayer.fireCooldown, 'actual guarded-shot fire timer', presentation);
             equal(state.headTimer, nativePlayer.headTimer, 'actual guarded-shot head timer', presentation);
+            if (item.requirePickupShotGuard) {
+              assert.equal(typeof nativePlayer.shootingPressed, 'boolean', 'Held Pickup shooting requires actual native db0 readback');
+              equal(state.player.shooting, nativePlayer.shootingPressed, 'actual guarded-shot held input', presentation);
+              if (state.pressed.includes('ArrowRight') && nativePlayer.mainSprite.animation === 'Pickup'
+                  && nativePlayer.pickupAnimationGuard) {
+                pickupShotGuardPhases.add(source.systemCounter % 2);
+                equal(state.tears.filter(tear => tear.motion.lifetime === 'alive').length,
+                  source.world.entities.filter(entity => entity.type === 2 && !entity.removed).length,
+                  'actual Pickup-guard emission', presentation);
+              }
+            }
             equal(owner.temporaryCollectibles, nativePlayer.temporaryCollectibles, 'actual temporary use records', presentation);
             equal(playerWorld, nativeActor.position, 'public active-use stored position', presentation);
             equal(playerVelocity, nativeActor.velocity, 'public active-use stored velocity', presentation);
@@ -376,6 +397,10 @@ try {
       if (acquisition) {
         assert.ok(queuedPresentations > 0, 'Every acquisition case must observe the actual deferred queue');
         assert.ok(grantedPresentations > 0, 'Every acquisition case must observe a later actual grant');
+      }
+      if (item.requirePickupShotGuard) {
+        assert.deepEqual([...pickupShotGuardPhases].sort(), [0, 1],
+          'Public held shooting must exercise the actual original Pickup guard on both presentations');
       }
       if (activeUse && item.expectedItemId !== undefined) {
         assert.ok(grantedItemIds.has(item.expectedItemId), 'Contrived use requires actual independent native45 acquisition');

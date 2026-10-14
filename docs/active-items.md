@@ -21,8 +21,11 @@ and a new press while exhausted do not create a second effect. Temporary45
 has authored cooldown0, which persists rather than immediately expiring.
 
 `test:e2e:active-item-use` is a required registry/CI suite that runs both real
-games freshly. Four contrived natural45 routes cover both public admission
-phases and full/damaged health; damage is caused by an ordinary own bomb.
+games freshly. Six contrived natural45 routes cover both public admission
+phases, full/damaged health and held shooting during Pickup; damage is caused
+by an ordinary own bomb. The two held-Pickup routes require an independent
+native guard witness on both presentations and compare actual db0 held input,
+fire/head timers, emission and movement.
 The gate also retains the earlier unfiltered291/48 discoveries and adds two
 new OS-random treasure routes without filtering item identities. Complete
 inputs, original observations, production snapshots and every functional
@@ -67,9 +70,12 @@ active/pocket/shot callbacks and before the common cooldown tail. A full-phase
 use advances the newly reset copy immediately; a fast-phase use waits for the
 next full callback.
 
-This bank does not cover held shooting during the legacy Pickup guard. Its
-source-confirmed aim-boundary correction is tracked separately; no acceptance
-for that case or latest-main composition is inherited from the replay. Source
+This eight-case bank does not cover held shooting during the legacy Pickup
+guard. A separate source correction now joins both owned bf4 representations
+at the shooting-input boundary; the ten-case fresh CI cohort adds both held
+Pickup routes. These new routes and latest-main composition await live
+acceptance. Actual da8 aim-vector ownership and positive7dc callback semantics
+remain separate follow-ups; db0 readback alone does not accept those fields. Source
 pins, complete reports and temporary research remain in ignored
 `.cache/coordination/active-items-research` and `.cache/e2e/active-item-use`.
 Flush291, other active effects, active swaps, modifier/reserve charge effects,
