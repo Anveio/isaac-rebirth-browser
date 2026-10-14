@@ -1115,6 +1115,25 @@ impl Game {
             self.state.music.room(id);
         }
         self.save_supported_run()?;
+        // The save keeps Door.Init's state1 records; the cleared start room's
+        // opened doors are state2 again by gameplay start in the original.
+        if let Some(grid) = &mut self.state.room.grid {
+            for door in &self.state.room.appearance.doors {
+                if door.state != "Opened" {
+                    continue;
+                }
+                let column = ((door.world_position.x - 40.0) / 40.0) as usize;
+                let row = ((door.world_position.y - 120.0) / 40.0) as usize;
+                if let Some(entity) = grid
+                    .cells
+                    .get_mut(column + row * usize::from(grid.width))
+                    .and_then(|cell| cell.entity.as_mut())
+                    .filter(|entity| entity.kind == 16)
+                {
+                    entity.state = 2;
+                }
+            }
+        }
         // Fresh54eb20 invokes54eaa0 after Level.Init/Save and the primary
         // manager initialization; room factories see the prior control byte.
         self.state
