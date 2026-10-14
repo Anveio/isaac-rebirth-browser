@@ -24,6 +24,8 @@ pub struct Room {
     pub appearance: RoomAppearance,
     pub descriptor: Option<crate::floor::Descriptor>,
     pub pickups: Vec<crate::pickups::Pickup>,
+    #[serde(default)]
+    pub saved_regular_pickups: Vec<crate::pickups::SavedRegularPickup>,
     pub npcs: Vec<crate::npcs::Npc>,
     #[serde(default)]
     pub background_stains: Vec<crate::familiars::BackgroundStain>,
@@ -473,6 +475,7 @@ impl Room {
         Room {
             descriptor: None,
             pickups: Vec::new(),
+            saved_regular_pickups: Vec::new(),
             npcs: Vec::new(),
             background_stains: Vec::new(),
             authored_actor_order: Vec::new(),

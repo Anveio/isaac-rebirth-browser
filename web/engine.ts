@@ -119,6 +119,7 @@ export interface Pickup {
   chest: {rng: ItemRng; gridCollisionClass: number; entityCollisionClass: number; price: number; cooldown: number;
     lootBirths: {variant: number; spawnSeed: number; position: {x: number; y: number}; velocity: {x: number; y: number}; spriteScaleMultiplier: number | null}[]} | null;
   regularCollision: {gridCollisionClass: number; entityCollisionClass: number} | null;
+  regularRng: ItemRng | null;
   spritesheetItemId: number;
   presentedPosition: {x: number; y: number}; anchorPosition: {x: number; y: number};
   velocity: {x: number; y: number}; configuredFriction: number; currentFriction: number; collisionMass: number;
@@ -164,6 +165,8 @@ export interface Room {
   pickups: Pickup[];
   backgroundStains: {sourceEffectId: number; spawnSeed: number; birthGameUpdate: number;
     position: {x: number; y: number}; sprite: ActorSprite}[];
+  savedRegularPickups: {handle: number; variant: number; subtype: number; position: {x: number; y: number};
+    spawnSeed: number; rngSeed: number; charge: number; touched: boolean}[];
   npcs: { id: number; kind: number; variant: number; subtype: number; spawnSeed: number;
     position: {x: number; y: number}; presentedPosition: {x: number; y: number}; velocity: {x: number; y: number};
     hp: number; maxHp: number; collisionRadius: number; collisionMass: number; collisionDamage: number;
