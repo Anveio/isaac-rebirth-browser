@@ -2,6 +2,7 @@
 //! Full NPC Update owns AI, native BaseUpdate motion and FIFO damage drain.
 //! Intermediate presentation predicts half velocity without advancing AI.
 use crate::entities::{Birth, Family, NpcWorld, SpawnContext};
+use crate::plain_npc::{ShooterTimers, ShotMode, ShotParameters};
 use crate::{
     bombs, combat, content,
     grid::Grid,
@@ -63,6 +64,9 @@ pub struct Npc {
     pub shooter: Option<crate::plain_npc::ShooterTimers>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub champion: Option<crate::champions::Champion>,
+    /// Sprite FlipX (+2fc) for families that face their target.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub flip_x: bool,
 }
 
 const ZERO: WorldVector = WorldVector { x: 0.0, y: 0.0 };
@@ -518,6 +522,7 @@ impl Npc {
             actor: String::new(),
             shooter: None,
             champion: None,
+            flip_x: false,
         }
     }
 
@@ -560,6 +565,11 @@ impl Npc {
                 // unadmitted. Neither discarded result establishes RNG parity.
                 let _other_target_chance = random.bounded(100);
             }
+        }
+        if matches!(self.kind, 13 | 14) {
+            // 4efa10/4f06e0: Fly and Pooter clear the chosen target every update
+            // unless a spawner102 owns them, so no target impulse follows.
+            self.target = ZERO;
         }
         if self.target != ZERO && counter.is_multiple_of(2) {
             let delta = WorldVector {
@@ -609,7 +619,7 @@ impl Npc {
 }
 
 pub(crate) const FLY_FAMILY: Family = Family {
-    kinds: &[13, 18],
+    kinds: &[13, 14, 18],
     spawn: spawn_fly,
     advance: advance_fly,
     post_contact_grid: crate::entities::clamp_walls,
@@ -619,8 +629,10 @@ pub(crate) const FLY_FAMILY: Family = Family {
 
 fn spawn_fly(id: u32, selector: &SpawnSelector, _: &SpawnContext) -> Result<Option<Npc>, String> {
     if selector.category != SpawnCategory::Entity
-        || !matches!(selector.entity_type, 13 | 18)
-        || selector.variant != 0
+        || !matches!(
+            (selector.entity_type, selector.variant),
+            (13 | 18, 0) | (14, 0 | 1)
+        )
         || selector.subtype != 0
     {
         return Ok(None);
@@ -630,11 +642,12 @@ fn spawn_fly(id: u32, selector: &SpawnSelector, _: &SpawnContext) -> Result<Opti
             "NPC admission requires bounded authored position and nonzero spawn seed".into(),
         );
     }
-    let config = content::entity(u32::from(selector.entity_type), 0);
+    let config = content::entity(u32::from(selector.entity_type), u32::from(selector.variant));
     Ok(Some(Npc {
         // Config47f573 SetFrame(default,0) leaves the default clip stopped.
         animation: "Fly".into(),
         actor: config.actor.into(),
+        shooter: (selector.entity_type == 14).then(ShooterTimers::default),
         ..Npc::authored(id, config, selector)
     }))
 }
@@ -649,12 +662,12 @@ fn advance_fly(
     crate::plain_npc::advance(npc, phase, random, world, births, fly_ai)
 }
 
-/// ai_fly4ef880 for Fly13/AttackFly18.
+/// ai_fly4ef880 for Fly13, Pooter14 and AttackFly18.
 fn fly_ai(
     npc: &mut Npc,
     random: &mut Mt19937,
     world: &mut NpcWorld,
-    _: &mut Vec<Birth>,
+    births: &mut Vec<Birth>,
     friction: &mut f32,
 ) -> Result<(), String> {
     if npc.state == 0 {
@@ -662,8 +675,12 @@ fn fly_ai(
         npc.grid_collision_class = 3;
         npc.state = 3;
     }
-    // 4ef941 plays the looping Fly clip without forcing a restart.
-    crate::plain_npc::play(npc, "Fly", false);
+    if npc.kind == 14 {
+        pooter_ai(npc, random, world, births, friction)?;
+    } else {
+        // 4ef941 plays the looping Fly clip without forcing a restart.
+        crate::plain_npc::play(npc, "Fly", false);
+    }
     *friction = npc.fly_movement(
         world.game_counter,
         random,
@@ -671,5 +688,64 @@ fn fly_ai(
         world.grid,
         *friction,
     );
+    Ok(())
+}
+
+/// Pooter14.0/Super Pooter14.1: 4f0bd0 clip state, then 4f029a aimed shots
+/// (4f10d0 mode0, 4f13a8 mode1).
+fn pooter_ai(
+    npc: &mut Npc,
+    random: &mut Mt19937,
+    world: &mut NpcWorld,
+    births: &mut Vec<Birth>,
+    friction: &mut f32,
+) -> Result<(), String> {
+    if npc.state <= 4 {
+        crate::plain_npc::play(npc, "Fly", false);
+    } else if npc.state == 8 && crate::plain_npc::finished(npc) {
+        npc.state = 4;
+    }
+    if npc.shooter.as_ref().is_some_and(|timers| timers.delay == 0) {
+        // 4f1250: the shot frame's sound precedes FireProjectiles.
+        world.audio.admit(
+            random,
+            world.system_counter,
+            crate::audio::SoundRequest {
+                id: 178,
+                volume: 1.0,
+                delay: 2,
+                looping: false,
+                pitch: 1.0,
+            },
+        );
+    }
+    // 4f10d0: default ProjectileParams draw their angle before the shot.
+    let parameter_angle = (f64::from(random.uniform()) * std::f64::consts::PI) as f32;
+    let shot = ShotParameters {
+        mode: if npc.variant == 1 {
+            ShotMode::Pair
+        } else {
+            ShotMode::Single
+        },
+        range: 200.0,
+        cooldown: 4,
+        delay: 7,
+        speed: 7.0,
+        parameter_angle,
+    };
+    if crate::plain_npc::try_shoot_player(npc, random, world, births, shot)? {
+        crate::plain_npc::play(npc, "Attack", false);
+        npc.state = 8;
+        npc.flip_x = world.player.x - npc.position.x < 0.0;
+    }
+    if npc
+        .shooter
+        .as_ref()
+        .is_some_and(|timers| timers.cooldown > 0)
+    {
+        // 4f02d3: cooling Pooters brake and damp their wander.
+        *friction *= 0.8;
+        npc.wander_velocity = npc.wander_velocity * 0.7;
+    }
     Ok(())
 }

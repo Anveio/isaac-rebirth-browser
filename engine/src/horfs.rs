@@ -6,7 +6,7 @@ use crate::{
     mt::Mt19937,
     npcs::Npc,
     phase::Phase,
-    plain_npc::{self, ShooterTimers, ShotParameters},
+    plain_npc::{self, ShooterTimers, ShotMode, ShotParameters},
     room_spawns::{SpawnCategory, SpawnSelector},
 };
 
@@ -60,6 +60,7 @@ fn ai(
     *friction *= 0.7;
     let parameter_angle = (f64::from(random.uniform()) * std::f64::consts::PI) as f32;
     let shot = ShotParameters {
+        mode: ShotMode::Single,
         range: 200.0,
         cooldown: 4,
         delay: 7,

@@ -328,8 +328,11 @@ This runs on the suite registry (`tools/e2e/suites.mjs`) and the shared
    source draw order and cite the source addresses.
 3. Add one line to `entities::FAMILIES`.
 4. Add the actor's ANM2 to `tools/foundation/port-npc-animations.txt` and
-   `web/npc-data.json`. Clip lengths and loop flags then come from the
-   generated clip catalogue. The renderer draws any NPC that carries `actor`,
+   regenerate `web/npc-data.json` with the command in that file's header
+   (`extract-animations.py --select-file ... --out web/npc-data.json`; pass
+   `--archive`/`--filenames`/`--fonts` from the main checkout when working in a
+   worktree). Clip lengths and loop flags then come from the generated clip
+   catalogue. The renderer draws any NPC that carries `actor`,
    and every monster/boss sheet is already globbed.
 5. Add `tools/e2e/entities/<name>.mjs`, then run:
 
@@ -373,7 +376,7 @@ engine work in M1–M5 does not.
 - [x] M1 entity catalogue (#145)
 - [x] M2 family registry and birth sink (#152)
 - [x] M3 registry-derived contact admission (the Dip fix itself landed in #146)
-- [ ] M4 clip and appear primitives: `plain_npc` (source generic appear, sprite clock, BaseUpdate, death) and `try_shoot_player` are in; existing families still use their own copies
+- [ ] M4 clip and appear primitives: `plain_npc` (source generic appear, sprite clock, BaseUpdate, death) and `try_shoot_player` (FireProjectiles modes 0 and 1) are in; Horf, Fly, AttackFly and Pooter/Super Pooter use them (#164 and this slice); the remaining legacy families still use their own copies
 - [ ] M5 generic renderer and asset wiring: NPCs carrying `actor` draw from the catalogue, the generated clip catalogue covers every NPC actor, and every monster/boss sheet is globbed (only referenced ones decode); legacy families keep their renderer branches
 - [x] M6 shared entity comparator (legacy comparators keep their own field sets for now)
 - [x] M7 scenario finder, entity specs and the update_ai source index
@@ -391,5 +394,32 @@ engine work in M1–M5 does not.
       - the start-room door state;
       - death gibs, which have no admission yet;
       - champion rolls, which this branch adds.
+  - Pooter 14.0 and Super Pooter 14.1: **about 80 minutes wall-clock** from
+    opening the `ai_fly` Pooter branch to every Pooter-owned row matching
+    wherever the Pooter's position matches.
+    - About 15 minutes of source reading: the 4f0bd0 clip state, the 4f029a
+      shot path, the shared movement block (Fly and Pooter clear their target
+      every update) and FireProjectiles mode 1.
+    - About 10 minutes of code, on top of `plain_npc`, `try_shoot_player` and
+      the Fly family.
+    - The rest went on tooling found along the way:
+      - `npc-data.json` is now regenerated from its allowlist rather than
+        edited by hand;
+      - worktree setup;
+      - a scenario-helper fix. A room with an unsupported co-spawn shifts the
+        actor sequence ids, and with them every frame gate, so the helper now
+        only picks rooms whose NPCs are all admitted (`floor` reports
+        `unsupportedNpcs`).
+    - Three live `entity-pooter` runs of about 11 minutes each.
+    - Remaining failures:
+      - the shared tear-knockback impulse;
+      - wander driven by the shared-MT gap (#162), which also moves `flipX`,
+        since the Pooter faces the player by position;
+      - projectile seeds (#162).
+    - Super Pooter is implemented from the source (FireProjectiles mode 1
+      49f1c5: two shots at the aim rotated by about ±16°) but has no live
+      evidence yet. The only 13x7 Basement room that authors it is 1/534
+      (difficulty 10). A 25-minute OS-random search found no seed that puts it
+      next to the start room. Live checks wait for large rooms or later stages.
 - [ ] M10 stages
 - [ ] M11 characters
