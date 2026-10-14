@@ -11,10 +11,12 @@ export interface Player {
   eye: "negative" | "positive";
   shotsFired: number;
 }
+export interface AttackColor { tint: [number,number,number,number]; sourceMiddle: [number,number,number,number]; offsets: [number,number,number]; }
 export interface Tear {
   id: number; x: number; y: number; vx: number; vy: number; age: number;
   spawnSeed: number; collisionRadius: number; gridContact: boolean;
   shotOrdinal: number; collisionDamage: number; baseDamage: number; scale: number; animationTier: number;
+  attackFlags: [number,number]; sourceColor: AttackColor;
   motion: {
     position: {x: number; y: number}; presentedPosition: {x: number; y: number};
     velocity: {x: number; y: number}; height: number; fallingSpeed: number;
@@ -228,6 +230,8 @@ export interface StageEffects {
   overlay: { asset: string; sourceCrop: Rect; offset: { x: number; y: number }; modulationRGBA: [number, number, number, number]; blend: Blend; simulationTick: number; motionEvidence: string };
 }
 export interface State {
+  weaponCache: {primary: number; flagsC98: [number,number]; colorCa0: AttackColor; colorCcc: AttackColor};
+  weaponAdmission: {sourcePlayerType: number|null; c18IsKnownEmpty: boolean; pendingPrimaryCleanup: {fromPrimary:number;toPrimary:number}|null; unadmittedController: {primary:number;channel:string}|null};
   lasers: {id:number; position:{x:number;y:number}; presentedPosition:{x:number;y:number}; positionOffset:{x:number;y:number}; length:number; rotation:number; scale:{x:number;y:number}; actor:string; animation:string; animationClock:number; removed:boolean;
     impact: {position:{x:number;y:number}; positionOffset:{x:number;y:number}; scale:{x:number;y:number}; rotation:number; actor:string; animation:string; animationClock:number; removed:boolean} | null}[];
   enemyProjectiles: {id:number; spawnSeed:number; position:{x:number;y:number}; presentedPosition:{x:number;y:number}; velocity:{x:number;y:number}; height:number; scale:number; animation:string|null; animationFrame:number; dead:boolean; removed:boolean}[];

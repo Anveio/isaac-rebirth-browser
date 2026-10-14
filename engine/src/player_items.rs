@@ -34,6 +34,8 @@ pub struct PlayerItems {
     pub entity_spawn_seed: u32,
     pub owned_counts: Vec<i32>,
     pub temporary_collectibles: Vec<TemporaryCollectible>,
+    ///Actual held trinket slots E14/E18; normal fresh constructor initializes0.
+    pub trinket_slots: [u32; 2],
     pub queued_id: Option<u32>,
     pub queued_charge: i32,
     pub queued_touched: bool,
@@ -85,6 +87,7 @@ impl PlayerItems {
             entity_spawn_seed,
             owned_counts: vec![0; 347],
             temporary_collectibles: Vec::new(),
+            trinket_slots: [0; 2],
             queued_id: None,
             queued_charge: 0,
             queued_touched: false,

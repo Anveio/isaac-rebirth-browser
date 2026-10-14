@@ -208,3 +208,40 @@ countdown decrement per presentation. A stationary blast leaves position
 offset occurred while planting/moving and is not applied as a general spawn
 correction. Alternate characters/items and multiple damage sources are outside
 this starting-room contract.
+
+## Blast admission and the issue #154 divergences
+
+Static reading of the pinned executable completes the blast-to-player path:
+
+| Native location | Meaning |
+| --- | --- |
+| `0x45776a → 0x555300 → 0x555380` | Bomb Update passes damage `+0x7d8`, position `+0x448`, its tear flags `+0x7e0` and itself as source. The helper calls `0x554490` with line check on (`dl=1`) and incoming DamageFlags4 (`r9d`). |
+| `0x554490` entity loop | Among others, skips the source, dead (`+0x31f`), zero-mass and tear (type 2) entities from the strict circle collector. |
+| `0x554b68 → 0x5c74a0` | With the line check on, `Room::CheckLine(blast, target, mode2, 0, ignoreWalls=1)` must pass. Failure skips both knockback and damage. Mode2 samples every 10 units from the blast. It blocks on a type-3 block, continues through doors and (with ignoreWalls) walls, and otherwise blocks on a cell whose collision class (`0x5c7080`) exceeds 3. A zero-length line passes. |
+| `0x554673`–`0x5547a5` | Knockback as recorded above. It precedes the damage call and does not depend on it. |
+| `0x554d6b`–`0x554e25` | Player/familiar damage is 2 when explosion damage is ≥50, else 1. It calls virtual `+0x38` with flags4 and the bomb source. |
+| `0x52b23b` | Player damage returns false while countdown `+0xbf8` is positive. No flag bypasses it. |
+| `0x52bed6` (`0x52b2c4` Holy Mantle) | Accepted damage writes countdown `round(damage) × 60`: 120 for a bomb, 60 for a half-heart hit. |
+| `0x56c670`, `0x56bf00` | Rock Destroy. A type-5 bomb rock destroyed by a blast (`immediate=0`) only enters state3. Rock Update counts `+0x348` down and then destroys it again. That explodes through `0x554490` with damage40, radius60 and flags4, so it hurts the player by 1 and its countdown blocks it like any hit. |
+
+The port's regular-bomb amount (2), countdown (120), knockback-before-damage
+and immunity rejection already match this path. Neither #154 divergence is a
+bomb defect. Dense original replays of the recorded tapes, with captures every
+3–6 presentations through `foundation-paired-observer.py`, show:
+
+* `paired-room-combat` T1PK6Y0W. A Round Worm (244) at native (240,160) fires
+  an enemy projectile at about presentation 1570. It hits the player at about
+  1614: red6→5, countdown60, last source type9 flags0. The countdown expires at
+  about 1673. The blast at 1676 then deals 2 (red3, countdown119, source
+  bomb/flags4). The destroyed rocks are all type2; no type-5 callback runs. In
+  the port, the two worms teleport to (320,400)/(520,400) instead of
+  (480,160)/(240,160), so its single shot misses.
+* `paired-random-run` CQHR 8NEH. A Wall Hugger (218) sliding along the top wall
+  touches the player at about presentation 1568: red6→5, countdown60, source
+  218. The blast at about 1589 pushes the player (vx +12.59) but is rejected
+  by immunity, so HP stays 5. Continued Hugger contact explains the final
+  leftward motion. The port spawns no NPCs in this room, so the bomb's 2-HP hit
+  lands.
+
+The `CheckLine` admission and bomb-rock secondary explosions are not
+implemented in the port. No recorded case exercises them yet.
