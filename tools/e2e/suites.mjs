@@ -15,6 +15,8 @@
 //           (default --scenarios; paired-game suites replay case.json tapes;
 //           false when the driver has no replay input yet)
 
+import { entitySpecs } from './entities.mjs';
+
 const suite = (id, entry, args, about, extra = {}) => ({ id, entry, args, about, ...extra });
 const paired = 'tools/foundation/paired-game.mjs';
 const e2e = name => `tools/e2e/${name}.mjs`;
@@ -23,6 +25,16 @@ const helper = name => `tools/original/${name}`;
 const statePair = e2e('state-pair');
 // Multi-room routes from a scenario helper (see traversal.mjs).
 const traversal = e2e('traversal');
+// One state-pair suite per entity spec in tools/e2e/entities/: OS-random rooms
+// admitting the entity, plus the spec's contrived seed/door routes.
+const pass = (flag, values) => values.flatMap(value => [flag, String(value)]);
+const entitySuite = spec => suite(`entity-${spec.name}`, statePair, [
+  '--scenario-helper', helper('entity-scenarios.py'),
+  ...pass('--helper-arg', ['--type', spec.type, '--variant', spec.variant, '--count', spec.count,
+    ...spec.contrived.flatMap(route => ['--contrived', route])]),
+  '--comparator', 'tools/foundation/entity-state-pair.mjs', ...pass('--comparator-arg', ['--entity', spec.name]),
+  '--native-frame-timeout', '120',
+], spec.about);
 
 export const SUITES = [
   suite('paired', paired, [], 'Title/menu, movement/fire, pause, bombs and combat rooms; six contrived + two OS-random runs'),
@@ -86,6 +98,7 @@ export const SUITES = [
     'Initial run admission: menu confirmation clock anchor and Player control enable timing'),
   suite('audio', e2e('audio'), ['--count', '2'], 'SFX admission and Web Audio output'),
   suite('music', e2e('music'), ['--count', '2'], 'Music channels, fades and queued tracks'),
+  ...(await entitySpecs()).map(entitySuite),
 ];
 
 export const suiteById = new Map(SUITES.map(item => [item.id, item]));
