@@ -28,8 +28,15 @@
   "validation": {
     "formatting": "pass",
     "diff": "pass",
-    "rust": "pending coordinated own-target compiler lease",
+    "rust": "pass; exact80b own-target all-target check/jobs1/incremental0,7.64s",
     "productionBuild": "not run",
-    "freshOriginalBrowser": "not run"
+    "freshOriginalBrowser": "not run",
+    "strictClippy": "pass; own-target/all-targets/-D warnings/jobs1/incremental0,8.17s",
+    "checkedHead": "80b0107a9cbd7d3e7dc950eba3b54c3b7a835601",
+    "receiptSha256": "e6b3f7e3165520b40ad05ce435fb10d1b2d634737997f252ac5b48d51762f4d3",
+    "codeHashes": {
+      "engine/src/grid.rs": "6811df5a4b4aac9f6e17b3e85f26b25295fcee3e09a49985119b808393dbe4c3",
+      "engine/src/roundworm.rs": "3f94e1b250d4146dd0f69bc5ed3a8af9f7a760ff232bed75df532eaa021c9e63"
+    }
   }
 }

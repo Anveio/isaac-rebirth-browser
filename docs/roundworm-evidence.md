@@ -58,5 +58,6 @@ blocking after the actual destruction cost aged0. This separate correction
 passes the existing World cost reference into the query. Four corners,
 ten-unit stepping, f32 geometry and collision predicates stay unchanged.
 `projectile-line-cost-correction.json` pins the full query and actual caller.
-Its Rust check and current build/live acceptance remain pending; every prior
-proof and failure is retained.
+Its own-target all-target Rust check passes7.64s and strict Clippy passes8.17s.
+Current build/live acceptance remains pending; every prior proof and failure
+is retained.
