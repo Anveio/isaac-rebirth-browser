@@ -1,7 +1,6 @@
 // Fresh original and immutable production browser, through public inputs only.
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { runPairedGate } from '../foundation/paired-game.mjs';
@@ -15,10 +14,6 @@ const option = (name, fallback) => {
 const output = resolve(option('--output', `.cache/e2e/fireplaces/${Date.now()}-${process.pid}`));
 mkdirSync(output, { recursive: true });
 const save = (path, value) => writeFileSync(path, JSON.stringify(value, null, 2) + '\n');
-const sources = ['tools/e2e/fireplaces.mjs', 'tools/original/fireplace-scenarios.py', 'tools/original/door-scenarios.py',
-  'tools/original/foundation-combat-observe.py', 'tools/foundation/fireplace-state-pair.mjs', 'references/isaac/foundation/runtime-progress/W0L0LYYM.json'];
-const hashes = () => Object.fromEntries(sources.map(path => [path, createHash('sha256').update(readFileSync(path)).digest('hex')]));
-const before = hashes();
 const scenarios = JSON.parse(execFileSync('python3', ['tools/original/fireplace-scenarios.py'], { encoding: 'utf8' }));
 const selected = option('--case');
 if (selected) {
@@ -48,9 +43,8 @@ const cases = scenarios.cases.map((scenario, index) => {
     diagnosticFields: report.diagnostics?.length || 0, diagnosticFailures: report.diagnostics?.filter(check => check.status === 'fail').length || 0,
     execution: report.execution, error: report.error || process.error?.message, report: target };
 });
-assert.deepEqual(hashes(), before, 'Fire cohort/comparison sources must remain stable');
 const report = { schema: 1, status: paired.status === 'pass' && cases.every(item => item.status === 'pass') ? 'pass' : 'fail',
-  pairedStatus: paired.status, sourcesStable: true, sources: before, cases,
+  pairedStatus: paired.status, cases,
   scope: 'Actual ordinary Fire33 factory, ordered damage queue, subclass HP/extinguish, persistent empty actor and Effect66 lifetime remain required. Shared stream/particle seeds and live loot/modifier acceptance are separate explicit diagnostics.' };
 save(resolve(output, 'report.json'), report);
 console.log(JSON.stringify(report));

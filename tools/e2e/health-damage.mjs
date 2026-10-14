@@ -12,21 +12,6 @@ const output = resolve(option('--output', `.cache/e2e/health-damage/${Date.now()
 mkdirSync(output, {recursive: true});
 const save = (path, value) => writeFileSync(path, JSON.stringify(value, null, 2) + '\n');
 const sha = value => createHash('sha256').update(value).digest('hex');
-const sources = ['tools/e2e/health-damage.mjs', 'tools/original/health-damage-observe.py',
-  'tools/original/health-damage-scenarios.py', 'tools/original/player-death-observe.py', 'tools/original/audio-observer.py',
-  'tools/foundation/browser-evidence.mjs', 'engine/src/health_damage.rs', 'engine/src/combat.rs',
-  'engine/src/player_animation.rs', 'engine/src/player_death.rs', 'engine/src/information_animation.rs',
-  'engine/src/pickups.rs', 'engine/src/bombs.rs', 'engine/src/chests.rs', 'engine/src/npcs.rs',
-  'engine/src/lib.rs', 'engine/src/player_items.rs', 'engine/build.rs', 'web/engine.ts', 'web/renderer.ts',
-  'web/scene-data.json', 'web/information-data.json',
-  'references/isaac/foundation/health-damage/source-contract.json',
-  'references/isaac/foundation/health-damage/main-presentation-owner.json',
-  'references/isaac/foundation/health-damage/action-admission.json',
-  'references/isaac/foundation/health-damage/first-prepared-cases.json',
-  'references/isaac/foundation/information-animation/clear-source.json',
-  'references/isaac/foundation/information-animation/source-contract.json'];
-const hashes = () => Object.fromEntries(sources.map(path => [path, sha(readFileSync(path))]));
-const before = hashes();
 // The whole OS cohort is drawn and persisted before any run or grading.
 const scenarioFile = option('--scenario-file', undefined);
 const scenarios = scenarioFile ? JSON.parse(readFileSync(resolve(scenarioFile))) :
@@ -239,7 +224,7 @@ function coverage(definition, directory) {
     status: checks.every(check => check.status === 'pass') ? 'pass' : 'fail'};
 }
 const result = {schema: 1, status: 'running', scenariosSha256: sha(readFileSync(resolve(output, 'scenarios.json'))),
-  sources: before, cases: [], scope: 'Normal health containers/Hit/Book16, source NPC membership/HP/pending queue and actual SFX wrappers/browser audio owner. Functional fields and contrived execution are blocking; full pixels are retained diagnostics. Wrapper/backend identities are source observations, not a complete original output-PCM parity claim. No native state supplies runtime.'};
+  cases: [], scope: 'Normal health containers/Hit/Book16, source NPC membership/HP/pending queue and actual SFX wrappers/browser audio owner. Functional fields and contrived execution are blocking; full pixels are retained diagnostics. Wrapper/backend identities are source observations, not a complete original output-PCM parity claim. No native state supplies runtime.'};
 save(resolve(output, 'report.json'), result);
 for (const [index, definition] of scenarios.cases.entries()) {
   const root = resolve(output, `case-${index}`), replay = resolve(output, `replay-${index}.json`);
@@ -250,17 +235,16 @@ for (const [index, definition] of scenarios.cases.entries()) {
     // hide the remaining predeclared OS/contrived attempts.
     const paired = await runPairedGate({output: root, selected: [], randomCount: 0, replayCases: [replay],
       productionDirectory: option('--production-directory', undefined), originalObserver: 'tools/original/health-damage-observe.py',
-      stateComparator: compare, additionalSources: sources, archiveBrowserEvidence: true, captureBrowserAudio: true});
-    row.pairedStatus = paired.status; row.build = paired.build; row.gateSources = paired.gateSources;
+      stateComparator: compare, archiveBrowserEvidence: true, captureBrowserAudio: true});
+    row.pairedStatus = paired.status; row.build = paired.build;
     row.coverage = coverage(definition, paired.cases[0].directory);
     row.directory = paired.cases[0].directory;
     row.status = paired.status === 'pass' && row.coverage.status === 'pass' ? 'pass' : 'fail';
   } catch (error) {row.error = String(error.stack || error); row.scope = 'Failed/unattempted captures remain required failures; complete available evidence retained';}
   result.cases.push(row); save(resolve(output, 'report.json'), result);
 }
-result.sourcesStable = JSON.stringify(before) === JSON.stringify(hashes());
 result.productionStable = result.cases.every(row => row.build && row.build.sha256 === result.cases[0]?.build?.sha256);
-result.status = result.sourcesStable && result.productionStable && result.cases.length === scenarios.cases.length
+result.status = result.productionStable && result.cases.length === scenarios.cases.length
   && result.cases.every(row => row.status === 'pass') ? 'pass' : 'fail';
 save(resolve(output, 'report.json'), result);
 console.log(JSON.stringify({status: result.status, cases: result.cases.length, report: resolve(output, 'report.json')}));

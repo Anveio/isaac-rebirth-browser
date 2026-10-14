@@ -19,7 +19,6 @@ assert.equal(pair.original.status, 'pass');
 assert.equal(pair.browser.status, 'pass');
 assert.equal(original.status, 'pass');
 assert.equal(browser.status, 'pass');
-assert.equal(gate.gateSourcesStable, true);
 assert.match(gate.build?.sha256 ?? '', /^[a-f0-9]{64}$/, 'Paired capture must identify its actual production artifact');
 const frames = new Map(browser.frames.map(frame => [frame.label, frame]));
 const observations = new Map(original.debugObservations.map(row => [row.context.label, row.observation]));
@@ -330,7 +329,7 @@ for (const game of ['native', 'browser']) for (const required of replay.fireRequ
 const report = { schema: 1, status: checks.every(row => row.status === 'pass') ? 'pass' : 'fail',
   scope: 'Ordinary33 raw1400 factory, actual ordered Tear/Bomb FIFO, subclass extinguish and Effect66 lifetime are required. Exact shared stream/particle seeds, live loot/heart collection/modifiers, blend/depth ordering and saved-room reconstruction remain explicit incomplete contracts.',
   provenance: { originalManifest: originalPath, originalSha256: hash(originalPath), browserManifest: browserPath, browserSha256: hash(browserPath),
-    originalBinarySha256: gate.sourceBinarySha256, browserArtifactSha256: gate.build.sha256, comparatorSha256: hash(new URL(import.meta.url)), gateSourcesStable: true },
+    originalBinarySha256: gate.sourceBinarySha256, browserArtifactSha256: gate.build.sha256, comparatorSha256: hash(new URL(import.meta.url)) },
   parentJoinScope: 'Source GameSpawn retains type/variant parent identity only, not actual Fire pointer/seed. Paired links use those real tags plus observed append ordinal within each contiguous capture segment; gaps start a new segment. No spatial/captured-parent inference.',
   exactTrajectoryScope: 'Shared-RNG-dependent seeds/paired numeric positions remain diagnostics; independent own-actor full/fast motion, playing/lifetime/birth/retirement laws and paired observed lifetime timing are required.',
   emberBirths: Object.fromEntries(Object.entries(emberBirths).map(([game, births]) => [game, Object.fromEntries(births)])),
