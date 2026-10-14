@@ -139,6 +139,11 @@ async function browserCapture(browser, server, caseData, directory, archiveBrows
       save(join(directory, 'trace-archive.json'), evidence);
     } else save(join(directory, 'trace.json'), trace);
     assert.equal(trace.enabled, true); assert.equal(trace.inputTraceTruncated, false);
+    assert.equal(trace.backendStateTruncated, false, 'Every actual backend callback must retain its complete snapshot');
+    assert.equal(trace.backendStateTruncationReason, null);
+    assert.ok(Array.isArray(trace.backendEvents) && trace.backendEvents.every(event =>
+      event.state && typeof event.state === 'object' && !Array.isArray(event.state)),
+    'Every actual backend event requires its recorded WASM state');
     assert.equal(trace.bootEpochSeed, caseData.bootEpochSeed);
     assert.equal(trace.initialSeed, caseData.initialSeed);
     assert.deepEqual(trace.commands, expectedCommands, 'Every intended DOM input/interval must reach the actual WASM trace');
