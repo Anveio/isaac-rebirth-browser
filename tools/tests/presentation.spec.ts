@@ -1,7 +1,9 @@
 import { test, expect, type Page } from "@playwright/test";
 import { readFileSync, mkdirSync, writeFileSync } from "node:fs";
 import { decodePNG, type RawImage } from "../../web/png";
-import { waitForReady } from "../foundation/verify.mjs";
+import { browserScenario, waitForReady } from "../foundation/verify.mjs";
+import { compareStageMaskTargets, loadStageMaskReference, readStageMaskCases } from "../foundation/stage-masks.mjs";
+import { CONTROLLED_BOMB_CHECKPOINTS } from "../foundation/mask-checkpoints.mjs";
 import type { State } from "../../web/engine";
 
 const ARTIFACTS = process.env.FOUNDATION_BROWSER_ARTIFACTS ?? "test-results/presentation";
@@ -77,4 +79,38 @@ test("pause composes original paper, actual seed and stats while freezing the ru
   const resumed = await page.evaluate(() => (window as any).game.snapshot()) as State;
   expect(resumed.paused).toBe(false);
   expect(resumed.pauseMenu.phase).toBe("hidden");
+});
+
+test("original GPU shadow and light masks match all complete native targets for independent seeds and movement", async ({ page }) => {
+  const cases = readStageMaskCases();
+  test.setTimeout(30_000 + cases.length * 15_000);
+  const output = `${ARTIFACTS}/stage-masks`;
+  mkdirSync(output, { recursive: true });
+  await page.goto("/");
+  const results: Array<{ id: string; status: "pass" | "fail"; error?: string; checkpoint?: string }> = [];
+  for (const selected of cases) {
+    try {
+      const reference = loadStageMaskReference(selected);
+      let actual: unknown;
+      const run = await browserScenario(page, {
+        initialSeed: reference.initialSeed, manualSeedText: reference.seedText.replaceAll(" ", ""),
+        bombCheckpoint: CONTROLLED_BOMB_CHECKPOINTS[reference.checkpoint] ? reference.checkpoint : undefined,
+        onCheckpoint: async (frame) => {
+          if (frame.label === reference.checkpoint) actual = await page.evaluate(() => (window as any).game.rendererTargets());
+        },
+      });
+      const start = run.frames.find((frame) => frame.label === "gameplay-start")!.state;
+      expect(start.runSeedValue).toBe(reference.observed.seedValue);
+      expect(start.stage).toBe(reference.observed.stage);
+      expect(start.stageSeed).toBe(reference.observed.stageSeed);
+      expect(actual, `Selected original checkpoint ${reference.checkpoint} must execute`).toBeTruthy();
+      const report = compareStageMaskTargets(actual, reference, `${output}/${reference.id}`);
+      expect(report.status, `${reference.id}: all original target RGBA bytes must match`).toBe("pass");
+      expect(report.originalStateParity).toBe(false);
+      results.push({ id: reference.id, status: "pass", checkpoint: reference.checkpoint });
+    } catch (error) { results.push({ id: selected.id, status: "fail", error: error instanceof Error ? error.message : String(error) }); }
+  }
+  writeFileSync(`${output}/report.json`, JSON.stringify({ cases: results, selected: cases.length, skipped: 0, originalStateParity: false, originalSimulationTickDelivery: false }, null, 2));
+  expect(results.length).toBe(cases.length);
+  expect(results.filter((item) => item.status === "fail"), "Every selected native target case must execute and match").toEqual([]);
 });
