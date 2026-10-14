@@ -1,6 +1,7 @@
 // Keep verification at the game level (see tools/e2e/README.md). Fails when a
 // change checks in unit tests or hard-codes checksums outside the input pins.
 import { globSync, readFileSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 const ROOT = fileURLToPath(new URL('../..', import.meta.url)).replace(/\/$/, '');
 
@@ -22,7 +23,9 @@ const INPUT_PINS = new Set([
 ]);
 
 const ignore = ['**/node_modules/**', '**/target/**', '**/.cache/**', '**/dist/**', '**/.venv/**'];
-const files = pattern => globSync(pattern, { cwd: ROOT, exclude: ignore });
+// Enforce checked-in repository policy; ignored vendor/research backups are not source.
+const tracked = new Set(execFileSync('git', ['ls-files', '-z'], { cwd: ROOT, encoding: 'utf8' }).split('\0'));
+const files = pattern => globSync(pattern, { cwd: ROOT, exclude: ignore }).filter(path => tracked.has(path));
 const problems = [];
 
 for (const path of files('**/*.{test,spec}.{js,mjs,cjs,ts,tsx}').concat(files('**/{test_*,*_test}.py'), files('**/__tests__/**'), files('engine/{tests,benches}/**')))
