@@ -13,6 +13,7 @@ pub mod audio;
 pub mod blood_effects;
 pub mod bombs;
 pub mod camera;
+pub mod champions;
 pub mod chests;
 pub mod combat;
 mod content;
@@ -1253,7 +1254,15 @@ impl Game {
                 stage: self.state.stage,
                 game_update_count: self.state.game_update_count,
             };
-            if let Some(npc) = entities::spawn(id, selector, &context)? {
+            if let Some(mut npc) = entities::spawn(id, selector, &context)? {
+                champions::roll(
+                    &mut npc,
+                    &mut self.state.boot_lifecycle.shared,
+                    &champions::Roll {
+                        stage: self.state.stage,
+                        player_items: self.state.player_items.as_ref(),
+                    },
+                )?;
                 order.push(actors::ActorRef {
                     kind: actors::ActorKind::Npc,
                     id,

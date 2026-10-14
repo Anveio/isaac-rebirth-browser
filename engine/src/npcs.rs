@@ -61,6 +61,8 @@ pub struct Npc {
     pub actor: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub shooter: Option<crate::plain_npc::ShooterTimers>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub champion: Option<crate::champions::Champion>,
 }
 
 const ZERO: WorldVector = WorldVector { x: 0.0, y: 0.0 };
@@ -515,6 +517,7 @@ impl Npc {
             dip: None,
             actor: String::new(),
             shooter: None,
+            champion: None,
         }
     }
 
