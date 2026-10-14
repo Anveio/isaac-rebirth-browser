@@ -1,0 +1,249 @@
+{
+  "schema": 1,
+  "scope": "PR108 guard source tested in the immutable pending108/110/131 composition; new browser outputs against explicitly retained current-turn independent original recordings. No fresh native recapture is claimed for these two browser runs.",
+  "baselineSource": "3fbd27f9179409623a006562c2412242fbc6b6f0",
+  "proposalSource": "ba0ae5e241b4fc5fbd09dfe86a05072025836479",
+  "baselineArtifact": "4006c8871c8914fa800c4ff77aae1ed5152641807f91f7b73d92340b1f40c1de",
+  "proposalArtifact": "4d4b7c1da59d9faa54f9374e1622472cf72c9a562598cade02d5a2a76327916f",
+  "cases": [
+    {
+      "name": "yum-full-phase-0",
+      "baselineStatus": "pass",
+      "proposalStatus": "pass",
+      "baselineChecks": 25332,
+      "proposalChecks": 25332,
+      "baselineFailures": 0,
+      "proposalFailures": 0,
+      "newFailures": 0,
+      "lostComparisons": 0,
+      "requiredCoverage": {
+        "comparedPresentations": 333,
+        "admittedPedestals": 1,
+        "queuedPresentations": 84,
+        "grantedPresentations": 84,
+        "pickupShotGuardPhases": []
+      }
+    },
+    {
+      "name": "yum-full-phase-1",
+      "baselineStatus": "pass",
+      "proposalStatus": "pass",
+      "baselineChecks": 25395,
+      "proposalChecks": 25395,
+      "baselineFailures": 0,
+      "proposalFailures": 0,
+      "newFailures": 0,
+      "lostComparisons": 0,
+      "requiredCoverage": {
+        "comparedPresentations": 334,
+        "admittedPedestals": 1,
+        "queuedPresentations": 84,
+        "grantedPresentations": 83,
+        "pickupShotGuardPhases": []
+      }
+    },
+    {
+      "name": "yum-damaged-phase-0",
+      "baselineStatus": "fail",
+      "proposalStatus": "fail",
+      "baselineChecks": 41532,
+      "proposalChecks": 41532,
+      "baselineFailures": 3,
+      "proposalFailures": 3,
+      "newFailures": 0,
+      "lostComparisons": 0,
+      "requiredCoverage": {
+        "comparedPresentations": 533,
+        "admittedPedestals": 1,
+        "queuedPresentations": 84,
+        "grantedPresentations": 284,
+        "pickupShotGuardPhases": []
+      }
+    },
+    {
+      "name": "yum-damaged-phase-1",
+      "baselineStatus": "fail",
+      "proposalStatus": "fail",
+      "baselineChecks": 41595,
+      "proposalChecks": 41595,
+      "baselineFailures": 3,
+      "proposalFailures": 3,
+      "newFailures": 0,
+      "lostComparisons": 0,
+      "requiredCoverage": {
+        "comparedPresentations": 534,
+        "admittedPedestals": 1,
+        "queuedPresentations": 84,
+        "grantedPresentations": 283,
+        "pickupShotGuardPhases": []
+      }
+    },
+    {
+      "name": "yum-pickup-aim-phase-0",
+      "baselineStatus": "fail",
+      "proposalStatus": "pass",
+      "baselineChecks": 25715,
+      "proposalChecks": 25715,
+      "baselineFailures": 50,
+      "proposalFailures": 0,
+      "newFailures": 0,
+      "lostComparisons": 0,
+      "requiredCoverage": {
+        "comparedPresentations": 333,
+        "admittedPedestals": 1,
+        "queuedPresentations": 84,
+        "grantedPresentations": 84,
+        "pickupShotGuardPhases": [
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "name": "yum-pickup-aim-phase-1",
+      "baselineStatus": "fail",
+      "proposalStatus": "pass",
+      "baselineChecks": 25779,
+      "proposalChecks": 25779,
+      "baselineFailures": 50,
+      "proposalFailures": 0,
+      "newFailures": 0,
+      "lostComparisons": 0,
+      "requiredCoverage": {
+        "comparedPresentations": 334,
+        "admittedPedestals": 1,
+        "queuedPresentations": 84,
+        "grantedPresentations": 83,
+        "pickupShotGuardPhases": [
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "name": "recorded-active-use-0",
+      "baselineStatus": "fail",
+      "proposalStatus": "fail",
+      "baselineChecks": 25068,
+      "proposalChecks": 25068,
+      "baselineFailures": 404,
+      "proposalFailures": 404,
+      "newFailures": 0,
+      "lostComparisons": 0,
+      "requiredCoverage": {
+        "comparedPresentations": 333,
+        "admittedPedestals": 1,
+        "queuedPresentations": 84,
+        "grantedPresentations": 84,
+        "pickupShotGuardPhases": []
+      }
+    },
+    {
+      "name": "recorded-active-use-1",
+      "baselineStatus": "pass",
+      "proposalStatus": "pass",
+      "baselineChecks": 24576,
+      "proposalChecks": 24576,
+      "baselineFailures": 0,
+      "proposalFailures": 0,
+      "newFailures": 0,
+      "lostComparisons": 0,
+      "requiredCoverage": {
+        "comparedPresentations": 334,
+        "admittedPedestals": 1,
+        "queuedPresentations": 84,
+        "grantedPresentations": 83,
+        "pickupShotGuardPhases": []
+      }
+    },
+    {
+      "name": "retained-random-pedestal-0",
+      "baselineStatus": "pass",
+      "proposalStatus": "pass",
+      "baselineChecks": 24504,
+      "proposalChecks": 24504,
+      "baselineFailures": 0,
+      "proposalFailures": 0,
+      "newFailures": 0,
+      "lostComparisons": 0,
+      "requiredCoverage": {
+        "comparedPresentations": 333,
+        "admittedPedestals": 1,
+        "queuedPresentations": 84,
+        "grantedPresentations": 84,
+        "pickupShotGuardPhases": []
+      }
+    },
+    {
+      "name": "retained-random-pedestal-1",
+      "baselineStatus": "fail",
+      "proposalStatus": "pass",
+      "baselineChecks": 24576,
+      "proposalChecks": 24576,
+      "baselineFailures": 21,
+      "proposalFailures": 0,
+      "newFailures": 0,
+      "lostComparisons": 0,
+      "requiredCoverage": {
+        "comparedPresentations": 334,
+        "admittedPedestals": 1,
+        "queuedPresentations": 84,
+        "grantedPresentations": 83,
+        "pickupShotGuardPhases": []
+      }
+    },
+    {
+      "name": "random-pedestal-0",
+      "baselineStatus": "pass",
+      "proposalStatus": "pass",
+      "baselineChecks": 24504,
+      "proposalChecks": 24504,
+      "baselineFailures": 0,
+      "proposalFailures": 0,
+      "newFailures": 0,
+      "lostComparisons": 0,
+      "requiredCoverage": {
+        "comparedPresentations": 333,
+        "admittedPedestals": 1,
+        "queuedPresentations": 84,
+        "grantedPresentations": 84,
+        "pickupShotGuardPhases": []
+      }
+    },
+    {
+      "name": "random-pedestal-1",
+      "baselineStatus": "pass",
+      "proposalStatus": "pass",
+      "baselineChecks": 24576,
+      "proposalChecks": 24576,
+      "baselineFailures": 0,
+      "proposalFailures": 0,
+      "newFailures": 0,
+      "lostComparisons": 0,
+      "requiredCoverage": {
+        "comparedPresentations": 334,
+        "admittedPedestals": 1,
+        "queuedPresentations": 84,
+        "grantedPresentations": 83,
+        "pickupShotGuardPhases": []
+      }
+    }
+  ],
+  "caseBankSha256": "034a2ac139bbffba86fd9d48adcf4989f455187f60d6d5c984afd4d841962bab",
+  "originalReportSha256": "0a29f5f3cbeb34b8c3b15f879f9317aca2825b17cfa6591b8f428184f46f7184",
+  "originalReadbackSha256": "f38758337f5ad35d9835bedeacf28370849f0d2aa575f5142761bef84731f576",
+  "baselineReportSha256": "56e7132af7896ce4b25e1879d2c36d2e2975a2ff068bf0d6b0af64804c1dcb0f",
+  "proposalReportSha256": "7ad204ec0ba4b4a32b82d1520e71e1bdd306e3c508e9727d3461228f915a039c",
+  "comparisonReadbackSha256": "04c8d57fd45569aa9b2747413db83c5d4b1003aeeb054124af593ea49dced427",
+  "checksEach": 333152,
+  "baselineRequiredFailures": 531,
+  "proposalRequiredFailures": 410,
+  "newFailingComparisons": 0,
+  "captureIntegrityErrors": 0,
+  "attribution": {
+    "pickupGuard": "Both held-Pickup cases pass with unchanged25715/25779 checks, removing100 actual held-input failures.",
+    "otherPendingSource": "Another21 firing-timer failures resolve in the retained222 case in the jointly tested damage/delay source. This does not qualify passive1/4 or whole222 behavior; Stats8 remains separate.",
+    "remaining": "Six damage comparisons and404 Flush comparisons remain failures. Every old531 failure, whole-MT and pixel diagnostic remains retained."
+  },
+  "unaccepted": "Positive guard timers and nonzero movement specifically while Pickup is guarded are source-preserved without witnesses here. No whole-game or whole-item acceptance follows."
+}

@@ -13,6 +13,7 @@ pub mod audio;
 pub mod blood_effects;
 pub mod bombs;
 pub mod camera;
+pub mod champions;
 pub mod chests;
 pub mod combat;
 mod content;
@@ -29,6 +30,7 @@ pub mod grid;
 mod grid_hazards;
 pub mod grid_records;
 mod health_damage;
+mod horfs;
 pub mod information_animation;
 pub mod input;
 pub mod items;
@@ -45,6 +47,7 @@ pub mod nightmares;
 pub mod npcs;
 pub mod phase;
 pub mod pickups;
+mod plain_npc;
 pub mod player_animation;
 pub mod player_death;
 pub mod player_items;
@@ -1120,6 +1123,25 @@ impl Game {
             self.state.music.room(id);
         }
         self.save_supported_run()?;
+        // The save keeps Door.Init's state1 records; the cleared start room's
+        // opened doors are state2 again by gameplay start in the original.
+        if let Some(grid) = &mut self.state.room.grid {
+            for door in &self.state.room.appearance.doors {
+                if door.state != "Opened" {
+                    continue;
+                }
+                let column = ((door.world_position.x - 40.0) / 40.0) as usize;
+                let row = ((door.world_position.y - 120.0) / 40.0) as usize;
+                if let Some(entity) = grid
+                    .cells
+                    .get_mut(column + row * usize::from(grid.width))
+                    .and_then(|cell| cell.entity.as_mut())
+                    .filter(|entity| entity.kind == 16)
+                {
+                    entity.state = 2;
+                }
+            }
+        }
         // Fresh54eb20 invokes54eaa0 after Level.Init/Save and the primary
         // manager initialization; room factories see the prior control byte.
         self.state
@@ -1256,7 +1278,15 @@ impl Game {
                 stage: self.state.stage,
                 game_update_count: self.state.game_update_count,
             };
-            if let Some(npc) = entities::spawn(id, selector, &context)? {
+            if let Some(mut npc) = entities::spawn(id, selector, &context)? {
+                champions::roll(
+                    &mut npc,
+                    &mut self.state.boot_lifecycle.shared,
+                    &champions::Roll {
+                        stage: self.state.stage,
+                        player_items: self.state.player_items.as_ref(),
+                    },
+                )?;
                 order.push(actors::ActorRef {
                     kind: actors::ActorKind::Npc,
                     id,
@@ -1308,12 +1338,18 @@ impl Game {
         }
         self.state.room.pickups = pickups;
         self.state.room.npcs = npcs;
-        self.state.room.boss_presentation_index =
-            if room_type == 5 && self.state.room.npcs.iter().any(|npc| npc.kind == 20) {
-                1
-            } else {
-                0
-            };
+        // Game551a10: the authored bossportraits.xml presentation of the
+        // room's boss (Monstro20/0 is presentation1).
+        self.state.room.boss_presentation_index = if room_type == 5 {
+            self.state
+                .room
+                .npcs
+                .iter()
+                .find_map(|npc| content::boss_presentation(npc.kind, npc.variant))
+                .unwrap_or(0)
+        } else {
+            0
+        };
         self.state.room.authored_actor_order = order;
         self.state.next_pickup = next;
         self.rebuild_room_actor_schedule()?;
@@ -2054,7 +2090,9 @@ impl Game {
             phase,
             &mut self.state.boot_lifecycle.shared,
             &mut entities::NpcWorld {
-                game_counter: self.state.game_update_count,
+                // Native Game+ce9f4 is one more than game_update_count (the
+                // run-loader origin); AI frame gates read the native value.
+                game_counter: self.state.game_update_count.wrapping_add(1),
                 player,
                 player_velocity,
                 grid: &grid,
@@ -2206,7 +2244,16 @@ impl Game {
                 player.facing = Direction::Down;
             }
         }
-        let aim = if !controls_enabled || self.state.player_animation.guard {
+        // Both main presentation owners represent Player+bf4. Source530388
+        // suppresses shooting input before head/aim work, while ordinary
+        // movement and the full fire/head timer continuation still run.
+        let animation_guard = self.state.player_animation.guard
+            || self
+                .state
+                .player_items
+                .as_ref()
+                .is_some_and(|items| items.pickup_animation_guard);
+        let aim = if !controls_enabled || animation_guard {
             None
         } else if self.held("ArrowLeft") {
             Some(Direction::Left)
@@ -2232,14 +2279,7 @@ impl Game {
         }
         if let Some(direction) = aim {
             self.state.player.facing = direction;
-            if !shooting_locked
-                && self.state.fire_cooldown < 0
-                && !self
-                    .state
-                    .player_items
-                    .as_ref()
-                    .is_some_and(|items| items.pickup_animation_guard)
-            {
+            if !shooting_locked && self.state.fire_cooldown < 0 {
                 let (dx, dy) = match direction {
                     Direction::Left => (-1.0, 0.0),
                     Direction::Right => (1.0, 0.0),

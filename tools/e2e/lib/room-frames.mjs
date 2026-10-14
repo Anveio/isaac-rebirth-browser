@@ -71,8 +71,8 @@ export function compareDoors(frame) {
 }
 
 // Ordinary Rock-family grids: admission, retirement, metadata and destruction
-// markers, read from the grid selector or from the signed Room path costs.
-export function compareRocks(frame, { marker = 'selector' } = {}) {
+// markers. The marker lives in the signed Room path costs (Room+e98).
+export function compareRocks(frame) {
   const { state, source, equal } = frame;
   const grid = state.room.grid;
   const rocks = source.grid.filter(cell => [2, 4, 5, 6].includes(cell.type));
@@ -82,11 +82,9 @@ export function compareRocks(frame, { marker = 'selector' } = {}) {
     if (!actual) continue; // Missing actors already fail the admission comparison.
     for (const [field, expected] of [['kind', rock.type], ['variant', rock.variant], ['state', rock.state], ['collisionClass', rock.collisionClass], ['spawnSeed', rock.spawnSeed]])
       equal(actual[field], expected, `rock${rock.index}:${field}`);
-    if (marker === 'pathCost') {
-      assert.ok(Array.isArray(state.room.pathCosts), 'Rock requires actual signed Room path costs');
-      assert.ok(Array.isArray(source.pathCosts), 'Original must expose signed Room path costs');
-      equal(state.room.pathCosts[rock.index], source.pathCosts[rock.index], `rock${rock.index}:destruction marker`);
-    } else equal(grid.cells[rock.index].selector, source.gridSelectors[rock.index], `rock${rock.index}:destruction marker`);
+    assert.ok(Array.isArray(state.room.pathCosts), 'Rock requires actual signed Room path costs');
+    assert.ok(Array.isArray(source.pathCosts), 'Original must expose signed Room path costs');
+    equal(state.room.pathCosts[rock.index], source.pathCosts[rock.index], `rock${rock.index}:destruction marker`);
   }
   return rocks;
 }
