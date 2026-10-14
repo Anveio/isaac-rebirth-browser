@@ -1,0 +1,131 @@
+{
+  "schema": 1,
+  "status": "Concrete source checkpoint; TS/fmt/Python/Node/matrix/diff checks only. Rust, production build and fresh paired gate not run.",
+  "nativeBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "sourceContractPath": ".cache/coordination/stage-progression-research/boss-clear/manager-contract.json",
+  "sourceContractSha256": "645e9ae4103bcfebedbe5a334424649e5b582b5358017bf2af31309d415f0314",
+  "source": {
+    "owner": "Room+15d0 actual EntityManager; all four words are signed i32, not counts derived from a final Vec or HP.",
+    "fields": {
+      "Room16ac": "managerdc admission contribution",
+      "Room16b0": "managere0 full callback refreshed contribution",
+      "Room16b4": "managere4 boss admission contribution",
+      "Room16b8": "managere8 full callback refreshed boss contribution"
+    },
+    "reset": "453ec0 actual manager reset sets dc/e0/e4/e8 zero at453ff2..454010. This is not proof of every constructor/copy producer;450050 has separate state-copy writes.",
+    "admission": "GameSpawn550ae7 calls Room5c6940, which increments Room15c8 handle, assigns actor+8 and tails4524f0. At4525f1 actual452490 reads actor virtual70; true adds managerdc. It then reads78; true adds e4.4525f6 marks actor31c=true. Keep this exact producer; no recomputed newborn counts.",
+    "retirementQualifier": "441bb0 Remove only sets active31e=false/dead31f=true. Actual NPC virtual68=47eb80 calls448040 cleanup, which has no mapped counter subtraction.452700 is a real subtraction helper, but pinned direct call/reference scan found none; do not wire it as generic removal merely by shape. Future indirect/unmapped producer is explicitly pending.",
+    "fullActorCount": [
+      "454df0 starts r14/r15 zero. In actual active array order, inactive31e actors skip update/count. flags318 bit8 normally skips virtual18, but unless bit20000 is present still proceeds directly to getters.",
+      "454eb1 calls actual virtual18 full update. Only if active31e remains true at454eb9 does4552bb count. Thus ordinary13/18/214/244 nextfull Remove is excluded even when stored103c remains true.",
+      "4552c6 reads virtual70; when true r14++. Then4552e1 reads78; if true and entityflags318 bit100000 clear (testbyte31a bit10), r15++. These getters run AFTER that actor callback, independent of HP.",
+      "After all actor callbacks and the interpolation-disabled extra Player path,454f98 adds olddc to r14; reads olde4; writesdc=0/e4=0; writese0=r14 ande8=(olde4+r15) at454fbf/fc6. Do not simplify pending/source contributions away or fit first-full counts."
+    ],
+    "typedNpcGetters": {
+      "table": "Common NPC vtable66ef30 +70=4fd200 readsbyte103c; +78=4fd210 readsbyte103d, no dead/HP check.",
+      "configuration": "47f643 copies actual config44 into103c;47f64f copies config20 into103d. Admitted authored13/18/214/244/20 normalvariant0 omit shutdoors (defaulttrue), bossesonly20true.",
+      "death": "Ordinary13/18/214/244 dead+active nextfull calls4f2d10\u2192virtual48\u2192441bb0; state16/deadflag alone does not clear103c. Monstro20 active boss Death retains countability until real clip-finished Remove.",
+      "otherWrites": "4fac06 is900-age anti-softlock, not ordinary death.4fa252 separately clears certain linked actors after boss count reacheszero; not a blanket native dead predicate."
+    },
+    "hostOrder": [
+      "Game54fa82 increments actual Gamecounter, then5bf1a0 PlayerManager;54fa98 Level584200 tailcallsRoom5d12a0.",
+      "Room5d12a0 handles actual grid retirement list first, then every nonnull full Grid virtual18 at5d1384, then real everythirdFull signed path-cost aging.",
+      "5d1423 reads OLD16b4+16b8;5d1454 storesRoom2490 before manager454df0 at5d145a. Boss final callback2490 mutation during manager remains independently source-owned.",
+      "Manager full actor updates/counter refresh then removal cleanup;455292 calls4545d0. It snapshots/buckets and executes actual pair/player callbacks. In final454b00..454b3a it loops current manager+68 count+74, Player1\u2192443d00(false), otheractors\u2192442b90(false): real late-ground grid contact. New contact births in the current list may receive this pass without a full actor update.",
+      "45529a calls452760 after4545d0. This is virtual50 draw-order sorting, NOT late-grid (an earlier shorthand was corrected).",
+      "Room then calls546fa0/4271d0.5d1487 AFTER manager/contacts/ground/sort reads signed16ac+16b0 for countdown.5d1975 ordinary doors/open, descriptorclear check then real clear callbacks/reward/recharge occur AFTER late-grid; do not move RoomClear before the existing late-grid pass."
+    ],
+    "qualification": "Native exact count/readback and complete actor birth/retirement membership remain fresh gate requirements. This source note makes no runtime edit and does not close existing clear failures.",
+    "sourcePins": [
+      {
+        "address": "0x5d12a0",
+        "fdeBytes": 1902,
+        "fdeSha256": "338c9cc7f8a51f7d3a5ce8503529347ac6af538be47072ced32275e13034c751",
+        "dumpSha256": "84da96dba851814994856feecb872143064fb74d540283de9de328c432f633f9"
+      },
+      {
+        "address": "0x454df0",
+        "fdeBytes": 2192,
+        "fdeSha256": "5a926d0b748f6abd6599d51d5dca746a0fd5ff4cd1a2340833df6bcd4857e205",
+        "dumpSha256": "9ec3154c8625865887a9ca0daf390fd9457a1aa8366b68e1621ab1dd56fbf3b7"
+      },
+      {
+        "address": "0x4545d0",
+        "fdeBytes": 2066,
+        "fdeSha256": "340e37a6abedcd7a2618835f27c30fea6d7163b1067c4829017b5140bc1d24dc",
+        "dumpSha256": "50b255f78810c53154fc20f432f401ba158f1c8f3444b34b9241c71c892a6075"
+      },
+      {
+        "address": "0x452490",
+        "fdeBytes": 91,
+        "fdeSha256": "06e7e44489f0e5e2c89cffd5faec498a85b5cd0cf52e34a38be4d071adf41ff9",
+        "dumpSha256": "64ca194c3878b3bffdb4acc314a9763d34de6a9728196a7df97af1824e51e9e0"
+      },
+      {
+        "address": "0x452700",
+        "fdeBytes": 91,
+        "fdeSha256": "48b17e276b3caa3fa1eda72149b37e6aae5364c70a69c4d5712efa679da2f7c3",
+        "dumpSha256": "38309f47049e61aac0e7298ff3de763930903b0ce50506087a923926b5e3bd58"
+      },
+      {
+        "address": "0x452760",
+        "fdeBytes": 209,
+        "fdeSha256": "e68cea0eb4b50f9143cedbc0cf4aef30685bc7b72635ea36bc2040a625e84d6d",
+        "dumpSha256": "2b9782934f0542efa06c60cef616b2dbafd16c1b6e2863ccefd784db17e53b99"
+      },
+      {
+        "address": "0x453ec0",
+        "fdeBytes": 425,
+        "fdeSha256": "2943b8db4302d539846b5335211301c0dcc92601672a7a6b3e50748a430af70a",
+        "dumpSha256": "12f66d545982e932319ed504551b4e5ff545ede905a8767cb25457f663bdeb11"
+      },
+      {
+        "address": "0x441bb0",
+        "dumpSha256": "c1a0cc40d86e54f7d7bc995329eed2f64f63fb6a00b33ff51c99054c30ff0fde"
+      },
+      {
+        "address": "0x448040",
+        "dumpSha256": "e1a04e64305db4ca5d29a38a7f52c45b4d1bab8ae5a675695d5457b2bc5b1438"
+      },
+      {
+        "address": "0x4524f0",
+        "dumpSha256": "5a1a1274a2c8892426011ff9ebf7bba52c556678cda8d76d69b094cac393d2c4"
+      },
+      {
+        "address": "0x47eb80",
+        "dumpSha256": "75f6b82043e28902b63796f8bdeda11c72afa0e274f368047e30e9dfe2c432ae"
+      },
+      {
+        "address": "0x47ed20",
+        "dumpSha256": "d624218b3df2d8d13b66d89ddb2ccae5cbcdb7c9926c39bc6ed42c9c965bef2e"
+      },
+      {
+        "address": "0x47f500",
+        "dumpSha256": "edf587de4bdd0166f682ae2550d90a09fa79aa9e55aff28b1ef8d1c80f5c4886"
+      },
+      {
+        "address": "0x4fd200",
+        "dumpSha256": "c3e1f99394ec4a560da1f08fa897e091d65267fc69d5ee3d60211c937d124dab"
+      },
+      {
+        "address": "0x4fd210",
+        "dumpSha256": "fc93e8e1a4aa7b2603c5b86fe173bdf8dfab6fefff4be04295b97f0fda3dc7e8"
+      }
+    ]
+  },
+  "implementation": {
+    "owner": "Room.manager_counts is the sole signed dc/e0/e4/e8 owner; defaults zero and resets with actual room manager replacement.",
+    "admission": "Each concrete admitted supported NPC invokes the countable/boss getters in manager admission order. Non-countable other modeled actors do not contribute.",
+    "full": "Each actor in the existing full-phase fence is advanced, then its active/countable/boss getters enter local totals. Pending is folded into current before entity contacts/lategrid. No final-vector recount or synthetic death subtraction.",
+    "consumers": "Boss2490 is refreshed from signed e4+e8 before manager full update; its actual final callback stays separate. Existing post-lategrid RoomClear countdown reads dc+e0.",
+    "gate": "Read-only original observer exposes all four signed native words; required Monstro pairs compare all four exactly. Existing countability predicate now compares its actual port owner instead of an NPC-vector proxy. No tolerances, tape checkpoints, selected cases or old failed reports removed."
+  },
+  "explicitPending": [
+    "Other actual admission/removal/countability mutation producers, including any indirect452700 callers.",
+    "900-age anti-softlock and other103c/103d writers.",
+    "Restored NPC full admission callbacks and complete Room.Update admission/contact ordering.",
+    "Interpolation-disabled extra Player full callbacks and complete entity-family membership.",
+    "Game10ecc0 reset predicate and complete clear/reward/recharge/boss/Grid17/Stage2 callbacks.",
+    "Every existing public paired failure; source proof makes no count/live acceptance claim."
+  ]
+}

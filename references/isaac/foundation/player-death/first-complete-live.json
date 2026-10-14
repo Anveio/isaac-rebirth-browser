@@ -1,0 +1,188 @@
+{
+  "schema": 1,
+  "auditedAt": "2026-10-14T04:16:12.552562+00:00",
+  "sourceHead": "5afa7ddb1a6d5c2031b6648905478e80d78fa6d9",
+  "production": {
+    "sha256": "c4685585239b9317064e350bb62a4e3abc2c15efff7096e8e16aceb66c4d7afc",
+    "files": 944,
+    "bytes": 214432758
+  },
+  "freezeSha256": "bd3f0e37ccf705f19dc10571b523d813f8a7a9baa9c7d316d28cdf29b99f4e0d",
+  "supervisionSha256": "38c5980ce8e3f43e6e6416dfcacabdf43c140e2868866d1540b27096614770d7",
+  "reportSha256": "0e5b7c67abc33e9d57c3e69c245ec9a64470f53f37e637e61dc4d3b96bf591bb",
+  "pairedReportSha256": "bc00c387b41bf211821c174784876ddf491349bd76384abd1a0ea14c2d9912eb",
+  "scenarioInputSha256": "ed19147bd3857acc97f5d357726e9cbb42be86cc367cdfbd4afbfaf3114bca93",
+  "cases": [
+    {
+      "id": "death-spikes-restart",
+      "status": "fail",
+      "sourceCapture": "pass",
+      "browserCapture": "pass",
+      "presentations": 740,
+      "scopedChecks": 13837,
+      "requiredFailures": {
+        "Game.fullUpdates": 653,
+        "player.y": 258
+      },
+      "reportSha256": "8cec440720fdd9ddc9755a162a026f8688c4da574e11be8c68cbc4a37efd599d"
+    },
+    {
+      "id": "death-spikes-exit",
+      "status": "fail",
+      "sourceCapture": "pass",
+      "browserCapture": "pass",
+      "presentations": 741,
+      "scopedChecks": 13140,
+      "requiredFailures": {
+        "Game.fullUpdates": 654,
+        "player.y": 259,
+        "titleAnimationFrame": 80,
+        "menuFade.active": 40,
+        "menuFade.alpha": 40,
+        "menuFade.color": 80
+      },
+      "reportSha256": "2c0ef4e6bac883c08964f6fb1693627e64bc31df05f75fc9700b06cb33076a1b"
+    },
+    {
+      "id": "death-unfiltered-0",
+      "status": "fail",
+      "sourceCapture": "pass",
+      "browserCapture": "pass",
+      "presentations": 740,
+      "scopedChecks": 12517,
+      "requiredFailures": {
+        "Game.fullUpdates": 733,
+        "player.y": 580,
+        "player.vy": 115
+      },
+      "reportSha256": "18b2b44e35a1d2042e1fce7f1da4e74bf259f5c92f1ee76c23ef2f590bf2b177"
+    },
+    {
+      "id": "death-unfiltered-1",
+      "status": "fail",
+      "sourceCapture": "pass",
+      "browserCapture": "pass",
+      "presentations": 741,
+      "scopedChecks": 12696,
+      "requiredFailures": {
+        "Game.fullUpdates": 734
+      },
+      "reportSha256": "4949adcae838667df2349b62897434c870994765a96f176fcad279305dba64e4"
+    }
+  ],
+  "presentations": 2962,
+  "scopedChecks": 52190,
+  "requiredFailures": {
+    "Game.fullUpdates": 2774,
+    "player.y": 1097,
+    "titleAnimationFrame": 80,
+    "menuFade.active": 40,
+    "menuFade.alpha": 40,
+    "menuFade.color": 80,
+    "player.vy": 115
+  },
+  "failedChecks": 4226,
+  "contrivedBothExecuted": 2,
+  "captureErrors": 0,
+  "archives": [
+    {
+      "path": ".cache/e2e/player-death/fresh-main-5afa7dd/paired/00-death-spikes-restart/original/manifest.json.gz",
+      "rawSha256": "d565aa5b94f94af45fd0d3cff047d908343f7c83f10bd8a5b000b815493a8ceb",
+      "rawBytes": 79795989,
+      "archiveSha256": "c5e612d80796abade91007492879b03ee6db4d18f466bdfc8e46161f2d8a49c8",
+      "archiveBytes": 6905040,
+      "origin": "central lossless native archival ledger",
+      "fullDecompressionReadback": "pass"
+    },
+    {
+      "path": ".cache/e2e/player-death/fresh-main-5afa7dd/paired/01-death-spikes-exit/original/manifest.json.gz",
+      "rawSha256": "d3f0219db2eb815db9e95ecf5327abf2a78219940d1efbf788b647dc19f86ae7",
+      "rawBytes": 72319054,
+      "archiveSha256": "b88cc3736c6eeeb7db78a6fdaaf7dc96ef999cc912a36057d55239502440cf26",
+      "archiveBytes": 6308159,
+      "origin": "central lossless native archival ledger",
+      "fullDecompressionReadback": "pass"
+    },
+    {
+      "path": ".cache/e2e/player-death/fresh-main-5afa7dd/paired/02-death-unfiltered-0/original/manifest.json.gz",
+      "rawSha256": "191b131c4dc847f806d5e8713d51368c95f52b6ae5bffdb7fa4de63205436015",
+      "rawBytes": 73237838,
+      "archiveSha256": "4a7e6b9dcce0a5a2f6bf379b63361c1b38737c19983e8a5702bcca1a9b6b353c",
+      "archiveBytes": 6485920,
+      "origin": "central lossless native archival ledger",
+      "fullDecompressionReadback": "pass"
+    },
+    {
+      "path": ".cache/e2e/player-death/fresh-main-5afa7dd/paired/03-death-unfiltered-1/original/manifest.json.gz",
+      "rawSha256": "ab219ff56a99080e8d8b1a520d238ff6830158f0d5fdc71ed8b5f07442c210e1",
+      "rawBytes": 38456328,
+      "archiveSha256": "64d76e6e761150b3ba25b5440771bda8b32c18bb9c0a21f261a6a2f4acd12384",
+      "archiveBytes": 3701060,
+      "origin": "central lossless native archival ledger",
+      "fullDecompressionReadback": "pass"
+    },
+    {
+      "path": ".cache/e2e/player-death/fresh-main-5afa7dd/paired/00-death-spikes-restart/browser/manifest.json.gz",
+      "rawSha256": "e806ce939927bc6eb2cb7c3a97b1ed68332a1067e68cdb6db35a71d5259de9f7",
+      "rawBytes": 145759581,
+      "archiveSha256": "839e9d0717b110948f3f49cd64e28942a7d33f908bfeab5724a69f02c6c97dc4",
+      "archiveBytes": 17872140,
+      "origin": "actual compact streamed browser archive receipt",
+      "receiptSha256": "f170ace0ae0ae4730172db4dbec267698980cccbcf6b0308f9c526c150db37ef",
+      "fullDecompressionReadback": "pass"
+    },
+    {
+      "path": ".cache/e2e/player-death/fresh-main-5afa7dd/paired/01-death-spikes-exit/browser/manifest.json.gz",
+      "rawSha256": "903cb0d6e401c1127ba8c47042722be9dc4cb80aba78021a7c47d13c21dc5991",
+      "rawBytes": 147994526,
+      "archiveSha256": "9a6e2058ed71ba2c71910eccb6108901874d3ab690fbeea13e610de26d3adcf0",
+      "archiveBytes": 18176567,
+      "origin": "actual compact streamed browser archive receipt",
+      "receiptSha256": "c83a9a90d88167541e7381dd43b2823a44f163d58d81bacddd83202b7e89c2e2",
+      "fullDecompressionReadback": "pass"
+    },
+    {
+      "path": ".cache/e2e/player-death/fresh-main-5afa7dd/paired/02-death-unfiltered-0/browser/manifest.json.gz",
+      "rawSha256": "994691eee8a046b1cdea7668101dd35b6210f7c9b289ae27e3f3dc4c9103d022",
+      "rawBytes": 142643139,
+      "archiveSha256": "c2dd41e06ca4ca39311b5e3bc37edbf67ead27589b528a5628e015bd9a412a4d",
+      "archiveBytes": 17226542,
+      "origin": "actual compact streamed browser archive receipt",
+      "receiptSha256": "94a2adb70ecd23c79ae26fe1f62bae290f3dd2ab1ea64c315138763a9d17c62f",
+      "fullDecompressionReadback": "pass"
+    },
+    {
+      "path": ".cache/e2e/player-death/fresh-main-5afa7dd/paired/03-death-unfiltered-1/browser/manifest.json.gz",
+      "rawSha256": "182492393274b7f3ff5c18cd3023adedd8b94006c33e4fe5232dbd05d4a48194",
+      "rawBytes": 130475120,
+      "archiveSha256": "2d4cba86c9ff95f91e268dcba0b229285cf80eb3030d232bd7ae37da7f460963",
+      "archiveBytes": 16408637,
+      "origin": "actual compact streamed browser archive receipt",
+      "receiptSha256": "9cec78a8cfa0be5bfdff6dbf140a5b9e301831e7a1d1fef7c62cb66a6a70aaf9",
+      "fullDecompressionReadback": "pass"
+    }
+  ],
+  "rawBytes": 830681575,
+  "compressedBytes": 93084065,
+  "scope": "All4 complete unchanged recorded cases actually ran fresh Original and immutable5afa production. Both mandatory death/popup routes executed in both; both unfiltered OS rows remained alive and were retained. Entire8 raw manifest streams hash/byte verified by full decompression. Gate remains FAIL on4226 required age/position/velocity and Exit-menu fields. Original states/RNG never supply port values; no counters/velocities fitted; no whole game/currentmain parity claimed.",
+  "auditReceiptSha256": "b73b650dd3cd41b33b12910a5e5213ef34fee5a662eb9b641e71d04b1d227683",
+  "publicOutcomes": [
+    {
+      "id": "death-spikes-restart",
+      "lastLabel": "dispatch-80",
+      "sourceScreen": "playing",
+      "browserScreen": "playing",
+      "sourcePopup": 0,
+      "browserPopup": 0
+    },
+    {
+      "id": "death-spikes-exit",
+      "lastLabel": "dispatch-80",
+      "sourceScreen": "main",
+      "browserScreen": "main",
+      "sourcePopup": 0,
+      "browserPopup": 0
+    }
+  ],
+  "selectedDeathContracts": "In both required routes actual dead, controls/visible, 57-frame Death full/fast frame+playing+guard, popup2, stopped Diary0 and SFX30 loaded+exact binary32 volume agree. Same public input sends actual Restart/Exit to playing/main; complete gate remains red."
+}

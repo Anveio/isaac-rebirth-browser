@@ -152,7 +152,7 @@ export interface RoomDescriptor {
   roomInitSeed: number; decorationSeed: number; spawnSeed: number; followingSeed: number;
 }
 export interface Floor {
-  contract: string; stageSeed: number; additionalRooms: number; attempts: number;
+  contract: string; stage: number; stageSeed: number; additionalRooms: number; attempts: number;
   descriptors: RoomDescriptor[]; grid: number[]; startingDescriptor: number;
   primaryState: number; primaryDraws: number; generatorState: number; gameFlags: number;
   specialWeights: number[]; basementWeights: number[];
@@ -187,6 +187,7 @@ export interface Room {
       particleBirthCount: number; lastParticleBirth: {parentId: number; spawnSeed: number; position: {x: number; y: number}; velocity: {x: number; y: number}} | null;
       lootBirth: {parentId: number; variant: number; spawnSeed: number; position: {x: number; y: number}} | null} | null }[];
   authoredActorOrder: {kind: "npc" | "pickup"; id: number}[];
+  managerCounts: { countablePending: number; countableCurrent: number; bossPending: number; bossCurrent: number };
   bossCount: number; bossPresentationIndex: number;
   combatClear: boolean; combatClearCountdown: number; combatShutDoorSlots: number[];
   grid: { width: number; height: number; cells: {selector: number; entity: {kind: number; variant: number; state: number; collisionClass: number; spawnSeed: number} | null}[] } | null;
