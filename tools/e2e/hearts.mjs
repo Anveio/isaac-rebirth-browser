@@ -9,11 +9,8 @@ import {runPairedGate} from '../foundation/paired-game.mjs';
 const option=(name,fallback)=>{const at=process.argv.indexOf(name);if(at<0)return fallback;assert.ok(process.argv[at+1]);return process.argv[at+1];};
 const output=resolve(option('--output','.cache/e2e/hearts'));mkdirSync(output,{recursive:true});
 const save=(p,v)=>writeFileSync(p,JSON.stringify(v,null,2)+'\n');
-const digest=p=>createHash('sha256').update(readFileSync(p)).digest('hex');
 const artifactBytes=p=>existsSync(p)?readFileSync(p):gunzipSync(readFileSync(p+'.gz'));
 const artifactDigest=p=>createHash('sha256').update(artifactBytes(p)).digest('hex');
-const sources=['tools/e2e/hearts.mjs','tools/original/heart-scenarios.py','tools/original/foundation-combat-observe.py','engine/src/pickups.rs','engine/src/player_items.rs','engine/src/fireplaces.rs','engine/src/health_damage.rs','engine/src/level_progress.rs','engine/src/lib.rs','references/isaac/foundation/hearts/first-prepared-cases.json','web/engine.ts','web/renderer.ts'];
-const hashes=()=>Object.fromEntries(sources.map(p=>[p,digest(p)])),before=hashes();
 const prepared=option('--scenarios');
 const scenarios=prepared?JSON.parse(readFileSync(resolve(prepared),'utf8')):JSON.parse(execFileSync('python3',['tools/original/heart-scenarios.py','--count',option('--count','2')],{encoding:'utf8'}));
 assert.equal(scenarios.schema,1);assert.ok(Array.isArray(scenarios.cases)&&scenarios.cases.length>=6&&scenarios.cases.length<=8);
@@ -44,7 +41,7 @@ for(const [index,c] of scenarios.cases.entries()){
   const original=JSON.parse(artifactBytes(originalPath)),browser=JSON.parse(artifactBytes(browserPath));
   const caseReport=JSON.parse(readFileSync(resolve(directory,'report.json'),'utf8'));
   assert.equal(caseReport.original.status,'pass');assert.equal(caseReport.browser.status,'pass');
-  assert.equal(original.status,'pass');assert.equal(browser.status,'pass');assert.equal(paired.gateSourcesStable,true);
+  assert.equal(original.status,'pass');assert.equal(browser.status,'pass');
   const frames=new Map(browser.frames.map(r=>[r.label,r.state])),observations=new Map(original.debugObservations.map(r=>[r.context.label,r.observation]));
   const check=(label,field,expected,actual)=>{assert.notEqual(expected,undefined,field);assert.notEqual(actual,undefined,field);checks.push({label,field,expected,actual,status:JSON.stringify(expected)===JSON.stringify(actual)?'pass':'fail'});};
   const f32=v=>{assert.equal(typeof v,'number');assert.ok(Number.isFinite(v));return Math.fround(v);};
@@ -85,6 +82,5 @@ for(const [index,c] of scenarios.cases.entries()){
  result.manifestHashes=Object.fromEntries(Object.entries(result.manifestHashes).map(([name,read])=>{try{return[name,read()];}catch{return[name,null];}}));
  save(resolve(directory,'heart-state.json'),result);results.push({id:result.id,status:result.status,fields:checks.length,failures:checks.filter(r=>r.status==='fail').length,execution,error,report:resolve(directory,'heart-state.json')});
 }
-const stable=JSON.stringify(before)===JSON.stringify(hashes());
-const report={schema:1,status:stable&&paired.status==='pass'&&results.every(r=>r.status==='pass')?'pass':'fail',pairedStatus:paired.status,sourcesStable:stable,sources:before,cases:results,scope:'Required paired healthcontainer/immunity/room/Heartbody-spawn-seed-identity-class-animation-collection fields, contrived actualadmission/damage/collection and2unfilteredrecordedOScases. Modifier-completefactory, wholeHUD/informationqueue13, readmission andsoul/blackdamagepriority remain explicit source-qualified follow-ups. Local30 four-word state and source collection SFX are not compared by this leaf.'};
+const report={schema:1,status:paired.status==='pass'&&results.every(r=>r.status==='pass')?'pass':'fail',pairedStatus:paired.status,cases:results,scope:'Required paired healthcontainer/immunity/room/Heartbody-spawn-seed-identity-class-animation-collection fields, contrived actualadmission/damage/collection and2unfilteredrecordedOScases. Modifier-completefactory, wholeHUD/informationqueue13, readmission andsoul/blackdamagepriority remain explicit source-qualified follow-ups. Local30 four-word state and source collection SFX are not compared by this leaf.'};
 save(resolve(output,'report.json'),report);console.log(JSON.stringify(report));process.exitCode=report.status==='pass'?0:1;

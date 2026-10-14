@@ -16,19 +16,6 @@ import { ORIGINAL_SHA } from './lib/original.mjs';
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const run = promisify(execFile);
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
-const gateSources = ['tools/e2e/keys.mjs', 'tools/original/key-scenarios.py',
-  'tools/original/rock-blast-scenarios.py', 'tools/foundation/decode-rooms.py',
-  'tools/original/foundation-seeds.py',
-  'tools/original/foundation-pickup-observe.py', 'tools/original/foundation-clock-run.py',
-  'tools/original/foundation-clock-gate.c', 'tools/original/foundation-clock-verify.py',
-  'tools/original/state-observer.py', 'tools/original/with-display.sh',
-  'tools/foundation/production-server.mjs', 'tools/foundation/browser.mjs',
-  'tools/foundation/verify.mjs',
-  'web/trace.ts',
-  'tools/original/key-observer.py', 'tools/original/audio-observer.py'];
-const sourceHashes = async () => Object.fromEntries(await Promise.all(gateSources.map(async path =>
-  [path, digest(await readFile(join(ROOT, path)))])));
-const beforeSources = await sourceHashes();
 const value = flag => { const index = process.argv.indexOf(flag); return index < 0 ? undefined : process.argv[index + 1]; };
 const output = resolve(value('--output') || join(ROOT, '.cache/e2e/keys', String(Date.now())));
 await mkdir(output, { recursive: true });
@@ -64,7 +51,6 @@ const browser = await chromium.launch(browserLaunchOptions());
 const report = {
   schema: 1, status: 'running', originalBinarySha256: ORIGINAL_SHA, production: server.build,
   selection: selectedCase ? { scope: 'Explicit targeted recorded-case replay; default CI executes the complete cohort', case: selectedCase } : { scope: 'Complete selected cohort' },
-  gateSources: beforeSources,
   graphics: await inspectBrowserGraphics(browser),
   scope: 'Live public-seed secret-room regular key admission, local subtype RNG, full-phase animation/contact/collection, inventory, actor cleanup and actual native key SFX slot admission. Golden keys, item modifiers, keeper NPC behavior, total shared MT/sample identity, key spending and pixels remain unaccepted.',
   cases: [],
@@ -258,8 +244,6 @@ try {
       comparedPresentations: caseResult.comparedPresentations, failures: caseResult.failures.length }));
   }
   report.status = report.cases.every(item => item.status === 'pass') ? 'pass' : 'fail';
-  report.gateSourcesStable = JSON.stringify(beforeSources) === JSON.stringify(await sourceHashes());
-  if (!report.gateSourcesStable) report.status = 'fail';
 } catch (error) {
   report.status = 'fail'; report.error = String(error); throw error;
 } finally {

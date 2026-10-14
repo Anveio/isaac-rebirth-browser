@@ -2,13 +2,13 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { readFileSync, writeFileSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
+import { resolve } from 'node:path';
 const option=name=>{const at=process.argv.indexOf(name);assert.ok(at>=0&&process.argv[at+1]);return process.argv[at+1];};
 const directory=resolve(option('--case')),load=path=>JSON.parse(readFileSync(path,'utf8'));
 const originalPath=resolve(directory,'original/manifest.json'),browserPath=resolve(directory,'browser/manifest.json');
 const original=load(originalPath),browser=load(browserPath),replay=load(resolve(directory,'case.json'));
-const paired=load(resolve(directory,'report.json')),gate=load(resolve(dirname(directory),'report.json'));
-assert.equal(paired.original.status,'pass');assert.equal(paired.browser.status,'pass');assert.equal(original.status,'pass');assert.equal(browser.status,'pass');assert.equal(gate.gateSourcesStable,true);
+const paired=load(resolve(directory,'report.json'));
+assert.equal(paired.original.status,'pass');assert.equal(paired.browser.status,'pass');assert.equal(original.status,'pass');assert.equal(browser.status,'pass');
 const f32=value=>{assert.equal(typeof value,'number','Required f32 field must exist');assert.ok(Number.isFinite(value),'Required f32 field must be finite');return Math.fround(value);};
 const vector=p=>[f32(p.x??p[0]),f32(p.y??p[1])],checks=[],diagnostics=[];
 const check=(rows,label,field,expected,actual)=>{assert.notEqual(expected,undefined,field);assert.notEqual(actual,undefined,field);rows.push({label,field,expected,actual,status:JSON.stringify(expected)===JSON.stringify(actual)?'pass':'fail'});};

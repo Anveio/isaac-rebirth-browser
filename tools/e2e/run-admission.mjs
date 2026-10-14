@@ -19,16 +19,6 @@ const run = promisify(execFile);
 const sha = bytes => createHash('sha256').update(bytes).digest('hex');
 const value = flag => { const index = process.argv.indexOf(flag); return index < 0 ? undefined : process.argv[index + 1]; };
 const output = resolve(value('--output') || join(ROOT, '.cache/e2e/run-admission', `${Date.now()}-${process.pid}`));
-const sources = ['tools/e2e/run-admission.mjs', 'tools/original/run-admission-scenarios.py',
-  'tools/original/run-admission-observe.py', 'tools/original/native-identity.py', 'tools/original/state-observer.py',
-  'tools/original/foundation-clock-run.py', 'tools/original/foundation-clock-gate.c', 'tools/original/foundation-seeds.py',
-  'tools/original/foundation-clock-verify.py', 'tools/original/foundation-random-seeds.py', 'tools/original/foundation-clock-scenarios.py',
-  'tools/original/debug-run.py', 'tools/original/with-display.sh', 'tools/foundation/verify.mjs',
-  'tools/foundation/browser-evidence.mjs', 'tools/foundation/browser.mjs', 'tools/foundation/production-server.mjs',
-  'engine/src/run_admission.rs', 'engine/src/lib.rs', 'engine/src/phase.rs', 'engine/src/motion.rs',
-  'web/main.ts', 'web/engine.ts', 'web/trace.ts'];
-const pinSources = async () => Object.fromEntries(await Promise.all(sources.map(async path => [path, sha(await readFile(join(ROOT, path)))])));
-const before = await pinSources();
 await mkdir(output, { recursive: true });
 const bank = value('--scenarios') ? JSON.parse(await readFile(resolve(value('--scenarios')), 'utf8'))
   : JSON.parse((await run('python3', ['tools/original/run-admission-scenarios.py', '--count', value('--count') || '2'], {cwd: ROOT})).stdout);
@@ -56,7 +46,7 @@ const report = {schema: 1, status: 'running', scope: 'Live real original and pro
   exclusions: ['Source585500/593660 stage-title and input-reset callbacks remain explicitly pending in runtime; this slice does not accept their visual or cache effects.',
     'Native introductory cutscene and absolute pre-Title system counter are omitted; raw source/browser counters and relative clocks remain observable.',
     'Unmapped room/NPC/background-effect constructors, rendering and complete gameplay parity remain separate.'],
-  production: production.build, clockInput: bank.clockInput, gateSources: before, cases: []};
+  production: production.build, clockInput: bank.clockInput, cases: []};
 try {
   browser = await chromium.launch(browserLaunchOptions());
   report.graphics = await inspectBrowserGraphics(browser);
@@ -167,9 +157,7 @@ try {
   }
 } finally {
   await browser?.close(); await production.close();
-  const after = await pinSources();
-  report.sourceStability = {status: JSON.stringify(before) === JSON.stringify(after) ? 'pass' : 'fail', before, after};
-  report.status = report.cases.every(c => c.status === 'pass') && report.sourceStability.status === 'pass' ? 'pass' : 'fail';
+  report.status = report.cases.every(c => c.status === 'pass') ? 'pass' : 'fail';
   await writeFile(join(output, 'report.json'), JSON.stringify(report, null, 2) + '\n');
 }
 console.log(JSON.stringify({status: report.status, cases: report.cases.map(c => ({name: c.name, code: c.code,

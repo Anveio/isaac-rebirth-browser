@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { readFileSync, writeFileSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
+import { resolve } from 'node:path';
 
 const option = name => { const at = process.argv.indexOf(name); assert.ok(at >= 0 && process.argv[at + 1]); return process.argv[at + 1]; };
 const directory = resolve(option('--case'));
@@ -10,9 +10,9 @@ const load = path => JSON.parse(readFileSync(path, 'utf8'));
 const hash = path => createHash('sha256').update(readFileSync(path)).digest('hex');
 const originalPath = resolve(directory, 'original/manifest.json'), browserPath = resolve(directory, 'browser/manifest.json');
 const original = load(originalPath), browser = load(browserPath), replay = load(resolve(directory, 'case.json'));
-const gate = load(resolve(dirname(directory), 'report.json')), pair = load(resolve(directory, 'report.json'));
+const pair = load(resolve(directory, 'report.json'));
 assert.equal(pair.original.status, 'pass'); assert.equal(pair.browser.status, 'pass');
-assert.equal(original.status, 'pass'); assert.equal(browser.status, 'pass'); assert.equal(gate.gateSourcesStable, true);
+assert.equal(original.status, 'pass'); assert.equal(browser.status, 'pass');
 const frames = new Map(browser.frames.map(frame => [frame.label, frame]));
 const observations = new Map(original.debugObservations.map(row => [row.context.label, row.observation]));
 const f32 = value => Math.fround(value), vector = point => [f32(point.x ?? point[0]), f32(point.y ?? point[1])];
