@@ -1,0 +1,99 @@
+{
+  "schema": 1,
+  "scope": "Separate narrow source correction to PR89 using unchanged immutable original84 proof. Runtime and required direct comparator are corrected; formatting, TypeScript, comparator syntax, matrix and diff checks pass. No new Rust/build/live acceptance. Historical bodies and failed reports remain unchanged.",
+  "binarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "sourcePins": {
+    ".cache/coordination/combat/function-441c80.txt": "b78d3740dbf3a012360714957e11615bf82401f86c9060e01207faad3d6ed741",
+    ".cache/coordination/combat/function-550a40.txt": "465a4e1f5a235720aa988de144d66d3af2b268937c3552ab8879d2d9a24098a4",
+    ".cache/coordination/combat/function-4f98e0.txt": "5f0ff9192cc17ce58e26064f31776e0c7fc959543c8441dbc9d44cf21d4351fa",
+    ".cache/coordination/boss-effects-research/function-458a70.txt": "5ff3d1d2f62c6f712713862de1bbf13d7aaac40250e74ef396d630a72b6e166f"
+  },
+  "nativeManifest": {
+    "path": ".cache/e2e/level2-boss/fresh-source-stable/paired/00-paired-level2-bll-admission/original/manifest.json.gz",
+    "compressedSha256": "2008005e61a0ba186316cf73193fd496334ca32c51cdc7a6b84211ff2aa83701",
+    "decodedSha256": "2e2b230d71f89d3282f8e8bede9c9eca2aeca523268c7806460ac934627c6b44",
+    "immutableArtifact": "30183f3349db92c079794be8918ed0cae74bfdfd5c3fdc7c12bd2aa5eadd8ba0"
+  },
+  "law": [
+    "Entity.Init441ee8/441eef defaults cached spawnerType1c/spawnerVariant20 to0. 441f1f defaults linked parent498 toNULL.",
+    "Game.Spawn550acd..550ada copies only actual caller cached type/variant1c/20 from r9; it does not link parent498.",
+    "NPC appearance4fbe4a..4fbf0d passes actual NPC as r9 to550a40, copiesrenderoffset458 and height+1 to7f8, then returns before Base; no447fc0 occurs in this caller branch.",
+    "Effect15 Init458a70 has no498 write or direct447fc0 call. Immutable native214 Poofs confirm linkedNULL; ordinary Monstro uses the same generic source caller but has no fresh captured boss proof.",
+    "The actual pre-Base seed/position, ordinary actor sequence admission and newborn fence are retained; only linked-parent semantics and separate cached metadata change."
+  ],
+  "nativeObservationCount": 172,
+  "nativeUniqueSeeds": [
+    858002454,
+    1356788320
+  ],
+  "nativeAllLinkedParentNull": true,
+  "nativeFirstSamples": [
+    {
+      "label": "level2-appearance-17",
+      "seed": 1356788320,
+      "spawnerType": 214,
+      "spawnerVariant": 0,
+      "linkedParent": null,
+      "position": [
+        240.0,
+        280.0
+      ]
+    },
+    {
+      "label": "level2-appearance-17",
+      "seed": 858002454,
+      "spawnerType": 214,
+      "spawnerVariant": 0,
+      "linkedParent": null,
+      "position": [
+        400.0,
+        280.0
+      ]
+    },
+    {
+      "label": "level2-appearance-18",
+      "seed": 1356788320,
+      "spawnerType": 214,
+      "spawnerVariant": 0,
+      "linkedParent": null,
+      "position": [
+        240.0,
+        280.0
+      ]
+    },
+    {
+      "label": "level2-appearance-18",
+      "seed": 858002454,
+      "spawnerType": 214,
+      "spawnerVariant": 0,
+      "linkedParent": null,
+      "position": [
+        400.0,
+        280.0
+      ]
+    }
+  ],
+  "requiredComparison": [
+    "Filter NPC Poofs by actual cached fields independently in native and port.",
+    "Require actual linkedParentNULL in both games; no actor-pointer join is fabricated from cached type/variant.",
+    "Require source cached type/variant, exact seed/subtype/raw7f8/body/ANM and sequence/birth-fence/retirement assertions.",
+    "Every historical/current failure remains required; correcting a comparator cannot establish current live acceptance."
+  ],
+  "mechanicalPrerequisite": "39514bcd28738628e1f9b65a65ca29b1c6dcc4d7",
+  "runtimeCorrection": [
+    "PoofAdmission keeps actual linked parentNone while populating sole common SpriteEffect.spawner_type/variant from actual NPC caller.",
+    "Pre-Base seed/currentposition/zeroV/offset-height and scheduler admission fence stay at their existing recovered callback.",
+    "Direct comparator selects NPC Poofs by cached fields and requires each actual linked pointerNULL, preserving all seed/body/ANM and execution assertions."
+  ],
+  "validation": {
+    "rust": "not run; compiler lease required",
+    "productionBuild": "not run",
+    "freshPairedOriginalBrowser": "not run",
+    "historicalNativeNullParentObservations": 172,
+    "formatting": "pass",
+    "typeScript": "pass",
+    "comparatorSyntax": "pass",
+    "matrix": "pass",
+    "diff": "pass"
+  }
+}
