@@ -76,8 +76,17 @@ def observe(pid,context):
     if pid not in EXECUTABLES:
         executable = Path(f'/proc/{pid}/exe')
         EXECUTABLES[pid] = {'path': str(executable.resolve()), 'sha256': hashlib.sha256(executable.read_bytes()).hexdigest()}
-    result = paired.observe(pid,context)
-    result['death'] = death_fields(pid)
+    death = death_fields(pid)
+    if death['systemState'] == 2:
+        result = paired.observe(pid,context)
+    else:
+        # System dispatches Menu here; Game retains no current gameplay Room.
+        # Observe the live owner rather than dereferencing cleared Room fields.
+        menu = paired.menu.observe(pid,context)
+        result = {'schema':1,'status':menu['status'],'menu':menu,
+                  'gameplay':{'status':'skip','systemState':death['systemState'],
+                              'scope':'Actual System is outside gameplay; no Room read attempted'}}
+    result['death'] = death
     sounds = audio.observe(pid,context)
     result['deathSound'] = {key: sounds.get(key) for key in ('status','memoryWritten','globalSfxVolume')}
     result['deathSound']['slot30'] = next((slot for slot in sounds.get('slots',[]) if slot['id']==30),None)
