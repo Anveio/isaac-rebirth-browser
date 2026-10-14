@@ -184,6 +184,7 @@ export interface Room {
       animation: string; animationClock: number; animationPlaying: boolean; tint: number[]; offsets: number[]} | null;
     actor?: string;
     shooter?: {cooldown: number; delay: number};
+    flipX?: boolean;
     dip: {entityFlags: number; birthGameUpdate: number; currentFriction: number; flipX: boolean;
       tint: number[]; offsets: number[]; renderOffset: {x: number; y: number}; statusCountdown: number} | null;
     level2Fly: {entityFlags: number; birthGameUpdate: number; feedbackVelocity: {x: number; y: number};

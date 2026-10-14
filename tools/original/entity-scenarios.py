@@ -91,6 +91,10 @@ def admitting_slots(generated, entity):
         template = descriptor['template']
         if template['type'] != 1 or (template['width'], template['height']) != (13, 7) or not spawns:
             continue
+        # A dropped co-spawn changes the room's actor order and with it every
+        # (counter + sequence) frame gate, so only fully admitted rooms qualify.
+        if generated['unsupportedNpcs'][index]:
+            continue
         if any(row['category'] == 'entity' and (row['type'], row['variant']) == entity for row in spawns['selectors']):
             yield slot, descriptor
 

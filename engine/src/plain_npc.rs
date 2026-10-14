@@ -189,7 +189,17 @@ fn on_frame(npc: &Npc, world: &NpcWorld, period: u32) -> Result<bool, String> {
     Ok(world.game_counter.wrapping_add(sequence) % period == 0)
 }
 
+/// FireProjectiles49ebc0 modes admitted so far.
+#[derive(Clone, Copy)]
+pub(crate) enum ShotMode {
+    /// Mode0: one shot along the aim.
+    Single,
+    /// Mode1 (49f1c5): two shots at the aim rotated by about ±16 degrees.
+    Pair,
+}
+
 pub(crate) struct ShotParameters {
+    pub mode: ShotMode,
     pub range: f32,
     pub cooldown: i32,
     pub delay: i32,
@@ -198,8 +208,7 @@ pub(crate) struct ShotParameters {
     pub parameter_angle: f32,
 }
 
-/// try_shoot_player4ba430 with a nonpredictive single FireProjectiles(mode0)
-/// shot. Returns whether this update chose to shoot; the shot itself follows
+/// try_shoot_player4ba430 with a nonpredictive FireProjectiles shot. Returns whether this update chose to shoot; the shot itself follows
 /// once the delay counts down to zero.
 pub(crate) fn try_shoot_player(
     npc: &mut Npc,
@@ -246,15 +255,36 @@ pub(crate) fn try_shoot_player(
         } else {
             delta
         };
-        let spawn_seed = random.next_u32();
-        let initial_falling_speed = (random.uniform() - 0.5) * 0.2;
-        births.push(Birth::Shot(Shot {
-            position: npc.position,
-            velocity: direction * shot.speed,
-            spawn_seed,
-            initial_falling_speed,
-            parameter_angle: shot.parameter_angle,
-        }));
+        let aim = direction * shot.speed;
+        let velocities = match shot.mode {
+            ShotMode::Single => vec![aim],
+            ShotMode::Pair => {
+                // 49f1c5: cos 0.961, sin 0.276, spread params+0x24 = 1.0.
+                let (cos, sin, spread) = (0.961_f32, 0.276_f32, 1.0_f32);
+                vec![
+                    WorldVector {
+                        x: aim.x * cos - aim.y * sin * spread,
+                        y: sin * aim.x * spread + cos * aim.y,
+                    },
+                    WorldVector {
+                        x: aim.x * cos + aim.y * sin * spread,
+                        y: cos * aim.y - sin * aim.x * spread,
+                    },
+                ]
+            }
+        };
+        for velocity in velocities {
+            // Each shot draws its spawn seed, then Init its falling speed.
+            let spawn_seed = random.next_u32();
+            let initial_falling_speed = (random.uniform() - 0.5) * 0.2;
+            births.push(Birth::Shot(Shot {
+                position: npc.position,
+                velocity,
+                spawn_seed,
+                initial_falling_speed,
+                parameter_angle: shot.parameter_angle,
+            }));
+        }
     }
     Ok(chosen)
 }

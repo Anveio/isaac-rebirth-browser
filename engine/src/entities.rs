@@ -104,6 +104,16 @@ pub(crate) fn family(kind: u32) -> Option<&'static Family> {
         .find(|family| family.kinds.contains(&kind))
 }
 
+/// Whether a registered family constructs this authored NPC selector. Scenario
+/// discovery uses it to find rooms whose every NPC the port admits.
+pub fn supports_npc_selector(selector: &SpawnSelector) -> bool {
+    let context = SpawnContext {
+        stage: 1,
+        game_update_count: 0,
+    };
+    matches!(spawn(0, selector, &context), Ok(Some(_)))
+}
+
 /// The first family whose constructor admits the authored selector.
 pub(crate) fn spawn(
     id: u32,

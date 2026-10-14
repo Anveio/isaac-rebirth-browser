@@ -22,6 +22,7 @@ mod doors;
 mod effects;
 pub mod enemy_projectiles;
 mod entities;
+pub use entities::supports_npc_selector;
 pub mod familiars;
 pub mod fireplaces;
 pub mod floor;
