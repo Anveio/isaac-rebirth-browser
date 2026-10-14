@@ -298,6 +298,78 @@ fn information_catalog(xml: &str, path: &Path) -> String {
     output
 }
 
+/// Every authored entities2.xml row, in document order. Lookups keep the
+/// first (id, variant) row, matching the native config search.
+fn entity_catalog(xml: &str) -> String {
+    let mut output = String::from("pub const ENTITIES: &[EntityConfig] = &[\n");
+    for tag in xml.split("<entity ").skip(1) {
+        let head = &tag[..tag.find('>').expect("entity tag end")];
+        let number = |field: &str| -> f64 {
+            let value: f64 = attribute(head, field)
+                .unwrap_or_else(|| panic!("entity {field} missing"))
+                .parse()
+                .unwrap_or_else(|_| panic!("invalid entity {field}"));
+            assert!(value.is_finite(), "non-finite authored entity value");
+            value
+        };
+        let integer = |field: &str| -> u32 {
+            attribute(head, field).map_or(0, |value| value.parse().expect("entity integer"))
+        };
+        let points = number("numGridCollisionPoints") as u16;
+        let grid_class = match attribute(head, "gridCollision") {
+            Some("none") => 0,
+            Some("walls") => 3,
+            Some("ground") => 5,
+            None if points > 0 => 5,
+            None => 3,
+            Some(value) => panic!("unsupported authored grid class {value}"),
+        };
+        let gibs = tag.split("<gibs ").nth(1).unwrap_or("");
+        let mut gib_flags = 0;
+        for (name, bit) in [
+            ("blood", 1),
+            ("bone", 2),
+            ("gut", 4),
+            ("eye", 8),
+            ("large", 16),
+            ("poop", 32),
+        ] {
+            if attribute(gibs, name) == Some("1") {
+                gib_flags |= bit;
+            }
+        }
+        let gib_amount: u32 =
+            attribute(gibs, "amount").map_or(0, |value| value.parse().expect("gib amount"));
+        let actor = format!(
+            "gfx/{}",
+            attribute(head, "anm2path").unwrap_or("").to_lowercase()
+        );
+        output.push_str(&format!(
+            "EntityConfig {{ id: {}, variant: {}, subtype: {}, name: {:?}, actor: {actor:?}, portrait: {}, \
+             base_hp: {:?}_f32, stage_hp: {:?}_f32, boss: {}, champion: {}, collision_damage: {:?}_f32, \
+             collision_mass: {:?}_f32, collision_radius: {:?}_f32, friction: {:?}_f32, shadow_size: {:?}_f32, \
+             grid_points: {points}, grid_class: {grid_class}, can_shut_doors: {}, gib_amount: {gib_amount}, gib_flags: {gib_flags} }},\n",
+            integer("id"),
+            integer("variant"),
+            integer("subtype"),
+            attribute(head, "name").unwrap_or(""),
+            attribute(head, "portrait").map_or("None".into(), |value| format!("Some({value})")),
+            number("baseHP"),
+            attribute(head, "stageHP").map_or(0.0, |value| value.parse::<f64>().expect("stageHP")),
+            number("boss") != 0.0,
+            number("champion") != 0.0,
+            number("collisionDamage"),
+            number("collisionMass"),
+            number("collisionRadius"),
+            number("friction"),
+            number("shadowSize"),
+            attribute(head, "shutdoors").unwrap_or("true") == "true",
+        ));
+    }
+    output.push_str("];\n");
+    output
+}
+
 fn main() {
     let manifest = PathBuf::from(std::env::var_os("CARGO_MANIFEST_DIR").unwrap());
     let resources = manifest
@@ -373,27 +445,6 @@ fn main() {
         generated.push_str(&format!(
             "pub const PLAYER_{}_FRAMES: u32 = {frames};\n",
             name.to_uppercase()
-        ));
-    }
-    let keeper_tag = xml
-        .split("<entity ")
-        .find(|tag| attribute(tag, "id") == Some("17") && attribute(tag, "variant") == Some("1"))
-        .expect("admitted secret Keeper config is authored");
-    let keeper_shut_doors = attribute(keeper_tag, "shutdoors").unwrap_or("true") == "true";
-    let keeper_boss = entity_number(&xml, 17, 1, "boss") != 0.0;
-    generated.push_str(&format!("pub const KEEPER_CAN_SHUT_DOORS: bool = {keeper_shut_doors};\npub const KEEPER_BOSS: bool = {keeper_boss};\n"));
-    for field in [
-        "baseHP",
-        "collisionRadius",
-        "collisionMass",
-        "collisionDamage",
-        "friction",
-        "shadowSize",
-    ] {
-        generated.push_str(&format!(
-            "pub const KEEPER_{}: f32 = {:?}_f32;\n",
-            field.to_uppercase(),
-            entity_number(&xml, 17, 1, field)
         ));
     }
     let npc_assets: Value =
@@ -583,83 +634,6 @@ fn main() {
         "pub const EMBER_IDLE_FRAMES: u32 = {};\n",
         ember["FrameNum"].as_u64().unwrap()
     ));
-    for kind in [9, 13, 18, 20, 33, 214, 217, 244] {
-        let tag = xml
-            .split("<entity ")
-            .find(|tag| {
-                attribute(tag, "id").and_then(|value| value.parse::<u32>().ok()) == Some(kind)
-                    && attribute(tag, "variant").and_then(|value| value.parse::<u32>().ok())
-                        == Some(0)
-            })
-            .expect("admitted NPC config is authored");
-        if kind != 9 {
-            let can_shut_doors = attribute(tag, "shutdoors").unwrap_or("true") == "true";
-            let boss = entity_number(&xml, kind, 0, "boss") != 0.0;
-            generated.push_str(&format!("pub const NPC_{kind}_CAN_SHUT_DOORS: bool = {can_shut_doors};\npub const NPC_{kind}_BOSS: bool = {boss};\n"));
-            let points = entity_number(&xml, kind, 0, "numGridCollisionPoints") as u16;
-            let class = match attribute(tag, "gridCollision") {
-                Some("none") => 0,
-                Some("walls") => 3,
-                Some("ground") => 5,
-                None => {
-                    if points > 0 {
-                        5
-                    } else {
-                        3
-                    }
-                }
-                Some(value) => panic!("unsupported authored NPC grid class {value}"),
-            };
-            generated.push_str(&format!(
-                "pub const NPC_{kind}_GRID_CLASS: u32 = {class};\n"
-            ));
-            if matches!(kind, 20 | 214 | 217 | 244) {
-                generated.push_str(&format!(
-                    "pub const NPC_{kind}_GRID_POINTS: u16 = {points};\n"
-                ));
-            }
-        }
-        if kind == 217 {
-            generated.push_str(&format!(
-                "pub const NPC_217_STAGEHP: f32 = {:?}_f32;\n",
-                entity_number(&xml, 217, 0, "stageHP")
-            ));
-            let gibs = tag.split("<gibs ").nth(1).expect("Dip authored gibs");
-            let amount: u32 = attribute(gibs, "amount").unwrap().parse().unwrap();
-            let mut flags = 0;
-            for (name, bit) in [
-                ("blood", 1),
-                ("bone", 2),
-                ("gut", 4),
-                ("eye", 8),
-                ("large", 16),
-                ("poop", 32),
-            ] {
-                if attribute(gibs, name) == Some("1") {
-                    flags |= bit;
-                }
-            }
-            assert_eq!(flags, 32, "ordinary Dip has only real poop gibs");
-            generated.push_str(&format!("pub const NPC_217_GIB_AMOUNT: u32 = {amount};\npub const NPC_217_GIB_FLAGS: u32 = {flags};\n"));
-        }
-        for field in [
-            "baseHP",
-            "collisionRadius",
-            "collisionMass",
-            "collisionDamage",
-            "friction",
-            "shadowSize",
-        ] {
-            if kind == 9 && !matches!(field, "collisionRadius" | "collisionMass") {
-                continue;
-            }
-            generated.push_str(&format!(
-                "pub const NPC_{kind}_{}: f32 = {:?}_f32;\n",
-                field.to_uppercase(),
-                entity_number(&xml, kind, 0, field)
-            ));
-        }
-    }
     for (constant, attribute) in [
         ("LIGHT_CROP_X", "XCrop"),
         ("LIGHT_CROP_Y", "YCrop"),
@@ -692,6 +666,8 @@ fn main() {
     .expect("write authored nightmare definitions");
 
     fs::write(output.join("shadow_catalog.rs"), generated).expect("write shadow catalog");
+    fs::write(output.join("entity_catalog.rs"), entity_catalog(&xml))
+        .expect("write entity catalog");
     fs::write(
         output.join("pickup_catalog.rs"),
         pickup_catalog(&pickups, &animations, &xml),

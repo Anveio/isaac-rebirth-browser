@@ -3,7 +3,7 @@
 //! and extinguishes without entering the ordinary NPC death path.
 use crate::{
     audio::{AudioState, SoundRequest},
-    combat, content,
+    content,
     grid::{Grid, GridDescriptor},
     motion::WorldVector,
     mt::{uint_to_uniform, Mt19937},
@@ -236,44 +236,8 @@ pub(crate) fn from_selector(id: u32, selector: &SpawnSelector) -> Result<Option<
         );
     }
     Ok(Some(Npc {
-        id,
-        kind: 33,
-        variant: 0,
-        subtype: u32::from(selector.subtype),
         spawn_seed,
-        position: selector.position,
-        presented_position: selector.position,
-        velocity: ZERO,
-        target: ZERO,
-        wander_velocity: ZERO,
-        hp: content::NPC_33_BASEHP,
-        max_hp: content::NPC_33_BASEHP,
-        collision_radius: content::NPC_33_COLLISIONRADIUS,
-        collision_mass: content::NPC_33_COLLISIONMASS,
-        collision_damage: content::NPC_33_COLLISIONDAMAGE,
-        base_friction: content::NPC_33_FRICTION,
-        shadow_size: content::NPC_33_SHADOWSIZE,
-        grid_collision_class: content::NPC_33_GRID_CLASS,
-        entity_collision_class: 4,
-        can_shut_doors: content::NPC_33_CAN_SHUT_DOORS,
-        boss: content::NPC_33_BOSS,
-        state: 1,
-        frame_age: 0,
-        animation_frame: 0,
         animation: "Idle".into(),
-        animation_clock: 0.0,
-        animation_playing: false,
-        visible: true,
-        saved_initialized_state: 0,
-        appearance_effect_seed: None,
-        death_effect_seed: None,
-        dead: false,
-        removed: false,
-        damage: combat::DamageQueue::default(),
-        keeper: None,
-        monstro: None,
-        level2_fly: None,
-        dip: None,
         fireplace: Some(FireplaceState {
             anchor: ZERO,
             authored_grid_index: selector.grid_index,
@@ -287,6 +251,7 @@ pub(crate) fn from_selector(id: u32, selector: &SpawnSelector) -> Result<Option<
             last_particle_birth: None,
             loot_birth: None,
         }),
+        ..Npc::authored(id, content::entity(33, 0), selector)
     }))
 }
 

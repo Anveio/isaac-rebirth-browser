@@ -2,7 +2,7 @@
 //! Constructors and actors use the shared stream; no captured state enters AI.
 use crate::{
     audio::{AudioState, SoundRequest},
-    combat, content,
+    content,
     enemy_projectiles::ProjectileBirth,
     grid::{Collider, CollisionGeometry, Grid},
     motion::WorldVector,
@@ -68,44 +68,7 @@ pub fn from_selector(id: u32, selector: &SpawnSelector) -> Result<Option<Npc>, S
         return Err("Monstro admission requires actual bounded authored position and seed".into());
     }
     Ok(Some(Npc {
-        id,
-        kind: 20,
-        variant: 0,
-        subtype: 0,
-        spawn_seed: selector.spawn_seed,
-        position: selector.position,
-        presented_position: selector.position,
-        velocity: ZERO,
-        target: ZERO,
-        wander_velocity: ZERO,
-        hp: content::NPC_20_BASEHP,
-        max_hp: content::NPC_20_BASEHP,
-        collision_radius: content::NPC_20_COLLISIONRADIUS,
-        collision_mass: content::NPC_20_COLLISIONMASS,
-        collision_damage: content::NPC_20_COLLISIONDAMAGE,
-        base_friction: content::NPC_20_FRICTION,
-        shadow_size: content::NPC_20_SHADOWSIZE,
-        grid_collision_class: content::NPC_20_GRID_CLASS,
-        entity_collision_class: 4,
-        can_shut_doors: content::NPC_20_CAN_SHUT_DOORS,
-        boss: content::NPC_20_BOSS,
-        state: 1,
-        frame_age: 0,
-        animation_frame: 0,
         animation: "Walk".into(),
-        animation_clock: 0.0,
-        animation_playing: false,
-        visible: true,
-        saved_initialized_state: 0,
-        appearance_effect_seed: None,
-        death_effect_seed: None,
-        dead: false,
-        removed: false,
-        damage: combat::DamageQueue::default(),
-        keeper: None,
-        fireplace: None,
-        level2_fly: None,
-        dip: None,
         monstro: Some(MonstroState {
             state_frame: 0,
             choice: 0,
@@ -120,6 +83,7 @@ pub fn from_selector(id: u32, selector: &SpawnSelector) -> Result<Option<Npc>, S
             death_explosion: false,
             final_boss_callback_pending: false,
         }),
+        ..Npc::authored(id, content::entity(20, 0), selector)
     }))
 }
 
@@ -397,9 +361,9 @@ fn collide(npc: &mut Npc, grid: &Grid, preview: bool) -> Result<(), String> {
     static COLLIDER: OnceLock<Collider> = OnceLock::new();
     let collider = COLLIDER.get_or_init(|| {
         Collider::new(CollisionGeometry {
-            radius: content::NPC_20_COLLISIONRADIUS,
+            radius: content::entity(20, 0).collision_radius,
             scale: WorldVector { x: 1.0, y: 1.0 },
-            points: content::NPC_20_GRID_POINTS,
+            points: content::entity(20, 0).grid_points,
         })
         .expect("authored Monstro collision geometry")
     });
