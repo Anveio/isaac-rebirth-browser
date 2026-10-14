@@ -169,7 +169,9 @@ try {
             for (const [field, expected] of [['kind', rock.type], ['variant', rock.variant], ['state', rock.state], ['collisionClass', rock.collisionClass], ['spawnSeed', rock.spawnSeed]]) {
               equal(actual[field], expected, 'rock' + rock.index + ':' + field, presentation);
             }
-            equal(grid.cells[rock.index].selector, source.gridSelectors[rock.index], 'rock' + rock.index + ':destruction marker', presentation);
+            assert.ok(Array.isArray(state.room.pathCosts), 'Rock requires actual signed Room path costs');
+            assert.ok(Array.isArray(source.pathCosts), 'Original must expose signed Room path costs');
+            equal(state.room.pathCosts[rock.index], source.pathCosts[rock.index], 'rock' + rock.index + ':destruction marker', presentation);
           }
           const originalBombs = source.entities.filter(entity => entity.type === 4 && !entity.removed);
           const bombs = state.bombs.filter(bomb => bomb.motion.lifetime === 'alive');
