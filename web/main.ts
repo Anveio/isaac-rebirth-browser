@@ -40,7 +40,7 @@ async function boot() {
   };
   audio.music.onBackend((command, audioTime) => dispatch(command, false, audioTime));
   audio.music.consume(currentState.music);
-  const supported = new Set(['Enter', 'Escape', 'Tab', 'Backspace', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyE']);
+  const supported = new Set(['Enter', 'Escape', 'Tab', 'Backspace', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyE', 'Space', 'KeyQ']);
   function keyboard(event: KeyboardEvent, down: boolean) {
     if (down && event.isTrusted) void audio.unlock().catch(console.error);
     if (down && (event.ctrlKey || event.altKey || event.metaKey)) return;

@@ -70,6 +70,8 @@ export const SUITES = [
     about: 'First collectible acquisition' },
   { id: 'stat-cache', entry: 'tools/e2e/items.mjs', args: ['--stat-cache', '--count', '2'],
     about: 'Player stat cache after acquiring Roid Rage and Speed Ball: stats, motion and tear velocity' },
+  { id: 'active-item-use', entry: 'tools/e2e/items.mjs', args: ['--active-use', '--count', '2'],
+    about: 'Acquiring and using an active item (Yum Heart): charge, health, animation and SFX' },
   { id: 'familiars', entry: 'tools/e2e/familiars.mjs', args: ['--count', '2'],
     about: 'Familiar admission, appearance and following' },
   { id: 'npcs', entry: 'tools/e2e/state-pair.mjs',
