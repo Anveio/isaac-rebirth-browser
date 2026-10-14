@@ -79,3 +79,25 @@ original draft, correction commits, source-dump and runtime hashes, and new
 one-job static checks. The original static proof and Fire artifact are intact.
 This correction does not establish live boss acceptance. Bomb/projectile full
 grid timing and the complete admission contact pass remain separate seams.
+
+
+The next source-only leaf replaces the pending final-callback marker with the
+actual pre-Base `4f2d10 -> Room5c8430` producer. It sets the NPC's sole flags318
+owner, decrements Room2490, plays83/queues37 and admits ordinary final Hearts
+through persistent NPC RNG30, shared Direction and real RoomFreePosition. It
+then removes the NPC and continues the same full Base/motion tail. Source
+System+51 is selected profile achievement33, Everything Is Terrible. Fresh
+profiles initialize false and get two sequential Hearts; the second placement
+sees the first admitted pickup. Unlocked profiles get one. Cached1c/20 metadata
+and linked498 NULL are independently represented and observed.
+
+The existing required Monstro CI suite keeps both BLL cases unchanged and adds
+two fixed978/B9112M6H opposite-phase public routes selected before grading.
+Each has962 captures, with full/fast adjacent pairs and fixed cardinal sweeps;
+full concrete NPC admission/retirement, boss death/count/clear and actual final
+Heart body/seed/identity/profile fields are required in both games. Exact0-frame
+birth timing is blocking when observed and otherwise explicitly pending. The
+first expensive unexecuted preparation remains retained. Source predictions
+supply no game state or fitted motion offsets. No compiler, production build or
+fresh paired acceptance is claimed for this leaf. Effect2/42/77 and ordinary
+room rewards, boss pedestal/exit and Stage2 remain explicit dependencies.

@@ -13,6 +13,8 @@ use crate::{
 pub(crate) struct FinalBossAdmission<'a> {
     pub room_type: u32,
     pub normal_difficulty: bool,
+    /// Current persistent profile achievement33: actual System+51.
+    pub everything_is_terrible: bool,
     pub game_update_count: u32,
     pub boss_count: &'a mut u32,
     pub next_pickup: &'a mut u32,
@@ -52,51 +54,56 @@ impl FinalBossAdmission<'_> {
         if !self.normal_difficulty {
             return Ok(()); //5c87c3 difficulty1 bypasses the ordinary heart.
         }
-        // Fresh single-player without trinkets:508fe0(22) is Daemon's Tail,
-        // not collectible22. Its actual trinket owner remains a separate leaf.
-        let seed = monstro.actor_rng.raw();
-        let velocity = crate::room_placement::direction(shared) * 7.0;
-        //5c815c mode0 checks actual admitted Bomb4/Pickup5/Laser6 members.
-        // Player and NPCs do not block this callback. Laser6 has no producer
-        // in the current scope, so no invented position enters the list.
-        let mut occupied: Vec<_> = self
-            .pickups
-            .iter()
-            .filter(|pickup| !pickup.removed)
-            .map(|pickup| pickup.position)
-            .collect();
-        occupied.extend(
-            self.bombs
+        //5c88ab: a fresh profile has achievement33=false and admits two
+        // Hearts. The second actual placement observes the first admitted PU.
+        for _ in 0..if self.everything_is_terrible { 1 } else { 2 } {
+            // Fresh single-player without trinkets:508fe0(22) is Daemon's Tail,
+            // not collectible22. Its actual trinket owner remains a separate leaf.
+            let seed = npc.monstro.as_mut().unwrap().actor_rng.raw();
+            let velocity = crate::room_placement::direction(shared) * 7.0;
+            //5c815c mode0 checks actual admitted Bomb4/Pickup5/Laser6 members.
+            // Player and NPCs do not block this callback. Laser6 has no producer
+            // in the current scope, so no invented position enters the list.
+            let mut occupied: Vec<_> = self
+                .pickups
                 .iter()
-                .filter(|bomb| bomb.motion.lifetime != crate::bombs::BombLifetime::Removed)
-                .map(|bomb| bomb.motion.position),
-        );
-        let position = crate::room_placement::pickup_position(
-            npc.position,
-            0.0,
-            self.grid,
-            self.path_costs,
-            &occupied,
-            shared,
-        )?;
-        let subtype = crate::pickups::regular_subtype(10, 0, seed)?;
-        let id = *self.next_pickup;
-        let next = id.checked_add(1).ok_or("boss heart identity exhausted")?;
-        let mut pickup = Pickup::spawn(id, 10, subtype, position, true)?;
-        pickup.initialize_spawn_seed(seed)?;
-        pickup.velocity = velocity;
-        pickup.birth_game_update = self.game_update_count;
-        //550acd copies cached1c/20. Neither this caller nor Pickup.Init links
-        // Entity.parent498; no immediate Update is invoked by5c889b.
-        pickup.spawner_type = npc.kind;
-        pickup.spawner_variant = npc.variant;
-        let actor = ActorRef {
-            kind: ActorKind::Pickup,
-            id,
-        };
-        self.pickups.push(pickup);
-        self.actor_order.push(actor);
-        *self.next_pickup = next;
-        scheduler.admit(actor)
+                .filter(|pickup| !pickup.removed)
+                .map(|pickup| pickup.position)
+                .collect();
+            occupied.extend(
+                self.bombs
+                    .iter()
+                    .filter(|bomb| bomb.motion.lifetime != crate::bombs::BombLifetime::Removed)
+                    .map(|bomb| bomb.motion.position),
+            );
+            let position = crate::room_placement::pickup_position(
+                npc.position,
+                0.0,
+                self.grid,
+                self.path_costs,
+                &occupied,
+                shared,
+            )?;
+            let subtype = crate::pickups::regular_subtype(10, 0, seed)?;
+            let id = *self.next_pickup;
+            let next = id.checked_add(1).ok_or("boss heart identity exhausted")?;
+            let mut pickup = Pickup::spawn(id, 10, subtype, position, true)?;
+            pickup.initialize_spawn_seed(seed)?;
+            pickup.velocity = velocity;
+            pickup.birth_game_update = self.game_update_count;
+            //550acd copies cached1c/20. Neither this caller nor Pickup.Init links
+            // Entity.parent498; no immediate Update is invoked by5c889b.
+            pickup.spawner_type = npc.kind;
+            pickup.spawner_variant = npc.variant;
+            let actor = ActorRef {
+                kind: ActorKind::Pickup,
+                id,
+            };
+            self.pickups.push(pickup);
+            self.actor_order.push(actor);
+            *self.next_pickup = next;
+            scheduler.admit(actor)?;
+        }
+        Ok(())
     }
 }

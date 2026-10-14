@@ -147,6 +147,9 @@ pub struct Pickup {
     pub spawner_type: u32,
     #[serde(default)]
     pub spawner_variant: u32,
+    /// Common Entity.Init441f1f initializes the linked Parent498 toNULL.
+    #[serde(default)]
+    pub parent: Option<crate::familiars::Parent>,
     pub variant: u32,
     pub subtype: u32,
     pub spritesheet_item_id: u32,
@@ -306,6 +309,7 @@ impl Pickup {
             spawn_seed: 0,
             spawner_type: 0,
             spawner_variant: 0,
+            parent: None,
             variant,
             subtype,
             spritesheet_item_id: subtype,

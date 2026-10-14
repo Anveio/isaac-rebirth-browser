@@ -1,0 +1,163 @@
+{
+  "schema": 1,
+  "status": "Separate compact capture schedule declared before first actual game execution/grade; exact same public inputs and durations",
+  "baseHead": "1d166003e9d73ae7188b29832f483b10e0067ae0",
+  "seedValue": 978,
+  "seed": "B9112M6H",
+  "randomized": false,
+  "selection": "First candidate from independent second source-only rule. Contrived, not OS-random. Keep all earlier attempts and BLL cases.",
+  "inputPhases": [
+    0,
+    1
+  ],
+  "route": [
+    6,
+    8,
+    9,
+    11,
+    0
+  ],
+  "doorSlots": [
+    2,
+    3,
+    3,
+    0
+  ],
+  "fixedMovement": [
+    {
+      "key": "d",
+      "frames": 120,
+      "stage": "start6-to8"
+    },
+    {
+      "key": "d",
+      "frames": 74,
+      "stage": "room8 align to lower doorway column"
+    },
+    {
+      "key": "s",
+      "frames": 120,
+      "stage": "8-to9"
+    },
+    {
+      "key": "s",
+      "frames": 120,
+      "stage": "9-to11"
+    },
+    {
+      "key": "s",
+      "frames": 54,
+      "stage": "room11 align to left doorway row"
+    },
+    {
+      "key": "a",
+      "frames": 120,
+      "stage": "11-to0"
+    }
+  ],
+  "prefixSweep": {
+    "rounds": 2,
+    "directions": [
+      "Up",
+      "Left",
+      "Right",
+      "Down"
+    ],
+    "heldFramesEach": 300,
+    "captureStride": 64,
+    "settleFrames": 80,
+    "clearTailFrames": 32
+  },
+  "bossSweep": {
+    "settleFrames": 240,
+    "directions": [
+      {
+        "key": "Left",
+        "frames": 3000
+      },
+      {
+        "key": "Up",
+        "frames": 300
+      },
+      {
+        "key": "Right",
+        "frames": 300
+      },
+      {
+        "key": "Down",
+        "frames": 300
+      },
+      {
+        "key": "Left",
+        "frames": 300
+      }
+    ],
+    "captureStride": 16,
+    "clearTailFrames": 240
+  },
+  "rules": [
+    "Only keyboard/public presentation actions; same fixed tape in both games.",
+    "No live aim, state injection, observed HP-dependent stop, capture-dependent input, reroll or post-grade fixture replacement.",
+    "No exit movement yet; Grid17 and Stage2 require separate real producer prerequisites.",
+    "Compact schedule is fixed before the first live run; no HP/death/grade/capture-fed adjustment.",
+    "Adjacent capture pairs every16presentations in boss/route tails; prefix cardinal firing sweeps use64pairs to keep each case below1000captures.",
+    "Exact0-frame birth fence is required when actually observed. Otherwise record its narrower coverage pending, without accepting an unobserved initialization order."
+  ],
+  "requiredBothGames": [
+    "prefix authored actors admitted",
+    "all 3 prefix rooms cleared",
+    "boss admission seed2321890733",
+    "actual boss pending damage or HP loss",
+    "real Death clip and dead byte",
+    "boss retirement following observed death",
+    "actual Room bossCount1 to0",
+    "actual RoomClear",
+    "actual final Heart5/10 admission with cached spawner20/0 and linkedParentNULL"
+  ],
+  "limits": [
+    "Source-selected geometry does not guarantee this fixed tape clears either game. Failure is retained.",
+    "No accepted effects2/42/77, reward/pedestal/Grid17/Stage2 implementation or acceptance is claimed.",
+    "Sparse observations may miss the exact final-heart admission/callback boundary. Actual actor admission, damage, death, retirement, final Heart identity/body/RNG/count/RoomClear stay required."
+  ],
+  "sources": {
+    ".cache/coordination/stage-progression-research/boss-route-second-rule.json": "357ef7ca20c7a2974c6060af3ceda3c42a730925f2cc8c969d32e814c0b18f11",
+    ".cache/coordination/stage-progression-research/boss-route-second-selection.json": "3788935b0c231b2433946ee83f4fd48764c195cea6e305d42e287e934343090a",
+    ".cache/coordination/stage-progression-research/boss-route-second-diagnostics.json": "1444b35f877ccc83b4ca283a88ea42cb65a1f9faa7bb6d177198a2dae7ce25b1",
+    ".cache/coordination/stage-progression-research/boss-route-second-floor.json": "60978cd2fbbc0d9ed20c2908dfe2cae7c06285deffe16eb21dc3da6274fa87f6",
+    ".cache/coordination/combat/boss-exit-research/final-boss-heart-source-contract.json": "5a35015b953ed55a4e9a53fa54513b6cfce40ff7391d66cff43a2c1546a4f805",
+    ".cache/coordination/combat/boss-exit-research/final-heart-trinket-correction.json": "82f46aac2f11aaeb7234f2c0afe23b8f7c53a0d2bafda9940c15d731ddf61fcb"
+  },
+  "baseFiles": {
+    "tools/original/monstro-scenarios.py": "2d0088f875a92c4ecbfb4606287d3672148de7b0d48241812b68d18e22254a7b",
+    "tools/e2e/monstro.mjs": "3cb886a534c4aa4e841c75f803f09bf5d78ae076c0bed48e465a18fb82ffce26",
+    "tools/foundation/monstro-state-pair.mjs": "ef26a86d756827b61485d748b5f9b551bff208dad5b5c780516f43c205e8c090",
+    "tools/original/foundation-combat-observe.py": "1d6af5ace3b4decdf06690ecc56ed0685d9dd10ad3a684495a7e14bdd0d25b3a"
+  },
+  "resourceCorrection": {
+    "priorPlanSha256": "a8dd494b58e788998379bc5cc84822e761d6a01f93e91e8dcede366e2126394d",
+    "priorReceiptSha256": "cc55ed2487e2adc06365a5aa7e86c62de2e6088937b8955b7bb1a5e291122489",
+    "priorCombinedPatchSha256": "94f8609d99d0fa2229bdaf5c885693c132bb9e4dbeb5d35e7fcfdd665bfd9e25",
+    "reason": "Root reports about1GiB free; first unexecuted dense tape is not practical. Capture-only correction before any actual-game grade.",
+    "gameProcessesStarted": 0,
+    "liveGrades": 0
+  },
+  "compactCaptureSchedule": {
+    "maxCapturesPerCase": 1000,
+    "fixedCardinalPrefixSweep": {
+      "pairStride": 64,
+      "indices": "capture index1, each multipleof64 and its next presentation, plus declared segment end"
+    },
+    "routeAndTails": {
+      "pairStride": 16,
+      "indices": "capture index1, each multipleof16 and its next presentation, plus declared segment end"
+    },
+    "bossSceneFightAndFinalTail": {
+      "pairStride": 16,
+      "indices": "capture index1, each multipleof16 and its next presentation, plus declared segment end"
+    },
+    "denseDeathTimingWindow": null,
+    "phasePair": "Consecutive presentation pairs expose opposite full/fast boundaries over both fixed input-phase cases.",
+    "exactFinalHeartZeroFrameFence": "Require frame0 when a birth is actually observed at its source birthGameUpdate. If never observed, report this narrower full-history coverage as pending; do not infer an immediate-update proof from sparse captures.",
+    "inputChange": "None; all noncapture key/step actions remain byte-equivalent to the first prepared case."
+  }
+}

@@ -1,23 +1,40 @@
 // Actual public214/20 actors and boss lifecycle. Every paired mismatch remains required.
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { gunzipSync } from 'node:zlib';
 import { dirname, resolve } from 'node:path';
 const option=name=>{const at=process.argv.indexOf(name);assert.ok(at>=0&&process.argv[at+1]);return process.argv[at+1];};
-const directory=resolve(option('--case')),load=path=>JSON.parse(readFileSync(path,'utf8'));
+const directory=resolve(option('--case'));
+// Hash decoded bytes identically whether lossless archived or still raw.
+const artifactBytes=path=>existsSync(path)?readFileSync(path):gunzipSync(readFileSync(path+'.gz'));
+const load=path=>JSON.parse(artifactBytes(path).toString('utf8'));
 const originalPath=resolve(directory,'original/manifest.json'),browserPath=resolve(directory,'browser/manifest.json');
+const checks=[],diagnostics=[];let execution={};
+const gateBinaryIdentity={expected:'724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13',observed:null,status:'not-read'};
+const coverage={native:{finalHeartFullBirthFence:'pending-unobserved'},browser:{finalHeartFullBirthFence:'pending-unobserved'}};
+const run=()=>{
 const original=load(originalPath),browser=load(browserPath),replay=load(resolve(directory,'case.json'));
 const paired=load(resolve(directory,'report.json')),gate=load(resolve(dirname(directory),'report.json'));
+// paired-game.mjs owns sourceBinarySha256; validate observed identity before
+// serializing it as proof. Missing/wrong fields stay explicit failures.
+gateBinaryIdentity.observed=typeof gate.sourceBinarySha256==='string'?gate.sourceBinarySha256:null;
+gateBinaryIdentity.status=gateBinaryIdentity.observed===gateBinaryIdentity.expected?'pass':'fail';
+assert.equal(typeof gate.sourceBinarySha256,'string','Paired gate must expose its actual sourceBinarySha256');
+assert.equal(gate.sourceBinarySha256,gateBinaryIdentity.expected,'Paired gate original binary identity must match the observer');
 assert.equal(paired.original.status,'pass');assert.equal(paired.browser.status,'pass');assert.equal(original.status,'pass');assert.equal(browser.status,'pass');assert.equal(gate.gateSourcesStable,true);
 const f32=value=>{assert.equal(typeof value,'number','Required f32 field must exist');assert.ok(Number.isFinite(value),'Required f32 field must be finite');return Math.fround(value);};
-const vector=p=>[f32(p.x??p[0]),f32(p.y??p[1])],checks=[],diagnostics=[];
+const vector=p=>[f32(p.x??p[0]),f32(p.y??p[1])];
 const check=(rows,label,field,expected,actual)=>{assert.notEqual(expected,undefined,field);assert.notEqual(actual,undefined,field);rows.push({label,field,expected,actual,status:JSON.stringify(expected)===JSON.stringify(actual)?'pass':'fail'});};
 const frames=new Map(browser.frames.map(row=>[row.label,row.state])),observations=new Map(original.debugObservations.map(row=>[row.context.label,row.observation]));
 const required=replay.monstroRequired;assert.ok(Array.isArray(required)&&required.length);
-const execution=Object.fromEntries(['native','browser'].map(name=>[name,Object.fromEntries(required.map(key=>[key,false]))]));
+const bossClear=replay.bossClear;
+if(bossClear){assert.equal(replay.seedValue,978);assert.equal(replay.seed,'B9112M6H');assert.equal(replay.scenario.randomized,false);assert.equal(bossClear.randomized,false);assert.equal(bossClear.firingBudgetFixedBeforeGrading,true);}
+execution=Object.fromEntries(['native','browser'].map(name=>[name,Object.fromEntries(required.map(key=>[key,false]))]));
 const prior={native:null,browser:null};
 const queued={native:new Map(),browser:new Map()},dead={native:new Set(),browser:new Set()};let started=false;
 const previousPoofs={native:new Map(),browser:new Map()};
+const bossDeaths={native:new Set(),browser:new Set()},previousHearts={native:new Map(),browser:new Map()};
 assert.ok(replay.pairedTape.some(action=>action.type==='capture'&&action.label==='gameplay-start'));
 for(const action of replay.pairedTape){
   if(action.type!=='capture')continue;
@@ -25,10 +42,26 @@ for(const action of replay.pairedTape){
   assert.ok(observation&&actual,`Missing declared capture${label}`);assert.equal(observation.status,'pass');
   if(label==='gameplay-start')started=true;
   if(actual.screen!=='playing'){assert.equal(started,false,'Post-start captures may not skip gameplay');assert.equal(observation.gameplay.status,'skip');continue;}
-  const source=observation.gameplay;assert.equal(source.status,'pass');assert.equal(source.memoryWritten,false);
+  const source=observation.gameplay;assert.equal(source.status,'pass');assert.equal(source.memoryWritten,false);assert.equal(source.nativeBinarySha256,'724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13');
   const phase=source.nativePhase.systemIterations%2;
+  // Preserve the historical214/20 contract independently of the new route.
   const natives=source.entities.filter(actor=>[214,20].includes(actor.type)&&actor.variant===0&&actor.subtype===0);
   const port=actual.room.npcs.filter(actor=>[214,20].includes(actor.kind)&&!actor.removed);
+  // The observer sets npcState only after checking the actual NPC vtable.
+  // Full concrete manager membership, not a type filter, owns new occupancy.
+  const nativeConcreteNpcs=source.entities.filter(actor=>Object.hasOwn(actor,'npcState'));
+  const portConcreteNpcs=actual.room.npcs.filter(actor=>!actor.removed);
+  const concreteWorlds={
+    native:nativeConcreteNpcs.map(a=>({type:a.type,variant:a.variant,subtype:a.subtype,seed:a.spawnSeed,dead:a.removed,animation:a.animation,canShutDoors:a.canShutDoors,boss:a.boss})),
+    browser:portConcreteNpcs.map(a=>({type:a.kind,variant:a.variant,subtype:a.subtype,seed:a.spawnSeed,dead:a.dead,animation:a.animation,canShutDoors:a.canShutDoors,boss:a.boss}))
+  };
+  const concreteIdentity=a=>[a.type,a.variant,a.subtype,a.seed];
+  const eligible=a=>a.canShutDoors||a.boss;
+  if(bossClear){
+    for(const rows of Object.values(concreteWorlds))for(const npc of rows){assert.equal(typeof npc.canShutDoors,'boolean');assert.equal(typeof npc.boss,'boolean');assert.ok(Number.isInteger(npc.seed)&&npc.seed>0);}
+    check(checks,label,'contrivedNpc.fullConcreteSeedOrder',concreteWorlds.native.map(concreteIdentity),concreteWorlds.browser.map(concreteIdentity));
+    check(checks,label,'contrivedNpc.eligibleSeedOrder',concreteWorlds.native.filter(eligible).map(concreteIdentity),concreteWorlds.browser.filter(eligible).map(concreteIdentity));
+  }
   check(checks,label,'npc.authoredSeedOrder',natives.map(a=>[a.type,a.spawnSeed]),port.map(a=>[a.kind,a.spawnSeed]));
   check(checks,label,'room.identity',source.room.descriptorIndex,actual.currentRoom);
   check(checks,label,'system.phase',phase,actual.systemClock.systemCounter%2);
@@ -66,9 +99,14 @@ for(const action of replay.pairedTape){
     if(native.type===214){
       assert.ok(npc.level2Fly);
       for(const[field,expected,observed]of[['feedback',vector(native.npcGridFeedbackVelocity),vector(npc.level2Fly.feedbackVelocity)],['gridContact',native.collidedWithGrid,npc.level2Fly.gridContact],['gridNormal',vector(native.gridCollisionNormal),vector(npc.level2Fly.gridNormal)],['previousGridVelocity',vector(native.preGridCollisionVelocity),vector(npc.level2Fly.previousGridVelocity)]])check(checks,label,`npc${native.spawnSeed}.${field}`,expected,observed);
-    }else{
+    }else if(native.type===20){
       assert.ok(npc.monstro);check(checks,label,`boss${native.spawnSeed}.stateFrame`,native.npcStateFrame,npc.monstro.stateFrame);
       check(checks,label,`boss${native.spawnSeed}.choice`,native.npcAux2,npc.monstro.choice);
+      if(bossClear){
+        assert.ok(npc.monstro.actorRng,'Final callback must own the actual persistent Entity RNG30');
+        check(checks,label,`boss${native.spawnSeed}.actorRngState`,native.actorRngState,npc.monstro.actorRng.state);
+        check(checks,label,`boss${native.spawnSeed}.entityFlags`,native.entityFlags,npc.monstro.entityFlags);
+      }
     }
   }
   const nativeShots=source.entities.filter(a=>a.type===9&&a.variant===0);
@@ -120,6 +158,60 @@ for(const action of replay.pairedTape){
     }
     previousPoofs[name]=new Map(effects.map(effect=>[effect.seed,{...effect,counter,system}]));
   }
+  if(bossClear){
+    const achievement33=actual.profiles[actual.profile-1]?.achievements[33];
+    assert.equal(typeof source.everythingIsTerrible,'boolean','Actual System51 profile flag must be observed');
+    assert.equal(typeof achievement33,'boolean','Port must expose the sole selected profile achievement33');
+    check(checks,label,'profile.achievement33',source.everythingIsTerrible,achievement33);
+    check(checks,label,'native.profile.freshAchievement33',false,source.everythingIsTerrible);
+    check(checks,label,'browser.profile.freshAchievement33',false,achievement33);
+    assert.ok(Number.isInteger(source.room.bossCount)&&Number.isInteger(actual.room.bossCount),'Room2490 must be observed separately from NPC presence');
+    check(checks,label,'room.bossCount',source.room.bossCount,actual.room.bossCount);
+    const nativeHearts=source.entities.filter(a=>a.type===5&&a.variant===10&&a.spawnerType===20&&a.spawnerVariant===0);
+    const portHearts=actual.room.pickups.filter(a=>a.variant===10&&!a.removed&&a.spawnerType===20&&a.spawnerVariant===0);
+    check(checks,label,'bossFinalHeart.seedOrder',nativeHearts.map(a=>a.spawnSeed),portHearts.map(a=>a.spawnSeed));
+    for(const heart of nativeHearts){
+      const pickup=portHearts.find(a=>a.spawnSeed===heart.spawnSeed);if(!pickup)continue;
+      assert.ok(Object.hasOwn(heart,'pickupParent')&&Object.hasOwn(pickup,'parent'),'Cached caller metadata may not stand in for actual Parent498');
+      const identity=actual.actorScheduler.identities.find(row=>row.actor.kind==='pickup'&&row.actor.id===pickup.id);
+      assert.ok(identity,'Final Heart must be admitted through the actual mixed actor scheduler');
+      for(const[field,expected,observed]of[
+        ['subtype',heart.subtype,pickup.subtype],['cachedSpawner',[heart.spawnerType,heart.spawnerVariant],[pickup.spawnerType,pickup.spawnerVariant]],
+        ['sequenceId',heart.sequenceId,identity.sequenceId],['animation',heart.animation,pickup.animation],['frame',f32(heart.animationFrame),f32(pickup.animationFrame)],['playing',heart.animationPlaying,pickup.animationPlaying],
+        ['position',vector(heart.position),vector(phase===0?pickup.presentedPosition:pickup.position)],['velocity',vector(heart.velocity),vector(pickup.velocity)],
+        ['radius',f32(heart.collisionRadius),f32(pickup.collisionRadius)],['mass',f32(heart.collisionMass),f32(pickup.collisionMass)]
+      ])check(checks,label,`bossFinalHeart${heart.spawnSeed}.${field}`,expected,observed);
+      check(checks,label,`bossFinalHeart${heart.spawnSeed}.nativeLinkedParent`,null,heart.pickupParent);
+      check(checks,label,`bossFinalHeart${heart.spawnSeed}.browserLinkedParent`,null,pickup.parent);
+    }
+    for(const[name,hearts,counter,system,bossCount,worldNpcs,roomClear,room]of[
+      ['native',nativeHearts.map(a=>({seed:a.spawnSeed,subtype:a.subtype,born:a.birthGameUpdate,frame:f32(a.animationFrame),animation:a.animation,playing:a.animationPlaying,position:vector(a.position),velocity:vector(a.velocity),parent:a.pickupParent})),source.nativePhase.fullGameUpdates,source.nativePhase.systemIterations,source.room.bossCount,nativeConcreteNpcs,source.room.combatClear,source.room.descriptorIndex],
+      ['browser',portHearts.map(a=>({seed:a.spawnSeed,subtype:a.subtype,born:a.birthGameUpdate,frame:f32(a.animationFrame),animation:a.animation,playing:a.animationPlaying,position:vector(phase===0?a.presentedPosition:a.position),velocity:vector(a.velocity),parent:a.parent})),actual.gameUpdateCount,actual.systemClock.systemCounter,actual.room.bossCount,portConcreteNpcs,actual.room.combatClear,actual.currentRoom]
+    ]){
+      if(room===0&&worldNpcs.some(a=>(a.type??a.kind)===20&&a.spawnSeed===bossClear.bossSeed)){
+        check(checks,label,`${name}.contrivedBoss.admittedCount`,1,bossCount);
+        execution[name]['boss-count-admitted']=bossCount===1;
+      }
+      for(const heart of hearts){
+        assert.ok(Number.isInteger(heart.born)&&Number.isInteger(heart.seed)&&heart.seed>0);
+        execution[name]['boss-final-heart']=room===0&&heart.parent===null&&[1,2,3,4,5,6].includes(heart.subtype);
+        const before=previousHearts[name].get(heart.seed);
+        if(!before&&heart.born===counter){
+          check(checks,label,`${name}.bossFinalHeart${heart.seed}.fullBirthFence`,0,heart.frame);
+          coverage[name].finalHeartFullBirthFence=heart.frame===0?'pass-observed':'fail-observed';
+        }
+        if(before&&system===before.system+1&&counter===before.counter){
+          for(const field of ['frame','animation','playing','velocity'])check(checks,label,`${name}.bossFinalHeart${heart.seed}.fastFreeze.${field}`,before[field],heart[field]);
+        }
+      }
+      previousHearts[name]=new Map(hearts.map(heart=>[heart.seed,{...heart,counter,system}]));
+      if(room===0&&bossDeaths[name].has(bossClear.bossSeed)&&!worldNpcs.some(a=>(a.type??a.kind)===20&&a.spawnSeed===bossClear.bossSeed)){
+        execution[name]['boss-retirement']=true;
+        execution[name]['boss-count-zero']=bossCount===0;
+        execution[name]['boss-room-clear']=roomClear;
+      }
+    }
+  }
   const worlds={native:{counter:source.nativePhase.fullGameUpdates,system:source.nativePhase.systemIterations,room:source.room.descriptorIndex,clear:source.room.combatClear,clearCountdown:source.room.combatClearCountdown,transition:source.roomTransition.state,
     scene:source.roomTransition.bossIntroduction&&source.roomTransition.state===2,cleanup:source.roomTransition.bossIntroduction&&source.roomTransition.state===3,
     npcs:natives.map(a=>({seed:a.spawnSeed,type:a.type,hp:f32(a.hp),pending:f32(a.pendingDamage),flags:a.pendingFlags,dead:a.removed,state:a.npcState,age:a.npcFrameAge,frame:f32(a.animationFrame),animation:a.animation,playing:a.animationPlaying,position:vector(a.position),velocity:vector(a.velocity),feedback:a.type===214?vector(a.npcGridFeedbackVelocity):null,gridContact:a.collidedWithGrid,gridNormal:vector(a.gridCollisionNormal)})),shots:nativeShots},
@@ -156,6 +248,27 @@ for(const action of replay.pairedTape){
     if(bosses.some(a=>![1,3].includes(a.state)))execution[name]['boss-ai']=true;
     if(world.room===0&&world.shots.length)execution[name]['boss-projectiles']=true;
     if(bosses.some(a=>a.pending>0||a.hp<250))execution[name]['boss-damage']=true;
+    if(bossClear){
+      const concrete=concreteWorlds[name],eligibleActors=concrete.filter(eligible);
+      for(const [room,seeds] of Object.entries(bossClear.prefixActors)){
+        if(world.room!==Number(room))continue;
+        const expected=seeds.map(([kind,seed])=>[kind,0,0,seed]);
+        const admitted=JSON.stringify(eligibleActors.map(concreteIdentity))===JSON.stringify(expected);
+        if(admitted)execution[name][`contrived-prefix-${room}-admission`]=true;
+        // Previously observed exact cohort followed by actual full-manager
+        // absence proves retirement; an empty214/20 subset cannot prove it.
+        if(execution[name][`contrived-prefix-${room}-admission`]&&concrete.length===0){
+          execution[name][`contrived-prefix-${room}-retirement`]=true;
+          if(world.clear)execution[name][`contrived-prefix-${room}-clear`]=true;
+        }
+      }
+      const concreteBosses=concrete.filter(a=>a.type===20);
+      if(concreteBosses.length)check(checks,label,`${name}.contrivedBoss.authoredIdentity`,[[20,0,0,bossClear.bossSeed]],concreteBosses.map(concreteIdentity));
+      for(const boss of concreteBosses){
+        if(boss.dead){bossDeaths[name].add(boss.seed);execution[name]['boss-death']=true;}
+        if(boss.dead&&boss.animation==='Death')execution[name]['boss-death-animation']=true;
+      }
+    }
     if(before&&before.room===world.room){
       for(const npc of world.npcs){const old=before.npcs.find(a=>a.seed===npc.seed);if(!old)continue;
         if(world.system===before.system+1&&world.counter===before.counter&&!world.transition&&!before.transition){
@@ -169,6 +282,15 @@ for(const action of replay.pairedTape){
 }
 for(const name of ['native','browser'])for(const requiredExecution of required)check(checks,'execution',`${name}.${requiredExecution}`,true,execution[name][requiredExecution]);
 const status=checks.every(row=>row.status==='pass')?'pass':'fail';
-const hash=path=>createHash('sha256').update(readFileSync(path)).digest('hex');
-const report={schema:1,status,execution,checks,diagnostics,sources:{originalManifest:hash(originalPath),browserManifest:hash(browserPath),comparator:hash('tools/foundation/monstro-state-pair.mjs')},scope:'All declared actual actor/body/state/HP/ordered queue/feedback/scene/projectile/Poof fields and executions are required. Exact shared-stream trajectories remain visible failures; absolute causal loader counter is named unaccepted. Blood background-paint/return acceptance needs an actual native render submission boundary; boss final blood/reward/trapdoor/stage exit remain required separate follow-ups.'};
+const hash=path=>createHash('sha256').update(artifactBytes(path)).digest('hex');
+const report={schema:1,status,execution,coverage,gateBinaryIdentity,checks,diagnostics,sources:{originalManifest:hash(originalPath),browserManifest:hash(browserPath),case:hash(resolve(directory,'case.json')),pairedGate:gate.gateSources,comparator:hash('tools/foundation/monstro-state-pair.mjs'),originalBinarySha256:gateBinaryIdentity.observed},scope:'All declared actual actor/body/state/HP/ordered queue/feedback/scene/projectile/Poof fields and executions are required. Exact shared-stream trajectories remain visible failures; absolute causal loader counter is named unaccepted. Blood background-paint/return acceptance needs an actual native render submission boundary; The source-selected contrived978 cases require real prefix clear, boss death/retirement, persistent RNG30, Room2490 zero, RoomClear and real final Heart seed/body/sequence and the fence when its admission is actually observed. Sparse compact captures leave unobserved exact0-frame admission coverage explicitly pending; they do not prove initialization order. Actual death effects2/42/77, rewards/Grid17/Stage2 remain mandatory separate dependencies. Final NPC flags and pre-Base callback position after manager retirement cannot be inferred from a removed actor; no event marker substitutes for those source obligations.'};
 writeFileSync(resolve(option('--output')),JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify({status,fields:checks.length,failures:checks.filter(row=>row.status==='fail').length,execution}));process.exitCode=status==='pass'?0:1;
+};
+try{run();}catch(error){
+  const digest=path=>{try{return createHash('sha256').update(artifactBytes(path)).digest('hex');}catch{return null;}};
+  const report={schema:1,status:'fail',error:String(error),execution,coverage,gateBinaryIdentity,checks,diagnostics,
+    sources:{originalManifest:digest(originalPath),browserManifest:digest(browserPath),case:digest(resolve(directory,'case.json')),comparator:digest('tools/foundation/monstro-state-pair.mjs'),originalBinarySha256:gateBinaryIdentity.observed},
+    scope:'Required comparison aborted. Keep the partial checks and all raw/lossless archived captures; no complete acceptance.'};
+  writeFileSync(resolve(option('--output')),JSON.stringify(report,null,2)+'\n');
+  console.log(JSON.stringify({status:'fail',error:report.error,fields:checks.length,failures:checks.filter(row=>row.status==='fail').length,execution}));process.exitCode=1;
+}

@@ -114,6 +114,14 @@ def observe(pid, context):
                     raise ValueError('Unexpected collision sample list')
                 samples = read(begin, sample_count * 8) if sample_count else b''
                 result['gridCollisionSamples'] = [list(struct.unpack_from('<ff', samples, i * 8)) for i in range(sample_count)]
+                if result['type'] == 5:
+                    # Game.Spawn caches caller metadata at1c/20 independently
+                    # of the actual linked Parent498. Never infer one from the other.
+                    result['spawnerType'], result['spawnerVariant'] = struct.unpack_from('<II', raw, 0x1c)
+                    parent = struct.unpack_from('<Q', raw, 0x498)[0]
+                    result['pickupParent'] = ({'type': u32(parent + 0x10), 'variant': u32(parent + 0x14),
+                        'subtype': u32(parent + 0x18), 'spawnSeed': u32(parent + 0x7d0),
+                        'sequenceId': u32(parent + 8)} if parent else None)
                 if result['type'] == 4:
                     more = read(address + 0x7d4, 0x14)
                     result['bombFuseUpdatesRemaining'] = struct.unpack_from('<i', more, 0)[0]
@@ -162,6 +170,7 @@ def observe(pid, context):
             game = u64(0x8ecd30)
             system = u64(0x8ed560)
             report['nativePhase'] = {'systemIterations': u32(system + 0x2efa0), 'fullGameUpdates': u32(game + 0xce9f4)}
+            report['everythingIsTerrible'] = bool(read(system + 0x51, 1)[0])
             room = u64(game + 0x8180)
             raw = read(room, 0x30)
             width, height = struct.unpack_from('<II', raw, 0x14)

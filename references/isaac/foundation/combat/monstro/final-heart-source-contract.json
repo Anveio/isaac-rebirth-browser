@@ -1,0 +1,288 @@
+{
+  "schema": 1,
+  "scope": "Recovered next concrete ordinary Monstro20/0/0 Stage1 final callback. Source only; no fresh runtime/build/original/browser acceptance. Historical BLL/PR84/87/89 capture failures unchanged.",
+  "nativeBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "functions": {
+    "entityInit": {
+      "path": ".cache/coordination/combat/function-441c80.txt",
+      "sha256": "b78d3740dbf3a012360714957e11615bf82401f86c9060e01207faad3d6ed741"
+    },
+    "gameFactory": {
+      "path": ".cache/coordination/combat/function-550a40.txt",
+      "sha256": "465a4e1f5a235720aa988de144d66d3af2b268937c3552ab8879d2d9a24098a4"
+    },
+    "npcRetire": {
+      "path": ".cache/coordination/combat/monstro-research/function-4f2d10.txt",
+      "sha256": "96587d6daaf34c6b96b63cbb01bdda13aa48583809f6814a255ad1c4bd784187"
+    },
+    "bossFinal": {
+      "path": ".cache/coordination/combat/boss-exit-research/function-5c8430.txt",
+      "sha256": "aeda4dc3bc084b7bf7a64a2c56318e3d351912141d12e023d8e4c7e16528fbbc"
+    },
+    "placement": {
+      "path": ".cache/coordination/combat/roundworm-research/function-5c7f30.txt",
+      "sha256": "4e3561ffc5b90c6f15bf7e31f4223b5cabaeca1d5d9f40baf8cbdf921a2732a2"
+    }
+  },
+  "callback": {
+    "caller": "4fb885 invokes4f2d10 after IsFinished(empty) with active31e true and BEFORE common Base447190/motion",
+    "retire": "4f2d10 boss103d invokes Room5c8430 at4f2d61 then tailcalls actual v+48Remove; callback must not return from ordinary Base/motion tail",
+    "flags": "5c849d OR0x100000 into sole MonstroState.entity_flags (actual Entity318)",
+    "count": "5c84c1..5c84ca actual Room2490 decrement; return until final boss. Replace current recomputation from live NPCs with actual callback ownership."
+  },
+  "ordinaryFinalHeart": {
+    "scope": "Fresh normal Isaac, ordinary uncolored Monstro20/0/0 in actualRoomtype5, difficulty0, no special collectible/trinket branches",
+    "music": "5c8ad0..5c8b00 invokes actual play83 then queue37. Reuse Root Death MusicState.play/queue; no Shared sampling.",
+    "entityRng": "Entity441ca5..441cbf seeds actual7c0 RNG30=[4,3,17] twice using spawn seed; no initial output. New Monstro owner starts there, not reconstructed after AI.",
+    "drawOrder": [
+      "Persistent NPC.Rng30.raw at5c8806",
+      "SharedDirection at5c8819, f32 velocity*7",
+      "Room5c7f30(anchor=currentpreBaseNPC.P,radius0,avoidNPCfalse) at5c885d; real retry direction executes even empty room",
+      "Game.Spawn5/10/subtype0 at5c889b with actualseed,position,velocity and NPC metadata parent",
+      "Natural Heart Init500150 through existing Heart10 local35 subtype owner; zero shared subtype draws",
+      "Room5c6940 normal actor identity/admission; full manager birth fence retained, no immediate Update from this caller"
+    ],
+    "parent": "550acd..550ada copies parent type/variant to actual1c/20. EntityInit441ee8/441eef defaults both0. This caller does not store a live parent pointer.",
+    "missingModifier": "Trinket22/Daemon's Tail508fe0, not collectible22: actual Player+2b34 trinketRNG35 child22 bounded5 may suppress each applicable heart; current no-trinket scope excludes this separately owned consumer. Champions/specialbosses/otherroom types excluded without fabricateddrops.",
+    "profileOwner": "Current State.profiles[profile-1].achievements[33] is the sole actual persistent System+51 owner; fresh defaultfalse. Actual5c88a0..5c88ab creates a second heart when false. No fabricated interpolation/difficulty/System field.",
+    "birthCount": "Fresh profilefalse: TWO sequential real admissions. Unlockedprofiletrue: one. Every iteration does NPC persistentRng30.raw\u2192SharedDirection\u00d77\u2192actual mode0 FreePosition\u2192Heart10/0 truefactory; second placement sees first realtype5 actor."
+  },
+  "dependencies": [
+    "Heart10/0 constructor + concrete health collection + current Death player_can_collect eligibility",
+    "PR99 signed all448 RoomCosts reset/producer",
+    "Root Death actualMusic play/queue",
+    "Effect5/2/42/77 actual boss-death factory/initialUpdate producers; incomplete death effects remain mandatory failures"
+  ],
+  "plannedRequiredE2e": [
+    "Retained first random BLL route and all failure reports",
+    "Independent source-selected978/B9112M6H second contrived fixture with 3RoundWorm/214/3AttackFly prefix",
+    "Actual native/browser lethal queue\u2192Death78\u2192final callback beforebodymotion",
+    "Exact boss count/Entityflags/remaining NPC/actual local30/Shared MT successor/pickup identityseed/P/V",
+    "Natural Heart health eligibility/collection separate retained sixcasebank",
+    "Actual clear\u2192reward\u2192Grid17\u2192stage request/Nightmare/Stage2, never synthetic exit"
+  ],
+  "draft": {
+    "path": ".cache/coordination/combat/boss-exit-research/final-boss-heart-draft.rs",
+    "sha256": "23240e1e84934364c44b3a43bfec006a28608699d081faddd413bfe8ec148385",
+    "status": "Historical ignored first single-heart draft retained; its whole-callback claim is superseded by actual achievement33 second-heart source branch."
+  },
+  "status": "Concrete source-only actual final-heart caller/gate; TS/fmt/syntax pass, Rust/full production/fresh paired acceptance pending.",
+  "retainedInitialContractSha256": "5a35015b953ed55a4e9a53fa54513b6cfce40ff7391d66cff43a2c1546a4f805",
+  "retainedInitialSourceRuntime": "2b324e6e90d0593ac407bcb0ed06363934e85adf",
+  "system51Proof": {
+    "sha256": "fdccbdcc0a6cb076f8aa30f71adc55e15dd4cc43712d1b38582b77d1d3dfe9da",
+    "contract": {
+      "schema": 1,
+      "scope": "Literal static source only. No native/browser execution, memory captures, compiler run, RNG fixture draw, tracked edit or runtime acceptance.",
+      "binarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+      "owner": {
+        "singletonPointer": "0x8ed560",
+        "persistentProfileMemberOffset": "0x10",
+        "achievementArrayMemberOffset": "0x20",
+        "achievementId": 33,
+        "actualSystemMemberOffset": "0x51",
+        "equation": "0x10 + 0x20 + 33 = 0x51",
+        "portExistingSoleOwner": "State.profiles[profile - 1].achievements[33]"
+      },
+      "meaning": {
+        "name": "Everything is Terrible",
+        "xmlPath": "references/isaac/rebirth/resources/achievements.xml",
+        "xmlSha256": "e88c04f1272d6b759e8934388f01d6ccb036ebca68a7c71679b9226f1783e172",
+        "xmlLiteral": "<achievement id=\"33\" text='Everything is Terrible!!! The game just got harder!' gfx=\"Achievement_EverythingIsTerrible.png\" />",
+        "xmlPrecedingComment": "beat Mom's Heart 5 times",
+        "independentNativeRead": "5a8882 reads actualSystem singleton;5a8a65 tests actualSystem+0x51;5a8a69 selects literal resources/gfx/ui/main menu/SaveDrawings/04_EverythingIsTerrible.png at0x677c78."
+      },
+      "freshDefault": {
+        "value": 0,
+        "allocationAndConstructor": "57b3a0 allocates System0x2f620;57b3b0 calls595de0;57b3b8 stores it to singleton8ed560.",
+        "embeddedConstructor": "595de2 forms System+0x10;595dfd calls5bc640.5bc650 sets reset arg1;5bc65d tails5bc520.",
+        "actualResetWrite": "5bc540 writes zero to PersistentProfile+rax+0x20 for rax=0..0xb2;loop upper comparison5bc549=0xb3.",
+        "qualification": "This is a newly initialized profile. Existing valid persistent data or Steam achievement synchronization may override it. No actual captured profile byte was read or fitted."
+      },
+      "recoveredWriterFamilies": [
+        {
+          "kind": "constructor/profile reset/failure reset",
+          "function": "0x5bc520",
+          "write": "0x5bc540",
+          "value": 0,
+          "callers": "595de0\u21925bc640 tail;594e00 profile-slot reset;5bd376 reset;5be497/5be4cc load-open/deserialize failure reset;5be5c4/5be5e8 secondary-load failure reset."
+        },
+        {
+          "kind": "normal achievement unlock",
+          "function": "0x5bd5e0",
+          "write": "0x5bd618",
+          "expression": "PersistentProfile+0x20+signed ID = 1",
+          "guards": "5bd5f5 profile+1 must be zero;ID must be nonzero;target must currently be zero.",
+          "id33Trigger": "5be6a0 updates persistent stat at+0xd4+4*statIndex;MomHeart statIndex1 is+0xd8.5be9fb compares+0xd8 against4, unsignedjbe5bea02 skips;5bea08 passes ID0x21;5bea10 calls5bd5e0.Thus count>=5 unlocks33, matching authored XML."
+        },
+        {
+          "kind": "persistent profile deserialize",
+          "function": "0x5bd8e0",
+          "write": "0x5bdf6c",
+          "expression": "setg PersistentProfile+0x20+entryIndex from signed serialized byte>0",
+          "guards": "5bdeef..5bdf20 bound achievement count to0xb3;5bdf40..5bdf89 reads indexed byte entries.",
+          "callers": [
+            "0x5be430\u21925be4b9",
+            "0x5be500\u21925be585"
+          ]
+        },
+        {
+          "kind": "Steam achievements synchronization",
+          "function": "0x5bd460",
+          "write": "0x5bd4c3",
+          "expression": "PersistentProfile+0x21+(achievementID-1)=1 for reported unlocked IDs1..178",
+          "guards": "SteamUserStats import must be available;vtable+0x30 GetAchievement-style call receives decimal ID string and bool output;both return and output must be nonzero.",
+          "importProof": "PLT408dd0 jmpGOT8e63a0;ELF relocation symbol SteamUserStats.",
+          "caller": "5944f1 formsSystem+0x10;5944f8 calls5bd460 on branch where earlier value+0x38 equals7."
+        }
+      ],
+      "writerSearchQualification": "Recovered literal/indexed profile writer families are pinned. No exhaustive proof excluding every generic bulk object copy or arbitrary external memory modification is claimed.",
+      "bossCallback": {
+        "firstHeart": "Source5c889b completes the first true GameSpawn5/10/0 before the flag test.",
+        "flagBranch": "5c88a0 loads actual singleton8ed560;5c88a7 cmp byte actualSystem+0x51,0;5c88ab je5c9029.",
+        "zero": "Prior branch/modifier gates permitting Heart admission, zero causes a second natural Heart. This is applicable to the fresh supported PC profile and is not a platform or interpolation branch.",
+        "nonzero": "Nonzero skips directly to5c88b1 champion/special tail after the first natural Heart.",
+        "secondOrder": [
+          "5c9065 persistentNPC Rng30.raw",
+          "5c9078 SharedDirection",
+          "5c9096 velocity=direction*7",
+          "5c90bc RoomFreePosition(pre-Base NPC P,radius0,avoidNPC=false)",
+          "5c90fa true GameSpawn5/10/0 with explicit local seed,NPC cached spawner context",
+          "5c90ff jumps5c88b1"
+        ],
+        "occupancy": "Second RoomFreePosition runs after first pickup admission. Actual type5 pickups remain mandatory occupants when avoidNPC=false; it must see the first Heart and preserve any actual retry SharedDirection draws. No same-position duplicated birth or guessed RNG padding.",
+        "execution": "Static applicability only; no original final boss Heart execution or WASM comparison has been measured by this task."
+      },
+      "excludedNearMatch": {
+        "function": "0x5b9ca0",
+        "localOffset": "0x51",
+        "literal": "resources/config.ini:EnableFilter",
+        "actualObject": "5983fc formsSystem+0x2df88;598423 calls5b9ca0 with this embedded config object.",
+        "actualSystemOffset": "0x2dfd9",
+        "conclusion": "This is not the System+0x51 boss gate. EnableInterpolation is separate config+0x4c."
+      },
+      "sources": [
+        {
+          "entry": "0x57b290",
+          "bytes": 440,
+          "rawSha256": "23afc9e419ca55836a22fa575a3e5002177eafb6b5928acc1443920a983dcf34",
+          "dump": ".cache/coordination/combat/boss-exit-research/system51-source/function-57b290.txt",
+          "dumpSha256": "c6812bc0b92b79b836db12a61bf3bd531ee0423694d13db0e1e134b348845e2e"
+        },
+        {
+          "entry": "0x595de0",
+          "bytes": 908,
+          "rawSha256": "635b5cfb189409f369481342889e6ce2e7a189fec2e59e53d75f76faadd0e6bb",
+          "dump": ".cache/coordination/combat/boss-exit-research/system51-source/function-595de0.txt",
+          "dumpSha256": "0fd4651fd893c4af394019444412d630ec7835f23a5167151a0fcbb032193cb8"
+        },
+        {
+          "entry": "0x5bc640",
+          "bytes": 34,
+          "rawSha256": "8f48806258a2ad5be842fde485cad6ec5d9269983768cae425b343317573e589",
+          "dump": ".cache/coordination/combat/boss-exit-research/system51-source/function-5bc640.txt",
+          "dumpSha256": "6862bad3d406dbafe5b9d48de67708dfb129573cb9ceff3712538b68f08fed9b"
+        },
+        {
+          "entry": "0x5bc520",
+          "bytes": 279,
+          "rawSha256": "aefa0dc3bf52677d01ce5ef8b1c57461f33f67acdc5e933bad3824f6e44d0c2a",
+          "dump": ".cache/coordination/combat/boss-exit-research/system51-source/function-5bc520.txt",
+          "dumpSha256": "c5e70da30a2eca62c452139cec859715c7ba50e58c89cb9f1579510819f6a4d1"
+        },
+        {
+          "entry": "0x5bd460",
+          "bytes": 295,
+          "rawSha256": "03aa5a25eafda75c5fdc8221b8b166b89001fbfdc0670d5b4894b3c376e915b6",
+          "dump": ".cache/coordination/combat/boss-exit-research/system51-source/function-5bd460.txt",
+          "dumpSha256": "3d4ed1e820b777141239df06b01b4030732b546adb86304236ab7610c75392c2"
+        },
+        {
+          "entry": "0x5bd5e0",
+          "bytes": 766,
+          "rawSha256": "7078dcefba1bf6704db78cc9e9be7bca211119c53e98e653539be63cace133b6",
+          "dump": ".cache/coordination/combat/boss-exit-research/system51-source/function-5bd5e0.txt",
+          "dumpSha256": "ec7e276fb38041fa7191fe41f5b62e0fb4ff9558f1f5c4aa12980c3a420c7e05"
+        },
+        {
+          "entry": "0x5bd8e0",
+          "bytes": 2891,
+          "rawSha256": "c797d424c40488727f060ede131714e75e0058131a47518f87f5e9d97046b17e",
+          "dump": ".cache/coordination/combat/boss-exit-research/system51-source/function-5bd8e0.txt",
+          "dumpSha256": "b037ad3ec728edf99227e33274cbde919b836cb30b9d395284a3895c61784ce9"
+        },
+        {
+          "entry": "0x5be430",
+          "bytes": 199,
+          "rawSha256": "92047ce00b5ae409e9162a091f363f4fbfedc12369ffd13e3c017a14de06c488",
+          "dump": ".cache/coordination/combat/boss-exit-research/system51-source/function-5be430.txt",
+          "dumpSha256": "2b929d55c1e82003bd2154f37cbbded66b173139521baf932cf58a34448c482c"
+        },
+        {
+          "entry": "0x5be500",
+          "bytes": 266,
+          "rawSha256": "e4e13c8aab99bf2b4a4ccf55f8cd20f1367951140cdfc856caea4e26f9d11160",
+          "dump": ".cache/coordination/combat/boss-exit-research/system51-source/function-5be500.txt",
+          "dumpSha256": "f0356e53f7164605a690353b1f23f268759c3c2a0475f6eb31b3d917b2026f9e"
+        },
+        {
+          "entry": "0x5be6a0",
+          "bytes": 1098,
+          "rawSha256": "9db90cccecd0a4340cc291281162182cffa6a9dea0b78544b5bd3f43a5da85d5",
+          "dump": ".cache/coordination/combat/boss-exit-research/system51-source/function-5be6a0.txt",
+          "dumpSha256": "0b96c5461214c16d164ccbfa904ac0d6549795574cce6b968d6cd9d1df068039"
+        },
+        {
+          "entry": "0x5a8870",
+          "bytes": 725,
+          "rawSha256": "30d58a7c91ae723d000713a1a061d79f60c1850cd7a33231d41c88f1405b3bc3",
+          "dump": ".cache/coordination/combat/boss-exit-research/system51-source/function-5a8870.txt",
+          "dumpSha256": "1668fcbb4248d95ab4f8b1e6100541a9b0adf47c8cd10797a036c5a300a64d61"
+        },
+        {
+          "entry": "0x5c8430",
+          "bytes": 3590,
+          "rawSha256": "19a149644f3c1c1c4d189a55be4669525f65a7686d3bf992e16ac294fd7999dc",
+          "dump": ".cache/coordination/combat/boss-exit-research/system51-source/function-5c8430.txt",
+          "dumpSha256": "aeda4dc3bc084b7bf7a64a2c56318e3d351912141d12e023d8e4c7e16528fbbc"
+        },
+        {
+          "entry": "0x5983e0",
+          "bytes": 1225,
+          "rawSha256": "3407463fea13392a16fab7fa2543e3d80e61b699de177110ea25cc65b890754b",
+          "dump": ".cache/coordination/combat/boss-exit-research/system51-source/function-5983e0.txt",
+          "dumpSha256": "948bfb2db9806cbda33804272e731cab4943a657b97e07cbb2618229e5f4dd9a"
+        },
+        {
+          "entry": "0x5b9ca0",
+          "bytes": 381,
+          "rawSha256": "8bf30b4c9a94601bef9f1368c0e834eaf8fb215af6ee630576216c7aee516272",
+          "dump": ".cache/coordination/combat/boss-exit-research/system51-source/function-5b9ca0.txt",
+          "dumpSha256": "40c60be35802f9eff288d26678fa66228ef3de3881502a0316581b6360cd158e"
+        }
+      ],
+      "xrefFiles": [
+        {
+          "path": ".cache/coordination/combat/boss-exit-research/system51-source/literal-byte51-xrefs.json",
+          "sha256": "9864250c28b0a1a2deb53547ac595dcec880272693a926b2a5e62f79ab272bba"
+        },
+        {
+          "path": ".cache/coordination/combat/boss-exit-research/system51-source/persistent-achievement20-xrefs.json",
+          "sha256": "431dca9ceeb01cc30698b235bf129324b55bd16c44b4f3984963524dcc07e186"
+        },
+        {
+          "path": ".cache/coordination/combat/boss-exit-research/system51-source/system-singleton-xrefs.json",
+          "sha256": "59d3c105bf3fd3a0e81edfa7ee7e713eb83ca0ae8976808addec3be4beb42625"
+        }
+      ]
+    }
+  },
+  "trinketCorrectionSha256": "82f46aac2f11aaeb7234f2c0afe23b8f7c53a0d2bafda9940c15d731ddf61fcb",
+  "placement": "Literal shared extraction of existing Worm5c7f30 kernel, exact directionf64*pi*2\u2192f32, budget100/radius500 reset, clamp/snap/cost<=599/actualGrid17/18/fallback operations retained. Worm ordered occupied inputs unchanged; boss mode0 only actualunremoved Pickup5/Bomb4, absentLaser6explicit.",
+  "requiredGate": {
+    "publicPlan": "references/isaac/foundation/combat/monstro/public-clear-route-plan.json",
+    "compactPreparedReceipt": "combat/boss-exit-research/boss-clear-gate-prep/compact-v2/source-receipt.json",
+    "scope": "Two unchanged mandatory BLLcases plus fixed independent978 oppositephase cases,962captures each. All publicinputs fixedbeforegrade; no newOSdraw oractualgame execution. Bothgames mustrealprefixadmit/retire/clear, bossadmit/damage/death/retire,count0,realfinalHeartseed/body/identity/cache1c20 andlinked498NULL. Exact0framefullbirthfence blockswhenobserved; otherwise pendingunobserved, never inferred."
+  },
+  "productionAndLive": "notrun; initialSourceStatic/Death/C5proofs do notaccept this checkpoint"
+}

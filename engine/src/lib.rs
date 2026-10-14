@@ -1960,6 +1960,20 @@ impl Game {
                 .ok_or("final boss requires admitted descriptor")?
                 .template
                 .room_type;
+            let profile = self
+                .state
+                .profiles
+                .get(usize::from(
+                    self.state
+                        .profile
+                        .checked_sub(1)
+                        .ok_or("final boss requires selected profile")?,
+                ))
+                .ok_or("final boss profile is missing")?;
+            let everything_is_terrible = *profile
+                .achievements
+                .get(33)
+                .ok_or("final boss requires achievement33 owner")?;
             let births = monstro::advance(
                 &mut self.state.room.npcs[index],
                 phase,
@@ -1978,6 +1992,7 @@ impl Game {
                     final_boss: boss_rewards::FinalBossAdmission {
                         room_type,
                         normal_difficulty: self.state.difficulty == "normal",
+                        everything_is_terrible,
                         game_update_count: self.state.game_update_count,
                         boss_count: &mut self.state.room.boss_count,
                         next_pickup: &mut self.state.next_pickup,

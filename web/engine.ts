@@ -113,6 +113,7 @@ export interface Bomb {
 }
 export interface Explosion { id: number; x: number; y: number; animationFrame: number; }
 export interface Pickup {
+  parent: { entityType: number; variant: number; id: number } | null;
   id: number; spawnSeed: number; spawnerType: number; spawnerVariant: number; variant: number; subtype: number; position: { x: number; y: number };
   x: number; y: number; actor: string; animation: string; animationFrame: number; animationPlaying: boolean;
   canCollect: boolean; collected: boolean; removed: boolean; collisionRadius: number; shadowSize: number; collectionDelay: number;
