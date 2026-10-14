@@ -70,8 +70,11 @@
     "browserArchiveSha256": "9d93bfc63ff000289c26f075c3c2cf361ed39ab8990a68f61f19a87b4787490d"
   },
   "verification": {
-    "status": "pending-fresh-production-proof",
-    "requiredGate": "tools/e2e/traversal.mjs compares the directly observed native controls field on every selected phase, retaining all existing motion/identity/door assertions."
+    "status": "source-frozen-browser-pass; fresh default gate pending",
+    "requiredGate": "tools/e2e/traversal.mjs directly compares native controlsEnabled on every selected phase. It always launches a fresh original.",
+    "proof": "references/isaac/foundation/doors/controls-verification.json",
+    "static": "Full check:build and floor helper passed on exact6c14d938; no unit tests added.",
+    "postCapture": "267 complete actual browser snapshots join unchanged same-turn original source,1335 exact checks including all18 false-control phases. Whole archives/hash/source stability/public command plan pass."
   },
   "exclusions": [
     "Transition player callbacks currently approximated by immunity remain a separate mandatory gap.",

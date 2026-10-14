@@ -1,0 +1,111 @@
+{
+  "schema": 1,
+  "status": "pass",
+  "scope": "Same-turn frozen original / fresh actual DOM-WASM prefix comparison. No original rerun or complete active-use acceptance is claimed. Default checked-in traversal gate always launches both games fresh.",
+  "producer": "6c14d938753530e36683cbd252cce5483cc51e66",
+  "production": {
+    "sha256": "b1da8971f1858a8a3dba890de6a0ee933ba7b8a17caea2eeeb061d88f73a6cf9",
+    "files": 940,
+    "source": "/workspace/isaac-worktrees/floor/dist",
+    "scope": "Immutable snapshot of production build bytes; source/native replay equality is checked separately"
+  },
+  "publicInput": {
+    "seed": "B911XGSG",
+    "runSeedValue": 1639,
+    "bootEpochSeed": 1700000000,
+    "commands": 321,
+    "prefix": "w74 / release60 / w32 / release100; before any active-use input"
+  },
+  "selectedSnapshots": 267,
+  "requiredChecks": 1335,
+  "failures": [],
+  "controlFalsePresentations": [
+    71,
+    72,
+    73,
+    74,
+    75,
+    76,
+    77,
+    78,
+    79,
+    80,
+    81,
+    82,
+    83,
+    84,
+    85,
+    86,
+    87,
+    88
+  ],
+  "source": {
+    "archive": "/workspace/isaac-worktrees/active-items/.cache/e2e/active-item-use/first-live/yum-full-phase-0/original/manifest.json.gz",
+    "rawSha256": "a97c4f07f5e4926b2dcc47699b6dd07f7ba80dc0ade96586b58a250973273865",
+    "rawBytes": 147670618,
+    "archiveSha256": "267cf378c49a8d806353f18115ea166d4194f0c22265515ac662c4e7c825db7f",
+    "completeOriginalRecords": 366
+  },
+  "browser": {
+    "path": "/workspace/isaac-worktrees/floor/.cache/coordination/traversal-controls-research/controls-browser-states.json.gz",
+    "encoding": "gzip",
+    "rawBytes": 86022865,
+    "rawSha256": "0ed656912ac4f1261811591e52eb56b1d69aebae31eb168593ba39f5087f92e7",
+    "archiveBytes": 10589434,
+    "archiveSha256": "c0b314f02724a0eda66d1ddad824aa0d794f7d9454a242914ae37cba1b84da31",
+    "scope": "Every selected phase retains its full actual snapshot, native comparisons, complete public commands and backend callbacks. JSON is written in lossless chunks without truncating snapshots or creating one whole-cohort string. Separate trace caps are disclosed; decompress before replay or inspection"
+  },
+  "sourceBefore": {
+    "engine/src/lib.rs": "9d5ebc00d6b5b9026c79f4253f98aa6c8837e5ea935679f617a445e8e6307181",
+    "engine/src/traversal.rs": "9340f735b95fa6be5867444f9a835c6d6d9a2e03055359a6de7a158e977b08bd",
+    "tools/original/foundation-pickup-observe.py": "3a004d9fa32f18f06d86736a03c2c3793a7a807cb8be8754bc4ef024d571c483",
+    "tools/e2e/traversal.mjs": "c22a6d8aae90f33f8ccce743522dd82fdebd16749bac8601959be82e9190d5e5",
+    "tools/foundation/verify.mjs": "3743b773cf2ede253c6d78f2605eb43f34e9d7002284b6a1dd2c413d45835a5c",
+    "tools/foundation/browser-evidence.mjs": "883a7a122be591ca79bb9bd57b9f44425bc232b88c6b643392f39e2a2bb89978",
+    ".cache/coordination/traversal-controls-research/replay-active45-prefix.mjs": "d7aa32e354390a19a7453ceb8ceed907234138157772cec20d86d18ad7fb234f"
+  },
+  "sourceAfter": {
+    "engine/src/lib.rs": "9d5ebc00d6b5b9026c79f4253f98aa6c8837e5ea935679f617a445e8e6307181",
+    "engine/src/traversal.rs": "9340f735b95fa6be5867444f9a835c6d6d9a2e03055359a6de7a158e977b08bd",
+    "tools/original/foundation-pickup-observe.py": "3a004d9fa32f18f06d86736a03c2c3793a7a807cb8be8754bc4ef024d571c483",
+    "tools/e2e/traversal.mjs": "c22a6d8aae90f33f8ccce743522dd82fdebd16749bac8601959be82e9190d5e5",
+    "tools/foundation/verify.mjs": "3743b773cf2ede253c6d78f2605eb43f34e9d7002284b6a1dd2c413d45835a5c",
+    "tools/foundation/browser-evidence.mjs": "883a7a122be591ca79bb9bd57b9f44425bc232b88c6b643392f39e2a2bb89978",
+    ".cache/coordination/traversal-controls-research/replay-active45-prefix.mjs": "d7aa32e354390a19a7453ceb8ceed907234138157772cec20d86d18ad7fb234f"
+  },
+  "archiveAudit": {
+    "path": "/workspace/isaac-rebirth-browser/.cache/coordination/traversal-controls-research/controls-prefix-archive-audit.json",
+    "sha256": "c9ed42a484a4119b083a3c04de11b92b8574fb6b3975d895958d0d5b259fc289",
+    "completeSelectedSnapshotsVerified": true,
+    "allNativeRowsIndependentlyRejoined": true
+  },
+  "traceDiagnostics": {
+    "inputTraceTruncated": false,
+    "stateHistoryTruncated": true,
+    "backendStateTruncated": false
+  },
+  "traceScope": "All selected snapshots and full321 input commands are preserved; backend payload is untruncated. The bounded trace state history is truncated, so no complete callback-history/replay claim is made.",
+  "firstAttempt": {
+    "schema": 1,
+    "scope": "First frozen-source / actual-browser attempt retained with its final provenance-helper caller error. Every actual snapshot and1335 successful comparisons preserved. Not acceptance.",
+    "originalPath": "/workspace/isaac-rebirth-browser/.cache/coordination/traversal-controls-research/controls-prefix-report.json",
+    "path": "/workspace/isaac-rebirth-browser/.cache/coordination/traversal-controls-research/controls-prefix-first-attempt-failed.json.gz",
+    "rawBytes": 156319117,
+    "rawSha256": "a31244d507edee02e8c6096e7afc98cddfe05397068b604325b98c69489afe58",
+    "archiveBytes": 9200733,
+    "archiveSha256": "719174460595d18b9153c198dd13fd864921414f35054a926daf9527920b57d5",
+    "mode": 384,
+    "mtimeNs": 1791936198607942960,
+    "verifiedRoundTrip": true
+  },
+  "static": {
+    "checkBuild": "pass",
+    "floorHelper": "pass",
+    "checkBuildLogSha256": "24dd2673ac713706e13b38485999af8b1300a4ede57fc1df33263e15ed39c6c6",
+    "floorHelperLogSha256": "3954f08a812caf1757406097a6436461b228455b65c752b87aa7f75d6ea2f69b"
+  },
+  "remaining": [
+    "Required default traversal gate still launches fresh original/browser processes; this proof reuses this same turn\u2019s unchanged completed original capture.",
+    "Special transition callbacks, actor callback approximations, hostile locks and full graphics parity remain separate required gaps."
+  ]
+}
