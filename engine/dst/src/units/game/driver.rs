@@ -15,7 +15,7 @@ use rebirth_cleanroom::{Command, PausePhase, Screen, State, MAX_COMMAND_TICKS};
 use std::cmp::Reverse;
 use std::collections::{BinaryHeap, VecDeque};
 
-pub const SUPPORTED_KEYS: [&str; 13] = [
+pub const SUPPORTED_KEYS: [&str; 15] = [
     "Enter",
     "Escape",
     "Tab",
@@ -29,10 +29,12 @@ pub const SUPPORTED_KEYS: [&str; 13] = [
     "KeyS",
     "KeyD",
     "KeyE",
+    "Space",
+    "KeyQ",
 ];
 const FOREIGN_KEYS: [&str; 8] = [
-    "KeyQ",
-    "Space",
+    "KeyR",
+    "Spacebar",
     "ShiftLeft",
     "",
     "enter",
@@ -357,7 +359,9 @@ impl Driver {
                 self.press("KeyE", hold)
             }
             65..=67 => self.press("Escape", 0),
-            68..=71 => self.music_backend(state, e),
+            68..=69 => self.music_backend(state, e),
+            // Active item and pocket inputs; triggers read held edges at a tick.
+            70..=71 => self.press(e.pick(&["Space", "KeyQ"]), e.range(0, 3)),
             _ => self.ticks(e),
         }
     }
