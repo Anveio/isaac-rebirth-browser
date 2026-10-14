@@ -11,6 +11,9 @@ independent reference evidence.
 ## Current live-game testing policy
 
 Checked-in Rust, Node and Python unit suites were removed at the user’s request.
+The sole, owner-authorized exception is the [Antithesis DST harness](dst.md) in
+`engine/dst/`: an inner-loop regression tool for engine safety and determinism,
+never original-game evidence or a merge gate.
 The current required gate is [run.mjs](../tools/e2e/run.mjs), which executes
 every registered live original/browser suite, retaining all results even if an
 earlier suite fails. The [paired gameplay gate](../tools/foundation/paired-game.mjs) gives

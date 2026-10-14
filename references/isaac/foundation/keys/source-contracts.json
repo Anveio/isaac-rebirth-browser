@@ -10,7 +10,7 @@
     "context": "Secret Room7.11 authored raw5/30/0 pickups retain free regular key rules. Shop and other special-room contexts remain rejected; no blanket special-room admission."
   },
   "liveGate": {
-    "command": "npm run test:e2e:keys",
+    "command": "npm run test:e2e -- keys",
     "producer": "tools/original/key-scenarios.py",
     "observer": "tools/original/key-observer.py",
     "comparator": "tools/e2e/keys.mjs",

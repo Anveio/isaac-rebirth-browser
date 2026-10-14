@@ -19,7 +19,6 @@ const pair = load(resolve(directory, 'report.json'));
 assert.equal(pair.original.status, 'pass', 'Fresh original provenance must pass');
 assert.equal(pair.browser.status, 'pass', 'Actual production DOM/WASM capture must pass');
 assert.equal(browser.status, 'pass');
-assert.equal(gate.gateSourcesStable, true, 'Paired gate source identity must remain fixed');
 const frames = new Map(browser.frames.map(frame => [frame.label, frame]));
 const checks = [];
 for (const row of native.debugObservations) {

@@ -46,7 +46,7 @@ actual-DOM browser gate:
 source cloud/env.sh
 npm run build
 cargo build --manifest-path engine/Cargo.toml --locked --bin floor
-bash tools/original/with-display.sh node tools/e2e/secrets.mjs --count 1
+npm run test:e2e -- secrets
 ```
 
 The gate captures a contrived opposite-phase JF2DSF92 secret route plus a newly

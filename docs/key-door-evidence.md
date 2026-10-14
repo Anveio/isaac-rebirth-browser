@@ -66,7 +66,7 @@ After a fresh build, the original plus actual-DOM production-WASM gate is:
 source cloud/env.sh
 npm run build
 cargo build --manifest-path engine/Cargo.toml --locked --bin floor
-bash tools/original/with-display.sh node tools/e2e/key-doors.mjs --count 1
+npm run test:e2e -- key-doors
 ```
 
 The gate independently plans the complete reset/menu/seed/route command trace

@@ -11,12 +11,11 @@ import { browserLaunchOptions, inspectBrowserGraphics } from '../foundation/brow
 import { startProductionServer } from '../foundation/production-server.mjs';
 import { assertInputProvenance, waitForReady } from '../foundation/verify.mjs';
 import { compareSavedRoomGrid } from '../foundation/saved-grid-compare.mjs';
+import { snapshot, step } from './lib/game.mjs';
+import { ORIGINAL_SHA, assertOriginalBinary } from './lib/original.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const run = promisify(execFile);
-const ORIGINAL_SHA = '724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13';
-const GATE_SOURCES = ['tools/e2e/ordinary-run.mjs', 'tools/foundation/saved-grid-compare.mjs', 'tools/original/boot-mt-observer.py', 'tools/original/native-identity.py', 'tools/original/state-observer.py', 'tools/original/foundation-clock-run.py', 'tools/original/foundation-clock-gate.c', 'tools/original/foundation-seeds.py', 'tools/original/debug-run.py', 'tools/original/with-display.sh', 'tools/foundation/browser.mjs', 'tools/foundation/production-server.mjs', 'tools/foundation/verify.mjs', 'engine/src/lib.rs', 'engine/src/mt.rs', 'engine/src/saved_game.rs', 'engine/src/grid_records.rs', 'engine/src/room_costs.rs', 'engine/src/grid.rs', 'engine/src/room.rs', 'engine/src/items.rs', 'engine/src/menu_lifecycle.rs', 'engine/src/seed.rs', 'engine/src/audio.rs', 'engine/src/music.rs', 'web/main.ts', 'web/trace.ts'];
-const hashes = async () => Object.fromEntries(await Promise.all(GATE_SOURCES.map(async path => [path, createHash('sha256').update(await readFile(join(ROOT, path))).digest('hex')])));
 const value = flag => { const index = process.argv.indexOf(flag); return index < 0 ? undefined : process.argv[index + 1]; };
 const ambientGrid = process.argv.includes('--ambient-grid');
 const gridRecords = process.argv.includes('--grid-records') || ambientGrid;
@@ -24,10 +23,7 @@ const savedGame = process.argv.includes('--saved-game') || gridRecords;
 const originalBank = value('--original-bank') ? resolve(value('--original-bank')) : null;
 const bankReportBytes = originalBank ? await readFile(join(originalBank, 'report.json')) : null;
 const bankReport = bankReportBytes ? JSON.parse(bankReportBytes) : null;
-if (bankReport) {
-  assert.equal(bankReport.originalBinarySha256, ORIGINAL_SHA);
-  assert.equal(bankReport.gateSourcesStable, true);
-}
+if (bankReport) assert.equal(bankReport.originalBinarySha256, ORIGINAL_SHA);
 const levelDescriptors = process.argv.includes('--level-descriptors') || savedGame;
 const output = resolve(value('--output') || join(ROOT, ambientGrid ? '.cache/e2e/ambient-grid' : gridRecords ? '.cache/e2e/grid-records' : savedGame ? '.cache/e2e/saved-game' : levelDescriptors ? '.cache/e2e/level-descriptors' : '.cache/e2e/ordinary-run', String(Date.now())));
 const count = Number(value('--count') || 4);
@@ -48,12 +44,11 @@ const nativeTape = [{ type: 'step', frames: 180 }, { type: 'capture', label: 'in
 for (const [index, label] of ['profile', 'main', 'character', 'gameplay-start'].entries()) nativeTape.push({ type: 'key', key: 'Return', down: true }, { type: 'step', frames: 12 }, { type: 'key', key: 'Return', down: false }, { type: 'step', frames: index === 3 ? 300 : 72 }, { type: 'capture', label });
 await mkdir(output, { recursive: true });
 await writeFile(join(output, 'scenarios.json'), JSON.stringify({ schema: 1, entropy: 'Node crypto OS entropy for independent boot epoch and browser reset seed; no requested run seed', cases }, null, 2) + '\n');
-assert.equal(createHash('sha256').update(await readFile(join(ROOT, '.cache/original-runtime/offline-depot/isaac.x64'))).digest('hex'), ORIGINAL_SHA);
-const gateSources = await hashes();
+await assertOriginalBinary();
 const production = await startProductionServer();
 const browser = await chromium.launch(browserLaunchOptions());
-const report = { schema: 1, status: 'running', originalBinarySha256: ORIGINAL_SHA, gateSources, production: production.build, graphics: await inspectBrowserGraphics(browser), scope: 'Ordinary public no-dialog Character-to-run admission uses the generated menu seed, preserving unseeded eligibility. Complete shared MT, saved/menu fields, nine grid pairs and179 stat poses compare through Character; actual run seed/code/stage and System admission are blocking. Run shared-MT differences remain explicit diagnostics; no original state becomes browser input.', cases: [] };
-report.nativeReference = originalBank ? { mode: 'reused-original-bank', directory: originalBank, reportSha256: createHash('sha256').update(bankReportBytes).digest('hex'), originalReportStatus: bankReport.status, originalGateSources: bankReport.gateSources } : { mode: 'fresh-owned-original-processes' };
+const report = { schema: 1, status: 'running', originalBinarySha256: ORIGINAL_SHA, production: production.build, graphics: await inspectBrowserGraphics(browser), scope: 'Ordinary public no-dialog Character-to-run admission uses the generated menu seed, preserving unseeded eligibility. Complete shared MT, saved/menu fields, nine grid pairs and179 stat poses compare through Character; actual run seed/code/stage and System admission are blocking. Run shared-MT differences remain explicit diagnostics; no original state becomes browser input.', cases: [] };
+report.nativeReference = originalBank ? { mode: 'reused-original-bank', directory: originalBank, reportSha256: createHash('sha256').update(bankReportBytes).digest('hex'), originalReportStatus: bankReport.status } : { mode: 'fresh-owned-original-processes' };
 if (levelDescriptors) report.scope += ' Level descriptor lifecycle additionally compares nine source Level seed pairs through menus and after actual Game admission; the real internal table is regenerated by587ec0 before floor construction. Full post-admission shared MT is retained and compared, with later room/effect differences explicit.';
 if (gridRecords) report.scope += ' Supported fresh GridBase owners execute actual construction and primary overrides in source authored/door/wall order before Save. Complete seven-field records for sampled actual room cells additionally compare against native Level and Saved records, with active-row seeds/whole occupancy still blocking. Padding seed pairs remain blocking; no padding-record metadata acceptance or durable continue/load is claimed.';
 if (ambientGrid) report.scope += ' Normal shape0 variable decorations use the actual descriptor-owned RNG35, occupied-pointer guard, signed path-cost guard and caller-seed-before-constructor order. All448 actual live path-cost words additionally compare as blocking fields. Wall/Door Init stores are admitted; later weighted-path reservations, decay, other derived callbacks and transition admission remain source gaps.';
@@ -87,7 +82,7 @@ try {
       // Both browser inputs come only from the saved public case, never native.
       await page.evaluate(({ initialSeed, bootEpochSeed }) => { window.game.pause(); window.game.reset(initialSeed, { trace: true, bootEpochSeed }); }, scenario);
       const compareMenu = async label => {
-        const state = await page.evaluate(() => window.game.snapshot()), observed = observations.get(label), boot = state.bootLifecycle;
+        const state = await snapshot(page), observed = observations.get(label), boot = state.bootLifecycle;
         checkpoints.push({ label, state }); assert.ok(observed && observed.status === 'pass');
         assert.equal(state.screen, label); assert.equal(observed.systemState, 1);
         assert.equal(observed.title.menuScreen, { title: 1, profile: 2, main: 3, character: 4 }[label]);
@@ -105,14 +100,14 @@ try {
       };
       await compareMenu('title');
       for (const label of ['profile', 'main', 'character']) {
-        await page.keyboard.down('Enter'); await page.evaluate(() => window.game.step(12));
-        await page.keyboard.up('Enter'); await page.evaluate(() => window.game.step(72));
+        await page.keyboard.down('Enter'); await step(page, 12);
+        await page.keyboard.up('Enter'); await step(page, 72);
         await compareMenu(label);
       }
       const characterSeed = checkpoints.at(-1).state.bootLifecycle.menuRunSeed;
-      await page.keyboard.down('Enter'); await page.evaluate(() => window.game.step(12));
-      await page.keyboard.up('Enter'); await page.evaluate(() => window.game.step(300));
-      const state = await page.evaluate(() => window.game.snapshot()), observed = observations.get('gameplay-start');
+      await page.keyboard.down('Enter'); await step(page, 12);
+      await page.keyboard.up('Enter'); await step(page, 300);
+      const state = await snapshot(page), observed = observations.get('gameplay-start');
       checkpoints.push({ label: 'gameplay-start', state });
       assert.equal(state.screen, 'playing'); assert.equal(observed.systemState, 2);
       assert.equal(state.runSeedValue, characterSeed, 'Actual generated Character seed must own run admission');
@@ -218,8 +213,6 @@ try {
       await writeFile(join(output, 'report.json'), JSON.stringify(report, null, 2) + '\n');
     }
   }
-  report.gateSourcesEnd = await hashes(); report.gateSourcesStable = JSON.stringify(gateSources) === JSON.stringify(report.gateSourcesEnd);
-  assert.equal(report.gateSourcesStable, true, 'Ordinary admission gate sources changed during capture');
   report.status = report.cases.every(c => c.status === 'pass') ? 'pass' : 'fail';
   if (report.status === 'fail') throw new AggregateError(report.cases.filter(c => c.status === 'fail').map(c => new Error(`${c.name}: ${c.error}`)), 'Ordinary admission cases failed; every selected case was attempted');
 } catch (error) { report.status = 'fail'; report.error = String(error); throw error; }

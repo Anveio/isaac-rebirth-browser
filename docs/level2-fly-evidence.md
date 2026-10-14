@@ -25,7 +25,7 @@ Native paint/return persistence, colors/modifiers and complete boss death FX
 remain unaccepted boundaries. Monstro appearance now calls the same actual
 Poof factory with subtype3; it receives no extra immediate Update.
 
-The required `test:e2e:monstro` suite prepares contrived admission and a public
+The required e2e suite `monstro` suite prepares contrived admission and a public
 firing/clear/boss route for BLLV920M. This is the first simple candidate from the
 unchanged OS-random banks written before grading: Start6 → up7/Room18 with a
 passive Fly13 → up9/Room185 with two214 → right0/Monstro1012. The runner requires

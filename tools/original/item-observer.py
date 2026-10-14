@@ -1,5 +1,4 @@
 """Bounded read-only original ItemPool/configuration/player acquisition evidence."""
-import hashlib
 import importlib.util
 import math
 import os
@@ -9,6 +8,9 @@ import struct
 import time
 import xml.etree.ElementTree as ET
 ROOT=Path(__file__).resolve().parents[2]
+identity_spec = importlib.util.spec_from_file_location('native_identity', ROOT / 'tools/original/native-identity.py')
+native_identity = importlib.util.module_from_spec(identity_spec)
+identity_spec.loader.exec_module(native_identity)
 NATIVE_SHA='724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13'
 spec=importlib.util.spec_from_file_location('pool_maps',ROOT/'tools/original/state-observer.py')
 maps_reader=importlib.util.module_from_spec(spec);spec.loader.exec_module(maps_reader)
@@ -24,7 +26,7 @@ def observe(pid,context):
   if type(pid)is not int or pid<=0 or context.get('gateBlocked')is not True:raise PermissionError('Requires positive direct-child PID at public gate')
   status=Path(f'/proc/{pid}/status').read_text();ppid=next(x.split(':',1)[1].strip() for x in status.splitlines() if x.startswith('PPid:'))
   if int(ppid)!=os.getpid():raise PermissionError('Not directly owned')
-  if hashlib.sha256(Path(f'/proc/{pid}/exe').read_bytes()).hexdigest()!=NATIVE_SHA:raise ValueError('Unexpected original ELF')
+  if native_identity.native_binary_sha256(pid)!=NATIVE_SHA:raise ValueError('Unexpected original ELF')
   os.kill(pid,signal.SIGSTOP);stopped=True;deadline=time.monotonic()+2
   while not all(p.joinpath('status').read_text().split('State:')[1].strip()[0]in'Tt' for p in Path(f'/proc/{pid}/task').iterdir()):
    if time.monotonic()>deadline:raise TimeoutError('Threads did not stop')

@@ -9,7 +9,7 @@ source max-container guard. Existing physical Collect/retirement and source
 SFX185/54/266 use their actual owners. Authored Blue/Black/Eternal HUD clips
 show those health fields; whole HUD placement remains unaccepted.
 
-`test:e2e:hearts` requires actual original and immutable production browser
+e2e suite `hearts` requires actual original and immutable production browser
 health containers, immunity, room identity and complete observed Heart
 seed/body/classes/animation/collection fields. Four opposite-phase contrived
 Room227 tapes require nonempty admission, real public blast damage and
