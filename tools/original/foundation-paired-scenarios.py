@@ -3,13 +3,14 @@
 
 The original's introductory cutscene is retained as a source-only prelude.
 Pairing starts at its independently observed first Title frame. No observed
-game state is injected into the browser. Random choices are saved in the tape.
+game state is injected into the browser. paired-random-run draws its actions
+from its OS-random run seed, so `--random-seeds` replays the same tape.
 """
 import argparse
 import importlib.util
 import json
 from pathlib import Path
-import secrets
+import random
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -92,15 +93,16 @@ def build(identifier, seed):
                     advance(tail, 1, label)
                 advance(tail, 10, 'bomb-after-blast')
             elif identifier == 'paired-random-run':
+                draw = random.Random(f'paired-random-run:{seed}')
                 for index in range(3):
-                    movement = secrets.choice(['w', 'a', 's', 'd'])
-                    shooting = secrets.choice(['Up', 'Left', 'Down', 'Right'])
+                    movement = draw.choice(['w', 'a', 's', 'd'])
+                    shooting = draw.choice(['Up', 'Left', 'Down', 'Right'])
                     key(tail, movement, True); key(tail, shooting, True)
-                    advance(tail, 12 + secrets.randbelow(37), f'random-held-{index}')
+                    advance(tail, 12 + draw.randrange(37), f'random-held-{index}')
                     key(tail, movement, False); key(tail, shooting, False)
-                    advance(tail, 8 + secrets.randbelow(29), f'random-coasting-{index}')
+                    advance(tail, 8 + draw.randrange(29), f'random-coasting-{index}')
                 key(tail, 'Escape', True); advance(tail, 1); key(tail, 'Escape', False)
-                advance(tail, 28 + secrets.randbelow(21), 'random-paused')
+                advance(tail, 28 + draw.randrange(21), 'random-paused')
                 key(tail, 'Escape', True); advance(tail, 1); key(tail, 'Escape', False)
                 advance(tail, 27, 'random-resumed')
                 key(tail, 'e', True); advance(tail, 1); key(tail, 'e', False)
