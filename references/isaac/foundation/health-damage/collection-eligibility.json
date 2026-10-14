@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "scope": "Concrete Hit/UseItem eligibility correction in the sole player_can_collect API; source qualified, no compiler or fresh public acceptance. Retained legacy queued-Pickup veto is explicitly incomplete.",
+  "functions": [
+    {
+      "address": "0x50c880",
+      "bytes": 243,
+      "label": "Actual Player collection eligibility",
+      "rawSha256": "bc60f143f370adb42072cc2166c854d92025a0e19465c7e9ea8096dc39f2373f"
+    },
+    {
+      "address": "0x50c780",
+      "bytes": 250,
+      "label": "Guarded item clip-name predicate",
+      "rawSha256": "d03137d1fa55d58b1d271a50870711350f0ee6587be7f27f3a217eeac2a191c5"
+    }
+  ],
+  "predicate": {
+    "dead": "50c8aa tests Entity+31f and returnsfalse when set.50c8d0 rejects mainclip nameDeath regardlessbf4. There is no red or Soul HP read and no controls7d4 predicate.",
+    "mainGuard": "50c89f testsbf4. Ifclear, dead/Death are the only predicates. Ifset,50c8e8 comparescurrentnameHit and permits it directly; otherwise50c8fc calls50c780.",
+    "itemClipExceptions": "50c780 compares actual main names Pickup/LiftItem/HideItem/UseItem and returns true for those four. Concrete ownedUseItem passes now, along withHit. Other owned guarded clips Trapdoor/Appear remain disallowed.",
+    "legacyLimit": "player_items.pickup_animation_guard remains a veto because actual Pickup/LiftItem/HideItem main-clock/queued ownership has not been composed. This is a retained port approximation, not evidence that source50c880 rejects Pickup; actual source permits those names. Full natural grant/copy semantics and these exceptions require the owning item callback.",
+    "consumer": "Root collect_regular_pickup_at, collectible/Chest contact and Combat Heart all consume one shared helper; no duplicate pickup predicate."
+  },
+  "runtimeSha256": "df2d01662448213bca569f6ac9e8a5901a817454938dfd648f29c1fc23a4aa49"
+}
