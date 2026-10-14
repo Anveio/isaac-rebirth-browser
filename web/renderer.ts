@@ -1,4 +1,4 @@
-import { Assets } from "./animation";
+import { Assets, type SpriteColor } from "./animation";
 import { MenuRenderer } from "./menu";
 import { GLMenuContext, type GLSurface } from "./gl-menu";
 import { StageComposer, type StageTargets } from "./gl-stage";
@@ -8,6 +8,14 @@ import type { ActorSprite, Room, RoomAppearance, RoomQuad, State } from "./engin
 
 const PLAYER = "gfx/001.000_player.anm2";
 const TEAR = "gfx/002.000_tear.anm2";
+// Static champion Colors at 0x8ec700 (built 0x40aa42..0x40ac23): tint RGBA
+// and offset RGB. ResetColor 47f430 copies the entry into the sprite color.
+const CHAMPION_OFFSET = 200 / 255;
+const CHAMPION_COLORS: readonly SpriteColor[] = [
+  [1, .1, .1, 1], [.6, .6, 0, 1], [.1, .8, .2, 1], [1, .6, .2, 1], [.2, .2, 1, 1], [0, .15, .15, 1],
+  [1, 1, 1, 1, CHAMPION_OFFSET], [.5, .5, .5, 1], [1, 1, 1, .3, CHAMPION_OFFSET], [0, 0, 0, 1],
+  [1, 0, 1, 1], [.75, 0, 1, 1], [.5, 0, 0, 1], [.5, .5, 1, 1],
+].map(([r, g, b, a, offset = 0]) => ({ tint: [r!, g!, b!, a!].map(Math.fround), offsets: [offset, offset, offset].map(Math.fround) }));
 const directionName = (direction: string) => direction[0]!.toUpperCase() + direction.slice(1);
 
 export class Renderer {
@@ -110,7 +118,11 @@ export class Renderer {
           ctx.save();
           ctx.translate(npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46);
           ctx.scale(npc.flipX ? -1 : 1, 1);
-          this.assets.draw(ctx, npc.actor, npc.animation, 0, 0, npc.animationClock, { scale: 0.65 });
+          // Champions draw with their table Color and the ×1.15 sprite scale.
+          const champion = npc.champion;
+          this.assets.draw(ctx, npc.actor, npc.animation, 0, 0, npc.animationClock, champion
+            ? { scale: Math.fround(0.65 * champion.scale), color: CHAMPION_COLORS[champion.color] }
+            : { scale: 0.65 });
           ctx.restore();
         } else {
           this.assets.draw(ctx, npc.kind === 13 ? "gfx/013.000_fly.anm2" : npc.kind === 18 ? "gfx/018.000_attack fly.anm2" : npc.kind === 214 ? "gfx/213.000_level2fly.anm2" : "gfx/244.000_round worm.anm2", npc.animation,
