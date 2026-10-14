@@ -455,7 +455,7 @@ fn authored_grants(state: &mut State, config: &items::CollectibleDefinition) {
 
 /// 52ee40 clears pointer/charge only after52cc90. The stored touched argument
 /// remains; it is meaningful only while an actual queued config exists.
-fn flush_queued(state: &mut State) -> Result<(), String> {
+pub(crate) fn flush_queued(state: &mut State) -> Result<(), String> {
     let Some(owner) = state.player_items.as_ref() else {
         return Ok(());
     };
