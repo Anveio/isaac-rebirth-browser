@@ -23,7 +23,8 @@ export function discoverDstUnits({ root = ROOT } = {}) {
       if (seen.has(key)) continue;
       seen.add(key);
       if (owner === 'harness') continue;
-      const unit = byName.get(owner);
+      // The shipped-WASM differential checks game tapes.
+      const unit = byName.get(owner === 'wasm' ? 'game' : owner);
       assert.ok(unit, `DST property "${key}" in ${source} names no registered unit`);
       unit.properties.push({ kind: KINDS[macro], message: key, source });
     }

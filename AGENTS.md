@@ -22,10 +22,11 @@ deterministic simulation testing (DST) harness in `engine/dst/`
 (`npm run test:dst`, `docs/dst.md`). Only that crate may hold per-unit engine
 workloads and Antithesis properties; it never adds test attributes to
 `engine/src` and admits no other unit suite or component harness anywhere. DST
-checks engine safety, determinism and documented contracts. It is not
-original-game evidence, never replaces live e2e parity and is an inner-loop
-regression tool, not a merge gate: `check:build` does not run it. Fix or
-record every DST violation; never weaken a property or its workload to pass.
+checks engine safety, determinism, native/WASM agreement and documented
+contracts. It is not original-game evidence, never replaces live e2e parity
+and is an inner-loop regression tool, not a merge gate: `check:build` does
+not run it. Fix or record every DST violation; never weaken a property or its
+workload to pass.
 
 Every live suite is registered in `tools/e2e/suites.mjs` and mixes contrived
 cases with OS-random fuzz cases; read `tools/e2e/README.md` before adding or
@@ -57,7 +58,10 @@ Lint and format are not CI or `npm run check` gates. A scheduled upkeep agent
 runs `npm run upkeep:check` on latest `main` and opens a PR with the fixes,
 settling each lint finding with the agent that introduced it; see
 `docs/lint-upkeep.md`. Prefer fixing over allowing; a deliberate exception is a
-narrow `#[expect(clippy::..., reason = "...")]` naming its evidence.
+narrow `#[expect(clippy::..., reason = "...")]` naming its evidence. Engine
+code calls `engine/src/fmath.rs` instead of std float functions such as `sin`,
+`cos` or `atan2`, whose native results differ from the shipped wasm32;
+`engine/clippy.toml` disallows them.
 
 Coordinate file ownership across parallel agents. Shared temporary tooling and
 RE notes belong in ignored `.cache/coordination/`; persist reusable tools and
