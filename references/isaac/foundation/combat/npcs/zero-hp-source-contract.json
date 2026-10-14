@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "status": "Source correction: ordinary nonplayer damage kills strictly below zero; fresh original/production zero-HP continuation is still unobserved.",
+  "base": "382f5ea167fb4b539e1e0ab7f3af261a7b90b18c",
+  "nativeBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "source": {
+    "entry": "0x447190",
+    "fdeBytes": 3489,
+    "rawSha256": "b7fc8a1713cd9a376279973dc2f7f5a74eeae7486d24b79a6eebad6ae7acc19c",
+    "dumpSha256": "add141f46cfe7c3bd9068c6c6ba0d0416f9d5001c7f44cb8f4b11568d20a8273"
+  },
+  "changed": [
+    "engine/src/combat.rs",
+    "engine/src/npcs.rs",
+    "engine/src/level2_flies.rs",
+    "engine/src/roundworm.rs",
+    "engine/src/monstro.rs"
+  ],
+  "sourceLaw": [
+    "Base447190 zeros xmm4 at447737 and skips nonpositive events at447887.",
+    "44789d..4478ac subtracts positive damage from HP+484;4478a9 compares zero with the result. JA at4478b4 enters447850 only for negative HP. Exactly zero proceeds through Hit at4478b6.",
+    "447850 tests flag1: set stores HP0 and skips Kill; clear invokes virtual+40 at447a9b. Current DamageKind models flags0,4,2 only; flag1 is not added.",
+    "Only shared AppliedDamage.lethal and ordinary NPC13/18/214/244/20 death thresholds change. Fireplace, Keeper and Player health paths keep their separate laws."
+  ],
+  "requiredLive": "Fresh public actual original/browser HP==0 continuation then next positive damage kill remains unobserved and required. Existing10HP/3.5 tears/60bomb cohorts crossnegative and do not prove equality. All104/108 historical heads/builds/reports remain unchanged.",
+  "validation": "Private all-target Rust check (10.58s), strict Clippy (10.93s), TypeScript, formatting, generated matrix and whitespace pass. Independent source peer checked the full native FDE and all five consumers. No production build or fresh paired zero-HP boundary witness."
+}
