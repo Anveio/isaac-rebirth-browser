@@ -1630,18 +1630,7 @@ impl Game {
                 }
             }
             for index in 0..self.state.room.pickups.len() {
-                if !pickups::player_can_collect(&self.state) {
-                    continue;
-                }
                 if self.state.room.pickups[index].variant == 100 {
-                    if self
-                        .state
-                        .player_items
-                        .as_ref()
-                        .is_some_and(|items| items.pickup_animation_guard)
-                    {
-                        continue;
-                    }
                     if !player_items::collect(&mut self.state, index)? {
                         player_items::empty_altar_contact(&mut self.state, index)?;
                     }
