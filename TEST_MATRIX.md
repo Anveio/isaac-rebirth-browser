@@ -8,7 +8,7 @@ All paired captures retain strict decoded-RGBA diagnostics. Their pixel failures
 
 ## Required live paired-game scenarios
 
-The definitions below are discovered by executing the actual tape builder. By default the paired suite executes all six contrived cases plus two fresh OS-random seed/action tapes. Random tapes sample three movement/fire direction pairs with replacement; they do not guarantee every direction or birth phase. Contrived moving-bomb tapes cover both birth phases. `--replay-cases PATH,...` reruns the exact saved seed **and** all random action choices. Seed-only replay creates new action choices and is discovery.
+The definitions below are discovered by executing the actual tape builder. By default the paired suite executes all 8 contrived cases plus two fresh OS-random seed/action tapes. Random tapes sample three movement/fire direction pairs with replacement; they do not guarantee every direction or birth phase. Contrived moving-bomb tapes cover both birth phases. `--replay-cases PATH,...` reruns the exact saved seed **and** all random action choices. Seed-only replay creates new action choices and is discovery.
 
 | Paired scenario | Behavior / systems | Shared bootstrap / captures | Presentation intervals |
 | --- | --- | --- | --- |
@@ -82,7 +82,7 @@ Generated from [the suite registry](tools/e2e/suites.mjs). Each suite runs the f
 
 | Suite | Proves | Driver |
 | --- | --- | --- |
-| `paired` | Title/menu, movement/fire, pause, bombs and combat rooms; six contrived + two OS-random runs | [paired-game.mjs](tools/foundation/paired-game.mjs) |
+| `paired` | Title/menu, movement/fire, pause, bombs and combat rooms; all declared contrived + OS-random runs | [paired-game.mjs](tools/foundation/paired-game.mjs) |
 | `regressions` | Recorded paired runs that previously regressed | [paired-game.mjs](tools/foundation/paired-game.mjs) `--replay-cases references/isaac/foundation/runtime-progress/1E0WJX06.json,references/isaac/foundation/runtime-progress/W0L0LYYM.json` |
 | `floor` | Complete Basement floor generation: descriptors, topology, retries and starting doors | [floor-e2e.mjs](tools/foundation/floor-e2e.mjs) `--count 2` |
 | `boot-mt` | Boot-time shared MT state at Title, through menu navigation and through seed dialog entry/reopening | [boot-mt.mjs](tools/e2e/boot-mt.mjs) `--count 4` |

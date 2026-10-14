@@ -110,7 +110,7 @@ All paired captures retain strict decoded-RGBA diagnostics. Their pixel failures
 
 ## Required live paired-game scenarios
 
-The definitions below are discovered by executing the actual tape builder. By default the paired suite executes all six contrived cases plus two fresh OS-random seed/action tapes. Random tapes sample three movement/fire direction pairs with replacement; they do not guarantee every direction or birth phase. Contrived moving-bomb tapes cover both birth phases. \`--replay-cases PATH,...\` reruns the exact saved seed **and** all random action choices. Seed-only replay creates new action choices and is discovery.
+The definitions below are discovered by executing the actual tape builder. By default the paired suite executes all ${pairedCases.filter(item => !item.randomized).length} contrived cases plus two fresh OS-random seed/action tapes. Random tapes sample three movement/fire direction pairs with replacement; they do not guarantee every direction or birth phase. Contrived moving-bomb tapes cover both birth phases. \`--replay-cases PATH,...\` reruns the exact saved seed **and** all random action choices. Seed-only replay creates new action choices and is discovery.
 
 | Paired scenario | Behavior / systems | Shared bootstrap / captures | Presentation intervals |
 | --- | --- | --- | --- |
