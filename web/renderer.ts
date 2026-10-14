@@ -216,9 +216,16 @@ export class Renderer {
     gl.drawImage(this.assets.image(appearance.fx.shading), x, y, width, height);
   }
   private drawPlayer(ctx: CanvasRenderingContext2D, state: State): void {
+    if (!state.player.visible) return;
     const player = state.player, x = Math.round((player.x + player.renderOffset.x) * 2) / 2,
       y = Math.round((player.y + player.renderOffset.y) * 2) / 2;
     const [RedTint, GreenTint, BlueTint] = state.stageEffects.actorTint;
+    if (state.playerAnimation.current) {
+      this.assets.draw(ctx, PLAYER, state.playerAnimation.current, x, y, state.playerAnimation.frame,
+        { overrides: Object.fromEntries(Array.from({length: 5}, (_, layer) => [layer, {RedTint, GreenTint, BlueTint}])) });
+      if (state.playerAnimation.current === "UseItem") this.pickups.drawCarried(ctx, state, x, y);
+      return;
+    }
     if (state.playerItems?.pickupAnimationGuard) {
       this.assets.draw(ctx, PLAYER, "Pickup", x, y, state.playerItems.pickupAnimationFrame,
         { overrides: Object.fromEntries(Array.from({length: 5}, (_, layer) => [layer, {RedTint, GreenTint, BlueTint}])) });
