@@ -51,6 +51,9 @@ pub struct Floor {
     pub contract: String,
     pub stage: u32,
     pub stage_seed: u32,
+    ///None keeps the existing ordinary floor's unimplemented curse owner
+    ///explicit. Challenge uses the actual local sampler and filtered mask.
+    pub challenge_curse: Option<crate::challenges::CurseSample>,
     pub additional_rooms: u8,
     pub attempts: u32,
     pub descriptors: Vec<Descriptor>,
@@ -795,6 +798,34 @@ pub fn generate_basement(stage_seed: u32) -> Result<Floor, String> {
 }
 
 pub fn generate_normal_basement(request: NormalBasementRequest) -> Result<Floor, String> {
+    generate_normal_basement_inner(request, None)
+}
+
+pub(crate) fn generate_challenge_basement(
+    stage_seed: u32,
+    definition: &crate::challenges::Definition,
+    profile: &crate::Profile,
+    has_black_candle: bool,
+) -> Result<Floor, String> {
+    definition.validate_initial_scope()?;
+    generate_normal_basement_inner(
+        NormalBasementRequest {
+            stage: 1,
+            stage_seed,
+            game_flags: 0,
+            red_hp: 6,
+            max_red_hp: 6,
+            soul_hp: 0,
+            coins: 0,
+        },
+        Some((definition, profile, has_black_candle)),
+    )
+}
+
+fn generate_normal_basement_inner(
+    request: NormalBasementRequest,
+    challenge: Option<(&crate::challenges::Definition, &crate::Profile, bool)>,
+) -> Result<Floor, String> {
     let stage_seed = request.stage_seed;
     if !(1..=2).contains(&request.stage) {
         return Err("normal Basement generation admits only stages 1 and 2".into());
@@ -842,6 +873,21 @@ pub fn generate_normal_basement(request: NormalBasementRequest) -> Result<Floor,
     primary.next(); // 587ec0 reset; fixed global MT draws are a separate stream.
     primary.random(1); // Backdrop palette.
     let count = (request.stage * 10 / 3 + 5 + primary.random(2)).min(20) as u8;
+    let challenge_curse = challenge
+        .map(|(definition, profile, has_black_candle)| {
+            crate::challenges::sample_initial_curse(
+                primary.state,
+                request.stage as i32,
+                definition,
+                profile,
+                crate::challenges::RunParameters::CHALLENGE_MENU,
+                has_black_candle,
+            )
+        })
+        .transpose()?;
+    if challenge_curse.is_some_and(|sample| sample.filtered_mask != 0) {
+        return Err("Challenge floor requires unimplemented nonzero curse consumers".into());
+    }
     let mut generator_state = primary.next(); // Constructor, once per floor.
     let mut flags = request.game_flags;
     let mut reports = Vec::new();
@@ -872,13 +918,16 @@ pub fn generate_normal_basement(request: NormalBasementRequest) -> Result<Floor,
             primary.next(); // 58c337: post-placement level stream word.
             let starting_descriptor = grid[84] as usize;
             return Ok(Floor {
-                contract: if request.stage == 1 {
+                contract: if challenge.is_some() {
+                    "source-authored-challenge1-neutral-filter-fresh-isaac-basement".into()
+                } else if request.stage == 1 {
                     CONTRACT.into()
                 } else {
                     "continuing-profile-normal-isaac-basement-II-without-labyrinth-or-equipped-modifiers;source-growth-fitting-secret-primary-routing-retry-continuity".into()
                 },
                 stage: request.stage,
                 stage_seed,
+                challenge_curse,
                 additional_rooms: count,
                 attempts: attempt_number,
                 descriptors,
