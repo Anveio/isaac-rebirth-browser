@@ -36,6 +36,23 @@ Consult the latest paired report for current implementation outcomes.
 
 ## Current integrated runtime checkpoint
 
+Current main `7492adba` registers36 required live suites. This is a source
+checkpoint, with separate cached effect spawner words and an actual null linked
+parent for the generic NPC Poof callers. The corrected stat-cache cohort retains
+158 required failures over212,485 checks; its earlier609-failure capture remains
+separate. The last complete consolidated production build is still f793/0f343,
+described below. [Current source and interrupted death scope](../references/isaac/foundation/runtime-progress/history/20261014-main36-source-and-death-abort.json)
+records these boundaries without claiming current-main live acceptance.
+
+The root normal-death draft captured two complete failing aggregate cases at
+source `1cc127e8` and artifact d0a6: restart733/740 failed checks and exit734/741.
+Its third actual native/browser segment reached capture but comparison stopped
+with ENOSPC; the fourth selected public OS input was unattempted. Both OS draws
+and all raw partial evidence are retained. The supervisor is terminal failure;
+the immutable interrupted nested paired report still says running. Later
+graphics/streaming/menu-owner source fixes are unbuilt, and no completed
+four-case death acceptance or main death integration is claimed.
+
 The latest completed six-suite run is commit `5b4901f`, immutable artifact
 `a7a5b4972a72c56cd07b33001295955596c9e8f7910e177f522ea037b25444ef`.
 At that checkpoint the core passed 140/149 functional checks, finalized floors
@@ -416,10 +433,10 @@ must not silently turn a room object into a generic enemy or delete it.
 | `Seeds`, `RNG`, global MT19937 | General seed codec, source run/stage/descriptor streams, authored weighted floor/room draws, independent ItemPool and Player child RNGs, and one shared MT owner for boot/menu/audio/tear/admitted actors | Special seeds, later floors and all missing actual spawn/effect consumers; complete post-run MT equality remains unaccepted |
 | `LevelGenerator`, `Level`, `RoomConfig` | Fresh normal Basement generation uses authored weights, source retries/fitting/secrets and complete descriptors; runtime rooms consume their descriptor selectors. Live floors verify full ordered descriptors and169 cells. | Other stages/profiles/challenges/curses and unsupported shapes/selectors; a passing source kernel does not accept its missing gameplay caller |
 | `Room`, `RoomTransition`, `StageTransition` | Reciprocal normal/curse/free treasure/secret and ordinary key doors, visited minimap, supported room persistence, tall-room geometry and scoped camera bounds have runtime owners and required public-route gates | Hostile/special lock rules, complete actor reentry, floor exits, alternate door styles, complete transition/camera/backdrop pixels |
-| `Entity_Player` | Native f32 movement, phase-aware motion/fire/bomb controls, inventory/health helpers, damage/immunity and an actual controlsEnabled field distinct from native Entity visibility | Item stat aggregation, broader health containers/caps and damage sources, death/transformations and complete Player callback/animation order |
+| `Entity_Player` | Native f32 movement, phase-aware motion/fire/bomb controls, inventory/health helpers, damage/immunity and an actual controlsEnabled field distinct from native Entity visibility; source cache4/8/16 and scoped passive callbacks retain their separate158-failure paired proof | Other stat/cache aggregation, broader health containers/caps and damage sources, death/transformations and complete Player callback/animation order |
 | `Entity_Tear`, `Entity_Projectile`, `Entity_Laser`, `Entity_Knife` | Regular tears own source ground/height/full/fast prediction, ordered birth RNG/audio admission and next-full removal; RoundWorm has a typed type9 projectile | Complete RNG-dependent numerical parity, other weapons, tear Poof/death effects, broader projectile contacts and downstream callbacks |
 | `Entity_NPC` | Authored Fly/AttackFly/RoundWorm/Keeper/Fire and ordinary Monstro have typed source admission/update/contact/damage paths. Scoped paired failures remain required; implemented AI is not a whole-NPC parity claim. | Unsupported subclasses/champions, exact shared seeds/trajectories, final-boss rewards/death effects and exceptional spawn contexts |
-| `Entity_Familiar` | Leech cache/child270 admission, separate room sequence owner, appearance and real Poof15. Four fresh pairs retain25,131 mandatory failures despite matching scoped local/sprite/reveal/retirement fields. [Evidence](familiars.md) | Missing spawn/shared consumers and placement/sequence/Poof seeds, path/target/contact/heal, other subclasses, full cache completion and room-return lifecycle |
+| `Entity_Familiar` | Leech cache/child270 admission, separate room sequence owner, appearance and real Poof15. Reviewed NPC Poof source now separates cached spawner words from its null linked parent; this correction has no new production/live acceptance. Four earlier fresh pairs retain25,131 mandatory failures despite matching scoped local/sprite/reveal/retirement fields. [Evidence](familiars.md) | Missing spawn/shared consumers and placement/sequence/Poof seeds, path/target/contact/heal, other subclasses, full cache completion and room-return lifecycle |
 | `Entity_Bomb`, `Game::BombDamage` | Rising-edge E placement, source full/fast regular motion/fuse/blast, inventory debit, self/NPC/grid damage and typed Troll/Mega conversion paths | Exact converted shared birth seeds, broader variant/grid/radial holdouts, craters and complete hurt/explosion rendering |
 | `Entity_Pickup`, grid entities | Natural coin/key/bomb actors, collection and scoped persistence; deferred collectible grant and empty-altar motion; Chest constructor/opening source path; actual grid occupancy, rock/spike/door response and fresh signed448-word Room costs | Regular saved readmission and anchor corrections remain separately reviewed; hearts/other families, paid/modifier contexts, Chest loot/live completion, weighted path costs and other grid callbacks |
 | `ItemConfig`, `ItemPool`, player item evaluation | Pinned343 configurations/16 pools, independent source RNG owners, weighted depletion/eligibility, natural selection and first queued acquisition/charge. Four frozen-original/fresh-browser acquisition recoveries pass70,696 scoped checks; required CI captures both games fresh. [Evidence](item-pools.md) | Item-specific cache/stat/costumes, active use/swaps, pocket/trinket effects, broader familiars, progression/paid/override and exceptional selectors |

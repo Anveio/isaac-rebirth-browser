@@ -1,0 +1,59 @@
+{
+  "schema": 1,
+  "scope": "Currentmain source/registry and separately interrupted rootDeath source cohort; no currentmain production/live acceptance",
+  "main": "7492adba9b256e5767e28906289e89ca6faa2655",
+  "registeredLiveSuites": 36,
+  "poofSource": {
+    "schemaPR": 102,
+    "schemaHead": "39514bcd28738628e1f9b65a65ca29b1c6dcc4d7",
+    "correctionPR": 103,
+    "correctionHead": "e07e7cc7e1fb7f92cfcd402de9e84d8cfc6f0d16",
+    "runtime": "e168e6016babbb39ef24af4f951cce81b321c877",
+    "contract": "GameSpawn copies cached1c/20; genericNPCappearance hasNULL linkedEntity498 without447fc0. Historical84/89 source/proof unchanged.",
+    "newProductionOrLiveAcceptance": false
+  },
+  "lastWholeBuild": {
+    "source": "f79338a6ebee7e095bfbd5df183c43da8e5fee56",
+    "registeredSuites": 33,
+    "artifact": "0f3432b0038e4a9dc36a491f312be05c8999096b153e7ed5d3b2e361f03e784b",
+    "scope": "Immutable first5/continuation28 whole33 scope remains distinct from latermain36."
+  },
+  "deathInterrupted": {
+    "source": "1cc127e860dba62990bcba874d1f7fe79f4c4d4e",
+    "artifact": "d0a6bcf3df25cf0787b0a2a18b9df892206e55eee236e1d87a45bcbce2ea7c39",
+    "supervisorStatus": "fail",
+    "supervisorSha256": "d02c7bebf844d15659942022b2698148c4f2d092d564e4adf1b079ab3407b8a4",
+    "nestedPairedStatus": "running",
+    "nestedPairedRawSha256": "185213c9f5a644c4dc1f251ac378cdec3bce113b27f62a3f36491edb06fbc9ea",
+    "nestedPairedArchiveSha256": "f8ed4cd4f64f31ca890716980abf9cdda02c75d28882a1b84cd14e2bfc888cd9",
+    "completedAggregateCases": [
+      {
+        "id": "death-spikes-restart",
+        "status": "fail",
+        "checks": 740,
+        "failedChecks": 733
+      },
+      {
+        "id": "death-spikes-exit",
+        "status": "fail",
+        "checks": 741,
+        "failedChecks": 734
+      }
+    ],
+    "thirdSegment": "Actual native/browser raw captured; comparison failedENOSPC before aggregation, no complete verdict.",
+    "fourthSegment": "Unattempted public OS draw retained; not a completedpair.",
+    "bothOSDrawsRetained": true,
+    "sourceAndProductionBeforeAfterStable": true,
+    "followingSourceFixesUnbuilt": [
+      "0b35d378117737078c98f9ed7d7b453bf5b15916",
+      "11721d86b6273b65d8e7a5cdd93bab145675f56d",
+      "af6835631a3ef31de4ea4e38382f9223493c547d"
+    ],
+    "mainIntegrated": false,
+    "completedFourCaseAcceptance": false
+  },
+  "pendingEffectLeaf": {
+    "pr": 104,
+    "scope": "ActualBloodParticle5+ordinary244producer/gate draft; no latestWASM/native proof. Monstro2/42/77 separate. Notpartofmain36."
+  }
+}
