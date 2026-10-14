@@ -1,4 +1,4 @@
-//! Source-derived fresh-profile normal Basement generation.
+//! Source-derived normal Basement I/II generation for the fresh profile.
 //! Independent stage primary, generator and local selector streams are kept
 //! separate. Authored catalogues supply every template and spawn selector.
 use crate::layout::{self, Cell, GeneratedRoom, Growth, GrowthRequest, GRID_CELLS, GRID_WIDTH};
@@ -7,6 +7,21 @@ use crate::room_templates::{AuthoredTemplate, SelectionRequest, TemplatePicker};
 use serde::{Deserialize, Serialize};
 
 pub const CONTRACT: &str = "fresh-profile-normal-isaac-basement-without-labyrinth;source-growth-fitting-secret-primary-routing-retry-continuity";
+
+/// Actual Level inputs carried from the continuing run. The stage controller
+/// must supply the retained stage seed and game flags, and health before the
+/// new-stage Player callback. Alternate stages, challenges, Labyrinth and
+/// equipped modifiers are outside this path.
+#[derive(Clone, Copy, Debug)]
+pub struct NormalBasementRequest {
+    pub stage: u32,
+    pub stage_seed: u32,
+    pub game_flags: u64,
+    pub red_hp: u8,
+    pub max_red_hp: u8,
+    pub soul_hp: i32,
+    pub coins: u32,
+}
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -34,6 +49,7 @@ pub struct Descriptor {
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Floor {
     pub contract: String,
+    pub stage: u32,
     pub stage_seed: u32,
     pub additional_rooms: u8,
     pub attempts: u32,
@@ -330,14 +346,25 @@ fn select(
         picker.catalog()[selected.catalog_index].clone(),
     ))
 }
-fn boss(primary: &mut Primary, flags: &mut u64) -> u32 {
+fn boss(primary: &mut Primary, flags: &mut u64, stage: u32) -> u32 {
     primary.next(); // Local RNG1 creation; fresh unavailable families never use it.
     if primary.random(4) == 0 {
-        if primary.random(2) == 1 {
-            *flags |= 0x100000;
+        // Odd floors choose and save a family; even floors use its retained
+        // flag to select the other member without consuming that extra draw.
+        let horseman = if stage == 1 {
+            primary.random(2) == 1
+        } else {
+            *flags & 0x100000 == 0
+        };
+        if horseman {
+            if stage == 1 {
+                *flags |= 0x100000;
+            }
             5020
         } else {
-            *flags &= !0x100000;
+            if stage == 1 {
+                *flags &= !0x100000;
+            }
             5140
         }
     } else {
@@ -358,11 +385,20 @@ fn boss(primary: &mut Primary, flags: &mut u64) -> u32 {
         primary.random(2);
         primary.random(2);
         primary.random(2);
-        if primary.random(2) == 1 {
-            *flags |= 16;
+        let monstro = if stage == 1 {
+            primary.random(2) == 1
+        } else {
+            *flags & 16 == 0
+        };
+        if monstro {
+            if stage == 1 {
+                *flags |= 16;
+            }
             1010
         } else {
-            *flags &= !16;
+            if stage == 1 {
+                *flags &= !16;
+            }
             1020
         }
     }
@@ -419,26 +455,38 @@ struct Placed {
     grid: Vec<i32>,
 }
 
+#[derive(Clone, Copy)]
+struct AttemptParameters {
+    request: NormalBasementRequest,
+    count: u8,
+    shape_mask: u8,
+}
+
 fn attempt(
     primary: &mut Primary,
     generator_state: &mut u32,
-    count: u8,
     special: &mut TemplatePicker,
     basement: &mut TemplatePicker,
     flags: &mut u64,
+    parameters: AttemptParameters,
 ) -> Result<Option<Placed>, String> {
+    let AttemptParameters {
+        request,
+        count,
+        shape_mask,
+    } = parameters;
     let growth = layout::generate(GrowthRequest {
         generator_seed: *generator_state,
         additional_rooms: count,
-        shape_mask: 15,
+        shape_mask,
     })?;
     *generator_state = growth.final_rng_state;
-    if growth.dead_end_indices.len() < 5 {
+    if growth.dead_end_indices.len() < 5 + usize::from(request.stage != 1) {
         return Ok(None);
     }
     let mut fitting = Fitting::new(growth);
     let mut descriptors = Vec::new();
-    let minimum = boss(primary, flags);
+    let minimum = boss(primary, flags, request.stage);
     let boss_seed = primary.next();
     let selected = select(special, boss_seed, 5, (minimum, minimum + 9), 4, 0, 10)?;
     let Some(index) = fitting.fit_small(selected.1.door_mask, true) else {
@@ -496,8 +544,9 @@ fn attempt(
     let selected = select(special, seed, kind, (0, u32::MAX), 4, 0, 10)?;
     let mut accepted = primary.random(7) == 0;
     if !accepted {
-        accepted = primary.random(4) == 0;
-    } //6<=6+0.
+        accepted = primary.random(4) == 0
+            && i32::from(request.max_red_hp) <= i32::from(request.red_hp) + request.soul_hp;
+    }
     optional(
         &mut fitting,
         &mut descriptors,
@@ -549,7 +598,7 @@ fn attempt(
     .filter_map(|(variant, flag)| (*flags & flag == 0).then_some(variant))
     .collect();
     if available.is_empty() {
-        return Err("fresh normal retry exhausted the source miniboss candidate set".into());
+        return Err("normal Basement retry exhausted the source miniboss candidate set".into());
     }
     let minimum =
         available[primary.random(available.len() as u32) as usize] + if rare { 100 } else { 0 };
@@ -557,7 +606,7 @@ fn attempt(
     let selected = select(special, seed, 6, (minimum, minimum + 9), 4, 0, 10)?;
     let mut accepted = primary.random(4) == 0;
     if !accepted {
-        accepted = primary.random(3) == 0;
+        accepted = primary.random(3) == 0 && request.stage == 1;
     }
     if optional(
         &mut fitting,
@@ -580,12 +629,14 @@ fn attempt(
     }
     let seed = primary.next();
     let selected = select(special, seed, 11, (0, u32::MAX), 4, 0, 10)?;
-    primary.random(2); // Consumed before unconditional stage1 rejection.
+    let accepted = primary.random(2) == 0
+        && request.stage > 1
+        && i32::from(request.max_red_hp) <= i32::from(request.red_hp) + request.soul_hp;
     optional(
         &mut fitting,
         &mut descriptors,
         selected,
-        false,
+        accepted,
         primary.state,
     );
     let mut alternate_arcade = primary.random(10) == 0;
@@ -607,16 +658,18 @@ fn attempt(
         &mut fitting,
         &mut descriptors,
         selected,
-        false,
+        request.stage == 2 && request.coins > 4,
         primary.state,
     );
     let kind = if primary.random(2) != 0 { 19 } else { 18 };
     let seed = primary.next();
     let selected = select(special, seed, kind, (0, u32::MAX), 4, 0, 10)?;
-    let accepted = primary.random(50) == 0;
+    let mut accepted = primary.random(50) == 0;
     if !accepted {
-        primary.random(5);
-    } // Fresh6HP fails low-health predicate.
+        accepted = primary.random(5) == 0
+            && ((request.soul_hp <= 0 && request.red_hp <= 1)
+                || (request.soul_hp <= 2 && request.max_red_hp == 0));
+    }
     optional(
         &mut fitting,
         &mut descriptors,
@@ -667,16 +720,20 @@ fn attempt(
                 (2, 2) => 3,
                 _ => return Err("unrecovered generated shape".into()),
             };
-            let selected = match select(
-                basement,
-                primary.next(),
-                1,
-                (0, u32::MAX),
+            let selected = match basement.choose(SelectionRequest {
+                seed: primary.next(),
+                room_type: 1,
                 shape,
-                fitting.mask(index),
-                5,
-            ) {
-                Ok(selected) => selected,
+                required_doors: fitting.mask(index),
+                min_variant: 0,
+                max_variant: u32::MAX,
+                min_difficulty: if request.stage == 1 { 1 } else { 5 },
+                max_difficulty: if request.stage == 1 { 5 } else { 10 },
+            }) {
+                Ok(selected) => (
+                    selected.catalog_index,
+                    basement.catalog()[selected.catalog_index].clone(),
+                ),
                 Err(_) => return Ok(None), // Source normal selector NULL aborts placement.
             };
             record(
@@ -726,6 +783,22 @@ fn attempt(
 }
 
 pub fn generate_basement(stage_seed: u32) -> Result<Floor, String> {
+    generate_normal_basement(NormalBasementRequest {
+        stage: 1,
+        stage_seed,
+        game_flags: 0,
+        red_hp: 6,
+        max_red_hp: 6,
+        soul_hp: 0,
+        coins: 0,
+    })
+}
+
+pub fn generate_normal_basement(request: NormalBasementRequest) -> Result<Floor, String> {
+    let stage_seed = request.stage_seed;
+    if !(1..=2).contains(&request.stage) {
+        return Err("normal Basement generation admits only stages 1 and 2".into());
+    }
     if stage_seed == 0 {
         return Err("nonzero stage seed required".into());
     }
@@ -743,15 +816,34 @@ pub fn generate_basement(stage_seed: u32) -> Result<Floor, String> {
             .map(|asset| asset.template)
             .collect(),
     )?;
+    // 58c18d queries actual normal templates in the floor's difficulty band;
+    // 58c20f admits a rectangular shape only when its count exceeds four.
+    let mut shape_counts = [0u32; 4];
+    let (minimum_difficulty, maximum_difficulty) =
+        if request.stage == 1 { (1, 5) } else { (5, 10) };
+    for template in basement.catalog() {
+        if template.room_type == 1
+            && (minimum_difficulty..=maximum_difficulty).contains(&template.difficulty)
+            && template.shape_index() < 4
+        {
+            shape_counts[usize::from(template.shape_index())] += 1;
+        }
+    }
+    let shape_mask = shape_counts
+        .iter()
+        .enumerate()
+        .fold(0u8, |mask, (shape, count)| {
+            mask | if *count > 4 { 1 << shape } else { 0 }
+        });
     let mut primary = Primary {
         state: stage_seed,
         draws: 0,
     };
     primary.next(); // 587ec0 reset; fixed global MT draws are a separate stream.
     primary.random(1); // Backdrop palette.
-    let count = 8 + primary.random(2) as u8;
+    let count = (request.stage * 10 / 3 + 5 + primary.random(2)).min(20) as u8;
     let mut generator_state = primary.next(); // Constructor, once per floor.
-    let mut flags = 0;
+    let mut flags = request.game_flags;
     let mut reports = Vec::new();
     for attempt_number in 1..=100 {
         let initial_generator_state = generator_state;
@@ -759,10 +851,14 @@ pub fn generate_basement(stage_seed: u32) -> Result<Floor, String> {
         let result = attempt(
             &mut primary,
             &mut generator_state,
-            count,
             &mut special,
             &mut basement,
             &mut flags,
+            AttemptParameters {
+                request,
+                count,
+                shape_mask,
+            },
         )?;
         reports.push(AttemptReport {
             attempt: attempt_number,
@@ -776,7 +872,12 @@ pub fn generate_basement(stage_seed: u32) -> Result<Floor, String> {
             primary.next(); // 58c337: post-placement level stream word.
             let starting_descriptor = grid[84] as usize;
             return Ok(Floor {
-                contract: CONTRACT.into(),
+                contract: if request.stage == 1 {
+                    CONTRACT.into()
+                } else {
+                    "continuing-profile-normal-isaac-basement-II-without-labyrinth-or-equipped-modifiers;source-growth-fitting-secret-primary-routing-retry-continuity".into()
+                },
+                stage: request.stage,
                 stage_seed,
                 additional_rooms: count,
                 attempts: attempt_number,
