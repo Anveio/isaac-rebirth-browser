@@ -20,11 +20,18 @@ public inputs. Live suites run contrived interactions and recorded OS-random sce
 selected source-observable functional contracts are blocking. Full-frame pixel
 comparisons remain explicit diagnostics with their actual pass/fail results.
 `test:e2e` runs every registered live suite, retaining every suite's result
-before failing. Pull requests run only `npm run check:build`; run the live
-suites your change touches locally before opening one. After each merge to
-main, every six hours and on dispatch, CI discovers that same registry and runs
-the suites in separate jobs with `fail-fast: false`. A red main run is a
-regression to fix next. Use `npm run test:e2e:paired -- --replay-cases PATH` to replay a recorded case. Standalone
+before failing.
+
+This repository deliberately has no CI. Nothing runs on pull requests or
+after merges, so every agent is responsible for making sure its own change
+does not regress the codebase, using the tooling available here: run
+`npm run check:build`, then the live suites your change touches (and any
+suite whose driver, comparator or shared code you edited), and compare their
+results against main before opening or merging a PR. Never merge a change
+that turns a passing comparison red or breaks the build, and fix any
+regression you find on main before starting new work. A dedicated agent
+workstream keeps main playable and fixes regressions, but that is a backstop,
+not a substitute for checking your own change. Use `npm run test:e2e:paired -- --replay-cases PATH` to replay a recorded case. Standalone
 browser checks require a fresh build. Native Rust/WASM self-equality proves
 replay consistency, not original hidden-state or simulation-tick parity.
 
