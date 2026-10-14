@@ -21,7 +21,7 @@ admission. Pending damage may admit SFX60 before common BaseUpdate. Ordered
 damage retains the first negative HP crossing, skips later records after the
 actual death flag, and keeps death distinct from next-full manager retirement.
 
-`test:e2e:dips` is a required fresh original/production browser gate. Its default
+e2e suite `dips` is a required fresh original/production browser gate. Its default
 cohort contains two contrived phase offsets for public Cellar seed69/Room213 and
 two OS seed tapes drawn once without filtering. It requires actual Dip presence,
 both phases, Idle/Move, negative death and retirement in both contrived games.

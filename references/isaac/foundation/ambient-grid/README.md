@@ -41,7 +41,7 @@ fresh original processes and one unchanged production artifact:
 - Fresh strict W0 replay passes 18/18 functional checkpoints on the same
   artifact. Pixels match 7/18 frames, with 11 diagnostic differences retained.
 
-The canonical gate is `npm run test:e2e:ambient-grid`. It compares all 448 live
+The canonical gate is `npm run test:e2e -- ambient-grid`. It compares all 448 live
 costs, bounded current-row seed pairs and seven-field records, and complete
 physical-grid occupancy. Differences make the case and suite fail; every
 selected case executes. Native data supplies comparison outputs only.

@@ -3,7 +3,6 @@
 Field offsets derive from the hashed local plaintext ELF, not browser input.
 Only logical values are exported. Requires actual original log/parent ownership.
 """
-import hashlib
 import importlib.util
 import os
 from pathlib import Path
@@ -12,6 +11,9 @@ import struct
 import time
 
 ROOT = Path(__file__).resolve().parents[2]
+identity_spec = importlib.util.spec_from_file_location('native_identity', ROOT / 'tools/original/native-identity.py')
+native_identity = importlib.util.module_from_spec(identity_spec)
+identity_spec.loader.exec_module(native_identity)
 spec = importlib.util.spec_from_file_location('readonly_maps', ROOT / 'tools/original/state-observer.py')
 maps = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(maps)
@@ -33,7 +35,7 @@ def observe(pid, context):
         parent = int(next(line.split(':', 1)[1] for line in status.splitlines() if line.startswith('PPid:')))
         if parent != os.getpid() or not context.get('gateBlocked'):
             raise ValueError('Requires blocked direct original child')
-        if hashlib.sha256(Path(f'/proc/{pid}/exe').read_bytes()).hexdigest() != NATIVE_SHA:
+        if native_identity.native_binary_sha256(pid) != NATIVE_SHA:
             raise ValueError('Unexpected original executable')
         log = context.get('publicLogState', {})
         if not all(type(log.get(key)) is int for key in ('stageSeed', 'spawnSeed', 'seedValue')):

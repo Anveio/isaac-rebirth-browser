@@ -88,7 +88,7 @@ The initial 0/4 actual paired report retains 3,075 failures; the following recov
 retains 902 raw decimal-spelling differences and 17 real active-item timer errors.
 Those failed reports and original mapping bytes remain intact.
 
-`test:e2e:item-acquisition` is required by the live suite registry and runs both
+e2e suite `item-acquisition` is required by the live suite registry and runs both
 real games freshly. Its default bank declares complete contact/grant intervals
 for both contrived offsets, both retained unfiltered OS outcomes, and two newly
 recorded unfiltered OS treasure routes. Selection remains a separate gate that

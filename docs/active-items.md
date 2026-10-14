@@ -20,7 +20,7 @@ authored nonlooping18-frame UseItem with the copied item sprite, and calls
 and a new press while exhausted do not create a second effect. Temporary45
 has authored cooldown0, which persists rather than immediately expiring.
 
-`test:e2e:active-item-use` is a required registry/CI suite that runs both real
+e2e suite `active-item-use` is a required registry/CI suite that runs both real
 games freshly. Four contrived natural45 routes cover both public admission
 phases and full/damaged health; damage is caused by an ordinary own bomb.
 The gate also retains the earlier unfiltered291/48 discoveries and adds two

@@ -11,25 +11,11 @@ import { chromium } from '@playwright/test';
 import { browserLaunchOptions, inspectBrowserGraphics } from '../foundation/browser.mjs';
 import { startProductionServer } from '../foundation/production-server.mjs';
 import { assertInputProvenance, enterSeededRun, manualSeedCommands, waitForReady } from '../foundation/verify.mjs';
+import { ORIGINAL_SHA } from './lib/original.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const run = promisify(execFile);
-const ORIGINAL_SHA = '724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13';
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
-const gateSources = ['tools/e2e/bomb-pickups.mjs', 'tools/original/bomb-pickup-scenarios.py',
-  'tools/original/rock-blast-scenarios.py', 'tools/foundation/decode-rooms.py',
-  'tools/original/foundation-seeds.py',
-  'tools/original/foundation-pickup-observe.py', 'tools/original/foundation-clock-run.py',
-  'tools/original/foundation-clock-gate.c', 'tools/original/foundation-clock-verify.py',
-  'tools/original/state-observer.py', 'tools/original/with-display.sh',
-  'tools/foundation/production-server.mjs', 'tools/foundation/browser.mjs',
-  'tools/foundation/verify.mjs',
-  'web/trace.ts',
-  'references/isaac/foundation/bomb-pickups/scoped-scenarios.json',
-  'tools/original/bomb-pickup-observer.py', 'tools/original/audio-observer.py'];
-const sourceHashes = async () => Object.fromEntries(await Promise.all(gateSources.map(async path =>
-  [path, digest(await readFile(join(ROOT, path)))])));
-const beforeSources = await sourceHashes();
 const value = flag => { const index = process.argv.indexOf(flag); return index < 0 ? undefined : process.argv[index + 1]; };
 const output = resolve(value('--output') || join(ROOT, '.cache/e2e/bomb-pickups', String(Date.now())));
 await mkdir(output, { recursive: true });
@@ -65,7 +51,6 @@ const browser = await chromium.launch(browserLaunchOptions());
 const report = {
   schema: 1, status: 'running', originalBinarySha256: ORIGINAL_SHA, production: server.build,
   selection: selectedCase ? { scope: 'Explicit targeted recorded-case replay; default CI executes the complete cohort', case: selectedCase } : { scope: 'Complete selected cohort' },
-  gateSources: beforeSources,
   graphics: await inspectBrowserGraphics(browser),
   scope: 'Live public-seed ordinary-room bomb pickup admission with unfiltered source subtype draws, local RNG, full-phase animation/contact/collection, inventory increments, actor cleanup and native SFX201 admission after real rock access. Regular/double callbacks are implemented; observed unsupported Troll/Megatroll conversions remain blocking. Inventory cap boundary, item modifiers, blast pickup impulses, special-room prices, total shared MT/sample identity and pixels remain unaccepted. Existing mandatory rare-rock/Troll regressions remain blocking in rock-blast.',
   cases: [],
@@ -302,8 +287,6 @@ try {
       comparedPresentations: caseResult.comparedPresentations, failures: caseResult.failures.length }));
   }
   report.status = report.cases.every(item => item.status === 'pass') ? 'pass' : 'fail';
-  report.gateSourcesStable = JSON.stringify(beforeSources) === JSON.stringify(await sourceHashes());
-  if (!report.gateSourcesStable) report.status = 'fail';
 } catch (error) {
   report.status = 'fail'; report.error = String(error); throw error;
 } finally {
