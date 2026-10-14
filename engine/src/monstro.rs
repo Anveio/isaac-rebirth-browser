@@ -45,7 +45,7 @@ pub(crate) struct World<'a> {
     pub grid: &'a Grid,
     pub audio: &'a mut AudioState,
     pub system_counter: u32,
-    pub poofs: crate::familiars::PoofAdmission<'a>,
+    pub poofs: crate::familiars::NpcEffectAdmission<'a>,
 }
 
 pub fn from_selector(id: u32, selector: &SpawnSelector) -> Result<Option<Npc>, String> {
@@ -97,6 +97,7 @@ pub fn from_selector(id: u32, selector: &SpawnSelector) -> Result<Option<Npc>, S
         keeper: None,
         fireplace: None,
         level2_fly: None,
+        dip: None,
         monstro: Some(MonstroState {
             state_frame: 0,
             choice: 0,

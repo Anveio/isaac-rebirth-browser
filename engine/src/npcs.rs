@@ -62,6 +62,7 @@ pub struct Npc {
     pub fireplace: Option<crate::fireplaces::FireplaceState>,
     pub monstro: Option<crate::monstro::MonstroState>,
     pub level2_fly: Option<crate::level2_flies::Level2FlyState>,
+    pub dip: Option<crate::dips::DipState>,
 }
 
 const ZERO: WorldVector = WorldVector { x: 0.0, y: 0.0 };
@@ -361,6 +362,7 @@ pub(crate) fn post_contact_grid(state: &mut State) -> Result<(), String> {
         match npc.kind {
             20 => crate::monstro::post_contact_grid(npc, &grid)?,
             214 => crate::level2_flies::post_contact_grid(npc, &grid)?,
+            217 => crate::dips::post_contact_grid(npc, &grid)?,
             244 => crate::roundworm::post_contact_grid(npc, &grid)?,
             // Source class3 clamps the center first. These authored families
             // have zero grid collision points, so their sample loop is empty.
@@ -454,7 +456,14 @@ pub(crate) fn direction(random: &mut Mt19937) -> WorldVector {
 }
 
 impl Npc {
-    pub fn from_selector(id: u32, selector: &SpawnSelector) -> Result<Option<Self>, String> {
+    pub fn from_selector(
+        id: u32,
+        selector: &SpawnSelector,
+        stage: u32,
+    ) -> Result<Option<Self>, String> {
+        if let Some(dip) = crate::dips::from_selector(id, selector, stage)? {
+            return Ok(Some(dip));
+        }
         if let Some(fly) = crate::level2_flies::from_selector(id, selector)? {
             return Ok(Some(fly));
         }
@@ -574,6 +583,7 @@ impl Npc {
             fireplace: None,
             monstro: None,
             level2_fly: None,
+            dip: None,
         }))
     }
 

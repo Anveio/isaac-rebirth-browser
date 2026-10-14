@@ -8,3 +8,4 @@ gfx/1000.066_ember particle.anm2
 gfx/020.000_monstro.anm2
 gfx/ui/boss/versusscreen.anm2
 gfx/213.000_level2fly.anm2
+gfx/216.000_dip.anm2

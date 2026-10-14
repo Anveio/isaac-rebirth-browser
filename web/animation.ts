@@ -57,6 +57,7 @@ const urls = import.meta.glob([
   "../references/isaac/rebirth/resources/gfx/effects/effect_poopspawn.png",
   "../references/isaac/rebirth/resources/gfx/monsters/classic/monster_010_fly.png",
   "../references/isaac/rebirth/resources/gfx/monsters/rebirth/monster_213_level2fly.png",
+  "../references/isaac/rebirth/resources/gfx/monsters/rebirth/monster_216_dip.png",
   "../references/isaac/rebirth/resources/gfx/effects/effect_032_bloodstains.png",
   "../references/isaac/rebirth/resources/gfx/bosses/classic/boss_004_monstro.png",
   "../references/isaac/rebirth/resources/gfx/effects/hangingguys.png",

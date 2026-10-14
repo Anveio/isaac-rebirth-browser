@@ -177,6 +177,8 @@ export interface Room {
     damage: {pendingDamage: number; pendingFlags: number};
     keeper: {anchor: {x: number; y: number}; entityFlags: number; stateFrame: number; countdown: number;
       animation: string; animationClock: number; animationPlaying: boolean; tint: number[]; offsets: number[]} | null;
+    dip: {entityFlags: number; birthGameUpdate: number; currentFriction: number; flipX: boolean;
+      tint: number[]; offsets: number[]} | null;
     level2Fly: {entityFlags: number; birthGameUpdate: number; feedbackVelocity: {x: number; y: number};
       gridContact: boolean; gridNormal: {x: number; y: number}; previousGridVelocity: {x: number; y: number}} | null;
     monstro: {stateFrame: number; choice: number; entityFlags: number; flipX: boolean; birthGameUpdate: number;

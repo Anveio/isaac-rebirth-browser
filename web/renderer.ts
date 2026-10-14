@@ -85,6 +85,18 @@ export class Renderer {
           this.assets.draw(ctx, "gfx/020.000_monstro.anm2", npc.animation,
             0, 0, npc.animationClock, { scale: 0.65 });
           ctx.restore();
+        } else if (npc.dip) {
+          ctx.save();
+          ctx.translate(npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46);
+          ctx.scale(npc.dip.flipX ? -1 : 1, 1);
+          this.assets.draw(ctx, "gfx/216.000_dip.anm2", npc.animation, 0, 0, npc.animationClock,
+            { scale: 0.65, overrides: { 0: {
+              RedTint: npc.dip.tint[0]! * 255, GreenTint: npc.dip.tint[1]! * 255,
+              BlueTint: npc.dip.tint[2]! * 255, AlphaTint: npc.dip.tint[3]! * 255,
+              RedOffset: npc.dip.offsets[0]! * 255, GreenOffset: npc.dip.offsets[1]! * 255,
+              BlueOffset: npc.dip.offsets[2]! * 255,
+            } } });
+          ctx.restore();
         } else if (npc.fireplace) {
           this.assets.draw(ctx, "gfx/033.000_fireplace.anm2", npc.animation,
             npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46, npc.animationClock,
