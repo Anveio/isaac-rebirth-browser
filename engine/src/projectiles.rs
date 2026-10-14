@@ -29,15 +29,21 @@ impl Eye {
 }
 
 /// Normal Isaac excludes the component moving against the aim, then inherits
-/// the remaining native entering velocity with f32 factor1.2.
-pub fn stored_velocity(aim: WorldVector, inherited: WorldVector) -> Result<WorldVector, String> {
-    if !aim.is_finite() || !inherited.is_finite() {
+/// the remaining native entering velocity with f32 factor1.2. Source51bce6
+/// adds that vector to the ten-unit aim before51bd71 scales the whole sum
+/// by cached shot speed, including inherited transverse motion.
+pub fn stored_velocity(
+    aim: WorldVector,
+    inherited: WorldVector,
+    shot_speed: f32,
+) -> Result<WorldVector, String> {
+    if !aim.is_finite() || !inherited.is_finite() || !shot_speed.is_finite() || shot_speed < 0.6 {
         return Err("tear velocity requires finite vectors".into());
     }
     let backward = (inherited.x * aim.x + inherited.y * aim.y).min(0.0);
     let velocity = WorldVector {
-        x: aim.x * 10.0 + (inherited.x - aim.x * backward) * 1.2,
-        y: aim.y * 10.0 + (inherited.y - aim.y * backward) * 1.2,
+        x: (aim.x * 10.0 + (inherited.x - aim.x * backward) * 1.2) * shot_speed,
+        y: (aim.y * 10.0 + (inherited.y - aim.y * backward) * 1.2) * shot_speed,
     };
     if !velocity.is_finite() {
         return Err("tear velocity overflowed".into());

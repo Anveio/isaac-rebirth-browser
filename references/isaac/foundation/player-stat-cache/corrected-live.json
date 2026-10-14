@@ -1,0 +1,194 @@
+{
+  "schema": 1,
+  "scope": "Closed eight-case fresh original/production-browser run at f613545. This receipt preserves actual required failures and only the passing contracts observed in that producer; it does not certify a later main composition.",
+  "sourceHead": "f61354576f592a3e251d60314cce2053bb373f40",
+  "buildSourceHead": "a4a335f0413f8a11da0f1980440385640da492de",
+  "production": {
+    "sha256": "93330fc5622b41660fd98fc44050737eddfd62d48d0807cbb1e9d5a1a8e09d35",
+    "files": 938
+  },
+  "wasmSha256": "511aa78864d66af2fb95739d63f70e55451fa99a84afdeefd388b55062e445c5",
+  "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "reportSha256": "a07e4846f8fb8097f813b3668ca7c319f562d2441d98b2b51405c0fb660ca023",
+  "evidenceAuditSha256": "31b7de65aac37f5017811c32ad56a2b2c343e9c271f113572940c66f7f943cba",
+  "sourceAndArtifactBeforeEnd": "pass",
+  "capturedGateSourceFiles": 42,
+  "gateSourceMapSha256": "80964ce41c7f35c36ecc5fcc8a1273167d44022e04685ae529446f78357ae7a1",
+  "samePublicCasesActionsAndTapesAsInitialRun": "pass",
+  "gameplayStatus": "fail",
+  "caseErrors": 0,
+  "phases": 2796,
+  "checks": 212485,
+  "failures": 158,
+  "passedCases": 0,
+  "failureGroups": {
+    "actualRegularTearCardinality": 28,
+    "ordinalStoredTearVelocity": 30,
+    "unmappedTinyPlanet233CachedFallingSpeed": 100
+  },
+  "observedPassingContracts": [
+    "Roid Rage14 and Speed Ball143 natural selection and actual deferred grants at both phase offsets",
+    "All source cached stats and fire delay for both mapped treasure passives, including corrected Roid falling speed/height",
+    "Player position/velocity and acquisition, counts, pools, queue, health and first active charge contracts across all eight public routes",
+    "Stored tear velocity comparisons for both Speed Ball phase offsets",
+    "Complete original input/binary provenance, actual browser commands/backend states and independent per-presentation snapshots"
+  ],
+  "associationScope": "All velocity checks remain blocking ordinal candidates. Six velocity failures coincide with count mismatches. The other24 occur in TinyPlanet233 at equal counts without an established same-birth identity join. None alone proves a same-actor motion defect.",
+  "pending": [
+    "Actual Entity+31f death flag versus manager pool retirement, death effects and associated tear candidate rows",
+    "TinyPlanet233 cached falling speed and orbital projectile updates",
+    "Boss-only27/28, temporary/repeated copies, other item/cache effects and characters",
+    "Full shared MT and latest main composition acceptance"
+  ],
+  "cases": [
+    {
+      "name": "passive-14-phase-0",
+      "code": "B91W8E0B",
+      "phases": 349,
+      "checks": 26493,
+      "failures": 2,
+      "failureFields": {
+        "actual regular tear cardinality": 2
+      },
+      "nativeGrantedIds": [
+        14
+      ],
+      "nativeRawSha256": "a84301eb9ae9dc9537df5a7483d5e01ffa5912f2474fc4ff4bba72b63a0f57d0",
+      "browserRawSha256": "a918a4b1e0801576f891a3e6bd24262f2cc5ed8e60d252167dc47011cf503d14",
+      "tapeSha256": "d23340c2d419b354122290e5a65187c082636a1bc86dafee9eecfcac30a15910",
+      "commands": 405,
+      "backendStates": 3
+    },
+    {
+      "name": "passive-14-phase-1",
+      "code": "B91W8E0B",
+      "phases": 350,
+      "checks": 26583,
+      "failures": 6,
+      "failureFields": {
+        "actual regular tear cardinality": 4,
+        "tear0:actual stored velocity": 2
+      },
+      "nativeGrantedIds": [
+        14
+      ],
+      "nativeRawSha256": "a2e84aa41755916dacd0b72e484eeff37ffb2dcc5ca251aa8e1703b7b6ba9e69",
+      "browserRawSha256": "f292ed9e6bc7d102fa9514bf2cf60693025f4f5f8ddbe7905a65773599545284",
+      "tapeSha256": "a272f24726412315ddb147878dfcf9c855bd1543b3dfc55c0f696d9482c54979",
+      "commands": 406,
+      "backendStates": 3
+    },
+    {
+      "name": "passive-143-phase-0",
+      "code": "B9119H6R",
+      "phases": 349,
+      "checks": 26489,
+      "failures": 2,
+      "failureFields": {
+        "actual regular tear cardinality": 2
+      },
+      "nativeGrantedIds": [
+        143
+      ],
+      "nativeRawSha256": "0b004572fc6eb0e7db26bbd7593a74d593b55e9b8e7ebb3b618c782a46302a07",
+      "browserRawSha256": "e9736ee32fbe6cdc191311a0d69d1ea1b80f03b8787033d6c4328eb67ed7489c",
+      "tapeSha256": "d336ff80c6d5f5df71644039336f22b0f61d0affa68cca29d57c1f4b37eeb33b",
+      "commands": 405,
+      "backendStates": 3
+    },
+    {
+      "name": "passive-143-phase-1",
+      "code": "B9119H6R",
+      "phases": 350,
+      "checks": 26575,
+      "failures": 4,
+      "failureFields": {
+        "actual regular tear cardinality": 4
+      },
+      "nativeGrantedIds": [
+        143
+      ],
+      "nativeRawSha256": "6829d0d23f67674e9868c9f2d03db2e69d22a4062a0b6ae609cb8f2f3b6b5971",
+      "browserRawSha256": "ba2b04d9036cab6ef6e2aecca3a14435b2022257471998cad1b153aba3d9255f",
+      "tapeSha256": "11bf6ece3773d3919d0e5788fa97a18e44783656973d7b1980ee5619f08d2958",
+      "commands": 406,
+      "backendStates": 3
+    },
+    {
+      "name": "recorded-pedestal-0",
+      "code": "R74QYMYS",
+      "phases": 349,
+      "checks": 26791,
+      "failures": 2,
+      "failureFields": {
+        "actual regular tear cardinality": 2
+      },
+      "nativeGrantedIds": [
+        291
+      ],
+      "nativeRawSha256": "f412ff8b3bb3e7ac789e5d3e231741fcb96ec67f70275f941d4af8da20cb6be4",
+      "browserRawSha256": "a0076bc2a5f75e968ebdb9fc09f6e1837edcd189d3de590912c3abad85dd3577",
+      "tapeSha256": "5d3547ab848161383700afe5c0a3db17c8fc9c6f554fead3cf9b8ef05596ec8e",
+      "commands": 405,
+      "backendStates": 3
+    },
+    {
+      "name": "recorded-pedestal-1",
+      "code": "VRQPT844",
+      "phases": 350,
+      "checks": 26383,
+      "failures": 6,
+      "failureFields": {
+        "actual regular tear cardinality": 4,
+        "tear0:actual stored velocity": 2
+      },
+      "nativeGrantedIds": [
+        48
+      ],
+      "nativeRawSha256": "99dd4310e4618fe2429e06abbb043093d23f792dc374408d27021c6ca552f536",
+      "browserRawSha256": "fb5500c0f11e176aa362ac8d229431fa98d772ac766b66c6d587ec68025f25dc",
+      "tapeSha256": "f548f5bd29f89e9beb56d24150e664272ce1df1b6d0cd87c4bc89736b2cd6bba",
+      "commands": 406,
+      "backendStates": 3
+    },
+    {
+      "name": "random-pedestal-0",
+      "code": "VHV90KXF",
+      "phases": 349,
+      "checks": 26293,
+      "failures": 130,
+      "failureFields": {
+        "cached tearFallingSpeed": 100,
+        "tear0:actual stored velocity": 24,
+        "actual regular tear cardinality": 6
+      },
+      "nativeGrantedIds": [
+        233
+      ],
+      "nativeRawSha256": "9696902dc4d67ef21f478dcfc70d8364b947bb9f55cfd35ab5e360f1eaf720fe",
+      "browserRawSha256": "8952b3127a0299aa64b6bc7c3aafc452d4b6ed4cfc3e0c3ee7dda9361cf39d8d",
+      "tapeSha256": "ec4692e60923d5d2defa28a687b0bd951bc912697d5d4e618ef5f9505b009bc1",
+      "commands": 405,
+      "backendStates": 3
+    },
+    {
+      "name": "random-pedestal-1",
+      "code": "VFW4ZN1S",
+      "phases": 350,
+      "checks": 26878,
+      "failures": 6,
+      "failureFields": {
+        "actual regular tear cardinality": 4,
+        "tear0:actual stored velocity": 2
+      },
+      "nativeGrantedIds": [
+        285
+      ],
+      "nativeRawSha256": "3c205dae0de1ebb5af80019b7f35f051a9293dc28cf58181e3a9e1999c8530fb",
+      "browserRawSha256": "a93d090bec36c7a3617288dc996d586b525811864b29278db27e6f1674475c18",
+      "tapeSha256": "a7600db3870bf4c2b02a5d3c97ca8d4846b0bb810240301cea3fb8d778978c37",
+      "commands": 406,
+      "backendStates": 3
+    }
+  ]
+}
