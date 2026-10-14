@@ -1,0 +1,87 @@
+{
+  "schema": 1,
+  "qualification": "Original source + authored assets only; no produced WASM or fresh paired acceptance for this leaf yet.",
+  "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "sourcePins": [
+    {
+      "address": "0x445c60",
+      "fdeBytes": 2130,
+      "rawSha256": "ea3c9f8ca72b6db67f34600d14de408e219139b32352ec579dc761d4251bd696",
+      "dumpSha256": "98626a3f5e99853c1d91d7a57a1aac4798e3d6835035e8111b6c7a15e0b717a3"
+    },
+    {
+      "address": "0x4464c0",
+      "fdeBytes": 42,
+      "rawSha256": "ba65678eb196cb791af1dc7e3a0c06ef004a6c96c4e1cc6131d6dac798f86943",
+      "dumpSha256": "43c08eaf2995ec5f3cf19237868aa2b8c1dc30fe99849ac44fcebfc02048894f"
+    },
+    {
+      "address": "0x47fc80",
+      "fdeBytes": 619,
+      "rawSha256": "051a0fef0b650bcf07fe16f6a41ba226bf5beb767122e7a7a1a3ddd6a24a2b52",
+      "dumpSha256": "98d295510256457a4cc4e7f9f9e160e0e1fab9135f86bb1b276bbb6ce4536cba"
+    },
+    {
+      "address": "0x4f2d10",
+      "fdeBytes": 99,
+      "rawSha256": "11d8832bbb51540cb4571f61534eb34084e7f6fdba2645794a8ba5e136c7d987",
+      "dumpSha256": "96587d6daaf34c6b96b63cbb01bdda13aa48583809f6814a255ad1c4bd784187"
+    },
+    {
+      "address": "0x458a70",
+      "fdeBytes": 6405,
+      "rawSha256": "be2ca9ea49b61472d00640d3a1c587d10df08116f626b23abc9f922b170e0569",
+      "dumpSha256": "5ff3d1d2f62c6f712713862de1bbf13d7aaac40250e74ef396d630a72b6e166f"
+    },
+    {
+      "address": "0x45aa70",
+      "fdeBytes": 47481,
+      "rawSha256": "ffc5e75affca431315980d89d135e1c9a95972465bdb29f4dd916bd5f91fc950",
+      "dumpSha256": "64417a254e2d7f575281406808b41a06cc12cc5423604b9bf2ddf5bae04b6d76"
+    },
+    {
+      "address": "0x44bd90",
+      "fdeBytes": 8263,
+      "rawSha256": "a5fa75ad18b6184b5c30005ffdcb70f34d509e36624651b52f7b0b4dbec6239c",
+      "dumpSha256": "a3287c94a3e3968c656a2bec0340ba2225fca1be35b299bc68b497063a33ed9e"
+    },
+    {
+      "address": "0x4589f0",
+      "fdeBytes": 125,
+      "rawSha256": "860f2e68414cb0caad2c206a6df337c06311a62a141e2cfff61edc076c1bbbd0",
+      "dumpSha256": "a2ee9c9b525386a29552f39eae3dcd18c820d501b3b35fecd026317d11b0a0c1"
+    },
+    {
+      "address": "0x40ff50",
+      "fdeBytes": 18,
+      "rawSha256": "6f26462da5f6f2659ab9335667da423a67d7a2aefe48909ba60ed659c9a898ae",
+      "dumpSha256": "2bdb6a48816e416613ccbbd1a98029381e5b595970cd590aa4309a18b7ac3884"
+    }
+  ],
+  "assets": [
+    {
+      "actor": "gfx/1000.058_poop particle.anm2",
+      "anm2Sha256": "1f4a20ee79ee5b3bfa90f0d8e2fadb88fff44629238ca2585705ebc5a9dea66f",
+      "png": "gfx/effects/effect_poopgibs.png",
+      "pngSha256": "f4791bf402bbc0df0c0bb98b343de3948a0a10b94ae54c71554329b54fa14381"
+    },
+    {
+      "actor": "gfx/1000.043_poop explosion.anm2",
+      "anm2Sha256": "571dadfa827a9a6cc665f19598b42de53eb5bf703e7b6243ce61475d63a938e2",
+      "png": "gfx/effects/effect_002b_shitpoof.png",
+      "pngSha256": "7956c2651b3d4e8301091f5bfeb6d57cea97d86bc08e38f4d3d6b019a22b6264"
+    }
+  ],
+  "sampler": "445c60 stack20..38 is seven count slots. For positive authored amount, challenge23 multiplies8 otherwise1; (amount+B2)/popcount(flags&0x27)+1. Sample blood/B+B, bone/half+Bhalf, gut/B, eye/Bmin3, poop/B and special/B in order BEFORE first birth. Slot4 remains0; large16 is a birth modifier. Zero count is legal.",
+  "DipCaller": "First FIFO HP<0 performs real v40 per owned225/234 eligibility, dead byte then SFX30, samples, real58 births with cached217/0 and NULL linkedparent, each immediate full callback, then final7 unless flags10000. Final7 inherited color is copied before its immediate Update. Next full: actual Dip AI tail first then Raw->43 at physical P+renderOffset, no initial Update, Remove, common Base continuation.",
+  "particle58": "Init458a70 radius9/points6/grid3/entity0/TTL-1/defaultGib01/state0/raw7d8false, no Init shared draws. First callback Base ANM/move/reset precedes U360 rotation/B5 clip/U verticalV. Only first Update initializes flight(-23,vv,1.3); later vv=.9vv+.1+1.3, height+=vv/renderOffsetY. Height>-5 seeks final pose preserving playing,V0,raw7d8true/depth90/flags8, actual current-count paint removes. Fast is Base v20 ground projection only; full late walls callback follows paint.",
+  "explosion43": "Actual Poof36/default factory white with parentNULL/V0, no immediate Update. First full Base then independentB2 flips/B2/B3 target6..8. Later frame4 SFX237(.9,delay2,pitch1), sampled target marksflags8 and actual paint removes. Real sheet Effect_002b_ShitPoof, not effect_poopspawn.",
+  "scope": "Existing normal-run admission and fresh ordinary217/0. Mutable status400 and renderOffset458 are initialized by actual441c80, never imported native values. Positive400 fails with an explicit missing-owner error; no fabricated137/status branch. Owned225/234 callbacks, challenge23 run context and large/modifier effect births remain unimplemented callers.",
+  "gate": "Same whole4 tapes remain required:2 contrived phase offsets Cellar69/Room213 and2 unfiltered OS, generated once before game execution. Compare every actual58/43 body/seed/cachedspawner/linkedparent/clip/frame/geometry/flight/position/velocity/flags/lifetime/colour. Require actual43 in both contrived games; zero category5 count remains legal. Preserve all failures and PNG evidence.",
+  "remaining": [
+    "Fresh compiled original/browser4 including native flight/landing/background witnesses",
+    "Generic timed color/sprite modulation and status400 expiry/SFX137",
+    "Actual owned225/234 kill callbacks and actor-local RNG consumers",
+    "Fear target modifiers/challenge23/save/pool overwrite and background reentry"
+  ]
+}

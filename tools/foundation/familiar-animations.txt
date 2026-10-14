@@ -1,5 +1,9 @@
 # Regenerate: python3 tools/foundation/extract-animations.py --select-file tools/foundation/familiar-animations.txt --out web/familiar-data.json
 gfx/003.056_leech.anm2
 gfx/1000.015_poof01.anm2
+gfx/1000.017_poof04.anm2
+gfx/1000.042_blood gush.anm2
 gfx/1000.049_heart.anm2
 gfx/1000.007_blood splat.anm2
+gfx/1000.058_poop particle.anm2
+gfx/1000.043_poop explosion.anm2

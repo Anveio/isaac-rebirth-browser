@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { chromium } from "@playwright/test";
 import { spawnSync } from "node:child_process";
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { browserLaunchOptions, inspectBrowserGraphics } from "./browser.mjs";
@@ -98,17 +98,29 @@ export async function floorE2e({ sourceReport, output = join(ROOT, ".cache/found
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  const value = (name) => { const at = process.argv.indexOf(name); return at < 0 ? undefined : process.argv[at + 1]; };
+  const value = (name) => { const at = process.argv.lastIndexOf(name); return at < 0 ? undefined : process.argv[at + 1]; };
+  const output = resolve(value("--output") ?? join(ROOT, ".cache/e2e/floor", String(Date.now())));
+  mkdirSync(output, { recursive: true });
   let sourceReport = value("--source-report");
   if (!sourceReport) {
-    sourceReport = join(ROOT, ".cache/foundation/floor-e2e-native.json");
-    const args = ["tools/original/foundation-floor-verify.py", "--report", sourceReport, "--capture", "--count", value("--count") ?? "2"];
-    // These public cases exercise two failed boss fits and a failed treasure fit.
-    for (const code of ["QNXPTVT1", "0YAZCZ7N", "BHX1EF8A"]) args.push("--seed", code);
+    sourceReport = join(output, "native.json");
+    // Contrived seeds exercise two failed boss fits and a failed treasure fit;
+    // a replay (--scenarios) reruns exactly the recorded seeds, random ones included.
+    const replay = value("--scenarios") && JSON.parse(readFileSync(resolve(value("--scenarios")), "utf8"));
+    const seeds = replay ? replay.seeds : ["QNXPTVT1", "0YAZCZ7N", "BHX1EF8A"];
+    const args = ["tools/original/foundation-floor-verify.py", "--report", sourceReport, "--capture",
+      "--count", replay ? "0" : value("--count") ?? "2", ...seeds.flatMap(code => ["--seed", code])];
     const captured = spawnSync("python3", args, { cwd: ROOT, encoding: "utf8", timeout: 600_000 });
+    // Record the seeds before judging the capture so a failing random floor
+    // can still be replayed.
+    if (existsSync(sourceReport)) {
+      const native = JSON.parse(readFileSync(sourceReport, "utf8"));
+      writeFileSync(join(output, "scenarios.json"), JSON.stringify({ schema: 1,
+        seeds: native.cases.map(entry => entry.seed).filter(Boolean) }, null, 2) + "\n");
+    }
     assert.equal(captured.status, 0, captured.stderr + captured.stdout);
   }
-  const report = await floorE2e({ sourceReport, output: value("--output") });
+  const report = await floorE2e({ sourceReport, output: join(output, "report.json") });
   console.log(JSON.stringify({ status: report.status, originals: report.cases.length, cases: report.cases }));
   process.exitCode = report.status === "pass" ? 0 : 1;
 }

@@ -31,7 +31,7 @@ All-target cargo check and strict Clippy pass with fresh private generated
 metadata; a first shared-target generated-header failure is retained. The
 frozen parent floor/WASM bytes are unchanged. This initial runtime slice has
 no full production build or fresh original/browser acceptance yet.
-The required `test:e2e:health-damage` gate declares public Soul72 and Black6
+The required e2e suite `health-damage` gate declares public Soul72 and Black6
 acquisition routes at both phase offsets, plus two OS seeds drawn and recorded
 before grading without filtering. Contrived cases must acquire health and
 damage it in both games, preserving red on Soul damage and executing guarded

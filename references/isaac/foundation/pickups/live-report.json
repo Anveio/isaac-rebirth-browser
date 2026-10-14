@@ -30,7 +30,7 @@
   },
   "scenariosSha256": "2c6a4c082d3145ab3abe448cb507710c7eda5b9d75abc2e3edfd6d9b2d3953bd",
   "replay": "bash tools/original/with-display.sh node tools/e2e/pickups.mjs --scenarios references/isaac/foundation/pickups/scenarios.json",
-  "freshRandomGate": "npm run test:e2e:pickups",
+  "freshRandomGate": "npm run test:e2e -- pickups",
   "cases": [
     {
       "name": "contact-phase-0",

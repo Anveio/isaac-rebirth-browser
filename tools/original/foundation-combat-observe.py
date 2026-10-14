@@ -3,7 +3,6 @@
 All reads are bounded writable data in a directly owned blocked original child.
 The ELF Game singleton and field offsets are reference tooling only.
 """
-import hashlib
 import importlib.util
 import math
 import os
@@ -13,6 +12,9 @@ import struct
 import time
 
 ROOT = Path(__file__).resolve().parents[2]
+identity_spec = importlib.util.spec_from_file_location('native_identity', ROOT / 'tools/original/native-identity.py')
+native_identity = importlib.util.module_from_spec(identity_spec)
+identity_spec.loader.exec_module(native_identity)
 spec = importlib.util.spec_from_file_location('reader', ROOT / 'tools/original/state-observer.py')
 reader = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(reader)
@@ -30,7 +32,7 @@ def observe(pid, context):
         parent = next(line.split(':', 1)[1].strip() for line in Path(f'/proc/{pid}/status').read_text().splitlines() if line.startswith('PPid:'))
         if int(parent) != os.getpid() or not context.get('gateBlocked'):
             raise PermissionError('Observation requires a blocked directly owned original')
-        if hashlib.sha256(Path(f'/proc/{pid}/exe').read_bytes()).hexdigest() != NATIVE_SHA:
+        if native_identity.native_binary_sha256(pid) != NATIVE_SHA:
             raise ValueError('Unexpected original executable')
         os.kill(pid, signal.SIGSTOP)
         stopped = True
@@ -71,6 +73,8 @@ def observe(pid, context):
                     'entityFlags': struct.unpack_from('<I', raw, 0x318)[0],
                     'authoredGridIndex': struct.unpack_from('<i', raw, 0x430)[0],
                     'renderOrderOffset': struct.unpack_from('<i', raw, 0x460)[0],
+                    'entityRenderOffset': pair(0x458),
+                    'statusCountdown': struct.unpack_from('<i', raw, 0x400)[0],
                     'actorRngState': struct.unpack_from('<I', raw, 0x7c0)[0],
                     'pendingDamage': struct.unpack_from('<f', raw, 0x378)[0],
                     'gridCollisionClass': struct.unpack_from('<I', raw, 0x340)[0],
@@ -130,7 +134,7 @@ def observe(pid, context):
                     result['projectileParameter2'] = struct.unpack_from('<f', more, 0x18)[0]
                     result['projectileFullUpdates'] = struct.unpack_from('<I', more, 0x1c)[0]
                     result['projectileFlags'] = struct.unpack_from('<I', more, 0x20)[0]
-                if result['type'] == 1000 and result['variant'] in (7, 15, 66):
+                if result['type'] == 1000 and result['variant'] in (7, 15, 43, 58, 66):
                     more = read(address + 0x7d4, 0x24)
                     result['effectLifetimeDivisor'] = struct.unpack_from('<i', more, 0)[0]
                     result['effectTimeToLive'] = struct.unpack_from('<i', more, 0x1c)[0]
@@ -141,6 +145,25 @@ def observe(pid, context):
                     parent = struct.unpack_from('<Q', raw, 0x498)[0]
                     result['effectParent'] = ({'type': u32(parent + 0x10), 'variant': u32(parent + 0x14),
                         'spawnSeed': u32(parent + 0x7d0), 'sequenceId': u32(parent + 8)} if parent else None)
+                    if result['variant'] in (43, 58):
+                        state = struct.unpack_from('<i', more, 0)[0]
+                        result['poopEffectState'] = state
+                        result['effectRaw7d8'] = bool(more[4])
+                        result['inheritedColor'] = list(struct.unpack_from('<11f', raw, 0x3cc))
+                        if result['variant'] == 58:
+                            # First actual58 Update, rather than Init, writes
+                            # flight7dc/7e0/7e4. Preserve pre-update raw storage.
+                            result['poopParticleControllerBits'] = more[8:20].hex()
+                            if state != 0:
+                                values = struct.unpack_from('<fff', more, 8)
+                                if not all(math.isfinite(value) for value in values):
+                                    raise ValueError('Nonfinite initialized Poop Particle controller')
+                                result['poopParticleHeight'], result['poopParticleVerticalVelocity'], result['poopParticleGravity'] = values
+                            layer_count = struct.unpack_from('<i', raw, 0x298)[0]
+                            if layer_count != 1:
+                                raise ValueError('Unexpected authored Poop Particle layer count')
+                            layer = struct.unpack_from('<Q', raw, 0x290)[0]
+                            result['poopParticleLayer0Rotation'] = struct.unpack('<f', read(layer + 0x2c, 4))[0]
                 if struct.unpack_from('<Q', raw, 0)[0] == 0x66ef30:
                     more = read(address + 0xf50, 0x138)
                     result['npcState'] = struct.unpack_from('<I', more, 0)[0]

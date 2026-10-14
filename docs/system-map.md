@@ -11,6 +11,9 @@ independent reference evidence.
 ## Current live-game testing policy
 
 Checked-in Rust, Node and Python unit suites were removed at the user’s request.
+The sole, owner-authorized exception is the [Antithesis DST harness](dst.md) in
+`engine/dst/`: an inner-loop regression tool for engine safety and determinism,
+never original-game evidence or a merge gate.
 The current required gate is [run.mjs](../tools/e2e/run.mjs), which executes
 every registered live original/browser suite, retaining all results even if an
 earlier suite fails. The [paired gameplay gate](../tools/foundation/paired-game.mjs) gives
@@ -34,9 +37,21 @@ The Wave1/Wave2 snapshots below are historical results from the earlier test
 policy. Their removed unit/integrity suites are not current executable gates.
 Consult the latest paired report for current implementation outcomes.
 
-## Current integrated runtime checkpoint
+## Monstro BloodStart source leaf
 
-Current main `7492adba` registers36 required live suites. This is a source
+The new partial producer routes ordinary Monstro’s real BloodStart random branches through Effect17, SFX72 and Effect42 in their original order. It preserves the actual authored NullId0 guide, separate cached spawner/link fields, signed scales and layer flips, and distinct active/dead lifecycle. The required `test:e2e:blood-start` gate retains contrived978 and recorded OSBLL routes with both input phases; it requires actual Death-interval execution and matched bodies. Private all-target Rust check and strictClippy pass at `d28154f`; production/WASM and fresh game qualification remain pending. Explosion2/77/category5 remains an explicit runtime error before any final reward, and existing native-prefix failures remain blocking. The final-heart/delayed-clear/Grid17 owners are separate; no boss-clear or stage-completion claim follows from this leaf.
+
+## Current source and actual-game qualification
+
+Main `19906c4e`, observed on October14, includes the reviewed normal-health source callbacks, the source-only Nightmare resource prerequisite and raw snapshot accessor, and retains39 registered live suites. This is source qualification. No complete current-main39-suite production/original/browser acceptance is claimed; the frozen local f793/0f343 checkpoint and later scoped owner artifacts remain separate.
+
+The integrated Death111 producer at `5afa7ddb` and artifact `c4685585` closed all four fresh original/browser pairs: 2,962 phases, 52,190 scoped checks and 4,226 required failures, with zero capture errors. Both contrived death/popup routes executed in both games; both unfiltered OS inputs remained alive and are retained. The full eight compressed native/browser streams were independently read back and hash-verified. This proves those actual executions and preserves the unresolved age, motion and menu fields; it does not establish complete death or whole-main parity. The earlier1cc interruption below remains a distinct historical attempt.
+
+The separate PR104 moving-bank continuation closed all four selected identities on its frozen1e9/4e0 artifact, retaining its earlier failed prefix and interrupted second attempt. It remains a failure with8,242 scoped checks and103 required differences. Native variant5 particles were observed, including cached244 spawners, but no captured native death requirement or matched body/controller comparison passed. Generic presence does not establish the lethal producer or body parity. Source-only later PR104 composition and the new partial BloodStart126 producer inherit none of that build/live qualification.
+
+## Retained main36 and interrupted-death checkpoint
+
+Main `7492adba` registered36 required live suites. This is a source
 checkpoint, with separate cached effect spawner words and an actual null linked
 parent for the generic NPC Poof callers. The corrected stat-cache cohort retains
 158 required failures over212,485 checks; its earlier609-failure capture remains
