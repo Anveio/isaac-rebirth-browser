@@ -51,8 +51,9 @@ functional gate. `verify:foundation` remains a strict pixel diagnostic.
 
 CI executes both games live using public inputs, fresh original profiles and a
 copied production build. The local suite runner executes every registered live gate in sequence and
-reports failure after every suite has run. CI discovers the same registry and
-runs each suite in a separate job with `fail-fast: false`, so a failed suite
+reports failure after every suite has run. Pull requests run only
+`npm run check:build`; after each merge to main, every six hours and on
+dispatch, CI discovers the same registry and runs each suite in a separate job with `fail-fast: false`, so a failed suite
 cannot cancel the other system checks. Recorded random tapes can be replayed unchanged.
 Checked-in unit suites and component-only harnesses have been removed;
 validators stay in runtime/e2e tools, while temporary probes belong in ignored

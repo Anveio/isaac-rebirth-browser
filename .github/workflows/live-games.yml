@@ -1,20 +1,22 @@
 name: Live original and browser game contracts
 
+# Live original/browser suites are too heavy for every pull request revision;
+# pull requests run build.yml. The full matrix runs after each merge to main,
+# every six hours (fresh OS-random cases) and on dispatch.
 on:
-  pull_request:
   push:
-    # Feature updates already run through pull_request; do not duplicate the
-    # complete original/browser matrix for the aggregate's branch push.
     branches: [main]
+  schedule:
+    - cron: '41 */6 * * *'
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: live-games-${{ github.workflow }}-${{ github.ref }}
-  # Keep the running main matrix; PR revisions cancel their older runs.
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  # One live matrix at a time; a running main matrix is never cancelled.
+  group: live-games-main
+  cancel-in-progress: false
 
 jobs:
   live-suites:
