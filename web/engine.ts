@@ -187,6 +187,7 @@ export interface Room {
       particleBirthCount: number; lastParticleBirth: {parentId: number; spawnSeed: number; position: {x: number; y: number}; velocity: {x: number; y: number}} | null;
       lootBirth: {parentId: number; variant: number; spawnSeed: number; position: {x: number; y: number}} | null} | null }[];
   authoredActorOrder: {kind: "npc" | "pickup"; id: number}[];
+  managerCounts: { countablePending: number; countableCurrent: number; bossPending: number; bossCurrent: number };
   bossCount: number; bossPresentationIndex: number;
   combatClear: boolean; combatClearCountdown: number; combatShutDoorSlots: number[];
   grid: { width: number; height: number; cells: {selector: number; entity: {kind: number; variant: number; state: number; collisionClass: number; spawnSeed: number} | null}[] } | null;

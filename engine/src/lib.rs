@@ -1269,8 +1269,6 @@ impl Game {
         }
         self.state.room.pickups = pickups;
         self.state.room.npcs = npcs;
-        self.state.room.boss_count =
-            self.state.room.npcs.iter().filter(|npc| npc.boss).count() as u32;
         self.state.room.boss_presentation_index =
             if room_type == 5 && self.state.room.npcs.iter().any(|npc| npc.kind == 20) {
                 1
@@ -1280,12 +1278,15 @@ impl Game {
         self.state.room.authored_actor_order = order;
         self.state.next_pickup = next;
         self.rebuild_room_actor_schedule()?;
+        self.state.room.boss_count = self.state.room.manager_counts.boss_total().max(0) as u32;
         self.refresh_stage_effects();
         Ok(())
     }
     /// Persisted Room clones retain supported actor handles in authored order.
     pub fn rebuild_room_actor_schedule(&mut self) -> Result<(), String> {
         self.state.actor_scheduler.clear_room();
+        //453ec0 resets all four actual manager count words on Room replacement.
+        self.state.room.manager_counts = actors::ManagerCounts::default();
         self.state.fire_particles.clear();
         self.state.sprite_effects.clear();
         let player = actors::ActorRef {
@@ -1314,6 +1315,19 @@ impl Game {
             };
             if admitted {
                 self.state.actor_scheduler.admit(actor)?;
+                if actor.kind == actors::ActorKind::Npc {
+                    let npc = self
+                        .state
+                        .room
+                        .npcs
+                        .iter()
+                        .find(|npc| npc.id == actor.id)
+                        .expect("checked admitted NPC");
+                    self.state
+                        .room
+                        .manager_counts
+                        .admit(npc.can_shut_doors, npc.boss);
+                }
             }
         }
         Ok(())
@@ -1552,6 +1566,8 @@ impl Game {
                         .clone();
                     self.admit_room_pickups(&selectors)?;
                     // The admitted Room::Update follows authored mixed order.
+                    self.refresh_room_boss_count();
+                    let mut counted = actors::FullCounts::default();
                     for actor in self.state.room.authored_actor_order.clone() {
                         match actor.kind {
                             actors::ActorKind::Npc => {
@@ -1562,7 +1578,9 @@ impl Game {
                             }
                             _ => return Err("invalid authored room actor handle".into()),
                         }
+                        self.count_updated_room_actor(actor, &mut counted);
                     }
+                    self.state.room.manager_counts.finish_full(counted);
                     familiars::paint_background_effects(&mut self.state)?;
                     pickups::full_grid_contacts(&mut self.state)?;
                     chests::full_grid_contacts(&mut self.state)?;
@@ -1616,9 +1634,13 @@ impl Game {
         let existing = self.state.actor_scheduler.full_phase();
         if phase == phase::Phase::Update {
             rock_blast::advance_markers(&mut self.state);
+            self.refresh_room_boss_count();
+            let mut counted = actors::FullCounts::default();
             for actor in existing.iter().copied() {
                 self.advance_actor(actor, phase, false, bomb_triggered)?;
+                self.count_updated_room_actor(actor, &mut counted);
             }
+            self.state.room.manager_counts.finish_full(counted);
         } else if phase == phase::Phase::Interpolate {
             let mut index = 0;
             while let Some(actor) = self.state.actor_scheduler.get(index) {
@@ -1830,6 +1852,34 @@ impl Game {
         }
         Ok(())
     }
+    /// Room5d1423/5d1454 refresh2490 before the full manager callbacks. The
+    /// final boss callback can decrement it later in that same pass.
+    fn refresh_room_boss_count(&mut self) {
+        self.state.room.boss_count = self.state.room.manager_counts.boss_total().max(0) as u32;
+    }
+
+    ///454eb9 counts only callbacks whose active31e remains true. NPC70/78
+    /// read103c/103d, with no HP/dead predicate; boss flags100000 exclude only
+    /// the boss subtotal. Other currently admitted entity families have v70false.
+    fn count_updated_room_actor(&self, actor: actors::ActorRef, counted: &mut actors::FullCounts) {
+        if actor.kind != actors::ActorKind::Npc {
+            return;
+        }
+        if let Some(npc) = self
+            .state
+            .room
+            .npcs
+            .iter()
+            .find(|npc| npc.id == actor.id && !npc.removed)
+        {
+            let final_flag = npc
+                .monstro
+                .as_ref()
+                .is_some_and(|owner| owner.entity_flags & 0x100000 != 0);
+            counted.observe(npc.can_shut_doors, npc.boss && !final_flag);
+        }
+    }
+
     fn advance_pickup(&mut self, id: u32, phase: phase::Phase) -> Result<(), String> {
         let Some(index) = self
             .state
