@@ -9,7 +9,7 @@ import { runPairedGate } from '../foundation/paired-game.mjs';
 const option=(name,fallback)=>{const at=process.argv.indexOf(name);if(at<0)return fallback;assert.ok(process.argv[at+1]);return process.argv[at+1];};
 const output=resolve(option('--output','.cache/e2e/roundworms'));mkdirSync(output,{recursive:true});
 const save=(path,value)=>writeFileSync(path,JSON.stringify(value,null,2)+'\n');
-const sources=['tools/e2e/roundworms.mjs','tools/original/roundworm-scenarios.py','tools/foundation/roundworm-state-pair.mjs','references/isaac/foundation/combat/roundworms/random-selection.json','references/isaac/foundation/combat/roundworms/hostile-return-tail.json'];
+const sources=['tools/e2e/roundworms.mjs','tools/original/roundworm-scenarios.py','tools/original/foundation-combat-observe.py','tools/foundation/roundworm-state-pair.mjs','references/isaac/foundation/combat/roundworms/random-selection.json','references/isaac/foundation/combat/roundworms/hostile-return-tail.json'];
 const hashes=()=>Object.fromEntries(sources.map(path=>[path,createHash('sha256').update(readFileSync(path)).digest('hex')]));
 const before=hashes();
 const scenarios=JSON.parse(execFileSync('python3',['tools/original/roundworm-scenarios.py'],{encoding:'utf8'}));

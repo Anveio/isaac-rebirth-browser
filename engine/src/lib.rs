@@ -1813,6 +1813,12 @@ impl Game {
                         .grid
                         .as_mut()
                         .expect("admitted Fire has grid"),
+                    path_costs: self
+                        .state
+                        .room
+                        .path_costs
+                        .as_mut()
+                        .ok_or("Fire requires source Room.Init path costs")?,
                     audio: &mut self.state.audio,
                     system_counter: self.state.system_clock.system_counter.wrapping_sub(1),
                 },
@@ -1933,6 +1939,12 @@ impl Game {
                 player_velocity,
                 occupied: &occupied,
                 grid: &grid,
+                path_costs: self
+                    .state
+                    .room
+                    .path_costs
+                    .as_ref()
+                    .ok_or("Round Worm requires source Room.Init path costs")?,
                 audio: &mut self.state.audio,
                 system_counter: self.state.system_clock.system_counter.wrapping_sub(1),
             },

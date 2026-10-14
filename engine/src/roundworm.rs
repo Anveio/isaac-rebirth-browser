@@ -7,6 +7,7 @@ use crate::{
     mt::Mt19937,
     npcs::Npc,
     phase::Phase,
+    room_costs::RoomCosts,
 };
 use std::sync::OnceLock;
 
@@ -44,6 +45,7 @@ pub struct World<'a> {
     /// and numeric10..999. Hidden NPCs still exclude their actual position.
     pub occupied: &'a [WorldVector],
     pub grid: &'a Grid,
+    pub path_costs: &'a RoomCosts,
     pub audio: &'a mut AudioState,
     pub system_counter: u32,
 }
@@ -67,7 +69,11 @@ fn direction(random: &mut Mt19937) -> WorldVector {
     }
 }
 
-fn free_position(anchor: WorldVector, random: &mut Mt19937, world: &World<'_>) -> WorldVector {
+fn free_position(
+    anchor: WorldVector,
+    random: &mut Mt19937,
+    world: &World<'_>,
+) -> Result<WorldVector, String> {
     let mut candidate = ZERO;
     let mut index: Option<usize> = None;
     let mut budget = 100_i32;
@@ -80,10 +86,10 @@ fn free_position(anchor: WorldVector, random: &mut Mt19937, world: &World<'_>) -
                     .as_ref()
                     .is_some_and(|entity| matches!(entity.kind, 17 | 18))
             })
-            && index.is_some_and(|at| world.grid.descriptor().cells[at].selector <= 599);
+            && index.is_some_and(|at| world.path_costs.entries()[at] <= 599);
         if admissible {
             if budget > 0 {
-                return candidate;
+                return Ok(candidate);
             }
             break;
         }
@@ -100,7 +106,7 @@ fn free_position(anchor: WorldVector, random: &mut Mt19937, world: &World<'_>) -
         let Some(at) = index else {
             continue;
         };
-        if world.grid.descriptor().cells[at].selector > 599 {
+        if world.path_costs.get(at)? > 599 {
             continue;
         }
         candidate = world.grid.position(at).expect("valid grid center");
@@ -115,11 +121,11 @@ fn free_position(anchor: WorldVector, random: &mut Mt19937, world: &World<'_>) -
         }
     }
     let original = world.grid.clamp_room(anchor, 20.0);
-    world
+    Ok(world
         .grid
         .index(original)
         .and_then(|at| world.grid.position(at))
-        .expect("clamped room anchor has a grid center")
+        .expect("clamped room anchor has a grid center"))
 }
 
 fn play(npc: &mut Npc, name: &str, force: bool) {
@@ -183,7 +189,7 @@ fn ai(
             let anchor = world
                 .grid
                 .clamp_room(world.grid.room_center() + direction(random) * radius, 20.0);
-            let candidate = free_position(anchor, random, world);
+            let candidate = free_position(anchor, random, world)?;
             let delta = WorldVector {
                 x: candidate.x - world.player.x,
                 y: candidate.y - world.player.y,

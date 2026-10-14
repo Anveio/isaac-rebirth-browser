@@ -112,9 +112,10 @@ for (const action of replay.pairedTape) {
         npc.damage.events.map(event => [f32(event.amount), { tear: 0, bomb: 4, fireContact: 2 }[event.kind], event.source.entityType])],
     ]) check(checks, label, `fire${actor.spawnSeed}.${field}`, expected, observed);
     const index = actor.authoredGridIndex;
-    assert.ok(Number.isInteger(index) && index >= 0 && index < source.gridSelectors.length);
+    assert.ok(Array.isArray(source.pathCosts) && Array.isArray(actual.room.pathCosts));
+    assert.ok(Number.isInteger(index) && index >= 0 && index < source.pathCosts.length);
     assert.ok(actual.room.grid?.cells[index]);
-    check(checks, label, `fire${actor.spawnSeed}.selector`, source.gridSelectors[index], actual.room.grid.cells[index].selector);
+    check(checks, label, `fire${actor.spawnSeed}.pathCost`, source.pathCosts[index], actual.room.pathCosts[index]);
     check(checks, label, `fire${actor.spawnSeed}.nullGrid`, source.grid.some(cell => cell.index === index), actual.room.grid.cells[index].entity !== null);
     for (const [at, record] of actor.pendingDamageRecords.entries()) {
       assert.equal(record.sourceActorType, record.sourceType, 'Native ordered damage must join the actual retained attacker');
