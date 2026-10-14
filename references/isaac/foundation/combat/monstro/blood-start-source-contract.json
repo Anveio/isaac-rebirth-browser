@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "status": "Source-supported partial BloodStart17/SFX72/42 producer/controller/renderer. No production or actual paired acceptance yet.",
+  "status": "Source-supported partial BloodStart17/SFX72/42 producer/controller/renderer. Private native all-target Rust check/strictClippy pass atd28154f; no production/WASM or actual paired acceptance.",
   "binarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
   "scope": "Ordinary fresh uncolored Monstro20/0/0. Native observations are never runtime inputs. Champion/status/transient ColorMod producers remain unimplemented.",
   "functions": {
