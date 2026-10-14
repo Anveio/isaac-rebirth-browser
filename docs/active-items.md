@@ -26,8 +26,10 @@ phases, full/damaged health and held shooting during Pickup; damage is caused
 by an ordinary own bomb. The two held-Pickup routes require an independent
 native guard witness on both presentations and compare actual db0 held input,
 fire/head timers, emission and movement.
-The gate also retains the earlier unfiltered291/48 discoveries and adds two
-new OS-random treasure routes without filtering item identities. Complete
+The gate retains the earlier unfiltered291/48/257/222 discoveries and adds
+two new OS-random treasure routes without filtering item identities. Its
+complete twelve-case cohort keeps every original eight-case input and adds
+both held-Pickup routes plus two independent new OS discoveries. Complete
 inputs, original observations, production snapshots and every functional
 failure remain in the report. Use of an unsupported random active remains
 red. Comparisons require charge/count/temporary records, health, input fields,
@@ -72,7 +74,7 @@ next full callback.
 
 This eight-case bank does not cover held shooting during the legacy Pickup
 guard. A separate source correction now joins both owned bf4 representations
-at the shooting-input boundary; the ten-case fresh CI cohort adds both held
+at the shooting-input boundary; the twelve-case fresh CI cohort adds both held
 Pickup routes. These new routes and latest-main composition await live
 acceptance. Actual da8 aim-vector ownership and positive7dc callback semantics
 remain separate follow-ups; db0 readback alone does not accept those fields. Source

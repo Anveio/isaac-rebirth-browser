@@ -28,7 +28,7 @@ def main():
     parser.add_argument('--count', type=int, default=2)
     args = parser.parse_args()
     if args.count != 2:
-        raise ValueError('The complete ten-case active gate requires two new unfiltered OS cases')
+        raise ValueError('The complete twelve-case active gate requires two new unfiltered OS cases')
     # Source-owned port selection predicts this contrived public route. The
     # gate independently requires original acquisition45; prediction is not
     # original evidence. No random discovery selects on an item identity.
@@ -58,6 +58,15 @@ def main():
                       'actions': items.route(delay, True) + use_tail(),
                       'entropy': 'Recorded OS secrets', 'discoveryAttempts': attempt,
                       'recordedEvidence': 'references/isaac/foundation/items/acquisition-initial-live.json'})
+    # Preserve the initial fresh OS outcomes as real regression inputs too.
+    # Their unfiltered discovery has already happened; new random discoveries
+    # below remain independent and are never selected on item identity.
+    for index, (recorded, delay, attempt) in enumerate([('DN8RQDXC', 0, 19), ('98C1GNPZ', 1, 139)]):
+        cases.append({'name': f'retained-random-pedestal-{index}', 'code': recorded,
+                      'seedValue': items.clock.codec.decode_seed(recorded), 'delay': delay,
+                      'actions': items.route(delay, True) + use_tail(),
+                      'entropy': 'Recorded OS secrets', 'discoveryAttempts': attempt,
+                      'recordedEvidence': 'references/isaac/foundation/items/active-use-verification.json'})
     for case in items.random_cases(args.count, True):
         case['actions'] += use_tail()
         cases.append(case)

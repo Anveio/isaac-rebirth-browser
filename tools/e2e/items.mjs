@@ -50,14 +50,14 @@ const scenarios = replayOriginal ? JSON.parse(await readFile(join(replayOriginal
     ...(statCache ? ['--stat-cache'] : acquisition && !activeUse ? ['--acquisition'] : [])], { cwd: ROOT, timeout: 600000 })).stdout);
 assert.equal(scenarios.schema, 1);
 assert.equal(scenarios.bootEpochSeed, 1700000000);
-assert.ok(scenarios.cases.length >= 4 && scenarios.cases.length <= (activeUse ? 10 : acquisition ? 8 : 6));
+assert.ok(scenarios.cases.length >= 4 && scenarios.cases.length <= (activeUse ? 12 : acquisition ? 8 : 6));
 assert.equal(new Set(scenarios.cases.map(item => item.name)).size, scenarios.cases.length);
 if (activeUse && !replayOriginal) {
-  assert.equal(scenarios.cases.length, 10, 'Active use requires the complete ten-case fresh cohort');
+  assert.equal(scenarios.cases.length, 12, 'Active use requires the complete twelve-case fresh cohort');
   assert.deepEqual(scenarios.cases.filter(item => item.requirePickupShotGuard).map(item => item.delay).sort(),
     [0, 1], 'Both held-Pickup admission phases are required');
-  assert.equal(scenarios.cases.filter(item => item.entropy === 'Recorded OS secrets').length, 2,
-    'Both retained unfiltered outcomes are required');
+  assert.deepEqual(scenarios.cases.filter(item => item.entropy === 'Recorded OS secrets').map(item => item.code).sort(),
+    ['98C1GNPZ', 'DN8RQDXC', 'R74QYMYS', 'VRQPT844'], 'Every earlier unfiltered OS outcome is required');
   assert.equal(scenarios.cases.filter(item => item.entropy === 'OS secrets').length, 2,
     'Two new unfiltered OS outcomes are required');
 }
