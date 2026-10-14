@@ -38,3 +38,14 @@ all-target Clippy, with TypeScript, syntax, formatting and matrix checks. This
 correction has no fresh production/original acceptance yet; the historical 598/50,900 required failures remain unchanged.
 Complete derived grid constructors, unsupported cost callbacks, whole shared
 stream alignment and boss free placement remain pending.
+
+The separate readmission correction `3314913` resets transient costs when
+traversal replaces the room, before restored actors run. Destroyed Rock2 state2
+therefore starts at cost0; old destruction markers cannot leak through the
+cached Room clone. Known Grid.Init stores follow the same recovered owner.
+Cached NPC/Fire reinitialization and its source cost writers remain pending; no
+Fire marker is synthesized from a cached HP value. The original observer and
+required Worm comparison now read all448 signed words, including unused tail.
+This exact runtime passes one-job all-target Rust check and strict Clippy in its
+own target. First admission Room.Update order remains approximate, and no new
+live acceptance is attributed to either cost correction.

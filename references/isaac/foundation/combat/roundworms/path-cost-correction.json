@@ -62,7 +62,8 @@
     "destroy": "56cbcb stores900 on actual Rock2 destruction before later source effect consumers; missing debris remains explicitly pending.",
     "fire": "49a611/49a9cd/49af65 stores900/950/900 at actual Fire callbacks.",
     "aging": "5d139b..5d13f1 everythird full ages signed1..900 by100, clamps0; no authored selector aging.",
-    "roomInit": "Room.from_floor_descriptor owns the Init-zeroed fixedarray beyond boot; known geometry callbacks supply only recovered writes. Initial full grid constructor path extends same owner."
+    "roomInit": "Room.from_floor_descriptor owns the Init-zeroed fixedarray beyond boot; known geometry callbacks supply only recovered writes. Initial full grid constructor path extends same owner.",
+    "readmission": "Actual traversal room replacement resets all0x700 transient cost bytes through sole Room.initialize_path_costs before restored actors run; supported Grid.Init stores then apply. Destroyed Rock2 state2 resets0. Cached NPC/Fire exact source readmission remains unimplemented; no inferred Fire950/900 replay."
   },
   "e2e": {
     "commands": [
@@ -70,7 +71,7 @@
       "npm run test:e2e:rock-blast",
       "npm run test:e2e:fireplaces"
     ],
-    "required": "Both games run by public inputs. Worm requires actual entire room path-cost readback; Rock/Fire require actual source/port per-cell costs. Complete retained contrived/OS-random cases remain mandatory.",
+    "required": "Both games run by public inputs. Worm requires all448 signed Room cost words including unused tail; Rock/Fire require actual source/port per-cell costs. Complete retained contrived/OS-random cases remain mandatory.",
     "liveStatus": "pending; no fresh original or production artifact for this correction",
     "historical": "598/50900 Worm failures, Rock explosive/tinted/troll and all Fire failures remain unchanged."
   },
@@ -81,33 +82,70 @@
       "check": {
         "command": "cargo check --manifest-path engine/Cargo.toml --locked --all-targets",
         "status": "pass",
-        "seconds": 12.57,
-        "logSha256": "a5e9f8141a810f0f3b64b7410487625b1ec4593751be3a2041eb999efa5c7806"
+        "seconds": 11.08,
+        "logSha256": "f885d774265162ebf45b32449730ee5e233311b0289cfda31db2d1f64b9e8354"
       },
       "strictAllTargetClippy": {
         "command": "cargo clippy --manifest-path engine/Cargo.toml --locked --all-targets -- -D warnings",
         "status": "pass",
-        "seconds": 13.52,
-        "logSha256": "1cf7e34560a1a77862e10c13ac8f50b2484aa4df89e3b81d6c7d3fd8e674d3e1"
+        "seconds": 12.99,
+        "logSha256": "3d9d6e694f118aec3b0498bb5dd7fe9f50ea64f0e424fa2bbb47b4c8b956fd25"
       },
       "jobs": 1,
       "incremental": false,
+      "target": "/workspace/isaac-worktrees/combat/engine/target",
       "runtimeSources": {
         "engine/src/room_costs.rs": "20de92cc3580df8cc277df767b867556ef9b694b3e2f5abeb72c1f3a4dd2893a",
-        "engine/src/room.rs": "eaf5d65c15e490c30a877561281226b5b453497977260609c815e5df69f76f65",
+        "engine/src/room.rs": "17e3075a578e52e41e2c899b683cc265b218d23ca78d32ff38dd6f1c1e92a731",
         "engine/src/grid_records.rs": "e24cfaff70acc6d5a94ad1b832c23c3b5f55263d6336c770ffac287dab662e57",
         "engine/src/rock_blast.rs": "6e9d1094f4c366e0707f11729219614173f4f9085ac01b2cb1157cb9f8ce69e1",
         "engine/src/fireplaces.rs": "d0fe97c310419e624a539a053bb16c083c42b4d586f1f1de3169e8d84a3f59cf",
         "engine/src/roundworm.rs": "6987486118786b1d11b8b6ebc4fe5fa8dd6eec4a91c3a7cf8b1ad50abec046db",
-        "engine/src/lib.rs": "f17c6bb76ce7447b188cc8755be6759c3a59f958f42a4fd21284c1acccfe99d6"
+        "engine/src/lib.rs": "f17c6bb76ce7447b188cc8755be6759c3a59f958f42a4fd21284c1acccfe99d6",
+        "engine/src/traversal.rs": "bab18803a2737201aa568cee3860af2a99c7db9b8b60a3e6ea701c6b44fb088c"
       },
-      "proofSha256": "21132aa413096b6cc117aad95434fe8fbea0fd80ec1aeb2e21835077fa64c83a"
+      "proofSha256": "306e4be5330a95d2a587538de5d9245b0cea0a87b50d0d80150e32d6353c7a8b"
     },
     "productionBuild": "pending",
     "originalBrowser": "pending",
     "typescript": "pass",
     "formatAndWhitespace": "pass"
   },
-  "runtimeCommit": "de7a73681ba2dbe90003c7f9709292fa1aae431d",
-  "sourceBinaryVerified": true
+  "runtimeCommit": "3314913f5f5e2cf12c5087b6bf06c292aba27723",
+  "sourceBinaryVerified": true,
+  "firstValidatedRuntimeCommit": "de7a73681ba2dbe90003c7f9709292fa1aae431d",
+  "firstGateHead": "a609851beccd12e3912bd57213b30df8b4ceaea6",
+  "firstStaticProof": {
+    "status": "pass",
+    "check": {
+      "command": "cargo check --manifest-path engine/Cargo.toml --locked --all-targets",
+      "status": "pass",
+      "seconds": 12.57,
+      "logSha256": "a5e9f8141a810f0f3b64b7410487625b1ec4593751be3a2041eb999efa5c7806"
+    },
+    "strictAllTargetClippy": {
+      "command": "cargo clippy --manifest-path engine/Cargo.toml --locked --all-targets -- -D warnings",
+      "status": "pass",
+      "seconds": 13.52,
+      "logSha256": "1cf7e34560a1a77862e10c13ac8f50b2484aa4df89e3b81d6c7d3fd8e674d3e1"
+    },
+    "jobs": 1,
+    "incremental": false,
+    "runtimeSources": {
+      "engine/src/room_costs.rs": "20de92cc3580df8cc277df767b867556ef9b694b3e2f5abeb72c1f3a4dd2893a",
+      "engine/src/room.rs": "eaf5d65c15e490c30a877561281226b5b453497977260609c815e5df69f76f65",
+      "engine/src/grid_records.rs": "e24cfaff70acc6d5a94ad1b832c23c3b5f55263d6336c770ffac287dab662e57",
+      "engine/src/rock_blast.rs": "6e9d1094f4c366e0707f11729219614173f4f9085ac01b2cb1157cb9f8ce69e1",
+      "engine/src/fireplaces.rs": "d0fe97c310419e624a539a053bb16c083c42b4d586f1f1de3169e8d84a3f59cf",
+      "engine/src/roundworm.rs": "6987486118786b1d11b8b6ebc4fe5fa8dd6eec4a91c3a7cf8b1ad50abec046db",
+      "engine/src/lib.rs": "f17c6bb76ce7447b188cc8755be6759c3a59f958f42a4fd21284c1acccfe99d6"
+    },
+    "proofSha256": "21132aa413096b6cc117aad95434fe8fbea0fd80ec1aeb2e21835077fa64c83a"
+  },
+  "pending": [
+    "Fresh production/original-browser cohort for corrected runtime",
+    "Exact first admission Room.Update order",
+    "Derived grid constructor RNG and unsupported path-cost callbacks",
+    "Source NPC/Fire saved readmission and its actual cost writers"
+  ]
 }
