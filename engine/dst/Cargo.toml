@@ -13,6 +13,8 @@ rebirth-cleanroom = { path = ".." }
 antithesis_sdk = { version = "=0.3.0", default-features = false, features = ["full"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1", features = ["float_roundtrip"] }
+# Pure-Rust interpreter: replays tapes through the shipped engine.wasm.
+wasmi = { version = "2", default-features = false, features = ["std", "stable", "validate", "portable-dispatch", "deterministic"] }
 
 [profile.release]
 opt-level = 3

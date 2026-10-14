@@ -5,7 +5,7 @@
 //! and checks state invariants, transition contracts and rejection
 //! semantics after every step. At the end it replays the tape for
 //! determinism, resumes from a serialized midpoint for snapshot completeness,
-//! and drives the C ABI used by the browser.
+//! drives the C ABI used by the browser, and (with `--wasm`) the shipped WASM.
 mod driver;
 mod invariants;
 
@@ -188,6 +188,9 @@ impl Simulation {
         self.replay_matches();
         self.continuation_matches(case.entropy);
         self.abi_matches();
+        if let Some(module) = case.wasm {
+            module.differential(&self.tape, &self.trace);
+        }
         if self.game.state.screen == rebirth_cleanroom::Screen::Playing {
             props::sometimes!(
                 self.game.state.run_tick > 3_000,

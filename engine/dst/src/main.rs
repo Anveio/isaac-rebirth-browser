@@ -9,6 +9,7 @@ mod harness;
 mod props;
 mod tape;
 mod units;
+mod wasm;
 
 use entropy::Mode;
 use harness::Plan;
@@ -19,7 +20,8 @@ use std::process::ExitCode;
 
 const USAGE: &str = "usage: rebirth-dst [--units all|a,b] [--cases N] [--steps N] [--seed U64]
                    [--case-seed U64] [--entropy seeded|antithesis] [--tapes DIR]
-                   [--replay TAPE.json] [--corpus DIR] [--report PATH] [--allow-unmet] [--retain-all] [--list]
+                   [--replay TAPE.json] [--corpus DIR] [--wasm ENGINE.wasm]
+                   [--report PATH] [--allow-unmet] [--retain-all] [--list]
                    [--setup-complete]";
 
 struct Options {
@@ -32,6 +34,7 @@ struct Options {
     tapes: Option<PathBuf>,
     replay: Option<PathBuf>,
     corpus: Option<PathBuf>,
+    wasm: Option<PathBuf>,
     report: Option<PathBuf>,
     allow_unmet: bool,
     list: bool,
@@ -50,6 +53,7 @@ fn parse() -> Result<Options, String> {
         tapes: None,
         replay: None,
         corpus: None,
+        wasm: None,
         report: None,
         allow_unmet: false,
         list: false,
@@ -79,6 +83,7 @@ fn parse() -> Result<Options, String> {
             "--tapes" => options.tapes = Some(value()?.into()),
             "--replay" => options.replay = Some(value()?.into()),
             "--corpus" => options.corpus = Some(value()?.into()),
+            "--wasm" => options.wasm = Some(value()?.into()),
             "--report" => options.report = Some(value()?.into()),
             "--allow-unmet" => options.allow_unmet = true,
             "--list" => options.list = true,
@@ -141,7 +146,21 @@ fn os_seed() -> u64 {
     u64::from_le_bytes(bytes)
 }
 
+/// The WASM interpreter's translator recurses deeply on the engine's large
+/// serde functions; run every case on one thread with a generous stack.
+const STACK_BYTES: usize = 512 * 1024 * 1024;
+
 fn main() -> ExitCode {
+    std::thread::Builder::new()
+        .name("rebirth-dst".into())
+        .stack_size(STACK_BYTES)
+        .spawn(simulate)
+        .expect("spawn the simulation thread")
+        .join()
+        .unwrap_or(ExitCode::FAILURE)
+}
+
+fn simulate() -> ExitCode {
     let options = match parse() {
         Ok(options) => options,
         Err(message) => {
@@ -187,6 +206,13 @@ fn main() -> ExitCode {
             return ExitCode::from(2);
         }
     };
+    let wasm = match options.wasm.as_deref().map(wasm::Module::load).transpose() {
+        Ok(wasm) => wasm,
+        Err(error) => {
+            eprintln!("cannot load WASM engine: {error}");
+            return ExitCode::from(2);
+        }
+    };
     let master_seed = options.seed.unwrap_or_else(os_seed);
     let replaying = options.replay.is_some();
     let plan = Plan {
@@ -203,17 +229,23 @@ fn main() -> ExitCode {
         steps: options.steps,
         tapes: options.tapes.clone(),
         replays,
+        wasm,
         retain_all: options.retain_all,
     };
     eprintln!(
-        "rebirth-dst: entropy={} seed=0x{master_seed:016x} units={} cases={} steps={}",
+        "rebirth-dst: entropy={} seed=0x{master_seed:016x} units={} cases={} steps={}{}",
         plan.mode,
         names.join(","),
         plan.cases,
         plan.steps,
+        if plan.wasm.is_some() {
+            " wasm=differential"
+        } else {
+            ""
+        }
     );
     let records = harness::run(&plan, &selected);
-    let results = props::verdict(&names);
+    let results = props::verdict(&names, plan.wasm.is_some() && names.contains(&"game"));
     let failed = results
         .iter()
         .filter(|result| result.status == Status::Failed)
@@ -257,6 +289,7 @@ fn main() -> ExitCode {
             "units": names,
             "casesPerUnit": plan.cases,
             "steps": plan.steps,
+            "wasmDifferential": options.wasm.as_ref().map(|path| path.display().to_string()),
             "allowUnmet": allow_unmet,
             "cases": records,
             "retainedTapes": harness::retained_tapes(),
