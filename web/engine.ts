@@ -240,7 +240,6 @@ export interface State {
   profiles: { slot: number; unlockedCharacters: string[]; selectedCharacter: string; achievements: boolean[] }[];
   characterCatalog: { name: string; animation: string }[];
   paused: boolean; pressed: string[];
-  publicActions: { menuConfirm: boolean; menuBack: boolean; activePressed: boolean; activeTriggered: boolean; pocketPressed: boolean; pocketTriggered: boolean; pocketWasDown: boolean; enterWasDown: boolean; spaceWasDown: boolean; escapeWasDown: boolean };
   floor: Floor; currentRoom: number; visitedRooms: number[];
   roomDisplayFlags: number[]; revealedSecretConnections: [number, number][];
   persistedRooms: Record<string, Room>;

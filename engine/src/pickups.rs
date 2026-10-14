@@ -4,7 +4,8 @@
 use crate::{motion::WorldVector, phase::Phase, Inventory, Player};
 use serde::{Deserialize, Serialize};
 /// Normal Isaac's actual50c880 collection predicate. Supported guarded clips
-/// include the actual Hit and UseItem names admitted by50c880/50c780.
+/// include the actual Hit and UseItem names admitted by50c880/50c780. The Hit
+/// callback is composed separately; its name uses this same predicate.
 /// Controls7d4 is not a general collection veto. The retained legacy queued
 /// Pickup veto is an incomplete deferred-grant approximation:50c780 permits
 /// actual Pickup/LiftItem/HideItem too, whose main-clip ownership is pending.
@@ -12,10 +13,10 @@ pub(crate) fn player_can_collect(state: &crate::State) -> bool {
     !state.player.dead
         && state.player_animation.current != Some(crate::player_animation::Clip::Death)
         && (!state.player_animation.guard
-            || matches!(
-                state.player_animation.current,
-                Some(crate::player_animation::Clip::Hit | crate::player_animation::Clip::UseItem)
-            ))
+            || state
+                .player_animation
+                .current
+                .is_some_and(|clip| matches!(clip.name(), "Hit" | "UseItem")))
         && !state
             .player_items
             .as_ref()
