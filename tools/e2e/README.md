@@ -65,6 +65,15 @@ for checking your own change.
    expected values. Keep comparing after the first mismatch so one run shows
    the whole divergence.
 
+## Large native captures
+
+`npm run test:e2e:paired -- --archive-native-evidence` retains the complete
+native manifest as `manifest.json.gz` with decompressed and archive hashes. Its
+separate progress journal commits each actual input, acknowledgement,
+observation and capture in a closed gzip member. Interrupted journals retain
+their uncommitted tail and identify the verified byte prefix; they cannot pass
+as complete runs.
+
 ## What not to check in
 
 - Unit tests of any kind: Rust `#[cfg(test)]`/`#[test]`, Node or Python test

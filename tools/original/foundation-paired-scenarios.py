@@ -148,7 +148,8 @@ def main():
         print(json.dumps(rows)); return 0
     if args.validate_original:
         verifier = load('paired_native_provenance', 'foundation-clock-verify.py')
-        failures = verifier.validate_run(json.loads(args.validate_original.read_text()))
+        evidence = load('paired_native_evidence', 'native-evidence.py')
+        failures = verifier.validate_run(evidence.read_manifest(args.validate_original))
         print(json.dumps({'status': 'fail' if failures else 'pass', 'failures': failures}))
         return 1 if failures else 0
     seed = args.seed or runner.codec.random_vector()['code']
