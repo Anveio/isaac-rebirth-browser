@@ -55,6 +55,7 @@ for (const action of tape.pairedTape) {
       ['flags', actor.entityFlags, actual.flags], ['visible', actor.visible, actual.visible],
       ['gridClass', actor.gridCollisionClass, actual.gridCollisionClass], ['entityClass', actor.entityCollisionClass, actual.entityCollisionClass],
       ['actorRng', actor.actorRngState, actual.actorRng.state], ['state', actor.bloodParticleState, particle.state],
+      ['actorRngWords', actor.actorRngWords, [actual.actorRng.state, actual.actorRng.rightA, actual.actorRng.left, actual.actorRng.rightB]],
       ['raw7d8', actor.effectRaw7d8, actual.raw7d8], ['timeToLive', actor.effectTimeToLive, actual.timeToLive],
       ['raw7f4', actor.effectRaw7f4, actual.raw7f4], ['depth', actor.renderOrderOffset, actual.renderOrderOffset],
       ['animation', actor.animation, actual.sprite.animation], ['playing', actor.animationPlaying, actual.sprite.playing],

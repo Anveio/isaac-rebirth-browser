@@ -72,6 +72,7 @@ def observe(pid, context):
                     'authoredGridIndex': struct.unpack_from('<i', raw, 0x430)[0],
                     'renderOrderOffset': struct.unpack_from('<i', raw, 0x460)[0],
                     'actorRngState': struct.unpack_from('<I', raw, 0x7c0)[0],
+                    'actorRngWords': list(struct.unpack_from('<4I', raw, 0x7c0)),
                     'pendingDamage': struct.unpack_from('<f', raw, 0x378)[0],
                     'gridCollisionClass': struct.unpack_from('<I', raw, 0x340)[0],
                     'entityCollisionClass': struct.unpack_from('<I', raw, 0x344)[0],
