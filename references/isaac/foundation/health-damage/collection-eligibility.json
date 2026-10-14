@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
-  "scope": "Sole source collection predicate composed on main regular pickup callbacks. Actual UseItem exemption is representable; source Hit exemption uses the same name API and awaits its separate Health callback. Source/static only; no current compiler or fresh game acceptance. Legacy queued-Pickup veto remains explicitly incomplete.",
+  "scope": "Sole source collection predicate for ordinary/restored regular pickup and Heart callbacks. Actual dead/Death and bf4 name rules apply. Known legacy Pickup does not veto generic regular collection; collectible queue admission retains its separate existing rule. Source-only qualification, fresh gameplay pending.",
   "functions": [
     {
       "address": "0x50c880",
@@ -14,14 +14,32 @@
       "bytes": 250,
       "label": "Guarded item clip-name predicate",
       "rawSha256": "d03137d1fa55d58b1d271a50870711350f0ee6587be7f27f3a217eeac2a191c5"
+    },
+    {
+      "address": "0x504820",
+      "bytes": 8329,
+      "label": "Pickup callback permits free physical response when collection is denied",
+      "rawSha256": "2737d0683e5bd89e4e68a811d2154a41b8c7a7b1f73038b6174169b51e1d3f2f"
+    },
+    {
+      "address": "0x4453a0",
+      "bytes": 242,
+      "label": "Compatible physical classes and independent actual dead-body veto before callback OR",
+      "rawSha256": "a2f7dcc6399de00c46a319fd832e78a34141e0482ab08615aa3028f51dbd8859"
+    },
+    {
+      "address": "0x445710",
+      "bytes": 1231,
+      "label": "Physical mass response after callback veto",
+      "rawSha256": "e5a792063f3888e25cbd0ed857e37232705c4f0ed80c7f1e44b405802855b105"
     }
   ],
   "predicate": {
     "dead": "50c8aa tests Entity+31f and returnsfalse when set.50c8d0 rejects mainclip nameDeath regardlessbf4. There is no red or Soul HP read and no controls7d4 predicate.",
     "mainGuard": "50c89f testsbf4. Ifclear, dead/Death are the only predicates. Ifset,50c8e8 comparescurrentnameHit and permits it directly; otherwise50c8fc calls50c780.",
-    "itemClipExceptions": "50c780 permits actual Pickup/LiftItem/HideItem/UseItem. The shared helper recognizes source names Hit and UseItem; current main has UseItem and Health separately adds Hit. Pickup/LiftItem/HideItem main-clock ownership remains pending.",
-    "legacyLimit": "player_items.pickup_animation_guard remains a veto because actual Pickup/LiftItem/HideItem main-clock/queued ownership has not been composed. This is a retained port approximation, not evidence that source50c880 rejects Pickup; actual source permits those names. Full natural grant/copy semantics and these exceptions require the owning item callback.",
-    "consumer": "Root collect_regular_pickup_at, collectible/Chest contact and Combat Heart all consume one shared helper; no duplicate pickup predicate."
+    "itemClipExceptions": "Generic helper permits actual source names Hit/Pickup/LiftItem/HideItem/UseItem while bf4 is set. Current concrete enum has UseItem; Health separately adds Hit and exclusive legacy Pickup transfer.",
+    "legacyLimit": "Legacy queued Pickup represents a source-permitted Pickup name and is not a generic veto. Existing collectible queue admission remains separately guarded. Full main/copy ownership still awaits its separate transfer leaf.",
+    "consumer": "One shared helper scopes ordinary/restored regular collection, collectible queue admission and separately composed Heart collection. Chest contact retains its own existing rules. Empty altar physical response is independent of collection/queue guards and rejects actual Player.dead within the admitted fixed class4 scope."
   },
   "historicalHealthHelperFile": {
     "producer": "9eb9956d320e9c8b8b7cf0457666037664af1f63",
@@ -29,7 +47,18 @@
   },
   "currentRuntime": {
     "path": "engine/src/pickups.rs",
-    "sha256": "8eddaa687184dd066aafbc5768d38a357e47ac6d37ef5edcc20dd3b135ac39c5",
+    "sha256": "5b25b383ccd0e9ec26386e06d8b6ad8aa2d5c9d01fc92ad21ca58806b1f967c7",
     "scope": "Actual current Clip.name predicate; no second helper. The separate Health Hit callback has not been composed into this Death-only leaf."
+  },
+  "physicalContact": {
+    "scope": "Admitted living normal class4 Player and retained active free subtype0 class4 altar; no general removed/dead equivalence claimed.",
+    "collectionFalse": "504820 returns pickup.price != 0 when Player.CanCollect is false; a free pickup returns0, permitting the physical response after callback OR.",
+    "eligibility": "4453a0 checks actual +344 compatible classes and either Entity+31f separately before445710 callback veto. Actual Player.dead rejects altar mass response; main/queue guards do not.",
+    "runtimeConsumers": {
+      "collect": "engine/src/player_items.rs::collect",
+      "physical": "engine/src/player_items.rs::empty_altar_contact",
+      "callOrder": "Attempt collectible collection, then physical altar contact on returnedfalse."
+    },
+    "runtimeFileSha256": "dc7c9413ab2ecea24e2a7b69a911c95e22f6bc58aa4306aac0bb9ca569fa30de"
   }
 }

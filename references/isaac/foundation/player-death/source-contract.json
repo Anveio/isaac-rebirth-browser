@@ -399,5 +399,21 @@
   "priorKeyboardContractSha256": "41f975d2579a0361324e9f0f033a6bb699a812c19438a572d731e4466080d379",
   "bombDamageCause": "BombUpdate45776a invokes555300. At55536c r9d=4 entersGame554490;5544bc stores it tostack44 andPlayer virtual38 forwardsit inesi at554e1b. Ordinary explosion amount>=50 supplies2health units. Actual death cause mustretainDamageFlags4, notguessfromhealth.",
   "popupWidgetPositions": "Source557e10 viewport-dependent positions: Exit(10,height\u221255),Restart(width\u221280,height\u221275);SourceDiary(width/2+16,height/2+16). At480x270 theseare(10,215),(400,195),(256,151); pixelprojectionunaccepted.",
-  "priorPlayerDispatchContractSha256": "7ea599fa87ff0316b8ae64862ba7009e2d91d7babbfd4832c5a6a2fd93e8e3ae"
+  "priorPlayerDispatchContractSha256": "7ea599fa87ff0316b8ae64862ba7009e2d91d7babbfd4832c5a6a2fd93e8e3ae",
+  "storedShootingBoundary": {
+    "scope": "Dead531b24 returns before the ordinary52f370 shooting-input owner. Preserve stored db0; suppress ordinary shot callbacks by returning, without inventing a stored-value clear. Held-arrow death public gameplay remains unaccepted.",
+    "writeOwner": "52f73d",
+    "checkedNoStoreCallers": [
+      "Player dead branch531b24",
+      "Player main ForcePlay50a5c0",
+      "Base447190",
+      "common Kill4464c0",
+      "dead-path50c000"
+    ],
+    "additionalSourceFunction": {
+      "address": "0x50c000",
+      "bytes": 1220,
+      "rawSha256": "6358d6eff95b38b268c1ba0dc22c9a735177faa453e1983f4bb9df67b6a9322a"
+    }
+  }
 }

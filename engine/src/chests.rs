@@ -272,7 +272,8 @@ fn admit_child(
 /// so the existing kernel retains the same pre-callback overlap geometry.
 pub(crate) fn player_contact(state: &mut State, index: usize) -> Result<(), String> {
     let pickup = &state.room.pickups[index];
-    if pickup.variant != 50
+    if state.player.dead
+        || pickup.variant != 50
         || pickup.removed
         || pickup
             .chest

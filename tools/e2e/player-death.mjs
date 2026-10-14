@@ -17,7 +17,14 @@ const scenarioFile=option('--scenario-file',undefined);
 const scenarioInput=scenarioFile?readFileSync(resolve(scenarioFile)):undefined;
 const scenarios=JSON.parse(scenarioInput||execFileSync('python3',['tools/original/player-death-scenarios.py','--count',option('--count','2')],{encoding:'utf8',maxBuffer:8*1024*1024}));
 assert.ok(Array.isArray(scenarios.cases)&&scenarios.cases.length>=4,'Death gate requires both contrived routes and at least two recorded random cases');
-assert.ok(scenarios.cases.some(c=>c.scenario.id==='death-spikes-restart')&&scenarios.cases.some(c=>c.scenario.id==='death-spikes-exit'),'Both mandatory public popup actions must remain in the cohort');
+const requiredIds=new Set(['death-spikes-restart','death-spikes-exit']);
+const ids=scenarios.cases.map(c=>c.scenario?.id);
+assert.ok(ids.every(id=>typeof id==='string')&&new Set(ids).size===ids.length,'Every declared death case requires a unique ID');
+for(const id of requiredIds)assert.ok(scenarios.cases.some(c=>c.scenario.id===id&&c.deathRequired===true),'Both mandatory public popup actions require actual death regardless of supplied bank metadata');
+const randomCases=scenarios.cases.filter(c=>/^death-unfiltered-\d+$/.test(c.scenario.id));
+assert.ok(randomCases.length>=2&&randomCases.every(c=>
+ c.entropy?.source==='OS secrets; unfiltered nonzero32-bit public seed'&&
+ c.entropy.draw?.seedValue===c.seedValue),'At least two complete recorded unfiltered OS rows must remain in the bank');
 save(resolve(output,'scenarios.json'),scenarios);
 const paths=scenarios.cases.map((c,n)=>{const p=resolve(output,`replay-${n}.json`);save(p,c);return p;});
 function compare(source,actual,gameplay){
@@ -57,9 +64,10 @@ const coverage=scenarios.cases.map((c,n)=>{
  const settled=native.debugObservations.find(r=>r.context.label==='death-settled')?.observation.death;
  const candidate=manifest(resolve(report.cases[n].directory,'browser/manifest.json')).frames.find(r=>r.label==='death-settled')?.state;
  const complete=settled?.dead===true&&settled.popupState===2&&candidate?.player.dead===true&&candidate.playerDeath.gameOver?.state===2;
- return {id:c.scenario.id,required:c.deathRequired,actualSource:settled,executedInBoth:complete,status:!c.deathRequired||complete?'pass':'fail'};
+ const required=requiredIds.has(c.scenario.id)||c.deathRequired;
+ return {id:c.scenario.id,required,actualSource:settled,executedInBoth:complete,status:!required||complete?'pass':'fail'};
  } catch (error) {
-  return {id:c.scenario.id,required:c.deathRequired,executedInBoth:false,status:'fail',error:String(error)};
+  return {id:c.scenario.id,required:requiredIds.has(c.scenario.id)||c.deathRequired,executedInBoth:false,status:'fail',error:String(error)};
  }
 });
 const stable=JSON.stringify(hashes())===JSON.stringify(before);
