@@ -205,7 +205,7 @@ post-acquisition Player state, load/continue and
 durable browser saves remain open. [SavedGame evidence](../references/isaac/foundation/saved-game/README.md)
 retains the original reports and the correction that made those gaps blocking.
 
-CI discovers all thirty-five registered live suites and runs separate jobs with
+CI discovers all thirty-six registered live suites and runs separate jobs with
 `fail-fast: false`, preserving each result and evidence. The first matrix run
 completed floors, weapons, boot MT and pickups successfully while retaining
 core and traversal failures. Historical build, typecheck, assets, matrix and strict Clippy
