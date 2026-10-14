@@ -61,6 +61,18 @@
     "0x410810": {
       "fdeBytes": 80,
       "rawSha256": "405f8608d8a8cf59b31009d0bac553dd7fa20cca5344f49011daa91a64becb39"
+    },
+    "0x47eb80": {
+      "fdeBytes": 218,
+      "rawSha256": "6f12ee17247810720997d0e48707ab6af88c66eb73deef12f575f88e4c31f0ad"
+    },
+    "0x448040": {
+      "fdeBytes": 212,
+      "rawSha256": "17d031c2b0d52ceaf489fac50292560cfeec1dcf315ab2bb13bf1e5cb34dbace"
+    },
+    "0x4524f0": {
+      "fdeBytes": 513,
+      "rawSha256": "e8f40a437d9275b5adbe97c6a3f2fad30443a5a12f3ff673b8fc74f2e33beabe"
     }
   },
   "callerFunction": {
@@ -113,7 +125,8 @@
     "controller42": "AfterBase/finishedcurrent check, existingdead31f causesRemove31e0. Missing/deadparent marks31f only then still executesTTLtail. TTLzero marksdead only; nextfullRemove.",
     "pool": "Actualactive31e/dead31f remain distinct. Manager retirement/render useactive. Background17 copiesactualvariant/Sprite thenRemove. raw7f8 affects sort rather thanvisibleheight.",
     "clipScope": "42 defaultIdleloops. Externalclip replacement reaching finishedcurrentLoop remains explicitunsupported.",
-    "render": "AuthoredPNG/root/layer frames plusglobal signedscale/rotation/layerflips/offset/color. Complete native draw-order/background-return/RGBA parity is unaccepted."
+    "render": "AuthoredPNG/root/layer frames plusglobal signedscale/rotation/layerflips/offset/color. Complete native draw-order/background-return/RGBA parity is unaccepted.",
+    "parentUninit": "Normal category+38 inactive scan455248\u2192455428\u2192Manager45543e invokes actual NPCvirtual68=47eb80, which calls448040 at47eba0; after actor/background callbacks and before4545d0 contacts.448052 clears ownParent via447fc0(NULL);448080..96 iterates parent registered child slots and448087 writes *slot=0. New42 link is cleared at that supported pre-contact boundary when its parentNPC retires; a stale reference remains a required gate failure. No destructor shortcut or dead31f-only cleanup."
   },
   "resources": {
     "references/isaac/rebirth/resources/entities2.xml": "76408c1612ce7281d131c460cf3450eeae6bc602bc539805d53d76406432a936",
@@ -131,6 +144,6 @@
     "Complete render ordering/backgroundreturn/RGBA",
     "Remaining shared run/ambient RNG producers; no padding",
     "Existing failed public-game histories",
-    "Actual parent+4b0 registered-link cleanup on retirement/destruction. A stale serialized ActorRef is a required comparator mismatch, not silently mapped to native NULL."
+    "Fresh actual parent Uninit/body witness and matched42 successor; the source-supported callback has no new live acceptance."
   ]
 }

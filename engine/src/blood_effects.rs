@@ -271,3 +271,24 @@ pub(crate) fn advance(state: &mut State, phase: Phase, id: u32) -> Result<(), St
     }
     Ok(())
 }
+
+/// Manager45543e invokes NPC.Uninit47eb80 ->448040 after actor/background
+/// callbacks and before4545d0 contacts.448087 nulls each registered child link;
+/// inactive effects also clear their own link through447fc0(NULL).
+pub(crate) fn clear_retired_links(state: &mut State) {
+    for effect in &mut state.sprite_effects {
+        if effect.blood_effect != Some(Controller::BloodGush) {
+            continue;
+        }
+        let parent_retired = effect.parent.is_some_and(|parent| {
+            state
+                .room
+                .npcs
+                .iter()
+                .any(|npc| npc.id == parent.actor.id && npc.removed)
+        });
+        if !effect.active || parent_retired {
+            effect.parent = None;
+        }
+    }
+}

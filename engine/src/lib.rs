@@ -1627,6 +1627,7 @@ impl Game {
                     }
                     self.state.room.manager_counts.finish_full(counted);
                     familiars::paint_background_effects(&mut self.state)?;
+                    blood_effects::clear_retired_links(&mut self.state);
                     pickups::full_grid_contacts(&mut self.state)?;
                     chests::full_grid_contacts(&mut self.state)?;
                     npcs::post_contact_grid(&mut self.state)?;
@@ -1717,6 +1718,7 @@ impl Game {
             // The independent render array paints flags8 at its current count,
             // including births from the admission-fenced actor callbacks.
             familiars::paint_background_effects(&mut self.state)?;
+            blood_effects::clear_retired_links(&mut self.state);
             let pickup_contacts = pickups::contact_candidates(&self.state)?;
             npcs::player_contacts(&mut self.state)?;
             npcs::nonplayer_contacts(&mut self.state)?;
