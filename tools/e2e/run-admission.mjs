@@ -12,6 +12,7 @@ import { browserLaunchOptions, inspectBrowserGraphics } from '../foundation/brow
 import { startProductionServer } from '../foundation/production-server.mjs';
 import { assertInputProvenance, assertSeededRun, manualSeedCommands, waitForReady } from '../foundation/verify.mjs';
 import { writeBrowserEvidence } from '../foundation/browser-evidence.mjs';
+import { ORIGINAL_SHA } from './lib/original.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const run = promisify(execFile);
@@ -86,7 +87,7 @@ try {
         && row.context.presentedFrame > baseline.context.presentedFrame);
       assert.equal(nativeRows.length, 342, 'Every declared dense original presentation must be observed');
       assert.ok(nativeRows.every(row => row.observation.status === 'pass'
-        && row.observation.nativeBinarySha256 === '724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13'
+        && row.observation.nativeBinarySha256 === ORIGINAL_SHA
         && row.observation.memoryWritten === false && row.observation.executableMappingsRead === false));
       const start = c.tape.findIndex(action => action.label === 'before-run-confirmation');
       const route = c.tape.slice(start + 1);

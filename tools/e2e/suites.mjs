@@ -1,0 +1,72 @@
+// The one registry of live e2e suites. Every suite plays the fresh original
+// and the immutable production build through public inputs only; most mix
+// contrived cases (fixed seeds/phases that pin known edges) with recorded
+// OS-random cases that catch behavior which only works for particular seeds.
+//
+// Run:     npm run test:e2e -- [suite ...] [--jobs N] [suite flags]
+// Replay:  the runner prints the exact command for every failed suite.
+//
+// Fields:
+//   id      suite name used by the runner, CI and docs
+//   entry   driver script, run under a virtual display
+//   args    default driver arguments (caller flags of the same name replace them)
+//   about   one line describing what the suite proves
+//   replay  flag that replays the suite's recorded scenarios.json
+//           (default --scenarios; paired-game suites replay case.json tapes)
+
+const suite = (id, entry, args, about, extra = {}) => ({ id, entry, args, about, ...extra });
+const paired = 'tools/foundation/paired-game.mjs';
+const e2e = name => `tools/e2e/${name}.mjs`;
+
+export const SUITES = [
+  suite('paired', paired, [], 'Title/menu, movement/fire, pause, bombs and combat rooms; six contrived + two OS-random runs'),
+  suite('regressions', paired,
+    ['--replay-cases', 'references/isaac/foundation/runtime-progress/1E0WJX06.json,references/isaac/foundation/runtime-progress/W0L0LYYM.json'],
+    'Recorded paired runs that previously regressed'),
+  suite('floor', 'tools/foundation/floor-e2e.mjs', ['--count', '2'],
+    'Complete Basement floor generation: descriptors, topology, retries and starting doors'),
+  suite('boot-mt', e2e('boot-mt'), ['--count', '4'], 'Boot-time shared MT state through title and menus'),
+  suite('menu-mt', e2e('boot-mt'), ['--menu-navigation', '--count', '4'], 'Menu navigation draws from the shared MT stream'),
+  suite('seed-dialog-mt', e2e('boot-mt'), ['--seed-dialog', '--count', '4'], 'Seed dialog entry and its MT consumption'),
+  suite('ordinary-run', e2e('ordinary-run'), ['--count', '4'], 'No-dialog ordinary run admission'),
+  suite('level-descriptors', e2e('ordinary-run'), ['--level-descriptors', '--count', '4'], 'Ordinary-run level descriptors'),
+  suite('saved-game', e2e('ordinary-run'), ['--saved-game', '--count', '4'], 'Game.Save stores after an ordinary run starts'),
+  suite('grid-records', e2e('ordinary-run'), ['--grid-records', '--count', '4'], 'Starting-room GridBase records'),
+  suite('ambient-grid', e2e('ordinary-run'), ['--ambient-grid', '--count', '4'], 'Ambient Room path costs and decorations'),
+  suite('weapons', e2e('weapons'), ['--count', '4'], 'Tear cadence, direction and inherited motion'),
+  suite('tear-lifecycle', e2e('weapons'), ['--lifecycle', '--count', '4'], 'Tear birth, flight and death phases'),
+  suite('traversal', e2e('traversal'), [], 'Ordinary doorway exit/return and hostile-room locks'),
+  suite('doors', e2e('doors'), ['--count', '1'], 'Curse and free treasure-room doors'),
+  suite('secrets', e2e('secrets'), ['--count', '1'], 'Bomb-revealed secret doors, entry and return'),
+  suite('keepers', e2e('keepers'), ['--count', '1'], 'Keeper construction and anchored idle in secret rooms'),
+  suite('key-doors', e2e('key-doors'), ['--count', '1'], 'Key collection, library unlock and revisit'),
+  suite('large-rooms', e2e('large-rooms'), ['--count', '2'], 'Tall-room bounds, doors and camera'),
+  suite('chest-opening', e2e('chest-opening'), ['--count', '2'], 'Free normal Chest opening and loot'),
+  suite('pickups', e2e('pickups'), ['--count', '2'], 'Natural authored pickups: admission, animation and collection'),
+  suite('keys', e2e('keys'), ['--count', '2'], 'Natural secret-room keys: admission and collection'),
+  suite('bomb-pickups', e2e('bomb-pickups'), ['--count', '2'], 'Regular/double bomb pickup admission and collection'),
+  suite('hearts', e2e('hearts'), ['--count', '2'], 'Natural Heart pickups through the shared collection guard'),
+  suite('troll-bombs', e2e('troll-bombs'), [], 'Troll/Megatroll conversion and lifetime'),
+  suite('rock-blast', e2e('rock-blast'), ['--count', '2'], 'Ordinary rock destruction by bombs'),
+  suite('items', e2e('items'), ['--count', '2'], 'Item pools and treasure-room pedestals'),
+  suite('item-acquisition', e2e('items'), ['--acquisition', '--count', '2'], 'First collectible acquisition'),
+  suite('stat-cache', e2e('items'), ['--stat-cache', '--count', '2'],
+    'Player stat cache after acquiring Roid Rage and Speed Ball: stats, motion and tear velocity'),
+  suite('active-item-use', e2e('items'), ['--active-use', '--count', '2'],
+    'Acquiring and using an active item (Yum Heart): charge, health, animation and SFX'),
+  suite('familiars', e2e('familiars'), ['--count', '2'], 'Familiar admission, appearance and following'),
+  suite('npcs', e2e('npcs'), [], 'Fly/AttackFly/Gaper construction, AI and contact'),
+  suite('roundworms', e2e('roundworms'), [], 'Round Worm actors, projectiles and room locks'),
+  suite('fireplaces', e2e('fireplaces'), [], 'Fireplace damage, extinguish and Ember effects'),
+  suite('monstro', e2e('monstro'), [], 'Level2 Fly route into Monstro: admission, AI, projectiles and scene cleanup'),
+  suite('health-damage', e2e('health-damage'), ['--count', '2'],
+    'Red/Soul/Black health damage, Hit and Black-heart callbacks', { replay: '--scenario-file' }),
+  suite('player-death', e2e('player-death'), ['--count', '2'],
+    'Normal Isaac death clip, GameOver freeze and deferred popup restart/exit actions', { replay: '--scenario-file' }),
+  suite('run-admission', e2e('run-admission'), ['--count', '2'],
+    'Initial run admission: menu confirmation clock anchor and Player control enable timing'),
+  suite('audio', e2e('audio'), ['--count', '2'], 'SFX admission and Web Audio output'),
+  suite('music', e2e('music'), ['--count', '2'], 'Music channels, fades and queued tracks'),
+];
+
+export const suiteById = new Map(SUITES.map(item => [item.id, item]));

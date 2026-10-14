@@ -15,7 +15,7 @@ PlayerManager's second RNG is separately default-constructed with
 The [source contracts](source-contracts.json) pin each function's original bytes
 and the copy order.
 
-Run `npm run test:e2e:saved-game`. The gate executes two contrived and four
+Run `npm run test:e2e -- saved-game`. The gate executes two contrived and four
 OS-random cases, records entropy for replay, and checks complete public command
 plans and the owned native process executable SHA. The
 [fresh evidence](verification.json) uses source `98c4ba6` and immutable browser

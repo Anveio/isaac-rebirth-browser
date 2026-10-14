@@ -11,10 +11,10 @@ import { chromium } from '@playwright/test';
 import { browserLaunchOptions, inspectBrowserGraphics } from '../foundation/browser.mjs';
 import { startProductionServer } from '../foundation/production-server.mjs';
 import { assertInputProvenance, enterSeededRun, manualSeedCommands, waitForReady } from '../foundation/verify.mjs';
+import { ORIGINAL_SHA } from './lib/original.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const run = promisify(execFile);
-const ORIGINAL_SHA = '724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13';
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
 const gateSources = ['tools/e2e/keys.mjs', 'tools/original/key-scenarios.py',
   'tools/original/rock-blast-scenarios.py', 'tools/foundation/decode-rooms.py',

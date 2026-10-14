@@ -34,6 +34,8 @@ bash cloud/install.sh
 bash cloud/start.sh                    # http://localhost:5173
 npm run check                         # Build and gate fresh original/browser games
 npm run test:e2e                      # Run every registered live suite; retain every result
+npm run test:e2e -- --list            # Registered live suites (tools/e2e/suites.mjs)
+npm run test:e2e -- keys doors --jobs 2 # Selected suites, in parallel
 npm run test:e2e:paired               # Six contrived + two recorded OS-random runs
 npm run test:e2e:paired -- --replay-cases PATH # Replay a recorded case.json
 npm run verify:foundation             # Strict legacy PNG/state diagnostics; mismatches exit nonzero

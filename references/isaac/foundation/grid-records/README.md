@@ -17,13 +17,13 @@ this API is not yet routed through durable continue or room restoration.
 The [source contracts](source-contracts.json) pin sixteen original functions,
 field offsets and caller order.
 
-Run `npm run test:e2e:grid-records`. The gate runs two contrived and four
+Run `npm run test:e2e -- grid-records`. The gate runs two contrived and four
 OS-random cases, records entropy, validates complete public command plans and
 pins each owned native process executable. Reproduce the
 [fresh proof](verification.json) with its [recorded cases](accepted-scenarios.json):
 
 ```sh
-npm run test:e2e:grid-records -- \
+npm run test:e2e -- grid-records \
   --scenarios references/isaac/foundation/grid-records/accepted-scenarios.json
 ```
 

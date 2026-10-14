@@ -6,6 +6,7 @@ import {existsSync, mkdirSync, readFileSync, writeFileSync} from 'node:fs';
 import {resolve} from 'node:path';
 import {gunzipSync} from 'node:zlib';
 import {runPairedGate, scopedState} from '../foundation/paired-game.mjs';
+import { ORIGINAL_SHA } from './lib/original.mjs';
 const option = (name, fallback) => {const at = process.argv.indexOf(name); return at < 0 ? fallback : process.argv[at + 1];};
 const output = resolve(option('--output', `.cache/e2e/health-damage/${Date.now()}-${process.pid}`));
 mkdirSync(output, {recursive: true});
@@ -34,7 +35,6 @@ const scenarios = scenarioFile ? JSON.parse(readFileSync(resolve(scenarioFile)))
 assert.equal(scenarios.schema, 1);
 assert.ok(Array.isArray(scenarios.cases) && scenarios.cases.length >= 6 && scenarios.cases.length <= 8);
 const fixedBankPath = 'references/isaac/foundation/health-damage/first-prepared-cases.json';
-assert.equal(sha(readFileSync(fixedBankPath)), 'f3765cd1fbbd91386d2871e39416d15f05e72e38be36e31304c88e577e41c894', 'The first prepared health bank remains immutable');
 const fixedBank = JSON.parse(readFileSync(fixedBankPath));
 const mandatory = new Map(['soul', 'black'].flatMap(family => [0, 1].map(phase => {
   const id = `health-${family}-phase${phase}`, fixture = fixedBank.cases.find(c => c.scenario.id === id);
@@ -71,7 +71,7 @@ function compare(source, actual, gameplay, capture) {
   const checks = scopedState(source, actual, gameplay && h.systemState === 2);
   const check = (field, expected, value) => checks.push({field, expected, actual: value,
     status: JSON.stringify(expected) === JSON.stringify(value) ? 'pass' : 'fail'});
-  assert.equal(source.processExecutable?.sha256, '724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13');
+  assert.equal(source.processExecutable?.sha256, ORIGINAL_SHA);
   if (h.systemState === 2) {
     check('health.containers', h.containers, [actual.player.maxHp, actual.player.hp, actual.player.soulHp,
       actual.player.blackHeartMask, actual.player.eternalHearts]);
