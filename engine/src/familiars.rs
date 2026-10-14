@@ -246,6 +246,9 @@ pub struct SpriteEffect {
     pub poop_effect: Option<crate::poop_effects::Controller>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub blood_effect: Option<crate::blood_effects::Controller>,
+    /// Player footprint Blood7 whose floor-sampled color offsets are unknown.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub footprint: bool,
 }
 
 impl SpriteEffect {
@@ -405,6 +408,7 @@ impl NpcEffectAdmission<'_> {
             full_updates: 0,
             poop_effect: None,
             blood_effect: None,
+            footprint: false,
         });
         self.scheduler.admit(ActorRef {
             kind: ActorKind::Effect,
@@ -665,6 +669,8 @@ pub struct BackgroundStain {
     pub render_offset: WorldVector,
     pub layer_rotation: Option<f32>,
     pub sprite: Sprite,
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub footprint: bool,
 }
 
 /// Fresh zero-gib death445c60: caller owns the external seed and color copy.
@@ -683,6 +689,26 @@ pub fn admit_blood_splat(
         scheduler: &mut state.actor_scheduler,
     }
     .admit_blood(seed, position, tint, offsets)
+}
+
+pub fn set_blood_scale(state: &mut State, id: u32, scale: f32) -> Result<(), String> {
+    NpcEffectAdmission {
+        game_update_count: state.game_update_count,
+        next_effect: &mut state.next_effect,
+        effects: &mut state.sprite_effects,
+        scheduler: &mut state.actor_scheduler,
+    }
+    .set_blood_scale(id, scale)
+}
+
+pub fn mark_footprint(state: &mut State, id: u32) -> Result<(), String> {
+    let effect = state
+        .sprite_effects
+        .iter_mut()
+        .find(|e| e.id == id && e.variant == 7)
+        .ok_or("footprint requires an admitted actual7")?;
+    effect.footprint = true;
+    Ok(())
 }
 
 pub fn advance_blood_initial(state: &mut State, id: u32) -> Result<(), String> {
@@ -749,6 +775,7 @@ impl NpcEffectAdmission<'_> {
             full_updates: 0,
             poop_effect: None,
             blood_effect: None,
+            footprint: false,
         });
         // Room5c6940 assigns the actual sequence first; Manager4524f0 then routes
         // flags8 to its separate background pool rather than the ordinary array.
@@ -883,6 +910,7 @@ pub fn paint_background_effects(state: &mut State) -> Result<(), String> {
                 .as_ref()
                 .and_then(|controller| controller.layer_rotation()),
             sprite: effect.sprite.clone(),
+            footprint: effect.footprint,
         });
         // Remove441bb0 clears active and marks dead; visibility stays unchanged.
         effect.active = false;

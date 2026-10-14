@@ -53,6 +53,7 @@ export interface SpriteEffect {
   raw7d8: boolean; poopEffect?: PoopEffect;
   sprite: ActorSprite; fullUpdates: number;
   bloodEffect?: {kind: "poof04" | "bloodGush"};
+  footprint?: boolean;
 }
 export interface Impact { id: number; x: number; y: number; age: number; }
 export interface ActorRef { kind: "player" | "familiar" | "tear" | "bomb" | "pickup" | "npc" | "projectile" | "effect"; id: number; }
@@ -181,7 +182,7 @@ export interface Room {
   spawns: {tintedRockIndex: number; finalSpawnState: number; selectors: {groupIndex: number; gridIndex: number; category: "entity" | "grid"; type: number; variant: number; subtype: number; position: {x: number; y: number}; groupSeed: number; spawnSeed: number}[]} | null;
   pickups: Pickup[];
   backgroundStains: {sourceEffectId: number; spawnSeed: number; birthGameUpdate: number;
-    position: {x: number; y: number}; variant: number; renderOffset: {x: number; y: number}; layerRotation: number | null; sprite: ActorSprite}[];
+    position: {x: number; y: number}; variant: number; renderOffset: {x: number; y: number}; layerRotation: number | null; sprite: ActorSprite; footprint?: boolean}[];
   savedRegularPickups: {handle: number; variant: number; subtype: number; position: {x: number; y: number};
     spawnSeed: number; rngSeed: number; charge: number; touched: boolean}[];
   npcs: { id: number; kind: number; variant: number; subtype: number; spawnSeed: number;

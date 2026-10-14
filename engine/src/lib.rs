@@ -60,6 +60,7 @@ pub mod pickups;
 mod plain_npc;
 pub mod player_animation;
 pub mod player_death;
+mod player_footprints;
 pub mod player_items;
 pub mod player_save;
 pub mod player_stats;
@@ -2589,6 +2590,16 @@ impl Game {
         let bomb_admitted = self.state.bomb_placement_cooldown.advance(phase);
         // Shooting inherits the velocity entering this phase, before input acceleration.
         let inherited_velocity = (self.state.player.vx, self.state.player.vy);
+        // Player531c8f reads the velocity after input but before this
+        // update's grid collision, which the engine applies afterward.
+        let footprint_velocity = motion::advance_world(
+            bombs::player_world(&self.state),
+            bombs::player_velocity(&self.state),
+            dx,
+            dy,
+            self.state.player_stats.move_speed,
+        )?
+        .1;
         motion::advance(
             &mut self.state.player,
             &self.state.room,
@@ -2757,6 +2768,9 @@ impl Game {
                 self.state.fire_cooldown = plan.fire_delay;
                 self.state.head_timer = plan.head_timer;
             }
+        }
+        if phase == phase::Phase::Update {
+            player_footprints::advance(&mut self.state, footprint_velocity)?;
         }
         player_items::advance_item_sprite(&mut self.state, phase);
         if self.state.player.input_cooldown > 0 {

@@ -496,7 +496,7 @@ fn change_doors(state: &mut State, open: bool) {
     }
 }
 
-fn normalized(vector: WorldVector) -> WorldVector {
+pub(crate) fn normalized(vector: WorldVector) -> WorldVector {
     let length = (vector.x * vector.x + vector.y * vector.y).sqrt();
     if length > 0.0 {
         vector * (1.0 / length)

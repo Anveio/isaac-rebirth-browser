@@ -203,7 +203,7 @@ export class Renderer {
           this.assets.draw(ctx, bomb.variant === 3 ? "gfx/004.003_troll bomb.anm2" : bomb.variant === 4 ? "gfx/004.004_megatroll bomb.anm2" : "gfx/004.000_bomb.anm2", bomb.animation, bomb.x, bomb.y - 1, bomb.animationFrame, { pixelSnap: this.canvas.width / 480 / 2 });
       for (const effect of state.spriteEffects) {
         // Source31f dead can coexist with31e active until a later Remove.
-        if (!effect.visible || !effect.active) continue;
+        if (!effect.visible || !effect.active || effect.footprint) continue;
         if (effect.variant === 58 || effect.variant === 43) {
           const sprite = effect.sprite, controller = effect.poopEffect;
           const rotation = controller && "particle58" in controller && typeof controller.particle58 === "object"
@@ -302,6 +302,9 @@ export class Renderer {
     gl.blendFactors("srcAlpha", "oneMinusSrcAlpha");
     const ctx = gl.asCanvasContext();
     for (const stain of room.backgroundStains) {
+      // Footprints take their color from floor pixels the runtime does not
+      // sample yet; painting them with zero offsets would draw black marks.
+      if (stain.footprint) continue;
       const sprite = stain.sprite;
       if (stain.variant === 58 || stain.variant === 43) {
         ctx.save();
