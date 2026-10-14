@@ -113,7 +113,7 @@ const observe = () => tab.evaluate(() => {
     doors: s.room.appearance.doors.map(d => ({ side: d.side, state: d.state, target: d.targetRoom, x: d.worldPosition.x, y: d.worldPosition.y })),
     tears: s.tears.length, bombs: s.bombs.length, explosions: s.explosions.length,
     inventory: s.inventory, items: s.playerItems ? s.playerItems.ownedCounts.reduce((a, b) => a + b, 0) : 0,
-    gameOver: !!s.playerDeath?.gameOver, runSeed: s.runSeed, npcKinds: s.room.npcs.filter(n => !n.removed).map(n => `${n.kind}.${n.variant}`), introduction: s.runIntroduction.active, stage: s.stage,
+    gameOver: !!s.playerDeath?.gameOver, runSeed: s.runSeed, npcKinds: s.room.npcs.filter(n => !n.removed).map(n => `${n.kind}.${n.variant}${n.champion ? "c" + n.champion.color : ""}`), introduction: s.runIntroduction.active, stage: s.stage,
   };
 });
 
