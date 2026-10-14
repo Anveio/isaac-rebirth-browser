@@ -20,12 +20,21 @@ authored nonlooping18-frame UseItem with the copied item sprite, and calls
 and a new press while exhausted do not create a second effect. Temporary45
 has authored cooldown0, which persists rather than immediately expiring.
 
-e2e suite `active-item-use` is a required registry suite that runs both real
-games freshly. Four contrived natural45 routes cover both public admission
-phases and full/damaged health; damage is caused by an ordinary own bomb.
-The gate also retains the earlier unfiltered291/48 discoveries and adds two
-new OS-random treasure routes without filtering item identities. Complete
-inputs, original observations, production snapshots and every functional
+e2e suite `active-item-use` is an available local comparison suite that runs both real
+games freshly. Six contrived natural45 routes cover both public admission
+phases, full/damaged health and held shooting during Pickup; damage is caused
+by an ordinary own bomb. The two held-Pickup routes require an independent
+native guard witness on both presentations and compare actual db0 held input,
+fire/head timers, emission and movement.
+The gate retains the earlier unfiltered291/48/257/222 discoveries and adds
+two new OS-random treasure routes without filtering item identities. Its
+complete twelve-case cohort keeps every original eight-case input and adds
+both held-Pickup routes plus two independent new OS discoveries. Complete
+fixed seed/phase/action declarations and the new OS use tails are required
+even when a recorded scenario file is supplied; removing a witness flag or
+shortening a use tape cannot remove required coverage. Completed browser
+captures are retained before coverage and provenance assertions run.
+Complete inputs, original observations, production snapshots and every functional
 failure remain in the report. Use of an unsupported random active remains
 red. Comparisons require charge/count/temporary records, health, input fields,
 UseItem frame/playing/guard, post-acquisition motion and actual SFX admission.
@@ -67,11 +76,47 @@ active/pocket/shot callbacks and before the common cooldown tail. A full-phase
 use advances the newly reset copy immediately; a fast-phase use waits for the
 next full callback.
 
-This bank does not cover held shooting during the legacy Pickup guard. Its
-source-confirmed aim-boundary correction is tracked separately; no acceptance
-for that case or latest-main composition is inherited from the replay. Source
-pins, complete reports and temporary research remain in ignored
+This eight-case bank does not cover held shooting during the legacy Pickup
+guard. A separate source correction now joins both owned bf4 representations
+at the shooting-input boundary; the twelve-case fresh CI cohort adds both held
+Pickup routes. Frozen source `984c393` over canonical main `c7e418e` builds
+production `158b4a6f` (944 files). Its complete fresh original/browser cohort
+performs 333,152 required checks and remains **FAIL** with 463 mismatches and no
+case errors: damaged phases 19+19 (Hit guard and collectible blast motion),
+Flush291 with 404 and Anti-Gravity222 with 21 fire-timer mismatches. The eight passing
+cases include both held-Pickup phases and new unfiltered OS discoveries
+`0SZMH27F`/item4 and `4FHEEKJK`/item167; these passes accept the declared Active
+gate fields and do not accept every effect of those items.
+
+Each held-Pickup case retains 50 public ArrowRight / actual native Pickup+bf4
+rows, 25 per source phase. Both native and browser have shooting false, no alive
+tears, matching clip/frame/playing and timers -1/-1. These rows contain no
+concurrent movement key, so positive-timer decrement and nonzero movement
+specifically during Pickup remain source-preserved branches without live
+acceptance here. Actual da8 aim-vector ownership and positive7dc callback
+semantics remain separate follow-ups; db0 readback alone does not accept them.
+The full byte/input/backend readback audit passes for all 12 native/browser
+archives. Complete shared-MT remains diagnostic (297/298 held-case differences),
+the 230 counter offset establishes phase alignment only, and independent
+332/333-state arrays remain complete despite bounded 205-state traces.
+
+The checked-in `pickup-guard-first-complete-live.json` records the actual
+results and immutable evidence hashes. `pickup-guard-full12-cases.json` retains
+the exact complete public input bank for `--scenarios` replay without rerolling
+either new OS outcome. The native host watchdog stayed 120 seconds with LP2,
+preserving the exact frozen runner; it does not change the source clock.
+Source pins, complete reports and temporary research remain in ignored
 `.cache/coordination/active-items-research` and `.cache/e2e/active-item-use`.
 Flush291, other active effects, active swaps, modifier/reserve charge effects,
 the actual room-clear recharge producer, equipped pockets, cards, pills and
 their identification/swap/drop behavior remain separate implementation work.
+
+A current-main regression comparison uses the unchanged full12 inputs and the
+same independent original recordings for two fresh browser runs. It executes
+333152 checks on each artifact, retains531 baseline and410 proposal failures,
+and finds no new or lost comparison. Both held-Pickup cases now pass, removing
+100 held-input failures; another21 firing-timer differences resolve in the
+separately pending damage/delay source. Six damage and404 Flush comparisons
+remain red. [Compact current regression evidence](../references/isaac/foundation/items/pickup-guard-main-regression.json)
+records this jointly tested source scope without accepting passive1/4, every
+Anti-Gravity behavior, positive guard timers, or nonzero movement during guard.

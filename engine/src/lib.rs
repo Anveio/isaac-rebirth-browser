@@ -2237,7 +2237,16 @@ impl Game {
                 player.facing = Direction::Down;
             }
         }
-        let aim = if !controls_enabled || self.state.player_animation.guard {
+        // Both main presentation owners represent Player+bf4. Source530388
+        // suppresses shooting input before head/aim work, while ordinary
+        // movement and the full fire/head timer continuation still run.
+        let animation_guard = self.state.player_animation.guard
+            || self
+                .state
+                .player_items
+                .as_ref()
+                .is_some_and(|items| items.pickup_animation_guard);
+        let aim = if !controls_enabled || animation_guard {
             None
         } else if self.held("ArrowLeft") {
             Some(Direction::Left)
@@ -2263,14 +2272,7 @@ impl Game {
         }
         if let Some(direction) = aim {
             self.state.player.facing = direction;
-            if !shooting_locked
-                && self.state.fire_cooldown < 0
-                && !self
-                    .state
-                    .player_items
-                    .as_ref()
-                    .is_some_and(|items| items.pickup_animation_guard)
-            {
+            if !shooting_locked && self.state.fire_cooldown < 0 {
                 let (dx, dy) = match direction {
                     Direction::Left => (-1.0, 0.0),
                     Direction::Right => (1.0, 0.0),

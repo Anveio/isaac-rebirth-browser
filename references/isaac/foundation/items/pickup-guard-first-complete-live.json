@@ -1,0 +1,702 @@
+{
+  "schema": 1,
+  "status": "complete fresh original/browser cohort FAIL; archive/input/backend audit PASS",
+  "capturedSourceCommit": "984c39302e9e98c35c457dfd331c492cb237d471",
+  "sourceCompositionBase": "c7e418e3540e18f1e29ebcfb3cd182b40d49fdd9",
+  "production": {
+    "schema": 1,
+    "scope": "Completed integrated build; no full-game parity claim",
+    "sourceCommit": "984c39302e9e98c35c457dfd331c492cb237d471",
+    "sha256": "158b4a6faf3d4494d4d96d2c70a6324ca04a87ce9f8f0e1f651dd94b1f7a5f7a",
+    "files": 944,
+    "bytes": 214441151,
+    "checkBuildLog": "/workspace/isaac-worktrees/active-items/.cache/coordination/active-items-research/pickup-984c3930-check-build.log"
+  },
+  "floorElfSha256": "6a445348b035e65dba9737c9232f63c3328375a87f237aaad55d1378c75f90cb",
+  "wasmSha256": "e5a732a623e7d6cde3fa1623806957c445209411211eac73112a3c69f764dbf2",
+  "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "originalCapture": {
+    "mode": "fresh-live-original-and-browser",
+    "scope": "Default required CI runs both real games freshly"
+  },
+  "selection": {
+    "scope": "Complete cohort"
+  },
+  "checks": 333152,
+  "requiredFailures": 463,
+  "caseErrors": [],
+  "caseCount": 12,
+  "passingCases": 8,
+  "failingCases": 4,
+  "publicScenarioFile": "references/isaac/foundation/items/pickup-guard-full12-cases.json",
+  "publicScenarioSha256": "034a2ac139bbffba86fd9d48adcf4989f455187f60d6d5c984afd4d841962bab",
+  "hostExecution": {
+    "nativeLease": "native1 Root-granted after headroom",
+    "lpNumThreads": 2,
+    "frameTimeoutSeconds": 120,
+    "qualification": "Root explicitly authorizes the frozen984c runner host120s watchdog for this cohort; public tapes/sourceClock unchanged. Other new runs retain60s preference."
+  },
+  "qualification": {
+    "heldPickup": "Both declared admission phases have 50 paired public ArrowRight / actual native Pickup+bf4 rows each, 25 per source phase; native/browser shooting false, alive tear counts zero, clip/frame/playing match. This accepts the declared input suppression and zero-emission behavior.",
+    "limits": "All 100 guarded rows have fire/head timers already -1/-1 and no concurrent movement key. Positive-timer decrement and nonzero movement specifically during Pickup remain source-preserved branches without live acceptance here. Actual da8 aim-vector ownership, positive7dc callback semantics and Hit interruption ownership remain separate.",
+    "diagnostics": "Full shared-MT mismatch is retained: held cases contain 297/298 diagnostics, including all100 guarded rows. A 230 counter offset preserves phase and does not establish simulation-tick or absolute counter parity. Traces are bounded/byte-truncated at205 states but independent gameplay arrays retain332/333 complete states. Pixels, complete cache callbacks and other item effects remain outside accepted scope.",
+    "wholeGate": "Every functional mismatch remains blocking. Four cases FAIL: damaged phases19+19 (Hit guard and collectible blast motion), Flush291404 and Anti-Gravity22221 fire-timer mismatches. No OS outcomes or failed original references were replaced.",
+    "history": "Historical739-failure fresh8 and607-failure retained-original/new-browser8 remain separately unchanged. Old64b production/floor1b912/wasmf96 were retained; this new source does not relabel their results."
+  },
+  "cases": [
+    {
+      "name": "yum-full-phase-0",
+      "code": "B911XGSG",
+      "seedValue": 1639,
+      "delay": 0,
+      "entropy": "Contrived public acquisition/use and admission phase offset",
+      "status": "pass",
+      "checks": 25332,
+      "comparedPresentations": 333,
+      "selectedItemIds": [
+        45
+      ],
+      "inputProvenance": {
+        "status": "pass",
+        "commands": 395,
+        "independentlyCapturedStates": 332,
+        "stateHistoryTruncated": true,
+        "inputTraceTruncated": false
+      },
+      "browserEvidence": {
+        "path": "/workspace/isaac-worktrees/active-items/.cache/e2e/active-item-use/fresh-984c3930-full12/yum-full-phase-0/browser-states.json.gz",
+        "encoding": "gzip",
+        "rawSha256": "03f394bdbed9aeb1368ff07688cda49211844f60e5dc6fa16eb01ae7774f717d",
+        "rawBytes": 99632012
+      },
+      "nativeEvidence": {
+        "path": "/workspace/isaac-worktrees/active-items/.cache/e2e/active-item-use/fresh-984c3930-full12/yum-full-phase-0/original/manifest.json.gz",
+        "encoding": "gzip",
+        "rawSha256": "75675b0837eeae8dc564bbde38df587c44b83b26e729f0f2a77c90279cdab835",
+        "rawBytes": 150119492
+      },
+      "requiredFailures": 0,
+      "requiredFailureFields": {},
+      "pickupShotGuardPhases": [],
+      "guardedRowCount": 0,
+      "completeReadonlyOriginalObservations": 366,
+      "completeGameplayStates": 332,
+      "completeBackendCallbacks": 3,
+      "nativeStatus": "pass",
+      "guardedRowSamples": []
+    },
+    {
+      "name": "yum-full-phase-1",
+      "code": "B911XGSG",
+      "seedValue": 1639,
+      "delay": 1,
+      "entropy": "Contrived public acquisition/use and admission phase offset",
+      "status": "pass",
+      "checks": 25395,
+      "comparedPresentations": 334,
+      "selectedItemIds": [
+        45
+      ],
+      "inputProvenance": {
+        "status": "pass",
+        "commands": 396,
+        "independentlyCapturedStates": 333,
+        "stateHistoryTruncated": true,
+        "inputTraceTruncated": false
+      },
+      "browserEvidence": {
+        "path": "/workspace/isaac-worktrees/active-items/.cache/e2e/active-item-use/fresh-984c3930-full12/yum-full-phase-1/browser-states.json.gz",
+        "encoding": "gzip",
+        "rawSha256": "de57e44bae9cbed99f03b3d78056cb42dc32f0a3c216909cc1c50065c89ea419",
+        "rawBytes": 99936216
+      },
+      "nativeEvidence": {
+        "path": "/workspace/isaac-worktrees/active-items/.cache/e2e/active-item-use/fresh-984c3930-full12/yum-full-phase-1/original/manifest.json.gz",
+        "encoding": "gzip",
+        "rawSha256": "61e96409348d223b423d1139e796a2ec832512e38dfd96be5b8bedb4b45b28ba",
+        "rawBytes": 150541019
+      },
+      "requiredFailures": 0,
+      "requiredFailureFields": {},
+      "pickupShotGuardPhases": [],
+      "guardedRowCount": 0,
+      "completeReadonlyOriginalObservations": 367,
+      "completeGameplayStates": 333,
+      "completeBackendCallbacks": 3,
+      "nativeStatus": "pass",
+      "guardedRowSamples": []
+    },
+    {
+      "name": "yum-damaged-phase-0",
+      "code": "B911XGSG",
+      "seedValue": 1639,
+      "delay": 0,
+      "entropy": "Contrived public acquisition/use and admission phase offset",
+      "status": "fail",
+      "checks": 41532,
+      "comparedPresentations": 533,
+      "selectedItemIds": [
+        45
+      ],
+      "inputProvenance": {
+        "status": "pass",
+        "commands": 597,
+        "independentlyCapturedStates": 532,
+        "stateHistoryTruncated": true,
+        "inputTraceTruncated": false
+      },
+      "browserEvidence": {
+        "path": "/workspace/isaac-worktrees/active-items/.cache/e2e/active-item-use/fresh-984c3930-full12/yum-damaged-phase-0/browser-states.json.gz",
+        "encoding": "gzip",
+        "rawSha256": "e67e1a05bc2a2a41a52eeac310d44c3801254f8a4ed72d4b4c2f5833fb711c04",
+        "rawBytes": 140696356
+      },
+      "nativeEvidence": {
+        "path": "/workspace/isaac-worktrees/active-items/.cache/e2e/active-item-use/fresh-984c3930-full12/yum-damaged-phase-0/original/manifest.json.gz",
+        "encoding": "gzip",
+        "rawSha256": "894aa1df86ad32464248f88934434faea4cd6f75242b15515e367359765b28b0",
+        "rawBytes": 238066217
+      },
+      "requiredFailures": 19,
+      "requiredFailureFields": {
+        "actual animation guard": 16,
+        "pedestal0:stored velocity": 2,
+        "pedestal0:world position": 1
+      },
+      "pickupShotGuardPhases": [],
+      "guardedRowCount": 0,
+      "completeReadonlyOriginalObservations": 566,
+      "completeGameplayStates": 532,
+      "completeBackendCallbacks": 3,
+      "nativeStatus": "pass",
+      "guardedRowSamples": []
+    },
+    {
+      "name": "yum-damaged-phase-1",
+      "code": "B911XGSG",
+      "seedValue": 1639,
+      "delay": 1,
+      "entropy": "Contrived public acquisition/use and admission phase offset",
+      "status": "fail",
+      "checks": 41595,
+      "comparedPresentations": 534,
+      "selectedItemIds": [
+        45
+      ],
+      "inputProvenance": {
+        "status": "pass",
+        "commands": 598,
+        "independentlyCapturedStates": 533,
+        "stateHistoryTruncated": true,
+        "inputTraceTruncated": false
+      },
+      "browserEvidence": {
+        "path": "/workspace/isaac-worktrees/active-items/.cache/e2e/active-item-use/fresh-984c3930-full12/yum-damaged-phase-1/browser-states.json.gz",
+        "encoding": "gzip",
+        "rawSha256": "3825447f1db580942d06b949ed0da67d7bb37bc738b76c3cce1a3cc2606c265b",
+        "rawBytes": 141447838
+      },
+      "nativeEvidence": {
+        "path": "/workspace/isaac-worktrees/active-items/.cache/e2e/active-item-use/fresh-984c3930-full12/yum-damaged-phase-1/original/manifest.json.gz",
+        "encoding": "gzip",
+        "rawSha256": "ca6e55f0dbb3078de8764aaeee589d11b931e4fe5a3dd74a96b6c7e580b577dc",
+        "rawBytes": 238904159
+      },
+      "requiredFailures": 19,
+      "requiredFailureFields": {
+        "actual animation guard": 16,
+        "pedestal0:stored velocity": 2,
+        "pedestal0:world position": 1
+      },
+      "pickupShotGuardPhases": [],
+      "guardedRowCount": 0,
+      "completeReadonlyOriginalObservations": 567,
+      "completeGameplayStates": 533,
+      "completeBackendCallbacks": 3,
+      "nativeStatus": "pass",
+      "guardedRowSamples": []
+    },
+    {
+      "name": "yum-pickup-aim-phase-0",
+      "code": "B911XGSG",
+      "seedValue": 1639,
+      "delay": 0,
+      "entropy": "Contrived public held shooting during natural Pickup",
+      "status": "pass",
+      "checks": 25715,
+      "comparedPresentations": 333,
+      "selectedItemIds": [
+        45
+      ],
+      "inputProvenance": {
+        "status": "pass",
+        "commands": 397,
+        "independentlyCapturedStates": 332,
+        "stateHistoryTruncated": true,
+        "inputTraceTruncated": false
+      },
+      "browserEvidence": {
+        "path": "/workspace/isaac-worktrees/active-items/.cache/e2e/active-item-use/fresh-984c3930-full12/yum-pickup-aim-phase-0/browser-states.json.gz",
+        "encoding": "gzip",
+        "rawSha256": "2c9ef66cc29db9cb9168251875b75bd5fdb1a47b5e26cc6b65439ccc0a61542e",
+        "rawBytes": 99634977
+      },
+      "nativeEvidence": {
+        "path": "/workspace/isaac-worktrees/active-items/.cache/e2e/active-item-use/fresh-984c3930-full12/yum-pickup-aim-phase-0/original/manifest.json.gz",
+        "encoding": "gzip",
+        "rawSha256": "063e78568e621fe7f5c7849336cc4fd6c1e9a5b9a651998da3abadb595a96873",
+        "rawBytes": 150121994
+      },
+      "requiredFailures": 0,
+      "requiredFailureFields": {},
+      "pickupShotGuardPhases": [
+        0,
+        1
+      ],
+      "guardedRowCount": 50,
+      "completeReadonlyOriginalObservations": 366,
+      "completeGameplayStates": 332,
+      "completeBackendCallbacks": 3,
+      "nativeStatus": "pass",
+      "guardedRowSamples": [
+        {
+          "gameplayPresentation": 167,
+          "nativePresentedFrame": 1373,
+          "nativeSystemPhase": 1,
+          "nativeHeldShooting": false,
+          "browserHeldShooting": false,
+          "fireTimer": -1,
+          "headTimer": -1,
+          "nativePosition": [
+            320.0,
+            294.9188232421875
+          ],
+          "browserPosition": [
+            240,
+            145.69723510742188
+          ]
+        },
+        {
+          "gameplayPresentation": 168,
+          "nativePresentedFrame": 1374,
+          "nativeSystemPhase": 0,
+          "nativeHeldShooting": false,
+          "browserHeldShooting": false,
+          "fireTimer": -1,
+          "headTimer": -1,
+          "nativePosition": [
+            320.0,
+            291.81488037109375
+          ],
+          "browserPosition": [
+            240,
+            143.67967224121094
+          ]
+        }
+      ]
+    },
+    {
+      "name": "yum-pickup-aim-phase-1",
+      "code": "B911XGSG",
+      "seedValue": 1639,
+      "delay": 1,
+      "entropy": "Contrived public held shooting during natural Pickup",
+      "status": "pass",
+      "checks": 25779,
+      "comparedPresentations": 334,
+      "selectedItemIds": [
+        45
+      ],
+      "inputProvenance": {
+        "status": "pass",
+        "commands": 398,
+        "independentlyCapturedStates": 333,
+        "stateHistoryTruncated": true,
+        "inputTraceTruncated": false
+      },
+      "browserEvidence": {
+        "path": "/workspace/isaac-worktrees/active-items/.cache/e2e/active-item-use/fresh-984c3930-full12/yum-pickup-aim-phase-1/browser-states.json.gz",
+        "encoding": "gzip",
+        "rawSha256": "5ddf96ba8599a15237db1c031fc4cc332483c82d0b0ef780098158be9eff290f",
+        "rawBytes": 99939716
+      },
+      "nativeEvidence": {
+        "path": "/workspace/isaac-worktrees/active-items/.cache/e2e/active-item-use/fresh-984c3930-full12/yum-pickup-aim-phase-1/original/manifest.json.gz",
+        "encoding": "gzip",
+        "rawSha256": "e8a5dfc88075eaac3e6a19410577cb4b782a944df49d616f8ebdfdd650bd9ffa",
+        "rawBytes": 150543829
+      },
+      "requiredFailures": 0,
+      "requiredFailureFields": {},
+      "pickupShotGuardPhases": [
+        0,
+        1
+      ],
+      "guardedRowCount": 50,
+      "completeReadonlyOriginalObservations": 367,
+      "completeGameplayStates": 333,
+      "completeBackendCallbacks": 3,
+      "nativeStatus": "pass",
+      "guardedRowSamples": [
+        {
+          "gameplayPresentation": 168,
+          "nativePresentedFrame": 1374,
+          "nativeSystemPhase": 0,
+          "nativeHeldShooting": false,
+          "browserHeldShooting": false,
+          "fireTimer": -1,
+          "headTimer": -1,
+          "nativePosition": [
+            320.0,
+            290.67010498046875
+          ],
+          "browserPosition": [
+            240,
+            142.9355682373047
+          ]
+        },
+        {
+          "gameplayPresentation": 169,
+          "nativePresentedFrame": 1375,
+          "nativeSystemPhase": 1,
+          "nativeHeldShooting": false,
+          "browserHeldShooting": false,
+          "fireTimer": -1,
+          "headTimer": -1,
+          "nativePosition": [
+            320.0,
+            292.53118896484375
+          ],
+          "browserPosition": [
+            240,
+            144.14527282714843
+          ]
+        }
+      ]
+    },
+    {
+      "name": "recorded-active-use-0",
+      "code": "R74QYMYS",
+      "seedValue": 1889244627,
+      "delay": 0,
+      "entropy": "Recorded OS secrets",
+      "status": "fail",
+      "checks": 25068,
+      "comparedPresentations": 333,
+      "selectedItemIds": [
+        291
+      ],
+      "inputProvenance": {
+        "status": "pass",
+        "commands": 395,
+        "independentlyCapturedStates": 332,
+        "stateHistoryTruncated": true,
+        "inputTraceTruncated": false
+      },
+      "browserEvidence": {
+        "path": "/workspace/isaac-worktrees/active-items/.cache/e2e/active-item-use/fresh-984c3930-full12/recorded-active-use-0/browser-states.json.gz",
+        "encoding": "gzip",
+        "rawSha256": "12401436f2162bec02bfac4eac17de5d3077822efe480f96bebc7aa8d69ed836",
+        "rawBytes": 99893691
+      },
+      "nativeEvidence": {
+        "path": "/workspace/isaac-worktrees/active-items/.cache/e2e/active-item-use/fresh-984c3930-full12/recorded-active-use-0/original/manifest.json.gz",
+        "encoding": "gzip",
+        "rawSha256": "e1e5e78055347c96a35e3ebf70c8889dde593b650c22eefe1557e6b49567c653",
+        "rawBytes": 151226544
+      },
+      "requiredFailures": 404,
+      "requiredFailureFields": {
+        "actual animation guard": 36,
+        "Player:activeCharge": 66,
+        "actual temporary use records": 66,
+        "actual UseItem name": 36,
+        "actual UseItem playing": 36,
+        "copied presentation frame": 66,
+        "actual UseItem frame": 34,
+        "actual guarded-shot fire timer": 22,
+        "actual guarded-shot head timer": 24,
+        "actual guarded-shot emission": 18
+      },
+      "pickupShotGuardPhases": [],
+      "guardedRowCount": 0,
+      "completeReadonlyOriginalObservations": 366,
+      "completeGameplayStates": 332,
+      "completeBackendCallbacks": 3,
+      "nativeStatus": "pass",
+      "guardedRowSamples": []
+    },
+    {
+      "name": "recorded-active-use-1",
+      "code": "VRQPT844",
+      "seedValue": 3560154886,
+      "delay": 1,
+      "entropy": "Recorded OS secrets",
+      "status": "pass",
+      "checks": 24576,
+      "comparedPresentations": 334,
+      "selectedItemIds": [
+        48
+      ],
+      "inputProvenance": {
+        "status": "pass",
+        "commands": 396,
+        "independentlyCapturedStates": 333,
+        "stateHistoryTruncated": true,
+        "inputTraceTruncated": false
+      },
+      "browserEvidence": {
+        "path": "/workspace/isaac-worktrees/active-items/.cache/e2e/active-item-use/fresh-984c3930-full12/recorded-active-use-1/browser-states.json.gz",
+        "encoding": "gzip",
+        "rawSha256": "e8c4ee24ddf4a660bad8279a53708edce2bd30a515b54994a272d9a66dae7277",
+        "rawBytes": 100404018
+      },
+      "nativeEvidence": {
+        "path": "/workspace/isaac-worktrees/active-items/.cache/e2e/active-item-use/fresh-984c3930-full12/recorded-active-use-1/original/manifest.json.gz",
+        "encoding": "gzip",
+        "rawSha256": "6e5a0524935460c892b501686d415d665ee57e2d8564ddd5074b208b6a88e562",
+        "rawBytes": 149554269
+      },
+      "requiredFailures": 0,
+      "requiredFailureFields": {},
+      "pickupShotGuardPhases": [],
+      "guardedRowCount": 0,
+      "completeReadonlyOriginalObservations": 367,
+      "completeGameplayStates": 333,
+      "completeBackendCallbacks": 3,
+      "nativeStatus": "pass",
+      "guardedRowSamples": []
+    },
+    {
+      "name": "retained-random-pedestal-0",
+      "code": "DN8RQDXC",
+      "seedValue": 349407475,
+      "delay": 0,
+      "entropy": "Recorded OS secrets",
+      "status": "pass",
+      "checks": 24504,
+      "comparedPresentations": 333,
+      "selectedItemIds": [
+        257
+      ],
+      "inputProvenance": {
+        "status": "pass",
+        "commands": 395,
+        "independentlyCapturedStates": 332,
+        "stateHistoryTruncated": true,
+        "inputTraceTruncated": false
+      },
+      "browserEvidence": {
+        "path": "/workspace/isaac-worktrees/active-items/.cache/e2e/active-item-use/fresh-984c3930-full12/retained-random-pedestal-0/browser-states.json.gz",
+        "encoding": "gzip",
+        "rawSha256": "240d280fae2df49ef63bdedcc1aa13ec5b2faa6b42bfa5a9547bde424f40d828",
+        "rawBytes": 99996341
+      },
+      "nativeEvidence": {
+        "path": "/workspace/isaac-worktrees/active-items/.cache/e2e/active-item-use/fresh-984c3930-full12/retained-random-pedestal-0/original/manifest.json.gz",
+        "encoding": "gzip",
+        "rawSha256": "90e4f82e73883b824a316de7aa21f30b98942df010ccbe0c3f35193eda737af2",
+        "rawBytes": 149874259
+      },
+      "requiredFailures": 0,
+      "requiredFailureFields": {},
+      "pickupShotGuardPhases": [],
+      "guardedRowCount": 0,
+      "completeReadonlyOriginalObservations": 366,
+      "completeGameplayStates": 332,
+      "completeBackendCallbacks": 3,
+      "nativeStatus": "pass",
+      "guardedRowSamples": []
+    },
+    {
+      "name": "retained-random-pedestal-1",
+      "code": "98C1GNPZ",
+      "seedValue": 4033481932,
+      "delay": 1,
+      "entropy": "Recorded OS secrets",
+      "status": "fail",
+      "checks": 24576,
+      "comparedPresentations": 334,
+      "selectedItemIds": [
+        222
+      ],
+      "inputProvenance": {
+        "status": "pass",
+        "commands": 396,
+        "independentlyCapturedStates": 333,
+        "stateHistoryTruncated": true,
+        "inputTraceTruncated": false
+      },
+      "browserEvidence": {
+        "path": "/workspace/isaac-worktrees/active-items/.cache/e2e/active-item-use/fresh-984c3930-full12/retained-random-pedestal-1/browser-states.json.gz",
+        "encoding": "gzip",
+        "rawSha256": "d705d16bcb6d7fa9edac00f137bb0bb43a1c5a1017c11fd3d39fc44557672b14",
+        "rawBytes": 100401016
+      },
+      "nativeEvidence": {
+        "path": "/workspace/isaac-worktrees/active-items/.cache/e2e/active-item-use/fresh-984c3930-full12/retained-random-pedestal-1/original/manifest.json.gz",
+        "encoding": "gzip",
+        "rawSha256": "ef336e9de2d0501afe4fa89b4ade82d6e5db21dee91cb27e0ebd52d4e509b0ab",
+        "rawBytes": 151773167
+      },
+      "requiredFailures": 21,
+      "requiredFailureFields": {
+        "actual guarded-shot fire timer": 21
+      },
+      "pickupShotGuardPhases": [],
+      "guardedRowCount": 0,
+      "completeReadonlyOriginalObservations": 367,
+      "completeGameplayStates": 333,
+      "completeBackendCallbacks": 3,
+      "nativeStatus": "pass",
+      "guardedRowSamples": []
+    },
+    {
+      "name": "random-pedestal-0",
+      "code": "0SZMH27F",
+      "seedValue": 3150302238,
+      "delay": 0,
+      "entropy": "OS secrets",
+      "status": "pass",
+      "checks": 24504,
+      "comparedPresentations": 333,
+      "selectedItemIds": [
+        4
+      ],
+      "inputProvenance": {
+        "status": "pass",
+        "commands": 395,
+        "independentlyCapturedStates": 332,
+        "stateHistoryTruncated": true,
+        "inputTraceTruncated": false
+      },
+      "browserEvidence": {
+        "path": "/workspace/isaac-worktrees/active-items/.cache/e2e/active-item-use/fresh-984c3930-full12/random-pedestal-0/browser-states.json.gz",
+        "encoding": "gzip",
+        "rawSha256": "891025b4a5cd04b154545cf6311584a641cc62493012d9c896e4597728507bb9",
+        "rawBytes": 99982633
+      },
+      "nativeEvidence": {
+        "path": "/workspace/isaac-worktrees/active-items/.cache/e2e/active-item-use/fresh-984c3930-full12/random-pedestal-0/original/manifest.json.gz",
+        "encoding": "gzip",
+        "rawSha256": "31fffcea1e643a634cb0d59d9e3bf169c9b65caa1cbfc81f4ebebea62993d20c",
+        "rawBytes": 151274877
+      },
+      "requiredFailures": 0,
+      "requiredFailureFields": {},
+      "pickupShotGuardPhases": [],
+      "guardedRowCount": 0,
+      "completeReadonlyOriginalObservations": 366,
+      "completeGameplayStates": 332,
+      "completeBackendCallbacks": 3,
+      "nativeStatus": "pass",
+      "guardedRowSamples": []
+    },
+    {
+      "name": "random-pedestal-1",
+      "code": "4FHEEKJK",
+      "seedValue": 3735109080,
+      "delay": 1,
+      "entropy": "OS secrets",
+      "status": "pass",
+      "checks": 24576,
+      "comparedPresentations": 334,
+      "selectedItemIds": [
+        167
+      ],
+      "inputProvenance": {
+        "status": "pass",
+        "commands": 396,
+        "independentlyCapturedStates": 333,
+        "stateHistoryTruncated": true,
+        "inputTraceTruncated": false
+      },
+      "browserEvidence": {
+        "path": "/workspace/isaac-worktrees/active-items/.cache/e2e/active-item-use/fresh-984c3930-full12/random-pedestal-1/browser-states.json.gz",
+        "encoding": "gzip",
+        "rawSha256": "6cd28d63fd0a8d3f3a58e50120d94fe76e2fc81f706c5fe107b7e312f4ee50ff",
+        "rawBytes": 100483407
+      },
+      "nativeEvidence": {
+        "path": "/workspace/isaac-worktrees/active-items/.cache/e2e/active-item-use/fresh-984c3930-full12/random-pedestal-1/original/manifest.json.gz",
+        "encoding": "gzip",
+        "rawSha256": "888b1aa7bb40b7c9d18bbe11a8252b8fa9511d7a93a52abcceb60b3879859b87",
+        "rawBytes": 151198626
+      },
+      "requiredFailures": 0,
+      "requiredFailureFields": {},
+      "pickupShotGuardPhases": [],
+      "guardedRowCount": 0,
+      "completeReadonlyOriginalObservations": 367,
+      "completeGameplayStates": 333,
+      "completeBackendCallbacks": 3,
+      "nativeStatus": "pass",
+      "guardedRowSamples": []
+    }
+  ],
+  "proofRefs": {
+    "rawReport": {
+      "path": "/workspace/isaac-worktrees/active-items/.cache/e2e/active-item-use/fresh-984c3930-full12/report.json",
+      "sha256": "06c0cb180f8c95a3de826c0ed5aaa3144aae84ba16771b76c82ea7494536a47b"
+    },
+    "readbackAudit": {
+      "path": "/workspace/isaac-rebirth-browser/.cache/coordination/active-items-research/pickup-984c3930-fresh-full12-readback-audit.json",
+      "sha256": "b760988c728979afafcdc3a139679f5d463336792e501bc24b9a024bc43f25d9"
+    },
+    "supervisorReceipt": {
+      "path": "/workspace/isaac-rebirth-browser/.cache/coordination/active-items-research/pickup-984c3930-fresh-full12-receipt.json",
+      "sha256": "d24b138464431f4dc9ba6ba0b32bed077208d89cd927b245712a00b8cbf594c8"
+    },
+    "buildReceipt": {
+      "path": "/workspace/isaac-rebirth-browser/.cache/coordination/active-items-research/pickup-984c3930-check-build-receipt.json",
+      "sha256": "453d394c4eabe47df312bb6d837da84886577c9af03cb493e0597f87e45b57f8"
+    },
+    "frozenBank": {
+      "path": "/workspace/isaac-rebirth-browser/.cache/coordination/active-items-research/pickup-984c3930-frozen-full12-bank.json",
+      "sha256": "6fb66801efacef532c72e690f7602a0334e567aa5e2a2a62c46d8c80a5031a19"
+    },
+    "beforeArtifactReceipt": {
+      "path": "/workspace/isaac-rebirth-browser/.cache/coordination/active-items-research/pickup-984c3930-fresh-artifact-before.json",
+      "sha256": "8f2d4c8d61ae2ca6aeb16ce95e8ae14e9a5205de089edd592207ae90e56f3b9b"
+    },
+    "afterArtifactReceipt": {
+      "path": "/workspace/isaac-rebirth-browser/.cache/coordination/active-items-research/pickup-984c3930-fresh-artifact-after.json",
+      "sha256": "8f2d4c8d61ae2ca6aeb16ce95e8ae14e9a5205de089edd592207ae90e56f3b9b"
+    }
+  },
+  "independentPeerAudit": {
+    "reviewer": "CI recovery lane",
+    "scope": "Four held-case gzip archives and100 guarded rows; no games/builds/source writes, not every51494 gate check",
+    "result": "PASS for byte hashes, complete arrays, readonly original PIN and declared guard comparisons",
+    "nativeReadonlyRows": [
+      366,
+      367
+    ],
+    "heldGamePresentationWindows": [
+      [
+        167,
+        216
+      ],
+      [
+        168,
+        217
+      ]
+    ],
+    "heldGuardRowsPerCase": 50,
+    "sourcePhasesPerCase": [
+      0,
+      1
+    ],
+    "sourcePhaseRowsPerCase": [
+      25,
+      25
+    ]
+  },
+  "gateSourceStability": {
+    "status": "pass",
+    "files": 48,
+    "sha256": "e11a078edeb57c7a7c5352b0c6a847fddfd68820e029b03b3f1a120a28281693",
+    "beforeEqualsEnd": true,
+    "qualification": "Complete source map and both observations remain in the immutable raw report named in proofRefs"
+  }
+}
