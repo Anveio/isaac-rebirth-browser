@@ -43,6 +43,32 @@ The new partial producer routes ordinary Monstro’s real BloodStart random bran
 
 ## Current source and actual-game qualification
 
+The weapon/stat foundation in [PR203](https://github.com/Anveio/isaac-rebirth-browser/pull/203)
+landed at `631e678`. Requested primary selection runs before scalar callbacks;
+the retained primary, attack flags and independent eleven-component tear/laser
+colors have explicit cache owners. Regular tears consume the resolved birth
+properties. Unmapped stages and controller requests stay observable, and a
+missed registered-actor cleanup cannot disappear on a later equal-primary
+evaluation. This foundation does not execute ordinary Knife, Brimstone or
+Ludovico actors.
+
+Exact `60ff78e3` production, strict Clippy and floor builds passed. Its public-ABI
+headless differential replayed 405 recorded commands and compared 406 snapshots,
+6,809,577 fields, with zero differences against the older `ef876` producer.
+The [qualification receipt](../references/isaac/foundation/items/weapon-cache-foundation-203.json)
+keeps that local WASM check separate from original-game evidence. The scoped EF8
+regular-actor browser replay retained 231,387 comparisons and 24 failures per
+browser, with zero new or lost comparisons. The item257 transformed-tear
+failures and native actor-seed differences remain unresolved; these reports
+do not qualify all current-main gameplay.
+
+Public Challenge ingress, ordinary Knife/Brimstone bodies, triple-loadout
+gameplay, ambient33/68 and the four-file shared-MT startup consumer are separate
+pending slices. Their source proofs and private builds do not establish
+original/browser actor, contact or complete 624-word MT parity. The frozen
+first32 campaign remains a functional failure: 1,185,154 comparisons, 68,333
+differences, 32 capture-integrity passes and zero capture errors.
+
 Main `19906c4e`, observed on October14, includes the reviewed normal-health source callbacks, the source-only Nightmare resource prerequisite and raw snapshot accessor, and retains39 registered live suites. This is source qualification. No complete current-main39-suite production/original/browser acceptance is claimed; the frozen local f793/0f343 checkpoint and later scoped owner artifacts remain separate.
 
 The integrated Death111 producer at `5afa7ddb` and artifact `c4685585` closed all four fresh original/browser pairs: 2,962 phases, 52,190 scoped checks and 4,226 required failures, with zero capture errors. Both contrived death/popup routes executed in both games; both unfiltered OS inputs remained alive and are retained. The full eight compressed native/browser streams were independently read back and hash-verified. This proves those actual executions and preserves the unresolved age, motion and menu fields; it does not establish complete death or whole-main parity. The earlier1cc interruption below remains a distinct historical attempt.
