@@ -65,6 +65,30 @@ for checking your own change.
    expected values. Keep comparing after the first mismatch so one run shows
    the whole divergence.
 
+## Adding an entity
+
+Most room entities need no new driver. Add a spec in
+[`entities/`](entities/) and it becomes the `entity-<name>` suite:
+
+```js
+export default { type: 12, variant: 0, about: 'Horf rooms: ...', count: 2, required: ['admission'] };
+```
+
+[`entity-scenarios.py`](../original/entity-scenarios.py) finds OS-random rooms
+next to the start room that admit the entity. Both games then walk in and shoot
+around. [`entity-state-pair.mjs`](../foundation/entity-state-pair.mjs) compares
+the shared NPC, room, door and projectile fields exactly. The whole workflow is
+in [docs/content-pipeline.md](../../docs/content-pipeline.md).
+
+## Large native captures
+
+`npm run test:e2e:paired -- --archive-native-evidence` retains the complete
+native manifest as `manifest.json.gz` with decompressed and archive hashes. Its
+separate progress journal commits each actual input, acknowledgement,
+observation and capture in a closed gzip member. Interrupted journals retain
+their uncommitted tail and identify the verified byte prefix; they cannot pass
+as complete runs.
+
 ## What not to check in
 
 - Unit tests of any kind: Rust `#[cfg(test)]`/`#[test]`, Node or Python test
