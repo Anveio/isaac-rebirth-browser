@@ -729,15 +729,7 @@ impl Game {
                                 profile: self.state.profile,
                             },
                         });
-                    self.state.character = self.state.profiles[usize::from(self.state.profile - 1)]
-                        .selected_character
-                        .clone();
-                    self.state.character_selection = self
-                        .state
-                        .character_catalog
-                        .iter()
-                        .position(|character| character.name == self.state.character)
-                        .unwrap_or(0) as u8;
+                    self.load_menu_character();
                     self.state.main_selection = 0;
                     self.state.screen = Screen::Main;
                 }
@@ -929,6 +921,19 @@ impl Game {
             }
         }
         Ok(())
+    }
+    /// The menus show the profile's selected character, including Random,
+    /// not the character a run resolved it to.
+    fn load_menu_character(&mut self) {
+        self.state.character = self.state.profiles[usize::from(self.state.profile - 1)]
+            .selected_character
+            .clone();
+        self.state.character_selection = self
+            .state
+            .character_catalog
+            .iter()
+            .position(|character| character.name == self.state.character)
+            .unwrap_or(0) as u8;
     }
     fn select_character(&mut self, direction: i32) {
         self.state.character_selection = (i32::from(self.state.character_selection) + direction)
@@ -1435,6 +1440,9 @@ impl Game {
                     // Popup557650 queues menu3;59cac0 stores it in Menu+38,
                     // the same native Main family observed by the paired gate.
                     self.state.screen = Screen::Main;
+                    // A Random run stored its resolved character; the menus
+                    // return to the profile's own selection.
+                    self.load_menu_character();
                     self.state.audio.pending.push(audio::SoundRequest {
                         id: 8,
                         volume: 1.0,
