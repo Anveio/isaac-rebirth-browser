@@ -1,16 +1,16 @@
 //! Ordinary Dip217: source4949c0, missing-Appear staging and Blood7 trail.
+use crate::entities::{Birth, Family, NpcWorld, SpawnContext};
 use crate::{
     actors::{ActorKind, ActorRef},
-    audio::{AudioState, SoundRequest},
+    audio::SoundRequest,
     content,
-    familiars::{NpcEffectAdmission, Parent},
+    familiars::Parent,
     gib_counts::{self, AmountScale},
     grid::{Collider, CollisionGeometry, Grid},
     motion::WorldVector,
     mt::Mt19937,
     npcs::Npc,
     phase::Phase,
-    player_items::PlayerItems,
     poop_effects,
     room_spawns::{SpawnCategory, SpawnSelector},
 };
@@ -31,15 +31,6 @@ pub struct DipState {
     /// Base441d81/441e66 per-spawn owners, not permanent eligibility constants.
     pub render_offset: WorldVector,
     pub status_countdown: i32,
-}
-
-pub(crate) struct World<'a> {
-    pub player: WorldVector,
-    pub grid: &'a Grid,
-    pub audio: &'a mut AudioState,
-    pub system_counter: u32,
-    pub player_items: &'a PlayerItems,
-    pub effects: NpcEffectAdmission<'a>,
 }
 
 const CONFIG: &content::EntityConfig = content::entity(217, 0);
@@ -86,7 +77,7 @@ fn play(npc: &mut Npc, name: &str) {
     }
 }
 
-fn ai(npc: &mut Npc, random: &mut Mt19937, world: &mut World<'_>) -> Result<(), String> {
+fn ai(npc: &mut Npc, random: &mut Mt19937, world: &mut NpcWorld<'_>) -> Result<(), String> {
     match npc.state {
         0 => {
             npc.state = 3;
@@ -188,11 +179,12 @@ fn advance_sprite(npc: &mut Npc) {
 }
 
 /// First dead31f transition4464c0 calls445c60 before the next FIFO record.
-fn die(npc: &mut Npc, random: &mut Mt19937, world: &mut World<'_>) -> Result<(), String> {
-    if [225, 234]
-        .iter()
-        .any(|&id| world.player_items.owned_counts[id] != 0)
-    {
+fn die(npc: &mut Npc, random: &mut Mt19937, world: &mut NpcWorld<'_>) -> Result<(), String> {
+    if [225, 234].iter().any(|&id| {
+        world
+            .player_items
+            .is_some_and(|items| items.owned_counts[id] != 0)
+    }) {
         return Err("Dip death requires the owned225/234 source callbacks".into());
     }
     let dip = npc.dip.as_ref().unwrap();
@@ -285,8 +277,12 @@ pub(crate) fn advance(
     npc: &mut Npc,
     phase: Phase,
     random: &mut Mt19937,
-    world: &mut World<'_>,
+    world: &mut NpcWorld<'_>,
+    _: &mut Vec<Birth>,
 ) -> Result<(), String> {
+    world
+        .player_items
+        .ok_or("Dip death requires actual Player inventory")?;
     if npc.removed || phase == Phase::Skipped {
         return Ok(());
     }
@@ -376,4 +372,29 @@ pub(crate) fn advance(
         return Err("Dip source state overflowed".into());
     }
     Ok(())
+}
+
+pub(crate) const FAMILY: Family = Family {
+    kinds: &[217],
+    spawn: spawn_family,
+    advance,
+    post_contact_grid,
+    entity_flags: family_flags,
+    needs_occupancy: false,
+};
+
+fn spawn_family(
+    id: u32,
+    selector: &SpawnSelector,
+    context: &SpawnContext,
+) -> Result<Option<Npc>, String> {
+    let mut npc = from_selector(id, selector, context.stage)?;
+    if let Some(dip) = npc.as_mut().and_then(|npc| npc.dip.as_mut()) {
+        dip.birth_game_update = context.game_update_count;
+    }
+    Ok(npc)
+}
+
+fn family_flags(npc: &Npc) -> u32 {
+    npc.dip.as_ref().map_or(4, |dip| dip.entity_flags)
 }

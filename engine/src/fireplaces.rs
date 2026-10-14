@@ -1,6 +1,7 @@
 //! Ordinary Fireplace33 factory and subclass AI49a530.
 //! Fire drains its own damage FIFO before common BaseUpdate, clamps to HP1
 //! and extinguishes without entering the ordinary NPC death path.
+use crate::entities::{Birth, Family, NpcWorld, SpawnContext};
 use crate::{
     audio::{AudioState, SoundRequest},
     content,
@@ -488,4 +489,54 @@ pub(crate) fn advance(
     })();
     npc.fireplace = Some(fire);
     result
+}
+
+pub(crate) const FAMILY: Family = Family {
+    kinds: &[33],
+    spawn: spawn_family,
+    advance: advance_family,
+    post_contact_grid: crate::entities::clamp_walls,
+    entity_flags: family_flags,
+    needs_occupancy: false,
+};
+
+fn spawn_family(
+    id: u32,
+    selector: &SpawnSelector,
+    _: &SpawnContext,
+) -> Result<Option<Npc>, String> {
+    from_selector(id, selector)
+}
+
+fn advance_family(
+    npc: &mut Npc,
+    phase: Phase,
+    random: &mut Mt19937,
+    world: &mut NpcWorld,
+    births: &mut Vec<Birth>,
+) -> Result<(), String> {
+    let produced = advance(
+        npc,
+        phase,
+        random,
+        &mut World {
+            grid: world
+                .grid_descriptor
+                .as_deref_mut()
+                .expect("admitted Fire has grid"),
+            path_costs: world
+                .path_costs
+                .as_deref_mut()
+                .ok_or("Fire requires source Room.Init path costs")?,
+            audio: world.audio,
+            system_counter: world.system_counter,
+        },
+    )?;
+    births.extend(produced.particle.map(Birth::Ember));
+    births.extend(produced.loot.map(Birth::Loot));
+    Ok(())
+}
+
+fn family_flags(npc: &Npc) -> u32 {
+    npc.fireplace.as_ref().map_or(4, |fire| fire.entity_flags)
 }

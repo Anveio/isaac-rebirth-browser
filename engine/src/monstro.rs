@@ -1,7 +1,8 @@
 //! Fresh Monstro20/0/0 source AI4ce290 and counted projectile producer48d5c0.
 //! Constructors and actors use the shared stream; no captured state enters AI.
+use crate::entities::{Birth, Family, NpcWorld, SpawnContext};
 use crate::{
-    audio::{AudioState, SoundRequest},
+    audio::SoundRequest,
     content,
     enemy_projectiles::ProjectileBirth,
     grid::{Collider, CollisionGeometry, Grid},
@@ -46,14 +47,6 @@ pub struct ProjectileBatch {
     pub count: u32,
     pub target: WorldVector,
     pub parameter_angle: f32,
-}
-
-pub(crate) struct World<'a> {
-    pub player: WorldVector,
-    pub grid: &'a Grid,
-    pub audio: &'a mut AudioState,
-    pub system_counter: u32,
-    pub poofs: crate::familiars::NpcEffectAdmission<'a>,
 }
 
 pub fn from_selector(id: u32, selector: &SpawnSelector) -> Result<Option<Npc>, String> {
@@ -158,7 +151,7 @@ fn direction(random: &mut Mt19937) -> WorldVector {
     }
 }
 
-fn sound(world: &mut World<'_>, random: &mut Mt19937, id: u32, volume: f32) {
+fn sound(world: &mut NpcWorld<'_>, random: &mut Mt19937, id: u32, volume: f32) {
     world.audio.admit(
         random,
         world.system_counter,
@@ -172,7 +165,7 @@ fn sound(world: &mut World<'_>, random: &mut Mt19937, id: u32, volume: f32) {
     );
 }
 
-fn snap_goal(npc: &mut Npc, world: &World<'_>) {
+fn snap_goal(npc: &mut Npc, world: &NpcWorld<'_>) {
     if npc.target == ZERO && world.grid.collision_at(world.player) == 0 {
         if let Some(center) = world
             .grid
@@ -235,7 +228,7 @@ fn produce(
 fn ai(
     npc: &mut Npc,
     random: &mut Mt19937,
-    world: &mut World<'_>,
+    world: &mut NpcWorld<'_>,
     friction: &mut f32,
 ) -> Result<Vec<ProjectileBirth>, String> {
     *friction *= 0.9;
@@ -392,7 +385,7 @@ pub(crate) fn advance(
     npc: &mut Npc,
     phase: Phase,
     random: &mut Mt19937,
-    world: &mut World<'_>,
+    world: &mut NpcWorld<'_>,
 ) -> Result<Vec<ProjectileBirth>, String> {
     if npc.removed {
         return Ok(Vec::new());
@@ -426,7 +419,7 @@ pub(crate) fn advance(
             let (x, y, scale_x, scale_y) = *content::MONSTRO_DEATH_GUIDE
                 .get(npc.animation_frame as usize)
                 .ok_or("Monstro current authored BloodGuide frame absent")?;
-            world.poofs.blood_start(
+            world.effects.blood_start(
                 crate::blood_effects::Emission {
                     parent: crate::familiars::Parent {
                         actor: crate::actors::ActorRef {
@@ -477,7 +470,7 @@ pub(crate) fn advance(
             1 => {
                 let seed = random.next_u32();
                 npc.appearance_effect_seed = Some(seed);
-                world.poofs.admit_npc(npc, 3, seed)?;
+                world.effects.admit_npc(npc, 3, seed)?;
             }
             4 => {
                 npc.visible = true;
@@ -515,4 +508,46 @@ pub(crate) fn advance(
         return Err("Monstro source motion overflowed actual world vectors".into());
     }
     Ok(shots)
+}
+
+pub(crate) const FAMILY: Family = Family {
+    kinds: &[20],
+    spawn: spawn_family,
+    advance: advance_family,
+    post_contact_grid,
+    entity_flags: family_flags,
+    needs_occupancy: false,
+};
+
+fn spawn_family(
+    id: u32,
+    selector: &SpawnSelector,
+    context: &SpawnContext,
+) -> Result<Option<Npc>, String> {
+    let mut npc = from_selector(id, selector)?;
+    if let Some(monstro) = npc.as_mut().and_then(|npc| npc.monstro.as_mut()) {
+        monstro.birth_game_update = context.game_update_count;
+    }
+    Ok(npc)
+}
+
+fn advance_family(
+    npc: &mut Npc,
+    phase: Phase,
+    random: &mut Mt19937,
+    world: &mut NpcWorld,
+    births: &mut Vec<Birth>,
+) -> Result<(), String> {
+    births.extend(
+        advance(npc, phase, random, world)?
+            .into_iter()
+            .map(Birth::Projectile),
+    );
+    Ok(())
+}
+
+fn family_flags(npc: &Npc) -> u32 {
+    npc.monstro
+        .as_ref()
+        .map_or(4, |monstro| monstro.entity_flags)
 }

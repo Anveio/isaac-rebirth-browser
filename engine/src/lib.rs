@@ -20,6 +20,7 @@ pub mod dips;
 mod doors;
 mod effects;
 pub mod enemy_projectiles;
+mod entities;
 pub mod familiars;
 pub mod fireplaces;
 pub mod floor;
@@ -1246,16 +1247,11 @@ impl Game {
             .map_or(1, |descriptor| descriptor.template.room_type);
         for selector in selectors {
             let id = u32::try_from(npcs.len()).map_err(|_| "NPC identity exhausted")?;
-            if let Some(mut npc) = npcs::Npc::from_selector(id, selector, self.state.stage)? {
-                if let Some(dip) = &mut npc.dip {
-                    dip.birth_game_update = self.state.game_update_count;
-                }
-                if let Some(fly) = &mut npc.level2_fly {
-                    fly.birth_game_update = self.state.game_update_count;
-                }
-                if let Some(monstro) = &mut npc.monstro {
-                    monstro.birth_game_update = self.state.game_update_count;
-                }
+            let context = entities::SpawnContext {
+                stage: self.state.stage,
+                game_update_count: self.state.game_update_count,
+            };
+            if let Some(npc) = entities::spawn(id, selector, &context)? {
                 order.push(actors::ActorRef {
                     kind: actors::ActorKind::Npc,
                     id,
@@ -2020,77 +2016,66 @@ impl Game {
         let Some(index) = self.state.room.npcs.iter().position(|npc| npc.id == id) else {
             return Ok(());
         };
-        if self.state.room.npcs[index].kind == 217 {
-            return dips::advance(
-                &mut self.state.room.npcs[index],
-                phase,
-                &mut self.state.boot_lifecycle.shared,
-                &mut dips::World {
-                    player,
-                    grid: &grid,
-                    audio: &mut self.state.audio,
-                    system_counter: self.state.system_clock.system_counter.wrapping_sub(1),
-                    player_items: self
-                        .state
-                        .player_items
-                        .as_ref()
-                        .ok_or("Dip death requires actual Player inventory")?,
-                    effects: familiars::NpcEffectAdmission {
-                        game_update_count: self.state.game_update_count,
-                        next_effect: &mut self.state.next_effect,
-                        effects: &mut self.state.sprite_effects,
-                        scheduler: &mut self.state.actor_scheduler,
-                    },
-                },
+        let family = entities::family(self.state.room.npcs[index].kind)
+            .ok_or("admitted NPC has no registered family")?;
+        let mut occupied = Vec::new();
+        if family.needs_occupancy {
+            occupied.push(player);
+            occupied.extend(
+                self.state
+                    .room
+                    .npcs
+                    .iter()
+                    .filter(|npc| !npc.removed)
+                    .map(|npc| npc.position),
             );
+            occupied.extend(
+                self.state
+                    .room
+                    .pickups
+                    .iter()
+                    .filter(|pickup| !pickup.removed)
+                    .map(|pickup| pickup.position),
+            );
+            occupied.extend(self.state.bombs.iter().map(|bomb| bomb.motion.position));
         }
-        if self.state.room.npcs[index].kind == 214 {
-            let produced = level2_flies::advance(
-                &mut self.state.room.npcs[index],
-                phase,
-                &mut self.state.boot_lifecycle.shared,
-                &mut level2_flies::World {
-                    game_counter: self.state.game_update_count,
-                    player,
-                    grid: &grid,
-                    audio: &mut self.state.audio,
-                    system_counter: self.state.system_clock.system_counter.wrapping_sub(1),
-                    poofs: familiars::NpcEffectAdmission {
-                        game_update_count: self.state.game_update_count,
-                        next_effect: &mut self.state.next_effect,
-                        effects: &mut self.state.sprite_effects,
-                        scheduler: &mut self.state.actor_scheduler,
-                    },
+        let player_velocity = bombs::player_velocity(&self.state);
+        let mut births = Vec::new();
+        (family.advance)(
+            &mut self.state.room.npcs[index],
+            phase,
+            &mut self.state.boot_lifecycle.shared,
+            &mut entities::NpcWorld {
+                game_counter: self.state.game_update_count,
+                player,
+                player_velocity,
+                grid: &grid,
+                grid_descriptor: self.state.room.grid.as_mut(),
+                path_costs: self.state.room.path_costs.as_mut(),
+                occupied: &occupied,
+                audio: &mut self.state.audio,
+                system_counter: self.state.system_clock.system_counter.wrapping_sub(1),
+                player_items: self.state.player_items.as_ref(),
+                effects: familiars::NpcEffectAdmission {
+                    game_update_count: self.state.game_update_count,
+                    next_effect: &mut self.state.next_effect,
+                    effects: &mut self.state.sprite_effects,
+                    scheduler: &mut self.state.actor_scheduler,
                 },
-            )?;
-            if let Some(seed) = produced.blood_seed {
-                self.admit_npc_blood(index, seed)?;
-            }
-            return Ok(());
+            },
+            &mut births,
+        )?;
+        for birth in births {
+            self.admit_npc_birth(index, birth)?;
         }
-        if self.state.room.npcs[index].kind == 33 {
-            let produced = fireplaces::advance(
-                &mut self.state.room.npcs[index],
-                phase,
-                &mut self.state.boot_lifecycle.shared,
-                &mut fireplaces::World {
-                    grid: self
-                        .state
-                        .room
-                        .grid
-                        .as_mut()
-                        .expect("admitted Fire has grid"),
-                    path_costs: self
-                        .state
-                        .room
-                        .path_costs
-                        .as_mut()
-                        .ok_or("Fire requires source Room.Init path costs")?,
-                    audio: &mut self.state.audio,
-                    system_counter: self.state.system_clock.system_counter.wrapping_sub(1),
-                },
-            )?;
-            if let Some(birth) = produced.particle {
+        Ok(())
+    }
+    /// Admits one NPC callback product at the callback's own return point.
+    fn admit_npc_birth(&mut self, index: usize, birth: entities::Birth) -> Result<(), String> {
+        let parent = self.state.room.npcs[index].id;
+        match birth {
+            entities::Birth::Blood(seed) => self.admit_npc_blood(index, seed),
+            entities::Birth::Ember(birth) => {
                 let id = self.state.next_effect;
                 self.state.next_effect = id.checked_add(1).ok_or("Ember identity exhausted")?;
                 self.state.fire_particles.push(fireplaces::Ember::birth(
@@ -2102,9 +2087,9 @@ impl Game {
                 self.state.actor_scheduler.admit(actors::ActorRef {
                     kind: actors::ActorKind::Effect,
                     id,
-                })?;
+                })
             }
-            if let Some(birth) = produced.loot {
+            entities::Birth::Loot(birth) => {
                 let subtype = fireplaces::loot_subtype(birth.variant, birth.spawn_seed)?;
                 let id = self.state.next_pickup;
                 let mut pickup = Pickup::spawn(id, birth.variant, subtype, birth.position, true)?;
@@ -2117,123 +2102,29 @@ impl Game {
                     id,
                 };
                 self.state.room.authored_actor_order.push(actor);
-                self.state.actor_scheduler.admit(actor)?;
+                self.state.actor_scheduler.admit(actor)
             }
-            return Ok(());
+            entities::Birth::Projectile(birth) => self.admit_enemy_projectile(|id| {
+                enemy_projectiles::EnemyProjectile::birth_with_parameters(id, parent, birth)
+            }),
+            entities::Birth::Shot(shot) => self.admit_enemy_projectile(|id| {
+                enemy_projectiles::EnemyProjectile::birth(id, parent, shot)
+            }),
         }
-        if self.state.room.npcs[index].kind == 20 {
-            let births = monstro::advance(
-                &mut self.state.room.npcs[index],
-                phase,
-                &mut self.state.boot_lifecycle.shared,
-                &mut monstro::World {
-                    player,
-                    grid: &grid,
-                    audio: &mut self.state.audio,
-                    system_counter: self.state.system_clock.system_counter.wrapping_sub(1),
-                    poofs: familiars::NpcEffectAdmission {
-                        game_update_count: self.state.game_update_count,
-                        next_effect: &mut self.state.next_effect,
-                        effects: &mut self.state.sprite_effects,
-                        scheduler: &mut self.state.actor_scheduler,
-                    },
-                },
-            )?;
-            for birth in births {
-                let id = self.state.next_enemy_projectile;
-                self.state.next_enemy_projectile = id
-                    .checked_add(1)
-                    .ok_or("Monstro projectile identity exhausted")?;
-                self.state.enemy_projectiles.push(
-                    enemy_projectiles::EnemyProjectile::birth_with_parameters(
-                        id,
-                        self.state.room.npcs[index].id,
-                        birth,
-                    ),
-                );
-                self.state.actor_scheduler.admit(actors::ActorRef {
-                    kind: actors::ActorKind::Projectile,
-                    id,
-                })?;
-            }
-            return Ok(());
-        }
-        if self.state.room.npcs[index].kind != 244 {
-            let was_dead = self.state.room.npcs[index].dead;
-            self.state.room.npcs[index].advance(
-                phase,
-                &mut self.state.boot_lifecycle.shared,
-                &mut npcs::World {
-                    game_counter: self.state.game_update_count,
-                    player,
-                    grid: &grid,
-                    audio: &mut self.state.audio,
-                    system_counter: self.state.system_clock.system_counter.wrapping_sub(1),
-                },
-            )?;
-            if !was_dead && self.state.room.npcs[index].dead {
-                if let Some(seed) = self.state.room.npcs[index].death_effect_seed {
-                    self.admit_npc_blood(index, seed)?;
-                }
-            }
-            return Ok(());
-        }
-        let mut occupied = vec![player];
-        occupied.extend(
-            self.state
-                .room
-                .npcs
-                .iter()
-                .filter(|npc| !npc.removed)
-                .map(|npc| npc.position),
-        );
-        occupied.extend(
-            self.state
-                .room
-                .pickups
-                .iter()
-                .filter(|pickup| !pickup.removed)
-                .map(|pickup| pickup.position),
-        );
-        occupied.extend(self.state.bombs.iter().map(|bomb| bomb.motion.position));
-        let player_velocity = bombs::player_velocity(&self.state);
-        let shot = roundworm::advance(
-            &mut self.state.room.npcs[index],
-            phase,
-            &mut self.state.boot_lifecycle.shared,
-            &mut roundworm::World {
-                player,
-                player_velocity,
-                occupied: &occupied,
-                grid: &grid,
-                path_costs: self
-                    .state
-                    .room
-                    .path_costs
-                    .as_ref()
-                    .ok_or("Round Worm requires source Room.Init path costs")?,
-                audio: &mut self.state.audio,
-                system_counter: self.state.system_clock.system_counter.wrapping_sub(1),
-            },
-        )?;
-        if let Some(shot) = shot {
-            let id = self.state.next_enemy_projectile;
-            self.state.next_enemy_projectile = id
-                .checked_add(1)
-                .ok_or("enemy projectile identity exhausted")?;
-            self.state
-                .enemy_projectiles
-                .push(enemy_projectiles::EnemyProjectile::birth(
-                    id,
-                    self.state.room.npcs[index].id,
-                    shot,
-                ));
-            self.state.actor_scheduler.admit(actors::ActorRef {
-                kind: actors::ActorKind::Projectile,
-                id,
-            })?;
-        }
-        Ok(())
+    }
+    fn admit_enemy_projectile(
+        &mut self,
+        birth: impl FnOnce(u32) -> enemy_projectiles::EnemyProjectile,
+    ) -> Result<(), String> {
+        let id = self.state.next_enemy_projectile;
+        self.state.next_enemy_projectile = id
+            .checked_add(1)
+            .ok_or("enemy projectile identity exhausted")?;
+        self.state.enemy_projectiles.push(birth(id));
+        self.state.actor_scheduler.admit(actors::ActorRef {
+            kind: actors::ActorKind::Projectile,
+            id,
+        })
     }
     fn update_player(
         &mut self,
