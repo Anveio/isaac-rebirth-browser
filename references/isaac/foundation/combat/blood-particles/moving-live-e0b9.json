@@ -1,0 +1,1496 @@
+{
+  "schema": 1,
+  "createdAt": "2026-10-14T05:37:35.273589+00:00",
+  "sourceHead": "e0b9cf05eb11052f77dd106119be8b5eda331129",
+  "runtimeBuildHead": "1e9d02f6954e4296a9864ee5f0b9b61d1225c100",
+  "production": {
+    "sha256": "4e0a87622c0910c0df920fa017a591d6d74e89c15579d1ee4e51f896df1c7e68",
+    "files": 941,
+    "bytes": 214140971
+  },
+  "freezeSha256": "af563a437c68dd6f3887ce97d97b0050ed46fd654821f5194a5ae14673494e52",
+  "sourcePinCount": 312,
+  "bankSha256": "9e8d3e8db89b2b443610c7879e95de14fc146763e09de092bf304c7093a24c82",
+  "status": "fail",
+  "completedCases": 4,
+  "newlyCompletedCases": 3,
+  "retainedPriorCompletedCases": 1,
+  "retainedInterruptedAttempts": 1,
+  "interruptedReceiptPath": "/workspace/isaac-worktrees/e2e-ci/.cache/coordination/boss-effects-research/moving-live-e0b9-interrupted.json",
+  "interruptedReceiptSha256": "8acb1d2a110a9ad819e82e053aa84a68ff7a0b9c19870d31b59758e16f4fcb75",
+  "supervisionSha256": "48116d832f4a2b2859a4adaa327e15aaebf17ef3e02f6768a9e6262e977606b7",
+  "reportSha256": "ce4075dfda0251bf211cc174e72932fb9dd35d7099288305066f923c2567cc99",
+  "cases": [
+    {
+      "id": "contrived-t1-moving-gibs-0",
+      "status": "fail",
+      "randomized": false,
+      "retainedFromPriorExecution": "/workspace/isaac-worktrees/e2e-ci/.cache/e2e/blood-particles/moving-live-e0b9-1/report.json",
+      "presentations": 619,
+      "scopedChecks": 1861,
+      "requiredFailures": 8,
+      "failureFields": {
+        "particle.orderedSpawnSeeds": 7,
+        "native-death": 1
+      },
+      "execution": {
+        "native-death": false,
+        "browser-death": true,
+        "native-particles": true,
+        "browser-particles": true
+      },
+      "sameCaptureMatchedBodyPairs": 0,
+      "bodyFieldChecksExecuted": 0,
+      "initializedMatchedBodyPairs": 0,
+      "nativeParticleRows": 20,
+      "nativeParticleUniqueSeeds": 19,
+      "browserParticleRows": 27,
+      "browserParticleUniqueSeeds": 24,
+      "cachedNativeSpawners": [
+        {
+          "type": 244,
+          "variant": 0,
+          "rows": 6
+        },
+        {
+          "type": 1000,
+          "variant": 5,
+          "rows": 14
+        }
+      ],
+      "nonNullLinkedParents": 0,
+      "observed244Seeds": 2,
+      "observedRemoved244Rows": 0,
+      "minimumObserved244Hp": 3.0,
+      "coreChecks": 626,
+      "corePassed": 83,
+      "coreStateChecks": 6225,
+      "coreStateFailures": 898,
+      "pixelFailures": 619,
+      "pairReportSha256": "9bc57ce8bfd3a18c12d66f7e59e1c723e7d7eddff5a54b08286215efe7025c01",
+      "fieldReportSha256": "ca26fbade4b733b169cd412aad4a1534f3ac44a51a24abfb1b053e8b14266888",
+      "traceArchive": {
+        "path": "/workspace/isaac-worktrees/e2e-ci/.cache/e2e/blood-particles/moving-live-e0b9-1/contrived-t1-moving-gibs-0/paired/00-contrived-t1-moving-gibs-0/browser/trace.json.gz",
+        "archiveBytes": 4384994,
+        "archiveSha256": "c74f3917be955da871eb4f0f190c17835045882adf9b6a75420f1fb604c29f11",
+        "rawBytes": 34120055,
+        "rawSha256": "ac62e8581b8ea8e9091646808761c3d274ddcd3ccca75e1136d3baf769e5148e",
+        "fullDecompressionReadback": "pass"
+      },
+      "archives": [
+        {
+          "path": "/workspace/isaac-worktrees/e2e-ci/.cache/e2e/blood-particles/moving-live-e0b9-1/contrived-t1-moving-gibs-0/paired/00-contrived-t1-moving-gibs-0/original/manifest.json.gz",
+          "archiveBytes": 5043644,
+          "archiveSha256": "c20cbc5fa6b7c2f202f8d0a5f646ad4ae0ea82c14db9c6fa92f522b192af9a65",
+          "rawBytes": 81588740,
+          "rawSha256": "3a4496afc721d8db5aca85b1dd1ddb32f2fa66562e459295e787ac3da3936e33",
+          "fullDecompressionReadback": "pass"
+        },
+        {
+          "path": "/workspace/isaac-worktrees/e2e-ci/.cache/e2e/blood-particles/moving-live-e0b9-1/contrived-t1-moving-gibs-0/paired/00-contrived-t1-moving-gibs-0/browser/manifest.json.gz",
+          "archiveBytes": 16478590,
+          "archiveSha256": "c016d31a3cf9551a6203174a6d1e82b9834e34e5a7242d550598c52c5b0ecdf3",
+          "rawBytes": 128581314,
+          "rawSha256": "0eb4b26fb2471936b78a67eb689d87ccc077c2a8f244f6299dd5587e27af362f",
+          "fullDecompressionReadback": "pass"
+        }
+      ],
+      "scope": "Cached244/0 metadata attributes the recorded spawner type; NULL parent and capture gaps do not establish a captured lethal callback. NativeDeathfalse remains required failure. Seed-unmatched bodies do not execute body/controller checks; ordered presence failure remains required. Full source/browser bytes and all required/core/pixel failure arrays remain unchanged.",
+      "requiredFailureDetails": [
+        {
+          "label": "moving-0075",
+          "field": "particle.orderedSpawnSeeds",
+          "expected": [],
+          "actual": [
+            1140062468,
+            796289803,
+            3289448738,
+            3378843800,
+            2792892728,
+            3770605198,
+            3474574121,
+            2698057612,
+            3408605999
+          ]
+        },
+        {
+          "label": "moving-0100",
+          "field": "particle.orderedSpawnSeeds",
+          "expected": [],
+          "actual": [
+            1140062468
+          ]
+        },
+        {
+          "label": "moving-0425",
+          "field": "particle.orderedSpawnSeeds",
+          "expected": [
+            3755287682,
+            2926368891,
+            2358739938,
+            3072109274,
+            2222516962,
+            2352996321,
+            2669318841,
+            20431363
+          ],
+          "actual": []
+        },
+        {
+          "label": "moving-0450",
+          "field": "particle.orderedSpawnSeeds",
+          "expected": [
+            2926368891
+          ],
+          "actual": []
+        },
+        {
+          "label": "moving-0575",
+          "field": "particle.orderedSpawnSeeds",
+          "expected": [],
+          "actual": [
+            3218032745,
+            669500883,
+            961240725,
+            3805719412,
+            3249325825,
+            4086368499,
+            3471177367,
+            1038681951
+          ]
+        },
+        {
+          "label": "moving-0600",
+          "field": "particle.orderedSpawnSeeds",
+          "expected": [],
+          "actual": [
+            669500883,
+            961240725,
+            3125705393,
+            2519959943,
+            2273203154,
+            3880052304,
+            275644672,
+            821982542,
+            52345411
+          ]
+        },
+        {
+          "label": "moving-1250",
+          "field": "particle.orderedSpawnSeeds",
+          "expected": [
+            2971545806,
+            1571025572,
+            2135094038,
+            2500093867,
+            3162369656,
+            1961625944,
+            4156554364,
+            3682946334,
+            3692305045,
+            1540803975,
+            1102010170
+          ],
+          "actual": []
+        },
+        {
+          "label": "execution",
+          "field": "native-death",
+          "expected": true,
+          "actual": false
+        }
+      ],
+      "pairedReportPath": "/workspace/isaac-worktrees/e2e-ci/.cache/e2e/blood-particles/moving-live-e0b9-1/contrived-t1-moving-gibs-0/paired/00-contrived-t1-moving-gibs-0/report.json",
+      "fieldReportPath": "/workspace/isaac-worktrees/e2e-ci/.cache/e2e/blood-particles/moving-live-e0b9-1/contrived-t1-moving-gibs-0/blood-particle-fields.json",
+      "coreRequiredFailureFields": {
+        "player.hp": 510,
+        "damageCooldown": 95,
+        "tears.alive": 111,
+        "player.x": 79,
+        "player.y": 79,
+        "player.vx": 16,
+        "player.vy": 8
+      }
+    },
+    {
+      "id": "contrived-t1-moving-gibs-1",
+      "status": "fail",
+      "randomized": false,
+      "retainedFromPriorExecution": null,
+      "presentations": 620,
+      "scopedChecks": 1864,
+      "requiredFailures": 46,
+      "failureFields": {
+        "particle.orderedSpawnSeeds": 45,
+        "native-death": 1
+      },
+      "execution": {
+        "native-death": false,
+        "browser-death": true,
+        "native-particles": true,
+        "browser-particles": true
+      },
+      "sameCaptureMatchedBodyPairs": 0,
+      "bodyFieldChecksExecuted": 0,
+      "initializedMatchedBodyPairs": 0,
+      "nativeParticleRows": 15,
+      "nativeParticleUniqueSeeds": 15,
+      "browserParticleRows": 246,
+      "browserParticleUniqueSeeds": 10,
+      "cachedNativeSpawners": [
+        {
+          "type": 244,
+          "variant": 0,
+          "rows": 4
+        },
+        {
+          "type": 1000,
+          "variant": 5,
+          "rows": 11
+        }
+      ],
+      "nonNullLinkedParents": 0,
+      "observed244Seeds": 2,
+      "observedRemoved244Rows": 0,
+      "minimumObserved244Hp": 3.0,
+      "coreChecks": 627,
+      "corePassed": 79,
+      "coreStateChecks": 6235,
+      "coreStateFailures": 914,
+      "pixelFailures": 620,
+      "pairReportSha256": "b6aaaa8c66ae170dd5911714b524543af3fb0762fb53ca74281320e8a8a95043",
+      "fieldReportSha256": "c010b5f09bb066d49b8e638d917c321f082652cd9984d034a346bf51b8e4a008",
+      "traceArchive": {
+        "path": "/workspace/isaac-worktrees/e2e-ci/.cache/e2e/blood-particles/moving-live-e0b9-recovery-1/contrived-t1-moving-gibs-1/paired/00-contrived-t1-moving-gibs-1/browser/trace.json.gz",
+        "archiveBytes": 4385191,
+        "archiveSha256": "3f2217ca3a2c5c9fece6d57fcfd9efc29253168a1b4e7c5bc8325c61026dd561",
+        "rawBytes": 34120463,
+        "rawSha256": "2a148dde772bf6e4bfc45c39d835cab020314eb368f7ba912adc3e138b4d6b38",
+        "fullDecompressionReadback": "pass"
+      },
+      "archives": [
+        {
+          "path": "/workspace/isaac-worktrees/e2e-ci/.cache/e2e/blood-particles/moving-live-e0b9-recovery-1/contrived-t1-moving-gibs-1/paired/00-contrived-t1-moving-gibs-1/original/manifest.json.gz",
+          "archiveBytes": 5231258,
+          "archiveSha256": "9abe91f6d7c77da6f673bf97bac344a8ee6ff016fd20531428f9e66a6bc9bae2",
+          "rawBytes": 83521709,
+          "rawSha256": "7840150a7bbe07b645f9c251f8053fdf68670cd7ea0d081c02feebd436733e1b",
+          "fullDecompressionReadback": "pass"
+        },
+        {
+          "path": "/workspace/isaac-worktrees/e2e-ci/.cache/e2e/blood-particles/moving-live-e0b9-recovery-1/contrived-t1-moving-gibs-1/paired/00-contrived-t1-moving-gibs-1/browser/manifest.json.gz",
+          "archiveBytes": 16861934,
+          "archiveSha256": "d03b02d58a85582a4871f863d3d1889cf163d48aebf783969b8262d69ff9b31e",
+          "rawBytes": 129783669,
+          "rawSha256": "8b9a93486a0e7d660eead5754e15f7f36def95e7dd95f3093b37a2db486039ac",
+          "fullDecompressionReadback": "pass"
+        }
+      ],
+      "scope": "Cached244/0 metadata attributes the recorded spawner type; NULL parent and capture gaps do not establish a captured lethal callback. NativeDeathfalse remains required failure. Seed-unmatched bodies do not execute body/controller checks; ordered presence failure remains required. Full source/browser bytes and all required/core/pixel failure arrays remain unchanged.",
+      "requiredFailureDetails": [
+        {
+          "label": "gib-fire-0-059",
+          "field": "particle.orderedSpawnSeeds",
+          "expected": [],
+          "actual": [
+            1980946123,
+            822977711,
+            1349347785
+          ]
+        },
+        {
+          "label": "gib-fire-0-060",
+          "field": "particle.orderedSpawnSeeds",
+          "expected": [],
+          "actual": [
+            1980946123,
+            822977711,
+            1349347785
+          ]
+        },
+        {
+          "label": "gib-fire-0-061",
+          "field": "particle.orderedSpawnSeeds",
+          "expected": [],
+          "actual": [
+            1980946123,
+            822977711,
+            1349347785
+          ]
+        },
+        {
+          "label": "gib-fire-0-062",
+          "field": "particle.orderedSpawnSeeds",
+          "expected": [],
+          "actual": [
+            1980946123,
+            822977711,
+            1349347785
+          ]
+        },
+        {
+          "label": "gib-fire-0-063",
+          "field": "particle.orderedSpawnSeeds",
+          "expected": [],
+          "actual": [
+            1980946123,
+            822977711,
+            1349347785,
+            3481715645,
+            487355266,
+            3850932384
+          ]
+        },
+        {
+          "label": "gib-fire-0-064",
+          "field": "particle.orderedSpawnSeeds",
+          "expected": [],
+          "actual": [
+            1980946123,
+            822977711,
+            1349347785,
+            3481715645,
+            487355266,
+            3850932384
+          ]
+        },
+        {
+          "label": "gib-fire-0-065",
+          "field": "particle.orderedSpawnSeeds",
+          "expected": [],
+          "actual": [
+            1980946123,
+            822977711,
+            1349347785,
+            3481715645,
+            487355266,
+            3850932384,
+            3932598362
+          ]
+        },
+        {
+          "label": "gib-fire-0-066",
+          "field": "particle.orderedSpawnSeeds",
+          "expected": [],
+          "actual": [
+            1980946123,
+            822977711,
+            1349347785,
+            3481715645,
+            487355266,
+            3850932384,
+            3932598362
+          ]
+        },
+        {
+          "label": "gib-fire-0-067",
+          "field": "particle.orderedSpawnSeeds",
+          "expected": [],
+          "actual": [
+            822977711,
+            1349347785,
+            3481715645,
+            487355266,
+            3850932384,
+            3932598362,
+            371509973,
+            3625305685,
+            340837879
+          ]
+        },
+        {
+          "label": "gib-fire-0-068",
+          "field": "particle.orderedSpawnSeeds",
+          "expected": [],
+          "actual": [
+            822977711,
+            1349347785,
+            3481715645,
+            487355266,
+            3850932384,
+            3932598362,
+            371509973,
+            3625305685,
+            340837879
+          ]
+        },
+        {
+          "label": "gib-fire-0-069",
+          "field": "particle.orderedSpawnSeeds",
+          "expected": [],
+          "actual": [
+            822977711,
+            1349347785,
+            3481715645,
+            487355266,
+            3850932384,
+            3932598362,
+            371509973,
+            3625305685,
+            340837879
+          ]
+        },
+        {
+          "label": "gib-fire-0-070",
+          "field": "particle.orderedSpawnSeeds",
+          "expected": [],
+          "actual": [
+            822977711,
+            1349347785,
+            3481715645,
+            487355266,
+            3850932384,
+            3932598362,
+            371509973,
+            3625305685,
+            340837879
+          ]
+        },
+        {
+          "label": "gib-fire-0-071",
+          "field": "particle.orderedSpawnSeeds",
+          "expected": [],
+          "actual": [
+            1349347785,
+            3481715645,
+            487355266,
+            3850932384,
+            3932598362,
+            371509973,
+            3625305685,
+            340837879
+          ]
+        },
+        {
+          "label": "gib-fire-0-072",
+          "field": "particle.orderedSpawnSeeds",
+          "expected": [],
+          "actual": [
+            1349347785,
+            3481715645,
+            487355266,
+            3850932384,
+            3932598362,
+            371509973,
+            3625305685,
+            340837879
+          ]
+        },
+        {
+          "label": "gib-fire-1-001",
+          "field": "particle.orderedSpawnSeeds",
+          "expected": [],
+          "actual": [
+            1349347785,
+            3481715645,
+            487355266,
+            3850932384,
+            3932598362,
+            371509973,
+            3625305685,
+            340837879
+          ]
+        },
+        {
+          "label": "gib-fire-1-002",
+          "field": "particle.orderedSpawnSeeds",
+          "expected": [],
+          "actual": [
+            1349347785,
+            3481715645,
+            487355266,
+            3850932384,
+            3932598362,
+            371509973,
+            3625305685,
+            340837879
+          ]
+        },
+        {
+          "label": "gib-fire-1-003",
+          "field": "particle.orderedSpawnSeeds",
+          "expected": [],
+          "actual": [
+            1349347785,
+            3481715645,
+            487355266,
+            3850932384,
+            3932598362,
+            371509973,
+            3625305685,
+            340837879
+          ]
+        },
+        {
+          "label": "gib-fire-1-004",
+          "field": "particle.orderedSpawnSeeds",
+          "expected": [],
+          "actual": [
+            1349347785,
+            3481715645,
+            487355266,
+            3850932384,
+            3932598362,
+            371509973,
+            3625305685,
+            340837879
+          ]
+        },
+        {
+          "label": "gib-fire-1-005",
+          "field": "particle.orderedSpawnSeeds",
+          "expected": [],
+          "actual": [
+            1349347785,
+            3481715645,
+            3850932384,
+            3932598362,
+            371509973,
+            3625305685,
+            340837879
+          ]
+        },
+        {
+          "label": "gib-fire-1-006",
+          "field": "particle.orderedSpawnSeeds",
+          "expected": [],
+          "actual": [
+            1349347785,
+            3481715645,
+            3850932384,
+            3932598362,
+            371509973,
+            3625305685,
+            340837879
+          ]
+        },
+        {
+          "label": "gib-fire-1-007",
+          "field": "particle.orderedSpawnSeeds",
+          "expected": [],
+          "actual": [
+            1349347785,
+            3481715645,
+            3850932384,
+            3932598362,
+            371509973,
+            3625305685,
+            340837879
+          ]
+        },
+        {
+          "label": "gib-fire-1-008",
+          "field": "particle.orderedSpawnSeeds",
+          "expected": [],
+          "actual": [
+            1349347785,
+            3481715645,
+            3850932384,
+            3932598362,
+            371509973,
+            3625305685,
+            340837879
+          ]
+        },
+        {
+          "label": "gib-fire-1-009",
+          "field": "particle.orderedSpawnSeeds",
+          "expected": [],
+          "actual": [
+            1349347785,
+            3481715645,
+            3850932384,
+            3932598362,
+            371509973,
+            3625305685,
+            340837879
+          ]
+        },
+        {
+          "label": "gib-fire-1-010",
+          "field": "particle.orderedSpawnSeeds",
+          "expected": [],
+          "actual": [
+            1349347785,
+            3481715645,
+            3850932384,
+            3932598362,
+            371509973,
+            3625305685,
+            340837879
+          ]
+        },
+        {
+          "label": "gib-fire-1-011",
+          "field": "particle.orderedSpawnSeeds",
+          "expected": [],
+          "actual": [
+            3481715645,
+            3850932384,
+            3932598362,
+            371509973,
+            3625305685,
+            340837879
+          ]
+        },
+        {
+          "label": "gib-fire-1-012",
+          "field": "particle.orderedSpawnSeeds",
+          "expected": [],
+          "actual": [
+            3481715645,
+            3850932384,
+            3932598362,
+            371509973,
+            3625305685,
+            340837879
+          ]
+        },
+        {
+          "label": "gib-fire-1-013",
+          "field": "particle.orderedSpawnSeeds",
+          "expected": [],
+          "actual": [
+            3481715645,
+            3850932384,
+            3932598362,
+            371509973,
+            3625305685,
+            340837879
+          ]
+        },
+        {
+          "label": "gib-fire-1-014",
+          "field": "particle.orderedSpawnSeeds",
+          "expected": [],
+          "actual": [
+            3481715645,
+            3850932384,
+            3932598362,
+            371509973,
+            3625305685,
+            340837879
+          ]
+        },
+        {
+          "label": "gib-fire-1-015",
+          "field": "particle.orderedSpawnSeeds",
+          "expected": [],
+          "actual": [
+            3481715645,
+            3850932384,
+            3932598362,
+            371509973,
+            3625305685,
+            340837879
+          ]
+        },
+        {
+          "label": "gib-fire-1-016",
+          "field": "particle.orderedSpawnSeeds",
+          "expected": [],
+          "actual": [
+            3481715645,
+            3850932384,
+            3932598362,
+            371509973,
+            3625305685,
+            340837879
+          ]
+        },
+        {
+          "label": "gib-fire-1-017",
+          "field": "particle.orderedSpawnSeeds",
+          "expected": [],
+          "actual": [
+            3481715645,
+            3850932384,
+            3932598362,
+            371509973,
+            3625305685,
+            340837879
+          ]
+        },
+        {
+          "label": "gib-fire-1-018",
+          "field": "particle.orderedSpawnSeeds",
+          "expected": [],
+          "actual": [
+            3481715645,
+            3850932384,
+            3932598362,
+            371509973,
+            3625305685,
+            340837879
+          ]
+        },
+        {
+          "label": "gib-fire-1-019",
+          "field": "particle.orderedSpawnSeeds",
+          "expected": [],
+          "actual": [
+            3481715645,
+            3850932384,
+            371509973,
+            3625305685,
+            340837879
+          ]
+        },
+        {
+          "label": "gib-fire-1-020",
+          "field": "particle.orderedSpawnSeeds",
+          "expected": [],
+          "actual": [
+            3481715645,
+            3850932384,
+            371509973,
+            3625305685,
+            340837879
+          ]
+        },
+        {
+          "label": "gib-fire-1-021",
+          "field": "particle.orderedSpawnSeeds",
+          "expected": [],
+          "actual": [
+            3481715645,
+            3850932384,
+            371509973,
+            3625305685,
+            340837879
+          ]
+        },
+        {
+          "label": "gib-fire-1-022",
+          "field": "particle.orderedSpawnSeeds",
+          "expected": [],
+          "actual": [
+            3481715645,
+            3850932384,
+            371509973,
+            3625305685,
+            340837879
+          ]
+        },
+        {
+          "label": "gib-fire-1-023",
+          "field": "particle.orderedSpawnSeeds",
+          "expected": [],
+          "actual": [
+            3481715645,
+            371509973,
+            3625305685
+          ]
+        },
+        {
+          "label": "gib-fire-1-024",
+          "field": "particle.orderedSpawnSeeds",
+          "expected": [],
+          "actual": [
+            3481715645,
+            371509973,
+            3625305685
+          ]
+        },
+        {
+          "label": "gib-fire-1-025",
+          "field": "particle.orderedSpawnSeeds",
+          "expected": [],
+          "actual": [
+            3481715645,
+            3625305685
+          ]
+        },
+        {
+          "label": "gib-fire-1-026",
+          "field": "particle.orderedSpawnSeeds",
+          "expected": [],
+          "actual": [
+            3481715645,
+            3625305685
+          ]
+        },
+        {
+          "label": "gib-fire-1-027",
+          "field": "particle.orderedSpawnSeeds",
+          "expected": [],
+          "actual": [
+            3625305685
+          ]
+        },
+        {
+          "label": "gib-fire-1-028",
+          "field": "particle.orderedSpawnSeeds",
+          "expected": [],
+          "actual": [
+            3625305685
+          ]
+        },
+        {
+          "label": "gib-fire-1-029",
+          "field": "particle.orderedSpawnSeeds",
+          "expected": [],
+          "actual": [
+            3625305685
+          ]
+        },
+        {
+          "label": "gib-fire-1-030",
+          "field": "particle.orderedSpawnSeeds",
+          "expected": [],
+          "actual": [
+            3625305685
+          ]
+        },
+        {
+          "label": "moving-1425",
+          "field": "particle.orderedSpawnSeeds",
+          "expected": [
+            3729415440,
+            2602345638,
+            408910353,
+            1298429613,
+            1518634187,
+            3283540931,
+            3148401300,
+            3957280160,
+            4231727604,
+            2086745759,
+            3601138540,
+            1956082103,
+            76248024,
+            1434217522,
+            3998219629
+          ],
+          "actual": []
+        },
+        {
+          "label": "execution",
+          "field": "native-death",
+          "expected": true,
+          "actual": false
+        }
+      ],
+      "pairedReportPath": "/workspace/isaac-worktrees/e2e-ci/.cache/e2e/blood-particles/moving-live-e0b9-recovery-1/contrived-t1-moving-gibs-1/paired/00-contrived-t1-moving-gibs-1/report.json",
+      "fieldReportPath": "/workspace/isaac-worktrees/e2e-ci/.cache/e2e/blood-particles/moving-live-e0b9-recovery-1/contrived-t1-moving-gibs-1/blood-particle-fields.json",
+      "coreRequiredFailureFields": {
+        "player.hp": 548,
+        "damageCooldown": 64,
+        "tears.alive": 121,
+        "player.x": 79,
+        "player.y": 79,
+        "player.vx": 16,
+        "player.vy": 7
+      }
+    },
+    {
+      "id": "recorded-os-moving-gibs-0",
+      "status": "fail",
+      "randomized": true,
+      "retainedFromPriorExecution": null,
+      "presentations": 751,
+      "scopedChecks": 2257,
+      "requiredFailures": 43,
+      "failureFields": {
+        "particle.orderedSpawnSeeds": 5,
+        "room.identity": 37,
+        "native-death": 1
+      },
+      "execution": {
+        "native-death": false,
+        "browser-death": true,
+        "native-particles": true,
+        "browser-particles": true
+      },
+      "sameCaptureMatchedBodyPairs": 0,
+      "bodyFieldChecksExecuted": 0,
+      "initializedMatchedBodyPairs": 0,
+      "nativeParticleRows": 23,
+      "nativeParticleUniqueSeeds": 20,
+      "browserParticleRows": 27,
+      "browserParticleUniqueSeeds": 24,
+      "cachedNativeSpawners": [
+        {
+          "type": 244,
+          "variant": 0,
+          "rows": 4
+        },
+        {
+          "type": 1000,
+          "variant": 5,
+          "rows": 19
+        }
+      ],
+      "nonNullLinkedParents": 0,
+      "observed244Seeds": 2,
+      "observedRemoved244Rows": 0,
+      "minimumObserved244Hp": 3.0,
+      "coreChecks": 758,
+      "corePassed": 245,
+      "coreStateChecks": 7545,
+      "coreStateFailures": 2503,
+      "pixelFailures": 751,
+      "pairReportSha256": "4cdec11117bca552acd273473fb7bf55feb67039f6c0eacce076a73115ad2a2f",
+      "fieldReportSha256": "fe0ca952f69c9b3488453f9c0f16a52827c2664e8623585718cf156444913c28",
+      "traceArchive": {
+        "path": "/workspace/isaac-worktrees/e2e-ci/.cache/e2e/blood-particles/moving-live-e0b9-recovery-1/recorded-os-moving-gibs-0/paired/00-recorded-os-moving-gibs-0/browser/trace.json.gz",
+        "archiveBytes": 4207045,
+        "archiveSha256": "c8f3511c63e60fbb656afcdc4f8a560a26c0a8a10dbd1c85b41a8e744a6aad08",
+        "rawBytes": 34178767,
+        "rawSha256": "cf76ba917cac37ccf2942179ae650e14ad1c1abb47a0c9703b45e98c36e004a7",
+        "fullDecompressionReadback": "pass"
+      },
+      "archives": [
+        {
+          "path": "/workspace/isaac-worktrees/e2e-ci/.cache/e2e/blood-particles/moving-live-e0b9-recovery-1/recorded-os-moving-gibs-0/paired/00-recorded-os-moving-gibs-0/original/manifest.json.gz",
+          "archiveBytes": 4468560,
+          "archiveSha256": "73f8e905c6e33b6c8346e670bc8fd27132246191a9e45de464b0596586ef052b",
+          "rawBytes": 72138465,
+          "rawSha256": "fa61b0dfce4342af55ba7c690ae054f3726b64081679ff58c2a91bbda81bbccf",
+          "fullDecompressionReadback": "pass"
+        },
+        {
+          "path": "/workspace/isaac-worktrees/e2e-ci/.cache/e2e/blood-particles/moving-live-e0b9-recovery-1/recorded-os-moving-gibs-0/paired/00-recorded-os-moving-gibs-0/browser/manifest.json.gz",
+          "archiveBytes": 20103862,
+          "archiveSha256": "b9ae7925095556a72a39b46216b03fdd880570a6d74293cb9e89a75bcf6f3982",
+          "rawBytes": 159078714,
+          "rawSha256": "13e5d33fefaa429b089da3a8aec7bffbdcd6a12f439b7bf31311856f71568f4c",
+          "fullDecompressionReadback": "pass"
+        }
+      ],
+      "scope": "Cached244/0 metadata attributes the recorded spawner type; NULL parent and capture gaps do not establish a captured lethal callback. NativeDeathfalse remains required failure. Seed-unmatched bodies do not execute body/controller checks; ordered presence failure remains required. Full source/browser bytes and all required/core/pixel failure arrays remain unchanged.",
+      "requiredFailureDetails": [
+        {
+          "label": "moving-0175",
+          "field": "particle.orderedSpawnSeeds",
+          "expected": [],
+          "actual": [
+            3469119611,
+            883601666,
+            2447413794,
+            1674165401,
+            304334980,
+            941728311,
+            2086482581
+          ]
+        },
+        {
+          "label": "moving-0200",
+          "field": "particle.orderedSpawnSeeds",
+          "expected": [],
+          "actual": [
+            2447413794,
+            304334980,
+            2086482581,
+            3249325825,
+            1628818158,
+            232999577,
+            2727834716
+          ]
+        },
+        {
+          "label": "moving-0900",
+          "field": "particle.orderedSpawnSeeds",
+          "expected": [
+            2487034507,
+            4159333980,
+            3235045759,
+            1930646102,
+            1566507089,
+            505826074,
+            827835309,
+            2669543901,
+            2879055189,
+            1340615787,
+            509222008,
+            271014669,
+            230466417,
+            3715766695,
+            3321787069,
+            4146918163,
+            2780606261,
+            1522178543,
+            2474297785,
+            2040505853
+          ],
+          "actual": []
+        },
+        {
+          "label": "moving-0925",
+          "field": "particle.orderedSpawnSeeds",
+          "expected": [
+            2487034507,
+            2879055189,
+            230466417
+          ],
+          "actual": []
+        },
+        {
+          "label": "moving-1350",
+          "field": "particle.orderedSpawnSeeds",
+          "expected": [],
+          "actual": [
+            2000581404,
+            438948227,
+            2352518974,
+            3131330978,
+            3837683814,
+            3154991021,
+            2506655967,
+            256948959,
+            2946757478,
+            3549082353,
+            3207755474,
+            490563023,
+            3562512565
+          ]
+        },
+        {
+          "label": "moving-1500",
+          "field": "room.identity",
+          "expected": 8,
+          "actual": 6
+        },
+        {
+          "label": "moving-1525",
+          "field": "room.identity",
+          "expected": 8,
+          "actual": 6
+        },
+        {
+          "label": "moving-1550",
+          "field": "room.identity",
+          "expected": 8,
+          "actual": 6
+        },
+        {
+          "label": "moving-1575",
+          "field": "room.identity",
+          "expected": 8,
+          "actual": 6
+        },
+        {
+          "label": "moving-1600",
+          "field": "room.identity",
+          "expected": 8,
+          "actual": 6
+        },
+        {
+          "label": "moving-tail-001",
+          "field": "room.identity",
+          "expected": 8,
+          "actual": 6
+        },
+        {
+          "label": "moving-tail-002",
+          "field": "room.identity",
+          "expected": 8,
+          "actual": 6
+        },
+        {
+          "label": "moving-tail-003",
+          "field": "room.identity",
+          "expected": 8,
+          "actual": 6
+        },
+        {
+          "label": "moving-tail-004",
+          "field": "room.identity",
+          "expected": 8,
+          "actual": 6
+        },
+        {
+          "label": "moving-tail-005",
+          "field": "room.identity",
+          "expected": 8,
+          "actual": 6
+        },
+        {
+          "label": "moving-tail-006",
+          "field": "room.identity",
+          "expected": 8,
+          "actual": 6
+        },
+        {
+          "label": "moving-tail-007",
+          "field": "room.identity",
+          "expected": 8,
+          "actual": 6
+        },
+        {
+          "label": "moving-tail-008",
+          "field": "room.identity",
+          "expected": 8,
+          "actual": 6
+        },
+        {
+          "label": "moving-tail-009",
+          "field": "room.identity",
+          "expected": 8,
+          "actual": 6
+        },
+        {
+          "label": "moving-tail-010",
+          "field": "room.identity",
+          "expected": 8,
+          "actual": 6
+        },
+        {
+          "label": "moving-tail-011",
+          "field": "room.identity",
+          "expected": 8,
+          "actual": 6
+        },
+        {
+          "label": "moving-tail-012",
+          "field": "room.identity",
+          "expected": 8,
+          "actual": 6
+        },
+        {
+          "label": "moving-tail-013",
+          "field": "room.identity",
+          "expected": 8,
+          "actual": 6
+        },
+        {
+          "label": "moving-tail-014",
+          "field": "room.identity",
+          "expected": 8,
+          "actual": 6
+        },
+        {
+          "label": "moving-tail-015",
+          "field": "room.identity",
+          "expected": 8,
+          "actual": 6
+        },
+        {
+          "label": "moving-tail-016",
+          "field": "room.identity",
+          "expected": 8,
+          "actual": 6
+        },
+        {
+          "label": "moving-tail-017",
+          "field": "room.identity",
+          "expected": 8,
+          "actual": 6
+        },
+        {
+          "label": "moving-tail-018",
+          "field": "room.identity",
+          "expected": 8,
+          "actual": 6
+        },
+        {
+          "label": "moving-tail-019",
+          "field": "room.identity",
+          "expected": 8,
+          "actual": 6
+        },
+        {
+          "label": "moving-tail-020",
+          "field": "room.identity",
+          "expected": 8,
+          "actual": 6
+        },
+        {
+          "label": "moving-tail-021",
+          "field": "room.identity",
+          "expected": 8,
+          "actual": 6
+        },
+        {
+          "label": "moving-tail-022",
+          "field": "room.identity",
+          "expected": 8,
+          "actual": 6
+        },
+        {
+          "label": "moving-tail-023",
+          "field": "room.identity",
+          "expected": 8,
+          "actual": 6
+        },
+        {
+          "label": "moving-tail-024",
+          "field": "room.identity",
+          "expected": 8,
+          "actual": 6
+        },
+        {
+          "label": "moving-tail-025",
+          "field": "room.identity",
+          "expected": 8,
+          "actual": 6
+        },
+        {
+          "label": "moving-tail-026",
+          "field": "room.identity",
+          "expected": 8,
+          "actual": 6
+        },
+        {
+          "label": "moving-tail-027",
+          "field": "room.identity",
+          "expected": 8,
+          "actual": 6
+        },
+        {
+          "label": "moving-tail-028",
+          "field": "room.identity",
+          "expected": 8,
+          "actual": 6
+        },
+        {
+          "label": "moving-tail-029",
+          "field": "room.identity",
+          "expected": 8,
+          "actual": 6
+        },
+        {
+          "label": "moving-tail-030",
+          "field": "room.identity",
+          "expected": 8,
+          "actual": 6
+        },
+        {
+          "label": "moving-tail-031",
+          "field": "room.identity",
+          "expected": 8,
+          "actual": 6
+        },
+        {
+          "label": "moving-tail-032",
+          "field": "room.identity",
+          "expected": 8,
+          "actual": 6
+        },
+        {
+          "label": "execution",
+          "field": "native-death",
+          "expected": true,
+          "actual": false
+        }
+      ],
+      "pairedReportPath": "/workspace/isaac-worktrees/e2e-ci/.cache/e2e/blood-particles/moving-live-e0b9-recovery-1/recorded-os-moving-gibs-0/paired/00-recorded-os-moving-gibs-0/report.json",
+      "fieldReportPath": "/workspace/isaac-worktrees/e2e-ci/.cache/e2e/blood-particles/moving-live-e0b9-recovery-1/recorded-os-moving-gibs-0/blood-particle-fields.json",
+      "coreRequiredFailureFields": {
+        "player.x": 513,
+        "player.y": 513,
+        "player.vx": 458,
+        "player.vy": 455,
+        "player.hp": 327,
+        "damageCooldown": 180,
+        "tears.alive": 57
+      }
+    },
+    {
+      "id": "recorded-os-moving-gibs-1",
+      "status": "fail",
+      "randomized": true,
+      "retainedFromPriorExecution": null,
+      "presentations": 752,
+      "scopedChecks": 2260,
+      "requiredFailures": 6,
+      "failureFields": {
+        "particle.orderedSpawnSeeds": 4,
+        "native-death": 1,
+        "browser-death": 1
+      },
+      "execution": {
+        "native-death": false,
+        "browser-death": false,
+        "native-particles": true,
+        "browser-particles": true
+      },
+      "sameCaptureMatchedBodyPairs": 0,
+      "bodyFieldChecksExecuted": 0,
+      "initializedMatchedBodyPairs": 0,
+      "nativeParticleRows": 25,
+      "nativeParticleUniqueSeeds": 24,
+      "browserParticleRows": 7,
+      "browserParticleUniqueSeeds": 7,
+      "cachedNativeSpawners": [
+        {
+          "type": 244,
+          "variant": 0,
+          "rows": 7
+        },
+        {
+          "type": 1000,
+          "variant": 5,
+          "rows": 18
+        }
+      ],
+      "nonNullLinkedParents": 0,
+      "observed244Seeds": 2,
+      "observedRemoved244Rows": 0,
+      "minimumObserved244Hp": 3.0,
+      "coreChecks": 759,
+      "corePassed": 245,
+      "coreStateChecks": 7555,
+      "coreStateFailures": 2281,
+      "pixelFailures": 752,
+      "pairReportSha256": "8856560392666992a4dc553587b0822ed2428c35dbfbc086c9fc1eb5c970b29c",
+      "fieldReportSha256": "eea9906f44eded92e297cd731d781957e3bace80c94a3d5fd21d86488f1f4344",
+      "traceArchive": {
+        "path": "/workspace/isaac-worktrees/e2e-ci/.cache/e2e/blood-particles/moving-live-e0b9-recovery-1/recorded-os-moving-gibs-1/paired/00-recorded-os-moving-gibs-1/browser/trace.json.gz",
+        "archiveBytes": 4207030,
+        "archiveSha256": "efe747716e85630f05928e7a470014f8e561a132ff44167b775dca8042a386b3",
+        "rawBytes": 34178708,
+        "rawSha256": "5bfe4f080baef8ef9e079a07685faad6e6eacbd48b2b5d004ac9c22f37a99af8",
+        "fullDecompressionReadback": "pass"
+      },
+      "archives": [
+        {
+          "path": "/workspace/isaac-worktrees/e2e-ci/.cache/e2e/blood-particles/moving-live-e0b9-recovery-1/recorded-os-moving-gibs-1/paired/00-recorded-os-moving-gibs-1/original/manifest.json.gz",
+          "archiveBytes": 4411616,
+          "archiveSha256": "33fd577dbe8a702f3180c706eafedb420cc6ef3e4b7f34d47131dd194361503b",
+          "rawBytes": 71589116,
+          "rawSha256": "eb7f3b1350914ae9cdbe98661e1cdbca7b72a49611c83ded2e4bea4dc324fc6a",
+          "fullDecompressionReadback": "pass"
+        },
+        {
+          "path": "/workspace/isaac-worktrees/e2e-ci/.cache/e2e/blood-particles/moving-live-e0b9-recovery-1/recorded-os-moving-gibs-1/paired/00-recorded-os-moving-gibs-1/browser/manifest.json.gz",
+          "archiveBytes": 20044656,
+          "archiveSha256": "1e19659407070a400a8375d26e04a6cbb3809efa25dc21367783e23c39826ec8",
+          "rawBytes": 158339124,
+          "rawSha256": "1a21f4911af15ad4151f4c00c016be614028a36de53c3dafe5ddd0d8c5292c44",
+          "fullDecompressionReadback": "pass"
+        }
+      ],
+      "scope": "Cached244/0 metadata attributes the recorded spawner type; NULL parent and capture gaps do not establish a captured lethal callback. NativeDeathfalse remains required failure. Seed-unmatched bodies do not execute body/controller checks; ordered presence failure remains required. Full source/browser bytes and all required/core/pixel failure arrays remain unchanged.",
+      "requiredFailureDetails": [
+        {
+          "label": "moving-0875",
+          "field": "particle.orderedSpawnSeeds",
+          "expected": [
+            2736987366,
+            1896766304,
+            4228033795,
+            4262070579,
+            3755332253,
+            3872212864,
+            505180169,
+            58083036,
+            35970505,
+            1891767914
+          ],
+          "actual": []
+        },
+        {
+          "label": "moving-0900",
+          "field": "particle.orderedSpawnSeeds",
+          "expected": [
+            2736987366
+          ],
+          "actual": []
+        },
+        {
+          "label": "moving-1275",
+          "field": "particle.orderedSpawnSeeds",
+          "expected": [],
+          "actual": [
+            604038204,
+            4286887681,
+            2615109203,
+            3986079519,
+            222743614,
+            3108631210,
+            1199109596
+          ]
+        },
+        {
+          "label": "moving-1325",
+          "field": "particle.orderedSpawnSeeds",
+          "expected": [
+            2216516877,
+            3192821109,
+            4180651921,
+            3373702202,
+            3672277145,
+            3898125559,
+            2765547114,
+            2794233067,
+            1763863365,
+            3694952817,
+            1741532580,
+            1394317362,
+            230820524,
+            1723509493
+          ],
+          "actual": []
+        },
+        {
+          "label": "execution",
+          "field": "native-death",
+          "expected": true,
+          "actual": false
+        },
+        {
+          "label": "execution",
+          "field": "browser-death",
+          "expected": true,
+          "actual": false
+        }
+      ],
+      "pairedReportPath": "/workspace/isaac-worktrees/e2e-ci/.cache/e2e/blood-particles/moving-live-e0b9-recovery-1/recorded-os-moving-gibs-1/paired/00-recorded-os-moving-gibs-1/report.json",
+      "fieldReportPath": "/workspace/isaac-worktrees/e2e-ci/.cache/e2e/blood-particles/moving-live-e0b9-recovery-1/recorded-os-moving-gibs-1/blood-particle-fields.json",
+      "coreRequiredFailureFields": {
+        "player.x": 514,
+        "player.y": 514,
+        "player.vx": 473,
+        "player.vy": 474,
+        "player.hp": 127,
+        "damageCooldown": 123,
+        "tears.alive": 56
+      }
+    }
+  ],
+  "presentations": 2742,
+  "scopedChecks": 8242,
+  "requiredFailures": 103,
+  "sameCaptureMatchedBodyPairs": 0,
+  "bodyFieldChecksExecuted": 0,
+  "coreChecks": 2770,
+  "corePassed": 652,
+  "manifestStreamsReadbackVerified": 8,
+  "rawManifestBytes": 884620851,
+  "archiveManifestBytes": 92644120,
+  "sourceAndArtifactBeforeAfterStable": true,
+  "scope": "Exact four-case frozen bank completed across original firstclosed failure plus three newly closed continuation cases. Original second interrupted attempt and all bytes remain separately retained, no reroll or overwrite. All8 complete manifest streams and all4 complete browser trace streams independently hash/byte verified. Failures are blocking; no main/whole-game or unmatched particle-body/controller acceptance. Source/native time/RNG/targets never feed port.",
+  "capturedProducerTag": "archive/pr104-e0b9-moving-producer-20261014",
+  "capturedProducerTagObject": "c3d5d2f36bc2db43f039f060c990dde632a3345e",
+  "archiveReadbackPath": ".cache/coordination/boss-effects-research/moving-live-e0b9-recovery-complete-audit.json",
+  "archiveReadbackSha256": "a84ab3bc4c27963e7318a83591852fe7ca837d41202407e07b2962827ae2ed98",
+  "historicalInitialCohort": {
+    "path": "references/isaac/foundation/combat/blood-particles/first-live-1e9d02f.json",
+    "sha256": "fde16cdab341c00cf487b205e1d366f136f5841bf2b5005771f4c186cc594592",
+    "status": "fail",
+    "checks": 7090,
+    "requiredFailures": 58,
+    "unchanged": true
+  },
+  "requiredFailureFields": {
+    "particle.orderedSpawnSeeds": 61,
+    "native-death": 4,
+    "room.identity": 37,
+    "browser-death": 1
+  },
+  "totalCoreStateChecks": 27560,
+  "totalCoreStateFailures": 6596,
+  "fullFramePixelFailures": 2742,
+  "unaccepted": [
+    "Captured native244 lethal/death execution",
+    "Matched real5 body/controller/seed/sequence/spawner/motion/color/clip parity",
+    "Core whole-game/full-state parity",
+    "Whole background render ordering/persistence",
+    "Monstro2/42/77 and boss rewards",
+    "Status/champion/perk/transient-color modifiers",
+    "Controller storage before first Update"
+  ],
+  "publicationQualification": "Reviewed source implementation and required game gate only. No new build/game qualification exists for a documentation or later restackedmain head; all actual-game evidence belongs to captured e0b9 with immutable1e9 artifact4e0a.",
+  "publicationHasNoNewRuntimeQualification": true
+}

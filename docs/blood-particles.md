@@ -36,9 +36,10 @@ time. It retains both0/1 phase offsets of the mandatory T1 route and the existin
 recorded OS-selected244 route. Every initial failed public action and capture
 remains an exact prefix; the default bank appends two fixed boundary movement
 and cardinal-firing laps, plus32 dense tail observations. Odd25-presentation
-samples alternate full/fast during movement. The newly declared default bank
-passes preparation and awaits a separate fresh execution. Browser manifests and
-traces use the reviewed shared streaming gzip writer, retaining every selected
+samples alternate full/fast during movement. The frozen moving bank has now
+completed all four original/browser cases and retains their required failures.
+Browser manifests and traces use the reviewed shared streaming gzip writer,
+retaining every selected
 snapshot, input and complete backend callback state with raw/archive hashes and
 byte counts. Other paired consumers retain their default raw evidence format.
 The comparator checks both compressed and decompressed checksum receipts before
@@ -56,8 +57,8 @@ separate floor build. Its production artifact is
 `4e0a87622c0910c0df920fa017a591d6d74e89c15579d1ee4e51f896df1c7e68`
 (941 files). All four fresh pairs completed with stable source/artifact hashes
 and fail: core648/2386, scoped7090 checks/58 failures. The scoped checks cover
-room, phase, ordered presence and execution. No native case killed a Worm or
-produced5; one browser case did. Zero native particle bodies matched, so these
+room, phase, ordered presence and execution. No native capture observed a Worm
+death or Effect5; one browser case did. Zero native particle bodies matched, so these
 counts do not establish particle-body/controller parity. Both recorded OS
 offsets remain in the failed cohort. [Compact evidence](../references/isaac/foundation/combat/blood-particles/first-live-1e9d02f.json)
 retains every case and report hash.
@@ -67,8 +68,44 @@ retained as88,413,976 gzip bytes. Independent streamed readback checks all eight
 archives against their original raw hashes. The subsequent default movement bank
 preserves this complete failed execution and every initial input/capture prefix.
 The gzip-aware verifier separately reread all four retained pairs: the7090 checks
-and58 failures are identical. This validates evidence transport; the new default
-bank still requires fresh games, and the built1e9d02f runtime remains unchanged.
+and58 failures are identical. This validates evidence transport; the
+built1e9d02f runtime remains unchanged.
+
+The moving cohort used captured source
+`e0b9cf05eb11052f77dd106119be8b5eda331129` with that same immutable production
+artifact. Its exact source is preserved in the
+`archive/pr104-e0b9-moving-producer-20261014` tag; all 312 source pins match the
+archived Git blobs. One original case closed before a process interruption;
+the completed failure and partial second attempt remain intact. The remaining
+three exact frozen tapes then ran sequentially in a new output directory, with
+the same recorded identities and phase offsets. No tape, outcome or requirement
+was replaced or rerolled.
+
+All four cases remain **FAIL**: 2,742 presentations, 8,242 scoped checks and
+103 required failures; core checkpoints pass 652/2,770. The scoped failures are
+61 ordered-particle seed/presence differences, 37 room-identity differences,
+four missing native-death observations and one missing browser-death
+observation. The complete core reports retain 6,596 required state differences;
+2,742 full-frame pixel differences remain diagnostics. [Moving evidence](../references/isaac/foundation/combat/blood-particles/moving-live-e0b9.json)
+includes all 103 scoped failure records and every case/report hash.
+
+Real native Effect5 rows are observed in every moving case: 83 observed rows
+include 21 cached spawner244/0 rows and 62 selfchild1000/5 rows. Every linked
+parent is NULL. Cached caller metadata supports the spawner attribution, but
+the captures contain no removed244 row and do not prove a captured lethal
+callback. Native death therefore remains a required failure in all four cases.
+No native/browser seed pairs match, so no body, controller, sequence, spawner,
+motion, color or clip parity checks execute or gain acceptance. Room/phase and
+empty ordered-presence comparisons do not establish those properties.
+
+All eight complete moving native/browser manifests retain 884,620,851 raw bytes
+as 92,644,120 gzip bytes. Full decompression verifies every raw/archive checksum;
+the four complete browser traces retain every input and backend snapshot without
+truncation. Source, artifact, bank and every original partial-file byte remain
+stable. Documentation publication and any later restack onto main are separate
+source heads: they do not qualify a new main production artifact or fresh game
+execution. The source implementation and mandatory failing gate are recorded
+separately from live acceptance.
 
 Status/champion/inherited-color modifiers, perks225/234, the exact full
 per-record transient-color damage path, other gibs categories and later stages
