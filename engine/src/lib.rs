@@ -22,6 +22,7 @@ pub mod enemy_projectiles;
 pub mod familiars;
 pub mod fireplaces;
 pub mod floor;
+pub mod gib_counts;
 pub mod grid;
 mod grid_hazards;
 pub mod grid_records;
@@ -46,6 +47,7 @@ pub mod player_animation;
 pub mod player_death;
 pub mod player_items;
 pub mod player_stats;
+pub mod poop_effects;
 pub mod projectiles;
 pub mod public_actions;
 pub mod rock_blast;
@@ -1769,6 +1771,25 @@ impl Game {
         }
         if phase == phase::Phase::Update {
             familiars::grid_contacts(&mut self.state)?;
+            if self
+                .state
+                .sprite_effects
+                .iter()
+                .any(|effect| effect.poop_effect.is_some() && effect.active && !effect.removed)
+            {
+                let grid = grid::Grid::new(
+                    self.state
+                        .room
+                        .grid
+                        .clone()
+                        .ok_or("poop effect requires actual grid")?,
+                )?;
+                for effect in &mut self.state.sprite_effects {
+                    if effect.poop_effect.is_some() {
+                        poop_effects::full_grid_contact(effect, &grid)?;
+                    }
+                }
+            }
         }
         for impact in &mut self.state.impacts {
             impact.age += 1;
@@ -2005,6 +2026,11 @@ impl Game {
                     grid: &grid,
                     audio: &mut self.state.audio,
                     system_counter: self.state.system_clock.system_counter.wrapping_sub(1),
+                    player_items: self
+                        .state
+                        .player_items
+                        .as_ref()
+                        .ok_or("Dip death requires actual Player inventory")?,
                     effects: familiars::NpcEffectAdmission {
                         game_update_count: self.state.game_update_count,
                         next_effect: &mut self.state.next_effect,

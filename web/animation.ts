@@ -59,6 +59,8 @@ const urls = import.meta.glob([
   "../references/isaac/rebirth/resources/gfx/grid/effect_005_fire.png",
   "../references/isaac/rebirth/resources/gfx/grid/effect_ember.png",
   "../references/isaac/rebirth/resources/gfx/effects/effect_poopspawn.png",
+  "../references/isaac/rebirth/resources/gfx/effects/effect_002b_shitpoof.png",
+  "../references/isaac/rebirth/resources/gfx/effects/effect_poopgibs.png",
   "../references/isaac/rebirth/resources/gfx/monsters/classic/monster_010_fly.png",
   "../references/isaac/rebirth/resources/gfx/monsters/rebirth/monster_213_level2fly.png",
   "../references/isaac/rebirth/resources/gfx/monsters/rebirth/monster_216_dip.png",
