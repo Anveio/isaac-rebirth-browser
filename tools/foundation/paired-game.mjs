@@ -87,7 +87,7 @@ async function nativeCapture(caseData, directory, nativeFrameTimeout, originalOb
   return { status: error || provenance.status !== 'pass' ? 'fail' : 'pass', error, provenance, directory, manifest };
 }
 
-async function browserCapture(browser, server, caseData, directory, archiveBrowserEvidence) {
+async function browserCapture(browser, server, caseData, directory, archiveBrowserEvidence, captureBrowserAudio) {
   mkdirSync(directory, { recursive: true });
   const context = await browser.newContext({ viewport: { width: 960, height: 540 } });
   const page = await context.newPage();
@@ -126,11 +126,16 @@ async function browserCapture(browser, server, caseData, directory, archiveBrows
         }
         inputs.push({ ...action, normalizedCode: code, browserPresentation: presentations });
       } else {
-        const captured = await page.evaluate(() => window.game.capture());
+        const captured = await page.evaluate(includeAudio => {
+          const result = window.game.capture();
+          if (includeAudio) result.browserAudio = window.game.audio();
+          return result;
+        }, captureBrowserAudio);
         const bytes = Buffer.from(captured.png, 'base64');
         const path = join(directory, action.label + '.png');
         writeFileSync(path, bytes);
-        frames.push({ label: action.label, path, sha256: digest(bytes), browserPresentation: presentations, state: captured.state });
+        frames.push({ label: action.label, path, sha256: digest(bytes), browserPresentation: presentations,
+          state: captured.state, ...(captureBrowserAudio ? {browserAudio: captured.browserAudio} : {}) });
       }
     }
     const trace = await page.evaluate(() => window.game.trace());
@@ -237,7 +242,7 @@ function comparePair(caseData, native, browser, directory, exactPixels, stateCom
       const { difference: ignoredImage, ...pixels } = difference;
       check.pixels = { ...pixels, status: pixels.exactRGBA ? 'pass' : 'fail', required: exactPixels };
       check.sourcePNGHash = digest(sourceBytes);
-      check.state = stateComparator(observations.get(label), candidate.state, index >= gameplayStart);
+      check.state = stateComparator(observations.get(label), candidate.state, index >= gameplayStart, candidate);
       assert.ok(Array.isArray(check.state) && check.state.length > 0, 'Every paired checkpoint requires typed state checks');
       check.status = (!exactPixels || pixels.exactRGBA) && check.state.every(field => field.status === 'pass') ? 'pass' : 'fail';
     } catch (error) { check.error = String(error.message); }
@@ -249,14 +254,14 @@ function comparePair(caseData, native, browser, directory, exactPixels, stateCom
 
 export async function runPairedGate({ output, selected, randomCount = 2, replaySeeds = [], replayCases = [], exactPixels = false, productionDirectory,
   nativeFrameTimeout = 60, originalObserver = 'tools/original/foundation-paired-observer.py',
-  stateComparator = scopedState, additionalSources = [], archiveBrowserEvidence = false }) {
+  stateComparator = scopedState, additionalSources = [], archiveBrowserEvidence = false, captureBrowserAudio = false }) {
   assert.ok(Number.isFinite(nativeFrameTimeout) && nativeFrameTimeout > 0 && nativeFrameTimeout <= 300,
     'Native frame timeout must be more than 0 and at most 300 host-wall seconds');
   mkdirSync(output, { recursive: true });
   let server, browser;
   const report = { schema: 1, status: 'starting', mode: 'fresh original process paired with immutable browser production artifact',
     nativeFrameTimeout,
-    originalObserver, archiveBrowserEvidence,
+    originalObserver, archiveBrowserEvidence, captureBrowserAudio,
     comparisons: { functional: 'Real input/phase/readback and source title, fade, player motion, pause/controller, HP, immunity, active tear/bomb counts',
       pixels: 'Strict full RGBA diagnostic; every difference remains a failure in its own pixel result',
       exactPixelsRequired: exactPixels, completeOriginalStateParity: false },
@@ -291,7 +296,7 @@ export async function runPairedGate({ output, selected, randomCount = 2, replayS
         // Remaining declared cases still run; failed capture evidence stays red.
         const captures = await Promise.allSettled([
           nativeCapture(caseData, join(directory, 'original'), nativeFrameTimeout, originalObserver),
-          browserCapture(browser, server, caseData, join(directory, 'browser'), archiveBrowserEvidence),
+          browserCapture(browser, server, caseData, join(directory, 'browser'), archiveBrowserEvidence, captureBrowserAudio),
         ]);
         native = captures[0].status === 'fulfilled' ? captures[0].value
           : {status: 'fail', error: String(captures[0].reason), directory: join(directory, 'original')};
