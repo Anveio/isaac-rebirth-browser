@@ -54,7 +54,13 @@ fn malformed(e: &mut Entropy) -> Vec<u8> {
             .expect("command");
             valid[..e.index(valid.len())].to_vec()
         }
-        6 => (0..e.range(1, 64)).map(|_| e.u32() as u8).collect(),
+        6 => {
+            // Arbitrary bytes can encode a valid command. Keep all drawn
+            // bytes, but prefix invalid UTF-8 so this arm is truly malformed.
+            let mut request = vec![0xff];
+            request.extend((0..e.range(1, 64)).map(|_| e.u32() as u8));
+            request
+        }
         _ => vec![0xff, 0xfe, b'{'],
     }
 }
