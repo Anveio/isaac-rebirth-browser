@@ -445,5 +445,21 @@ engine work in M1–M5 does not.
       - the "ISAAC VS GLUTTONY" streak and the boss HP bar (presentation);
       - Super Gluttony 49.1 needs lob projectiles 48d5c0;
       - laser render quads are approximated.
+- [x] Room shapes (coordinator priority 2): one generic admission gate
+  (`traversal::admitted_shape`) opens ordinary type-1 rooms in all four
+  authored shapes (13x7, 13x14, 26x7, 26x14). Geometry, eight door slots and
+  CameraStyle1 scrolling were already shape-generic, from the tall-room leaf.
+  - `entity-scenarios.py --shape WxH`, typeless specs, and the `shape` marker
+    and `roomFields` rows in `entity-compare.mjs` make every shape a spec file:
+    `tools/e2e/entities/room-26x7.mjs` and `room-26x14.mjs`.
+  - Verified: geometry, bounds and player motion match the original exactly
+    until a gameplay divergence.
+  - Open:
+    - the large-room backdrop is still the 1x1 assembly;
+    - interior camera scroll differs by up to about 3e-5 (the known float
+      gap);
+    - player-versus-rock corner sliding differs (filed);
+    - a runtime type-96 child appears in one 26x14 room;
+    - spawnConfig 5c5240 alternate-variant rolls (separate PR).
 - [ ] M10 stages
 - [ ] M11 characters
