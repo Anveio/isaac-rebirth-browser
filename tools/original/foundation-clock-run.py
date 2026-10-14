@@ -113,6 +113,7 @@ def main():
     parser.add_argument('--archive-evidence', action='store_true', help='Lossless gzip manifest plus committed native progress journal; public observations and clock unchanged')
     parser.add_argument('--gl-trace', type=Path, help='Optional documented graphics API observer to chain; no game instructions/state')
     parser.add_argument('--audio-trace', type=Path, help='Optional forwarding OpenAL API observer to chain; no game instructions/state')
+    parser.add_argument('--mt-trace', action='store_true', help='Chain the shared-MT draw observer; writes OUTPUT/mt-trace/trace-<pid>.bin')
     parser.add_argument('--sfx-volume', type=float, default=0, help='Owned public SFXVolume option, 0..1; admission still occurs when muted')
     parser.add_argument('--music-volume', type=float, default=0, help='Owned public MusicVolume option, 0..1')
     parser.add_argument('--trace-every-frame', action='store_true', help='Request graphics observer continuous draw/presentation tracing')
@@ -297,6 +298,14 @@ def main():
         trace.mkdir(exist_ok=True)
         env['LD_PRELOAD'] += ' ' + str(args.audio_trace.resolve())
         env['ISAAC_AUDIO_TRACE_DIR'] = str(trace)
+    if args.mt_trace:
+        trace = out / 'mt-trace'
+        trace.mkdir(exist_ok=True)
+        library = out / 'mt-trace.so'
+        subprocess.run(['cc', '-std=c11', '-Wall', '-Wextra', '-Werror', '-fPIC', '-shared',
+                        str(Path(__file__).with_name('foundation-mt-trace.c')), '-o', str(library), '-ldl'], check=True)
+        env['LD_PRELOAD'] += ' ' + str(library)
+        env['ISAAC_MT_TRACE_DIR'] = str(trace)
     observer = None
     if args.state_observer:
         spec = importlib.util.spec_from_file_location('original_reference_observer', args.state_observer.resolve())
