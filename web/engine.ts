@@ -22,6 +22,7 @@ export interface Tear {
 export interface ActorSprite {
   animation: string; frame: number; playing: boolean; speed: number; scale: {x: number; y: number};
   offset: {x: number; y: number}; flipX: boolean; flipY: boolean;
+  rotation: number; layerFlips: Record<string, [boolean, boolean]>;
   tint: [number, number, number, number]; offsets: [number, number, number];
 }
 export interface Familiar {
@@ -46,6 +47,7 @@ export interface SpriteEffect {
   renderOrderOffset: number; lifetimeDivisor: number; timeToLive: number; raw7f4: number; raw7f8: number;
   raw7d8: boolean; poopEffect?: PoopEffect;
   sprite: ActorSprite; fullUpdates: number;
+  bloodEffect?: {kind: "poof04" | "bloodGush"};
 }
 export interface Impact { id: number; x: number; y: number; age: number; }
 export interface ActorRef { kind: "player" | "familiar" | "tear" | "bomb" | "pickup" | "npc" | "projectile" | "effect"; id: number; }

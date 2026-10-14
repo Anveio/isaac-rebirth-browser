@@ -199,6 +199,8 @@ fn familiar_catalog(path: &Path, entities_xml: &str) -> String {
         (3, 56, "gfx/003.056_leech.anm2"),
         (1000, 7, "gfx/1000.007_blood splat.anm2"),
         (1000, 15, "gfx/1000.015_poof01.anm2"),
+        (1000, 17, "gfx/1000.017_poof04.anm2"),
+        (1000, 42, "gfx/1000.042_blood gush.anm2"),
         (1000, 49, "gfx/1000.049_heart.anm2"),
         (1000, 58, "gfx/1000.058_poop particle.anm2"),
         (1000, 43, "gfx/1000.043_poop explosion.anm2"),
@@ -479,6 +481,36 @@ fn main() {
             clip["FrameNum"].as_u64().unwrap()
         ));
         if name == "Death" {
+            let guide = clip["NullAnimations"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .find(|track| track["NullId"] == 0)
+                .expect("Monstro actual BloodGuide0 missing");
+            assert_eq!(guide["Visible"], true);
+            generated.push_str("pub static MONSTRO_DEATH_GUIDE: &[(f32,f32,f32,f32)] = &[\n");
+            let mut guide_frames = 0_u64;
+            for frame in guide["Frames"]
+                .as_array()
+                .expect("BloodGuide frames missing")
+            {
+                assert_eq!(
+                    frame["Interpolated"], false,
+                    "Current Death null frames are discrete"
+                );
+                let x = frame["XPosition"].as_f64().unwrap() as f32;
+                let y = frame["YPosition"].as_f64().unwrap() as f32;
+                // Packed raw scales were multiplied by100 only for ANM2 export.
+                let scale_x = (frame["XScale"].as_f64().unwrap() / 100.0) as f32;
+                let scale_y = (frame["YScale"].as_f64().unwrap() / 100.0) as f32;
+                let duration = frame["Delay"].as_u64().unwrap();
+                for _ in 0..duration {
+                    generated.push_str(&format!("({x:?},{y:?},{scale_x:?},{scale_y:?}),\n"));
+                }
+                guide_frames += duration;
+            }
+            assert_eq!(guide_frames, clip["FrameNum"].as_u64().unwrap());
+            generated.push_str("];\n");
             for trigger in clip["Triggers"]
                 .as_array()
                 .expect("Monstro Death triggers missing")

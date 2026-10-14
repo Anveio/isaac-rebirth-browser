@@ -1,0 +1,149 @@
+{
+  "schema": 1,
+  "status": "Source-supported partial BloodStart17/SFX72/42 producer/controller/renderer. Private native all-target Rust check/strictClippy pass atd28154f; no production/WASM or actual paired acceptance.",
+  "binarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "scope": "Ordinary fresh uncolored Monstro20/0/0. Native observations are never runtime inputs. Champion/status/transient ColorMod producers remain unimplemented.",
+  "functions": {
+    "0x5c9240": {
+      "fdeBytes": 10470,
+      "rawSha256": "851cd26e176cf6807037fa98fa3fee89c5a9e9e34fd9642fefce5d816c0810df",
+      "rawPath": ".cache/coordination/boss-effects-next/function-5c9240.bin"
+    },
+    "0x45aa70": {
+      "fdeBytes": 47481,
+      "rawSha256": "ffc5e75affca431315980d89d135e1c9a95972465bdb29f4dd916bd5f91fc950",
+      "rawPath": ".cache/coordination/boss-effects-next/function-45aa70.bin"
+    },
+    "0x41e570": {
+      "fdeBytes": 16608,
+      "rawSha256": "f85fabff465dc48c414546ee37d9a5b975f9578a63e235dc676d4310306844be",
+      "rawPath": ".cache/coordination/boss-effects-next/function-41e570.bin"
+    },
+    "0x454df0": {
+      "fdeBytes": 2192,
+      "rawSha256": "5a926d0b748f6abd6599d51d5dca746a0fd5ff4cd1a2340833df6bcd4857e205",
+      "rawPath": ".cache/coordination/boss-effects-next/function-454df0.bin"
+    },
+    "0x4589f0": {
+      "fdeBytes": 125,
+      "rawSha256": "860f2e68414cb0caad2c206a6df337c06311a62a141e2cfff61edc076c1bbbd0",
+      "rawPath": ".cache/coordination/boss-effects-next/function-4589f0.bin"
+    },
+    "0x458780": {
+      "fdeBytes": 544,
+      "rawSha256": "5ba93e07153f0be9527aa2c38ec3218fb32dae956e593a3ba39bd130ecf1ec89",
+      "rawPath": ".cache/coordination/boss-effects-next/function-458780.bin"
+    },
+    "0x4586c0": {
+      "fdeBytes": 150,
+      "rawSha256": "4beebeb7d057342f54fba5b6f95c651a26f5bb5d4fb24fcd7da275d9e4cf9d2f",
+      "rawPath": ".cache/coordination/boss-effects-next/function-4586c0.bin"
+    },
+    "0x441c80": {
+      "fdeBytes": 713,
+      "rawSha256": "fdb3091280e32986d66c18d256250eb01b68ea9b03f6a60e0863252b35d545ba",
+      "rawPath": ".cache/coordination/boss-effects-next/function-441c80.bin"
+    },
+    "0x550a40": {
+      "fdeBytes": 225,
+      "rawSha256": "d383eb855e6c18e25704875091b29c8bf1bdd8600a66ed0a4cb8a9b90d94eeff",
+      "rawPath": ".cache/coordination/boss-effects-next/function-550a40.bin"
+    },
+    "0x447fc0": {
+      "fdeBytes": 121,
+      "rawSha256": "8d72105ecb29e5db988e512138b24c86ca9f015f0e9130f8279668ae1ae2f6bf",
+      "rawPath": ".cache/coordination/boss-effects-next/function-447fc0.bin"
+    },
+    "0x458a70": {
+      "fdeBytes": 6405,
+      "rawSha256": "be2ca9ea49b61472d00640d3a1c587d10df08116f626b23abc9f922b170e0569"
+    },
+    "0x410810": {
+      "fdeBytes": 80,
+      "rawSha256": "405f8608d8a8cf59b31009d0bac553dd7fa20cca5344f49011daa91a64becb39"
+    },
+    "0x47eb80": {
+      "fdeBytes": 218,
+      "rawSha256": "6f12ee17247810720997d0e48707ab6af88c66eb73deef12f575f88e4c31f0ad"
+    },
+    "0x448040": {
+      "fdeBytes": 212,
+      "rawSha256": "17d031c2b0d52ceaf489fac50292560cfeec1dcf315ab2bb13bf1e5cb34dbace"
+    },
+    "0x4524f0": {
+      "fdeBytes": 513,
+      "rawSha256": "e8f40a437d9275b5adbe97c6a3f2fad30443a5a12f3ff673b8fc74f2e33beabe"
+    }
+  },
+  "callerFunction": {
+    "address": "0x4f98e0",
+    "fdeBytes": 14621,
+    "rawPath": "/workspace/isaac-worktrees/e2e-ci/.cache/coordination/boss-effects-research/function-4f98e0.bin",
+    "rawSha256": "e4c38ce935a4ee7e5791e7b5974fcfbf5c24e6e83afd3ee99b3ed1765d46c441",
+    "dumpPath": "/workspace/isaac-worktrees/e2e-ci/.cache/coordination/boss-effects-research/function-4f98e0.txt",
+    "dumpSha256": "52b58d13e1846559cbb9a979f65a3a30bbcd6acb1add935854d000860725c890"
+  },
+  "callerSlices": [
+    {
+      "start": "0x4fa69b",
+      "endExclusive": "0x4fa83e",
+      "path": ".cache/coordination/boss-effects-research/monstro-death-caller-4fa69b.txt",
+      "sha256": "3aa07bf43494f21737b60f17c05cce76771d420f719e3ca31cc26d686f6230ef"
+    },
+    {
+      "start": "0x4fba4e",
+      "endExclusive": "0x4fbc54",
+      "path": ".cache/coordination/boss-effects-research/monstro-death-caller-4fba4e.txt",
+      "sha256": "0a2e284947c7c4dafdb12e632b9d54c70571461f6780fe8f8c70ce1ca026168c"
+    },
+    {
+      "start": "0x4fc40c",
+      "endExclusive": "0x4fc646",
+      "path": ".cache/coordination/boss-effects-research/monstro-death-caller-4fc40c.txt",
+      "sha256": "9fb30e70f1d396105485e575e4380aecfd02fc3e70cc90e3a8a99c633e2052b2"
+    }
+  ],
+  "sourceLaw": {
+    "emissionOrder": "BloodStart-withoutStop/Explosion interval: realBound2 at4fba53. Zero branch4fc40c consumesraw->factory17 then U/Direction spriteoffset, Bound4 globalrotation, Bound2/Bound2 signedscale, U scale, inheritedcolor, U sourceSFX72volume. Rejoins4fba60, so realBound5 executes after BOTHBound2 outcomes. Bound5zero chooses real42 only forNPC20/43. No skip/ordinalmodel.",
+    "effect17Birth": "FactoryNULLcaller: cached0/0, linkedNULL; NPCphysicalP/zeroV. Sprite offset+2bc is BloodGuide vector + ((Direction*U) componentwise BloodGuide+10 vector)*4. No injected sourcevalue. Bound4*90 writesglobalSprite.rotation2cc; twoBound2 form signedscalexy then U multiplier1-.4U. Actual inheritedcolor via virtual58; no explicit immediateUpdate in this branch.",
+    "effect42Birth": "FactoryNULLcaller cached0/0; actual447fc0 linksNPC afterbirth. Same physicalP/zeroV and offset law; raw7f8=50, TTL7f0=20/raw7f4=20, thenBound2 conditionallyforcesglobalflipXtrue, Uscale1-.4U, inheritedcolor. No explicit immediateUpdate.",
+    "controller17": "Shares exactfull45ac60 with2, but identity/lifecycle differ: firstcallbackrealBound2/Bound2layer0flips+Bound3+6 target; subtype0 at target ORflags8 WITHOUT2-specific20000. Backgroundpaint thereforecanRemove17onthatframe. Genericfinishedclip path alsoRemove; no aliasing17to2."
+  },
+  "nullFrame": {
+    "reader": "Full41e570 FDE16608, rawf85fabff465dc48c414546ee37d9a5b975f9578a63e235dc676d4310306844be",
+    "layout": "NullAnimations420e47;84-byte frames. XPosition4210a2 stores+0;Y421110 stores+4;XScale4212fa stores+10 afterf32/100;YScale42133e stores+14 afterf32/100. GetNull4107f0/410560/4104c0 returns current selected frame.",
+    "packedScale": "Pinned packed-cache fields are rawf32. extract-animations.py multiplies by100 only for percentage export in Pythonf64; build recovers rawf32 using(exportPercent/100) asf32. No secondXMLdecimal parse.",
+    "deathFrames": 78,
+    "guideNullId": 0,
+    "keyframes": 42,
+    "noninterpolated": true,
+    "expandedFrames": 78
+  },
+  "lifecycle": {
+    "factory": "ActualNULLcaller caches0/0,linkedNULL,seededRng30,physicalP/zeroV. Native7d4=0,TTL7f0=-1,raw7f4=1. True scheduler birth fence; no immediateUpdate.",
+    "controller17": "AfterBase, initialB2/B2 are layer0 flips thenB3+6. Target subtype0flags8 without2-specific20000; samefull backgroundpaint/Remove. Finishedclip separatelyRemove. Fastgenericmotion has noANM/shareddraws.",
+    "controller42": "AfterBase/finishedcurrent check, existingdead31f causesRemove31e0. Missing/deadparent marks31f only then still executesTTLtail. TTLzero marksdead only; nextfullRemove.",
+    "pool": "Actualactive31e/dead31f remain distinct. Manager retirement/render useactive. Background17 copiesactualvariant/Sprite thenRemove. raw7f8 affects sort rather thanvisibleheight.",
+    "clipScope": "42 defaultIdleloops. Externalclip replacement reaching finishedcurrentLoop remains explicitunsupported.",
+    "render": "AuthoredPNG/root/layer frames plusglobal signedscale/rotation/layerflips/offset/color. Complete native draw-order/background-return/RGBA parity is unaccepted.",
+    "parentUninit": "Normal category+38 inactive scan455248\u2192455428\u2192Manager45543e invokes actual NPCvirtual68=47eb80, which calls448040 at47eba0; after actor/background callbacks and before4545d0 contacts.448052 clears ownParent via447fc0(NULL);448080..96 iterates parent registered child slots and448087 writes *slot=0. New42 link is cleared at that supported pre-contact boundary when its parentNPC retires; a stale reference remains a required gate failure. No destructor shortcut or dead31f-only cleanup."
+  },
+  "resources": {
+    "references/isaac/rebirth/resources/entities2.xml": "76408c1612ce7281d131c460cf3450eeae6bc602bc539805d53d76406432a936",
+    "references/isaac/rebirth/resources/sounds.xml": "8e4a4ce10de0835c86df68006b156a62ce3b9d2a9be40ee8b9b541a30b42e30d",
+    "web/npc-data.json": "020a1bc26896042136616f09f1d9f674fd2436cfb9b0d53789df76ec9f69575b",
+    "web/familiar-data.json": "903d4226c3656c14ba16e3888cb16a8ecf4cc156a9f77e265a81d856caca6efe",
+    "tools/foundation/extract-animations.py": "c62ad90e54177bcd8586ade5da1c0327d1253531e725745f601181b660ceb4e1",
+    "references/isaac/rebirth/resources/gfx/effects/effect_012_poof04.png": "5817b08426544b8184a6d3f2a556439e35e5fa5ab678088d011856893de2b8f9",
+    "references/isaac/rebirth/resources/gfx/effects/effect_bloodgush.png": "07d58f7c414aa21471f26a1279b9af02eb6c330785988d6fb631ab7a8bb1d2ec"
+  },
+  "requiredProof": "Actual original plus productionWASM public-input cohort must observe bossdamage/Death,real17and42,actualmatchingseeds/body/controller,SFX72 andfull/fast/cleanup. Contrived978and retainedrecordedOSBLL identities remainmandatory, no reroll or source-fed runtime values. Unreached producer/body is requiredred.",
+  "unaccepted": [
+    "Explosion2/77/category5/final7/final-heart anddelayedclear/Grid17",
+    "NativeMonstro/config/color/guide/body proof",
+    "Complete render ordering/backgroundreturn/RGBA",
+    "Remaining shared run/ambient RNG producers; no padding",
+    "Existing failed public-game histories",
+    "Fresh actual parent Uninit/body witness and matched42 successor; the source-supported callback has no new live acceptance."
+  ]
+}

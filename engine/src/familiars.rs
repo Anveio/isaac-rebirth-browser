@@ -12,6 +12,9 @@ use serde::{Deserialize, Serialize};
 use std::sync::OnceLock;
 
 const ZERO: WorldVector = WorldVector { x: 0.0, y: 0.0 };
+fn blood_variant() -> u32 {
+    7
+}
 fn white() -> [f32; 4] {
     [1.0; 4]
 }
@@ -55,6 +58,10 @@ pub struct Sprite {
     pub speed: f32,
     pub scale: WorldVector,
     pub offset: WorldVector,
+    #[serde(default)]
+    pub rotation: f32,
+    #[serde(default)]
+    pub layer_flips: std::collections::BTreeMap<u32, [bool; 2]>,
     pub flip_x: bool,
     #[serde(default)]
     pub flip_y: bool,
@@ -73,6 +80,8 @@ impl Sprite {
             speed: 1.0,
             scale: WorldVector { x: 1.0, y: 1.0 },
             offset: ZERO,
+            rotation: 0.0,
+            layer_flips: std::collections::BTreeMap::new(),
             flip_x: false,
             flip_y: false,
             tint: white(),
@@ -235,6 +244,8 @@ pub struct SpriteEffect {
     pub full_updates: u32,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub poop_effect: Option<crate::poop_effects::Controller>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub blood_effect: Option<crate::blood_effects::Controller>,
 }
 
 impl SpriteEffect {
@@ -393,6 +404,7 @@ impl NpcEffectAdmission<'_> {
             sprite,
             full_updates: 0,
             poop_effect: None,
+            blood_effect: None,
         });
         self.scheduler.admit(ActorRef {
             kind: ActorKind::Effect,
@@ -403,6 +415,13 @@ impl NpcEffectAdmission<'_> {
 }
 
 pub fn advance_effect(state: &mut State, phase: Phase, id: u32) -> Result<(), String> {
+    if state
+        .sprite_effects
+        .iter()
+        .any(|effect| effect.id == id && effect.blood_effect.is_some())
+    {
+        return crate::blood_effects::advance(state, phase, id);
+    }
     if let Some(effect) = state
         .sprite_effects
         .iter_mut()
@@ -641,6 +660,7 @@ pub struct BackgroundStain {
     pub spawn_seed: u32,
     pub birth_game_update: u32,
     pub position: WorldVector,
+    #[serde(default = "blood_variant")]
     pub variant: u32,
     pub render_offset: WorldVector,
     pub layer_rotation: Option<f32>,
@@ -728,6 +748,7 @@ impl NpcEffectAdmission<'_> {
             sprite,
             full_updates: 0,
             poop_effect: None,
+            blood_effect: None,
         });
         // Room5c6940 assigns the actual sequence first; Manager4524f0 then routes
         // flags8 to its separate background pool rather than the ordinary array.
@@ -832,13 +853,11 @@ pub fn paint_background_effects(state: &mut State) -> Result<(), String> {
         .iter()
         .enumerate()
         .filter(|(_, effect)| {
-            matches!(effect.variant, 7 | 43 | 58)
-                && effect.flags & 8 != 0
-                && effect.active
-                && !effect.removed
+            matches!(effect.variant, 7 | 17 | 43 | 58) && effect.flags & 8 != 0 && effect.active
         })
         .map(|(index, effect)| {
-            let key = ((100.0_f32 * effect.position.y + 10030.0) + 0.5).floor() as u32;
+            let key =
+                (((effect.position.y + effect.raw_7f8) * 100.0 + 10030.0) + 0.5).floor() as u32;
             (
                 index,
                 key.wrapping_add(effect.render_order_offset as u32),

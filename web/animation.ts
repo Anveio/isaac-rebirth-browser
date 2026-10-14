@@ -70,6 +70,8 @@ const urls = import.meta.glob([
   "../references/isaac/rebirth/resources/gfx/monsters/rebirth/monster_244_roundworm.png",
   "../references/isaac/rebirth/resources/gfx/familiar/familiar_270_leech.png",
   "../references/isaac/rebirth/resources/gfx/effects/effect_009_poof01*.png",
+  "../references/isaac/rebirth/resources/gfx/effects/effect_012_poof04.png",
+  "../references/isaac/rebirth/resources/gfx/effects/effect_bloodgush.png",
   "../references/isaac/rebirth/resources/gfx/effects/effect_006_hearteffect.png",
   "../references/isaac/rebirth/resources/gfx/shadow.png",
   "../references/isaac/rebirth/resources/gfx/tears.png",
