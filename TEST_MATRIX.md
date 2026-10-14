@@ -244,7 +244,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | `actors` | actor admission order and room identities against a list model | 4 | 2 | 0 |
 | `floor` | Basement generation structure, retries and per-descriptor room admission | 18 | 4 | 0 |
 | `grid` | grid queries and ground-collision solvers on generated rooms | 14 | 3 | 0 |
-| `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 56 | 42 | 2 |
+| `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 56 | 44 | 2 |
 | `abi` | the exported C ABI transport the browser bridge drives | 11 | 1 | 0 |
 
 <details><summary>Every declared DST property</summary>
@@ -409,6 +409,8 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Always | game: fire cooldown and head timers stay in range | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: entity identities are unique and below their allocators | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: room NPC identities are unique | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Sometimes | game: the player is in a miniboss room | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Sometimes | game: a laser is live | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: the actor schedule names exactly the live player, tears, bombs and room actors | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: room bookkeeping indexes the run's floor | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: room transitions follow floor neighbor links | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
