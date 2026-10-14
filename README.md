@@ -51,14 +51,14 @@ checkpoint also retains a complete pixel comparison and difference image;
 pixel mismatches stay reported as failures without blocking the default
 functional gate. `verify:foundation` remains a strict pixel diagnostic.
 
-CI executes both games live using public inputs, fresh original profiles and a
-copied production build. The local suite runner executes every registered live gate in sequence and
-reports failure after every suite has run. CI discovers the same registry and
-runs each suite in a separate job with `fail-fast: false`, so a failed suite
-cannot cancel the other system checks. Recorded random tapes can be replayed unchanged.
-Checked-in unit suites and component-only harnesses have been removed;
-validators stay in runtime/e2e tools, while temporary probes belong in ignored
-research cache. See [the live-game workflow](.github/workflows/live-games.yml).
+The live suites execute both games using public inputs, fresh original
+profiles and a copied production build. The local suite runner executes every
+registered live gate and reports failure after every suite has run. Recorded
+random tapes can be replayed unchanged. There is deliberately no CI: every
+agent runs `npm run check:build` and the live suites its change touches
+before merging (see [AGENTS.md](AGENTS.md)). Checked-in unit suites and
+component-only harnesses have been removed; validators stay in runtime/e2e
+tools, while temporary probes belong in ignored research cache.
 
 Ordinary play retains no command/state history. To capture diagnostic evidence,
 pause automatic stepping and call `game.reset(seed, { trace: true })` in the

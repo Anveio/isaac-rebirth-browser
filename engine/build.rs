@@ -199,7 +199,11 @@ fn familiar_catalog(path: &Path, entities_xml: &str) -> String {
         (3, 56, "gfx/003.056_leech.anm2"),
         (1000, 7, "gfx/1000.007_blood splat.anm2"),
         (1000, 15, "gfx/1000.015_poof01.anm2"),
+        (1000, 17, "gfx/1000.017_poof04.anm2"),
+        (1000, 42, "gfx/1000.042_blood gush.anm2"),
         (1000, 49, "gfx/1000.049_heart.anm2"),
+        (1000, 58, "gfx/1000.058_poop particle.anm2"),
+        (1000, 43, "gfx/1000.043_poop explosion.anm2"),
     ] {
         let catalogue = &actors[actor];
         let default = catalogue["DefaultAnimation"]
@@ -452,6 +456,20 @@ fn main() {
         "pub const LEVEL2_FLY_IDLE_FRAMES: u32 = {};\n",
         level2["FrameNum"].as_u64().unwrap()
     ));
+    for clip in npc_clips["gfx/216.000_dip.anm2"]["Animations"]
+        .as_array()
+        .expect("Dip clips missing")
+    {
+        let name = clip["Name"].as_str().unwrap();
+        assert!(matches!(name, "Idle" | "Move"));
+        assert_eq!(clip["Loop"], true);
+        assert_eq!(clip["Triggers"].as_array().unwrap().len(), 0);
+        generated.push_str(&format!(
+            "pub const DIP_{}_FRAMES: u32 = {};\n",
+            name.to_uppercase(),
+            clip["FrameNum"].as_u64().unwrap()
+        ));
+    }
     for clip in npc_clips["gfx/020.000_monstro.anm2"]["Animations"]
         .as_array()
         .expect("Monstro clips missing")
@@ -463,6 +481,36 @@ fn main() {
             clip["FrameNum"].as_u64().unwrap()
         ));
         if name == "Death" {
+            let guide = clip["NullAnimations"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .find(|track| track["NullId"] == 0)
+                .expect("Monstro actual BloodGuide0 missing");
+            assert_eq!(guide["Visible"], true);
+            generated.push_str("pub static MONSTRO_DEATH_GUIDE: &[(f32,f32,f32,f32)] = &[\n");
+            let mut guide_frames = 0_u64;
+            for frame in guide["Frames"]
+                .as_array()
+                .expect("BloodGuide frames missing")
+            {
+                assert_eq!(
+                    frame["Interpolated"], false,
+                    "Current Death null frames are discrete"
+                );
+                let x = frame["XPosition"].as_f64().unwrap() as f32;
+                let y = frame["YPosition"].as_f64().unwrap() as f32;
+                // Packed raw scales were multiplied by100 only for ANM2 export.
+                let scale_x = (frame["XScale"].as_f64().unwrap() / 100.0) as f32;
+                let scale_y = (frame["YScale"].as_f64().unwrap() / 100.0) as f32;
+                let duration = frame["Delay"].as_u64().unwrap();
+                for _ in 0..duration {
+                    generated.push_str(&format!("({x:?},{y:?},{scale_x:?},{scale_y:?}),\n"));
+                }
+                guide_frames += duration;
+            }
+            assert_eq!(guide_frames, clip["FrameNum"].as_u64().unwrap());
+            generated.push_str("];\n");
             for trigger in clip["Triggers"]
                 .as_array()
                 .expect("Monstro Death triggers missing")
@@ -535,7 +583,7 @@ fn main() {
         "pub const EMBER_IDLE_FRAMES: u32 = {};\n",
         ember["FrameNum"].as_u64().unwrap()
     ));
-    for kind in [9, 13, 18, 20, 33, 214, 244] {
+    for kind in [9, 13, 18, 20, 33, 214, 217, 244] {
         let tag = xml
             .split("<entity ")
             .find(|tag| {
@@ -565,11 +613,34 @@ fn main() {
             generated.push_str(&format!(
                 "pub const NPC_{kind}_GRID_CLASS: u32 = {class};\n"
             ));
-            if matches!(kind, 20 | 214 | 244) {
+            if matches!(kind, 20 | 214 | 217 | 244) {
                 generated.push_str(&format!(
                     "pub const NPC_{kind}_GRID_POINTS: u16 = {points};\n"
                 ));
             }
+        }
+        if kind == 217 {
+            generated.push_str(&format!(
+                "pub const NPC_217_STAGEHP: f32 = {:?}_f32;\n",
+                entity_number(&xml, 217, 0, "stageHP")
+            ));
+            let gibs = tag.split("<gibs ").nth(1).expect("Dip authored gibs");
+            let amount: u32 = attribute(gibs, "amount").unwrap().parse().unwrap();
+            let mut flags = 0;
+            for (name, bit) in [
+                ("blood", 1),
+                ("bone", 2),
+                ("gut", 4),
+                ("eye", 8),
+                ("large", 16),
+                ("poop", 32),
+            ] {
+                if attribute(gibs, name) == Some("1") {
+                    flags |= bit;
+                }
+            }
+            assert_eq!(flags, 32, "ordinary Dip has only real poop gibs");
+            generated.push_str(&format!("pub const NPC_217_GIB_AMOUNT: u32 = {amount};\npub const NPC_217_GIB_FLAGS: u32 = {flags};\n"));
         }
         for field in [
             "baseHP",

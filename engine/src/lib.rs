@@ -10,17 +10,20 @@ use std::collections::{BTreeMap, BTreeSet};
 pub mod active_items;
 pub mod actors;
 pub mod audio;
+pub mod blood_effects;
 pub mod bombs;
 pub mod camera;
 pub mod chests;
 pub mod combat;
 mod content;
+pub mod dips;
 mod doors;
 mod effects;
 pub mod enemy_projectiles;
 pub mod familiars;
 pub mod fireplaces;
 pub mod floor;
+pub mod gib_counts;
 pub mod grid;
 mod grid_hazards;
 pub mod grid_records;
@@ -45,6 +48,7 @@ pub mod player_animation;
 pub mod player_death;
 pub mod player_items;
 pub mod player_stats;
+pub mod poop_effects;
 pub mod projectiles;
 pub mod public_actions;
 pub mod rock_blast;
@@ -1242,7 +1246,10 @@ impl Game {
             .map_or(1, |descriptor| descriptor.template.room_type);
         for selector in selectors {
             let id = u32::try_from(npcs.len()).map_err(|_| "NPC identity exhausted")?;
-            if let Some(mut npc) = npcs::Npc::from_selector(id, selector)? {
+            if let Some(mut npc) = npcs::Npc::from_selector(id, selector, self.state.stage)? {
+                if let Some(dip) = &mut npc.dip {
+                    dip.birth_game_update = self.state.game_update_count;
+                }
                 if let Some(fly) = &mut npc.level2_fly {
                     fly.birth_game_update = self.state.game_update_count;
                 }
@@ -1634,6 +1641,7 @@ impl Game {
                     }
                     self.state.room.manager_counts.finish_full(counted);
                     familiars::paint_background_effects(&mut self.state)?;
+                    blood_effects::clear_retired_links(&mut self.state);
                     pickups::full_grid_contacts(&mut self.state)?;
                     chests::full_grid_contacts(&mut self.state)?;
                     npcs::post_contact_grid(&mut self.state)?;
@@ -1724,6 +1732,7 @@ impl Game {
             // The independent render array paints flags8 at its current count,
             // including births from the admission-fenced actor callbacks.
             familiars::paint_background_effects(&mut self.state)?;
+            blood_effects::clear_retired_links(&mut self.state);
             let pickup_contacts = pickups::contact_candidates(&self.state)?;
             npcs::player_contacts(&mut self.state)?;
             npcs::nonplayer_contacts(&mut self.state)?;
@@ -1765,6 +1774,25 @@ impl Game {
         }
         if phase == phase::Phase::Update {
             familiars::grid_contacts(&mut self.state)?;
+            if self
+                .state
+                .sprite_effects
+                .iter()
+                .any(|effect| effect.poop_effect.is_some() && effect.active && !effect.removed)
+            {
+                let grid = grid::Grid::new(
+                    self.state
+                        .room
+                        .grid
+                        .clone()
+                        .ok_or("poop effect requires actual grid")?,
+                )?;
+                for effect in &mut self.state.sprite_effects {
+                    if effect.poop_effect.is_some() {
+                        poop_effects::full_grid_contact(effect, &grid)?;
+                    }
+                }
+            }
         }
         for impact in &mut self.state.impacts {
             impact.age += 1;
@@ -1789,7 +1817,8 @@ impl Game {
         self.state.room.pickups.retain(|pickup| !pickup.removed);
         self.state.room.npcs.retain(|npc| !npc.removed);
         self.state.familiars.retain(|familiar| !familiar.removed);
-        self.state.sprite_effects.retain(|effect| !effect.removed);
+        //454df0 retires actual31e inactive actors;31f alone is not removal.
+        self.state.sprite_effects.retain(|effect| effect.active);
         self.state
             .enemy_projectiles
             .retain(|projectile| !projectile.removed);
@@ -1991,6 +2020,30 @@ impl Game {
         let Some(index) = self.state.room.npcs.iter().position(|npc| npc.id == id) else {
             return Ok(());
         };
+        if self.state.room.npcs[index].kind == 217 {
+            return dips::advance(
+                &mut self.state.room.npcs[index],
+                phase,
+                &mut self.state.boot_lifecycle.shared,
+                &mut dips::World {
+                    player,
+                    grid: &grid,
+                    audio: &mut self.state.audio,
+                    system_counter: self.state.system_clock.system_counter.wrapping_sub(1),
+                    player_items: self
+                        .state
+                        .player_items
+                        .as_ref()
+                        .ok_or("Dip death requires actual Player inventory")?,
+                    effects: familiars::NpcEffectAdmission {
+                        game_update_count: self.state.game_update_count,
+                        next_effect: &mut self.state.next_effect,
+                        effects: &mut self.state.sprite_effects,
+                        scheduler: &mut self.state.actor_scheduler,
+                    },
+                },
+            );
+        }
         if self.state.room.npcs[index].kind == 214 {
             let produced = level2_flies::advance(
                 &mut self.state.room.npcs[index],
@@ -2002,7 +2055,7 @@ impl Game {
                     grid: &grid,
                     audio: &mut self.state.audio,
                     system_counter: self.state.system_clock.system_counter.wrapping_sub(1),
-                    poofs: familiars::PoofAdmission {
+                    poofs: familiars::NpcEffectAdmission {
                         game_update_count: self.state.game_update_count,
                         next_effect: &mut self.state.next_effect,
                         effects: &mut self.state.sprite_effects,
@@ -2078,7 +2131,7 @@ impl Game {
                     grid: &grid,
                     audio: &mut self.state.audio,
                     system_counter: self.state.system_clock.system_counter.wrapping_sub(1),
-                    poofs: familiars::PoofAdmission {
+                    poofs: familiars::NpcEffectAdmission {
                         game_update_count: self.state.game_update_count,
                         next_effect: &mut self.state.next_effect,
                         effects: &mut self.state.sprite_effects,

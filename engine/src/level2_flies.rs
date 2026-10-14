@@ -28,7 +28,7 @@ pub(crate) struct World<'a> {
     pub grid: &'a Grid,
     pub audio: &'a mut AudioState,
     pub system_counter: u32,
-    pub poofs: crate::familiars::PoofAdmission<'a>,
+    pub poofs: crate::familiars::NpcEffectAdmission<'a>,
 }
 #[derive(Default)]
 pub struct Produced {
@@ -83,6 +83,7 @@ pub fn from_selector(id: u32, selector: &SpawnSelector) -> Result<Option<Npc>, S
         keeper: None,
         fireplace: None,
         monstro: None,
+        dip: None,
         level2_fly: Some(Level2FlyState {
             entity_flags: 4,
             birth_game_update: 0,

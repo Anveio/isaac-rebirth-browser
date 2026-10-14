@@ -101,6 +101,7 @@ function replayCommand(suite, directory) {
     const failed = cases.filter(item => item.status !== 'pass' && item.directory).map(item => relative(ROOT, join(item.directory, 'case.json')));
     return failed.length ? `npm run test:e2e -- ${suite.id} --replay-cases ${failed.join(',')}` : undefined;
   }
+  if (suite.replay === false) return undefined;
   return existsSync(join(directory, 'scenarios.json'))
     ? `npm run test:e2e -- ${suite.id} ${suite.replay ?? '--scenarios'} ${relative(ROOT, join(directory, 'scenarios.json'))}` : undefined;
 }

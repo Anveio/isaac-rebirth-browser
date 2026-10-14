@@ -15,6 +15,9 @@ use serde::{Deserialize, Serialize};
 use std::sync::OnceLock;
 
 const ZERO: WorldVector = WorldVector { x: 0.0, y: 0.0 };
+fn white() -> [f32; 4] {
+    [1.0; 4]
+}
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -23,6 +26,11 @@ pub struct MonstroState {
     pub choice: u32,
     pub entity_flags: u32,
     pub flip_x: bool,
+    /// Actual fresh ColorMod42f450; later status/champion writers are pending.
+    #[serde(default = "white")]
+    pub inherited_tint: [f32; 4],
+    #[serde(default)]
+    pub inherited_offsets: [f32; 3],
     pub birth_game_update: u32,
     pub projectile_birth_count: u32,
     pub last_projectile_batch: Option<ProjectileBatch>,
@@ -45,7 +53,7 @@ pub(crate) struct World<'a> {
     pub grid: &'a Grid,
     pub audio: &'a mut AudioState,
     pub system_counter: u32,
-    pub poofs: crate::familiars::PoofAdmission<'a>,
+    pub poofs: crate::familiars::NpcEffectAdmission<'a>,
 }
 
 pub fn from_selector(id: u32, selector: &SpawnSelector) -> Result<Option<Npc>, String> {
@@ -97,11 +105,14 @@ pub fn from_selector(id: u32, selector: &SpawnSelector) -> Result<Option<Npc>, S
         keeper: None,
         fireplace: None,
         level2_fly: None,
+        dip: None,
         monstro: Some(MonstroState {
             state_frame: 0,
             choice: 0,
             entity_flags: 4,
             flip_x: false,
+            inherited_tint: white(),
+            inherited_offsets: [0.0; 3],
             birth_game_update: 0,
             projectile_birth_count: 0,
             last_projectile_batch: None,
@@ -446,6 +457,41 @@ pub(crate) fn advance(
         }
         if npc.animation_frame == content::MONSTRO_EXPLOSION_FRAME {
             state.death_explosion = true;
+        }
+        if state.death_blood_start && !state.death_explosion {
+            let (x, y, scale_x, scale_y) = *content::MONSTRO_DEATH_GUIDE
+                .get(npc.animation_frame as usize)
+                .ok_or("Monstro current authored BloodGuide frame absent")?;
+            world.poofs.blood_start(
+                crate::blood_effects::Emission {
+                    parent: crate::familiars::Parent {
+                        actor: crate::actors::ActorRef {
+                            kind: crate::actors::ActorKind::Npc,
+                            id: npc.id,
+                        },
+                        entity_type: npc.kind,
+                        variant: npc.variant,
+                    },
+                    position: npc.position,
+                    guide: crate::blood_effects::Guide {
+                        position: WorldVector { x, y },
+                        scale: WorldVector {
+                            x: scale_x,
+                            y: scale_y,
+                        },
+                    },
+                    tint: state.inherited_tint,
+                    offsets: state.inherited_offsets,
+                },
+                random,
+                world.audio,
+                world.system_counter,
+            )?;
+        }
+        if state.death_explosion {
+            return Err(
+                "Monstro actual Explosion2/77/category5 death callback is not admitted".into(),
+            );
         }
         if !npc.animation_playing {
             // Source4f2d10 invokes final-boss reward/heart callback before Remove.
