@@ -230,12 +230,21 @@ fn admit(state: &mut State, admission: Admission) -> Result<u32, String> {
         configured_friction: config.friction,
         current_friction: config.friction,
         collision_radius: config.collision_radius,
-        collision_mass: config.collision_mass,
+        // Effect.Init 458dd8 gives 21/33/68 mass 1 and entity class 4.
+        collision_mass: if matches!(variant, 21 | 33 | 68) {
+            1.0
+        } else {
+            config.collision_mass
+        },
         collision_damage: 22.0,
         hp: config.base_hp,
         max_hp: config.base_hp,
         grid_collision_class: 0,
-        entity_collision_class: 0,
+        entity_collision_class: if matches!(variant, 21 | 33 | 68) {
+            4
+        } else {
+            0
+        },
         flags: 0,
         visible: true,
         active: true,
@@ -468,6 +477,27 @@ fn update(state: &mut State, id: u32, counter: u32) -> Result<(), String> {
 }
 
 /// Remove441bb0 clears active and marks the actor dead.
+/// Game554490's effect branch 554e40: live Tiny Bugs and Tiny Flies in the
+/// blast query (critter radius 0) whose line passes the 5545d1 check are
+/// marked dead without any draw. Wall Bugs fall through to the no-op effect
+/// TakeDamage.
+pub(crate) fn blast(
+    state: &mut State,
+    center: WorldVector,
+    radius: f32,
+    clear: &dyn Fn(WorldVector) -> bool,
+) {
+    for effect in &mut state.sprite_effects {
+        if effect.removed || !matches!(effect.variant, 21 | 33) || effect.critter.is_none() {
+            continue;
+        }
+        let (dx, dy) = (effect.position.x - center.x, effect.position.y - center.y);
+        if dx * dx + dy * dy < radius * radius && clear(effect.position) {
+            remove(effect);
+        }
+    }
+}
+
 fn remove(effect: &mut SpriteEffect) {
     effect.active = false;
     effect.removed = true;
