@@ -277,7 +277,7 @@ impl Room {
                 side: side.into(),
                 state: if secret {
                     "Hidden"
-                } else if matches!(destination.template.room_type, 2 | 12) {
+                } else if matches!(destination.template.room_type, 2 | 12 | 21) {
                     "KeyClosed"
                 } else {
                     "Opened"
