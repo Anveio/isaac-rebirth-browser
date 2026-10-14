@@ -22,6 +22,8 @@ pub struct MonstroState {
     pub state_frame: u32,
     pub choice: u32,
     pub entity_flags: u32,
+    /// Actual Entity+7c0 RNG30, initialized by Entity.Init without output.
+    pub actor_rng: crate::items::Rng,
     pub flip_x: bool,
     pub birth_game_update: u32,
     pub projectile_birth_count: u32,
@@ -29,7 +31,6 @@ pub struct MonstroState {
     /// Actual source event boundaries; their effect actors remain unadmitted.
     pub death_blood_start: bool,
     pub death_explosion: bool,
-    pub final_boss_callback_pending: bool,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
@@ -46,6 +47,7 @@ pub(crate) struct World<'a> {
     pub audio: &'a mut AudioState,
     pub system_counter: u32,
     pub poofs: crate::familiars::PoofAdmission<'a>,
+    pub final_boss: crate::boss_rewards::FinalBossAdmission<'a>,
 }
 
 pub fn from_selector(id: u32, selector: &SpawnSelector) -> Result<Option<Npc>, String> {
@@ -101,13 +103,13 @@ pub fn from_selector(id: u32, selector: &SpawnSelector) -> Result<Option<Npc>, S
             state_frame: 0,
             choice: 0,
             entity_flags: 4,
+            actor_rng: crate::items::Rng::new(selector.spawn_seed, [4, 3, 17]),
             flip_x: false,
             birth_game_update: 0,
             projectile_birth_count: 0,
             last_projectile_batch: None,
             death_blood_start: false,
             death_explosion: false,
-            final_boss_callback_pending: false,
         }),
     }))
 }
@@ -448,9 +450,11 @@ pub(crate) fn advance(
             state.death_explosion = true;
         }
         if !npc.animation_playing {
-            // Source4f2d10 invokes final-boss reward/heart callback before Remove.
-            // Keep that unimplemented callback explicit; never use Fly retirement.
-            state.final_boss_callback_pending = true;
+            //4fb885→4f2d10 invokes Room5c8430 before v+48 Remove and Base.
+            // The current full callback continues its ordinary motion tail.
+            world
+                .final_boss
+                .finish(npc, random, world.poofs.scheduler)?;
             npc.removed = true;
             npc.visible = false;
         }

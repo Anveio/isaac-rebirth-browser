@@ -142,6 +142,11 @@ pub struct SavedRegularPickup {
 pub struct Pickup {
     pub id: u32,
     pub spawn_seed: u32,
+    /// GameSpawn cached Entity1c/20, distinct from linked Entity.parent498.
+    #[serde(default)]
+    pub spawner_type: u32,
+    #[serde(default)]
+    pub spawner_variant: u32,
     pub variant: u32,
     pub subtype: u32,
     pub spritesheet_item_id: u32,
@@ -299,6 +304,8 @@ impl Pickup {
         Ok(Self {
             id,
             spawn_seed: 0,
+            spawner_type: 0,
+            spawner_variant: 0,
             variant,
             subtype,
             spritesheet_item_id: subtype,

@@ -8,6 +8,7 @@ use crate::{
     npcs::Npc,
     phase::Phase,
     room_costs::RoomCosts,
+    room_placement::direction,
 };
 use std::sync::OnceLock;
 
@@ -59,73 +60,6 @@ pub struct Shot {
     /// The default ProjectileParams constructor executes this real draw,
     /// even though FireProjectiles(mode0) does not read its stored angle.
     pub parameter_angle: f32,
-}
-
-fn direction(random: &mut Mt19937) -> WorldVector {
-    let angle = (f64::from(random.uniform()) * std::f64::consts::PI * 2.0) as f32;
-    WorldVector {
-        x: angle.cos(),
-        y: angle.sin(),
-    }
-}
-
-fn free_position(
-    anchor: WorldVector,
-    random: &mut Mt19937,
-    world: &World<'_>,
-) -> Result<WorldVector, String> {
-    let mut candidate = ZERO;
-    let mut index: Option<usize> = None;
-    let mut budget = 100_i32;
-    let mut radius = 0.0_f32;
-    loop {
-        let admissible = world.grid.collision_at(candidate) == 0
-            && world.grid.index(candidate).is_none_or(|at| {
-                !world.grid.descriptor().cells[at]
-                    .entity
-                    .as_ref()
-                    .is_some_and(|entity| matches!(entity.kind, 17 | 18))
-            })
-            && index.is_some_and(|at| world.path_costs.entries()[at] <= 599);
-        if admissible {
-            if budget > 0 {
-                return Ok(candidate);
-            }
-            break;
-        }
-        budget -= 1;
-        if budget == -1 {
-            break;
-        }
-        radius = (if radius <= 500.0 { radius } else { 0.0 }) + 5.0;
-        candidate = anchor + direction(random) * radius;
-        if world.grid.clamp_room(candidate, 0.0) != candidate {
-            continue;
-        }
-        index = world.grid.index(candidate);
-        let Some(at) = index else {
-            continue;
-        };
-        if world.path_costs.get(at)? > 599 {
-            continue;
-        }
-        candidate = world.grid.position(at).expect("valid grid center");
-        for actor in world.occupied {
-            let delta = WorldVector {
-                x: actor.x - candidate.x,
-                y: actor.y - candidate.y,
-            };
-            if (delta.x * delta.x + delta.y * delta.y).sqrt() < 20.0 {
-                index = None;
-            }
-        }
-    }
-    let original = world.grid.clamp_room(anchor, 20.0);
-    Ok(world
-        .grid
-        .index(original)
-        .and_then(|at| world.grid.position(at))
-        .expect("clamped room anchor has a grid center"))
 }
 
 fn play(npc: &mut Npc, name: &str, force: bool) {
@@ -189,7 +123,14 @@ fn ai(
             let anchor = world
                 .grid
                 .clamp_room(world.grid.room_center() + direction(random) * radius, 20.0);
-            let candidate = free_position(anchor, random, world)?;
+            let candidate = crate::room_placement::pickup_position(
+                anchor,
+                0.0,
+                world.grid,
+                world.path_costs,
+                world.occupied,
+                random,
+            )?;
             let delta = WorldVector {
                 x: candidate.x - world.player.x,
                 y: candidate.y - world.player.y,

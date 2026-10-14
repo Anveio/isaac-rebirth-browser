@@ -113,7 +113,7 @@ export interface Bomb {
 }
 export interface Explosion { id: number; x: number; y: number; animationFrame: number; }
 export interface Pickup {
-  id: number; spawnSeed: number; variant: number; subtype: number; position: { x: number; y: number };
+  id: number; spawnSeed: number; spawnerType: number; spawnerVariant: number; variant: number; subtype: number; position: { x: number; y: number };
   x: number; y: number; actor: string; animation: string; animationFrame: number; animationPlaying: boolean;
   canCollect: boolean; collected: boolean; removed: boolean; collisionRadius: number; shadowSize: number; collectionDelay: number;
   overlay: string | null; overlayFrame: number; overlayPlaying: boolean;
@@ -179,9 +179,9 @@ export interface Room {
       animation: string; animationClock: number; animationPlaying: boolean; tint: number[]; offsets: number[]} | null;
     level2Fly: {entityFlags: number; birthGameUpdate: number; feedbackVelocity: {x: number; y: number};
       gridContact: boolean; gridNormal: {x: number; y: number}; previousGridVelocity: {x: number; y: number}} | null;
-    monstro: {stateFrame: number; choice: number; entityFlags: number; flipX: boolean; birthGameUpdate: number;
+    monstro: {stateFrame: number; choice: number; entityFlags: number; actorRng: ItemRng; flipX: boolean; birthGameUpdate: number;
       projectileBirthCount: number; lastProjectileBatch: {count: number; target: {x: number; y: number}; parameterAngle: number} | null;
-      deathBloodStart: boolean; deathExplosion: boolean; finalBossCallbackPending: boolean} | null;
+      deathBloodStart: boolean; deathExplosion: boolean} | null;
     fireplace: {anchor: {x: number; y: number}; authoredGridIndex: number; entityFlags: number; countdown: number;
       actorRngState: number; renderOrderOffset: number; flameScale: number; flameRenderMode: number;
       particleBirthCount: number; lastParticleBirth: {parentId: number; spawnSeed: number; position: {x: number; y: number}; velocity: {x: number; y: number}} | null;

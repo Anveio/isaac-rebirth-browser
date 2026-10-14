@@ -381,12 +381,7 @@ pub fn admit_room_combat(state: &mut State) {
 }
 
 pub fn advance_room_clear(state: &mut State) {
-    state.room.boss_count = state
-        .room
-        .npcs
-        .iter()
-        .filter(|npc| npc.boss && !npc.removed)
-        .count() as u32;
+    // Actual boss count2490 is decremented only by Room5c8430, before Remove.
     if state
         .room
         .npcs

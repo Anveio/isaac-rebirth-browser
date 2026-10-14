@@ -11,6 +11,7 @@ pub mod active_items;
 pub mod actors;
 pub mod audio;
 pub mod bombs;
+mod boss_rewards;
 pub mod camera;
 pub mod chests;
 pub mod combat;
@@ -46,6 +47,7 @@ pub mod rock_blast;
 mod room;
 pub mod room_assets;
 pub mod room_costs;
+mod room_placement;
 pub mod room_spawns;
 pub mod room_templates;
 pub mod roundworm;
@@ -1950,6 +1952,14 @@ impl Game {
             return Ok(());
         }
         if self.state.room.npcs[index].kind == 20 {
+            let room_type = self
+                .state
+                .room
+                .descriptor
+                .as_ref()
+                .ok_or("final boss requires admitted descriptor")?
+                .template
+                .room_type;
             let births = monstro::advance(
                 &mut self.state.room.npcs[index],
                 phase,
@@ -1964,6 +1974,24 @@ impl Game {
                         next_effect: &mut self.state.next_effect,
                         effects: &mut self.state.sprite_effects,
                         scheduler: &mut self.state.actor_scheduler,
+                    },
+                    final_boss: boss_rewards::FinalBossAdmission {
+                        room_type,
+                        normal_difficulty: self.state.difficulty == "normal",
+                        game_update_count: self.state.game_update_count,
+                        boss_count: &mut self.state.room.boss_count,
+                        next_pickup: &mut self.state.next_pickup,
+                        pickups: &mut self.state.room.pickups,
+                        actor_order: &mut self.state.room.authored_actor_order,
+                        music: &mut self.state.music,
+                        grid: &grid,
+                        path_costs: self
+                            .state
+                            .room
+                            .path_costs
+                            .as_ref()
+                            .ok_or("final boss requires Room.Init path costs")?,
+                        bombs: &self.state.bombs,
                     },
                 },
             )?;
