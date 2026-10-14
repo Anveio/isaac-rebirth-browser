@@ -2,12 +2,14 @@
 import assert from 'node:assert/strict';
 import {execFileSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
-import {mkdirSync,readFileSync,writeFileSync} from 'node:fs';
+import {existsSync,mkdirSync,readFileSync,writeFileSync} from 'node:fs';
 import {resolve} from 'node:path';
+import {gunzipSync} from 'node:zlib';
 import {runPairedGate,scopedState} from '../foundation/paired-game.mjs';
 const option=(name,fallback)=>{const i=process.argv.indexOf(name);return i<0?fallback:process.argv[i+1];};
 const output=resolve(option('--output',`.cache/e2e/player-death/${Date.now()}-${process.pid}`));mkdirSync(output,{recursive:true});
 const save=(p,d)=>writeFileSync(p,JSON.stringify(d,null,2)+'\n');
+const manifest=p=>JSON.parse((existsSync(p)?readFileSync(p):gunzipSync(readFileSync(p+'.gz'))).toString('utf8'));
 const sources=['tools/e2e/player-death.mjs','tools/original/player-death-observe.py','tools/original/player-death-scenarios.py','tools/original/audio-observer.py','references/isaac/foundation/player-death/source-contract.json'];
 const hashes=()=>Object.fromEntries(sources.map(p=>[p,createHash('sha256').update(readFileSync(p)).digest('hex')]));
 const before=hashes();
@@ -39,9 +41,9 @@ const report=await runPairedGate({output:resolve(output,'paired'),selected:[],ra
  originalObserver:'tools/original/player-death-observe.py',stateComparator:compare,additionalSources:sources});
 const coverage=scenarios.cases.map((c,n)=>{
  try {
- const native=JSON.parse(readFileSync(resolve(report.cases[n].directory,'original/manifest.json'),'utf8'));
+ const native=manifest(resolve(report.cases[n].directory,'original/manifest.json'));
  const settled=native.debugObservations.find(r=>r.context.label==='death-settled')?.observation.death;
- const candidate=JSON.parse(readFileSync(resolve(report.cases[n].directory,'browser/manifest.json'),'utf8')).frames.find(r=>r.label==='death-settled')?.state;
+ const candidate=manifest(resolve(report.cases[n].directory,'browser/manifest.json')).frames.find(r=>r.label==='death-settled')?.state;
  const complete=settled?.dead===true&&settled.popupState===2&&candidate?.player.dead===true&&candidate.playerDeath.gameOver?.state===2;
  return {id:c.scenario.id,required:c.deathRequired,actualSource:settled,executedInBoth:complete,status:!c.deathRequired||complete?'pass':'fail'};
  } catch (error) {
