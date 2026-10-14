@@ -54,6 +54,22 @@ assert.ok(scenarios.cases.length >= 4 && scenarios.cases.length <= (activeUse ? 
 assert.equal(new Set(scenarios.cases.map(item => item.name)).size, scenarios.cases.length);
 if (activeUse && !replayOriginal) {
   assert.equal(scenarios.cases.length, 12, 'Active use requires the complete twelve-case fresh cohort');
+  const fixed = JSON.parse((await run('python3', ['tools/original/active-item-scenarios.py', '--fixed-only'],
+    { cwd: ROOT })).stdout);
+  assert.equal(fixed.cases.length, 10);
+  for (const required of fixed.cases) {
+    assert.deepEqual(scenarios.cases.find(item => item.name === required.name), required,
+      `Active use requires the unchanged public seed/phase/actions and witnesses for ${required.name}`);
+  }
+  const fresh = scenarios.cases.filter(item => item.entropy === 'OS secrets');
+  assert.deepEqual(fresh.map(item => [item.name, item.delay]).sort(),
+    [['random-pedestal-0', 0], ['random-pedestal-1', 1]], 'Both fresh OS admission phases are required');
+  for (const item of fresh) {
+    const required = fixed.cases.find(fixed => fixed.name === `recorded-active-use-${item.delay}`);
+    assert.deepEqual(item.actions, required.actions, 'Every new unfiltered OS outcome requires the complete acquisition/use tape');
+    assert.equal(item.expectedItemId, undefined, 'Fresh OS outcomes cannot request a filtered item identity');
+    assert.equal(item.requirePickupShotGuard, undefined, 'The held-Pickup witnesses belong to their fixed public cases');
+  }
   assert.deepEqual(scenarios.cases.filter(item => item.requirePickupShotGuard).map(item => item.delay).sort(),
     [0, 1], 'Both held-Pickup admission phases are required');
   assert.deepEqual(scenarios.cases.filter(item => item.entropy === 'Recorded OS secrets').map(item => item.code).sort(),

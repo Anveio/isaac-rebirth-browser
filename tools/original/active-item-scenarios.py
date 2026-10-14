@@ -26,6 +26,8 @@ def use_tail(damaged=False):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--count', type=int, default=2)
+    parser.add_argument('--fixed-only', action='store_true',
+                        help='Declare the required fixed public cases without discovering OS seeds')
     args = parser.parse_args()
     if args.count != 2:
         raise ValueError('The complete twelve-case active gate requires two new unfiltered OS cases')
@@ -67,10 +69,11 @@ def main():
                       'actions': items.route(delay, True) + use_tail(),
                       'entropy': 'Recorded OS secrets', 'discoveryAttempts': attempt,
                       'recordedEvidence': 'references/isaac/foundation/items/active-use-verification.json'})
-    for case in items.random_cases(args.count, True):
-        case['actions'] += use_tail()
-        cases.append(case)
-    print(json.dumps({'schema': 1, 'mode': 'active-use', 'bootEpochSeed': 1700000000,
+    if not args.fixed_only:
+        for case in items.random_cases(args.count, True):
+            case['actions'] += use_tail()
+            cases.append(case)
+    print(json.dumps({'schema': 1, 'mode': 'active-use-fixed' if args.fixed_only else 'active-use', 'bootEpochSeed': 1700000000,
                       'source': 'Public input/own bomb damage; every OS item outcome retained',
                       'cases': cases}))
     return 0
