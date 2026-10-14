@@ -647,7 +647,7 @@ impl Npc {
         let mut health = self.health();
         self.damage.advance(&mut health, phase)?;
         self.hp = health.hp;
-        if self.hp <= 0.0 {
+        if self.hp < 0.0 {
             self.dead = true;
             // Source44641d zero-gib sound precedes the real Blood Splat seed.
             world.audio.admit(
