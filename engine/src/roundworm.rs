@@ -66,8 +66,8 @@ pub struct Shot {
 fn direction(random: &mut Mt19937) -> WorldVector {
     let angle = (f64::from(random.uniform()) * std::f64::consts::PI * 2.0) as f32;
     WorldVector {
-        x: angle.cos(),
-        y: angle.sin(),
+        x: crate::fmath::cos(angle),
+        y: crate::fmath::sin(angle),
     }
 }
 
