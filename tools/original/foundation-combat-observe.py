@@ -182,6 +182,11 @@ def observe(pid, context):
 
             game = u64(0x8ecd30)
             system = u64(0x8ed560)
+            # Actual Level is embedded at Game+0; its flags are distinct from
+            # the retained boss-family Game+10eae0 word.
+            report['levelProgress'] = {'flags': u64(game + 0x81b0),
+                'heartCollected': bool(read(game + 0xc, 1)[0]),
+                'lastPenaltyStage': u32(game + 0x10ecdc)}
             report['nativePhase'] = {'systemIterations': u32(system + 0x2efa0), 'fullGameUpdates': u32(game + 0xce9f4)}
             room = u64(game + 0x8180)
             raw = read(room, 0x30)

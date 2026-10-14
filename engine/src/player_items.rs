@@ -225,6 +225,11 @@ pub(crate) fn collect(state: &mut State, index: usize) -> Result<bool, String> {
         || pickup.age <= 20
         || owner.collection_delay > 0
         || owner.pickup_animation_guard
+        //504820 ->5054ca uses the selected item-clip name, independently
+        // of bf4. UseItem owns the same main Sprite after retiring Pickup.
+        || state.player_animation.current.is_some_and(|clip| {
+            matches!(clip.name(), "Pickup" | "LiftItem" | "HideItem" | "UseItem")
+        })
         || !pickup.touches(&state.player)
     {
         return Ok(false);
@@ -242,10 +247,8 @@ pub(crate) fn collect(state: &mut State, index: usize) -> Result<bool, String> {
         .as_mut()
         .ok_or("ItemPool owner absent")?
         .removed[id as usize] = true;
+    crate::player_animation::force_pickup(state);
     let owner = state.player_items.as_mut().expect("checked Player owner");
-    owner.pickup_animation_frame = 0.0;
-    owner.pickup_animation_playing = true;
-    owner.pickup_animation_guard = true;
     owner.pickup_presentation = Some(PickupPresentation {
         item_id: id,
         animation_frame: 0.0,

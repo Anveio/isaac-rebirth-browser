@@ -12,7 +12,7 @@ const save=(p,v)=>writeFileSync(p,JSON.stringify(v,null,2)+'\n');
 const digest=p=>createHash('sha256').update(readFileSync(p)).digest('hex');
 const artifactBytes=p=>existsSync(p)?readFileSync(p):gunzipSync(readFileSync(p+'.gz'));
 const artifactDigest=p=>createHash('sha256').update(artifactBytes(p)).digest('hex');
-const sources=['tools/e2e/hearts.mjs','tools/original/heart-scenarios.py','tools/original/foundation-combat-observe.py','engine/src/pickups.rs','engine/src/player_items.rs','engine/src/fireplaces.rs','engine/src/lib.rs','references/isaac/foundation/hearts/first-prepared-cases.json','web/engine.ts','web/renderer.ts'];
+const sources=['tools/e2e/hearts.mjs','tools/original/heart-scenarios.py','tools/original/foundation-combat-observe.py','engine/src/pickups.rs','engine/src/player_items.rs','engine/src/fireplaces.rs','engine/src/health_damage.rs','engine/src/level_progress.rs','engine/src/lib.rs','references/isaac/foundation/hearts/first-prepared-cases.json','web/engine.ts','web/renderer.ts'];
 const hashes=()=>Object.fromEntries(sources.map(p=>[p,digest(p)])),before=hashes();
 const prepared=option('--scenarios');
 const scenarios=prepared?JSON.parse(readFileSync(resolve(prepared),'utf8')):JSON.parse(execFileSync('python3',['tools/original/heart-scenarios.py','--count',option('--count','2')],{encoding:'utf8'}));
@@ -60,6 +60,12 @@ for(const [index,c] of scenarios.cases.entries()){
    const hpBrowser=[state.player.maxHp,state.player.hp,state.player.soulHp,state.player.blackHeartMask,state.player.eternalHearts];
    assert.ok([...hpNative,...hpBrowser].every(Number.isInteger),'Every declared healthowner must be observed');
    check(label,'player.healthContainers',hpNative,hpBrowser);
+   assert.ok(Number.isInteger(source.levelProgress?.flags)&&Number.isInteger(state.levelProgress?.flags),'Actual Level flags must be read in both games');
+   check(label,'level.damagePenaltyBits',source.levelProgress.flags&0x24,state.levelProgress.flags&0x24);
+   check(label,'level.heartCollected',source.levelProgress.heartCollected,state.levelProgress.heartCollected);
+   // Initial/restore companion values remain unadmitted. Once native bit5
+   // proves its writer ran, a missing browser companion value must fail.
+   if(source.levelProgress.flags&0x20)check(label,'level.lastPenaltyStage',source.levelProgress.lastPenaltyStage,state.levelProgress.lastPenaltyStage);
    check(label,'player.immunity',player.damageCountdown,state.damageCooldown);
    check(label,'room.identity',source.room.descriptorIndex,state.currentRoom);
    const native=source.entities.filter(a=>a.type===5&&a.variant===10),port=state.room.pickups.filter(a=>a.variant===10&&!a.removed);

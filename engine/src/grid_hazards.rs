@@ -4,7 +4,7 @@
 use crate::{bombs, motion::WorldVector, phase::Phase, State};
 
 pub fn advance(state: &mut State, phase: Phase) -> Result<(), String> {
-    if phase != Phase::Update || state.player.hp == 0 || state.damage_cooldown != 0 {
+    if phase != Phase::Update || state.player.dead || state.damage_cooldown != 0 {
         return Ok(());
     }
     let Some(grid) = state.room.grid.as_ref() else {
@@ -44,9 +44,7 @@ pub fn advance(state: &mut State, phase: Phase) -> Result<(), String> {
         if !velocity.is_finite() {
             return Err("spike impulse overflowed native velocity".into());
         }
-        state.player.hp = state.player.hp.saturating_sub(2);
-        state.damage_cooldown = 120;
-        crate::player_death::after_damage(state, crate::player_death::DAMAGE_SPIKES)?;
+        crate::combat::try_damage_player(state, 2, 120, crate::player_death::DAMAGE_SPIKES)?;
         state.player.vx = f64::from(velocity.x) * 0.65;
         state.player.vy = f64::from(velocity.y) * 0.65;
         break;

@@ -61,6 +61,7 @@
     "test:e2e:active-item-use": "cargo build --manifest-path engine/Cargo.toml --locked --bin floor && bash tools/original/with-display.sh node tools/e2e/items.mjs --active-use --count 2",
     "test:e2e:player-death": "bash tools/original/with-display.sh node tools/e2e/player-death.mjs --count 2",
     "test:e2e:hearts": "bash tools/original/with-display.sh node tools/e2e/hearts.mjs --count 2",
+    "test:e2e:health-damage": "bash tools/original/with-display.sh node tools/e2e/health-damage.mjs --count 2",
     "test:e2e:blood-particles": "bash tools/original/with-display.sh node tools/e2e/blood-particles.mjs"
   },
   "devDependencies": {

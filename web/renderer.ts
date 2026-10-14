@@ -45,7 +45,11 @@ export class Renderer {
     gl.blendFactors("srcAlpha", "oneMinusSrcAlpha");
     gl.scale(this.canvas.width / 480, this.canvas.height / 270);
     const ctx = gl.asCanvasContext();
-    if (state.screen !== "playing") this.menu.draw(ctx, state);
+    if (state.nightmares.systemActive) {
+      if (state.nightmares.definitionLoaded && state.nightmares.currentActor)
+        this.assets.draw(ctx, state.nightmares.currentActor, "Scene", 240, 135, state.nightmares.frame);
+    }
+    else if (state.screen !== "playing") this.menu.draw(ctx, state);
     else {
       ctx.save();
       if (state.camera) ctx.translate(state.camera.scroll.x, state.camera.scroll.y);
@@ -150,6 +154,10 @@ export class Renderer {
       this.stage.foreground(state.stageEffects);
       this.presentation.introduction(ctx, state);
       this.hud(ctx, state);
+      const info = state.informationAnimation;
+      if (info.state === 2 && info.definitionLoaded && info.currentActor && info.currentClip)
+        this.assets.draw(ctx, info.currentActor, info.currentClip, 240, 135, info.frame,
+          { spritesheets: info.spritesheet ? { 0: info.spritesheet } : {} });
       const bossScene = state.roomTransition?.bossScene;
       if (bossScene && state.roomTransition?.phase === "bossScene")
         this.assets.draw(ctx, "gfx/ui/boss/versusscreen.anm2", "Scene", 240, 135, bossScene.animationFrame);

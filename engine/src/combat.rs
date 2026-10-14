@@ -16,13 +16,13 @@ pub fn try_damage_player(
     immunity_presentations: u32,
     flags: u32,
 ) -> Result<bool, String> {
-    if health_units == 0 || state.player.dead || state.player.hp == 0 || state.damage_cooldown != 0
-    {
+    if health_units == 0 || state.player.dead || state.damage_cooldown != 0 {
         return Ok(false);
     }
-    state.player.hp = state.player.hp.saturating_sub(health_units);
+    crate::health_damage::apply_admitted(state, health_units, flags)?;
     state.damage_cooldown = immunity_presentations;
     crate::player_death::after_damage(state, flags)?;
+    crate::health_damage::finish_admitted(state);
     Ok(true)
 }
 
@@ -316,6 +316,7 @@ pub enum DamageKind {
     Tear,
     Bomb,
     FireContact,
+    RoomEffect,
 }
 
 impl DamageKind {
@@ -324,6 +325,7 @@ impl DamageKind {
             Self::Tear => 0,
             Self::Bomb => 4,
             Self::FireContact => 2,
+            Self::RoomEffect => 0,
         }
     }
 }

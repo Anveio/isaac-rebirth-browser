@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "originalBinarySha256": "724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13",
+  "scope": "Source-qualified exclusive main-presentation transfer for Hit/Use45/Death and existing natural Pickup, plus actual collectible-specific item-clip selection. Composed06e409 private Rust/strict Clippy pass; no production/public interruption acceptance.",
+  "functions": [
+    {
+      "address": "0x50a5c0",
+      "bytes": 187,
+      "rawSha256": "95c240132b2b69161b7ff962005d89f24957b4e794bb2598f0ecc4d205927df8"
+    },
+    {
+      "address": "0x50a830",
+      "bytes": 110,
+      "rawSha256": "bb43aef60487c27dbe403d5c043984b65c07f4d8979bca7d9523f32a166f358e"
+    },
+    {
+      "address": "0x531850",
+      "bytes": 13012,
+      "rawSha256": "afc91e017a8190f954b8859c4cb46cabdc2996f64432f099ba8d7e9163c7c20f"
+    },
+    {
+      "address": "0x50c780",
+      "bytes": 250,
+      "label": "Guarded item clip-name predicate",
+      "rawSha256": "d03137d1fa55d58b1d271a50870711350f0ee6587be7f27f3a217eeac2a191c5"
+    },
+    {
+      "address": "0x504820",
+      "bytes": 8329,
+      "label": "Player pickup collision dispatch",
+      "rawSha256": "2737d0683e5bd89e4e68a811d2154a41b8c7a7b1f73038b6174169b51e1d3f2f"
+    }
+  ],
+  "forceMain": "50a5c0 sets speed+300=1, clears overlay410460, force-plays mainSprite+28 through40fd80, then storesbf4=true at50a620. It does not touch queued3058/3060/3064, collection delay30d4 or copiedSprite7e0. State-aware force_play retires the old legacy main guard/playing ownership before resetting the concrete main clip; inactive legacy frame never resumes.",
+  "naturalPickup": "50a830 calls50a5c0(Pickup) at50a84c, then copies itemSprite toPlayer+7e0 at50a866. Natural505e5e calls it before505ed6 queues through52f310. force_pickup exclusively replaces any concrete current main with the existing legacy Pickup representation. The caller still owns new copy/reset and enqueue, including prior-queue flush.",
+  "completion": "Base447190 advances main beforePlayer531881 bf4 test;53245e queriesIsFinished(current),532484 clearsbf4. Legacy Pickup and concrete main clocks are mutually exclusive; completion cannot resume an interrupted clip.",
+  "lateCopyAndQueue": "Normalfull531e6f advances the copiedSprite7e0 after active/pocket/shot callbacks; fast skips and rejoins531e7f. Common cooldown/collection delay then decrements.531f01 excludesfast;531f0a tests actualbf4false before5325b8 and52ee40 queueflush. LiftItem D80 gate remains separately scoped; ordinary Hit/Use45 D80zero is admitted.",
+  "limits": [
+    "Existing two main representations remain, with one active owner. The sole Root generic collection helper permits actual item names without a legacy Pickup veto; collectible selection separately rejects item clips. Complete LiftItem/HideItem and extra queue/D80 presentation remain pending.",
+    "Charged49 costume cancellation, extra queued presentation types/overlay ownership and fresh public Hit-during-Pickup/copy/queue interruption coverage remain pending.",
+    "No native state, RNG, clocks or phase feedback supplies port runtime; no frame fitting or queue clearing."
+  ],
+  "collectibleSelection": "Natural collectible504820 at5054ca calls50c780 before collection delay30d4. This tests selected main name Pickup/LiftItem/HideItem/UseItem, independently of bf4 or playing state; it denies item clips while admitting Hit. collect retains the legacy Pickup name representation and additionally rejects owned UseItem. Regular/Heart generic50c880 and empty altar physical contact are separate and unchanged."
+}
