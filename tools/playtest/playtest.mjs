@@ -108,8 +108,9 @@ const observe = () => tab.evaluate(() => {
     npcs: npcs.map(n => ({ x: n.position.x, y: n.position.y, boss: n.boss, kind: n.kind })),
     pickups: s.room.pickups.filter(p => !p.collected && !p.removed).map(p => ({ x: p.position.x, y: p.position.y, variant: p.variant })),
     // Solid grid cells (walls, rocks, pits); door cells stay walkable for routing.
+    // Authored cells without a grid entity (e.g. pits, selector 3000) still block.
     grid: s.room.grid && { w: s.room.grid.width, h: s.room.grid.height,
-      solid: s.room.grid.cells.map(c => (c.entity && c.entity.collisionClass !== 0 && c.entity.kind !== 16 ? 1 : 0)).join('') },
+      solid: s.room.grid.cells.map(c => ((c.entity ? c.entity.collisionClass !== 0 && c.entity.kind !== 16 : c.selector !== 0) ? 1 : 0)).join('') },
     doors: s.room.appearance.doors.map(d => ({ side: d.side, state: d.state, target: d.targetRoom, x: d.worldPosition.x, y: d.worldPosition.y })),
     tears: s.tears.length, bombs: s.bombs.length, explosions: s.explosions.length,
     inventory: s.inventory, items: s.playerItems ? s.playerItems.ownedCounts.reduce((a, b) => a + b, 0) : 0,
