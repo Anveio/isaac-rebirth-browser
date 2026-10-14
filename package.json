@@ -9,6 +9,8 @@
   "scripts": {
     "dev": "vite --host 0.0.0.0 --port 5173 --strictPort",
     "build": "npm run build:wasm && vite build",
+    "playtest:bundle": "node tools/playtest/bundle.mjs",
+    "playtest:self": "node tools/playtest/playtest.mjs",
     "typecheck": "tsc --noEmit",
     "test:browser": "bash tools/original/with-display.sh node node_modules/@playwright/test/cli.js test",
     "check": "npm run check:build && npm run test:e2e",
