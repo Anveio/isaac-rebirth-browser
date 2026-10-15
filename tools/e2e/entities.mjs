@@ -6,6 +6,7 @@
 //   export default {
 //     type: 12, variant: 0,                 // entities2.xml identity (omit for a room-shape spec)
 //     shape: [26, 7],                       // authored room size to enter (default 13x7)
+//     roomType: 13,                         // enter a room of this authored type (typeless specs)
 //     boss: true,                           // walk a recorded route into the floor's boss room
 //                                           // (tools/original/boss-scenarios.py; contrived entries are CODE or CODE:FIGHT)
 //     about: 'one line for the suite list',
