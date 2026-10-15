@@ -35,6 +35,10 @@ pub struct Room {
     pub pickups: Vec<crate::pickups::Pickup>,
     #[serde(default)]
     pub saved_regular_pickups: Vec<crate::pickups::SavedRegularPickup>,
+    /// Descriptor+B8 records survive crater paint/Remove and replay on reentry.
+    /// Legacy or missing restore history remains unknown until its producer.
+    #[serde(default)]
+    pub dynamic_crater_records: Option<Vec<crate::explosion_effects::DynamicCraterRecord>>,
     pub npcs: Vec<crate::npcs::Npc>,
     /// Append-only within a room. The per-frame WASM snapshot elides them
     /// (see `frame_snapshot_ptr`); the browser reads new ones incrementally.
@@ -548,6 +552,7 @@ impl Room {
             source_tear_slowdown_2494: None,
             pickups: Vec::new(),
             saved_regular_pickups: Vec::new(),
+            dynamic_crater_records: Some(Vec::new()),
             npcs: Vec::new(),
             background_stains: Vec::new(),
             authored_actor_order: Vec::new(),

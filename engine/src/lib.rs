@@ -36,6 +36,8 @@ mod doors;
 mod dr_fetus;
 pub mod duke;
 mod effects;
+mod epic_fetus;
+mod explosion_effects;
 pub mod enemy_projectiles;
 mod entities;
 pub mod sprite_color;
@@ -1942,6 +1944,8 @@ impl Game {
             attack_runtime::restore_fast_positions(&mut self.state);
             laser_runtime::restore_fast_positions(&mut self.state);
             bombs::restore_shot_fast_positions(&mut self.state);
+            epic_fetus::restore_fast_positions(&mut self.state)?;
+            explosion_effects::restore_fast_positions(&mut self.state)?;
         }
         let gameplay_was_paused = self.state.paused;
         if self.state.screen == Screen::Playing {
@@ -2043,6 +2047,8 @@ impl Game {
                 if restoring {
                     let restored_pickups = pickups::readmit_regular_records(&mut self.state)?;
                     self.rebuild_room_actor_schedule()?;
+                    //5CF58E replays persistent+B8 records after ordinary5C5860.
+                    crate::explosion_effects::replay_dynamic_craters(&mut self.state)?;
                     self.state.room.complete_initialization();
                     // The native Room.Update admission tail advances the new
                     // actors once at the unchanged Game clock. Other saved
@@ -2050,6 +2056,10 @@ impl Game {
                     for id in restored_pickups.iter().copied() {
                         self.advance_pickup(id, phase)?;
                     }
+                    //The restored Room.Update has the same late manager paint
+                    //and actual inactive Uninit fence before entity contacts.
+                    familiars::paint_background_effects(&mut self.state)?;
+                    explosion_effects::retire_full(&mut self.state);
                     let candidates = pickups::contact_candidates(&self.state)?;
                     //454a0a dispatches Player/PU callbacks before453340's
                     //PU self-pairs. Disabled transition controls do not veto
@@ -2209,6 +2219,8 @@ impl Game {
             attack_runtime::retire_full(&mut self.state);
             laser_runtime::retire_full(&mut self.state)?;
             bombs::retire_shots_full(&mut self.state);
+            epic_fetus::retire_full(&mut self.state);
+            explosion_effects::retire_full(&mut self.state);
             controlled_tear::retire_full(&mut self.state);
             attack_runtime::contacts(&mut self.state)?;
             let pickup_contacts = pickups::contact_candidates(&self.state)?;
@@ -3016,8 +3028,9 @@ impl Game {
                         plan.controller == weapon_plan::ControllerChannel::ControlledTechnology;
                     let controlled_fetus =
                         plan.controller == weapon_plan::ControllerChannel::ControlledFetus;
+                    let epic_fetus = plan.controller == weapon_plan::ControllerChannel::EpicFetus;
                     let controlled_target =
-                        controlled_brim || controlled_technology || controlled_fetus;
+                        controlled_brim || controlled_technology || controlled_fetus || epic_fetus;
                     let aim_step = if ordinary || controlled || controlled_tear || controlled_target {
                         attack_runtime::ordinary_shooting_aim(
                             callback_aim,
@@ -3100,6 +3113,8 @@ impl Game {
                                 buttons.held(),
                                 if controlled_fetus {
                                     "controlledFetusMovementHistory"
+                                } else if epic_fetus {
+                                    "epicFetusMovementHistory"
                                 } else if controlled_technology {
                                     "controlledTechnologyMovementHistory"
                                 } else {
