@@ -304,6 +304,23 @@ try {
     const p = state.player;
     const keys = [];
     const waypoint = (x, y) => routeWaypoint(state.grid, p, { x, y });
+    // Route as if poop were open floor; when poop is the next thing in the way,
+    // line up with it and shoot it down, as a player would. Returns keys or null.
+    const passGrid = () => state.grid && { ...state.grid, solid: [...state.grid.solid].map((v, i) => (state.grid.poop[i] === '1' ? '0' : v)).join('') };
+    const breakPoop = target => {
+      if (!state.grid) return null;
+      const step = routeWaypoint(passGrid(), p, target);
+      const dx = step.x - p.x, dy = step.y - p.y, length = Math.hypot(dx, dy) || 1;
+      const ahead = [1, 0.5].map(k => ({ c: Math.round((p.x + dx / length * 40 * k - 40) / 40), r: Math.round((p.y + dy / length * 40 * k - 120) / 40) }))
+        .find(({ c, r }) => c >= 0 && r >= 0 && c < state.grid.w && r < state.grid.h && state.grid.poop[r * state.grid.w + c] === '1');
+      if (!ahead) return null;
+      const px = ahead.c * 40 + 40, py = ahead.r * 40 + 120, out = [];
+      if (Math.abs(px - p.x) > Math.abs(py - p.y)) { out.push(px > p.x ? 'ArrowRight' : 'ArrowLeft'); if (Math.abs(py - p.y) > 8) out.push(py > p.y ? 'KeyS' : 'KeyW'); }
+      else { out.push(py > p.y ? 'ArrowDown' : 'ArrowUp'); if (Math.abs(px - p.x) > 8) out.push(px > p.x ? 'KeyD' : 'KeyA'); }
+      return out;
+    };
+    // Walk to a point through poop: shoot what blocks, otherwise follow the poop-free route.
+    const reach = (x, y, slack) => { const shoot = breakPoop({ x, y }); if (shoot) keys.push(...shoot); else { const step = routeWaypoint(passGrid(), p, { x, y }); toward(step.x, step.y, slack); } };
     const toward = (x, y, slack = 8) => keys.push(...routeToward(p, { x, y }, slack));
     segment++;
     if (wiggle && now < wiggle.until) keys.push(...wiggle.keys);
@@ -338,12 +355,10 @@ try {
     } else if (state.pickups.length && (pickupsAtStart.get(state.room) ?? 0) < 60) {
       pickupsAtStart.set(state.room, (pickupsAtStart.get(state.room) ?? 0) + 1);
       const target = state.pickups.reduce((a, b) => Math.hypot(a.x - p.x, a.y - p.y) < Math.hypot(b.x - p.x, b.y - p.y) ? a : b);
-      const step = waypoint(target.x, target.y);
-      toward(step.x, step.y, 2);
+      reach(target.x, target.y, 2);
     } else if (state.trapdoor?.open && state.clear) {
       // Take the trapdoor once the room is cleared and its pickups collected.
-      const step = waypoint(state.trapdoor.x, state.trapdoor.y);
-      toward(step.x, step.y, 2);
+      reach(state.trapdoor.x, state.trapdoor.y, 2);
     } else {
       const open = state.doors.filter(d => /^open/i.test(d.state));
       const back = open.find(d => d.target === cameFromDoor);
@@ -372,19 +387,9 @@ try {
       }
       const choice = doorGoal && open.find(d => d.target === doorGoal.target);
       if (choice) {
-        // Route as if poop were open floor; when poop is the next thing in the
-        // way, line up with it and shoot it down, as a player would.
-        const grid = state.grid && { ...state.grid, solid: [...state.grid.solid].map((v, i) => (state.grid.poop[i] === '1' ? '0' : v)).join('') };
-        const step = routeWaypoint(grid, p, choice);
-        const dx = step.x - p.x, dy = step.y - p.y, length = Math.hypot(dx, dy) || 1;
-        const ahead = state.grid && [1, 0.5].map(k => ({ c: Math.round((p.x + dx / length * 40 * k - 40) / 40), r: Math.round((p.y + dy / length * 40 * k - 120) / 40) }))
-          .find(({ c, r }) => c >= 0 && r >= 0 && c < state.grid.w && r < state.grid.h && state.grid.poop[r * state.grid.w + c] === '1');
-        if (ahead) {
-          doorGoal.until = Math.max(doorGoal.until, now + 5000); // breaking poop is progress
-          const px = ahead.c * 40 + 40, py = ahead.r * 40 + 120;
-          if (Math.abs(px - p.x) > Math.abs(py - p.y)) { keys.push(px > p.x ? 'ArrowRight' : 'ArrowLeft'); if (Math.abs(py - p.y) > 8) keys.push(py > p.y ? 'KeyS' : 'KeyW'); }
-          else { keys.push(py > p.y ? 'ArrowDown' : 'ArrowUp'); if (Math.abs(px - p.x) > 8) keys.push(px > p.x ? 'KeyD' : 'KeyA'); }
-        } else keys.push(...routeDoorKeys(grid, p, choice));
+        const shoot = breakPoop(choice);
+        if (shoot) { keys.push(...shoot); doorGoal.until = Math.max(doorGoal.until, now + 5000); } // breaking poop is progress
+        else keys.push(...routeDoorKeys(passGrid(), p, choice));
       }
       else keys.push(['KeyW', 'KeyA', 'KeyS', 'KeyD'][Math.floor(segment / 8) % 4]);
       // Semi-random shooting and occasional bombs while exploring.
