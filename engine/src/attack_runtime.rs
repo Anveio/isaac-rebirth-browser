@@ -127,9 +127,11 @@ pub(crate) fn dispatch_player(
         ControllerChannel::ChargedBrimstone => {
             crate::brimstone::dispatch_player(state, plan, input, phase, callback_aim)
         }
+        ControllerChannel::ControlledBrimstone => {
+            crate::controlled_brimstone::dispatch_player(state, plan, input, phase, callback_aim)
+        }
         unsupported => {
             let channel = match unsupported {
-                ControllerChannel::ControlledBrimstone => "controlledBrimstone",
                 ControllerChannel::ControlledTear => "controlledTear",
                 ControllerChannel::Unimplemented(_) => "unimplementedPrimary",
                 _ => unreachable!("implemented controller matched above"),
@@ -316,6 +318,10 @@ pub(crate) fn controlled_head_direction(
 }
 
 pub(crate) fn controlled_idle_head(state: &mut State, held: bool) {
+    controlled_idle_head_for(state, held, "controlledKnifeMovementHistory");
+}
+
+pub(crate) fn controlled_idle_head_for(state: &mut State, held: bool, channel: &str) {
     if !held && state.head_timer < 0 {
         if let Some(direction) = state.attack_runtime.movement_direction_d9c {
             state.attack_runtime.head_direction_da0 = Some(match direction {
@@ -325,7 +331,7 @@ pub(crate) fn controlled_idle_head(state: &mut State, held: bool) {
                 _ => 3,
             });
         } else {
-            record_frontier(state, "controlledKnifeMovementHistory");
+            record_frontier(state, channel);
         }
     }
 }

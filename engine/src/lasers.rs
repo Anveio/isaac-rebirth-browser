@@ -52,6 +52,7 @@ pub use crate::laser_runtime::{advance_actor, advance_impact};
 pub enum LaserOrigin {
     NpcShootAngle,
     PlayerCharged,
+    PlayerControlled,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
@@ -310,11 +311,16 @@ fn segment_distance_squared(point: WorldVector, from: WorldVector, to: WorldVect
 
 impl Laser {
     pub(crate) fn initialize(id: u32, subtype: u32, seed: u32, age: u32) -> Result<Self, String> {
-        if subtype != 0 {
-            return Err("ordinary Player Laser requires actual subtype0".into());
+        if subtype > 1 {
+            return Err("Player Laser requires an admitted subtype0 or subtype1".into());
         }
         let mut laser = Self::initialize_npc(id, 1, seed, age, crate::content::entity(7, 1));
-        laser.origin = LaserOrigin::PlayerCharged;
+        laser.origin = if subtype == 1 {
+            LaserOrigin::PlayerControlled
+        } else {
+            LaserOrigin::PlayerCharged
+        };
+        laser.subtype = subtype;
         laser.uninitialized = Some(false);
         laser.spawner_variant = Some(0);
         laser.entity_flags = Some(0); //441EDE, actual fresh Base.Init318.
