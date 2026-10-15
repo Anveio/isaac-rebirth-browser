@@ -1,0 +1,13 @@
+# Ordinary Technology
+
+The ordinary item68 producer uses the canonical Laser store and scheduler. Cached primary selection is168 >114 >52 >118 >68 >character7 >329 >229 >regular. Positive329 while C08=3 is an explicit unimplemented controlled-Technology frontier; this slice does not attach an extra beam to Knife or Brimstone.
+
+The current source domain is fresh normal Isaac with a real sole68 grant, known nonflying Player geometry, no temporary collectibles/trinkets and mapped neutral kind2/3 property reads. An optional registration owner tracks the actual grant; old restore, another costume grant and duplicate68 history remain unknown. Cache arithmetic and getter capability are independent: the narrow cache/grant context also supports selected1/4, but stacked costume/null priority does not become known from that fact.
+
+The519FC0 ordinary branch fires on held input and C74<0, writes C74=C78 and BB0=trunc(C78*-.4)+7, then calls50E1C0 and immediate Full even on an admitted outer Fast callback. The actual directed LeftEye lookup uses Head* frame1, not a Brimstone Mouth or a new pose clock. Spawn consumes shared Raw before the current kind2 damage getter; ordinary Technology never binds C18.
+
+Variant2 has lifetime3, grid class5, line resampling.7 and its actual one-layer thin actor. TTL reaching0 marks31F; a following body performs Remove and the manager's global Full cleanup retires it. There is no thick-Laser fade. Impact50 subtype0 uses the canonical Idle actor, actual Bound2 flip followed by Bound4*90 into raw814, and the source color/immediate callback. raw814 is retained separately from Sprite rotation. Brimstone and NPC callback ownership remains separate.
+
+The two added canonical animation records come from the existing authored-resource decoder; all prior registry entries stay unchanged. Technology costume presentation and Effect50 raw814 render projection are separate visual work. Compilation, actual Original/public-input bodies, contacts, actor seeds/full624 state, natural retirement and DOM/render comparisons remain unqualified until their own runs. The existing ordinary-Brim comparisons do not qualify variant2.
+
+The first planned public cohort uses two fixed phase offsets at epoch12713 and the existing recorded entropy tokens unchanged. It exercises cardinal/released/opposite-key input and expiry; any receiver case adds identical authored NPC14/18 XML/STB/actions to both games. It must observe actual manager7/2/0 births, Full/Fast bodies, FIFO/next-Full damage and retirement. Missing fields/identity/events remain failures. Controlled68+329 and real order-dependent68→118/114/329 histories are separate next cases.

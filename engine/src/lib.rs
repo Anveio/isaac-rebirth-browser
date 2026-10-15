@@ -23,9 +23,9 @@ pub mod challenges;
 pub mod champions;
 pub mod chests;
 pub mod combat;
-mod creep_effects;
 mod content;
 mod controlled_knife;
+mod creep_effects;
 pub mod dingle;
 pub mod dips;
 mod doors;
@@ -33,6 +33,7 @@ mod effects;
 pub mod enemy_projectiles;
 mod entities;
 pub mod sprite_color;
+mod technology;
 pub use entities::{implemented_npc_kinds, supports_npc_selector};
 pub mod familiars;
 pub mod fireplaces;
@@ -60,8 +61,8 @@ mod laser_runtime;
 pub mod lasers;
 pub mod layout;
 pub mod level2_flies;
-pub mod maggots;
 pub mod level_progress;
+pub mod maggots;
 pub mod menu_lifecycle;
 pub mod monstro;
 pub mod motion;
@@ -2770,6 +2771,7 @@ impl Game {
                         plan.controller,
                         weapon_plan::ControllerChannel::OrdinaryKnife
                             | weapon_plan::ControllerChannel::ChargedBrimstone
+                            | weapon_plan::ControllerChannel::OrdinaryTechnology
                     );
                     let controlled =
                         plan.controller == weapon_plan::ControllerChannel::ControlledKnife;
@@ -2830,6 +2832,13 @@ impl Game {
                         // 519FC0 returns before the released idle D9C -> DA0 effect.
                         if controlled {
                             attack_runtime::controlled_idle_head(&mut self.state, buttons.held());
+                        }
+                        if plan.controller == weapon_plan::ControllerChannel::OrdinaryTechnology {
+                            //530A19 released ordinary idle uses the same canonical D9C/DA0.
+                            attack_runtime::ordinary_brimstone_idle_head(
+                                &mut self.state,
+                                buttons.held(),
+                            );
                         }
                         if plan.controller == weapon_plan::ControllerChannel::ChargedBrimstone {
                             attack_runtime::ordinary_brimstone_idle_head(

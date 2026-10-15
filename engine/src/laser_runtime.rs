@@ -7,7 +7,8 @@ use crate::{
 };
 
 pub(crate) use crate::laser_player_runtime::{
-    admit_ordinary_brim, advance_ordinary_brim_initial, OrdinaryBrimBirth,
+    admit_ordinary_brim, admit_ordinary_technology, advance_ordinary_brim_initial,
+    advance_ordinary_technology_initial, OrdinaryBrimBirth, OrdinaryTechnologyBirth,
 };
 
 #[derive(Clone, Copy)]
@@ -144,7 +145,7 @@ fn contact_callbacks(state: &mut State, index: usize) -> Result<(), String> {
     }
     if inputs.positive_owned_count(151)
         || inputs.positive_owned_count(213)
-        || !inputs.admits_neutral_kind3()
+        || (!inputs.admits_neutral_kind3() && !inputs.admits_technology_cache_context())
     {
         record_frontier(state, LaserFrontier::ContactModifiers);
         return Ok(());
@@ -263,7 +264,8 @@ pub fn advance_actor(state: &mut State, phase: Phase, id: u32) -> Result<(), Str
         crate::lasers::LaserOrigin::NpcShootAngle => {
             crate::laser_npc_runtime::advance_actor(state, phase, id)
         }
-        crate::lasers::LaserOrigin::PlayerCharged => {
+        crate::lasers::LaserOrigin::PlayerCharged
+        | crate::lasers::LaserOrigin::PlayerTechnology => {
             crate::laser_player_runtime::advance_actor(state, phase, id)
         }
     }
@@ -311,7 +313,7 @@ pub fn advance_impact(state: &mut State, phase: Phase, id: u32) -> Result<(), St
 }
 pub(crate) fn restore_fast_positions(state: &mut State) {
     for laser in &mut state.lasers {
-        if laser.origin == crate::lasers::LaserOrigin::PlayerCharged {
+        if laser.origin.is_player() {
             laser.restore_fast_position();
         }
     }
@@ -322,7 +324,7 @@ pub(crate) fn uninit_actor(state: &mut State, actor: ActorRef) -> Result<(), Str
         .iter_mut()
         .find(|laser| laser.id == actor.id)
         .ok_or("Laser Uninit handle is unresolved")?;
-    if laser.origin != crate::lasers::LaserOrigin::PlayerCharged {
+    if !laser.origin.is_player() {
         return Err("Player Uninit received legacy NPC actor".into());
     }
     if laser.uninitialized == Some(true) {
@@ -361,9 +363,7 @@ pub(crate) fn retire_full(state: &mut State) -> Result<(), String> {
         .lasers
         .iter()
         .filter(|laser| {
-            laser.origin == crate::lasers::LaserOrigin::PlayerCharged
-                && !laser.active
-                && laser.uninitialized == Some(false)
+            laser.origin.is_player() && !laser.active && laser.uninitialized == Some(false)
         })
         .map(|laser| ActorRef {
             kind: ActorKind::Laser,
@@ -375,7 +375,7 @@ pub(crate) fn retire_full(state: &mut State) -> Result<(), String> {
     }
     let mut released = Vec::new();
     for laser in &mut state.lasers {
-        if laser.origin != crate::lasers::LaserOrigin::PlayerCharged {
+        if !laser.origin.is_player() {
             continue;
         }
         if laser.uninitialized == Some(true) {
@@ -409,7 +409,7 @@ pub(crate) fn retire_full(state: &mut State) -> Result<(), String> {
         .actor_scheduler
         .retain(|actor| !released.contains(&actor));
     state.lasers.retain(|laser| {
-        laser.origin != crate::lasers::LaserOrigin::PlayerCharged
+        !laser.origin.is_player()
             || laser.uninitialized != Some(true)
             || laser.impact.as_ref().is_some_and(|impact| !impact.removed)
     });
@@ -419,7 +419,7 @@ pub(crate) fn reset_room(state: &mut State) -> Result<(), String> {
     let actors: Vec<_> = state
         .lasers
         .iter()
-        .filter(|laser| laser.origin == crate::lasers::LaserOrigin::PlayerCharged)
+        .filter(|laser| laser.origin.is_player())
         .map(|laser| ActorRef {
             kind: ActorKind::Laser,
             id: laser.id,

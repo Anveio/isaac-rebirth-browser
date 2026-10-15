@@ -215,6 +215,8 @@ pub(crate) enum ControllerChannel {
     OrdinaryKnife,
     ControlledKnife,
     ChargedBrimstone,
+    OrdinaryTechnology,
+    ControlledTechnology,
     ControlledBrimstone,
     ControlledTear,
     Unimplemented(PrimaryWeaponC08),
@@ -234,6 +236,10 @@ pub(crate) fn resolve_controller(
             ControllerChannel::ControlledBrimstone
         }
         PrimaryWeaponC08::Brimstone => ControllerChannel::ChargedBrimstone,
+        PrimaryWeaponC08::Technology if items.primary_permanent_presence(329)? => {
+            ControllerChannel::ControlledTechnology
+        }
+        PrimaryWeaponC08::Technology => ControllerChannel::OrdinaryTechnology,
         PrimaryWeaponC08::Ludovico => ControllerChannel::ControlledTear,
         other => ControllerChannel::Unimplemented(other),
     })
@@ -394,7 +400,16 @@ pub(crate) fn admits_neutral_brimstone_properties(
     source_player_type == Some(0) && items.admits_neutral_kind2()
 }
 
-///50E4A7 executes this current38 getter only AFTER the real Laser Spawn.
+///Independent neutral50D090 kinds2/3 footprint for Technology. Its cached
+///context predicate alone does not establish a getter/controller capability.
+pub(crate) fn admits_neutral_technology_properties(
+    items: ItemInputs<'_>,
+    source_player_type: Option<u32>,
+) -> bool {
+    source_player_type == Some(0) && items.admits_technology_cache_context()
+}
+
+///50E4A7/50E2A8 execute this current38 getter only AFTER the real Laser Spawn.
 ///Neutral kind2 requests no RNG; the generic3C scale is not a Laser consumer.
 pub(crate) fn resolve_neutral_kind2_damage(
     items: ItemInputs<'_>,
@@ -402,7 +417,9 @@ pub(crate) fn resolve_neutral_kind2_damage(
     stats: PlayerStats,
 ) -> Result<f32, String> {
     stats.validate()?;
-    if !admits_neutral_brimstone_properties(items, source_player_type) {
+    if !admits_neutral_brimstone_properties(items, source_player_type)
+        && !admits_neutral_technology_properties(items, source_player_type)
+    {
         return Err("kind2 requires an unadmitted source modifier/context branch".into());
     }
     Ok(stats.damage)
@@ -474,7 +491,7 @@ pub(crate) fn admit_current_laser_contact_flags(
             .as_ref()
             .ok_or("Laser kind3 actual Player items absent")?,
     )?;
-    if !inputs.admits_neutral_kind3() {
+    if !inputs.admits_neutral_kind3() && !inputs.admits_technology_cache_context() {
         return Ok(LaserStatusAdmission::UnmappedBuilderModifiers);
     }
     //Actual476869..8A1 status masks start at8; currentlow3 is inert.

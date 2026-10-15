@@ -30,6 +30,94 @@ pub(crate) struct OrdinaryBrimBirth {
     pub(crate) color_ccc: AttackColor,
 }
 
+#[derive(Clone, Copy)]
+pub(crate) struct OrdinaryTechnologyBirth {
+    pub(crate) player_position: WorldVector,
+    pub(crate) aim_cardinal: WorldVector,
+    ///Actual50B720(kind0) directed eye lookup, never Brimstone's Mouth.
+    pub(crate) render_offset_from_50b720: WorldVector,
+    pub(crate) flags_c98: AttackFlags,
+    pub(crate) color_ccc: AttackColor,
+}
+
+///Literal50E1C0 selected mode0/r8true: own variant2/lifetime3 factory.
+///No C18 write: the caller immediately invokes Full on the returned actor.
+pub(crate) fn admit_ordinary_technology(
+    state: &mut State,
+    birth: OrdinaryTechnologyBirth,
+    kind2_damage: fn(&State) -> Result<f32, String>,
+) -> Result<ActorRef, String> {
+    if !birth.player_position.is_finite()
+        || !birth.render_offset_from_50b720.is_finite()
+        || !birth.color_ccc.is_finite()
+        || !cardinal(birth.aim_cardinal)
+    {
+        return Err("Technology requires finite actual cardinal aim and directed eye owner".into());
+    }
+    let id = state.next_laser;
+    let next = id.checked_add(1).ok_or("Laser handle exhausted")?;
+    let angle = (crate::fmath::atan2(
+        f64::from(birth.aim_cardinal.y),
+        f64::from(birth.aim_cardinal.x),
+    ) as f32)
+        * f32::from_bits(0x4265_2ee0);
+    let seed = state.boot_lifecycle.shared.next_u32(); //476151 after50B720.
+    let mut laser = Laser::initialize_technology(id, seed, state.game_update_count);
+    laser.position = birth.player_position;
+    laser.angle = angle;
+    laser.remaining_updates = 3; //50E235, independently of Brim15.
+    laser.render_offset = birth.render_offset_from_50b720;
+    laser.spawner_type = 1;
+    laser.parent = Some(PLAYER);
+    laser.parent_offset = delta(birth.player_position, crate::bombs::player_world(state));
+    let actor = ActorRef {
+        kind: ActorKind::Laser,
+        id,
+    };
+    state.lasers.push(laser);
+    state.next_laser = next;
+    state.actor_scheduler.admit(actor)?;
+    let index = state.lasers.len() - 1;
+    state.lasers[index].attack_flags = birth.flags_c98;
+    state.lasers[index].line_flags = Some(birth.flags_c98);
+    state.lasers[index].source_color = birth.color_ccc;
+    state.lasers[index].current_color = birth.color_ccc;
+    state.lasers[index].sprite.tint = birth.color_ccc.tint;
+    state.lasers[index].sprite.offsets = birth.color_ccc.offsets;
+    //50E2A8 actual kind2 is AFTER Spawn/v58; mode1's direct C88 branch is
+    //not a substitute, and mode2's bounded random-flags branch is unadmitted.
+    let damage = kind2_damage(state)?;
+    if !damage.is_finite() || damage < 0.0 {
+        return Err("Technology kind2 returned invalid actual damage".into());
+    }
+    state.lasers[index].collision_damage = damage;
+    state.lasers[index].grid_collision_class = 5; //50E2BF.
+                                                  //50E2CB..E5 selected r8true: y<-.5 or x>.5 takes raw7E4=-10.
+    state.lasers[index].render_sort_offset =
+        if birth.aim_cardinal.y < -0.5 || birth.aim_cardinal.x > 0.5 {
+            -10.0
+        } else {
+            3000.0
+        };
+    Ok(actor)
+}
+
+pub(crate) fn advance_ordinary_technology_initial(
+    state: &mut State,
+    actor: ActorRef,
+) -> Result<(), String> {
+    if actor.kind != ActorKind::Laser
+        || !state.lasers.iter().any(|laser| {
+            laser.id == actor.id
+                && laser.origin == LaserOrigin::PlayerTechnology
+                && laser.first_update
+        })
+    {
+        return Err("Technology initial callback has an unresolved actor".into());
+    }
+    advance_actor(state, Phase::Update, actor.id)
+}
+
 fn frontier(state: &mut State, channel: &str) {
     state
         .weapon_admission
@@ -131,8 +219,17 @@ fn initialize_first(state: &mut State, index: usize) -> Result<(), String> {
         state.system_clock.system_counter.wrapping_sub(1),
         //Actual table66CDB8 variant1→476320→ParentPlayer476410.
         SoundRequest {
-            id: 7,
-            volume: 0.5,
+            id: if state.lasers[index].variant == 2 {
+                133
+            } else {
+                7
+            },
+            //4763FD actual666118=.6; variant1/476435 keeps its own.5.
+            volume: if state.lasers[index].variant == 2 {
+                0.6
+            } else {
+                0.5
+            },
             delay: 2,
             looping: false,
             pitch: 1.0,
@@ -159,9 +256,22 @@ fn initialize_first(state: &mut State, index: usize) -> Result<(), String> {
         position_offset: ZERO,
         scale: WorldVector { x: 1.0, y: 1.0 },
         rotation: 0.0,
-        depth: laser.render_sort_offset - 5.0,
-        actor: "gfx/1000.050_brimstoneimpact.anm2".into(),
-        animation: "Start".into(),
+        //4795F4 writes Brim sort-5; variant2 leaves real Effect Init7F8=0.
+        depth: if laser.variant == 2 {
+            0.0
+        } else {
+            laser.render_sort_offset - 5.0
+        },
+        actor: if laser.variant == 2 {
+            "gfx/1000.050_laserimpact.anm2"
+        } else {
+            "gfx/1000.050_brimstoneimpact.anm2"
+        }
+        .into(),
+        source_subtype: Some(if laser.variant == 2 { 0 } else { 1 }),
+        sprite_flip_x: None,
+        raw_814: None,
+        animation: if laser.variant == 2 { "Idle" } else { "Start" }.into(),
         animation_clock: 0.0,
         animation_playing: true,
         source_color: Some(laser.current_color),
@@ -172,6 +282,14 @@ fn initialize_first(state: &mut State, index: usize) -> Result<(), String> {
     state.next_effect = next;
     state.actor_scheduler.admit(actor)?;
     state.lasers[index].child = Some(actor);
+    if state.lasers[index].variant == 2 {
+        //479726..77B, AFTER actual Effect Spawn/SetChild/SetParent and BEFORE
+        //v58 color/immediate Full. These are two real shared Bound consumers.
+        impact.sprite_flip_x = Some(state.boot_lifecycle.shared.bounded(2) == 0);
+        impact.raw_814 = Some(state.boot_lifecycle.shared.bounded(4) as f32 * 90.0);
+        impact.source_color = Some(state.lasers[index].current_color);
+        impact.current_color = Some(state.lasers[index].current_color);
+    }
     crate::laser_npc_runtime::advance_impact_full(&mut impact, false)?;
     state.lasers[index].impact = Some(impact);
     let laser = &mut state.lasers[index];
@@ -184,6 +302,13 @@ fn initialize_first(state: &mut State, index: usize) -> Result<(), String> {
 ///Authored real Layer0 frame owner consumed by47842E..47F. The actor has two
 ///layers; its XPosition+Width is not an assumed zero displacement.
 fn root_extent(laser: &Laser) -> Result<f32, String> {
+    if laser.origin == LaserOrigin::PlayerTechnology {
+        if laser.variant != 2 || laser.sprite.animation != "RedLaser" || THIN_LASER_LAYER_COUNT != 1
+        {
+            return Err("Technology requires its actual one-layer RedLaser owner".into());
+        }
+        return Ok(0.0); // Authored7/2 layer count1 ->47842C skips root lookup.
+    }
     if LASER_LAYER_COUNT <= 1 {
         return Ok(0.0);
     }
@@ -241,12 +366,24 @@ fn body(state: &mut State, index: usize, grid: &Grid, dc4: WorldVector) -> Resul
     laser.line.origin = start;
     laser.line.offset = endpoint;
     laser.line.straight_controls(); //5791F0(mode0), no target mutation.
-    laser.line.resample(0.3)?;
-    //5786A0 queries each point+458*.4. It compares saved CALLER gridclass
-    //EDX/r13d to5, not the returned terrain collision. Admitted receiver3
-    //discards that result for every terrain; receiver5 remains unadmitted.
-    for point in laser.line.points.iter().skip(2) {
-        grid.collision_at(*point + laser.render_offset * 0.4);
+                                    //479250 variant2 explicitly selects .7; other admitted ordinary paths
+                                    //reach478FF8's .3. These are source calls, not an accuracy setting.
+    laser
+        .line
+        .resample(if laser.variant == 2 { 0.7 } else { 0.3 })?;
+    //5786A0 starts at point2. Caller class3 discards every terrain result;
+    //actual Technology class5 erases [first blocked point,end), excluding
+    //that point. Terrain0/1/4/5 continue; no fitted endpoint/range clamp.
+    let mut cut = None;
+    for (i, point) in laser.line.points.iter().enumerate().skip(2) {
+        let collision = grid.collision_at(*point + laser.render_offset * 0.4);
+        if laser.grid_collision_class == 5 && collision > 1 && collision != 4 && collision != 5 {
+            cut = Some(i);
+            break;
+        }
+    }
+    if let Some(index) = cut {
+        laser.line.points.truncate(index);
     }
     let end = *laser
         .line
@@ -269,24 +406,35 @@ fn body(state: &mut State, index: usize, grid: &Grid, dc4: WorldVector) -> Resul
             .as_mut()
             .filter(|impact| child.kind == ActorKind::Effect && impact.id == child.id)
             .ok_or("ordinary Laser actual Child identity is unresolved")?;
-        impact.scale = WorldVector {
-            x: laser.sprite.scale.x * 0.5 + 0.5,
-            y: laser.sprite.scale.y,
-        };
-        impact.position = laser.position;
-        impact.position_offset = delta(end + laser.render_offset, laser.position);
-        let angle = (crate::fmath::atan2(f64::from(normalized.y), f64::from(normalized.x)) as f32)
-            * f32::from_bits(0x4265_2ee0);
-        impact.rotation = crate::source_angles::wrap_180(angle - 90.0);
+        if laser.variant == 2 {
+            //478FA0: thin Laser writes its child's physical position directly.
+            //It does not execute variant1/3 scale,458 or angle callbacks.
+            impact.position = end + laser.render_offset;
+        } else {
+            impact.scale = WorldVector {
+                x: laser.sprite.scale.x * 0.5 + 0.5,
+                y: laser.sprite.scale.y,
+            };
+            impact.position = laser.position;
+            impact.position_offset = delta(end + laser.render_offset, laser.position);
+            let angle = (crate::fmath::atan2(f64::from(normalized.y), f64::from(normalized.x))
+                as f32)
+                * f32::from_bits(0x4265_2ee0);
+            impact.rotation = crate::source_angles::wrap_180(angle - 90.0);
+        }
     }
     //Missing Parent deliberately leaves31F unchanged (478AD7→478A60).
     if laser.parent == Some(PLAYER) && state.player.dead {
         laser.dead = true;
     }
     if laser.dead || laser.contact_disabled {
-        laser.sprite.scale.x *= 0.895;
-        if laser.sprite.scale.x < 0.08 {
-            laser.remove();
+        if laser.variant == 2 {
+            laser.remove(); //478AFC/478B04→478B0D, no thick-Laser fade.
+        } else {
+            laser.sprite.scale.x *= 0.895;
+            if laser.sprite.scale.x < 0.08 {
+                laser.remove();
+            }
         }
     }
     //Actual478A7A passes edx0 to444890. Entity sequence is not added here.
@@ -362,7 +510,11 @@ pub(crate) fn advance_actor(state: &mut State, phase: Phase, id: u32) -> Result<
     }
     if laser.subtype != 0
         || !laser.line_enabled && !laser.first_update
-        || laser.grid_collision_class != 3
+        || match laser.origin {
+            LaserOrigin::PlayerCharged => laser.variant != 1 || laser.grid_collision_class != 3,
+            LaserOrigin::PlayerTechnology => laser.variant != 2 || laser.grid_collision_class != 5,
+            LaserOrigin::NpcShootAngle => true,
+        }
         || laser.attack_flags.0 != 0
         || laser.rotation_enabled
         || laser.max_distance != 0.0
@@ -397,7 +549,11 @@ pub(crate) fn advance_actor(state: &mut State, phase: Phase, id: u32) -> Result<
     if laser.remaining_updates > 0 && !laser.fast {
         laser.remaining_updates -= 1;
         if laser.remaining_updates == 0 {
-            laser.contact_disabled = true;
+            if laser.variant == 2 {
+                laser.dead = true; //4791CA; next body observes31F and Remove.
+            } else {
+                laser.contact_disabled = true; //479370 thick-Laser fade owner.
+            }
         }
     }
     laser.previous_angle = Some(laser.angle);

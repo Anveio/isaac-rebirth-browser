@@ -46,6 +46,10 @@ pub struct PlayerItems {
     pub entity_spawn_seed: u32,
     #[serde(default)]
     pub costume118: Option<crate::player_costume118::Costume118>,
+    ///Actual fresh68 registration owns LeftEye. Old restore/other wardrobe
+    ///history never receives an inventory-derived positive null owner.
+    #[serde(default)]
+    pub technology_eye_registered: Option<bool>,
     pub owned_counts: Vec<i32>,
     pub temporary_collectibles: Vec<TemporaryCollectible>,
     #[serde(default)]
@@ -102,6 +106,7 @@ impl PlayerItems {
             pocket_rngs,
             entity_spawn_seed,
             costume118: None,
+            technology_eye_registered: Some(false),
             owned_counts: vec![0; 347],
             temporary_collectibles: Vec::new(),
             // 519680/51968A/519524 and the 28-word loop at 519798.
@@ -538,12 +543,19 @@ pub(crate) fn add_collectible(
     touched: bool,
 ) -> Result<(), String> {
     let config = items::definition(id).ok_or("granted collectible config absent")?;
+    let normal_isaac = state.weapon_admission.source_player_type == Some(0);
     let owner = state
         .player_items
         .as_mut()
         .expect("checked Player item owner");
     owner.owned_counts[id as usize] = owner.owned_counts[id as usize].wrapping_add(1);
-    if ![1, 4, 6, 114, 118, 329, 304].contains(&id) {
+    //68 has the same closed zero-amount/common auxiliary producer. Preserve
+    //only an existing owner in its bounded cache context; never create Some.
+    let keep_technology_luck = id == 68
+        && normal_isaac
+        && crate::item_pipeline::ItemInputs::new(owner)
+            .is_ok_and(|inputs| inputs.admits_technology_cache_context());
+    if ![1, 4, 6, 114, 118, 329, 304].contains(&id) && !keep_technology_luck {
         // These admitted grant paths preserve the fresh auxiliary words.
         // Nonzero setters and restore need their own producer binding.
         owner.luck_inputs = None;
@@ -554,6 +566,7 @@ pub(crate) fn add_collectible(
         state.player.transformation_counts = None;
     }
     crate::player_costume118::on_collectible_added(state, id);
+    crate::technology::on_collectible_added(state, id);
     if config.kind != 3 || !touched {
         authored_grants(state, config);
     }

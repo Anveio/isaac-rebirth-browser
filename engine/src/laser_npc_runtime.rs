@@ -223,6 +223,9 @@ pub(crate) fn admit(state: &mut State, parent: u32, birth: LaserBirth) -> Result
         id: impact_id,
     })?;
     let mut impact = Impact {
+        source_subtype: None,
+        sprite_flip_x: None,
+        raw_814: None,
         parent: Some(ActorRef {
             kind: ActorKind::Laser,
             id,
