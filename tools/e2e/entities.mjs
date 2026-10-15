@@ -1,7 +1,7 @@
 // Entity specs: one small module per authored room entity in ./entities/.
-// suites.mjs turns each into a live state-pair suite `entity-<name>`, graded
-// by tools/foundation/entity-state-pair.mjs over rooms that
-// tools/original/entity-scenarios.py (or boss-scenarios.py) finds for it.
+// The `entities` suite (suites.mjs) grades every spec with
+// tools/foundation/entity-state-pair.mjs over rooms and routes that
+// tools/original/entities-scenarios.py finds; `entity-<name>` runs one alone.
 //
 //   export default {
 //     type: 12, variant: 0,                 // entities2.xml identity (omit for a room-shape spec)

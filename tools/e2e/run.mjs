@@ -8,6 +8,8 @@
 //   npm run test:e2e -- --list               suite ids as JSON (CI matrix)
 //   npm run test:e2e -- --keep-evidence      keep every artifact of passing suites too
 //   npm run test:e2e -- --keep-runs 5        slim runs older than the newest 5 (default 3)
+//   npm run test:e2e -- --affected           suites the changes since origin/main touch
+//   npm run test:e2e -- --affected --base REF --list   the selection and why
 //
 // The production build is rebuilt first when web/ or engine/ sources are newer
 // than dist/ (skip with --no-build). Failed suites print how to replay them.
@@ -16,14 +18,14 @@ import { appendFileSync, createWriteStream, existsSync, mkdirSync, readdirSync, 
 import { join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { pruneRuns, slimSuite, sweepProductionSnapshots } from './lib/retention.mjs';
-import { SUITES, suiteById } from './suites.mjs';
+import { RUNNABLE, SUITES, suiteById } from './suites.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const writeJson = (path, value) => writeFileSync(path, JSON.stringify(value, null, 2) + '\n');
 
 const argv = process.argv.slice(2);
 const ids = [], suiteArgs = [];
-let jobs = 1, output, list = false, build = true, keepEvidence = false, keepRuns = 3;
+let jobs = 1, output, list = false, build = true, keepEvidence = false, keepRuns = 3, affected = false, base = 'origin/main';
 for (let index = 0; index < argv.length; index++) {
   const arg = argv[index];
   if (arg === '--jobs') jobs = Number(argv[++index]);
@@ -32,6 +34,8 @@ for (let index = 0; index < argv.length; index++) {
   else if (arg === '--no-build') build = false;
   else if (arg === '--keep-evidence') keepEvidence = true;
   else if (arg === '--keep-runs') keepRuns = Number(argv[++index]);
+  else if (arg === '--affected') affected = true;
+  else if (arg === '--base') base = argv[++index];
   else if (arg === '--suite') ids.push(...argv[++index].split(','));
   else if (!arg.startsWith('--') && !suiteArgs.length) ids.push(...arg.split(','));
   else suiteArgs.push(arg);
@@ -43,11 +47,19 @@ if (unknown.length) {
   console.error(`Unknown suite ${unknown.join(', ')}; known: ${SUITES.map(suite => suite.id).join(', ')}`);
   process.exit(2);
 }
+let selection;
+if (affected) {
+  if (ids.length) { console.error('--affected selects suites itself; name suites or pass --affected, not both'); process.exit(2); }
+  selection = (await import('./affected.mjs')).select(base);
+  ids.push(...selection.selected.map(item => item.id));
+  if (!list) console.log(`--affected: ${ids.length}/${RUNNABLE.length} suites for ${selection.files.length} files changed since ${base} (${selection.mergeBase.slice(0, 10)}): ${ids.join(' ') || 'none'}`);
+  if (!ids.length && !list) process.exit(0);
+}
 if (list) {
-  console.log(JSON.stringify(SUITES.map(suite => suite.id)));
+  console.log(JSON.stringify(selection ? selection.selected : RUNNABLE.map(suite => suite.id), null, selection ? 2 : 0));
   process.exit(0);
 }
-const selected = ids.length ? ids.map(id => suiteById.get(id)) : SUITES;
+const selected = ids.length ? ids.map(id => suiteById.get(id)) : RUNNABLE;
 // Drivers take different flags (e.g. paired counts with --random-count), so
 // suite flags only make sense for one named suite.
 if (suiteArgs.length && selected.length !== 1) {
@@ -93,7 +105,8 @@ if (build && (!existsSync(dist) || sourcesChanged())) sh('npm', ['run', 'build']
 if (build) sh('cargo', ['build', '--manifest-path', 'engine/Cargo.toml', '--locked', '--bin', 'floor']);
 
 const runDirectory = output || join(ROOT, '.cache/e2e', `run-${new Date().toISOString().replace(/[:.]/g, '-')}`);
-const report = { schema: 2, status: 'running', startedAt: new Date().toISOString(), jobs, suiteArgs, suites: [] };
+const report = { schema: 2, status: 'running', startedAt: new Date().toISOString(), jobs, suiteArgs, suites: [],
+  ...(selection && { affected: { base, mergeBase: selection.mergeBase, files: selection.files, selected: selection.selected } }) };
 const reportPath = join(runDirectory, 'report.json');
 mkdirSync(runDirectory, { recursive: true });
 writeJson(reportPath, report);

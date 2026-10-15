@@ -279,7 +279,8 @@ pub(crate) fn advance(
     npc.position = npc.position + npc.velocity;
     npc.presented_position = npc.position;
     let mut health = npc.health();
-    npc.damage.advance(&mut health, phase)?;
+    let applied = npc.damage.advance(&mut health, phase)?;
+    npc.advance_sprite_color(phase, &applied);
     npc.hp = health.hp;
     if npc.hp < 0.0 {
         npc.dead = true;

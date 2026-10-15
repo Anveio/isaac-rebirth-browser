@@ -28,8 +28,6 @@ paired = load('entity_paired', 'foundation-paired-scenarios.py')
 runner = load('entity_clock', 'foundation-clock-run.py')
 codec = runner.codec
 GENERATOR = ROOT / 'engine/target/debug/floor'
-# --room-type restricts discovery to one authored room type (e.g. 13).
-ROOM_TYPES = None
 # Door slots 0..3 are left, up, right, down. Hold frames match the traversal
 # route that crosses each ordinary 1x1 starting-room doorway.
 DEPART = (('a', 72), ('w', 74), ('d', 72), ('s', 18))
@@ -92,7 +90,7 @@ def floor(run_seed):
     return json.loads(result.stdout)
 
 
-def admitting_slots(generated, entity, shape=(13, 7)):
+def admitting_slots(generated, entity, shape=(13, 7), room_type=None):
     start = generated['descriptors'][generated['startingDescriptor']]
     for slot, index in enumerate(start['neighbors'][:4]):
         if index is None:
@@ -101,7 +99,8 @@ def admitting_slots(generated, entity, shape=(13, 7)):
         template = descriptor['template']
         # Ordinary (1) and miniboss (6) 13x7 rooms, or ordinary larger shapes;
         # boss rooms are never adjacent to the start.
-        types = ROOM_TYPES or ((1, 6) if shape == (13, 7) else (1,))
+        # A room-type spec (e.g. Sacrifice 13) enters only that authored type.
+        types = (room_type,) if room_type is not None else (1, 6) if shape == (13, 7) else (1,)
         if template['type'] not in types or (template['width'], template['height']) != shape:
             continue
         if entity[0] is not None and not spawns:
@@ -115,14 +114,14 @@ def admitting_slots(generated, entity, shape=(13, 7)):
             yield slot, descriptor
 
 
-def discover(entity, count, attempts, shape=(13, 7)):
+def discover(entity, count, attempts, shape=(13, 7), room_type=None):
     found, tried = [], set()
     for attempt in range(1, attempts + 1):
         vector = codec.random_vector()
         if vector['seedValue'] in tried:
             continue
         tried.add(vector['seedValue'])
-        for slot, descriptor in admitting_slots(floor(vector['seedValue']), entity, shape):
+        for slot, descriptor in admitting_slots(floor(vector['seedValue']), entity, shape, room_type):
             code = codec.encode_seed(vector['seedValue'])
             found.append(case(f'random-{len(found)}', code, slot, entity,
                               {'entropy': 'OS random', 'discoveryAttempts': attempt,
@@ -145,16 +144,14 @@ def main():
     args = parser.parse_args()
     entity = (args.type, args.variant if args.type is not None else None)
     shape = tuple(int(part) for part in args.shape.split('x'))
-    global ROOM_TYPES
-    ROOM_TYPES = (args.room_type,) if args.room_type is not None else None
     cases = []
     for index, item in enumerate(args.contrived):
         code, slot = item.split(':')
-        slots = dict(admitting_slots(floor(codec.decode_seed(code)), entity, shape))
+        slots = dict(admitting_slots(floor(codec.decode_seed(code)), entity, shape, args.room_type))
         if int(slot) not in slots:
             raise ValueError(f'Contrived {code} slot {slot} does not admit {entity} in a {args.shape} room')
         cases.append(case(f'contrived-{index}', code, int(slot), entity, {'entropy': 'contrived spec seed'}, False, shape))
-    cases += discover(entity, args.count, args.attempts, shape) if args.count else []
+    cases += discover(entity, args.count, args.attempts, shape, args.room_type) if args.count else []
     print(json.dumps({'schema': 1, 'entity': {'type': args.type, 'variant': entity[1], 'shape': list(shape)}, 'cases': cases}))
 
 

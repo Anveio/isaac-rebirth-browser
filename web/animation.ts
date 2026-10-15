@@ -57,6 +57,7 @@ const urls = import.meta.glob([
   "../references/isaac/rebirth/resources/gfx/grid/door_13_librarydoor.png",
   "../references/isaac/rebirth/resources/gfx/grid/rocks_basement.png",
   "../references/isaac/rebirth/resources/gfx/grid/grid_spikes.png",
+  "../references/isaac/rebirth/resources/gfx/grid/grid_pit.png",
   "../references/isaac/rebirth/resources/gfx/grid/grid_fireplace.png",
   "../references/isaac/rebirth/resources/gfx/grid/effect_005_fire.png",
   "../references/isaac/rebirth/resources/gfx/grid/effect_ember.png",
@@ -154,6 +155,15 @@ export class Assets {
     const layer = animation.LayerAnimations.find(layer => layer.LayerId === layerId);
     return layer?.Visible ? sampleFrame(layer.Frames, tick, animation.Loop) : undefined;
   }
+  /** The spritesheet image an authored layer samples. */
+  layerImage(path: string, layerId: number): HTMLImageElement {
+    const actor = (sceneData as unknown as Record<string, Actor>)[normalize(path)];
+    if (!actor) throw new Error(`Missing authored animation: ${path}`);
+    const definition = actor.Layers.find(layer => layer.Id === layerId);
+    const sheet = definition && actor.Spritesheets.find(candidate => candidate.Id === definition.SpritesheetId);
+    if (!sheet) throw new Error(`Missing authored layer ${path}:${layerId}`);
+    return this.image(`${actor.BaseSpritesheetPath}/${sheet.Path}`);
+  }
   nullFrame(path: string, name: string, nullId: number, tick: number): SampledFrame | undefined {
     const actor = (sceneData as unknown as Record<string, Actor>)[normalize(path)];
     if (!actor) throw new Error(`Missing authored animation: ${path}`);
@@ -179,6 +189,14 @@ export class Assets {
       if (!layer.Visible || options.layers && !options.layers.includes(layer.LayerId)) continue;
       const found = sampleFrame(layer.Frames, tick, animation.Loop); if (!found) continue;
       const frame = overrideFrame(found, options.overrides?.[layer.LayerId]);
+      // The root keyframe colour combines into every layer (tints multiply,
+      // offsets add); only the brimstone impact authors a non-white root.
+      if (root.RedTint !== 1 || root.GreenTint !== 1 || root.BlueTint !== 1 || root.RedOffset || root.GreenOffset || root.BlueOffset) {
+        frame.RedTint = Math.fround(frame.RedTint * root.RedTint); frame.GreenTint = Math.fround(frame.GreenTint * root.GreenTint);
+        frame.BlueTint = Math.fround(frame.BlueTint * root.BlueTint);
+        frame.RedOffset = Math.fround(frame.RedOffset + root.RedOffset); frame.GreenOffset = Math.fround(frame.GreenOffset + root.GreenOffset);
+        frame.BlueOffset = Math.fround(frame.BlueOffset + root.BlueOffset);
+      }
       const color = options.color;
       if (color) {
         // Tints multiply and offsets add; colorize is zero for every caller.

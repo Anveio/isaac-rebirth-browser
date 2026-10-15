@@ -136,6 +136,12 @@ impl<'a> ItemInputs<'a> {
                 })
     }
 
+    /// An independent strict 511F10 trace proves 68 ordered requests for zero
+    /// familiars with these inputs. Actual manager queries remain required.
+    pub(crate) fn admits_selected_zero_familiar_requests(self) -> bool {
+        self.admits_selected_scalar_completion()
+    }
+
     fn has_unmapped_owner(self, flag: u32, supported: &[u32]) -> bool {
         self.owner
             .owned_counts
@@ -282,4 +288,42 @@ pub(crate) fn resolve_neutral_flight(
         && inputs.admits_selected_scalar_completion()
         && transformation_counts == Some([0, 0]))
     .then_some((false, 5))
+}
+
+/// 513C80 computes a signed wrapping sum, then CVTSI2SS and ADDSS. Its
+/// auxiliary words and Game 10EAD8 are distinct inputs; absent history is unknown.
+pub(crate) fn resolve_luck(
+    inputs: ItemInputs<'_>,
+    source_player_type: Option<u32>,
+    source_run_flags: Option<u64>,
+) -> Result<Option<f32>, String> {
+    if inputs
+        .owner
+        .luck_inputs
+        .is_some_and(|auxiliary| !auxiliary.source_d58.is_finite())
+    {
+        return Err("Luck requires a finite actual D58 input".into());
+    }
+    let (Some(auxiliary), Some(run_flags)) = (inputs.owner.luck_inputs, source_run_flags) else {
+        return Ok(None);
+    };
+    if source_player_type != Some(0) || !inputs.admits_selected_scalar_completion() {
+        return Ok(None);
+    }
+    let sum = auxiliary
+        .source_13d0
+        .wrapping_sub(auxiliary.source_13cc)
+        .wrapping_add(auxiliary.source_d3c)
+        .wrapping_add(auxiliary.source_d40)
+        .wrapping_add(inputs.owned_count(253))
+        .wrapping_add(inputs.owned_count(46))
+        .wrapping_add(inputs.owned_count(343));
+    let mut luck = sum as f32 + auxiliary.source_d58;
+    if run_flags & 0x100 != 0 {
+        luck += 50.0_f32; // 513CFE/513D06, after the trinket and character branches.
+    }
+    if !luck.is_finite() {
+        return Err("Luck callback overflowed its source f32 output".into());
+    }
+    Ok(Some(luck))
 }

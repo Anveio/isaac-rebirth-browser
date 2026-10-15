@@ -4,7 +4,7 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { CHECKPOINTS } from './verify.mjs';
 import { TASKS } from './systems.mjs';
-import { SUITES } from '../e2e/suites.mjs';
+import { RUNNABLE } from '../e2e/suites.mjs';
 import { readStageMaskCases } from './stage-masks.mjs';
 import { discoverPairedGameScenarios, discoverTestCases, discoverOriginalClockScenarios, validateOriginalClockScenarios, ORIGINAL_CLOCK_SOURCE } from './scenario-index.mjs';
 import { discoverDstUnits, DST_REGISTRY } from './dst-index.mjs';
@@ -134,7 +134,7 @@ Generated from [the suite registry](tools/e2e/suites.mjs). Each suite runs the f
 
 | Suite | Proves | Driver |
 | --- | --- | --- |
-${SUITES.map(suite => `| \`${suite.id}\` | ${suite.about} | [${suite.entry.split('/').at(-1)}](${suite.entry})${suite.args.length ? ` \`${suite.args.join(' ')}\`` : ''} |`).join('\n')}
+${RUNNABLE.map(suite => `| \`${suite.id}\` | ${suite.about} | [${suite.entry.split('/').at(-1)}](${suite.entry})${suite.args.length ? ` \`${suite.args.join(' ')}\`` : ''} |`).join('\n')}
 
 ## Executable coverage
 

@@ -40,6 +40,9 @@ export function npcFields(native, actor, phase) {
     ['position', vector(native.position), vector(phase === 0 ? actor.presentedPosition : actor.position)],
     ['velocity', vector(native.velocity), vector(actor.velocity)], ['target', vector(native.npcTarget), vector(actor.target)],
     ['championColor', native.npcChampionColor, actor.champion?.color ?? -1],
+    // Sprite Color +2d0 (champion colour or timed hit flash), every component.
+    ['spriteColor', native.spriteColor?.map(f32), actor.spriteColor &&
+      [...actor.spriteColor.current.tint, ...actor.spriteColor.current.colorize, ...actor.spriteColor.current.offset].map(f32)],
   ];
 }
 
@@ -109,7 +112,10 @@ export function entityRows(rows, source, actual, spec, render) {
   const rock = cell => ROCK_ANIMATIONS[cell.type] && cell.state === 1 &&
     (cell.type === 2 && cell.variant >= 1000 ? [cell.index, cell.type, 'big', cell.variant - 1000] : [cell.index, cell.type, ROCK_ANIMATIONS[cell.type], cell.variant]);
   check(rows, 'render.rocks', source.grid.map(rock).filter(Boolean),
-    render?.grid.map(drawn => [drawn.index, drawn.kind, drawn.animation, drawn.frame]));
+    render?.grid.filter(drawn => drawn.kind !== 7).map(drawn => [drawn.index, drawn.kind, drawn.animation, drawn.frame]));
+  // Pit Render draws `pit` frame variant (the autotile frame 5684c0 stores).
+  check(rows, 'render.pits', source.grid.filter(cell => cell.type === 7).map(cell => [cell.index, 'pit', cell.variant]),
+    render?.grid.filter(drawn => drawn.kind === 7).map(drawn => [drawn.index, drawn.animation, drawn.frame]));
   for (const [field, expected, observed] of spec.roomFields?.(source, actual, phase) ?? []) check(rows, field, expected, observed);
   const selected = npcs.filter(actor => spec.matches(actor.type, actor.variant));
   for (const native of selected) {
