@@ -141,8 +141,10 @@ pub(crate) fn ground_collision(npc: &mut Npc, grid: &Grid) -> Result<(), String>
     Ok(())
 }
 
+/// 442c2d: classes 3 and 5 both clamp the center to the room bounds before
+/// the sample loop (empty for zero points, e.g. Larry Jr.'s class 5).
 pub(crate) fn clamp_walls(npc: &mut Npc, grid: &Grid) -> Result<(), String> {
-    if npc.grid_collision_class == 3 {
+    if matches!(npc.grid_collision_class, 3 | 5) {
         npc.position = grid.clamp_room(npc.position, 0.0);
         npc.presented_position = npc.position;
     }
