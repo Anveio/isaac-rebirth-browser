@@ -512,6 +512,13 @@ fn run_hold(before: &State, count: u32, after: &State, run_started: bool) {
 
 /// Invariants of every published state.
 pub fn state(state: &State) {
+    // Every "unchanged" and "same game" comparison relies on this; a field
+    // that can hold NaN breaks it.
+    props::always!(
+        PartialEq::eq(state, state),
+        "game: state equality is reflexive",
+        json!({ "screen": state.screen })
+    );
     let details = || json!({ "screen": state.screen, "tick": state.tick });
     let catalog = state.character_catalog.len();
     props::always!(
@@ -642,6 +649,10 @@ pub fn state(state: &State) {
         allocated(state.tears.iter().map(|tear| tear.id), state.next_tear)
             && allocated(state.bombs.iter().map(|bomb| bomb.id), state.next_bomb)
             && allocated(
+                state.knives.iter().map(|knife| knife.id),
+                state.attack_runtime.next_knife
+            )
+            && allocated(
                 state.room.pickups.iter().map(|pickup| pickup.id),
                 state.next_pickup
             )
@@ -706,6 +717,7 @@ pub fn state(state: &State) {
             .any(|familiar| familiar.id == actor.id),
         ActorKind::Tear => state.tears.iter().any(|tear| tear.id == actor.id),
         ActorKind::Bomb => state.bombs.iter().any(|bomb| bomb.id == actor.id),
+        ActorKind::Knife => state.knives.iter().any(|knife| knife.id == actor.id),
         ActorKind::Pickup => state
             .room
             .pickups

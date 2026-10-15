@@ -76,5 +76,10 @@ export function routingView(s) {
     player: { x: (s.player.x - 32) / 0.65, y: (s.player.y + 46) / 0.65, controls: s.player.controlsEnabled },
     grid: s.room.grid && solidGrid(s.room.grid, s.room.npcs.filter(n => !n.dead && !n.removed)),
     doors: s.room.appearance.doors.map(d => ({ side: d.side, state: d.state, target: d.targetRoom, x: d.worldPosition.x, y: d.worldPosition.y })),
+    keys: s.inventory.keys,
+    // Live fireplaces, which a route may shoot out rather than walk around.
+    fires: s.room.npcs.filter(n => n.kind === 33 && !n.dead && !n.removed).map(n => ({ x: n.position.x, y: n.position.y })),
+    openGrid: s.room.grid && solidGrid(s.room.grid, s.room.npcs.filter(n => !n.dead && !n.removed && n.kind !== 33)),
+    pickups: s.room.pickups.filter(p => !p.removed).map(p => ({ variant: p.variant, x: p.position.x, y: p.position.y })),
   };
 }

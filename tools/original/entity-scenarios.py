@@ -90,7 +90,7 @@ def floor(run_seed):
     return json.loads(result.stdout)
 
 
-def admitting_slots(generated, entity, shape=(13, 7)):
+def admitting_slots(generated, entity, shape=(13, 7), room_type=None):
     start = generated['descriptors'][generated['startingDescriptor']]
     for slot, index in enumerate(start['neighbors'][:4]):
         if index is None:
@@ -99,7 +99,8 @@ def admitting_slots(generated, entity, shape=(13, 7)):
         template = descriptor['template']
         # Ordinary (1) and miniboss (6) 13x7 rooms, or ordinary larger shapes;
         # boss rooms are never adjacent to the start.
-        types = (1, 6) if shape == (13, 7) else (1,)
+        # A room-type spec (e.g. Sacrifice 13) enters only that authored type.
+        types = (room_type,) if room_type is not None else (1, 6) if shape == (13, 7) else (1,)
         if template['type'] not in types or (template['width'], template['height']) != shape:
             continue
         if entity[0] is not None and not spawns:
@@ -113,14 +114,14 @@ def admitting_slots(generated, entity, shape=(13, 7)):
             yield slot, descriptor
 
 
-def discover(entity, count, attempts, shape=(13, 7)):
+def discover(entity, count, attempts, shape=(13, 7), room_type=None):
     found, tried = [], set()
     for attempt in range(1, attempts + 1):
         vector = codec.random_vector()
         if vector['seedValue'] in tried:
             continue
         tried.add(vector['seedValue'])
-        for slot, descriptor in admitting_slots(floor(vector['seedValue']), entity, shape):
+        for slot, descriptor in admitting_slots(floor(vector['seedValue']), entity, shape, room_type):
             code = codec.encode_seed(vector['seedValue'])
             found.append(case(f'random-{len(found)}', code, slot, entity,
                               {'entropy': 'OS random', 'discoveryAttempts': attempt,
@@ -138,6 +139,7 @@ def main():
     parser.add_argument('--contrived', action='append', default=[], metavar='CODE:SLOT')
     parser.add_argument('--count', type=int, default=2, help='OS-random cases to discover')
     parser.add_argument('--attempts', type=int, default=4000)
+    parser.add_argument('--room-type', type=int, help='authored room type to enter (default ordinary 1, or 1/6 at 13x7)')
     parser.add_argument('--shape', default='13x7', help='authored room WIDTHxHEIGHT (13x7, 13x14, 26x7, 26x14)')
     args = parser.parse_args()
     entity = (args.type, args.variant if args.type is not None else None)
@@ -145,11 +147,11 @@ def main():
     cases = []
     for index, item in enumerate(args.contrived):
         code, slot = item.split(':')
-        slots = dict(admitting_slots(floor(codec.decode_seed(code)), entity, shape))
+        slots = dict(admitting_slots(floor(codec.decode_seed(code)), entity, shape, args.room_type))
         if int(slot) not in slots:
             raise ValueError(f'Contrived {code} slot {slot} does not admit {entity} in a {args.shape} room')
         cases.append(case(f'contrived-{index}', code, int(slot), entity, {'entropy': 'contrived spec seed'}, False, shape))
-    cases += discover(entity, args.count, args.attempts, shape) if args.count else []
+    cases += discover(entity, args.count, args.attempts, shape, args.room_type) if args.count else []
     print(json.dumps({'schema': 1, 'entity': {'type': args.type, 'variant': entity[1], 'shape': list(shape)}, 'cases': cases}))
 
 

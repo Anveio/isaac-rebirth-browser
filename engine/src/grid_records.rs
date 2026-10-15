@@ -203,22 +203,6 @@ pub fn constructs_grid_object(entity_type: u16) -> bool {
     )
 }
 
-/// Fresh room admission5cecc0: authored groups first, enabled door slots
-/// ascending, top/bottom columns, then left/right rows. Additional normal
-/// shape0 decoration follows the walls. The starting room has no NPCs.
-pub fn admit_fresh(room: &mut Room, shared: &mut Mt19937, game_update: u32) -> Result<(), String> {
-    let selectors = room
-        .spawns
-        .as_ref()
-        .ok_or("grid admission requires authored selectors")?
-        .selectors
-        .clone();
-    for selector in &selectors {
-        admit_selector(room, shared, selector, game_update)?;
-    }
-    admit_boundary(room, shared, game_update, false)
-}
-
 /// One authored grid selector of the 5cecc0 selector pass. Decorations and
 /// the rocks/spikes recovered by room geometry own their constructor seeds;
 /// other GridBase objects keep the two constructor draws without an owner.

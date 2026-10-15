@@ -255,6 +255,42 @@ fn familiar_catalog(path: &Path, entities_xml: &str) -> String {
     output
 }
 
+fn attack_catalog(path: &Path) -> String {
+    let actors: Value =
+        serde_json::from_str(&fs::read_to_string(path).expect("read authored attack animations"))
+            .expect("parse authored attack animations");
+    let actor = "gfx/008.000_moms knife.anm2";
+    let catalogue = &actors[actor];
+    let default = catalogue["DefaultAnimation"]
+        .as_str()
+        .expect("knife default clip");
+    let mut output = format!("pub static KNIFE_DEFINITION: Definition = Definition {{ entity_type: 8, variant: 0, actor: {actor:?}, default_clip: {default:?}, ");
+    for field in [
+        "base_hp",
+        "collision_radius",
+        "collision_mass",
+        "collision_damage",
+        "friction",
+        "shadow_size",
+    ] {
+        output.push_str(&format!("{field}: crate::content::entity(8, 0).{field}, "));
+    }
+    output.push_str("grid_points: crate::content::entity(8, 0).grid_points, clips: &[");
+    for clip in catalogue["Animations"]
+        .as_array()
+        .expect("knife authored clips")
+    {
+        output.push_str(&format!(
+            "crate::familiars::Clip {{ name: {:?}, frames: {}, looping: {} }},",
+            clip["Name"].as_str().expect("knife clip name"),
+            clip["FrameNum"].as_u64().expect("knife clip length"),
+            clip["Loop"].as_bool().expect("knife clip loop")
+        ));
+    }
+    output.push_str("] };\n");
+    output
+}
+
 fn information_catalog(xml: &str, path: &Path) -> String {
     let actors: Value =
         serde_json::from_str(&fs::read_to_string(path).expect("read authored stage animations"))
@@ -558,6 +594,35 @@ fn main() {
     generated.push_str(&format!(
         "pub const KEEPER_ANIMATION_FRAMES: [u32; 9] = {keeper_frames:?};\n"
     ));
+    let shopkeeper_animations = npc_assets["gfx/017.001_shopkeeper.anm2"]["Animations"]
+        .as_array()
+        .expect("Shopkeeper animations are authored");
+    let shopkeeper_clips: Vec<(u32, bool)> = (1..=9)
+        .map(|subtype| {
+            let name = format!("Shopkeeper {subtype}");
+            let clip = shopkeeper_animations
+                .iter()
+                .find(|animation| animation["Name"] == name)
+                .expect("every derived Shopkeeper subtype has an authored clip");
+            (
+                u32::try_from(clip["FrameNum"].as_u64().expect("Shopkeeper frame count"))
+                    .expect("Shopkeeper frame count fits native actor clock"),
+                clip["Loop"].as_bool().expect("Shopkeeper clip loop flag"),
+            )
+        })
+        .collect();
+    generated.push_str(&format!(
+        "pub const SHOPKEEPER_ANIMATION_FRAMES: [u32; 9] = {:?};\n\
+         pub const SHOPKEEPER_ANIMATION_LOOPS: [bool; 9] = {:?};\n",
+        shopkeeper_clips
+            .iter()
+            .map(|clip| clip.0)
+            .collect::<Vec<_>>(),
+        shopkeeper_clips
+            .iter()
+            .map(|clip| clip.1)
+            .collect::<Vec<_>>()
+    ));
     let light = authored_light_frame(&animations);
     let npc_animations = manifest.parent().unwrap().join("web/npc-data.json");
     println!("cargo:rerun-if-changed={}", npc_animations.display());
@@ -842,6 +907,13 @@ fn main() {
         familiar_catalog(&familiar_path, &xml),
     )
     .expect("write authored Familiar/effect catalogue");
+    let attack_path = manifest.parent().unwrap().join("web/attack-data.json");
+    println!("cargo:rerun-if-changed={}", attack_path.display());
+    fs::write(
+        output.join("attack_catalog.rs"),
+        attack_catalog(&attack_path),
+    )
+    .expect("write authored attack catalogue");
     fs::write(output.join("item_catalog.rs"), items.stdout)
         .expect("write authored collectible catalogue");
 }

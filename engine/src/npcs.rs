@@ -51,6 +51,8 @@ pub struct Npc {
     pub death_effect_seed: Option<u32>,
     pub dead: bool,
     pub removed: bool,
+    /// Entity Init 446A90 clears the independent eligibility byte +494.
+    pub raw_494: bool,
     pub damage: combat::DamageQueue,
     pub keeper: Option<crate::keepers::KeeperState>,
     pub fireplace: Option<crate::fireplaces::FireplaceState>,
@@ -64,6 +66,9 @@ pub struct Npc {
     pub shooter: Option<crate::plain_npc::ShooterTimers>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub champion: Option<crate::champions::Champion>,
+    /// Sprite colour (+2d0) and its timed stack; the renderer draws it.
+    #[serde(default)]
+    pub sprite_color: crate::sprite_color::SpriteColor,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub gluttony: Option<crate::gluttony::GluttonyState>,
     /// NPCAI_Pathfinder (+7d8) for families that walk the grid.
@@ -78,6 +83,11 @@ pub struct Npc {
     pub sprite_events: SpriteEvents,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub dingle: Option<crate::dingle::DingleState>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub wall_hugger: Option<crate::wall_hugger::WallHuggerState>,
+    /// Entity+494: BaseUpdate discards every queued hit.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub invincible: bool,
 }
 
 #[derive(Clone, Copy, Debug, Default, Deserialize, Serialize, PartialEq, Eq)]
@@ -257,7 +267,13 @@ pub fn player_contacts(state: &mut State) -> Result<(), String> {
         if !combat::player_npc_overlap(&player_body, &npc_body)? {
             continue;
         }
-        let contact_damage = npc.collision_damage;
+        // Callback49c2ec: a Wall Hugger still showing "No-Spikes" pushes the
+        // player without hurting it.
+        let contact_damage = if npc.kind == 218 && npc.animation == "No-Spikes" {
+            0.0
+        } else {
+            npc.collision_damage
+        };
         if contact_damage > 0.0 {
             combat::try_damage_player(state, contact_damage as u8, 60, 0)?;
         }
@@ -294,10 +310,12 @@ pub fn nonplayer_contacts(state: &mut State) -> Result<(), String> {
             let (left, right) = state.room.npcs.split_at_mut(second);
             let first = &mut left[first];
             let second = &mut right[0];
+            // 49b980: two Wall Huggers never collide.
             if first.dead
                 || second.dead
                 || first.entity_collision_class != 4
                 || second.entity_collision_class != 4
+                || (first.kind == 218 && second.kind == 218)
             {
                 continue;
             }
@@ -405,6 +423,19 @@ pub fn admit_room_combat(state: &mut State) {
     if state.room.npcs.iter().any(|npc| npc.can_shut_doors) {
         state.room.combat_clear = false;
         state.room.combat_clear_countdown = 10;
+        change_doors(state, false);
+    }
+}
+
+/// Fresh5cecc0 reads signed current16ac+pending16b0 after factories. A
+/// nonpositive total sets descriptor3d; a positive total preserves its flag.
+/// This is separate from the doorway's immediate update/countdown10 tail.
+pub(crate) fn initialize_startup_clear(state: &mut State) {
+    state.room.combat_clear_countdown = 0;
+    if state.room.manager_counts.countable_total() <= 0 {
+        state.room.combat_clear = true;
+    }
+    if !state.room.combat_clear {
         change_doors(state, false);
     }
 }
@@ -518,6 +549,24 @@ pub(crate) fn direction(random: &mut Mt19937) -> WorldVector {
 }
 
 impl Npc {
+    /// ResetColor 47f430: a champion's table colour, otherwise plain white.
+    pub(crate) fn base_color(&self) -> crate::sprite_color::Color {
+        self.champion
+            .as_ref()
+            .map_or(crate::sprite_color::Color::WHITE, |champion| {
+                crate::champions::color(champion.color)
+            })
+    }
+    /// BaseUpdate after the damage drain: colour countdown, then hit flashes.
+    pub(crate) fn advance_sprite_color(
+        &mut self,
+        phase: crate::phase::Phase,
+        applied: &[crate::combat::AppliedDamage],
+    ) {
+        let base = self.base_color();
+        self.sprite_color.advance(phase, applied, base);
+    }
+
     /// Actual Entity+318 view for the supported typed NPC owners. Normal
     /// Fly/AttackFly/RoundWorm Init441c80 clears flags then47ed20 ORs4;
     /// concrete subclasses preserve their own later flag writes.
@@ -581,6 +630,7 @@ impl Npc {
             death_effect_seed: None,
             dead: false,
             removed: false,
+            raw_494: false,
             damage: combat::DamageQueue::default(),
             keeper: None,
             fireplace: None,
@@ -590,11 +640,14 @@ impl Npc {
             actor: String::new(),
             shooter: None,
             champion: None,
+            sprite_color: crate::sprite_color::SpriteColor::default(),
             flip_x: false,
             pathfinder: None,
             gluttony: None,
             sprite_events: SpriteEvents::default(),
             dingle: None,
+            wall_hugger: None,
+            invincible: false,
         }
     }
 

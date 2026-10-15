@@ -63,7 +63,9 @@ def plan(generated, boss):
     """Shortest room chain start → boss room through quiet ordinary rooms, or a rejection reason."""
     descriptors, spawns = generated['descriptors'], generated['spawns']
     room = next(index for index, descriptor in enumerate(descriptors) if descriptor['template']['type'] == 5)
-    if not any(row['category'] == 'entity' and (row['type'], row['variant']) == boss for row in spawns[room]['selectors']):
+    selector = next((row for row in spawns[room]['selectors']
+                     if row['category'] == 'entity' and (row['type'], row['variant']) == boss), None)
+    if selector is None:
         return None, 'other-boss'
     start = generated['startingDescriptor']
     previous, queue = {start: None}, [start]
@@ -83,7 +85,8 @@ def plan(generated, boss):
     while previous[rooms[0]] is not None:
         rooms.insert(0, previous[rooms[0]])
     entry = descriptors[rooms[-2]]['neighbors'].index(room) % 4
-    return {'rooms': rooms, 'entrySlot': entry, 'boss': descriptors[room]['template']['name']}, None
+    return {'rooms': rooms, 'entrySlot': entry, 'boss': descriptors[room]['template']['name'],
+            'template': descriptors[room]['template'], 'selector': selector}, None
 
 
 def fight(entry, mode='sweep'):
@@ -144,17 +147,27 @@ def original_route(result, directory):
     return route
 
 
-def case(identifier, code, route, boss, provenance, randomized, mode='sweep'):
+def arrival(code, route):
+    """The paired case for `code` cut at gameplay-start plus the port-recorded
+    route into the boss room, ending at `boss-room-arrival`; or a rejection."""
     result = paired.build('paired-bomb-moving-even', code)
     for name in ('tape', 'pairedTape'):
         end = next(index for index, action in enumerate(result[name]) if action.get('label') == 'gameplay-start')
         result[name] = result[name][:end + 1]
     recorded = record(result, route['rooms'])
     if recorded['status'] != 'pass':
-        return None, f"port-route: {recorded['reason']}", None
-    tail = recorded['actions'] + fight(route['entrySlot'], mode)
+        return None, f"port-route: {recorded['reason']}"
     for name in ('tape', 'pairedTape'):
-        result[name] = result[name] + tail
+        result[name] = result[name] + recorded['actions']
+    return result, recorded
+
+
+def case(identifier, code, route, boss, provenance, randomized, mode='sweep'):
+    result, recorded = arrival(code, route)
+    if result is None:
+        return None, recorded, None
+    for name in ('tape', 'pairedTape'):
+        result[name] = result[name] + fight(route['entrySlot'], mode)
     runner.validate_tape(result['tape'])
     result['scenario'] = {'id': identifier, 'description': f"Walk {len(route['rooms']) - 1} rooms into {route['boss']} and fight",
                           'systems': ['enemies-bosses', 'damage-pipeline', 'room-connectivity', 'projectile-physics'],

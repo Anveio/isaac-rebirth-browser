@@ -15,7 +15,10 @@ def load(name, path):
 
 
 monstro = load('blood_start_monstro', Path(__file__).with_name('monstro-scenarios.py'))
+boss = load('blood_start_boss', Path(__file__).with_name('boss-scenarios.py'))
 paired = monstro.paired
+# Validated with `boss-scenarios.py --type 20 --contrived EJ32YEEL --count 0`.
+CONTRIVED = 'EJ32YEEL'
 
 
 def observed(count, label, stride=16):
@@ -46,20 +49,21 @@ def boss_sweep():
 
 
 def contrived():
-    result = paired.build('paired-room-combat', 'B9112M6H')
+    # A port-recorded route that a fresh original was validated to follow into
+    # Monstro's room (boss-scenarios.py); the boss sweep starts on arrival.
+    route, reason = boss.plan(boss.floor(paired.runner.codec.decode_seed(CONTRIVED)), (20, 0))
+    if route is None:
+        raise ValueError(f'{CONTRIVED} no longer plans a quiet route to Monstro: {reason}')
+    result, recorded = boss.arrival(CONTRIVED, route)
+    if result is None:
+        raise ValueError(f'{CONTRIVED} route was not recorded: {recorded}')
     result['bloodStartSelection'] = {
-        'kind': 'contrived deterministic identity-only source fixture', 'seedValue': 978,
-        'route': [6, 8, 9, 11, 0], 'bossSeed': 2321890733,
-        'scope': 'First deterministic978 selected before actual game grading; never OS-random or a reachability guarantee.',
+        'kind': 'contrived boss-route fixture, original-validated by boss-scenarios.py', 'code': CONTRIVED,
+        'route': route['rooms'], 'bossSeed': route['selector']['spawnSeed'],
     }
-    tail = hold('d', 120, 'blood-start-to8') + clear_prefix('blood-room8')
-    tail += hold('d', 74, 'blood-room8-align') + hold('s', 120, 'blood-to9') + clear_prefix('blood-room9')
-    tail += hold('s', 120, 'blood-to11') + clear_prefix('blood-room11')
-    tail += hold('s', 54, 'blood-room11-align') + hold('a', 120, 'blood-to0') + boss_sweep()
     for name in ('tape', 'pairedTape'):
-        end = next(i for i, action in enumerate(result[name]) if action.get('label') == 'gameplay-start')
-        result[name] = result[name][:end + 1] + tail
-    return result
+        result[name] += boss_sweep()
+    return result, route
 
 
 def cohort():
@@ -69,7 +73,8 @@ def cohort():
     for name in ('tape', 'pairedTape'):
         random[name] += boss_sweep()
     cases = []
-    for base, kind in [(contrived(), 'contrived978'), (random, 'recorded-os-bll')]:
+    fixture, route = contrived()
+    for base, kind in [(fixture, 'contrived-route'), (random, 'recorded-os-bll')]:
         for offset in (0, 1):
             case = json.loads(json.dumps(base))
             case['scenario'] = {
@@ -79,10 +84,12 @@ def cohort():
                 'systems': ['enemies-bosses', 'damage-pipeline', 'sprite-effects', 'audio'],
             }
             case['bloodStartInputPhaseOffset'] = offset
+            routed = kind == 'contrived-route'
             case['bloodStartBossIdentity'] = {
-                'descriptorIndex': 0, 'gridIndex': 110 if kind == 'contrived978' else 59,
-                'type': 5, 'variant': 1010 if kind == 'contrived978' else 1012, 'name': 'Monstro',
-                'spawnSeed': 2321890733 if kind == 'contrived978' else 1050413383,
+                'descriptorIndex': route['rooms'][-1] if routed else 0,
+                'gridIndex': route['selector']['gridIndex'] if routed else 59,
+                'type': 5, 'variant': route['template']['variant'] if routed else 1012, 'name': 'Monstro',
+                'spawnSeed': route['selector']['spawnSeed'] if routed else 1050413383,
                 'scope': 'Independent source-selected fixture identity; gate-only expectation, never a runtime input.',
             }
             case['bloodStartRequired'] = ['bossAdmission', 'bossDamage', 'bossDeath', 'poof04', 'bloodGush',

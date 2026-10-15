@@ -2,8 +2,9 @@
 // traces and raw states; what replay and triage need is small:
 //   - every suite keeps report.json, scenarios.json, case.json, logs and every
 //     file of at most 1 MB, so a recorded case can always be replayed;
-//   - recorded browser traces are gzipped, not dropped (the --affected map is
-//     rebuilt from them);
+//   - recorded browser traces are gzipped, not dropped, and the input traces
+//     embedded in large browser evidence archives are kept beside them (the
+//     --affected map is rebuilt from them);
 //   - a failing suite keeps everything until its run falls out of the newest
 //     --keep-runs runs.
 // Only runner-created .cache/e2e/run-* directories are ever pruned.
@@ -11,7 +12,7 @@ import { createReadStream, createWriteStream, existsSync, readdirSync, readFileS
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pipeline } from 'node:stream/promises';
-import { createGzip } from 'node:zlib';
+import { createGzip, gunzipSync, gzipSync } from 'node:zlib';
 
 const ALWAYS = new Set(['report.json', 'scenarios.json', 'case.json']);
 const SMALL = 1 << 20;
@@ -38,10 +39,28 @@ export async function slimSuite(directory) {
       continue;
     }
     if (name.endsWith('.gz') && /trace/.test(name)) continue;
+    if (/^browser.*\.json(\.gz)?$/.test(name)) keepInputTraces(path);
     unlinkSync(path);
     removed.files++; removed.bytes += size;
   }
   return { removed, gzipped };
+}
+
+// The public input part (seed, commands, backend callbacks) of every trace in
+// a browser evidence file, without its state history: <name>.traces.json.gz.
+function keepInputTraces(path) {
+  let document;
+  try { document = JSON.parse((path.endsWith('.gz') ? gunzipSync(readFileSync(path)) : readFileSync(path)).toString()); } catch { return; }
+  const found = [];
+  (function walk(value) {
+    if (!value || typeof value !== 'object') return;
+    if (Number.isInteger(value.initialSeed) && Array.isArray(value.commands)) {
+      found.push({ initialSeed: value.initialSeed, bootEpochSeed: value.bootEpochSeed ?? 0, commands: value.commands, backendEvents: (value.backendEvents ?? []).map(({ afterCommandCount, command }) => ({ afterCommandCount, command })) });
+      return;
+    }
+    for (const child of Array.isArray(value) ? value : Object.values(value)) walk(child);
+  })(document);
+  if (found.length) writeFileSync(path.replace(/\.json(\.gz)?$/, '.traces.json.gz'), gzipSync(JSON.stringify({ schema: 1, traces: found })));
 }
 
 // Slim every suite of the runner-created runs older than the newest `keep`.

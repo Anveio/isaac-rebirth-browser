@@ -9,6 +9,8 @@ export interface Player {
   soulHp: number; blackHeartMask: number; eternalHearts: number;
   facing: Direction; bodyFacing: Direction; walkFrame: number; headFrame: number; shooting: boolean; shootingLock: number;
   renderOffset: { x: number; y: number }; controlsEnabled: boolean;
+  transformationCounts: [number, number] | null;
+  flying: boolean | null; gridCollisionClass: number | null;
   eye: "negative" | "positive";
   shotsFired: number;
 }
@@ -55,7 +57,29 @@ export interface SpriteEffect {
   bloodEffect?: {kind: "poof04" | "bloodGush"};
   footprint?: boolean;
 }
-export interface ActorRef { kind: "player" | "familiar" | "tear" | "bomb" | "pickup" | "npc" | "projectile" | "effect"; id: number; }
+export interface ActorRef { kind: "player" | "familiar" | "tear" | "knife" | "laser" | "bomb" | "pickup" | "npc" | "projectile" | "effect"; id: number; }
+export interface Knife {
+  id: number; entityType: number; variant: number; subtype: number; spawnSeed: number; birthGameUpdate: number; actorRng: ItemRng;
+  spawnerType: number; spawnerVariant: number; parent: ActorRef | null;
+  childChain4a0: "unknown" | "empty";
+  active: boolean; dead: boolean; visible: boolean;
+  position: {x: number; y: number}; savedPosition: {x: number; y: number};
+  homePosition: {x: number; y: number}; homingTarget: ActorRef | null;
+  renderOffset: {x: number; y: number}; velocity: {x: number; y: number};
+  configuredFriction: number; currentFriction: number;
+  collisionRadius: number; collisionMass: number; collisionDamage: number;
+  hp: number; maxHp: number; raw494: boolean;
+  entityFlags: number; gridCollisionClass: number; entityCollisionClass: number;
+  attackFlags: [number, number]; sourceColor: AttackColor; currentColor: AttackColor; fast: boolean; sprite: ActorSprite;
+  raw7e0: number; raw7e4: number; raw7e8: number; raw7ec: number;
+  raw7f0: number; raw7f4: number; raw7f8: number; raw7fc: {x: number; y: number};
+  raw804: {x: number; y: number}; raw80c: number; raw810: number; raw814: boolean;
+  line: {origin: {x: number; y: number}; offset: {x: number; y: number}; subdivisions: number | null; mode: number | null; width: number | null;
+    controls: {position: {x: number; y: number}; incoming: {x: number; y: number}; outgoing: {x: number; y: number}}[];
+    history: {x: number; y: number}[]; points: {x: number; y: number}[]; priorPoints: {x: number; y: number}[]; length: number | null};
+  lineRaw18: [number, number] | null;
+  raw8a0: number; raw8a4: number; raw8a8: number; hitSequences: number[];
+}
 export interface MtState { words: number[]; index: number; }
 export interface GridSeedSample { roomRecord: number; gridIndex: number; seeds: [number, number]; }
 export interface GridRecord {
@@ -139,6 +163,7 @@ export interface Pickup {
   presentedPosition: {x: number; y: number}; anchorPosition: {x: number; y: number};
   velocity: {x: number; y: number}; configuredFriction: number; currentFriction: number; collisionMass: number;
 }
+export interface SpriteColorValue { tint: number[]; colorize: number[]; offset: number[]; }
 export interface RunIntroduction { age: number; active: boolean; title: string; stage: boolean; }
 export interface BossBar { fill: number | null; flash: number; maximum: number; }
 export interface PauseMenu {
@@ -177,6 +202,7 @@ export interface Floor {
 export interface Room {
   left: number; right: number; top: number; bottom: number; appearance: RoomAppearance;
   descriptor: RoomDescriptor | null;
+  initializationGameUpdate: number | null; loaded: boolean;
   pathCosts: number[] | null;
   spawns: {tintedRockIndex: number; finalSpawnState: number; selectors: {groupIndex: number; gridIndex: number; category: "entity" | "grid"; type: number; variant: number; subtype: number; position: {x: number; y: number}; groupSeed: number; spawnSeed: number}[]} | null;
   pickups: Pickup[];
@@ -188,12 +214,13 @@ export interface Room {
     position: {x: number; y: number}; presentedPosition: {x: number; y: number}; velocity: {x: number; y: number};
     hp: number; maxHp: number; collisionRadius: number; collisionMass: number; collisionDamage: number;
     gridCollisionClass: number; entityCollisionClass: number; canShutDoors: boolean; boss: boolean;
-    state: number; frameAge: number; animationFrame: number; animation: string; animationClock: number; animationPlaying: boolean; visible: boolean; savedInitializedState: number; shadowSize: number; dead: boolean; removed: boolean;
+    state: number; frameAge: number; animationFrame: number; animation: string; animationClock: number; animationPlaying: boolean; visible: boolean; savedInitializedState: number; shadowSize: number; dead: boolean; removed: boolean; raw494: boolean;
     damage: {pendingDamage: number; pendingFlags: number};
     keeper: {anchor: {x: number; y: number}; entityFlags: number; stateFrame: number; countdown: number;
       animation: string; animationClock: number; animationPlaying: boolean; tint: number[]; offsets: number[]} | null;
     actor?: string;
     champion?: {color: number; scale: number; speed: number; timer: number | null};
+    spriteColor: {current: SpriteColorValue; stack: {priority: number; color: SpriteColorValue; duration: number; remaining: number}[]};
     shooter?: {cooldown: number; delay: number};
     flipX?: boolean;
     dip: {entityFlags: number; birthGameUpdate: number; currentFriction: number; flipX: boolean;
@@ -234,9 +261,16 @@ export interface StageEffects {
 }
 export interface State {
   weaponCache: {primary: number; flagsC98: [number,number]; colorCa0: AttackColor; colorCcc: AttackColor};
+  attackRuntime: {chargeC0c: number | null; headDirectionDa0: number | null; shootingAimDb4: {x: number; y: number} | null; movementDirectionD9c: number | null; persistent: ActorRef | null; secondary: (ActorRef | null)[]; nextKnife: number};
+  knives: Knife[];
+  stageShootingGuard: {state: number; counter: number};
   weaponAdmission: {sourcePlayerType: number|null; c18IsKnownEmpty: boolean; pendingPrimaryCleanup: {fromPrimary:number;toPrimary:number}|null; unadmittedController: {primary:number;channel:string}|null};
-  lasers: {id:number; position:{x:number;y:number}; presentedPosition:{x:number;y:number}; positionOffset:{x:number;y:number}; length:number; rotation:number; scale:{x:number;y:number}; actor:string; animation:string; animationClock:number; removed:boolean;
-    impact: {position:{x:number;y:number}; positionOffset:{x:number;y:number}; scale:{x:number;y:number}; rotation:number; actor:string; animation:string; animationClock:number; removed:boolean} | null}[];
+  lasers: {id:number; origin:"npcShootAngle"; entityType:number; variant:number; subtype:number;
+    spawnSeed:number; parent:ActorRef|null; child:ActorRef|null; active:boolean; dead:boolean; visible:boolean;
+    position:{x:number;y:number}; savedPosition:{x:number;y:number}; renderOffset:{x:number;y:number};
+    parentOffset:{x:number;y:number}; angle:number; renderSortOffset:number; remainingUpdates:number;
+    beamLength:number; fast:boolean; sourceColor:AttackColor; currentColor:AttackColor; sprite:ActorSprite;
+    impact: {position:{x:number;y:number}; positionOffset:{x:number;y:number}; scale:{x:number;y:number}; rotation:number; actor:string; animation:string; animationClock:number; removed:boolean}|null; actor:string}[];
   enemyProjectiles: {id:number; spawnSeed:number; position:{x:number;y:number}; presentedPosition:{x:number;y:number}; velocity:{x:number;y:number}; height:number; scale:number; animation:string|null; animationFrame:number; dead:boolean; removed:boolean}[];
   schema: 1; tickRate: 60; tick: number; menuAnimationTick: number; runTick: number; gameUpdateCount: number; screen: Screen;
   titleAnimationFrame: number; menuFade: { active: boolean; alpha: number; color: [number, number, number, number] };
@@ -259,7 +293,8 @@ export interface State {
     pickupPresentation: {itemId: number; animationFrame: number; animationPlaying: boolean} | null;
     collectionDelay: number; activeId: number; activeCharge: number; activeSubordinateCharge: number; saveWordD88: number;
     activeStateD80: number; activeStateD84: number; reserveCharge: number; activeFlag3076: boolean;
-    unevaluatedCacheFlags: number} | null;
+    unevaluatedCacheFlags: number;
+    luckInputs: {sourceD3c: number; sourceD40: number; sourceD58: number; source13cc: number; source13d0: number} | null} | null;
   informationAnimation: {state: number; delay: number; currentActor: string | null;
     currentClip: string | null; spritesheet: string | null; definitionLoaded: boolean; frame: number; playing: boolean};
   savedRunSummary: SavedRunSummary | null;
@@ -276,7 +311,8 @@ export interface State {
   roomDisplayFlags: number[]; revealedSecretConnections: [number, number][];
   persistedRooms: Record<string, Room>;
   roomTransition: {fromRoom: number; targetRoom: number; fromSlot: number; targetSlot: number; phase: "out" | "in" | "bossScene" | "bossCleanup"; fullUpdates: number; bossScene: {presentationIndex: number; animationFrame: number; animationPlaying: boolean} | null} | null;
-  playerStats: {shotSpeed: number; damage: number; tearHeight: number; tearFallingSpeed: number; tearFallingAcceleration: number; moveSpeed: number};
+  sourceCacheRunFlags: number | null;
+  playerStats: {shotSpeed: number; damage: number; tearHeight: number; tearFallingSpeed: number; tearFallingAcceleration: number; moveSpeed: number; luck: number | null};
   player: Player; room: Room; stageEffects: StageEffects; inventory: { coins: number; bombs: number; keys: number };
   publicActions: { menuConfirm: boolean; menuBack: boolean; activePressed: boolean; activeTriggered: boolean; pocketPressed: boolean; pocketTriggered: boolean; enterWasDown: boolean; spaceWasDown: boolean; escapeWasDown: boolean; pocketWasDown: boolean };
   playerAnimation: { current: "Trapdoor" | "Appear" | "Death" | "UseItem" | "Hit" | null; frame: number; playing: boolean; guard: boolean };
@@ -299,11 +335,13 @@ export interface State {
   runIntroduction: RunIntroduction; bossBar: BossBar; pauseMenu: PauseMenu;
   playerDeath: { lastDamageFlags: number; gameOver: { state: number; damageFlags: number; diaryFrame: number; diaryPlaying: boolean } | null; systemPending: "restart" | "exit" | null };
 }
-export interface ResourceInputs { challengesXml: string; }
+export interface ResourceInputs { challengesXml: string; specialRooms?: number[]; }
 export type Command = { type: "key"; code: string; down: boolean } | { type: "text"; text: string } | { type: "tick"; count: number; timestampMillis?: number } | { type: "audioVolume"; sfx_volume: number } | { type: 'musicVolume'; volume: number } | MusicBackendCommand;
 interface Exports extends WebAssembly.Exports {
   memory: WebAssembly.Memory; abi_version: () => number; reset: (initialSeed: number, bootEpochSeed: number) => number; request_ptr: (length: number) => number;
   reset_with_resources: (initialSeed: number, bootEpochSeed: number) => number;
+  reset_with_boot_resources: (initialSeed: number, bootEpochSeed: number) => number;
+  boot_resource_ptr: (length: number) => number;
   command: () => number; snapshot_ptr: () => number; snapshot_len: () => number;
   error_ptr: () => number; error_len: () => number; public_keys_ptr: () => number; public_keys_len: () => number;
   mt_draws_enable: (enabled: number) => void; mt_draws_ptr: () => number;
@@ -351,14 +389,14 @@ export class Engine {
     let result: number;
     if (resources === undefined) result = this.wasm.reset(initialSeed, bootEpochSeed);
     else {
-      if (typeof this.wasm.reset_with_resources !== "function")
+      if (typeof this.wasm.reset_with_boot_resources !== "function" || typeof this.wasm.boot_resource_ptr !== "function")
         throw new Error("WASM resource ingress is stale; rebuild with npm run build:wasm");
       const bytes = new TextEncoder().encode(JSON.stringify(resources));
-      if (bytes.length > 65_536) throw new Error("Boot resource input exceeds 64 KiB");
-      const ptr = this.wasm.request_ptr(bytes.length);
+      if (bytes.length > 512 * 1024) throw new Error("Boot resource input exceeds 512 KiB");
+      const ptr = this.wasm.boot_resource_ptr(bytes.length);
       if (ptr === 0) throw new Error("WASM resource allocation failed");
       new Uint8Array(this.wasm.memory.buffer, ptr, bytes.length).set(bytes);
-      result = this.wasm.reset_with_resources(initialSeed, bootEpochSeed);
+      result = this.wasm.reset_with_boot_resources(initialSeed, bootEpochSeed);
     }
     if (result !== 0) throw new Error(this.read(this.wasm.error_ptr(), this.wasm.error_len()));
     return this.snapshot();

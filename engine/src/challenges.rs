@@ -12,6 +12,8 @@ const AUTHORED_XML: &str = include_str!(concat!(env!("OUT_DIR"), "/challenges.xm
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct ResourceInputs {
     pub challenges_xml: String,
+    ///Complete authored STB bytes, never a decoded actor/state DTO.
+    pub special_rooms: Option<Vec<u8>>,
 }
 
 ///Exact594620 arguments stored at54eb4e/54eb5e. No semantic alias to
@@ -112,7 +114,10 @@ pub(crate) fn sample_initial_curse(
 }
 
 impl ResourceInputs {
-    pub(crate) fn catalog(self) -> Result<Catalog, String> {
+    pub(crate) fn catalog(&self) -> Result<Catalog, String> {
+        if self.challenges_xml.len() > 65_536 {
+            return Err("Challenge XML input exceeds 64 KiB".into());
+        }
         Catalog::from_xml(&self.challenges_xml)
     }
 }
@@ -299,7 +304,7 @@ impl Definition {
         }
         for &id in &self.starting_items {
             items::definition(id).ok_or("Challenge starting collectible config absent")?;
-            if !matches!(id, 1 | 4 | 114 | 118 | 329) {
+            if !matches!(id, 1 | 4 | 6 | 114 | 118 | 329 | 304) {
                 return Err("Challenge starting grant outside the mapped item frontier".into());
             }
         }
@@ -336,7 +341,6 @@ pub(crate) fn initialize_player(state: &mut State, definition: &Definition) -> R
     }
     //52e340 invokes511f10 unconditionally, even when the requested mask is0.
     crate::player_stats::evaluate_cache(state)?;
-    crate::familiars::evaluate_cache(state)?;
     state.player.initialized_3074 = true;
     Ok(())
 }

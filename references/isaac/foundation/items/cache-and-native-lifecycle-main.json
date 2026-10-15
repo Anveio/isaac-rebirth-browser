@@ -1,0 +1,188 @@
+{
+  "schema": 1,
+  "scope": "Main Number One6 scalar operators and separate Native lifecycle observability. No historical grade substitution or complete capture/whole-game acceptance.",
+  "mainAtSummary": "e0fd5e9f45e109a6def9b2a1019d779849631c64",
+  "publications": {
+    "numberOneScalar": {
+      "pr": 282,
+      "merge": "e0fd5e9f45e109a6def9b2a1019d779849631c64",
+      "qualifiedSource": "7eefafa8a7602b5197305eb597facbdbd57ff884"
+    },
+    "nativeLifecycle": {
+      "pr": 283,
+      "merge": "4b5ddbbee051f55b0e2e9fac2795773e73a71ec1"
+    }
+  },
+  "numberOne6": {
+    "ownQualification": {
+      "production": "PASS",
+      "strictAllTargetClippy": "PASS",
+      "releaseFloor": "PASS",
+      "regularFourRoute": {
+        "fieldComparisons": 37956648,
+        "differences": 0,
+        "items": [
+          1,
+          4,
+          14,
+          143
+        ]
+      },
+      "scope": "Own immutable WASM and existing supported routes; not Original equivalence."
+    },
+    "realPedestal": {
+      "sourceCaseSha256": "0187af336624e56bb912469d6d531a7a6ab04ccb3a5d92f010ce9dbc94ee9fca",
+      "sourceBankSha256": "701154740aef0854776c3290d6fcb99e66d8ec5cf23008d3415163948490f863",
+      "nativeStatus": "NATIVE_SCALAR_ACQUISITION_OBSERVED",
+      "pairedReportStatus": "MISSING_OR_DIFFERENT_SCALAR_WITNESS",
+      "finalCaptureTransportStatus": "FAILED_INCOMPLETE_FINAL_ARCHIVE",
+      "pairedRows": 632,
+      "postGrantRows": 93,
+      "numericFields": [
+        "shotSpeed",
+        "damage",
+        "tearHeight",
+        "tearFallingSpeed",
+        "tearFallingAcceleration",
+        "moveSpeed",
+        "maxFireDelay"
+      ],
+      "eachNumericFieldDifferences": 0,
+      "otherMatchingFields": [
+        "owned6",
+        "otherNonzeroOwned",
+        "queuedId",
+        "actual full/fast phase"
+      ],
+      "cache64": {
+        "differingRows": 93,
+        "browserPending": 64,
+        "nativePending": 0,
+        "status": "UNRESOLVED"
+      },
+      "actualGrant": {
+        "browserTitleRelativePresentation": 917,
+        "browserAbsolutePresentation": 980,
+        "nativeAbsolutePresentation": 1211,
+        "scope": "Distinct coordinate systems; comparison uses exact title-relative gates."
+      },
+      "durablePublicTape": {
+        "completed": true,
+        "actions": 8,
+        "gameplayPresentations": 361,
+        "commands": 698,
+        "commandsEqualDeclaration": true
+      },
+      "sourceAndToolBytePinsBeforeEqualsEnd": true,
+      "ownProductionBytesAndModesEqualQualifiedProducer": true,
+      "remaining": [
+        "Complete capture/archive transport",
+        "Appearance/cache64 completion",
+        "Auxiliary ownership and coherent regular birth",
+        "Public Challenge6 acceptance",
+        "Full body/Original-browser gameplay parity"
+      ],
+      "scope": "Actual source-pinned committed Browser prefix versus selected validated Native tuples. Seven-field numeric match does not pass the full report or incomplete archive."
+    },
+    "pendingCompanion": {
+      "pr": 288,
+      "source": "cdda2c7bedb76c64340aaf1c7f877bef0856349e",
+      "qualification": "SOURCE_ONLY at summary; no inherited acceptance"
+    },
+    "pendingReadiness": {
+      "pr": 287,
+      "qualification": "SOURCE_ONLY; held behind cache64 companion; no unsupported-history promotion"
+    }
+  },
+  "nativeLifecycle": {
+    "scope": "Separate fresh Original-only event capability. No Browser event comparison, actor implementation or triple-loadout gameplay acceptance.",
+    "strictTransport": {
+      "status": "pass",
+      "sameFunctionExceptCachedDecode": true,
+      "presentations": 1064,
+      "debugObservations": 1107,
+      "pngRows": 44,
+      "inputs": 30
+    },
+    "eventTransport": {
+      "status": "PASS",
+      "events": 24,
+      "uniqueChildIdentities": 12,
+      "pre329Identities": 12,
+      "alsoObservedPost329Identities": 8,
+      "eachIdentityEvents": [
+        "remove-post",
+        "uninit-entry"
+      ],
+      "allRemovePrecedesUninit": true,
+      "allEventFlags": {
+        "active": false,
+        "dead": true,
+        "fast322": false
+      },
+      "actualTracerExit": 0,
+      "debugRegistersRestoredExactly": true,
+      "detached": true
+    },
+    "actualGrantsTitleRelative": {
+      "114": 917,
+      "118": 379,
+      "329": 1107
+    },
+    "counterOwnership": "Actual event counter/absolute frame and previous blocked public-gate anchor remain separate; no pointer reads after target lifetime.",
+    "boundary": "Uninit-entry is not completed cleanup. Later Full manager absence/weak references remain separate observations.",
+    "frozenNativeOnlyHistory": {
+      "checks": 6744,
+      "failures": 18,
+      "coverageGaps": 18,
+      "status": "FAIL unchanged; event capability does not regrade the frozen GL-only helper"
+    },
+    "protectedBeforeEqualsEnd": true,
+    "remaining": [
+      "Paired Browser lifecycle events",
+      "Meaningful continuing-child quantifier and event-aware contract qualification",
+      "Port Has118/controlled actor implementation and game parity",
+      "Live selector-change cleanup frontier"
+    ]
+  },
+  "mainRuntimeBoundary": {
+    "implemented": [
+      "Ordinary Knife subtype0 parent (PR270)",
+      "Number One6 scoped scalar operators (PR282)"
+    ],
+    "pending": [
+      "Has118 subtype1 child actor",
+      "Ordinary Brimstone actor",
+      "Ludovico controlled actor",
+      "Paired118/114/329 continuation and cleanup",
+      "Number One6 coherent appearance/auxiliary companion",
+      "Libra304 runtime qualification"
+    ],
+    "observerIsNotActorImplementation": true
+  },
+  "proofs": {
+    "numberOneOwn": {
+      "path": "/dev/shm/isaac-number6-candidate-7eef-owned-proof/closed-own-qualification.json",
+      "sha256": "1e0442c61e9dcd0f39f060cda8f924347115372258a5add31982cd42a42221d4"
+    },
+    "numberOneNative": {
+      "path": "/dev/shm/isaac-number6-public-pedestal-v1/native6-selected-scalar-witness.json",
+      "sha256": "e86dbe740fb1d24cd63f320f97da539bcbf65551acf8be9c41334b5114382e9c"
+    },
+    "numberOnePairedCommittedPrefix": {
+      "path": "/dev/shm/isaac-number6-public-pedestal-v1/paired-committed-scalar-witness.json",
+      "sha256": "6286ed37206fbe4faac1dfa5ee76eb74d302c4ade48041112733a80cf215280b"
+    },
+    "nativeLifecycle": [
+      {
+        "path": ".cache/coordination/quality-main/native-lifecycle-group-stops-peer-v1/actual-readback-v1/report.json",
+        "sha256": "9376a5bbd2ff0f9947ee09b4128e75ee6816741168ca28e6b366f2779b727835"
+      },
+      {
+        "path": ".cache/coordination/quality-main/native-lifecycle-group-stops-peer-v1/actual-readback-v1/actual-event-identity-join.json",
+        "sha256": "201b31c83110d9922b60132a46eb51ad6853a8dffc7e87417ebd2df32599636d"
+      }
+    ]
+  },
+  "retention": "All ordinary0..2, Brim10, a320, private90ea, v7/v8 and PR270 frozen/additive results remain unchanged. Native event capability does not regrade the older 6744/18/18 helper. No comparison totals are summed."
+}

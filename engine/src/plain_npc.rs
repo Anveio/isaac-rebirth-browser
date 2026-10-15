@@ -157,6 +157,22 @@ pub(crate) fn advance(
     births: &mut Vec<Birth>,
     ai: Ai,
 ) -> Result<(), String> {
+    advance_with(npc, phase, random, world, births, ai, true)
+}
+
+/// `advance` for a family whose state0 initializer may clear the APPEAR flag
+/// (4): with `appear` false, 4f9a46 skips the hide/save, so the actor stays
+/// visible, never draws the age-1 Poof seed and runs its AI a second time in
+/// the age-0 update.
+pub(crate) fn advance_with(
+    npc: &mut Npc,
+    phase: Phase,
+    random: &mut Mt19937,
+    world: &mut NpcWorld<'_>,
+    births: &mut Vec<Birth>,
+    ai: Ai,
+    appear: bool,
+) -> Result<(), String> {
     if npc.removed {
         return Ok(());
     }
@@ -179,9 +195,11 @@ pub(crate) fn advance(
                 // then 4fb1d4 hides the actor and saves the chosen state.
                 npc.state = 0;
                 ai(npc, random, world, births, &mut friction)?;
-                npc.saved_initialized_state = npc.state;
-                npc.state = 1;
-                npc.visible = false;
+                if appear {
+                    npc.saved_initialized_state = npc.state;
+                    npc.state = 1;
+                    npc.visible = false;
+                }
             }
             1 => {
                 let seed = random.next_u32();
@@ -214,8 +232,13 @@ pub(crate) fn advance(
     npc.velocity = npc.velocity * friction;
     npc.position = npc.position + npc.velocity;
     npc.presented_position = npc.position;
+    if npc.invincible {
+        // BaseUpdate447729: an invincible actor (+494) discards its queue.
+        npc.damage.clear();
+    }
     let mut health = npc.health();
-    npc.damage.advance(&mut health, phase)?;
+    let applied = npc.damage.advance(&mut health, phase)?;
+    npc.advance_sprite_color(phase, &applied);
     npc.hp = health.hp;
     if npc.hp < 0.0 {
         npc.dead = true;

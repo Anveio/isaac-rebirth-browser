@@ -6,6 +6,7 @@
 //! the platform supplies and steers every decision. See `docs/dst.md`.
 mod entropy;
 mod harness;
+mod json_diff;
 mod props;
 mod tape;
 mod units;

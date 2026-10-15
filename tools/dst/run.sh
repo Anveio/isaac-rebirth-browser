@@ -10,10 +10,13 @@ if ! command -v cargo >/dev/null; then source "$HOME/.cargo/env"; fi
 bash tools/build-wasm.sh
 python3 tools/dst/sync-lock.py
 cargo build --manifest-path engine/dst/Cargo.toml --locked --release
+# CARGO_TARGET_DIR or Cargo configuration may move the build output.
+target_directory="$(cargo metadata --manifest-path engine/dst/Cargo.toml --locked --no-deps --format-version 1 \
+  | node -p 'JSON.parse(require("node:fs").readFileSync(0, "utf8")).target_directory')"
 output="${DST_OUTPUT:-.cache/dst/run-$(date +%s)-$$}"
 mkdir -p "$output"
 echo "DST report and retained tapes: $output"
-exec engine/dst/target/release/rebirth-dst --units all \
+exec "$target_directory/release/rebirth-dst" --units all \
   --cases "${DST_CASES:-12}" --steps "${DST_STEPS:-1500}" \
   --wasm web/generated/engine.wasm --corpus engine/dst/corpus \
   --tapes "$output/tapes" \

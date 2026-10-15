@@ -1,0 +1,1183 @@
+{
+  "schema": 1,
+  "cases": [
+    {
+      "name": "history-118-114-329-phase0",
+      "fixture": {
+        "kind": "source-authored-modified-challenge",
+        "challengeId": 1,
+        "startingItems": [
+          118
+        ],
+        "view": "item-only",
+        "authoredResourcePath": "resources/challenges.xml",
+        "baselineResourcePath": "../../../rebirth/resources/challenges.xml",
+        "specialRoomsPath": "resources/rooms/view-0/00.special rooms.stb",
+        "specialRoomsSha256": "dcdf668b089f935108e10cf6ff9a50a282f44792785d8fd47f601d26ad2f67a6",
+        "otherChallengeAttributes": "preserve all rows and attributes except explicit neutral changes and startingitems",
+        "attributeChanges": [
+          {
+            "attribute": "getcurse",
+            "baselineValue": "9",
+            "authoredValue": "0"
+          },
+          {
+            "attribute": "cursefilter",
+            "baselineValue": "6",
+            "authoredValue": "127"
+          },
+          {
+            "attribute": "roomfilter",
+            "baselineValue": "2",
+            "authoredValue": null
+          }
+        ],
+        "startRoomSpawnChange": {
+          "catalogue": 0,
+          "index": 80,
+          "type": 1,
+          "variant": 2,
+          "operation": "append",
+          "groups": [
+            {
+              "x": 7,
+              "y": 3,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 100,
+                  "subtype": 114,
+                  "weight": 1.0
+                }
+              ]
+            },
+            {
+              "x": 9,
+              "y": 3,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 100,
+                  "subtype": 329,
+                  "weight": 1.0
+                }
+              ]
+            }
+          ],
+          "allOtherRowsMetadataDoorsWeightsOrderPreserved": true
+        },
+        "declaredResetJsonBytes": 277639
+      },
+      "bootEpochSeed": 12713,
+      "initialPhaseOffset": 0,
+      "entropy": "fixed declared public history",
+      "actions": [
+        {
+          "label": "ready",
+          "keys": [],
+          "presentations": 1
+        },
+        {
+          "label": "approach-pedestal-row",
+          "keys": [
+            "w"
+          ],
+          "presentations": 28
+        },
+        {
+          "label": "settle-before-charge",
+          "keys": [],
+          "presentations": 24
+        },
+        {
+          "label": "initial-brim-charge",
+          "keys": [
+            "Right"
+          ],
+          "presentations": 120
+        },
+        {
+          "label": "release-brim-and-move-to-114",
+          "keys": [
+            "d"
+          ],
+          "presentations": 24
+        },
+        {
+          "label": "ordinary-knife-charge",
+          "keys": [
+            "Right"
+          ],
+          "presentations": 120
+        },
+        {
+          "label": "release-knife-and-move-to-329",
+          "keys": [
+            "d",
+            "s"
+          ],
+          "presentations": 44
+        },
+        {
+          "label": "controlled-triple-dispatch",
+          "keys": [
+            "Right"
+          ],
+          "presentations": 120
+        },
+        {
+          "label": "canceled-held",
+          "keys": [
+            "Right",
+            "Left"
+          ],
+          "presentations": 18
+        },
+        {
+          "label": "released",
+          "keys": [],
+          "presentations": 60
+        },
+        {
+          "label": "vertical-steering",
+          "keys": [
+            "Up"
+          ],
+          "presentations": 80
+        },
+        {
+          "label": "final-release",
+          "keys": [],
+          "presentations": 60
+        }
+      ],
+      "requires": {
+        "actualPublicChallengeEntry": true,
+        "bothGamesConsumeIdenticalDeclaredResourceBytes": true,
+        "orderedRealPedestalGrants": [
+          114,
+          329
+        ],
+        "ownedCounts": [
+          {
+            "itemId": 118,
+            "count": 1
+          }
+        ],
+        "sourceExpectedActorContract": {
+          "primaryC08": 2,
+          "family": 7,
+          "variant": 1,
+          "subtype": 0,
+          "registeredC18DuringActualLifetime": true,
+          "managerRoomPersistent": false,
+          "controlledBy329": false,
+          "requiredWhen": "actual charged release and registered lifetime"
+        },
+        "staticActorContractScope": "Initial stage only; classify each game from its own actual counts against actorStages.",
+        "actorStages": [
+          {
+            "ownedCounts": [
+              {
+                "itemId": 118,
+                "count": 1
+              }
+            ],
+            "sourceExpectedActorContract": {
+              "primaryC08": 2,
+              "family": 7,
+              "variant": 1,
+              "subtype": 0,
+              "registeredC18DuringActualLifetime": true,
+              "managerRoomPersistent": false,
+              "controlledBy329": false,
+              "requiredWhen": "actual charged release and registered lifetime"
+            },
+            "requiredWitnesses": [
+              "At actual queued114 contact, observe the own live registered 7/1/0 C18 with positive TTL; then observe its same-identity natural timer expiry and own retirement during Pickup, independently of deferred Add114."
+            ]
+          },
+          {
+            "ownedCounts": [
+              {
+                "itemId": 114,
+                "count": 1
+              },
+              {
+                "itemId": 118,
+                "count": 1
+              }
+            ],
+            "sourceExpectedActorContract": {
+              "primaryC08": 4,
+              "family": 8,
+              "variant": 0,
+              "subtype": 0,
+              "registeredC18DuringActualLifetime": true,
+              "managerRoomPersistent": true,
+              "controlledBy329": false,
+              "requiredWhen": "next actual admitted 519FC0 callback after the grant; preserve pickup/charge/control fences"
+            },
+            "requiredWitnesses": [
+              "Observe the actual deferred114 count/cache/C08 2\u21924 transition and actual C18/weak slots. Pickup42 exceeds LaserTTL15; this route does not qualify removal of a live Laser by selector change.",
+              "Before 329, observe an actual ordinary Knife C18 and an actually born 8/0/1 child whose Parent498 resolves to that Knife. Missing parent or child fails coverage."
+            ]
+          },
+          {
+            "ownedCounts": [
+              {
+                "itemId": 114,
+                "count": 1
+              },
+              {
+                "itemId": 118,
+                "count": 1
+              },
+              {
+                "itemId": 329,
+                "count": 1
+              }
+            ],
+            "sourceExpectedActorContract": {
+              "primaryC08": 4,
+              "family": 8,
+              "variant": 0,
+              "subtype": 0,
+              "registeredC18DuringActualLifetime": true,
+              "managerRoomPersistent": true,
+              "controlledBy329": true,
+              "requiredWhen": "next actual admitted 519FC0 callback after the grant; preserve pickup/charge/control fences"
+            },
+            "requiredWitnesses": [
+              "Observe the actual 329 queued grant with C08 still4; next live dispatch reuses the same existing type8 C18 and applies bit33.",
+              "Observe the SAME preexisting ParentKnife subtype1 child continuing its copied curve after the parent becomes controlled, then its own Remove and later full Uninit. Conversion does not remove this child; missing continuation or retirement fails coverage.",
+              "Observe controlled full/fast bodies and current C7C steering. Its dispatch must not emit a new ordinary 118 child or Laser; compare existing transient actors too."
+            ]
+          }
+        ],
+        "lifecycleExperiment": "brim-to-ordinary-to-controlled-triple",
+        "historyWitnessContract": "brim-ordinary-controlled-queued-lifetime-v2",
+        "sourceExcludedObligations": [
+          "Positive prior Laser TTL at deferred Add114 on uninterrupted Pickup42; ordinary release Laser TTL is15."
+        ],
+        "untestedHistoryFrontiers": [
+          "Live selector-change Laser Remove and replacement-safe Uninit need a separately admitted public route."
+        ],
+        "actualBeforeAndAfterCountsRequired": true,
+        "actualQueueGrantCacheAndControllerFencesRequired": true,
+        "actualFree5_100SelectorContactAndQueuedGrantRequired": true,
+        "canonicalDiagnosticOwner": "weaponAdmission.unadmittedController must be present and null",
+        "actualPendingPrimaryCleanup": "must be present and null",
+        "secondarySlotScope": "Observe actual C20/C28/C30 values separately. This selected route has neither Have55 nor Have87 secondary producer; null slots are not cleanup evidence. Nonempty slot cleanup needs a separately admitted public producer. Parent498 and Base4A0 are independent owners.",
+        "actualCachePendingFlags": 0,
+        "preserveAllIdentitySeedRngInitNumericFamilyAndCoverageMismatches": true,
+        "unknownDiagnosticOrMissingCoverageIsFailure": true,
+        "sourceInferredGrantPath": {
+          "orderedItems": [
+            118
+          ],
+          "each": "52E1A0 \u219252CC90 \u2192511F10 \u2192581750",
+          "final": "511F10 then3074=true",
+          "nativeDynamicCallCountObserved": false
+        },
+        "inputAndFieldScope": "Compare actual held/released/canceled input, retained DB4/DA0/C0C, counts, cache, actors and slots at each observed boundary. No fitted identities or source-equivalence across histories.",
+        "actualSourceCurseSamplerDrawsBeforeMask": true,
+        "actualLevelCurseMask": 0
+      },
+      "execution": {
+        "status": "not-executed",
+        "blockingPrerequisites": [
+          "One immutable public producer with ordinary Brim, ordinary Knife and controlled Knife on canonical stores/C18, actual guards/Remove/Uninit",
+          "Whole Special STB input and stage-aware live pickup/actor/child/cleanup observers and comparisons",
+          "Owned production build and integration-owner game/storage lease"
+        ],
+        "neverSatisfiedBy": "Static grants, final inventory, source inference, missing actor/child/cleanup/body, native-state injection or seed rerolls"
+      }
+    },
+    {
+      "name": "history-118-114-329-phase1",
+      "fixture": {
+        "kind": "source-authored-modified-challenge",
+        "challengeId": 1,
+        "startingItems": [
+          118
+        ],
+        "view": "item-only",
+        "authoredResourcePath": "resources/challenges.xml",
+        "baselineResourcePath": "../../../rebirth/resources/challenges.xml",
+        "specialRoomsPath": "resources/rooms/view-0/00.special rooms.stb",
+        "specialRoomsSha256": "dcdf668b089f935108e10cf6ff9a50a282f44792785d8fd47f601d26ad2f67a6",
+        "otherChallengeAttributes": "preserve all rows and attributes except explicit neutral changes and startingitems",
+        "attributeChanges": [
+          {
+            "attribute": "getcurse",
+            "baselineValue": "9",
+            "authoredValue": "0"
+          },
+          {
+            "attribute": "cursefilter",
+            "baselineValue": "6",
+            "authoredValue": "127"
+          },
+          {
+            "attribute": "roomfilter",
+            "baselineValue": "2",
+            "authoredValue": null
+          }
+        ],
+        "startRoomSpawnChange": {
+          "catalogue": 0,
+          "index": 80,
+          "type": 1,
+          "variant": 2,
+          "operation": "append",
+          "groups": [
+            {
+              "x": 7,
+              "y": 3,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 100,
+                  "subtype": 114,
+                  "weight": 1.0
+                }
+              ]
+            },
+            {
+              "x": 9,
+              "y": 3,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 100,
+                  "subtype": 329,
+                  "weight": 1.0
+                }
+              ]
+            }
+          ],
+          "allOtherRowsMetadataDoorsWeightsOrderPreserved": true
+        },
+        "declaredResetJsonBytes": 277639
+      },
+      "bootEpochSeed": 12713,
+      "initialPhaseOffset": 1,
+      "entropy": "fixed declared public history",
+      "actions": [
+        {
+          "label": "ready",
+          "keys": [],
+          "presentations": 1
+        },
+        {
+          "label": "approach-pedestal-row",
+          "keys": [
+            "w"
+          ],
+          "presentations": 28
+        },
+        {
+          "label": "settle-before-charge",
+          "keys": [],
+          "presentations": 24
+        },
+        {
+          "label": "initial-brim-charge",
+          "keys": [
+            "Right"
+          ],
+          "presentations": 120
+        },
+        {
+          "label": "release-brim-and-move-to-114",
+          "keys": [
+            "d"
+          ],
+          "presentations": 24
+        },
+        {
+          "label": "ordinary-knife-charge",
+          "keys": [
+            "Right"
+          ],
+          "presentations": 120
+        },
+        {
+          "label": "release-knife-and-move-to-329",
+          "keys": [
+            "d",
+            "s"
+          ],
+          "presentations": 44
+        },
+        {
+          "label": "controlled-triple-dispatch",
+          "keys": [
+            "Right"
+          ],
+          "presentations": 120
+        },
+        {
+          "label": "canceled-held",
+          "keys": [
+            "Right",
+            "Left"
+          ],
+          "presentations": 18
+        },
+        {
+          "label": "released",
+          "keys": [],
+          "presentations": 60
+        },
+        {
+          "label": "vertical-steering",
+          "keys": [
+            "Up"
+          ],
+          "presentations": 80
+        },
+        {
+          "label": "final-release",
+          "keys": [],
+          "presentations": 60
+        }
+      ],
+      "requires": {
+        "actualPublicChallengeEntry": true,
+        "bothGamesConsumeIdenticalDeclaredResourceBytes": true,
+        "orderedRealPedestalGrants": [
+          114,
+          329
+        ],
+        "ownedCounts": [
+          {
+            "itemId": 118,
+            "count": 1
+          }
+        ],
+        "sourceExpectedActorContract": {
+          "primaryC08": 2,
+          "family": 7,
+          "variant": 1,
+          "subtype": 0,
+          "registeredC18DuringActualLifetime": true,
+          "managerRoomPersistent": false,
+          "controlledBy329": false,
+          "requiredWhen": "actual charged release and registered lifetime"
+        },
+        "staticActorContractScope": "Initial stage only; classify each game from its own actual counts against actorStages.",
+        "actorStages": [
+          {
+            "ownedCounts": [
+              {
+                "itemId": 118,
+                "count": 1
+              }
+            ],
+            "sourceExpectedActorContract": {
+              "primaryC08": 2,
+              "family": 7,
+              "variant": 1,
+              "subtype": 0,
+              "registeredC18DuringActualLifetime": true,
+              "managerRoomPersistent": false,
+              "controlledBy329": false,
+              "requiredWhen": "actual charged release and registered lifetime"
+            },
+            "requiredWitnesses": [
+              "At actual queued114 contact, observe the own live registered 7/1/0 C18 with positive TTL; then observe its same-identity natural timer expiry and own retirement during Pickup, independently of deferred Add114."
+            ]
+          },
+          {
+            "ownedCounts": [
+              {
+                "itemId": 114,
+                "count": 1
+              },
+              {
+                "itemId": 118,
+                "count": 1
+              }
+            ],
+            "sourceExpectedActorContract": {
+              "primaryC08": 4,
+              "family": 8,
+              "variant": 0,
+              "subtype": 0,
+              "registeredC18DuringActualLifetime": true,
+              "managerRoomPersistent": true,
+              "controlledBy329": false,
+              "requiredWhen": "next actual admitted 519FC0 callback after the grant; preserve pickup/charge/control fences"
+            },
+            "requiredWitnesses": [
+              "Observe the actual deferred114 count/cache/C08 2\u21924 transition and actual C18/weak slots. Pickup42 exceeds LaserTTL15; this route does not qualify removal of a live Laser by selector change.",
+              "Before 329, observe an actual ordinary Knife C18 and an actually born 8/0/1 child whose Parent498 resolves to that Knife. Missing parent or child fails coverage."
+            ]
+          },
+          {
+            "ownedCounts": [
+              {
+                "itemId": 114,
+                "count": 1
+              },
+              {
+                "itemId": 118,
+                "count": 1
+              },
+              {
+                "itemId": 329,
+                "count": 1
+              }
+            ],
+            "sourceExpectedActorContract": {
+              "primaryC08": 4,
+              "family": 8,
+              "variant": 0,
+              "subtype": 0,
+              "registeredC18DuringActualLifetime": true,
+              "managerRoomPersistent": true,
+              "controlledBy329": true,
+              "requiredWhen": "next actual admitted 519FC0 callback after the grant; preserve pickup/charge/control fences"
+            },
+            "requiredWitnesses": [
+              "Observe the actual 329 queued grant with C08 still4; next live dispatch reuses the same existing type8 C18 and applies bit33.",
+              "Observe the SAME preexisting ParentKnife subtype1 child continuing its copied curve after the parent becomes controlled, then its own Remove and later full Uninit. Conversion does not remove this child; missing continuation or retirement fails coverage.",
+              "Observe controlled full/fast bodies and current C7C steering. Its dispatch must not emit a new ordinary 118 child or Laser; compare existing transient actors too."
+            ]
+          }
+        ],
+        "lifecycleExperiment": "brim-to-ordinary-to-controlled-triple",
+        "historyWitnessContract": "brim-ordinary-controlled-queued-lifetime-v2",
+        "sourceExcludedObligations": [
+          "Positive prior Laser TTL at deferred Add114 on uninterrupted Pickup42; ordinary release Laser TTL is15."
+        ],
+        "untestedHistoryFrontiers": [
+          "Live selector-change Laser Remove and replacement-safe Uninit need a separately admitted public route."
+        ],
+        "actualBeforeAndAfterCountsRequired": true,
+        "actualQueueGrantCacheAndControllerFencesRequired": true,
+        "actualFree5_100SelectorContactAndQueuedGrantRequired": true,
+        "canonicalDiagnosticOwner": "weaponAdmission.unadmittedController must be present and null",
+        "actualPendingPrimaryCleanup": "must be present and null",
+        "secondarySlotScope": "Observe actual C20/C28/C30 values separately. This selected route has neither Have55 nor Have87 secondary producer; null slots are not cleanup evidence. Nonempty slot cleanup needs a separately admitted public producer. Parent498 and Base4A0 are independent owners.",
+        "actualCachePendingFlags": 0,
+        "preserveAllIdentitySeedRngInitNumericFamilyAndCoverageMismatches": true,
+        "unknownDiagnosticOrMissingCoverageIsFailure": true,
+        "sourceInferredGrantPath": {
+          "orderedItems": [
+            118
+          ],
+          "each": "52E1A0 \u219252CC90 \u2192511F10 \u2192581750",
+          "final": "511F10 then3074=true",
+          "nativeDynamicCallCountObserved": false
+        },
+        "inputAndFieldScope": "Compare actual held/released/canceled input, retained DB4/DA0/C0C, counts, cache, actors and slots at each observed boundary. No fitted identities or source-equivalence across histories.",
+        "actualSourceCurseSamplerDrawsBeforeMask": true,
+        "actualLevelCurseMask": 0
+      },
+      "execution": {
+        "status": "not-executed",
+        "blockingPrerequisites": [
+          "One immutable public producer with ordinary Brim, ordinary Knife and controlled Knife on canonical stores/C18, actual guards/Remove/Uninit",
+          "Whole Special STB input and stage-aware live pickup/actor/child/cleanup observers and comparisons",
+          "Owned production build and integration-owner game/storage lease"
+        ],
+        "neverSatisfiedBy": "Static grants, final inventory, source inference, missing actor/child/cleanup/body, native-state injection or seed rerolls"
+      }
+    },
+    {
+      "name": "history-random-0",
+      "fixture": {
+        "kind": "source-authored-modified-challenge",
+        "challengeId": 1,
+        "startingItems": [
+          118
+        ],
+        "view": "item-only",
+        "authoredResourcePath": "resources/challenges.xml",
+        "baselineResourcePath": "../../../rebirth/resources/challenges.xml",
+        "specialRoomsPath": "resources/rooms/view-0/00.special rooms.stb",
+        "specialRoomsSha256": "dcdf668b089f935108e10cf6ff9a50a282f44792785d8fd47f601d26ad2f67a6",
+        "otherChallengeAttributes": "preserve all rows and attributes except explicit neutral changes and startingitems",
+        "attributeChanges": [
+          {
+            "attribute": "getcurse",
+            "baselineValue": "9",
+            "authoredValue": "0"
+          },
+          {
+            "attribute": "cursefilter",
+            "baselineValue": "6",
+            "authoredValue": "127"
+          },
+          {
+            "attribute": "roomfilter",
+            "baselineValue": "2",
+            "authoredValue": null
+          }
+        ],
+        "startRoomSpawnChange": {
+          "catalogue": 0,
+          "index": 80,
+          "type": 1,
+          "variant": 2,
+          "operation": "append",
+          "groups": [
+            {
+              "x": 7,
+              "y": 3,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 100,
+                  "subtype": 114,
+                  "weight": 1.0
+                }
+              ]
+            },
+            {
+              "x": 9,
+              "y": 3,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 100,
+                  "subtype": 329,
+                  "weight": 1.0
+                }
+              ]
+            }
+          ],
+          "allOtherRowsMetadataDoorsWeightsOrderPreserved": true
+        },
+        "declaredResetJsonBytes": 277644
+      },
+      "bootEpochSeed": 2038552851,
+      "initialPhaseOffset": 1,
+      "entropy": "unfiltered OS token recorded before projection",
+      "actions": [
+        {
+          "label": "ready",
+          "keys": [],
+          "presentations": 1
+        },
+        {
+          "label": "approach-pedestal-row",
+          "keys": [
+            "w"
+          ],
+          "presentations": 28
+        },
+        {
+          "label": "settle-before-charge",
+          "keys": [],
+          "presentations": 24
+        },
+        {
+          "label": "initial-brim-charge",
+          "keys": [
+            "Right"
+          ],
+          "presentations": 128
+        },
+        {
+          "label": "release-brim-and-move-to-114",
+          "keys": [
+            "d"
+          ],
+          "presentations": 24
+        },
+        {
+          "label": "ordinary-knife-charge",
+          "keys": [
+            "Right"
+          ],
+          "presentations": 120
+        },
+        {
+          "label": "release-knife-and-move-to-329",
+          "keys": [
+            "d",
+            "s"
+          ],
+          "presentations": 44
+        },
+        {
+          "label": "controlled-triple-dispatch",
+          "keys": [
+            "Right"
+          ],
+          "presentations": 120
+        },
+        {
+          "label": "canceled-held",
+          "keys": [
+            "Right",
+            "Left"
+          ],
+          "presentations": 18
+        },
+        {
+          "label": "released",
+          "keys": [],
+          "presentations": 60
+        },
+        {
+          "label": "vertical-steering",
+          "keys": [
+            "Up"
+          ],
+          "presentations": 80
+        },
+        {
+          "label": "final-release",
+          "keys": [],
+          "presentations": 60
+        }
+      ],
+      "requires": {
+        "actualPublicChallengeEntry": true,
+        "bothGamesConsumeIdenticalDeclaredResourceBytes": true,
+        "orderedRealPedestalGrants": [
+          114,
+          329
+        ],
+        "ownedCounts": [
+          {
+            "itemId": 118,
+            "count": 1
+          }
+        ],
+        "sourceExpectedActorContract": {
+          "primaryC08": 2,
+          "family": 7,
+          "variant": 1,
+          "subtype": 0,
+          "registeredC18DuringActualLifetime": true,
+          "managerRoomPersistent": false,
+          "controlledBy329": false,
+          "requiredWhen": "actual charged release and registered lifetime"
+        },
+        "staticActorContractScope": "Initial stage only; classify each game from its own actual counts against actorStages.",
+        "actorStages": [
+          {
+            "ownedCounts": [
+              {
+                "itemId": 118,
+                "count": 1
+              }
+            ],
+            "sourceExpectedActorContract": {
+              "primaryC08": 2,
+              "family": 7,
+              "variant": 1,
+              "subtype": 0,
+              "registeredC18DuringActualLifetime": true,
+              "managerRoomPersistent": false,
+              "controlledBy329": false,
+              "requiredWhen": "actual charged release and registered lifetime"
+            },
+            "requiredWitnesses": [
+              "At actual queued114 contact, observe the own live registered 7/1/0 C18 with positive TTL; then observe its same-identity natural timer expiry and own retirement during Pickup, independently of deferred Add114."
+            ]
+          },
+          {
+            "ownedCounts": [
+              {
+                "itemId": 114,
+                "count": 1
+              },
+              {
+                "itemId": 118,
+                "count": 1
+              }
+            ],
+            "sourceExpectedActorContract": {
+              "primaryC08": 4,
+              "family": 8,
+              "variant": 0,
+              "subtype": 0,
+              "registeredC18DuringActualLifetime": true,
+              "managerRoomPersistent": true,
+              "controlledBy329": false,
+              "requiredWhen": "next actual admitted 519FC0 callback after the grant; preserve pickup/charge/control fences"
+            },
+            "requiredWitnesses": [
+              "Observe the actual deferred114 count/cache/C08 2\u21924 transition and actual C18/weak slots. Pickup42 exceeds LaserTTL15; this route does not qualify removal of a live Laser by selector change.",
+              "Before 329, observe an actual ordinary Knife C18 and an actually born 8/0/1 child whose Parent498 resolves to that Knife. Missing parent or child fails coverage."
+            ]
+          },
+          {
+            "ownedCounts": [
+              {
+                "itemId": 114,
+                "count": 1
+              },
+              {
+                "itemId": 118,
+                "count": 1
+              },
+              {
+                "itemId": 329,
+                "count": 1
+              }
+            ],
+            "sourceExpectedActorContract": {
+              "primaryC08": 4,
+              "family": 8,
+              "variant": 0,
+              "subtype": 0,
+              "registeredC18DuringActualLifetime": true,
+              "managerRoomPersistent": true,
+              "controlledBy329": true,
+              "requiredWhen": "next actual admitted 519FC0 callback after the grant; preserve pickup/charge/control fences"
+            },
+            "requiredWitnesses": [
+              "Observe the actual 329 queued grant with C08 still4; next live dispatch reuses the same existing type8 C18 and applies bit33.",
+              "Observe the SAME preexisting ParentKnife subtype1 child continuing its copied curve after the parent becomes controlled, then its own Remove and later full Uninit. Conversion does not remove this child; missing continuation or retirement fails coverage.",
+              "Observe controlled full/fast bodies and current C7C steering. Its dispatch must not emit a new ordinary 118 child or Laser; compare existing transient actors too."
+            ]
+          }
+        ],
+        "lifecycleExperiment": "brim-to-ordinary-to-controlled-triple",
+        "historyWitnessContract": "brim-ordinary-controlled-queued-lifetime-v2",
+        "sourceExcludedObligations": [
+          "Positive prior Laser TTL at deferred Add114 on uninterrupted Pickup42; ordinary release Laser TTL is15."
+        ],
+        "untestedHistoryFrontiers": [
+          "Live selector-change Laser Remove and replacement-safe Uninit need a separately admitted public route."
+        ],
+        "actualBeforeAndAfterCountsRequired": true,
+        "actualQueueGrantCacheAndControllerFencesRequired": true,
+        "actualFree5_100SelectorContactAndQueuedGrantRequired": true,
+        "canonicalDiagnosticOwner": "weaponAdmission.unadmittedController must be present and null",
+        "actualPendingPrimaryCleanup": "must be present and null",
+        "secondarySlotScope": "Observe actual C20/C28/C30 values separately. This selected route has neither Have55 nor Have87 secondary producer; null slots are not cleanup evidence. Nonempty slot cleanup needs a separately admitted public producer. Parent498 and Base4A0 are independent owners.",
+        "actualCachePendingFlags": 0,
+        "preserveAllIdentitySeedRngInitNumericFamilyAndCoverageMismatches": true,
+        "unknownDiagnosticOrMissingCoverageIsFailure": true,
+        "sourceInferredGrantPath": {
+          "orderedItems": [
+            118
+          ],
+          "each": "52E1A0 \u219252CC90 \u2192511F10 \u2192581750",
+          "final": "511F10 then3074=true",
+          "nativeDynamicCallCountObserved": false
+        },
+        "inputAndFieldScope": "Compare actual held/released/canceled input, retained DB4/DA0/C0C, counts, cache, actors and slots at each observed boundary. No fitted identities or source-equivalence across histories.",
+        "actualSourceCurseSamplerDrawsBeforeMask": true,
+        "actualLevelCurseMask": 0
+      },
+      "execution": {
+        "status": "not-executed",
+        "blockingPrerequisites": [
+          "One immutable public producer with ordinary Brim, ordinary Knife and controlled Knife on canonical stores/C18, actual guards/Remove/Uninit",
+          "Whole Special STB input and stage-aware live pickup/actor/child/cleanup observers and comparisons",
+          "Owned production build and integration-owner game/storage lease"
+        ],
+        "neverSatisfiedBy": "Static grants, final inventory, source inference, missing actor/child/cleanup/body, native-state injection or seed rerolls"
+      },
+      "entropyTokenIndex": 0
+    },
+    {
+      "name": "history-random-1",
+      "fixture": {
+        "kind": "source-authored-modified-challenge",
+        "challengeId": 1,
+        "startingItems": [
+          118
+        ],
+        "view": "item-only",
+        "authoredResourcePath": "resources/challenges.xml",
+        "baselineResourcePath": "../../../rebirth/resources/challenges.xml",
+        "specialRoomsPath": "resources/rooms/view-0/00.special rooms.stb",
+        "specialRoomsSha256": "dcdf668b089f935108e10cf6ff9a50a282f44792785d8fd47f601d26ad2f67a6",
+        "otherChallengeAttributes": "preserve all rows and attributes except explicit neutral changes and startingitems",
+        "attributeChanges": [
+          {
+            "attribute": "getcurse",
+            "baselineValue": "9",
+            "authoredValue": "0"
+          },
+          {
+            "attribute": "cursefilter",
+            "baselineValue": "6",
+            "authoredValue": "127"
+          },
+          {
+            "attribute": "roomfilter",
+            "baselineValue": "2",
+            "authoredValue": null
+          }
+        ],
+        "startRoomSpawnChange": {
+          "catalogue": 0,
+          "index": 80,
+          "type": 1,
+          "variant": 2,
+          "operation": "append",
+          "groups": [
+            {
+              "x": 7,
+              "y": 3,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 100,
+                  "subtype": 114,
+                  "weight": 1.0
+                }
+              ]
+            },
+            {
+              "x": 9,
+              "y": 3,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 100,
+                  "subtype": 329,
+                  "weight": 1.0
+                }
+              ]
+            }
+          ],
+          "allOtherRowsMetadataDoorsWeightsOrderPreserved": true
+        },
+        "declaredResetJsonBytes": 277644
+      },
+      "bootEpochSeed": 4152429072,
+      "initialPhaseOffset": 1,
+      "entropy": "unfiltered OS token recorded before projection",
+      "actions": [
+        {
+          "label": "ready",
+          "keys": [],
+          "presentations": 1
+        },
+        {
+          "label": "approach-pedestal-row",
+          "keys": [
+            "w"
+          ],
+          "presentations": 28
+        },
+        {
+          "label": "settle-before-charge",
+          "keys": [],
+          "presentations": 24
+        },
+        {
+          "label": "initial-brim-charge",
+          "keys": [
+            "Right"
+          ],
+          "presentations": 127
+        },
+        {
+          "label": "release-brim-and-move-to-114",
+          "keys": [
+            "d"
+          ],
+          "presentations": 24
+        },
+        {
+          "label": "ordinary-knife-charge",
+          "keys": [
+            "Right"
+          ],
+          "presentations": 120
+        },
+        {
+          "label": "release-knife-and-move-to-329",
+          "keys": [
+            "d",
+            "s"
+          ],
+          "presentations": 44
+        },
+        {
+          "label": "controlled-triple-dispatch",
+          "keys": [
+            "Right"
+          ],
+          "presentations": 120
+        },
+        {
+          "label": "canceled-held",
+          "keys": [
+            "Right",
+            "Left"
+          ],
+          "presentations": 18
+        },
+        {
+          "label": "released",
+          "keys": [],
+          "presentations": 60
+        },
+        {
+          "label": "vertical-steering",
+          "keys": [
+            "Up"
+          ],
+          "presentations": 80
+        },
+        {
+          "label": "final-release",
+          "keys": [],
+          "presentations": 60
+        }
+      ],
+      "requires": {
+        "actualPublicChallengeEntry": true,
+        "bothGamesConsumeIdenticalDeclaredResourceBytes": true,
+        "orderedRealPedestalGrants": [
+          114,
+          329
+        ],
+        "ownedCounts": [
+          {
+            "itemId": 118,
+            "count": 1
+          }
+        ],
+        "sourceExpectedActorContract": {
+          "primaryC08": 2,
+          "family": 7,
+          "variant": 1,
+          "subtype": 0,
+          "registeredC18DuringActualLifetime": true,
+          "managerRoomPersistent": false,
+          "controlledBy329": false,
+          "requiredWhen": "actual charged release and registered lifetime"
+        },
+        "staticActorContractScope": "Initial stage only; classify each game from its own actual counts against actorStages.",
+        "actorStages": [
+          {
+            "ownedCounts": [
+              {
+                "itemId": 118,
+                "count": 1
+              }
+            ],
+            "sourceExpectedActorContract": {
+              "primaryC08": 2,
+              "family": 7,
+              "variant": 1,
+              "subtype": 0,
+              "registeredC18DuringActualLifetime": true,
+              "managerRoomPersistent": false,
+              "controlledBy329": false,
+              "requiredWhen": "actual charged release and registered lifetime"
+            },
+            "requiredWitnesses": [
+              "At actual queued114 contact, observe the own live registered 7/1/0 C18 with positive TTL; then observe its same-identity natural timer expiry and own retirement during Pickup, independently of deferred Add114."
+            ]
+          },
+          {
+            "ownedCounts": [
+              {
+                "itemId": 114,
+                "count": 1
+              },
+              {
+                "itemId": 118,
+                "count": 1
+              }
+            ],
+            "sourceExpectedActorContract": {
+              "primaryC08": 4,
+              "family": 8,
+              "variant": 0,
+              "subtype": 0,
+              "registeredC18DuringActualLifetime": true,
+              "managerRoomPersistent": true,
+              "controlledBy329": false,
+              "requiredWhen": "next actual admitted 519FC0 callback after the grant; preserve pickup/charge/control fences"
+            },
+            "requiredWitnesses": [
+              "Observe the actual deferred114 count/cache/C08 2\u21924 transition and actual C18/weak slots. Pickup42 exceeds LaserTTL15; this route does not qualify removal of a live Laser by selector change.",
+              "Before 329, observe an actual ordinary Knife C18 and an actually born 8/0/1 child whose Parent498 resolves to that Knife. Missing parent or child fails coverage."
+            ]
+          },
+          {
+            "ownedCounts": [
+              {
+                "itemId": 114,
+                "count": 1
+              },
+              {
+                "itemId": 118,
+                "count": 1
+              },
+              {
+                "itemId": 329,
+                "count": 1
+              }
+            ],
+            "sourceExpectedActorContract": {
+              "primaryC08": 4,
+              "family": 8,
+              "variant": 0,
+              "subtype": 0,
+              "registeredC18DuringActualLifetime": true,
+              "managerRoomPersistent": true,
+              "controlledBy329": true,
+              "requiredWhen": "next actual admitted 519FC0 callback after the grant; preserve pickup/charge/control fences"
+            },
+            "requiredWitnesses": [
+              "Observe the actual 329 queued grant with C08 still4; next live dispatch reuses the same existing type8 C18 and applies bit33.",
+              "Observe the SAME preexisting ParentKnife subtype1 child continuing its copied curve after the parent becomes controlled, then its own Remove and later full Uninit. Conversion does not remove this child; missing continuation or retirement fails coverage.",
+              "Observe controlled full/fast bodies and current C7C steering. Its dispatch must not emit a new ordinary 118 child or Laser; compare existing transient actors too."
+            ]
+          }
+        ],
+        "lifecycleExperiment": "brim-to-ordinary-to-controlled-triple",
+        "historyWitnessContract": "brim-ordinary-controlled-queued-lifetime-v2",
+        "sourceExcludedObligations": [
+          "Positive prior Laser TTL at deferred Add114 on uninterrupted Pickup42; ordinary release Laser TTL is15."
+        ],
+        "untestedHistoryFrontiers": [
+          "Live selector-change Laser Remove and replacement-safe Uninit need a separately admitted public route."
+        ],
+        "actualBeforeAndAfterCountsRequired": true,
+        "actualQueueGrantCacheAndControllerFencesRequired": true,
+        "actualFree5_100SelectorContactAndQueuedGrantRequired": true,
+        "canonicalDiagnosticOwner": "weaponAdmission.unadmittedController must be present and null",
+        "actualPendingPrimaryCleanup": "must be present and null",
+        "secondarySlotScope": "Observe actual C20/C28/C30 values separately. This selected route has neither Have55 nor Have87 secondary producer; null slots are not cleanup evidence. Nonempty slot cleanup needs a separately admitted public producer. Parent498 and Base4A0 are independent owners.",
+        "actualCachePendingFlags": 0,
+        "preserveAllIdentitySeedRngInitNumericFamilyAndCoverageMismatches": true,
+        "unknownDiagnosticOrMissingCoverageIsFailure": true,
+        "sourceInferredGrantPath": {
+          "orderedItems": [
+            118
+          ],
+          "each": "52E1A0 \u219252CC90 \u2192511F10 \u2192581750",
+          "final": "511F10 then3074=true",
+          "nativeDynamicCallCountObserved": false
+        },
+        "inputAndFieldScope": "Compare actual held/released/canceled input, retained DB4/DA0/C0C, counts, cache, actors and slots at each observed boundary. No fitted identities or source-equivalence across histories.",
+        "actualSourceCurseSamplerDrawsBeforeMask": true,
+        "actualLevelCurseMask": 0
+      },
+      "execution": {
+        "status": "not-executed",
+        "blockingPrerequisites": [
+          "One immutable public producer with ordinary Brim, ordinary Knife and controlled Knife on canonical stores/C18, actual guards/Remove/Uninit",
+          "Whole Special STB input and stage-aware live pickup/actor/child/cleanup observers and comparisons",
+          "Owned production build and integration-owner game/storage lease"
+        ],
+        "neverSatisfiedBy": "Static grants, final inventory, source inference, missing actor/child/cleanup/body, native-state injection or seed rerolls"
+      },
+      "entropyTokenIndex": 1
+    }
+  ],
+  "publicRouteRevision": "upward-sweep-28-settle24-diagonal-second-pickup-v2",
+  "scope": "Declared live118\u2192114\u2192329 public-history successor; no execution or acceptance",
+  "selection": "Two fixed phases plus every journaled unfiltered OS projection; no outcome filtering or rerolls",
+  "outcomePolicy": "Missing real stages/grants/actors/children/cleanup/bodies and every mismatch remain failures"
+}

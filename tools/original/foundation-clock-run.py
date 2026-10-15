@@ -105,11 +105,13 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--seed', help='Valid seed; omitted means new OS-random seed')
     parser.add_argument('--ordinary-run', action='store_true', help='Observe a generated Character seed through an explicit no-dialog tape; no requested run seed')
+    parser.add_argument('--challenge-run', action='store_true', help='Explicit Challenge menu tape; observes the generated run seed without manual seed entry')
     parser.add_argument('--boot-epoch-seed', type=int, default=1700000000, help='Public realtime seconds supplied to native time(NULL); independent of the requested run seed')
     parser.add_argument('--tape', type=Path, help='List of key/step/capture/audioHold commands; public X11 keys and explicit real audio-device holds')
     parser.add_argument('--focus-handoff', action='append', default=[], help='At named capture, generate public X11 focus out/in and release one presentation before capture; diagnostic tape alteration is recorded')
     parser.add_argument('--state-observer', type=Path, help='Optional parent-only reference debug module exposing observe(pid, context); never production game input')
     parser.add_argument('--observe-every-step', action='store_true', help='Observe at each tape step gate without screenshots; use one-frame steps for dense trajectories')
+    parser.add_argument('--composition-lifecycle-events', action='store_true', help='Optional source-bound leader-thread Knife8/0/1 hardware event observation; requires canonical ISAAC_ORIGINAL_SHA, no game inputs changed')
     parser.add_argument('--archive-evidence', action='store_true', help='Lossless gzip manifest plus committed native progress journal; public observations and clock unchanged')
     parser.add_argument('--gl-trace', type=Path, help='Optional documented graphics API observer to chain; no game instructions/state')
     parser.add_argument('--audio-trace', type=Path, help='Optional forwarding OpenAL API observer to chain; no game instructions/state')
@@ -244,12 +246,17 @@ def main():
         raise SystemExit('Window must be 16:9, from 480x270 through 3840x2160')
     if args.ordinary_run and (args.seed or not args.tape):
         raise SystemExit('--ordinary-run requires an explicit public tape and excludes --seed')
-    vector = {'seedValue': None} if args.ordinary_run else ({'code': args.seed, 'seedValue': codec.decode_seed(args.seed)} if args.seed else codec.random_vector())
-    seed = None if args.ordinary_run else codec.encode_seed(vector['seedValue'])
+    if args.challenge_run and (args.ordinary_run or args.seed or not args.tape):
+        raise SystemExit('--challenge-run requires an explicit public tape and excludes --seed/--ordinary-run')
+    generated_run = args.ordinary_run or args.challenge_run
+    vector = {'seedValue': None} if generated_run else ({'code': args.seed, 'seedValue': codec.decode_seed(args.seed)} if args.seed else codec.random_vector())
+    seed = None if generated_run else codec.encode_seed(vector['seedValue'])
     tape = json.loads(args.tape.read_text()) if args.tape else default_tape(seed)
     validate_tape(tape)
     if args.ordinary_run and any(a['type'] == 'key' and a['key'] != 'Return' for a in tape):
         raise SystemExit('--ordinary-run admission tape permits Return confirmations only, without a seed dialog')
+    if args.challenge_run and any(a['type'] == 'key' and a['key'] == 'Tab' for a in tape):
+        raise SystemExit('--challenge-run enters the source-selected Challenge seed without a seed dialog')
     selected_labels = {a['label'] for a in tape if a['type'] == 'capture'}
     if not set(args.focus_handoff) <= selected_labels:
         raise SystemExit('Focus-handoff labels must exist in the selected tape')
@@ -316,7 +323,7 @@ def main():
     frames, events, acknowledgements = [], [], []
     report = {'schema': 1, 'status': 'running', 'output': str(out),
               'captureClock': 'main-thread virtual Linux clocks and blocking public GL presentation gate; simulation ticks unknown', 'seed': seed, 'seedValue': vector['seedValue'],
-              'seedMode': 'ordinary-character-menu' if args.ordinary_run else 'public-manual-entry',
+              'seedMode': 'source-challenge-menu' if args.challenge_run else 'ordinary-character-menu' if args.ordinary_run else 'public-manual-entry',
               'bootEpochSeed': args.boot_epoch_seed,
               'requestedViewport': {'width': args.width, 'height': args.height, 'maxRenderScale': args.max_render_scale},
               'profile': {'fresh': True, 'isolated': True}, 'tape': tape, 'frames': frames,
@@ -338,6 +345,7 @@ def main():
             progress.append(kind, value)
     record('start', report)
     proc = None
+    lifecycle = None
     started = time.monotonic()
     try:
         with tempfile.TemporaryDirectory(prefix='isaac-clock-') as socket_dir, (out / 'launch.log').open('w') as log:
@@ -368,8 +376,13 @@ def main():
                 status['controllerElapsedMs'] = (time.monotonic() - started) * 1000
                 acknowledgements.append(status)
                 record('acknowledgement', status)
+                if lifecycle is not None:
+                    lifecycle.gate(status)
                 return status
             current = acknowledgement()
+            if args.composition_lifecycle_events:
+                lifecycle = module('composition_lifecycle', 'composition-lifecycle.py').Tap(proc.pid, out / 'lifecycle', timeout=args.frame_timeout)
+                lifecycle.gate(current)
             connection.sendall(b'step 30\n')
             current = acknowledgement()
             report['bootstrapPresentedFrames'] = 30
@@ -458,7 +471,7 @@ def main():
                                    'simulationTick': None, 'gateBlocked': True, 'x11Focus': x11_focus(), 'targetWindow': int(window)})
                     record('capture', frames[-1])
             report['observedState'] = debug.observed_state((local / 'log.txt').read_text()) if (local / 'log.txt').exists() else {}
-            if args.ordinary_run:
+            if generated_run:
                 observed = report['observedState']
                 if codec.decode_seed(observed.get('seed')) != observed.get('seedValue'):
                     raise RuntimeError('Original generated seed code/value did not agree through the public codec')
@@ -475,6 +488,8 @@ def main():
                 'hostWallMs': sum(p['advanceHostWallMs'] for p in measured),
                 'nativeCpuMs': sum(p['advancePerformance']['cpuUserMs']+p['advancePerformance']['cpuSystemMs'] for p in measured),
                 'scope': 'released presentation intervals only; simulation ticks unknown; observer cost included'}
+            if lifecycle is not None:
+                report['compositionLifecycle'] = lifecycle.close()
             report['status'] = 'pass'
             connection.sendall(b'quit\n')
             proc.wait(timeout=5)
@@ -484,6 +499,12 @@ def main():
         report['status'] = 'fail'
         report['failures'].append(str(error))
     finally:
+        if lifecycle is not None:
+            try:
+                report['compositionLifecycle'] = lifecycle.close()
+            except Exception as error:
+                report['status'] = 'fail'
+                report['failures'].append(str(error))
         if proc is not None and proc.poll() is None:
             os.killpg(proc.pid, signal.SIGTERM)
             try:

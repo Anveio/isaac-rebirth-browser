@@ -16,6 +16,9 @@ pub struct PlayerStats {
     pub tear_falling_acceleration: f32,
     /// Source Player+d60, consumed before both-phase input acceleration.
     pub move_speed: f32,
+    /// Actual Player D64. Legacy or unadmitted output remains absent.
+    #[serde(default)]
+    pub luck: Option<f32>,
 }
 
 impl Default for PlayerStats {
@@ -27,6 +30,7 @@ impl Default for PlayerStats {
             tear_falling_speed: 0.0,
             tear_falling_acceleration: 0.0,
             move_speed: 1.0,
+            luck: None,
         }
     }
 }
@@ -51,6 +55,7 @@ impl PlayerStats {
             || !self.tear_falling_acceleration.is_finite()
             || !self.move_speed.is_finite()
             || !(0.1..=2.0).contains(&self.move_speed)
+            || self.luck.is_some_and(|luck| !luck.is_finite())
         {
             return Err("Player cached stats violate finite source clamps".into());
         }
@@ -66,20 +71,19 @@ pub(crate) fn evaluate_cache(state: &mut State) -> Result<(), String> {
         return Ok(());
     };
     let requested = item_pipeline::CacheMask(owner.unevaluated_cache_flags);
-    let inputs = item_pipeline::ItemInputs::new(owner)?;
     let mut completed = 0;
     if let Some(source_type) = state.weapon_admission.source_player_type {
         let prior_primary = state.weapon_cache.primary;
         state.weapon_cache.primary = crate::weapon_plan::resolve_primary(
-            inputs,
+            item_pipeline::ItemInputs::new(owner)?,
             source_type,
             state.weapon_cache.primary,
             requested,
         )?;
         if requested.0 & 0x100 != 0 {
-            if state.weapon_cache.primary != prior_primary
-                && !state.weapon_admission.c18_is_known_empty
-            {
+            if crate::attack_runtime::complete_primary_cleanup(state, prior_primary)? {
+                completed |= 0x100;
+            } else if state.weapon_cache.primary != prior_primary {
                 state
                     .weapon_admission
                     .pending_primary_cleanup
@@ -88,20 +92,24 @@ pub(crate) fn evaluate_cache(state: &mut State) -> Result<(), String> {
                         to_primary: state.weapon_cache.primary,
                     });
             }
-            //513AF7 equal primary skips this invocation's C18 effect only.
-            //A previously unperformed cleanup persists independently of the
-            //current C08, including later equality or a new NULL assumption.
-            if state.weapon_admission.pending_primary_cleanup.is_none()
-                && (state.weapon_cache.primary == prior_primary
-                    || state.weapon_admission.c18_is_known_empty)
-            {
-                completed |= 0x100;
-            }
         }
     }
+    let inputs =
+        item_pipeline::ItemInputs::new(state.player_items.as_ref().expect("checked cache owner"))?;
+    //511F39 expands the actual request word after requested C08 selection.
+    //Keep the owner word synchronized before its mutable Familiar callback.
+    let requested = item_pipeline::expand_libra_requests(inputs, requested);
+    state
+        .player_items
+        .as_mut()
+        .expect("checked Player cache owner")
+        .unevaluated_cache_flags = requested.0;
+    let inputs =
+        item_pipeline::ItemInputs::new(state.player_items.as_ref().expect("checked cache owner"))?;
     let resolved = item_pipeline::resolve_scalars(
         inputs,
         state.weapon_cache.primary,
+        state.weapon_admission.source_player_type,
         item_pipeline::CachedScalars {
             stats: state.player_stats,
             max_fire_delay: state.max_fire_delay,
@@ -118,10 +126,77 @@ pub(crate) fn evaluate_cache(state: &mut State) -> Result<(), String> {
     );
     state.weapon_cache = cache;
     completed |= appearance.0;
+    if requested.0 & 128 != 0 {
+        if let Some((flying, grid_class)) = item_pipeline::resolve_neutral_flight(
+            inputs,
+            state.weapon_admission.source_player_type,
+            state.player.transformation_counts,
+        ) {
+            state.player.flying = Some(flying);
+            state.player.grid_collision_class = Some(grid_class);
+            completed |= 128;
+        }
+    }
+    if requested.0 & 512 != 0 {
+        // 511F10 evaluates Familiar after Flight and before Luck. Retain the
+        // sole manager/RNG consumer; its pending result controls completion.
+        crate::familiars::evaluate_cache(state)?;
+        if state
+            .player_items
+            .as_ref()
+            .expect("checked Player cache owner")
+            .unevaluated_cache_flags
+            & 512
+            == 0
+        {
+            completed |= 512;
+        }
+    }
+    if requested.0 & 1024 != 0 {
+        let inputs = item_pipeline::ItemInputs::new(
+            state.player_items.as_ref().expect("checked cache owner"),
+        )?;
+        if let Some(luck) = item_pipeline::resolve_luck(
+            inputs,
+            state.weapon_admission.source_player_type,
+            state.source_cache_run_flags,
+        )? {
+            state.player_stats.luck = Some(luck);
+            completed |= 1024;
+        }
+    }
+    //5121EF reads Have304 again after Familiar/Luck, then couples actual
+    //current fields; it never rebuilds unrequested fields from inventory.
+    let final_scalars = item_pipeline::finalize_scalars(
+        item_pipeline::ItemInputs::new(state.player_items.as_ref().expect("checked cache owner"))?,
+        item_pipeline::CachedScalars {
+            stats: state.player_stats,
+            max_fire_delay: state.max_fire_delay,
+        },
+    )?;
+    state.player_stats = final_scalars.stats;
+    state.max_fire_delay = final_scalars.max_fire_delay;
+    let pending = item_pipeline::pending_after_libra(
+        item_pipeline::ItemInputs::new(state.player_items.as_ref().expect("checked cache owner"))?,
+        item_pipeline::CacheMask(resolved.pending(requested).0 & !completed),
+    )
+    .0;
+    let tail_admitted = state.weapon_admission.source_player_type == Some(0)
+        && state.weapon_admission.pending_primary_cleanup.is_none()
+        && state.player.transformation_counts == Some([0, 0])
+        && state.source_cache_run_flags.is_some()
+        && item_pipeline::ItemInputs::new(
+            state.player_items.as_ref().expect("checked cache owner"),
+        )?
+        .admits_complete_selected_tail()
+        && pending & 0x7ff == 0;
     state
         .player_items
         .as_mut()
         .expect("checked Player cache owner")
-        .unevaluated_cache_flags = resolved.pending(requested).0 & !completed;
+        // 512286 clears all 32 D6C bits after the actual requested callbacks.
+        // Reserved bits have no independent callback at this admitted tail.
+        // Unimplemented callbacks or history retain their pending requests.
+        .unevaluated_cache_flags = if tail_admitted { 0 } else { pending };
     Ok(())
 }

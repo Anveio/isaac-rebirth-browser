@@ -16,7 +16,7 @@ import { startProductionServer } from './production-server.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const SOURCE = 'tools/original/foundation-paired-scenarios.py';
-export const DEFAULT_PAIRED_SCENARIOS = ['paired-title-menu', 'paired-movement-fire', 'paired-pause-release', 'paired-bomb-moving-even', 'paired-bomb-moving-odd', 'paired-room-combat', 'paired-pause-before-transition', 'paired-pause-transition'];
+export const DEFAULT_PAIRED_SCENARIOS = ['paired-title-menu', 'paired-movement-fire', 'paired-pause-release', 'paired-bomb-moving-even', 'paired-bomb-moving-odd', 'paired-room-combat', 'paired-pause-before-transition', 'paired-pause-transition', 'paired-wall-hugger-contact'];
 export const DEFAULT_RANDOM_CASE_COUNT = 2;
 const runProcess = promisify(execFile);
 const save = (path, value) => writeFileSync(path, JSON.stringify(value, null, 2) + '\n');

@@ -1,0 +1,225 @@
+{
+  "schema": 1,
+  "scope": "New Number One companion qualification, separate Knife-first/public-WASM result, birth-law causal diagnostic, pending capture tooling and partial readiness checks. No prior report is regraded or summed.",
+  "mainAtSummary": "5f6a78bf3b3526a2fdb248ef318c158ca3d04e08",
+  "numberOne6": {
+    "pr": 288,
+    "mainMerge": "383d96eb9a8a5dc4eeb6e120cc1939b12c452e24",
+    "source": "cdda2c7bedb76c64340aaf1c7f877bef0856349e",
+    "wasmSha256": "6b144c99bb36954e24c66323049f31426563e6e7e25b10d54d55b7e3e4d50d46",
+    "ownChecks": {
+      "production": "PASS",
+      "strictAllTargetClippy": "PASS",
+      "floor": "PASS",
+      "fourRouteFullStateFields": 37956648,
+      "fourRouteDifferences": 0
+    },
+    "nativeVersusPublicWasm": {
+      "checks": 17423,
+      "differences": 0,
+      "uniquePairedGates": 631,
+      "postGrantGates": 93,
+      "fields": [
+        "All11 PlayerCA0 components",
+        "All11 PlayerCCC components",
+        "LuckD64",
+        "Owned6/queue/full pending cache",
+        "Independently generated run seed"
+      ],
+      "postGrantCachePending": 0,
+      "scope": "Retained actual Native reference versus independently executed public WASM; no current candidate DOM/renderer capture."
+    },
+    "birthColor": {
+      "eachSideOwnIdentities": 6,
+      "firstObservedAtGrantGate": 917,
+      "firstOwnTearRetainsPriorWhiteThrough": 958,
+      "laterOwnTearsCopyOwnChangedCA0": 5,
+      "crossSideActorIdsJoined": false,
+      "nativeFields": "Actual permanent/current color retained in reference",
+      "portFields": "Captured sourceColor only; currentColor2D0 and sourceVariant unavailable",
+      "scope": "Within-side identity and observation chronology, not a matched physical/lifecycle or variant contract."
+    },
+    "remaining": {
+      "pairedTearActualShotOrdinal": "Not retained in these compact port/Native tuples; no strict crossside actor join inferred from IDs/firstSeen.",
+      "portCurrentColor2D0": "Not exposed by this captured port getter; no default/current-from-permanent alias asserted.",
+      "portSourceVariant": "Unavailable here; no default0.",
+      "NativePhysicalPhaseAndFullLifecycle": "Unqualified.",
+      "candidateBrowserRenderer": "Pending distinct new6b144c99 capture."
+    },
+    "historicalRetention": "Old282 scalar632x7 and93pending64 rows plus FAILED_INCOMPLETE final archive remain unchanged; new companion scope is separate."
+  },
+  "unchangedV8PublicWasm": {
+    "status": "FAIL",
+    "checks": 19359,
+    "failures": 5394,
+    "pairedPlayingRows": 1010,
+    "nativeChildIdentities": 12,
+    "portChildIdentities": 0,
+    "history": {
+      "checks": 18759,
+      "failures": 2307
+    },
+    "reportSha256": "2f1e30db71417b233e039d9411abc6ac63086be8ae8d5aa31d9103dc3119145d",
+    "route": "Unchanged v8, 118 first then114 then329.",
+    "causeFrontier": "Actual primary C08 changes2→4 at114; typed primary cleanup remains pending and no port children execute. No cleanup source fix or game acceptance.",
+    "scope": "Completed public-WASM replay with retained Native tuples. DOM/browser capture remains unexecuted; earlier pregame guard stops remain separate.",
+    "retention": "Initial C98-key report remains separate; corrected v2 uses actual flagsC98 and all1010 flag rows match. No old report is regraded."
+  },
+  "knifeFirst": {
+    "pr": 286,
+    "source": "dbfea25a9c5d4e8fdf24b424d3a8ac582e838cef",
+    "wasmSha256": "a38333414f8f9949e8d34fe4f78dedc00cf84e7b6d65f493acfd85cb96026846",
+    "mainImplementationAtSummary": false,
+    "ownChecks": "Production/strict Clippy/floor and four-route37956648/0 local regression pass; not child gameplay acceptance.",
+    "route": "Separately declared114→118→329 fixed phase0, no Browser/DOM/pixels or complete624 audit in this public-WASM comparison.",
+    "functional": {
+      "checks": 106884,
+      "failures": 11158,
+      "status": "FAIL",
+      "reportSha256": "522704f1e8dd05da1833db4b631494f2f3a276639653fb05b8f75d3bcf7122c4",
+      "pairedPlayingRows": 1010,
+      "pairedChildBirths": 12,
+      "childBodies": 614,
+      "pre329ChildBodies": 550,
+      "pre329PositionDifferences": 550,
+      "pre329VelocityDifferences": 550,
+      "pre329SpriteRotationDifferences": 550,
+      "pre329Raw8a4Differences": 532,
+      "copiedLineControlsDifferences": 0,
+      "post329ControlledParentDifferences": 280,
+      "sourceHistoryHelper": {
+        "checks": 1,
+        "failures": 1,
+        "coverageGaps": 1,
+        "reason": "New marker is not consumed by the frozen helper; no whole-history claim."
+      }
+    },
+    "nativeEventCapability": {
+      "strictTransport": "PASS",
+      "events": 24,
+      "childIdentities": 12,
+      "eventTransport": "PASS",
+      "sourceAndInputsBeforeEqualsEnd": true,
+      "scope": "Actual Native events and separate public-WASM actors, not paired event/DOM acceptance."
+    },
+    "separateBirthLaw": {
+      "nativeChecks": 42,
+      "nativeFailures": 0,
+      "portChecks": 42,
+      "portFailures": 0,
+      "birthsPerSide": 12,
+      "firstFastPerSide": 6,
+      "scope": "Each side uses its own recorded copied controls, actual8A4 and actual8A8. Does not independently prove nearest-parameter selection or all later614 body rows."
+    },
+    "causalAudit": {
+      "firstBirthPresentation": 1049,
+      "sameConsumedControlsAnd8a4": true,
+      "native8a8": 8.216850280761719,
+      "port8a8": -10.389177322387695,
+      "uniformOwner": "Shared global MT, converted to f32 then*50−25; not actorRng/spawnSeed.",
+      "retainedSourceTarget": "C(t+.1)+perpendicular(normalized tangent)*actual8A8",
+      "preChildParentRngAlreadyDifferent": true,
+      "conclusion": "Inherited shared-stream divergence explains first-birth motion input difference; no demonstrated new child-law defect in these first-birth witnesses.",
+      "pending": [
+        "Absolute Native draw ordinal and first upstream divergent consumer",
+        "All later movement/nearest-parameter parity",
+        "Controlled parent/triple actor acceptance"
+      ]
+    },
+    "retention": "106884/11158 remains FAIL; oldordinary0..2/a320/90ea/PR270/v7/v8 grades unchanged.",
+    "providerDraftHead": "3a766616"
+  },
+  "readiness287": {
+    "head": "d6f1886c36b888eeb1acfc9f531c0ba7c6a23838",
+    "unmerged": true,
+    "production": {
+      "status": "PASS warmretry",
+      "seconds": 5.173249482002575,
+      "firstAttempt": "CAPACITY_STOP37.524s retained separately"
+    },
+    "strictClippy": {
+      "status": "PASS",
+      "seconds": 25.474247757985722
+    },
+    "floor": {
+      "status": "CAPACITY_STOP",
+      "exitCode": -2,
+      "seconds": 19.915477564005414,
+      "availableBytesAtStop": 1606115328,
+      "workingAvailableFloorBytes": 1610612736
+    },
+    "allSourceRawPinsBeforeEqualsEnd": true,
+    "remaining": "Four fixed positive405routes, real6 positive and fixed/recordedOS unsupported7 public-WASM contracts UNEXECUTED. No compile-error claim, floor pass or readiness/game acceptance."
+  },
+  "traceTool292": {
+    "providerHead": "be840ee63186c275aa58a63d181f01fcf64892fc",
+    "sourceHead": "e92c732567614eefe716b553f1ee900b43fa49af",
+    "sourceBaseAtPublication": "383d96eb9a8a5dc4eeb6e120cc1939b12c452e24",
+    "status": "SOURCE_READY; live finalization pending",
+    "closed270TraceReadback": {
+      "status": "PASS",
+      "traceBytes": 34042951,
+      "traceSha256": "eb95bbfd08717c3b7e0e2b311e40eee62c1f4869f145fb3709a435dbeb0a9cc9",
+      "commands": 1532,
+      "states": 216,
+      "backendEvents": 3,
+      "sourceInputsBeforeEqualsEnd": true,
+      "stateHistoryAlreadyTruncated": true,
+      "inputAndBackendTraceTruncated": false,
+      "scope": "Byte-exact extraction/streaming of the actual existing nonnull trace, preserving its schema/caps. No new game or old report regrade."
+    },
+    "liveAttempts": "Earlier live attempts incomplete; Browser5 prepared but unexecuted at summary. Tool readiness does not establish actor/runtime parity."
+  },
+  "mainRuntimeBoundary": "At main5f6a78bf (formatting-only PR293 after383), ordinaryKnife parent and positive-permanent6 scalar/appearance/auxiliary/public grant code are merged. Has118/controlled/Brim actor feature leaves and readiness/Libra remain separate pending implementation/qualification scopes.",
+  "proofs": {
+    "number6Own": {
+      "path": "/dev/shm/isaac-number6-regular-cdda-owned-proof/closed-own-qualification.json",
+      "sha256": "837e5b7796d2ab5f5944392252ee73f50ee5595409d39aab5bc577f7092abaa4"
+    },
+    "number6Properties": {
+      "path": "/dev/shm/isaac-number6-regular-cdda-owned-proof/own-wasm-vs-native-properties.json",
+      "sha256": "316be7772e21331166c2a0b43517984e57d04c545e62a847bd4ccc2521f06222"
+    },
+    "number6ActualReference": {
+      "path": "/tmp/isaac-number6-native-properties-v1/property-readback.json",
+      "sha256": "48910a7bb7dda80831c687fce5fc0af01309e268e013ebc86bc03257a3daaca0"
+    },
+    "knifeOwn": {
+      "path": "/dev/shm/isaac-has118-pr286-qualification/closed-qualification.json",
+      "sha256": "127354c955135598684a180d058158e677294b34c69ae3394df7ba9470f2a23d"
+    },
+    "knifeNative": {
+      "path": "/dev/shm/isaac-has118-knife-first-native-readback-v1/report.json",
+      "sha256": "e152480b13abe9ea59ca54595df5117f68f5fdc0bce3780c04cf36d8332074a2"
+    },
+    "knifeUnchangedV8": {
+      "path": "/dev/shm/isaac-has118-pr286-public-wasm-v8-v1/functional-summary-v2.json",
+      "sha256": "0c04edc06c332dffa285d79ed076bb11b8e6983b35b3c0e9f3b3dae462f489b6"
+    },
+    "knifeFunctional": {
+      "path": "/dev/shm/isaac-has118-knife-first-public-wasm-v1/functional-summary-v2.json",
+      "sha256": "f9027355c1533178f139409baad6ed9bff4a2db37564f95618eb09030bd39ab8"
+    },
+    "knifeBirthLaw": {
+      "path": "/dev/shm/isaac-has118-child-own-source-law-v1/report.json",
+      "sha256": "d5293bdfa775c33766b4ce5b9be5102956caf00d404e83c9fadaafde0cddc4b1"
+    },
+    "knifeCausalAudit": {
+      "path": "/tmp/isaac-has118-8a8-causal-audit/conclusion.json",
+      "sha256": "cfe62b4b6e7ab23ce4d142cb2c83c8c0434b7e0a13e712ed394d80df472f90db"
+    },
+    "readinessPartial": {
+      "path": "/dev/shm/isaac-regular-readiness-287-own-proof/partial-phase-closure.json",
+      "sha256": "ce8b87d137b6515b0bdbed8be511d7225d4d710af760f4955e50660f6fbf80f2"
+    },
+    "tracePreparation": {
+      "path": ".cache/coordination/quality-main/browser-trace-streaming-v1/combined-publication-preparation.json",
+      "sha256": "845473d4f9e85dbf8405ce67e3b25d8cb4e9e825ea46f0858c845825164619de"
+    },
+    "traceClosedReadback": {
+      "path": "/tmp/isaac-browser-trace-streaming-closed270-v1/report.json",
+      "sha256": "8923d615047e11354320bdb5958d1db8569df160a559dee47674cc728483f1b2"
+    }
+  },
+  "retention": "Previous evidence capsules remain historical. Passing local, Native-only and conditional source-law contracts never replace required cross-game failures."
+}
