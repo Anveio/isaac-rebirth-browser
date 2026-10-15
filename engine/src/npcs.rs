@@ -112,6 +112,21 @@ pub struct Npc {
     /// +318 APPEAR (4) cleared by a mid-room spawner: no hide/Poof/Appear.
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     pub no_appear: bool,
+    /// Sprite overlay (ANM2 overlay slot): Gemini's head.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub overlay: Option<Overlay>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub gemini: Option<crate::gemini::GeminiState>,
+}
+
+/// One overlay clip of an NPC sprite, advanced with the main clip.
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct Overlay {
+    pub animation: String,
+    pub frame: u32,
+    pub clock: f32,
+    pub playing: bool,
 }
 
 fn is_zero(value: &u32) -> bool {
@@ -706,6 +721,8 @@ impl Npc {
             maggot: None,
             grid_collided: false,
             no_appear: false,
+            overlay: None,
+            gemini: None,
         }
     }
 
@@ -915,6 +932,8 @@ fn pooter_ai(
         delay: 7,
         speed: 7.0,
         parameter_angle,
+        lead: 0.0,
+        adjust: None,
     };
     if crate::plain_npc::try_shoot_player(npc, random, world, births, shot)? {
         crate::plain_npc::play(npc, "Attack", false);

@@ -572,7 +572,7 @@ impl Grid {
         to: WorldVector,
         costs: &crate::room_costs::RoomCosts,
     ) -> bool {
-        self.line_clear(from, to, costs, true)
+        self.line_clear(from, to, costs, true, 0)
     }
 
     /// CheckLine5c74a0 mode0 (Charger and Grub charges): every nonzero grid
@@ -583,7 +583,19 @@ impl Grid {
         to: WorldVector,
         costs: &crate::room_costs::RoomCosts,
     ) -> bool {
-        self.line_clear(from, to, costs, false)
+        self.line_clear(from, to, costs, false, 0)
+    }
+
+    /// CheckLine mode0 with a cost threshold, as FindGridPath5b41e0 refreshes
+    /// its line of sight (threshold 0; 900 while charmed).
+    pub fn path_line_clear(
+        &self,
+        from: WorldVector,
+        to: WorldVector,
+        costs: &crate::room_costs::RoomCosts,
+        threshold: i32,
+    ) -> bool {
+        self.line_clear(from, to, costs, false, threshold)
     }
 
     fn line_clear(
@@ -592,6 +604,7 @@ impl Grid {
         to: WorldVector,
         costs: &crate::room_costs::RoomCosts,
         exempt_class1: bool,
+        threshold: i32,
     ) -> bool {
         let delta = WorldVector {
             x: from.x - to.x,
@@ -624,7 +637,7 @@ impl Grid {
                 };
                 match self.collision(index) {
                     1 if exempt_class1 => {}
-                    0 => marked_samples += u32::from(costs.entries()[index] > 0),
+                    0 => marked_samples += u32::from(costs.entries()[index] > threshold),
                     _ => return false,
                 }
             }
