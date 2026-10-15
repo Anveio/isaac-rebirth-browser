@@ -1,12 +1,13 @@
 # Item composition coverage
 
 This map separates current source owners, declared public cases and observed
-functional results. Main `35b44087` includes ordinary Player Brimstone299,
-FireDelay ownership304, optional regular Tear variant298 and per-field
-comparer continuation311. Draft307 has passed its own builds and retained
-regressions. Its original standalone comparison fails on admission; the corrected
-producer creates Tears but fails on motion and other fields. Transport, source
-review and local replay consistency do not establish Original functional parity.
+functional results. Main `3df99031` includes ordinary Player Brimstone299,
+FireDelay ownership304, optional regular Tear variant298, per-field comparer311
+and standalone Ludovico Tear307. The final C421 artifact fixes the controlled
+saved-position rewind and matches motion across three retained routes; its
+four-case comparison still fails on contacts, identities and missing owners.
+Transport, source review and local replay consistency do not establish Original
+functional parity.
 
 | Ordered boundary | Current owner and scope | Observed evidence and remaining interaction |
 | --- | --- | --- |
@@ -19,7 +20,7 @@ review and local replay consistency do not establish Original functional parity.
 | Regular Tear variant | Merged298 returns optional Some0 only for the closed normal-Isaac/current-primary1/flags0/positive1/4/6 producer | Unknown contexts remain null. The regular-kind1 proof does not admit kind8, widen contacts or establish Native variant parity |
 | Ordinary/Has118/controlled Knife | Merged270/286/301 share one store, allocator, registered C18 and Remove/Uninit owner; subtype1 children keep ParentKnife498 and their copied Line | The controlled fixed route retains106,884/8,755 FAIL plus one missing old marker;281 post329 parent physical/DA0/C18 rows match and280 carry bit33. Child SharedMT/geometry,37 strict rotations, contact and event/history gaps remain red |
 | Ordinary Player Brimstone | Merged299 uses canonical Laser/Impact storage, charge/live properties, Full/Fast, registered slots and retirement | Retained ordinary case22,111/1,030 FAIL has two births and61 Laser/Impact rows with matching observed geometry/phase/TTL/fade/Sprite/color. Two following-Full absence/slot witnesses do not observe Native Remove/Uninit events |
-| Standalone Ludovico Tear | Draft307 uses the existing Tear store/scheduler and a separately proved neutral329-only kind8 builder | OWN builds,37,965,608/0 regular regression and503,611/0 retained Libra properties pass. The original d1e582 comparison remains85,050/11,620 FAIL with zero port Tears. Corrected8120 produces1,541 bodies (770 Full/771 Fast), but remains134,350/24,248 FAIL. Selected birth/properties and contact queue→next-Full HP chains match; controlled450 rewind is a proven motion defect with its correction pending. Identity, geometry, strict queue/HP and missing-owner failures remain |
+| Standalone Ludovico Tear | Merged307 uses the existing Tear store/scheduler and a separately proved neutral329-only kind8 builder | Final C421 owned builds and 37,965,608 / 0 regular regression pass. The four-case comparison remains 134,364 / 20,813 FAIL, with 1,541 bodies (770 Full / 771 Fast). Three motion routes match 1,157 actual position, velocity, B28 and saved450 rows; the contact route still differs and has zero port FIFO/drain witnesses. Original 85,050 / 11,620 and intermediate 134,350 / 24,248 failures remain unchanged. Identity/RNG, strict contact and missing-owner gaps remain |
 | Controlled Brimstone | Draft312 selects actual7/1/1, with current properties and ring Full/Fast owners; its future Tear replacement must consume307's real Remove/physical448 capability | Four cases are declared, unexecuted. Source-only316 checks same-C18 item4 live reapply and later114 priority; missing fields, callback events or registered replacement bodies stay FAIL |
 
 The public `item-composition` driver and suite are registered. Literal
@@ -60,27 +61,39 @@ identities, including eight after329. That is Native observability only: it
 does not regrade the older helper's6,744/18 FAIL or prove paired port event
 parity. Manager absence, Remove flags and callback events are distinct facts.
 
-| Source-only leaf | Declared responsibility | Execution still required |
+| Focused leaf | Declared responsibility | Execution still required |
 | --- | --- | --- |
 | [314](https://github.com/Anveio/isaac-rebirth-browser/pull/314) | Four public ordinary-Brim contact cases, both fixed phases and both reused OS-token projections | Actual typed14/18 receiver contact, FIFO attribution, next-Full HP and natural expiry |
-| [315](https://github.com/Anveio/isaac-rebirth-browser/pull/315) | Optional typed14/18 observation/comparison | Actual field readback and same-receiver causal damage; missing owners stay FAIL |
+| [315](https://github.com/Anveio/isaac-rebirth-browser/pull/315) | Merged typed14/18 observation/comparison | Consumed by the standalone 329 contact comparison; receiver identity/geometry and port minimum enqueue/drain remain FAIL |
 | [316](https://github.com/Anveio/isaac-rebirth-browser/pull/316) | Controlled-Brim property/priority history marker | Actual7/1/1 Full/Fast bodies, same-C18 live4 properties,114 replacement and separately observed Laser lifecycle |
-| [317](https://github.com/Anveio/isaac-rebirth-browser/pull/317) | Optional source-owned Room2494, born83C and Full velocity-delta fields | Actual writer-scope readback; registry808/818 and ordinal838 remain absent |
+| [317](https://github.com/Anveio/isaac-rebirth-browser/pull/317) | Merged source-owned Room2494, born83C and Full velocity-delta fields | Optional fields consumed by the standalone 329 comparison; registry808/818 and ordinal838 remain absent |
 | [318](https://github.com/Anveio/isaac-rebirth-browser/pull/318) | Pure Damage operator and adjacent footprint | Separate next312 consumed build/retained regression; no added eligibility or changed arithmetic |
 
-The built307 report remains85,050/11,620 FAIL across all four cases: motion16,448/2,301,
-contact35,474/4,684, OS0 16,477/2,300 and OS1 16,651/2,335. Successful capture
-exits and public tape completion do not waive its zero-port-Tear failure. The
-corrected8120 producer reuses the same frozen Native references and remains
-134,350/24,248 FAIL with 1,541 controlled bodies (770 Full, 771 Fast). It passes
-37,965,608/0 retained regular checks and selected birth/damage/flags/color
-properties. Each game independently observes accepted queue→next-Full HP chains;
-strict receiver identity/positions, 42 HP differences and 10 queue differences
-remain red. A source-confirmed controlled450 rewind motion defect needs its
-next correction and artifact/game qualification. The fixed motion case retains
-188 prebirth C74 differences, 188 BB0 differences and seven DA0 differences.
-These selected matches do not establish all Player/controller fields or
-body/contact/lifetime parity, and do not regrade the original no-Tear report. The OS0 initial guard-stop remains retained.
+The final C421 producer reuses all four frozen Native references and remains
+**134,364 checks / 20,813 FAIL**, with 1,541 controlled bodies (770 Full,
+771 Fast). The fixed motion route and both recorded OS routes match position,
+velocity, movement delta B28 and saved position450 across 1,157 body rows. This
+qualifies the specific saved-position rewind repair, not all actor motion or
+Player/controller fields. The owned builds and 37,965,608 / 0 retained regular
+regression pass; no new Original capture or whole merged-tree build is implied.
+
+The contact route still has 259 position, 264 velocity, 255 B28 and258 saved-position
+differences across 384 bodies. Its first position/velocity mismatch is at
+presentation 686, before the observed Native FIFO at 821. Native type 18 FIFO is
+observed at 821/822 and 825/826, with a nonlethal next-Full HP application at 823.
+The port has **zero actual FIFO or drain observations** and fails both required
+minimum witnesses; older supported-minimum counters do not prove coverage.
+Receiver geometry, identity/seed/RNG, unknown actor owners, registry/veto and
+lethal lifecycle remain unresolved. These report-only values justify no new
+timing, steering or actor-law fix.
+
+The original d1e582 report remains 85,050 / 11,620 FAIL with zero port Tears:
+motion16,448/2,301, contact35,474/4,684, OS0 16,477/2,300 and OS1 16,651/2,335.
+The intermediate 8120 report remains 134,350 / 24,248 FAIL, including 42 strict
+contact HP and 10 queue differences. Its then-observed independent queue/HP
+chains are historical evidence, not a pass for final C421 contacts. The original
+OS0 guard-stop and every prelude timer, observation and lifecycle failure remain
+retained. No newer selected match regrades either earlier report.
 
 Historical reports remain immutable. Frozen Brim10 retains307,112/23,017 FAIL;
 ordinary6 completed only cases0..2 with571,311/37,820 FAIL. The pre299 unchanged-v8

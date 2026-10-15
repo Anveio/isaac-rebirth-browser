@@ -192,9 +192,8 @@ fn pickup_catalog(path: &Path, animations: &Path, entities_xml: &str) -> String 
 /// tools/foundation/extract-alpha-masks.py output: one alpha>0.5 bitfield
 /// per clip of Creep (Red), rows as hex with bit x for texel x.
 fn creep_mask_catalog(path: &Path) -> String {
-    let data: Value =
-        serde_json::from_str(&fs::read_to_string(path).expect("read creep masks"))
-            .expect("parse creep masks");
+    let data: Value = serde_json::from_str(&fs::read_to_string(path).expect("read creep masks"))
+        .expect("parse creep masks");
     let mut output = String::from("pub static CREEP_MASKS: &[CreepMask] = &[\n");
     for (name, mask) in data["masks"].as_object().expect("creep masks") {
         let rows: Vec<String> = mask["rows"]
@@ -510,7 +509,11 @@ fn boss_catalog(xml: &str) -> String {
         let (kind, variant) = identity.split_once('.').expect("portrait type.variant");
         // 551a10 maps entity types to ids in code, not by file name:
         // 551ccd gives Gurglings 237 id 56, whose sheet is named 276.0.
-        let (kind, variant) = if id == 56 { ("237", "1") } else { (kind, variant) };
+        let (kind, variant) = if id == 56 {
+            ("237", "1")
+        } else {
+            (kind, variant)
+        };
         output.push_str(&format!(
             "BossPresentation {{ id: {id}, entity_type: {kind}, variant: {variant}, portrait: {portrait:?} }},\n",
             kind = kind.parse::<u32>().expect("portrait type"),
@@ -968,8 +971,11 @@ fn main() {
     );
     let creep_masks = manifest.parent().unwrap().join("web/creep-mask-data.json");
     println!("cargo:rerun-if-changed={}", creep_masks.display());
-    fs::write(output.join("creep_masks.rs"), creep_mask_catalog(&creep_masks))
-        .expect("write creep masks");
+    fs::write(
+        output.join("creep_masks.rs"),
+        creep_mask_catalog(&creep_masks),
+    )
+    .expect("write creep masks");
     let familiar_path = manifest.parent().unwrap().join("web/familiar-data.json");
     println!("cargo:rerun-if-changed={}", familiar_path.display());
     fs::write(

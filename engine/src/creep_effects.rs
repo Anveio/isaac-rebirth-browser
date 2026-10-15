@@ -123,7 +123,12 @@ impl NpcEffectAdmission<'_> {
     }
 
     /// SetColor of the spawner's colour after the first update.
-    pub(crate) fn set_creep_color(&mut self, id: u32, tint: [f32; 4], offsets: [f32; 3]) -> Result<(), String> {
+    pub(crate) fn set_creep_color(
+        &mut self,
+        id: u32,
+        tint: [f32; 4],
+        offsets: [f32; 3],
+    ) -> Result<(), String> {
         let effect = self
             .effects
             .iter_mut()
@@ -260,7 +265,12 @@ pub(crate) fn advance(state: &mut State, phase: Phase, id: u32) -> Result<(), St
         effect.presented_position = effect.position;
         return Ok(());
     }
-    if step(effect, &mut state.boot_lifecycle.shared, game_counter, player)? {
+    if step(
+        effect,
+        &mut state.boot_lifecycle.shared,
+        game_counter,
+        player,
+    )? {
         hurt_player(state)?;
     }
     Ok(())
