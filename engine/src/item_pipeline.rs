@@ -11,6 +11,13 @@ pub(crate) struct CacheMask(pub(crate) u32);
 
 const LIBRA_SCALAR_FLAGS: u32 = 0x1b;
 
+// Independent Monstro229 callback, Familiar, grant and kind1 footprints.
+// Equal sets do not transfer controller, getter or auxiliary ownership.
+const MONSTRO_CACHE_ITEMS: &[usize] = &[1, 4, 229];
+const MONSTRO_FAMILIAR_ITEMS: &[usize] = &[1, 4, 229];
+const MONSTRO_GRANT_ITEMS: &[usize] = &[1, 4, 229];
+const MONSTRO_KIND1_ITEMS: &[usize] = &[1, 4, 229];
+
 // Independent source-owned footprints. Equal current sets are deliberately
 // separate: cache additions cannot silently admit a50D090 getter branch.
 const TECHNOLOGY_CACHE_ITEMS: &[usize] = &[1, 4, 68, 329];
@@ -171,6 +178,9 @@ impl<'a> ItemInputs<'a> {
         if self.admits_technology_cache_context() || self.admits_fetus_cache_context() {
             return true;
         }
+        if self.admits_monstro_cache_context() {
+            return true;
+        }
         self.owner.trinket_slots == [0, 0]
             && self
                 .owner
@@ -219,6 +229,40 @@ impl<'a> ItemInputs<'a> {
     pub(crate) fn admits_controlled_technology_context(self) -> bool {
         self.positive_owned_count(329)
             && self.admits_permanent_readset(68, CONTROLLED_TECHNOLOGY_CALLER_ITEMS)
+    }
+
+    ///Independent511F10 footprint.229 is neutral for the selected callbacks;
+    ///FireDelay separately consumes the actual retained C08=7 multiplier.
+    pub(crate) fn admits_monstro_cache_context(self) -> bool {
+        self.admits_monstro_readset(MONSTRO_CACHE_ITEMS, false)
+    }
+
+    ///Independent strict511F10 path requests the same68 zero familiars.
+    pub(crate) fn admits_monstro_zero_familiar_requests(self) -> bool {
+        self.admits_monstro_readset(MONSTRO_FAMILIAR_ITEMS, false)
+    }
+
+    ///Only actualAdd229 may preserve an existing auxiliary owner. Unknown
+    ///restore histories remain None regardless of the current item counts.
+    pub(crate) fn admits_monstro_grant_context(self) -> bool {
+        self.admits_monstro_readset(MONSTRO_GRANT_ITEMS, false)
+    }
+
+    ///Separate50D090(kind1) path: Have229 transforms the actual initial0
+    ///variant to BloodTear1. This grants no controller or cache capability.
+    pub(crate) fn admits_monstro_kind1_context(self) -> bool {
+        self.admits_monstro_readset(MONSTRO_KIND1_ITEMS, true)
+    }
+
+    fn admits_monstro_readset(self, supported: &[usize], empty_queue: bool) -> bool {
+        self.admits_permanent_readset(229, supported)
+            && if empty_queue {
+                self.owner.queued_id.is_none()
+            } else {
+                self.owner
+                    .queued_id
+                    .is_none_or(|id| supported.contains(&(id as usize)))
+            }
     }
 
     ///Mechanical signed-count/context check, with no item capability implied
@@ -307,6 +351,7 @@ impl<'a> ItemInputs<'a> {
         //52 is neutral for these scalar callbacks except the separately
         //implemented retained-C08 FireDelay multiplier below.
         let fetus_context = self.admits_fetus_cache_context();
+        let neutral_monstro = self.admits_monstro_cache_context();
         self.admits_scalar_context()
             && self
                 .owner
@@ -320,7 +365,8 @@ impl<'a> ItemInputs<'a> {
                                 || neutral.contains(&(id as u32))
                                 || (id == 304 && coupled_libra)
                                 || (id == 68 && neutral_technology)
-                                || (id == 52 && fetus_context)))
+                                || (id == 52 && fetus_context)
+                                || (id == 229 && neutral_monstro)))
                 })
     }
 
@@ -328,6 +374,9 @@ impl<'a> ItemInputs<'a> {
     /// effects admitted above do not expand Flight, Familiar, Luck or history.
     fn admits_selected_auxiliary_callbacks(self) -> bool {
         if self.admits_technology_cache_context() || self.admits_fetus_cache_context() {
+            return true;
+        }
+        if self.admits_monstro_cache_context() {
             return true;
         }
         self.admits_scalar_context()
@@ -344,6 +393,9 @@ impl<'a> ItemInputs<'a> {
     /// An independent strict 511F10 trace proves 68 ordered requests for zero
     /// familiars with these inputs. Actual manager queries remain required.
     pub(crate) fn admits_selected_zero_familiar_requests(self) -> bool {
+        if self.owned_count(229) != 0 {
+            return self.admits_monstro_zero_familiar_requests();
+        }
         self.admits_selected_auxiliary_callbacks()
     }
 
@@ -452,6 +504,11 @@ impl FireDelayStage {
         }
         if inputs.positive_owned_count(222) {
             delay -= 2.0_f32;
+        }
+        //512738/5151EE: Monstro uses the actual retained C08 after222,
+        //before Soy and CVTT. The binary32 literal is 0x4089999A.
+        if primary == PrimaryWeaponC08::MonstrosLung {
+            delay *= 4.3_f32;
         }
         (delay as i32).max(1)
     }
