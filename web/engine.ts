@@ -9,6 +9,8 @@ export interface Player {
   soulHp: number; blackHeartMask: number; eternalHearts: number;
   facing: Direction; bodyFacing: Direction; walkFrame: number; headFrame: number; shooting: boolean; shootingLock: number;
   renderOffset: { x: number; y: number }; controlsEnabled: boolean;
+  transformationCounts: [number, number] | null;
+  flying: boolean | null; gridCollisionClass: number | null;
   eye: "negative" | "positive";
   shotsFired: number;
 }
