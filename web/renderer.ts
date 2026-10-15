@@ -83,9 +83,15 @@ export class Renderer {
         const entity = cell.entity;
         if (!entity) continue;
         const x = (40 + index % grid.width * 40) * 0.65 + 32;
-        const y = (120 + Math.floor(index / grid.width) * 40) * 0.65 - 46;
+        // Grid Render projects through WorldToScreen 42eb00 (0.65y - 47);
+        // the -46 actor anchor sits one logical pixel lower.
+        const y = (120 + Math.floor(index / grid.width) * 40) * 0.65 - 47;
         const rock = entity.state === 1 ? rockSprite(entity.kind, entity.variant) : undefined;
-        if (rock) {
+        if (entity.kind === 7) {
+          // GridEntity_Pit 5684c0 stores its autotile frame as the variant.
+          this.assets.draw(ctx, "gfx/grid/grid_pit.anm2", "pit", x, y, entity.variant);
+          this.drawnGrid.push({ index, kind: 7, animation: "pit", frame: entity.variant });
+        } else if (rock) {
           this.assets.draw(ctx, "gfx/grid/grid_rock.anm2", rock.animation, x, y, rock.frame);
           this.drawnGrid.push({ index, kind: entity.kind, ...rock });
         } else if (entity.kind === 8 && entity.state === 0)
