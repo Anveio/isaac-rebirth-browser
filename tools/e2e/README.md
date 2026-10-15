@@ -71,7 +71,8 @@ npm run affected:map                 # or: npm run affected:map -- run-…
 `--affected` is a developer convenience, not a merge gate.
 
 The runner rebuilds `dist/` when `web/` or `engine/` sources are newer than it
-(use `--no-build` to skip). It builds the native `floor` generator, runs each
+(use `--no-build` to skip). It always builds the native `floor` generator,
+which seed discovery runs, so `--no-build` never leaves it stale. It runs each
 suite under its own virtual display, and writes `.cache/e2e/run-*/report.json`
 and one log per suite. A failing suite prints its replay command:
 
