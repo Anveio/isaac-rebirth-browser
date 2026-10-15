@@ -235,7 +235,7 @@ export interface StageEffects {
 export interface State {
   weaponCache: {primary: number; flagsC98: [number,number]; colorCa0: AttackColor; colorCcc: AttackColor};
   weaponAdmission: {sourcePlayerType: number|null; c18IsKnownEmpty: boolean; pendingPrimaryCleanup: {fromPrimary:number;toPrimary:number}|null; unadmittedController: {primary:number;channel:string}|null};
-  lasers: {id:number; position:{x:number;y:number}; presentedPosition:{x:number;y:number}; positionOffset:{x:number;y:number}; length:number; rotation:number; scale:{x:number;y:number}; actor:string; animation:string; animationClock:number; removed:boolean;
+  lasers: {id:number; angle:number; depth:number; position:{x:number;y:number}; presentedPosition:{x:number;y:number}; positionOffset:{x:number;y:number}; length:number; rotation:number; scale:{x:number;y:number}; actor:string; animation:string; animationClock:number; removed:boolean;
     impact: {position:{x:number;y:number}; positionOffset:{x:number;y:number}; scale:{x:number;y:number}; rotation:number; actor:string; animation:string; animationClock:number; removed:boolean} | null}[];
   enemyProjectiles: {id:number; spawnSeed:number; position:{x:number;y:number}; presentedPosition:{x:number;y:number}; velocity:{x:number;y:number}; height:number; scale:number; animation:string|null; animationFrame:number; dead:boolean; removed:boolean}[];
   schema: 1; tickRate: 60; tick: number; menuAnimationTick: number; runTick: number; gameUpdateCount: number; screen: Screen;
