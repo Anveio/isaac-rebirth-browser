@@ -310,6 +310,8 @@ export type Command = { type: "key"; code: string; down: boolean } | { type: "te
 interface Exports extends WebAssembly.Exports {
   memory: WebAssembly.Memory; abi_version: () => number; reset: (initialSeed: number, bootEpochSeed: number) => number; request_ptr: (length: number) => number;
   reset_with_resources: (initialSeed: number, bootEpochSeed: number) => number;
+  reset_with_boot_resources: (initialSeed: number, bootEpochSeed: number) => number;
+  boot_resource_ptr: (length: number) => number;
   command: () => number; snapshot_ptr: () => number; snapshot_len: () => number;
   error_ptr: () => number; error_len: () => number; public_keys_ptr: () => number; public_keys_len: () => number;
 }
@@ -354,14 +356,14 @@ export class Engine {
     let result: number;
     if (resources === undefined) result = this.wasm.reset(initialSeed, bootEpochSeed);
     else {
-      if (typeof this.wasm.reset_with_resources !== "function")
+      if (typeof this.wasm.reset_with_boot_resources !== "function" || typeof this.wasm.boot_resource_ptr !== "function")
         throw new Error("WASM resource ingress is stale; rebuild with npm run build:wasm");
       const bytes = new TextEncoder().encode(JSON.stringify(resources));
-      if (bytes.length > 65_536) throw new Error("Boot resource input exceeds 64 KiB");
-      const ptr = this.wasm.request_ptr(bytes.length);
+      if (bytes.length > 512 * 1024) throw new Error("Boot resource input exceeds 512 KiB");
+      const ptr = this.wasm.boot_resource_ptr(bytes.length);
       if (ptr === 0) throw new Error("WASM resource allocation failed");
       new Uint8Array(this.wasm.memory.buffer, ptr, bytes.length).set(bytes);
-      result = this.wasm.reset_with_resources(initialSeed, bootEpochSeed);
+      result = this.wasm.reset_with_boot_resources(initialSeed, bootEpochSeed);
     }
     if (result !== 0) throw new Error(this.read(this.wasm.error_ptr(), this.wasm.error_len()));
     return this.snapshot();
