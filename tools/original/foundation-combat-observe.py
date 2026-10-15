@@ -84,6 +84,8 @@ def observe(pid, context):
                     'spriteFlipX': bool(raw[0x2fc]), 'spriteFlipY': bool(raw[0x2fd]),
                     'spriteScale': pair(0x2c4),
                     'spriteTint': list(struct.unpack_from('<ffff', raw, 0x2d0)),
+                    # Whole sprite KColor +2d0: tint RGBA, colorize RGBA, offset RGB.
+                    'spriteColor': list(struct.unpack_from('<11f', raw, 0x2d0)),
                     'spriteOffsets': list(struct.unpack_from('<fff', raw, 0x2e0))}
                 definition = struct.unpack_from('<Q', raw, 0x40)[0]
                 text_pointer = u64(definition) if definition else 0

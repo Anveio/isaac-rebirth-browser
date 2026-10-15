@@ -40,6 +40,9 @@ export function npcFields(native, actor, phase) {
     ['position', vector(native.position), vector(phase === 0 ? actor.presentedPosition : actor.position)],
     ['velocity', vector(native.velocity), vector(actor.velocity)], ['target', vector(native.npcTarget), vector(actor.target)],
     ['championColor', native.npcChampionColor, actor.champion?.color ?? -1],
+    // Sprite Color +2d0 (champion colour or timed hit flash), every component.
+    ['spriteColor', native.spriteColor?.map(f32), actor.spriteColor &&
+      [...actor.spriteColor.current.tint, ...actor.spriteColor.current.colorize, ...actor.spriteColor.current.offset].map(f32)],
   ];
 }
 

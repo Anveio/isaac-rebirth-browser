@@ -1,4 +1,4 @@
-import { Assets, type SpriteColor } from "./animation";
+import { Assets } from "./animation";
 import { MenuRenderer } from "./menu";
 import { GLMenuContext, type GLSurface } from "./gl-menu";
 import { StageComposer, type StageTargets } from "./gl-stage";
@@ -8,14 +8,6 @@ import type { ActorSprite, Room, RoomAppearance, RoomQuad, State } from "./engin
 
 const PLAYER = "gfx/001.000_player.anm2";
 const TEAR = "gfx/002.000_tear.anm2";
-// Static champion Colors at 0x8ec700 (built 0x40aa42..0x40ac23): tint RGBA
-// and offset RGB. ResetColor 47f430 copies the entry into the sprite color.
-const CHAMPION_OFFSET = 200 / 255;
-const CHAMPION_COLORS: readonly SpriteColor[] = [
-  [1, .1, .1, 1], [.6, .6, 0, 1], [.1, .8, .2, 1], [1, .6, .2, 1], [.2, .2, 1, 1], [0, .15, .15, 1],
-  [1, 1, 1, 1, CHAMPION_OFFSET], [.5, .5, .5, 1], [1, 1, 1, .3, CHAMPION_OFFSET], [0, 0, 0, 1],
-  [1, 0, 1, 1], [.75, 0, 1, 1], [.5, 0, 0, 1], [.5, .5, 1, 1],
-].map(([r, g, b, a, offset = 0]) => ({ tint: [r!, g!, b!, a!].map(Math.fround), offsets: [offset, offset, offset].map(Math.fround) }));
 // Rock Init 56ed00 / Render 56bf80: an intact (state 1) rock-family grid
 // entity sets frame variant of its type's grid_rock.anm2 animation.
 const ROCK_ANIMATIONS: Record<number, string> = { 2: "normal", 3: "black", 4: "tinted", 5: "bombrock", 6: "alt" };
@@ -178,6 +170,8 @@ export class Renderer {
       if (npc.removed || (npc.dead && !npc.monstro && !npc.dip) || (!npc.keeper && !npc.visible)) continue;
       // Sprite Scale (+2c4): 1.15 for champions, otherwise the fresh 1.
       const scale = npc.champion?.scale ?? 1;
+      // Sprite Color (+2d0): champion table colour or a timed hit flash.
+      const color = { tint: npc.spriteColor.current.tint, offsets: npc.spriteColor.current.offset };
       this.drawnNpcs.push({ kind: npc.kind, spawnSeed: npc.spawnSeed, scale: [scale, scale] });
       const keeper = npc.keeper;
       if (keeper) {
@@ -193,7 +187,7 @@ export class Renderer {
         ctx.translate(npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46);
         ctx.scale(npc.monstro.flipX ? -1 : 1, 1);
         this.assets.draw(ctx, "gfx/020.000_monstro.anm2", npc.animation,
-          0, 0, npc.animationClock, { scale });
+          0, 0, npc.animationClock, { scale, color });
         ctx.restore();
       } else if (npc.dip) {
         ctx.save();
@@ -216,13 +210,11 @@ export class Renderer {
         ctx.save();
         ctx.translate(npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46);
         ctx.scale(npc.flipX ? -1 : 1, 1);
-        // Champions draw with their table Color and the ×1.15 sprite scale.
-        this.assets.draw(ctx, npc.actor, npc.animation, 0, 0, npc.animationClock,
-          { scale, color: npc.champion && CHAMPION_COLORS[npc.champion.color] });
+        this.assets.draw(ctx, npc.actor, npc.animation, 0, 0, npc.animationClock, { scale, color });
         ctx.restore();
       } else {
         this.assets.draw(ctx, npc.kind === 13 ? "gfx/013.000_fly.anm2" : npc.kind === 18 ? "gfx/018.000_attack fly.anm2" : npc.kind === 214 ? "gfx/213.000_level2fly.anm2" : "gfx/244.000_round worm.anm2", npc.animation,
-          npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46, npc.animationFrame, { scale });
+          npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46, npc.animationFrame, { scale, color });
       }
     }
     for (const familiar of state.familiars) {
