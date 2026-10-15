@@ -131,7 +131,10 @@ game features (owned collectibles, secret reveals, boss clears) each case
 reached, including each owned weapon collectible (`weapon:<id>`). The summary
 line names the implemented NPC kinds no case simulated
 (from `rebirth_cleanroom::implemented_npc_kinds`) and the room types that
-generated floors contained but no case entered. The census is a measurement,
+generated floors contained but no case entered. Unsimulated kinds are split
+by whether any authored Basement or special room places them
+(`unplacedNpcKinds`): a kind no room places, such as one from a later stage,
+is reachable only when another entity spawns it, so it is not a driver gap. The census is a measurement,
 not a property. Must-hit properties and coverage tapes make the important
 branches binding.
 

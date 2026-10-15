@@ -8,7 +8,7 @@
 //! Each case also records the command at which it first reached every key,
 //! so `tools/dst/cover.py` can cut the shortest tape prefixes that bring a
 //! missing key into the corpus.
-use rebirth_cleanroom::{implemented_npc_kinds, items, Screen, State};
+use rebirth_cleanroom::{implemented_npc_kinds, items, room_assets, Screen, State};
 use serde_json::{json, Value};
 use std::cell::RefCell;
 use std::collections::{BTreeMap, BTreeSet};
@@ -159,13 +159,27 @@ pub fn observe(state: &State) {
     });
 }
 
+/// Entity types some authored Basement or special room spawns: what a
+/// floor can place directly. Other kinds appear only when spawned at runtime.
+fn authored_entity_types() -> BTreeSet<u32> {
+    room_assets::basement()
+        .iter()
+        .chain(room_assets::special().iter())
+        .flat_map(|asset| asset.spawns.iter())
+        .flat_map(|group| group.entries.iter())
+        .map(|entry| u32::from(entry.entity_type))
+        .collect()
+}
+
 /// The census for the report, and what the workload never reached: NPC kinds
-/// the engine implements and room types its floors contained.
+/// the engine implements (split by whether any authored room places them)
+/// and room types its floors contained.
 pub fn report() -> Value {
     let census = census();
-    let unreached_npcs: Vec<u32> = implemented_npc_kinds()
+    let authored = authored_entity_types();
+    let (unreached_npcs, unplaced_npcs): (Vec<u32>, Vec<u32>) = implemented_npc_kinds()
         .filter(|kind| !census.reached.contains_key(&format!("npc:{kind}")))
-        .collect();
+        .partition(|kind| authored.contains(kind));
     let unentered_rooms: Vec<u32> = census
         .floor_reached
         .keys()
@@ -186,6 +200,7 @@ pub fn report() -> Value {
         "reached": census.reached,
         "floorRoomTypes": census.floor_reached,
         "unreachedNpcKinds": unreached_npcs,
+        "unplacedNpcKinds": unplaced_npcs,
         "unenteredRoomTypes": unentered_rooms,
     })
 }
