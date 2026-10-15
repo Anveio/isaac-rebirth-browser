@@ -457,6 +457,12 @@ impl DamageQueue {
         self.pending_flags = 0;
     }
 
+    /// A subclass AI erasing queued entries (4fd320 vector erase) leaves the
+    /// pending total and flags as they were.
+    pub(crate) fn erase_events(&mut self, erase: impl Fn(&DamageEvent) -> bool) {
+        self.events.retain(|event| !erase(event));
+    }
+
     /// The source admits positive damage when maximum HP is positive; damage
     /// does not immediately change current HP. Boss/co-op scaling belongs to
     /// admission before this ordinary single-player queue contract.

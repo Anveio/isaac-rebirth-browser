@@ -229,6 +229,7 @@ pub(crate) static FAMILIES: &[&Family] = &[
     &crate::gemini::FAMILY,
     &crate::gapers::FAMILY,
     &crate::gushers::FAMILY,
+    &crate::hoppers::FAMILY,
 ];
 
 /// Every NPC type a registered family constructs, in registry order. Tools
