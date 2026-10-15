@@ -679,6 +679,16 @@ pub fn state(state: &State) {
         "game: room NPC identities are unique",
         details()
     );
+    // Coverage the laser and miniboss contracts depend on.
+    props::sometimes!(
+        state.screen == Screen::Playing
+            && state.floor.descriptors[state.current_room]
+                .template
+                .room_type
+                == 6,
+        "game: the player is in a miniboss room"
+    );
+    props::sometimes!(!state.lasers.is_empty(), "game: a laser is live");
 
     // Every scheduled handle names one live entity of its kind.
     let scheduled = state.actor_scheduler.full_phase();

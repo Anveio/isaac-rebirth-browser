@@ -229,6 +229,7 @@ export class Renderer {
       this.stage.foreground(state.stageEffects);
       this.presentation.introduction(ctx, state);
       this.hud(ctx, state);
+      this.presentation.bossBar(ctx, state);
       const info = state.informationAnimation;
       if (info.state === 2 && info.definitionLoaded && info.currentActor && info.currentClip)
         this.assets.draw(ctx, info.currentActor, info.currentClip, 240, 135, info.frame,

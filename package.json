@@ -23,7 +23,7 @@
     "matrix:check": "node tools/foundation/matrix.mjs --check",
     "test:original-clock": "python3 tools/original/foundation-clock-verify.py --count 2 --jobs 2",
     "lint": "cargo clippy --manifest-path engine/Cargo.toml --locked --all-targets -- -D warnings",
-    "lint:dst": "cargo fmt --manifest-path engine/dst/Cargo.toml --check && cargo clippy --manifest-path engine/dst/Cargo.toml --locked --all-targets -- -D warnings",
+    "lint:dst": "python3 tools/dst/sync-lock.py && cargo fmt --manifest-path engine/dst/Cargo.toml --check && cargo clippy --manifest-path engine/dst/Cargo.toml --locked --all-targets -- -D warnings",
     "test:dst": "bash tools/dst/run.sh",
     "format": "cargo fmt --manifest-path engine/Cargo.toml",
     "format:check": "cargo fmt --manifest-path engine/Cargo.toml --check",

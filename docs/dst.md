@@ -24,6 +24,13 @@ engine/dst/target/release/rebirth-dst --list      # the unit registry
 npm run lint:dst                                  # rustfmt + strict clippy for the harness
 ```
 
+The harness keeps its own `Cargo.lock`, so the shipped engine's lockfile never
+names the SDK. `tools/dst/sync-lock.py` runs before every harness build
+(`test:dst`, `lint:dst`). It pins each package of the engine's dependency
+closure to the version `engine/Cargo.lock` ships, so DST simulates the engine
+that ships and an engine dependency change never breaks `--locked` harness
+builds. When it changes the lock it says so: commit the lock with your change.
+
 ## How it works
 
 Every simulated decision draws from one entropy source
@@ -74,9 +81,13 @@ over-budget ticks, stale music callbacks, key repeats and releases). Each case
 follows one persona (direct play, menu explorer or seeded run), sends
 browser-style host-timestamped frames (with jitter, hitches and rollbacks) or
 controlled steps, and steers by the published state: shortest grid routes to
-doors and reachable pickups, a door-graph route toward the boss room,
-demolishing rocks with bombs, aiming at NPCs, pausing, and answering the
-GameOver popup.
+doors and reachable pickups, door-graph routes toward the boss room or the
+nearest unvisited room, demolishing rocks with bombs, aiming at NPCs, pausing,
+and answering the GameOver popup. Door-graph routes cross only the rooms the
+engine's own `traversal::admits` lets the player enter, so newly admitted rooms
+join the workload without a driver change. Rooms behind bombable secret doors
+and floors whose boss is Dingle are not yet reached, so Keepers and Dingle
+have no DST coverage.
 
 Beyond its invariants, every `game` tape is checked by:
 
@@ -130,6 +141,7 @@ fix must follow source evidence rather than merely silence the property.
 | A bomb coasting into a wall with a ~1e-26 residual velocity underflowed its f32 squared speed to zero in an interpolation preview, which the reflection guard reported as overflow, failing the tick. | Fixed on main (#118), following the native early return: a zero-speed preview skips refinement. An earlier guard-only fix kept the tick alive but continued into refinement, unlike the original. | `grid: nonplayer ground resolution never fails for bounded motion` fails without any fix; `grid: an underflowing inward preview skips refinement` goes unmet under the guard-only fix. |
 | Native std float functions call the host C library, while wasm32 std uses Rust's `libm`. Against `libm`, glibc 2.39 disagreed on 162,416 of 10,405,090 sampled `f32` `sin`/`cos` inputs and on 446,514 of 10,000,000 sampled `f64` `atan2` pairs. Generated tapes diverged from the shipped WASM by one ulp of NPC motion; the corpus tape's first difference is an Attack Fly's wander velocity (`npcs.rs`) at step 749, so native replay and tools could disagree with the artifact. | [fmath.rs](../engine/src/fmath.rs) routes the engine's `sin`, `cos` and `atan2` through the `libm` crate. wasm32 std matched it on every sampled input under Rust 1.97 and 1.99, so the shipped artifact computes the same results while native builds now agree with it. [engine/clippy.toml](../engine/clippy.toml) disallows every std float function whose precision Rust leaves unspecified, so `npm run lint` flags new host calls; a newly needed function gets a `libm` wrapper in `fmath.rs`. This makes no original-game parity claim. | `regression-native-wasm-fly-trig`, the shipped-WASM differential on every tape, and the lint rule |
 | Engine validation, the browser and DST each kept their own copy of the accepted key list, so new keys drifted. | Fixed on main (#122): `rebirth_cleanroom::input::PUBLIC_KEYS` is the single owner, published through the `public_keys` exports. | `abi: the public_keys export publishes exactly the engine's key surface`. |
+| The `game` driver kept its own copy of which rooms the player may enter. Main admitted large and miniboss rooms (#171, #181) but the copy did not, so DST never entered Gluttony's room. Lasers, the shared pathfinder and the laser invariants went unexercised; generated runs reached 8 of the 12 implemented NPC kinds. | `rebirth_cleanroom::traversal::admits` is the single owner of doorway admission (the engine's departure check uses it). The driver routes by it, and explorers head for the nearest unvisited admitted room. 48 generated runs then reached Gluttony and Pooters and met every `game` property without the corpus. | `game: the player is in a miniboss room`, `game: a laser is live` and `coverage-5923f07d83419608` |
 
 ## Running on Antithesis
 
