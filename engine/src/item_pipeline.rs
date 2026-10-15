@@ -156,6 +156,9 @@ impl<'a> ItemInputs<'a> {
     /// remain outside this scope. Future property operators extend their own
     /// cache reads instead of widening controller/contact admission.
     pub(crate) fn admits_selected_appearance(self) -> bool {
+        if self.admits_technology_cache_context() {
+            return true;
+        }
         self.owner.trinket_slots == [0, 0]
             && self
                 .owner
@@ -181,6 +184,20 @@ impl<'a> ItemInputs<'a> {
             && self.owner.temporary_collectibles.is_empty()
     }
 
+    /// Independent511F10 footprint for positive Technology with selected1/4.
+    /// Callers retain their normal-Isaac and typed auxiliary-owner checks.
+    /// This is cache context only, never a property/controller/contact admission.
+    pub(crate) fn admits_technology_cache_context(self) -> bool {
+        self.positive_owned_count(68)
+            && self.admits_scalar_context()
+            && self
+                .owner
+                .owned_counts
+                .iter()
+                .enumerate()
+                .all(|(id, &count)| count == 0 || (count > 0 && [1, 4, 68].contains(&id)))
+    }
+
     /// Each callback composes its implemented effects with its proven neutral
     /// read set. C08 remains an independent input to the ordered formulas.
     /// Config 118's request for all callbacks adds no implicit scalar effect.
@@ -197,6 +214,7 @@ impl<'a> ItemInputs<'a> {
         //It is neutral only for ShotSpeed; do not hide its dependency in the
         //other callback neutral lists or evaluate it as a loadout-only fold.
         let coupled_libra = stage.flag() & LIBRA_SCALAR_FLAGS != 0;
+        let neutral_technology = self.admits_technology_cache_context();
         self.admits_scalar_context()
             && self
                 .owner
@@ -208,13 +226,17 @@ impl<'a> ItemInputs<'a> {
                         || (count > 0
                             && (effects.contains(&(id as u32))
                                 || neutral.contains(&(id as u32))
-                                || (id == 304 && coupled_libra)))
+                                || (id == 304 && coupled_libra)
+                                || (id == 68 && neutral_technology)))
                 })
     }
 
     /// Auxiliary callbacks have their own narrower source proof. Scalar
     /// effects admitted above do not expand Flight, Familiar, Luck or history.
     fn admits_selected_auxiliary_callbacks(self) -> bool {
+        if self.admits_technology_cache_context() {
+            return true;
+        }
         self.admits_scalar_context()
             && self
                 .owner
