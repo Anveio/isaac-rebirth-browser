@@ -53,6 +53,14 @@ Antithesis they are judged across the whole exploration instead. Property
 messages start with their unit name and are the property identities; keep them
 stable.
 
+Seeded cases are independent, so they run on `--jobs` worker threads (all
+cores by default). A run's report does not depend on the thread count: each
+thread counts its own violations, the census tracks each thread's case
+separately, and a property reports the failure from the earliest unit, case
+and step. `--jobs 1` and `--jobs 4` write byte-identical reports for one
+seed. Under Antithesis the harness drives a single thread, so the platform
+orders every decision.
+
 A panic anywhere is an `unreachable` violation with its message attached. The
 harness profile unwinds and enables overflow checks and debug assertions, so
 the engine runs under debug arithmetic semantics while simulated.
@@ -84,11 +92,28 @@ browser-style host-timestamped frames (with jitter, hitches and rollbacks) or
 controlled steps, and steers by the published state. In a room it plays
 before it leaves:
 * It fights what is alive, lining up on one axis to fire along it. It keeps a
-  wider range against a boss and strafes across the boss's line.
+  wider range against a boss and never stands still against one, but strafes
+  only to align, escape a corner or dodge: tears inherit 1.2× the player's
+  velocity across their aim (`projectiles::stored_velocity`), so a strafe
+  bends every shot off the line. It first steps away from the nearest threat
+  (a hostile NPC, where it will be in ten updates, or a boss's published
+  target such as Monstro's landing cell), still firing.
+* Movement and fire keys stay held from one macro to the next, as a player's
+  would; a macro presses and releases only the keys that change, so commands
+  buy game time instead of re-pressing held keys.
 * It then collects every pickup the engine marks `can_collect`: pedestal
   items, hearts, chests and consumables.
 * It also demolishes blocking rocks with bombs, pauses, uses active and pocket
   items and answers the GameOver popup.
+
+A seeded case first scouts its seed. On copies of the booted game it opens
+the seed dialog through the same public commands, starts runs for 96
+candidate codes, and asks the engine's own pedestal rule
+(`Pickup::from_collectible_selector`) what each floor's treasure room offers.
+It types a code whose collectible requests the weapon cache (authored
+`cacheFlags` 0x100: Brimstone, Technology, Mom's Knife, the fetuses and the
+rest of `weapon_plan::resolve_primary`) and heads for the treasure room, so
+the weapon plans and their attacks run under DST in ordinary budgets.
 
 Between rooms it follows door-graph routes toward the boss room or the nearest
 unvisited room. Routes cross only the rooms the engine's own
@@ -96,13 +121,15 @@ unvisited room. Routes cross only the rooms the engine's own
 workload without a driver change. A key opens a `KeyClosed` door on contact,
 and the driver bombs `Hidden` doors to reach secret rooms.
 
-No case has yet cleared a boss room. The closest long runs brought Monstro to
-54 of 250 HP and Gluttony to 37 before the player died, so boss deaths and
-their rewards have no DST coverage yet.
+Boss fights decide how long a tape must be to reach a clear. With key holds,
+aligned fire and threat evasion, cases branched from a Monstro room entry
+clear it in 7 of 32 runs, and from a Gluttony entry in 8 of 32. Dingle still
+wins every fight it starts.
 
 Every report carries a coverage census: the room types, NPC kinds, pickups and
 game features (owned collectibles, secret reveals, boss clears) each case
-reached. The summary line names the implemented NPC kinds no case simulated
+reached, including each owned weapon collectible (`weapon:<id>`). The summary
+line names the implemented NPC kinds no case simulated
 (from `rebirth_cleanroom::implemented_npc_kinds`) and the room types that
 generated floors contained but no case entered. The census is a measurement,
 not a property. Must-hit properties and coverage tapes make the important
@@ -117,6 +144,11 @@ Beyond its invariants, every `game` tape is checked by:
   outside `Game`'s serialization.
 * **Lossless publication.** Published states and whole games round-trip
   through JSON and the engine's own deserialization validators.
+* **Batched ticks.** A sampled `Tick` of up to 32 steps is re-run as that many
+  single ticks and must reach the identical game. Only command-level
+  publication may differ: the batch carries every step's sound and music
+  events, and a screen change resets the menu animation counter at the
+  command boundary.
 * **C ABI differential.** The tape drives the exported `reset`/`request_ptr`/
   `command`/`snapshot_*` functions exactly as `web/engine.ts` does.
 * **Shipped-WASM differential.** With `--wasm web/generated/engine.wasm` (the
@@ -140,12 +172,21 @@ property set on every run, after the generated cases:
 
 * `regression-*` tapes reproduce fixed findings and fail without their fix.
 * `coverage-*` tapes are generated cases that together reach every `game`
-  must-hit property (boss-scene key handling, GameOver, collection and other
-  rare branches), so ordinary budgets never pass or fail on luck. When an
+  must-hit property (boss-scene key handling, GameOver, collection, boss and
+  miniboss clears and other rare branches), so ordinary budgets never pass or
+  fail on luck. The clear tapes were branched with `--resume` from boss and
+  miniboss room entries. When an
   engine change moves them off those branches, harvest candidates with
   `--retain-all`, replay each with `--replay … --report …`, and keep a small
   covering set. Game tapes drift as the engine evolves; a regression tape that
   stops reproducing its finding is retired rather than kept under its label.
+
+`--resume TAPE` makes every generated `game` case replay that tape (with
+every check) and then drive on from its end, so exploration branches from an
+interesting state, as Antithesis does, instead of rediscovering it. Cut a
+harvested tape at, say, a boss room entry, resume many cases from it, and the
+census shows how often each branch clears the room; a clearing branch is a
+short coverage tape.
 
 Open findings, which fail on current main and wait on their owner, keep their
 tape in [engine/dst/findings](../engine/dst/findings) instead. `test:dst` does

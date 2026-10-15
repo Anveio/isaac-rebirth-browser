@@ -4,8 +4,9 @@
 //! rest, so a coverage gap (a room type never entered, an implemented NPC
 //! family never simulated) is visible in every run rather than only to a
 //! probe. It is a measurement, not a property: nothing here passes or fails.
-use rebirth_cleanroom::{implemented_npc_kinds, Screen, State};
+use rebirth_cleanroom::{implemented_npc_kinds, items, Screen, State};
 use serde_json::{json, Value};
+use std::cell::RefCell;
 use std::collections::{BTreeMap, BTreeSet};
 use std::sync::Mutex;
 
@@ -13,21 +14,27 @@ struct Census {
     cases: u64,
     /// Cases that reached each key.
     reached: BTreeMap<String, u64>,
-    /// Keys the running case reached.
-    current: BTreeSet<String>,
-    /// Room types the running case's floors contained.
-    floor_rooms: BTreeSet<u32>,
     /// Cases whose floors contained each room type.
     floor_reached: BTreeMap<u32, u64>,
+}
+
+/// What the case running on this thread reached.
+#[derive(Default)]
+struct Current {
+    keys: BTreeSet<String>,
+    /// Room types the case's floors contained.
+    floor_rooms: BTreeSet<u32>,
 }
 
 static CENSUS: Mutex<Census> = Mutex::new(Census {
     cases: 0,
     reached: BTreeMap::new(),
-    current: BTreeSet::new(),
-    floor_rooms: BTreeSet::new(),
     floor_reached: BTreeMap::new(),
 });
+
+thread_local! {
+    static CURRENT: RefCell<Current> = RefCell::new(Current::default());
+}
 
 fn census() -> std::sync::MutexGuard<'static, Census> {
     CENSUS
@@ -36,20 +43,17 @@ fn census() -> std::sync::MutexGuard<'static, Census> {
 }
 
 pub fn begin_case() {
-    let mut census = census();
-    census.current.clear();
-    census.floor_rooms.clear();
+    CURRENT.with(|current| *current.borrow_mut() = Current::default());
 }
 
 pub fn end_case() {
+    let current = CURRENT.with(|current| std::mem::take(&mut *current.borrow_mut()));
     let mut census = census();
     census.cases += 1;
-    let current = std::mem::take(&mut census.current);
-    for key in current {
+    for key in current.keys {
         *census.reached.entry(key).or_default() += 1;
     }
-    let floor_rooms = std::mem::take(&mut census.floor_rooms);
-    for room_type in floor_rooms {
+    for room_type in current.floor_rooms {
         *census.floor_reached.entry(room_type).or_default() += 1;
     }
 }
@@ -78,6 +82,16 @@ pub fn observe(state: &State) {
         for pickup in state.room.pickups.iter().filter(|pickup| !pickup.removed) {
             keys.push(format!("pickup:{}", pickup.variant));
         }
+        // Owned collectibles that re-resolve the primary weapon (cache 0x100).
+        if let Some(items) = &state.player_items {
+            for (id, count) in items.owned_counts.iter().enumerate() {
+                let weapon = items::definition(id as u32)
+                    .is_some_and(|config| config.cache_flags & 0x100 != 0);
+                if *count > 0 && weapon {
+                    keys.push(format!("weapon:{id}"));
+                }
+            }
+        }
         let features = [
             (
                 "collectible owned",
@@ -97,6 +111,14 @@ pub fn observe(state: &State) {
                 "secret door revealed",
                 !state.revealed_secret_connections.is_empty(),
             ),
+            (
+                "boss below half health",
+                state
+                    .room
+                    .npcs
+                    .iter()
+                    .any(|npc| npc.boss && !npc.removed && npc.hp < npc.max_hp / 2.0),
+            ),
             ("laser", !state.lasers.is_empty()),
             ("knife", !state.knives.is_empty()),
             ("familiar", !state.familiars.is_empty()),
@@ -113,17 +135,16 @@ pub fn observe(state: &State) {
                 .map(|(key, _)| (*key).to_owned()),
         );
     }
-    let mut census = census();
-    if state.screen == Screen::Playing {
-        let rooms: Vec<u32> = state
-            .floor
-            .descriptors
-            .iter()
-            .map(|room| room.template.room_type)
-            .collect();
-        census.floor_rooms.extend(rooms);
-    }
-    census.current.extend(keys);
+    CURRENT.with(|current| {
+        let mut current = current.borrow_mut();
+        if state.screen == Screen::Playing {
+            let rooms = state.floor.descriptors.iter();
+            current
+                .floor_rooms
+                .extend(rooms.map(|room| room.template.room_type));
+        }
+        current.keys.extend(keys);
+    });
 }
 
 /// The census for the report, and what the workload never reached: NPC kinds

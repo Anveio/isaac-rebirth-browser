@@ -246,7 +246,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | `floor` | Basement generation structure, retries and per-descriptor room admission | 18 | 4 | 0 |
 | `grid` | grid queries and ground-collision solvers on generated rooms | 14 | 3 | 0 |
 | `item_pools` | ItemPool selection, depletion, fallbacks, routing and continuation | 21 | 6 | 3 |
-| `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 58 | 47 | 2 |
+| `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 62 | 51 | 2 |
 | `abi` | the exported C ABI transport the browser bridge drives | 11 | 1 | 0 |
 
 <details><summary>Every declared DST property</summary>
@@ -413,6 +413,10 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Sometimes | game: a pickup is collected | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: a valid seed code is committed through the dialog | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: an invalid seed code is dismissed | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: a room is marked clear only on an empty pass after its countdown expires | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: combat-shut doors reopen only when the room clears or a secret is revealed | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Sometimes | game: a boss room is cleared | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Sometimes | game: a miniboss room is cleared | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: the player dies | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: a death reaches GameOver | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: keys never navigate while GameOver shows | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
@@ -438,6 +442,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Always | game: player controls are disabled exactly while the run-start fade or a room transition holds | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: no run-start request is pending during gameplay | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: player motion is finite and health is bounded | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: every room body has finite motion | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: consumables are capped at 99 | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: fire cooldown and head timers stay in range | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: entity identities are unique and below their allocators | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
@@ -469,12 +474,15 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Always | game: boot is a pure function of its seeds | [mod.rs](engine/dst/src/units/game/mod.rs) |
 | Unreachable | game: public commands never panic the engine | [mod.rs](engine/dst/src/units/game/mod.rs) |
 | Always | game: a rejected command leaves the whole game unchanged | [mod.rs](engine/dst/src/units/game/mod.rs) |
+| Always | game: a batched Tick simulates exactly what single Ticks do | [mod.rs](engine/dst/src/units/game/mod.rs) |
 | Always | game: published states round-trip losslessly through their validators | [mod.rs](engine/dst/src/units/game/mod.rs) |
 | Always | game: complete games round-trip losslessly through their validators | [mod.rs](engine/dst/src/units/game/mod.rs) |
 | Sometimes | game: a run lasts more than 3,000 ticks | [mod.rs](engine/dst/src/units/game/mod.rs) |
 | Always | game: replaying a tape reproduces every outcome and state | [mod.rs](engine/dst/src/units/game/mod.rs) |
 | Always | game: a game resumed from its serialized midpoint reaches the same end | [mod.rs](engine/dst/src/units/game/mod.rs) |
 | Always | game: the C ABI agrees with direct dispatch | [mod.rs](engine/dst/src/units/game/mod.rs) |
+| Sometimes | game: the seed scout starts a seeded run | [scout.rs](engine/dst/src/units/game/scout.rs) |
+| Sometimes | game: a scouted seed offers a weapon collectible | [scout.rs](engine/dst/src/units/game/scout.rs) |
 | Always | wasm: the shipped engine agrees with native dispatch | [wasm.rs](engine/dst/src/wasm.rs) |
 | Always | abi: the exported ABI version is current | [abi.rs](engine/dst/src/units/abi.rs) |
 | Always | abi: commands before reset fail and snapshots publish null | [abi.rs](engine/dst/src/units/abi.rs) |

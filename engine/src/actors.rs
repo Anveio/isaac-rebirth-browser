@@ -74,7 +74,9 @@ impl ManagerCounts {
         self.boss_pending = 0;
     }
 
-    pub(crate) fn countable_total(&self) -> i32 {
+    /// Signed current plus pending countable actors: the Room.Update clear
+    /// predicate (5d1487) and spawn caps read this sum.
+    pub fn countable_total(&self) -> i32 {
         self.countable_pending.wrapping_add(self.countable_current)
     }
 
