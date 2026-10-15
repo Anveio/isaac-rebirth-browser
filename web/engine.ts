@@ -242,7 +242,7 @@ export interface Room {
   managerCounts: { countablePending: number; countableCurrent: number; bossPending: number; bossCurrent: number };
   bossCount: number; bossPresentationIndex: number;
   combatClear: boolean; combatClearCountdown: number; combatShutDoorSlots: number[];
-  grid: { width: number; height: number; cells: {selector: number; entity: {kind: number; variant: number; state: number; collisionClass: number; spawnSeed: number} | null}[] } | null;
+  grid: { width: number; height: number; cells: {selector: number; entity: {kind: number; variant: number; state: number; collisionClass: number; spawnSeed: number; sourceOwner?: {birthGameUpdate: number | null; poopSheet?: number}} | null}[] } | null;
 }
 export interface Rect { x: number; y: number; width: number; height: number; }
 export interface RoomQuad { sourcePatchIndex: number; sourceRect: Rect; destRect: Rect; flipX: boolean; flipY: boolean; }
@@ -269,7 +269,7 @@ export interface State {
   knives: Knife[];
   stageShootingGuard: {state: number; counter: number};
   weaponAdmission: {sourcePlayerType: number|null; c18IsKnownEmpty: boolean; pendingPrimaryCleanup: {fromPrimary:number;toPrimary:number}|null; unadmittedController: {primary:number;channel:string}|null};
-  lasers: {id:number; origin:"npcShootAngle"|"playerCharged"; uninitialized:boolean|null; entityType:number; variant:number; subtype:number;
+  lasers: {id:number; origin:"npcShootAngle"|"playerCharged" | "playerControlled"; uninitialized:boolean|null; entityType:number; variant:number; subtype:number;
     spawnSeed:number; parent:ActorRef|null; child:ActorRef|null; active:boolean; dead:boolean; visible:boolean;
     position:{x:number;y:number}; savedPosition:{x:number;y:number}; renderOffset:{x:number;y:number};
     parentOffset:{x:number;y:number}; angle:number; renderSortOffset:number; remainingUpdates:number;

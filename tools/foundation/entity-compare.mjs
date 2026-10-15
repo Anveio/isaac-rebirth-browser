@@ -117,7 +117,7 @@ export function entityRows(rows, source, actual, spec, render) {
   const rock = cell => ROCK_ANIMATIONS[cell.type] && cell.state === 1 &&
     (cell.type === 2 && cell.variant >= 1000 ? [cell.index, cell.type, 'big', cell.variant - 1000] : [cell.index, cell.type, ROCK_ANIMATIONS[cell.type], cell.variant]);
   check(rows, 'render.rocks', source.grid.map(rock).filter(Boolean),
-    render?.grid.filter(drawn => drawn.kind !== 7 && drawn.kind !== 16).map(drawn => [drawn.index, drawn.kind, drawn.animation, drawn.frame]));
+    render?.grid.filter(drawn => ![7, 14, 16].includes(drawn.kind)).map(drawn => [drawn.index, drawn.kind, drawn.animation, drawn.frame]));
   // Door.LoadGraphics5629c0 overlays door_17_bardoor on variant4; a closed
   // door (AnimState563b70) holds its Idle clip. The opening Vanish fade is
   // not modelled, so only doors not yet opening (state != 2) are claimed.
@@ -125,6 +125,13 @@ export function entityRows(rows, source, actual, spec, render) {
     .map(cell => [cell.index, 'Idle']),
     render?.grid.filter(drawn => drawn.kind === 16).map(drawn => [drawn.index, drawn.animation]));
   // Pit Render draws `pit` frame variant (the autotile frame 5684c0 stores).
+  // Poop.Init569600 gives every ordinary poop (variant0) a grid_poop sprite;
+  // an undrawn one is an invisible wall. This is a render contract against
+  // the port's own grid: poop admission and placement parity with the
+  // original belong to the grid rows, and clip choice is not claimed here.
+  check(rows, 'render.poops', (actual.room.grid?.cells ?? []).flatMap((cell, index) =>
+    cell.entity?.kind === 14 && cell.entity.variant === 0 ? [index] : []),
+    render?.grid.filter(drawn => drawn.kind === 14).map(drawn => drawn.index));
   check(rows, 'render.pits', source.grid.filter(cell => cell.type === 7).map(cell => [cell.index, 'pit', cell.variant]),
     render?.grid.filter(drawn => drawn.kind === 7).map(drawn => [drawn.index, drawn.animation, drawn.frame]));
   for (const [field, expected, observed] of spec.roomFields?.(source, actual, phase) ?? []) check(rows, field, expected, observed);
