@@ -1,7 +1,7 @@
 # Item composition coverage
 
 This map separates current source owners, declared public cases and observed
-functional results. Main `03a8ea73` includes ordinary Player Brimstone299,
+functional results. Main `3df99031` includes ordinary Player Brimstone299,
 FireDelay ownership304, optional regular Tear variant298, per-field comparer311
 and standalone Ludovico Tear307. The final C421 artifact fixes the controlled
 saved-position rewind and matches motion across three retained routes; its
@@ -66,7 +66,7 @@ parity. Manager absence, Remove flags and callback events are distinct facts.
 | [314](https://github.com/Anveio/isaac-rebirth-browser/pull/314) | Four public ordinary-Brim contact cases, both fixed phases and both reused OS-token projections | Actual typed14/18 receiver contact, FIFO attribution, next-Full HP and natural expiry |
 | [315](https://github.com/Anveio/isaac-rebirth-browser/pull/315) | Merged typed14/18 observation/comparison | Consumed by the standalone 329 contact comparison; receiver identity/geometry and port minimum enqueue/drain remain FAIL |
 | [316](https://github.com/Anveio/isaac-rebirth-browser/pull/316) | Controlled-Brim property/priority history marker | Actual7/1/1 Full/Fast bodies, same-C18 live4 properties,114 replacement and separately observed Laser lifecycle |
-| [317](https://github.com/Anveio/isaac-rebirth-browser/pull/317) | Optional source-owned Room2494, born83C and Full velocity-delta fields | Optional fields consumed by the standalone 329 comparison; registry808/818 and ordinal838 remain absent |
+| [317](https://github.com/Anveio/isaac-rebirth-browser/pull/317) | Merged source-owned Room2494, born83C and Full velocity-delta fields | Optional fields consumed by the standalone 329 comparison; registry808/818 and ordinal838 remain absent |
 | [318](https://github.com/Anveio/isaac-rebirth-browser/pull/318) | Pure Damage operator and adjacent footprint | Separate next312 consumed build/retained regression; no added eligibility or changed arithmetic |
 
 The final C421 producer reuses all four frozen Native references and remains

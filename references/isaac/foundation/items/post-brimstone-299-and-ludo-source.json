@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "status": "SCOPED_SOURCE_BUILD_AND_RETAINED_COMPARISON_SNAPSHOT",
-  "main": "03a8ea73ec78bb4c77b778e9a71c15c68a375a0c",
+  "main": "3df99031eff287a6745c0f7e994b7603e98203d5",
   "merged": {
     "298": "261dbd60b3921fed421a614ef80c52baaadb0cca",
     "299": "988ae6355c7956d918ff0e00eb329d313645b864",
@@ -10,7 +10,8 @@
     "322": "35b440877344e1d1c2fd5d9c9fa28fe7cf80a11a",
     "307": "d56726797ad12976e9fdec53f3456c5b6161e184",
     "321": "3e9d0241df42c30e62c530b6485ee28d84b0dacb",
-    "315": "03a8ea73ec78bb4c77b778e9a71c15c68a375a0c"
+    "315": "03a8ea73ec78bb4c77b778e9a71c15c68a375a0c",
+    "317": "3df99031eff287a6745c0f7e994b7603e98203d5"
   },
   "ordinary299": {
     "ownBuilds": "production/strict Clippy/floor PASS",
@@ -487,12 +488,6 @@
       "ownGameAcceptance": false
     },
     {
-      "pr": 317,
-      "head": "ee14739c2b225c935140550098c186aa663c4ab4",
-      "scope": "tools: expose source-owned kind8 Tear fields",
-      "ownGameAcceptance": false
-    },
-    {
       "pr": 318,
       "head": "27780ed2f951c772feebb827a759568f42f5538a",
       "scope": "Keep Damage ownership beside its pure cache operator",
@@ -512,5 +507,13 @@
     "ownGameAcceptance": false,
     "historicalSourceOnlyHead": "a1768e04e2b17da708234fddcd575d05471e2115",
     "mainMerge": "03a8ea73ec78bb4c77b778e9a71c15c68a375a0c"
+  },
+  "kind8Observation317": {
+    "pr": 317,
+    "head": "5cb6a4646b14a6916c6bc7a8c70c6cb9311208a3",
+    "scope": "Merged optional kind8 observation fields consumed by the retained standalone329 comparison. Missing registry/ordinal, strict actor identity and contact/lifecycle evidence remain failures or gaps.",
+    "ownGameAcceptance": false,
+    "historicalSourceOnlyHead": "ee14739c2b225c935140550098c186aa663c4ab4",
+    "mainMerge": "3df99031eff287a6745c0f7e994b7603e98203d5"
   }
 }

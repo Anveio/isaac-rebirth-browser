@@ -43,7 +43,7 @@ The new partial producer routes ordinary Monstro’s real BloodStart random bran
 
 ## Current source and actual-game qualification
 
-Current main `03a8ea73` includes ordinary Player Brimstone299, per-field comparer
+Current main `3df99031` includes ordinary Player Brimstone299, per-field comparer
 continuation311, the FireDelay descriptor304, optional regular Tear variant298
 and standalone Ludovico Tear307. The existing ordinary/Has118/controlled Knife
 and Number One/Libra owners remain in main. Ludovico's final C421 artifact has
@@ -100,14 +100,14 @@ Earlier producers remain separate. Original `d1e58278` / WASM `d9c35ac7` retains
 while both games observed 3. Intermediate `7e000d3f` / WASM `8120d8e9` retains
 **134,350 / 24,248 FAIL**, including 42 strict contact HP and 10 queue differences;
 its independent queue/HP chains are not final C421 contact coverage. The prior
-**37,966,740 / 2, 264 FAIL** regular report and OS0 guard-stop remain preserved.
+**37,966,740 / 2,264 FAIL** regular report and OS0 guard-stop remain preserved.
 Two retained reciprocal Libra histories pass **503,611 / 0**, with 631 gates and
 93 post-grant rows each; the first still lacks 631 Native Familiar observations.
 Falling speed, prelude timers, missing registry/ordinal and complete
 actor/contact/lifecycle or DOM parity remain unaccepted.
 
 Draft314 declares four ordinary-Brim contact cases; merged315 adds typed14/18 contact
-observations/comparison;316 adds controlled-Brim property/priority history;317
+observations/comparison;316 adds controlled-Brim property/priority history; merged317
 adds optional kind8 Room2494/born83C/velocity-delta fields. Draft318 extracts the
 unchanged Damage operator and its footprint for a separate next-producer
 qualification. The other leaves remain separate Drafts. The 315/317 tools are consumed by the retained standalone 329 comparison, with strict contact and observation gaps retained; their presence is not gameplay acceptance. Runtime312's
@@ -341,7 +341,8 @@ identity/seed/Init8A8, shared-MT and child-geometry failures. Snapshot observati
 leave short Remove/Uninit events unqualified. No DOM/render, full624, contact/lifetime
 or whole triple parity follows. Earlier grades and OS prefixes remain unchanged;
 ordinary Player Brimstone299 is now merged with the scoped results above;
-controlled Tear307 remains an unmerged Draft whose first own-game comparison fails.
+controlled Tear307 is also merged; its final retained four-case comparison remains
+134,364 checks / 20,813 failures, with contact and observation gaps above.
 
 Readiness287 passes a warm production retry and strict Clippy, but its floor
 build stopped at the working-memory floor. Its earlier production capacity stop
