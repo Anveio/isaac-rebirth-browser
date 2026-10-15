@@ -3,7 +3,7 @@
 // Used by npcs, roundworms, fireplaces, monstro and entities (see suites.mjs).
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
-import { readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { basename, resolve } from 'node:path';
 import { runPairedGate } from '../foundation/paired-game.mjs';
 import { flag, outputDirectory, writeJson } from './lib/cli.mjs';
@@ -29,8 +29,11 @@ if (selected) {
 writeJson(resolve(output, 'scenarios.json'), scenarios);
 const tapes = scenarios.cases.map((item, index) => writeJson(resolve(output, `replay-${index}.json`), item));
 
+// Browser manifests and traces are gzipped losslessly as they are written
+// (~250 MB raw per case); the comparators read either form.
 const paired = tapes.length ? await runPairedGate({ output: resolve(output, 'paired'), selected: [], randomCount: 0, replayCases: tapes,
-  productionDirectory: flag('--production-directory'), nativeFrameTimeout: Number(flag('--native-frame-timeout', '60')) })
+  productionDirectory: flag('--production-directory'), nativeFrameTimeout: Number(flag('--native-frame-timeout', '60')),
+  archiveBrowserEvidence: true })
   : { status: 'fail', cases: [] };
 
 const requireKey = flag('--require-from-case');
@@ -41,7 +44,12 @@ const cases = scenarios.cases.map((scenario, index) => {
   const args = [comparator, ...comparatorArgs, '--case', directory, '--output', target];
   if (requireKey) args.push('--require', scenario[requireKey].join(','));
   const child = spawnSync('node', args, { encoding: 'utf8' });
-  writeFileSync(resolve(directory, `${name}-output.txt`), child.stdout + child.stderr);
+  // A case that aborted before capture (e.g. on a full disk) may have no
+  // directory; it is graded as failed without losing the other cases' reports.
+  try {
+    mkdirSync(directory, { recursive: true });
+    writeFileSync(resolve(directory, `${name}-output.txt`), child.stdout + child.stderr);
+  } catch {}
   let report;
   try { report = JSON.parse(readFileSync(target, 'utf8')); }
   catch { report = { status: 'fail', error: child.stderr || 'Comparator produced no report' }; }

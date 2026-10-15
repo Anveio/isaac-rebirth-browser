@@ -700,6 +700,35 @@ pub fn state(state: &State) {
         "game: the player is in a miniboss room"
     );
     props::sometimes!(!state.lasers.is_empty(), "game: a laser is live");
+    if state.screen == Screen::Playing {
+        let room_type = state
+            .floor
+            .descriptors
+            .get(state.current_room)
+            .map(|room| room.template.room_type);
+        props::sometimes!(
+            matches!(room_type, Some(7 | 8)),
+            "game: the player is in a secret room"
+        );
+        props::sometimes!(
+            !state.revealed_secret_connections.is_empty(),
+            "game: a secret door is revealed"
+        );
+        props::sometimes!(
+            state
+                .player_items
+                .as_ref()
+                .is_some_and(|items| items.owned_counts.iter().any(|count| *count > 0)),
+            "game: the player owns a collectible"
+        );
+    }
+    // Every engine path that adds consumables clamps at 99, as the original
+    // HUD's two digits do.
+    props::always!(
+        state.inventory.coins <= 99 && state.inventory.bombs <= 99 && state.inventory.keys <= 99,
+        "game: consumable counts stay within 99",
+        json!({ "inventory": state.inventory })
+    );
 
     // Every scheduled handle names one live entity of its kind.
     let scheduled = state.actor_scheduler.full_phase();
