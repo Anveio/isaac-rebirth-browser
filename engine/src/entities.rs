@@ -127,6 +127,8 @@ pub(crate) fn no_grid_query(_: &mut Npc, _: &Grid) -> Result<(), String> {
 /// rocks, pits and walls with the source nonplayer ground collider built from
 /// their own radius and point count, as Dips do; other classes clamp.
 pub(crate) fn ground_collision(npc: &mut Npc, grid: &Grid) -> Result<(), String> {
+    // 442bc0 clears +34c even when this pass has no collision samples.
+    npc.grid_collided = false;
     let points = crate::content::entity(npc.kind, npc.variant).grid_points;
     if npc.grid_collision_class != 5 || points == 0 {
         return clamp_walls(npc, grid);
@@ -136,10 +138,13 @@ pub(crate) fn ground_collision(npc: &mut Npc, grid: &Grid) -> Result<(), String>
         scale: crate::motion::WorldVector { x: 1.0, y: 1.0 },
         points,
     })?;
-    // 442bc0 clears +34c; a solid sample sets it again (442df8).
+    let sample_position = npc.position;
+    collider.resolve_nonplayer_ground(grid, &mut npc.position, &mut npc.velocity, false)?;
+    // 442df8 records a solid sample independently of the summed normal.
     npc.grid_collided = collider
-        .resolve_nonplayer_ground(grid, &mut npc.position, &mut npc.velocity, false)?
-        .is_some();
+        .samples()
+        .iter()
+        .any(|sample| grid.collision_at(sample_position + *sample) != 0);
     npc.presented_position = npc.position;
     Ok(())
 }
