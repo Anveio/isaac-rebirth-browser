@@ -117,59 +117,136 @@ parent_births = set()
 charge_rows = []
 charge_witnesses = []
 
-def knife_body(original, actual, state, t, role):
-    ref = {'kind':'knife','id':actual['id']}
-    check(role+' own-manager membership',original['inActiveManager'],ref in state['actorScheduler']['actors'],t)
-    check(role+' actual identity/seed', identity_tuple(original['identity']), identity_tuple(reference(state,ref)),t)
-    for key in ('active','dead','visible','gridCollisionClass','entityCollisionClass','raw494'):
-        check(role+' '+key,original[key],actual[key],t)
-    for key in ('collisionDamage','collisionRadius','collisionMass','hp','maxHp'):
-        check(role+' '+key,f32(original[key]),f32(actual[key]),t)
-    for sk,pk in [('position','position'),('savedPosition450','savedPosition'),('velocity','velocity'),('renderOffset','renderOffset')]:
-        check(role+' '+sk,vector(original[sk]),vector(actual[pk]),t)
-    check(role+' configured friction',f32(original['configuredFriction46c']),f32(actual['configuredFriction']),t)
-    check(role+' current friction',f32(original['currentFriction470']),f32(actual['currentFriction']),t)
-    check(role+' birth age',original['bornGameAge'],actual['birthGameUpdate'],t)
-    check(role+' fast322',original['fast322'],actual['fast'],t)
-    check(role+' generic flags318',original['genericFlags318'],actual['entityFlags'],t)
-    check(role+' attack flags7d8',original['attackFlags7d8'],flags(actual['attackFlags']),t)
-    check(role+' source RNG7c0',original['actorRngWords7c0'],[actual['actorRng'][k] for k in ('state','rightA','left','rightB')],t)
-    check(role+' cached spawner',(original['cachedSpawner']['kind'],original['cachedSpawner']['variant']),(actual['spawnerType'],actual['spawnerVariant']),t)
-    check(role+' permanent color3a0',original['permanentColor3a0'],color(actual['sourceColor']),t)
-    check(role+' current color2d0',original['currentColor2d0'],color(actual['currentColor']),t)
-    parent=reference(state,actual['parent'])
-    check(role+' linked Parent NULL',original['linkedParent'] is None,parent is None,t)
-    if original['linkedParent'] and parent:
-        fields=('kind','variant','subtype','sequenceId')
-        check(role+' linked Parent identity',tuple(original['linkedParent'][k] for k in fields),tuple(parent[k] for k in fields),t)
-        if parent['kind']!=1:check(role+' linked Parent seed',original['linkedParent']['spawnSeed'],parent['spawnSeed'],t)
-    for offset,value in original['knifeRawFloats'].items():check(role+' raw'+offset,f32(value),f32(actual['raw'+offset]),t)
-    for offset,value in original['knifeRawVectors'].items():check(role+' raw'+offset,vector(value),vector(actual['raw'+offset]),t)
-    check(role+' raw814',original['knifeRaw814'],actual['raw814'],t)
-    check(role+' raw8a0 u32',original['knifeRaw8a0'],actual['raw8a0'],t)
-    check(role+' Init uniform8a8',f32(original['initUniform8a8']),f32(actual['raw8a8']),t)
-    for key in ('animation','frame','playing','rotation'):
-        a,b=original['sprite'][key],actual['sprite'][key]
-        if type(a) is float:a,b=f32(a),f32(b)
-        check(role+' Sprite '+key,a,b,t)
-    for key in ('scale','offset'):check(role+' Sprite '+key,vector(original['sprite'][key]),vector(actual['sprite'][key]),t)
-    line=original['knifeLine'];port=actual['line']
-    for key in ('origin','offset'):check(role+' Line '+key,vector(line[key]),vector(port[key]),t)
-    for key in ('points','priorPoints','history'):check(role+' full Line '+key,[vector(v) for v in line[key]],[vector(v) for v in port[key]],t)
-    check(role+' full Line controls',[[f32(x) for x in v] for v in line['controls']],
-          [vector(v['position'])+vector(v['incoming'])+vector(v['outgoing']) for v in port['controls']],t)
-    if line['sourceOrdinaryCurveWriterScope']:
-        for key in ('subdivisions','mode'):check(role+' initialized Line '+key,line[key],port[key],t)
-        check(role+' initialized Line width',f32(line['width']),f32(port['width']),t)
-    else:
-        for key in ('subdivisions','mode','width'):check(role+' unowned Line '+key+' stays unknown',None,port[key],t)
-    # Neither constructor nor admitted Knife body owns6C/18/1C. Native raw
-    # bits remain archived. Copy equality is tested separately at child birth;
-    # unknown port words are never relabeled as numeric parity.
-    check(role+' unowned Line length stays unknown',None,port['length'],t)
-    coverage[role+'Bodies']+=1
-    coverage[role+('FullBodies' if not original['fast322'] else 'FastBodies')]+=1
+def check_field(field, expected, actual, presentation):
+    """Evaluate each captured owner independently; missing never means equal."""
+    try:
+        check(field, expected(), actual(), presentation)
+    except Exception as error:
+        missing(field, presentation, error)
 
+
+def knife_body(original, actual, state, t, role):
+    ref = {'kind': 'knife', 'id': actual['id']}
+    check_field(role + ' own-manager membership', lambda: original['inActiveManager'], lambda: ref in state['actorScheduler']['actors'], t)
+    check_field(role + ' actual identity/seed', lambda: identity_tuple(original['identity']), lambda: identity_tuple(reference(state, ref)), t)
+    for key in ('active', 'dead', 'visible', 'gridCollisionClass', 'entityCollisionClass', 'raw494'):
+        check_field(role + ' ' + key, lambda: original[key], lambda: actual[key], t)
+    for key in ('collisionDamage', 'collisionRadius', 'collisionMass', 'hp', 'maxHp'):
+        check_field(role + ' ' + key, lambda: f32(original[key]), lambda: f32(actual[key]), t)
+    for sk, pk in [('position', 'position'), ('savedPosition450', 'savedPosition'), ('velocity', 'velocity'), ('renderOffset', 'renderOffset')]:
+        check_field(role + ' ' + sk, lambda: vector(original[sk]), lambda: vector(actual[pk]), t)
+    check_field(role + ' configured friction', lambda: f32(original['configuredFriction46c']), lambda: f32(actual['configuredFriction']), t)
+    check_field(role + ' current friction', lambda: f32(original['currentFriction470']), lambda: f32(actual['currentFriction']), t)
+    check_field(role + ' birth age', lambda: original['bornGameAge'], lambda: actual['birthGameUpdate'], t)
+    check_field(role + ' fast322', lambda: original['fast322'], lambda: actual['fast'], t)
+    check_field(role + ' generic flags318', lambda: original['genericFlags318'], lambda: actual['entityFlags'], t)
+    check_field(role + ' attack flags7d8', lambda: original['attackFlags7d8'], lambda: flags(actual['attackFlags']), t)
+    check_field(role + ' source RNG7c0', lambda: original['actorRngWords7c0'], lambda: [actual['actorRng'][k] for k in ('state', 'rightA', 'left', 'rightB')], t)
+    check_field(role + ' cached spawner', lambda: (original['cachedSpawner']['kind'], original['cachedSpawner']['variant']), lambda: (actual['spawnerType'], actual['spawnerVariant']), t)
+    check_field(role + ' permanent color3a0', lambda: original['permanentColor3a0'], lambda: color(actual['sourceColor']), t)
+    check_field(role + ' current color2d0', lambda: original['currentColor2d0'], lambda: color(actual['currentColor']), t)
+    try:
+        parent = reference(state, actual['parent'])
+        check_field(role + ' linked Parent NULL', lambda: original['linkedParent'] is None, lambda: parent is None, t)
+        if original['linkedParent'] and parent:
+            fields = ('kind', 'variant', 'subtype', 'sequenceId')
+            check_field(role + ' linked Parent identity', lambda: tuple((original['linkedParent'][k] for k in fields)), lambda: tuple((parent[k] for k in fields)), t)
+            if parent['kind'] != 1:
+                check_field(role + ' linked Parent seed', lambda: original['linkedParent']['spawnSeed'], lambda: parent['spawnSeed'], t)
+    except Exception as error:
+        missing(role + ' linked Parent owner', t, error)
+    try:
+        for offset, value in original['knifeRawFloats'].items():
+            check_field(role + ' raw' + offset, lambda: f32(value), lambda: f32(actual['raw' + offset]), t)
+    except Exception as error:
+        missing(role + ' raw float owners', t, error)
+    try:
+        for offset, value in original['knifeRawVectors'].items():
+            check_field(role + ' raw' + offset, lambda: vector(value), lambda: vector(actual['raw' + offset]), t)
+    except Exception as error:
+        missing(role + ' raw vector owners', t, error)
+    check_field(role + ' raw814', lambda: original['knifeRaw814'], lambda: actual['raw814'], t)
+    check_field(role + ' raw8a0 u32', lambda: original['knifeRaw8a0'], lambda: actual['raw8a0'], t)
+    check_field(role + ' Init uniform8a8', lambda: f32(original['initUniform8a8']), lambda: f32(actual['raw8a8']), t)
+    for key in ('animation', 'frame', 'playing', 'rotation'):
+        check_field(role + ' Sprite ' + key, lambda: f32(original['sprite'][key]) if type(original['sprite'][key]) is float else original['sprite'][key], lambda: f32(actual['sprite'][key]) if type(original['sprite'][key]) is float else actual['sprite'][key], t)
+    for key in ('scale', 'offset'):
+        check_field(role + ' Sprite ' + key, lambda: vector(original['sprite'][key]), lambda: vector(actual['sprite'][key]), t)
+    for key in ('origin', 'offset'):
+        check_field(role + ' Line ' + key, lambda: vector(original['knifeLine'][key]), lambda: vector(actual['line'][key]), t)
+    for key in ('points', 'priorPoints', 'history'):
+        check_field(role + ' full Line ' + key, lambda: [vector(v) for v in original['knifeLine'][key]], lambda: [vector(v) for v in actual['line'][key]], t)
+    check_field(role + ' full Line controls', lambda: [[f32(x) for x in v] for v in original['knifeLine']['controls']], lambda: [vector(v['position']) + vector(v['incoming']) + vector(v['outgoing']) for v in actual['line']['controls']], t)
+    try:
+        if original['knifeLine']['sourceOrdinaryCurveWriterScope']:
+            for key in ('subdivisions', 'mode'):
+                check_field(role + ' initialized Line ' + key, lambda: original['knifeLine'][key], lambda: actual['line'][key], t)
+            check_field(role + ' initialized Line width', lambda: f32(original['knifeLine']['width']), lambda: f32(actual['line']['width']), t)
+        else:
+            for key in ('subdivisions', 'mode', 'width'):
+                check_field(role + ' unowned Line ' + key + ' stays unknown', lambda: None, lambda: actual['line'][key], t)
+    except Exception as error:
+        missing(role + ' Line writer scope', t, error)
+    check_field(role + ' unowned Line length stays unknown', lambda: None, lambda: actual['line']['length'], t)
+    # Coverage counts observed actors; every unavailable field still fails.
+    coverage[role + 'Bodies'] += 1
+    try:
+        coverage[role + ('FullBodies' if not original['fast322'] else 'FastBodies')] += 1
+    except Exception as error:
+        missing(role + ' body phase owner', t, error)
+
+
+def registered_knife_body(original, actual, state, t, controlled, native_counter):
+    for key in ('active', 'dead', 'visible'):
+        check_field('actual Knife ' + key, lambda: original[key], lambda: actual[key], t)
+    check_field('actual Knife collisionDamage', lambda: f32(original['collisionDamage']), lambda: f32(actual['collisionDamage']), t)
+    for key in ('collisionRadius', 'collisionMass', 'hp', 'maxHp'):
+        check_field('actual Knife ' + key, lambda: f32(original[key]), lambda: f32(actual[key]), t)
+    for key in ('gridCollisionClass', 'entityCollisionClass', 'raw494'):
+        check_field('actual Knife ' + key, lambda: original[key], lambda: actual[key], t)
+    check_field('actual Knife generic flags318', lambda: original['genericFlags318'], lambda: actual['entityFlags'], t)
+    check_field('actual Knife cached spawner', lambda: (original['cachedSpawner']['kind'], original['cachedSpawner']['variant']), lambda: (actual['spawnerType'], actual['spawnerVariant']), t)
+    try:
+        parent = reference(state, actual['parent'])
+        check_field('actual Knife linked Parent null/ref', lambda: original['linkedParent'] is None, lambda: parent is None, t)
+        if original['linkedParent'] and parent:
+            parent_fields = ('kind', 'variant', 'subtype', 'sequenceId')
+            check_field('actual Knife Parent kind/variant/subtype/sequence', lambda: tuple((original['linkedParent'][key] for key in parent_fields)), lambda: tuple((parent[key] for key in parent_fields)), t)
+    except Exception as error:
+        missing('actual Knife linked Parent owner', t, error)
+    check_field('actual Knife current RNG words7c0', lambda: original['actorRngWords7c0'], lambda: [actual['actorRng'][key] for key in ('state', 'rightA', 'left', 'rightB')], t)
+    check_field('actual Knife current friction470', lambda: f32(original['currentFriction470']), lambda: f32(actual['currentFriction']), t)
+    check_field('actual Knife birth age', lambda: original['bornGameAge'], lambda: actual['birthGameUpdate'], t)
+    check_field('actual Knife physical448', lambda: vector(original['position']), lambda: vector(actual['position']), t)
+    check_field('actual Knife saved450', lambda: vector(original['savedPosition450']), lambda: vector(actual['savedPosition']), t)
+    check_field('actual Knife velocity464', lambda: vector(original['velocity']), lambda: vector(actual['velocity']), t)
+    check_field('actual Knife fast322', lambda: original['fast322'], lambda: actual['fast'], t)
+    check_field('actual Knife flags7D8', lambda: original['attackFlags7d8'], lambda: flags(actual['attackFlags']), t)
+    check_field('actual Knife permanent color3A0', lambda: original['permanentColor3a0'], lambda: color(actual['sourceColor']), t)
+    check_field('actual Knife current color2D0', lambda: original['currentColor2d0'], lambda: color(actual['currentColor']), t)
+    check_field('actual Knife Init uniform8A8', lambda: f32(original['initUniform8a8']), lambda: f32(actual['raw8a8']), t)
+    try:
+        for offset, value in original['knifeRawFloats'].items():
+            check_field('actual Knife raw' + offset, lambda: f32(value), lambda: f32(actual['raw' + offset]), t)
+    except Exception as error:
+        missing('actual Knife raw float owners', t, error)
+    try:
+        for offset, value in original['knifeRawVectors'].items():
+            check_field('actual Knife raw' + offset, lambda: vector(value), lambda: vector(actual['raw' + offset]), t)
+    except Exception as error:
+        missing('actual Knife raw vector owners', t, error)
+    check_field('actual Knife raw814', lambda: original['knifeRaw814'], lambda: actual['raw814'], t)
+    check_field('actual Knife raw8a0 curve index', lambda: original['knifeRaw8a0'], lambda: actual['raw8a0'], t)
+    check_field('actual Knife render offset458', lambda: vector(original['renderOffset']), lambda: vector(actual['renderOffset']), t)
+    try:
+        if original['active'] and controlled:
+            coverage['controlledKnifeFullBodies' if native_counter % 2 == 1 else 'controlledKnifeFastBodies'] += 1
+    except Exception as error:
+        missing('actual Knife controlled phase owner', t, error)
+    for source_key, port_key in [('animation', 'animation'), ('frame', 'frame'), ('playing', 'playing'), ('rotation', 'rotation')]:
+        check_field('actual Knife Sprite ' + source_key, lambda: f32(original['sprite'][source_key]) if source_key == 'rotation' else original['sprite'][source_key], lambda: f32(actual['sprite'][port_key]) if source_key == 'rotation' else actual['sprite'][port_key], t)
+    for key in ('scale', 'offset'):
+        check_field('actual Knife Sprite ' + key, lambda: vector(original['sprite'][key]), lambda: vector(actual['sprite'][key]), t)
 
 def ordinary_knives(source,state,t,native_counter):
     slot=source['players'][0]['actorSlots']['c18'];port_ref=state['attackRuntime']['persistent']
@@ -188,11 +265,24 @@ def ordinary_knives(source,state,t,native_counter):
         key=identity_tuple(parent_native['identity'])
         if key not in parent_births:
             parent_births.add(key);coverage['ordinaryParentBirths']+=1
-        if parent_native['knifeRaw814'] and parent_port['raw814']:coverage['ordinaryParentLaunchedRows']+=1
+        try:
+            if parent_native['knifeRaw814'] and parent_port['raw814']:coverage['ordinaryParentLaunchedRows']+=1
+        except Exception as error:
+            missing('ordinaryParent launch owner', t, error)
+    launch = {}
+    for label, actor, key in [('nativeLaunched', parent_native, 'knifeRaw814'), ('portLaunched', parent_port, 'raw814')]:
+        if actor is None:
+            launch[label] = None
+        else:
+            try:
+                launch[label] = actor[key]
+            except Exception as error:
+                missing('ordinary charge ' + label + ' owner', t, error)
+                launch[label] = {'unavailable': True}
     native_charge=source['players'][0]['chargeC0c'];port_charge=state['attackRuntime']['chargeC0c']
     charge_row={'presentation':t,'nativeCounter':native_counter,'portCounter':state['systemClock']['systemCounter'],
-        'nativeCharge':native_charge,'portCharge':port_charge,'nativeLaunched':parent_native['knifeRaw814'] if parent_native else None,
-        'portLaunched':parent_port['raw814'] if parent_port else None}
+        'nativeCharge':native_charge,'portCharge':port_charge,'nativeLaunched':launch['nativeLaunched'],
+        'portLaunched':launch['portLaunched']}
     if charge_rows:
         previous=charge_rows[-1]
         if native_counter%2==state['systemClock']['systemCounter']%2==1 and native_charge==port_charge and native_charge is not None and previous['nativeCharge']==previous['portCharge'] and previous['nativeCharge'] is not None and native_charge>previous['nativeCharge']:
@@ -627,9 +717,12 @@ for captured in sorted(all_captured, key=lambda row: row['presentation']):
                 port_actor = [actor for actor in state['knives'] if actor['id'] == port_slot['id']]
                 assert len(source_actor) == len(port_actor) == 1, 'Actual referenced actor unresolved; no NULL coercion'
                 original, actual = source_actor[0], port_actor[0]
-                source_identity = next(i for i in state['actorScheduler']['identities'] if i['actor'] == port_slot)
-                controlled = bool(player['ownedCounts'][329] and state['playerItems']['ownedCounts'][329]
-                                  and int(original['attackFlags7d8']) & (1 << 33) and int(flags(actual['attackFlags'])) & (1 << 33))
+                try:
+                    controlled = bool(player['ownedCounts'][329] and state['playerItems']['ownedCounts'][329]
+                                      and int(original['attackFlags7d8']) & (1 << 33) and int(flags(actual['attackFlags'])) & (1 << 33))
+                except Exception as error:
+                    missing('actual Knife controlled classification owners', t, error)
+                    controlled = None  # Explicitly unknown; cannot establish a controlled witness.
                 if controlled:
                     coverage['actualControlledKnifeBodies'] += 1
                     try:
@@ -637,56 +730,12 @@ for captured in sorted(all_captured, key=lambda row: row['presentation']):
                               (original['childChain4a0Null'], actual['childChain4a0']), t)
                     except Exception as error:
                         missing('controlled actual childChain4A0 eligibility', t, error)
-                check('actual Knife own-manager membership', original['inActiveManager'],
-                      port_slot in state['actorScheduler']['actors'], t)
-                check('actual primary source sequence', identity['sequenceId'], source_identity['sequenceId'], t)
-                check('actual primary birth seed', identity['spawnSeed'], actual['spawnSeed'], t)
-                for key in ('active', 'dead', 'visible'):
-                    check('actual Knife ' + key, original[key], actual[key], t)
-                check('actual Knife collisionDamage', f32(original['collisionDamage']), f32(actual['collisionDamage']), t)
-                for key in ('collisionRadius', 'collisionMass', 'hp', 'maxHp'):
-                    check('actual Knife ' + key, f32(original[key]), f32(actual[key]), t)
-                for key in ('gridCollisionClass', 'entityCollisionClass', 'raw494'):
-                    check('actual Knife ' + key, original[key], actual[key], t)
-                check('actual Knife generic flags318', original['genericFlags318'], actual['entityFlags'], t)
-                check('actual Knife cached spawner', (original['cachedSpawner']['kind'], original['cachedSpawner']['variant']),
-                      (actual['spawnerType'], actual['spawnerVariant']), t)
-                parent = reference(state, actual['parent'])
-                check('actual Knife linked Parent null/ref', original['linkedParent'] is None, parent is None, t)
-                if original['linkedParent'] and parent:
-                    # This group compares the typed Parent relation and sequence.
-                    # The complete actor-seed roster is a separate required audit.
-                    parent_fields = ('kind', 'variant', 'subtype', 'sequenceId')
-                    check('actual Knife Parent kind/variant/subtype/sequence',
-                          tuple(original['linkedParent'][key] for key in parent_fields), tuple(parent[key] for key in parent_fields), t)
-                check('actual Knife current RNG words7c0', original['actorRngWords7c0'],
-                      [actual['actorRng'][key] for key in ('state', 'rightA', 'left', 'rightB')], t)
-                check('actual Knife current friction470', f32(original['currentFriction470']), f32(actual['currentFriction']), t)
-                check('actual Knife birth age', original['bornGameAge'], actual['birthGameUpdate'], t)
-                check('actual Knife physical448', vector(original['position']), vector(actual['position']), t)
-                check('actual Knife saved450', vector(original['savedPosition450']), vector(actual['savedPosition']), t)
-                check('actual Knife velocity464', vector(original['velocity']), vector(actual['velocity']), t)
-                check('actual Knife fast322', original['fast322'], actual['fast'], t)
-                check('actual Knife flags7D8', original['attackFlags7d8'], flags(actual['attackFlags']), t)
-                check('actual Knife permanent color3A0', original['permanentColor3a0'], color(actual['sourceColor']), t)
-                check('actual Knife current color2D0', original['currentColor2d0'], color(actual['currentColor']), t)
-                check('actual Knife Init uniform8A8', f32(original['initUniform8a8']), f32(actual['raw8a8']), t)
-                for offset, value in original['knifeRawFloats'].items():
-                    check('actual Knife raw' + offset, f32(value), f32(actual['raw' + offset]), t)
-                for offset, value in original['knifeRawVectors'].items():
-                    check('actual Knife raw' + offset, vector(value), vector(actual['raw' + offset]), t)
-                check('actual Knife raw814', original['knifeRaw814'], actual['raw814'], t)
-                check('actual Knife raw8a0 curve index', original['knifeRaw8a0'], actual['raw8a0'], t)
-                check('actual Knife render offset458', vector(original['renderOffset']), vector(actual['renderOffset']), t)
-                if original['active'] and controlled:
-                    coverage['controlledKnifeFullBodies' if observed['systemCounter'] % 2 == 1 else 'controlledKnifeFastBodies'] += 1
-                for source_key, port_key in [('animation', 'animation'), ('frame', 'frame'), ('playing', 'playing'), ('rotation', 'rotation')]:
-                    expected, actual_value = original['sprite'][source_key], actual['sprite'][port_key]
-                    if source_key == 'rotation':
-                        expected, actual_value = f32(expected), f32(actual_value)
-                    check('actual Knife Sprite ' + source_key, expected, actual_value, t)
-                for key in ('scale', 'offset'):
-                    check('actual Knife Sprite ' + key, vector(original['sprite'][key]), vector(actual['sprite'][key]), t)
+                check_field('actual Knife own-manager membership', lambda: original['inActiveManager'],
+                            lambda: port_slot in state['actorScheduler']['actors'], t)
+                check_field('actual primary source sequence', lambda: identity['sequenceId'],
+                            lambda: next(i for i in state['actorScheduler']['identities'] if i['actor'] == port_slot)['sequenceId'], t)
+                check_field('actual primary birth seed', lambda: identity['spawnSeed'], lambda: actual['spawnSeed'], t)
+                registered_knife_body(original, actual, state, t, controlled, observed['systemCounter'])
         except Exception as error:
             missing('mandatory registered Knife body group', t, error)
         for field, expected, getter in [
