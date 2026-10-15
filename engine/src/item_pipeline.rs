@@ -13,17 +13,7 @@ const LIBRA_SCALAR_FLAGS: u32 = 0x1b;
 
 //Actual152 requestsWeapon/Damage; optional4 separately requestsShotSpeed.
 //These callback/grant footprints do not admit a primary or secondary caller.
-const TECHNOLOGY2_DAMAGE_ITEMS: &[usize] = &[4, 152];
-const TECHNOLOGY2_SHOT_SPEED_ITEMS: &[usize] = &[4, 152];
 const TECHNOLOGY2_GRANT_ITEMS: &[usize] = &[4, 152];
-const TECHNOLOGY2_PRIMARY_ITEMS: &[usize] = &[4, 152];
-const TECHNOLOGY2_SECONDARY_ITEMS: &[usize] = &[4, 152];
-const TECHNOLOGY2_KIND1_ITEMS: &[usize] = &[4, 152];
-const TECHNOLOGY2_KIND3_ITEMS: &[usize] = &[4, 152];
-const TECHNOLOGY2_PRIMARY_QUEUED: &[usize] = &[4, 152];
-const TECHNOLOGY2_SECONDARY_QUEUED: &[usize] = &[4, 152];
-const TECHNOLOGY2_KIND1_QUEUED: &[usize] = &[4, 152];
-const TECHNOLOGY2_KIND3_QUEUED: &[usize] = &[4, 152];
 
 // Source-owned footprints remain independent even when their admitted counts
 // currently match. Cache completion is never a kind5 or grant-history proof.
@@ -92,10 +82,6 @@ const SOY_KIND3_ITEMS: &[usize] = &[1, 4, 118, 330];
 
 // Independent169 callbacks, kind1 getter and current519FC0 caller footprints.
 // Equal selected sets do not complete grant/history/contact or other stages.
-const POLYPHEMUS_FIRE_DELAY_ITEMS: &[usize] = &[4, 169];
-const POLYPHEMUS_SHOT_SPEED_ITEMS: &[usize] = &[4, 169];
-const POLYPHEMUS_FLAGS_ITEMS: &[usize] = &[4, 169];
-const POLYPHEMUS_KIND1_ITEMS: &[usize] = &[4, 169];
 const POLYPHEMUS_CALLER_ITEMS: &[usize] = &[4, 169];
 
 /// Literal511f10 dispatch order. Weapon selection/removal precedes stats;
@@ -256,12 +242,12 @@ impl<'a> ItemInputs<'a> {
 
     ///Literal51316D's selected Flags32 callback. No color/grant permission.
     pub(crate) fn admits_polyphemus_flags_context(self) -> bool {
-        self.admits_permanent_readset(169, POLYPHEMUS_FLAGS_ITEMS)
+        TearFlagsStage::admits_polyphemus(self)
     }
 
     ///Separate50D090(kind1) readset;169 adds no modifier query or RNG here.
     pub(crate) fn admits_polyphemus_kind1_context(self) -> bool {
-        self.admits_permanent_readset(169, POLYPHEMUS_KIND1_ITEMS)
+        self.positive_owned_count(169) && self.admits_kind1_neutral_fields()
     }
 
     ///Actual519FC0 Have169 changes the born origin after the eye draw. This
@@ -332,29 +318,46 @@ impl<'a> ItemInputs<'a> {
 
     ///Actual519FC0 primary and52F370 secondary caller footprints remain distinct.
     pub(crate) fn admits_technology2_primary(self) -> bool {
-        self.admits_technology2_readset(TECHNOLOGY2_PRIMARY_ITEMS, TECHNOLOGY2_PRIMARY_QUEUED)
+        self.positive_owned_count(152)
+            && self.admits_stage_owned_roles(|id| Technology2PrimaryReadRole::of(id).is_some())
     }
     pub(crate) fn admits_technology2_secondary(self) -> bool {
-        self.admits_technology2_readset(TECHNOLOGY2_SECONDARY_ITEMS, TECHNOLOGY2_SECONDARY_QUEUED)
+        self.positive_owned_count(152)
+            && self.admits_stage_owned_roles(|id| Technology2SecondaryReadRole::of(id).is_some())
     }
     ///Selected50D090 kind1 and kind3 never inherit a factory/cache permission.
     pub(crate) fn admits_technology2_kind1_getter(self) -> bool {
-        self.admits_technology2_readset(TECHNOLOGY2_KIND1_ITEMS, TECHNOLOGY2_KIND1_QUEUED)
+        self.positive_owned_count(152) && self.admits_kind1_neutral_fields()
     }
     pub(crate) fn admits_technology2_kind3_getter(self) -> bool {
-        self.admits_technology2_readset(TECHNOLOGY2_KIND3_ITEMS, TECHNOLOGY2_KIND3_QUEUED)
-    }
-    fn admits_technology2_readset(self, supported: &[usize], queued: &[usize]) -> bool {
-        self.admits_permanent_readset(152, supported)
-            && self
-                .owner
-                .queued_id
-                .is_none_or(|id| queued.contains(&(id as usize)))
+        self.positive_owned_count(152) && self.admits_kind3_neutral_fields()
     }
 
-    ///Independent5139B1→513E10 Damage callback context only.
-    fn admits_technology2_damage_context(self) -> bool {
-        self.admits_permanent_readset(152, TECHNOLOGY2_DAMAGE_ITEMS)
+    ///Selected50D090(kind1): these items add no modifier query/RNG/variant.
+    ///Current C98/all11CA0/C88/C8C remain actual copied inputs, not neutralized
+    ///values. Consumers still own their supported property/body/caller flags.
+    fn admits_kind1_neutral_fields(self) -> bool {
+        self.admits_stage_owned_roles(|id| matches!(id, 4 | 152 | 169))
+    }
+
+    ///Independent50D090(kind3) proof for its current output fields. Equal
+    ///neutral roles do not transfer kind1 or retained C40 ownership here.
+    fn admits_kind3_neutral_fields(self) -> bool {
+        self.admits_stage_owned_roles(|id| matches!(id, 4 | 152 | 169))
+    }
+
+    ///Mechanical context/count validation only; each stage classifies its own
+    ///source-proven roles.508FE0 reads queued3058 only for configkind2, so a
+    ///known passive config is inert here before lateAdd. Unknown configs stay
+    ///unknown. No caller queue, grant or cache permission follows from this.
+    fn admits_stage_owned_roles(self, owns_role: impl Fn(usize) -> bool) -> bool {
+        self.admits_scalar_context()
+            && self
+                .owner
+                .owned_counts
+                .iter()
+                .enumerate()
+                .all(|(id, &count)| count == 0 || (count > 0 && owns_role(id)))
     }
 
     ///Actualpassive152 defaultAdd preserves only an existing auxiliary owner.
@@ -600,19 +603,13 @@ impl<'a> ItemInputs<'a> {
     /// Config 118's request for all callbacks adds no implicit scalar effect.
     fn admits_scalar_stage(self, stage: CacheStage, effects: &[u32]) -> bool {
         if self.owned_count(152) != 0 {
-            return stage == CacheStage::ShotSpeed
-                && self.admits_permanent_readset(152, TECHNOLOGY2_SHOT_SPEED_ITEMS);
+            //New stage-local capabilities resolve their own reads. This is
+            //only the preserved legacy scalar compatibility boundary.
+            return false;
         }
         if self.owned_count(169) != 0 {
-            return match stage {
-                CacheStage::FireDelay => {
-                    self.admits_permanent_readset(169, POLYPHEMUS_FIRE_DELAY_ITEMS)
-                }
-                CacheStage::ShotSpeed => {
-                    self.admits_permanent_readset(169, POLYPHEMUS_SHOT_SPEED_ITEMS)
-                }
-                _ => false,
-            };
+            //Its effect is owned by each stage, never legacy compatibility.
+            return false;
         }
         //330's grant/readset context is separate from its two effect lists.
         if self.owned_count(330) != 0 && !self.admits_soy_milk_cache_context() {
@@ -759,6 +756,112 @@ impl CacheResolution {
     }
 }
 
+///ShotSpeed4 owns one nonzero143 base operator plus its own neutral reads.
+///The full511F68..51212E CFG never queries/loads4/152/169. Their presence
+///therefore composes here without granting another cache, grant or caller.
+struct ShotSpeedStage;
+
+impl ShotSpeedStage {
+    fn admits(inputs: ItemInputs<'_>, source_player_type: Option<u32>) -> bool {
+        //The former scalar capability is retained only as a whole for old
+        //neutral/coupled contexts. It supplies no newly combined neutral owner.
+        let legacy_neutral = inputs.admits_scalar_stage(CacheStage::ShotSpeed, &[4, 143]);
+        source_player_type == Some(0)
+            && inputs.admits_scalar_context()
+            && inputs
+                .owner
+                .owned_counts
+                .iter()
+                .enumerate()
+                .all(|(id, &count)| {
+                    count == 0
+                        || (count > 0
+                            && (id == 143 //Actual raw nonzero base operator.
+                                || matches!(id, 4 | 152 | 169) //Source-neutral here only.
+                                || legacy_neutral))
+                })
+    }
+}
+
+///519FC0's selected normal Tear caller:152 owns the alternating-eye
+///branch;169 owns the later current-P override after the eye RNG draw.
+///4 does not alter this caller. Getter/cache/body permissions stay separate.
+enum Technology2PrimaryReadRole {
+    AlternateEye,
+    CurrentPlayerOrigin,
+    Neutral,
+}
+
+impl Technology2PrimaryReadRole {
+    fn of(id: usize) -> Option<Self> {
+        match id {
+            152 => Some(Self::AlternateEye),
+            169 => Some(Self::CurrentPlayerOrigin),
+            4 => Some(Self::Neutral),
+            _ => None,
+        }
+    }
+}
+
+///52F370's distinct C40 caller:152 selects the real thin beam;4/169 do
+///not add a caller branch. Birth reads actual current C88/C98/CCC while an
+///existing C40 keeps its born properties. No primary permission follows.
+enum Technology2SecondaryReadRole {
+    ThinBeam,
+    Neutral,
+}
+
+impl Technology2SecondaryReadRole {
+    fn of(id: usize) -> Option<Self> {
+        match id {
+            152 => Some(Self::ThinBeam),
+            4 | 169 => Some(Self::Neutral),
+            _ => None,
+        }
+    }
+}
+
+///Source-local read roles for the literal FireDelay operator below. Full
+///511F10 closure proves152 neutral; no caller/cache/grant permission follows.
+///The shared multiplier owns permanent2/169, while153 and every TEMP record
+///remain outside this selected plan. Retained C08 stays an independent input.
+enum FireDelayReadRole {
+    Tier,
+    SharedMultiplier,
+    PostBoundReduction,
+    SoyMilk,
+    Neutral,
+}
+
+impl FireDelayReadRole {
+    fn of(id: usize) -> Option<Self> {
+        match id {
+            1 | 6 => Some(Self::Tier),
+            2 | 169 => Some(Self::SharedMultiplier),
+            222 => Some(Self::PostBoundReduction),
+            330 => Some(Self::SoyMilk),
+            4 | 152 => Some(Self::Neutral),
+            _ => None,
+        }
+    }
+}
+
+///Only the Flags32 callback's implemented source roles.152 is neutral in
+///this callback, while169 supplies the existing51316D OR0x200 operator.
+///Neither role owns Color64, a returned getter field or a born actor body.
+struct TearFlagsStage;
+
+impl TearFlagsStage {
+    fn admits_polyphemus(inputs: ItemInputs<'_>) -> bool {
+        inputs.positive_owned_count(169)
+            && inputs.admits_stage_owned_roles(|id| match id {
+                4 | 152 => true, //Independently source-neutral Flags32 reads.
+                169 => true,     //Existing one OR0x200 operator.
+                _ => false,
+            })
+    }
+}
+
 /// One callback's source ownership, beside its literal pure operator.
 /// Reads signed permanent/TEMP1/6, positive permanent2/222 and retained C08;
 /// writes integer C78 only. Source-local bounds and truncation precede Libra.
@@ -772,8 +875,14 @@ impl FireDelayStage {
     const NEUTRAL_ITEMS: &'static [u32] = &[4, 114, 118, 329];
 
     fn admits(inputs: ItemInputs<'_>, source_player_type: Option<u32>) -> bool {
-        source_player_type == Some(0)
-            && inputs.admits_scalar_stage(CacheStage::FireDelay, Self::EFFECT_ITEMS)
+        //Legacy neutral/coupled histories remain one whole capability. They
+        //cannot supply a new neutral role beside152/169 operators.
+        let legacy = inputs.owned_count(152) == 0
+            && inputs.owned_count(169) == 0
+            && inputs.admits_scalar_stage(CacheStage::FireDelay, Self::EFFECT_ITEMS);
+        let operator_reads = !inputs.positive_owned_count(153)
+            && inputs.admits_stage_owned_roles(|id| FireDelayReadRole::of(id).is_some());
+        source_player_type == Some(0) && (legacy || operator_reads)
     }
 
     fn resolve(inputs: ItemInputs<'_>, primary: PrimaryWeaponC08) -> i32 {
@@ -823,67 +932,192 @@ impl FireDelayStage {
     }
 }
 
-/// One Damage callback's ownership beside its literal pure operator.
-/// Signed permanent4/12 feed the tier; positive169 precedes the shared4/12
-/// multiplier and330. This selected operator does not complete other caches,
-/// grant history, temporary modifiers or any attack getter/caller.
+///Source514F40/515670 separates169 absence, positive2/153 add4-only,
+///and no-presence add4-then-double. TEMP2 remains a distinct unknown query.
+#[derive(Clone, Copy)]
+enum PolyphemusDamageMode {
+    Disabled,
+    AddFour,
+    AddFourThenDouble,
+}
+
+/// One source-ordered Damage operation and its permanent input ownership.
+/// The variant order is chosen by DamagePlan, never by collectible order.
+/// These reads grant no other cache/getter/caller/contact capability.
+#[derive(Clone, Copy)]
+enum DamageOperator {
+    BaseTier {
+        signed_four: i32,
+        signed_twelve: i32,
+    },
+    Polyphemus {
+        mode: PolyphemusDamageMode,
+    },
+    MinimumBound,
+    Technology2 {
+        enabled: bool,
+    },
+    SharedFourOrTwelve {
+        enabled: bool,
+    },
+    SoyMilk {
+        enabled: bool,
+    },
+}
+
+impl DamageOperator {
+    ///Only this callback's implemented producers, including their inactive
+    ///presence reads. New effects extend their operator, not a pair table.
+    fn reads_owned(self, id: usize) -> bool {
+        match self {
+            Self::BaseTier { .. } | Self::SharedFourOrTwelve { .. } => matches!(id, 4 | 12),
+            Self::Polyphemus { mode } => {
+                id == 169
+                    || (!matches!(mode, PolyphemusDamageMode::Disabled) && matches!(id, 2 | 153))
+            }
+            Self::Technology2 { .. } => id == 152,
+            Self::SoyMilk { .. } => id == 330,
+            Self::MinimumBound => false,
+        }
+    }
+
+    fn apply(self, mut damage: f32) -> f32 {
+        match self {
+            Self::BaseTier {
+                signed_four,
+                signed_twelve,
+            } => {
+                //513628..513880: signed contributions, then f32 linear,
+                //f64 sqrt*3.5 and f32 store. TEMP12 stays unadmitted.
+                let tier = signed_four as f32 * 0.5_f32 + signed_twelve as f32 * 0.3_f32;
+                let linear = (1.2_f32 * tier + 1.0_f32).max(0.0);
+                (f64::from(linear).sqrt() * 3.5_f64) as f32
+            }
+            Self::Polyphemus { mode } => match mode {
+                PolyphemusDamageMode::Disabled => damage,
+                PolyphemusDamageMode::AddFour => damage + 4.0_f32, //514F55.
+                PolyphemusDamageMode::AddFourThenDouble => {
+                    //515AF6: add4 then self-add, before the same later bound.
+                    damage += 4.0_f32;
+                    damage += damage;
+                    damage
+                }
+            },
+            Self::MinimumBound => damage.max(0.5_f32),
+            Self::Technology2 { enabled } => {
+                if enabled {
+                    //5139B1→513E10, once; not the bornLaser *.2 operator.
+                    damage *= f32::from_bits(0x3f26_6666);
+                }
+                damage
+            }
+            Self::SharedFourOrTwelve { enabled } => {
+                if enabled {
+                    //513A20→515026: one shared factor, including both items.
+                    damage *= 1.5_f32;
+                }
+                damage
+            }
+            Self::SoyMilk { enabled } => {
+                if enabled {
+                    //513A78→513DF8, before the final bound and later Libra.
+                    damage *= 0.2_f32;
+                }
+                damage
+            }
+        }
+    }
+}
+
+///Immutable functional plan of one actual Damage callback. Partial numeric
+///values are still evaluated for unknown contexts; only completion is withheld.
+///No item pair or other callback's permission can supply a missing read owner.
+struct DamagePlan {
+    operators: [DamageOperator; 7],
+    reads_admitted: bool,
+}
+
+impl DamagePlan {
+    fn new(inputs: ItemInputs<'_>) -> Self {
+        let polyphemus_mode = if !inputs.positive_owned_count(169) {
+            PolyphemusDamageMode::Disabled
+        } else if inputs.positive_owned_count(2) || inputs.positive_owned_count(153) {
+            PolyphemusDamageMode::AddFour
+        } else {
+            PolyphemusDamageMode::AddFourThenDouble
+        };
+        let operators = [
+            DamageOperator::BaseTier {
+                signed_four: inputs.owned_count(4),
+                signed_twelve: inputs.owned_count(12),
+            },
+            DamageOperator::Polyphemus {
+                mode: polyphemus_mode,
+            },
+            DamageOperator::MinimumBound,
+            DamageOperator::Technology2 {
+                enabled: inputs.positive_owned_count(152),
+            },
+            DamageOperator::SharedFourOrTwelve {
+                enabled: inputs.positive_owned_count(4) || inputs.positive_owned_count(12),
+            },
+            DamageOperator::SoyMilk {
+                enabled: inputs.positive_owned_count(330),
+            },
+            DamageOperator::MinimumBound,
+        ];
+        //514F40/515670 owns the permanent2/153 presence diversion inside
+        //this operator. TEMP2 record presence is a different source query;
+        //the actual no-TEMP context below still excludes every such record.
+        //Preserve existing neutral/coupled-owner capabilities exactly. This
+        //compatibility path does not compose unclosed neutral histories with
+        //new operators. Item1 is independently Damage-neutral in all selected
+        //operator traces; other new neutrals still need their own source proof.
+        let legacy_neutral = inputs.owned_count(12) == 0
+            && inputs.owned_count(152) == 0
+            && inputs.owned_count(169) == 0
+            && inputs.admits_scalar_stage(CacheStage::Damage, DamageStage::EFFECT_ITEMS);
+        let reads_admitted = inputs.admits_scalar_context()
+            && inputs
+                .owner
+                .owned_counts
+                .iter()
+                .enumerate()
+                .all(|(id, &count)| {
+                    count == 0
+                        || (count > 0
+                            && (id == 1
+                                || operators.iter().any(|operator| operator.reads_owned(id))
+                                || legacy_neutral))
+                });
+        Self {
+            operators,
+            reads_admitted,
+        }
+    }
+
+    fn resolve(self) -> f32 {
+        self.operators
+            .into_iter()
+            .fold(0.0, |damage, operator| operator.apply(damage))
+    }
+}
+
+///Damage-only stage capability. Its source-ordered plan composes implemented
+///operators; primary selection, other callbacks, grants and contacts stay local.
 struct DamageStage;
 
 impl DamageStage {
     const REQUESTED: CacheMask = CacheMask(1);
-    const EFFECT_ITEMS: &'static [u32] = &[4, 12, 169, 330];
+    const EFFECT_ITEMS: &'static [u32] = &[4, 12, 152, 169, 330];
     const NEUTRAL_ITEMS: &'static [u32] = &[1, 6, 114, 118, 329];
-    // Independent Damage-only footprint; in particular this must not widen
-    // Soy's other caches/getters or the current primary/caller capabilities.
-    const MULTIPLIER_ITEMS: &'static [usize] = &[1, 4, 12, 169, 330];
 
     fn admits(inputs: ItemInputs<'_>, source_player_type: Option<u32>) -> bool {
-        source_player_type == Some(0)
-            && if inputs.owned_count(152) != 0 {
-                inputs.admits_technology2_damage_context()
-            } else if inputs.owned_count(12) != 0 || inputs.owned_count(169) != 0 {
-                let required = if inputs.positive_owned_count(12) {
-                    12
-                } else {
-                    169
-                };
-                inputs.admits_permanent_readset(required, Self::MULTIPLIER_ITEMS)
-            } else {
-                inputs.admits_scalar_stage(CacheStage::Damage, Self::EFFECT_ITEMS)
-            }
+        source_player_type == Some(0) && DamagePlan::new(inputs).reads_admitted
     }
 
     fn resolve(inputs: ItemInputs<'_>) -> f32 {
-        //513628..5136C4: signed12's .3 contribution follows signed4's .5;
-        //513846..513880 then use f32 linear, f64 sqrt*3.5, f32 store.
-        //TEMP12's signed first-record count is a separate unadmitted owner.
-        let tier = inputs.owned_count(4) as f32 * 0.5_f32 + inputs.owned_count(12) as f32 * 0.3_f32;
-        let linear = (1.2_f32 * tier + 1.0_f32).max(0.0);
-        let mut damage = (f64::from(linear).sqrt() * 3.5_f64) as f32;
-        if inputs.positive_owned_count(169) {
-            //513892 ->515AF6: add4, then add the result to itself. The
-            //2/153/TEMP2 add4-only diversion is outside this footprint.
-            damage += 4.0_f32;
-            damage += damage;
-        }
-        //5138EA..51391D bounds the current damage before later multipliers.
-        damage = damage.max(0.5_f32);
-        //5139B1 Have152→513E10 once, before the shared4/12 multiplier.
-        //66 895C is binary32 0x3F266666, not a bornLaser *.2 operator.
-        if inputs.positive_owned_count(152) {
-            damage *= f32::from_bits(0x3f26_6666);
-        }
-        if inputs.positive_owned_count(4) || inputs.positive_owned_count(12) {
-            //513A20 ->515026: shared single factor, even when both are held.
-            //TEMP12 record presence has a distinct, unadmitted lifetime.
-            damage *= 1.5_f32;
-        }
-        //513A78 Have330 reaches513DF8 once, after the shared multiplier;
-        //the local .5 bound and the separate Libra coupling remain later.
-        if inputs.positive_owned_count(330) {
-            damage *= 0.2_f32;
-        }
-        damage.max(0.5_f32)
+        DamagePlan::new(inputs).resolve()
     }
 }
 
@@ -963,6 +1197,7 @@ pub(crate) fn resolve_scalars(
             && match stage {
                 CacheStage::FireDelay => FireDelayStage::admits(inputs, source_player_type),
                 CacheStage::Damage => DamageStage::admits(inputs, source_player_type),
+                CacheStage::ShotSpeed => ShotSpeedStage::admits(inputs, source_player_type),
                 _ => source_player_type == Some(0) && inputs.admits_scalar_stage(stage, supported),
             }
         {

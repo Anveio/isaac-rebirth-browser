@@ -286,7 +286,11 @@ pub(crate) fn secondary(
         .as_ref()
         .ok_or("Technology2 birth items absent")?;
     let inputs = ItemInputs::new(owner)?;
-    if inputs.pending_cache().0 & (1 | 32 | 64) != 0 || state.weapon_cache.flags_c98.0 != 0 {
+    //Mode1 copies actual currentC98&~1. Bit9 has no thin-body/status
+    //operator; its born7E8/818 and currentGet3 readsets remain independent.
+    if inputs.pending_cache().0 & (1 | 32 | 64) != 0
+        || !matches!(state.weapon_cache.flags_c98.0, 0 | 0x200)
+    {
         invalidate_history(state, "technology2BirthCache");
         return Ok(());
     }
@@ -381,13 +385,20 @@ pub(crate) fn primary(
     }
     let base = aim * 10.0 + inherited;
     let uniform = state.boot_lifecycle.shared.uniform();
-    //52068A uses unscaled baseV for eye position, then5177F0 addsDC4.
+    //52068A always consumes the eye draw, using unscaled baseV. Only after
+    //that draw does currentHave169 select currentPlayerP at520703..734.
+    //5177F0 then addsDC4. This primary override never touches C40's RightEye.
     let origin = crate::projectiles::eye_origin(
         crate::bombs::player_world(state),
         base,
         state.player.eye,
         uniform,
-    )? + dc4;
+    )?;
+    let origin = if inputs.positive_owned_count(169) {
+        crate::bombs::player_world(state)
+    } else {
+        origin
+    } + dc4;
     let velocity = base * plan.source_shot_speed_c7c;
     let birth = crate::weapon_plan::resolve_technology2_kind1(state)?;
     crate::tear_factory::fire(state, birth, Some(0), origin, velocity)?;

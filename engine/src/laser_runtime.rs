@@ -216,7 +216,7 @@ fn contact_callbacks(state: &mut State, index: usize) -> Result<(), String> {
                 //476830 evaluates kind3 AFTER each real callback. Birth kind2
                 //or cached flags cannot replace this current status resolver.
                 let flags = crate::weapon_plan::resolve_current_laser_contact_flags(state)?;
-                if flags.0 & !3 != 0 {
+                if flags.has_laser_status_effect() {
                     record_frontier(state, index, LaserFrontier::ContactModifiers);
                 }
             }
