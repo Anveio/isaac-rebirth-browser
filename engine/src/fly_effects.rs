@@ -123,13 +123,7 @@ impl NpcEffectAdmission<'_> {
         parent: Option<u32>,
     ) -> Result<u32, String> {
         let id = self.next_id()?;
-        let mut effect = base(
-            id,
-            33,
-            seed,
-            position,
-            self.game_update_count,
-        );
+        let mut effect = base(id, 33, seed, position, self.game_update_count);
         effect.spawner_type = 67;
         effect.velocity = velocity;
         effect.entity_collision_class = 4;
@@ -165,7 +159,10 @@ impl NpcEffectAdmission<'_> {
     }
 
     /// Attack03: push every tiny fly away from `origin`.
-    pub(crate) fn push_tiny_flies(&mut self, mut push: impl FnMut(WorldVector, &mut WorldVector, f32)) {
+    pub(crate) fn push_tiny_flies(
+        &mut self,
+        mut push: impl FnMut(WorldVector, &mut WorldVector, f32),
+    ) {
         for effect in self
             .effects
             .iter_mut()
@@ -186,13 +183,7 @@ impl NpcEffectAdmission<'_> {
         random: &mut Mt19937,
     ) -> Result<u32, String> {
         let id = self.next_id()?;
-        let mut effect = base(
-            id,
-            1,
-            seed,
-            position,
-            self.game_update_count,
-        );
+        let mut effect = base(id, 1, seed, position, self.game_update_count);
         effect.sprite.flip_x = random.bounded(2) == 0;
         effect.spawner_type = 67;
         effect.sprite.tint = [0.0, 0.0, 0.0, 0.5];
@@ -206,15 +197,14 @@ impl NpcEffectAdmission<'_> {
 
     /// A killed tiny fly's 1000.2: seed, scale 0.3, then its first update
     /// (both flips and the stamp frame).
-    fn blood_explosion(&mut self, seed: u32, position: WorldVector, random: &mut Mt19937) -> Result<(), String> {
+    fn blood_explosion(
+        &mut self,
+        seed: u32,
+        position: WorldVector,
+        random: &mut Mt19937,
+    ) -> Result<(), String> {
         let id = self.next_id()?;
-        let mut effect = base(
-            id,
-            2,
-            seed,
-            position,
-            self.game_update_count,
-        );
+        let mut effect = base(id, 2, seed, position, self.game_update_count);
         effect.sprite.scale = WorldVector { x: 0.3, y: 0.3 };
         self.admit_actor(effect)?;
         let index = self.effects.len() - 1;
@@ -319,7 +309,11 @@ fn tiny_fly(
             let rim = delta * ((span - radius) / span);
             let strength = random.uniform() * 0.5;
             let rim_length = length(rim);
-            let direction = if rim_length > 0.0 { rim * (1.0 / rim_length) } else { ZERO };
+            let direction = if rim_length > 0.0 {
+                rim * (1.0 / rim_length)
+            } else {
+                ZERO
+            };
             add_scaled(&mut effect.velocity, direction * strength, friction);
         } else {
             let strength = random.uniform() * 0.5;
@@ -353,11 +347,7 @@ fn tiny_fly(
         if kill {
             admission.effects[index].removed = true;
             let seed = random.next_u32();
-            admission.blood_explosion(
-                seed,
-                position + WorldVector { x: 0.0, y: -16.0 },
-                random,
-            )?;
+            admission.blood_explosion(seed, position + WorldVector { x: 0.0, y: -16.0 }, random)?;
             admission.effects[index].sprite.playing = false;
         }
     }
@@ -417,7 +407,11 @@ fn tail(effect: &mut SpriteEffect, probe: &Probe) {
 
 /// One manager-pass update of a Duke effect.
 pub(crate) fn advance(state: &mut State, phase: Phase, id: u32) -> Result<(), String> {
-    let Some(index) = state.sprite_effects.iter().position(|effect| effect.id == id) else {
+    let Some(index) = state
+        .sprite_effects
+        .iter()
+        .position(|effect| effect.id == id)
+    else {
         return Ok(());
     };
     if phase == Phase::Skipped || !state.sprite_effects[index].active {
@@ -445,7 +439,11 @@ pub(crate) fn advance(state: &mut State, phase: Phase, id: u32) -> Result<(), St
         }
         Some(Controller::TinyFly { parent, .. }) => {
             let grid = crate::grid::Grid::new(
-                state.room.grid.clone().ok_or("tiny fly requires the room grid")?,
+                state
+                    .room
+                    .grid
+                    .clone()
+                    .ok_or("tiny fly requires the room grid")?,
             )?;
             let parent = parent.and_then(|parent| {
                 state
@@ -490,7 +488,12 @@ pub(crate) fn advance(state: &mut State, phase: Phase, id: u32) -> Result<(), St
                 effects: &mut state.sprite_effects,
                 scheduler: &mut state.actor_scheduler,
             };
-            tiny_fly(&mut admission, index, &mut state.boot_lifecycle.shared, &probe)
+            tiny_fly(
+                &mut admission,
+                index,
+                &mut state.boot_lifecycle.shared,
+                &probe,
+            )
         }
         None => Ok(()),
     }
@@ -516,13 +519,21 @@ pub(crate) fn tear_partition(state: &State) -> Vec<(WorldVector, f32)> {
 }
 
 /// 554490: a bomb blast kills every tiny fly inside its radius (no 1000.2).
-pub(crate) fn bomb_hit(state: &mut State, position: WorldVector, radius: f32, clear: impl Fn(WorldVector) -> bool) {
+pub(crate) fn bomb_hit(
+    state: &mut State,
+    position: WorldVector,
+    radius: f32,
+    clear: impl Fn(WorldVector) -> bool,
+) {
     for effect in state
         .sprite_effects
         .iter_mut()
         .filter(|effect| effect.variant == 33 && effect.active && !effect.removed)
     {
-        let (dx, dy) = (effect.position.x - position.x, effect.position.y - position.y);
+        let (dx, dy) = (
+            effect.position.x - position.x,
+            effect.position.y - position.y,
+        );
         if radius * radius > dx * dx + dy * dy && clear(effect.position) {
             effect.removed = true;
         }

@@ -154,7 +154,11 @@ fn hold_overlay(npc: &mut Npc, animation: &str) {
 }
 
 fn play_overlay(npc: &mut Npc, animation: &str) {
-    if npc.overlay.as_ref().is_some_and(|overlay| overlay.animation == animation && overlay.playing) {
+    if npc
+        .overlay
+        .as_ref()
+        .is_some_and(|overlay| overlay.animation == animation && overlay.playing)
+    {
         return;
     }
     npc.overlay = Some(Overlay {
@@ -242,7 +246,9 @@ fn parent(
 /// 48fda0: forget a detached child; pull the baby beyond 76 and drape the
 /// cords between the two; with no baby (or dead) remove the cords.
 fn tether(npc: &mut Npc, world: &mut NpcWorld) -> Result<(), String> {
-    let child = npc.child.and_then(|id| world.peers.get(id).map(|baby| (id, baby.parent)));
+    let child = npc
+        .child
+        .and_then(|id| world.peers.get(id).map(|baby| (id, baby.parent)));
     if let Some((_, parent)) = child {
         if parent.is_none() {
             npc.child = None;
@@ -258,7 +264,9 @@ fn tether(npc: &mut Npc, world: &mut NpcWorld) -> Result<(), String> {
             .before
             .iter_mut()
             .chain(world.peers.after.iter_mut())
-            .filter(|other| other.kind == 79 && other.variant == u32::from(CORD) && other.parent == Some(npc.id))
+            .filter(|other| {
+                other.kind == 79 && other.variant == u32::from(CORD) && other.parent == Some(npc.id)
+            })
         {
             piece.removed = true;
             piece.dead = true;
@@ -280,19 +288,26 @@ fn tether(npc: &mut Npc, world: &mut NpcWorld) -> Result<(), String> {
                 };
         }
     }
-    let slack = if 196.0 - length > 0.0 { (196.0 - length) / 196.0 } else { 0.0 };
+    let slack = if 196.0 - length > 0.0 {
+        (196.0 - length) / 196.0
+    } else {
+        0.0
+    };
     let mut k = 0.0_f32;
     for piece in world
         .peers
         .before
         .iter_mut()
         .chain(world.peers.after.iter_mut())
-        .filter(|other| other.kind == 79 && other.variant == u32::from(CORD) && other.parent == Some(npc.id))
+        .filter(|other| {
+            other.kind == 79 && other.variant == u32::from(CORD) && other.parent == Some(npc.id)
+        })
     {
         let sag = 16.0 - ((k - 9.0).abs() * 0.5).powi(2);
         let t = (16.0 - k) / 18.0;
         piece.position.x = (npc.position.x - delta.x * t) - 6.0;
-        piece.position.y = (((npc.position.y - delta.y * t) - 20.0) + (sag * slack) * 1.5) + k * 0.8;
+        piece.position.y =
+            (((npc.position.y - delta.y * t) - 20.0) + (sag * slack) * 1.5) + k * 0.8;
         piece.presented_position = piece.position;
         piece.visible = true;
         k += 1.0;

@@ -41,7 +41,9 @@ fn spawn(id: u32, selector: &SpawnSelector, context: &SpawnContext) -> Result<Op
         return Ok(None);
     }
     if !selector.position.is_finite() || selector.spawn_seed == 0 {
-        return Err("Duke of Flies requires bounded authored position and nonzero spawn seed".into());
+        return Err(
+            "Duke of Flies requires bounded authored position and nonzero spawn seed".into(),
+        );
     }
     let config = content::entity(67, 0);
     let mut npc = Npc {
@@ -254,9 +256,10 @@ fn attack_flies(
         let velocity = crate::npcs::direction(random);
         let spread = random.uniform() * 40.0;
         let angle = crate::npcs::direction(random);
-        let id = world
-            .effects
-            .admit_tiny_fly(seed, origin + angle * spread, velocity, Some(npc.id))?;
+        let id =
+            world
+                .effects
+                .admit_tiny_fly(seed, origin + angle * spread, velocity, Some(npc.id))?;
         // The spawner runs the tiny fly's update at once (vtable+0x18).
         let fires: Vec<_> = world
             .peers
@@ -318,8 +321,8 @@ fn blow(npc: &Npc, random: &mut Mt19937, world: &mut NpcWorld) -> Result<(), Str
         let friction = fly.friction;
         push(fly.position, &mut fly.velocity, friction, 18.0);
     }
-    world.effects.push_tiny_flies(|position, velocity, friction| {
-        push(position, velocity, friction, 3.0)
-    });
+    world
+        .effects
+        .push_tiny_flies(|position, velocity, friction| push(position, velocity, friction, 3.0));
     Ok(())
 }
