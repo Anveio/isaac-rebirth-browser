@@ -2,9 +2,7 @@
 // Native observations come from foundation-combat-observe.py; browser rows
 // are the engine's own snapshot. Every row is exact: f32 values are restored
 // with Math.fround from shortest-decimal JSON, never compared with epsilons.
-import { existsSync, readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
-import { gunzipSync } from 'node:zlib';
+import { manifestPath, readJsonEvidence } from './browser-evidence.mjs';
 
 export const f32 = value => typeof value === 'number' && Number.isFinite(value) ? Math.fround(value) : undefined;
 export const vector = value => value ? [f32(value.x ?? value[0]), f32(value.y ?? value[1])] : undefined;
@@ -164,11 +162,7 @@ export function entityRows(rows, source, actual, spec, render) {
 }
 
 /** Read a side's manifest, raw or from its archived receipt. */
-export function loadManifest(directory, side) {
-  const raw = resolve(directory, side, 'manifest.json');
-  if (existsSync(raw)) return JSON.parse(readFileSync(raw, 'utf8'));
-  return JSON.parse(gunzipSync(readFileSync(resolve(directory, side, 'manifest.json.gz'))));
-}
+export const loadManifest = (directory, side) => readJsonEvidence(manifestPath(directory, side));
 
 export const MARKERS = ['admission', 'damage', 'death', 'retirement', 'clear', 'shape', 'bossRoom', 'roomType'];
 

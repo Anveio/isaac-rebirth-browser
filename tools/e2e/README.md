@@ -105,7 +105,11 @@ output ([`lib/retention.mjs`](lib/retention.mjs)):
 - **Gzipped:** recorded traces.
 - **Dropped:** frames and other large evidence.
 
-A failing suite keeps everything. At start, the runner slims every suite of the
+A failing suite keeps everything. State-pair suites (`entities`, `npcs`,
+`monstro`, …) write each case's browser manifest and trace gzipped
+(`manifest.json.gz`, `trace.json.gz`, losslessly, with raw and archive
+hashes). A case then takes about 120 MB instead of 350 MB, and the comparators
+read either form. At start, the runner slims every suite of the
 runner-created `.cache/e2e/run-*` directories older than the newest
 `--keep-runs` runs (default 3). It also removes `/tmp/isaac-production-*`
 snapshots whose process is gone.

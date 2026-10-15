@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
+import { manifestPath, readJsonEvidence } from './browser-evidence.mjs';
 
 const option = name => {
   const at = process.argv.indexOf(name);
@@ -10,9 +11,9 @@ const option = name => {
   return process.argv[at + 1];
 };
 const directory = resolve(option('--case'));
-const load = path => JSON.parse(readFileSync(path, 'utf8'));
+const load = readJsonEvidence;
 const hash = path => createHash('sha256').update(readFileSync(path)).digest('hex');
-const originalPath = resolve(directory, 'original/manifest.json'), browserPath = resolve(directory, 'browser/manifest.json');
+const originalPath = manifestPath(directory, 'original'), browserPath = manifestPath(directory, 'browser');
 const original = load(originalPath), browser = load(browserPath), replay = load(resolve(directory, 'case.json'));
 const gate = load(resolve(dirname(directory), 'report.json')), pair = load(resolve(directory, 'report.json'));
 assert.equal(pair.original.status, 'pass');
