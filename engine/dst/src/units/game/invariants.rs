@@ -152,6 +152,7 @@ fn menu_edge(from: Screen, to: Screen) -> bool {
 /// Contracts relating the state before and after an accepted command.
 pub fn transition(before: &State, command: &Command, after: &State) {
     death(before, command, after);
+    room_clear(before, command, after);
     // A run starts from the menus, or restarts from the GameOver popup without
     // leaving the playing screen; both go through the engine's run start.
     let restarted = before.player_death.game_over.is_some()
@@ -398,6 +399,78 @@ pub fn transition(before: &State, command: &Command, after: &State) {
             "game: an invalid seed code is dismissed"
         );
     }
+}
+
+/// Room.Update (`npcs::advance_room_clear`, source 5d149b/5d1487) runs once
+/// per nonplayer pass: countable actors reset a ten-pass countdown, and only
+/// an empty pass entered with the countdown expired marks the room clear and
+/// reopens the doors combat shut. A bomb may reveal a secret door mid-combat.
+fn room_clear(before: &State, command: &Command, after: &State) {
+    let same_room = before.screen == Screen::Playing
+        && after.screen == Screen::Playing
+        && before.current_room == after.current_room
+        && before.stage_seed == after.stage_seed
+        && before.room_transition.is_none()
+        && before.player_death.game_over.is_none();
+    if !same_room {
+        return;
+    }
+    let room_type = after.floor.descriptors[after.current_room]
+        .template
+        .room_type;
+    let cleared = !before.room.combat_clear && after.room.combat_clear;
+    if let (Command::Tick { count, .. }, true) = (command, cleared) {
+        // The command's nonplayer passes, from the engine's own phase clock.
+        let mut clock = before.system_clock;
+        let passes = (0..*count)
+            .filter(|_| {
+                clock
+                    .advance()
+                    .is_ok_and(|phase| phase.updates_nonplayers())
+            })
+            .count();
+        let countdown = before.room.combat_clear_countdown as usize;
+        props::always!(
+            passes > countdown
+                && (passes > 1
+                    || (countdown == 0 && after.room.manager_counts.countable_total() <= 0)),
+            "game: a room is marked clear only on an empty pass after its countdown expires",
+            json!({
+                "room": after.current_room,
+                "passes": passes,
+                "countdown": countdown,
+                "counts": after.room.manager_counts,
+            })
+        );
+    }
+    let reopened = before.room.appearance.doors.iter().filter(|door| {
+        door.state == "Closed"
+            && before.room.combat_shut_door_slots.contains(&door.slot)
+            && after
+                .room
+                .appearance
+                .doors
+                .iter()
+                .any(|after_door| after_door.slot == door.slot && after_door.state == "Opened")
+    });
+    let mut unexplained = reopened.filter(|door| {
+        let target = door.target_room as usize;
+        let connection = [
+            after.current_room.min(target),
+            after.current_room.max(target),
+        ];
+        !after.room.combat_clear && !after.revealed_secret_connections.contains(&connection)
+    });
+    props::always!(
+        unexplained.next().is_none(),
+        "game: combat-shut doors reopen only when the room clears or a secret is revealed",
+        json!({ "room": after.current_room, "command": command })
+    );
+    props::sometimes!(cleared && room_type == 5, "game: a boss room is cleared");
+    props::sometimes!(
+        cleared && room_type == 6,
+        "game: a miniboss room is cleared"
+    );
 }
 
 /// Normal Isaac death (`engine/src/player_death.rs`): GameOver freezes

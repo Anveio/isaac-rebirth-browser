@@ -126,6 +126,11 @@ Beyond its invariants, every `game` tape is checked by:
   outside `Game`'s serialization.
 * **Lossless publication.** Published states and whole games round-trip
   through JSON and the engine's own deserialization validators.
+* **Batched ticks.** A sampled `Tick` of up to 32 steps is re-run as that many
+  single ticks and must reach the identical game. Only command-level
+  publication may differ: the batch carries every step's sound and music
+  events, and a screen change resets the menu animation counter at the
+  command boundary.
 * **C ABI differential.** The tape drives the exported `reset`/`request_ptr`/
   `command`/`snapshot_*` functions exactly as `web/engine.ts` does.
 * **Shipped-WASM differential.** With `--wasm web/generated/engine.wasm` (the
@@ -149,8 +154,10 @@ property set on every run, after the generated cases:
 
 * `regression-*` tapes reproduce fixed findings and fail without their fix.
 * `coverage-*` tapes are generated cases that together reach every `game`
-  must-hit property (boss-scene key handling, GameOver, collection and other
-  rare branches), so ordinary budgets never pass or fail on luck. When an
+  must-hit property (boss-scene key handling, GameOver, collection, boss and
+  miniboss clears and other rare branches), so ordinary budgets never pass or
+  fail on luck. The clear tapes were branched with `--resume` from boss and
+  miniboss room entries. When an
   engine change moves them off those branches, harvest candidates with
   `--retain-all`, replay each with `--replay … --report …`, and keep a small
   covering set. Game tapes drift as the engine evolves; a regression tape that

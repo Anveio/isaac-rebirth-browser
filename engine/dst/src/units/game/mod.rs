@@ -72,6 +72,9 @@ pub fn run(case: &mut Case) {
     }
 }
 
+/// Batched Ticks up to this length are re-run as single Ticks when sampled.
+const BATCH_SAMPLE_TICKS: u32 = 32;
+
 struct Simulation {
     game: Game,
     tape: Tape,
@@ -210,9 +213,68 @@ impl Simulation {
         coverage::observe(&self.game.state);
         if e.chance(1, 50) {
             self.snapshot_round_trip();
+            if let (
+                Ok(()),
+                Command::Tick {
+                    count,
+                    timestamp_millis: None,
+                },
+            ) = (&result, &command)
+            {
+                if (2..=BATCH_SAMPLE_TICKS).contains(count) {
+                    self.batch_matches_single_ticks(&before, *count);
+                }
+            }
         }
         self.trace.push((result.is_ok(), digest(&self.game.state)));
         true
+    }
+
+    /// A batched Tick runs the same system iterations as that many single
+    /// Ticks. Only command-level publication differs: the batch carries every
+    /// iteration's sound and music events, and a screen change resets the
+    /// menu animation counter at the command boundary.
+    fn batch_matches_single_ticks(&self, before: &Game, count: u32) {
+        let mut singles = before.clone();
+        let mut sounds = Vec::new();
+        let mut music = Vec::new();
+        let mut screen_changed = false;
+        let mut failed_at = None;
+        for index in 0..count {
+            let screen = singles.state.screen;
+            let single = Command::Tick {
+                count: 1,
+                timestamp_millis: None,
+            };
+            if !matches!(command_engine(&mut singles, single), Ok(Ok(()))) {
+                failed_at = Some(index);
+                break;
+            }
+            screen_changed |= singles.state.screen != screen;
+            sounds.extend(singles.state.audio.events.iter().cloned());
+            music.extend(singles.state.music.events.iter().cloned());
+        }
+        singles.state.audio.events = sounds;
+        singles.state.music.events = music;
+        if screen_changed {
+            singles.state.menu_animation_tick = self.game.state.menu_animation_tick;
+        }
+        let equal = failed_at.is_none() && singles == self.game;
+        props::always!(
+            equal,
+            "game: a batched Tick simulates exactly what single Ticks do",
+            json!({
+                "count": count,
+                "singleFailedAt": failed_at,
+                "difference": (!equal && failed_at.is_none()).then(|| {
+                    let batch = serde_json::to_value(&self.game).unwrap_or_default();
+                    let single = serde_json::to_value(&singles).unwrap_or_default();
+                    json_diff::first(&batch, &single).map(|(path, batch, single)| {
+                        json!({ "path": path, "batch": batch, "single": single })
+                    })
+                }),
+            })
+        );
     }
 
     /// The browser reads states only through JSON; it must be lossless and

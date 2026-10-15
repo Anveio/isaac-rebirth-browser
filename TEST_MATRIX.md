@@ -244,7 +244,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | `floor` | Basement generation structure, retries and per-descriptor room admission | 18 | 4 | 0 |
 | `grid` | grid queries and ground-collision solvers on generated rooms | 14 | 3 | 0 |
 | `item_pools` | ItemPool selection, depletion, fallbacks, routing and continuation | 21 | 6 | 3 |
-| `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 58 | 47 | 2 |
+| `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 61 | 49 | 2 |
 | `abi` | the exported C ABI transport the browser bridge drives | 11 | 1 | 0 |
 
 <details><summary>Every declared DST property</summary>
@@ -411,6 +411,10 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Sometimes | game: a pickup is collected | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: a valid seed code is committed through the dialog | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: an invalid seed code is dismissed | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: a room is marked clear only on an empty pass after its countdown expires | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: combat-shut doors reopen only when the room clears or a secret is revealed | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Sometimes | game: a boss room is cleared | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Sometimes | game: a miniboss room is cleared | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: the player dies | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: a death reaches GameOver | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: keys never navigate while GameOver shows | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
@@ -467,6 +471,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Always | game: boot is a pure function of its seeds | [mod.rs](engine/dst/src/units/game/mod.rs) |
 | Unreachable | game: public commands never panic the engine | [mod.rs](engine/dst/src/units/game/mod.rs) |
 | Always | game: a rejected command leaves the whole game unchanged | [mod.rs](engine/dst/src/units/game/mod.rs) |
+| Always | game: a batched Tick simulates exactly what single Ticks do | [mod.rs](engine/dst/src/units/game/mod.rs) |
 | Always | game: published states round-trip losslessly through their validators | [mod.rs](engine/dst/src/units/game/mod.rs) |
 | Always | game: complete games round-trip losslessly through their validators | [mod.rs](engine/dst/src/units/game/mod.rs) |
 | Sometimes | game: a run lasts more than 3,000 ticks | [mod.rs](engine/dst/src/units/game/mod.rs) |
