@@ -66,6 +66,8 @@ fn ai(
         delay: 7,
         speed: 7.0,
         parameter_angle,
+        lead: 0.0,
+        adjust: None,
     };
     if plain_npc::try_shoot_player(npc, random, world, births, shot)? {
         plain_npc::play(npc, "Attack", true);

@@ -40,6 +40,7 @@ pub mod floor;
 mod fmath;
 pub mod gib_counts;
 pub mod gluttony;
+pub mod gemini;
 pub mod grid;
 mod grid_hazards;
 pub mod grid_records;
@@ -2654,6 +2655,25 @@ impl Game {
                 enemy_projectiles::EnemyProjectile::birth(id, parent, shot)
             }),
             entities::Birth::CreepHit => creep_effects::hurt_player(&mut self.state),
+            entities::Birth::Child(selector) => {
+                self.admit_npc_birth(index, entities::Birth::Npc(selector))?;
+                let id = {
+                    let child = self.state.room.npcs.last_mut().expect("admitted NPC birth");
+                    child.parent = Some(parent);
+                    child.id
+                };
+                self.state.room.npcs[index].child = Some(id);
+                self.advance_npc(id, phase::Phase::Update)
+            }
+            entities::Birth::Attached(selector) => {
+                self.admit_npc_birth(index, entities::Birth::Npc(selector))?;
+                let piece = self.state.room.npcs.last_mut().expect("admitted NPC birth");
+                piece.parent = Some(parent);
+                piece.entity_collision_class = 0;
+                piece.visible = false;
+                piece.no_appear = true;
+                Ok(())
+            }
             entities::Birth::FlungNpc(selector, velocity) => {
                 self.admit_npc_birth(index, entities::Birth::Npc(selector))?;
                 let npc = self.state.room.npcs.last_mut().expect("admitted NPC birth");
