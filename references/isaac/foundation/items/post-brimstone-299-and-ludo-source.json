@@ -1925,5 +1925,207 @@
       "storedBodyPhaseSummariesAreNotCallbackEntryProof": true,
       "qualityReportOnlyClarificationConfirmed": true
     }
+  },
+  "currentProduction4Evidence": {
+    "schema": "production4-combined-qualified-contract-facts-v1",
+    "snapshotMain": "61dfde2688f931013c28aa6d4836fe669b841abb",
+    "sourceHead": "d6db18ccfde7605e24efad6403173278d3d076f5",
+    "wasmSha256": "e01372621b57eafadb4bc33340ab624bd9339699a151d86b4f5bfb0f6951fa49",
+    "inputs": {
+      "productionSeal": {
+        "path": "/dev/shm/isaac-player-items-production4-own-proof/production-sealed.json",
+        "sha256": "61df4279b3427748ee22891ef65b0aba5549ca605e290f02bbc7ea31960e06c2",
+        "bytes": 467204
+      },
+      "artifactBinding": {
+        "path": "/dev/shm/isaac-player-items-production4-own-proof/artifact-binding-own-gameplay.json",
+        "sha256": "a43e576e190de7b1c47a57b3a8e608a00ff7974aa5d23a2aae15be54e330d721",
+        "bytes": 1518
+      },
+      "raw405": {
+        "path": "/dev/shm/isaac-player-items-production4-own-proof/regular405/versus-main9a90/compact-raw-partition.json",
+        "sha256": "61fb559a3f137322dbf691e5f0fcdd1513015affe73e435b10aa2813e2c760a9",
+        "bytes": 728
+      },
+      "jointOwn": {
+        "path": "/dev/shm/isaac-technology2-polyphemus169-production4-own-observations-v3/compact-metadata.json",
+        "sha256": "aa203b4eb0675bb618ade2df51ecf31b66e5e91d5027597e55115ef1008134f0",
+        "bytes": 95607
+      },
+      "contactOwn": {
+        "path": "/dev/shm/isaac-technology2-contact-production4-own-observations-v1/compact-metadata.json",
+        "sha256": "1fb51547cb5bc6fc191e04f1f222f5ad561adaab3936a2ac160732d1a511eada",
+        "bytes": 42999
+      },
+      "jointOriginal": {
+        "path": "/dev/shm/isaac-technology2-polyphemus169-production4-native-evidence-v1/technology2-polyphemus169-fixed-phase0/native-attempt1/paired-functional-v1/compact-metadata.json",
+        "sha256": "d5c7900a522a2cfb54dae0c542d8121f6437b06a4f75553b77c211bf94682263",
+        "bytes": 1728762
+      },
+      "contactOriginal": {
+        "path": "/dev/shm/isaac-technology2-contact-production4-native-evidence-v2/technology2-thin-npc-contact-recorded-0/paired-functional-v1/compact-metadata.json",
+        "sha256": "5d79117bad006b0a5962c337d0d50f834e41ea556d5380e12fe2dcf6a74fa6a4",
+        "bytes": 48553
+      },
+      "codecNode": {
+        "path": "/dev/shm/isaac-native-live-journal-zstd-integration-v1/node-reader-proof-v3.json",
+        "sha256": "5fd92ea22b0786ad0d6d4208ce4ad7c99be7c108c3735446804af160a5f86ef5",
+        "bytes": 1473
+      },
+      "codecNativeClosure": {
+        "path": "/dev/shm/isaac-technology2-contact-production4-native-evidence-v2/technology2-thin-npc-contact-recorded-0/native-attempt1/native-closed.json",
+        "sha256": "21ad6bcc6842f6a966e6d2033f1aecea8df3a57da5339cf62fef428b699d0bb9",
+        "bytes": 31105
+      }
+    },
+    "production": {
+      "actualExitCode": 0,
+      "seconds": 28.38,
+      "sourcePins": 3498,
+      "optionalFloorAndClippy": "PENDING"
+    },
+    "raw405": {
+      "checks": 38020341,
+      "failures": 2856,
+      "errors": 0,
+      "partition": {
+        "keyShape": 1428,
+        "newFields": 1428
+      },
+      "excludedPaths": [],
+      "pinsBeforeEndEqual": true
+    },
+    "jointOwn": {
+      "checks": 118443,
+      "failures": 79,
+      "numericFailedFields": 0,
+      "unknownFailures": 78,
+      "reverseRemoveEndpointMinimumFailures": 1
+    },
+    "contactOwn": {
+      "checks": 25397,
+      "failures": 48,
+      "coveredCase": "recorded0/NPC18",
+      "copiedParent": 5,
+      "fifo": 5,
+      "hpDrains": 6,
+      "death": 1,
+      "retirement": 1,
+      "other3Npc14ContactWitness": "ABSENT_COVERAGE_FAIL_RETAINED"
+    },
+    "jointOriginal": {
+      "checks": 80714,
+      "failures": 3935,
+      "pairedRows": 1567,
+      "jointSides": {
+        "native": {
+          "jointCompletedCacheRows": 686,
+          "jointPrimaryTearBirths": 5,
+          "newBorn200C40Actors": 2,
+          "retainedBorn0Current200Rows": 286,
+          "preLateAddTearBirths": 0,
+          "strictTearBodyJoins": 0
+        },
+        "port": {
+          "jointCompletedCacheRows": 686,
+          "jointPrimaryTearBirths": 5,
+          "newBorn200C40Actors": 2,
+          "retainedBorn0Current200Rows": 286,
+          "preLateAddTearBirths": 0,
+          "strictTearBodyJoins": 0
+        }
+      },
+      "c40Sides": {
+        "native": {
+          "grants": 2,
+          "qualifiedBirthMetadataActors": 7,
+          "actualBirthAgeActors": 7,
+          "actualTearBirths": 11,
+          "preGrantOrdinaryTearBirths": 0,
+          "retiredStoredBeamEndpoints": 0,
+          "actualC40Births": 7,
+          "actualFullBodyRows": 327,
+          "actualFastBodyRows": 327,
+          "retainedAcross4Rows": 0,
+          "actualRemoveStateC40Rows": 1,
+          "actualC40NullTransitions": 7,
+          "exactIdentityBodyJoins": 0
+        },
+        "port": {
+          "grants": 2,
+          "qualifiedBirthMetadataActors": 7,
+          "actualBirthAgeActors": 7,
+          "actualTearBirths": 11,
+          "preGrantOrdinaryTearBirths": 0,
+          "retiredStoredBeamEndpoints": 7,
+          "actualC40Births": 7,
+          "actualFullBodyRows": 327,
+          "actualFastBodyRows": 327,
+          "retainedAcross4Rows": 0,
+          "actualRemoveStateC40Rows": 1,
+          "actualC40NullTransitions": 7,
+          "exactIdentityBodyJoins": 0
+        }
+      },
+      "strictBodyScope": "Zero exact identity/seed joins leaves all51C40 and16Tear strict body fields UNGRADED/FAIL; positive own current/cache/property witnesses nevercreate identity aliases or physical parity.",
+      "crossCachedFields": 6,
+      "crossCachedRowsPerField": 1567,
+      "crossCachedFailures": 0
+    },
+    "contactOriginal": {
+      "checks": 94894,
+      "failures": 9184,
+      "pairedRows": 1216,
+      "copiedPayloadChecks": 12,
+      "copiedPayloadFailures": 0,
+      "retainedDamageRows": 582,
+      "retainedDamageFailures": 0,
+      "nativeFifo": 6,
+      "portFifo": 5,
+      "hpDrainsEach": 6,
+      "deathEach": 1,
+      "retirementEach": 1
+    },
+    "codec": {
+      "default": "gzip",
+      "optIn": "zstd",
+      "manifest": "unchanged gzip",
+      "actualRecords": 3934,
+      "rawBytes": 200977212,
+      "encodedBytes": 394681,
+      "positivePlayingTuples": 1258,
+      "malformedNodeRejections": 6,
+      "gameParity": false
+    },
+    "runtimeIdentity": {
+      "main": "61dfde2688f931013c28aa6d4836fe669b841abb",
+      "artifactSource": "d6db18ccfde7605e24efad6403173278d3d076f5",
+      "scopes": [
+        "engine/src",
+        "engine/Cargo.toml",
+        "engine/Cargo.lock",
+        "engine/build.rs",
+        "references/isaac/rebirth/resources",
+        "web",
+        "tools/foundation/item-catalog.py"
+      ],
+      "gitDiffPaths": [],
+      "wholeCurrentTreeBuildClaim": false
+    },
+    "futureOnly": [
+      "Spoon Bender3 homing",
+      "neutral2/Knife capability",
+      "4A0 satellite"
+    ],
+    "historicalReportsUnchanged": true,
+    "noStatesTuplesJournalsRead": true,
+    "noCaptureBuildOrRegrade": true,
+    "scope": [
+      "The production4 artifact (`d6db18cc` / WASM `e0137262`, binding `a43e576e`) passed normal production in 28.380s with all 3,498 source pins stable. Its full regular405 comparison against qualified main9a retains 38,020,341 checks / 2,856 FAIL: 1,428 added `player.entitySource` fields and 1,428 key-shape differences; changed or missing preexisting values and errors are zero. The item-stage core411 and separate copied-Parent414 are now merged. Their runtime/build/resource inputs match this combined artifact; the standalone intermediate core was not separately built or played. Later tool metadata is outside that build, and optional floor/Clippy checks remain pending.",
+      "Six public joint Technology 2 + Polyphemus captures and their finite reader retain 118,443 checks / 79 FAIL. No numeric operator field fails; 78 failures retain strict-join/callback unknowns and one reverse-case Remove-state endpoint coverage minimum remains. Four own contact cases retain 25,397 / 48 FAIL. Only recorded0/NPC18 exercises five complete copied Parent payloads, five FIFO appends, six HP drains, one death and one retirement; the three NPC14 cases retain missing-contact coverage failures.",
+      "The first fresh joint Original/browser pair retains 80,714 checks / 3,935 FAIL across 1,567 paired playing rows. All six selected cross-cache fields match across those rows; ordered Damage/Flags match across 32 observations and FireDelay across 1,170 on each side, while C70 ownership matches 1,254 observations. Both sides observe 686 completed joint-cache rows, five joint Tear births, two new born-0x200 C40 actors and 286 retained born-0/current-0x200 rows. Each side has seven C40 births, eleven Tears, 327 Full and 327 Fast body rows and seven NULL transitions. Zero exact identity joins leave all 51 C40 and 16 Tear body fields explicitly UNGRADED/FAIL; clocks, identities, callback and lifecycle owners remain unresolved. Stored retired endpoints differ (Native0/port7); no own-side material witness supplies a cross-game identity.",
+      "The first fresh contact Original/browser pair retains 94,894 checks / 9,184 FAIL across 1,216 paired rows. All 12 selected copied-source payload checks pass and retained C40 damage matches across 582 body rows. Both sides show six C40 identities, six HP drains, one death and one retirement. Native records six FIFO appends while the port records five; this observed gap remains, together with strict identity/RNG/clock/HP-geometry and callback failures. These selected contracts do not establish full combat parity or the other Original cases.",
+      "The explicit Native journal Zstd option412 preserves gzip as the default and leaves the gzip manifest format unchanged. Actual opt-in capture closed with 3,934 records (200,977,212 raw bytes / 394,681 encoded bytes); the first positive-playing projection completed with 1,258 tuples and the full contact comparison above. Node codec probes retain equal decoded bytes and six malformed-input rejections. This establishes the exercised transport scope, not game parity. Spoon Bender3 homing, neutral2/Knife capability and 4A0 satellite followups remain separate source-only work outside this P4 record. Historical P3, saved-history and corrected271 reports remain unchanged; the ten-case Number One replay remains pending."
+    ]
   }
 }
