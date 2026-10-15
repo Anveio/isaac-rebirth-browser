@@ -2,6 +2,8 @@
 import gzip
 import hashlib
 import json
+import importlib.util
+from pathlib import Path
 
 
 def atomic_metadata(path, value):
@@ -18,6 +20,53 @@ def file_digest(path):
             digest.update(chunk)
             size += len(chunk)
     return size, digest.hexdigest()
+
+
+_ZSTD = None
+
+
+def zstd_module():
+    global _ZSTD
+    if _ZSTD is None:
+        spec = importlib.util.spec_from_file_location(
+            'native_journal_zstd', Path(__file__).with_name('native-journal-zstd.py'))
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        _ZSTD = module
+    return _ZSTD
+
+
+def make_progress(directory, codec='gzip'):
+    if codec == 'gzip':
+        return Progress(directory)
+    if codec == 'zstd':
+        return zstd_module().Progress(directory, atomic_metadata)
+    raise ValueError('Unknown Native journal codec')
+
+
+def progress_path(directory):
+    paths = [directory / name for name in ('native-progress.jsonl.gz', 'native-progress.jsonl.zst')]
+    present = [path for path in paths if path.exists()]
+    if len(present) > 1:
+        raise ValueError('Multiple Native progress formats in one capture')
+    return present[0] if present else None
+
+
+def validate_progress_format(path, metadata):
+    if path.suffix == '.gz' and (metadata['schema'], metadata['encoding']) == (1, 'gzip-members-jsonl'):
+        return
+    if path.suffix == '.zst' and (metadata['schema'], metadata['encoding']) == (2, 'zstd-stream-jsonl'):
+        if metadata['windowLog'] == 23 and metadata['checksum'] is True:
+            return
+    raise ValueError('Unknown Native progress format')
+
+
+def open_progress(path):
+    if path.suffix == '.gz':
+        return gzip.open(path, 'rb')
+    if path.suffix == '.zst':
+        return zstd_module().open_closed(path)
+    raise ValueError('Unknown Native progress format')
 
 
 class JournalValues:
@@ -38,7 +87,7 @@ class JournalValues:
             raise ValueError('Native progress has an uncommitted tail or changed archive')
         raw_hash = hashlib.sha256()
         raw_bytes = records = 0
-        with gzip.open(progress.path, 'rb') as stream:
+        with open_progress(progress.path) as stream:
             for raw in stream:
                 raw_hash.update(raw)
                 raw_bytes += len(raw)
@@ -155,12 +204,15 @@ class Progress:
 def read_manifest(path):
     if path.suffix == '.gz':
         metadata = path.with_name(path.name + '.meta.json')
-        progress = path.parent / 'native-progress.jsonl.gz'
-        if metadata.exists() and progress.exists():
+        progress = progress_path(path.parent)
+        if progress is not None and progress.suffix == '.zst' and not metadata.exists():
+            raise ValueError('Zstd Native evidence requires complete manifest metadata')
+        if metadata.exists() and progress is not None:
             manifest_meta = json.loads(metadata.read_text())
             progress_meta = json.loads(progress.with_name(progress.name + '.meta.json').read_text())
-            if (manifest_meta['schema'], manifest_meta['encoding'], progress_meta['schema'], progress_meta['encoding']) != (1, 'gzip', 1, 'gzip-members-jsonl'):
+            if (manifest_meta['schema'], manifest_meta['encoding']) != (1, 'gzip'):
                 raise ValueError('Unknown native evidence format')
+            validate_progress_format(progress, progress_meta)
             if manifest_meta['status'] != 'closed' or progress_meta['status'] != 'closed':
                 raise ValueError('Native evidence is not closed')
             if file_digest(path) != (manifest_meta['archiveBytes'], manifest_meta['archiveSha256']):
@@ -171,7 +223,7 @@ def read_manifest(path):
             raw_bytes = records = 0
             report = None
             finished = False
-            with gzip.open(progress, 'rb') as stream:
+            with open_progress(progress) as stream:
                 for raw in stream:
                     raw_hash.update(raw)
                     raw_bytes += len(raw)
