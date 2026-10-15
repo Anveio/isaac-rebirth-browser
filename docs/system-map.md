@@ -206,8 +206,8 @@ and old-v2 history 18,759/2,307 FAIL. Native has12 children versus0 in the port;
 the118-first transition to114 leaves typed primary cleanup unresolved. DOM/browser
 capture remains unexecuted, separate from earlier pregame guard stops.
 
-Separate Draft286 source executes the Knife-first114→118→329 route through
-public WASM. Its functional comparison fails11,158 of106,884 checks;12 child
+The retained PR297 snapshot describes Draft286 executing the Knife-first
+114→118→329 route through public WASM. Its functional comparison fails11,158 of106,884 checks;12 child
 births pair at actual gates and copied controls match, while all550 pre329 child
 position/velocity/angle rows and532 raw8A4 rows differ. A separate84/0 birth-law
 diagnostic uses each side's own actual8A4/8A8. The source consumes a shared-MT
@@ -217,6 +217,25 @@ later movement/nearest-parameter or random-stream alignment. Native24 lifecycle
 events/12 children,280 post329 controlled-parent differences and the new marker's
 missing helper remain separately scoped. Has118/controlled/Brim actor gameplay
 acceptance is pending.
+
+Subsequently, PR290 merged at `ce5033cf` and PR286 at `98b35534`.
+Main now uses one canonical NPC Laser record/store, shared Line layout and
+optional unknown fields, and executes ordinary Has118 subtype1 children through
+the existing Knife store. PR290 preserves 17 NPC callbacks and compares
+15,268,885 existing-State fields with zero differences; its three own builds
+pass. The scoped replay observes 43/86 Full rows and zero fast rows, retaining
+fast nonvacuity failures. Original comparisons remain 2,820/21,942 and
+2,831/23,070 differences with zero numeric Laser joins and no DOM acceptance.
+
+PR286's three own builds and 37,956,648-field local regular regression pass.
+The fixed route observes 12 same-gate child births and 614 body rows with matching
+copied Line, flags, damage and color; its universal 106,884/11,158 FAIL and the
+older v8 19,359/5,394 FAIL remain unchanged. The inherited shared-MT divergence
+already precedes child birth; later physical/parameter and controlled behavior
+remain unaccepted. Both recorded-OS attempts stopped at resource guards; the
+second reaches 610/748 presentations with an unfinished tape and full transport
+FAIL. No new DOM, history-helper, complete lifetime or triple parity follows.
+The PR297 evidence capsule remains an unchanged historical snapshot.
 
 Readiness287 passes a warm production retry and strict Clippy, but its floor
 build stopped at the working-memory floor. Its earlier production capacity stop
