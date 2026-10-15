@@ -105,8 +105,8 @@ as do six public-WASM startup/invalid-resource checks. These do not qualify
 Original/DOM equivalence or full live item history. PR266 registers the public
 item-composition driver and all four literal v7 replay cases.
 
-Ordinary Brimstone and Knife actor execution remains in separate private
-producers at this main checkpoint; PR270 ordinary-Knife publication is pending.
+At the retained main4e122 checkpoint, ordinary Brimstone and Knife actor
+execution remained in private producers. The later PR270 result is recorded below.
 Number One6 and Libra304 have prepared source operators and scoped admission,
 without inherited runtime or gameplay acceptance. The ordinary Knife six-case
 bank completed only cases 0..2 on `2ed8a7b`: 571,311 checks, 37,820 differences,
@@ -152,6 +152,25 @@ children have actual full-curve movement/copied-line witnesses; two have only
 post-conversion fast rows before later Full manager absence. Actual Remove
 flags remain unobserved for all eight. No browser v8 or whole-history
 acceptance follows; all four declared cases and all older grades remain retained.
+
+At main `8ac96e2f` (PR270), the ordinary parent implementation is merged.
+PR270 adds the ordinary Mom's Knife subtype0 parent to main, including its
+registered slots, launch/return and Full/fast callbacks. Has118 children,
+Brimstone and Ludovico execution remain separate private/source leaves. Own
+production, strict Clippy and floor checks pass; the four-route local WASM
+regression retains 37,928,004 field comparisons with zero differences. The
+existing authorized DST consumer also compiles; no full DST run is claimed.
+
+The recorded Original114 case retains its frozen 125,788-check/8,922-failure
+grade. A separate overlapping additive report has 87,879 checks and 21,918
+failures; these totals are not summed or substituted. Each of 44 parent fields
+matches all 1,278 rows (639 Full/639 fast). C0C matches 1,466 rows, with 157
+observed charge increases, 104 launched rows, two release resets and 12 declared
+render witnesses. Four strict-f32 rotation differences, actor identity/seed,
+RNG/Init uniform, missing raw8A4/8A0/Line fields, prebirth C74/BB0 counters and
+NPC/contact/clear differences remain red. Child/controlled/triple histories and
+whole-case parity remain unaccepted. [Parent evidence](../references/isaac/foundation/items/ordinary-knife-parent-main.json)
+preserves the two report scopes and all earlier grades.
 
 Main `19906c4e`, observed on October14, includes the reviewed normal-health source callbacks, the source-only Nightmare resource prerequisite and raw snapshot accessor, and retains39 registered live suites. This is source qualification. No complete current-main39-suite production/original/browser acceptance is claimed; the frozen local f793/0f343 checkpoint and later scoped owner artifacts remain separate.
 
