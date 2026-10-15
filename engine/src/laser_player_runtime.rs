@@ -40,6 +40,32 @@ pub(crate) struct OrdinaryTechnologyBirth {
     pub(crate) color_ccc: AttackColor,
 }
 
+///Actual50E1C0 mode1/r8false input. The caller owns the real selected
+///RightEye point before Raw; C88/C98/CCC are read by the factory after Spawn.
+#[derive(Clone, Copy)]
+pub(crate) struct Technology2Birth {
+    pub(crate) player_position: WorldVector,
+    pub(crate) aim: WorldVector,
+    pub(crate) render_offset_from_50b720: WorldVector,
+}
+
+#[derive(Clone, Copy)]
+struct TechnologyFactoryBirth {
+    player_position: WorldVector,
+    aim: WorldVector,
+    render_offset_from_50b720: WorldVector,
+}
+
+#[derive(Clone, Copy)]
+enum TechnologyPropertySource {
+    Kind2 {
+        flags: AttackFlags,
+        color: AttackColor,
+        damage: fn(&State) -> Result<f32, String>,
+    },
+    CurrentTechnology2Cache,
+}
+
 ///Literal50E1C0 selected mode0/r8true: own variant2/lifetime3 factory.
 ///No C18 write: the caller immediately invokes Full on the returned actor.
 pub(crate) fn admit_ordinary_technology(
@@ -54,15 +80,67 @@ pub(crate) fn admit_ordinary_technology(
     {
         return Err("Technology requires finite actual cardinal aim and directed eye owner".into());
     }
+    admit_technology_factory(
+        state,
+        TechnologyFactoryBirth {
+            player_position: birth.player_position,
+            aim: birth.aim_cardinal,
+            render_offset_from_50b720: birth.render_offset_from_50b720,
+        },
+        TechnologyPropertySource::Kind2 {
+            flags: birth.flags_c98,
+            color: birth.color_ccc,
+            damage: kind2_damage,
+        },
+    )
+}
+
+///Literalmode1 factory only. Caller531623..53166B separately applies *.2,
+///TTL=-1, actual registered C40 and immediateFull, in that source order.
+///No birth, getter, wardrobe or caller capability is inferred by this API.
+pub(crate) fn admit_technology2(
+    state: &mut State,
+    birth: Technology2Birth,
+) -> Result<ActorRef, String> {
+    if !birth.player_position.is_finite()
+        || !birth.render_offset_from_50b720.is_finite()
+        || !birth.aim.is_finite()
+        || (birth.aim.x == 0.0 && birth.aim.y == 0.0)
+    {
+        return Err(
+            "Technology2 requires finite actual nonzero aim and directed RightEye owner".into(),
+        );
+    }
+    admit_technology_factory(
+        state,
+        TechnologyFactoryBirth {
+            player_position: birth.player_position,
+            aim: birth.aim,
+            render_offset_from_50b720: birth.render_offset_from_50b720,
+        },
+        TechnologyPropertySource::CurrentTechnology2Cache,
+    )
+}
+
+///One canonical7/2/0 Raw/Init/store/Parent/property factory for both actual
+///50E1C0 callers. Mode2 random flags and other r8 combinations stay unadmitted.
+fn admit_technology_factory(
+    state: &mut State,
+    birth: TechnologyFactoryBirth,
+    properties: TechnologyPropertySource,
+) -> Result<ActorRef, String> {
     let id = state.next_laser;
     let next = id.checked_add(1).ok_or("Laser handle exhausted")?;
-    let angle = (crate::fmath::atan2(
-        f64::from(birth.aim_cardinal.y),
-        f64::from(birth.aim_cardinal.x),
-    ) as f32)
+    let angle = (crate::fmath::atan2(f64::from(birth.aim.y), f64::from(birth.aim.x)) as f32)
         * f32::from_bits(0x4265_2ee0);
     let seed = state.boot_lifecycle.shared.next_u32(); //476151 after50B720.
     let mut laser = Laser::initialize_technology(id, seed, state.game_update_count);
+    if matches!(
+        properties,
+        TechnologyPropertySource::CurrentTechnology2Cache
+    ) {
+        laser.origin = LaserOrigin::PlayerTechnology2;
+    }
     laser.position = birth.player_position;
     laser.angle = angle;
     laser.remaining_updates = 3; //50E235, independently of Brim15.
@@ -78,27 +156,52 @@ pub(crate) fn admit_ordinary_technology(
     state.next_laser = next;
     state.actor_scheduler.admit(actor)?;
     let index = state.lasers.len() - 1;
-    state.lasers[index].attack_flags = birth.flags_c98;
-    state.lasers[index].line_flags = Some(birth.flags_c98);
-    state.lasers[index].source_color = birth.color_ccc;
-    state.lasers[index].current_color = birth.color_ccc;
-    state.lasers[index].sprite.tint = birth.color_ccc.tint;
-    state.lasers[index].sprite.offsets = birth.color_ccc.offsets;
-    //50E2A8 actual kind2 is AFTER Spawn/v58; mode1's direct C88 branch is
-    //not a substitute, and mode2's bounded random-flags branch is unadmitted.
-    let damage = kind2_damage(state)?;
+    //50E350 reads current C98/CCC after Spawn for mode1. Mode0 retains its
+    //independent caller values and actual kind2 getter after v58.
+    let (flags, color) = match properties {
+        TechnologyPropertySource::Kind2 { flags, color, .. } => (flags, color),
+        TechnologyPropertySource::CurrentTechnology2Cache => (
+            AttackFlags(state.weapon_cache.flags_c98.0 & !1),
+            state.weapon_cache.color_ccc,
+        ),
+    };
+    if !color.is_finite() {
+        return Err("Technology actual current CCC is nonfinite".into());
+    }
+    state.lasers[index].attack_flags = flags;
+    state.lasers[index].line_flags = Some(flags);
+    state.lasers[index].source_color = color;
+    state.lasers[index].current_color = color;
+    state.lasers[index].sprite.tint = color.tint;
+    state.lasers[index].sprite.offsets = color.offsets;
+    let damage = match properties {
+        TechnologyPropertySource::Kind2 { damage, .. } => damage(state)?,
+        //50E391/v60 reads current C88; it never calls50D090(kind2).
+        TechnologyPropertySource::CurrentTechnology2Cache => state.player_stats.damage,
+    };
     if !damage.is_finite() || damage < 0.0 {
         return Err("Technology kind2 returned invalid actual damage".into());
     }
     state.lasers[index].collision_damage = damage;
     state.lasers[index].grid_collision_class = 5; //50E2BF.
                                                   //50E2CB..E5 selected r8true: y<-.5 or x>.5 takes raw7E4=-10.
-    state.lasers[index].render_sort_offset =
-        if birth.aim_cardinal.y < -0.5 || birth.aim_cardinal.x > 0.5 {
-            -10.0
-        } else {
-            3000.0
-        };
+    state.lasers[index].render_sort_offset = match properties {
+        TechnologyPropertySource::Kind2 { .. } => {
+            if birth.aim.y < -0.5 || birth.aim.x > 0.5 {
+                -10.0
+            } else {
+                3000.0
+            }
+        }
+        //50E320..33A r8false takes -10 on y<=-.5 or x<=-.5.
+        TechnologyPropertySource::CurrentTechnology2Cache => {
+            if birth.aim.y > -0.5 && birth.aim.x > -0.5 {
+                3000.0
+            } else {
+                -10.0
+            }
+        }
+    };
     Ok(actor)
 }
 
@@ -109,7 +212,10 @@ pub(crate) fn advance_ordinary_technology_initial(
     if actor.kind != ActorKind::Laser
         || !state.lasers.iter().any(|laser| {
             laser.id == actor.id
-                && laser.origin == LaserOrigin::PlayerTechnology
+                && matches!(
+                    laser.origin,
+                    LaserOrigin::PlayerTechnology | LaserOrigin::PlayerTechnology2
+                )
                 && laser.first_update
         })
     {
@@ -118,7 +224,11 @@ pub(crate) fn advance_ordinary_technology_initial(
     advance_actor(state, Phase::Update, actor.id)
 }
 
-fn frontier(state: &mut State, channel: &str) {
+fn frontier(state: &mut State, index: usize, channel: &str) {
+    if state.lasers[index].origin == LaserOrigin::PlayerTechnology2 {
+        crate::technology2::diagnostic(state, channel);
+        return;
+    }
     state
         .weapon_admission
         .record_unadmitted(state.weapon_cache.primary, channel);
@@ -235,6 +345,35 @@ fn initialize_first(state: &mut State, index: usize) -> Result<(), String> {
             pitch: 1.0,
         },
     );
+    spawn_initial_impact(state, index)?;
+    let laser = &mut state.lasers[index];
+    laser.line_enabled = true;
+    laser.line.initialize(50, 0);
+    laser.line.width = Some(120.0);
+    Ok(())
+}
+
+///4796BC actual variant2 Impact factory, shared by ordinary subtype0 and
+///controlled subtype1. The controlled sound dispatcher has already returned.
+pub(crate) fn initialize_controlled_technology_impact(
+    state: &mut State,
+    index: usize,
+) -> Result<(), String> {
+    let laser = &state.lasers[index];
+    if laser.origin != LaserOrigin::PlayerControlled
+        || laser.variant != 2
+        || laser.subtype != 1
+        || !laser.first_update
+        || laser.parent != Some(PLAYER)
+        || laser.child.is_some()
+        || laser.impact.is_some()
+    {
+        return Err("controlled Technology first Impact requires actual fresh7/2/1".into());
+    }
+    spawn_initial_impact(state, index)
+}
+
+fn spawn_initial_impact(state: &mut State, index: usize) -> Result<(), String> {
     let id = state.next_effect;
     let next = id.checked_add(1).ok_or("Effect handle exhausted")?;
     let seed = state.boot_lifecycle.shared.next_u32(); //47955E before550A40.
@@ -248,6 +387,7 @@ fn initialize_first(state: &mut State, index: usize) -> Result<(), String> {
     };
     let laser = &state.lasers[index];
     let mut impact = Impact {
+        birth_game_update: Some(state.game_update_count),
         id,
         parent: Some(parent),
         parent_known: true,
@@ -292,17 +432,16 @@ fn initialize_first(state: &mut State, index: usize) -> Result<(), String> {
     }
     crate::laser_npc_runtime::advance_impact_full(&mut impact, false)?;
     state.lasers[index].impact = Some(impact);
-    let laser = &mut state.lasers[index];
-    laser.line_enabled = true;
-    laser.line.initialize(50, 0);
-    laser.line.width = Some(120.0);
     Ok(())
 }
 
 ///Authored real Layer0 frame owner consumed by47842E..47F. The actor has two
 ///layers; its XPosition+Width is not an assumed zero displacement.
 fn root_extent(laser: &Laser) -> Result<f32, String> {
-    if laser.origin == LaserOrigin::PlayerTechnology {
+    if matches!(
+        laser.origin,
+        LaserOrigin::PlayerTechnology | LaserOrigin::PlayerTechnology2
+    ) {
         if laser.variant != 2 || laser.sprite.animation != "RedLaser" || THIN_LASER_LAYER_COUNT != 1
         {
             return Err("Technology requires its actual one-layer RedLaser owner".into());
@@ -494,7 +633,7 @@ pub(crate) fn advance_actor(state: &mut State, phase: Phase, id: u32) -> Result<
         return Ok(());
     }
     let Some(dc4) = state.attack_runtime.player_dc4 else {
-        frontier(state, "ordinaryBrimstoneParentHistory");
+        frontier(state, index, "ordinaryBrimstoneParentHistory");
         return Ok(());
     };
     if !dc4.is_finite() {
@@ -505,23 +644,25 @@ pub(crate) fn advance_actor(state: &mut State, phase: Phase, id: u32) -> Result<
         || laser.previous_angle.is_none()
         || laser.uninitialized.is_none()
     {
-        frontier(state, "ordinaryBrimstoneActorHistory");
+        frontier(state, index, "ordinaryBrimstoneActorHistory");
         return Ok(());
     }
     if laser.subtype != 0
         || !laser.line_enabled && !laser.first_update
         || match laser.origin {
             LaserOrigin::PlayerCharged => laser.variant != 1 || laser.grid_collision_class != 3,
-            LaserOrigin::PlayerTechnology => laser.variant != 2 || laser.grid_collision_class != 5,
+            LaserOrigin::PlayerTechnology | LaserOrigin::PlayerTechnology2 => {
+                laser.variant != 2 || laser.grid_collision_class != 5
+            }
             LaserOrigin::NpcShootAngle | LaserOrigin::PlayerControlled => true,
         }
-        || laser.attack_flags.0 != 0
+        || !laser.has_supported_neutral_body_flags()
         || laser.rotation_enabled
         || laser.max_distance != 0.0
         || laser.line_controller != 0
         || laser.sprite.scale.x > 1.0
     {
-        frontier(state, "ordinaryBrimstoneBodyProperties");
+        frontier(state, index, "ordinaryBrimstoneBodyProperties");
         return Ok(());
     }
     let grid = Grid::new(

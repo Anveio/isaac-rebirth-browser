@@ -250,10 +250,19 @@ pub struct SpriteEffect {
     pub poop_effect: Option<crate::poop_effects::Controller>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub blood_effect: Option<crate::blood_effects::Controller>,
+    /// Player footprint Blood7 whose floor-sampled color offsets are unknown.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub footprint: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub critter: Option<crate::critters::Critter>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub creep_effect: Option<crate::creep_effects::Controller>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub fly_effect: Option<crate::fly_effects::Controller>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub epic_fetus: Option<crate::epic_fetus::Controller>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub explosion_effect: Option<crate::explosion_effects::Controller>,
 }
 
 impl SpriteEffect {
@@ -413,8 +422,12 @@ impl NpcEffectAdmission<'_> {
             full_updates: 0,
             poop_effect: None,
             blood_effect: None,
+            footprint: false,
+            critter: None,
             creep_effect: None,
             fly_effect: None,
+            epic_fetus: None,
+            explosion_effect: None,
         });
         self.scheduler.admit(ActorRef {
             kind: ActorKind::Effect,
@@ -425,6 +438,27 @@ impl NpcEffectAdmission<'_> {
 }
 
 pub fn advance_effect(state: &mut State, phase: Phase, id: u32) -> Result<(), String> {
+    if state
+        .sprite_effects
+        .iter()
+        .any(|effect| effect.id == id && effect.critter.is_some())
+    {
+        return crate::critters::advance(state, phase, id);
+    }
+    if state
+        .sprite_effects
+        .iter()
+        .any(|effect| effect.id == id && effect.explosion_effect.is_some())
+    {
+        return crate::explosion_effects::advance(state, phase, id);
+    }
+    if state
+        .sprite_effects
+        .iter()
+        .any(|effect| effect.id == id && effect.epic_fetus.is_some())
+    {
+        return crate::epic_fetus::advance(state, phase, id);
+    }
     if state
         .sprite_effects
         .iter()
@@ -735,6 +769,8 @@ pub struct BackgroundStain {
     pub render_offset: WorldVector,
     pub layer_rotation: Option<f32>,
     pub sprite: Sprite,
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub footprint: bool,
 }
 
 /// Fresh zero-gib death445c60: caller owns the external seed and color copy.
@@ -753,6 +789,26 @@ pub fn admit_blood_splat(
         scheduler: &mut state.actor_scheduler,
     }
     .admit_blood(seed, position, tint, offsets)
+}
+
+pub fn set_blood_scale(state: &mut State, id: u32, scale: f32) -> Result<(), String> {
+    NpcEffectAdmission {
+        game_update_count: state.game_update_count,
+        next_effect: &mut state.next_effect,
+        effects: &mut state.sprite_effects,
+        scheduler: &mut state.actor_scheduler,
+    }
+    .set_blood_scale(id, scale)
+}
+
+pub fn mark_footprint(state: &mut State, id: u32) -> Result<(), String> {
+    let effect = state
+        .sprite_effects
+        .iter_mut()
+        .find(|e| e.id == id && e.variant == 7)
+        .ok_or("footprint requires an admitted actual7")?;
+    effect.footprint = true;
+    Ok(())
 }
 
 pub fn advance_blood_initial(state: &mut State, id: u32) -> Result<(), String> {
@@ -819,8 +875,12 @@ impl NpcEffectAdmission<'_> {
             full_updates: 0,
             poop_effect: None,
             blood_effect: None,
+            footprint: false,
+            critter: None,
             creep_effect: None,
             fly_effect: None,
+            epic_fetus: None,
+            explosion_effect: None,
         });
         // Room5c6940 assigns the actual sequence first; Manager4524f0 then routes
         // flags8 to its separate background pool rather than the ordinary array.
@@ -950,7 +1010,11 @@ pub fn paint_background_effects(state: &mut State) -> Result<(), String> {
     let scheduler = &state.actor_scheduler;
     let mut pending = Vec::new();
     for (index, effect) in state.sprite_effects.iter().enumerate() {
-        if !(matches!(effect.variant, 7 | 17 | 43 | 58) && effect.flags & 8 != 0 && effect.active) {
+        if !((matches!(effect.variant, 7 | 17 | 43 | 58)
+            || (effect.variant == 18 && effect.explosion_effect.is_some()))
+            && effect.flags & 8 != 0
+            && effect.active)
+        {
             continue;
         }
         let key = if effect.raw_7d8 {
@@ -988,6 +1052,7 @@ pub fn paint_background_effects(state: &mut State) -> Result<(), String> {
                 .as_ref()
                 .and_then(|controller| controller.layer_rotation()),
             sprite: effect.sprite.clone(),
+            footprint: effect.footprint,
         });
         // Remove441bb0 clears active and marks dead; visibility stays unchanged.
         effect.active = false;

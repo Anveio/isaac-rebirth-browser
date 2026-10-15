@@ -35,10 +35,17 @@ pub struct Room {
     pub pickups: Vec<crate::pickups::Pickup>,
     #[serde(default)]
     pub saved_regular_pickups: Vec<crate::pickups::SavedRegularPickup>,
+    /// Descriptor+B8 records survive crater paint/Remove and replay on reentry.
+    /// Legacy or missing restore history remains unknown until its producer.
+    #[serde(default)]
+    pub dynamic_crater_records: Option<Vec<crate::explosion_effects::DynamicCraterRecord>>,
     pub npcs: Vec<crate::npcs::Npc>,
     /// Append-only within a room. The per-frame WASM snapshot elides them
     /// (see `frame_snapshot_ptr`); the browser reads new ones incrementally.
-    #[serde(default, serialize_with = "crate::familiars::serialize_background_stains")]
+    #[serde(
+        default,
+        serialize_with = "crate::familiars::serialize_background_stains"
+    )]
     pub background_stains: Vec<crate::familiars::BackgroundStain>,
     pub authored_actor_order: Vec<crate::actors::ActorRef>,
     #[serde(default)]
@@ -48,6 +55,9 @@ pub struct Room {
     pub combat_clear: bool,
     pub combat_clear_countdown: u32,
     pub combat_shut_door_slots: Vec<u8>,
+    /// Game update on which combat played the doors' Close animation.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub combat_shut_update: Option<u32>,
     pub spawns: Option<crate::room_spawns::RoomSpawns>,
     pub grid: Option<crate::grid::GridDescriptor>,
     /// The actual signed Room+e98 owner; absent until its source Init is admitted.
@@ -56,6 +66,10 @@ pub struct Room {
     /// Rock+348 countdowns of type5 bomb rocks a blast moved to state3.
     #[serde(default)]
     pub bomb_rock_fuses: Vec<crate::rock_blast::BombRockFuse>,
+    /// Grid17 boss-room exit spawned by the clear award; its grid cell holds
+    /// the identity, this owns the TrapDoor state and sprite clock.
+    #[serde(default)]
+    pub trapdoor: Option<crate::stage_transition::Trapdoor>,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
@@ -221,6 +235,26 @@ impl DecorationRng {
         self.state ^= self.state << 9;
         self.state ^= self.state >> 7;
         self.state
+    }
+}
+
+/// Room backdrop setup 5c5b30 reloads fxlayers.xml (5c5be3 -> 5489b0) on
+/// every Room init. Each authored `fxRay`, in every ray group whatever its
+/// stages, draws one phase uniform()*pi at 54a16d. Crawlspace rooms (type 16)
+/// and backdrop 13 (boss RoomData 5000) clear the layers instead. The browser
+/// does not draw rays yet, so only the draws are kept.
+pub fn load_fx_rays(room: &Room, shared: &mut crate::mt::Mt19937) {
+    if let Some(descriptor) = &room.descriptor {
+        let template = &descriptor.template;
+        if template.room_type == 16 || (template.room_type == 5 && template.variant == 5000) {
+            return;
+        }
+    }
+    let rays = include_str!("../../references/isaac/rebirth/resources/fxlayers.xml")
+        .matches("<fxRay ")
+        .count();
+    for _ray in 0..rays {
+        let _phase = (f64::from(shared.uniform()) * std::f64::consts::PI) as f32;
     }
 }
 
@@ -541,6 +575,7 @@ impl Room {
             source_tear_slowdown_2494: None,
             pickups: Vec::new(),
             saved_regular_pickups: Vec::new(),
+            dynamic_crater_records: Some(Vec::new()),
             npcs: Vec::new(),
             background_stains: Vec::new(),
             authored_actor_order: Vec::new(),
@@ -550,10 +585,12 @@ impl Room {
             combat_clear: true,
             combat_clear_countdown: 0,
             combat_shut_door_slots: Vec::new(),
+            combat_shut_update: None,
             spawns: None,
             grid: None,
             path_costs: None,
             bomb_rock_fuses: Vec::new(),
+            trapdoor: None,
             left: left_plane + radius,
             right: right_plane - radius,
             top: top_plane + radius,

@@ -11,11 +11,78 @@ pub(crate) struct CacheMask(pub(crate) u32);
 
 const LIBRA_SCALAR_FLAGS: u32 = 0x1b;
 
+//Actual152 requestsWeapon/Damage; optional4 separately requestsShotSpeed.
+//These callback/grant footprints do not admit a primary or secondary caller.
+const TECHNOLOGY2_GRANT_ITEMS: &[usize] = &[4, 152];
+
+// Source-owned footprints remain independent even when their admitted counts
+// currently match. Cache completion is never a kind5 or grant-history proof.
+const FETUS_CACHE_ITEMS: &[usize] = &[4, 52];
+const FETUS_KIND5_ITEMS: &[usize] = &[4, 52];
+const FETUS_GRANT_ITEMS: &[usize] = &[4, 52];
+//Independent controlled52 cache, kind5 and caller footprints.
+const CONTROLLED_FETUS_CACHE_ITEMS: &[usize] = &[1, 4, 52, 329];
+const CONTROLLED_FETUS_KIND5_ITEMS: &[usize] = &[1, 4, 52, 329];
+const CONTROLLED_FETUS_GRANT_ITEMS: &[usize] = &[1, 4, 52, 329];
+const CONTROLLED_FETUS_CALLER_ITEMS: &[usize] = &[1, 4, 52, 329];
+// Independent current caller and kind5 readsets do not consume the queued
+// passive4 config. Pickup guard release precedes its late real Add callback.
+const CONTROLLED_FETUS_KIND5_QUEUED_ITEMS: &[usize] = &[4];
+const CONTROLLED_FETUS_CALLER_QUEUED_ITEMS: &[usize] = &[4];
+
+// Independent Monstro229 callback, Familiar, grant and kind1 footprints.
+// Equal sets do not transfer controller, getter or auxiliary ownership.
+const MONSTRO_CACHE_ITEMS: &[usize] = &[1, 4, 229];
+const MONSTRO_FAMILIAR_ITEMS: &[usize] = &[1, 4, 229];
+const MONSTRO_GRANT_ITEMS: &[usize] = &[1, 4, 229];
+const MONSTRO_KIND1_ITEMS: &[usize] = &[1, 4, 229];
+const MONSTRO_CALLER_ITEMS: &[usize] = &[1, 4, 229];
+// Independent current getter/caller histories admit actual queued passive4.
+// Its late Add has not changed current stats or selected229 costume yet.
+const MONSTRO_KIND1_QUEUED_ITEMS: &[usize] = &[4];
+const MONSTRO_CALLER_QUEUED_ITEMS: &[usize] = &[4];
+
+
+// Independently closed cache, Familiar and actual grant footprints. Equal
+// sets do not transfer getter or controller admission.
+const EPIC_FETUS_CACHE_ITEMS: &[usize] = &[1, 2, 4, 168];
+const EPIC_FETUS_FAMILIAR_ITEMS: &[usize] = &[1, 2, 4, 168];
+const EPIC_FETUS_GRANT_ITEMS: &[usize] = &[1, 2, 4, 168];
+// Real2-before168 grants have independent callback and auxiliary histories.
+// These prefixes admit no ordinary triple-tear emitter or Epic caller.
+const INNER_EYE_PREFIX_CACHE_ITEMS: &[usize] = &[1, 2, 4];
+const INNER_EYE_PREFIX_FAMILIAR_ITEMS: &[usize] = &[1, 2, 4];
+const INNER_EYE_PREFIX_GRANT_ITEMS: &[usize] = &[1, 2, 4];
+
+// Independently closed getter and live caller footprints. Cache/Familiar
+// and grant ownership above never admits these consumers by itself.
+const EPIC_FETUS_KIND6_ITEMS: &[usize] = &[1, 2, 4, 168];
+const EPIC_FETUS_CALLER_ITEMS: &[usize] = &[1, 2, 4, 168];
+// Actual queued passive2 supplies no early owned count or cache value.
+const EPIC_FETUS_KIND6_QUEUED_ITEMS: &[usize] = &[2];
+const EPIC_FETUS_CALLER_QUEUED_ITEMS: &[usize] = &[2];
+
+//519FC0's ordinary Have2 emitter and50D090(kind1) have separate readsets.
+//Neither follows from the existing cache/Familiar/grant prefix capabilities.
+const INNER_EYE_CALLER_ITEMS: &[usize] = &[2, 4];
+const INNER_EYE_KIND1_ITEMS: &[usize] = &[2, 4];
+const INNER_EYE_CALLER_QUEUED_ITEMS: &[usize] = &[2, 4];
+const INNER_EYE_KIND1_QUEUED_ITEMS: &[usize] = &[2, 4];
+
 // Independent source-owned footprints. Equal current sets are deliberately
 // separate: cache additions cannot silently admit a50D090 getter branch.
-const TECHNOLOGY_CACHE_ITEMS: &[usize] = &[1, 4, 68];
+const TECHNOLOGY_CACHE_ITEMS: &[usize] = &[1, 4, 68, 329];
 const TECHNOLOGY_KIND2_ITEMS: &[usize] = &[1, 4, 68];
-const TECHNOLOGY_KIND3_ITEMS: &[usize] = &[1, 4, 68];
+const TECHNOLOGY_KIND3_ITEMS: &[usize] = &[1, 4, 68, 329];
+const CONTROLLED_TECHNOLOGY_CALLER_ITEMS: &[usize] = &[1, 4, 68, 329];
+const SOY_CACHE_ITEMS: &[usize] = &[1, 4, 118, 330];
+const SOY_KIND1_ITEMS: &[usize] = &[1, 4, 118, 330];
+const SOY_KIND2_ITEMS: &[usize] = &[1, 4, 118, 330];
+const SOY_KIND3_ITEMS: &[usize] = &[1, 4, 118, 330];
+
+// Independent169 callbacks, kind1 getter and current519FC0 caller footprints.
+// Equal selected sets do not complete grant/history/contact or other stages.
+const POLYPHEMUS_CALLER_ITEMS: &[usize] = &[4, 169];
 
 /// Literal511f10 dispatch order. Weapon selection/removal precedes stats;
 /// Libra304 has additional coupling before and after this sequence.
@@ -130,6 +197,16 @@ impl<'a> ItemInputs<'a> {
         primary: PrimaryWeaponC08,
         flags: crate::attack_flags::AttackFlags,
     ) -> Option<u32> {
+        if self.admits_soy_milk_regular_properties(source_player_type, primary, flags) {
+            return Some(0);
+        }
+        if source_player_type == Some(0)
+            && primary == PrimaryWeaponC08::RegularTears
+            && flags.0 == 0x200
+            && self.admits_polyphemus_kind1_context()
+        {
+            return Some(0);
+        }
         (source_player_type == Some(0)
             && primary == PrimaryWeaponC08::RegularTears
             && flags.0 == 0
@@ -163,11 +240,64 @@ impl<'a> ItemInputs<'a> {
                 })
     }
 
+    ///Literal51316D's selected Flags32 callback. No color/grant permission.
+    pub(crate) fn admits_polyphemus_flags_context(self) -> bool {
+        TearFlagsStage::admits_polyphemus(self)
+    }
+
+    ///Separate50D090(kind1) readset;169 adds no modifier query or RNG here.
+    pub(crate) fn admits_polyphemus_kind1_context(self) -> bool {
+        self.positive_owned_count(169) && self.admits_kind1_neutral_fields()
+    }
+
+    ///Actual519FC0 Have169 changes the born origin after the eye draw. This
+    ///capability says nothing about the later Tear's0x200 contact callback.
+    pub(crate) fn admits_polyphemus_caller_context(self) -> bool {
+        self.admits_permanent_readset(169, POLYPHEMUS_CALLER_ITEMS)
+    }
+
+    ///Independent positive330 callback footprint from full511F10 and the
+    ///actual zero-amount Add330 path. No TEMP/trinkets or unknown grants.
+    ///Kind-specific property consumers retain independent capabilities.
+    pub(crate) fn admits_soy_milk_cache_context(self) -> bool {
+        self.admits_permanent_readset(330, SOY_CACHE_ITEMS)
+    }
+
+    ///Independently closed50D090(kind1) outputs00=0 and3C*=.5.
+    ///The cache footprint alone never grants a kind-specific property owner.
+    pub(crate) fn admits_soy_milk_regular_properties(
+        self,
+        source_player_type: Option<u32>,
+        primary: PrimaryWeaponC08,
+        flags: crate::attack_flags::AttackFlags,
+    ) -> bool {
+        source_player_type == Some(0)
+            && primary == PrimaryWeaponC08::RegularTears
+            && flags.0 == 0
+            && self.admits_permanent_readset(330, SOY_KIND1_ITEMS)
+    }
+
+    ///Selected positive330 changes only unused3C in kind2/3; actual38/30
+    ///remain currentC88/C98. Factory50E4AF and476D70 consume those separately.
+    pub(crate) fn admits_soy_milk_kind2_getter(self) -> bool {
+        self.admits_permanent_readset(330, SOY_KIND2_ITEMS)
+    }
+
+    pub(crate) fn admits_soy_milk_kind3_getter(self) -> bool {
+        self.admits_permanent_readset(330, SOY_KIND3_ITEMS)
+    }
+
     /// Exact per-callback cache32/64 proof: other modifier and trinket owners
     /// remain outside this scope. Future property operators extend their own
     /// cache reads instead of widening controller/contact admission.
     pub(crate) fn admits_selected_appearance(self) -> bool {
         if self.admits_technology_cache_context() || self.admits_fetus_cache_context() {
+            return true;
+        }
+        if self.admits_soy_milk_cache_context() || self.admits_monstro_cache_context() {
+            return true;
+        }
+        if self.admits_epic_fetus_cache_context() {
             return true;
         }
         self.owner.trinket_slots == [0, 0]
@@ -186,6 +316,55 @@ impl<'a> ItemInputs<'a> {
                 })
     }
 
+    ///Actual519FC0 primary and52F370 secondary caller footprints remain distinct.
+    pub(crate) fn admits_technology2_primary(self) -> bool {
+        self.positive_owned_count(152)
+            && self.admits_stage_owned_roles(|id| Technology2PrimaryReadRole::of(id).is_some())
+    }
+    pub(crate) fn admits_technology2_secondary(self) -> bool {
+        self.positive_owned_count(152)
+            && self.admits_stage_owned_roles(|id| Technology2SecondaryReadRole::of(id).is_some())
+    }
+    ///Selected50D090 kind1 and kind3 never inherit a factory/cache permission.
+    pub(crate) fn admits_technology2_kind1_getter(self) -> bool {
+        self.positive_owned_count(152) && self.admits_kind1_neutral_fields()
+    }
+    pub(crate) fn admits_technology2_kind3_getter(self) -> bool {
+        self.positive_owned_count(152) && self.admits_kind3_neutral_fields()
+    }
+
+    ///Selected50D090(kind1): these items add no modifier query/RNG/variant.
+    ///Current C98/all11CA0/C88/C8C remain actual copied inputs, not neutralized
+    ///values. Consumers still own their supported property/body/caller flags.
+    fn admits_kind1_neutral_fields(self) -> bool {
+        self.admits_stage_owned_roles(|id| matches!(id, 4 | 152 | 169))
+    }
+
+    ///Independent50D090(kind3) proof for its current output fields. Equal
+    ///neutral roles do not transfer kind1 or retained C40 ownership here.
+    fn admits_kind3_neutral_fields(self) -> bool {
+        self.admits_stage_owned_roles(|id| matches!(id, 4 | 152 | 169))
+    }
+
+    ///Mechanical context/count validation only; each stage classifies its own
+    ///source-proven roles.508FE0 reads queued3058 only for configkind2, so a
+    ///known passive config is inert here before lateAdd. Unknown configs stay
+    ///unknown. No caller queue, grant or cache permission follows from this.
+    fn admits_stage_owned_roles(self, owns_role: impl Fn(usize) -> bool) -> bool {
+        self.admits_scalar_context()
+            && self
+                .owner
+                .owned_counts
+                .iter()
+                .enumerate()
+                .all(|(id, &count)| count == 0 || (count > 0 && owns_role(id)))
+    }
+
+    ///Actualpassive152 defaultAdd preserves only an existing auxiliary owner.
+    pub(crate) fn admits_technology2_grant_context(self) -> bool {
+        self.admits_permanent_readset(152, TECHNOLOGY2_GRANT_ITEMS)
+    }
+
     fn admits_scalar_context(self) -> bool {
         self.owner.trinket_slots == [0, 0]
             && self
@@ -195,7 +374,7 @@ impl<'a> ItemInputs<'a> {
             && self.owner.temporary_collectibles.is_empty()
     }
 
-    /// Independent511F10 footprint for positive Technology with selected1/4.
+    /// Independent511F10 footprint for positive Technology with selected1/4/329.
     /// Callers retain their normal-Isaac and typed auxiliary-owner checks.
     /// This is cache context only, never a property/controller/contact admission.
     pub(crate) fn admits_technology_cache_context(self) -> bool {
@@ -210,6 +389,117 @@ impl<'a> ItemInputs<'a> {
     ///Separate50D090 output30 footprint consumed by476D70 status handling.
     pub(crate) fn admits_technology_kind3_getter(self) -> bool {
         self.admits_permanent_readset(68, TECHNOLOGY_KIND3_ITEMS)
+    }
+
+    ///519FC0 C08=3 + live Have329 reads current cache directly; it never
+    ///calls the ordinary kind2 builder. Keep its caller footprint separate
+    ///from cache completion and the independently closed kind3 status getter.
+    pub(crate) fn admits_controlled_technology_context(self) -> bool {
+        self.positive_owned_count(329)
+            && self.admits_permanent_readset(68, CONTROLLED_TECHNOLOGY_CALLER_ITEMS)
+    }
+
+    ///Independent511F10 footprint.229 is neutral for the selected callbacks;
+    ///FireDelay separately consumes the actual retained C08=7 multiplier.
+    pub(crate) fn admits_monstro_cache_context(self) -> bool {
+        self.admits_monstro_readset(MONSTRO_CACHE_ITEMS)
+    }
+
+    ///Independent strict511F10 path requests the same68 zero familiars.
+    pub(crate) fn admits_monstro_zero_familiar_requests(self) -> bool {
+        self.admits_monstro_readset(MONSTRO_FAMILIAR_ITEMS)
+    }
+
+    ///Only actualAdd229 may preserve an existing auxiliary owner. Unknown
+    ///restore histories remain None regardless of the current item counts.
+    pub(crate) fn admits_monstro_grant_context(self) -> bool {
+        self.admits_monstro_readset(MONSTRO_GRANT_ITEMS)
+    }
+
+    ///Separate50D090(kind1) path: Have229 transforms the actual initial0
+    ///variant to BloodTear1. This grants no controller or cache capability.
+    pub(crate) fn admits_monstro_kind1_context(self) -> bool {
+        self.admits_monstro_readset(MONSTRO_KIND1_ITEMS)
+            && self.owner.queued_id.is_none_or(|id| {
+                MONSTRO_KIND1_QUEUED_ITEMS.contains(&(id as usize))
+            })
+    }
+
+    ///Separate519FC0 C08=7 caller footprint. Has149/55/87/153/2/245
+    ///are false; cache and kind1 admission do not grant this controller.
+    pub(crate) fn admits_monstro_caller(self) -> bool {
+        self.admits_monstro_readset(MONSTRO_CALLER_ITEMS)
+            && self.owner.queued_id.is_none_or(|id| {
+                MONSTRO_CALLER_QUEUED_ITEMS.contains(&(id as usize))
+            })
+    }
+
+    fn admits_monstro_readset(self, supported: &[usize]) -> bool {
+        self.admits_permanent_readset(229, supported)
+            && self
+                .owner
+                .queued_id
+                .is_none_or(|id| supported.contains(&(id as usize)))
+    }
+
+    ///Independent511F10 footprint for positive168 with selected1/2/4,
+    ///or the actual2-before168 prefix. C08=6 adds no FireDelay multiplier.
+    ///Normal-Isaac, requested callbacks and field/history owners stay separate.
+    pub(crate) fn admits_epic_fetus_cache_context(self) -> bool {
+        self.admits_permanent_readset(168, EPIC_FETUS_CACHE_ITEMS)
+            || self.admits_permanent_readset(2, INNER_EYE_PREFIX_CACHE_ITEMS)
+    }
+
+    ///Independent strict511F10 trace: all68 actual Familiar requests are0.
+    ///Cache completion alone never admits a Familiar request or RNG owner.
+    pub(crate) fn admits_epic_fetus_zero_familiar_requests(self) -> bool {
+        self.admits_permanent_readset(168, EPIC_FETUS_FAMILIAR_ITEMS)
+            || self.admits_permanent_readset(2, INNER_EYE_PREFIX_FAMILIAR_ITEMS)
+    }
+
+    ///Separate50D090(kind6) footprint used by Rocket31 at death. The consumer
+    ///retains actualFIRSTPlayer/source0 and currentC88/C98/CA0 ownership;
+    ///physicalParent and the Target's birth inventory are not this getter.
+    pub(crate) fn admits_epic_fetus_kind6_context(self) -> bool {
+        self.owner
+            .queued_id
+            .is_none_or(|id| EPIC_FETUS_KIND6_QUEUED_ITEMS.contains(&(id as usize)))
+            && self.admits_permanent_readset(168, EPIC_FETUS_KIND6_ITEMS)
+    }
+
+    ///Only actualAdd2/168 may consume this independent zero-amount grant proof,
+    ///with normal-Isaac and existingSomeLuck guards retained by its wrapper.
+    ///No counts or cache result can create missing auxiliary history.
+    pub(crate) fn admits_epic_fetus_grant_context(self) -> bool {
+        self.admits_permanent_readset(168, EPIC_FETUS_GRANT_ITEMS)
+            || self.admits_permanent_readset(2, INNER_EYE_PREFIX_GRANT_ITEMS)
+    }
+
+    ///Separate51A160/51E370/51B7C3/51B859/51DA6C caller footprint. Selected
+    ///Has2 is current signed ownership;153/55/87 are absent. Source0, D80,
+    ///charge, C18, RNG and canonicalTarget/Rocket remain caller obligations.
+    pub(crate) fn admits_epic_fetus_caller(self) -> bool {
+        self.owner
+            .queued_id
+            .is_none_or(|id| EPIC_FETUS_CALLER_QUEUED_ITEMS.contains(&(id as usize)))
+            && self.admits_permanent_readset(168, EPIC_FETUS_CALLER_ITEMS)
+    }
+
+    ///51A420..51F3D7: normal C08=1, actual Have2 and no other emitter modifiers.
+    pub(crate) fn admits_inner_eye_caller(self) -> bool {
+        self.owner
+            .queued_id
+            .is_none_or(|id| INNER_EYE_CALLER_QUEUED_ITEMS.contains(&(id as usize)))
+            && self.admits_permanent_readset(2, INNER_EYE_CALLER_ITEMS)
+    }
+
+    ///Independent selected50D090(kind1) trace; passive queued2/4 do not enter
+    ///508FE0's queued-config-kind2 branch. Actual current cache stays separate.
+    pub(crate) fn admits_inner_eye_kind1_context(self) -> bool {
+        self.owner
+            .queued_id
+            .is_none_or(|id| INNER_EYE_KIND1_QUEUED_ITEMS.contains(&(id as usize)))
+            && self.admits_permanent_readset(2, INNER_EYE_KIND1_ITEMS)
     }
 
     ///Mechanical signed-count/context check, with no item capability implied
@@ -230,58 +520,105 @@ impl<'a> ItemInputs<'a> {
                 .all(|(id, &count)| count == 0 || (count > 0 && supported.contains(&id)))
     }
 
-    /// Independent511F10 footprint for one fresh permanent52. The callback
-    /// callers retain normal-Isaac, known auxiliary and retained-C08 owners.
-    /// Add52 evaluates these callbacks before its same passive queue clears.
-    /// This cache capability never grants a kind5/controller/contact scope.
+    /// Independent511F10 footprint for one actual52 and selected4. The
+    /// controlled path retains its separate source-owned cache footprint.
+    /// Callback callers retain actual normal-Isaac and auxiliary owners.
     pub(crate) fn admits_fetus_cache_context(self) -> bool {
-        self.owner.trinket_slots == [0, 0]
-            && self.owner.queued_id.is_none_or(|id| id == 52)
-            && self.owner.temporary_collectibles.is_empty()
-            && self.owned_count(52) == 1
-            && self
-                .owner
-                .owned_counts
-                .iter()
-                .enumerate()
-                .all(|(id, &count)| count == 0 || (id == 52 && count == 1))
+        if self.admits_controlled_fetus_readset(
+            CONTROLLED_FETUS_CACHE_ITEMS,
+            CONTROLLED_FETUS_CACHE_ITEMS,
+        ) {
+            return true;
+        }
+        self.owner.queued_id.is_none_or(|id| matches!(id, 4 | 52))
+            && self.admits_fetus_readset(FETUS_CACHE_ITEMS, Some(1))
     }
 
-    /// Separate50D090(kind5) query footprint, including its125/140 tail.
-    /// Current C98/C88/CA0 stay actual inputs; cache admission is not reused.
+    ///Separate50D090(kind5) footprints retain the125/140 tail proof and
+    ///separate queue readsets. Controlled kind5 also admits actual passive4
+    ///queued before its late Add; current C98/C88/CA0 remain independently owned.
     pub(crate) fn admits_fetus_kind5_context(self) -> bool {
-        self.owner.trinket_slots == [0, 0]
-            && self.owner.queued_id.is_none()
-            && self.owner.temporary_collectibles.is_empty()
-            && self.owned_count(52) == 1
-            && self
-                .owner
-                .owned_counts
-                .iter()
-                .enumerate()
-                .all(|(id, &count)| count == 0 || (id == 52 && count == 1))
+        if self.admits_controlled_fetus_readset(
+            CONTROLLED_FETUS_KIND5_ITEMS,
+            CONTROLLED_FETUS_KIND5_QUEUED_ITEMS,
+        ) {
+            return true;
+        }
+        self.owner.queued_id.is_none() && self.admits_fetus_readset(FETUS_KIND5_ITEMS, Some(1))
     }
 
-    /// Actual post-increment Add52 may still own the same passive queue entry.
-    /// Its specific/default and zero-amount common paths preserve an existing
-    /// LuckInputs owner; they never produce a missing owner from inventory.
+    ///Only the actual Add52 wrapper consumes this independent grant proof.
+    ///It preserves existing SomeLuck without creating a missing history.
     pub(crate) fn admits_fetus_grant_context(self) -> bool {
-        self.owner.trinket_slots == [0, 0]
-            && self.owner.queued_id.is_none_or(|id| id == 52)
+        if self.admits_controlled_fetus_readset(
+            CONTROLLED_FETUS_GRANT_ITEMS,
+            CONTROLLED_FETUS_GRANT_ITEMS,
+        ) {
+            return true;
+        }
+        self.owner.queued_id.is_none_or(|id| matches!(id, 4 | 52))
+            && self.admits_fetus_readset(FETUS_GRANT_ITEMS, Some(1))
+    }
+
+    ///519FC0's currentC7C motion branch is separate from cache and kind5.
+    pub(crate) fn admits_controlled_fetus_caller(self) -> bool {
+        self.admits_controlled_fetus_readset(
+            CONTROLLED_FETUS_CALLER_ITEMS,
+            CONTROLLED_FETUS_CALLER_QUEUED_ITEMS,
+        )
+    }
+
+    fn admits_controlled_fetus_readset(self, supported: &[usize], queued: &[usize]) -> bool {
+        self.positive_owned_count(329)
+            && self.admits_fetus_readset(supported, None)
+            && self
+                .owner
+                .queued_id
+                .is_none_or(|id| queued.contains(&(id as usize)))
+    }
+
+    ///Mechanical signed-count/context validation, independent of the caller's
+    ///semantic item set. Both source proofs require exactly one52; their
+    ///separate count bounds and queue rules are explicit inputs, not inherited
+    ///cache/getter/grant/controller permissions.
+    fn admits_fetus_readset(self, supported: &[usize], maximum_count: Option<i32>) -> bool {
+        self.owned_count(52) == 1
+            && self.owner.trinket_slots == [0, 0]
             && self.owner.temporary_collectibles.is_empty()
-            && self.owned_count(52) == 1
             && self
                 .owner
                 .owned_counts
                 .iter()
                 .enumerate()
-                .all(|(id, &count)| count == 0 || (id == 52 && count == 1))
+                .all(|(id, &count)| {
+                    count == 0
+                        || (count > 0
+                            && supported.contains(&id)
+                            && maximum_count.is_none_or(|maximum| count <= maximum))
+                })
     }
 
     /// Each callback composes its implemented effects with its proven neutral
     /// read set. C08 remains an independent input to the ordered formulas.
     /// Config 118's request for all callbacks adds no implicit scalar effect.
     fn admits_scalar_stage(self, stage: CacheStage, effects: &[u32]) -> bool {
+        if self.owned_count(152) != 0 {
+            //New stage-local capabilities resolve their own reads. This is
+            //only the preserved legacy scalar compatibility boundary.
+            return false;
+        }
+        if self.owned_count(169) != 0 {
+            //Its effect is owned by each stage, never legacy compatibility.
+            return false;
+        }
+        //330's grant/readset context is separate from its two effect lists.
+        if self.owned_count(330) != 0 && !self.admits_soy_milk_cache_context() {
+            return false;
+        }
+        let neutral_soy_milk = matches!(
+            stage,
+            CacheStage::ShotSpeed | CacheStage::Range | CacheStage::MoveSpeed
+        ) && self.admits_soy_milk_cache_context();
         let neutral: &[u32] = match stage {
             CacheStage::FireDelay => FireDelayStage::NEUTRAL_ITEMS,
             CacheStage::ShotSpeed => &[1, 6, 114, 118, 329, 304],
@@ -298,6 +635,8 @@ impl<'a> ItemInputs<'a> {
         //52 is neutral for these scalar callbacks except the separately
         //implemented retained-C08 FireDelay multiplier below.
         let fetus_context = self.admits_fetus_cache_context();
+        let neutral_monstro = self.admits_monstro_cache_context();
+        let epic_fetus_context = self.admits_epic_fetus_cache_context();
         self.admits_scalar_context()
             && self
                 .owner
@@ -311,7 +650,11 @@ impl<'a> ItemInputs<'a> {
                                 || neutral.contains(&(id as u32))
                                 || (id == 304 && coupled_libra)
                                 || (id == 68 && neutral_technology)
-                                || (id == 52 && fetus_context)))
+                                || (id == 330 && neutral_soy_milk)
+                                || (id == 52 && fetus_context)
+                                || (id == 229 && neutral_monstro)
+                                || (id == 168 && epic_fetus_context)
+                                || (id == 2 && epic_fetus_context)))
                 })
     }
 
@@ -319,6 +662,12 @@ impl<'a> ItemInputs<'a> {
     /// effects admitted above do not expand Flight, Familiar, Luck or history.
     fn admits_selected_auxiliary_callbacks(self) -> bool {
         if self.admits_technology_cache_context() || self.admits_fetus_cache_context() {
+            return true;
+        }
+        if self.admits_soy_milk_cache_context() || self.admits_monstro_cache_context() {
+            return true;
+        }
+        if self.admits_epic_fetus_cache_context() {
             return true;
         }
         self.admits_scalar_context()
@@ -335,6 +684,12 @@ impl<'a> ItemInputs<'a> {
     /// An independent strict 511F10 trace proves 68 ordered requests for zero
     /// familiars with these inputs. Actual manager queries remain required.
     pub(crate) fn admits_selected_zero_familiar_requests(self) -> bool {
+        if self.owned_count(229) != 0 {
+            return self.admits_monstro_zero_familiar_requests();
+        }
+        if self.owned_count(168) != 0 || self.owned_count(2) != 0 {
+            return self.admits_epic_fetus_zero_familiar_requests();
+        }
         self.admits_selected_auxiliary_callbacks()
     }
 
@@ -401,8 +756,114 @@ impl CacheResolution {
     }
 }
 
+///ShotSpeed4 owns one nonzero143 base operator plus its own neutral reads.
+///The full511F68..51212E CFG never queries/loads4/152/169. Their presence
+///therefore composes here without granting another cache, grant or caller.
+struct ShotSpeedStage;
+
+impl ShotSpeedStage {
+    fn admits(inputs: ItemInputs<'_>, source_player_type: Option<u32>) -> bool {
+        //The former scalar capability is retained only as a whole for old
+        //neutral/coupled contexts. It supplies no newly combined neutral owner.
+        let legacy_neutral = inputs.admits_scalar_stage(CacheStage::ShotSpeed, &[4, 143]);
+        source_player_type == Some(0)
+            && inputs.admits_scalar_context()
+            && inputs
+                .owner
+                .owned_counts
+                .iter()
+                .enumerate()
+                .all(|(id, &count)| {
+                    count == 0
+                        || (count > 0
+                            && (id == 143 //Actual raw nonzero base operator.
+                                || matches!(id, 4 | 152 | 169) //Source-neutral here only.
+                                || legacy_neutral))
+                })
+    }
+}
+
+///519FC0's selected normal Tear caller:152 owns the alternating-eye
+///branch;169 owns the later current-P override after the eye RNG draw.
+///4 does not alter this caller. Getter/cache/body permissions stay separate.
+enum Technology2PrimaryReadRole {
+    AlternateEye,
+    CurrentPlayerOrigin,
+    Neutral,
+}
+
+impl Technology2PrimaryReadRole {
+    fn of(id: usize) -> Option<Self> {
+        match id {
+            152 => Some(Self::AlternateEye),
+            169 => Some(Self::CurrentPlayerOrigin),
+            4 => Some(Self::Neutral),
+            _ => None,
+        }
+    }
+}
+
+///52F370's distinct C40 caller:152 selects the real thin beam;4/169 do
+///not add a caller branch. Birth reads actual current C88/C98/CCC while an
+///existing C40 keeps its born properties. No primary permission follows.
+enum Technology2SecondaryReadRole {
+    ThinBeam,
+    Neutral,
+}
+
+impl Technology2SecondaryReadRole {
+    fn of(id: usize) -> Option<Self> {
+        match id {
+            152 => Some(Self::ThinBeam),
+            4 | 169 => Some(Self::Neutral),
+            _ => None,
+        }
+    }
+}
+
+///Source-local read roles for the literal FireDelay operator below. Full
+///511F10 closure proves152 neutral; no caller/cache/grant permission follows.
+///The shared multiplier owns permanent2/169, while153 and every TEMP record
+///remain outside this selected plan. Retained C08 stays an independent input.
+enum FireDelayReadRole {
+    Tier,
+    SharedMultiplier,
+    PostBoundReduction,
+    SoyMilk,
+    Neutral,
+}
+
+impl FireDelayReadRole {
+    fn of(id: usize) -> Option<Self> {
+        match id {
+            1 | 6 => Some(Self::Tier),
+            2 | 169 => Some(Self::SharedMultiplier),
+            222 => Some(Self::PostBoundReduction),
+            330 => Some(Self::SoyMilk),
+            4 | 152 => Some(Self::Neutral),
+            _ => None,
+        }
+    }
+}
+
+///Only the Flags32 callback's implemented source roles.152 is neutral in
+///this callback, while169 supplies the existing51316D OR0x200 operator.
+///Neither role owns Color64, a returned getter field or a born actor body.
+struct TearFlagsStage;
+
+impl TearFlagsStage {
+    fn admits_polyphemus(inputs: ItemInputs<'_>) -> bool {
+        inputs.positive_owned_count(169)
+            && inputs.admits_stage_owned_roles(|id| match id {
+                4 | 152 => true, //Independently source-neutral Flags32 reads.
+                169 => true,     //Existing one OR0x200 operator.
+                _ => false,
+            })
+    }
+}
+
 /// One callback's source ownership, beside its literal pure operator.
-/// Reads signed permanent/TEMP1/6, positive permanent222 and retained C08;
+/// Reads signed permanent/TEMP1/6, positive permanent2/222 and retained C08;
 /// writes integer C78 only. Source-local bounds and truncation precede Libra.
 /// The caller retains the separate TEMP6/negative-history guard. These neutral
 /// items prove this callback only;304 remains a distinct coupled operator.
@@ -410,12 +871,18 @@ struct FireDelayStage;
 
 impl FireDelayStage {
     const REQUESTED: CacheMask = CacheMask(2);
-    const EFFECT_ITEMS: &'static [u32] = &[1, 6, 222];
+    const EFFECT_ITEMS: &'static [u32] = &[1, 6, 222, 330];
     const NEUTRAL_ITEMS: &'static [u32] = &[4, 114, 118, 329];
 
     fn admits(inputs: ItemInputs<'_>, source_player_type: Option<u32>) -> bool {
-        source_player_type == Some(0)
-            && inputs.admits_scalar_stage(CacheStage::FireDelay, Self::EFFECT_ITEMS)
+        //Legacy neutral/coupled histories remain one whole capability. They
+        //cannot supply a new neutral role beside152/169 operators.
+        let legacy = inputs.owned_count(152) == 0
+            && inputs.owned_count(169) == 0
+            && inputs.admits_scalar_stage(CacheStage::FireDelay, Self::EFFECT_ITEMS);
+        let operator_reads = !inputs.positive_owned_count(153)
+            && inputs.admits_stage_owned_roles(|id| FireDelayReadRole::of(id).is_some());
+        source_player_type == Some(0) && (legacy || operator_reads)
     }
 
     fn resolve(inputs: ItemInputs<'_>, primary: PrimaryWeaponC08) -> i32 {
@@ -434,6 +901,13 @@ impl FireDelayStage {
         }
         //512562 bound precedes512666's one permanent222 modifier.
         delay = delay.max(5.0_f32);
+        //5125B0/514D95 share one5125BD operator after the bound and before
+        //retained C08. Separate multiply/add; simultaneous2/169 never stack.
+        //153/TEMP2 remain independently unadmitted modifier owners.
+        if inputs.positive_owned_count(2) || inputs.positive_owned_count(169) {
+            delay *= 2.1_f32;
+            delay += 3.0_f32;
+        }
         //512610 reads retained C08; multiply BEFORE integer truncation.
         if primary == PrimaryWeaponC08::Brimstone {
             delay *= 3.0_f32;
@@ -444,34 +918,206 @@ impl FireDelayStage {
         if inputs.positive_owned_count(222) {
             delay -= 2.0_f32;
         }
+        //512738/5151EE: Monstro uses the actual retained C08 after222,
+        //before Soy and CVTT. The binary32 literal is 0x4089999A.
+        if primary == PrimaryWeaponC08::MonstrosLung {
+            delay *= 4.3_f32;
+        }
+        //512749 Have330: one permanent effect after retained-C08 modifiers;
+        //51275B/512763 round subtraction and multiplication before C78.
+        if inputs.positive_owned_count(330) {
+            delay = (delay - 6.0_f32) * 0.25_f32;
+        }
         (delay as i32).max(1)
     }
 }
 
-/// One Damage callback's ownership beside its literal pure operator.
-/// Reads signed permanent4 for the tier and positive presence for one multiplier;
-/// writes Damage/C88. Its source-local bound precedes separate Libra coupling.
+///Source514F40/515670 separates169 absence, positive2/153 add4-only,
+///and no-presence add4-then-double. TEMP2 remains a distinct unknown query.
+#[derive(Clone, Copy)]
+enum PolyphemusDamageMode {
+    Disabled,
+    AddFour,
+    AddFourThenDouble,
+}
+
+/// One source-ordered Damage operation and its permanent input ownership.
+/// The variant order is chosen by DamagePlan, never by collectible order.
+/// These reads grant no other cache/getter/caller/contact capability.
+#[derive(Clone, Copy)]
+enum DamageOperator {
+    BaseTier {
+        signed_four: i32,
+        signed_twelve: i32,
+    },
+    Polyphemus {
+        mode: PolyphemusDamageMode,
+    },
+    MinimumBound,
+    Technology2 {
+        enabled: bool,
+    },
+    SharedFourOrTwelve {
+        enabled: bool,
+    },
+    SoyMilk {
+        enabled: bool,
+    },
+}
+
+impl DamageOperator {
+    ///Only this callback's implemented producers, including their inactive
+    ///presence reads. New effects extend their operator, not a pair table.
+    fn reads_owned(self, id: usize) -> bool {
+        match self {
+            Self::BaseTier { .. } | Self::SharedFourOrTwelve { .. } => matches!(id, 4 | 12),
+            Self::Polyphemus { mode } => {
+                id == 169
+                    || (!matches!(mode, PolyphemusDamageMode::Disabled) && matches!(id, 2 | 153))
+            }
+            Self::Technology2 { .. } => id == 152,
+            Self::SoyMilk { .. } => id == 330,
+            Self::MinimumBound => false,
+        }
+    }
+
+    fn apply(self, mut damage: f32) -> f32 {
+        match self {
+            Self::BaseTier {
+                signed_four,
+                signed_twelve,
+            } => {
+                //513628..513880: signed contributions, then f32 linear,
+                //f64 sqrt*3.5 and f32 store. TEMP12 stays unadmitted.
+                let tier = signed_four as f32 * 0.5_f32 + signed_twelve as f32 * 0.3_f32;
+                let linear = (1.2_f32 * tier + 1.0_f32).max(0.0);
+                (f64::from(linear).sqrt() * 3.5_f64) as f32
+            }
+            Self::Polyphemus { mode } => match mode {
+                PolyphemusDamageMode::Disabled => damage,
+                PolyphemusDamageMode::AddFour => damage + 4.0_f32, //514F55.
+                PolyphemusDamageMode::AddFourThenDouble => {
+                    //515AF6: add4 then self-add, before the same later bound.
+                    damage += 4.0_f32;
+                    damage += damage;
+                    damage
+                }
+            },
+            Self::MinimumBound => damage.max(0.5_f32),
+            Self::Technology2 { enabled } => {
+                if enabled {
+                    //5139B1→513E10, once; not the bornLaser *.2 operator.
+                    damage *= f32::from_bits(0x3f26_6666);
+                }
+                damage
+            }
+            Self::SharedFourOrTwelve { enabled } => {
+                if enabled {
+                    //513A20→515026: one shared factor, including both items.
+                    damage *= 1.5_f32;
+                }
+                damage
+            }
+            Self::SoyMilk { enabled } => {
+                if enabled {
+                    //513A78→513DF8, before the final bound and later Libra.
+                    damage *= 0.2_f32;
+                }
+                damage
+            }
+        }
+    }
+}
+
+///Immutable functional plan of one actual Damage callback. Partial numeric
+///values are still evaluated for unknown contexts; only completion is withheld.
+///No item pair or other callback's permission can supply a missing read owner.
+struct DamagePlan {
+    operators: [DamageOperator; 7],
+    reads_admitted: bool,
+}
+
+impl DamagePlan {
+    fn new(inputs: ItemInputs<'_>) -> Self {
+        let polyphemus_mode = if !inputs.positive_owned_count(169) {
+            PolyphemusDamageMode::Disabled
+        } else if inputs.positive_owned_count(2) || inputs.positive_owned_count(153) {
+            PolyphemusDamageMode::AddFour
+        } else {
+            PolyphemusDamageMode::AddFourThenDouble
+        };
+        let operators = [
+            DamageOperator::BaseTier {
+                signed_four: inputs.owned_count(4),
+                signed_twelve: inputs.owned_count(12),
+            },
+            DamageOperator::Polyphemus {
+                mode: polyphemus_mode,
+            },
+            DamageOperator::MinimumBound,
+            DamageOperator::Technology2 {
+                enabled: inputs.positive_owned_count(152),
+            },
+            DamageOperator::SharedFourOrTwelve {
+                enabled: inputs.positive_owned_count(4) || inputs.positive_owned_count(12),
+            },
+            DamageOperator::SoyMilk {
+                enabled: inputs.positive_owned_count(330),
+            },
+            DamageOperator::MinimumBound,
+        ];
+        //514F40/515670 owns the permanent2/153 presence diversion inside
+        //this operator. TEMP2 record presence is a different source query;
+        //the actual no-TEMP context below still excludes every such record.
+        //Preserve existing neutral/coupled-owner capabilities exactly. This
+        //compatibility path does not compose unclosed neutral histories with
+        //new operators. Item1 is independently Damage-neutral in all selected
+        //operator traces; other new neutrals still need their own source proof.
+        let legacy_neutral = inputs.owned_count(12) == 0
+            && inputs.owned_count(152) == 0
+            && inputs.owned_count(169) == 0
+            && inputs.admits_scalar_stage(CacheStage::Damage, DamageStage::EFFECT_ITEMS);
+        let reads_admitted = inputs.admits_scalar_context()
+            && inputs
+                .owner
+                .owned_counts
+                .iter()
+                .enumerate()
+                .all(|(id, &count)| {
+                    count == 0
+                        || (count > 0
+                            && (id == 1
+                                || operators.iter().any(|operator| operator.reads_owned(id))
+                                || legacy_neutral))
+                });
+        Self {
+            operators,
+            reads_admitted,
+        }
+    }
+
+    fn resolve(self) -> f32 {
+        self.operators
+            .into_iter()
+            .fold(0.0, |damage, operator| operator.apply(damage))
+    }
+}
+
+///Damage-only stage capability. Its source-ordered plan composes implemented
+///operators; primary selection, other callbacks, grants and contacts stay local.
 struct DamageStage;
 
 impl DamageStage {
     const REQUESTED: CacheMask = CacheMask(1);
-    const EFFECT_ITEMS: &'static [u32] = &[4];
+    const EFFECT_ITEMS: &'static [u32] = &[4, 12, 152, 169, 330];
     const NEUTRAL_ITEMS: &'static [u32] = &[1, 6, 114, 118, 329];
 
     fn admits(inputs: ItemInputs<'_>, source_player_type: Option<u32>) -> bool {
-        source_player_type == Some(0)
-            && inputs.admits_scalar_stage(CacheStage::Damage, Self::EFFECT_ITEMS)
+        source_player_type == Some(0) && DamagePlan::new(inputs).reads_admitted
     }
 
     fn resolve(inputs: ItemInputs<'_>) -> f32 {
-        //513628..513644: f32 linear, f64 sqrt*3.5, then f32 store.
-        let tier = inputs.owned_count(4) as f32 * 0.5_f32;
-        let linear = (1.2_f32 * tier + 1.0_f32).max(0.0);
-        let mut damage = (f64::from(linear).sqrt() * 3.5_f64) as f32;
-        if inputs.positive_owned_count(4) {
-            damage *= 1.5_f32;
-        }
-        damage.max(0.5_f32)
+        DamagePlan::new(inputs).resolve()
     }
 }
 
@@ -551,6 +1197,7 @@ pub(crate) fn resolve_scalars(
             && match stage {
                 CacheStage::FireDelay => FireDelayStage::admits(inputs, source_player_type),
                 CacheStage::Damage => DamageStage::admits(inputs, source_player_type),
+                CacheStage::ShotSpeed => ShotSpeedStage::admits(inputs, source_player_type),
                 _ => source_player_type == Some(0) && inputs.admits_scalar_stage(stage, supported),
             }
         {

@@ -113,8 +113,10 @@ def main():
     parser.add_argument('--observe-every-step', action='store_true', help='Observe at each tape step gate without screenshots; use one-frame steps for dense trajectories')
     parser.add_argument('--composition-lifecycle-events', action='store_true', help='Optional source-bound leader-thread Knife8/0/1 hardware event observation; requires canonical ISAAC_ORIGINAL_SHA, no game inputs changed')
     parser.add_argument('--archive-evidence', action='store_true', help='Lossless gzip manifest plus committed native progress journal; public observations and clock unchanged')
+    parser.add_argument('--journal-codec', choices=('gzip', 'zstd'), default='gzip', help='Opt-in journal transport only; zstd requires Python zstandard/system libzstd and Node24 readers; default gzip unchanged')
     parser.add_argument('--gl-trace', type=Path, help='Optional documented graphics API observer to chain; no game instructions/state')
     parser.add_argument('--audio-trace', type=Path, help='Optional forwarding OpenAL API observer to chain; no game instructions/state')
+    parser.add_argument('--mt-trace', action='store_true', help='Chain the shared-MT draw observer; writes OUTPUT/mt-trace/trace-<pid>.bin')
     parser.add_argument('--sfx-volume', type=float, default=0, help='Owned public SFXVolume option, 0..1; admission still occurs when muted')
     parser.add_argument('--music-volume', type=float, default=0, help='Owned public MusicVolume option, 0..1')
     parser.add_argument('--trace-every-frame', action='store_true', help='Request graphics observer continuous draw/presentation tracing')
@@ -127,6 +129,8 @@ def main():
     parser.add_argument('--frame-timeout', type=float, default=60,
                         help='Host-wall socket/gate wait limit in seconds; does not alter released presentation counts')
     args = parser.parse_args()
+    if args.journal_codec != 'gzip' and not args.archive_evidence:
+        raise SystemExit('--journal-codec requires --archive-evidence')
     if not 0 <= args.boot_epoch_seed <= 0xffffffff:
         raise SystemExit('--boot-epoch-seed must be a u32')
     if args.observe_every_step and not args.state_observer:
@@ -304,6 +308,14 @@ def main():
         trace.mkdir(exist_ok=True)
         env['LD_PRELOAD'] += ' ' + str(args.audio_trace.resolve())
         env['ISAAC_AUDIO_TRACE_DIR'] = str(trace)
+    if args.mt_trace:
+        trace = out / 'mt-trace'
+        trace.mkdir(exist_ok=True)
+        library = out / 'mt-trace.so'
+        subprocess.run(['cc', '-std=c11', '-Wall', '-Wextra', '-Werror', '-fPIC', '-shared',
+                        str(Path(__file__).with_name('foundation-mt-trace.c')), '-o', str(library), '-ldl'], check=True)
+        env['LD_PRELOAD'] += ' ' + str(library)
+        env['ISAAC_MT_TRACE_DIR'] = str(trace)
     observer = None
     if args.state_observer:
         spec = importlib.util.spec_from_file_location('original_reference_observer', args.state_observer.resolve())
@@ -330,7 +342,7 @@ def main():
         report['debugObserver'] = {'module': str(args.state_observer.resolve()), 'everyTapeStep': args.observe_every_step, 'scope': 'reference-only parent debug observations at blocked presentation checkpoints; no hidden-state parity claim'}
         report['debugObservations'] = []
     (out / 'tape.json').write_text(json.dumps(tape, indent=2) + '\n')
-    progress = evidence.Progress(out) if args.archive_evidence else None
+    progress = evidence.make_progress(out, args.journal_codec) if args.archive_evidence else None
     def record(kind, value):
         if progress:
             progress.append(kind, value)

@@ -90,6 +90,11 @@ pub fn outcome(state: &State, command: &Command, result: &Result<(), String>) {
             details()
         );
     }
+    props::sometimes!(
+        matches!(command, Command::Tick { count, .. } if *count == MAX_COMMAND_TICKS)
+            && result.is_ok(),
+        "game: a Tick of exactly the command budget is accepted"
+    );
     if result.is_err() {
         match expected {
             Some("tick budget") => props::sometimes!(true, "game: an over-budget Tick is rejected"),
@@ -154,6 +159,23 @@ fn menu_edge(from: Screen, to: Screen) -> bool {
 pub fn transition(before: &State, command: &Command, after: &State) {
     death(before, command, after);
     room_clear(before, command, after);
+    // A shot sets the fire cooldown to the max fire delay it fires with, and
+    // the cooldown then only counts down. The max delay itself may drop under
+    // a running cooldown: a collectible queued during its pickup animation
+    // flushes at 531f01, after the shot (52f..530) on the frame the animation
+    // ends, so a shot fired with the old delay outlasts a lowered one.
+    props::always!(
+        after.fire_cooldown
+            <= before
+                .fire_cooldown
+                .max(before.max_fire_delay)
+                .max(after.max_fire_delay),
+        "game: the fire cooldown never rises above a max fire delay the command held",
+        json!({
+            "before": [before.fire_cooldown, before.max_fire_delay],
+            "after": [after.fire_cooldown, after.max_fire_delay],
+        })
+    );
     // A run starts from the menus, or restarts from the GameOver popup without
     // leaving the playing screen; both go through the engine's run start.
     let restarted = before.player_death.game_over.is_some()
@@ -237,13 +259,23 @@ pub fn transition(before: &State, command: &Command, after: &State) {
                 let floor = rebirth_cleanroom::floor::generate_basement(seed::stage1_seed(
                     after.run_seed_value,
                 ));
+                // Held keys survive a GameOver restart, so a long tick can
+                // carry the new run's player on through doors once its start
+                // hold ends: the rooms it visits are a walk from the start.
                 props::always!(
                     floor.as_ref().ok() == Some(&after.floor)
-                        && after.current_room == after.floor.starting_descriptor
                         && after.run_tick <= count
-                        && after.visited_rooms == BTreeSet::from([after.current_room]),
+                        && walk_from_start(after),
                     "game: a run starts in the starting room of its seed's floor",
-                    json!({ "runSeed": after.run_seed })
+                    json!({
+                        "runSeed": after.run_seed,
+                        "currentRoom": after.current_room,
+                        "visitedRooms": after.visited_rooms,
+                    })
+                );
+                props::sometimes!(
+                    after.current_room != after.floor.starting_descriptor,
+                    "game: a new run's player walks on from the starting room within its first command"
                 );
                 props::sometimes!(after.seeded_run, "game: a seeded run starts");
                 props::sometimes!(
@@ -400,6 +432,29 @@ pub fn transition(before: &State, command: &Command, after: &State) {
             "game: an invalid seed code is dismissed"
         );
     }
+}
+
+/// The visited rooms are the starting room and rooms reached from it
+/// through visited neighbours, the current room among them.
+fn walk_from_start(state: &State) -> bool {
+    let start = state.floor.starting_descriptor;
+    let visited = &state.visited_rooms;
+    if !visited.contains(&start) || !visited.contains(&state.current_room) {
+        return false;
+    }
+    let mut reached = BTreeSet::from([start]);
+    let mut frontier = vec![start];
+    while let Some(room) = frontier.pop() {
+        let Some(descriptor) = state.floor.descriptors.get(room) else {
+            return false;
+        };
+        for next in descriptor.neighbors.iter().flatten().copied() {
+            if visited.contains(&next) && reached.insert(next) {
+                frontier.push(next);
+            }
+        }
+    }
+    reached == *visited
 }
 
 /// Room.Update (`npcs::advance_room_clear`, source 5d149b/5d1487) runs once
@@ -744,9 +799,7 @@ pub fn state(state: &State) {
         json!({ "inventory": state.inventory })
     );
     props::always!(
-        state.fire_cooldown >= -1
-            && state.fire_cooldown <= state.max_fire_delay
-            && state.head_timer >= -1,
+        state.fire_cooldown >= -1 && state.head_timer >= -1,
         "game: fire cooldown and head timers stay in range",
         json!({ "fireCooldown": state.fire_cooldown, "headTimer": state.head_timer })
     );

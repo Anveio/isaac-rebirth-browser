@@ -173,16 +173,25 @@ pub(crate) fn resolve_appearance(
 ) -> (WeaponCache, CacheMask) {
     let mut completed = 0;
     let number_one = source_player_type == Some(0) && items.admits_number_one_appearance();
-    if source_player_type == Some(0) && (items.admits_selected_appearance() || number_one) {
+    let soy_milk = source_player_type == Some(0) && items.admits_soy_milk_cache_context();
+    let polyphemus_flags = source_player_type == Some(0)
+        && prior.primary == PrimaryWeaponC08::RegularTears
+        && items.admits_polyphemus_flags_context();
+    if source_player_type == Some(0)
+        && (items.admits_selected_appearance() || number_one || polyphemus_flags)
+    {
         if requested.0 & 32 != 0 {
             prior.flags_c98 = AttackFlags(if prior.primary == PrimaryWeaponC08::Ludovico {
                 3
+            } else if polyphemus_flags {
+                //51316D/513176: permanent169 ORs the independent bit9.
+                0x200
             } else {
                 0
             });
             completed |= 32;
         }
-        if requested.0 & 64 != 0 {
+        if requested.0 & 64 != 0 && !polyphemus_flags {
             //515997/515AB1 Have6, else5E3D70 record-presence. This leaf
             //admits permanent6 only; the two literal ColorMods are distinct.
             if number_one && items.number_one_present() {
@@ -197,6 +206,14 @@ pub(crate) fn resolve_appearance(
                     source_middle: [0.0; 4],
                     offsets: [255.0 * byte_scale, 255.0 * byte_scale, 0.0],
                 };
+            } else if soy_milk {
+                //515E76 Have330 reaches the late CA0 tint at513480.
+                //This selected context excludes higher-precedence modifiers.
+                prior.color_ca0 = AttackColor {
+                    tint: [1.5, 2.0, 2.0, 1.0],
+                    ..AttackColor::WHITE
+                };
+                prior.color_ccc = AttackColor::WHITE;
             } else {
                 prior.color_ca0 = AttackColor::WHITE;
                 prior.color_ccc = AttackColor::WHITE;
@@ -214,13 +231,15 @@ pub(crate) enum ControllerChannel {
     RegularShots,
     OrdinaryKnife,
     OrdinaryFetus,
+    MonstroLung,
+    ControlledFetus,
+    EpicFetus,
     ControlledKnife,
     ChargedBrimstone,
     OrdinaryTechnology,
     ControlledTechnology,
     ControlledBrimstone,
     ControlledTear,
-    Unimplemented(PrimaryWeaponC08),
 }
 
 pub(crate) fn resolve_controller(
@@ -241,11 +260,13 @@ pub(crate) fn resolve_controller(
             ControllerChannel::ControlledTechnology
         }
         PrimaryWeaponC08::Technology => ControllerChannel::OrdinaryTechnology,
-        PrimaryWeaponC08::DrFetus if !items.primary_permanent_presence(329)? => {
-            ControllerChannel::OrdinaryFetus
+        PrimaryWeaponC08::DrFetus if items.primary_permanent_presence(329)? => {
+            ControllerChannel::ControlledFetus
         }
+        PrimaryWeaponC08::DrFetus => ControllerChannel::OrdinaryFetus,
+        PrimaryWeaponC08::MonstrosLung => ControllerChannel::MonstroLung,
+        PrimaryWeaponC08::EpicFetus => ControllerChannel::EpicFetus,
         PrimaryWeaponC08::Ludovico => ControllerChannel::ControlledTear,
-        other => ControllerChannel::Unimplemented(other),
     })
 }
 
@@ -318,7 +339,18 @@ pub(crate) fn resolve_live_weapon(
         source_range_c8c: stats.tear_height,
         max_fire_delay,
         regular: if controller == ControllerChannel::RegularShots {
-            Some(RegularTearPlan::resolve(stats, max_fire_delay, cache)?)
+            let regular = RegularTearPlan::resolve(stats, max_fire_delay, cache)?;
+            Some(
+                if items.admits_soy_milk_regular_properties(
+                    admission.source_player_type,
+                    cache.primary,
+                    cache.flags_c98,
+                ) {
+                    regular.with_soy_milk_scale()?
+                } else {
+                    regular
+                },
+            )
         } else {
             None
         },
@@ -406,7 +438,8 @@ pub(crate) fn admits_neutral_brimstone_properties(
     items: ItemInputs<'_>,
     source_player_type: Option<u32>,
 ) -> bool {
-    source_player_type == Some(0) && items.admits_neutral_kind2()
+    source_player_type == Some(0)
+        && (items.admits_neutral_kind2() || items.admits_soy_milk_kind2_getter())
 }
 
 ///Independent neutral50D090 kinds2/3 footprint for Technology. Its cached
@@ -460,6 +493,31 @@ pub(crate) fn resolve_fetus_kind5(
     })
 }
 
+///45F3F0 calls FIRSTPlayer kind6 on the actual dead Rocket Full.
+///No target/rocket birth owns these current cache values.
+pub(crate) fn resolve_epic_fetus_kind6(
+    items: ItemInputs<'_>,
+    source_player_type: Option<u32>,
+    cache: WeaponCache,
+    stats: PlayerStats,
+) -> Result<AttackProperties, String> {
+    stats.validate()?;
+    if source_player_type != Some(0)
+        || cache.primary != PrimaryWeaponC08::EpicFetus
+        || !items.admits_epic_fetus_kind6_context()
+    {
+        return Err("kind6 requires an unadmitted FIRSTPlayer context".into());
+    }
+    if !cache.color_ca0.is_finite() {
+        return Err("kind6 actual current CA0 is nonfinite".into());
+    }
+    Ok(AttackProperties {
+        flags: cache.flags_c98,
+        color: cache.color_ca0,
+        collision_damage: stats.damage,
+    })
+}
+
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub(crate) struct RegularTearPlan {
     pub(crate) flags: AttackFlags,
@@ -478,6 +536,16 @@ impl RegularTearPlan {
     /// C88, C78, C7C, C8C/C90/C94, C98 and CA0 are birth inputs.
     /// Move/Flight/Familiar/Luck requests do not own these copied fields.
     const INPUT_CACHE_MASK: CacheMask = CacheMask(1 | 2 | 4 | 8 | 32 | 64);
+
+    ///50D3E3/3EB applies the Soy size operator before541FF0's .01 bound.
+    ///Selected finite nonnegative damage makes the earlier scale() bound a
+    ///no-op (raw scale>=.6); preserve the actual post-multiply bound too.
+    fn with_soy_milk_scale(mut self) -> Result<Self, String> {
+        self.scale = (self.scale * 0.5_f32).max(0.01_f32);
+        self.animation_tier = projectiles::regular_animation_tier(self.scale)?;
+        self.collision_radius = projectiles::collision_radius(self.scale, 8.0)?;
+        Ok(self)
+    }
 
     pub(crate) fn resolve(
         stats: PlayerStats,
@@ -502,6 +570,64 @@ impl RegularTearPlan {
             head_timer: ((max_fire_delay as f32 * 0.45) as i32 + 7).max(11),
         })
     }
+}
+
+///Independent selected50D090(kind1) result for ordinary2. Layout, eye,
+///clock, RNG and actor operations stay with its caller and canonical factory.
+pub(crate) fn resolve_inner_eye_kind1(state: &State) -> Result<RegularTearPlan, String> {
+    let inputs = ItemInputs::new(state.player_items.as_ref().ok_or("Inner Eye items absent")?)?;
+    if state.weapon_admission.source_player_type != Some(0)
+        || state.weapon_cache.primary != PrimaryWeaponC08::RegularTears
+        || state.weapon_cache.flags_c98.0 != 0
+        || !inputs.admits_inner_eye_kind1_context()
+        || inputs.pending_cache().0 & RegularTearPlan::INPUT_CACHE_MASK.0 != 0
+    {
+        return Err("Inner Eye kind1 requires its actual current cache/context".into());
+    }
+    RegularTearPlan::resolve(state.player_stats, state.max_fire_delay, state.weapon_cache)
+}
+
+///Independent selected50D090(kind1) result for the229 burst. The common
+///scale/range/color/damage arithmetic matches the selected regular builder;
+///50DD18/50DB45 produces BloodTear1 instead of ordinary variant0.
+pub(crate) fn resolve_monstro_kind1(state: &State) -> Result<RegularTearPlan, String> {
+    let inputs = ItemInputs::new(
+        state
+            .player_items
+            .as_ref()
+            .ok_or("Monstro kind1 item owner absent")?,
+    )?;
+    if state.weapon_admission.source_player_type != Some(0)
+        || state.weapon_cache.primary != PrimaryWeaponC08::MonstrosLung
+        || !inputs.admits_monstro_kind1_context()
+        || inputs.pending_cache().0 & RegularTearPlan::INPUT_CACHE_MASK.0 != 0
+        || state.weapon_cache.flags_c98.0 != 0
+    {
+        return Err("Monstro kind1 requires its independent current cache/context".into());
+    }
+    RegularTearPlan::resolve(state.player_stats, state.max_fire_delay, state.weapon_cache)
+}
+
+///Actual selected50D090(kind1) for positive152: source variant0 and current
+///C88/C98/CA0/kinematics. The secondary mode1 factory does not use this getter.
+///Current bit9 is copied by kind1 without changing its source variant0.
+///Independent caller, cache and born-body permissions remain separate.
+pub(crate) fn resolve_technology2_kind1(state: &State) -> Result<RegularTearPlan, String> {
+    let inputs = ItemInputs::new(
+        state
+            .player_items
+            .as_ref()
+            .ok_or("Technology2 item owner absent")?,
+    )?;
+    if state.weapon_admission.source_player_type != Some(0)
+        || state.weapon_cache.primary != PrimaryWeaponC08::RegularTears
+        || !inputs.admits_technology2_kind1_getter()
+        || inputs.pending_cache().0 & RegularTearPlan::INPUT_CACHE_MASK.0 != 0
+        || !matches!(state.weapon_cache.flags_c98.0, 0 | 0x200)
+    {
+        return Err("Technology2 kind1 requires its current source-owned context".into());
+    }
+    RegularTearPlan::resolve(state.player_stats, state.max_fire_delay, state.weapon_cache)
 }
 
 ///Actual50D090(kind3) builder/status frontier, independent of actor511D90
@@ -530,11 +656,16 @@ pub(crate) fn admit_current_laser_contact_flags(
             .as_ref()
             .ok_or("Laser kind3 actual Player items absent")?,
     )?;
-    if !inputs.admits_neutral_kind3() && !inputs.admits_technology_kind3_getter() {
+    if !inputs.admits_neutral_kind3()
+        && !inputs.admits_technology_kind3_getter()
+        && !inputs.admits_soy_milk_kind3_getter()
+        && !inputs.admits_technology2_kind3_getter()
+    {
         return Ok(LaserStatusAdmission::UnmappedBuilderModifiers);
     }
-    //Actual476869..8A1 status masks start at8; currentlow3 is inert.
-    if state.weapon_cache.flags_c98.0 & !3 != 0 {
+    //The current kind3 status predicate is independent of born Laser flags.
+    //0x200 is source-inert here, even when a retained C40 was born with0.
+    if state.weapon_cache.flags_c98.has_laser_status_effect() {
         return Ok(LaserStatusAdmission::UnmappedStatusFlags);
     }
     Ok(LaserStatusAdmission::Mapped)

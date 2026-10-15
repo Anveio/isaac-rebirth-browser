@@ -42,6 +42,7 @@ pub(crate) struct NpcWorld<'a> {
     pub system_counter: u32,
     pub player_items: Option<&'a PlayerItems>,
     pub effects: NpcEffectAdmission<'a>,
+    pub item_death_pickups: crate::item_death_effects::PickupAdmission<'a>,
     /// Room+0x10 descriptor type of the current room.
     pub room_type: u32,
     /// The room's other NPCs, live, for families that link actors.
