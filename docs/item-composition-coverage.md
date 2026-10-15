@@ -21,7 +21,9 @@ The smallest new runnable cohort is two fixed phases of Challenge starting118,
 then real free pedestals114 and329. Two unfiltered OS declarations vary phase,
 side, hold duration and boot epoch, with tokens durably recorded before case
 projection. The first release/movement segment reuses the separately declared
-118→114 provider route. No route is adjusted after observing an outcome.
+118→114 provider route. Each declaration is immutable and outcomes are never filtered. A separately
+versioned successor may repair a public route after a missing witness, while
+retaining its predecessor and every result.
 
 Each case has three declared actor stages, selected separately from each game's
 actual owned counts: initial118, after114, and after 329. Require all stages,
@@ -36,9 +38,9 @@ Frozen Brim10, ordinary6, controlled8, Number One15 and their original entropy
 and evidence remain unchanged. The successor does not claim equivalence to any
 predecessor or acceptance before an owned production build and public games.
 
-The `item-composition` driver owns capture, comparison and suite registration.
-Its `--scenarios PATH` mode replays a literal bank and bypasses this generator
-and all entropy draws. `tools/original/composition-scenarios.py --output DIR`
+The `item-composition` driver and suite registration are pending in a separate
+leaf. Its declared `--scenarios PATH` mode will replay a literal bank and bypass
+this generator and all entropy draws. `tools/original/composition-scenarios.py --output DIR`
 creates only the separate history successor above; it never rewrites an older
 bank or infers source equivalence from its final inventory. Stage contracts
 apply at their actual charge, pickup and controller callback fences, not as an
