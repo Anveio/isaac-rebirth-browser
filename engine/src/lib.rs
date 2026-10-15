@@ -276,6 +276,62 @@ fn character_catalog() -> Vec<CharacterDefinition> {
 pub struct RunIntroduction {
     pub age: u32,
     pub active: bool,
+    /// HUD::ShowItemText 5732c0 title on the shared ui_streak sprite.
+    #[serde(default = "stage_title")]
+    pub title: String,
+    /// The stage name (Level::ShowName 585500) rather than a later banner
+    /// such as the miniboss VS text, which restarts the same streak clock.
+    #[serde(default = "stage_streak")]
+    pub stage: bool,
+}
+fn stage_title() -> String {
+    "BASEMENT I".into()
+}
+fn stage_streak() -> bool {
+    true
+}
+impl RunIntroduction {
+    fn stage(active: bool) -> Self {
+        Self {
+            age: 0,
+            active,
+            title: stage_title(),
+            stage: true,
+        }
+    }
+}
+/// HUD boss bar: SetFill 5732a0 at HUD+61894 (-1 hidden) and its flash
+/// countdown at +61898; the manager's non-shrinking boss max HP is +ec.
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct BossBar {
+    #[serde(with = "nan_as_null")]
+    pub fill: f32,
+    pub flash: i32,
+    pub maximum: f32,
+}
+/// JSON has no NaN: serde_json writes it as null, so read null back as NaN.
+mod nan_as_null {
+    use serde::{Deserialize, Deserializer, Serializer};
+    pub fn serialize<S: Serializer>(value: &f32, serializer: S) -> Result<S::Ok, S::Error> {
+        if value.is_nan() {
+            serializer.serialize_none()
+        } else {
+            serializer.serialize_f32(*value)
+        }
+    }
+    pub fn deserialize<'de, D: Deserializer<'de>>(deserializer: D) -> Result<f32, D::Error> {
+        Ok(Option::<f32>::deserialize(deserializer)?.unwrap_or(f32::NAN))
+    }
+}
+impl Default for BossBar {
+    fn default() -> Self {
+        Self {
+            fill: -1.0,
+            flash: -1,
+            maximum: 0.0,
+        }
+    }
 }
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -463,6 +519,8 @@ pub struct State {
     pub bomb_placement_cooldown: bombs::BombPlacementCooldown,
     pub bomb_action_was_down: bool,
     pub run_introduction: RunIntroduction,
+    #[serde(default)]
+    pub boss_bar: BossBar,
     pub pause_menu: PauseMenu,
 }
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -644,10 +702,8 @@ impl Game {
                 damage_cooldown: 0,
                 bomb_placement_cooldown: bombs::BombPlacementCooldown::default(),
                 bomb_action_was_down: false,
-                run_introduction: RunIntroduction {
-                    age: 0,
-                    active: false,
-                },
+                run_introduction: RunIntroduction::stage(false),
+                boss_bar: BossBar::default(),
                 pause_menu: PauseMenu::hidden(),
             },
             saved_game,
@@ -1239,10 +1295,8 @@ impl Game {
         self.state.damage_cooldown = 0;
         self.state.bomb_placement_cooldown = bombs::BombPlacementCooldown::default();
         self.state.bomb_action_was_down = self.held("KeyE");
-        self.state.run_introduction = RunIntroduction {
-            age: 0,
-            active: true,
-        };
+        self.state.run_introduction = RunIntroduction::stage(true);
+        self.state.boss_bar = BossBar::default();
         self.state.pause_menu = PauseMenu::hidden();
         self.state.player = Player::starting();
         if let Some(definition) = &challenge {
@@ -1865,6 +1919,9 @@ impl Game {
                         self.count_updated_room_actor(actor, &mut counted);
                     }
                     self.state.room.manager_counts.finish_full(counted);
+                    // The admitting manager pass also sets the bar: a fresh
+                    // boss is present but not yet summed, so the fill is 0/0.
+                    self.update_boss_bar();
                     familiars::paint_background_effects(&mut self.state)?;
                     blood_effects::clear_retired_links(&mut self.state);
                     pickups::full_grid_contacts(&mut self.state)?;
@@ -1877,6 +1934,7 @@ impl Game {
                             || pickups.iter().any(|pickup| pickup.id == actor.id)
                     });
                     npcs::admit_room_combat(&mut self.state);
+                    self.show_miniboss_streak();
                 }
                 // ChangeRoom5dd260 restores Player+7d4=false after the
                 // admitted Room.Update, before the incoming leg or Scene.
@@ -1943,6 +2001,7 @@ impl Game {
                 self.count_updated_room_actor(actor, &mut counted);
             }
             self.state.room.manager_counts.finish_full(counted);
+            self.update_boss_bar();
         } else if phase == phase::Phase::Interpolate {
             let mut index = 0;
             while let Some(actor) = self.state.actor_scheduler.get(index) {
@@ -2109,7 +2168,7 @@ impl Game {
         Ok(())
     }
     fn advance_camera(&mut self, phase: phase::Phase) {
-        if self.state.run_introduction.active
+        if (self.state.run_introduction.active && self.state.run_introduction.stage)
             || self.state.room_transition.is_some()
             || self.state.information_animation.active()
         {
@@ -2204,6 +2263,76 @@ impl Game {
     ///454eb9 counts only callbacks whose active31e remains true. NPC70/78
     /// read103c/103d, with no HP/dead predicate; boss flags100000 exclude only
     /// the boss subtotal. Other currently admitted entity families have v70false.
+    /// Room::Init 5cfb36: entering an uncleared miniboss room (type 6) with
+    /// countable or boss actors shows "<player> VS <room name>" through the
+    /// shared streak, without the stage paper.
+    fn show_miniboss_streak(&mut self) {
+        let Some(descriptor) = self.state.room.descriptor.as_ref() else {
+            return;
+        };
+        if descriptor.template.room_type != 6
+            || !self
+                .state
+                .room
+                .npcs
+                .iter()
+                .any(|npc| !npc.removed && (npc.can_shut_doors || npc.boss))
+        {
+            return;
+        }
+        let player = self
+            .state
+            .profiles
+            .get(usize::from(self.state.profile.saturating_sub(1)))
+            .map_or("Isaac", |profile| profile.selected_character.as_str());
+        self.state.run_introduction = RunIntroduction {
+            age: 0,
+            active: true,
+            title: format!("{player} VS {}", descriptor.template.name),
+            stage: false,
+        };
+    }
+
+    /// EntityManager update 454df0 sums HP over boss actors that are not
+    /// final-flagged (0x100000) and are past their second frame, against
+    /// the larger of their max HP and the retained maximum. HUD::Update
+    /// 572d48 counts the flash down; SetFill 5732a0 restarts it at 8 whenever
+    /// the fill drops. No boss hides the bar and forgets the maximum.
+    fn update_boss_bar(&mut self) {
+        let bar = &mut self.state.boss_bar;
+        if bar.flash >= 0 {
+            bar.flash -= 1;
+        }
+        let (mut hp, mut maximum, mut any) = (0.0_f32, 0.0_f32, false);
+        for npc in &self.state.room.npcs {
+            let final_flag = npc
+                .monstro
+                .as_ref()
+                .is_some_and(|owner| owner.entity_flags & 0x100000 != 0);
+            if npc.removed || !npc.boss || final_flag {
+                continue;
+            }
+            any = true;
+            // Only actors past their first two frames contribute HP; before
+            // that the original divides 0 by 0 and the bar draws nothing.
+            if npc.frame_age > 1 {
+                hp += npc.hp;
+                maximum += npc.max_hp;
+            }
+        }
+        let fill = if any {
+            bar.maximum = bar.maximum.max(maximum);
+            hp / bar.maximum
+        } else {
+            bar.maximum = 0.0;
+            -1.0
+        };
+        if fill < bar.fill {
+            bar.flash = 8;
+        }
+        bar.fill = fill;
+    }
+
     fn count_updated_room_actor(&self, actor: actors::ActorRef, counted: &mut actors::FullCounts) {
         if actor.kind != actors::ActorKind::Npc {
             return;
