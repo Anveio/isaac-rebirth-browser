@@ -39,7 +39,9 @@ pub struct BossScene {
 /// ordinary admission; special large rooms keep their own gates.
 fn admitted_shape(template: &crate::room_templates::AuthoredTemplate) -> bool {
     match (template.width, template.height) {
-        (13, 7) => matches!(template.room_type, 1 | 4 | 7 | 8 | 10 | 12),
+        // Shop2 admits its room, doors and Shopkeeper17/0; 5/150 shop
+        // placeholders and the6/8 slot remain unadmitted selectors.
+        (13, 7) => matches!(template.room_type, 1 | 2 | 4 | 7 | 8 | 10 | 12),
         (13, 14) | (26, 7) | (26, 14) => template.room_type == 1,
         _ => false,
     }

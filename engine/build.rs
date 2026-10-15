@@ -550,6 +550,35 @@ fn main() {
     generated.push_str(&format!(
         "pub const KEEPER_ANIMATION_FRAMES: [u32; 9] = {keeper_frames:?};\n"
     ));
+    let shopkeeper_animations = npc_assets["gfx/017.001_shopkeeper.anm2"]["Animations"]
+        .as_array()
+        .expect("Shopkeeper animations are authored");
+    let shopkeeper_clips: Vec<(u32, bool)> = (1..=9)
+        .map(|subtype| {
+            let name = format!("Shopkeeper {subtype}");
+            let clip = shopkeeper_animations
+                .iter()
+                .find(|animation| animation["Name"] == name)
+                .expect("every derived Shopkeeper subtype has an authored clip");
+            (
+                u32::try_from(clip["FrameNum"].as_u64().expect("Shopkeeper frame count"))
+                    .expect("Shopkeeper frame count fits native actor clock"),
+                clip["Loop"].as_bool().expect("Shopkeeper clip loop flag"),
+            )
+        })
+        .collect();
+    generated.push_str(&format!(
+        "pub const SHOPKEEPER_ANIMATION_FRAMES: [u32; 9] = {:?};\n\
+         pub const SHOPKEEPER_ANIMATION_LOOPS: [bool; 9] = {:?};\n",
+        shopkeeper_clips
+            .iter()
+            .map(|clip| clip.0)
+            .collect::<Vec<_>>(),
+        shopkeeper_clips
+            .iter()
+            .map(|clip| clip.1)
+            .collect::<Vec<_>>()
+    ));
     let light = authored_light_frame(&animations);
     let npc_animations = manifest.parent().unwrap().join("web/npc-data.json");
     println!("cargo:rerun-if-changed={}", npc_animations.display());

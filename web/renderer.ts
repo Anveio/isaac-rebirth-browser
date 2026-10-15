@@ -181,7 +181,7 @@ export class Renderer {
       this.drawnNpcs.push({ kind: npc.kind, spawnSeed: npc.spawnSeed, scale: [scale, scale] });
       const keeper = npc.keeper;
       if (keeper) {
-        this.assets.draw(ctx, "gfx/017.002_secret room keeper.anm2", keeper.animation,
+        this.assets.draw(ctx, npc.variant === 0 ? "gfx/017.001_shopkeeper.anm2" : "gfx/017.002_secret room keeper.anm2", keeper.animation,
           npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46, keeper.animationClock,
           { scale, overrides: { 0: {
             RedTint: keeper.tint[0]! * 255, GreenTint: keeper.tint[1]! * 255, BlueTint: keeper.tint[2]! * 255,

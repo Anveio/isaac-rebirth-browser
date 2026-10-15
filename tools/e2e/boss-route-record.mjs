@@ -5,6 +5,13 @@
 // helper rejects any seed whose original does not arrive in the boss room.
 //
 //   node tools/e2e/boss-route-record.mjs --case CASE.json --rooms 6,7,9,0 [--production-directory dist]
+//     [--collect 7] [--arrival boss-room-arrival]
+//
+// --collect names rooms whose key pickups the player walks over before leaving
+// them; a key-locked door on the route is then pushed open with a held key.
+// --arrival names the final checkpoint (shop routes use `shop-arrival`).
+// --from names the scripted prefix label (default gameplay-start) after which
+// closed-loop routing begins; the 60-frame settle applies only at gameplay-start.
 //
 // CASE.json is a paired case (pairedTape up to gameplay-start, initialSeed,
 // bootEpochSeed). Prints { status, actions, checkpoints, frames, rooms } on stdout.
@@ -14,17 +21,31 @@ import { chromium } from '@playwright/test';
 import { browserLaunchOptions } from '../foundation/browser.mjs';
 import { startProductionServer } from '../foundation/production-server.mjs';
 import { flag } from './lib/cli.mjs';
-import { doorKeys, routingView } from './lib/route.mjs';
+import { doorKeys, routingView, toward, waypoint } from './lib/route.mjs';
 
 const caseData = JSON.parse(readFileSync(flag('--case'), 'utf8'));
 const rooms = flag('--rooms').split(',').map(Number);
 // Frames allowed per room before the route is abandoned.
 const ROOM_FRAMES = Number(flag('--room-frames', '600'));
+const collect = new Set((flag('--collect', '') || '').split(',').filter(Boolean).map(Number));
+const ARRIVAL = flag('--arrival', 'boss-room-arrival');
+const FROM = flag('--from', 'gameplay-start');
 // The player re-plans on every other frame; the tape holds keys in between.
 const STRIDE = 2;
 const namedKeys = { Return: 'Enter', Up: 'ArrowUp', Down: 'ArrowDown', Left: 'ArrowLeft', Right: 'ArrowRight', space: 'Space' };
 // DOM codes back to the tape's X11 names.
-const tapeKey = { KeyW: 'w', KeyA: 'a', KeyS: 's', KeyD: 'd' };
+const tapeKey = { KeyW: 'w', KeyA: 'a', KeyS: 's', KeyD: 'd', ArrowUp: 'Up', ArrowDown: 'Down', ArrowLeft: 'Left', ArrowRight: 'Right' };
+
+// Walk toward a key pickup, routing through fireplaces; a fire standing in the
+// next cell is shot out along its axis instead of walked into.
+function collectKeys(state, key) {
+  const next = waypoint(state.openGrid, state.player, key);
+  const fire = state.fires.find(f => Math.abs(f.x - next.x) < 20 && Math.abs(f.y - next.y) < 20);
+  if (!fire) return toward(state.player, next, 4);
+  const dx = fire.x - state.player.x, dy = fire.y - state.player.y;
+  if (Math.abs(dx) > Math.abs(dy)) return Math.abs(dy) > 6 ? [dy < 0 ? 'KeyW' : 'KeyS'] : [dx < 0 ? 'ArrowLeft' : 'ArrowRight'];
+  return Math.abs(dx) > 6 ? [dx < 0 ? 'KeyA' : 'KeyD'] : [dy < 0 ? 'ArrowUp' : 'ArrowDown'];
+}
 
 const server = await startProductionServer({ directory: flag('--production-directory') });
 const browser = await chromium.launch({ ...browserLaunchOptions(), headless: true });
@@ -37,8 +58,8 @@ try {
   await page.evaluate(({ initialSeed, bootEpochSeed }) => {
     window.game.pause(); window.game.reset(initialSeed, { bootEpochSeed, trace: true });
   }, caseData);
-  const start = caseData.pairedTape.findIndex(action => action.label === 'gameplay-start');
-  assert.ok(start >= 0, 'The case tape must reach gameplay-start');
+  const start = caseData.pairedTape.findIndex(action => action.label === FROM);
+  assert.ok(start >= 0, `The case tape must reach ${FROM}`);
   for (const action of caseData.pairedTape.slice(0, start)) {
     if (action.type === 'step') await page.evaluate(count => window.game.step(count), action.frames);
     else if (action.type === 'key') await page.keyboard[action.down ? 'down' : 'up'](namedKeys[action.key] || action.key);
@@ -65,7 +86,7 @@ try {
     if (last?.type === 'step') last.frames += count; else actions.push({ type: 'step', frames: count });
   };
   // The paired preamble settles 60 frames before any route input.
-  await step(60);
+  if (FROM === 'gameplay-start') await step(60);
   let state = await view();
   assert.equal(state.room, rooms[0], `Route must start in room ${rooms[0]}, not ${state.room}`);
   for (let leg = 1; leg < rooms.length; leg++) {
@@ -76,7 +97,11 @@ try {
       if (budget <= 0) throw new Error(`No way from room ${state.room} to room ${target} in ${ROOM_FRAMES} frames`);
       const door = state.doors.find(d => d.target === target);
       if (!door) throw new Error(`Room ${state.room} has no door to room ${target}`);
-      await hold(state.transition || !state.player.controls || !/^open/i.test(door.state) ? [] : doorKeys(state.grid, state.player, door));
+      const key = collect.has(state.room) && state.pickups.find(p => p.variant === 30);
+      const usable = /^open/i.test(door.state) || (door.state === 'KeyClosed' && state.keys > 0);
+      await hold(state.transition || !state.player.controls ? []
+        : key ? collectKeys(state, key)
+        : !usable ? [] : doorKeys(state.grid, state.player, door));
       if (process.env.BOSS_ROUTE_DEBUG && budget % 30 === 0) process.stderr.write(`${JSON.stringify({ room: state.room, budget, player: state.player, door, keys: [...held], transition: state.transition })}\n`);
       await step(STRIDE); budget -= STRIDE;
       // Route checkpoints let both games' positions be compared on the way.
@@ -87,7 +112,7 @@ try {
   // Settle out of the doorway transition before the arrival checkpoint.
   await hold([]);
   do { await step(1); state = await view(); } while (state.transition);
-  checkpoint('boss-room-arrival');
+  checkpoint(ARRIVAL);
   status = 'pass';
 } catch (error) {
   reason = String(error.message || error);
