@@ -142,6 +142,10 @@ impl<'a> ItemInputs<'a> {
         self.admits_selected_scalar_completion()
     }
 
+    pub(crate) fn admits_complete_selected_tail(self) -> bool {
+        self.admits_selected_scalar_completion() && self.owner.luck_inputs.is_some()
+    }
+
     fn has_unmapped_owner(self, flag: u32, supported: &[u32]) -> bool {
         self.owner
             .owned_counts
