@@ -706,6 +706,24 @@ fn main() {
         &fs::read_to_string(npc_animations).expect("read authored NPC animations"),
     )
     .expect("parse authored NPC animations");
+    // npc-data.json is generated from this allowlist; an actor added to the
+    // JSON alone would be dropped by the next regeneration.
+    let npc_list = manifest
+        .parent()
+        .unwrap()
+        .join("tools/foundation/port-npc-animations.txt");
+    println!("cargo:rerun-if-changed={}", npc_list.display());
+    let listed = fs::read_to_string(npc_list).expect("read NPC animation allowlist");
+    let listed = listed
+        .lines()
+        .filter(|line| !line.is_empty() && !line.starts_with('#'))
+        .collect::<std::collections::BTreeSet<_>>();
+    for actor in npc_clips.as_object().expect("NPC animations are a map").keys() {
+        assert!(
+            listed.contains(actor.as_str()),
+            "web/npc-data.json has {actor}, which tools/foundation/port-npc-animations.txt does not list"
+        );
+    }
     let boss_scene = npc_clips["gfx/ui/boss/versusscreen.anm2"]["Animations"]
         .as_array()
         .expect("boss Scene animations missing")

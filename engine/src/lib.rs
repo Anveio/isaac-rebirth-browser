@@ -45,6 +45,8 @@ pub mod floor;
 mod fmath;
 pub mod gib_counts;
 pub mod gluttony;
+pub mod gapers;
+pub mod gushers;
 pub mod gemini;
 pub mod grid;
 mod grid_hazards;
