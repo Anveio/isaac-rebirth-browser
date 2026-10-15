@@ -392,12 +392,14 @@ def compare_history(case_definition, paired_rows, *, sides=('native', 'browser')
                             manager_absences.append(absence)
                         absent = manager_absent and not view.weak_references(key)
                         kept = replacement is None or record['slot'] == replacement
-                        absence.update(observedReferencesClear=absent, replacementC18Retained=kept)
+                        absence.update(observedReferencesClear=absent)
                         check(side, name + ' full retirement observed slot/Parent/homing references clear', True, absent, record['presentation'])
-                        check(side, name + ' replacement C18 retained', True, kept, record['presentation'])
+                        if replacement is not None:
+                            absence['replacementC18Retained'] = kept
+                            check(side, name + ' replacement C18 retained', True, kept, record['presentation'])
                         if absent:
                             retired.append(record['presentation'])
-                            if kept:
+                            if replacement is not None and kept:
                                 replacement_safe.append(absence)
                             if removed and record['presentation'] > removed[0]:
                                 ordered_cleanup.append({'remove': removed[0], 'laterFull': absence})
