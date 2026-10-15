@@ -143,9 +143,12 @@ export type MusicBackendCommand = { type: 'musicBackend'; channel: number; gener
 export interface Bomb {
   id: number; variant: number; spawnSeed: number | null; birthGameUpdate: number; friction: number;
   animation: string; animationFrame: number; animationPlaying: boolean; x: number; y: number;
+  shot?: {actorRng: ItemRng; spawnerType: number; spawnerVariant: number; subtype: number; parent: ActorRef | null;
+    attackFlags: [number,number]; sourceColor: AttackColor; currentColor: AttackColor; explosionDamage: number;
+    gridCollisionClass: number; gridCollided: boolean; shotMarker: boolean; playerContactCountdown: number; ordinal7ec: number | null};
   motion: {
     position: { x: number; y: number }; presentedPosition: { x: number; y: number };
-    velocity: { x: number; y: number }; fuseUpdatesRemaining: number;
+    velocity: { x: number; y: number }; fuseUpdatesRemaining: number; initialFuseUpdates?: number;
     fullUpdates: number; animationFrame: number; lifetime: "alive" | "exploding" | "removed";
   };
 }

@@ -31,6 +31,7 @@ mod creep_effects;
 pub mod dingle;
 pub mod dips;
 mod doors;
+mod dr_fetus;
 mod effects;
 pub mod enemy_projectiles;
 mod entities;
@@ -2073,6 +2074,7 @@ impl Game {
                     pickups::full_grid_contacts(&mut self.state)?;
                     chests::full_grid_contacts(&mut self.state)?;
                     npcs::post_contact_grid(&mut self.state)?;
+                    bombs::full_grid_contacts(&mut self.state)?;
                     self.state.room.pickups.retain(|pickup| !pickup.removed);
                     let pickups = &self.state.room.pickups;
                     self.state.actor_scheduler.retain(|actor| {
@@ -2174,8 +2176,10 @@ impl Game {
             controlled_tear::retire_full(&mut self.state);
             attack_runtime::contacts(&mut self.state)?;
             let pickup_contacts = pickups::contact_candidates(&self.state)?;
+            bombs::player_contacts(&mut self.state)?;
             npcs::player_contacts(&mut self.state)?;
             npcs::nonplayer_contacts(&mut self.state)?;
+            bombs::bomb_contacts(&mut self.state)?;
             enemy_projectiles::player_contacts(&mut self.state)?;
             // Actual full manager contact pass uses typed ground coordinates.
             let tears: Vec<_> = self
@@ -2227,6 +2231,7 @@ impl Game {
             pickups::full_grid_contacts(&mut self.state)?;
             chests::full_grid_contacts(&mut self.state)?;
             npcs::post_contact_grid(&mut self.state)?;
+            bombs::full_grid_contacts(&mut self.state)?;
         }
         if phase == phase::Phase::Update {
             familiars::grid_contacts(&mut self.state)?;
@@ -2821,6 +2826,7 @@ impl Game {
                         weapon_plan::ControllerChannel::OrdinaryKnife
                             | weapon_plan::ControllerChannel::ChargedBrimstone
                             | weapon_plan::ControllerChannel::OrdinaryTechnology
+                            | weapon_plan::ControllerChannel::OrdinaryFetus
                     );
                     let controlled =
                         plan.controller == weapon_plan::ControllerChannel::ControlledKnife;
