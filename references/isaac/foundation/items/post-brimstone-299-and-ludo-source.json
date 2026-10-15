@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "status": "SCOPED_MERGED_312_320_348_COMPLETE_PAIRS_FIRST_DR_FAIL",
-  "main": "918303b6a93f67263212cc8b75231bee0844b8e7",
+  "status": "SCOPED_MERGED_343_355_367_368_FIRST_CONTROLLED_ORIGINAL_FAILURES",
+  "main": "298738b44643794424d75c7e9ba68407f362069a",
   "merged": {
     "298": "261dbd60b3921fed421a614ef80c52baaadb0cca",
     "299": "988ae6355c7956d918ff0e00eb329d313645b864",
@@ -21,7 +21,14 @@
     "320": "85962135c15ad3dcb90351795d39069dae19e253",
     "345": "04e52bbffc3cb3bafe0ec13a732cfa48a668e40e",
     "348": "918303b6a93f67263212cc8b75231bee0844b8e7",
-    "350": "b3a23e2429613cd0e66176a9412e5bc7caabd365"
+    "350": "b3a23e2429613cd0e66176a9412e5bc7caabd365",
+    "343": "f4988359fb4545fd0adfeff6072530383c006132",
+    "356": "8159750bc5903b1071c23e29471dad99689a4724",
+    "355": "f077682274d1885d5dd4ce46a917cb177ecdb376",
+    "367": "0556891d0a87a33dd18b991d3ed5f94884d7930a",
+    "368": "5cf11fef27962620cab062e209b4f7e5a24e9c25",
+    "353": "ba9855aedb40d627a6d5a68edbfd9571bcbb1124",
+    "369": "298738b44643794424d75c7e9ba68407f362069a"
   },
   "ordinary299": {
     "ownBuilds": "production/strict Clippy/floor PASS",
@@ -815,7 +822,7 @@
   },
   "unmergedComparedTools": [],
   "drFetus52": {
-    "status": "DRAFT_THREE_BUILDS_STRICT_REGRESSION_FOUR_OWN_ROUTES_FIRST_NATIVE_PAIR_FAIL",
+    "status": "MERGED_343_356_SCOPED_OWN_AND_FIRST_ORIGINAL_FAILURES_PRESERVED",
     "producer": "072118868a2cf802455227eda22bec59264b7fa8",
     "wasmSha256": "26cb9cf8a5aaf60d149c7195b2ea137d3a9b4ada2200f9bf4fdc55efc6e67850",
     "buildClosure": {
@@ -861,7 +868,7 @@
     "gameAcceptance": false,
     "controlled329Admitted": false,
     "guessedHistoryDefaults": false,
-    "idleDa0Successor": "SOURCE_ONLY_NOT_CONSUMED",
+    "idleDa0Successor": "MERGED356_CONSUMED_ON21_4FA",
     "counterV2Addendum": {
       "checks": 29598,
       "failures": 2740,
@@ -879,6 +886,19 @@
       "bombFifoRows": 2,
       "followingFullHp4ToMinus6_5": 1,
       "strictCrossIdentityParity": false
+    },
+    "historical072IdleDa0Successor": "SOURCE_ONLY_NOT_CONSUMED",
+    "consumedIdleDa0": {
+      "mainMerge": "8159750bc5903b1071c23e29471dad99689a4724",
+      "consumedProducer": "21f00d206afaf50ceb85e94ae2cae5e7cd723abd",
+      "checks": 29598,
+      "beforeFailures": 2740,
+      "afterFailures": 2500,
+      "onlyResolvedField": "DA0",
+      "resolvedDifferences": 240,
+      "pairedRows": 815,
+      "allOtherPerFieldCountsFailuresAndCoverageUnchanged": true,
+      "summarySha256": "f3ca02b088a20d6497bc31582fa7ad01e2506abd24afb7f809622315deef1eab"
     }
   },
   "soy330": {
@@ -913,12 +933,178 @@
       "laserBirthsPerCase": 0,
       "costumeTransformFrontierRowsPerCase": 360,
       "coverage": "FAIL"
-    }
+    },
+    "historical26cbResultUnchanged": true,
+    "mergedRuntime": "5cf11fef27962620cab062e209b4f7e5a24e9c25"
   },
   "controlledTechnology68Plus329": {
-    "status": "SOURCE_ONLY",
+    "status": "MERGED_355_FIRST_ORIGINAL_STRICT_FAILURES_RETAINED",
     "primaryC08": 3,
     "selectedFlags": 0,
-    "actorGameAcceptance": false
+    "actorGameAcceptance": false,
+    "firstFreshOriginal": {
+      "reportPath": "/dev/shm/isaac-controlled-technology68-native-evidence-v2/controlled-technology-68-329-fixed-phase0/paired-functional-v1/functional-report.json.gz",
+      "sha256": "83f440a18e85b59a7c3dec7a8b9295ec70ef8667fc49bf5948540fb46ad4dbad",
+      "producer": "21/4fa, notdf133",
+      "checks": 117717,
+      "failures": 13575,
+      "pairedRows": 1371,
+      "bodyRows": 677,
+      "scope": "All677materialdamage/flags/radius/mass/TTL/angles/colors/Sprite/Lineconfigcompare; identity/RNG/geometry/unknowns remainFAIL.2708missingLaserHPmaxHPchecks are notNPCHPfailure. Emptyroomdoesnotprovecontact; other3Nativecasesunexecuted."
+    }
+  },
+  "currentPrivateDf133Evidence": {
+    "artifactBinding": {
+      "path": "/dev/shm/isaac-composed-item-own-proof/artifact-binding-v3-own-gameplay.json",
+      "sha256": "39b83a331e9332a79e886daf2f166d543288facdd21b59d2694a3f82e1411afe",
+      "sourceHead": "df1339ac150184d867a32e3dc9ec8a97b4126efd",
+      "wasmSha256": "15f8357c28c0a155958a48290de30204a0409955a1b04c665853601dc8b5d367",
+      "normalProductionExit0Seconds": 42.97972321510315,
+      "floorExit0Seconds": 16.617607593536377,
+      "clippyPending": true,
+      "allStagesPassed": false
+    },
+    "strictRegular405": {
+      "checks": 37972668,
+      "differences": 0,
+      "excluded": [],
+      "additive": [],
+      "scope": "LocalWASMregression versus21/4fa, notOriginal/wholemainparity"
+    },
+    "summary": {
+      "controlled": {
+        "checks": 1066,
+        "failures": 40,
+        "births": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "bodyRows": [
+          82,
+          81,
+          81,
+          82
+        ],
+        "actualFullFastBodyRows": [
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            0
+          ]
+        ],
+        "propertyCohorts": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "coverageFailures": "Actualbirth1<required2 andactualpropertycohort1<required2 EACHcase, separatefrommissingraw322FullFast and6eventFAILs.10FAIL/case remains.",
+        "freshOriginalFixed0": {
+          "checks": 41683,
+          "failures": 3258,
+          "nativeBirths": 3,
+          "portBirths": 1,
+          "nativePropertyCohorts": 2,
+          "portPropertyCohorts": 1,
+          "realMissingPortBirths": 2,
+          "scope": "One actualOriginal case only; rawstrictunknowns and actualcoverageFAILs preserved."
+        }
+      },
+      "mixed": {
+        "checks": 17056,
+        "failures": 1558,
+        "mixedBombBirths": [
+          3,
+          3,
+          3,
+          3
+        ],
+        "bodyRows": [
+          246,
+          244,
+          244,
+          244
+        ],
+        "retentionRows": [
+          405,
+          241,
+          241,
+          402
+        ],
+        "coverageFailures": "ActualBombraw322 absent978bodyrows, actualFull/FastminimaFAIL; both4-firstcases lackactualTearbirthtimestamp554observations andrequiredTearbirthcoverage.4eventFAIL/case.ObservedBombbirthcache/properties/retentionchecks pass; this isownstateonly."
+      },
+      "soy": {
+        "firstObservedActorIdentities": [
+          16,
+          1,
+          16,
+          1
+        ],
+        "bodyRows": [
+          {
+            "tear:0": 606
+          },
+          {
+            "laser:1": 20
+          },
+          {
+            "tear:0": 632
+          },
+          {
+            "laser:1": 20
+          }
+        ],
+        "coverageLimits": "Ownendpointonly/noOriginalcomparison.16/1/16/1 arefirstobservedidentities, notInitbirths.Ordinary118eachhas1observedLaser/20bodyrows and360unadmitted ordinaryBrimstoneBodyCostumeTransform observations; notwholefiring/readinessPASS.",
+        "knownUnconsumedDefect": "FullAdd52CF25 clears selected2EC before50EDC0; df133 Soy leaf still preserves prior override. Correction d9d03159 remains future source only."
+      }
+    },
+    "controlledDrFreshOriginal": {
+      "compactSummary": {
+        "path": "/dev/shm/isaac-controlled-dr-fetus52-native-evidence-v2/controlled-dr-fetus-52-329-fixed-phase0/paired-functional-v1/compact-summary.json",
+        "sha256": "3987cead24174fa200542b70dce5dea61ce86df21d53ccaf6a03d26b786bbf82"
+      },
+      "report": {
+        "path": "/dev/shm/isaac-controlled-dr-fetus52-native-evidence-v2/controlled-dr-fetus-52-329-fixed-phase0/paired-functional-v1/functional-report.json.gz",
+        "sha256": "79681ad6aa7c6bc8b9d69fd6333d6fe5415daefaf5690a58fc54097f5d25bd1e",
+        "checks": 41683,
+        "failures": 3258
+      },
+      "nativeActualClosure": {
+        "path": "/dev/shm/isaac-controlled-dr-fetus52-native-evidence-v2/controlled-dr-fetus-52-329-fixed-phase0/native-attempt1/native-closed.json",
+        "sha256": "22d5f57de4742c93e5274da204d6c81455195b28e6884f7f396ea6bef500544d",
+        "pid": 2169245,
+        "exitCode": 0,
+        "actualWait": true,
+        "seconds": 86.64723819901701,
+        "guardStop": null,
+        "sourceAndDeclaredInputsBeforeEqualsEnd": true,
+        "gameClosure": "EXACT_OWNED_GAMES_EXITED"
+      },
+      "pairedPlayingRows": 1377,
+      "material82Rows": "Actual velocity, fuse, damage, flags, friction, born age, grid class/collision, permanent/current colors, Parent and ChildNULL fields pass on82 paired bodies. Strictidentity/RNG/position/visibility/rawphase remainfailed.",
+      "realCoverageGap": "Port misses2actualcontrolledBombbirths and a second born-property cohort. This is actual executable coverage failure, not merely missing observer metadata. Queued4 readiness source successor is unconsumed by frozen df133.",
+      "sourceOrderBoundary": "Native birth at1495 still copies10.5 from earlierC88=3.5 although same post-Add snapshot has currentC88=6.6407833; later1623birth copies19.92234992980957. Frozen consumer reports one dense-prior completed-inventory and stable-prior-cache failure at1495; preserve those checks/fails and do not force postAdddamage onto earlier birth.",
+      "limits": "Only fixed0 freshOriginal completed; other3controlledDrOriginal cases, mixedOriginal and SoyOriginal remainunexecuted. Exactraw/identity/RNG/callback/lifecycleFAILs unchanged. No capture/projection/grade performed by this report-only fold.",
+      "nativeBirths": 3,
+      "portBirths": 1,
+      "nativePropertyCohorts": 2,
+      "portPropertyCohorts": 1
+    },
+    "scope": "Own private df133 product only: actual production+floor PASS/Clippy pending; all12 captures and finite readers closed. Not whole-current-main qualification; old reports unchanged. Mixed and Soy merged independently; controlledDr354 remains unmerged awaiting queued4 successor.",
+    "reportOnlyFoldSourceSha256": "ba73dba4",
+    "sourceOnlyEpicMonstro": "Unbuilt independent drafts; future producer changes no prior grade."
   }
 }

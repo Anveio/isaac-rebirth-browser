@@ -8,6 +8,20 @@ only an actual report establishes its outcome. Rust/WASM replay equality checks
 the port's determinism, while original logs, graphics and controls establish
 independent reference evidence.
 
+The current item integration snapshot is main `298738b4`: ordinaryDr343/356,
+controlledTechnology355, independent mixed52+4 capabilities367 and Soy330
+stats/118Mouth-history368 are merged. The private df133/15f product separately
+passes production and floor plus37,972,668/0 strict regular comparisons; Clippy
+is capacity-pending. Its12 public routes complete, with3mixedBomb births each
+and post330 Lasers in both118routes; raw phase/birth/callback and costume-frontier
+failures remain. First controlledTechnology Original remains117,717/13,575FAIL
+with677 matching material/configuration rows, separate from absent NPC contact.
+First controlledDr Original remains41,683/3,258FAIL:3Native births/2cohorts versus
+1portbirth/1cohort. ControlledDr354 stays pending the queued4 readiness fix.
+Epic168/MonstrosLung229 are source-only drafts awaiting their next producer.
+See [item composition coverage](item-composition-coverage.md) for exact scopes;
+these reports do not establish whole-current-main or complete game parity.
+
 ## Current live-game testing policy
 
 Checked-in Rust, Node and Python unit suites were removed at the user’s request.
