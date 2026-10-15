@@ -731,29 +731,54 @@ impl FireDelayStage {
 }
 
 /// One Damage callback's ownership beside its literal pure operator.
-/// Reads signed permanent4 for the tier and positive presence for one multiplier;
-/// writes Damage/C88. Its source-local bound precedes separate Libra coupling.
+/// Signed permanent4/12 feed the tier; positive169 precedes the shared4/12
+/// multiplier and330. This selected operator does not complete other caches,
+/// grant history, temporary modifiers or any attack getter/caller.
 struct DamageStage;
 
 impl DamageStage {
     const REQUESTED: CacheMask = CacheMask(1);
-    const EFFECT_ITEMS: &'static [u32] = &[4, 330];
+    const EFFECT_ITEMS: &'static [u32] = &[4, 12, 169, 330];
     const NEUTRAL_ITEMS: &'static [u32] = &[1, 6, 114, 118, 329];
+    // Independent Damage-only footprint; in particular this must not widen
+    // Soy's other caches/getters or the current primary/caller capabilities.
+    const MULTIPLIER_ITEMS: &'static [usize] = &[1, 4, 12, 169, 330];
 
     fn admits(inputs: ItemInputs<'_>, source_player_type: Option<u32>) -> bool {
         source_player_type == Some(0)
-            && inputs.admits_scalar_stage(CacheStage::Damage, Self::EFFECT_ITEMS)
+            && if inputs.owned_count(12) != 0 || inputs.owned_count(169) != 0 {
+                let required = if inputs.positive_owned_count(12) {
+                    12
+                } else {
+                    169
+                };
+                inputs.admits_permanent_readset(required, Self::MULTIPLIER_ITEMS)
+            } else {
+                inputs.admits_scalar_stage(CacheStage::Damage, Self::EFFECT_ITEMS)
+            }
     }
 
     fn resolve(inputs: ItemInputs<'_>) -> f32 {
-        //513628..513644: f32 linear, f64 sqrt*3.5, then f32 store.
-        let tier = inputs.owned_count(4) as f32 * 0.5_f32;
+        //513628..5136C4: signed12's .3 contribution follows signed4's .5;
+        //513846..513880 then use f32 linear, f64 sqrt*3.5, f32 store.
+        //TEMP12's signed first-record count is a separate unadmitted owner.
+        let tier = inputs.owned_count(4) as f32 * 0.5_f32 + inputs.owned_count(12) as f32 * 0.3_f32;
         let linear = (1.2_f32 * tier + 1.0_f32).max(0.0);
         let mut damage = (f64::from(linear).sqrt() * 3.5_f64) as f32;
-        if inputs.positive_owned_count(4) {
+        if inputs.positive_owned_count(169) {
+            //513892 ->515AF6: add4, then add the result to itself. The
+            //2/153/TEMP2 add4-only diversion is outside this footprint.
+            damage += 4.0_f32;
+            damage += damage;
+        }
+        //5138EA..51391D bounds the current damage before later multipliers.
+        damage = damage.max(0.5_f32);
+        if inputs.positive_owned_count(4) || inputs.positive_owned_count(12) {
+            //513A20 ->515026: shared single factor, even when both are held.
+            //TEMP12 record presence has a distinct, unadmitted lifetime.
             damage *= 1.5_f32;
         }
-        //513A78 Have330 reaches513DF8 once, after the Max Head multiplier;
+        //513A78 Have330 reaches513DF8 once, after the shared multiplier;
         //the local .5 bound and the separate Libra coupling remain later.
         if inputs.positive_owned_count(330) {
             damage *= 0.2_f32;
