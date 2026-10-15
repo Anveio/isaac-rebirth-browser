@@ -35,6 +35,7 @@ mod effects;
 pub mod enemy_projectiles;
 mod entities;
 pub mod sprite_color;
+mod technology;
 pub use entities::{implemented_npc_kinds, supports_npc_selector};
 pub mod familiars;
 pub mod fireplaces;
@@ -2819,6 +2820,7 @@ impl Game {
                         plan.controller,
                         weapon_plan::ControllerChannel::OrdinaryKnife
                             | weapon_plan::ControllerChannel::ChargedBrimstone
+                            | weapon_plan::ControllerChannel::OrdinaryTechnology
                     );
                     let controlled =
                         plan.controller == weapon_plan::ControllerChannel::ControlledKnife;
@@ -2904,6 +2906,13 @@ impl Game {
                                 &mut self.state,
                                 buttons.held(),
                                 "controlledBrimstoneMovementHistory",
+                            );
+                        }
+                        if plan.controller == weapon_plan::ControllerChannel::OrdinaryTechnology {
+                            //530A19 released ordinary idle uses the same canonical D9C/DA0.
+                            attack_runtime::ordinary_brimstone_idle_head(
+                                &mut self.state,
+                                buttons.held(),
                             );
                         }
                         if plan.controller == weapon_plan::ControllerChannel::ChargedBrimstone

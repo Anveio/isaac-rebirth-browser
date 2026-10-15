@@ -548,6 +548,18 @@ fn laser_root_catalog(actors: &Value) -> String {
         out.push_str(&format!("({delay}, {:?}),\n", x + width));
     }
     out.push_str("];\n");
+    let thin_layers = actors["gfx/007.002_thin red laser.anm2"]["Layers"]
+        .as_array()
+        .expect("Technology authored layers");
+    assert_eq!(
+        thin_layers.len(),
+        1,
+        "Technology actual47842C single-layer branch"
+    );
+    out.push_str(&format!(
+        "const THIN_LASER_LAYER_COUNT: usize = {};\n",
+        thin_layers.len()
+    ));
     out
 }
 
