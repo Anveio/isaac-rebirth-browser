@@ -31,6 +31,10 @@ pub struct DipState {
     /// Base441d81/441e66 per-spawn owners, not permanent eligibility constants.
     pub render_offset: WorldVector,
     pub status_countdown: i32,
+    /// Entity+7C0, seeded by441CB0/441CBF from the actual Spawn seed.
+    /// A restored state without that owner remains unknown; never reseed it.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub entity_rng: Option<crate::items::Rng>,
 }
 
 const CONFIG: &content::EntityConfig = content::entity(217, 0);
@@ -61,6 +65,7 @@ pub fn from_selector(id: u32, selector: &SpawnSelector, stage: u32) -> Result<Op
             offsets: [0.0; 3],
             render_offset: ZERO,
             status_countdown: 0,
+            entity_rng: Some(crate::items::Rng::new(selector.spawn_seed, [4, 3, 17])),
         }),
         ..Npc::authored(id, CONFIG, selector)
     }))
@@ -178,20 +183,39 @@ fn advance_sprite(npc: &mut Npc) {
 
 /// First dead31f transition4464c0 calls445c60 before the next FIFO record.
 fn die(npc: &mut Npc, random: &mut Mt19937, world: &mut NpcWorld<'_>) -> Result<(), String> {
-    if [225, 234].iter().any(|&id| {
-        world
-            .player_items
-            .is_some_and(|items| items.owned_counts[id] != 0)
-    }) {
-        return Err("Dip death requires the owned225/234 source callbacks".into());
+    // Infestation2 requires copied FIFO source variants and a real BlueSpider
+    // producer. Its unresolved path does not admit a substitute effect.
+    if world
+        .player_items
+        .is_some_and(|items| items.owned_counts[234] != 0)
+    {
+        return Err("Dip death requires the owned234 BlueSpider source callback".into());
     }
-    let dip = npc.dip.as_ref().unwrap();
-    if dip.status_countdown > 0 {
+    if npc.dip.as_ref().unwrap().status_countdown > 0 {
         return Err(
             "Dip death with positive Entity400 requires the actual status/SFX137 owner".into(),
         );
     }
+    //47FC80 owns the item effect BEFORE4464D3 sets dead31F and before
+    //445C60's SFX/gib draws. Use the persistent Entity RNG, not shared MT.
+    let drops_half_heart = crate::item_death_effects::gimpy_half_heart(
+        world
+            .player_items
+            .ok_or("Gimpy callback Player owner absent")?,
+        npc.max_hp,
+        &mut npc.dip.as_mut().unwrap().entity_rng,
+    )?;
+    if drops_half_heart {
+        let seed = random.next_u32();
+        world.item_death_pickups.admit_half_heart(
+            seed,
+            npc.position,
+            world.room_type,
+            world.effects.scheduler,
+        )?;
+    }
     npc.dead = true;
+    let dip = npc.dip.as_ref().unwrap();
     world.audio.admit(
         random,
         world.system_counter,

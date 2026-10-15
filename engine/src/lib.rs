@@ -61,6 +61,7 @@ mod horfs;
 pub mod information_animation;
 pub mod input;
 mod inner_eye;
+mod item_death_effects;
 mod item_pipeline;
 pub mod items;
 pub mod keepers;
@@ -2831,6 +2832,12 @@ impl Game {
                 audio: &mut self.state.audio,
                 system_counter: self.state.system_clock.system_counter.wrapping_sub(1),
                 player_items: self.state.player_items.as_ref(),
+                item_death_pickups: item_death_effects::PickupAdmission {
+                    game_update_count: self.state.game_update_count,
+                    next_pickup: &mut self.state.next_pickup,
+                    pickups: &mut self.state.room.pickups,
+                    actor_order: &mut self.state.room.authored_actor_order,
+                },
                 effects: familiars::NpcEffectAdmission {
                     game_update_count: self.state.game_update_count,
                     next_effect: &mut self.state.next_effect,
