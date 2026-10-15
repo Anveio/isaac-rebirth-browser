@@ -46,7 +46,7 @@ impl CacheStage {
     const fn flag(self) -> u32 {
         match self {
             Self::Weapon => 0x100,
-            Self::FireDelay => 2,
+            Self::FireDelay => FireDelayStage::REQUESTED.0,
             Self::ShotSpeed => 4,
             Self::Damage => 1,
             Self::Range => 8,
@@ -164,7 +164,7 @@ impl<'a> ItemInputs<'a> {
     /// Config 118's request for all callbacks adds no implicit scalar effect.
     fn admits_scalar_stage(self, stage: CacheStage, effects: &[u32]) -> bool {
         let neutral: &[u32] = match stage {
-            CacheStage::FireDelay => &[4, 114, 118, 329],
+            CacheStage::FireDelay => FireDelayStage::NEUTRAL_ITEMS,
             CacheStage::ShotSpeed => &[1, 6, 114, 118, 329, 304],
             CacheStage::Damage => &[1, 6, 114, 118, 329],
             CacheStage::Range => &[1, 4, 114, 118, 329],
@@ -252,6 +252,50 @@ impl CacheResolution {
     }
 }
 
+/// One callback's source ownership, beside its literal pure operator.
+/// Reads signed permanent/TEMP1/6, positive permanent222 and retained C08;
+/// writes integer C78 only. Source-local bounds and truncation precede Libra.
+/// The caller retains the separate TEMP6/negative-history guard. These neutral
+/// items prove this callback only;304 remains a distinct coupled operator.
+struct FireDelayStage;
+
+impl FireDelayStage {
+    const REQUESTED: CacheMask = CacheMask(2);
+    const EFFECT_ITEMS: &'static [u32] = &[1, 6, 222];
+    const NEUTRAL_ITEMS: &'static [u32] = &[4, 114, 118, 329];
+
+    fn admits(inputs: ItemInputs<'_>, source_player_type: Option<u32>) -> bool {
+        source_player_type == Some(0)
+            && inputs.admits_scalar_stage(CacheStage::FireDelay, Self::EFFECT_ITEMS)
+    }
+
+    fn resolve(inputs: ItemInputs<'_>, primary: PrimaryWeaponC08) -> i32 {
+        //512320/512323 add signed Number One counts before CVTSI2SS.
+        //512354/512373 round Sad Onion counts separately, then5123DB
+        //adds that weighted contribution to the Number One term.
+        let number_one = inputs
+            .owned_count(6)
+            .wrapping_add(inputs.temporary_count(6));
+        let tier = number_one as f32 * 1.5_f32
+            + (inputs.owned_count(1) as f32 + inputs.temporary_count(1) as f32) * 0.7_f32;
+        let root = (1.3_f32 * tier + 1.0_f32).max(0.0).sqrt();
+        let mut delay = 16.0_f32 - 6.0_f32 * root;
+        if tier <= 0.0 {
+            delay -= 6.0_f32 * tier;
+        }
+        //512562 bound precedes512666's one permanent222 modifier.
+        delay = delay.max(5.0_f32);
+        //512610 reads retained C08; multiply BEFORE integer truncation.
+        if primary == PrimaryWeaponC08::Brimstone {
+            delay *= 3.0_f32;
+        }
+        if inputs.positive_owned_count(222) {
+            delay -= 2.0_f32;
+        }
+        (delay as i32).max(1)
+    }
+}
+
 /// Recompute requested mapped callbacks from actual item inputs, retaining
 /// partial values and pending bits for every unimplemented callback owner.
 /// This extraction preserves Source110 arithmetic and predicates exactly.
@@ -271,30 +315,8 @@ pub(crate) fn resolve_scalars(
         }
         let supported: &[u32] = match stage {
             CacheStage::FireDelay => {
-                //512320/512323 add signed Number One counts before CVTSI2SS.
-                //512354/512373 round Sad Onion counts separately, then5123DB
-                //adds that weighted contribution to the Number One term.
-                let number_one = inputs
-                    .owned_count(6)
-                    .wrapping_add(inputs.temporary_count(6));
-                let tier = number_one as f32 * 1.5_f32
-                    + (inputs.owned_count(1) as f32 + inputs.temporary_count(1) as f32) * 0.7_f32;
-                let root = (1.3_f32 * tier + 1.0_f32).max(0.0).sqrt();
-                let mut delay = 16.0_f32 - 6.0_f32 * root;
-                if tier <= 0.0 {
-                    delay -= 6.0_f32 * tier;
-                }
-                //512562 bound precedes512666's one permanent222 modifier.
-                delay = delay.max(5.0_f32);
-                //512610 reads retained C08; multiply BEFORE integer truncation.
-                if primary == PrimaryWeaponC08::Brimstone {
-                    delay *= 3.0_f32;
-                }
-                if inputs.positive_owned_count(222) {
-                    delay -= 2.0_f32;
-                }
-                values.max_fire_delay = (delay as i32).max(1);
-                &[1, 6, 222]
+                values.max_fire_delay = FireDelayStage::resolve(inputs, primary);
+                FireDelayStage::EFFECT_ITEMS
             }
             CacheStage::ShotSpeed => {
                 // 511f68/513e48 test raw permanent and temporary143 counts
@@ -354,8 +376,10 @@ pub(crate) fn resolve_scalars(
         let unadmitted_number_one = matches!(stage, CacheStage::FireDelay | CacheStage::Range)
             && (inputs.owned_count(6) < 0 || inputs.number_one_record_present());
         if !unadmitted_number_one
-            && source_player_type == Some(0)
-            && inputs.admits_scalar_stage(stage, supported)
+            && match stage {
+                CacheStage::FireDelay => FireDelayStage::admits(inputs, source_player_type),
+                _ => source_player_type == Some(0) && inputs.admits_scalar_stage(stage, supported),
+            }
         {
             completed |= flag;
         }
