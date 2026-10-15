@@ -23,9 +23,10 @@ pub mod challenges;
 pub mod champions;
 pub mod chests;
 pub mod combat;
-mod creep_effects;
 mod content;
 mod controlled_knife;
+pub mod controlled_tear;
+mod creep_effects;
 pub mod dingle;
 pub mod dips;
 mod doors;
@@ -61,8 +62,8 @@ mod laser_runtime;
 pub mod lasers;
 pub mod layout;
 pub mod level2_flies;
-pub mod maggots;
 pub mod level_progress;
+pub mod maggots;
 pub mod menu_lifecycle;
 pub mod monstro;
 pub mod motion;
@@ -218,10 +219,10 @@ pub struct Tear {
     pub vy: f64,
     pub age: u32,
     pub spawn_seed: u32,
-    /// Actual kind1 builder variant copied to Entity+14; None is unqualified.
+    /// Source-owned builder variant copied to Entity+14; None is unqualified.
     pub source_variant: Option<u32>,
     /// Actual Tear+838, copied from Player+c84 before its increment.
-    pub shot_ordinal: u32,
+    pub shot_ordinal: Option<u32>,
     /// Source setter5411e0 writes collision48c and base83c at birth.
     pub collision_damage: f32,
     pub base_damage: f32,
@@ -233,6 +234,8 @@ pub struct Tear {
     pub collision_radius: f32,
     pub grid_contact: bool,
     pub motion: projectiles::TearMotion,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub controlled: Option<controlled_tear::ControlledTear>,
 }
 impl Tear {
     fn project(&mut self) {
@@ -1435,6 +1438,7 @@ impl Game {
         // Fresh587f44→58821c clears descriptor+3d; placement preserves it.
         // Room.Init5ced20 stamps159c before its grid/entity factories.
         self.state.room.initialization_game_update = Some(self.state.game_update_count);
+        self.state.room.source_tear_slowdown_2494 = Some(0);
         self.state.room.combat_clear = false;
         self.state.camera = Some(camera::Camera::new(&self.state.room, None));
         // PlayerManager.Init precedes Level.Init -> Room.Init. Room reset
@@ -2136,6 +2140,11 @@ impl Game {
             rock_blast::advance_bomb_rocks(&mut self.state)?;
             rock_blast::advance_markers(&mut self.state);
             self.refresh_room_boss_count();
+            if let Some(counter) = &mut self.state.room.source_tear_slowdown_2494 {
+                if *counter > 0 {
+                    *counter -= 1;
+                }
+            }
             let mut counted = actors::FullCounts::default();
             for actor in existing.iter().copied() {
                 self.advance_actor(actor, phase, false, bomb_triggered)?;
@@ -2160,6 +2169,7 @@ impl Game {
             blood_effects::clear_retired_links(&mut self.state);
             attack_runtime::retire_full(&mut self.state);
             laser_runtime::retire_full(&mut self.state)?;
+            controlled_tear::retire_full(&mut self.state);
             attack_runtime::contacts(&mut self.state)?;
             let pickup_contacts = pickups::contact_candidates(&self.state)?;
             npcs::player_contacts(&mut self.state)?;
@@ -2181,6 +2191,15 @@ impl Game {
                 })
                 .collect();
             for (id, mut motion, radius, damage) in tears {
+                if self
+                    .state
+                    .tears
+                    .iter()
+                    .any(|tear| tear.id == id && tear.controlled.is_some())
+                {
+                    controlled_tear::contacts_actor(&mut self.state, id)?;
+                    continue;
+                }
                 if npcs::tear_hit(&mut self.state, &mut motion, radius, id, damage)?.is_some() {
                     if let Some(tear) = self.state.tears.iter_mut().find(|tear| tear.id == id) {
                         motion.lifetime = projectiles::Lifetime::Dying;
@@ -2348,6 +2367,14 @@ impl Game {
                 familiars::advance_actor(&mut self.state, phase, actor.id)?
             }
             actors::ActorKind::Tear => {
+                if self
+                    .state
+                    .tears
+                    .iter()
+                    .any(|tear| tear.id == actor.id && tear.controlled.is_some())
+                {
+                    return controlled_tear::advance(&mut self.state, phase, actor.id);
+                }
                 let grid = if phase == phase::Phase::Update && !newborn {
                     Some(
                         self.state
@@ -2382,6 +2409,7 @@ impl Game {
                 self.advance_pickup(actor.id, phase)?;
             }
             actors::ActorKind::Npc => {
+                controlled_tear::before_npc_update(&mut self.state, phase, actor.id);
                 self.advance_npc(actor.id, phase)?;
             }
             actors::ActorKind::Projectile => {
@@ -2793,7 +2821,9 @@ impl Game {
                     );
                     let controlled =
                         plan.controller == weapon_plan::ControllerChannel::ControlledKnife;
-                    let aim_step = if ordinary || controlled {
+                    let controlled_tear =
+                        plan.controller == weapon_plan::ControllerChannel::ControlledTear;
+                    let aim_step = if ordinary || controlled || controlled_tear {
                         attack_runtime::ordinary_shooting_aim(
                             callback_aim,
                             buttons.held(),
@@ -2808,7 +2838,9 @@ impl Game {
                     };
                     if let Some(mut aim_step) = aim_step {
                         // 52F6B7 normalizes r13 before the callback and DB4 store.
-                        if controlled && knives::squared_length(aim_step.callback_aim) > 1.0 {
+                        if (controlled || controlled_tear)
+                            && knives::squared_length(aim_step.callback_aim) > 1.0
+                        {
                             aim_step.callback_aim = knives::normalized(aim_step.callback_aim);
                             if aim_step.db4_write.is_some() {
                                 aim_step.db4_write = Some(aim_step.callback_aim);
@@ -2816,10 +2848,16 @@ impl Game {
                         }
                         shooting_aim_db4 = aim_step.db4_write;
                         let head_frame_request = if self.state.head_timer > 8 { 2 } else { 0 };
-                        if ordinary || controlled {
+                        if ordinary || controlled || controlled_tear {
                             source_weapon_clock = true;
                             if controlled {
                                 attack_runtime::controlled_head_direction(
+                                    &mut self.state,
+                                    aim_step.callback_aim,
+                                    buttons.held(),
+                                )?;
+                            } else if controlled_tear {
+                                controlled_tear::head_direction(
                                     &mut self.state,
                                     aim_step.callback_aim,
                                     buttons.held(),
@@ -2850,6 +2888,8 @@ impl Game {
                         // 519FC0 returns before the released idle D9C -> DA0 effect.
                         if controlled {
                             attack_runtime::controlled_idle_head(&mut self.state, buttons.held());
+                        } else if controlled_tear {
+                            controlled_tear::idle_head(&mut self.state, buttons.held());
                         }
                         if plan.controller == weapon_plan::ControllerChannel::ChargedBrimstone {
                             attack_runtime::ordinary_brimstone_idle_head(
@@ -3017,7 +3057,8 @@ impl Game {
                     age: 0,
                     spawn_seed,
                     source_variant,
-                    shot_ordinal: self.state.player.shots_fired,
+                    shot_ordinal: Some(self.state.player.shots_fired),
+                    controlled: None,
                     collision_damage: plan.damage,
                     base_damage: plan.damage,
                     attack_flags: plan.flags,

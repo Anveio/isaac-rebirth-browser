@@ -905,23 +905,31 @@ pub fn paint_background_effects(state: &mut State) -> Result<(), String> {
     // Insert4524f0 keeps the independent render array in unsigned virtual+50
     // key order. Equal keys insert before existing entries, so later births
     // paint first. Ordinary actors also occupy that array; only flags8 paint.
-    let mut pending: Vec<_> = state
-        .sprite_effects
-        .iter()
-        .enumerate()
-        .filter(|(_, effect)| {
-            matches!(effect.variant, 7 | 17 | 43 | 58) && effect.flags & 8 != 0 && effect.active
-        })
-        .map(|(index, effect)| {
-            let key =
-                (((effect.position.y + effect.raw_7f8) * 100.0 + 10030.0) + 0.5).floor() as u32;
-            (
-                index,
-                key.wrapping_add(effect.render_order_offset as u32),
-                effect.id,
-            )
-        })
-        .collect();
+    // The effect key 4586c0 uses (Entity+8 & 0x3ff) + 100 when Init set +7d8,
+    // as every flags8 site does; otherwise the y-based depth key.
+    let scheduler = &state.actor_scheduler;
+    let mut pending = Vec::new();
+    for (index, effect) in state.sprite_effects.iter().enumerate() {
+        if !(matches!(effect.variant, 7 | 17 | 43 | 58) && effect.flags & 8 != 0 && effect.active) {
+            continue;
+        }
+        let key = if effect.raw_7d8 {
+            let sequence = scheduler
+                .sequence_id(ActorRef {
+                    kind: ActorKind::Effect,
+                    id: effect.id,
+                })
+                .ok_or("background effect has no admitted Entity+8 sequence")?;
+            (sequence & 0x3ff) + 100
+        } else {
+            (((effect.position.y + effect.raw_7f8) * 100.0 + 10030.0) + 0.5).floor() as u32
+        };
+        pending.push((
+            index,
+            key.wrapping_add(effect.render_order_offset as u32),
+            effect.id,
+        ));
+    }
     pending.sort_by(|a, b| a.1.cmp(&b.1).then_with(|| b.2.cmp(&a.2)));
     for (index, _, _) in pending {
         let effect = &mut state.sprite_effects[index];

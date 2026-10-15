@@ -191,7 +191,9 @@ pub(crate) static FAMILIES: &[&Family] = &[
 /// that measure coverage read the port's NPC surface here instead of keeping
 /// a copy.
 pub fn implemented_npc_kinds() -> impl Iterator<Item = u32> {
-    FAMILIES.iter().flat_map(|family| family.kinds.iter().copied())
+    FAMILIES
+        .iter()
+        .flat_map(|family| family.kinds.iter().copied())
 }
 
 pub(crate) fn family(kind: u32) -> Option<&'static Family> {

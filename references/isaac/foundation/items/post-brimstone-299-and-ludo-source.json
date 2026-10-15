@@ -1,13 +1,17 @@
 {
   "schema": 1,
   "status": "SCOPED_SOURCE_BUILD_AND_RETAINED_COMPARISON_SNAPSHOT",
-  "main": "35b440877344e1d1c2fd5d9c9fa28fe7cf80a11a",
+  "main": "3df99031eff287a6745c0f7e994b7603e98203d5",
   "merged": {
     "298": "261dbd60b3921fed421a614ef80c52baaadb0cca",
     "299": "988ae6355c7956d918ff0e00eb329d313645b864",
     "304": "1f59bc2fe7311ee19706575f9b704d80830f56bc",
     "311": "53339e2ea8cdd588b1e47e3f786d9b7e139a2d41",
-    "322": "35b440877344e1d1c2fd5d9c9fa28fe7cf80a11a"
+    "322": "35b440877344e1d1c2fd5d9c9fa28fe7cf80a11a",
+    "307": "d56726797ad12976e9fdec53f3456c5b6161e184",
+    "321": "3e9d0241df42c30e62c530b6485ee28d84b0dacb",
+    "315": "03a8ea73ec78bb4c77b778e9a71c15c68a375a0c",
+    "317": "3df99031eff287a6745c0f7e994b7603e98203d5"
   },
   "ordinary299": {
     "ownBuilds": "production/strict Clippy/floor PASS",
@@ -241,7 +245,7 @@
       "actualCacheC98BothSides": 3,
       "incorrectGuard": "C98 == 0",
       "observedPortTears": 0,
-      "correctedProducer": "Corrected7e000d3f / WASM8120 produces real Tears; its failing report and pending450 rewind correction are recorded separately.",
+      "correctedProducer": "Historical8120 repaired the zero-only admission guard; finalC421 separately repairs controlled saved450 rewind. Both exact failing reports remain below.",
       "bodyContactLifecycleAcceptance": false
     },
     "correctedFunctionalComparison": {
@@ -313,8 +317,8 @@
           "reportSha256": "78a2c099d3034b33f348885212848ec79f2bce926e2e5442104d01dacbb32b7a"
         }
       ],
-      "selectedMatchedScope": "Fixed motion383 damage/born83C/radius/frictions/height/flags/colors/generic318/birthAge/Parent observations and571 counts/C18/cache/Room rows. Contact accepted queue and next-Full HP chains occur independently in both games (Native1/port2).",
-      "knownMotionDefect": "controlled saved450 rewind; peer-clear d234 source fix, next artifact/game qualification pending",
+      "selectedMatchedScope": "Historical8120 only. Fixed motion383 damage/born83C/radius/frictions/height/flags/colors/generic318/birthAge/Parent observations and571 counts/C18/cache/Room rows. Contact accepted queue and next-Full HP chains occur independently in both games (Native1/port2).",
+      "knownMotionDefect": "Historical8120 controlled saved450 rewind; its specific repair is qualified by finalC421 below. Other failures remain unchanged.",
       "remaining": [
         "strict physical/receiver identity/positions",
         "42 contact HP differences",
@@ -329,7 +333,146 @@
         "da0Differences": 7,
         "allPlayerControllerFieldsAccepted": false
       }
-    }
+    },
+    "sourceOnlyPRHeadScope": "Historical prequalification Draft head; the final landed source and independently qualified C421 producer are recorded below.",
+    "finalIntegralFunctionalComparison": {
+      "path": "/dev/shm/isaac-ludo307-integral-own-proof/integral-four-case-functional-summary.json",
+      "sha256": "91fee5f6ffe9ea6f5501bd31415a5a1fdd18560d3d30a585d4023941c9d56c70",
+      "source": "d234fd9ea78ed12af2cd97d47699d3b58d13d4cb",
+      "wasmSha256": "c421a00a80bd1e63a4dbe507ca1adccabefcfb29f663291925a253b10c9d2c23",
+      "mainMerge": "d56726797ad12976e9fdec53f3456c5b6161e184",
+      "mergeReceipt": {
+        "path": "/workspace/isaac-rebirth-browser/.cache/coordination/combat/ludo307-integration/merged.json",
+        "sha256": "581314c2e5e90c84069ce11f433a904f938a2aeeb56fbd66bb05e26f2facc3fb"
+      },
+      "qualificationClosure": {
+        "path": "/dev/shm/isaac-ludo307-integral-own-proof/qualification-closure.json",
+        "sha256": "95ee8c24d48eb6c27785767af0a5ab8ba3da48389b38c7033167f54d902bbafd"
+      },
+      "buildSeconds": {
+        "production": 26.642,
+        "strictClippy": 16.203,
+        "floor": 11.334
+      },
+      "retained405": {
+        "checks": 37965608,
+        "differences": 0
+      },
+      "status": "FAIL",
+      "checks": 134364,
+      "differences": 20813,
+      "bodies": 1541,
+      "fullRows": 770,
+      "fastRows": 771,
+      "cases": [
+        {
+          "case": "ludovico329-motion-phase0-v1",
+          "status": "FAIL",
+          "checks": 28704,
+          "differences": 4209,
+          "coverage": {
+            "pairedActualPlayingRows": 571,
+            "controlledTearBodies": 383,
+            "controlledTearFullGates": 191,
+            "controlledTearFastGates": 192
+          },
+          "reportSha256": "28e1030fe761bfdceea9d5ebb5fe935ac6c12d733755a548e6688d034625c72e"
+        },
+        {
+          "case": "ludovico329-contact-phase1-v1",
+          "status": "FAIL",
+          "checks": 47764,
+          "differences": 7835,
+          "coverage": {
+            "pairedActualPlayingRows": 572,
+            "controlledTearBodies": 384,
+            "controlledTearFullGates": 192,
+            "controlledTearFastGates": 192
+          },
+          "reportSha256": "d67fdc44ccc6ce7df37e164178372b859fdec105cf24886df301c43116e91c23"
+        },
+        {
+          "case": "ludovico329-os-0-v1",
+          "status": "FAIL",
+          "checks": 28765,
+          "differences": 4219,
+          "coverage": {
+            "pairedActualPlayingRows": 572,
+            "controlledTearBodies": 384,
+            "controlledTearFullGates": 192,
+            "controlledTearFastGates": 192
+          },
+          "reportSha256": "74b0653dbac0905ca0615cc75c24ea003a76ed985f9d0af7d302df9e6f96e6f7"
+        },
+        {
+          "case": "ludovico329-os-1-v1",
+          "status": "FAIL",
+          "checks": 29131,
+          "differences": 4550,
+          "coverage": {
+            "pairedActualPlayingRows": 578,
+            "controlledTearBodies": 390,
+            "controlledTearFullGates": 195,
+            "controlledTearFastGates": 195
+          },
+          "reportSha256": "15adc1c784fb7d250f3c8589f0ab9b064f01620b36aba8a115c2e2bb7ac3c2ca"
+        }
+      ],
+      "numericClassification": {
+        "path": "/dev/shm/isaac-ludo307-integral-own-proof/report-only-numeric-classification.json",
+        "sha256": "f2a9897f524e050b37bdd6fa83c204406dd30687b495aaecd33617225106b31a",
+        "status": "REPORT_ONLY_NO_REGRADE",
+        "noRegrade": true
+      },
+      "exactMotionScope": {
+        "cases": [
+          "ludovico329-motion-phase0-v1",
+          "ludovico329-os-0-v1",
+          "ludovico329-os-1-v1"
+        ],
+        "bodyRows": 1157,
+        "fields": [
+          "position448",
+          "velocity464",
+          "velocityDeltaB28",
+          "savedPosition450"
+        ],
+        "differences": 0,
+        "scope": "Only these three routes and actual body rows; identity/RNG/missing-owner failures remain."
+      },
+      "contactRoute": {
+        "case": "ludovico329-contact-phase1-v1",
+        "bodyRows": 384,
+        "positionDifferences": 259,
+        "velocityDifferences": 264,
+        "velocityDeltaB28Differences": 255,
+        "savedPosition450Differences": 258,
+        "firstPositionVelocityDifferencePresentation": 686,
+        "maxPositionEuclideanError": 47.42170146084022,
+        "maxVelocityEuclideanError": 4.882339838658294,
+        "nativeType18FifoObservationGates": [
+          821,
+          822,
+          825,
+          826
+        ],
+        "nativeType18NonlethalAppliedGate": 823,
+        "portFifoObservationGates": [],
+        "portAppliedGates": [],
+        "requiredPortMinimumEnqueueAndDrainPassed": false,
+        "scope": "Port has zero actual FIFO/drain witnesses. Older supported-minimum counters do not establish port contact coverage. First Tear motion mismatch precedes observed Native FIFO; report-only values establish no new timing, steering or actor-law repair."
+      },
+      "remaining": [
+        "Contact-route physical and receiver geometry differences",
+        "Required port accepted-enqueue and next-Full drain witnesses fail",
+        "Actor/receiver identity and seed/RNG mismatches",
+        "Unknown HP/class/mass/registry/ordinal owners and fallingSpeed differences",
+        "Unobserved atomic receiver velocity/registry/veto, lethal lifecycle, DOM/render and complete actor/lifecycle parity"
+      ],
+      "supersedesOnly": "The source-proven controlled saved450 rewind defect in8120; no other prior failure is regraded.",
+      "artifactScope": "Exact qualified C421 producer and retained inputs. Owner merged the reviewed source blobs with external renderer326; no full merged-tree build or whole-case parity is claimed."
+    },
+    "producerHistoryScope": "ownProducer, ownWasm, buildSeconds, functionalComparison and correctedFunctionalComparison retain the original and intermediate artifacts. finalIntegralFunctionalComparison records the independently qualified final C421 artifact and actual source landing."
   },
   "sourceOnlyDrafts": [
     {
@@ -339,21 +482,9 @@
       "ownGameAcceptance": false
     },
     {
-      "pr": 315,
-      "head": "a1768e04e2b17da708234fddcd575d05471e2115",
-      "scope": "tools: observe typed NPC14/18 contact queues",
-      "ownGameAcceptance": false
-    },
-    {
       "pr": 316,
       "head": "35d01c742130b746947214ddfb9154f06c350129",
       "scope": "Compare controlled Brimstone property and priority histories",
-      "ownGameAcceptance": false
-    },
-    {
-      "pr": 317,
-      "head": "ee14739c2b225c935140550098c186aa663c4ab4",
-      "scope": "tools: expose source-owned kind8 Tear fields",
       "ownGameAcceptance": false
     },
     {
@@ -368,5 +499,21 @@
   "retainedStandaloneInputs": {
     "path": "references/isaac/cases/item-composition/ludovico329-v1.json",
     "scope": "Four declared cases and literal Challenge/STB resources; no passing gameplay result follows from retaining them."
+  },
+  "typedContact315": {
+    "pr": 315,
+    "head": "336c87231c15240a86496943b951baa7757ccc72",
+    "scope": "Merged typed common NPC contact observer/comparer. Consumed C421 receiver observations retain port FIFO/drain minimum failures; no whole contact acceptance.",
+    "ownGameAcceptance": false,
+    "historicalSourceOnlyHead": "a1768e04e2b17da708234fddcd575d05471e2115",
+    "mainMerge": "03a8ea73ec78bb4c77b778e9a71c15c68a375a0c"
+  },
+  "kind8Observation317": {
+    "pr": 317,
+    "head": "5cb6a4646b14a6916c6bc7a8c70c6cb9311208a3",
+    "scope": "Merged optional kind8 observation fields consumed by the retained standalone329 comparison. Missing registry/ordinal, strict actor identity and contact/lifecycle evidence remain failures or gaps.",
+    "ownGameAcceptance": false,
+    "historicalSourceOnlyHead": "ee14739c2b225c935140550098c186aa663c4ab4",
+    "mainMerge": "3df99031eff287a6745c0f7e994b7603e98203d5"
   }
 }

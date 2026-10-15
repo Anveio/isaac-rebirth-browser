@@ -82,8 +82,8 @@ impl Default for WeaponCache {
     }
 }
 
-/// Source context admission, not a replacement native pointer. Main has no
-/// nonregular actor producer yet, so only actual fresh NULL C18 is admitted.
+/// Source context admission, separate from the registered actor reference.
+/// Fresh NULL C18 and each admitted actor transition have explicit owners.
 /// A real unsupported invocation invalidates that proof until the next run.
 #[derive(Clone, Debug, Default, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]

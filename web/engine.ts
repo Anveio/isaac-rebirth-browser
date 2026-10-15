@@ -18,8 +18,9 @@ export interface AttackColor { tint: [number,number,number,number]; sourceMiddle
 export interface Tear {
   id: number; x: number; y: number; vx: number; vy: number; age: number;
   spawnSeed: number; sourceVariant: number | null; collisionRadius: number; gridContact: boolean;
-  shotOrdinal: number; collisionDamage: number; baseDamage: number; scale: number; animationTier: number;
+  shotOrdinal: number | null; collisionDamage: number; baseDamage: number; scale: number; animationTier: number;
   attackFlags: [number,number]; sourceColor: AttackColor;
+  controlled?: { parent: ActorRef | null; active: boolean; dead: boolean; visible: boolean; entityFlags: number; configuredFriction: number; currentFriction: number; savedPosition: {x:number;y:number}; velocityDeltaB28: {x:number;y:number}; currentColor: AttackColor; birthGameUpdate: number; hitSequences: number[]; registryKnown: boolean; currentParamsKnown: boolean; childChainEmpty: boolean | null };
   motion: {
     position: {x: number; y: number}; presentedPosition: {x: number; y: number};
     velocity: {x: number; y: number}; height: number; fallingSpeed: number;
@@ -202,7 +203,7 @@ export interface Floor {
 export interface Room {
   left: number; right: number; top: number; bottom: number; appearance: RoomAppearance;
   descriptor: RoomDescriptor | null;
-  initializationGameUpdate: number | null; loaded: boolean;
+  initializationGameUpdate: number | null; loaded: boolean; sourceTearSlowdown2494: number | null;
   pathCosts: number[] | null;
   spawns: {tintedRockIndex: number; finalSpawnState: number; selectors: {groupIndex: number; gridIndex: number; category: "entity" | "grid"; type: number; variant: number; subtype: number; position: {x: number; y: number}; groupSeed: number; spawnSeed: number}[]} | null;
   pickups: Pickup[];

@@ -43,15 +43,14 @@ The new partial producer routes ordinary Monstro’s real BloodStart random bran
 
 ## Current source and actual-game qualification
 
-Current main `35b44087` includes ordinary Player Brimstone299, per-field comparer
-continuation311, the FireDelay descriptor304 and optional regular Tear variant298.
-The existing ordinary/Has118/controlled Knife and Number One/Libra owners remain
-in main. Draft307 has its own successful builds and retained regressions. Its original
-standalone Ludovico comparison fails on an admission defect; the corrected
-producer creates real Tears but retains a motion defect and failing comparison.
-Four Native and four public-WASM processes completed; their exit status did not
-establish functional actor parity. A capture or transport
-result alone establishes no functional parity.
+Current main `3df99031` includes ordinary Player Brimstone299, per-field comparer
+continuation311, the FireDelay descriptor304, optional regular Tear variant298
+and standalone Ludovico Tear307. The existing ordinary/Has118/controlled Knife
+and Number One/Libra owners remain in main. Ludovico's final C421 artifact has
+successful owned builds and retained regressions; three routes match selected
+motion fields, while the complete four-case comparison still fails. The exact
+source landing preserves external renderer326; no new full merged-tree build
+or whole-game parity follows from that merge.
 
 PR299's OWN production, strict Clippy and floor checks pass. Four retained
 405-command public-WASM routes compare 37,958,272 preexisting fields with zero
@@ -77,39 +76,41 @@ sourceVariant as optional: Some0 requires the closed normal-Isaac, current
 primary1, flags0 and positive1/4/6 domain. Other contexts remain unknown; this
 regular-kind1 proof does not admit kind8 or establish Native variant parity.
 
-Draft307's separately produced `d1e58278` / WASM `d9c35ac7` passes production,
-strict Clippy and floor checks. Its current four-route retained regular
-regression passes **37,965,608 / 0**; the original **37,966,740 / 2,264 FAIL**
-remains preserved with the new persisted-Room-field witness separate. Two
-retained reciprocal Libra histories pass **503,611 / 0**, with 631 gates and 93
-post-grant rows each. The first still lacks 631 Native Familiar observations.
-These are build and retained-regression results. The first four standalone329
-Original/public-WASM comparisons fail **85,050 / 11,620**: motion16,448/2,301,
-contact35,474/4,684, OS0 16,477/2,300 and OS1 16,651/2,335. Both games observe
-C98=3, but the built port's zero-only guard suppresses every controlled Tear
-birth. The intended body/contact/lifetime contracts were not exercised. That
-failed producer and the earlier OS0 guard-stop remain retained.
+Merged 307's final `d234fd9e` / WASM `c421a00a` passes production, strict Clippy
+and floor checks, plus **37,965,608 / 0** retained regular-field comparisons.
+Its four retained Original/public-WASM cases remain **134,364 checks / 20,813
+FAIL**, with 1,541 controlled bodies (770 Full,771 Fast). The fixed motion case
+and both recorded OS cases match position, velocity, B28 movement delta and
+saved position450 across **1,157 body rows**. This qualifies the source-confirmed
+saved-position rewind correction, without accepting identity/seed/RNG or missing
+actor fields.
 
-The corrected `7e000d3f` / WASM `8120d8e9` reuses those four Native references
-and remains **134,350 checks / 24,248 FAIL**, with 1,541 actual controlled bodies
-(770 Full, 771 Fast). Its strict four-route regression passes **37,965,608 / 0**.
-The fixed motion case matches 383 damage, born83C, radius, friction, height,
-flags, color, generic318, birth-age and Parent observations; all 571 counts,
-C18, cache and Room rows match. Contact minimum accepted-queue and next-Full HP
-chains are observed independently in both games (one Native, two port), while
-strict receiver identity/positions, 42 HP differences and 10 queue differences
-remain red. The controlled saved450 rewind is a source-confirmed motion defect;
-its correction is pending. Falling speed, identity/seed and missing actor owners
-also remain unresolved. In that fixed motion case, C74 and BB0 each retain
-188 prebirth differences and DA0 retains seven. The peer-clear saved450 source
-fix still needs its next artifact/game qualification. These selected matches do
-not establish actor, Player/controller or whole-case parity.
+The contact case still differs on 259 position, 264 velocity, 255 B28 and258
+saved-position rows among 384 bodies. Its first P/V mismatch is at presentation 686;
+observed Native FIFO begins at 821. Native type 18 has FIFO observations at 821/822
+and 825/826, then a valid nonlethal HP application at 823. The port has **no actual
+FIFO or drain observations** and fails its required minimum enqueue/drain
+witnesses. Older supported-minimum counters are not port contact evidence.
+Receiver geometry, strict source identities, registry/atomic velocity/veto,
+lethal lifecycle and unknown owners remain gaps or failures. The report-only
+classification establishes no new timing, steering or actor-law correction.
 
-Draft314 declares four ordinary-Brim contact cases;315 adds typed14/18 contact
-observations/comparison;316 adds controlled-Brim property/priority history;317
+Earlier producers remain separate. Original `d1e58278` / WASM `d9c35ac7` retains
+**85,050 / 11,620 FAIL** with zero port Tears because its guard required C98=0
+while both games observed 3. Intermediate `7e000d3f` / WASM `8120d8e9` retains
+**134,350 / 24,248 FAIL**, including 42 strict contact HP and 10 queue differences;
+its independent queue/HP chains are not final C421 contact coverage. The prior
+**37,966,740 / 2,264 FAIL** regular report and OS0 guard-stop remain preserved.
+Two retained reciprocal Libra histories pass **503,611 / 0**, with 631 gates and
+93 post-grant rows each; the first still lacks 631 Native Familiar observations.
+Falling speed, prelude timers, missing registry/ordinal and complete
+actor/contact/lifecycle or DOM parity remain unaccepted.
+
+Draft314 declares four ordinary-Brim contact cases; merged315 adds typed14/18 contact
+observations/comparison;316 adds controlled-Brim property/priority history; merged317
 adds optional kind8 Room2494/born83C/velocity-delta fields. Draft318 extracts the
 unchanged Damage operator and its footprint for a separate next-producer
-qualification. All five are source-only at this snapshot. Runtime312's
+qualification. The other leaves remain separate Drafts. The 315/317 tools are consumed by the retained standalone 329 comparison, with strict contact and observation gaps retained; their presence is not gameplay acceptance. Runtime312's
 controlled Brimstone and its future controlled-Tear replacement join remain
 separate Draft scope. Missing actor fields, FIFO attribution and lifecycle
 events stay failures. The [current compact record](../references/isaac/foundation/items/post-brimstone-299-and-ludo-source.json)
@@ -340,7 +341,8 @@ identity/seed/Init8A8, shared-MT and child-geometry failures. Snapshot observati
 leave short Remove/Uninit events unqualified. No DOM/render, full624, contact/lifetime
 or whole triple parity follows. Earlier grades and OS prefixes remain unchanged;
 ordinary Player Brimstone299 is now merged with the scoped results above;
-controlled Tear307 remains an unmerged Draft whose first own-game comparison fails.
+controlled Tear307 is also merged; its final retained four-case comparison remains
+134,364 checks / 20,813 failures, with contact and observation gaps above.
 
 Readiness287 passes a warm production retry and strict Clippy, but its floor
 build stopped at the working-memory floor. Its earlier production capacity stop

@@ -17,7 +17,7 @@ ROOT = Path(__file__).resolve().parents[2]
 EXPECTED_SHA = os.environ.get('ISAAC_ORIGINAL_SHA')
 if not isinstance(EXPECTED_SHA, str) or re.fullmatch(r'[0-9a-f]{64}', EXPECTED_SHA) is None:
     raise ValueError('ISAAC_ORIGINAL_SHA must provide the driver-verified canonical binary SHA256')
-SOURCE_FIELDS = frozenset(('playerMovementD9c', 'knifeChildChain4a0'))
+SOURCE_FIELDS = frozenset(('playerMovementD9c', 'knifeChildChain4a0', 'npc14And18DamageQueue', 'kind8TearFields'))
 spec = importlib.util.spec_from_file_location('composition_items', ROOT / 'tools/original/item-observer.py')
 base = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(base)
@@ -50,6 +50,8 @@ def observe(pid, context):
     supplemental = {'schema': 1, 'scope': 'source Player weapon slots, C0C charge and common attack actors; full controller laws remain separately scoped',
                     'memoryWritten': False, 'executableMappingsRead': False, 'bytesRead': 0,
                     'nativeBinarySha256': EXPECTED_SHA, 'requestedSourceFields': requested_fields, 'players': [], 'attacks': [], 'impacts': [], 'contactNpcs': []}
+    if 'npc14And18DamageQueue' in requested_fields:
+        supplemental['commonContactNpcs'] = []
     stopped = False
     try:
         parent = next(line.split(':', 1)[1].strip() for line in Path(f'/proc/{pid}/status').read_text().splitlines() if line.startswith('PPid:'))
@@ -168,6 +170,10 @@ def observe(pid, context):
                 if 'playerMovementD9c' in requested_fields:
                     supplemental['players'][-1]['movementDirectionD9c'] = i32(player + 0xd9c)
             room = u64(game + 0x8180)
+            if 'kind8TearFields' in requested_fields:
+                # 5414DA..5414E8/542E08..542E16 dereference the actual Room;
+                # zero/negative/positive are read values, never a default.
+                supplemental['sourceTearSlowdown2494'] = i32(room + 0x2494)
             supplemental['roomInitializedGameAge159c'] = u32(room + 0x159c)
             supplemental['roomLoaded'] = flags(room, 1)[0]
             age_delta = (supplemental['gameAge'] - supplemental['roomInitializedGameAge159c']) & 0xffffffff
@@ -202,9 +208,13 @@ def observe(pid, context):
                 if not actor:
                     continue
                 identity = actor_ref(actor)
-                if identity['kind'] == 217:
+                common_receiver = ('npc14And18DamageQueue' in requested_fields and identity['kind'] in (14, 18))
+                if identity['kind'] == 217 or common_receiver:
+                    # 555700 routes14/18 through the generic1088 NPC pool;
+                    # 49EA17 stores66EF30, whose+38 is446CF0. Require the
+                    # actual class before interpreting its common damage FIFO.
                     if u64(actor) != 0x66ef30:
-                        raise ValueError('Contact Dip must own the actual NPC class')
+                        raise ValueError('Contact receiver must own the actual common NPC class')
                     visible, active, dead = flags(actor + 0x31d, 3)
                     begin, end = u64(actor + 0x360), u64(actor + 0x368)
                     if end < begin or (end - begin) % 0x30 or (end - begin) // 0x30 > 128:
@@ -214,14 +224,25 @@ def observe(pid, context):
                         records.append({'amount': floats(record), 'flags': u32(record + 4),
                             'sourceType': u32(record + 8), 'sourceVariant': u32(record + 12),
                             'actualAttacker': actor_ref(u64(record + 0x28))})
-                    supplemental['contactNpcs'].append({'identity': identity, 'inActiveManager': actor in active_pointers,
+                        if common_receiver:
+                            # 446E24..446EAB copies the actual EntityRef. These
+                            # historical values are not reread from its source.
+                            records[-1].update({'sourceRaw1c': u32(record + 0x10), 'sourceRaw20': u32(record + 0x14),
+                                'sourcePosition': floats(record + 0x18, 2), 'sourceVelocity': floats(record + 0x20, 2)})
+                    row = {'identity': identity, 'inActiveManager': actor in active_pointers,
                         'active': active, 'dead': dead, 'visible': visible, 'hp': floats(actor + 0x484),
                         'maxHp': floats(actor + 0x488), 'pendingDamage': floats(actor + 0x378),
                         'pendingFlags': u32(actor + 0x37c), 'pendingDamageRecords': records,
                         'canShutDoors': flags(actor + 0x103c, 1)[0], 'boss': flags(actor + 0x103d, 1)[0],
                         'position': floats(actor + 0x448, 2), 'velocity': floats(actor + 0x464, 2),
                         'collisionRadius': floats(actor + 0x474), 'entityCollisionClass': u32(actor + 0x344),
-                        'raw494': flags(actor + 0x494, 1)[0], 'entityFlags': u32(actor + 0x318)})
+                        'raw494': flags(actor + 0x494, 1)[0], 'entityFlags': u32(actor + 0x318)}
+                    if common_receiver:
+                        row.update({'npcState': u32(actor + 0xf50), 'npcFrameAge': u32(actor + 0xf60),
+                            'champion': flags(actor + 0x103f, 1)[0]})
+                        supplemental['commonContactNpcs'].append(row)
+                    else:
+                        supplemental['contactNpcs'].append(row)
                 if identity['kind'] not in VTABLES or (identity['kind'] == 1000 and (identity['variant'],identity['subtype']) != (50,1)):
                     continue
                 if u64(actor) != VTABLES[identity['kind']]:
@@ -249,6 +270,16 @@ def observe(pid, context):
                     # 7D8 is falling speed in Tear; its attack flags live at
                     # 7F0. Knife's distinct attack flags are at 7D8 below.
                     row['attackFlags7f0'] = str(u64(actor + 0x7f0))
+                    if 'kind8TearFields' in requested_fields:
+                        writer = ((identity['variant'], identity['subtype']) == (0, 0)
+                                  and bool(int(row['attackFlags7f0']) & (1 << 33)))
+                        row['sourceKind8WriterScope'] = writer
+                        # Completed public gates expose initialized actors:
+                        # 54240F/5411E8 own83C; Init5424FB ownsB28, then
+                        # Full542DDD..542DF5 writes the actual velocity delta.
+                        # Fast5414A0 retainsB28; do not synthesize a Fast zero.
+                        row['baseDamage83c'] = floats(actor + 0x83c) if writer else None
+                        row['velocityDeltaB28'] = floats(actor + 0xb28, 2) if writer else None
                     row['height7d4'] = floats(actor + 0x7d4)
                     row['fallingSpeed7d8'] = floats(actor + 0x7d8)
                     row['fallingAcceleration7dc'] = floats(actor + 0x7dc)
