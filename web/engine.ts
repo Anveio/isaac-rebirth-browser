@@ -30,7 +30,7 @@ export interface Tear {
 export interface ActorSprite {
   animation: string; frame: number; playing: boolean; speed: number; scale: {x: number; y: number};
   offset: {x: number; y: number}; flipX: boolean; flipY: boolean;
-  rotation: number; layerFlips: Record<string, [boolean, boolean]>;
+  rotation: number; layerFlips: Record<string, [boolean, boolean]>; layerOffsets?: Record<string, [number, number]>;
   tint: [number, number, number, number]; offsets: [number, number, number];
 }
 export interface Familiar {
@@ -53,7 +53,7 @@ export interface SpriteEffect {
   collisionRadius: number; collisionMass: number; collisionDamage: number; hp: number; maxHp: number;
   gridCollisionClass: number; entityCollisionClass: number; flags: number; visible: boolean; active: boolean; removed: boolean;
   renderOrderOffset: number; lifetimeDivisor: number; timeToLive: number; raw7f4: number; raw7f8: number;
-  raw7d8: boolean; poopEffect?: PoopEffect; creepEffect?: { counter: number; size: number };
+  raw7d8: boolean; poopEffect?: PoopEffect; flyEffect?: { kind: string }; creepEffect?: { counter: number; size: number };
   sprite: ActorSprite; fullUpdates: number;
   bloodEffect?: {kind: "poof04" | "bloodGush"};
 }
@@ -215,7 +215,7 @@ export interface Room {
     position: {x: number; y: number}; presentedPosition: {x: number; y: number}; velocity: {x: number; y: number};
     hp: number; maxHp: number; collisionRadius: number; collisionMass: number; collisionDamage: number;
     gridCollisionClass: number; entityCollisionClass: number; canShutDoors: boolean; boss: boolean;
-    state: number; frameAge: number; animationFrame: number; animation: string; animationClock: number; animationPlaying: boolean; visible: boolean; savedInitializedState: number; shadowSize: number; dead: boolean; removed: boolean; raw494: boolean; overlay?: { animation: string; frame: number; clock: number; playing: boolean };
+    state: number; frameAge: number; animationFrame: number; animation: string; animationClock: number; animationPlaying: boolean; visible: boolean; savedInitializedState: number; shadowSize: number; dead: boolean; removed: boolean; raw494: boolean; spriteScale?: number; overlay?: { animation: string; frame: number; clock: number; playing: boolean };
     damage: {pendingDamage: number; pendingFlags: number};
     keeper: {anchor: {x: number; y: number}; entityFlags: number; stateFrame: number; countdown: number;
       animation: string; animationClock: number; animationPlaying: boolean; tint: number[]; offsets: number[]} | null;

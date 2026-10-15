@@ -105,6 +105,7 @@ impl NpcEffectAdmission<'_> {
             full_updates: 0,
             blood_effect: Some(controller),
             creep_effect: None,
+            fly_effect: None,
             poop_effect: None,
         });
         self.scheduler.admit(ActorRef {

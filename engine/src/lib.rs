@@ -30,6 +30,7 @@ pub mod controlled_tear;
 mod creep_effects;
 pub mod dingle;
 pub mod dips;
+pub mod duke;
 mod doors;
 mod effects;
 pub mod enemy_projectiles;
@@ -39,6 +40,7 @@ mod technology;
 pub use entities::{implemented_npc_kinds, supports_npc_selector};
 pub mod familiars;
 pub mod fireplaces;
+pub mod fly_effects;
 pub mod floor;
 mod fmath;
 pub mod gib_counts;
@@ -555,6 +557,10 @@ pub struct State {
     pub fire_particles: Vec<fireplaces::Ember>,
     pub next_effect: u32,
     pub sprite_effects: Vec<familiars::SpriteEffect>,
+    /// Tears in the last contact pass's tear partition (4545d0), read by
+    /// tiny flies at live positions in the next actor pass.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub tear_partition: Vec<u32>,
     #[serde(default)]
     pub lasers: Vec<lasers::Laser>,
     #[serde(default)]
@@ -767,6 +773,7 @@ impl Game {
                 fire_particles: Vec::new(),
                 next_effect: 1,
                 sprite_effects: Vec::new(),
+                tear_partition: Vec::new(),
                 lasers: Vec::new(),
                 knives: Vec::new(),
                 attack_runtime: attack_runtime::AttackRuntime::default(),
@@ -2178,6 +2185,13 @@ impl Game {
             npcs::nonplayer_contacts(&mut self.state)?;
             enemy_projectiles::player_contacts(&mut self.state)?;
             // Actual full manager contact pass uses typed ground coordinates.
+            self.state.tear_partition = self
+                .state
+                .tears
+                .iter()
+                .filter(|tear| tear.motion.lifetime == projectiles::Lifetime::Alive)
+                .map(|tear| tear.id)
+                .collect();
             let tears: Vec<_> = self
                 .state
                 .tears
@@ -2606,6 +2620,13 @@ impl Game {
             .descriptor
             .as_ref()
             .map_or(1, |descriptor| descriptor.template.room_type);
+        let tear_probe = fly_effects::tear_partition(&self.state);
+        let knife_probe: Vec<_> = self
+            .state
+            .knives
+            .iter()
+            .map(|knife| (knife.position, knife.collision_radius))
+            .collect();
         let mut births = Vec::new();
         let (before, rest) = self.state.room.npcs.split_at_mut(index);
         let (npc, after) = rest.split_first_mut().expect("indexed NPC");
@@ -2635,6 +2656,8 @@ impl Game {
                 },
                 room_type,
                 peers: entities::Peers { before, after },
+                tear_probe: &tear_probe,
+                knife_probe: &knife_probe,
             },
             &mut births,
         )?;
@@ -2685,6 +2708,20 @@ impl Game {
                 enemy_projectiles::EnemyProjectile::birth(id, parent, shot)
             }),
             entities::Birth::CreepHit => creep_effects::hurt_player(&mut self.state),
+            entities::Birth::Spawned(spawned) => {
+                self.admit_npc_birth(index, entities::Birth::Npc(spawned.selector))?;
+                let npc = self.state.room.npcs.last_mut().expect("admitted NPC birth");
+                npc.velocity = spawned.velocity;
+                npc.no_appear = true;
+                npc.spawner_type = spawned.spawner_type;
+                npc.boss_spawned = spawned.boss_spawned;
+                if spawned.scale != 1.0 {
+                    npc.sprite_scale = Some(spawned.scale);
+                }
+                npc.max_hp *= spawned.health_scale;
+                npc.hp *= spawned.health_scale;
+                Ok(())
+            }
             entities::Birth::Child(selector) => {
                 self.admit_npc_birth(index, entities::Birth::Npc(selector))?;
                 let id = {

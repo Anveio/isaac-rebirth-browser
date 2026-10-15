@@ -62,6 +62,9 @@ pub struct Sprite {
     pub rotation: f32,
     #[serde(default)]
     pub layer_flips: std::collections::BTreeMap<u32, [bool; 2]>,
+    /// Per-layer LayerState offset (+0x30), in anm2 pixels.
+    #[serde(default, skip_serializing_if = "std::collections::BTreeMap::is_empty")]
+    pub layer_offsets: std::collections::BTreeMap<u32, [f32; 2]>,
     pub flip_x: bool,
     #[serde(default)]
     pub flip_y: bool,
@@ -82,6 +85,7 @@ impl Sprite {
             offset: ZERO,
             rotation: 0.0,
             layer_flips: std::collections::BTreeMap::new(),
+            layer_offsets: std::collections::BTreeMap::new(),
             flip_x: false,
             flip_y: false,
             tint: white(),
@@ -248,6 +252,8 @@ pub struct SpriteEffect {
     pub blood_effect: Option<crate::blood_effects::Controller>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub creep_effect: Option<crate::creep_effects::Controller>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub fly_effect: Option<crate::fly_effects::Controller>,
 }
 
 impl SpriteEffect {
@@ -408,6 +414,7 @@ impl NpcEffectAdmission<'_> {
             poop_effect: None,
             blood_effect: None,
             creep_effect: None,
+            fly_effect: None,
         });
         self.scheduler.admit(ActorRef {
             kind: ActorKind::Effect,
@@ -418,6 +425,13 @@ impl NpcEffectAdmission<'_> {
 }
 
 pub fn advance_effect(state: &mut State, phase: Phase, id: u32) -> Result<(), String> {
+    if state
+        .sprite_effects
+        .iter()
+        .any(|effect| effect.id == id && effect.fly_effect.is_some())
+    {
+        return crate::fly_effects::advance(state, phase, id);
+    }
     if state
         .sprite_effects
         .iter()
@@ -806,6 +820,7 @@ impl NpcEffectAdmission<'_> {
             poop_effect: None,
             blood_effect: None,
             creep_effect: None,
+            fly_effect: None,
         });
         // Room5c6940 assigns the actual sequence first; Manager4524f0 then routes
         // flags8 to its separate background pool rather than the ordinary array.

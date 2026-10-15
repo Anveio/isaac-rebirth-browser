@@ -140,6 +140,7 @@ fn dying_boss(npc: &mut Npc, mut friction: f32) -> Result<(), String> {
     }
     npc.death_frame = frame;
     update_sprite(npc)?;
+    npc.friction = friction;
     npc.velocity = npc.velocity * friction;
     npc.position = npc.position + npc.velocity;
     npc.presented_position = npc.position;
@@ -311,6 +312,7 @@ fn advance_full(
         return dying_boss(npc, friction);
     }
     update_sprite(npc)?;
+    npc.friction = friction;
     npc.velocity = npc.velocity * friction;
     npc.position = npc.position + npc.velocity;
     npc.presented_position = npc.position;

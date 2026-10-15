@@ -214,7 +214,7 @@ export class Renderer {
       // A dying boss (state 16) keeps drawing its death clip.
       if (npc.removed || (npc.dead && !npc.monstro && !npc.dip && npc.state !== 16) || (!npc.keeper && !npc.visible)) continue;
       // Sprite Scale (+2c4): 1.15 for champions, otherwise the fresh 1.
-      const scale = npc.champion?.scale ?? 1;
+      const scale = npc.spriteScale ?? npc.champion?.scale ?? 1;
       // Sprite Color (+2d0): champion table colour or a timed hit flash.
       const color = { tint: npc.spriteColor.current.tint, offsets: npc.spriteColor.current.offset };
       this.drawnNpcs.push({ kind: npc.kind, spawnSeed: npc.spawnSeed, scale: [scale, scale] });
@@ -369,6 +369,27 @@ export class Renderer {
             BlueTint: sprite.tint[2] * 255, AlphaTint: sprite.tint[3] * 255,
             RedOffset: sprite.offsets[0] * 255, GreenOffset: sprite.offsets[1] * 255, BlueOffset: sprite.offsets[2] * 255,
           }} });
+        ctx.restore();
+        continue;
+      }
+      if (effect.flyEffect) {
+        // Duke effects: the smoke draws 40 above its ground (+458) with its
+        // colour multiplying every layer; a dying tiny fly's Main layer falls
+        // onto its shadow (LayerState+0x30).
+        const sprite = effect.sprite;
+        const actor = effect.variant === 1 ? "gfx/1000.001_bomb explosion.anm2"
+          : effect.variant === 2 ? "gfx/1000.002_blood explosion.anm2" : "gfx/1000.033_tiny fly.anm2";
+        const fall = sprite.layerOffsets?.[0]?.[1];
+        const layerScales = Object.fromEntries(Object.entries(sprite.layerFlips).map(([layer, flips]) =>
+          [layer, [flips[0] ? -1 : 1, flips[1] ? -1 : 1] as const]));
+        ctx.save();
+        ctx.translate((effect.presentedPosition.x + effect.renderOffset.x) * 0.65 + 32,
+          (effect.presentedPosition.y + effect.renderOffset.y) * 0.65 - 46);
+        ctx.rotate(sprite.rotation * Math.PI / 180);
+        ctx.scale(sprite.scale.x * (sprite.flipX ? -1 : 1), sprite.scale.y * (sprite.flipY ? -1 : 1));
+        this.assets.draw(ctx, actor, sprite.animation, 0, 0, sprite.frame, {
+          layerScales, color: { tint: sprite.tint, offsets: sprite.offsets },
+          ...(fall === undefined ? {} : { overrides: { 0: { YPosition: -16 + fall } } }) });
         ctx.restore();
         continue;
       }

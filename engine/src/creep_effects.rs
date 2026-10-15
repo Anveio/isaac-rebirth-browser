@@ -95,6 +95,7 @@ impl NpcEffectAdmission<'_> {
                 counter: 0,
                 size: 1.0,
             }),
+            fly_effect: None,
         });
         self.scheduler.admit(ActorRef {
             kind: ActorKind::Effect,
