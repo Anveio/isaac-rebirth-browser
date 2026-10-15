@@ -17,7 +17,7 @@ ROOT = Path(__file__).resolve().parents[2]
 EXPECTED_SHA = os.environ.get('ISAAC_ORIGINAL_SHA')
 if not isinstance(EXPECTED_SHA, str) or re.fullmatch(r'[0-9a-f]{64}', EXPECTED_SHA) is None:
     raise ValueError('ISAAC_ORIGINAL_SHA must provide the driver-verified canonical binary SHA256')
-SOURCE_FIELDS = frozenset(('playerMovementD9c', 'knifeChildChain4a0', 'npc14And18DamageQueue', 'kind8TearFields', 'ordinaryTechnology', 'ordinaryDrFetusBombs'))
+SOURCE_FIELDS = frozenset(('playerMovementD9c', 'knifeChildChain4a0', 'npc14And18DamageQueue', 'kind8TearFields', 'ordinaryTechnology', 'ordinaryDrFetusBombs', 'controlledTechnology7x2x1'))
 spec = importlib.util.spec_from_file_location('composition_items', ROOT / 'tools/original/item-observer.py')
 base = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(base)
@@ -282,8 +282,8 @@ def observe(pid, context):
                     #7EC's initial/global ordinal writer is unowned. Its raw
                     # padding is not read or substituted with a numeric zero.
                 if identity['kind'] not in VTABLES or (identity['kind'] == 1000 and (identity['variant'],identity['subtype']) != (50,1)):
-                    if not ('ordinaryTechnology' in requested_fields and identity['kind'] == 1000
-                            and (identity['variant'], identity['subtype']) == (50, 0)):
+                    if not (('ordinaryTechnology' in requested_fields or 'controlledTechnology7x2x1' in requested_fields)
+                            and identity['kind'] == 1000 and (identity['variant'], identity['subtype']) == (50, 0)):
                         continue
                 if u64(actor) != VTABLES[identity['kind']]:
                     raise ValueError('Source attack family has an unexpected virtual class')
@@ -405,6 +405,19 @@ def observe(pid, context):
                             'subdivisions': u32(actor + 0x814) if technology_writer else None,
                             'mode': u32(actor + 0x868) if technology_writer else None,
                             'length': floats(actor + 0x86c) if technology_writer else None}
+                    if 'controlledTechnology7x2x1' in requested_fields:
+                        #4799D0 initializes actual7/2/1 Line50/mode1/width60.
+                        #477DC0 owns the ring vectors; preserve other typed fields.
+                        controlled_technology_writer = (identity['variant'] == 2 and identity['subtype'] == 1
+                            and row['linkedParent'] is not None and row['linkedParent']['kind'] == 1
+                            and not row['laser']['firstUpdate'] and row['laser']['lineEnabled']
+                            and len(points) >= 2)
+                        row['laser']['controlledTechnologyLine'] = {
+                            'sourceWriterScope': controlled_technology_writer,
+                            'width': floats(actor + 0x810) if controlled_technology_writer else None,
+                            'subdivisions': u32(actor + 0x814) if controlled_technology_writer else None,
+                            'mode': u32(actor + 0x868) if controlled_technology_writer else None,
+                            'length': floats(actor + 0x86c) if controlled_technology_writer else None}
                 if identity['kind'] == 1000:
                     # v2 ordinary Impact contract5187908b:7D8 is a raw u8,
                     # render depth lives at7F8; remaining7F0 starts-1.
@@ -415,6 +428,12 @@ def observe(pid, context):
                         #Actual479732 and479773 owners;814 is not Sprite2CC.
                         row['impact']['technology'] = {'spriteFlipX': flags(actor + 0x2fc, 1)[0],
                                                        'raw814': floats(actor + 0x814)}
+                    if ('controlledTechnology7x2x1' in requested_fields
+                            and identity['variant'] == 50 and identity['subtype'] == 0):
+                        #479732/479773 own flip2FC and raw814 before childFull.
+                        #raw814 is independent of Sprite.rotation2CC.
+                        row['impact']['controlledTechnology'] = {
+                            'spriteFlipX': flags(actor + 0x2fc, 1)[0], 'raw814': floats(actor + 0x814)}
                     supplemental['impacts'].append(row)
                 else:
                     supplemental['attacks'].append(row)
