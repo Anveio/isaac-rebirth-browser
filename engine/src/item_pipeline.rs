@@ -71,6 +71,11 @@ impl<'a> ItemInputs<'a> {
         Ok(Self { owner })
     }
 
+    /// Actual D6C requests still uncompleted by their source callbacks.
+    pub(crate) fn pending_cache(self) -> CacheMask {
+        CacheMask(self.owner.unevaluated_cache_flags)
+    }
+
     pub(crate) fn owned_count(self, id: usize) -> i32 {
         self.owner.owned_counts[id]
     }
