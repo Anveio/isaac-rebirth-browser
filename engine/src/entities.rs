@@ -94,6 +94,24 @@ pub(crate) fn no_grid_query(_: &mut Npc, _: &Grid) -> Result<(), String> {
 
 /// Source class3 clamps the center first. Families with zero grid
 /// collision points have an empty sample loop after it.
+/// Ground walkers (grid class 5, authored collision points) resolve against
+/// rocks, pits and walls with the source nonplayer ground collider built from
+/// their own radius and point count, as Dips do; other classes clamp.
+pub(crate) fn ground_collision(npc: &mut Npc, grid: &Grid) -> Result<(), String> {
+    let points = crate::content::entity(npc.kind, npc.variant).grid_points;
+    if npc.grid_collision_class != 5 || points == 0 {
+        return clamp_walls(npc, grid);
+    }
+    let collider = crate::grid::Collider::new(crate::grid::CollisionGeometry {
+        radius: npc.collision_radius,
+        scale: crate::motion::WorldVector { x: 1.0, y: 1.0 },
+        points,
+    })?;
+    collider.resolve_nonplayer_ground(grid, &mut npc.position, &mut npc.velocity, false)?;
+    npc.presented_position = npc.position;
+    Ok(())
+}
+
 pub(crate) fn clamp_walls(npc: &mut Npc, grid: &Grid) -> Result<(), String> {
     if npc.grid_collision_class == 3 {
         npc.position = grid.clamp_room(npc.position, 0.0);

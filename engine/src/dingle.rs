@@ -22,7 +22,7 @@ pub(crate) const FAMILY: Family = Family {
     kinds: &[261],
     spawn,
     advance,
-    post_contact_grid: crate::entities::clamp_walls,
+    post_contact_grid: crate::entities::ground_collision,
     entity_flags: crate::entities::ordinary_flags,
     occupancy: crate::entities::Occupancy::Items,
 };
