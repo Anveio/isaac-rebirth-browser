@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "status": "SCOPED_MERGED_EPIC_ORDINARY2_COPIED_DAMAGE_SHAKE_WITH_STRICT_FAILURES_PRESERVED",
-  "main": "48b9f4ef73d351fb7a72b4b2efe85127b1cdc86d",
+  "status": "SCOPED_PRODUCTION3_FIRST_REFERENCES_MAIN_RAW_FAILURES_AND_SAVED_HISTORY_WITH_UNGRADED_IDENTITIES",
+  "main": "30e5ea6279ab8a2eb2424b09bb25133ed4a8f838",
   "merged": {
     "298": "261dbd60b3921fed421a614ef80c52baaadb0cca",
     "299": "988ae6355c7956d918ff0e00eb329d313645b864",
@@ -1286,7 +1286,9 @@
     "correctedAndMerged": [
       362
     ],
-    "remainingNoDuplicateProved": true
+    "remainingNoDuplicateProved": true,
+    "snapshotMain": "48b9f4ef73d351fb7a72b4b2efe85127b1cdc86d",
+    "historicalNotCurrentCensus": true
   },
   "currentPrivateProduction2Evidence": {
     "artifact": {
@@ -1406,5 +1408,522 @@
     },
     "notWholeCurrentMainQualification": true,
     "snapshotMain": "48b9f4ef73d351fb7a72b4b2efe85127b1cdc86d"
+  },
+  "currentPrivateProduction3Evidence": {
+    "factAuthority": {
+      "path": "/dev/shm/isaac-p3-main-contact-facts-v1/facts-index.json",
+      "bytes": 17149,
+      "sha256": "cc8e034592f61aee65f614d753dfb16d922857d6deb0252aa5d4d3c25be9a8a1"
+    },
+    "snapshotMain": "30e5ea6279ab8a2eb2424b09bb25133ed4a8f838",
+    "production3Artifact": {
+      "sourceHead": "b25a85e7d03ae7215b9c8a74c71050a0e3b2894e",
+      "sourceTree": "0642c118de8b072e0eae82261c4d25d0feee40a7",
+      "binding": {
+        "path": "/dev/shm/isaac-player-items-production3-own-proof/artifact-binding-own-gameplay.json",
+        "sha256": "11f8e07986e5610617aa70adea6ab6d4f88bf1fe2adde179973e5634492fdc83"
+      },
+      "wasmSha256": "9d30105b33c2e57d116ca5cbab4d404d385a5f6727a05054368d22f890237f0f",
+      "normalProduction": {
+        "path": "/dev/shm/isaac-player-items-production3-own-proof/attempt2/check-build-status.json",
+        "sha256": "ee4090b7ff2bf437e6ad6999f0d549730d9946ae81dba970a39a5695024a2fae",
+        "head": "b25a85e7d03ae7215b9c8a74c71050a0e3b2894e",
+        "stage": "check-build",
+        "status": "pass",
+        "exitCode": 0,
+        "actualWait": true,
+        "seconds": 29.74690341949463,
+        "sourceBeforeEqualsEnd": true
+      },
+      "floorPending": true,
+      "clippyPending": true
+    },
+    "latestValidatedMainArtifact": {
+      "sourceHead": "9a908a6da3864bcbe4164929fe52db660488994c",
+      "sourceTree": "c97b85e682f56bc3c683a1eab8cd570053c049fe",
+      "binding": {
+        "path": "/dev/shm/isaac-items-current-main-own-proof/artifact-binding-own-gameplay.json",
+        "sha256": "2d6fbb4d0673c134203a0d8b1c0a803e0e6bb20b7c6dea12e3208869f356aff0",
+        "wasmSha256": "c720ec0c50008e76fff63d45585771ecad091a60a8a646af667ded69f5bfed72",
+        "allStagesPassed": false,
+        "floorPending": true,
+        "clippyPending": true
+      },
+      "normalProductionSeconds": 29.30738854408264,
+      "normalProductionExitCode": 0,
+      "changedPreexistingValues": 0,
+      "missingPreexistingValues": 0,
+      "laterToolOnlyChangesNotQualified": true
+    },
+    "completedReportScopes": {
+      "triple": {
+        "compact": {
+          "path": "/dev/shm/isaac-knife-triple-production3-native-evidence-v2/knife-brim-ludo-npc-contact-fixed-phase0/paired-functional-v1/compact-functional-summary.json",
+          "bytes": 6550,
+          "sha256": "bde820206aea180de047a88f3ea3e91067bf42654cc39a4d796e62e986dac8da"
+        },
+        "report": {
+          "path": "/dev/shm/isaac-knife-triple-production3-native-evidence-v2/knife-brim-ludo-npc-contact-fixed-phase0/paired-functional-v1/functional-report.json.gz",
+          "sha256": "54e02c237c857cf2676c9031b24103d794218c734eeb4a91dfd538034ef48369"
+        },
+        "closed": {
+          "path": "/dev/shm/isaac-knife-triple-production3-native-evidence-v2/knife-brim-ludo-npc-contact-fixed-phase0/paired-functional-v1/closed.json",
+          "sha256": "3df0fe2350cc5be756a3639b818cba1267fb5388ae1a5e6afcd870c016ff04f3"
+        },
+        "status": "FAIL",
+        "checks": 67254,
+        "failures": 5206,
+        "coverage": {
+          "pairedActualPlayingRows": 696,
+          "controlledKnifeTripleBodies": 508,
+          "controlledKnifeTripleFullBodies": 254,
+          "controlledKnifeTripleFastBodies": 254
+        },
+        "perOwnMetrics": {
+          "native": {
+            "actualControlledKnifeIdentities": 1,
+            "actualC18BodyRows": 508,
+            "compatibleKnifeFifoAppends": 2,
+            "copiedKnifeFifoAppends": 2,
+            "currentGet4DamageStateDiagnostics": 2,
+            "orderedHpDrains": 2,
+            "observedNegativeHpDeaths": 1,
+            "observedManagerRetirements": 1
+          },
+          "port": {
+            "actualControlledKnifeIdentities": 1,
+            "actualC18BodyRows": 508,
+            "compatibleKnifeFifoAppends": 2,
+            "copiedKnifeFifoAppends": 2,
+            "currentGet4DamageStateDiagnostics": 2,
+            "orderedHpDrains": 2,
+            "observedNegativeHpDeaths": 1,
+            "observedManagerRetirements": 1
+          }
+        }
+      },
+      "polyCorrected": {
+        "compact": {
+          "path": "/dev/shm/isaac-polyphemus169-production3-native-evidence-v1/poly169-cricket4-fixed-phase0/paired-functional-v1/consumer-readset-v2/compact-functional-summary.json",
+          "bytes": 7058,
+          "sha256": "849f020b80c03ae0e9965f7e857b0d85932f9ad933d97e92208501e3adf83b97"
+        },
+        "report": {
+          "path": "/dev/shm/isaac-polyphemus169-production3-native-evidence-v1/poly169-cricket4-fixed-phase0/paired-functional-v1/consumer-readset-v2/functional-report.json.gz",
+          "sha256": "15d73d0f0de553e957124e12996638dc2512a7fc876a48e998c3490a3a41708f"
+        },
+        "closed": {
+          "path": "/dev/shm/isaac-polyphemus169-production3-native-evidence-v1/poly169-cricket4-fixed-phase0/paired-functional-v1/consumer-readset-v2/closed.json",
+          "sha256": "0e3bce77f715d994683357f5be2ff32b056b693e0aa21673b51ef7609b8c01c7"
+        },
+        "status": "FAIL",
+        "checks": 84313,
+        "failures": 5378,
+        "coverage": {
+          "pairedActualPlayingRows": 1295,
+          "nativePolyphemusTypedTearRows": 664,
+          "nativePolyphemusTracked200Rows": 664,
+          "nativePolyphemusTypedNpcRows": 1252,
+          "portPolyphemusTypedTearRows": 656,
+          "portPolyphemusTracked200Rows": 656,
+          "portPolyphemusTypedNpcRows": 1246
+        },
+        "perOwnMetrics": {
+          "native": {
+            "grants": 2,
+            "firstStageBirths": 2,
+            "mixedBirths": 10,
+            "qualifiedFullRows": 332,
+            "qualifiedFastRows": 0,
+            "phaseUnknownRows": 332,
+            "rawFast322UnknownRows": 0,
+            "retainedRows": 652,
+            "distinctReceivers": 2,
+            "sameTearTwoReceiverRegistries": 1,
+            "observedRegistryAppends": 2,
+            "observedRemainingDamageChanges": 2,
+            "orderedFifoAppends": 2,
+            "copiedTearFifoAppends": 2,
+            "hpDrainEndpoints": 2,
+            "mixedFamilyGates": 0
+          },
+          "port": {
+            "grants": 2,
+            "firstStageBirths": 2,
+            "mixedBirths": 10,
+            "qualifiedFullRows": 328,
+            "qualifiedFastRows": 328,
+            "phaseUnknownRows": 0,
+            "rawFast322UnknownRows": 656,
+            "retainedRows": 644,
+            "distinctReceivers": 2,
+            "sameTearTwoReceiverRegistries": 1,
+            "observedRegistryAppends": 2,
+            "observedRemainingDamageChanges": 2,
+            "orderedFifoAppends": 2,
+            "copiedTearFifoAppends": 2,
+            "hpDrainEndpoints": 2,
+            "mixedFamilyGates": 0
+          }
+        }
+      },
+      "technology2": {
+        "compact": {
+          "path": "/dev/shm/isaac-technology2-152-production3-native-evidence-v1/technology2-alone-fixed-phase0/attempt2/paired-functional-v1/compact-functional-summary.json",
+          "bytes": 15569,
+          "sha256": "a5167b0e2dbe4d852906d28afc4a68da3d5b287d412df908aa59b31e814d3a7a"
+        },
+        "report": {
+          "path": "/dev/shm/isaac-technology2-152-production3-native-evidence-v1/technology2-alone-fixed-phase0/attempt2/paired-functional-v1/functional-report.json.gz",
+          "sha256": "0b861fcd23ef69cf941121c3eb2dc93ab842de21c9eedcbd7b0772c0ffebea4e"
+        },
+        "closed": {
+          "path": "/dev/shm/isaac-technology2-152-production3-native-evidence-v1/technology2-alone-fixed-phase0/attempt2/paired-functional-v1/closed.json",
+          "sha256": "76ae53da6c5c65464dc3aeddcfe638f4df1f52444b5001bba311362d64833244"
+        },
+        "status": "FAIL",
+        "checks": 34748,
+        "failures": 1964,
+        "coverage": {
+          "pairedActualPlayingRows": 959,
+          "nativeTechnology2TypedBeamRows": 256,
+          "portTechnology2TypedBeamRows": 256
+        },
+        "perOwnMetrics": {
+          "native": {
+            "grants": 1,
+            "qualifiedBirthMetadataActors": 4,
+            "actualBirthAgeActors": 4,
+            "actualTearBirths": 7,
+            "preGrantOrdinaryTearBirths": 0,
+            "retiredStoredBeamEndpoints": 0,
+            "actualC40Births": 4,
+            "actualFullBodyRows": 128,
+            "actualFastBodyRows": 128,
+            "retainedAcross4Rows": 0,
+            "actualRemoveStateC40Rows": 0,
+            "actualC40NullTransitions": 4,
+            "exactIdentityBodyJoins": 0
+          },
+          "port": {
+            "grants": 1,
+            "qualifiedBirthMetadataActors": 4,
+            "actualBirthAgeActors": 4,
+            "actualTearBirths": 7,
+            "preGrantOrdinaryTearBirths": 0,
+            "retiredStoredBeamEndpoints": 4,
+            "actualC40Births": 4,
+            "actualFullBodyRows": 128,
+            "actualFastBodyRows": 128,
+            "retainedAcross4Rows": 0,
+            "actualRemoveStateC40Rows": 0,
+            "actualC40NullTransitions": 4,
+            "exactIdentityBodyJoins": 0
+          }
+        }
+      },
+      "polyHistoricalSchemaFailure": {
+        "compact": {
+          "path": "/dev/shm/isaac-polyphemus169-production3-native-evidence-v1/poly169-cricket4-fixed-phase0/paired-functional-v1/compact-functional-summary.json",
+          "bytes": 7074,
+          "sha256": "b2602cdb52825534372c8e0bc25452c90720beea84b191507c1d9e67ae5d6d86"
+        },
+        "report": {
+          "path": "/dev/shm/isaac-polyphemus169-production3-native-evidence-v1/poly169-cricket4-fixed-phase0/paired-functional-v1/functional-report.json.gz",
+          "sha256": "e1f6d1cc9780819020b0e31ee222804bb1d1f172bd8ce782acc322579f273df8"
+        },
+        "checks": 53291,
+        "failures": 5784,
+        "qualification": "Preserved historical failedreport.1295Native snapshot KeyError commonContactNpcs and1295context failures; Native zero grant/contact metrics unqualified, not absence. Corrected same saved tuples use actual requested contactNpcs NPC217 fields, not synthetic NPC14/18. No new Original or projection."
+      },
+      "technology2PartialOwn": {
+        "compact": {
+          "path": "/dev/shm/isaac-technology2-152-production3-partial2-own-observations-v1/compact-partial2of8-summary.json",
+          "bytes": 4587,
+          "sha256": "103ead521a328a4b6f168bdc78d29c3d5fd158581e7b4ae80ec289de61f90580"
+        },
+        "report": {
+          "path": "/dev/shm/isaac-technology2-152-production3-partial2-own-observations-v1/own-technology2-partial2of8-nonvacuity.json.gz",
+          "sha256": "749a30f16cf878ba95f038f401a5c93a6ae893d68bfcf0ba35a5a86ab84a5380"
+        },
+        "actualExitCode": 0,
+        "scope": "Onlytwoheldcases; originalall8fa786unchanged, other6archivednotregraded, Nativeunobservedbythisreader.",
+        "cases": [
+          {
+            "case": "technology2-alone-fixed-phase0",
+            "metrics": {
+              "grants": 1,
+              "qualifiedBirthMetadataActors": 4,
+              "actualBirthAgeActors": 4,
+              "actualTearBirths": 7,
+              "preGrantOrdinaryTearBirths": 0,
+              "retiredStoredBeamEndpoints": 4,
+              "actualC40Births": 4,
+              "actualFullBodyRows": 128,
+              "actualFastBodyRows": 128,
+              "retainedAcross4Rows": 0,
+              "actualRemoveStateC40Rows": 0,
+              "actualC40NullTransitions": 4,
+              "exactIdentityBodyJoins": 0,
+              "allObservedDischarges": 7,
+              "actualDiagonalCounter0": 0,
+              "actualDiagonalCounter1": 0
+            },
+            "failures": 10
+          },
+          {
+            "case": "cricket4-technology2-fixed-phase0",
+            "metrics": {
+              "grants": 2,
+              "qualifiedBirthMetadataActors": 3,
+              "actualBirthAgeActors": 3,
+              "actualTearBirths": 10,
+              "preGrantOrdinaryTearBirths": 1,
+              "retiredStoredBeamEndpoints": 3,
+              "actualC40Births": 3,
+              "actualFullBodyRows": 222,
+              "actualFastBodyRows": 223,
+              "retainedAcross4Rows": 0,
+              "actualRemoveStateC40Rows": 0,
+              "actualC40NullTransitions": 3,
+              "exactIdentityBodyJoins": 0,
+              "allObservedDischarges": 10,
+              "actualDiagonalCounter0": 0,
+              "actualDiagonalCounter1": 0
+            },
+            "failures": 10
+          }
+        ]
+      },
+      "technology2ContactOwn": {
+        "compact": {
+          "path": "/dev/shm/isaac-technology2-contact-production3-own-observations-v1/compact-own-nonvacuity.json",
+          "bytes": 3192,
+          "sha256": "05156b97b788eee21df157a8627c70fdfb649961be5e19c7a0dd0628db222923"
+        },
+        "report": {
+          "path": "/dev/shm/isaac-technology2-contact-production3-own-observations-v1/own-technology2-contact-nonvacuity.json.gz",
+          "sha256": "00c6b9019991c9b6311536785beb225af67783ebdcaeb02640e865c7f33d4e43"
+        },
+        "actualReaderWait": true,
+        "actualReaderExitCode": 0,
+        "seconds": 12.46267604798777,
+        "checks": 25378,
+        "failures": 45,
+        "qualification": {
+          "sourceHead": "b25a85e7d03ae7215b9c8a74c71050a0e3b2894e",
+          "bindingSha256": "11f8e07986e5610617aa70adea6ab6d4f88bf1fe2adde179973e5634492fdc83",
+          "floorPending": true,
+          "clippyPending": true
+        },
+        "scope": "Closed own public03b captures only. Native unobserved. Caller qualification scope retained without promoting pending stages.",
+        "cases": [
+          {
+            "case": "technology2-thin-npc-contact-fixed-phase0",
+            "metrics": {
+              "actualGrants": 1,
+              "actualC40Identities": 5,
+              "actualC40BodyRows": 168,
+              "compatibleLaserFifoAppends": 0,
+              "retainedDamageStateDiagnostics": 0,
+              "orderedHpDrains": 0,
+              "observedNegativeHpDeaths": 0,
+              "observedManagerRetirements": 0
+            },
+            "checkCount": 6285,
+            "failures": 12
+          },
+          {
+            "case": "technology2-thin-npc-contact-fixed-phase1",
+            "metrics": {
+              "actualGrants": 1,
+              "actualC40Identities": 6,
+              "actualC40BodyRows": 179,
+              "compatibleLaserFifoAppends": 0,
+              "retainedDamageStateDiagnostics": 0,
+              "orderedHpDrains": 0,
+              "observedNegativeHpDeaths": 0,
+              "observedManagerRetirements": 0
+            },
+            "checkCount": 6346,
+            "failures": 12
+          },
+          {
+            "case": "technology2-thin-npc-contact-recorded-0",
+            "metrics": {
+              "actualGrants": 1,
+              "actualC40Identities": 6,
+              "actualC40BodyRows": 582,
+              "compatibleLaserFifoAppends": 5,
+              "retainedDamageStateDiagnostics": 5,
+              "orderedHpDrains": 6,
+              "observedNegativeHpDeaths": 1,
+              "observedManagerRetirements": 1
+            },
+            "checkCount": 6456,
+            "failures": 9
+          },
+          {
+            "case": "technology2-thin-npc-contact-recorded-1",
+            "metrics": {
+              "actualGrants": 1,
+              "actualC40Identities": 5,
+              "actualC40BodyRows": 168,
+              "compatibleLaserFifoAppends": 0,
+              "retainedDamageStateDiagnostics": 0,
+              "orderedHpDrains": 0,
+              "observedNegativeHpDeaths": 0,
+              "observedManagerRetirements": 0
+            },
+            "checkCount": 6291,
+            "failures": 12
+          }
+        ]
+      },
+      "currentMainRaw405": {
+        "compact": {
+          "path": "/dev/shm/isaac-items-current-main-own-proof/regular405/versus-production2/compact-raw-partition.json",
+          "bytes": 1011,
+          "sha256": "90027ba189bfa8d7915134c55f0a7fb05a74801af265e7590c483366b20c7a69"
+        },
+        "report": {
+          "path": "/dev/shm/isaac-items-current-main-own-proof/regular405/versus-production2/raw-all-field-comparison.json",
+          "sha256": "65fc814c08102650ba1a5fbdf3c98ca169d00ab1627ffcdc56f7e9953787c1c9"
+        },
+        "actualWait": true,
+        "exitCode": 1,
+        "status": "FAIL",
+        "checks": 38005081,
+        "failures": 11616,
+        "errors": 0,
+        "rawPartition": {
+          "keyShape": 5808,
+          "newCandidateFields": 5808
+        },
+        "sourceHead": "9a908a6da3864bcbe4164929fe52db660488994c",
+        "baseline": "3ec/abdb actualqualified production2",
+        "guardStop": null
+      }
+    },
+    "savedPreexistingChildHistory": {
+      "compact": {
+        "path": "/dev/shm/isaac-knife-preexisting-child-history-actual-v1/summary.json",
+        "bytes": 9405,
+        "sha256": "53ce8bb851654b7381cc6425f4b51e2af3598e188cdd8c54e3c0c0263145f2b2"
+      },
+      "reportSha256": "1c728944d242b2c3e617900a8466e3fe3f41ee41dcfac1b23731879dc45c5b57",
+      "checks": 1535,
+      "failures": 36,
+      "coverage": {
+        "native": {
+          "observations": 1009,
+          "preexistingChildren": 8,
+          "continuedChildren": 8,
+          "fullChildRows": 24,
+          "fastChildRows": 32,
+          "removeEvents": 8,
+          "uninitEntryEvents": 8
+        },
+        "browser": {
+          "observations": 1009,
+          "preexistingChildren": 8,
+          "continuedChildren": 8,
+          "fullChildRows": 24,
+          "fastChildRows": 32,
+          "removeEvents": 0,
+          "uninitEntryEvents": 0
+        }
+      },
+      "priorWholeFieldChecks": 106884,
+      "priorWholeFieldFailures": 8755,
+      "priorHistoryFailures": 1,
+      "scope": "Additive own preexisting-child history only. Six mandatory missing-owner classes and missing browser events remain failures. No whole-game parity or transfer from source/API16 probes."
+    },
+    "savedExactIdentityComparer": {
+      "compact": {
+        "path": "/dev/shm/isaac-pr271-one169-pair-actual-v1/summary.json",
+        "bytes": 3820,
+        "sha256": "4fe7baefe6e432b83ad12320b3894b94d78e282cdaa0ea28ac68c14bcc73a398"
+      },
+      "reportSha256": "9ff887e3ce8966996b33c6779e5daab7f3ee7cc82793b18d6eef4dda8383a1c0",
+      "actualSavedCaseCount": 1,
+      "actualPairedPlayingRows": 1295,
+      "summaries": {
+        "original271": {
+          "checks": 13167,
+          "failures": 2146,
+          "coverage": {
+            "actualTearPropertyRows": 652,
+            "tearFullProperties": 326,
+            "tearFastProperties": 326
+          },
+          "correspondenceSideTotals": {
+            "status": "unavailable",
+            "reason": "Original271 helper does not record matched/unmatched/UNGRADED side rosters."
+          },
+          "oldConsumerUngradedReporting": "not implemented"
+        },
+        "corrected271": {
+          "checks": 7263,
+          "failures": 1319,
+          "coverage": {},
+          "correspondenceSideTotals": {
+            "native": {
+              "managerRows": 664,
+              "matchedRows": 0,
+              "unmatchedRows": 664,
+              "comparisonAttemptedRows": 0,
+              "ungradedMaterialRows": 664,
+              "ungradedMaterialObligationCount": 7304,
+              "ungradedPairObligationCount": 6640
+            },
+            "browser": {
+              "managerRows": 656,
+              "matchedRows": 0,
+              "unmatchedRows": 656,
+              "comparisonAttemptedRows": 0,
+              "ungradedMaterialRows": 656,
+              "ungradedMaterialObligationCount": 7216,
+              "ungradedPairObligationCount": 6560
+            }
+          },
+          "oldConsumerUngradedReporting": "explicit side rosters"
+        }
+      },
+      "numberOneTenCaseExecution": "pending",
+      "scope": "ONE actual retained169/4 case, exact original271 and corrected271 helper only. No fresh capture, new game, NumberOne ten-case qualification or whole-game parity. Lower raw FAIL count cannot imply improved parity; read matched/unmatched/ungraded coverage."
+    },
+    "futureJoint152And169": {
+      "sourceHeadPrefix": "52e4",
+      "toolsSourceApiPeerPrefix": "3b8c341d",
+      "actualParentOwnerIncluded": true,
+      "independentItemEvidenceDoesNotQualifyJointAdmission": true,
+      "qualificationStatus": "OUTSIDE_THIS_FROZEN_QUALIFICATION_RECORD",
+      "noJointOrParentAcceptanceInherited": true
+    },
+    "sourceOnlyNullableC18Correction": {
+      "sourcePrefix": "f8b1",
+      "rootPeerPrefix": "7bc2",
+      "regraded": false
+    },
+    "scope": [
+      "The latest validated main runtime is source `9a908a6d` / WASM `c720ec0c` (binding `2d6fbb4d`): normal production passed in 29.307s; optional floor and Clippy checks remain pending. Its regular405 comparison against production2 retains 38,005,081 checks / 11,616 FAIL: 5,808 new fields and 5,808 key-shape differences, with zero changed or missing preexisting values. Later tool-only changes, including the corrected Tear identity comparer, are outside this runtime artifact. This source snapshot retains separate Technology 2 and Polyphemus owners; their future joint pipeline is outside this frozen qualification record; no joint/Parent acceptance is inherited.",
+      "The separate immutable production3 artifact (`b25a85e7` / WASM `9d30105b`, binding `11f8e079`) has three completed first Original/browser references. Technology 2 alone retains 34,748 checks / 1,964 FAIL: both own histories show one grant, four C40 births, seven primary Tears, 128 Full and 128 Fast stored-body rows, and four C40 NULL transitions. Selected typed material/property checks pass; strict identities, clocks and missing callback owners remain unresolved. Stored phase summaries do not establish callback entry, and zero exact-identity body joins do not establish actor correspondence. Polyphemus retains 84,313 / 5,378 FAIL: both sides show two grants, two pre-mixed plus ten mixed births, two actual NPC217 receivers, two registry appends, remaining-damage changes, copied FIFO appends and HP endpoints, including one same-Tear/two-receiver registry witness. Native Fast classification remains unknown. The starting Knife + Brimstone + Ludovico pair retains 67,254 / 5,206 FAIL: both sides show one controlled Knife across 508 body rows, two copied FIFO appends/Get4 state diagnostics/HP drains, one negative-HP death and one manager retirement. Strict identities, clocks, actor/callback ownership and lifecycle gaps remain failed. The nullable-C18 tool correction is source-only and has not regraded that report.",
+      "Separate browser-only Technology 2 contact coverage is 25,378 checks / 45 FAIL across four cases. Only recorded0 (NPC18) shows five flags8-compatible FIFO appends/retained48C diagnostics, six HP drains, one death and one retirement. The other three NPC14 cases have no contact witness and retain 12 failures each. No Original contact comparison ran. The corrected held-case reader covers only two of eight cases (10 FAIL each); the other six have not been regraded, and the older eight-case report is preserved.",
+      "A saved real-pedestal 114\u2192118\u2192329 history replay adds 1,535 checks / 36 FAIL: each side observes eight preexisting and eight continued children, 24 Full and 32 Fast stored-body rows. Native-only event input observes eight Remove post-store and eight Uninit-entry events; browser events remain unknown. Missing birth-copy, current-Get4 callback, dispatch, Uninit completion/weak-link, child-contact and raw-Line owners remain explicit, together with unexercised per-child obligations. The prior 106,884 / 8,755 FAIL plus one history failure is unchanged; this additive own-history check does not establish whole-synergy parity.",
+      "The corrected Tear identity comparer was exercised on one saved Polyphemus pair (1,295 playing rows), not the pending ten-case Number One suite. It reports 7,263 checks / 1,319 FAIL with zero exact cross-game joins: all 664 Native and 656 browser manager rows remain unmatched, with 7,304 and 7,216 material-field obligations explicitly UNGRADED. The former comparer reports 13,167 / 2,146 FAIL on the same saved pair. The lower failure count is a reporting/association correction, not improved parity; no ordinal, time or geometry fit supplies a join.",
+      "The future joint Technology 2 + Polyphemus typed pipeline and actual Parent-owner slice is outside this frozen qualification record; no joint/Parent acceptance is inherited. Independent item results do not qualify joint admission. These entries consume compact completed reports only; they do not rerun games or rewrite historical failures."
+    ],
+    "historicalReportsUnchanged": true,
+    "noStatesTuplesJournalsRead": true,
+    "noGameOrBuildRun": true,
+    "technology2SelectedPropertiesScope": {
+      "selectedTypedPropertyChecks": "PASS",
+      "exactCrossIdentityBodyJoins": 0,
+      "exactActorCorrespondence": "UNGRADED",
+      "retainedFailures": 1964,
+      "storedBodyPhaseSummariesAreNotCallbackEntryProof": true,
+      "qualityReportOnlyClarificationConfirmed": true
+    }
   }
 }

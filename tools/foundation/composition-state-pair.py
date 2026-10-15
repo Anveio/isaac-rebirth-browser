@@ -50,6 +50,11 @@ case, native, browser = load(args.case), load(args.original), load(args.browser)
 contract = case['requires']['sourceExpectedActorContract']
 stages = case['requires'].get('actorStages', [])
 contracts = [stage['sourceExpectedActorContract'] for stage in stages] or [contract]
+tear_contracts = [c for c in contracts if c['family'] == 2]
+regular_tear_contracts = [c for c in tear_contracts if c.get('primaryC08') == 1
+    and c.get('variant') == 0 and c.get('subtype') == 0 and c.get('controlledBy329') is False]
+regular_tear_required = bool(regular_tear_contracts)
+unadmitted_tear_contracts = [c for c in tear_contracts if c not in regular_tear_contracts]
 ordinary_laser_required = any(c['family'] == 7 and c['variant'] == 1 and c['subtype'] == 0 for c in contracts)
 controlled_knife_required = any(c['family'] == 8 and c.get('controlledBy329') for c in contracts)
 ordinary_knife_required = any(c['family'] == 8 and not c.get('controlledBy329') for c in contracts)
@@ -72,6 +77,8 @@ common_damage_chains = {}
 doorway_witnesses = []
 laser_lifetimes = {}
 render_witnesses = []
+tear_lifetimes, tear_position_observations = {}, []
+tear_correspondence_observations = []
 
 
 def reference(state, ref):
@@ -97,6 +104,9 @@ def reference(state, ref):
     # The nested Impact is the source-scoped real50/1 factory. Regular Tear
     # variant is an actual stored owner; missing it cannot silently become0.
     variant = actor['sourceVariant'] if ref['kind'] == 'tear' else 50 if ref['kind'] == 'effect' else actor['variant']
+    if ref['kind'] == 'tear':
+        for value in (variant, identities[0]['sequenceId'], actor['spawnSeed']):
+            assert type(value) is int and 0 <= value <= 0xffffffff, 'Actual typed Tear variant/sequence/seed owner required'
     subtype = 1 if ref['kind'] == 'effect' else 0 if ref['kind'] == 'tear' else actor['subtype']
     return {'kind': kind, 'variant': variant, 'subtype': subtype,
             'sequenceId': identities[0]['sequenceId'], 'spawnSeed': actor['spawnSeed']}
@@ -104,6 +114,194 @@ def reference(state, ref):
 
 def identity_tuple(identity):
     return tuple(identity[key] for key in ('kind', 'variant', 'subtype', 'sequenceId', 'spawnSeed'))
+
+
+def compare_regular_tears(source, observed, state, t):
+    """Join only exact actual source identities; ordinals are own-side diagnostics."""
+    native_tears = [a for a in observed['world']['entities'] if a['type'] == 2]
+    scheduled = state['actorScheduler']['actors']
+    port_tears = [a for a in state['tears'] if {'kind': 'tear', 'id': a['id']} in scheduled]
+    native_rows, port_rows = [], []
+    for actor in native_tears:
+        try:
+            identity = tuple(actor[key] for key in ('type', 'variant', 'subtype', 'sequenceId', 'spawnSeed'))
+            assert all(type(value) is int and 0 <= value <= 0xffffffff for value in identity), 'Actual typed native Tear identity required'
+            native_rows.append((identity, actor))
+        except Exception as error:
+            missing('actual Tear native typed identity owner', t, error)
+    for actor in port_tears:
+        try:
+            identity = identity_tuple(reference(state, {'kind': 'tear', 'id': actor['id']}))
+            port_rows.append((identity, actor))
+        except Exception as error:
+            missing('actual Tear browser typed identity owner', t, error)
+    native_identities, port_identities = [identity for identity, _ in native_rows], [identity for identity, _ in port_rows]
+    check('actual Tear native identity uniqueness', len(native_identities), len(set(native_identities)), t)
+    check('actual Tear browser identity uniqueness', len(port_identities), len(set(port_identities)), t)
+    check('actual Tear complete source-identity manager membership', sorted(native_identities), sorted(port_identities), t)
+    # Retain each observed ordinal's typed/unique-owner obligations, but never
+    # use an ordinal, timing or geometry to pair actors between games.
+    for side, actors in (('native', native_tears), ('browser', port_tears)):
+        try:
+            ordinals = [actor['shotOrdinal'] for actor in actors]
+            assert all(type(value) is int and 0 <= value <= 0xffffffff for value in ordinals), 'Actual typed own-side Tear shot ordinal required'
+            check('actual Tear ' + side + ' own shot-ordinal uniqueness', sorted(ordinals), sorted(set(ordinals)), t)
+        except Exception as error:
+            missing('actual Tear ' + side + ' own shot-ordinal owner', t, error)
+    no_timed_override = (contract.get('schema') == 'number-one-composition-actor-v1'
+        and case['requires'].get('sourceActorPropertyObligations', {}).get('tearTimedColorScope') ==
+        'Only this declared no-timed-override positive permanent loadout. Missing port current-color owner cannot qualify other status/TEMP/timed histories.')
+    # Counts describe observed own-side manager rows. A missing exact join
+    # leaves every material and pair obligation explicitly UNGRADED.
+    material_fields = [
+        'collision damage48C', 'base damage83C', 'scale7E4', 'collision radius474',
+        'velocity464', 'attack flags7F0', 'permanent color3A0', 'height7D4',
+        'falling speed7D8', 'falling acceleration7DC', 'authored regular clip',
+    ]
+    pair_obligations = [
+        'native world manager owner', 'own-manager membership',
+        'family/variant/subtype/sequence/seed', 'native linked Player owner',
+        'native world/property Parent agreement', 'own native identity retained',
+        'own browser identity retained', 'raw position observation',
+        'native callback-phase owner', 'lifetime and manager-absence observation',
+    ]
+    if no_timed_override:
+        pair_obligations.append('current2D0/permanent projection only in declared no-timed scope')
+    correspondence = {'presentation': t, 'scope': 'UNGRADED is an unattempted obligation, never equality or parity.'}
+    own_reports = {}
+    for side, actors in (('native', native_tears), ('browser', port_tears)):
+        records = []
+        for actor in actors:
+            keys = ('type', 'variant', 'subtype', 'sequenceId', 'spawnSeed') if side == 'native' else ('sourceVariant', 'spawnSeed')
+            record = {'identityFieldsObserved': {key: actor[key] for key in keys if key in actor},
+                      'correspondenceStatus': 'unmatched', 'bodyGradingStatus': 'UNGRADED'}
+            if side == 'browser':
+                record['ownHandle'] = {'kind': 'tear', 'id': actor['id']}
+                record['schedulerIdentityRows'] = [row for row in state['actorScheduler']['identities'] if row['actor'] == record['ownHandle']]
+            records.append(record)
+        correspondence[side] = {'managerRows': len(actors), 'matchedRows': 0, 'unmatchedRows': len(actors),
+            'comparisonAttemptedRows': 0, 'ungradedMaterialRows': len(actors),
+            'ungradedMaterialFields': material_fields, 'materialFieldCountPerRow': len(material_fields),
+            'ungradedMaterialObligationCount': len(actors) * len(material_fields),
+            'ungradedPairObligations': pair_obligations,
+            'ungradedPairObligationCount': len(actors) * len(pair_obligations), 'rows': records}
+        # Object identity is only own-list bookkeeping, never a game identity
+        # or a cross-game correspondence key.
+        own_reports[side] = list(zip(actors, records))
+    tear_correspondence_observations.append(correspondence)
+    for native_identity, world_actor in native_rows:
+        originals = [a for a in source['attacks'] if identity_tuple(a['identity']) == native_identity]
+        matches = [a for identity, a in port_rows if identity == native_identity]
+        world_members = native_identities.count(native_identity)
+        if world_members != 1 or len(originals) != 1 or len(matches) != 1:
+            missing('actual Tear same-gate world/property and source-identity body correspondence', t,
+                    {'nativeIdentity': native_identity, 'nativeWorldRows': world_members,
+                     'nativePropertyRows': len(originals), 'portBodies': len(matches)})
+            continue
+        original, actual = originals[0], matches[0]
+        bound_reports = []
+        for side, actor in (('native', world_actor), ('browser', actual)):
+            record = next(record for own_actor, record in own_reports[side] if own_actor is actor)
+            record['correspondenceStatus'] = 'matched-exact-source-identity'
+            correspondence[side]['matchedRows'] += 1
+            correspondence[side]['unmatchedRows'] -= 1
+            bound_reports.append((side, record))
+        ref = {'kind': 'tear', 'id': actual['id']}
+        # These are each game's actual manager owners, never !dead or !removed.
+        try:
+            check('actual Tear native world manager owner', True, world_actor['managerMember'], t)
+            check('actual Tear own-manager membership', original['inActiveManager'], ref in scheduled, t)
+        except Exception as error:
+            missing('actual Tear manager owner', t, error)
+        try:
+            port_identity = identity_tuple(reference(state, ref))
+            check('actual Tear family/variant/subtype/sequence/seed', native_identity, port_identity, t)
+        except Exception as error:
+            missing('actual Tear typed identity owner', t, error)
+            port_identity = None
+        try:
+            native_player = source['players'][0]['owner']
+            check('actual Tear native linked Player owner',
+                  {key: native_player[key] for key in ('kind', 'variant', 'subtype', 'sequenceId', 'spawnSeed')},
+                  original['linkedParent'], t)
+            check('actual Tear native world/property Parent agreement',
+                  {'type': native_player['kind'], 'variant': native_player['variant'], 'sequenceId': native_player['sequenceId']},
+                  world_actor['tearOwner'], t)
+        except Exception as error:
+            missing('actual Tear native Parent owner agreement', t, error)
+        def port_clip():
+            tier = actual['animationTier']
+            assert type(tier) is int and 1 <= tier <= 13, 'Actual regular renderer tier required'
+            return 'RegularTear' + str(tier)
+
+        # Resolve every property of an identity-bound body independently: an
+        # unknown color must not erase damage, velocity or vertical fields.
+        for name, expected, actual_value in [
+            ('collision damage48C', lambda: f32(original['collisionDamage']), lambda: f32(actual['collisionDamage'])),
+            ('base damage83C', lambda: f32(world_actor['baseDamage']), lambda: f32(actual['baseDamage'])),
+            ('scale7E4', lambda: f32(world_actor['tearScale']), lambda: f32(actual['scale'])),
+            ('collision radius474', lambda: f32(original['collisionRadius']), lambda: f32(actual['collisionRadius'])),
+            ('velocity464', lambda: vector(original['velocity']), lambda: vector(actual['motion']['velocity'])),
+            ('attack flags7F0', lambda: original['attackFlags7f0'], lambda: flags(actual['attackFlags'])),
+            ('permanent color3A0', lambda: [f32(v) for v in original['permanentColor3a0']], lambda: color(actual['sourceColor'])),
+            ('height7D4', lambda: f32(original['height7d4']), lambda: f32(actual['motion']['height'])),
+            ('falling speed7D8', lambda: f32(original['fallingSpeed7d8']), lambda: f32(actual['motion']['fallingSpeed'])),
+            ('falling acceleration7DC', lambda: f32(original['fallingAcceleration7dc']), lambda: f32(actual['motion']['fallingAcceleration'])),
+            ('authored regular clip', lambda: world_actor['animation'], port_clip),
+        ]:
+            try:
+                left, right = expected(), actual_value()
+                if name == 'permanent color3A0':
+                    assert len(left) == len(right) == 11, 'All eleven actual color words required'
+                check('actual Tear ' + name, left, right, t)
+            except Exception as error:
+                missing('actual Tear ' + name, t, error)
+        if no_timed_override:
+            try:
+                current, permanent = [f32(v) for v in original['currentColor2d0']], color(actual['sourceColor'])
+                assert len(current) == len(permanent) == 11
+                check('actual Tear current2D0/permanent projection only in declared no-timed scope', current, permanent, t)
+            except Exception as error:
+                missing('actual Tear declared no-timed color projection', t, error)
+        lifetime_key = json.dumps(native_identity, separators=(',', ':'))
+        facts = tear_lifetimes.setdefault(lifetime_key, {'nativeIdentity': native_identity,
+            'portHandle': ref, 'portIdentity': port_identity, 'firstObservedPresentation': t})
+        check('actual Tear own native identity retained', facts['nativeIdentity'], native_identity, t)
+        if port_identity is not None and facts['portIdentity'] is not None:
+            check('actual Tear own browser identity retained', facts['portIdentity'], port_identity, t)
+        facts['lastPairedManagerPresentation'] = t
+        # Preserve these raw, independently observed coordinates without
+        # asserting an unclosed native448/450-to-port phase alias.
+        try:
+            tear_position_observations.append({'presentation': t, 'nativeIdentity': native_identity,
+                'portIdentity': port_identity,
+                'nativePhysical448': vector(original['position']), 'nativeSaved450': vector(original['savedPosition450']),
+                'portFullPosition': vector(actual['motion']['position']),
+                'portPresentedPosition': vector(actual['motion']['presentedPosition']),
+                'nativeFast322': original['fast322'], 'nativeCounter': observed['systemCounter'],
+                'portCounter': state['systemClock']['systemCounter'],
+                'scope': 'Actual values retained; physical-position phase binding remains unqualified.'})
+        except Exception as error:
+            missing('actual Tear raw position observation', t, error)
+        coverage['actualTearPropertyRows'] += 1
+        try:
+            assert type(original['fast322']) is bool, 'Actual native callback-phase flag required'
+            coverage['tearFastProperties' if original['fast322'] else 'tearFullProperties'] += 1
+        except Exception as error:
+            missing('actual Tear native callback-phase owner', t, error)
+        for side, record in bound_reports:
+            record['bodyGradingStatus'] = 'COMPARISON_ATTEMPTED'
+            correspondence[side]['comparisonAttemptedRows'] += 1
+            correspondence[side]['ungradedMaterialRows'] -= 1
+            correspondence[side]['ungradedMaterialObligationCount'] -= len(material_fields)
+            correspondence[side]['ungradedPairObligationCount'] -= len(pair_obligations)
+    for facts in tear_lifetimes.values():
+        if len(native_rows) == len(native_tears) and facts['nativeIdentity'] not in native_identities and 'nativeManagerAbsentAt' not in facts:
+            facts['nativeManagerAbsentAt'] = t
+        if facts['portHandle'] not in scheduled and 'portUnscheduledAt' not in facts:
+            facts['portUnscheduledAt'] = t
+
+
 
 
 def count_total(words):
@@ -920,6 +1118,11 @@ for captured in sorted(all_captured, key=lambda row: row['presentation']):
             check('actual complete active attack families/sequence/seeds', native_families, sorted(port_families), t)
         except Exception as error:
             missing('mandatory active attack scheduler group', t, error)
+        if regular_tear_required:
+            try:
+                compare_regular_tears(source, observed, state, t)
+            except Exception as error:
+                missing('mandatory actual Tear property group', t, error)
         if controlled_technology_comparer is not None:
             try:
                 controlled_technology_comparer.snapshot(source, state, t, observed['systemCounter'], observed['players'][0])
@@ -1071,6 +1274,24 @@ for captured in sorted(all_captured, key=lambda row: row['presentation']):
         missing('mandatory source/browser field and actor execution', t, error)
 check('actual declared native family must execute', True, coverage['nativeFamilyKind' + str(contract['family'])] > 0, None)
 check('actual declared browser family must execute', True, coverage['browserFamilyKind' + str(contract['family'])] > 0, None)
+if unadmitted_tear_contracts:
+    missing('declared Tear controller/property contract is unadmitted', None,
+            {'contracts': unadmitted_tear_contracts, 'scope': 'Only declared primary1, variant0/subtype0, noncontrolled regular Tears are bound here; other type2 producers need their own contract.'})
+tear_scope_gaps = [
+    'Direct port Tear Parent498 is not serialized; no Player-owner inference replaces that observed link.',
+    'Port Tear has no actual Base31D/31E/31F/322 or Sprite owner; motion.lifetime is not those fields.',
+    'Port Tear has no actual birthGameAge owner; age is not substituted for it.',
+    'Port Tear has no live actor RNG7C0 owner; its birth seed is not substituted for those words.',
+    'Port Tear exposes permanent sourceColor only. A declared no-timed projection does not qualify a distinct current2D0 owner or timed histories.',
+    'Native physical448/saved450 to port motion positions still lacks a closed regular-Tear phase/read-time binding.',
+    'Observed later manager absence cannot fabricate short Remove/Uninit flags or qualify the full retirement law.',
+    'A same-label PNG pair during actual regular-Tear life has no dedicated comparison witness yet; full-frame pixels remain separate diagnostics.',
+] if regular_tear_required else []
+if regular_tear_required:
+    for key in ('actualTearPropertyRows', 'tearFullProperties', 'tearFastProperties'):
+        check('required actual ' + key, True, coverage[key] > 0, None)
+    for gap in tear_scope_gaps:
+        missing('mandatory regular-Tear body/observable coverage', None, gap)
 if ordinary_laser_required:
     check('actual ordinary Laser body must execute', True, coverage['actualOrdinaryLaserBodies'] > 0, None)
     check('actual ordinary Laser full bodies must execute', True, coverage['ordinaryLaserFullBodies'] > 0, None)
@@ -1310,10 +1531,13 @@ if fetus_context is not None:
 
 result = {'schema': 2, 'status': 'fail' if any(not item['passed'] for item in checks) else 'pass', 'checks': checks,
           'coverage': dict(coverage), 'damageChains': list(damage_chains.values()), 'doorwayWitnesses': doorway_witnesses, 'laserLifetimes':list(laser_lifetimes.values()), 'renderWitnesses':render_witnesses,
-          'sameGateDuplicateObservations': duplicate_observations, 'history': history, 'childLifetimes': child_lifetimes, 'chargeWitnesses': charge_witnesses,
+          'sameGateDuplicateObservations': duplicate_observations, 'history': history,
+          'regularTearObservedLifetimes': tear_lifetimes, 'regularTearRawPositionObservations': tear_position_observations,
+          'regularTearCorrespondenceObservations': tear_correspondence_observations,
+          'regularTearRequiredCoverageGaps': tear_scope_gaps, 'childLifetimes': child_lifetimes, 'chargeWitnesses': charge_witnesses,
           'backendAcceptanceStatus': 'incomplete',
           'requiredBackendCoverageGaps': ['History requirements are graded by their explicit versioned raw witnesses; missing transient Remove flags remain failures even when later manager absence is observed.', 'Body comparison covers ordinary7/1/0 with linked1000/50/1 and actual registered Knife/ParentKnife roles. Other Laser subtypes and general modifier domains require separate admitted comparisons; no whole-backend acceptance is implied.', 'Player birth seed uses the actual PlayerItems.entitySpawnSeed owner; missing or unknown fields remain failures. Native regular-Tear physical-position phase binding remains unclosed.'],
-          'scope': 'Public resource game-level composition. Actual declared fields and complete active attack identities/slots. New body correspondence uses each own actual registered C18, no crossside fitted IDs/positions; all independent identity/seed mismatches remain failures. Case PASS cannot accept the whole backend while its separate required gaps remain. Every mismatch/missing field retained; syntax checks are not game acceptance.',
+          'scope': 'Public resource game-level composition. Actual declared fields and complete active attack identities/slots. Body correspondence uses each own actual registered C18 for those families and exact observed source identities for declared regular Tears; no crossside ordinal/time/geometry fitting or ID/seed remapping. All independent identity/seed mismatches remain failures. Case PASS cannot accept the whole backend while its separate required gaps remain. Every mismatch/missing field retained; syntax checks are not game acceptance.',
           'sourceSha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest()}
 if common_spec is not None:
     result['commonDamageChains'] = list(common_damage_chains.values())

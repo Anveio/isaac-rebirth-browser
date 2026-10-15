@@ -608,6 +608,26 @@ pub(crate) fn resolve_monstro_kind1(state: &State) -> Result<RegularTearPlan, St
     RegularTearPlan::resolve(state.player_stats, state.max_fire_delay, state.weapon_cache)
 }
 
+///Actual selected50D090(kind1) for positive152: source variant0 and current
+///C88/C98/CA0/kinematics. The secondary mode1 factory does not use this getter.
+pub(crate) fn resolve_technology2_kind1(state: &State) -> Result<RegularTearPlan, String> {
+    let inputs = ItemInputs::new(
+        state
+            .player_items
+            .as_ref()
+            .ok_or("Technology2 item owner absent")?,
+    )?;
+    if state.weapon_admission.source_player_type != Some(0)
+        || state.weapon_cache.primary != PrimaryWeaponC08::RegularTears
+        || !inputs.admits_technology2_kind1_getter()
+        || inputs.pending_cache().0 & RegularTearPlan::INPUT_CACHE_MASK.0 != 0
+        || state.weapon_cache.flags_c98.0 != 0
+    {
+        return Err("Technology2 kind1 requires its current source-owned context".into());
+    }
+    RegularTearPlan::resolve(state.player_stats, state.max_fire_delay, state.weapon_cache)
+}
+
 ///Actual50D090(kind3) builder/status frontier, independent of actor511D90
 ///history and ordinary/controlled Laser geometry and enqueue ownership.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -637,6 +657,7 @@ pub(crate) fn admit_current_laser_contact_flags(
     if !inputs.admits_neutral_kind3()
         && !inputs.admits_technology_kind3_getter()
         && !inputs.admits_soy_milk_kind3_getter()
+        && !inputs.admits_technology2_kind3_getter()
     {
         return Ok(LaserStatusAdmission::UnmappedBuilderModifiers);
     }

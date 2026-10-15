@@ -122,6 +122,9 @@ pub(crate) fn dispatch_player(
         ControllerChannel::RegularShots if crate::inner_eye::selected(state, plan) => {
             crate::inner_eye::dispatch_player(state, plan, input, phase, callback_aim)
         }
+        ControllerChannel::RegularShots if crate::technology2::selected(state) => {
+            crate::technology2::primary(state, plan, input, phase, callback_aim)
+        }
         ControllerChannel::RegularShots => Ok(DispatchOutcome::RegularTear),
         ControllerChannel::MonstroLung => {
             crate::monstros_lung::dispatch_player(state, plan, input, phase, callback_aim)
@@ -190,6 +193,21 @@ impl KnifeBirthProperties {
     }
 }
 
+///Actual registered Player+C40, independent of C18 andC20/C28/C30.
+///An absent outer owner is unknown. A present owner with actorNone is actual
+///knownNULL, and survives a serde roundtrip without Option<Option> collapse.
+#[derive(Clone, Debug, Default, Deserialize, Serialize, PartialEq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct Technology2Slot {
+    ///Port knowledge of the actual registered weak pointer, not a native bit.
+    #[serde(default)]
+    pub pointer_known: bool,
+    pub actor: Option<ActorRef>,
+    ///Port qualification history only; never a current-callback veto or C18
+    ///readiness owner. An actual collector must still inspect observed births.
+    pub first_diagnostic: Option<String>,
+}
+
 #[derive(Clone, Debug, Default, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct AttackRuntime {
@@ -217,6 +235,9 @@ pub struct AttackRuntime {
     pub persistent: Option<ActorRef>,
     /// Actual C20/C28/C30 slots; absence is distinct from Remove requested.
     pub secondary: [Option<ActorRef>; 3],
+    ///5195B9 actual C40 constructorNULL; missing legacy state stays unknown.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub technology2_c40: Option<Technology2Slot>,
     pub next_knife: u32,
 }
 
@@ -226,6 +247,10 @@ impl AttackRuntime {
         Self {
             charge_c0c: Some(0),
             aim_rotation_c70: Some(0), //5196B0; never reconstructed from counts.
+            technology2_c40: Some(Technology2Slot {
+                pointer_known: true,
+                ..Technology2Slot::default()
+            }),
             head_direction_da0: Some(3), //5198e4, independently from C0C.
             movement_direction_d9c: Some(-1),
             shooting_aim_db4: Some(WorldVector { x: 0.0, y: 0.0 }),
