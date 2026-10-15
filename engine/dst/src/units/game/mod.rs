@@ -329,7 +329,7 @@ impl Simulation {
     }
 
     fn finish(&mut self, case: &mut Case) {
-        coverage::end_case();
+        coverage::end_case(&case.label);
         self.snapshot_round_trip();
         self.replay_matches();
         self.continuation_matches(case.entropy);

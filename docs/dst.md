@@ -175,11 +175,31 @@ property set on every run, after the generated cases:
   must-hit property (boss-scene key handling, GameOver, collection, boss and
   miniboss clears and other rare branches), so ordinary budgets never pass or
   fail on luck. The clear tapes were branched with `--resume` from boss and
-  miniboss room entries. When an
-  engine change moves them off those branches, harvest candidates with
-  `--retain-all`, replay each with `--replay … --report …`, and keep a small
-  covering set. Game tapes drift as the engine evolves; a regression tape that
-  stops reproducing its finding is retired rather than kept under its label.
+  miniboss room entries. Other coverage tapes run implemented NPC families
+  that ordinary budgets seldom meet, so their AI runs through every property
+  and the shipped WASM on every run. Game tapes drift as the engine evolves;
+  a regression tape that stops reproducing its finding is retired rather than
+  kept under its label.
+
+Every report's census records, per case, the command at which the case first
+reached each key (`coverage.firstSteps`). `tools/dst/cover.py` turns that into
+corpus upkeep. Harvest with `--retain-all`, measure the corpus alone
+(`--units game --cases 0 --corpus engine/dst/corpus --report …`), and the
+tool cuts the shortest harvested prefixes, running 300 commands past each
+first contact, that cover the keys the corpus misses:
+
+```sh
+engine/dst/target/release/rebirth-dst --units game --cases 64 --steps 4000 \
+  --retain-all --tapes H/tapes --report H/report.json
+engine/dst/target/release/rebirth-dst --units game --cases 0 \
+  --corpus engine/dst/corpus --report B.json
+python3 tools/dst/cover.py --harvest H/report.json --tapes H/tapes \
+  --baseline B.json --prefix npc: --out engine/dst/corpus --verify
+```
+
+`--verify` replays each written tape and drops any that no longer reaches its
+keys. When an engine change moves a must-hit coverage tape off its branch,
+the same harvest refreshes it.
 
 `--resume TAPE` makes every generated `game` case replay that tape (with
 every check) and then drive on from its end, so exploration branches from an
