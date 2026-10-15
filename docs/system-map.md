@@ -8,10 +8,18 @@ only an actual report establishes its outcome. Rust/WASM replay equality checks
 the port's determinism, while original logs, graphics and controls establish
 independent reference evidence.
 
-The current item integration snapshot is main `3ef319fc`. ControlledDr354
-and the coherent Monstro cache/factory/wardrobe/registration/controller slices
-363/364/376/378/379/380 are merged alongside ordinaryDr343/356,
-controlledTechnology355, mixed52+4 capabilities367 and Soy330 stats/history368.
+Main `48b9f4ef` now includes Epic cache/grant382 and actor/neutral lifecycle384, Monstro queued4 correction386, Soy full-Add clear387, Monstro head renderer388, Impact birth metadata389, ordinary Inner Eye390, copied damage-source payloads391, selected Epic startup392, and blast/camera shake393. Corrected Monstro comparison tools362 are merged; the original comparer and old results remain preserved. External stage-transition374 and boss-award poop fix385 are retained. These small source integrations do not qualify the entire current main tree against a frozen private artifact.
+
+Separate production2 source3ec42d94/WASMabdb286e passed normal production; floor and Clippy remain pending. Its raw405 comparison against f1 records37,987,905 checks/8,728 FAIL:4,364 added-key-shape and4,364 new GameShake/camera-history/C70 fields, with zero changed or missing preexisting values. All raw failures remain visible. Ordinary Inner Eye has eight completed own cases,198 typed births and66 complete three-Tear cohorts,84,879 checks/72 FAIL. The finite reader hit its final32MiB output quota after writing the complete report; a separate successful opaque component verified all report bytes without rereading State spools. No Native ordinary2 or callback/RNG-draw parity is established.
+
+Both four-case Epic contact cohorts (70 and132.815673828125 damage) record6,663 checks/56 FAIL. Every case observes one copied-Rocket FIFO append, ordered HP drain, negative-HP death and manager retirement; missing callback/argument/RNG/lifecycle event owners remain failures. The first high-damage Original/port pair retains40,872 checks/4,064 FAIL over476 paired rows and261 typed body rows. Both sides show one target, three rockets, one triple cohort, three explosions/record appends and one FIFO-to-retirement state chain. Selected properties match across261 body rows and receiver HP matches377 observations; receiver geometry, exact identities/RNG/Parent/records/counters and missing owners remain failed. Zero observed transient crater18 births do not prove absent callbacks.
+
+Four own shake cases retain867 checks/20 FAIL. The first strict pair observes58/56 positive-duration and64/61 nonzero-offset rows on Native/port; duration62/476, history430/476 and cameraStyle/sharedMT476/476 checks still fail. The port lacks an explicit cameraStyle owner, and matching endpoint MT states would not certify individual draws.
+
+The production2 Monstro queued4 replay reuses the same5149 Original tuples at exactly62,795 checks: failures improve5,346 to2,520. Only three fields change, each942 to0 (historical controller diagnostic, C18 knownNULL and unadmitted controller); all field counts and all other failures are unchanged. Both games retain four complete13-Tear cohorts and three mixed cohorts. Native held/phase owners remain null with mandatory failures; every earlier frozen-f1/e2bb report is preserved.
+
+The refreshed bounded audit has five open PRs:253/271/292/329/366. Unique253/271/292/329 remain preserved. Stale361 was closed only after preserving its complete source/commit metadata and landing the qualifying cache/actor successors382/384; corrected362 was updated and merged rather than discarded. No further duplicate is proved.
+
 The frozen f1/b957 product passed normal production; floor/Clippy remain pending.
 Its regular405 comparison retains37,979,876 checks/14,416 raw failures from
 recorded key removals/additions, with no changed prior values; typed ledgers do
@@ -31,7 +39,7 @@ body rows. Zero observed crater18 births do not exclude transient
 callbacks. Empty-room evidence supplies no NPC-contact proof; the later contact
 fixture stopped at the shared Challenge-entry frontier before gameplay.
 
-Epic remains an unlanded runtime slice, separately exercised on frozen f1.
+The frozen-f1 Epic results retain their original artifact scope; the later main actor integration384 is recorded above.
 First controlledTechnology117,717/13,575FAIL, mixed17,056/1,558FAIL and Soy's
 visual/fullAdd frontiers retain their own scopes. See
 [item composition coverage](item-composition-coverage.md) for source owners,

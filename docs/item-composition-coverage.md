@@ -10,15 +10,17 @@ four-case comparison still fails on contacts, identities and missing owners.
 Transport, source review and local replay consistency do not establish Original
 functional parity.
 
-Current main `3ef319fc` includes ordinary Dr. Fetus343/356, controlled
-Technology355, mixed52+4 capabilities367, Soy330 stats/118 Mouth-history368,
-corrected controlledDr354 and the consumed Monstro controller380. Its small
-Monstro slices are canonical factory363, cache/grant364, fresh Tear42C376,
-wardrobe378, ordered registration/fullAdd4 clearing379 and core380. Tools353,
-358,359,369 and the DB0 source-owner correction377 are merged. The earlier
-private df133/15f product separately passes production42.980s, floor16.618s
-and strict405 37,972,668/0; its historical controlledDr missing-birth result
-remains unchanged. Neither private artifact qualifies the entire current tree.
+Main `48b9f4ef` now includes Epic cache/grant382 and actor/neutral lifecycle384, Monstro queued4 correction386, Soy full-Add clear387, Monstro head renderer388, Impact birth metadata389, ordinary Inner Eye390, copied damage-source payloads391, selected Epic startup392, and blast/camera shake393. Corrected Monstro comparison tools362 are merged; the original comparer and old results remain preserved. External stage-transition374 and boss-award poop fix385 are retained. These small source integrations do not qualify the entire current main tree against a frozen private artifact.
+
+Separate production2 source3ec42d94/WASMabdb286e passed normal production; floor and Clippy remain pending. Its raw405 comparison against f1 records37,987,905 checks/8,728 FAIL:4,364 added-key-shape and4,364 new GameShake/camera-history/C70 fields, with zero changed or missing preexisting values. All raw failures remain visible. Ordinary Inner Eye has eight completed own cases,198 typed births and66 complete three-Tear cohorts,84,879 checks/72 FAIL. The finite reader hit its final32MiB output quota after writing the complete report; a separate successful opaque component verified all report bytes without rereading State spools. No Native ordinary2 or callback/RNG-draw parity is established.
+
+Both four-case Epic contact cohorts (70 and132.815673828125 damage) record6,663 checks/56 FAIL. Every case observes one copied-Rocket FIFO append, ordered HP drain, negative-HP death and manager retirement; missing callback/argument/RNG/lifecycle event owners remain failures. The first high-damage Original/port pair retains40,872 checks/4,064 FAIL over476 paired rows and261 typed body rows. Both sides show one target, three rockets, one triple cohort, three explosions/record appends and one FIFO-to-retirement state chain. Selected properties match across261 body rows and receiver HP matches377 observations; receiver geometry, exact identities/RNG/Parent/records/counters and missing owners remain failed. Zero observed transient crater18 births do not prove absent callbacks.
+
+Four own shake cases retain867 checks/20 FAIL. The first strict pair observes58/56 positive-duration and64/61 nonzero-offset rows on Native/port; duration62/476, history430/476 and cameraStyle/sharedMT476/476 checks still fail. The port lacks an explicit cameraStyle owner, and matching endpoint MT states would not certify individual draws.
+
+The production2 Monstro queued4 replay reuses the same5149 Original tuples at exactly62,795 checks: failures improve5,346 to2,520. Only three fields change, each942 to0 (historical controller diagnostic, C18 knownNULL and unadmitted controller); all field counts and all other failures are unchanged. Both games retain four complete13-Tear cohorts and three mixed cohorts. Native held/phase owners remain null with mandatory failures; every earlier frozen-f1/e2bb report is preserved.
+
+The following paragraphs retain their frozen-f1 or earlier artifact scopes; later evidence never rewrites those reports.
 
 The immutable f1 artifact b9577ad4 passed normal production; floor and Clippy remain pending. Its regular405 comparison against df133 remains RAW FAIL: 37,979,876 checks / 14,416 differences. Known removed backdrop fields and additive Room/NPC-friction/costume-registration/Tear-birth/partition fields account for the recorded differences; fresh-empty and source-known owner ledgers do not waive any failure or establish whole-game parity.
 
@@ -35,14 +37,12 @@ matching observed birth/retained properties. Its raw322/first-stage Tear/event
 owners remain unknown, not evidence of zero Tears. Soy retains16/1/16/1
 first-observed actor identities, including20 Laser rows in both118routes;
 these are not proven Init births. Its360 body-transform frontier rows per118case,
-additional render layer and separate unconsumed d9d fullAdd52CF25 clear remain.
+additional render layer remains a visual frontier. The source-known fullAdd52CF25 clear is now merged387 and consumed by production2, without retroactively regrading these older rows.
 The first controlled-Technology Original remains117,717/13,575FAIL across677
 matching material/configured-Line bodies;2,708 missing LaserHP/maxHP checks are
 separate from absent NPC-contact evidence. Other Original cases, mixed/Soy
 Original, complete costume rendering, lifecycle events and full shared RNG
-remain unqualified. The nine open PRs at this publication include unique
-253/271/292/329, source drafts361/362/366 and independent374/375; no duplicate
-was proved by the refreshed bounded audit. Historical paragraphs below retain
+remain unqualified. The refreshed bounded audit has five open PRs:253/271/292/329/366. Unique253/271/292/329 remain preserved. Stale361 was closed only after preserving its complete source/commit metadata and landing the qualifying cache/actor successors382/384; corrected362 was updated and merged rather than discarded. No further duplicate is proved. Historical paragraphs below retain
 their original artifact scopes and every old failure.
 
 | Ordered boundary | Current owner and scope | Observed evidence and remaining interaction |
