@@ -51,6 +51,8 @@ pub struct Npc {
     pub death_effect_seed: Option<u32>,
     pub dead: bool,
     pub removed: bool,
+    /// Entity Init 446A90 clears the independent eligibility byte +494.
+    pub raw_494: bool,
     pub damage: combat::DamageQueue,
     pub keeper: Option<crate::keepers::KeeperState>,
     pub fireplace: Option<crate::fireplaces::FireplaceState>,
@@ -612,6 +614,7 @@ impl Npc {
             death_effect_seed: None,
             dead: false,
             removed: false,
+            raw_494: false,
             damage: combat::DamageQueue::default(),
             keeper: None,
             fireplace: None,

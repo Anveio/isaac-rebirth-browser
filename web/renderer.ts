@@ -217,6 +217,23 @@ export class Renderer {
           npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46, npc.animationFrame, { scale, color });
       }
     }
+    for (const knife of state.knives) {
+      if (!knife.visible) continue;
+      const sprite = knife.sprite, color = knife.currentColor, flips = sprite.layerFlips?.[0] ?? [false, false];
+      ctx.save();
+      ctx.translate((knife.position.x + knife.renderOffset.x + sprite.offset.x) * 0.65 + 32,
+        (knife.position.y + knife.renderOffset.y + sprite.offset.y) * 0.65 - 46);
+      ctx.rotate(sprite.rotation * Math.PI / 180);
+      ctx.scale(flips[0] ? -1 : 1, flips[1] ? -1 : 1);
+      this.assets.draw(ctx, "gfx/008.000_moms knife.anm2", sprite.animation, 0, 0, sprite.frame,
+        {scale: 0.65, layerScales: {0: [sprite.scale.x, sprite.scale.y]}, overrides: {0: {
+          RedTint: color.tint[0]! * 255, GreenTint: color.tint[1]! * 255,
+          BlueTint: color.tint[2]! * 255, AlphaTint: color.tint[3]! * 255,
+          RedOffset: color.offsets[0]! * 255, GreenOffset: color.offsets[1]! * 255,
+          BlueOffset: color.offsets[2]! * 255,
+        }}});
+      ctx.restore();
+    }
     for (const familiar of state.familiars) {
       if (!familiar.visible || !familiar.active || familiar.removed) continue;
       ctx.save();

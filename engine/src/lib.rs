@@ -11,13 +11,14 @@ pub mod active_items;
 pub mod actors;
 pub mod attack_color;
 pub mod attack_flags;
+mod attack_grid;
+pub mod attack_runtime;
 pub mod audio;
 pub mod blood_effects;
 pub mod bombs;
 pub mod camera;
 pub mod challenges;
 pub mod champions;
-pub mod sprite_color;
 pub mod chests;
 pub mod combat;
 mod content;
@@ -27,6 +28,7 @@ mod doors;
 mod effects;
 pub mod enemy_projectiles;
 mod entities;
+pub mod sprite_color;
 pub use entities::supports_npc_selector;
 pub mod familiars;
 pub mod fireplaces;
@@ -44,6 +46,7 @@ pub mod input;
 mod item_pipeline;
 pub mod items;
 pub mod keepers;
+pub mod knives;
 pub mod lasers;
 pub mod layout;
 pub mod level2_flies;
@@ -77,6 +80,8 @@ pub mod roundworm;
 pub mod run_admission;
 pub mod saved_game;
 pub mod seed;
+mod source_angles;
+pub mod stage_shooting_guard;
 pub mod traversal;
 pub mod wall_hugger;
 mod weapon_plan;
@@ -496,6 +501,7 @@ pub struct State {
     pub weapon_cache: weapon_plan::WeaponCache,
     #[serde(default)]
     pub weapon_admission: weapon_plan::WeaponAdmission,
+    pub stage_shooting_guard: stage_shooting_guard::StageShootingGuard,
     pub information_animation: information_animation::InformationAnimation,
     pub stage: u32,
     pub stage_seed: u32,
@@ -531,6 +537,10 @@ pub struct State {
     pub sprite_effects: Vec<familiars::SpriteEffect>,
     #[serde(default)]
     pub lasers: Vec<lasers::Laser>,
+    #[serde(default)]
+    pub knives: Vec<knives::Knife>,
+    #[serde(default)]
+    pub attack_runtime: attack_runtime::AttackRuntime,
     #[serde(default)]
     pub next_laser: u32,
     pub familiars: Vec<familiars::Familiar>,
@@ -672,6 +682,7 @@ impl Game {
                 player_stats: player_stats::PlayerStats::default(),
                 weapon_cache: weapon_plan::WeaponCache::fresh_player(),
                 weapon_admission: weapon_plan::WeaponAdmission::default(),
+                stage_shooting_guard: stage_shooting_guard::StageShootingGuard::fresh_game(),
                 information_animation: information_animation::InformationAnimation::default(),
                 stage: 1,
                 stage_seed: seed::stage1_seed(initial_seed),
@@ -717,6 +728,8 @@ impl Game {
                 next_effect: 1,
                 sprite_effects: Vec::new(),
                 lasers: Vec::new(),
+                knives: Vec::new(),
+                attack_runtime: attack_runtime::AttackRuntime::default(),
                 next_laser: 1,
                 familiars: Vec::new(),
                 next_familiar: 1,
@@ -1305,6 +1318,8 @@ impl Game {
         self.state.next_effect = 1;
         self.state.sprite_effects.clear();
         self.state.lasers.clear();
+        self.state.knives.clear();
+        self.state.attack_runtime = attack_runtime::AttackRuntime::fresh_player();
         self.state.next_laser = 1;
         self.state.familiars.clear();
         self.state.next_familiar = 1;
@@ -1629,7 +1644,7 @@ impl Game {
     }
     /// Persisted Room clones retain supported actor handles in authored order.
     pub fn rebuild_room_actor_schedule(&mut self) -> Result<(), String> {
-        self.state.actor_scheduler.clear_room();
+        attack_runtime::reset_room_schedule(&mut self.state);
         //453ec0 resets all four actual manager count words on Room replacement.
         self.state.room.manager_counts = actors::ManagerCounts::default();
         self.state.fire_particles.clear();
@@ -1640,7 +1655,7 @@ impl Game {
         };
         if self.state.actor_scheduler.sequence_id(player).is_none() {
             self.state.actor_scheduler.admit(player)?;
-            self.state.actor_scheduler.clear_room();
+            attack_runtime::reset_room_schedule(&mut self.state);
         }
         for actor in self.state.room.authored_actor_order.iter().copied() {
             let admitted = match actor.kind {
@@ -1824,6 +1839,9 @@ impl Game {
             }
             return Ok(());
         }
+        if phase == phase::Phase::Update && self.state.screen == Screen::Playing {
+            attack_runtime::restore_fast_positions(&mut self.state);
+        }
         let gameplay_was_paused = self.state.paused;
         if self.state.screen == Screen::Playing {
             self.state.pause_menu.advance(phase);
@@ -1895,6 +1913,12 @@ impl Game {
                         .map(|transition| transition.target_slot),
                 ));
                 doors::begin_room_admission(&mut self.state);
+                if !self.state.knives.is_empty() {
+                    self.state.weapon_admission.record_unadmitted(
+                        self.state.weapon_cache.primary,
+                        "ordinaryKnifeRoomAdmissionTail",
+                    );
+                }
                 // Transition explicitly updates Player before loading; the
                 // GameChangeRoom5509f2 ->584200 ->Room.Update5d12a0 tail
                 // admits another update at unchanged Game counter.
@@ -2057,6 +2081,8 @@ impl Game {
             // including births from the admission-fenced actor callbacks.
             familiars::paint_background_effects(&mut self.state)?;
             blood_effects::clear_retired_links(&mut self.state);
+            attack_runtime::retire_full(&mut self.state);
+            attack_runtime::contacts(&mut self.state)?;
             let pickup_contacts = pickups::contact_candidates(&self.state)?;
             npcs::player_contacts(&mut self.state)?;
             npcs::nonplayer_contacts(&mut self.state)?;
@@ -2198,6 +2224,7 @@ impl Game {
                             .is_some_and(|impact| impact.id == actor.id)
                     })
             }
+            actors::ActorKind::Knife => self.state.knives.iter().any(|knife| knife.id == actor.id),
             actors::ActorKind::Laser => self.state.lasers.iter().any(|laser| laser.id == actor.id),
             _ => true,
         });
@@ -2277,6 +2304,10 @@ impl Game {
             }
             actors::ActorKind::Projectile => {
                 enemy_projectiles::advance_actor(&mut self.state, phase, actor.id)?
+            }
+            actors::ActorKind::Knife => {
+                let primary = self.state.weapon_cache.primary.numeric();
+                attack_runtime::advance_scheduled_actor(&mut self.state, phase, actor.id, primary)?;
             }
             actors::ActorKind::Laser => lasers::advance_actor(&mut self.state, phase, actor.id)?,
             actors::ActorKind::Effect => {
@@ -2602,6 +2633,89 @@ impl Game {
             && self.state.player.controls_enabled
             && self.state.player.input_cooldown <= 0;
         player_items::advance_presentation(&mut self.state, phase);
+        //52f370 positive7dc returns before its both-phase519fc0 callbacks.
+        //53004c otherwise precedes later full/body work, independent of aim.
+        let shoot_callback_admitted =
+            controls_enabled
+                && self.state.player.can_shoot
+                && self.state.player.shooting_lock == 0
+                && !self.state.player_animation.guard
+                && self.state.player_items.as_ref().is_some_and(|items| {
+                    !items.pickup_animation_guard && items.active_state_d80 == 0
+                })
+                && !self.state.stage_shooting_guard.active()
+                && self.state.player.controls_enabled
+                && self.state.player.input_cooldown <= 0;
+        let mut ordinary_source_clock = false;
+        let mut regular_plan = None;
+        let mut shooting_aim_db4 = None;
+        let regular_dispatch = if shoot_callback_admitted {
+            match weapon_plan::resolve_current_weapon(&self.state)? {
+                weapon_plan::LiveWeaponResolution::Unadmitted(channel) => {
+                    self.state
+                        .weapon_admission
+                        .record_unadmitted(self.state.weapon_cache.primary, channel);
+                    false
+                }
+                weapon_plan::LiveWeaponResolution::Resolved(plan) => {
+                    let buttons = attack_runtime::ShootButtons::read(&self.state.pressed);
+                    let callback_aim =
+                        if plan.controller == weapon_plan::ControllerChannel::OrdinaryKnife {
+                            buttons.ordinary_knife_aim()
+                        } else {
+                            buttons.aim()
+                        };
+                    let ordinary = plan.controller == weapon_plan::ControllerChannel::OrdinaryKnife;
+                    let aim_step = if ordinary {
+                        attack_runtime::ordinary_shooting_aim(
+                            callback_aim,
+                            buttons.held(),
+                            self.state.attack_runtime.shooting_aim_db4,
+                        )?
+                    } else {
+                        Some(attack_runtime::ShootingAimStep {
+                            callback_aim,
+                            db4_write: (callback_aim.x != 0.0 || callback_aim.y != 0.0)
+                                .then_some(callback_aim),
+                        })
+                    };
+                    if let Some(aim_step) = aim_step {
+                        shooting_aim_db4 = aim_step.db4_write;
+                        if ordinary {
+                            ordinary_source_clock = true;
+                            attack_runtime::ordinary_head_direction(
+                                &mut self.state,
+                                aim_step.callback_aim,
+                            );
+                            if phase == phase::Phase::Update {
+                                if self.state.fire_cooldown >= 0 {
+                                    self.state.fire_cooldown -= 1;
+                                }
+                                if self.state.head_timer >= 0 {
+                                    self.state.head_timer -= 1;
+                                }
+                            }
+                        }
+                        regular_plan = plan.regular;
+                        attack_runtime::dispatch_player(
+                            &mut self.state,
+                            &plan,
+                            buttons,
+                            phase,
+                            aim_step.callback_aim,
+                        )? == attack_runtime::DispatchOutcome::RegularTear
+                    } else {
+                        self.state
+                            .weapon_admission
+                            .record_unadmitted(plan.primary, "ordinaryShootingAimHistory");
+                        false
+                    }
+                }
+            }
+        } else {
+            false
+        };
+
         let dx = if controls_enabled {
             i32::from(self.held("KeyD")) - i32::from(self.held("KeyA"))
         } else {
@@ -2675,31 +2789,13 @@ impl Game {
         self.state.player.shooting = aim.is_some() && !shooting_locked;
         if phase == phase::Phase::Update && !shooting_locked {
             self.state.player.head_frame = if self.state.head_timer > 8 { 2 } else { 0 };
-            if self.state.fire_cooldown >= 0 {
+            if !ordinary_source_clock && self.state.fire_cooldown >= 0 {
                 self.state.fire_cooldown -= 1;
             }
-            if self.state.head_timer >= 0 {
+            if !ordinary_source_clock && self.state.head_timer >= 0 {
                 self.state.head_timer -= 1;
             }
         }
-        let regular_dispatch = if controls_enabled && !animation_guard && !shooting_locked {
-            match weapon_plan::resolve_dispatch_admission(
-                self.state.weapon_cache,
-                self.state.weapon_admission.source_player_type,
-                self.state.player_stats,
-                self.state.weapon_admission.pending_primary_cleanup,
-            )? {
-                weapon_plan::DispatchAdmission::Regular => true,
-                weapon_plan::DispatchAdmission::Unadmitted(channel) => {
-                    self.state
-                        .weapon_admission
-                        .record_unadmitted(self.state.weapon_cache.primary, channel);
-                    false
-                }
-            }
-        } else {
-            false
-        };
         if let Some(direction) = aim {
             self.state.player.facing = direction;
             if regular_dispatch && !shooting_locked && self.state.fire_cooldown < 0 {
@@ -2714,11 +2810,8 @@ impl Game {
                     x: (inherited_velocity.0 / motion::WORLD_SCALE) as f32,
                     y: (inherited_velocity.1 / motion::WORLD_SCALE) as f32,
                 };
-                let plan = weapon_plan::RegularTearPlan::resolve(
-                    self.state.player_stats,
-                    self.state.max_fire_delay,
-                    self.state.weapon_cache,
-                )?;
+                let plan = regular_plan
+                    .ok_or("regular dispatch requires its actual immutable birth plan")?;
                 let velocity = projectiles::stored_velocity(aim, inherited, plan.shot_speed)?;
                 self.state.player.eye = self.state.player.eye.flipped();
                 let eye_uniform = self.state.boot_lifecycle.shared.uniform();
@@ -2784,6 +2877,11 @@ impl Game {
                 self.state.fire_cooldown = plan.fire_delay;
                 self.state.head_timer = plan.head_timer;
             }
+        }
+        //52F738/744 gates the postcallback DB4 store by nonzero processed input.
+        //Release and canceled held input retain the actual prior DB4.
+        if let Some(aim) = shooting_aim_db4 {
+            self.state.attack_runtime.shooting_aim_db4 = Some(aim);
         }
         player_items::advance_item_sprite(&mut self.state, phase);
         if self.state.player.input_cooldown > 0 {

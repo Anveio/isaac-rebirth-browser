@@ -171,6 +171,25 @@ impl<'a> ItemInputs<'a> {
         self.admits_selected_auxiliary_callbacks() && self.owner.luck_inputs.is_some()
     }
 
+    ///Separate literal neutral kind4/contact modifier footprint. Extending
+    ///cache32/64 support never expands this contact/controller domain.
+    pub(crate) fn admits_neutral_kind4(self) -> bool {
+        self.owner.trinket_slots == [0, 0]
+            && self
+                .owner
+                .queued_id
+                .is_none_or(|id| items::definition(id).is_some_and(|config| config.kind != 2))
+            && self.owner.temporary_collectibles.is_empty()
+            && self
+                .owner
+                .owned_counts
+                .iter()
+                .enumerate()
+                .all(|(id, &count)| {
+                    count == 0 || (count > 0 && [1, 4, 114, 118, 329].contains(&id))
+                })
+    }
+
     fn has_unmapped_owner(self, flag: u32, supported: &[u32]) -> bool {
         self.owner
             .owned_counts
