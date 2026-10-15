@@ -1382,6 +1382,11 @@ impl Game {
             run_seeds.initialized_fields[12],
         )?);
         self.state.run_seeds = Some(run_seeds);
+        // NewRun54eb20 begins every run on the first stage, whether it comes
+        // from the GameOver Restart or the menus after a descent, and outside
+        // any stage transition the last run was in.
+        self.state.stage = 1;
+        self.state.stage_transition = stage_transition::StageTransition::default();
         self.state.system_clock.align_run_start()?;
         self.state.screen = Screen::Playing;
         self.state.paused = false;
@@ -1869,7 +1874,6 @@ impl Game {
                         let seed = self.state.boot_lifecycle.shared.next_u32().max(1);
                         self.state.boot_lifecycle.commit_character_seed(seed)?;
                     }
-                    self.state.stage = 1;
                     self.start_run()?;
                 }
                 player_death::Request::Exit => {

@@ -384,7 +384,15 @@ pub fn transition(before: &State, command: &Command, after: &State) {
                 && !boss_scene
                 && before.player_death.game_over.is_none()
             {
-                if before.room_transition.is_some() {
+                if before.nightmares.system_active || before.nightmares.request_pending {
+                    // Game54f760 returns while the nightmare scene owns System
+                    // state 4, before any menu key handling.
+                    props::always!(
+                        !after.paused && after.pause_menu == before.pause_menu,
+                        "game: Escape during the nightmare scene does not pause",
+                        json!({ "nightmares": before.nightmares.system_active, "pause": after.pause_menu })
+                    );
+                } else if before.room_transition.is_some() {
                     // The original ignores Escape until the transition ends (#168).
                     props::always!(
                         !after.paused && after.pause_menu == before.pause_menu,
@@ -713,8 +721,9 @@ pub fn state(state: &State) {
     // Seeds::SetStartSeed5e1470 gives stage s the (s+1)-th startup draw
     // (stage 1's is `stage1_seed`). A run's floor is its stage's; between
     // SetNextStage and Level::Init an active stage transition still holds
-    // the previous stage's floor. The menus keep the last run's floor while
-    // a typed seed replaces the run seed.
+    // the previous stage's floor. The menus keep the last run's stage and
+    // floor until the next run starts, while a typed seed already gives the
+    // next run's first-stage seed.
     let stage_seed =
         |stage: u32| (0..=stage).fold(state.run_seed_value, |value, _| seed::startup_next(value));
     let transition = state.stage_transition.active();
@@ -726,7 +735,8 @@ pub fn state(state: &State) {
     props::always!(
         seed::encode(state.run_seed_value).as_deref() == Ok(state.run_seed.as_str())
             && stage_seed(1) == seed::stage1_seed(state.run_seed_value)
-            && state.stage_seed == stage_seed(level_stage)
+            && (state.stage_seed == stage_seed(level_stage)
+                || (state.screen != Screen::Playing && state.stage_seed == stage_seed(1)))
             && (state.screen != Screen::Playing
                 || (state.floor.stage == level_stage
                     && state.floor.stage_seed == state.stage_seed))

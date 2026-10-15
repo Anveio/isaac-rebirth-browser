@@ -257,7 +257,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | `contact` | mass contact responses against momentum, centre-of-mass and overlap oracles | 16 | 3 | 0 |
 | `pathfinder` | FindGridPath's flood against an independent node-weighted Dijkstra | 6 | 5 | 0 |
 | `item_pools` | ItemPool selection, depletion, fallbacks, routing and continuation | 21 | 6 | 3 |
-| `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 65 | 54 | 2 |
+| `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 66 | 54 | 2 |
 | `abi` | the exported C ABI transport the browser bridge drives | 15 | 3 | 0 |
 
 <details><summary>Every declared DST property</summary>
@@ -581,6 +581,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Sometimes | game: a key arrives during the run-start fade | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: key presses during a boss scene are ignored | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: a key arrives during a boss scene | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: Escape during the nightmare scene does not pause | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: Escape during a room transition does not pause | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: Escape arrives during a room transition | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: Escape opens the pause menu | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
