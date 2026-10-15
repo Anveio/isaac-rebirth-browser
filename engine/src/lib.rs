@@ -591,6 +591,10 @@ pub struct Game {
     pub saved_run: Option<saved_game::SavedRun>,
     pub player_manager_secondary_rng: saved_game::PlayerManagerSecondaryRng,
     pub challenge_catalog: challenges::Catalog,
+    ///Immutable authored context belongs to the complete Game continuation,
+    ///outside per-frame State snapshots. Selector and admission share it.
+    #[serde(default, with = "room_assets::shared_catalogue")]
+    special_room_assets: Option<std::sync::Arc<Vec<room_assets::RoomAsset>>>,
 }
 
 impl Game {
@@ -602,6 +606,7 @@ impl Game {
             initial_seed,
             boot_epoch_seed,
             challenges::Catalog::authored()?,
+            None,
         )
     }
     pub fn new_with_resources(
@@ -609,20 +614,35 @@ impl Game {
         boot_epoch_seed: u32,
         resources: challenges::ResourceInputs,
     ) -> Result<Self, String> {
-        Self::new_with_challenges(initial_seed, boot_epoch_seed, resources.catalog()?)
+        let catalog = resources.catalog()?;
+        let special = resources
+            .special_rooms
+            .as_deref()
+            .map(room_assets::decode)
+            .transpose()?
+            .map(std::sync::Arc::new);
+        Self::new_with_challenges(initial_seed, boot_epoch_seed, catalog, special)
     }
     fn new_with_challenges(
         initial_seed: u32,
         boot_epoch_seed: u32,
         challenge_catalog: challenges::Catalog,
+        special_room_assets: Option<std::sync::Arc<Vec<room_assets::RoomAsset>>>,
     ) -> Result<Self, String> {
         let run_seed = seed::encode(initial_seed)?;
         let (boot_lifecycle, saved_game, boot_level_grid) =
             mt::BootLifecycle::new(boot_epoch_seed).into_parts();
         let player = Player::starting();
-        let floor = floor::generate_basement(seed::stage1_seed(initial_seed))?;
+        let floor = floor::generate_basement_with_special(
+            seed::stage1_seed(initial_seed),
+            special_room_assets.as_deref().map(Vec::as_slice),
+        )?;
         let current_room = floor.starting_descriptor;
-        let room = Room::from_starting_floor(&floor);
+        let room = Room::from_floor_descriptor_with_special(
+            &floor,
+            current_room,
+            special_room_assets.as_deref().map(Vec::as_slice),
+        )?;
         let camera = Some(camera::Camera::new(&room, None));
         let stage_effects = StageEffects::basement(&player, &room.appearance.fx, 0);
         let mut game = Self {
@@ -741,6 +761,7 @@ impl Game {
             saved_run: None,
             player_manager_secondary_rng: saved_game::PlayerManagerSecondaryRng::default(),
             challenge_catalog,
+            special_room_assets,
         };
         game.refresh_minimap();
         Ok(game)
@@ -1362,9 +1383,13 @@ impl Game {
                         .ok_or("Level requires actual Player item owner")?,
                 )?
                 .positive_owned_count(260),
+                self.special_room_assets.as_deref().map(Vec::as_slice),
             )?
         } else {
-            floor::generate_basement(seed::stage1_seed(self.state.run_seed_value))?
+            floor::generate_basement_with_special(
+                seed::stage1_seed(self.state.run_seed_value),
+                self.special_room_assets.as_deref().map(Vec::as_slice),
+            )?
         };
         self.state.current_room = self.state.floor.starting_descriptor;
         self.state.visited_rooms = BTreeSet::from([self.state.current_room]);
@@ -1372,7 +1397,15 @@ impl Game {
         self.state.revealed_secret_connections.clear();
         self.state.persisted_rooms.clear();
         self.state.room_transition = None;
-        self.state.room = Room::from_starting_floor(&self.state.floor);
+        self.state.room = Room::from_floor_descriptor_with_special(
+            &self.state.floor,
+            self.state.current_room,
+            self.special_room_assets.as_deref().map(Vec::as_slice),
+        )?;
+        // Fresh587f44→58821c clears descriptor+3d; placement preserves it.
+        // Room.Init5ced20 stamps159c before its grid/entity factories.
+        self.state.room.initialization_game_update = Some(self.state.game_update_count);
+        self.state.room.combat_clear = false;
         self.state.camera = Some(camera::Camera::new(&self.state.room, None));
         // PlayerManager.Init precedes Level.Init -> Room.Init. Room reset
         // keeps its admitted Player pointer/ID and starts a new allocator.
@@ -1391,6 +1424,28 @@ impl Game {
             &mut self.state.boot_lifecycle.shared,
             self.state.game_update_count,
         )?;
+        let selectors = self
+            .state
+            .room
+            .spawns
+            .as_ref()
+            .ok_or("starting descriptor has no authored actor admission")?
+            .selectors
+            .clone();
+        let requested_entities = selectors
+            .iter()
+            .filter(|selector| selector.category == room_spawns::SpawnCategory::Entity)
+            .count();
+        // 5cf5c6 constructs/registers actors before loaded5cf614 and Save.
+        // This startup caller has no virtual18 or doorway manager update.
+        self.admit_room_pickups(&selectors)?;
+        if self.state.room.authored_actor_order.len() != requested_entities {
+            return Err(format!(
+                "starting authored entity frontier is incomplete: admitted {} of {requested_entities}",
+                self.state.room.authored_actor_order.len()
+            ));
+        }
+        npcs::initialize_startup_clear(&mut self.state);
         // Source Level generation loads the start room, then immediately calls
         // RoomMusic. This runtime's Level contract is fresh normal Basement.
         if let Some(id) = music::stage_track(self.state.stage, false) {
@@ -1623,6 +1678,7 @@ impl Game {
         self.state.room.authored_actor_order = order;
         self.state.next_pickup = next;
         self.rebuild_room_actor_schedule()?;
+        self.state.room.complete_initialization();
         self.state.room.boss_count = self.state.room.manager_counts.boss_total().max(0) as u32;
         self.refresh_stage_effects();
         Ok(())
@@ -1880,7 +1936,11 @@ impl Game {
         {
             pickups::save_regular_records(&mut self.state)?;
         }
-        if traversal::advance_transition(&mut self.state, phase) {
+        if traversal::advance_transition(
+            &mut self.state,
+            phase,
+            self.special_room_assets.as_deref().map(Vec::as_slice),
+        )? {
             if boss_cleanup {
                 // State3 calls Player.Update at5dde9e before enabling controls
                 // and leaving the transition. The outer actor pass stays frozen.
@@ -1903,6 +1963,7 @@ impl Game {
                 if restoring {
                     let restored_pickups = pickups::readmit_regular_records(&mut self.state)?;
                     self.rebuild_room_actor_schedule()?;
+                    self.state.room.complete_initialization();
                     // The native Room.Update admission tail advances the new
                     // actors once at the unchanged Game clock. Other saved
                     // families keep their existing reconstruction owners.
@@ -2163,7 +2224,10 @@ impl Game {
             let dx = i32::from(self.held("KeyD")) - i32::from(self.held("KeyA"));
             let dy = i32::from(self.held("KeyS")) - i32::from(self.held("KeyW"));
             doors::check_unlock(&mut self.state, dx, dy);
-            traversal::check_departure(&mut self.state);
+            traversal::check_departure(
+                &mut self.state,
+                self.special_room_assets.as_deref().map(Vec::as_slice),
+            );
         }
         let surviving = &self.state.tears;
         let pickups = &self.state.room.pickups;

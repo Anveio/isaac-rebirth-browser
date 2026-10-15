@@ -23,6 +23,12 @@ pub struct Room {
     pub bottom: f64,
     pub appearance: RoomAppearance,
     pub descriptor: Option<crate::floor::Descriptor>,
+    /// Room+159c is stamped by Room.Init before grid and entity factories.
+    #[serde(default)]
+    pub initialization_game_update: Option<u32>,
+    /// Room+0 becomes true after the admitted factory or restore tail.
+    #[serde(default)]
+    pub loaded: bool,
     pub pickups: Vec<crate::pickups::Pickup>,
     #[serde(default)]
     pub saved_regular_pickups: Vec<crate::pickups::SavedRegularPickup>,
@@ -214,6 +220,11 @@ impl DecorationRng {
 }
 
 impl Room {
+    /// 5cf614/5cff3f store loaded after factories or saved actor admission.
+    pub(crate) fn complete_initialization(&mut self) {
+        self.loaded = true;
+    }
+
     pub fn from_starting_floor(floor: &crate::floor::Floor) -> Self {
         Self::from_floor_descriptor(floor, floor.starting_descriptor)
     }
@@ -221,7 +232,19 @@ impl Room {
     /// Admit the authored configuration once. Mutable fields on Room persist
     /// with its descriptor when the player leaves and later returns.
     pub fn from_floor_descriptor(floor: &crate::floor::Floor, index: usize) -> Self {
-        let descriptor = &floor.descriptors[index];
+        Self::from_floor_descriptor_with_special(floor, index, None)
+            .expect("generated descriptor identifies original authored STB")
+    }
+
+    pub(crate) fn from_floor_descriptor_with_special(
+        floor: &crate::floor::Floor,
+        index: usize,
+        special: Option<&[crate::room_assets::RoomAsset]>,
+    ) -> Result<Self, String> {
+        let descriptor = floor
+            .descriptors
+            .get(index)
+            .ok_or("Room descriptor index outside Floor")?;
         let mut room = Self::from_decoration_seed(descriptor.decoration_seed);
         room.descriptor = Some(descriptor.clone());
         // Room load5cedf0..5ceec7 uses GridPosition(gridWidth+1)-(20,20)
@@ -240,12 +263,11 @@ impl Room {
         // Start Room's authored boundary door grid positions, padded by one,
         // use RoomGetGridPosition (40+40*x,120+40*y), .65 projection and
         // common sprite Y−1. Normal door setup adds the source 15px inset.
-        let authored = crate::room_assets::for_descriptor(descriptor)
-            .expect("generated starting descriptor identifies authored STB");
-        room.spawns = Some(
-            crate::room_spawns::select(&authored, descriptor.spawn_seed)
-                .expect("generated descriptor identifies bounded authored spawns"),
-        );
+        let authored = crate::room_assets::for_descriptor_with_special(descriptor, special)?;
+        room.spawns = Some(crate::room_spawns::select(
+            &authored,
+            descriptor.spawn_seed,
+        )?);
         room.appearance.tutorial = descriptor.asset_stage == 0
             && descriptor.template.room_type == 1
             && descriptor.template.variant == 2;
@@ -330,20 +352,21 @@ impl Room {
                     == 21,
             })
             .collect::<Vec<_>>();
-        room.grid = Some(
-            crate::grid::for_room(
-                &authored,
-                room.spawns.as_ref().expect("authored groups were selected"),
-                descriptor.decoration_seed,
-                &doors,
-            )
-            .expect("authored ordinary grid admission"),
-        );
-        room.initialize_path_costs();
+        room.grid = Some(crate::grid::for_room(
+            &authored,
+            room.spawns.as_ref().expect("authored groups were selected"),
+            descriptor.decoration_seed,
+            &doors,
+        )?);
+        room.path_costs = room
+            .grid
+            .as_ref()
+            .map(crate::room_costs::RoomCosts::for_supported_grid)
+            .transpose()?;
         room.appearance.generation =
             "source-fresh-normal-basement-floor;descriptor-decoration12;authored-spawn11;provisional-fx-route"
                 .into();
-        room
+        Ok(room)
     }
 
     /// Room.Init5cecc0 clears its transient0x700-byte cost array on every
@@ -494,6 +517,8 @@ impl Room {
             - render_offset.y;
         Room {
             descriptor: None,
+            initialization_game_update: None,
+            loaded: false,
             pickups: Vec::new(),
             saved_regular_pickups: Vec::new(),
             npcs: Vec::new(),
