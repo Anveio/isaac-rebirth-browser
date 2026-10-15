@@ -17,7 +17,7 @@ ROOT = Path(__file__).resolve().parents[2]
 EXPECTED_SHA = os.environ.get('ISAAC_ORIGINAL_SHA')
 if not isinstance(EXPECTED_SHA, str) or re.fullmatch(r'[0-9a-f]{64}', EXPECTED_SHA) is None:
     raise ValueError('ISAAC_ORIGINAL_SHA must provide the driver-verified canonical binary SHA256')
-SOURCE_FIELDS = frozenset(('playerMovementD9c', 'knifeChildChain4a0', 'npc14And18DamageQueue', 'kind8TearFields', 'ordinaryTechnology', 'ordinaryDrFetusBombs'))
+SOURCE_FIELDS = frozenset(('playerMovementD9c', 'knifeChildChain4a0', 'npc14And18DamageQueue', 'kind8TearFields', 'ordinaryTechnology', 'ordinaryDrFetusBombs', 'controlledDrFetusBombs'))
 spec = importlib.util.spec_from_file_location('composition_items', ROOT / 'tools/original/item-observer.py')
 base = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(base)
@@ -52,7 +52,7 @@ def observe(pid, context):
                     'nativeBinarySha256': EXPECTED_SHA, 'requestedSourceFields': requested_fields, 'players': [], 'attacks': [], 'impacts': [], 'contactNpcs': []}
     if 'npc14And18DamageQueue' in requested_fields:
         supplemental['commonContactNpcs'] = []
-    if 'ordinaryDrFetusBombs' in requested_fields:
+    if 'ordinaryDrFetusBombs' in requested_fields or 'controlledDrFetusBombs' in requested_fields:
         supplemental['fetusBombs'] = []
     stopped = False
     try:
@@ -169,7 +169,7 @@ def observe(pid, context):
                     'initialized3074': flags(player + 0x3074, 1)[0], 'canShoot3075': flags(player + 0x3075, 1)[0],
                     'transformationCounts': [i32(player + 0x3068), i32(player + 0x306c)],
                     'actorSlots': {f'{offset:x}': actor_slot(pointer) for offset, pointer in slots.items()}})
-                if 'ordinaryDrFetusBombs' in requested_fields:
+                if 'ordinaryDrFetusBombs' in requested_fields or 'controlledDrFetusBombs' in requested_fields:
                     supplemental['players'][-1]['fetusCaller'] = {
                         'playerTypeBfc': i32(player + 0xbfc),
                         'trinketSlotsE14': [i32(player + 0xe14), i32(player + 0xe18)],
@@ -251,7 +251,7 @@ def observe(pid, context):
                         supplemental['commonContactNpcs'].append(row)
                     else:
                         supplemental['contactNpcs'].append(row)
-                if identity['kind'] == 4 and 'ordinaryDrFetusBombs' in requested_fields:
+                if identity['kind'] == 4 and ('ordinaryDrFetusBombs' in requested_fields or 'controlledDrFetusBombs' in requested_fields):
                     # 66B4D0: Init456E00/Full457060/Fast4446A0. This is a
                     # distinct Bomb owner, never a Knife/Laser field alias.
                     if u64(actor) != 0x66b4d0:
@@ -279,6 +279,10 @@ def observe(pid, context):
                         'linkedParent': actor_ref(u64(actor + 0x498)),
                         'sourceColor3a0': floats(actor + 0x3a0, 11),
                         'currentColor2d0': floats(actor + 0x2d0, 11)})
+                    if 'controlledDrFetusBombs' in requested_fields:
+                        #519FC0 follows the real reused Bomb4's Child4A0. The
+                        #66B4D0/type4 guard above precedes this typed pointer.
+                        supplemental['fetusBombs'][-1]['controlledChild4a0'] = actor_ref(u64(actor + 0x4a0))
                     #7EC's initial/global ordinal writer is unowned. Its raw
                     # padding is not read or substituted with a numeric zero.
                 if identity['kind'] not in VTABLES or (identity['kind'] == 1000 and (identity['variant'],identity['subtype']) != (50,1)):
