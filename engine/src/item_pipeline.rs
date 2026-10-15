@@ -269,3 +269,17 @@ pub(crate) fn resolve_scalars(
         completed: CacheMask(completed),
     })
 }
+
+/// The negative Flight callback at 515328/51532F writes both D68 and class 340.
+/// Selected inputs have no flight item or TEMP term; both transformation
+/// predicates require their actual history. Flying class 3 remains unadmitted.
+pub(crate) fn resolve_neutral_flight(
+    inputs: ItemInputs<'_>,
+    source_player_type: Option<u32>,
+    transformation_counts: Option<[i32; 2]>,
+) -> Option<(bool, u32)> {
+    (source_player_type == Some(0)
+        && inputs.admits_selected_scalar_completion()
+        && transformation_counts == Some([0, 0]))
+    .then_some((false, 5))
+}

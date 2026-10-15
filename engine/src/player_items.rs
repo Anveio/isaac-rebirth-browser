@@ -515,6 +515,11 @@ pub(crate) fn add_collectible(
         .as_mut()
         .expect("checked Player item owner");
     owner.owned_counts[id as usize] = owner.owned_counts[id as usize].wrapping_add(1);
+    if [81, 133, 134, 145, 187, 212].contains(&id) {
+        // The 52CC90 producer needs its actual 576BB0 guard. Current item
+        // counts cannot reconstruct these transformation history counters.
+        state.player.transformation_counts = None;
+    }
     if config.kind != 3 || !touched {
         authored_grants(state, config);
     }

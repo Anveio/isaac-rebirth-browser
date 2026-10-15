@@ -139,6 +139,15 @@ pub struct Player {
     pub shooting_lock: u32,
     /// Actual Player+7d4 input gate, distinct from Entity+31d visibility.
     pub controls_enabled: bool,
+    /// Actual signed counters at 3068/306C. Unadmitted history remains absent.
+    #[serde(default)]
+    pub transformation_counts: Option<[i32; 2]>,
+    /// Actual Player D68 and Entity 340 cache outputs. These are independent
+    /// of Entity 344, which controls entity pair collisions.
+    #[serde(default)]
+    pub flying: Option<bool>,
+    #[serde(default)]
+    pub grid_collision_class: Option<u32>,
     pub eye: projectiles::Eye,
     /// Actual Player+c84, independent of manager tear handles.
     pub shots_fired: u32,
@@ -168,6 +177,9 @@ impl Player {
             shooting: false,
             shooting_lock: 0,
             controls_enabled: true,
+            transformation_counts: None,
+            flying: None,
+            grid_collision_class: None,
             eye: projectiles::Eye::Positive,
             shots_fired: 0,
             // Authored sprite roots and shadow centers are one logical pixel
@@ -1310,6 +1322,12 @@ impl Game {
         self.state.boss_bar = BossBar::default();
         self.state.pause_menu = PauseMenu::hidden();
         self.state.player = Player::starting();
+        // 519767/519771 initialize the two transformation history counters.
+        self.state.player.transformation_counts = Some([0, 0]);
+        // 51987A initializes D68 to false. Base/config 446A90 independently
+        // initializes the authored Player's 40-point grid collision class to 5.
+        self.state.player.flying = Some(false);
+        self.state.player.grid_collision_class = Some(5);
         if let Some(definition) = &challenge {
             challenges::configure_player(&mut self.state, definition)?;
         }
