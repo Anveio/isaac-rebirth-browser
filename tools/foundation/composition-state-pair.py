@@ -784,6 +784,14 @@ if case['requires'].get('ordinaryTechnologyFunctional') is not None:
     technology_module = importlib.util.module_from_spec(technology_spec)
     technology_spec.loader.exec_module(technology_module)
     technology_comparer = technology_module.TechnologyComparer(globals(), case)
+controlled_technology_comparer = None
+controlled_technology_result = None
+if case['requires'].get('controlledTechnologyFunctional') is not None:
+    controlled_technology_spec = importlib.util.spec_from_file_location(
+        'controlled_technology_comparer', Path(__file__).with_name('composition-controlled-technology.py'))
+    controlled_technology_module = importlib.util.module_from_spec(controlled_technology_spec)
+    controlled_technology_spec.loader.exec_module(controlled_technology_module)
+    controlled_technology_comparer = controlled_technology_module.ControlledTechnologyComparer(globals(), case)
 check('actual completed original', ('pass', []), (native.get('status'), native.get('failures')), None)
 check('actual completed browser', 'complete', browser.get('captureStatus'), None)
 trace = browser.get('trace') or {}
@@ -867,7 +875,12 @@ for captured in sorted(all_captured, key=lambda row: row['presentation']):
             check('actual complete active attack families/sequence/seeds', native_families, sorted(port_families), t)
         except Exception as error:
             missing('mandatory active attack scheduler group', t, error)
-        if technology_comparer is not None:
+        if controlled_technology_comparer is not None:
+            try:
+                controlled_technology_comparer.snapshot(source, state, t, observed['systemCounter'], observed['players'][0])
+            except Exception as error:
+                missing('mandatory actual controlled Technology C18/body/history group', t, error)
+        elif technology_comparer is not None:
             try:
                 technology_comparer.snapshot(source, state, t, observed['systemCounter'])
             except Exception as error:
@@ -1233,6 +1246,8 @@ if 'controlledBrimContact' in case['requires']:
         controlled_ring_contact = contact_module.compare_contact(case, paired_rows, globals())
     except Exception as error:
         missing('mandatory controlled ring typed contact consumer', None, error)
+if controlled_technology_comparer is not None:
+    controlled_technology_result = controlled_technology_comparer.finish()
 if technology_comparer is not None:
     technology_result = technology_comparer.finish()
 
@@ -1254,6 +1269,8 @@ if controlled_ring_contact is not None:
     result['controlledRingContact'] = controlled_ring_contact
 if technology_result is not None:
     result['ordinaryTechnology'] = technology_result
+if controlled_technology_result is not None:
+    result['controlledTechnology'] = controlled_technology_result
 if ordinary_dr_fetus is not None:
     result['ordinaryDrFetus'] = ordinary_dr_fetus
 payload = (json.dumps(result, separators=(',', ':')) + '\n').encode()
