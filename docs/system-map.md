@@ -46,10 +46,11 @@ The new partial producer routes ordinary Monstro’s real BloodStart random bran
 Current main `35b44087` includes ordinary Player Brimstone299, per-field comparer
 continuation311, the FireDelay descriptor304 and optional regular Tear variant298.
 The existing ordinary/Has118/controlled Knife and Number One/Libra owners remain
-in main. Draft307 has its own successful build and retained regressions; its
-first standalone Ludovico comparison fails on an admission defect. Four Native
-and four public-WASM processes completed; their exit status did not establish
-functional actor parity. A capture or transport
+in main. Draft307 has its own successful builds and retained regressions. Its original
+standalone Ludovico comparison fails on an admission defect; the corrected
+producer creates real Tears but retains a motion defect and failing comparison.
+Four Native and four public-WASM processes completed; their exit status did not
+establish functional actor parity. A capture or transport
 result alone establishes no functional parity.
 
 PR299's OWN production, strict Clippy and floor checks pass. Four retained
@@ -87,8 +88,20 @@ Original/public-WASM comparisons fail **85,050 / 11,620**: motion16,448/2,301,
 contact35,474/4,684, OS0 16,477/2,300 and OS1 16,651/2,335. Both games observe
 C98=3, but the built port's zero-only guard suppresses every controlled Tear
 birth. The intended body/contact/lifetime contracts were not exercised. That
-failed producer and the earlier OS0 guard-stop remain retained; a corrected
-producer using the same Native references is pending.
+failed producer and the earlier OS0 guard-stop remain retained.
+
+The corrected `7e000d3f` / WASM `8120d8e9` reuses those four Native references
+and remains **134,350 checks / 24,248 FAIL**, with 1,541 actual controlled bodies
+(770 Full, 771 Fast). Its strict four-route regression passes **37,965,608 / 0**.
+The fixed motion case matches 383 damage, born83C, radius, friction, height,
+flags, color, generic318, birth-age and Parent observations; all 571 admission,
+C18, cache and Room rows match. Contact minimum accepted-queue and next-Full HP
+chains are observed independently in both games (one Native, two port), while
+strict receiver identity/positions, 42 HP differences and 10 queue differences
+remain red. The controlled saved450 rewind is a source-confirmed motion defect;
+its correction is pending. Falling speed, identity/seed and missing actor owners
+also remain unresolved. These selected matches do not establish actor or
+whole-case parity.
 
 Draft314 declares four ordinary-Brim contact cases;315 adds typed14/18 contact
 observations/comparison;316 adds controlled-Brim property/priority history;317

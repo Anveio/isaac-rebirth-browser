@@ -241,8 +241,88 @@
       "actualCacheC98BothSides": 3,
       "incorrectGuard": "C98 == 0",
       "observedPortTears": 0,
-      "correctedProducer": "pending; must reuse identical four Native references",
+      "correctedProducer": "Corrected7e000d3f / WASM8120 produces real Tears; its failing report and pending450 rewind correction are recorded separately.",
       "bodyContactLifecycleAcceptance": false
+    },
+    "correctedFunctionalComparison": {
+      "path": "/dev/shm/isaac-ludo307-c98-own-proof/corrected-four-case-functional-summary.json",
+      "sha256": "7c17427901e16c3cd6594f44e377f6735b36acfde7ba4e55333d6cbeaee2316e",
+      "source": "7e000d3f06ea93d739929fe245019d3dc70e8f0b",
+      "wasmSha256": "8120d8e90fdf13aa961372d24fecbc1ac70e35d20f99b4989b119c18ad207f09",
+      "status": "FAIL",
+      "checks": 134350,
+      "differences": 24248,
+      "bodies": 1541,
+      "fullRows": 770,
+      "fastRows": 771,
+      "retained405": {
+        "checks": 37965608,
+        "differences": 0
+      },
+      "cases": [
+        {
+          "case": "ludovico329-motion-phase0-v1",
+          "status": "FAIL",
+          "checks": 28704,
+          "differences": 5299,
+          "coverage": {
+            "pairedActualPlayingRows": 571,
+            "controlledTearBodies": 383,
+            "controlledTearFullGates": 191,
+            "controlledTearFastGates": 192
+          },
+          "reportSha256": "1067782f0856099dbd2b076e821580068b1534fc8c7f2fbd6054cadd9f1b7fa4"
+        },
+        {
+          "case": "ludovico329-contact-phase1-v1",
+          "status": "FAIL",
+          "checks": 47750,
+          "differences": 7994,
+          "coverage": {
+            "pairedActualPlayingRows": 572,
+            "controlledTearBodies": 384,
+            "controlledTearFullGates": 192,
+            "controlledTearFastGates": 192
+          },
+          "reportSha256": "a67f2fe4be5fc4105a6df9d47f9df79a1e16b372c64fad28e019f8b64ac71253"
+        },
+        {
+          "case": "ludovico329-os-0-v1",
+          "status": "FAIL",
+          "checks": 28765,
+          "differences": 5310,
+          "coverage": {
+            "pairedActualPlayingRows": 572,
+            "controlledTearBodies": 384,
+            "controlledTearFullGates": 192,
+            "controlledTearFastGates": 192
+          },
+          "reportSha256": "f9ed05a41ac608bd82f712c240a98a32e0b07de3465c363e5f60faaf1a8f9389"
+        },
+        {
+          "case": "ludovico329-os-1-v1",
+          "status": "FAIL",
+          "checks": 29131,
+          "differences": 5645,
+          "coverage": {
+            "pairedActualPlayingRows": 578,
+            "controlledTearBodies": 390,
+            "controlledTearFullGates": 195,
+            "controlledTearFastGates": 195
+          },
+          "reportSha256": "78a2c099d3034b33f348885212848ec79f2bce926e2e5442104d01dacbb32b7a"
+        }
+      ],
+      "selectedMatchedScope": "Fixed motion383 damage/born83C/radius/frictions/height/flags/colors/generic318/birthAge/Parent observations and571 admission/C18/cache/Room rows. Contact accepted queue and next-Full HP chains occur independently in both games (Native1/port2).",
+      "knownMotionDefect": "controlled saved450 rewind; next correction pending",
+      "remaining": [
+        "strict physical/receiver identity/positions",
+        "42 contact HP differences",
+        "10 contact queue differences",
+        "fallingSpeed/identity/seed",
+        "missing actor owners/registry/ordinal",
+        "full actor/contact/lifecycle parity"
+      ]
     }
   },
   "sourceOnlyDrafts": [

@@ -4,7 +4,8 @@ This map separates current source owners, declared public cases and observed
 functional results. Main `35b44087` includes ordinary Player Brimstone299,
 FireDelay ownership304, optional regular Tear variant298 and per-field
 comparer continuation311. Draft307 has passed its own builds and retained
-regressions; its first standalone game comparison fails on a source admission defect. Transport, source
+regressions. Its original standalone comparison fails on admission; the corrected
+producer creates Tears but fails on motion and other fields. Transport, source
 review and local replay consistency do not establish Original functional parity.
 
 | Ordered boundary | Current owner and scope | Observed evidence and remaining interaction |
@@ -18,7 +19,7 @@ review and local replay consistency do not establish Original functional parity.
 | Regular Tear variant | Merged298 returns optional Some0 only for the closed normal-Isaac/current-primary1/flags0/positive1/4/6 producer | Unknown contexts remain null. The regular-kind1 proof does not admit kind8, widen contacts or establish Native variant parity |
 | Ordinary/Has118/controlled Knife | Merged270/286/301 share one store, allocator, registered C18 and Remove/Uninit owner; subtype1 children keep ParentKnife498 and their copied Line | The controlled fixed route retains106,884/8,755 FAIL plus one missing old marker;281 post329 parent physical/DA0/C18 rows match and280 carry bit33. Child SharedMT/geometry,37 strict rotations, contact and event/history gaps remain red |
 | Ordinary Player Brimstone | Merged299 uses canonical Laser/Impact storage, charge/live properties, Full/Fast, registered slots and retirement | Retained ordinary case22,111/1,030 FAIL has two births and61 Laser/Impact rows with matching observed geometry/phase/TTL/fade/Sprite/color. Two following-Full absence/slot witnesses do not observe Native Remove/Uninit events |
-| Standalone Ludovico Tear | Draft307 uses the existing Tear store/scheduler and a separately proved neutral329-only kind8 builder | OWN builds,37,965,608/0 regular regression and503,611/0 retained Libra properties pass. The four-case own-game comparison fails85,050/11,620: both games observeC98=3, but the zero-only guard suppresses all port Tears. Corrected source/producer is pending; no body/contact/lifetime acceptance follows |
+| Standalone Ludovico Tear | Draft307 uses the existing Tear store/scheduler and a separately proved neutral329-only kind8 builder | OWN builds,37,965,608/0 regular regression and503,611/0 retained Libra properties pass. The original d1e582 comparison remains85,050/11,620 FAIL with zero port Tears. Corrected8120 produces1,541 bodies (770 Full/771 Fast), but remains134,350/24,248 FAIL. Selected birth/properties and contact queue→next-Full HP chains match; controlled450 rewind is a proven motion defect with its correction pending. Identity, geometry, strict queue/HP and missing-owner failures remain |
 | Controlled Brimstone | Draft312 selects actual7/1/1, with current properties and ring Full/Fast owners; its future Tear replacement must consume307's real Remove/physical448 capability | Four cases are declared, unexecuted. Source-only316 checks same-C18 item4 live reapply and later114 priority; missing fields, callback events or registered replacement bodies stay FAIL |
 
 The public `item-composition` driver and suite are registered. Literal
@@ -70,8 +71,14 @@ parity. Manager absence, Remove flags and callback events are distinct facts.
 The built307 report remains85,050/11,620 FAIL across all four cases: motion16,448/2,301,
 contact35,474/4,684, OS0 16,477/2,300 and OS1 16,651/2,335. Successful capture
 exits and public tape completion do not waive its zero-port-Tear failure. The
-source correction must reuse the same frozen Native references; the OS0 initial
-guard-stop is separately retained.
+corrected8120 producer reuses the same frozen Native references and remains
+134,350/24,248 FAIL with 1,541 controlled bodies (770 Full, 771 Fast). It passes
+37,965,608/0 retained regular checks and selected birth/damage/flags/color
+properties. Each game independently observes accepted queue→next-Full HP chains;
+strict receiver identity/positions, 42 HP differences and 10 queue differences
+remain red. A source-confirmed controlled450 rewind motion defect needs its
+next correction. This does not regrade the original no-Tear report or establish
+full body/contact/lifetime parity. The OS0 initial guard-stop remains retained.
 
 Historical reports remain immutable. Frozen Brim10 retains307,112/23,017 FAIL;
 ordinary6 completed only cases0..2 with571,311/37,820 FAIL. The pre299 unchanged-v8
