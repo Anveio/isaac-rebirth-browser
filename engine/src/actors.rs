@@ -12,6 +12,8 @@ pub enum ActorKind {
     Npc,
     Projectile,
     Effect,
+    /// Entity_Knife (type 8), including the real Brim child subtype1.
+    Knife,
     /// Entity_Laser (type 7).
     Laser,
 }
@@ -149,7 +151,14 @@ impl Scheduler {
     /// Room.Init resets its allocator before Game.Spawn restores ordinary
     /// records. Manager453ec0 retains the same Player/Familiar pointers and IDs.
     pub fn clear_room(&mut self) {
-        self.retain(|actor| matches!(actor.kind, ActorKind::Player | ActorKind::Familiar));
+        self.clear_room_retaining(|_| false);
+    }
+
+    ///453ec0 preserves Player1/Familiar3 and actual type8/subtype0.
+    pub(crate) fn clear_room_retaining(&mut self, mut retained: impl FnMut(ActorRef) -> bool) {
+        self.retain(|actor| {
+            matches!(actor.kind, ActorKind::Player | ActorKind::Familiar) || retained(actor)
+        });
         self.room_next_sequence = 0;
     }
 

@@ -1,4 +1,5 @@
-//! Authored secret Keeper17/1 first-AI initialization and anchored idle.
+//! Authored Keeper17 first-AI initialization and anchored idle: shop Keeper
+//! variant0 and secret-room Keeper variant1 share AI48af20.
 use crate::entities::{Birth, Family, NpcWorld, SpawnContext};
 use crate::{
     content,
@@ -46,7 +47,11 @@ pub(crate) fn from_selector(id: u32, selector: &SpawnSelector) -> Result<Npc, St
             tint: [1.0; 4],
             offsets: [0.0; 3],
         }),
-        ..Npc::authored(id, content::entity(17, 1), selector)
+        ..Npc::authored(
+            id,
+            content::entity(17, u32::from(selector.variant)),
+            selector,
+        )
     })
 }
 
@@ -67,7 +72,12 @@ pub(crate) fn advance(npc: &mut Npc, phase: Phase) -> Result<(), String> {
             npc.grid_collision_class = 0;
             npc.entity_collision_class = 1;
             keeper.entity_flags = (keeper.entity_flags & !4) | 0x11;
-            keeper.animation = format!("Guy{}", npc.subtype);
+            // 48af8c: variant0 formats "Shopkeeper %u", variant1 "Guy%u".
+            keeper.animation = if npc.variant == 0 {
+                format!("Shopkeeper {}", npc.subtype)
+            } else {
+                format!("Guy{}", npc.subtype)
+            };
             keeper.tint = [0.2, 0.2, 0.2, 1.0];
             keeper.offsets = [0.2; 3];
             keeper.anchor = npc.position;
@@ -78,8 +88,25 @@ pub(crate) fn advance(npc: &mut Npc, phase: Phase) -> Result<(), String> {
         npc.position = keeper.anchor;
         // Native Sprite::Update runs once at the admitted full update and
         // once per active full phase; transition freezes retain this clock.
-        let frames = content::KEEPER_ANIMATION_FRAMES[(npc.subtype - 1) as usize];
-        keeper.animation_clock = (keeper.animation_clock + 1.0) % frames as f32;
+        let clip = (npc.subtype - 1) as usize;
+        if npc.variant == 0 {
+            // Nonlooping authored Shopkeeper clips stop on their final frame.
+            let frames = content::SHOPKEEPER_ANIMATION_FRAMES[clip] as f32;
+            if keeper.animation_playing {
+                keeper.animation_clock += 1.0;
+                if keeper.animation_clock >= frames {
+                    if content::SHOPKEEPER_ANIMATION_LOOPS[clip] {
+                        keeper.animation_clock %= frames;
+                    } else {
+                        keeper.animation_clock = frames - 1.0;
+                        keeper.animation_playing = false;
+                    }
+                }
+            }
+        } else {
+            let frames = content::KEEPER_ANIMATION_FRAMES[clip];
+            keeper.animation_clock = (keeper.animation_clock + 1.0) % frames as f32;
+        }
         npc.animation_frame = keeper.animation_clock as u32;
         npc.animation = keeper.animation.clone();
         npc.animation_clock = keeper.animation_clock;
@@ -105,7 +132,7 @@ fn spawn_family(
 ) -> Result<Option<Npc>, String> {
     if selector.category == SpawnCategory::Entity
         && selector.entity_type == 17
-        && selector.variant == 1
+        && matches!(selector.variant, 0 | 1)
         && selector.subtype == 0
     {
         return from_selector(id, selector).map(Some);
