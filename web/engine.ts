@@ -208,6 +208,7 @@ export interface Room {
   descriptor: RoomDescriptor | null;
   initializationGameUpdate: number | null; loaded: boolean; sourceTearSlowdown2494: number | null;
   pathCosts: number[] | null;
+  trapdoor: {gridIndex: number; state: number; spawnSeed: number; clip: "closed" | "openAnimation"; frame: number; playing: boolean} | null;
   spawns: {tintedRockIndex: number; finalSpawnState: number; selectors: {groupIndex: number; gridIndex: number; category: "entity" | "grid"; type: number; variant: number; subtype: number; position: {x: number; y: number}; groupSeed: number; spawnSeed: number}[]} | null;
   pickups: Pickup[];
   backgroundStains: {sourceEffectId: number; spawnSeed: number; birthGameUpdate: number;
@@ -315,6 +316,7 @@ export interface State {
   floor: Floor; currentRoom: number; visitedRooms: number[];
   roomDisplayFlags: number[]; revealedSecretConnections: [number, number][];
   persistedRooms: Record<string, Room>;
+  stageTransition: {state: number; counter: number; sameStage: boolean; animation: number};
   roomTransition: {fromRoom: number; targetRoom: number; fromSlot: number; targetSlot: number; phase: "out" | "in" | "bossScene" | "bossCleanup"; fullUpdates: number; bossScene: {presentationIndex: number; animationFrame: number; animationPlaying: boolean} | null} | null;
   sourceCacheRunFlags: number | null;
   playerStats: {shotSpeed: number; damage: number; tearHeight: number; tearFallingSpeed: number; tearFallingAcceleration: number; moveSpeed: number; luck: number | null};

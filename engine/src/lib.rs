@@ -107,6 +107,7 @@ pub mod saved_game;
 pub mod seed;
 mod source_angles;
 pub mod stage_shooting_guard;
+pub mod stage_transition;
 pub mod traversal;
 pub mod wall_hugger;
 mod weapon_plan;
@@ -558,6 +559,8 @@ pub struct State {
     pub revealed_secret_connections: BTreeSet<[usize; 2]>,
     pub persisted_rooms: BTreeMap<usize, Room>,
     pub room_transition: Option<traversal::RoomTransition>,
+    #[serde(default)]
+    pub stage_transition: stage_transition::StageTransition,
     pub stage_effects: StageEffects,
     pub inventory: Inventory,
     pub next_pickup: u32,
@@ -770,6 +773,7 @@ impl Game {
                 revealed_secret_connections: BTreeSet::new(),
                 persisted_rooms: BTreeMap::new(),
                 room_transition: None,
+                stage_transition: stage_transition::StageTransition::default(),
                 stage_effects,
                 inventory: Inventory {
                     coins: 0,
@@ -1968,6 +1972,17 @@ impl Game {
             self.state.run_introduction.age += 1;
             self.state.run_introduction.active = self.state.run_introduction.age < 140;
         }
+        // Game::Update54f9da: an active StageTransition replaces the whole
+        // full Game update, and fast550760 freezes the Room as well.
+        if self.state.stage_transition.active() {
+            if phase == phase::Phase::Update {
+                self.advance_stage_transition(phase)?;
+            }
+            if phase != phase::Phase::Skipped {
+                self.state.music.advance();
+            }
+            return Ok(());
+        }
         let room_before = self.state.current_room;
         let restoring = self
             .state
@@ -2155,6 +2170,8 @@ impl Game {
                 .ok_or("game update counter exhausted")?;
         }
         doors::advance(&mut self.state, phase)?;
+        // Room grid pass5d1378: GridEntity_TrapDoor::Update before entities.
+        stage_transition::advance_trapdoor(&mut self.state, phase)?;
         let explosion_fence = self.state.explosions.len();
         grid_hazards::advance(&mut self.state, phase)?;
         let existing = self.state.actor_scheduler.full_phase();
@@ -2316,7 +2333,7 @@ impl Game {
         lasers::retire(&mut self.state);
         self.refresh_minimap();
         if phase.updates_nonplayers() {
-            npcs::advance_room_clear(&mut self.state);
+            npcs::advance_room_clear(&mut self.state)?;
             let dx = i32::from(self.held("KeyD")) - i32::from(self.held("KeyA"));
             let dy = i32::from(self.held("KeyS")) - i32::from(self.held("KeyW"));
             doors::check_unlock(&mut self.state, dx, dy);
@@ -2366,6 +2383,109 @@ impl Game {
             self.state.music.advance();
         }
         self.advance_camera(phase);
+        Ok(())
+    }
+    /// StageTransition::Update5e38b0 and the Game callbacks it dispatches.
+    fn advance_stage_transition(&mut self, phase: phase::Phase) -> Result<(), String> {
+        match stage_transition::advance(&mut self.state) {
+            stage_transition::Step::UpdatePlayer => {
+                self.update_player(phase, false, false)?;
+                if self.state.stage_transition.state == 4
+                    && self.state.information_animation.active()
+                {
+                    // 5e3902 advances the information manager after the Player.
+                    self.state.information_animation.advance_full()?;
+                }
+                stage_transition::after_player_update(&mut self.state);
+            }
+            stage_transition::Step::NextStage => {
+                // SetNextStage585620 -> SetStage585600 -> 5b8340, then
+                // ShowNightmareScene595580(sameStage=false).
+                let next = stage_transition::next_stage(self.state.stage)?;
+                self.state.stage = next;
+                self.state.nightmares.select_normal_basement(next)?;
+                self.state.nightmares.request(false);
+            }
+            stage_transition::Step::AdmitLevel => self.admit_next_level(phase)?,
+            stage_transition::Step::Done => {}
+        }
+        Ok(())
+    }
+
+    /// StageTransition state2 completion5e398d..5e3a2c for animation0: Appear,
+    /// Player Update and visibility, then Level::Init58be30 for the retained
+    /// run and the first Level update584200. The no-damage/boss streak
+    /// counters10eaf0/10eaf4 belong to persistent achievements, not admitted.
+    fn admit_next_level(&mut self, phase: phase::Phase) -> Result<(), String> {
+        player_animation::force_play(&mut self.state, player_animation::Clip::Appear);
+        self.update_player(phase, false, false)?;
+        self.state.player.visible = true;
+        let stage = self.state.stage;
+        let stage_seed = self
+            .state
+            .run_seeds
+            .as_ref()
+            .ok_or("next level requires the run's Seeds")?
+            .initialized_fields[stage as usize];
+        // Level::Init58be30 clears the per-level owners and reinitializes the
+        // descriptor grid seeds from the shared stream (587ec0).
+        self.state.level_progress.begin_level();
+        self.boot_level_grid = self.state.boot_lifecycle.initialize_level_grid();
+        self.state.floor = floor::generate_normal_basement(floor::NormalBasementRequest {
+            stage,
+            stage_seed,
+            game_flags: self.state.floor.game_flags,
+            red_hp: self.state.player.hp,
+            max_red_hp: self.state.player.max_hp,
+            soul_hp: self.state.player.soul_hp,
+            coins: self.state.inventory.coins,
+        })?;
+        self.state.stage_seed = stage_seed;
+        self.state.current_room = self.state.floor.starting_descriptor;
+        self.state.visited_rooms = BTreeSet::from([self.state.current_room]);
+        self.state.room_display_flags = vec![0; self.state.floor.descriptors.len()];
+        self.state.revealed_secret_connections.clear();
+        self.state.persisted_rooms.clear();
+        self.state.room_transition = None;
+        self.state.room = Room::from_starting_floor(&self.state.floor);
+        self.state.actor_scheduler.clear_room();
+        self.state.tears.clear();
+        self.state.impacts.clear();
+        self.state.enemy_projectiles.clear();
+        self.state.fire_particles.clear();
+        self.state.sprite_effects.clear();
+        self.state.lasers.clear();
+        self.state.bombs.clear();
+        self.state.explosions.clear();
+        grid_records::admit_fresh(
+            &mut self.state.room,
+            &mut self.state.boot_lifecycle.shared,
+            self.state.game_update_count,
+        )?;
+        // Player::TriggerNewStage52a260 (58c3a3): a later stage places the
+        // player at the room centre and converts one Eternal heart into a
+        // container through GiantBook13. Map/compass item branches remain
+        // with their item owners.
+        let centre = motion::WorldVector {
+            x: ((self.state.room.left + self.state.room.right) / 2.0) as f32,
+            y: ((self.state.room.top + self.state.room.bottom) / 2.0) as f32,
+        };
+        self.state.player.x = f64::from(centre.x);
+        self.state.player.y = f64::from(centre.y);
+        if self.state.player.eternal_hearts > 0 {
+            self.state.player.eternal_hearts = 0;
+            self.state.information_animation.request_eternal();
+            player_items::add_max_hearts(&mut self.state.player, 2);
+            player_items::add_red_hearts(&mut self.state.player, 2);
+        }
+        if let Some(id) = music::stage_track(stage, false) {
+            self.state.music.room(id);
+        }
+        self.save_supported_run()?;
+        self.state.camera = Some(camera::Camera::new(&self.state.room, None));
+        // Level::Update584200 -> Room.Update: the player entity is updated again.
+        self.update_player(phase, false, false)?;
+        self.refresh_minimap();
         Ok(())
     }
     fn advance_camera(&mut self, phase: phase::Phase) {
@@ -2821,11 +2941,18 @@ impl Game {
             self.state.player_animation.advance_full();
             if matches!(
                 self.state.player_animation.current,
-                Some(player_animation::Clip::UseItem | player_animation::Clip::Hit)
+                Some(
+                    player_animation::Clip::UseItem
+                        | player_animation::Clip::Hit
+                        | player_animation::Clip::Trapdoor
+                        | player_animation::Clip::Appear
+                )
             ) && self.state.player_animation.is_finished(None)
             {
                 // Current-main completion returns ordinary presentation; an
                 // interrupted Pickup never resumes its obsolete main clock.
+                // The original shows WalkDown frame0 once the stage
+                // transition's Trapdoor and Appear clips end.
                 self.state.player_animation.current = None;
             }
         }

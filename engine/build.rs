@@ -647,6 +647,25 @@ fn main() {
             name.to_uppercase()
         ));
     }
+    let grid_animations = manifest.parent().unwrap().join("web/grid-data.json");
+    println!("cargo:rerun-if-changed={}", grid_animations.display());
+    let grid_assets: Value = serde_json::from_str(
+        &fs::read_to_string(grid_animations).expect("read authored grid animations"),
+    )
+    .expect("authored grid animation JSON");
+    for (constant, name) in [("CLOSED", "Closed"), ("OPEN_ANIMATION", "Open Animation")] {
+        let clip = grid_assets["gfx/grid/door_11_trapdoor.anm2"]["Animations"]
+            .as_array()
+            .expect("authored trapdoor clips")
+            .iter()
+            .find(|clip| clip["Name"] == name)
+            .expect("authored trapdoor clip");
+        assert_eq!(clip["Loop"], false, "trapdoor clip is nonlooping");
+        generated.push_str(&format!(
+            "pub const TRAPDOOR_{constant}_FRAMES: u32 = {};\n",
+            clip["FrameNum"].as_u64().expect("trapdoor clip frames")
+        ));
+    }
     let npc_assets: Value =
         serde_json::from_str(&fs::read_to_string(npcs).expect("read authored NPC animations"))
             .expect("authored NPC animation JSON");

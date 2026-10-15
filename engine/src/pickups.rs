@@ -921,3 +921,28 @@ pub(crate) fn bomb_hit(
     }
     Ok(())
 }
+
+/// Game::Spawn(5, 100, position, zero velocity, no spawner, subtype, seed)
+/// from a Room award: the caller already selected the concrete collectible.
+pub(crate) fn admit_collectible(
+    state: &mut crate::State,
+    subtype: u32,
+    position: WorldVector,
+    spawn_seed: u32,
+) -> Result<(), String> {
+    let config =
+        crate::items::definition(subtype).ok_or("awarded collectible subtype has no ItemConfig")?;
+    let id = state.next_pickup;
+    let mut pickup = Pickup::spawn(id, 100, subtype, position, true)?;
+    pickup.spawn_seed = spawn_seed;
+    pickup.charge = config.max_charges;
+    pickup.birth_game_update = state.game_update_count;
+    state.next_pickup = id.checked_add(1).ok_or("pickup identity exhausted")?;
+    state.room.pickups.push(pickup);
+    let actor = crate::actors::ActorRef {
+        kind: crate::actors::ActorKind::Pickup,
+        id,
+    };
+    state.room.authored_actor_order.push(actor);
+    state.actor_scheduler.admit(actor)
+}

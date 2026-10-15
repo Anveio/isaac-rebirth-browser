@@ -22,7 +22,8 @@ NATIVE_SHA = '724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13'
 
 
 def observe(pid, context):
-    if context.get('publicLogState', {}).get('stage') != 1:
+    # Gameplay begins at the first Level::Init; later stages keep observing.
+    if (context.get('publicLogState', {}).get('stage') or 0) < 1:
         return {'schema': 2, 'status': 'skip', 'scope': 'combat gameplay-only observer'}
     report = {'schema': 2, 'status': 'pass', 'scope': 'source-identified bounded writable room/grid/entity fields',
               'memoryWritten': False, 'executableMappingsRead': False, 'checkpoint': context['label'],
@@ -219,6 +220,10 @@ def observe(pid, context):
                 'heartCollected': bool(read(game + 0xc, 1)[0]),
                 'lastPenaltyStage': u32(game + 0x10ecdc)}
             report['nativePhase'] = {'systemIterations': u32(system + 0x2efa0), 'fullGameUpdates': u32(game + 0xce9f4)}
+            # Level stage/alt at Game+0/+4; StageTransition at Game+a0e0
+            # (state, counter) is driven by TrapDoor 5711a0 and 5e38b0.
+            report['level'] = {'stage': u32(game), 'alt': read(game + 4, 1)[0]}
+            report['stageTransition'] = {'state': u32(game + 0xa0e0), 'counter': u32(game + 0xa0e4)}
             room = u64(game + 0x8180)
             raw = read(room, 0x30)
             width, height = struct.unpack_from('<II', raw, 0x14)
@@ -258,6 +263,15 @@ def observe(pid, context):
                     'varData': struct.unpack_from('<I', raw, 0x14)[0], 'spawnSeed': struct.unpack_from('<I', raw, 0x18)[0],
                     'collisionClass': struct.unpack_from('<I', raw, 0x3c)[0],
                     'position': [40 + index % width * 40, 120 + index // width * 40]})
+                if cells[-1]['type'] == 17:
+                    # GridEntity_TrapDoor sprite at +40: definition +18, frame +120, playing +124.
+                    definition = u64(pointer + 0x40 + 0x18)
+                    text_pointer = u64(definition) if definition else 0
+                    length = u64(text_pointer - 24) if text_pointer else 0
+                    if length > 128: raise ValueError('Unexpected trapdoor animation name length')
+                    cells[-1]['animation'] = read(text_pointer, length).decode('ascii') if length else None
+                    cells[-1]['animationFrame'] = struct.unpack('<f', read(pointer + 0x160, 4))[0]
+                    cells[-1]['animationPlaying'] = bool(read(pointer + 0x164, 1)[0])
             report['grid'] = cells
             # FXLayers at Room+1730 (fxlayers.xml, 5489b0): entries (0x58) at
             # +8/+10 each hold layers (0x14) at +10/+18 whose x/y (+8/+c) are
