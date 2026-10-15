@@ -118,12 +118,17 @@ fn room_bounds(state: &State) -> Result<(WorldVector, WorldVector), String> {
     ))
 }
 
-fn parent_position(state: &State, parent: u32, presented: bool) -> Option<(WorldVector, bool)> {
+fn parent_position(
+    state: &State,
+    parent: Option<ActorRef>,
+    presented: bool,
+) -> Option<(WorldVector, bool)> {
+    let parent = parent.filter(|actor| actor.kind == ActorKind::Npc)?;
     state
         .room
         .npcs
         .iter()
-        .find(|npc| npc.id == parent && !npc.removed)
+        .find(|npc| npc.id == parent.id && !npc.removed)
         .map(|npc| {
             (
                 if presented {
@@ -176,35 +181,28 @@ pub(crate) fn admit(state: &mut State, parent: u32, birth: LaserBirth) -> Result
         kind: ActorKind::Laser,
         id,
     })?;
-    let mut laser = Laser {
+    let mut laser = Laser::initialize_npc(
         id,
-        variant: birth.variant,
-        spawn_seed: birth.spawn_seed,
-        parent,
-        parent_type,
-        position: birth.position,
-        presented_position: birth.position,
-        follow_offset: sub(birth.position, birth.parent_position),
-        position_offset: birth.position_offset,
-        angle: birth.angle,
-        depth: birth.depth,
-        timeout: birth.timeout,
-        shrinking: false,
-        length: 0.0,
-        endpoint: birth.position,
-        scale: WorldVector { x: 1.0, y: 1.0 },
-        // init_laser: the only rotation store for straight lasers.
-        rotation: birth.angle - 90.0,
-        birth_game_update: state.game_update_count.wrapping_add(1),
-        collision_radius: config.collision_radius,
-        collision_damage: config.collision_damage,
-        actor: config.actor.into(),
-        animation: "LargeRedLaser".into(),
-        animation_clock: 0.0,
-        dead: false,
-        removed: false,
-        impact: None,
-    };
+        birth.variant,
+        birth.spawn_seed,
+        state.game_update_count.wrapping_add(1),
+        config,
+    );
+    laser.parent = Some(ActorRef {
+        kind: ActorKind::Npc,
+        id: parent,
+    });
+    laser.spawner_type = parent_type;
+    laser.set_npc_positions(birth.position, birth.position, false);
+    laser.parent_offset = sub(birth.position, birth.parent_position);
+    laser.render_offset = birth.position_offset;
+    laser.angle = birth.angle;
+    laser.render_sort_offset = birth.depth;
+    laser.remaining_updates = birth.timeout;
+    laser.endpoint = birth.position;
+    // init_laser: the only rotation store for straight lasers.
+    laser.sprite.rotation = birth.angle - 90.0;
+
     // init_laser plays the parent's sound before the impact Spawn.
     state.audio.admit(
         &mut state.boot_lifecycle.shared,
@@ -231,7 +229,7 @@ pub(crate) fn admit(state: &mut State, parent: u32, birth: LaserBirth) -> Result
         position_offset: WorldVector { x: 0.0, y: 0.0 },
         scale: WorldVector { x: 1.0, y: 1.0 },
         rotation: 0.0,
-        depth: laser.depth - 5.0,
+        depth: laser.render_sort_offset - 5.0,
         actor: IMPACT_ACTOR.into(),
         animation: "Start".into(),
         animation_clock: 0.0,
@@ -241,6 +239,10 @@ pub(crate) fn admit(state: &mut State, parent: u32, birth: LaserBirth) -> Result
     };
     // fx->Update immediately: Entity::Update then the variant50 tail.
     advance_impact_full(&mut impact, false)?;
+    laser.child = Some(ActorRef {
+        kind: ActorKind::Effect,
+        id: impact_id,
+    });
     laser.impact = Some(impact);
     // The spawn-frame Update ran inside the parent's AI, before its motion.
     let bounds = room_bounds(state)?;
@@ -251,6 +253,8 @@ pub(crate) fn admit(state: &mut State, parent: u32, birth: LaserBirth) -> Result
         false,
         Some(birth.parent_position),
     )?;
+    //479B38 clears7F4 after the successful immediate first callback.
+    laser.first_update = false;
     state.lasers.push(laser);
     Ok(())
 }
@@ -284,44 +288,47 @@ fn update(
     interpolating: bool,
     parent_override: Option<WorldVector>,
 ) -> Result<(), String> {
+    let (mut normal_position, mut presented_position) = laser.npc_positions();
     let parent = match parent_override {
         Some(position) => Some((position, false)),
         None => parent_position(state, laser.parent, interpolating),
     };
     if let Some((position, _)) = parent {
-        let followed = position + laser.follow_offset;
+        let followed = position + laser.parent_offset;
         if interpolating {
-            laser.presented_position = followed;
+            presented_position = followed;
         } else {
-            laser.position = followed;
-            laser.presented_position = followed;
+            normal_position = followed;
+            presented_position = followed;
         }
     }
     let base = if interpolating {
-        laser.presented_position
+        presented_position
     } else {
-        laser.position
+        normal_position
     };
-    let start = base + laser.position_offset;
+    laser.set_npc_positions(normal_position, presented_position, interpolating);
+    let start = base + laser.render_offset;
     let heading = direction(laser.angle);
     laser.endpoint = end_point(start, heading, WorldVector { x: 0.0, y: 0.0 }, bounds);
-    laser.length = length(sub(laser.endpoint, start));
+    laser.beam_length = length(sub(laser.endpoint, start));
     if let Some(impact) = &mut laser.impact {
         impact.scale = WorldVector {
-            x: laser.scale.x * 0.5 + 0.5,
-            y: laser.scale.y,
+            x: laser.sprite.scale.x * 0.5 + 0.5,
+            y: laser.sprite.scale.y,
         };
         impact.rotation = 90.0 + laser.angle;
         impact.position = base;
-        impact.position_offset = sub(base + heading * laser.length, base) + laser.position_offset;
+        impact.position_offset =
+            sub(base + heading * laser.beam_length, base) + laser.render_offset;
     }
     // 478ad0: a dead parent kills the beam.
     if parent.is_none_or(|(_, dead)| dead) {
         laser.dead = true;
     }
-    if laser.dead || laser.shrinking {
-        laser.scale.x *= 0.895;
-        if 0.08 > laser.scale.x {
+    if laser.dead || laser.contact_disabled {
+        laser.sprite.scale.x *= 0.895;
+        if 0.08 > laser.sprite.scale.x {
             remove(laser);
         }
         if laser.dead {
@@ -335,29 +342,28 @@ fn update(
     {
         damage(state, laser, heading)?;
     }
-    if laser.timeout > 0 && !interpolating {
-        laser.timeout -= 1;
-        if laser.timeout == 0 {
-            laser.shrinking = true;
+    if laser.remaining_updates > 0 && !interpolating {
+        laser.remaining_updates -= 1;
+        if laser.remaining_updates == 0 {
+            laser.contact_disabled = true;
         }
     }
     Ok(())
 }
 
 fn remove(laser: &mut Laser) {
-    laser.dead = true;
-    laser.removed = true;
+    laser.remove();
 }
 
 fn hits(laser: &Laser, heading: WorldVector, position: WorldVector, radius: f32) -> bool {
-    let delta = sub(position, laser.position);
+    let delta = sub(position, laser.npc_positions().0);
     let reach = radius + laser.collision_radius;
     let cross = (delta.x * heading.y - heading.x * delta.y).abs();
     if reach <= cross {
         return false;
     }
     let dot = delta.x * heading.x + delta.y * heading.y;
-    dot > 0.0 && laser.length > dot
+    dot > 0.0 && laser.beam_length > dot
 }
 
 /// damage_entities476d70 for a non-player parent: the player takes 1.0 and
@@ -375,8 +381,10 @@ fn damage(state: &mut State, laser: &Laser, heading: WorldVector) -> Result<(), 
         combat::try_damage_player(state, 1, 60, combat::DamageKind::Laser.flags())?;
     }
     for npc in &mut state.room.npcs {
-        if npc.id == laser.parent
-            || npc.kind == laser.parent_type
+        if laser
+            .parent
+            .is_some_and(|parent| parent.kind == ActorKind::Npc && npc.id == parent.id)
+            || npc.kind == laser.spawner_type
             || npc.dead
             || npc.removed
             || !(10..1000).contains(&npc.kind)
@@ -393,8 +401,8 @@ fn damage(state: &mut State, laser: &Laser, heading: WorldVector) -> Result<(), 
                 amount: laser.collision_damage,
                 kind: combat::DamageKind::Laser,
                 source: combat::DamageSource {
-                    id: laser.parent,
-                    entity_type: laser.parent_type,
+                    id: laser.parent.ok_or("NPC Laser Parent link absent")?.id,
+                    entity_type: laser.spawner_type,
                 },
             },
         )?;
@@ -407,19 +415,19 @@ pub fn advance_actor(state: &mut State, phase: Phase, id: u32) -> Result<(), Str
     let Some(index) = state.lasers.iter().position(|laser| laser.id == id) else {
         return Ok(());
     };
-    if phase == Phase::Skipped || state.lasers[index].removed {
+    if phase == Phase::Skipped || !state.lasers[index].active {
         return Ok(());
     }
     let bounds = room_bounds(state)?;
     let mut laser = state.lasers[index].clone();
     update(state, &mut laser, bounds, phase == Phase::Interpolate, None)?;
-    if phase == Phase::Update && !laser.removed {
+    if phase == Phase::Update && laser.active {
         // Entity::Update447190: sprite advance; zero velocity keeps position.
         let mut playing = true;
         step_clip(
             &laser.actor,
-            &laser.animation,
-            &mut laser.animation_clock,
+            &laser.sprite.animation,
+            &mut laser.sprite.frame,
             &mut playing,
         )?;
     }
@@ -435,17 +443,18 @@ pub fn advance_impact(state: &mut State, phase: Phase, id: u32) -> Result<(), St
     for laser in &mut state.lasers {
         let laser_dead = laser.dead;
         if let Some(impact) = laser.impact.as_mut().filter(|impact| impact.id == id) {
-            advance_impact_full(impact, laser_dead || laser.removed)?;
+            advance_impact_full(impact, laser_dead || !laser.active)?;
         }
     }
     Ok(())
 }
 
-/// Retire removed beams and impacts from the scheduler.
+/// Preserve the existing NPC scheduler/storage retirement in both phases.
+/// This boundary is not evidence of native full Uninit or weak-link clearing.
 pub fn retire(state: &mut State) {
     let mut retired = Vec::new();
     for laser in &state.lasers {
-        if laser.removed {
+        if !laser.active {
             retired.push(ActorRef {
                 kind: ActorKind::Laser,
                 id: laser.id,
@@ -462,6 +471,6 @@ pub fn retire(state: &mut State) {
         .actor_scheduler
         .retain(|actor| !retired.contains(&actor));
     state.lasers.retain(|laser| {
-        !(laser.removed && laser.impact.as_ref().is_none_or(|impact| impact.removed))
+        !(!laser.active && laser.impact.as_ref().is_none_or(|impact| impact.removed))
     });
 }

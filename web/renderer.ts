@@ -116,7 +116,13 @@ export class Renderer {
    * layer as an ordinary ANM2 draw at the mouth, then (length > 15) one body
    * quad from 16 px past the mouth to the end, whose V runs 0.65*length
    * texels over the repeating 64-texel layer-1 column (SetWrap GL_REPEAT). */
-  private drawLaser(ctx: CanvasRenderingContext2D, laser: State["lasers"][number]): void {
+  private npcLaserView(laser: State["lasers"][number]) {
+    return { presentedPosition: laser.position, positionOffset: laser.renderOffset,
+      rotation: laser.sprite.rotation, scale: laser.sprite.scale, actor: laser.actor,
+      animation: laser.sprite.animation, animationClock: laser.sprite.frame,
+      angle: laser.angle, length: laser.beamLength };
+  }
+  private drawLaser(ctx: CanvasRenderingContext2D, laser: ReturnType<Renderer["npcLaserView"]>): void {
     const origin = { x: laser.presentedPosition.x + laser.positionOffset.x, y: laser.presentedPosition.y + laser.positionOffset.y };
     const screen = (x: number, y: number): [number, number] => [Math.fround(x * 0.65 + 32), Math.fround(y * 0.65 - 46)];
     const s0 = screen(origin.x, origin.y);
@@ -259,7 +265,7 @@ export class Renderer {
       ctx.restore();
     }
     for (const laser of state.lasers) {
-      if (laser.removed) continue;
+      if (!laser.active) continue;
       // The impact effect keys 500 below its laser, so it draws under the beam.
       const impact = laser.impact;
       if (impact && !impact.removed) {
@@ -270,7 +276,7 @@ export class Renderer {
         this.assets.draw(ctx, impact.actor, impact.animation, 0, 0, impact.animationClock);
         ctx.restore();
       }
-      this.drawLaser(ctx, laser);
+      this.drawLaser(ctx, this.npcLaserView(laser));
     }
     for (const projectile of state.enemyProjectiles)
       if (!projectile.removed && projectile.animation)
