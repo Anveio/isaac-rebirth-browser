@@ -257,7 +257,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | `contact` | mass contact responses against momentum, centre-of-mass and overlap oracles | 16 | 3 | 0 |
 | `pathfinder` | FindGridPath's flood against an independent node-weighted Dijkstra | 6 | 5 | 0 |
 | `item_pools` | ItemPool selection, depletion, fallbacks, routing and continuation | 21 | 6 | 3 |
-| `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 64 | 53 | 2 |
+| `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 65 | 54 | 2 |
 | `abi` | the exported C ABI transport the browser bridge drives | 15 | 3 | 0 |
 
 <details><summary>Every declared DST property</summary>
@@ -563,8 +563,10 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Always | game: Tick advances the tick and system clocks by its count (plus run-start alignment) | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: the menu animation clock advances with Tick and restarts on screen changes | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: Tick changes the screen only by starting a run or leaving GameOver | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
-| Always | game: unpaused gameplay advances the run clock once per tick | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
-| Always | game: within a run the floor is fixed and full updates never rewind | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: unpaused gameplay advances the run clock once per tick, except while the nightmare scene plays | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: the nightmare scene between stages holds the run clock | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: within a run the floor changes only by descending to the next stage, and full updates never rewind | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Sometimes | game: a run descends to the next stage's floor | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: a paused run freezes gameplay and the shared stream | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: ticks elapse while paused | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Reachable | game: a run starts through the public menus | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
@@ -613,12 +615,12 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Always | game: menu selections stay within their menus | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: the highlighted character is the selected character | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: dialog seed text is at most eight uppercase glyphs and its validity is its decode | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
-| Always | game: the run seed code, value, stage seed and eligibility agree | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: the run seed code, value, stage seeds, floor and eligibility agree | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: only supported keys are ever held | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: pause state agrees with the pause menu phase | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: volumes stay within the unit interval | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: the run introduction lasts at most 140 ticks | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
-| Always | game: player controls are disabled exactly while the run-start fade or a room transition holds | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: player controls are disabled exactly while the run-start fade, a room transition or a stage transition holds | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: no run-start request is pending during gameplay | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: player motion is finite and health is bounded | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: grid-colliding bodies stay inside the room's walls | [invariants.rs](engine/dst/src/units/game/invariants.rs) |

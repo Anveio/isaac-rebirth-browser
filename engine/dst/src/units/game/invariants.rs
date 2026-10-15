@@ -223,17 +223,50 @@ pub fn transition(before: &State, command: &Command, after: &State) {
                 && before.player_death.game_over.is_none()
                 && after.player_death.game_over.is_none()
             {
+                // The nightmare scene a stage transition requests (System
+                // state 4, 5950a0) owns its ticks before the Game update and
+                // its run clock; it is requested only as the stage advances.
+                let scene = |state: &State| {
+                    state.nightmares.system_active || state.nightmares.request_pending
+                };
+                let ticks =
+                    u64::from(after.run_tick) - u64::from(before.run_tick.min(after.run_tick));
                 props::always!(
-                    u64::from(after.run_tick) == u64::from(before.run_tick) + u64::from(count),
-                    "game: unpaused gameplay advances the run clock once per tick",
+                    after.run_tick >= before.run_tick
+                        && if scene(before) || scene(after) || after.stage != before.stage {
+                            ticks <= u64::from(count)
+                        } else {
+                            ticks == u64::from(count)
+                        },
+                    "game: unpaused gameplay advances the run clock once per tick, except while the nightmare scene plays",
                     json!({ "count": count, "before": before.run_tick, "after": after.run_tick })
                 );
+                if before.nightmares.system_active && after.nightmares.system_active {
+                    props::always!(
+                        after.run_tick == before.run_tick,
+                        "game: the nightmare scene between stages holds the run clock",
+                        json!({ "count": count, "before": before.run_tick, "after": after.run_tick })
+                    );
+                }
             }
             if before.screen == Screen::Playing && after.screen == Screen::Playing && !restarted {
+                // StageTransition (docs/stage-progression.md) is the only
+                // admitted floor change: SetNextStage advances the stage and
+                // Level::Init, up to a nightmare scene later, generates the
+                // next stage's floor from that stage's seed.
+                let descended = after.floor.stage == before.floor.stage + 1
+                    && after.floor.stage == after.stage
+                    && after.floor.stage_seed == after.stage_seed;
                 props::always!(
                     after.game_update_count >= before.game_update_count
-                        && after.floor == before.floor,
-                    "game: within a run the floor is fixed and full updates never rewind"
+                        && after.stage >= before.stage
+                        && (after.floor == before.floor || descended),
+                    "game: within a run the floor changes only by descending to the next stage, and full updates never rewind",
+                    json!({ "stage": [before.stage, after.stage], "stageSeed": [before.stage_seed, after.stage_seed] })
+                );
+                props::sometimes!(
+                    after.floor != before.floor,
+                    "game: a run descends to the next stage's floor"
                 );
             }
             if before.paused && after.paused && count > 0 {
@@ -677,12 +710,29 @@ pub fn state(state: &State) {
         "game: dialog seed text is at most eight uppercase glyphs and its validity is its decode",
         json!({ "text": state.seed_text, "valid": state.seed_valid })
     );
+    // Seeds::SetStartSeed5e1470 gives stage s the (s+1)-th startup draw
+    // (stage 1's is `stage1_seed`). A run's floor is its stage's; between
+    // SetNextStage and Level::Init an active stage transition still holds
+    // the previous stage's floor. The menus keep the last run's floor while
+    // a typed seed replaces the run seed.
+    let stage_seed =
+        |stage: u32| (0..=stage).fold(state.run_seed_value, |value, _| seed::startup_next(value));
+    let transition = state.stage_transition.active();
+    let level_stage = if transition && state.floor.stage + 1 == state.stage {
+        state.floor.stage
+    } else {
+        state.stage
+    };
     props::always!(
         seed::encode(state.run_seed_value).as_deref() == Ok(state.run_seed.as_str())
-            && state.stage_seed == seed::stage1_seed(state.run_seed_value)
+            && stage_seed(1) == seed::stage1_seed(state.run_seed_value)
+            && state.stage_seed == stage_seed(level_stage)
+            && (state.screen != Screen::Playing
+                || (state.floor.stage == level_stage
+                    && state.floor.stage_seed == state.stage_seed))
             && state.seeded_run != state.achievement_eligibility,
-        "game: the run seed code, value, stage seed and eligibility agree",
-        json!({ "runSeed": state.run_seed, "value": state.run_seed_value, "stage": state.stage_seed })
+        "game: the run seed code, value, stage seeds, floor and eligibility agree",
+        json!({ "screen": state.screen, "runSeed": state.run_seed, "value": state.run_seed_value, "stage": state.stage, "stageSeed": state.stage_seed, "floor": [state.floor.stage, state.floor.stage_seed], "transition": state.stage_transition })
     );
     props::always!(
         state.pressed.iter().all(|code| input::is_public_key(code)),
@@ -714,11 +764,14 @@ pub fn state(state: &State) {
         json!({ "introduction": introduction })
     );
     let admission = &state.run_admission;
-    // Player+7d4 is cleared by the run-start fade and by every doorway or
-    // boss-scene transition, and set again when both have finished.
+    // Player+7d4 is cleared by the run-start fade, by every doorway or
+    // boss-scene transition and by StageTransition::Start (5e3800), and set
+    // again when all have finished (stage transition state 4).
     let controls_follow_holds = if state.screen == Screen::Playing {
         state.player.controls_enabled
-            == (admission.initial_fade == 0.0 && state.room_transition.is_none())
+            == (admission.initial_fade == 0.0
+                && state.room_transition.is_none()
+                && !state.stage_transition.active())
             && admission.requested_time_anchor_ms.is_some()
     } else {
         state.player.controls_enabled && admission.initial_fade == 0.0
@@ -728,8 +781,8 @@ pub fn state(state: &State) {
             && (admission.fade_rate == 0.0 || admission.fade_rate == 0.04)
             && admission.clock.sub_millisecond_nanoseconds < 1_000_000
             && controls_follow_holds,
-        "game: player controls are disabled exactly while the run-start fade or a room transition holds",
-        json!({ "admission": admission, "controls": state.player.controls_enabled, "transition": state.room_transition })
+        "game: player controls are disabled exactly while the run-start fade, a room transition or a stage transition holds",
+        json!({ "admission": admission, "controls": state.player.controls_enabled, "transition": state.room_transition, "stageTransition": state.stage_transition })
     );
     let request = &state.run_start_request;
     props::always!(
