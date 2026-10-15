@@ -808,6 +808,15 @@ if case['requires'].get('controlledDrFetusFunctional') is not None:
     controlled_fetus_module = importlib.util.module_from_spec(controlled_fetus_spec)
     controlled_fetus_spec.loader.exec_module(controlled_fetus_module)
     controlled_fetus_comparer = controlled_fetus_module.ControlledDrFetusComparer(globals(), case)
+
+monstro_comparer = None
+monstro_result = None
+if case['requires'].get('monstrosLungFunctional') is not None:
+    monstro_spec = importlib.util.spec_from_file_location(
+        'monstro229_comparer', Path(__file__).with_name('composition-monstros-lung.py'))
+    monstro_module = importlib.util.module_from_spec(monstro_spec)
+    monstro_spec.loader.exec_module(monstro_module)
+    monstro_comparer = monstro_module.MonstrosLungComparer(globals(), case)
 check('actual completed original', ('pass', []), (native.get('status'), native.get('failures')), None)
 check('actual completed browser', 'complete', browser.get('captureStatus'), None)
 trace = browser.get('trace') or {}
@@ -875,6 +884,14 @@ for captured in sorted(all_captured, key=lambda row: row['presentation']):
                 mixed_fetus_comparer.snapshot(source, state, t, observed['systemCounter'], observed['players'][0])
             except Exception as error:
                 missing('mandatory actual mixed DrFetus stats group', t, error)
+
+        if monstro_comparer is not None:
+            try:
+                monstro_comparer.snapshot(source, state, t, observed['systemCounter'], observed['players'][0],
+                    native_gameplay_presentation=t - (start - native_title),
+                    port_gameplay_presentation=captured.get('gameplayPresentation'))
+            except Exception as error:
+                missing('mandatory actual Monstro229 charge/release/burst group', t, error)
         if fetus_context is not None:
             try:
                 fetus_module.snapshot(fetus_context, source, state, t, observed['systemCounter'],
@@ -1283,6 +1300,10 @@ if controlled_fetus_comparer is not None:
     controlled_fetus_result = controlled_fetus_comparer.finish()
 
 mixed_dr_fetus = mixed_fetus_comparer.finish() if mixed_fetus_comparer is not None else None
+
+if monstro_comparer is not None:
+    monstro_result = monstro_comparer.finish()
+
 ordinary_dr_fetus = None
 if fetus_context is not None:
     ordinary_dr_fetus = fetus_module.finish(fetus_context, globals())
@@ -1309,6 +1330,9 @@ if controlled_fetus_result is not None:
     result['controlledDrFetus'] = controlled_fetus_result
 if mixed_dr_fetus is not None:
     result['mixedDrFetusCricket4'] = mixed_dr_fetus
+
+if monstro_result is not None:
+    result['monstrosLung'] = monstro_result
 payload = (json.dumps(result, separators=(',', ':')) + '\n').encode()
 with args.output.open('xb') as stream:
     stream.write(gzip.compress(payload, mtime=0) if str(args.output).endswith('.gz') else payload)
