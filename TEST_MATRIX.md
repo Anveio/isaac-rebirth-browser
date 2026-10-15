@@ -373,7 +373,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Always | contact: the impulse conserves momentum, the player taking half its share | [contact.rs](engine/dst/src/units/contact.rs) |
 | Always | contact: the player's collider is offered exactly the displacement applied | [contact.rs](engine/dst/src/units/contact.rs) |
 | Always | contact: the impulse carries the pair's relative speed, split by mass | [contact.rs](engine/dst/src/units/contact.rs) |
-| Always | contact: the player's collider is consulted once per colliding player contact | [contact.rs](engine/dst/src/units/contact.rs) |
+| Always | contact: the player's collider is consulted for a colliding player contact | [contact.rs](engine/dst/src/units/contact.rs) |
 | Sometimes | contact: a fast separating pair takes the reversed overlap | [contact.rs](engine/dst/src/units/contact.rs) |
 | Always | contact: an ordinary pair ends exactly a radius sum apart | [contact.rs](engine/dst/src/units/contact.rs) |
 | Always | contact: an NPC pair resolves the same whichever body comes first | [contact.rs](engine/dst/src/units/contact.rs) |

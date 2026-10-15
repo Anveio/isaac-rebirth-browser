@@ -475,7 +475,7 @@ fn check(pair: Pair, first: ContactBody, second: ContactBody, block: bool, kinds
     );
     props::always!(
         proposed.get().is_some() == pair.player(),
-        "contact: the player's collider is consulted once per colliding player contact",
+        "contact: the player's collider is consulted for a colliding player contact",
         details()
     );
     props::sometimes!(

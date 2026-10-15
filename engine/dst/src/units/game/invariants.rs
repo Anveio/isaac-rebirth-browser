@@ -429,10 +429,6 @@ pub fn transition(before: &State, command: &Command, after: &State) {
     }
 }
 
-/// Room.Update (`npcs::advance_room_clear`, source 5d149b/5d1487) runs once
-/// per nonplayer pass: countable actors reset a ten-pass countdown, and only
-/// an empty pass entered with the countdown expired marks the room clear and
-/// reopens the doors combat shut. A bomb may reveal a secret door mid-combat.
 /// The visited rooms are the starting room and rooms reached from it
 /// through visited neighbours, the current room among them.
 fn walk_from_start(state: &State) -> bool {
@@ -456,6 +452,10 @@ fn walk_from_start(state: &State) -> bool {
     reached == *visited
 }
 
+/// Room.Update (`npcs::advance_room_clear`, source 5d149b/5d1487) runs once
+/// per nonplayer pass: countable actors reset a ten-pass countdown, and only
+/// an empty pass entered with the countdown expired marks the room clear and
+/// reopens the doors combat shut. A bomb may reveal a secret door mid-combat.
 fn room_clear(before: &State, command: &Command, after: &State) {
     let same_room = before.screen == Screen::Playing
         && after.screen == Screen::Playing
