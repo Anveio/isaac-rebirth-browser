@@ -770,6 +770,14 @@ if 'ordinaryDrFetus' in case['requires']:
     fetus_spec.loader.exec_module(fetus_module)
     fetus_context = fetus_module.begin(case)
 
+mixed_fetus_comparer = None
+if case['requires'].get('mixedDrFetusCricket4') is not None:
+    mixed_fetus_spec = importlib.util.spec_from_file_location(
+        'mixed_dr_fetus_stats', Path(__file__).with_name('composition-dr-fetus-stats.py'))
+    mixed_fetus_module = importlib.util.module_from_spec(mixed_fetus_spec)
+    mixed_fetus_spec.loader.exec_module(mixed_fetus_module)
+    mixed_fetus_comparer = mixed_fetus_module.MixedDrFetusComparer(globals(), case)
+
 common_spec = None
 try:
     common_spec = common_contact_spec()
@@ -862,6 +870,11 @@ for captured in sorted(all_captured, key=lambda row: row['presentation']):
                     port_gameplay_presentation=captured.get('gameplayPresentation'))
             except Exception as error:
                 missing('mandatory actual controlled DrFetus C18/body group', t, error)
+        if mixed_fetus_comparer is not None:
+            try:
+                mixed_fetus_comparer.snapshot(source, state, t, observed['systemCounter'], observed['players'][0])
+            except Exception as error:
+                missing('mandatory actual mixed DrFetus stats group', t, error)
         if fetus_context is not None:
             try:
                 fetus_module.snapshot(fetus_context, source, state, t, observed['systemCounter'],
@@ -1269,6 +1282,7 @@ if technology_comparer is not None:
 if controlled_fetus_comparer is not None:
     controlled_fetus_result = controlled_fetus_comparer.finish()
 
+mixed_dr_fetus = mixed_fetus_comparer.finish() if mixed_fetus_comparer is not None else None
 ordinary_dr_fetus = None
 if fetus_context is not None:
     ordinary_dr_fetus = fetus_module.finish(fetus_context, globals())
@@ -1293,6 +1307,8 @@ if ordinary_dr_fetus is not None:
     result['ordinaryDrFetus'] = ordinary_dr_fetus
 if controlled_fetus_result is not None:
     result['controlledDrFetus'] = controlled_fetus_result
+if mixed_dr_fetus is not None:
+    result['mixedDrFetusCricket4'] = mixed_dr_fetus
 payload = (json.dumps(result, separators=(',', ':')) + '\n').encode()
 with args.output.open('xb') as stream:
     stream.write(gzip.compress(payload, mtime=0) if str(args.output).endswith('.gz') else payload)
