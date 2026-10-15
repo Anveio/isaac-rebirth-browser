@@ -17,6 +17,7 @@ export class MenuRenderer {
       case "profile": this.profile(ctx, state); break;
       case "main": this.main(ctx, state); break;
       case "character": this.character(ctx, state); break;
+      case "challenge": this.challenge(ctx, state); break;
       case "seed": this.seed(ctx, state); break;
       case "playing": return;
     }
@@ -60,6 +61,17 @@ export class MenuRenderer {
         2: { XCrop: 160, YCrop: 336 },
       },
     });
+  }
+
+  private challenge(ctx: CanvasRenderingContext2D, state: State): void {
+    const actor = `${MENU}challengemenu.anm2`;
+    this.assets.draw(ctx, actor, "Idle", 0, 0, 0, {layers: [0, 3, 4, 5, 6, 7, 28, 1]});
+    this.assets.draw(ctx, actor, "Idle", 0, 0, (state.challengeSelection ?? 1) - 1, {layers: [2]});
+    for (let index = 0; index < 20; index++) {
+      //Fresh menu state implements actual locked/unlocked layers. Completed
+      //profile import/presentation is outside this item-focused frontdoor.
+      this.assets.draw(ctx, actor, "Idle", 0, 0, state.challengeUnlocked[index] ? 1 : 0, {layers: [8 + index]});
+    }
   }
 
   private character(ctx: CanvasRenderingContext2D, state: State): void {

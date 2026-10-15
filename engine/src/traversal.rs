@@ -74,6 +74,13 @@ fn supported_boss(descriptor: &crate::floor::Descriptor) -> bool {
     })
 }
 
+/// Whether the player may leave through a doorway into `destination`: an
+/// admitted shape, or a supported boss or miniboss room. The single owner of
+/// doorway admission, public so tools route by the engine's rule.
+pub fn admits(destination: &crate::floor::Descriptor) -> bool {
+    admitted_shape(&destination.template) || supported_boss(destination)
+}
+
 /// Game551a10 supplies the room's authored boss presentation. Source
 /// TransitionChange starts Scene only after the admitted immediate Room.Update.
 pub(crate) fn begin_boss_scene(state: &mut State) {
@@ -173,7 +180,7 @@ pub(crate) fn check_departure(state: &mut State) {
         }
         let target_room = door.target_room as usize;
         let destination = &state.floor.descriptors[target_room];
-        if !admitted_shape(&destination.template) && !supported_boss(destination) {
+        if !admits(destination) {
             continue;
         }
         let normal = outward(door.slot);
