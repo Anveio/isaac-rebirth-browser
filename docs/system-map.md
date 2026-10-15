@@ -106,14 +106,16 @@ Two retained reciprocal Libra histories pass **503,611 / 0**, with 631 gates and
 Falling speed, prelude timers, missing registry/ordinal and complete
 actor/contact/lifecycle or DOM parity remain unaccepted.
 
-Draft314 declares four ordinary-Brim contact cases; merged315 adds typed14/18 contact
-observations/comparison;316 adds controlled-Brim property/priority history; merged317
-adds optional kind8 Room2494/born83C/velocity-delta fields. Draft318 extracts the
-unchanged Damage operator and its footprint for a separate next-producer
-qualification. The other leaves remain separate Drafts. The 315/317 tools are consumed by the retained standalone 329 comparison, with strict contact and observation gaps retained; their presence is not gameplay acceptance. Runtime312's
-controlled Brimstone and its future controlled-Tear replacement join remain
-separate Draft scope. Missing actor fields, FIFO attribution and lifecycle
-events stay failures. The [current compact record](../references/isaac/foundation/items/post-brimstone-299-and-ludo-source.json)
+Draft314 declares four ordinary-Brim contact cases, and Draft316 owns the
+controlled-Brim property/priority marker. Merged315 supplies typed14/18 contact
+observations; merged317 supplies optional kind8 Room2494/born83C/velocity-delta
+fields. Those tools are consumed by final C421, with strict contact and
+observation gaps retained. Merged318 keeps the unchanged Damage operator beside
+its footprint and is consumed by the independently built708 producer, whose
+scoped builds and retained regressions pass as recorded below. Runtime312's
+controlled Brimstone remains a separate Draft with a failing incomplete Native
+prefix comparison. Missing actor fields, FIFO attribution and lifecycle events
+stay failures. The [current compact record](../references/isaac/foundation/items/post-brimstone-299-and-ludo-source.json)
 keeps exact report and source pins; the historical checkpoints below retain
 their original grades.
 
@@ -361,7 +363,7 @@ in bounded windows, with 36,974,592 bytes observed validation RSS. This is
 storage equivalence, not a new Native or game result. Historical per-process
 memory attribution is unavailable, and fresh-Native peak improvement remains
 unverified. The corrected Technology/Gimpy producer passes production after preserving an
-earlier compile failure, and strict Clippy also passes. Floor, retained
+earlier compile failure. Production, strict Clippy and floor now pass; retained
 regressions and games remain pending. Their
 declared cases imply no gameplay acceptance. Merged335 adds opt-in controlled-
 Brim contact tooling with source/default/help/import validation only; its contact

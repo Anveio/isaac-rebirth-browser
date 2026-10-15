@@ -586,7 +586,7 @@
     "freshNativePeakReductionVerified": false
   },
   "nextTechnologyAndGimpy": {
-    "status": "CORRECTED_PRODUCTION_AND_CLIPPY_PASS_FLOOR_REGRESSION_AND_GAME_PENDING",
+    "status": "CORRECTED_THREE_BUILDS_PASS_REGRESSION_AND_GAME_PENDING",
     "technologyFirstBuild": "Missing PlayerControlled match arm; failure101 retained, no product from that attempt.",
     "technologyCohortSha256": "06986a09a1fde39d8e580a0691dc7b8d71a669417d0d72527f256d28cbe5b524",
     "gimpyCohortSha256": "d0cdf483a0f9c2e5689fae7b65ffc0a01a0e4c69bcf88cf3a5d6f31f6766a412",
@@ -602,7 +602,7 @@
       "actualWait": true,
       "seconds": 27.841788,
       "allPinsStable": true,
-      "scope": "Production and subsequent strict Clippy pass on frozen77cd; floor, retained regressions and declared public games pending.",
+      "scope": "Production, subsequent strict Clippy and floor pass on frozen77cd; retained regressions and declared public games pending.",
       "exitCode": 0
     },
     "strictClippy": {
@@ -614,6 +614,16 @@
       "seconds": 29.557749271392822,
       "scope": "Same frozen77cd source; no future source correction or game acceptance inferred.",
       "exitCode": 0
+    },
+    "floor": {
+      "closure": {
+        "path": "/dev/shm/isaac-technology320-own-proof/attempt2/floor-status.json",
+        "sha256": "f162e244eb42bdbc8ee28f3b678ab1b83101b5a3c501beb3da0c633461e19dd4"
+      },
+      "exitCode": 0,
+      "actualWait": true,
+      "seconds": 16.855637073516846,
+      "scope": "Same frozen77cd source; no future source correction or game acceptance inferred."
     }
   },
   "controlledBrimContact335": {

@@ -103,7 +103,7 @@ cleanup remain separate temporary host changes.
 Technology319/320/325 and the separately consumed Gimpy329 kill slice are source
 preparations. Technology's first joined build stopped on a missing origin match
 arm before producing a product. Its minimal correction now passes production;
-strict Clippy also passes, while floor, retained regressions and the public
+strict Clippy and floor also pass, while retained regressions and the public
 cohort remain pending. The four frozen Technology cases and the Gimpy
 paired declarations have no accepted gameplay result. A retained Gimpy DST
 finding cannot establish Original roll or spawn order.
