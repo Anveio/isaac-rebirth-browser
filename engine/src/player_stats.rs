@@ -119,6 +119,17 @@ pub(crate) fn evaluate_cache(state: &mut State) -> Result<(), String> {
     );
     state.weapon_cache = cache;
     completed |= appearance.0;
+    if requested.0 & 128 != 0 {
+        if let Some((flying, grid_class)) = item_pipeline::resolve_neutral_flight(
+            inputs,
+            state.weapon_admission.source_player_type,
+            state.player.transformation_counts,
+        ) {
+            state.player.flying = Some(flying);
+            state.player.grid_collision_class = Some(grid_class);
+            completed |= 128;
+        }
+    }
     state
         .player_items
         .as_mut()
