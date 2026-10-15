@@ -106,7 +106,7 @@ const observe = () => tab.evaluate(() => {
     player: { x: (s.player.x - 32) / 0.65, y: (s.player.y + 46) / 0.65, hp: s.player.hp, maxHp: s.player.maxHp, dead: s.player.dead, controls: s.player.controlsEnabled },
     room: s.currentRoom, visited: s.visitedRooms.length, transition: !!s.roomTransition, clear: s.room.combatClear,
     bounds: { left: s.room.left, right: s.room.right, top: s.room.top, bottom: s.room.bottom },
-    npcs: npcs.map(n => ({ x: n.position.x, y: n.position.y, boss: n.boss, kind: n.kind })),
+    npcs: npcs.map(n => ({ x: n.position.x, y: n.position.y, boss: n.boss, kind: n.kind, hp: n.hp, maxHp: n.maxHp })),
     pickups: s.room.pickups.filter(p => !p.collected && !p.removed).map(p => ({ x: p.position.x, y: p.position.y, variant: p.variant })),
     // Solid grid cells (walls, rocks, pits); door cells stay walkable for routing.
     // Authored cells without a grid entity (e.g. pits, selector 3000) still block.
@@ -152,7 +152,7 @@ async function tap(key, ms = 120) { await tab.keyboard.down(key); await tab.wait
 
 let exitCode = 0;
 const stats = { roomsEntered: new Set(), returnedToStart: false, leftStart: false, maxTears: 0, bombsPlaced: 0, explosionsSeen: 0,
-  pickupsCollected: 0, itemsGained: 0, coinsMax: 0, enemiesSeen: 0, enemyRoomsCleared: 0, damageTaken: 0, deaths: 0, pauses: 0,
+  pickupsCollected: 0, itemsGained: 0, coinsMax: 0, enemiesSeen: 0, enemyRoomsCleared: 0, bossesKilled: 0, bossHpLeast: null, damageTaken: 0, deaths: 0, pauses: 0,
   distance: 0, stalls: 0, maxFrozenMs: 0, stages: new Set() };
 try {
   // Boot.
@@ -228,6 +228,9 @@ try {
     stats.explosionsSeen += state.explosions > previous.explosions ? 1 : 0;
     stats.coinsMax = Math.max(stats.coinsMax, state.inventory.coins);
     stats.enemiesSeen = Math.max(stats.enemiesSeen, state.npcs.length);
+    // Boss progress: the lowest boss HP fraction reached, and kills (a boss room cleared).
+    for (const npc of state.npcs.filter(n => n.boss && n.maxHp > 0)) stats.bossHpLeast = Math.min(stats.bossHpLeast ?? 1, Math.round(npc.hp / npc.maxHp * 100) / 100);
+    if (previous.npcs.some(n => n.boss) && !state.npcs.some(n => n.boss) && state.room === previous.room && state.clear && !state.player.dead) stats.bossesKilled++;
     stats.stages.add(state.stage);
     if (state.player.hp < previous.player.hp) stats.damageTaken += previous.player.hp - state.player.hp;
     if (state.items > itemsBefore) { stats.itemsGained += state.items - itemsBefore; itemsBefore = state.items; log(`collected an item (${state.items} owned)`); await shot('item'); }
@@ -299,10 +302,23 @@ try {
       const target = state.npcs.reduce((a, b) => Math.hypot(a.x - p.x, a.y - p.y) < Math.hypot(b.x - p.x, b.y - p.y) ? a : b);
       const dx = target.x - p.x, dy = target.y - p.y, distance = Math.hypot(dx, dy);
       const post = !lineOfFire(state.grid, p, target) && firingPost(state.grid, p, target);
-      if (post) { const step = waypoint(post.x, post.y); toward(step.x, step.y, 4); keys.push(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'ArrowRight' : 'ArrowLeft') : (dy > 0 ? 'ArrowDown' : 'ArrowUp')); }
-      else if (Math.abs(dx) > Math.abs(dy)) { keys.push(dx > 0 ? 'ArrowRight' : 'ArrowLeft'); if (Math.abs(dy) > 16) keys.push(dy > 0 ? 'KeyS' : 'KeyW'); }
-      else { keys.push(dy > 0 ? 'ArrowDown' : 'ArrowUp'); if (Math.abs(dx) > 16) keys.push(dx > 0 ? 'KeyD' : 'KeyA'); }
-      if (distance < 130) keys.push(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'KeyA' : 'KeyD') : (dy > 0 ? 'KeyW' : 'KeyS'));
+      const horizontal = Math.abs(dx) > Math.abs(dy), offset = horizontal ? dy : dx;
+      const fire = horizontal ? (dx > 0 ? 'ArrowRight' : 'ArrowLeft') : (dy > 0 ? 'ArrowDown' : 'ArrowUp');
+      const back = horizontal ? (dx > 0 ? 'KeyA' : 'KeyD') : (dy > 0 ? 'KeyW' : 'KeyS');
+      const align = horizontal ? (offset > 0 ? 'KeyS' : 'KeyW') : (offset > 0 ? 'KeyD' : 'KeyA');
+      if (target.boss) {
+        // Bosses jump, charge and spray tears: hold ~220 units and weave
+        // across the firing line so a landing or a tear line misses.
+        keys.push(fire);
+        if (distance < 200) keys.push(back);
+        if (Math.abs(offset) > 60) keys.push(align);
+        else keys.push(Math.floor(segment / 6) % 2 ? (horizontal ? 'KeyW' : 'KeyA') : (horizontal ? 'KeyS' : 'KeyD'));
+      } else if (post) { const step = waypoint(post.x, post.y); toward(step.x, step.y, 4); keys.push(fire); }
+      else {
+        keys.push(fire);
+        if (Math.abs(offset) > 16) keys.push(align);
+        if (distance < 130) keys.push(back);
+      }
       if (segment % 40 === 0 && state.inventory.bombs > 0 && distance < 180) keys.push('KeyE');
     } else if (state.pickups.length && (pickupsAtStart.get(state.room) ?? 0) < 60) {
       pickupsAtStart.set(state.room, (pickupsAtStart.get(state.room) ?? 0) + 1);
