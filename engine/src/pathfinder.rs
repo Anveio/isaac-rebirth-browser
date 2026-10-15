@@ -422,21 +422,44 @@ fn pop_heap(heap: &mut Vec<(i32, i32)>) {
     heap.pop();
 }
 
-/// 5b498f: Dijkstra from the target cell over a copy of the room costs.
 fn flood(path: &mut Pathfinder, world: &NpcWorld, start: i32) -> Result<(), String> {
     let descriptor = world.grid.descriptor();
-    let (width, height) = (i32::from(descriptor.width), i32::from(descriptor.height));
-    path.flood = world
+    let costs = world
         .path_costs
         .as_deref()
-        .ok_or("FindGridPath requires source Room.Init path costs")?
-        .clone();
-    path.found = false;
+        .ok_or("FindGridPath requires source Room.Init path costs")?;
+    (path.flood, path.found) =
+        flood_costs(costs, descriptor.width, descriptor.height, start, path.cell)?;
+    Ok(())
+}
+
+/// 5b498f: Dijkstra from the `start` (target) cell over a copy of a
+/// `width` x `height` room's costs, for the `owner` cell's walk. A visited
+/// open cell (cost 0..=949) holds -distance, entering an empty cell costing
+/// 1 and any other open cell 7. The flood stops once the nearest unexpanded
+/// cell is half the room's cell count away, or after the expansion that
+/// visits `owner`; it returns the map and whether `owner` was visited.
+pub fn flood_costs(
+    costs: &RoomCosts,
+    width: u16,
+    height: u16,
+    start: i32,
+    owner: i32,
+) -> Result<(RoomCosts, bool), String> {
+    let cells = usize::from(width) * usize::from(height);
+    if cells == 0 || cells > crate::grid::MAX_GRID_CELLS {
+        return Err(format!(
+            "FindGridPath flood requires an admitted room grid, not {width}x{height}"
+        ));
+    }
+    let (width, height) = (i32::from(width), i32::from(height));
+    let mut flood = costs.clone();
+    let mut found = false;
     let half = (width * height) / 2;
     let mut heap = Vec::new();
     push_heap(&mut heap, (start, 0));
     while let Some(&(current, distance)) = heap.first() {
-        if path.found || distance >= half {
+        if found || distance >= half {
             break;
         }
         pop_heap(&mut heap);
@@ -444,19 +467,23 @@ fn flood(path: &mut Pathfinder, world: &NpcWorld, start: i32) -> Result<(), Stri
             if next < 0 {
                 continue;
             }
-            let cost = path.flood.get(next as usize)?;
+            let cost = flood.get(next as usize)?;
             if !(0..=949).contains(&cost) {
                 continue;
             }
-            let reached = if cost == 0 { distance + 1 } else { distance + 7 };
-            path.flood.store(next as usize, -reached)?;
-            if path.cell == next {
-                path.found = true;
+            let reached = if cost == 0 {
+                distance + 1
+            } else {
+                distance + 7
+            };
+            flood.store(next as usize, -reached)?;
+            if owner == next {
+                found = true;
             }
             push_heap(&mut heap, (next, reached));
         }
     }
-    Ok(())
+    Ok((flood, found))
 }
 
 /// 5b47f8: the visited neighbour nearest the target (first of L, U, R, D).

@@ -11,6 +11,7 @@ mod grid;
 mod item_pools;
 mod layout;
 mod mt;
+mod pathfinder;
 mod phase;
 mod seed_codec;
 
@@ -49,6 +50,11 @@ pub const UNITS: &[Unit] = &[
         name: "grid",
         summary: "grid queries and ground-collision solvers on generated rooms",
         run: grid::run,
+    },
+    Unit {
+        name: "pathfinder",
+        summary: "FindGridPath's flood against an independent node-weighted Dijkstra",
+        run: pathfinder::run,
     },
     Unit {
         name: "item_pools",
