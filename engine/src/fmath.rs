@@ -17,3 +17,8 @@ pub fn cos(x: f32) -> f32 {
 pub fn atan2(y: f64, x: f64) -> f64 {
     libm::atan2(y, x)
 }
+
+/// Native atan2f consumers retain their actual single-precision call boundary.
+pub fn atan2_f32(y: f32, x: f32) -> f32 {
+    libm::atan2f(y, x)
+}

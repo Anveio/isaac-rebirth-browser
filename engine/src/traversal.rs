@@ -343,9 +343,7 @@ pub(crate) fn advance_transition(
     state.impacts.clear();
     state.bombs.clear();
     state.explosions.clear();
-    state
-        .actor_scheduler
-        .retain(|actor| actor.kind == crate::actors::ActorKind::Player);
+    crate::attack_runtime::reset_room_schedule(state);
     transition.phase = TransitionPhase::In;
     transition.full_updates = 0;
     state.room_transition = Some(transition);
