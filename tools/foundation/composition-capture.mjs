@@ -16,6 +16,55 @@ const keyCode = key => {
 };
 const save = (path, value) => writeFile(path, JSON.stringify(value, null, 2) + '\n');
 
+// The same pure selector runs in the page and against retained real trace
+// evidence. Capture the public getter ONCE; never clone a whole trace to Node.
+export function readTracePart(trace, request) {
+  if (request === null) {
+    return {keys:Object.keys(trace),fields:Object.fromEntries(Object.entries(trace).filter(([,value])=>!Array.isArray(value))),
+      arrays:Object.fromEntries(Object.entries(trace).filter(([,value])=>Array.isArray(value)).map(([key,value])=>[key,value.length]))};
+  }
+  const {field,index,count}=request;
+  if (!Array.isArray(trace[field]) || !Number.isSafeInteger(index) || index<0 ||
+      !Number.isSafeInteger(count) || count<1 || count>64)throw Error('Invalid actual trace chunk request');
+  return {index,rows:trace[field].slice(index,index+count)};
+}
+
+export async function streamCapturedTrace(readPart, directory, expectedCommands) {
+  await mkdir(directory,{recursive:false});
+  const spool=await BrowserProgress.create(directory);
+  const info={arrayCounts:{},commandErrors:[],backendStatesComplete:true};
+  let header,transferError;
+  try {
+    header=await readPart(null);await spool.append('header',header);
+    for(const [field,length] of Object.entries(header.arrays)) {
+      assert.ok(Number.isSafeInteger(length)&&length>=0,'Actual trace array length');
+      let index=0;
+      while(index<length) {
+        const part=await readPart({field,index,count:field==='commands'?64:1});
+        assert.equal(part.index,index);assert.ok(part.rows.length>0&&index+part.rows.length<=length);
+        for(const value of part.rows) {
+          await spool.append('array:'+field,value);
+          if(field==='commands') {
+            try {assert.deepEqual(value,expectedCommands[index]);}
+            catch(error){info.commandErrors.push({index,error:String(error)});}
+          }
+          if(field==='backendEvents')info.backendStatesComplete&&=Boolean(value?.state);
+          index++;
+        }
+        info.arrayCounts[field]=index;
+      }
+      info.arrayCounts[field]=index;
+    }
+    await spool.append('finish',{status:'complete',info});
+  } catch(error) {
+    transferError=String(error);
+    await spool.append('failure',{error:transferError,info});
+  } finally {await spool.close(transferError?'partial':'closed');}
+  const trace=header?Object.fromEntries(header.keys.map(key=>[key,
+    Object.hasOwn(header.arrays,key)?spool.values('array:'+key):header.fields[key]])):null;
+  return {trace,info,error:transferError};
+}
+
 export async function captureComposition(browser, server, declaration, directory) {
   await mkdir(directory, {recursive:true});
   const xml = await readFile(declaration.fixture.authoredResourcePath);
@@ -42,15 +91,16 @@ export async function captureComposition(browser, server, declaration, directory
     await save(join(directory,'preflight-allocation-failure.json'),{status:'fail',error:String(error),cleanupError,scope:'No tape/game capture; actual allocation failure retained.'});
     throw error;
   }
-  const states = [], preludeStates = [], captures = [], commands = [], inputs = [], errors = [];
+  const captureScreens = new Map(), commands = [], inputs = [], errors = [];
+  let stateCount = 0, preludeStateCount = 0, contextClosed = false;
   let progress;
   try {progress=await BrowserProgress.create(directory);}
   catch(error){try{await context.close();}catch(failure){errors.push('Context cleanup: '+String(failure));}throw error;}
-  let presentation = 0, gameplayPresentation = null, trace = null, traceError;
+  let presentation = 0, gameplayPresentation = null, trace = null, traceError, traceInfo;
   let completedTape = false, archiveWritten = false;
   page.on('pageerror',error=>errors.push(String(error)));
   const step = async count => {
-    await page.evaluate(count=>window.game.step(count),count);
+    await page.evaluate(count=>{window.game.step(count);},count);
     commands.push({type:'tick',count});presentation += count;
   };
   const key = async (name,down) => {
@@ -62,8 +112,8 @@ export async function captureComposition(browser, server, declaration, directory
     const captured = await page.evaluate(()=>window.game.capture());
     const bytes = Buffer.from(captured.png,'base64');
     const path = join(directory,label+'.png');await writeFile(path,bytes);
-    captures.push({label,presentation,gameplayPresentation,path,sha256:hash(bytes),state:captured.state});
-    await progress.append('capture',captures.at(-1));
+    if(!captureScreens.has(label))captureScreens.set(label,{screen:captured.state.screen,mainSelection:captured.state.mainSelection,challengeSelection:captured.state.challengeSelection});
+    await progress.append('capture',{label,presentation,gameplayPresentation,path,sha256:hash(bytes),state:captured.state});
     return captured.state;
   };
   const press = async (name,settle,label) => {
@@ -71,8 +121,8 @@ export async function captureComposition(browser, server, declaration, directory
       if (label !== 'gameplay-start') {await step(count);return;}
       for (let i=0;i<count;i++) {
         await step(1);
-        preludeStates.push({presentation,relativeTitlePresentation:presentation-63,state:await page.evaluate(()=>window.game.snapshot())});
-        await progress.append('preludeState',preludeStates.at(-1));
+        await progress.append('preludeState',{presentation,relativeTitlePresentation:presentation-63,state:await page.evaluate(()=>window.game.snapshot())});
+        preludeStateCount++;
       }
     };
     await key(name,true);await advance(12);await key(name,false);await advance(settle);
@@ -93,12 +143,12 @@ export async function captureComposition(browser, server, declaration, directory
     await press('Down',72,'challenge-selected');await press('Return',72,'challenges');
     await press('Return',300,'gameplay-start');
     gameplayPresentation = 0;
-    states.push({presentation,gameplayPresentation,state:await page.evaluate(()=>window.game.snapshot())});
-    await progress.append('state',states.at(-1));
+    await progress.append('state',{presentation,gameplayPresentation,state:await page.evaluate(()=>window.game.snapshot())});
+    stateCount++;
     if (declaration.initialPhaseOffset) {
       assert.equal(declaration.initialPhaseOffset,1);await step(1);gameplayPresentation++;
-      states.push({presentation,gameplayPresentation,state:await page.evaluate(()=>window.game.snapshot())});
-      await progress.append('state',states.at(-1));
+      await progress.append('state',{presentation,gameplayPresentation,state:await page.evaluate(()=>window.game.snapshot())});
+      stateCount++;
     }
     let held = new Set();
     for (const action of declaration.actions) {
@@ -110,8 +160,8 @@ export async function captureComposition(browser, server, declaration, directory
       for (const name of [...requested].filter(name=>!held.has(name)).sort()) await key(name,true);
       for (let i=0;i<action.presentations;i++) {
         await step(1);gameplayPresentation++;
-        states.push({presentation,gameplayPresentation,state:await page.evaluate(()=>window.game.snapshot())});
-        await progress.append('state',states.at(-1));
+        await progress.append('state',{presentation,gameplayPresentation,state:await page.evaluate(()=>window.game.snapshot())});
+        stateCount++;
         if ([3,4].includes(i+1)) await checkpoint(action.label+'-observe-step'+String(i+1));
       }
       await checkpoint(action.label);held=requested;
@@ -127,13 +177,28 @@ export async function captureComposition(browser, server, declaration, directory
       await progress.append('beforeTrace',{completedTape,presentation,gameplayPresentation,commands,inputs,errors});
       await progress.flush();
     } catch(error) {errors.push('Actual committed journal unavailable before trace: '+String(error));}
-    try {trace=await page.evaluate(()=>window.game.trace());}
-    catch (error) {traceError=String(error);errors.push('Actual trace unavailable: '+traceError);}
+    let traceHandle;
+    try {
+      traceHandle=await page.evaluateHandle(()=>window.game.trace());
+      const transferred=await streamCapturedTrace(request=>traceHandle.evaluate(readTracePart,request),
+        join(directory,'trace'),commands);
+      trace=transferred.trace;traceInfo=transferred.info;traceError=transferred.error;
+      if(traceError)errors.push('Actual trace unavailable: '+traceError);
+    } catch (error) {traceError=String(error);errors.push('Actual trace unavailable: '+traceError);}
+    finally {if(traceHandle)await traceHandle.dispose().catch(error=>errors.push('Actual trace handle cleanup failed: '+String(error)));}
+    // All page-dependent evidence is collected. Release Chromium before the
+    // final archive; replay the fully closed journal instead of retaining a
+    // second full observation history in this Node process.
+    try {await context.close();contextClosed=true;}
+    catch(error){errors.push('Actual context cleanup failed: '+String(error));}
+    try {await progress.closeForRead();}
+    catch(error){errors.push('Actual committed journal close failed: '+String(error));}
     // Archive before validity/coverage/comparison assertions. Failed and
     // partial captures keep their real states, commands and remaining trace.
     try {
       const evidence = await writeJsonEvidence(join(directory,'browser-evidence.json.gz'),{
-        schema:1,captureStatus:completedTape?'complete':'partial',states,preludeStates,captures,trace,traceError,
+        schema:1,captureStatus:completedTape?'complete':'partial',
+        states:progress.values('state'),preludeStates:progress.values('preludeState'),captures:progress.values('capture'),trace,traceError,
         expectedCommands:commands,actualDomInputs:inputs,errors,declaredResourceHashes,
         independentInitialSeed:initialSeed,declaredBootEpochSeed:declaration.bootEpochSeed,
         declaredResourceJsonBytes:resourceBytes,
@@ -146,7 +211,7 @@ export async function captureComposition(browser, server, declaration, directory
     } finally {
       try {await progress.close(completedTape&&!traceError&&archiveWritten&&!errors.length?'closed':'partial');}
       catch(error){errors.push('Actual committed journal cleanup failed: '+String(error));}
-      finally {try {await context.close();} catch (error) {errors.push('Actual context cleanup failed: '+String(error));}}
+      finally {if(!contextClosed)try {await context.close();contextClosed=true;} catch (error) {errors.push('Actual context cleanup failed: '+String(error));}}
     }
   }
   const validation = [];
@@ -154,16 +219,17 @@ export async function captureComposition(browser, server, declaration, directory
     assert.equal(completedTape,true);assert.equal(archiveWritten,true);assert.deepEqual(errors,[]);assert.ok(trace);
     assert.equal(trace.enabled,true);assert.equal(trace.inputTraceTruncated,false);
     assert.equal(trace.backendStateTruncated,false);assert.equal(trace.backendStateTruncationReason,null);
-    assert.deepEqual(trace.commands,commands);assert.equal(trace.initialSeed,initialSeed);
+    assert.equal(traceInfo.arrayCounts.commands,commands.length);assert.deepEqual(traceInfo.commandErrors,[]);
+    assert.equal(trace.initialSeed,initialSeed);
     assert.equal(trace.bootEpochSeed,declaration.bootEpochSeed);
-    assert.ok(trace.backendEvents.length>0&&trace.backendEvents.every(event=>event.state));
-    assert.equal(states.length,1+declaration.initialPhaseOffset+declaration.actions.reduce((n,a)=>n+a.presentations,0));
-    assert.equal(preludeStates.length,312,'Every real run-confirm/admission presentation is retained');
+    assert.ok(traceInfo.arrayCounts.backendEvents>0&&traceInfo.backendStatesComplete);
+    assert.equal(stateCount,1+declaration.initialPhaseOffset+declaration.actions.reduce((n,a)=>n+a.presentations,0));
+    assert.equal(preludeStateCount,312,'Every real run-confirm/admission presentation is retained');
     for (const [label,screen] of [['title','title'],['profile','profile'],['main','main'],['challenge-selected','main'],['challenges','challenge'],['gameplay-start','playing']]) {
-      assert.equal(captures.find(c=>c.label===label)?.state.screen,screen,'Actual navigation checkpoint '+label);
+      assert.equal(captureScreens.get(label)?.screen,screen,'Actual navigation checkpoint '+label);
     }
-    assert.equal(captures.find(c=>c.label==='challenge-selected').state.mainSelection,2);
-    assert.equal(captures.find(c=>c.label==='challenges').state.challengeSelection,1);
+    assert.equal(captureScreens.get('challenge-selected').mainSelection,2);
+    assert.equal(captureScreens.get('challenges').challengeSelection,1);
     assert.equal(hash(await readFile(declaration.fixture.authoredResourcePath)),declaredResourceHashes.challengesXml);
     if (resources.specialRooms) assert.equal(hash(await readFile(declaration.fixture.specialRoomsPath)),declaredResourceHashes.specialRooms);
     validation.push({field:'actual public input/backend/resource readback',passed:true});
