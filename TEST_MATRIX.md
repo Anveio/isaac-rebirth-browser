@@ -442,7 +442,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Always | game: player controls are disabled exactly while the run-start fade or a room transition holds | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: no run-start request is pending during gameplay | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: player motion is finite and health is bounded | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
-| Always | game: grid-colliding NPCs stay inside the room's walls | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: grid-colliding bodies stay inside the room's walls | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: every room body has finite motion | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: consumables are capped at 99 | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: fire cooldown and head timers stay in range | [invariants.rs](engine/dst/src/units/game/invariants.rs) |

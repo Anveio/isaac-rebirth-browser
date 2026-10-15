@@ -695,8 +695,8 @@ pub fn state(state: &State) {
         "game: player motion is finite and health is bounded",
         json!({ "player": player })
     );
-    // Grid collision keeps a body's circle off solid wall cells, so a
-    // colliding NPC's centre never leaves the room interior
+    // Grid collision keeps a body's circle off solid wall cells, so the centre
+    // of a colliding NPC, pickup or bomb never leaves the room interior
     // (`Grid::clamp_room`), whatever its speed or family.
     if state.room_transition.is_none() {
         let grid = state
@@ -705,15 +705,22 @@ pub fn state(state: &State) {
             .clone()
             .map(rebirth_cleanroom::grid::Grid::new);
         if let Some(Ok(grid)) = grid {
-            let escaped = state.room.npcs.iter().find(|npc| {
-                !npc.removed
-                    && npc.grid_collision_class != 0
-                    && grid.clamp_room(npc.position, 0.0) != npc.position
-            });
+            let npcs = state.room.npcs.iter().filter(|npc| !npc.removed);
+            let npcs = npcs
+                .filter(|npc| npc.grid_collision_class != 0)
+                .map(|npc| ("npc", npc.id, npc.position));
+            let pickups = state.room.pickups.iter().filter(|pickup| !pickup.removed);
+            let pickups = pickups.map(|pickup| ("pickup", pickup.id, pickup.position));
+            let bombs = state.bombs.iter();
+            let bombs = bombs.map(|bomb| ("bomb", bomb.id, bomb.motion.position));
+            let escaped = npcs
+                .chain(pickups)
+                .chain(bombs)
+                .find(|(_, _, position)| grid.clamp_room(*position, 0.0) != *position);
             props::always!(
                 escaped.is_none(),
-                "game: grid-colliding NPCs stay inside the room's walls",
-                json!({ "npc": escaped.map(|npc| (npc.id, npc.kind, npc.grid_collision_class, npc.position)) })
+                "game: grid-colliding bodies stay inside the room's walls",
+                json!({ "body": escaped })
             );
         }
     }
