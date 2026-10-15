@@ -11,6 +11,12 @@ pub(crate) struct CacheMask(pub(crate) u32);
 
 const LIBRA_SCALAR_FLAGS: u32 = 0x1b;
 
+//Independent controlled52 cache, kind5 and caller footprints.
+const CONTROLLED_FETUS_CACHE_ITEMS: &[usize] = &[1, 4, 52, 329];
+const CONTROLLED_FETUS_KIND5_ITEMS: &[usize] = &[1, 4, 52, 329];
+const CONTROLLED_FETUS_GRANT_ITEMS: &[usize] = &[1, 4, 52, 329];
+const CONTROLLED_FETUS_CALLER_ITEMS: &[usize] = &[1, 4, 52, 329];
+
 // Independent source-owned footprints. Equal current sets are deliberately
 // separate: cache additions cannot silently admit a50D090 getter branch.
 const TECHNOLOGY_CACHE_ITEMS: &[usize] = &[1, 4, 68];
@@ -235,6 +241,9 @@ impl<'a> ItemInputs<'a> {
     /// Add52 evaluates these callbacks before its same passive queue clears.
     /// This cache capability never grants a kind5/controller/contact scope.
     pub(crate) fn admits_fetus_cache_context(self) -> bool {
+        if self.admits_controlled_fetus_readset(CONTROLLED_FETUS_CACHE_ITEMS, false) {
+            return true;
+        }
         self.owner.trinket_slots == [0, 0]
             && self.owner.queued_id.is_none_or(|id| id == 52)
             && self.owner.temporary_collectibles.is_empty()
@@ -250,6 +259,9 @@ impl<'a> ItemInputs<'a> {
     /// Separate50D090(kind5) query footprint, including its125/140 tail.
     /// Current C98/C88/CA0 stay actual inputs; cache admission is not reused.
     pub(crate) fn admits_fetus_kind5_context(self) -> bool {
+        if self.admits_controlled_fetus_readset(CONTROLLED_FETUS_KIND5_ITEMS, true) {
+            return true;
+        }
         self.owner.trinket_slots == [0, 0]
             && self.owner.queued_id.is_none()
             && self.owner.temporary_collectibles.is_empty()
@@ -266,6 +278,9 @@ impl<'a> ItemInputs<'a> {
     /// Its specific/default and zero-amount common paths preserve an existing
     /// LuckInputs owner; they never produce a missing owner from inventory.
     pub(crate) fn admits_fetus_grant_context(self) -> bool {
+        if self.admits_controlled_fetus_readset(CONTROLLED_FETUS_GRANT_ITEMS, false) {
+            return true;
+        }
         self.owner.trinket_slots == [0, 0]
             && self.owner.queued_id.is_none_or(|id| id == 52)
             && self.owner.temporary_collectibles.is_empty()
@@ -276,6 +291,31 @@ impl<'a> ItemInputs<'a> {
                 .iter()
                 .enumerate()
                 .all(|(id, &count)| count == 0 || (id == 52 && count == 1))
+    }
+
+    ///519FC0's currentC7C motion branch is separate from cache and kind5.
+    pub(crate) fn admits_controlled_fetus_caller(self) -> bool {
+        self.admits_controlled_fetus_readset(CONTROLLED_FETUS_CALLER_ITEMS, true)
+    }
+
+    fn admits_controlled_fetus_readset(self, supported: &[usize], empty_queue: bool) -> bool {
+        self.owned_count(52) == 1
+            && self.positive_owned_count(329)
+            && self.owner.trinket_slots == [0, 0]
+            && self.owner.temporary_collectibles.is_empty()
+            && if empty_queue {
+                self.owner.queued_id.is_none()
+            } else {
+                self.owner
+                    .queued_id
+                    .is_none_or(|id| supported.contains(&(id as usize)))
+            }
+            && self
+                .owner
+                .owned_counts
+                .iter()
+                .enumerate()
+                .all(|(id, &count)| count == 0 || (count > 0 && supported.contains(&id)))
     }
 
     /// Each callback composes its implemented effects with its proven neutral
