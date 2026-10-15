@@ -23,6 +23,7 @@ const { values } = parseArgs({ options: {
   'run-seed': { type: 'string' },
   'boot-epoch-seed': { type: 'string' },
   headed: { type: 'boolean', default: false },
+  boss: { type: 'boolean', default: false },
 } });
 const BUNDLE = resolve(values.bundle);
 const PLAY_MS = Number(values.seconds) * 1000;
@@ -115,6 +116,8 @@ const observe = () => tab.evaluate(() => {
     tears: s.tears.length, bombs: s.bombs.length, explosions: s.explosions.length,
     inventory: s.inventory, items: s.playerItems ? s.playerItems.ownedCounts.reduce((a, b) => a + b, 0) : 0,
     gameOver: !!s.playerDeath?.gameOver, runSeed: s.runSeed, npcKinds: s.room.npcs.filter(n => !n.removed).map(n => `${n.kind}.${n.variant}${n.champion ? "c" + n.champion.color : ""}`), introduction: s.runIntroduction.active, stage: s.stage,
+    // Floor layout for --boss: each room's grid index and type (5 = boss).
+    rooms: s.floor ? s.floor.descriptors.map(d => [d.gridIndex, d.template.type]) : [],
   };
 });
 
@@ -185,7 +188,7 @@ try {
   const playStart = Date.now(), playStartTick = state.tick;
   let previous = state, lastAdvance = Date.now(), lastMoveCheck = { at: Date.now(), x: state.player.x, y: state.player.y };
   let previousRoom = startRoom, cameFromDoor = null, segment = 0, lastPause = Date.now(), blackStreak = 0, nextShot = Date.now() + 20_000;
-  const blockedDoors = new Set(), lastVisit = new Map();
+  const blockedDoors = new Set(), lastVisit = new Map(), visits = new Map();
   let doorGoal = null, wantReturn = false, stuckSince = null, wiggle = null, itemsBefore = state.items;
   const pickupsAtStart = new Map();
   while (Date.now() - playStart < PLAY_MS) {
@@ -212,7 +215,7 @@ try {
     if (state.room !== previousRoom) {
       log(`entered room ${state.room} from ${previousRoom} (${state.npcs.length} enemies, ${state.pickups.length} pickups)`);
       timeline.push({ event: 'room', atMs: now - started, from: previousRoom, room: state.room, runSeed: state.runSeed, npcKinds: state.npcKinds });
-      cameFromDoor = previousRoom; previousRoom = state.room; lastVisit.set(state.room, now);
+      cameFromDoor = previousRoom; previousRoom = state.room; lastVisit.set(state.room, now); visits.set(state.room, (visits.get(state.room) ?? 0) + 1);
       if (state.room !== startRoom) stats.leftStart = true;
       if (state.room === startRoom && stats.leftStart) { stats.returnedToStart = true; wantReturn = false; }
       if (!stats.roomsEntered.has(state.room) && stats.roomsEntered.size === 1) { wantReturn = true; await shot('first-new-room'); }
@@ -297,10 +300,15 @@ try {
         const usable = open.filter(d => !blockedDoors.has(`${state.room}->${d.target}`));
         // Explore: the least recently visited neighbour, never straight back unless it is the only way.
         const onward = usable.filter(d => d !== back);
-        const pool = (wantReturn && back && usable.includes(back) && [back]) || (onward.length && onward) || (usable.length && usable) || open;
+        const pool = (!values.boss && wantReturn && back && usable.includes(back) && [back]) || (onward.length && onward) || (usable.length && usable) || open;
         const age = d => lastVisit.get(d.target) ?? -1;
-        const oldest = Math.min(...pool.map(age));
-        const pickFrom = pool.filter(d => age(d) === oldest);
+        // --boss: head for the boss room by floor-grid distance (13 columns),
+        // with visits as a penalty so dead ends are not retried forever.
+        const bossCell = state.rooms.find(([, type]) => type === 5)?.[0];
+        const toBoss = d => { const cell = state.rooms[d.target]?.[0]; return cell == null ? 99 : Math.abs(cell % 13 - bossCell % 13) + Math.abs(Math.floor(cell / 13) - Math.floor(bossCell / 13)) + 3 * (visits.get(d.target) ?? 0); };
+        const score = values.boss && bossCell != null && state.rooms[state.room]?.[1] !== 5 ? toBoss : age;
+        const oldest = Math.min(...pool.map(score));
+        const pickFrom = pool.filter(d => score(d) === oldest);
         const door = pickFrom[Math.floor(Math.random() * pickFrom.length)];
         doorGoal = door && { room: state.room, target: door.target, until: now + 15_000 };
       }
