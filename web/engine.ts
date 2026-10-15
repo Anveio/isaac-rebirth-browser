@@ -3,6 +3,7 @@ import wasmUrl from "./generated/engine.wasm?url";
 export type Screen = "title" | "profile" | "main" | "character" | "challenge" | "seed" | "playing";
 export type Direction = "left" | "right" | "up" | "down";
 export interface Player {
+  entitySource?: { entityType: number; variant: number; spawnerType: number; spawnerVariant: number };
   canShoot: boolean; initialized3074: boolean;
   visible: boolean; inputCooldown: number; dead: boolean;
   x: number; y: number; vx: number; vy: number; hp: number; maxHp: number;

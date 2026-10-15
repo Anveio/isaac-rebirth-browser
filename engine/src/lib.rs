@@ -153,6 +153,9 @@ pub enum Direction {
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Player {
+    ///None is legacy/unowned Entity source history, never a neutral default.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub entity_source: Option<PlayerEntitySource>,
     ///Actual Player+3074 final starting-grant callback completion.
     pub initialized_3074: bool,
     ///Actual Player+3075 constructor byte, then Challenge Config+98 override.
@@ -194,9 +197,31 @@ pub struct Player {
     pub shots_fired: u32,
     pub render_offset: Point,
 }
+///Actual Entity10/14/1C/20 provenance owned by the supported Player Init.
+///It is separate from inventory, current character type and copied P/V.
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct PlayerEntitySource {
+    pub entity_type: u32,
+    pub variant: u32,
+    pub spawner_type: u32,
+    pub spawner_variant: u32,
+}
+impl PlayerEntitySource {
+    ///5BF4F5..505 passes type1/variant0;519480→441EE8/EF clears1C/20.
+    const fn fresh_isaac() -> Self {
+        Self {
+            entity_type: 1,
+            variant: 0,
+            spawner_type: 0,
+            spawner_variant: 0,
+        }
+    }
+}
 impl Player {
     fn starting() -> Self {
         Self {
+            entity_source: None,
             initialized_3074: false,
             can_shoot: true,
             visible: true,
@@ -1430,6 +1455,8 @@ impl Game {
         self.state.boss_bar = BossBar::default();
         self.state.pause_menu = PauseMenu::hidden();
         self.state.player = Player::starting();
+        //Actual fresh Manager.Init→Player.Init; title/old restores stay None.
+        self.state.player.entity_source = Some(PlayerEntitySource::fresh_isaac());
         // 519767/519771 initialize the two transformation history counters.
         self.state.player.transformation_counts = Some([0, 0]);
         // 51985C initializes the actual D64 Luck output.
