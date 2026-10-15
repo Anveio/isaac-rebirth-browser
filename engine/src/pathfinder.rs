@@ -396,6 +396,10 @@ fn push_heap(heap: &mut Vec<(i32, i32)>, value: (i32, i32)) {
 /// taking the right child, then sifts up.
 fn pop_heap(heap: &mut Vec<(i32, i32)>) {
     let last = heap.len() - 1;
+    if last == 0 {
+        heap.pop();
+        return;
+    }
     let value = heap[last];
     heap[last] = heap[0];
     let n = last as isize;
