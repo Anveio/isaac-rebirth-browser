@@ -249,7 +249,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | `grid` | grid queries and ground-collision solvers on generated rooms | 14 | 3 | 0 |
 | `pathfinder` | FindGridPath's flood against an independent node-weighted Dijkstra | 6 | 5 | 0 |
 | `item_pools` | ItemPool selection, depletion, fallbacks, routing and continuation | 21 | 6 | 3 |
-| `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 63 | 51 | 2 |
+| `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 64 | 51 | 2 |
 | `abi` | the exported C ABI transport the browser bridge drives | 15 | 3 | 0 |
 
 <details><summary>Every declared DST property</summary>
@@ -411,6 +411,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Sometimes | game: a locked or unimplemented character is rejected | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: text outside the seed dialog is rejected | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: invalid seed text is rejected | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: the fire cooldown never rises above a max fire delay the command held | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: Tick advances the tick and system clocks by its count (plus run-start alignment) | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: the menu animation clock advances with Tick and restarts on screen changes | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: Tick changes the screen only by starting a run or leaving GameOver | [invariants.rs](engine/dst/src/units/game/invariants.rs) |

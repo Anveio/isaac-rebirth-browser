@@ -154,6 +154,23 @@ fn menu_edge(from: Screen, to: Screen) -> bool {
 pub fn transition(before: &State, command: &Command, after: &State) {
     death(before, command, after);
     room_clear(before, command, after);
+    // A shot sets the fire cooldown to the max fire delay it fires with, and
+    // the cooldown then only counts down. The max delay itself may drop under
+    // a running cooldown: a collectible queued during its pickup animation
+    // flushes at 531f01, after the shot (52f..530) on the frame the animation
+    // ends, so a shot fired with the old delay outlasts a lowered one.
+    props::always!(
+        after.fire_cooldown
+            <= before
+                .fire_cooldown
+                .max(before.max_fire_delay)
+                .max(after.max_fire_delay),
+        "game: the fire cooldown never rises above a max fire delay the command held",
+        json!({
+            "before": [before.fire_cooldown, before.max_fire_delay],
+            "after": [after.fire_cooldown, after.max_fire_delay],
+        })
+    );
     // A run starts from the menus, or restarts from the GameOver popup without
     // leaving the playing screen; both go through the engine's run start.
     let restarted = before.player_death.game_over.is_some()
@@ -744,9 +761,7 @@ pub fn state(state: &State) {
         json!({ "inventory": state.inventory })
     );
     props::always!(
-        state.fire_cooldown >= -1
-            && state.fire_cooldown <= state.max_fire_delay
-            && state.head_timer >= -1,
+        state.fire_cooldown >= -1 && state.head_timer >= -1,
         "game: fire cooldown and head timers stay in range",
         json!({ "fireCooldown": state.fire_cooldown, "headTimer": state.head_timer })
     );
