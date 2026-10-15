@@ -899,6 +899,31 @@ impl NpcEffectAdmission<'_> {
     }
 }
 
+thread_local! {
+    static ELIDE_BACKGROUND_STAINS: std::cell::Cell<bool> = const { std::cell::Cell::new(false) };
+}
+
+/// Serialize `f` with every room's background stains written as `[]`. The
+/// browser's per-tick snapshot uses this; stains then cost O(new) per tick
+/// through `background_stains_since` instead of O(all) per tick.
+pub fn with_background_stains_elided<T>(f: impl FnOnce() -> T) -> T {
+    ELIDE_BACKGROUND_STAINS.with(|elide| elide.set(true));
+    let result = f();
+    ELIDE_BACKGROUND_STAINS.with(|elide| elide.set(false));
+    result
+}
+
+pub(crate) fn serialize_background_stains<S: serde::Serializer>(
+    stains: &[BackgroundStain],
+    serializer: S,
+) -> Result<S::Ok, S::Error> {
+    if ELIDE_BACKGROUND_STAINS.with(std::cell::Cell::get) {
+        serializer.collect_seq(std::iter::empty::<&BackgroundStain>())
+    } else {
+        serializer.collect_seq(stains)
+    }
+}
+
 /// Actual454df0 current-count background pass follows actor callbacks and
 /// precedes entity contacts/grid queries. Newborn flags8 blood participates.
 pub fn paint_background_effects(state: &mut State) -> Result<(), String> {
