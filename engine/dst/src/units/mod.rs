@@ -15,6 +15,7 @@ mod mt;
 mod pathfinder;
 mod phase;
 mod room_spawns;
+mod room_templates;
 mod seed_codec;
 
 pub const UNITS: &[Unit] = &[
@@ -47,6 +48,11 @@ pub const UNITS: &[Unit] = &[
         name: "room_spawns",
         summary: "authored spawn-group selection over every authored room and synthetic edge rooms",
         run: room_spawns::run,
+    },
+    Unit {
+        name: "room_templates",
+        summary: "authored room-template picks and weight decay against a weight model",
+        run: room_templates::run,
     },
     Unit {
         name: "floor",
