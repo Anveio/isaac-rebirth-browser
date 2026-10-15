@@ -89,13 +89,45 @@ future capture serialization and does not regrade those archived audits.
 [Compact evidence](../references/isaac/foundation/items/public-ingress-and-brim10.json)
 retains the exact producer/report scopes and unresolved fields.
 
-Controlled Knife caller, ordered-cache completion and Line/Impact corrections
-are source-peered follow-ups, with no inherited Brimstone gameplay acceptance.
-Ordinary Knife, triple-loadout parity, ambient33/68 and the four-file shared-MT
-startup consumer remain unaccepted. The frozen first32 campaign remains a
-functional failure: 1,185,154 comparisons, 68,333 differences, 32
-capture-integrity passes and zero capture errors. Source proofs and private
-builds do not establish contact or complete 624-word MT/actor-seed parity.
+The shared cache evaluator now includes known scalar completion (PR233),
+negative Flight (PR236) and Familiar after Flight (PR239). Familiar239 passed
+its own production, strict Clippy and floor builds with stable inputs and 44
+own generated headers. The merged Luck254 leaf also passed these checks.
+ALL-tail260 has its own compiler passes and is ready; required per-stage
+composition remains pending. Number One6 and Libra304 have source operators
+and bounded admission proofs, with no inherited gameplay acceptance.
+
+The ordinary Knife six-case bank has completed only cases 0..2 on the private
+`2ed8a7b` producer: 571,311 checks, 37,820 differences and three functional
+failures, despite passing capture audits. The later corrected `a3209046`
+producer passed its own production, strict Clippy and floor builds. Its older
+DST run still fails four of 109 properties; the NaN-equality source correction
+on main does not retroactively regrade that execution.
+
+Merged capture/resource leaves PR232/234 and generator/route leaves PR243/247
+keep both games on the same declared public inputs. The body comparer is
+merged as PR255; helper251 is merged with independent source and retained-tuple
+peers. The v7 route grants item114 at presentation917 and item329 at1067 in
+both games, recording 280 controlled-Knife bodies (140 Full/140 fast). Its body
+comparison still fails 9,052 of 113,707 checks. The native history has 6,274
+checks and one missing preexisting-child witness; the paired helper has 18,607
+checks, 701 failures and three gaps. A separate native replay of the narrow
+post-Uninit comparer correction has 6,263 checks and the same child gap. Five
+selected browser rows prove the actual expiry boundary; they do not regrade
+the full paired result. These scopes do not accept the complete triple.
+
+The older v5 partial comparison retains its 17,123 differences. A separate
+readback corrects 970 Game-flag schema errors without changing that report;
+v7 also matches 970 actual Player seed fields. The complete 624-word/cursor
+and actor-roster audit remains red: at the first mismatch all words match,
+but cursors 490/463 and five missing ambient actors differ. Ambient33/68,
+live selector-change replacement cleanup, a child surviving the item329 grant,
+STB resource transport and suite registration remain pending. A separate
+Luck-plus-ABI257 own producer passes production and seven XML-only public
+transport checks; these do not execute either game or qualify STB. The
+[compact evidence](../references/isaac/foundation/items/public-ingress-and-brim10.json)
+keeps these exact producer scopes and all prior grades, including the frozen
+first32 failure (1,185,154 checks/68,333 differences), unchanged.
 
 Main `19906c4e`, observed on October14, includes the reviewed normal-health source callbacks, the source-only Nightmare resource prerequisite and raw snapshot accessor, and retains39 registered live suites. This is source qualification. No complete current-main39-suite production/original/browser acceptance is claimed; the frozen local f793/0f343 checkpoint and later scoped owner artifacts remain separate.
 
