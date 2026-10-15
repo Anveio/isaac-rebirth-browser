@@ -150,7 +150,7 @@ native helper still fails 18 of 6,744 checks: two same-child full-curve movement
 gaps, eight Remove-flag gaps and eight Remove-before-full-cleanup gaps. Six
 children have actual full-curve movement/copied-line witnesses; two have only
 post-conversion fast rows before later Full manager absence. Actual Remove
-flags remain unobserved for all eight. No browser v8 or whole-history
+flags remain unobserved for all eight. No DOM/browser v8 capture or whole-history
 acceptance follows; all four declared cases and all older grades remain retained.
 
 At main `8ac96e2f` (PR270), the ordinary parent implementation is merged.
@@ -190,6 +190,42 @@ its archived missing-event grades are unchanged. Has118 children, Brimstone and
 controlled actors remain separate private/source runtime leaves.
 [Current scoped evidence](../references/isaac/foundation/items/cache-and-native-lifecycle-main.json)
 retains the exact proof pins, incomplete capture status and remaining boundaries.
+
+At main `383d96eb` (PR288, retained through formatting-only PR293), Number One6
+has scoped appearance, auxiliary and public-starting-grant code in main. Its own
+three builds and 37,956,648-field local regression pass. Retained Native versus
+independently executed public-WASM properties match17,423/0 at631 unique gates,
+including93 after grant with pendingcache0. Each side's grant-gate Tear remains
+white while five later own Tears copy changedCA0. This does not join cross-side
+actor IDs or qualify port currentColor2D0, sourceVariant, physics, lifecycle or
+candidate DOM/rendering. The older scalar-only93 cache64 differences and failed
+incomplete archive remain unchanged.
+
+The separate completed unchanged-v8 public-WASM replay retains 19,359/5,394 FAIL
+and old-v2 history 18,759/2,307 FAIL. Native has12 children versus0 in the port;
+the118-first transition to114 leaves typed primary cleanup unresolved. DOM/browser
+capture remains unexecuted, separate from earlier pregame guard stops.
+
+Separate Draft286 source executes the Knife-first114→118→329 route through
+public WASM. Its functional comparison fails11,158 of106,884 checks;12 child
+births pair at actual gates and copied controls match, while all550 pre329 child
+position/velocity/angle rows and532 raw8A4 rows differ. A separate84/0 birth-law
+diagnostic uses each side's own actual8A4/8A8. The source consumes a shared-MT
+uniform for8A8; the parent seed/uniform already differs before child birth.
+These first-birth witnesses do not demonstrate a new child-law defect, nor close
+later movement/nearest-parameter or random-stream alignment. Native24 lifecycle
+events/12 children,280 post329 controlled-parent differences and the new marker's
+missing helper remain separately scoped. Has118/controlled/Brim actor gameplay
+acceptance is pending.
+
+Readiness287 passes a warm production retry and strict Clippy, but its floor
+build stopped at the working-memory floor. Its earlier production capacity stop
+is also retained; public-game contracts remain unexecuted. Pending capture-tool
+PR292 preserves an existing nonnull trace's34,042,951 bytes,1,532 commands,
+216 retained states and3 backend events, including disclosed state-history
+truncation. Its live attempts remain incomplete; no engine parity follows.
+[New scoped evidence](../references/isaac/foundation/items/post-number-one-and-knife-first.json)
+keeps these results separate from every earlier report.
 
 Main `19906c4e`, observed on October14, includes the reviewed normal-health source callbacks, the source-only Nightmare resource prerequisite and raw snapshot accessor, and retains39 registered live suites. This is source qualification. No complete current-main39-suite production/original/browser acceptance is claimed; the frozen local f793/0f343 checkpoint and later scoped owner artifacts remain separate.
 
