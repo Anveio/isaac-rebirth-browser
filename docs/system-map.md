@@ -78,9 +78,10 @@ functional failures. All native processes exited zero and captures completed
 without errors. The observed 669 Laser and 669 Impact body rows include both
 phases; 16 transient Full-Uninit slot-null witnesses were recorded. All ten
 frozen strict audits failed while reconstructing manifest bytes, before
-later clock/X11/options/resource validation. Case0's additive diagnosis proves
-only the known root-order difference; all-case additive validation remains
-pending. [PR217](https://github.com/Anveio/isaac-rebirth-browser/pull/217) fixes
+later clock/X11/options/resource validation. The separate additive audit passes
+all ten cases: only the permitted adjacent root-key reorder, an exact complete
+manifest SHA and no nested observation/input difference. The skipped guard
+validations remain pending. [PR217](https://github.com/Anveio/isaac-rebirth-browser/pull/217) fixes
 future capture serialization and does not regrade those archived audits.
 [Compact evidence](../references/isaac/foundation/items/public-ingress-and-brim10.json)
 retains the exact producer/report scopes and unresolved fields.
