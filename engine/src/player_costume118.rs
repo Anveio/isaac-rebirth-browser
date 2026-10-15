@@ -104,6 +104,10 @@ pub struct Costume118 {
     pub history_frontier: Option<String>,
     pub body_history_admitted: bool,
     pub main_clip_frontier: bool,
+    ///Port coverage metadata for an actual additional selected costume layer;
+    ///it never invalidates the independently owned118 Mouth/pose history.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub additional_layer_frontier: Option<u32>,
 }
 impl Costume118 {
     fn fresh() -> Self {
@@ -130,17 +134,44 @@ impl Costume118 {
             history_frontier: None,
             body_history_admitted: true,
             main_clip_frontier: false,
+            additional_layer_frontier: None,
         }
     }
 }
 
 ///Actual52D196 costume registration, before the grant's cache callback. Only
-///the fresh118-alone registration history is closed; another grant cannot become
-///an inventory-based guess about slot priorities or costume removal.
+///known118 registration and the source-closed first330 Null-preserving change
+///are admitted; other grants retain their own slot/Null/removal frontier.
 pub(crate) fn on_collectible_added(state: &mut State, id: u32) {
+    let normal_nonflying =
+        state.weapon_admission.source_player_type == Some(0) && state.player.flying == Some(false);
     let Some(items) = state.player_items.as_mut() else {
         return;
     };
+    //Actual330 registration selects distinct head1 slot6, leaving118's
+    //body1/head4 mappings. The authored330 actor has no Nulls in any clip,
+    //so it cannot replace118's Mouth; its additional render layer is pending.
+    //50EDC0 still stops each selected body/head at its Down0 pose.
+    //Preserve only this real post-Add330 history, never restore an unknown
+    //wardrobe from counts or clear its separate body/main render frontiers.
+    let null_preserving_soy_registration = id == 330
+        && normal_nonflying
+        && items.trinket_slots == [0, 0]
+        && items.temporary_collectibles.is_empty()
+        && items.owned_counts[330] == 1
+        && items.owned_counts[118] > 0;
+    if null_preserving_soy_registration {
+        if let Some(costume) = items
+            .costume118
+            .as_mut()
+            .filter(|costume| costume.history_frontier.is_none())
+        {
+            costume.sprites[0].set_frame("WalkDown", 0);
+            costume.sprites[1].set_frame("HeadDown", 0);
+            costume.additional_layer_frontier = Some(330);
+            return;
+        }
+    }
     if id != 118 {
         if let Some(costume) = &mut items.costume118 {
             costume
@@ -323,6 +354,8 @@ pub(crate) fn advance_full(state: &mut State, phase: Phase) {
         Some("ordinaryBrimstoneMainClipCostumeRender")
     } else if !costume.body_history_admitted {
         Some("ordinaryBrimstoneBodyCostumeTransform")
+    } else if costume.additional_layer_frontier.is_some() {
+        Some("ordinaryBrimstoneAdditionalCostumeLayer")
     } else {
         None
     };

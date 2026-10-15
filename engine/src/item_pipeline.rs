@@ -23,6 +23,10 @@ const TECHNOLOGY_CACHE_ITEMS: &[usize] = &[1, 4, 68, 329];
 const TECHNOLOGY_KIND2_ITEMS: &[usize] = &[1, 4, 68];
 const TECHNOLOGY_KIND3_ITEMS: &[usize] = &[1, 4, 68, 329];
 const CONTROLLED_TECHNOLOGY_CALLER_ITEMS: &[usize] = &[1, 4, 68, 329];
+const SOY_CACHE_ITEMS: &[usize] = &[1, 4, 118, 330];
+const SOY_KIND1_ITEMS: &[usize] = &[1, 4, 118, 330];
+const SOY_KIND2_ITEMS: &[usize] = &[1, 4, 118, 330];
+const SOY_KIND3_ITEMS: &[usize] = &[1, 4, 118, 330];
 
 /// Literal511f10 dispatch order. Weapon selection/removal precedes stats;
 /// Libra304 has additional coupling before and after this sequence.
@@ -137,6 +141,9 @@ impl<'a> ItemInputs<'a> {
         primary: PrimaryWeaponC08,
         flags: crate::attack_flags::AttackFlags,
     ) -> Option<u32> {
+        if self.admits_soy_milk_regular_properties(source_player_type, primary, flags) {
+            return Some(0);
+        }
         (source_player_type == Some(0)
             && primary == PrimaryWeaponC08::RegularTears
             && flags.0 == 0
@@ -170,11 +177,45 @@ impl<'a> ItemInputs<'a> {
                 })
     }
 
+    ///Independent positive330 callback footprint from full511F10 and the
+    ///actual zero-amount Add330 path. No TEMP/trinkets or unknown grants.
+    ///Kind-specific property consumers retain independent capabilities.
+    pub(crate) fn admits_soy_milk_cache_context(self) -> bool {
+        self.admits_permanent_readset(330, SOY_CACHE_ITEMS)
+    }
+
+    ///Independently closed50D090(kind1) outputs00=0 and3C*=.5.
+    ///The cache footprint alone never grants a kind-specific property owner.
+    pub(crate) fn admits_soy_milk_regular_properties(
+        self,
+        source_player_type: Option<u32>,
+        primary: PrimaryWeaponC08,
+        flags: crate::attack_flags::AttackFlags,
+    ) -> bool {
+        source_player_type == Some(0)
+            && primary == PrimaryWeaponC08::RegularTears
+            && flags.0 == 0
+            && self.admits_permanent_readset(330, SOY_KIND1_ITEMS)
+    }
+
+    ///Selected positive330 changes only unused3C in kind2/3; actual38/30
+    ///remain currentC88/C98. Factory50E4AF and476D70 consume those separately.
+    pub(crate) fn admits_soy_milk_kind2_getter(self) -> bool {
+        self.admits_permanent_readset(330, SOY_KIND2_ITEMS)
+    }
+
+    pub(crate) fn admits_soy_milk_kind3_getter(self) -> bool {
+        self.admits_permanent_readset(330, SOY_KIND3_ITEMS)
+    }
+
     /// Exact per-callback cache32/64 proof: other modifier and trinket owners
     /// remain outside this scope. Future property operators extend their own
     /// cache reads instead of widening controller/contact admission.
     pub(crate) fn admits_selected_appearance(self) -> bool {
         if self.admits_technology_cache_context() || self.admits_fetus_cache_context() {
+            return true;
+        }
+        if self.admits_soy_milk_cache_context() {
             return true;
         }
         self.owner.trinket_slots == [0, 0]
@@ -286,6 +327,14 @@ impl<'a> ItemInputs<'a> {
     /// read set. C08 remains an independent input to the ordered formulas.
     /// Config 118's request for all callbacks adds no implicit scalar effect.
     fn admits_scalar_stage(self, stage: CacheStage, effects: &[u32]) -> bool {
+        //330's grant/readset context is separate from its two effect lists.
+        if self.owned_count(330) != 0 && !self.admits_soy_milk_cache_context() {
+            return false;
+        }
+        let neutral_soy_milk = matches!(
+            stage,
+            CacheStage::ShotSpeed | CacheStage::Range | CacheStage::MoveSpeed
+        ) && self.admits_soy_milk_cache_context();
         let neutral: &[u32] = match stage {
             CacheStage::FireDelay => FireDelayStage::NEUTRAL_ITEMS,
             CacheStage::ShotSpeed => &[1, 6, 114, 118, 329, 304],
@@ -315,6 +364,7 @@ impl<'a> ItemInputs<'a> {
                                 || neutral.contains(&(id as u32))
                                 || (id == 304 && coupled_libra)
                                 || (id == 68 && neutral_technology)
+                                || (id == 330 && neutral_soy_milk)
                                 || (id == 52 && fetus_context)))
                 })
     }
@@ -323,6 +373,9 @@ impl<'a> ItemInputs<'a> {
     /// effects admitted above do not expand Flight, Familiar, Luck or history.
     fn admits_selected_auxiliary_callbacks(self) -> bool {
         if self.admits_technology_cache_context() || self.admits_fetus_cache_context() {
+            return true;
+        }
+        if self.admits_soy_milk_cache_context() {
             return true;
         }
         self.admits_scalar_context()
@@ -414,7 +467,7 @@ struct FireDelayStage;
 
 impl FireDelayStage {
     const REQUESTED: CacheMask = CacheMask(2);
-    const EFFECT_ITEMS: &'static [u32] = &[1, 6, 222];
+    const EFFECT_ITEMS: &'static [u32] = &[1, 6, 222, 330];
     const NEUTRAL_ITEMS: &'static [u32] = &[4, 114, 118, 329];
 
     fn admits(inputs: ItemInputs<'_>, source_player_type: Option<u32>) -> bool {
@@ -448,6 +501,11 @@ impl FireDelayStage {
         if inputs.positive_owned_count(222) {
             delay -= 2.0_f32;
         }
+        //512749 Have330: one permanent effect after retained-C08 modifiers;
+        //51275B/512763 round subtraction and multiplication before C78.
+        if inputs.positive_owned_count(330) {
+            delay = (delay - 6.0_f32) * 0.25_f32;
+        }
         (delay as i32).max(1)
     }
 }
@@ -459,7 +517,7 @@ struct DamageStage;
 
 impl DamageStage {
     const REQUESTED: CacheMask = CacheMask(1);
-    const EFFECT_ITEMS: &'static [u32] = &[4];
+    const EFFECT_ITEMS: &'static [u32] = &[4, 330];
     const NEUTRAL_ITEMS: &'static [u32] = &[1, 6, 114, 118, 329];
 
     fn admits(inputs: ItemInputs<'_>, source_player_type: Option<u32>) -> bool {
@@ -474,6 +532,11 @@ impl DamageStage {
         let mut damage = (f64::from(linear).sqrt() * 3.5_f64) as f32;
         if inputs.positive_owned_count(4) {
             damage *= 1.5_f32;
+        }
+        //513A78 Have330 reaches513DF8 once, after the Max Head multiplier;
+        //the local .5 bound and the separate Libra coupling remain later.
+        if inputs.positive_owned_count(330) {
+            damage *= 0.2_f32;
         }
         damage.max(0.5_f32)
     }
