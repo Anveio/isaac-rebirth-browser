@@ -34,6 +34,9 @@ pub struct Npc {
     pub collision_mass: f32,
     pub collision_damage: f32,
     pub base_friction: f32,
+    /// Entity+470 as this actor's last full update left it.
+    #[serde(default)]
+    pub friction: f32,
     pub shadow_size: f32,
     pub grid_collision_class: u32,
     pub entity_collision_class: u32,
@@ -112,6 +115,15 @@ pub struct Npc {
     /// +318 APPEAR (4) cleared by a mid-room spawner: no hide/Poof/Appear.
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     pub no_appear: bool,
+    /// Entity+1c spawner type (0 when authored or spawned without one).
+    #[serde(default, skip_serializing_if = "is_zero")]
+    pub spawner_type: u32,
+    /// +320: spawned by a boss.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub boss_spawned: bool,
+    /// Sprite scale +2c4 set by a spawner (None keeps the champion/1 scale).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub sprite_scale: Option<f32>,
 }
 
 fn is_zero(value: &u32) -> bool {
@@ -663,6 +675,7 @@ impl Npc {
             collision_mass: config.collision_mass,
             collision_damage: config.collision_damage,
             base_friction: config.friction,
+            friction: config.friction,
             shadow_size: config.shadow_size,
             grid_collision_class: config.grid_class,
             entity_collision_class: 4,
@@ -706,6 +719,9 @@ impl Npc {
             maggot: None,
             grid_collided: false,
             no_appear: false,
+            spawner_type: 0,
+            boss_spawned: false,
+            sprite_scale: None,
         }
     }
 
@@ -763,6 +779,10 @@ impl Npc {
             if self.kind == 13 {
                 self.wander_velocity = self.wander_velocity * 0.7;
             }
+            if self.boss_spawned {
+                // 4efccd: boss-spawned flies chase with extra friction.
+                friction *= 0.9;
+            }
             let range = if self.kind == 18 { 25.0 } else { 30.0 };
             if length > range {
                 let impulse = ((length - range) * 0.08).min(1.2);
@@ -783,7 +803,8 @@ impl Npc {
         if counter % 4 == 1 {
             self.wander_velocity = (self.wander_velocity + direction(random) * 0.6) * 0.4;
         }
-        if counter % 3 == 2 {
+        // 4f0600: a Duke's orbiting fly skips the room-edge nudges.
+        if counter % 3 == 2 && self.spawner_type != 67 {
             if self.position.y < 230.0 {
                 self.wander_velocity.y += 0.06;
             } else if self.position.y > 420.0 {
@@ -794,6 +815,8 @@ impl Npc {
             } else if self.position.x < 100.0 {
                 self.wander_velocity.x += 0.06;
             }
+        }
+        if counter % 3 == 2 {
             self.velocity = self.velocity + self.wander_velocity * (2.0 / friction);
             friction *= 0.6;
         }
@@ -864,6 +887,9 @@ fn fly_ai(
         // 4ef941 plays the looping Fly clip without forcing a restart.
         crate::plain_npc::play(npc, "Fly", false);
     }
+    if npc.kind == 18 && npc.spawner_type == 67 && world.game_counter.is_multiple_of(3) {
+        duke_orbit(npc, world, *friction);
+    }
     *friction = npc.fly_movement(
         world.game_counter,
         random,
@@ -872,6 +898,41 @@ fn fly_ai(
         *friction,
     );
     Ok(())
+}
+
+/// 4f101a: a Duke-spawned Attack Fly (spawner type 67) orbits the last
+/// type-67 actor in the room list within 260 on a breathing 60..70 ring;
+/// with none left it is released for good.
+fn duke_orbit(npc: &mut Npc, world: &NpcWorld, friction: f32) {
+    let Some(duke) = world
+        .peers
+        .iter()
+        .filter(|other| other.kind == 67 && !other.removed)
+        .last()
+    else {
+        npc.spawner_type = 0;
+        return;
+    };
+    let delta = WorldVector {
+        x: duke.position.x - npc.position.x,
+        y: duke.position.y - npc.position.y,
+    };
+    let length = (delta.x * delta.x + delta.y * delta.y).sqrt();
+    if length >= 260.0 {
+        return;
+    }
+    let ring = crate::fmath::sin(world.game_counter as f32 * 0.02) * 5.0 + 65.0;
+    let error = length - ring;
+    let pull = if error > -5.0 { error.min(5.0) } else { -5.0 };
+    let radial = (delta * pull) * 0.5;
+    npc.velocity = npc.velocity
+        + WorldVector {
+            x: (radial.x / length) / friction,
+            y: (radial.y / length) / friction,
+        };
+    let spin = pull.abs() + 2.0;
+    npc.velocity.y += (((0.2 * delta.x) / spin) / friction) / friction;
+    npc.velocity.x -= (((0.2 * delta.y) / spin) / friction) / friction;
 }
 
 /// Pooter14.0/Super Pooter14.1: 4f0bd0 clip state, then 4f029a aimed shots

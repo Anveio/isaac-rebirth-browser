@@ -46,6 +46,11 @@ pub(crate) struct NpcWorld<'a> {
     pub room_type: u32,
     /// The room's other NPCs, live, for families that link actors.
     pub peers: Peers<'a>,
+    /// The last contact pass's tear partition at live positions and radii
+    /// (tiny-fly kill checks run inside the Duke's AI).
+    pub tear_probe: &'a [(WorldVector, f32)],
+    /// Knife positions and radii in list order.
+    pub knife_probe: &'a [(WorldVector, f32)],
 }
 
 /// The room NPC list around the updating actor, in list order. Peers read
@@ -73,6 +78,20 @@ impl Peers<'_> {
     }
 }
 
+/// Spawner-written fields of a mid-room NPC.
+pub(crate) struct SpawnedNpc {
+    pub selector: SpawnSelector,
+    pub velocity: WorldVector,
+    /// Entity+1c: the spawner's type (0 for a NULL spawner).
+    pub spawner_type: u32,
+    /// +320: spawned by a boss (Attack Fly chase friction x0.9).
+    pub boss_spawned: bool,
+    /// Sprite scale (+2c4) multiplier.
+    pub scale: f32,
+    /// HP and max HP multiplier.
+    pub health_scale: f32,
+}
+
 /// Actors an NPC callback creates. Game admits them in this order.
 pub(crate) enum Birth {
     Blood(u32),
@@ -87,6 +106,9 @@ pub(crate) enum Birth {
     CreepHit,
     /// A mid-room NPC spawned with a velocity and its APPEAR flag cleared.
     FlungNpc(SpawnSelector, WorldVector),
+    /// A mid-room NPC with spawner-written fields (Spawn550a40 then the
+    /// caller's stores), APPEAR cleared.
+    Spawned(SpawnedNpc),
 }
 
 pub(crate) type Advance =
@@ -122,6 +144,25 @@ pub(crate) fn ordinary_flags(_: &Npc) -> u32 {
 }
 
 pub(crate) fn no_grid_query(_: &mut Npc, _: &Grid) -> Result<(), String> {
+    Ok(())
+}
+
+/// Class3 flyers with authored sample points (the Duke of Flies): 442c3b
+/// clamps the center, then only wall and door samples reflect (442b90).
+pub(crate) fn wall_collision(npc: &mut Npc, grid: &Grid) -> Result<(), String> {
+    let points = crate::content::entity(npc.kind, npc.variant).grid_points;
+    if npc.grid_collision_class != 3 || points == 0 {
+        return clamp_walls(npc, grid);
+    }
+    let collider = crate::grid::Collider::new(crate::grid::CollisionGeometry {
+        radius: npc.collision_radius,
+        scale: crate::motion::WorldVector { x: 1.0, y: 1.0 },
+        points,
+    })?;
+    npc.grid_collided = collider
+        .resolve_nonplayer_walls(grid, &mut npc.position, &mut npc.velocity, false)?
+        .is_some();
+    npc.presented_position = npc.position;
     Ok(())
 }
 
@@ -178,6 +219,7 @@ pub(crate) static FAMILIES: &[&Family] = &[
     &crate::wall_hugger::FAMILY,
     &crate::larry::FAMILY,
     &crate::maggots::FAMILY,
+    &crate::duke::FAMILY,
 ];
 
 /// Every NPC type a registered family constructs, in registry order. Tools

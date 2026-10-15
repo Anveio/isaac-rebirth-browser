@@ -140,6 +140,7 @@ fn dying_boss(npc: &mut Npc, mut friction: f32) -> Result<(), String> {
     }
     npc.death_frame = frame;
     update_sprite(npc)?;
+    npc.friction = friction;
     npc.velocity = npc.velocity * friction;
     npc.position = npc.position + npc.velocity;
     npc.presented_position = npc.position;
@@ -202,6 +203,34 @@ pub(crate) fn advance_with(
     ai: Ai,
     appear: bool,
 ) -> Result<(), String> {
+    advance_full(npc, phase, random, world, births, ai, appear, false)
+}
+
+/// `advance` for a boss whose AI handles its own death: Entity_NPC::Update
+/// calls update_ai once more with dead set (the base kill follows the AI),
+/// and only the post-AI handling enters state16 in that same update.
+pub(crate) fn advance_dead_ai(
+    npc: &mut Npc,
+    phase: Phase,
+    random: &mut Mt19937,
+    world: &mut NpcWorld<'_>,
+    births: &mut Vec<Birth>,
+    ai: Ai,
+) -> Result<(), String> {
+    advance_full(npc, phase, random, world, births, ai, true, true)
+}
+
+#[expect(clippy::too_many_arguments, reason = "the shared appear and dead-AI switches of advance_with and advance_dead_ai")]
+fn advance_full(
+    npc: &mut Npc,
+    phase: Phase,
+    random: &mut Mt19937,
+    world: &mut NpcWorld<'_>,
+    births: &mut Vec<Birth>,
+    ai: Ai,
+    appear: bool,
+    dead_ai: bool,
+) -> Result<(), String> {
     if npc.removed {
         return Ok(());
     }
@@ -216,6 +245,9 @@ pub(crate) fn advance_with(
             // and retire at the following full pass.
             npc.removed = true;
             return Ok(());
+        }
+        if dead_ai && npc.state != 16 {
+            ai(npc, random, world, births, &mut friction)?;
         }
         return dying_boss(npc, friction);
     }
@@ -266,6 +298,7 @@ pub(crate) fn advance_with(
         return dying_boss(npc, friction);
     }
     update_sprite(npc)?;
+    npc.friction = friction;
     npc.velocity = npc.velocity * friction;
     npc.position = npc.position + npc.velocity;
     npc.presented_position = npc.position;
