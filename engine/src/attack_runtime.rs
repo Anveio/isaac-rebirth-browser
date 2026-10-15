@@ -1158,6 +1158,19 @@ pub(crate) fn knife_contacts(
                 state.knives[index].collision_damage
             };
             let amount = state.knives[index].hit_damage(base_damage)?;
+            //475066..50E2 copies the CURRENT Knife, independently of the
+            //ParentPlayer's current Get4 damage or a child's retained48C.
+            //The historical source pointer is not resolved again at drain.
+            let knife = &state.knives[index];
+            let copied_source = crate::combat::CopiedDamageSource {
+                entity_type: knife.entity_type,
+                variant: knife.variant,
+                spawner_type: knife.spawner_type,
+                spawner_variant: knife.spawner_variant,
+                position: knife.position,
+                velocity: knife.velocity,
+                actor_at_copy: Some(actor),
+            };
             //475030 calls511d90(firstPlayer,0) after current kind4 resolution
             //and the actor's charge multiplier. Fresh519767 and the selected
             //grant route prove zero; unknown/restored history is not false.
@@ -1173,7 +1186,7 @@ pub(crate) fn knife_contacts(
                         id: actor.id,
                         entity_type: 8,
                     },
-                    copied_source: None,
+                    copied_source: Some(copied_source),
                 },
             )?;
         }
