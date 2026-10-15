@@ -99,6 +99,21 @@ The exact same-base PR269 public-WASM regression preserves 37,914,507 complete
 field comparisons and 416 positive-owned completion rows with zero differences.
 This is local regression evidence, not new original/browser acceptance.
 
+Merged [PR291](https://github.com/Anveio/isaac-rebirth-browser/pull/291) adds
+Libra304's coupled request expansion after primary selection and its
+post-callback balance before final clamps. Unsupported input callbacks keep the
+coupled outputs pending. Its own production, strict Clippy and floor checks pass;
+the local regression retains 37,956,648 fields with zero differences. Two fixed
+public-pedestal histories, 304→6 and 6→304, pass 503,611 scoped Native/public-WASM
+checks across 1,262 paired gates, including 186 post-grant rows. The first case
+lacks 631 Native Familiar-manager selections; its pending bit 512 is observed as 0,
+while the second case's actual empty manager matches. Actor identity, source
+variant/current color, physical/lifetime and browser/render parity remain open.
+Duplicates, partial requests, active clamps and item118 triples remain unexecuted.
+Current main `3080e8e2` contains the four qualified owned blobs; this does not claim
+a separately built whole-current-main artifact. Earlier evidence capsules and
+failed attempts remain unchanged.
+
 Merged PR262 carries authored whole Special STB resources through real startup
 and doorway factories. Its own production, strict Clippy and floor checks pass,
 as do six public-WASM startup/invalid-resource checks. These do not qualify
