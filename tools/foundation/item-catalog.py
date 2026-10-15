@@ -10,7 +10,8 @@ import xml.etree.ElementTree as ET
 ROOT = Path(__file__).resolve().parents[2]
 RESOURCES = ROOT / 'references/isaac/rebirth/resources'
 PINS = {'items.xml': '4fbad99276eebf0ed5dcba7e88591c03673bbae44c4cd8b5dd3ead36caad68cc',
-        'itempools.xml': '8c3d8f04589992f1bac0c4f719c49068265d5fe134d29f414d90161e7bf95378'}
+        'itempools.xml': '8c3d8f04589992f1bac0c4f719c49068265d5fe134d29f414d90161e7bf95378',
+        'costumes2.xml': '663f4653e1f753a1e16e5db6ee3ea4d9fedaca9df5c4f02f9a473e47b840c808'}
 POOLS = ['treasure', 'shop', 'boss', 'devil', 'angel', 'secret', 'library', 'challenge',
          'goldenChest', 'redChest', 'beggar', 'demonBeggar', 'curse', 'keyMaster', 'bossrush', 'dungeon']
 CACHE = dict(zip(['damage', 'firedelay', 'shotspeed', 'range', 'speed', 'tearflag',
@@ -69,13 +70,22 @@ def catalogue():
             entries.append({'id': item_id, 'weight': float32(entry.attrib['Weight']),
                 'decreaseBy': float32(entry.attrib['DecreaseBy']), 'removeOn': float32(entry.attrib['RemoveOn'])})
         pools.append({'id': index, 'name': name, 'entries': entries})
-    return {'schema': 1, 'sourceHashes': PINS, 'collectibles': definitions, 'pools': pools}
+    # Collectible costume presence is configuration metadata, not evidence
+    # that an Add call passed57BF00 or that any selected pose is implemented.
+    costume_ids = sorted({int(node.attrib['id']) for node in trees['costumes2.xml']
+                          if node.get('type') in ('passive', 'active', 'familiar')
+                          and node.get('anm2path', '')})
+    if not set(costume_ids) <= ids:
+        raise ValueError('Costume references an undefined base collectible')
+    return {'schema': 1, 'sourceHashes': PINS, 'collectibles': definitions,
+            'pools': pools, 'costumeCollectibleIds': costume_ids}
 
 
 def rust(data):
     def scalar(value):
         return f'f32::from_bits(0x{struct.unpack("<I", struct.pack("<f", value))[0]:08x})'
-    lines = ['pub const COLLECTIBLES: &[CollectibleDefinition] = &[']
+    lines = [f"pub const COSTUME_COLLECTIBLE_IDS: &[u32] = &{data['costumeCollectibleIds']!r};",
+             'pub const COLLECTIBLES: &[CollectibleDefinition] = &[']
     for item in data['collectibles']:
         strings = ', '.join(f'{key}: {json.dumps(item[key], ensure_ascii=False)}' for key in ['name', 'description'])
         graphic = f'Some({json.dumps(item["graphic"], ensure_ascii=False)})' if item['graphic'] else 'None'

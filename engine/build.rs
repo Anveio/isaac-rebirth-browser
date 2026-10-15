@@ -968,6 +968,7 @@ fn main() {
         &item_decoder,
         &resources.join("items.xml"),
         &resources.join("itempools.xml"),
+        &resources.join("costumes2.xml"),
     ] {
         println!("cargo:rerun-if-changed={}", path.display());
     }

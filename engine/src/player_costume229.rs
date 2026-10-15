@@ -79,6 +79,38 @@ pub(crate) fn on_collectible_added(state: &mut State, id: u32) {
     let Some(items) = state.player_items.as_mut() else {
         return;
     };
+    // Actual Add4 registers only its lower-priority sole head layer. A
+    // known selected229 entry stays the same object, but50EDC0 still resets
+    // that entry's pose through40FEF0. No counts create missing ownership.
+    let first_cricket_after_known229 = id == 4
+        && state.weapon_admission.source_player_type == Some(0)
+        && items.trinket_slots == [0, 0]
+        && items.temporary_collectibles.is_empty()
+        && items.owned_counts.get(4) == Some(&1)
+        && items.owned_counts.get(229).is_some_and(|count| *count > 0)
+        && items
+            .costume_registrations
+            .as_ref()
+            .is_some_and(|history| history.configuration_ids == [229, 4])
+        && !items
+            .owned_counts
+            .iter()
+            .enumerate()
+            .any(|(id, count)| id != 4 && id != 229 && *count != 0);
+    if first_cricket_after_known229 {
+        if let Some(costume) = &mut items.costume229 {
+            if costume.history_frontier.is_none() {
+                // 229priority22 beats4priority0 in the same head slot4.
+                // FullAdd52CF25 clears selected entry2EC before511060;
+                // then50EDC0 resets the pose. BA8/main/history stay owned.
+                costume.sprite.override_active = false;
+                costume
+                    .sprite
+                    .set_frame_with_frames("HeadDown", 0, animation("HeadDown").frames);
+                return;
+            }
+        }
+    }
     if id != 229 {
         if let Some(costume) = &mut items.costume229 {
             costume
@@ -87,14 +119,21 @@ pub(crate) fn on_collectible_added(state: &mut State, id: u32) {
         }
         return;
     }
-    let fresh_context = state.weapon_admission.source_player_type == Some(0)
+    let actual_registration = items.costume_registrations.as_ref().is_some_and(|history| {
+        history.configuration_ids == [229]
+            || (history.configuration_ids == [4, 229]
+                && items.owned_counts.get(4) == Some(&1)
+                && items.owned_counts.get(229) == Some(&1))
+    });
+    let fresh_context = actual_registration
+        && state.weapon_admission.source_player_type == Some(0)
         && items.trinket_slots == [0, 0]
         && items.temporary_collectibles.is_empty()
         && !items
             .owned_counts
             .iter()
             .enumerate()
-            .any(|(id, count)| id != 229 && *count != 0);
+            .any(|(id, count)| id != 4 && id != 229 && *count != 0);
     let actual_count = items.owned_counts[229];
     if let Some(previous) = &mut items.costume229 {
         if previous.history_frontier.is_some() {

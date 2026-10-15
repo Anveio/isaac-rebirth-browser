@@ -86,6 +86,7 @@ mod plain_npc;
 pub mod player_animation;
 pub mod player_costume118;
 pub mod player_costume229;
+mod player_costume_registration;
 pub mod player_death;
 pub mod player_items;
 pub mod player_save;
