@@ -17,7 +17,7 @@ ROOT = Path(__file__).resolve().parents[2]
 EXPECTED_SHA = os.environ.get('ISAAC_ORIGINAL_SHA')
 if not isinstance(EXPECTED_SHA, str) or re.fullmatch(r'[0-9a-f]{64}', EXPECTED_SHA) is None:
     raise ValueError('ISAAC_ORIGINAL_SHA must provide the driver-verified canonical binary SHA256')
-SOURCE_FIELDS = frozenset(('playerMovementD9c', 'knifeChildChain4a0'))
+SOURCE_FIELDS = frozenset(('playerMovementD9c', 'knifeChildChain4a0', 'kind8TearFields'))
 spec = importlib.util.spec_from_file_location('composition_items', ROOT / 'tools/original/item-observer.py')
 base = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(base)
@@ -168,6 +168,10 @@ def observe(pid, context):
                 if 'playerMovementD9c' in requested_fields:
                     supplemental['players'][-1]['movementDirectionD9c'] = i32(player + 0xd9c)
             room = u64(game + 0x8180)
+            if 'kind8TearFields' in requested_fields:
+                # 5414DA..5414E8/542E08..542E16 dereference the actual Room;
+                # zero/negative/positive are read values, never a default.
+                supplemental['sourceTearSlowdown2494'] = i32(room + 0x2494)
             supplemental['roomInitializedGameAge159c'] = u32(room + 0x159c)
             supplemental['roomLoaded'] = flags(room, 1)[0]
             age_delta = (supplemental['gameAge'] - supplemental['roomInitializedGameAge159c']) & 0xffffffff
@@ -249,6 +253,16 @@ def observe(pid, context):
                     # 7D8 is falling speed in Tear; its attack flags live at
                     # 7F0. Knife's distinct attack flags are at 7D8 below.
                     row['attackFlags7f0'] = str(u64(actor + 0x7f0))
+                    if 'kind8TearFields' in requested_fields:
+                        writer = ((identity['variant'], identity['subtype']) == (0, 0)
+                                  and bool(int(row['attackFlags7f0']) & (1 << 33)))
+                        row['sourceKind8WriterScope'] = writer
+                        # Completed public gates expose initialized actors:
+                        # 54240F/5411E8 own83C; Init5424FB ownsB28, then
+                        # Full542DDD..542DF5 writes the actual velocity delta.
+                        # Fast5414A0 retainsB28; do not synthesize a Fast zero.
+                        row['baseDamage83c'] = floats(actor + 0x83c) if writer else None
+                        row['velocityDeltaB28'] = floats(actor + 0xb28, 2) if writer else None
                     row['height7d4'] = floats(actor + 0x7d4)
                     row['fallingSpeed7d8'] = floats(actor + 0x7d8)
                     row['fallingAcceleration7dc'] = floats(actor + 0x7dc)
