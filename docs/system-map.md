@@ -8,19 +8,35 @@ only an actual report establishes its outcome. Rust/WASM replay equality checks
 the port's determinism, while original logs, graphics and controls establish
 independent reference evidence.
 
-The current item integration snapshot is main `298738b4`: ordinaryDr343/356,
-controlledTechnology355, independent mixed52+4 capabilities367 and Soy330
-stats/118Mouth-history368 are merged. The private df133/15f product separately
-passes production and floor plus37,972,668/0 strict regular comparisons; Clippy
-is capacity-pending. Its12 public routes complete, with3mixedBomb births each
-and post330 Lasers in both118routes; raw phase/birth/callback and costume-frontier
-failures remain. First controlledTechnology Original remains117,717/13,575FAIL
-with677 matching material/configuration rows, separate from absent NPC contact.
-First controlledDr Original remains41,683/3,258FAIL:3Native births/2cohorts versus
-1portbirth/1cohort. ControlledDr354 stays pending the queued4 readiness fix.
-Epic168/MonstrosLung229 are source-only drafts awaiting their next producer.
-See [item composition coverage](item-composition-coverage.md) for exact scopes;
-these reports do not establish whole-current-main or complete game parity.
+The current item integration snapshot is main `3ef319fc`. ControlledDr354
+and the coherent Monstro cache/factory/wardrobe/registration/controller slices
+363/364/376/378/379/380 are merged alongside ordinaryDr343/356,
+controlledTechnology355, mixed52+4 capabilities367 and Soy330 stats/history368.
+The frozen f1/b957 product passed normal production; floor/Clippy remain pending.
+Its regular405 comparison retains37,979,876 checks/14,416 raw failures from
+recorded key removals/additions, with no changed prior values; typed ledgers do
+not waive those failures or qualify the whole current source tree.
+
+First controlledDr46,040/3,508FAIL now observes three births/246 body rows/two
+property cohorts in both games, including prior-cache10.5 on the Add4 frame and
+later19.92235. All four port-own cases show three births/two cohorts/three C18
+cleanup observations, with ten unknown/boundary/event failures each. Monstro's
+corrected same-tuple62,795/5,346FAIL observes52 births/four13-cohorts/three mixed
+cohorts in both games; all four port-own cases show three mixed13-cohorts.
+Native held input/phase remain null with required failures; this is a tool-owner
+correction, not a new gameplay result. Old64,147/6,043FAIL remains unchanged.
+First Epic92,164/5,207FAIL observes three targets/nine rockets/three triple
+cohorts/nine explosions/nine record appends in both games, withselected properties matching across786
+body rows. Zero observed crater18 births do not exclude transient
+callbacks. Empty-room evidence supplies no NPC-contact proof; the later contact
+fixture stopped at the shared Challenge-entry frontier before gameplay.
+
+Epic remains an unlanded runtime slice, separately exercised on frozen f1.
+First controlledTechnology117,717/13,575FAIL, mixed17,056/1,558FAIL and Soy's
+visual/fullAdd frontiers retain their own scopes. See
+[item composition coverage](item-composition-coverage.md) for source owners,
+remaining cases and historical reports. These results do not establish complete
+game, render, contact, identity or RNG parity.
 
 ## Current live-game testing policy
 

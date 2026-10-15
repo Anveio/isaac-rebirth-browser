@@ -10,34 +10,40 @@ four-case comparison still fails on contacts, identities and missing owners.
 Transport, source review and local replay consistency do not establish Original
 functional parity.
 
-Current main `298738b4` also includes ordinary Dr. Fetus343/356, controlled
-Technology355, mixed52+4 capabilities367, Soy330 stats and118 Mouth-history368,
-and the exercised353/369 observer/capture tools. These merged source slices do
-not imply a whole-current-main product qualification. The private df133 / WASM15f
-producer separately passes normal production42.980s, floor16.618s and strict405
-37,972,668/0 against21/4fa; Clippy remains pending capacity.
+Current main `3ef319fc` includes ordinary Dr. Fetus343/356, controlled
+Technology355, mixed52+4 capabilities367, Soy330 stats/118 Mouth-history368,
+corrected controlledDr354 and the consumed Monstro controller380. Its small
+Monstro slices are canonical factory363, cache/grant364, fresh Tear42C376,
+wardrobe378, ordered registration/fullAdd4 clearing379 and core380. Tools353,
+358,359,369 and the DB0 source-owner correction377 are merged. The earlier
+private df133/15f product separately passes production42.980s, floor16.618s
+and strict405 37,972,668/0; its historical controlledDr missing-birth result
+remains unchanged. Neither private artifact qualifies the entire current tree.
 
-All12 Dr/mixed/Soy public routes completed. Mixed52+4 observes all ordered grants,
-three mixed Bomb births per case and matching observed birth/retained properties;
-its17,056/1,558FAIL still includes raw322, first-stage Tear birth ownership,
-coverage and callback gaps. Soy has16/1/16/1 first-observed actor identities,
-not proven Init births. Both118routes now have one post330 Laser with
-birthGameUpdate213/damage.7/radius16/20bodyrows, while360 body-transform frontier
-rows per case and the additional render layer remain. Source-proved fullAdd
-52CF25 selected-override clearing is a separate unconsumed d9d successor.
+The immutable f1 artifact b9577ad4 passed normal production; floor and Clippy remain pending. Its regular405 comparison against df133 remains RAW FAIL: 37,979,876 checks / 14,416 differences. Known removed backdrop fields and additive Room/NPC-friction/costume-registration/Tear-birth/partition fields account for the recorded differences; fresh-empty and source-known owner ledgers do not waive any failure or establish whole-game parity.
 
-The first controlled-Technology Original pair is117,717/13,575FAIL across677
-Laser bodies, with all observed material properties and configured Line values
-matching. Unavailable LaserHP/maxHP owners (2,708 checks) are separate from NPC
-contact; the empty room supplies no contact evidence. ControlledDr354 remains
-unmerged: own1,066/40FAIL has one birth/cohort in each route, and the first actual
-Original41,683/3,258FAIL observes3Nativebirths/2cohorts against1portbirth/1cohort.
-Its82paired material body rows match. Native's same-pickup-frame birth keeps
-old10.5damage before lateAdd4; a later birth copies19.92235. This preserves the
-failed dense-prior-cache checks and the real missing-port-birth bug; the queued4
-source correction awaits its next artifact. Other3Original cases per controlled
-family and mixed/Soy Original remain unexecuted. Earlier failed reports below
-retain their own snapshots and are not regraded.
+The first controlled-Dr Native/port pair remains 46,040 checks / 3,508 FAIL. Both games expose three Bomb births, 246 body rows and two born-property cohorts, preserving the damage 10.5 birth before late Add4 and later 19.92235 birth. All four f1 port-own cases now independently show three births, two property cohorts and three C18 cleanup state observations each. Each retains ten failures: two dense-prior cache/birth boundary obligations, two raw Full/Fast unknowns and six callback unknowns. Missing boundary proof does not assert incorrect post-Add damage. Strict identity/RNG/position/counter and callback gaps remain.
+
+All four Monstro port-own cases show both ordered grants and three mixed 13-Tear cohorts each. The corrected first Native/port saved-tuples comparison is 62,795 checks / 5,346 FAIL: both games expose 52 actual Tear births, four actual 13-Tear birth cohorts and three actual mixed-item cohorts. Native held input and callback phase are unavailable; held-specific release/saturation/diagonal metrics remain null with required failures. DB0 is the opposing-direction flag, and post-callback 319 does not identify callback phase. Every common prior per-field count is unchanged. Historical e2bb (64,147 / 6,043 FAIL) is preserved; the changed total is a tool source-owner correction, not a gameplay improvement. No new Native capture or projection ran.
+
+The first Epic strict pair remains 92,164 checks / 5,207 FAIL. Both games show three targets, nine rockets, three triple birth cohorts, nine explosion births and nine crater-record appends. Selected body-property fields match across786 body rows; IDs/RNG/Parent/records/counters and missing event/background/wardrobe evidence remain failures. Observed zero crater18 births do not prove a transient callback never executed. Empty-room observations establish no NPC contact/HP behavior; the later contact attempt was blocked before gameplay at the shared authored Challenge entry frontier.
+
+Other Monstro/Epic Original cases remain queued. Preserve every old report, failed wrapper attempt and unknown owner. This packet uses existing compact summaries only and performs no regrade, raw decode, capture, game or main mutation.
+
+Mixed52+4 retains17,056/1,558FAIL with three mixed Bomb births per case and
+matching observed birth/retained properties. Its raw322/first-stage Tear/event
+owners remain unknown, not evidence of zero Tears. Soy retains16/1/16/1
+first-observed actor identities, including20 Laser rows in both118routes;
+these are not proven Init births. Its360 body-transform frontier rows per118case,
+additional render layer and separate unconsumed d9d fullAdd52CF25 clear remain.
+The first controlled-Technology Original remains117,717/13,575FAIL across677
+matching material/configured-Line bodies;2,708 missing LaserHP/maxHP checks are
+separate from absent NPC-contact evidence. Other Original cases, mixed/Soy
+Original, complete costume rendering, lifecycle events and full shared RNG
+remain unqualified. The nine open PRs at this publication include unique
+253/271/292/329, source drafts361/362/366 and independent374/375; no duplicate
+was proved by the refreshed bounded audit. Historical paragraphs below retain
+their original artifact scopes and every old failure.
 
 | Ordered boundary | Current owner and scope | Observed evidence and remaining interaction |
 | --- | --- | --- |
