@@ -615,6 +615,15 @@ def missing(field, presentation, error):
     checks.append({'field': field, 'presentation': presentation, 'passed': False, 'error': str(error)})
 
 
+technology_comparer = None
+technology_result = None
+if case['requires'].get('ordinaryTechnologyFunctional') is not None:
+    technology_spec = importlib.util.spec_from_file_location(
+        'ordinary_technology_comparer', Path(__file__).with_name('composition-technology.py'))
+    technology_module = importlib.util.module_from_spec(technology_spec)
+    technology_spec.loader.exec_module(technology_module)
+    technology_comparer = technology_module.TechnologyComparer(globals(), case)
+
 check('actual completed original', ('pass', []), (native.get('status'), native.get('failures')), None)
 check('actual completed browser', 'complete', browser.get('captureStatus'), None)
 trace = browser.get('trace') or {}
@@ -687,7 +696,12 @@ for captured in sorted(all_captured, key=lambda row: row['presentation']):
             check('actual complete active attack families/sequence/seeds', native_families, sorted(port_families), t)
         except Exception as error:
             missing('mandatory active attack scheduler group', t, error)
-        if any(actor['identity']['kind'] == 7 for actor in source['attacks']):
+        if technology_comparer is not None:
+            try:
+                technology_comparer.snapshot(source, state, t, observed['systemCounter'])
+            except Exception as error:
+                missing('mandatory actual Technology manager-role body group', t, error)
+        elif any(actor['identity']['kind'] == 7 for actor in source['attacks']):
             try:
                 compare_lasers(source, state, t, observed['systemCounter'])
             except Exception as error:
@@ -1015,6 +1029,9 @@ for label, controlled, required in [('ordinary Knife', False, ordinary_knife_req
             missing('mandatory actual ' + label + ' rendered-frame group', t, error)
     check('required actual ' + label + ' rendered-frame witness', True, any(w['passed'] for w in seen), None)
 
+if technology_comparer is not None:
+    technology_result = technology_comparer.finish()
+
 result = {'schema': 2, 'status': 'fail' if any(not item['passed'] for item in checks) else 'pass', 'checks': checks,
           'coverage': dict(coverage), 'damageChains': list(damage_chains.values()), 'doorwayWitnesses': doorway_witnesses, 'laserLifetimes':list(laser_lifetimes.values()), 'renderWitnesses':render_witnesses,
           'sameGateDuplicateObservations': duplicate_observations, 'history': history, 'childLifetimes': child_lifetimes, 'chargeWitnesses': charge_witnesses,
@@ -1022,6 +1039,9 @@ result = {'schema': 2, 'status': 'fail' if any(not item['passed'] for item in ch
           'requiredBackendCoverageGaps': ['History requirements are graded by their explicit versioned raw witnesses; missing transient Remove flags remain failures even when later manager absence is observed.', 'Body comparison covers ordinary7/1/0 with linked1000/50/1 and actual registered Knife/ParentKnife roles. Other Laser subtypes and general modifier domains require separate admitted comparisons; no whole-backend acceptance is implied.', 'Player birth seed uses the actual PlayerItems.entitySpawnSeed owner; missing or unknown fields remain failures. Native regular-Tear physical-position phase binding remains unclosed.'],
           'scope': 'Public resource game-level composition. Actual declared fields and complete active attack identities/slots. New body correspondence uses each own actual registered C18, no crossside fitted IDs/positions; all independent identity/seed mismatches remain failures. Case PASS cannot accept the whole backend while its separate required gaps remain. Every mismatch/missing field retained; syntax checks are not game acceptance.',
           'sourceSha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest()}
+if technology_result is not None:
+    result['ordinaryTechnology'] = technology_result
+
 payload = (json.dumps(result, separators=(',', ':')) + '\n').encode()
 with args.output.open('xb') as stream:
     stream.write(gzip.compress(payload, mtime=0) if str(args.output).endswith('.gz') else payload)

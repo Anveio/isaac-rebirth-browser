@@ -17,7 +17,7 @@ ROOT = Path(__file__).resolve().parents[2]
 EXPECTED_SHA = os.environ.get('ISAAC_ORIGINAL_SHA')
 if not isinstance(EXPECTED_SHA, str) or re.fullmatch(r'[0-9a-f]{64}', EXPECTED_SHA) is None:
     raise ValueError('ISAAC_ORIGINAL_SHA must provide the driver-verified canonical binary SHA256')
-SOURCE_FIELDS = frozenset(('playerMovementD9c', 'knifeChildChain4a0'))
+SOURCE_FIELDS = frozenset(('playerMovementD9c', 'knifeChildChain4a0', 'ordinaryTechnology'))
 spec = importlib.util.spec_from_file_location('composition_items', ROOT / 'tools/original/item-observer.py')
 base = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(base)
@@ -223,7 +223,9 @@ def observe(pid, context):
                         'collisionRadius': floats(actor + 0x474), 'entityCollisionClass': u32(actor + 0x344),
                         'raw494': flags(actor + 0x494, 1)[0], 'entityFlags': u32(actor + 0x318)})
                 if identity['kind'] not in VTABLES or (identity['kind'] == 1000 and (identity['variant'],identity['subtype']) != (50,1)):
-                    continue
+                    if not ('ordinaryTechnology' in requested_fields and identity['kind'] == 1000
+                            and (identity['variant'], identity['subtype']) == (50, 0)):
+                        continue
                 if u64(actor) != VTABLES[identity['kind']]:
                     raise ValueError('Source attack family has an unexpected virtual class')
                 visible, active, dead = flags(actor + 0x31d, 3)
@@ -321,11 +323,29 @@ def observe(pid, context):
                             'points': points, 'priorPoints': vector_storage(actor + 0x838),
                             'history': vector_storage(actor + 0x850),
                             'controls': vector_storage(actor + 0x870, 24)}}
+                    if 'ordinaryTechnology' in requested_fields:
+                        #479648 initializes50/mode0/width120;478320/579FA0
+                        #own the resampled7/2/0 Line. Preserve old typed fields.
+                        technology_writer = (identity['variant'] == 2 and identity['subtype'] == 0
+                            and row['linkedParent'] is not None and row['linkedParent']['kind'] == 1
+                            and not row['laser']['firstUpdate'] and row['laser']['lineEnabled']
+                            and len(points) >= 2)
+                        row['laser']['technologyLine'] = {
+                            'sourceWriterScope': technology_writer,
+                            'width': floats(actor + 0x810) if technology_writer else None,
+                            'subdivisions': u32(actor + 0x814) if technology_writer else None,
+                            'mode': u32(actor + 0x868) if technology_writer else None,
+                            'length': floats(actor + 0x86c) if technology_writer else None}
                 if identity['kind'] == 1000:
                     # v2 ordinary Impact contract5187908b:7D8 is a raw u8,
                     # render depth lives at7F8; remaining7F0 starts-1.
                     row['impact'] = {'raw7d8': read(actor + 0x7d8, 1)[0],
                         'remainingUpdates': i32(actor + 0x7f0), 'renderSortOffset': floats(actor + 0x7f8)}
+                    if ('ordinaryTechnology' in requested_fields
+                            and identity['variant'] == 50 and identity['subtype'] == 0):
+                        #Actual479732 and479773 owners;814 is not Sprite2CC.
+                        row['impact']['technology'] = {'spriteFlipX': flags(actor + 0x2fc, 1)[0],
+                                                       'raw814': floats(actor + 0x814)}
                     supplemental['impacts'].append(row)
                 else:
                     supplemental['attacks'].append(row)

@@ -145,8 +145,10 @@ def main():
     if not isinstance(contract, dict) or type(contract.get('family')) is not int:
         raise ValueError('A source-backed actor-family obligation is required before fixture preparation')
     source_fields = case.get('requires', {}).get('compositionSourceFields', ['playerMovementD9c', 'knifeChildChain4a0'])
+    if case.get('requires', {}).get('ordinaryTechnologyFunctional') is not None:
+        source_fields = [*source_fields, *([] if 'ordinaryTechnology' in source_fields else ['ordinaryTechnology'])]
     if (not isinstance(source_fields, list) or len(set(source_fields)) != len(source_fields)
-            or any(name not in ('playerMovementD9c', 'knifeChildChain4a0') for name in source_fields)):
+            or any(name not in ('playerMovementD9c', 'knifeChildChain4a0', 'ordinaryTechnology') for name in source_fields)):
         raise ValueError('Unknown or duplicate requested composition source field')
     tape = public_tape(case)
     spec = importlib.util.spec_from_file_location('composition_clock', ROOT / 'tools/original/foundation-clock-run.py')
