@@ -97,6 +97,14 @@ pub fn observe(state: &State) {
                 "secret door revealed",
                 !state.revealed_secret_connections.is_empty(),
             ),
+            (
+                "boss below half health",
+                state
+                    .room
+                    .npcs
+                    .iter()
+                    .any(|npc| npc.boss && !npc.removed && npc.hp < npc.max_hp / 2.0),
+            ),
             ("laser", !state.lasers.is_empty()),
             ("knife", !state.knives.is_empty()),
             ("familiar", !state.familiars.is_empty()),

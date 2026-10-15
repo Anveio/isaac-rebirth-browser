@@ -84,7 +84,15 @@ browser-style host-timestamped frames (with jitter, hitches and rollbacks) or
 controlled steps, and steers by the published state. In a room it plays
 before it leaves:
 * It fights what is alive, lining up on one axis to fire along it. It keeps a
-  wider range against a boss and strafes across the boss's line.
+  wider range against a boss and never stands still against one, but strafes
+  only to align, escape a corner or dodge: tears inherit 1.2× the player's
+  velocity across their aim (`projectiles::stored_velocity`), so a strafe
+  bends every shot off the line. It first steps away from the nearest threat
+  (a hostile NPC, where it will be in ten updates, or a boss's published
+  target such as Monstro's landing cell), still firing.
+* Movement and fire keys stay held from one macro to the next, as a player's
+  would; a macro presses and releases only the keys that change, so commands
+  buy game time instead of re-pressing held keys.
 * It then collects every pickup the engine marks `can_collect`: pedestal
   items, hearts, chests and consumables.
 * It also demolishes blocking rocks with bombs, pauses, uses active and pocket
@@ -96,9 +104,10 @@ unvisited room. Routes cross only the rooms the engine's own
 workload without a driver change. A key opens a `KeyClosed` door on contact,
 and the driver bombs `Hidden` doors to reach secret rooms.
 
-No case has yet cleared a boss room. The closest long runs brought Monstro to
-54 of 250 HP and Gluttony to 37 before the player died, so boss deaths and
-their rewards have no DST coverage yet.
+Boss fights decide how long a tape must be to reach a clear. With key holds,
+aligned fire and threat evasion, cases branched from a Monstro room entry
+clear it in 7 of 32 runs, and from a Gluttony entry in 8 of 32. Dingle still
+wins every fight it starts.
 
 Every report carries a coverage census: the room types, NPC kinds, pickups and
 game features (owned collectibles, secret reveals, boss clears) each case
