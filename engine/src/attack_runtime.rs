@@ -121,6 +121,9 @@ pub(crate) fn dispatch_player(
     match plan.controller {
         ControllerChannel::RegularShots => Ok(DispatchOutcome::RegularTear),
         ControllerChannel::OrdinaryKnife => ordinary_knife(state, plan, input, phase, callback_aim),
+        ControllerChannel::OrdinaryFetus => {
+            crate::dr_fetus::dispatch_player(state, plan, input, phase, callback_aim)
+        }
         ControllerChannel::ControlledKnife => {
             controlled_knife(state, plan, input, phase, callback_aim)
         }
