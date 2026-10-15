@@ -50,6 +50,11 @@ pub struct PlayerItems {
     ///counts stay None, and absent ownership adds no field to old game states.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub costume229: Option<crate::player_costume229::Costume229>,
+    ///Actual collectible costume-config registrations, separate from each
+    ///selected pose/null/caller readset. Old restores have unknown history.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub costume_registrations:
+        Option<crate::player_costume_registration::CostumeRegistrationHistory>,
     ///Actual fresh68 registration owns LeftEye. Old restore/other wardrobe
     ///history never receives an inventory-derived positive null owner.
     #[serde(default)]
@@ -111,6 +116,9 @@ impl PlayerItems {
             entity_spawn_seed,
             costume118: None,
             costume229: None,
+            costume_registrations: Some(
+                crate::player_costume_registration::CostumeRegistrationHistory::fresh(),
+            ),
             technology_eye_registered: Some(false),
             owned_counts: vec![0; 347],
             temporary_collectibles: Vec::new(),
@@ -590,6 +598,7 @@ pub(crate) fn add_collectible(
         state.player.transformation_counts = None;
     }
     crate::player_costume118::on_collectible_added(state, id);
+    crate::player_costume_registration::on_collectible_added(state, id);
     crate::player_costume229::on_collectible_added(state, id);
     crate::technology::on_collectible_added(state, id);
     if config.kind != 3 || !touched {
