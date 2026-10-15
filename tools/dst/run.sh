@@ -8,6 +8,7 @@ set -euo pipefail
 cd "$(dirname "$0")/../.."
 if ! command -v cargo >/dev/null; then source "$HOME/.cargo/env"; fi
 bash tools/build-wasm.sh
+python3 tools/dst/sync-lock.py
 cargo build --manifest-path engine/dst/Cargo.toml --locked --release
 output="${DST_OUTPUT:-.cache/dst/run-$(date +%s)-$$}"
 mkdir -p "$output"

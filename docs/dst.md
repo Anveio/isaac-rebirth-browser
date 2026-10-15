@@ -24,6 +24,13 @@ engine/dst/target/release/rebirth-dst --list      # the unit registry
 npm run lint:dst                                  # rustfmt + strict clippy for the harness
 ```
 
+The harness keeps its own `Cargo.lock`, so the shipped engine's lockfile never
+names the SDK. `tools/dst/sync-lock.py` runs before every harness build
+(`test:dst`, `lint:dst`). It pins each package of the engine's dependency
+closure to the version `engine/Cargo.lock` ships, so DST simulates the engine
+that ships and an engine dependency change never breaks `--locked` harness
+builds. When it changes the lock it says so: commit the lock with your change.
+
 ## How it works
 
 Every simulated decision draws from one entropy source
