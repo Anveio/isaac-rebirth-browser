@@ -69,6 +69,7 @@ pub mod gapers;
 pub mod gemini;
 pub mod gib_counts;
 pub mod gluttony;
+pub mod hoppers;
 pub mod grid;
 mod grid_hazards;
 pub mod grid_records;

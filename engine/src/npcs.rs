@@ -134,6 +134,8 @@ pub struct Npc {
     pub overlay: Option<Overlay>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub gemini: Option<crate::gemini::GeminiState>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub hopper: Option<crate::hoppers::HopperState>,
 }
 
 /// One overlay clip of an NPC sprite, advanced with the main clip.
@@ -925,6 +927,7 @@ impl Npc {
             sprite_scale: None,
             overlay: None,
             gemini: None,
+            hopper: None,
         }
     }
 
