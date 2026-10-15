@@ -163,10 +163,24 @@ pub(crate) fn evaluate_cache(state: &mut State) -> Result<(), String> {
             completed |= 1024;
         }
     }
+    state.player_stats.validate()?;
+    let pending = resolved.pending(requested).0 & !completed;
+    let tail_admitted = state.weapon_admission.source_player_type == Some(0)
+        && state.weapon_admission.pending_primary_cleanup.is_none()
+        && state.player.transformation_counts == Some([0, 0])
+        && state.source_cache_run_flags.is_some()
+        && item_pipeline::ItemInputs::new(
+            state.player_items.as_ref().expect("checked cache owner"),
+        )?
+        .admits_complete_selected_tail()
+        && pending & 0x7ff == 0;
     state
         .player_items
         .as_mut()
         .expect("checked Player cache owner")
-        .unevaluated_cache_flags = resolved.pending(requested).0 & !completed;
+        // 512286 clears all 32 D6C bits after the actual requested callbacks.
+        // Reserved bits have no independent callback at this admitted tail.
+        // Unimplemented callbacks or history retain their pending requests.
+        .unevaluated_cache_flags = if tail_admitted { 0 } else { pending };
     Ok(())
 }
