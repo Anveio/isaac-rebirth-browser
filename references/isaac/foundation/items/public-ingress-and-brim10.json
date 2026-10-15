@@ -514,5 +514,221 @@
       },
       "merge": "ca63b0ade6468033f90cef9feff253a02c89c0d9"
     }
+  },
+  "pipelineAndCombatUpdate": {
+    "scope": "New scoped update after the historical ca63 compositionProgress snapshot above. Main cache/resource implementation and the separate private90ea producer remain distinct; no historical grade changes.",
+    "mainAtSummary": "4e122eadb30ecb6371a2ebcd77e2cfcc9e9704e0",
+    "mergedPrerequisites": [
+      {
+        "pr": 264,
+        "merge": "a84be2b6cfb25da4205ade079bd8f17bd3e80235",
+        "scope": "Explicit per-stage union of implemented effects and proven-neutral item footprints; not an OR of completed-stage masks",
+        "ownCompiler": "production/strict all-target Clippy/floor PASS"
+      },
+      {
+        "pr": 269,
+        "merge": "84837567d193c5a8981977dd275109bd358e5adb",
+        "scope": "Explicit per-callback capabilities replace config request flags as scalar-completion proof; formulas and supported effect/neutral tables unchanged",
+        "ownCompiler": "production/strict all-target Clippy/floor PASS"
+      },
+      {
+        "pr": 262,
+        "merge": "0cb08ac7c4e00066736bd0dab7930fa5f8d209e9",
+        "scope": "Public whole Special STB transport through real startup and doorway factories",
+        "ownCompiler": "production/strict all-target Clippy/floor PASS"
+      },
+      {
+        "pr": 266,
+        "merge": "4be7914fc553c35b7aff59adba420f79579df81d",
+        "scope": "Registered item-composition live driver and all four literal v7 replay inputs; preparation is not game acceptance"
+      },
+      {
+        "pr": 273,
+        "merge": "4e122eadb30ecb6371a2ebcd77e2cfcc9e9704e0",
+        "scope": "Versioned public v8 route; generator/input qualification is separate from actual lifecycle outcomes"
+      }
+    ],
+    "scalarCapabilityRegression": {
+      "baseline": "a84be2b6cfb25da4205ade079bd8f17bd3e80235",
+      "candidate": "3c55ba16fa92ba6f2d5b61a1466bdb64e0af39a8",
+      "fixedPublicRoutes": [
+        1,
+        4,
+        14,
+        143
+      ],
+      "commands": 1620,
+      "snapshots": 1624,
+      "completeFieldComparisons": 37914507,
+      "differences": 0,
+      "errors": 0,
+      "positiveOwnedCompletionRows": 416,
+      "scope": "Own WASM same-base regression only. No new Original/browser acceptance or blanket compositional admission."
+    },
+    "specialRoomPublicProbe": {
+      "qualificationHead": "ea5c6940a5f3546316434b003606e85b9882f56c",
+      "checks": 6,
+      "failures": 0,
+      "scope": "Own WASM public startup, authored pedestals/order/manager, signed clear and Save-before118; malformed STB rejects without snapshot change. No DOM/Original/full-history acceptance."
+    },
+    "private90eaOnRetainedV7": {
+      "runtime": "90ea8ed23b787b33c5869a1a99403ef8636a6826",
+      "artifactSha256": "13056bfe3fb6b2a7460f9209b4ecb596f73599efccbf51cd9dccf335cd77cf6a",
+      "captureIntegrity": "PASS",
+      "actualTransportRows": {
+        "prelude": 312,
+        "gameplay": 700,
+        "pngs": 40,
+        "inputs": 28
+      },
+      "protectedBeforeEqualsEnd": true,
+      "body": {
+        "checks": 113714,
+        "differences": 6822,
+        "status": "FAIL",
+        "selectedPassingFields": {
+          "actual C0C charge owner": {
+            "checks": 970,
+            "differences": 0
+          },
+          "actual Knife physical448": {
+            "checks": 430,
+            "differences": 0
+          },
+          "actual Knife saved450": {
+            "checks": 430,
+            "differences": 0
+          },
+          "actual Knife raw80c": {
+            "checks": 430,
+            "differences": 0
+          },
+          "actual Knife raw810": {
+            "checks": 430,
+            "differences": 0
+          },
+          "actual Knife raw7f8": {
+            "checks": 430,
+            "differences": 0
+          },
+          "actual Knife raw814": {
+            "checks": 430,
+            "differences": 0
+          }
+        },
+        "controlledBodies": 280,
+        "controlledFull": 140,
+        "controlledFast": 140,
+        "rotationChecks": 430,
+        "rotationDifferences": 35,
+        "ordinaryChildFull": 107,
+        "ordinaryChildFast": 111
+      },
+      "history": {
+        "checks": 18614,
+        "failures": 700,
+        "coverageGaps": 2,
+        "missing": [
+          "Native preexisting ParentKnife subtype1 child before329",
+          "Browser preexisting ParentKnife subtype1 child before329"
+        ],
+        "remainingControllerFailures": 698
+      },
+      "completeSharedMt": {
+        "browserRequiredFrames": 1012,
+        "mtWordComparisons": 631488,
+        "mtCursorComparisons": 1012,
+        "mtWordDifferences": 472992,
+        "mtCursorDifferences": 970,
+        "actorSeedRosterComparisons": 970,
+        "actorSeedRosterDifferences": 970,
+        "missingActorSeedFields": 0,
+        "repeatedSamePublicPresentationRows": 1,
+        "matchedFrames": 1012,
+        "passingFrames": 42
+      },
+      "firstSharedMtFrontier": {
+        "presentation": 379,
+        "all624WordsEqual": true,
+        "nativeCursor": 490,
+        "browserCursor": 463,
+        "nativeExtraAmbientActors": 5
+      },
+      "wholeCaseAccepted": false
+    },
+    "mainRuntimeBoundary": {
+      "ordinaryBrimstoneAndKnife": "Private90ea actor execution is not merged-main runtime implementation or PR270 qualification. PR270 ordinary Knife publication remains separate and pending.",
+      "numberOne6AndLibra304": "Source operators/admission are prepared; own runtime/game qualification remains separate.",
+      "unaccepted": [
+        "Ambient shared-stream consumption and all actor sequence/seed identities",
+        "Controlled rotation and child motion/Init uniform parity",
+        "Paired Original/browser preexisting-child continuation and cleanup through329; live selector-change cleanup",
+        "Complete original/browser gameplay and all-current-main acceptance"
+      ],
+      "knifeModuleAtMainSummary": "No engine/src/knives.rs in exact main4e122 tree; separate private90ea/PR270 source does not establish merged runtime support."
+    },
+    "proofs": {
+      "perStage": {
+        "path": ".cache/coordination/item-pipeline-research/stage-cfc3dd25-production-current/closed-qualification-warm-target.json",
+        "sha256": "fbe0dd7a7b6aa93e124dcab425f7ce917667f56551c18301ae8db6406a6f7922"
+      },
+      "explicitCapabilities": {
+        "path": ".cache/coordination/item-pipeline-research/strict-3c55ba16-production-current/closed-qualification-warm-target.json",
+        "sha256": "aaa43affe05605402dca5fc428da6ffd353282b1303c4f623cc9d03f9e597427"
+      },
+      "publicScalarDifferential": {
+        "path": ".cache/coordination/item-pipeline-research/strict-3c55ba16-production-current/public-replay-summary.json",
+        "sha256": "a9787b186404629d671749e1e492a6b3a822fc1be7a23ada6b6f78abba891076"
+      },
+      "specialRooms": {
+        "path": ".cache/coordination/item-pipeline-research/stb-ea5c6940-production-current/final-stb-closure-and-target-reclaim.json",
+        "sha256": "60e272dd426379da2975c5b07708c842d628d909e6aa0b790ed9de95a08f414c"
+      },
+      "private90ea": {
+        "path": ".cache/coordination/quality-main/composition-publication-v1/01cc-v7-triple-v1/compact-summary.json",
+        "sha256": "0f8ea3a0610c64aae2c05c4296ce1a3f4dabe30cdfa14111ecabbe242b7a66ba"
+      },
+      "private90eaClosure": {
+        "path": ".cache/coordination/quality-main/composition-publication-v1/01cc-v7-triple-v1/closure-and-reader-release.json",
+        "sha256": "5a66998491ae5c3063edec025ef498ff75d0b7c6e83d16411ac6be6786dc78a9"
+      },
+      "originalV8": {
+        "path": ".cache/coordination/quality-main/composition-publication-v1/native-v8-readback-v1/report.json",
+        "sha256": "19821501fca9d7ffe09883bae981febeec02ba134e46b9daddd97069993a1445"
+      },
+      "originalV8Compact": {
+        "path": ".cache/coordination/quality-main/composition-publication-v1/native-v8-readback-v1/compact-summary.json",
+        "sha256": "75bbc95103ccb9a11534bbca67286bea10c308450be5a24022dec723d851c67c"
+      }
+    },
+    "retention": "All compositionProgress, first32, Brim10, ordinary0..2, v3/v5/v6, a320 v7 body113707/9052 and helper18607/701/3, native6274/1 and additive6263/1 values above are byte-semantically unchanged.",
+    "originalV8": {
+      "scope": "ONE first fixed phase0 actual Original run; all four declared inputs retained, other cases and browser unexecuted. No entropy rerolls, fitted state, old-grade change or whole-history acceptance.",
+      "bankSha256": "34bccd7f375a47c1cd05be587efd16aa2ff1d29fbd27380d7e318599968a8dac",
+      "captureIntegrity": "PASS",
+      "presentations": 1064,
+      "observations": 1107,
+      "pngs": 44,
+      "inputs": 30,
+      "protectedPinsBeforeEqualsEnd": 383,
+      "actual114Grant": 917,
+      "actual329Grant": 1107,
+      "preexistingChildBefore329": "observed; prior v7 gap remains historical",
+      "history": {
+        "checks": 6744,
+        "failures": 18,
+        "coverageGaps": 18,
+        "sameChildFullCurveMovementGaps": 2,
+        "actualRemoveFlagGaps": 8,
+        "RemoveBeforeFullCleanupGaps": 8
+      },
+      "browserExecuted": false,
+      "wholeCaseAccepted": false,
+      "observedChildrenAfterConversion": {
+        "fullCurveMovementAndCopiedLineWitnesses": 6,
+        "onlyFastBeforeFirstPostConversionFullAbsence": 2,
+        "actualRemoveFlags": "unobserved for all eight; Full manager absence/weak refs are separate witnesses"
+      }
+    }
   }
 }
