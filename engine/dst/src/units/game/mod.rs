@@ -8,6 +8,7 @@
 //! drives the C ABI used by the browser, and (with `--wasm`) the shipped WASM.
 mod driver;
 mod invariants;
+mod scout;
 
 use crate::coverage;
 use crate::entropy::Entropy;
@@ -45,6 +46,10 @@ pub fn run(case: &mut Case) {
         return;
     };
     let mut driver = driver::Driver::new(case.entropy);
+    if !replaying && driver.seeded() {
+        let codes = scout::codes(&simulation.game, case.entropy);
+        driver.scout(codes);
+    }
     let budget = if replaying {
         tape.commands.len()
     } else {

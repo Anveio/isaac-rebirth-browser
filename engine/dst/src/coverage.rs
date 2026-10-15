@@ -4,7 +4,7 @@
 //! rest, so a coverage gap (a room type never entered, an implemented NPC
 //! family never simulated) is visible in every run rather than only to a
 //! probe. It is a measurement, not a property: nothing here passes or fails.
-use rebirth_cleanroom::{implemented_npc_kinds, Screen, State};
+use rebirth_cleanroom::{implemented_npc_kinds, items, Screen, State};
 use serde_json::{json, Value};
 use std::collections::{BTreeMap, BTreeSet};
 use std::sync::Mutex;
@@ -77,6 +77,16 @@ pub fn observe(state: &State) {
         }
         for pickup in state.room.pickups.iter().filter(|pickup| !pickup.removed) {
             keys.push(format!("pickup:{}", pickup.variant));
+        }
+        // Owned collectibles that re-resolve the primary weapon (cache 0x100).
+        if let Some(items) = &state.player_items {
+            for (id, count) in items.owned_counts.iter().enumerate() {
+                let weapon = items::definition(id as u32)
+                    .is_some_and(|config| config.cache_flags & 0x100 != 0);
+                if *count > 0 && weapon {
+                    keys.push(format!("weapon:{id}"));
+                }
+            }
         }
         let features = [
             (

@@ -98,6 +98,15 @@ before it leaves:
 * It also demolishes blocking rocks with bombs, pauses, uses active and pocket
   items and answers the GameOver popup.
 
+A seeded case first scouts its seed. On copies of the booted game it opens
+the seed dialog through the same public commands, starts runs for 96
+candidate codes, and asks the engine's own pedestal rule
+(`Pickup::from_collectible_selector`) what each floor's treasure room offers.
+It types a code whose collectible requests the weapon cache (authored
+`cacheFlags` 0x100: Brimstone, Technology, Mom's Knife, the fetuses and the
+rest of `weapon_plan::resolve_primary`) and heads for the treasure room, so
+the weapon plans and their attacks run under DST in ordinary budgets.
+
 Between rooms it follows door-graph routes toward the boss room or the nearest
 unvisited room. Routes cross only the rooms the engine's own
 `traversal::admits` lets the player enter, so newly admitted rooms join the
@@ -111,7 +120,8 @@ wins every fight it starts.
 
 Every report carries a coverage census: the room types, NPC kinds, pickups and
 game features (owned collectibles, secret reveals, boss clears) each case
-reached. The summary line names the implemented NPC kinds no case simulated
+reached, including each owned weapon collectible (`weapon:<id>`). The summary
+line names the implemented NPC kinds no case simulated
 (from `rebirth_cleanroom::implemented_npc_kinds`) and the room types that
 generated floors contained but no case entered. The census is a measurement,
 not a property. Must-hit properties and coverage tapes make the important

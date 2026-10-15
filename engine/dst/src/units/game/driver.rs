@@ -58,12 +58,17 @@ pub struct Driver {
     /// Pickups the player reached without collecting (a full-health heart,
     /// say), by room and id, with how often; they stop being targets.
     touched: BTreeMap<(usize, u32), u32>,
+    /// Seed codes whose treasure room offers a weapon collectible.
+    scouted: Vec<String>,
 }
 
 #[derive(Clone, Copy, PartialEq)]
 enum Travel {
     /// The boss room.
     Boss,
+    /// An unvisited treasure room, then the boss room: a scouted seed's
+    /// collectible waits there.
+    Treasure,
     /// The nearest unvisited room the player may enter: special, large and
     /// miniboss rooms are otherwise never on a route.
     Explore,
@@ -131,7 +136,20 @@ impl Driver {
             },
             admitted: None,
             touched: BTreeMap::new(),
+            scouted: Vec::new(),
         }
+    }
+
+    /// Whether this case types seed codes, so scouting them pays off.
+    pub fn seeded(&self) -> bool {
+        self.persona == Persona::Seeded
+    }
+
+    pub fn scout(&mut self, codes: Vec<String>) {
+        if !codes.is_empty() {
+            self.travel = Some(Travel::Treasure);
+        }
+        self.scouted = codes;
     }
 
     pub fn next(&mut self, state: &State, e: &mut Entropy) -> Command {
@@ -285,12 +303,18 @@ impl Driver {
                 29 => self.press("Escape", 0),
                 _ => self.ticks(e),
             },
-            Screen::Seed if self.persona != Persona::Direct && e.chance(1, 2) => {
+            Screen::Seed
+                if self.persona != Persona::Direct
+                    && (!self.scouted.is_empty() || e.chance(1, 2)) =>
+            {
                 // Replace the dialog text with one complete code, then confirm.
                 for _ in 0..state.seed_text.len() {
                     self.press("Backspace", 0);
                 }
                 let code = match e.below(8) {
+                    _ if !self.scouted.is_empty() && e.chance(3, 4) => {
+                        e.pick(&self.scouted).clone()
+                    }
                     0 => (*e.pick(&["T1PK6Y0W", "QNXPTVT1", "0YAZCZ7N", "BHX1EF8A", "KMAGB3XH"]))
                         .into(),
                     1 => (0..8)
@@ -835,8 +859,11 @@ impl Driver {
         let descriptors = &state.floor.descriptors;
         let boss = |room: usize| descriptors[room].template.room_type == 5;
         let unvisited = |room: usize| !state.visited_rooms.contains(&room);
+        let treasure = |room: usize| descriptors[room].template.room_type == 4 && unvisited(room);
         let next = match travel {
             Travel::Boss => first_step(state, &admitted, boss),
+            Travel::Treasure => first_step(state, &admitted, treasure)
+                .or_else(|| first_step(state, &admitted, boss)),
             Travel::Explore => first_step(state, &admitted, unvisited)
                 .or_else(|| first_step(state, &admitted, boss)),
         }?;
@@ -850,8 +877,6 @@ impl Driver {
     }
 }
 
-/// The neighbour of the current room that starts a shortest path through
-/// admitted rooms to the nearest room satisfying `goal`.
 /// The nearest point the player must not be at: a hostile NPC, where it will
 /// be in ten updates, or a boss's published target (Monstro's landing cell
 /// is snapped to the player's at take-off), within contact reach and margin.
@@ -880,6 +905,8 @@ fn threat(state: &State, player: WorldVector) -> Option<WorldVector> {
         .map(|(point, _)| point)
 }
 
+/// The neighbour of the current room that starts a shortest path through
+/// admitted rooms to the nearest room satisfying `goal`.
 fn first_step(state: &State, admitted: &[bool], goal: impl Fn(usize) -> bool) -> Option<usize> {
     let descriptors = &state.floor.descriptors;
     let start = state.current_room;

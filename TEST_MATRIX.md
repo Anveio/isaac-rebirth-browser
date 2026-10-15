@@ -244,7 +244,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | `floor` | Basement generation structure, retries and per-descriptor room admission | 18 | 4 | 0 |
 | `grid` | grid queries and ground-collision solvers on generated rooms | 14 | 3 | 0 |
 | `item_pools` | ItemPool selection, depletion, fallbacks, routing and continuation | 21 | 6 | 3 |
-| `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 61 | 49 | 2 |
+| `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 61 | 51 | 2 |
 | `abi` | the exported C ABI transport the browser bridge drives | 11 | 1 | 0 |
 
 <details><summary>Every declared DST property</summary>
@@ -478,6 +478,8 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Always | game: replaying a tape reproduces every outcome and state | [mod.rs](engine/dst/src/units/game/mod.rs) |
 | Always | game: a game resumed from its serialized midpoint reaches the same end | [mod.rs](engine/dst/src/units/game/mod.rs) |
 | Always | game: the C ABI agrees with direct dispatch | [mod.rs](engine/dst/src/units/game/mod.rs) |
+| Sometimes | game: the seed scout starts a seeded run | [scout.rs](engine/dst/src/units/game/scout.rs) |
+| Sometimes | game: a scouted seed offers a weapon collectible | [scout.rs](engine/dst/src/units/game/scout.rs) |
 | Always | wasm: the shipped engine agrees with native dispatch | [wasm.rs](engine/dst/src/wasm.rs) |
 | Always | abi: the exported ABI version is current | [abi.rs](engine/dst/src/units/abi.rs) |
 | Always | abi: commands before reset fail and snapshots publish null | [abi.rs](engine/dst/src/units/abi.rs) |
