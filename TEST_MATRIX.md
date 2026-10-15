@@ -244,7 +244,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | `actors` | actor admission order and room identities against a list model | 4 | 2 | 0 |
 | `floor` | Basement generation structure, retries and per-descriptor room admission | 18 | 4 | 0 |
 | `grid` | grid queries and ground-collision solvers on generated rooms | 14 | 3 | 0 |
-| `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 56 | 44 | 2 |
+| `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 57 | 44 | 2 |
 | `abi` | the exported C ABI transport the browser bridge drives | 11 | 1 | 0 |
 
 <details><summary>Every declared DST property</summary>
@@ -394,6 +394,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Always | game: the run-start hold blocks full game updates | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: the host clock rolls back during the run-start hold | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: the run-start fade completes and controls return | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: state equality is reflexive | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: menu selections stay within their menus | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: the highlighted character is the selected character | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: dialog seed text is at most eight uppercase glyphs and its validity is its decode | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
