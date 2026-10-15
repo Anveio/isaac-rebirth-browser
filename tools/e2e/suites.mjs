@@ -77,6 +77,8 @@ export const SUITES = [
   suite('troll-bombs', e2e('troll-bombs'), ['--count', '2'], 'Troll/Megatroll conversion and lifetime'),
   suite('rock-blast', e2e('rock-blast'), ['--count', '2'], 'Ordinary rock destruction by bombs'),
   suite('items', e2e('items'), ['--count', '2'], 'Item pools and treasure-room pedestals'),
+  suite('item-composition', e2e('item-composition'), ['--count', '2'],
+    'Public Challenge resources, ordered pedestal grants, cache and weapon bodies/history across fixed phases and recorded OS cases'),
   suite('item-acquisition', e2e('items'), ['--acquisition', '--count', '2'], 'First collectible acquisition'),
   suite('stat-cache', e2e('items'), ['--stat-cache', '--count', '2'],
     'Player stat cache after acquiring Roid Rage and Speed Ball: stats, motion and tear velocity'),
