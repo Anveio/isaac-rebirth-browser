@@ -121,6 +121,27 @@ const observe = () => tab.evaluate(() => {
   };
 });
 
+// Tears fly along one axis: an enemy behind rocks needs a firing post in its
+// row or column with no solid cell between. Grid cell centres are (c*40+40, r*40+120).
+const solidAt = (grid, x, y) => { const c = Math.round((x - 40) / 40), r = Math.round((y - 120) / 40); return c < 0 || r < 0 || c >= grid.w || r >= grid.h || grid.solid[r * grid.w + c] === '1'; };
+function lineOfFire(grid, from, to) {
+  if (!grid) return true;
+  const horizontal = Math.abs(to.x - from.x) > Math.abs(to.y - from.y);
+  if (Math.abs(horizontal ? to.y - from.y : to.x - from.x) > 20) return false;
+  const steps = Math.ceil(Math.hypot(to.x - from.x, to.y - from.y) / 20);
+  for (let i = 1; i < steps; i++) if (solidAt(grid, from.x + (to.x - from.x) * i / steps, from.y + (to.y - from.y) * i / steps)) return false;
+  return true;
+}
+function firingPost(grid, from, target) {
+  if (!grid) return null;
+  const posts = [];
+  for (let k = 2; k <= 6; k++) for (const [ox, oy] of [[k, 0], [-k, 0], [0, k], [0, -k]]) {
+    const post = { x: target.x + ox * 40, y: target.y + oy * 40 };
+    if (!solidAt(grid, post.x, post.y) && lineOfFire(grid, post, target)) posts.push(post);
+  }
+  return posts.sort((a, b) => Math.hypot(a.x - from.x, a.y - from.y) - Math.hypot(b.x - from.x, b.y - from.y))[0] ?? null;
+}
+
 const held = new Set();
 async function hold(keys) {
   for (const key of [...held]) if (!keys.includes(key)) { await tab.keyboard.up(key); held.delete(key); }
@@ -277,7 +298,9 @@ try {
       // Fight: face the nearest enemy along its dominant axis, keep distance.
       const target = state.npcs.reduce((a, b) => Math.hypot(a.x - p.x, a.y - p.y) < Math.hypot(b.x - p.x, b.y - p.y) ? a : b);
       const dx = target.x - p.x, dy = target.y - p.y, distance = Math.hypot(dx, dy);
-      if (Math.abs(dx) > Math.abs(dy)) { keys.push(dx > 0 ? 'ArrowRight' : 'ArrowLeft'); if (Math.abs(dy) > 16) keys.push(dy > 0 ? 'KeyS' : 'KeyW'); }
+      const post = !lineOfFire(state.grid, p, target) && firingPost(state.grid, p, target);
+      if (post) { const step = waypoint(post.x, post.y); toward(step.x, step.y, 4); keys.push(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'ArrowRight' : 'ArrowLeft') : (dy > 0 ? 'ArrowDown' : 'ArrowUp')); }
+      else if (Math.abs(dx) > Math.abs(dy)) { keys.push(dx > 0 ? 'ArrowRight' : 'ArrowLeft'); if (Math.abs(dy) > 16) keys.push(dy > 0 ? 'KeyS' : 'KeyW'); }
       else { keys.push(dy > 0 ? 'ArrowDown' : 'ArrowUp'); if (Math.abs(dx) > 16) keys.push(dx > 0 ? 'KeyD' : 'KeyA'); }
       if (distance < 130) keys.push(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'KeyA' : 'KeyD') : (dy > 0 ? 'KeyW' : 'KeyS'));
       if (segment % 40 === 0 && state.inventory.bombs > 0 && distance < 180) keys.push('KeyE');
