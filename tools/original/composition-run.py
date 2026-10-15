@@ -149,7 +149,7 @@ def main():
         raise ValueError('A source-backed actor-family obligation is required before fixture preparation')
     source_fields = case.get('requires', {}).get('compositionSourceFields', ['playerMovementD9c', 'knifeChildChain4a0'])
     if (not isinstance(source_fields, list) or len(set(source_fields)) != len(source_fields)
-            or any(name not in ('playerMovementD9c', 'knifeChildChain4a0', 'npc14And18DamageQueue', 'kind8TearFields', 'ordinaryTechnology', 'ordinaryDrFetusBombs', 'controlledTechnology7x2x1') for name in source_fields)):
+            or any(name not in ('playerMovementD9c', 'knifeChildChain4a0', 'npc14And18DamageQueue', 'kind8TearFields', 'ordinaryTechnology', 'ordinaryDrFetusBombs', 'controlledTechnology7x2x1', 'controlledDrFetusBombs') for name in source_fields)):
         raise ValueError('Unknown or duplicate requested composition source field')
     source_fields = list(source_fields)
     if case.get('requires', {}).get('ordinaryTechnologyFunctional') is not None:
@@ -162,6 +162,15 @@ def main():
         source_fields.append('kind8TearFields')
     if case.get('requires', {}).get('controlledTechnologyFunctional') is not None:
         source_fields = [*source_fields, *([] if 'controlledTechnology7x2x1' in source_fields else ['controlledTechnology7x2x1'])]
+    controlled_fetus = case['requires'].get('controlledDrFetusFunctional')
+    if controlled_fetus is not None:
+        if (not isinstance(controlled_fetus, dict) or controlled_fetus.get('schema') != 'controlled-dr-fetus52-bomb-c18-v1'
+                or (contract.get('primaryC08'), contract['family'], contract.get('variant'),
+                    contract.get('subtype'), contract.get('controlledBy329')) != (5, 4, 0, 0, True)):
+            raise ValueError('Controlled DrFetus Bomb observation requires its exact source declaration')
+        for name in ('playerMovementD9c', 'controlledDrFetusBombs'):
+            if name not in source_fields:
+                source_fields.append(name)
     fetus = case['requires'].get('ordinaryDrFetus')
     if fetus is not None:
         if (not isinstance(fetus, dict) or fetus.get('schema') != 'ordinary-dr-fetus52-bomb-shots-v1'
