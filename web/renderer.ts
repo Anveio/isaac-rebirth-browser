@@ -20,6 +20,37 @@ const MINIMAP_ICONS: Record<number, string> = {
   20: "IconChestRoom", 21: "IconDiceRoom",
 };
 // Mask 0x3c1204: shown as locked while only shadow-revealed and unvisited.
+// Minimap pickup icon 5af6df: saved type5 records set one bit per kind and
+// the first set bit in draw order wins. Hearts prefer eternal, then black
+// over soul/red, then soul; chests prefer locked (gold), then red.
+function minimapPickupIcon(records: readonly { variant: number; subtype: number }[]): string | undefined {
+  let heart = 0, chest = 0;
+  const kinds = new Set<string>();
+  for (const { variant, subtype } of records) {
+    if (variant === 10) {
+      kinds.add("heart");
+      if (subtype === 4) heart = 4;
+      else if (subtype === 6 && (heart === 0 || heart === 3)) heart = 6;
+      else if (subtype === 3 && heart === 0) heart = 3;
+    } else if (variant === 100 || variant === 350) kinds.add("item");
+    else if (variant === 50 || variant === 60 || variant === 360) {
+      kinds.add("chest");
+      if (variant === 60) chest = 60;
+      else if (variant === 360 && chest !== 60) chest = 360;
+    } else if (variant === 300) kinds.add("card");
+    else if (variant === 70) kinds.add("pill");
+    else if (variant === 30) kinds.add("key");
+    else if (variant === 40) kinds.add("bomb");
+    else if (variant === 20) kinds.add("coin");
+    else if (variant === 90) kinds.add("battery");
+  }
+  if (kinds.has("heart")) return { 4: "IconWhiteHeart", 6: "IconBlackHeart", 3: "IconBlueHeart" }[heart] ?? "IconHeart";
+  if (kinds.has("item")) return "IconItem";
+  if (kinds.has("chest")) return chest === 60 ? "IconGoldChest" : chest === 360 ? "IconRedChest" : "IconChest";
+  const order: [string, string][] = [["card", "IconCard"], ["pill", "IconPill"], ["key", "IconKey"],
+    ["bomb", "IconBomb"], ["coin", "IconCoin"], ["battery", "IconBattery"]];
+  return order.find(([kind]) => kinds.has(kind))?.[1];
+}
 // Base Rebirth's four shapes: bit 1 tall, bit 2 wide (1x1, 1x2, 2x1, 2x2).
 function minimapShape(template: { width: number; height: number }): number {
   return (template.width === 26 ? 2 : 0) + (template.height === 14 ? 1 : 0);
@@ -658,11 +689,16 @@ export class Renderer {
       const room = descriptors[cell.index]!, type = room.template.type;
       const icon = cell.flags & 4 ? MINIMAP_ICONS[type] : undefined;
       const locked = !icon && cell.flags & 2 && !state.visitedRooms.includes(cell.index) && LOCKED_MINIMAP_TYPES.has(type);
-      if (!icon && !locked) continue;
+      // Without a room icon, a non-shop room shows its saved pickups' icon
+      // (Descriptor+70..78 records; one icon by the constructor's limit).
+      const saved = cell.index === state.currentRoom ? state.room.savedRegularPickups
+        : state.persistedRooms[cell.index]?.savedRegularPickups ?? [];
+      const pickup = icon || locked || type === 2 ? undefined : minimapPickupIcon(saved);
+      if (!icon && !locked && !pickup) continue;
       // Multi-cell rooms shift the icon half a cell (3.5, 3) towards the room's centre.
       const shape = minimapShape(room.template);
       const x = cell.x + (shape & 2 ? 3.5 : 0), y = cell.y + (shape & 1 ? 3 : 0);
-      this.assets.draw(ctx, "gfx/ui/minimap1.anm2", icon ?? "IconLockedRoom", Math.round(x), y);
+      this.assets.draw(ctx, "gfx/ui/minimap1.anm2", icon ?? pickup ?? "IconLockedRoom", Math.round(x), y);
     }
   }
 }
