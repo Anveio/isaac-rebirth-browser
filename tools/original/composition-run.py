@@ -93,7 +93,10 @@ def public_tape(case):
         for index in range(1, count + 1):
             tape.append({'type': 'step', 'frames': 1})
             if index in (3, 4):
-                tape.append({'type': 'capture', 'label': action['label'] + '-observe-step' + str(index)})
+                label = action['label'] + '-observe-step' + str(index)
+                if len(label) > 80:
+                    label = label[:63] + '-' + hashlib.sha256(label.encode('utf8')).hexdigest()[:16]
+                tape.append({'type': 'capture', 'label': label})
         tape.append({'type': 'capture', 'label': action['label']})
         held = keys
     for key in sorted(held):
