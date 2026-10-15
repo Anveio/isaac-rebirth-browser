@@ -5,3 +5,4 @@ gfx/grid/grid_spikes.anm2
 gfx/grid/grid_pit.anm2
 # Boss-room exit trapdoor (GridEntity_TrapDoor InitSubclass570fd0).
 gfx/grid/door_11_trapdoor.anm2
+gfx/grid/grid_poop.anm2

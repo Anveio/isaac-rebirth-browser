@@ -6,7 +6,7 @@ import laserData from "./npc-data.json";
 
 type Vector = { x: number; y: number };
 export interface LaserView {
-  id: number; origin: "npcShootAngle" | "playerCharged"; uninitialized: boolean | null;
+  id: number; origin: "npcShootAngle" | "playerCharged" | "playerControlled" | "playerTechnology"; uninitialized: boolean | null;
   active: boolean; actor: string; beamLength: number;
   impact: {id: number; position: Vector; positionOffset: Vector; scale: Vector;
     rotation: number; actor: string; animation: string; animationClock: number; removed: boolean;
@@ -18,6 +18,7 @@ export interface LaserView {
 }
 
 const ACTOR = laserData["gfx/007.001_thick red laser.anm2"];
+const THIN_ACTOR = laserData["gfx/007.002_thin red laser.anm2"];
 const SHEET = "gfx/effects/effect_018_lasereffects.png";
 const f = Math.fround;
 const add = (a: Point, b: Point): Point => [f(a[0] + b[0]), f(a[1] + b[1])];
@@ -90,17 +91,19 @@ function beamQuads(laser: LaserView, width: number, xScale: number, yScale: numb
 export function drawPlayerLaser(context: GLMenuContext, assets: Assets,
   laser: LaserView, viewport: LaserProjection): void {
   if (!laser.visible) return;
-  if (laser.entityType !== 7 || laser.variant !== 1 || ![0, 1].includes(laser.subtype) || !laser.lineEnabled)
-    throw new Error("Laser renderer requires admitted Player7/1 line ownership");
+  if (laser.entityType !== 7 || ![1, 2].includes(laser.variant) || ![0, 1].includes(laser.subtype) || !laser.lineEnabled)
+    throw new Error("Laser renderer requires admitted Player7/1 or7/2 line ownership");
   if (!Number.isFinite(viewport.pixelScale) || viewport.pixelScale <= 0)
     throw new Error("Laser projection requires the actual positive display scale");
   if (laser.currentColor.sourceMiddle.some(value => value !== 0))
     throw new Error("Laser renderer's additional source color operators are not admitted");
-  const animation = ACTOR.Animations.find(clip => clip.Name === laser.sprite.animation);
+  const actor = laser.variant === 2 ? THIN_ACTOR : ACTOR;
+  const animation = actor.Animations.find(clip => clip.Name === laser.sprite.animation);
   if (!animation) throw new Error("Laser clip is missing from its authored actor");
-  const layer = animation.LayerAnimations.find(layer => layer.LayerId === 1);
+  const beamLayer = actor.Layers.length > 1 ? 1 : 0;
+  const layer = animation.LayerAnimations.find(layer => layer.LayerId === beamLayer);
   const frame = layer?.Visible ? sampleFrame(layer.Frames, laser.sprite.frame, animation.Loop) : undefined;
-  if (!frame) throw new Error("Laser beam requires actual cached authored layer1");
+  if (!frame) throw new Error("Laser beam requires its actual cached authored beam layer");
   //sampleFrame already converts the authored percentage to its native f32
   //ratio. Consume that value once, independently of Sprite2C4 current scale.
   const xScale = f(frame.XScale * laser.sprite.scale.x);
@@ -117,7 +120,7 @@ export function drawPlayerLaser(context: GLMenuContext, assets: Assets,
   }
   //47B654 admits the authored endpoint layer0 for subtype0 only. Keep its
   //source current line direction and original ANM frame separate from layer1.
-  if (laser.subtype === 0 && laser.line.points.length >= 2) {
+  if (actor.Layers.length > 1 && laser.subtype === 0 && laser.line.points.length >= 2) {
     const end = laser.line.points.at(-1)!, before = laser.line.points.at(-2)!;
     const point = add(project(end, viewport), scale([laser.renderOffset.x, laser.renderOffset.y], f(.65)));
     context.save();

@@ -22,9 +22,10 @@ use std::process::ExitCode;
 
 const USAGE: &str = "usage: rebirth-dst [--units all|a,b] [--cases N] [--steps N] [--seed U64]
                    [--case-seed U64] [--entropy seeded|antithesis] [--tapes DIR]
-                   [--replay TAPE.json] [--corpus DIR] [--wasm ENGINE.wasm]
-                   [--report PATH] [--allow-unmet] [--retain-all] [--list]
-                   [--setup-complete]";
+                   [--replay TAPE.json] [--resume TAPE.json] [--corpus DIR]
+                   [--wasm ENGINE.wasm]
+                   [--report PATH] [--allow-unmet] [--retain-all] [--jobs N]
+                   [--list] [--setup-complete]";
 
 struct Options {
     units: Vec<String>,
@@ -35,6 +36,7 @@ struct Options {
     mode: Mode,
     tapes: Option<PathBuf>,
     replay: Option<PathBuf>,
+    resume: Option<PathBuf>,
     corpus: Option<PathBuf>,
     wasm: Option<PathBuf>,
     report: Option<PathBuf>,
@@ -42,6 +44,7 @@ struct Options {
     list: bool,
     setup_complete: bool,
     retain_all: bool,
+    jobs: usize,
 }
 
 fn parse() -> Result<Options, String> {
@@ -54,6 +57,7 @@ fn parse() -> Result<Options, String> {
         mode: Mode::Seeded,
         tapes: None,
         replay: None,
+        resume: None,
         corpus: None,
         wasm: None,
         report: None,
@@ -61,6 +65,7 @@ fn parse() -> Result<Options, String> {
         list: false,
         setup_complete: false,
         retain_all: false,
+        jobs: std::thread::available_parallelism().map_or(1, usize::from),
     };
     let mut arguments = std::env::args().skip(1);
     while let Some(flag) = arguments.next() {
@@ -84,6 +89,7 @@ fn parse() -> Result<Options, String> {
             }
             "--tapes" => options.tapes = Some(value()?.into()),
             "--replay" => options.replay = Some(value()?.into()),
+            "--resume" => options.resume = Some(value()?.into()),
             "--corpus" => options.corpus = Some(value()?.into()),
             "--wasm" => options.wasm = Some(value()?.into()),
             "--report" => options.report = Some(value()?.into()),
@@ -91,6 +97,7 @@ fn parse() -> Result<Options, String> {
             "--list" => options.list = true,
             "--setup-complete" => options.setup_complete = true,
             "--retain-all" => options.retain_all = true,
+            "--jobs" => options.jobs = value()?.parse().map_err(|_| "invalid --jobs")?,
             "--help" | "-h" => return Err(USAGE.into()),
             other => return Err(format!("unknown argument {other}\n{USAGE}")),
         }
@@ -148,14 +155,10 @@ fn os_seed() -> u64 {
     u64::from_le_bytes(bytes)
 }
 
-/// The WASM interpreter's translator recurses deeply on the engine's large
-/// serde functions; run every case on one thread with a generous stack.
-const STACK_BYTES: usize = 512 * 1024 * 1024;
-
 fn main() -> ExitCode {
     std::thread::Builder::new()
         .name("rebirth-dst".into())
-        .stack_size(STACK_BYTES)
+        .stack_size(harness::STACK_BYTES)
         .spawn(simulate)
         .expect("spawn the simulation thread")
         .join()
@@ -208,6 +211,14 @@ fn simulate() -> ExitCode {
             return ExitCode::from(2);
         }
     };
+    // Generated game cases branch from the end of this tape.
+    let resume = match options.resume.as_deref().map(tape::Tape::read).transpose() {
+        Ok(resume) => resume,
+        Err(error) => {
+            eprintln!("cannot read resume tape: {error}");
+            return ExitCode::from(2);
+        }
+    };
     let wasm = match options.wasm.as_deref().map(wasm::Module::load).transpose() {
         Ok(wasm) => wasm,
         Err(error) => {
@@ -231,8 +242,10 @@ fn simulate() -> ExitCode {
         steps: options.steps,
         tapes: options.tapes.clone(),
         replays,
+        resume,
         wasm,
         retain_all: options.retain_all,
+        jobs: options.jobs,
     };
     eprintln!(
         "rebirth-dst: entropy={} seed=0x{master_seed:016x} units={} cases={} steps={}{}",
@@ -285,8 +298,8 @@ fn simulate() -> ExitCode {
     let census = names.contains(&"game").then(coverage::report);
     if let Some(census) = &census {
         eprintln!(
-            "rebirth-dst coverage: {} game cases; NPC kinds never simulated: {}; room types on floors never entered: {}",
-            census["gameCases"], census["unreachedNpcKinds"], census["unenteredRoomTypes"]
+            "rebirth-dst coverage: {} game cases; NPC kinds never simulated: {} (and {} that no authored room places); simulated but never removed: {}; room types on floors never entered: {}",
+            census["gameCases"], census["unreachedNpcKinds"], census["unplacedNpcKinds"], census["unremovedNpcKinds"], census["unenteredRoomTypes"]
         );
     }
     if let Some(path) = &options.report {

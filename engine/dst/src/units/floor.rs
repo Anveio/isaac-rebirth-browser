@@ -7,6 +7,7 @@ use crate::harness::{self, Case};
 use crate::props;
 use rebirth_cleanroom::floor::{self, Floor, NormalBasementRequest};
 use rebirth_cleanroom::layout::{GRID_CELLS, GRID_WIDTH};
+use rebirth_cleanroom::room_assets::RoomAsset;
 use rebirth_cleanroom::{room_assets, room_spawns, seed, Room};
 use serde_json::json;
 use std::collections::{BTreeSet, VecDeque};
@@ -21,6 +22,7 @@ const READ_FLAGS: [u64; 4] = [0x100, 64, 16, 0x100000];
 
 pub fn run(case: &mut Case) {
     let e = &mut *case.entropy;
+    let catalogues = [room_assets::special(), room_assets::basement()];
     let fresh = |stage_seed| NormalBasementRequest {
         stage: 1,
         stage_seed,
@@ -70,8 +72,11 @@ pub fn run(case: &mut Case) {
         let Some(first) = generate(fresh(stage_seed)) else {
             continue;
         };
+        swaps(e, &first, &catalogues);
         if e.chance(1, 2) {
-            generate(continuing(e, &first));
+            if let Some(second) = generate(continuing(e, &first)) {
+                swaps(e, &second, &catalogues);
+            }
         }
     }
 }
@@ -356,10 +361,58 @@ fn structure(request: &NormalBasementRequest, floor: &Floor) {
     );
 }
 
+/// Generation weights its authored rooms, so a run admits only a few of the
+/// catalogue's 1,064. Each descriptor in turn takes a uniformly chosen
+/// authored room the generator could have placed there (same catalogue, type
+/// and shape, its doors available, a normal room's difficulty in its stage's
+/// range) and must admit like any generated room.
+fn swaps(e: &mut Entropy, floor: &Floor, catalogues: &[Vec<RoomAsset>; 2]) {
+    for index in 0..floor.descriptors.len() {
+        let descriptor = &floor.descriptors[index];
+        let Some(catalogue) = catalogues.get(usize::from(descriptor.asset_stage)) else {
+            continue;
+        };
+        let template = &descriptor.template;
+        let difficulty = if floor.stage == 1 { 1..=5 } else { 5..=10 };
+        let compatible: Vec<usize> = catalogue
+            .iter()
+            .enumerate()
+            .filter(|(_, asset)| {
+                let candidate = &asset.template;
+                candidate.room_type == template.room_type
+                    && (candidate.width, candidate.height) == (template.width, template.height)
+                    && descriptor.door_mask & !candidate.door_mask == 0
+                    && (template.room_type != 1 || difficulty.contains(&candidate.difficulty))
+            })
+            .map(|(catalog_index, _)| catalog_index)
+            .collect();
+        if compatible.is_empty() {
+            continue;
+        }
+        let catalog_index = *e.pick(&compatible);
+        let mut swapped = floor.clone();
+        let target = &mut swapped.descriptors[index];
+        target.catalog_index = catalog_index;
+        target.template = catalogue[catalog_index].template.clone();
+        admit(floor.stage_seed, &swapped, index);
+        props::sometimes!(
+            catalog_index != descriptor.catalog_index,
+            "floor: another authored room admits in a generated descriptor's place"
+        );
+    }
+}
+
 /// Every generated descriptor must resolve to authored content and admit as
 /// a Room: traversal constructs any of them on first entry.
 fn admission(stage_seed: u32, floor: &Floor) {
-    for (index, descriptor) in floor.descriptors.iter().enumerate() {
+    for index in 0..floor.descriptors.len() {
+        admit(stage_seed, floor, index);
+    }
+}
+
+fn admit(stage_seed: u32, floor: &Floor, index: usize) {
+    {
+        let descriptor = &floor.descriptors[index];
         let resolved = room_assets::for_descriptor(descriptor)
             .and_then(|asset| room_spawns::select(&asset, descriptor.spawn_seed));
         props::always!(

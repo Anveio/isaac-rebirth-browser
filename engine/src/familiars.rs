@@ -62,6 +62,9 @@ pub struct Sprite {
     pub rotation: f32,
     #[serde(default)]
     pub layer_flips: std::collections::BTreeMap<u32, [bool; 2]>,
+    /// Per-layer LayerState offset (+0x30), in anm2 pixels.
+    #[serde(default, skip_serializing_if = "std::collections::BTreeMap::is_empty")]
+    pub layer_offsets: std::collections::BTreeMap<u32, [f32; 2]>,
     pub flip_x: bool,
     #[serde(default)]
     pub flip_y: bool,
@@ -82,6 +85,7 @@ impl Sprite {
             offset: ZERO,
             rotation: 0.0,
             layer_flips: std::collections::BTreeMap::new(),
+            layer_offsets: std::collections::BTreeMap::new(),
             flip_x: false,
             flip_y: false,
             tint: white(),
@@ -246,6 +250,10 @@ pub struct SpriteEffect {
     pub poop_effect: Option<crate::poop_effects::Controller>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub blood_effect: Option<crate::blood_effects::Controller>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub creep_effect: Option<crate::creep_effects::Controller>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub fly_effect: Option<crate::fly_effects::Controller>,
 }
 
 impl SpriteEffect {
@@ -405,6 +413,8 @@ impl NpcEffectAdmission<'_> {
             full_updates: 0,
             poop_effect: None,
             blood_effect: None,
+            creep_effect: None,
+            fly_effect: None,
         });
         self.scheduler.admit(ActorRef {
             kind: ActorKind::Effect,
@@ -415,6 +425,20 @@ impl NpcEffectAdmission<'_> {
 }
 
 pub fn advance_effect(state: &mut State, phase: Phase, id: u32) -> Result<(), String> {
+    if state
+        .sprite_effects
+        .iter()
+        .any(|effect| effect.id == id && effect.fly_effect.is_some())
+    {
+        return crate::fly_effects::advance(state, phase, id);
+    }
+    if state
+        .sprite_effects
+        .iter()
+        .any(|effect| effect.id == id && effect.creep_effect.is_some())
+    {
+        return crate::creep_effects::advance(state, phase, id);
+    }
     if state
         .sprite_effects
         .iter()
@@ -795,6 +819,8 @@ impl NpcEffectAdmission<'_> {
             full_updates: 0,
             poop_effect: None,
             blood_effect: None,
+            creep_effect: None,
+            fly_effect: None,
         });
         // Room5c6940 assigns the actual sequence first; Manager4524f0 then routes
         // flags8 to its separate background pool rather than the ordinary array.
@@ -888,29 +914,62 @@ impl NpcEffectAdmission<'_> {
     }
 }
 
+thread_local! {
+    static ELIDE_BACKGROUND_STAINS: std::cell::Cell<bool> = const { std::cell::Cell::new(false) };
+}
+
+/// Serialize `f` with every room's background stains written as `[]`. The
+/// browser's per-tick snapshot uses this; stains then cost O(new) per tick
+/// through `background_stains_since` instead of O(all) per tick.
+pub fn with_background_stains_elided<T>(f: impl FnOnce() -> T) -> T {
+    ELIDE_BACKGROUND_STAINS.with(|elide| elide.set(true));
+    let result = f();
+    ELIDE_BACKGROUND_STAINS.with(|elide| elide.set(false));
+    result
+}
+
+pub(crate) fn serialize_background_stains<S: serde::Serializer>(
+    stains: &[BackgroundStain],
+    serializer: S,
+) -> Result<S::Ok, S::Error> {
+    if ELIDE_BACKGROUND_STAINS.with(std::cell::Cell::get) {
+        serializer.collect_seq(std::iter::empty::<&BackgroundStain>())
+    } else {
+        serializer.collect_seq(stains)
+    }
+}
+
 /// Actual454df0 current-count background pass follows actor callbacks and
 /// precedes entity contacts/grid queries. Newborn flags8 blood participates.
 pub fn paint_background_effects(state: &mut State) -> Result<(), String> {
     // Insert4524f0 keeps the independent render array in unsigned virtual+50
     // key order. Equal keys insert before existing entries, so later births
     // paint first. Ordinary actors also occupy that array; only flags8 paint.
-    let mut pending: Vec<_> = state
-        .sprite_effects
-        .iter()
-        .enumerate()
-        .filter(|(_, effect)| {
-            matches!(effect.variant, 7 | 17 | 43 | 58) && effect.flags & 8 != 0 && effect.active
-        })
-        .map(|(index, effect)| {
-            let key =
-                (((effect.position.y + effect.raw_7f8) * 100.0 + 10030.0) + 0.5).floor() as u32;
-            (
-                index,
-                key.wrapping_add(effect.render_order_offset as u32),
-                effect.id,
-            )
-        })
-        .collect();
+    // The effect key 4586c0 uses (Entity+8 & 0x3ff) + 100 when Init set +7d8,
+    // as every flags8 site does; otherwise the y-based depth key.
+    let scheduler = &state.actor_scheduler;
+    let mut pending = Vec::new();
+    for (index, effect) in state.sprite_effects.iter().enumerate() {
+        if !(matches!(effect.variant, 7 | 17 | 43 | 58) && effect.flags & 8 != 0 && effect.active) {
+            continue;
+        }
+        let key = if effect.raw_7d8 {
+            let sequence = scheduler
+                .sequence_id(ActorRef {
+                    kind: ActorKind::Effect,
+                    id: effect.id,
+                })
+                .ok_or("background effect has no admitted Entity+8 sequence")?;
+            (sequence & 0x3ff) + 100
+        } else {
+            (((effect.position.y + effect.raw_7f8) * 100.0 + 10030.0) + 0.5).floor() as u32
+        };
+        pending.push((
+            index,
+            key.wrapping_add(effect.render_order_offset as u32),
+            effect.id,
+        ));
+    }
     pending.sort_by(|a, b| a.1.cmp(&b.1).then_with(|| b.2.cmp(&a.2)));
     for (index, _, _) in pending {
         let effect = &mut state.sprite_effects[index];

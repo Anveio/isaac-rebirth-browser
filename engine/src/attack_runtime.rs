@@ -121,16 +121,32 @@ pub(crate) fn dispatch_player(
     match plan.controller {
         ControllerChannel::RegularShots => Ok(DispatchOutcome::RegularTear),
         ControllerChannel::OrdinaryKnife => ordinary_knife(state, plan, input, phase, callback_aim),
+        ControllerChannel::OrdinaryFetus => {
+            crate::dr_fetus::dispatch_player(state, plan, input, phase, callback_aim)
+        }
+        ControllerChannel::ControlledFetus => {
+            crate::controlled_fetus::dispatch_player(state, plan, input, phase, callback_aim)
+        }
         ControllerChannel::ControlledKnife => {
             controlled_knife(state, plan, input, phase, callback_aim)
+        }
+        ControllerChannel::OrdinaryTechnology => {
+            crate::technology::dispatch_player(state, plan, input, phase, callback_aim)
         }
         ControllerChannel::ChargedBrimstone => {
             crate::brimstone::dispatch_player(state, plan, input, phase, callback_aim)
         }
+        ControllerChannel::ControlledTear => {
+            crate::controlled_tear::dispatch(state, input, phase, callback_aim)
+        }
+        ControllerChannel::ControlledBrimstone => {
+            crate::controlled_brimstone::dispatch_player(state, plan, input, phase, callback_aim)
+        }
+        ControllerChannel::ControlledTechnology => {
+            crate::controlled_technology::dispatch_player(state, plan, input, phase, callback_aim)
+        }
         unsupported => {
             let channel = match unsupported {
-                ControllerChannel::ControlledBrimstone => "controlledBrimstone",
-                ControllerChannel::ControlledTear => "controlledTear",
                 ControllerChannel::Unimplemented(_) => "unimplementedPrimary",
                 _ => unreachable!("implemented controller matched above"),
             };
@@ -316,6 +332,10 @@ pub(crate) fn controlled_head_direction(
 }
 
 pub(crate) fn controlled_idle_head(state: &mut State, held: bool) {
+    controlled_idle_head_for(state, held, "controlledKnifeMovementHistory");
+}
+
+pub(crate) fn controlled_idle_head_for(state: &mut State, held: bool, channel: &str) {
     if !held && state.head_timer < 0 {
         if let Some(direction) = state.attack_runtime.movement_direction_d9c {
             state.attack_runtime.head_direction_da0 = Some(match direction {
@@ -325,7 +345,7 @@ pub(crate) fn controlled_idle_head(state: &mut State, held: bool) {
                 _ => 3,
             });
         } else {
-            record_frontier(state, "controlledKnifeMovementHistory");
+            record_frontier(state, channel);
         }
     }
 }
@@ -666,6 +686,7 @@ pub(crate) fn persists_across_room(actor: ActorRef, knives: &[Knife]) -> bool {
 }
 
 pub(crate) fn reset_room_schedule(state: &mut State) {
+    crate::bombs::reset_room_shots(state);
     //453EC0 Uninit/Remove the transient pool before rebuilding the retained
     //type8/subtype0 pool. Active/dead is not this source pool predicate.
     let transient: Vec<_> = state
@@ -685,7 +706,37 @@ pub(crate) fn reset_room_schedule(state: &mut State) {
         .clear_room_retaining(|actor| persists_across_room(actor, knives));
 }
 
+/// The preflight and actual Remove share the existing per-family owner.
+/// An arbitrary regular Tear does not acquire the controlled Tear callback.
+pub(crate) fn admits_referenced_remove(state: &State, actor: ActorRef) -> Result<bool, String> {
+    match actor.kind {
+        ActorKind::Knife => state
+            .knives
+            .iter()
+            .find(|knife| knife.id == actor.id)
+            .map(|_| true)
+            .ok_or_else(|| "registered knife handle is unresolved".into()),
+        ActorKind::Laser => state
+            .lasers
+            .iter()
+            .find(|laser| laser.id == actor.id)
+            .map(|_| true)
+            .ok_or_else(|| "registered Laser handle is unresolved".into()),
+        ActorKind::Tear => state
+            .tears
+            .iter()
+            .find(|tear| tear.id == actor.id)
+            .map(|tear| tear.controlled.is_some())
+            .ok_or_else(|| "registered Tear handle is unresolved".into()),
+        ActorKind::Bomb => crate::bombs::admits_referenced_remove(state, actor.id),
+        _ => Ok(false),
+    }
+}
+
 pub(crate) fn remove_referenced_actor(state: &mut State, actor: ActorRef) -> Result<(), String> {
+    if !admits_referenced_remove(state, actor)? {
+        return Err("referenced attack actor has no admitted Remove callback".into());
+    }
     match actor.kind {
         ActorKind::Knife => {
             let knife = state
@@ -703,6 +754,8 @@ pub(crate) fn remove_referenced_actor(state: &mut State, actor: ActorRef) -> Res
                 .ok_or("registered Laser handle is unresolved")?
                 .remove();
         }
+        ActorKind::Tear => crate::controlled_tear::remove(state, actor.id)?,
+        ActorKind::Bomb => crate::bombs::remove_referenced(state, actor.id)?,
         _ => return Err("referenced attack actor has no admitted Remove callback".into()),
     }
     Ok(())
@@ -715,6 +768,11 @@ pub(crate) fn replace_c18(state: &mut State, actor: Option<ActorRef>) -> Result<
         let admitted = match actor.kind {
             ActorKind::Knife => state.knives.iter().any(|knife| knife.id == actor.id),
             ActorKind::Laser => state.lasers.iter().any(|laser| laser.id == actor.id),
+            ActorKind::Tear => state
+                .tears
+                .iter()
+                .any(|tear| tear.id == actor.id && tear.controlled.is_some()),
+            ActorKind::Bomb => crate::bombs::admits_referenced_remove(state, actor.id)?,
             _ => false,
         };
         if !admitted {
@@ -1142,7 +1200,12 @@ pub(crate) fn complete_primary_cleanup(
         return Ok(true);
     }
     match state.attack_runtime.persistent {
-        Some(actor) if matches!(actor.kind, ActorKind::Knife | ActorKind::Laser) => {
+        Some(actor)
+            if matches!(
+                actor.kind,
+                ActorKind::Knife | ActorKind::Laser | ActorKind::Tear | ActorKind::Bomb
+            ) =>
+        {
             remove_referenced_actor(state, actor)?;
             //Virtual48 preserves the registered C18 until actual Uninit.
             Ok(true)

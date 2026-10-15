@@ -2,6 +2,7 @@
 use crate::props;
 use rebirth_cleanroom::actors::ActorKind;
 use rebirth_cleanroom::input;
+use rebirth_cleanroom::motion::WorldVector;
 use rebirth_cleanroom::player_death;
 use rebirth_cleanroom::run_admission::{MAX_SAFE_TIMESTAMP_MS, PRESENTATION_INTERVAL_NS};
 use rebirth_cleanroom::traversal::TransitionPhase;
@@ -89,6 +90,11 @@ pub fn outcome(state: &State, command: &Command, result: &Result<(), String>) {
             details()
         );
     }
+    props::sometimes!(
+        matches!(command, Command::Tick { count, .. } if *count == MAX_COMMAND_TICKS)
+            && result.is_ok(),
+        "game: a Tick of exactly the command budget is accepted"
+    );
     if result.is_err() {
         match expected {
             Some("tick budget") => props::sometimes!(true, "game: an over-budget Tick is rejected"),
@@ -152,6 +158,24 @@ fn menu_edge(from: Screen, to: Screen) -> bool {
 /// Contracts relating the state before and after an accepted command.
 pub fn transition(before: &State, command: &Command, after: &State) {
     death(before, command, after);
+    room_clear(before, command, after);
+    // A shot sets the fire cooldown to the max fire delay it fires with, and
+    // the cooldown then only counts down. The max delay itself may drop under
+    // a running cooldown: a collectible queued during its pickup animation
+    // flushes at 531f01, after the shot (52f..530) on the frame the animation
+    // ends, so a shot fired with the old delay outlasts a lowered one.
+    props::always!(
+        after.fire_cooldown
+            <= before
+                .fire_cooldown
+                .max(before.max_fire_delay)
+                .max(after.max_fire_delay),
+        "game: the fire cooldown never rises above a max fire delay the command held",
+        json!({
+            "before": [before.fire_cooldown, before.max_fire_delay],
+            "after": [after.fire_cooldown, after.max_fire_delay],
+        })
+    );
     // A run starts from the menus, or restarts from the GameOver popup without
     // leaving the playing screen; both go through the engine's run start.
     let restarted = before.player_death.game_over.is_some()
@@ -235,13 +259,23 @@ pub fn transition(before: &State, command: &Command, after: &State) {
                 let floor = rebirth_cleanroom::floor::generate_basement(seed::stage1_seed(
                     after.run_seed_value,
                 ));
+                // Held keys survive a GameOver restart, so a long tick can
+                // carry the new run's player on through doors once its start
+                // hold ends: the rooms it visits are a walk from the start.
                 props::always!(
                     floor.as_ref().ok() == Some(&after.floor)
-                        && after.current_room == after.floor.starting_descriptor
                         && after.run_tick <= count
-                        && after.visited_rooms == BTreeSet::from([after.current_room]),
+                        && walk_from_start(after),
                     "game: a run starts in the starting room of its seed's floor",
-                    json!({ "runSeed": after.run_seed })
+                    json!({
+                        "runSeed": after.run_seed,
+                        "currentRoom": after.current_room,
+                        "visitedRooms": after.visited_rooms,
+                    })
+                );
+                props::sometimes!(
+                    after.current_room != after.floor.starting_descriptor,
+                    "game: a new run's player walks on from the starting room within its first command"
                 );
                 props::sometimes!(after.seeded_run, "game: a seeded run starts");
                 props::sometimes!(
@@ -398,6 +432,101 @@ pub fn transition(before: &State, command: &Command, after: &State) {
             "game: an invalid seed code is dismissed"
         );
     }
+}
+
+/// The visited rooms are the starting room and rooms reached from it
+/// through visited neighbours, the current room among them.
+fn walk_from_start(state: &State) -> bool {
+    let start = state.floor.starting_descriptor;
+    let visited = &state.visited_rooms;
+    if !visited.contains(&start) || !visited.contains(&state.current_room) {
+        return false;
+    }
+    let mut reached = BTreeSet::from([start]);
+    let mut frontier = vec![start];
+    while let Some(room) = frontier.pop() {
+        let Some(descriptor) = state.floor.descriptors.get(room) else {
+            return false;
+        };
+        for next in descriptor.neighbors.iter().flatten().copied() {
+            if visited.contains(&next) && reached.insert(next) {
+                frontier.push(next);
+            }
+        }
+    }
+    reached == *visited
+}
+
+/// Room.Update (`npcs::advance_room_clear`, source 5d149b/5d1487) runs once
+/// per nonplayer pass: countable actors reset a ten-pass countdown, and only
+/// an empty pass entered with the countdown expired marks the room clear and
+/// reopens the doors combat shut. A bomb may reveal a secret door mid-combat.
+fn room_clear(before: &State, command: &Command, after: &State) {
+    let same_room = before.screen == Screen::Playing
+        && after.screen == Screen::Playing
+        && before.current_room == after.current_room
+        && before.stage_seed == after.stage_seed
+        && before.room_transition.is_none()
+        && before.player_death.game_over.is_none();
+    if !same_room {
+        return;
+    }
+    let room_type = after.floor.descriptors[after.current_room]
+        .template
+        .room_type;
+    let cleared = !before.room.combat_clear && after.room.combat_clear;
+    if let (Command::Tick { count, .. }, true) = (command, cleared) {
+        // The command's nonplayer passes, from the engine's own phase clock.
+        let mut clock = before.system_clock;
+        let passes = (0..*count)
+            .filter(|_| {
+                clock
+                    .advance()
+                    .is_ok_and(|phase| phase.updates_nonplayers())
+            })
+            .count();
+        let countdown = before.room.combat_clear_countdown as usize;
+        props::always!(
+            passes > countdown
+                && (passes > 1
+                    || (countdown == 0 && after.room.manager_counts.countable_total() <= 0)),
+            "game: a room is marked clear only on an empty pass after its countdown expires",
+            json!({
+                "room": after.current_room,
+                "passes": passes,
+                "countdown": countdown,
+                "counts": after.room.manager_counts,
+            })
+        );
+    }
+    let reopened = before.room.appearance.doors.iter().filter(|door| {
+        door.state == "Closed"
+            && before.room.combat_shut_door_slots.contains(&door.slot)
+            && after
+                .room
+                .appearance
+                .doors
+                .iter()
+                .any(|after_door| after_door.slot == door.slot && after_door.state == "Opened")
+    });
+    let mut unexplained = reopened.filter(|door| {
+        let target = door.target_room as usize;
+        let connection = [
+            after.current_room.min(target),
+            after.current_room.max(target),
+        ];
+        !after.room.combat_clear && !after.revealed_secret_connections.contains(&connection)
+    });
+    props::always!(
+        unexplained.next().is_none(),
+        "game: combat-shut doors reopen only when the room clears or a secret is revealed",
+        json!({ "room": after.current_room, "command": command })
+    );
+    props::sometimes!(cleared && room_type == 5, "game: a boss room is cleared");
+    props::sometimes!(
+        cleared && room_type == 6,
+        "game: a miniboss room is cleared"
+    );
 }
 
 /// Normal Isaac death (`engine/src/player_death.rs`): GameOver freezes
@@ -622,15 +751,55 @@ pub fn state(state: &State) {
         "game: player motion is finite and health is bounded",
         json!({ "player": player })
     );
+    // Grid collision reflects a body's motion into solid cells, so the centre
+    // of a colliding NPC, pickup or bomb never moves out of the room interior
+    // (`Grid::clamp_room`), whatever its speed or family. The ground solver
+    // (443117) never moves a body at rest, so one born where the player
+    // stands in an open doorway (a bomb dropped there) rests on the door
+    // cell; the boundary walls and the space beyond them stay out of reach.
+    if state.room_transition.is_none() {
+        let grid = state
+            .room
+            .grid
+            .clone()
+            .map(rebirth_cleanroom::grid::Grid::new);
+        if let Some(Ok(grid)) = grid {
+            let npcs = state.room.npcs.iter().filter(|npc| !npc.removed);
+            let npcs = npcs
+                .filter(|npc| npc.grid_collision_class != 0)
+                .map(|npc| ("npc", npc.id, npc.position));
+            let pickups = state.room.pickups.iter().filter(|pickup| !pickup.removed);
+            let pickups = pickups.map(|pickup| ("pickup", pickup.id, pickup.position));
+            let bombs = state.bombs.iter();
+            let bombs = bombs.map(|bomb| ("bomb", bomb.id, bomb.motion.position));
+            let doorway = |position: WorldVector| {
+                grid.index(position)
+                    .and_then(|index| grid.descriptor().cells[index].entity.as_ref())
+                    .is_some_and(|entity| entity.kind == 16)
+            };
+            let escaped = npcs.chain(pickups).chain(bombs).find(|(_, _, position)| {
+                grid.clamp_room(*position, 0.0) != *position && !doorway(*position)
+            });
+            props::always!(
+                escaped.is_none(),
+                "game: grid-colliding bodies stay inside the room's walls",
+                json!({ "body": escaped })
+            );
+        }
+    }
+    let unfinite = unfinite_body(state);
+    props::always!(
+        unfinite.is_none(),
+        "game: every room body has finite motion",
+        json!({ "body": unfinite })
+    );
     props::always!(
         state.inventory.coins <= 99 && state.inventory.bombs <= 99 && state.inventory.keys <= 99,
         "game: consumables are capped at 99",
         json!({ "inventory": state.inventory })
     );
     props::always!(
-        state.fire_cooldown >= -1
-            && state.fire_cooldown <= state.max_fire_delay
-            && state.head_timer >= -1,
+        state.fire_cooldown >= -1 && state.head_timer >= -1,
         "game: fire cooldown and head timers stay in range",
         json!({ "fireCooldown": state.fire_cooldown, "headTimer": state.head_timer })
     );
@@ -891,6 +1060,74 @@ pub fn state(state: &State) {
 }
 
 /// Laser impacts are effects whose handles come from the effect allocator.
+/// The first body whose motion is NaN or infinite, as (kind, id). One bad
+/// value (a normalized zero vector, say) spreads through every later
+/// contact, so every family's bodies are checked, new families included.
+fn unfinite_body(state: &State) -> Option<(&'static str, u32)> {
+    let finite = |vectors: &[WorldVector], scalars: &[f64]| {
+        vectors.iter().all(|vector| vector.is_finite())
+            && scalars.iter().all(|value| value.is_finite())
+    };
+    let npcs = state.room.npcs.iter().map(|npc| {
+        let ok = finite(
+            &[npc.position, npc.presented_position, npc.velocity],
+            &[f64::from(npc.hp), f64::from(npc.max_hp)],
+        );
+        ("npc", npc.id, ok)
+    });
+    let pickups = state.room.pickups.iter().map(|pickup| {
+        let vectors = [pickup.position, pickup.presented_position, pickup.velocity];
+        ("pickup", pickup.id, finite(&vectors, &[pickup.x, pickup.y]))
+    });
+    let tears = state.tears.iter().map(|tear| {
+        let motion = &tear.motion;
+        let vectors = [motion.position, motion.presented_position, motion.velocity];
+        let scalars = [tear.x, tear.y, tear.vx, tear.vy];
+        ("tear", tear.id, finite(&vectors, &scalars))
+    });
+    let projectiles = state.enemy_projectiles.iter().map(|shot| {
+        let vectors = [shot.position, shot.presented_position, shot.velocity];
+        ("enemy projectile", shot.id, finite(&vectors, &[]))
+    });
+    let familiars = state.familiars.iter().map(|familiar| {
+        let vectors = [
+            familiar.position,
+            familiar.presented_position,
+            familiar.velocity,
+        ];
+        let health = [f64::from(familiar.hp), f64::from(familiar.max_hp)];
+        ("familiar", familiar.id, finite(&vectors, &health))
+    });
+    let bombs = state.bombs.iter().map(|bomb| {
+        let motion = &bomb.motion;
+        let vectors = [motion.position, motion.presented_position, motion.velocity];
+        ("bomb", bomb.id, finite(&vectors, &[bomb.x, bomb.y]))
+    });
+    let lasers = state.lasers.iter().map(|laser| {
+        (
+            "laser",
+            laser.id,
+            finite(&[laser.position, laser.velocity], &[]),
+        )
+    });
+    let knives = state.knives.iter().map(|knife| {
+        (
+            "knife",
+            knife.id,
+            finite(&[knife.position, knife.velocity], &[]),
+        )
+    });
+    npcs.chain(pickups)
+        .chain(tears)
+        .chain(projectiles)
+        .chain(familiars)
+        .chain(bombs)
+        .chain(lasers)
+        .chain(knives)
+        .find(|(_, _, ok)| !ok)
+        .map(|(kind, id, _)| (kind, id))
+}
+
 fn laser_impacts(state: &State) -> impl Iterator<Item = u32> + '_ {
     state
         .lasers

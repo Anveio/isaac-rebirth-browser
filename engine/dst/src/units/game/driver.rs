@@ -58,12 +58,17 @@ pub struct Driver {
     /// Pickups the player reached without collecting (a full-health heart,
     /// say), by room and id, with how often; they stop being targets.
     touched: BTreeMap<(usize, u32), u32>,
+    /// Seed codes whose treasure room offers a weapon collectible.
+    scouted: Vec<String>,
 }
 
 #[derive(Clone, Copy, PartialEq)]
 enum Travel {
     /// The boss room.
     Boss,
+    /// An unvisited treasure room, then the boss room: a scouted seed's
+    /// collectible waits there.
+    Treasure,
     /// The nearest unvisited room the player may enter: special, large and
     /// miniboss rooms are otherwise never on a route.
     Explore,
@@ -131,7 +136,20 @@ impl Driver {
             },
             admitted: None,
             touched: BTreeMap::new(),
+            scouted: Vec::new(),
         }
+    }
+
+    /// Whether this case types seed codes, so scouting them pays off.
+    pub fn seeded(&self) -> bool {
+        self.persona == Persona::Seeded
+    }
+
+    pub fn scout(&mut self, codes: Vec<String>) {
+        if !codes.is_empty() {
+            self.travel = Some(Travel::Treasure);
+        }
+        self.scouted = codes;
     }
 
     pub fn next(&mut self, state: &State, e: &mut Entropy) -> Command {
@@ -143,6 +161,26 @@ impl Driver {
             self.plan(state, e);
         }
         self.queue.pop_front().unwrap_or_else(|| tick(1))
+    }
+
+    /// Holds exactly `keys` of the movement and fire keys across `ticks`:
+    /// releases those the engine reports held that this macro does not
+    /// want and presses only the rest. They stay held into the next macro,
+    /// as a player's would, so commands buy game time instead of
+    /// re-pressing what is already down.
+    fn hold(&mut self, state: &State, keys: &[&str], ticks: u32) {
+        for code in &state.pressed {
+            let play = MOVES.contains(&code.as_str()) || AIMS.contains(&code.as_str());
+            if play && !keys.contains(&code.as_str()) {
+                self.queue.push_back(key(code, false));
+            }
+        }
+        for code in keys {
+            if !state.pressed.contains(*code) {
+                self.queue.push_back(key(code, true));
+            }
+        }
+        self.queue.push_back(tick(ticks));
     }
 
     fn press(&mut self, code: &str, hold: u32) {
@@ -265,12 +303,18 @@ impl Driver {
                 29 => self.press("Escape", 0),
                 _ => self.ticks(e),
             },
-            Screen::Seed if self.persona != Persona::Direct && e.chance(1, 2) => {
+            Screen::Seed
+                if self.persona != Persona::Direct
+                    && (!self.scouted.is_empty() || e.chance(1, 2)) =>
+            {
                 // Replace the dialog text with one complete code, then confirm.
                 for _ in 0..state.seed_text.len() {
                     self.press("Backspace", 0);
                 }
                 let code = match e.below(8) {
+                    _ if !self.scouted.is_empty() && e.chance(3, 4) => {
+                        e.pick(&self.scouted).clone()
+                    }
                     0 => (*e.pick(&["T1PK6Y0W", "QNXPTVT1", "0YAZCZ7N", "BHX1EF8A", "KMAGB3XH"]))
                         .into(),
                     1 => (0..8)
@@ -364,7 +408,7 @@ impl Driver {
                             Some(Route::Walk(waypoint)) => waypoint,
                             _ => rock,
                         };
-                        self.steer(player, waypoint, None, e);
+                        self.steer(state, player, waypoint, None, e);
                     }
                     None => self.ticks(e),
                 }
@@ -500,7 +544,7 @@ impl Driver {
             return self.bomb_rock(player, target, e);
         }
         match route(state, player, target) {
-            Some(Route::Walk(waypoint)) => self.steer(player, waypoint, hostile, e),
+            Some(Route::Walk(waypoint)) => self.steer(state, player, waypoint, hostile, e),
             Some(Route::Blocked { stand, rock }) if state.inventory.bombs > 0 => {
                 if distance(player, stand) < 14.0 {
                     self.bomb_rock(player, rock, e);
@@ -509,18 +553,19 @@ impl Driver {
                         Some(Route::Walk(waypoint)) => waypoint,
                         _ => stand,
                     };
-                    self.steer(player, waypoint, None, e);
+                    self.steer(state, player, waypoint, None, e);
                 }
             }
-            _ => self.steer(player, target, hostile, e),
+            _ => self.steer(state, player, target, hostile, e),
         }
     }
 
     /// Lines up with `npc` on one axis and fires along it: tears fly
     /// straight, so alignment is what lands hits. Keeps a range band (wider
-    /// against a boss), never stands still against a boss, turns away from
-    /// walls instead of backing into a corner, and steps across the path of
-    /// the nearest enemy projectile.
+    /// against a boss), never stands still against a boss, strafes only to
+    /// align, escape a corner or dodge, turns away from walls instead of
+    /// backing into a corner, and steps across the path of the nearest enemy
+    /// projectile.
     fn fight(
         &mut self,
         state: &State,
@@ -553,6 +598,30 @@ impl Driver {
             "ArrowDown" => ("KeyS", "KeyW"),
             _ => ("KeyW", "KeyS"),
         };
+        // Contact hurts most: step away from the nearest threat first, still
+        // firing at the target.
+        if let Some(threat) = threat(state, player) {
+            let mut keys = vec![fire];
+            let (dx, dy) = (player.x - threat.x, player.y - threat.y);
+            let horizontal_away = if dx >= 0.0 { "KeyD" } else { "KeyA" };
+            let vertical_away = if dy >= 0.0 { "KeyS" } else { "KeyW" };
+            for (code, magnitude) in [(horizontal_away, dx.abs()), (vertical_away, dy.abs())] {
+                // Along a wall, slide along it instead of pressing into it.
+                if magnitude > 4.0 && !walled(code) {
+                    keys.push(code);
+                }
+            }
+            if keys.len() == 1 {
+                let (first, second) = if dx.abs() >= dy.abs() {
+                    (vertical_away, opposite(vertical_away))
+                } else {
+                    (horizontal_away, opposite(horizontal_away))
+                };
+                keys.push(if walled(first) { second } else { first });
+            }
+            let ticks = e.range(3, 6);
+            return self.hold(state, &keys, ticks);
+        }
         let (near, far) = if boss { (120.0, 220.0) } else { (70.0, 400.0) };
         let range = distance(player, npc);
         // One key per axis: along the firing line and across it.
@@ -572,11 +641,19 @@ impl Driver {
         let cornered = range < near && walled(away);
         let mut across = if cross.abs() > 8.0 {
             Some(if cross > 0.0 { positive } else { negative })
-        } else if boss || cornered {
+        } else if cornered {
             Some(if e.chance(1, 2) { positive } else { negative })
         } else {
             None
         };
+        // Tears inherit 1.2x the player's velocity across their aim
+        // (`projectiles::stored_velocity`), so a strafe bends every shot off
+        // the line. Aligned against a boss, keep moving along the line
+        // instead: that changes tear speed, not direction.
+        if boss && along.is_none() && across.is_none() {
+            let step = if e.chance(1, 2) { toward } else { away };
+            along = Some(if walled(step) { opposite(step) } else { step });
+        }
         if let Some(code) = across.filter(|code| walled(code)) {
             across = Some(opposite(code));
         }
@@ -610,18 +687,13 @@ impl Driver {
             }
         }
         let held: Vec<&str> = std::iter::once(fire).chain(along).chain(across).collect();
-        for code in &held {
-            self.queue.push_back(key(code, true));
-        }
-        self.queue
-            .push_back(tick(if boss { e.range(4, 14) } else { e.range(3, 20) }));
-        for code in &held {
-            self.queue.push_back(key(code, false));
-        }
+        let ticks = if boss { e.range(4, 14) } else { e.range(3, 20) };
+        self.hold(state, &held, ticks);
     }
 
     fn steer(
         &mut self,
+        state: &State,
         player: WorldVector,
         target: WorldVector,
         hostile: Option<WorldVector>,
@@ -644,13 +716,8 @@ impl Driver {
                 held.push(aim_toward(player, npc));
             }
         }
-        for code in &held {
-            self.queue.push_back(key(code, true));
-        }
-        self.queue.push_back(tick(e.range(2, 18)));
-        for code in &held {
-            self.queue.push_back(key(code, false));
-        }
+        let ticks = e.range(2, 18);
+        self.hold(state, &held, ticks);
     }
 
     /// Plants a bomb beside a blocking rock and retreats from the blast.
@@ -710,7 +777,14 @@ impl Driver {
             5 => self
                 .queue
                 .push_back(tick(*e.pick(&[0, MAX_COMMAND_TICKS + 1, u32::MAX]))),
-            6 if e.chance(1, 40) => self.queue.push_back(tick(MAX_COMMAND_TICKS)),
+            // The budget itself is accepted. Paused or in the menus that is
+            // cheap; in play it simulates ten minutes in one command, and
+            // every replay, continuation and the interpreted WASM
+            // differential repeat it, which once stretched a test:dst run
+            // from two and a half minutes to twelve.
+            6 if (state.paused || state.screen != Screen::Playing) && e.chance(1, 40) => {
+                self.queue.push_back(tick(MAX_COMMAND_TICKS))
+            }
             6 => {
                 // Out-of-range host clocks and timestamps on batched steps.
                 let (count, timestamp) = if e.chance(1, 2) {
@@ -792,8 +866,11 @@ impl Driver {
         let descriptors = &state.floor.descriptors;
         let boss = |room: usize| descriptors[room].template.room_type == 5;
         let unvisited = |room: usize| !state.visited_rooms.contains(&room);
+        let treasure = |room: usize| descriptors[room].template.room_type == 4 && unvisited(room);
         let next = match travel {
             Travel::Boss => first_step(state, &admitted, boss),
+            Travel::Treasure => first_step(state, &admitted, treasure)
+                .or_else(|| first_step(state, &admitted, boss)),
             Travel::Explore => first_step(state, &admitted, unvisited)
                 .or_else(|| first_step(state, &admitted, boss)),
         }?;
@@ -805,6 +882,34 @@ impl Driver {
             .find(|door| door.target_room as usize == next)
             .map(|door| (door.world_position, door.state == "Hidden"))
     }
+}
+
+/// The nearest point the player must not be at: a hostile NPC, where it will
+/// be in ten updates, or a boss's published target (Monstro's landing cell
+/// is snapped to the player's at take-off), within contact reach and margin.
+fn threat(state: &State, player: WorldVector) -> Option<WorldVector> {
+    const MARGIN: f32 = 28.0;
+    state
+        .room
+        .npcs
+        .iter()
+        .filter(|npc| !npc.removed && npc.hp > 0.0 && npc.collision_damage > 0.0)
+        .flat_map(|npc| {
+            let ahead = WorldVector {
+                x: npc.position.x + npc.velocity.x * 10.0,
+                y: npc.position.y + npc.velocity.y * 10.0,
+            };
+            let target =
+                (npc.boss && (npc.target.x != 0.0 || npc.target.y != 0.0)).then_some(npc.target);
+            let reach = npc.collision_radius + MARGIN;
+            [Some(npc.position), Some(ahead), target]
+                .into_iter()
+                .flatten()
+                .map(move |point| (point, distance(player, point) - reach))
+        })
+        .filter(|(point, gap)| *gap < 0.0 && point.is_finite())
+        .min_by(|a, b| a.1.total_cmp(&b.1))
+        .map(|(point, _)| point)
 }
 
 /// The neighbour of the current room that starts a shortest path through

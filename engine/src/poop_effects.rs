@@ -146,6 +146,8 @@ impl Admission<'_> {
             full_updates: 0,
             poop_effect: Some(controller),
             blood_effect: None,
+            creep_effect: None,
+            fly_effect: None,
         });
         // Real Room sequence and manager append precede any caller Update.
         self.scheduler.admit(ActorRef {
@@ -272,6 +274,8 @@ fn explosion_update(
         );
     }
     if frame == *frame_target {
+        // Every native flags8 site also sets +7d8 (sequence render key).
+        effect.raw_7d8 = true;
         effect.flags |= 8;
     }
     if !effect.sprite.playing {

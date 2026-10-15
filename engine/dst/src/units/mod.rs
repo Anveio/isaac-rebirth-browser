@@ -5,12 +5,16 @@ use crate::harness::Unit;
 
 mod abi;
 mod actors;
+mod contact;
 mod floor;
 mod game;
 mod grid;
 mod item_pools;
+mod layout;
 mod mt;
+mod pathfinder;
 mod phase;
+mod room_spawns;
 mod seed_codec;
 
 pub const UNITS: &[Unit] = &[
@@ -35,6 +39,16 @@ pub const UNITS: &[Unit] = &[
         run: actors::run,
     },
     Unit {
+        name: "layout",
+        summary: "rectangular floor growth over every accepted seed, room count and shape mask",
+        run: layout::run,
+    },
+    Unit {
+        name: "room_spawns",
+        summary: "authored spawn-group selection over every authored room and synthetic edge rooms",
+        run: room_spawns::run,
+    },
+    Unit {
         name: "floor",
         summary: "Basement generation structure, retries and per-descriptor room admission",
         run: floor::run,
@@ -43,6 +57,16 @@ pub const UNITS: &[Unit] = &[
         name: "grid",
         summary: "grid queries and ground-collision solvers on generated rooms",
         run: grid::run,
+    },
+    Unit {
+        name: "contact",
+        summary: "mass contact responses against momentum, centre-of-mass and overlap oracles",
+        run: contact::run,
+    },
+    Unit {
+        name: "pathfinder",
+        summary: "FindGridPath's flood against an independent node-weighted Dijkstra",
+        run: pathfinder::run,
     },
     Unit {
         name: "item_pools",

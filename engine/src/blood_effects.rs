@@ -104,6 +104,8 @@ impl NpcEffectAdmission<'_> {
             sprite: Sprite::new(config),
             full_updates: 0,
             blood_effect: Some(controller),
+            creep_effect: None,
+            fly_effect: None,
             poop_effect: None,
         });
         self.scheduler.admit(ActorRef {
@@ -246,6 +248,8 @@ pub(crate) fn advance(state: &mut State, phase: Phase, id: u32) -> Result<(), St
                 effect.lifetime_divisor = state.boot_lifecycle.shared.bounded(3) as i32 + 6;
             }
             if effect.sprite.frame.floor() as i32 == effect.lifetime_divisor {
+                // 45e58f pairs flags8 with +7d8 (sequence render key).
+                effect.raw_7d8 = true;
                 effect.flags |= 8; //17 does not acquire2's0x20000 preservation bit.
             }
             if !effect.sprite.playing {

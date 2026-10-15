@@ -1,7 +1,9 @@
 //! NPCAI_Pathfinder (Entity_NPC+7d8) for families that wander the room grid.
 //! MoveRandomly5b4d40 picks a cardinal target up to eleven cells away from
 //! the signed Room+e98 path costs, then steers toward it each update.
-use crate::{entities::NpcWorld, motion::WorldVector, mt::Mt19937, npcs::Npc};
+use crate::{
+    entities::NpcWorld, motion::WorldVector, mt::Mt19937, npcs::Npc, room_costs::RoomCosts,
+};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
@@ -15,6 +17,35 @@ pub struct Pathfinder {
     pub stuck: i32,
     /// +20: Game+ce9f4 at the previous call.
     pub last_update: u32,
+    /// +24: FindGridPath's lagged grid cell of the owner; -1 after Reset.
+    #[serde(default = "no_cell")]
+    pub cell: i32,
+    /// +28: cell-adoption delay.
+    #[serde(default)]
+    pub cell_delay: i32,
+    /// +2c: re-plan timer.
+    #[serde(default)]
+    pub replan: i32,
+    /// +30: flood map, a Room+e98 copy whose visited cells hold -distance.
+    #[serde(default = "RoomCosts::zeroed")]
+    pub flood: RoomCosts,
+    /// +730: line of sight to the target cell.
+    #[serde(default)]
+    pub direct: bool,
+    /// +731: the flood reached `cell`.
+    #[serde(default)]
+    pub found: bool,
+    /// +734: last target whose cell was open (cost <= 999).
+    #[serde(default = "zero")]
+    pub last_target: WorldVector,
+}
+
+fn no_cell() -> i32 {
+    -1
+}
+
+fn zero() -> WorldVector {
+    ZERO
 }
 
 impl Pathfinder {
@@ -25,6 +56,13 @@ impl Pathfinder {
             direction: -1,
             stuck: 0,
             last_update: 0,
+            cell: -1,
+            cell_delay: 0,
+            replan: 0,
+            flood: RoomCosts::zeroed(),
+            direct: false,
+            found: false,
+            last_target: ZERO,
         }
     }
 }
@@ -61,11 +99,19 @@ fn length(vector: WorldVector) -> f32 {
 
 fn cost(world: &NpcWorld, point: WorldVector) -> Result<i32, String> {
     // Outside the lattice GetGridIndex5c6fa0 returns -1 and the source reads
-    // the word before Room+e98; that unrelated field is not modelled.
-    let index = world
-        .grid
-        .index(point)
-        .ok_or("pathfinder probe left the room grid")?;
+    // the word before Room+e98: Room+e94, which Room.Init (5cf3a0/5cfe40)
+    // leaves at -1 or a grid index below width*height. Every caller tests
+    // the cost against 199, 300 or 700, so in a room of at most 200 cells
+    // any such value reads as an open cell. Larger rooms need the field.
+    // (MoveRandomly's dirs[-1] side probe reaches speed*40 below the end
+    // point, which leaves the lattice for Larry Jr.'s speed 2.)
+    let Some(index) = world.grid.index(point) else {
+        let descriptor = world.grid.descriptor();
+        if u32::from(descriptor.width) * u32::from(descriptor.height) <= 200 {
+            return Ok(-1);
+        }
+        return Err("pathfinder probe left the room grid; Room+e94 is not modelled".into());
+    };
     world
         .path_costs
         .as_deref()
@@ -273,5 +319,320 @@ fn choose(
         }
     };
     path.stuck = 0;
+    Ok(())
+}
+
+/// GetGridIndex with the native -1 sentinel.
+fn cell_of(world: &NpcWorld, point: WorldVector) -> i32 {
+    world.grid.index(point).map_or(-1, |index| index as i32)
+}
+
+/// A Room+e98 word by native index; -1 reads Room+e94 (see `cost`).
+fn cost_at(world: &NpcWorld, index: i32) -> Result<i32, String> {
+    if index < 0 {
+        let descriptor = world.grid.descriptor();
+        if u32::from(descriptor.width) * u32::from(descriptor.height) <= 200 {
+            return Ok(-1);
+        }
+        return Err("FindGridPath read Room+e94, which is not modelled".into());
+    }
+    world
+        .path_costs
+        .as_deref()
+        .ok_or("FindGridPath requires source Room.Init path costs")?
+        .get(index as usize)
+}
+
+/// GetGridPosition5c78b0 for a valid cell.
+fn centre(world: &NpcWorld, index: i32) -> Result<WorldVector, String> {
+    if index < 0 {
+        return Err("FindGridPath centre left the room grid".into());
+    }
+    world
+        .grid
+        .position(index as usize)
+        .ok_or_else(|| "FindGridPath centre left the room grid".into())
+}
+
+/// IndexXY5c7870.
+fn index_xy(width: i32, height: i32, x: i32, y: i32) -> i32 {
+    if x < 0 || y < 0 || x >= width || y >= height {
+        -1
+    } else {
+        y * width + x
+    }
+}
+
+fn neighbours(width: i32, height: i32, cell: i32) -> [i32; 4] {
+    let (x, y) = (cell % width, cell / width);
+    [
+        index_xy(width, height, x - 1, y),
+        index_xy(width, height, x, y - 1),
+        index_xy(width, height, x + 1, y),
+        index_xy(width, height, x, y + 1),
+    ]
+}
+
+/// libstdc++ __push_heap with comp(a, b) = a.dist > b.dist.
+fn sift_up(heap: &mut [(i32, i32)], mut hole: usize, value: (i32, i32)) {
+    while hole > 0 {
+        let parent = (hole - 1) / 2;
+        if heap[parent].1 <= value.1 {
+            break;
+        }
+        heap[hole] = heap[parent];
+        hole = parent;
+    }
+    heap[hole] = value;
+}
+
+fn push_heap(heap: &mut Vec<(i32, i32)>, value: (i32, i32)) {
+    heap.push(value);
+    let hole = heap.len() - 1;
+    sift_up(heap, hole, value);
+}
+
+/// libstdc++ pop_heap: the last element sifts down from the root, ties
+/// taking the right child, then sifts up.
+fn pop_heap(heap: &mut Vec<(i32, i32)>) {
+    let last = heap.len() - 1;
+    if last == 0 {
+        heap.pop();
+        return;
+    }
+    let value = heap[last];
+    heap[last] = heap[0];
+    let n = last as isize;
+    let mut hole = 0_isize;
+    let mut child = 0_isize;
+    while child < (n - 1) / 2 {
+        child = 2 * (child + 1);
+        if heap[child as usize].1 > heap[(child - 1) as usize].1 {
+            child -= 1;
+        }
+        heap[hole as usize] = heap[child as usize];
+        hole = child;
+    }
+    if n & 1 == 0 && child == (n - 2) / 2 {
+        child = 2 * (child + 1);
+        heap[hole as usize] = heap[(child - 1) as usize];
+        hole = child - 1;
+    }
+    sift_up(&mut heap[..last], hole as usize, value);
+    heap.pop();
+}
+
+fn flood(path: &mut Pathfinder, world: &NpcWorld, start: i32) -> Result<(), String> {
+    let descriptor = world.grid.descriptor();
+    let costs = world
+        .path_costs
+        .as_deref()
+        .ok_or("FindGridPath requires source Room.Init path costs")?;
+    (path.flood, path.found) =
+        flood_costs(costs, descriptor.width, descriptor.height, start, path.cell)?;
+    Ok(())
+}
+
+/// 5b498f: Dijkstra from the `start` (target) cell over a copy of a
+/// `width` x `height` room's costs, for the `owner` cell's walk. A visited
+/// open cell (cost 0..=949) holds -distance, entering an empty cell costing
+/// 1 and any other open cell 7. The flood stops once the nearest unexpanded
+/// cell is half the room's cell count away, or after the expansion that
+/// visits `owner`; it returns the map and whether `owner` was visited.
+pub fn flood_costs(
+    costs: &RoomCosts,
+    width: u16,
+    height: u16,
+    start: i32,
+    owner: i32,
+) -> Result<(RoomCosts, bool), String> {
+    let cells = usize::from(width) * usize::from(height);
+    if cells == 0 || cells > crate::grid::MAX_GRID_CELLS {
+        return Err(format!(
+            "FindGridPath flood requires an admitted room grid, not {width}x{height}"
+        ));
+    }
+    let (width, height) = (i32::from(width), i32::from(height));
+    let mut flood = costs.clone();
+    let mut found = false;
+    let half = (width * height) / 2;
+    let mut heap = Vec::new();
+    push_heap(&mut heap, (start, 0));
+    while let Some(&(current, distance)) = heap.first() {
+        if found || distance >= half {
+            break;
+        }
+        pop_heap(&mut heap);
+        for next in neighbours(width, height, current) {
+            if next < 0 {
+                continue;
+            }
+            let cost = flood.get(next as usize)?;
+            if !(0..=949).contains(&cost) {
+                continue;
+            }
+            let reached = if cost == 0 {
+                distance + 1
+            } else {
+                distance + 7
+            };
+            flood.store(next as usize, -reached)?;
+            if owner == next {
+                found = true;
+            }
+            push_heap(&mut heap, (next, reached));
+        }
+    }
+    Ok((flood, found))
+}
+
+/// 5b47f8: the visited neighbour nearest the target (first of L, U, R, D).
+fn step(path: &Pathfinder, world: &NpcWorld) -> Result<WorldVector, String> {
+    let descriptor = world.grid.descriptor();
+    let (width, height) = (i32::from(descriptor.width), i32::from(descriptor.height));
+    let mut best = path.cell;
+    let mut best_value = -1000;
+    for (side, next) in neighbours(width, height, path.cell).into_iter().enumerate() {
+        if world.room_type == 16 && side == 1 && next >= 0 {
+            return Err("FindGridPath crawlspace gravity cells are not admitted".into());
+        }
+        if next >= 0 {
+            let value = path.flood.get(next as usize)?;
+            if value < 0 && value > best_value {
+                best_value = value;
+                best = next;
+            }
+        }
+    }
+    centre(world, best)
+}
+
+/// NPCAI_Pathfinder::FindGridPath5b41e0: re-plan a flood path toward
+/// `target` every 10..19 calls (the only shared draw), walk cell centres or
+/// straight at a target in sight, and stamp `marker` into the owner's cell
+/// cost. Charm, confusion and fear are not admitted.
+pub(crate) fn find_grid_path(
+    npc: &mut Npc,
+    random: &mut Mt19937,
+    world: &mut NpcWorld,
+    target: WorldVector,
+    speed: f32,
+    marker: i32,
+    friction: &mut f32,
+) -> Result<(), String> {
+    let mut path = npc
+        .pathfinder
+        .take()
+        .ok_or("pathfinding NPC requires its NPCAI_Pathfinder")?;
+    let result = find_with(
+        npc, &mut path, random, world, target, speed, marker, friction,
+    );
+    npc.pathfinder = Some(path);
+    result
+}
+
+#[expect(
+    clippy::too_many_arguments,
+    reason = "FindGridPath5b41e0's owner, pathfinder, target, speed, marker and friction"
+)]
+fn find_with(
+    npc: &mut Npc,
+    path: &mut Pathfinder,
+    random: &mut Mt19937,
+    world: &mut NpcWorld,
+    target: WorldVector,
+    speed: f32,
+    marker: i32,
+    friction: &mut f32,
+) -> Result<(), String> {
+    let mut goal = cell_of(world, target);
+    if goal >= 0 && cost_at(world, goal)? <= 999 {
+        path.last_target = target;
+    } else if path.last_target != ZERO {
+        goal = cell_of(world, path.last_target);
+    }
+    let cell = cell_of(world, npc.position);
+    let origin = centre(world, cell)?;
+    if cell != path.cell {
+        path.cell_delay -= 10;
+        if path.cell_delay < 0 {
+            path.cell = cell;
+            path.cell_delay = if speed > 0.2 {
+                (20.0_f32 / speed) as i32
+            } else {
+                100
+            };
+        }
+    }
+    let mut slowdown = 1.0;
+    if world.game_counter.wrapping_add(1).is_multiple_of(3) {
+        let probe = npc.position + normalized(npc.velocity) * 40.0;
+        let ahead = cost_at(world, cell_of(world, probe))?;
+        if (1..=949).contains(&ahead) {
+            slowdown = 0.7;
+        }
+    }
+    if path.cell < 0 {
+        return Err("FindGridPath owner left the room grid".into());
+    }
+    let costs = world
+        .path_costs
+        .as_deref_mut()
+        .ok_or("FindGridPath requires source Room.Init path costs")?;
+    if costs.get(path.cell as usize)? <= 949 {
+        costs.store(path.cell as usize, marker)?;
+    }
+    if crate::plain_npc::on_frame(npc, world, 10)? {
+        let sighted = centre(world, cell_of(world, target))?;
+        let costs = world
+            .path_costs
+            .as_deref()
+            .ok_or("FindGridPath requires source Room.Init path costs")?;
+        path.direct =
+            world.grid.path_line_clear(origin, sighted, costs, 0) || npc.grid_collision_class == 3;
+    }
+    let distance = length(sub(target, npc.position));
+    let waypoint = if (path.direct && 750.0 > distance) || path.cell == goal {
+        path.replan -= 10;
+        path.cell_delay -= 50;
+        target
+    } else {
+        let timer = path.replan;
+        if cost_at(world, path.cell)? != 1000 && timer <= 0 {
+            path.replan = random.bounded(10) as i32 + 10;
+            flood(path, world, goal)?;
+        } else {
+            path.replan = timer - 1;
+        }
+        if path.found {
+            step(path, world)?
+        } else {
+            ZERO
+        }
+    };
+    if waypoint != ZERO {
+        let delta = sub(waypoint, npc.position);
+        let length = length(delta);
+        if length > 1.0 {
+            let scale = (length * 0.1).min(2.0);
+            let push = (slowdown * speed) * scale;
+            *friction *= 0.7;
+            if *friction != 0.0 {
+                let accel = WorldVector {
+                    x: (delta.x / length) * push,
+                    y: (delta.y / length) * push,
+                };
+                npc.velocity = npc.velocity
+                    + WorldVector {
+                        x: accel.x / *friction,
+                        y: accel.y / *friction,
+                    };
+            }
+        } else {
+            *friction *= 0.5;
+        }
+    } else {
+        *friction *= 0.85;
+    }
     Ok(())
 }

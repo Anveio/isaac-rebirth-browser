@@ -82,8 +82,8 @@ impl Default for WeaponCache {
     }
 }
 
-/// Source context admission, not a replacement native pointer. Main has no
-/// nonregular actor producer yet, so only actual fresh NULL C18 is admitted.
+/// Source context admission, separate from the registered actor reference.
+/// Fresh NULL C18 and each admitted actor transition have explicit owners.
 /// A real unsupported invocation invalidates that proof until the next run.
 #[derive(Clone, Debug, Default, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -173,6 +173,7 @@ pub(crate) fn resolve_appearance(
 ) -> (WeaponCache, CacheMask) {
     let mut completed = 0;
     let number_one = source_player_type == Some(0) && items.admits_number_one_appearance();
+    let soy_milk = source_player_type == Some(0) && items.admits_soy_milk_cache_context();
     if source_player_type == Some(0) && (items.admits_selected_appearance() || number_one) {
         if requested.0 & 32 != 0 {
             prior.flags_c98 = AttackFlags(if prior.primary == PrimaryWeaponC08::Ludovico {
@@ -197,6 +198,14 @@ pub(crate) fn resolve_appearance(
                     source_middle: [0.0; 4],
                     offsets: [255.0 * byte_scale, 255.0 * byte_scale, 0.0],
                 };
+            } else if soy_milk {
+                //515E76 Have330 reaches the late CA0 tint at513480.
+                //This selected context excludes higher-precedence modifiers.
+                prior.color_ca0 = AttackColor {
+                    tint: [1.5, 2.0, 2.0, 1.0],
+                    ..AttackColor::WHITE
+                };
+                prior.color_ccc = AttackColor::WHITE;
             } else {
                 prior.color_ca0 = AttackColor::WHITE;
                 prior.color_ccc = AttackColor::WHITE;
@@ -213,8 +222,12 @@ pub(crate) fn resolve_appearance(
 pub(crate) enum ControllerChannel {
     RegularShots,
     OrdinaryKnife,
+    OrdinaryFetus,
+    ControlledFetus,
     ControlledKnife,
     ChargedBrimstone,
+    OrdinaryTechnology,
+    ControlledTechnology,
     ControlledBrimstone,
     ControlledTear,
     Unimplemented(PrimaryWeaponC08),
@@ -234,6 +247,14 @@ pub(crate) fn resolve_controller(
             ControllerChannel::ControlledBrimstone
         }
         PrimaryWeaponC08::Brimstone => ControllerChannel::ChargedBrimstone,
+        PrimaryWeaponC08::Technology if items.primary_permanent_presence(329)? => {
+            ControllerChannel::ControlledTechnology
+        }
+        PrimaryWeaponC08::Technology => ControllerChannel::OrdinaryTechnology,
+        PrimaryWeaponC08::DrFetus if items.primary_permanent_presence(329)? => {
+            ControllerChannel::ControlledFetus
+        }
+        PrimaryWeaponC08::DrFetus => ControllerChannel::OrdinaryFetus,
         PrimaryWeaponC08::Ludovico => ControllerChannel::ControlledTear,
         other => ControllerChannel::Unimplemented(other),
     })
@@ -290,6 +311,11 @@ pub(crate) fn resolve_live_weapon(
         return Ok(LiveWeaponResolution::Unadmitted("weaponContext"));
     }
     let controller = resolve_controller(items, cache.primary)?;
+    if controller == ControllerChannel::RegularShots
+        && items.pending_cache().0 & RegularTearPlan::INPUT_CACHE_MASK.0 != 0
+    {
+        return Ok(LiveWeaponResolution::Unadmitted("regularTearCache"));
+    }
     let plan = ResolvedWeaponPlan {
         primary: cache.primary,
         controller,
@@ -303,7 +329,18 @@ pub(crate) fn resolve_live_weapon(
         source_range_c8c: stats.tear_height,
         max_fire_delay,
         regular: if controller == ControllerChannel::RegularShots {
-            Some(RegularTearPlan::resolve(stats, max_fire_delay, cache)?)
+            let regular = RegularTearPlan::resolve(stats, max_fire_delay, cache)?;
+            Some(
+                if items.admits_soy_milk_regular_properties(
+                    admission.source_player_type,
+                    cache.primary,
+                    cache.flags_c98,
+                ) {
+                    regular.with_soy_milk_scale()?
+                } else {
+                    regular
+                },
+            )
         } else {
             None
         },
@@ -391,10 +428,20 @@ pub(crate) fn admits_neutral_brimstone_properties(
     items: ItemInputs<'_>,
     source_player_type: Option<u32>,
 ) -> bool {
-    source_player_type == Some(0) && items.admits_neutral_kind2()
+    source_player_type == Some(0)
+        && (items.admits_neutral_kind2() || items.admits_soy_milk_kind2_getter())
 }
 
-///50E4A7 executes this current38 getter only AFTER the real Laser Spawn.
+///Independent neutral50D090 kinds2/3 footprint for Technology. Its cached
+///context predicate alone does not establish a getter/controller capability.
+pub(crate) fn admits_neutral_technology_properties(
+    items: ItemInputs<'_>,
+    source_player_type: Option<u32>,
+) -> bool {
+    source_player_type == Some(0) && items.admits_technology_kind2_getter()
+}
+
+///50E4A7/50E2A8 execute this current38 getter only AFTER the real Laser Spawn.
 ///Neutral kind2 requests no RNG; the generic3C scale is not a Laser consumer.
 pub(crate) fn resolve_neutral_kind2_damage(
     items: ItemInputs<'_>,
@@ -402,10 +449,38 @@ pub(crate) fn resolve_neutral_kind2_damage(
     stats: PlayerStats,
 ) -> Result<f32, String> {
     stats.validate()?;
-    if !admits_neutral_brimstone_properties(items, source_player_type) {
+    if !admits_neutral_brimstone_properties(items, source_player_type)
+        && !admits_neutral_technology_properties(items, source_player_type)
+    {
         return Err("kind2 requires an unadmitted source modifier/context branch".into());
     }
     Ok(stats.damage)
+}
+
+///50DE83 consumes actual50D090(kind5) outputs30/38/04 for the Bomb.
+///The factory owns its later damage multiplier, variant, RNG and Parent setter;
+///unused generic size/variant outputs are not promoted to Bomb properties.
+pub(crate) fn resolve_fetus_kind5(
+    items: ItemInputs<'_>,
+    source_player_type: Option<u32>,
+    cache: WeaponCache,
+    stats: PlayerStats,
+) -> Result<AttackProperties, String> {
+    stats.validate()?;
+    if source_player_type != Some(0)
+        || cache.primary != PrimaryWeaponC08::DrFetus
+        || !items.admits_fetus_kind5_context()
+    {
+        return Err("kind5 requires an unadmitted source modifier/context branch".into());
+    }
+    if !cache.color_ca0.is_finite() {
+        return Err("kind5 current CA0 owner is nonfinite".into());
+    }
+    Ok(AttackProperties {
+        flags: cache.flags_c98,
+        color: cache.color_ca0,
+        collision_damage: stats.damage,
+    })
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -423,6 +498,20 @@ pub(crate) struct RegularTearPlan {
 }
 
 impl RegularTearPlan {
+    /// C88, C78, C7C, C8C/C90/C94, C98 and CA0 are birth inputs.
+    /// Move/Flight/Familiar/Luck requests do not own these copied fields.
+    const INPUT_CACHE_MASK: CacheMask = CacheMask(1 | 2 | 4 | 8 | 32 | 64);
+
+    ///50D3E3/3EB applies the Soy size operator before541FF0's .01 bound.
+    ///Selected finite nonnegative damage makes the earlier scale() bound a
+    ///no-op (raw scale>=.6); preserve the actual post-multiply bound too.
+    fn with_soy_milk_scale(mut self) -> Result<Self, String> {
+        self.scale = (self.scale * 0.5_f32).max(0.01_f32);
+        self.animation_tier = projectiles::regular_animation_tier(self.scale)?;
+        self.collision_radius = projectiles::collision_radius(self.scale, 8.0)?;
+        Ok(self)
+    }
+
     pub(crate) fn resolve(
         stats: PlayerStats,
         max_fire_delay: i32,
@@ -474,7 +563,10 @@ pub(crate) fn admit_current_laser_contact_flags(
             .as_ref()
             .ok_or("Laser kind3 actual Player items absent")?,
     )?;
-    if !inputs.admits_neutral_kind3() {
+    if !inputs.admits_neutral_kind3()
+        && !inputs.admits_technology_kind3_getter()
+        && !inputs.admits_soy_milk_kind3_getter()
+    {
         return Ok(LaserStatusAdmission::UnmappedBuilderModifiers);
     }
     //Actual476869..8A1 status masks start at8; currentlow3 is inert.

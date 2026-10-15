@@ -42,6 +42,40 @@ fn definition() -> &'static Definition {
     })
 }
 
+// Actual7/2 authored config has one layer:478416 skips its root displacement.
+// It owns RedLaser, not the thick Laser's LargeRedLaser clip or extents.
+fn technology_definition() -> &'static Definition {
+    static DEFINITION: OnceLock<Definition> = OnceLock::new();
+    DEFINITION.get_or_init(|| {
+        let config = crate::content::entity(7, 2);
+        Definition {
+            entity_type: 7,
+            variant: 2,
+            actor: "gfx/007.002_thin red laser.anm2",
+            base_hp: config.base_hp,
+            collision_radius: config.collision_radius,
+            collision_mass: config.collision_mass,
+            collision_damage: config.collision_damage,
+            friction: config.friction,
+            shadow_size: config.shadow_size,
+            grid_points: config.grid_points,
+            default_clip: "RedLaser",
+            clips: &[
+                Clip {
+                    name: "RedLaser",
+                    frames: 3,
+                    looping: true,
+                },
+                Clip {
+                    name: "RedLaserWavy",
+                    frames: 3,
+                    looping: true,
+                },
+            ],
+        }
+    })
+}
+
 pub use crate::laser_npc_runtime::retire;
 pub(crate) use crate::laser_npc_runtime::{admit, LaserBirth};
 pub use crate::laser_runtime::{advance_actor, advance_impact};
@@ -52,6 +86,16 @@ pub use crate::laser_runtime::{advance_actor, advance_impact};
 pub enum LaserOrigin {
     NpcShootAngle,
     PlayerCharged,
+    PlayerControlled,
+    PlayerTechnology,
+}
+impl LaserOrigin {
+    pub(crate) fn is_player(self) -> bool {
+        matches!(
+            self,
+            Self::PlayerCharged | Self::PlayerControlled | Self::PlayerTechnology
+        )
+    }
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
@@ -232,6 +276,14 @@ impl Laser {
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Impact {
+    #[serde(default)]
+    pub source_subtype: Option<u32>,
+    #[serde(default)]
+    pub sprite_flip_x: Option<bool>,
+    ///Actual Effect+814 word, independent of Sprite.rotation. Missing old
+    ///history stays unknown; selected Effect50 Full does not copy it to2CC.
+    #[serde(default)]
+    pub raw_814: Option<f32>,
     ///Actual registered Parent value; false knownness is retained NPC history, not NULL proof.
     pub parent: Option<ActorRef>,
     pub parent_known: bool,
@@ -310,17 +362,44 @@ fn segment_distance_squared(point: WorldVector, from: WorldVector, to: WorldVect
 
 impl Laser {
     pub(crate) fn initialize(id: u32, subtype: u32, seed: u32, age: u32) -> Result<Self, String> {
-        if subtype != 0 {
-            return Err("ordinary Player Laser requires actual subtype0".into());
+        if subtype > 1 {
+            return Err("Player Laser requires an admitted subtype0 or subtype1".into());
         }
         let mut laser = Self::initialize_npc(id, 1, seed, age, crate::content::entity(7, 1));
-        laser.origin = LaserOrigin::PlayerCharged;
+        laser.origin = if subtype == 1 {
+            LaserOrigin::PlayerControlled
+        } else {
+            LaserOrigin::PlayerCharged
+        };
+        laser.subtype = subtype;
         laser.uninitialized = Some(false);
         laser.spawner_variant = Some(0);
         laser.entity_flags = Some(0); //441EDE, actual fresh Base.Init318.
         laser.previous_angle = Some(0.0); //475EF8 actual Init7E0.
         Ok(laser)
     }
+    ///475EA0/441C80 Init through the actual7/2 config; factory50E1C0 owns
+    ///the later lifetime3, grid5 and copied properties. No C18 registration.
+    pub(crate) fn initialize_technology(id: u32, seed: u32, age: u32) -> Self {
+        let mut laser = Self::initialize_npc(id, 2, seed, age, crate::content::entity(7, 2));
+        laser.origin = LaserOrigin::PlayerTechnology;
+        laser.sprite = Sprite::new(technology_definition());
+        laser.uninitialized = Some(false);
+        laser.spawner_variant = Some(0);
+        laser.entity_flags = Some(0);
+        laser.previous_angle = Some(0.0);
+        laser
+    }
+
+    ///475EA0 for actual7/2/1. The direct519FC0 caller owns property copies,
+    ///Parent and sort; it does not execute ordinary50E1C0's lifetime3 factory.
+    pub(crate) fn initialize_controlled_technology(id: u32, seed: u32, age: u32) -> Self {
+        let mut laser = Self::initialize_technology(id, seed, age);
+        laser.origin = LaserOrigin::PlayerControlled;
+        laser.subtype = 1;
+        laser
+    }
+
     pub(crate) fn restore_fast_position(&mut self) {
         if self.fast {
             self.position = self.saved_position;
@@ -451,7 +530,15 @@ impl Laser {
     }
 
     pub(crate) fn finish_full(&mut self) -> Result<(), String> {
-        self.sprite.advance(definition())?;
+        self.sprite.advance(
+            if self.origin == LaserOrigin::PlayerTechnology
+                || (self.origin == LaserOrigin::PlayerControlled && self.variant == 2)
+            {
+                technology_definition()
+            } else {
+                definition()
+            },
+        )?;
         self.velocity = self.velocity * self.current_friction;
         self.position = self.position + self.velocity;
         self.current_friction = self.configured_friction;

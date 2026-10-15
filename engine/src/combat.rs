@@ -195,6 +195,56 @@ pub fn resolve_player_projectile_contact(
     resolve_contact(player, projectile, blocks_player_shift, |_, _| {})
 }
 
+///Player509160 returnsfalse for other type4 before Bomb456C20(flagfalse).
+///A positive7DC resets4 and vetoes physics; expiry adds PlayerV*.4 first.
+pub(crate) fn resolve_player_bomb_contact(
+    player: &mut ContactBody,
+    bomb: &mut ContactBody,
+    countdown: &mut u8,
+    blocks_player_shift: impl FnOnce(WorldVector) -> bool,
+) -> Result<ContactResolution, String> {
+    if player.entity_type != 1 || bomb.entity_type != 4 || *countdown > 4 {
+        return Err("ordinary Player/Bomb contact requires actual types/countdown".into());
+    }
+    let mut next_countdown = *countdown;
+    let result = resolve_contact_with_veto(player, bomb, blocks_player_shift, |player, bomb| {
+        if next_countdown > 0 {
+            next_countdown = 4;
+            true
+        } else {
+            bomb.velocity = bomb.velocity + player.velocity * 0.4;
+            false
+        }
+    })?;
+    *countdown = next_countdown;
+    Ok(result)
+}
+
+///Neutral456C20 first(flagtrue), then second(flagfalse); the latter is a
+///no-op for otherBomb. First-markertrue vetoes only after both callbacks.
+pub(crate) fn resolve_bomb_pair(
+    first: &mut ContactBody,
+    second: &mut ContactBody,
+    first_shot_marker: bool,
+) -> Result<ContactResolution, String> {
+    if first.entity_type != 4 || second.entity_type != 4 {
+        return Err("Bomb pair requires source actor type4".into());
+    }
+    resolve_contact_with_veto(
+        first,
+        second,
+        |_| false,
+        |first, second| {
+            if first_shot_marker {
+                true
+            } else {
+                bomb_pair_callback(first, second);
+                false
+            }
+        },
+    )
+}
+
 fn bomb_pair_callback(first: &mut ContactBody, second: &mut ContactBody) {
     if first.entity_type == 4 {
         second.velocity = second.velocity * 0.2;
@@ -207,6 +257,18 @@ fn resolve_contact(
     npc: &mut ContactBody,
     blocks_player_shift: impl FnOnce(WorldVector) -> bool,
     callback: impl FnOnce(&mut ContactBody, &mut ContactBody),
+) -> Result<ContactResolution, String> {
+    resolve_contact_with_veto(player, npc, blocks_player_shift, |first, second| {
+        callback(first, second);
+        false
+    })
+}
+
+fn resolve_contact_with_veto(
+    player: &mut ContactBody,
+    npc: &mut ContactBody,
+    blocks_player_shift: impl FnOnce(WorldVector) -> bool,
+    callback: impl FnOnce(&mut ContactBody, &mut ContactBody) -> bool,
 ) -> Result<ContactResolution, String> {
     if !contact_overlap(player, npc)? {
         return Ok(ContactResolution {
@@ -221,9 +283,18 @@ fn resolve_contact(
     let mut distance = (delta.x * delta.x + delta.y * delta.y).sqrt();
     let mut next_player = *player;
     let mut next_npc = *npc;
-    callback(&mut next_player, &mut next_npc);
+    let veto = callback(&mut next_player, &mut next_npc);
     next_player.validate()?;
     next_npc.validate()?;
+    if veto {
+        //445429 ORs both callback returns;445814 skips generic mass response.
+        *player = next_player;
+        *npc = next_npc;
+        return Ok(ContactResolution {
+            colliding: false,
+            player_displacement_blocked: false,
+        });
+    }
     if distance < 0.0001 {
         *player = next_player;
         *npc = next_npc;
@@ -319,6 +390,8 @@ pub enum DamageKind {
     RoomEffect,
     /// Entity_Laser do_damage476760 passes DAMAGE_LASER.
     Laser,
+    /// Grub head HP sync 4f43d9: TakeDamage with flags 0.
+    HealthSync,
 }
 
 impl DamageKind {
@@ -329,6 +402,7 @@ impl DamageKind {
             Self::FireContact => 2,
             Self::Laser => 8,
             Self::RoomEffect => 0,
+            Self::HealthSync => 0,
         }
     }
 }

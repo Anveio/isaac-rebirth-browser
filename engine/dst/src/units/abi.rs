@@ -1,6 +1,8 @@
 //! The exported C ABI transport (`engine/src/lib.rs`, consumed by
-//! `web/engine.ts`): request framing, malformed requests, failed resets and
-//! the per-thread engine slot.
+//! `web/engine.ts`): request framing, malformed requests, failed resets, the
+//! per-thread engine slot and the authored-resource boot the e2e harness uses.
+//! A resource boot with the authored inputs must behave exactly like the plain
+//! boot, or a suite booted with resources would not speak for the browser.
 use crate::entropy::Entropy;
 use crate::harness::Case;
 use crate::props;
@@ -10,6 +12,14 @@ use serde_json::json;
 
 /// web/engine.ts refuses larger requests before calling `request_ptr`.
 const MAX_REQUEST: usize = 65_536;
+/// web/engine.ts refuses larger boot resources before `boot_resource_ptr`.
+const MAX_BOOT_RESOURCE: usize = 512 * 1024;
+
+/// The authored resources the engine embeds, as the harness supplies them.
+const CHALLENGES_XML: &str =
+    include_str!("../../../../references/isaac/rebirth/resources/challenges.xml");
+const SPECIAL_ROOMS: &[u8] =
+    include_bytes!("../../../../references/isaac/rebirth/resources/rooms/00.special rooms.stb");
 
 fn send(bytes: &[u8]) -> Option<u32> {
     let pointer = abi::request_ptr(bytes.len());
@@ -19,6 +29,17 @@ fn send(bytes: &[u8]) -> Option<u32> {
     // SAFETY: request_ptr returned a writable buffer of exactly bytes.len().
     unsafe { std::ptr::copy_nonoverlapping(bytes.as_ptr(), pointer, bytes.len()) };
     Some(abi::command())
+}
+
+/// Fills the boot resource buffer and resets from it.
+fn boot_with(resources: &[u8], seed: u32, epoch: u32) -> Option<u32> {
+    let pointer = abi::boot_resource_ptr(resources.len());
+    if pointer.is_null() {
+        return None;
+    }
+    // SAFETY: boot_resource_ptr returned a writable buffer of exactly resources.len().
+    unsafe { std::ptr::copy_nonoverlapping(resources.as_ptr(), pointer, resources.len()) };
+    Some(abi::reset_with_boot_resources(seed, epoch))
 }
 
 fn snapshot() -> Vec<u8> {
@@ -164,6 +185,135 @@ pub fn run(case: &mut Case) {
             );
             props::sometimes!(!accepted, "abi: a well-formed command is rejected");
             current = published;
+        }
+    }
+    resources(e);
+}
+
+/// The commands both boots replay: through the menus into a run, then play.
+fn script(e: &mut Entropy) -> Vec<Command> {
+    let tap = |code: &str| {
+        [true, false].map(|down| Command::Key {
+            code: code.into(),
+            down,
+        })
+    };
+    let mut commands = Vec::new();
+    for _ in 0..8 {
+        commands.extend(tap("Enter"));
+        commands.push(Command::Tick {
+            count: e.range(1, 40),
+            timestamp_millis: None,
+        });
+    }
+    for _ in 0..e.range(20, 80) {
+        commands.push(match e.below(3) {
+            0 => Command::Key {
+                code: (*e.pick(&["KeyW", "KeyA", "KeyS", "KeyD", "ArrowUp", "ArrowLeft"])).into(),
+                down: e.chance(1, 2),
+            },
+            _ => Command::Tick {
+                count: e.range(1, 30),
+                timestamp_millis: None,
+            },
+        });
+    }
+    commands
+}
+
+/// Each command's return code and the snapshot after it.
+fn replay(commands: &[Command]) -> Vec<(Option<u32>, Vec<u8>)> {
+    commands
+        .iter()
+        .map(|command| {
+            let bytes = serde_json::to_vec(command).expect("command serializes");
+            (send(&bytes), snapshot())
+        })
+        .collect()
+}
+
+fn resources(e: &mut Entropy) {
+    props::always!(
+        abi::boot_resource_ptr(MAX_BOOT_RESOURCE + 1 + e.index(1024)).is_null()
+            && !abi::boot_resource_ptr(MAX_BOOT_RESOURCE).is_null(),
+        "abi: boot resource buffers are bounded at 512 KiB"
+    );
+    let authored = serde_json::to_vec(&json!({
+        "challengesXml": CHALLENGES_XML,
+        "specialRooms": SPECIAL_ROOMS,
+    }))
+    .expect("resources serialize");
+    let (seed, epoch) = (e.nonzero_u32(), e.u32());
+    let commands = script(e);
+    let plain = (abi::reset(seed, epoch), snapshot(), replay(&commands));
+    let booted = boot_with(&authored, seed, epoch);
+    let resourced = (booted.unwrap_or(2), snapshot(), replay(&commands));
+    props::always!(
+        booted == Some(0) && abi::error_len() == 0 && resourced.1 == plain.1,
+        "abi: a boot from the authored resources publishes the plain boot's state",
+        json!({ "seed": seed, "epoch": epoch, "result": booted, "error": error() })
+    );
+    let first = resourced.2.iter().zip(&plain.2).position(|(a, b)| a != b);
+    props::always!(
+        plain.0 == 0 && first.is_none(),
+        "abi: a game booted from the authored resources plays exactly like the plain boot",
+        json!({ "seed": seed, "epoch": epoch, "firstDifference": first.map(|at| (at, &commands[at])) })
+    );
+    let playing = plain
+        .2
+        .last()
+        .and_then(|(_, state)| serde_json::from_slice::<State>(state).ok());
+    props::sometimes!(
+        playing.is_some_and(|state| state.screen == rebirth_cleanroom::Screen::Playing),
+        "abi: the resource boot comparison reaches a run"
+    );
+
+    // Corrupted or malformed resources fail with an error, or (a benign
+    // corruption) boot; a failure keeps the game already in the slot.
+    for _ in 0..e.range(2, 6) {
+        let previous = snapshot();
+        let corrupted = corrupt(e, &authored);
+        let result = boot_with(&corrupted, e.nonzero_u32(), e.u32());
+        let failed_cleanly = result == Some(1) && !error().is_empty() && snapshot() == previous;
+        props::always!(
+            failed_cleanly || (result == Some(0) && abi::error_len() == 0),
+            "abi: a resource boot either succeeds or fails with an error, keeping the previous game",
+            json!({ "result": result, "error": error(), "bytes": corrupted.len() })
+        );
+        props::sometimes!(failed_cleanly, "abi: corrupted boot resources are rejected");
+    }
+}
+
+/// Resource bytes the bridge could deliver: truncated or invalid JSON, an
+/// unknown field, a wrong or oversized challenge XML, damaged STB bytes.
+fn corrupt(e: &mut Entropy, authored: &[u8]) -> Vec<u8> {
+    let stb = |bytes: Vec<u8>| {
+        serde_json::to_vec(&json!({ "challengesXml": CHALLENGES_XML, "specialRooms": bytes }))
+            .expect("resources serialize")
+    };
+    match e.below(7) {
+        0 => authored[..e.index(authored.len())].to_vec(),
+        1 => serde_json::to_vec(&json!({ "challengesXml": CHALLENGES_XML, "extra": true }))
+            .expect("resources serialize"),
+        2 => serde_json::to_vec(&json!({ "challengesXml": "<rooms/>" }))
+            .expect("resources serialize"),
+        3 => serde_json::to_vec(&json!({ "challengesXml": " ".repeat(65_537) }))
+            .expect("resources serialize"),
+        4 => {
+            let mut xml = CHALLENGES_XML.as_bytes().to_vec();
+            let at = e.index(xml.len());
+            xml[at] = *e.pick(b"<>\"=/ x\0");
+            let xml = String::from_utf8_lossy(&xml).into_owned();
+            serde_json::to_vec(&json!({ "challengesXml": xml })).expect("resources serialize")
+        }
+        5 => stb(SPECIAL_ROOMS[..e.index(SPECIAL_ROOMS.len())].to_vec()),
+        _ => {
+            let mut bytes = SPECIAL_ROOMS.to_vec();
+            for _ in 0..e.range(1, 8) {
+                let at = e.index(bytes.len());
+                bytes[at] = e.u32() as u8;
+            }
+            stb(bytes)
         }
     }
 }

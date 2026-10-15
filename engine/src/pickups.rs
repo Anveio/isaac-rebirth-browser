@@ -279,6 +279,9 @@ impl Pickup {
     }
     /// Concrete subtype and authored world position come from room/loot routing.
     /// A restored pickup starts idle; a fresh ordinary pickup starts appearing.
+    /// Transient subtypes (Troll and Megatroll Bombs) take their temporary
+    /// visual definition through `definition_subtype`, so no birth site can
+    /// spawn one without it.
     pub fn spawn(
         id: u32,
         variant: u32,
@@ -289,7 +292,8 @@ impl Pickup {
         if !position.is_finite() {
             return Err("pickup position must be finite".into());
         }
-        let definition = definition(variant, subtype)
+        let visual = definition_subtype(variant, subtype);
+        let definition = definition(variant, visual)
             .ok_or_else(|| format!("unresolved pickup selector {variant}/{subtype}"))?;
         let animation = if variant == 100 && subtype == 0 {
             "Empty"
@@ -308,7 +312,7 @@ impl Pickup {
             spawn_seed: 0,
             variant,
             subtype,
-            spritesheet_item_id: subtype,
+            spritesheet_item_id: visual,
             position,
             presented_position: position,
             anchor_position: if matches!(variant, 10 | 20 | 30 | 40) {

@@ -111,7 +111,9 @@ const observe = () => tab.evaluate(() => {
     // Solid grid cells (walls, rocks, pits); door cells stay walkable for routing.
     // Authored cells without a grid entity (e.g. pits, selector 3000) still block.
     grid: s.room.grid && { w: s.room.grid.width, h: s.room.grid.height,
-      solid: s.room.grid.cells.map(c => ((c.entity ? c.entity.collisionClass !== 0 && c.entity.kind !== 16 : c.selector !== 0) ? 1 : 0)).join('') },
+      solid: s.room.grid.cells.map(c => ((c.entity ? c.entity.collisionClass !== 0 && c.entity.kind !== 16 : c.selector !== 0) ? 1 : 0)).join(''),
+      // Solid poop (kind 14) blocks like a rock but breaks under tears.
+      poop: s.room.grid.cells.map(c => (c.entity && c.entity.kind === 14 && c.entity.collisionClass !== 0 ? 1 : 0)).join('') },
     doors: s.room.appearance.doors.map(d => ({ side: d.side, state: d.state, target: d.targetRoom, x: d.worldPosition.x, y: d.worldPosition.y })),
     shots: (s.enemyProjectiles ?? []).map(t => t.position ?? t).filter(t => Number.isFinite(t?.x) && Number.isFinite(t?.y)).map(t => ({ x: t.x, y: t.y })),
     tears: s.tears.length, bombs: s.bombs.length, explosions: s.explosions.length,
@@ -362,7 +364,21 @@ try {
         doorGoal = door && { room: state.room, target: door.target, until: now + 15_000 };
       }
       const choice = doorGoal && open.find(d => d.target === doorGoal.target);
-      if (choice) keys.push(...routeDoorKeys(state.grid, p, choice));
+      if (choice) {
+        // Route as if poop were open floor; when poop is the next thing in the
+        // way, line up with it and shoot it down, as a player would.
+        const grid = state.grid && { ...state.grid, solid: [...state.grid.solid].map((v, i) => (state.grid.poop[i] === '1' ? '0' : v)).join('') };
+        const step = routeWaypoint(grid, p, choice);
+        const dx = step.x - p.x, dy = step.y - p.y, length = Math.hypot(dx, dy) || 1;
+        const ahead = state.grid && [1, 0.5].map(k => ({ c: Math.round((p.x + dx / length * 40 * k - 40) / 40), r: Math.round((p.y + dy / length * 40 * k - 120) / 40) }))
+          .find(({ c, r }) => c >= 0 && r >= 0 && c < state.grid.w && r < state.grid.h && state.grid.poop[r * state.grid.w + c] === '1');
+        if (ahead) {
+          doorGoal.until = Math.max(doorGoal.until, now + 5000); // breaking poop is progress
+          const px = ahead.c * 40 + 40, py = ahead.r * 40 + 120;
+          if (Math.abs(px - p.x) > Math.abs(py - p.y)) { keys.push(px > p.x ? 'ArrowRight' : 'ArrowLeft'); if (Math.abs(py - p.y) > 8) keys.push(py > p.y ? 'KeyS' : 'KeyW'); }
+          else { keys.push(py > p.y ? 'ArrowDown' : 'ArrowUp'); if (Math.abs(px - p.x) > 8) keys.push(px > p.x ? 'KeyD' : 'KeyA'); }
+        } else keys.push(...routeDoorKeys(grid, p, choice));
+      }
       else keys.push(['KeyW', 'KeyA', 'KeyS', 'KeyD'][Math.floor(segment / 8) % 4]);
       // Semi-random shooting and occasional bombs while exploring.
       if (segment % 7 < 3) keys.push(['ArrowUp', 'ArrowRight', 'ArrowDown', 'ArrowLeft'][segment % 4]);
@@ -382,6 +398,11 @@ try {
         stats.stalls++; stuckSince ??= now;
         const options = [['KeyW', 'KeyA'], ['KeyW', 'KeyD'], ['KeyS', 'KeyA'], ['KeyS', 'KeyD'], ['KeyW'], ['KeyS'], ['KeyA'], ['KeyD']];
         wiggle = { until: now + 700, keys: options[(stats.stalls * 3) % options.length] };
+        // Caged by poop (e.g. a boss's tail trail): shoot the adjacent poop instead of wiggling.
+        const c = Math.round((p.x - 40) / 40), r = Math.round((p.y - 120) / 40), g = state.grid;
+        const poop = g && now - stuckSince > 3000 && [[1, 0, 'ArrowRight'], [-1, 0, 'ArrowLeft'], [0, 1, 'ArrowDown'], [0, -1, 'ArrowUp']]
+          .find(([dc, dr]) => g.poop[(r + dr) * g.w + c + dc] === '1');
+        if (poop) wiggle = { until: now + 1500, keys: [poop[2]] };
       } else stuckSince = null;
       if (stuckSince && now - stuckSince > 20_000) { fail('Player has not moved for 20s while movement keys were held'); break; }
       lastMoveCheck = { at: now, x: state.player.x, y: state.player.y };

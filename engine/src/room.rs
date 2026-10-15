@@ -29,11 +29,19 @@ pub struct Room {
     /// Room+0 becomes true after the admitted factory or restore tail.
     #[serde(default)]
     pub loaded: bool,
+    /// Actual Room+2494. Missing restore or unclosed writer history is unknown.
+    #[serde(default)]
+    pub source_tear_slowdown_2494: Option<i32>,
     pub pickups: Vec<crate::pickups::Pickup>,
     #[serde(default)]
     pub saved_regular_pickups: Vec<crate::pickups::SavedRegularPickup>,
     pub npcs: Vec<crate::npcs::Npc>,
-    #[serde(default)]
+    /// Append-only within a room. The per-frame WASM snapshot elides them
+    /// (see `frame_snapshot_ptr`); the browser reads new ones incrementally.
+    #[serde(
+        default,
+        serialize_with = "crate::familiars::serialize_background_stains"
+    )]
     pub background_stains: Vec<crate::familiars::BackgroundStain>,
     pub authored_actor_order: Vec<crate::actors::ActorRef>,
     #[serde(default)]
@@ -224,6 +232,12 @@ impl DecorationRng {
 }
 
 impl Room {
+    /// Death66/variant0,481090 Attack02 frame22 writes4822DF after its
+    /// ordered Player effects. Unknown prior history is not invented as160.
+    pub fn apply_death_tear_slowdown(&mut self) {
+        self.source_tear_slowdown_2494 = self.source_tear_slowdown_2494.map(|prior| prior.max(160));
+    }
+
     /// 5cf614/5cff3f store loaded after factories or saved actor admission.
     pub(crate) fn complete_initialization(&mut self) {
         self.loaded = true;
@@ -354,6 +368,9 @@ impl Room {
                     .template
                     .room_type
                     == 21,
+                // A freshly constructed room is uncleared (descriptor+3d);
+                // hidden secret connections already took variant6.
+                barred: descriptor.template.room_type == 6 || descriptor.surprise_miniboss,
             })
             .collect::<Vec<_>>();
         room.grid = Some(crate::grid::for_room(
@@ -528,6 +545,7 @@ impl Room {
             descriptor: None,
             initialization_game_update: None,
             loaded: false,
+            source_tear_slowdown_2494: None,
             pickups: Vec::new(),
             saved_regular_pickups: Vec::new(),
             npcs: Vec::new(),

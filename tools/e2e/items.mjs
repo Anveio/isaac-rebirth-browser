@@ -351,8 +351,13 @@ try {
             equal(state.fireCooldown, nativePlayer.fireCooldown, 'actual guarded-shot fire timer', presentation);
             equal(state.headTimer, nativePlayer.headTimer, 'actual guarded-shot head timer', presentation);
             if (item.requirePickupShotGuard) {
-              assert.equal(typeof nativePlayer.shootingPressed, 'boolean', 'Held Pickup shooting requires actual native db0 readback');
-              equal(state.player.shooting, nativePlayer.shootingPressed, 'actual guarded-shot held input', presentation);
+              // Legacy shootingPressed reads DB0, the opposing-direction pair
+              // flag. Actual native HasShoot is not observed by this field.
+              assert.equal(typeof nativePlayer.shootingPressed, 'boolean', 'Actual native opposed-pair DB0 readback required');
+              equal(nativePlayer.shootingPressed, false, 'actual native DB0 under single-direction public tape', presentation);
+              if (owner.pickupAnimationGuard && state.pressed.includes('ArrowRight')) {
+                equal(state.player.shooting, false, 'actual port processed shooting under own Pickup guard', presentation);
+              }
               if (state.pressed.includes('ArrowRight') && nativePlayer.mainSprite.animation === 'Pickup'
                   && nativePlayer.pickupAnimationGuard) {
                 pickupShotGuardPhases.add(source.systemCounter % 2);
@@ -464,7 +469,13 @@ try {
       await archiveBrowser(trace, 'complete');
       Object.assign(result, {checks, comparedPresentations: presentations + 1,
         passedPresentations, admittedPedestals: admitted, selectedItemIds: [...selectedItemIds],
-        queuedPresentations, grantedPresentations, pickupShotGuardPhases: [...pickupShotGuardPhases].sort(), nativeManifestSha256: digest(nativeBytes), tapeSha256: digest(Buffer.from(tape))});
+        queuedPresentations, grantedPresentations, pickupShotGuardPhases: [...pickupShotGuardPhases].sort(),
+        inputObservationScope: item.requirePickupShotGuard ? {
+          nativeDb0: 'Actual opposed-direction pair byte, preserved under its legacy shootingPressed field name',
+          nativeHasShoot: 'Unobserved internal InputManager action4..7 query owner; public tape is not its readback',
+          portShooting: 'Actual processed port shooting state under its own Pickup guard',
+        } : undefined,
+        nativeManifestSha256: digest(nativeBytes), tapeSha256: digest(Buffer.from(tape))});
       assert.ok(admitted > 0, 'Every case must naturally admit a source-selected pedestal');
       if (acquisition) {
         assert.ok(queuedPresentations > 0, 'Every acquisition case must observe the actual deferred queue');

@@ -8,6 +8,20 @@ only an actual report establishes its outcome. Rust/WASM replay equality checks
 the port's determinism, while original logs, graphics and controls establish
 independent reference evidence.
 
+The current item integration snapshot is main `298738b4`: ordinaryDr343/356,
+controlledTechnology355, independent mixed52+4 capabilities367 and Soy330
+stats/118Mouth-history368 are merged. The private df133/15f product separately
+passes production and floor plus37,972,668/0 strict regular comparisons; Clippy
+is capacity-pending. Its12 public routes complete, with3mixedBomb births each
+and post330 Lasers in both118routes; raw phase/birth/callback and costume-frontier
+failures remain. First controlledTechnology Original remains117,717/13,575FAIL
+with677 matching material/configuration rows, separate from absent NPC contact.
+First controlledDr Original remains41,683/3,258FAIL:3Native births/2cohorts versus
+1portbirth/1cohort. ControlledDr354 stays pending the queued4 readiness fix.
+Epic168/MonstrosLung229 are source-only drafts awaiting their next producer.
+See [item composition coverage](item-composition-coverage.md) for exact scopes;
+these reports do not establish whole-current-main or complete game parity.
+
 ## Current live-game testing policy
 
 Checked-in Rust, Node and Python unit suites were removed at the user’s request.
@@ -43,14 +57,91 @@ The new partial producer routes ordinary Monstro’s real BloodStart random bran
 
 ## Current source and actual-game qualification
 
+Current main `3df99031` includes ordinary Player Brimstone299, per-field comparer
+continuation311, the FireDelay descriptor304, optional regular Tear variant298
+and standalone Ludovico Tear307. The existing ordinary/Has118/controlled Knife
+and Number One/Libra owners remain in main. Ludovico's final C421 artifact has
+successful owned builds and retained regressions; three routes match selected
+motion fields, while the complete four-case comparison still fails. The exact
+source landing preserves external renderer326; no new full merged-tree build
+or whole-game parity follows from that merge.
+
+PR299's OWN production, strict Clippy and floor checks pass. Four retained
+405-command public-WASM routes compare 37,958,272 preexisting fields with zero
+differences. The retained Original ordinary case remains **22,111 checks / 1,030
+failures**. It contains two births and 61 Laser/Impact rows (30 Full, 31 Fast);
+observed geometry, phase, TTL/fade, Sprite and color fields match. Two
+following-Full retirements observe Native absence, port unscheduled/uninitialized
+and actual C18 NULL. They do not observe Native Remove/Uninit callback events.
+Required HP/maxHP owners, identities/seeds/RNG, prelude timers and diagnostics
+remain red; typed contacts, DOM/render and the full shared stream remain open.
+
+The same producer's retained118→114→329 comparison remains **88,941 / 9,079 FAIL**;
+its unchanged-v2 history remains **19,838 / 774 FAIL**, with 36 gaps. Actual grants
+and primary changes match, as do counts, queue, cache, C0C and later
+pendingPrimaryCleanup None across 1,010 rows. There are 470 parent, 614 child and
+51 early Laser/Impact rows. Later None values do not prove a captured cleanup
+transient or callback. These results leave all older Brim10, private v7/v8 and
+Knife reports unchanged.
+
+Merged PR304 keeps FireDelay request2, effect/proven-neutral/context and its
+literal ordered operator together. Merged PR298 exposes regular Tear
+sourceVariant as optional: Some0 requires the closed normal-Isaac, current
+primary1, flags0 and positive1/4/6 domain. Other contexts remain unknown; this
+regular-kind1 proof does not admit kind8 or establish Native variant parity.
+
+Merged 307's final `d234fd9e` / WASM `c421a00a` passes production, strict Clippy
+and floor checks, plus **37,965,608 / 0** retained regular-field comparisons.
+Its four retained Original/public-WASM cases remain **134,364 checks / 20,813
+FAIL**, with 1,541 controlled bodies (770 Full,771 Fast). The fixed motion case
+and both recorded OS cases match position, velocity, B28 movement delta and
+saved position450 across **1,157 body rows**. This qualifies the source-confirmed
+saved-position rewind correction, without accepting identity/seed/RNG or missing
+actor fields.
+
+The contact case still differs on 259 position, 264 velocity, 255 B28 and258
+saved-position rows among 384 bodies. Its first P/V mismatch is at presentation 686;
+observed Native FIFO begins at 821. Native type 18 has FIFO observations at 821/822
+and 825/826, then a valid nonlethal HP application at 823. The port has **no actual
+FIFO or drain observations** and fails its required minimum enqueue/drain
+witnesses. Older supported-minimum counters are not port contact evidence.
+Receiver geometry, strict source identities, registry/atomic velocity/veto,
+lethal lifecycle and unknown owners remain gaps or failures. The report-only
+classification establishes no new timing, steering or actor-law correction.
+
+Earlier producers remain separate. Original `d1e58278` / WASM `d9c35ac7` retains
+**85,050 / 11,620 FAIL** with zero port Tears because its guard required C98=0
+while both games observed 3. Intermediate `7e000d3f` / WASM `8120d8e9` retains
+**134,350 / 24,248 FAIL**, including 42 strict contact HP and 10 queue differences;
+its independent queue/HP chains are not final C421 contact coverage. The prior
+**37,966,740 / 2,264 FAIL** regular report and OS0 guard-stop remain preserved.
+Two retained reciprocal Libra histories pass **503,611 / 0**, with 631 gates and
+93 post-grant rows each; the first still lacks 631 Native Familiar observations.
+Falling speed, prelude timers, missing registry/ordinal and complete
+actor/contact/lifecycle or DOM parity remain unaccepted.
+
+Draft314 declares four ordinary-Brim contact cases, and Draft316 owns the
+controlled-Brim property/priority marker. Merged315 supplies typed14/18 contact
+observations; merged317 supplies optional kind8 Room2494/born83C/velocity-delta
+fields. Those tools are consumed by final C421, with strict contact and
+observation gaps retained. Merged318 keeps the unchanged Damage operator beside
+its footprint and is consumed by the independently built708 producer, whose
+scoped builds and retained regressions pass as recorded below. Runtime312's
+controlled Brimstone remains a separate Draft. Its historical incomplete-prefix
+failures remain; four fresh Native transports complete, while finished paired
+case0 grade86,999/7,688 FAIL is complete; other three grades are pending. Missing actor fields, FIFO
+attribution and lifecycle events stay failures. The [current compact record](../references/isaac/foundation/items/post-brimstone-299-and-ludo-source.json)
+keeps exact report and source pins; the historical checkpoints below retain
+their original grades.
+
 The weapon/stat foundation in [PR203](https://github.com/Anveio/isaac-rebirth-browser/pull/203)
 landed at `631e678`. Requested primary selection runs before scalar callbacks;
 the retained primary, attack flags and independent eleven-component tear/laser
 colors have explicit cache owners. Regular tears consume the resolved birth
 properties. Unmapped stages and controller requests stay observable, and a
 missed registered-actor cleanup cannot disappear on a later equal-primary
-evaluation. This foundation does not execute ordinary Knife, Brimstone or
-Ludovico actors.
+evaluation. The PR203 foundation checkpoint itself did not execute nonregular actors;
+the later current-main actor owners are recorded above and below.
 
 Exact `60ff78e3` production, strict Clippy and floor builds passed. Its public-ABI
 headless differential replayed 405 recorded commands and compared 406 snapshots,
@@ -110,7 +201,8 @@ lacks 631 Native Familiar-manager selections; its pending bit 512 is observed as
 while the second case's actual empty manager matches. Actor identity, source
 variant/current color, physical/lifetime and browser/render parity remain open.
 Duplicates, partial requests, active clamps and item118 triples remain unexecuted.
-Current main `3080e8e2` contains the four qualified owned blobs; this does not claim
+The Libra leaf landed at `3080e8e2`; current main retains its four owned blobs.
+This does not claim
 a separately built whole-current-main artifact. Earlier evidence capsules and
 failed attempts remain unchanged.
 
@@ -170,8 +262,8 @@ acceptance follows; all four declared cases and all older grades remain retained
 
 At main `8ac96e2f` (PR270), the ordinary parent implementation is merged.
 PR270 adds the ordinary Mom's Knife subtype0 parent to main, including its
-registered slots, launch/return and Full/fast callbacks. Has118 children,
-Brimstone and Ludovico execution remain separate private/source leaves. Own
+registered slots, launch/return and Full/fast callbacks. At that checkpoint,
+Has118, Brimstone and Ludovico execution were separate private/source leaves. Own
 production, strict Clippy and floor checks pass; the four-route local WASM
 regression retains 37,928,004 field comparisons with zero differences. The
 existing authorized DST consumer also compiles; no full DST run is claimed.
@@ -194,15 +286,15 @@ pedestal witness matches all seven numeric fields across 632 paired rows,
 including 93 after acquisition. This is committed-prefix evidence: the durable
 8-action, 361-presentation, 698-command tape completed, but final capture/archive
 creation failed. Those 93 post-grant browser rows retain pending color cache64
-against Native0. Appearance/auxiliary PR288 and consumed-cache readiness PR287
-are source-only; complete item6 acquisition/birth parity remains unaccepted.
+against Native0. At that checkpoint, appearance/auxiliary PR288 and consumed-cache readiness
+PR287 were source-only; later scoped PR288 evidence is recorded below.
 
 Merged PR283 adds an optional Native event tap. Its separate actual capture
 observes 24 lifecycle events for 12 identities, including eight post329 child
 identities. This establishes Native Remove/Uninit observability, without port
 or paired triple parity. The old Original-only v8 helper remains 6,744/18/18;
-its archived missing-event grades are unchanged. Has118 children, Brimstone and
-controlled actors remain separate private/source runtime leaves.
+its archived missing-event grades are unchanged. These captures predate the
+later merged Has118, controlled Knife and ordinary Brimstone runtime leaves.
 [Current scoped evidence](../references/isaac/foundation/items/cache-and-native-lifecycle-main.json)
 retains the exact proof pins, incomplete capture status and remaining boundaries.
 
@@ -230,8 +322,8 @@ uniform for8A8; the parent seed/uniform already differs before child birth.
 These first-birth witnesses do not demonstrate a new child-law defect, nor close
 later movement/nearest-parameter or random-stream alignment. Native24 lifecycle
 events/12 children,280 post329 controlled-parent differences and the new marker's
-missing helper remain separately scoped. Has118/controlled/Brim actor gameplay
-acceptance is pending.
+missing helper remain separately scoped. That snapshot establishes no Has118/controlled/Brim whole-game parity;
+later merged source and scoped results are recorded below.
 
 Subsequently, PR290 merged at `ce5033cf` and PR286 at `98b35534`.
 Main now uses one canonical NPC Laser record/store, shared Line layout and
@@ -265,7 +357,67 @@ rotation differences (34 post329), 136 pre329 DA0 differences and inherited
 identity/seed/Init8A8, shared-MT and child-geometry failures. Snapshot observations
 leave short Remove/Uninit events unqualified. No DOM/render, full624, contact/lifetime
 or whole triple parity follows. Earlier grades and OS prefixes remain unchanged;
-ordinary Player Brimstone299 and controlled Tear307 remain separate Drafts.
+ordinary Player Brimstone299 is now merged with the scoped results above;
+controlled Tear307 is also merged; its final retained four-case comparison remains
+134,364 checks / 20,813 failures, with contact and observation gaps above.
+
+Controlled Brimstone312 is merged atf4668ae9. Its708 producer passes three owned
+builds,37,968,484 strict regular fields and503,611 retained Libra properties.
+Four complete Original/public pairs retain349,856 checks/30,892 FAIL over4,058
+playing rows,2,192 Laser C18 bodies and1,110 Knife bodies. All2,188 stable Laser
+history rows match material fields; geometry, identity/RNG, HP ownership and
+actual callbacks remain unresolved. Historical incomplete-prefix86,718/7,667
+and87,458/7,667 failures remain separate. The failed full comparer established
+no grade; the later bounded paged successor closes all four comparisons.
+
+Portable lifecycle345 is merged at04e52bbf. Four saved-sidecar addenda each retain
+19 checks/4 failures, two actual Laser boundary events and one separately observed
+following-Full cleanup chain. Remove-post differs from BaseUninit-entry;
+completion, live reapply, initial Full/C18 order and paired port callbacks remain
+missing. These addenda do not rewrite the functional predecessors.
+
+Technology320 is merged at85962135 with the source-owned post-contact reset and
+Eye-history repair. New027c's four-reference comparison retains82,351/5,731 FAIL;
+all152 damage checks match, resolving exactly76 old damage failures. Other
+per-field counts are identical to the historical77cd82,351/5,807 report, which
+remains unchanged. The027c three owned builds pass. Raw405 comparisons still fail:
+37,972,668 checks with5,928 differences versus77cd and8,368 versus708, entirely
+5,512 optionalRoom key/null additions and reviewed Eye fields. A separate actual
+public-ABI history ledger has zero unknown-history issues; raw reports stay red.
+Merged348 separates cache/kind2/kind3-contact capabilities without changing their
+current[1,4,68] domains. Identity/RNG, geometry, HP/contact/render/lifecycle gaps
+remain open. No whole-current-main product or parity follows.
+
+Merged332 now runs in four complete Technology and four controlled-Brim Native
+captures. Its original69-window raw/gzip equivalence and36,974,592-byte validation
+RSS retain their scope. Current recorder highwater36,585,472B is a measurement,
+not a historical peak-reduction claim. Same memory floors, output caps and exact
+owned-game pidfd closure remain in force.
+
+Gimpy's old bank still misses item225 and Dip death. Its separate v2 own bank
+observes225 grant, lethal Dip and bounded100 failed-roll transition consistency
+in all four routes. Atomic callback, Original, successful proc and hurt remain
+pending. Room8 requires the unmerged329 kill owner, not an isolated DTO addition.
+
+Dr.Fetus343 remains Draft. Test producer07211886/26cb passes production45.211s,
+Clippy29.475s and floor17.465s with all3,451 pins stable; strict four-route405
+regression against027c passes37,972,668/0 without exclusions or additive fields.
+All four public routes execute three shot births/retirements each, birth fuse30,
+fullUpdates0, damage10.5 and actual ParentPlayer0. Each has two Bomb-source FIFO
+rows and a following-Full HP4 to-6.5 witness; this is own-side nonvacuity only.
+The first fresh Original fixed0 capture closes normally and its strict paired
+grade retains28,783/2,740 FAIL. The remaining three Native captures are pending;
+strict cross-game body join coverage, identity/RNG, counters and actual callbacks stay failures.
+A saved-input Dr counter-v2 addendum retains29,598/2,740 FAIL and adds815 matching
+parity checks without regrading absolute counters. Independent Native birth,
+retirement, Bomb FIFO and following-Full HP witnesses are separate from strict
+cross-game identity failures. Soy330's four public routes complete on26cb; the
+regular routes observe16 Tear births each, while118+330 has zero Laser births
+and360 costume-transform frontier rows per case, retaining coverageFAIL. Soy
+Original comparison is pending.
+Controlled Technology68+329 and the Dridle DA0 fix remain source-only work.
+Merged314/325/316 preserve default declaration bytes; ordinary-contact and335
+controlled-ring contact cases remain unexecuted at this snapshot.
 
 Readiness287 passes a warm production retry and strict Clippy, but its floor
 build stopped at the working-memory floor. Its earlier production capacity stop
