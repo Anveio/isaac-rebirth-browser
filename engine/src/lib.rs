@@ -47,6 +47,7 @@ mod item_pipeline;
 pub mod items;
 pub mod keepers;
 pub mod knives;
+pub mod laser_line;
 mod laser_npc_runtime;
 pub mod lasers;
 pub mod layout;
