@@ -5,6 +5,7 @@ use crate::harness::Unit;
 
 mod abi;
 mod actors;
+mod contact;
 mod floor;
 mod game;
 mod grid;
@@ -50,6 +51,11 @@ pub const UNITS: &[Unit] = &[
         name: "grid",
         summary: "grid queries and ground-collision solvers on generated rooms",
         run: grid::run,
+    },
+    Unit {
+        name: "contact",
+        summary: "mass contact responses against momentum, centre-of-mass and overlap oracles",
+        run: contact::run,
     },
     Unit {
         name: "pathfinder",

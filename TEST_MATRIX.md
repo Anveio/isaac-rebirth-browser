@@ -247,6 +247,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | `layout` | rectangular floor growth over every accepted seed, room count and shape mask | 11 | 2 | 1 |
 | `floor` | Basement generation structure, retries and per-descriptor room admission | 18 | 5 | 0 |
 | `grid` | grid queries and ground-collision solvers on generated rooms | 14 | 3 | 0 |
+| `contact` | mass contact responses against momentum, centre-of-mass and overlap oracles | 16 | 3 | 0 |
 | `pathfinder` | FindGridPath's flood against an independent node-weighted Dijkstra | 6 | 5 | 0 |
 | `item_pools` | ItemPool selection, depletion, fallbacks, routing and continuation | 21 | 6 | 3 |
 | `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 64 | 51 | 2 |
@@ -357,6 +358,25 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Sometimes | grid: a player wall contact changes velocity | [grid.rs](engine/dst/src/units/grid.rs) |
 | Always | grid: blast candidates are ascending, unique cells of the room | [grid.rs](engine/dst/src/units/grid.rs) |
 | Always | grid: blast queries reject non-positive, oversized and non-finite radii | [grid.rs](engine/dst/src/units/grid.rs) |
+| Always | contact: pairs outside the source types or with invalid geometry are rejected | [contact.rs](engine/dst/src/units/contact.rs) |
+| Always | contact: every admitted pair at ordinary scales resolves | [contact.rs](engine/dst/src/units/contact.rs) |
+| Always | contact: a rejected pair leaves both bodies unchanged | [contact.rs](engine/dst/src/units/contact.rs) |
+| Always | contact: the response runs exactly for strictly overlapping circles | [contact.rs](engine/dst/src/units/contact.rs) |
+| Always | contact: a pair that does not overlap is left unchanged | [contact.rs](engine/dst/src/units/contact.rs) |
+| Always | contact: coincident centres only run the callbacks | [contact.rs](engine/dst/src/units/contact.rs) |
+| Sometimes | contact: coincident centres collide | [contact.rs](engine/dst/src/units/contact.rs) |
+| Always | contact: positions and velocities change only along the centre line | [contact.rs](engine/dst/src/units/contact.rs) |
+| Always | contact: only the player's collider blocks its displacement | [contact.rs](engine/dst/src/units/contact.rs) |
+| Always | contact: a blocked player keeps its position and velocity | [contact.rs](engine/dst/src/units/contact.rs) |
+| Sometimes | contact: a player's collider blocks its displacement | [contact.rs](engine/dst/src/units/contact.rs) |
+| Always | contact: separation keeps the pair's centre of mass in place | [contact.rs](engine/dst/src/units/contact.rs) |
+| Always | contact: the impulse conserves momentum, the player taking half its share | [contact.rs](engine/dst/src/units/contact.rs) |
+| Always | contact: the player's collider is offered exactly the displacement applied | [contact.rs](engine/dst/src/units/contact.rs) |
+| Always | contact: the impulse carries the pair's relative speed, split by mass | [contact.rs](engine/dst/src/units/contact.rs) |
+| Always | contact: the player's collider is consulted once per colliding player contact | [contact.rs](engine/dst/src/units/contact.rs) |
+| Sometimes | contact: a fast separating pair takes the reversed overlap | [contact.rs](engine/dst/src/units/contact.rs) |
+| Always | contact: an ordinary pair ends exactly a radius sum apart | [contact.rs](engine/dst/src/units/contact.rs) |
+| Always | contact: an NPC pair resolves the same whichever body comes first | [contact.rs](engine/dst/src/units/contact.rs) |
 | Always | pathfinder: the flood runs on every admitted grid and rejects any other | [pathfinder.rs](engine/dst/src/units/pathfinder.rs) |
 | Always | pathfinder: the flood is a pure function of its grid, start and owner | [pathfinder.rs](engine/dst/src/units/pathfinder.rs) |
 | Always | pathfinder: the flood only marks open cells of its grid, with negative distances | [pathfinder.rs](engine/dst/src/units/pathfinder.rs) |
