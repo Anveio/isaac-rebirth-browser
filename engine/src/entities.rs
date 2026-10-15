@@ -42,6 +42,35 @@ pub(crate) struct NpcWorld<'a> {
     pub system_counter: u32,
     pub player_items: Option<&'a PlayerItems>,
     pub effects: NpcEffectAdmission<'a>,
+    /// Room+0x10 descriptor type of the current room.
+    pub room_type: u32,
+    /// The room's other NPCs, live, for families that link actors.
+    pub peers: Peers<'a>,
+}
+
+/// The room NPC list around the updating actor, in list order. Peers read
+/// what earlier actors already wrote this update.
+pub(crate) struct Peers<'a> {
+    pub before: &'a mut [Npc],
+    pub after: &'a mut [Npc],
+}
+
+impl Peers<'_> {
+    /// Every other NPC in room list order.
+    pub fn iter(&self) -> impl Iterator<Item = &Npc> {
+        self.before.iter().chain(self.after.iter())
+    }
+
+    pub fn get(&self, id: u32) -> Option<&Npc> {
+        self.iter().find(|npc| npc.id == id && !npc.removed)
+    }
+
+    pub fn get_mut(&mut self, id: u32) -> Option<&mut Npc> {
+        self.before
+            .iter_mut()
+            .chain(self.after.iter_mut())
+            .find(|npc| npc.id == id && !npc.removed)
+    }
 }
 
 /// Actors an NPC callback creates. Game admits them in this order.
@@ -54,6 +83,10 @@ pub(crate) enum Birth {
     Laser(crate::lasers::LaserBirth),
     /// Spawn550a40 of an NPC mid-room (no champion roll in a live room).
     Npc(SpawnSelector),
+    /// Creep 5516d0 hurt of the player from a spawner-run first update.
+    CreepHit,
+    /// A mid-room NPC spawned with a velocity and its APPEAR flag cleared.
+    FlungNpc(SpawnSelector, WorldVector),
 }
 
 pub(crate) type Advance =
@@ -98,6 +131,8 @@ pub(crate) fn no_grid_query(_: &mut Npc, _: &Grid) -> Result<(), String> {
 /// rocks, pits and walls with the source nonplayer ground collider built from
 /// their own radius and point count, as Dips do; other classes clamp.
 pub(crate) fn ground_collision(npc: &mut Npc, grid: &Grid) -> Result<(), String> {
+    // 442bc0 clears +34c even when this pass has no collision samples.
+    npc.grid_collided = false;
     let points = crate::content::entity(npc.kind, npc.variant).grid_points;
     if npc.grid_collision_class != 5 || points == 0 {
         return clamp_walls(npc, grid);
@@ -107,13 +142,21 @@ pub(crate) fn ground_collision(npc: &mut Npc, grid: &Grid) -> Result<(), String>
         scale: crate::motion::WorldVector { x: 1.0, y: 1.0 },
         points,
     })?;
+    let sample_position = npc.position;
     collider.resolve_nonplayer_ground(grid, &mut npc.position, &mut npc.velocity, false)?;
+    // 442df8 records a solid sample independently of the summed normal.
+    npc.grid_collided = collider
+        .samples()
+        .iter()
+        .any(|sample| grid.collision_at(sample_position + *sample) != 0);
     npc.presented_position = npc.position;
     Ok(())
 }
 
+/// 442c2d: classes 3 and 5 both clamp the center to the room bounds before
+/// the sample loop (empty for zero points, e.g. Larry Jr.'s class 5).
 pub(crate) fn clamp_walls(npc: &mut Npc, grid: &Grid) -> Result<(), String> {
-    if npc.grid_collision_class == 3 {
+    if matches!(npc.grid_collision_class, 3 | 5) {
         npc.position = grid.clamp_room(npc.position, 0.0);
         npc.presented_position = npc.position;
     }
@@ -133,7 +176,16 @@ pub(crate) static FAMILIES: &[&Family] = &[
     &crate::gluttony::FAMILY,
     &crate::dingle::FAMILY,
     &crate::wall_hugger::FAMILY,
+    &crate::larry::FAMILY,
+    &crate::maggots::FAMILY,
 ];
+
+/// Every NPC type a registered family constructs, in registry order. Tools
+/// that measure coverage read the port's NPC surface here instead of keeping
+/// a copy.
+pub fn implemented_npc_kinds() -> impl Iterator<Item = u32> {
+    FAMILIES.iter().flat_map(|family| family.kinds.iter().copied())
+}
 
 pub(crate) fn family(kind: u32) -> Option<&'static Family> {
     FAMILIES

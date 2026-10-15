@@ -7,3 +7,4 @@ gfx/1000.049_heart.anm2
 gfx/1000.007_blood splat.anm2
 gfx/1000.058_poop particle.anm2
 gfx/1000.043_poop explosion.anm2
+gfx/1000.022_creep (red).anm2

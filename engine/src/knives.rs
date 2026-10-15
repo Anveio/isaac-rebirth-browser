@@ -1,4 +1,4 @@
-//! Actual ordinary type8/subtype0 parent Knife.
+//! Actual ordinary/controlled subtype 0 and Has118 subtype 1 Knife.
 //! Its caller owns composition; this module owns Init, movement and lifetime.
 use crate::{
     actors::ActorRef,
@@ -16,6 +16,16 @@ const ZERO: WorldVector = WorldVector { x: 0.0, y: 0.0 };
 pub(crate) const CONTROLLED: u64 = 0x2_0000_0000;
 pub use crate::attack_flags::AttackFlags;
 
+///Actual Base+4A0 empty-chain proof. Missing/nonempty histories remain unknown;
+///447FC0's Parent+498 registration does not produce this independent owner.
+#[derive(Clone, Copy, Debug, Default, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub enum ChildChain {
+    #[default]
+    Unknown,
+    Empty,
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Knife {
@@ -29,6 +39,8 @@ pub struct Knife {
     pub spawner_type: u32,
     pub spawner_variant: u32,
     pub parent: Option<ActorRef>,
+    #[serde(default)]
+    pub child_chain_4a0: ChildChain,
 
     pub active: bool,
     pub dead: bool,
@@ -98,6 +110,7 @@ impl Knife {
             spawner_type: 0,
             spawner_variant: 0,
             parent: None,
+            child_chain_4a0: ChildChain::Empty, //441F2A before the Parent498 link.
 
             active: true,
             dead: false,

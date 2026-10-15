@@ -61,11 +61,19 @@ fn length(vector: WorldVector) -> f32 {
 
 fn cost(world: &NpcWorld, point: WorldVector) -> Result<i32, String> {
     // Outside the lattice GetGridIndex5c6fa0 returns -1 and the source reads
-    // the word before Room+e98; that unrelated field is not modelled.
-    let index = world
-        .grid
-        .index(point)
-        .ok_or("pathfinder probe left the room grid")?;
+    // the word before Room+e98: Room+e94, which Room.Init (5cf3a0/5cfe40)
+    // leaves at -1 or a grid index below width*height. Every caller tests
+    // the cost against 199, 300 or 700, so in a room of at most 200 cells
+    // any such value reads as an open cell. Larger rooms need the field.
+    // (MoveRandomly's dirs[-1] side probe reaches speed*40 below the end
+    // point, which leaves the lattice for Larry Jr.'s speed 2.)
+    let Some(index) = world.grid.index(point) else {
+        let descriptor = world.grid.descriptor();
+        if u32::from(descriptor.width) * u32::from(descriptor.height) <= 200 {
+            return Ok(-1);
+        }
+        return Err("pathfinder probe left the room grid; Room+e94 is not modelled".into());
+    };
     world
         .path_costs
         .as_deref()

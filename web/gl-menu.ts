@@ -188,6 +188,25 @@ export class GLMenuContext {
     this.drawTexture(this.texture(source), arguments_, [rgbaTint[0]!, rgbaTint[1]!, rgbaTint[2]!, rgbaTint[3]! * this.state.alpha], offsets, pixelSize);
   }
   /** Authored actors supply their sequential f32 geometry before outer transforms. */
+  drawTintedImageQuadRepeated(source: CanvasImageSource, rgbaTint: readonly number[], offsets: readonly number[], crop: readonly [number, number, number, number], points: readonly (readonly [number, number])[]): void {
+    if (points.length !== 4) throw new Error("Laser beam must have four source corners");
+    const texture = this.texture(source), gl = this.gl;
+    //The selected448x64 authored Laser sheet has unpadded64-pixel height.
+    //Its bounded x crop never crosses the logical448-pixel source boundary.
+    if (texture.height !== texture.textureHeight || crop[0] < 0 || crop[0] + crop[2] > texture.width)
+      throw new Error("Laser repeat requires actual unpadded height and bounded authored x crop");
+    gl.bindTexture(gl.TEXTURE_2D, texture.handle);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+    try {
+      this.submitQuad(texture, crop, points, [rgbaTint[0]!, rgbaTint[1]!, rgbaTint[2]!, rgbaTint[3]! * this.state.alpha], offsets);
+    } finally {
+      gl.bindTexture(gl.TEXTURE_2D, texture.handle);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    }
+  }
+
   drawTintedImageQuad(source: CanvasImageSource, rgbaTint: readonly number[], offsets: readonly number[], crop: readonly [number, number, number, number], points: readonly (readonly [number, number])[], pixelSize?: number): void {
     if (points.length !== 4) throw new Error("An authored sprite must have four corners");
     if (pixelSize !== undefined && (!Number.isFinite(pixelSize) || pixelSize <= 0)) throw new Error("Sprite raster pixel size must be finite and positive");

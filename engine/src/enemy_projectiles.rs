@@ -24,6 +24,8 @@ pub struct ProjectileBirth {
     pub falling_speed: f32,
     pub falling_acceleration: f32,
     pub scale: f32,
+    /// +7d4 after FireProjectiles: Init's -23 plus ProjectileParams+4.
+    pub height: f32,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
@@ -75,6 +77,7 @@ impl EnemyProjectile {
                 falling_speed: -3.0,
                 falling_acceleration: 0.1,
                 scale: 1.0,
+                height: -23.0,
             },
         )
     }
@@ -87,7 +90,7 @@ impl EnemyProjectile {
             position: shot.position,
             presented_position: shot.position,
             velocity: shot.velocity,
-            height: -23.0,
+            height: shot.height,
             falling_speed: shot.falling_speed,
             falling_acceleration: shot.falling_acceleration,
             initializer_falling_speed: shot.initial_falling_speed,
