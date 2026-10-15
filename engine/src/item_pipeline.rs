@@ -115,17 +115,42 @@ impl<'a> ItemInputs<'a> {
                 })
     }
 
-    /// Independent scalar read sets in 511F10 for fresh Isaac: items 114,
-    /// 118 and 329 have no direct term in callbacks 2, 4, 1, 8 and 16.
-    /// Current C08 still changes FireDelay first. Config 118 requests all
-    /// callbacks; that request does not imply another scalar effect.
-    fn admits_selected_scalar_completion(self) -> bool {
+    fn admits_scalar_context(self) -> bool {
         self.owner.trinket_slots == [0, 0]
             && self
                 .owner
                 .queued_id
                 .is_none_or(|id| items::definition(id).is_some_and(|config| config.kind != 2))
             && self.owner.temporary_collectibles.is_empty()
+    }
+
+    /// Each callback composes its implemented effects with its proven neutral
+    /// read set. C08 remains an independent input to the ordered formulas.
+    /// Config 118's request for all callbacks adds no implicit scalar effect.
+    fn admits_scalar_stage(self, stage: CacheStage, effects: &[u32]) -> bool {
+        let neutral: &[u32] = match stage {
+            CacheStage::FireDelay => &[4, 114, 118, 329],
+            CacheStage::ShotSpeed | CacheStage::Damage => &[1, 114, 118, 329],
+            CacheStage::Range | CacheStage::MoveSpeed => &[1, 4, 114, 118, 329],
+            _ => return false,
+        };
+        self.admits_scalar_context()
+            && self
+                .owner
+                .owned_counts
+                .iter()
+                .enumerate()
+                .all(|(id, &count)| {
+                    count == 0
+                        || (count > 0
+                            && (effects.contains(&(id as u32)) || neutral.contains(&(id as u32))))
+                })
+    }
+
+    /// Auxiliary callbacks have their own narrower source proof. Scalar
+    /// effects admitted above do not expand Flight, Familiar, Luck or history.
+    fn admits_selected_auxiliary_callbacks(self) -> bool {
+        self.admits_scalar_context()
             && self
                 .owner
                 .owned_counts
@@ -139,11 +164,11 @@ impl<'a> ItemInputs<'a> {
     /// An independent strict 511F10 trace proves 68 ordered requests for zero
     /// familiars with these inputs. Actual manager queries remain required.
     pub(crate) fn admits_selected_zero_familiar_requests(self) -> bool {
-        self.admits_selected_scalar_completion()
+        self.admits_selected_auxiliary_callbacks()
     }
 
     pub(crate) fn admits_complete_selected_tail(self) -> bool {
-        self.admits_selected_scalar_completion() && self.owner.luck_inputs.is_some()
+        self.admits_selected_auxiliary_callbacks() && self.owner.luck_inputs.is_some()
     }
 
     fn has_unmapped_owner(self, flag: u32, supported: &[u32]) -> bool {
@@ -267,7 +292,7 @@ pub(crate) fn resolve_scalars(
             }
             _ => continue,
         };
-        if (source_player_type == Some(0) && inputs.admits_selected_scalar_completion())
+        if (source_player_type == Some(0) && inputs.admits_scalar_stage(stage, supported))
             || !inputs.has_unmapped_owner(flag, supported)
         {
             completed |= flag;
@@ -289,7 +314,7 @@ pub(crate) fn resolve_neutral_flight(
     transformation_counts: Option<[i32; 2]>,
 ) -> Option<(bool, u32)> {
     (source_player_type == Some(0)
-        && inputs.admits_selected_scalar_completion()
+        && inputs.admits_selected_auxiliary_callbacks()
         && transformation_counts == Some([0, 0]))
     .then_some((false, 5))
 }
@@ -311,7 +336,7 @@ pub(crate) fn resolve_luck(
     let (Some(auxiliary), Some(run_flags)) = (inputs.owner.luck_inputs, source_run_flags) else {
         return Ok(None);
     };
-    if source_player_type != Some(0) || !inputs.admits_selected_scalar_completion() {
+    if source_player_type != Some(0) || !inputs.admits_selected_auxiliary_callbacks() {
         return Ok(None);
     }
     let sum = auxiliary
