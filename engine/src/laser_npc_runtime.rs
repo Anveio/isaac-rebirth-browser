@@ -223,6 +223,7 @@ pub(crate) fn admit(state: &mut State, parent: u32, birth: LaserBirth) -> Result
         id: impact_id,
     })?;
     let mut impact = Impact {
+        birth_game_update: None,
         source_subtype: None,
         sprite_flip_x: None,
         raw_814: None,
@@ -414,6 +415,7 @@ fn damage(state: &mut State, laser: &Laser, heading: WorldVector) -> Result<(), 
                     id: laser.parent.ok_or("NPC Laser Parent link absent")?.id,
                     entity_type: laser.spawner_type,
                 },
+                copied_source: None,
             },
         )?;
     }

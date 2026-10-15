@@ -225,13 +225,13 @@ pub(crate) enum ControllerChannel {
     OrdinaryFetus,
     MonstroLung,
     ControlledFetus,
+    EpicFetus,
     ControlledKnife,
     ChargedBrimstone,
     OrdinaryTechnology,
     ControlledTechnology,
     ControlledBrimstone,
     ControlledTear,
-    Unimplemented(PrimaryWeaponC08),
 }
 
 pub(crate) fn resolve_controller(
@@ -257,8 +257,8 @@ pub(crate) fn resolve_controller(
         }
         PrimaryWeaponC08::DrFetus => ControllerChannel::OrdinaryFetus,
         PrimaryWeaponC08::MonstrosLung => ControllerChannel::MonstroLung,
+        PrimaryWeaponC08::EpicFetus => ControllerChannel::EpicFetus,
         PrimaryWeaponC08::Ludovico => ControllerChannel::ControlledTear,
-        other => ControllerChannel::Unimplemented(other),
     })
 }
 
@@ -485,6 +485,31 @@ pub(crate) fn resolve_fetus_kind5(
     })
 }
 
+///45F3F0 calls FIRSTPlayer kind6 on the actual dead Rocket Full.
+///No target/rocket birth owns these current cache values.
+pub(crate) fn resolve_epic_fetus_kind6(
+    items: ItemInputs<'_>,
+    source_player_type: Option<u32>,
+    cache: WeaponCache,
+    stats: PlayerStats,
+) -> Result<AttackProperties, String> {
+    stats.validate()?;
+    if source_player_type != Some(0)
+        || cache.primary != PrimaryWeaponC08::EpicFetus
+        || !items.admits_epic_fetus_kind6_context()
+    {
+        return Err("kind6 requires an unadmitted FIRSTPlayer context".into());
+    }
+    if !cache.color_ca0.is_finite() {
+        return Err("kind6 actual current CA0 is nonfinite".into());
+    }
+    Ok(AttackProperties {
+        flags: cache.flags_c98,
+        color: cache.color_ca0,
+        collision_damage: stats.damage,
+    })
+}
+
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub(crate) struct RegularTearPlan {
     pub(crate) flags: AttackFlags,
@@ -537,6 +562,21 @@ impl RegularTearPlan {
             head_timer: ((max_fire_delay as f32 * 0.45) as i32 + 7).max(11),
         })
     }
+}
+
+///Independent selected50D090(kind1) result for ordinary2. Layout, eye,
+///clock, RNG and actor operations stay with its caller and canonical factory.
+pub(crate) fn resolve_inner_eye_kind1(state: &State) -> Result<RegularTearPlan, String> {
+    let inputs = ItemInputs::new(state.player_items.as_ref().ok_or("Inner Eye items absent")?)?;
+    if state.weapon_admission.source_player_type != Some(0)
+        || state.weapon_cache.primary != PrimaryWeaponC08::RegularTears
+        || state.weapon_cache.flags_c98.0 != 0
+        || !inputs.admits_inner_eye_kind1_context()
+        || inputs.pending_cache().0 & RegularTearPlan::INPUT_CACHE_MASK.0 != 0
+    {
+        return Err("Inner Eye kind1 requires its actual current cache/context".into());
+    }
+    RegularTearPlan::resolve(state.player_stats, state.max_fire_delay, state.weapon_cache)
 }
 
 ///Independent selected50D090(kind1) result for the229 burst. The common

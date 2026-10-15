@@ -33,6 +33,37 @@ const MONSTRO_FAMILIAR_ITEMS: &[usize] = &[1, 4, 229];
 const MONSTRO_GRANT_ITEMS: &[usize] = &[1, 4, 229];
 const MONSTRO_KIND1_ITEMS: &[usize] = &[1, 4, 229];
 const MONSTRO_CALLER_ITEMS: &[usize] = &[1, 4, 229];
+// Independent current getter/caller histories admit actual queued passive4.
+// Its late Add has not changed current stats or selected229 costume yet.
+const MONSTRO_KIND1_QUEUED_ITEMS: &[usize] = &[4];
+const MONSTRO_CALLER_QUEUED_ITEMS: &[usize] = &[4];
+
+
+// Independently closed cache, Familiar and actual grant footprints. Equal
+// sets do not transfer getter or controller admission.
+const EPIC_FETUS_CACHE_ITEMS: &[usize] = &[1, 2, 4, 168];
+const EPIC_FETUS_FAMILIAR_ITEMS: &[usize] = &[1, 2, 4, 168];
+const EPIC_FETUS_GRANT_ITEMS: &[usize] = &[1, 2, 4, 168];
+// Real2-before168 grants have independent callback and auxiliary histories.
+// These prefixes admit no ordinary triple-tear emitter or Epic caller.
+const INNER_EYE_PREFIX_CACHE_ITEMS: &[usize] = &[1, 2, 4];
+const INNER_EYE_PREFIX_FAMILIAR_ITEMS: &[usize] = &[1, 2, 4];
+const INNER_EYE_PREFIX_GRANT_ITEMS: &[usize] = &[1, 2, 4];
+
+// Independently closed getter and live caller footprints. Cache/Familiar
+// and grant ownership above never admits these consumers by itself.
+const EPIC_FETUS_KIND6_ITEMS: &[usize] = &[1, 2, 4, 168];
+const EPIC_FETUS_CALLER_ITEMS: &[usize] = &[1, 2, 4, 168];
+// Actual queued passive2 supplies no early owned count or cache value.
+const EPIC_FETUS_KIND6_QUEUED_ITEMS: &[usize] = &[2];
+const EPIC_FETUS_CALLER_QUEUED_ITEMS: &[usize] = &[2];
+
+//519FC0's ordinary Have2 emitter and50D090(kind1) have separate readsets.
+//Neither follows from the existing cache/Familiar/grant prefix capabilities.
+const INNER_EYE_CALLER_ITEMS: &[usize] = &[2, 4];
+const INNER_EYE_KIND1_ITEMS: &[usize] = &[2, 4];
+const INNER_EYE_CALLER_QUEUED_ITEMS: &[usize] = &[2, 4];
+const INNER_EYE_KIND1_QUEUED_ITEMS: &[usize] = &[2, 4];
 
 // Independent source-owned footprints. Equal current sets are deliberately
 // separate: cache additions cannot silently admit a50D090 getter branch.
@@ -235,6 +266,9 @@ impl<'a> ItemInputs<'a> {
         if self.admits_soy_milk_cache_context() || self.admits_monstro_cache_context() {
             return true;
         }
+        if self.admits_epic_fetus_cache_context() {
+            return true;
+        }
         self.owner.trinket_slots == [0, 0]
             && self
                 .owner
@@ -288,41 +322,104 @@ impl<'a> ItemInputs<'a> {
     ///Independent511F10 footprint.229 is neutral for the selected callbacks;
     ///FireDelay separately consumes the actual retained C08=7 multiplier.
     pub(crate) fn admits_monstro_cache_context(self) -> bool {
-        self.admits_monstro_readset(MONSTRO_CACHE_ITEMS, false)
+        self.admits_monstro_readset(MONSTRO_CACHE_ITEMS)
     }
 
     ///Independent strict511F10 path requests the same68 zero familiars.
     pub(crate) fn admits_monstro_zero_familiar_requests(self) -> bool {
-        self.admits_monstro_readset(MONSTRO_FAMILIAR_ITEMS, false)
+        self.admits_monstro_readset(MONSTRO_FAMILIAR_ITEMS)
     }
 
     ///Only actualAdd229 may preserve an existing auxiliary owner. Unknown
     ///restore histories remain None regardless of the current item counts.
     pub(crate) fn admits_monstro_grant_context(self) -> bool {
-        self.admits_monstro_readset(MONSTRO_GRANT_ITEMS, false)
+        self.admits_monstro_readset(MONSTRO_GRANT_ITEMS)
     }
 
     ///Separate50D090(kind1) path: Have229 transforms the actual initial0
     ///variant to BloodTear1. This grants no controller or cache capability.
     pub(crate) fn admits_monstro_kind1_context(self) -> bool {
-        self.admits_monstro_readset(MONSTRO_KIND1_ITEMS, true)
+        self.admits_monstro_readset(MONSTRO_KIND1_ITEMS)
+            && self.owner.queued_id.is_none_or(|id| {
+                MONSTRO_KIND1_QUEUED_ITEMS.contains(&(id as usize))
+            })
     }
 
     ///Separate519FC0 C08=7 caller footprint. Has149/55/87/153/2/245
     ///are false; cache and kind1 admission do not grant this controller.
     pub(crate) fn admits_monstro_caller(self) -> bool {
-        self.admits_monstro_readset(MONSTRO_CALLER_ITEMS, true)
+        self.admits_monstro_readset(MONSTRO_CALLER_ITEMS)
+            && self.owner.queued_id.is_none_or(|id| {
+                MONSTRO_CALLER_QUEUED_ITEMS.contains(&(id as usize))
+            })
     }
 
-    fn admits_monstro_readset(self, supported: &[usize], empty_queue: bool) -> bool {
+    fn admits_monstro_readset(self, supported: &[usize]) -> bool {
         self.admits_permanent_readset(229, supported)
-            && if empty_queue {
-                self.owner.queued_id.is_none()
-            } else {
-                self.owner
-                    .queued_id
-                    .is_none_or(|id| supported.contains(&(id as usize)))
-            }
+            && self
+                .owner
+                .queued_id
+                .is_none_or(|id| supported.contains(&(id as usize)))
+    }
+
+    ///Independent511F10 footprint for positive168 with selected1/2/4,
+    ///or the actual2-before168 prefix. C08=6 adds no FireDelay multiplier.
+    ///Normal-Isaac, requested callbacks and field/history owners stay separate.
+    pub(crate) fn admits_epic_fetus_cache_context(self) -> bool {
+        self.admits_permanent_readset(168, EPIC_FETUS_CACHE_ITEMS)
+            || self.admits_permanent_readset(2, INNER_EYE_PREFIX_CACHE_ITEMS)
+    }
+
+    ///Independent strict511F10 trace: all68 actual Familiar requests are0.
+    ///Cache completion alone never admits a Familiar request or RNG owner.
+    pub(crate) fn admits_epic_fetus_zero_familiar_requests(self) -> bool {
+        self.admits_permanent_readset(168, EPIC_FETUS_FAMILIAR_ITEMS)
+            || self.admits_permanent_readset(2, INNER_EYE_PREFIX_FAMILIAR_ITEMS)
+    }
+
+    ///Separate50D090(kind6) footprint used by Rocket31 at death. The consumer
+    ///retains actualFIRSTPlayer/source0 and currentC88/C98/CA0 ownership;
+    ///physicalParent and the Target's birth inventory are not this getter.
+    pub(crate) fn admits_epic_fetus_kind6_context(self) -> bool {
+        self.owner
+            .queued_id
+            .is_none_or(|id| EPIC_FETUS_KIND6_QUEUED_ITEMS.contains(&(id as usize)))
+            && self.admits_permanent_readset(168, EPIC_FETUS_KIND6_ITEMS)
+    }
+
+    ///Only actualAdd2/168 may consume this independent zero-amount grant proof,
+    ///with normal-Isaac and existingSomeLuck guards retained by its wrapper.
+    ///No counts or cache result can create missing auxiliary history.
+    pub(crate) fn admits_epic_fetus_grant_context(self) -> bool {
+        self.admits_permanent_readset(168, EPIC_FETUS_GRANT_ITEMS)
+            || self.admits_permanent_readset(2, INNER_EYE_PREFIX_GRANT_ITEMS)
+    }
+
+    ///Separate51A160/51E370/51B7C3/51B859/51DA6C caller footprint. Selected
+    ///Has2 is current signed ownership;153/55/87 are absent. Source0, D80,
+    ///charge, C18, RNG and canonicalTarget/Rocket remain caller obligations.
+    pub(crate) fn admits_epic_fetus_caller(self) -> bool {
+        self.owner
+            .queued_id
+            .is_none_or(|id| EPIC_FETUS_CALLER_QUEUED_ITEMS.contains(&(id as usize)))
+            && self.admits_permanent_readset(168, EPIC_FETUS_CALLER_ITEMS)
+    }
+
+    ///51A420..51F3D7: normal C08=1, actual Have2 and no other emitter modifiers.
+    pub(crate) fn admits_inner_eye_caller(self) -> bool {
+        self.owner
+            .queued_id
+            .is_none_or(|id| INNER_EYE_CALLER_QUEUED_ITEMS.contains(&(id as usize)))
+            && self.admits_permanent_readset(2, INNER_EYE_CALLER_ITEMS)
+    }
+
+    ///Independent selected50D090(kind1) trace; passive queued2/4 do not enter
+    ///508FE0's queued-config-kind2 branch. Actual current cache stays separate.
+    pub(crate) fn admits_inner_eye_kind1_context(self) -> bool {
+        self.owner
+            .queued_id
+            .is_none_or(|id| INNER_EYE_KIND1_QUEUED_ITEMS.contains(&(id as usize)))
+            && self.admits_permanent_readset(2, INNER_EYE_KIND1_ITEMS)
     }
 
     ///Mechanical signed-count/context check, with no item capability implied
@@ -450,6 +547,7 @@ impl<'a> ItemInputs<'a> {
         //implemented retained-C08 FireDelay multiplier below.
         let fetus_context = self.admits_fetus_cache_context();
         let neutral_monstro = self.admits_monstro_cache_context();
+        let epic_fetus_context = self.admits_epic_fetus_cache_context();
         self.admits_scalar_context()
             && self
                 .owner
@@ -465,7 +563,9 @@ impl<'a> ItemInputs<'a> {
                                 || (id == 68 && neutral_technology)
                                 || (id == 330 && neutral_soy_milk)
                                 || (id == 52 && fetus_context)
-                                || (id == 229 && neutral_monstro)))
+                                || (id == 229 && neutral_monstro)
+                                || (id == 168 && epic_fetus_context)
+                                || (id == 2 && epic_fetus_context)))
                 })
     }
 
@@ -476,6 +576,9 @@ impl<'a> ItemInputs<'a> {
             return true;
         }
         if self.admits_soy_milk_cache_context() || self.admits_monstro_cache_context() {
+            return true;
+        }
+        if self.admits_epic_fetus_cache_context() {
             return true;
         }
         self.admits_scalar_context()
@@ -494,6 +597,9 @@ impl<'a> ItemInputs<'a> {
     pub(crate) fn admits_selected_zero_familiar_requests(self) -> bool {
         if self.owned_count(229) != 0 {
             return self.admits_monstro_zero_familiar_requests();
+        }
+        if self.owned_count(168) != 0 || self.owned_count(2) != 0 {
+            return self.admits_epic_fetus_zero_familiar_requests();
         }
         self.admits_selected_auxiliary_callbacks()
     }
@@ -562,7 +668,7 @@ impl CacheResolution {
 }
 
 /// One callback's source ownership, beside its literal pure operator.
-/// Reads signed permanent/TEMP1/6, positive permanent222 and retained C08;
+/// Reads signed permanent/TEMP1/6, positive permanent2/222 and retained C08;
 /// writes integer C78 only. Source-local bounds and truncation precede Libra.
 /// The caller retains the separate TEMP6/negative-history guard. These neutral
 /// items prove this callback only;304 remains a distinct coupled operator.
@@ -594,6 +700,12 @@ impl FireDelayStage {
         }
         //512562 bound precedes512666's one permanent222 modifier.
         delay = delay.max(5.0_f32);
+        //5125B0 tests positive ownership once, after the bound and before
+        //the retained-C08 modifiers. Separate f32 multiply/add, not a count.
+        if inputs.positive_owned_count(2) {
+            delay *= 2.1_f32;
+            delay += 3.0_f32;
+        }
         //512610 reads retained C08; multiply BEFORE integer truncation.
         if primary == PrimaryWeaponC08::Brimstone {
             delay *= 3.0_f32;

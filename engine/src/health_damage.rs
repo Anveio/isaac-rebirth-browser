@@ -117,6 +117,7 @@ fn use_black_heart(state: &mut State) -> Result<(), String> {
                     id: 0,
                     entity_type: 0,
                 },
+                copied_source: None,
             },
         )?;
     }

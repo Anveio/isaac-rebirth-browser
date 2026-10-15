@@ -119,6 +119,9 @@ pub(crate) fn dispatch_player(
     callback_aim: WorldVector,
 ) -> Result<DispatchOutcome, String> {
     match plan.controller {
+        ControllerChannel::RegularShots if crate::inner_eye::selected(state, plan) => {
+            crate::inner_eye::dispatch_player(state, plan, input, phase, callback_aim)
+        }
         ControllerChannel::RegularShots => Ok(DispatchOutcome::RegularTear),
         ControllerChannel::MonstroLung => {
             crate::monstros_lung::dispatch_player(state, plan, input, phase, callback_aim)
@@ -129,6 +132,9 @@ pub(crate) fn dispatch_player(
         }
         ControllerChannel::ControlledFetus => {
             crate::controlled_fetus::dispatch_player(state, plan, input, phase, callback_aim)
+        }
+        ControllerChannel::EpicFetus => {
+            crate::epic_fetus::dispatch_player(state, plan, input, phase, callback_aim)
         }
         ControllerChannel::ControlledKnife => {
             controlled_knife(state, plan, input, phase, callback_aim)
@@ -147,16 +153,6 @@ pub(crate) fn dispatch_player(
         }
         ControllerChannel::ControlledTechnology => {
             crate::controlled_technology::dispatch_player(state, plan, input, phase, callback_aim)
-        }
-        unsupported => {
-            let channel = match unsupported {
-                ControllerChannel::Unimplemented(_) => "unimplementedPrimary",
-                _ => unreachable!("implemented controller matched above"),
-            };
-            //One bounded first-attempt diagnostic persists for this run. This
-            //branch performs no admission, RNG, actor or discharge writes.
-            record_frontier(state, channel);
-            Ok(DispatchOutcome::Unadmitted)
         }
     }
 }
@@ -201,6 +197,10 @@ pub struct AttackRuntime {
     ///old/unsupported restore histories never receive an invented zero.
     #[serde(default)]
     pub charge_c0c: Option<i32>,
+    ///5196B0 actual fresh Player+C70. Only the source-owned neutral lifetime
+    ///is admitted; legacy restores and unclosed grant histories remain absent.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub aim_rotation_c70: Option<i32>,
     ///Actual Player+DA0. Title/unsupported restore does not own a direction.
     #[serde(default)]
     pub head_direction_da0: Option<i32>,
@@ -225,6 +225,7 @@ impl AttackRuntime {
     pub(crate) fn fresh_player() -> Self {
         Self {
             charge_c0c: Some(0),
+            aim_rotation_c70: Some(0), //5196B0; never reconstructed from counts.
             head_direction_da0: Some(3), //5198e4, independently from C0C.
             movement_direction_d9c: Some(-1),
             shooting_aim_db4: Some(WorldVector { x: 0.0, y: 0.0 }),
@@ -690,6 +691,7 @@ pub(crate) fn persists_across_room(actor: ActorRef, knives: &[Knife]) -> bool {
 
 pub(crate) fn reset_room_schedule(state: &mut State) {
     crate::bombs::reset_room_shots(state);
+    crate::epic_fetus::reset_room(state);
     //453EC0 Uninit/Remove the transient pool before rebuilding the retained
     //type8/subtype0 pool. Active/dead is not this source pool predicate.
     let transient: Vec<_> = state
@@ -732,6 +734,7 @@ pub(crate) fn admits_referenced_remove(state: &State, actor: ActorRef) -> Result
             .map(|tear| tear.controlled.is_some())
             .ok_or_else(|| "registered Tear handle is unresolved".into()),
         ActorKind::Bomb => crate::bombs::admits_referenced_remove(state, actor.id),
+        ActorKind::Effect => crate::epic_fetus::admits_referenced_remove(state, actor.id),
         _ => Ok(false),
     }
 }
@@ -759,6 +762,7 @@ pub(crate) fn remove_referenced_actor(state: &mut State, actor: ActorRef) -> Res
         }
         ActorKind::Tear => crate::controlled_tear::remove(state, actor.id)?,
         ActorKind::Bomb => crate::bombs::remove_referenced(state, actor.id)?,
+        ActorKind::Effect => crate::epic_fetus::remove_referenced(state, actor.id)?,
         _ => return Err("referenced attack actor has no admitted Remove callback".into()),
     }
     Ok(())
@@ -776,6 +780,7 @@ pub(crate) fn replace_c18(state: &mut State, actor: Option<ActorRef>) -> Result<
                 .iter()
                 .any(|tear| tear.id == actor.id && tear.controlled.is_some()),
             ActorKind::Bomb => crate::bombs::admits_referenced_remove(state, actor.id)?,
+            ActorKind::Effect => crate::epic_fetus::admits_referenced_remove(state, actor.id)?,
             _ => false,
         };
         if !admitted {
@@ -1168,6 +1173,7 @@ pub(crate) fn knife_contacts(
                         id: actor.id,
                         entity_type: 8,
                     },
+                    copied_source: None,
                 },
             )?;
         }
@@ -1214,6 +1220,13 @@ pub(crate) fn complete_primary_cleanup(
             Ok(true)
         }
         None if state.weapon_admission.c18_is_known_empty => Ok(true),
+        Some(actor)
+            if actor.kind == ActorKind::Effect
+                && crate::epic_fetus::admits_referenced_remove(state, actor.id)? =>
+        {
+            remove_referenced_actor(state, actor)?;
+            Ok(true)
+        }
         _ => {
             record_frontier(state, "weaponPrimaryCleanupActor");
             Ok(false)

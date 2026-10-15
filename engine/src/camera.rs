@@ -61,6 +61,9 @@ pub struct Camera {
     pub scroll: WorldVector,
     pub last_player_position: WorldVector,
     pub histories: Vec<History>,
+    ///Only the real Room camera constructor owns the four +60 samples.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub shake_history_known: Option<bool>,
 }
 
 fn player_position(player: &Player) -> WorldVector {
@@ -138,6 +141,7 @@ impl Camera {
         Self {
             scroll: clamp_focus(room, point),
             last_player_position: ZERO,
+            shake_history_known: Some(true),
             histories: vec![
                 History::filled(60, ZERO),
                 History::filled(90, ZERO),
@@ -148,6 +152,60 @@ impl Camera {
             ],
         }
     }
+    pub(crate) fn source_shake_history_is_known(&self) -> bool {
+        self.shake_history_known == Some(true)
+            && self.histories.get(4).is_some_and(|history| {
+                history.capacity == 4
+                    && history.samples.len() == 4
+                    && history.head < 4
+                    && history.samples.iter().all(|sample| sample.is_finite())
+            })
+    }
+
+    ///42CF66..42D0B0: one real42E8D0 draw on EVERY positive-duration
+    ///camera pass. Game age modulo3 selects the formula, not draw admission.
+    pub(crate) fn advance_source_shake(
+        &mut self,
+        owner: &mut Option<crate::game_shake::GameShake>,
+        game_age: u32,
+        shared: &mut crate::mt::Mt19937,
+        phase: Phase,
+    ) {
+        if phase == Phase::Skipped {
+            return;
+        }
+        let Some(shake) = owner else {
+            self.shake_history_known = None;
+            return;
+        };
+        let Some(duration) = shake.duration_ce9fc else {
+            self.shake_history_known = None;
+            shake.unknown("gameShakeDurationHistory");
+            return;
+        };
+        if !self.source_shake_history_is_known() {
+            shake.unknown("cameraShakeRingHistory");
+            return;
+        }
+        let history = &mut self.histories[4];
+        if duration > 0 {
+            let direction = crate::npcs::direction(shared);
+            let sample = if (game_age as i32) % 3 == 0 {
+                direction * 10.0
+            } else {
+                *history.samples.last().expect("validated four samples") + direction * 2.0
+            };
+            history.append(sample);
+            //The source mutates the just-appended last element before mean(.9).
+            let attenuation = ((duration as f32) / 11.0).clamp(0.0, 1.0);
+            let sample = history.samples.last_mut().expect("validated four samples");
+            *sample = *sample * attenuation;
+        } else {
+            history.append(ZERO);
+        }
+        shake.offset_cea00 = Some(history.mean(0.9, None));
+    }
+
     /// Source42d780 admits default-style camera updates after each active game
     /// presentation. Room freezes are handled by the game/transition caller.
     pub fn advance(&mut self, room: &Room, player: &Player, aim: WorldVector, phase: Phase) {
@@ -185,8 +243,7 @@ impl Camera {
         self.histories[2].append(enemy);
         // Fresh single Isaac has no cooperative relative-player focus.
         self.histories[3].append(ZERO);
-        // The shake consumer and special item focus callbacks remain separate.
-        self.histories[4].append(ZERO);
+        //The independent +60 shake pass already ran once at this camera hook.
         // DefaultStyle1 clears its special-target flag after BOTH phases. With
         // no callback-supplied target, each phase appends the sentinel again.
         self.histories[5].append(SENTINEL);

@@ -106,7 +106,7 @@ export class Renderer {
     const gl = this.graphics;
     if (state.screen === "playing") {
       this.prepareRoom(state.room);
-      this.stage.prepare(state.stageEffects, state.camera?.scroll);
+      this.stage.prepare(state.stageEffects, this.worldOffset(state));
     }
     gl.beginScreen(); gl.resetTransform(); gl.globalAlpha = 1; gl.imageSmoothingEnabled = false;
     gl.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -194,15 +194,22 @@ export class Renderer {
         [point(0, start), point(1, start), point(0, end), point(1, end)]);
     }
   }
+  /** Source CEA00 is a pixel offset, independent of Room15B8 scrolling. */
+  private worldOffset(state: State): { x: number; y: number } | undefined {
+    const scroll = state.camera?.scroll, shake = state.gameShake?.offsetCea00;
+    if (scroll && shake) return { x: Math.fround(scroll.x + shake.x), y: Math.fround(scroll.y + shake.y) };
+    return shake ?? scroll;
+  }
   /** Room::Render world layer: backdrop, grid, actors and stage composites. */
   private drawWorld(ctx: CanvasRenderingContext2D, state: State, hidePlayer = false): void {
     ctx.save();
-    if (state.camera) ctx.translate(state.camera.scroll.x, state.camera.scroll.y);
+    const offset = this.worldOffset(state);
+    if (offset) ctx.translate(offset.x, offset.y);
     this.drawRoom(state.room.appearance, state.room.grid);
     ctx.restore();
     this.stage.ground(state.stageEffects);
     ctx.save();
-    if (state.camera) ctx.translate(state.camera.scroll.x, state.camera.scroll.y);
+    if (offset) ctx.translate(offset.x, offset.y);
     // Creep's render key (seq & 0x3ff) + 2100 sorts every pool under the
     // y-sorted actors, in spawn order; colour multiplies the clip's pulse.
     for (const effect of state.spriteEffects) {
@@ -635,8 +642,18 @@ export class Renderer {
     }
     this.assets.draw(ctx, PLAYER, `Walk${directionName(player.bodyFacing)}`, x, y, player.walkFrame,
       { layers: [1], overrides: { 1: { RedTint, GreenTint, BlueTint } } });
-    this.assets.draw(ctx, PLAYER, `Head${directionName(player.facing)}`, x, y, player.headFrame,
-      { layers: [4], overrides: { 4: { RedTint, GreenTint, BlueTint } } });
+    const costume = state.playerItems?.costume229, head = costume?.slots[4];
+    if (costume && costume.historyFrontier === null && !costume.mainClipFrontier
+      && head?.layer === 0 && !head.bodyGroup) {
+      //The actual selected head pose owns its clip/frame. Normal Isaac and
+      //this costume both retain skin-1, so50F206 keeps the authored sheet.
+      this.assets.draw(ctx, "gfx/characters/229_monstros lung.anm2",
+        costume.sprite.clip, x, y, costume.sprite.frame,
+        { layers: [0], overrides: { 0: { RedTint, GreenTint, BlueTint } } });
+    } else {
+      this.assets.draw(ctx, PLAYER, `Head${directionName(player.facing)}`, x, y, player.headFrame,
+        { layers: [4], overrides: { 4: { RedTint, GreenTint, BlueTint } } });
+    }
   }
   private hud(ctx: CanvasRenderingContext2D, state: State): void {
     for (let heart = 0; heart < Math.ceil(state.player.maxHp / 2); heart++) {

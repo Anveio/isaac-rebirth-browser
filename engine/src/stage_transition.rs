@@ -148,18 +148,11 @@ pub(crate) fn spawn_boss_award(state: &mut State) -> Result<(), String> {
         y: center.y + 80.0,
     };
     let collectible_index = room_index(width, collectible_position);
+    // 5c97c1 fix_award_pos5c8260 runs on the trapdoor cell before its MT
+    // draw; 5c9894 5c8320 on the collectible position after selection. The
+    // admitted clear draws no RNG, so clearing both cells first is equivalent.
     for index in [trapdoor_index, collectible_index] {
-        // fix_award_pos5c8260/5c8320 destroys an occupying grid object and
-        // relocates when collision remains; neither branch is admitted yet.
-        let occupied = grid.cells[index].entity.is_some()
-            || state
-                .room
-                .path_costs
-                .as_ref()
-                .is_some_and(|costs| costs.get(index).is_ok_and(|cost| cost >= 1000));
-        if occupied {
-            return Err("occupied boss clear award cell is not admitted".into());
-        }
+        clear_award_cell(state, index)?;
     }
     // Room+8 descriptor+50 seeds the award RNG with shift index 35.
     let mut rng = crate::items::Rng::new(
@@ -359,4 +352,32 @@ fn stage_name(stage: u32) -> &'static str {
         2 => "BASEMENT II",
         _ => "BASEMENT I",
     }
+}
+
+/// fix_award_pos5c8260/5c8320: an occupying grid object takes its vtable+30
+/// destroy (561c00 = Damage+28 with 4 hits). A poop (14) reaches hit state4,
+/// collision0 and path cost900 (56a750..56a770). Its Poop Explosion43 effect,
+/// sound, drop rolls and their RNG draws (56a390) are not admitted, nor are
+/// other occupants' destroys or the 5c7f30 relocation when collision remains:
+/// those cells keep their object and the award still spawns there.
+fn clear_award_cell(state: &mut crate::State, index: usize) -> Result<(), String> {
+    let grid = state
+        .room
+        .grid
+        .as_mut()
+        .ok_or("boss clear award requires the admitted room grid")?;
+    let Some(entity) = grid.cells[index].entity.as_mut() else {
+        return Ok(());
+    };
+    if entity.kind == 14 && entity.state <= 3 {
+        entity.state = 4;
+        entity.collision_class = 0;
+        state
+            .room
+            .path_costs
+            .as_mut()
+            .ok_or("boss clear award requires source Room.Init path costs")?
+            .store(index, 900)?;
+    }
+    Ok(())
 }

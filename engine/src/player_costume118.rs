@@ -180,6 +180,11 @@ pub(crate) fn on_collectible_added(state: &mut State, id: u32) {
             .as_mut()
             .filter(|costume| costume.history_frontier.is_none())
         {
+            //52CF00..52CF32 clears only the actually assigned entries
+            //before57BF00/511060.50EDC0 then resets their Down0 poses.
+            for slot in costume.slots.iter().flatten() {
+                costume.sprites[slot.entry].override_active = false;
+            }
             costume.sprites[0].set_frame("WalkDown", 0);
             costume.sprites[1].set_frame("HeadDown", 0);
             costume.additional_layer_frontier = Some(330);

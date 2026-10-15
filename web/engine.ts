@@ -15,6 +15,12 @@ export interface Player {
   shotsFired: number;
 }
 export interface AttackColor { tint: [number,number,number,number]; sourceMiddle: [number,number,number,number]; offsets: [number,number,number]; }
+export interface Costume229 {
+  slots: ({entry: number; layer: number; bodyGroup: boolean} | null)[];
+  sprite: {clip: string; frame: number; playing: boolean; overrideActive: boolean};
+  priority: number; historyFrontier: string | null; mainClipFrontier: boolean;
+  lastShootMainClipBa8: string | null;
+}
 export interface Tear {
   id: number; x: number; y: number; vx: number; vy: number; age: number;
   spawnSeed: number; sourceVariant: number | null; collisionRadius: number; gridContact: boolean;
@@ -266,7 +272,7 @@ export interface StageEffects {
 }
 export interface State {
   weaponCache: {primary: number; flagsC98: [number,number]; colorCa0: AttackColor; colorCcc: AttackColor};
-  attackRuntime: {chargeC0c: number | null; headDirectionDa0: number | null; shootingAimDb4: {x: number; y: number} | null; movementDirectionD9c: number | null; playerDc4: {x: number; y: number} | null; persistent: ActorRef | null; secondary: (ActorRef | null)[]; nextKnife: number};
+  attackRuntime: {chargeC0c: number | null; aimRotationC70?: number | null; headDirectionDa0: number | null; shootingAimDb4: {x: number; y: number} | null; movementDirectionD9c: number | null; playerDc4: {x: number; y: number} | null; persistent: ActorRef | null; secondary: (ActorRef | null)[]; nextKnife: number};
   knives: Knife[];
   stageShootingGuard: {state: number; counter: number};
   weaponAdmission: {sourcePlayerType: number|null; c18IsKnownEmpty: boolean; pendingPrimaryCleanup: {fromPrimary:number;toPrimary:number}|null; unadmittedController: {primary:number;channel:string}|null};
@@ -294,6 +300,7 @@ export interface State {
   playerItems: {initializerSeed: number; managerRng: ItemRng; initializerRng: ItemRng;
     itemRngs: ItemRng[]; trinketRngs: ItemRng[]; pocketRngs: ItemRng[]; entitySpawnSeed: number;
     technologyEyeRegistered: boolean | null;
+    costume229?: Costume229 | null;
     ownedCounts: number[]; temporaryCollectibles: {itemId: number; count: number; cooldown: number}[]; queuedId: number | null; queuedCharge: number; queuedTouched: boolean;
     pickupAnimationFrame: number; pickupAnimationPlaying: boolean; pickupAnimationGuard: boolean;
     pickupPresentation: {itemId: number; animationFrame: number; animationPlaying: boolean} | null;
@@ -324,7 +331,8 @@ export interface State {
   publicActions: { menuConfirm: boolean; menuBack: boolean; activePressed: boolean; activeTriggered: boolean; pocketPressed: boolean; pocketTriggered: boolean; enterWasDown: boolean; spaceWasDown: boolean; escapeWasDown: boolean; pocketWasDown: boolean };
   playerAnimation: { current: "Trapdoor" | "Appear" | "Death" | "UseItem" | "Hit" | null; frame: number; playing: boolean; guard: boolean };
 
-  camera: {scroll: {x: number; y: number}; lastPlayerPosition: {x: number; y: number};
+  gameShake?: {durationCe9fc: number | null; offsetCea00: {x: number; y: number} | null; frontier: string | null} | null;
+  camera: {scroll: {x: number; y: number}; lastPlayerPosition: {x: number; y: number}; shakeHistoryKnown?: boolean | null;
     histories: {capacity: number; head: number; samples: {x: number; y: number}[]}[]} | null;
   nextPickup: number;
   minimap: { cells: { x: number; y: number; visibility: "unvisited" | "visited" | "current" }[] };

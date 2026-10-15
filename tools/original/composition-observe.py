@@ -17,7 +17,7 @@ ROOT = Path(__file__).resolve().parents[2]
 EXPECTED_SHA = os.environ.get('ISAAC_ORIGINAL_SHA')
 if not isinstance(EXPECTED_SHA, str) or re.fullmatch(r'[0-9a-f]{64}', EXPECTED_SHA) is None:
     raise ValueError('ISAAC_ORIGINAL_SHA must provide the driver-verified canonical binary SHA256')
-SOURCE_FIELDS = frozenset(('playerMovementD9c', 'knifeChildChain4a0', 'npc14And18DamageQueue', 'kind8TearFields', 'ordinaryTechnology', 'ordinaryDrFetusBombs', 'controlledTechnology7x2x1', 'controlledDrFetusBombs'))
+SOURCE_FIELDS = frozenset(('playerMovementD9c', 'knifeChildChain4a0', 'npc14And18DamageQueue', 'kind8TearFields', 'ordinaryTechnology', 'ordinaryDrFetusBombs', 'controlledTechnology7x2x1', 'controlledDrFetusBombs', 'monstrosLung229'))
 spec = importlib.util.spec_from_file_location('composition_items', ROOT / 'tools/original/item-observer.py')
 base = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(base)
@@ -175,6 +175,14 @@ def observe(pid, context):
                         'trinketSlotsE14': [i32(player + 0xe14), i32(player + 0xe18)],
                         'previousVelocityDd4': floats(player + 0xdd4, 2),
                         'fireCooldownC74': i32(player + 0xc74), 'headTimerBb0': i32(player + 0xbb0)}
+                if 'monstrosLung229' in requested_fields:
+                    supplemental['players'][-1]['monstroCaller'] = {
+                        'playerTypeBfc': i32(player + 0xbfc),
+                        'trinketSlotsE14': [i32(player + 0xe14), i32(player + 0xe18)],
+                        'playerFlags318': u32(player + 0x318),
+                        'shootingLock7dc': u32(player + 0x7dc),
+                        'position448': floats(player + 0x448, 2),
+                        'previousVelocityDd4': floats(player + 0xdd4, 2)}
                 if 'playerMovementD9c' in requested_fields:
                     supplemental['players'][-1]['movementDirectionD9c'] = i32(player + 0xd9c)
             room = u64(game + 0x8180)
@@ -324,6 +332,13 @@ def observe(pid, context):
                         # Fast5414A0 retainsB28; do not synthesize a Fast zero.
                         row['baseDamage83c'] = floats(actor + 0x83c) if writer else None
                         row['velocityDeltaB28'] = floats(actor + 0xb28, 2) if writer else None
+                    if ('monstrosLung229' in requested_fields
+                            and (identity['variant'], identity['subtype']) == (1, 0)):
+                        #Canonical2/1/0 passes actual671270 before these reads.
+                        #5411E8/54240F owns83C;5179DB copies actualPlayerC84
+                        #into Tear838. Neither field is a correspondence alias.
+                        row['monstroBaseDamage83c'] = floats(actor + 0x83c)
+                        row['monstroShotOrdinal838'] = u32(actor + 0x838)
                     row['height7d4'] = floats(actor + 0x7d4)
                     row['fallingSpeed7d8'] = floats(actor + 0x7d8)
                     row['fallingAcceleration7dc'] = floats(actor + 0x7dc)
