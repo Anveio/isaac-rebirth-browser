@@ -6,7 +6,8 @@ import npcData from "./npc-data.json";
 import familiarData from "./familiar-data.json";
 import gameOverData from "./gameover-data.json";
 import stageData from "./stage-data.json";
-const sceneData = { ...informationData, ...baseSceneData, ...doorData, ...gridData, ...npcData, ...familiarData, ...gameOverData, ...stageData };
+import attackData from "./attack-data.json";
+const sceneData = { ...informationData, ...baseSceneData, ...doorData, ...gridData, ...npcData, ...familiarData, ...gameOverData, ...stageData, ...attackData };
 import fontData from "./font-data.json";
 import completionUrl from "./assets/completion_widget.png?url";
 const bossSceneUrls = import.meta.glob("./assets/boss-scene/*.png", { eager: true, query: "?url", import: "default" }) as Record<string, string>;
@@ -69,12 +70,14 @@ const urls = import.meta.glob([
   "../references/isaac/rebirth/resources/gfx/bosses/**/*.png",
   "../references/isaac/rebirth/resources/gfx/effects/effect_032_bloodstains.png",
   "../references/isaac/rebirth/resources/gfx/effects/hangingguys.png",
+  "../references/isaac/rebirth/resources/gfx/effects/effect_000_shopkeepers.png",
   "../references/isaac/rebirth/resources/gfx/familiar/familiar_270_leech.png",
   "../references/isaac/rebirth/resources/gfx/effects/effect_009_poof01*.png",
   "../references/isaac/rebirth/resources/gfx/effects/effect_012_poof04.png",
   "../references/isaac/rebirth/resources/gfx/effects/effect_bloodgush.png",
   "../references/isaac/rebirth/resources/gfx/effects/effect_018_lasereffects.png",
   "../references/isaac/rebirth/resources/gfx/effects/effect_brimstoneimpact.png",
+  "../references/isaac/rebirth/resources/gfx/effects/effect_momsknife.png",
   "../references/isaac/rebirth/resources/gfx/effects/effect_006_hearteffect.png",
   "../references/isaac/rebirth/resources/gfx/shadow.png",
   "../references/isaac/rebirth/resources/gfx/tears.png",

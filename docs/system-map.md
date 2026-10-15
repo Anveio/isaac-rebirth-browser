@@ -99,16 +99,31 @@ The exact same-base PR269 public-WASM regression preserves 37,914,507 complete
 field comparisons and 416 positive-owned completion rows with zero differences.
 This is local regression evidence, not new original/browser acceptance.
 
+Merged [PR291](https://github.com/Anveio/isaac-rebirth-browser/pull/291) adds
+Libra304's coupled request expansion after primary selection and its
+post-callback balance before final clamps. Unsupported input callbacks keep the
+coupled outputs pending. Its own production, strict Clippy and floor checks pass;
+the local regression retains 37,956,648 fields with zero differences. Two fixed
+public-pedestal histories, 304→6 and 6→304, pass 503,611 scoped Native/public-WASM
+checks across 1,262 paired gates, including 186 post-grant rows. The first case
+lacks 631 Native Familiar-manager selections; its pending bit 512 is observed as 0,
+while the second case's actual empty manager matches. Actor identity, source
+variant/current color, physical/lifetime and browser/render parity remain open.
+Duplicates, partial requests, active clamps and item118 triples remain unexecuted.
+Current main `3080e8e2` contains the four qualified owned blobs; this does not claim
+a separately built whole-current-main artifact. Earlier evidence capsules and
+failed attempts remain unchanged.
+
 Merged PR262 carries authored whole Special STB resources through real startup
 and doorway factories. Its own production, strict Clippy and floor checks pass,
 as do six public-WASM startup/invalid-resource checks. These do not qualify
 Original/DOM equivalence or full live item history. PR266 registers the public
 item-composition driver and all four literal v7 replay cases.
 
-Ordinary Brimstone and Knife actor execution remains in separate private
-producers at this main checkpoint; PR270 ordinary-Knife publication is pending.
-Number One6 and Libra304 have prepared source operators and scoped admission,
-without inherited runtime or gameplay acceptance. The ordinary Knife six-case
+At the retained main4e122 checkpoint, ordinary Brimstone and Knife actor
+execution remained in private producers. The later PR270 result is recorded below.
+At that checkpoint, Number One6 and Libra304 had prepared source operators and
+scoped admission without inherited runtime or gameplay acceptance. The ordinary Knife six-case
 bank completed only cases 0..2 on `2ed8a7b`: 571,311 checks, 37,820 differences,
 three functional failures and passing capture audits. Cases 3..5 remain pending.
 The later `a3209046` producer passed its own compiler checks; its older DST run
@@ -150,8 +165,101 @@ native helper still fails 18 of 6,744 checks: two same-child full-curve movement
 gaps, eight Remove-flag gaps and eight Remove-before-full-cleanup gaps. Six
 children have actual full-curve movement/copied-line witnesses; two have only
 post-conversion fast rows before later Full manager absence. Actual Remove
-flags remain unobserved for all eight. No browser v8 or whole-history
+flags remain unobserved for all eight. No DOM/browser v8 capture or whole-history
 acceptance follows; all four declared cases and all older grades remain retained.
+
+At main `8ac96e2f` (PR270), the ordinary parent implementation is merged.
+PR270 adds the ordinary Mom's Knife subtype0 parent to main, including its
+registered slots, launch/return and Full/fast callbacks. Has118 children,
+Brimstone and Ludovico execution remain separate private/source leaves. Own
+production, strict Clippy and floor checks pass; the four-route local WASM
+regression retains 37,928,004 field comparisons with zero differences. The
+existing authorized DST consumer also compiles; no full DST run is claimed.
+
+The recorded Original114 case retains its frozen 125,788-check/8,922-failure
+grade. A separate overlapping additive report has 87,879 checks and 21,918
+failures; these totals are not summed or substituted. Each of 44 parent fields
+matches all 1,278 rows (639 Full/639 fast). C0C matches 1,466 rows, with 157
+observed charge increases, 104 launched rows, two release resets and 12 declared
+render witnesses. Four strict-f32 rotation differences, actor identity/seed,
+RNG/Init uniform, missing raw8A4/8A0/Line fields, prebirth C74/BB0 counters and
+NPC/contact/clear differences remain red. Child/controlled/triple histories and
+whole-case parity remain unaccepted. [Parent evidence](../references/isaac/foundation/items/ordinary-knife-parent-main.json)
+preserves the two report scopes and all earlier grades.
+
+At main `e0fd5e9f`, PR282 adds Number One6's scoped scalar operators. Own
+production, strict Clippy and floor checks pass; the same-input four-route local
+WASM regression compares 37,956,648 fields with zero differences. The real
+pedestal witness matches all seven numeric fields across 632 paired rows,
+including 93 after acquisition. This is committed-prefix evidence: the durable
+8-action, 361-presentation, 698-command tape completed, but final capture/archive
+creation failed. Those 93 post-grant browser rows retain pending color cache64
+against Native0. Appearance/auxiliary PR288 and consumed-cache readiness PR287
+are source-only; complete item6 acquisition/birth parity remains unaccepted.
+
+Merged PR283 adds an optional Native event tap. Its separate actual capture
+observes 24 lifecycle events for 12 identities, including eight post329 child
+identities. This establishes Native Remove/Uninit observability, without port
+or paired triple parity. The old Original-only v8 helper remains 6,744/18/18;
+its archived missing-event grades are unchanged. Has118 children, Brimstone and
+controlled actors remain separate private/source runtime leaves.
+[Current scoped evidence](../references/isaac/foundation/items/cache-and-native-lifecycle-main.json)
+retains the exact proof pins, incomplete capture status and remaining boundaries.
+
+At main `383d96eb` (PR288, retained through formatting-only PR293), Number One6
+has scoped appearance, auxiliary and public-starting-grant code in main. Its own
+three builds and 37,956,648-field local regression pass. Retained Native versus
+independently executed public-WASM properties match17,423/0 at631 unique gates,
+including93 after grant with pendingcache0. Each side's grant-gate Tear remains
+white while five later own Tears copy changedCA0. This does not join cross-side
+actor IDs or qualify port currentColor2D0, sourceVariant, physics, lifecycle or
+candidate DOM/rendering. The older scalar-only93 cache64 differences and failed
+incomplete archive remain unchanged.
+
+The separate completed unchanged-v8 public-WASM replay retains 19,359/5,394 FAIL
+and old-v2 history 18,759/2,307 FAIL. Native has12 children versus0 in the port;
+the118-first transition to114 leaves typed primary cleanup unresolved. DOM/browser
+capture remains unexecuted, separate from earlier pregame guard stops.
+
+The retained PR297 snapshot describes Draft286 executing the Knife-first
+114→118→329 route through public WASM. Its functional comparison fails11,158 of106,884 checks;12 child
+births pair at actual gates and copied controls match, while all550 pre329 child
+position/velocity/angle rows and532 raw8A4 rows differ. A separate84/0 birth-law
+diagnostic uses each side's own actual8A4/8A8. The source consumes a shared-MT
+uniform for8A8; the parent seed/uniform already differs before child birth.
+These first-birth witnesses do not demonstrate a new child-law defect, nor close
+later movement/nearest-parameter or random-stream alignment. Native24 lifecycle
+events/12 children,280 post329 controlled-parent differences and the new marker's
+missing helper remain separately scoped. Has118/controlled/Brim actor gameplay
+acceptance is pending.
+
+Subsequently, PR290 merged at `ce5033cf` and PR286 at `98b35534`.
+Main now uses one canonical NPC Laser record/store, shared Line layout and
+optional unknown fields, and executes ordinary Has118 subtype1 children through
+the existing Knife store. PR290 preserves 17 NPC callbacks and compares
+15,268,885 existing-State fields with zero differences; its three own builds
+pass. The scoped replay observes 43/86 Full rows and zero fast rows, retaining
+fast nonvacuity failures. Original comparisons remain 2,820/21,942 and
+2,831/23,070 differences with zero numeric Laser joins and no DOM acceptance.
+
+PR286's three own builds and 37,956,648-field local regular regression pass.
+The fixed route observes 12 same-gate child births and 614 body rows with matching
+copied Line, flags, damage and color; its universal 106,884/11,158 FAIL and the
+older v8 19,359/5,394 FAIL remain unchanged. The inherited shared-MT divergence
+already precedes child birth; later physical/parameter and controlled behavior
+remain unaccepted. Both recorded-OS attempts stopped at resource guards; the
+second reaches 610/748 presentations with an unfinished tape and full transport
+FAIL. No new DOM, history-helper, complete lifetime or triple parity follows.
+The PR297 evidence capsule remains an unchanged historical snapshot.
+
+Readiness287 passes a warm production retry and strict Clippy, but its floor
+build stopped at the working-memory floor. Its earlier production capacity stop
+is also retained; public-game contracts remain unexecuted. Pending capture-tool
+PR292 preserves an existing nonnull trace's34,042,951 bytes,1,532 commands,
+216 retained states and3 backend events, including disclosed state-history
+truncation. Its live attempts remain incomplete; no engine parity follows.
+[New scoped evidence](../references/isaac/foundation/items/post-number-one-and-knife-first.json)
+keeps these results separate from every earlier report.
 
 Main `19906c4e`, observed on October14, includes the reviewed normal-health source callbacks, the source-only Nightmare resource prerequisite and raw snapshot accessor, and retains39 registered live suites. This is source qualification. No complete current-main39-suite production/original/browser acceptance is claimed; the frozen local f793/0f343 checkpoint and later scoped owner artifacts remain separate.
 

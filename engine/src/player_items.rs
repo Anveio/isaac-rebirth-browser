@@ -540,7 +540,7 @@ pub(crate) fn add_collectible(
         .as_mut()
         .expect("checked Player item owner");
     owner.owned_counts[id as usize] = owner.owned_counts[id as usize].wrapping_add(1);
-    if ![1, 4, 114, 118, 329].contains(&id) {
+    if ![1, 4, 6, 114, 118, 329, 304].contains(&id) {
         // These admitted grant paths preserve the fresh auxiliary words.
         // Nonzero setters and restore need their own producer binding.
         owner.luck_inputs = None;

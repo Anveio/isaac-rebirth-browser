@@ -111,6 +111,7 @@ def main():
     parser.add_argument('--focus-handoff', action='append', default=[], help='At named capture, generate public X11 focus out/in and release one presentation before capture; diagnostic tape alteration is recorded')
     parser.add_argument('--state-observer', type=Path, help='Optional parent-only reference debug module exposing observe(pid, context); never production game input')
     parser.add_argument('--observe-every-step', action='store_true', help='Observe at each tape step gate without screenshots; use one-frame steps for dense trajectories')
+    parser.add_argument('--composition-lifecycle-events', action='store_true', help='Optional source-bound leader-thread Knife8/0/1 hardware event observation; requires canonical ISAAC_ORIGINAL_SHA, no game inputs changed')
     parser.add_argument('--archive-evidence', action='store_true', help='Lossless gzip manifest plus committed native progress journal; public observations and clock unchanged')
     parser.add_argument('--gl-trace', type=Path, help='Optional documented graphics API observer to chain; no game instructions/state')
     parser.add_argument('--audio-trace', type=Path, help='Optional forwarding OpenAL API observer to chain; no game instructions/state')
@@ -335,6 +336,7 @@ def main():
             progress.append(kind, value)
     record('start', report)
     proc = None
+    lifecycle = None
     started = time.monotonic()
     try:
         with tempfile.TemporaryDirectory(prefix='isaac-clock-') as socket_dir, (out / 'launch.log').open('w') as log:
@@ -365,8 +367,13 @@ def main():
                 status['controllerElapsedMs'] = (time.monotonic() - started) * 1000
                 acknowledgements.append(status)
                 record('acknowledgement', status)
+                if lifecycle is not None:
+                    lifecycle.gate(status)
                 return status
             current = acknowledgement()
+            if args.composition_lifecycle_events:
+                lifecycle = module('composition_lifecycle', 'composition-lifecycle.py').Tap(proc.pid, out / 'lifecycle', timeout=args.frame_timeout)
+                lifecycle.gate(current)
             connection.sendall(b'step 30\n')
             current = acknowledgement()
             report['bootstrapPresentedFrames'] = 30
@@ -472,6 +479,8 @@ def main():
                 'hostWallMs': sum(p['advanceHostWallMs'] for p in measured),
                 'nativeCpuMs': sum(p['advancePerformance']['cpuUserMs']+p['advancePerformance']['cpuSystemMs'] for p in measured),
                 'scope': 'released presentation intervals only; simulation ticks unknown; observer cost included'}
+            if lifecycle is not None:
+                report['compositionLifecycle'] = lifecycle.close()
             report['status'] = 'pass'
             connection.sendall(b'quit\n')
             proc.wait(timeout=5)
@@ -481,6 +490,12 @@ def main():
         report['status'] = 'fail'
         report['failures'].append(str(error))
     finally:
+        if lifecycle is not None:
+            try:
+                report['compositionLifecycle'] = lifecycle.close()
+            except Exception as error:
+                report['status'] = 'fail'
+                report['failures'].append(str(error))
         if proc is not None and proc.poll() is None:
             os.killpg(proc.pid, signal.SIGTERM)
             try:

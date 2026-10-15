@@ -199,7 +199,13 @@ fn tinted_reward(
     index: usize,
     local: &mut crate::items::Rng,
 ) -> Result<(), String> {
-    let grid = Grid::new(state.room.grid.clone().ok_or("tinted reward requires room grid")?)?;
+    let grid = Grid::new(
+        state
+            .room
+            .grid
+            .clone()
+            .ok_or("tinted reward requires room grid")?,
+    )?;
     let position = grid.position(index).ok_or("tinted rock outside its grid")?;
     // Int(10)==0 offers Small Rock only once Persistent+0x3c unlocks it; a
     // fresh profile has not destroyed the tinted rocks that unlock it.
@@ -294,7 +300,9 @@ fn admit_reward(
     };
     pickup.velocity = velocity;
     pickup.birth_game_update = state.game_update_count;
-    state.next_pickup = id.checked_add(1).ok_or("tinted reward identity exhausted")?;
+    state.next_pickup = id
+        .checked_add(1)
+        .ok_or("tinted reward identity exhausted")?;
     state.room.pickups.push(pickup);
     let actor = crate::actors::ActorRef {
         kind: crate::actors::ActorKind::Pickup,

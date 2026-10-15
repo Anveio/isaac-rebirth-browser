@@ -10,6 +10,20 @@ const PLAYER = "gfx/001.000_player.anm2";
 const TEAR = "gfx/002.000_tear.anm2";
 // Rock Init 56ed00 / Render 56bf80: an intact (state 1) rock-family grid
 // entity sets frame variant of its type's grid_rock.anm2 animation.
+// Minimap room-type icons from the jump table at 0x678748; challenge rooms
+// (11) use the ambush icon unless the game's boss-challenge flag is set.
+const MINIMAP_ICONS: Record<number, string> = {
+  2: "IconShop", 4: "IconTreasureRoom", 5: "IconBoss", 6: "IconMiniboss", 7: "IconSecretRoom",
+  8: "IconSuperSecretRoom", 9: "IconArcade", 10: "IconCurseRoom", 11: "IconAmbushRoom", 12: "IconLibrary",
+  13: "IconSacrificeRoom", 15: "IconAngelRoom", 18: "IconIsaacsRoom", 19: "IconBarrenRoom",
+  20: "IconChestRoom", 21: "IconDiceRoom",
+};
+// Mask 0x3c1204: shown as locked while only shadow-revealed and unvisited.
+// Base Rebirth's four shapes: bit 1 tall, bit 2 wide (1x1, 1x2, 2x1, 2x2).
+function minimapShape(template: { width: number; height: number }): number {
+  return (template.width === 26 ? 2 : 0) + (template.height === 14 ? 1 : 0);
+}
+const LOCKED_MINIMAP_TYPES = new Set([2, 9, 12, 18, 19, 20, 21]);
 const ROCK_ANIMATIONS: Record<number, string> = { 2: "normal", 3: "black", 4: "tinted", 5: "bombrock", 6: "alt" };
 function rockSprite(kind: number, variant: number): { animation: string; frame: number } | undefined {
   const animation = ROCK_ANIMATIONS[kind];
@@ -102,7 +116,13 @@ export class Renderer {
    * layer as an ordinary ANM2 draw at the mouth, then (length > 15) one body
    * quad from 16 px past the mouth to the end, whose V runs 0.65*length
    * texels over the repeating 64-texel layer-1 column (SetWrap GL_REPEAT). */
-  private drawLaser(ctx: CanvasRenderingContext2D, laser: State["lasers"][number]): void {
+  private npcLaserView(laser: State["lasers"][number]) {
+    return { presentedPosition: laser.position, positionOffset: laser.renderOffset,
+      rotation: laser.sprite.rotation, scale: laser.sprite.scale, actor: laser.actor,
+      animation: laser.sprite.animation, animationClock: laser.sprite.frame,
+      angle: laser.angle, length: laser.beamLength };
+  }
+  private drawLaser(ctx: CanvasRenderingContext2D, laser: ReturnType<Renderer["npcLaserView"]>): void {
     const origin = { x: laser.presentedPosition.x + laser.positionOffset.x, y: laser.presentedPosition.y + laser.positionOffset.y };
     const screen = (x: number, y: number): [number, number] => [Math.fround(x * 0.65 + 32), Math.fround(y * 0.65 - 46)];
     const s0 = screen(origin.x, origin.y);
@@ -175,7 +195,7 @@ export class Renderer {
       this.drawnNpcs.push({ kind: npc.kind, spawnSeed: npc.spawnSeed, scale: [scale, scale] });
       const keeper = npc.keeper;
       if (keeper) {
-        this.assets.draw(ctx, "gfx/017.002_secret room keeper.anm2", keeper.animation,
+        this.assets.draw(ctx, npc.variant === 0 ? "gfx/017.001_shopkeeper.anm2" : "gfx/017.002_secret room keeper.anm2", keeper.animation,
           npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46, keeper.animationClock,
           { scale, overrides: { 0: {
             RedTint: keeper.tint[0]! * 255, GreenTint: keeper.tint[1]! * 255, BlueTint: keeper.tint[2]! * 255,
@@ -217,6 +237,23 @@ export class Renderer {
           npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46, npc.animationFrame, { scale, color });
       }
     }
+    for (const knife of state.knives) {
+      if (!knife.visible) continue;
+      const sprite = knife.sprite, color = knife.currentColor, flips = sprite.layerFlips?.[0] ?? [false, false];
+      ctx.save();
+      ctx.translate((knife.position.x + knife.renderOffset.x + sprite.offset.x) * 0.65 + 32,
+        (knife.position.y + knife.renderOffset.y + sprite.offset.y) * 0.65 - 46);
+      ctx.rotate(sprite.rotation * Math.PI / 180);
+      ctx.scale(flips[0] ? -1 : 1, flips[1] ? -1 : 1);
+      this.assets.draw(ctx, "gfx/008.000_moms knife.anm2", sprite.animation, 0, 0, sprite.frame,
+        {scale: 0.65, layerScales: {0: [sprite.scale.x, sprite.scale.y]}, overrides: {0: {
+          RedTint: color.tint[0]! * 255, GreenTint: color.tint[1]! * 255,
+          BlueTint: color.tint[2]! * 255, AlphaTint: color.tint[3]! * 255,
+          RedOffset: color.offsets[0]! * 255, GreenOffset: color.offsets[1]! * 255,
+          BlueOffset: color.offsets[2]! * 255,
+        }}});
+      ctx.restore();
+    }
     for (const familiar of state.familiars) {
       if (!familiar.visible || !familiar.active || familiar.removed) continue;
       ctx.save();
@@ -228,7 +265,7 @@ export class Renderer {
       ctx.restore();
     }
     for (const laser of state.lasers) {
-      if (laser.removed) continue;
+      if (!laser.active) continue;
       // The impact effect keys 500 below its laser, so it draws under the beam.
       const impact = laser.impact;
       if (impact && !impact.removed) {
@@ -239,7 +276,7 @@ export class Renderer {
         this.assets.draw(ctx, impact.actor, impact.animation, 0, 0, impact.animationClock);
         ctx.restore();
       }
-      this.drawLaser(ctx, laser);
+      this.drawLaser(ctx, this.npcLaserView(laser));
     }
     for (const projectile of state.enemyProjectiles)
       if (!projectile.removed && projectile.animation)
@@ -250,8 +287,18 @@ export class Renderer {
         this.assets.draw(ctx, "gfx/1000.066_ember particle.anm2", "Idle",
           particle.presentedPosition.x * 0.65 + 32, particle.presentedPosition.y * 0.65 - 46, particle.animationClock);
     if (!hidePlayer) this.drawPlayer(ctx, state);
-    for (const tear of state.tears)
-      this.assets.draw(ctx, TEAR, `RegularTear${tear.animationTier}`, Math.round(tear.x * 2) / 2, Math.round(tear.y * 2) / 2, tear.age);
+    for (const tear of state.tears) {
+      const color = tear.sourceColor;
+      //RegularTear's white authored layer receives its birth-owned ColorMod.
+      //Keep all11 components in state; project tint and final RGB offsets.
+      this.assets.draw(ctx, TEAR, `RegularTear${tear.animationTier}`, Math.round(tear.x * 2) / 2, Math.round(tear.y * 2) / 2, tear.age,
+        { overrides: { 0: {
+          RedTint: color.tint[0]! * 255, GreenTint: color.tint[1]! * 255,
+          BlueTint: color.tint[2]! * 255, AlphaTint: color.tint[3]! * 255,
+          RedOffset: color.offsets[0]! * 255, GreenOffset: color.offsets[1]! * 255,
+          BlueOffset: color.offsets[2]! * 255,
+        } } });
+    }
     for (const impact of state.impacts)
       this.assets.draw(ctx, "gfx/1000.012_tear poof_small.anm2", "Poof", impact.x, impact.y, impact.age);
     for (const bomb of state.bombs)
@@ -491,9 +538,52 @@ export class Renderer {
     }
     if (!state.achievementEligibility) this.assets.draw(ctx, "gfx/ui/hudpickups.anm2", "Idle", 24, 84, 5);
     this.assets.draw(ctx, "gfx/ui/minimap1.anm2", "Frame", 400, 16);
-    for (const cell of state.minimap.cells) {
-      const animation = { current: "RoomCurrent", visited: "RoomVisited", unvisited: "RoomUnvisited" }[cell.visibility];
-      this.assets.draw(ctx, "gfx/ui/minimap1.anm2", animation, 420 + 8 * cell.x, 33 + 8 * cell.y);
+    this.drawMinimap(ctx, state);
+  }
+
+  // Minimap render 5aeb10: a 7x7 grid-cell window around the current room's
+  // origin, clamped to the 13x13 grid, stepping (7+1, 6+1) from (396, 12).
+  // Outlines go under every flagged cell, unvisited secret rooms draw no cell,
+  // multi-cell rooms pick per-cell frames by shape, and one icon (the
+  // constructor's limit) is centred on the room's origin cell.
+  private drawMinimap(ctx: CanvasRenderingContext2D, state: State) {
+    const descriptors = state.floor.descriptors;
+    const current = descriptors[state.currentRoom]!.gridIndex;
+    const left = Math.min(Math.max(current % 13 - 3, 0), 6);
+    const top = Math.min(Math.max(Math.floor(current / 13) - 3, 0), 6);
+    // A multi-cell current room shifts the view back half a cell, (3.5, 3).
+    const currentShape = minimapShape(descriptors[state.currentRoom]!.template);
+    const originX = 396 - (currentShape & 2 ? 3.5 : 0), originY = 12 - (currentShape & 1 ? 3 : 0);
+    const cells: { index: number; flags: number; origin: boolean; frame: number; x: number; y: number }[] = [];
+    for (let row = 0; row < 7; row++) for (let column = 0; column < 7; column++) {
+      const cell = (top + row) * 13 + left + column;
+      const index = state.floor.grid[cell] ?? -1;
+      const flags = index < 0 ? 0 : state.roomDisplayFlags[index] ?? 0;
+      if (!flags) continue;
+      const room = descriptors[index]!;
+      const offset = cell - room.gridIndex, down = Math.floor(offset / 13), across = offset - 13 * down;
+      const shape = minimapShape(room.template);
+      const frame = shape === 1 ? down + 1 : shape === 2 ? across + 3 : shape === 3 ? across + 2 * down + 5 : 0;
+      cells.push({ index, flags, origin: offset === 0, frame, x: originX + 8 * column, y: originY + 7 * row });
+    }
+    for (const cell of cells) this.assets.draw(ctx, "gfx/ui/minimap1.anm2", "RoomOutline", Math.round(cell.x), cell.y);
+    for (const cell of cells) {
+      const type = descriptors[cell.index]!.template.type;
+      const animation = cell.index === state.currentRoom ? "RoomCurrent"
+        : state.visitedRooms.includes(cell.index) ? "RoomVisited"
+        : cell.flags & 1 && type !== 7 && type !== 8 ? "RoomUnvisited" : null;
+      if (animation) this.assets.draw(ctx, "gfx/ui/minimap1.anm2", animation, Math.round(cell.x), cell.y, cell.frame);
+    }
+    for (const cell of cells) {
+      if (!cell.origin) continue;
+      const room = descriptors[cell.index]!, type = room.template.type;
+      const icon = cell.flags & 4 ? MINIMAP_ICONS[type] : undefined;
+      const locked = !icon && cell.flags & 2 && !state.visitedRooms.includes(cell.index) && LOCKED_MINIMAP_TYPES.has(type);
+      if (!icon && !locked) continue;
+      // Multi-cell rooms shift the icon half a cell (3.5, 3) towards the room's centre.
+      const shape = minimapShape(room.template);
+      const x = cell.x + (shape & 2 ? 3.5 : 0), y = cell.y + (shape & 1 ? 3 : 0);
+      this.assets.draw(ctx, "gfx/ui/minimap1.anm2", icon ?? "IconLockedRoom", Math.round(x), y);
     }
   }
 }
