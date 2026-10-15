@@ -273,6 +273,8 @@ fn explosion_update(
         );
     }
     if frame == *frame_target {
+        // Every native flags8 site also sets +7d8 (sequence render key).
+        effect.raw_7d8 = true;
         effect.flags |= 8;
     }
     if !effect.sprite.playing {

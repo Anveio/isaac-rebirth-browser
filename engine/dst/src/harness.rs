@@ -22,6 +22,8 @@ pub struct Case<'a> {
     pub tapes: Option<PathBuf>,
     /// Replays this tape instead of generating commands (game unit only).
     pub replay: Option<Tape>,
+    /// Generated commands continue from the end of this tape (game unit).
+    pub resume: Option<Tape>,
     pub wasm: Option<&'a crate::wasm::Module>,
     pub label: String,
     /// Retain every game tape (corpus harvesting), not only violating ones.
@@ -51,7 +53,9 @@ impl Case<'_> {
 static RETAINED: std::sync::Mutex<Vec<String>> = std::sync::Mutex::new(Vec::new());
 
 pub fn retained_tapes() -> Vec<String> {
-    RETAINED.lock().expect("retained tapes").clone()
+    let mut tapes = RETAINED.lock().expect("retained tapes").clone();
+    tapes.sort();
+    tapes
 }
 
 thread_local! {
@@ -103,8 +107,12 @@ pub struct Plan {
     pub tapes: Option<PathBuf>,
     /// Named tapes the game unit replays after its generated cases.
     pub replays: Vec<(String, Tape)>,
+    /// A tape every generated game case replays before driving on.
+    pub resume: Option<Tape>,
     pub wasm: Option<crate::wasm::Module>,
     pub retain_all: bool,
+    /// Worker threads for seeded cases.
+    pub jobs: usize,
 }
 
 #[derive(serde::Serialize)]
@@ -124,8 +132,19 @@ pub fn case_seed(master: u64, unit_index: usize, case: u64) -> u64 {
     splitmix64(&mut state)
 }
 
+/// One case to run: its unit and index, and the tape it replays, if any.
+struct Job<'a> {
+    unit_index: usize,
+    unit: &'a Unit,
+    case: u64,
+    replay: Option<&'a (String, Tape)>,
+}
+
+/// Runs every case. Seeded cases are independent, so they spread over
+/// `plan.jobs` threads; the report is identical for any thread count.
+/// Antithesis drives one thread so the platform owns every decision's order.
 pub fn run(plan: &Plan, units: &[(usize, &Unit)]) -> Vec<CaseRecord> {
-    let mut records = Vec::new();
+    let mut jobs = Vec::new();
     for (unit_index, unit) in units {
         let replays: &[(String, Tape)] = if unit.name == "game" {
             &plan.replays
@@ -136,53 +155,104 @@ pub fn run(plan: &Plan, units: &[(usize, &Unit)]) -> Vec<CaseRecord> {
         let replayed = replays
             .iter()
             .enumerate()
-            .map(|(index, (name, tape))| (plan.cases + index as u64, Some((name, tape))));
+            .map(|(index, replay)| (plan.cases + index as u64, Some(replay)));
         for (case, replay) in generated.chain(replayed) {
-            // Replays take their commands from the tape; their remaining
-            // choices (e.g. the continuation midpoint) stay seeded.
-            let seed = match (plan.mode, replay) {
-                (Mode::Seeded, None) => Some(
-                    plan.case_seed
-                        .unwrap_or_else(|| case_seed(plan.master_seed, *unit_index, case)),
-                ),
-                (_, Some(_)) => Some(case_seed(plan.master_seed, *unit_index, case)),
-                (Mode::Antithesis, None) => None,
-            };
-            let mut entropy = match seed {
-                Some(seed) => Entropy::seeded(seed),
-                None => Entropy::antithesis(),
-            };
-            props::set_context(Context {
-                unit: unit.name,
-                entropy: plan.mode.to_string(),
+            jobs.push(Job {
+                unit_index: *unit_index,
+                unit,
                 case,
-                case_seed: seed,
-                step: 0,
-                tape: replay.map(|(name, _)| name.clone()),
-            });
-            let label = match (replay, seed) {
-                (Some((name, _)), _) => format!("{}-replay-{name}", unit.name),
-                (None, Some(seed)) => format!("{}-{seed:016x}", unit.name),
-                (None, None) => format!("{}-antithesis-{case}", unit.name),
-            };
-            let mut context = Case {
-                entropy: &mut entropy,
-                steps: plan.steps,
-                tapes: plan.tapes.clone(),
-                replay: replay.map(|(_, tape)| tape.clone()),
-                wasm: plan.wasm.as_ref(),
-                label,
-                retain_all: plan.retain_all,
-            };
-            guarded(|| (unit.run)(&mut context));
-            records.push(CaseRecord {
-                unit: unit.name,
-                case,
-                case_seed: seed,
-                replay: replay.map(|(name, _)| name.clone()),
-                draws: entropy.draws(),
+                replay,
             });
         }
     }
-    records
+    let threads = if plan.mode == Mode::Antithesis {
+        1
+    } else {
+        plan.jobs.clamp(1, jobs.len().max(1))
+    };
+    let next = std::sync::atomic::AtomicUsize::new(0);
+    let records = std::sync::Mutex::new(Vec::new());
+    let work = || loop {
+        let index = next.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+        let Some(job) = jobs.get(index) else { break };
+        let record = run_case(plan, job);
+        records.lock().expect("case records").push((index, record));
+    };
+    if threads == 1 {
+        work();
+    } else {
+        std::thread::scope(|scope| {
+            for worker in 0..threads {
+                std::thread::Builder::new()
+                    .name(format!("rebirth-dst-{worker}"))
+                    .stack_size(STACK_BYTES)
+                    .spawn_scoped(scope, work)
+                    .expect("spawn a case worker");
+            }
+        });
+    }
+    let mut records = records.into_inner().expect("case records");
+    records.sort_by_key(|(index, _)| *index);
+    records.into_iter().map(|(_, record)| record).collect()
+}
+
+/// The WASM interpreter's translator recurses deeply on the engine's large
+/// serde functions; every case runs with a generous stack.
+pub const STACK_BYTES: usize = 512 * 1024 * 1024;
+
+fn run_case(plan: &Plan, job: &Job<'_>) -> CaseRecord {
+    let Job {
+        unit_index,
+        unit,
+        case,
+        replay,
+    } = *job;
+    // Replays take their commands from the tape; their remaining choices
+    // (e.g. the continuation midpoint) stay seeded.
+    let seed = match (plan.mode, replay) {
+        (Mode::Seeded, None) => Some(
+            plan.case_seed
+                .unwrap_or_else(|| case_seed(plan.master_seed, unit_index, case)),
+        ),
+        (_, Some(_)) => Some(case_seed(plan.master_seed, unit_index, case)),
+        (Mode::Antithesis, None) => None,
+    };
+    let mut entropy = match seed {
+        Some(seed) => Entropy::seeded(seed),
+        None => Entropy::antithesis(),
+    };
+    props::set_context(Context {
+        unit: unit.name,
+        entropy: plan.mode.to_string(),
+        case,
+        case_seed: seed,
+        step: 0,
+        tape: replay.map(|(name, _)| name.clone()),
+    });
+    let label = match (replay, seed) {
+        (Some((name, _)), _) => format!("{}-replay-{name}", unit.name),
+        (None, Some(seed)) => format!("{}-{seed:016x}", unit.name),
+        (None, None) => format!("{}-antithesis-{case}", unit.name),
+    };
+    let mut context = Case {
+        entropy: &mut entropy,
+        steps: plan.steps,
+        tapes: plan.tapes.clone(),
+        replay: replay.map(|(_, tape)| tape.clone()),
+        resume: plan
+            .resume
+            .clone()
+            .filter(|_| replay.is_none() && unit.name == "game"),
+        wasm: plan.wasm.as_ref(),
+        label,
+        retain_all: plan.retain_all,
+    };
+    guarded(|| (unit.run)(&mut context));
+    CaseRecord {
+        unit: unit.name,
+        case,
+        case_seed: seed,
+        replay: replay.map(|(name, _)| name.clone()),
+        draws: entropy.draws(),
+    }
 }

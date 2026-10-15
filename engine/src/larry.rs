@@ -41,7 +41,12 @@ const ZERO: WorldVector = WorldVector { x: 0.0, y: 0.0 };
 /// 444900/4448c0 direction index 0 left, 1 up, 2 right, 3 down.
 const HEAD_CLIPS: [&str; 4] = ["WalkHeadHori", "WalkHeadUp", "WalkHeadHori", "WalkHeadDown"];
 /// 66ed40: a charging Grub head.
-const ATTACK_CLIPS: [&str; 4] = ["AttackHeadHori", "AttackHeadUp", "AttackHeadHori", "AttackHeadDown"];
+const ATTACK_CLIPS: [&str; 4] = [
+    "AttackHeadHori",
+    "AttackHeadUp",
+    "AttackHeadHori",
+    "AttackHeadDown",
+];
 /// 4f3d1b death rolls bounded(3): Charger, Spitty, Maggot.
 const GRUB_SPAWNS: [u16; 3] = [23, 31, 21];
 const BODY_CLIPS: [&str; 4] = ["WalkBodyHori", "WalkBodyUp", "WalkBodyHori", "WalkBodyDown"];
@@ -307,7 +312,11 @@ fn run(
     if npc.parent.is_none() && npc.kind == 239 {
         sync_health(npc, world)?;
         grub_head(npc, state, random, world, friction)?;
-        let clips = if state.charging { ATTACK_CLIPS } else { HEAD_CLIPS };
+        let clips = if state.charging {
+            ATTACK_CLIPS
+        } else {
+            HEAD_CLIPS
+        };
         face(npc, clips, npc.velocity);
         target_velocity = npc.velocity;
     } else if npc.parent.is_none() {
@@ -472,7 +481,11 @@ fn pool_health(npc: &mut Npc, world: &mut NpcWorld) {
                 break;
             };
             segment.hp = npc.hp;
-            next = if upward { segment.parent } else { segment.child };
+            next = if upward {
+                segment.parent
+            } else {
+                segment.child
+            };
             steps += 1;
             if steps > limit {
                 break;
@@ -504,7 +517,11 @@ fn sync_health(npc: &mut Npc, world: &mut NpcWorld) -> Result<(), String> {
     for &id in &chain {
         if let Some(segment) = world.peers.get(id) {
             let remaining = segment.hp - segment.damage.pending_damage();
-            lowest = if remaining < lowest { remaining } else { lowest };
+            lowest = if remaining < lowest {
+                remaining
+            } else {
+                lowest
+            };
         }
     }
     let source = DamageSource {
@@ -690,7 +707,9 @@ fn death_burst(
         },
     );
     let seed = random.next_u32();
-    let id = world.effects.admit_blood(seed, position, [1.0; 4], [0.0; 3])?;
+    let id = world
+        .effects
+        .admit_blood(seed, position, [1.0; 4], [0.0; 3])?;
     world.effects.advance_blood_initial(id, random)?;
     Ok(seed)
 }

@@ -67,12 +67,19 @@ fn spawn(id: u32, selector: &SpawnSelector, context: &SpawnContext) -> Result<Op
         return Ok(None);
     }
     if !selector.position.is_finite() || selector.spawn_seed == 0 {
-        return Err("Maggot family requires bounded authored position and nonzero spawn seed".into());
+        return Err(
+            "Maggot family requires bounded authored position and nonzero spawn seed".into(),
+        );
     }
     let config = content::entity(selector.entity_type.into(), selector.variant.into());
     let mut npc = Npc {
         // Config47f573 SetFrame(default, 0) leaves the default clip stopped.
-        animation: if selector.entity_type == 237 { "WalkVert" } else { "Move Hori" }.into(),
+        animation: if selector.entity_type == 237 {
+            "WalkVert"
+        } else {
+            "Move Hori"
+        }
+        .into(),
         actor: config.actor.into(),
         pathfinder: Some(Pathfinder::new()),
         maggot: Some(MaggotState {
@@ -108,7 +115,10 @@ fn ai(
         npc.state = 4;
         return Ok(());
     }
-    let mut state = npc.maggot.take().ok_or("Maggot family requires its AI state")?;
+    let mut state = npc
+        .maggot
+        .take()
+        .ok_or("Maggot family requires its AI state")?;
     let result = update(npc, &mut state, random, world, births, friction);
     npc.maggot = Some(state);
     result
@@ -152,7 +162,11 @@ fn update(
         .store(index, 900)?;
     // 4c67a6: a Gurgling has left/right clips and never touches FlipX.
     let gurgling = if npc.velocity.x.abs() > npc.velocity.y.abs() {
-        if npc.velocity.x >= 0.0 { 3 } else { 2 }
+        if npc.velocity.x >= 0.0 {
+            3
+        } else {
+            2
+        }
     } else if npc.velocity.y >= 0.0 {
         1
     } else {
@@ -292,9 +306,7 @@ fn tail(
         if npc.champion.is_none() {
             tint[3] = 1.0;
         }
-        world
-            .effects
-            .set_creep_color(creep, tint, color.offset)?;
+        world.effects.set_creep_color(creep, tint, color.offset)?;
     }
     Ok(())
 }
