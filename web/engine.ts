@@ -15,6 +15,12 @@ export interface Player {
   shotsFired: number;
 }
 export interface AttackColor { tint: [number,number,number,number]; sourceMiddle: [number,number,number,number]; offsets: [number,number,number]; }
+export interface Costume229 {
+  slots: ({entry: number; layer: number; bodyGroup: boolean} | null)[];
+  sprite: {clip: string; frame: number; playing: boolean; overrideActive: boolean};
+  priority: number; historyFrontier: string | null; mainClipFrontier: boolean;
+  lastShootMainClipBa8: string | null;
+}
 export interface Tear {
   id: number; x: number; y: number; vx: number; vy: number; age: number;
   spawnSeed: number; sourceVariant: number | null; collisionRadius: number; gridContact: boolean;
@@ -294,6 +300,7 @@ export interface State {
   playerItems: {initializerSeed: number; managerRng: ItemRng; initializerRng: ItemRng;
     itemRngs: ItemRng[]; trinketRngs: ItemRng[]; pocketRngs: ItemRng[]; entitySpawnSeed: number;
     technologyEyeRegistered: boolean | null;
+    costume229?: Costume229 | null;
     ownedCounts: number[]; temporaryCollectibles: {itemId: number; count: number; cooldown: number}[]; queuedId: number | null; queuedCharge: number; queuedTouched: boolean;
     pickupAnimationFrame: number; pickupAnimationPlaying: boolean; pickupAnimationGuard: boolean;
     pickupPresentation: {itemId: number; animationFrame: number; animationPlaying: boolean} | null;
