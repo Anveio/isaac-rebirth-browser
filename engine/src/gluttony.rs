@@ -78,7 +78,7 @@ fn length(vector: WorldVector) -> f32 {
 }
 
 /// 42e930: the dominant-axis unit vector.
-fn axis(vector: WorldVector) -> WorldVector {
+pub(crate) fn axis(vector: WorldVector) -> WorldVector {
     if vector.x.abs() > vector.y.abs() {
         WorldVector {
             x: if 0.0 > vector.x { -1.0 } else { 1.0 },
@@ -226,6 +226,7 @@ fn spit_burst(npc: &mut Npc, random: &mut Mt19937, births: &mut Vec<Birth>) -> R
             falling_speed: initial_falling_speed,
             falling_acceleration: 0.0,
             scale: 1.0,
+            height: -23.0,
         }));
     }
     Ok(())

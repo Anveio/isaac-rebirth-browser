@@ -136,7 +136,10 @@ pub(crate) fn ground_collision(npc: &mut Npc, grid: &Grid) -> Result<(), String>
         scale: crate::motion::WorldVector { x: 1.0, y: 1.0 },
         points,
     })?;
-    collider.resolve_nonplayer_ground(grid, &mut npc.position, &mut npc.velocity, false)?;
+    // 442bc0 clears +34c; a solid sample sets it again (442df8).
+    npc.grid_collided = collider
+        .resolve_nonplayer_ground(grid, &mut npc.position, &mut npc.velocity, false)?
+        .is_some();
     npc.presented_position = npc.position;
     Ok(())
 }
@@ -165,6 +168,7 @@ pub(crate) static FAMILIES: &[&Family] = &[
     &crate::dingle::FAMILY,
     &crate::wall_hugger::FAMILY,
     &crate::larry::FAMILY,
+    &crate::maggots::FAMILY,
 ];
 
 pub(crate) fn family(kind: u32) -> Option<&'static Family> {

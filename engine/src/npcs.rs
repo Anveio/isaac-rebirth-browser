@@ -104,6 +104,11 @@ pub struct Npc {
     pub child: Option<u32>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub larry: Option<crate::larry::LarryState>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub maggot: Option<crate::maggots::MaggotState>,
+    /// Entity+34c: the last non-preview grid pass hit a solid sample.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub grid_collided: bool,
 }
 
 fn is_zero(value: &u32) -> bool {
@@ -695,6 +700,8 @@ impl Npc {
             parent: None,
             child: None,
             larry: None,
+            maggot: None,
+            grid_collided: false,
         }
     }
 

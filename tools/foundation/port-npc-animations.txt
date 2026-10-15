@@ -20,3 +20,7 @@ gfx/1000.050_brimstoneimpact.anm2
 gfx/261.000_dingle.anm2
 gfx/218.000_wall hugger.anm2
 gfx/019.000_larry jr..anm2
+gfx/021.000_maggot.anm2
+gfx/023.000_charger.anm2
+gfx/031.000_spity.anm2
+gfx/239.000_grub.anm2

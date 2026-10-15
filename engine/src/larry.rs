@@ -5,8 +5,14 @@
 //! four entries back, and the tail rolls for poop. Severing a chain
 //! (448040, `npcs::unlink_removed`) turns the follower into a new head, and
 //! a head without a live child kills itself.
+//!
+//! Grub 239.0 shares ai_larry: its chain pools HP, the head charges the
+//! player along an axis, and the first death kills the whole chain and
+//! spawns two to five Chargers, Spitties or Maggots at shuffled segments.
 use crate::{
     actors::{ActorKind, ActorRef},
+    audio::SoundRequest,
+    combat::{DamageEvent, DamageKind, DamageSource},
     content,
     entities::{Birth, Family, NpcWorld, SpawnContext},
     grid::GridEntity,
@@ -19,10 +25,11 @@ use crate::{
     plain_npc,
     room_spawns::{SpawnCategory, SpawnSelector},
 };
+
 use serde::{Deserialize, Serialize};
 
 pub(crate) const FAMILY: Family = Family {
-    kinds: &[19],
+    kinds: &[19, 239],
     spawn,
     advance,
     post_contact_grid: crate::entities::ground_collision,
@@ -33,6 +40,10 @@ pub(crate) const FAMILY: Family = Family {
 const ZERO: WorldVector = WorldVector { x: 0.0, y: 0.0 };
 /// 444900/4448c0 direction index 0 left, 1 up, 2 right, 3 down.
 const HEAD_CLIPS: [&str; 4] = ["WalkHeadHori", "WalkHeadUp", "WalkHeadHori", "WalkHeadDown"];
+/// 66ed40: a charging Grub head.
+const ATTACK_CLIPS: [&str; 4] = ["AttackHeadHori", "AttackHeadUp", "AttackHeadHori", "AttackHeadDown"];
+/// 4f3d1b death rolls bounded(3): Charger, Spitty, Maggot.
+const GRUB_SPAWNS: [u16; 3] = [23, 31, 21];
 const BODY_CLIPS: [&str; 4] = ["WalkBodyHori", "WalkBodyUp", "WalkBodyHori", "WalkBodyDown"];
 /// Larry Jr. bodies read the parent's trail four entries back.
 const FOLLOW_DELAY: usize = 4;
@@ -59,13 +70,22 @@ pub struct LarryState {
     pub rng: Rng,
     /// Entity+318 flags.
     pub entity_flags: u32,
+    /// Grub +f58 charge cooldown, counting up to 51 while walking.
+    #[serde(default)]
+    pub charge_counter: i32,
+    /// Grub +f88: charging along `npc.target` (+440).
+    #[serde(default)]
+    pub charging: bool,
+    /// Grub +f8c: this chain's death was processed.
+    #[serde(default)]
+    pub death_processed: bool,
 }
 
 fn spawn(id: u32, selector: &SpawnSelector, context: &SpawnContext) -> Result<Option<Npc>, String> {
     // The Hollow 19.1 and subtypes 1/2 have their own movement, shots and
-    // drops; base rooms author 19.0.0 only.
+    // drops; base rooms author 19.0.0 and 239.0.0 only.
     if selector.category != SpawnCategory::Entity
-        || selector.entity_type != 19
+        || !matches!(selector.entity_type, 19 | 239)
         || selector.variant != 0
         || selector.subtype != 0
     {
@@ -74,7 +94,7 @@ fn spawn(id: u32, selector: &SpawnSelector, context: &SpawnContext) -> Result<Op
     if !selector.position.is_finite() || selector.spawn_seed == 0 {
         return Err("Larry Jr. requires bounded authored position and nonzero spawn seed".into());
     }
-    let config = content::entity(19, 0);
+    let config = content::entity(selector.entity_type.into(), 0);
     let mut npc = Npc {
         // Config47f573 SetFrame(default, 0) leaves the default clip stopped.
         animation: "WalkHeadHori".into(),
@@ -86,6 +106,9 @@ fn spawn(id: u32, selector: &SpawnSelector, context: &SpawnContext) -> Result<Op
             group: 0,
             rng: Rng::new(selector.spawn_seed, [4, 3, 17]),
             entity_flags: 4,
+            charge_counter: 0,
+            charging: false,
+            death_processed: false,
         }),
         ..Npc::authored(id, config, selector)
     };
@@ -105,7 +128,11 @@ fn advance(
     world: &mut NpcWorld,
     births: &mut Vec<Birth>,
 ) -> Result<(), String> {
-    if phase == Phase::Update && npc.dead && !npc.removed && npc.state != 16 {
+    if phase == Phase::Update && npc.dead && !npc.removed && npc.kind == 239 {
+        // 4f2e56: Entity_NPC::Update runs the AI once more with dead set.
+        grub_death(npc, random, world, births)?;
+    }
+    if phase == Phase::Update && npc.dead && !npc.removed && npc.kind == 19 && npc.state != 16 {
         // 4f3760: Entity_NPC::Update runs the AI once more with dead set
         // before the boss enters state16. A dead head heals its child.
         if let (None, Some(child)) = (npc.parent, npc.child) {
@@ -186,7 +213,7 @@ fn link(npc: &mut Npc, state: &mut LarryState, world: &mut NpcWorld) {
     let candidates: Vec<u32> = world
         .peers
         .iter()
-        .filter(|other| other.kind == 19 && !other.removed)
+        .filter(|other| other.kind == npc.kind && !other.removed)
         .map(|other| other.id)
         .collect();
     npc.parent = None;
@@ -209,6 +236,9 @@ fn link(npc: &mut Npc, state: &mut LarryState, world: &mut NpcWorld) {
             parent.child = Some(npc.id);
         }
         plain_npc::play(npc, "WalkBodyHori", false);
+        if npc.kind == 239 {
+            pool_health(npc, world);
+        }
     } else {
         plain_npc::play(npc, "WalkHeadDown", false);
         let group = sequence(world, npc.id);
@@ -263,7 +293,7 @@ fn run(
     world: &mut NpcWorld,
     friction: &mut f32,
 ) -> Result<(), String> {
-    if plain_npc::on_frame(npc, world, 10)? {
+    if npc.kind == 19 && plain_npc::on_frame(npc, world, 10)? {
         // 480fe0 without SetColor: a red Blood7 splat scaled 0.3..0.7.
         let scale = random.uniform() * 0.4 + 0.3;
         let seed = random.next_u32();
@@ -274,7 +304,13 @@ fn run(
         world.effects.advance_blood_initial(id, random)?;
     }
     let mut target_velocity = ZERO;
-    if npc.parent.is_none() {
+    if npc.parent.is_none() && npc.kind == 239 {
+        sync_health(npc, world)?;
+        grub_head(npc, state, random, world, friction)?;
+        let clips = if state.charging { ATTACK_CLIPS } else { HEAD_CLIPS };
+        face(npc, clips, npc.velocity);
+        target_velocity = npc.velocity;
+    } else if npc.parent.is_none() {
         pathfinder::move_randomly(npc, random, world, 2.0, *friction)?;
         face(npc, HEAD_CLIPS, npc.velocity);
         target_velocity = npc.velocity;
@@ -291,7 +327,7 @@ fn run(
         // TNT, whose Hurt draws are not admitted yet.
     } else {
         follow(npc, &mut target_velocity, world);
-        if npc.child.is_none() && world.room_type != 11 {
+        if npc.kind == 19 && npc.child.is_none() && world.room_type != 11 {
             tail_poop(npc, state, random, world)?;
         }
     }
@@ -336,7 +372,8 @@ fn follow(npc: &mut Npc, target_velocity: &mut WorldVector, world: &NpcWorld) {
         npc.position = npc.position + offset * (1.0 / distance) * 15.0;
     }
     let mut clips = BODY_CLIPS;
-    if npc.child.is_none() {
+    // 4f46e0: Grub tails keep WalkBodyUp.
+    if npc.child.is_none() && npc.kind == 19 {
         clips[1] = "Butt";
     }
     face(npc, clips, entry.velocity);
@@ -409,4 +446,251 @@ fn release_death_trigger(state: &mut LarryState, world: &NpcWorld) {
     if before.is_empty() && after.iter().all(|other| other.dead) {
         state.entity_flags &= !NO_DEATH_TRIGGER;
     }
+}
+
+/// 4f3bb8: a linking Grub takes max(child, parent) + its own max HP and
+/// writes it along the whole chain; max HP stays per segment.
+fn pool_health(npc: &mut Npc, world: &mut NpcWorld) {
+    let child = npc
+        .child
+        .and_then(|id| world.peers.get(id))
+        .map_or(0.0, |child| child.hp);
+    let parent = npc
+        .parent
+        .and_then(|id| world.peers.get(id))
+        .map_or(0.0, |parent| parent.hp);
+    // maxss: the child's value only when strictly greater.
+    let pooled = if child > parent { child } else { parent };
+    npc.hp = pooled + npc.max_hp;
+    let limit = world.peers.before.len() + world.peers.after.len();
+    for start in [npc.parent, npc.child] {
+        let upward = start == npc.parent;
+        let mut next = start;
+        let mut steps = 0;
+        while let Some(id) = next {
+            let Some(segment) = world.peers.get_mut(id) else {
+                break;
+            };
+            segment.hp = npc.hp;
+            next = if upward { segment.parent } else { segment.child };
+            steps += 1;
+            if steps > limit {
+                break;
+            }
+        }
+    }
+}
+
+/// The chain below `npc` in child order (cycle-guarded).
+fn descendants(npc: &Npc, world: &NpcWorld) -> Vec<u32> {
+    let limit = world.peers.before.len() + world.peers.after.len();
+    let mut chain = Vec::new();
+    let mut next = npc.child;
+    while let Some(id) = next {
+        if chain.len() > limit || chain.contains(&id) {
+            break;
+        }
+        chain.push(id);
+        next = world.peers.get(id).and_then(|segment| segment.child);
+    }
+    chain
+}
+
+/// 4f43d9: the head queues damage on every segment above the chain's
+/// lowest HP after pending damage. TakeDamage only queues; no draws.
+fn sync_health(npc: &mut Npc, world: &mut NpcWorld) -> Result<(), String> {
+    let chain = descendants(npc, world);
+    let mut lowest = npc.hp - npc.damage.pending_damage();
+    for &id in &chain {
+        if let Some(segment) = world.peers.get(id) {
+            let remaining = segment.hp - segment.damage.pending_damage();
+            lowest = if remaining < lowest { remaining } else { lowest };
+        }
+    }
+    let source = DamageSource {
+        id: npc.id,
+        entity_type: npc.kind,
+    };
+    let queue = |segment: &mut Npc| -> Result<(), String> {
+        if segment.hp - segment.damage.pending_damage() > lowest {
+            let health = segment.health();
+            segment.damage.enqueue(
+                health,
+                DamageEvent {
+                    amount: segment.hp - lowest,
+                    kind: DamageKind::HealthSync,
+                    source,
+                },
+            )?;
+        }
+        Ok(())
+    };
+    queue(npc)?;
+    for id in chain {
+        if let Some(segment) = world.peers.get_mut(id) {
+            queue(segment)?;
+        }
+    }
+    Ok(())
+}
+
+/// 4f4681: walk with MoveRandomly; after 50 walking updates look for the
+/// player aligned within 20 on an axis and in sight, then charge at 3.7.
+fn grub_head(
+    npc: &mut Npc,
+    state: &mut LarryState,
+    random: &mut Mt19937,
+    world: &mut NpcWorld,
+    friction: &mut f32,
+) -> Result<(), String> {
+    if state.charging {
+        if npc.grid_collided {
+            state.charging = false;
+            npc.target = ZERO;
+        } else {
+            *friction *= 0.9;
+            let push = npc.target * 3.7;
+            npc.velocity = npc.velocity
+                + WorldVector {
+                    x: push.x / *friction,
+                    y: push.y / *friction,
+                };
+        }
+        return Ok(());
+    }
+    pathfinder::move_randomly(npc, random, world, 2.0, *friction)?;
+    if state.charge_counter <= 50 {
+        state.charge_counter += 1;
+        return Ok(());
+    }
+    let lead = random.uniform();
+    let predicted = world.player + (world.player_velocity * lead) * 16.0;
+    let delta = minus(predicted, npc.position);
+    if !(20.0 > delta.y.abs() || 20.0 > delta.x.abs()) {
+        return Ok(());
+    }
+    let end = npc.position + delta;
+    let costs = world
+        .path_costs
+        .as_deref()
+        .ok_or("Grub charge requires source Room.Init path costs")?;
+    if !world.grid.charge_line_clear(npc.position, end, costs) {
+        return Ok(());
+    }
+    world.audio.admit(
+        random,
+        world.system_counter,
+        SoundRequest {
+            id: 115,
+            volume: 1.0,
+            delay: 2,
+            looping: false,
+            pitch: 1.0,
+        },
+    );
+    npc.target = crate::gluttony::axis(delta);
+    state.charge_counter = 0;
+    state.charging = true;
+    if let Some(path) = npc.pathfinder.as_mut() {
+        path.target = ZERO;
+    }
+    Ok(())
+}
+
+/// 4f2e56: the first dead Grub to update kills every linked segment, then
+/// shuffles their positions and spawns 2..5 rolls of Charger, Spitty or
+/// Maggot at the collision-free ones.
+fn grub_death(
+    npc: &mut Npc,
+    random: &mut Mt19937,
+    world: &mut NpcWorld,
+    births: &mut Vec<Birth>,
+) -> Result<(), String> {
+    let mut state = npc.larry.take().ok_or("Grub requires its AI state")?;
+    let result = (|| {
+        if state.death_processed {
+            return Ok(());
+        }
+        state.death_processed = true;
+        let mut positions = vec![npc.position];
+        let mut members = descendants(npc, world);
+        let limit = world.peers.before.len() + world.peers.after.len();
+        let mut next = npc.parent;
+        while let Some(id) = next {
+            if members.len() > limit || members.contains(&id) {
+                break;
+            }
+            members.push(id);
+            next = world.peers.get(id).and_then(|segment| segment.parent);
+        }
+        for id in members {
+            let Some(segment) = world.peers.get_mut(id) else {
+                continue;
+            };
+            let position = segment.position;
+            positions.push(position);
+            if let Some(owner) = segment.larry.as_mut() {
+                owner.death_processed = true;
+            }
+            if segment.dead {
+                continue;
+            }
+            segment.dead = true;
+            let seed = death_burst(position, random, world)?;
+            if let Some(segment) = world.peers.get_mut(id) {
+                segment.death_effect_seed = Some(seed);
+            }
+        }
+        for index in (1..positions.len()).rev() {
+            let other = random.bounded(index as u32 + 1) as usize;
+            positions.swap(index, other);
+        }
+        let tries = random.bounded(4) as usize + 2;
+        for &position in positions.iter().take(tries) {
+            if world.grid.collision_at(position) != 0 {
+                continue;
+            }
+            let roll = random.bounded(3) as usize;
+            let spawn_seed = random.next_u32();
+            births.push(Birth::Npc(SpawnSelector {
+                group_index: 0,
+                grid_index: 0,
+                category: SpawnCategory::Entity,
+                entity_type: GRUB_SPAWNS[roll],
+                variant: 0,
+                subtype: 0,
+                position,
+                group_seed: spawn_seed,
+                spawn_seed,
+            }));
+        }
+        state.entity_flags &= !NO_DEATH_TRIGGER;
+        Ok(())
+    })();
+    npc.larry = Some(state);
+    result
+}
+
+/// 47fc80 Kill of a living non-boss segment: 445c60 runs at once (the
+/// death sound and Blood splat the plain NPC death admits; gibs pending).
+fn death_burst(
+    position: WorldVector,
+    random: &mut Mt19937,
+    world: &mut NpcWorld,
+) -> Result<u32, String> {
+    world.audio.admit(
+        random,
+        world.system_counter,
+        SoundRequest {
+            id: 30,
+            volume: 0.8,
+            delay: 2,
+            looping: false,
+            pitch: 1.0,
+        },
+    );
+    let seed = random.next_u32();
+    let id = world.effects.admit_blood(seed, position, [1.0; 4], [0.0; 3])?;
+    world.effects.advance_blood_initial(id, random)?;
+    Ok(seed)
 }

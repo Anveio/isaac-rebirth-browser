@@ -210,6 +210,7 @@ fn produce(
             falling_speed,
             falling_acceleration: 0.32,
             scale,
+            height: -23.0,
         });
     }
     let state = npc.monstro.as_mut().expect("actual Monstro owns its state");
