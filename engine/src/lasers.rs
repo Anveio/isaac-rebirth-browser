@@ -483,9 +483,22 @@ impl Laser {
         Ok(())
     }
 
+    ///Born7E8/818 are retained actor owners, never the current kind3 result.
+    ///Only the actual Player mode1 thin Laser has the source-closed0x200
+    ///geometry path; other born flags and origins keep their own frontiers.
+    pub(crate) fn has_supported_neutral_body_flags(&self) -> bool {
+        self.attack_flags.0 == 0
+            || (self.origin == LaserOrigin::PlayerTechnology2
+                && self.entity_type == 7
+                && self.variant == 2
+                && self.subtype == 0
+                && self.attack_flags.0 == 0x200
+                && self.line_flags == Some(self.attack_flags))
+    }
+
     pub(crate) fn contacts(&self, targets: &[LaserTarget]) -> Result<Vec<LaserContact>, String> {
         self.validate_contact_geometry()?;
-        if self.attack_flags.0 != 0
+        if !self.has_supported_neutral_body_flags()
             || !self.has_first_player_parent()
             || !self.line_enabled
             || self.line.points.len() < 2
