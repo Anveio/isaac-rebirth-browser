@@ -140,17 +140,22 @@ export function entityRows(rows, source, actual, spec, render) {
   }
   // Entity_Laser beams in room order, by spawn seed, with their source fields.
   const beams = source.entities.filter(actor => actor.type === 7 && !actor.removed);
-  const ported = (actual.lasers ?? []).filter(laser => !laser.removed);
+  check(rows, 'laser.storeOwner', true, Array.isArray(actual.lasers) ? true : undefined);
+  const stored = Array.isArray(actual.lasers) ? actual.lasers : [];
+  for (const laser of stored)
+    check(rows, `laser${laser.spawnSeed}.activeOwner`, 'boolean',
+      typeof laser.active === 'boolean' ? 'boolean' : undefined);
+  const ported = stored.filter(laser => laser.active === true);
   check(rows, 'laser.seeds', beams.map(actor => actor.spawnSeed), ported.map(laser => laser.spawnSeed));
   for (const beam of beams) {
     const laser = ported.find(candidate => candidate.spawnSeed === beam.spawnSeed);
     if (!laser) continue;
     const name = `laser${beam.spawnSeed}`;
     for (const [field, expected, observed] of [
-      ['position', vector(beam.position), vector(phase === 0 ? laser.presentedPosition : laser.position)],
-      ['angle', f32(beam.laserAngle), f32(laser.angle)], ['timeout', beam.laserTimeout, laser.timeout],
-      ['shrinking', beam.laserShrinking, laser.shrinking], ['length', f32(beam.laserLength), f32(laser.length)],
-      ['endpoint', vector(beam.laserEndpoint), vector(laser.endpoint)], ['scaleX', f32(beam.spriteScale?.[0]), f32(laser.scale.x)],
+      ['position', vector(beam.position), vector(phase === 0 ? laser.position : laser.savedPosition)],
+      ['angle', f32(beam.laserAngle), f32(laser.angle)], ['timeout', beam.laserTimeout, laser.remainingUpdates],
+      ['shrinking', beam.laserShrinking, laser.contactDisabled], ['length', f32(beam.laserLength), f32(laser.beamLength)],
+      ['endpoint', vector(beam.laserEndpoint), vector(laser.endpoint)], ['scaleX', f32(beam.spriteScale?.[0]), f32(laser.sprite?.scale?.x)],
     ]) check(rows, `${name}.${field}`, expected, observed);
   }
   const shots = source.entities.filter(actor => actor.type === 9 && !actor.removed);
