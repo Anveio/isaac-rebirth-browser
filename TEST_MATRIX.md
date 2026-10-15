@@ -249,7 +249,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | `grid` | grid queries and ground-collision solvers on generated rooms | 14 | 3 | 0 |
 | `item_pools` | ItemPool selection, depletion, fallbacks, routing and continuation | 21 | 6 | 3 |
 | `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 63 | 51 | 2 |
-| `abi` | the exported C ABI transport the browser bridge drives | 11 | 1 | 0 |
+| `abi` | the exported C ABI transport the browser bridge drives | 15 | 3 | 0 |
 
 <details><summary>Every declared DST property</summary>
 
@@ -514,6 +514,12 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Always | abi: rejected commands leave the snapshot unchanged | [abi.rs](engine/dst/src/units/abi.rs) |
 | Always | abi: every published snapshot is a valid state | [abi.rs](engine/dst/src/units/abi.rs) |
 | Sometimes | abi: a well-formed command is rejected | [abi.rs](engine/dst/src/units/abi.rs) |
+| Always | abi: boot resource buffers are bounded at 512 KiB | [abi.rs](engine/dst/src/units/abi.rs) |
+| Always | abi: a boot from the authored resources publishes the plain boot's state | [abi.rs](engine/dst/src/units/abi.rs) |
+| Always | abi: a game booted from the authored resources plays exactly like the plain boot | [abi.rs](engine/dst/src/units/abi.rs) |
+| Sometimes | abi: the resource boot comparison reaches a run | [abi.rs](engine/dst/src/units/abi.rs) |
+| Always | abi: a resource boot either succeeds or fails with an error, keeping the previous game | [abi.rs](engine/dst/src/units/abi.rs) |
+| Sometimes | abi: corrupted boot resources are rejected | [abi.rs](engine/dst/src/units/abi.rs) |
 
 </details>
 
