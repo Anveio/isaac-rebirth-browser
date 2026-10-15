@@ -344,6 +344,29 @@ ordinary Player Brimstone299 is now merged with the scoped results above;
 controlled Tear307 is also merged; its final retained four-case comparison remains
 134,364 checks / 20,813 failures, with contact and observation gaps above.
 
+Controlled Brimstone312 remains a separate Draft. Its 708 producer, which also
+consumes the landed Damage318 operator, passes production/strict Clippy/floor,
+37,968,484 strict retained regular checks and 503,611 reciprocal Libra property
+checks. The first fixed public replay compared with an incomplete Native prefix
+retains 86,718 checks / 7,667 failures across 1,007 paired playing gates. There
+are 541 controlled-Laser C18 bodies (270 Full / 271 Fast). Same-side stable-owner
+property transitions pass, but actual reapply callbacks remain missing/FAIL;
+transport, HP, identity/RNG and lifecycle gaps persist. The earlier
+87,458 / 7,667 report is unchanged, and no four-case paired pass follows.
+
+Merged recorder332 removes retained decoded-observation history from the
+archive path while preserving every journal record and the final report API.
+Its closed-prefix validation preserves raw JSON and gzip bytes for 3,302 records
+in bounded windows, with 36,974,592 bytes observed validation RSS. This is
+storage equivalence, not a new Native or game result. Historical per-process
+memory attribution is unavailable, and fresh-Native peak improvement remains
+unverified. The corrected Technology/Gimpy producer passes production after preserving an
+earlier compile failure, and strict Clippy also passes. Floor, retained
+regressions and games remain pending. Their
+declared cases imply no gameplay acceptance. Merged335 adds opt-in controlled-
+Brim contact tooling with source/default/help/import validation only; its contact
+cases have not executed.
+
 Readiness287 passes a warm production retry and strict Clippy, but its floor
 build stopped at the working-memory floor. Its earlier production capacity stop
 is also retained; public-game contracts remain unexecuted. Pending capture-tool
