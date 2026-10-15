@@ -11,6 +11,12 @@ pub(crate) struct CacheMask(pub(crate) u32);
 
 const LIBRA_SCALAR_FLAGS: u32 = 0x1b;
 
+//Actual152 requestsWeapon/Damage; optional4 separately requestsShotSpeed.
+//These callback/grant footprints do not admit a primary or secondary caller.
+const TECHNOLOGY2_DAMAGE_ITEMS: &[usize] = &[4, 152];
+const TECHNOLOGY2_SHOT_SPEED_ITEMS: &[usize] = &[4, 152];
+const TECHNOLOGY2_GRANT_ITEMS: &[usize] = &[4, 152];
+
 // Source-owned footprints remain independent even when their admitted counts
 // currently match. Cache completion is never a kind5 or grant-history proof.
 const FETUS_CACHE_ITEMS: &[usize] = &[4, 52];
@@ -316,6 +322,16 @@ impl<'a> ItemInputs<'a> {
                 })
     }
 
+    ///Independent5139B1→513E10 Damage callback context only.
+    fn admits_technology2_damage_context(self) -> bool {
+        self.admits_permanent_readset(152, TECHNOLOGY2_DAMAGE_ITEMS)
+    }
+
+    ///Actualpassive152 defaultAdd preserves only an existing auxiliary owner.
+    pub(crate) fn admits_technology2_grant_context(self) -> bool {
+        self.admits_permanent_readset(152, TECHNOLOGY2_GRANT_ITEMS)
+    }
+
     fn admits_scalar_context(self) -> bool {
         self.owner.trinket_slots == [0, 0]
             && self
@@ -553,6 +569,10 @@ impl<'a> ItemInputs<'a> {
     /// read set. C08 remains an independent input to the ordered formulas.
     /// Config 118's request for all callbacks adds no implicit scalar effect.
     fn admits_scalar_stage(self, stage: CacheStage, effects: &[u32]) -> bool {
+        if self.owned_count(152) != 0 {
+            return stage == CacheStage::ShotSpeed
+                && self.admits_permanent_readset(152, TECHNOLOGY2_SHOT_SPEED_ITEMS);
+        }
         if self.owned_count(169) != 0 {
             return match stage {
                 CacheStage::FireDelay => {
@@ -789,7 +809,9 @@ impl DamageStage {
 
     fn admits(inputs: ItemInputs<'_>, source_player_type: Option<u32>) -> bool {
         source_player_type == Some(0)
-            && if inputs.owned_count(12) != 0 || inputs.owned_count(169) != 0 {
+            && if inputs.owned_count(152) != 0 {
+                inputs.admits_technology2_damage_context()
+            } else if inputs.owned_count(12) != 0 || inputs.owned_count(169) != 0 {
                 let required = if inputs.positive_owned_count(12) {
                     12
                 } else {
@@ -816,6 +838,11 @@ impl DamageStage {
         }
         //5138EA..51391D bounds the current damage before later multipliers.
         damage = damage.max(0.5_f32);
+        //5139B1 Have152→513E10 once, before the shared4/12 multiplier.
+        //66 895C is binary32 0x3F266666, not a bornLaser *.2 operator.
+        if inputs.positive_owned_count(152) {
+            damage *= f32::from_bits(0x3f26_6666);
+        }
         if inputs.positive_owned_count(4) || inputs.positive_owned_count(12) {
             //513A20 ->515026: shared single factor, even when both are held.
             //TEMP12 record presence has a distinct, unadmitted lifetime.
