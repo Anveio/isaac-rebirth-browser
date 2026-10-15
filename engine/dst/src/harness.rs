@@ -22,6 +22,8 @@ pub struct Case<'a> {
     pub tapes: Option<PathBuf>,
     /// Replays this tape instead of generating commands (game unit only).
     pub replay: Option<Tape>,
+    /// Generated commands continue from the end of this tape (game unit).
+    pub resume: Option<Tape>,
     pub wasm: Option<&'a crate::wasm::Module>,
     pub label: String,
     /// Retain every game tape (corpus harvesting), not only violating ones.
@@ -103,6 +105,8 @@ pub struct Plan {
     pub tapes: Option<PathBuf>,
     /// Named tapes the game unit replays after its generated cases.
     pub replays: Vec<(String, Tape)>,
+    /// A tape every generated game case replays before driving on.
+    pub resume: Option<Tape>,
     pub wasm: Option<crate::wasm::Module>,
     pub retain_all: bool,
 }
@@ -170,6 +174,10 @@ pub fn run(plan: &Plan, units: &[(usize, &Unit)]) -> Vec<CaseRecord> {
                 steps: plan.steps,
                 tapes: plan.tapes.clone(),
                 replay: replay.map(|(_, tape)| tape.clone()),
+                resume: plan
+                    .resume
+                    .clone()
+                    .filter(|_| replay.is_none() && unit.name == "game"),
                 wasm: plan.wasm.as_ref(),
                 label,
                 retain_all: plan.retain_all,

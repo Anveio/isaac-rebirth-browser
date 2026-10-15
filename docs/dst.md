@@ -156,6 +156,13 @@ property set on every run, after the generated cases:
   covering set. Game tapes drift as the engine evolves; a regression tape that
   stops reproducing its finding is retired rather than kept under its label.
 
+`--resume TAPE` makes every generated `game` case replay that tape (with
+every check) and then drive on from its end, so exploration branches from an
+interesting state, as Antithesis does, instead of rediscovering it. Cut a
+harvested tape at, say, a boss room entry, resume many cases from it, and the
+census shows how often each branch clears the room; a clearing branch is a
+short coverage tape.
+
 Open findings, which fail on current main and wait on their owner, keep their
 tape in [engine/dst/findings](../engine/dst/findings) instead. `test:dst` does
 not replay that directory, so one unfixed finding does not turn every run red,

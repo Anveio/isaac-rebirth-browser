@@ -22,7 +22,8 @@ use std::process::ExitCode;
 
 const USAGE: &str = "usage: rebirth-dst [--units all|a,b] [--cases N] [--steps N] [--seed U64]
                    [--case-seed U64] [--entropy seeded|antithesis] [--tapes DIR]
-                   [--replay TAPE.json] [--corpus DIR] [--wasm ENGINE.wasm]
+                   [--replay TAPE.json] [--resume TAPE.json] [--corpus DIR]
+                   [--wasm ENGINE.wasm]
                    [--report PATH] [--allow-unmet] [--retain-all] [--list]
                    [--setup-complete]";
 
@@ -35,6 +36,7 @@ struct Options {
     mode: Mode,
     tapes: Option<PathBuf>,
     replay: Option<PathBuf>,
+    resume: Option<PathBuf>,
     corpus: Option<PathBuf>,
     wasm: Option<PathBuf>,
     report: Option<PathBuf>,
@@ -54,6 +56,7 @@ fn parse() -> Result<Options, String> {
         mode: Mode::Seeded,
         tapes: None,
         replay: None,
+        resume: None,
         corpus: None,
         wasm: None,
         report: None,
@@ -84,6 +87,7 @@ fn parse() -> Result<Options, String> {
             }
             "--tapes" => options.tapes = Some(value()?.into()),
             "--replay" => options.replay = Some(value()?.into()),
+            "--resume" => options.resume = Some(value()?.into()),
             "--corpus" => options.corpus = Some(value()?.into()),
             "--wasm" => options.wasm = Some(value()?.into()),
             "--report" => options.report = Some(value()?.into()),
@@ -208,6 +212,14 @@ fn simulate() -> ExitCode {
             return ExitCode::from(2);
         }
     };
+    // Generated game cases branch from the end of this tape.
+    let resume = match options.resume.as_deref().map(tape::Tape::read).transpose() {
+        Ok(resume) => resume,
+        Err(error) => {
+            eprintln!("cannot read resume tape: {error}");
+            return ExitCode::from(2);
+        }
+    };
     let wasm = match options.wasm.as_deref().map(wasm::Module::load).transpose() {
         Ok(wasm) => wasm,
         Err(error) => {
@@ -231,6 +243,7 @@ fn simulate() -> ExitCode {
         steps: options.steps,
         tapes: options.tapes.clone(),
         replays,
+        resume,
         wasm,
         retain_all: options.retain_all,
     };

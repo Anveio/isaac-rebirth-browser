@@ -23,9 +23,13 @@ use std::panic::{self, AssertUnwindSafe};
 pub fn run(case: &mut Case) {
     let replay = case.replay.take();
     let replaying = replay.is_some();
-    let tape = match replay {
-        Some(tape) => tape,
-        None => {
+    // `--resume`: replay a prefix (a boss room entered, say), then branch.
+    let resume = case.resume.take();
+    let prefix = resume.as_ref().map_or(&[][..], |tape| &tape.commands[..]);
+    let tape = match (replay, &resume) {
+        (Some(tape), _) => tape,
+        (None, Some(resume)) => Tape::new(resume.initial_seed, resume.boot_epoch_seed),
+        (None, None) => {
             let e = &mut *case.entropy;
             let initial_seed = e.nonzero_u32();
             let boot_epoch_seed = match e.below(4) {
@@ -44,12 +48,14 @@ pub fn run(case: &mut Case) {
     let budget = if replaying {
         tape.commands.len()
     } else {
-        case.steps as usize
+        prefix.len() + case.steps as usize
     };
     for step in 0..budget {
         props::set_step(step as u64);
         let command = if replaying {
             tape.commands[step].clone()
+        } else if let Some(command) = prefix.get(step) {
+            command.clone()
         } else {
             driver.next(&simulation.game.state, case.entropy)
         };
