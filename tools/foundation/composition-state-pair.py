@@ -68,6 +68,7 @@ checks = []
 coverage = collections.Counter()
 paired_rows = []
 damage_chains = {}
+common_damage_chains = {}
 doorway_witnesses = []
 laser_lifetimes = {}
 render_witnesses = []
@@ -590,6 +591,152 @@ def compare_causal_npcs(source, world, state, t, native_counter):
             'scope': 'Actual next-full manager absence/counts; inactive store inferred from sole Remove, never an invented absent actor row.'}
 
 
+def common_contact_spec():
+    """Two explicit source payloads; never reinterpret the Dip217 contract."""
+    brim = case['requires'].get('ordinaryBrimContact')
+    tear = case['requires'].get('controlledTearContact')
+    assert not (brim is not None and tear is not None), 'One typed contact producer required'
+    if brim is not None:
+        receiver = brim['authoredReceiver']
+        assert receiver['type'] in (14, 18)
+        assert contract['family'] == 7 and contract['variant'] == 1 and contract['subtype'] == 0
+        return brim, [receiver['type']], 1, 0, 8
+    if tear is not None:
+        assert tear['receiverTypes'] and all(type(k) is int and k in (14, 18) for k in tear['receiverTypes'])
+        assert (tear['sourceEntityType'], tear['sourceVariant'], tear['damageFlags'], tear['countdown']) == (2, 0, 0, 30)
+        assert contract['family'] == 2 and contract['controlledBy329'] is True
+        return tear, tear['receiverTypes'], 2, 0, 0
+    return None
+
+
+def contact_source(source, state, spec):
+    """Resolve each own C18/source; a Parent payload is not a Laser identity."""
+    _, _, source_type, source_variant, _ = spec
+    slot = source['players'][0]['actorSlots']['c18']
+    assert slot is not None, 'Contact source requires its actual registered C18'
+    native_bodies = [a for a in source['attacks'] if a['identity'] == slot['identity']]
+    assert len(native_bodies) == 1, 'Native C18 must resolve one real source actor'
+    native_body = native_bodies[0]
+    ref = state['attackRuntime']['persistent']
+    assert ref is not None and ref['kind'] == ('laser' if source_type == 1 else 'tear')
+    port_body = [a for a in state['lasers' if source_type == 1 else 'tears'] if a['id'] == ref['id']]
+    assert len(port_body) == 1, 'Port C18 must resolve one real source actor'
+    if source_type == 1:
+        assert identity_tuple(native_body['identity'])[:3] == (7, 1, 0)
+        native_owner = native_body['linkedParent']
+        assert native_owner == source['players'][0]['owner'], 'Laser damage source must be its actual ParentPlayer'
+        port_owner = reference(state, port_body[0]['parent'])
+        assert port_owner == reference(state, {'kind': 'player', 'id': 0})
+    else:
+        native_owner, port_owner = native_body['identity'], reference(state, ref)
+        assert int(native_body['attackFlags7f0']) & (1 << 33) and int(flags(port_body[0]['attackFlags'])) & (1 << 33)
+    assert identity_tuple(native_owner)[:2] == identity_tuple(port_owner)[:2] == (source_type, source_variant)
+    return native_owner, port_owner, f32(native_body['collisionDamage']), f32(port_body[0]['collisionDamage'])
+
+
+def compare_common_contacts(source, state, t, native_counter, spec):
+    """Observe real common NPC FIFO and nonlethal next-Full application.
+
+    This does not infer callback counts, historical EntityRef values, registry
+    hits, impulse order, lethal subclass behavior or Remove from later absence.
+    """
+    declaration, kinds, source_type, source_variant, damage_flags = spec
+    native_targets = [a for a in source['commonContactNpcs'] if a['identity']['kind'] in kinds]
+    port_targets = [a for a in state['room']['npcs'] if a['kind'] in kinds and not a['removed']]
+    check_field('typed contact complete receiver identities',
+        lambda: sorted(identity_tuple(a['identity']) for a in native_targets),
+        lambda: sorted(identity_tuple(reference(state, {'kind': 'npc', 'id': a['id']})) for a in port_targets), t)
+    for original in native_targets:
+        identity = original['identity']
+        matches = [a for a in port_targets if (a['kind'], a['variant'], a['subtype'],
+            reference(state, {'kind': 'npc', 'id': a['id']})['sequenceId']) == identity_tuple(identity)[:4]]
+        if len(matches) != 1:
+            missing('typed contact receiver correspondence', t, 'No unique actual kind/variant/subtype/source-sequence join')
+            continue
+        actual = matches[0]
+        for field in ('hp', 'maxHp', 'pendingDamage', 'pendingFlags'):
+            check_field('typed contact receiver ' + field,
+                lambda: f32(original[field]) if field != 'pendingFlags' else original[field],
+                lambda: f32(actual['damage'][field] if field.startswith('pending') else actual[field]) if field != 'pendingFlags' else actual['damage'][field], t)
+        for field in ('dead', 'visible', 'raw494', 'entityCollisionClass'):
+            check_field('typed contact receiver ' + field, lambda: original[field], lambda: actual[field], t)
+        check_field('typed contact receiver own-manager membership', lambda: original['inActiveManager'],
+            lambda: {'kind': 'npc', 'id': actual['id']} in state['actorScheduler']['actors'], t)
+        # Npc.champion serializes Some only; absence is that explicit Option
+        # schema, not an assumed authored variant/HP or native champion value.
+        check_field('typed contact receiver champion', lambda: original['champion'], lambda: actual.get('champion') is not None, t)
+        for field in ('npcState', 'npcFrameAge'):
+            check_field('typed contact receiver ' + field, lambda: original[field],
+                lambda: actual['state' if field == 'npcState' else 'frameAge'], t)
+        for field, port_field in (('position', 'presentedPosition'), ('velocity', 'velocity')):
+            check_field('typed contact receiver ' + field, lambda: vector(original[field]), lambda: vector(actual[port_field]), t)
+        check_field('typed contact receiver radius', lambda: f32(original['collisionRadius']), lambda: f32(actual['collisionRadius']), t)
+        native_records, port_events = original['pendingDamageRecords'], actual['damage']['events']
+        check('typed contact ordered FIFO length', len(native_records), len(port_events), t)
+        event_flag_values = {'laser': 8, 'tear': 0, 'knife': 0, 'bomb': 4, 'fireContact': 2, 'roomEffect': 0}
+        for record, event in zip(native_records, port_events):
+            check_field('typed contact FIFO amount', lambda: f32(record['amount']), lambda: f32(event['amount']), t)
+            check_field('typed contact FIFO flags', lambda: record['flags'], lambda: event_flag_values[event['kind']], t)
+            check_field('typed contact FIFO source type', lambda: record['sourceType'], lambda: event['source']['entityType'], t)
+        native_fifo, port_fifo = [], []
+        for record in native_records:
+            native_fifo.append([f32(record['amount']), record['flags'], record['sourceType'], record['sourceVariant'],
+                identity_tuple(record['actualAttacker']) if record['actualAttacker'] is not None else None])
+        for index, event in enumerate(port_events):
+            try:
+                kind = {1: 'player', 2: 'tear', 7: 'laser', 8: 'knife'}[event['source']['entityType']]
+                attacker = reference(state, {'kind': kind, 'id': event['source']['id']})
+                event_flags = event_flag_values[event['kind']]
+                port_fifo.append([f32(event['amount']), event_flags, event['source']['entityType'], attacker['variant'], identity_tuple(attacker)])
+            except Exception as error:
+                port_fifo.append(None)
+                missing('typed contact actual FIFO source ' + str(index), t, error)
+        check('typed contact ordered FIFO amount/flags/source identity', native_fifo, port_fifo, t)
+        row = {'presentation': t, 'nativeCounter': native_counter, 'portCounter': state['systemClock']['systemCounter'],
+            'nativeGameAge': source['gameAge'], 'portGameAge': state['gameUpdateCount'],
+            'nativeHp': f32(original['hp']), 'portHp': f32(actual['hp']),
+            'nativeFifo': native_fifo, 'portFifo': port_fifo, 'nativeRawRecords': native_records,
+            'nativeQueued': False, 'portQueued': False, 'nativeApplied': False, 'portApplied': False}
+        try:
+            native_owner, port_owner, native_damage, port_damage = contact_source(source, state, spec)
+            check('typed contact own source identities', identity_tuple(native_owner), identity_tuple(port_owner), t)
+            for side, fifo, owner, amount in (('native', native_fifo, native_owner, native_damage), ('port', port_fifo, port_owner, port_damage)):
+                row[side + 'Queued'] = any(r is not None and r == [amount, damage_flags, source_type, source_variant, identity_tuple(owner)] and amount > 0 for r in fifo)
+        except Exception as error:
+            missing('typed contact actual registered damage producer', t, error)
+        # 447729 skips damage for494; Game bit40 chooses a different applier.
+        # No literal0 is supplied for an unknown serialized owner.
+        row['nativeApplierKnown'] = original['raw494'] is False and original['entityFlags'] == 4 and int(source['runFlags10ead8']) & 0x40 == 0
+        try:
+            row['portApplierKnown'] = actual['raw494'] is False and int(source_run_flags(state)) & 0x40 == 0
+        except Exception as error:
+            row['portApplierKnown'] = False
+            missing('typed contact port damage run-flag owner', t, error)
+        key = (source['roomDescriptor']['gridIndex'], *identity_tuple(identity))
+        chain = common_damage_chains.setdefault(key, {'identity': identity, 'rows': []})
+        previous = chain['rows'][-1] if chain['rows'] else None
+        if previous and previous['presentation'] == t:
+            continue  # Same recorded gate is not another accepted enqueue.
+        if previous and native_counter % 2 == row['portCounter'] % 2 == 1:
+            for side in ('native', 'port'):
+                if (row[side + 'GameAge'] != previous[side + 'GameAge'] + 1
+                        or not previous[side + 'Queued'] or not previous[side + 'ApplierKnown'] or not row[side + 'ApplierKnown']):
+                    continue
+                expected = previous[side + 'Hp']
+                fifo = previous[side + 'Fifo']
+                if not fifo or any(r is None or r[1] not in (0, 8) or r[0] <= 0 for r in fifo):
+                    missing('typed contact ' + side + ' unsupported queued applier', t, 'Unknown flags/nonpositive amount in complete FIFO')
+                    continue
+                for record in fifo:
+                    expected = f32(expected - record[0])
+                if expected < 0:
+                    missing('typed contact ' + side + ' lethal subclass lifecycle', t, 'Captured lethal queue needs its separate callback/cleanup witness')
+                    continue
+                check('typed contact ' + side + ' next-Full ordered f32 HP application', expected, row[side + 'Hp'], t)
+                row[side + 'Applied'] = expected == row[side + 'Hp']
+        chain['rows'].append(row)
+
+
 def equal(expected, actual):
     if isinstance(expected, bool) or isinstance(actual, bool):
         return type(expected) is type(actual) and expected == actual
@@ -614,6 +761,12 @@ def check(field, expected, actual, presentation):
 def missing(field, presentation, error):
     checks.append({'field': field, 'presentation': presentation, 'passed': False, 'error': str(error)})
 
+
+common_spec = None
+try:
+    common_spec = common_contact_spec()
+except Exception as error:
+    missing('mandatory typed NPC14/18 contact declaration', None, error)
 
 check('actual completed original', ('pass', []), (native.get('status'), native.get('failures')), None)
 check('actual completed browser', 'complete', browser.get('captureStatus'), None)
@@ -675,6 +828,11 @@ for captured in sorted(all_captured, key=lambda row: row['presentation']):
                 compare_causal_npcs(source, observed['world'], state, t, observed['systemCounter'])
             except Exception as error:
                 missing('mandatory actual same-target contact group', t, error)
+        if common_spec is not None:
+            try:
+                compare_common_contacts(source, state, t, observed['systemCounter'], common_spec)
+            except Exception as error:
+                missing('mandatory typed NPC14/18 contact group', t, error)
         native_families = sorted(identity_tuple(actor['identity']) for actor in source['attacks'] if actor['inActiveManager'])
         port_families = []
         try:
@@ -948,6 +1106,29 @@ for lifetime in laser_lifetimes.values():
     lifetime['retirementWitness'] = retirement
 if ordinary_laser_required:
     check('required actual ordinary transient full-Uninit and registered C18 NULL witness',True,bool(qualified_lifetimes),None)
+if common_spec is not None:
+    declaration = common_spec[0]
+    rows = [row for chain in common_damage_chains.values() for row in chain['rows']]
+    for side in ('native', 'port'):
+        for key, field in (('minimumAcceptedEnqueuesPerGame', 'Queued'), ('minimumNextFullDamageApplicationsPerGame', 'Applied')):
+            minimum = declaration[key]
+            # A retained FIFO proves an accepted enqueue, not an exact dynamic
+            # append count across unobserved boundaries or repeated GL gates.
+            check('typed contact supported minimum ' + key, 1, minimum, None)
+            check('required typed contact ' + side + ' ' + field, True, any(row[side + field] for row in rows), None)
+    if case['requires'].get('ordinaryBrimContact') is not None:
+        missing('required typed contact exact Laser callback attribution', None,
+            'Accepted sourceType1/flags8 FIFO identifies ParentPlayer. A retained record plus current C18/amount does not uniquely identify the Laser that enqueued it; an actual bounded enqueue window is still required.')
+        check('typed contact supported natural-retirement minimum', 1, declaration['minimumNaturalLaserRetirementsPerGame'], None)
+        natural = [life for life in laser_lifetimes.values() if life['retirementWitness'] and life['retirementWitness']['passed']
+            and any(r['nativeRemaining'] > 0 and r['portRemaining'] > 0 for r in life['rows'])
+            and any(r['nativeRemaining'] == r['portRemaining'] == 0 for r in life['rows'])]
+        check('required typed contact ordinary Laser natural timer and following-Full C18 NULL', True, bool(natural), None)
+    if case['requires'].get('controlledTearContact') is not None:
+        for key in ('firstRegistryHit', 'bit33Veto', 'halfTearVelocityReceiverTypes', 'repeatedRegistryHitSkipsBothUntilRealClear'):
+            if declaration.get(key):
+                missing('typed Tear contact ' + key + ' coverage', None,
+                    'FIFO/HP observations do not expose the pre-callback registry or isolate callback impulse/veto ordering')
 
 # Fixed observation PNGs are chosen solely from the predeclared interval.
 for captured in browser['captures']:
@@ -1022,6 +1203,9 @@ result = {'schema': 2, 'status': 'fail' if any(not item['passed'] for item in ch
           'requiredBackendCoverageGaps': ['History requirements are graded by their explicit versioned raw witnesses; missing transient Remove flags remain failures even when later manager absence is observed.', 'Body comparison covers ordinary7/1/0 with linked1000/50/1 and actual registered Knife/ParentKnife roles. Other Laser subtypes and general modifier domains require separate admitted comparisons; no whole-backend acceptance is implied.', 'Player birth seed uses the actual PlayerItems.entitySpawnSeed owner; missing or unknown fields remain failures. Native regular-Tear physical-position phase binding remains unclosed.'],
           'scope': 'Public resource game-level composition. Actual declared fields and complete active attack identities/slots. New body correspondence uses each own actual registered C18, no crossside fitted IDs/positions; all independent identity/seed mismatches remain failures. Case PASS cannot accept the whole backend while its separate required gaps remain. Every mismatch/missing field retained; syntax checks are not game acceptance.',
           'sourceSha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest()}
+if common_spec is not None:
+    result['commonDamageChains'] = list(common_damage_chains.values())
+    result['commonContactScope'] = 'Actual common-class NPC14/18 FIFO and nonlethal next-Full HP. Player-source FIFO is not a particular Laser callback witness. Native copied EntityRef raw words/P/V are retained, not reconstructed from current sources. Countdown30 is a source callback argument, not a stored queue field. Full copied-history, registry/impulse order, lethal subclass cleanup and explicit Remove/Uninit callbacks remain separately unqualified.'
 payload = (json.dumps(result, separators=(',', ':')) + '\n').encode()
 with args.output.open('xb') as stream:
     stream.write(gzip.compress(payload, mtime=0) if str(args.output).endswith('.gz') else payload)
