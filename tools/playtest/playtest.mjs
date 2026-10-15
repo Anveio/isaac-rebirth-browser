@@ -106,7 +106,7 @@ const observe = () => tab.evaluate(() => {
     player: { x: (s.player.x - 32) / 0.65, y: (s.player.y + 46) / 0.65, hp: s.player.hp, maxHp: s.player.maxHp, dead: s.player.dead, controls: s.player.controlsEnabled },
     room: s.currentRoom, visited: s.visitedRooms.length, transition: !!s.roomTransition, clear: s.room.combatClear,
     bounds: { left: s.room.left, right: s.room.right, top: s.room.top, bottom: s.room.bottom },
-    npcs: npcs.map(n => ({ x: n.position.x, y: n.position.y, boss: n.boss, kind: n.kind })),
+    npcs: npcs.map(n => ({ x: n.position.x, y: n.position.y, boss: n.boss, kind: n.kind, hp: n.hp, maxHp: n.maxHp })),
     pickups: s.room.pickups.filter(p => !p.collected && !p.removed).map(p => ({ x: p.position.x, y: p.position.y, variant: p.variant })),
     // Solid grid cells (walls, rocks, pits); door cells stay walkable for routing.
     // Authored cells without a grid entity (e.g. pits, selector 3000) still block.
@@ -152,7 +152,7 @@ async function tap(key, ms = 120) { await tab.keyboard.down(key); await tab.wait
 
 let exitCode = 0;
 const stats = { roomsEntered: new Set(), returnedToStart: false, leftStart: false, maxTears: 0, bombsPlaced: 0, explosionsSeen: 0,
-  pickupsCollected: 0, itemsGained: 0, coinsMax: 0, enemiesSeen: 0, enemyRoomsCleared: 0, damageTaken: 0, deaths: 0, pauses: 0,
+  pickupsCollected: 0, itemsGained: 0, coinsMax: 0, enemiesSeen: 0, enemyRoomsCleared: 0, bossesKilled: 0, bossHpLeast: null, damageTaken: 0, deaths: 0, pauses: 0,
   distance: 0, stalls: 0, maxFrozenMs: 0, stages: new Set() };
 try {
   // Boot.
@@ -228,6 +228,9 @@ try {
     stats.explosionsSeen += state.explosions > previous.explosions ? 1 : 0;
     stats.coinsMax = Math.max(stats.coinsMax, state.inventory.coins);
     stats.enemiesSeen = Math.max(stats.enemiesSeen, state.npcs.length);
+    // Boss progress: the lowest boss HP fraction reached, and kills (a boss room cleared).
+    for (const npc of state.npcs.filter(n => n.boss && n.maxHp > 0)) stats.bossHpLeast = Math.min(stats.bossHpLeast ?? 1, Math.round(npc.hp / npc.maxHp * 100) / 100);
+    if (previous.npcs.some(n => n.boss) && !state.npcs.some(n => n.boss) && state.room === previous.room && state.clear && !state.player.dead) stats.bossesKilled++;
     stats.stages.add(state.stage);
     if (state.player.hp < previous.player.hp) stats.damageTaken += previous.player.hp - state.player.hp;
     if (state.items > itemsBefore) { stats.itemsGained += state.items - itemsBefore; itemsBefore = state.items; log(`collected an item (${state.items} owned)`); await shot('item'); }
