@@ -308,13 +308,25 @@ pub(crate) fn advance_transition(
         .insert(state.current_room, state.room.clone());
     state.current_room = transition.target_room;
     state.room = match state.persisted_rooms.remove(&state.current_room) {
-        Some(room) => room,
+        Some(mut room) => {
+            crate::room::initialize_normal_fx_rays(
+                &mut room,
+                state.stage,
+                &mut state.boot_lifecycle.shared,
+            );
+            room
+        }
         None => {
             let mut room = Room::from_floor_descriptor_with_special(
                 &state.floor,
                 state.current_room,
                 special,
             )?;
+            crate::room::initialize_normal_fx_rays(
+                &mut room,
+                state.stage,
+                &mut state.boot_lifecycle.shared,
+            );
             if let Some(grid) = room.grid.as_mut() {
                 crate::grid::link_pits(grid, &mut state.boot_lifecycle.shared);
             }

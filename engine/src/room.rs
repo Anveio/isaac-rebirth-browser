@@ -22,6 +22,11 @@ pub struct Room {
     pub top: f64,
     pub bottom: f64,
     pub appearance: RoomAppearance,
+    /// Actual constructor phase values from the latest FX reload, including
+    /// stage-inactive groups. This is initialization history, not a rendered
+    /// ray list or a claim that all native ray controllers are implemented.
+    #[serde(default)]
+    pub fx_ray_initialization_phases: Vec<f32>,
     pub descriptor: Option<crate::floor::Descriptor>,
     /// Room+159c is stamped by Room.Init before grid and entity factories.
     #[serde(default)]
@@ -216,6 +221,62 @@ impl DecorationRng {
         self.state ^= self.state << 9;
         self.state ^= self.state >> 7;
         self.state
+    }
+}
+
+/// Backdrop selector 5c5b30 for the existing normal-stage request. Its default
+/// 5d49b0 stage backdrop rounds an even stage down to the preceding odd stage;
+/// alternate-stage callers must supply their own admitted source context.
+fn normal_backdrop_id(room: &Room, stage: u32) -> u32 {
+    let default = stage.wrapping_sub(u32::from(stage & 1 == 0));
+    let Some(descriptor) = &room.descriptor else {
+        return default;
+    };
+    let template = &descriptor.template;
+    match template.room_type {
+        5 if template.variant == 5000 => 13,
+        2 => 15,
+        3 => 21,
+        7 => 18,
+        8 => [7, 10, 9, 6, 2, 1, 11, 14]
+            .get(template.variant as usize)
+            .copied()
+            .unwrap_or(0),
+        9 => 20,
+        10 | 11 | 14 | 17 | 22 => 9,
+        12 => 14,
+        13 => 5,
+        15 => 10,
+        16 => 0,
+        18 => 16,
+        19 => 17,
+        20 => 12,
+        21 => 19,
+        _ => default,
+    }
+}
+
+/// Real Room.Init5cef3e reloads these phases before its path/grid setup, on
+/// initial admission and every fresh/restored doorway admission. Parsing
+/// stage-inactive groups still constructs their rays and consumes uniforms;
+/// native display admission is separate. This keeps actual constructor values
+/// rather than advancing the stream by a fitted count.
+pub fn initialize_normal_fx_rays(room: &mut Room, stage: u32, shared: &mut crate::mt::Mt19937) {
+    room.fx_ray_initialization_phases.clear();
+    if room
+        .descriptor
+        .as_ref()
+        .is_some_and(|descriptor| descriptor.template.room_type == 16)
+        || normal_backdrop_id(room, stage) == 13
+    {
+        return;
+    }
+    let rays = include_str!("../../references/isaac/rebirth/resources/fxlayers.xml")
+        .matches("<fxRay ")
+        .count();
+    for _ray in 0..rays {
+        let phase = (f64::from(shared.uniform()) * std::f64::consts::PI) as f32;
+        room.fx_ray_initialization_phases.push(phase);
     }
 }
 
@@ -525,6 +586,7 @@ impl Room {
             initialization_game_update: None,
             loaded: false,
             pickups: Vec::new(),
+            fx_ray_initialization_phases: Vec::new(),
             saved_regular_pickups: Vec::new(),
             npcs: Vec::new(),
             background_stains: Vec::new(),
