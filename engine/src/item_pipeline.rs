@@ -34,6 +34,17 @@ const MONSTRO_GRANT_ITEMS: &[usize] = &[1, 4, 229];
 const MONSTRO_KIND1_ITEMS: &[usize] = &[1, 4, 229];
 const MONSTRO_CALLER_ITEMS: &[usize] = &[1, 4, 229];
 
+// Independently closed cache, Familiar and actual grant footprints. Equal
+// sets do not transfer getter or controller admission.
+const EPIC_FETUS_CACHE_ITEMS: &[usize] = &[1, 2, 4, 168];
+const EPIC_FETUS_FAMILIAR_ITEMS: &[usize] = &[1, 2, 4, 168];
+const EPIC_FETUS_GRANT_ITEMS: &[usize] = &[1, 2, 4, 168];
+// Real2-before168 grants have independent callback and auxiliary histories.
+// These prefixes admit no ordinary triple-tear emitter or Epic caller.
+const INNER_EYE_PREFIX_CACHE_ITEMS: &[usize] = &[1, 2, 4];
+const INNER_EYE_PREFIX_FAMILIAR_ITEMS: &[usize] = &[1, 2, 4];
+const INNER_EYE_PREFIX_GRANT_ITEMS: &[usize] = &[1, 2, 4];
+
 // Independent source-owned footprints. Equal current sets are deliberately
 // separate: cache additions cannot silently admit a50D090 getter branch.
 const TECHNOLOGY_CACHE_ITEMS: &[usize] = &[1, 4, 68, 329];
@@ -235,6 +246,9 @@ impl<'a> ItemInputs<'a> {
         if self.admits_soy_milk_cache_context() || self.admits_monstro_cache_context() {
             return true;
         }
+        if self.admits_epic_fetus_cache_context() {
+            return true;
+        }
         self.owner.trinket_slots == [0, 0]
             && self
                 .owner
@@ -323,6 +337,29 @@ impl<'a> ItemInputs<'a> {
                     .queued_id
                     .is_none_or(|id| supported.contains(&(id as usize)))
             }
+    }
+
+    ///Independent511F10 footprint for positive168 with selected1/2/4,
+    ///or the actual2-before168 prefix. C08=6 adds no FireDelay multiplier.
+    ///Normal-Isaac, requested callbacks and field/history owners stay separate.
+    pub(crate) fn admits_epic_fetus_cache_context(self) -> bool {
+        self.admits_permanent_readset(168, EPIC_FETUS_CACHE_ITEMS)
+            || self.admits_permanent_readset(2, INNER_EYE_PREFIX_CACHE_ITEMS)
+    }
+
+    ///Independent strict511F10 trace: all68 actual Familiar requests are0.
+    ///Cache completion alone never admits a Familiar request or RNG owner.
+    pub(crate) fn admits_epic_fetus_zero_familiar_requests(self) -> bool {
+        self.admits_permanent_readset(168, EPIC_FETUS_FAMILIAR_ITEMS)
+            || self.admits_permanent_readset(2, INNER_EYE_PREFIX_FAMILIAR_ITEMS)
+    }
+
+    ///Only actualAdd2/168 may consume this independent zero-amount grant proof,
+    ///with normal-Isaac and existingSomeLuck guards retained by its wrapper.
+    ///No counts or cache result can create missing auxiliary history.
+    pub(crate) fn admits_epic_fetus_grant_context(self) -> bool {
+        self.admits_permanent_readset(168, EPIC_FETUS_GRANT_ITEMS)
+            || self.admits_permanent_readset(2, INNER_EYE_PREFIX_GRANT_ITEMS)
     }
 
     ///Mechanical signed-count/context check, with no item capability implied
@@ -450,6 +487,7 @@ impl<'a> ItemInputs<'a> {
         //implemented retained-C08 FireDelay multiplier below.
         let fetus_context = self.admits_fetus_cache_context();
         let neutral_monstro = self.admits_monstro_cache_context();
+        let epic_fetus_context = self.admits_epic_fetus_cache_context();
         self.admits_scalar_context()
             && self
                 .owner
@@ -465,7 +503,9 @@ impl<'a> ItemInputs<'a> {
                                 || (id == 68 && neutral_technology)
                                 || (id == 330 && neutral_soy_milk)
                                 || (id == 52 && fetus_context)
-                                || (id == 229 && neutral_monstro)))
+                                || (id == 229 && neutral_monstro)
+                                || (id == 168 && epic_fetus_context)
+                                || (id == 2 && epic_fetus_context)))
                 })
     }
 
@@ -476,6 +516,9 @@ impl<'a> ItemInputs<'a> {
             return true;
         }
         if self.admits_soy_milk_cache_context() || self.admits_monstro_cache_context() {
+            return true;
+        }
+        if self.admits_epic_fetus_cache_context() {
             return true;
         }
         self.admits_scalar_context()
@@ -494,6 +537,9 @@ impl<'a> ItemInputs<'a> {
     pub(crate) fn admits_selected_zero_familiar_requests(self) -> bool {
         if self.owned_count(229) != 0 {
             return self.admits_monstro_zero_familiar_requests();
+        }
+        if self.owned_count(168) != 0 || self.owned_count(2) != 0 {
+            return self.admits_epic_fetus_zero_familiar_requests();
         }
         self.admits_selected_auxiliary_callbacks()
     }
@@ -562,7 +608,7 @@ impl CacheResolution {
 }
 
 /// One callback's source ownership, beside its literal pure operator.
-/// Reads signed permanent/TEMP1/6, positive permanent222 and retained C08;
+/// Reads signed permanent/TEMP1/6, positive permanent2/222 and retained C08;
 /// writes integer C78 only. Source-local bounds and truncation precede Libra.
 /// The caller retains the separate TEMP6/negative-history guard. These neutral
 /// items prove this callback only;304 remains a distinct coupled operator.
@@ -594,6 +640,12 @@ impl FireDelayStage {
         }
         //512562 bound precedes512666's one permanent222 modifier.
         delay = delay.max(5.0_f32);
+        //5125B0 tests positive ownership once, after the bound and before
+        //the retained-C08 modifiers. Separate f32 multiply/add, not a count.
+        if inputs.positive_owned_count(2) {
+            delay *= 2.1_f32;
+            delay += 3.0_f32;
+        }
         //512610 reads retained C08; multiply BEFORE integer truncation.
         if primary == PrimaryWeaponC08::Brimstone {
             delay *= 3.0_f32;
