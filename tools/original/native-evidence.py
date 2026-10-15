@@ -130,7 +130,7 @@ def read_manifest(path):
                         if report['presentations'][-1]['presentedFrame'] != value['presentedFrame']:
                             raise ValueError('Native progress advance does not match its acknowledgement')
                         report['presentations'][-1] = value
-                    elif kind == 'field' and value['name'] in ('bootstrapPresentedFrames', 'initialState'):
+                    elif kind == 'field' and value['name'] in ('bootstrapPresentedFrames', 'declaredOptionsKept', 'initialState'):
                         report[value['name']] = value['value']
                     elif kind in ('debugObservation', 'input', 'capture', 'audioHold', 'focusHandoff'):
                         field = {'debugObservation': 'debugObservations', 'input': 'inputs', 'capture': 'frames',

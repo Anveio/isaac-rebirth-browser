@@ -455,6 +455,8 @@ fn main() {
         .unwrap()
         .join("references/isaac/rebirth/resources");
     let giantbook = resources.join("giantbook.xml");
+    let challenges = resources.join("challenges.xml");
+    println!("cargo:rerun-if-changed={}", challenges.display());
     let information_animations = manifest.parent().unwrap().join("web/information-data.json");
     println!("cargo:rerun-if-changed={}", giantbook.display());
     println!(
@@ -726,6 +728,8 @@ fn main() {
         ));
     }
     let output = PathBuf::from(std::env::var_os("OUT_DIR").unwrap());
+    fs::copy(challenges, output.join("challenges.xml"))
+        .expect("copy actual authored Challenge resource");
     fs::write(
         output.join("information_catalog.rs"),
         information_catalog(
