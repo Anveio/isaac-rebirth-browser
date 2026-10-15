@@ -246,6 +246,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | `actors` | actor admission order and room identities against a list model | 4 | 2 | 0 |
 | `layout` | rectangular floor growth over every accepted seed, room count and shape mask | 11 | 2 | 1 |
 | `room_spawns` | authored spawn-group selection over every authored room and synthetic edge rooms | 11 | 4 | 0 |
+| `room_templates` | authored room-template picks and weight decay against a weight model | 8 | 5 | 0 |
 | `floor` | Basement generation structure, retries and per-descriptor room admission | 18 | 5 | 0 |
 | `grid` | grid queries and ground-collision solvers on generated rooms | 14 | 3 | 0 |
 | `contact` | mass contact responses against momentum, centre-of-mass and overlap oracles | 16 | 3 | 0 |
@@ -334,6 +335,19 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Sometimes | room_spawns: a group without weight falls back to its first entry | [room_spawns.rs](engine/dst/src/units/room_spawns.rs) |
 | Sometimes | room_spawns: spawnConfig chooses an alternate variant | [room_spawns.rs](engine/dst/src/units/room_spawns.rs) |
 | Always | room_spawns: a selector carries its group's cell, position and stream seeds | [room_spawns.rs](engine/dst/src/units/room_spawns.rs) |
+| Always | room_templates: a picker is built exactly from valid catalogues | [room_templates.rs](engine/dst/src/units/room_templates.rs) |
+| Sometimes | room_templates: an invalid catalogue is rejected | [room_templates.rs](engine/dst/src/units/room_templates.rs) |
+| Always | room_templates: two pickers fed the same requests answer alike | [room_templates.rs](engine/dst/src/units/room_templates.rs) |
+| Always | room_templates: only the picked template's weight changes, to a tenth | [room_templates.rs](engine/dst/src/units/room_templates.rs) |
+| Always | room_templates: a request is refused exactly when malformed, weightless or past its pool | [room_templates.rs](engine/dst/src/units/room_templates.rs) |
+| Sometimes | room_templates: a request no compatible template weighs is refused | [room_templates.rs](engine/dst/src/units/room_templates.rs) |
+| Always | room_templates: the pick satisfies its request | [room_templates.rs](engine/dst/src/units/room_templates.rs) |
+| Always | room_templates: the reported pools and RNG7 draws match an independent filter | [room_templates.rs](engine/dst/src/units/room_templates.rs) |
+| Always | room_templates: the pick is 5d5878's running-sum choice from the gated pool | [room_templates.rs](engine/dst/src/units/room_templates.rs) |
+| Sometimes | room_templates: the exact door-mask pool is used | [room_templates.rs](engine/dst/src/units/room_templates.rs) |
+| Sometimes | room_templates: the compatible pool is used though exact masks exist | [room_templates.rs](engine/dst/src/units/room_templates.rs) |
+| Sometimes | room_templates: a template already picked is picked again | [room_templates.rs](engine/dst/src/units/room_templates.rs) |
+| Always | room_templates: the picked template keeps a tenth of its weight | [room_templates.rs](engine/dst/src/units/room_templates.rs) |
 | Always | floor: requests outside stages 1 and 2 or with stage seed zero are rejected | [floor.rs](engine/dst/src/units/floor.rs) |
 | Always | floor: the first-floor entry is the normal generator with fresh run inputs | [floor.rs](engine/dst/src/units/floor.rs) |
 | Always | floor: generation is a pure function of its request | [floor.rs](engine/dst/src/units/floor.rs) |
