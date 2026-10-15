@@ -77,6 +77,7 @@ pub mod run_admission;
 pub mod saved_game;
 pub mod seed;
 pub mod traversal;
+pub mod wall_hugger;
 mod weapon_plan;
 pub use bombs::{Bomb, Explosion};
 pub use effects::{Point, StageEffects};

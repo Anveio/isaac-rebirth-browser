@@ -78,6 +78,11 @@ pub struct Npc {
     pub sprite_events: SpriteEvents,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub dingle: Option<crate::dingle::DingleState>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub wall_hugger: Option<crate::wall_hugger::WallHuggerState>,
+    /// Entity+494: BaseUpdate discards every queued hit.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub invincible: bool,
 }
 
 #[derive(Clone, Copy, Debug, Default, Deserialize, Serialize, PartialEq, Eq)]
@@ -257,7 +262,13 @@ pub fn player_contacts(state: &mut State) -> Result<(), String> {
         if !combat::player_npc_overlap(&player_body, &npc_body)? {
             continue;
         }
-        let contact_damage = npc.collision_damage;
+        // Callback49c2ec: a Wall Hugger still showing "No-Spikes" pushes the
+        // player without hurting it.
+        let contact_damage = if npc.kind == 218 && npc.animation == "No-Spikes" {
+            0.0
+        } else {
+            npc.collision_damage
+        };
         if contact_damage > 0.0 {
             combat::try_damage_player(state, contact_damage as u8, 60, 0)?;
         }
@@ -294,10 +305,12 @@ pub fn nonplayer_contacts(state: &mut State) -> Result<(), String> {
             let (left, right) = state.room.npcs.split_at_mut(second);
             let first = &mut left[first];
             let second = &mut right[0];
+            // 49b980: two Wall Huggers never collide.
             if first.dead
                 || second.dead
                 || first.entity_collision_class != 4
                 || second.entity_collision_class != 4
+                || (first.kind == 218 && second.kind == 218)
             {
                 continue;
             }
@@ -592,6 +605,8 @@ impl Npc {
             gluttony: None,
             sprite_events: SpriteEvents::default(),
             dingle: None,
+            wall_hugger: None,
+            invincible: false,
         }
     }
 
