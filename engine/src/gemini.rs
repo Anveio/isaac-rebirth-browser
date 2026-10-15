@@ -331,7 +331,11 @@ fn baby(
         let (minimum, maximum) = crate::laser_npc_runtime::room_bounds_from_grid(world.grid);
         npc.position.x = npc.position.x.min(maximum.x).max(minimum.x);
         npc.position.y = npc.position.y.min(maximum.y - 10.0).max(minimum.y + 30.0);
-        npc.velocity = npc.velocity * 0.85;
+        // 4bceaf 612bb0 divides: v /= 0.85.
+        npc.velocity = WorldVector {
+            x: npc.velocity.x / 0.85,
+            y: npc.velocity.y / 0.85,
+        };
         npc.velocity = npc.velocity
             + WorldVector {
                 x: (unit.x * 0.5) / *friction,
