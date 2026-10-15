@@ -324,7 +324,7 @@ try {
         else if (Math.abs(dx) > Math.abs(dy)) { keys.push(dx > 0 ? 'ArrowRight' : 'ArrowLeft'); if (Math.abs(dy) > 16) keys.push(dy > 0 ? 'KeyS' : 'KeyW'); }
         else { keys.push(dy > 0 ? 'ArrowDown' : 'ArrowUp'); if (Math.abs(dx) > 16) keys.push(dx > 0 ? 'KeyD' : 'KeyA'); }
         if (distance < 130) keys.push(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'KeyA' : 'KeyD') : (dy > 0 ? 'KeyW' : 'KeyS'));
-        if (segment % 40 === 0 && state.inventory.bombs > 0 && distance < 180) keys.push('KeyE');
+        if (segment % 40 === 0 && state.inventory.bombs > 0 && state.player.hp > 2 && distance < 180) keys.push('KeyE');
       }
     } else if (state.pickups.length && (pickupsAtStart.get(state.room) ?? 0) < 60) {
       pickupsAtStart.set(state.room, (pickupsAtStart.get(state.room) ?? 0) + 1);
@@ -362,7 +362,8 @@ try {
       else keys.push(['KeyW', 'KeyA', 'KeyS', 'KeyD'][Math.floor(segment / 8) % 4]);
       // Semi-random shooting and occasional bombs while exploring.
       if (segment % 7 < 3) keys.push(['ArrowUp', 'ArrowRight', 'ArrowDown', 'ArrowLeft'][segment % 4]);
-      if (segment % 90 === 45 && state.inventory.bombs > 0) keys.push('KeyE');
+      // Never bomb on one heart or less: the bot cannot dodge its own blast reliably.
+      if (segment % 90 === 45 && state.inventory.bombs > 0 && state.player.hp > 2) keys.push('KeyE');
     }
     if (process.env.PLAYTEST_DEBUG && segment % 15 === 0) log(`p=${Math.round(p.x)},${Math.round(p.y)} npcs=${JSON.stringify(state.npcs.map(n => [Math.round(n.x), Math.round(n.y), n.kind]))} doors=${JSON.stringify(state.doors.map(d => [d.side, d.state, d.target, Math.round(d.x), Math.round(d.y)]))} clear=${state.clear} keys=${keys.join('+')}`);
     if (keys.includes('KeyE') && !held.has('KeyE')) stats.bombsPlaced++;
