@@ -57,6 +57,7 @@ const urls = import.meta.glob([
   "../references/isaac/rebirth/resources/gfx/grid/door_13_librarydoor.png",
   "../references/isaac/rebirth/resources/gfx/grid/rocks_basement.png",
   "../references/isaac/rebirth/resources/gfx/grid/grid_spikes.png",
+  "../references/isaac/rebirth/resources/gfx/grid/grid_pit.png",
   "../references/isaac/rebirth/resources/gfx/grid/grid_fireplace.png",
   "../references/isaac/rebirth/resources/gfx/grid/effect_005_fire.png",
   "../references/isaac/rebirth/resources/gfx/grid/effect_ember.png",
@@ -84,8 +85,20 @@ const urls = import.meta.glob([
   "../references/isaac/rebirth/resources/gfx/effects/effect_023_starflash.png",
   "../references/isaac/rebirth/resources/gfx/effects/effect_052_dust cloud.png",
   "../references/isaac/rebirth/resources/gfx/ui/ui_chargebar.png",
+  "../references/isaac/rebirth/resources/gfx/ui/ui_bosshealthbar.png",
   "../references/isaac/rebirth/resources/font/*_0.png",
 ], { eager: true, query: "?url", import: "default" }) as Record<string, string>;
+
+function loaded(image: HTMLImageElement, error: unknown): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const settle = () => image.naturalWidth > 0 ? resolve() : reject(error);
+    if (image.complete) settle();
+    else {
+      image.addEventListener("load", settle, { once: true });
+      image.addEventListener("error", () => reject(error), { once: true });
+    }
+  });
+}
 
 function fontLineWidth(font: Font, line: string, glyphBounds: boolean): number {
   let cursor = 0, extent = 0, previous: number | undefined;
@@ -113,14 +126,17 @@ export class Assets {
     entries.push(["gfx/ui/main menu/completion_widget.png", completionUrl], ["gfx/ui/main menu/gamemenu_postitoverlap.png", postitOverlapUrl]);
     for (const [path, url] of Object.entries(bossSceneUrls))
       entries.push([`gfx/ui/boss/${path.split("/").at(-1)!}`, url]);
-    // Chromium rejects decode() with EncodingError when a few hundred decodes
-    // are in flight, so keep a bounded number of decoders busy.
+    // Chromium rejects decode() with EncodingError when many decodes are in
+    // flight, even for intact images. Keep a bounded number busy, and on a
+    // rejection fall back to the load event: an image that loaded with real
+    // dimensions is usable (drawing decodes it); only a failed load is fatal.
     const images: HTMLImageElement[] = [];
     let next = 0;
     await Promise.all(Array.from({ length: 16 }, async () => {
       while (next < entries.length) {
         const index = next++, image = new Image();
-        image.src = entries[index]![1]; await image.decode();
+        image.src = entries[index]![1];
+        await image.decode().catch(error => loaded(image, error));
         images[index] = image;
       }
     }));
@@ -138,6 +154,15 @@ export class Assets {
     if (!animation) throw new Error(`Missing animation ${path}:${name}`);
     const layer = animation.LayerAnimations.find(layer => layer.LayerId === layerId);
     return layer?.Visible ? sampleFrame(layer.Frames, tick, animation.Loop) : undefined;
+  }
+  /** The spritesheet image an authored layer samples. */
+  layerImage(path: string, layerId: number): HTMLImageElement {
+    const actor = (sceneData as unknown as Record<string, Actor>)[normalize(path)];
+    if (!actor) throw new Error(`Missing authored animation: ${path}`);
+    const definition = actor.Layers.find(layer => layer.Id === layerId);
+    const sheet = definition && actor.Spritesheets.find(candidate => candidate.Id === definition.SpritesheetId);
+    if (!sheet) throw new Error(`Missing authored layer ${path}:${layerId}`);
+    return this.image(`${actor.BaseSpritesheetPath}/${sheet.Path}`);
   }
   nullFrame(path: string, name: string, nullId: number, tick: number): SampledFrame | undefined {
     const actor = (sceneData as unknown as Record<string, Actor>)[normalize(path)];
@@ -164,6 +189,14 @@ export class Assets {
       if (!layer.Visible || options.layers && !options.layers.includes(layer.LayerId)) continue;
       const found = sampleFrame(layer.Frames, tick, animation.Loop); if (!found) continue;
       const frame = overrideFrame(found, options.overrides?.[layer.LayerId]);
+      // The root keyframe colour combines into every layer (tints multiply,
+      // offsets add); only the brimstone impact authors a non-white root.
+      if (root.RedTint !== 1 || root.GreenTint !== 1 || root.BlueTint !== 1 || root.RedOffset || root.GreenOffset || root.BlueOffset) {
+        frame.RedTint = Math.fround(frame.RedTint * root.RedTint); frame.GreenTint = Math.fround(frame.GreenTint * root.GreenTint);
+        frame.BlueTint = Math.fround(frame.BlueTint * root.BlueTint);
+        frame.RedOffset = Math.fround(frame.RedOffset + root.RedOffset); frame.GreenOffset = Math.fround(frame.GreenOffset + root.GreenOffset);
+        frame.BlueOffset = Math.fround(frame.BlueOffset + root.BlueOffset);
+      }
       const color = options.color;
       if (color) {
         // Tints multiply and offsets add; colorize is zero for every caller.

@@ -9,11 +9,15 @@ use std::cell::RefCell;
 use std::collections::{BTreeMap, BTreeSet};
 pub mod active_items;
 pub mod actors;
+pub mod attack_color;
+pub mod attack_flags;
 pub mod audio;
 pub mod blood_effects;
 pub mod bombs;
 pub mod camera;
+pub mod challenges;
 pub mod champions;
+pub mod sprite_color;
 pub mod chests;
 pub mod combat;
 mod content;
@@ -74,6 +78,7 @@ pub mod run_admission;
 pub mod saved_game;
 pub mod seed;
 pub mod traversal;
+pub mod wall_hugger;
 mod weapon_plan;
 pub use bombs::{Bomb, Explosion};
 pub use effects::{Point, StageEffects};
@@ -85,6 +90,7 @@ pub const ABI_VERSION: u32 = 2;
 pub const MAX_COMMAND_TICKS: u32 = 36_000;
 pub const MAX_REPLAY_COMMANDS: usize = 36_000;
 const MAX_REQUEST: usize = 65_536;
+const MAX_BOOT_RESOURCE: usize = 512 * 1024;
 
 #[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "lowercase")]
@@ -93,6 +99,7 @@ pub enum Screen {
     Profile,
     Main,
     Character,
+    Challenge,
     Seed,
     Playing,
 }
@@ -107,6 +114,10 @@ pub enum Direction {
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Player {
+    ///Actual Player+3074 final starting-grant callback completion.
+    pub initialized_3074: bool,
+    ///Actual Player+3075 constructor byte, then Challenge Config+98 override.
+    pub can_shoot: bool,
     /// Entity+31d; distinct from the persistent Player+7d4 controls field.
     pub visible: bool,
     /// Source Player+7d8, separate from pickup collection delay.
@@ -130,6 +141,15 @@ pub struct Player {
     pub shooting_lock: u32,
     /// Actual Player+7d4 input gate, distinct from Entity+31d visibility.
     pub controls_enabled: bool,
+    /// Actual signed counters at 3068/306C. Unadmitted history remains absent.
+    #[serde(default)]
+    pub transformation_counts: Option<[i32; 2]>,
+    /// Actual Player D68 and Entity 340 cache outputs. These are independent
+    /// of Entity 344, which controls entity pair collisions.
+    #[serde(default)]
+    pub flying: Option<bool>,
+    #[serde(default)]
+    pub grid_collision_class: Option<u32>,
     pub eye: projectiles::Eye,
     /// Actual Player+c84, independent of manager tear handles.
     pub shots_fired: u32,
@@ -138,6 +158,8 @@ pub struct Player {
 impl Player {
     fn starting() -> Self {
         Self {
+            initialized_3074: false,
+            can_shoot: true,
             visible: true,
             input_cooldown: 0,
             dead: false,
@@ -157,6 +179,9 @@ impl Player {
             shooting: false,
             shooting_lock: 0,
             controls_enabled: true,
+            transformation_counts: None,
+            flying: None,
+            grid_collision_class: None,
             eye: projectiles::Eye::Positive,
             shots_fired: 0,
             // Authored sprite roots and shadow centers are one logical pixel
@@ -180,6 +205,9 @@ pub struct Tear {
     /// Source setter5411e0 writes collision48c and base83c at birth.
     pub collision_damage: f32,
     pub base_damage: f32,
+    ///Actual kind1 birth copies flags7F0 and permanent ColorMod3A0.
+    pub attack_flags: attack_flags::AttackFlags,
+    pub source_color: attack_color::AttackColor,
     pub scale: f32,
     pub animation_tier: u8,
     pub collision_radius: f32,
@@ -218,6 +246,8 @@ pub struct Profile {
     pub unlocked_characters: Vec<String>,
     pub selected_character: String,
     pub achievements: Vec<bool>,
+    ///Actual Persistent+D4 array, initialized by5bc520 for a fresh profile.
+    pub counters: Vec<i32>,
 }
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -261,6 +291,72 @@ fn character_catalog() -> Vec<CharacterDefinition> {
 pub struct RunIntroduction {
     pub age: u32,
     pub active: bool,
+    /// HUD::ShowItemText 5732c0 title on the shared ui_streak sprite.
+    #[serde(default = "stage_title")]
+    pub title: String,
+    /// The stage name (Level::ShowName 585500) rather than a later banner
+    /// such as the miniboss VS text, which restarts the same streak clock.
+    #[serde(default = "stage_streak")]
+    pub stage: bool,
+}
+fn stage_title() -> String {
+    "BASEMENT I".into()
+}
+fn stage_streak() -> bool {
+    true
+}
+impl RunIntroduction {
+    fn stage(active: bool) -> Self {
+        Self {
+            age: 0,
+            active,
+            title: stage_title(),
+            stage: true,
+        }
+    }
+}
+/// HUD boss bar: SetFill 5732a0 at HUD+61894 (-1 hidden) and its flash
+/// countdown at +61898; the manager's non-shrinking boss max HP is +ec.
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct BossBar {
+    #[serde(with = "nan_as_null")]
+    pub fill: f32,
+    pub flash: i32,
+    pub maximum: f32,
+}
+/// JSON has no NaN: serde_json writes it as null, so read null back as NaN.
+mod nan_as_null {
+    use serde::{Deserialize, Deserializer, Serializer};
+    pub fn serialize<S: Serializer>(value: &f32, serializer: S) -> Result<S::Ok, S::Error> {
+        if value.is_nan() {
+            serializer.serialize_none()
+        } else {
+            serializer.serialize_f32(*value)
+        }
+    }
+    pub fn deserialize<'de, D: Deserializer<'de>>(deserializer: D) -> Result<f32, D::Error> {
+        Ok(Option::<f32>::deserialize(deserializer)?.unwrap_or(f32::NAN))
+    }
+}
+/// The 0/0 fill is NaN, and any two NaN fills are the same bar, so state
+/// equality stays reflexive. NaN sign and payload are not compared: native and
+/// wasm32 may produce different NaN bits for 0/0, and JSON keeps neither.
+impl PartialEq for BossBar {
+    fn eq(&self, other: &Self) -> bool {
+        (self.fill == other.fill || (self.fill.is_nan() && other.fill.is_nan()))
+            && self.flash == other.flash
+            && self.maximum == other.maximum
+    }
+}
+impl Default for BossBar {
+    fn default() -> Self {
+        Self {
+            fill: -1.0,
+            flash: -1,
+            maximum: 0.0,
+        }
+    }
 }
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -279,6 +375,8 @@ pub struct RunStartRequest {
     pub fade_alpha: f32,
     /// System pending request is consumed at the following system dispatch.
     pub system_pending: bool,
+    ///594620 actual challenge argument; None is the existing New Run route.
+    pub challenge_id: Option<u32>,
 }
 impl MenuFade {
     fn first_title() -> Self {
@@ -363,6 +461,11 @@ pub struct State {
     pub screen: Screen,
     pub profile: u8,
     pub main_selection: u8,
+    pub challenge_selection: Option<u32>,
+    ///Real Config achievement requirements queried for the fresh menu rows.
+    pub challenge_unlocked: Vec<bool>,
+    pub challenge_id: u32,
+    pub challenge_run_parameters: Option<challenges::RunParameters>,
     pub character_selection: u8,
     pub character: String,
     pub difficulty: String,
@@ -372,6 +475,10 @@ pub struct State {
     pub initial_seed: u32,
     pub boot_epoch_seed: u32,
     pub boot_lifecycle: mt::BootState,
+    /// Actual Game 10EAD8 word, separate from floor flags and run r8/r9.
+    /// Unknown legacy or restore history remains absent.
+    #[serde(default)]
+    pub source_cache_run_flags: Option<u64>,
     pub saved_run_summary: Option<saved_game::SavedRunSummary>,
     pub audio: audio::AudioState,
     #[serde(default)]
@@ -385,6 +492,10 @@ pub struct State {
     pub public_actions: public_actions::PublicActions,
     #[serde(default)]
     pub player_stats: player_stats::PlayerStats,
+    #[serde(default)]
+    pub weapon_cache: weapon_plan::WeaponCache,
+    #[serde(default)]
+    pub weapon_admission: weapon_plan::WeaponAdmission,
     pub information_animation: information_animation::InformationAnimation,
     pub stage: u32,
     pub stage_seed: u32,
@@ -437,6 +548,8 @@ pub struct State {
     pub bomb_placement_cooldown: bombs::BombPlacementCooldown,
     pub bomb_action_was_down: bool,
     pub run_introduction: RunIntroduction,
+    #[serde(default)]
+    pub boss_bar: BossBar,
     pub pause_menu: PauseMenu,
 }
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -477,6 +590,7 @@ pub struct Game {
     pub boot_level_grid: mt::DescriptorSeeds,
     pub saved_run: Option<saved_game::SavedRun>,
     pub player_manager_secondary_rng: saved_game::PlayerManagerSecondaryRng,
+    pub challenge_catalog: challenges::Catalog,
 }
 
 impl Game {
@@ -484,6 +598,24 @@ impl Game {
         Self::new_with_boot_epoch(initial_seed, 0)
     }
     pub fn new_with_boot_epoch(initial_seed: u32, boot_epoch_seed: u32) -> Result<Self, String> {
+        Self::new_with_challenges(
+            initial_seed,
+            boot_epoch_seed,
+            challenges::Catalog::authored()?,
+        )
+    }
+    pub fn new_with_resources(
+        initial_seed: u32,
+        boot_epoch_seed: u32,
+        resources: challenges::ResourceInputs,
+    ) -> Result<Self, String> {
+        Self::new_with_challenges(initial_seed, boot_epoch_seed, resources.catalog()?)
+    }
+    fn new_with_challenges(
+        initial_seed: u32,
+        boot_epoch_seed: u32,
+        challenge_catalog: challenges::Catalog,
+    ) -> Result<Self, String> {
         let run_seed = seed::encode(initial_seed)?;
         let (boot_lifecycle, saved_game, boot_level_grid) =
             mt::BootLifecycle::new(boot_epoch_seed).into_parts();
@@ -513,6 +645,10 @@ impl Game {
                 screen: Screen::Title,
                 profile: 1,
                 main_selection: 0,
+                challenge_selection: None,
+                challenge_unlocked: Vec::new(),
+                challenge_id: 0,
+                challenge_run_parameters: None,
                 character_selection: 0,
                 character: "Isaac".into(),
                 difficulty: "normal".into(),
@@ -522,6 +658,7 @@ impl Game {
                 initial_seed,
                 boot_epoch_seed,
                 boot_lifecycle,
+                source_cache_run_flags: Some(0), // Game constructor 554034.
                 saved_run_summary: None,
                 audio: audio::AudioState::default(),
                 pending_menu_initializations: Vec::new(),
@@ -533,6 +670,8 @@ impl Game {
                 player_animation: player_animation::PlayerAnimation::default(),
                 public_actions: public_actions::PublicActions::default(),
                 player_stats: player_stats::PlayerStats::default(),
+                weapon_cache: weapon_plan::WeaponCache::fresh_player(),
+                weapon_admission: weapon_plan::WeaponAdmission::default(),
                 information_animation: information_animation::InformationAnimation::default(),
                 stage: 1,
                 stage_seed: seed::stage1_seed(initial_seed),
@@ -546,6 +685,7 @@ impl Game {
                         unlocked_characters: vec!["Isaac".into()],
                         selected_character: "Isaac".into(),
                         achievements: vec![false; 179],
+                        counters: vec![0; 95],
                     })
                     .collect(),
                 character_catalog: character_catalog(),
@@ -592,16 +732,15 @@ impl Game {
                 damage_cooldown: 0,
                 bomb_placement_cooldown: bombs::BombPlacementCooldown::default(),
                 bomb_action_was_down: false,
-                run_introduction: RunIntroduction {
-                    age: 0,
-                    active: false,
-                },
+                run_introduction: RunIntroduction::stage(false),
+                boss_bar: BossBar::default(),
                 pause_menu: PauseMenu::hidden(),
             },
             saved_game,
             boot_level_grid,
             saved_run: None,
             player_manager_secondary_rng: saved_game::PlayerManagerSecondaryRng::default(),
+            challenge_catalog,
         };
         game.refresh_minimap();
         Ok(game)
@@ -769,13 +908,69 @@ impl Game {
             Screen::Main => match code {
                 "Escape" => self.state.screen = Screen::Profile,
                 "ArrowUp" | "KeyW" => {
-                    self.state.main_selection = (self.state.main_selection + 4) % 5
+                    self.state.main_selection = (self.state.main_selection + 4) % 5;
+                    if self.state.main_selection == 1 && self.saved_run.is_none() {
+                        self.state.main_selection = 0;
+                    }
                 }
                 "ArrowDown" | "KeyS" => {
-                    self.state.main_selection = (self.state.main_selection + 1) % 5
+                    self.state.main_selection = (self.state.main_selection + 1) % 5;
+                    if self.state.main_selection == 1 && self.saved_run.is_none() {
+                        self.state.main_selection = 2;
+                    }
                 }
                 "Enter" if self.state.main_selection == 0 => self.state.screen = Screen::Character,
+                "Enter" if self.state.main_selection == 2 => {
+                    //59cef0 initializes selectedID1/counter0 when Menu5 opens.
+                    self.state.challenge_selection = Some(1);
+                    self.state.challenge_unlocked = (1..=20)
+                        .map(|id| {
+                            self.challenge_catalog.get(id).map(|definition| {
+                                definition.is_unlocked(
+                                    &self.state.profiles[usize::from(self.state.profile - 1)]
+                                        .achievements,
+                                )
+                            })
+                        })
+                        .collect::<Result<Vec<_>, _>>()?;
+                    self.state.screen = Screen::Challenge;
+                }
                 "Enter" => return Err("this foundation implements the New Run menu action".into()),
+                _ => {}
+            },
+            Screen::Challenge => match code {
+                "Escape" => self.state.screen = Screen::Main,
+                "ArrowUp" | "ArrowDown" | "KeyW" | "KeyS" => {
+                    let direction = if matches!(code, "ArrowUp" | "KeyW") {
+                        -1
+                    } else {
+                        1
+                    };
+                    self.state.challenge_selection = Some(
+                        self.challenge_catalog.adjacent_unlocked(
+                            self.state
+                                .challenge_selection
+                                .ok_or("Challenge menu is uninitialized")?,
+                            direction,
+                            &self.state.profiles[usize::from(self.state.profile - 1)].achievements,
+                        )?,
+                    );
+                }
+                "Enter" => {
+                    let id = self
+                        .state
+                        .challenge_selection
+                        .ok_or("Challenge menu is uninitialized")?;
+                    let definition = self.challenge_catalog.get(id)?;
+                    if !definition.is_unlocked(
+                        &self.state.profiles[usize::from(self.state.profile - 1)].achievements,
+                    ) {
+                        return Err("selected Challenge is locked".into());
+                    }
+                    definition.validate_initial_scope()?;
+                    self.state.run_start_request.challenge_id = Some(id);
+                    self.state.run_start_request.input_pending = true;
+                }
                 _ => {}
             },
             Screen::Character => match code {
@@ -805,6 +1000,7 @@ impl Game {
                 "ArrowRight" | "KeyD" => self.select_character(1),
                 "Enter" if self.state.difficulty == "normal" => {
                     self.validate_run_character()?;
+                    self.state.run_start_request.challenge_id = None;
                     self.state.run_start_request.input_pending = true;
                 }
                 "Enter" => {
@@ -901,6 +1097,7 @@ impl Game {
                 (Screen::Title, Screen::Profile)
                     | (Screen::Profile, Screen::Main)
                     | (Screen::Main, Screen::Character)
+                    | (Screen::Main, Screen::Challenge)
             ) {
             Some(8)
         } else {
@@ -1032,6 +1229,9 @@ impl Game {
         self.state
             .stage_effects
             .add_familiar_shadows(&self.state.familiars);
+        self.state
+            .stage_effects
+            .add_npc_shadows(&self.state.room.npcs);
         self.state.stage_effects.add_tear_shadows(&self.state.tears);
         self.state
             .stage_effects
@@ -1045,6 +1245,21 @@ impl Game {
         // request; Game 54eb20 decodes that code into its startup stream. This
         // also applies when no public seed dialog was entered: the real
         // Character initializer owns the generated seed, not reset entropy.
+        let challenge = self
+            .state
+            .run_start_request
+            .challenge_id
+            .map(|id| self.challenge_catalog.get(id).cloned())
+            .transpose()?;
+        self.state.challenge_id = challenge.as_ref().map_or(0, |definition| definition.id);
+        self.state.challenge_run_parameters = challenge
+            .as_ref()
+            .map(|_| challenges::RunParameters::CHALLENGE_MENU);
+        if let Some(definition) = &challenge {
+            definition.validate_initial_scope()?;
+            self.state.character = "Isaac".into();
+            self.state.difficulty = "normal".into();
+        }
         self.state.run_seed_value = self.state.boot_lifecycle.menu_run_seed;
         self.state.run_seed = seed::encode(self.state.run_seed_value)?;
         let unlocked =
@@ -1096,6 +1311,10 @@ impl Game {
         self.state.fire_cooldown = -1;
         self.state.max_fire_delay = 10;
         self.state.player_stats = player_stats::PlayerStats::default();
+        // Fresh reset 54E6A3 initializes the actual Game run-flag word.
+        self.state.source_cache_run_flags = Some(0);
+        self.state.weapon_cache = weapon_plan::WeaponCache::fresh_player();
+        self.state.weapon_admission = weapon_plan::WeaponAdmission::fresh_isaac();
         self.state.head_timer = -1;
         self.state.actor_scheduler = actors::Scheduler::default();
         self.state.actor_scheduler.admit(actors::ActorRef {
@@ -1108,19 +1327,45 @@ impl Game {
         self.state.damage_cooldown = 0;
         self.state.bomb_placement_cooldown = bombs::BombPlacementCooldown::default();
         self.state.bomb_action_was_down = self.held("KeyE");
-        self.state.run_introduction = RunIntroduction {
-            age: 0,
-            active: true,
-        };
+        self.state.run_introduction = RunIntroduction::stage(true);
+        self.state.boss_bar = BossBar::default();
         self.state.pause_menu = PauseMenu::hidden();
         self.state.player = Player::starting();
+        // 519767/519771 initialize the two transformation history counters.
+        self.state.player.transformation_counts = Some([0, 0]);
+        // 51985C initializes the actual D64 Luck output.
+        self.state.player_stats.luck = Some(0.0);
+        // 51987A initializes D68 to false. Base/config 446A90 independently
+        // initializes the authored Player's 40-point grid collision class to 5.
+        self.state.player.flying = Some(false);
+        self.state.player.grid_collision_class = Some(5);
+        if let Some(definition) = &challenge {
+            challenges::configure_player(&mut self.state, definition)?;
+        }
         self.state.player_death = player_death::PlayerDeath::default();
         self.state.player_animation = player_animation::PlayerAnimation::default();
         // Source 58bea7 constructs every descriptor's padded grid seed pairs.
         // floor::generate_basement owns the separate primary xorshift advance.
         self.state.level_progress.begin_level();
         self.boot_level_grid = self.state.boot_lifecycle.initialize_level_grid();
-        self.state.floor = floor::generate_basement(seed::stage1_seed(self.state.run_seed_value))?;
+        self.state.floor = if let Some(definition) = &challenge {
+            //The real curse/local-RNG owner is passed at this Level boundary,
+            //before room placement; its sampler cannot be skipped by filter127.
+            floor::generate_challenge_basement(
+                seed::stage1_seed(self.state.run_seed_value),
+                definition,
+                &self.state.profiles[usize::from(self.state.profile - 1)],
+                item_pipeline::ItemInputs::new(
+                    self.state
+                        .player_items
+                        .as_ref()
+                        .ok_or("Level requires actual Player item owner")?,
+                )?
+                .positive_owned_count(260),
+            )?
+        } else {
+            floor::generate_basement(seed::stage1_seed(self.state.run_seed_value))?
+        };
         self.state.current_room = self.state.floor.starting_descriptor;
         self.state.visited_rooms = BTreeSet::from([self.state.current_room]);
         self.state.room_display_flags = vec![0; self.state.floor.descriptors.len()];
@@ -1152,24 +1397,12 @@ impl Game {
             self.state.music.room(id);
         }
         self.save_supported_run()?;
-        // The save keeps Door.Init's state1 records; the cleared start room's
-        // opened doors are state2 again by gameplay start in the original.
-        if let Some(grid) = &mut self.state.room.grid {
-            for door in &self.state.room.appearance.doors {
-                if door.state != "Opened" {
-                    continue;
-                }
-                let column = ((door.world_position.x - 40.0) / 40.0) as usize;
-                let row = ((door.world_position.y - 120.0) / 40.0) as usize;
-                if let Some(entity) = grid
-                    .cells
-                    .get_mut(column + row * usize::from(grid.width))
-                    .and_then(|cell| cell.entity.as_mut())
-                    .filter(|entity| entity.kind == 16)
-                {
-                    entity.state = 2;
-                }
-            }
+        if let Some(definition) = &challenge {
+            challenges::initialize_player(&mut self.state, definition)?;
+        } else {
+            //52e340/final3074 store also runs on the ordinary Challenge0 route.
+            player_stats::evaluate_cache(&mut self.state)?;
+            self.state.player.initialized_3074 = true;
         }
         // Fresh54eb20 invokes54eaa0 after Level.Init/Save and the primary
         // manager initialization; room factories see the prior control byte.
@@ -1557,6 +1790,14 @@ impl Game {
                 // Forty f32 additions remain below one; the forty-first wins.
                 request.fade_alpha += 0.025_f32;
                 if request.fade_alpha >= 1.0_f32 {
+                    if request.challenge_id.is_some() && !request.system_pending {
+                        //59d080 explicitly assigns the empty seed code, decodes0,
+                        //then takes sharedRaw(max1), re-encodes and queues594620.
+                        self.state.seed_text.clear();
+                        self.state.seed_valid = false;
+                        let seed = self.state.boot_lifecycle.shared.next_u32().max(1);
+                        self.state.boot_lifecycle.commit_character_seed(seed)?;
+                    }
                     request.system_pending = true;
                 }
             }
@@ -1717,6 +1958,9 @@ impl Game {
                         self.count_updated_room_actor(actor, &mut counted);
                     }
                     self.state.room.manager_counts.finish_full(counted);
+                    // The admitting manager pass also sets the bar: a fresh
+                    // boss is present but not yet summed, so the fill is 0/0.
+                    self.update_boss_bar();
                     familiars::paint_background_effects(&mut self.state)?;
                     blood_effects::clear_retired_links(&mut self.state);
                     pickups::full_grid_contacts(&mut self.state)?;
@@ -1729,6 +1973,7 @@ impl Game {
                             || pickups.iter().any(|pickup| pickup.id == actor.id)
                     });
                     npcs::admit_room_combat(&mut self.state);
+                    self.show_miniboss_streak();
                 }
                 // ChangeRoom5dd260 restores Player+7d4=false after the
                 // admitted Room.Update, before the incoming leg or Scene.
@@ -1787,6 +2032,7 @@ impl Game {
         grid_hazards::advance(&mut self.state, phase)?;
         let existing = self.state.actor_scheduler.full_phase();
         if phase == phase::Phase::Update {
+            rock_blast::advance_bomb_rocks(&mut self.state)?;
             rock_blast::advance_markers(&mut self.state);
             self.refresh_room_boss_count();
             let mut counted = actors::FullCounts::default();
@@ -1795,6 +2041,7 @@ impl Game {
                 self.count_updated_room_actor(actor, &mut counted);
             }
             self.state.room.manager_counts.finish_full(counted);
+            self.update_boss_bar();
         } else if phase == phase::Phase::Interpolate {
             let mut index = 0;
             while let Some(actor) = self.state.actor_scheduler.get(index) {
@@ -1961,7 +2208,7 @@ impl Game {
         Ok(())
     }
     fn advance_camera(&mut self, phase: phase::Phase) {
-        if self.state.run_introduction.active
+        if (self.state.run_introduction.active && self.state.run_introduction.stage)
             || self.state.room_transition.is_some()
             || self.state.information_animation.active()
         {
@@ -2056,6 +2303,76 @@ impl Game {
     ///454eb9 counts only callbacks whose active31e remains true. NPC70/78
     /// read103c/103d, with no HP/dead predicate; boss flags100000 exclude only
     /// the boss subtotal. Other currently admitted entity families have v70false.
+    /// Room::Init 5cfb36: entering an uncleared miniboss room (type 6) with
+    /// countable or boss actors shows "<player> VS <room name>" through the
+    /// shared streak, without the stage paper.
+    fn show_miniboss_streak(&mut self) {
+        let Some(descriptor) = self.state.room.descriptor.as_ref() else {
+            return;
+        };
+        if descriptor.template.room_type != 6
+            || !self
+                .state
+                .room
+                .npcs
+                .iter()
+                .any(|npc| !npc.removed && (npc.can_shut_doors || npc.boss))
+        {
+            return;
+        }
+        let player = self
+            .state
+            .profiles
+            .get(usize::from(self.state.profile.saturating_sub(1)))
+            .map_or("Isaac", |profile| profile.selected_character.as_str());
+        self.state.run_introduction = RunIntroduction {
+            age: 0,
+            active: true,
+            title: format!("{player} VS {}", descriptor.template.name),
+            stage: false,
+        };
+    }
+
+    /// EntityManager update 454df0 sums HP over boss actors that are not
+    /// final-flagged (0x100000) and are past their second frame, against
+    /// the larger of their max HP and the retained maximum. HUD::Update
+    /// 572d48 counts the flash down; SetFill 5732a0 restarts it at 8 whenever
+    /// the fill drops. No boss hides the bar and forgets the maximum.
+    fn update_boss_bar(&mut self) {
+        let bar = &mut self.state.boss_bar;
+        if bar.flash >= 0 {
+            bar.flash -= 1;
+        }
+        let (mut hp, mut maximum, mut any) = (0.0_f32, 0.0_f32, false);
+        for npc in &self.state.room.npcs {
+            let final_flag = npc
+                .monstro
+                .as_ref()
+                .is_some_and(|owner| owner.entity_flags & 0x100000 != 0);
+            if npc.removed || !npc.boss || final_flag {
+                continue;
+            }
+            any = true;
+            // Only actors past their first two frames contribute HP; before
+            // that the original divides 0 by 0 and the bar draws nothing.
+            if npc.frame_age > 1 {
+                hp += npc.hp;
+                maximum += npc.max_hp;
+            }
+        }
+        let fill = if any {
+            bar.maximum = bar.maximum.max(maximum);
+            hp / bar.maximum
+        } else {
+            bar.maximum = 0.0;
+            -1.0
+        };
+        if fill < bar.fill {
+            bar.flash = 8;
+        }
+        bar.fill = fill;
+    }
+
     fn count_updated_room_actor(&self, actor: actors::ActorRef, counted: &mut actors::FullCounts) {
         if actor.kind != actors::ActorKind::Npc {
             return;
@@ -2215,8 +2532,20 @@ impl Game {
                 enemy_projectiles::EnemyProjectile::birth(id, parent, shot)
             }),
             entities::Birth::Npc(selector) => {
-                let id = u32::try_from(self.state.room.npcs.len())
-                    .map_err(|_| "NPC identity exhausted")?;
+                // Retired NPCs leave the room list, so its length can name a
+                // live handle; take one past every id still held anywhere.
+                let id = self
+                    .state
+                    .room
+                    .npcs
+                    .iter()
+                    .map(|npc| npc.id.checked_add(1))
+                    .chain([self
+                        .state
+                        .actor_scheduler
+                        .next_free_id(actors::ActorKind::Npc)])
+                    .try_fold(0_u32, |next, id| id.map(|id| next.max(id)))
+                    .ok_or("NPC identity exhausted")?;
                 let context = entities::SpawnContext {
                     stage: self.state.stage,
                     game_update_count: self.state.game_update_count,
@@ -2353,9 +2682,27 @@ impl Game {
                 self.state.head_timer -= 1;
             }
         }
+        let regular_dispatch = if controls_enabled && !animation_guard && !shooting_locked {
+            match weapon_plan::resolve_dispatch_admission(
+                self.state.weapon_cache,
+                self.state.weapon_admission.source_player_type,
+                self.state.player_stats,
+                self.state.weapon_admission.pending_primary_cleanup,
+            )? {
+                weapon_plan::DispatchAdmission::Regular => true,
+                weapon_plan::DispatchAdmission::Unadmitted(channel) => {
+                    self.state
+                        .weapon_admission
+                        .record_unadmitted(self.state.weapon_cache.primary, channel);
+                    false
+                }
+            }
+        } else {
+            false
+        };
         if let Some(direction) = aim {
             self.state.player.facing = direction;
-            if !shooting_locked && self.state.fire_cooldown < 0 {
+            if regular_dispatch && !shooting_locked && self.state.fire_cooldown < 0 {
                 let (dx, dy) = match direction {
                     Direction::Left => (-1.0, 0.0),
                     Direction::Right => (1.0, 0.0),
@@ -2370,6 +2717,7 @@ impl Game {
                 let plan = weapon_plan::RegularTearPlan::resolve(
                     self.state.player_stats,
                     self.state.max_fire_delay,
+                    self.state.weapon_cache,
                 )?;
                 let velocity = projectiles::stored_velocity(aim, inherited, plan.shot_speed)?;
                 self.state.player.eye = self.state.player.eye.flipped();
@@ -2408,6 +2756,8 @@ impl Game {
                     shot_ordinal: self.state.player.shots_fired,
                     collision_damage: plan.damage,
                     base_damage: plan.damage,
+                    attack_flags: plan.flags,
+                    source_color: plan.color,
                     scale: plan.scale,
                     animation_tier: plan.animation_tier,
                     collision_radius: plan.collision_radius,
@@ -2455,6 +2805,7 @@ impl Game {
 thread_local! {
     static GAME: RefCell<Option<Game>> = const { RefCell::new(None) };
     static REQUEST: RefCell<Vec<u8>> = const { RefCell::new(Vec::new()) };
+    static BOOT_RESOURCE: RefCell<Vec<u8>> = const { RefCell::new(Vec::new()) };
     static SNAPSHOT: RefCell<Vec<u8>> = const { RefCell::new(Vec::new()) };
     static ERROR: RefCell<Vec<u8>> = const { RefCell::new(Vec::new()) };
     static PUBLIC_KEYS_JSON: Vec<u8> =
@@ -2478,6 +2829,41 @@ pub extern "C" fn reset(initial_seed: u32, boot_epoch_seed: u32) -> u32 {
         }
     }
 }
+///Existing ABI2 resource reset reads the64KiB REQUEST filled by request_ptr.
+#[no_mangle]
+pub extern "C" fn reset_with_resources(initial_seed: u32, boot_epoch_seed: u32) -> u32 {
+    REQUEST.with(|request| reset_with_resource_buffer(initial_seed, boot_epoch_seed, request))
+}
+///Additive boot-resource reset pairs only with boot_resource_ptr's512KiB buffer.
+#[no_mangle]
+pub extern "C" fn reset_with_boot_resources(initial_seed: u32, boot_epoch_seed: u32) -> u32 {
+    BOOT_RESOURCE
+        .with(|resource| reset_with_resource_buffer(initial_seed, boot_epoch_seed, resource))
+}
+fn reset_with_resource_buffer(
+    initial_seed: u32,
+    boot_epoch_seed: u32,
+    buffer: &RefCell<Vec<u8>>,
+) -> u32 {
+    let resources = {
+        let input = buffer.borrow();
+        serde_json::from_slice::<challenges::ResourceInputs>(&input)
+            .map_err(|error| error.to_string())
+    };
+    let result = resources
+        .and_then(|resources| Game::new_with_resources(initial_seed, boot_epoch_seed, resources));
+    match result {
+        Ok(game) => {
+            GAME.with(|state| *state.borrow_mut() = Some(game));
+            ERROR.with(|error| error.borrow_mut().clear());
+            0
+        }
+        Err(message) => {
+            ERROR.with(|error| *error.borrow_mut() = message.into_bytes());
+            1
+        }
+    }
+}
 #[no_mangle]
 pub extern "C" fn request_ptr(length: usize) -> *mut u8 {
     if length > MAX_REQUEST {
@@ -2489,6 +2875,20 @@ pub extern "C" fn request_ptr(length: usize) -> *mut u8 {
         bytes.as_mut_ptr()
     })
 }
+///Separate bounded buffer for complete authored resources. Ordinary Command
+///requests retain their64KiB cap; resource bytes only enter a fresh Game reset.
+#[no_mangle]
+pub extern "C" fn boot_resource_ptr(length: usize) -> *mut u8 {
+    if length > MAX_BOOT_RESOURCE {
+        return std::ptr::null_mut();
+    }
+    BOOT_RESOURCE.with(|resource| {
+        let mut bytes = resource.borrow_mut();
+        bytes.resize(length, 0);
+        bytes.as_mut_ptr()
+    })
+}
+
 #[no_mangle]
 pub extern "C" fn command() -> u32 {
     let result = REQUEST

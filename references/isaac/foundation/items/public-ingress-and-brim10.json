@@ -1,0 +1,518 @@
+{
+  "schema": 1,
+  "scope": "Evidence summary only. Merged public ingress/Door and separate private ordinary-Brimstone execution have distinct producer and acceptance scopes.",
+  "publicIngress": {
+    "mergedPullRequests": [
+      214,
+      216
+    ],
+    "case": {
+      "index": 16,
+      "name": "composition-1-phase0",
+      "bootEpoch": 12713,
+      "initialPhase": 0,
+      "startingItems": [
+        1
+      ],
+      "mode": "browser-only replay of the unchanged closed current-turn original, XML and public tape"
+    },
+    "runtimeSource": "76d7a01b7ec06f8a1db519a10fc24835c830e18e",
+    "testConsumerSource": "32b5bcfd7322d9c0a05de586235b89131b54a322",
+    "artifactSha256": "4823ea6d6bf897e082ac8c863605c58e32d39ee929dc007b8906b29037e512f9",
+    "result": {
+      "requiredChecks": 8368,
+      "requiredPasses": 8368,
+      "requiredFailures": 0,
+      "doorStateRows": 631,
+      "doorStateFailures": 0,
+      "diagnosticDifferences": 0,
+      "unqualifiedBodyRows": 631,
+      "completeFirst32CaseAccepted": false,
+      "actorOrFactoryAccepted": false
+    },
+    "closure": {
+      "path": ".cache/coordination/active-items-research/challenge-current76d-case16-closure/closure.json",
+      "sha256": "5b61d6eb47ff3c12d7992904b10a11fde1630a63cc7762d4384585b0fb7b4a02"
+    },
+    "independentReadback": {
+      "path": ".cache/coordination/active-items-research/challenge-current76d-case16-closure/independent-readback.json",
+      "sha256": "6e6de212d08011670e34405d50fb03d77b1ac25e942f72350b0f72493d417c81"
+    },
+    "priorD156": {
+      "requiredPasses": 8180,
+      "requiredFailures": 188,
+      "reportUnchanged": true
+    },
+    "unobserved": [
+      "Native menu selection memory and Saved347/450/current-room Save records",
+      "Dynamic Add/evaluator counts and Save-to-Door call order",
+      "General DoorFSM/countable-room behavior and complete actor/body/identity/RNG parity"
+    ]
+  },
+  "ordinaryBrimstone": {
+    "status": "All captures closed; all ten functional comparisons and frozen strict audits remain FAIL.",
+    "producerSource": "866d2c8cb62b78698fc354a396157d19be31a7d9",
+    "artifactSha256": "fbb4896910d40c6d2388b3593616d40315fe453c9735e19fdeb618b249055c8c",
+    "artifactEnvelopeSha256": "fe7f5655509f4660025580d210819dd2bd022b61a1121e1072e3aedc155dc7c6",
+    "completedCases": 10,
+    "nativeExitCodes": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "originalCaptureErrors": 0,
+    "browserCaptureErrors": 0,
+    "checks": 307112,
+    "differences": 23017,
+    "frozenStrictAuditFailures": 10,
+    "actualChildWaitReturnCode": 1,
+    "observedCoverage": {
+      "laserBodyRows": 669,
+      "impactBodyRows": 669,
+      "fullRowsPerFamily": 330,
+      "fastRowsPerFamily": 339,
+      "transientFullUninitSlotNullWitnesses": 16
+    },
+    "closure": {
+      "path": ".cache/coordination/quality-main/composition-brim10-host-v5-allocation/brim10-final-capture-closure-and-release.json",
+      "sha256": "57eb8c81f124cbf879ac636e218617549e4729b9e1c10e7eee729c4959a11701"
+    },
+    "archiveAudit": "All ten frozen auditors stop at complete manifest-byte reconstruction and remain FAIL. A separate closed additive classifier passes all ten: only the permitted adjacent root-key swap, exact full raw manifest SHA and no nested-value/input/observation difference. Separate executions of every remaining frozen native clock/X11/options/resource validation also pass all ten with protected pins before=end. These addenda establish scoped capture validity, not weapon parity. PR217 changes future captures only.",
+    "case0AdditiveDiagnosis": {
+      "path": ".cache/coordination/item-weapon-composition/brim0-journal-manifest-classification-v1.json",
+      "sha256": "9796fa30936845accd9c1a78c424cfd6236b12de50323a2f4f528443b4f6b69b",
+      "scope": "Read-only classification, not a change to the frozen FAIL or full capture-audit acceptance."
+    },
+    "retainedFailures": {
+      "actual cache pending": 6510,
+      "mandatory source/browser field and actor execution": 6510,
+      "accepted controller frontier": 4630,
+      "actual complete active attack families/sequence/seeds": 669,
+      "actual Laser identity family/variant/subtype/sequence/seed": 669,
+      "actual Laser current RNG words": 669,
+      "actual Laser child source identity": 638,
+      "actual Laser complete line points": 501,
+      "actual Laser complete line priorPoints": 49,
+      "actual Impact identity/seed": 669,
+      "actual Impact Parent source identity": 669,
+      "actual Impact Sprite rotation": 669,
+      "actual DA0 head direction": 165
+    },
+    "sourceOnlyFollowups": [
+      "Controlled Knife caller ebc9333",
+      "Ordered cache completion ba85599",
+      "Line and Impact correction fe8c0d0"
+    ],
+    "notAccepted": [
+      "Whole original/browser Brimstone or current-main attack parity",
+      "Identity/seed/current-RNG and complete624-word shared MT routing",
+      "Full contact chain, general wardrobe/properties and pixels",
+      "Source-only corrections inherit none of the866 gameplay outcomes"
+    ],
+    "rootOrderAddendum": {
+      "status": "pass",
+      "cases": 10,
+      "supervisorPath": ".cache/coordination/quality-main/composition-brim10-host-v5-allocation/closed-root-order-addendum-v1/supervisor.json",
+      "supervisorSha256": "5b09665422e384aa3601597ff05dfea47743032384dc62e6a3042134ce40ed86",
+      "classification": "EXACT_DECLARED_OPTIONS_INITIAL_STATE_ROOT_ORDER_ONLY",
+      "scope": "All nested data equal; reordered full raw manifest SHA exact. Frozen audit/gameplay grades unchanged; skipped validations separate."
+    },
+    "nativeGuardsAddendum": {
+      "status": "pass",
+      "cases": 10,
+      "supervisorPath": ".cache/coordination/quality-main/composition-brim10-host-v5-allocation/closed-native-guards-addendum-v1/supervisor.json",
+      "supervisorSha256": "a57758b410477652b47a13de8f0f4bfbf2129bb354c7f88f81c4792e0cca620b",
+      "executedFrozenFunction": "native_readback",
+      "unchangedRemainingAssertions": true,
+      "scope": "Actual remaining clock/X11/options/resource validations executed after exact full-byte equivalence; all protected sources, archives and fixtures before=end. Frozen strict and gameplay grades unchanged."
+    }
+  },
+  "compositionProgress": {
+    "scope": "Closed evidence by producer and contract. Source implementation, tool integrity, native-only witnesses, local compiler/DST checks and paired gameplay grades are separate. No older grade is replaced.",
+    "mergedLeaves": [
+      {
+        "pr": 233,
+        "merge": "5caf3d94be90c7e171ef8e5b37e1f8aa949e815e",
+        "scope": "Known scalar callback completion and source context"
+      },
+      {
+        "pr": 236,
+        "merge": "dfe23d5944503f3045ed8e4c3e724c83a8bc689c",
+        "scope": "Negative Flight cache; unknown/flying histories pending"
+      },
+      {
+        "pr": 239,
+        "merge": "9a4d35349ac53083dc2de354a8038fa64e0118ab",
+        "scope": "Familiar in shared evaluator after Flight;68 zero-count manager queries in admitted context"
+      },
+      {
+        "pr": 232,
+        "merge": "0080373f6a7111abfb72c37e96b98b2a0efca913",
+        "scope": "Public original resource transport and dense capture"
+      },
+      {
+        "pr": 234,
+        "merge": "1b893fbd45003a9ffe759729ad194aa3e4d8146a",
+        "scope": "Browser transport of the same declared public resources"
+      },
+      {
+        "pr": 243,
+        "merge": "c9a0cdae7827d1823194856d96c69c7650082f24",
+        "scope": "History generator and explicit versioned source exclusions/frontiers"
+      },
+      {
+        "pr": 247,
+        "merge": "6c90a3b039c1f5805a3bcfb5aaaf9478f41a3934",
+        "scope": "Second pickup diagonal public route; all other declarations unchanged"
+      },
+      {
+        "pr": 254,
+        "merge": "2048325e3d6fb16cd31dc7c2419564801793820b",
+        "scope": "Typed Luck Player modifier inputs and separate Game10EAD8 owner after Familiar"
+      },
+      {
+        "pr": 255,
+        "merge": "7a4ebc1fb87b6342240e4b22142bb229cad4c13c",
+        "scope": "Standalone body comparer; helper/registry remain separate leaves"
+      },
+      {
+        "pr": 257,
+        "merge": "f7aa2f6419793de46499544ce392d3c2be9f0f20",
+        "scope": "Separate public boot-resource buffer/reset API; XML-only qualification, STB remains separate"
+      },
+      {
+        "pr": 251,
+        "merge": "4e53432fb3f8a2f4e4db93835c126f822536f68d",
+        "scope": "History helper with explicit native-only mode, source exclusions and first-expiry stop; no whole paired acceptance"
+      },
+      {
+        "pr": 260,
+        "merge": "ca63b0ade6468033f90cef9feff253a02c89c0d9",
+        "scope": "Admitted source511F10 final ALL tail; unresolved callbacks/history remain pending"
+      }
+    ],
+    "familiarOwnChecks": {
+      "head": "ce4486543197a1b8742ed57ca3546b5343e92259",
+      "production": "PASS",
+      "strictClippy": "PASS",
+      "releaseFloor": "PASS",
+      "gameAcceptance": "pending",
+      "closure": {
+        "path": ".cache/coordination/item-pipeline-research/familiar-ce448654-production-current/closed-qualification-and-reclaim.json",
+        "sha256": "1818ce89ea7749e8b09b3c1aa4dffa3bd9dc3d8e333d492bfa04d82a85a8a953"
+      }
+    },
+    "a320OwnChecks": {
+      "runtime": "a32090466642c20eba31bd705885595738c70f79",
+      "dstConsumer": "f2a6e8fdb5fbed0e23e927b7224d47082775593a",
+      "compiler": {
+        "check-build": {
+          "exitCode": 0,
+          "seconds": 37.387
+        },
+        "clippy": {
+          "exitCode": 0,
+          "seconds": 23.375
+        },
+        "floor": {
+          "exitCode": 0,
+          "seconds": 13.389
+        }
+      },
+      "dst": {
+        "exitCode": 1,
+        "properties": 109,
+        "failedProperties": 4,
+        "unmet": 0,
+        "failureCounts": [
+          {
+            "property": "game: a rejected command leaves the whole game unchanged",
+            "failures": 1
+          },
+          {
+            "property": "game: complete games round-trip losslessly through their validators",
+            "failures": 2
+          },
+          {
+            "property": "game: published states round-trip losslessly through their validators",
+            "failures": 2
+          },
+          {
+            "property": "game: key presses during a boss scene are ignored",
+            "failures": 52
+          }
+        ],
+        "classification": "Items agent reports current main has manual BossBar NaN-aware equality and reflexivity assertion absent from this older runtime producer. Actual current-main/retained-tape replay is pending; source presence does not regrade this FAIL.",
+        "report": {
+          "path": "/workspace/isaac-rebirth-browser/.cache/coordination/attack-runtime-research/production-a3209046-1/dst-consumer-f2a6e8fd/dst-report.json",
+          "sha256": "cc79944a69b907563ae737dd82040c9024bd760f2e6e6a2112831aef71c843c2",
+          "bytes": 36473
+        }
+      },
+      "scope": "Own compiler passes; historical DST failure retained. Paired a320 history results below do not accept all current main."
+    },
+    "ordinarySixCaseBank": {
+      "runtime": "2ed8a7b4ea8371aa88adb71c087cd85e377af355",
+      "artifact": "dc628700722f11052dd7400abd14b3008047323eb64ec4428611f7a9499d95ec",
+      "completedSubset": [
+        {
+          "caseIndex": 0,
+          "checks": 169615,
+          "differences": 10235,
+          "status": "FAIL",
+          "captureAudit": "PASS",
+          "summary": {
+            "path": "/workspace/isaac-rebirth-browser/.cache/coordination/attack-runtime-research/ordinary6-corrected2ed-case0-attempt2/case0-summary.json",
+            "sha256": "858fc022e2c094668192a347255b742948bbd0b209ac777152906a944123d508"
+          }
+        },
+        {
+          "caseIndex": 1,
+          "checks": 169684,
+          "differences": 10246,
+          "status": "FAIL",
+          "captureAudit": "PASS",
+          "summary": {
+            "path": "/workspace/isaac-rebirth-browser/.cache/coordination/attack-runtime-research/ordinary6-corrected2ed-case1-v1/case1-summary.json",
+            "sha256": "fb7e6f604f760da4b7785d79559a7a9214c5590b1332c9dd8d27975d007042d5"
+          }
+        },
+        {
+          "caseIndex": 2,
+          "checks": 232012,
+          "differences": 17339,
+          "status": "FAIL",
+          "captureAudit": "PASS",
+          "summary": {
+            "path": "/workspace/isaac-rebirth-browser/.cache/coordination/attack-runtime-research/ordinary6-corrected2ed-case2-v1/case2-summary.json",
+            "sha256": "78b9607db627229c4dcf9765afad35c5d3652e57b06e773f4ff9d92e86ce9902"
+          }
+        }
+      ],
+      "totalChecks": 571311,
+      "totalDifferences": 37820,
+      "unexecutedCases": [
+        3,
+        4,
+        5
+      ],
+      "wholeBankAccepted": false
+    },
+    "nativeHistory": {
+      "oldStage0Only": {
+        "checks": 5601,
+        "failures": 10,
+        "coverageGaps": 8,
+        "transport": "PASS",
+        "report": {
+          "path": "/workspace/isaac-rebirth-browser/.cache/coordination/quality-main/composition-publication-v1/native-live-readback-v1/report.json",
+          "sha256": "3712c632171af846bbade5474817564c644f342f94e515ff8d0ba23ec0a22ce2"
+        }
+      },
+      "v5": {
+        "actual114Grant": 917,
+        "actual329Grant": null,
+        "oldV1": {
+          "checks": 5932,
+          "failures": 7,
+          "coverageGaps": 5
+        },
+        "explicitV2Projection": {
+          "checks": 5987,
+          "failures": 6,
+          "coverageGaps": 4
+        },
+        "report": {
+          "path": ".cache/coordination/quality-main/composition-publication-v1/native-v5-readback-v1/report.json",
+          "sha256": "cf2a0f34cc649f8e55a055b8b89eb706685b6b9bee044c0f07619fab0400d731"
+        }
+      },
+      "v7": {
+        "transport": "PASS",
+        "actualGrants": {
+          "114": 917,
+          "329": 1067
+        },
+        "primaryC08": 4,
+        "helperBlob": "befab285b2657b23d4ac5af899c1216e4a2c29f5625b86209e82823ef84f860e",
+        "checks": 6274,
+        "failures": 1,
+        "coverageGaps": [
+          "No actual preexisting subtype1 ParentKnife child immediately before329"
+        ],
+        "report": {
+          "path": ".cache/coordination/quality-main/composition-publication-v1/native-v7-readback-v1/report.json",
+          "sha256": "f54ce69095c4b302ac54c655d2f98d681ca9aaeb3138ec46169d03da3cd1d53a"
+        },
+        "firstExpiryAdditive": {
+          "helperBlob": "98e993ac1786d1ac5cb16347024e01be3946428a572af145def22172a2543ee4",
+          "checks": 6263,
+          "failures": 1,
+          "coverageGaps": 1,
+          "scope": "Separate native retained-complete-tuple replay only; old6274/1 unchanged",
+          "report": {
+            "path": ".cache/coordination/item-pipeline-research/history-helper-publication/first-expiry-v7-native-additive-summary.json",
+            "sha256": "c6943dd27434bccaf1c58753dd7c3021c99bceeb4161683a52557f437b350742"
+          }
+        }
+      },
+      "sourceExclusions": [
+        {
+          "field": "positive prior Laser TTL at deferred Add114",
+          "reason": "Uninterrupted Pickup42 exceeds ordinary release Laser timeout15; natural expiry is not selector cleanup."
+        }
+      ],
+      "untestedFrontiers": [
+        {
+          "field": "live selector-change Laser Remove and replacement-safe Uninit",
+          "reason": "Requires a separately admitted public route with a live prior actor at the actual grant."
+        }
+      ]
+    },
+    "pairedHistory": {
+      "runtime": "a32090466642c20eba31bd705885595738c70f79",
+      "v5Partial": {
+        "captureIntegrity": "PASS",
+        "bodyChecks": 173825,
+        "bodyDifferences": 17123,
+        "oldGameFlagSchemaErrors": 970,
+        "strictSourceCacheRunFlagsAddendum": {
+          "actualRows": 970,
+          "differences": 0,
+          "report": {
+            "path": ".cache/coordination/quality-main/composition-publication-v1/body-publication-v2/additive-game-flags-readback.json",
+            "sha256": "91d1ca3324c8dd7d4fb59ab55359abef9ee3759c784ad00565716cb05bfa671a"
+          }
+        },
+        "report": {
+          "path": ".cache/coordination/quality-main/composition-publication-v1/a320-v5-partial-v1/compact-summary.json",
+          "sha256": "343df53baf8692377778597d3da415699158ac6d3205824ee878818f05e3e630"
+        }
+      },
+      "v7": {
+        "captureIntegrity": "PASS",
+        "actualGrantsBothGames": {
+          "114": 917,
+          "329": 1067
+        },
+        "bodyChecks": 113707,
+        "bodyDifferences": 9052,
+        "controlledKnifeBodies": 280,
+        "controlledFull": 140,
+        "controlledFast": 140,
+        "helper": {
+          "checks": 18607,
+          "failures": 701,
+          "coverageGaps": 3,
+          "retainedIssues": [
+            "Missing preexisting subtype1 ParentKnife child before329 in both games",
+            "Expiry scan requested identity after explicit browser Uninit; additive correction pending"
+          ]
+        },
+        "strictGameFlagRows": {
+          "checks": 970,
+          "differences": 0
+        },
+        "strictPlayerSeedRows": {
+          "checks": 970,
+          "differences": 0
+        },
+        "report": {
+          "path": ".cache/coordination/quality-main/composition-publication-v1/a320-v7-triple-v1/compact-summary.json",
+          "sha256": "e7002d7cb5128267f7c6acc89a455fae5a9eb5d305527cbdab30ad9175c053a3"
+        },
+        "firstExpirySelectedBrowserAdditive": {
+          "actualPresentations": [
+            833,
+            847,
+            849,
+            872,
+            873
+          ],
+          "scope": "Exact source lifetime loop stops at actual same-identity Full847\u2192849 TTL1\u21920 before later873 Uninit. Existing independent body retirement873 retained. Five selected state rows do not regrade full paired helper or replay complete weak-reference retirement.",
+          "fullPairedRegrade": false,
+          "report": {
+            "path": ".cache/coordination/item-pipeline-research/history-helper-publication/first-expiry-selected-browser-additive.json",
+            "sha256": "0c6c0cf0d857764989400e37d80c45f3e9e5a98497133e4b81ef61e07421aff9"
+          }
+        }
+      },
+      "completeSharedMt": {
+        "wordChecks": 631488,
+        "wordDifferences": 472992,
+        "cursorChecks": 1012,
+        "cursorDifferences": 968,
+        "actorRosterChecks": 970,
+        "actorRosterDifferences": 970,
+        "missingActorSeedFields": 0,
+        "firstDifference": {
+          "presentation": 379,
+          "all624WordsEqual": true,
+          "nativeCursor": 490,
+          "browserCursor": 463,
+          "nativeExtraAmbientActors": 5
+        },
+        "scope": "Real ambient/sequence/shared-MT gap remains after correcting the separate Game flag and Player seed field adapters."
+      },
+      "wholeCaseAccepted": false
+    },
+    "sourceOnlyPending": [
+      "Number One6 composable scalar/flags/colors and typed auxiliary preservation",
+      "Libra304 coupled1B request expansion, ordered pre/post coupling and scoped admission",
+      "Ambient33/68 shared startup consumers",
+      "STB resource transport remains source-only; XML ABI probe is not its qualification",
+      "Luck254 public original/browser qualification pending; own compiler PASS",
+      "Required per-stage completion publication; own qualification is running on exactcfc3dd25",
+      "History helper251 and body255 are merged; registry/public suite registration remains pending"
+    ],
+    "retention": "The first32, Brim10, ordinary0..2, v3/v5/v6 and frozen v7 reports remain unchanged. Additive source/field/comparer corrections receive separate reports.",
+    "luckOwnChecks": {
+      "head": "75e11dea300034ffbd14a8c1062da373f17dcab9",
+      "production": "PASS",
+      "strictAllTargetClippy": "PASS",
+      "releaseFloor": "PASS",
+      "publicGameAcceptance": "pending",
+      "closure": {
+        "path": ".cache/coordination/item-pipeline-research/luck-75e11dea-production-current/closed-qualification-warm-target.json",
+        "sha256": "4bf499b1c81f084d3574f29e1e38e4741ff45d657607ed8ea0251c69035b0478"
+      }
+    },
+    "publicAbi257Qualification": {
+      "abiDonor": "5a82c1182e32423312d7549a627f01143d4b2279",
+      "qualificationHead": "f5c06830a12fea7169584bda99a54270d2ce9613",
+      "qualificationBaseMain": "6c90a3b039c1f5805a3bcfb5aaaf9478f41a3934",
+      "includesExactLuck": "75e11dea300034ffbd14a8c1062da373f17dcab9",
+      "ownProduction": "PASS",
+      "publicXmlAbiChecks": 7,
+      "publicXmlAbiFailures": 0,
+      "nativeOrBrowserExecuted": false,
+      "scope": "Separate true-three-way own producer; XML-only ABI transport, no STB or original-game acceptance.",
+      "closure": {
+        "path": ".cache/coordination/item-pipeline-research/luck-abi-f5c06830-production-current/closed-qualification-warm-target.json",
+        "sha256": "bd158dee7e068b11d3625ec0c94330bf8739784defc7a3b02c0d94141d609113"
+      }
+    },
+    "mainAtSummary": "ca63b0ade6468033f90cef9feff253a02c89c0d9",
+    "allTailOwnChecks": {
+      "head": "f46191992d811f3a02987177b36a04536b550855",
+      "pr": 260,
+      "production": "PASS",
+      "strictAllTargetClippy": "PASS",
+      "releaseFloor": "PASS",
+      "mainPublication": "merged",
+      "publicGameAcceptance": "pending",
+      "closure": {
+        "path": ".cache/coordination/item-pipeline-research/all-f4619199-production-current/closed-qualification-warm-target.json",
+        "sha256": "f14ff8cefbdb0194889eacf4af67662a7f41059826c8ae0e2e9e93d2b6d07860"
+      },
+      "merge": "ca63b0ade6468033f90cef9feff253a02c89c0d9"
+    }
+  }
+}

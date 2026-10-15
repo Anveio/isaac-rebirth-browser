@@ -29,6 +29,10 @@ impl RoomCosts {
                 2 | 5 | 6 => i32::from(entity.state == 1) * 1000,
                 // Ordinary Spike.Init56f830 always stores999.
                 8 => 999,
+                // Block and tinted rock share Rock.Init56ed00.
+                3 | 4 => i32::from(entity.state == 1) * 1000,
+                // Pit.Init568990: 3000, or 0 once bridged (state1).
+                7 => i32::from(entity.state == 0) * 3000,
                 // Wall5717e0 and Door5628e0 Init each store1000.
                 15 | 16 => 1000,
                 _ => continue,

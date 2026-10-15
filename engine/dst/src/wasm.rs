@@ -5,6 +5,7 @@
 //! deterministic pure-Rust interpreter. Every command outcome and sampled
 //! published snapshots must equal the native engine's, so properties proven
 //! natively speak for the artifact browsers run.
+use crate::json_diff;
 use crate::props;
 use crate::tape::Tape;
 use rebirth_cleanroom::Game;
@@ -217,51 +218,8 @@ fn first_difference(tape: &Tape, step: usize, wasm: &[u8]) -> Value {
     ) else {
         return Value::Null;
     };
-    let mut path = String::new();
-    match difference(&native, &wasm, &mut path) {
-        Some((native, wasm)) => json!({ "path": path, "native": native, "wasm": wasm }),
+    match json_diff::first(&native, &wasm) {
+        Some((path, native, wasm)) => json!({ "path": path, "native": native, "wasm": wasm }),
         None => Value::Null,
     }
-}
-
-/// Depth-first search for the first differing value; `path` becomes its JSON
-/// pointer.
-fn difference<'a>(
-    native: &'a Value,
-    wasm: &'a Value,
-    path: &mut String,
-) -> Option<(&'a Value, &'a Value)> {
-    let length = path.len();
-    let found =
-        match (native, wasm) {
-            (Value::Object(native_fields), Value::Object(wasm_fields))
-                if native_fields.keys().eq(wasm_fields.keys()) =>
-            {
-                native_fields
-                    .iter()
-                    .zip(wasm_fields.values())
-                    .find_map(|((key, native), wasm)| {
-                        path.truncate(length);
-                        path.push('/');
-                        path.push_str(key);
-                        difference(native, wasm, path)
-                    })
-            }
-            (Value::Array(native_items), Value::Array(wasm_items))
-                if native_items.len() == wasm_items.len() =>
-            {
-                native_items.iter().zip(wasm_items).enumerate().find_map(
-                    |(index, (native, wasm))| {
-                        path.truncate(length);
-                        path.push_str(&format!("/{index}"));
-                        difference(native, wasm, path)
-                    },
-                )
-            }
-            _ => return (native != wasm).then_some((native, wasm)),
-        };
-    if found.is_none() {
-        path.truncate(length);
-    }
-    found
 }

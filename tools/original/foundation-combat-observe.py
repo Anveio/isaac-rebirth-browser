@@ -84,6 +84,8 @@ def observe(pid, context):
                     'spriteFlipX': bool(raw[0x2fc]), 'spriteFlipY': bool(raw[0x2fd]),
                     'spriteScale': pair(0x2c4),
                     'spriteTint': list(struct.unpack_from('<ffff', raw, 0x2d0)),
+                    # Whole sprite KColor +2d0: tint RGBA, colorize RGBA, offset RGB.
+                    'spriteColor': list(struct.unpack_from('<11f', raw, 0x2d0)),
                     'spriteOffsets': list(struct.unpack_from('<fff', raw, 0x2e0))}
                 definition = struct.unpack_from('<Q', raw, 0x40)[0]
                 text_pointer = u64(definition) if definition else 0
@@ -204,6 +206,13 @@ def observe(pid, context):
 
             game = u64(0x8ecd30)
             system = u64(0x8ed560)
+            # HUD at Game+2b578: boss-bar fill +61894 (-1 hidden), flash +61898.
+            hud = game + 0x2b578
+            fill_bits = u32(hud + 0x61894)
+            fill = struct.unpack('<f', struct.pack('<I', fill_bits))[0]
+            # Keep JSON exact: a non-finite fill is retained only as its bits.
+            report['bossBar'] = {'fill': fill if math.isfinite(fill) else None, 'fillBits': fill_bits,
+                'flash': struct.unpack('<i', read(hud + 0x61898, 4))[0]}
             # Actual Level is embedded at Game+0; its flags are distinct from
             # the retained boss-family Game+10eae0 word.
             report['levelProgress'] = {'flags': u64(game + 0x81b0),

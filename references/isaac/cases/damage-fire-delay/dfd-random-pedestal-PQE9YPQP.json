@@ -1,0 +1,346 @@
+{
+  "schema": 1,
+  "bootEpochSeed": 1700000000,
+  "mode": "damage-fire-delay",
+  "source": "Declared public acquisition/motion/shooting; fresh OS discovery never filters item identity",
+  "cases": [
+    {
+      "name": "passive-1-phase-0",
+      "code": "B91XK7GP",
+      "seedValue": 19209,
+      "delay": 0,
+      "expectedItemId": 1,
+      "actions": [
+        {
+          "key": "w",
+          "frames": 74
+        },
+        {
+          "key": null,
+          "frames": 60
+        },
+        {
+          "key": "w",
+          "frames": 32
+        },
+        {
+          "key": null,
+          "frames": 100
+        },
+        {
+          "key": "a",
+          "frames": 14
+        },
+        {
+          "key": null,
+          "frames": 16
+        },
+        {
+          "key": "Down",
+          "frames": 22
+        },
+        {
+          "key": null,
+          "frames": 30
+        }
+      ],
+      "entropy": "Contrived port-only public-route prediction; actual native selection is required"
+    },
+    {
+      "name": "passive-1-phase-1",
+      "code": "B91XK7GP",
+      "seedValue": 19209,
+      "delay": 1,
+      "expectedItemId": 1,
+      "actions": [
+        {
+          "key": "w",
+          "frames": 74
+        },
+        {
+          "key": null,
+          "frames": 61
+        },
+        {
+          "key": "w",
+          "frames": 32
+        },
+        {
+          "key": null,
+          "frames": 100
+        },
+        {
+          "key": "a",
+          "frames": 14
+        },
+        {
+          "key": null,
+          "frames": 16
+        },
+        {
+          "key": "Down",
+          "frames": 22
+        },
+        {
+          "key": null,
+          "frames": 30
+        }
+      ],
+      "entropy": "Contrived port-only public-route prediction; actual native selection is required"
+    },
+    {
+      "name": "passive-4-phase-0",
+      "code": "B91X1BV8",
+      "seedValue": 17530,
+      "delay": 0,
+      "expectedItemId": 4,
+      "actions": [
+        {
+          "key": "w",
+          "frames": 74
+        },
+        {
+          "key": null,
+          "frames": 60
+        },
+        {
+          "key": "w",
+          "frames": 32
+        },
+        {
+          "key": null,
+          "frames": 100
+        },
+        {
+          "key": "a",
+          "frames": 14
+        },
+        {
+          "key": null,
+          "frames": 16
+        },
+        {
+          "key": "Down",
+          "frames": 22
+        },
+        {
+          "key": null,
+          "frames": 30
+        }
+      ],
+      "entropy": "Contrived port-only public-route prediction; actual native selection is required"
+    },
+    {
+      "name": "passive-4-phase-1",
+      "code": "B91X1BV8",
+      "seedValue": 17530,
+      "delay": 1,
+      "expectedItemId": 4,
+      "actions": [
+        {
+          "key": "w",
+          "frames": 74
+        },
+        {
+          "key": null,
+          "frames": 61
+        },
+        {
+          "key": "w",
+          "frames": 32
+        },
+        {
+          "key": null,
+          "frames": 100
+        },
+        {
+          "key": "a",
+          "frames": 14
+        },
+        {
+          "key": null,
+          "frames": 16
+        },
+        {
+          "key": "Down",
+          "frames": 22
+        },
+        {
+          "key": null,
+          "frames": 30
+        }
+      ],
+      "entropy": "Contrived port-only public-route prediction; actual native selection is required"
+    },
+    {
+      "name": "recorded-pedestal-0",
+      "code": "R74QYMYS",
+      "seedValue": 1889244627,
+      "delay": 0,
+      "actions": [
+        {
+          "key": "w",
+          "frames": 74
+        },
+        {
+          "key": null,
+          "frames": 60
+        },
+        {
+          "key": "w",
+          "frames": 32
+        },
+        {
+          "key": null,
+          "frames": 100
+        },
+        {
+          "key": "a",
+          "frames": 14
+        },
+        {
+          "key": null,
+          "frames": 16
+        },
+        {
+          "key": "Down",
+          "frames": 22
+        },
+        {
+          "key": null,
+          "frames": 30
+        }
+      ],
+      "entropy": "Recorded OS secrets",
+      "discoveryAttempts": 3,
+      "recordedEvidence": "references/isaac/foundation/items/acquisition-initial-live.json"
+    },
+    {
+      "name": "recorded-pedestal-1",
+      "code": "VRQPT844",
+      "seedValue": 3560154886,
+      "delay": 1,
+      "actions": [
+        {
+          "key": "w",
+          "frames": 74
+        },
+        {
+          "key": null,
+          "frames": 61
+        },
+        {
+          "key": "w",
+          "frames": 32
+        },
+        {
+          "key": null,
+          "frames": 100
+        },
+        {
+          "key": "a",
+          "frames": 14
+        },
+        {
+          "key": null,
+          "frames": 16
+        },
+        {
+          "key": "Down",
+          "frames": 22
+        },
+        {
+          "key": null,
+          "frames": 30
+        }
+      ],
+      "entropy": "Recorded OS secrets",
+      "discoveryAttempts": 75,
+      "recordedEvidence": "references/isaac/foundation/items/acquisition-initial-live.json"
+    },
+    {
+      "name": "random-pedestal-0",
+      "code": "PQE9YPQP",
+      "seedValue": 1684440520,
+      "delay": 0,
+      "actions": [
+        {
+          "key": "w",
+          "frames": 74
+        },
+        {
+          "key": null,
+          "frames": 60
+        },
+        {
+          "key": "w",
+          "frames": 32
+        },
+        {
+          "key": null,
+          "frames": 100
+        },
+        {
+          "key": "a",
+          "frames": 14
+        },
+        {
+          "key": null,
+          "frames": 16
+        },
+        {
+          "key": "Down",
+          "frames": 22
+        },
+        {
+          "key": null,
+          "frames": 30
+        }
+      ],
+      "entropy": "OS secrets",
+      "discoveryAttempts": 106
+    },
+    {
+      "name": "random-pedestal-1",
+      "code": "0QSWDNDV",
+      "seedValue": 3159252557,
+      "delay": 1,
+      "actions": [
+        {
+          "key": "w",
+          "frames": 74
+        },
+        {
+          "key": null,
+          "frames": 61
+        },
+        {
+          "key": "w",
+          "frames": 32
+        },
+        {
+          "key": null,
+          "frames": 100
+        },
+        {
+          "key": "a",
+          "frames": 14
+        },
+        {
+          "key": null,
+          "frames": 16
+        },
+        {
+          "key": "Down",
+          "frames": 22
+        },
+        {
+          "key": null,
+          "frames": 30
+        }
+      ],
+      "entropy": "OS secrets",
+      "discoveryAttempts": 121
+    }
+  ]
+}

@@ -76,7 +76,14 @@ fn free_position(
     random: &mut Mt19937,
     world: &World<'_>,
 ) -> Result<WorldVector, String> {
-    find_free_position(anchor, 0.0, random, world.grid, world.path_costs, world.occupied)
+    find_free_position(
+        anchor,
+        0.0,
+        random,
+        world.grid,
+        world.path_costs,
+        world.occupied,
+    )
 }
 
 /// Room::FindFreePosition5c7f30: up to 100 random candidates on a ring that
@@ -343,7 +350,8 @@ pub fn advance(
     npc.position = npc.position + npc.velocity;
     npc.presented_position = npc.position;
     let mut health = npc.health();
-    npc.damage.advance(&mut health, phase)?;
+    let applied = npc.damage.advance(&mut health, phase)?;
+    npc.advance_sprite_color(phase, &applied);
     npc.hp = health.hp;
     if npc.hp < 0.0 {
         npc.dead = true;

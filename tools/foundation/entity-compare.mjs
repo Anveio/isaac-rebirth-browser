@@ -15,6 +15,7 @@ export function check(rows, field, expected, actual) {
     status: expected !== undefined && actual !== undefined && JSON.stringify(expected) === JSON.stringify(actual) ? 'pass' : 'fail' });
 }
 
+const ROCK_ANIMATIONS = { 2: 'normal', 3: 'black', 4: 'tinted', 5: 'bombrock', 6: 'alt' };
 const DAMAGE_FLAGS = { tear: 0, bomb: 4, fireContact: 2, roomEffect: 0, laser: 8 };
 
 /** Fields every authored NPC shares, as [name, native, port] pairs. Native
@@ -39,6 +40,9 @@ export function npcFields(native, actor, phase) {
     ['position', vector(native.position), vector(phase === 0 ? actor.presentedPosition : actor.position)],
     ['velocity', vector(native.velocity), vector(actor.velocity)], ['target', vector(native.npcTarget), vector(actor.target)],
     ['championColor', native.npcChampionColor, actor.champion?.color ?? -1],
+    // Sprite Color +2d0 (champion colour or timed hit flash), every component.
+    ['spriteColor', native.spriteColor?.map(f32), actor.spriteColor &&
+      [...actor.spriteColor.current.tint, ...actor.spriteColor.current.colorize, ...actor.spriteColor.current.offset].map(f32)],
   ];
 }
 
@@ -48,14 +52,46 @@ export function roomRows(rows, source, actual) {
   check(rows, 'room.grid', [source.room.gridWidth, source.room.gridHeight], actual.room.grid && [actual.room.grid.width, actual.room.grid.height]);
   check(rows, 'room.combatClear', source.room.combatClear, actual.room.combatClear);
   check(rows, 'room.combatClearCountdown', source.room.combatClearCountdown, actual.room.combatClearCountdown);
+  // A 0/0 fill is NaN on both sides: native keeps its bits, JSON gives null.
+  const nativeFill = source.bossBar && (source.bossBar.fill === null ? 'NaN' : f32(source.bossBar.fill));
+  const portFill = actual.bossBar && (actual.bossBar.fill === null ? 'NaN' : f32(actual.bossBar.fill));
+  check(rows, 'hud.bossBarFill', nativeFill, portFill);
+  check(rows, 'hud.bossBarFlash', source.bossBar?.flash, actual.bossBar?.flash);
   for (const field of ['countablePending', 'countableCurrent', 'bossPending', 'bossCurrent'])
     check(rows, `manager.${field}`, source.room[field], actual.room.managerCounts?.[field]);
+  // Admitted grid objects: Block3, Tinted Rock4, Alt Rock6, Pit7 (autotile
+  // frame) and Spider Web10.
+  for (const cell of source.grid.filter(cell => [3, 4, 6, 7, 10].includes(cell.type))) {
+    const port = actual.room.grid?.cells[cell.index]?.entity;
+    check(rows, `grid${cell.index}`, [cell.type, cell.variant, cell.state, cell.collisionClass],
+      port && [port.kind, port.variant, port.state, port.collisionClass]);
+  }
   for (const door of source.grid.filter(cell => cell.type === 16)) {
     const port = actual.room.grid?.cells[door.index]?.entity;
     check(rows, `door${door.index}.state`, door.state, port?.state);
     check(rows, `door${door.index}.class`, door.collisionClass, port?.collisionClass);
   }
 }
+
+/** Collision class of the grid cell under a point (GetGridIndex: 40-unit
+ * cells from (20,100)); a port cell without an entity falls back to its
+ * authored selector like Grid::collision. */
+function cellClass(cells, width, height, point) {
+  const column = Math.floor((point[0] - 20) / 40), row = Math.floor((point[1] - 100) / 40);
+  if (column < 0 || row < 0 || column >= width || row >= height) return 4;
+  return cells(row * width + column);
+}
+const nativeCellClass = (source, point) => {
+  const byIndex = new Map(source.grid.map(cell => [cell.index, cell.collisionClass]));
+  return cellClass(index => byIndex.get(index) ?? 0, source.room.gridWidth, source.room.gridHeight, point);
+};
+const portCellClass = (actual, point) => {
+  const grid = actual.room.grid;
+  return grid && cellClass(index => {
+    const cell = grid.cells[index];
+    return cell.entity ? cell.entity.collisionClass : cell.selector === 3000 ? 1 : cell.selector >= 1000 ? 3 : 0;
+  }, grid.width, grid.height, point);
+};
 
 /** Every authored NPC in the room, by identity and spawn seed, then each
  * selected actor's shared fields plus the spec's own rows. */
@@ -69,6 +105,17 @@ export function entityRows(rows, source, actual, spec, render) {
   roomRows(rows, source, actual);
   // The browser's own draw record for this capture: what it actually drew.
   check(rows, 'render.recorded', true, render !== undefined);
+  // Intact rock-family grid entities: native Rock Render 56bf80 sets frame
+  // variant of its type's grid_rock.anm2 animation (Init 56ed00). Destroyed
+  // rubble needs per-piece offsets the engine does not model yet, and the
+  // other grid kinds' render rules are not decoded; neither is claimed here.
+  const rock = cell => ROCK_ANIMATIONS[cell.type] && cell.state === 1 &&
+    (cell.type === 2 && cell.variant >= 1000 ? [cell.index, cell.type, 'big', cell.variant - 1000] : [cell.index, cell.type, ROCK_ANIMATIONS[cell.type], cell.variant]);
+  check(rows, 'render.rocks', source.grid.map(rock).filter(Boolean),
+    render?.grid.filter(drawn => drawn.kind !== 7).map(drawn => [drawn.index, drawn.kind, drawn.animation, drawn.frame]));
+  // Pit Render draws `pit` frame variant (the autotile frame 5684c0 stores).
+  check(rows, 'render.pits', source.grid.filter(cell => cell.type === 7).map(cell => [cell.index, 'pit', cell.variant]),
+    render?.grid.filter(drawn => drawn.kind === 7).map(drawn => [drawn.index, drawn.animation, drawn.frame]));
   for (const [field, expected, observed] of spec.roomFields?.(source, actual, phase) ?? []) check(rows, field, expected, observed);
   const selected = npcs.filter(actor => spec.matches(actor.type, actor.variant));
   for (const native of selected) {
@@ -77,6 +124,10 @@ export function entityRows(rows, source, actual, spec, render) {
     const name = `${spec.name}${native.spawnSeed}`;
     for (const [field, expected, observed] of [...npcFields(native, actor, phase), ...(spec.fields?.(native, actor, phase) ?? [])])
       check(rows, `${name}.${field}`, expected, observed);
+    // A ground walker (class5) never stands inside a solid grid cell (#229).
+    if (native.gridCollisionClass === 5)
+      check(rows, `${name}.insideSolid`, nativeCellClass(source, vector(native.position)) !== 0,
+        portCellClass(actual, vector(actor.position)) !== 0);
     // Every drawn NPC uses the source sprite Scale (+2c4), 1:1 in logical
     // pixels; only positions take the 0.65 world projection.
     const drawn = render?.npcs.find(candidate => candidate.kind === native.type && candidate.spawnSeed === native.spawnSeed);
@@ -109,7 +160,7 @@ export function loadManifest(directory, side) {
   return JSON.parse(gunzipSync(readFileSync(resolve(directory, side, 'manifest.json.gz'))));
 }
 
-export const MARKERS = ['admission', 'damage', 'death', 'retirement', 'clear', 'shape', 'bossRoom'];
+export const MARKERS = ['admission', 'damage', 'death', 'retirement', 'clear', 'shape', 'bossRoom', 'roomType'];
 
 /** Lifecycle markers each game reaches on its own over a whole case. */
 export function markers(directory, spec) {
@@ -130,6 +181,9 @@ export function markers(directory, spec) {
       // The spec's authored shape plus the one-cell wall border.
       const grid = side === 'original' ? [row.room.gridWidth, row.room.gridHeight] : row.room.grid && [row.room.grid.width, row.room.grid.height];
       seen.shape ||= Boolean(spec.shape && grid && grid[0] === spec.shape[0] + 2 && grid[1] === spec.shape[1] + 2);
+      // Room specs: the player stands in a room of the spec's authored type.
+      seen.roomType ||= spec.roomType !== undefined
+        && (side === 'original' ? row.room.type : row.room.descriptor?.template?.type) === spec.roomType;
       // Boss routes: the player stands in a type-5 boss room.
       seen.bossRoom ||= (side === 'original' ? row.room.type : row.room.descriptor?.template?.type) === 5;
       seen.admission ||= actors.length > 0;

@@ -89,9 +89,20 @@ def plan(generated, boss):
             'template': descriptors[room]['template'], 'selector': selector}, None
 
 
-def fight(entry):
-    """The boss segment after `boss-room-arrival`: Scene, then shoot along every axis."""
+def fight(entry, mode='sweep'):
+    """The boss segment after `boss-room-arrival`.
+
+    sweep: Scene, then shoot along every axis and idle.
+    churn: stand still and turn the aim every 30 frames for 960 frames, so the
+      boss keeps summoning while its minions die (mid-room spawn churn)."""
     tape = []
+    if mode == 'churn':
+        for turn in range(32):
+            aim = AIM[turn % 4]
+            tape.append(key(aim, True))
+            dense(tape, 30, f'boss-churn{turn}', 10)
+            tape.append(key(aim, False))
+        return tape
     dense(tape, 220, 'boss-scene', 2)
     for turn in range(4):
         aim = AIM[(entry + turn) % 4]
@@ -151,12 +162,12 @@ def arrival(code, route):
     return result, recorded
 
 
-def case(identifier, code, route, boss, provenance, randomized):
+def case(identifier, code, route, boss, provenance, randomized, mode='sweep'):
     result, recorded = arrival(code, route)
     if result is None:
         return None, recorded, None
     for name in ('tape', 'pairedTape'):
-        result[name] = result[name] + fight(route['entrySlot'])
+        result[name] = result[name] + fight(route['entrySlot'], mode)
     runner.validate_tape(result['tape'])
     result['scenario'] = {'id': identifier, 'description': f"Walk {len(route['rooms']) - 1} rooms into {route['boss']} and fight",
                           'systems': ['enemies-bosses', 'damage-pipeline', 'room-connectivity', 'projectile-physics'],
@@ -183,11 +194,11 @@ def validate(result, checkpoints, scratch):
     return None
 
 
-def build(identifier, code, boss, provenance, randomized, checked, scratch):
+def build(identifier, code, boss, provenance, randomized, checked, scratch, mode='sweep'):
     route, reason = plan(floor(codec.decode_seed(code)), boss)
     if route is None:
         return None, reason
-    result, reason, checkpoints = case(identifier, code, route, boss, provenance, randomized)
+    result, reason, checkpoints = case(identifier, code, route, boss, provenance, randomized, mode)
     if result is None or not checked:
         return result, reason
     reason = validate(result, checkpoints, scratch / code.replace(' ', ''))
@@ -209,8 +220,11 @@ def main():
     # Rejected routes keep their original evidence for diagnosis.
     (ROOT / '.cache/boss-route').mkdir(parents=True, exist_ok=True)
     scratch = Path(tempfile.mkdtemp(prefix='validate-', dir=ROOT / '.cache/boss-route'))
-    for index, code in enumerate(args.contrived):
-        result, reason = build(f'contrived-{index}', code, boss, {'entropy': 'contrived spec seed'}, False, checked, scratch)
+    for index, item in enumerate(args.contrived):
+        # CODE or CODE:FIGHT, where FIGHT names a fight() mode.
+        code, _, mode = item.partition(':')
+        result, reason = build(f'contrived-{index}', code, boss, {'entropy': 'contrived spec seed', 'fight': mode or 'sweep'},
+                               False, checked, scratch, mode or 'sweep')
         if result is None:
             raise ValueError(f'Contrived {code} does not reach boss {boss}: {reason}')
         cases.append(result)

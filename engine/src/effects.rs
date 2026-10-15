@@ -343,6 +343,30 @@ impl StageEffects {
         }
     }
 
+    /// DrawShadows 452920 draws every visible, live entity whose shadow size
+    /// (+30c, XML percent / 100) times sprite Scale.X (+2c4) is at least
+    /// 0.001, at its render position without PositionOffset. Champions carry
+    /// the ×1.15 sprite scale.
+    pub fn add_npc_shadows(&mut self, npcs: &[crate::npcs::Npc]) {
+        for npc in npcs
+            .iter()
+            .filter(|npc| npc.visible && !npc.dead && !npc.removed)
+        {
+            let scale = npc.champion.as_ref().map_or(1.0, |champion| champion.scale);
+            let size = f64::from(npc.shadow_size * scale);
+            if size / 100.0 < 0.001 {
+                continue;
+            }
+            self.shadow_casters.push(ShadowCaster::authored(
+                npc.id,
+                f64::from(npc.presented_position.x) * crate::motion::WORLD_SCALE + 32.0,
+                f64::from(npc.presented_position.y) * crate::motion::WORLD_SCALE - 47.0,
+                size,
+                &self.mask_raster,
+            ));
+        }
+    }
+
     /// Light and sprite anchors remain separate in the current logical model.
     /// Observed raster geometry alone does not identify native physical units.
     pub fn basement(player: &Player, fx: &RoomFx, run_tick: u32) -> Self {

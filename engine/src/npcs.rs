@@ -64,6 +64,9 @@ pub struct Npc {
     pub shooter: Option<crate::plain_npc::ShooterTimers>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub champion: Option<crate::champions::Champion>,
+    /// Sprite colour (+2d0) and its timed stack; the renderer draws it.
+    #[serde(default)]
+    pub sprite_color: crate::sprite_color::SpriteColor,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub gluttony: Option<crate::gluttony::GluttonyState>,
     /// NPCAI_Pathfinder (+7d8) for families that walk the grid.
@@ -78,6 +81,11 @@ pub struct Npc {
     pub sprite_events: SpriteEvents,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub dingle: Option<crate::dingle::DingleState>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub wall_hugger: Option<crate::wall_hugger::WallHuggerState>,
+    /// Entity+494: BaseUpdate discards every queued hit.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub invincible: bool,
 }
 
 #[derive(Clone, Copy, Debug, Default, Deserialize, Serialize, PartialEq, Eq)]
@@ -97,7 +105,14 @@ const ZERO: WorldVector = WorldVector { x: 0.0, y: 0.0 };
 
 /// Ordinary actor explosion collection is strict (75 + collision radius).
 /// Velocity changes at admission; HP waits for the next full BaseUpdate.
-pub fn bomb_hit(state: &mut State, center: WorldVector, bomb_id: u32) -> Result<(), String> {
+pub fn bomb_hit(
+    state: &mut State,
+    center: WorldVector,
+    blast_radius: f32,
+    damage: f32,
+    source: combat::DamageSource,
+    line_clear: &dyn Fn(WorldVector) -> bool,
+) -> Result<(), String> {
     for npc in &mut state.room.npcs {
         if npc.dead
             || npc.removed
@@ -111,8 +126,8 @@ pub fn bomb_hit(state: &mut State, center: WorldVector, bomb_id: u32) -> Result<
             y: npc.position.y - center.y,
         };
         let squared = delta.x * delta.x + delta.y * delta.y;
-        let radius = 75.0 + npc.collision_radius;
-        if squared >= radius * radius {
+        let radius = blast_radius + npc.collision_radius;
+        if squared >= radius * radius || !line_clear(npc.position) {
             continue;
         }
         if squared > 0.0 {
@@ -128,12 +143,9 @@ pub fn bomb_hit(state: &mut State, center: WorldVector, bomb_id: u32) -> Result<
         npc.damage.enqueue(
             health,
             combat::DamageEvent {
-                amount: 60.0,
+                amount: damage,
                 kind: combat::DamageKind::Bomb,
-                source: combat::DamageSource {
-                    id: bomb_id,
-                    entity_type: 4,
-                },
+                source,
             },
         )?;
     }
@@ -253,7 +265,13 @@ pub fn player_contacts(state: &mut State) -> Result<(), String> {
         if !combat::player_npc_overlap(&player_body, &npc_body)? {
             continue;
         }
-        let contact_damage = npc.collision_damage;
+        // Callback49c2ec: a Wall Hugger still showing "No-Spikes" pushes the
+        // player without hurting it.
+        let contact_damage = if npc.kind == 218 && npc.animation == "No-Spikes" {
+            0.0
+        } else {
+            npc.collision_damage
+        };
         if contact_damage > 0.0 {
             combat::try_damage_player(state, contact_damage as u8, 60, 0)?;
         }
@@ -290,10 +308,12 @@ pub fn nonplayer_contacts(state: &mut State) -> Result<(), String> {
             let (left, right) = state.room.npcs.split_at_mut(second);
             let first = &mut left[first];
             let second = &mut right[0];
+            // 49b980: two Wall Huggers never collide.
             if first.dead
                 || second.dead
                 || first.entity_collision_class != 4
                 || second.entity_collision_class != 4
+                || (first.kind == 218 && second.kind == 218)
             {
                 continue;
             }
@@ -412,14 +432,21 @@ pub fn advance_room_clear(state: &mut State) {
         state.room.combat_clear_countdown = 10;
     } else if state.room.combat_clear_countdown > 0 {
         state.room.combat_clear_countdown -= 1;
-    } else if !state.room.combat_clear {
-        state.room.combat_clear = true;
+    } else {
+        //5d1988 calls5659f0 before the descriptor-clear predicate. An
+        //already-clear empty start room still opens on this actual Full.
         change_doors(state, true);
+        if !state.room.combat_clear {
+            state.room.combat_clear = true;
+        }
     }
 }
 
 fn change_doors(state: &mut State, open: bool) {
     let mut changed = Vec::new();
+    let source_type = state.floor.descriptors[state.current_room]
+        .template
+        .room_type;
     for door in &mut state.room.appearance.doors {
         if !open && door.state == "Opened" {
             door.state = "Closed".into();
@@ -427,12 +454,43 @@ fn change_doors(state: &mut State, open: bool) {
                 state.room.combat_shut_door_slots.push(door.slot);
             }
             changed.push(door.world_position);
-        } else if open
-            && door.state == "Closed"
-            && state.room.combat_shut_door_slots.contains(&door.slot)
-        {
-            door.state = "Opened".into();
-            changed.push(door.world_position);
+        } else if open {
+            //565b00 binds44/48 to the real current/neighbor room types.
+            //5659f0 refuses either zero, hidden config6 and already-state2.
+            let destination_type = state.floor.descriptors[door.target_room as usize]
+                .template
+                .room_type;
+            //Type11 takes separate586300/5cc800/TEMP175 callbacks before
+            //the normal config branch; retain its current state unadmitted.
+            if source_type == 0
+                || destination_type == 0
+                || source_type == 11
+                || destination_type == 11
+            {
+                continue;
+            }
+            let Some(grid) = &mut state.room.grid else {
+                continue;
+            };
+            let column = ((door.world_position.x - 40.0) / 40.0 + 0.5).floor() as usize;
+            let row = ((door.world_position.y - 120.0) / 40.0 + 0.5).floor() as usize;
+            let Some(entity) = grid
+                .cells
+                .get_mut(column + row * usize::from(grid.width))
+                .and_then(|cell| cell.entity.as_mut())
+                .filter(|entity| entity.kind == 16)
+            else {
+                continue;
+            };
+            if entity.state == 2 || !matches!(entity.variant, 7 | 4) {
+                continue;
+            }
+            //Admitted normal configs7/4 store FSM2. Graphics refresh and
+            //other locked configs remain separate; no collision-class store.
+            entity.state = 2;
+            if door.state == "Closed" && state.room.combat_shut_door_slots.contains(&door.slot) {
+                door.state = "Opened".into();
+            }
         }
     }
     if open {
@@ -447,8 +505,7 @@ fn change_doors(state: &mut State, open: bool) {
                 .get_mut(column + row * usize::from(grid.width))
                 .and_then(|cell| cell.entity.as_mut())
             {
-                entity.state = if open { 2 } else { 1 };
-                // The next full Door::Update admits opened-door class5.
+                entity.state = 1;
                 entity.collision_class = 4;
             }
         }
@@ -474,6 +531,24 @@ pub(crate) fn direction(random: &mut Mt19937) -> WorldVector {
 }
 
 impl Npc {
+    /// ResetColor 47f430: a champion's table colour, otherwise plain white.
+    pub(crate) fn base_color(&self) -> crate::sprite_color::Color {
+        self.champion
+            .as_ref()
+            .map_or(crate::sprite_color::Color::WHITE, |champion| {
+                crate::champions::color(champion.color)
+            })
+    }
+    /// BaseUpdate after the damage drain: colour countdown, then hit flashes.
+    pub(crate) fn advance_sprite_color(
+        &mut self,
+        phase: crate::phase::Phase,
+        applied: &[crate::combat::AppliedDamage],
+    ) {
+        let base = self.base_color();
+        self.sprite_color.advance(phase, applied, base);
+    }
+
     /// Actual Entity+318 view for the supported typed NPC owners. Normal
     /// Fly/AttackFly/RoundWorm Init441c80 clears flags then47ed20 ORs4;
     /// concrete subclasses preserve their own later flag writes.
@@ -546,11 +621,14 @@ impl Npc {
             actor: String::new(),
             shooter: None,
             champion: None,
+            sprite_color: crate::sprite_color::SpriteColor::default(),
             flip_x: false,
             pathfinder: None,
             gluttony: None,
             sprite_events: SpriteEvents::default(),
             dingle: None,
+            wall_hugger: None,
+            invincible: false,
         }
     }
 

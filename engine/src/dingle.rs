@@ -22,7 +22,7 @@ pub(crate) const FAMILY: Family = Family {
     kinds: &[261],
     spawn,
     advance,
-    post_contact_grid: crate::entities::clamp_walls,
+    post_contact_grid: crate::entities::ground_collision,
     entity_flags: crate::entities::ordinary_flags,
     occupancy: crate::entities::Occupancy::Items,
 };
@@ -296,7 +296,9 @@ fn slide_event(
             .path_costs
             .as_deref_mut()
             .ok_or("Dingle poop requires source Room.Init path costs")?;
-        if let Some(mut poop) = GridEntity::spawn(14, 0, seed, random, world.game_counter, costs, index)? {
+        if let Some(mut poop) =
+            GridEntity::spawn(14, 0, seed, random, world.game_counter, costs, index)?
+        {
             // Poop.Init569600: no collision while a walking player stands on it.
             let cell = world.grid.position(index).expect("valid grid center");
             let (dx, dy) = (world.player.x - cell.x, world.player.y - cell.y);

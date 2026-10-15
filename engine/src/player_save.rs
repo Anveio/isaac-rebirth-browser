@@ -115,7 +115,6 @@ pub(crate) fn normalize_player(state: &mut State) -> Result<(), String> {
         //Real supported cache/familiar callbacks own any requested work.
         if owner.unevaluated_cache_flags != 0 {
             crate::player_stats::evaluate_cache(state)?;
-            crate::familiars::evaluate_cache(state)?;
         }
     }
     let owner = state

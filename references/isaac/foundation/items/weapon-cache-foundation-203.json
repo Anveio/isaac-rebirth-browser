@@ -1,0 +1,70 @@
+{
+  "schema": 1,
+  "scope": "Qualified weapon/cache foundation PR203, with source/build, public-ABI local differential and older original/browser EF8 evidence kept separate.",
+  "pullRequest": "https://github.com/Anveio/isaac-rebirth-browser/pull/203",
+  "sourceHead": "60ff78e3d2c4b6a4c088a8de842be6e8e99ce504",
+  "mergeCommit": "631e678693a2354a1538b6adee8b5a39ce69153c",
+  "implemented": "Requested primary selector precedes scalars; current flags and two independent eleven-component colors feed regular-tear birth. Pending cache/controller and missed prior-actor cleanup remain explicit; no unsupported regular-tear fallback.",
+  "currentSourceBuild": {
+    "producerSource": "60ff78e3d2c4b6a4c088a8de842be6e8e99ce504",
+    "productionSha256": "204226e5df46172d833d4626aa38f81157a72132c4e354c870bc0dde5a15438f",
+    "wasmSha256": "b9b094d605161f582628795f3d6e4ee572f8120f2635f72afd67f88b77443c5b",
+    "checkBuild": {
+      "exit": 0,
+      "seconds": 32.88603274599882
+    },
+    "strictClippy": {
+      "exit": 0,
+      "seconds": 21.63577994800289
+    },
+    "floorBuild": {
+      "exit": 0,
+      "seconds": 29.928021890984382
+    },
+    "sourceAndOutputsBeforeEqualsEnd": true,
+    "receiptSha256": "4bf71621743cfa790210268ed8148495bb8350156cc417ac4c3f8514e8782629",
+    "noNewOriginalBrowserGame": true
+  },
+  "headlessPublicAbiDifferential": {
+    "baselineSource": "ef01066 on876",
+    "candidateSource": "60ff78e3d2c4b6a4c088a8de842be6e8e99ce504",
+    "publicAbi": 2,
+    "commands": 405,
+    "snapshots": 406,
+    "fieldComparisons": 6809577,
+    "differences": 0,
+    "status": "PASS",
+    "inputAndWasmPinsBeforeEqualsEnd": true,
+    "receiptSha256": "3ace0b30ba3de3812215a8b668683462ac589b54fa549b9cbb510308a8f1f54d",
+    "scope": "Actual independently declared recorded public commands through WASM C ABI; local differential only, no native or browser/render acceptance."
+  },
+  "retainedOriginalRegularActorReplay": {
+    "cases": 8,
+    "baselineSource": "34b61642, tree-equivalent8c5ad979",
+    "baselineProductionSha256": "718973f55aff3243b34c7b5df21661486977f418cc9ef34a9a7af3e8d7352411",
+    "candidateSource": "ef01066dc0a74bcdbefbb0c5f805041464d19006",
+    "candidateProductionSha256": "72671e6baa0ed57af25a53b7b6e1e6a92e1d7591779f8267a2481aed919a7ab9",
+    "comparisonsPerBrowser": 231387,
+    "failuresPerBrowser": 24,
+    "passingCases": 7,
+    "failingCases": 1,
+    "newFailingComparisons": 0,
+    "lostExecutedComparisons": 0,
+    "integrityErrors": 0,
+    "coverageGaps": 0,
+    "actualHostWaitReturnCode": 1,
+    "functionalStatus": "FAIL with24 retained differences",
+    "nonregressionStatus": "PASS within same cases and executed fields",
+    "freshNativeProcesses": false,
+    "newEntropyDraws": false,
+    "auditSha256": "e4a6df9aa64dba6aafee9a5f71000f670ebcaef6ec436c91afd91ec351ccf3c9",
+    "closedReleaseSha256": "4cad23168ee3b7e22bdf65fb75c2f83517b3aa79970a0a182abc1564cb20ae55",
+    "scope": "Two immutable browser artifacts against one explicitly retained original bank; old artifact scopes, not current-main whole-game acceptance."
+  },
+  "unqualified": [
+    "All24 item257 transformed-tear authored-clip differences remain; no clip relabel.",
+    "All616 actual native tear-seed comparisons remain different; native position/vertical aliases and complete shared MT are unqualified.",
+    "Ordinary Player Knife/Brimstone/Ludovico and triple gameplay, registered-slot switching, temporary expiry and broader modifiers remain pending.",
+    "Public Challenge ingress, ambient33/68 and shared-MT startup source leaves are separate and receive no implementation or gameplay credit here."
+  ]
+}

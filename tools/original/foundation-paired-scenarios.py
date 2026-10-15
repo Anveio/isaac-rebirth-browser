@@ -41,6 +41,8 @@ SCENARIOS = [
      'systems': ['menu-navigation', 'room-connectivity', 'locomotion', 'input-determinism']},
     {'id': 'paired-pause-transition', 'description': 'Escape during the upper room transition is refused; the next Escape pauses',
      'systems': ['menu-navigation', 'room-connectivity', 'locomotion', 'input-determinism']},
+    {'id': 'paired-wall-hugger-contact', 'description': 'Recorded #154 run: start-room Wall Huggers crawl into the player before the bomb blast',
+     'systems': ['npc-ai', 'entity-collision', 'health-inventory', 'bombs', 'locomotion', 'input-determinism']},
     {'id': 'paired-random-run', 'description': 'Fresh OS-random run seed and recorded randomized movement, firing, coasting, pause and bomb actions',
      'systems': ['locomotion', 'projectile-physics', 'bombs', 'menu-navigation', 'input-determinism'],
      'randomized': True},
@@ -57,6 +59,12 @@ def advance(tape, count, label=None):
         tape.append({'type': 'capture', 'label': label})
 
 
+# The #154 run, first drawn OS-randomly before #170 and retained verbatim:
+# CQHR 8NEH's Wall Huggers touch the player before its bomb detonates.
+WALL_HUGGER_SEED = 'CQHR 8NEH'
+WALL_HUGGER_ACTIONS = [('s', 'Right', 18, 12), ('w', 'Left', 26, 16), ('s', 'Right', 31, 31)]
+
+
 # Contrived room-transition pause cases own a seed whose start room has an
 # ordinary room above the spawn point (#168).
 TRANSITION_SEED = '0EWL B4FT'
@@ -66,6 +74,8 @@ TRANSITION_ESCAPE_FRAMES = {'paired-pause-before-transition': 30, 'paired-pause-
 def build(identifier, seed):
     if identifier in TRANSITION_ESCAPE_FRAMES:
         seed = TRANSITION_SEED
+    if identifier == 'paired-wall-hugger-contact':
+        seed = WALL_HUGGER_SEED
     if identifier == 'paired-title-menu':
         tape = scenarios.build_scenario('title-animation-fade', seed)
         boundary = 'title-first'
@@ -112,6 +122,18 @@ def build(identifier, seed):
                 advance(tail, 40, 'transition-escape-1')
                 key(tail, 'Escape', True); advance(tail, 1); key(tail, 'Escape', False)
                 advance(tail, 30, 'transition-escape-2')
+            elif identifier == 'paired-wall-hugger-contact':
+                for index, (movement, shooting, held, coasting) in enumerate(WALL_HUGGER_ACTIONS):
+                    key(tail, movement, True); key(tail, shooting, True)
+                    advance(tail, held, f'random-held-{index}')
+                    key(tail, movement, False); key(tail, shooting, False)
+                    advance(tail, coasting, f'random-coasting-{index}')
+                key(tail, 'Escape', True); advance(tail, 1); key(tail, 'Escape', False)
+                advance(tail, 43, 'random-paused')
+                key(tail, 'Escape', True); advance(tail, 1); key(tail, 'Escape', False)
+                advance(tail, 27, 'random-resumed')
+                key(tail, 'e', True); advance(tail, 1); key(tail, 'e', False)
+                advance(tail, 133, 'random-after-bomb')
             elif identifier == 'paired-random-run':
                 draw = random.Random(f'paired-random-run:{seed}')
                 for index in range(3):

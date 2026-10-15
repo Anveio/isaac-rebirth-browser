@@ -131,6 +131,56 @@ def random_cases(count):
     raise RuntimeError(f'Only {len(found)} isolated ordinary rock rooms found in 10000 OS-random candidates')
 
 
+# Room283 (variant282) seen through the starting room's top door. The bomb
+# sits in the bottom notch beside Block(5,4); Isaac walks round to the notch
+# above it, 77 native units away and inside the 85-unit blast circle. The
+# original rejects both knockback and damage through Room::CheckLine.
+BLOCK_ROOM = 283
+BLOCK_ROUTE = [('w', 74), (None, 40), ('w', 12), (None, 20), ('a', 15), (None, 20), ('e', 1),
+               ('d', 12), (None, 15), ('w', 18), (None, 15), ('a', 15), (None, 120)]
+
+
+def block_case(name, code, entropy, **extra):
+    return {'name': name, 'code': code, 'seedValue': clock.codec.decode_seed(code), 'delay': 0, 'slot': 1,
+            'actions': [{'key': key, 'frames': frames} for key, frames in BLOCK_ROUTE],
+            'entropy': entropy, 'cohort': 'block-line', **extra}
+
+
+def random_block_case():
+    decoder = load('rock_rooms', 'tools/foundation/decode-rooms.py')
+    rooms = decoder.decode(ROOT / 'references/isaac/rebirth/resources/rooms/01.basement.stb')
+    occupied = {group['x'] + 1 + (group['y'] + 1) * 15
+                for group in rooms[BLOCK_ROOM]['spawns'] if group['entries']}
+    for attempt in range(1, 20001):
+        run_seed = secrets.randbelow(0xffffffff) + 1
+        result = subprocess.run([str(ROOT / 'engine/target/debug/floor')],
+            input=json.dumps({'stageSeed': clock.codec.initial_stage_seed(run_seed)}),
+            capture_output=True, text=True, check=True)
+        floor = json.loads(result.stdout)
+        index = floor['descriptors'][floor['startingDescriptor']]['neighbors'][1]
+        if index is None:
+            continue
+        descriptor = floor['descriptors'][index]
+        if descriptor['assetStage'] != 1 or descriptor['catalogIndex'] != BLOCK_ROOM:
+            continue
+        first = next11(descriptor['spawnSeed'])
+        second = next11(first)
+        if first % 13 + 1 + (second % 7 + 1) * 15 in occupied:
+            continue
+        # Exclude natural kind5/6 rolls exactly as the ordinary cohort does.
+        group_seed, ordinary = second, True
+        for group in rooms[BLOCK_ROOM]['spawns']:
+            group_seed = next11(group_seed)
+            if group['entries'] and next35(group_seed) % 1001 < 16:
+                ordinary = False
+                break
+        if not ordinary:
+            continue
+        return block_case('random-block-line', clock.codec.encode_seed(run_seed), 'OS secrets',
+                          discoveryAttempts=attempt)
+    raise RuntimeError('No ordinary Room283 above the start room in 20000 OS-random candidates')
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--count', type=int, default=2)
@@ -156,7 +206,9 @@ def main():
     regressions = json.loads((ROOT / 'references/isaac/foundation/rock-blast/known-regressions.json').read_text())['cases']
     print(json.dumps({'schema': 1, 'bootEpochSeed': 1700000000,
                       'source': 'Public seed and key events only; authored discovery never enters WASM',
-                      'cases': contrived + random_cases(args.count) + regressions}))
+                      'cases': contrived + [block_case('block-line', '286TWPAC',
+                                                       'Contrived public route behind a natural Block')]
+                      + random_cases(args.count) + [random_block_case()] + regressions}))
     return 0
 
 

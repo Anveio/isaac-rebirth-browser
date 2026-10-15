@@ -39,7 +39,8 @@ pub struct BossScene {
 /// ordinary admission; special large rooms keep their own gates.
 fn admitted_shape(template: &crate::room_templates::AuthoredTemplate) -> bool {
     match (template.width, template.height) {
-        (13, 7) => matches!(template.room_type, 1 | 4 | 7 | 8 | 10 | 12),
+        // Sacrifice rooms (13) have no Room.Init branch of their own.
+        (13, 7) => matches!(template.room_type, 1 | 4 | 7 | 8 | 10 | 12 | 13),
         (13, 14) | (26, 7) | (26, 14) => template.room_type == 1,
         _ => false,
     }
@@ -72,6 +73,13 @@ fn supported_boss(descriptor: &crate::floor::Descriptor) -> bool {
                 && (room_type == 6
                     || crate::content::boss_presentation(npc.kind, npc.variant).is_some()))
     })
+}
+
+/// Whether the player may leave through a doorway into `destination`: an
+/// admitted shape, or a supported boss or miniboss room. The single owner of
+/// doorway admission, public so tools route by the engine's rule.
+pub fn admits(destination: &crate::floor::Descriptor) -> bool {
+    admitted_shape(&destination.template) || supported_boss(destination)
 }
 
 /// Game551a10 supplies the room's authored boss presentation. Source
@@ -173,7 +181,7 @@ pub(crate) fn check_departure(state: &mut State) {
         }
         let target_room = door.target_room as usize;
         let destination = &state.floor.descriptors[target_room];
-        if !admitted_shape(&destination.template) && !supported_boss(destination) {
+        if !admits(destination) {
             continue;
         }
         let normal = outward(door.slot);
@@ -280,10 +288,16 @@ pub(crate) fn advance_transition(state: &mut State, phase: Phase) -> bool {
         .persisted_rooms
         .insert(state.current_room, state.room.clone());
     state.current_room = transition.target_room;
-    state.room = state
-        .persisted_rooms
-        .remove(&state.current_room)
-        .unwrap_or_else(|| Room::from_floor_descriptor(&state.floor, state.current_room));
+    state.room = match state.persisted_rooms.remove(&state.current_room) {
+        Some(room) => room,
+        None => {
+            let mut room = Room::from_floor_descriptor(&state.floor, state.current_room);
+            if let Some(grid) = room.grid.as_mut() {
+                crate::grid::link_pits(grid, &mut state.boot_lifecycle.shared);
+            }
+            room
+        }
+    };
     state.room.initialize_path_costs();
     state.visited_rooms.insert(state.current_room);
     let door = state

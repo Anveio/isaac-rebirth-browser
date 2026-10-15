@@ -1,4 +1,4 @@
-import { Assets, type SpriteColor } from "./animation";
+import { Assets } from "./animation";
 import { MenuRenderer } from "./menu";
 import { GLMenuContext, type GLSurface } from "./gl-menu";
 import { StageComposer, type StageTargets } from "./gl-stage";
@@ -8,14 +8,14 @@ import type { ActorSprite, Room, RoomAppearance, RoomQuad, State } from "./engin
 
 const PLAYER = "gfx/001.000_player.anm2";
 const TEAR = "gfx/002.000_tear.anm2";
-// Static champion Colors at 0x8ec700 (built 0x40aa42..0x40ac23): tint RGBA
-// and offset RGB. ResetColor 47f430 copies the entry into the sprite color.
-const CHAMPION_OFFSET = 200 / 255;
-const CHAMPION_COLORS: readonly SpriteColor[] = [
-  [1, .1, .1, 1], [.6, .6, 0, 1], [.1, .8, .2, 1], [1, .6, .2, 1], [.2, .2, 1, 1], [0, .15, .15, 1],
-  [1, 1, 1, 1, CHAMPION_OFFSET], [.5, .5, .5, 1], [1, 1, 1, .3, CHAMPION_OFFSET], [0, 0, 0, 1],
-  [1, 0, 1, 1], [.75, 0, 1, 1], [.5, 0, 0, 1], [.5, .5, 1, 1],
-].map(([r, g, b, a, offset = 0]) => ({ tint: [r!, g!, b!, a!].map(Math.fround), offsets: [offset, offset, offset].map(Math.fround) }));
+// Rock Init 56ed00 / Render 56bf80: an intact (state 1) rock-family grid
+// entity sets frame variant of its type's grid_rock.anm2 animation.
+const ROCK_ANIMATIONS: Record<number, string> = { 2: "normal", 3: "black", 4: "tinted", 5: "bombrock", 6: "alt" };
+function rockSprite(kind: number, variant: number): { animation: string; frame: number } | undefined {
+  const animation = ROCK_ANIMATIONS[kind];
+  if (!animation) return undefined;
+  return kind === 2 && variant >= 1000 ? { animation: "big", frame: variant - 1000 } : { animation, frame: variant };
+}
 const directionName = (direction: string) => direction[0]!.toUpperCase() + direction.slice(1);
 
 export class Renderer {
@@ -27,8 +27,15 @@ export class Renderer {
   private readonly floor: GLSurface;
   private readonly walls: GLSurface;
   private roomKey = "";
+  // Room-transition snapshots of the old and new world layers.
+  private readonly slideOld: GLSurface;
+  private readonly slideNew: GLSurface;
+  private slideKey: string | null = null;
+  private slideNewReady = false;
+  private slideRecord: { npcs: Renderer["drawnNpcs"]; grid: Renderer["drawnGrid"] } = { npcs: [], grid: [] };
   // Sprite scale of every NPC the latest frame drew, for live render contracts.
   private drawnNpcs: { kind: number; spawnSeed: number; scale: [number, number] }[] = [];
+  private drawnGrid: { index: number; kind: number; animation: string; frame: number }[] = [];
   private constructor(private readonly canvas: HTMLCanvasElement, private readonly assets: Assets,
     private readonly graphics: GLMenuContext) {
     this.context = canvas.getContext("2d", { alpha: false })!;
@@ -37,6 +44,9 @@ export class Renderer {
     this.presentation = new RunPresentation(assets);
     this.pickups = new PickupRenderer(assets);
     this.floor = graphics.createTarget(1024, 512);
+    const screen = graphics.screenSurface();
+    this.slideOld = graphics.createTarget(screen.width, screen.height);
+    this.slideNew = graphics.createTarget(screen.width, screen.height);
     this.walls = graphics.createTarget(1024, 512);
   }
   static async load(canvas: HTMLCanvasElement): Promise<Renderer> {
@@ -45,7 +55,7 @@ export class Renderer {
     return new Renderer(canvas, assets, graphics);
   }
   draw(state: State): void {
-    this.drawnNpcs = [];
+    this.drawnNpcs = []; this.drawnGrid = [];
     const gl = this.graphics;
     if (state.screen === "playing") {
       this.prepareRoom(state.room);
@@ -62,163 +72,10 @@ export class Renderer {
     }
     else if (state.screen !== "playing") this.menu.draw(ctx, state);
     else {
-      ctx.save();
-      if (state.camera) ctx.translate(state.camera.scroll.x, state.camera.scroll.y);
-      this.drawRoom(state.room.appearance);
-      ctx.restore();
-      this.stage.ground(state.stageEffects);
-      ctx.save();
-      if (state.camera) ctx.translate(state.camera.scroll.x, state.camera.scroll.y);
-      const grid = state.room.grid;
-      if (grid) for (const [index, cell] of grid.cells.entries()) {
-        const entity = cell.entity;
-        if (!entity) continue;
-        const x = (40 + index % grid.width * 40) * 0.65 + 32;
-        const y = (120 + Math.floor(index / grid.width) * 40) * 0.65 - 46;
-        if (entity.kind === 2 && entity.state === 1)
-          this.assets.draw(ctx, "gfx/grid/grid_rock.anm2", entity.variant >= 1000 ? "big" : "normal",
-            x, y, entity.variant >= 1000 ? entity.variant - 1000 : entity.variant);
-        else if (entity.kind === 8 && entity.state === 0)
-          this.assets.draw(ctx, "gfx/grid/grid_spikes.anm2", `Spikes${String(entity.variant).padStart(2, "0")}`, x, y);
-      }
-      this.pickups.draw(ctx, state);
-      for (const npc of state.room.npcs) {
-        if (npc.removed || (npc.dead && !npc.monstro && !npc.dip) || (!npc.keeper && !npc.visible)) continue;
-        // Sprite Scale (+2c4): 1.15 for champions, otherwise the fresh 1.
-        const scale = npc.champion?.scale ?? 1;
-        this.drawnNpcs.push({ kind: npc.kind, spawnSeed: npc.spawnSeed, scale: [scale, scale] });
-        const keeper = npc.keeper;
-        if (keeper) {
-          this.assets.draw(ctx, "gfx/017.002_secret room keeper.anm2", keeper.animation,
-            npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46, keeper.animationClock,
-            { scale, overrides: { 0: {
-              RedTint: keeper.tint[0]! * 255, GreenTint: keeper.tint[1]! * 255, BlueTint: keeper.tint[2]! * 255,
-              AlphaTint: keeper.tint[3]! * 255, RedOffset: keeper.offsets[0]! * 255,
-              GreenOffset: keeper.offsets[1]! * 255, BlueOffset: keeper.offsets[2]! * 255,
-            } } });
-        } else if (npc.monstro) {
-          ctx.save();
-          ctx.translate(npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46);
-          ctx.scale(npc.monstro.flipX ? -1 : 1, 1);
-          this.assets.draw(ctx, "gfx/020.000_monstro.anm2", npc.animation,
-            0, 0, npc.animationClock, { scale });
-          ctx.restore();
-        } else if (npc.dip) {
-          ctx.save();
-          ctx.translate(npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46);
-          ctx.scale(npc.dip.flipX ? -1 : 1, 1);
-          this.assets.draw(ctx, "gfx/216.000_dip.anm2", npc.animation, 0, 0, npc.animationClock,
-            { scale, overrides: { 0: {
-              RedTint: npc.dip.tint[0]! * 255, GreenTint: npc.dip.tint[1]! * 255,
-              BlueTint: npc.dip.tint[2]! * 255, AlphaTint: npc.dip.tint[3]! * 255,
-              RedOffset: npc.dip.offsets[0]! * 255, GreenOffset: npc.dip.offsets[1]! * 255,
-              BlueOffset: npc.dip.offsets[2]! * 255,
-            } } });
-          ctx.restore();
-        } else if (npc.fireplace) {
-          this.assets.draw(ctx, "gfx/033.000_fireplace.anm2", npc.animation,
-            npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46, npc.animationClock,
-            { scale, layerScales: { 1: [npc.fireplace.flameScale, npc.fireplace.flameScale] } });
-        } else if (npc.actor) {
-          // Catalogue-driven families: the engine names the authored actor.
-          ctx.save();
-          ctx.translate(npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46);
-          ctx.scale(npc.flipX ? -1 : 1, 1);
-          // Champions draw with their table Color and the ×1.15 sprite scale.
-          this.assets.draw(ctx, npc.actor, npc.animation, 0, 0, npc.animationClock,
-            { scale, color: npc.champion && CHAMPION_COLORS[npc.champion.color] });
-          ctx.restore();
-        } else {
-          this.assets.draw(ctx, npc.kind === 13 ? "gfx/013.000_fly.anm2" : npc.kind === 18 ? "gfx/018.000_attack fly.anm2" : npc.kind === 214 ? "gfx/213.000_level2fly.anm2" : "gfx/244.000_round worm.anm2", npc.animation,
-            npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46, npc.animationFrame, { scale });
-        }
-      }
-      for (const familiar of state.familiars) {
-        if (!familiar.visible || !familiar.active || familiar.removed) continue;
-        ctx.save();
-        ctx.translate(familiar.presentedPosition.x * 0.65 + 32,
-          familiar.presentedPosition.y * 0.65 - 46);
-        ctx.scale(familiar.sprite.flipX ? -1 : 1, 1);
-        this.assets.draw(ctx, "gfx/003.056_leech.anm2", familiar.sprite.animation,
-          familiar.sprite.offset.x * 0.65, familiar.sprite.offset.y * 0.65, familiar.sprite.frame);
-        ctx.restore();
-      }
-      for (const laser of state.lasers) {
-        if (laser.removed) continue;
-        // Render479c20's quad builder is not decoded: tile the beam layer from
-        // pos+offset along the sprite rotation and cap it with the tip layer.
-        const start = { x: laser.presentedPosition.x + laser.positionOffset.x, y: laser.presentedPosition.y + laser.positionOffset.y };
-        const body = this.assets.layerFrame(laser.actor, laser.animation, 1, laser.animationClock);
-        const tile = body?.Height ? body.Height : 0;
-        if (laser.length > 15 && tile > 0) {
-          ctx.save();
-          ctx.translate(start.x * 0.65 + 32, start.y * 0.65 - 46);
-          ctx.rotate(laser.rotation * Math.PI / 180);
-          for (let along = 0; along < laser.length; along += tile)
-            this.assets.draw(ctx, laser.actor, laser.animation, 0, along * 0.65, laser.animationClock, { scale: 0.65, layers: [1], layerScales: { 1: [laser.scale.x, 1] } });
-          this.assets.draw(ctx, laser.actor, laser.animation, 0, laser.length * 0.65, laser.animationClock, { scale: 0.65, layers: [0], layerScales: { 0: [laser.scale.x, 1] } });
-          ctx.restore();
-        }
-        const impact = laser.impact;
-        if (impact && !impact.removed) {
-          ctx.save();
-          ctx.translate((impact.position.x + impact.positionOffset.x) * 0.65 + 32, (impact.position.y + impact.positionOffset.y) * 0.65 - 46);
-          ctx.rotate(impact.rotation * Math.PI / 180);
-          ctx.scale(impact.scale.x, impact.scale.y);
-          this.assets.draw(ctx, impact.actor, impact.animation, 0, 0, impact.animationClock);
-          ctx.restore();
-        }
-      }
-      for (const projectile of state.enemyProjectiles)
-        if (!projectile.removed && projectile.animation)
-          this.assets.draw(ctx, "gfx/009.000_projectile.anm2", projectile.animation,
-            projectile.presentedPosition.x * 0.65 + 32, (projectile.presentedPosition.y + projectile.height) * 0.65 - 46, projectile.animationFrame, { scale: projectile.scale });
-      for (const particle of state.fireParticles)
-        if (!particle.removed && particle.visible)
-          this.assets.draw(ctx, "gfx/1000.066_ember particle.anm2", "Idle",
-            particle.presentedPosition.x * 0.65 + 32, particle.presentedPosition.y * 0.65 - 46, particle.animationClock);
-      this.drawPlayer(ctx, state);
-      for (const tear of state.tears)
-        this.assets.draw(ctx, TEAR, `RegularTear${tear.animationTier}`, Math.round(tear.x * 2) / 2, Math.round(tear.y * 2) / 2, tear.age);
-      for (const impact of state.impacts)
-        this.assets.draw(ctx, "gfx/1000.012_tear poof_small.anm2", "Poof", impact.x, impact.y, impact.age);
-      for (const bomb of state.bombs)
-        if (bomb.motion.lifetime === "alive")
-          this.assets.draw(ctx, bomb.variant === 3 ? "gfx/004.003_troll bomb.anm2" : bomb.variant === 4 ? "gfx/004.004_megatroll bomb.anm2" : "gfx/004.000_bomb.anm2", bomb.animation, bomb.x, bomb.y - 1, bomb.animationFrame, { pixelSnap: this.canvas.width / 480 / 2 });
-      for (const explosion of state.explosions) {
-        this.assets.draw(ctx, "gfx/1000.001_bomb explosion.anm2", "Explosion", explosion.x, explosion.y - 1, explosion.animationFrame, { pixelSnap: this.canvas.width / 480 / 2 });
-      }
-      for (const bomb of state.bombs)
-        if (bomb.motion.lifetime === "exploding")
-          this.assets.draw(ctx, bomb.variant === 3 ? "gfx/004.003_troll bomb.anm2" : bomb.variant === 4 ? "gfx/004.004_megatroll bomb.anm2" : "gfx/004.000_bomb.anm2", bomb.animation, bomb.x, bomb.y - 1, bomb.animationFrame, { pixelSnap: this.canvas.width / 480 / 2 });
-      for (const effect of state.spriteEffects) {
-        // Source31f dead can coexist with31e active until a later Remove.
-        if (!effect.visible || !effect.active) continue;
-        if (effect.variant === 58 || effect.variant === 43) {
-          const sprite = effect.sprite, controller = effect.poopEffect;
-          const rotation = controller && "particle58" in controller && typeof controller.particle58 === "object"
-            ? controller.particle58.flying.layerRotation : 0;
-          ctx.save();
-          ctx.translate((effect.presentedPosition.x + effect.renderOffset.x + sprite.offset.x) * 0.65 + 32,
-            (effect.presentedPosition.y + effect.renderOffset.y + sprite.offset.y) * 0.65 - 46);
-          ctx.scale(sprite.flipX ? -1 : 1, sprite.flipY ? -1 : 1);
-          this.assets.draw(ctx, effect.variant === 58 ? "gfx/1000.058_poop particle.anm2" : "gfx/1000.043_poop explosion.anm2",
-            sprite.animation, 0, 0, sprite.frame, { layerScales: {0: [sprite.scale.x, sprite.scale.y]}, overrides: {0: {
-              Rotation: rotation, RedTint: sprite.tint[0] * 255, GreenTint: sprite.tint[1] * 255,
-              BlueTint: sprite.tint[2] * 255, AlphaTint: sprite.tint[3] * 255,
-              RedOffset: sprite.offsets[0] * 255, GreenOffset: sprite.offsets[1] * 255, BlueOffset: sprite.offsets[2] * 255,
-            }} });
-          ctx.restore();
-          continue;
-        }
-        this.drawEffect(ctx, effect.variant, effect.sprite,
-          (effect.presentedPosition.x + effect.sprite.offset.x) * 0.65 + 32,
-          (effect.presentedPosition.y + effect.sprite.offset.y) * 0.65 - 46);
-      }
-      ctx.restore();
-      this.stage.foreground(state.stageEffects);
+      this.drawWorldOrSlide(ctx, state);
       this.presentation.introduction(ctx, state);
       this.hud(ctx, state);
+      this.presentation.bossBar(ctx, state);
       const info = state.informationAnimation;
       if (info.state === 2 && info.definitionLoaded && info.currentActor && info.currentClip)
         this.assets.draw(ctx, info.currentActor, info.currentClip, 240, 135, info.frame,
@@ -241,8 +98,251 @@ export class Renderer {
     this.context.reset(); this.context.imageSmoothingEnabled = false;
     this.context.drawImage(gl.canvas, 0, 0);
   }
+  /** Entity_Laser::Render 479c20, two-layer variant path 47a650: the tip
+   * layer as an ordinary ANM2 draw at the mouth, then (length > 15) one body
+   * quad from 16 px past the mouth to the end, whose V runs 0.65*length
+   * texels over the repeating 64-texel layer-1 column (SetWrap GL_REPEAT). */
+  private drawLaser(ctx: CanvasRenderingContext2D, laser: State["lasers"][number]): void {
+    const origin = { x: laser.presentedPosition.x + laser.positionOffset.x, y: laser.presentedPosition.y + laser.positionOffset.y };
+    const screen = (x: number, y: number): [number, number] => [Math.fround(x * 0.65 + 32), Math.fround(y * 0.65 - 46)];
+    const s0 = screen(origin.x, origin.y);
+    ctx.save();
+    ctx.translate(s0[0], s0[1]);
+    ctx.rotate(laser.rotation * Math.PI / 180);
+    this.assets.draw(ctx, laser.actor, laser.animation, 0, 0, laser.animationClock,
+      { layers: [0], layerScales: { 0: [laser.scale.x, laser.scale.y] } });
+    ctx.restore();
+    if (!(laser.length > 15)) return;
+    const tip = this.assets.layerFrame(laser.actor, laser.animation, 0, laser.animationClock);
+    const body = this.assets.layerFrame(laser.actor, laser.animation, 1, laser.animationClock);
+    const backend = ctx as unknown as { drawTintedImageQuad?: (source: CanvasImageSource, tint: number[], offsets: number[], crop: readonly [number, number, number, number], points: readonly (readonly [number, number])[], pixelSize?: number) => void };
+    if (!tip || !body || !backend.drawTintedImageQuad) return;
+    const radians = laser.angle * Math.PI / 180, dir = [Math.cos(radians), Math.sin(radians)] as const;
+    const along = [dir[0] * 0.5 * tip.Height!, dir[1] * 0.5 * tip.Height!];
+    const reach = laser.length - 0.5 * tip.Height! / 0.65;
+    const s1 = screen(origin.x + dir[0] * reach, origin.y + dir[1] * reach);
+    const half = 0.5 * body.Width! * body.XScale * laser.scale.x, side = [dir[1] * half, -dir[0] * half];
+    const a0 = [s0[0] + along[0] - side[0], s0[1] + along[1] - side[1]];
+    const u = [2 * side[0], 2 * side[1]];
+    const a1 = [s1[0] + along[0] - side[0], s1[1] + along[1] - side[1]];
+    const texels = 0.65 * laser.length, v = [(a1[0] - a0[0]) / texels, (a1[1] - a0[1]) / texels];
+    const point = (fu: number, tv: number): [number, number] => [a0[0] + u[0] * fu + v[0] * tv, a0[1] + u[1] * fu + v[1] * tv];
+    const sheet = this.assets.layerImage(laser.actor, 1);
+    const tint = [body.RedTint, body.GreenTint, body.BlueTint, body.AlphaTint];
+    const offsets = [body.RedOffset, body.GreenOffset, body.BlueOffset];
+    const column = sheet.height;
+    for (let start = 0; start < texels; start += column) {
+      const end = Math.min(texels, start + column);
+      backend.drawTintedImageQuad(sheet, tint, offsets, [body.XCrop!, body.YCrop!, body.Width!, end - start],
+        [point(0, start), point(1, start), point(0, end), point(1, end)]);
+    }
+  }
+  /** Room::Render world layer: backdrop, grid, actors and stage composites. */
+  private drawWorld(ctx: CanvasRenderingContext2D, state: State, hidePlayer = false): void {
+    ctx.save();
+    if (state.camera) ctx.translate(state.camera.scroll.x, state.camera.scroll.y);
+    this.drawRoom(state.room.appearance);
+    ctx.restore();
+    this.stage.ground(state.stageEffects);
+    ctx.save();
+    if (state.camera) ctx.translate(state.camera.scroll.x, state.camera.scroll.y);
+    const grid = state.room.grid;
+    if (grid) for (const [index, cell] of grid.cells.entries()) {
+      const entity = cell.entity;
+      if (!entity) continue;
+      const x = (40 + index % grid.width * 40) * 0.65 + 32;
+      // Grid Render projects through WorldToScreen 42eb00 (0.65y - 47);
+      // the -46 actor anchor sits one logical pixel lower.
+      const y = (120 + Math.floor(index / grid.width) * 40) * 0.65 - 47;
+      const rock = entity.state === 1 ? rockSprite(entity.kind, entity.variant) : undefined;
+      if (entity.kind === 7) {
+        // GridEntity_Pit 5684c0 stores its autotile frame as the variant.
+        this.assets.draw(ctx, "gfx/grid/grid_pit.anm2", "pit", x, y, entity.variant);
+        this.drawnGrid.push({ index, kind: 7, animation: "pit", frame: entity.variant });
+      } else if (rock) {
+        this.assets.draw(ctx, "gfx/grid/grid_rock.anm2", rock.animation, x, y, rock.frame);
+        this.drawnGrid.push({ index, kind: entity.kind, ...rock });
+      } else if (entity.kind === 8 && entity.state === 0)
+        this.assets.draw(ctx, "gfx/grid/grid_spikes.anm2", `Spikes${String(entity.variant).padStart(2, "0")}`, x, y);
+    }
+    this.pickups.draw(ctx, state);
+    for (const npc of state.room.npcs) {
+      if (npc.removed || (npc.dead && !npc.monstro && !npc.dip) || (!npc.keeper && !npc.visible)) continue;
+      // Sprite Scale (+2c4): 1.15 for champions, otherwise the fresh 1.
+      const scale = npc.champion?.scale ?? 1;
+      // Sprite Color (+2d0): champion table colour or a timed hit flash.
+      const color = { tint: npc.spriteColor.current.tint, offsets: npc.spriteColor.current.offset };
+      this.drawnNpcs.push({ kind: npc.kind, spawnSeed: npc.spawnSeed, scale: [scale, scale] });
+      const keeper = npc.keeper;
+      if (keeper) {
+        this.assets.draw(ctx, "gfx/017.002_secret room keeper.anm2", keeper.animation,
+          npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46, keeper.animationClock,
+          { scale, overrides: { 0: {
+            RedTint: keeper.tint[0]! * 255, GreenTint: keeper.tint[1]! * 255, BlueTint: keeper.tint[2]! * 255,
+            AlphaTint: keeper.tint[3]! * 255, RedOffset: keeper.offsets[0]! * 255,
+            GreenOffset: keeper.offsets[1]! * 255, BlueOffset: keeper.offsets[2]! * 255,
+          } } });
+      } else if (npc.monstro) {
+        ctx.save();
+        ctx.translate(npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46);
+        ctx.scale(npc.monstro.flipX ? -1 : 1, 1);
+        this.assets.draw(ctx, "gfx/020.000_monstro.anm2", npc.animation,
+          0, 0, npc.animationClock, { scale, color });
+        ctx.restore();
+      } else if (npc.dip) {
+        ctx.save();
+        ctx.translate(npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46);
+        ctx.scale(npc.dip.flipX ? -1 : 1, 1);
+        this.assets.draw(ctx, "gfx/216.000_dip.anm2", npc.animation, 0, 0, npc.animationClock,
+          { scale, overrides: { 0: {
+            RedTint: npc.dip.tint[0]! * 255, GreenTint: npc.dip.tint[1]! * 255,
+            BlueTint: npc.dip.tint[2]! * 255, AlphaTint: npc.dip.tint[3]! * 255,
+            RedOffset: npc.dip.offsets[0]! * 255, GreenOffset: npc.dip.offsets[1]! * 255,
+            BlueOffset: npc.dip.offsets[2]! * 255,
+          } } });
+        ctx.restore();
+      } else if (npc.fireplace) {
+        this.assets.draw(ctx, "gfx/033.000_fireplace.anm2", npc.animation,
+          npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46, npc.animationClock,
+          { scale, layerScales: { 1: [npc.fireplace.flameScale, npc.fireplace.flameScale] } });
+      } else if (npc.actor) {
+        // Catalogue-driven families: the engine names the authored actor.
+        ctx.save();
+        ctx.translate(npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46);
+        ctx.scale(npc.flipX ? -1 : 1, 1);
+        this.assets.draw(ctx, npc.actor, npc.animation, 0, 0, npc.animationClock, { scale, color });
+        ctx.restore();
+      } else {
+        this.assets.draw(ctx, npc.kind === 13 ? "gfx/013.000_fly.anm2" : npc.kind === 18 ? "gfx/018.000_attack fly.anm2" : npc.kind === 214 ? "gfx/213.000_level2fly.anm2" : "gfx/244.000_round worm.anm2", npc.animation,
+          npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46, npc.animationFrame, { scale, color });
+      }
+    }
+    for (const familiar of state.familiars) {
+      if (!familiar.visible || !familiar.active || familiar.removed) continue;
+      ctx.save();
+      ctx.translate(familiar.presentedPosition.x * 0.65 + 32,
+        familiar.presentedPosition.y * 0.65 - 46);
+      ctx.scale(familiar.sprite.flipX ? -1 : 1, 1);
+      this.assets.draw(ctx, "gfx/003.056_leech.anm2", familiar.sprite.animation,
+        familiar.sprite.offset.x * 0.65, familiar.sprite.offset.y * 0.65, familiar.sprite.frame);
+      ctx.restore();
+    }
+    for (const laser of state.lasers) {
+      if (laser.removed) continue;
+      // The impact effect keys 500 below its laser, so it draws under the beam.
+      const impact = laser.impact;
+      if (impact && !impact.removed) {
+        ctx.save();
+        ctx.translate((impact.position.x + impact.positionOffset.x) * 0.65 + 32, (impact.position.y + impact.positionOffset.y) * 0.65 - 46);
+        ctx.rotate(impact.rotation * Math.PI / 180);
+        ctx.scale(impact.scale.x, impact.scale.y);
+        this.assets.draw(ctx, impact.actor, impact.animation, 0, 0, impact.animationClock);
+        ctx.restore();
+      }
+      this.drawLaser(ctx, laser);
+    }
+    for (const projectile of state.enemyProjectiles)
+      if (!projectile.removed && projectile.animation)
+        this.assets.draw(ctx, "gfx/009.000_projectile.anm2", projectile.animation,
+          projectile.presentedPosition.x * 0.65 + 32, (projectile.presentedPosition.y + projectile.height) * 0.65 - 46, projectile.animationFrame, { scale: projectile.scale });
+    for (const particle of state.fireParticles)
+      if (!particle.removed && particle.visible)
+        this.assets.draw(ctx, "gfx/1000.066_ember particle.anm2", "Idle",
+          particle.presentedPosition.x * 0.65 + 32, particle.presentedPosition.y * 0.65 - 46, particle.animationClock);
+    if (!hidePlayer) this.drawPlayer(ctx, state);
+    for (const tear of state.tears)
+      this.assets.draw(ctx, TEAR, `RegularTear${tear.animationTier}`, Math.round(tear.x * 2) / 2, Math.round(tear.y * 2) / 2, tear.age);
+    for (const impact of state.impacts)
+      this.assets.draw(ctx, "gfx/1000.012_tear poof_small.anm2", "Poof", impact.x, impact.y, impact.age);
+    for (const bomb of state.bombs)
+      if (bomb.motion.lifetime === "alive")
+        this.assets.draw(ctx, bomb.variant === 3 ? "gfx/004.003_troll bomb.anm2" : bomb.variant === 4 ? "gfx/004.004_megatroll bomb.anm2" : "gfx/004.000_bomb.anm2", bomb.animation, bomb.x, bomb.y - 1, bomb.animationFrame, { pixelSnap: this.canvas.width / 480 / 2 });
+    for (const explosion of state.explosions) {
+      this.assets.draw(ctx, "gfx/1000.001_bomb explosion.anm2", "Explosion", explosion.x, explosion.y - 1, explosion.animationFrame, { pixelSnap: this.canvas.width / 480 / 2 });
+    }
+    for (const bomb of state.bombs)
+      if (bomb.motion.lifetime === "exploding")
+        this.assets.draw(ctx, bomb.variant === 3 ? "gfx/004.003_troll bomb.anm2" : bomb.variant === 4 ? "gfx/004.004_megatroll bomb.anm2" : "gfx/004.000_bomb.anm2", bomb.animation, bomb.x, bomb.y - 1, bomb.animationFrame, { pixelSnap: this.canvas.width / 480 / 2 });
+    for (const effect of state.spriteEffects) {
+      // Source31f dead can coexist with31e active until a later Remove.
+      if (!effect.visible || !effect.active) continue;
+      if (effect.variant === 58 || effect.variant === 43) {
+        const sprite = effect.sprite, controller = effect.poopEffect;
+        const rotation = controller && "particle58" in controller && typeof controller.particle58 === "object"
+          ? controller.particle58.flying.layerRotation : 0;
+        ctx.save();
+        ctx.translate((effect.presentedPosition.x + effect.renderOffset.x + sprite.offset.x) * 0.65 + 32,
+          (effect.presentedPosition.y + effect.renderOffset.y + sprite.offset.y) * 0.65 - 46);
+        ctx.scale(sprite.flipX ? -1 : 1, sprite.flipY ? -1 : 1);
+        this.assets.draw(ctx, effect.variant === 58 ? "gfx/1000.058_poop particle.anm2" : "gfx/1000.043_poop explosion.anm2",
+          sprite.animation, 0, 0, sprite.frame, { layerScales: {0: [sprite.scale.x, sprite.scale.y]}, overrides: {0: {
+            Rotation: rotation, RedTint: sprite.tint[0] * 255, GreenTint: sprite.tint[1] * 255,
+            BlueTint: sprite.tint[2] * 255, AlphaTint: sprite.tint[3] * 255,
+            RedOffset: sprite.offsets[0] * 255, GreenOffset: sprite.offsets[1] * 255, BlueOffset: sprite.offsets[2] * 255,
+          }} });
+        ctx.restore();
+        continue;
+      }
+      this.drawEffect(ctx, effect.variant, effect.sprite,
+        (effect.presentedPosition.x + effect.sprite.offset.x) * 0.65 + 32,
+        (effect.presentedPosition.y + effect.sprite.offset.y) * 0.65 - 46);
+    }
+    ctx.restore();
+    this.stage.foreground(state.stageEffects);
+  }
+
+  /** Room transition 5de870: the old room (captured without the player) and
+   * the new room slide one screen apart by smoothstep(progress), progress =
+   * full updates (plus 0.5 on an interpolation frame) over a limit of 7. The
+   * HUD and overlays stay fixed on top. */
+  private drawWorldOrSlide(ctx: CanvasRenderingContext2D, state: State): void {
+    const transition = state.roomTransition, gl = this.graphics;
+    const key = transition && `${transition.fromRoom}:${transition.targetRoom}:${transition.fromSlot}`;
+    if (transition?.phase === "out") {
+      this.drawWorld(ctx, state, true);
+      this.copyScreen(this.slideOld);
+      this.slideKey = key; this.slideNewReady = false;
+      this.drawnNpcs = []; this.drawnGrid = [];
+      gl.clearRect(0, 0, 480, 270);
+    }
+    if (!transition || transition.phase !== "in" || this.slideKey !== key || transition.fromSlot < 0) {
+      this.drawWorld(ctx, state);
+      return;
+    }
+    if (!this.slideNewReady) {
+      this.drawWorld(ctx, state);
+      this.copyScreen(this.slideNew);
+      this.slideNewReady = true;
+      this.slideRecord = { npcs: structuredClone(this.drawnNpcs), grid: structuredClone(this.drawnGrid) };
+    }
+    // The new room shown during the slide is that one snapshot draw.
+    this.drawnNpcs = structuredClone(this.slideRecord.npcs); this.drawnGrid = structuredClone(this.slideRecord.grid);
+    const limit = 7, k = transition.fullUpdates;
+    const interpolated = state.systemClock.interpolationEnabled && state.systemClock.systemCounter % 2 === 0;
+    const p = Math.fround((k + (interpolated && k < limit ? 0.5 : 0)) / limit);
+    const e = Math.fround(p * p * Math.fround(3 - 2 * p));
+    const [dx, dy] = [[1, 0], [0, 1], [-1, 0], [0, -1]][transition.fromSlot % 4]!;
+    const old: [number, number] = [dx * e * 480, dy * e * 270];
+    const next: [number, number] = [old[0] - dx * 480, old[1] - dy * 270];
+    gl.clearRect(0, 0, 480, 270);
+    gl.blendFactors("one", "oneMinusSrcAlpha");
+    for (const [surface, [x, y]] of [[this.slideOld, old], [this.slideNew, next]] as const)
+      gl.drawSurface(surface, 0, 0, surface.width, surface.height, x, y, 480, 270);
+    gl.blendFactors("srcAlpha", "oneMinusSrcAlpha");
+  }
+
+  /** Copy the screen target (world layer so far) into a slide snapshot. */
+  private copyScreen(target: GLSurface): void {
+    const gl = this.graphics, screen = gl.screenSurface();
+    gl.beginTarget(target); gl.resetTransform(); gl.globalAlpha = 1;
+    gl.clearRect(0, 0, target.width, target.height);
+    gl.blendFactors("one", "zero");
+    gl.drawSurface(screen, 0, 0, screen.width, screen.height, 0, 0, target.width, target.height);
+    gl.beginTarget(null); gl.resetTransform(); gl.blendFactors("srcAlpha", "oneMinusSrcAlpha");
+    gl.scale(this.canvas.width / 480, this.canvas.height / 270);
+  }
   debugTargets(): StageTargets { return this.stage.debugTargets(); }
-  drawRecord() { return { npcs: structuredClone(this.drawnNpcs) }; }
+  drawRecord() { return { npcs: structuredClone(this.drawnNpcs), grid: structuredClone(this.drawnGrid) }; }
   private drawQuads(appearance: RoomAppearance, quads: RoomQuad[]): void {
     const gl = this.graphics, image = this.assets.image(appearance.backdrop);
     for (const quad of quads) {

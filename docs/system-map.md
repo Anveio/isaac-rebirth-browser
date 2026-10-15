@@ -43,6 +43,92 @@ The new partial producer routes ordinary Monstro’s real BloodStart random bran
 
 ## Current source and actual-game qualification
 
+The weapon/stat foundation in [PR203](https://github.com/Anveio/isaac-rebirth-browser/pull/203)
+landed at `631e678`. Requested primary selection runs before scalar callbacks;
+the retained primary, attack flags and independent eleven-component tear/laser
+colors have explicit cache owners. Regular tears consume the resolved birth
+properties. Unmapped stages and controller requests stay observable, and a
+missed registered-actor cleanup cannot disappear on a later equal-primary
+evaluation. This foundation does not execute ordinary Knife, Brimstone or
+Ludovico actors.
+
+Exact `60ff78e3` production, strict Clippy and floor builds passed. Its public-ABI
+headless differential replayed 405 recorded commands and compared 406 snapshots,
+6,809,577 fields, with zero differences against the older `ef876` producer.
+The [qualification receipt](../references/isaac/foundation/items/weapon-cache-foundation-203.json)
+keeps that local WASM check separate from original-game evidence. The scoped EF8
+regular-actor browser replay retained 231,387 comparisons and 24 failures per
+browser, with zero new or lost comparisons. The item257 transformed-tear
+failures and native actor-seed differences remain unresolved; these reports
+do not qualify all current-main gameplay.
+
+[PR214](https://github.com/Anveio/isaac-rebirth-browser/pull/214) adds the public
+Main/Challenge route for declared neutral Challenge1 XML, including conditional
+curse sampling and source pre-grant Save followed by ordered grants.
+[PR216](https://github.com/Anveio/isaac-rebirth-browser/pull/216) leaves startup
+Doors initialized until the eligible Full room callback opens them. The retained
+original case16 replay on `76d7a01b`/`32b5bcfd` passes all 8,368 required frontdoor
+checks, including 631 Door rows; its 631 attack-body rows remain unqualified.
+The older d156 report retains all 188 early-opening failures. Native Saved data
+and dynamic Save/grant call order were not observed by that scoped replay.
+
+The separate ordinary Brimstone producer `866d2c8`/artifact `fbb48969` completed
+ten fixed and recorded-OS cases: 307,112 checks, 23,017 differences and ten
+functional failures. All native processes exited zero and captures completed
+without errors. The observed 669 Laser and 669 Impact body rows include both
+phases; 16 transient Full-Uninit slot-null witnesses were recorded. All ten
+frozen strict audits failed while reconstructing manifest bytes, before
+later clock/X11/options/resource validation. The separate additive audit passes
+all ten cases: only the permitted adjacent root-key reorder, an exact complete
+manifest SHA and no nested observation/input difference. Separate executions
+of every remaining unchanged clock/X11/options/resource validation also pass all
+ten with protected sources, archives and fixtures unchanged. These addenda
+establish scoped capture validity; they leave the archived strict and gameplay
+grades unchanged. [PR217](https://github.com/Anveio/isaac-rebirth-browser/pull/217) fixes
+future capture serialization and does not regrade those archived audits.
+[Compact evidence](../references/isaac/foundation/items/public-ingress-and-brim10.json)
+retains the exact producer/report scopes and unresolved fields.
+
+The shared cache evaluator now includes known scalar completion (PR233),
+negative Flight (PR236) and Familiar after Flight (PR239). Familiar239 passed
+its own production, strict Clippy and floor builds with stable inputs and 44
+own generated headers. The merged Luck254 leaf also passed these checks.
+The merged ALL-tail260 has its own compiler passes; required per-stage
+composition remains pending. Number One6 and Libra304 have source operators
+and bounded admission proofs, with no inherited gameplay acceptance.
+
+The ordinary Knife six-case bank has completed only cases 0..2 on the private
+`2ed8a7b` producer: 571,311 checks, 37,820 differences and three functional
+failures, despite passing capture audits. The later corrected `a3209046`
+producer passed its own production, strict Clippy and floor builds. Its older
+DST run still fails four of 109 properties; the NaN-equality source correction
+on main does not retroactively regrade that execution.
+
+Merged capture/resource leaves PR232/234 and generator/route leaves PR243/247
+keep both games on the same declared public inputs. The body comparer is
+merged as PR255; helper251 is merged with independent source and retained-tuple
+peers. The v7 route grants item114 at presentation917 and item329 at1067 in
+both games, recording 280 controlled-Knife bodies (140 Full/140 fast). Its body
+comparison still fails 9,052 of 113,707 checks. The native history has 6,274
+checks and one missing preexisting-child witness; the paired helper has 18,607
+checks, 701 failures and three gaps. A separate native replay of the narrow
+post-Uninit comparer correction has 6,263 checks and the same child gap. Five
+selected browser rows prove the actual expiry boundary; they do not regrade
+the full paired result. These scopes do not accept the complete triple.
+
+The older v5 partial comparison retains its 17,123 differences. A separate
+readback corrects 970 Game-flag schema errors without changing that report;
+v7 also matches 970 actual Player seed fields. The complete 624-word/cursor
+and actor-roster audit remains red: at the first mismatch all words match,
+but cursors 490/463 and five missing ambient actors differ. Ambient33/68,
+live selector-change replacement cleanup, a child surviving the item329 grant,
+STB resource transport and suite registration remain pending. A separate
+Luck-plus-ABI257 own producer passes production and seven XML-only public
+transport checks; these do not execute either game or qualify STB. The
+[compact evidence](../references/isaac/foundation/items/public-ingress-and-brim10.json)
+keeps these exact producer scopes and all prior grades, including the frozen
+first32 failure (1,185,154 checks/68,333 differences), unchanged.
+
 Main `19906c4e`, observed on October14, includes the reviewed normal-health source callbacks, the source-only Nightmare resource prerequisite and raw snapshot accessor, and retains39 registered live suites. This is source qualification. No complete current-main39-suite production/original/browser acceptance is claimed; the frozen local f793/0f343 checkpoint and later scoped owner artifacts remain separate.
 
 The integrated Death111 producer at `5afa7ddb` and artifact `c4685585` closed all four fresh original/browser pairs: 2,962 phases, 52,190 scoped checks and 4,226 required failures, with zero capture errors. Both contrived death/popup routes executed in both games; both unfiltered OS inputs remained alive and are retained. The full eight compressed native/browser streams were independently read back and hash-verified. This proves those actual executions and preserves the unresolved age, motion and menu fields; it does not establish complete death or whole-main parity. The earlier1cc interruption below remains a distinct historical attempt.

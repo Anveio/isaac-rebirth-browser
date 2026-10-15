@@ -2,7 +2,9 @@
 //!
 //! Item predicates retain their distinct source meanings. Actor removal,
 //! admission, audio, and random draws belong to the caller/backend.
-use crate::{items, player_items::PlayerItems, player_stats::PlayerStats};
+use crate::{
+    items, player_items::PlayerItems, player_stats::PlayerStats, weapon_plan::PrimaryWeaponC08,
+};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) struct CacheMask(pub(crate) u32);
@@ -79,12 +81,70 @@ impl<'a> ItemInputs<'a> {
         self.owned_count(id) > 0
     }
 
+    /// Literal5090C0: only requested327/328 enter its trinket/age branch;
+    /// every admitted C08 selector query below loads signed E1C+4*ID.
+    /// Unknown query is rejected, never promoted to a generic Have accessor.
+    pub(crate) fn primary_permanent_presence(self, id: usize) -> Result<bool, String> {
+        match id {
+            168 | 114 | 52 | 118 | 68 | 329 | 229 => Ok(self.owned_count(id) > 0),
+            _ => Err("primary selector queried an unadmitted HaveCollectible domain".into()),
+        }
+    }
+
     pub(crate) fn temporary_count(self, id: u32) -> i32 {
         self.owner.temporary_count(id)
     }
 
-    // Temporary record presence5e3d70 is deliberately not a count predicate.
-    // Its concrete consumers are added with the weapon callback slice.
+    /// Exact per-callback cache32/64 proof: other modifier and trinket owners
+    /// remain outside this scope. Future property operators extend their own
+    /// cache reads instead of widening controller/contact admission.
+    pub(crate) fn admits_selected_appearance(self) -> bool {
+        self.owner.trinket_slots == [0, 0]
+            && self
+                .owner
+                .queued_id
+                .is_none_or(|id| items::definition(id).is_some_and(|c| c.kind != 2))
+            && self.owner.temporary_collectibles.is_empty()
+            && self
+                .owner
+                .owned_counts
+                .iter()
+                .enumerate()
+                .all(|(id, &count)| {
+                    count == 0 || (count > 0 && [1, 4, 114, 118, 329, 257].contains(&id))
+                })
+    }
+
+    /// Independent scalar read sets in 511F10 for fresh Isaac: items 114,
+    /// 118 and 329 have no direct term in callbacks 2, 4, 1, 8 and 16.
+    /// Current C08 still changes FireDelay first. Config 118 requests all
+    /// callbacks; that request does not imply another scalar effect.
+    fn admits_selected_scalar_completion(self) -> bool {
+        self.owner.trinket_slots == [0, 0]
+            && self
+                .owner
+                .queued_id
+                .is_none_or(|id| items::definition(id).is_some_and(|config| config.kind != 2))
+            && self.owner.temporary_collectibles.is_empty()
+            && self
+                .owner
+                .owned_counts
+                .iter()
+                .enumerate()
+                .all(|(id, &count)| {
+                    count == 0 || (count > 0 && [1, 4, 114, 118, 329].contains(&id))
+                })
+    }
+
+    /// An independent strict 511F10 trace proves 68 ordered requests for zero
+    /// familiars with these inputs. Actual manager queries remain required.
+    pub(crate) fn admits_selected_zero_familiar_requests(self) -> bool {
+        self.admits_selected_scalar_completion()
+    }
+
+    pub(crate) fn admits_complete_selected_tail(self) -> bool {
+        self.admits_selected_scalar_completion() && self.owner.luck_inputs.is_some()
+    }
 
     fn has_unmapped_owner(self, flag: u32, supported: &[u32]) -> bool {
         self.owner
@@ -98,8 +158,7 @@ impl<'a> ItemInputs<'a> {
                         .is_some_and(|config| config.cache_flags & flag != 0)
             })
             || self.owner.temporary_collectibles.iter().any(|entry| {
-                entry.count != 0
-                    && !supported.contains(&entry.item_id)
+                !supported.contains(&entry.item_id)
                     && items::definition(entry.item_id)
                         .is_some_and(|config| config.cache_flags & flag != 0)
             })
@@ -129,6 +188,8 @@ impl CacheResolution {
 /// This extraction preserves Source110 arithmetic and predicates exactly.
 pub(crate) fn resolve_scalars(
     inputs: ItemInputs<'_>,
+    primary: PrimaryWeaponC08,
+    source_player_type: Option<u32>,
     prior: CachedScalars,
     requested: CacheMask,
 ) -> Result<CacheResolution, String> {
@@ -151,6 +212,10 @@ pub(crate) fn resolve_scalars(
                 }
                 //512562 bound precedes512666's one permanent222 modifier.
                 delay = delay.max(5.0_f32);
+                //512610 reads retained C08; multiply BEFORE integer truncation.
+                if primary == PrimaryWeaponC08::Brimstone {
+                    delay *= 3.0_f32;
+                }
                 if inputs.positive_owned_count(222) {
                     delay -= 2.0_f32;
                 }
@@ -158,8 +223,8 @@ pub(crate) fn resolve_scalars(
                 &[1, 222]
             }
             CacheStage::ShotSpeed => {
-                // Preserve the existing110 count predicate in this extraction;
-                // actual record-presence edge correction is a separate slice.
+                // 511f68/513e48 test raw permanent and temporary143 counts
+                // for nonzero. Presence and signed-positive getters are distinct.
                 values.stats.shot_speed =
                     if inputs.owned_count(143) != 0 || inputs.temporary_count(143) != 0 {
                         1.2_f32
@@ -202,7 +267,9 @@ pub(crate) fn resolve_scalars(
             }
             _ => continue,
         };
-        if !inputs.has_unmapped_owner(flag, supported) {
+        if (source_player_type == Some(0) && inputs.admits_selected_scalar_completion())
+            || !inputs.has_unmapped_owner(flag, supported)
+        {
             completed |= flag;
         }
     }
@@ -211,4 +278,56 @@ pub(crate) fn resolve_scalars(
         values,
         completed: CacheMask(completed),
     })
+}
+
+/// The negative Flight callback at 515328/51532F writes both D68 and class 340.
+/// Selected inputs have no flight item or TEMP term; both transformation
+/// predicates require their actual history. Flying class 3 remains unadmitted.
+pub(crate) fn resolve_neutral_flight(
+    inputs: ItemInputs<'_>,
+    source_player_type: Option<u32>,
+    transformation_counts: Option<[i32; 2]>,
+) -> Option<(bool, u32)> {
+    (source_player_type == Some(0)
+        && inputs.admits_selected_scalar_completion()
+        && transformation_counts == Some([0, 0]))
+    .then_some((false, 5))
+}
+
+/// 513C80 computes a signed wrapping sum, then CVTSI2SS and ADDSS. Its
+/// auxiliary words and Game 10EAD8 are distinct inputs; absent history is unknown.
+pub(crate) fn resolve_luck(
+    inputs: ItemInputs<'_>,
+    source_player_type: Option<u32>,
+    source_run_flags: Option<u64>,
+) -> Result<Option<f32>, String> {
+    if inputs
+        .owner
+        .luck_inputs
+        .is_some_and(|auxiliary| !auxiliary.source_d58.is_finite())
+    {
+        return Err("Luck requires a finite actual D58 input".into());
+    }
+    let (Some(auxiliary), Some(run_flags)) = (inputs.owner.luck_inputs, source_run_flags) else {
+        return Ok(None);
+    };
+    if source_player_type != Some(0) || !inputs.admits_selected_scalar_completion() {
+        return Ok(None);
+    }
+    let sum = auxiliary
+        .source_13d0
+        .wrapping_sub(auxiliary.source_13cc)
+        .wrapping_add(auxiliary.source_d3c)
+        .wrapping_add(auxiliary.source_d40)
+        .wrapping_add(inputs.owned_count(253))
+        .wrapping_add(inputs.owned_count(46))
+        .wrapping_add(inputs.owned_count(343));
+    let mut luck = sum as f32 + auxiliary.source_d58;
+    if run_flags & 0x100 != 0 {
+        luck += 50.0_f32; // 513CFE/513D06, after the trinket and character branches.
+    }
+    if !luck.is_finite() {
+        return Err("Luck callback overflowed its source f32 output".into());
+    }
+    Ok(Some(luck))
 }

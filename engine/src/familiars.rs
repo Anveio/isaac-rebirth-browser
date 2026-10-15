@@ -454,11 +454,57 @@ pub fn advance_effect(state: &mut State, phase: Phase, id: u32) -> Result<(), St
     Ok(())
 }
 
+fn reconcile_selected_zero_requests(state: &State) -> Result<bool, String> {
+    const VARIANTS: [u32; 68] = [
+        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 20, 21, 22, 23, 24, 30, 31, 32, 17, 16, 25, 41, 42, 35,
+        50, 53, 68, 51, 52, 54, 75, 57, 64, 56, 76, 77, 65, 55, 58, 59, 66, 67, 74, 62, 79, 63, 61,
+        33, 40, 14, 60, 44, 45, 46, 47, 69, 70, 71, 72, 48, 78, 28, 26, 27, 12, 13, 15,
+    ];
+    let mut empty_queries = true;
+    for variant in VARIANTS {
+        // 508D10 queries 455680 even when the requested count is zero. Retain
+        // inactive and dead records until Uninit. An unowned lookup is an
+        // error; nonempty excess-removal paths remain requested here.
+        let query = state
+            .actor_scheduler
+            .full_phase()
+            .into_iter()
+            .filter(|actor| actor.kind == ActorKind::Familiar)
+            .map(|actor| {
+                state
+                    .familiars
+                    .iter()
+                    .find(|familiar| familiar.id == actor.id)
+                    .ok_or("Familiar manager query contains an unowned actor")
+            })
+            .collect::<Result<Vec<_>, _>>()?;
+        if query
+            .into_iter()
+            .any(|familiar| familiar.variant == variant)
+        {
+            empty_queries = false;
+        }
+    }
+    Ok(empty_queries)
+}
+
 pub(crate) fn evaluate_cache(state: &mut State) -> Result<(), String> {
     let Some(owner) = state.player_items.as_ref() else {
         return Ok(());
     };
     if owner.unevaluated_cache_flags & 0x200 == 0 {
+        return Ok(());
+    }
+    if state.weapon_admission.source_player_type == Some(0)
+        && crate::item_pipeline::ItemInputs::new(owner)?.admits_selected_zero_familiar_requests()
+    {
+        if reconcile_selected_zero_requests(state)? {
+            state
+                .player_items
+                .as_mut()
+                .expect("checked Player owner")
+                .unevaluated_cache_flags &= !0x200;
+        }
         return Ok(());
     }
     let requested = owner.owned_counts[270]

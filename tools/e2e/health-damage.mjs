@@ -65,7 +65,8 @@ function compare(source, actual, gameplay, capture) {
     check('player.dead', d.dead, actual.player.dead);
     check('player.visible', d.visible, actual.player.visible);
     check('player.controls7d4', d.controlsEnabled, actual.player.controlsEnabled);
-    check('Game.fullUpdates', d.fullGameUpdates, actual.gameUpdateCount);
+    // Native Game+ce9f4 starts at the run loader's 1; game_update_count is 0.
+    check('Game.fullUpdates', d.fullGameUpdates, actual.gameUpdateCount + 1);
     check('items.ownedCounts', h.ownedCounts, actual.playerItems?.ownedCounts);
     check('items.temporaryRecords', h.temporaryCollectibles, actual.playerItems?.temporaryCollectibles);
     check('items.activeD80', h.activeStateD80, actual.playerItems?.activeStateD80);
@@ -235,7 +236,10 @@ for (const [index, definition] of scenarios.cases.entries()) {
     // hide the remaining predeclared OS/contrived attempts.
     const paired = await runPairedGate({output: root, selected: [], randomCount: 0, replayCases: [replay],
       productionDirectory: option('--production-directory', undefined), originalObserver: 'tools/original/health-damage-observe.py',
-      stateComparator: compare, archiveBrowserEvidence: true, captureBrowserAudio: true});
+      stateComparator: compare, archiveBrowserEvidence: true, captureBrowserAudio: true,
+      // The browser's public SFX preference defaults to 1; declare the same
+      // option to the original so SFX.globalVolume compares like with like.
+      originalSfxVolume: 1});
     row.pairedStatus = paired.status; row.build = paired.build;
     row.coverage = coverage(definition, paired.cases[0].directory);
     row.directory = paired.cases[0].directory;

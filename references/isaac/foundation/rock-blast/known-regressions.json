@@ -50,7 +50,7 @@
       ],
       "entropy": "Contrived public bomb phase offset on a recorded natural rock room",
       "cohort": "explosive-rock-regression",
-      "description": "Already-selected natural kind5 Rock must remain admitted and keep its unsupported explosive callback source mismatch blocking."
+      "description": "Already-selected natural kind5 Rock stays admitted; a blast that reaches it moves it to state3 and its secondary explosion follows four full updates later."
     },
     {
       "name": "regression-rock-phase-1",
@@ -101,7 +101,7 @@
       ],
       "entropy": "Contrived public bomb phase offset on a recorded natural rock room",
       "cohort": "explosive-rock-regression",
-      "description": "Already-selected natural kind5 Rock must remain admitted and keep its unsupported explosive callback source mismatch blocking."
+      "description": "Already-selected natural kind5 Rock stays admitted; a blast that reaches it moves it to state3 and its secondary explosion follows four full updates later."
     },
     {
       "name": "regression-random-rock-0",
@@ -166,7 +166,7 @@
       "entropy": "OS secrets",
       "discoveryAttempts": 242,
       "cohort": "explosive-rock-regression",
-      "description": "Already-selected natural kind5 Rock must remain admitted and keep its unsupported explosive callback source mismatch blocking."
+      "description": "Already-selected natural kind5 Rock stays admitted; a blast that reaches it moves it to state3 and its secondary explosion follows four full updates later."
     },
     {
       "name": "regression-tinted-rock",
