@@ -115,6 +115,27 @@ impl<'a> ItemInputs<'a> {
                 })
     }
 
+    /// Independent scalar read sets in 511F10 for fresh Isaac: items 114,
+    /// 118 and 329 have no direct term in callbacks 2, 4, 1, 8 and 16.
+    /// Current C08 still changes FireDelay first. Config 118 requests all
+    /// callbacks; that request does not imply another scalar effect.
+    fn admits_selected_scalar_completion(self) -> bool {
+        self.owner.trinket_slots == [0, 0]
+            && self
+                .owner
+                .queued_id
+                .is_none_or(|id| items::definition(id).is_some_and(|config| config.kind != 2))
+            && self.owner.temporary_collectibles.is_empty()
+            && self
+                .owner
+                .owned_counts
+                .iter()
+                .enumerate()
+                .all(|(id, &count)| {
+                    count == 0 || (count > 0 && [1, 4, 114, 118, 329].contains(&id))
+                })
+    }
+
     fn has_unmapped_owner(self, flag: u32, supported: &[u32]) -> bool {
         self.owner
             .owned_counts
@@ -158,6 +179,7 @@ impl CacheResolution {
 pub(crate) fn resolve_scalars(
     inputs: ItemInputs<'_>,
     primary: PrimaryWeaponC08,
+    source_player_type: Option<u32>,
     prior: CachedScalars,
     requested: CacheMask,
 ) -> Result<CacheResolution, String> {
@@ -235,7 +257,9 @@ pub(crate) fn resolve_scalars(
             }
             _ => continue,
         };
-        if !inputs.has_unmapped_owner(flag, supported) {
+        if (source_player_type == Some(0) && inputs.admits_selected_scalar_completion())
+            || !inputs.has_unmapped_owner(flag, supported)
+        {
             completed |= flag;
         }
     }

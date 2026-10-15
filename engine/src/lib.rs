@@ -302,7 +302,7 @@ impl RunIntroduction {
 }
 /// HUD boss bar: SetFill 5732a0 at HUD+61894 (-1 hidden) and its flash
 /// countdown at +61898; the manager's non-shrinking boss max HP is +ec.
-#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct BossBar {
     #[serde(with = "nan_as_null")]
@@ -322,6 +322,16 @@ mod nan_as_null {
     }
     pub fn deserialize<'de, D: Deserializer<'de>>(deserializer: D) -> Result<f32, D::Error> {
         Ok(Option::<f32>::deserialize(deserializer)?.unwrap_or(f32::NAN))
+    }
+}
+/// The 0/0 fill is NaN, and any two NaN fills are the same bar, so state
+/// equality stays reflexive. NaN sign and payload are not compared: native and
+/// wasm32 may produce different NaN bits for 0/0, and JSON keeps neither.
+impl PartialEq for BossBar {
+    fn eq(&self, other: &Self) -> bool {
+        (self.fill == other.fill || (self.fill.is_nan() && other.fill.is_nan()))
+            && self.flash == other.flash
+            && self.maximum == other.maximum
     }
 }
 impl Default for BossBar {

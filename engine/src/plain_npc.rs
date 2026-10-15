@@ -52,8 +52,8 @@ fn poof_subtype(npc: &Npc) -> u32 {
 /// clip, or the same looping clip while stopped (+124 clear, e.g. after
 /// SetFrame), restarts. A finished nonlooping clip stays finished.
 pub(crate) fn play(npc: &mut Npc, name: &str, force: bool) {
-    let stopped_loop = !npc.animation_playing
-        && content::clip(&npc.actor, name).is_some_and(|clip| clip.looping);
+    let stopped_loop =
+        !npc.animation_playing && content::clip(&npc.actor, name).is_some_and(|clip| clip.looping);
     if force || npc.animation != name || stopped_loop {
         npc.animation = name.into();
         npc.animation_frame = 0;
