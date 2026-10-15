@@ -2,10 +2,10 @@ export default {
   type: 79, variant: 0,
   boss: true,
   about: 'Gemini boss rooms reached by a recorded route: baby and umbilical cord spawn, FindGridPath chase, rage/pant cycle, tethered baby predictive shots',
-  // SL9K4GJ3 and DN379LBR reach a Gemini room through quiet rooms (S1E7BJQ2's
-  // room 10 rock ring defeats the router);
-  // :churn shoots long enough for damage and the baby's shots.
-  contrived: ['SL9K4GJ3', 'DN379LBR:churn'],
+  // DN379LBR reaches a Gemini room through quiet rooms and its route holds
+  // in the original (SL9K4GJ3 and 6AQ8KAWZ drift there; S1E7BJQ2's rock ring
+  // defeats the router). :churn shoots long enough for the baby's shots.
+  contrived: ['DN379LBR', 'DN379LBR:churn'],
   count: 1,
   fields: (native, actor) => [
     ['stateFrame', native.npcStateFrame, actor.gemini?.counter],
