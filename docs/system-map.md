@@ -93,7 +93,7 @@ The shared cache evaluator now includes known scalar completion (PR233),
 negative Flight (PR236) and Familiar after Flight (PR239). Familiar239 passed
 its own production, strict Clippy and floor builds with stable inputs and 44
 own generated headers. The merged Luck254 leaf also passed these checks.
-ALL-tail260 has its own compiler passes and is ready; required per-stage
+The merged ALL-tail260 has its own compiler passes; required per-stage
 composition remains pending. Number One6 and Libra304 have source operators
 and bounded admission proofs, with no inherited gameplay acceptance.
 

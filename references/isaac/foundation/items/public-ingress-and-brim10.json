@@ -191,6 +191,11 @@
         "pr": 251,
         "merge": "4e53432fb3f8a2f4e4db93835c126f822536f68d",
         "scope": "History helper with explicit native-only mode, source exclusions and first-expiry stop; no whole paired acceptance"
+      },
+      {
+        "pr": 260,
+        "merge": "ca63b0ade6468033f90cef9feff253a02c89c0d9",
+        "scope": "Admitted source511F10 final ALL tail; unresolved callbacks/history remain pending"
       }
     ],
     "familiarOwnChecks": {
@@ -464,7 +469,7 @@
       "Ambient33/68 shared startup consumers",
       "STB resource transport remains source-only; XML ABI probe is not its qualification",
       "Luck254 public original/browser qualification pending; own compiler PASS",
-      "ALL tail and required per-stage completion publication",
+      "Required per-stage completion publication; own qualification is running on exactcfc3dd25",
       "History helper251 and body255 are merged; registry/public suite registration remains pending"
     ],
     "retention": "The first32, Brim10, ordinary0..2, v3/v5/v6 and frozen v7 reports remain unchanged. Additive source/field/comparer corrections receive separate reports.",
@@ -494,19 +499,20 @@
         "sha256": "bd158dee7e068b11d3625ec0c94330bf8739784defc7a3b02c0d94141d609113"
       }
     },
-    "mainAtSummary": "4e53432fb3f8a2f4e4db93835c126f822536f68d",
+    "mainAtSummary": "ca63b0ade6468033f90cef9feff253a02c89c0d9",
     "allTailOwnChecks": {
       "head": "f46191992d811f3a02987177b36a04536b550855",
       "pr": 260,
       "production": "PASS",
       "strictAllTargetClippy": "PASS",
       "releaseFloor": "PASS",
-      "mainPublication": "ready",
+      "mainPublication": "merged",
       "publicGameAcceptance": "pending",
       "closure": {
         "path": ".cache/coordination/item-pipeline-research/all-f4619199-production-current/closed-qualification-warm-target.json",
         "sha256": "f14ff8cefbdb0194889eacf4af67662a7f41059826c8ae0e2e9e93d2b6d07860"
-      }
+      },
+      "merge": "ca63b0ade6468033f90cef9feff253a02c89c0d9"
     }
   }
 }
