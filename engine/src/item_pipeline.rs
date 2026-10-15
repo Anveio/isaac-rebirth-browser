@@ -32,6 +32,7 @@ const MONSTRO_CACHE_ITEMS: &[usize] = &[1, 4, 229];
 const MONSTRO_FAMILIAR_ITEMS: &[usize] = &[1, 4, 229];
 const MONSTRO_GRANT_ITEMS: &[usize] = &[1, 4, 229];
 const MONSTRO_KIND1_ITEMS: &[usize] = &[1, 4, 229];
+const MONSTRO_CALLER_ITEMS: &[usize] = &[1, 4, 229];
 
 // Independent source-owned footprints. Equal current sets are deliberately
 // separate: cache additions cannot silently admit a50D090 getter branch.
@@ -305,6 +306,12 @@ impl<'a> ItemInputs<'a> {
     ///variant to BloodTear1. This grants no controller or cache capability.
     pub(crate) fn admits_monstro_kind1_context(self) -> bool {
         self.admits_monstro_readset(MONSTRO_KIND1_ITEMS, true)
+    }
+
+    ///Separate519FC0 C08=7 caller footprint. Has149/55/87/153/2/245
+    ///are false; cache and kind1 admission do not grant this controller.
+    pub(crate) fn admits_monstro_caller(self) -> bool {
+        self.admits_monstro_readset(MONSTRO_CALLER_ITEMS, true)
     }
 
     fn admits_monstro_readset(self, supported: &[usize], empty_queue: bool) -> bool {

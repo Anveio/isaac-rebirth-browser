@@ -74,6 +74,7 @@ pub mod level_progress;
 pub mod maggots;
 pub mod menu_lifecycle;
 pub mod monstro;
+mod monstros_lung;
 pub mod motion;
 pub mod mt;
 pub mod music;
@@ -2876,6 +2877,7 @@ impl Game {
                             | weapon_plan::ControllerChannel::ChargedBrimstone
                             | weapon_plan::ControllerChannel::OrdinaryTechnology
                             | weapon_plan::ControllerChannel::OrdinaryFetus
+                            | weapon_plan::ControllerChannel::MonstroLung
                     );
                     let controlled =
                         plan.controller == weapon_plan::ControllerChannel::ControlledKnife;
@@ -2904,7 +2906,10 @@ impl Game {
                     };
                     if let Some(mut aim_step) = aim_step {
                         // 52F6B7 normalizes r13 before the callback and DB4 store.
-                        if (controlled || controlled_tear || controlled_target)
+                        if (controlled
+                            || controlled_tear
+                            || controlled_target
+                            || plan.controller == weapon_plan::ControllerChannel::MonstroLung)
                             && knives::squared_length(aim_step.callback_aim) > 1.0
                         {
                             aim_step.callback_aim = knives::normalized(aim_step.callback_aim);
@@ -2982,12 +2987,20 @@ impl Game {
                                 buttons.held(),
                             );
                         }
-                        if plan.controller == weapon_plan::ControllerChannel::OrdinaryFetus {
-                            //5306E0 C08=5 reads D9C directly on the released idle path.
+                        if matches!(
+                            plan.controller,
+                            weapon_plan::ControllerChannel::OrdinaryFetus
+                                | weapon_plan::ControllerChannel::MonstroLung
+                        ) {
+                            //5306E0 excludes onlyC08=2; these released callers read D9C.
                             attack_runtime::controlled_idle_head_for(
                                 &mut self.state,
                                 buttons.held(),
-                                "drFetusMovementHistory",
+                                if plan.controller == weapon_plan::ControllerChannel::MonstroLung {
+                                    "monstroLungMovementHistory"
+                                } else {
+                                    "drFetusMovementHistory"
+                                },
                             );
                         }
                         if plan.controller == weapon_plan::ControllerChannel::ChargedBrimstone
