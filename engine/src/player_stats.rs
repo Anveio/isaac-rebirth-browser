@@ -130,6 +130,21 @@ pub(crate) fn evaluate_cache(state: &mut State) -> Result<(), String> {
             completed |= 128;
         }
     }
+    if requested.0 & 512 != 0 {
+        // 511F10 evaluates Familiar after Flight and before Luck. Retain the
+        // sole manager/RNG consumer; its pending result controls completion.
+        crate::familiars::evaluate_cache(state)?;
+        if state
+            .player_items
+            .as_ref()
+            .expect("checked Player cache owner")
+            .unevaluated_cache_flags
+            & 512
+            == 0
+        {
+            completed |= 512;
+        }
+    }
     state
         .player_items
         .as_mut()

@@ -136,6 +136,12 @@ impl<'a> ItemInputs<'a> {
                 })
     }
 
+    /// An independent strict 511F10 trace proves 68 ordered requests for zero
+    /// familiars with these inputs. Actual manager queries remain required.
+    pub(crate) fn admits_selected_zero_familiar_requests(self) -> bool {
+        self.admits_selected_scalar_completion()
+    }
+
     fn has_unmapped_owner(self, flag: u32, supported: &[u32]) -> bool {
         self.owner
             .owned_counts
