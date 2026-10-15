@@ -73,8 +73,10 @@ for (const label of labels) {
   check(label, 'pedestals', pedestals, actualPedestals);
 }
 check('next-stage', 'arrivedStage', 2, finalStage);
+// The original logs each Level::Init seed; the last one is Basement II's.
+check('next-stage', 'stageSeed', native.observedState.stageSeed, frames.get('next-stage').state.stageSeed);
 const report = { schema: 1, status: checks.every(item => item.status === 'pass') ? 'pass' : 'fail',
-  scope: 'Shared tail from exit-start: boss award trapdoor and pedestal, StageTransition state/counter, player Trapdoor/Appear clip, visibility and controls, admitted stage and room. Per-game fights are not graded; MT trapdoor seeds are diagnostics',
+  scope: 'Shared tail from exit-start: boss award trapdoor and pedestal, StageTransition state/counter, player Trapdoor/Appear clip, visibility and controls, admitted stage, stage seed and room. Per-game fights are not graded; MT trapdoor seeds are diagnostics',
   buildSha256: gate.build.sha256, sourceBinarySha256: gate.sourceBinarySha256,
   originalManifestSha256: hash(originalPath), browserManifestSha256: hash(browserPath),
   caseSha256: hash(resolve(directory, 'case.json')), checks, diagnostics };
