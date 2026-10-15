@@ -18,7 +18,7 @@ import { appendFileSync, createWriteStream, existsSync, mkdirSync, readdirSync, 
 import { join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { pruneRuns, slimSuite, sweepProductionSnapshots } from './lib/retention.mjs';
-import { SUITES, suiteById } from './suites.mjs';
+import { RUNNABLE, SUITES, suiteById } from './suites.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const writeJson = (path, value) => writeFileSync(path, JSON.stringify(value, null, 2) + '\n');
@@ -52,14 +52,14 @@ if (affected) {
   if (ids.length) { console.error('--affected selects suites itself; name suites or pass --affected, not both'); process.exit(2); }
   selection = (await import('./affected.mjs')).select(base);
   ids.push(...selection.selected.map(item => item.id));
-  if (!list) console.log(`--affected: ${ids.length}/${SUITES.length} suites for ${selection.files.length} files changed since ${base} (${selection.mergeBase.slice(0, 10)}): ${ids.join(' ') || 'none'}`);
+  if (!list) console.log(`--affected: ${ids.length}/${RUNNABLE.length} suites for ${selection.files.length} files changed since ${base} (${selection.mergeBase.slice(0, 10)}): ${ids.join(' ') || 'none'}`);
   if (!ids.length && !list) process.exit(0);
 }
 if (list) {
-  console.log(JSON.stringify(selection ? selection.selected : SUITES.map(suite => suite.id), null, selection ? 2 : 0));
+  console.log(JSON.stringify(selection ? selection.selected : RUNNABLE.map(suite => suite.id), null, selection ? 2 : 0));
   process.exit(0);
 }
-const selected = ids.length ? ids.map(id => suiteById.get(id)) : SUITES;
+const selected = ids.length ? ids.map(id => suiteById.get(id)) : RUNNABLE;
 // Drivers take different flags (e.g. paired counts with --random-count), so
 // suite flags only make sense for one named suite.
 if (suiteArgs.length && selected.length !== 1) {
