@@ -121,10 +121,12 @@ pub(crate) fn dispatch_player(
     match plan.controller {
         ControllerChannel::RegularShots => Ok(DispatchOutcome::RegularTear),
         ControllerChannel::OrdinaryKnife => ordinary_knife(state, plan, input, phase, callback_aim),
+        ControllerChannel::ChargedBrimstone => {
+            crate::brimstone::dispatch_player(state, plan, input, phase, callback_aim)
+        }
         unsupported => {
             let channel = match unsupported {
                 ControllerChannel::ControlledKnife => "controlledKnife",
-                ControllerChannel::ChargedBrimstone => "chargedBrimstone",
                 ControllerChannel::ControlledBrimstone => "controlledBrimstone",
                 ControllerChannel::ControlledTear => "controlledTear",
                 ControllerChannel::Unimplemented(_) => "unimplementedPrimary",
@@ -184,6 +186,12 @@ pub struct AttackRuntime {
     ///Actual Player+DB4 fresh519902/519915; unsupported histories remain absent.
     #[serde(default)]
     pub shooting_aim_db4: Option<WorldVector>,
+    ///Actual5198DA orientation; no Player.facing alias for unknown history.
+    #[serde(default)]
+    pub movement_direction_d9c: Option<i32>,
+    ///Actual51992B/519937 current Player DC4 vector.
+    #[serde(default)]
+    pub player_dc4: Option<WorldVector>,
     /// Player+C18 is a registered slot, not an independently recomputed actor.
     pub persistent: Option<ActorRef>,
     /// Actual C20/C28/C30 slots; absence is distinct from Remove requested.
@@ -198,6 +206,8 @@ impl AttackRuntime {
             charge_c0c: Some(0),
             head_direction_da0: Some(3), //5198e4, independently from C0C.
             shooting_aim_db4: Some(WorldVector { x: 0.0, y: 0.0 }),
+            movement_direction_d9c: Some(-1),
+            player_dc4: Some(WorldVector { x: 0.0, y: 0.0 }),
             ..Self::default()
         }
     }
@@ -219,6 +229,64 @@ pub(crate) fn ordinary_head_direction(state: &mut State, aim: WorldVector) {
         } else {
             3
         });
+    }
+}
+
+pub(crate) fn update_movement_direction(state: &mut State, controls: bool) -> Result<(), String> {
+    if state.weapon_admission.source_player_type != Some(0)
+        || !state
+            .player_items
+            .as_ref()
+            .is_some_and(|items| items.active_state_d80 == 0)
+    {
+        state.attack_runtime.movement_direction_d9c = None;
+        return Ok(());
+    }
+    let scale = state.player_stats.move_speed * 0.25 + 0.75;
+    if !scale.is_finite() || scale <= 0.0 {
+        return Err("current movement direction requires its actual positive input scale".into());
+    }
+    let enabled = controls && state.player.controls_enabled && state.player.input_cooldown <= 0;
+    let pressed = &state.pressed;
+    let x = if enabled {
+        f32::from(u8::from(pressed.contains("KeyD")))
+            - f32::from(u8::from(pressed.contains("KeyA")))
+    } else {
+        0.0
+    } * scale;
+    let y = if enabled {
+        f32::from(u8::from(pressed.contains("KeyS")))
+            - f32::from(u8::from(pressed.contains("KeyW")))
+    } else {
+        0.0
+    } * scale;
+    //52981F initializes -1 each invocation; strict X dominance, then Y.
+    state.attack_runtime.movement_direction_d9c = Some(if x.abs() > y.abs() {
+        if x < 0.0 {
+            0
+        } else {
+            2
+        }
+    } else if y < 0.0 {
+        1
+    } else if y > 0.0 {
+        3
+    } else {
+        -1
+    });
+    Ok(())
+}
+
+pub(crate) fn ordinary_brimstone_idle_head(state: &mut State, held: bool) {
+    if !held && state.head_timer < 0 && state.attack_runtime.persistent.is_none() {
+        if let Some(direction) = state.attack_runtime.movement_direction_d9c {
+            state.attack_runtime.head_direction_da0 = Some(match direction {
+                0 => 0,
+                1 => 1,
+                2 => 2,
+                _ => 3,
+            });
+        }
     }
 }
 
@@ -403,6 +471,14 @@ pub(crate) fn remove_referenced_actor(state: &mut State, actor: ActorRef) -> Res
                 .ok_or("registered knife handle is unresolved")?;
             knife.remove();
         }
+        ActorKind::Laser => {
+            state
+                .lasers
+                .iter_mut()
+                .find(|laser| laser.id == actor.id)
+                .ok_or("registered Laser handle is unresolved")?
+                .remove();
+        }
         _ => return Err("referenced attack actor has no admitted Remove callback".into()),
     }
     Ok(())
@@ -414,6 +490,7 @@ pub(crate) fn replace_c18(state: &mut State, actor: Option<ActorRef>) -> Result<
     if let Some(actor) = actor {
         let admitted = match actor.kind {
             ActorKind::Knife => state.knives.iter().any(|knife| knife.id == actor.id),
+            ActorKind::Laser => state.lasers.iter().any(|laser| laser.id == actor.id),
             _ => false,
         };
         if !admitted {
@@ -733,7 +810,7 @@ pub(crate) fn complete_primary_cleanup(
         return Ok(true);
     }
     match state.attack_runtime.persistent {
-        Some(actor) if actor.kind == ActorKind::Knife => {
+        Some(actor) if matches!(actor.kind, ActorKind::Knife | ActorKind::Laser) => {
             remove_referenced_actor(state, actor)?;
             //Virtual48 preserves the registered C18 until actual Uninit.
             Ok(true)

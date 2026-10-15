@@ -252,6 +252,7 @@ pub(crate) struct ResolvedWeaponPlan {
     pub(crate) primary: PrimaryWeaponC08,
     pub(crate) controller: ControllerChannel,
     pub(crate) properties: AttackProperties,
+    pub(crate) secondary_color_ccc: AttackColor,
     pub(crate) source_range_c8c: f32,
     pub(crate) max_fire_delay: i32,
     pub(crate) regular: Option<RegularTearPlan>,
@@ -294,6 +295,7 @@ pub(crate) fn resolve_live_weapon(
             color: cache.color_ca0,
             collision_damage: stats.damage,
         },
+        secondary_color_ccc: cache.color_ccc,
         source_range_c8c: stats.tear_height,
         max_fire_delay,
         regular: if controller == ControllerChannel::RegularShots {
@@ -378,6 +380,29 @@ pub(crate) fn resolve_neutral_kind4_damage(
     Ok(stats.damage)
 }
 
+///OrdinaryBrimstone caller and its kind2 damage read have their own
+///source footprint. This is independent of Knife contact/transformation.
+pub(crate) fn admits_neutral_brimstone_properties(
+    items: ItemInputs<'_>,
+    source_player_type: Option<u32>,
+) -> bool {
+    source_player_type == Some(0) && items.admits_neutral_kind2()
+}
+
+///50E4A7 executes this current38 getter only AFTER the real Laser Spawn.
+///Neutral kind2 requests no RNG; the generic3C scale is not a Laser consumer.
+pub(crate) fn resolve_neutral_kind2_damage(
+    items: ItemInputs<'_>,
+    source_player_type: Option<u32>,
+    stats: PlayerStats,
+) -> Result<f32, String> {
+    stats.validate()?;
+    if !admits_neutral_brimstone_properties(items, source_player_type) {
+        return Err("kind2 requires an unadmitted source modifier/context branch".into());
+    }
+    Ok(stats.damage)
+}
+
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub(crate) struct RegularTearPlan {
     pub(crate) flags: AttackFlags,
@@ -416,4 +441,50 @@ impl RegularTearPlan {
             head_timer: ((max_fire_delay as f32 * 0.45) as i32 + 7).max(11),
         })
     }
+}
+
+///Actual50D090(kind3) builder/status frontier, independent of actor511D90
+///history and ordinary/controlled Laser geometry and enqueue ownership.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum LaserStatusAdmission {
+    Mapped,
+    UnknownPlayerContext,
+    UnmappedBuilderModifiers,
+    UnmappedStatusFlags,
+}
+
+pub(crate) fn admit_current_laser_contact_flags(
+    state: &State,
+) -> Result<LaserStatusAdmission, String> {
+    state.player_stats.validate()?;
+    if !state.weapon_cache.color_ca0.is_finite() || !state.weapon_cache.color_ccc.is_finite() {
+        return Err("Laser kind3 requires finite actual Player color owners".into());
+    }
+    if state.weapon_admission.source_player_type != Some(0) {
+        return Ok(LaserStatusAdmission::UnknownPlayerContext);
+    }
+    let inputs = ItemInputs::new(
+        state
+            .player_items
+            .as_ref()
+            .ok_or("Laser kind3 actual Player items absent")?,
+    )?;
+    if !inputs.admits_neutral_kind3() {
+        return Ok(LaserStatusAdmission::UnmappedBuilderModifiers);
+    }
+    //Actual476869..8A1 status masks start at8; currentlow3 is inert.
+    if state.weapon_cache.flags_c98.0 & !3 != 0 {
+        return Ok(LaserStatusAdmission::UnmappedStatusFlags);
+    }
+    Ok(LaserStatusAdmission::Mapped)
+}
+
+///This actual output30 read is called AFTER each admitted NPC enqueue.
+///Selected neutral kind3 has no RNG/proc demand; it does not resolve kind2
+///birth fields, kind4 damage, or the actor's separate transformation query.
+pub(crate) fn resolve_current_laser_contact_flags(state: &State) -> Result<AttackFlags, String> {
+    if admit_current_laser_contact_flags(state)? != LaserStatusAdmission::Mapped {
+        return Err("Laser kind3 reached an unadmitted actual source path".into());
+    }
+    Ok(state.weapon_cache.flags_c98)
 }

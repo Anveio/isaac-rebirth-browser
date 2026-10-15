@@ -4,6 +4,7 @@ import { GLMenuContext, type GLSurface } from "./gl-menu";
 import { StageComposer, type StageTargets } from "./gl-stage";
 import { RunPresentation } from "./presentation";
 import { PickupRenderer } from "./pickups";
+import {drawPlayerLaser} from "./lasers";
 import type { ActorSprite, Room, RoomAppearance, RoomQuad, State } from "./engine";
 
 const PLAYER = "gfx/001.000_player.anm2";
@@ -265,6 +266,7 @@ export class Renderer {
       ctx.restore();
     }
     for (const laser of state.lasers) {
+      if (laser.origin === "npcShootAngle") {
       if (!laser.active) continue;
       // The impact effect keys 500 below its laser, so it draws under the beam.
       const impact = laser.impact;
@@ -277,6 +279,20 @@ export class Renderer {
         ctx.restore();
       }
       this.drawLaser(ctx, this.npcLaserView(laser));
+        continue;
+      }
+      const impact=laser.impact;
+      if (impact && !impact.removed && state.actorScheduler.actors.some(actor => actor.kind === "effect" && actor.id === impact.id)) {
+        ctx.save();
+        ctx.translate((impact.position.x+impact.positionOffset.x)*.65+32,(impact.position.y+impact.positionOffset.y)*.65-46);
+        ctx.rotate(impact.rotation*Math.PI/180);ctx.scale(impact.scale.x,impact.scale.y);
+        if (!impact.currentColor) throw new Error("Player Impact color history is absent");
+        this.assets.draw(ctx,impact.actor,impact.animation,0,0,impact.animationClock,
+          {color:impact.currentColor});
+        ctx.restore();
+      }
+      if (laser.uninitialized !== false || !state.actorScheduler.actors.some(actor => actor.kind === "laser" && actor.id === laser.id)) continue;
+      drawPlayerLaser(this.graphics,this.assets,laser,{width:480,height:270,pixelScale:this.canvas.width/480});
     }
     for (const projectile of state.enemyProjectiles)
       if (!projectile.removed && projectile.animation)
