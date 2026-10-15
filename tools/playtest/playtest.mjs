@@ -250,6 +250,8 @@ try {
       lastPause = now; await release();
       await tap('Escape'); await tab.waitForTimeout(800);
       const paused = await observe();
+      // Escape can land as the player crosses a door; retry after the transition.
+      if (!paused.paused && (paused.transition || paused.room !== state.room)) { lastPause = now - 45_000; previous = paused; lastAdvance = Date.now(); continue; }
       if (!paused.paused && paused.pauseMenu === 'hidden') fail(`Escape did not open the pause menu (screen ${paused.screen}, tick ${paused.tick}, room ${paused.room}, controls ${paused.player.controls}, dead ${paused.player.dead})`);
       else { stats.pauses++; await shot('paused'); }
       await tab.keyboard.down('KeyD'); await tab.waitForTimeout(400); await tab.keyboard.up('KeyD');
