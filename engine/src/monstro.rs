@@ -398,17 +398,12 @@ pub(crate) fn advance(
     let mut friction = npc.base_friction;
     let mut shots = Vec::new();
     if npc.dead {
-        if npc.state != 16 {
-            npc.state = 16;
-            npc.monstro.as_mut().unwrap().state_frame = 0;
-        }
-        friction *= 0.01;
-        let frame = npc.monstro.as_ref().unwrap().state_frame;
-        if frame == 0 {
+        let mut frame = npc.monstro.as_ref().unwrap().state_frame;
+        if crate::boss_death::step(npc, &mut frame, &mut friction)? == 0 {
             play(npc, "Death", false);
         }
         let state = npc.monstro.as_mut().unwrap();
-        state.state_frame = frame.checked_add(1).ok_or("boss Death frame exhausted")?;
+        state.state_frame = frame;
         if npc.animation_frame == content::MONSTRO_BLOODSTART_FRAME {
             state.death_blood_start = true;
         }
@@ -450,12 +445,10 @@ pub(crate) fn advance(
         // own shared draws. Those effect owners are not admitted yet, so the
         // event is recorded in death_explosion and the authored Death clip
         // continues to retirement instead of halting the game.
-        if !npc.animation_playing {
+        if crate::boss_death::finish_if_done(npc) {
             // Source4f2d10 invokes final-boss reward/heart callback before Remove.
             // Keep that unimplemented callback explicit; never use Fly retirement.
-            state.final_boss_callback_pending = true;
-            npc.removed = true;
-            npc.visible = false;
+            npc.monstro.as_mut().unwrap().final_boss_callback_pending = true;
         }
     } else if npc.state == 1 {
         friction *= 0.01;

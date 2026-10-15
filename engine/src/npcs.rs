@@ -88,6 +88,26 @@ pub struct Npc {
     /// Entity+494: BaseUpdate discards every queued hit.
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     pub invincible: bool,
+    /// Dying boss state16 frame (Entity_NPC+f58), see boss_death.rs.
+    #[serde(default, skip_serializing_if = "is_zero")]
+    pub death_frame: u32,
+    /// 4f2d10's boss callback 5c8430 (boss count, rewards) ran at removal; its
+    /// reward effects are not admitted yet.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub boss_callback_pending: bool,
+    /// Entity+498/+4a0 parent and child handles (SetParent447fc0,
+    /// SetChild447f40). Removal448040 nulls every handle naming the purged
+    /// actor, see `unlink_removed`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub parent: Option<u32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub child: Option<u32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub larry: Option<crate::larry::LarryState>,
+}
+
+fn is_zero(value: &u32) -> bool {
+    *value == 0
 }
 
 #[derive(Clone, Copy, Debug, Default, Deserialize, Serialize, PartialEq, Eq)]
@@ -296,6 +316,29 @@ pub fn player_contacts(state: &mut State) -> Result<(), String> {
 /// Full manager contacts also separate ordinary NPC pairs and planted Bombs.
 /// Callback49b8f0 returns false for these uncharmed13/18 pairs; regular Bomb
 /// damps both entering velocities before the source mass response. Spatial candidate ordering remains diagnostic.
+const WORM_SEGMENTS: [u32; 4] = [19, 28, 89, 239];
+
+/// 448040: purging an actor nulls every parent and child handle naming it,
+/// so a severed chain's follower becomes a head and its leader a tail.
+pub(crate) fn unlink_removed(npcs: &mut [Npc]) {
+    let removed: Vec<u32> = npcs
+        .iter()
+        .filter(|npc| npc.removed)
+        .map(|npc| npc.id)
+        .collect();
+    if removed.is_empty() {
+        return;
+    }
+    for npc in npcs.iter_mut() {
+        if npc.parent.is_some_and(|id| removed.contains(&id)) {
+            npc.parent = None;
+        }
+        if npc.child.is_some_and(|id| removed.contains(&id)) {
+            npc.child = None;
+        }
+    }
+}
+
 pub fn nonplayer_contacts(state: &mut State) -> Result<(), String> {
     let body = |npc: &Npc| combat::ContactBody {
         id: npc.id,
@@ -310,12 +353,14 @@ pub fn nonplayer_contacts(state: &mut State) -> Result<(), String> {
             let (left, right) = state.room.npcs.split_at_mut(second);
             let first = &mut left[first];
             let second = &mut right[0];
-            // 49b980: two Wall Huggers never collide.
+            // 49b980: two Wall Huggers never collide; 49bbb4 vetoes every
+            // pair of worm segments (Larry Jr., 28, 89, 239) without charm.
             if first.dead
                 || second.dead
                 || first.entity_collision_class != 4
                 || second.entity_collision_class != 4
                 || (first.kind == 218 && second.kind == 218)
+                || (WORM_SEGMENTS.contains(&first.kind) && WORM_SEGMENTS.contains(&second.kind))
             {
                 continue;
             }
@@ -645,6 +690,11 @@ impl Npc {
             dingle: None,
             wall_hugger: None,
             invincible: false,
+            death_frame: 0,
+            boss_callback_pending: false,
+            parent: None,
+            child: None,
+            larry: None,
         }
     }
 

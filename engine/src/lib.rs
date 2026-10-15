@@ -16,6 +16,7 @@ pub mod attack_runtime;
 pub mod audio;
 pub mod blood_effects;
 pub mod bombs;
+pub mod boss_death;
 mod brimstone;
 pub mod camera;
 pub mod challenges;
@@ -50,6 +51,7 @@ pub mod items;
 pub mod keepers;
 mod knife_path;
 pub mod knives;
+pub mod larry;
 pub mod laser_line;
 mod laser_npc_runtime;
 mod laser_player_runtime;
@@ -2245,6 +2247,7 @@ impl Game {
         bombs::advance_explosions(&mut self.state, phase, explosion_fence);
         bombs::retire_removed(&mut self.state);
         self.state.room.pickups.retain(|pickup| !pickup.removed);
+        npcs::unlink_removed(&mut self.state.room.npcs);
         self.state.room.npcs.retain(|npc| !npc.removed);
         self.state.familiars.retain(|familiar| !familiar.removed);
         //454df0 retires actual31e inactive actors;31f alone is not removal.
@@ -2564,9 +2567,17 @@ impl Game {
             occupied.extend(self.state.bombs.iter().map(|bomb| bomb.motion.position));
         }
         let player_velocity = bombs::player_velocity(&self.state);
+        let room_type = self
+            .state
+            .room
+            .descriptor
+            .as_ref()
+            .map_or(1, |descriptor| descriptor.template.room_type);
         let mut births = Vec::new();
+        let (before, rest) = self.state.room.npcs.split_at_mut(index);
+        let (npc, after) = rest.split_first_mut().expect("indexed NPC");
         (family.advance)(
-            &mut self.state.room.npcs[index],
+            npc,
             phase,
             &mut self.state.boot_lifecycle.shared,
             &mut entities::NpcWorld {
@@ -2589,6 +2600,8 @@ impl Game {
                     effects: &mut self.state.sprite_effects,
                     scheduler: &mut self.state.actor_scheduler,
                 },
+                room_type,
+                peers: entities::Peers { before, after },
             },
             &mut births,
         )?;
