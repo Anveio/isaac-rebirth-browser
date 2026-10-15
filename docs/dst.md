@@ -137,7 +137,13 @@ line names the implemented NPC kinds no case simulated
 generated floors contained but no case entered. Unsimulated kinds are split
 by whether any authored Basement or special room places them
 (`unplacedNpcKinds`): a kind no room places, such as one from a later stage,
-is reachable only when another entity spawns it, so it is not a driver gap. The census is a measurement,
+is reachable only when another entity spawns it, so it is not a driver gap.
+A `removed:<kind>` key records an NPC of that kind leaving a room the player
+stayed in, killed or retired by its family; removed bodies are pruned within
+the update that removes them, so the census watches for the absence rather
+than the death frame. The summary also names the simulated kinds whose
+removal never ran (`unremovedNpcKinds`), the death and retirement paths no
+case exercised. The census is a measurement,
 not a property. Must-hit properties and coverage tapes make the important
 branches binding.
 
