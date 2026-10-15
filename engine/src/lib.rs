@@ -19,6 +19,7 @@ pub mod bombs;
 pub mod boss_death;
 mod brimstone;
 pub mod camera;
+pub mod game_shake;
 pub mod challenges;
 pub mod champions;
 pub mod chests;
@@ -555,6 +556,9 @@ pub struct State {
     pub room: Room,
     #[serde(default)]
     pub camera: Option<camera::Camera>,
+    ///Independent Game+CE9FC/CEA00 history; legacy restore stays unknown.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub game_shake: Option<game_shake::GameShake>,
     pub floor: floor::Floor,
     pub current_room: usize,
     pub visited_rooms: BTreeSet<usize>,
@@ -769,6 +773,7 @@ impl Game {
                 player_death: player_death::PlayerDeath::default(),
                 room,
                 camera,
+                game_shake: Some(game_shake::GameShake::fresh()),
                 room_display_flags: vec![0; floor.descriptors.len()],
                 floor,
                 current_room,
@@ -1375,6 +1380,11 @@ impl Game {
         self.state.paused = false;
         self.state.run_tick = 0;
         self.state.game_update_count = 0;
+        //54F471/54F635 clear duration, without writing the independent output.
+        self.state
+            .game_shake
+            .get_or_insert_with(Default::default)
+            .reset_duration();
         self.state.tears.clear();
         self.state.impacts.clear();
         self.state.next_tear = 1;
@@ -1954,6 +1964,12 @@ impl Game {
             epic_fetus::restore_fast_positions(&mut self.state)?;
             explosion_effects::restore_fast_positions(&mut self.state)?;
         }
+        //54F938 precedes every GameFull popup/transition/age guard.
+        if phase == phase::Phase::Update && self.state.screen == Screen::Playing {
+            if let Some(shake) = &mut self.state.game_shake {
+                shake.advance_full_clock();
+            }
+        }
         let gameplay_was_paused = self.state.paused;
         if self.state.screen == Screen::Playing {
             self.state.pause_menu.advance(phase);
@@ -2520,10 +2536,21 @@ impl Game {
             y: f32::from(u8::from(self.held("ArrowDown")))
                 - f32::from(u8::from(self.held("ArrowUp"))),
         };
+        let known_constructor = self.state.camera.is_some();
         let camera = self
             .state
             .camera
             .get_or_insert_with(|| camera::Camera::new(&self.state.room, None));
+        if !known_constructor {
+            //A missing restored Camera is not an observed Room constructor.
+            camera.shake_history_known = None;
+        }
+        camera.advance_source_shake(
+            &mut self.state.game_shake,
+            self.state.game_update_count,
+            &mut self.state.boot_lifecycle.shared,
+            phase,
+        );
         camera.advance(&self.state.room, &self.state.player, aim, phase);
     }
     fn advance_actor(
