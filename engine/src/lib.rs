@@ -2626,13 +2626,14 @@ impl Game {
                 self.state.player_animation.current = None;
             }
         }
+        // Base main-sprite time advances before the Player death/shooting caller.
+        player_items::advance_presentation(&mut self.state, phase);
         if player_death::advance(&mut self.state, phase) {
             return Ok(());
         }
         let controls_enabled = controls_enabled
             && self.state.player.controls_enabled
             && self.state.player.input_cooldown <= 0;
-        player_items::advance_presentation(&mut self.state, phase);
         //52f370 positive7dc returns before its both-phase519fc0 callbacks.
         //53004c otherwise precedes later full/body work, independent of aim.
         let shoot_callback_admitted =
