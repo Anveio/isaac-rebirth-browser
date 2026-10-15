@@ -336,7 +336,6 @@ pub(crate) fn initialize_player(state: &mut State, definition: &Definition) -> R
     }
     //52e340 invokes511f10 unconditionally, even when the requested mask is0.
     crate::player_stats::evaluate_cache(state)?;
-    crate::familiars::evaluate_cache(state)?;
     state.player.initialized_3074 = true;
     Ok(())
 }

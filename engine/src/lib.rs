@@ -1392,7 +1392,6 @@ impl Game {
         } else {
             //52e340/final3074 store also runs on the ordinary Challenge0 route.
             player_stats::evaluate_cache(&mut self.state)?;
-            familiars::evaluate_cache(&mut self.state)?;
             self.state.player.initialized_3074 = true;
         }
         // Fresh54eb20 invokes54eaa0 after Level.Init/Save and the primary
