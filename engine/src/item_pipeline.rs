@@ -170,24 +170,6 @@ impl<'a> ItemInputs<'a> {
     pub(crate) fn admits_complete_selected_tail(self) -> bool {
         self.admits_selected_auxiliary_callbacks() && self.owner.luck_inputs.is_some()
     }
-
-    fn has_unmapped_owner(self, flag: u32, supported: &[u32]) -> bool {
-        self.owner
-            .owned_counts
-            .iter()
-            .enumerate()
-            .any(|(id, &count)| {
-                count != 0
-                    && !supported.contains(&(id as u32))
-                    && items::definition(id as u32)
-                        .is_some_and(|config| config.cache_flags & flag != 0)
-            })
-            || self.owner.temporary_collectibles.iter().any(|entry| {
-                !supported.contains(&entry.item_id)
-                    && items::definition(entry.item_id)
-                        .is_some_and(|config| config.cache_flags & flag != 0)
-            })
-    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -292,9 +274,7 @@ pub(crate) fn resolve_scalars(
             }
             _ => continue,
         };
-        if (source_player_type == Some(0) && inputs.admits_scalar_stage(stage, supported))
-            || !inputs.has_unmapped_owner(flag, supported)
-        {
+        if source_player_type == Some(0) && inputs.admits_scalar_stage(stage, supported) {
             completed |= flag;
         }
     }
