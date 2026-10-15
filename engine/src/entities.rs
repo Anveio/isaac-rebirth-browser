@@ -42,6 +42,35 @@ pub(crate) struct NpcWorld<'a> {
     pub system_counter: u32,
     pub player_items: Option<&'a PlayerItems>,
     pub effects: NpcEffectAdmission<'a>,
+    /// Room+0x10 descriptor type of the current room.
+    pub room_type: u32,
+    /// The room's other NPCs, live, for families that link actors.
+    pub peers: Peers<'a>,
+}
+
+/// The room NPC list around the updating actor, in list order. Peers read
+/// what earlier actors already wrote this update.
+pub(crate) struct Peers<'a> {
+    pub before: &'a mut [Npc],
+    pub after: &'a mut [Npc],
+}
+
+impl Peers<'_> {
+    /// Every other NPC in room list order.
+    pub fn iter(&self) -> impl Iterator<Item = &Npc> {
+        self.before.iter().chain(self.after.iter())
+    }
+
+    pub fn get(&self, id: u32) -> Option<&Npc> {
+        self.iter().find(|npc| npc.id == id && !npc.removed)
+    }
+
+    pub fn get_mut(&mut self, id: u32) -> Option<&mut Npc> {
+        self.before
+            .iter_mut()
+            .chain(self.after.iter_mut())
+            .find(|npc| npc.id == id && !npc.removed)
+    }
 }
 
 /// Actors an NPC callback creates. Game admits them in this order.
@@ -133,6 +162,7 @@ pub(crate) static FAMILIES: &[&Family] = &[
     &crate::gluttony::FAMILY,
     &crate::dingle::FAMILY,
     &crate::wall_hugger::FAMILY,
+    &crate::larry::FAMILY,
 ];
 
 pub(crate) fn family(kind: u32) -> Option<&'static Family> {

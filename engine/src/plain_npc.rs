@@ -119,6 +119,34 @@ pub(crate) fn walk_frame(npc: &mut Npc, horizontal: &str, vertical: &str, thresh
     }
 }
 
+/// 4fc3d6: a boss plays "Death"; Larry Jr. (4fc8e8) picks DeathBody01 for
+/// a segment with a parent and DeathHead otherwise.
+fn death_clip(npc: &Npc) -> &'static str {
+    if content::clip(&npc.actor, "Death").is_some() {
+        "Death"
+    } else if npc.parent.is_some() {
+        "DeathBody01"
+    } else {
+        "DeathHead"
+    }
+}
+
+/// A dead boss plays its death clip in state16 before 4f2d10 removes it.
+fn dying_boss(npc: &mut Npc, mut friction: f32) -> Result<(), String> {
+    let mut frame = npc.death_frame;
+    if crate::boss_death::step(npc, &mut frame, &mut friction)? == 0 {
+        let clip = death_clip(npc);
+        play(npc, clip, false);
+    }
+    npc.death_frame = frame;
+    update_sprite(npc)?;
+    npc.velocity = npc.velocity * friction;
+    npc.position = npc.position + npc.velocity;
+    npc.presented_position = npc.position;
+    crate::boss_death::finish_if_done(npc);
+    Ok(())
+}
+
 /// IsFinished40fba0 for the current clip.
 pub(crate) fn finished(npc: &Npc) -> bool {
     !npc.animation_playing
@@ -180,13 +208,16 @@ pub(crate) fn advance_with(
         npc.presented_position = npc.position + npc.velocity * 0.5;
         return Ok(());
     }
-    if npc.dead {
-        // Dead NPCs keep negative HP through the next intermediate phase and
-        // retire at the following full pass.
-        npc.removed = true;
-        return Ok(());
-    }
     let mut friction = npc.base_friction;
+    if npc.dead {
+        if !npc.boss {
+            // Dead NPCs keep negative HP through the next intermediate phase
+            // and retire at the following full pass.
+            npc.removed = true;
+            return Ok(());
+        }
+        return dying_boss(npc, friction);
+    }
     if npc.state == 1 {
         friction *= 0.01;
         match npc.frame_age {
@@ -227,6 +258,11 @@ pub(crate) fn advance_with(
         }
     } else {
         ai(npc, random, world, births, &mut friction)?;
+    }
+    if npc.dead && npc.boss {
+        // A boss that killed itself in its AI (Larry Jr.'s lone head) enters
+        // state16 in the same update's post-AI handling.
+        return dying_boss(npc, friction);
     }
     update_sprite(npc)?;
     npc.velocity = npc.velocity * friction;
