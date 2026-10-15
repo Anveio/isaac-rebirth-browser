@@ -1,7 +1,7 @@
 # Item composition coverage
 
 This map separates current source owners, declared public cases and observed
-functional results. Main `8c918fb6` includes ordinary Player Brimstone299,
+functional results. Snapshot main `968adab2` includes ordinary Player Brimstone299,
 FireDelay ownership304, Damage ownership318, optional regular Tear variant298,
 per-field comparer311, standalone Ludovico Tear307 and the Native recorder
 storage fix332. The final C421 artifact fixes the controlled
@@ -22,7 +22,10 @@ functional parity.
 | Ordinary/Has118/controlled Knife | Merged270/286/301 share one store, allocator, registered C18 and Remove/Uninit owner; subtype1 children keep ParentKnife498 and their copied Line | The controlled fixed route retains106,884/8,755 FAIL plus one missing old marker;281 post329 parent physical/DA0/C18 rows match and280 carry bit33. Child SharedMT/geometry,37 strict rotations, contact and event/history gaps remain red |
 | Ordinary Player Brimstone | Merged299 uses canonical Laser/Impact storage, charge/live properties, Full/Fast, registered slots and retirement | Retained ordinary case22,111/1,030 FAIL has two births and61 Laser/Impact rows with matching observed geometry/phase/TTL/fade/Sprite/color. Two following-Full absence/slot witnesses do not observe Native Remove/Uninit events |
 | Standalone Ludovico Tear | Merged307 uses the existing Tear store/scheduler and a separately proved neutral329-only kind8 builder | Final C421 owned builds and 37,965,608 / 0 regular regression pass. The four-case comparison remains 134,364 / 20,813 FAIL, with 1,541 bodies (770 Full / 771 Fast). Three motion routes match 1,157 actual position, velocity, B28 and saved450 rows; the contact route still differs and has zero port FIFO/drain witnesses. Original 85,050 / 11,620 and intermediate 134,350 / 24,248 failures remain unchanged. Identity/RNG, strict contact and missing-owner gaps remain |
-| Controlled Brimstone | Draft312 selects actual7/1/1, with current properties and ring Full/Fast owners; its future Tear replacement must consume307's real Remove/physical448 capability | The first fixed case has a complete public-WASM replay and an incomplete Native prefix: 86,718 checks / 7,667 FAIL. Both games show the same-side stable-owner item4 property transition; actual reapply callbacks remain missing/FAIL. No completed four-case paired pass exists |
+| Controlled Brimstone | Draft312 selects actual7/1/1 and consumes307’s real Remove/physical448 capability | Own builds and retained regressions pass; historical prefix86,718/7,667 FAIL remains. Four new Native transports complete; completed case0 grade86,999/7,688 FAIL, other three pending; callback/lifecycle obligations unresolved |
+| Technology68 cache/grant | Pure319 is merged independently of Draft320 actors | Consumed77cd three builds and37,968,484 old-field checks pass;416 new registration failures remain |
+| Ordinary Technology | Draft320/325 use canonical7/2/0 and a separate manager role | Four Native/public pairs82,351/5,807 FAIL;76/152 damage differences. Reviewed eye/post-contact repairs belong to a separate new product |
+| Gimpy225 kill | Separate329 on77cd; old zero-pickup/death coverage stays failed | V2 four own routes observe225 grant, lethal Dip and one bounded100 failure transition; no atomic callback, success/proc or Original claim |
 
 The public `item-composition` driver and suite are registered. Literal
 `--scenarios PATH` replay bypasses generation and every entropy draw.
@@ -69,7 +72,7 @@ parity. Manager absence, Remove flags and callback events are distinct facts.
 | [316](https://github.com/Anveio/isaac-rebirth-browser/pull/316) | Controlled-Brim property/priority history marker | Actual7/1/1 Full/Fast bodies, same-C18 live4 properties,114 replacement and separately observed Laser lifecycle |
 | [317](https://github.com/Anveio/isaac-rebirth-browser/pull/317) | Merged source-owned Room2494, born83C and Full velocity-delta fields | Optional fields consumed by the standalone 329 comparison; registry808/818 and ordinal838 remain absent |
 | [318](https://github.com/Anveio/isaac-rebirth-browser/pull/318) | Merged pure Damage operator and adjacent footprint | Consumed708 production/Clippy/floor, strict regular and retained Libra checks pass; no separate whole-main or contact acceptance |
-| [332](https://github.com/Anveio/isaac-rebirth-browser/pull/332) | Merged lossless Native observation spooling | Closed-prefix storage validation is byte-exact; no fresh Native capture or game parity result follows |
+| [332](https://github.com/Anveio/isaac-rebirth-browser/pull/332) | Merged lossless Native observation spooling | Closed-prefix raw/gzip equivalence and four actual Technology Native captures; current recorder memory measured, no historical peak-reduction claim |
 | [335](https://github.com/Anveio/isaac-rebirth-browser/pull/335) | Merged opt-in controlled-Brim contact tools | Source/default/help/import validation passes; its contact cases remain unexecuted |
 
 The controlled-Brim 708 producer independently passes production, strict Clippy
@@ -81,32 +84,65 @@ history still lacks 631 Native Familiar-manager observations. These checks also
 exercise the separately consumed Damage318 operator; they do not qualify a
 whole current-main product or controlled-Brim contacts.
 
-The first controlled-Brim fixed route has 1,007 paired playing gates from a
-resource-stopped Native prefix. Both games expose 541 controlled-Laser C18 body
-rows (270 Full / 271 Fast); their comparison remains **86,718 / 7,667 FAIL**.
-The versioned semantic regrade separates an observed same-side stable-owner
-property-state transition, which passes in both games, from the actual admitted
-reapply callback, which remains missing/FAIL in both. It preserves all body
-values and the original 87,458 / 7,667 failing report. Incomplete transport,
-three port-only suffix gates, HP ownership, identities/RNG and lifecycle gaps
-remain. No completed four-case paired result or callback-event pass is claimed.
+The historical first controlled-Brim fixed route paired 1,007 playing gates from
+an incomplete Native prefix: 541 controlled-Laser C18 bodies (270 Full / 271
+Fast), with **86,718 / 7,667 FAIL**. Same-side stable-owner property transitions
+pass independently; actual reapply callbacks remain missing/FAIL. The earlier
+87,458 / 7,667 report and its incomplete transport and suffix gaps are unchanged.
+All four fresh Native references now finish normally on the same frozen a408
+inputs and 708 artifact, with stable pins, no guard stop and natural pidfd exit.
+This closes capture transport. The first completed paged case0 grade is
+**86,999 / 7,688 FAIL** over1,010 paired playing rows, 541 Laser C18 bodies
+(270 Full /271 Fast) and280 Knife bodies. Damage, flags, colors, TTL, Sprite,
+friction, classes and Parent match; geometry, identity/RNG and HP ownership
+remain unresolved. The other three grades are pending. The earlier full comparer
+stopped at its process-memory limit after successful projection and established
+no functional grade. Separate captured lifecycle records are not yet joined;
+BaseUninit entry is not completion.
 
-Recorder332 streams every committed observation from the lossless journal when
-writing the final report. Validation of the closed 3,302-record prefix compared
-1,103 observations in 69 bounded windows and preserved both raw JSON and gzip
-bytes exactly, with 36,974,592 bytes observed validation RSS. This validates
-storage behavior, not a fresh Native run or the old capture's completion. The
-old captures have no measured per-process RSS highwater; aggregate memory
-change cannot supply one. A fresh-Native peak reduction has not been verified. Future-only guard diagnostics and exact-game pidfd
-cleanup remain separate temporary host changes.
+Recorder332 preserves every committed observation and the final report API.
+Its original storage validation preserves raw JSON and gzip bytes over 3,302
+prefix records and 1,103 observations in 69 bounded windows, with 36,974,592 bytes
+observed validation RSS. Fresh Technology captures now also exercise the
+streaming path: the first observed recorder highwater is 36,585,472 bytes, with
+unchanged OOM counters and exact owned-game exit. Historical per-process peaks
+remain unknown, so this is a current measurement rather than a quantified
+before/after reduction. The versioned capacity monitor counts bounded clean,
+unmapped file-cache reclaim LRUs, excludes slab/shmem/anon, keeps the old metric
+as a diagnostic and retains the existing memory floors and output limits.
 
-Technology319/320/325 and the separately consumed Gimpy329 kill slice are source
-preparations. Technology's first joined build stopped on a missing origin match
-arm before producing a product. Its minimal correction now passes production;
-strict Clippy and floor also pass, while retained regressions and the public
-cohort remain pending. The four frozen Technology cases and the Gimpy
-paired declarations have no accepted gameplay result. A retained Gimpy DST
-finding cannot establish Original roll or spawn order.
+Pure cache/grant319 is merged; runtime320 and its tool/case325 remain separate
+Drafts. Their consumed77cd producer passes production, strict Clippy and floor.
+Four retained regular routes preserve 37,968,484 old fields with zero differences;
+2,856 additional registration checks retain 416 failures. Four actual Technology
+Original/public pairs retain **82,351 / 5,807 FAIL**: 30 Native versus 29 port
+births and 152 paired bodies (74 Full / 78 Fast), including 76 damage differences.
+The four own routes expose 29 Laser and 29 Impact identities, 170 manager rows
+and 1,928 C18 NULL observations. Eye-history and post-contact damage-reset source
+repairs are included in a separate new producer whose game qualification is
+pending; they do not regrade these77cd failures.
+Identity/RNG, geometry, prelude timers, HP owners, contact, render and lifecycle
+gaps remain explicit.
+
+The old Gimpy four-route bank retains zero item225 ownership and no Dip death.
+A separate v2 bank completes four own public routes: pickup225 at counter755,
+Bomb/explosion, queued damage1154, next-Full HP4 to -56/dead1155 and same-room
+Dip disappearance1156 to1157. Item234 remains zero and no pickup beyond the
+pedestal is observed. Each actual entity-RNG endpoint is consistent with one
+xorshift[4,3,17] transition bounded by100; outcomes81/81/75/37 are failed rolls.
+This is state-transition consistency, not atomic callback/call-count proof,
+trinket-slot observation or Original parity. The separate 5,820-command own DST
+replay preserves 235 rejected commands and zero traps/rollback violations.
+Success/proc coverage, hurt225 and complete item behavior remain pending.
+
+The next joined source68ae on c15 includes Soy stages, capability split,
+eye-history repair, readiness287, Room8 and Technology post-contact reset. Its
+new independently sealed027c7031 product passes production in30.328s; strict
+Clippy passes in30.075s and floor in15.902s. Game qualification is pending. Dr.Fetus52 has a retained
+source map and a coherent canonical-Bomb implementation is beginning. Neither
+source progress establishes gameplay acceptance or controlled329 admission.
+Browser292 still has no completed before/after comparison; both failed attempts
+remain recorded.
 
 The final C421 producer reuses all four frozen Native references and remains
 **134,364 checks / 20,813 FAIL**, with 1,541 controlled bodies (770 Full,
