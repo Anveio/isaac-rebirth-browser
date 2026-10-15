@@ -64,6 +64,7 @@ const urls = import.meta.glob([
   "../references/isaac/rebirth/resources/gfx/grid/door_11_trapdoor.png",
   "../references/isaac/rebirth/resources/gfx/grid/grid_spikes.png",
   "../references/isaac/rebirth/resources/gfx/grid/grid_poop_[123].png",
+  "../references/isaac/rebirth/resources/gfx/backdrop/fx_ray*.png",
   "../references/isaac/rebirth/resources/gfx/grid/grid_pit.png",
   "../references/isaac/rebirth/resources/gfx/grid/grid_fireplace.png",
   "../references/isaac/rebirth/resources/gfx/grid/effect_005_fire.png",

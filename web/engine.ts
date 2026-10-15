@@ -183,6 +183,8 @@ export interface PauseMenu {
 }
 export interface RoomAppearance {
   backdrop: string; columns: number; rows: number; tileSize: number; origin: { x: number; y: number };
+  fxRays?: { index: number; xMin: number; xMax: number; topParallax: number; bottomParallax: number; rayLength: number;
+    raySpacing: number; perspective: number; rays: { opacity: number; animationSpeed: number; phase: number; texture: string }[] };
   backdropPatchSize: { width: number; height: number }; backdropPatchColumns: number;
   floorQuads: RoomQuad[]; wallQuads: RoomQuad[]; tutorial: boolean;
   wallVariantCatalog: { sourcePatchIndex: number; name: string; weight: number; eligibility: string }[];
