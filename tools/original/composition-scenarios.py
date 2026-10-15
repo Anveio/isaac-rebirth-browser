@@ -195,20 +195,137 @@ def ordinary_brim_contact_case(name, phase, epoch, receiver=14, side=0,
     return case
 
 
+def ordinary_technology_case(name, phase, epoch, receiver=14, side=0,
+                             timing=0, rotation=0, canceled_extra=0, token_index=None):
+    directions = ('Right', 'Up', 'Left', 'Down')
+    directions = directions[rotation:] + directions[:rotation]
+    actions = [dict(label='technology-ready', keys=[], presentations=1)]
+    for index, direction in enumerate(directions):
+        actions.extend([
+            dict(label=f'held-{index}-{direction.lower()}', keys=[direction],
+                 presentations=24 + timing),
+            dict(label=f'released-{index}-natural-expiry', keys=[], presentations=16),
+        ])
+    actions.extend([
+        dict(label='canceled-held-prior-db4', keys=['Right', 'Left'],
+             presentations=10 + canceled_extra),
+        dict(label='final-release-natural-expiry', keys=[], presentations=24),
+    ])
+    contract = dict(primaryC08=3, family=7, variant=2, subtype=0,
+        registeredC18DuringActualLifetime=False, managerRoomPersistent=False,
+        controlledBy329=False,
+        requiredWhen='actual held ordinary519FC0 with C74<0; manager birth independently of C18',
+        actualParentType=1, sourceInitializedLifetime=3,
+        sourceInitializationScope='Source factory lifetime3 is followed immediately by actual Full; the first observed remaining lifetime may already be2. Do not demand an impossible post-callback3.',
+        sourceC18Scope='Fresh sole68 has no519130/C18 bind; compare actual NULL throughout. NULL is not prior-actor cleanup evidence.')
+    case = dict(
+        name=name,
+        fixture=dict(kind='source-authored-modified-challenge', challengeId=1,
+                     startingItems=[68], view='item-only'),
+        bootEpochSeed=epoch, initialPhaseOffset=phase,
+        entropy='fixed declared ordinary Technology case' if token_index is None
+            else 'both literal existing OS records reused without new draws or selection',
+        actions=actions,
+        requires=dict(
+            actualPublicChallengeEntry=True,
+            bothGamesConsumeIdenticalDeclaredResourceBytes=True,
+            nativeObservationIsNeverBrowserInput=True,
+            ownedCounts=[dict(itemId=68, count=1)],
+            sourceExpectedActorContract=contract,
+            actorStages=[dict(ownedCounts=[dict(itemId=68, count=1)],
+                              sourceExpectedActorContract=contract,
+                              requiredWitnesses=['Actual ordinary7/2/0 manager births and Full/Fast bodies; no persistent-slot alias.'])],
+            ordinaryTechnologyFunctional=dict(
+                schema='ordinary-technology-properties-lifetime-v1',
+                declaredCountsOnlySelectStage=True,
+                role='each game own actual manager7/2/0 with actual ParentPlayer498; never use C18 as Laser identity',
+                minimumActualBirthsPerGame=1,
+                minimumActualFullBodyRowsPerGame=1,
+                minimumActualFastBodyRowsPerGame=1,
+                minimumSameIdentityNaturalRetirementsPerGame=1,
+                requiredActualFields=[
+                    'Independent real identity/spawn seed/birth age/actor RNG; compare every observed eligible actor, not fitted identities.',
+                    'Player C08/C74/BB0 and actual held/released/canceled callback aim, retained DB4/DA0/D9C; no C0C charge/release contract is substituted.',
+                    'Parent498, relativeParentOffset7D4, physical448/saved450/render458, velocity/friction, actual fast322,31E/31F and both collision classes.',
+                    'Born C98/7E8 and separate818 flags, CCC/source/current colors, actual kind2 damage48C; unknown HP/maxHP must remain missing failures.',
+                    'Angle/previousAngle, actual Line50/mode0 initialization and width120; compare actual controls/points/.7 resampling/class5 clipping without forcing a post-resample count50.',
+                    'Actual positive remaining lifetime through zero/31F, subsequent Remove/31Efalse and following Full manager absence with own Parent/Child weak links. Preserve partial/event gaps separately.',
+                ],
+                birthAndLivePropertyScope='50E1C0 copies C98/CCC then calls real kind2 AFTER Spawn. Kind3 is current after actual receiver enqueue. Do not broadcast current damage/color to older actors or claim a dynamic callback count from source order.',
+                ttlScope=contract['sourceInitializationScope'],
+                noBrimstoneFade=True,
+                actualC18='must be present and NULL throughout this fresh sole68 route; no C18 bind/reapply/cleanup credit',
+                actualSecondarySlots='Compare actual C20/C28/C30 separately; selected no55/no87 NULLs are not cleanup witnesses.',
+                impact=dict(entityType=1000, variant=50, subtype=0,
+                    minimumActualBirthsPerGame=1,
+                    actor='gfx/1000.050_laserimpact.anm2', defaultAnimation='Idle',
+                    sourceAuthoredAnimationScope='Actual canonical Idle24 looping; no BrimStart/Loop substitution or inferred pose.',
+                    requiredActualFields=['Independent identity/seed/actual manager membership and matching ownParent498/LaserChild4A0.',
+                        'Source/current color, actual physical448/saved450/render458, scale and Sprite state.',
+                        'Actual Sprite flip2FC and separate raw814; require real fields rather than guessing false/0 or aliasing raw814 to Sprite rotation.',
+                        'Actual own-parent death/NULL, dead versus Remove, later Full manager absence and exact matching weak-link cleanup.'],
+                    sourceBoundOrder='SharedRaw Effect Spawn, SetChild/SetParent, Bound2 flip, Bound4*90 raw814, v58 color, immediate Full.',
+                    nativeDynamicCallCountObserved=False),
+                unknownOrMissingFieldsMustFail=True),
+            ordinaryTechnologyContact=dict(
+                authoredReceiver=dict(type=receiver, variant=0, subtype=0),
+                spawnGroup=dict(x=6 if receiver == 18 else (9 if side == 0 else 3),
+                                y=5 if receiver == 18 else 3),
+                publicAimPolicy='Stationary four-cardinal held/released sweep plus canceled-held; no observed-position targeting, conditional repair or Native state input.',
+                receiverVariantPolicy='Preserve real factory variant/subtype/champion/health and independently compare actual manager identity; authored selector is not a fitted actor alias.',
+                minimumActualAcceptedEnqueuesPerGame=1,
+                minimumActualNextFullDamageApplicationsPerGame=1,
+                requiredActualWitnesses=[
+                    'Actual eligible overlapping receiver with true class/flags/geometry and actual manager7/2/0 Laser.',
+                    'Real ordered FIFO append with amount/flags8/sourceType1 and the actual ParentPlayer copied reference, followed by the same receiver next-Full health application.',
+                    'A real bounded source window or event must attribute enqueue to this Laser callback; ParentPlayer plus matching amount or unique current Laser alone is insufficient.',
+                ],
+                sourceCountdownScope='476A60 callback countdown30 is source-only until an actual call witness; it is not a stored FIFO field.',
+                requiredToolingStatus='Pending typed14/18 plus ordinary-Technology manager-role/queue-window continuation; existing217 or ordinary-Brim C18 proof is insufficient.',
+                missingContactCoverageRemainsGapAndFail=True),
+            compositionSourceFields=['playerMovementD9c', 'knifeChildChain4a0'],
+            additionalRequiredObservationFieldsPending=['Manager7/2/0 role and explicit Technology contract consumption',
+                'Impact50/0 actual flip2FC/raw814 and independent Sprite/frame ownership',
+                'Typed14/18 ordered FIFO with Laser ParentPlayer flags8 and actual source window'],
+            actualPendingPrimaryCleanup='must be present and null',
+            actualCachePendingFlags=0,
+            canonicalDiagnosticOwner='weaponAdmission.unadmittedController must be present and null',
+            preserveAllIdentitySeedRngInitNumericFamilyAndCoverageMismatches=True,
+            unknownDiagnosticOrMissingCoverageIsFailure=True,
+            sourceInferredGrantPath=dict(orderedItems=[68], each='52E1A0→52CC90→511F10→581750',
+                final='511F10 then3074=true', nativeDynamicCallCountObserved=False),
+            coverageGapsRequiringSeparateActualEvidence=[
+                'Explicit Native Remove and Uninit callback events/precedence; GL disappearance alone is not this event witness.',
+                'Exact contact enqueue attribution/current kind3 callback timing and complete copied FIFO history.',
+                'DOM/render/pixel, Technology wardrobe presentation and Effect raw814 render projection.',
+                'Full624 word/index and complete actual actor-init rosters remain separately graded; no seed/cursor proxy.',
+            ]),
+        execution=dict(status='not-executed', wholeCaseAccepted=False,
+            blockingPrerequisites=['Owned qualified ordinary-Technology producer and integration-owner serial game/storage lease',
+                'Every declared contract must be consumed explicitly by its grader; missing manager-role/event/contact/render observation stays gap/failure.'],
+            neverSatisfiedBy='Static counts/source proof, an invented C18/pose/default, disappearance alone, borrowed WASM, Native-state injection, seed reroll or dropping failed cases'))
+    if token_index is not None:
+        case['entropyTokenIndex'] = token_index
+    return case
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--count', type=int, default=2)
     parser.add_argument('--repository', type=Path, default=ROOT)
-    parser.add_argument('--suite', choices=('history', 'ordinary-brim-contact'), default='history')
+    parser.add_argument('--suite', choices=('history', 'ordinary-brim-contact', 'ordinary-technology'), default='history')
     parser.add_argument('--entropy-journal', type=Path,
                         help='Reuse every literal token from an existing declaration; never draws again.')
     args = parser.parse_args()
     if not 0 <= args.count <= 8:
         raise ValueError('count must be 0..8; all declared outcomes are retained')
     contact = args.suite == 'ordinary-brim-contact'
+    technology = args.suite == 'ordinary-technology'
     if contact and args.entropy_journal is None:
         raise ValueError('Contact declaration requires an existing entropy journal; no new draws')
+    if technology and args.entropy_journal is None:
+        raise ValueError('Technology declaration requires an existing entropy journal; no new draws')
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=False)
     entries = []
@@ -228,12 +345,19 @@ def main():
             os.fsync(journal.fileno())
             if not args.entropy_journal:
                 entries.append(entry)
-    cases = ([ordinary_brim_contact_case(f'brim-contact-fixed-phase{phase}', phase, 0x31A9)
+    cases = ([ordinary_technology_case(f'technology-fixed-phase{phase}', phase, 0x31A9)
+              for phase in (0, 1)] if technology else
+             [ordinary_brim_contact_case(f'brim-contact-fixed-phase{phase}', phase, 0x31A9)
               for phase in (0, 1)] if contact else
              [history_case(f'history-118-114-329-phase{phase}', phase, 0x31A9) for phase in (0, 1)])
     for entry in entries:
         token = bytes.fromhex(entry['tokenHex'])
-        if contact:
+        if technology:
+            cases.append(ordinary_technology_case(f'technology-recorded-{entry["index"]}',
+                token[0] % 2, int.from_bytes(token[4:8], 'little'),
+                (14, 18)[token[2] % 2], token[1] % 2, token[2] % 13,
+                token[8] % 4, token[9] % 3, entry['index']))
+        elif contact:
             cases.append(ordinary_brim_contact_case(f'brim-contact-recorded-{entry["index"]}',
                 token[0] % 2, int.from_bytes(token[4:8], 'little'),
                 (14, 18)[token[2] % 2], token[1] % 2, token[2] % 13, entry['index']))
@@ -264,11 +388,15 @@ def main():
                 node.attrib.pop(name, None)
             else:
                 node.set(name, value)
-        node.set('startingitems', '118')
+        node.set('startingitems', ','.join(map(str, case['fixture']['startingItems'])))
         xml = output / case['name'] / 'resources/challenges.xml'
         xml.parent.mkdir(parents=True)
         ET.ElementTree(root).write(xml, encoding='utf-8', xml_declaration=True)
-        if contact:
+        if technology:
+            receiver = case['requires']['ordinaryTechnologyContact']
+            groups = [dict(**receiver['spawnGroup'], entries=[dict(
+                **receiver['authoredReceiver'], weight=1.0)])]
+        elif contact:
             receiver = case['requires']['ordinaryBrimContact']
             groups = [dict(**receiver['spawnGroup'], entries=[dict(
                 **receiver['authoredReceiver'], weight=1.0)])]
@@ -296,8 +424,8 @@ def main():
             raise ValueError('Authored public reset exceeds its boot-resource transport')
         case['fixture']['declaredResetJsonBytes'] = size
     write_json(output / 'scenarios.json', dict(schema=1, cases=cases,
-        publicRouteRevision='ordinary-brim-contact-v1' if contact else 'maxcharge-near-contact-opposite-aim-v3',
-        scope='Declared ordinary-Brim receiver contact; no execution or acceptance' if contact else 'Declared live118→114→329 public-history successor; no execution or acceptance',
+        publicRouteRevision='ordinary-technology-v1' if technology else 'ordinary-brim-contact-v1' if contact else 'maxcharge-near-contact-opposite-aim-v3',
+        scope='Declared ordinary Technology7/2/0 manager bodies/TTL/Impact/contact; no execution or acceptance' if technology else 'Declared ordinary-Brim receiver contact; no execution or acceptance' if contact else 'Declared live118→114→329 public-history successor; no execution or acceptance',
         selection='Two fixed phases plus every journaled unfiltered OS projection; no outcome filtering or rerolls',
         outcomePolicy='Missing real stages/grants/actors/children/cleanup/bodies and every mismatch remain failures'))
     print(json.dumps(dict(status='declared-not-executed', cases=len(cases), scenarios=str(output / 'scenarios.json'))))
