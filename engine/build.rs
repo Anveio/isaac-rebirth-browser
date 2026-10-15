@@ -505,6 +505,9 @@ fn boss_catalog(xml: &str) -> String {
             continue;
         };
         let (kind, variant) = identity.split_once('.').expect("portrait type.variant");
+        // 551a10 maps entity types to ids in code, not by file name:
+        // 551ccd gives Gurglings 237 id 56, whose sheet is named 276.0.
+        let (kind, variant) = if id == 56 { ("237", "1") } else { (kind, variant) };
         output.push_str(&format!(
             "BossPresentation {{ id: {id}, entity_type: {kind}, variant: {variant}, portrait: {portrait:?} }},\n",
             kind = kind.parse::<u32>().expect("portrait type"),
