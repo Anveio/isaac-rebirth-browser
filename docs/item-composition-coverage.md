@@ -77,8 +77,10 @@ corrected8120 producer reuses the same frozen Native references and remains
 properties. Each game independently observes accepted queue→next-Full HP chains;
 strict receiver identity/positions, 42 HP differences and 10 queue differences
 remain red. A source-confirmed controlled450 rewind motion defect needs its
-next correction. This does not regrade the original no-Tear report or establish
-full body/contact/lifetime parity. The OS0 initial guard-stop remains retained.
+next correction and artifact/game qualification. The fixed motion case retains
+188 prebirth C74 differences, 188 BB0 differences and seven DA0 differences.
+These selected matches do not establish all Player/controller fields or
+body/contact/lifetime parity, and do not regrade the original no-Tear report. The OS0 initial guard-stop remains retained.
 
 Historical reports remain immutable. Frozen Brim10 retains307,112/23,017 FAIL;
 ordinary6 completed only cases0..2 with571,311/37,820 FAIL. The pre299 unchanged-v8

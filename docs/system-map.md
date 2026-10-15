@@ -94,14 +94,16 @@ The corrected `7e000d3f` / WASM `8120d8e9` reuses those four Native references
 and remains **134,350 checks / 24,248 FAIL**, with 1,541 actual controlled bodies
 (770 Full, 771 Fast). Its strict four-route regression passes **37,965,608 / 0**.
 The fixed motion case matches 383 damage, born83C, radius, friction, height,
-flags, color, generic318, birth-age and Parent observations; all 571 admission,
+flags, color, generic318, birth-age and Parent observations; all 571 counts,
 C18, cache and Room rows match. Contact minimum accepted-queue and next-Full HP
 chains are observed independently in both games (one Native, two port), while
 strict receiver identity/positions, 42 HP differences and 10 queue differences
 remain red. The controlled saved450 rewind is a source-confirmed motion defect;
 its correction is pending. Falling speed, identity/seed and missing actor owners
-also remain unresolved. These selected matches do not establish actor or
-whole-case parity.
+also remain unresolved. In that fixed motion case, C74 and BB0 each retain
+188 prebirth differences and DA0 retains seven. The peer-clear saved450 source
+fix still needs its next artifact/game qualification. These selected matches do
+not establish actor, Player/controller or whole-case parity.
 
 Draft314 declares four ordinary-Brim contact cases;315 adds typed14/18 contact
 observations/comparison;316 adds controlled-Brim property/priority history;317

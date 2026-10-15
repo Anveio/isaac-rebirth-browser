@@ -313,8 +313,8 @@
           "reportSha256": "78a2c099d3034b33f348885212848ec79f2bce926e2e5442104d01dacbb32b7a"
         }
       ],
-      "selectedMatchedScope": "Fixed motion383 damage/born83C/radius/frictions/height/flags/colors/generic318/birthAge/Parent observations and571 admission/C18/cache/Room rows. Contact accepted queue and next-Full HP chains occur independently in both games (Native1/port2).",
-      "knownMotionDefect": "controlled saved450 rewind; next correction pending",
+      "selectedMatchedScope": "Fixed motion383 damage/born83C/radius/frictions/height/flags/colors/generic318/birthAge/Parent observations and571 counts/C18/cache/Room rows. Contact accepted queue and next-Full HP chains occur independently in both games (Native1/port2).",
+      "knownMotionDefect": "controlled saved450 rewind; peer-clear d234 source fix, next artifact/game qualification pending",
       "remaining": [
         "strict physical/receiver identity/positions",
         "42 contact HP differences",
@@ -322,7 +322,13 @@
         "fallingSpeed/identity/seed",
         "missing actor owners/registry/ordinal",
         "full actor/contact/lifecycle parity"
-      ]
+      ],
+      "fixedMotionRemaining": {
+        "c74PrebirthDifferences": 188,
+        "bb0PrebirthDifferences": 188,
+        "da0Differences": 7,
+        "allPlayerControllerFieldsAccepted": false
+      }
     }
   },
   "sourceOnlyDrafts": [
