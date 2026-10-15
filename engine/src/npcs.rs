@@ -97,7 +97,14 @@ const ZERO: WorldVector = WorldVector { x: 0.0, y: 0.0 };
 
 /// Ordinary actor explosion collection is strict (75 + collision radius).
 /// Velocity changes at admission; HP waits for the next full BaseUpdate.
-pub fn bomb_hit(state: &mut State, center: WorldVector, bomb_id: u32) -> Result<(), String> {
+pub fn bomb_hit(
+    state: &mut State,
+    center: WorldVector,
+    blast_radius: f32,
+    damage: f32,
+    source: combat::DamageSource,
+    line_clear: &dyn Fn(WorldVector) -> bool,
+) -> Result<(), String> {
     for npc in &mut state.room.npcs {
         if npc.dead
             || npc.removed
@@ -111,8 +118,8 @@ pub fn bomb_hit(state: &mut State, center: WorldVector, bomb_id: u32) -> Result<
             y: npc.position.y - center.y,
         };
         let squared = delta.x * delta.x + delta.y * delta.y;
-        let radius = 75.0 + npc.collision_radius;
-        if squared >= radius * radius {
+        let radius = blast_radius + npc.collision_radius;
+        if squared >= radius * radius || !line_clear(npc.position) {
             continue;
         }
         if squared > 0.0 {
@@ -128,12 +135,9 @@ pub fn bomb_hit(state: &mut State, center: WorldVector, bomb_id: u32) -> Result<
         npc.damage.enqueue(
             health,
             combat::DamageEvent {
-                amount: 60.0,
+                amount: damage,
                 kind: combat::DamageKind::Bomb,
-                source: combat::DamageSource {
-                    id: bomb_id,
-                    entity_type: 4,
-                },
+                source,
             },
         )?;
     }

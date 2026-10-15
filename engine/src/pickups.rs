@@ -862,7 +862,12 @@ pub(crate) fn resolve_grid(
 
 /// The real554490 actor circle changes velocity immediately; ordinary Pickup
 /// HP0 rejects the later damage virtual. No loot or shared-RNG word is sampled.
-pub(crate) fn bomb_hit(state: &mut crate::State, center: WorldVector) -> Result<(), String> {
+pub(crate) fn bomb_hit(
+    state: &mut crate::State,
+    center: WorldVector,
+    blast_radius: f32,
+    line_clear: &dyn Fn(WorldVector) -> bool,
+) -> Result<(), String> {
     if !center.is_finite() {
         return Err("pickup blast center must be finite".into());
     }
@@ -882,11 +887,11 @@ pub(crate) fn bomb_hit(state: &mut crate::State, center: WorldVector) -> Result<
             y: pickup.position.y - center.y,
         };
         let squared = delta.x * delta.x + delta.y * delta.y;
-        let radius = 75.0 + pickup.collision_radius;
+        let radius = blast_radius + pickup.collision_radius;
         if !squared.is_finite() || !radius.is_finite() {
             return Err("pickup blast geometry overflowed".into());
         }
-        if squared == 0.0 || squared >= radius * radius {
+        if squared == 0.0 || squared >= radius * radius || !line_clear(pickup.position) {
             continue;
         }
         let distance = squared.sqrt();

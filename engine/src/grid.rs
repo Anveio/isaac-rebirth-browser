@@ -465,11 +465,22 @@ impl Grid {
         marked_samples <= 8
     }
 
+    /// Native grid type. Authored Block selectors 1900 are type3 although the
+    /// port admits them without a grid entity record.
+    fn kind(&self, index: usize) -> Option<u32> {
+        let cell = &self.descriptor.cells[index];
+        match &cell.entity {
+            Some(entity) => Some(entity.kind),
+            None => (cell.selector == 1900).then_some(3),
+        }
+    }
+
     /// Source CheckLine(mode=2): ordinary rocks permit the line; kind3 blocks
-    /// it, kind16 doors bypass collision-class rejection, and walls block it.
-    /// The source advances ten units before testing, including the final step
-    /// that may overshoot the endpoint by less than ten units.
-    fn blast_line_clear(&self, from: WorldVector, to: WorldVector) -> bool {
+    /// it, kind16 doors bypass collision-class rejection, and kind15 walls
+    /// block it unless ignoreWalls is set. The source advances ten units
+    /// before testing, including the final step that may overshoot the
+    /// endpoint by less than ten units.
+    pub fn blast_line_clear(&self, from: WorldVector, to: WorldVector, ignore_walls: bool) -> bool {
         let delta = WorldVector {
             x: from.x - to.x,
             y: from.y - to.y,
@@ -490,14 +501,12 @@ impl Grid {
             let Some(index) = self.index(point) else {
                 return false;
             };
-            let kind = self.descriptor.cells[index]
-                .entity
-                .as_ref()
-                .map(|entity| entity.kind);
+            let kind = self.kind(index);
             if kind == Some(3) {
                 return false;
             }
-            if kind != Some(16) && !matches!(self.collision(index), 0..=3) {
+            let passes_class = kind == Some(16) || (ignore_walls && kind == Some(15));
+            if !passes_class && !matches!(self.collision(index), 0..=3) {
                 return false;
             }
             travelled += 10.0;
@@ -531,11 +540,11 @@ impl Grid {
                 let Some(index) = self.index(point) else {
                     continue;
                 };
-                let Some(entity) = &self.descriptor.cells[index].entity else {
+                let Some(kind) = self.kind(index) else {
                     continue;
                 };
                 selected.insert(index);
-                if entity.kind == 3 {
+                if kind == 3 {
                     break;
                 }
             }
@@ -551,6 +560,7 @@ impl Grid {
                 self.blast_line_clear(
                     origin,
                     self.position(index).expect("selected index is valid"),
+                    false,
                 )
             })
             .collect())

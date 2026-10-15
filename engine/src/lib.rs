@@ -1993,6 +1993,7 @@ impl Game {
         grid_hazards::advance(&mut self.state, phase)?;
         let existing = self.state.actor_scheduler.full_phase();
         if phase == phase::Phase::Update {
+            rock_blast::advance_bomb_rocks(&mut self.state)?;
             rock_blast::advance_markers(&mut self.state);
             self.refresh_room_boss_count();
             let mut counted = actors::FullCounts::default();

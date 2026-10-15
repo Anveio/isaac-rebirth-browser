@@ -22,6 +22,64 @@ pub fn advance_markers(state: &mut State) {
     }
 }
 
+#[derive(Clone, Copy, Debug, serde::Deserialize, serde::Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct BombRockFuse {
+    pub index: u32,
+    pub remaining: u8,
+}
+
+/// Rock.Update56bf00 runs before Room.Update ages markers. State3 holds
+/// collision class3 and post-decrements Rock+348; when it reads zero, the
+/// fourth update, Destroy56c670 sets state2, collision0 and marker900, then
+/// explodes through Game554490 with damage40, radius60 and flags4 and no
+/// source entity. Its 1000/1 explosion and particle draws stay unadmitted
+/// effect families, as for ordinary rock debris.
+pub fn advance_bomb_rocks(state: &mut State) -> Result<(), String> {
+    // Grid updates run in ascending cell order; rocks that a secondary blast
+    // moves to state3 start counting on the next update.
+    let mut due = Vec::new();
+    state.room.bomb_rock_fuses.retain_mut(|fuse| {
+        if fuse.remaining == 0 {
+            due.push(fuse.index as usize);
+            return false;
+        }
+        fuse.remaining -= 1;
+        true
+    });
+    due.sort_unstable();
+    for cell in due {
+        let grid = state.room.grid.as_mut().ok_or("bomb rock requires a room grid")?;
+        let rock = grid.cells[cell]
+            .entity
+            .as_mut()
+            .filter(|rock| rock.kind == 5 && rock.state == 3)
+            .ok_or("bomb rock fuse lost its state3 rock")?;
+        rock.state = 2;
+        rock.collision_class = 0;
+        let position = Grid::new(grid.clone())?
+            .position(cell)
+            .ok_or("bomb rock outside its grid")?;
+        state
+            .room
+            .path_costs
+            .as_mut()
+            .ok_or("Bomb rock destruction requires source Room.Init path costs")?
+            .store(cell, 900)?;
+        crate::bombs::explode(
+            state,
+            position,
+            60.0,
+            40.0,
+            crate::combat::DamageSource {
+                id: 0,
+                entity_type: 0,
+            },
+        )?;
+    }
+    Ok(())
+}
+
 /// Source 555300 selects a75-unit regular blast tier before554490 collects
 /// ascending grid indices. Each Rock.Destroy56c670 may repair surviving links
 /// before the next selected object's callback observes its current variant.
@@ -40,9 +98,19 @@ pub fn destroy(state: &mut State, origin: WorldVector, radius: f32) -> Result<()
             continue;
         }
         let grid = state.room.grid.as_mut().expect("admitted room grid");
-        let Some(rock) = grid.cells[index].entity.as_ref() else {
+        let Some(rock) = grid.cells[index].entity.as_mut() else {
             continue;
         };
+        // Destroy56c670: a blast (immediate0) only moves an intact type5 bomb
+        // rock to state3. Init stored its Rock+348 countdown as 3.
+        if rock.kind == 5 && rock.state == 1 {
+            rock.state = 3;
+            state.room.bomb_rock_fuses.push(BombRockFuse {
+                index: index as u32,
+                remaining: 3,
+            });
+            continue;
+        }
         if rock.kind != 2 || rock.state != 1 {
             continue;
         }
