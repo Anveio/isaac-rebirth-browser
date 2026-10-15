@@ -100,7 +100,7 @@ pub fn observe(state: &State) {
             .room
             .npcs
             .iter()
-            .filter(|npc| !npc.removed && !npc.dead && npc.hp > 0.0)
+            .filter(|npc| !npc.removed)
             .map(|npc| (npc.id, npc.kind))
             .collect();
         CURRENT.with(|current| {
