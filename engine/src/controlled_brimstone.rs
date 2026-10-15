@@ -77,7 +77,7 @@ pub(crate) fn steer_reused(
     Ok(())
 }
 
-/// 52F4FB/530340 uses the real C18 displacement for held C08=2 or3/Has329.
+/// 52F4FB/530340 uses the real C18 displacement for held C08=2/3/5/Has329.
 /// It changes head presentation only; the callback keeps its processed aim.
 pub(crate) fn head_direction(
     state: &mut State,
@@ -93,6 +93,13 @@ pub(crate) fn head_direction(
                     .iter()
                     .find(|a| a.id == actor.id)
                     .map(|a| a.position),
+                ActorKind::Bomb => {
+                    let Some(position) = crate::bombs::referenced_position(state, actor.id)? else {
+                        frontier(state, "controlledFetusHeadReference");
+                        return Ok(());
+                    };
+                    Some(position)
+                }
                 ActorKind::Knife => state
                     .knives
                     .iter()
