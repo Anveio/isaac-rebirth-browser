@@ -77,7 +77,8 @@ indexes each one's declared properties from source.
 | `mt` | MT19937, descriptor seed tables, boot lifecycle | the C++ standard's mt19937 reference outputs; mid-stream JSON continuation; an eager 120,960-word table model of the lazy descriptor table; seed draw accounting |
 | `phase` | update/interpolate/skip phases | a counter model; two player and one nonplayer update per two-phase window regardless of interpolation; exhaustion without mutation |
 | `actors` | actor admission order and room identities | an independent list model under random admit/retain/reset |
-| `floor` | Basement generation and room admission | determinism; footprints; reciprocal edge-adjacent neighbors; reachability; exactly one boss/super secret/shop/treasure (the source retry rule); retry continuity; every descriptor admits as a `Room` |
+| `layout` | rectangular floor growth (`engine/src/layout.rs`) over every accepted seed, room count and shape mask | the grid marks exactly each room's rectangle; growth starts from the centre 1x1 room; every room has a shape its mask makes available and grows from an earlier room one step farther from the start; requested rooms are added unless the queue runs dry; the reported draw count replays the final RNG35 state through `items::Rng`; dead ends are leaves; expansion stops at five dead ends or five attempts; rejections; JSON round trips |
+| `floor` | Basement generation and room admission | determinism; footprints; reciprocal edge-adjacent neighbors; reachability; exactly one boss/super secret/shop/treasure (the source retry rule); retry continuity; every descriptor admits as a `Room`, and so does a uniformly chosen compatible authored room swapped into each descriptor (same catalogue, type and shape, doors available, stage difficulty), which admits about half again as many distinct authored rooms per run |
 | `grid` | grid queries and both ground-collision solvers on generated rooms | resolution never fails for bounded motion (including residual speeds whose squares underflow); previews keep velocity; an underflowing inward preview skips refinement (source 443117 → 44346c); correction moves only out along the contact normal; full nonplayer reflections leave the wall; blast candidate ordering and bounds |
 | `item_pools` | the run-owned ItemPool manager (`docs/item-pools.md`) | selection never offers a collectible twice (Breakfast aside), comes from its pool, the treasure fallback, Breakfast or the Bible, and advances none of the manager's streams; depletion only lowers weights and fills the removed/selected maps; a zero-counter counterfactual isolates Rosary's Bible override and the candidate it marks; drains reach Breakfast within the catalog; locked collectibles survive every redraw; error rooms route with one shared draw and special rooms to their namesake pools; JSON continuation; rejections without mutation |
 | `game` | the whole engine through public commands | per-step state invariants, per-command transition contracts (menus, run-start hold, pause, boss scenes, death and GameOver), exact rejection semantics, tape replay, serialized-midpoint continuation, the C ABI, the shipped WASM |
@@ -243,8 +244,9 @@ and the production `engine.wasm` from a context that
 [Dockerfile.dockerignore](../antithesis/Dockerfile.dockerignore) limits to the
 engine build's inputs; the entrypoint signals `setup_complete` and
 Test Composer runs the [drivers](../antithesis/test/v1/rebirth-engine) with
-`--entropy antithesis`: the kernel units, and one whole-engine game per
-invocation checked against the shipped WASM. Under Antithesis, must-hit
+`--entropy antithesis`: every registered unit but `game` (the driver lists them
+from `rebirth-dst --list`, so new units join without a driver change), and one
+whole-engine game per invocation checked against the shipped WASM. Under Antithesis, must-hit
 properties are judged across the whole exploration, so a single driver
 invocation never fails for leaving some unmet. `--build-arg INSTRUMENT=1` adds
 Antithesis coverage instrumentation and needs the platform's `libvoidstar.so`

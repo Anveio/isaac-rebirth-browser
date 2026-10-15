@@ -243,10 +243,11 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | `mt` | shared MT19937 stream, lazy descriptor seed tables and boot lifecycle | 19 | 1 | 0 |
 | `phase` | system update/interpolation phases against a counter model | 6 | 2 | 0 |
 | `actors` | actor admission order and room identities against a list model | 4 | 2 | 0 |
-| `floor` | Basement generation structure, retries and per-descriptor room admission | 18 | 4 | 0 |
+| `layout` | rectangular floor growth over every accepted seed, room count and shape mask | 11 | 2 | 1 |
+| `floor` | Basement generation structure, retries and per-descriptor room admission | 18 | 5 | 0 |
 | `grid` | grid queries and ground-collision solvers on generated rooms | 14 | 3 | 0 |
 | `item_pools` | ItemPool selection, depletion, fallbacks, routing and continuation | 21 | 6 | 3 |
-| `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 62 | 51 | 2 |
+| `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 63 | 51 | 2 |
 | `abi` | the exported C ABI transport the browser bridge drives | 11 | 1 | 0 |
 
 <details><summary>Every declared DST property</summary>
@@ -300,6 +301,20 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Always | actors: the scheduler round-trips through JSON | [actors.rs](engine/dst/src/units/actors.rs) |
 | Always | actors: dispatch order equals admission order minus retired handles | [actors.rs](engine/dst/src/units/actors.rs) |
 | Always | actors: room sequence identities follow admission and reset with the room | [actors.rs](engine/dst/src/units/actors.rs) |
+| Always | layout: seeds, room counts and shape masks outside the source ranges are rejected | [layout.rs](engine/dst/src/units/layout.rs) |
+| Unreachable | layout: a valid growth request fails | [layout.rs](engine/dst/src/units/layout.rs) |
+| Always | layout: growth is a pure function of its request | [layout.rs](engine/dst/src/units/layout.rs) |
+| Always | layout: growth round-trips through JSON | [layout.rs](engine/dst/src/units/layout.rs) |
+| Sometimes | layout: dead-end expansion runs | [layout.rs](engine/dst/src/units/layout.rs) |
+| Sometimes | layout: a growth without 1x1 rooms completes | [layout.rs](engine/dst/src/units/layout.rs) |
+| Always | layout: the grid marks exactly each room's rectangle | [layout.rs](engine/dst/src/units/layout.rs) |
+| Always | layout: growth starts from the 1x1 room at the grid centre | [layout.rs](engine/dst/src/units/layout.rs) |
+| Always | layout: every grown room has a shape the mask makes available | [layout.rs](engine/dst/src/units/layout.rs) |
+| Always | layout: every room grows from an earlier room one step farther from the start | [layout.rs](engine/dst/src/units/layout.rs) |
+| Always | layout: growth adds the requested rooms unless its queue runs dry | [layout.rs](engine/dst/src/units/layout.rs) |
+| Always | layout: the reported draws reproduce the final RNG35 state | [layout.rs](engine/dst/src/units/layout.rs) |
+| Always | layout: dead ends are grown rooms no other room grows from | [layout.rs](engine/dst/src/units/layout.rs) |
+| Always | layout: expansion stops at five dead ends or five attempts | [layout.rs](engine/dst/src/units/layout.rs) |
 | Always | floor: requests outside stages 1 and 2 or with stage seed zero are rejected | [floor.rs](engine/dst/src/units/floor.rs) |
 | Always | floor: the first-floor entry is the normal generator with fresh run inputs | [floor.rs](engine/dst/src/units/floor.rs) |
 | Always | floor: generation is a pure function of its request | [floor.rs](engine/dst/src/units/floor.rs) |
@@ -319,6 +334,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Always | floor: attempts are bounded, contiguous and end with a placement | [floor.rs](engine/dst/src/units/floor.rs) |
 | Sometimes | floor: a generation retry is exercised | [floor.rs](engine/dst/src/units/floor.rs) |
 | Always | floor: floors round-trip through JSON | [floor.rs](engine/dst/src/units/floor.rs) |
+| Sometimes | floor: another authored room admits in a generated descriptor's place | [floor.rs](engine/dst/src/units/floor.rs) |
 | Always | floor: every descriptor resolves authored layout and spawns | [floor.rs](engine/dst/src/units/floor.rs) |
 | Always | floor: every descriptor admits as a room without panicking | [floor.rs](engine/dst/src/units/floor.rs) |
 | Always | floor: admitted rooms have one door per neighbor and bounded geometry | [floor.rs](engine/dst/src/units/floor.rs) |
@@ -442,6 +458,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Always | game: player controls are disabled exactly while the run-start fade or a room transition holds | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: no run-start request is pending during gameplay | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: player motion is finite and health is bounded | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: grid-colliding bodies stay inside the room's walls | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: every room body has finite motion | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: consumables are capped at 99 | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: fire cooldown and head timers stay in range | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
