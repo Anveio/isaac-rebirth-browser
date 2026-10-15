@@ -9,6 +9,8 @@
 //     roomType: 13,                         // enter a room of this authored type (typeless specs)
 //     boss: true,                           // walk a recorded route into the floor's boss room
 //                                           // (tools/original/boss-scenarios.py; contrived entries are CODE or CODE:FIGHT)
+//     shop: true,                           // bomb a secret room for keys and walk into the shop
+//                                           // (tools/original/shop-scenarios.py; contrived entries are CODE)
 //     about: 'one line for the suite list',
 //     contrived: ['CODE:SLOT'],             // fixed seed + starting-room door slot (optional)
 //     count: 2,                             // OS-random rooms discovered per run
