@@ -1233,6 +1233,16 @@ if 'controlledBrimContact' in case['requires']:
         controlled_ring_contact = contact_module.compare_contact(case, paired_rows, globals())
     except Exception as error:
         missing('mandatory controlled ring typed contact consumer', None, error)
+controlled_technology_contact = None
+if 'controlledTechnologyContact' in case['requires']:
+    try:
+        contact_path = Path(__file__).with_name('composition-controlled-technology-contact.py')
+        contact_spec = importlib.util.spec_from_file_location('controlled_technology_ring_contact', contact_path)
+        contact_module = importlib.util.module_from_spec(contact_spec)
+        contact_spec.loader.exec_module(contact_module)
+        controlled_technology_contact = contact_module.compare_contact(case, paired_rows, globals())
+    except Exception as error:
+        missing('mandatory controlled Technology typed contact consumer', None, error)
 if technology_comparer is not None:
     technology_result = technology_comparer.finish()
 
@@ -1252,6 +1262,8 @@ if common_spec is not None:
     result['commonContactScope'] = 'Actual common-class NPC14/18 FIFO and nonlethal next-Full HP. Player-source FIFO is not a particular Laser callback witness. Native copied EntityRef raw words/P/V are retained, not reconstructed from current sources. Countdown30 is a source callback argument, not a stored queue field. Full copied-history, registry/impulse order, lethal subclass cleanup and explicit Remove/Uninit callbacks remain separately unqualified.'
 if controlled_ring_contact is not None:
     result['controlledRingContact'] = controlled_ring_contact
+if controlled_technology_contact is not None:
+    result['controlledTechnologyContact'] = controlled_technology_contact
 if technology_result is not None:
     result['ordinaryTechnology'] = technology_result
 if ordinary_dr_fetus is not None:

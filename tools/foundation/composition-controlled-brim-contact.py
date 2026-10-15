@@ -11,12 +11,22 @@ import struct
 
 
 def compare_contact(case, rows, common):
+    return compare_typed_ring_contact(case, rows, common,
+        marker='controlledBrimContact', schema='controlled-brim-ring-contact-v1', primary=2, variant=1)
+
+
+def compare_typed_ring_contact(case, rows, common, *, marker, schema, primary, variant):
     """Consume actual paired rows without manufacturing a browser or events."""
     check, missing, field = (common[k] for k in ('check', 'missing', 'check_field'))
     f32, vector, reference, identity = (common[k] for k in ('f32', 'vector', 'reference', 'identity_tuple'))
     run_flags = common['source_run_flags']
-    declaration = case['requires']['controlledBrimContact']
-    result = {'schema': 'controlled-brim-ring-contact-v1', 'chains': [],
+    if (marker, schema, primary, variant) not in (
+            ('controlledBrimContact', 'controlled-brim-ring-contact-v1', 2, 1),
+            ('controlledTechnologyContact', 'controlled-technology-ring-contact-v1', 3, 2)):
+        raise ValueError('Explicit source-owned Brim or Technology ring role required')
+    technology = variant == 2
+    declaration = case['requires'][marker]
+    result = {'schema': schema, 'chains': [],
               'scope': 'Observed compatible ParentPlayer FIFO append and nonlethal following-Full HP application. Exact Laser callback attribution, actual collision delivery and lifecycle events are separate required witnesses.'}
     try:
         assert declaration['schema'] == result['schema']
@@ -25,7 +35,7 @@ def compare_contact(case, rows, common):
         assert receiver['variant'] == receiver['subtype'] == 0
         assert (declaration['sourceEntityType'], declaration['sourceVariant'], declaration['damageFlags']) == (1, 0, 8)
         contract = case['requires']['sourceExpectedActorContract']
-        assert (contract['primaryC08'], contract['family'], contract['variant'], contract['subtype'], contract['controlledBy329']) == (2, 7, 1, 1, True)
+        assert (contract['primaryC08'], contract['family'], contract['variant'], contract['subtype'], contract['controlledBy329']) == (primary, 7, variant, 1, True)
         assert 'npc14And18DamageQueue' in case['requires']['compositionSourceFields']
         assert declaration['missingToolingMustFail'] is True
         window = declaration['uniqueSourceWindow']
@@ -55,7 +65,7 @@ def compare_contact(case, rows, common):
             assert len(actors) == 1, 'Actual Native C18 must resolve one source actor'
             actor = actors[0]
             actor_identity = identity(actor['identity'])
-            assert actor_identity[:3] == (7, 1, 1)
+            assert actor_identity[:3] == (7, variant, 1)
 
         else:
             slot = state['attackRuntime']['persistent']
@@ -66,7 +76,7 @@ def compare_contact(case, rows, common):
             assert len(actors) == 1, 'Actual port C18 must resolve one source actor'
             actor = actors[0]
             actor_identity = identity(reference(state, slot))
-            assert actor_identity[:3] == (7, 1, 1)
+            assert actor_identity[:3] == (7, variant, 1)
 
         return {'identity': actor_identity, 'owner': None, 'amount': None, 'eligible': False}, actor
 
@@ -119,7 +129,11 @@ def compare_contact(case, rows, common):
                         missing('controlled ring ' + side + ' actual source eligibility owner', t, error)
                     if owner['eligible']:
                         actual_counter = counter if side == 'native' else state['systemClock']['systemCounter']
-                        source_rows[side]['Full' if actual_counter % 2 else 'Fast'] += 1
+                        if technology:
+                            fast = boolean(actor['fast322'] if side == 'native' else actor['fast'])
+                            source_rows[side]['Fast' if fast else 'Full'] += 1
+                        else:
+                            source_rows[side]['Full' if actual_counter % 2 else 'Fast'] += 1
             except Exception as error:
                 owners[side], bodies[side] = None, None
                 missing('controlled ring ' + side + ' actual C18 source owner', t, error)
@@ -163,6 +177,12 @@ def compare_contact(case, rows, common):
                   lambda: [vector(v['position']) + vector(v['incoming']) + vector(v['outgoing']) for v in p['line']['controls']], t)
             field('controlled ring actual Line length', lambda: f32(n['laser']['line']['length']), lambda: f32(p['line']['length']), t)
             def native_width():
+                if technology:
+                    value = n['laser']['controlledTechnologyLine']
+                    assert value['sourceWriterScope'] is True and n['laser']['firstUpdate'] is False
+                    assert len(n['laser']['line']['points']) >= 2
+                    assert value['subdivisions'] == 50 and value['mode'] == 1
+                    return f32(value['width'])
                 value = n['laser']['line']
                 assert value['sourceControlledLineWriterScope'] is True and n['laser']['firstUpdate'] is False
                 assert len(value['points']) >= 2
@@ -170,6 +190,14 @@ def compare_contact(case, rows, common):
                 assert type(bits) is int and 0 <= bits <= 0xffffffff
                 return f32(struct.unpack('<f', struct.pack('<I', bits))[0])
             field('controlled ring actual source-scoped Line width', native_width, lambda: f32(p['line']['width']), t)
+            if technology:
+                for name, expected in (('subdivisions', 50), ('mode', 1)):
+                    field('controlled Technology contact actual Line ' + name,
+                        lambda: integer(n['laser']['controlledTechnologyLine'][name]), lambda: integer(p['line'][name]), t)
+                    field('controlled Technology contact source-owned Line ' + name,
+                        lambda: expected, lambda: integer(n['laser']['controlledTechnologyLine'][name]), t)
+                field('controlled Technology contact persistent TTL0', lambda: integer(n['laser']['remainingUpdates']), lambda: integer(p['remainingUpdates']), t)
+                field('controlled Technology contact source TTL0', lambda: 0, lambda: integer(n['laser']['remainingUpdates']), t)
         try:
             targets = [a for a in source['commonContactNpcs'] if a['identity']['kind'] == receiver['type']]
         except Exception as error:
@@ -279,6 +307,14 @@ def compare_contact(case, rows, common):
                     for record in previous['fifo']:
                         expected = f32(expected - record[0])
                     if expected < 0:
+                        if technology:
+                            #A same-live-record negative HP endpoint can prove
+                            #the ordered common subtraction; it cannot prove
+                            #Kill/effects/Remove/Uninit callback completion.
+                            check('controlled Technology ring ' + side + ' following-Full ordered negative HP endpoint', expected, current['hp'], t)
+                            check('controlled Technology ring ' + side + ' actual dead31F endpoint', True, boolean(target['dead']), t)
+                            current['lethalHpEndpointObserved'] = expected == current['hp'] and boolean(target['dead'])
+                            current['nextFullApplied'] = current['lethalHpEndpointObserved']
                         missing('controlled ring ' + side + ' lethal subclass lifecycle', t, 'Negative-HP subclass callback and cleanup need independent actual witnesses')
                         continue
                     check('controlled ring ' + side + ' following-Full ordered f32 HP application', expected, current['hp'], t)
