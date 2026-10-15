@@ -564,6 +564,21 @@ impl RegularTearPlan {
     }
 }
 
+///Independent selected50D090(kind1) result for ordinary2. Layout, eye,
+///clock, RNG and actor operations stay with its caller and canonical factory.
+pub(crate) fn resolve_inner_eye_kind1(state: &State) -> Result<RegularTearPlan, String> {
+    let inputs = ItemInputs::new(state.player_items.as_ref().ok_or("Inner Eye items absent")?)?;
+    if state.weapon_admission.source_player_type != Some(0)
+        || state.weapon_cache.primary != PrimaryWeaponC08::RegularTears
+        || state.weapon_cache.flags_c98.0 != 0
+        || !inputs.admits_inner_eye_kind1_context()
+        || inputs.pending_cache().0 & RegularTearPlan::INPUT_CACHE_MASK.0 != 0
+    {
+        return Err("Inner Eye kind1 requires its actual current cache/context".into());
+    }
+    RegularTearPlan::resolve(state.player_stats, state.max_fire_delay, state.weapon_cache)
+}
+
 ///Independent selected50D090(kind1) result for the229 burst. The common
 ///scale/range/color/damage arithmetic matches the selected regular builder;
 ///50DD18/50DB45 produces BloodTear1 instead of ordinary variant0.

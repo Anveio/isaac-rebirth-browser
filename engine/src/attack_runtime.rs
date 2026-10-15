@@ -119,6 +119,9 @@ pub(crate) fn dispatch_player(
     callback_aim: WorldVector,
 ) -> Result<DispatchOutcome, String> {
     match plan.controller {
+        ControllerChannel::RegularShots if crate::inner_eye::selected(state, plan) => {
+            crate::inner_eye::dispatch_player(state, plan, input, phase, callback_aim)
+        }
         ControllerChannel::RegularShots => Ok(DispatchOutcome::RegularTear),
         ControllerChannel::MonstroLung => {
             crate::monstros_lung::dispatch_player(state, plan, input, phase, callback_aim)
@@ -194,6 +197,10 @@ pub struct AttackRuntime {
     ///old/unsupported restore histories never receive an invented zero.
     #[serde(default)]
     pub charge_c0c: Option<i32>,
+    ///5196B0 actual fresh Player+C70. Only the source-owned neutral lifetime
+    ///is admitted; legacy restores and unclosed grant histories remain absent.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub aim_rotation_c70: Option<i32>,
     ///Actual Player+DA0. Title/unsupported restore does not own a direction.
     #[serde(default)]
     pub head_direction_da0: Option<i32>,
@@ -218,6 +225,7 @@ impl AttackRuntime {
     pub(crate) fn fresh_player() -> Self {
         Self {
             charge_c0c: Some(0),
+            aim_rotation_c70: Some(0), //5196B0; never reconstructed from counts.
             head_direction_da0: Some(3), //5198e4, independently from C0C.
             movement_direction_d9c: Some(-1),
             shooting_aim_db4: Some(WorldVector { x: 0.0, y: 0.0 }),
