@@ -1,118 +1,102 @@
 # Item composition coverage
 
-This is a source and scenario map, not a passing report. Each game must supply
-its own actual counts, cache, actor references and lifecycle witnesses. A static
-starting loadout does not establish a live acquisition or cleanup transition.
+This map separates current source owners, declared public cases and observed
+functional results. Main `35b44087` includes ordinary Player Brimstone299,
+FireDelay ownership304, optional regular Tear variant298 and per-field
+comparer continuation311. Draft307 has passed its own builds and retained
+regressions. Its original standalone comparison fails on admission; the corrected
+producer creates Tears but fails on motion and other fields. Transport, source
+review and local replay consistency do not establish Original functional parity.
 
-| Ordered boundary | Reads and writes | Existing declared case | Remaining interaction |
-| --- | --- | --- | --- |
-| Raw/permanent/TEMP predicates | Preserve signed count, positive Have, and record presence as separate inputs | Number One15 repeats positive 6; current 143 uses raw/count nonzero | Zero-count TEMP 6 record and negative counts have no admitted public producer here; remain unqualified |
-| Requested primary 100 | Seven literal positive queries; write C08 before scalars; changed primary removes the prior registered C18 | First28 static pair/triple partitions; separate118→114 provider pair | Full live118→114→329 is missing; equality after missed cleanup cannot erase pending intent |
-| FireDelay 2 | Number One count×1.5 and Sad Onion count×.7 in source order; clamp, current C08×3, then integer conversion | First28 [118,1] both phases; Number One15 positive/repeated 6 and1/4 interactions | Later separate6+118 case must distinguish source17 from early-truncation15; ID6 operator/ingress still prerequisite |
-| ShotSpeed 4 / Damage 1 | Raw143/count predicate; repeated4 damage count and positive multiplier; stored birth properties | Stats8 and repeated [114,329,1,1,4,4] | Stage-neutral weapons must compose with each implemented effect; contact/birth/reapply values stay distinct |
-| Range 8 / Move 16 | Number One once-only presence versus counts; current range/falling fields; ordered existing move additions | Number One15 plus stat-cache public14/143 | Scalar-stage support union admits effect+neutral-owner mixtures without enumerating full loadouts; no automatic contact admission |
-| Flags 32 / Color 64 | CurrentC08 flags; separate full11 CA0 and CCC; copy actual birth fields | First28 Ludo/pairs/triple; Number One15 yellowCA0 versus distinctCCC | Old actors cannot be recolored from a later cache result without their actual reapply callback |
-| Flight 128 → Familiar 512 → Luck 1024 → final tail | Actual D68/class340, 68 manager queries, typed modifier/run-flag inputs, then conditional all32 clear | New small cache leaves source-reviewed; old Brim mask failures retained | Exact corrected producer must execute the same public banks; reserved bits cannot waive unknown callbacks/history |
-| Live controller | Cached C08 plus current 329 predicate; independent held/canceled/released input | First28 includes114+118+329; ordinary6 and controlled8 are separate frozen banks | Selecting ControlledKnife is distinct from executing it; no extra Laser or ordinary 118 child on that route |
-| Live acquisition/effects | Prior7/1/0 Remove/Uninit; ordinary8 birth; same-primary329 conversion; independent ParentKnife child history | Controlled8: live114→329→118, static[114,118]→329, static[114,329]→late4 | New successor118→114→329 exercises a different history; every intermediate actor and real grant must be observed |
-| Contact/retirement | Registry insertion precedes current kind4 read; stored child damage has its own owner; weak slots clear on real Uninit | Controlled8 late4 declaration; separate contact geometry bank | Earlier contact4 had no hit in either game; absence is not contact acceptance. No legal passive removal/expiry route is invented |
+| Ordered boundary | Current owner and scope | Observed evidence and remaining interaction |
+| --- | --- | --- |
+| Permanent/TEMP predicates | Signed counts, positive Have and record presence remain distinct; unsupported history stays explicit | Number One has scoped positive/repeated-count source and public acquisition evidence. Zero-count TEMP records and negative histories have no admitted public producer here |
+| Requested primary100 | Seven literal positive queries select C08 before scalars; changed primary retains cleanup intent until the real owner handles it | Real118→114→329 and114→118→329 histories have executed in separately scoped producers and still fail. Equal later C08 or NULL slots cannot repair a missed cleanup witness |
+| FireDelay2 | Number One count×1.5, Sad Onion count×.7, clamps, current C08×3 and integer conversion retain source order; merged304 puts the footprint beside the pure operator | Number One scalar and reciprocal304→6/6→304 property scopes pass. A separate6+118 witness must still distinguish17 from early-truncation15; those outcomes are not inferred from a neutral item set |
+| ShotSpeed4 / Damage1 / Range8 / Move16 | Ordered per-stage effects compose with source-proven neutral owners, preserving rounding/clamps and once-only presence predicates | Stat-cache, Number One and Libra results retain their scopes. Draft318's Damage extraction changes no formula/admission/history; its separate consumed qualification is pending |
+| Flags32 / Color64 | Current C98 and full eleven-component CA0/CCC have separate owners; ordinary births copy actual fields | Number One's scoped properties pass17,423/0 at631 gates, including93 after grant. Existing birth colors are retained until their real reapply callback; cross-side actor/current-color parity is not implied |
+| Flight128 → Familiar512 → Luck1024 → tail | Merged callbacks consume actual typed owners in source order; unsupported history and reserved-bit semantics remain observable | Corrected actor producers execute known cache values. The first retained Libra history still lacks631 Native Familiar-manager observations; pending512=0 is not manager-query evidence |
+| Regular Tear variant | Merged298 returns optional Some0 only for the closed normal-Isaac/current-primary1/flags0/positive1/4/6 producer | Unknown contexts remain null. The regular-kind1 proof does not admit kind8, widen contacts or establish Native variant parity |
+| Ordinary/Has118/controlled Knife | Merged270/286/301 share one store, allocator, registered C18 and Remove/Uninit owner; subtype1 children keep ParentKnife498 and their copied Line | The controlled fixed route retains106,884/8,755 FAIL plus one missing old marker;281 post329 parent physical/DA0/C18 rows match and280 carry bit33. Child SharedMT/geometry,37 strict rotations, contact and event/history gaps remain red |
+| Ordinary Player Brimstone | Merged299 uses canonical Laser/Impact storage, charge/live properties, Full/Fast, registered slots and retirement | Retained ordinary case22,111/1,030 FAIL has two births and61 Laser/Impact rows with matching observed geometry/phase/TTL/fade/Sprite/color. Two following-Full absence/slot witnesses do not observe Native Remove/Uninit events |
+| Standalone Ludovico Tear | Draft307 uses the existing Tear store/scheduler and a separately proved neutral329-only kind8 builder | OWN builds,37,965,608/0 regular regression and503,611/0 retained Libra properties pass. The original d1e582 comparison remains85,050/11,620 FAIL with zero port Tears. Corrected8120 produces1,541 bodies (770 Full/771 Fast), but remains134,350/24,248 FAIL. Selected birth/properties and contact queue→next-Full HP chains match; controlled450 rewind is a proven motion defect with its correction pending. Identity, geometry, strict queue/HP and missing-owner failures remain |
+| Controlled Brimstone | Draft312 selects actual7/1/1, with current properties and ring Full/Fast owners; its future Tear replacement must consume307's real Remove/physical448 capability | Four cases are declared, unexecuted. Source-only316 checks same-C18 item4 live reapply and later114 priority; missing fields, callback events or registered replacement bodies stay FAIL |
 
-The smallest new runnable cohort is two fixed phases of Challenge starting118,
-then real free pedestals114 and329. Two unfiltered OS declarations vary phase,
-side, hold duration and boot epoch, with tokens durably recorded before case
-projection. The first release/movement segment reuses the separately declared
-118→114 provider route. Each declaration is immutable and outcomes are never filtered. A separately
-versioned successor may repair a public route after a missing witness, while
-retaining its predecessor and every result.
+The public `item-composition` driver and suite are registered. Literal
+`--scenarios PATH` replay bypasses generation and every entropy draw.
+[The generator](../tools/original/composition-scenarios.py) declares versioned
+public Challenge resources/actions; fixed phases and recorded OS-token routes
+remain separate inputs. Merged PR322 retains the four standalone329 cases and
+their literal resources in the repository; it adds no passing gameplay result.
+Outcomes are not filtered or rerolled, and a repaired
+route keeps its predecessor and every failed result. Original observations never
+become port seeds, state, positions or timing inputs.
 
-Each case has three declared actor stages, selected separately from each game's
-actual owned counts: initial118, after114, and after 329. Require all stages,
-real queue/grant/count/cache transitions, the old Laser while registered at
-queued contact, its subsequent natural expiry and own retirement, an ordinary
-Knife and real ParentKnife child
-before 329, and the same primary Knife after controlled conversion. Missing any
-required actor, child, slot, transition or body is a failure. Identity, seeds,
-RNG, numeric and render mismatches remain independently reported.
+Every live history selects stages separately from each game's actual counts and
+current primary, resolving its own C18 and manager identities. Require real
+queue/grant/cache transitions and the actual actor callback/body after its
+admission fence. A changed count can precede replacement while Pickup blocks
+shooting. A later registered new-family actor is a distinct witness from the
+dense count boundary. Missing actors and fields remain failures; absent slots
+never establish cleanup.
 
-Frozen Brim10, ordinary6, controlled8, Number One15 and their original entropy
-and evidence remain unchanged. The successor does not claim equivalence to any
-predecessor or acceptance before an owned production build and public games.
+The source Pickup clip lasts42 Full callbacks, while a released ordinary Brim
+Laser starts with timeout15. A positive ordinary Laser at deferred Add114 is
+therefore impossible on the uninterrupted pedestal route. Queued contact,
+positive-to-zero timeout, natural retirement and live selector cleanup are
+separate obligations. Source exclusions and untested frontiers are recorded
+outside passing checks. This ordinary lifetime does not apply to controlled
+subtype1 Lasers; their priority/removal route needs its own actual observations.
 
-The `item-composition` driver and suite registration are pending in a separate
-leaf. Its declared `--scenarios PATH` mode will replay a literal bank and bypass
-this generator and all entropy draws. `tools/original/composition-scenarios.py --output DIR`
-creates only the separate history successor above; it never rewrites an older
-bank or infers source equivalence from its final inventory. Stage contracts
-apply at their actual charge, pickup and controller callback fences, not as an
-immediate actor replacement at the instant an owned count changes.
+Has118 subtype1 children have Parent498 pointing to their Knife. The selected
+histories have no Have55/Have87 secondary producer, so they do not invent
+Player C20/C28/C30 or Base4A0 ownership. Compare actual slot values, including
+NULL. After329 converts the parent, preexisting children retain their copied
+curve and independent lifetime; the parent's new C08/bit33 does not remove
+them. Real continuation and own Remove→Full Uninit remain required.
 
-The ordinary Has118 child has Parent498 pointing to its Knife. It is not
-implicitly registered in Player C20/C28/C30 or linked through Base 4A0. The
-selected history has neither the Have55 nor Have87 secondary producer.
-Compare their actual values, but null slots cannot establish secondary cleanup.
-A future nonempty-slot cleanup case needs its own legal public producer. The
-earlier controlled8 declaration of a C20 child remains frozen as an unexecuted
-obligation with this source ownership gap; it provides no cleanup acceptance.
+An optional Native event capture observes24 Remove/Uninit events for12 child
+identities, including eight after329. That is Native observability only: it
+does not regrade the older helper's6,744/18 FAIL or prove paired port event
+parity. Manager absence, Remove flags and callback events are distinct facts.
 
-After the parent becomes controlled, require the same existing subtype1 child
-to continue its copied curve and reach its own Remove and full Uninit. Its
-callback does not inherit the parent's new C08, bit33 or subtype0/814 removal
-rule. A child missing before conversion, missing continuation afterward, or
-unobserved own retirement is unmet coverage. This supersedes the earlier C20
-ownership/cleanup assumption, while retaining all predecessor input and entropy
-validation and every original unexecuted declaration.
+| Source-only leaf | Declared responsibility | Execution still required |
+| --- | --- | --- |
+| [314](https://github.com/Anveio/isaac-rebirth-browser/pull/314) | Four public ordinary-Brim contact cases, both fixed phases and both reused OS-token projections | Actual typed14/18 receiver contact, FIFO attribution, next-Full HP and natural expiry |
+| [315](https://github.com/Anveio/isaac-rebirth-browser/pull/315) | Optional typed14/18 observation/comparison | Actual field readback and same-receiver causal damage; missing owners stay FAIL |
+| [316](https://github.com/Anveio/isaac-rebirth-browser/pull/316) | Controlled-Brim property/priority history marker | Actual7/1/1 Full/Fast bodies, same-C18 live4 properties,114 replacement and separately observed Laser lifecycle |
+| [317](https://github.com/Anveio/isaac-rebirth-browser/pull/317) | Optional source-owned Room2494, born83C and Full velocity-delta fields | Actual writer-scope readback; registry808/818 and ordinal838 remain absent |
+| [318](https://github.com/Anveio/isaac-rebirth-browser/pull/318) | Pure Damage operator and adjacent footprint | Separate next312 consumed build/retained regression; no added eligibility or changed arithmetic |
 
-The history comparer consumes the explicit `historyWitnessContract` version.
-An older or unknown obligation produces a missing contract result; it cannot
-silently gain the corrected ParentKnife continuation grade. The semantic-only
-declaration successor retains all prior public inputs and recorded tokens.
+The built307 report remains85,050/11,620 FAIL across all four cases: motion16,448/2,301,
+contact35,474/4,684, OS0 16,477/2,300 and OS1 16,651/2,335. Successful capture
+exits and public tape completion do not waive its zero-port-Tear failure. The
+corrected8120 producer reuses the same frozen Native references and remains
+134,350/24,248 FAIL with 1,541 controlled bodies (770 Full, 771 Fast). It passes
+37,965,608/0 retained regular checks and selected birth/damage/flags/color
+properties. Each game independently observes accepted queue→next-Full HP chains;
+strict receiver identity/positions, 42 HP differences and 10 queue differences
+remain red. A source-confirmed controlled450 rewind motion defect needs its
+next correction and artifact/game qualification. The fixed motion case retains
+188 prebirth C74 differences, 188 BB0 differences and seven DA0 differences.
+These selected matches do not establish all Player/controller fields or
+body/contact/lifetime parity, and do not regrade the original no-Tear report. The OS0 initial guard-stop remains retained.
 
-The later public route successor adds a fixed 28-presentation upward movement
-and 24 released presentations before charging. This is a bounded approach
-sweep; it does not import a native position or guarantee a pickup. All later
-actions, resources, epochs, phases and recorded tokens stay unchanged. Earlier
-stage0-only failures remain failures, and actual grants and lifecycle witnesses
-are still required from a fresh original game.
+Historical reports remain immutable. Frozen Brim10 retains307,112/23,017 FAIL;
+ordinary6 completed only cases0..2 with571,311/37,820 FAIL. The pre299 unchanged-v8
+public-WASM report remains19,359/5,394 FAIL and old-v2 history18,759/2,307 FAIL.
+The Has118 fixed report remains106,884/11,158 FAIL; its separate84/0 own-birth-law
+diagnostic does not prove later geometry. The later299 unchanged-v8 body remains
+88,941/9,079 FAIL and history19,838/774 FAIL with36 gaps; matched later
+pendingPrimaryCleanup None is not a captured cleanup transient. Resource-stopped
+OS prefixes retain incomplete transport grades. No newer source or selected
+passing field regrades any of these totals.
 
-The queued-lifetime contract v2 separates pedestal contact from the actual
-deferred grant. The source Pickup clip lasts42 full callbacks; its guard
-suppresses ordinary shooting until it finishes. A released ordinary Brim Laser
-starts with timeout15, so positive prior TTL at deferred Add114 is impossible
-on this uninterrupted route. Require the real live registered Laser at queued
-contact, its same-identity positive-to-zero timer transition, and its own Remove
-and full retirement. Do not attribute natural expiry to selector cleanup.
-
-At deferred Add114, require the real counts, cache and C08 change and record
-the actual weak slots, including NULL. The report keeps this source exclusion
-and the untested live-selector cleanup frontier outside passing checks. A
-separate admitted public route is needed for that cleanup interaction. Earlier
-v1-v5 declarations, their version1 obligations and all actual failures remain
-unchanged; a semantic successor retains every v5 action, resource and entropy
-record. The preexisting subtype1 child at329 still requires actual birth,
-survival, full curve movement and its own retirement; a fixed lifetime is not
-inferred from the parent conversion.
-
-The diagonal-second-pickup route successor adds the public down key to the
-existing second44-presentation release/movement leg. The actual version5
-original capture acquired114, whose physical pickup contact displaced the
-Player above the pedestal row; the later straight horizontal leg missed329.
-The new declaration uses two movement keys and retains every duration, resource,
-epoch, phase and recorded token. It requires a fresh actual329 queue/grant and
-all subsequent witnesses; the earlier missing329 failure remains unchanged.
-
-The route successor with full charge and an aim across the room retains the same four cases,
-recorded tokens, phases, epochs and authored resources. It aims the ordinary
-Knife opposite the pedestal approach, extends the charge to 160 presentations,
-and splits the same 44-presentation diagonal movement into 12 presentations
-with charge held and 32 with charge released. This releases nearer public
-contact while the copied child curve extends across the room.
-
-The preceding version 7 capture observed eight actual subtype1 children, all
-gone before the 329 grant. Starting from each child's first observed full-update state, source
-arithmetic using the current next-curve-point anchor reproduces 99 subsequent
-full-update positions, velocities and curve parameters across all eight children. Finite samples across the full initial lateral-offset interval
-support this new route's feasibility; they do not prove every float outcome or
-actual pickup timing. Original-first execution must still observe maximum
-charge, real queue/grants, a surviving preexisting child, controlled conversion,
-continuation and its own retirement. Every version 7 failure remains unchanged;
-a missing child in this successor remains a failure.
+[Foundation and Brim10](../references/isaac/foundation/items/public-ingress-and-brim10.json),
+[parent-only evidence](../references/isaac/foundation/items/ordinary-knife-parent-main.json),
+[Number One and Native lifecycle](../references/isaac/foundation/items/cache-and-native-lifecycle-main.json),
+[Has118 snapshot](../references/isaac/foundation/items/post-number-one-and-knife-first.json)
+and [current299/307 source-and-execution scopes](../references/isaac/foundation/items/post-brimstone-299-and-ludo-source.json)
+retain the source/artifact/report boundaries. The explicit
+`historyWitnessContract` version controls each history obligation; a new helper
+does not silently reinterpret an old marker or failure.
