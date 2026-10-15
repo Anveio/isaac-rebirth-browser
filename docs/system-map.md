@@ -113,9 +113,10 @@ fields. Those tools are consumed by final C421, with strict contact and
 observation gaps retained. Merged318 keeps the unchanged Damage operator beside
 its footprint and is consumed by the independently built708 producer, whose
 scoped builds and retained regressions pass as recorded below. Runtime312's
-controlled Brimstone remains a separate Draft with a failing incomplete Native
-prefix comparison. Missing actor fields, FIFO attribution and lifecycle events
-stay failures. The [current compact record](../references/isaac/foundation/items/post-brimstone-299-and-ludo-source.json)
+controlled Brimstone remains a separate Draft. Its historical incomplete-prefix
+failures remain; four fresh Native transports complete, while finished paired
+case0 grade86,999/7,688 FAIL is complete; other three grades are pending. Missing actor fields, FIFO
+attribution and lifecycle events stay failures. The [current compact record](../references/isaac/foundation/items/post-brimstone-299-and-ludo-source.json)
 keeps exact report and source pins; the historical checkpoints below retain
 their original grades.
 
@@ -346,28 +347,49 @@ ordinary Player Brimstone299 is now merged with the scoped results above;
 controlled Tear307 is also merged; its final retained four-case comparison remains
 134,364 checks / 20,813 failures, with contact and observation gaps above.
 
-Controlled Brimstone312 remains a separate Draft. Its 708 producer, which also
-consumes the landed Damage318 operator, passes production/strict Clippy/floor,
-37,968,484 strict retained regular checks and 503,611 reciprocal Libra property
-checks. The first fixed public replay compared with an incomplete Native prefix
-retains 86,718 checks / 7,667 failures across 1,007 paired playing gates. There
-are 541 controlled-Laser C18 bodies (270 Full / 271 Fast). Same-side stable-owner
-property transitions pass, but actual reapply callbacks remain missing/FAIL;
-transport, HP, identity/RNG and lifecycle gaps persist. The earlier
-87,458 / 7,667 report is unchanged, and no four-case paired pass follows.
+Controlled Brimstone312 remains a separate Draft. Its 708 producer consumes
+landed Damage318 and passes production/strict Clippy/floor, 37,968,484 strict
+retained regular checks and 503,611 reciprocal Libra property checks. Historical
+prefix86,718/7,667 and earlier87,458/7,667 FAIL remain unchanged. Four fresh
+Native references now finish normally on the same inputs/artifact. The first
+completed paged case0 grade is86,999/7,688 FAIL over1,010 paired playing rows,
+541 Laser C18 bodies (270 Full/271 Fast) and280 Knife bodies. Damage, flags,
+colors, TTL, Sprite, friction, classes and Parent match; geometry, identity/RNG
+and HP ownership remain unresolved. Other three grades are pending. The first
+full comparer hit its process-memory limit after successful projection and
+established no functional grade. Separately captured
+lifecycle records have not been joined; entry is not completion and actual
+reapply callbacks, HP, identity/RNG and contact obligations remain unresolved.
 
-Merged recorder332 removes retained decoded-observation history from the
-archive path while preserving every journal record and the final report API.
-Its closed-prefix validation preserves raw JSON and gzip bytes for 3,302 records
-in bounded windows, with 36,974,592 bytes observed validation RSS. This is
-storage equivalence, not a new Native or game result. Historical per-process
-memory attribution is unavailable, and fresh-Native peak improvement remains
-unverified. The corrected Technology/Gimpy producer passes production after preserving an
-earlier compile failure. Production, strict Clippy and floor now pass; retained
-regressions and games remain pending. Their
-declared cases imply no gameplay acceptance. Merged335 adds opt-in controlled-
-Brim contact tooling with source/default/help/import validation only; its contact
-cases have not executed.
+Merged332 preserves journal/report bytes and now runs in four successful
+Technology Native captures. Its original 69-window equivalence validation and
+36,974,592-byte validation RSS retain their scope. The first fresh recorder has
+36,585,472-byte observed kernel highwater; old per-process peaks remain unknown.
+The versioned capacity accounting includes bounded clean unmapped file-cache
+reclaim LRUs, excludes slab/shmem/anon and keeps the same floors/output caps,
+legacy diagnostic and exact-game pidfd closure. This is observed capture
+reliability, not Original gameplay parity or a quantified historical reduction.
+
+Merged319 owns only Technology cache/grant context. Separate Draft320's consumed
+77cd product passes three builds and 37,968,484 old regular fields with zero
+differences; 416 failures in 2,856 new registration checks remain. Four fresh
+Technology pairs retain82,351/5,807 FAIL over152 paired bodies (74 Full/78 Fast),
+with30 Native/29 port births and76 damage differences. Eye-history and the
+source-owned post-contact zero-damage repair are in a separate new producer;
+game qualification is pending and the77cd grade is unchanged.
+Identity/RNG, geometry, prelude, HP/contact/render/lifecycle gaps stay explicit.
+
+Gimpy's old bank still misses item225 and Dip death. The separately declared v2
+public bank observes pickup225, Bomb, explosion, queued damage, next-Full lethal
+HP and same-room disappearance in all four port routes. Its four entity-RNG
+endpoints match one bounded100 failure transition (81/81/75/37); no atomic
+callback/call-count, trinket-slot, success/proc or Original acceptance follows.
+The separate5,820-command own replay retains235 rejected commands and zero
+traps/rollback violations. Next joined68ae Soy/capability/eye/readiness/Room8/Technology reset source has
+new027c7031 productionPASS in30.328s, strictClippyPASS in30.075s and floorPASS
+in15.902s; game qualification is pending. Dr.Fetus52 source mapping and the
+canonical-Bomb implementation work establish no gameplay acceptance.
+Merged335 contact tools remain separately scoped; their four cases are unexecuted.
 
 Readiness287 passes a warm production retry and strict Clippy, but its floor
 build stopped at the working-memory floor. Its earlier production capacity stop

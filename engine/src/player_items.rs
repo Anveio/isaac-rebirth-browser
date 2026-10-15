@@ -538,12 +538,19 @@ pub(crate) fn add_collectible(
     touched: bool,
 ) -> Result<(), String> {
     let config = items::definition(id).ok_or("granted collectible config absent")?;
+    let normal_isaac = state.weapon_admission.source_player_type == Some(0);
     let owner = state
         .player_items
         .as_mut()
         .expect("checked Player item owner");
     owner.owned_counts[id as usize] = owner.owned_counts[id as usize].wrapping_add(1);
-    if ![1, 4, 6, 114, 118, 329, 304].contains(&id) {
+    //68 has the same closed zero-amount/common auxiliary producer. Preserve
+    //only an existing owner in its bounded cache context; never create Some.
+    let keep_technology_luck = id == 68
+        && normal_isaac
+        && crate::item_pipeline::ItemInputs::new(owner)
+            .is_ok_and(|inputs| inputs.admits_technology_cache_context());
+    if ![1, 4, 6, 114, 118, 329, 304].contains(&id) && !keep_technology_luck {
         // These admitted grant paths preserve the fresh auxiliary words.
         // Nonzero setters and restore need their own producer binding.
         owner.luck_inputs = None;

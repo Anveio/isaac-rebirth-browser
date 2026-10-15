@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "status": "SCOPED_SOURCE_BUILD_AND_RETAINED_COMPARISON_SNAPSHOT",
-  "main": "8c918fb62d835a10ac8799058b9f5b8c4463744f",
+  "status": "SCOPED_FINISHED_TECH_FAIL_GIMPY_OWN_V2_AND_COMPLETE_708_CAPTURE_SNAPSHOT",
+  "main": "968adab250fb8606cde25f4607027d6ad0a00ee3",
   "merged": {
     "298": "261dbd60b3921fed421a614ef80c52baaadb0cca",
     "299": "988ae6355c7956d918ff0e00eb329d313645b864",
@@ -14,7 +14,9 @@
     "317": "3df99031eff287a6745c0f7e994b7603e98203d5",
     "318": "2ec601c5c9af116ff43e5c1881b5e02dab05607c",
     "332": "12c6d19cfc191738350c6d3f359eb28c1ee4e7b8",
-    "335": "8c918fb62d835a10ac8799058b9f5b8c4463744f"
+    "335": "8c918fb62d835a10ac8799058b9f5b8c4463744f",
+    "319": "c15fab7788e134b8e302c91c96bb20ebaf5c4d01",
+    "338": "968adab250fb8606cde25f4607027d6ad0a00ee3"
   },
   "ordinary299": {
     "ownBuilds": "production/strict Clippy/floor PASS",
@@ -483,12 +485,6 @@
       "head": "6e9b5738e465e3a14b7439102c9156259bb6f4bb",
       "scope": "tools: declare public ordinary Brimstone contact cases",
       "ownGameAcceptance": false
-    },
-    {
-      "pr": 316,
-      "head": "35d01c742130b746947214ddfb9154f06c350129",
-      "scope": "Compare controlled Brimstone property and priority histories",
-      "ownGameAcceptance": false
     }
   ],
   "historicalReportsUnchanged": true,
@@ -514,7 +510,7 @@
     "mainMerge": "3df99031eff287a6745c0f7e994b7603e98203d5"
   },
   "controlledBrim312": {
-    "status": "SEPARATE_DRAFT_WITH_FAILING_INCOMPLETE_NATIVE_PREFIX_COMPARISON",
+    "status": "SEPARATE_DRAFT_FOUR_FRESH_NATIVE_TRANSPORTS_COMPLETE_CASE0_GRADE_FAIL",
     "runtimeSource": "b8ae2eccd7694688ada95da097e81c067dda285e",
     "ownWasmSha256": "708457d9dd1eeaa40c8e450bf805a362ed3f2394ce5421c1f38f68bc8d43850a",
     "ownBuildClosure": {
@@ -560,13 +556,58 @@
       "retainedUnchanged": true
     },
     "remaining": [
-      "Complete four-case Native/public paired execution",
+      "Finished four-case paired grading",
       "Actual admitted reapply callback events",
       "HP ownership",
       "Identity/seed/RNG mismatches",
-      "Contact and lifecycle gaps"
+      "Contact and joined lifecycle event/completion/call-order obligations"
     ],
-    "fullPairedAcceptance": false
+    "fullPairedAcceptance": false,
+    "completeFourNativeTransport": {
+      "cases": 4,
+      "actualWaitExit0": true,
+      "allPinsStable": true,
+      "guards": 0,
+      "naturalPidfdExit": true,
+      "sameFrozenInputs": "a408de65",
+      "same708ArtifactAndPublicStateBytes": true,
+      "functionalAcceptance": false
+    },
+    "fullComparerAttempt": {
+      "status": "MEMORY_FAILURE_AFTER_SUCCESSFUL_PROJECTION",
+      "functionalGradeEstablished": false,
+      "pagedSuccessor": "358398a4/module510fa22d; first completed case0 grade86999/7688FAIL is separate from failed full comparer; three further grades pending"
+    },
+    "lifecycleScope": "Separate new lifecycle journals captured but not joined; BaseUninit-entry is not completion.",
+    "completeCase0Paired": {
+      "report": "/dev/shm/isaac-controlled-brim708-native-evidence-v2/controlled-brim-properties-priority-phase0/paired-functional-paged-v3/functional-report.json.gz",
+      "reportShaPrefix": "978c19ea",
+      "checks": 86999,
+      "failures": 7688,
+      "pairedPlayingRows": 1010,
+      "laserC18Bodies": 541,
+      "full": 270,
+      "fast": 271,
+      "knifeBodies": 280,
+      "matched": [
+        "Damage",
+        "flags",
+        "colors",
+        "TTL",
+        "Sprite",
+        "friction",
+        "classes",
+        "Parent"
+      ],
+      "remaining": [
+        "geometry",
+        "identity/RNG",
+        "HP ownership",
+        "actual admitted reapply callbacks",
+        "unjoined lifecycle records"
+      ],
+      "otherThreeGrades": "PENDING_AT_SNAPSHOT"
+    }
   },
   "nativeEvidenceStreaming332": {
     "mainMerge": "12c6d19cfc191738350c6d3f359eb28c1ee4e7b8",
@@ -575,18 +616,23 @@
       "path": "/dev/shm/isaac-native-observation-streaming-v1/validation-result.json",
       "sha256": "b0ed87ae8e11fbe0ca8419519e83630c319ab13e0bbc6845a0a2ecbd80492eb3"
     },
-    "scope": "Closed incomplete-capture committed prefix only; raw JSON and gzip storage equivalence, no fresh Native game result or retroactive capture pass.",
+    "scope": "Original closed-prefix raw/gzip/API equivalence remains; subsequent four actual Technology captures complete normally, not a retroactive prefix pass or gameplay parity.",
     "committedRecords": 3302,
     "observations": 1103,
     "boundedWindows": 69,
     "rawAndGzipBytesExact": true,
     "observedValidationPeakRssBytes": 36974592,
     "historicalNativePerPidPeak": "Unmeasured; aggregate cgroup growth does not establish recorder RSS",
-    "temporaryFutureHostDiagnostics": "Sampled per-process memory and exact owned-game pidfd cleanup remain source-only temporary host changes, separate from332.",
-    "freshNativePeakReductionVerified": false
+    "temporaryFutureHostDiagnostics": "Versioned capacity monitor and exact-game pidfd/RSS diagnostics exercised by real fresh captures; historical failed guards/captures preserved.",
+    "freshNativePeakReductionVerified": false,
+    "currentRecorderObservation": {
+      "observedKernelHighWaterBytes": 36585472,
+      "historicalPeakKnown": false,
+      "quantifiedPeakReductionVerified": false
+    }
   },
   "nextTechnologyAndGimpy": {
-    "status": "CORRECTED_THREE_BUILDS_PASS_REGRESSION_AND_GAME_PENDING",
+    "status": "FROZEN77CD_TECH_FOUR_PAIRS_FAIL_GIMPY_V2_OWN_TRANSITIONS_ONLY",
     "technologyFirstBuild": "Missing PlayerControlled match arm; failure101 retained, no product from that attempt.",
     "technologyCohortSha256": "06986a09a1fde39d8e580a0691dc7b8d71a669417d0d72527f256d28cbe5b524",
     "gimpyCohortSha256": "d0cdf483a0f9c2e5689fae7b65ffc0a01a0e4c69bcf88cf3a5d6f31f6766a412",
@@ -602,7 +648,7 @@
       "actualWait": true,
       "seconds": 27.841788,
       "allPinsStable": true,
-      "scope": "Production, subsequent strict Clippy and floor pass on frozen77cd; retained regressions and declared public games pending.",
+      "scope": "Frozen77cd production/strict Clippy/floor pass; no future source correction or whole-current-main acceptance.",
       "exitCode": 0
     },
     "strictClippy": {
@@ -624,6 +670,102 @@
       "actualWait": true,
       "seconds": 16.855637073516846,
       "scope": "Same frozen77cd source; no future source correction or game acceptance inferred."
+    },
+    "strictRegular": {
+      "preexistingChecks": 37968484,
+      "preexistingFailures": 0,
+      "additionalRegistrationChecks": 2856,
+      "additionalRegistrationFailures": 416,
+      "grade": "FAIL_RETAINED"
+    },
+    "technologyPaired": {
+      "path": "/dev/shm/isaac-technology320-native-evidence-v1/four-case-paired-summary-v1.json",
+      "sha256": "ff0801857d12726852f1e7618083ef303f7380a707e694e7c1b53b4abbee15e7",
+      "cases": 4,
+      "checks": 82351,
+      "failures": 5807,
+      "nativeBirths": 30,
+      "portBirths": 29,
+      "pairedBodies": 152,
+      "full": 74,
+      "fast": 78,
+      "damageDifferences": 76,
+      "ownLaserIdentities": 29,
+      "ownImpactIdentities": 29,
+      "ownManagerRows": 170,
+      "ownC18NullRows": 1928
+    },
+    "gimpyOriginalBank": {
+      "cases": 4,
+      "positive225Observed": false,
+      "dipDeathObserved": false,
+      "coverage": "FAIL_RETAINED"
+    },
+    "gimpyV2Own": {
+      "path": "/dev/shm/isaac-gimpy225-public-game-v2/own-gimpy-v2-nonvacuity.json",
+      "sha256": "3fc41cb012d0d9d76d2df44778d4d80af140107bc15cb439cc4a7b2b1e9ddf28",
+      "cases": 4,
+      "pickup225Counter": 755,
+      "explosionCounter": 1153,
+      "queuedDamageCounter": 1154,
+      "hp4ToMinus56DeadCounter": 1155,
+      "sameRoomDisappearanceCounters": [
+        1156,
+        1157
+      ],
+      "item234": 0,
+      "newPickupBeyondPedestal": false,
+      "rngTransitionAssessment": {
+        "path": "/dev/shm/isaac-gimpy225-rng-transition-consistency-v1/assessment.json",
+        "sha256": "0daa06a6096f85f9af7064e822d51171d31a1b3b1e0eaf3df504589afdaae419",
+        "xorshift": [
+          4,
+          3,
+          17
+        ],
+        "bound": 100,
+        "nonzeroFailureResults": [
+          81,
+          81,
+          75,
+          37
+        ],
+        "scope": "One observed state-transition consistency only; no atomic callback/call-count, trinket-slot or Original claim."
+      }
+    },
+    "futureSource": {
+      "head": "68aeedc15251245b1f35e6db3fb42d351e4c2b79",
+      "tree": "c511dab9",
+      "status": "NEW_OWN_THREE_BUILDS_PASS_GAME_PENDING",
+      "owners": [
+        "Soy stages",
+        "capability split",
+        "eye-history repair",
+        "readiness287",
+        "Room8",
+        "Technology post-contact reset69f5d812"
+      ],
+      "historical77cdAndFailuresUnchanged": true,
+      "ownWasmSha256": "027c7031c89292e78fa1d36fa23546ed849eb5297fa0740ce1e31dc95776a956",
+      "productionSeconds": 30.328,
+      "productionExitCode": 0,
+      "productionActualWait": true,
+      "clippy": {
+        "exitCode": 0,
+        "actualWait": true,
+        "seconds": 30.0746,
+        "sourceBeforeEqualsEnd": true,
+        "guardStop": false
+      },
+      "floor": {
+        "exitCode": 0,
+        "actualWait": true,
+        "seconds": 15.9015,
+        "sourceBeforeEqualsEnd": true,
+        "guardStop": false,
+        "earlierPreflightDeficitBytes": 126156800
+      },
+      "gameQualification": false
     }
   },
   "controlledBrimContact335": {
@@ -631,5 +773,18 @@
     "sourceDefaultHelpImportValidation": "PASS",
     "actualContactCases": "UNEXECUTED",
     "scope": "Opt-in controlled7/1/1 tools only; no default capture change or ordinary7/1/0/Technology7/2 alias."
+  },
+  "unmergedComparedTools": [
+    {
+      "pr": 316,
+      "scope": "Controlled-Brim body/property/priority marker consumed by708; no full-game acceptance",
+      "fullPairedGrade": "CASE0_86999_7688_FAIL_THREE_OTHER_GRADES_PENDING"
+    }
+  ],
+  "drFetus52": {
+    "status": "SOURCE_MAP_AND_COHERENT_CANONICAL_BOMB_IMPLEMENTATION_BEGINNING",
+    "gameAcceptance": false,
+    "controlled329Admitted": false,
+    "guessedHistoryDefaults": false
   }
 }

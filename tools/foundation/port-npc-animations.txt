@@ -25,3 +25,6 @@ gfx/023.000_charger.anm2
 gfx/031.000_spity.anm2
 gfx/239.000_grub.anm2
 gfx/237.000_gurgling.anm2
+gfx/079.000_gemini.anm2
+gfx/079.010_gemini baby.anm2
+gfx/079.020_umbilical cord.anm2
