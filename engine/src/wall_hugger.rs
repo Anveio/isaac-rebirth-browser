@@ -71,9 +71,7 @@ fn spawn(id: u32, selector: &SpawnSelector, context: &SpawnContext) -> Result<Op
 }
 
 fn entity_flags(npc: &Npc) -> u32 {
-    npc.wall_hugger
-        .as_ref()
-        .map_or(4, |state| state.entity_flags)
+    npc.wall_hugger.as_ref().map_or(4, |state| state.entity_flags)
 }
 
 fn advance(
@@ -90,10 +88,7 @@ fn advance(
 
 fn step(direction: i32) -> WorldVector {
     let (x, y) = DIRECTIONS[direction.rem_euclid(4) as usize];
-    WorldVector {
-        x: x * 40.0,
-        y: y * 40.0,
-    }
+    WorldVector { x: x * 40.0, y: y * 40.0 }
 }
 
 fn ai(
