@@ -106,7 +106,7 @@ export class Renderer {
     const gl = this.graphics;
     if (state.screen === "playing") {
       this.prepareRoom(state.room);
-      this.stage.prepare(state.stageEffects, state.camera?.scroll);
+      this.stage.prepare(state.stageEffects, this.worldOffset(state));
     }
     gl.beginScreen(); gl.resetTransform(); gl.globalAlpha = 1; gl.imageSmoothingEnabled = false;
     gl.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -194,15 +194,22 @@ export class Renderer {
         [point(0, start), point(1, start), point(0, end), point(1, end)]);
     }
   }
+  /** Source CEA00 is a pixel offset, independent of Room15B8 scrolling. */
+  private worldOffset(state: State): { x: number; y: number } | undefined {
+    const scroll = state.camera?.scroll, shake = state.gameShake?.offsetCea00;
+    if (scroll && shake) return { x: Math.fround(scroll.x + shake.x), y: Math.fround(scroll.y + shake.y) };
+    return shake ?? scroll;
+  }
   /** Room::Render world layer: backdrop, grid, actors and stage composites. */
   private drawWorld(ctx: CanvasRenderingContext2D, state: State, hidePlayer = false): void {
     ctx.save();
-    if (state.camera) ctx.translate(state.camera.scroll.x, state.camera.scroll.y);
+    const offset = this.worldOffset(state);
+    if (offset) ctx.translate(offset.x, offset.y);
     this.drawRoom(state.room.appearance, state.room.grid);
     ctx.restore();
     this.stage.ground(state.stageEffects);
     ctx.save();
-    if (state.camera) ctx.translate(state.camera.scroll.x, state.camera.scroll.y);
+    if (offset) ctx.translate(offset.x, offset.y);
     // Creep's render key (seq & 0x3ff) + 2100 sorts every pool under the
     // y-sorted actors, in spawn order; colour multiplies the clip's pulse.
     for (const effect of state.spriteEffects) {

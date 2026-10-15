@@ -213,6 +213,15 @@ pub(crate) fn explode_neutral(
         frontier(state, "neutralExplosionCraterRecordHistory");
         return Ok(false);
     }
+    if damage >= 100.0
+        && !state
+            .camera
+            .as_ref()
+            .is_some_and(|camera| camera.source_shake_history_is_known())
+    {
+        frontier(state, "neutralExplosionShakeHistory");
+        return Ok(false);
+    }
     state
         .next_effect
         .checked_add(2)
@@ -224,6 +233,8 @@ pub(crate) fn explode_neutral(
     } else {
         75.0
     };
+    //554490 enters this producer before any blast query/impulse/queue.
+    crate::game_shake::from_blast(state, damage);
     crate::bombs::explode_with_copied_source(
         state,
         position,
