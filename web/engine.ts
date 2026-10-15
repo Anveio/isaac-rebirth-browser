@@ -61,6 +61,7 @@ export interface ActorRef { kind: "player" | "familiar" | "tear" | "knife" | "la
 export interface Knife {
   id: number; entityType: number; variant: number; subtype: number; spawnSeed: number; birthGameUpdate: number; actorRng: ItemRng;
   spawnerType: number; spawnerVariant: number; parent: ActorRef | null;
+  childChain4a0: "unknown" | "empty";
   active: boolean; dead: boolean; visible: boolean;
   position: {x: number; y: number}; savedPosition: {x: number; y: number};
   homePosition: {x: number; y: number}; homingTarget: ActorRef | null;
@@ -260,16 +261,16 @@ export interface StageEffects {
 }
 export interface State {
   weaponCache: {primary: number; flagsC98: [number,number]; colorCa0: AttackColor; colorCcc: AttackColor};
-  attackRuntime: {chargeC0c: number | null; headDirectionDa0: number | null; shootingAimDb4: {x: number; y: number} | null; persistent: ActorRef | null; secondary: (ActorRef | null)[]; nextKnife: number};
+  attackRuntime: {chargeC0c: number | null; headDirectionDa0: number | null; shootingAimDb4: {x: number; y: number} | null; movementDirectionD9c: number | null; playerDc4: {x: number; y: number} | null; persistent: ActorRef | null; secondary: (ActorRef | null)[]; nextKnife: number};
   knives: Knife[];
   stageShootingGuard: {state: number; counter: number};
   weaponAdmission: {sourcePlayerType: number|null; c18IsKnownEmpty: boolean; pendingPrimaryCleanup: {fromPrimary:number;toPrimary:number}|null; unadmittedController: {primary:number;channel:string}|null};
-  lasers: {id:number; origin:"npcShootAngle"; entityType:number; variant:number; subtype:number;
+  lasers: {id:number; origin:"npcShootAngle"|"playerCharged"; uninitialized:boolean|null; entityType:number; variant:number; subtype:number;
     spawnSeed:number; parent:ActorRef|null; child:ActorRef|null; active:boolean; dead:boolean; visible:boolean;
     position:{x:number;y:number}; savedPosition:{x:number;y:number}; renderOffset:{x:number;y:number};
     parentOffset:{x:number;y:number}; angle:number; renderSortOffset:number; remainingUpdates:number;
-    beamLength:number; fast:boolean; sourceColor:AttackColor; currentColor:AttackColor; sprite:ActorSprite;
-    impact: {position:{x:number;y:number}; positionOffset:{x:number;y:number}; scale:{x:number;y:number}; rotation:number; actor:string; animation:string; animationClock:number; removed:boolean}|null; actor:string}[];
+    beamLength:number; lineEnabled:boolean; line:{points:{x:number;y:number}[]}; fast:boolean; sourceColor:AttackColor; currentColor:AttackColor; sprite:ActorSprite;
+    impact: {id:number; parent:ActorRef|null; parentKnown:boolean; sourceColor:AttackColor|null; currentColor:AttackColor|null; position:{x:number;y:number}; positionOffset:{x:number;y:number}; scale:{x:number;y:number}; rotation:number; actor:string; animation:string; animationClock:number; removed:boolean}|null; actor:string}[];
   enemyProjectiles: {id:number; spawnSeed:number; position:{x:number;y:number}; presentedPosition:{x:number;y:number}; velocity:{x:number;y:number}; height:number; scale:number; animation:string|null; animationFrame:number; dead:boolean; removed:boolean}[];
   schema: 1; tickRate: 60; tick: number; menuAnimationTick: number; runTick: number; gameUpdateCount: number; screen: Screen;
   titleAnimationFrame: number; menuFade: { active: boolean; alpha: number; color: [number, number, number, number] };

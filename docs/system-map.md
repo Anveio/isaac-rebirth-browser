@@ -99,6 +99,21 @@ The exact same-base PR269 public-WASM regression preserves 37,914,507 complete
 field comparisons and 416 positive-owned completion rows with zero differences.
 This is local regression evidence, not new original/browser acceptance.
 
+Merged [PR291](https://github.com/Anveio/isaac-rebirth-browser/pull/291) adds
+Libra304's coupled request expansion after primary selection and its
+post-callback balance before final clamps. Unsupported input callbacks keep the
+coupled outputs pending. Its own production, strict Clippy and floor checks pass;
+the local regression retains 37,956,648 fields with zero differences. Two fixed
+public-pedestal histories, 304→6 and 6→304, pass 503,611 scoped Native/public-WASM
+checks across 1,262 paired gates, including 186 post-grant rows. The first case
+lacks 631 Native Familiar-manager selections; its pending bit 512 is observed as 0,
+while the second case's actual empty manager matches. Actor identity, source
+variant/current color, physical/lifetime and browser/render parity remain open.
+Duplicates, partial requests, active clamps and item118 triples remain unexecuted.
+Current main `3080e8e2` contains the four qualified owned blobs; this does not claim
+a separately built whole-current-main artifact. Earlier evidence capsules and
+failed attempts remain unchanged.
+
 Merged PR262 carries authored whole Special STB resources through real startup
 and doorway factories. Its own production, strict Clippy and floor checks pass,
 as do six public-WASM startup/invalid-resource checks. These do not qualify
@@ -236,6 +251,21 @@ remain unaccepted. Both recorded-OS attempts stopped at resource guards; the
 second reaches 610/748 presentations with an unfinished tape and full transport
 FAIL. No new DOM, history-helper, complete lifetime or triple parity follows.
 The PR297 evidence capsule remains an unchanged historical snapshot.
+
+PR301 subsequently merged at `78dcabee`, implementing controlled Knife on the
+same store, allocator and registered C18 as ordinary/Has118 Knife. Its own
+production, strict Clippy and floor checks pass; four public-WASM routes retain
+37,956,648 preexisting fields with zero differences. The 1,624 new D9C observations
+are additive type checks, not baseline numeric parity. The fixed Knife-first
+comparison remains 106,884/8,755 FAIL plus one missing old history marker.
+In 281 post329 observations (141 Full/140 fast), parent physical/saved position,
+velocity, DA0 and C18 retention match; 280 rows carry bit33. All 12 child births and
+614 child bodies remain, 64 after329. The current report retains 37 strict parent
+rotation differences (34 post329), 136 pre329 DA0 differences and inherited
+identity/seed/Init8A8, shared-MT and child-geometry failures. Snapshot observations
+leave short Remove/Uninit events unqualified. No DOM/render, full624, contact/lifetime
+or whole triple parity follows. Earlier grades and OS prefixes remain unchanged;
+ordinary Player Brimstone299 and controlled Tear307 remain separate Drafts.
 
 Readiness287 passes a warm production retry and strict Clippy, but its floor
 build stopped at the working-memory floor. Its earlier production capacity stop

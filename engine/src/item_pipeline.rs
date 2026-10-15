@@ -216,6 +216,27 @@ impl<'a> ItemInputs<'a> {
 
     ///Separate literal neutral kind4/contact modifier footprint. Extending
     ///cache32/64 support never expands this contact/controller domain.
+    pub(crate) fn admits_neutral_kind2(self) -> bool {
+        self.owner.trinket_slots == [0, 0]
+            && self
+                .owner
+                .queued_id
+                .is_none_or(|id| items::definition(id).is_some_and(|config| config.kind != 2))
+            && self.owner.temporary_collectibles.is_empty()
+            && self
+                .owner
+                .owned_counts
+                .iter()
+                .enumerate()
+                .all(|(id, &count)| {
+                    count == 0 || (count > 0 && [1, 4, 114, 118, 329].contains(&id))
+                })
+    }
+
+    pub(crate) fn admits_neutral_kind3(self) -> bool {
+        self.admits_neutral_kind2()
+    }
+
     pub(crate) fn admits_neutral_kind4(self) -> bool {
         self.owner.trinket_slots == [0, 0]
             && self

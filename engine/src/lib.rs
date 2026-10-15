@@ -16,12 +16,14 @@ pub mod attack_runtime;
 pub mod audio;
 pub mod blood_effects;
 pub mod bombs;
+mod brimstone;
 pub mod camera;
 pub mod challenges;
 pub mod champions;
 pub mod chests;
 pub mod combat;
 mod content;
+mod controlled_knife;
 pub mod dingle;
 pub mod dips;
 mod doors;
@@ -29,7 +31,7 @@ mod effects;
 pub mod enemy_projectiles;
 mod entities;
 pub mod sprite_color;
-pub use entities::supports_npc_selector;
+pub use entities::{implemented_npc_kinds, supports_npc_selector};
 pub mod familiars;
 pub mod fireplaces;
 pub mod floor;
@@ -50,6 +52,8 @@ mod knife_path;
 pub mod knives;
 pub mod laser_line;
 mod laser_npc_runtime;
+mod laser_player_runtime;
+mod laser_runtime;
 pub mod lasers;
 pub mod layout;
 pub mod level2_flies;
@@ -66,6 +70,7 @@ pub mod phase;
 pub mod pickups;
 mod plain_npc;
 pub mod player_animation;
+pub mod player_costume118;
 pub mod player_death;
 pub mod player_items;
 pub mod player_save;
@@ -1341,7 +1346,7 @@ impl Game {
         self.state.fire_particles.clear();
         self.state.next_effect = 1;
         self.state.sprite_effects.clear();
-        self.state.lasers.clear();
+        laser_runtime::reset_room(&mut self.state)?;
         self.state.knives.clear();
         self.state.attack_runtime = attack_runtime::AttackRuntime::fresh_player();
         self.state.next_laser = 1;
@@ -1900,6 +1905,7 @@ impl Game {
         }
         if phase == phase::Phase::Update && self.state.screen == Screen::Playing {
             attack_runtime::restore_fast_positions(&mut self.state);
+            laser_runtime::restore_fast_positions(&mut self.state);
         }
         let gameplay_was_paused = self.state.paused;
         if self.state.screen == Screen::Playing {
@@ -2146,6 +2152,7 @@ impl Game {
             familiars::paint_background_effects(&mut self.state)?;
             blood_effects::clear_retired_links(&mut self.state);
             attack_runtime::retire_full(&mut self.state);
+            laser_runtime::retire_full(&mut self.state)?;
             attack_runtime::contacts(&mut self.state)?;
             let pickup_contacts = pickups::contact_candidates(&self.state)?;
             npcs::player_contacts(&mut self.state)?;
@@ -2701,6 +2708,7 @@ impl Game {
         let controls_enabled = controls_enabled
             && self.state.player.controls_enabled
             && self.state.player.input_cooldown <= 0;
+        attack_runtime::update_movement_direction(&mut self.state, controls_enabled)?;
         //52f370 positive7dc returns before its both-phase519fc0 callbacks.
         //53004c otherwise precedes later full/body work, independent of aim.
         let shoot_callback_admitted =
@@ -2714,7 +2722,7 @@ impl Game {
                 && !self.state.stage_shooting_guard.active()
                 && self.state.player.controls_enabled
                 && self.state.player.input_cooldown <= 0;
-        let mut ordinary_source_clock = false;
+        let mut source_weapon_clock = false;
         let mut regular_plan = None;
         let mut shooting_aim_db4 = None;
         let regular_dispatch = if shoot_callback_admitted {
@@ -2733,8 +2741,14 @@ impl Game {
                         } else {
                             buttons.aim()
                         };
-                    let ordinary = plan.controller == weapon_plan::ControllerChannel::OrdinaryKnife;
-                    let aim_step = if ordinary {
+                    let ordinary = matches!(
+                        plan.controller,
+                        weapon_plan::ControllerChannel::OrdinaryKnife
+                            | weapon_plan::ControllerChannel::ChargedBrimstone
+                    );
+                    let controlled =
+                        plan.controller == weapon_plan::ControllerChannel::ControlledKnife;
+                    let aim_step = if ordinary || controlled {
                         attack_runtime::ordinary_shooting_aim(
                             callback_aim,
                             buttons.held(),
@@ -2747,14 +2761,30 @@ impl Game {
                                 .then_some(callback_aim),
                         })
                     };
-                    if let Some(aim_step) = aim_step {
+                    if let Some(mut aim_step) = aim_step {
+                        // 52F6B7 normalizes r13 before the callback and DB4 store.
+                        if controlled && knives::squared_length(aim_step.callback_aim) > 1.0 {
+                            aim_step.callback_aim = knives::normalized(aim_step.callback_aim);
+                            if aim_step.db4_write.is_some() {
+                                aim_step.db4_write = Some(aim_step.callback_aim);
+                            }
+                        }
                         shooting_aim_db4 = aim_step.db4_write;
-                        if ordinary {
-                            ordinary_source_clock = true;
-                            attack_runtime::ordinary_head_direction(
-                                &mut self.state,
-                                aim_step.callback_aim,
-                            );
+                        let head_frame_request = if self.state.head_timer > 8 { 2 } else { 0 };
+                        if ordinary || controlled {
+                            source_weapon_clock = true;
+                            if controlled {
+                                attack_runtime::controlled_head_direction(
+                                    &mut self.state,
+                                    aim_step.callback_aim,
+                                    buttons.held(),
+                                )?;
+                            } else {
+                                attack_runtime::ordinary_head_direction(
+                                    &mut self.state,
+                                    aim_step.callback_aim,
+                                );
+                            }
                             if phase == phase::Phase::Update {
                                 if self.state.fire_cooldown >= 0 {
                                     self.state.fire_cooldown -= 1;
@@ -2765,13 +2795,25 @@ impl Game {
                             }
                         }
                         regular_plan = plan.regular;
-                        attack_runtime::dispatch_player(
+                        let outcome = attack_runtime::dispatch_player(
                             &mut self.state,
                             &plan,
                             buttons,
                             phase,
                             aim_step.callback_aim,
-                        )? == attack_runtime::DispatchOutcome::RegularTear
+                        )?;
+                        // 519FC0 returns before the released idle D9C -> DA0 effect.
+                        if controlled {
+                            attack_runtime::controlled_idle_head(&mut self.state, buttons.held());
+                        }
+                        if plan.controller == weapon_plan::ControllerChannel::ChargedBrimstone {
+                            attack_runtime::ordinary_brimstone_idle_head(
+                                &mut self.state,
+                                buttons.held(),
+                            );
+                            player_costume118::sync_head(&mut self.state, head_frame_request)?;
+                        }
+                        outcome == attack_runtime::DispatchOutcome::RegularTear
                     } else {
                         self.state
                             .weapon_admission
@@ -2857,10 +2899,10 @@ impl Game {
         self.state.player.shooting = aim.is_some() && !shooting_locked;
         if phase == phase::Phase::Update && !shooting_locked {
             self.state.player.head_frame = if self.state.head_timer > 8 { 2 } else { 0 };
-            if !ordinary_source_clock && self.state.fire_cooldown >= 0 {
+            if !source_weapon_clock && self.state.fire_cooldown >= 0 {
                 self.state.fire_cooldown -= 1;
             }
-            if !ordinary_source_clock && self.state.head_timer >= 0 {
+            if !source_weapon_clock && self.state.head_timer >= 0 {
                 self.state.head_timer -= 1;
             }
         }
@@ -2952,6 +2994,7 @@ impl Game {
             self.state.attack_runtime.shooting_aim_db4 = Some(aim);
         }
         player_items::advance_item_sprite(&mut self.state, phase);
+        player_costume118::advance_full(&mut self.state, phase);
         if self.state.player.input_cooldown > 0 {
             self.state.player.input_cooldown -= 1;
         }
