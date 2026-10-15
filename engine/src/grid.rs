@@ -282,12 +282,48 @@ pub fn link_pits(grid: &mut GridDescriptor, shared: &mut crate::mt::Mt19937) {
             | u32::from(at(0, 1)) << 3;
         let frame = match mask {
             0 => shared.bounded(2) << 4,
-            3 => if up_left { 3 } else { 17 },
-            6 => if up_right { 6 } else { 18 },
-            9 => if down_left { 9 } else { 19 },
-            12 => if down_right { 12 } else { 20 },
-            11 => if up_left { 11 } else { 26 },
-            14 => if up_right { 14 } else { 25 },
+            3 => {
+                if up_left {
+                    3
+                } else {
+                    17
+                }
+            }
+            6 => {
+                if up_right {
+                    6
+                } else {
+                    18
+                }
+            }
+            9 => {
+                if down_left {
+                    9
+                } else {
+                    19
+                }
+            }
+            12 => {
+                if down_right {
+                    12
+                } else {
+                    20
+                }
+            }
+            11 => {
+                if up_left {
+                    11
+                } else {
+                    26
+                }
+            }
+            14 => {
+                if up_right {
+                    14
+                } else {
+                    25
+                }
+            }
             7 => match (up_left, up_right) {
                 (true, true) => 7,
                 (true, false) => 27,
@@ -301,7 +337,13 @@ pub fn link_pits(grid: &mut GridDescriptor, shared: &mut crate::mt::Mt19937) {
                 (false, false) => 32,
             },
             15 => match (up_left, up_right) {
-                (true, true) => if down_right || down_left { 15 } else { 24 },
+                (true, true) => {
+                    if down_right || down_left {
+                        15
+                    } else {
+                        24
+                    }
+                }
                 (false, true) => 21,
                 (true, false) => 22,
                 (false, false) => 23,

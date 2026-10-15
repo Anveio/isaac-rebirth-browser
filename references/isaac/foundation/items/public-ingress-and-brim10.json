@@ -1,0 +1,137 @@
+{
+  "schema": 1,
+  "scope": "Evidence summary only. Merged public ingress/Door and separate private ordinary-Brimstone execution have distinct producer and acceptance scopes.",
+  "publicIngress": {
+    "mergedPullRequests": [
+      214,
+      216
+    ],
+    "case": {
+      "index": 16,
+      "name": "composition-1-phase0",
+      "bootEpoch": 12713,
+      "initialPhase": 0,
+      "startingItems": [
+        1
+      ],
+      "mode": "browser-only replay of the unchanged closed current-turn original, XML and public tape"
+    },
+    "runtimeSource": "76d7a01b7ec06f8a1db519a10fc24835c830e18e",
+    "testConsumerSource": "32b5bcfd7322d9c0a05de586235b89131b54a322",
+    "artifactSha256": "4823ea6d6bf897e082ac8c863605c58e32d39ee929dc007b8906b29037e512f9",
+    "result": {
+      "requiredChecks": 8368,
+      "requiredPasses": 8368,
+      "requiredFailures": 0,
+      "doorStateRows": 631,
+      "doorStateFailures": 0,
+      "diagnosticDifferences": 0,
+      "unqualifiedBodyRows": 631,
+      "completeFirst32CaseAccepted": false,
+      "actorOrFactoryAccepted": false
+    },
+    "closure": {
+      "path": ".cache/coordination/active-items-research/challenge-current76d-case16-closure/closure.json",
+      "sha256": "5b61d6eb47ff3c12d7992904b10a11fde1630a63cc7762d4384585b0fb7b4a02"
+    },
+    "independentReadback": {
+      "path": ".cache/coordination/active-items-research/challenge-current76d-case16-closure/independent-readback.json",
+      "sha256": "6e6de212d08011670e34405d50fb03d77b1ac25e942f72350b0f72493d417c81"
+    },
+    "priorD156": {
+      "requiredPasses": 8180,
+      "requiredFailures": 188,
+      "reportUnchanged": true
+    },
+    "unobserved": [
+      "Native menu selection memory and Saved347/450/current-room Save records",
+      "Dynamic Add/evaluator counts and Save-to-Door call order",
+      "General DoorFSM/countable-room behavior and complete actor/body/identity/RNG parity"
+    ]
+  },
+  "ordinaryBrimstone": {
+    "status": "All captures closed; all ten functional comparisons and frozen strict audits remain FAIL.",
+    "producerSource": "866d2c8cb62b78698fc354a396157d19be31a7d9",
+    "artifactSha256": "fbb4896910d40c6d2388b3593616d40315fe453c9735e19fdeb618b249055c8c",
+    "artifactEnvelopeSha256": "fe7f5655509f4660025580d210819dd2bd022b61a1121e1072e3aedc155dc7c6",
+    "completedCases": 10,
+    "nativeExitCodes": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "originalCaptureErrors": 0,
+    "browserCaptureErrors": 0,
+    "checks": 307112,
+    "differences": 23017,
+    "frozenStrictAuditFailures": 10,
+    "actualChildWaitReturnCode": 1,
+    "observedCoverage": {
+      "laserBodyRows": 669,
+      "impactBodyRows": 669,
+      "fullRowsPerFamily": 330,
+      "fastRowsPerFamily": 339,
+      "transientFullUninitSlotNullWitnesses": 16
+    },
+    "closure": {
+      "path": ".cache/coordination/quality-main/composition-brim10-host-v5-allocation/brim10-final-capture-closure-and-release.json",
+      "sha256": "57eb8c81f124cbf879ac636e218617549e4729b9e1c10e7eee729c4959a11701"
+    },
+    "archiveAudit": "All ten frozen auditors stop at complete manifest-byte reconstruction and remain FAIL. A separate closed additive classifier passes all ten: only the permitted adjacent root-key swap, exact full raw manifest SHA and no nested-value/input/observation difference. Separate executions of every remaining frozen native clock/X11/options/resource validation also pass all ten with protected pins before=end. These addenda establish scoped capture validity, not weapon parity. PR217 changes future captures only.",
+    "case0AdditiveDiagnosis": {
+      "path": ".cache/coordination/item-weapon-composition/brim0-journal-manifest-classification-v1.json",
+      "sha256": "9796fa30936845accd9c1a78c424cfd6236b12de50323a2f4f528443b4f6b69b",
+      "scope": "Read-only classification, not a change to the frozen FAIL or full capture-audit acceptance."
+    },
+    "retainedFailures": {
+      "actual cache pending": 6510,
+      "mandatory source/browser field and actor execution": 6510,
+      "accepted controller frontier": 4630,
+      "actual complete active attack families/sequence/seeds": 669,
+      "actual Laser identity family/variant/subtype/sequence/seed": 669,
+      "actual Laser current RNG words": 669,
+      "actual Laser child source identity": 638,
+      "actual Laser complete line points": 501,
+      "actual Laser complete line priorPoints": 49,
+      "actual Impact identity/seed": 669,
+      "actual Impact Parent source identity": 669,
+      "actual Impact Sprite rotation": 669,
+      "actual DA0 head direction": 165
+    },
+    "sourceOnlyFollowups": [
+      "Controlled Knife caller ebc9333",
+      "Ordered cache completion ba85599",
+      "Line and Impact correction fe8c0d0"
+    ],
+    "notAccepted": [
+      "Whole original/browser Brimstone or current-main attack parity",
+      "Identity/seed/current-RNG and complete624-word shared MT routing",
+      "Full contact chain, general wardrobe/properties and pixels",
+      "Source-only corrections inherit none of the866 gameplay outcomes"
+    ],
+    "rootOrderAddendum": {
+      "status": "pass",
+      "cases": 10,
+      "supervisorPath": ".cache/coordination/quality-main/composition-brim10-host-v5-allocation/closed-root-order-addendum-v1/supervisor.json",
+      "supervisorSha256": "5b09665422e384aa3601597ff05dfea47743032384dc62e6a3042134ce40ed86",
+      "classification": "EXACT_DECLARED_OPTIONS_INITIAL_STATE_ROOT_ORDER_ONLY",
+      "scope": "All nested data equal; reordered full raw manifest SHA exact. Frozen audit/gameplay grades unchanged; skipped validations separate."
+    },
+    "nativeGuardsAddendum": {
+      "status": "pass",
+      "cases": 10,
+      "supervisorPath": ".cache/coordination/quality-main/composition-brim10-host-v5-allocation/closed-native-guards-addendum-v1/supervisor.json",
+      "supervisorSha256": "a57758b410477652b47a13de8f0f4bfbf2129bb354c7f88f81c4792e0cca620b",
+      "executedFrozenFunction": "native_readback",
+      "unchangedRemainingAssertions": true,
+      "scope": "Actual remaining clock/X11/options/resource validations executed after exact full-byte equivalence; all protected sources, archives and fixtures before=end. Frozen strict and gameplay grades unchanged."
+    }
+  }
+}

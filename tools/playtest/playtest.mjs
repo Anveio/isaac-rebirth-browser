@@ -23,6 +23,7 @@ const { values } = parseArgs({ options: {
   'run-seed': { type: 'string' },
   'boot-epoch-seed': { type: 'string' },
   headed: { type: 'boolean', default: false },
+  boss: { type: 'boolean', default: false },
 } });
 const BUNDLE = resolve(values.bundle);
 const PLAY_MS = Number(values.seconds) * 1000;
@@ -115,8 +116,31 @@ const observe = () => tab.evaluate(() => {
     tears: s.tears.length, bombs: s.bombs.length, explosions: s.explosions.length,
     inventory: s.inventory, items: s.playerItems ? s.playerItems.ownedCounts.reduce((a, b) => a + b, 0) : 0,
     gameOver: !!s.playerDeath?.gameOver, runSeed: s.runSeed, npcKinds: s.room.npcs.filter(n => !n.removed).map(n => `${n.kind}.${n.variant}${n.champion ? "c" + n.champion.color : ""}`), introduction: s.runIntroduction.active, stage: s.stage,
+    // Floor layout for --boss: each room's grid index and type (5 = boss).
+    rooms: s.floor ? s.floor.descriptors.map(d => [d.gridIndex, d.template.type]) : [],
   };
 });
+
+// Tears fly along one axis: an enemy behind rocks needs a firing post in its
+// row or column with no solid cell between. Grid cell centres are (c*40+40, r*40+120).
+const solidAt = (grid, x, y) => { const c = Math.round((x - 40) / 40), r = Math.round((y - 120) / 40); return c < 0 || r < 0 || c >= grid.w || r >= grid.h || grid.solid[r * grid.w + c] === '1'; };
+function lineOfFire(grid, from, to) {
+  if (!grid) return true;
+  const horizontal = Math.abs(to.x - from.x) > Math.abs(to.y - from.y);
+  if (Math.abs(horizontal ? to.y - from.y : to.x - from.x) > 20) return false;
+  const steps = Math.ceil(Math.hypot(to.x - from.x, to.y - from.y) / 20);
+  for (let i = 1; i < steps; i++) if (solidAt(grid, from.x + (to.x - from.x) * i / steps, from.y + (to.y - from.y) * i / steps)) return false;
+  return true;
+}
+function firingPost(grid, from, target) {
+  if (!grid) return null;
+  const posts = [];
+  for (let k = 2; k <= 6; k++) for (const [ox, oy] of [[k, 0], [-k, 0], [0, k], [0, -k]]) {
+    const post = { x: target.x + ox * 40, y: target.y + oy * 40 };
+    if (!solidAt(grid, post.x, post.y) && lineOfFire(grid, post, target)) posts.push(post);
+  }
+  return posts.sort((a, b) => Math.hypot(a.x - from.x, a.y - from.y) - Math.hypot(b.x - from.x, b.y - from.y))[0] ?? null;
+}
 
 const held = new Set();
 async function hold(keys) {
@@ -185,7 +209,7 @@ try {
   const playStart = Date.now(), playStartTick = state.tick;
   let previous = state, lastAdvance = Date.now(), lastMoveCheck = { at: Date.now(), x: state.player.x, y: state.player.y };
   let previousRoom = startRoom, cameFromDoor = null, segment = 0, lastPause = Date.now(), blackStreak = 0, nextShot = Date.now() + 20_000;
-  const blockedDoors = new Set(), lastVisit = new Map();
+  const blockedDoors = new Set(), lastVisit = new Map(), visits = new Map();
   let doorGoal = null, wantReturn = false, stuckSince = null, wiggle = null, itemsBefore = state.items;
   const pickupsAtStart = new Map();
   while (Date.now() - playStart < PLAY_MS) {
@@ -212,7 +236,7 @@ try {
     if (state.room !== previousRoom) {
       log(`entered room ${state.room} from ${previousRoom} (${state.npcs.length} enemies, ${state.pickups.length} pickups)`);
       timeline.push({ event: 'room', atMs: now - started, from: previousRoom, room: state.room, runSeed: state.runSeed, npcKinds: state.npcKinds });
-      cameFromDoor = previousRoom; previousRoom = state.room; lastVisit.set(state.room, now);
+      cameFromDoor = previousRoom; previousRoom = state.room; lastVisit.set(state.room, now); visits.set(state.room, (visits.get(state.room) ?? 0) + 1);
       if (state.room !== startRoom) stats.leftStart = true;
       if (state.room === startRoom && stats.leftStart) { stats.returnedToStart = true; wantReturn = false; }
       if (!stats.roomsEntered.has(state.room) && stats.roomsEntered.size === 1) { wantReturn = true; await shot('first-new-room'); }
@@ -274,7 +298,9 @@ try {
       // Fight: face the nearest enemy along its dominant axis, keep distance.
       const target = state.npcs.reduce((a, b) => Math.hypot(a.x - p.x, a.y - p.y) < Math.hypot(b.x - p.x, b.y - p.y) ? a : b);
       const dx = target.x - p.x, dy = target.y - p.y, distance = Math.hypot(dx, dy);
-      if (Math.abs(dx) > Math.abs(dy)) { keys.push(dx > 0 ? 'ArrowRight' : 'ArrowLeft'); if (Math.abs(dy) > 16) keys.push(dy > 0 ? 'KeyS' : 'KeyW'); }
+      const post = !lineOfFire(state.grid, p, target) && firingPost(state.grid, p, target);
+      if (post) { const step = waypoint(post.x, post.y); toward(step.x, step.y, 4); keys.push(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'ArrowRight' : 'ArrowLeft') : (dy > 0 ? 'ArrowDown' : 'ArrowUp')); }
+      else if (Math.abs(dx) > Math.abs(dy)) { keys.push(dx > 0 ? 'ArrowRight' : 'ArrowLeft'); if (Math.abs(dy) > 16) keys.push(dy > 0 ? 'KeyS' : 'KeyW'); }
       else { keys.push(dy > 0 ? 'ArrowDown' : 'ArrowUp'); if (Math.abs(dx) > 16) keys.push(dx > 0 ? 'KeyD' : 'KeyA'); }
       if (distance < 130) keys.push(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'KeyA' : 'KeyD') : (dy > 0 ? 'KeyW' : 'KeyS'));
       if (segment % 40 === 0 && state.inventory.bombs > 0 && distance < 180) keys.push('KeyE');
@@ -297,10 +323,15 @@ try {
         const usable = open.filter(d => !blockedDoors.has(`${state.room}->${d.target}`));
         // Explore: the least recently visited neighbour, never straight back unless it is the only way.
         const onward = usable.filter(d => d !== back);
-        const pool = (wantReturn && back && usable.includes(back) && [back]) || (onward.length && onward) || (usable.length && usable) || open;
+        const pool = (!values.boss && wantReturn && back && usable.includes(back) && [back]) || (onward.length && onward) || (usable.length && usable) || open;
         const age = d => lastVisit.get(d.target) ?? -1;
-        const oldest = Math.min(...pool.map(age));
-        const pickFrom = pool.filter(d => age(d) === oldest);
+        // --boss: head for the boss room by floor-grid distance (13 columns),
+        // with visits as a penalty so dead ends are not retried forever.
+        const bossCell = state.rooms.find(([, type]) => type === 5)?.[0];
+        const toBoss = d => { const cell = state.rooms[d.target]?.[0]; return cell == null ? 99 : Math.abs(cell % 13 - bossCell % 13) + Math.abs(Math.floor(cell / 13) - Math.floor(bossCell / 13)) + 3 * (visits.get(d.target) ?? 0); };
+        const score = values.boss && bossCell != null && state.rooms[state.room]?.[1] !== 5 ? toBoss : age;
+        const oldest = Math.min(...pool.map(score));
+        const pickFrom = pool.filter(d => score(d) === oldest);
         const door = pickFrom[Math.floor(Math.random() * pickFrom.length)];
         doorGoal = door && { room: state.room, target: door.target, until: now + 15_000 };
       }

@@ -102,6 +102,7 @@ pub(crate) fn evaluate_cache(state: &mut State) -> Result<(), String> {
     let resolved = item_pipeline::resolve_scalars(
         inputs,
         state.weapon_cache.primary,
+        state.weapon_admission.source_player_type,
         item_pipeline::CachedScalars {
             stats: state.player_stats,
             max_fire_delay: state.max_fire_delay,

@@ -17,7 +17,7 @@ npm run matrix:update                         # sync TEST_MATRIX.md
 | Simulation engine (crate, systems) | [engine/src/lib.rs](engine/src/lib.rs) |
 | Native diagnostic binaries (floor, replay) | [engine/src/bin](engine/src/bin) |
 | Authored content pipeline | [docs/content-pipeline.md](docs/content-pipeline.md) |
-| Antithesis DST harness (only unit exception) | [engine/dst](engine/dst), [docs/dst.md](docs/dst.md) |
+| Antithesis DST harness (only unit exception) | [engine/dst](engine/dst), [antithesis](antithesis), [tools/dst](tools/dst), [docs/dst.md](docs/dst.md) |
 | Browser runtime, renderer, audio, WASM bridge | [web/main.ts](web/main.ts), [web/engine.ts](web/engine.ts) |
 | Live original/browser e2e suites | [tools/e2e/suites.mjs](tools/e2e/suites.mjs), [tools/e2e/README.md](tools/e2e/README.md) |
 | Paired gameplay gate, comparators, extractors | [tools/foundation](tools/foundation) |
