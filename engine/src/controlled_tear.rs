@@ -300,6 +300,8 @@ pub(crate) fn dispatch(
         birth_game_update: None,
         shot_ordinal: None,
         source_variant: Some(params.variant),
+        //The controlled owner below retains its separate actual cadence.
+        persistent_contacts: None,
         collision_damage: damage,
         base_damage: damage,
         attack_flags: AttackFlags(params.flags.0 | CONTROLLED),

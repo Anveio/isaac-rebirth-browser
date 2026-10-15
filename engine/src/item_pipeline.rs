@@ -76,6 +76,14 @@ const SOY_KIND1_ITEMS: &[usize] = &[1, 4, 118, 330];
 const SOY_KIND2_ITEMS: &[usize] = &[1, 4, 118, 330];
 const SOY_KIND3_ITEMS: &[usize] = &[1, 4, 118, 330];
 
+// Independent169 callbacks, kind1 getter and current519FC0 caller footprints.
+// Equal selected sets do not complete grant/history/contact or other stages.
+const POLYPHEMUS_FIRE_DELAY_ITEMS: &[usize] = &[4, 169];
+const POLYPHEMUS_SHOT_SPEED_ITEMS: &[usize] = &[4, 169];
+const POLYPHEMUS_FLAGS_ITEMS: &[usize] = &[4, 169];
+const POLYPHEMUS_KIND1_ITEMS: &[usize] = &[4, 169];
+const POLYPHEMUS_CALLER_ITEMS: &[usize] = &[4, 169];
+
 /// Literal511f10 dispatch order. Weapon selection/removal precedes stats;
 /// Libra304 has additional coupling before and after this sequence.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -192,6 +200,13 @@ impl<'a> ItemInputs<'a> {
         if self.admits_soy_milk_regular_properties(source_player_type, primary, flags) {
             return Some(0);
         }
+        if source_player_type == Some(0)
+            && primary == PrimaryWeaponC08::RegularTears
+            && flags.0 == 0x200
+            && self.admits_polyphemus_kind1_context()
+        {
+            return Some(0);
+        }
         (source_player_type == Some(0)
             && primary == PrimaryWeaponC08::RegularTears
             && flags.0 == 0
@@ -223,6 +238,22 @@ impl<'a> ItemInputs<'a> {
                 .all(|(id, &count)| {
                     count == 0 || (count > 0 && [1, 4, 6, 114, 118, 329, 304].contains(&id))
                 })
+    }
+
+    ///Literal51316D's selected Flags32 callback. No color/grant permission.
+    pub(crate) fn admits_polyphemus_flags_context(self) -> bool {
+        self.admits_permanent_readset(169, POLYPHEMUS_FLAGS_ITEMS)
+    }
+
+    ///Separate50D090(kind1) readset;169 adds no modifier query or RNG here.
+    pub(crate) fn admits_polyphemus_kind1_context(self) -> bool {
+        self.admits_permanent_readset(169, POLYPHEMUS_KIND1_ITEMS)
+    }
+
+    ///Actual519FC0 Have169 changes the born origin after the eye draw. This
+    ///capability says nothing about the later Tear's0x200 contact callback.
+    pub(crate) fn admits_polyphemus_caller_context(self) -> bool {
+        self.admits_permanent_readset(169, POLYPHEMUS_CALLER_ITEMS)
     }
 
     ///Independent positive330 callback footprint from full511F10 and the
@@ -522,6 +553,17 @@ impl<'a> ItemInputs<'a> {
     /// read set. C08 remains an independent input to the ordered formulas.
     /// Config 118's request for all callbacks adds no implicit scalar effect.
     fn admits_scalar_stage(self, stage: CacheStage, effects: &[u32]) -> bool {
+        if self.owned_count(169) != 0 {
+            return match stage {
+                CacheStage::FireDelay => {
+                    self.admits_permanent_readset(169, POLYPHEMUS_FIRE_DELAY_ITEMS)
+                }
+                CacheStage::ShotSpeed => {
+                    self.admits_permanent_readset(169, POLYPHEMUS_SHOT_SPEED_ITEMS)
+                }
+                _ => false,
+            };
+        }
         //330's grant/readset context is separate from its two effect lists.
         if self.owned_count(330) != 0 && !self.admits_soy_milk_cache_context() {
             return false;
@@ -700,9 +742,10 @@ impl FireDelayStage {
         }
         //512562 bound precedes512666's one permanent222 modifier.
         delay = delay.max(5.0_f32);
-        //5125B0 tests positive ownership once, after the bound and before
-        //the retained-C08 modifiers. Separate f32 multiply/add, not a count.
-        if inputs.positive_owned_count(2) {
+        //5125B0/514D95 share one5125BD operator after the bound and before
+        //retained C08. Separate multiply/add; simultaneous2/169 never stack.
+        //153/TEMP2 remain independently unadmitted modifier owners.
+        if inputs.positive_owned_count(2) || inputs.positive_owned_count(169) {
             delay *= 2.1_f32;
             delay += 3.0_f32;
         }
