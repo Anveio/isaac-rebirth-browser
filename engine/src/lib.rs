@@ -2958,6 +2958,14 @@ impl Game {
                                 buttons.held(),
                             );
                         }
+                        if plan.controller == weapon_plan::ControllerChannel::OrdinaryFetus {
+                            //5306E0 C08=5 reads D9C directly on the released idle path.
+                            attack_runtime::controlled_idle_head_for(
+                                &mut self.state,
+                                buttons.held(),
+                                "drFetusMovementHistory",
+                            );
+                        }
                         if plan.controller == weapon_plan::ControllerChannel::ChargedBrimstone
                             || controlled_brim
                         {
