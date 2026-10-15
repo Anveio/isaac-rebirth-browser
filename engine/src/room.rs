@@ -451,14 +451,19 @@ impl Room {
                 ));
             }
         }
-        // Authored fxlayers.xml fx id=2, roomsize=0 replacement order.
-        let overlay_variant = [2, 3, 4, 5, 1][(rng.next() % 5) as usize];
+        // fxlayers.xml (parsed per room load, 5489b0) seeds a fresh RNG per
+        // fx entry from the decoration seed, shift index 35 (5494df): it does
+        // not continue the backdrop/wall stream. RandomInt(5) picks the 1x1
+        // overlay in authored order [2, 3, 4, 5, 1] (54972d); two
+        // RandomFloat*100 draws (5498f8, 549926; RandomFloat 5c2db0 is
+        // next * 2.3283064e-10 in f32) give the layer's x and y offsets.
+        let mut fx = DecorationRng::new(decoration_seed);
+        let overlay_variant = [2, 3, 4, 5, 1][(fx.next() % 5) as usize];
+        let mut offset = || f64::from(fx.next() as f32 * 2.328_306_4e-10_f32 * 100.0_f32);
         let overlay_origin = RoomOrigin {
-            // fxlayers.xml supplies random offsets 0..100 on both axes. Natural
-            // overlay size is 663×429, so viewport-centered sampling starts here.
-            // The original stream and exact float conversion remain unverified.
-            x: (663.0 - 480.0) * 0.5 + f64::from(rng.next()) / f64::from(u32::MAX) * 100.0,
-            y: (429.0 - 270.0) * 0.5 + f64::from(rng.next()) / f64::from(u32::MAX) * 100.0,
+            // Natural overlay size is 663×429; viewport-centered sampling starts here.
+            x: (663.0 - 480.0) * 0.5 + offset(),
+            y: (429.0 - 270.0) * 0.5 + offset(),
         };
 
         let origin = RoomOrigin { x: 19.0, y: -8.0 };
