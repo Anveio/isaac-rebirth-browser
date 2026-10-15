@@ -52,7 +52,7 @@ export interface SpriteEffect {
   collisionRadius: number; collisionMass: number; collisionDamage: number; hp: number; maxHp: number;
   gridCollisionClass: number; entityCollisionClass: number; flags: number; visible: boolean; active: boolean; removed: boolean;
   renderOrderOffset: number; lifetimeDivisor: number; timeToLive: number; raw7f4: number; raw7f8: number;
-  raw7d8: boolean; poopEffect?: PoopEffect;
+  raw7d8: boolean; poopEffect?: PoopEffect; creepEffect?: { counter: number; size: number };
   sprite: ActorSprite; fullUpdates: number;
   bloodEffect?: {kind: "poof04" | "bloodGush"};
 }

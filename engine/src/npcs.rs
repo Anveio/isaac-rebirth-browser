@@ -109,6 +109,9 @@ pub struct Npc {
     /// Entity+34c: the last non-preview grid pass hit a solid sample.
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     pub grid_collided: bool,
+    /// +318 APPEAR (4) cleared by a mid-room spawner: no hide/Poof/Appear.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub no_appear: bool,
 }
 
 fn is_zero(value: &u32) -> bool {
@@ -702,6 +705,7 @@ impl Npc {
             larry: None,
             maggot: None,
             grid_collided: false,
+            no_appear: false,
         }
     }
 

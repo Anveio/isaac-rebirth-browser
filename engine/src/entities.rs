@@ -83,6 +83,10 @@ pub(crate) enum Birth {
     Laser(crate::lasers::LaserBirth),
     /// Spawn550a40 of an NPC mid-room (no champion roll in a live room).
     Npc(SpawnSelector),
+    /// Creep 5516d0 hurt of the player from a spawner-run first update.
+    CreepHit,
+    /// A mid-room NPC spawned with a velocity and its APPEAR flag cleared.
+    FlungNpc(SpawnSelector, WorldVector),
 }
 
 pub(crate) type Advance =

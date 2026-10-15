@@ -1,7 +1,11 @@
-//! Maggot 21.0, Charger 23.0 and Spitty 31.0: ai_maggot_leech 4c6520.
+//! Maggot 21.0, Charger 23.0, Spitty 31.0 and Gurgling 237.0/237.1:
+//! ai_maggot_leech 4c6520.
 //! Ground walkers that wander with MoveRandomly and mark their cell with
 //! path cost 900. A Charger rushes along an axis toward the player's
-//! predicted position; a Spitty stops to spit one cardinal shot.
+//! predicted position; a Spitty stops to spit one cardinal shot. A Gurgling
+//! charges like a Charger, skids to a Stop that fires a six-shot ring
+//! (237.0) or releases Attack Flies (the 237.1 boss), and splats blood
+//! while moving fast.
 use crate::{
     audio::SoundRequest,
     content,
@@ -19,7 +23,7 @@ use crate::{
 use serde::{Deserialize, Serialize};
 
 pub(crate) const FAMILY: Family = Family {
-    kinds: &[21, 23, 31],
+    kinds: &[21, 23, 31, 237],
     spawn,
     advance,
     post_contact_grid: crate::entities::ground_collision,
@@ -30,6 +34,9 @@ pub(crate) const FAMILY: Family = Family {
 const ZERO: WorldVector = WorldVector { x: 0.0, y: 0.0 };
 const WALK_CLIPS: [&str; 3] = ["Move Hori", "Move Up", "Move Down"];
 const ATTACK_CLIPS: [&str; 3] = ["Attack Hori", "Attack Up", "Attack Down"];
+/// t170/t190, indexed up, down, left, right.
+const GURGLING_WALK: [&str; 4] = ["WalkVert", "WalkVert", "WalkLeft", "WalkRight"];
+const GURGLING_CHARGE: [&str; 4] = ["ChargeUp", "ChargeDown", "ChargeLeft", "ChargeRight"];
 /// 42e9e0 dir4: left, up, right, down.
 const DIRECTIONS: [WorldVector; 4] = [
     WorldVector { x: -1.0, y: 0.0 },
@@ -49,10 +56,12 @@ pub struct MaggotState {
     pub attack_direction: usize,
 }
 
-fn spawn(id: u32, selector: &SpawnSelector, _: &SpawnContext) -> Result<Option<Npc>, String> {
+fn spawn(id: u32, selector: &SpawnSelector, context: &SpawnContext) -> Result<Option<Npc>, String> {
     if selector.category != SpawnCategory::Entity
-        || !matches!(selector.entity_type, 21 | 23 | 31)
-        || selector.variant != 0
+        || !matches!(
+            (selector.entity_type, selector.variant),
+            (21 | 23 | 31 | 237, 0) | (237, 1)
+        )
         || selector.subtype != 0
     {
         return Ok(None);
@@ -60,10 +69,10 @@ fn spawn(id: u32, selector: &SpawnSelector, _: &SpawnContext) -> Result<Option<N
     if !selector.position.is_finite() || selector.spawn_seed == 0 {
         return Err("Maggot family requires bounded authored position and nonzero spawn seed".into());
     }
-    let config = content::entity(selector.entity_type.into(), 0);
-    Ok(Some(Npc {
+    let config = content::entity(selector.entity_type.into(), selector.variant.into());
+    let mut npc = Npc {
         // Config47f573 SetFrame(default, 0) leaves the default clip stopped.
-        animation: "Move Hori".into(),
+        animation: if selector.entity_type == 237 { "WalkVert" } else { "Move Hori" }.into(),
         actor: config.actor.into(),
         pathfinder: Some(Pathfinder::new()),
         maggot: Some(MaggotState {
@@ -72,7 +81,10 @@ fn spawn(id: u32, selector: &SpawnSelector, _: &SpawnContext) -> Result<Option<N
             attack_direction: 0,
         }),
         ..Npc::authored(id, config, selector)
-    }))
+    };
+    npc.max_hp = content::initial_hp(config, context.stage);
+    npc.hp = npc.max_hp;
+    Ok(Some(npc))
 }
 
 fn advance(
@@ -126,7 +138,7 @@ fn update(
 ) -> Result<(), String> {
     let speed = match npc.kind {
         21 => 0.75,
-        23 => 0.6,
+        23 | 237 => 0.6,
         _ => 0.72,
     };
     let index = world
@@ -138,8 +150,18 @@ fn update(
         .as_deref_mut()
         .ok_or("Maggot family requires source Room.Init path costs")?
         .store(index, 900)?;
+    // 4c67a6: a Gurgling has left/right clips and never touches FlipX.
+    let gurgling = if npc.velocity.x.abs() > npc.velocity.y.abs() {
+        if npc.velocity.x >= 0.0 { 3 } else { 2 }
+    } else if npc.velocity.y >= 0.0 {
+        1
+    } else {
+        0
+    };
     // 4c67a1: strict horizontal test sets FlipX; vertical leaves it alone.
-    let direction = if npc.velocity.x.abs() > npc.velocity.y.abs() {
+    let direction = if npc.kind == 237 {
+        0
+    } else if npc.velocity.x.abs() > npc.velocity.y.abs() {
         npc.flip_x = 0.0 > npc.velocity.x;
         0
     } else if npc.velocity.y >= 0.0 {
@@ -149,12 +171,16 @@ fn update(
     };
     match npc.state {
         4 => {
-            plain_npc::play(npc, WALK_CLIPS[direction], false);
+            if npc.kind == 237 {
+                plain_npc::play(npc, GURGLING_WALK[gurgling], false);
+            } else {
+                plain_npc::play(npc, WALK_CLIPS[direction], false);
+            }
             pathfinder::move_randomly(npc, random, world, speed, *friction)?;
             *friction *= 0.85;
             npc.velocity.y *= 0.82 / *friction;
             match npc.kind {
-                23 => charge_check(npc, state, random, world, index)?,
+                23 | 237 => charge_check(npc, state, random, world, index)?,
                 // 4c7850: bounded(35) every walking update.
                 31 if random.bounded(35) == 0 => {
                     npc.state = 9;
@@ -171,11 +197,17 @@ fn update(
                 if let Some(path) = npc.pathfinder.as_mut() {
                     path.target = ZERO;
                 }
-                npc.state = 4;
-                state.counter += 1;
-                return Ok(());
+                if npc.kind != 237 {
+                    npc.state = 4;
+                    state.counter += 1;
+                    return Ok(());
+                }
+                // 4c7966: a Gurgling skids into Stop and runs the tail.
+                plain_npc::play(npc, "Stop", false);
+                npc.state = 3;
+                return tail(npc, state, random, world, births);
             }
-            *friction *= 0.8;
+            *friction *= if npc.kind == 23 { 0.8 } else { 0.9 };
             npc.velocity = npc.velocity
                 + WorldVector {
                     x: state.charge.x / *friction,
@@ -188,7 +220,24 @@ fn update(
             } else {
                 npc.position.y = 0.9 * npc.position.y + centre.y * 0.1;
             }
-            plain_npc::play(npc, ATTACK_CLIPS[direction], false);
+            if npc.kind == 237 {
+                plain_npc::play(npc, GURGLING_CHARGE[gurgling], false);
+            } else {
+                plain_npc::play(npc, ATTACK_CLIPS[direction], false);
+            }
+        }
+        3 => {
+            *friction *= 0.85;
+            if npc.animation_frame == 10 {
+                if npc.variant == 0 {
+                    ring(npc, random, world, births);
+                } else {
+                    release_flies(npc, random, births);
+                }
+            }
+            if plain_npc::finished(npc) {
+                npc.state = 4;
+            }
         }
         9 => {
             *friction *= 0.85;
@@ -200,7 +249,53 @@ fn update(
         }
         _ => {}
     }
+    tail(npc, state, random, world, births)
+}
+
+/// 4c67ee: the counter ticks; a fast Gurgling splats blood on every fifth
+/// game update (no sequence offset) and, unless it is the boss walking,
+/// leaves red creep.
+fn tail(
+    npc: &mut Npc,
+    state: &mut MaggotState,
+    random: &mut Mt19937,
+    world: &mut NpcWorld,
+    births: &mut Vec<Birth>,
+) -> Result<(), String> {
     state.counter += 1;
+    let speed = npc.velocity.x * npc.velocity.x + npc.velocity.y * npc.velocity.y;
+    if npc.kind != 237 || speed <= 9.0 || !world.game_counter.is_multiple_of(5) {
+        return Ok(());
+    }
+    let scale = random.uniform() * 0.39 + 0.2;
+    let seed = random.next_u32();
+    let id = world
+        .effects
+        .admit_blood(seed, npc.position, [1.0; 4], [0.0; 3])?;
+    world.effects.set_blood_scale(id, scale)?;
+    world.effects.advance_blood_initial(id, random)?;
+    if npc.variant == 0 || npc.state == 8 {
+        let seed = random.next_u32();
+        let creep = world
+            .effects
+            .admit_creep(seed, npc.position, (npc.kind, npc.variant), 1.23)?;
+        if world
+            .effects
+            .advance_creep_initial(creep, random, world.game_counter, world.player)?
+        {
+            births.push(Birth::CreepHit);
+        }
+        // SetColor copies the Gurgling's colour; alpha 1 unless champion.
+        // Entity+3a0 is the base colour, not the timed hit flash.
+        let color = npc.base_color();
+        let mut tint = color.tint;
+        if npc.champion.is_none() {
+            tint[3] = 1.0;
+        }
+        world
+            .effects
+            .set_creep_color(creep, tint, color.offset)?;
+    }
     Ok(())
 }
 
@@ -236,7 +331,7 @@ fn charge_check(
     if !world.grid.charge_line_clear(centre, predicted, costs) {
         return Ok(());
     }
-    sound(random, world, 224, 20);
+    sound(random, world, if npc.kind == 237 { 57 } else { 224 }, 20);
     state.charge = axis(delta) * 1.3;
     npc.state = 8;
     Ok(())
@@ -272,4 +367,58 @@ fn spit(
         scale: if npc.champion.is_some() { 1.4 } else { 1.0 },
         height: -23.0 + 14.0,
     }));
+}
+
+/// 4c762c: FireProjectiles mode 9, a six-shot ring at 7.5 that keeps the
+/// projectile Init falling speed.
+fn ring(npc: &Npc, random: &mut Mt19937, world: &mut NpcWorld, births: &mut Vec<Birth>) {
+    sound(random, world, 178, 2);
+    let parameter_angle = (f64::from(random.uniform()) * std::f64::consts::PI) as f32;
+    let step = (2.0 * std::f64::consts::PI / 6.0) as f32;
+    let mut angle = parameter_angle;
+    for _ in 0..6 {
+        angle += step;
+        let velocity = WorldVector {
+            x: 7.5 * crate::fmath::cos(angle),
+            y: 7.5 * crate::fmath::sin(angle),
+        };
+        let spawn_seed = random.next_u32();
+        let initial_falling_speed = (random.uniform() - 0.5) * 0.2;
+        births.push(Birth::Projectile(ProjectileBirth {
+            position: npc.position,
+            velocity,
+            spawn_seed,
+            initial_falling_speed,
+            parameter_angle,
+            falling_speed: initial_falling_speed,
+            falling_acceleration: 0.0,
+            scale: if npc.champion.is_some() { 1.4 } else { 1.0 },
+            height: -23.0,
+        }));
+    }
+}
+
+/// 4c7615: up to two Attack Flies 40 out along random angles, flung at 2
+/// with APPEAR cleared; the bound is redrawn on every test.
+fn release_flies(npc: &Npc, random: &mut Mt19937, births: &mut Vec<Birth>) {
+    let mut count = 0;
+    while count < random.bounded(3) {
+        let direction = crate::npcs::direction(random);
+        count += 1;
+        let spawn_seed = random.next_u32();
+        births.push(Birth::FlungNpc(
+            SpawnSelector {
+                group_index: 0,
+                grid_index: 0,
+                category: SpawnCategory::Entity,
+                entity_type: 18,
+                variant: 0,
+                subtype: 0,
+                position: npc.position + direction * 40.0,
+                group_seed: spawn_seed,
+                spawn_seed,
+            },
+            direction * 2.0,
+        ));
+    }
 }

@@ -160,6 +160,18 @@ export class Renderer {
     this.stage.ground(state.stageEffects);
     ctx.save();
     if (state.camera) ctx.translate(state.camera.scroll.x, state.camera.scroll.y);
+    // Creep's render key (seq & 0x3ff) + 2100 sorts every pool under the
+    // y-sorted actors, in spawn order; colour multiplies the clip's pulse.
+    for (const effect of state.spriteEffects) {
+      if (!effect.creepEffect || !effect.visible || !effect.active) continue;
+      const sprite = effect.sprite;
+      ctx.save();
+      ctx.translate(effect.presentedPosition.x * 0.65 + 32, effect.presentedPosition.y * 0.65 - 46);
+      ctx.scale(sprite.scale.x, sprite.scale.y);
+      this.assets.draw(ctx, "gfx/1000.022_creep (red).anm2", sprite.animation, 0, 0, sprite.frame,
+        { color: { tint: sprite.tint, offsets: sprite.offsets } });
+      ctx.restore();
+    }
     const grid = state.room.grid;
     if (grid) for (const [index, cell] of grid.cells.entries()) {
       const entity = cell.entity;
@@ -181,7 +193,8 @@ export class Renderer {
     }
     this.pickups.draw(ctx, state);
     for (const npc of state.room.npcs) {
-      if (npc.removed || (npc.dead && !npc.monstro && !npc.dip) || (!npc.keeper && !npc.visible)) continue;
+      // A dying boss (state 16) keeps drawing its death clip.
+      if (npc.removed || (npc.dead && !npc.monstro && !npc.dip && npc.state !== 16) || (!npc.keeper && !npc.visible)) continue;
       // Sprite Scale (+2c4): 1.15 for champions, otherwise the fresh 1.
       const scale = npc.champion?.scale ?? 1;
       // Sprite Color (+2d0): champion table colour or a timed hit flash.
@@ -296,7 +309,7 @@ export class Renderer {
         this.assets.draw(ctx, bomb.variant === 3 ? "gfx/004.003_troll bomb.anm2" : bomb.variant === 4 ? "gfx/004.004_megatroll bomb.anm2" : "gfx/004.000_bomb.anm2", bomb.animation, bomb.x, bomb.y - 1, bomb.animationFrame, { pixelSnap: this.canvas.width / 480 / 2 });
     for (const effect of state.spriteEffects) {
       // Source31f dead can coexist with31e active until a later Remove.
-      if (!effect.visible || !effect.active) continue;
+      if (!effect.visible || !effect.active || effect.creepEffect) continue;
       if (effect.variant === 58 || effect.variant === 43) {
         const sprite = effect.sprite, controller = effect.poopEffect;
         const rotation = controller && "particle58" in controller && typeof controller.particle58 === "object"

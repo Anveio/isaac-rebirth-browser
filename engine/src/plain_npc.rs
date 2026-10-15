@@ -185,7 +185,8 @@ pub(crate) fn advance(
     births: &mut Vec<Birth>,
     ai: Ai,
 ) -> Result<(), String> {
-    advance_with(npc, phase, random, world, births, ai, true)
+    let appear = !npc.no_appear;
+    advance_with(npc, phase, random, world, births, ai, appear)
 }
 
 /// `advance` for a family whose state0 initializer may clear the APPEAR flag
