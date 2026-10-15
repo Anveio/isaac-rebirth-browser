@@ -757,6 +757,7 @@ pub(crate) fn contacts_actor(state: &mut State, id: u32) -> Result<(), String> {
                     amount,
                     kind: crate::combat::DamageKind::Tear,
                     source: crate::combat::DamageSource { id, entity_type: 2 },
+                    copied_source: None,
                 },
             )?;
             //546278..546309: this separate receiver callback adds half

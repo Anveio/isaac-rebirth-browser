@@ -537,6 +537,7 @@ fn sync_health(npc: &mut Npc, world: &mut NpcWorld) -> Result<(), String> {
                     amount: segment.hp - lowest,
                     kind: DamageKind::HealthSync,
                     source,
+                    copied_source: None,
                 },
             )?;
         }

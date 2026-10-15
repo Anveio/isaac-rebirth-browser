@@ -194,6 +194,7 @@ pub(crate) fn explode_neutral(
     flags: AttackFlags,
     color: AttackColor,
     source: crate::combat::DamageSource,
+    copied_source: crate::combat::CopiedDamageSource,
 ) -> Result<bool, String> {
     if !position.is_finite() || !damage.is_finite() || damage < 0.0 || !color.is_finite() {
         return Err("neutral555300 contains nonfinite actual inputs".into());
@@ -223,7 +224,14 @@ pub(crate) fn explode_neutral(
     } else {
         75.0
     };
-    crate::bombs::explode(state, position, radius, damage, source)?;
+    crate::bombs::explode_with_copied_source(
+        state,
+        position,
+        radius,
+        damage,
+        source,
+        Some(copied_source),
+    )?;
     let seed = state.boot_lifecycle.shared.next_u32();
     let id = admit_crater(state, seed, position)?;
     let actual_seed = state

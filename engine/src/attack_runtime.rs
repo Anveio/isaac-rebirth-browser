@@ -1173,6 +1173,7 @@ pub(crate) fn knife_contacts(
                         id: actor.id,
                         entity_type: 8,
                     },
+                    copied_source: None,
                 },
             )?;
         }

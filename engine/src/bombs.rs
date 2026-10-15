@@ -962,6 +962,18 @@ pub(crate) fn explode(
     damage: f32,
     source: crate::combat::DamageSource,
 ) -> Result<(), String> {
+    explode_with_copied_source(state, position, radius, damage, source, None)
+}
+
+///Actual common554490 path; only proven callers carry copied EntityRef words.
+pub(crate) fn explode_with_copied_source(
+    state: &mut State,
+    position: WorldVector,
+    radius: f32,
+    damage: f32,
+    source: crate::combat::DamageSource,
+    copied_source: Option<crate::combat::CopiedDamageSource>,
+) -> Result<(), String> {
     let line = state
         .room
         .grid
@@ -972,7 +984,15 @@ pub(crate) fn explode(
         line.as_ref()
             .is_none_or(|grid| grid.blast_line_clear(position, target, true))
     };
-    crate::npcs::bomb_hit(state, position, radius, damage, source, &clear)?;
+    crate::npcs::bomb_hit_with_copied_source(
+        state,
+        position,
+        radius,
+        damage,
+        source,
+        copied_source,
+        &clear,
+    )?;
     crate::pickups::bomb_hit(state, position, radius, &clear)?;
     crate::fly_effects::bomb_hit(state, position, radius, clear);
     let player_velocity = if clear(player_world(state)) {
