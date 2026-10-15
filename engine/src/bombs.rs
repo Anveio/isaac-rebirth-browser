@@ -217,6 +217,7 @@ pub fn isaac_blast_velocity(
     player: WorldVector,
     velocity: WorldVector,
     bomb: WorldVector,
+    blast_radius: f32,
 ) -> Result<Option<WorldVector>, String> {
     if !player.is_finite() || !velocity.is_finite() || !bomb.is_finite() {
         return Err("blast contact requires finite native vectors".into());
@@ -229,7 +230,7 @@ pub fn isaac_blast_velocity(
     if !squared.is_finite() {
         return Err("blast distance overflowed".into());
     }
-    let radius = BLAST_RADIUS + ISAAC_RADIUS;
+    let radius = blast_radius + ISAAC_RADIUS;
     if squared >= radius * radius {
         return Ok(None);
     }
@@ -501,18 +502,13 @@ pub fn advance_actor(state: &mut State, phase: Phase, id: u32) -> Result<(), Str
     state.bombs[index].x = f64::from(presented.x) * WORLD_SCALE + 32.0;
     state.bombs[index].y = f64::from(presented.y) * WORLD_SCALE - 46.0;
     if detonated {
-        crate::npcs::bomb_hit(state, position, id)?;
-        crate::pickups::bomb_hit(state, position)?;
-        if let Some(velocity) =
-            isaac_blast_velocity(player_world(state), player_velocity(state), position)?
-        {
-            state.player.vx = f64::from(velocity.x) * WORLD_SCALE;
-            state.player.vy = f64::from(velocity.y) * WORLD_SCALE;
-            // Bomb555300 supplies actual incoming DamageFlags4 via
-            // r9d to Game554490; its Player virtual38 forwards esi.
-            crate::combat::try_damage_player(state, PLAYER_DAMAGE, DAMAGE_COOLDOWN_TICKS, 4)?;
-        }
-        crate::rock_blast::destroy(state, position, BLAST_RADIUS)?;
+        explode(
+            state,
+            position,
+            BLAST_RADIUS,
+            60.0,
+            crate::combat::DamageSource { id, entity_type: 4 },
+        )?;
         state.explosions.push(Explosion {
             id,
             x: f64::from(position.x) * WORLD_SCALE + 32.0,
@@ -521,6 +517,55 @@ pub fn advance_actor(state: &mut State, phase: Phase, id: u32) -> Result<(), Str
         });
     }
     Ok(())
+}
+
+/// Game554490 with the line check on and incoming DamageFlags4. Each circle
+/// target must pass Room::CheckLine(mode2, ignoreWalls); a blocked line skips
+/// knockback and damage alike. Player damage is 2 when the explosion damage
+/// is at least 50, else 1, with immunity of 60 per damage unit.
+pub(crate) fn explode(
+    state: &mut State,
+    position: WorldVector,
+    radius: f32,
+    damage: f32,
+    source: crate::combat::DamageSource,
+) -> Result<(), String> {
+    let line = state
+        .room
+        .grid
+        .as_ref()
+        .map(|descriptor| crate::grid::Grid::new(descriptor.clone()))
+        .transpose()?;
+    let clear = |target: WorldVector| {
+        line.as_ref()
+            .is_none_or(|grid| grid.blast_line_clear(position, target, true))
+    };
+    crate::npcs::bomb_hit(state, position, radius, damage, source, &clear)?;
+    crate::pickups::bomb_hit(state, position, radius, &clear)?;
+    let player_velocity = if clear(player_world(state)) {
+        isaac_blast_velocity(
+            player_world(state),
+            player_velocity(state),
+            position,
+            radius,
+        )?
+    } else {
+        None
+    };
+    if let Some(velocity) = player_velocity {
+        state.player.vx = f64::from(velocity.x) * WORLD_SCALE;
+        state.player.vy = f64::from(velocity.y) * WORLD_SCALE;
+        // Bomb555300 supplies actual incoming DamageFlags4 via
+        // r9d to Game554490; its Player virtual38 forwards esi.
+        let units = if damage >= 50.0 { PLAYER_DAMAGE } else { 1 };
+        crate::combat::try_damage_player(
+            state,
+            units,
+            DAMAGE_COOLDOWN_TICKS / u32::from(PLAYER_DAMAGE) * u32::from(units),
+            4,
+        )?;
+    }
+    crate::rock_blast::destroy(state, position, radius)
 }
 
 pub fn retire_removed(state: &mut State) {

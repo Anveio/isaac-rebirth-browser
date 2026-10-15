@@ -42,6 +42,9 @@ pub struct Room {
     /// The actual signed Room+e98 owner; absent until its source Init is admitted.
     #[serde(default)]
     pub path_costs: Option<crate::room_costs::RoomCosts>,
+    /// Rock+348 countdowns of type5 bomb rocks a blast moved to state3.
+    #[serde(default)]
+    pub bomb_rock_fuses: Vec<crate::rock_blast::BombRockFuse>,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
@@ -505,6 +508,7 @@ impl Room {
             spawns: None,
             grid: None,
             path_costs: None,
+            bomb_rock_fuses: Vec::new(),
             left: left_plane + radius,
             right: right_plane - radius,
             top: top_plane + radius,

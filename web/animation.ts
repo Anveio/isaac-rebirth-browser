@@ -89,6 +89,17 @@ const urls = import.meta.glob([
   "../references/isaac/rebirth/resources/font/*_0.png",
 ], { eager: true, query: "?url", import: "default" }) as Record<string, string>;
 
+function loaded(image: HTMLImageElement, error: unknown): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const settle = () => image.naturalWidth > 0 ? resolve() : reject(error);
+    if (image.complete) settle();
+    else {
+      image.addEventListener("load", settle, { once: true });
+      image.addEventListener("error", () => reject(error), { once: true });
+    }
+  });
+}
+
 function fontLineWidth(font: Font, line: string, glyphBounds: boolean): number {
   let cursor = 0, extent = 0, previous: number | undefined;
   for (const character of line) {
@@ -115,14 +126,17 @@ export class Assets {
     entries.push(["gfx/ui/main menu/completion_widget.png", completionUrl], ["gfx/ui/main menu/gamemenu_postitoverlap.png", postitOverlapUrl]);
     for (const [path, url] of Object.entries(bossSceneUrls))
       entries.push([`gfx/ui/boss/${path.split("/").at(-1)!}`, url]);
-    // Chromium rejects decode() with EncodingError when a few hundred decodes
-    // are in flight, so keep a bounded number of decoders busy.
+    // Chromium rejects decode() with EncodingError when many decodes are in
+    // flight, even for intact images. Keep a bounded number busy, and on a
+    // rejection fall back to the load event: an image that loaded with real
+    // dimensions is usable (drawing decodes it); only a failed load is fatal.
     const images: HTMLImageElement[] = [];
     let next = 0;
     await Promise.all(Array.from({ length: 16 }, async () => {
       while (next < entries.length) {
         const index = next++, image = new Image();
-        image.src = entries[index]![1]; await image.decode();
+        image.src = entries[index]![1];
+        await image.decode().catch(error => loaded(image, error));
         images[index] = image;
       }
     }));

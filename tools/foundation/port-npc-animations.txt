@@ -17,3 +17,4 @@ gfx/049.000_gluttony.anm2
 gfx/007.001_thick red laser.anm2
 gfx/1000.050_brimstoneimpact.anm2
 gfx/261.000_dingle.anm2
+gfx/218.000_wall hugger.anm2

@@ -512,6 +512,13 @@ fn run_hold(before: &State, count: u32, after: &State, run_started: bool) {
 
 /// Invariants of every published state.
 pub fn state(state: &State) {
+    // Every "unchanged" and "same game" comparison relies on this; a field
+    // that can hold NaN breaks it.
+    props::always!(
+        PartialEq::eq(state, state),
+        "game: state equality is reflexive",
+        json!({ "screen": state.screen })
+    );
     let details = || json!({ "screen": state.screen, "tick": state.tick });
     let catalog = state.character_catalog.len();
     props::always!(

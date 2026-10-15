@@ -76,7 +76,14 @@ fn free_position(
     random: &mut Mt19937,
     world: &World<'_>,
 ) -> Result<WorldVector, String> {
-    find_free_position(anchor, 0.0, random, world.grid, world.path_costs, world.occupied)
+    find_free_position(
+        anchor,
+        0.0,
+        random,
+        world.grid,
+        world.path_costs,
+        world.occupied,
+    )
 }
 
 /// Room::FindFreePosition5c7f30: up to 100 random candidates on a ring that

@@ -62,12 +62,40 @@ browser, with zero new or lost comparisons. The item257 transformed-tear
 failures and native actor-seed differences remain unresolved; these reports
 do not qualify all current-main gameplay.
 
-Public Challenge ingress, ordinary Knife/Brimstone bodies, triple-loadout
-gameplay, ambient33/68 and the four-file shared-MT startup consumer are separate
-pending slices. Their source proofs and private builds do not establish
-original/browser actor, contact or complete 624-word MT parity. The frozen
-first32 campaign remains a functional failure: 1,185,154 comparisons, 68,333
-differences, 32 capture-integrity passes and zero capture errors.
+[PR214](https://github.com/Anveio/isaac-rebirth-browser/pull/214) adds the public
+Main/Challenge route for declared neutral Challenge1 XML, including conditional
+curse sampling and source pre-grant Save followed by ordered grants.
+[PR216](https://github.com/Anveio/isaac-rebirth-browser/pull/216) leaves startup
+Doors initialized until the eligible Full room callback opens them. The retained
+original case16 replay on `76d7a01b`/`32b5bcfd` passes all 8,368 required frontdoor
+checks, including 631 Door rows; its 631 attack-body rows remain unqualified.
+The older d156 report retains all 188 early-opening failures. Native Saved data
+and dynamic Save/grant call order were not observed by that scoped replay.
+
+The separate ordinary Brimstone producer `866d2c8`/artifact `fbb48969` completed
+ten fixed and recorded-OS cases: 307,112 checks, 23,017 differences and ten
+functional failures. All native processes exited zero and captures completed
+without errors. The observed 669 Laser and 669 Impact body rows include both
+phases; 16 transient Full-Uninit slot-null witnesses were recorded. All ten
+frozen strict audits failed while reconstructing manifest bytes, before
+later clock/X11/options/resource validation. The separate additive audit passes
+all ten cases: only the permitted adjacent root-key reorder, an exact complete
+manifest SHA and no nested observation/input difference. Separate executions
+of every remaining unchanged clock/X11/options/resource validation also pass all
+ten with protected sources, archives and fixtures unchanged. These addenda
+establish scoped capture validity; they leave the archived strict and gameplay
+grades unchanged. [PR217](https://github.com/Anveio/isaac-rebirth-browser/pull/217) fixes
+future capture serialization and does not regrade those archived audits.
+[Compact evidence](../references/isaac/foundation/items/public-ingress-and-brim10.json)
+retains the exact producer/report scopes and unresolved fields.
+
+Controlled Knife caller, ordered-cache completion and Line/Impact corrections
+are source-peered follow-ups, with no inherited Brimstone gameplay acceptance.
+Ordinary Knife, triple-loadout parity, ambient33/68 and the four-file shared-MT
+startup consumer remain unaccepted. The frozen first32 campaign remains a
+functional failure: 1,185,154 comparisons, 68,333 differences, 32
+capture-integrity passes and zero capture errors. Source proofs and private
+builds do not establish contact or complete 624-word MT/actor-seed parity.
 
 Main `19906c4e`, observed on October14, includes the reviewed normal-health source callbacks, the source-only Nightmare resource prerequisite and raw snapshot accessor, and retains39 registered live suites. This is source qualification. No complete current-main39-suite production/original/browser acceptance is claimed; the frozen local f793/0f343 checkpoint and later scoped owner artifacts remain separate.
 

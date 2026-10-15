@@ -10,6 +10,7 @@ npm run playtest:bundle                # .cache/playtest/bundle (+ manifest.json
 npm run playtest:self                  # 180s self-playtest; exits 1 on failure
 npm run playtest:self -- --seconds 60 --initial-seed N --boot-epoch-seed M   # replay a reported run
 npm run playtest:self -- --run-seed 1X37ZP4V    # type a run seed on the character screen
+npm run playtest:self -- --boss --run-seed VZ1FV4J6   # head for the boss room (Dingle)
 ```
 
 ## Bundle (`bundle.mjs`)
@@ -43,8 +44,10 @@ Serves the bundle the way the Artifact host does, boots it in Chromium
 (SwiftShader WebGL), clicks to focus, presses Enter through the menus into an
 OS-random run (or a typed `--run-seed`) and plays with real keyboard input. It routes
 around rocks over the room grid, fights enemies that hold the
-doors shut, collects pickups and items, explores the least recently visited
-rooms, returns to the start room, bombs, pauses and restarts after death.
+doors shut from a clear line of fire, collects pickups and items, explores the least recently visited
+rooms, returns to the start room, bombs, pauses and restarts after death. With
+`--boss` it heads for the floor's boss room instead, so a publish exercises
+the newest boss: pair it with a run seed whose boss room holds that boss.
 
 It fails on uncaught errors, console errors, failed requests, a frozen
 simulation (no tick for 3s), black frames, held movement that never moves the
