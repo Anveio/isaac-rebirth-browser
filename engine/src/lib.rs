@@ -227,6 +227,10 @@ pub struct Tear {
     pub vy: f64,
     pub age: u32,
     pub spawn_seed: u32,
+    ///Actual BaseInit441D24/441D34 birth42C, owned at fresh factory Init.
+    ///Unknown/deserialized histories keep None; first observation is no owner.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub birth_game_update: Option<u32>,
     /// Source-owned builder variant copied to Entity+14; None is unqualified.
     pub source_variant: Option<u32>,
     /// Actual Tear+838, copied from Player+c84 before its increment.
