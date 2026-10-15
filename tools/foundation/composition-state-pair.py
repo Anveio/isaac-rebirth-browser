@@ -770,6 +770,14 @@ if 'ordinaryDrFetus' in case['requires']:
     fetus_spec.loader.exec_module(fetus_module)
     fetus_context = fetus_module.begin(case)
 
+mixed_fetus_comparer = None
+if case['requires'].get('mixedDrFetusCricket4') is not None:
+    mixed_fetus_spec = importlib.util.spec_from_file_location(
+        'mixed_dr_fetus_stats', Path(__file__).with_name('composition-dr-fetus-stats.py'))
+    mixed_fetus_module = importlib.util.module_from_spec(mixed_fetus_spec)
+    mixed_fetus_spec.loader.exec_module(mixed_fetus_module)
+    mixed_fetus_comparer = mixed_fetus_module.MixedDrFetusComparer(globals(), case)
+
 common_spec = None
 try:
     common_spec = common_contact_spec()
@@ -784,6 +792,31 @@ if case['requires'].get('ordinaryTechnologyFunctional') is not None:
     technology_module = importlib.util.module_from_spec(technology_spec)
     technology_spec.loader.exec_module(technology_module)
     technology_comparer = technology_module.TechnologyComparer(globals(), case)
+controlled_technology_comparer = None
+controlled_technology_result = None
+if case['requires'].get('controlledTechnologyFunctional') is not None:
+    controlled_technology_spec = importlib.util.spec_from_file_location(
+        'controlled_technology_comparer', Path(__file__).with_name('composition-controlled-technology.py'))
+    controlled_technology_module = importlib.util.module_from_spec(controlled_technology_spec)
+    controlled_technology_spec.loader.exec_module(controlled_technology_module)
+    controlled_technology_comparer = controlled_technology_module.ControlledTechnologyComparer(globals(), case)
+controlled_fetus_comparer = None
+controlled_fetus_result = None
+if case['requires'].get('controlledDrFetusFunctional') is not None:
+    controlled_fetus_spec = importlib.util.spec_from_file_location(
+        'controlled_dr_fetus_comparer', Path(__file__).with_name('composition-controlled-dr-fetus.py'))
+    controlled_fetus_module = importlib.util.module_from_spec(controlled_fetus_spec)
+    controlled_fetus_spec.loader.exec_module(controlled_fetus_module)
+    controlled_fetus_comparer = controlled_fetus_module.ControlledDrFetusComparer(globals(), case)
+
+monstro_comparer = None
+monstro_result = None
+if case['requires'].get('monstrosLungFunctional') is not None:
+    monstro_spec = importlib.util.spec_from_file_location(
+        'monstro229_comparer', Path(__file__).with_name('composition-monstros-lung.py'))
+    monstro_module = importlib.util.module_from_spec(monstro_spec)
+    monstro_spec.loader.exec_module(monstro_module)
+    monstro_comparer = monstro_module.MonstrosLungComparer(globals(), case)
 check('actual completed original', ('pass', []), (native.get('status'), native.get('failures')), None)
 check('actual completed browser', 'complete', browser.get('captureStatus'), None)
 trace = browser.get('trace') or {}
@@ -839,6 +872,26 @@ for captured in sorted(all_captured, key=lambda row: row['presentation']):
         paired_rows.append({'presentation': t, 'source': source, 'state': state,
                             'nativeCounter': observed['systemCounter'], 'nativeContext': row['context'],
                             'nativePlayer': observed['players'][0], 'gameplayPresentation': captured.get('gameplayPresentation')})
+        if controlled_fetus_comparer is not None:
+            try:
+                controlled_fetus_comparer.snapshot(source, state, t, observed['systemCounter'], observed['players'][0],
+                    native_gameplay_presentation=t - (start - native_title),
+                    port_gameplay_presentation=captured.get('gameplayPresentation'))
+            except Exception as error:
+                missing('mandatory actual controlled DrFetus C18/body group', t, error)
+        if mixed_fetus_comparer is not None:
+            try:
+                mixed_fetus_comparer.snapshot(source, state, t, observed['systemCounter'], observed['players'][0])
+            except Exception as error:
+                missing('mandatory actual mixed DrFetus stats group', t, error)
+
+        if monstro_comparer is not None:
+            try:
+                monstro_comparer.snapshot(source, state, t, observed['systemCounter'], observed['players'][0],
+                    native_gameplay_presentation=t - (start - native_title),
+                    port_gameplay_presentation=captured.get('gameplayPresentation'))
+            except Exception as error:
+                missing('mandatory actual Monstro229 charge/release/burst group', t, error)
         if fetus_context is not None:
             try:
                 fetus_module.snapshot(fetus_context, source, state, t, observed['systemCounter'],
@@ -867,7 +920,12 @@ for captured in sorted(all_captured, key=lambda row: row['presentation']):
             check('actual complete active attack families/sequence/seeds', native_families, sorted(port_families), t)
         except Exception as error:
             missing('mandatory active attack scheduler group', t, error)
-        if technology_comparer is not None:
+        if controlled_technology_comparer is not None:
+            try:
+                controlled_technology_comparer.snapshot(source, state, t, observed['systemCounter'], observed['players'][0])
+            except Exception as error:
+                missing('mandatory actual controlled Technology C18/body/history group', t, error)
+        elif technology_comparer is not None:
             try:
                 technology_comparer.snapshot(source, state, t, observed['systemCounter'])
             except Exception as error:
@@ -1233,8 +1291,18 @@ if 'controlledBrimContact' in case['requires']:
         controlled_ring_contact = contact_module.compare_contact(case, paired_rows, globals())
     except Exception as error:
         missing('mandatory controlled ring typed contact consumer', None, error)
+if controlled_technology_comparer is not None:
+    controlled_technology_result = controlled_technology_comparer.finish()
 if technology_comparer is not None:
     technology_result = technology_comparer.finish()
+
+if controlled_fetus_comparer is not None:
+    controlled_fetus_result = controlled_fetus_comparer.finish()
+
+mixed_dr_fetus = mixed_fetus_comparer.finish() if mixed_fetus_comparer is not None else None
+
+if monstro_comparer is not None:
+    monstro_result = monstro_comparer.finish()
 
 ordinary_dr_fetus = None
 if fetus_context is not None:
@@ -1254,8 +1322,17 @@ if controlled_ring_contact is not None:
     result['controlledRingContact'] = controlled_ring_contact
 if technology_result is not None:
     result['ordinaryTechnology'] = technology_result
+if controlled_technology_result is not None:
+    result['controlledTechnology'] = controlled_technology_result
 if ordinary_dr_fetus is not None:
     result['ordinaryDrFetus'] = ordinary_dr_fetus
+if controlled_fetus_result is not None:
+    result['controlledDrFetus'] = controlled_fetus_result
+if mixed_dr_fetus is not None:
+    result['mixedDrFetusCricket4'] = mixed_dr_fetus
+
+if monstro_result is not None:
+    result['monstrosLung'] = monstro_result
 payload = (json.dumps(result, separators=(',', ':')) + '\n').encode()
 with args.output.open('xb') as stream:
     stream.write(gzip.compress(payload, mtime=0) if str(args.output).endswith('.gz') else payload)

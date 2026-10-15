@@ -279,6 +279,9 @@ impl Pickup {
     }
     /// Concrete subtype and authored world position come from room/loot routing.
     /// A restored pickup starts idle; a fresh ordinary pickup starts appearing.
+    /// Transient subtypes (Troll and Megatroll Bombs) take their temporary
+    /// visual definition through `definition_subtype`, so no birth site can
+    /// spawn one without it.
     pub fn spawn(
         id: u32,
         variant: u32,
@@ -289,7 +292,8 @@ impl Pickup {
         if !position.is_finite() {
             return Err("pickup position must be finite".into());
         }
-        let definition = definition(variant, subtype)
+        let visual = definition_subtype(variant, subtype);
+        let definition = definition(variant, visual)
             .ok_or_else(|| format!("unresolved pickup selector {variant}/{subtype}"))?;
         let animation = if variant == 100 && subtype == 0 {
             "Empty"
@@ -308,7 +312,7 @@ impl Pickup {
             spawn_seed: 0,
             variant,
             subtype,
-            spritesheet_item_id: subtype,
+            spritesheet_item_id: visual,
             position,
             presented_position: position,
             anchor_position: if matches!(variant, 10 | 20 | 30 | 40) {
@@ -916,4 +920,29 @@ pub(crate) fn bomb_hit(
         }
     }
     Ok(())
+}
+
+/// Game::Spawn(5, 100, position, zero velocity, no spawner, subtype, seed)
+/// from a Room award: the caller already selected the concrete collectible.
+pub(crate) fn admit_collectible(
+    state: &mut crate::State,
+    subtype: u32,
+    position: WorldVector,
+    spawn_seed: u32,
+) -> Result<(), String> {
+    let config =
+        crate::items::definition(subtype).ok_or("awarded collectible subtype has no ItemConfig")?;
+    let id = state.next_pickup;
+    let mut pickup = Pickup::spawn(id, 100, subtype, position, true)?;
+    pickup.spawn_seed = spawn_seed;
+    pickup.charge = config.max_charges;
+    pickup.birth_game_update = state.game_update_count;
+    state.next_pickup = id.checked_add(1).ok_or("pickup identity exhausted")?;
+    state.room.pickups.push(pickup);
+    let actor = crate::actors::ActorRef {
+        kind: crate::actors::ActorKind::Pickup,
+        id,
+    };
+    state.room.authored_actor_order.push(actor);
+    state.actor_scheduler.admit(actor)
 }

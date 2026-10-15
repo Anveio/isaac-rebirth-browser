@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "status": "SCOPED_MERGED_312_320_348_COMPLETE_PAIRS_FIRST_DR_FAIL",
-  "main": "918303b6a93f67263212cc8b75231bee0844b8e7",
+  "status": "SCOPED_MERGED_EPIC_ORDINARY2_COPIED_DAMAGE_SHAKE_WITH_STRICT_FAILURES_PRESERVED",
+  "main": "48b9f4ef73d351fb7a72b4b2efe85127b1cdc86d",
   "merged": {
     "298": "261dbd60b3921fed421a614ef80c52baaadb0cca",
     "299": "988ae6355c7956d918ff0e00eb329d313645b864",
@@ -21,7 +21,39 @@
     "320": "85962135c15ad3dcb90351795d39069dae19e253",
     "345": "04e52bbffc3cb3bafe0ec13a732cfa48a668e40e",
     "348": "918303b6a93f67263212cc8b75231bee0844b8e7",
-    "350": "b3a23e2429613cd0e66176a9412e5bc7caabd365"
+    "350": "b3a23e2429613cd0e66176a9412e5bc7caabd365",
+    "343": "f4988359fb4545fd0adfeff6072530383c006132",
+    "356": "8159750bc5903b1071c23e29471dad99689a4724",
+    "355": "f077682274d1885d5dd4ce46a917cb177ecdb376",
+    "367": "0556891d0a87a33dd18b991d3ed5f94884d7930a",
+    "368": "5cf11fef27962620cab062e209b4f7e5a24e9c25",
+    "353": "ba9855aedb40d627a6d5a68edbfd9571bcbb1124",
+    "369": "298738b44643794424d75c7e9ba68407f362069a",
+    "357": "5dfd2b6b9abc14a37b5064ec5505b152dacb0e0b",
+    "363": "7f193c302bcb174e5af9158b148056e0d2c2f43f",
+    "354": "a5c9ca0a65f4956716d03f73d258a273f4bfa43f",
+    "359": "a35a37e80521590273e17f78748cc0e230b44130",
+    "358": "16da564281b756c4ce63188fa1879a4c2e4aafef",
+    "364": "9142752644a3d42195e6e8e45d7d3e13330529f2",
+    "376": "f7e39beb64a687282596689b3ceccee7d09c1f2f",
+    "377": "20a2883ea7981fb6d70216e33715dd56e2852db3",
+    "378": "be1a0003478d112b76926eb4820b5b56723722cb",
+    "379": "5312beb380a8db8f906cb0fac0f13aeb075f908f",
+    "380": "3ef319fca532ab63d191457cd4dfb9821952a25d",
+    "374": "09a769c857468023addb4bd1f02588823b35a81c",
+    "375": "dbbc3eb068bf95f2cd24c5539fffb3e1d6d985e7",
+    "384": "e7d06383fe0252dde0712f82635bcd4ec36de1ac",
+    "386": "159adf74822408e40b0306c91d1b118c49d3c576",
+    "387": "f0d52b1dc6eb382d889d506dd067273853c8e520",
+    "388": "dbeab822628a4dbaa66856e10c7c92336b42aae5",
+    "389": "b756dfb50586540d1cfc34e3a93fad2c742c9ce6",
+    "390": "f09af7864a7291dd4d485e6b911f3ec70eabd0a0",
+    "391": "d7ce6e0ae7de51970d6fbccec3d2f8fde3a53655",
+    "392": "ea5fcfc406f1b86f17f3cbc147d7100e79e72c98",
+    "393": "911cc9980277cf0f873f8ac0127d6449bb065170",
+    "362": "0a0deae79209ba0294db3278beea93042f29de5e",
+    "385": "48b9f4ef73d351fb7a72b4b2efe85127b1cdc86d",
+    "382": "375713058d5719df13cac959665652997fdd46fb"
   },
   "ordinary299": {
     "ownBuilds": "production/strict Clippy/floor PASS",
@@ -815,7 +847,7 @@
   },
   "unmergedComparedTools": [],
   "drFetus52": {
-    "status": "DRAFT_THREE_BUILDS_STRICT_REGRESSION_FOUR_OWN_ROUTES_FIRST_NATIVE_PAIR_FAIL",
+    "status": "MERGED_343_356_SCOPED_OWN_AND_FIRST_ORIGINAL_FAILURES_PRESERVED",
     "producer": "072118868a2cf802455227eda22bec59264b7fa8",
     "wasmSha256": "26cb9cf8a5aaf60d149c7195b2ea137d3a9b4ada2200f9bf4fdc55efc6e67850",
     "buildClosure": {
@@ -861,7 +893,7 @@
     "gameAcceptance": false,
     "controlled329Admitted": false,
     "guessedHistoryDefaults": false,
-    "idleDa0Successor": "SOURCE_ONLY_NOT_CONSUMED",
+    "idleDa0Successor": "MERGED356_CONSUMED_ON21_4FA",
     "counterV2Addendum": {
       "checks": 29598,
       "failures": 2740,
@@ -879,6 +911,19 @@
       "bombFifoRows": 2,
       "followingFullHp4ToMinus6_5": 1,
       "strictCrossIdentityParity": false
+    },
+    "historical072IdleDa0Successor": "SOURCE_ONLY_NOT_CONSUMED",
+    "consumedIdleDa0": {
+      "mainMerge": "8159750bc5903b1071c23e29471dad99689a4724",
+      "consumedProducer": "21f00d206afaf50ceb85e94ae2cae5e7cd723abd",
+      "checks": 29598,
+      "beforeFailures": 2740,
+      "afterFailures": 2500,
+      "onlyResolvedField": "DA0",
+      "resolvedDifferences": 240,
+      "pairedRows": 815,
+      "allOtherPerFieldCountsFailuresAndCoverageUnchanged": true,
+      "summarySha256": "f3ca02b088a20d6497bc31582fa7ad01e2506abd24afb7f809622315deef1eab"
     }
   },
   "soy330": {
@@ -913,12 +958,453 @@
       "laserBirthsPerCase": 0,
       "costumeTransformFrontierRowsPerCase": 360,
       "coverage": "FAIL"
-    }
+    },
+    "historical26cbResultUnchanged": true,
+    "mergedRuntime": "5cf11fef27962620cab062e209b4f7e5a24e9c25"
   },
   "controlledTechnology68Plus329": {
-    "status": "SOURCE_ONLY",
+    "status": "MERGED_355_FIRST_ORIGINAL_STRICT_FAILURES_RETAINED",
     "primaryC08": 3,
     "selectedFlags": 0,
-    "actorGameAcceptance": false
+    "actorGameAcceptance": false,
+    "firstFreshOriginal": {
+      "reportPath": "/dev/shm/isaac-controlled-technology68-native-evidence-v2/controlled-technology-68-329-fixed-phase0/paired-functional-v1/functional-report.json.gz",
+      "sha256": "83f440a18e85b59a7c3dec7a8b9295ec70ef8667fc49bf5948540fb46ad4dbad",
+      "producer": "21/4fa, notdf133",
+      "checks": 117717,
+      "failures": 13575,
+      "pairedRows": 1371,
+      "bodyRows": 677,
+      "scope": "All677materialdamage/flags/radius/mass/TTL/angles/colors/Sprite/Lineconfigcompare; identity/RNG/geometry/unknowns remainFAIL.2708missingLaserHPmaxHPchecks are notNPCHPfailure. Emptyroomdoesnotprovecontact; other3Nativecasesunexecuted."
+    }
+  },
+  "currentPrivateDf133Evidence": {
+    "artifactBinding": {
+      "path": "/dev/shm/isaac-composed-item-own-proof/artifact-binding-v3-own-gameplay.json",
+      "sha256": "39b83a331e9332a79e886daf2f166d543288facdd21b59d2694a3f82e1411afe",
+      "sourceHead": "df1339ac150184d867a32e3dc9ec8a97b4126efd",
+      "wasmSha256": "15f8357c28c0a155958a48290de30204a0409955a1b04c665853601dc8b5d367",
+      "normalProductionExit0Seconds": 42.97972321510315,
+      "floorExit0Seconds": 16.617607593536377,
+      "clippyPending": true,
+      "allStagesPassed": false
+    },
+    "strictRegular405": {
+      "checks": 37972668,
+      "differences": 0,
+      "excluded": [],
+      "additive": [],
+      "scope": "LocalWASMregression versus21/4fa, notOriginal/wholemainparity"
+    },
+    "summary": {
+      "controlled": {
+        "checks": 1066,
+        "failures": 40,
+        "births": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "bodyRows": [
+          82,
+          81,
+          81,
+          82
+        ],
+        "actualFullFastBodyRows": [
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            0
+          ]
+        ],
+        "propertyCohorts": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "coverageFailures": "Actualbirth1<required2 andactualpropertycohort1<required2 EACHcase, separatefrommissingraw322FullFast and6eventFAILs.10FAIL/case remains.",
+        "freshOriginalFixed0": {
+          "checks": 41683,
+          "failures": 3258,
+          "nativeBirths": 3,
+          "portBirths": 1,
+          "nativePropertyCohorts": 2,
+          "portPropertyCohorts": 1,
+          "realMissingPortBirths": 2,
+          "scope": "One actualOriginal case only; rawstrictunknowns and actualcoverageFAILs preserved."
+        }
+      },
+      "mixed": {
+        "checks": 17056,
+        "failures": 1558,
+        "mixedBombBirths": [
+          3,
+          3,
+          3,
+          3
+        ],
+        "bodyRows": [
+          246,
+          244,
+          244,
+          244
+        ],
+        "retentionRows": [
+          405,
+          241,
+          241,
+          402
+        ],
+        "coverageFailures": "ActualBombraw322 absent978bodyrows, actualFull/FastminimaFAIL; both4-firstcases lackactualTearbirthtimestamp554observations andrequiredTearbirthcoverage.4eventFAIL/case.ObservedBombbirthcache/properties/retentionchecks pass; this isownstateonly."
+      },
+      "soy": {
+        "firstObservedActorIdentities": [
+          16,
+          1,
+          16,
+          1
+        ],
+        "bodyRows": [
+          {
+            "tear:0": 606
+          },
+          {
+            "laser:1": 20
+          },
+          {
+            "tear:0": 632
+          },
+          {
+            "laser:1": 20
+          }
+        ],
+        "coverageLimits": "Ownendpointonly/noOriginalcomparison.16/1/16/1 arefirstobservedidentities, notInitbirths.Ordinary118eachhas1observedLaser/20bodyrows and360unadmitted ordinaryBrimstoneBodyCostumeTransform observations; notwholefiring/readinessPASS.",
+        "knownUnconsumedDefect": "FullAdd52CF25 clears selected2EC before50EDC0; df133 Soy leaf still preserves prior override. Correction d9d03159 remains future source only."
+      }
+    },
+    "controlledDrFreshOriginal": {
+      "compactSummary": {
+        "path": "/dev/shm/isaac-controlled-dr-fetus52-native-evidence-v2/controlled-dr-fetus-52-329-fixed-phase0/paired-functional-v1/compact-summary.json",
+        "sha256": "3987cead24174fa200542b70dce5dea61ce86df21d53ccaf6a03d26b786bbf82"
+      },
+      "report": {
+        "path": "/dev/shm/isaac-controlled-dr-fetus52-native-evidence-v2/controlled-dr-fetus-52-329-fixed-phase0/paired-functional-v1/functional-report.json.gz",
+        "sha256": "79681ad6aa7c6bc8b9d69fd6333d6fe5415daefaf5690a58fc54097f5d25bd1e",
+        "checks": 41683,
+        "failures": 3258
+      },
+      "nativeActualClosure": {
+        "path": "/dev/shm/isaac-controlled-dr-fetus52-native-evidence-v2/controlled-dr-fetus-52-329-fixed-phase0/native-attempt1/native-closed.json",
+        "sha256": "22d5f57de4742c93e5274da204d6c81455195b28e6884f7f396ea6bef500544d",
+        "pid": 2169245,
+        "exitCode": 0,
+        "actualWait": true,
+        "seconds": 86.64723819901701,
+        "guardStop": null,
+        "sourceAndDeclaredInputsBeforeEqualsEnd": true,
+        "gameClosure": "EXACT_OWNED_GAMES_EXITED"
+      },
+      "pairedPlayingRows": 1377,
+      "material82Rows": "Actual velocity, fuse, damage, flags, friction, born age, grid class/collision, permanent/current colors, Parent and ChildNULL fields pass on82 paired bodies. Strictidentity/RNG/position/visibility/rawphase remainfailed.",
+      "realCoverageGap": "Port misses2actualcontrolledBombbirths and a second born-property cohort. This is actual executable coverage failure, not merely missing observer metadata. Queued4 readiness source successor is unconsumed by frozen df133.",
+      "sourceOrderBoundary": "Native birth at1495 still copies10.5 from earlierC88=3.5 although same post-Add snapshot has currentC88=6.6407833; later1623birth copies19.92234992980957. Frozen consumer reports one dense-prior completed-inventory and stable-prior-cache failure at1495; preserve those checks/fails and do not force postAdddamage onto earlier birth.",
+      "limits": "Only fixed0 freshOriginal completed; other3controlledDrOriginal cases, mixedOriginal and SoyOriginal remainunexecuted. Exactraw/identity/RNG/callback/lifecycleFAILs unchanged. No capture/projection/grade performed by this report-only fold.",
+      "nativeBirths": 3,
+      "portBirths": 1,
+      "nativePropertyCohorts": 2,
+      "portPropertyCohorts": 1
+    },
+    "scope": "Own private df133 product only: actual production+floor PASS/Clippy pending; all12 captures and finite readers closed. Not whole-current-main qualification; old reports unchanged. Mixed and Soy merged independently; controlledDr354 remains unmerged awaiting queued4 successor.",
+    "reportOnlyFoldSourceSha256": "ba73dba4",
+    "sourceOnlyEpicMonstro": "Unbuilt independent drafts; future producer changes no prior grade."
+  },
+  "currentPrivateF1Evidence": {
+    "controlledDr": {
+      "checks": 46040,
+      "coverage": {
+        "browserFamilyKind4": 246,
+        "nativeFamilyKind4": 246,
+        "pairedActualPlayingRows": 1377
+      },
+      "failures": 3508,
+      "report": "/dev/shm/isaac-controlled-dr52-f1-public-game-v1/controlled-dr-fetus-52-329-fixed-phase0/paired-functional-f1-v1/functional-report.json.gz",
+      "reportSha256": "51a376e2644a0522a8c329d062bc89a1dfab51de71b88a0c0032a6dad051ebc5",
+      "scope": "First-case strict pair only. Both games expose 3 actual Bomb births / 246 body rows / 2 born-property cohorts, resolving the older df133 two-birth coverage gap. The actual pre-late-Add4 birth damage 10.5 and later birth damage 19.92235 remain distinct. Strict seed/ID/RNG/position/counter and unavailable raw322/callback failures remain. All four f1 port-own cases are recorded separately below."
+    },
+    "controlledDrAllFourOwn": {
+      "peakRssBytes": 28307456,
+      "report": "/dev/shm/isaac-controlled-dr52-f1-own-nonvacuity-v1/own-controlled-dr-fetus-nonvacuity.json",
+      "reportSha256": "90db27a4a6a0869b52e1b5c1c9cf84e0d504bb4ae69776fa9558b943ad760da4",
+      "scope": "All four actual f1controlledDr closed public captures; each3actualbirths/2born-propertycohorts/3C18cleanup stateobservations. TenFAIL each preserve2dense-prior birth/cache-boundary checks,2rawFull/Fast coverageunknowns,6callbackunknowns. Sourceboundary missingproof is not a wrong postAdd damage assertion. Old093 andfirst51a reports unchanged. No Native/sourcegrade/reader rerun by factauthor.",
+      "seconds": 14.659967990999576,
+      "sourceBeforeEqualsEnd": true,
+      "status": "ACTUAL_CLOSED_OWN_REPORT_ONLY_ADDITIONAL_FACT",
+      "caseCount": 4,
+      "birthsEach": 3,
+      "bornPropertyCohortsEach": 2,
+      "cleanupStateObservationsEach": 3,
+      "failuresEach": 10
+    },
+    "epicFirstPair": {
+      "checks": 92164,
+      "coverage": {
+        "browserFamilyKind1000": 786,
+        "nativeFamilyKind1000": 786,
+        "pairedActualPlayingRows": 1597
+      },
+      "failures": 5207,
+      "report": "/dev/shm/isaac-epic-f1-native-evidence-v1/epic-fetus-168-2-fixed-phase0/paired-functional-v1/functional-report-v2.json.gz",
+      "reportSha256": "8142cedc20ab82eb5eeffe15485ecc94c83980e5c63cc2adc5eed199eb4367a6",
+      "scope": "FirstfreshNative only; both3targets/9rockets/3triple birthcohorts/9explosion1births/9recordappends;786bodyposition/velocity/TTL/config/Sprite/collisionproperties/currentHave2/Get6diagnostic values match. Identity786/RNG786/Parent360/record744/systemcounter1597 and callback/background/wardrobe/actualstrike invocation unknowns remainFAIL. crater18 observedbirths0 is not proof of no transient18callback; end-of-step observations may miss it. This empty-room route does not prove NPC contact damage. Oldpregradeoptional-flag KeyError/outputcollision retained; savedtuple projection reused."
+    },
+    "monstroFirstPairCorrected": {
+      "beforeEqualsAfter": true,
+      "checks": 62795,
+      "closure": "/dev/shm/isaac-monstro-f1-native-evidence-v1/monstro229-cricket4-fixed-phase0/paired-functional-v1/closed-native-owner-v2.json",
+      "closureSha256": "ab3711aec2ad2eca771609cfa5aea7880d09002ab63e1f8b9106dbe83aa287fe",
+      "commonPriorPerFieldChanged": {},
+      "coverage": {
+        "pairedActualPlayingRows": 1791
+      },
+      "execution": {
+        "actualExitCode": 0,
+        "guardTriggered": false,
+        "scope": "Pipeline actual saved-grade closure; no new Native capture or projection.",
+        "seconds": 11.285
+      },
+      "failed": 5346,
+      "interpretation": "Both games independently expose 52 actual Tear births, four actual 13-Tear birth cohorts and three actual mixed-item 13-Tear birth cohorts. Native actual held input and Player callback phase remain unavailable: held-specific burst/release/saturation/diagonal metrics stay null with mandatory failures. Port held/release observations remain its own State/qualified Phase.Clock evidence; raw Tear phase is still unknown on 956 body rows. Every common prior per-field count is identical to the historical e2bb report. The lower total reflects source-owner assertion repair and additive independent cohort checks, not an implementation improvement. Strict cross-game IDs/seeds/RNG/absolute counters and missing lifecycle/callback events remain failures. Empty-room observations do not prove NPC contact/HP behavior.",
+      "noProjectionOrNativeReplay": true,
+      "observedBirths": {
+        "native": 52,
+        "port": 52
+      },
+      "priorReport": "/dev/shm/isaac-monstro-f1-native-evidence-v1/monstro229-cricket4-fixed-phase0/paired-functional-v1/functional-report.json.gz",
+      "priorReportSha256": "e2bb8982260624289e7999491664665961234a32a84cb4280da1cb910270a219",
+      "report": "/dev/shm/isaac-monstro-f1-native-evidence-v1/monstro229-cricket4-fixed-phase0/paired-functional-v1/functional-report-native-owner-v2.json.gz",
+      "reportSha256": "175a4dbc6c9a63e63bf9339237eb2d167a34dc1feb86662b56d123981ff6ea45",
+      "scope": "Actual declared monstro229 public-WASM states versus complete full-finish Native tuples at independent actual title-relative gates. Exact original opt-in module compares canonical actor fields and own histories; strict identities/seeds/body/absolute counters and unavailable rawphase/callback/RNG owners remain failures. Actual Native gameplay-start and port gameplayPresentation are independent without fitted origins. Both use actual f1 normal-production binding with observed optional floor/Clippy pending preserved. Empty-room states do not prove NPC contacts.",
+      "unknownPreserved": {
+        "native": {
+          "bursts": null,
+          "diagonalGateStates": null,
+          "saturatedHeld": null,
+          "undercharged": null
+        }
+      }
+    },
+    "monstroOwn": {
+      "report": "/dev/shm/isaac-monstro229-f1-own-nonvacuity-v3/own-monstro229-nonvacuity.json",
+      "reportSha256": "42d7e1fa64fca7bd17bf84fac59a22edfebea86fdf8453c62523d59fb78e0ab9",
+      "scope": "All four realport own cases; each has3 mixed13-Tear state cohorts and bothorderedgrants. PortcounterPhase.Clock grading is not Nativephase or rawTear322. Stickyhistorical diagnostics remain separateFAIL; earlier53c80287 retained.",
+      "caseCount": 4,
+      "mixedThirteenTearCohortsEach": 3
+    },
+    "production": {
+      "actualProductionSeconds": 32.80390667915344,
+      "actualWait": true,
+      "allStagesPassed": false,
+      "clippyPending": true,
+      "exitCode": 0,
+      "floorPending": true,
+      "scope": "Actual normal production passed; no floor/Clippy pass inferred. This immutable f1 artifact is not relabeled as later main HEAD.",
+      "sourceBeforeEqualsEnd": true,
+      "sourceHead": "f1e9b28c346f12d3f1fb55862832a96da6f6ef0f",
+      "sourceTree": "b4e1e84c0c3a648e9d8cdc14a7ac7cb92f1a7f43",
+      "wasmSha256": "b9577ad49c1b1df681e60ffccdbf92ca79857b47419a60f3721e3f6732f39571"
+    },
+    "regular405": {
+      "checks": 37979876,
+      "failures": 14416,
+      "preexistingDifferenceCounts": {
+        "state.persistedRooms.6::sourceBackdrop1ae0": 1132,
+        "state.room::sourceBackdrop1ae0": 1624
+      },
+      "rawStatus": "FAIL",
+      "report": "/dev/shm/isaac-player-items-next-own-proof/regular405/versus-df133/raw-all-field-comparison.json",
+      "reportSha256": "0d5b26f6a3fa7eeadf0abcae997d5771c2c3677bdd6e9bde407a59badb802f1a",
+      "scope": "Every raw and preexisting mismatch retained. Only old-field differences are known removed roomBackdrop field incl persisted room (2756); other old-field values match. Source-known removals and fresh empty Room/registration/Tear owners do not waive raw failure or prove whole gameplay. Birth-owner ledger FAILs include unrelated unowned additions; no all-owners PASS claim.",
+      "sourcePartitionsOfRawDifferenceRecords": {
+        "costumeRegistrationFieldAndPlayerItemsKeyManifests": 2232,
+        "freshCraterRecordFieldIncludingPersistedRoom": 2756,
+        "npcFrictionFieldsAndContainerKeyManifests": 6226,
+        "removedSourceBackdropFieldIncludingPersistedRoom": 2756,
+        "tearBirth42CFieldsAndTearKeyManifests": 240,
+        "tearPartitionAndStateKeyManifests": 206
+      }
+    },
+    "remaining": "Other Monstro/Epic Original cases remain unexecuted. All four controlled-Dr port-own cases are now closed and recorded, with ten failures each preserved. Ordinary Inner Eye 2 actor43d4/bank1d17/toolsfeccc are a separate private followup, not included in this frozen-f1 record. Poly169/152/wardrobe/C18 followups remain private. First Epic contact attempt reached a shared authored Challenge entry frontier before gameplay; no NPC contact or HP claim follows. No complete-game, pixel, complete-RNG, contact or whole-lifecycle qualification.",
+    "scope": "Report-only factual fold of existing compact summaries and the Dr all-four addendum. No raw payload decode, reader, capture, game, projection, regrade, compiler or main mutation by the fact author. Source-owner changes are separated from gameplay implementation changes; historical reports remain preserved.",
+    "sourceBeforeEqualsEnd": true,
+    "status": "REPORT_ONLY_FACTUAL_UPDATE_NO_REGRADING_NO_RAW_DECODE",
+    "version": 2,
+    "factsPacket": {
+      "path": "/dev/shm/isaac-f1-first-originals-matrix-facts-v2/facts-compact.json",
+      "sha256": "738c2b7d55116cef7d7c2cb32373e3409d9169db5fea253701a904e8c4f373a8"
+    },
+    "sourceTreeScope": "Frozen f1 is not the entire current-main artifact; external NPC/Pickup/format/minimap changes have separate ownership."
+  },
+  "openPullRequestAudit": {
+    "count": 5,
+    "numbers": [
+      366,
+      329,
+      292,
+      271,
+      253
+    ],
+    "preserveUnique": [
+      253,
+      271,
+      292,
+      329
+    ],
+    "provedDuplicateClosures": [
+      {
+        "number": 361,
+        "supersededBy": [
+          382,
+          384
+        ],
+        "preservation": "/dev/shm/isaac-pr361-supersession-preserved-v1.json"
+      }
+    ],
+    "correctedAndMerged": [
+      362
+    ],
+    "remainingNoDuplicateProved": true
+  },
+  "currentPrivateProduction2Evidence": {
+    "artifact": {
+      "sourceHead": "3ec42d94aed6d6d5e16538a8f8c60c0353eb2f18",
+      "sourceTree": "821bae0a3da77b37546b00c4c1698e748d32fe28",
+      "wasmSha256": "abdb286e328f019c85b37eaa3639138837d519ec95277213786bb736d4147621",
+      "binding": {
+        "path": "/dev/shm/isaac-player-items-production2-own-proof/artifact-binding-own-gameplay.json",
+        "sha256": "2cc0fe88174c6582e7cc09715d5da55bf2b0dc4b2fefdb9bdb5b4a0e4190c3f7"
+      },
+      "normalProductionPassed": true,
+      "floorPending": true,
+      "clippyPending": true,
+      "allStagesPassed": false
+    },
+    "authority": {
+      "path": "/dev/shm/isaac-production2-item-matrix-facts-v1/facts-compact.json",
+      "sha256": "a83542ddfa50d9b3a10ca8406c4178bca28a511e104c731e7cecd8653d21813c"
+    },
+    "regular405": {
+      "checks": 37987905,
+      "failures": 8728,
+      "addedKeyShape": 4364,
+      "newFields": 4364,
+      "changedPreexistingValues": 0,
+      "missingPreexistingValues": 0,
+      "rawFailurePreserved": true
+    },
+    "ordinary2Own8": {
+      "metadata": {
+        "path": "/dev/shm/isaac-inner-eye2-production2-own-summary-v1/report-metadata-summary.json",
+        "sha256": "8257047d3577d7ff52d9bfe73deac46a2cd72e62782c91d545f29d2cad7e25f6"
+      },
+      "totals": {
+        "cases": 8,
+        "checks": 84879,
+        "failures": 72,
+        "actualBirthAgeActors": 198,
+        "actualCompleteThreeTearCohorts": 66,
+        "qualifiedBirthMetadataActors": 198,
+        "unknownTypedBirthMetadataActors": 0,
+        "unknownRawTearPhaseRows": 10015
+      },
+      "readerFinalQuotaFailurePreserved": true,
+      "separateOpaqueComponentVerifiedCompleteReport": true
+    },
+    "scope": [
+      "This packet is separate actualproduction2 evidence, not a rewrite or reclassification of frozenf1 reports.",
+      "Own contact and shake rows prove observed source-state chains, not atomic callback order/arguments, isolated RNG-call attribution, sound/rumble/render or full lifecycle events.",
+      "No Original ordinary2 evidence exists in this packet. RawTear322 unknowns and strict body identity/RNG correspondence remain failures.",
+      "Highdamage first Original covers fixedphase0 NPC14; unexecuted remaining Original cases stay unexecuted.",
+      "No State/native-tuple/journal reread, regrade, capture, reader, codec, compiler, main mutation or source-mask changes by fact author. Existing report metadata only."
+    ],
+    "epicOld70ContactOwn4": {
+      "report": {
+        "path": "/dev/shm/isaac-epic-contact-production2-own-observations-v2/own-epic-npc-contact-nonvacuity.json",
+        "sha256": "2e438e43032734720e8b01924fb1e616d85c0b3f836d728028ff4ec054c104a0"
+      },
+      "totalChecks": 6663,
+      "totalFailures": 56,
+      "sourceBeforeEqualsEnd": true,
+      "cases": 4
+    },
+    "epicHighDamageContactOwn4": {
+      "report": {
+        "path": "/dev/shm/isaac-blast-contact-production2-own-observations-v1/own-epic-npc-contact-nonvacuity.json",
+        "sha256": "9e65c8932630a00b86653c99840fb1efcb14df9d07639a52e7c58d49829ebc52"
+      },
+      "totalChecks": 6663,
+      "totalFailures": 56,
+      "sourceBeforeEqualsEnd": true,
+      "cases": 4
+    },
+    "blastShakeOwn4": {
+      "report": {
+        "path": "/dev/shm/isaac-blast-shake-production2-own-observations-v1/own-blast-camera-shake-nonvacuity.json",
+        "sha256": "efc8f2b7c46ee3072fa4f73735df85881c2a714bd2390e7c5f1773b18f4227a1"
+      },
+      "totalChecks": 867,
+      "totalFailures": 20,
+      "sourceBeforeEqualsEnd": true,
+      "cases": 4
+    },
+    "epicHighDamageFirstOriginalPair": {
+      "compact": {
+        "path": "/dev/shm/isaac-blast-shake-production2-native-evidence-v1/epic-fetus-high-damage-shake-contact-fixed-phase0/paired-functional-v3/compact-summary.json",
+        "sha256": "306ad3c76590ef39744e5bd4b592951e6e9296e568cb6c2c6212067b5d2d3fe9"
+      },
+      "report": {
+        "path": "/dev/shm/isaac-blast-shake-production2-native-evidence-v1/epic-fetus-high-damage-shake-contact-fixed-phase0/paired-functional-v3/functional-report.json.gz",
+        "sha256": "a4fe4c49fbc1104116d0e59a1b2319848e41f453bbd7acc05d42e2ad823b2148"
+      },
+      "closure": {
+        "path": "/dev/shm/isaac-blast-shake-production2-native-evidence-v1/epic-fetus-high-damage-shake-contact-fixed-phase0/paired-functional-v3/closed.json",
+        "sha256": "9e7d010f602839062778d2d6b924cff84d4959f6280fbbac4162ae1e8d05db6a"
+      },
+      "checks": 40872,
+      "failures": 4064,
+      "scope": "Both four-case Epic contact cohorts (70 and132.815673828125 damage) record6,663 checks/56 FAIL. Every case observes one copied-Rocket FIFO append, ordered HP drain, negative-HP death and manager retirement; missing callback/argument/RNG/lifecycle event owners remain failures. The first high-damage Original/port pair retains40,872 checks/4,064 FAIL over476 paired rows and261 typed body rows. Both sides show one target, three rockets, one triple cohort, three explosions/record appends and one FIFO-to-retirement state chain. Selected properties match across261 body rows and receiver HP matches377 observations; receiver geometry, exact identities/RNG/Parent/records/counters and missing owners remain failed. Zero observed transient crater18 births do not prove absent callbacks."
+    },
+    "monstroSameOriginalQueued4Regression": {
+      "compact": {
+        "path": "/dev/shm/isaac-monstro229-production2-public-game-v1/monstro229-cricket4-fixed-phase0/paired-functional-production2-v1/compact-summary.json",
+        "sha256": "6b9123f686adfb48498923eb2729e0d97f516f4890bbe5e30a2a939f5ae99616"
+      },
+      "report": {
+        "path": "/dev/shm/isaac-monstro229-production2-public-game-v1/monstro229-cricket4-fixed-phase0/paired-functional-production2-v1/functional-report.json.gz",
+        "sha256": "5101375acdbfbd6bd9c6432351f4264ed4fa909fdf4648d3b793cc03995b216d"
+      },
+      "closure": {
+        "path": "/dev/shm/isaac-monstro229-production2-public-game-v1/monstro229-cricket4-fixed-phase0/paired-functional-production2-v1/closed.json",
+        "sha256": "9601bcd4a1629a79073f98a8692cecc4014999a42274cd67e23a76d26088702e"
+      },
+      "checks": 62795,
+      "failures": 2520,
+      "scope": "The production2 Monstro queued4 replay reuses the same5149 Original tuples at exactly62,795 checks: failures improve5,346 to2,520. Only three fields change, each942 to0 (historical controller diagnostic, C18 knownNULL and unadmitted controller); all field counts and all other failures are unchanged. Both games retain four complete13-Tear cohorts and three mixed cohorts. Native held/phase owners remain null with mandatory failures; every earlier frozen-f1/e2bb report is preserved."
+    },
+    "notWholeCurrentMainQualification": true,
+    "snapshotMain": "48b9f4ef73d351fb7a72b4b2efe85127b1cdc86d"
   }
 }

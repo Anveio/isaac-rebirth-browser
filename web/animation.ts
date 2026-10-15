@@ -7,7 +7,9 @@ import familiarData from "./familiar-data.json";
 import gameOverData from "./gameover-data.json";
 import stageData from "./stage-data.json";
 import attackData from "./attack-data.json";
-const sceneData = { ...informationData, ...baseSceneData, ...doorData, ...gridData, ...npcData, ...familiarData, ...gameOverData, ...stageData, ...attackData };
+import bloodTearData from "./blood-tear-data.json";
+import costume229Data from "./costume229-data.json";
+const sceneData = { ...informationData, ...baseSceneData, ...doorData, ...gridData, ...npcData, ...familiarData, ...gameOverData, ...stageData, ...attackData, ...bloodTearData, ...costume229Data };
 import fontData from "./font-data.json";
 import completionUrl from "./assets/completion_widget.png?url";
 const bossSceneUrls = import.meta.glob("./assets/boss-scene/*.png", { eager: true, query: "?url", import: "default" }) as Record<string, string>;
@@ -46,6 +48,7 @@ const urls = import.meta.glob([
   "../references/isaac/rebirth/resources/gfx/ui/effect_cursepaper.png",
   "../references/isaac/rebirth/resources/gfx/characters/costumes/character_001_isaac.png",
   "../references/isaac/rebirth/resources/gfx/characters/costumes/ghost.png",
+  "../references/isaac/rebirth/resources/gfx/characters/costumes/costume_monstros lung.png",
   "../references/isaac/rebirth/resources/gfx/backdrop/01_basement.png",
   "../references/isaac/rebirth/resources/gfx/backdrop/controls.png",
   "../references/isaac/rebirth/resources/gfx/backdrop/shading.png",
@@ -58,6 +61,7 @@ const urls = import.meta.glob([
   "../references/isaac/rebirth/resources/gfx/grid/door_17_bardoor.png",
   "../references/isaac/rebirth/resources/gfx/grid/door_13_librarydoor.png",
   "../references/isaac/rebirth/resources/gfx/grid/rocks_basement.png",
+  "../references/isaac/rebirth/resources/gfx/grid/door_11_trapdoor.png",
   "../references/isaac/rebirth/resources/gfx/grid/grid_spikes.png",
   "../references/isaac/rebirth/resources/gfx/grid/grid_poop_[123].png",
   "../references/isaac/rebirth/resources/gfx/grid/grid_pit.png",

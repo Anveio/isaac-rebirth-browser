@@ -20,6 +20,37 @@ const MINIMAP_ICONS: Record<number, string> = {
   20: "IconChestRoom", 21: "IconDiceRoom",
 };
 // Mask 0x3c1204: shown as locked while only shadow-revealed and unvisited.
+// Minimap pickup icon 5af6df: saved type5 records set one bit per kind and
+// the first set bit in draw order wins. Hearts prefer eternal, then black
+// over soul/red, then soul; chests prefer locked (gold), then red.
+function minimapPickupIcon(records: readonly { variant: number; subtype: number }[]): string | undefined {
+  let heart = 0, chest = 0;
+  const kinds = new Set<string>();
+  for (const { variant, subtype } of records) {
+    if (variant === 10) {
+      kinds.add("heart");
+      if (subtype === 4) heart = 4;
+      else if (subtype === 6 && (heart === 0 || heart === 3)) heart = 6;
+      else if (subtype === 3 && heart === 0) heart = 3;
+    } else if (variant === 100 || variant === 350) kinds.add("item");
+    else if (variant === 50 || variant === 60 || variant === 360) {
+      kinds.add("chest");
+      if (variant === 60) chest = 60;
+      else if (variant === 360 && chest !== 60) chest = 360;
+    } else if (variant === 300) kinds.add("card");
+    else if (variant === 70) kinds.add("pill");
+    else if (variant === 30) kinds.add("key");
+    else if (variant === 40) kinds.add("bomb");
+    else if (variant === 20) kinds.add("coin");
+    else if (variant === 90) kinds.add("battery");
+  }
+  if (kinds.has("heart")) return { 4: "IconWhiteHeart", 6: "IconBlackHeart", 3: "IconBlueHeart" }[heart] ?? "IconHeart";
+  if (kinds.has("item")) return "IconItem";
+  if (kinds.has("chest")) return chest === 60 ? "IconGoldChest" : chest === 360 ? "IconRedChest" : "IconChest";
+  const order: [string, string][] = [["card", "IconCard"], ["pill", "IconPill"], ["key", "IconKey"],
+    ["bomb", "IconBomb"], ["coin", "IconCoin"], ["battery", "IconBattery"]];
+  return order.find(([kind]) => kinds.has(kind))?.[1];
+}
 // Base Rebirth's four shapes: bit 1 tall, bit 2 wide (1x1, 1x2, 2x1, 2x2).
 function minimapShape(template: { width: number; height: number }): number {
   return (template.width === 26 ? 2 : 0) + (template.height === 14 ? 1 : 0);
@@ -75,7 +106,7 @@ export class Renderer {
     const gl = this.graphics;
     if (state.screen === "playing") {
       this.prepareRoom(state.room);
-      this.stage.prepare(state.stageEffects, state.camera?.scroll);
+      this.stage.prepare(state.stageEffects, this.worldOffset(state));
     }
     gl.beginScreen(); gl.resetTransform(); gl.globalAlpha = 1; gl.imageSmoothingEnabled = false;
     gl.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -99,6 +130,10 @@ export class Renderer {
       const bossScene = state.roomTransition?.bossScene;
       if (bossScene && state.roomTransition?.phase === "bossScene")
         this.assets.draw(ctx, "gfx/ui/boss/versusscreen.anm2", "Scene", 240, 135, bossScene.animationFrame);
+      // StageTransition::Render5e3bd0: black quad, alpha counter/50 then 1-counter/50.
+      const transition = state.stageTransition;
+      if (transition.state === 2 || transition.state === 3)
+        gl.fillRectRGBA(0, 0, 480, 270, [0, 0, 0, transition.state === 2 ? transition.counter / 50 : 1 - transition.counter / 50]);
       this.presentation.pause(ctx, state);
       if (state.playerDeath.gameOver) {
         gl.fillRectRGBA(0, 0, 480, 270, [0, 0, 0, 128 / 255]);
@@ -159,15 +194,22 @@ export class Renderer {
         [point(0, start), point(1, start), point(0, end), point(1, end)]);
     }
   }
+  /** Source CEA00 is a pixel offset, independent of Room15B8 scrolling. */
+  private worldOffset(state: State): { x: number; y: number } | undefined {
+    const scroll = state.camera?.scroll, shake = state.gameShake?.offsetCea00;
+    if (scroll && shake) return { x: Math.fround(scroll.x + shake.x), y: Math.fround(scroll.y + shake.y) };
+    return shake ?? scroll;
+  }
   /** Room::Render world layer: backdrop, grid, actors and stage composites. */
   private drawWorld(ctx: CanvasRenderingContext2D, state: State, hidePlayer = false): void {
     ctx.save();
-    if (state.camera) ctx.translate(state.camera.scroll.x, state.camera.scroll.y);
+    const offset = this.worldOffset(state);
+    if (offset) ctx.translate(offset.x, offset.y);
     this.drawRoom(state.room.appearance, state.room.grid);
     ctx.restore();
     this.stage.ground(state.stageEffects);
     ctx.save();
-    if (state.camera) ctx.translate(state.camera.scroll.x, state.camera.scroll.y);
+    if (offset) ctx.translate(offset.x, offset.y);
     // Creep's render key (seq & 0x3ff) + 2100 sorts every pool under the
     // y-sorted actors, in spawn order; colour multiplies the clip's pulse.
     for (const effect of state.spriteEffects) {
@@ -209,6 +251,11 @@ export class Renderer {
       } else if (entity.kind === 8 && entity.state === 0)
         this.assets.draw(ctx, "gfx/grid/grid_spikes.anm2", `Spikes${String(entity.variant).padStart(2, "0")}`, x, y);
     }
+    const trapdoor = state.room.trapdoor;
+    if (grid && trapdoor)
+      this.assets.draw(ctx, "gfx/grid/door_11_trapdoor.anm2", trapdoor.clip === "closed" ? "Closed" : "Open Animation",
+        (40 + trapdoor.gridIndex % grid.width * 40) * 0.65 + 32,
+        (120 + Math.floor(trapdoor.gridIndex / grid.width) * 40) * 0.65 - 47, Math.floor(trapdoor.frame));
     this.pickups.draw(ctx, state);
     for (const npc of state.room.npcs) {
       // A dying boss (state 16) keeps drawing its death clip.
@@ -331,9 +378,11 @@ export class Renderer {
     if (!hidePlayer) this.drawPlayer(ctx, state);
     for (const tear of state.tears) {
       const color = tear.sourceColor;
-      //RegularTear's white authored layer receives its birth-owned ColorMod.
+      //The selected Regular/Blood authored layer receives its birth-owned ColorMod.
       //Keep all11 components in state; project tint and final RGB offsets.
-      this.assets.draw(ctx, TEAR, `RegularTear${tear.animationTier}`, Math.round(tear.x * 2) / 2, Math.round(tear.y * 2) / 2, tear.age,
+      const blood = tear.sourceVariant === 1;
+      this.assets.draw(ctx, blood ? "gfx/002.001_blood tear.anm2" : TEAR,
+        `${blood ? "BloodTear" : "RegularTear"}${tear.animationTier}`, Math.round(tear.x * 2) / 2, Math.round(tear.y * 2) / 2, tear.age,
         { overrides: { 0: {
           RedTint: color.tint[0]! * 255, GreenTint: color.tint[1]! * 255,
           BlueTint: color.tint[2]! * 255, AlphaTint: color.tint[3]! * 255,
@@ -597,8 +646,18 @@ export class Renderer {
     }
     this.assets.draw(ctx, PLAYER, `Walk${directionName(player.bodyFacing)}`, x, y, player.walkFrame,
       { layers: [1], overrides: { 1: { RedTint, GreenTint, BlueTint } } });
-    this.assets.draw(ctx, PLAYER, `Head${directionName(player.facing)}`, x, y, player.headFrame,
-      { layers: [4], overrides: { 4: { RedTint, GreenTint, BlueTint } } });
+    const costume = state.playerItems?.costume229, head = costume?.slots[4];
+    if (costume && costume.historyFrontier === null && !costume.mainClipFrontier
+      && head?.layer === 0 && !head.bodyGroup) {
+      //The actual selected head pose owns its clip/frame. Normal Isaac and
+      //this costume both retain skin-1, so50F206 keeps the authored sheet.
+      this.assets.draw(ctx, "gfx/characters/229_monstros lung.anm2",
+        costume.sprite.clip, x, y, costume.sprite.frame,
+        { layers: [0], overrides: { 0: { RedTint, GreenTint, BlueTint } } });
+    } else {
+      this.assets.draw(ctx, PLAYER, `Head${directionName(player.facing)}`, x, y, player.headFrame,
+        { layers: [4], overrides: { 4: { RedTint, GreenTint, BlueTint } } });
+    }
   }
   private hud(ctx: CanvasRenderingContext2D, state: State): void {
     for (let heart = 0; heart < Math.ceil(state.player.maxHp / 2); heart++) {
@@ -662,11 +721,16 @@ export class Renderer {
       const room = descriptors[cell.index]!, type = room.template.type;
       const icon = cell.flags & 4 ? MINIMAP_ICONS[type] : undefined;
       const locked = !icon && cell.flags & 2 && !state.visitedRooms.includes(cell.index) && LOCKED_MINIMAP_TYPES.has(type);
-      if (!icon && !locked) continue;
+      // Without a room icon, a non-shop room shows its saved pickups' icon
+      // (Descriptor+70..78 records; one icon by the constructor's limit).
+      const saved = cell.index === state.currentRoom ? state.room.savedRegularPickups
+        : state.persistedRooms[cell.index]?.savedRegularPickups ?? [];
+      const pickup = icon || locked || type === 2 ? undefined : minimapPickupIcon(saved);
+      if (!icon && !locked && !pickup) continue;
       // Multi-cell rooms shift the icon half a cell (3.5, 3) towards the room's centre.
       const shape = minimapShape(room.template);
       const x = cell.x + (shape & 2 ? 3.5 : 0), y = cell.y + (shape & 1 ? 3 : 0);
-      this.assets.draw(ctx, "gfx/ui/minimap1.anm2", icon ?? "IconLockedRoom", Math.round(x), y);
+      this.assets.draw(ctx, "gfx/ui/minimap1.anm2", icon ?? pickup ?? "IconLockedRoom", Math.round(x), y);
     }
   }
 }

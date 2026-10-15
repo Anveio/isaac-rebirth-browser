@@ -150,6 +150,8 @@ impl Admission<'_> {
             critter: None,
             creep_effect: None,
             fly_effect: None,
+            epic_fetus: None,
+            explosion_effect: None,
         });
         // Real Room sequence and manager append precede any caller Update.
         self.scheduler.admit(ActorRef {

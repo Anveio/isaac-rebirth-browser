@@ -155,8 +155,12 @@ pub(crate) fn finished(npc: &Npc) -> bool {
 
 fn update_sprite(npc: &mut Npc) -> Result<(), String> {
     if let Some(overlay) = npc.overlay.as_mut().filter(|overlay| overlay.playing) {
-        let clip = content::clip(&npc.actor, &overlay.animation)
-            .ok_or_else(|| format!("{} has no authored overlay {}", npc.actor, overlay.animation))?;
+        let clip = content::clip(&npc.actor, &overlay.animation).ok_or_else(|| {
+            format!(
+                "{} has no authored overlay {}",
+                npc.actor, overlay.animation
+            )
+        })?;
         let next = overlay.clock + 1.0;
         if next.floor() < clip.frames as f32 {
             overlay.clock = next;
@@ -234,7 +238,10 @@ pub(crate) fn advance_dead_ai(
     advance_full(npc, phase, random, world, births, ai, true, true)
 }
 
-#[expect(clippy::too_many_arguments, reason = "the shared appear and dead-AI switches of advance_with and advance_dead_ai")]
+#[expect(
+    clippy::too_many_arguments,
+    reason = "the shared appear and dead-AI switches of advance_with and advance_dead_ai"
+)]
 fn advance_full(
     npc: &mut Npc,
     phase: Phase,
@@ -465,17 +472,19 @@ pub(crate) fn try_shoot_player(
             let initial_falling_speed = (random.uniform() - 0.5) * 0.2;
             if let Some(adjust) = shot.adjust {
                 // Mode0's post loop stores -3/0.1, then adds the params.
-                births.push(Birth::Projectile(crate::enemy_projectiles::ProjectileBirth {
-                    position: npc.position,
-                    velocity: velocity * adjust.velocity_scale,
-                    spawn_seed,
-                    initial_falling_speed,
-                    parameter_angle: shot.parameter_angle,
-                    falling_speed: -3.0 + adjust.falling_speed,
-                    falling_acceleration: 0.1,
-                    scale: 1.0,
-                    height: -23.0 + adjust.height,
-                }));
+                births.push(Birth::Projectile(
+                    crate::enemy_projectiles::ProjectileBirth {
+                        position: npc.position,
+                        velocity: velocity * adjust.velocity_scale,
+                        spawn_seed,
+                        initial_falling_speed,
+                        parameter_angle: shot.parameter_angle,
+                        falling_speed: -3.0 + adjust.falling_speed,
+                        falling_acceleration: 0.1,
+                        scale: 1.0,
+                        height: -23.0 + adjust.height,
+                    },
+                ));
                 continue;
             }
             births.push(Birth::Shot(Shot {

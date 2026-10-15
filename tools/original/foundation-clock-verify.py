@@ -42,7 +42,9 @@ def validate_run(run):
         else:
             if codec.decode_seed(state.get('seed')) != value or state.get('seedValue') != value:
                 failures.append('Actual original seed readback must match the selected seed')
-            if state.get('stage') != 1 or state.get('altStage') != 0 or state.get('stageSeed') != codec.initial_stage_seed(value):
+            # The run's first Level::Init; older records only kept the latest.
+            first = lambda key: state.get('initial' + key[0].upper() + key[1:], state.get(key))
+            if first('stage') != 1 or first('altStage') != 0 or first('stageSeed') != codec.initial_stage_seed(value):
                 failures.append('Actual original Stage1 log readback must match the general public stage-seed model')
             if type(state.get('rooms')) is not int or state['rooms'] < 2 or not isinstance(state.get('room'), str) or not state['room'] or type(state.get('spawnSeed')) is not int:
                 failures.append('Original room-generation and spawn log readback is required')

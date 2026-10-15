@@ -81,5 +81,51 @@ export function routingView(s) {
     fires: s.room.npcs.filter(n => n.kind === 33 && !n.dead && !n.removed).map(n => ({ x: n.position.x, y: n.position.y })),
     openGrid: s.room.grid && solidGrid(s.room.grid, s.room.npcs.filter(n => !n.dead && !n.removed && n.kind !== 33)),
     pickups: s.room.pickups.filter(p => !p.removed).map(p => ({ variant: p.variant, x: p.position.x, y: p.position.y })),
+    // Living door-shutting enemies and enemy shots, for fight().
+    foes: s.room.npcs.filter(n => n.canShutDoors && !n.dead && !n.removed && n.hp > 0)
+      .map(n => ({ kind: n.kind, boss: n.boss, x: n.position.x, y: n.position.y })),
+    shots: s.enemyProjectiles.filter(p => !p.dead && !p.removed).map(p => ({ x: p.position.x, y: p.position.y })),
+    stage: s.stage, stageTransition: s.stageTransition.state, trapdoor: s.room.trapdoor,
   };
+}
+
+// One closed-loop fight decision: aim along the dominant axis at the nearest
+// foe and orbit it (bosses at 170 units, others at 110), steering away from
+// walls, solid cells, foes and enemy shots; `memory.orbit` flips when boxed in.
+// Room bounds are the 1x1 playable box.
+export function fightKeys(view, memory) {
+  const { player, grid, foes, shots } = view;
+  if (!foes.length) return [];
+  const target = foes.reduce((a, b) => Math.hypot(a.x - player.x, a.y - player.y) <= Math.hypot(b.x - player.x, b.y - player.y) ? a : b);
+  const dx = target.x - player.x, dy = target.y - player.y, distance = Math.hypot(dx, dy) || 1;
+  const aim = Math.abs(dx) >= Math.abs(dy) ? (dx > 0 ? 'ArrowRight' : 'ArrowLeft') : (dy > 0 ? 'ArrowDown' : 'ArrowUp');
+  const radius = target.boss ? 170 : 110, pull = (radius - distance) / radius * 2;
+  const tangent = [-dy / distance * memory.orbit, dx / distance * memory.orbit];
+  const want = [tangent[0] - dx / distance * pull, tangent[1] - dy / distance * pull];
+  const solid = (x, y) => {
+    const [c, r] = cellOf(x, y);
+    return grid && c >= 0 && r >= 0 && c < grid.w && r < grid.h && grid.solid[r * grid.w + c] === '1';
+  };
+  let best;
+  for (const [ux0, uy0, keys] of [[1, 0, ['KeyD']], [1, 1, ['KeyD', 'KeyS']], [0, 1, ['KeyS']], [-1, 1, ['KeyS', 'KeyA']],
+    [-1, 0, ['KeyA']], [-1, -1, ['KeyA', 'KeyW']], [0, -1, ['KeyW']], [1, -1, ['KeyW', 'KeyD']], [0, 0, []]]) {
+    const norm = Math.hypot(ux0, uy0) || 1, ux = ux0 / norm, uy = uy0 / norm;
+    let score = ux * want[0] + uy * want[1];
+    for (const look of [20, 45]) {
+      const nx = player.x + ux * look, ny = player.y + uy * look, cost = look === 20 ? 3 : 1;
+      if (nx < 72 || nx > 568 || ny < 152 || ny > 408) score -= cost;
+      if (solid(nx, ny)) score -= cost;
+    }
+    for (const foe of foes) {
+      const near = Math.hypot(foe.x - (player.x + ux * 40), foe.y - (player.y + uy * 40)), reach = foe.boss ? 90 : 40;
+      if (near < reach) score -= (90 - near) / 30;
+    }
+    for (const shot of shots) {
+      const near = Math.hypot(shot.x - (player.x + ux * 25), shot.y - (player.y + uy * 25));
+      if (near < 45) score -= (45 - near) / 15;
+    }
+    if (!best || score > best.score) best = { score, keys, ux, uy };
+  }
+  if (best.score < 0.2 && Math.abs(tangent[0] * best.ux + tangent[1] * best.uy) < 0.5) memory.orbit = -memory.orbit;
+  return [...best.keys, aim];
 }

@@ -243,6 +243,9 @@ fn familiar_catalog(path: &Path, entities_xml: &str) -> String {
         (1000, 68, "gfx/1000.021_tiny bug.anm2"),
         (1000, 22, "gfx/1000.022_creep (red).anm2"),
         (1000, 1, "gfx/1000.001_bomb explosion.anm2"),
+        (1000, 30, "gfx/1000.030_dr. fetus target.anm2"),
+        (1000, 31, "gfx/1000.031_dr. fetus rocket.anm2"),
+        (1000, 18, "gfx/1000.018_bomb crater.anm2"),
     ] {
         let catalogue = &actors[actor];
         let default = catalogue["DefaultAnimation"]
@@ -653,6 +656,25 @@ fn main() {
             name.to_uppercase()
         ));
     }
+    let grid_animations = manifest.parent().unwrap().join("web/grid-data.json");
+    println!("cargo:rerun-if-changed={}", grid_animations.display());
+    let grid_assets: Value = serde_json::from_str(
+        &fs::read_to_string(grid_animations).expect("read authored grid animations"),
+    )
+    .expect("authored grid animation JSON");
+    for (constant, name) in [("CLOSED", "Closed"), ("OPEN_ANIMATION", "Open Animation")] {
+        let clip = grid_assets["gfx/grid/door_11_trapdoor.anm2"]["Animations"]
+            .as_array()
+            .expect("authored trapdoor clips")
+            .iter()
+            .find(|clip| clip["Name"] == name)
+            .expect("authored trapdoor clip");
+        assert_eq!(clip["Loop"], false, "trapdoor clip is nonlooping");
+        generated.push_str(&format!(
+            "pub const TRAPDOOR_{constant}_FRAMES: u32 = {};\n",
+            clip["FrameNum"].as_u64().expect("trapdoor clip frames")
+        ));
+    }
     let npc_assets: Value =
         serde_json::from_str(&fs::read_to_string(npcs).expect("read authored NPC animations"))
             .expect("authored NPC animation JSON");
@@ -974,6 +996,7 @@ fn main() {
         &item_decoder,
         &resources.join("items.xml"),
         &resources.join("itempools.xml"),
+        &resources.join("costumes2.xml"),
     ] {
         println!("cargo:rerun-if-changed={}", path.display());
     }

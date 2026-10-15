@@ -297,8 +297,11 @@ pub(crate) fn dispatch(
         vy: 0.0,
         age: 0,
         spawn_seed: seed,
+        birth_game_update: None,
         shot_ordinal: None,
         source_variant: Some(params.variant),
+        //The controlled owner below retains its separate actual cadence.
+        persistent_contacts: None,
         collision_damage: damage,
         base_damage: damage,
         attack_flags: AttackFlags(params.flags.0 | CONTROLLED),
@@ -756,6 +759,7 @@ pub(crate) fn contacts_actor(state: &mut State, id: u32) -> Result<(), String> {
                     amount,
                     kind: crate::combat::DamageKind::Tear,
                     source: crate::combat::DamageSource { id, entity_type: 2 },
+                    copied_source: None,
                 },
             )?;
             //546278..546309: this separate receiver callback adds half

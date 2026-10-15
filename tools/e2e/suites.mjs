@@ -62,6 +62,12 @@ export const SUITES = [
     'Bomb-revealed secret doors, entry and return'),
   suite('keepers', traversal, ['--scenario-helper', helper('keeper-scenarios.py'), '--count', '1'],
     'Keeper construction and anchored idle in secret rooms'),
+  // Each game fights its own keys into a fixed window; the trapdoor exit tail
+  // is shared (see stage-exit-scenarios.py).
+  suite('stage-exit', statePair, ['--scenario-helper', helper('stage-exit-scenarios.py'),
+    '--helper-arg', '--contrived', '--helper-arg', 'E1T36YXW-monstro', '--helper-arg', '--count', '--helper-arg', '1',
+    '--comparator', 'tools/foundation/stage-exit-state-pair.mjs', '--native-frame-timeout', '120'],
+    'Boss-room clear award trapdoor and pedestal, stage transition and Basement II arrival'),
   suite('key-doors', traversal, ['--scenario-helper', helper('key-door-scenarios.py'),
     '--state-observer', helper('key-door-observe.py'), '--count', '1'], 'Key collection, library unlock and revisit'),
   suite('large-rooms', traversal, ['--scenario-helper', helper('large-room-scenarios.py'), '--count', '2'],
