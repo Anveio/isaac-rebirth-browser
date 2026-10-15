@@ -29,6 +29,9 @@ pub struct Room {
     /// Room+0 becomes true after the admitted factory or restore tail.
     #[serde(default)]
     pub loaded: bool,
+    /// Actual Room+2494. Missing restore or unclosed writer history is unknown.
+    #[serde(default)]
+    pub source_tear_slowdown_2494: Option<i32>,
     pub pickups: Vec<crate::pickups::Pickup>,
     #[serde(default)]
     pub saved_regular_pickups: Vec<crate::pickups::SavedRegularPickup>,
@@ -220,6 +223,12 @@ impl DecorationRng {
 }
 
 impl Room {
+    /// Death66/variant0,481090 Attack02 frame22 writes4822DF after its
+    /// ordered Player effects. Unknown prior history is not invented as160.
+    pub fn apply_death_tear_slowdown(&mut self) {
+        self.source_tear_slowdown_2494 = self.source_tear_slowdown_2494.map(|prior| prior.max(160));
+    }
+
     /// 5cf614/5cff3f store loaded after factories or saved actor admission.
     pub(crate) fn complete_initialization(&mut self) {
         self.loaded = true;
@@ -527,6 +536,7 @@ impl Room {
             descriptor: None,
             initialization_game_update: None,
             loaded: false,
+            source_tear_slowdown_2494: None,
             pickups: Vec::new(),
             saved_regular_pickups: Vec::new(),
             npcs: Vec::new(),
