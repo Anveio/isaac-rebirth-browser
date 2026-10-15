@@ -371,6 +371,7 @@ fn spit(
             falling_speed: -4.0,
             falling_acceleration: 0.1,
             scale: 1.0,
+            height: -23.0,
         }));
     }
     sound(random, world, 303, 1.0, 2);

@@ -99,6 +99,18 @@ pub fn regular_subtype(variant: u32, subtype: u32, spawn_seed: u32) -> Result<u3
     }
 }
 
+/// Init can select transient Troll/Megatroll PU subtypes (40/3, 40/5)
+/// without an authored pickup actor. Until their first full Update converts
+/// them, they use the bomb pickup's temporary visual definition, so every
+/// definition lookup for a live pickup resolves its subtype here.
+pub(crate) fn definition_subtype(variant: u32, subtype: u32) -> u32 {
+    if variant == 40 && matches!(subtype, 3 | 5) {
+        1
+    } else {
+        subtype
+    }
+}
+
 pub fn definition(variant: u32, subtype: u32) -> Option<&'static Definition> {
     DEFINITIONS
         .iter()
@@ -217,15 +229,13 @@ impl Pickup {
         ) {
             return Ok(None);
         }
-        // Init can select transient Troll/Megatroll PU subtypes without an
-        // authored pickup actor. Their first full Update converts them before
-        // generic animation; use the bomb pickup's temporary visual definition.
-        let definition_subtype = if variant == 40 && matches!(subtype, 3 | 5) {
-            1
-        } else {
-            subtype
-        };
-        let mut pickup = Self::spawn(id, variant, definition_subtype, selector.position, appear)?;
+        let mut pickup = Self::spawn(
+            id,
+            variant,
+            definition_subtype(variant, subtype),
+            selector.position,
+            appear,
+        )?;
         pickup.subtype = subtype;
         pickup.initialize_spawn_seed(selector.spawn_seed)?;
         Ok(Some(pickup))
@@ -394,7 +404,7 @@ impl Pickup {
         // invent a Game-clock tick or age while the transition is frozen.
         self.age = game_update.saturating_sub(self.birth_game_update);
         if self.animation_playing {
-            let clip = definition(self.variant, self.subtype)
+            let clip = definition(self.variant, definition_subtype(self.variant, self.subtype))
                 .expect("admitted pickup definition")
                 .clips
                 .iter()
@@ -413,7 +423,7 @@ impl Pickup {
             }
         }
         if self.overlay_playing {
-            let clip = definition(self.variant, self.subtype)
+            let clip = definition(self.variant, definition_subtype(self.variant, self.subtype))
                 .expect("admitted pickup definition")
                 .clips
                 .iter()
@@ -602,15 +612,10 @@ pub(crate) fn readmit_regular_records(state: &mut crate::State) -> Result<Vec<u3
         // Saved subtype is concrete. Fresh normal Isaac has no modifier that
         // rerolls it; initializing temporary RNG35 consumes no output here.
         let subtype = regular_subtype(record.variant, record.subtype, record.spawn_seed)?;
-        let definition_subtype = if record.variant == 40 && matches!(subtype, 3 | 5) {
-            1
-        } else {
-            subtype
-        };
         let mut pickup = Pickup::spawn(
             record.handle,
             record.variant,
-            definition_subtype,
+            definition_subtype(record.variant, subtype),
             record.position,
             false,
         )?;
@@ -832,8 +837,11 @@ pub(crate) fn resolve_grid(
     grid: &crate::grid::Grid,
     preview: bool,
 ) -> Result<(), String> {
-    let definition = definition(pickup.variant, pickup.subtype)
-        .ok_or("moving pickup requires authored collision definition")?;
+    let definition = definition(
+        pickup.variant,
+        definition_subtype(pickup.variant, pickup.subtype),
+    )
+    .ok_or("moving pickup requires authored collision definition")?;
     let collider = crate::grid::Collider::new(crate::grid::CollisionGeometry {
         radius: pickup.collision_radius,
         scale: WorldVector { x: 1.0, y: 1.0 },

@@ -8,6 +8,7 @@ mod actors;
 mod floor;
 mod game;
 mod grid;
+mod item_pools;
 mod mt;
 mod phase;
 mod seed_codec;
@@ -42,6 +43,11 @@ pub const UNITS: &[Unit] = &[
         name: "grid",
         summary: "grid queries and ground-collision solvers on generated rooms",
         run: grid::run,
+    },
+    Unit {
+        name: "item_pools",
+        summary: "ItemPool selection, depletion, fallbacks, routing and continuation",
+        run: item_pools::run,
     },
     Unit {
         name: "game",

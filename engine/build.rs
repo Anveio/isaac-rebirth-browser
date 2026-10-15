@@ -189,6 +189,36 @@ fn pickup_catalog(path: &Path, animations: &Path, entities_xml: &str) -> String 
     output
 }
 
+/// tools/foundation/extract-alpha-masks.py output: one alpha>0.5 bitfield
+/// per clip of Creep (Red), rows as hex with bit x for texel x.
+fn creep_mask_catalog(path: &Path) -> String {
+    let data: Value =
+        serde_json::from_str(&fs::read_to_string(path).expect("read creep masks"))
+            .expect("parse creep masks");
+    let mut output = String::from("pub static CREEP_MASKS: &[CreepMask] = &[\n");
+    for (name, mask) in data["masks"].as_object().expect("creep masks") {
+        let rows: Vec<String> = mask["rows"]
+            .as_array()
+            .expect("mask rows")
+            .iter()
+            .map(|row| {
+                let bits = u128::from_str_radix(row.as_str().expect("mask row"), 16)
+                    .expect("hex mask row");
+                format!("{bits}")
+            })
+            .collect();
+        output.push_str(&format!(
+            "CreepMask {{ clip: {name:?}, left: {:?}_f32, top: {:?}_f32, width: {}, rows: &[{}] }},\n",
+            mask["left"].as_f64().expect("mask left"),
+            mask["top"].as_f64().expect("mask top"),
+            mask["width"].as_u64().expect("mask width"),
+            rows.join(",")
+        ));
+    }
+    output.push_str("];\n");
+    output
+}
+
 fn familiar_catalog(path: &Path, entities_xml: &str) -> String {
     let actors: Value = serde_json::from_str(
         &fs::read_to_string(path).expect("read authored Familiar/effect animations"),
@@ -204,6 +234,7 @@ fn familiar_catalog(path: &Path, entities_xml: &str) -> String {
         (1000, 49, "gfx/1000.049_heart.anm2"),
         (1000, 58, "gfx/1000.058_poop particle.anm2"),
         (1000, 43, "gfx/1000.043_poop explosion.anm2"),
+        (1000, 22, "gfx/1000.022_creep (red).anm2"),
     ] {
         let catalogue = &actors[actor];
         let default = catalogue["DefaultAnimation"]
@@ -474,6 +505,9 @@ fn boss_catalog(xml: &str) -> String {
             continue;
         };
         let (kind, variant) = identity.split_once('.').expect("portrait type.variant");
+        // 551a10 maps entity types to ids in code, not by file name:
+        // 551ccd gives Gurglings 237 id 56, whose sheet is named 276.0.
+        let (kind, variant) = if id == 56 { ("237", "1") } else { (kind, variant) };
         output.push_str(&format!(
             "BossPresentation {{ id: {id}, entity_type: {kind}, variant: {variant}, portrait: {portrait:?} }},\n",
             kind = kind.parse::<u32>().expect("portrait type"),
@@ -484,6 +518,38 @@ fn boss_catalog(xml: &str) -> String {
     output
 }
 
+fn laser_root_catalog(actors: &Value) -> String {
+    let actor = &actors["gfx/007.001_thick red laser.anm2"];
+    let layers = actor["Layers"].as_array().expect("Laser authored layers");
+    let clip = actor["Animations"]
+        .as_array()
+        .expect("Laser authored clips")
+        .iter()
+        .find(|clip| clip["Name"] == "LargeRedLaser")
+        .expect("Laser default clip");
+    let root = clip["LayerAnimations"]
+        .as_array()
+        .expect("Laser layer clips")
+        .iter()
+        .find(|layer| layer["LayerId"] == 0)
+        .expect("Laser root layer");
+    let mut out = format!(
+        "const LASER_LAYER_COUNT: usize = {};\nconst LASER_ROOT_EXTENTS: &[(u32, f32)] = &[\n",
+        layers.len()
+    );
+    for frame in root["Frames"].as_array().expect("Laser root frames") {
+        let delay = frame["Delay"].as_u64().expect("Laser root frame delay");
+        let x = frame["XPosition"].as_f64().expect("Laser root X") as f32;
+        let width = frame["Width"].as_f64().expect("Laser root width") as f32;
+        assert!(delay > 0 && delay <= u64::from(u32::MAX) && x.is_finite() && width.is_finite());
+        out.push_str(&format!("({delay}, {:?}),\n", x + width));
+    }
+    out.push_str("];\n");
+    out
+}
+
+/// bossportraits.xml: VS-screen presentation id, boss type/variant (encoded
+/// in the authored portrait name `Portrait_<type>.<variant>_...`) and portrait.
 fn main() {
     let manifest = PathBuf::from(std::env::var_os("CARGO_MANIFEST_DIR").unwrap());
     let resources = manifest
@@ -815,6 +881,11 @@ fn main() {
     fs::write(output.join("shadow_catalog.rs"), generated).expect("write shadow catalog");
     fs::write(output.join("entity_catalog.rs"), entity_catalog(&xml))
         .expect("write entity catalog");
+    fs::write(
+        output.join("laser_root_catalog.rs"),
+        laser_root_catalog(&npc_clips),
+    )
+    .expect("write authored Laser root definitions");
     fs::write(output.join("clip_catalog.rs"), clip_catalog(&npc_clips))
         .expect("write clip catalog");
     let portraits = resources.join("bossportraits.xml");
@@ -892,6 +963,10 @@ fn main() {
         "collectible catalogue rejected: {}",
         String::from_utf8_lossy(&items.stderr)
     );
+    let creep_masks = manifest.parent().unwrap().join("web/creep-mask-data.json");
+    println!("cargo:rerun-if-changed={}", creep_masks.display());
+    fs::write(output.join("creep_masks.rs"), creep_mask_catalog(&creep_masks))
+        .expect("write creep masks");
     let familiar_path = manifest.parent().unwrap().join("web/familiar-data.json");
     println!("cargo:rerun-if-changed={}", familiar_path.display());
     fs::write(

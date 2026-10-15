@@ -340,7 +340,7 @@ pub(crate) fn advance_transition(
     state.player.vy = 0.0;
     state.tears.clear();
     state.enemy_projectiles.clear();
-    state.lasers.clear();
+    crate::laser_runtime::reset_room(state)?;
     state.fire_particles.clear();
     state.impacts.clear();
     state.bombs.clear();
