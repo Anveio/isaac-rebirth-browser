@@ -798,7 +798,32 @@ pub fn generate_basement(stage_seed: u32) -> Result<Floor, String> {
 }
 
 pub fn generate_normal_basement(request: NormalBasementRequest) -> Result<Floor, String> {
-    generate_normal_basement_inner(request, None)
+    generate_normal_basement_with_special(request, None)
+}
+
+pub(crate) fn generate_normal_basement_with_special(
+    request: NormalBasementRequest,
+    special: Option<&[room_assets::RoomAsset]>,
+) -> Result<Floor, String> {
+    generate_normal_basement_inner(request, None, special)
+}
+
+pub(crate) fn generate_basement_with_special(
+    stage_seed: u32,
+    special: Option<&[room_assets::RoomAsset]>,
+) -> Result<Floor, String> {
+    generate_normal_basement_with_special(
+        NormalBasementRequest {
+            stage: 1,
+            stage_seed,
+            game_flags: 0,
+            red_hp: 6,
+            max_red_hp: 6,
+            soul_hp: 0,
+            coins: 0,
+        },
+        special,
+    )
 }
 
 pub(crate) fn generate_challenge_basement(
@@ -806,6 +831,7 @@ pub(crate) fn generate_challenge_basement(
     definition: &crate::challenges::Definition,
     profile: &crate::Profile,
     has_black_candle: bool,
+    special: Option<&[room_assets::RoomAsset]>,
 ) -> Result<Floor, String> {
     definition.validate_initial_scope()?;
     generate_normal_basement_inner(
@@ -819,12 +845,14 @@ pub(crate) fn generate_challenge_basement(
             coins: 0,
         },
         Some((definition, profile, has_black_candle)),
+        special,
     )
 }
 
 fn generate_normal_basement_inner(
     request: NormalBasementRequest,
     challenge: Option<(&crate::challenges::Definition, &crate::Profile, bool)>,
+    special: Option<&[room_assets::RoomAsset]>,
 ) -> Result<Floor, String> {
     let stage_seed = request.stage_seed;
     if !(1..=2).contains(&request.stage) {
@@ -833,7 +861,8 @@ fn generate_normal_basement_inner(
     if stage_seed == 0 {
         return Err("nonzero stage seed required".into());
     }
-    let special_assets = room_assets::special();
+    let special_assets =
+        special.map_or_else(room_assets::special, <[room_assets::RoomAsset]>::to_vec);
     let basement_assets = room_assets::basement();
     let mut special = TemplatePicker::new(
         special_assets

@@ -12,6 +12,8 @@ const AUTHORED_XML: &str = include_str!(concat!(env!("OUT_DIR"), "/challenges.xm
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct ResourceInputs {
     pub challenges_xml: String,
+    ///Complete authored STB bytes, never a decoded actor/state DTO.
+    pub special_rooms: Option<Vec<u8>>,
 }
 
 ///Exact594620 arguments stored at54eb4e/54eb5e. No semantic alias to

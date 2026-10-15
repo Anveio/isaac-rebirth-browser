@@ -179,8 +179,17 @@ pub fn basement() -> Vec<RoomAsset> {
 /// Resolve complete authored groups through the descriptor's original catalogue
 /// index, with an identity check. Selected weights live separately in Floor.
 pub fn for_descriptor(descriptor: &crate::floor::Descriptor) -> Result<RoomAsset, String> {
+    for_descriptor_with_special(descriptor, None)
+}
+
+///One decoded per-boot catalogue supplies both selector metadata and Room
+///admission. The transport accepts real STB records, not alternate actor state.
+pub(crate) fn for_descriptor_with_special(
+    descriptor: &crate::floor::Descriptor,
+    source: Option<&[RoomAsset]>,
+) -> Result<RoomAsset, String> {
     let mut catalog = match descriptor.asset_stage {
-        0 => special(),
+        0 => source.map_or_else(special, <[RoomAsset]>::to_vec),
         1 => basement(),
         _ => return Err("unimplemented authored stage catalogue".into()),
     };
@@ -192,4 +201,26 @@ pub fn for_descriptor(descriptor: &crate::floor::Descriptor) -> Result<RoomAsset
         return Err("descriptor identity differs from original authored catalogue".into());
     }
     Ok(asset)
+}
+
+///Serialize the immutable shared resource in a complete Game continuation.
+///State snapshots never contain this catalogue. Rebinding an Arc after load
+///preserves the same decoded authored input for later Room admissions.
+pub(crate) mod shared_catalogue {
+    use super::RoomAsset;
+    use serde::{Deserialize, Deserializer, Serialize, Serializer};
+    use std::sync::Arc;
+
+    pub fn serialize<S: Serializer>(
+        value: &Option<Arc<Vec<RoomAsset>>>,
+        serializer: S,
+    ) -> Result<S::Ok, S::Error> {
+        value.as_deref().serialize(serializer)
+    }
+
+    pub fn deserialize<'de, D: Deserializer<'de>>(
+        deserializer: D,
+    ) -> Result<Option<Arc<Vec<RoomAsset>>>, D::Error> {
+        Option::<Vec<RoomAsset>>::deserialize(deserializer).map(|value| value.map(Arc::new))
+    }
 }
