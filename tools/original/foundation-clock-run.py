@@ -344,6 +344,10 @@ def main():
         if progress:
             progress.append(kind, value)
     record('start', report)
+    if progress and observer:
+        # The committed journal already owns every complete observation.
+        # Keep its final array lazy instead of retaining all decoded snapshots.
+        report['debugObservations'] = evidence.JournalValues(progress, 'debugObservation')
     proc = None
     lifecycle = None
     started = time.monotonic()
@@ -408,7 +412,8 @@ def main():
                     'scope': 'reference debug data only; simulation ticks and full internal state not established'}
                 observed = checked_observation(observer, proc.pid, context)
                 observation = {'context': context, 'observation': observed}
-                report['debugObservations'].append(observation)
+                if not progress:
+                    report['debugObservations'].append(observation)
                 record('debugObservation', observation)
             if args.observe_every_step:
                 observe_current('bootstrap-'+str(current['presentedFrame']))

@@ -53,6 +53,14 @@ Antithesis they are judged across the whole exploration instead. Property
 messages start with their unit name and are the property identities; keep them
 stable.
 
+Seeded cases are independent, so they run on `--jobs` worker threads (all
+cores by default). A run's report does not depend on the thread count: each
+thread counts its own violations, the census tracks each thread's case
+separately, and a property reports the failure from the earliest unit, case
+and step. `--jobs 1` and `--jobs 4` write byte-identical reports for one
+seed. Under Antithesis the harness drives a single thread, so the platform
+orders every decision.
+
 A panic anywhere is an `unreachable` violation with its message attached. The
 harness profile unwinds and enables overflow checks and debug assertions, so
 the engine runs under debug arithmetic semantics while simulated.
@@ -69,10 +77,13 @@ indexes each one's declared properties from source.
 | `mt` | MT19937, descriptor seed tables, boot lifecycle | the C++ standard's mt19937 reference outputs; mid-stream JSON continuation; an eager 120,960-word table model of the lazy descriptor table; seed draw accounting |
 | `phase` | update/interpolate/skip phases | a counter model; two player and one nonplayer update per two-phase window regardless of interpolation; exhaustion without mutation |
 | `actors` | actor admission order and room identities | an independent list model under random admit/retain/reset |
-| `floor` | Basement generation and room admission | determinism; footprints; reciprocal edge-adjacent neighbors; reachability; exactly one boss/super secret/shop/treasure (the source retry rule); retry continuity; every descriptor admits as a `Room` |
+| `layout` | rectangular floor growth (`engine/src/layout.rs`) over every accepted seed, room count and shape mask | the grid marks exactly each room's rectangle; growth starts from the centre 1x1 room; every room has a shape its mask makes available and grows from an earlier room one step farther from the start; requested rooms are added unless the queue runs dry; the reported draw count replays the final RNG35 state through `items::Rng`; dead ends are leaves; expansion stops at five dead ends or five attempts; rejections; JSON round trips |
+| `floor` | Basement generation and room admission | determinism; footprints; reciprocal edge-adjacent neighbors; reachability; exactly one boss/super secret/shop/treasure (the source retry rule); retry continuity; every descriptor admits as a `Room`, and so does a uniformly chosen compatible authored room swapped into each descriptor (same catalogue, type and shape, doors available, stage difficulty), which admits about half again as many distinct authored rooms per run |
 | `grid` | grid queries and both ground-collision solvers on generated rooms | resolution never fails for bounded motion (including residual speeds whose squares underflow); previews keep velocity; an underflowing inward preview skips refinement (source 443117 → 44346c); correction moves only out along the contact normal; full nonplayer reflections leave the wall; blast candidate ordering and bounds |
+| `pathfinder` | FindGridPath's flood (`pathfinder::flood_costs`, 5b498f) over room-shaped and arbitrary cost grids | an independent node-weighted Dijkstra: every label is the cell's shortest distance whatever order heap ties take; only open cells of the grid change; the owner is visited exactly when it lies within half the room's cells; without it the flood visits exactly the cells nearer than that cutoff, with it every cell nearer than the expansion that visits the owner and none farther, and that expansion runs to its end; purity; grids outside admission are rejected |
+| `item_pools` | the run-owned ItemPool manager (`docs/item-pools.md`) | selection never offers a collectible twice (Breakfast aside), comes from its pool, the treasure fallback, Breakfast or the Bible, and advances none of the manager's streams; depletion only lowers weights and fills the removed/selected maps; a zero-counter counterfactual isolates Rosary's Bible override and the candidate it marks; drains reach Breakfast within the catalog; locked collectibles survive every redraw; error rooms route with one shared draw and special rooms to their namesake pools; JSON continuation; rejections without mutation |
 | `game` | the whole engine through public commands | per-step state invariants, per-command transition contracts (menus, run-start hold, pause, boss scenes, death and GameOver), exact rejection semantics, tape replay, serialized-midpoint continuation, the C ABI, the shipped WASM |
-| `abi` | the exported C ABI the browser bridge drives | framing bounds, malformed requests, failed resets, pre-reset commands on a fresh thread, the published key surface |
+| `abi` | the exported C ABI the browser bridge drives | framing bounds, malformed requests, failed resets, pre-reset commands on a fresh thread, the published key surface; a boot from the authored challenge XML and special-room STB through `reset_with_boot_resources` publishes and plays exactly like the plain boot, and truncated, unknown-field, oversized or corrupted resources fail with an error that keeps the previous game |
 
 The `game` driver ([driver.rs](../engine/dst/src/units/game/driver.rs)) only
 emits commands the browser bridge can send, plus adversarial variants of them
@@ -80,14 +91,54 @@ emits commands the browser bridge can send, plus adversarial variants of them
 over-budget ticks, stale music callbacks, key repeats and releases). Each case
 follows one persona (direct play, menu explorer or seeded run), sends
 browser-style host-timestamped frames (with jitter, hitches and rollbacks) or
-controlled steps, and steers by the published state: shortest grid routes to
-doors and reachable pickups, door-graph routes toward the boss room or the
-nearest unvisited room, demolishing rocks with bombs, aiming at NPCs, pausing,
-and answering the GameOver popup. Door-graph routes cross only the rooms the
-engine's own `traversal::admits` lets the player enter, so newly admitted rooms
-join the workload without a driver change. Rooms behind bombable secret doors
-and floors whose boss is Dingle are not yet reached, so Keepers and Dingle
-have no DST coverage.
+controlled steps, and steers by the published state. In a room it plays
+before it leaves:
+* It fights what is alive, lining up on one axis to fire along it. It keeps a
+  wider range against a boss and never stands still against one, but strafes
+  only to align, escape a corner or dodge: tears inherit 1.2× the player's
+  velocity across their aim (`projectiles::stored_velocity`), so a strafe
+  bends every shot off the line. It first steps away from the nearest threat
+  (a hostile NPC, where it will be in ten updates, or a boss's published
+  target such as Monstro's landing cell), still firing.
+* Movement and fire keys stay held from one macro to the next, as a player's
+  would; a macro presses and releases only the keys that change, so commands
+  buy game time instead of re-pressing held keys.
+* It then collects every pickup the engine marks `can_collect`: pedestal
+  items, hearts, chests and consumables.
+* It also demolishes blocking rocks with bombs, pauses, uses active and pocket
+  items and answers the GameOver popup.
+
+A seeded case first scouts its seed. On copies of the booted game it opens
+the seed dialog through the same public commands, starts runs for 96
+candidate codes, and asks the engine's own pedestal rule
+(`Pickup::from_collectible_selector`) what each floor's treasure room offers.
+It types a code whose collectible requests the weapon cache (authored
+`cacheFlags` 0x100: Brimstone, Technology, Mom's Knife, the fetuses and the
+rest of `weapon_plan::resolve_primary`) and heads for the treasure room, so
+the weapon plans and their attacks run under DST in ordinary budgets.
+
+Between rooms it follows door-graph routes toward the boss room or the nearest
+unvisited room. Routes cross only the rooms the engine's own
+`traversal::admits` lets the player enter, so newly admitted rooms join the
+workload without a driver change. A key opens a `KeyClosed` door on contact,
+and the driver bombs `Hidden` doors to reach secret rooms.
+
+Boss fights decide how long a tape must be to reach a clear. With key holds,
+aligned fire and threat evasion, cases branched from a Monstro room entry
+clear it in 7 of 32 runs, and from a Gluttony entry in 8 of 32. Dingle still
+wins every fight it starts.
+
+Every report carries a coverage census: the room types, NPC kinds, pickups and
+game features (owned collectibles, secret reveals, boss clears) each case
+reached, including each owned weapon collectible (`weapon:<id>`). The summary
+line names the implemented NPC kinds no case simulated
+(from `rebirth_cleanroom::implemented_npc_kinds`) and the room types that
+generated floors contained but no case entered. Unsimulated kinds are split
+by whether any authored Basement or special room places them
+(`unplacedNpcKinds`): a kind no room places, such as one from a later stage,
+is reachable only when another entity spawns it, so it is not a driver gap. The census is a measurement,
+not a property. Must-hit properties and coverage tapes make the important
+branches binding.
 
 Beyond its invariants, every `game` tape is checked by:
 
@@ -98,6 +149,11 @@ Beyond its invariants, every `game` tape is checked by:
   outside `Game`'s serialization.
 * **Lossless publication.** Published states and whole games round-trip
   through JSON and the engine's own deserialization validators.
+* **Batched ticks.** A sampled `Tick` of up to 32 steps is re-run as that many
+  single ticks and must reach the identical game. Only command-level
+  publication may differ: the batch carries every step's sound and music
+  events, and a screen change resets the menu animation counter at the
+  command boundary.
 * **C ABI differential.** The tape drives the exported `reset`/`request_ptr`/
   `command`/`snapshot_*` functions exactly as `web/engine.ts` does.
 * **Shipped-WASM differential.** With `--wasm web/generated/engine.wasm` (the
@@ -121,12 +177,47 @@ property set on every run, after the generated cases:
 
 * `regression-*` tapes reproduce fixed findings and fail without their fix.
 * `coverage-*` tapes are generated cases that together reach every `game`
-  must-hit property (boss-scene key handling, GameOver, collection and other
-  rare branches), so ordinary budgets never pass or fail on luck. When an
-  engine change moves them off those branches, harvest candidates with
-  `--retain-all`, replay each with `--replay … --report …`, and keep a small
-  covering set. Game tapes drift as the engine evolves; a regression tape that
-  stops reproducing its finding is retired rather than kept under its label.
+  must-hit property (boss-scene key handling, GameOver, collection, boss and
+  miniboss clears and other rare branches), so ordinary budgets never pass or
+  fail on luck. The clear tapes were branched with `--resume` from boss and
+  miniboss room entries. Other coverage tapes run implemented NPC families
+  that ordinary budgets seldom meet, so their AI runs through every property
+  and the shipped WASM on every run. Game tapes drift as the engine evolves;
+  a regression tape that stops reproducing its finding is retired rather than
+  kept under its label.
+
+Every report's census records, per case, the command at which the case first
+reached each key (`coverage.firstSteps`). `tools/dst/cover.py` turns that into
+corpus upkeep. Harvest with `--retain-all`, measure the corpus alone
+(`--units game --cases 0 --corpus engine/dst/corpus --report …`), and the
+tool cuts the shortest harvested prefixes, running 300 commands past each
+first contact, that cover the keys the corpus misses:
+
+```sh
+engine/dst/target/release/rebirth-dst --units game --cases 64 --steps 4000 \
+  --retain-all --tapes H/tapes --report H/report.json
+engine/dst/target/release/rebirth-dst --units game --cases 0 \
+  --corpus engine/dst/corpus --report B.json
+python3 tools/dst/cover.py --harvest H/report.json --tapes H/tapes \
+  --baseline B.json --prefix npc: --out engine/dst/corpus --verify
+```
+
+`--verify` replays each written tape and drops any that no longer reaches its
+keys. When an engine change moves a must-hit coverage tape off its branch,
+the same harvest refreshes it.
+
+`--resume TAPE` makes every generated `game` case replay that tape (with
+every check) and then drive on from its end, so exploration branches from an
+interesting state, as Antithesis does, instead of rediscovering it. Cut a
+harvested tape at, say, a boss room entry, resume many cases from it, and the
+census shows how often each branch clears the room; a clearing branch is a
+short coverage tape.
+
+Open findings, which fail on current main and wait on their owner, keep their
+tape in [engine/dst/findings](../engine/dst/findings) instead. `test:dst` does
+not replay that directory, so one unfixed finding does not turn every run red,
+but `--replay engine/dst/findings/NAME.json` reproduces it exactly. The fix
+moves the tape into the corpus as a `regression-*` tape.
 
 ## Findings
 
@@ -142,6 +233,9 @@ fix must follow source evidence rather than merely silence the property.
 | Native std float functions call the host C library, while wasm32 std uses Rust's `libm`. Against `libm`, glibc 2.39 disagreed on 162,416 of 10,405,090 sampled `f32` `sin`/`cos` inputs and on 446,514 of 10,000,000 sampled `f64` `atan2` pairs. Generated tapes diverged from the shipped WASM by one ulp of NPC motion; the corpus tape's first difference is an Attack Fly's wander velocity (`npcs.rs`) at step 749, so native replay and tools could disagree with the artifact. | [fmath.rs](../engine/src/fmath.rs) routes the engine's `sin`, `cos` and `atan2` through the `libm` crate. wasm32 std matched it on every sampled input under Rust 1.97 and 1.99, so the shipped artifact computes the same results while native builds now agree with it. [engine/clippy.toml](../engine/clippy.toml) disallows every std float function whose precision Rust leaves unspecified, so `npm run lint` flags new host calls; a newly needed function gets a `libm` wrapper in `fmath.rs`. This makes no original-game parity claim. | `regression-native-wasm-fly-trig`, the shipped-WASM differential on every tape, and the lint rule |
 | Engine validation, the browser and DST each kept their own copy of the accepted key list, so new keys drifted. | Fixed on main (#122): `rebirth_cleanroom::input::PUBLIC_KEYS` is the single owner, published through the `public_keys` exports. | `abi: the public_keys export publishes exactly the engine's key surface`. |
 | Main reproduces the original's 0/0 boss bar fill during a boss's first two frames (83112e8): the fill is NaN, published as `null`. `BossBar` kept a derived equality, and NaN never equals itself, so whole-state equality stopped being reflexive while the bar held NaN. Every "unchanged" or "same game" comparison then failed: lossless round trips, ignored boss-scene keys, replay and midpoint continuation. Ordinary runs on main reached that window after the grid changes of #224 and #225. | `BossBar` equality treats any two NaN fills as the same bar, without comparing NaN bits, which native and wasm32 may produce differently. Lossy round trips now report the first differing JSON pointer, or where the values' `Debug` forms differ when the JSON agrees. | `game: state equality is reflexive` and `regression-boss-bar-nan-equality` |
+| **Open.** Killing a Dip while the player owns Gimpy (225) or Infestation 2 (234) fails the tick with `Dip death requires the owned225/234 source callbacks`, and every later tick fails the same way, so the browser's frame loop stops. The item pipeline grants these items, but the Dip death callbacks they need are not reconstructed. DST reached it once the driver collected items and fought rooms. | Tracked in #295 for the Dip death owner (#128): reconstruct the 225/234 death callbacks from source, or keep those items out of reach until then. DST does not fake the callbacks. | [`findings/dip-death-with-gimpy`](../engine/dst/findings/dip-death-with-gimpy.json) fails `game: valid Tick commands always succeed` at command 5819 |
+| A chest that dropped a Troll or Megatroll Bomb (pickup 40/3 or 40/5) froze the game. Every tick after it failed with `moving pickup requires authored collision definition`. The loot is born moving, so the newborn grid pass looked up its collision definition by the transient subtype, which has none. Three spawn sites already mapped these subtypes to the bomb pickup's temporary visual definition, but the grid and animation lookups did not. | `pickups::definition_subtype` is the single owner of that mapping. Every spawn, animation and grid lookup for a live pickup resolves through it, as the transient subtypes' Init already documents. | `regression-chest-troll-bomb-loot` (380 commands) |
+| The walls invariant (#331) claimed a grid-colliding body's centre never leaves the room interior. A bomb dropped while the player stood in an open top doorway was born on the door cell, outside the interior, and rested there until the player left: the nonplayer ground solver (443117) reflects only motion into solid cells and never moves a body at rest, so nothing pushes it back. The property, not the engine, was wrong; one of 64 generated cases in a harvest hit it. | The invariant admits a centre on a doorway cell (grid kind 16) and still rejects any centre on a boundary wall or beyond the grid. | `regression-bomb-in-doorway` (230 commands) fails the old property at command 209 |
 | The `game` driver kept its own copy of which rooms the player may enter. Main admitted large and miniboss rooms (#171, #181) but the copy did not, so DST never entered Gluttony's room. Lasers, the shared pathfinder and the laser invariants went unexercised; generated runs reached 8 of the 12 implemented NPC kinds. | `rebirth_cleanroom::traversal::admits` is the single owner of doorway admission (the engine's departure check uses it). The driver routes by it, and explorers head for the nearest unvisited admitted room. 48 generated runs then reached Gluttony and Pooters and met every `game` property without the corpus. | `game: the player is in a miniboss room`, `game: a laser is live` and `coverage-5923f07d83419608` |
 
 ## Running on Antithesis
@@ -152,19 +246,26 @@ and the production `engine.wasm` from a context that
 [Dockerfile.dockerignore](../antithesis/Dockerfile.dockerignore) limits to the
 engine build's inputs; the entrypoint signals `setup_complete` and
 Test Composer runs the [drivers](../antithesis/test/v1/rebirth-engine) with
-`--entropy antithesis`: the kernel units, and one whole-engine game per
-invocation checked against the shipped WASM. Under Antithesis, must-hit
+`--entropy antithesis`: every registered unit but `game` (the driver lists them
+from `rebirth-dst --list`, so new units join without a driver change), and one
+whole-engine game per invocation checked against the shipped WASM. Under Antithesis, must-hit
 properties are judged across the whole exploration, so a single driver
 invocation never fails for leaving some unmet. `--build-arg INSTRUMENT=1` adds
 Antithesis coverage instrumentation and needs the platform's `libvoidstar.so`
 at `antithesis/libvoidstar.so`.
 
+The platform is optional. Local runs (`npm run test:dst`) are the suite: they
+use the same SDK assertions and Antithesis's must-hit semantics, with seeded,
+replayable entropy, and every finding so far came from them. A platform run
+would add guided input search and far larger parallel exploration. Its fault
+injection and scheduling control add little to a single-threaded simulation
+without I/O.
+
 The binary embeds data compiled from the private original resources (room
 layouts and catalogues). Pushing the image to any external registry,
 Antithesis included, requires the repository owner's explicit approval. The
 entrypoint and both drivers run cleanly in the SDK's local mode
-(`ANTITHESIS_SDK_LOCAL_OUTPUT`); the platform's own evaluation remains to be
-done.
+(`ANTITHESIS_SDK_LOCAL_OUTPUT`).
 
 ## Extending
 

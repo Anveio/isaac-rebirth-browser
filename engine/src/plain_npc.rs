@@ -119,12 +119,55 @@ pub(crate) fn walk_frame(npc: &mut Npc, horizontal: &str, vertical: &str, thresh
     }
 }
 
+/// 4fc3d6: a boss plays "Death"; Larry Jr. (4fc8e8) picks DeathBody01 for
+/// a segment with a parent and DeathHead otherwise.
+fn death_clip(npc: &Npc) -> &'static str {
+    if content::clip(&npc.actor, "Death").is_some() {
+        "Death"
+    } else if npc.parent.is_some() {
+        "DeathBody01"
+    } else {
+        "DeathHead"
+    }
+}
+
+/// A dead boss plays its death clip in state16 before 4f2d10 removes it.
+fn dying_boss(npc: &mut Npc, mut friction: f32) -> Result<(), String> {
+    let mut frame = npc.death_frame;
+    if crate::boss_death::step(npc, &mut frame, &mut friction)? == 0 {
+        let clip = death_clip(npc);
+        play(npc, clip, false);
+    }
+    npc.death_frame = frame;
+    update_sprite(npc)?;
+    npc.friction = friction;
+    npc.velocity = npc.velocity * friction;
+    npc.position = npc.position + npc.velocity;
+    npc.presented_position = npc.position;
+    crate::boss_death::finish_if_done(npc);
+    Ok(())
+}
+
 /// IsFinished40fba0 for the current clip.
 pub(crate) fn finished(npc: &Npc) -> bool {
     !npc.animation_playing
 }
 
 fn update_sprite(npc: &mut Npc) -> Result<(), String> {
+    if let Some(overlay) = npc.overlay.as_mut().filter(|overlay| overlay.playing) {
+        let clip = content::clip(&npc.actor, &overlay.animation)
+            .ok_or_else(|| format!("{} has no authored overlay {}", npc.actor, overlay.animation))?;
+        let next = overlay.clock + 1.0;
+        if next.floor() < clip.frames as f32 {
+            overlay.clock = next;
+        } else if clip.looping {
+            overlay.clock = 0.0;
+        } else {
+            overlay.clock = (clip.frames - 1) as f32;
+            overlay.playing = false;
+        }
+        overlay.frame = overlay.clock.floor() as u32;
+    }
     if !npc.animation_playing {
         return Ok(());
     }
@@ -157,7 +200,8 @@ pub(crate) fn advance(
     births: &mut Vec<Birth>,
     ai: Ai,
 ) -> Result<(), String> {
-    advance_with(npc, phase, random, world, births, ai, true)
+    let appear = !npc.no_appear;
+    advance_with(npc, phase, random, world, births, ai, appear)
 }
 
 /// `advance` for a family whose state0 initializer may clear the APPEAR flag
@@ -173,6 +217,34 @@ pub(crate) fn advance_with(
     ai: Ai,
     appear: bool,
 ) -> Result<(), String> {
+    advance_full(npc, phase, random, world, births, ai, appear, false)
+}
+
+/// `advance` for a boss whose AI handles its own death: Entity_NPC::Update
+/// calls update_ai once more with dead set (the base kill follows the AI),
+/// and only the post-AI handling enters state16 in that same update.
+pub(crate) fn advance_dead_ai(
+    npc: &mut Npc,
+    phase: Phase,
+    random: &mut Mt19937,
+    world: &mut NpcWorld<'_>,
+    births: &mut Vec<Birth>,
+    ai: Ai,
+) -> Result<(), String> {
+    advance_full(npc, phase, random, world, births, ai, true, true)
+}
+
+#[expect(clippy::too_many_arguments, reason = "the shared appear and dead-AI switches of advance_with and advance_dead_ai")]
+fn advance_full(
+    npc: &mut Npc,
+    phase: Phase,
+    random: &mut Mt19937,
+    world: &mut NpcWorld<'_>,
+    births: &mut Vec<Birth>,
+    ai: Ai,
+    appear: bool,
+    dead_ai: bool,
+) -> Result<(), String> {
     if npc.removed {
         return Ok(());
     }
@@ -180,13 +252,19 @@ pub(crate) fn advance_with(
         npc.presented_position = npc.position + npc.velocity * 0.5;
         return Ok(());
     }
-    if npc.dead {
-        // Dead NPCs keep negative HP through the next intermediate phase and
-        // retire at the following full pass.
-        npc.removed = true;
-        return Ok(());
-    }
     let mut friction = npc.base_friction;
+    if npc.dead {
+        if !npc.boss {
+            // Dead NPCs keep negative HP through the next intermediate phase
+            // and retire at the following full pass.
+            npc.removed = true;
+            return Ok(());
+        }
+        if dead_ai && npc.state != 16 {
+            ai(npc, random, world, births, &mut friction)?;
+        }
+        return dying_boss(npc, friction);
+    }
     if npc.state == 1 {
         friction *= 0.01;
         match npc.frame_age {
@@ -228,7 +306,13 @@ pub(crate) fn advance_with(
     } else {
         ai(npc, random, world, births, &mut friction)?;
     }
+    if npc.dead && npc.boss {
+        // A boss that killed itself in its AI (Larry Jr.'s lone head) enters
+        // state16 in the same update's post-AI handling.
+        return dying_boss(npc, friction);
+    }
     update_sprite(npc)?;
+    npc.friction = friction;
     npc.velocity = npc.velocity * friction;
     npc.position = npc.position + npc.velocity;
     npc.presented_position = npc.position;
@@ -295,6 +379,18 @@ pub(crate) struct ShotParameters {
     pub speed: f32,
     /// Default ProjectileParams47eaf0 angle, drawn by the caller every update.
     pub parameter_angle: f32,
+    /// 4ba430 predictive aim: the player's velocity times this is added.
+    pub lead: f32,
+    /// ProjectileParams +4 height, +8 falling-speed and +10 velocity
+    /// overrides applied after mode0's post loop (None keeps the defaults).
+    pub adjust: Option<ShotAdjust>,
+}
+
+#[derive(Clone, Copy)]
+pub(crate) struct ShotAdjust {
+    pub height: f32,
+    pub falling_speed: f32,
+    pub velocity_scale: f32,
 }
 
 /// try_shoot_player4ba430 with a nonpredictive FireProjectiles shot. Returns whether this update chose to shoot; the shot itself follows
@@ -306,9 +402,10 @@ pub(crate) fn try_shoot_player(
     births: &mut Vec<Birth>,
     shot: ShotParameters,
 ) -> Result<bool, String> {
+    let aimed = world.player + world.player_velocity * shot.lead;
     let delta = WorldVector {
-        x: world.player.x - npc.position.x,
-        y: world.player.y - npc.position.y,
+        x: aimed.x - npc.position.x,
+        y: aimed.y - npc.position.y,
     };
     let mut chosen = false;
     let gate = on_frame(npc, world, 7)?;
@@ -322,7 +419,7 @@ pub(crate) fn try_shoot_player(
         } else if delta.x * delta.x + delta.y * delta.y < shot.range * shot.range
             && world.grid.projectile_line_clear(
                 npc.position,
-                world.player,
+                aimed,
                 world
                     .path_costs
                     .as_deref()
@@ -366,6 +463,21 @@ pub(crate) fn try_shoot_player(
             // Each shot draws its spawn seed, then Init its falling speed.
             let spawn_seed = random.next_u32();
             let initial_falling_speed = (random.uniform() - 0.5) * 0.2;
+            if let Some(adjust) = shot.adjust {
+                // Mode0's post loop stores -3/0.1, then adds the params.
+                births.push(Birth::Projectile(crate::enemy_projectiles::ProjectileBirth {
+                    position: npc.position,
+                    velocity: velocity * adjust.velocity_scale,
+                    spawn_seed,
+                    initial_falling_speed,
+                    parameter_angle: shot.parameter_angle,
+                    falling_speed: -3.0 + adjust.falling_speed,
+                    falling_acceleration: 0.1,
+                    scale: 1.0,
+                    height: -23.0 + adjust.height,
+                }));
+                continue;
+            }
             births.push(Birth::Shot(Shot {
                 position: npc.position,
                 velocity,

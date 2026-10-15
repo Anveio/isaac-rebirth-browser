@@ -4,6 +4,7 @@ import { GLMenuContext, type GLSurface } from "./gl-menu";
 import { StageComposer, type StageTargets } from "./gl-stage";
 import { RunPresentation } from "./presentation";
 import { PickupRenderer } from "./pickups";
+import {drawPlayerLaser} from "./lasers";
 import type { ActorSprite, Room, RoomAppearance, RoomQuad, State } from "./engine";
 
 const PLAYER = "gfx/001.000_player.anm2";
@@ -41,6 +42,7 @@ export class Renderer {
   private readonly floor: GLSurface;
   private readonly walls: GLSurface;
   private roomKey = "";
+  private paintedStains = { count: 0, last: "" };
   // Room-transition snapshots of the old and new world layers.
   private readonly slideOld: GLSurface;
   private readonly slideNew: GLSurface;
@@ -161,11 +163,23 @@ export class Renderer {
   private drawWorld(ctx: CanvasRenderingContext2D, state: State, hidePlayer = false): void {
     ctx.save();
     if (state.camera) ctx.translate(state.camera.scroll.x, state.camera.scroll.y);
-    this.drawRoom(state.room.appearance);
+    this.drawRoom(state.room.appearance, state.room.grid);
     ctx.restore();
     this.stage.ground(state.stageEffects);
     ctx.save();
     if (state.camera) ctx.translate(state.camera.scroll.x, state.camera.scroll.y);
+    // Creep's render key (seq & 0x3ff) + 2100 sorts every pool under the
+    // y-sorted actors, in spawn order; colour multiplies the clip's pulse.
+    for (const effect of state.spriteEffects) {
+      if (!effect.creepEffect || !effect.visible || !effect.active) continue;
+      const sprite = effect.sprite;
+      ctx.save();
+      ctx.translate(effect.presentedPosition.x * 0.65 + 32, effect.presentedPosition.y * 0.65 - 46);
+      ctx.scale(sprite.scale.x, sprite.scale.y);
+      this.assets.draw(ctx, "gfx/1000.022_creep (red).anm2", sprite.animation, 0, 0, sprite.frame,
+        { color: { tint: sprite.tint, offsets: sprite.offsets } });
+      ctx.restore();
+    }
     const grid = state.room.grid;
     if (grid) for (const [index, cell] of grid.cells.entries()) {
       const entity = cell.entity;
@@ -182,14 +196,25 @@ export class Renderer {
       } else if (rock) {
         this.assets.draw(ctx, "gfx/grid/grid_rock.anm2", rock.animation, x, y, rock.frame);
         this.drawnGrid.push({ index, kind: entity.kind, ...rock });
+      } else if (entity.kind === 14 && entity.variant === 0 && entity.sourceOwner?.poopSheet) {
+        // Poop.Init569600 picks grid_poop_{1..3} and plays State{state+1}
+        // (State5 once broken); a spawn into a loaded room plays Appear first.
+        const sheet = { 0: `gfx/grid/grid_poop_${entity.sourceOwner.poopSheet}.png`, 1: "gfx/effects/effect_poopspawn.png" };
+        const birth = entity.sourceOwner.birthGameUpdate, init = state.room.initializationGameUpdate;
+        const age = birth !== null && init !== null && birth > init ? state.gameUpdateCount - birth : Infinity;
+        const animation = age < 20 ? "Appear" : `State${Math.min(entity.state + 1, 5)}`;
+        const frame = age < 20 ? age : entity.state === 0 ? 0 : 4;
+        this.assets.draw(ctx, "gfx/grid/grid_poop.anm2", animation, x, y, frame, { spritesheets: sheet });
+        this.drawnGrid.push({ index, kind: 14, animation, frame });
       } else if (entity.kind === 8 && entity.state === 0)
         this.assets.draw(ctx, "gfx/grid/grid_spikes.anm2", `Spikes${String(entity.variant).padStart(2, "0")}`, x, y);
     }
     this.pickups.draw(ctx, state);
     for (const npc of state.room.npcs) {
-      if (npc.removed || (npc.dead && !npc.monstro && !npc.dip) || (!npc.keeper && !npc.visible)) continue;
+      // A dying boss (state 16) keeps drawing its death clip.
+      if (npc.removed || (npc.dead && !npc.monstro && !npc.dip && npc.state !== 16) || (!npc.keeper && !npc.visible)) continue;
       // Sprite Scale (+2c4): 1.15 for champions, otherwise the fresh 1.
-      const scale = npc.champion?.scale ?? 1;
+      const scale = npc.spriteScale ?? npc.champion?.scale ?? 1;
       // Sprite Color (+2d0): champion table colour or a timed hit flash.
       const color = { tint: npc.spriteColor.current.tint, offsets: npc.spriteColor.current.offset };
       this.drawnNpcs.push({ kind: npc.kind, spawnSeed: npc.spawnSeed, scale: [scale, scale] });
@@ -231,6 +256,8 @@ export class Renderer {
         ctx.translate(npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46);
         ctx.scale(npc.flipX ? -1 : 1, 1);
         this.assets.draw(ctx, npc.actor, npc.animation, 0, 0, npc.animationClock, { scale, color });
+        // ANM2 overlay slot (Gemini's head) draws over the main clip.
+        if (npc.overlay) this.assets.draw(ctx, npc.actor, npc.overlay.animation, 0, 0, npc.overlay.clock, { scale, color });
         ctx.restore();
       } else {
         this.assets.draw(ctx, npc.kind === 13 ? "gfx/013.000_fly.anm2" : npc.kind === 18 ? "gfx/018.000_attack fly.anm2" : npc.kind === 214 ? "gfx/213.000_level2fly.anm2" : "gfx/244.000_round worm.anm2", npc.animation,
@@ -265,6 +292,7 @@ export class Renderer {
       ctx.restore();
     }
     for (const laser of state.lasers) {
+      if (laser.origin === "npcShootAngle") {
       if (!laser.active) continue;
       // The impact effect keys 500 below its laser, so it draws under the beam.
       const impact = laser.impact;
@@ -277,6 +305,20 @@ export class Renderer {
         ctx.restore();
       }
       this.drawLaser(ctx, this.npcLaserView(laser));
+        continue;
+      }
+      const impact=laser.impact;
+      if (impact && !impact.removed && state.actorScheduler.actors.some(actor => actor.kind === "effect" && actor.id === impact.id)) {
+        ctx.save();
+        ctx.translate((impact.position.x+impact.positionOffset.x)*.65+32,(impact.position.y+impact.positionOffset.y)*.65-46);
+        ctx.rotate(impact.rotation*Math.PI/180);ctx.scale(impact.scale.x,impact.scale.y);
+        if (!impact.currentColor) throw new Error("Player Impact color history is absent");
+        this.assets.draw(ctx,impact.actor,impact.animation,0,0,impact.animationClock,
+          {color:impact.currentColor});
+        ctx.restore();
+      }
+      if (laser.uninitialized !== false || !state.actorScheduler.actors.some(actor => actor.kind === "laser" && actor.id === laser.id)) continue;
+      drawPlayerLaser(this.graphics,this.assets,laser,{width:480,height:270,pixelScale:this.canvas.width/480});
     }
     for (const projectile of state.enemyProjectiles)
       if (!projectile.removed && projectile.animation)
@@ -310,7 +352,7 @@ export class Renderer {
         this.assets.draw(ctx, bomb.variant === 3 ? "gfx/004.003_troll bomb.anm2" : bomb.variant === 4 ? "gfx/004.004_megatroll bomb.anm2" : "gfx/004.000_bomb.anm2", bomb.animation, bomb.x, bomb.y - 1, bomb.animationFrame, { pixelSnap: this.canvas.width / 480 / 2 });
     for (const effect of state.spriteEffects) {
       // Source31f dead can coexist with31e active until a later Remove.
-      if (!effect.visible || !effect.active || effect.footprint) continue;
+      if (!effect.visible || !effect.active || effect.footprint || effect.creepEffect) continue;
       if (effect.variant === 58 || effect.variant === 43) {
         const sprite = effect.sprite, controller = effect.poopEffect;
         const rotation = controller && "particle58" in controller && typeof controller.particle58 === "object"
@@ -325,6 +367,27 @@ export class Renderer {
             BlueTint: sprite.tint[2] * 255, AlphaTint: sprite.tint[3] * 255,
             RedOffset: sprite.offsets[0] * 255, GreenOffset: sprite.offsets[1] * 255, BlueOffset: sprite.offsets[2] * 255,
           }} });
+        ctx.restore();
+        continue;
+      }
+      if (effect.flyEffect) {
+        // Duke effects: the smoke draws 40 above its ground (+458) with its
+        // colour multiplying every layer; a dying tiny fly's Main layer falls
+        // onto its shadow (LayerState+0x30).
+        const sprite = effect.sprite;
+        const actor = effect.variant === 1 ? "gfx/1000.001_bomb explosion.anm2"
+          : effect.variant === 2 ? "gfx/1000.002_blood explosion.anm2" : "gfx/1000.033_tiny fly.anm2";
+        const fall = sprite.layerOffsets?.[0]?.[1];
+        const layerScales = Object.fromEntries(Object.entries(sprite.layerFlips).map(([layer, flips]) =>
+          [layer, [flips[0] ? -1 : 1, flips[1] ? -1 : 1] as const]));
+        ctx.save();
+        ctx.translate((effect.presentedPosition.x + effect.renderOffset.x) * 0.65 + 32,
+          (effect.presentedPosition.y + effect.renderOffset.y) * 0.65 - 46);
+        ctx.rotate(sprite.rotation * Math.PI / 180);
+        ctx.scale(sprite.scale.x * (sprite.flipX ? -1 : 1), sprite.scale.y * (sprite.flipY ? -1 : 1));
+        this.assets.draw(ctx, actor, sprite.animation, 0, 0, sprite.frame, {
+          layerScales, color: { tint: sprite.tint, offsets: sprite.offsets },
+          ...(fall === undefined ? {} : { overrides: { 0: { YPosition: -16 + fall } } }) });
         ctx.restore();
         continue;
       }
@@ -425,10 +488,22 @@ export class Renderer {
     const key = JSON.stringify({ backdrop: appearance.backdrop, patchSize: appearance.backdropPatchSize,
       patchColumns: appearance.backdropPatchColumns, floor: appearance.floorQuads, walls: appearance.wallQuads,
       columns: appearance.columns, rows: appearance.rows, tileSize: appearance.tileSize, tutorial: appearance.tutorial,
-      backgroundStains: room.backgroundStains });
-    if (key === this.roomKey) return;
+      origin: appearance.origin });
+    // Background stains are append-only within a room (familiars.rs pushes,
+    // a new room starts empty), so an unchanged prefix only needs the new
+    // stains painted over the existing floor target.
+    const stains = room.backgroundStains, painted = this.paintedStains;
+    const continues = key === this.roomKey && stains.length >= painted.count
+      && (painted.count === 0 || JSON.stringify(stains[painted.count - 1]) === painted.last);
+    if (continues && stains.length === painted.count) return;
     const gl = this.graphics, width = appearance.columns * appearance.tileSize, height = appearance.rows * appearance.tileSize;
     gl.beginTarget(this.floor, width, height); gl.resetTransform(); gl.globalAlpha = 1; gl.imageSmoothingEnabled = false;
+    if (continues) {
+      gl.blendFactors("srcAlpha", "oneMinusSrcAlpha");
+      this.paintStains(appearance, stains.slice(painted.count));
+      this.paintedStains = { count: stains.length, last: JSON.stringify(stains[stains.length - 1]) };
+      return;
+    }
     gl.clearRect(0, 0, this.floor.width, this.floor.height); gl.blendFactors("one", "zero");
     this.drawQuads(appearance, appearance.floorQuads);
     if (appearance.tutorial) {
@@ -437,8 +512,16 @@ export class Renderer {
       gl.drawImage(controls, Math.round(width / 2 - controls.width / 2), Math.round(height / 2 - controls.height / 2));
     }
     gl.blendFactors("srcAlpha", "oneMinusSrcAlpha");
-    const ctx = gl.asCanvasContext();
-    for (const stain of room.backgroundStains) {
+    this.paintStains(appearance, stains);
+    gl.beginTarget(this.walls, width, height); gl.resetTransform();
+    gl.clearRect(0, 0, this.walls.width, this.walls.height); gl.blendFactors("one", "zero");
+    this.drawQuads(appearance, appearance.wallQuads);
+    this.roomKey = key;
+    this.paintedStains = { count: stains.length, last: stains.length ? JSON.stringify(stains[stains.length - 1]) : "" };
+  }
+  private paintStains(appearance: RoomAppearance, stains: Room["backgroundStains"]): void {
+    const ctx = this.graphics.asCanvasContext();
+    for (const stain of stains) {
       // Footprints take their color from floor pixels the runtime does not
       // sample yet; painting them with zero offsets would draw black marks.
       if (stain.footprint) continue;
@@ -465,12 +548,8 @@ export class Renderer {
           (stain.position.y + sprite.offset.y) * 0.65 - 46 - appearance.origin.y);
       }
     }
-    gl.beginTarget(this.walls, width, height); gl.resetTransform();
-    gl.clearRect(0, 0, this.walls.width, this.walls.height); gl.blendFactors("one", "zero");
-    this.drawQuads(appearance, appearance.wallQuads);
-    this.roomKey = key;
   }
-  private drawRoom(appearance: RoomAppearance): void {
+  private drawRoom(appearance: RoomAppearance, grid: Room["grid"]): void {
     const gl = this.graphics, ctx = gl.asCanvasContext(), size = appearance.tileSize, border = size * 2;
     const width = appearance.columns * size, height = appearance.rows * size, { x, y } = appearance.origin;
     gl.drawSurface(this.floor, border, border, width - border * 2, height - border - size,
@@ -484,7 +563,18 @@ export class Renderer {
     for (const connection of appearance.doors) {
       ctx.save(); ctx.translate(connection.x, connection.y); ctx.rotate(rotation[connection.side]);
       this.assets.draw(ctx, connection.asset, connection.state, 0, 0, 0,
-        connection.spritesheet ? { spritesheets: { 0: connection.spritesheet } } : {}); ctx.restore();
+        connection.spritesheet ? { spritesheets: { 0: connection.spritesheet } } : {});
+      // Door.LoadGraphics5629c0 overlays door_17_bardoor on barred variant4;
+      // AnimState563b70 holds its Idle while closed. The Vanish fade on
+      // opening is not yet modelled.
+      const index = grid ? Math.floor((connection.worldPosition.x - 40) / 40 + 0.5)
+        + Math.floor((connection.worldPosition.y - 120) / 40 + 0.5) * grid.width : -1;
+      const entity = grid?.cells[index]?.entity;
+      if (entity?.kind === 16 && entity.variant === 4 && entity.state !== 2) {
+        this.assets.draw(ctx, "gfx/grid/door_17_bardoor.anm2", "Idle", 0, 0);
+        this.drawnGrid.push({ index, kind: 16, animation: "Idle", frame: 0 });
+      }
+      ctx.restore();
     }
     gl.drawImage(this.assets.image(appearance.fx.shading), x, y, width, height);
   }

@@ -16,6 +16,18 @@ gfx/014.000_pooter.anm2
 gfx/014.001_super pooter.anm2
 gfx/049.000_gluttony.anm2
 gfx/007.001_thick red laser.anm2
+gfx/007.002_thin red laser.anm2
 gfx/1000.050_brimstoneimpact.anm2
 gfx/261.000_dingle.anm2
 gfx/218.000_wall hugger.anm2
+gfx/019.000_larry jr..anm2
+gfx/021.000_maggot.anm2
+gfx/023.000_charger.anm2
+gfx/031.000_spity.anm2
+gfx/239.000_grub.anm2
+gfx/237.000_gurgling.anm2
+gfx/067.000_the duke of flies.anm2
+gfx/079.000_gemini.anm2
+gfx/079.010_gemini baby.anm2
+gfx/079.020_umbilical cord.anm2
+gfx/1000.050_laserimpact.anm2

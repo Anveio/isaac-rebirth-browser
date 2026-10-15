@@ -68,6 +68,7 @@ checks = []
 coverage = collections.Counter()
 paired_rows = []
 damage_chains = {}
+common_damage_chains = {}
 doorway_witnesses = []
 laser_lifetimes = {}
 render_witnesses = []
@@ -347,67 +348,72 @@ def compare_lasers(source, state, t, native_counter):
         matches = [actor for actor in state['lasers'] if actor['id'] == ref['id']]
         assert len(matches) == 1, 'Referenced Laser unresolved; no NULL coercion'
         actual = matches[0]
-        check('actual Laser identity family/variant/subtype/sequence/seed', identity_tuple(identity), identity_tuple(reference(state, ref)), t)
-        check('actual Laser own-manager membership', original['inActiveManager'], ref in state['actorScheduler']['actors'], t)
+        check_field('actual Laser identity family/variant/subtype/sequence/seed', lambda: identity_tuple(identity), lambda: identity_tuple(reference(state, ref)), t)
+        check_field('actual Laser own-manager membership', lambda: original['inActiveManager'], lambda: ref in state['actorScheduler']['actors'], t)
         for key in ('active', 'dead', 'visible', 'hp', 'maxHp', 'collisionRadius', 'collisionMass', 'collisionDamage',
                     'gridCollisionClass', 'entityCollisionClass', 'raw494'):
-            expected, observed = original[key], actual[key]
-            if type(expected) is float:
-                expected, observed = f32(expected), f32(observed)
-            check('actual Laser ' + key, expected, observed, t)
+            if key in ('hp', 'maxHp'):
+                check_field('actual Laser ' + key + ' Native numeric owner',
+                            lambda: True, lambda: math.isfinite(f32(original[key])), t)
+                check_field('actual Laser ' + key + ' port numeric owner',
+                            lambda: True, lambda: math.isfinite(f32(actual[key])), t)
+            check_field('actual Laser ' + key,
+                        lambda: f32(original[key]) if key in ('hp', 'maxHp') or type(original[key]) is float else original[key],
+                        lambda: f32(actual[key]) if key in ('hp', 'maxHp') or type(original[key]) is float else actual[key], t)
         for source_key, port_key in [('position', 'position'), ('savedPosition450', 'savedPosition'),
                                       ('velocity', 'velocity'), ('renderOffset', 'renderOffset')]:
-            check('actual Laser ' + source_key, vector(original[source_key]), vector(actual[port_key]), t)
-        check('actual Laser born age', original['bornGameAge'], actual['birthGameUpdate'], t)
-        check('actual Laser fast322', original['fast322'], actual['fast'], t)
-        check('actual Laser generic flags318', original['genericFlags318'], actual['entityFlags'], t)
+            check_field('actual Laser ' + source_key, lambda: vector(original[source_key]), lambda: vector(actual[port_key]), t)
+        check_field('actual Laser born age', lambda: original['bornGameAge'], lambda: actual['birthGameUpdate'], t)
+        check_field('actual Laser fast322', lambda: original['fast322'], lambda: actual['fast'], t)
+        check_field('actual Laser generic flags318', lambda: original['genericFlags318'], lambda: actual['entityFlags'], t)
         for source_key, port_key in [('currentFriction470', 'currentFriction'), ('configuredFriction46c', 'configuredFriction')]:
-            check('actual Laser ' + source_key, f32(original[source_key]), f32(actual[port_key]), t)
-        check('actual Laser current RNG words', original['actorRngWords7c0'],
-              [actual['actorRng'][key] for key in ('state', 'rightA', 'left', 'rightB')], t)
-        check('actual Laser permanent3a0 color', original['permanentColor3a0'], color(actual['sourceColor']), t)
-        check('actual Laser current2d0 color', original['currentColor2d0'], color(actual['currentColor']), t)
-        check('actual Laser cached spawner', (original['cachedSpawner']['kind'], original['cachedSpawner']['variant']),
-              (actual['spawnerType'], actual['spawnerVariant']), t)
-        for key, source_ref in [('parent', original['linkedParent']), ('child', original['laser']['child'])]:
+            check_field('actual Laser ' + source_key, lambda: f32(original[source_key]), lambda: f32(actual[port_key]), t)
+        check_field('actual Laser current RNG words', lambda: original['actorRngWords7c0'],
+              lambda: [actual['actorRng'][key] for key in ('state', 'rightA', 'left', 'rightB')], t)
+        check_field('actual Laser permanent3a0 color', lambda: original['permanentColor3a0'], lambda: color(actual['sourceColor']), t)
+        check_field('actual Laser current2d0 color', lambda: original['currentColor2d0'], lambda: color(actual['currentColor']), t)
+        check_field('actual Laser cached spawner', lambda: (original['cachedSpawner']['kind'], original['cachedSpawner']['variant']),
+              lambda: (actual['spawnerType'], actual['spawnerVariant']), t)
+        for key in ('parent', 'child'):
             try:
+                source_ref = original['linkedParent'] if key == 'parent' else original['laser']['child']
                 port_ref = reference(state, actual[key])
-                check('actual Laser ' + key + ' null/reference', source_ref is None, port_ref is None, t)
+                check_field('actual Laser ' + key + ' null/reference', lambda: source_ref is None, lambda: port_ref is None, t)
                 if source_ref and port_ref:
                     fields = ('kind', 'variant', 'subtype', 'sequenceId')
-                    check('actual Laser ' + key + ' source identity', tuple(source_ref[k] for k in fields), tuple(port_ref[k] for k in fields), t)
+                    check_field('actual Laser ' + key + ' source identity', lambda: tuple(source_ref[k] for k in fields), lambda: tuple(port_ref[k] for k in fields), t)
             except Exception as error:
                 missing('actual Laser '+key+' reference group',t,error)
         for key in ('parentOffset', 'endpoint'):
-            check('actual Laser ' + key, vector(original['laser'][key]), vector(actual[key]), t)
+            check_field('actual Laser ' + key, lambda: vector(original['laser'][key]), lambda: vector(actual[key]), t)
         for key in ('angle', 'previousAngle', 'renderSortOffset', 'beamLength', 'maxDistance'):
-            check('actual Laser ' + key, f32(original['laser'][key]), f32(actual[key]), t)
+            check_field('actual Laser ' + key, lambda: f32(original['laser'][key]), lambda: f32(actual[key]), t)
         for key in ('remainingUpdates', 'firstUpdate', 'lineEnabled', 'contactDisabled', 'rotationEnabled', 'lineController'):
-            check('actual Laser ' + key, original['laser'][key], actual[key], t)
-        check('actual Laser attack flags7e8', original['laser']['attackFlags'], flags(actual['attackFlags']), t)
-        check('actual Laser copied line flags818', original['laser']['lineFlags'], flags(actual['lineFlags']), t)
+            check_field('actual Laser ' + key, lambda: original['laser'][key], lambda: actual[key], t)
+        check_field('actual Laser attack flags7e8', lambda: original['laser']['attackFlags'], lambda: flags(actual['attackFlags']), t)
+        check_field('actual Laser copied line flags818', lambda: original['laser']['lineFlags'], lambda: flags(actual['lineFlags']), t)
         try:
-            check('source ordinary ParentPlayer Laser Line writer scope', True, original['laser']['line']['sourceOrdinaryLineWriterScope'], t)
+            check_field('source ordinary ParentPlayer Laser Line writer scope', lambda: True, lambda: original['laser']['line']['sourceOrdinaryLineWriterScope'], t)
             for key in ('origin', 'offset'):
-                check('actual Laser line ' + key, vector(original['laser']['line'][key]), vector(actual['line'][key]), t)
+                check_field('actual Laser line ' + key, lambda: vector(original['laser']['line'][key]), lambda: vector(actual['line'][key]), t)
             for key in ('subdivisions', 'mode'):
-                check('actual Laser line ' + key, original['laser']['line'][key], actual['line'][key], t)
-            check('actual Laser line length86c', f32(original['laser']['line']['length']), f32(actual['line']['length']), t)
-            check('actual ordinary initialized Laser width810', f32(original['laser']['line']['width']), f32(actual['line']['width']), t)
+                check_field('actual Laser line ' + key, lambda: original['laser']['line'][key], lambda: actual['line'][key], t)
+            check_field('actual Laser line length86c', lambda: f32(original['laser']['line']['length']), lambda: f32(actual['line']['length']), t)
+            check_field('actual ordinary initialized Laser width810', lambda: f32(original['laser']['line']['width']), lambda: f32(actual['line']['width']), t)
             for key in ('points', 'priorPoints', 'history'):
-                check('actual Laser complete line ' + key, [vector(v) for v in original['laser']['line'][key]],
-                      [vector(v) for v in actual['line'][key]], t)
+                check_field('actual Laser complete line ' + key, lambda: [vector(v) for v in original['laser']['line'][key]],
+                      lambda: [vector(v) for v in actual['line'][key]], t)
             controls = [[f32(v) for v in values] for values in original['laser']['line']['controls']]
             port_controls = [vector(value['position']) + vector(value['incoming']) + vector(value['outgoing']) for value in actual['line']['controls']]
-            check('actual Laser complete line controls870', controls, port_controls, t)
+            check_field('actual Laser complete line controls870', lambda: controls, lambda: port_controls, t)
         except Exception as error:
             missing('mandatory source-typed ordinary Line body group',t,error)
         for key in ('animation', 'frame', 'playing', 'rotation'):
-            expected, observed = original['sprite'][key], actual['sprite'][key]
-            if type(expected) is float: expected, observed = f32(expected), f32(observed)
-            check('actual Laser Sprite ' + key, expected, observed, t)
+            check_field('actual Laser Sprite ' + key,
+                        lambda: f32(original['sprite'][key]) if type(original['sprite'][key]) is float else original['sprite'][key],
+                        lambda: f32(actual['sprite'][key]) if type(original['sprite'][key]) is float else actual['sprite'][key], t)
         for key in ('scale', 'offset'):
-            check('actual Laser Sprite ' + key, vector(original['sprite'][key]), vector(actual['sprite'][key]), t)
+            check_field('actual Laser Sprite ' + key, lambda: vector(original['sprite'][key]), lambda: vector(actual['sprite'][key]), t)
         try:
             compare_impact(source, original, actual, state, t, native_counter)
         except Exception as error:
@@ -425,7 +431,7 @@ def compare_lasers(source, state, t, native_counter):
 def compare_impact(source, original_laser, actual_laser, state, t, native_counter):
     source_ref = original_laser['laser']['child']
     port_ref = actual_laser['child']
-    check('actual ordinary Impact child relation present', source_ref is None, port_ref is None, t)
+    check_field('actual ordinary Impact child relation present', lambda: source_ref is None, lambda: port_ref is None, t)
     if source_ref is None:
         return
     assert tuple(source_ref[k] for k in ('kind','variant','subtype')) == (1000,50,1)
@@ -435,22 +441,22 @@ def compare_impact(source, original_laser, actual_laser, state, t, native_counte
     actual = actual_laser['impact']
     assert actual is not None and port_ref is not None and port_ref['kind'] == 'effect' and port_ref['id'] == actual['id']
     identity = reference(state, port_ref)
-    check('actual Impact identity/seed', identity_tuple(source_ref), identity_tuple(identity), t)
-    check('actual Impact dead31f', original['dead'], actual['dead'], t)
-    check('actual Impact manager membership', original['inActiveManager'], port_ref in state['actorScheduler']['actors'], t)
-    check('actual Impact Parent NULL relation', original['linkedParent'] is None, actual['parent'] is None, t)
+    check_field('actual Impact identity/seed', lambda: identity_tuple(source_ref), lambda: identity_tuple(identity), t)
+    check_field('actual Impact dead31f', lambda: original['dead'], lambda: actual['dead'], t)
+    check_field('actual Impact manager membership', lambda: original['inActiveManager'], lambda: port_ref in state['actorScheduler']['actors'], t)
+    check_field('actual Impact Parent NULL relation', lambda: original['linkedParent'] is None, lambda: actual['parent'] is None, t)
     if original['linkedParent'] is not None and actual['parent'] is not None:
-        check('actual Impact Parent source identity', identity_tuple(original['linkedParent']), identity_tuple(reference(state,actual['parent'])), t)
+        check_field('actual Impact Parent source identity', lambda: identity_tuple(original['linkedParent']), lambda: identity_tuple(reference(state,actual['parent'])), t)
     for source_key,port_key in [('position','position'),('renderOffset','positionOffset')]:
-        check('actual Impact '+source_key,vector(original[source_key]),vector(actual[port_key]),t)
-    check('actual Impact Sprite scale',vector(original['sprite']['scale']),vector(actual['scale']),t)
-    check('actual Impact Sprite rotation',f32(original['sprite']['rotation']),f32(actual['rotation']),t)
-    check('actual Impact Sprite clip',original['sprite']['animation'],actual['animation'],t)
-    check('actual Impact Sprite frame',f32(original['sprite']['frame']),f32(actual['animationClock']),t)
-    check('actual Impact Sprite playing',original['sprite']['playing'],actual['animationPlaying'],t)
-    check('actual Impact depth7f8',f32(original['impact']['renderSortOffset']),f32(actual['depth']),t)
-    check('actual Impact permanent color3a0',original['permanentColor3a0'],color(actual['sourceColor']),t)
-    check('actual Impact current color2d0',original['currentColor2d0'],color(actual['currentColor']),t)
+        check_field('actual Impact '+source_key,lambda: vector(original[source_key]),lambda: vector(actual[port_key]),t)
+    check_field('actual Impact Sprite scale',lambda: vector(original['sprite']['scale']),lambda: vector(actual['scale']),t)
+    check_field('actual Impact Sprite rotation',lambda: f32(original['sprite']['rotation']),lambda: f32(actual['rotation']),t)
+    check_field('actual Impact Sprite clip',lambda: original['sprite']['animation'],lambda: actual['animation'],t)
+    check_field('actual Impact Sprite frame',lambda: f32(original['sprite']['frame']),lambda: f32(actual['animationClock']),t)
+    check_field('actual Impact Sprite playing',lambda: original['sprite']['playing'],lambda: actual['animationPlaying'],t)
+    check_field('actual Impact depth7f8',lambda: f32(original['impact']['renderSortOffset']),lambda: f32(actual['depth']),t)
+    check_field('actual Impact permanent color3a0',lambda: original['permanentColor3a0'],lambda: color(actual['sourceColor']),t)
+    check_field('actual Impact current color2d0',lambda: original['currentColor2d0'],lambda: color(actual['currentColor']),t)
     coverage['actualImpactBodies'] += 1
     coverage['impactFullBodies' if native_counter % 2 == 1 else 'impactFastBodies'] += 1
 
@@ -585,6 +591,152 @@ def compare_causal_npcs(source, world, state, t, native_counter):
             'scope': 'Actual next-full manager absence/counts; inactive store inferred from sole Remove, never an invented absent actor row.'}
 
 
+def common_contact_spec():
+    """Two explicit source payloads; never reinterpret the Dip217 contract."""
+    brim = case['requires'].get('ordinaryBrimContact')
+    tear = case['requires'].get('controlledTearContact')
+    assert not (brim is not None and tear is not None), 'One typed contact producer required'
+    if brim is not None:
+        receiver = brim['authoredReceiver']
+        assert receiver['type'] in (14, 18)
+        assert contract['family'] == 7 and contract['variant'] == 1 and contract['subtype'] == 0
+        return brim, [receiver['type']], 1, 0, 8
+    if tear is not None:
+        assert tear['receiverTypes'] and all(type(k) is int and k in (14, 18) for k in tear['receiverTypes'])
+        assert (tear['sourceEntityType'], tear['sourceVariant'], tear['damageFlags'], tear['countdown']) == (2, 0, 0, 30)
+        assert contract['family'] == 2 and contract['controlledBy329'] is True
+        return tear, tear['receiverTypes'], 2, 0, 0
+    return None
+
+
+def contact_source(source, state, spec):
+    """Resolve each own C18/source; a Parent payload is not a Laser identity."""
+    _, _, source_type, source_variant, _ = spec
+    slot = source['players'][0]['actorSlots']['c18']
+    assert slot is not None, 'Contact source requires its actual registered C18'
+    native_bodies = [a for a in source['attacks'] if a['identity'] == slot['identity']]
+    assert len(native_bodies) == 1, 'Native C18 must resolve one real source actor'
+    native_body = native_bodies[0]
+    ref = state['attackRuntime']['persistent']
+    assert ref is not None and ref['kind'] == ('laser' if source_type == 1 else 'tear')
+    port_body = [a for a in state['lasers' if source_type == 1 else 'tears'] if a['id'] == ref['id']]
+    assert len(port_body) == 1, 'Port C18 must resolve one real source actor'
+    if source_type == 1:
+        assert identity_tuple(native_body['identity'])[:3] == (7, 1, 0)
+        native_owner = native_body['linkedParent']
+        assert native_owner == source['players'][0]['owner'], 'Laser damage source must be its actual ParentPlayer'
+        port_owner = reference(state, port_body[0]['parent'])
+        assert port_owner == reference(state, {'kind': 'player', 'id': 0})
+    else:
+        native_owner, port_owner = native_body['identity'], reference(state, ref)
+        assert int(native_body['attackFlags7f0']) & (1 << 33) and int(flags(port_body[0]['attackFlags'])) & (1 << 33)
+    assert identity_tuple(native_owner)[:2] == identity_tuple(port_owner)[:2] == (source_type, source_variant)
+    return native_owner, port_owner, f32(native_body['collisionDamage']), f32(port_body[0]['collisionDamage'])
+
+
+def compare_common_contacts(source, state, t, native_counter, spec):
+    """Observe real common NPC FIFO and nonlethal next-Full application.
+
+    This does not infer callback counts, historical EntityRef values, registry
+    hits, impulse order, lethal subclass behavior or Remove from later absence.
+    """
+    declaration, kinds, source_type, source_variant, damage_flags = spec
+    native_targets = [a for a in source['commonContactNpcs'] if a['identity']['kind'] in kinds]
+    port_targets = [a for a in state['room']['npcs'] if a['kind'] in kinds and not a['removed']]
+    check_field('typed contact complete receiver identities',
+        lambda: sorted(identity_tuple(a['identity']) for a in native_targets),
+        lambda: sorted(identity_tuple(reference(state, {'kind': 'npc', 'id': a['id']})) for a in port_targets), t)
+    for original in native_targets:
+        identity = original['identity']
+        matches = [a for a in port_targets if (a['kind'], a['variant'], a['subtype'],
+            reference(state, {'kind': 'npc', 'id': a['id']})['sequenceId']) == identity_tuple(identity)[:4]]
+        if len(matches) != 1:
+            missing('typed contact receiver correspondence', t, 'No unique actual kind/variant/subtype/source-sequence join')
+            continue
+        actual = matches[0]
+        for field in ('hp', 'maxHp', 'pendingDamage', 'pendingFlags'):
+            check_field('typed contact receiver ' + field,
+                lambda: f32(original[field]) if field != 'pendingFlags' else original[field],
+                lambda: f32(actual['damage'][field] if field.startswith('pending') else actual[field]) if field != 'pendingFlags' else actual['damage'][field], t)
+        for field in ('dead', 'visible', 'raw494', 'entityCollisionClass'):
+            check_field('typed contact receiver ' + field, lambda: original[field], lambda: actual[field], t)
+        check_field('typed contact receiver own-manager membership', lambda: original['inActiveManager'],
+            lambda: {'kind': 'npc', 'id': actual['id']} in state['actorScheduler']['actors'], t)
+        # Npc.champion serializes Some only; absence is that explicit Option
+        # schema, not an assumed authored variant/HP or native champion value.
+        check_field('typed contact receiver champion', lambda: original['champion'], lambda: actual.get('champion') is not None, t)
+        for field in ('npcState', 'npcFrameAge'):
+            check_field('typed contact receiver ' + field, lambda: original[field],
+                lambda: actual['state' if field == 'npcState' else 'frameAge'], t)
+        for field, port_field in (('position', 'presentedPosition'), ('velocity', 'velocity')):
+            check_field('typed contact receiver ' + field, lambda: vector(original[field]), lambda: vector(actual[port_field]), t)
+        check_field('typed contact receiver radius', lambda: f32(original['collisionRadius']), lambda: f32(actual['collisionRadius']), t)
+        native_records, port_events = original['pendingDamageRecords'], actual['damage']['events']
+        check('typed contact ordered FIFO length', len(native_records), len(port_events), t)
+        event_flag_values = {'laser': 8, 'tear': 0, 'knife': 0, 'bomb': 4, 'fireContact': 2, 'roomEffect': 0}
+        for record, event in zip(native_records, port_events):
+            check_field('typed contact FIFO amount', lambda: f32(record['amount']), lambda: f32(event['amount']), t)
+            check_field('typed contact FIFO flags', lambda: record['flags'], lambda: event_flag_values[event['kind']], t)
+            check_field('typed contact FIFO source type', lambda: record['sourceType'], lambda: event['source']['entityType'], t)
+        native_fifo, port_fifo = [], []
+        for record in native_records:
+            native_fifo.append([f32(record['amount']), record['flags'], record['sourceType'], record['sourceVariant'],
+                identity_tuple(record['actualAttacker']) if record['actualAttacker'] is not None else None])
+        for index, event in enumerate(port_events):
+            try:
+                kind = {1: 'player', 2: 'tear', 7: 'laser', 8: 'knife'}[event['source']['entityType']]
+                attacker = reference(state, {'kind': kind, 'id': event['source']['id']})
+                event_flags = event_flag_values[event['kind']]
+                port_fifo.append([f32(event['amount']), event_flags, event['source']['entityType'], attacker['variant'], identity_tuple(attacker)])
+            except Exception as error:
+                port_fifo.append(None)
+                missing('typed contact actual FIFO source ' + str(index), t, error)
+        check('typed contact ordered FIFO amount/flags/source identity', native_fifo, port_fifo, t)
+        row = {'presentation': t, 'nativeCounter': native_counter, 'portCounter': state['systemClock']['systemCounter'],
+            'nativeGameAge': source['gameAge'], 'portGameAge': state['gameUpdateCount'],
+            'nativeHp': f32(original['hp']), 'portHp': f32(actual['hp']),
+            'nativeFifo': native_fifo, 'portFifo': port_fifo, 'nativeRawRecords': native_records,
+            'nativeQueued': False, 'portQueued': False, 'nativeApplied': False, 'portApplied': False}
+        try:
+            native_owner, port_owner, native_damage, port_damage = contact_source(source, state, spec)
+            check('typed contact own source identities', identity_tuple(native_owner), identity_tuple(port_owner), t)
+            for side, fifo, owner, amount in (('native', native_fifo, native_owner, native_damage), ('port', port_fifo, port_owner, port_damage)):
+                row[side + 'Queued'] = any(r is not None and r == [amount, damage_flags, source_type, source_variant, identity_tuple(owner)] and amount > 0 for r in fifo)
+        except Exception as error:
+            missing('typed contact actual registered damage producer', t, error)
+        # 447729 skips damage for494; Game bit40 chooses a different applier.
+        # No literal0 is supplied for an unknown serialized owner.
+        row['nativeApplierKnown'] = original['raw494'] is False and original['entityFlags'] == 4 and int(source['runFlags10ead8']) & 0x40 == 0
+        try:
+            row['portApplierKnown'] = actual['raw494'] is False and int(source_run_flags(state)) & 0x40 == 0
+        except Exception as error:
+            row['portApplierKnown'] = False
+            missing('typed contact port damage run-flag owner', t, error)
+        key = (source['roomDescriptor']['gridIndex'], *identity_tuple(identity))
+        chain = common_damage_chains.setdefault(key, {'identity': identity, 'rows': []})
+        previous = chain['rows'][-1] if chain['rows'] else None
+        if previous and previous['presentation'] == t:
+            continue  # Same recorded gate is not another accepted enqueue.
+        if previous and native_counter % 2 == row['portCounter'] % 2 == 1:
+            for side in ('native', 'port'):
+                if (row[side + 'GameAge'] != previous[side + 'GameAge'] + 1
+                        or not previous[side + 'Queued'] or not previous[side + 'ApplierKnown'] or not row[side + 'ApplierKnown']):
+                    continue
+                expected = previous[side + 'Hp']
+                fifo = previous[side + 'Fifo']
+                if not fifo or any(r is None or r[1] not in (0, 8) or r[0] <= 0 for r in fifo):
+                    missing('typed contact ' + side + ' unsupported queued applier', t, 'Unknown flags/nonpositive amount in complete FIFO')
+                    continue
+                for record in fifo:
+                    expected = f32(expected - record[0])
+                if expected < 0:
+                    missing('typed contact ' + side + ' lethal subclass lifecycle', t, 'Captured lethal queue needs its separate callback/cleanup witness')
+                    continue
+                check('typed contact ' + side + ' next-Full ordered f32 HP application', expected, row[side + 'Hp'], t)
+                row[side + 'Applied'] = expected == row[side + 'Hp']
+        chain['rows'].append(row)
+
+
 def equal(expected, actual):
     if isinstance(expected, bool) or isinstance(actual, bool):
         return type(expected) is type(actual) and expected == actual
@@ -610,6 +762,28 @@ def missing(field, presentation, error):
     checks.append({'field': field, 'presentation': presentation, 'passed': False, 'error': str(error)})
 
 
+fetus_module, fetus_context = None, None
+if 'ordinaryDrFetus' in case['requires']:
+    fetus_path = Path(__file__).with_name('composition-dr-fetus.py')
+    fetus_spec = importlib.util.spec_from_file_location('ordinary_dr_fetus', fetus_path)
+    fetus_module = importlib.util.module_from_spec(fetus_spec)
+    fetus_spec.loader.exec_module(fetus_module)
+    fetus_context = fetus_module.begin(case)
+
+common_spec = None
+try:
+    common_spec = common_contact_spec()
+except Exception as error:
+    missing('mandatory typed NPC14/18 contact declaration', None, error)
+
+technology_comparer = None
+technology_result = None
+if case['requires'].get('ordinaryTechnologyFunctional') is not None:
+    technology_spec = importlib.util.spec_from_file_location(
+        'ordinary_technology_comparer', Path(__file__).with_name('composition-technology.py'))
+    technology_module = importlib.util.module_from_spec(technology_spec)
+    technology_spec.loader.exec_module(technology_module)
+    technology_comparer = technology_module.TechnologyComparer(globals(), case)
 check('actual completed original', ('pass', []), (native.get('status'), native.get('failures')), None)
 check('actual completed browser', 'complete', browser.get('captureStatus'), None)
 trace = browser.get('trace') or {}
@@ -665,11 +839,22 @@ for captured in sorted(all_captured, key=lambda row: row['presentation']):
         paired_rows.append({'presentation': t, 'source': source, 'state': state,
                             'nativeCounter': observed['systemCounter'], 'nativeContext': row['context'],
                             'nativePlayer': observed['players'][0], 'gameplayPresentation': captured.get('gameplayPresentation')})
+        if fetus_context is not None:
+            try:
+                fetus_module.snapshot(fetus_context, source, state, t, observed['systemCounter'],
+                                      globals(), observed['players'][0])
+            except Exception as error:
+                missing('mandatory typed DrFetus Bomb group', t, error)
         if dip_contact_required:
             try:
                 compare_causal_npcs(source, observed['world'], state, t, observed['systemCounter'])
             except Exception as error:
                 missing('mandatory actual same-target contact group', t, error)
+        if common_spec is not None:
+            try:
+                compare_common_contacts(source, state, t, observed['systemCounter'], common_spec)
+            except Exception as error:
+                missing('mandatory typed NPC14/18 contact group', t, error)
         native_families = sorted(identity_tuple(actor['identity']) for actor in source['attacks'] if actor['inActiveManager'])
         port_families = []
         try:
@@ -682,7 +867,12 @@ for captured in sorted(all_captured, key=lambda row: row['presentation']):
             check('actual complete active attack families/sequence/seeds', native_families, sorted(port_families), t)
         except Exception as error:
             missing('mandatory active attack scheduler group', t, error)
-        if any(actor['identity']['kind'] == 7 for actor in source['attacks']):
+        if technology_comparer is not None:
+            try:
+                technology_comparer.snapshot(source, state, t, observed['systemCounter'])
+            except Exception as error:
+                missing('mandatory actual Technology manager-role body group', t, error)
+        elif any(actor['identity']['kind'] == 7 for actor in source['attacks']):
             try:
                 compare_lasers(source, state, t, observed['systemCounter'])
             except Exception as error:
@@ -760,7 +950,7 @@ for captured in sorted(all_captured, key=lambda row: row['presentation']):
         check('actual Playing frontdoor', 'playing', state['screen'], t)
         check('actual Challenge ID', (1, 1), (source['challengeId'], state['challengeId']), t)
         check('actual source phase', observed['systemCounter'] % 2, state['systemClock']['systemCounter'] % 2, t)
-        if not stages:
+        if not stages and fetus_context is None:
             check('actual native declared counts', expected_counts, player['ownedCounts'], t)
             check('actual browser declared counts', expected_counts, state['playerItems']['ownedCounts'], t)
         check('actual owned counts at the same public gate', player['ownedCounts'], state['playerItems']['ownedCounts'], t)
@@ -780,7 +970,7 @@ for captured in sorted(all_captured, key=lambda row: row['presentation']):
         if captured.get('gameplayPresentation') == 0:
             check('declared ready controls enabled', (True, True), (player['controlsEnabled'], state['player']['controlsEnabled']), t)
         check('actual primary cache C08', weapon['primaryWeaponC08'], state['weaponCache']['primary'], t)
-        if not stages:
+        if not stages and (fetus_context is None or player['ownedCounts'][52] > 0):
             check('declared primary cache C08', contract['primaryC08'], state['weaponCache']['primary'], t)
         check('actual cached C98', weapon['attackFlagsC98'], flags(state['weaponCache']['flagsC98']), t)
         for source_field, port_field in [('cachedColorCA0', 'colorCa0'), ('cachedColorCCC', 'colorCcc')]:
@@ -943,6 +1133,29 @@ for lifetime in laser_lifetimes.values():
     lifetime['retirementWitness'] = retirement
 if ordinary_laser_required:
     check('required actual ordinary transient full-Uninit and registered C18 NULL witness',True,bool(qualified_lifetimes),None)
+if common_spec is not None:
+    declaration = common_spec[0]
+    rows = [row for chain in common_damage_chains.values() for row in chain['rows']]
+    for side in ('native', 'port'):
+        for key, field in (('minimumAcceptedEnqueuesPerGame', 'Queued'), ('minimumNextFullDamageApplicationsPerGame', 'Applied')):
+            minimum = declaration[key]
+            # A retained FIFO proves an accepted enqueue, not an exact dynamic
+            # append count across unobserved boundaries or repeated GL gates.
+            check('typed contact supported minimum ' + key, 1, minimum, None)
+            check('required typed contact ' + side + ' ' + field, True, any(row[side + field] for row in rows), None)
+    if case['requires'].get('ordinaryBrimContact') is not None:
+        missing('required typed contact exact Laser callback attribution', None,
+            'Accepted sourceType1/flags8 FIFO identifies ParentPlayer. A retained record plus current C18/amount does not uniquely identify the Laser that enqueued it; an actual bounded enqueue window is still required.')
+        check('typed contact supported natural-retirement minimum', 1, declaration['minimumNaturalLaserRetirementsPerGame'], None)
+        natural = [life for life in laser_lifetimes.values() if life['retirementWitness'] and life['retirementWitness']['passed']
+            and any(r['nativeRemaining'] > 0 and r['portRemaining'] > 0 for r in life['rows'])
+            and any(r['nativeRemaining'] == r['portRemaining'] == 0 for r in life['rows'])]
+        check('required typed contact ordinary Laser natural timer and following-Full C18 NULL', True, bool(natural), None)
+    if case['requires'].get('controlledTearContact') is not None:
+        for key in ('firstRegistryHit', 'bit33Veto', 'halfTearVelocityReceiverTypes', 'repeatedRegistryHitSkipsBothUntilRealClear'):
+            if declaration.get(key):
+                missing('typed Tear contact ' + key + ' coverage', None,
+                    'FIFO/HP observations do not expose the pre-callback registry or isolate callback impulse/veto ordering')
 
 # Fixed observation PNGs are chosen solely from the predeclared interval.
 for captured in browser['captures']:
@@ -1010,6 +1223,23 @@ for label, controlled, required in [('ordinary Knife', False, ordinary_knife_req
             missing('mandatory actual ' + label + ' rendered-frame group', t, error)
     check('required actual ' + label + ' rendered-frame witness', True, any(w['passed'] for w in seen), None)
 
+controlled_ring_contact = None
+if 'controlledBrimContact' in case['requires']:
+    try:
+        contact_path = Path(__file__).with_name('composition-controlled-brim-contact.py')
+        contact_spec = importlib.util.spec_from_file_location('controlled_brim_ring_contact', contact_path)
+        contact_module = importlib.util.module_from_spec(contact_spec)
+        contact_spec.loader.exec_module(contact_module)
+        controlled_ring_contact = contact_module.compare_contact(case, paired_rows, globals())
+    except Exception as error:
+        missing('mandatory controlled ring typed contact consumer', None, error)
+if technology_comparer is not None:
+    technology_result = technology_comparer.finish()
+
+ordinary_dr_fetus = None
+if fetus_context is not None:
+    ordinary_dr_fetus = fetus_module.finish(fetus_context, globals())
+
 result = {'schema': 2, 'status': 'fail' if any(not item['passed'] for item in checks) else 'pass', 'checks': checks,
           'coverage': dict(coverage), 'damageChains': list(damage_chains.values()), 'doorwayWitnesses': doorway_witnesses, 'laserLifetimes':list(laser_lifetimes.values()), 'renderWitnesses':render_witnesses,
           'sameGateDuplicateObservations': duplicate_observations, 'history': history, 'childLifetimes': child_lifetimes, 'chargeWitnesses': charge_witnesses,
@@ -1017,6 +1247,15 @@ result = {'schema': 2, 'status': 'fail' if any(not item['passed'] for item in ch
           'requiredBackendCoverageGaps': ['History requirements are graded by their explicit versioned raw witnesses; missing transient Remove flags remain failures even when later manager absence is observed.', 'Body comparison covers ordinary7/1/0 with linked1000/50/1 and actual registered Knife/ParentKnife roles. Other Laser subtypes and general modifier domains require separate admitted comparisons; no whole-backend acceptance is implied.', 'Player birth seed uses the actual PlayerItems.entitySpawnSeed owner; missing or unknown fields remain failures. Native regular-Tear physical-position phase binding remains unclosed.'],
           'scope': 'Public resource game-level composition. Actual declared fields and complete active attack identities/slots. New body correspondence uses each own actual registered C18, no crossside fitted IDs/positions; all independent identity/seed mismatches remain failures. Case PASS cannot accept the whole backend while its separate required gaps remain. Every mismatch/missing field retained; syntax checks are not game acceptance.',
           'sourceSha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest()}
+if common_spec is not None:
+    result['commonDamageChains'] = list(common_damage_chains.values())
+    result['commonContactScope'] = 'Actual common-class NPC14/18 FIFO and nonlethal next-Full HP. Player-source FIFO is not a particular Laser callback witness. Native copied EntityRef raw words/P/V are retained, not reconstructed from current sources. Countdown30 is a source callback argument, not a stored queue field. Full copied-history, registry/impulse order, lethal subclass cleanup and explicit Remove/Uninit callbacks remain separately unqualified.'
+if controlled_ring_contact is not None:
+    result['controlledRingContact'] = controlled_ring_contact
+if technology_result is not None:
+    result['ordinaryTechnology'] = technology_result
+if ordinary_dr_fetus is not None:
+    result['ordinaryDrFetus'] = ordinary_dr_fetus
 payload = (json.dumps(result, separators=(',', ':')) + '\n').encode()
 with args.output.open('xb') as stream:
     stream.write(gzip.compress(payload, mtime=0) if str(args.output).endswith('.gz') else payload)

@@ -14,3 +14,5 @@ gfx/1000.012_tear poofa.anm2
 gfx/1000.013_tear poofb.anm2
 gfx/1000.012_tear poof_small.anm2
 gfx/1000.012_tear poof_verysmall.anm2
+gfx/1000.022_creep (red).anm2
+gfx/1000.001_bomb explosion.anm2

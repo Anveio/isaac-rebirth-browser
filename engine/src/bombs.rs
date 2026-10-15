@@ -4,7 +4,14 @@
 //! presentation births. Native predicates, motion and scheduling evidence are
 //! recorded in docs/bomb-evidence.md. Grid destruction, crater rendering and
 //! variant callbacks remain separately tracked combat work.
-use crate::{motion::WorldVector, phase::Phase, Screen, State};
+use crate::{
+    actors::{ActorKind, ActorRef},
+    attack_color::AttackColor,
+    attack_flags::AttackFlags,
+    motion::WorldVector,
+    phase::Phase,
+    Screen, State,
+};
 use serde::{Deserialize, Serialize};
 
 // Explosion is an authored 19-frame animation observed at two presentations
@@ -19,6 +26,15 @@ pub const PLAYER_DAMAGE_RADIUS: f64 = (BLAST_RADIUS + ISAAC_RADIUS) as f64 * WOR
 pub const DAMAGE_COOLDOWN_TICKS: u32 = 120;
 
 pub const INITIAL_FUSE_UPDATES: u8 = 59;
+const DR_FETUS_FUSE_UPDATES: u8 = 30;
+
+fn initial_fuse_default() -> u8 {
+    INITIAL_FUSE_UPDATES
+}
+
+fn is_initial_fuse_default(value: &u8) -> bool {
+    *value == INITIAL_FUSE_UPDATES
+}
 pub const PLACEMENT_COOLDOWN_UPDATES: u8 = 30;
 const PULSE_FRAMES: u8 = 59;
 const CORPSE_FRAMES: u8 = 10;
@@ -40,6 +56,11 @@ pub struct BombMotion {
     pub presented_position: WorldVector,
     pub velocity: WorldVector,
     pub fuse_updates_remaining: u8,
+    #[serde(
+        default = "initial_fuse_default",
+        skip_serializing_if = "is_initial_fuse_default"
+    )]
+    pub initial_fuse_updates: u8,
     pub full_updates: u8,
     pub animation_frame: u8,
     pub lifetime: BombLifetime,
@@ -54,12 +75,24 @@ impl BombMotion {
             presented_position: player,
             velocity: velocity * 0.1,
             fuse_updates_remaining: INITIAL_FUSE_UPDATES,
+            initial_fuse_updates: INITIAL_FUSE_UPDATES,
             full_updates: 0,
             animation_frame: 0,
             lifetime: BombLifetime::Alive,
         };
         if !player.is_finite() || !velocity.is_finite() || !motion.is_finite() {
             return Err("bomb birth requires finite native vectors".into());
+        }
+        Ok(motion)
+    }
+
+    fn spawn_dr_fetus(position: WorldVector, velocity: WorldVector) -> Result<Self, String> {
+        let mut motion = Self::spawn(position, WorldVector { x: 0.0, y: 0.0 })?;
+        motion.velocity = velocity;
+        motion.initial_fuse_updates = DR_FETUS_FUSE_UPDATES;
+        motion.fuse_updates_remaining = DR_FETUS_FUSE_UPDATES;
+        if !motion.is_finite() {
+            return Err("Dr. Fetus bomb birth requires finite native vectors".into());
         }
         Ok(motion)
     }
@@ -74,20 +107,26 @@ impl BombMotion {
         if !self.is_finite() {
             return Err("bomb motion requires finite native vectors".into());
         }
+        if !matches!(
+            self.initial_fuse_updates,
+            INITIAL_FUSE_UPDATES | DR_FETUS_FUSE_UPDATES
+        ) {
+            return Err("unsupported born bomb fuse".into());
+        }
         let valid_clock = match self.lifetime {
             BombLifetime::Alive => {
-                self.fuse_updates_remaining <= INITIAL_FUSE_UPDATES
-                    && self.full_updates == INITIAL_FUSE_UPDATES - self.fuse_updates_remaining
+                self.fuse_updates_remaining <= self.initial_fuse_updates
+                    && self.full_updates == self.initial_fuse_updates - self.fuse_updates_remaining
                     && self.animation_frame == self.full_updates.min(PULSE_FRAMES - 1)
             }
             BombLifetime::Exploding => {
                 self.fuse_updates_remaining == 0
-                    && self.full_updates == INITIAL_FUSE_UPDATES + 1
+                    && self.full_updates == self.initial_fuse_updates + 1
                     && self.animation_frame < corpse_frames
             }
             BombLifetime::Removed => {
                 self.fuse_updates_remaining == 0
-                    && self.full_updates == INITIAL_FUSE_UPDATES + 1
+                    && self.full_updates == self.initial_fuse_updates + 1
                     && self.animation_frame == corpse_frames
             }
         };
@@ -265,6 +304,125 @@ pub struct Bomb {
     pub x: f64,
     pub y: f64,
     pub motion: BombMotion,
+    /// Ordinary50DE10 birth metadata. Legacy planted/conversion histories stay separate.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub shot: Option<BombShot>,
+}
+
+/// Born-owned fields of the admitted neutral ordinary Dr. Fetus actor4/0.
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct BombShot {
+    pub actor_rng: crate::items::Rng,
+    pub spawner_type: u32,
+    pub spawner_variant: u32,
+    /// Actual50DEDB Spawn subtype argument, owned by this factory.
+    pub subtype: u32,
+    pub parent: Option<ActorRef>,
+    pub attack_flags: AttackFlags,
+    pub source_color: AttackColor,
+    pub current_color: AttackColor,
+    pub explosion_damage: f32,
+    pub grid_collision_class: u32,
+    pub grid_collided: bool,
+    pub shot_marker: bool,
+    pub player_contact_countdown: u8,
+    ///457CD8 reads a global ordinal whose initial/history owner is not closed.
+    pub ordinal_7ec: Option<u32>,
+}
+
+impl BombShot {
+    fn validate(&self) -> Result<(), String> {
+        if self.attack_flags.0 != 0
+            || self.spawner_type != 1
+            || self.spawner_variant != 0
+            || self.subtype != 0
+            || self.grid_collision_class != 6
+            || !self.shot_marker
+            || !self.source_color.is_finite()
+            || !self.current_color.is_finite()
+            || !self.explosion_damage.is_finite()
+            || self.explosion_damage < 0.0
+            || self.player_contact_countdown > 4
+        {
+            return Err("unsupported ordinary Dr. Fetus bomb state".into());
+        }
+        Ok(())
+    }
+}
+
+/// Caller resolves actual kind5 parameters and vectors before its SharedRaw seed.
+#[derive(Clone, Copy, Debug)]
+pub(crate) struct DrFetusBirth {
+    pub spawn_seed: u32,
+    pub position: WorldVector,
+    pub velocity: WorldVector,
+    pub explosion_damage: f32,
+    pub flags: AttackFlags,
+    pub color: AttackColor,
+    pub parent_player: ActorRef,
+}
+
+///50DE10 stores the real Bomb after Init; no inventory debit, C18 bind or first Full.
+pub(crate) fn admit_dr_fetus(
+    state: &mut State,
+    phase: Phase,
+    birth: DrFetusBirth,
+) -> Result<u32, String> {
+    if phase == Phase::Skipped
+        || birth.parent_player
+            != (ActorRef {
+                kind: ActorKind::Player,
+                id: 0,
+            })
+        || birth.flags.0 != 0
+        || !birth.color.is_finite()
+        || !birth.explosion_damage.is_finite()
+        || birth.explosion_damage < 0.0
+    {
+        return Err("unsupported ordinary Dr. Fetus bomb birth".into());
+    }
+    let id = state.next_bomb;
+    let next = id.checked_add(1).ok_or("bomb IDs exhausted")?;
+    let mut motion = BombMotion::spawn_dr_fetus(birth.position, birth.velocity)?;
+    motion.present_birth(phase)?;
+    let shot = BombShot {
+        actor_rng: crate::items::Rng::new(birth.spawn_seed, [4, 3, 17]),
+        spawner_type: 1,
+        spawner_variant: 0,
+        subtype: 0,
+        parent: Some(birth.parent_player),
+        attack_flags: birth.flags,
+        source_color: birth.color,
+        current_color: birth.color,
+        explosion_damage: birth.explosion_damage,
+        grid_collision_class: 6,
+        grid_collided: false,
+        shot_marker: true,
+        player_contact_countdown: 4,
+        ordinal_7ec: None,
+    };
+    shot.validate()?;
+    state.actor_scheduler.admit(ActorRef {
+        kind: ActorKind::Bomb,
+        id,
+    })?;
+    state.bombs.push(Bomb {
+        id,
+        variant: 0,
+        spawn_seed: Some(birth.spawn_seed),
+        birth_game_update: state.game_update_count,
+        friction: 1.0,
+        animation: "Pulse".into(),
+        animation_frame: 0,
+        animation_playing: true,
+        x: f64::from(motion.presented_position.x) * WORLD_SCALE + 32.0,
+        y: f64::from(motion.presented_position.y) * WORLD_SCALE - 46.0,
+        motion,
+        shot: Some(shot),
+    });
+    state.next_bomb = next;
+    Ok(id)
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
@@ -324,6 +482,7 @@ pub fn place(state: &mut State, phase: Phase) -> Result<(), String> {
         x: f64::from(motion.presented_position.x) * WORLD_SCALE + 32.0,
         y: f64::from(motion.presented_position.y) * WORLD_SCALE - 46.0,
         motion,
+        shot: None,
     });
     state.next_bomb = next;
     state.inventory.bombs -= 1;
@@ -360,6 +519,7 @@ pub fn admit_conversion(
         x: f64::from(position.x) * WORLD_SCALE + 32.0,
         y: f64::from(position.y) * WORLD_SCALE - 46.0,
         motion,
+        shot: None,
     });
     state.next_bomb = next;
     Ok(())
@@ -432,18 +592,40 @@ pub fn advance_actor(state: &mut State, phase: Phase, id: u32) -> Result<(), Str
     let Some(index) = state.bombs.iter().position(|bomb| bomb.id == id) else {
         return Ok(());
     };
+    if let Some(shot) = &state.bombs[index].shot {
+        shot.validate()?;
+        if state.bombs[index].variant != 0
+            || state.bombs[index].motion.initial_fuse_updates != DR_FETUS_FUSE_UPDATES
+        {
+            return Err("Dr. Fetus bomb birth configuration changed".into());
+        }
+    } else if state.bombs[index].motion.initial_fuse_updates != INITIAL_FUSE_UPDATES {
+        return Err("legacy bomb born fuse changed".into());
+    }
     let corpse_frames = if matches!(state.bombs[index].variant, 3 | 4) {
         5
     } else {
         CORPSE_FRAMES
     };
     let friction = state.bombs[index].friction;
-    let detonated = state.bombs[index]
-        .motion
-        .advance_variant(phase, friction, corpse_frames)?;
+    let mut next_motion = state.bombs[index].motion;
+    let detonated = next_motion.advance_variant(phase, friction, corpse_frames)?;
+    let shot_detonation = detonated && state.bombs[index].shot.is_some();
+    if shot_detonation {
+        //45776A calls555300 before457784 publishes31F/Explode. Publish
+        //the completed Base/Bomb vectors now, while the actual helper still
+        //sees the live source actor. Completed-call clocks publish afterward.
+        state.bombs[index].motion.position = next_motion.position;
+        state.bombs[index].motion.presented_position = next_motion.presented_position;
+        state.bombs[index].motion.velocity = next_motion.velocity;
+    } else {
+        state.bombs[index].motion = next_motion;
+    }
     if phase == Phase::Update {
         state.bombs[index].friction = 1.0;
-        advance_animation(&mut state.bombs[index], detonated);
+        //Base already advances Pulse before the source explosion helper;
+        //only the new shot's Explode transition is deferred to its real fence.
+        advance_animation(&mut state.bombs[index], detonated && !shot_detonation);
         // Update457bb0 targets the nearest player at position + velocity*5.
         // The strict 270-world-unit envelope owns a normalized 1.5 impulse,
         // followed by .8 velocity damping. Early age also sets next-turn drag.
@@ -476,7 +658,16 @@ pub fn advance_actor(state: &mut State, phase: Phase, id: u32) -> Result<(), Str
             }
         }
     }
-    if state.bombs[index].motion.lifetime == BombLifetime::Alive {
+    if state.bombs[index].shot.is_some() {
+        if phase == Phase::Interpolate
+            && state.bombs[index].motion.lifetime != BombLifetime::Removed
+        {
+            let grid = room_grid(state)?;
+            resolve_shot_grid(&mut state.bombs[index], &grid, true)?;
+        }
+        // Full class6 grid correction belongs to454B10 after entity contacts,
+        // including births excluded by the current actor-update fence.
+    } else if state.bombs[index].motion.lifetime == BombLifetime::Alive {
         use std::sync::OnceLock;
         static COLLIDER: OnceLock<crate::grid::Collider> = OnceLock::new();
         let grid = state
@@ -518,14 +709,226 @@ pub fn advance_actor(state: &mut State, phase: Phase, id: u32) -> Result<(), Str
     state.bombs[index].x = f64::from(presented.x) * WORLD_SCALE + 32.0;
     state.bombs[index].y = f64::from(presented.y) * WORLD_SCALE - 46.0;
     if detonated {
+        let damage = state.bombs[index]
+            .shot
+            .as_ref()
+            .map_or(60.0, |shot| shot.explosion_damage);
+        let radius = if damage >= 105.0 {
+            105.0
+        } else if damage > 85.0 {
+            90.0
+        } else {
+            BLAST_RADIUS
+        };
         explode(
             state,
             position,
-            BLAST_RADIUS,
-            60.0,
+            radius,
+            damage,
             crate::combat::DamageSource { id, entity_type: 4 },
         )?;
+        if shot_detonation {
+            state.bombs[index].motion = next_motion;
+            advance_animation(&mut state.bombs[index], true);
+        }
         spawn_blast_effects(state, id, position);
+    }
+    //4575DD..EA follows555300 and the dead/Explode stores. NeverFast.
+    if phase == Phase::Update {
+        if let Some(shot) = &mut state.bombs[index].shot {
+            shot.player_contact_countdown = shot.player_contact_countdown.saturating_sub(1);
+        }
+    }
+    Ok(())
+}
+
+fn room_grid(state: &State) -> Result<crate::grid::Grid, String> {
+    state
+        .room
+        .grid
+        .as_ref()
+        .map(|descriptor| crate::grid::Grid::new(descriptor.clone()))
+        .transpose()
+        .map(|grid| grid.unwrap_or_else(crate::grid::Grid::closed_1x1_boundary))
+}
+
+fn bomb_collider() -> &'static crate::grid::Collider {
+    static COLLIDER: std::sync::OnceLock<crate::grid::Collider> = std::sync::OnceLock::new();
+    COLLIDER.get_or_init(|| {
+        crate::grid::Collider::new(crate::grid::CollisionGeometry {
+            radius: 16.0,
+            scale: WorldVector { x: 1.0, y: 1.0 },
+            points: 12,
+        })
+        .expect("authored ordinary bomb geometry is valid")
+    })
+}
+
+fn project(bomb: &mut Bomb) {
+    bomb.x = f64::from(bomb.motion.presented_position.x) * WORLD_SCALE + 32.0;
+    bomb.y = f64::from(bomb.motion.presented_position.y) * WORLD_SCALE - 46.0;
+}
+
+fn contact_body(bomb: &Bomb) -> crate::combat::ContactBody {
+    crate::combat::ContactBody {
+        id: bomb.id,
+        entity_type: 4,
+        position: bomb.motion.position,
+        velocity: bomb.motion.velocity,
+        radius: 16.0,
+        mass: 6.0,
+    }
+}
+
+fn commit_contact(bomb: &mut Bomb, body: crate::combat::ContactBody) {
+    bomb.motion.position = body.position;
+    bomb.motion.presented_position = body.position;
+    bomb.motion.velocity = body.velocity;
+    project(bomb);
+}
+
+fn resolve_shot_grid(
+    bomb: &mut Bomb,
+    grid: &crate::grid::Grid,
+    preview: bool,
+) -> Result<(), String> {
+    bomb.shot
+        .as_ref()
+        .ok_or("ordinary bomb shot metadata absent")?
+        .validate()?;
+    let mut position = if preview {
+        bomb.motion.presented_position
+    } else {
+        bomb.motion.position
+    };
+    position = grid.clamp_room(position, 0.0);
+    let collided = bomb_collider()
+        .samples()
+        .iter()
+        .any(|sample| grid.collision_at(position + *sample) > 1);
+    let mut velocity = bomb.motion.velocity;
+    bomb_collider().resolve_nonplayer_no_pits(grid, &mut position, &mut velocity, preview)?;
+    bomb.motion.presented_position = position;
+    if !preview {
+        bomb.motion.position = position;
+        bomb.motion.velocity = velocity;
+        bomb.shot
+            .as_mut()
+            .expect("checked shot owner")
+            .grid_collided = collided;
+    }
+    project(bomb);
+    Ok(())
+}
+
+///454B10 full grid fence, after entity contacts; only the new admitted shot body.
+pub(crate) fn full_grid_contacts(state: &mut State) -> Result<(), String> {
+    if !state
+        .bombs
+        .iter()
+        .any(|bomb| bomb.shot.is_some() && bomb.motion.lifetime != BombLifetime::Removed)
+    {
+        return Ok(());
+    }
+    let grid = room_grid(state)?;
+    for bomb in &mut state.bombs {
+        if bomb.shot.is_some() && bomb.motion.lifetime != BombLifetime::Removed {
+            resolve_shot_grid(bomb, &grid, false)?;
+        }
+    }
+    Ok(())
+}
+
+///4453A0 calls Player509160 first (Bomb fails444810: returnsfalse), then
+///Bomb456C20 with flagfalse. No new no-shot history is admitted by this hook.
+pub(crate) fn player_contacts(state: &mut State) -> Result<(), String> {
+    if state.player.dead
+        || !state
+            .bombs
+            .iter()
+            .any(|bomb| bomb.shot.is_some() && bomb.motion.lifetime == BombLifetime::Alive)
+    {
+        return Ok(());
+    }
+    let grid = room_grid(state)?;
+    static COLLIDER: std::sync::OnceLock<crate::grid::Collider> = std::sync::OnceLock::new();
+    let collider = COLLIDER.get_or_init(|| {
+        crate::grid::Collider::new(crate::grid::CollisionGeometry {
+            radius: 10.0,
+            scale: WorldVector { x: 1.0, y: 1.0 },
+            points: 40,
+        })
+        .expect("authored Isaac geometry is valid")
+    });
+    for index in 0..state.bombs.len() {
+        if state.bombs[index].shot.is_none()
+            || state.bombs[index].motion.lifetime != BombLifetime::Alive
+        {
+            continue;
+        }
+        let mut player = crate::combat::ContactBody {
+            id: 0,
+            entity_type: 1,
+            position: player_world(state),
+            velocity: player_velocity(state),
+            radius: 10.0,
+            mass: 5.0,
+        };
+        let original = player.position;
+        let player_before = player;
+        let mut bomb = contact_body(&state.bombs[index]);
+        let shot = state.bombs[index]
+            .shot
+            .as_mut()
+            .expect("checked shot owner");
+        shot.validate()?;
+        crate::combat::resolve_player_bomb_contact(
+            &mut player,
+            &mut bomb,
+            &mut shot.player_contact_countdown,
+            |shift| collider.blocks_player_shift(&grid, original, shift),
+        )?;
+        if player != player_before {
+            state.player.x = f64::from(player.position.x) * WORLD_SCALE + 32.0;
+            state.player.y = f64::from(player.position.y) * WORLD_SCALE - 46.0;
+            state.player.vx = f64::from(player.velocity.x) * WORLD_SCALE;
+            state.player.vy = f64::from(player.velocity.y) * WORLD_SCALE;
+        }
+        commit_contact(&mut state.bombs[index], bomb);
+    }
+    Ok(())
+}
+
+///Same-type ties retain Bomb admission order. Both callbacks run; the first
+///actual shot marker vetoes mass response. Legacy no-shot pairs stay untouched.
+pub(crate) fn bomb_contacts(state: &mut State) -> Result<(), String> {
+    for first in 0..state.bombs.len() {
+        for second in first + 1..state.bombs.len() {
+            let (left, right) = state.bombs.split_at_mut(second);
+            let first = &mut left[first];
+            let second = &mut right[0];
+            if (first.shot.is_none() && second.shot.is_none())
+                || first.motion.lifetime != BombLifetime::Alive
+                || second.motion.lifetime != BombLifetime::Alive
+            {
+                continue;
+            }
+            if let Some(shot) = &first.shot {
+                shot.validate()?;
+            }
+            if let Some(shot) = &second.shot {
+                shot.validate()?;
+            }
+            let mut a = contact_body(first);
+            let mut b = contact_body(second);
+            crate::combat::resolve_bomb_pair(
+                &mut a,
+                &mut b,
+                first.shot.as_ref().is_some_and(|shot| shot.shot_marker),
+            )?;
+            commit_contact(first, a);
+            commit_contact(second, b);
+        }
     }
     Ok(())
 }
@@ -572,6 +975,7 @@ pub(crate) fn explode(
     };
     crate::npcs::bomb_hit(state, position, radius, damage, source, &clear)?;
     crate::pickups::bomb_hit(state, position, radius, &clear)?;
+    crate::fly_effects::bomb_hit(state, position, radius, clear);
     let player_velocity = if clear(player_world(state)) {
         isaac_blast_velocity(
             player_world(state),

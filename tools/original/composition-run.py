@@ -146,8 +146,25 @@ def main():
         raise ValueError('A source-backed actor-family obligation is required before fixture preparation')
     source_fields = case.get('requires', {}).get('compositionSourceFields', ['playerMovementD9c', 'knifeChildChain4a0'])
     if (not isinstance(source_fields, list) or len(set(source_fields)) != len(source_fields)
-            or any(name not in ('playerMovementD9c', 'knifeChildChain4a0') for name in source_fields)):
+            or any(name not in ('playerMovementD9c', 'knifeChildChain4a0', 'npc14And18DamageQueue', 'kind8TearFields', 'ordinaryTechnology', 'ordinaryDrFetusBombs') for name in source_fields)):
         raise ValueError('Unknown or duplicate requested composition source field')
+    source_fields = list(source_fields)
+    if case.get('requires', {}).get('ordinaryTechnologyFunctional') is not None:
+        source_fields = [*source_fields, *([] if 'ordinaryTechnology' in source_fields else ['ordinaryTechnology'])]
+    if any(name in case['requires'] for name in ('ordinaryBrimContact', 'controlledTearContact')):
+        if 'npc14And18DamageQueue' not in source_fields:
+            source_fields.append('npc14And18DamageQueue')
+    if (contract.get('primaryC08') == 8 and contract['family'] == 2
+            and contract.get('controlledBy329') is True and 'kind8TearFields' not in source_fields):
+        source_fields.append('kind8TearFields')
+    fetus = case['requires'].get('ordinaryDrFetus')
+    if fetus is not None:
+        if (not isinstance(fetus, dict) or fetus.get('schema') != 'ordinary-dr-fetus52-bomb-shots-v1'
+                or (contract.get('primaryC08'), contract['family'], contract.get('variant'),
+                    contract.get('subtype'), contract.get('controlledBy329')) != (5, 4, 0, 0, False)):
+            raise ValueError('Typed DrFetus Bomb observation requires its exact source declaration')
+        if 'ordinaryDrFetusBombs' not in source_fields:
+            source_fields.append('ordinaryDrFetusBombs')
     tape = public_tape(case)
     spec = importlib.util.spec_from_file_location('composition_clock', ROOT / 'tools/original/foundation-clock-run.py')
     clock = importlib.util.module_from_spec(spec)

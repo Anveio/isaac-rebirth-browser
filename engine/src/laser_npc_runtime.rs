@@ -5,7 +5,7 @@ use crate::{
     actors::{ActorKind, ActorRef},
     audio::SoundRequest,
     combat, content,
-    lasers::{Impact, Laser},
+    lasers::{Impact, Laser, LaserOrigin},
     motion::WorldVector,
     phase::Phase,
     State,
@@ -58,7 +58,7 @@ fn clamp(point: WorldVector, low: WorldVector, high: WorldVector) -> WorldVector
 
 /// CalculateEndPoint476450: clip start + dir*1000 to the room interior
 /// expanded by 20 units; rocks and other grid entities never stop the beam.
-fn end_point(
+pub(crate) fn end_point(
     start: WorldVector,
     heading: WorldVector,
     offset: WorldVector,
@@ -223,6 +223,16 @@ pub(crate) fn admit(state: &mut State, parent: u32, birth: LaserBirth) -> Result
         id: impact_id,
     })?;
     let mut impact = Impact {
+        source_subtype: None,
+        sprite_flip_x: None,
+        raw_814: None,
+        parent: Some(ActorRef {
+            kind: ActorKind::Laser,
+            id,
+        }),
+        parent_known: true,
+        source_color: None,
+        current_color: None,
         id: impact_id,
         spawn_seed: impact_seed,
         position: laser.position,
@@ -259,7 +269,7 @@ pub(crate) fn admit(state: &mut State, parent: u32, birth: LaserBirth) -> Result
     Ok(())
 }
 
-fn advance_impact_full(impact: &mut Impact, parent_dead: bool) -> Result<(), String> {
+pub(crate) fn advance_impact_full(impact: &mut Impact, parent_dead: bool) -> Result<(), String> {
     step_clip(
         &impact.actor,
         &impact.animation,
@@ -452,15 +462,26 @@ pub fn advance_impact(state: &mut State, phase: Phase, id: u32) -> Result<(), St
 /// Preserve the existing NPC scheduler/storage retirement in both phases.
 /// This boundary is not evidence of native full Uninit or weak-link clearing.
 pub fn retire(state: &mut State) {
+    for laser in &mut state.lasers {
+        if laser.origin == LaserOrigin::NpcShootAngle && !laser.active {
+            if let Some(impact) = &mut laser.impact {
+                impact.parent_known = false;
+            }
+        }
+    }
     let mut retired = Vec::new();
     for laser in &state.lasers {
-        if !laser.active {
+        if laser.origin == LaserOrigin::NpcShootAngle && !laser.active {
             retired.push(ActorRef {
                 kind: ActorKind::Laser,
                 id: laser.id,
             });
         }
-        if let Some(impact) = laser.impact.as_ref().filter(|impact| impact.removed) {
+        if let Some(impact) = laser
+            .impact
+            .as_ref()
+            .filter(|impact| impact.removed && laser.origin == LaserOrigin::NpcShootAngle)
+        {
             retired.push(ActorRef {
                 kind: ActorKind::Effect,
                 id: impact.id,
@@ -471,6 +492,25 @@ pub fn retire(state: &mut State) {
         .actor_scheduler
         .retain(|actor| !retired.contains(&actor));
     state.lasers.retain(|laser| {
-        !(!laser.active && laser.impact.as_ref().is_none_or(|impact| impact.removed))
+        laser.origin != LaserOrigin::NpcShootAngle
+            || !(!laser.active && laser.impact.as_ref().is_none_or(|impact| impact.removed))
     });
+}
+
+pub(crate) fn room_bounds_from_grid(grid: &crate::grid::Grid) -> (WorldVector, WorldVector) {
+    let descriptor = grid.descriptor();
+    (
+        WorldVector { x: 60.0, y: 140.0 },
+        WorldVector {
+            x: 60.0 + f32::from(descriptor.width - 2) * 40.0,
+            y: 140.0 + f32::from(descriptor.height - 2) * 40.0,
+        },
+    )
+}
+
+pub(crate) fn has_impact(state: &State, id: u32) -> bool {
+    state
+        .lasers
+        .iter()
+        .any(|laser| laser.impact.as_ref().is_some_and(|impact| impact.id == id))
 }

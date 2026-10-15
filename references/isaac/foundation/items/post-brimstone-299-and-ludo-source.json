@@ -1,0 +1,924 @@
+{
+  "schema": 1,
+  "status": "SCOPED_MERGED_312_320_348_COMPLETE_PAIRS_FIRST_DR_FAIL",
+  "main": "918303b6a93f67263212cc8b75231bee0844b8e7",
+  "merged": {
+    "298": "261dbd60b3921fed421a614ef80c52baaadb0cca",
+    "299": "988ae6355c7956d918ff0e00eb329d313645b864",
+    "304": "1f59bc2fe7311ee19706575f9b704d80830f56bc",
+    "311": "53339e2ea8cdd588b1e47e3f786d9b7e139a2d41",
+    "322": "35b440877344e1d1c2fd5d9c9fa28fe7cf80a11a",
+    "307": "d56726797ad12976e9fdec53f3456c5b6161e184",
+    "321": "3e9d0241df42c30e62c530b6485ee28d84b0dacb",
+    "315": "03a8ea73ec78bb4c77b778e9a71c15c68a375a0c",
+    "317": "3df99031eff287a6745c0f7e994b7603e98203d5",
+    "318": "2ec601c5c9af116ff43e5c1881b5e02dab05607c",
+    "332": "12c6d19cfc191738350c6d3f359eb28c1ee4e7b8",
+    "335": "8c918fb62d835a10ac8799058b9f5b8c4463744f",
+    "319": "c15fab7788e134b8e302c91c96bb20ebaf5c4d01",
+    "338": "968adab250fb8606cde25f4607027d6ad0a00ee3",
+    "312": "f4668ae9d58ed889e4479a1aa1f21a3fb4988b88",
+    "320": "85962135c15ad3dcb90351795d39069dae19e253",
+    "345": "04e52bbffc3cb3bafe0ec13a732cfa48a668e40e",
+    "348": "918303b6a93f67263212cc8b75231bee0844b8e7",
+    "350": "b3a23e2429613cd0e66176a9412e5bc7caabd365"
+  },
+  "ordinary299": {
+    "ownBuilds": "production/strict Clippy/floor PASS",
+    "retained405": {
+      "checks": 37958272,
+      "failures": 0
+    },
+    "ordinaryOriginal": {
+      "summarySha256": "79fa8c02ac1137dd372db8262a5e3b2e4ae516b57ca7e995cad6b1ec8e5a54d0",
+      "reportSha256": "995d0a2aca68f81f8d6476c1b33c29e99421a23cacee6093c0bd98c64ba1caf0",
+      "checks": 22111,
+      "failures": 1030,
+      "playingRows": 631,
+      "births": 2,
+      "laserRows": 61,
+      "impactRows": 61,
+      "fullRows": 30,
+      "fastRows": 31,
+      "followingFullAbsenceSlotWitnesses": [
+        861,
+        965
+      ],
+      "callbackEventsObserved": false
+    },
+    "oldV8": {
+      "summarySha256": "b09bb8880b519c7e7a65ab86ce5f8ed6739d777f033789f45ef3cc52bb9881d2",
+      "checks": 88941,
+      "failures": 9079,
+      "historyChecks": 19838,
+      "historyFailures": 774,
+      "historyGaps": 36,
+      "playingRows": 1010,
+      "parentRows": 470,
+      "childRows": 614,
+      "earlyLaserImpactRows": 51,
+      "matchedPendingCleanupNoneRows": 1010,
+      "nonnullCleanupTransientObserved": false
+    },
+    "remaining": [
+      "Required HP/maxHP owners",
+      "identity/seed/RNG",
+      "prelude timers/diagnostics",
+      "typed contact enqueue/next-Full damage",
+      "explicit Native Remove/Uninit events",
+      "DOM/render",
+      "full shared624"
+    ]
+  },
+  "standalone307": {
+    "sourceOnlyPRHead": "4d0040378271ca36adb428d82fcd45a0cab6f27e",
+    "ownProducer": "d1e582784c61e0001d289772c81be6a71db5ec8d",
+    "ownWasmSha256": "d9c35ac74ef3a6240929156579c2e4c3df1a87c45d1d2b6af5d656c6bcb3e7cf",
+    "closureSha256": "b8fc8a88e4827f4ea8bc74da55e445254d279426c2840b6aae1fa2c5ce5e8355",
+    "buildSeconds": {
+      "production": 26.004,
+      "strictClippy": 26.876,
+      "floor": 15.16
+    },
+    "regularCurrent": {
+      "checks": 37965608,
+      "failures": 0,
+      "reportSha256": "394f65e4028a029f9f84d5490fcf8d4f8a97fc09048f8e9420487aabeb2a1d70"
+    },
+    "regularPriorPreserved": {
+      "checks": 37966740,
+      "failures": 2264,
+      "reportSha256": "5b5ce091cb0d8032babb33682d3bf36866eec8c8d0fcd4d19caee027dc593557",
+      "newPersistedRoomFieldWitnessSeparate": true
+    },
+    "retainedLibra": {
+      "checks": 503611,
+      "failures": 0,
+      "gatesEach": 631,
+      "postGrantEach": 93,
+      "firstCaseMissingNativeFamiliarRows": 631,
+      "reportSha256": "0229236ca5178f10f51737a76277b4d9b83da45396bc6a05cd51e8d892646935"
+    },
+    "publicProcessClosures": [
+      {
+        "path": "/dev/shm/isaac-ludo307-public-game-v1/ludovico329-contact-phase1-v1/native-closed.json",
+        "case": "ludovico329-contact-phase1-v1",
+        "status": "CAPTURE_PROCESS_CLOSED",
+        "exitCode": 0,
+        "actualWait": true,
+        "seconds": 38.59804024800542,
+        "pinsStable": true,
+        "guardStopped": false,
+        "sha256": "77c240587e55ab2ced07eae7433f641614569c022cfc790953d0512acaf3cb26"
+      },
+      {
+        "path": "/dev/shm/isaac-ludo307-public-game-v1/ludovico329-contact-phase1-v1/public-wasm/host-closed.json",
+        "case": "ludovico329-contact-phase1-v1",
+        "status": "PUBLIC_WASM_PROCESS_CLOSED",
+        "exitCode": 0,
+        "actualWait": true,
+        "seconds": 3.908732873009285,
+        "pinsStable": true,
+        "guardStopped": false,
+        "sha256": "7152e2e35a6b1b14d23590526be4f1b5f36ff1ebec2c6beb96e094ff53e1620f"
+      },
+      {
+        "path": "/dev/shm/isaac-ludo307-public-game-v1/ludovico329-motion-phase0-v1/native-closed.json",
+        "case": "ludovico329-motion-phase0-v1",
+        "status": "CAPTURE_PROCESS_CLOSED",
+        "exitCode": 0,
+        "actualWait": true,
+        "seconds": 38.70190028601792,
+        "pinsStable": true,
+        "guardStopped": false,
+        "sha256": "ebab4ff1f1a804d82b3c9618a99e45a11d540272768a8deb06252ead986bf36f"
+      },
+      {
+        "path": "/dev/shm/isaac-ludo307-public-game-v1/ludovico329-motion-phase0-v1/public-wasm/host-closed.json",
+        "case": "ludovico329-motion-phase0-v1",
+        "status": "PUBLIC_WASM_PROCESS_CLOSED",
+        "exitCode": 0,
+        "actualWait": true,
+        "seconds": 3.4047722649993375,
+        "pinsStable": true,
+        "guardStopped": false,
+        "sha256": "f13bfa51a7356e9e8d65151fcf5ec59994d0a83fc6009ae267a57b59e5a7af69"
+      },
+      {
+        "path": "/dev/shm/isaac-ludo307-public-game-v1/ludovico329-os-0-v1/attempt2/native-closed.json",
+        "case": "ludovico329-os-0-v1",
+        "status": "CAPTURE_PROCESS_CLOSED",
+        "exitCode": 0,
+        "actualWait": true,
+        "seconds": 38.06537663398194,
+        "pinsStable": true,
+        "guardStopped": false,
+        "sha256": "2c9750f71d0977bd42320612c2aed32d577add953a4e37dcda0e6db789d386fc"
+      },
+      {
+        "path": "/dev/shm/isaac-ludo307-public-game-v1/ludovico329-os-0-v1/native-closed.json",
+        "case": "ludovico329-os-0-v1",
+        "status": "FAIL_OR_GUARD",
+        "exitCode": -15,
+        "actualWait": true,
+        "seconds": 0.6679294090135954,
+        "pinsStable": true,
+        "guardStopped": true,
+        "sha256": "9413ed97c544e635ea5013320aab926ff5fc3e8cf5184f20864c486825e97a75"
+      },
+      {
+        "path": "/dev/shm/isaac-ludo307-public-game-v1/ludovico329-os-0-v1/public-wasm/host-closed.json",
+        "case": "ludovico329-os-0-v1",
+        "status": "PUBLIC_WASM_PROCESS_CLOSED",
+        "exitCode": 0,
+        "actualWait": true,
+        "seconds": 3.5518726320005953,
+        "pinsStable": true,
+        "guardStopped": false,
+        "sha256": "650e0f9bfb5afc9e439bcad14857c964698379a90cbdbd1e86a4b06833daf052"
+      },
+      {
+        "path": "/dev/shm/isaac-ludo307-public-game-v1/ludovico329-os-1-v1/native-closed.json",
+        "case": "ludovico329-os-1-v1",
+        "status": "CAPTURE_PROCESS_CLOSED",
+        "exitCode": 0,
+        "actualWait": true,
+        "seconds": 41.00527680499363,
+        "pinsStable": true,
+        "guardStopped": false,
+        "sha256": "908b6f8b7eef085e408e69500cb01e5c0e10e5ad070c722322ca7bc8c6a8cd7d"
+      },
+      {
+        "path": "/dev/shm/isaac-ludo307-public-game-v1/ludovico329-os-1-v1/public-wasm/host-closed.json",
+        "case": "ludovico329-os-1-v1",
+        "status": "PUBLIC_WASM_PROCESS_CLOSED",
+        "exitCode": 0,
+        "actualWait": true,
+        "seconds": 3.859430522978073,
+        "pinsStable": true,
+        "guardStopped": false,
+        "sha256": "c82222cd75793c20b9979108b5c6a373f4a89cd40f9fa66ea30624bce7db84ca"
+      }
+    ],
+    "processCompletionScope": "Four Native and four public-WASM processes closed0 with stable source/input pins. Prior OS0 guard-stop remains FAIL. This is not full transport audit, functional actor comparison or DOM acceptance.",
+    "functionalComparison": {
+      "path": "/dev/shm/isaac-ludo307-public-game-v1/initial-four-case-functional-summary.json",
+      "sha256": "5fef4810ac2ad99803a2ee98a1a15fb9f51749aa0574e745ae59416b6f981e06",
+      "status": "FAIL",
+      "checks": 85050,
+      "differences": 11620,
+      "scope": "All four original captures and independent public-WASM whole-game replays complete. Single committed journal projection per case followed by thin actual state comparison. Known C98==0 birth-domain bug suppresses port controlled Tears; no whole-game acceptance.",
+      "cases": [
+        {
+          "case": "ludovico329-motion-phase0-v1",
+          "status": "FAIL",
+          "checks": 16448,
+          "differences": 2301,
+          "coverage": {
+            "pairedActualPlayingRows": 571
+          },
+          "reportSha256": "e2860572aafe64c7571d1f1a3557fde3f7b595331c69a52c2eb5e9fffe1689b8"
+        },
+        {
+          "case": "ludovico329-contact-phase1-v1",
+          "status": "FAIL",
+          "checks": 35474,
+          "differences": 4684,
+          "coverage": {
+            "pairedActualPlayingRows": 572
+          },
+          "reportSha256": "374c812e725e7ec9bdfaba4948ba8f14d1fa9adc14f54d0ff8f2a29d085175d6"
+        },
+        {
+          "case": "ludovico329-os-0-v1",
+          "status": "FAIL",
+          "checks": 16477,
+          "differences": 2300,
+          "coverage": {
+            "pairedActualPlayingRows": 572
+          },
+          "reportSha256": "8e36ccdfa406b787e9cf9fa1c2115eeb6a2851ade690b8e4936521315c7b5021"
+        },
+        {
+          "case": "ludovico329-os-1-v1",
+          "status": "FAIL",
+          "checks": 16651,
+          "differences": 2335,
+          "coverage": {
+            "pairedActualPlayingRows": 578
+          },
+          "reportSha256": "e74abf7d7db7db6edb0b9310e2582aee1a988d82d13ffa33bc4a92a34f9ade2b"
+        }
+      ]
+    },
+    "admissionDefect": {
+      "actualCacheC98BothSides": 3,
+      "incorrectGuard": "C98 == 0",
+      "observedPortTears": 0,
+      "correctedProducer": "Historical8120 repaired the zero-only admission guard; finalC421 separately repairs controlled saved450 rewind. Both exact failing reports remain below.",
+      "bodyContactLifecycleAcceptance": false
+    },
+    "correctedFunctionalComparison": {
+      "path": "/dev/shm/isaac-ludo307-c98-own-proof/corrected-four-case-functional-summary.json",
+      "sha256": "7c17427901e16c3cd6594f44e377f6735b36acfde7ba4e55333d6cbeaee2316e",
+      "source": "7e000d3f06ea93d739929fe245019d3dc70e8f0b",
+      "wasmSha256": "8120d8e90fdf13aa961372d24fecbc1ac70e35d20f99b4989b119c18ad207f09",
+      "status": "FAIL",
+      "checks": 134350,
+      "differences": 24248,
+      "bodies": 1541,
+      "fullRows": 770,
+      "fastRows": 771,
+      "retained405": {
+        "checks": 37965608,
+        "differences": 0
+      },
+      "cases": [
+        {
+          "case": "ludovico329-motion-phase0-v1",
+          "status": "FAIL",
+          "checks": 28704,
+          "differences": 5299,
+          "coverage": {
+            "pairedActualPlayingRows": 571,
+            "controlledTearBodies": 383,
+            "controlledTearFullGates": 191,
+            "controlledTearFastGates": 192
+          },
+          "reportSha256": "1067782f0856099dbd2b076e821580068b1534fc8c7f2fbd6054cadd9f1b7fa4"
+        },
+        {
+          "case": "ludovico329-contact-phase1-v1",
+          "status": "FAIL",
+          "checks": 47750,
+          "differences": 7994,
+          "coverage": {
+            "pairedActualPlayingRows": 572,
+            "controlledTearBodies": 384,
+            "controlledTearFullGates": 192,
+            "controlledTearFastGates": 192
+          },
+          "reportSha256": "a67f2fe4be5fc4105a6df9d47f9df79a1e16b372c64fad28e019f8b64ac71253"
+        },
+        {
+          "case": "ludovico329-os-0-v1",
+          "status": "FAIL",
+          "checks": 28765,
+          "differences": 5310,
+          "coverage": {
+            "pairedActualPlayingRows": 572,
+            "controlledTearBodies": 384,
+            "controlledTearFullGates": 192,
+            "controlledTearFastGates": 192
+          },
+          "reportSha256": "f9ed05a41ac608bd82f712c240a98a32e0b07de3465c363e5f60faaf1a8f9389"
+        },
+        {
+          "case": "ludovico329-os-1-v1",
+          "status": "FAIL",
+          "checks": 29131,
+          "differences": 5645,
+          "coverage": {
+            "pairedActualPlayingRows": 578,
+            "controlledTearBodies": 390,
+            "controlledTearFullGates": 195,
+            "controlledTearFastGates": 195
+          },
+          "reportSha256": "78a2c099d3034b33f348885212848ec79f2bce926e2e5442104d01dacbb32b7a"
+        }
+      ],
+      "selectedMatchedScope": "Historical8120 only. Fixed motion383 damage/born83C/radius/frictions/height/flags/colors/generic318/birthAge/Parent observations and571 counts/C18/cache/Room rows. Contact accepted queue and next-Full HP chains occur independently in both games (Native1/port2).",
+      "knownMotionDefect": "Historical8120 controlled saved450 rewind; its specific repair is qualified by finalC421 below. Other failures remain unchanged.",
+      "remaining": [
+        "strict physical/receiver identity/positions",
+        "42 contact HP differences",
+        "10 contact queue differences",
+        "fallingSpeed/identity/seed",
+        "missing actor owners/registry/ordinal",
+        "full actor/contact/lifecycle parity"
+      ],
+      "fixedMotionRemaining": {
+        "c74PrebirthDifferences": 188,
+        "bb0PrebirthDifferences": 188,
+        "da0Differences": 7,
+        "allPlayerControllerFieldsAccepted": false
+      }
+    },
+    "sourceOnlyPRHeadScope": "Historical prequalification Draft head; the final landed source and independently qualified C421 producer are recorded below.",
+    "finalIntegralFunctionalComparison": {
+      "path": "/dev/shm/isaac-ludo307-integral-own-proof/integral-four-case-functional-summary.json",
+      "sha256": "91fee5f6ffe9ea6f5501bd31415a5a1fdd18560d3d30a585d4023941c9d56c70",
+      "source": "d234fd9ea78ed12af2cd97d47699d3b58d13d4cb",
+      "wasmSha256": "c421a00a80bd1e63a4dbe507ca1adccabefcfb29f663291925a253b10c9d2c23",
+      "mainMerge": "d56726797ad12976e9fdec53f3456c5b6161e184",
+      "mergeReceipt": {
+        "path": "/workspace/isaac-rebirth-browser/.cache/coordination/combat/ludo307-integration/merged.json",
+        "sha256": "581314c2e5e90c84069ce11f433a904f938a2aeeb56fbd66bb05e26f2facc3fb"
+      },
+      "qualificationClosure": {
+        "path": "/dev/shm/isaac-ludo307-integral-own-proof/qualification-closure.json",
+        "sha256": "95ee8c24d48eb6c27785767af0a5ab8ba3da48389b38c7033167f54d902bbafd"
+      },
+      "buildSeconds": {
+        "production": 26.642,
+        "strictClippy": 16.203,
+        "floor": 11.334
+      },
+      "retained405": {
+        "checks": 37965608,
+        "differences": 0
+      },
+      "status": "FAIL",
+      "checks": 134364,
+      "differences": 20813,
+      "bodies": 1541,
+      "fullRows": 770,
+      "fastRows": 771,
+      "cases": [
+        {
+          "case": "ludovico329-motion-phase0-v1",
+          "status": "FAIL",
+          "checks": 28704,
+          "differences": 4209,
+          "coverage": {
+            "pairedActualPlayingRows": 571,
+            "controlledTearBodies": 383,
+            "controlledTearFullGates": 191,
+            "controlledTearFastGates": 192
+          },
+          "reportSha256": "28e1030fe761bfdceea9d5ebb5fe935ac6c12d733755a548e6688d034625c72e"
+        },
+        {
+          "case": "ludovico329-contact-phase1-v1",
+          "status": "FAIL",
+          "checks": 47764,
+          "differences": 7835,
+          "coverage": {
+            "pairedActualPlayingRows": 572,
+            "controlledTearBodies": 384,
+            "controlledTearFullGates": 192,
+            "controlledTearFastGates": 192
+          },
+          "reportSha256": "d67fdc44ccc6ce7df37e164178372b859fdec105cf24886df301c43116e91c23"
+        },
+        {
+          "case": "ludovico329-os-0-v1",
+          "status": "FAIL",
+          "checks": 28765,
+          "differences": 4219,
+          "coverage": {
+            "pairedActualPlayingRows": 572,
+            "controlledTearBodies": 384,
+            "controlledTearFullGates": 192,
+            "controlledTearFastGates": 192
+          },
+          "reportSha256": "74b0653dbac0905ca0615cc75c24ea003a76ed985f9d0af7d302df9e6f96e6f7"
+        },
+        {
+          "case": "ludovico329-os-1-v1",
+          "status": "FAIL",
+          "checks": 29131,
+          "differences": 4550,
+          "coverage": {
+            "pairedActualPlayingRows": 578,
+            "controlledTearBodies": 390,
+            "controlledTearFullGates": 195,
+            "controlledTearFastGates": 195
+          },
+          "reportSha256": "15adc1c784fb7d250f3c8589f0ab9b064f01620b36aba8a115c2e2bb7ac3c2ca"
+        }
+      ],
+      "numericClassification": {
+        "path": "/dev/shm/isaac-ludo307-integral-own-proof/report-only-numeric-classification.json",
+        "sha256": "f2a9897f524e050b37bdd6fa83c204406dd30687b495aaecd33617225106b31a",
+        "status": "REPORT_ONLY_NO_REGRADE",
+        "noRegrade": true
+      },
+      "exactMotionScope": {
+        "cases": [
+          "ludovico329-motion-phase0-v1",
+          "ludovico329-os-0-v1",
+          "ludovico329-os-1-v1"
+        ],
+        "bodyRows": 1157,
+        "fields": [
+          "position448",
+          "velocity464",
+          "velocityDeltaB28",
+          "savedPosition450"
+        ],
+        "differences": 0,
+        "scope": "Only these three routes and actual body rows; identity/RNG/missing-owner failures remain."
+      },
+      "contactRoute": {
+        "case": "ludovico329-contact-phase1-v1",
+        "bodyRows": 384,
+        "positionDifferences": 259,
+        "velocityDifferences": 264,
+        "velocityDeltaB28Differences": 255,
+        "savedPosition450Differences": 258,
+        "firstPositionVelocityDifferencePresentation": 686,
+        "maxPositionEuclideanError": 47.42170146084022,
+        "maxVelocityEuclideanError": 4.882339838658294,
+        "nativeType18FifoObservationGates": [
+          821,
+          822,
+          825,
+          826
+        ],
+        "nativeType18NonlethalAppliedGate": 823,
+        "portFifoObservationGates": [],
+        "portAppliedGates": [],
+        "requiredPortMinimumEnqueueAndDrainPassed": false,
+        "scope": "Port has zero actual FIFO/drain witnesses. Older supported-minimum counters do not establish port contact coverage. First Tear motion mismatch precedes observed Native FIFO; report-only values establish no new timing, steering or actor-law repair."
+      },
+      "remaining": [
+        "Contact-route physical and receiver geometry differences",
+        "Required port accepted-enqueue and next-Full drain witnesses fail",
+        "Actor/receiver identity and seed/RNG mismatches",
+        "Unknown HP/class/mass/registry/ordinal owners and fallingSpeed differences",
+        "Unobserved atomic receiver velocity/registry/veto, lethal lifecycle, DOM/render and complete actor/lifecycle parity"
+      ],
+      "supersedesOnly": "The source-proven controlled saved450 rewind defect in8120; no other prior failure is regraded.",
+      "artifactScope": "Exact qualified C421 producer and retained inputs. Owner merged the reviewed source blobs with external renderer326; no full merged-tree build or whole-case parity is claimed."
+    },
+    "producerHistoryScope": "ownProducer, ownWasm, buildSeconds, functionalComparison and correctedFunctionalComparison retain the original and intermediate artifacts. finalIntegralFunctionalComparison records the independently qualified final C421 artifact and actual source landing."
+  },
+  "sourceOnlyDrafts": [],
+  "historicalReportsUnchanged": true,
+  "noCaptureTransportAsFunctionalParity": true,
+  "retainedStandaloneInputs": {
+    "path": "references/isaac/cases/item-composition/ludovico329-v1.json",
+    "scope": "Four declared cases and literal Challenge/STB resources; no passing gameplay result follows from retaining them."
+  },
+  "typedContact315": {
+    "pr": 315,
+    "head": "336c87231c15240a86496943b951baa7757ccc72",
+    "scope": "Merged typed common NPC contact observer/comparer. Consumed C421 receiver observations retain port FIFO/drain minimum failures; no whole contact acceptance.",
+    "ownGameAcceptance": false,
+    "historicalSourceOnlyHead": "a1768e04e2b17da708234fddcd575d05471e2115",
+    "mainMerge": "03a8ea73ec78bb4c77b778e9a71c15c68a375a0c"
+  },
+  "kind8Observation317": {
+    "pr": 317,
+    "head": "5cb6a4646b14a6916c6bc7a8c70c6cb9311208a3",
+    "scope": "Merged optional kind8 observation fields consumed by the retained standalone329 comparison. Missing registry/ordinal, strict actor identity and contact/lifecycle evidence remain failures or gaps.",
+    "ownGameAcceptance": false,
+    "historicalSourceOnlyHead": "ee14739c2b225c935140550098c186aa663c4ab4",
+    "mainMerge": "3df99031eff287a6745c0f7e994b7603e98203d5"
+  },
+  "controlledBrim312": {
+    "status": "MERGED_FOUR_COMPLETE_PAIRS_FAIL",
+    "runtimeSource": "b8ae2eccd7694688ada95da097e81c067dda285e",
+    "ownWasmSha256": "708457d9dd1eeaa40c8e450bf805a362ed3f2394ce5421c1f38f68bc8d43850a",
+    "ownBuildClosure": {
+      "path": "/dev/shm/isaac-controlled-brim312-own-proof/qualification-closure.json",
+      "sha256": "1ba09cc412ac84755e264f6c8b6b5ff0e1e288e0caa9d237c6cd21c8165fa50a"
+    },
+    "ownBuildScope": "Independent312 plus separately consumed Damage318 only; production/Clippy/floor pass. No whole-current-main product claim.",
+    "strictRegularRegression": {
+      "path": "/dev/shm/isaac-controlled-brim312-own-proof/regular405/regular405x4-comparison.json",
+      "sha256": "eae1e6b4431df7ba1a18651f9ddcb795a942d0ff9ccfb7ef445fc537505b8738",
+      "checks": 37968484,
+      "failures": 0,
+      "preexistingFieldsFiltered": false
+    },
+    "retainedLibraRegression": {
+      "path": "/dev/shm/isaac-controlled-brim312-own-proof/libra-regression/paired-property-comparison.json",
+      "sha256": "9e55bbbbaba7b58f91a2ae517d03c162f338f1f85e8a8cc179628997448ebdce",
+      "checks": 503611,
+      "failures": 0,
+      "gatesPerCase": 631,
+      "postGrantGatesPerCase": 93,
+      "cases": 2,
+      "firstCaseMissingNativeFamiliarSelections": 631
+    },
+    "semanticV2": {
+      "path": "/dev/shm/isaac-controlled-brim312-public-game-v1/controlled-brim-properties-priority-phase0/paired-prefix-reapply-semantic-v2/functional-compact-summary.json",
+      "sha256": "9946cb70a3d3d6bb79ea6026ca5badb2c68a8373d91678fbc898bed2c4ad660c",
+      "checks": 86718,
+      "failures": 7667,
+      "pairedPlayingGates": 1007,
+      "controlledLaserBodies": 541,
+      "full": 270,
+      "fast": 271,
+      "nativeTransport": "incomplete-prefix",
+      "propertyStateTransition": "PASS separately on both games",
+      "actualReapplyCallback": "MISSING_FAIL on both games",
+      "portOnlySuffixGates": 3,
+      "otherBodyGradesUnchanged": true
+    },
+    "historicalPrefixV1": {
+      "checks": 87458,
+      "failures": 7667,
+      "retainedUnchanged": true
+    },
+    "remaining": [
+      "Actual admitted reapply callback events",
+      "HP ownership",
+      "Identity/seed/RNG mismatches",
+      "Contact and joined lifecycle event/completion/call-order obligations"
+    ],
+    "fullPairedAcceptance": false,
+    "completeFourNativeTransport": {
+      "cases": 4,
+      "actualWaitExit0": true,
+      "allPinsStable": true,
+      "guards": 0,
+      "naturalPidfdExit": true,
+      "sameFrozenInputs": "a408de65",
+      "same708ArtifactAndPublicStateBytes": true,
+      "functionalAcceptance": false
+    },
+    "fullComparerAttempt": {
+      "status": "MEMORY_FAILURE_AFTER_SUCCESSFUL_PROJECTION",
+      "functionalGradeEstablished": false,
+      "pagedSuccessor": "Complete four-case bounded paged grading; historical full-comparer failure remains unchanged"
+    },
+    "lifecycleScope": "Four separate saved-sidecar addenda each19checks/4FAIL,2events/1independentlyobservedcleanupchain; BaseUninit-entry is not completion, actualreapply/initialorder/portcallbacks missing",
+    "completeCase0Paired": {
+      "report": "/dev/shm/isaac-controlled-brim708-native-evidence-v2/controlled-brim-properties-priority-phase0/paired-functional-paged-v3/functional-report.json.gz",
+      "reportShaPrefix": "978c19ea",
+      "checks": 86999,
+      "failures": 7688,
+      "pairedPlayingRows": 1010,
+      "laserC18Bodies": 541,
+      "full": 270,
+      "fast": 271,
+      "knifeBodies": 280,
+      "matched": [
+        "Damage",
+        "flags",
+        "colors",
+        "TTL",
+        "Sprite",
+        "friction",
+        "classes",
+        "Parent"
+      ],
+      "remaining": [
+        "geometry",
+        "identity/RNG",
+        "HP ownership",
+        "actual admitted reapply callbacks",
+        "unjoined lifecycle records"
+      ],
+      "otherThreeGrades": "COMPLETE_SEPARATE_FOUR_CASE_SUMMARY"
+    },
+    "completeFourPaired": {
+      "path": "/dev/shm/isaac-controlled-brim708-native-evidence-v2/four-case-paired-summary-v3.json",
+      "sha256": "cd2f66908ed679c9364a1f6b04138637553bd08d98ac98fb8b18567ca9e1c09f",
+      "checks": 349856,
+      "failures": 30892,
+      "playingRows": 4058,
+      "laserC18Bodies": 2192,
+      "full": 1094,
+      "fast": 1098,
+      "knifeBodies": 1110,
+      "stableMaterialRowsMatching": 2188
+    },
+    "lifecycleReadback": {
+      "path": "/dev/shm/isaac-controlled-primary-events-portable-v1/four-case-saved-readback-closed.json",
+      "sha256": "4c28a2d4d879c75fb7146b0d95932ec403e6850d6877ebef803aaffa1e1a4ee7",
+      "cases": 4,
+      "checksPerCase": 19,
+      "failuresPerCase": 4,
+      "predecessorsUnchanged": true
+    }
+  },
+  "nativeEvidenceStreaming332": {
+    "mainMerge": "12c6d19cfc191738350c6d3f359eb28c1ee4e7b8",
+    "head": "c4ca68dd420c9fb37f8f0069f89a03bbb8853c2d",
+    "validation": {
+      "path": "/dev/shm/isaac-native-observation-streaming-v1/validation-result.json",
+      "sha256": "b0ed87ae8e11fbe0ca8419519e83630c319ab13e0bbc6845a0a2ecbd80492eb3"
+    },
+    "scope": "Original closed-prefix raw/gzip/API equivalence remains; subsequent four actual Technology captures complete normally, not a retroactive prefix pass or gameplay parity.",
+    "committedRecords": 3302,
+    "observations": 1103,
+    "boundedWindows": 69,
+    "rawAndGzipBytesExact": true,
+    "observedValidationPeakRssBytes": 36974592,
+    "historicalNativePerPidPeak": "Unmeasured; aggregate cgroup growth does not establish recorder RSS",
+    "temporaryFutureHostDiagnostics": "Versioned capacity monitor and exact-game pidfd/RSS diagnostics exercised by real fresh captures; historical failed guards/captures preserved.",
+    "freshNativePeakReductionVerified": false,
+    "currentRecorderObservation": {
+      "observedKernelHighWaterBytes": 36585472,
+      "historicalPeakKnown": false,
+      "quantifiedPeakReductionVerified": false
+    }
+  },
+  "nextTechnologyAndGimpy": {
+    "status": "HISTORICAL77CD_RETAINED_NEW027C_TECH_DAMAGE_REPAIR_QUALIFIED",
+    "technologyFirstBuild": "Missing PlayerControlled match arm; failure101 retained, no product from that attempt.",
+    "technologyCohortSha256": "06986a09a1fde39d8e580a0691dc7b8d71a669417d0d72527f256d28cbe5b524",
+    "gimpyCohortSha256": "d0cdf483a0f9c2e5689fae7b65ffc0a01a0e4c69bcf88cf3a5d6f31f6766a412",
+    "gimpyFinding": "Retained5820-command DST finding does not establish Original roll/spawn order.",
+    "room8": "SuperSecret; frozen numeric roomType!=8 exclusion unchanged",
+    "correctedProduction": {
+      "source": "77cd240828dbecbc236cba5b2f925cd861c4b61e",
+      "wasmSha256": "8e9c763bba399378c498ead4f1d4d0705e8828ed29ea49ca68b8815e5f496f6e",
+      "closure": {
+        "path": "/dev/shm/isaac-technology320-own-proof/attempt2/check-build-status.json",
+        "sha256": "5e968e89a18aa95371df531cc4a0700f55cf71c2469c4c5f0062cb3e4c2e0334"
+      },
+      "actualWait": true,
+      "seconds": 27.841788,
+      "allPinsStable": true,
+      "scope": "Frozen77cd production/strict Clippy/floor pass; no future source correction or whole-current-main acceptance.",
+      "exitCode": 0
+    },
+    "strictClippy": {
+      "closure": {
+        "path": "/dev/shm/isaac-technology320-own-proof/attempt2/clippy-status.json",
+        "sha256": "873c44b757d93796a2b5abadab18983c1d98306ea70b7be46dea8e02d327aa88"
+      },
+      "actualWait": true,
+      "seconds": 29.557749271392822,
+      "scope": "Same frozen77cd source; no future source correction or game acceptance inferred.",
+      "exitCode": 0
+    },
+    "floor": {
+      "closure": {
+        "path": "/dev/shm/isaac-technology320-own-proof/attempt2/floor-status.json",
+        "sha256": "f162e244eb42bdbc8ee28f3b678ab1b83101b5a3c501beb3da0c633461e19dd4"
+      },
+      "exitCode": 0,
+      "actualWait": true,
+      "seconds": 16.855637073516846,
+      "scope": "Same frozen77cd source; no future source correction or game acceptance inferred."
+    },
+    "strictRegular": {
+      "preexistingChecks": 37968484,
+      "preexistingFailures": 0,
+      "additionalRegistrationChecks": 2856,
+      "additionalRegistrationFailures": 416,
+      "grade": "FAIL_RETAINED"
+    },
+    "technologyPaired": {
+      "path": "/dev/shm/isaac-technology320-native-evidence-v1/four-case-paired-summary-v1.json",
+      "sha256": "ff0801857d12726852f1e7618083ef303f7380a707e694e7c1b53b4abbee15e7",
+      "cases": 4,
+      "checks": 82351,
+      "failures": 5807,
+      "nativeBirths": 30,
+      "portBirths": 29,
+      "pairedBodies": 152,
+      "full": 74,
+      "fast": 78,
+      "damageDifferences": 76,
+      "ownLaserIdentities": 29,
+      "ownImpactIdentities": 29,
+      "ownManagerRows": 170,
+      "ownC18NullRows": 1928
+    },
+    "gimpyOriginalBank": {
+      "cases": 4,
+      "positive225Observed": false,
+      "dipDeathObserved": false,
+      "coverage": "FAIL_RETAINED"
+    },
+    "gimpyV2Own": {
+      "path": "/dev/shm/isaac-gimpy225-public-game-v2/own-gimpy-v2-nonvacuity.json",
+      "sha256": "3fc41cb012d0d9d76d2df44778d4d80af140107bc15cb439cc4a7b2b1e9ddf28",
+      "cases": 4,
+      "pickup225Counter": 755,
+      "explosionCounter": 1153,
+      "queuedDamageCounter": 1154,
+      "hp4ToMinus56DeadCounter": 1155,
+      "sameRoomDisappearanceCounters": [
+        1156,
+        1157
+      ],
+      "item234": 0,
+      "newPickupBeyondPedestal": false,
+      "rngTransitionAssessment": {
+        "path": "/dev/shm/isaac-gimpy225-rng-transition-consistency-v1/assessment.json",
+        "sha256": "0daa06a6096f85f9af7064e822d51171d31a1b3b1e0eaf3df504589afdaae419",
+        "xorshift": [
+          4,
+          3,
+          17
+        ],
+        "bound": 100,
+        "nonzeroFailureResults": [
+          81,
+          81,
+          75,
+          37
+        ],
+        "scope": "One observed state-transition consistency only; no atomic callback/call-count, trinket-slot or Original claim."
+      }
+    },
+    "futureSource": {
+      "head": "68aeedc15251245b1f35e6db3fb42d351e4c2b79",
+      "tree": "c511dab9",
+      "status": "OWN_THREE_BUILDS_AND_SCOPED_TECH_DAMAGE_COMPARISON_COMPLETE",
+      "owners": [
+        "Soy stages",
+        "capability split",
+        "eye-history repair",
+        "readiness287",
+        "Room8",
+        "Technology post-contact reset69f5d812"
+      ],
+      "historical77cdAndFailuresUnchanged": true,
+      "ownWasmSha256": "027c7031c89292e78fa1d36fa23546ed849eb5297fa0740ce1e31dc95776a956",
+      "productionSeconds": 30.328,
+      "productionExitCode": 0,
+      "productionActualWait": true,
+      "clippy": {
+        "exitCode": 0,
+        "actualWait": true,
+        "seconds": 30.0746,
+        "sourceBeforeEqualsEnd": true,
+        "guardStop": false
+      },
+      "floor": {
+        "exitCode": 0,
+        "actualWait": true,
+        "seconds": 15.9015,
+        "sourceBeforeEqualsEnd": true,
+        "guardStop": false,
+        "earlierPreflightDeficitBytes": 126156800
+      },
+      "gameQualification": "Scoped Technology comparison only; no whole-game acceptance"
+    },
+    "newTechnologyPaired": {
+      "path": "/dev/shm/isaac-item330-public-game-v1/four-case-technology-comparison-v1.json",
+      "sha256": "03509b681efba6ebf8af88e9848734585557ceb16ff2be9ac639db361a2dd6d9",
+      "checks": 82351,
+      "failures": 5731,
+      "damageChecks": 152,
+      "damageFailures": 0,
+      "resolvedDamageFailures": 76,
+      "allOtherPerFieldCountsUnchanged": true
+    },
+    "raw405DualBaseline": {
+      "path": "/dev/shm/isaac-item330-composition-own-proof/regular405/raw-dual-baseline-summary.json",
+      "sha256": "edd603c24573c8c5ae67f8b050641c8216d944897f5e1e76dec2c38746b75d76",
+      "checksEach": 37972668,
+      "failuresVs77cd": 5928,
+      "failuresVs708": 8368,
+      "optionalRoomKeyNullAdditions": 5512,
+      "allOtherDifferences": "Reviewed Eye key/null-to-false history only",
+      "rawFailuresRetained": true,
+      "fieldExclusions": [],
+      "separatePublicAbiHistoryLedgerUnknownIssues": 0
+    }
+  },
+  "controlledBrimContact335": {
+    "mainMerge": "8c918fb62d835a10ac8799058b9f5b8c4463744f",
+    "sourceDefaultHelpImportValidation": "PASS",
+    "actualContactCases": "UNEXECUTED",
+    "scope": "Opt-in controlled7/1/1 tools only; no default capture change or ordinary7/1/0/Technology7/2 alias."
+  },
+  "unmergedComparedTools": [],
+  "drFetus52": {
+    "status": "DRAFT_THREE_BUILDS_STRICT_REGRESSION_FOUR_OWN_ROUTES_FIRST_NATIVE_PAIR_FAIL",
+    "producer": "072118868a2cf802455227eda22bec59264b7fa8",
+    "wasmSha256": "26cb9cf8a5aaf60d149c7195b2ea137d3a9b4ada2200f9bf4fdc55efc6e67850",
+    "buildClosure": {
+      "path": "/dev/shm/isaac-dr-fetus52-own-proof/qualification-closure.json",
+      "sha256": "a3ca7c0624e4a0e39b5140c6d2fc1274196bd48386079f7a8b73fe4ca5373ed6"
+    },
+    "buildSeconds": {
+      "production": 45.211,
+      "strictClippy": 29.475,
+      "floor": 17.465
+    },
+    "stablePins": 3451,
+    "strict405": {
+      "checks": 37972668,
+      "failures": 0,
+      "excludedPaths": [],
+      "additivePaths": []
+    },
+    "ownNonvacuity": {
+      "path": "/dev/shm/isaac-dr-fetus52-own-nonvacuity-v1/own-bomb-nonvacuity.json",
+      "sha256": "cd667264ff3a097fdead01d85a7a17e4c67f3f6808d2977f7d0dcd1f1df14ebb",
+      "cases": 4,
+      "birthsAndRetirementsEach": 3,
+      "birthFuse": 30,
+      "birthFullUpdates": 0,
+      "birthDamage": 10.5,
+      "bodyRows": [
+        214,
+        212,
+        244,
+        212
+      ],
+      "fifoRowsEach": 2,
+      "hpWitnessEach": "FollowingFull4to-6.5"
+    },
+    "firstStrictPair": {
+      "path": "/dev/shm/isaac-dr-fetus52-native-evidence-v1/ordinary-dr-fetus52-fixed-phase0/paired-functional-v1/functional-report.json.gz",
+      "sha256": "100536666e2448ea69c63be8a0ed08e956ca169cb0076740def92a7fc9873008",
+      "checks": 28783,
+      "failures": 2740,
+      "otherThreeNativeCaptures": "PENDING_AT_SNAPSHOT"
+    },
+    "gameAcceptance": false,
+    "controlled329Admitted": false,
+    "guessedHistoryDefaults": false,
+    "idleDa0Successor": "SOURCE_ONLY_NOT_CONSUMED",
+    "counterV2Addendum": {
+      "checks": 29598,
+      "failures": 2740,
+      "addedParityChecks": 815,
+      "addedParityFailures": 0,
+      "originalAbsoluteCounterFailuresRetained": true,
+      "reportShaPrefix": "893ab429",
+      "original10053666Unchanged": true
+    },
+    "independentNativeWitness": {
+      "summaryPath": "/dev/shm/isaac-dr-fetus52-native-own-witness-v1/actual-fixed0-v1/summary.json",
+      "summaryShaPrefix": "6ee134af",
+      "fuse30Births": 3,
+      "laterFullAbsences": 3,
+      "bombFifoRows": 2,
+      "followingFullHp4ToMinus6_5": 1,
+      "strictCrossIdentityParity": false
+    }
+  },
+  "soy330": {
+    "bankSha256": "3a35a3a8aa7489db9886d31815f9f6fb983284c887c19f7766ff7b5b07b80028",
+    "publicCasesCompleted": 4,
+    "sameResourcesTokens": true,
+    "originalComparison": "PENDING",
+    "ownSummaryShaPrefix": "97fe6c5a",
+    "queueCounter": 897,
+    "grantCounter": 981,
+    "pendingAfterGrant": 0,
+    "regularOwn": {
+      "fireDelayBeforeAfter": [
+        7,
+        1
+      ],
+      "damageBeforeAfter": [
+        6.6407833,
+        1.3281567
+      ],
+      "tearBirthsPerCase": 16
+    },
+    "brimOwn": {
+      "fireDelayBeforeAfter": [
+        30,
+        6
+      ],
+      "damageBeforeAfter": [
+        3.5,
+        0.7
+      ],
+      "laserBirthsPerCase": 0,
+      "costumeTransformFrontierRowsPerCase": 360,
+      "coverage": "FAIL"
+    }
+  },
+  "controlledTechnology68Plus329": {
+    "status": "SOURCE_ONLY",
+    "primaryC08": 3,
+    "selectedFlags": 0,
+    "actorGameAcceptance": false
+  }
+}

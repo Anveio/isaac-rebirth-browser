@@ -260,6 +260,8 @@ fn admit(state: &mut State, admission: Admission) -> Result<u32, String> {
         full_updates: 0,
         poop_effect: None,
         blood_effect: None,
+        creep_effect: None,
+        fly_effect: None,
         footprint: false,
         critter: critter.then_some(Critter {
             timer: 0,

@@ -12,6 +12,9 @@ pub struct GridOwner {
     pub initialized: bool,
     pub birth_game_update: Option<u32>,
     pub local_rng: Rng,
+    /// Poop.Init569600 variant0 sheet: grid_poop_{RandomInt(3)+1}.png.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub poop_sheet: Option<u32>,
 }
 
 /// Seven semantic fields in each native 0x1c-byte grid record. Padding beside
@@ -60,6 +63,7 @@ impl GridEntity {
             initialized: false,
             birth_game_update: None,
             local_rng: Rng::new(0xaa17_414f, [5, 9, 7]),
+            poop_sheet: None,
         });
         Ok(())
     }
@@ -93,8 +97,9 @@ impl GridEntity {
             1 => {} // Supported Decoration.Init has no direct path-cost store.
             14 if self.variant == 0 && self.state <= 3 => {
                 // Poop.Init569600: an ordinary unbroken poop blocks (class3)
-                // and stores path cost1500. Its local RNG5/9/7 owns the
-                // cosmetic +314 draw.
+                // and stores path cost1500. Its local RNG5/9/7 first draws
+                // the variant0 sheet (569ac0 RandomInt(3)+1), then the
+                // cosmetic +314 (56994f RandomInt(2)).
                 self.collision_class = 3;
                 costs.store(index, 1500)?;
                 let owner = self
@@ -102,6 +107,7 @@ impl GridEntity {
                     .as_mut()
                     .ok_or("Poop Init requires its constructor")?;
                 owner.local_rng = Rng::new(self.spawn_seed, [5, 9, 7]);
+                owner.poop_sheet = Some(owner.local_rng.bounded(3) + 1);
                 owner.local_rng.bounded(2);
             }
             // Rock (2/5/6) and Spike (8) Init stores are owned by the

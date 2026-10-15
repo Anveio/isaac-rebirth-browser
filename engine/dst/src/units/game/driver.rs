@@ -15,7 +15,7 @@ use rebirth_cleanroom::run_admission::MAX_SAFE_TIMESTAMP_MS;
 use rebirth_cleanroom::traversal;
 use rebirth_cleanroom::{Command, PausePhase, Screen, State, MAX_COMMAND_TICKS};
 use std::cmp::Reverse;
-use std::collections::{BinaryHeap, VecDeque};
+use std::collections::{BTreeMap, BinaryHeap, VecDeque};
 
 /// Unrelated browser key codes; `foreign_key` keeps only those outside the
 /// engine's public surface.
@@ -55,12 +55,20 @@ pub struct Driver {
     /// The engine's doorway admission per descriptor, for the floor it was
     /// computed on (boss and miniboss checks decode authored room assets).
     admitted: Option<((u32, u32), Vec<bool>)>,
+    /// Pickups the player reached without collecting (a full-health heart,
+    /// say), by room and id, with how often; they stop being targets.
+    touched: BTreeMap<(usize, u32), u32>,
+    /// Seed codes whose treasure room offers a weapon collectible.
+    scouted: Vec<String>,
 }
 
 #[derive(Clone, Copy, PartialEq)]
 enum Travel {
     /// The boss room.
     Boss,
+    /// An unvisited treasure room, then the boss room: a scouted seed's
+    /// collectible waits there.
+    Treasure,
     /// The nearest unvisited room the player may enter: special, large and
     /// miniboss rooms are otherwise never on a route.
     Explore,
@@ -71,6 +79,8 @@ struct Goal {
     room: usize,
     position: WorldVector,
     remaining: u32,
+    /// A hidden door: bomb it on arrival.
+    bomb: bool,
 }
 
 fn key(code: &str, down: bool) -> Command {
@@ -125,7 +135,21 @@ impl Driver {
                 _ => None,
             },
             admitted: None,
+            touched: BTreeMap::new(),
+            scouted: Vec::new(),
         }
+    }
+
+    /// Whether this case types seed codes, so scouting them pays off.
+    pub fn seeded(&self) -> bool {
+        self.persona == Persona::Seeded
+    }
+
+    pub fn scout(&mut self, codes: Vec<String>) {
+        if !codes.is_empty() {
+            self.travel = Some(Travel::Treasure);
+        }
+        self.scouted = codes;
     }
 
     pub fn next(&mut self, state: &State, e: &mut Entropy) -> Command {
@@ -137,6 +161,26 @@ impl Driver {
             self.plan(state, e);
         }
         self.queue.pop_front().unwrap_or_else(|| tick(1))
+    }
+
+    /// Holds exactly `keys` of the movement and fire keys across `ticks`:
+    /// releases those the engine reports held that this macro does not
+    /// want and presses only the rest. They stay held into the next macro,
+    /// as a player's would, so commands buy game time instead of
+    /// re-pressing what is already down.
+    fn hold(&mut self, state: &State, keys: &[&str], ticks: u32) {
+        for code in &state.pressed {
+            let play = MOVES.contains(&code.as_str()) || AIMS.contains(&code.as_str());
+            if play && !keys.contains(&code.as_str()) {
+                self.queue.push_back(key(code, false));
+            }
+        }
+        for code in keys {
+            if !state.pressed.contains(*code) {
+                self.queue.push_back(key(code, true));
+            }
+        }
+        self.queue.push_back(tick(ticks));
     }
 
     fn press(&mut self, code: &str, hold: u32) {
@@ -259,12 +303,18 @@ impl Driver {
                 29 => self.press("Escape", 0),
                 _ => self.ticks(e),
             },
-            Screen::Seed if self.persona != Persona::Direct && e.chance(1, 2) => {
+            Screen::Seed
+                if self.persona != Persona::Direct
+                    && (!self.scouted.is_empty() || e.chance(1, 2)) =>
+            {
                 // Replace the dialog text with one complete code, then confirm.
                 for _ in 0..state.seed_text.len() {
                     self.press("Backspace", 0);
                 }
                 let code = match e.below(8) {
+                    _ if !self.scouted.is_empty() && e.chance(3, 4) => {
+                        e.pick(&self.scouted).clone()
+                    }
                     0 => (*e.pick(&["T1PK6Y0W", "QNXPTVT1", "0YAZCZ7N", "BHX1EF8A", "KMAGB3XH"]))
                         .into(),
                     1 => (0..8)
@@ -325,6 +375,23 @@ impl Driver {
             .filter(|npc| !npc.removed && npc.hp > 0.0)
             .map(|npc| npc.position)
             .min_by(|a, b| distance(player, *a).total_cmp(&distance(player, *b)));
+        // Play the room before leaving it: fight what is alive (a boss on
+        // nearly every macro, since its HP outlasts short cases), then collect
+        // what the engine says can be collected.
+        let boss_fight = state
+            .room
+            .npcs
+            .iter()
+            .any(|npc| npc.boss && !npc.removed && npc.hp > 0.0);
+        let fight_odds = if boss_fight { (4, 5) } else { (1, 2) };
+        if let Some(npc) = hostile.filter(|_| e.chance(fight_odds.0, fight_odds.1)) {
+            return self.fight(state, player, npc, boss_fight, e);
+        }
+        if hostile.is_none() && e.chance(2, 3) {
+            if let Some(pickup) = self.nearest_collectable(state, player) {
+                return self.go(state, player, pickup, false, hostile, e);
+            }
+        }
         // Travellers spend most macros travelling.
         let choice = if self.travel.is_some() && e.chance(1, 2) {
             5 + e.below(40)
@@ -341,7 +408,7 @@ impl Driver {
                             Some(Route::Walk(waypoint)) => waypoint,
                             _ => rock,
                         };
-                        self.steer(player, waypoint, None, e);
+                        self.steer(state, player, waypoint, None, e);
                     }
                     None => self.ticks(e),
                 }
@@ -357,29 +424,18 @@ impl Driver {
                         remaining: goal.remaining - 1,
                         ..goal
                     },
-                    None => Goal {
-                        room: state.current_room,
-                        position: self.target(state, player, e),
-                        remaining: e.range(6, 24),
-                    },
-                };
-                self.goal = Some(goal);
-                let target = goal.position;
-                match route(state, player, target) {
-                    Some(Route::Walk(waypoint)) => self.steer(player, waypoint, hostile, e),
-                    Some(Route::Blocked { stand, rock }) if state.inventory.bombs > 0 => {
-                        if distance(player, stand) < 14.0 {
-                            self.bomb_rock(player, rock, e);
-                        } else {
-                            let waypoint = match route(state, player, stand) {
-                                Some(Route::Walk(waypoint)) => waypoint,
-                                _ => stand,
-                            };
-                            self.steer(player, waypoint, None, e);
+                    None => {
+                        let (position, bomb) = self.target(state, player, e);
+                        Goal {
+                            room: state.current_room,
+                            position,
+                            remaining: e.range(6, 24),
+                            bomb,
                         }
                     }
-                    _ => self.steer(player, target, hostile, e),
-                }
+                };
+                self.goal = Some(goal);
+                self.go(state, player, goal.position, goal.bomb, hostile, e);
             }
             45..=59 => {
                 let aim = match hostile {
@@ -403,25 +459,18 @@ impl Driver {
         }
     }
 
-    /// A reachable consumable pickup, an open door or a random point.
-    fn target(&mut self, state: &State, player: WorldVector, e: &mut Entropy) -> WorldVector {
-        let pickups: Vec<WorldVector> = state
-            .room
-            .pickups
-            .iter()
-            .filter(|pickup| {
-                !pickup.removed
-                    && !pickup.collected
-                    && pickup.can_collect
-                    && matches!(pickup.variant, 20 | 30 | 40)
-            })
-            .map(|pickup| pickup.position)
-            // Pursue only pickups an open route or a bomb can reach.
-            .filter(|position| match route(state, player, *position) {
-                Some(Route::Walk(_)) => true,
-                Some(Route::Blocked { .. }) => state.inventory.bombs > 0,
-                None => false,
-            })
+    /// A collectable pickup, an open door or a random point; true when the
+    /// target is a hidden door to bomb.
+    fn target(
+        &mut self,
+        state: &State,
+        player: WorldVector,
+        e: &mut Entropy,
+    ) -> (WorldVector, bool) {
+        let pickups: Vec<WorldVector> = self
+            .collectable(state, player)
+            .into_iter()
+            .map(|(_, position)| position)
             .collect();
         let doors: Vec<WorldVector> = state
             .room
@@ -436,18 +485,215 @@ impl Driver {
                 return door;
             }
         }
-        match e.below(10) {
+        let position = match e.below(10) {
             0..=6 if !pickups.is_empty() => *e.pick(&pickups),
             0..=7 if !doors.is_empty() => *e.pick(&doors),
             _ => WorldVector {
                 x: player.x + (e.range(0, 400) as f32 - 200.0),
                 y: player.y + (e.range(0, 300) as f32 - 150.0),
             },
+        };
+        (position, false)
+    }
+
+    /// Pickups the engine marks collectable that an open route, or a bomb,
+    /// reaches, minus those the player already stood on without collecting.
+    fn collectable(&self, state: &State, player: WorldVector) -> Vec<(u32, WorldVector)> {
+        state
+            .room
+            .pickups
+            .iter()
+            .filter(|pickup| !pickup.removed && !pickup.collected && pickup.can_collect)
+            .filter(|pickup| {
+                self.touched
+                    .get(&(state.current_room, pickup.id))
+                    .is_none_or(|touches| *touches < 6)
+            })
+            .map(|pickup| (pickup.id, pickup.position))
+            .filter(|(_, position)| match route(state, player, *position) {
+                Some(Route::Walk(_)) => true,
+                Some(Route::Blocked { .. }) => state.inventory.bombs > 0,
+                None => false,
+            })
+            .collect()
+    }
+
+    fn nearest_collectable(&mut self, state: &State, player: WorldVector) -> Option<WorldVector> {
+        let (id, position) = self
+            .collectable(state, player)
+            .into_iter()
+            .min_by(|a, b| distance(player, a.1).total_cmp(&distance(player, b.1)))?;
+        if distance(player, position) < 14.0 {
+            *self.touched.entry((state.current_room, id)).or_default() += 1;
         }
+        Some(position)
+    }
+
+    /// Walks a route to `target`, bombing the first rock when every route is
+    /// blocked; a hidden-door target is bombed on arrival.
+    fn go(
+        &mut self,
+        state: &State,
+        player: WorldVector,
+        target: WorldVector,
+        bomb: bool,
+        hostile: Option<WorldVector>,
+        e: &mut Entropy,
+    ) {
+        if bomb && state.inventory.bombs > 0 && distance(player, target) < 44.0 {
+            return self.bomb_rock(player, target, e);
+        }
+        match route(state, player, target) {
+            Some(Route::Walk(waypoint)) => self.steer(state, player, waypoint, hostile, e),
+            Some(Route::Blocked { stand, rock }) if state.inventory.bombs > 0 => {
+                if distance(player, stand) < 14.0 {
+                    self.bomb_rock(player, rock, e);
+                } else {
+                    let waypoint = match route(state, player, stand) {
+                        Some(Route::Walk(waypoint)) => waypoint,
+                        _ => stand,
+                    };
+                    self.steer(state, player, waypoint, None, e);
+                }
+            }
+            _ => self.steer(state, player, target, hostile, e),
+        }
+    }
+
+    /// Lines up with `npc` on one axis and fires along it: tears fly
+    /// straight, so alignment is what lands hits. Keeps a range band (wider
+    /// against a boss), never stands still against a boss, strafes only to
+    /// align, escape a corner or dodge, turns away from walls instead of
+    /// backing into a corner, and steps across the path of the nearest enemy
+    /// projectile.
+    fn fight(
+        &mut self,
+        state: &State,
+        player: WorldVector,
+        npc: WorldVector,
+        boss: bool,
+        e: &mut Entropy,
+    ) {
+        let (dx, dy) = (npc.x - player.x, npc.y - player.y);
+        let horizontal = dx.abs() >= dy.abs();
+        let fire = aim_toward(player, npc);
+        // The published room bounds share the player's screen coordinates.
+        let room = &state.room;
+        let (x, y) = (state.player.x, state.player.y);
+        let walled = |code: &str| match code {
+            "KeyA" => x - room.left < 40.0,
+            "KeyD" => room.right - x < 40.0,
+            "KeyW" => y - room.top < 40.0,
+            _ => room.bottom - y < 40.0,
+        };
+        let opposite = |code: &str| match code {
+            "KeyA" => "KeyD",
+            "KeyD" => "KeyA",
+            "KeyW" => "KeyS",
+            _ => "KeyW",
+        };
+        let (toward, away) = match fire {
+            "ArrowRight" => ("KeyD", "KeyA"),
+            "ArrowLeft" => ("KeyA", "KeyD"),
+            "ArrowDown" => ("KeyS", "KeyW"),
+            _ => ("KeyW", "KeyS"),
+        };
+        // Contact hurts most: step away from the nearest threat first, still
+        // firing at the target.
+        if let Some(threat) = threat(state, player) {
+            let mut keys = vec![fire];
+            let (dx, dy) = (player.x - threat.x, player.y - threat.y);
+            let horizontal_away = if dx >= 0.0 { "KeyD" } else { "KeyA" };
+            let vertical_away = if dy >= 0.0 { "KeyS" } else { "KeyW" };
+            for (code, magnitude) in [(horizontal_away, dx.abs()), (vertical_away, dy.abs())] {
+                // Along a wall, slide along it instead of pressing into it.
+                if magnitude > 4.0 && !walled(code) {
+                    keys.push(code);
+                }
+            }
+            if keys.len() == 1 {
+                let (first, second) = if dx.abs() >= dy.abs() {
+                    (vertical_away, opposite(vertical_away))
+                } else {
+                    (horizontal_away, opposite(horizontal_away))
+                };
+                keys.push(if walled(first) { second } else { first });
+            }
+            let ticks = e.range(3, 6);
+            return self.hold(state, &keys, ticks);
+        }
+        let (near, far) = if boss { (120.0, 220.0) } else { (70.0, 400.0) };
+        let range = distance(player, npc);
+        // One key per axis: along the firing line and across it.
+        let mut along = if range < near && !walled(away) {
+            Some(away)
+        } else if range > far {
+            Some(toward)
+        } else {
+            None
+        };
+        let cross = if horizontal { dy } else { dx };
+        let (positive, negative) = if horizontal {
+            ("KeyS", "KeyW")
+        } else {
+            ("KeyD", "KeyA")
+        };
+        let cornered = range < near && walled(away);
+        let mut across = if cross.abs() > 8.0 {
+            Some(if cross > 0.0 { positive } else { negative })
+        } else if cornered {
+            Some(if e.chance(1, 2) { positive } else { negative })
+        } else {
+            None
+        };
+        // Tears inherit 1.2x the player's velocity across their aim
+        // (`projectiles::stored_velocity`), so a strafe bends every shot off
+        // the line. Aligned against a boss, keep moving along the line
+        // instead: that changes tear speed, not direction.
+        if boss && along.is_none() && across.is_none() {
+            let step = if e.chance(1, 2) { toward } else { away };
+            along = Some(if walled(step) { opposite(step) } else { step });
+        }
+        if let Some(code) = across.filter(|code| walled(code)) {
+            across = Some(opposite(code));
+        }
+        if let Some(shot) = state
+            .enemy_projectiles
+            .iter()
+            .filter(|shot| distance(player, shot.position) < 90.0)
+            .min_by(|a, b| distance(player, a.position).total_cmp(&distance(player, b.position)))
+        {
+            let shot_horizontal = shot.velocity.x.abs() >= shot.velocity.y.abs();
+            let dodge = match (
+                shot_horizontal,
+                player.y >= shot.position.y,
+                player.x >= shot.position.x,
+            ) {
+                (true, true, _) => "KeyS",
+                (true, false, _) => "KeyW",
+                (false, _, true) => "KeyD",
+                (false, _, false) => "KeyA",
+            };
+            let dodge = if walled(dodge) {
+                opposite(dodge)
+            } else {
+                dodge
+            };
+            // A dodge on the firing axis replaces the range move.
+            if matches!(dodge, "KeyA" | "KeyD") == horizontal {
+                along = Some(dodge);
+            } else {
+                across = Some(dodge);
+            }
+        }
+        let held: Vec<&str> = std::iter::once(fire).chain(along).chain(across).collect();
+        let ticks = if boss { e.range(4, 14) } else { e.range(3, 20) };
+        self.hold(state, &held, ticks);
     }
 
     fn steer(
         &mut self,
+        state: &State,
         player: WorldVector,
         target: WorldVector,
         hostile: Option<WorldVector>,
@@ -470,13 +716,8 @@ impl Driver {
                 held.push(aim_toward(player, npc));
             }
         }
-        for code in &held {
-            self.queue.push_back(key(code, true));
-        }
-        self.queue.push_back(tick(e.range(2, 18)));
-        for code in &held {
-            self.queue.push_back(key(code, false));
-        }
+        let ticks = e.range(2, 18);
+        self.hold(state, &held, ticks);
     }
 
     /// Plants a bomb beside a blocking rock and retreats from the blast.
@@ -595,15 +836,34 @@ impl Driver {
         &self.admitted.as_ref().expect("computed above").1
     }
 
-    /// The open door on a shortest path through admitted rooms to the
-    /// nearest room `travel` seeks; explorers without one head for the boss.
-    fn toward(&mut self, state: &State, travel: Travel) -> Option<WorldVector> {
-        let admitted = self.admitted(state).to_vec();
+    /// The door on a shortest path through admitted rooms to the nearest
+    /// room `travel` seeks, and whether it is hidden and needs a bomb;
+    /// explorers without one head for the boss.
+    fn toward(&mut self, state: &State, travel: Travel) -> Option<(WorldVector, bool)> {
+        let mut admitted = self.admitted(state).to_vec();
+        // A key opens a KeyClosed door on contact and a bomb reveals a
+        // hidden one; without them those neighbours are out of reach.
+        for door in &state.room.appearance.doors {
+            let passable = match door.state.as_str() {
+                "Opened" => true,
+                "KeyClosed" => state.inventory.keys > 0,
+                "Hidden" => state.inventory.bombs > 0,
+                _ => false,
+            };
+            if !passable {
+                if let Some(room) = admitted.get_mut(door.target_room as usize) {
+                    *room = false;
+                }
+            }
+        }
         let descriptors = &state.floor.descriptors;
         let boss = |room: usize| descriptors[room].template.room_type == 5;
         let unvisited = |room: usize| !state.visited_rooms.contains(&room);
+        let treasure = |room: usize| descriptors[room].template.room_type == 4 && unvisited(room);
         let next = match travel {
             Travel::Boss => first_step(state, &admitted, boss),
+            Travel::Treasure => first_step(state, &admitted, treasure)
+                .or_else(|| first_step(state, &admitted, boss)),
             Travel::Explore => first_step(state, &admitted, unvisited)
                 .or_else(|| first_step(state, &admitted, boss)),
         }?;
@@ -612,9 +872,37 @@ impl Driver {
             .appearance
             .doors
             .iter()
-            .find(|door| door.state == "Opened" && door.target_room as usize == next)
-            .map(|door| door.world_position)
+            .find(|door| door.target_room as usize == next)
+            .map(|door| (door.world_position, door.state == "Hidden"))
     }
+}
+
+/// The nearest point the player must not be at: a hostile NPC, where it will
+/// be in ten updates, or a boss's published target (Monstro's landing cell
+/// is snapped to the player's at take-off), within contact reach and margin.
+fn threat(state: &State, player: WorldVector) -> Option<WorldVector> {
+    const MARGIN: f32 = 28.0;
+    state
+        .room
+        .npcs
+        .iter()
+        .filter(|npc| !npc.removed && npc.hp > 0.0 && npc.collision_damage > 0.0)
+        .flat_map(|npc| {
+            let ahead = WorldVector {
+                x: npc.position.x + npc.velocity.x * 10.0,
+                y: npc.position.y + npc.velocity.y * 10.0,
+            };
+            let target =
+                (npc.boss && (npc.target.x != 0.0 || npc.target.y != 0.0)).then_some(npc.target);
+            let reach = npc.collision_radius + MARGIN;
+            [Some(npc.position), Some(ahead), target]
+                .into_iter()
+                .flatten()
+                .map(move |point| (point, distance(player, point) - reach))
+        })
+        .filter(|(point, gap)| *gap < 0.0 && point.is_finite())
+        .min_by(|a, b| a.1.total_cmp(&b.1))
+        .map(|(point, _)| point)
 }
 
 /// The neighbour of the current room that starts a shortest path through

@@ -34,6 +34,9 @@ pub struct Npc {
     pub collision_mass: f32,
     pub collision_damage: f32,
     pub base_friction: f32,
+    /// Entity+470 as this actor's last full update left it.
+    #[serde(default)]
+    pub friction: f32,
     pub shadow_size: f32,
     pub grid_collision_class: u32,
     pub entity_collision_class: u32,
@@ -88,6 +91,58 @@ pub struct Npc {
     /// Entity+494: BaseUpdate discards every queued hit.
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     pub invincible: bool,
+    /// Dying boss state16 frame (Entity_NPC+f58), see boss_death.rs.
+    #[serde(default, skip_serializing_if = "is_zero")]
+    pub death_frame: u32,
+    /// 4f2d10's boss callback 5c8430 (boss count, rewards) ran at removal; its
+    /// reward effects are not admitted yet.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub boss_callback_pending: bool,
+    /// Entity+498/+4a0 parent and child handles (SetParent447fc0,
+    /// SetChild447f40). Removal448040 nulls every handle naming the purged
+    /// actor, see `unlink_removed`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub parent: Option<u32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub child: Option<u32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub larry: Option<crate::larry::LarryState>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub maggot: Option<crate::maggots::MaggotState>,
+    /// Entity+34c: the last non-preview grid pass hit a solid sample.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub grid_collided: bool,
+    /// +318 APPEAR (4) cleared by a mid-room spawner: no hide/Poof/Appear.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub no_appear: bool,
+    /// Entity+1c spawner type (0 when authored or spawned without one).
+    #[serde(default, skip_serializing_if = "is_zero")]
+    pub spawner_type: u32,
+    /// +320: spawned by a boss.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub boss_spawned: bool,
+    /// Sprite scale +2c4 set by a spawner (None keeps the champion/1 scale).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub sprite_scale: Option<f32>,
+    /// Sprite overlay (ANM2 overlay slot): Gemini's head.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub overlay: Option<Overlay>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub gemini: Option<crate::gemini::GeminiState>,
+}
+
+/// One overlay clip of an NPC sprite, advanced with the main clip.
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct Overlay {
+    pub animation: String,
+    pub frame: u32,
+    pub clock: f32,
+    pub playing: bool,
+}
+
+fn is_zero(value: &u32) -> bool {
+    *value == 0
 }
 
 #[derive(Clone, Copy, Debug, Default, Deserialize, Serialize, PartialEq, Eq)]
@@ -296,6 +351,29 @@ pub fn player_contacts(state: &mut State) -> Result<(), String> {
 /// Full manager contacts also separate ordinary NPC pairs and planted Bombs.
 /// Callback49b8f0 returns false for these uncharmed13/18 pairs; regular Bomb
 /// damps both entering velocities before the source mass response. Spatial candidate ordering remains diagnostic.
+const WORM_SEGMENTS: [u32; 4] = [19, 28, 89, 239];
+
+/// 448040: purging an actor nulls every parent and child handle naming it,
+/// so a severed chain's follower becomes a head and its leader a tail.
+pub(crate) fn unlink_removed(npcs: &mut [Npc]) {
+    let removed: Vec<u32> = npcs
+        .iter()
+        .filter(|npc| npc.removed)
+        .map(|npc| npc.id)
+        .collect();
+    if removed.is_empty() {
+        return;
+    }
+    for npc in npcs.iter_mut() {
+        if npc.parent.is_some_and(|id| removed.contains(&id)) {
+            npc.parent = None;
+        }
+        if npc.child.is_some_and(|id| removed.contains(&id)) {
+            npc.child = None;
+        }
+    }
+}
+
 pub fn nonplayer_contacts(state: &mut State) -> Result<(), String> {
     let body = |npc: &Npc| combat::ContactBody {
         id: npc.id,
@@ -310,12 +388,14 @@ pub fn nonplayer_contacts(state: &mut State) -> Result<(), String> {
             let (left, right) = state.room.npcs.split_at_mut(second);
             let first = &mut left[first];
             let second = &mut right[0];
-            // 49b980: two Wall Huggers never collide.
+            // 49b980: two Wall Huggers never collide; 49bbb4 vetoes every
+            // pair of worm segments (Larry Jr., 28, 89, 239) without charm.
             if first.dead
                 || second.dead
                 || first.entity_collision_class != 4
                 || second.entity_collision_class != 4
                 || (first.kind == 218 && second.kind == 218)
+                || (WORM_SEGMENTS.contains(&first.kind) && WORM_SEGMENTS.contains(&second.kind))
             {
                 continue;
             }
@@ -613,6 +693,7 @@ impl Npc {
             collision_mass: config.collision_mass,
             collision_damage: config.collision_damage,
             base_friction: config.friction,
+            friction: config.friction,
             shadow_size: config.shadow_size,
             grid_collision_class: config.grid_class,
             entity_collision_class: 4,
@@ -648,6 +729,19 @@ impl Npc {
             dingle: None,
             wall_hugger: None,
             invincible: false,
+            death_frame: 0,
+            boss_callback_pending: false,
+            parent: None,
+            child: None,
+            larry: None,
+            maggot: None,
+            grid_collided: false,
+            no_appear: false,
+            spawner_type: 0,
+            boss_spawned: false,
+            sprite_scale: None,
+            overlay: None,
+            gemini: None,
         }
     }
 
@@ -705,6 +799,10 @@ impl Npc {
             if self.kind == 13 {
                 self.wander_velocity = self.wander_velocity * 0.7;
             }
+            if self.boss_spawned {
+                // 4efccd: boss-spawned flies chase with extra friction.
+                friction *= 0.9;
+            }
             let range = if self.kind == 18 { 25.0 } else { 30.0 };
             if length > range {
                 let impulse = ((length - range) * 0.08).min(1.2);
@@ -725,7 +823,8 @@ impl Npc {
         if counter % 4 == 1 {
             self.wander_velocity = (self.wander_velocity + direction(random) * 0.6) * 0.4;
         }
-        if counter % 3 == 2 {
+        // 4f0600: a Duke's orbiting fly skips the room-edge nudges.
+        if counter % 3 == 2 && self.spawner_type != 67 {
             if self.position.y < 230.0 {
                 self.wander_velocity.y += 0.06;
             } else if self.position.y > 420.0 {
@@ -736,6 +835,8 @@ impl Npc {
             } else if self.position.x < 100.0 {
                 self.wander_velocity.x += 0.06;
             }
+        }
+        if counter % 3 == 2 {
             self.velocity = self.velocity + self.wander_velocity * (2.0 / friction);
             friction *= 0.6;
         }
@@ -806,6 +907,9 @@ fn fly_ai(
         // 4ef941 plays the looping Fly clip without forcing a restart.
         crate::plain_npc::play(npc, "Fly", false);
     }
+    if npc.kind == 18 && npc.spawner_type == 67 && world.game_counter.is_multiple_of(3) {
+        duke_orbit(npc, world, *friction);
+    }
     *friction = npc.fly_movement(
         world.game_counter,
         random,
@@ -814,6 +918,41 @@ fn fly_ai(
         *friction,
     );
     Ok(())
+}
+
+/// 4f101a: a Duke-spawned Attack Fly (spawner type 67) orbits the last
+/// type-67 actor in the room list within 260 on a breathing 60..70 ring;
+/// with none left it is released for good.
+fn duke_orbit(npc: &mut Npc, world: &NpcWorld, friction: f32) {
+    let Some(duke) = world
+        .peers
+        .iter()
+        .filter(|other| other.kind == 67 && !other.removed)
+        .last()
+    else {
+        npc.spawner_type = 0;
+        return;
+    };
+    let delta = WorldVector {
+        x: duke.position.x - npc.position.x,
+        y: duke.position.y - npc.position.y,
+    };
+    let length = (delta.x * delta.x + delta.y * delta.y).sqrt();
+    if length >= 260.0 {
+        return;
+    }
+    let ring = crate::fmath::sin(world.game_counter as f32 * 0.02) * 5.0 + 65.0;
+    let error = length - ring;
+    let pull = if error > -5.0 { error.min(5.0) } else { -5.0 };
+    let radial = (delta * pull) * 0.5;
+    npc.velocity = npc.velocity
+        + WorldVector {
+            x: (radial.x / length) / friction,
+            y: (radial.y / length) / friction,
+        };
+    let spin = pull.abs() + 2.0;
+    npc.velocity.y += (((0.2 * delta.x) / spin) / friction) / friction;
+    npc.velocity.x -= (((0.2 * delta.y) / spin) / friction) / friction;
 }
 
 /// Pooter14.0/Super Pooter14.1: 4f0bd0 clip state, then 4f029a aimed shots
@@ -857,6 +996,8 @@ fn pooter_ai(
         delay: 7,
         speed: 7.0,
         parameter_angle,
+        lead: 0.0,
+        adjust: None,
     };
     if crate::plain_npc::try_shoot_player(npc, random, world, births, shot)? {
         crate::plain_npc::play(npc, "Attack", false);

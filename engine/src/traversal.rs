@@ -317,6 +317,7 @@ pub(crate) fn advance_transition(
     };
     // Reentry owns a new Room.Init timestamp, independent of saved geometry.
     state.room.initialization_game_update = Some(state.game_update_count);
+    state.room.source_tear_slowdown_2494 = Some(0);
     state.room.loaded = false;
     state.room.initialize_path_costs();
     state.visited_rooms.insert(state.current_room);
@@ -332,9 +333,10 @@ pub(crate) fn advance_transition(
     state.player.y = f64::from(door.world_position.y - normal.y * 40.0) * 0.65 - 46.0;
     state.player.vx = 0.0;
     state.player.vy = 0.0;
+    crate::controlled_tear::clear_room(state);
     state.tears.clear();
     state.enemy_projectiles.clear();
-    state.lasers.clear();
+    crate::laser_runtime::reset_room(state)?;
     state.fire_particles.clear();
     state.bombs.clear();
     state.explosions.clear();
