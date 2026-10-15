@@ -304,7 +304,7 @@ impl Definition {
         }
         for &id in &self.starting_items {
             items::definition(id).ok_or("Challenge starting collectible config absent")?;
-            if !matches!(id, 1 | 4 | 114 | 118 | 329) {
+            if !matches!(id, 1 | 4 | 6 | 114 | 118 | 329) {
                 return Err("Challenge starting grant outside the mapped item frontier".into());
             }
         }

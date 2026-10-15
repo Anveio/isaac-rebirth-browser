@@ -172,7 +172,8 @@ pub(crate) fn resolve_appearance(
     requested: CacheMask,
 ) -> (WeaponCache, CacheMask) {
     let mut completed = 0;
-    if source_player_type == Some(0) && items.admits_selected_appearance() {
+    let number_one = source_player_type == Some(0) && items.admits_number_one_appearance();
+    if source_player_type == Some(0) && (items.admits_selected_appearance() || number_one) {
         if requested.0 & 32 != 0 {
             prior.flags_c98 = AttackFlags(if prior.primary == PrimaryWeaponC08::Ludovico {
                 3
@@ -182,8 +183,24 @@ pub(crate) fn resolve_appearance(
             completed |= 32;
         }
         if requested.0 & 64 != 0 {
-            prior.color_ca0 = AttackColor::WHITE;
-            prior.color_ccc = AttackColor::WHITE;
+            //515997/515AB1 Have6, else5E3D70 record-presence. This leaf
+            //admits permanent6 only; the two literal ColorMods are distinct.
+            if number_one && items.number_one_present() {
+                let byte_scale = 1.0_f32 / 255.0_f32;
+                prior.color_ca0 = AttackColor {
+                    tint: [1.0, 1.0, 0.0, 1.0],
+                    source_middle: [0.0; 4],
+                    offsets: [45.0 * byte_scale, 15.0 * byte_scale, 0.0],
+                };
+                prior.color_ccc = AttackColor {
+                    tint: [0.2, 1.0, 0.0, 1.0],
+                    source_middle: [0.0; 4],
+                    offsets: [255.0 * byte_scale, 255.0 * byte_scale, 0.0],
+                };
+            } else {
+                prior.color_ca0 = AttackColor::WHITE;
+                prior.color_ccc = AttackColor::WHITE;
+            }
             completed |= 64;
         }
     }

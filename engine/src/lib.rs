@@ -49,6 +49,7 @@ pub mod items;
 pub mod keepers;
 pub mod knives;
 pub mod larry;
+mod laser_npc_runtime;
 pub mod lasers;
 pub mod layout;
 pub mod level2_flies;
