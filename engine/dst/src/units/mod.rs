@@ -9,6 +9,7 @@ mod floor;
 mod game;
 mod grid;
 mod item_pools;
+mod layout;
 mod mt;
 mod phase;
 mod seed_codec;
@@ -33,6 +34,11 @@ pub const UNITS: &[Unit] = &[
         name: "actors",
         summary: "actor admission order and room identities against a list model",
         run: actors::run,
+    },
+    Unit {
+        name: "layout",
+        summary: "rectangular floor growth over every accepted seed, room count and shape mask",
+        run: layout::run,
     },
     Unit {
         name: "floor",
