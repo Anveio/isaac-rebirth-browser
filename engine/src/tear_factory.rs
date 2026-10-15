@@ -37,6 +37,7 @@ pub(crate) fn fire(
         vy: 0.0,
         age: 0,
         spawn_seed,
+        birth_game_update: Some(state.game_update_count),
         source_variant,
         shot_ordinal: Some(state.player.shots_fired),
         controlled: None,

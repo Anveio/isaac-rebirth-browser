@@ -297,6 +297,7 @@ pub(crate) fn dispatch(
         vy: 0.0,
         age: 0,
         spawn_seed: seed,
+        birth_game_update: None,
         shot_ordinal: None,
         source_variant: Some(params.variant),
         collision_damage: damage,
