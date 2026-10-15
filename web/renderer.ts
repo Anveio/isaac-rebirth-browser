@@ -196,6 +196,16 @@ export class Renderer {
       } else if (rock) {
         this.assets.draw(ctx, "gfx/grid/grid_rock.anm2", rock.animation, x, y, rock.frame);
         this.drawnGrid.push({ index, kind: entity.kind, ...rock });
+      } else if (entity.kind === 14 && entity.variant === 0 && entity.sourceOwner?.poopSheet) {
+        // Poop.Init569600 picks grid_poop_{1..3} and plays State{state+1}
+        // (State5 once broken); a spawn into a loaded room plays Appear first.
+        const sheet = { 0: `gfx/grid/grid_poop_${entity.sourceOwner.poopSheet}.png`, 1: "gfx/effects/effect_poopspawn.png" };
+        const birth = entity.sourceOwner.birthGameUpdate, init = state.room.initializationGameUpdate;
+        const age = birth !== null && init !== null && birth > init ? state.gameUpdateCount - birth : Infinity;
+        const animation = age < 20 ? "Appear" : `State${Math.min(entity.state + 1, 5)}`;
+        const frame = age < 20 ? age : entity.state === 0 ? 0 : 4;
+        this.assets.draw(ctx, "gfx/grid/grid_poop.anm2", animation, x, y, frame, { spritesheets: sheet });
+        this.drawnGrid.push({ index, kind: 14, animation, frame });
       } else if (entity.kind === 8 && entity.state === 0)
         this.assets.draw(ctx, "gfx/grid/grid_spikes.anm2", `Spikes${String(entity.variant).padStart(2, "0")}`, x, y);
     }
