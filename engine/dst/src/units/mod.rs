@@ -18,6 +18,7 @@ mod phase;
 mod room_spawns;
 mod room_templates;
 mod seed_codec;
+mod tears;
 
 pub const UNITS: &[Unit] = &[
     Unit {
@@ -64,6 +65,11 @@ pub const UNITS: &[Unit] = &[
         name: "motion",
         summary: "player motion steps and held-input runs against an along/across velocity model",
         run: motion::run,
+    },
+    Unit {
+        name: "tears",
+        summary: "tear velocity, eye origin, size and flight against f64 and lifecycle models",
+        run: tears::run,
     },
     Unit {
         name: "grid",

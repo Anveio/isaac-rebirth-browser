@@ -250,6 +250,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | `room_templates` | authored room-template picks and weight decay against a weight model | 8 | 5 | 0 |
 | `floor` | Basement generation structure, retries and per-descriptor room admission | 18 | 5 | 0 |
 | `motion` | player motion steps and held-input runs against an along/across velocity model | 12 | 4 | 0 |
+| `tears` | tear velocity, eye origin, size and flight against f64 and lifecycle models | 28 | 8 | 0 |
 | `grid` | grid queries and ground-collision solvers on generated rooms | 14 | 3 | 0 |
 | `contact` | mass contact responses against momentum, centre-of-mass and overlap oracles | 16 | 3 | 0 |
 | `pathfinder` | FindGridPath's flood against an independent node-weighted Dijkstra | 6 | 5 | 0 |
@@ -389,6 +390,42 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Always | motion: held input brings the velocity geometrically closer to its terminal velocity | [motion.rs](engine/dst/src/units/motion.rs) |
 | Always | motion: a settled player moves at its speed stat's terminal speed, along axes and diagonals alike | [motion.rs](engine/dst/src/units/motion.rs) |
 | Always | motion: a released player glides the geometric sum of its velocity | [motion.rs](engine/dst/src/units/motion.rs) |
+| Always | tears: the stored velocity is a pure function of its shot | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | tears: a velocity is stored exactly for finite vectors and a shot speed of at least 0.6, and is finite | [tears.rs](engine/dst/src/units/tears.rs) |
+| Sometimes | tears: an invalid shot is refused | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | tears: along its aim a shot keeps ten plus 1.2 of the player's forward motion, never motion against it | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | tears: across its aim a shot keeps 1.2 of the player's sideways motion | [tears.rs](engine/dst/src/units/tears.rs) |
+| Sometimes | tears: a shot drops the player's motion against its aim | [tears.rs](engine/dst/src/units/tears.rs) |
+| Sometimes | tears: a shot inherits the player's motion along its aim | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | tears: the eye origin is a pure function of its shot | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | tears: an eye origin is placed exactly for finite vectors and a uniform in 0..=1, and is finite | [tears.rs](engine/dst/src/units/tears.rs) |
+| Sometimes | tears: an invalid eye draw is refused | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | tears: an eye sits across the shot, 0.3 to 0.5 of its velocity from the player | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | tears: each eye sits on its own side of the shot | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | tears: scale is a pure function of damage | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | tears: scale is computed exactly for finite nonnegative damage | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | tears: scale is 0.6 + 0.04·damage + 0.15·√damage | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | tears: scale never falls as damage rises | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | tears: an animation tier is chosen exactly for finite scales of at least 0.01 | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | tears: the animation tier counts the 5418e0 thresholds a scale exceeds, up to the thirteenth clip | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | tears: the animation tier never falls as scale rises | [tears.rs](engine/dst/src/units/tears.rs) |
+| Sometimes | tears: a scale reaches the largest tier | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | tears: the collision radius is the authored radius times the scale, for admitted parameters | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | tears: the render offset bends below 8.5 height, unless the tear accelerates | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | tears: the render offset never falls as height rises | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | tears: a tear is born exactly from finite parameters and a uniform in 0..=1 | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | tears: a tear is born one step out, falling once, with its velocity | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | tears: a tear's flight fails only when its position overflows | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | tears: a refused step leaves the tear unchanged | [tears.rs](engine/dst/src/units/tears.rs) |
+| Sometimes | tears: a step whose position overflows is refused | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | tears: a tear's lifetime only moves forward | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | tears: a skipped phase or a removed tear changes nothing | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | tears: an intermediate phase presents half a step ahead and moves nothing | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | tears: a dying tear is removed at the next update, where it died | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | tears: an update moves a tear one step and lets it fall, until it lands or collides | [tears.rs](engine/dst/src/units/tears.rs) |
+| Sometimes | tears: a tear lands | [tears.rs](engine/dst/src/units/tears.rs) |
+| Sometimes | tears: a tear dies on a collision in flight | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | tears: a tear whose falling speed settles positive is removed within its flight | [tears.rs](engine/dst/src/units/tears.rs) |
 | Always | grid: admitted room grids are valid grids | [grid.rs](engine/dst/src/units/grid.rs) |
 | Always | grid: every cell centre indexes back to its cell | [grid.rs](engine/dst/src/units/grid.rs) |
 | Always | grid: nonplayer ground resolution never fails for bounded motion | [grid.rs](engine/dst/src/units/grid.rs) |
