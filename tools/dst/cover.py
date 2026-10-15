@@ -18,6 +18,7 @@ import json
 import pathlib
 import subprocess
 import sys
+import tempfile
 
 
 def reached(report):
@@ -101,13 +102,18 @@ def main():
         source = json.loads(tape.read_text())
         target = args.out / f"coverage-{label.removeprefix('game-')}.json"
         cut = {**source, "commands": source["commands"][:length]}
-        target.write_text(json.dumps(cut, separators=(",", ":")))
-        if args.verify and not replay_reaches(args.binary, target, keys):
-            print(f"{target}: replay misses {sorted(keys)}; removed", file=sys.stderr)
-            target.unlink()
-            failed = True
-        else:
-            print(f"wrote {target}")
+        encoded = json.dumps(cut, separators=(",", ":"))
+        if args.verify:
+            with tempfile.TemporaryDirectory(prefix=".cover-", dir=args.out) as scratch:
+                candidate = pathlib.Path(scratch) / target.name
+                candidate.write_text(encoded)
+                verified = replay_reaches(args.binary, candidate, keys)
+            if not verified:
+                print(f"{target}: replay misses {sorted(keys)}; candidate discarded", file=sys.stderr)
+                failed = True
+                continue
+        target.write_text(encoded)
+        print(f"wrote {target}")
     return 1 if failed else 0
 
 
