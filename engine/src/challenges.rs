@@ -310,9 +310,17 @@ impl Definition {
         {
             return Err("Challenge Soy Milk composition outside the mapped cache frontier".into());
         }
+        //Independent52E280 startup order proof. Each prefix uses its actual
+        //common52CC90/cache/pool callback; this grants no firing/history owner.
+        let epic_startup = matches!(
+            self.starting_items.as_slice(),
+            [168, 2] | [2, 168] | [4, 168, 2] | [4, 2, 168]
+        );
         for &id in &self.starting_items {
             items::definition(id).ok_or("Challenge starting collectible config absent")?;
-            if !matches!(id, 1 | 4 | 6 | 68 | 114 | 118 | 329 | 304 | 330) {
+            if !(matches!(id, 1 | 4 | 6 | 68 | 114 | 118 | 329 | 304 | 330)
+                || (epic_startup && matches!(id, 2 | 168)))
+            {
                 return Err("Challenge starting grant outside the mapped item frontier".into());
             }
         }
