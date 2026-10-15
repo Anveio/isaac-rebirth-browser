@@ -56,6 +56,27 @@ function minimapShape(template: { width: number; height: number }): number {
   return (template.width === 26 ? 2 : 0) + (template.height === 14 ? 1 : 0);
 }
 const LOCKED_MINIMAP_TYPES = new Set([2, 9, 12, 18, 19, 20, 21]);
+// GridEntity_Decoration Init 561e60 picks Props_*.anm2 by backdrop type
+// (3/4 Caves, 5/6 Depths, 7/8 Womb, 9 Sheol, 10 Cathedral, 12 Chest, else
+// Basement). Only the Basement/Cellar backdrops the port builds are listed.
+const DECORATION_PROPS: Record<string, { actor: string; allowCaves: boolean }> = {
+  "gfx/backdrop/01_basement.png": { actor: "gfx/grid/props_01_basement.anm2", allowCaves: false },
+  "gfx/backdrop/02_cellar.png": { actor: "gfx/grid/props_01_basement.anm2", allowCaves: false },
+};
+// 561f07: an RNG seeded (Descriptor+48 + grid index, shift35 = 5/9/7) plays
+// clip raw() % count, retrying (20 tries) while a "Caves" clip lands outside
+// the Caves backdrop.
+function decorationClip(names: readonly string[], seed: number, allowCaves: boolean): string {
+  let state = seed >>> 0, name = names[0]!;
+  for (let attempt = 0; attempt < 20; attempt++) {
+    state = (state ^ (state >>> 5)) >>> 0;
+    state = (state ^ (state << 9)) >>> 0;
+    state = (state ^ (state >>> 7)) >>> 0;
+    name = names[state % names.length]!;
+    if (allowCaves || !name.includes("Caves")) break;
+  }
+  return name;
+}
 const ROCK_ANIMATIONS: Record<number, string> = { 2: "normal", 3: "black", 4: "tinted", 5: "bombrock", 6: "alt" };
 function rockSprite(kind: number, variant: number): { animation: string; frame: number } | undefined {
   const animation = ROCK_ANIMATIONS[kind];
@@ -238,6 +259,14 @@ export class Renderer {
       } else if (rock) {
         this.assets.draw(ctx, "gfx/grid/grid_rock.anm2", rock.animation, x, y, rock.frame);
         this.drawnGrid.push({ index, kind: entity.kind, ...rock });
+      } else if (entity.kind === 1 && state.room.descriptor && state.room.descriptor.template.type !== 16) {
+        const props = DECORATION_PROPS[state.room.appearance.backdrop];
+        if (props) {
+          const animation = decorationClip(this.assets.animationNames(props.actor),
+            state.room.descriptor.decorationSeed + index, props.allowCaves);
+          this.assets.draw(ctx, props.actor, animation, x, y, state.gameUpdateCount);
+          this.drawnGrid.push({ index, kind: 1, animation, frame: state.gameUpdateCount });
+        }
       } else if (entity.kind === 14 && entity.variant === 0 && entity.sourceOwner?.poopSheet) {
         // Poop.Init569600 picks grid_poop_{1..3} and plays State{state+1}
         // (State5 once broken); a spawn into a loaded room plays Appear first.

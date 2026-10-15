@@ -64,6 +64,7 @@ const urls = import.meta.glob([
   "../references/isaac/rebirth/resources/gfx/grid/door_11_trapdoor.png",
   "../references/isaac/rebirth/resources/gfx/grid/grid_spikes.png",
   "../references/isaac/rebirth/resources/gfx/grid/grid_poop_[123].png",
+  "../references/isaac/rebirth/resources/gfx/grid/props_01_basement.png",
   "../references/isaac/rebirth/resources/gfx/grid/grid_pit.png",
   "../references/isaac/rebirth/resources/gfx/grid/grid_fireplace.png",
   "../references/isaac/rebirth/resources/gfx/grid/effect_005_fire.png",
@@ -169,6 +170,12 @@ export class Assets {
     if (!animation) throw new Error(`Missing animation ${path}:${name}`);
     const layer = animation.LayerAnimations.find(layer => layer.LayerId === layerId);
     return layer?.Visible ? sampleFrame(layer.Frames, tick, animation.Loop) : undefined;
+  }
+  /** An actor's clip names in authored order (Sprite play-by-index order). */
+  animationNames(path: string): string[] {
+    const actor = (sceneData as unknown as Record<string, Actor>)[normalize(path)];
+    if (!actor) throw new Error(`Missing authored animation: ${path}`);
+    return actor.Animations.map(animation => animation.Name);
   }
   /** The spritesheet image an authored layer samples. */
   layerImage(path: string, layerId: number): HTMLImageElement {
