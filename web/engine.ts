@@ -141,6 +141,7 @@ export interface Pickup {
   presentedPosition: {x: number; y: number}; anchorPosition: {x: number; y: number};
   velocity: {x: number; y: number}; configuredFriction: number; currentFriction: number; collisionMass: number;
 }
+export interface SpriteColorValue { tint: number[]; colorize: number[]; offset: number[]; }
 export interface RunIntroduction { age: number; active: boolean; title: string; stage: boolean; }
 export interface BossBar { fill: number | null; flash: number; maximum: number; }
 export interface PauseMenu {
@@ -196,6 +197,7 @@ export interface Room {
       animation: string; animationClock: number; animationPlaying: boolean; tint: number[]; offsets: number[]} | null;
     actor?: string;
     champion?: {color: number; scale: number; speed: number; timer: number | null};
+    spriteColor: {current: SpriteColorValue; stack: {priority: number; color: SpriteColorValue; duration: number; remaining: number}[]};
     shooter?: {cooldown: number; delay: number};
     flipX?: boolean;
     dip: {entityFlags: number; birthGameUpdate: number; currentFriction: number; flipX: boolean;

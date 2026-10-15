@@ -64,6 +64,9 @@ pub struct Npc {
     pub shooter: Option<crate::plain_npc::ShooterTimers>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub champion: Option<crate::champions::Champion>,
+    /// Sprite colour (+2d0) and its timed stack; the renderer draws it.
+    #[serde(default)]
+    pub sprite_color: crate::sprite_color::SpriteColor,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub gluttony: Option<crate::gluttony::GluttonyState>,
     /// NPCAI_Pathfinder (+7d8) for families that walk the grid.
@@ -528,6 +531,24 @@ pub(crate) fn direction(random: &mut Mt19937) -> WorldVector {
 }
 
 impl Npc {
+    /// ResetColor 47f430: a champion's table colour, otherwise plain white.
+    pub(crate) fn base_color(&self) -> crate::sprite_color::Color {
+        self.champion
+            .as_ref()
+            .map_or(crate::sprite_color::Color::WHITE, |champion| {
+                crate::champions::color(champion.color)
+            })
+    }
+    /// BaseUpdate after the damage drain: colour countdown, then hit flashes.
+    pub(crate) fn advance_sprite_color(
+        &mut self,
+        phase: crate::phase::Phase,
+        applied: &[crate::combat::AppliedDamage],
+    ) {
+        let base = self.base_color();
+        self.sprite_color.advance(phase, applied, base);
+    }
+
     /// Actual Entity+318 view for the supported typed NPC owners. Normal
     /// Fly/AttackFly/RoundWorm Init441c80 clears flags then47ed20 ORs4;
     /// concrete subclasses preserve their own later flag writes.
@@ -600,6 +621,7 @@ impl Npc {
             actor: String::new(),
             shooter: None,
             champion: None,
+            sprite_color: crate::sprite_color::SpriteColor::default(),
             flip_x: false,
             pathfinder: None,
             gluttony: None,

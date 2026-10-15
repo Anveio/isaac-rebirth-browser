@@ -17,6 +17,7 @@ pub mod bombs;
 pub mod camera;
 pub mod challenges;
 pub mod champions;
+pub mod sprite_color;
 pub mod chests;
 pub mod combat;
 mod content;
