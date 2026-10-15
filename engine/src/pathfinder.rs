@@ -38,6 +38,18 @@ pub struct Pathfinder {
     /// +734: last target whose cell was open (cost <= 999).
     #[serde(default = "zero")]
     pub last_target: WorldVector,
+    /// +73c: EvadeTarget panic counter, 3 when the threat comes in range.
+    #[serde(default)]
+    pub panic: i32,
+    /// +740: EvadeTarget's distance-test slack.
+    #[serde(default)]
+    pub slack: f32,
+    /// +744: EvadeTarget's pressure, clamped to 20.
+    #[serde(default)]
+    pub pressure: f32,
+    /// +748: grid indices EvadeTarget already tried (cleared every 30 frames).
+    #[serde(default)]
+    pub tried: std::collections::BTreeSet<i32>,
 }
 
 fn no_cell() -> i32 {
@@ -63,14 +75,19 @@ impl Pathfinder {
             direct: false,
             found: false,
             last_target: ZERO,
+            panic: 0,
+            slack: 0.0,
+            pressure: 0.0,
+            tried: std::collections::BTreeSet::new(),
         }
     }
 
-    /// Reset5b4010: everything but the flood map (+30).
+    /// Reset5b4010: everything but the flood map (+30) and the tried set (+748).
     pub(crate) fn reset(&mut self) {
         *self = Self {
             last_update: u32::MAX,
             flood: std::mem::replace(&mut self.flood, RoomCosts::zeroed()),
+            tried: std::mem::take(&mut self.tried),
             ..Self::new()
         };
     }
@@ -696,4 +713,205 @@ pub(crate) fn wander(
             };
     }
     Ok(())
+}
+
+/// EvadeTarget 5b5ea0 (uncharmed): every 14th frame the threat in range
+/// (250 with a clear mode-1 line, else 170) sets the panic counter to 3,
+/// otherwise it decays. Calm, the owner wanders; panicking, it pushes away
+/// and searches for a cell far from the threat that it can reach in a line,
+/// then paths there with FindGridPath (speed 1.079, marker 0).
+pub(crate) fn evade_target(
+    npc: &mut Npc,
+    random: &mut Mt19937,
+    world: &mut NpcWorld,
+    threat: WorldVector,
+    friction: &mut f32,
+) -> Result<(), String> {
+    let position = npc.position;
+    let delta = sub(threat, position);
+    let distance = length(delta);
+    let fourteenth = crate::plain_npc::on_frame(npc, world, 14)?;
+    let thirtieth = crate::plain_npc::on_frame(npc, world, 30)?;
+    let tenth = crate::plain_npc::on_frame(npc, world, 10)?;
+    let reach = if fourteenth {
+        Some(mode1(world, position, threat)?)
+    } else {
+        None
+    };
+    let path = npc
+        .pathfinder
+        .as_mut()
+        .ok_or("EvadeTarget requires Entity_NPC+7d8")?;
+    // cmpnltss keeps the pressure when it is not above 20.
+    if path.pressure > 20.0 {
+        path.pressure = 20.0;
+    }
+    if let Some(clear) = reach {
+        let limit = if clear { 250.0 } else { 170.0 };
+        if limit > distance {
+            if path.panic <= 0 {
+                path.target = ZERO;
+            }
+            path.panic = 3;
+        } else {
+            path.panic -= 1;
+        }
+    }
+    if thirtieth {
+        path.tried.clear();
+    }
+    if path.panic <= 0 {
+        path.slack = 0.0;
+        path.pressure *= 0.9;
+        wander(npc, random, world, *friction)?;
+        *friction *= 0.9;
+        return Ok(());
+    }
+    if path.target == ZERO {
+        pick(npc, random, world, threat, delta, distance, *friction)?;
+    }
+    // STEER 5b6276.
+    let path = npc
+        .pathfinder
+        .as_mut()
+        .ok_or("EvadeTarget requires Entity_NPC+7d8")?;
+    if path.target == ZERO {
+        return Ok(());
+    }
+    if tenth {
+        let waypoint = path.target;
+        let seen = mode1(world, threat, waypoint)?;
+        let path = npc
+            .pathfinder
+            .as_mut()
+            .ok_or("EvadeTarget requires Entity_NPC+7d8")?;
+        if seen && 20.0 > path.pressure {
+            path.target = ZERO;
+        } else {
+            let away = sub(threat, waypoint);
+            if away.x * away.x + away.y * away.y < 40000.0
+                || away.x.abs() < 20.0
+                || away.y.abs() < 20.0
+            {
+                path.target = ZERO;
+            }
+        }
+    }
+    let waypoint = npc.pathfinder.as_ref().map_or(ZERO, |path| path.target);
+    if waypoint != ZERO {
+        find_grid_path(npc, random, world, waypoint, 1.079, 0, friction)?;
+    }
+    Ok(())
+}
+
+fn mode1(world: &NpcWorld, from: WorldVector, to: WorldVector) -> Result<bool, String> {
+    let costs = world
+        .path_costs
+        .as_deref()
+        .ok_or("EvadeTarget requires source Room.Init path costs")?;
+    world.grid.mode1_line_clear(from, to, costs, 0)
+}
+
+/// PICK 5b5ffc: the flee push, then up to ceil(7 - 0.3 pressure) new
+/// candidate cells (set hits cost 0.3) 30..480 beyond the owner.
+fn pick(
+    npc: &mut Npc,
+    random: &mut Mt19937,
+    world: &NpcWorld,
+    threat: WorldVector,
+    delta: WorldVector,
+    distance: f32,
+    friction: f32,
+) -> Result<(), String> {
+    let mut away = ZERO;
+    if distance > 0.0 {
+        away = WorldVector {
+            x: delta.x / -distance,
+            y: delta.y / -distance,
+        };
+    }
+    if (away.x.abs() - away.y.abs()).abs() < 0.25 {
+        if random.bounded(2) == 0 {
+            away.x *= 0.5;
+        } else {
+            away.y *= 0.5;
+        }
+    }
+    let push = away * 1.5;
+    if friction != 0.0 {
+        npc.velocity = npc.velocity
+            + WorldVector {
+                x: push.x / friction,
+                y: push.y / friction,
+            };
+    }
+    let owner = npc.position;
+    let base = owner + away * 30.0;
+    let mut spent = 0.0_f32;
+    // The budget comparisons are false for NaN, like the source's comiss.
+    let within = |pressure: f32, spent: f32| {
+        matches!(
+            (7.0 - 0.3 * pressure).partial_cmp(&spent),
+            Some(std::cmp::Ordering::Greater)
+        )
+    };
+    let pressure = npc
+        .pathfinder
+        .as_ref()
+        .ok_or("EvadeTarget requires Entity_NPC+7d8")?
+        .pressure;
+    if !within(pressure, 0.0) {
+        return Ok(());
+    }
+    loop {
+        let radius = random.uniform() * 450.0 + 30.0;
+        let mut angle = crate::npcs::direction(random);
+        angle.y *= 0.5;
+        let candidate = base + angle * radius;
+        let index = world.grid.index(candidate);
+        let key = index.map_or(-1, |index| index as i32);
+        let path = npc
+            .pathfinder
+            .as_mut()
+            .ok_or("EvadeTarget requires Entity_NPC+7d8")?;
+        if path.tried.contains(&key) {
+            spent = (spent - 0.7) + 1.0;
+        } else {
+            path.tried.insert(key);
+            // GetGridPosition(-1) is (0,120), outside the room: class 4.
+            let cell = index.and_then(|index| world.grid.position(index));
+            let accepted = match cell {
+                Some(cell) if world.grid.collision_at(cell) == 0 => {
+                    if !mode1(world, owner, cell)? {
+                        false
+                    } else if mode1(world, threat, owner)? && path.pressure < 20.0 {
+                        path.pressure += 0.35;
+                        false
+                    } else {
+                        let far = length(sub(threat, cell));
+                        let need =
+                            (((distance + 100.0) + radius / 3.0) + path.pressure) - path.slack;
+                        if need > far {
+                            path.slack += 10.0;
+                            false
+                        } else {
+                            path.target = cell;
+                            if path.pressure < 20.0 {
+                                path.pressure *= 0.5;
+                            }
+                            true
+                        }
+                    }
+                }
+                _ => false,
+            };
+            if accepted {
+                return Ok(());
+            }
+            spent += 1.0;
+        }
+        if !within(path.pressure, spent) {
+            return Ok(());
+        }
+    }
 }
