@@ -42,7 +42,7 @@ SCENARIOS = [
     {'id': 'paired-pause-transition', 'description': 'Escape during the upper room transition is refused; the next Escape pauses',
      'systems': ['menu-navigation', 'room-connectivity', 'locomotion', 'input-determinism']},
     {'id': 'paired-wall-hugger-contact', 'description': 'Recorded #154 run: start-room Wall Huggers crawl into the player before the bomb blast',
-     'systems': ['enemies-bosses', 'health-inventory', 'bombs', 'locomotion', 'input-determinism']},
+     'systems': ['npc-ai', 'entity-collision', 'health-inventory', 'bombs', 'locomotion', 'input-determinism']},
     {'id': 'paired-random-run', 'description': 'Fresh OS-random run seed and recorded randomized movement, firing, coasting, pause and bomb actions',
      'systems': ['locomotion', 'projectile-physics', 'bombs', 'menu-navigation', 'input-determinism'],
      'randomized': True},
