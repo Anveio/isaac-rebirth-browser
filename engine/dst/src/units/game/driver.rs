@@ -341,7 +341,7 @@ impl Driver {
             .any(|npc| npc.boss && !npc.removed && npc.hp > 0.0);
         let fight_odds = if boss_fight { (4, 5) } else { (1, 2) };
         if let Some(npc) = hostile.filter(|_| e.chance(fight_odds.0, fight_odds.1)) {
-            return self.fight(player, npc, boss_fight, e);
+            return self.fight(state, player, npc, boss_fight, e);
         }
         if hostile.is_none() && e.chance(2, 3) {
             if let Some(pickup) = self.nearest_collectable(state, player) {
@@ -517,13 +517,36 @@ impl Driver {
     }
 
     /// Lines up with `npc` on one axis and fires along it: tears fly
-    /// straight, so alignment is what lands hits. Keeps a range band, close
-    /// for small rooms and wider against a boss, and strafes across a boss's
-    /// line while aligned so its jumps and bursts can miss.
-    fn fight(&mut self, player: WorldVector, npc: WorldVector, boss: bool, e: &mut Entropy) {
+    /// straight, so alignment is what lands hits. Keeps a range band (wider
+    /// against a boss), never stands still against a boss, turns away from
+    /// walls instead of backing into a corner, and steps across the path of
+    /// the nearest enemy projectile.
+    fn fight(
+        &mut self,
+        state: &State,
+        player: WorldVector,
+        npc: WorldVector,
+        boss: bool,
+        e: &mut Entropy,
+    ) {
         let (dx, dy) = (npc.x - player.x, npc.y - player.y);
         let horizontal = dx.abs() >= dy.abs();
         let fire = aim_toward(player, npc);
+        // The published room bounds share the player's screen coordinates.
+        let room = &state.room;
+        let (x, y) = (state.player.x, state.player.y);
+        let walled = |code: &str| match code {
+            "KeyA" => x - room.left < 40.0,
+            "KeyD" => room.right - x < 40.0,
+            "KeyW" => y - room.top < 40.0,
+            _ => room.bottom - y < 40.0,
+        };
+        let opposite = |code: &str| match code {
+            "KeyA" => "KeyD",
+            "KeyD" => "KeyA",
+            "KeyW" => "KeyS",
+            _ => "KeyW",
+        };
         let (toward, away) = match fire {
             "ArrowRight" => ("KeyD", "KeyA"),
             "ArrowLeft" => ("KeyA", "KeyD"),
@@ -532,23 +555,61 @@ impl Driver {
         };
         let (near, far) = if boss { (120.0, 220.0) } else { (70.0, 400.0) };
         let range = distance(player, npc);
-        let mut held = vec![fire];
-        if range < near {
-            held.push(away);
+        // One key per axis: along the firing line and across it.
+        let mut along = if range < near && !walled(away) {
+            Some(away)
         } else if range > far {
-            held.push(toward);
-        }
+            Some(toward)
+        } else {
+            None
+        };
         let cross = if horizontal { dy } else { dx };
         let (positive, negative) = if horizontal {
             ("KeyS", "KeyW")
         } else {
             ("KeyD", "KeyA")
         };
-        if cross.abs() > 8.0 {
-            held.push(if cross > 0.0 { positive } else { negative });
-        } else if boss && e.chance(1, 2) {
-            held.push(if e.chance(1, 2) { positive } else { negative });
+        let cornered = range < near && walled(away);
+        let mut across = if cross.abs() > 8.0 {
+            Some(if cross > 0.0 { positive } else { negative })
+        } else if boss || cornered {
+            Some(if e.chance(1, 2) { positive } else { negative })
+        } else {
+            None
+        };
+        if let Some(code) = across.filter(|code| walled(code)) {
+            across = Some(opposite(code));
         }
+        if let Some(shot) = state
+            .enemy_projectiles
+            .iter()
+            .filter(|shot| distance(player, shot.position) < 90.0)
+            .min_by(|a, b| distance(player, a.position).total_cmp(&distance(player, b.position)))
+        {
+            let shot_horizontal = shot.velocity.x.abs() >= shot.velocity.y.abs();
+            let dodge = match (
+                shot_horizontal,
+                player.y >= shot.position.y,
+                player.x >= shot.position.x,
+            ) {
+                (true, true, _) => "KeyS",
+                (true, false, _) => "KeyW",
+                (false, _, true) => "KeyD",
+                (false, _, false) => "KeyA",
+            };
+            let dodge = if walled(dodge) {
+                opposite(dodge)
+            } else {
+                dodge
+            };
+            // A dodge on the firing axis replaces the range move.
+            if matches!(dodge, "KeyA" | "KeyD") == horizontal {
+                along = Some(dodge);
+            } else {
+                across = Some(dodge);
+            }
+        }
+        let held: Vec<&str> = std::iter::once(fire).chain(along).chain(across).collect();
         for code in &held {
             self.queue.push_back(key(code, true));
         }
