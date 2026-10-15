@@ -73,7 +73,11 @@ export interface Knife {
   raw7e0: number; raw7e4: number; raw7e8: number; raw7ec: number;
   raw7f0: number; raw7f4: number; raw7f8: number; raw7fc: {x: number; y: number};
   raw804: {x: number; y: number}; raw80c: number; raw810: number; raw814: boolean;
-  raw8a8: number; hitSequences: number[];
+  line: {origin: {x: number; y: number}; offset: {x: number; y: number}; subdivisions: number | null; mode: number | null; width: number | null;
+    controls: {position: {x: number; y: number}; incoming: {x: number; y: number}; outgoing: {x: number; y: number}}[];
+    history: {x: number; y: number}[]; points: {x: number; y: number}[]; priorPoints: {x: number; y: number}[]; length: number | null};
+  lineRaw18: [number, number] | null;
+  raw8a0: number; raw8a4: number; raw8a8: number; hitSequences: number[];
 }
 export interface MtState { words: number[]; index: number; }
 export interface GridSeedSample { roomRecord: number; gridIndex: number; seeds: [number, number]; }
