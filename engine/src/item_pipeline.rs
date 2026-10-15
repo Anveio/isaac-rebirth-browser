@@ -58,6 +58,13 @@ const EPIC_FETUS_CALLER_ITEMS: &[usize] = &[1, 2, 4, 168];
 const EPIC_FETUS_KIND6_QUEUED_ITEMS: &[usize] = &[2];
 const EPIC_FETUS_CALLER_QUEUED_ITEMS: &[usize] = &[2];
 
+//519FC0's ordinary Have2 emitter and50D090(kind1) have separate readsets.
+//Neither follows from the existing cache/Familiar/grant prefix capabilities.
+const INNER_EYE_CALLER_ITEMS: &[usize] = &[2, 4];
+const INNER_EYE_KIND1_ITEMS: &[usize] = &[2, 4];
+const INNER_EYE_CALLER_QUEUED_ITEMS: &[usize] = &[2, 4];
+const INNER_EYE_KIND1_QUEUED_ITEMS: &[usize] = &[2, 4];
+
 // Independent source-owned footprints. Equal current sets are deliberately
 // separate: cache additions cannot silently admit a50D090 getter branch.
 const TECHNOLOGY_CACHE_ITEMS: &[usize] = &[1, 4, 68, 329];
@@ -396,6 +403,23 @@ impl<'a> ItemInputs<'a> {
             .queued_id
             .is_none_or(|id| EPIC_FETUS_CALLER_QUEUED_ITEMS.contains(&(id as usize)))
             && self.admits_permanent_readset(168, EPIC_FETUS_CALLER_ITEMS)
+    }
+
+    ///51A420..51F3D7: normal C08=1, actual Have2 and no other emitter modifiers.
+    pub(crate) fn admits_inner_eye_caller(self) -> bool {
+        self.owner
+            .queued_id
+            .is_none_or(|id| INNER_EYE_CALLER_QUEUED_ITEMS.contains(&(id as usize)))
+            && self.admits_permanent_readset(2, INNER_EYE_CALLER_ITEMS)
+    }
+
+    ///Independent selected50D090(kind1) trace; passive queued2/4 do not enter
+    ///508FE0's queued-config-kind2 branch. Actual current cache stays separate.
+    pub(crate) fn admits_inner_eye_kind1_context(self) -> bool {
+        self.owner
+            .queued_id
+            .is_none_or(|id| INNER_EYE_KIND1_QUEUED_ITEMS.contains(&(id as usize)))
+            && self.admits_permanent_readset(2, INNER_EYE_KIND1_ITEMS)
     }
 
     ///Mechanical signed-count/context check, with no item capability implied

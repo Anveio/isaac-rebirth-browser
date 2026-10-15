@@ -59,6 +59,7 @@ mod health_damage;
 mod horfs;
 pub mod information_animation;
 pub mod input;
+mod inner_eye;
 mod item_pipeline;
 pub mod items;
 pub mod keepers;
@@ -1887,6 +1888,12 @@ impl Game {
         }
         if phase != phase::Phase::Skipped {
             self.state.public_actions.advance(&self.state.pressed);
+            //5282B0 pocket effects are not reconstructed here. An actual
+            //held pocket request invalidates C70 before any Player callback;
+            //later release never recreates a neutral owner.
+            if self.state.screen == Screen::Playing && self.state.public_actions.pocket_pressed {
+                self.state.attack_runtime.aim_rotation_c70 = None;
+            }
         }
         if phase != phase::Phase::Skipped {
             self.state.music.flush_pending();
@@ -3010,7 +3017,8 @@ impl Game {
                         } else {
                             buttons.aim()
                         };
-                    let ordinary = matches!(
+                    let inner_eye = inner_eye::selected(&self.state, &plan);
+                    let ordinary = inner_eye || matches!(
                         plan.controller,
                         weapon_plan::ControllerChannel::OrdinaryKnife
                             | weapon_plan::ControllerChannel::ChargedBrimstone
@@ -3047,6 +3055,7 @@ impl Game {
                     if let Some(mut aim_step) = aim_step {
                         // 52F6B7 normalizes r13 before the callback and DB4 store.
                         if (controlled
+                            || inner_eye
                             || controlled_tear
                             || controlled_target
                             || plan.controller == weapon_plan::ControllerChannel::MonstroLung)
@@ -3129,7 +3138,7 @@ impl Game {
                                 buttons.held(),
                             );
                         }
-                        if matches!(
+                        if inner_eye || matches!(
                             plan.controller,
                             weapon_plan::ControllerChannel::OrdinaryFetus
                                 | weapon_plan::ControllerChannel::MonstroLung
@@ -3138,7 +3147,9 @@ impl Game {
                             attack_runtime::controlled_idle_head_for(
                                 &mut self.state,
                                 buttons.held(),
-                                if plan.controller == weapon_plan::ControllerChannel::MonstroLung {
+                                if inner_eye {
+                                    "innerEyeMovementHistory"
+                                } else if plan.controller == weapon_plan::ControllerChannel::MonstroLung {
                                     "monstroLungMovementHistory"
                                 } else {
                                     "drFetusMovementHistory"
