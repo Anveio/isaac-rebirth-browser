@@ -596,6 +596,10 @@ pub struct State {
     pub room_transition: Option<traversal::RoomTransition>,
     #[serde(default)]
     pub stage_transition: stage_transition::StageTransition,
+    /// The player's velocity when a door transition began, before departure
+    /// cleared it; the post-ChangeRoom admitted update's footprint reads it.
+    #[serde(skip)]
+    pub departure_velocity: Option<motion::WorldVector>,
     pub stage_effects: StageEffects,
     pub inventory: Inventory,
     pub next_pickup: u32,
@@ -812,6 +816,7 @@ impl Game {
                 persisted_rooms: BTreeMap::new(),
                 room_transition: None,
                 stage_transition: stage_transition::StageTransition::default(),
+                departure_velocity: None,
                 stage_effects,
                 inventory: Inventory {
                     coins: 0,
@@ -1709,6 +1714,17 @@ impl Game {
         }
     }
 
+    /// The ChangeRoom Room.Update5d12a0 tail updates the Player first at the
+    /// unchanged counter. It leaves position and velocity unchanged; its only
+    /// shared draws are the 50c000 footprint, gated by the departing velocity.
+    fn admitted_update_footprint(&mut self, phase: phase::Phase) -> Result<(), String> {
+        if let (phase::Phase::Update, Some(velocity)) =
+            (phase, self.state.departure_velocity.take())
+        {
+            player_footprints::advance(&mut self.state, velocity)?;
+        }
+        Ok(())
+    }
     /// The native list admits Player first, then supported selectors in their
     /// authored order. Persist that order with the room rather than regrouping
     /// NPCs and pickups when rebuilding the shared actor scheduler.
@@ -2166,6 +2182,7 @@ impl Game {
                 combat::advance_player_immunity(&mut self.state);
                 if restoring {
                     let restored_pickups = pickups::readmit_regular_records(&mut self.state)?;
+                    self.admitted_update_footprint(phase)?;
                     self.rebuild_room_actor_schedule()?;
                     //5CF58E replays persistent+B8 records after ordinary5C5860.
                     crate::explosion_effects::replay_dynamic_craters(&mut self.state)?;
@@ -2214,6 +2231,7 @@ impl Game {
                         .clone();
                     let counter = self.state.game_update_count.wrapping_add(1);
                     self.admit_room_pickups(&selectors, counter, false)?;
+                    self.admitted_update_footprint(phase)?;
                     // The admitted Room::Update follows authored mixed order.
                     self.refresh_room_boss_count();
                     let mut counted = actors::FullCounts::default();
