@@ -126,7 +126,7 @@ pub(crate) fn opening_loot(
     Ok(())
 }
 
-fn scatter(position: WorldVector, grid: &Grid, shared: &mut Mt19937) -> WorldVector {
+pub(crate) fn scatter(position: WorldVector, grid: &Grid, shared: &mut Mt19937) -> WorldVector {
     let mut velocity = WorldVector { x: 0.0, y: 0.0 };
     for _ in 0..10 {
         velocity = crate::npcs::direction(shared) * 5.0;
