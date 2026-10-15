@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "status": "SCOPED_FINISHED_TECH_FAIL_GIMPY_OWN_V2_AND_COMPLETE_708_CAPTURE_SNAPSHOT",
-  "main": "968adab250fb8606cde25f4607027d6ad0a00ee3",
+  "status": "SCOPED_MERGED_312_320_348_COMPLETE_PAIRS_FIRST_DR_FAIL",
+  "main": "918303b6a93f67263212cc8b75231bee0844b8e7",
   "merged": {
     "298": "261dbd60b3921fed421a614ef80c52baaadb0cca",
     "299": "988ae6355c7956d918ff0e00eb329d313645b864",
@@ -16,7 +16,12 @@
     "332": "12c6d19cfc191738350c6d3f359eb28c1ee4e7b8",
     "335": "8c918fb62d835a10ac8799058b9f5b8c4463744f",
     "319": "c15fab7788e134b8e302c91c96bb20ebaf5c4d01",
-    "338": "968adab250fb8606cde25f4607027d6ad0a00ee3"
+    "338": "968adab250fb8606cde25f4607027d6ad0a00ee3",
+    "312": "f4668ae9d58ed889e4479a1aa1f21a3fb4988b88",
+    "320": "85962135c15ad3dcb90351795d39069dae19e253",
+    "345": "04e52bbffc3cb3bafe0ec13a732cfa48a668e40e",
+    "348": "918303b6a93f67263212cc8b75231bee0844b8e7",
+    "350": "b3a23e2429613cd0e66176a9412e5bc7caabd365"
   },
   "ordinary299": {
     "ownBuilds": "production/strict Clippy/floor PASS",
@@ -479,14 +484,7 @@
     },
     "producerHistoryScope": "ownProducer, ownWasm, buildSeconds, functionalComparison and correctedFunctionalComparison retain the original and intermediate artifacts. finalIntegralFunctionalComparison records the independently qualified final C421 artifact and actual source landing."
   },
-  "sourceOnlyDrafts": [
-    {
-      "pr": 314,
-      "head": "6e9b5738e465e3a14b7439102c9156259bb6f4bb",
-      "scope": "tools: declare public ordinary Brimstone contact cases",
-      "ownGameAcceptance": false
-    }
-  ],
+  "sourceOnlyDrafts": [],
   "historicalReportsUnchanged": true,
   "noCaptureTransportAsFunctionalParity": true,
   "retainedStandaloneInputs": {
@@ -510,7 +508,7 @@
     "mainMerge": "3df99031eff287a6745c0f7e994b7603e98203d5"
   },
   "controlledBrim312": {
-    "status": "SEPARATE_DRAFT_FOUR_FRESH_NATIVE_TRANSPORTS_COMPLETE_CASE0_GRADE_FAIL",
+    "status": "MERGED_FOUR_COMPLETE_PAIRS_FAIL",
     "runtimeSource": "b8ae2eccd7694688ada95da097e81c067dda285e",
     "ownWasmSha256": "708457d9dd1eeaa40c8e450bf805a362ed3f2394ce5421c1f38f68bc8d43850a",
     "ownBuildClosure": {
@@ -556,7 +554,6 @@
       "retainedUnchanged": true
     },
     "remaining": [
-      "Finished four-case paired grading",
       "Actual admitted reapply callback events",
       "HP ownership",
       "Identity/seed/RNG mismatches",
@@ -576,9 +573,9 @@
     "fullComparerAttempt": {
       "status": "MEMORY_FAILURE_AFTER_SUCCESSFUL_PROJECTION",
       "functionalGradeEstablished": false,
-      "pagedSuccessor": "358398a4/module510fa22d; first completed case0 grade86999/7688FAIL is separate from failed full comparer; three further grades pending"
+      "pagedSuccessor": "Complete four-case bounded paged grading; historical full-comparer failure remains unchanged"
     },
-    "lifecycleScope": "Separate new lifecycle journals captured but not joined; BaseUninit-entry is not completion.",
+    "lifecycleScope": "Four separate saved-sidecar addenda each19checks/4FAIL,2events/1independentlyobservedcleanupchain; BaseUninit-entry is not completion, actualreapply/initialorder/portcallbacks missing",
     "completeCase0Paired": {
       "report": "/dev/shm/isaac-controlled-brim708-native-evidence-v2/controlled-brim-properties-priority-phase0/paired-functional-paged-v3/functional-report.json.gz",
       "reportShaPrefix": "978c19ea",
@@ -606,7 +603,27 @@
         "actual admitted reapply callbacks",
         "unjoined lifecycle records"
       ],
-      "otherThreeGrades": "PENDING_AT_SNAPSHOT"
+      "otherThreeGrades": "COMPLETE_SEPARATE_FOUR_CASE_SUMMARY"
+    },
+    "completeFourPaired": {
+      "path": "/dev/shm/isaac-controlled-brim708-native-evidence-v2/four-case-paired-summary-v3.json",
+      "sha256": "cd2f66908ed679c9364a1f6b04138637553bd08d98ac98fb8b18567ca9e1c09f",
+      "checks": 349856,
+      "failures": 30892,
+      "playingRows": 4058,
+      "laserC18Bodies": 2192,
+      "full": 1094,
+      "fast": 1098,
+      "knifeBodies": 1110,
+      "stableMaterialRowsMatching": 2188
+    },
+    "lifecycleReadback": {
+      "path": "/dev/shm/isaac-controlled-primary-events-portable-v1/four-case-saved-readback-closed.json",
+      "sha256": "4c28a2d4d879c75fb7146b0d95932ec403e6850d6877ebef803aaffa1e1a4ee7",
+      "cases": 4,
+      "checksPerCase": 19,
+      "failuresPerCase": 4,
+      "predecessorsUnchanged": true
     }
   },
   "nativeEvidenceStreaming332": {
@@ -632,7 +649,7 @@
     }
   },
   "nextTechnologyAndGimpy": {
-    "status": "FROZEN77CD_TECH_FOUR_PAIRS_FAIL_GIMPY_V2_OWN_TRANSITIONS_ONLY",
+    "status": "HISTORICAL77CD_RETAINED_NEW027C_TECH_DAMAGE_REPAIR_QUALIFIED",
     "technologyFirstBuild": "Missing PlayerControlled match arm; failure101 retained, no product from that attempt.",
     "technologyCohortSha256": "06986a09a1fde39d8e580a0691dc7b8d71a669417d0d72527f256d28cbe5b524",
     "gimpyCohortSha256": "d0cdf483a0f9c2e5689fae7b65ffc0a01a0e4c69bcf88cf3a5d6f31f6766a412",
@@ -736,7 +753,7 @@
     "futureSource": {
       "head": "68aeedc15251245b1f35e6db3fb42d351e4c2b79",
       "tree": "c511dab9",
-      "status": "NEW_OWN_THREE_BUILDS_PASS_GAME_PENDING",
+      "status": "OWN_THREE_BUILDS_AND_SCOPED_TECH_DAMAGE_COMPARISON_COMPLETE",
       "owners": [
         "Soy stages",
         "capability split",
@@ -765,7 +782,29 @@
         "guardStop": false,
         "earlierPreflightDeficitBytes": 126156800
       },
-      "gameQualification": false
+      "gameQualification": "Scoped Technology comparison only; no whole-game acceptance"
+    },
+    "newTechnologyPaired": {
+      "path": "/dev/shm/isaac-item330-public-game-v1/four-case-technology-comparison-v1.json",
+      "sha256": "03509b681efba6ebf8af88e9848734585557ceb16ff2be9ac639db361a2dd6d9",
+      "checks": 82351,
+      "failures": 5731,
+      "damageChecks": 152,
+      "damageFailures": 0,
+      "resolvedDamageFailures": 76,
+      "allOtherPerFieldCountsUnchanged": true
+    },
+    "raw405DualBaseline": {
+      "path": "/dev/shm/isaac-item330-composition-own-proof/regular405/raw-dual-baseline-summary.json",
+      "sha256": "edd603c24573c8c5ae67f8b050641c8216d944897f5e1e76dec2c38746b75d76",
+      "checksEach": 37972668,
+      "failuresVs77cd": 5928,
+      "failuresVs708": 8368,
+      "optionalRoomKeyNullAdditions": 5512,
+      "allOtherDifferences": "Reviewed Eye key/null-to-false history only",
+      "rawFailuresRetained": true,
+      "fieldExclusions": [],
+      "separatePublicAbiHistoryLedgerUnknownIssues": 0
     }
   },
   "controlledBrimContact335": {
@@ -774,17 +813,112 @@
     "actualContactCases": "UNEXECUTED",
     "scope": "Opt-in controlled7/1/1 tools only; no default capture change or ordinary7/1/0/Technology7/2 alias."
   },
-  "unmergedComparedTools": [
-    {
-      "pr": 316,
-      "scope": "Controlled-Brim body/property/priority marker consumed by708; no full-game acceptance",
-      "fullPairedGrade": "CASE0_86999_7688_FAIL_THREE_OTHER_GRADES_PENDING"
-    }
-  ],
+  "unmergedComparedTools": [],
   "drFetus52": {
-    "status": "SOURCE_MAP_AND_COHERENT_CANONICAL_BOMB_IMPLEMENTATION_BEGINNING",
+    "status": "DRAFT_THREE_BUILDS_STRICT_REGRESSION_FOUR_OWN_ROUTES_FIRST_NATIVE_PAIR_FAIL",
+    "producer": "072118868a2cf802455227eda22bec59264b7fa8",
+    "wasmSha256": "26cb9cf8a5aaf60d149c7195b2ea137d3a9b4ada2200f9bf4fdc55efc6e67850",
+    "buildClosure": {
+      "path": "/dev/shm/isaac-dr-fetus52-own-proof/qualification-closure.json",
+      "sha256": "a3ca7c0624e4a0e39b5140c6d2fc1274196bd48386079f7a8b73fe4ca5373ed6"
+    },
+    "buildSeconds": {
+      "production": 45.211,
+      "strictClippy": 29.475,
+      "floor": 17.465
+    },
+    "stablePins": 3451,
+    "strict405": {
+      "checks": 37972668,
+      "failures": 0,
+      "excludedPaths": [],
+      "additivePaths": []
+    },
+    "ownNonvacuity": {
+      "path": "/dev/shm/isaac-dr-fetus52-own-nonvacuity-v1/own-bomb-nonvacuity.json",
+      "sha256": "cd667264ff3a097fdead01d85a7a17e4c67f3f6808d2977f7d0dcd1f1df14ebb",
+      "cases": 4,
+      "birthsAndRetirementsEach": 3,
+      "birthFuse": 30,
+      "birthFullUpdates": 0,
+      "birthDamage": 10.5,
+      "bodyRows": [
+        214,
+        212,
+        244,
+        212
+      ],
+      "fifoRowsEach": 2,
+      "hpWitnessEach": "FollowingFull4to-6.5"
+    },
+    "firstStrictPair": {
+      "path": "/dev/shm/isaac-dr-fetus52-native-evidence-v1/ordinary-dr-fetus52-fixed-phase0/paired-functional-v1/functional-report.json.gz",
+      "sha256": "100536666e2448ea69c63be8a0ed08e956ca169cb0076740def92a7fc9873008",
+      "checks": 28783,
+      "failures": 2740,
+      "otherThreeNativeCaptures": "PENDING_AT_SNAPSHOT"
+    },
     "gameAcceptance": false,
     "controlled329Admitted": false,
-    "guessedHistoryDefaults": false
+    "guessedHistoryDefaults": false,
+    "idleDa0Successor": "SOURCE_ONLY_NOT_CONSUMED",
+    "counterV2Addendum": {
+      "checks": 29598,
+      "failures": 2740,
+      "addedParityChecks": 815,
+      "addedParityFailures": 0,
+      "originalAbsoluteCounterFailuresRetained": true,
+      "reportShaPrefix": "893ab429",
+      "original10053666Unchanged": true
+    },
+    "independentNativeWitness": {
+      "summaryPath": "/dev/shm/isaac-dr-fetus52-native-own-witness-v1/actual-fixed0-v1/summary.json",
+      "summaryShaPrefix": "6ee134af",
+      "fuse30Births": 3,
+      "laterFullAbsences": 3,
+      "bombFifoRows": 2,
+      "followingFullHp4ToMinus6_5": 1,
+      "strictCrossIdentityParity": false
+    }
+  },
+  "soy330": {
+    "bankSha256": "3a35a3a8aa7489db9886d31815f9f6fb983284c887c19f7766ff7b5b07b80028",
+    "publicCasesCompleted": 4,
+    "sameResourcesTokens": true,
+    "originalComparison": "PENDING",
+    "ownSummaryShaPrefix": "97fe6c5a",
+    "queueCounter": 897,
+    "grantCounter": 981,
+    "pendingAfterGrant": 0,
+    "regularOwn": {
+      "fireDelayBeforeAfter": [
+        7,
+        1
+      ],
+      "damageBeforeAfter": [
+        6.6407833,
+        1.3281567
+      ],
+      "tearBirthsPerCase": 16
+    },
+    "brimOwn": {
+      "fireDelayBeforeAfter": [
+        30,
+        6
+      ],
+      "damageBeforeAfter": [
+        3.5,
+        0.7
+      ],
+      "laserBirthsPerCase": 0,
+      "costumeTransformFrontierRowsPerCase": 360,
+      "coverage": "FAIL"
+    }
+  },
+  "controlledTechnology68Plus329": {
+    "status": "SOURCE_ONLY",
+    "primaryC08": 3,
+    "selectedFlags": 0,
+    "actorGameAcceptance": false
   }
 }
