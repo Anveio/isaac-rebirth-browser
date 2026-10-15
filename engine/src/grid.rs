@@ -905,12 +905,35 @@ impl Collider {
         velocity: &mut WorldVector,
         preview: bool,
     ) -> Result<Option<GridContact>, String> {
+        self.resolve_nonplayer_ground_class(grid, position, velocity, preview, false)
+    }
+
+    ///442CD4 /443512: class6 ignores grid collision1, and refines six times.
+    ///The caller owns source room-bound clamping and full/preview placement.
+    pub fn resolve_nonplayer_no_pits(
+        &self,
+        grid: &Grid,
+        position: &mut WorldVector,
+        velocity: &mut WorldVector,
+        preview: bool,
+    ) -> Result<Option<GridContact>, String> {
+        self.resolve_nonplayer_ground_class(grid, position, velocity, preview, true)
+    }
+
+    fn resolve_nonplayer_ground_class(
+        &self,
+        grid: &Grid,
+        position: &mut WorldVector,
+        velocity: &mut WorldVector,
+        preview: bool,
+        ignores_pits: bool,
+    ) -> Result<Option<GridContact>, String> {
         if !position.is_finite() || !velocity.is_finite() {
             return Err("nonplayer collision requires finite world vectors".into());
         }
         let mut normal = WorldVector { x: 0.0, y: 0.0 };
         for &sample in &self.samples {
-            if grid.collision_at(*position + sample) != 0 {
+            if grid.collision_at(*position + sample) > u32::from(ignores_pits) {
                 normal = normal + sample;
             }
         }
@@ -952,9 +975,9 @@ impl Collider {
                 * self.geometry.radius;
             let mut upper = radius;
             let mut lower = radius - speed.max(2.0);
-            for _ in 0..12 {
+            for _ in 0..if ignores_pits { 6 } else { 12 } {
                 let middle = (upper - lower) * 0.5 + lower;
-                if grid.collision_at(*position + normal * middle) == 0 {
+                if grid.collision_at(*position + normal * middle) <= u32::from(ignores_pits) {
                     lower = middle;
                 } else {
                     upper = middle;

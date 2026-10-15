@@ -213,6 +213,7 @@ pub(crate) fn resolve_appearance(
 pub(crate) enum ControllerChannel {
     RegularShots,
     OrdinaryKnife,
+    OrdinaryFetus,
     ControlledKnife,
     ChargedBrimstone,
     OrdinaryTechnology,
@@ -240,6 +241,9 @@ pub(crate) fn resolve_controller(
             ControllerChannel::ControlledTechnology
         }
         PrimaryWeaponC08::Technology => ControllerChannel::OrdinaryTechnology,
+        PrimaryWeaponC08::DrFetus if !items.primary_permanent_presence(329)? => {
+            ControllerChannel::OrdinaryFetus
+        }
         PrimaryWeaponC08::Ludovico => ControllerChannel::ControlledTear,
         other => ControllerChannel::Unimplemented(other),
     })
@@ -428,6 +432,32 @@ pub(crate) fn resolve_neutral_kind2_damage(
         return Err("kind2 requires an unadmitted source modifier/context branch".into());
     }
     Ok(stats.damage)
+}
+
+///50DE83 consumes actual50D090(kind5) outputs30/38/04 for the Bomb.
+///The factory owns its later damage multiplier, variant, RNG and Parent setter;
+///unused generic size/variant outputs are not promoted to Bomb properties.
+pub(crate) fn resolve_fetus_kind5(
+    items: ItemInputs<'_>,
+    source_player_type: Option<u32>,
+    cache: WeaponCache,
+    stats: PlayerStats,
+) -> Result<AttackProperties, String> {
+    stats.validate()?;
+    if source_player_type != Some(0)
+        || cache.primary != PrimaryWeaponC08::DrFetus
+        || !items.admits_fetus_kind5_context()
+    {
+        return Err("kind5 requires an unadmitted source modifier/context branch".into());
+    }
+    if !cache.color_ca0.is_finite() {
+        return Err("kind5 current CA0 owner is nonfinite".into());
+    }
+    Ok(AttackProperties {
+        flags: cache.flags_c98,
+        color: cache.color_ca0,
+        collision_damage: stats.damage,
+    })
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]

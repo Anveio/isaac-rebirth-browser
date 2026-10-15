@@ -167,7 +167,7 @@ impl<'a> ItemInputs<'a> {
     /// remain outside this scope. Future property operators extend their own
     /// cache reads instead of widening controller/contact admission.
     pub(crate) fn admits_selected_appearance(self) -> bool {
-        if self.admits_technology_cache_context() {
+        if self.admits_technology_cache_context() || self.admits_fetus_cache_context() {
             return true;
         }
         self.owner.trinket_slots == [0, 0]
@@ -230,6 +230,54 @@ impl<'a> ItemInputs<'a> {
                 .all(|(id, &count)| count == 0 || (count > 0 && supported.contains(&id)))
     }
 
+    /// Independent511F10 footprint for one fresh permanent52. The callback
+    /// callers retain normal-Isaac, known auxiliary and retained-C08 owners.
+    /// Add52 evaluates these callbacks before its same passive queue clears.
+    /// This cache capability never grants a kind5/controller/contact scope.
+    pub(crate) fn admits_fetus_cache_context(self) -> bool {
+        self.owner.trinket_slots == [0, 0]
+            && self.owner.queued_id.is_none_or(|id| id == 52)
+            && self.owner.temporary_collectibles.is_empty()
+            && self.owned_count(52) == 1
+            && self
+                .owner
+                .owned_counts
+                .iter()
+                .enumerate()
+                .all(|(id, &count)| count == 0 || (id == 52 && count == 1))
+    }
+
+    /// Separate50D090(kind5) query footprint, including its125/140 tail.
+    /// Current C98/C88/CA0 stay actual inputs; cache admission is not reused.
+    pub(crate) fn admits_fetus_kind5_context(self) -> bool {
+        self.owner.trinket_slots == [0, 0]
+            && self.owner.queued_id.is_none()
+            && self.owner.temporary_collectibles.is_empty()
+            && self.owned_count(52) == 1
+            && self
+                .owner
+                .owned_counts
+                .iter()
+                .enumerate()
+                .all(|(id, &count)| count == 0 || (id == 52 && count == 1))
+    }
+
+    /// Actual post-increment Add52 may still own the same passive queue entry.
+    /// Its specific/default and zero-amount common paths preserve an existing
+    /// LuckInputs owner; they never produce a missing owner from inventory.
+    pub(crate) fn admits_fetus_grant_context(self) -> bool {
+        self.owner.trinket_slots == [0, 0]
+            && self.owner.queued_id.is_none_or(|id| id == 52)
+            && self.owner.temporary_collectibles.is_empty()
+            && self.owned_count(52) == 1
+            && self
+                .owner
+                .owned_counts
+                .iter()
+                .enumerate()
+                .all(|(id, &count)| count == 0 || (id == 52 && count == 1))
+    }
+
     /// Each callback composes its implemented effects with its proven neutral
     /// read set. C08 remains an independent input to the ordered formulas.
     /// Config 118's request for all callbacks adds no implicit scalar effect.
@@ -247,6 +295,9 @@ impl<'a> ItemInputs<'a> {
         //other callback neutral lists or evaluate it as a loadout-only fold.
         let coupled_libra = stage.flag() & LIBRA_SCALAR_FLAGS != 0;
         let neutral_technology = self.admits_technology_cache_context();
+        //52 is neutral for these scalar callbacks except the separately
+        //implemented retained-C08 FireDelay multiplier below.
+        let fetus_context = self.admits_fetus_cache_context();
         self.admits_scalar_context()
             && self
                 .owner
@@ -259,14 +310,15 @@ impl<'a> ItemInputs<'a> {
                             && (effects.contains(&(id as u32))
                                 || neutral.contains(&(id as u32))
                                 || (id == 304 && coupled_libra)
-                                || (id == 68 && neutral_technology)))
+                                || (id == 68 && neutral_technology)
+                                || (id == 52 && fetus_context)))
                 })
     }
 
     /// Auxiliary callbacks have their own narrower source proof. Scalar
     /// effects admitted above do not expand Flight, Familiar, Luck or history.
     fn admits_selected_auxiliary_callbacks(self) -> bool {
-        if self.admits_technology_cache_context() {
+        if self.admits_technology_cache_context() || self.admits_fetus_cache_context() {
             return true;
         }
         self.admits_scalar_context()
@@ -385,6 +437,9 @@ impl FireDelayStage {
         //512610 reads retained C08; multiply BEFORE integer truncation.
         if primary == PrimaryWeaponC08::Brimstone {
             delay *= 3.0_f32;
+        } else if primary == PrimaryWeaponC08::DrFetus {
+            //51262F..51263D: retained C08=5, after max5 and before222.
+            delay *= 2.5_f32;
         }
         if inputs.positive_owned_count(222) {
             delay -= 2.0_f32;
