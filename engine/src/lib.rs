@@ -25,6 +25,7 @@ pub mod chests;
 pub mod combat;
 mod content;
 mod controlled_brimstone;
+mod epic_fetus;
 mod controlled_knife;
 pub mod controlled_tear;
 mod controlled_technology;
@@ -1928,6 +1929,7 @@ impl Game {
         if phase == phase::Phase::Update && self.state.screen == Screen::Playing {
             attack_runtime::restore_fast_positions(&mut self.state);
             laser_runtime::restore_fast_positions(&mut self.state);
+            epic_fetus::restore_fast_positions(&mut self.state)?;
         }
         let gameplay_was_paused = self.state.paused;
         if self.state.screen == Screen::Playing {
@@ -2181,6 +2183,7 @@ impl Game {
             blood_effects::clear_retired_links(&mut self.state);
             attack_runtime::retire_full(&mut self.state);
             laser_runtime::retire_full(&mut self.state)?;
+            epic_fetus::retire_full(&mut self.state);
             controlled_tear::retire_full(&mut self.state);
             attack_runtime::contacts(&mut self.state)?;
             let pickup_contacts = pickups::contact_candidates(&self.state)?;
@@ -2874,7 +2877,8 @@ impl Game {
                         plan.controller == weapon_plan::ControllerChannel::ControlledBrimstone;
                     let controlled_technology =
                         plan.controller == weapon_plan::ControllerChannel::ControlledTechnology;
-                    let controlled_ring = controlled_brim || controlled_technology;
+                    let epic_fetus = plan.controller == weapon_plan::ControllerChannel::EpicFetus;
+                    let controlled_ring = controlled_brim || controlled_technology || epic_fetus;
                     let aim_step = if ordinary || controlled || controlled_tear || controlled_ring {
                         attack_runtime::ordinary_shooting_aim(
                             callback_aim,
@@ -2952,7 +2956,9 @@ impl Game {
                             attack_runtime::controlled_idle_head_for(
                                 &mut self.state,
                                 buttons.held(),
-                                if controlled_technology {
+                                if epic_fetus {
+                                    "epicFetusMovementHistory"
+                                } else if controlled_technology {
                                     "controlledTechnologyMovementHistory"
                                 } else {
                                     "controlledBrimstoneMovementHistory"

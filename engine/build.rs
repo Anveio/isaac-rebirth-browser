@@ -237,6 +237,8 @@ fn familiar_catalog(path: &Path, entities_xml: &str) -> String {
         (1000, 1, "gfx/1000.001_bomb explosion.anm2"),
         (1000, 2, "gfx/1000.002_blood explosion.anm2"),
         (1000, 33, "gfx/1000.033_tiny fly.anm2"),
+        (1000, 30, "gfx/1000.030_dr. fetus target.anm2"),
+        (1000, 31, "gfx/1000.031_dr. fetus rocket.anm2"),
     ] {
         let catalogue = &actors[actor];
         let default = catalogue["DefaultAnimation"]

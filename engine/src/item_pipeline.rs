@@ -11,6 +11,14 @@ pub(crate) struct CacheMask(pub(crate) u32);
 
 const LIBRA_SCALAR_FLAGS: u32 = 0x1b;
 
+// Independently closed Epic Fetus callbacks, getter and actual caller. Equal
+// current sets do not transfer cache, Familiar, grant or actor permissions.
+const EPIC_FETUS_CACHE_ITEMS: &[usize] = &[1, 4, 168];
+const EPIC_FETUS_FAMILIAR_ITEMS: &[usize] = &[1, 4, 168];
+const EPIC_FETUS_KIND6_ITEMS: &[usize] = &[1, 4, 168];
+const EPIC_FETUS_GRANT_ITEMS: &[usize] = &[1, 4, 168];
+const EPIC_FETUS_CALLER_ITEMS: &[usize] = &[1, 4, 168];
+
 // Independent source-owned footprints. Equal current sets are deliberately
 // separate: cache additions cannot silently admit a50D090 getter branch.
 const TECHNOLOGY_CACHE_ITEMS: &[usize] = &[1, 4, 68, 329];
@@ -171,6 +179,9 @@ impl<'a> ItemInputs<'a> {
         if self.admits_technology_cache_context() || self.admits_fetus_cache_context() {
             return true;
         }
+        if self.admits_epic_fetus_cache_context() {
+            return true;
+        }
         self.owner.trinket_slots == [0, 0]
             && self
                 .owner
@@ -219,6 +230,41 @@ impl<'a> ItemInputs<'a> {
     pub(crate) fn admits_controlled_technology_context(self) -> bool {
         self.positive_owned_count(329)
             && self.admits_permanent_readset(68, CONTROLLED_TECHNOLOGY_CALLER_ITEMS)
+    }
+
+    ///Independent511F10 footprint for positive168 with selected1/4. Actual
+    ///C08=6 adds no FireDelay multiplier; each requested callback and its
+    ///normal-Isaac, cached-field and history owners remain separately required.
+    pub(crate) fn admits_epic_fetus_cache_context(self) -> bool {
+        self.admits_permanent_readset(168, EPIC_FETUS_CACHE_ITEMS)
+    }
+
+    ///Independent strict511F10 trace: all68 actual Familiar requests are0.
+    ///Cache completion alone never admits a Familiar request or RNG owner.
+    pub(crate) fn admits_epic_fetus_zero_familiar_requests(self) -> bool {
+        self.admits_permanent_readset(168, EPIC_FETUS_FAMILIAR_ITEMS)
+    }
+
+    ///Separate50D090(kind6) footprint used by Rocket31 at death. The consumer
+    ///retains actualFIRSTPlayer/source0 and currentC88/C98/CA0 ownership;
+    ///physicalParent and the Target's birth inventory are not this getter.
+    pub(crate) fn admits_epic_fetus_kind6_context(self) -> bool {
+        self.owner.queued_id.is_none() && self.admits_permanent_readset(168, EPIC_FETUS_KIND6_ITEMS)
+    }
+
+    ///Only actualAdd168 may consume this independent zero-amount grant proof,
+    ///with normal-Isaac and existingSomeLuck guards retained by its wrapper.
+    ///No counts or cache result can create missing auxiliary history.
+    pub(crate) fn admits_epic_fetus_grant_context(self) -> bool {
+        self.admits_permanent_readset(168, EPIC_FETUS_GRANT_ITEMS)
+    }
+
+    ///Separate51A160/51E370/51B7C3/51B859/51DA6C caller footprint. Selected
+    ///Has2/153/55/87 are false; actualsource0, D80, charge, C18, RNG and
+    ///canonicalTarget/Rocket lifetime owners remain the caller's obligation.
+    pub(crate) fn admits_epic_fetus_caller(self) -> bool {
+        self.owner.queued_id.is_none()
+            && self.admits_permanent_readset(168, EPIC_FETUS_CALLER_ITEMS)
     }
 
     ///Mechanical signed-count/context check, with no item capability implied
@@ -307,6 +353,7 @@ impl<'a> ItemInputs<'a> {
         //52 is neutral for these scalar callbacks except the separately
         //implemented retained-C08 FireDelay multiplier below.
         let fetus_context = self.admits_fetus_cache_context();
+        let neutral_epic_fetus = self.admits_epic_fetus_cache_context();
         self.admits_scalar_context()
             && self
                 .owner
@@ -320,7 +367,8 @@ impl<'a> ItemInputs<'a> {
                                 || neutral.contains(&(id as u32))
                                 || (id == 304 && coupled_libra)
                                 || (id == 68 && neutral_technology)
-                                || (id == 52 && fetus_context)))
+                                || (id == 52 && fetus_context)
+                                || (id == 168 && neutral_epic_fetus)))
                 })
     }
 
@@ -328,6 +376,9 @@ impl<'a> ItemInputs<'a> {
     /// effects admitted above do not expand Flight, Familiar, Luck or history.
     fn admits_selected_auxiliary_callbacks(self) -> bool {
         if self.admits_technology_cache_context() || self.admits_fetus_cache_context() {
+            return true;
+        }
+        if self.admits_epic_fetus_cache_context() {
             return true;
         }
         self.admits_scalar_context()
@@ -344,6 +395,9 @@ impl<'a> ItemInputs<'a> {
     /// An independent strict 511F10 trace proves 68 ordered requests for zero
     /// familiars with these inputs. Actual manager queries remain required.
     pub(crate) fn admits_selected_zero_familiar_requests(self) -> bool {
+        if self.owned_count(168) != 0 {
+            return self.admits_epic_fetus_zero_familiar_requests();
+        }
         self.admits_selected_auxiliary_callbacks()
     }
 

@@ -214,6 +214,7 @@ pub(crate) enum ControllerChannel {
     RegularShots,
     OrdinaryKnife,
     OrdinaryFetus,
+    EpicFetus,
     ControlledKnife,
     ChargedBrimstone,
     OrdinaryTechnology,
@@ -244,6 +245,7 @@ pub(crate) fn resolve_controller(
         PrimaryWeaponC08::DrFetus if !items.primary_permanent_presence(329)? => {
             ControllerChannel::OrdinaryFetus
         }
+        PrimaryWeaponC08::EpicFetus => ControllerChannel::EpicFetus,
         PrimaryWeaponC08::Ludovico => ControllerChannel::ControlledTear,
         other => ControllerChannel::Unimplemented(other),
     })
@@ -452,6 +454,31 @@ pub(crate) fn resolve_fetus_kind5(
     }
     if !cache.color_ca0.is_finite() {
         return Err("kind5 current CA0 owner is nonfinite".into());
+    }
+    Ok(AttackProperties {
+        flags: cache.flags_c98,
+        color: cache.color_ca0,
+        collision_damage: stats.damage,
+    })
+}
+
+///45F3F0 calls FIRSTPlayer kind6 on the actual dead Rocket Full.
+///No target/rocket birth owns these current cache values.
+pub(crate) fn resolve_epic_fetus_kind6(
+    items: ItemInputs<'_>,
+    source_player_type: Option<u32>,
+    cache: WeaponCache,
+    stats: PlayerStats,
+) -> Result<AttackProperties, String> {
+    stats.validate()?;
+    if source_player_type != Some(0)
+        || cache.primary != PrimaryWeaponC08::EpicFetus
+        || !items.admits_epic_fetus_kind6_context()
+    {
+        return Err("kind6 requires an unadmitted FIRSTPlayer context".into());
+    }
+    if !cache.color_ca0.is_finite() {
+        return Err("kind6 actual current CA0 is nonfinite".into());
     }
     Ok(AttackProperties {
         flags: cache.flags_c98,
