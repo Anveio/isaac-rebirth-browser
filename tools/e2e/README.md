@@ -225,3 +225,24 @@ as complete runs.
   [`lib/original.mjs`](lib/original.mjs).
 
 Put throwaway probes in the ignored `.cache/` research area.
+
+Native evidence journals default to the historical per-record gzip format. For a
+new capture, `foundation-clock-run.py --archive-evidence --journal-codec zstd`
+(or the same extra arguments to `composition-run.py`) explicitly selects a
+persistent level-1 Zstd stream in `native-progress.jsonl.zst`. It retains the
+canonical JSONL records and flushes every completed record at the existing gate.
+The complete manifest remains gzip. This opt-in requires installed Python
+`zstandard`, system `libzstd`, and Node 24 with built-in Zstd support for JavaScript
+readers. `cloud/install.sh` installs the pinned Python dependency through
+`cloud/requirements.txt` and the system library through apt; non-root portable
+hosts must provide system `libzstd` before opting in. Legacy gzip runs do not
+load those codec helpers. Codec metadata and
+source/tool identities must describe the new capture. Existing evidence and
+archival restoration recipes keep their original formats and identities.
+
+A running Zstd journal is an unfinished frame. Atomic metadata pins only its
+committed encoded prefix; recovery must verify both encoded and decoded hashes,
+bytes and record count and retain incomplete status. Only a successful final
+frame/checksum write, file close and metadata commit certify a closed journal.
+Readers reject incomplete frames, uncommitted tails and ambiguous mixed formats.
+No game field, public input, clock, RNG stream or capacity floor changes.
