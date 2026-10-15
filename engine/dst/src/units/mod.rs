@@ -11,6 +11,7 @@ mod game;
 mod grid;
 mod item_pools;
 mod layout;
+mod motion;
 mod mt;
 mod pathfinder;
 mod phase;
@@ -58,6 +59,11 @@ pub const UNITS: &[Unit] = &[
         name: "floor",
         summary: "Basement generation structure, retries and per-descriptor room admission",
         run: floor::run,
+    },
+    Unit {
+        name: "motion",
+        summary: "player motion steps and held-input runs against an along/across velocity model",
+        run: motion::run,
     },
     Unit {
         name: "grid",

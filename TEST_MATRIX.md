@@ -249,6 +249,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | `room_spawns` | authored spawn-group selection over every authored room and synthetic edge rooms | 11 | 4 | 0 |
 | `room_templates` | authored room-template picks and weight decay against a weight model | 8 | 5 | 0 |
 | `floor` | Basement generation structure, retries and per-descriptor room admission | 18 | 5 | 0 |
+| `motion` | player motion steps and held-input runs against an along/across velocity model | 12 | 4 | 0 |
 | `grid` | grid queries and ground-collision solvers on generated rooms | 14 | 3 | 0 |
 | `contact` | mass contact responses against momentum, centre-of-mass and overlap oracles | 16 | 3 | 0 |
 | `pathfinder` | FindGridPath's flood against an independent node-weighted Dijkstra | 6 | 5 | 0 |
@@ -372,6 +373,22 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Always | floor: every descriptor resolves authored layout and spawns | [floor.rs](engine/dst/src/units/floor.rs) |
 | Always | floor: every descriptor admits as a room without panicking | [floor.rs](engine/dst/src/units/floor.rs) |
 | Always | floor: admitted rooms have one door per neighbor and bounded geometry | [floor.rs](engine/dst/src/units/floor.rs) |
+| Always | motion: a step is a pure function of its inputs | [motion.rs](engine/dst/src/units/motion.rs) |
+| Always | motion: a step runs exactly on digital input, finite vectors and an admitted speed stat, and never returns a non-finite vector | [motion.rs](engine/dst/src/units/motion.rs) |
+| Sometimes | motion: an invalid step is refused | [motion.rs](engine/dst/src/units/motion.rs) |
+| Sometimes | motion: a step whose vectors overflow is refused | [motion.rs](engine/dst/src/units/motion.rs) |
+| Always | motion: a step commutes with the square's symmetries | [motion.rs](engine/dst/src/units/motion.rs) |
+| Always | motion: position advances by the previous velocity | [motion.rs](engine/dst/src/units/motion.rs) |
+| Always | motion: a released player keeps the forward retention of its velocity | [motion.rs](engine/dst/src/units/motion.rs) |
+| Always | motion: held input damps drift across it by both retentions | [motion.rs](engine/dst/src/units/motion.rs) |
+| Always | motion: held input accelerates along it, braking harder against it | [motion.rs](engine/dst/src/units/motion.rs) |
+| Always | motion: held input contracts speed toward its terminal speed | [motion.rs](engine/dst/src/units/motion.rs) |
+| Sometimes | motion: held input brakes a player moving against it | [motion.rs](engine/dst/src/units/motion.rs) |
+| Sometimes | motion: a speed beyond the terminal speed decays toward it | [motion.rs](engine/dst/src/units/motion.rs) |
+| Always | motion: every step of a settling run is admitted | [motion.rs](engine/dst/src/units/motion.rs) |
+| Always | motion: held input brings the velocity geometrically closer to its terminal velocity | [motion.rs](engine/dst/src/units/motion.rs) |
+| Always | motion: a settled player moves at its speed stat's terminal speed, along axes and diagonals alike | [motion.rs](engine/dst/src/units/motion.rs) |
+| Always | motion: a released player glides the geometric sum of its velocity | [motion.rs](engine/dst/src/units/motion.rs) |
 | Always | grid: admitted room grids are valid grids | [grid.rs](engine/dst/src/units/grid.rs) |
 | Always | grid: every cell centre indexes back to its cell | [grid.rs](engine/dst/src/units/grid.rs) |
 | Always | grid: nonplayer ground resolution never fails for bounded motion | [grid.rs](engine/dst/src/units/grid.rs) |
