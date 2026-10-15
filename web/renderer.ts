@@ -41,6 +41,7 @@ export class Renderer {
   private readonly floor: GLSurface;
   private readonly walls: GLSurface;
   private roomKey = "";
+  private paintedStains = { count: 0, last: "" };
   // Room-transition snapshots of the old and new world layers.
   private readonly slideOld: GLSurface;
   private readonly slideNew: GLSurface;
@@ -424,10 +425,22 @@ export class Renderer {
     const key = JSON.stringify({ backdrop: appearance.backdrop, patchSize: appearance.backdropPatchSize,
       patchColumns: appearance.backdropPatchColumns, floor: appearance.floorQuads, walls: appearance.wallQuads,
       columns: appearance.columns, rows: appearance.rows, tileSize: appearance.tileSize, tutorial: appearance.tutorial,
-      backgroundStains: room.backgroundStains });
-    if (key === this.roomKey) return;
+      origin: appearance.origin });
+    // Background stains are append-only within a room (familiars.rs pushes,
+    // a new room starts empty), so an unchanged prefix only needs the new
+    // stains painted over the existing floor target.
+    const stains = room.backgroundStains, painted = this.paintedStains;
+    const continues = key === this.roomKey && stains.length >= painted.count
+      && (painted.count === 0 || JSON.stringify(stains[painted.count - 1]) === painted.last);
+    if (continues && stains.length === painted.count) return;
     const gl = this.graphics, width = appearance.columns * appearance.tileSize, height = appearance.rows * appearance.tileSize;
     gl.beginTarget(this.floor, width, height); gl.resetTransform(); gl.globalAlpha = 1; gl.imageSmoothingEnabled = false;
+    if (continues) {
+      gl.blendFactors("srcAlpha", "oneMinusSrcAlpha");
+      this.paintStains(appearance, stains.slice(painted.count));
+      this.paintedStains = { count: stains.length, last: JSON.stringify(stains[stains.length - 1]) };
+      return;
+    }
     gl.clearRect(0, 0, this.floor.width, this.floor.height); gl.blendFactors("one", "zero");
     this.drawQuads(appearance, appearance.floorQuads);
     if (appearance.tutorial) {
@@ -436,8 +449,16 @@ export class Renderer {
       gl.drawImage(controls, Math.round(width / 2 - controls.width / 2), Math.round(height / 2 - controls.height / 2));
     }
     gl.blendFactors("srcAlpha", "oneMinusSrcAlpha");
-    const ctx = gl.asCanvasContext();
-    for (const stain of room.backgroundStains) {
+    this.paintStains(appearance, stains);
+    gl.beginTarget(this.walls, width, height); gl.resetTransform();
+    gl.clearRect(0, 0, this.walls.width, this.walls.height); gl.blendFactors("one", "zero");
+    this.drawQuads(appearance, appearance.wallQuads);
+    this.roomKey = key;
+    this.paintedStains = { count: stains.length, last: stains.length ? JSON.stringify(stains[stains.length - 1]) : "" };
+  }
+  private paintStains(appearance: RoomAppearance, stains: Room["backgroundStains"]): void {
+    const ctx = this.graphics.asCanvasContext();
+    for (const stain of stains) {
       const sprite = stain.sprite;
       if (stain.variant === 58 || stain.variant === 43) {
         ctx.save();
@@ -461,10 +482,6 @@ export class Renderer {
           (stain.position.y + sprite.offset.y) * 0.65 - 46 - appearance.origin.y);
       }
     }
-    gl.beginTarget(this.walls, width, height); gl.resetTransform();
-    gl.clearRect(0, 0, this.walls.width, this.walls.height); gl.blendFactors("one", "zero");
-    this.drawQuads(appearance, appearance.wallQuads);
-    this.roomKey = key;
   }
   private drawRoom(appearance: RoomAppearance): void {
     const gl = this.graphics, ctx = gl.asCanvasContext(), size = appearance.tileSize, border = size * 2;
