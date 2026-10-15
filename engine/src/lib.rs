@@ -27,6 +27,7 @@ mod content;
 mod controlled_brimstone;
 mod controlled_knife;
 pub mod controlled_tear;
+mod controlled_technology;
 mod creep_effects;
 pub mod dingle;
 pub mod dips;
@@ -2871,7 +2872,10 @@ impl Game {
                         plan.controller == weapon_plan::ControllerChannel::ControlledTear;
                     let controlled_brim =
                         plan.controller == weapon_plan::ControllerChannel::ControlledBrimstone;
-                    let aim_step = if ordinary || controlled || controlled_tear || controlled_brim {
+                    let controlled_technology =
+                        plan.controller == weapon_plan::ControllerChannel::ControlledTechnology;
+                    let controlled_ring = controlled_brim || controlled_technology;
+                    let aim_step = if ordinary || controlled || controlled_tear || controlled_ring {
                         attack_runtime::ordinary_shooting_aim(
                             callback_aim,
                             buttons.held(),
@@ -2886,7 +2890,7 @@ impl Game {
                     };
                     if let Some(mut aim_step) = aim_step {
                         // 52F6B7 normalizes r13 before the callback and DB4 store.
-                        if (controlled || controlled_tear || controlled_brim)
+                        if (controlled || controlled_tear || controlled_ring)
                             && knives::squared_length(aim_step.callback_aim) > 1.0
                         {
                             aim_step.callback_aim = knives::normalized(aim_step.callback_aim);
@@ -2896,7 +2900,7 @@ impl Game {
                         }
                         shooting_aim_db4 = aim_step.db4_write;
                         let head_frame_request = if self.state.head_timer > 8 { 2 } else { 0 };
-                        if ordinary || controlled || controlled_tear || controlled_brim {
+                        if ordinary || controlled || controlled_tear || controlled_ring {
                             source_weapon_clock = true;
                             if controlled {
                                 attack_runtime::controlled_head_direction(
@@ -2910,7 +2914,7 @@ impl Game {
                                     aim_step.callback_aim,
                                     buttons.held(),
                                 )?;
-                            } else if controlled_brim {
+                            } else if controlled_ring {
                                 controlled_brimstone::head_direction(
                                     &mut self.state,
                                     aim_step.callback_aim,
@@ -2944,11 +2948,15 @@ impl Game {
                             attack_runtime::controlled_idle_head(&mut self.state, buttons.held());
                         } else if controlled_tear {
                             controlled_tear::idle_head(&mut self.state, buttons.held());
-                        } else if controlled_brim {
+                        } else if controlled_ring {
                             attack_runtime::controlled_idle_head_for(
                                 &mut self.state,
                                 buttons.held(),
-                                "controlledBrimstoneMovementHistory",
+                                if controlled_technology {
+                                    "controlledTechnologyMovementHistory"
+                                } else {
+                                    "controlledBrimstoneMovementHistory"
+                                },
                             );
                         }
                         if plan.controller == weapon_plan::ControllerChannel::OrdinaryTechnology {

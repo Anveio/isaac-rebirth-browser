@@ -13,9 +13,10 @@ const LIBRA_SCALAR_FLAGS: u32 = 0x1b;
 
 // Independent source-owned footprints. Equal current sets are deliberately
 // separate: cache additions cannot silently admit a50D090 getter branch.
-const TECHNOLOGY_CACHE_ITEMS: &[usize] = &[1, 4, 68];
+const TECHNOLOGY_CACHE_ITEMS: &[usize] = &[1, 4, 68, 329];
 const TECHNOLOGY_KIND2_ITEMS: &[usize] = &[1, 4, 68];
-const TECHNOLOGY_KIND3_ITEMS: &[usize] = &[1, 4, 68];
+const TECHNOLOGY_KIND3_ITEMS: &[usize] = &[1, 4, 68, 329];
+const CONTROLLED_TECHNOLOGY_CALLER_ITEMS: &[usize] = &[1, 4, 68, 329];
 
 /// Literal511f10 dispatch order. Weapon selection/removal precedes stats;
 /// Libra304 has additional coupling before and after this sequence.
@@ -195,7 +196,7 @@ impl<'a> ItemInputs<'a> {
             && self.owner.temporary_collectibles.is_empty()
     }
 
-    /// Independent511F10 footprint for positive Technology with selected1/4.
+    /// Independent511F10 footprint for positive Technology with selected1/4/329.
     /// Callers retain their normal-Isaac and typed auxiliary-owner checks.
     /// This is cache context only, never a property/controller/contact admission.
     pub(crate) fn admits_technology_cache_context(self) -> bool {
@@ -210,6 +211,14 @@ impl<'a> ItemInputs<'a> {
     ///Separate50D090 output30 footprint consumed by476D70 status handling.
     pub(crate) fn admits_technology_kind3_getter(self) -> bool {
         self.admits_permanent_readset(68, TECHNOLOGY_KIND3_ITEMS)
+    }
+
+    ///519FC0 C08=3 + live Have329 reads current cache directly; it never
+    ///calls the ordinary kind2 builder. Keep its caller footprint separate
+    ///from cache completion and the independently closed kind3 status getter.
+    pub(crate) fn admits_controlled_technology_context(self) -> bool {
+        self.positive_owned_count(329)
+            && self.admits_permanent_readset(68, CONTROLLED_TECHNOLOGY_CALLER_ITEMS)
     }
 
     ///Mechanical signed-count/context check, with no item capability implied

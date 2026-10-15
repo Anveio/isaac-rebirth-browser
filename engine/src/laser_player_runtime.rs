@@ -235,6 +235,35 @@ fn initialize_first(state: &mut State, index: usize) -> Result<(), String> {
             pitch: 1.0,
         },
     );
+    spawn_initial_impact(state, index)?;
+    let laser = &mut state.lasers[index];
+    laser.line_enabled = true;
+    laser.line.initialize(50, 0);
+    laser.line.width = Some(120.0);
+    Ok(())
+}
+
+///4796BC actual variant2 Impact factory, shared by ordinary subtype0 and
+///controlled subtype1. The controlled sound dispatcher has already returned.
+pub(crate) fn initialize_controlled_technology_impact(
+    state: &mut State,
+    index: usize,
+) -> Result<(), String> {
+    let laser = &state.lasers[index];
+    if laser.origin != LaserOrigin::PlayerControlled
+        || laser.variant != 2
+        || laser.subtype != 1
+        || !laser.first_update
+        || laser.parent != Some(PLAYER)
+        || laser.child.is_some()
+        || laser.impact.is_some()
+    {
+        return Err("controlled Technology first Impact requires actual fresh7/2/1".into());
+    }
+    spawn_initial_impact(state, index)
+}
+
+fn spawn_initial_impact(state: &mut State, index: usize) -> Result<(), String> {
     let id = state.next_effect;
     let next = id.checked_add(1).ok_or("Effect handle exhausted")?;
     let seed = state.boot_lifecycle.shared.next_u32(); //47955E before550A40.
@@ -292,10 +321,6 @@ fn initialize_first(state: &mut State, index: usize) -> Result<(), String> {
     }
     crate::laser_npc_runtime::advance_impact_full(&mut impact, false)?;
     state.lasers[index].impact = Some(impact);
-    let laser = &mut state.lasers[index];
-    laser.line_enabled = true;
-    laser.line.initialize(50, 0);
-    laser.line.width = Some(120.0);
     Ok(())
 }
 
