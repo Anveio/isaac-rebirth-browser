@@ -244,7 +244,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | `phase` | system update/interpolation phases against a counter model | 6 | 2 | 0 |
 | `actors` | actor admission order and room identities against a list model | 4 | 2 | 0 |
 | `layout` | rectangular floor growth over every accepted seed, room count and shape mask | 11 | 2 | 1 |
-| `floor` | Basement generation structure, retries and per-descriptor room admission | 18 | 4 | 0 |
+| `floor` | Basement generation structure, retries and per-descriptor room admission | 18 | 5 | 0 |
 | `grid` | grid queries and ground-collision solvers on generated rooms | 14 | 3 | 0 |
 | `item_pools` | ItemPool selection, depletion, fallbacks, routing and continuation | 21 | 6 | 3 |
 | `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 63 | 51 | 2 |
@@ -334,6 +334,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Always | floor: attempts are bounded, contiguous and end with a placement | [floor.rs](engine/dst/src/units/floor.rs) |
 | Sometimes | floor: a generation retry is exercised | [floor.rs](engine/dst/src/units/floor.rs) |
 | Always | floor: floors round-trip through JSON | [floor.rs](engine/dst/src/units/floor.rs) |
+| Sometimes | floor: another authored room admits in a generated descriptor's place | [floor.rs](engine/dst/src/units/floor.rs) |
 | Always | floor: every descriptor resolves authored layout and spawns | [floor.rs](engine/dst/src/units/floor.rs) |
 | Always | floor: every descriptor admits as a room without panicking | [floor.rs](engine/dst/src/units/floor.rs) |
 | Always | floor: admitted rooms have one door per neighbor and bounded geometry | [floor.rs](engine/dst/src/units/floor.rs) |
