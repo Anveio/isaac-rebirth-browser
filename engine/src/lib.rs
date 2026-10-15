@@ -1787,6 +1787,9 @@ impl Game {
                         self.count_updated_room_actor(actor, &mut counted);
                     }
                     self.state.room.manager_counts.finish_full(counted);
+                    // The admitting manager pass also sets the bar: a fresh
+                    // boss is present but not yet summed, so the fill is 0/0.
+                    self.update_boss_bar();
                     familiars::paint_background_effects(&mut self.state)?;
                     blood_effects::clear_retired_links(&mut self.state);
                     pickups::full_grid_contacts(&mut self.state)?;
