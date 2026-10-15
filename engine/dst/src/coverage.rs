@@ -4,7 +4,11 @@
 //! rest, so a coverage gap (a room type never entered, an implemented NPC
 //! family never simulated) is visible in every run rather than only to a
 //! probe. It is a measurement, not a property: nothing here passes or fails.
-use rebirth_cleanroom::{implemented_npc_kinds, items, Screen, State};
+//!
+//! Each case also records the command at which it first reached every key,
+//! so `tools/dst/cover.py` can cut the shortest tape prefixes that bring a
+//! missing key into the corpus.
+use rebirth_cleanroom::{implemented_npc_kinds, items, room_assets, Screen, State};
 use serde_json::{json, Value};
 use std::cell::RefCell;
 use std::collections::{BTreeMap, BTreeSet};
@@ -16,12 +20,14 @@ struct Census {
     reached: BTreeMap<String, u64>,
     /// Cases whose floors contained each room type.
     floor_reached: BTreeMap<u32, u64>,
+    /// Each case's label with the command index that first reached each key.
+    first_steps: Vec<(String, BTreeMap<String, u64>)>,
 }
 
-/// What the case running on this thread reached.
+/// What the case running on this thread reached, and at which command.
 #[derive(Default)]
 struct Current {
-    keys: BTreeSet<String>,
+    keys: BTreeMap<String, u64>,
     /// Room types the case's floors contained.
     floor_rooms: BTreeSet<u32>,
 }
@@ -30,6 +36,7 @@ static CENSUS: Mutex<Census> = Mutex::new(Census {
     cases: 0,
     reached: BTreeMap::new(),
     floor_reached: BTreeMap::new(),
+    first_steps: Vec::new(),
 });
 
 thread_local! {
@@ -46,16 +53,18 @@ pub fn begin_case() {
     CURRENT.with(|current| *current.borrow_mut() = Current::default());
 }
 
-pub fn end_case() {
+/// Folds the case into the census under `label`, its retained tape's name.
+pub fn end_case(label: &str) {
     let current = CURRENT.with(|current| std::mem::take(&mut *current.borrow_mut()));
     let mut census = census();
     census.cases += 1;
-    for key in current.keys {
-        *census.reached.entry(key).or_default() += 1;
+    for key in current.keys.keys() {
+        *census.reached.entry(key.clone()).or_default() += 1;
     }
     for room_type in current.floor_rooms {
         *census.floor_reached.entry(room_type).or_default() += 1;
     }
+    census.first_steps.push((label.to_owned(), current.keys));
 }
 
 /// Records what this published state shows the workload reaching.
@@ -143,17 +152,34 @@ pub fn observe(state: &State) {
                 .floor_rooms
                 .extend(rooms.map(|room| room.template.room_type));
         }
-        current.keys.extend(keys);
+        let step = crate::props::step();
+        for key in keys {
+            current.keys.entry(key).or_insert(step);
+        }
     });
 }
 
+/// Entity types some authored Basement or special room spawns: what a
+/// floor can place directly. Other kinds appear only when spawned at runtime.
+fn authored_entity_types() -> BTreeSet<u32> {
+    room_assets::basement()
+        .iter()
+        .chain(room_assets::special().iter())
+        .flat_map(|asset| asset.spawns.iter())
+        .flat_map(|group| group.entries.iter())
+        .map(|entry| u32::from(entry.entity_type))
+        .collect()
+}
+
 /// The census for the report, and what the workload never reached: NPC kinds
-/// the engine implements and room types its floors contained.
+/// the engine implements (split by whether any authored room places them)
+/// and room types its floors contained.
 pub fn report() -> Value {
     let census = census();
-    let unreached_npcs: Vec<u32> = implemented_npc_kinds()
+    let authored = authored_entity_types();
+    let (unreached_npcs, unplaced_npcs): (Vec<u32>, Vec<u32>) = implemented_npc_kinds()
         .filter(|kind| !census.reached.contains_key(&format!("npc:{kind}")))
-        .collect();
+        .partition(|kind| authored.contains(kind));
     let unentered_rooms: Vec<u32> = census
         .floor_reached
         .keys()
@@ -165,11 +191,16 @@ pub fn report() -> Value {
             })
         })
         .collect();
+    let mut first_steps = census.first_steps.clone();
+    first_steps.sort();
+    let first_steps: BTreeMap<String, BTreeMap<String, u64>> = first_steps.into_iter().collect();
     json!({
         "gameCases": census.cases,
+        "firstSteps": first_steps,
         "reached": census.reached,
         "floorRoomTypes": census.floor_reached,
         "unreachedNpcKinds": unreached_npcs,
+        "unplacedNpcKinds": unplaced_npcs,
         "unenteredRoomTypes": unentered_rooms,
     })
 }

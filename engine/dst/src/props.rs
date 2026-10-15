@@ -143,6 +143,11 @@ pub fn set_context(context: Context) {
     CONTEXT.with(|current| *current.borrow_mut() = context);
 }
 
+/// The command index the running case is at.
+pub fn step() -> u64 {
+    CONTEXT.with(|current| current.borrow().step)
+}
+
 pub fn set_step(step: u64) {
     CONTEXT.with(|current| current.borrow_mut().step = step);
 }
