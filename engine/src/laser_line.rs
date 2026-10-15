@@ -48,3 +48,50 @@ impl Default for LaserLine {
         }
     }
 }
+
+fn add(a: WorldVector, b: WorldVector) -> WorldVector {
+    WorldVector {
+        x: a.x + b.x,
+        y: a.y + b.y,
+    }
+}
+fn scale(a: WorldVector, value: f32) -> WorldVector {
+    WorldVector {
+        x: a.x * value,
+        y: a.y * value,
+    }
+}
+///577020 preserves the scalar coefficient arithmetic and addition order.
+pub(crate) fn cubic(a: CurvePoint, b: CurvePoint, t: f32) -> WorldVector {
+    let t2 = t * t;
+    let opposite = 1.0 - t;
+    let opposite2 = opposite * opposite;
+    let c0 = opposite2 * opposite;
+    let c1 = (opposite2 * 3.0) * t;
+    let c2 = (opposite * 3.0) * t2;
+    let c3 = t * t2;
+    add(
+        add(
+            add(scale(a.position, c0), scale(a.outgoing, c1)),
+            scale(b.incoming, c2),
+        ),
+        scale(b.position, c3),
+    )
+}
+
+impl LaserLine {
+    ///577120 clears all four logical vectors without fitting prior samples.
+    pub(crate) fn initialize(&mut self, subdivisions: u32, mode: u32) {
+        self.subdivisions = Some(subdivisions);
+        self.mode = Some(mode);
+        self.controls.clear();
+        self.history.clear();
+        self.points.clear();
+        self.prior_points.clear();
+    }
+
+    ///578270 clears only controls; sampled/history state survives each rebuild.
+    pub(crate) fn begin_curve(&mut self) {
+        self.controls.clear();
+    }
+}
