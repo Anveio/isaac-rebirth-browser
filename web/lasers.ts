@@ -6,7 +6,7 @@ import laserData from "./npc-data.json";
 
 type Vector = { x: number; y: number };
 export interface LaserView {
-  id: number; origin: "npcShootAngle" | "playerCharged"; uninitialized: boolean | null;
+  id: number; origin: "npcShootAngle" | "playerCharged" | "playerControlled"; uninitialized: boolean | null;
   active: boolean; actor: string; beamLength: number;
   impact: {id: number; position: Vector; positionOffset: Vector; scale: Vector;
     rotation: number; actor: string; animation: string; animationClock: number; removed: boolean;
