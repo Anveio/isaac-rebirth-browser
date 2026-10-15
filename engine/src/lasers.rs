@@ -391,6 +391,15 @@ impl Laser {
         laser
     }
 
+    ///475EA0 for actual7/2/1. The direct519FC0 caller owns property copies,
+    ///Parent and sort; it does not execute ordinary50E1C0's lifetime3 factory.
+    pub(crate) fn initialize_controlled_technology(id: u32, seed: u32, age: u32) -> Self {
+        let mut laser = Self::initialize_technology(id, seed, age);
+        laser.origin = LaserOrigin::PlayerControlled;
+        laser.subtype = 1;
+        laser
+    }
+
     pub(crate) fn restore_fast_position(&mut self) {
         if self.fast {
             self.position = self.saved_position;
@@ -521,12 +530,15 @@ impl Laser {
     }
 
     pub(crate) fn finish_full(&mut self) -> Result<(), String> {
-        self.sprite
-            .advance(if self.origin == LaserOrigin::PlayerTechnology {
+        self.sprite.advance(
+            if self.origin == LaserOrigin::PlayerTechnology
+                || (self.origin == LaserOrigin::PlayerControlled && self.variant == 2)
+            {
                 technology_definition()
             } else {
                 definition()
-            })?;
+            },
+        )?;
         self.velocity = self.velocity * self.current_friction;
         self.position = self.position + self.velocity;
         self.current_friction = self.configured_friction;
