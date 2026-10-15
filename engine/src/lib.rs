@@ -44,6 +44,7 @@ mod entities;
 pub mod sprite_color;
 mod tear_factory;
 mod technology;
+mod technology2;
 pub use entities::{implemented_npc_kinds, supports_npc_selector};
 pub mod familiars;
 pub mod fireplaces;
@@ -3037,8 +3038,24 @@ impl Game {
         attack_runtime::update_movement_direction(&mut self.state, controls_enabled)?;
         //52f370 positive7dc returns before its both-phase519fc0 callbacks.
         //53004c otherwise precedes later full/body work, independent of aim.
+        let technology2_selected = technology2::selected(&self.state);
+        let technology2_callback = technology2_selected
+            && self
+                .state
+                .player_items
+                .as_ref()
+                .is_some_and(|owner| owner.active_state_d80 == 0)
+            && self.state.player.shooting_lock <= 0
+            && !self.state.stage_shooting_guard.active();
+        //The secondary callback has its own current readset and runs before
+        //primary kind1/cache admission. Its retained beam does not reread C88.
+        let technology2_step = if technology2_callback {
+            technology2::prepare_callback(&mut self.state, phase, controls_enabled)?
+        } else {
+            None
+        };
         let shoot_callback_admitted =
-            controls_enabled
+            (controls_enabled
                 && self.state.player.can_shoot
                 && self.state.player.shooting_lock == 0
                 && !self.state.player_animation.guard
@@ -3047,20 +3064,29 @@ impl Game {
                 })
                 && !self.state.stage_shooting_guard.active()
                 && self.state.player.controls_enabled
-                && self.state.player.input_cooldown <= 0;
-        let mut source_weapon_clock = false;
+                && self.state.player.input_cooldown <= 0)
+                || technology2_step.is_some();
+        let mut source_weapon_clock = technology2_step.is_some();
         let mut regular_plan = None;
-        let mut shooting_aim_db4 = None;
+        let mut shooting_aim_db4 = technology2_step.as_ref().and_then(|step| step.db4_write);
         let regular_dispatch = if shoot_callback_admitted {
             match weapon_plan::resolve_current_weapon(&self.state)? {
                 weapon_plan::LiveWeaponResolution::Unadmitted(channel) => {
-                    self.state
-                        .weapon_admission
-                        .record_unadmitted(self.state.weapon_cache.primary, channel);
+                    if technology2_selected {
+                        technology2::primary_frontier(&mut self.state, channel);
+                    } else {
+                        self.state
+                            .weapon_admission
+                            .record_unadmitted(self.state.weapon_cache.primary, channel);
+                    }
                     false
                 }
                 weapon_plan::LiveWeaponResolution::Resolved(plan) => {
-                    let buttons = attack_runtime::ShootButtons::read(&self.state.pressed);
+                    let buttons = if let Some(step) = &technology2_step {
+                        step.buttons
+                    } else {
+                        attack_runtime::ShootButtons::read(&self.state.pressed)
+                    };
                     let callback_aim =
                         if plan.controller == weapon_plan::ControllerChannel::OrdinaryKnife {
                             buttons.ordinary_knife_aim()
@@ -3068,7 +3094,7 @@ impl Game {
                             buttons.aim()
                         };
                     let inner_eye = inner_eye::selected(&self.state, &plan);
-                    let ordinary = inner_eye || matches!(
+                    let ordinary = inner_eye || technology2_selected || matches!(
                         plan.controller,
                         weapon_plan::ControllerChannel::OrdinaryKnife
                             | weapon_plan::ControllerChannel::ChargedBrimstone
@@ -3089,7 +3115,12 @@ impl Game {
                     let epic_fetus = plan.controller == weapon_plan::ControllerChannel::EpicFetus;
                     let controlled_target =
                         controlled_brim || controlled_technology || controlled_fetus || epic_fetus;
-                    let aim_step = if ordinary || controlled || controlled_tear || controlled_target {
+                    let aim_step = if let Some(step) = &technology2_step {
+                        Some(attack_runtime::ShootingAimStep {
+                            callback_aim: step.aim,
+                            db4_write: step.db4_write,
+                        })
+                    } else if ordinary || controlled || controlled_tear || controlled_target {
                         attack_runtime::ordinary_shooting_aim(
                             callback_aim,
                             buttons.held(),
@@ -3118,7 +3149,9 @@ impl Game {
                         }
                         shooting_aim_db4 = aim_step.db4_write;
                         let head_frame_request = if self.state.head_timer > 8 { 2 } else { 0 };
-                        if ordinary || controlled || controlled_tear || controlled_target {
+                        if !technology2_selected
+                            && (ordinary || controlled || controlled_tear || controlled_target)
+                        {
                             source_weapon_clock = true;
                             if controlled {
                                 attack_runtime::controlled_head_direction(
@@ -3154,14 +3187,26 @@ impl Game {
                             }
                         }
                         regular_plan = plan.regular;
-                        let outcome = attack_runtime::dispatch_player(
-                            &mut self.state,
-                            &plan,
-                            buttons,
-                            phase,
-                            aim_step.callback_aim,
-                        )?;
-                        // 519FC0 returns before the released idle D9C -> DA0 effect.
+                        let outcome = if technology2_selected
+                            && (!self.state.player.can_shoot
+                                || self.state.player_animation.guard
+                                || self
+                                    .state
+                                    .player_items
+                                    .as_ref()
+                                    .is_some_and(|items| items.pickup_animation_guard))
+                        {
+                            attack_runtime::DispatchOutcome::Handled
+                        } else {
+                            attack_runtime::dispatch_player(
+                                &mut self.state,
+                                &plan,
+                                buttons,
+                                phase,
+                                aim_step.callback_aim,
+                            )?
+                        };
+                        //519FC0 returns before the released idle D9C -> DA0 effect.
                         if controlled {
                             attack_runtime::controlled_idle_head(&mut self.state, buttons.held());
                         } else if controlled_tear {
@@ -3232,6 +3277,11 @@ impl Game {
         } else {
             false
         };
+
+        if let Some(step) = &technology2_step {
+            //The current idle/DB4 continuation survives primary admission failure.
+            technology2::idle_head(&mut self.state, step.buttons.held());
+        }
 
         let dx = if controls_enabled {
             i32::from(self.held("KeyD")) - i32::from(self.held("KeyA"))
