@@ -80,14 +80,32 @@ emits commands the browser bridge can send, plus adversarial variants of them
 over-budget ticks, stale music callbacks, key repeats and releases). Each case
 follows one persona (direct play, menu explorer or seeded run), sends
 browser-style host-timestamped frames (with jitter, hitches and rollbacks) or
-controlled steps, and steers by the published state: shortest grid routes to
-doors and reachable pickups, door-graph routes toward the boss room or the
-nearest unvisited room, demolishing rocks with bombs, aiming at NPCs, pausing,
-and answering the GameOver popup. Door-graph routes cross only the rooms the
-engine's own `traversal::admits` lets the player enter, so newly admitted rooms
-join the workload without a driver change. Rooms behind bombable secret doors
-and floors whose boss is Dingle are not yet reached, so Keepers and Dingle
-have no DST coverage.
+controlled steps, and steers by the published state. In a room it plays
+before it leaves:
+* It fights what is alive, lining up on one axis to fire along it. It keeps a
+  wider range against a boss and strafes across the boss's line.
+* It then collects every pickup the engine marks `can_collect`: pedestal
+  items, hearts, chests and consumables.
+* It also demolishes blocking rocks with bombs, pauses, uses active and pocket
+  items and answers the GameOver popup.
+
+Between rooms it follows door-graph routes toward the boss room or the nearest
+unvisited room. Routes cross only the rooms the engine's own
+`traversal::admits` lets the player enter, so newly admitted rooms join the
+workload without a driver change. A key opens a `KeyClosed` door on contact,
+and the driver bombs `Hidden` doors to reach secret rooms.
+
+No case has yet cleared a boss room. The closest long runs brought Monstro to
+54 of 250 HP and Gluttony to 37 before the player died, so boss deaths and
+their rewards have no DST coverage yet.
+
+Every report carries a coverage census: the room types, NPC kinds, pickups and
+game features (owned collectibles, secret reveals, boss clears) each case
+reached. The summary line names the implemented NPC kinds no case simulated
+(from `rebirth_cleanroom::implemented_npc_kinds`) and the room types that
+generated floors contained but no case entered. The census is a measurement,
+not a property. Must-hit properties and coverage tapes make the important
+branches binding.
 
 Beyond its invariants, every `game` tape is checked by:
 
@@ -167,12 +185,18 @@ invocation never fails for leaving some unmet. `--build-arg INSTRUMENT=1` adds
 Antithesis coverage instrumentation and needs the platform's `libvoidstar.so`
 at `antithesis/libvoidstar.so`.
 
+The platform is optional. Local runs (`npm run test:dst`) are the suite: they
+use the same SDK assertions and Antithesis's must-hit semantics, with seeded,
+replayable entropy, and every finding so far came from them. A platform run
+would add guided input search and far larger parallel exploration. Its fault
+injection and scheduling control add little to a single-threaded simulation
+without I/O.
+
 The binary embeds data compiled from the private original resources (room
 layouts and catalogues). Pushing the image to any external registry,
 Antithesis included, requires the repository owner's explicit approval. The
 entrypoint and both drivers run cleanly in the SDK's local mode
-(`ANTITHESIS_SDK_LOCAL_OUTPUT`); the platform's own evaluation remains to be
-done.
+(`ANTITHESIS_SDK_LOCAL_OUTPUT`).
 
 ## Extending
 
