@@ -147,16 +147,22 @@ for checking your own change.
 ## Adding an entity
 
 Most room entities need no new driver. Add a spec in
-[`entities/`](entities/) and it becomes the `entity-<name>` suite:
+[`entities/`](entities/) and the `entities` suite grades it. `entity-<name>` runs
+that spec alone, which is the per-entity inner loop:
 
 ```js
 export default { type: 12, variant: 0, about: 'Horf rooms: ...', count: 2, required: ['admission'] };
 ```
 
-[`entity-scenarios.py`](../original/entity-scenarios.py) finds OS-random rooms
-next to the start room that admit the entity. Both games then walk in and shoot
-around. [`entity-state-pair.mjs`](../foundation/entity-state-pair.mjs) compares
-the shared NPC, room, door and projectile fields exactly. The whole workflow is
+[`entities-scenarios.py`](../original/entities-scenarios.py) gives every spec its
+own contrived routes and OS-random rooms next to the start room that admit it
+(the rules in [`entity-scenarios.py`](../original/entity-scenarios.py), or the
+boss routes of [`boss-scenarios.py`](../original/boss-scenarios.py)). Specs
+share one seed stream, and a room that admits several of them is launched once
+and graded for each. Both games then walk in and shoot around. [`entity-state-pair.mjs`](../foundation/entity-state-pair.mjs) compares
+the shared NPC, room, door and projectile fields exactly, spec by spec. A spec
+whose rooms cannot be found fails the suite without hiding the others. The
+whole workflow is
 in [docs/content-pipeline.md](../../docs/content-pipeline.md).
 
 ## Large native captures

@@ -269,9 +269,12 @@ This runs on the suite registry (`tools/e2e/suites.mjs`) and the shared
   - the lifecycle markers both games must reach;
   - optional extra `[field, native, port]` rows.
 
-  `suites.mjs` turns every spec into one `entity-<name>` state-pair suite. No
-  other registration exists.
-- **Scenarios.** `tools/original/entity-scenarios.py --type T --variant V`
+  The `entities` suite runs every spec, and `entity-<name>` runs one spec alone.
+  No other registration exists.
+- **Scenarios.** `tools/original/entities-scenarios.py` builds every spec's
+  cases. Room specs share one OS-random seed stream, and a room admitting
+  several specs is one case graded for each; boss specs keep
+  `boss-scenarios.py`. For each spec, `entity-scenarios.py --type T --variant V`
   draws OS-random run seeds. It keeps those where a room next to the start
   admits the entity. "Admits" means the port's own floor generator and authored
   spawn selection pick that entity in the room; the `floor` binary reports this
