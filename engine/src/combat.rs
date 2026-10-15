@@ -313,6 +313,7 @@ impl ActorHealth {
 #[serde(rename_all = "camelCase")]
 pub enum DamageKind {
     Tear,
+    Knife,
     Bomb,
     FireContact,
     RoomEffect,
@@ -323,7 +324,7 @@ pub enum DamageKind {
 impl DamageKind {
     pub fn flags(self) -> u32 {
         match self {
-            Self::Tear => 0,
+            Self::Tear | Self::Knife => 0,
             Self::Bomb => 4,
             Self::FireContact => 2,
             Self::Laser => 8,

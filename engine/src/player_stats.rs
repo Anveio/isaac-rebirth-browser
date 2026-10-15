@@ -71,20 +71,19 @@ pub(crate) fn evaluate_cache(state: &mut State) -> Result<(), String> {
         return Ok(());
     };
     let requested = item_pipeline::CacheMask(owner.unevaluated_cache_flags);
-    let inputs = item_pipeline::ItemInputs::new(owner)?;
     let mut completed = 0;
     if let Some(source_type) = state.weapon_admission.source_player_type {
         let prior_primary = state.weapon_cache.primary;
         state.weapon_cache.primary = crate::weapon_plan::resolve_primary(
-            inputs,
+            item_pipeline::ItemInputs::new(owner)?,
             source_type,
             state.weapon_cache.primary,
             requested,
         )?;
         if requested.0 & 0x100 != 0 {
-            if state.weapon_cache.primary != prior_primary
-                && !state.weapon_admission.c18_is_known_empty
-            {
+            if crate::attack_runtime::complete_primary_cleanup(state, prior_primary)? {
+                completed |= 0x100;
+            } else if state.weapon_cache.primary != prior_primary {
                 state
                     .weapon_admission
                     .pending_primary_cleanup
@@ -93,17 +92,10 @@ pub(crate) fn evaluate_cache(state: &mut State) -> Result<(), String> {
                         to_primary: state.weapon_cache.primary,
                     });
             }
-            //513AF7 equal primary skips this invocation's C18 effect only.
-            //A previously unperformed cleanup persists independently of the
-            //current C08, including later equality or a new NULL assumption.
-            if state.weapon_admission.pending_primary_cleanup.is_none()
-                && (state.weapon_cache.primary == prior_primary
-                    || state.weapon_admission.c18_is_known_empty)
-            {
-                completed |= 0x100;
-            }
         }
     }
+    let inputs =
+        item_pipeline::ItemInputs::new(state.player_items.as_ref().expect("checked cache owner"))?;
     let resolved = item_pipeline::resolve_scalars(
         inputs,
         state.weapon_cache.primary,
