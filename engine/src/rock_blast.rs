@@ -49,7 +49,11 @@ pub fn advance_bomb_rocks(state: &mut State) -> Result<(), String> {
     });
     due.sort_unstable();
     for cell in due {
-        let grid = state.room.grid.as_mut().ok_or("bomb rock requires a room grid")?;
+        let grid = state
+            .room
+            .grid
+            .as_mut()
+            .ok_or("bomb rock requires a room grid")?;
         let rock = grid.cells[cell]
             .entity
             .as_mut()
