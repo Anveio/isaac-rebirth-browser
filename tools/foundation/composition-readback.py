@@ -124,7 +124,9 @@ def native_readback():
     expect(input_meta['declaredResourceHashes'], input_meta['declaredResourceHashesAfter'])
     expect(input_meta['declaredResourceHashes']['challengesXml'], digest(Path(case['fixture']['authoredResourcePath'])))
     if case['fixture'].get('specialRoomsPath'):
-        expect(input_meta['declaredResourceHashes']['specialRooms'], case['fixture']['specialRoomsSha256'])
+        expect(input_meta['declaredResourceHashes']['specialRooms'], digest(Path(case['fixture']['specialRoomsPath'])))
+        if 'specialRoomsSha256' in case['fixture']:
+            expect(input_meta['declaredResourceHashes']['specialRooms'], case['fixture']['specialRoomsSha256'])
     for frame in native['frames']:
         assert Path(frame['path']).is_file(), 'Actual original screenshot required'
 
@@ -189,7 +191,9 @@ def browser_readback():
     expect(browser['declaredResourceHashes']['challengesXml'], digest(Path(case['fixture']['authoredResourcePath'])))
     if case['fixture'].get('specialRoomsPath'):
         expect(bytes(resources['resources']['specialRooms']), Path(case['fixture']['specialRoomsPath']).read_bytes())
-        expect(browser['declaredResourceHashes']['specialRooms'], case['fixture']['specialRoomsSha256'])
+        expect(browser['declaredResourceHashes']['specialRooms'], digest(Path(case['fixture']['specialRoomsPath'])))
+        if 'specialRoomsSha256' in case['fixture']:
+            expect(browser['declaredResourceHashes']['specialRooms'], case['fixture']['specialRoomsSha256'])
     expect(set(resources), {'initialSeed', 'bootEpochSeed', 'resources'})
     expect(set(resources['resources']), {'challengesXml', 'specialRooms'} if case['fixture'].get('specialRoomsPath') else {'challengesXml'})
     assert browser['declaredFullResetJsonBytes'] <= 512 * 1024
