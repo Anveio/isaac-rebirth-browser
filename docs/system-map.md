@@ -99,6 +99,21 @@ The exact same-base PR269 public-WASM regression preserves 37,914,507 complete
 field comparisons and 416 positive-owned completion rows with zero differences.
 This is local regression evidence, not new original/browser acceptance.
 
+Merged [PR291](https://github.com/Anveio/isaac-rebirth-browser/pull/291) adds
+Libra304's coupled request expansion after primary selection and its
+post-callback balance before final clamps. Unsupported input callbacks keep the
+coupled outputs pending. Its own production, strict Clippy and floor checks pass;
+the local regression retains 37,956,648 fields with zero differences. Two fixed
+public-pedestal histories, 304→6 and 6→304, pass 503,611 scoped Native/public-WASM
+checks across 1,262 paired gates, including 186 post-grant rows. The first case
+lacks 631 Native Familiar-manager selections; its pending bit 512 is observed as 0,
+while the second case's actual empty manager matches. Actor identity, source
+variant/current color, physical/lifetime and browser/render parity remain open.
+Duplicates, partial requests, active clamps and item118 triples remain unexecuted.
+Current main `3080e8e2` contains the four qualified owned blobs; this does not claim
+a separately built whole-current-main artifact. Earlier evidence capsules and
+failed attempts remain unchanged.
+
 Merged PR262 carries authored whole Special STB resources through real startup
 and doorway factories. Its own production, strict Clippy and floor checks pass,
 as do six public-WASM startup/invalid-resource checks. These do not qualify
@@ -206,8 +221,8 @@ and old-v2 history 18,759/2,307 FAIL. Native has12 children versus0 in the port;
 the118-first transition to114 leaves typed primary cleanup unresolved. DOM/browser
 capture remains unexecuted, separate from earlier pregame guard stops.
 
-Separate Draft286 source executes the Knife-first114→118→329 route through
-public WASM. Its functional comparison fails11,158 of106,884 checks;12 child
+The retained PR297 snapshot describes Draft286 executing the Knife-first
+114→118→329 route through public WASM. Its functional comparison fails11,158 of106,884 checks;12 child
 births pair at actual gates and copied controls match, while all550 pre329 child
 position/velocity/angle rows and532 raw8A4 rows differ. A separate84/0 birth-law
 diagnostic uses each side's own actual8A4/8A8. The source consumes a shared-MT
@@ -217,6 +232,25 @@ later movement/nearest-parameter or random-stream alignment. Native24 lifecycle
 events/12 children,280 post329 controlled-parent differences and the new marker's
 missing helper remain separately scoped. Has118/controlled/Brim actor gameplay
 acceptance is pending.
+
+Subsequently, PR290 merged at `ce5033cf` and PR286 at `98b35534`.
+Main now uses one canonical NPC Laser record/store, shared Line layout and
+optional unknown fields, and executes ordinary Has118 subtype1 children through
+the existing Knife store. PR290 preserves 17 NPC callbacks and compares
+15,268,885 existing-State fields with zero differences; its three own builds
+pass. The scoped replay observes 43/86 Full rows and zero fast rows, retaining
+fast nonvacuity failures. Original comparisons remain 2,820/21,942 and
+2,831/23,070 differences with zero numeric Laser joins and no DOM acceptance.
+
+PR286's three own builds and 37,956,648-field local regular regression pass.
+The fixed route observes 12 same-gate child births and 614 body rows with matching
+copied Line, flags, damage and color; its universal 106,884/11,158 FAIL and the
+older v8 19,359/5,394 FAIL remain unchanged. The inherited shared-MT divergence
+already precedes child birth; later physical/parameter and controlled behavior
+remain unaccepted. Both recorded-OS attempts stopped at resource guards; the
+second reaches 610/748 presentations with an unfinished tape and full transport
+FAIL. No new DOM, history-helper, complete lifetime or triple parity follows.
+The PR297 evidence capsule remains an unchanged historical snapshot.
 
 Readiness287 passes a warm production retry and strict Clippy, but its floor
 build stopped at the working-memory floor. Its earlier production capacity stop

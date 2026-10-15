@@ -23,6 +23,7 @@ pub mod champions;
 pub mod chests;
 pub mod combat;
 mod content;
+mod controlled_knife;
 pub mod dingle;
 pub mod dips;
 mod doors;
@@ -2721,7 +2722,7 @@ impl Game {
                 && !self.state.stage_shooting_guard.active()
                 && self.state.player.controls_enabled
                 && self.state.player.input_cooldown <= 0;
-        let mut ordinary_source_clock = false;
+        let mut source_weapon_clock = false;
         let mut regular_plan = None;
         let mut shooting_aim_db4 = None;
         let regular_dispatch = if shoot_callback_admitted {
@@ -2745,7 +2746,9 @@ impl Game {
                         weapon_plan::ControllerChannel::OrdinaryKnife
                             | weapon_plan::ControllerChannel::ChargedBrimstone
                     );
-                    let aim_step = if ordinary {
+                    let controlled =
+                        plan.controller == weapon_plan::ControllerChannel::ControlledKnife;
+                    let aim_step = if ordinary || controlled {
                         attack_runtime::ordinary_shooting_aim(
                             callback_aim,
                             buttons.held(),
@@ -2758,15 +2761,30 @@ impl Game {
                                 .then_some(callback_aim),
                         })
                     };
-                    if let Some(aim_step) = aim_step {
+                    if let Some(mut aim_step) = aim_step {
+                        // 52F6B7 normalizes r13 before the callback and DB4 store.
+                        if controlled && knives::squared_length(aim_step.callback_aim) > 1.0 {
+                            aim_step.callback_aim = knives::normalized(aim_step.callback_aim);
+                            if aim_step.db4_write.is_some() {
+                                aim_step.db4_write = Some(aim_step.callback_aim);
+                            }
+                        }
                         shooting_aim_db4 = aim_step.db4_write;
                         let head_frame_request = if self.state.head_timer > 8 { 2 } else { 0 };
-                        if ordinary {
-                            ordinary_source_clock = true;
-                            attack_runtime::ordinary_head_direction(
-                                &mut self.state,
-                                aim_step.callback_aim,
-                            );
+                        if ordinary || controlled {
+                            source_weapon_clock = true;
+                            if controlled {
+                                attack_runtime::controlled_head_direction(
+                                    &mut self.state,
+                                    aim_step.callback_aim,
+                                    buttons.held(),
+                                )?;
+                            } else {
+                                attack_runtime::ordinary_head_direction(
+                                    &mut self.state,
+                                    aim_step.callback_aim,
+                                );
+                            }
                             if phase == phase::Phase::Update {
                                 if self.state.fire_cooldown >= 0 {
                                     self.state.fire_cooldown -= 1;
@@ -2784,6 +2802,10 @@ impl Game {
                             phase,
                             aim_step.callback_aim,
                         )?;
+                        // 519FC0 returns before the released idle D9C -> DA0 effect.
+                        if controlled {
+                            attack_runtime::controlled_idle_head(&mut self.state, buttons.held());
+                        }
                         if plan.controller == weapon_plan::ControllerChannel::ChargedBrimstone {
                             attack_runtime::ordinary_brimstone_idle_head(
                                 &mut self.state,
@@ -2877,10 +2899,10 @@ impl Game {
         self.state.player.shooting = aim.is_some() && !shooting_locked;
         if phase == phase::Phase::Update && !shooting_locked {
             self.state.player.head_frame = if self.state.head_timer > 8 { 2 } else { 0 };
-            if !ordinary_source_clock && self.state.fire_cooldown >= 0 {
+            if !source_weapon_clock && self.state.fire_cooldown >= 0 {
                 self.state.fire_cooldown -= 1;
             }
-            if !ordinary_source_clock && self.state.head_timer >= 0 {
+            if !source_weapon_clock && self.state.head_timer >= 0 {
                 self.state.head_timer -= 1;
             }
         }
