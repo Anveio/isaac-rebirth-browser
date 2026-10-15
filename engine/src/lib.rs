@@ -85,6 +85,7 @@ pub mod pickups;
 mod plain_npc;
 pub mod player_animation;
 pub mod player_costume118;
+pub mod player_costume229;
 pub mod player_death;
 pub mod player_items;
 pub mod player_save;
@@ -2828,6 +2829,7 @@ impl Game {
         }
         // Base main-sprite time advances before the Player death/shooting caller.
         player_items::advance_presentation(&mut self.state, phase);
+        player_costume229::begin_full(&mut self.state, phase);
         if player_death::advance(&mut self.state, phase) {
             return Ok(());
         }
@@ -2998,6 +3000,9 @@ impl Game {
                             }
                             player_costume118::sync_head(&mut self.state, head_frame_request)?;
                         }
+                        if plan.primary == weapon_plan::PrimaryWeaponC08::MonstrosLung {
+                            player_costume229::sync_head(&mut self.state, head_frame_request)?;
+                        }
                         outcome == attack_runtime::DispatchOutcome::RegularTear
                     } else {
                         self.state
@@ -3143,6 +3148,7 @@ impl Game {
         }
         player_items::advance_item_sprite(&mut self.state, phase);
         player_costume118::advance_full(&mut self.state, phase);
+        player_costume229::advance_full(&mut self.state, phase);
         if self.state.player.input_cooldown > 0 {
             self.state.player.input_cooldown -= 1;
         }

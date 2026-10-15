@@ -45,7 +45,7 @@ pub struct CostumeSprite {
     pub override_active: bool,
 }
 impl CostumeSprite {
-    fn stopped(clip: &str) -> Self {
+    pub(crate) fn stopped(clip: &str) -> Self {
         Self {
             clip: clip.into(),
             frame: 0.0,
@@ -53,35 +53,49 @@ impl CostumeSprite {
             override_active: false,
         }
     }
-    ///40FEF0/40EB30 selects the named clip and clamps to its final frame.
-    fn set_frame(&mut self, name: &str, frame: i32) {
+    pub(crate) fn set_frame_with_frames(&mut self, name: &str, frame: i32, frames: i32) {
         self.clip = name.into();
-        self.frame = frame.min(animation(name).frames - 1) as f32;
+        self.frame = frame.min(frames - 1) as f32;
         self.playing = false;
     }
-    ///40FD80 force=false does not restart an existing nonloop clip, including
-    ///its stopped final pose. A stopped loop or a changed name starts at0.
-    fn play(&mut self, name: &str) {
-        if self.clip != name || (animation(name).looping && !self.playing) {
+    pub(crate) fn play_with_looping(&mut self, name: &str, looping: bool) {
+        if self.clip != name || (looping && !self.playing) {
             self.clip = name.into();
             self.frame = 0.0;
             self.playing = true;
         }
+    }
+    pub(crate) fn advance_full_with_clip(&mut self, frames: i32, looping: bool) {
+        if !self.playing {
+            return;
+        }
+        self.frame += 1.0;
+        if self.frame.floor() >= frames as f32 {
+            if looping {
+                self.frame = 0.0;
+            } else {
+                self.frame = (frames - 1) as f32;
+                self.playing = false;
+            }
+        }
+    }
+    ///40FEF0/40EB30 selects the named clip and clamps to its final frame.
+    fn set_frame(&mut self, name: &str, frame: i32) {
+        self.set_frame_with_frames(name, frame, animation(name).frames);
+    }
+    ///40FD80 force=false does not restart an existing nonloop clip, including
+    ///its stopped final pose. A stopped loop or a changed name starts at0.
+    fn play(&mut self, name: &str) {
+        //Preserve the original metadata lookup short-circuit on a new name.
+        let looping = self.clip == name && animation(name).looping;
+        self.play_with_looping(name, looping);
     }
     fn advance_full(&mut self) {
         if !self.playing {
             return;
         }
         let clip = animation(&self.clip);
-        self.frame += 1.0; //Fresh Sprite+2D8 is1; no C0C-derived clock.
-        if self.frame.floor() >= clip.frames as f32 {
-            if clip.looping {
-                self.frame = 0.0;
-            } else {
-                self.frame = (clip.frames - 1) as f32;
-                self.playing = false;
-            }
-        }
+        self.advance_full_with_clip(clip.frames, clip.looping);
     }
 }
 
