@@ -77,6 +77,7 @@ pub mod run_admission;
 pub mod saved_game;
 pub mod seed;
 pub mod traversal;
+pub mod wall_hugger;
 mod weapon_plan;
 pub use bombs::{Bomb, Explosion};
 pub use effects::{Point, StageEffects};
@@ -138,6 +139,15 @@ pub struct Player {
     pub shooting_lock: u32,
     /// Actual Player+7d4 input gate, distinct from Entity+31d visibility.
     pub controls_enabled: bool,
+    /// Actual signed counters at 3068/306C. Unadmitted history remains absent.
+    #[serde(default)]
+    pub transformation_counts: Option<[i32; 2]>,
+    /// Actual Player D68 and Entity 340 cache outputs. These are independent
+    /// of Entity 344, which controls entity pair collisions.
+    #[serde(default)]
+    pub flying: Option<bool>,
+    #[serde(default)]
+    pub grid_collision_class: Option<u32>,
     pub eye: projectiles::Eye,
     /// Actual Player+c84, independent of manager tear handles.
     pub shots_fired: u32,
@@ -167,6 +177,9 @@ impl Player {
             shooting: false,
             shooting_lock: 0,
             controls_enabled: true,
+            transformation_counts: None,
+            flying: None,
+            grid_collision_class: None,
             eye: projectiles::Eye::Positive,
             shots_fired: 0,
             // Authored sprite roots and shadow centers are one logical pixel
@@ -302,7 +315,7 @@ impl RunIntroduction {
 }
 /// HUD boss bar: SetFill 5732a0 at HUD+61894 (-1 hidden) and its flash
 /// countdown at +61898; the manager's non-shrinking boss max HP is +ec.
-#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct BossBar {
     #[serde(with = "nan_as_null")]
@@ -322,6 +335,16 @@ mod nan_as_null {
     }
     pub fn deserialize<'de, D: Deserializer<'de>>(deserializer: D) -> Result<f32, D::Error> {
         Ok(Option::<f32>::deserialize(deserializer)?.unwrap_or(f32::NAN))
+    }
+}
+/// The 0/0 fill is NaN, and any two NaN fills are the same bar, so state
+/// equality stays reflexive. NaN sign and payload are not compared: native and
+/// wasm32 may produce different NaN bits for 0/0, and JSON keeps neither.
+impl PartialEq for BossBar {
+    fn eq(&self, other: &Self) -> bool {
+        (self.fill == other.fill || (self.fill.is_nan() && other.fill.is_nan()))
+            && self.flash == other.flash
+            && self.maximum == other.maximum
     }
 }
 impl Default for BossBar {
@@ -1299,6 +1322,12 @@ impl Game {
         self.state.boss_bar = BossBar::default();
         self.state.pause_menu = PauseMenu::hidden();
         self.state.player = Player::starting();
+        // 519767/519771 initialize the two transformation history counters.
+        self.state.player.transformation_counts = Some([0, 0]);
+        // 51987A initializes D68 to false. Base/config 446A90 independently
+        // initializes the authored Player's 40-point grid collision class to 5.
+        self.state.player.flying = Some(false);
+        self.state.player.grid_collision_class = Some(5);
         if let Some(definition) = &challenge {
             challenges::configure_player(&mut self.state, definition)?;
         }
@@ -1993,6 +2022,7 @@ impl Game {
         grid_hazards::advance(&mut self.state, phase)?;
         let existing = self.state.actor_scheduler.full_phase();
         if phase == phase::Phase::Update {
+            rock_blast::advance_bomb_rocks(&mut self.state)?;
             rock_blast::advance_markers(&mut self.state);
             self.refresh_room_boss_count();
             let mut counted = actors::FullCounts::default();

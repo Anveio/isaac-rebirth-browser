@@ -56,12 +56,38 @@ export function roomRows(rows, source, actual) {
   check(rows, 'hud.bossBarFlash', source.bossBar?.flash, actual.bossBar?.flash);
   for (const field of ['countablePending', 'countableCurrent', 'bossPending', 'bossCurrent'])
     check(rows, `manager.${field}`, source.room[field], actual.room.managerCounts?.[field]);
+  // Admitted grid objects: Block3, Tinted Rock4 and Pit7 (autotile frame).
+  for (const cell of source.grid.filter(cell => [3, 4, 7].includes(cell.type))) {
+    const port = actual.room.grid?.cells[cell.index]?.entity;
+    check(rows, `grid${cell.index}`, [cell.type, cell.variant, cell.state, cell.collisionClass],
+      port && [port.kind, port.variant, port.state, port.collisionClass]);
+  }
   for (const door of source.grid.filter(cell => cell.type === 16)) {
     const port = actual.room.grid?.cells[door.index]?.entity;
     check(rows, `door${door.index}.state`, door.state, port?.state);
     check(rows, `door${door.index}.class`, door.collisionClass, port?.collisionClass);
   }
 }
+
+/** Collision class of the grid cell under a point (GetGridIndex: 40-unit
+ * cells from (20,100)); a port cell without an entity falls back to its
+ * authored selector like Grid::collision. */
+function cellClass(cells, width, height, point) {
+  const column = Math.floor((point[0] - 20) / 40), row = Math.floor((point[1] - 100) / 40);
+  if (column < 0 || row < 0 || column >= width || row >= height) return 4;
+  return cells(row * width + column);
+}
+const nativeCellClass = (source, point) => {
+  const byIndex = new Map(source.grid.map(cell => [cell.index, cell.collisionClass]));
+  return cellClass(index => byIndex.get(index) ?? 0, source.room.gridWidth, source.room.gridHeight, point);
+};
+const portCellClass = (actual, point) => {
+  const grid = actual.room.grid;
+  return grid && cellClass(index => {
+    const cell = grid.cells[index];
+    return cell.entity ? cell.entity.collisionClass : cell.selector === 3000 ? 1 : cell.selector >= 1000 ? 3 : 0;
+  }, grid.width, grid.height, point);
+};
 
 /** Every authored NPC in the room, by identity and spawn seed, then each
  * selected actor's shared fields plus the spec's own rows. */
@@ -82,7 +108,10 @@ export function entityRows(rows, source, actual, spec, render) {
   const rock = cell => ROCK_ANIMATIONS[cell.type] && cell.state === 1 &&
     (cell.type === 2 && cell.variant >= 1000 ? [cell.index, cell.type, 'big', cell.variant - 1000] : [cell.index, cell.type, ROCK_ANIMATIONS[cell.type], cell.variant]);
   check(rows, 'render.rocks', source.grid.map(rock).filter(Boolean),
-    render?.grid.map(drawn => [drawn.index, drawn.kind, drawn.animation, drawn.frame]));
+    render?.grid.filter(drawn => drawn.kind !== 7).map(drawn => [drawn.index, drawn.kind, drawn.animation, drawn.frame]));
+  // Pit Render draws `pit` frame variant (the autotile frame 5684c0 stores).
+  check(rows, 'render.pits', source.grid.filter(cell => cell.type === 7).map(cell => [cell.index, 'pit', cell.variant]),
+    render?.grid.filter(drawn => drawn.kind === 7).map(drawn => [drawn.index, drawn.animation, drawn.frame]));
   for (const [field, expected, observed] of spec.roomFields?.(source, actual, phase) ?? []) check(rows, field, expected, observed);
   const selected = npcs.filter(actor => spec.matches(actor.type, actor.variant));
   for (const native of selected) {
@@ -91,6 +120,10 @@ export function entityRows(rows, source, actual, spec, render) {
     const name = `${spec.name}${native.spawnSeed}`;
     for (const [field, expected, observed] of [...npcFields(native, actor, phase), ...(spec.fields?.(native, actor, phase) ?? [])])
       check(rows, `${name}.${field}`, expected, observed);
+    // A ground walker (class5) never stands inside a solid grid cell (#229).
+    if (native.gridCollisionClass === 5)
+      check(rows, `${name}.insideSolid`, nativeCellClass(source, vector(native.position)) !== 0,
+        portCellClass(actual, vector(actor.position)) !== 0);
     // Every drawn NPC uses the source sprite Scale (+2c4), 1:1 in logical
     // pixels; only positions take the 0.65 world projection.
     const drawn = render?.npcs.find(candidate => candidate.kind === native.type && candidate.spawnSeed === native.spawnSeed);

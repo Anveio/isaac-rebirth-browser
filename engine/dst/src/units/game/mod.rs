@@ -11,6 +11,7 @@ mod invariants;
 
 use crate::entropy::Entropy;
 use crate::harness::{self, Case};
+use crate::json_diff;
 use crate::props;
 use crate::tape::Tape;
 use rebirth_cleanroom::{Command, Game, State};
@@ -77,6 +78,50 @@ fn digest(state: &State) -> u64 {
         .expect("state serializes")
         .hash(&mut hasher);
     hasher.finish()
+}
+
+/// Names what a lossy round trip lost: the first JSON pointer where the
+/// re-serialized value differs from the original text or, when both texts
+/// agree, where the values' `Debug` forms first differ (a skipped field, or a
+/// NaN that serializes as `null`).
+fn round_trip_difference<T: std::fmt::Debug>(
+    original: &str,
+    round_tripped: Option<&str>,
+    value: &T,
+    restored: Option<&T>,
+) -> serde_json::Value {
+    let (Some(round_tripped), Some(restored)) = (round_tripped, restored) else {
+        return serde_json::Value::Null;
+    };
+    let (Ok(original), Ok(round_tripped)) = (
+        serde_json::from_str::<serde_json::Value>(original),
+        serde_json::from_str::<serde_json::Value>(round_tripped),
+    ) else {
+        return serde_json::Value::Null;
+    };
+    match json_diff::first(&original, &round_tripped) {
+        Some((path, original, round_tripped)) => {
+            json!({ "path": path, "original": original, "roundTripped": round_tripped })
+        }
+        None => {
+            let (value, restored) = (format!("{value:?}"), format!("{restored:?}"));
+            let at = value
+                .char_indices()
+                .zip(restored.chars())
+                .find(|((_, a), b)| a != b)
+                .map_or(value.len().min(restored.len()), |((index, _), _)| index);
+            let window = |text: &str| {
+                let start = text.floor_char_boundary(at.saturating_sub(160));
+                let end = text.ceil_char_boundary((at + 80).min(text.len()));
+                text[start..end].to_owned()
+            };
+            json!({
+                "identicalJson": true,
+                "value": window(&value),
+                "restored": window(&restored),
+            })
+        }
+    }
 }
 
 fn command_engine(game: &mut Game, command: Command) -> Result<Result<(), String>, String> {
@@ -165,21 +210,44 @@ impl Simulation {
     fn snapshot_round_trip(&self) {
         let text = self.game.json();
         let restored = serde_json::from_str::<State>(&text);
-        let stable = restored
+        let republished = restored
             .as_ref()
             .ok()
-            .map(|state| serde_json::to_string(state).ok() == Some(text.clone()));
+            .and_then(|state| serde_json::to_string(state).ok());
+        let lossless = restored.as_ref().ok() == Some(&self.game.state)
+            && republished.as_deref() == Some(text.as_str());
         props::always!(
-            restored.as_ref().ok() == Some(&self.game.state) && stable == Some(true),
+            lossless,
             "game: published states round-trip losslessly through their validators",
-            json!({ "error": restored.err().map(|error| error.to_string()) })
+            json!({
+                "error": restored.as_ref().err().map(|error| error.to_string()),
+                "difference": (!lossless).then(|| round_trip_difference(
+                    &text,
+                    republished.as_deref(),
+                    &self.game.state,
+                    restored.as_ref().ok(),
+                )),
+            })
         );
         let game_text = serde_json::to_string(&self.game).expect("game serializes");
         let restored = serde_json::from_str::<Game>(&game_text);
+        let lossless = restored.as_ref().ok() == Some(&self.game);
+        let reserialized = restored
+            .as_ref()
+            .ok()
+            .and_then(|game| serde_json::to_string(game).ok());
         props::always!(
-            restored.as_ref().ok() == Some(&self.game),
+            lossless,
             "game: complete games round-trip losslessly through their validators",
-            json!({ "error": restored.err().map(|error| error.to_string()) })
+            json!({
+                "error": restored.as_ref().err().map(|error| error.to_string()),
+                "difference": (!lossless).then(|| round_trip_difference(
+                    &game_text,
+                    reserialized.as_deref(),
+                    &self.game,
+                    restored.as_ref().ok(),
+                )),
+            })
         );
     }
 

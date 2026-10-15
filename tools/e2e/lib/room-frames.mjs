@@ -213,7 +213,7 @@ async function runCase({ suite, item, scenarios, directory, browser, server, cas
       stateHistoryTruncationReason: trace.stateHistoryTruncationReason, inputEncodedBytes: trace.inputEncodedBytes,
       stateEncodedBytes: trace.stateEncodedBytes, backendEvents: trace.backendEvents.length, completeStateRecords: trace.states.length };
     assertInputProvenance(trace, expected, item.seedValue, scenarios.bootEpochSeed);
-    Object.assign(caseResult, suite.finish({ states, last: states.at(-1), track, detonation }) ?? {});
+    Object.assign(caseResult, suite.finish({ item, states, last: states.at(-1), track, detonation }) ?? {});
     assert.deepEqual(errors, []);
   } finally {
     Object.assign(caseResult, { comparedPresentations: compared, passedPresentations: passed, detonation, ...suite.summary?.(track) });
