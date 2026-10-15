@@ -20,6 +20,66 @@ def file_digest(path):
     return size, digest.hexdigest()
 
 
+class JournalValues:
+    """One final manifest array, streamed from its already committed journal.
+
+    The recorder owns the writer until close. No observation is cached here;
+    every decoded value exists only while the JSON encoder consumes that row.
+    """
+    def __init__(self, progress, kind):
+        self.progress = progress
+        self.kind = kind
+
+    def __iter__(self):
+        progress = self.progress
+        if not progress.stream.closed:
+            raise ValueError('Close native progress before streaming manifest arrays')
+        if file_digest(progress.path) != (progress.archive_bytes, progress.archive_digest.hexdigest()):
+            raise ValueError('Native progress has an uncommitted tail or changed archive')
+        raw_hash = hashlib.sha256()
+        raw_bytes = records = 0
+        with gzip.open(progress.path, 'rb') as stream:
+            for raw in stream:
+                raw_hash.update(raw)
+                raw_bytes += len(raw)
+                records += 1
+                row = json.loads(raw)
+                if row['kind'] == self.kind:
+                    yield row['value']
+        if (records, raw_bytes, raw_hash.hexdigest()) != (
+                progress.records, progress.raw_bytes, progress.raw_digest.hexdigest()):
+            raise ValueError('Native progress array read is incomplete or changed')
+
+
+def manifest_chunks(report):
+    """Keep the existing pretty-JSON bytes, including lazy top-level arrays."""
+    encoder = json.JSONEncoder(indent=2)
+    if not isinstance(report, dict) or not any(isinstance(value, JournalValues) for value in report.values()):
+        yield from encoder.iterencode(report)
+        return
+    if not all(isinstance(key, str) for key in report):
+        raise ValueError('Native manifest field names must be strings')
+    yield '{'
+    for index, (key, value) in enumerate(report.items()):
+        yield ',\n' if index else '\n'
+        yield '  ' + encoder.encode(key) + ': '
+        if isinstance(value, JournalValues):
+            yield '['
+            first = True
+            for row in value:
+                yield '\n    ' if first else ',\n    '
+                first = False
+                for text in encoder.iterencode(row):
+                    yield text.replace('\n', '\n    ')
+            if not first:
+                yield '\n  '
+            yield ']'
+        else:
+            for text in encoder.iterencode(value):
+                yield text.replace('\n', '\n  ')
+    yield '\n}'
+
+
 def write_manifest(path, report):
     """Decompression is byte-identical to json.dumps(report, indent=2)+'\n'."""
     temporary = path.with_name(path.name + '.part')
@@ -29,7 +89,7 @@ def write_manifest(path, report):
         with gzip.GzipFile(filename='', fileobj=output, mode='wb', compresslevel=1, mtime=0) as archive:
             pending = []
             buffered = 0
-            for text in json.JSONEncoder(indent=2).iterencode(report):
+            for text in manifest_chunks(report):
                 chunk = text.encode('utf8')
                 digest.update(chunk)
                 size += len(chunk)

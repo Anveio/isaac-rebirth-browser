@@ -127,10 +127,12 @@ pub(crate) fn dispatch_player(
         ControllerChannel::ChargedBrimstone => {
             crate::brimstone::dispatch_player(state, plan, input, phase, callback_aim)
         }
+        ControllerChannel::ControlledTear => {
+            crate::controlled_tear::dispatch(state, input, phase, callback_aim)
+        }
         unsupported => {
             let channel = match unsupported {
                 ControllerChannel::ControlledBrimstone => "controlledBrimstone",
-                ControllerChannel::ControlledTear => "controlledTear",
                 ControllerChannel::Unimplemented(_) => "unimplementedPrimary",
                 _ => unreachable!("implemented controller matched above"),
             };
@@ -703,6 +705,7 @@ pub(crate) fn remove_referenced_actor(state: &mut State, actor: ActorRef) -> Res
                 .ok_or("registered Laser handle is unresolved")?
                 .remove();
         }
+        ActorKind::Tear => crate::controlled_tear::remove(state, actor.id)?,
         _ => return Err("referenced attack actor has no admitted Remove callback".into()),
     }
     Ok(())
@@ -715,6 +718,10 @@ pub(crate) fn replace_c18(state: &mut State, actor: Option<ActorRef>) -> Result<
         let admitted = match actor.kind {
             ActorKind::Knife => state.knives.iter().any(|knife| knife.id == actor.id),
             ActorKind::Laser => state.lasers.iter().any(|laser| laser.id == actor.id),
+            ActorKind::Tear => state
+                .tears
+                .iter()
+                .any(|tear| tear.id == actor.id && tear.controlled.is_some()),
             _ => false,
         };
         if !admitted {
@@ -1142,7 +1149,12 @@ pub(crate) fn complete_primary_cleanup(
         return Ok(true);
     }
     match state.attack_runtime.persistent {
-        Some(actor) if matches!(actor.kind, ActorKind::Knife | ActorKind::Laser) => {
+        Some(actor)
+            if matches!(
+                actor.kind,
+                ActorKind::Knife | ActorKind::Laser | ActorKind::Tear
+            ) =>
+        {
             remove_referenced_actor(state, actor)?;
             //Virtual48 preserves the registered C18 until actual Uninit.
             Ok(true)

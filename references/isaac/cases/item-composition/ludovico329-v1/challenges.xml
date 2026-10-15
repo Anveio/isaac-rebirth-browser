@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='utf-8'?>
+<challenges version="1">
+	<challenge name="Pitch Black" id="1" endstage="6" cursefilter="127" getcurse="0" startingitems="329" />
+	<challenge name="High Brow" id="2" startingitems="209,6,236,291" startingtrinkets="2" endstage="6" roomfilter="4" />
+	<challenge name="Head Trauma" id="3" startingitems="233,330,201,90" endstage="6" roomfilter="4" />
+	<challenge name="Darkness Falls" id="4" startingitems="126,259,51,172" endstage="9" roomfilter="4" playertype="5" achievements="42,34" altpath="false" />
+	<challenge name="The Tank" id="5" startingitems="314,129,242" endstage="6" roomfilter="4" playertype="1" achievements="1" />
+	<challenge name="Solar System" id="6" startingitems="57,128,10,20" endstage="8" roomfilter="4" achievements="8" canshoot="false" />
+	<challenge name="Suicide King" id="7" startingitems="149,5,106" endstage="9" roomfilter="4" altpath="true" playertype="8" achievements="80,34" />
+	<challenge name="Cat Got Your Tongue" id="8" startingitems="134,145,187" endstage="6" roomfilter="4" achievements="65" soulhp="6" blackhp="6" canshoot="false" />
+	<challenge name="Demo Man" id="9" startingitems="52,137" startingtrinkets="41" endstage="8" roomfilter="4" achievements="11" />
+	<challenge name="Cursed!" id="10" startingitems="54,21,246,16" startingtrinkets="34" endstage="6" getcurse="16" playertype="1" achievements="1" />
+	<challenge name="Glass Cannon" id="11" startingitems="168,87" endstage="9" roomfilter="4" achievements="15,62,34,3" altpath="false" playertype="3" />
+	<challenge name="When Life Gives You Lemons" id="12" startingitems="56,156,116" startingpill="26" endstage="6" roomfilter="4" />
+	<challenge name="BEANS!" id="13" startingitems="209,190,180,111,116" endstage="6" roomfilter="4" canshoot="false" />
+	<challenge name="Its In The Cards" id="14" startingitems="251,85,116,63" startingcard="-1" endstage="6" roomfilter="4" />
+	<challenge name="Slow Roll" id="15" startingitems="169,48,5" endstage="6" roomfilter="4" maxdamage="true" minfirerate="true" minshotspeed="true" />
+	<challenge name="Computer Savy" id="16" startingitems="68,152,3" endstage="6" roomfilter="4" />
+	<challenge name="WAKA WAKA" id="17" startingitems="315,222" endstage="6" roomfilter="4" />
+	<challenge name="The Host" id="18" startingitems="151,211" startingtrinkets="53" endstage="6" roomfilter="4" />
+	<challenge name="The Family Man" id="19" startingitems="175,67,8,268,247" endstage="9" roomfilter="4" canshoot="false" altpath="true" achievements="34,58" />
+	<challenge name="Purist" id="20" endstage="8" roomfilter="4" achievements="4" />
+</challenges>

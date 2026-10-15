@@ -1,0 +1,740 @@
+{
+  "schema": 1,
+  "cases": [
+    {
+      "name": "ludovico329-motion-phase0-v1",
+      "fixture": {
+        "kind": "source-authored-modified-challenge",
+        "challengeId": 1,
+        "startingItems": [
+          329
+        ],
+        "view": "item-only",
+        "baselineResourcePath": "../../rebirth/resources/challenges.xml",
+        "authoredResourcePath": "ludovico329-v1/challenges.xml",
+        "specialRoomsPath": "ludovico329-v1/motion.stb",
+        "specialRoomsSha256": "daacc0812ebb2fb44ce35f30fddafd9c25799156552633f8108fcb7f4b84761c",
+        "attributeChanges": [
+          {
+            "attribute": "getcurse",
+            "baselineValue": "9",
+            "authoredValue": "0"
+          },
+          {
+            "attribute": "cursefilter",
+            "baselineValue": "6",
+            "authoredValue": "127"
+          },
+          {
+            "attribute": "roomfilter",
+            "baselineValue": "2",
+            "authoredValue": null
+          },
+          {
+            "attribute": "startingitems",
+            "baselineValue": null,
+            "authoredValue": "329"
+          }
+        ],
+        "startRoomSpawnChange": {
+          "catalogue": 0,
+          "index": 80,
+          "operation": "replace only this row spawns",
+          "baseline": [
+            {
+              "x": 10,
+              "y": 2,
+              "entries": [
+                {
+                  "type": 0,
+                  "variant": 20,
+                  "subtype": 0,
+                  "weight": 1.0
+                }
+              ]
+            },
+            {
+              "x": 9,
+              "y": 4,
+              "entries": [
+                {
+                  "type": 0,
+                  "variant": 20,
+                  "subtype": 0,
+                  "weight": 1.0
+                }
+              ]
+            }
+          ],
+          "authored": [],
+          "allOtherRowsMetadataDoorsWeightsOrderPreserved": true
+        },
+        "declaredResetJsonBytes": 277497
+      },
+      "bootEpochSeed": 12713,
+      "initialPhaseOffset": 0,
+      "entropy": "fixed public declaration",
+      "actions": [
+        {
+          "label": "released-birth",
+          "keys": [],
+          "presentations": 12
+        },
+        {
+          "label": "held-first-axis",
+          "keys": [
+            "Right"
+          ],
+          "presentations": 60
+        },
+        {
+          "label": "released-return",
+          "keys": [],
+          "presentations": 40
+        },
+        {
+          "label": "canceled-held",
+          "keys": [
+            "Right",
+            "Left"
+          ],
+          "presentations": 18
+        },
+        {
+          "label": "held-opposite-axis",
+          "keys": [
+            "Left"
+          ],
+          "presentations": 90
+        },
+        {
+          "label": "vertical-steering",
+          "keys": [
+            "Up"
+          ],
+          "presentations": 40
+        },
+        {
+          "label": "final-release",
+          "keys": [],
+          "presentations": 40
+        }
+      ],
+      "requires": {
+        "actualPublicChallengeEntry": true,
+        "bothGamesConsumeIdenticalDeclaredResourceBytes": true,
+        "ownedCounts": [
+          {
+            "itemId": 329,
+            "count": 1
+          }
+        ],
+        "actualCachePendingFlags": 0,
+        "sourceExpectedActorContract": {
+          "primaryC08": 8,
+          "family": 2,
+          "variant": 0,
+          "subtype": 0,
+          "controlledBy329": true,
+          "registeredC18DuringActualLifetime": true,
+          "managerRoomPersistent": false,
+          "requiredWhen": "actual admitted519FC0 callback, including released first birth"
+        },
+        "actualProperties": [
+          "own actor identity/spawn seed and registered ParentPlayer/C18",
+          "birth48C=83C; born specialscale retained while actual periodic48C/CA0/flags refresh separately",
+          "Full/Fast physical position, velocity, saved450/B28/currentfriction and phase",
+          "held, canceled-held and released controls plus DB4/D9C/head/C0C",
+          "actual registry clear/first and repeated contact, queue then later receiver drain; no generic impulse or TearDying"
+        ],
+        "contactCoverage": [],
+        "unknownDiagnosticOrMissingCoverageIsFailure": true,
+        "canonicalDiagnosticOwner": "weaponAdmission.unadmittedController must be present and null",
+        "actualPendingPrimaryCleanup": "must be present and null",
+        "preserveAllIdentitySeedRngInitNumericFamilyAndCoverageMismatches": true
+      },
+      "execution": {
+        "status": "not-executed",
+        "prerequisites": [
+          "actual main301/298 and owned immutable307 composition producer",
+          "Owner build/game/resource lease",
+          "strict actual source/port getters; absent fields fail"
+        ],
+        "unqualifiedScopes": [
+          "full copied EntityRef queue history",
+          "shotOrdinal remains unknown, no factory sequence substitute",
+          "rendering and whole-case parity",
+          "nonempty4A0/other modifiers/nontrivial grid receiver",
+          "primary-change Remove/Uninit requires a separate real acquisition route; no natural TTL invented"
+        ]
+      }
+    },
+    {
+      "name": "ludovico329-contact-phase1-v1",
+      "fixture": {
+        "kind": "source-authored-modified-challenge",
+        "challengeId": 1,
+        "startingItems": [
+          329
+        ],
+        "view": "item-only",
+        "baselineResourcePath": "../../rebirth/resources/challenges.xml",
+        "authoredResourcePath": "ludovico329-v1/challenges.xml",
+        "specialRoomsPath": "ludovico329-v1/contact.stb",
+        "specialRoomsSha256": "27f48837b097db6c0d12c407a01d645e6050693ca43da463cbfa75cb4ac4eaf4",
+        "attributeChanges": [
+          {
+            "attribute": "getcurse",
+            "baselineValue": "9",
+            "authoredValue": "0"
+          },
+          {
+            "attribute": "cursefilter",
+            "baselineValue": "6",
+            "authoredValue": "127"
+          },
+          {
+            "attribute": "roomfilter",
+            "baselineValue": "2",
+            "authoredValue": null
+          },
+          {
+            "attribute": "startingitems",
+            "baselineValue": null,
+            "authoredValue": "329"
+          }
+        ],
+        "startRoomSpawnChange": {
+          "catalogue": 0,
+          "index": 80,
+          "operation": "replace only this row spawns",
+          "baseline": [
+            {
+              "x": 10,
+              "y": 2,
+              "entries": [
+                {
+                  "type": 0,
+                  "variant": 20,
+                  "subtype": 0,
+                  "weight": 1.0
+                }
+              ]
+            },
+            {
+              "x": 9,
+              "y": 4,
+              "entries": [
+                {
+                  "type": 0,
+                  "variant": 20,
+                  "subtype": 0,
+                  "weight": 1.0
+                }
+              ]
+            }
+          ],
+          "authored": [
+            {
+              "x": 4,
+              "y": 3,
+              "entries": [
+                {
+                  "type": 14,
+                  "variant": 0,
+                  "subtype": 0,
+                  "weight": 1.0
+                }
+              ]
+            },
+            {
+              "x": 8,
+              "y": 3,
+              "entries": [
+                {
+                  "type": 18,
+                  "variant": 0,
+                  "subtype": 0,
+                  "weight": 1.0
+                }
+              ]
+            }
+          ],
+          "allOtherRowsMetadataDoorsWeightsOrderPreserved": true
+        },
+        "declaredResetJsonBytes": 277565
+      },
+      "bootEpochSeed": 12713,
+      "initialPhaseOffset": 1,
+      "entropy": "fixed public declaration",
+      "actions": [
+        {
+          "label": "released-birth",
+          "keys": [],
+          "presentations": 12
+        },
+        {
+          "label": "held-first-axis",
+          "keys": [
+            "Right"
+          ],
+          "presentations": 60
+        },
+        {
+          "label": "released-return",
+          "keys": [],
+          "presentations": 40
+        },
+        {
+          "label": "canceled-held",
+          "keys": [
+            "Right",
+            "Left"
+          ],
+          "presentations": 18
+        },
+        {
+          "label": "held-opposite-axis",
+          "keys": [
+            "Left"
+          ],
+          "presentations": 90
+        },
+        {
+          "label": "vertical-steering",
+          "keys": [
+            "Up"
+          ],
+          "presentations": 40
+        },
+        {
+          "label": "final-release",
+          "keys": [],
+          "presentations": 40
+        }
+      ],
+      "requires": {
+        "actualPublicChallengeEntry": true,
+        "bothGamesConsumeIdenticalDeclaredResourceBytes": true,
+        "ownedCounts": [
+          {
+            "itemId": 329,
+            "count": 1
+          }
+        ],
+        "actualCachePendingFlags": 0,
+        "sourceExpectedActorContract": {
+          "primaryC08": 8,
+          "family": 2,
+          "variant": 0,
+          "subtype": 0,
+          "controlledBy329": true,
+          "registeredC18DuringActualLifetime": true,
+          "managerRoomPersistent": false,
+          "requiredWhen": "actual admitted519FC0 callback, including released first birth"
+        },
+        "actualProperties": [
+          "own actor identity/spawn seed and registered ParentPlayer/C18",
+          "birth48C=83C; born specialscale retained while actual periodic48C/CA0/flags refresh separately",
+          "Full/Fast physical position, velocity, saved450/B28/currentfriction and phase",
+          "held, canceled-held and released controls plus DB4/D9C/head/C0C",
+          "actual registry clear/first and repeated contact, queue then later receiver drain; no generic impulse or TearDying"
+        ],
+        "contactCoverage": [
+          {
+            "receiverType": 14,
+            "firstRegistryHit": true,
+            "damageQueueAndLaterDrain": true,
+            "sourceSpecificHalfTearVelocityCallback": true,
+            "repeatedRegistryHitSkipsBothUntilRealClear": true
+          },
+          {
+            "receiverType": 18,
+            "firstRegistryHit": true,
+            "damageQueueAndLaterDrain": true,
+            "sourceSpecificHalfTearVelocityCallback": true,
+            "repeatedRegistryHitSkipsBothUntilRealClear": true
+          }
+        ],
+        "unknownDiagnosticOrMissingCoverageIsFailure": true,
+        "canonicalDiagnosticOwner": "weaponAdmission.unadmittedController must be present and null",
+        "actualPendingPrimaryCleanup": "must be present and null",
+        "preserveAllIdentitySeedRngInitNumericFamilyAndCoverageMismatches": true,
+        "controlledTearContact": {
+          "receiverTypes": [
+            14,
+            18
+          ],
+          "sourceEntityType": 2,
+          "sourceVariant": 0,
+          "damageFlags": 0,
+          "countdown": 30,
+          "minimumAcceptedEnqueuesPerGame": 1,
+          "minimumNextFullDamageApplicationsPerGame": 1,
+          "firstRegistryHit": true,
+          "bit33Veto": true,
+          "halfTearVelocityReceiverTypes": [
+            14,
+            18
+          ]
+        }
+      },
+      "execution": {
+        "status": "not-executed",
+        "prerequisites": [
+          "actual main301/298 and owned immutable307 composition producer",
+          "Owner build/game/resource lease",
+          "strict actual source/port getters; absent fields fail"
+        ],
+        "unqualifiedScopes": [
+          "full copied EntityRef queue history",
+          "shotOrdinal remains unknown, no factory sequence substitute",
+          "rendering and whole-case parity",
+          "nonempty4A0/other modifiers/nontrivial grid receiver",
+          "primary-change Remove/Uninit requires a separate real acquisition route; no natural TTL invented"
+        ]
+      }
+    },
+    {
+      "name": "ludovico329-os-0-v1",
+      "fixture": {
+        "kind": "source-authored-modified-challenge",
+        "challengeId": 1,
+        "startingItems": [
+          329
+        ],
+        "view": "item-only",
+        "baselineResourcePath": "../../rebirth/resources/challenges.xml",
+        "authoredResourcePath": "ludovico329-v1/challenges.xml",
+        "specialRoomsPath": "ludovico329-v1/motion.stb",
+        "specialRoomsSha256": "daacc0812ebb2fb44ce35f30fddafd9c25799156552633f8108fcb7f4b84761c",
+        "attributeChanges": [
+          {
+            "attribute": "getcurse",
+            "baselineValue": "9",
+            "authoredValue": "0"
+          },
+          {
+            "attribute": "cursefilter",
+            "baselineValue": "6",
+            "authoredValue": "127"
+          },
+          {
+            "attribute": "roomfilter",
+            "baselineValue": "2",
+            "authoredValue": null
+          },
+          {
+            "attribute": "startingitems",
+            "baselineValue": null,
+            "authoredValue": "329"
+          }
+        ],
+        "startRoomSpawnChange": {
+          "catalogue": 0,
+          "index": 80,
+          "operation": "replace only this row spawns",
+          "baseline": [
+            {
+              "x": 10,
+              "y": 2,
+              "entries": [
+                {
+                  "type": 0,
+                  "variant": 20,
+                  "subtype": 0,
+                  "weight": 1.0
+                }
+              ]
+            },
+            {
+              "x": 9,
+              "y": 4,
+              "entries": [
+                {
+                  "type": 0,
+                  "variant": 20,
+                  "subtype": 0,
+                  "weight": 1.0
+                }
+              ]
+            }
+          ],
+          "authored": [],
+          "allOtherRowsMetadataDoorsWeightsOrderPreserved": true
+        },
+        "declaredResetJsonBytes": 277502
+      },
+      "bootEpochSeed": 2038552851,
+      "initialPhaseOffset": 1,
+      "entropy": "all unchanged literal recorded OS tokens; no new draw/selection",
+      "actions": [
+        {
+          "label": "released-birth",
+          "keys": [],
+          "presentations": 12
+        },
+        {
+          "label": "held-first-axis",
+          "keys": [
+            "Right"
+          ],
+          "presentations": 60
+        },
+        {
+          "label": "released-return",
+          "keys": [],
+          "presentations": 40
+        },
+        {
+          "label": "canceled-held",
+          "keys": [
+            "Right",
+            "Left"
+          ],
+          "presentations": 18
+        },
+        {
+          "label": "held-opposite-axis",
+          "keys": [
+            "Left"
+          ],
+          "presentations": 90
+        },
+        {
+          "label": "vertical-steering",
+          "keys": [
+            "Up"
+          ],
+          "presentations": 40
+        },
+        {
+          "label": "final-release",
+          "keys": [],
+          "presentations": 40
+        }
+      ],
+      "requires": {
+        "actualPublicChallengeEntry": true,
+        "bothGamesConsumeIdenticalDeclaredResourceBytes": true,
+        "ownedCounts": [
+          {
+            "itemId": 329,
+            "count": 1
+          }
+        ],
+        "actualCachePendingFlags": 0,
+        "sourceExpectedActorContract": {
+          "primaryC08": 8,
+          "family": 2,
+          "variant": 0,
+          "subtype": 0,
+          "controlledBy329": true,
+          "registeredC18DuringActualLifetime": true,
+          "managerRoomPersistent": false,
+          "requiredWhen": "actual admitted519FC0 callback, including released first birth"
+        },
+        "actualProperties": [
+          "own actor identity/spawn seed and registered ParentPlayer/C18",
+          "birth48C=83C; born specialscale retained while actual periodic48C/CA0/flags refresh separately",
+          "Full/Fast physical position, velocity, saved450/B28/currentfriction and phase",
+          "held, canceled-held and released controls plus DB4/D9C/head/C0C",
+          "actual registry clear/first and repeated contact, queue then later receiver drain; no generic impulse or TearDying"
+        ],
+        "contactCoverage": [],
+        "unknownDiagnosticOrMissingCoverageIsFailure": true,
+        "canonicalDiagnosticOwner": "weaponAdmission.unadmittedController must be present and null",
+        "actualPendingPrimaryCleanup": "must be present and null",
+        "preserveAllIdentitySeedRngInitNumericFamilyAndCoverageMismatches": true
+      },
+      "execution": {
+        "status": "not-executed",
+        "prerequisites": [
+          "actual main301/298 and owned immutable307 composition producer",
+          "Owner build/game/resource lease",
+          "strict actual source/port getters; absent fields fail"
+        ],
+        "unqualifiedScopes": [
+          "full copied EntityRef queue history",
+          "shotOrdinal remains unknown, no factory sequence substitute",
+          "rendering and whole-case parity",
+          "nonempty4A0/other modifiers/nontrivial grid receiver",
+          "primary-change Remove/Uninit requires a separate real acquisition route; no natural TTL invented"
+        ]
+      },
+      "entropyTokenIndex": 0
+    },
+    {
+      "name": "ludovico329-os-1-v1",
+      "fixture": {
+        "kind": "source-authored-modified-challenge",
+        "challengeId": 1,
+        "startingItems": [
+          329
+        ],
+        "view": "item-only",
+        "baselineResourcePath": "../../rebirth/resources/challenges.xml",
+        "authoredResourcePath": "ludovico329-v1/challenges.xml",
+        "specialRoomsPath": "ludovico329-v1/motion.stb",
+        "specialRoomsSha256": "daacc0812ebb2fb44ce35f30fddafd9c25799156552633f8108fcb7f4b84761c",
+        "attributeChanges": [
+          {
+            "attribute": "getcurse",
+            "baselineValue": "9",
+            "authoredValue": "0"
+          },
+          {
+            "attribute": "cursefilter",
+            "baselineValue": "6",
+            "authoredValue": "127"
+          },
+          {
+            "attribute": "roomfilter",
+            "baselineValue": "2",
+            "authoredValue": null
+          },
+          {
+            "attribute": "startingitems",
+            "baselineValue": null,
+            "authoredValue": "329"
+          }
+        ],
+        "startRoomSpawnChange": {
+          "catalogue": 0,
+          "index": 80,
+          "operation": "replace only this row spawns",
+          "baseline": [
+            {
+              "x": 10,
+              "y": 2,
+              "entries": [
+                {
+                  "type": 0,
+                  "variant": 20,
+                  "subtype": 0,
+                  "weight": 1.0
+                }
+              ]
+            },
+            {
+              "x": 9,
+              "y": 4,
+              "entries": [
+                {
+                  "type": 0,
+                  "variant": 20,
+                  "subtype": 0,
+                  "weight": 1.0
+                }
+              ]
+            }
+          ],
+          "authored": [],
+          "allOtherRowsMetadataDoorsWeightsOrderPreserved": true
+        },
+        "declaredResetJsonBytes": 277502
+      },
+      "bootEpochSeed": 4152429072,
+      "initialPhaseOffset": 1,
+      "entropy": "all unchanged literal recorded OS tokens; no new draw/selection",
+      "actions": [
+        {
+          "label": "released-birth",
+          "keys": [],
+          "presentations": 12
+        },
+        {
+          "label": "held-first-axis",
+          "keys": [
+            "Right"
+          ],
+          "presentations": 63
+        },
+        {
+          "label": "released-return",
+          "keys": [],
+          "presentations": 40
+        },
+        {
+          "label": "canceled-held",
+          "keys": [
+            "Right",
+            "Left"
+          ],
+          "presentations": 18
+        },
+        {
+          "label": "held-opposite-axis",
+          "keys": [
+            "Left"
+          ],
+          "presentations": 93
+        },
+        {
+          "label": "vertical-steering",
+          "keys": [
+            "Up"
+          ],
+          "presentations": 40
+        },
+        {
+          "label": "final-release",
+          "keys": [],
+          "presentations": 40
+        }
+      ],
+      "requires": {
+        "actualPublicChallengeEntry": true,
+        "bothGamesConsumeIdenticalDeclaredResourceBytes": true,
+        "ownedCounts": [
+          {
+            "itemId": 329,
+            "count": 1
+          }
+        ],
+        "actualCachePendingFlags": 0,
+        "sourceExpectedActorContract": {
+          "primaryC08": 8,
+          "family": 2,
+          "variant": 0,
+          "subtype": 0,
+          "controlledBy329": true,
+          "registeredC18DuringActualLifetime": true,
+          "managerRoomPersistent": false,
+          "requiredWhen": "actual admitted519FC0 callback, including released first birth"
+        },
+        "actualProperties": [
+          "own actor identity/spawn seed and registered ParentPlayer/C18",
+          "birth48C=83C; born specialscale retained while actual periodic48C/CA0/flags refresh separately",
+          "Full/Fast physical position, velocity, saved450/B28/currentfriction and phase",
+          "held, canceled-held and released controls plus DB4/D9C/head/C0C",
+          "actual registry clear/first and repeated contact, queue then later receiver drain; no generic impulse or TearDying"
+        ],
+        "contactCoverage": [],
+        "unknownDiagnosticOrMissingCoverageIsFailure": true,
+        "canonicalDiagnosticOwner": "weaponAdmission.unadmittedController must be present and null",
+        "actualPendingPrimaryCleanup": "must be present and null",
+        "preserveAllIdentitySeedRngInitNumericFamilyAndCoverageMismatches": true
+      },
+      "execution": {
+        "status": "not-executed",
+        "prerequisites": [
+          "actual main301/298 and owned immutable307 composition producer",
+          "Owner build/game/resource lease",
+          "strict actual source/port getters; absent fields fail"
+        ],
+        "unqualifiedScopes": [
+          "full copied EntityRef queue history",
+          "shotOrdinal remains unknown, no factory sequence substitute",
+          "rendering and whole-case parity",
+          "nonempty4A0/other modifiers/nontrivial grid receiver",
+          "primary-change Remove/Uninit requires a separate real acquisition route; no natural TTL invented"
+        ]
+      },
+      "entropyTokenIndex": 1
+    }
+  ],
+  "scope": "Prepared public standalone329 motion/contact inputs; no game acceptance",
+  "selection": "Two fixed cases plus BOTH unmodified existing recorded OS tokens; no outcome filtering/retries",
+  "publicRouteRevision": "standalone329-source-motion-and-contact-v1"
+}

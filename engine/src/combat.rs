@@ -319,6 +319,8 @@ pub enum DamageKind {
     RoomEffect,
     /// Entity_Laser do_damage476760 passes DAMAGE_LASER.
     Laser,
+    /// Grub head HP sync 4f43d9: TakeDamage with flags 0.
+    HealthSync,
 }
 
 impl DamageKind {
@@ -329,6 +331,7 @@ impl DamageKind {
             Self::FireContact => 2,
             Self::Laser => 8,
             Self::RoomEffect => 0,
+            Self::HealthSync => 0,
         }
     }
 }

@@ -152,6 +152,7 @@ fn menu_edge(from: Screen, to: Screen) -> bool {
 /// Contracts relating the state before and after an accepted command.
 pub fn transition(before: &State, command: &Command, after: &State) {
     death(before, command, after);
+    room_clear(before, command, after);
     // A run starts from the menus, or restarts from the GameOver popup without
     // leaving the playing screen; both go through the engine's run start.
     let restarted = before.player_death.game_over.is_some()
@@ -400,6 +401,78 @@ pub fn transition(before: &State, command: &Command, after: &State) {
     }
 }
 
+/// Room.Update (`npcs::advance_room_clear`, source 5d149b/5d1487) runs once
+/// per nonplayer pass: countable actors reset a ten-pass countdown, and only
+/// an empty pass entered with the countdown expired marks the room clear and
+/// reopens the doors combat shut. A bomb may reveal a secret door mid-combat.
+fn room_clear(before: &State, command: &Command, after: &State) {
+    let same_room = before.screen == Screen::Playing
+        && after.screen == Screen::Playing
+        && before.current_room == after.current_room
+        && before.stage_seed == after.stage_seed
+        && before.room_transition.is_none()
+        && before.player_death.game_over.is_none();
+    if !same_room {
+        return;
+    }
+    let room_type = after.floor.descriptors[after.current_room]
+        .template
+        .room_type;
+    let cleared = !before.room.combat_clear && after.room.combat_clear;
+    if let (Command::Tick { count, .. }, true) = (command, cleared) {
+        // The command's nonplayer passes, from the engine's own phase clock.
+        let mut clock = before.system_clock;
+        let passes = (0..*count)
+            .filter(|_| {
+                clock
+                    .advance()
+                    .is_ok_and(|phase| phase.updates_nonplayers())
+            })
+            .count();
+        let countdown = before.room.combat_clear_countdown as usize;
+        props::always!(
+            passes > countdown
+                && (passes > 1
+                    || (countdown == 0 && after.room.manager_counts.countable_total() <= 0)),
+            "game: a room is marked clear only on an empty pass after its countdown expires",
+            json!({
+                "room": after.current_room,
+                "passes": passes,
+                "countdown": countdown,
+                "counts": after.room.manager_counts,
+            })
+        );
+    }
+    let reopened = before.room.appearance.doors.iter().filter(|door| {
+        door.state == "Closed"
+            && before.room.combat_shut_door_slots.contains(&door.slot)
+            && after
+                .room
+                .appearance
+                .doors
+                .iter()
+                .any(|after_door| after_door.slot == door.slot && after_door.state == "Opened")
+    });
+    let mut unexplained = reopened.filter(|door| {
+        let target = door.target_room as usize;
+        let connection = [
+            after.current_room.min(target),
+            after.current_room.max(target),
+        ];
+        !after.room.combat_clear && !after.revealed_secret_connections.contains(&connection)
+    });
+    props::always!(
+        unexplained.next().is_none(),
+        "game: combat-shut doors reopen only when the room clears or a secret is revealed",
+        json!({ "room": after.current_room, "command": command })
+    );
+    props::sometimes!(cleared && room_type == 5, "game: a boss room is cleared");
+    props::sometimes!(
+        cleared && room_type == 6,
+        "game: a miniboss room is cleared"
+    );
+}
+
 /// Normal Isaac death (`engine/src/player_death.rs`): GameOver freezes
 /// gameplay (Game54f760 returns before the run tick), the menu key handler
 /// ignores input, and the released System popup's Restart or Exit request is
@@ -621,6 +694,41 @@ pub fn state(state: &State) {
             && player.soul_hp >= 0,
         "game: player motion is finite and health is bounded",
         json!({ "player": player })
+    );
+    // Grid collision keeps a body's circle off solid wall cells, so the centre
+    // of a colliding NPC, pickup or bomb never leaves the room interior
+    // (`Grid::clamp_room`), whatever its speed or family.
+    if state.room_transition.is_none() {
+        let grid = state
+            .room
+            .grid
+            .clone()
+            .map(rebirth_cleanroom::grid::Grid::new);
+        if let Some(Ok(grid)) = grid {
+            let npcs = state.room.npcs.iter().filter(|npc| !npc.removed);
+            let npcs = npcs
+                .filter(|npc| npc.grid_collision_class != 0)
+                .map(|npc| ("npc", npc.id, npc.position));
+            let pickups = state.room.pickups.iter().filter(|pickup| !pickup.removed);
+            let pickups = pickups.map(|pickup| ("pickup", pickup.id, pickup.position));
+            let bombs = state.bombs.iter();
+            let bombs = bombs.map(|bomb| ("bomb", bomb.id, bomb.motion.position));
+            let escaped = npcs
+                .chain(pickups)
+                .chain(bombs)
+                .find(|(_, _, position)| grid.clamp_room(*position, 0.0) != *position);
+            props::always!(
+                escaped.is_none(),
+                "game: grid-colliding bodies stay inside the room's walls",
+                json!({ "body": escaped })
+            );
+        }
+    }
+    let unfinite = unfinite_body(state);
+    props::always!(
+        unfinite.is_none(),
+        "game: every room body has finite motion",
+        json!({ "body": unfinite })
     );
     props::always!(
         state.inventory.coins <= 99 && state.inventory.bombs <= 99 && state.inventory.keys <= 99,
@@ -891,6 +999,75 @@ pub fn state(state: &State) {
 }
 
 /// Laser impacts are effects whose handles come from the effect allocator.
+/// The first body whose motion is NaN or infinite, as (kind, id). One bad
+/// value (a normalized zero vector, say) spreads through every later
+/// contact, so every family's bodies are checked, new families included.
+fn unfinite_body(state: &State) -> Option<(&'static str, u32)> {
+    use rebirth_cleanroom::motion::WorldVector;
+    let finite = |vectors: &[WorldVector], scalars: &[f64]| {
+        vectors.iter().all(|vector| vector.is_finite())
+            && scalars.iter().all(|value| value.is_finite())
+    };
+    let npcs = state.room.npcs.iter().map(|npc| {
+        let ok = finite(
+            &[npc.position, npc.presented_position, npc.velocity],
+            &[f64::from(npc.hp), f64::from(npc.max_hp)],
+        );
+        ("npc", npc.id, ok)
+    });
+    let pickups = state.room.pickups.iter().map(|pickup| {
+        let vectors = [pickup.position, pickup.presented_position, pickup.velocity];
+        ("pickup", pickup.id, finite(&vectors, &[pickup.x, pickup.y]))
+    });
+    let tears = state.tears.iter().map(|tear| {
+        let motion = &tear.motion;
+        let vectors = [motion.position, motion.presented_position, motion.velocity];
+        let scalars = [tear.x, tear.y, tear.vx, tear.vy];
+        ("tear", tear.id, finite(&vectors, &scalars))
+    });
+    let projectiles = state.enemy_projectiles.iter().map(|shot| {
+        let vectors = [shot.position, shot.presented_position, shot.velocity];
+        ("enemy projectile", shot.id, finite(&vectors, &[]))
+    });
+    let familiars = state.familiars.iter().map(|familiar| {
+        let vectors = [
+            familiar.position,
+            familiar.presented_position,
+            familiar.velocity,
+        ];
+        let health = [f64::from(familiar.hp), f64::from(familiar.max_hp)];
+        ("familiar", familiar.id, finite(&vectors, &health))
+    });
+    let bombs = state.bombs.iter().map(|bomb| {
+        let motion = &bomb.motion;
+        let vectors = [motion.position, motion.presented_position, motion.velocity];
+        ("bomb", bomb.id, finite(&vectors, &[bomb.x, bomb.y]))
+    });
+    let lasers = state.lasers.iter().map(|laser| {
+        (
+            "laser",
+            laser.id,
+            finite(&[laser.position, laser.velocity], &[]),
+        )
+    });
+    let knives = state.knives.iter().map(|knife| {
+        (
+            "knife",
+            knife.id,
+            finite(&[knife.position, knife.velocity], &[]),
+        )
+    });
+    npcs.chain(pickups)
+        .chain(tears)
+        .chain(projectiles)
+        .chain(familiars)
+        .chain(bombs)
+        .chain(lasers)
+        .chain(knives)
+        .find(|(_, _, ok)| !ok)
+        .map(|(kind, id, _)| (kind, id))
+}
+
 fn laser_impacts(state: &State) -> impl Iterator<Item = u32> + '_ {
     state
         .lasers

@@ -1,3 +1,8 @@
 #!/usr/bin/env sh
-# Pure engine kernels and the C ABI with platform-chosen inputs.
-exec rebirth-dst --entropy antithesis --units seed_codec,mt,phase,actors,floor,grid,abi --cases 2
+# Every registered unit except the whole-engine game (its own driver), with
+# platform-chosen inputs. The list comes from the registry, so new units join.
+units=""
+for unit in $(rebirth-dst --list | cut -d' ' -f1); do
+  [ "$unit" = game ] || units="${units:+$units,}$unit"
+done
+exec rebirth-dst --entropy antithesis --units "$units" --cases 2

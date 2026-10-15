@@ -71,6 +71,8 @@ export function roomRows(rows, source, actual) {
   }
   for (const door of source.grid.filter(cell => cell.type === 16)) {
     const port = actual.room.grid?.cells[door.index]?.entity;
+    // SetRoomTypes565b00 variant: 7 ordinary, 4 barred (uncleared miniboss).
+    check(rows, `door${door.index}.variant`, door.variant, port?.variant);
     check(rows, `door${door.index}.state`, door.state, port?.state);
     check(rows, `door${door.index}.class`, door.collisionClass, port?.collisionClass);
   }
@@ -115,7 +117,13 @@ export function entityRows(rows, source, actual, spec, render) {
   const rock = cell => ROCK_ANIMATIONS[cell.type] && cell.state === 1 &&
     (cell.type === 2 && cell.variant >= 1000 ? [cell.index, cell.type, 'big', cell.variant - 1000] : [cell.index, cell.type, ROCK_ANIMATIONS[cell.type], cell.variant]);
   check(rows, 'render.rocks', source.grid.map(rock).filter(Boolean),
-    render?.grid.filter(drawn => drawn.kind !== 7).map(drawn => [drawn.index, drawn.kind, drawn.animation, drawn.frame]));
+    render?.grid.filter(drawn => drawn.kind !== 7 && drawn.kind !== 16).map(drawn => [drawn.index, drawn.kind, drawn.animation, drawn.frame]));
+  // Door.LoadGraphics5629c0 overlays door_17_bardoor on variant4; a closed
+  // door (AnimState563b70) holds its Idle clip. The opening Vanish fade is
+  // not modelled, so only doors not yet opening (state != 2) are claimed.
+  check(rows, 'render.doorBars', source.grid.filter(cell => cell.type === 16 && cell.variant === 4 && cell.state !== 2)
+    .map(cell => [cell.index, 'Idle']),
+    render?.grid.filter(drawn => drawn.kind === 16).map(drawn => [drawn.index, drawn.animation]));
   // Pit Render draws `pit` frame variant (the autotile frame 5684c0 stores).
   check(rows, 'render.pits', source.grid.filter(cell => cell.type === 7).map(cell => [cell.index, 'pit', cell.variant]),
     render?.grid.filter(drawn => drawn.kind === 7).map(drawn => [drawn.index, drawn.animation, drawn.frame]));

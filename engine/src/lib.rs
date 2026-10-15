@@ -16,6 +16,7 @@ pub mod attack_runtime;
 pub mod audio;
 pub mod blood_effects;
 pub mod bombs;
+pub mod boss_death;
 mod brimstone;
 pub mod camera;
 pub mod challenges;
@@ -24,6 +25,8 @@ pub mod chests;
 pub mod combat;
 mod content;
 mod controlled_knife;
+pub mod controlled_tear;
+mod creep_effects;
 pub mod dingle;
 pub mod dips;
 mod doors;
@@ -38,6 +41,7 @@ pub mod floor;
 mod fmath;
 pub mod gib_counts;
 pub mod gluttony;
+pub mod gemini;
 pub mod grid;
 mod grid_hazards;
 pub mod grid_records;
@@ -50,6 +54,7 @@ pub mod items;
 pub mod keepers;
 mod knife_path;
 pub mod knives;
+pub mod larry;
 pub mod laser_line;
 mod laser_npc_runtime;
 mod laser_player_runtime;
@@ -58,6 +63,7 @@ pub mod lasers;
 pub mod layout;
 pub mod level2_flies;
 pub mod level_progress;
+pub mod maggots;
 pub mod menu_lifecycle;
 pub mod monstro;
 pub mod motion;
@@ -213,10 +219,10 @@ pub struct Tear {
     pub vy: f64,
     pub age: u32,
     pub spawn_seed: u32,
-    /// Actual kind1 builder variant copied to Entity+14; None is unqualified.
+    /// Source-owned builder variant copied to Entity+14; None is unqualified.
     pub source_variant: Option<u32>,
     /// Actual Tear+838, copied from Player+c84 before its increment.
-    pub shot_ordinal: u32,
+    pub shot_ordinal: Option<u32>,
     /// Source setter5411e0 writes collision48c and base83c at birth.
     pub collision_damage: f32,
     pub base_damage: f32,
@@ -228,6 +234,8 @@ pub struct Tear {
     pub collision_radius: f32,
     pub grid_contact: bool,
     pub motion: projectiles::TearMotion,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub controlled: Option<controlled_tear::ControlledTear>,
 }
 impl Tear {
     fn project(&mut self) {
@@ -1430,6 +1438,7 @@ impl Game {
         // Fresh587f44→58821c clears descriptor+3d; placement preserves it.
         // Room.Init5ced20 stamps159c before its grid/entity factories.
         self.state.room.initialization_game_update = Some(self.state.game_update_count);
+        self.state.room.source_tear_slowdown_2494 = Some(0);
         self.state.room.combat_clear = false;
         self.state.camera = Some(camera::Camera::new(&self.state.room, None));
         // PlayerManager.Init precedes Level.Init -> Room.Init. Room reset
@@ -2131,6 +2140,11 @@ impl Game {
             rock_blast::advance_bomb_rocks(&mut self.state)?;
             rock_blast::advance_markers(&mut self.state);
             self.refresh_room_boss_count();
+            if let Some(counter) = &mut self.state.room.source_tear_slowdown_2494 {
+                if *counter > 0 {
+                    *counter -= 1;
+                }
+            }
             let mut counted = actors::FullCounts::default();
             for actor in existing.iter().copied() {
                 self.advance_actor(actor, phase, false, bomb_triggered)?;
@@ -2155,6 +2169,7 @@ impl Game {
             blood_effects::clear_retired_links(&mut self.state);
             attack_runtime::retire_full(&mut self.state);
             laser_runtime::retire_full(&mut self.state)?;
+            controlled_tear::retire_full(&mut self.state);
             attack_runtime::contacts(&mut self.state)?;
             let pickup_contacts = pickups::contact_candidates(&self.state)?;
             npcs::player_contacts(&mut self.state)?;
@@ -2176,6 +2191,15 @@ impl Game {
                 })
                 .collect();
             for (id, mut motion, radius, damage) in tears {
+                if self
+                    .state
+                    .tears
+                    .iter()
+                    .any(|tear| tear.id == id && tear.controlled.is_some())
+                {
+                    controlled_tear::contacts_actor(&mut self.state, id)?;
+                    continue;
+                }
                 if npcs::tear_hit(&mut self.state, &mut motion, radius, id, damage)?.is_some() {
                     if let Some(tear) = self.state.tears.iter_mut().find(|tear| tear.id == id) {
                         motion.lifetime = projectiles::Lifetime::Dying;
@@ -2245,6 +2269,7 @@ impl Game {
         bombs::advance_explosions(&mut self.state, phase, explosion_fence);
         bombs::retire_removed(&mut self.state);
         self.state.room.pickups.retain(|pickup| !pickup.removed);
+        npcs::unlink_removed(&mut self.state.room.npcs);
         self.state.room.npcs.retain(|npc| !npc.removed);
         self.state.familiars.retain(|familiar| !familiar.removed);
         //454df0 retires actual31e inactive actors;31f alone is not removal.
@@ -2342,6 +2367,14 @@ impl Game {
                 familiars::advance_actor(&mut self.state, phase, actor.id)?
             }
             actors::ActorKind::Tear => {
+                if self
+                    .state
+                    .tears
+                    .iter()
+                    .any(|tear| tear.id == actor.id && tear.controlled.is_some())
+                {
+                    return controlled_tear::advance(&mut self.state, phase, actor.id);
+                }
                 let grid = if phase == phase::Phase::Update && !newborn {
                     Some(
                         self.state
@@ -2376,6 +2409,7 @@ impl Game {
                 self.advance_pickup(actor.id, phase)?;
             }
             actors::ActorKind::Npc => {
+                controlled_tear::before_npc_update(&mut self.state, phase, actor.id);
                 self.advance_npc(actor.id, phase)?;
             }
             actors::ActorKind::Projectile => {
@@ -2564,9 +2598,17 @@ impl Game {
             occupied.extend(self.state.bombs.iter().map(|bomb| bomb.motion.position));
         }
         let player_velocity = bombs::player_velocity(&self.state);
+        let room_type = self
+            .state
+            .room
+            .descriptor
+            .as_ref()
+            .map_or(1, |descriptor| descriptor.template.room_type);
         let mut births = Vec::new();
+        let (before, rest) = self.state.room.npcs.split_at_mut(index);
+        let (npc, after) = rest.split_first_mut().expect("indexed NPC");
         (family.advance)(
-            &mut self.state.room.npcs[index],
+            npc,
             phase,
             &mut self.state.boot_lifecycle.shared,
             &mut entities::NpcWorld {
@@ -2589,6 +2631,8 @@ impl Game {
                     effects: &mut self.state.sprite_effects,
                     scheduler: &mut self.state.actor_scheduler,
                 },
+                room_type,
+                peers: entities::Peers { before, after },
             },
             &mut births,
         )?;
@@ -2638,6 +2682,33 @@ impl Game {
             entities::Birth::Shot(shot) => self.admit_enemy_projectile(|id| {
                 enemy_projectiles::EnemyProjectile::birth(id, parent, shot)
             }),
+            entities::Birth::CreepHit => creep_effects::hurt_player(&mut self.state),
+            entities::Birth::Child(selector) => {
+                self.admit_npc_birth(index, entities::Birth::Npc(selector))?;
+                let id = {
+                    let child = self.state.room.npcs.last_mut().expect("admitted NPC birth");
+                    child.parent = Some(parent);
+                    child.id
+                };
+                self.state.room.npcs[index].child = Some(id);
+                self.advance_npc(id, phase::Phase::Update)
+            }
+            entities::Birth::Attached(selector) => {
+                self.admit_npc_birth(index, entities::Birth::Npc(selector))?;
+                let piece = self.state.room.npcs.last_mut().expect("admitted NPC birth");
+                piece.parent = Some(parent);
+                piece.entity_collision_class = 0;
+                piece.visible = false;
+                piece.no_appear = true;
+                Ok(())
+            }
+            entities::Birth::FlungNpc(selector, velocity) => {
+                self.admit_npc_birth(index, entities::Birth::Npc(selector))?;
+                let npc = self.state.room.npcs.last_mut().expect("admitted NPC birth");
+                npc.velocity = velocity;
+                npc.no_appear = true;
+                Ok(())
+            }
             entities::Birth::Npc(selector) => {
                 // Retired NPCs leave the room list, so its length can name a
                 // live handle; take one past every id still held anywhere.
@@ -2750,7 +2821,9 @@ impl Game {
                     );
                     let controlled =
                         plan.controller == weapon_plan::ControllerChannel::ControlledKnife;
-                    let aim_step = if ordinary || controlled {
+                    let controlled_tear =
+                        plan.controller == weapon_plan::ControllerChannel::ControlledTear;
+                    let aim_step = if ordinary || controlled || controlled_tear {
                         attack_runtime::ordinary_shooting_aim(
                             callback_aim,
                             buttons.held(),
@@ -2765,7 +2838,9 @@ impl Game {
                     };
                     if let Some(mut aim_step) = aim_step {
                         // 52F6B7 normalizes r13 before the callback and DB4 store.
-                        if controlled && knives::squared_length(aim_step.callback_aim) > 1.0 {
+                        if (controlled || controlled_tear)
+                            && knives::squared_length(aim_step.callback_aim) > 1.0
+                        {
                             aim_step.callback_aim = knives::normalized(aim_step.callback_aim);
                             if aim_step.db4_write.is_some() {
                                 aim_step.db4_write = Some(aim_step.callback_aim);
@@ -2773,10 +2848,16 @@ impl Game {
                         }
                         shooting_aim_db4 = aim_step.db4_write;
                         let head_frame_request = if self.state.head_timer > 8 { 2 } else { 0 };
-                        if ordinary || controlled {
+                        if ordinary || controlled || controlled_tear {
                             source_weapon_clock = true;
                             if controlled {
                                 attack_runtime::controlled_head_direction(
+                                    &mut self.state,
+                                    aim_step.callback_aim,
+                                    buttons.held(),
+                                )?;
+                            } else if controlled_tear {
+                                controlled_tear::head_direction(
                                     &mut self.state,
                                     aim_step.callback_aim,
                                     buttons.held(),
@@ -2807,6 +2888,8 @@ impl Game {
                         // 519FC0 returns before the released idle D9C -> DA0 effect.
                         if controlled {
                             attack_runtime::controlled_idle_head(&mut self.state, buttons.held());
+                        } else if controlled_tear {
+                            controlled_tear::idle_head(&mut self.state, buttons.held());
                         }
                         if plan.controller == weapon_plan::ControllerChannel::ChargedBrimstone {
                             attack_runtime::ordinary_brimstone_idle_head(
@@ -2974,7 +3057,8 @@ impl Game {
                     age: 0,
                     spawn_seed,
                     source_variant,
-                    shot_ordinal: self.state.player.shots_fired,
+                    shot_ordinal: Some(self.state.player.shots_fired),
+                    controlled: None,
                     collision_damage: plan.damage,
                     base_damage: plan.damage,
                     attack_flags: plan.flags,
@@ -3026,6 +3110,23 @@ impl Game {
     }
     pub fn json(&self) -> String {
         serde_json::to_string(&self.state).expect("state contains finite values")
+    }
+    /// The browser's per-tick state: `json` with background stains elided.
+    pub fn frame_json(&self) -> String {
+        familiars::with_background_stains_elided(|| self.json())
+    }
+    /// The current room's background stains from index `from`, with the room
+    /// identity (index and Room.Init stamp) that scopes the append-only list.
+    pub fn background_stains_since_json(&self, from: usize) -> String {
+        let room = &self.state.room;
+        let stains = room.background_stains.get(from..).unwrap_or(&[]);
+        serde_json::to_string(&serde_json::json!({
+            "room": self.state.current_room,
+            "initialization": room.initialization_game_update,
+            "total": room.background_stains.len(),
+            "stains": stains,
+        }))
+        .expect("background stains contain finite values")
     }
 }
 
@@ -3155,6 +3256,28 @@ pub extern "C" fn snapshot_ptr() -> *const u8 {
 #[no_mangle]
 pub extern "C" fn snapshot_len() -> usize {
     SNAPSHOT.with(|snapshot| snapshot.borrow().len())
+}
+fn store_snapshot(text: impl FnOnce(&Game) -> String) -> *const u8 {
+    SNAPSHOT.with(|snapshot| {
+        *snapshot.borrow_mut() = GAME.with(|game| {
+            game.borrow()
+                .as_ref()
+                .map(text)
+                .unwrap_or_else(|| "null".into())
+                .into_bytes()
+        });
+        snapshot.borrow().as_ptr()
+    })
+}
+/// Per-tick browser state without background stains; length via `snapshot_len`.
+#[no_mangle]
+pub extern "C" fn frame_snapshot_ptr() -> *const u8 {
+    store_snapshot(Game::frame_json)
+}
+/// Current-room background stains from `from` onward; length via `snapshot_len`.
+#[no_mangle]
+pub extern "C" fn background_stains_ptr(from: u32) -> *const u8 {
+    store_snapshot(|game| game.background_stains_since_json(from as usize))
 }
 #[no_mangle]
 pub extern "C" fn error_ptr() -> *const u8 {

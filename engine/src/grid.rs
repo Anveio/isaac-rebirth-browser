@@ -48,6 +48,9 @@ pub struct DoorCollision {
     pub hidden: bool,
     /// Dice-room doorways are closed with the double-lock variant2.
     pub double_lock: bool,
+    /// SetRoomTypes565b00: an uncleared miniboss (type6 or surprise flag)
+    /// room bars its ordinary non-secret doorways with variant4.
+    pub barred: bool,
 }
 
 /// Admit supported authored rocks and spikes with their actual local spawn seeds. The
@@ -102,11 +105,16 @@ pub fn for_room(
         cells[column + row * usize::from(width)].entity = Some(GridEntity {
             kind: 16,
             // Fresh stage1 ordinary/curse/treasure doors use variant7 when
-            // opened; the admitted key-closed target2/12 branch uses variant1.
+            // opened, or barred variant4 from an uncleared miniboss room; the
+            // admitted key-closed target2/12 branch uses variant1.
             variant: if door.hidden {
                 6
             } else if door.open {
-                7
+                if door.barred {
+                    4
+                } else {
+                    7
+                }
             } else if door.double_lock {
                 2
             } else {
@@ -564,6 +572,40 @@ impl Grid {
         to: WorldVector,
         costs: &crate::room_costs::RoomCosts,
     ) -> bool {
+        self.line_clear(from, to, costs, true, 0)
+    }
+
+    /// CheckLine5c74a0 mode0 (Charger and Grub charges): every nonzero grid
+    /// collision blocks, class1 included.
+    pub fn charge_line_clear(
+        &self,
+        from: WorldVector,
+        to: WorldVector,
+        costs: &crate::room_costs::RoomCosts,
+    ) -> bool {
+        self.line_clear(from, to, costs, false, 0)
+    }
+
+    /// CheckLine mode0 with a cost threshold, as FindGridPath5b41e0 refreshes
+    /// its line of sight (threshold 0; 900 while charmed).
+    pub fn path_line_clear(
+        &self,
+        from: WorldVector,
+        to: WorldVector,
+        costs: &crate::room_costs::RoomCosts,
+        threshold: i32,
+    ) -> bool {
+        self.line_clear(from, to, costs, false, threshold)
+    }
+
+    fn line_clear(
+        &self,
+        from: WorldVector,
+        to: WorldVector,
+        costs: &crate::room_costs::RoomCosts,
+        exempt_class1: bool,
+        threshold: i32,
+    ) -> bool {
         let delta = WorldVector {
             x: from.x - to.x,
             y: from.y - to.y,
@@ -594,8 +636,8 @@ impl Grid {
                     return false;
                 };
                 match self.collision(index) {
-                    1 => {}
-                    0 => marked_samples += u32::from(costs.entries()[index] > 0),
+                    1 if exempt_class1 => {}
+                    0 => marked_samples += u32::from(costs.entries()[index] > threshold),
                     _ => return false,
                 }
             }

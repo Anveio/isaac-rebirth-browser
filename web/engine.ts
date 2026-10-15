@@ -18,8 +18,9 @@ export interface AttackColor { tint: [number,number,number,number]; sourceMiddle
 export interface Tear {
   id: number; x: number; y: number; vx: number; vy: number; age: number;
   spawnSeed: number; sourceVariant: number | null; collisionRadius: number; gridContact: boolean;
-  shotOrdinal: number; collisionDamage: number; baseDamage: number; scale: number; animationTier: number;
+  shotOrdinal: number | null; collisionDamage: number; baseDamage: number; scale: number; animationTier: number;
   attackFlags: [number,number]; sourceColor: AttackColor;
+  controlled?: { parent: ActorRef | null; active: boolean; dead: boolean; visible: boolean; entityFlags: number; configuredFriction: number; currentFriction: number; savedPosition: {x:number;y:number}; velocityDeltaB28: {x:number;y:number}; currentColor: AttackColor; birthGameUpdate: number; hitSequences: number[]; registryKnown: boolean; currentParamsKnown: boolean; childChainEmpty: boolean | null };
   motion: {
     position: {x: number; y: number}; presentedPosition: {x: number; y: number};
     velocity: {x: number; y: number}; height: number; fallingSpeed: number;
@@ -52,7 +53,7 @@ export interface SpriteEffect {
   collisionRadius: number; collisionMass: number; collisionDamage: number; hp: number; maxHp: number;
   gridCollisionClass: number; entityCollisionClass: number; flags: number; visible: boolean; active: boolean; removed: boolean;
   renderOrderOffset: number; lifetimeDivisor: number; timeToLive: number; raw7f4: number; raw7f8: number;
-  raw7d8: boolean; poopEffect?: PoopEffect;
+  raw7d8: boolean; poopEffect?: PoopEffect; creepEffect?: { counter: number; size: number };
   sprite: ActorSprite; fullUpdates: number;
   bloodEffect?: {kind: "poof04" | "bloodGush"};
 }
@@ -202,7 +203,7 @@ export interface Floor {
 export interface Room {
   left: number; right: number; top: number; bottom: number; appearance: RoomAppearance;
   descriptor: RoomDescriptor | null;
-  initializationGameUpdate: number | null; loaded: boolean;
+  initializationGameUpdate: number | null; loaded: boolean; sourceTearSlowdown2494: number | null;
   pathCosts: number[] | null;
   spawns: {tintedRockIndex: number; finalSpawnState: number; selectors: {groupIndex: number; gridIndex: number; category: "entity" | "grid"; type: number; variant: number; subtype: number; position: {x: number; y: number}; groupSeed: number; spawnSeed: number}[]} | null;
   pickups: Pickup[];
@@ -214,7 +215,7 @@ export interface Room {
     position: {x: number; y: number}; presentedPosition: {x: number; y: number}; velocity: {x: number; y: number};
     hp: number; maxHp: number; collisionRadius: number; collisionMass: number; collisionDamage: number;
     gridCollisionClass: number; entityCollisionClass: number; canShutDoors: boolean; boss: boolean;
-    state: number; frameAge: number; animationFrame: number; animation: string; animationClock: number; animationPlaying: boolean; visible: boolean; savedInitializedState: number; shadowSize: number; dead: boolean; removed: boolean; raw494: boolean;
+    state: number; frameAge: number; animationFrame: number; animation: string; animationClock: number; animationPlaying: boolean; visible: boolean; savedInitializedState: number; shadowSize: number; dead: boolean; removed: boolean; raw494: boolean; overlay?: { animation: string; frame: number; clock: number; playing: boolean };
     damage: {pendingDamage: number; pendingFlags: number};
     keeper: {anchor: {x: number; y: number}; entityFlags: number; stateFrame: number; countdown: number;
       animation: string; animationClock: number; animationPlaying: boolean; tint: number[]; offsets: number[]} | null;
@@ -343,6 +344,7 @@ interface Exports extends WebAssembly.Exports {
   reset_with_boot_resources: (initialSeed: number, bootEpochSeed: number) => number;
   boot_resource_ptr: (length: number) => number;
   command: () => number; snapshot_ptr: () => number; snapshot_len: () => number;
+  frame_snapshot_ptr: () => number; background_stains_ptr: (from: number) => number;
   error_ptr: () => number; error_len: () => number; public_keys_ptr: () => number; public_keys_len: () => number;
 }
 export class Engine {
@@ -368,7 +370,8 @@ export class Engine {
     if (!response.ok) throw new Error(`WASM load failed: ${response.status}`);
     const { instance } = await WebAssembly.instantiate(await response.arrayBuffer());
     if (typeof instance.exports.abi_version !== "function" || instance.exports.abi_version() !== 2
-      || typeof instance.exports.public_keys_ptr !== "function" || typeof instance.exports.public_keys_len !== "function")
+      || typeof instance.exports.public_keys_ptr !== "function" || typeof instance.exports.public_keys_len !== "function"
+      || typeof instance.exports.frame_snapshot_ptr !== "function" || typeof instance.exports.background_stains_ptr !== "function")
       throw new Error("WASM engine ABI is stale; rebuild with npm run build:wasm");
     const engine = new Engine(instance.exports as Exports); engine.reset(initialSeed, bootEpochSeed, resources); return engine;
   }
@@ -396,6 +399,7 @@ export class Engine {
       result = this.wasm.reset_with_boot_resources(initialSeed, bootEpochSeed);
     }
     if (result !== 0) throw new Error(this.read(this.wasm.error_ptr(), this.wasm.error_len()));
+    this.stains = { room: null, initialization: null, list: [] };
     return this.snapshot();
   }
   command(command: Command): State {
@@ -411,7 +415,28 @@ export class Engine {
   key(code: string, down: boolean): State { return this.command({ type: "key", code, down }); }
   text(text: string): State { return this.command({ type: "text", text }); }
   tick(count = 1): State { return this.command({ type: "tick", count }); }
-  snapshot(): State { return JSON.parse(this.snapshotJson()) as State; }
+  /** Per-tick state. Background stains are append-only within a room, so the
+   * engine elides them from this snapshot and only new ones cross the
+   * boundary; each snapshot still carries the room's complete list. */
+  snapshot(): State {
+    const state = JSON.parse(this.read(this.wasm.frame_snapshot_ptr(), this.wasm.snapshot_len())) as State | null;
+    if (state === null) return state as unknown as State;
+    const cache = this.stains;
+    let delta = this.stainsSince(cache.list.length);
+    if (delta.room !== cache.room || delta.initialization !== cache.initialization || delta.total < cache.list.length) {
+      delta = this.stainsSince(0);
+      this.stains = { room: delta.room, initialization: delta.initialization, list: delta.stains };
+    } else if (delta.stains.length) this.stains = { ...cache, list: cache.list.concat(delta.stains) };
+    if (this.stains.list.length !== delta.total) throw new Error("Background stain channel lost entries");
+    state.room.backgroundStains = this.stains.list;
+    return state;
+  }
+  /** The complete engine state, stains included, as the engine's JSON text. */
   snapshotJson(): string { const ptr = this.wasm.snapshot_ptr(); return this.read(ptr, this.wasm.snapshot_len()); }
+  private stains: { room: number | null; initialization: number | null; list: Room["backgroundStains"] } =
+    { room: null, initialization: null, list: [] };
+  private stainsSince(from: number): { room: number; initialization: number | null; total: number; stains: Room["backgroundStains"] } {
+    return JSON.parse(this.read(this.wasm.background_stains_ptr(from), this.wasm.snapshot_len()));
+  }
   private read(ptr: number, length: number) { return new TextDecoder().decode(new Uint8Array(this.wasm.memory.buffer, ptr, length)); }
 }
