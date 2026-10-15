@@ -762,6 +762,14 @@ def missing(field, presentation, error):
     checks.append({'field': field, 'presentation': presentation, 'passed': False, 'error': str(error)})
 
 
+fetus_module, fetus_context = None, None
+if 'ordinaryDrFetus' in case['requires']:
+    fetus_path = Path(__file__).with_name('composition-dr-fetus.py')
+    fetus_spec = importlib.util.spec_from_file_location('ordinary_dr_fetus', fetus_path)
+    fetus_module = importlib.util.module_from_spec(fetus_spec)
+    fetus_spec.loader.exec_module(fetus_module)
+    fetus_context = fetus_module.begin(case)
+
 common_spec = None
 try:
     common_spec = common_contact_spec()
@@ -831,6 +839,12 @@ for captured in sorted(all_captured, key=lambda row: row['presentation']):
         paired_rows.append({'presentation': t, 'source': source, 'state': state,
                             'nativeCounter': observed['systemCounter'], 'nativeContext': row['context'],
                             'nativePlayer': observed['players'][0], 'gameplayPresentation': captured.get('gameplayPresentation')})
+        if fetus_context is not None:
+            try:
+                fetus_module.snapshot(fetus_context, source, state, t, observed['systemCounter'],
+                                      globals(), observed['players'][0])
+            except Exception as error:
+                missing('mandatory typed DrFetus Bomb group', t, error)
         if dip_contact_required:
             try:
                 compare_causal_npcs(source, observed['world'], state, t, observed['systemCounter'])
@@ -936,7 +950,7 @@ for captured in sorted(all_captured, key=lambda row: row['presentation']):
         check('actual Playing frontdoor', 'playing', state['screen'], t)
         check('actual Challenge ID', (1, 1), (source['challengeId'], state['challengeId']), t)
         check('actual source phase', observed['systemCounter'] % 2, state['systemClock']['systemCounter'] % 2, t)
-        if not stages:
+        if not stages and fetus_context is None:
             check('actual native declared counts', expected_counts, player['ownedCounts'], t)
             check('actual browser declared counts', expected_counts, state['playerItems']['ownedCounts'], t)
         check('actual owned counts at the same public gate', player['ownedCounts'], state['playerItems']['ownedCounts'], t)
@@ -956,7 +970,7 @@ for captured in sorted(all_captured, key=lambda row: row['presentation']):
         if captured.get('gameplayPresentation') == 0:
             check('declared ready controls enabled', (True, True), (player['controlsEnabled'], state['player']['controlsEnabled']), t)
         check('actual primary cache C08', weapon['primaryWeaponC08'], state['weaponCache']['primary'], t)
-        if not stages:
+        if not stages and (fetus_context is None or player['ownedCounts'][52] > 0):
             check('declared primary cache C08', contract['primaryC08'], state['weaponCache']['primary'], t)
         check('actual cached C98', weapon['attackFlagsC98'], flags(state['weaponCache']['flagsC98']), t)
         for source_field, port_field in [('cachedColorCA0', 'colorCa0'), ('cachedColorCCC', 'colorCcc')]:
@@ -1222,6 +1236,10 @@ if 'controlledBrimContact' in case['requires']:
 if technology_comparer is not None:
     technology_result = technology_comparer.finish()
 
+ordinary_dr_fetus = None
+if fetus_context is not None:
+    ordinary_dr_fetus = fetus_module.finish(fetus_context, globals())
+
 result = {'schema': 2, 'status': 'fail' if any(not item['passed'] for item in checks) else 'pass', 'checks': checks,
           'coverage': dict(coverage), 'damageChains': list(damage_chains.values()), 'doorwayWitnesses': doorway_witnesses, 'laserLifetimes':list(laser_lifetimes.values()), 'renderWitnesses':render_witnesses,
           'sameGateDuplicateObservations': duplicate_observations, 'history': history, 'childLifetimes': child_lifetimes, 'chargeWitnesses': charge_witnesses,
@@ -1236,6 +1254,8 @@ if controlled_ring_contact is not None:
     result['controlledRingContact'] = controlled_ring_contact
 if technology_result is not None:
     result['ordinaryTechnology'] = technology_result
+if ordinary_dr_fetus is not None:
+    result['ordinaryDrFetus'] = ordinary_dr_fetus
 payload = (json.dumps(result, separators=(',', ':')) + '\n').encode()
 with args.output.open('xb') as stream:
     stream.write(gzip.compress(payload, mtime=0) if str(args.output).endswith('.gz') else payload)
