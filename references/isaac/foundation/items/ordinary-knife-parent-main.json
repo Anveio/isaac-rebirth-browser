@@ -1,0 +1,158 @@
+{
+  "schema": 1,
+  "scope": "PR270 ordinary Knife subtype0 parent only. Historical frozen and separate overlapping additive reports retain their own grades; no combined score or whole-game acceptance.",
+  "publication": {
+    "pr": 270,
+    "mainMerge": "8ac96e2f857c368aab6ba20eecb2efe5387c1563",
+    "runtimeSource": "50a31060c9d61eab72caa8fa3f61693a44d30931",
+    "productionSha256": "7c101b091ccf9e2d27a773a211c02150de918e4d766578332a10ad8f8a70f37a",
+    "wasmSha256": "e2c75c790ebff5bd68f12d6a8b00379248d20dfb7463616e98e16a8430b3bcfc",
+    "excludedRuntimeScopes": [
+      "Brimstone actor",
+      "Has118 subtype1 child",
+      "Ludovico controlled actor",
+      "Paired118/114/329 continuation and cleanup"
+    ],
+    "numberOne6AndLibra304": "Prepared source; main implementation and own qualification remain pending."
+  },
+  "ownQualification": {
+    "production": "PASS",
+    "strictAllTargetClippy": "PASS",
+    "releaseFloor": "PASS",
+    "regularFourRouteRegression": {
+      "fieldComparisons": 37928004,
+      "differences": 0,
+      "fixedItemRoutes": [
+        1,
+        4,
+        14,
+        143
+      ],
+      "scope": "Own same-base WASM regression; not Original equivalence"
+    },
+    "existingDstConsumerCompile": {
+      "head": "d30d0d356225fb39a25d31c1efb45f31b9eb453b",
+      "exitCode": 0,
+      "seconds": 28.83,
+      "scope": "Existing authorized DST consumer compilation only; no full DST execution."
+    },
+    "existingDstRun": "not claimed"
+  },
+  "retainedOriginal114": {
+    "case": "ordinary-body-114-contrived-phase0",
+    "runtimeSource": "50a31060c9d61eab72caa8fa3f61693a44d30931",
+    "capture": "PASS",
+    "transport": "PASS",
+    "protectedBeforeEqualsEnd": true,
+    "sameOriginalPublicInputs": true,
+    "newNativeProcesses": 0,
+    "newEntropy": 0,
+    "frozenComparer": {
+      "checks": 125788,
+      "failures": 8922,
+      "reportSha256": "8ab7a3a5f02679b5d64c0bd7431c7f22d340aeb7148304f7d8092a665fb4a12e",
+      "status": "FAIL historical unchanged"
+    },
+    "separateOverlappingAdditive": {
+      "checks": 87879,
+      "failures": 21918,
+      "reportSha256": "a3bd14e84a965c020a17255e596c7612d7e8ad99312fc07782ef7585deb14882",
+      "status": "FAIL; overlapping comparisons, not added to frozen grade"
+    },
+    "passingParentFields": {
+      "fieldCount": 44,
+      "eachFieldChecks": 1278,
+      "eachFieldDifferences": 0,
+      "bodyRows": 1278,
+      "fullRows": 639,
+      "fastRows": 639,
+      "fields": [
+        "ordinaryParent own-manager membership",
+        "ordinaryParent active",
+        "ordinaryParent dead",
+        "ordinaryParent visible",
+        "ordinaryParent gridCollisionClass",
+        "ordinaryParent entityCollisionClass",
+        "ordinaryParent raw494",
+        "ordinaryParent collisionDamage",
+        "ordinaryParent collisionRadius",
+        "ordinaryParent collisionMass",
+        "ordinaryParent hp",
+        "ordinaryParent maxHp",
+        "ordinaryParent position",
+        "ordinaryParent savedPosition450",
+        "ordinaryParent velocity",
+        "ordinaryParent renderOffset",
+        "ordinaryParent configured friction",
+        "ordinaryParent current friction",
+        "ordinaryParent birth age",
+        "ordinaryParent fast322",
+        "ordinaryParent generic flags318",
+        "ordinaryParent attack flags7d8",
+        "ordinaryParent cached spawner",
+        "ordinaryParent permanent color3a0",
+        "ordinaryParent current color2d0",
+        "ordinaryParent linked Parent NULL",
+        "ordinaryParent linked Parent identity",
+        "ordinaryParent raw7e0",
+        "ordinaryParent raw7e4",
+        "ordinaryParent raw7e8",
+        "ordinaryParent raw7ec",
+        "ordinaryParent raw7f0",
+        "ordinaryParent raw7f4",
+        "ordinaryParent raw7f8",
+        "ordinaryParent raw80c",
+        "ordinaryParent raw810",
+        "ordinaryParent raw7fc",
+        "ordinaryParent raw804",
+        "ordinaryParent raw814",
+        "ordinaryParent Sprite animation",
+        "ordinaryParent Sprite frame",
+        "ordinaryParent Sprite playing",
+        "ordinaryParent Sprite scale",
+        "ordinaryParent Sprite offset"
+      ]
+    },
+    "charge": {
+      "checks": 1466,
+      "differences": 0,
+      "observedIncreases": 157,
+      "launchedRows": 104,
+      "releaseResets": 2
+    },
+    "render": {
+      "fixedActualPngWitnesses": 12,
+      "passed": 12
+    },
+    "remaining": {
+      "strictF32Rotation": {
+        "checks": 1278,
+        "differences": 4
+      },
+      "unaccepted": [
+        "Actor identity/seed and RNG/init uniform parity",
+        "Missing raw8a4/raw8a0/Line fields remain failures",
+        "188 prebirth C74/BB0 counter differences",
+        "NPC/contact/FIFO/drain/retirement/count/clear parity",
+        "Whole pixel/game/history acceptance",
+        "Future Has118 children and controlled/triple synergy"
+      ]
+    },
+    "selectedTuplesScope": "Selected actual parent/weapon/NPC records; manager/linked-parent checks executed against full decoded states. Tuples alone omit complete scheduler/Player rows and are not a full-state replay."
+  },
+  "proofs": {
+    "actual114Compact": {
+      "path": ".cache/coordination/attack-runtime-research/ordinary-parent-main0cb-qualification-source/recorded114-phase0-browser-v1/actual114-closure-and-field-summary.json",
+      "sha256": "e9f0d5e2f9aedf1e2b3b2c0069f893ac8260e45b40f380f0b30305ad21bf6c73"
+    },
+    "compilerAndRegular": {
+      "path": ".cache/coordination/attack-runtime-research/ordinary-parent-main0cb-qualification-source/compiler-regular-closure-and-release.json",
+      "sha256": "9936469e03d80acfc64bef388044cf1eae91990b45b5368ff3d5e2d480bbee84"
+    },
+    "existingDstConsumer": {
+      "path": "/tmp/isaac-parent270-dst-consumer-sync-2b2074d6/compiler-closure-and-output-seal.json",
+      "sha256": "2485f3a69c610e64178ed36c9de65539601cb8178beabe0b037a9ae396c31b92"
+    }
+  },
+  "retention": "Prior public-ingress-and-brim10.json snapshots and all ordinary0..2/a320/90ea/v7/v8 results remain unchanged."
+}
