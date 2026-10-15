@@ -173,6 +173,10 @@ pub fn bomb_hit(
     line_clear: &dyn Fn(WorldVector) -> bool,
 ) -> Result<(), String> {
     for npc in &mut state.room.npcs {
+        // 554490 skips the blast's own source entity (a Mulligan's EXPLODE).
+        if npc.id == source.id && npc.kind == source.entity_type {
+            continue;
+        }
         if npc.dead
             || npc.removed
             || npc.entity_collision_class == 0

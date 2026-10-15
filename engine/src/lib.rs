@@ -49,6 +49,7 @@ pub mod gluttony;
 pub mod gapers;
 pub mod gushers;
 pub mod hoppers;
+pub mod mulligans;
 pub mod gemini;
 pub mod grid;
 mod grid_hazards;
@@ -2674,6 +2675,47 @@ impl Game {
         }
         Ok(())
     }
+    /// Mulligan EXPLODE 4e8200: the blast (damage 40, radius 60, source the
+    /// Mulligan), the effect and burst draws, Kill's non-boss burst, then
+    /// the dead branch. The post-AI dead handling removes it this update.
+    fn mulligan_explode(&mut self, index: usize) -> Result<(), String> {
+        let (id, kind, position) = {
+            let npc = &self.state.room.npcs[index];
+            (npc.id, npc.kind, npc.position)
+        };
+        bombs::explode(
+            &mut self.state,
+            position,
+            60.0,
+            40.0,
+            combat::DamageSource { id, entity_type: kind },
+        )?;
+        let mut births = Vec::new();
+        mulligans::explode_shots(position, &mut self.state.boot_lifecycle.shared, &mut births);
+        // Kill 4464c0: the non-boss burst 445c60 at once.
+        self.state.audio.admit(
+            &mut self.state.boot_lifecycle.shared,
+            self.state.system_clock.system_counter.wrapping_sub(1),
+            audio::SoundRequest {
+                id: 30,
+                volume: 0.8,
+                delay: 2,
+                looping: false,
+                pitch: 1.0,
+            },
+        );
+        let seed = self.state.boot_lifecycle.shared.next_u32();
+        let npc = &mut self.state.room.npcs[index];
+        npc.dead = true;
+        npc.death_effect_seed = Some(seed);
+        births.push(entities::Birth::Blood(seed));
+        mulligans::death(npc, &mut self.state.boot_lifecycle.shared, &mut births);
+        for birth in births {
+            self.admit_npc_birth(index, birth)?;
+        }
+        self.state.room.npcs[index].removed = true;
+        Ok(())
+    }
     /// Admits one NPC callback product at the callback's own return point.
     fn admit_npc_birth(&mut self, index: usize, birth: entities::Birth) -> Result<(), String> {
         let parent = self.state.room.npcs[index].id;
@@ -2716,6 +2758,10 @@ impl Game {
                 enemy_projectiles::EnemyProjectile::birth(id, parent, shot)
             }),
             entities::Birth::CreepHit => creep_effects::hurt_player(&mut self.state),
+            entities::Birth::Bomb { variant, seed, position } => {
+                bombs::admit_conversion(&mut self.state, variant, seed, position)
+            }
+            entities::Birth::MulliganExplode => self.mulligan_explode(index),
             entities::Birth::Spawned(spawned) => {
                 self.admit_npc_birth(index, entities::Birth::Npc(spawned.selector))?;
                 let npc = self.state.room.npcs.last_mut().expect("admitted NPC birth");

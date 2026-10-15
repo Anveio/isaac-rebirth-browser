@@ -104,6 +104,15 @@ pub(crate) enum Birth {
     Npc(SpawnSelector),
     /// Creep 5516d0 hurt of the player from a spawner-run first update.
     CreepHit,
+    /// Spawn550a40 of a pickup-less bomb (Troll Bomb variant 3), spawner NULL.
+    Bomb {
+        variant: u32,
+        seed: u32,
+        position: WorldVector,
+    },
+    /// Mulligan EXPLODE 4e8200: its blast, effect seeds, cardinal burst, Kill
+    /// and dead branch, in the spawner's update order.
+    MulliganExplode,
     /// A mid-room NPC spawned with a velocity and its APPEAR flag cleared.
     FlungNpc(SpawnSelector, WorldVector),
     /// A mid-room NPC with spawner-written fields (Spawn550a40 then the
@@ -230,6 +239,7 @@ pub(crate) static FAMILIES: &[&Family] = &[
     &crate::gapers::FAMILY,
     &crate::gushers::FAMILY,
     &crate::hoppers::FAMILY,
+    &crate::mulligans::FAMILY,
 ];
 
 /// Every NPC type a registered family constructs, in registry order. Tools

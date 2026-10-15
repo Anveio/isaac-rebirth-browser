@@ -588,6 +588,48 @@ impl Grid {
 
     /// CheckLine mode0 with a cost threshold, as FindGridPath5b41e0 refreshes
     /// its line of sight (threshold 0; 900 while charmed).
+    /// CheckLine5c74a0 mode1 at any length: one sample per ten-unit step
+    /// from (never at) `from`, possibly overshooting `to`; any nonzero class
+    /// blocks, and more than eight samples over cells costing above
+    /// `threshold` block too. Zero length (or NaN) is clear.
+    pub fn mode1_line_clear(
+        &self,
+        from: WorldVector,
+        to: WorldVector,
+        costs: &crate::room_costs::RoomCosts,
+        threshold: i32,
+    ) -> Result<bool, String> {
+        let delta = WorldVector {
+            x: from.x - to.x,
+            y: from.y - to.y,
+        };
+        let length = (delta.x * delta.x + delta.y * delta.y).sqrt();
+        if length.is_nan() || length <= 0.0 {
+            return Ok(true);
+        }
+        let step = WorldVector {
+            x: delta.x / length * 10.0,
+            y: delta.y / length * 10.0,
+        };
+        let (mut point, mut travelled, mut count) = (from, 0.0_f32, 0_u32);
+        loop {
+            point.x -= step.x;
+            point.y -= step.y;
+            let Some(index) = self.index(point) else {
+                return Ok(false);
+            };
+            if self.collision(index) != 0 {
+                return Ok(false);
+            }
+            count += u32::from(costs.get(index)? > threshold);
+            travelled += 10.0;
+            if length <= travelled {
+                break;
+            }
+        }
+        Ok(count <= 8)
+    }
+
     pub fn path_line_clear(
         &self,
         from: WorldVector,
