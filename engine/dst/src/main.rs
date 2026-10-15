@@ -24,8 +24,8 @@ const USAGE: &str = "usage: rebirth-dst [--units all|a,b] [--cases N] [--steps N
                    [--case-seed U64] [--entropy seeded|antithesis] [--tapes DIR]
                    [--replay TAPE.json] [--resume TAPE.json] [--corpus DIR]
                    [--wasm ENGINE.wasm]
-                   [--report PATH] [--allow-unmet] [--retain-all] [--list]
-                   [--setup-complete]";
+                   [--report PATH] [--allow-unmet] [--retain-all] [--jobs N]
+                   [--list] [--setup-complete]";
 
 struct Options {
     units: Vec<String>,
@@ -44,6 +44,7 @@ struct Options {
     list: bool,
     setup_complete: bool,
     retain_all: bool,
+    jobs: usize,
 }
 
 fn parse() -> Result<Options, String> {
@@ -64,6 +65,7 @@ fn parse() -> Result<Options, String> {
         list: false,
         setup_complete: false,
         retain_all: false,
+        jobs: std::thread::available_parallelism().map_or(1, usize::from),
     };
     let mut arguments = std::env::args().skip(1);
     while let Some(flag) = arguments.next() {
@@ -95,6 +97,7 @@ fn parse() -> Result<Options, String> {
             "--list" => options.list = true,
             "--setup-complete" => options.setup_complete = true,
             "--retain-all" => options.retain_all = true,
+            "--jobs" => options.jobs = value()?.parse().map_err(|_| "invalid --jobs")?,
             "--help" | "-h" => return Err(USAGE.into()),
             other => return Err(format!("unknown argument {other}\n{USAGE}")),
         }
@@ -152,14 +155,10 @@ fn os_seed() -> u64 {
     u64::from_le_bytes(bytes)
 }
 
-/// The WASM interpreter's translator recurses deeply on the engine's large
-/// serde functions; run every case on one thread with a generous stack.
-const STACK_BYTES: usize = 512 * 1024 * 1024;
-
 fn main() -> ExitCode {
     std::thread::Builder::new()
         .name("rebirth-dst".into())
-        .stack_size(STACK_BYTES)
+        .stack_size(harness::STACK_BYTES)
         .spawn(simulate)
         .expect("spawn the simulation thread")
         .join()
@@ -246,6 +245,7 @@ fn simulate() -> ExitCode {
         resume,
         wasm,
         retain_all: options.retain_all,
+        jobs: options.jobs,
     };
     eprintln!(
         "rebirth-dst: entropy={} seed=0x{master_seed:016x} units={} cases={} steps={}{}",

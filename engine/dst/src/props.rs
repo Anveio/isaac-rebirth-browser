@@ -10,9 +10,13 @@
 //!
 //! Details are built only when the SDK would emit them (the first pass and the
 //! first failure of each call site), keeping per-step checks cheap.
+//!
+//! Cases may run on several threads. A site's reported failure is the one
+//! from the earliest (unit, case, step), and each thread counts its own
+//! violations, so a report depends on the seed, never on scheduling.
 use serde::Serialize;
 use serde_json::{json, Value};
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use std::collections::BTreeMap;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::Mutex;
@@ -33,16 +37,29 @@ pub struct Site {
     passes: AtomicU64,
     fails: AtomicU64,
     registered: AtomicBool,
-    first_failure: Mutex<Option<Value>>,
+    first_failure: Mutex<Option<(FailureKey, Value)>>,
 }
 
-static SITES: Mutex<Vec<&'static Site>> = Mutex::new(Vec::new());
-static VIOLATIONS: AtomicU64 = AtomicU64::new(0);
+/// Where a failure happened: unit, case and step, ordered for determinism.
+type FailureKey = (&'static str, u64, u64);
 
-/// Total `always`/`unreachable` failures so far; a case compares it before
-/// and after to decide whether to retain its tape.
+static SITES: Mutex<Vec<&'static Site>> = Mutex::new(Vec::new());
+
+thread_local! {
+    static VIOLATIONS: Cell<u64> = const { Cell::new(0) };
+}
+
+/// `always`/`unreachable` failures on this thread so far; a case compares it
+/// before and after to decide whether to retain its tape.
 pub fn violations() -> u64 {
-    VIOLATIONS.load(Ordering::Relaxed)
+    VIOLATIONS.with(Cell::get)
+}
+
+fn failure_key() -> FailureKey {
+    CONTEXT.with(|context| {
+        let context = context.borrow();
+        (context.unit, context.case, context.step)
+    })
 }
 
 impl Site {
@@ -57,13 +74,22 @@ impl Site {
         }
     }
 
-    /// The SDK emits only a call site's first pass and first failure.
+    /// The SDK emits only a call site's first pass and first failure; the
+    /// ledger also keeps an earlier case's failure seen after a later one.
     pub fn would_emit(&self, condition: bool) -> bool {
         if condition {
             self.passes.load(Ordering::Relaxed) == 0
         } else {
-            self.fails.load(Ordering::Relaxed) == 0
+            self.fails.load(Ordering::Relaxed) == 0 || self.earliest(failure_key())
         }
+    }
+
+    fn earliest(&self, key: FailureKey) -> bool {
+        self.first_failure
+            .lock()
+            .expect("property failure")
+            .as_ref()
+            .is_none_or(|(recorded, _)| key < *recorded)
     }
 
     pub fn record(&'static self, condition: bool, details: &Value) {
@@ -78,12 +104,14 @@ impl Site {
         if self.kind == Kind::Sometimes {
             return;
         }
-        VIOLATIONS.fetch_add(1, Ordering::Relaxed);
-        if previous != 0 {
+        VIOLATIONS.with(|count| count.set(count.get() + 1));
+        let key = failure_key();
+        let mut first = self.first_failure.lock().expect("property failure");
+        if first.as_ref().is_some_and(|(recorded, _)| *recorded <= key) {
             return;
         }
-        *self.first_failure.lock().expect("property failure") = Some(details.clone());
-        {
+        *first = Some((key, details.clone()));
+        if previous == 0 {
             eprintln!(
                 "PROPERTY VIOLATION [{:?}] {}\n{}",
                 self.kind,
@@ -244,13 +272,19 @@ pub struct PropertyResult {
 pub fn verdict(units: &[&str], wasm: bool) -> Vec<PropertyResult> {
     // Antithesis identifies a property by its message, so call sites sharing
     // a message (e.g. the pass and fail arms of one check) aggregate.
-    let mut sites: BTreeMap<&'static str, (u64, u64, Option<Value>)> = BTreeMap::new();
+    type Ledger = (u64, u64, Option<(FailureKey, Value)>);
+    let mut sites: BTreeMap<&'static str, Ledger> = BTreeMap::new();
     for site in SITES.lock().expect("property ledger").iter() {
         let entry = sites.entry(site.message).or_default();
         entry.0 += site.passes.load(Ordering::Relaxed);
         entry.1 += site.fails.load(Ordering::Relaxed);
-        if entry.2.is_none() && site.kind != Kind::Sometimes {
-            entry.2 = site.first_failure.lock().expect("property failure").clone();
+        if site.kind != Kind::Sometimes {
+            let failure = site.first_failure.lock().expect("property failure").clone();
+            if let Some(failure) = failure {
+                if entry.2.as_ref().is_none_or(|(key, _)| failure.0 < *key) {
+                    entry.2 = Some(failure);
+                }
+            }
         }
     }
     let selected = |class: &str| {
@@ -267,6 +301,7 @@ pub fn verdict(units: &[&str], wasm: bool) -> Vec<PropertyResult> {
             continue;
         }
         let (passes, fails, first_failure) = sites.get(info.message).cloned().unwrap_or_default();
+        let first_failure = first_failure.map(|(_, details)| details);
         let status = match info.display_type {
             "Always" if fails > 0 => Status::Failed,
             "Always" if passes == 0 => Status::Unmet,

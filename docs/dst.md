@@ -53,6 +53,14 @@ Antithesis they are judged across the whole exploration instead. Property
 messages start with their unit name and are the property identities; keep them
 stable.
 
+Seeded cases are independent, so they run on `--jobs` worker threads (all
+cores by default). A run's report does not depend on the thread count: each
+thread counts its own violations, the census tracks each thread's case
+separately, and a property reports the failure from the earliest unit, case
+and step. `--jobs 1` and `--jobs 4` write byte-identical reports for one
+seed. Under Antithesis the harness drives a single thread, so the platform
+orders every decision.
+
 A panic anywhere is an `unreachable` violation with its message attached. The
 harness profile unwinds and enables overflow checks and debug assertions, so
 the engine runs under debug arithmetic semantics while simulated.
