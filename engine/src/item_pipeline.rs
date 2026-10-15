@@ -48,7 +48,7 @@ impl CacheStage {
             Self::Weapon => 0x100,
             Self::FireDelay => FireDelayStage::REQUESTED.0,
             Self::ShotSpeed => 4,
-            Self::Damage => 1,
+            Self::Damage => DamageStage::REQUESTED.0,
             Self::Range => 8,
             Self::MoveSpeed => 16,
             Self::TearFlags => 32,
@@ -166,7 +166,7 @@ impl<'a> ItemInputs<'a> {
         let neutral: &[u32] = match stage {
             CacheStage::FireDelay => FireDelayStage::NEUTRAL_ITEMS,
             CacheStage::ShotSpeed => &[1, 6, 114, 118, 329, 304],
-            CacheStage::Damage => &[1, 6, 114, 118, 329],
+            CacheStage::Damage => DamageStage::NEUTRAL_ITEMS,
             CacheStage::Range => &[1, 4, 114, 118, 329],
             CacheStage::MoveSpeed => &[1, 4, 6, 114, 118, 329],
             _ => return false,
@@ -317,6 +317,33 @@ impl FireDelayStage {
     }
 }
 
+/// One Damage callback's ownership beside its literal pure operator.
+/// Reads signed permanent4 for the tier and positive presence for one multiplier;
+/// writes Damage/C88. Its source-local bound precedes separate Libra coupling.
+struct DamageStage;
+
+impl DamageStage {
+    const REQUESTED: CacheMask = CacheMask(1);
+    const EFFECT_ITEMS: &'static [u32] = &[4];
+    const NEUTRAL_ITEMS: &'static [u32] = &[1, 6, 114, 118, 329];
+
+    fn admits(inputs: ItemInputs<'_>, source_player_type: Option<u32>) -> bool {
+        source_player_type == Some(0)
+            && inputs.admits_scalar_stage(CacheStage::Damage, Self::EFFECT_ITEMS)
+    }
+
+    fn resolve(inputs: ItemInputs<'_>) -> f32 {
+        //513628..513644: f32 linear, f64 sqrt*3.5, then f32 store.
+        let tier = inputs.owned_count(4) as f32 * 0.5_f32;
+        let linear = (1.2_f32 * tier + 1.0_f32).max(0.0);
+        let mut damage = (f64::from(linear).sqrt() * 3.5_f64) as f32;
+        if inputs.positive_owned_count(4) {
+            damage *= 1.5_f32;
+        }
+        damage.max(0.5_f32)
+    }
+}
+
 /// Recompute requested mapped callbacks from actual item inputs, retaining
 /// partial values and pending bits for every unimplemented callback owner.
 /// This extraction preserves Source110 arithmetic and predicates exactly.
@@ -352,15 +379,8 @@ pub(crate) fn resolve_scalars(
                 &[4, 143]
             }
             CacheStage::Damage => {
-                //513628..513644: f32 linear, f64 sqrt*3.5, then f32 store.
-                let tier = inputs.owned_count(4) as f32 * 0.5_f32;
-                let linear = (1.2_f32 * tier + 1.0_f32).max(0.0);
-                let mut damage = (f64::from(linear).sqrt() * 3.5_f64) as f32;
-                if inputs.positive_owned_count(4) {
-                    damage *= 1.5_f32;
-                }
-                values.stats.damage = damage.max(0.5_f32);
-                &[4]
+                values.stats.damage = DamageStage::resolve(inputs);
+                DamageStage::EFFECT_ITEMS
             }
             CacheStage::Range => {
                 let roid = inputs.owned_count(14) as f32;
@@ -399,6 +419,7 @@ pub(crate) fn resolve_scalars(
         if !unadmitted_number_one
             && match stage {
                 CacheStage::FireDelay => FireDelayStage::admits(inputs, source_player_type),
+                CacheStage::Damage => DamageStage::admits(inputs, source_player_type),
                 _ => source_player_type == Some(0) && inputs.admits_scalar_stage(stage, supported),
             }
         {
