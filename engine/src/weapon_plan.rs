@@ -406,7 +406,7 @@ pub(crate) fn admits_neutral_technology_properties(
     items: ItemInputs<'_>,
     source_player_type: Option<u32>,
 ) -> bool {
-    source_player_type == Some(0) && items.admits_technology_cache_context()
+    source_player_type == Some(0) && items.admits_technology_kind2_getter()
 }
 
 ///50E4A7/50E2A8 execute this current38 getter only AFTER the real Laser Spawn.
@@ -491,7 +491,7 @@ pub(crate) fn admit_current_laser_contact_flags(
             .as_ref()
             .ok_or("Laser kind3 actual Player items absent")?,
     )?;
-    if !inputs.admits_neutral_kind3() && !inputs.admits_technology_cache_context() {
+    if !inputs.admits_neutral_kind3() && !inputs.admits_technology_kind3_getter() {
         return Ok(LaserStatusAdmission::UnmappedBuilderModifiers);
     }
     //Actual476869..8A1 status masks start at8; currentlow3 is inert.

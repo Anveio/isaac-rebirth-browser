@@ -11,6 +11,12 @@ pub(crate) struct CacheMask(pub(crate) u32);
 
 const LIBRA_SCALAR_FLAGS: u32 = 0x1b;
 
+// Independent source-owned footprints. Equal current sets are deliberately
+// separate: cache additions cannot silently admit a50D090 getter branch.
+const TECHNOLOGY_CACHE_ITEMS: &[usize] = &[1, 4, 68];
+const TECHNOLOGY_KIND2_ITEMS: &[usize] = &[1, 4, 68];
+const TECHNOLOGY_KIND3_ITEMS: &[usize] = &[1, 4, 68];
+
 /// Literal511f10 dispatch order. Weapon selection/removal precedes stats;
 /// Libra304 has additional coupling before and after this sequence.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -188,14 +194,35 @@ impl<'a> ItemInputs<'a> {
     /// Callers retain their normal-Isaac and typed auxiliary-owner checks.
     /// This is cache context only, never a property/controller/contact admission.
     pub(crate) fn admits_technology_cache_context(self) -> bool {
-        self.positive_owned_count(68)
-            && self.admits_scalar_context()
+        self.admits_permanent_readset(68, TECHNOLOGY_CACHE_ITEMS)
+    }
+
+    ///Separate50D090 output38 footprint; cache coverage is not this owner.
+    pub(crate) fn admits_technology_kind2_getter(self) -> bool {
+        self.admits_permanent_readset(68, TECHNOLOGY_KIND2_ITEMS)
+    }
+
+    ///Separate50D090 output30 footprint consumed by476D70 status handling.
+    pub(crate) fn admits_technology_kind3_getter(self) -> bool {
+        self.admits_permanent_readset(68, TECHNOLOGY_KIND3_ITEMS)
+    }
+
+    ///Mechanical signed-count/context check, with no item capability implied
+    ///by the checker itself. Each caller supplies its own source-owned set.
+    fn admits_permanent_readset(self, required: usize, supported: &[usize]) -> bool {
+        self.positive_owned_count(required)
+            && self.owner.trinket_slots == [0, 0]
+            && self
+                .owner
+                .queued_id
+                .is_none_or(|id| items::definition(id).is_some_and(|config| config.kind != 2))
+            && self.owner.temporary_collectibles.is_empty()
             && self
                 .owner
                 .owned_counts
                 .iter()
                 .enumerate()
-                .all(|(id, &count)| count == 0 || (count > 0 && [1, 4, 68].contains(&id)))
+                .all(|(id, &count)| count == 0 || (count > 0 && supported.contains(&id)))
     }
 
     /// Each callback composes its implemented effects with its proven neutral

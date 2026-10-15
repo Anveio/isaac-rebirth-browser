@@ -145,7 +145,7 @@ fn contact_callbacks(state: &mut State, index: usize) -> Result<(), String> {
     }
     if inputs.positive_owned_count(151)
         || inputs.positive_owned_count(213)
-        || (!inputs.admits_neutral_kind3() && !inputs.admits_technology_cache_context())
+        || (!inputs.admits_neutral_kind3() && !inputs.admits_technology_kind3_getter())
     {
         record_frontier(state, LaserFrontier::ContactModifiers);
         return Ok(());
