@@ -10,6 +10,20 @@ const PLAYER = "gfx/001.000_player.anm2";
 const TEAR = "gfx/002.000_tear.anm2";
 // Rock Init 56ed00 / Render 56bf80: an intact (state 1) rock-family grid
 // entity sets frame variant of its type's grid_rock.anm2 animation.
+// Minimap room-type icons from the jump table at 0x678748; challenge rooms
+// (11) use the ambush icon unless the game's boss-challenge flag is set.
+const MINIMAP_ICONS: Record<number, string> = {
+  2: "IconShop", 4: "IconTreasureRoom", 5: "IconBoss", 6: "IconMiniboss", 7: "IconSecretRoom",
+  8: "IconSuperSecretRoom", 9: "IconArcade", 10: "IconCurseRoom", 11: "IconAmbushRoom", 12: "IconLibrary",
+  13: "IconSacrificeRoom", 15: "IconAngelRoom", 18: "IconIsaacsRoom", 19: "IconBarrenRoom",
+  20: "IconChestRoom", 21: "IconDiceRoom",
+};
+// Mask 0x3c1204: shown as locked while only shadow-revealed and unvisited.
+// Base Rebirth's four shapes: bit 1 tall, bit 2 wide (1x1, 1x2, 2x1, 2x2).
+function minimapShape(template: { width: number; height: number }): number {
+  return (template.width === 26 ? 2 : 0) + (template.height === 14 ? 1 : 0);
+}
+const LOCKED_MINIMAP_TYPES = new Set([2, 9, 12, 18, 19, 20, 21]);
 const ROCK_ANIMATIONS: Record<number, string> = { 2: "normal", 3: "black", 4: "tinted", 5: "bombrock", 6: "alt" };
 function rockSprite(kind: number, variant: number): { animation: string; frame: number } | undefined {
   const animation = ROCK_ANIMATIONS[kind];
@@ -480,9 +494,52 @@ export class Renderer {
     }
     if (!state.achievementEligibility) this.assets.draw(ctx, "gfx/ui/hudpickups.anm2", "Idle", 24, 84, 5);
     this.assets.draw(ctx, "gfx/ui/minimap1.anm2", "Frame", 400, 16);
-    for (const cell of state.minimap.cells) {
-      const animation = { current: "RoomCurrent", visited: "RoomVisited", unvisited: "RoomUnvisited" }[cell.visibility];
-      this.assets.draw(ctx, "gfx/ui/minimap1.anm2", animation, 420 + 8 * cell.x, 33 + 8 * cell.y);
+    this.drawMinimap(ctx, state);
+  }
+
+  // Minimap render 5aeb10: a 7x7 grid-cell window around the current room's
+  // origin, clamped to the 13x13 grid, stepping (7+1, 6+1) from (396, 12).
+  // Outlines go under every flagged cell, unvisited secret rooms draw no cell,
+  // multi-cell rooms pick per-cell frames by shape, and one icon (the
+  // constructor's limit) is centred on the room's origin cell.
+  private drawMinimap(ctx: CanvasRenderingContext2D, state: State) {
+    const descriptors = state.floor.descriptors;
+    const current = descriptors[state.currentRoom]!.gridIndex;
+    const left = Math.min(Math.max(current % 13 - 3, 0), 6);
+    const top = Math.min(Math.max(Math.floor(current / 13) - 3, 0), 6);
+    // A multi-cell current room shifts the view back half a cell, (3.5, 3).
+    const currentShape = minimapShape(descriptors[state.currentRoom]!.template);
+    const originX = 396 - (currentShape & 2 ? 3.5 : 0), originY = 12 - (currentShape & 1 ? 3 : 0);
+    const cells: { index: number; flags: number; origin: boolean; frame: number; x: number; y: number }[] = [];
+    for (let row = 0; row < 7; row++) for (let column = 0; column < 7; column++) {
+      const cell = (top + row) * 13 + left + column;
+      const index = state.floor.grid[cell] ?? -1;
+      const flags = index < 0 ? 0 : state.roomDisplayFlags[index] ?? 0;
+      if (!flags) continue;
+      const room = descriptors[index]!;
+      const offset = cell - room.gridIndex, down = Math.floor(offset / 13), across = offset - 13 * down;
+      const shape = minimapShape(room.template);
+      const frame = shape === 1 ? down + 1 : shape === 2 ? across + 3 : shape === 3 ? across + 2 * down + 5 : 0;
+      cells.push({ index, flags, origin: offset === 0, frame, x: originX + 8 * column, y: originY + 7 * row });
+    }
+    for (const cell of cells) this.assets.draw(ctx, "gfx/ui/minimap1.anm2", "RoomOutline", Math.round(cell.x), cell.y);
+    for (const cell of cells) {
+      const type = descriptors[cell.index]!.template.type;
+      const animation = cell.index === state.currentRoom ? "RoomCurrent"
+        : state.visitedRooms.includes(cell.index) ? "RoomVisited"
+        : cell.flags & 1 && type !== 7 && type !== 8 ? "RoomUnvisited" : null;
+      if (animation) this.assets.draw(ctx, "gfx/ui/minimap1.anm2", animation, Math.round(cell.x), cell.y, cell.frame);
+    }
+    for (const cell of cells) {
+      if (!cell.origin) continue;
+      const room = descriptors[cell.index]!, type = room.template.type;
+      const icon = cell.flags & 4 ? MINIMAP_ICONS[type] : undefined;
+      const locked = !icon && cell.flags & 2 && !state.visitedRooms.includes(cell.index) && LOCKED_MINIMAP_TYPES.has(type);
+      if (!icon && !locked) continue;
+      // Multi-cell rooms shift the icon half a cell (3.5, 3) towards the room's centre.
+      const shape = minimapShape(room.template);
+      const x = cell.x + (shape & 2 ? 3.5 : 0), y = cell.y + (shape & 1 ? 3 : 0);
+      this.assets.draw(ctx, "gfx/ui/minimap1.anm2", icon ?? "IconLockedRoom", Math.round(x), y);
     }
   }
 }
