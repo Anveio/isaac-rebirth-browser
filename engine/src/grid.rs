@@ -564,6 +564,27 @@ impl Grid {
         to: WorldVector,
         costs: &crate::room_costs::RoomCosts,
     ) -> bool {
+        self.line_clear(from, to, costs, true)
+    }
+
+    /// CheckLine5c74a0 mode0 (Charger and Grub charges): every nonzero grid
+    /// collision blocks, class1 included.
+    pub fn charge_line_clear(
+        &self,
+        from: WorldVector,
+        to: WorldVector,
+        costs: &crate::room_costs::RoomCosts,
+    ) -> bool {
+        self.line_clear(from, to, costs, false)
+    }
+
+    fn line_clear(
+        &self,
+        from: WorldVector,
+        to: WorldVector,
+        costs: &crate::room_costs::RoomCosts,
+        exempt_class1: bool,
+    ) -> bool {
         let delta = WorldVector {
             x: from.x - to.x,
             y: from.y - to.y,
@@ -594,7 +615,7 @@ impl Grid {
                     return false;
                 };
                 match self.collision(index) {
-                    1 => {}
+                    1 if exempt_class1 => {}
                     0 => marked_samples += u32::from(costs.entries()[index] > 0),
                     _ => return false,
                 }

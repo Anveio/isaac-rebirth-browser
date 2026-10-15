@@ -59,6 +59,7 @@ mod laser_runtime;
 pub mod lasers;
 pub mod layout;
 pub mod level2_flies;
+pub mod maggots;
 pub mod level_progress;
 pub mod menu_lifecycle;
 pub mod monstro;
