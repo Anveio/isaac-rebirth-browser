@@ -302,23 +302,10 @@ try {
       const target = state.npcs.reduce((a, b) => Math.hypot(a.x - p.x, a.y - p.y) < Math.hypot(b.x - p.x, b.y - p.y) ? a : b);
       const dx = target.x - p.x, dy = target.y - p.y, distance = Math.hypot(dx, dy);
       const post = !lineOfFire(state.grid, p, target) && firingPost(state.grid, p, target);
-      const horizontal = Math.abs(dx) > Math.abs(dy), offset = horizontal ? dy : dx;
-      const fire = horizontal ? (dx > 0 ? 'ArrowRight' : 'ArrowLeft') : (dy > 0 ? 'ArrowDown' : 'ArrowUp');
-      const back = horizontal ? (dx > 0 ? 'KeyA' : 'KeyD') : (dy > 0 ? 'KeyW' : 'KeyS');
-      const align = horizontal ? (offset > 0 ? 'KeyS' : 'KeyW') : (offset > 0 ? 'KeyD' : 'KeyA');
-      if (target.boss) {
-        // Bosses jump, charge and spray tears: hold ~220 units and weave
-        // across the firing line so a landing or a tear line misses.
-        keys.push(fire);
-        if (distance < 200) keys.push(back);
-        if (Math.abs(offset) > 60) keys.push(align);
-        else keys.push(Math.floor(segment / 6) % 2 ? (horizontal ? 'KeyW' : 'KeyA') : (horizontal ? 'KeyS' : 'KeyD'));
-      } else if (post) { const step = waypoint(post.x, post.y); toward(step.x, step.y, 4); keys.push(fire); }
-      else {
-        keys.push(fire);
-        if (Math.abs(offset) > 16) keys.push(align);
-        if (distance < 130) keys.push(back);
-      }
+      if (post) { const step = waypoint(post.x, post.y); toward(step.x, step.y, 4); keys.push(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'ArrowRight' : 'ArrowLeft') : (dy > 0 ? 'ArrowDown' : 'ArrowUp')); }
+      else if (Math.abs(dx) > Math.abs(dy)) { keys.push(dx > 0 ? 'ArrowRight' : 'ArrowLeft'); if (Math.abs(dy) > 16) keys.push(dy > 0 ? 'KeyS' : 'KeyW'); }
+      else { keys.push(dy > 0 ? 'ArrowDown' : 'ArrowUp'); if (Math.abs(dx) > 16) keys.push(dx > 0 ? 'KeyD' : 'KeyA'); }
+      if (distance < 130) keys.push(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'KeyA' : 'KeyD') : (dy > 0 ? 'KeyW' : 'KeyS'));
       if (segment % 40 === 0 && state.inventory.bombs > 0 && distance < 180) keys.push('KeyE');
     } else if (state.pickups.length && (pickupsAtStart.get(state.room) ?? 0) < 60) {
       pickupsAtStart.set(state.room, (pickupsAtStart.get(state.room) ?? 0) + 1);
