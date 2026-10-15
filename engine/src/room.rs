@@ -36,7 +36,9 @@ pub struct Room {
     #[serde(default)]
     pub saved_regular_pickups: Vec<crate::pickups::SavedRegularPickup>,
     pub npcs: Vec<crate::npcs::Npc>,
-    #[serde(default)]
+    /// Append-only within a room. The per-frame WASM snapshot elides them
+    /// (see `frame_snapshot_ptr`); the browser reads new ones incrementally.
+    #[serde(default, serialize_with = "crate::familiars::serialize_background_stains")]
     pub background_stains: Vec<crate::familiars::BackgroundStain>,
     pub authored_actor_order: Vec<crate::actors::ActorRef>,
     #[serde(default)]
