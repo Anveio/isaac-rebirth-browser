@@ -56,8 +56,9 @@ export function roomRows(rows, source, actual) {
   check(rows, 'hud.bossBarFlash', source.bossBar?.flash, actual.bossBar?.flash);
   for (const field of ['countablePending', 'countableCurrent', 'bossPending', 'bossCurrent'])
     check(rows, `manager.${field}`, source.room[field], actual.room.managerCounts?.[field]);
-  // Admitted grid objects: Block3, Tinted Rock4 and Pit7 (autotile frame).
-  for (const cell of source.grid.filter(cell => [3, 4, 7].includes(cell.type))) {
+  // Admitted grid objects: Block3, Tinted Rock4, Alt Rock6, Pit7 (autotile
+  // frame) and Spider Web10.
+  for (const cell of source.grid.filter(cell => [3, 4, 6, 7, 10].includes(cell.type))) {
     const port = actual.room.grid?.cells[cell.index]?.entity;
     check(rows, `grid${cell.index}`, [cell.type, cell.variant, cell.state, cell.collisionClass],
       port && [port.kind, port.variant, port.state, port.collisionClass]);
@@ -153,7 +154,7 @@ export function loadManifest(directory, side) {
   return JSON.parse(gunzipSync(readFileSync(resolve(directory, side, 'manifest.json.gz'))));
 }
 
-export const MARKERS = ['admission', 'damage', 'death', 'retirement', 'clear', 'shape', 'bossRoom'];
+export const MARKERS = ['admission', 'damage', 'death', 'retirement', 'clear', 'shape', 'bossRoom', 'roomType'];
 
 /** Lifecycle markers each game reaches on its own over a whole case. */
 export function markers(directory, spec) {
@@ -174,6 +175,9 @@ export function markers(directory, spec) {
       // The spec's authored shape plus the one-cell wall border.
       const grid = side === 'original' ? [row.room.gridWidth, row.room.gridHeight] : row.room.grid && [row.room.grid.width, row.room.grid.height];
       seen.shape ||= Boolean(spec.shape && grid && grid[0] === spec.shape[0] + 2 && grid[1] === spec.shape[1] + 2);
+      // Room specs: the player stands in a room of the spec's authored type.
+      seen.roomType ||= spec.roomType !== undefined
+        && (side === 'original' ? row.room.type : row.room.descriptor?.template?.type) === spec.roomType;
       // Boss routes: the player stands in a type-5 boss room.
       seen.bossRoom ||= (side === 'original' ? row.room.type : row.room.descriptor?.template?.type) === 5;
       seen.admission ||= actors.length > 0;

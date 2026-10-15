@@ -31,7 +31,8 @@ const pass = (flag, values) => values.flatMap(value => [flag, String(value)]);
 const entitySuite = spec => suite(`entity-${spec.name}`, statePair, [
   '--scenario-helper', helper(spec.boss ? 'boss-scenarios.py' : 'entity-scenarios.py'),
   ...pass('--helper-arg', [...(spec.type === undefined ? [] : ['--type', spec.type, '--variant', spec.variant]),
-    ...(spec.shape ? ['--shape', spec.shape.join('x')] : []), '--count', spec.count,
+    ...(spec.shape ? ['--shape', spec.shape.join('x')] : []),
+    ...(spec.roomType !== undefined ? ['--room-type', spec.roomType] : []), '--count', spec.count,
     ...spec.contrived.flatMap(route => ['--contrived', route])]),
   '--comparator', 'tools/foundation/entity-state-pair.mjs', ...pass('--comparator-arg', ['--entity', spec.name]),
   '--native-frame-timeout', '120',

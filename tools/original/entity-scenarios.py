@@ -28,6 +28,8 @@ paired = load('entity_paired', 'foundation-paired-scenarios.py')
 runner = load('entity_clock', 'foundation-clock-run.py')
 codec = runner.codec
 GENERATOR = ROOT / 'engine/target/debug/floor'
+# --room-type restricts discovery to one authored room type (e.g. 13).
+ROOM_TYPES = None
 # Door slots 0..3 are left, up, right, down. Hold frames match the traversal
 # route that crosses each ordinary 1x1 starting-room doorway.
 DEPART = (('a', 72), ('w', 74), ('d', 72), ('s', 18))
@@ -99,7 +101,7 @@ def admitting_slots(generated, entity, shape=(13, 7)):
         template = descriptor['template']
         # Ordinary (1) and miniboss (6) 13x7 rooms, or ordinary larger shapes;
         # boss rooms are never adjacent to the start.
-        types = (1, 6) if shape == (13, 7) else (1,)
+        types = ROOM_TYPES or ((1, 6) if shape == (13, 7) else (1,))
         if template['type'] not in types or (template['width'], template['height']) != shape:
             continue
         if entity[0] is not None and not spawns:
@@ -138,10 +140,13 @@ def main():
     parser.add_argument('--contrived', action='append', default=[], metavar='CODE:SLOT')
     parser.add_argument('--count', type=int, default=2, help='OS-random cases to discover')
     parser.add_argument('--attempts', type=int, default=4000)
+    parser.add_argument('--room-type', type=int, help='authored room type to enter (default ordinary 1, or 1/6 at 13x7)')
     parser.add_argument('--shape', default='13x7', help='authored room WIDTHxHEIGHT (13x7, 13x14, 26x7, 26x14)')
     args = parser.parse_args()
     entity = (args.type, args.variant if args.type is not None else None)
     shape = tuple(int(part) for part in args.shape.split('x'))
+    global ROOM_TYPES
+    ROOM_TYPES = (args.room_type,) if args.room_type is not None else None
     cases = []
     for index, item in enumerate(args.contrived):
         code, slot = item.split(':')
