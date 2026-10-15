@@ -27,9 +27,10 @@ const replay = load(resolve(directory, 'case.json'));
 assert.equal(browser.status, 'pass', 'Actual production DOM/WASM capture must pass');
 const frames = new Map(browser.frames.map(frame => [frame.label, frame]));
 const observations = new Map(native.debugObservations.map(row => [row.context.label, row.observation]));
-const labels = replay.pairedTape.filter(action => action.type === 'capture').map(action => action.label);
-const start = labels.indexOf('exit-start');
-assert.ok(start >= 0 && labels.includes('next-stage'), 'The tape must declare exit-start and next-stage');
+// `exit-start` labels a step; the graded captures follow it.
+const marker = replay.pairedTape.findIndex(action => action.label === 'exit-start');
+const labels = replay.pairedTape.slice(marker + 1).filter(action => action.type === 'capture').map(action => action.label);
+assert.ok(marker >= 0 && labels.includes('next-stage'), 'The tape must declare exit-start and next-stage');
 const checks = [], diagnostics = [];
 const row = (list, label, field, expected, actual) => list.push({ label, field, expected, actual,
   status: JSON.stringify(expected) === JSON.stringify(actual) ? 'pass' : 'fail' });
@@ -37,7 +38,7 @@ const check = (...args) => row(checks, ...args), diagnostic = (...args) => row(d
 const CLIPS = { Closed: 'closed', 'Open Animation': 'openAnimation' };
 const PLAYER_CLIPS = ['Trapdoor', 'Appear'];
 let finalStage;
-for (const label of labels.slice(start)) {
+for (const label of labels) {
   const source = observations.get(label)?.gameplay, candidate = frames.get(label);
   assert.ok(candidate, `Missing production checkpoint ${label}`);
   if (source?.status !== 'pass') { check(label, 'observation', 'pass', source?.status ?? 'missing'); continue; }

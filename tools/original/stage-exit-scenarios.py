@@ -8,7 +8,7 @@ fights with its own public keys over a fixed window. The original replays
 the fixture's recorded keys, which a fresh original reproduces exactly. The
 port replays keys recorded closed-loop in the production build
 (boss-route-record.mjs --fight). Both segments end parked in the bottom-left
-corner and are padded to the same frame count. From `exit-start` both games
+corner and are padded to the same frame count. After `exit-start` both games
 receive identical keys, recorded in the port with --exit, onto the award
 trapdoor and through the stage transition. Only the shared tail is graded.
 
@@ -74,8 +74,10 @@ def fought(fixture):
 def case(fixture, base, fights, identifier, randomized, idle, via):
     result = json.loads(json.dumps(base))
     for name, fight in fights.items():
-        result[name] = result[name] + fight + [{'type': 'step', 'frames': WINDOW - frames(fight) + idle},
-                                              {'type': 'capture', 'label': 'exit-start'}]
+        # `exit-start` labels the padding step rather than a capture: where
+        # each game's corner press releases depends on its fight, so the first
+        # graded checkpoint comes after the trapdoor snaps the player.
+        result[name] = result[name] + fight + [{'type': 'step', 'frames': WINDOW - frames(fight) + idle, 'label': 'exit-start'}]
     tail = record(result, '--from', 'exit-start', '--exit', 1500, *(['--via', f'{via[0]},{via[1]}'] if via else []))
     if tail['status'] != 'pass':
         return None, f"port-exit: {tail['reason']}"
