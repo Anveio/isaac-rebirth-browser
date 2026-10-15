@@ -120,6 +120,9 @@ pub(crate) fn dispatch_player(
 ) -> Result<DispatchOutcome, String> {
     match plan.controller {
         ControllerChannel::RegularShots => Ok(DispatchOutcome::RegularTear),
+        ControllerChannel::MonstroLung => {
+            crate::monstros_lung::dispatch_player(state, plan, input, phase, callback_aim)
+        }
         ControllerChannel::OrdinaryKnife => ordinary_knife(state, plan, input, phase, callback_aim),
         ControllerChannel::OrdinaryFetus => {
             crate::dr_fetus::dispatch_player(state, plan, input, phase, callback_aim)

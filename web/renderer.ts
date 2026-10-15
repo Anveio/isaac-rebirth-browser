@@ -362,9 +362,11 @@ export class Renderer {
     if (!hidePlayer) this.drawPlayer(ctx, state);
     for (const tear of state.tears) {
       const color = tear.sourceColor;
-      //RegularTear's white authored layer receives its birth-owned ColorMod.
+      //The selected Regular/Blood authored layer receives its birth-owned ColorMod.
       //Keep all11 components in state; project tint and final RGB offsets.
-      this.assets.draw(ctx, TEAR, `RegularTear${tear.animationTier}`, Math.round(tear.x * 2) / 2, Math.round(tear.y * 2) / 2, tear.age,
+      const blood = tear.sourceVariant === 1;
+      this.assets.draw(ctx, blood ? "gfx/002.001_blood tear.anm2" : TEAR,
+        `${blood ? "BloodTear" : "RegularTear"}${tear.animationTier}`, Math.round(tear.x * 2) / 2, Math.round(tear.y * 2) / 2, tear.age,
         { overrides: { 0: {
           RedTint: color.tint[0]! * 255, GreenTint: color.tint[1]! * 255,
           BlueTint: color.tint[2]! * 255, AlphaTint: color.tint[3]! * 255,

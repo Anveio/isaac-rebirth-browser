@@ -223,6 +223,7 @@ pub(crate) enum ControllerChannel {
     RegularShots,
     OrdinaryKnife,
     OrdinaryFetus,
+    MonstroLung,
     ControlledFetus,
     ControlledKnife,
     ChargedBrimstone,
@@ -255,6 +256,7 @@ pub(crate) fn resolve_controller(
             ControllerChannel::ControlledFetus
         }
         PrimaryWeaponC08::DrFetus => ControllerChannel::OrdinaryFetus,
+        PrimaryWeaponC08::MonstrosLung => ControllerChannel::MonstroLung,
         PrimaryWeaponC08::Ludovico => ControllerChannel::ControlledTear,
         other => ControllerChannel::Unimplemented(other),
     })
@@ -535,6 +537,27 @@ impl RegularTearPlan {
             head_timer: ((max_fire_delay as f32 * 0.45) as i32 + 7).max(11),
         })
     }
+}
+
+///Independent selected50D090(kind1) result for the229 burst. The common
+///scale/range/color/damage arithmetic matches the selected regular builder;
+///50DD18/50DB45 produces BloodTear1 instead of ordinary variant0.
+pub(crate) fn resolve_monstro_kind1(state: &State) -> Result<RegularTearPlan, String> {
+    let inputs = ItemInputs::new(
+        state
+            .player_items
+            .as_ref()
+            .ok_or("Monstro kind1 item owner absent")?,
+    )?;
+    if state.weapon_admission.source_player_type != Some(0)
+        || state.weapon_cache.primary != PrimaryWeaponC08::MonstrosLung
+        || !inputs.admits_monstro_kind1_context()
+        || inputs.pending_cache().0 & RegularTearPlan::INPUT_CACHE_MASK.0 != 0
+        || state.weapon_cache.flags_c98.0 != 0
+    {
+        return Err("Monstro kind1 requires its independent current cache/context".into());
+    }
+    RegularTearPlan::resolve(state.player_stats, state.max_fire_delay, state.weapon_cache)
 }
 
 ///Actual50D090(kind3) builder/status frontier, independent of actor511D90
