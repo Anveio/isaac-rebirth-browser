@@ -195,6 +195,14 @@ def compare_history(case_definition, paired_rows, *, sides=('native', 'browser')
     """Compare actual history; native-only reads cannot establish paired parity."""
     if sides not in (('native', 'browser'), ('native',)):
         raise ValueError('Expected the paired contract or explicit native-only readback')
+    if case_definition.get('requires', {}).get('historyWitnessContract') == 'controlled-brim-properties-priority-v1':
+        import importlib.util
+        from pathlib import Path
+        path = Path(__file__).with_name('composition-controlled-brim-history.py')
+        spec = importlib.util.spec_from_file_location('controlled_brim_history', path)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return module.compare_history(case_definition, paired_rows, sides=sides, shared=globals())
     requires = case_definition.get('requires', {})
     stages = requires.get('actorStages', [])
     checks, witnesses, gaps = [], [], []
