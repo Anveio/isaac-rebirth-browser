@@ -112,7 +112,10 @@ pub(crate) fn sample_initial_curse(
 }
 
 impl ResourceInputs {
-    pub(crate) fn catalog(self) -> Result<Catalog, String> {
+    pub(crate) fn catalog(&self) -> Result<Catalog, String> {
+        if self.challenges_xml.len() > 65_536 {
+            return Err("Challenge XML input exceeds 64 KiB".into());
+        }
         Catalog::from_xml(&self.challenges_xml)
     }
 }
