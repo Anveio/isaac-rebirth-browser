@@ -135,6 +135,13 @@ pub(crate) static FAMILIES: &[&Family] = &[
     &crate::wall_hugger::FAMILY,
 ];
 
+/// Every NPC type a registered family constructs, in registry order. Tools
+/// that measure coverage read the port's NPC surface here instead of keeping
+/// a copy.
+pub fn implemented_npc_kinds() -> impl Iterator<Item = u32> {
+    FAMILIES.iter().flat_map(|family| family.kinds.iter().copied())
+}
+
 pub(crate) fn family(kind: u32) -> Option<&'static Family> {
     FAMILIES
         .iter()

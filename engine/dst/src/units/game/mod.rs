@@ -9,6 +9,7 @@
 mod driver;
 mod invariants;
 
+use crate::coverage;
 use crate::entropy::Entropy;
 use crate::harness::{self, Case};
 use crate::json_diff;
@@ -150,6 +151,8 @@ impl Simulation {
                     "game: boot is a pure function of its seeds"
                 );
                 invariants::state(&game.state);
+                coverage::begin_case();
+                coverage::observe(&game.state);
                 Some(Self {
                     game,
                     tape: Tape::new(initial_seed, boot_epoch_seed),
@@ -198,6 +201,7 @@ impl Simulation {
             ),
         }
         invariants::state(&self.game.state);
+        coverage::observe(&self.game.state);
         if e.chance(1, 50) {
             self.snapshot_round_trip();
         }
@@ -252,6 +256,7 @@ impl Simulation {
     }
 
     fn finish(&mut self, case: &mut Case) {
+        coverage::end_case();
         self.snapshot_round_trip();
         self.replay_matches();
         self.continuation_matches(case.entropy);

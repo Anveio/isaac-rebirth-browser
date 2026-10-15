@@ -4,6 +4,7 @@
 //! checks Antithesis properties after every step. Locally a seeded stream
 //! makes every case reproducible; under Antithesis (`--entropy antithesis`)
 //! the platform supplies and steers every decision. See `docs/dst.md`.
+mod coverage;
 mod entropy;
 mod harness;
 mod json_diff;
@@ -281,6 +282,13 @@ fn simulate() -> ExitCode {
         if allow_unmet { " (allowed)" } else { "" },
         if passed { "pass" } else { "fail" }
     );
+    let census = names.contains(&"game").then(coverage::report);
+    if let Some(census) = &census {
+        eprintln!(
+            "rebirth-dst coverage: {} game cases; NPC kinds never simulated: {}; room types on floors never entered: {}",
+            census["gameCases"], census["unreachedNpcKinds"], census["unenteredRoomTypes"]
+        );
+    }
     if let Some(path) = &options.report {
         let report = json!({
             "schema": 1,
@@ -295,6 +303,7 @@ fn simulate() -> ExitCode {
             "cases": records,
             "retainedTapes": harness::retained_tapes(),
             "properties": results,
+            "coverage": census,
         });
         if let Some(parent) = path.parent() {
             let _ = std::fs::create_dir_all(parent);

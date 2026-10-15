@@ -252,6 +252,9 @@ pub(crate) struct ResolvedWeaponPlan {
     pub(crate) primary: PrimaryWeaponC08,
     pub(crate) controller: ControllerChannel,
     pub(crate) properties: AttackProperties,
+    /// Current cached C7C, read by the controlled caller each invocation.
+    /// This is separate from the actor's born velocity and current friction.
+    pub(crate) source_shot_speed_c7c: f32,
     pub(crate) source_range_c8c: f32,
     pub(crate) max_fire_delay: i32,
     pub(crate) regular: Option<RegularTearPlan>,
@@ -294,6 +297,7 @@ pub(crate) fn resolve_live_weapon(
             color: cache.color_ca0,
             collision_damage: stats.damage,
         },
+        source_shot_speed_c7c: stats.shot_speed,
         source_range_c8c: stats.tear_height,
         max_fire_delay,
         regular: if controller == ControllerChannel::RegularShots {
