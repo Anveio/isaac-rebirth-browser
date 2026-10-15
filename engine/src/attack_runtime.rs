@@ -920,14 +920,10 @@ pub(crate) fn advance_actor(
         record_frontier(state, "ordinaryKnifeParentHistory");
         return Ok(());
     }
-    let receiver = crate::attack_grid::knife_callback(
-        &mut state.room,
-        &grid,
-        state.knives[index].position,
-        &mut state.boot_lifecycle.shared,
-    )?;
-    if let crate::attack_grid::GridCallbackOutcome::UnadmittedKind(kind) = receiver {
-        record_frontier(state, format!("ordinaryKnifeGridKind{kind}"));
+    let position = state.knives[index].position;
+    let receiver = crate::attack_grid::knife_callback(state, &grid, position)?;
+    if let Some(channel) = receiver.frontier() {
+        record_frontier(state, format!("ordinaryKnife{channel}"));
     }
     state.knives[index].finish_full()?;
     Ok(())
