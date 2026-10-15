@@ -695,6 +695,28 @@ pub fn state(state: &State) {
         "game: player motion is finite and health is bounded",
         json!({ "player": player })
     );
+    // Grid collision keeps a body's circle off solid wall cells, so a
+    // colliding NPC's centre never leaves the room interior
+    // (`Grid::clamp_room`), whatever its speed or family.
+    if state.room_transition.is_none() {
+        let grid = state
+            .room
+            .grid
+            .clone()
+            .map(rebirth_cleanroom::grid::Grid::new);
+        if let Some(Ok(grid)) = grid {
+            let escaped = state.room.npcs.iter().find(|npc| {
+                !npc.removed
+                    && npc.grid_collision_class != 0
+                    && grid.clamp_room(npc.position, 0.0) != npc.position
+            });
+            props::always!(
+                escaped.is_none(),
+                "game: grid-colliding NPCs stay inside the room's walls",
+                json!({ "npc": escaped.map(|npc| (npc.id, npc.kind, npc.grid_collision_class, npc.position)) })
+            );
+        }
+    }
     let unfinite = unfinite_body(state);
     props::always!(
         unfinite.is_none(),
