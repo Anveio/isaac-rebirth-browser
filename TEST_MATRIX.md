@@ -245,6 +245,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | `phase` | system update/interpolation phases against a counter model | 6 | 2 | 0 |
 | `actors` | actor admission order and room identities against a list model | 4 | 2 | 0 |
 | `layout` | rectangular floor growth over every accepted seed, room count and shape mask | 11 | 2 | 1 |
+| `room_spawns` | authored spawn-group selection over every authored room and synthetic edge rooms | 11 | 4 | 0 |
 | `floor` | Basement generation structure, retries and per-descriptor room admission | 18 | 5 | 0 |
 | `grid` | grid queries and ground-collision solvers on generated rooms | 14 | 3 | 0 |
 | `contact` | mass contact responses against momentum, centre-of-mass and overlap oracles | 16 | 3 | 0 |
@@ -318,6 +319,21 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Always | layout: the reported draws reproduce the final RNG35 state | [layout.rs](engine/dst/src/units/layout.rs) |
 | Always | layout: dead ends are grown rooms no other room grows from | [layout.rs](engine/dst/src/units/layout.rs) |
 | Always | layout: expansion stops at five dead ends or five attempts | [layout.rs](engine/dst/src/units/layout.rs) |
+| Always | room_spawns: selection admits exactly the rooms and groups the source admits | [room_spawns.rs](engine/dst/src/units/room_spawns.rs) |
+| Sometimes | room_spawns: an invalid room or group is rejected | [room_spawns.rs](engine/dst/src/units/room_spawns.rs) |
+| Always | room_spawns: selection is a pure function of the room and its seed | [room_spawns.rs](engine/dst/src/units/room_spawns.rs) |
+| Always | room_spawns: selection round-trips through JSON | [room_spawns.rs](engine/dst/src/units/room_spawns.rs) |
+| Always | room_spawns: the tinted-rock candidate is an interior cell drawn from the room stream | [room_spawns.rs](engine/dst/src/units/room_spawns.rs) |
+| Always | room_spawns: the room stream advances once per group, empty ones included | [room_spawns.rs](engine/dst/src/units/room_spawns.rs) |
+| Always | room_spawns: every group with entries yields exactly one selector, in authored order | [room_spawns.rs](engine/dst/src/units/room_spawns.rs) |
+| Sometimes | room_spawns: an empty group is skipped | [room_spawns.rs](engine/dst/src/units/room_spawns.rs) |
+| Always | room_spawns: a selector holds one of its group's entries | [room_spawns.rs](engine/dst/src/units/room_spawns.rs) |
+| Always | room_spawns: a weighted entry wins unless the first entry is the fallback | [room_spawns.rs](engine/dst/src/units/room_spawns.rs) |
+| Always | room_spawns: the pick is 0x5d49d0's strict running-sum comparison against the group draw | [room_spawns.rs](engine/dst/src/units/room_spawns.rs) |
+| Always | room_spawns: a lone weighted entry always wins | [room_spawns.rs](engine/dst/src/units/room_spawns.rs) |
+| Sometimes | room_spawns: a group without weight falls back to its first entry | [room_spawns.rs](engine/dst/src/units/room_spawns.rs) |
+| Sometimes | room_spawns: spawnConfig chooses an alternate variant | [room_spawns.rs](engine/dst/src/units/room_spawns.rs) |
+| Always | room_spawns: a selector carries its group's cell, position and stream seeds | [room_spawns.rs](engine/dst/src/units/room_spawns.rs) |
 | Always | floor: requests outside stages 1 and 2 or with stage seed zero are rejected | [floor.rs](engine/dst/src/units/floor.rs) |
 | Always | floor: the first-floor entry is the normal generator with fresh run inputs | [floor.rs](engine/dst/src/units/floor.rs) |
 | Always | floor: generation is a pure function of its request | [floor.rs](engine/dst/src/units/floor.rs) |

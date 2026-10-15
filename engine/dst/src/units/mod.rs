@@ -14,6 +14,7 @@ mod layout;
 mod mt;
 mod pathfinder;
 mod phase;
+mod room_spawns;
 mod seed_codec;
 
 pub const UNITS: &[Unit] = &[
@@ -41,6 +42,11 @@ pub const UNITS: &[Unit] = &[
         name: "layout",
         summary: "rectangular floor growth over every accepted seed, room count and shape mask",
         run: layout::run,
+    },
+    Unit {
+        name: "room_spawns",
+        summary: "authored spawn-group selection over every authored room and synthetic edge rooms",
+        run: room_spawns::run,
     },
     Unit {
         name: "floor",
