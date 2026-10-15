@@ -1,6 +1,7 @@
 # Regenerate: python3 tools/foundation/extract-animations.py --select-file tools/foundation/port-npc-animations.txt --out web/npc-data.json
 gfx/013.000_fly.anm2
 gfx/018.000_attack fly.anm2
+gfx/017.001_shopkeeper.anm2
 gfx/017.002_secret room keeper.anm2
 gfx/244.000_round worm.anm2
 gfx/009.000_projectile.anm2

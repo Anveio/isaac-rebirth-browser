@@ -6,9 +6,10 @@ their type, shape and the all-NPCs-admitted filter) but share one OS-random
 seed stream and one floor generation per seed. A (seed, door slot, route kind)
 that admits several specs still needing rooms is one case graded for each of
 them; random counts are met only by OS-random rooms. Identical contrived
-routes are deduplicated. Boss specs keep boss-scenarios.py and its own
-discovery and attempt budget. A spec whose discovery fails is reported in
-`failures` and every other spec's cases still run. Each case names its
+routes are deduplicated. Boss specs keep boss-scenarios.py and shop specs
+shop-scenarios.py, each with its own discovery and attempt budget. A spec
+whose discovery fails is reported in `failures` and every other spec's cases
+still run. Each case names its
 graded specs in `entity.specs`.
 """
 import argparse
@@ -33,8 +34,8 @@ codec = entity.codec
 
 def specs():
     script = ("import { entitySpecs } from './tools/e2e/entities.mjs';"
-              "console.log(JSON.stringify((await entitySpecs()).map(({ name, type, variant, shape, roomType, count, contrived, boss }) =>"
-              " ({ name, type, variant, shape, roomType, count, contrived, boss: Boolean(boss) }))));")
+              "console.log(JSON.stringify((await entitySpecs()).map(({ name, type, variant, shape, roomType, count, contrived, boss, shop }) =>"
+              " ({ name, type, variant, shape, roomType, count, contrived, boss: Boolean(boss), shop: Boolean(shop) }))));")
     return json.loads(subprocess.run(['node', '--input-type=module', '-e', script], cwd=ROOT, capture_output=True, text=True, check=True).stdout)
 
 
@@ -113,12 +114,12 @@ def room_cases(room_specs, attempts):
     return cases, failures, {'seedsTried': len(tried)}
 
 
-def boss_cases(spec, attempts):
-    args = ['python3', str(Path(__file__).with_name('boss-scenarios.py')), '--type', str(spec['type']), '--variant', str(spec.get('variant', 0)),
+def routed_cases(spec, helper, attempts):
+    args = ['python3', str(Path(__file__).with_name(helper)), '--type', str(spec['type']), '--variant', str(spec.get('variant', 0)),
             '--count', str(spec['count']), '--attempts', str(attempts), *[arg for code in spec['contrived'] for arg in ('--contrived', code)]]
     result = subprocess.run(args, cwd=ROOT, capture_output=True, text=True)
     if result.returncode:
-        return [], [{'spec': spec['name'], 'error': (result.stderr.strip().splitlines() or ['boss discovery failed'])[-1]}], None
+        return [], [{'spec': spec['name'], 'error': (result.stderr.strip().splitlines() or [f'{helper} discovery failed'])[-1]}], None
     document = json.loads(result.stdout)
     cases = [tagged(case, [spec['name']], f"{spec['name']}-{case['scenario']['id']}") for case in document['cases']]
     return cases, [], document.get('discovery')
@@ -129,6 +130,7 @@ def main():
     parser.add_argument('--only', action='append', default=[], help='spec names (repeatable or comma-separated); default every spec')
     parser.add_argument('--attempts', type=int, default=4000, help='shared room-spec seed budget')
     parser.add_argument('--boss-attempts', type=int, default=6000, help='seed budget per boss spec')
+    parser.add_argument('--shop-attempts', type=int, default=40000, help='seed budget per shop spec')
     args = parser.parse_args()
     selected = specs()
     only = {name for item in args.only for name in item.split(',') if name}
@@ -137,11 +139,12 @@ def main():
         raise SystemExit(f'Unknown entity spec {", ".join(sorted(unknown))}')
     if only:
         selected = [spec for spec in selected if spec['name'] in only]
-    cases, failures, discovery = room_cases([spec for spec in selected if not spec['boss']], args.attempts)
+    cases, failures, discovery = room_cases([spec for spec in selected if not spec['boss'] and not spec['shop']], args.attempts)
     discovery = {'rooms': discovery}
     for spec in selected:
-        if spec['boss']:
-            found, failed, summary = boss_cases(spec, args.boss_attempts)
+        if spec['boss'] or spec['shop']:
+            found, failed, summary = (routed_cases(spec, 'boss-scenarios.py', args.boss_attempts) if spec['boss']
+                                      else routed_cases(spec, 'shop-scenarios.py', args.shop_attempts))
             cases += found
             failures += failed
             discovery[spec['name']] = summary

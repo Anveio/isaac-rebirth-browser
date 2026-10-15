@@ -51,6 +51,11 @@ export function roomRows(rows, source, actual) {
   check(rows, 'room.identity', source.room.descriptorIndex, actual.currentRoom);
   check(rows, 'room.grid', [source.room.gridWidth, source.room.gridHeight], actual.room.grid && [actual.room.grid.width, actual.room.grid.height]);
   check(rows, 'room.combatClear', source.room.combatClear, actual.room.combatClear);
+  // The Basement overlay's per-room offsets (fxlayers.xml fx 2): the only
+  // layered fx entry; the port's origin adds the 663x429 centring offsets.
+  const overlay = actual.room.appearance?.fx?.overlayOrigin;
+  check(rows, 'stage.overlayOffset', source.fxLayers?.flat().map(([x, y]) => [f32(x), f32(y)]),
+    overlay && [[f32(overlay.x - (663 - 480) * 0.5), f32(overlay.y - (429 - 270) * 0.5)]]);
   check(rows, 'room.combatClearCountdown', source.room.combatClearCountdown, actual.room.combatClearCountdown);
   // A 0/0 fill is NaN on both sides: native keeps its bits, JSON gives null.
   const nativeFill = source.bossBar && (source.bossBar.fill === null ? 'NaN' : f32(source.bossBar.fill));

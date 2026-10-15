@@ -95,6 +95,19 @@ impl<'a> ItemInputs<'a> {
         self.owner.temporary_count(id)
     }
 
+    ///514FAF/5E3D70 tests Number One's collectible record, not its count.
+    ///The actual config for ID6 is kind1; this is no universal TEMP getter.
+    fn number_one_record_present(self) -> bool {
+        self.owner
+            .temporary_collectibles
+            .iter()
+            .any(|record| record.item_id == 6)
+    }
+
+    fn number_one_present(self) -> bool {
+        self.positive_owned_count(6) || self.number_one_record_present()
+    }
+
     /// Exact per-callback cache32/64 proof: other modifier and trinket owners
     /// remain outside this scope. Future property operators extend their own
     /// cache reads instead of widening controller/contact admission.
@@ -115,11 +128,66 @@ impl<'a> ItemInputs<'a> {
                 })
     }
 
-    /// Independent scalar read sets in 511F10 for fresh Isaac: items 114,
-    /// 118 and 329 have no direct term in callbacks 2, 4, 1, 8 and 16.
-    /// Current C08 still changes FireDelay first. Config 118 requests all
-    /// callbacks; that request does not imply another scalar effect.
-    fn admits_selected_scalar_completion(self) -> bool {
+    fn admits_scalar_context(self) -> bool {
+        self.owner.trinket_slots == [0, 0]
+            && self
+                .owner
+                .queued_id
+                .is_none_or(|id| items::definition(id).is_some_and(|config| config.kind != 2))
+            && self.owner.temporary_collectibles.is_empty()
+    }
+
+    /// Each callback composes its implemented effects with its proven neutral
+    /// read set. C08 remains an independent input to the ordered formulas.
+    /// Config 118's request for all callbacks adds no implicit scalar effect.
+    fn admits_scalar_stage(self, stage: CacheStage, effects: &[u32]) -> bool {
+        let neutral: &[u32] = match stage {
+            CacheStage::FireDelay => &[4, 114, 118, 329],
+            CacheStage::ShotSpeed | CacheStage::Damage => &[1, 6, 114, 118, 329],
+            CacheStage::Range => &[1, 4, 114, 118, 329],
+            CacheStage::MoveSpeed => &[1, 4, 6, 114, 118, 329],
+            _ => return false,
+        };
+        self.admits_scalar_context()
+            && self
+                .owner
+                .owned_counts
+                .iter()
+                .enumerate()
+                .all(|(id, &count)| {
+                    count == 0
+                        || (count > 0
+                            && (effects.contains(&(id as u32)) || neutral.contains(&(id as u32))))
+                })
+    }
+
+    /// Auxiliary callbacks have their own narrower source proof. Scalar
+    /// effects admitted above do not expand Flight, Familiar, Luck or history.
+    fn admits_selected_auxiliary_callbacks(self) -> bool {
+        self.admits_scalar_context()
+            && self
+                .owner
+                .owned_counts
+                .iter()
+                .enumerate()
+                .all(|(id, &count)| {
+                    count == 0 || (count > 0 && [1, 4, 114, 118, 329].contains(&id))
+                })
+    }
+
+    /// An independent strict 511F10 trace proves 68 ordered requests for zero
+    /// familiars with these inputs. Actual manager queries remain required.
+    pub(crate) fn admits_selected_zero_familiar_requests(self) -> bool {
+        self.admits_selected_auxiliary_callbacks()
+    }
+
+    pub(crate) fn admits_complete_selected_tail(self) -> bool {
+        self.admits_selected_auxiliary_callbacks() && self.owner.luck_inputs.is_some()
+    }
+
+    ///Separate literal neutral kind4/contact modifier footprint. Extending
+    ///cache32/64 support never expands this contact/controller domain.
+    pub(crate) fn admits_neutral_kind4(self) -> bool {
         self.owner.trinket_slots == [0, 0]
             && self
                 .owner
@@ -134,34 +202,6 @@ impl<'a> ItemInputs<'a> {
                 .all(|(id, &count)| {
                     count == 0 || (count > 0 && [1, 4, 114, 118, 329].contains(&id))
                 })
-    }
-
-    /// An independent strict 511F10 trace proves 68 ordered requests for zero
-    /// familiars with these inputs. Actual manager queries remain required.
-    pub(crate) fn admits_selected_zero_familiar_requests(self) -> bool {
-        self.admits_selected_scalar_completion()
-    }
-
-    pub(crate) fn admits_complete_selected_tail(self) -> bool {
-        self.admits_selected_scalar_completion() && self.owner.luck_inputs.is_some()
-    }
-
-    fn has_unmapped_owner(self, flag: u32, supported: &[u32]) -> bool {
-        self.owner
-            .owned_counts
-            .iter()
-            .enumerate()
-            .any(|(id, &count)| {
-                count != 0
-                    && !supported.contains(&(id as u32))
-                    && items::definition(id as u32)
-                        .is_some_and(|config| config.cache_flags & flag != 0)
-            })
-            || self.owner.temporary_collectibles.iter().any(|entry| {
-                !supported.contains(&entry.item_id)
-                    && items::definition(entry.item_id)
-                        .is_some_and(|config| config.cache_flags & flag != 0)
-            })
     }
 }
 
@@ -202,9 +242,14 @@ pub(crate) fn resolve_scalars(
         }
         let supported: &[u32] = match stage {
             CacheStage::FireDelay => {
-                //512354/512373 round permanent and temporary counts separately.
-                let tier =
-                    (inputs.owned_count(1) as f32 + inputs.temporary_count(1) as f32) * 0.7_f32;
+                //512320/512323 add signed Number One counts before CVTSI2SS.
+                //512354/512373 round Sad Onion counts separately, then5123DB
+                //adds that weighted contribution to the Number One term.
+                let number_one = inputs
+                    .owned_count(6)
+                    .wrapping_add(inputs.temporary_count(6));
+                let tier = number_one as f32 * 1.5_f32
+                    + (inputs.owned_count(1) as f32 + inputs.temporary_count(1) as f32) * 0.7_f32;
                 let root = (1.3_f32 * tier + 1.0_f32).max(0.0).sqrt();
                 let mut delay = 16.0_f32 - 6.0_f32 * root;
                 if tier <= 0.0 {
@@ -220,7 +265,7 @@ pub(crate) fn resolve_scalars(
                     delay -= 2.0_f32;
                 }
                 values.max_fire_delay = (delay as i32).max(1);
-                &[1, 222]
+                &[1, 6, 222]
             }
             CacheStage::ShotSpeed => {
                 // 511f68/513e48 test raw permanent and temporary143 counts
@@ -247,12 +292,19 @@ pub(crate) fn resolve_scalars(
             }
             CacheStage::Range => {
                 let roid = inputs.owned_count(14) as f32;
-                values.stats.tear_falling_speed = roid * 0.5_f32;
-                values.stats.tear_height = ((-23.75_f32 - roid * 5.0_f32)
+                //5127EE Have6, else514FAF record presence: one contribution
+                //regardless of multiplicity or the record's signed count.
+                let (height, falling) = if inputs.number_one_present() {
+                    (-7.75_f32, 0.45_f32)
+                } else {
+                    (-23.75_f32, 0.0_f32)
+                };
+                values.stats.tear_falling_speed = falling + roid * 0.5_f32;
+                values.stats.tear_height = ((height - roid * 5.0_f32)
                     - values.stats.tear_falling_speed * 0.5_f32)
                     .min(-7.0);
                 values.stats.tear_falling_acceleration = 0.0;
-                &[14]
+                &[6, 14]
             }
             CacheStage::MoveSpeed => {
                 let additive = inputs
@@ -267,8 +319,14 @@ pub(crate) fn resolve_scalars(
             }
             _ => continue,
         };
-        if (source_player_type == Some(0) && inputs.admits_selected_scalar_completion())
-            || !inputs.has_unmapped_owner(flag, supported)
+        //The literal TEMP6/negative6 values are distinct from their producer
+        //history qualification. Keep these requested until that lifecycle is
+        //admitted; only positive permanent6 expands this completion domain.
+        let unadmitted_number_one = matches!(stage, CacheStage::FireDelay | CacheStage::Range)
+            && (inputs.owned_count(6) < 0 || inputs.number_one_record_present());
+        if !unadmitted_number_one
+            && source_player_type == Some(0)
+            && inputs.admits_scalar_stage(stage, supported)
         {
             completed |= flag;
         }
@@ -289,7 +347,7 @@ pub(crate) fn resolve_neutral_flight(
     transformation_counts: Option<[i32; 2]>,
 ) -> Option<(bool, u32)> {
     (source_player_type == Some(0)
-        && inputs.admits_selected_scalar_completion()
+        && inputs.admits_selected_auxiliary_callbacks()
         && transformation_counts == Some([0, 0]))
     .then_some((false, 5))
 }
@@ -311,7 +369,7 @@ pub(crate) fn resolve_luck(
     let (Some(auxiliary), Some(run_flags)) = (inputs.owner.luck_inputs, source_run_flags) else {
         return Ok(None);
     };
-    if source_player_type != Some(0) || !inputs.admits_selected_scalar_completion() {
+    if source_player_type != Some(0) || !inputs.admits_selected_auxiliary_callbacks() {
         return Ok(None);
     }
     let sum = auxiliary

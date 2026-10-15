@@ -12,7 +12,8 @@
 //   npm run test:e2e -- --affected --base REF --list   the selection and why
 //
 // The production build is rebuilt first when web/ or engine/ sources are newer
-// than dist/ (skip with --no-build). Failed suites print how to replay them.
+// than dist/ (skip with --no-build; the native floor generator is always kept
+// fresh). Failed suites print how to replay them.
 import { spawn, spawnSync } from 'node:child_process';
 import { appendFileSync, createWriteStream, existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { join, relative, resolve } from 'node:path';
@@ -101,8 +102,9 @@ const sourcesChanged = () => ['web', 'engine/src', 'engine/Cargo.toml', 'index.h
   .map(path => join(ROOT, path)).filter(existsSync)
   .some(path => (statSync(path).isDirectory() ? newestMtime(path) : statSync(path).mtimeMs) > statSync(dist).mtimeMs);
 if (build && (!existsSync(dist) || sourcesChanged())) sh('npm', ['run', 'build']);
-// Seed discovery runs the native floor generator; cargo is a no-op when fresh.
-if (build) sh('cargo', ['build', '--manifest-path', 'engine/Cargo.toml', '--locked', '--bin', 'floor']);
+// Seed discovery runs the native floor generator; cargo is a no-op when fresh,
+// so it is rebuilt even under --no-build (a stale generator fails discovery).
+sh('cargo', ['build', '--manifest-path', 'engine/Cargo.toml', '--locked', '--bin', 'floor']);
 
 const runDirectory = output || join(ROOT, '.cache/e2e', `run-${new Date().toISOString().replace(/[:.]/g, '-')}`);
 const report = { schema: 2, status: 'running', startedAt: new Date().toISOString(), jobs, suiteArgs, suites: [],

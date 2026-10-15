@@ -51,6 +51,8 @@ pub struct Npc {
     pub death_effect_seed: Option<u32>,
     pub dead: bool,
     pub removed: bool,
+    /// Entity Init 446A90 clears the independent eligibility byte +494.
+    pub raw_494: bool,
     pub damage: combat::DamageQueue,
     pub keeper: Option<crate::keepers::KeeperState>,
     pub fireplace: Option<crate::fireplaces::FireplaceState>,
@@ -470,6 +472,19 @@ pub fn admit_room_combat(state: &mut State) {
     }
 }
 
+/// Fresh5cecc0 reads signed current16ac+pending16b0 after factories. A
+/// nonpositive total sets descriptor3d; a positive total preserves its flag.
+/// This is separate from the doorway's immediate update/countdown10 tail.
+pub(crate) fn initialize_startup_clear(state: &mut State) {
+    state.room.combat_clear_countdown = 0;
+    if state.room.manager_counts.countable_total() <= 0 {
+        state.room.combat_clear = true;
+    }
+    if !state.room.combat_clear {
+        change_doors(state, false);
+    }
+}
+
 pub fn advance_room_clear(state: &mut State) {
     // Room5d1487 checks signed dc+e0 after the full manager/contact pass.
     // It is independent of HP, visible actor count and current boss_count2490.
@@ -657,6 +672,7 @@ impl Npc {
             death_effect_seed: None,
             dead: false,
             removed: false,
+            raw_494: false,
             damage: combat::DamageQueue::default(),
             keeper: None,
             fireplace: None,

@@ -14,9 +14,9 @@ Checked-in Rust, Node and Python unit suites were removed at the user’s reques
 The sole, owner-authorized exception is the [Antithesis DST harness](dst.md) in
 `engine/dst/`: an inner-loop regression tool for engine safety and determinism,
 never original-game evidence or a merge gate.
-The current required gate is [run.mjs](../tools/e2e/run.mjs), which executes
+The live suite runner is [run.mjs](../tools/e2e/run.mjs), which executes
 every registered live original/browser suite, retaining all results even if an
-earlier suite fails. The [paired gameplay gate](../tools/foundation/paired-game.mjs) gives
+earlier suite fails. The [paired gameplay runner](../tools/foundation/paired-game.mjs) gives
 fresh original processes/profiles and an immutable production browser receive
 identical public input/presentation tails across contrived and recorded
 OS-random scenarios. Source-observable title/fader clocks, seed readback,
@@ -90,44 +90,87 @@ future capture serialization and does not regrade those archived audits.
 retains the exact producer/report scopes and unresolved fields.
 
 The shared cache evaluator now includes known scalar completion (PR233),
-negative Flight (PR236) and Familiar after Flight (PR239). Familiar239 passed
-its own production, strict Clippy and floor builds with stable inputs and 44
-own generated headers. The merged Luck254 leaf also passed these checks.
-The merged ALL-tail260 has its own compiler passes; required per-stage
-composition remains pending. Number One6 and Libra304 have source operators
-and bounded admission proofs, with no inherited gameplay acceptance.
+negative Flight (PR236), Familiar after Flight (PR239), typed Luck (PR254),
+the final ALL tail (PR260), and per-stage effect/proven-neutral item footprints
+(PR264).
+PR269 replaces config-request inference with explicit callback capabilities.
+Each cache leaf passed its own production, strict Clippy and floor checks.
+The exact same-base PR269 public-WASM regression preserves 37,914,507 complete
+field comparisons and 416 positive-owned completion rows with zero differences.
+This is local regression evidence, not new original/browser acceptance.
 
-The ordinary Knife six-case bank has completed only cases 0..2 on the private
-`2ed8a7b` producer: 571,311 checks, 37,820 differences and three functional
-failures, despite passing capture audits. The later corrected `a3209046`
-producer passed its own production, strict Clippy and floor builds. Its older
-DST run still fails four of 109 properties; the NaN-equality source correction
-on main does not retroactively regrade that execution.
+Merged PR262 carries authored whole Special STB resources through real startup
+and doorway factories. Its own production, strict Clippy and floor checks pass,
+as do six public-WASM startup/invalid-resource checks. These do not qualify
+Original/DOM equivalence or full live item history. PR266 registers the public
+item-composition driver and all four literal v7 replay cases.
 
-Merged capture/resource leaves PR232/234 and generator/route leaves PR243/247
-keep both games on the same declared public inputs. The body comparer is
-merged as PR255; helper251 is merged with independent source and retained-tuple
-peers. The v7 route grants item114 at presentation917 and item329 at1067 in
-both games, recording 280 controlled-Knife bodies (140 Full/140 fast). Its body
-comparison still fails 9,052 of 113,707 checks. The native history has 6,274
-checks and one missing preexisting-child witness; the paired helper has 18,607
-checks, 701 failures and three gaps. A separate native replay of the narrow
-post-Uninit comparer correction has 6,263 checks and the same child gap. Five
-selected browser rows prove the actual expiry boundary; they do not regrade
-the full paired result. These scopes do not accept the complete triple.
+At the retained main4e122 checkpoint, ordinary Brimstone and Knife actor
+execution remained in private producers. The later PR270 result is recorded below.
+Number One6 and Libra304 have prepared source operators and scoped admission,
+without inherited runtime or gameplay acceptance. The ordinary Knife six-case
+bank completed only cases 0..2 on `2ed8a7b`: 571,311 checks, 37,820 differences,
+three functional failures and passing capture audits. Cases 3..5 remain pending.
+The later `a3209046` producer passed its own compiler checks; its older DST run
+still fails four of 109 properties. Main's NaN-equality source correction does
+not retroactively regrade that execution.
 
-The older v5 partial comparison retains its 17,123 differences. A separate
-readback corrects 970 Game-flag schema errors without changing that report;
-v7 also matches 970 actual Player seed fields. The complete 624-word/cursor
-and actor-roster audit remains red: at the first mismatch all words match,
-but cursors 490/463 and five missing ambient actors differ. Ambient33/68,
-live selector-change replacement cleanup, a child surviving the item329 grant,
-STB resource transport and suite registration remain pending. A separate
-Luck-plus-ABI257 own producer passes production and seven XML-only public
-transport checks; these do not execute either game or qualify STB. The
+The a320 v7 history observed item114 at presentation917 and item329 at1067 in
+both games, with 280 controlled bodies. Its archived body113,707/9,052 and
+helper 18,607/701/3-gap results remain unchanged. The native history retains
+6,274 checks and one missing preexisting-child witness; its separate narrow
+comparer replay has 6,263 checks and the same gap. Five selected browser expiry
+rows do not regrade the full paired report. The older v5 partial comparison
+retains 17,123 differences and its separate 970-row Game-flag correction.
+
+The newer private `90ea8ed2` producer ran the identical retained native v7
+inputs. Capture and transport pass with protected inputs unchanged. C0C matches
+all 970 observations; each of the 430 primary Knife physical/saved positions and
+raw80C/810/7F8/814 owners matches, including 280 controlled rows. There remain 35
+rotation differences, and the full body comparison fails 6,822 of 113,714 checks.
+Its history has 18,614 checks, 700 failures and two missing preexisting-child
+gaps, one in each game. This is a new result, not an a320 regrade or PR270
+qualification.
+
+Complete shared-MT/actor parity remains red: 472,992 of 631,488 word comparisons,
+970 of 1,012 cursor checks and 970 actor rosters differ. At the first frontier,
+all 624 words match while cursors 490/463 and five ambient actors differ. Missing
+field/owner errors are zero; these are real simulation differences. Ambient
+consumers, actor identities/seeds, child motion, paired Original/browser child
+continuation and cleanup through item329, live selector-change cleanup and
+whole-main gameplay remain unaccepted. The
 [compact evidence](../references/isaac/foundation/items/public-ingress-and-brim10.json)
-keeps these exact producer scopes and all prior grades, including the frozen
-first32 failure (1,185,154 checks/68,333 differences), unchanged.
+adds the exact 262/269 and 90ea scopes while preserving the earlier ca63 snapshot,
+first32, Brim10 and every historical failure.
+
+The separately declared v8 route has one completed Original-only fixed-phase
+capture. Strict transport passes with unchanged protected inputs; grants occur
+at 917 and 1107, and an actual preexisting child before 329 is now observed. The
+native helper still fails 18 of 6,744 checks: two same-child full-curve movement
+gaps, eight Remove-flag gaps and eight Remove-before-full-cleanup gaps. Six
+children have actual full-curve movement/copied-line witnesses; two have only
+post-conversion fast rows before later Full manager absence. Actual Remove
+flags remain unobserved for all eight. No browser v8 or whole-history
+acceptance follows; all four declared cases and all older grades remain retained.
+
+At main `8ac96e2f` (PR270), the ordinary parent implementation is merged.
+PR270 adds the ordinary Mom's Knife subtype0 parent to main, including its
+registered slots, launch/return and Full/fast callbacks. Has118 children,
+Brimstone and Ludovico execution remain separate private/source leaves. Own
+production, strict Clippy and floor checks pass; the four-route local WASM
+regression retains 37,928,004 field comparisons with zero differences. The
+existing authorized DST consumer also compiles; no full DST run is claimed.
+
+The recorded Original114 case retains its frozen 125,788-check/8,922-failure
+grade. A separate overlapping additive report has 87,879 checks and 21,918
+failures; these totals are not summed or substituted. Each of 44 parent fields
+matches all 1,278 rows (639 Full/639 fast). C0C matches 1,466 rows, with 157
+observed charge increases, 104 launched rows, two release resets and 12 declared
+render witnesses. Four strict-f32 rotation differences, actor identity/seed,
+RNG/Init uniform, missing raw8A4/8A0/Line fields, prebirth C74/BB0 counters and
+NPC/contact/clear differences remain red. Child/controlled/triple histories and
+whole-case parity remain unaccepted. [Parent evidence](../references/isaac/foundation/items/ordinary-knife-parent-main.json)
+preserves the two report scopes and all earlier grades.
 
 Main `19906c4e`, observed on October14, includes the reviewed normal-health source callbacks, the source-only Nightmare resource prerequisite and raw snapshot accessor, and retains39 registered live suites. This is source qualification. No complete current-main39-suite production/original/browser acceptance is claimed; the frozen local f793/0f343 checkpoint and later scoped owner artifacts remain separate.
 

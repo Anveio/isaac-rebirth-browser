@@ -39,8 +39,10 @@ pub struct BossScene {
 /// ordinary admission; special large rooms keep their own gates.
 fn admitted_shape(template: &crate::room_templates::AuthoredTemplate) -> bool {
     match (template.width, template.height) {
-        // Sacrifice rooms (13) have no Room.Init branch of their own.
-        (13, 7) => matches!(template.room_type, 1 | 4 | 7 | 8 | 10 | 12 | 13),
+        // Shop2 admits its room, doors and Shopkeeper17/0; 5/150 shop
+        // placeholders and the6/8 slot remain unadmitted selectors. Sacrifice
+        // rooms (13) have no Room.Init branch of their own.
+        (13, 7) => matches!(template.room_type, 1 | 2 | 4 | 7 | 8 | 10 | 12 | 13),
         (13, 14) | (26, 7) | (26, 14) => template.room_type == 1,
         _ => false,
     }
@@ -50,14 +52,17 @@ fn admitted_shape(template: &crate::room_templates::AuthoredTemplate) -> bool {
 /// registered family constructs its authored boss. Boss rooms also need a
 /// bossportraits.xml presentation for their VS scene; minibosses enter without
 /// one. Other authored NPCs follow ordinary-room admission.
-fn supported_boss(descriptor: &crate::floor::Descriptor) -> bool {
+fn supported_boss(
+    descriptor: &crate::floor::Descriptor,
+    special: Option<&[crate::room_assets::RoomAsset]>,
+) -> bool {
     let room_type = descriptor.template.room_type;
     if !matches!(room_type, 5 | 6)
         || (descriptor.template.width, descriptor.template.height) != (13, 7)
     {
         return false;
     }
-    let Ok(asset) = crate::room_assets::for_descriptor(descriptor) else {
+    let Ok(asset) = crate::room_assets::for_descriptor_with_special(descriptor, special) else {
         return false;
     };
     let Ok(spawns) = crate::room_spawns::select(&asset, descriptor.spawn_seed) else {
@@ -79,7 +84,14 @@ fn supported_boss(descriptor: &crate::floor::Descriptor) -> bool {
 /// admitted shape, or a supported boss or miniboss room. The single owner of
 /// doorway admission, public so tools route by the engine's rule.
 pub fn admits(destination: &crate::floor::Descriptor) -> bool {
-    admitted_shape(&destination.template) || supported_boss(destination)
+    admits_with_special(destination, None)
+}
+
+fn admits_with_special(
+    destination: &crate::floor::Descriptor,
+    special: Option<&[crate::room_assets::RoomAsset]>,
+) -> bool {
+    admitted_shape(&destination.template) || supported_boss(destination, special)
 }
 
 /// Game551a10 supplies the room's authored boss presentation. Source
@@ -170,7 +182,10 @@ pub(crate) fn doorway_grid(room: &Room) -> crate::grid::Grid {
 /// Room::check_player_enter_door 5c71c0 uses Euclidean distance below 25
 /// from the authored grid position displaced outward by 18 world units.
 /// This check runs after entities in a full Room update.
-pub(crate) fn check_departure(state: &mut State) {
+pub(crate) fn check_departure(
+    state: &mut State,
+    special: Option<&[crate::room_assets::RoomAsset]>,
+) {
     if state.room_transition.is_some() {
         return;
     }
@@ -181,7 +196,7 @@ pub(crate) fn check_departure(state: &mut State) {
         }
         let target_room = door.target_room as usize;
         let destination = &state.floor.descriptors[target_room];
-        if !admits(destination) {
+        if !admits_with_special(destination, special) {
             continue;
         }
         let normal = outward(door.slot);
@@ -233,13 +248,17 @@ pub(crate) fn check_departure(state: &mut State) {
 /// The inbound state3 pre-counter then uses limit7 (5dde10).
 /// Native room admission clears velocity and puts the player one 40-unit cell
 /// inside the incoming authored doorway. Mutable Room state is restored once.
-pub(crate) fn advance_transition(state: &mut State, phase: Phase) -> bool {
+pub(crate) fn advance_transition(
+    state: &mut State,
+    phase: Phase,
+    special: Option<&[crate::room_assets::RoomAsset]>,
+) -> Result<bool, String> {
     let Some(mut transition) = state.room_transition.take() else {
-        return false;
+        return Ok(false);
     };
     if !phase.updates_nonplayers() {
         state.room_transition = Some(transition);
-        return true;
+        return Ok(true);
     }
     if transition.phase == TransitionPhase::BossScene {
         let scene = transition
@@ -263,23 +282,23 @@ pub(crate) fn advance_transition(state: &mut State, phase: Phase) -> bool {
             state.player.shooting_lock = state.player.shooting_lock.max(10);
         }
         state.room_transition = Some(transition);
-        return true;
+        return Ok(true);
     }
     if transition.phase == TransitionPhase::BossCleanup {
         // Game owns the real controls-disabled Player.Update at5dde9e before
         // resuming ordinary actors. Removing the transition ends its freeze.
-        return true;
+        return Ok(true);
     }
     if transition.phase == TransitionPhase::In && transition.full_updates < 7 {
         transition.full_updates += 1;
         state.room_transition = Some(transition);
-        return true;
+        return Ok(true);
     }
     if transition.phase == TransitionPhase::In {
         // The state3 completion branch dispatches one Player::Update at
         // 5dde9e while the room's grid/nonplayer callbacks remain frozen.
         crate::combat::advance_player_immunity(state);
-        return true;
+        return Ok(true);
     }
     // ChangeRoom5dd1b0 enables Player+7d4 before550970, whose admitted
     // Room.Update observes it. Game restores the incoming freeze afterward.
@@ -291,13 +310,20 @@ pub(crate) fn advance_transition(state: &mut State, phase: Phase) -> bool {
     state.room = match state.persisted_rooms.remove(&state.current_room) {
         Some(room) => room,
         None => {
-            let mut room = Room::from_floor_descriptor(&state.floor, state.current_room);
+            let mut room = Room::from_floor_descriptor_with_special(
+                &state.floor,
+                state.current_room,
+                special,
+            )?;
             if let Some(grid) = room.grid.as_mut() {
                 crate::grid::link_pits(grid, &mut state.boot_lifecycle.shared);
             }
             room
         }
     };
+    // Reentry owns a new Room.Init timestamp, independent of saved geometry.
+    state.room.initialization_game_update = Some(state.game_update_count);
+    state.room.loaded = false;
     state.room.initialize_path_costs();
     state.visited_rooms.insert(state.current_room);
     let door = state
@@ -319,11 +345,9 @@ pub(crate) fn advance_transition(state: &mut State, phase: Phase) -> bool {
     state.impacts.clear();
     state.bombs.clear();
     state.explosions.clear();
-    state
-        .actor_scheduler
-        .retain(|actor| actor.kind == crate::actors::ActorKind::Player);
+    crate::attack_runtime::reset_room_schedule(state);
     transition.phase = TransitionPhase::In;
     transition.full_updates = 0;
     state.room_transition = Some(transition);
-    true
+    Ok(true)
 }

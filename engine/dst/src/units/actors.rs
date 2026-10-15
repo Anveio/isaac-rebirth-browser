@@ -5,7 +5,7 @@ use crate::props;
 use rebirth_cleanroom::actors::{ActorKind, ActorRef, Scheduler};
 use serde_json::json;
 
-const KINDS: [ActorKind; 8] = [
+const KINDS: [ActorKind; 9] = [
     ActorKind::Player,
     ActorKind::Familiar,
     ActorKind::Tear,
@@ -14,6 +14,7 @@ const KINDS: [ActorKind; 8] = [
     ActorKind::Npc,
     ActorKind::Projectile,
     ActorKind::Effect,
+    ActorKind::Knife,
 ];
 
 #[derive(Default)]

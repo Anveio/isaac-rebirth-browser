@@ -39,6 +39,7 @@ def actor_stage(items, primary, family, subtype, controlled, witnesses):
 
 def history_case(name, phase, epoch, side=0, timing=0, token_index=None):
     move, shoot = [('d', 'Right'), ('a', 'Left')][side]
+    opposite_shoot = 'Left' if shoot == 'Right' else 'Right'
     segments = [
         ('ready', [], 1),
         # A fixed public approach sweep, not a fitted native position or a
@@ -50,8 +51,12 @@ def history_case(name, phase, epoch, side=0, timing=0, token_index=None):
         # Its live C18 at queued contact and later natural expiry are required
         # observations. The 42-full Pickup wait exceeds the Laser timeout15.
         ('release-brim-and-move-to-114', [move], 24),
-        ('ordinary-knife-charge', [shoot], 120),
-        ('release-knife-and-move-to-329', [move, 's'], 44),
+        # Keep charging while approaching; release near public contact and aim
+        # across the authored room. Actual maximum charge/contact/survival
+        # remain witnesses, never inferred from these durations.
+        ('ordinary-knife-charge', [opposite_shoot], 160),
+        ('approach-329-while-charged', [move, 's', opposite_shoot], 12),
+        ('release-knife-and-move-to-329', [move, 's'], 32),
         ('controlled-triple-dispatch', [shoot], 120),
         ('canceled-held', ['Right', 'Left'], 18),
         ('released', [], 60),
@@ -201,7 +206,7 @@ def main():
             raise ValueError('Authored public reset exceeds its boot-resource transport')
         case['fixture']['declaredResetJsonBytes'] = size
     write_json(output / 'scenarios.json', dict(schema=1, cases=cases,
-        publicRouteRevision='upward-sweep-28-settle24-diagonal-second-pickup-v2',
+        publicRouteRevision='maxcharge-near-contact-opposite-aim-v3',
         scope='Declared live118→114→329 public-history successor; no execution or acceptance',
         selection='Two fixed phases plus every journaled unfiltered OS projection; no outcome filtering or rerolls',
         outcomePolicy='Missing real stages/grants/actors/children/cleanup/bodies and every mismatch remain failures'))

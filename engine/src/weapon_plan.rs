@@ -5,7 +5,7 @@ use crate::{
     attack_flags::AttackFlags,
     item_pipeline::{CacheMask, ItemInputs},
     player_stats::PlayerStats,
-    projectiles,
+    projectiles, State,
 };
 use serde::{Deserialize, Serialize};
 
@@ -190,37 +190,175 @@ pub(crate) fn resolve_appearance(
     (prior, CacheMask(completed))
 }
 
-/// Live invocation support is distinct from requested selector/cache writes.
-/// An unsupported family never consumes regular birth RNG or synthesizes a
-/// Tear. Its persistent diagnostic is independent of ordinary body/tail work.
+///Source519fc0 resolves permanent329 on each admitted invocation. These
+///are caller channels, separate from actor types and secondary birth callbacks.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub(crate) enum DispatchAdmission {
-    Regular,
-    /// Ordered concrete adapter effect: retain diagnostic and invalidate the
-    /// fresh NULL-slot proof. No actor/RNG/property effects are invented.
+pub(crate) enum ControllerChannel {
+    RegularShots,
+    OrdinaryKnife,
+    ControlledKnife,
+    ChargedBrimstone,
+    ControlledBrimstone,
+    ControlledTear,
+    Unimplemented(PrimaryWeaponC08),
+}
+
+pub(crate) fn resolve_controller(
+    items: ItemInputs<'_>,
+    primary: PrimaryWeaponC08,
+) -> Result<ControllerChannel, String> {
+    Ok(match primary {
+        PrimaryWeaponC08::RegularTears => ControllerChannel::RegularShots,
+        PrimaryWeaponC08::MomsKnife if items.primary_permanent_presence(329)? => {
+            ControllerChannel::ControlledKnife
+        }
+        PrimaryWeaponC08::MomsKnife => ControllerChannel::OrdinaryKnife,
+        PrimaryWeaponC08::Brimstone if items.primary_permanent_presence(329)? => {
+            ControllerChannel::ControlledBrimstone
+        }
+        PrimaryWeaponC08::Brimstone => ControllerChannel::ChargedBrimstone,
+        PrimaryWeaponC08::Ludovico => ControllerChannel::ControlledTear,
+        other => ControllerChannel::Unimplemented(other),
+    })
+}
+
+///Current invocation's values. Cache reevaluation never broadcasts these
+///copies to already admitted actors; the actual Player callback owns reapply.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub(crate) struct AttackProperties {
+    pub(crate) flags: AttackFlags,
+    pub(crate) color: AttackColor,
+    pub(crate) collision_damage: f32,
+}
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub(crate) struct ResolvedWeaponPlan {
+    pub(crate) primary: PrimaryWeaponC08,
+    pub(crate) controller: ControllerChannel,
+    pub(crate) properties: AttackProperties,
+    pub(crate) source_range_c8c: f32,
+    pub(crate) max_fire_delay: i32,
+    pub(crate) regular: Option<RegularTearPlan>,
+}
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub(crate) enum LiveWeaponResolution {
+    Resolved(ResolvedWeaponPlan),
     Unadmitted(&'static str),
 }
 
-pub(crate) fn resolve_dispatch_admission(
+///Pure current read/resolve stage. Mutable input, C0C/C18, actual phase,
+///RNG, registration, contact and requested-primary cleanup stay concrete.
+///No builder is evaluated eagerly for a nonregular controller.
+pub(crate) fn resolve_live_weapon(
+    items: ItemInputs<'_>,
     cache: WeaponCache,
-    source_player_type: Option<u32>,
     stats: PlayerStats,
-    pending_primary_cleanup: Option<PrimaryCleanupIntent>,
-) -> Result<DispatchAdmission, String> {
+    max_fire_delay: i32,
+    admission: &WeaponAdmission,
+) -> Result<LiveWeaponResolution, String> {
     stats.validate()?;
+    if max_fire_delay <= 0 {
+        return Err("Player C78 violates its source positive clamp".into());
+    }
     if !cache.color_ca0.is_finite() || !cache.color_ccc.is_finite() {
         return Err("weapon cache contains nonfinite source color owners".into());
     }
-    if pending_primary_cleanup.is_some() {
-        return Ok(DispatchAdmission::Unadmitted("pendingPrimaryCleanup"));
+    if admission.pending_primary_cleanup.is_some() {
+        return Ok(LiveWeaponResolution::Unadmitted("pendingPrimaryCleanup"));
     }
-    if source_player_type != Some(0) {
-        return Ok(DispatchAdmission::Unadmitted("weaponContext"));
+    if admission.source_player_type != Some(0) {
+        return Ok(LiveWeaponResolution::Unadmitted("weaponContext"));
     }
-    if cache.primary != PrimaryWeaponC08::RegularTears {
-        return Ok(DispatchAdmission::Unadmitted("weaponActorFamily"));
+    let controller = resolve_controller(items, cache.primary)?;
+    Ok(LiveWeaponResolution::Resolved(ResolvedWeaponPlan {
+        primary: cache.primary,
+        controller,
+        properties: AttackProperties {
+            flags: cache.flags_c98,
+            color: cache.color_ca0,
+            collision_damage: stats.damage,
+        },
+        source_range_c8c: stats.tear_height,
+        max_fire_delay,
+        regular: if controller == ControllerChannel::RegularShots {
+            Some(RegularTearPlan::resolve(stats, max_fire_delay, cache)?)
+        } else {
+            None
+        },
+    }))
+}
+
+///Concrete owner's read-only adapter. Live dispatch handles typed frontier
+///results before actor writes; requested cache evaluation remains separate.
+pub(crate) fn resolve_current_weapon(state: &State) -> Result<LiveWeaponResolution, String> {
+    resolve_live_weapon(
+        ItemInputs::new(
+            state
+                .player_items
+                .as_ref()
+                .ok_or("Player item owner absent at firing")?,
+        )?,
+        state.weapon_cache,
+        state.player_stats,
+        state.max_fire_delay,
+        &state.weapon_admission,
+    )
+}
+
+///Actual511D90 signed3068/index0 history, distinct from kind4 modifiers.
+///It is never reconstructed from current inventory or reset on removal.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum KnifeContactAdmission {
+    Mapped,
+    UnmappedBuilderModifiers,
+    UnknownTransformationHistory,
+    TransformationProc,
+}
+pub(crate) fn admit_knife_transformation_history(
+    counts: Option<[i32; 2]>,
+) -> KnifeContactAdmission {
+    match counts {
+        None => KnifeContactAdmission::UnknownTransformationHistory,
+        Some(counts) if counts[0] >= 3 => KnifeContactAdmission::TransformationProc,
+        Some(_) => KnifeContactAdmission::Mapped,
     }
-    Ok(DispatchAdmission::Regular)
+}
+
+///Only the literal selected neutral kind4 path.257/6, TEMP, trinket and
+///unknown fresh context remain separate frontiers. No general Has wrapper.
+pub(crate) fn admits_neutral_knife_properties(
+    items: ItemInputs<'_>,
+    source_player_type: Option<u32>,
+) -> bool {
+    source_player_type == Some(0) && items.admits_neutral_kind4()
+}
+
+///Pure preflight at eligible overlap before hit-registry/queue mutation.
+///ParentKnife uses only admit_knife_transformation_history; ParentPlayer
+///also demands its real kind4 builder domain.
+pub(crate) fn admit_neutral_knife_contact(
+    items: ItemInputs<'_>,
+    source_player_type: Option<u32>,
+    counts: Option<[i32; 2]>,
+) -> KnifeContactAdmission {
+    if !admits_neutral_knife_properties(items, source_player_type) {
+        return KnifeContactAdmission::UnmappedBuilderModifiers;
+    }
+    admit_knife_transformation_history(counts)
+}
+
+///Actual neutral50D090(kind4) after registry insertion reads CURRENT C88,
+///which can differ from the earlier Knife48C copied by Player reapply.
+///This stage requests no RNG; proc/contact callback ownership is separate.
+pub(crate) fn resolve_neutral_kind4_damage(
+    items: ItemInputs<'_>,
+    source_player_type: Option<u32>,
+    stats: PlayerStats,
+) -> Result<f32, String> {
+    stats.validate()?;
+    if !admits_neutral_knife_properties(items, source_player_type) {
+        return Err("kind4 requires an unadmitted source modifier/context branch".into());
+    }
+    Ok(stats.damage)
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
