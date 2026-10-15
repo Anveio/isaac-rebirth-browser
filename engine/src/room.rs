@@ -350,6 +350,9 @@ impl Room {
                     .template
                     .room_type
                     == 21,
+                // A freshly constructed room is uncleared (descriptor+3d);
+                // hidden secret connections already took variant6.
+                barred: descriptor.template.room_type == 6 || descriptor.surprise_miniboss,
             })
             .collect::<Vec<_>>();
         room.grid = Some(crate::grid::for_room(
