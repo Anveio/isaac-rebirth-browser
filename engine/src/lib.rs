@@ -2812,11 +2812,18 @@ impl Game {
             self.state.player_animation.advance_full();
             if matches!(
                 self.state.player_animation.current,
-                Some(player_animation::Clip::UseItem | player_animation::Clip::Hit)
+                Some(
+                    player_animation::Clip::UseItem
+                        | player_animation::Clip::Hit
+                        | player_animation::Clip::Trapdoor
+                        | player_animation::Clip::Appear
+                )
             ) && self.state.player_animation.is_finished(None)
             {
                 // Current-main completion returns ordinary presentation; an
                 // interrupted Pickup never resumes its obsolete main clock.
+                // The original shows WalkDown frame0 once the stage
+                // transition's Trapdoor and Appear clips end.
                 self.state.player_animation.current = None;
             }
         }
