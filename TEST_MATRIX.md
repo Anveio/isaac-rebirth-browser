@@ -243,6 +243,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | `actors` | actor admission order and room identities against a list model | 4 | 2 | 0 |
 | `floor` | Basement generation structure, retries and per-descriptor room admission | 18 | 4 | 0 |
 | `grid` | grid queries and ground-collision solvers on generated rooms | 14 | 3 | 0 |
+| `item_pools` | ItemPool selection, depletion, fallbacks, routing and continuation | 21 | 6 | 3 |
 | `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 58 | 47 | 2 |
 | `abi` | the exported C ABI transport the browser bridge drives | 11 | 1 | 0 |
 
@@ -336,6 +337,36 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Sometimes | grid: a player wall contact changes velocity | [grid.rs](engine/dst/src/units/grid.rs) |
 | Always | grid: blast candidates are ascending, unique cells of the room | [grid.rs](engine/dst/src/units/grid.rs) |
 | Always | grid: blast queries reject non-positive, oversized and non-finite radii | [grid.rs](engine/dst/src/units/grid.rs) |
+| Unreachable | item_pools: valid construction fails | [item_pools.rs](engine/dst/src/units/item_pools.rs) |
+| Always | item_pools: managers round-trip through JSON | [item_pools.rs](engine/dst/src/units/item_pools.rs) |
+| Always | item_pools: construction rejects a zero seed and malformed achievement tables | [item_pools.rs](engine/dst/src/units/item_pools.rs) |
+| Always | item_pools: construction is a pure function of its seed and achievements | [item_pools.rs](engine/dst/src/units/item_pools.rs) |
+| Always | item_pools: construction mirrors the authored pools and the profile's unlocks | [item_pools.rs](engine/dst/src/units/item_pools.rs) |
+| Always | item_pools: pill colors take distinct effects | [item_pools.rs](engine/dst/src/units/item_pools.rs) |
+| Always | item_pools: only error rooms consume a shared draw to route | [item_pools.rs](engine/dst/src/units/item_pools.rs) |
+| Always | item_pools: room routing names an authored pool | [item_pools.rs](engine/dst/src/units/item_pools.rs) |
+| Always | item_pools: special rooms draw from their namesake pools | [item_pools.rs](engine/dst/src/units/item_pools.rs) |
+| Always | item_pools: selection is a pure function of the manager and its inputs | [item_pools.rs](engine/dst/src/units/item_pools.rs) |
+| Always | item_pools: a zero seed or unknown pool is rejected without mutation | [item_pools.rs](engine/dst/src/units/item_pools.rs) |
+| Always | item_pools: pool -1 yields no collectible without mutation | [item_pools.rs](engine/dst/src/units/item_pools.rs) |
+| Unreachable | item_pools: a valid selection fails | [item_pools.rs](engine/dst/src/units/item_pools.rs) |
+| Always | item_pools: a draw comes from its pool, the treasure fallback, Breakfast or the Bible | [item_pools.rs](engine/dst/src/units/item_pools.rs) |
+| Always | item_pools: no collectible is offered twice except Breakfast | [item_pools.rs](engine/dst/src/units/item_pools.rs) |
+| Sometimes | item_pools: a draw falls back to the treasure pool | [item_pools.rs](engine/dst/src/units/item_pools.rs) |
+| Sometimes | item_pools: a locked collectible survives every eligibility redraw | [item_pools.rs](engine/dst/src/units/item_pools.rs) |
+| Sometimes | item_pools: a special collectible is offered | [item_pools.rs](engine/dst/src/units/item_pools.rs) |
+| Always | item_pools: the special counter can only replace a draw with the Bible | [item_pools.rs](engine/dst/src/units/item_pools.rs) |
+| Always | item_pools: only Rosary's special counter lets the Bible replace a draw | [item_pools.rs](engine/dst/src/units/item_pools.rs) |
+| Always | item_pools: a draw marks the offered collectible and any the Bible replaced | [item_pools.rs](engine/dst/src/units/item_pools.rs) |
+| Sometimes | item_pools: the Bible replaces a draw | [item_pools.rs](engine/dst/src/units/item_pools.rs) |
+| Always | item_pools: weights only fall and the removed and selected maps only fill | [item_pools.rs](engine/dst/src/units/item_pools.rs) |
+| Always | item_pools: selection without depletion leaves every weight unchanged | [item_pools.rs](engine/dst/src/units/item_pools.rs) |
+| Always | item_pools: the special-item factor decays toward its floor | [item_pools.rs](engine/dst/src/units/item_pools.rs) |
+| Sometimes | item_pools: offering a special collectible lowers the special factor | [item_pools.rs](engine/dst/src/units/item_pools.rs) |
+| Always | item_pools: a drained pool reaches Breakfast within the catalog | [item_pools.rs](engine/dst/src/units/item_pools.rs) |
+| Sometimes | item_pools: a drained pool yields Breakfast | [item_pools.rs](engine/dst/src/units/item_pools.rs) |
+| Unreachable | item_pools: a manager fails to serialize or restore | [item_pools.rs](engine/dst/src/units/item_pools.rs) |
+| Always | item_pools: a serialized manager continues identically | [item_pools.rs](engine/dst/src/units/item_pools.rs) |
 | Always | game: exactly the documented invalid inputs are rejected | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: valid Tick commands always succeed | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: an over-budget Tick is rejected | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
