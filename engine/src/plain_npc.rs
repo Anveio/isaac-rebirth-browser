@@ -154,6 +154,20 @@ pub(crate) fn finished(npc: &Npc) -> bool {
 }
 
 fn update_sprite(npc: &mut Npc) -> Result<(), String> {
+    if let Some(overlay) = npc.overlay.as_mut().filter(|overlay| overlay.playing) {
+        let clip = content::clip(&npc.actor, &overlay.animation)
+            .ok_or_else(|| format!("{} has no authored overlay {}", npc.actor, overlay.animation))?;
+        let next = overlay.clock + 1.0;
+        if next.floor() < clip.frames as f32 {
+            overlay.clock = next;
+        } else if clip.looping {
+            overlay.clock = 0.0;
+        } else {
+            overlay.clock = (clip.frames - 1) as f32;
+            overlay.playing = false;
+        }
+        overlay.frame = overlay.clock.floor() as u32;
+    }
     if !npc.animation_playing {
         return Ok(());
     }
@@ -365,6 +379,18 @@ pub(crate) struct ShotParameters {
     pub speed: f32,
     /// Default ProjectileParams47eaf0 angle, drawn by the caller every update.
     pub parameter_angle: f32,
+    /// 4ba430 predictive aim: the player's velocity times this is added.
+    pub lead: f32,
+    /// ProjectileParams +4 height, +8 falling-speed and +10 velocity
+    /// overrides applied after mode0's post loop (None keeps the defaults).
+    pub adjust: Option<ShotAdjust>,
+}
+
+#[derive(Clone, Copy)]
+pub(crate) struct ShotAdjust {
+    pub height: f32,
+    pub falling_speed: f32,
+    pub velocity_scale: f32,
 }
 
 /// try_shoot_player4ba430 with a nonpredictive FireProjectiles shot. Returns whether this update chose to shoot; the shot itself follows
@@ -376,9 +402,10 @@ pub(crate) fn try_shoot_player(
     births: &mut Vec<Birth>,
     shot: ShotParameters,
 ) -> Result<bool, String> {
+    let aimed = world.player + world.player_velocity * shot.lead;
     let delta = WorldVector {
-        x: world.player.x - npc.position.x,
-        y: world.player.y - npc.position.y,
+        x: aimed.x - npc.position.x,
+        y: aimed.y - npc.position.y,
     };
     let mut chosen = false;
     let gate = on_frame(npc, world, 7)?;
@@ -392,7 +419,7 @@ pub(crate) fn try_shoot_player(
         } else if delta.x * delta.x + delta.y * delta.y < shot.range * shot.range
             && world.grid.projectile_line_clear(
                 npc.position,
-                world.player,
+                aimed,
                 world
                     .path_costs
                     .as_deref()
@@ -436,6 +463,21 @@ pub(crate) fn try_shoot_player(
             // Each shot draws its spawn seed, then Init its falling speed.
             let spawn_seed = random.next_u32();
             let initial_falling_speed = (random.uniform() - 0.5) * 0.2;
+            if let Some(adjust) = shot.adjust {
+                // Mode0's post loop stores -3/0.1, then adds the params.
+                births.push(Birth::Projectile(crate::enemy_projectiles::ProjectileBirth {
+                    position: npc.position,
+                    velocity: velocity * adjust.velocity_scale,
+                    spawn_seed,
+                    initial_falling_speed,
+                    parameter_angle: shot.parameter_angle,
+                    falling_speed: -3.0 + adjust.falling_speed,
+                    falling_acceleration: 0.1,
+                    scale: 1.0,
+                    height: -23.0 + adjust.height,
+                }));
+                continue;
+            }
             births.push(Birth::Shot(Shot {
                 position: npc.position,
                 velocity,

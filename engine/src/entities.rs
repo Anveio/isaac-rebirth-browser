@@ -109,6 +109,12 @@ pub(crate) enum Birth {
     /// A mid-room NPC with spawner-written fields (Spawn550a40 then the
     /// caller's stores), APPEAR cleared.
     Spawned(SpawnedNpc),
+    /// A mid-room NPC the spawner parents to itself and adopts as its child
+    /// (SetParent447fc0 + SetChild447f40), updated at once (vtable+0x18).
+    Child(SpawnSelector),
+    /// A mid-room NPC parented to the spawner, without entity collision,
+    /// hidden and with APPEAR cleared (Gemini's umbilical cord pieces).
+    Attached(SpawnSelector),
 }
 
 pub(crate) type Advance =
@@ -220,6 +226,7 @@ pub(crate) static FAMILIES: &[&Family] = &[
     &crate::larry::FAMILY,
     &crate::maggots::FAMILY,
     &crate::duke::FAMILY,
+    &crate::gemini::FAMILY,
 ];
 
 /// Every NPC type a registered family constructs, in registry order. Tools

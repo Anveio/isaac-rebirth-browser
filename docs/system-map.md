@@ -106,14 +106,16 @@ Two retained reciprocal Libra histories pass **503,611 / 0**, with 631 gates and
 Falling speed, prelude timers, missing registry/ordinal and complete
 actor/contact/lifecycle or DOM parity remain unaccepted.
 
-Draft314 declares four ordinary-Brim contact cases; merged315 adds typed14/18 contact
-observations/comparison;316 adds controlled-Brim property/priority history; merged317
-adds optional kind8 Room2494/born83C/velocity-delta fields. Draft318 extracts the
-unchanged Damage operator and its footprint for a separate next-producer
-qualification. The other leaves remain separate Drafts. The 315/317 tools are consumed by the retained standalone 329 comparison, with strict contact and observation gaps retained; their presence is not gameplay acceptance. Runtime312's
-controlled Brimstone and its future controlled-Tear replacement join remain
-separate Draft scope. Missing actor fields, FIFO attribution and lifecycle
-events stay failures. The [current compact record](../references/isaac/foundation/items/post-brimstone-299-and-ludo-source.json)
+Draft314 declares four ordinary-Brim contact cases, and Draft316 owns the
+controlled-Brim property/priority marker. Merged315 supplies typed14/18 contact
+observations; merged317 supplies optional kind8 Room2494/born83C/velocity-delta
+fields. Those tools are consumed by final C421, with strict contact and
+observation gaps retained. Merged318 keeps the unchanged Damage operator beside
+its footprint and is consumed by the independently built708 producer, whose
+scoped builds and retained regressions pass as recorded below. Runtime312's
+controlled Brimstone remains a separate Draft with a failing incomplete Native
+prefix comparison. Missing actor fields, FIFO attribution and lifecycle events
+stay failures. The [current compact record](../references/isaac/foundation/items/post-brimstone-299-and-ludo-source.json)
 keeps exact report and source pins; the historical checkpoints below retain
 their original grades.
 
@@ -343,6 +345,29 @@ or whole triple parity follows. Earlier grades and OS prefixes remain unchanged;
 ordinary Player Brimstone299 is now merged with the scoped results above;
 controlled Tear307 is also merged; its final retained four-case comparison remains
 134,364 checks / 20,813 failures, with contact and observation gaps above.
+
+Controlled Brimstone312 remains a separate Draft. Its 708 producer, which also
+consumes the landed Damage318 operator, passes production/strict Clippy/floor,
+37,968,484 strict retained regular checks and 503,611 reciprocal Libra property
+checks. The first fixed public replay compared with an incomplete Native prefix
+retains 86,718 checks / 7,667 failures across 1,007 paired playing gates. There
+are 541 controlled-Laser C18 bodies (270 Full / 271 Fast). Same-side stable-owner
+property transitions pass, but actual reapply callbacks remain missing/FAIL;
+transport, HP, identity/RNG and lifecycle gaps persist. The earlier
+87,458 / 7,667 report is unchanged, and no four-case paired pass follows.
+
+Merged recorder332 removes retained decoded-observation history from the
+archive path while preserving every journal record and the final report API.
+Its closed-prefix validation preserves raw JSON and gzip bytes for 3,302 records
+in bounded windows, with 36,974,592 bytes observed validation RSS. This is
+storage equivalence, not a new Native or game result. Historical per-process
+memory attribution is unavailable, and fresh-Native peak improvement remains
+unverified. The corrected Technology/Gimpy producer passes production after preserving an
+earlier compile failure. Production, strict Clippy and floor now pass; retained
+regressions and games remain pending. Their
+declared cases imply no gameplay acceptance. Merged335 adds opt-in controlled-
+Brim contact tooling with source/default/help/import validation only; its contact
+cases have not executed.
 
 Readiness287 passes a warm production retry and strict Clippy, but its floor
 build stopped at the working-memory floor. Its earlier production capacity stop

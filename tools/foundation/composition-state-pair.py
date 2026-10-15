@@ -1196,6 +1196,17 @@ for label, controlled, required in [('ordinary Knife', False, ordinary_knife_req
             missing('mandatory actual ' + label + ' rendered-frame group', t, error)
     check('required actual ' + label + ' rendered-frame witness', True, any(w['passed'] for w in seen), None)
 
+controlled_ring_contact = None
+if 'controlledBrimContact' in case['requires']:
+    try:
+        contact_path = Path(__file__).with_name('composition-controlled-brim-contact.py')
+        contact_spec = importlib.util.spec_from_file_location('controlled_brim_ring_contact', contact_path)
+        contact_module = importlib.util.module_from_spec(contact_spec)
+        contact_spec.loader.exec_module(contact_module)
+        controlled_ring_contact = contact_module.compare_contact(case, paired_rows, globals())
+    except Exception as error:
+        missing('mandatory controlled ring typed contact consumer', None, error)
+
 result = {'schema': 2, 'status': 'fail' if any(not item['passed'] for item in checks) else 'pass', 'checks': checks,
           'coverage': dict(coverage), 'damageChains': list(damage_chains.values()), 'doorwayWitnesses': doorway_witnesses, 'laserLifetimes':list(laser_lifetimes.values()), 'renderWitnesses':render_witnesses,
           'sameGateDuplicateObservations': duplicate_observations, 'history': history, 'childLifetimes': child_lifetimes, 'chargeWitnesses': charge_witnesses,
@@ -1206,6 +1217,8 @@ result = {'schema': 2, 'status': 'fail' if any(not item['passed'] for item in ch
 if common_spec is not None:
     result['commonDamageChains'] = list(common_damage_chains.values())
     result['commonContactScope'] = 'Actual common-class NPC14/18 FIFO and nonlethal next-Full HP. Player-source FIFO is not a particular Laser callback witness. Native copied EntityRef raw words/P/V are retained, not reconstructed from current sources. Countdown30 is a source callback argument, not a stored queue field. Full copied-history, registry/impulse order, lethal subclass cleanup and explicit Remove/Uninit callbacks remain separately unqualified.'
+if controlled_ring_contact is not None:
+    result['controlledRingContact'] = controlled_ring_contact
 payload = (json.dumps(result, separators=(',', ':')) + '\n').encode()
 with args.output.open('xb') as stream:
     stream.write(gzip.compress(payload, mtime=0) if str(args.output).endswith('.gz') else payload)

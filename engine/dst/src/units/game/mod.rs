@@ -46,9 +46,15 @@ pub fn run(case: &mut Case) {
         return;
     };
     let mut driver = driver::Driver::new(case.entropy);
-    if !replaying && driver.seeded() {
-        let codes = scout::codes(&simulation.game, case.entropy);
-        driver.scout(codes);
+    if !replaying {
+        // Every generated case scouts, so the scout's own must-hits never hang
+        // on how many cases drew the seeded persona; only that persona types
+        // the codes.
+        let wanted = if driver.seeded() { 3 } else { 1 };
+        let codes = scout::codes(&simulation.game, case.entropy, wanted);
+        if driver.seeded() {
+            driver.scout(codes);
+        }
     }
     let budget = if replaying {
         tape.commands.len()

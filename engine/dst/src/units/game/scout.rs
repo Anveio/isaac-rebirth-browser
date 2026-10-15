@@ -21,9 +21,9 @@ const WEAPON_CACHE: u32 = 0x100;
 const CANDIDATES: usize = 96;
 const MENU_COMMANDS: usize = 400;
 
-/// Up to a few seed codes whose first treasure room offers a weapon
+/// Up to `wanted` seed codes whose first treasure room offers a weapon
 /// collectible.
-pub fn codes(booted: &Game, e: &mut Entropy) -> Vec<String> {
+pub fn codes(booted: &Game, e: &mut Entropy, wanted: usize) -> Vec<String> {
     // Every candidate starts from the same open seed dialog.
     let Some(dialog) = walk(booted.clone(), None) else {
         return Vec::new();
@@ -41,7 +41,7 @@ pub fn codes(booted: &Game, e: &mut Entropy) -> Vec<String> {
         if scouted.is_some_and(|config| config.cache_flags & WEAPON_CACHE != 0) {
             props::sometimes!(true, "game: a scouted seed offers a weapon collectible");
             found.push(code);
-            if found.len() == 3 {
+            if found.len() == wanted {
                 break;
             }
         }

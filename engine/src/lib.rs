@@ -43,6 +43,7 @@ pub mod floor;
 mod fmath;
 pub mod gib_counts;
 pub mod gluttony;
+pub mod gemini;
 pub mod grid;
 mod grid_hazards;
 pub mod grid_records;
@@ -2719,6 +2720,25 @@ impl Game {
                 npc.hp *= spawned.health_scale;
                 Ok(())
             }
+            entities::Birth::Child(selector) => {
+                self.admit_npc_birth(index, entities::Birth::Npc(selector))?;
+                let id = {
+                    let child = self.state.room.npcs.last_mut().expect("admitted NPC birth");
+                    child.parent = Some(parent);
+                    child.id
+                };
+                self.state.room.npcs[index].child = Some(id);
+                self.advance_npc(id, phase::Phase::Update)
+            }
+            entities::Birth::Attached(selector) => {
+                self.admit_npc_birth(index, entities::Birth::Npc(selector))?;
+                let piece = self.state.room.npcs.last_mut().expect("admitted NPC birth");
+                piece.parent = Some(parent);
+                piece.entity_collision_class = 0;
+                piece.visible = false;
+                piece.no_appear = true;
+                Ok(())
+            }
             entities::Birth::FlungNpc(selector, velocity) => {
                 self.admit_npc_birth(index, entities::Birth::Npc(selector))?;
                 let npc = self.state.room.npcs.last_mut().expect("admitted NPC birth");
@@ -3128,6 +3148,23 @@ impl Game {
     pub fn json(&self) -> String {
         serde_json::to_string(&self.state).expect("state contains finite values")
     }
+    /// The browser's per-tick state: `json` with background stains elided.
+    pub fn frame_json(&self) -> String {
+        familiars::with_background_stains_elided(|| self.json())
+    }
+    /// The current room's background stains from index `from`, with the room
+    /// identity (index and Room.Init stamp) that scopes the append-only list.
+    pub fn background_stains_since_json(&self, from: usize) -> String {
+        let room = &self.state.room;
+        let stains = room.background_stains.get(from..).unwrap_or(&[]);
+        serde_json::to_string(&serde_json::json!({
+            "room": self.state.current_room,
+            "initialization": room.initialization_game_update,
+            "total": room.background_stains.len(),
+            "stains": stains,
+        }))
+        .expect("background stains contain finite values")
+    }
 }
 
 thread_local! {
@@ -3256,6 +3293,28 @@ pub extern "C" fn snapshot_ptr() -> *const u8 {
 #[no_mangle]
 pub extern "C" fn snapshot_len() -> usize {
     SNAPSHOT.with(|snapshot| snapshot.borrow().len())
+}
+fn store_snapshot(text: impl FnOnce(&Game) -> String) -> *const u8 {
+    SNAPSHOT.with(|snapshot| {
+        *snapshot.borrow_mut() = GAME.with(|game| {
+            game.borrow()
+                .as_ref()
+                .map(text)
+                .unwrap_or_else(|| "null".into())
+                .into_bytes()
+        });
+        snapshot.borrow().as_ptr()
+    })
+}
+/// Per-tick browser state without background stains; length via `snapshot_len`.
+#[no_mangle]
+pub extern "C" fn frame_snapshot_ptr() -> *const u8 {
+    store_snapshot(Game::frame_json)
+}
+/// Current-room background stains from `from` onward; length via `snapshot_len`.
+#[no_mangle]
+pub extern "C" fn background_stains_ptr(from: u32) -> *const u8 {
+    store_snapshot(|game| game.background_stains_since_json(from as usize))
 }
 #[no_mangle]
 pub extern "C" fn error_ptr() -> *const u8 {
