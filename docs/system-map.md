@@ -252,6 +252,21 @@ second reaches 610/748 presentations with an unfinished tape and full transport
 FAIL. No new DOM, history-helper, complete lifetime or triple parity follows.
 The PR297 evidence capsule remains an unchanged historical snapshot.
 
+PR301 subsequently merged at `78dcabee`, implementing controlled Knife on the
+same store, allocator and registered C18 as ordinary/Has118 Knife. Its own
+production, strict Clippy and floor checks pass; four public-WASM routes retain
+37,956,648 preexisting fields with zero differences. The 1,624 new D9C observations
+are additive type checks, not baseline numeric parity. The fixed Knife-first
+comparison remains 106,884/8,755 FAIL plus one missing old history marker.
+In 281 post329 observations (141 Full/140 fast), parent physical/saved position,
+velocity, DA0 and C18 retention match; 280 rows carry bit33. All 12 child births and
+614 child bodies remain, 64 after329. The current report retains 37 strict parent
+rotation differences (34 post329), 136 pre329 DA0 differences and inherited
+identity/seed/Init8A8, shared-MT and child-geometry failures. Snapshot observations
+leave short Remove/Uninit events unqualified. No DOM/render, full624, contact/lifetime
+or whole triple parity follows. Earlier grades and OS prefixes remain unchanged;
+ordinary Player Brimstone299 and controlled Tear307 remain separate Drafts.
+
 Readiness287 passes a warm production retry and strict Clippy, but its floor
 build stopped at the working-memory floor. Its earlier production capacity stop
 is also retained; public-game contracts remain unexecuted. Pending capture-tool

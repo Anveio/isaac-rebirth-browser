@@ -248,13 +248,14 @@ fn admit_child(
     if birth.variant == 30 && subtype == 2 {
         return Ok(()); // Actual golden key Init/collection remains unsupported.
     }
-    let definition_subtype = if birth.variant == 40 && matches!(subtype, 3 | 5) {
-        1
-    } else {
-        subtype
-    };
     let id = *next_pickup;
-    let mut pickup = Pickup::spawn(id, birth.variant, definition_subtype, birth.position, true)?;
+    let mut pickup = Pickup::spawn(
+        id,
+        birth.variant,
+        crate::pickups::definition_subtype(birth.variant, subtype),
+        birth.position,
+        true,
+    )?;
     pickup.subtype = subtype;
     pickup.initialize_spawn_seed(birth.spawn_seed)?;
     pickup.velocity = birth.velocity;

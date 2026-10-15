@@ -31,7 +31,7 @@ mod effects;
 pub mod enemy_projectiles;
 mod entities;
 pub mod sprite_color;
-pub use entities::supports_npc_selector;
+pub use entities::{implemented_npc_kinds, supports_npc_selector};
 pub mod familiars;
 pub mod fireplaces;
 pub mod floor;
