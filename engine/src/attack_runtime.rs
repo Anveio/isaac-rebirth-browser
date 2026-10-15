@@ -139,9 +139,11 @@ pub(crate) fn dispatch_player(
         ControllerChannel::ControlledBrimstone => {
             crate::controlled_brimstone::dispatch_player(state, plan, input, phase, callback_aim)
         }
+        ControllerChannel::ControlledTechnology => {
+            crate::controlled_technology::dispatch_player(state, plan, input, phase, callback_aim)
+        }
         unsupported => {
             let channel = match unsupported {
-                ControllerChannel::ControlledTechnology => "controlledTechnology",
                 ControllerChannel::Unimplemented(_) => "unimplementedPrimary",
                 _ => unreachable!("implemented controller matched above"),
             };
