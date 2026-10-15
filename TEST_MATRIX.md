@@ -250,7 +250,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | `contact` | mass contact responses against momentum, centre-of-mass and overlap oracles | 16 | 3 | 0 |
 | `pathfinder` | FindGridPath's flood against an independent node-weighted Dijkstra | 6 | 5 | 0 |
 | `item_pools` | ItemPool selection, depletion, fallbacks, routing and continuation | 21 | 6 | 3 |
-| `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 64 | 51 | 2 |
+| `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 64 | 52 | 2 |
 | `abi` | the exported C ABI transport the browser bridge drives | 15 | 3 | 0 |
 
 <details><summary>Every declared DST property</summary>
@@ -441,6 +441,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Sometimes | game: ticks elapse while paused | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Reachable | game: a run starts through the public menus | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: a run starts in the starting room of its seed's floor | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Sometimes | game: a new run's player walks on from the starting room within its first command | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: a seeded run starts | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: a Random character run starts | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: key events never advance simulation or consume the shared stream | [invariants.rs](engine/dst/src/units/game/invariants.rs) |

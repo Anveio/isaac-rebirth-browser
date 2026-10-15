@@ -254,13 +254,23 @@ pub fn transition(before: &State, command: &Command, after: &State) {
                 let floor = rebirth_cleanroom::floor::generate_basement(seed::stage1_seed(
                     after.run_seed_value,
                 ));
+                // Held keys survive a GameOver restart, so a long tick can
+                // carry the new run's player on through doors once its start
+                // hold ends: the rooms it visits are a walk from the start.
                 props::always!(
                     floor.as_ref().ok() == Some(&after.floor)
-                        && after.current_room == after.floor.starting_descriptor
                         && after.run_tick <= count
-                        && after.visited_rooms == BTreeSet::from([after.current_room]),
+                        && walk_from_start(after),
                     "game: a run starts in the starting room of its seed's floor",
-                    json!({ "runSeed": after.run_seed })
+                    json!({
+                        "runSeed": after.run_seed,
+                        "currentRoom": after.current_room,
+                        "visitedRooms": after.visited_rooms,
+                    })
+                );
+                props::sometimes!(
+                    after.current_room != after.floor.starting_descriptor,
+                    "game: a new run's player walks on from the starting room within its first command"
                 );
                 props::sometimes!(after.seeded_run, "game: a seeded run starts");
                 props::sometimes!(
@@ -423,6 +433,29 @@ pub fn transition(before: &State, command: &Command, after: &State) {
 /// per nonplayer pass: countable actors reset a ten-pass countdown, and only
 /// an empty pass entered with the countdown expired marks the room clear and
 /// reopens the doors combat shut. A bomb may reveal a secret door mid-combat.
+/// The visited rooms are the starting room and rooms reached from it
+/// through visited neighbours, the current room among them.
+fn walk_from_start(state: &State) -> bool {
+    let start = state.floor.starting_descriptor;
+    let visited = &state.visited_rooms;
+    if !visited.contains(&start) || !visited.contains(&state.current_room) {
+        return false;
+    }
+    let mut reached = BTreeSet::from([start]);
+    let mut frontier = vec![start];
+    while let Some(room) = frontier.pop() {
+        let Some(descriptor) = state.floor.descriptors.get(room) else {
+            return false;
+        };
+        for next in descriptor.neighbors.iter().flatten().copied() {
+            if visited.contains(&next) && reached.insert(next) {
+                frontier.push(next);
+            }
+        }
+    }
+    reached == *visited
+}
+
 fn room_clear(before: &State, command: &Command, after: &State) {
     let same_room = before.screen == Screen::Playing
         && after.screen == Screen::Playing
