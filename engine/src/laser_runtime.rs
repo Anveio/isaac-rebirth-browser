@@ -18,13 +18,17 @@ enum LaserFrontier {
     EffectTargetFields,
     GridKind(u32),
 }
-fn record_frontier(state: &mut State, reason: LaserFrontier) {
+fn record_frontier(state: &mut State, index: usize, reason: LaserFrontier) {
     let channel = match reason {
         LaserFrontier::ContactModifiers => "ordinaryBrimstoneContactModifiers".into(),
         LaserFrontier::TransformationHistory => "ordinaryBrimstoneTransformationHistory".into(),
         LaserFrontier::EffectTargetFields => "ordinaryBrimstoneEffectTargetFields".into(),
         LaserFrontier::GridKind(kind) => format!("ordinaryBrimstoneGridKind{kind}"),
     };
+    if state.lasers[index].origin == crate::lasers::LaserOrigin::PlayerTechnology2 {
+        crate::technology2::diagnostic(state, &channel);
+        return;
+    }
     state
         .weapon_admission
         .record_unadmitted(state.weapon_cache.primary, &channel);
@@ -131,7 +135,7 @@ fn contact_callbacks(state: &mut State, index: usize) -> Result<(), String> {
     //diagnostic priority below. The real resolver still runs after enqueue.
     let transform_admission = crate::weapon_plan::admit_current_laser_contact_flags(state)?;
     let Some(counts) = state.player.transformation_counts else {
-        record_frontier(state, LaserFrontier::TransformationHistory);
+        record_frontier(state, index, LaserFrontier::TransformationHistory);
         return Ok(());
     };
     let owner = state
@@ -140,14 +144,16 @@ fn contact_callbacks(state: &mut State, index: usize) -> Result<(), String> {
         .ok_or("Laser requires actual first Player items")?;
     let inputs = crate::item_pipeline::ItemInputs::new(owner)?;
     if counts[0] >= 3 {
-        record_frontier(state, LaserFrontier::TransformationHistory);
+        record_frontier(state, index, LaserFrontier::TransformationHistory);
         return Ok(());
     }
     if inputs.positive_owned_count(151)
         || inputs.positive_owned_count(213)
-        || (!inputs.admits_neutral_kind3() && !inputs.admits_technology_kind3_getter())
+        || (!inputs.admits_neutral_kind3()
+            && !inputs.admits_technology_kind3_getter()
+            && !inputs.admits_technology2_kind3_getter())
     {
-        record_frontier(state, LaserFrontier::ContactModifiers);
+        record_frontier(state, index, LaserFrontier::ContactModifiers);
         return Ok(());
     }
     //This is the actual kind3 builder/status frontier, separate from476D70's
@@ -155,10 +161,10 @@ fn contact_callbacks(state: &mut State, index: usize) -> Result<(), String> {
     //geometry/HP validation in the actual target/overlap kernel precedes the
     //first queue write; valid unmapped modifiers preserve body continuation.
     if query.unadmitted_effect_fields {
-        record_frontier(state, LaserFrontier::EffectTargetFields);
+        record_frontier(state, index, LaserFrontier::EffectTargetFields);
     }
     if transform_admission != crate::weapon_plan::LaserStatusAdmission::Mapped {
-        record_frontier(state, LaserFrontier::ContactModifiers);
+        record_frontier(state, index, LaserFrontier::ContactModifiers);
         return Ok(());
     }
     for contact in contacts {
@@ -168,7 +174,7 @@ fn contact_callbacks(state: &mut State, index: usize) -> Result<(), String> {
                     return Err("Laser direct31F callback requires actual Effect owner".into());
                 }
                 //No canonical main Effect31F target owner is currently admitted.
-                record_frontier(state, LaserFrontier::EffectTargetFields);
+                record_frontier(state, index, LaserFrontier::EffectTargetFields);
             }
             LaserContact::Damage {
                 target,
@@ -211,7 +217,7 @@ fn contact_callbacks(state: &mut State, index: usize) -> Result<(), String> {
                 //or cached flags cannot replace this current status resolver.
                 let flags = crate::weapon_plan::resolve_current_laser_contact_flags(state)?;
                 if flags.0 & !3 != 0 {
-                    record_frontier(state, LaserFrontier::ContactModifiers);
+                    record_frontier(state, index, LaserFrontier::ContactModifiers);
                 }
             }
         }
@@ -247,7 +253,7 @@ pub(crate) fn run_line_contacts(
             &mut state.boot_lifecycle.shared,
         )?;
         if let crate::attack_grid::GridCallbackOutcome::UnadmittedKind(kind) = outcome {
-            record_frontier(state, LaserFrontier::GridKind(kind));
+            record_frontier(state, index, LaserFrontier::GridKind(kind));
         }
     }
     state.lasers[index].finish_grid_contacts();
@@ -273,7 +279,8 @@ pub fn advance_actor(state: &mut State, phase: Phase, id: u32) -> Result<(), Str
             crate::laser_npc_runtime::advance_actor(state, phase, id)
         }
         crate::lasers::LaserOrigin::PlayerCharged
-        | crate::lasers::LaserOrigin::PlayerTechnology => {
+        | crate::lasers::LaserOrigin::PlayerTechnology
+        | crate::lasers::LaserOrigin::PlayerTechnology2 => {
             crate::laser_player_runtime::advance_actor(state, phase, id)
         }
         crate::lasers::LaserOrigin::PlayerControlled => {
@@ -362,6 +369,13 @@ pub(crate) fn uninit_actor(state: &mut State, actor: ActorRef) -> Result<(), Str
     for slot in &mut state.attack_runtime.secondary {
         if *slot == Some(actor) {
             *slot = None;
+        }
+    }
+    //Actual BaseUninit releases incoming519130 registrations. Remove does
+    //not clear C40. Preserve an unknown outer owner and its historical note.
+    if let Some(slot) = &mut state.attack_runtime.technology2_c40 {
+        if slot.pointer_known && slot.actor == Some(actor) {
+            slot.actor = None;
         }
     }
     Ok(())

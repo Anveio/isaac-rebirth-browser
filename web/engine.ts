@@ -272,11 +272,11 @@ export interface StageEffects {
 }
 export interface State {
   weaponCache: {primary: number; flagsC98: [number,number]; colorCa0: AttackColor; colorCcc: AttackColor};
-  attackRuntime: {chargeC0c: number | null; aimRotationC70?: number | null; headDirectionDa0: number | null; shootingAimDb4: {x: number; y: number} | null; movementDirectionD9c: number | null; playerDc4: {x: number; y: number} | null; persistent: ActorRef | null; secondary: (ActorRef | null)[]; nextKnife: number};
+  attackRuntime: {chargeC0c: number | null; aimRotationC70?: number | null; headDirectionDa0: number | null; shootingAimDb4: {x: number; y: number} | null; movementDirectionD9c: number | null; playerDc4: {x: number; y: number} | null; persistent: ActorRef | null; secondary: (ActorRef | null)[]; technology2C40?: {pointerKnown: boolean; actor: ActorRef | null; firstDiagnostic: string | null}; nextKnife: number};
   knives: Knife[];
   stageShootingGuard: {state: number; counter: number};
   weaponAdmission: {sourcePlayerType: number|null; c18IsKnownEmpty: boolean; pendingPrimaryCleanup: {fromPrimary:number;toPrimary:number}|null; unadmittedController: {primary:number;channel:string}|null};
-  lasers: {id:number; origin:"npcShootAngle"|"playerCharged" | "playerControlled" | "playerTechnology"; uninitialized:boolean|null; entityType:number; variant:number; subtype:number;
+  lasers: {id:number; origin:"npcShootAngle"|"playerCharged" | "playerControlled" | "playerTechnology" | "playerTechnology2"; uninitialized:boolean|null; entityType:number; variant:number; subtype:number;
     spawnSeed:number; parent:ActorRef|null; child:ActorRef|null; active:boolean; dead:boolean; visible:boolean;
     position:{x:number;y:number}; savedPosition:{x:number;y:number}; renderOffset:{x:number;y:number};
     parentOffset:{x:number;y:number}; angle:number; renderSortOffset:number; remainingUpdates:number;

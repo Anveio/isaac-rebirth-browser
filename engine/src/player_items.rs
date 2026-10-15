@@ -562,10 +562,10 @@ pub(crate) fn add_collectible(
         .as_mut()
         .expect("checked Player item owner");
     owner.owned_counts[id as usize] = owner.owned_counts[id as usize].wrapping_add(1);
-    //Only actual2/4 Add paths have a closed neutral C70 lifetime here.
+    //Only actual2/4/152 Add paths have a closed neutral C70 lifetime here.
     //Keep an existing owner for those grants; other producers invalidate it.
     //Neither current counts nor a cache evaluation can recreate this word.
-    if !matches!(id, 2 | 4) {
+    if !matches!(id, 2 | 4 | 152) {
         state.attack_runtime.aim_rotation_c70 = None;
     }
     //68 has the same closed zero-amount/common auxiliary producer. Preserve

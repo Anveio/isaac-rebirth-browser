@@ -16,6 +16,14 @@ const LIBRA_SCALAR_FLAGS: u32 = 0x1b;
 const TECHNOLOGY2_DAMAGE_ITEMS: &[usize] = &[4, 152];
 const TECHNOLOGY2_SHOT_SPEED_ITEMS: &[usize] = &[4, 152];
 const TECHNOLOGY2_GRANT_ITEMS: &[usize] = &[4, 152];
+const TECHNOLOGY2_PRIMARY_ITEMS: &[usize] = &[4, 152];
+const TECHNOLOGY2_SECONDARY_ITEMS: &[usize] = &[4, 152];
+const TECHNOLOGY2_KIND1_ITEMS: &[usize] = &[4, 152];
+const TECHNOLOGY2_KIND3_ITEMS: &[usize] = &[4, 152];
+const TECHNOLOGY2_PRIMARY_QUEUED: &[usize] = &[4, 152];
+const TECHNOLOGY2_SECONDARY_QUEUED: &[usize] = &[4, 152];
+const TECHNOLOGY2_KIND1_QUEUED: &[usize] = &[4, 152];
+const TECHNOLOGY2_KIND3_QUEUED: &[usize] = &[4, 152];
 
 // Source-owned footprints remain independent even when their admitted counts
 // currently match. Cache completion is never a kind5 or grant-history proof.
@@ -320,6 +328,28 @@ impl<'a> ItemInputs<'a> {
                 .all(|(id, &count)| {
                     count == 0 || (count > 0 && [1, 4, 114, 118, 329, 257, 304].contains(&id))
                 })
+    }
+
+    ///Actual519FC0 primary and52F370 secondary caller footprints remain distinct.
+    pub(crate) fn admits_technology2_primary(self) -> bool {
+        self.admits_technology2_readset(TECHNOLOGY2_PRIMARY_ITEMS, TECHNOLOGY2_PRIMARY_QUEUED)
+    }
+    pub(crate) fn admits_technology2_secondary(self) -> bool {
+        self.admits_technology2_readset(TECHNOLOGY2_SECONDARY_ITEMS, TECHNOLOGY2_SECONDARY_QUEUED)
+    }
+    ///Selected50D090 kind1 and kind3 never inherit a factory/cache permission.
+    pub(crate) fn admits_technology2_kind1_getter(self) -> bool {
+        self.admits_technology2_readset(TECHNOLOGY2_KIND1_ITEMS, TECHNOLOGY2_KIND1_QUEUED)
+    }
+    pub(crate) fn admits_technology2_kind3_getter(self) -> bool {
+        self.admits_technology2_readset(TECHNOLOGY2_KIND3_ITEMS, TECHNOLOGY2_KIND3_QUEUED)
+    }
+    fn admits_technology2_readset(self, supported: &[usize], queued: &[usize]) -> bool {
+        self.admits_permanent_readset(152, supported)
+            && self
+                .owner
+                .queued_id
+                .is_none_or(|id| queued.contains(&(id as usize)))
     }
 
     ///Independent5139B1→513E10 Damage callback context only.

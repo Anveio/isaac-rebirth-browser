@@ -88,12 +88,17 @@ pub enum LaserOrigin {
     PlayerCharged,
     PlayerControlled,
     PlayerTechnology,
+    ///Actual50E1C0 mode1 port provenance; not a native actor class or identity.
+    PlayerTechnology2,
 }
 impl LaserOrigin {
     pub(crate) fn is_player(self) -> bool {
         matches!(
             self,
-            Self::PlayerCharged | Self::PlayerControlled | Self::PlayerTechnology
+            Self::PlayerCharged
+                | Self::PlayerControlled
+                | Self::PlayerTechnology
+                | Self::PlayerTechnology2
         )
     }
 }
@@ -534,8 +539,10 @@ impl Laser {
 
     pub(crate) fn finish_full(&mut self) -> Result<(), String> {
         self.sprite.advance(
-            if self.origin == LaserOrigin::PlayerTechnology
-                || (self.origin == LaserOrigin::PlayerControlled && self.variant == 2)
+            if matches!(
+                self.origin,
+                LaserOrigin::PlayerTechnology | LaserOrigin::PlayerTechnology2
+            ) || (self.origin == LaserOrigin::PlayerControlled && self.variant == 2)
             {
                 technology_definition()
             } else {
