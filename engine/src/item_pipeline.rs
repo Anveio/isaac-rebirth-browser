@@ -104,8 +104,28 @@ impl<'a> ItemInputs<'a> {
             .any(|record| record.item_id == 6)
     }
 
-    fn number_one_present(self) -> bool {
+    pub(crate) fn number_one_present(self) -> bool {
         self.positive_owned_count(6) || self.number_one_record_present()
+    }
+
+    ///Independent cache32/64 footprint for positive permanent6 with selected1/4/114/118/329.
+    ///This never widens a controller, contact or temporary-effect frontier.
+    pub(crate) fn admits_number_one_appearance(self) -> bool {
+        self.positive_owned_count(6)
+            && self.owner.trinket_slots == [0, 0]
+            && self
+                .owner
+                .queued_id
+                .is_none_or(|id| items::definition(id).is_some_and(|c| c.kind != 2))
+            && self.owner.temporary_collectibles.is_empty()
+            && self
+                .owner
+                .owned_counts
+                .iter()
+                .enumerate()
+                .all(|(id, &count)| {
+                    count == 0 || (count > 0 && [1, 4, 6, 114, 118, 329].contains(&id))
+                })
     }
 
     /// Exact per-callback cache32/64 proof: other modifier and trinket owners
@@ -171,7 +191,7 @@ impl<'a> ItemInputs<'a> {
                 .iter()
                 .enumerate()
                 .all(|(id, &count)| {
-                    count == 0 || (count > 0 && [1, 4, 114, 118, 329].contains(&id))
+                    count == 0 || (count > 0 && [1, 4, 6, 114, 118, 329].contains(&id))
                 })
     }
 

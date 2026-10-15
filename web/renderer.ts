@@ -287,8 +287,18 @@ export class Renderer {
         this.assets.draw(ctx, "gfx/1000.066_ember particle.anm2", "Idle",
           particle.presentedPosition.x * 0.65 + 32, particle.presentedPosition.y * 0.65 - 46, particle.animationClock);
     if (!hidePlayer) this.drawPlayer(ctx, state);
-    for (const tear of state.tears)
-      this.assets.draw(ctx, TEAR, `RegularTear${tear.animationTier}`, Math.round(tear.x * 2) / 2, Math.round(tear.y * 2) / 2, tear.age);
+    for (const tear of state.tears) {
+      const color = tear.sourceColor;
+      //RegularTear's white authored layer receives its birth-owned ColorMod.
+      //Keep all11 components in state; project tint and final RGB offsets.
+      this.assets.draw(ctx, TEAR, `RegularTear${tear.animationTier}`, Math.round(tear.x * 2) / 2, Math.round(tear.y * 2) / 2, tear.age,
+        { overrides: { 0: {
+          RedTint: color.tint[0]! * 255, GreenTint: color.tint[1]! * 255,
+          BlueTint: color.tint[2]! * 255, AlphaTint: color.tint[3]! * 255,
+          RedOffset: color.offsets[0]! * 255, GreenOffset: color.offsets[1]! * 255,
+          BlueOffset: color.offsets[2]! * 255,
+        } } });
+    }
     for (const impact of state.impacts)
       this.assets.draw(ctx, "gfx/1000.012_tear poof_small.anm2", "Poof", impact.x, impact.y, impact.age);
     for (const bomb of state.bombs)
