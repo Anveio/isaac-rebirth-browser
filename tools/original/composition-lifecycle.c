@@ -190,8 +190,9 @@ int main(int argc, char **argv) {
             /* The interrupt can report SIGSTOP while LISTENing. Detach keeps
              * the existing job-control stop; it does not send SIGCONT. */
             success = identity(pid, owner, ticks, device, inode); break;
-        } else if (ptrace_event == PTRACE_EVENT_STOP && sig == SIGSTOP) {
-            stage = "preserve actual SIGSTOP group stop";
+        } else if (ptrace_event == PTRACE_EVENT_STOP &&
+                   (sig == SIGSTOP || sig == SIGTSTP || sig == SIGTTIN || sig == SIGTTOU)) {
+            stage = "preserve actual job-control group stop";
             if (ptrace(PTRACE_LISTEN, pid, 0, 0)) goto cleanup;
             listens++;
             fprintf(journal, "{\"record\":%llu,\"kind\":\"group-stop-listen\",\"signal\":%d}\n", ++records, sig);
