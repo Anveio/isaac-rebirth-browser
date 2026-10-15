@@ -39,7 +39,8 @@ impl TryFrom<State> for Mt19937 {
 
 /// One shared draw in the opt-in diagnostic log read by the e2e MT draw
 /// comparator (`--mt-draws`). `counter` is the port's game update count when
-/// the draw happened; `index` is the stream index before it.
+/// the draw happened; only gameplay draws (count 1 on) are logged. `index` is
+/// the stream index before it.
 #[derive(Clone, Debug, Serialize, PartialEq, Eq)]
 pub struct Draw {
     pub counter: u32,
@@ -105,10 +106,13 @@ impl Mt19937 {
     fn draw(&mut self, kind: char) -> u32 {
         // Read outside the closure, which does not inherit #[track_caller].
         let site = std::panic::Location::caller();
+        let counter = DRAW_COUNTER.with(Cell::get);
+        // Boot and menu draws (count 0, millions per case) are not compared;
+        // logging them exhausted the page's memory on long cases.
         DRAW_LOG.with(|log| {
-            if let Some(log) = log.borrow_mut().as_mut() {
+            if let Some(log) = log.borrow_mut().as_mut().filter(|_| counter > 0) {
                 log.push(Draw {
-                    counter: DRAW_COUNTER.with(Cell::get),
+                    counter,
                     index: self.index,
                     kind,
                     site: format!("{}:{}", site.file(), site.line()),
