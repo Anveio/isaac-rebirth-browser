@@ -48,6 +48,9 @@ pub struct DoorCollision {
     pub hidden: bool,
     /// Dice-room doorways are closed with the double-lock variant2.
     pub double_lock: bool,
+    /// SetRoomTypes565b00: an uncleared miniboss (type6 or surprise flag)
+    /// room bars its ordinary non-secret doorways with variant4.
+    pub barred: bool,
 }
 
 /// Admit supported authored rocks and spikes with their actual local spawn seeds. The
@@ -102,11 +105,16 @@ pub fn for_room(
         cells[column + row * usize::from(width)].entity = Some(GridEntity {
             kind: 16,
             // Fresh stage1 ordinary/curse/treasure doors use variant7 when
-            // opened; the admitted key-closed target2/12 branch uses variant1.
+            // opened, or barred variant4 from an uncleared miniboss room; the
+            // admitted key-closed target2/12 branch uses variant1.
             variant: if door.hidden {
                 6
             } else if door.open {
-                7
+                if door.barred {
+                    4
+                } else {
+                    7
+                }
             } else if door.double_lock {
                 2
             } else {

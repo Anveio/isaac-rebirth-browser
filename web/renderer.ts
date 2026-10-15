@@ -141,7 +141,7 @@ export class Renderer {
   private drawWorld(ctx: CanvasRenderingContext2D, state: State, hidePlayer = false): void {
     ctx.save();
     if (state.camera) ctx.translate(state.camera.scroll.x, state.camera.scroll.y);
-    this.drawRoom(state.room.appearance);
+    this.drawRoom(state.room.appearance, state.room.grid);
     ctx.restore();
     this.stage.ground(state.stageEffects);
     ctx.save();
@@ -419,7 +419,7 @@ export class Renderer {
     this.drawQuads(appearance, appearance.wallQuads);
     this.roomKey = key;
   }
-  private drawRoom(appearance: RoomAppearance): void {
+  private drawRoom(appearance: RoomAppearance, grid: Room["grid"]): void {
     const gl = this.graphics, ctx = gl.asCanvasContext(), size = appearance.tileSize, border = size * 2;
     const width = appearance.columns * size, height = appearance.rows * size, { x, y } = appearance.origin;
     gl.drawSurface(this.floor, border, border, width - border * 2, height - border - size,
@@ -433,7 +433,18 @@ export class Renderer {
     for (const connection of appearance.doors) {
       ctx.save(); ctx.translate(connection.x, connection.y); ctx.rotate(rotation[connection.side]);
       this.assets.draw(ctx, connection.asset, connection.state, 0, 0, 0,
-        connection.spritesheet ? { spritesheets: { 0: connection.spritesheet } } : {}); ctx.restore();
+        connection.spritesheet ? { spritesheets: { 0: connection.spritesheet } } : {});
+      // Door.LoadGraphics5629c0 overlays door_17_bardoor on barred variant4;
+      // AnimState563b70 holds its Idle while closed. The Vanish fade on
+      // opening is not yet modelled.
+      const index = grid ? Math.floor((connection.worldPosition.x - 40) / 40 + 0.5)
+        + Math.floor((connection.worldPosition.y - 120) / 40 + 0.5) * grid.width : -1;
+      const entity = grid?.cells[index]?.entity;
+      if (entity?.kind === 16 && entity.variant === 4 && entity.state !== 2) {
+        this.assets.draw(ctx, "gfx/grid/door_17_bardoor.anm2", "Idle", 0, 0);
+        this.drawnGrid.push({ index, kind: 16, animation: "Idle", frame: 0 });
+      }
+      ctx.restore();
     }
     gl.drawImage(this.assets.image(appearance.fx.shading), x, y, width, height);
   }
