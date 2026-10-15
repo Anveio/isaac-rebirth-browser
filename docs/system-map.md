@@ -347,49 +347,63 @@ ordinary Player Brimstone299 is now merged with the scoped results above;
 controlled Tear307 is also merged; its final retained four-case comparison remains
 134,364 checks / 20,813 failures, with contact and observation gaps above.
 
-Controlled Brimstone312 remains a separate Draft. Its 708 producer consumes
-landed Damage318 and passes production/strict Clippy/floor, 37,968,484 strict
-retained regular checks and 503,611 reciprocal Libra property checks. Historical
-prefix86,718/7,667 and earlier87,458/7,667 FAIL remain unchanged. Four fresh
-Native references now finish normally on the same inputs/artifact. The first
-completed paged case0 grade is86,999/7,688 FAIL over1,010 paired playing rows,
-541 Laser C18 bodies (270 Full/271 Fast) and280 Knife bodies. Damage, flags,
-colors, TTL, Sprite, friction, classes and Parent match; geometry, identity/RNG
-and HP ownership remain unresolved. Other three grades are pending. The first
-full comparer hit its process-memory limit after successful projection and
-established no functional grade. Separately captured
-lifecycle records have not been joined; entry is not completion and actual
-reapply callbacks, HP, identity/RNG and contact obligations remain unresolved.
+Controlled Brimstone312 is merged atf4668ae9. Its708 producer passes three owned
+builds,37,968,484 strict regular fields and503,611 retained Libra properties.
+Four complete Original/public pairs retain349,856 checks/30,892 FAIL over4,058
+playing rows,2,192 Laser C18 bodies and1,110 Knife bodies. All2,188 stable Laser
+history rows match material fields; geometry, identity/RNG, HP ownership and
+actual callbacks remain unresolved. Historical incomplete-prefix86,718/7,667
+and87,458/7,667 failures remain separate. The failed full comparer established
+no grade; the later bounded paged successor closes all four comparisons.
 
-Merged332 preserves journal/report bytes and now runs in four successful
-Technology Native captures. Its original 69-window equivalence validation and
-36,974,592-byte validation RSS retain their scope. The first fresh recorder has
-36,585,472-byte observed kernel highwater; old per-process peaks remain unknown.
-The versioned capacity accounting includes bounded clean unmapped file-cache
-reclaim LRUs, excludes slab/shmem/anon and keeps the same floors/output caps,
-legacy diagnostic and exact-game pidfd closure. This is observed capture
-reliability, not Original gameplay parity or a quantified historical reduction.
+Portable lifecycle345 is merged at04e52bbf. Four saved-sidecar addenda each retain
+19 checks/4 failures, two actual Laser boundary events and one separately observed
+following-Full cleanup chain. Remove-post differs from BaseUninit-entry;
+completion, live reapply, initial Full/C18 order and paired port callbacks remain
+missing. These addenda do not rewrite the functional predecessors.
 
-Merged319 owns only Technology cache/grant context. Separate Draft320's consumed
-77cd product passes three builds and 37,968,484 old regular fields with zero
-differences; 416 failures in 2,856 new registration checks remain. Four fresh
-Technology pairs retain82,351/5,807 FAIL over152 paired bodies (74 Full/78 Fast),
-with30 Native/29 port births and76 damage differences. Eye-history and the
-source-owned post-contact zero-damage repair are in a separate new producer;
-game qualification is pending and the77cd grade is unchanged.
-Identity/RNG, geometry, prelude, HP/contact/render/lifecycle gaps stay explicit.
+Technology320 is merged at85962135 with the source-owned post-contact reset and
+Eye-history repair. New027c's four-reference comparison retains82,351/5,731 FAIL;
+all152 damage checks match, resolving exactly76 old damage failures. Other
+per-field counts are identical to the historical77cd82,351/5,807 report, which
+remains unchanged. The027c three owned builds pass. Raw405 comparisons still fail:
+37,972,668 checks with5,928 differences versus77cd and8,368 versus708, entirely
+5,512 optionalRoom key/null additions and reviewed Eye fields. A separate actual
+public-ABI history ledger has zero unknown-history issues; raw reports stay red.
+Merged348 separates cache/kind2/kind3-contact capabilities without changing their
+current[1,4,68] domains. Identity/RNG, geometry, HP/contact/render/lifecycle gaps
+remain open. No whole-current-main product or parity follows.
 
-Gimpy's old bank still misses item225 and Dip death. The separately declared v2
-public bank observes pickup225, Bomb, explosion, queued damage, next-Full lethal
-HP and same-room disappearance in all four port routes. Its four entity-RNG
-endpoints match one bounded100 failure transition (81/81/75/37); no atomic
-callback/call-count, trinket-slot, success/proc or Original acceptance follows.
-The separate5,820-command own replay retains235 rejected commands and zero
-traps/rollback violations. Next joined68ae Soy/capability/eye/readiness/Room8/Technology reset source has
-new027c7031 productionPASS in30.328s, strictClippyPASS in30.075s and floorPASS
-in15.902s; game qualification is pending. Dr.Fetus52 source mapping and the
-canonical-Bomb implementation work establish no gameplay acceptance.
-Merged335 contact tools remain separately scoped; their four cases are unexecuted.
+Merged332 now runs in four complete Technology and four controlled-Brim Native
+captures. Its original69-window raw/gzip equivalence and36,974,592-byte validation
+RSS retain their scope. Current recorder highwater36,585,472B is a measurement,
+not a historical peak-reduction claim. Same memory floors, output caps and exact
+owned-game pidfd closure remain in force.
+
+Gimpy's old bank still misses item225 and Dip death. Its separate v2 own bank
+observes225 grant, lethal Dip and bounded100 failed-roll transition consistency
+in all four routes. Atomic callback, Original, successful proc and hurt remain
+pending. Room8 requires the unmerged329 kill owner, not an isolated DTO addition.
+
+Dr.Fetus343 remains Draft. Test producer07211886/26cb passes production45.211s,
+Clippy29.475s and floor17.465s with all3,451 pins stable; strict four-route405
+regression against027c passes37,972,668/0 without exclusions or additive fields.
+All four public routes execute three shot births/retirements each, birth fuse30,
+fullUpdates0, damage10.5 and actual ParentPlayer0. Each has two Bomb-source FIFO
+rows and a following-Full HP4 to-6.5 witness; this is own-side nonvacuity only.
+The first fresh Original fixed0 capture closes normally and its strict paired
+grade retains28,783/2,740 FAIL. The remaining three Native captures are pending;
+strict cross-game body join coverage, identity/RNG, counters and actual callbacks stay failures.
+A saved-input Dr counter-v2 addendum retains29,598/2,740 FAIL and adds815 matching
+parity checks without regrading absolute counters. Independent Native birth,
+retirement, Bomb FIFO and following-Full HP witnesses are separate from strict
+cross-game identity failures. Soy330's four public routes complete on26cb; the
+regular routes observe16 Tear births each, while118+330 has zero Laser births
+and360 costume-transform frontier rows per case, retaining coverageFAIL. Soy
+Original comparison is pending.
+Controlled Technology68+329 and the Dridle DA0 fix remain source-only work.
+Merged314/325/316 preserve default declaration bytes; ordinary-contact and335
+controlled-ring contact cases remain unexecuted at this snapshot.
 
 Readiness287 passes a warm production retry and strict Clippy, but its floor
 build stopped at the working-memory floor. Its earlier production capacity stop
