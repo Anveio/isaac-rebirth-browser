@@ -121,16 +121,94 @@ def history_case(name, phase, epoch, side=0, timing=0, token_index=None):
     return result
 
 
+def ordinary_brim_contact_case(name, phase, epoch, receiver=14, side=0,
+                               timing=0, token_index=None):
+    directions = [('Right', 'Up', 'Left', 'Down'),
+                  ('Left', 'Down', 'Right', 'Up')][side]
+    if receiver == 18:
+        directions = ('Down', 'Right', 'Up', 'Left')
+    actions = [dict(label='receiver-ready', keys=[], presentations=1)]
+    for index, direction in enumerate(directions):
+        actions.extend([
+            dict(label=f'charge-{index}-{direction.lower()}', keys=[direction],
+                 presentations=120 + timing),
+            dict(label=f'release-{index}-and-expire', keys=[], presentations=64),
+        ])
+    case = {
+        'name': name,
+        'fixture': {'kind': 'source-authored-modified-challenge', 'challengeId': 1,
+                    'startingItems': [118], 'view': 'item-only'},
+        'bootEpochSeed': epoch, 'initialPhaseOffset': phase,
+        'entropy': 'fixed declared public contact case' if token_index is None
+            else 'existing unfiltered OS token reused without a new draw',
+        'actions': actions,
+        'requires': {
+            'actualPublicChallengeEntry': True,
+            'bothGamesConsumeIdenticalDeclaredResourceBytes': True,
+            'ownedCounts': [{'itemId': 118, 'count': 1}],
+            'sourceExpectedActorContract': actor_stage([118], 2, 7, 0, False, [])[
+                'sourceExpectedActorContract'],
+            'ordinaryBrimContact': {
+                'authoredReceiver': {'type': receiver, 'variant': 0, 'subtype': 0},
+                'receiverVariantPolicy': 'Preserve actual spawnConfig variants, champions and health; no assumed variant0/HP or identity aliases.',
+                'spawnGroup': ({'x': 6, 'y': 5} if receiver == 18 else
+                               {'x': 9 if side == 0 else 3, 'y': 3}),
+                'publicAimPolicy': 'Stationary four-cardinal charge/release sweep; no observed-position targeting or conditional repair.',
+                'requiredActualWitnesses': [
+                    'Actual receiver admission, independent identity/seed and own manager membership in each game.',
+                    'Actual registered ParentPlayer Laser birth and positive-TTL Full and Fast bodies.',
+                    'Actual eligible receiver intersecting an actual Laser Line segment, with raw eligibility/geometry retained.',
+                    'At least one accepted FIFO append from this Laser callback: actual ParentPlayer sourceType1, flags8 and amount; raw ordered source payload retained independently.',
+                    'The same actual receiver on its next Full callback: ordered pending FIFO drained, applied health change and pending state compared. Nonlethal damage qualifies; enqueue alone does not.',
+                    'Current kind3 property outputs compared after the real receiver callback; static source order is not a dynamic call-count witness.',
+                    'Same Laser positive TTL to zero/fade and following-Full absence, actual C18 NULL and matching weak-link cleanup; final inventory alone is insufficient.',
+                ],
+                'minimumAcceptedEnqueuesPerGame': 1,
+                'minimumNextFullDamageApplicationsPerGame': 1,
+                'minimumNaturalLaserRetirementsPerGame': 1,
+                'receiverDeathPolicy': 'When actual damage reaches the source death predicate, retain death/cleanup witnesses; do not require a fitted lethal first hit.',
+                'sourcePayloadScope': 'Laser476A60 ParentPlayer DamageInfo, flags8/countdown30. Do not substitute Tear/Dip flags0, a Laser-as-source alias, Tear dying, or generic impulse.',
+                'countdownScope': '476A60 passes countdown30 as a callback argument; it is not a stored FIFO field or a claimed dynamic call-argument witness.',
+                'requiredToolingStatus': 'pending scoped typed NPC14/18 observer and Laser FIFO comparer extension',
+                'missingToolingMustFail': True,
+            },
+            'actualPendingPrimaryCleanup': 'must be present and null',
+            'actualCachePendingFlags': 0,
+            'canonicalDiagnosticOwner': 'weaponAdmission.unadmittedController must be present and null',
+            'unknownDiagnosticOrMissingCoverageIsFailure': True,
+            'preserveAllIdentitySeedRngInitNumericFamilyAndCoverageMismatches': True,
+            'nativeObservationIsNeverBrowserInput': True,
+            'sourceInferredGrantPath': {'orderedItems': [118],
+                'each': '52E1A0 →52CC90 →511F10 →581750',
+                'final': '511F10 then3074=true', 'nativeDynamicCallCountObserved': False},
+            'unqualifiedCoverage': ['DOM/render/pixel parity', 'explicit native Remove/Uninit callback events',
+                'full624 RNG parity', 'full copied receiver-payload history beyond recorded owners'],
+        },
+        'execution': {'status': 'not-executed', 'blockingPrerequisites': [
+            'Immutable owned producer with ordinary Brimstone execution',
+            'Typed actual NPC14/18 eligibility, ordered receiver FIFO and next-Full health observation/comparison; existing217-only law is insufficient',
+            'Integration-owner serial game/storage lease',
+        ], 'neverSatisfiedBy': 'Admission alone, static overlap, hypothetical enqueue, empty scenes, disappearance, unsupported receiver aliases, or outcome filtering'},
+    }
+    if token_index is not None:
+        case['entropyTokenIndex'] = token_index
+    return case
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--count', type=int, default=2)
     parser.add_argument('--repository', type=Path, default=ROOT)
+    parser.add_argument('--suite', choices=('history', 'ordinary-brim-contact'), default='history')
     parser.add_argument('--entropy-journal', type=Path,
                         help='Reuse every literal token from an existing declaration; never draws again.')
     args = parser.parse_args()
     if not 0 <= args.count <= 8:
         raise ValueError('count must be 0..8; all declared outcomes are retained')
+    contact = args.suite == 'ordinary-brim-contact'
+    if contact and args.entropy_journal is None:
+        raise ValueError('Contact declaration requires an existing entropy journal; no new draws')
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=False)
     entries = []
@@ -150,11 +228,18 @@ def main():
             os.fsync(journal.fileno())
             if not args.entropy_journal:
                 entries.append(entry)
-    cases = [history_case(f'history-118-114-329-phase{phase}', phase, 0x31A9) for phase in (0, 1)]
+    cases = ([ordinary_brim_contact_case(f'brim-contact-fixed-phase{phase}', phase, 0x31A9)
+              for phase in (0, 1)] if contact else
+             [history_case(f'history-118-114-329-phase{phase}', phase, 0x31A9) for phase in (0, 1)])
     for entry in entries:
         token = bytes.fromhex(entry['tokenHex'])
-        cases.append(history_case(f'history-random-{entry["index"]}', token[0] % 2,
-            int.from_bytes(token[4:8], 'little'), token[1] % 2, token[2] % 13, entry['index']))
+        if contact:
+            cases.append(ordinary_brim_contact_case(f'brim-contact-recorded-{entry["index"]}',
+                token[0] % 2, int.from_bytes(token[4:8], 'little'),
+                (14, 18)[token[2] % 2], token[1] % 2, token[2] % 13, entry['index']))
+        else:
+            cases.append(history_case(f'history-random-{entry["index"]}', token[0] % 2,
+                int.from_bytes(token[4:8], 'little'), token[1] % 2, token[2] % 13, entry['index']))
     repository = args.repository.resolve()
     resources = repository / 'references/isaac/rebirth/resources'
     xml_path, stb_path = resources / 'challenges.xml', resources / 'rooms/00.special rooms.stb'
@@ -183,11 +268,16 @@ def main():
         xml = output / case['name'] / 'resources/challenges.xml'
         xml.parent.mkdir(parents=True)
         ET.ElementTree(root).write(xml, encoding='utf-8', xml_declaration=True)
-        release = next(action for action in case['actions']
-                       if action['label'] == 'release-brim-and-move-to-114')
-        side = 0 if release['keys'] == ['d'] else 1
-        groups = [dict(x=column, y=3, entries=[dict(type=5, variant=100, subtype=item, weight=1.0)])
-                  for column, item in zip(([7, 9], [5, 3])[side], [114, 329])]
+        if contact:
+            receiver = case['requires']['ordinaryBrimContact']
+            groups = [dict(**receiver['spawnGroup'], entries=[dict(
+                **receiver['authoredReceiver'], weight=1.0)])]
+        else:
+            release = next(action for action in case['actions']
+                           if action['label'] == 'release-brim-and-move-to-114')
+            side = 0 if release['keys'] == ['d'] else 1
+            groups = [dict(x=column, y=3, entries=[dict(type=5, variant=100, subtype=item, weight=1.0)])
+                      for column, item in zip(([7, 9], [5, 3])[side], [114, 329])]
         authored = copy.deepcopy(rooms)
         authored[starts[0]]['spawns'].extend(groups)
         stb = output / case['name'] / 'resources/rooms/00.special rooms.stb'
@@ -206,8 +296,8 @@ def main():
             raise ValueError('Authored public reset exceeds its boot-resource transport')
         case['fixture']['declaredResetJsonBytes'] = size
     write_json(output / 'scenarios.json', dict(schema=1, cases=cases,
-        publicRouteRevision='maxcharge-near-contact-opposite-aim-v3',
-        scope='Declared live118→114→329 public-history successor; no execution or acceptance',
+        publicRouteRevision='ordinary-brim-contact-v1' if contact else 'maxcharge-near-contact-opposite-aim-v3',
+        scope='Declared ordinary-Brim receiver contact; no execution or acceptance' if contact else 'Declared live118→114→329 public-history successor; no execution or acceptance',
         selection='Two fixed phases plus every journaled unfiltered OS projection; no outcome filtering or rerolls',
         outcomePolicy='Missing real stages/grants/actors/children/cleanup/bodies and every mismatch remain failures'))
     print(json.dumps(dict(status='declared-not-executed', cases=len(cases), scenarios=str(output / 'scenarios.json'))))
