@@ -266,7 +266,7 @@ export interface State {
   knives: Knife[];
   stageShootingGuard: {state: number; counter: number};
   weaponAdmission: {sourcePlayerType: number|null; c18IsKnownEmpty: boolean; pendingPrimaryCleanup: {fromPrimary:number;toPrimary:number}|null; unadmittedController: {primary:number;channel:string}|null};
-  lasers: {id:number; origin:"npcShootAngle"|"playerCharged"; uninitialized:boolean|null; entityType:number; variant:number; subtype:number;
+  lasers: {id:number; origin:"npcShootAngle"|"playerCharged" | "playerControlled"; uninitialized:boolean|null; entityType:number; variant:number; subtype:number;
     spawnSeed:number; parent:ActorRef|null; child:ActorRef|null; active:boolean; dead:boolean; visible:boolean;
     position:{x:number;y:number}; savedPosition:{x:number;y:number}; renderOffset:{x:number;y:number};
     parentOffset:{x:number;y:number}; angle:number; renderSortOffset:number; remainingUpdates:number;
