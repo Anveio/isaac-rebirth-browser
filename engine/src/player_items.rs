@@ -565,10 +565,15 @@ pub(crate) fn add_collectible(
         && normal_isaac
         && crate::item_pipeline::ItemInputs::new(owner)
             .is_ok_and(|inputs| inputs.admits_fetus_grant_context());
+    let keep_monstro_luck = id == 229
+        && normal_isaac
+        && crate::item_pipeline::ItemInputs::new(owner)
+            .is_ok_and(|inputs| inputs.admits_monstro_grant_context());
     if ![1, 4, 6, 114, 118, 329, 304].contains(&id)
         && !keep_technology_luck
         && !keep_soy_luck
         && !keep_fetus_luck
+        && !keep_monstro_luck
     {
         // These admitted grant paths preserve the fresh auxiliary words.
         // Nonzero setters and restore need their own producer binding.
