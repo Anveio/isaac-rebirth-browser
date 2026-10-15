@@ -60,6 +60,16 @@ fn frontier(state: &mut State, name: &str) {
         .record_unadmitted(state.weapon_cache.primary, name);
 }
 
+/// Read actual physical448 only when the existing controlled owner is known.
+pub(crate) fn referenced_position(state: &State, id: u32) -> Result<Option<WorldVector>, String> {
+    let tear = state
+        .tears
+        .iter()
+        .find(|tear| tear.id == id)
+        .ok_or("controlled Tear head reference is unresolved")?;
+    Ok(tear.controlled.as_ref().map(|_| tear.motion.position))
+}
+
 pub(crate) fn head_direction(
     state: &mut State,
     aim: WorldVector,

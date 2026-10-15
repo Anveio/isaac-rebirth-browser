@@ -25,6 +25,7 @@ pub mod chests;
 pub mod combat;
 mod creep_effects;
 mod content;
+mod controlled_brimstone;
 mod controlled_knife;
 pub mod controlled_tear;
 pub mod dingle;
@@ -2803,7 +2804,9 @@ impl Game {
                         plan.controller == weapon_plan::ControllerChannel::ControlledKnife;
                     let controlled_tear =
                         plan.controller == weapon_plan::ControllerChannel::ControlledTear;
-                    let aim_step = if ordinary || controlled || controlled_tear {
+                    let controlled_brim =
+                        plan.controller == weapon_plan::ControllerChannel::ControlledBrimstone;
+                    let aim_step = if ordinary || controlled || controlled_tear || controlled_brim {
                         attack_runtime::ordinary_shooting_aim(
                             callback_aim,
                             buttons.held(),
@@ -2818,7 +2821,7 @@ impl Game {
                     };
                     if let Some(mut aim_step) = aim_step {
                         // 52F6B7 normalizes r13 before the callback and DB4 store.
-                        if (controlled || controlled_tear)
+                        if (controlled || controlled_tear || controlled_brim)
                             && knives::squared_length(aim_step.callback_aim) > 1.0
                         {
                             aim_step.callback_aim = knives::normalized(aim_step.callback_aim);
@@ -2828,7 +2831,7 @@ impl Game {
                         }
                         shooting_aim_db4 = aim_step.db4_write;
                         let head_frame_request = if self.state.head_timer > 8 { 2 } else { 0 };
-                        if ordinary || controlled || controlled_tear {
+                        if ordinary || controlled || controlled_tear || controlled_brim {
                             source_weapon_clock = true;
                             if controlled {
                                 attack_runtime::controlled_head_direction(
@@ -2838,6 +2841,12 @@ impl Game {
                                 )?;
                             } else if controlled_tear {
                                 controlled_tear::head_direction(
+                                    &mut self.state,
+                                    aim_step.callback_aim,
+                                    buttons.held(),
+                                )?;
+                            } else if controlled_brim {
+                                controlled_brimstone::head_direction(
                                     &mut self.state,
                                     aim_step.callback_aim,
                                     buttons.held(),
@@ -2870,12 +2879,22 @@ impl Game {
                             attack_runtime::controlled_idle_head(&mut self.state, buttons.held());
                         } else if controlled_tear {
                             controlled_tear::idle_head(&mut self.state, buttons.held());
-                        }
-                        if plan.controller == weapon_plan::ControllerChannel::ChargedBrimstone {
-                            attack_runtime::ordinary_brimstone_idle_head(
+                        } else if controlled_brim {
+                            attack_runtime::controlled_idle_head_for(
                                 &mut self.state,
                                 buttons.held(),
+                                "controlledBrimstoneMovementHistory",
                             );
+                        }
+                        if plan.controller == weapon_plan::ControllerChannel::ChargedBrimstone
+                            || controlled_brim
+                        {
+                            if !controlled_brim {
+                                attack_runtime::ordinary_brimstone_idle_head(
+                                    &mut self.state,
+                                    buttons.held(),
+                                );
+                            }
                             player_costume118::sync_head(&mut self.state, head_frame_request)?;
                         }
                         outcome == attack_runtime::DispatchOutcome::RegularTear
