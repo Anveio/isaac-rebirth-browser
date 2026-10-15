@@ -91,3 +91,11 @@ unchanged; a semantic successor retains every v5 action, resource and entropy
 record. The preexisting subtype1 child at329 still requires actual birth,
 survival, full curve movement and its own retirement; a fixed lifetime is not
 inferred from the parent conversion.
+
+The diagonal-second-pickup route successor adds the public down key to the
+existing second44-presentation release/movement leg. The actual version5
+original capture acquired114, whose physical pickup contact displaced the
+Player above the pedestal row; the later straight horizontal leg missed329.
+The new declaration uses two movement keys and retains every duration, resource,
+epoch, phase and recorded token. It requires a fresh actual329 queue/grant and
+all subsequent witnesses; the earlier missing329 failure remains unchanged.
