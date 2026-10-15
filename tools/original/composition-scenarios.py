@@ -51,7 +51,7 @@ def history_case(name, phase, epoch, side=0, timing=0, token_index=None):
         # observations. The 42-full Pickup wait exceeds the Laser timeout15.
         ('release-brim-and-move-to-114', [move], 24),
         ('ordinary-knife-charge', [shoot], 120),
-        ('release-knife-and-move-to-329', [move], 44),
+        ('release-knife-and-move-to-329', [move, 's'], 44),
         ('controlled-triple-dispatch', [shoot], 120),
         ('canceled-held', ['Right', 'Left'], 18),
         ('released', [], 60),
@@ -201,7 +201,7 @@ def main():
             raise ValueError('Authored public reset exceeds its boot-resource transport')
         case['fixture']['declaredResetJsonBytes'] = size
     write_json(output / 'scenarios.json', dict(schema=1, cases=cases,
-        publicRouteRevision='upward-sweep-28-settle24-v1',
+        publicRouteRevision='upward-sweep-28-settle24-diagonal-second-pickup-v2',
         scope='Declared live118→114→329 public-history successor; no execution or acceptance',
         selection='Two fixed phases plus every journaled unfiltered OS projection; no outcome filtering or rerolls',
         outcomePolicy='Missing real stages/grants/actors/children/cleanup/bodies and every mismatch remain failures'))
