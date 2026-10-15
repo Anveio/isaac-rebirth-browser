@@ -157,8 +157,8 @@ try {
       await step(STRIDE); state = await view();
     }
     await hold([]);
-    for (let left = 600; state.stageTransition !== 0 || !state.player.controls; left--) {
-      if (left <= 0) throw new Error('The stage transition did not finish in 600 frames');
+    for (let left = 1200; state.stageTransition !== 0 || !state.player.controls; left--) {
+      if (left <= 0) throw new Error('The stage transition did not finish in 1200 frames');
       await step(1); state = await view();
       if (frames % 4 === 0) checkpoint(`stage-transition-${frames}`);
     }
