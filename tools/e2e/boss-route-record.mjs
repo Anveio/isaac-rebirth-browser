@@ -12,6 +12,10 @@
 // --arrival names the final checkpoint (shop routes use `shop-arrival`).
 // --from names the scripted prefix label (default gameplay-start) after which
 // closed-loop routing begins; the 60-frame settle applies only at gameplay-start.
+// --fight FRAMES then fights the room clear within FRAMES (lib/route.mjs
+// fightKeys) and parks the player in the bottom-left corner (`corner`).
+// --exit FRAMES walks through --via X,Y onto the boss-room trapdoor and waits
+// out the stage transition (`next-stage`). --arrival '' skips that checkpoint.
 //
 // CASE.json is a paired case (pairedTape up to gameplay-start, initialSeed,
 // bootEpochSeed). Prints { status, actions, checkpoints, frames, rooms } on stdout.
@@ -21,7 +25,7 @@ import { chromium } from '@playwright/test';
 import { browserLaunchOptions } from '../foundation/browser.mjs';
 import { startProductionServer } from '../foundation/production-server.mjs';
 import { flag } from './lib/cli.mjs';
-import { doorKeys, routingView, toward, waypoint } from './lib/route.mjs';
+import { doorKeys, fightKeys, routingView, toward, waypoint } from './lib/route.mjs';
 
 const caseData = JSON.parse(readFileSync(flag('--case'), 'utf8'));
 const rooms = flag('--rooms').split(',').map(Number);
@@ -30,6 +34,12 @@ const ROOM_FRAMES = Number(flag('--room-frames', '600'));
 const collect = new Set((flag('--collect', '') || '').split(',').filter(Boolean).map(Number));
 const ARRIVAL = flag('--arrival', 'boss-room-arrival');
 const FROM = flag('--from', 'gameplay-start');
+const FIGHT = Number(flag('--fight', '0')), EXIT = Number(flag('--exit', '0'));
+const VIA = flag('--via') && flag('--via').split(',').map(Number);
+// Cells around the boss-award trapdoor (grid 37) and pedestal (grid 97) that
+// the corner walk and the exit approach keep clear of.
+const AWARD_CELLS = [22, 36, 37, 38, 52, 82, 96, 97, 98, 112];
+const avoiding = (grid, cells) => grid && { ...grid, solid: [...grid.solid].map((c, i) => (cells.includes(i) ? '1' : c)).join('') };
 // The player re-plans on every other frame; the tape holds keys in between.
 const STRIDE = 2;
 const namedKeys = { Return: 'Enter', Up: 'ArrowUp', Down: 'ArrowDown', Left: 'ArrowLeft', Right: 'ArrowRight', space: 'Space' };
@@ -112,7 +122,48 @@ try {
   // Settle out of the doorway transition before the arrival checkpoint.
   await hold([]);
   do { await step(1); state = await view(); } while (state.transition);
-  checkpoint(ARRIVAL);
+  if (ARRIVAL) checkpoint(ARRIVAL);
+  const walk = async (goal, cells, budget, label) => {
+    for (let left = budget; Math.hypot(goal.x - state.player.x, goal.y - state.player.y) > 6; left -= STRIDE) {
+      if (left <= 0) throw new Error(`${label}: no way to (${goal.x}, ${goal.y}) in ${budget} frames`);
+      await hold(toward(state.player, waypoint(avoiding(state.grid, cells), state.player, goal), 4));
+      await step(STRIDE); state = await view();
+    }
+  };
+  if (FIGHT) {
+    const memory = { orbit: 1 };
+    for (let left = FIGHT; !(state.clear && !state.foes.length); left -= STRIDE) {
+      if (left <= 0) throw new Error(`Room not cleared in ${FIGHT} fight frames`);
+      await hold(state.player.controls ? fightKeys(state, memory) : []);
+      await step(STRIDE); state = await view();
+      if (frames % 20 === 0) checkpoint(`fight-${frames}`);
+    }
+    checkpoint('clear');
+    await walk({ x: 80, y: 400 }, AWARD_CELLS, 600, 'corner walk');
+    // Pressing into the corner makes the parked position independent of the fight.
+    await hold(['KeyS', 'KeyA']); await step(60); await hold([]); await step(1);
+    state = await view();
+    checkpoint('corner');
+  }
+  if (EXIT) {
+    if (VIA) await walk({ x: VIA[0], y: VIA[1] }, AWARD_CELLS, EXIT, 'exit via');
+    const index = state.trapdoor?.gridIndex;
+    if (index === undefined) throw new Error('The cleared boss room has no trapdoor');
+    const door = { x: 40 + index % 15 * 40, y: 120 + Math.floor(index / 15) * 40 };
+    const pedestal = AWARD_CELLS.filter(cell => cell > 60);
+    for (let left = EXIT; state.stageTransition === 0; left -= STRIDE) {
+      if (left <= 0) throw new Error(`No trapdoor entry in ${EXIT} frames`);
+      await hold(toward(state.player, waypoint(avoiding(state.grid, pedestal), state.player, door), 2));
+      await step(STRIDE); state = await view();
+    }
+    await hold([]);
+    for (let left = 600; state.stageTransition !== 0 || !state.player.controls; left--) {
+      if (left <= 0) throw new Error('The stage transition did not finish in 600 frames');
+      await step(1); state = await view();
+      if (frames % 4 === 0) checkpoint(`stage-transition-${frames}`);
+    }
+    checkpoint('next-stage');
+  }
   status = 'pass';
 } catch (error) {
   reason = String(error.message || error);
