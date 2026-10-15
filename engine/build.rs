@@ -484,6 +484,38 @@ fn boss_catalog(xml: &str) -> String {
     output
 }
 
+fn laser_root_catalog(actors: &Value) -> String {
+    let actor = &actors["gfx/007.001_thick red laser.anm2"];
+    let layers = actor["Layers"].as_array().expect("Laser authored layers");
+    let clip = actor["Animations"]
+        .as_array()
+        .expect("Laser authored clips")
+        .iter()
+        .find(|clip| clip["Name"] == "LargeRedLaser")
+        .expect("Laser default clip");
+    let root = clip["LayerAnimations"]
+        .as_array()
+        .expect("Laser layer clips")
+        .iter()
+        .find(|layer| layer["LayerId"] == 0)
+        .expect("Laser root layer");
+    let mut out = format!(
+        "const LASER_LAYER_COUNT: usize = {};\nconst LASER_ROOT_EXTENTS: &[(u32, f32)] = &[\n",
+        layers.len()
+    );
+    for frame in root["Frames"].as_array().expect("Laser root frames") {
+        let delay = frame["Delay"].as_u64().expect("Laser root frame delay");
+        let x = frame["XPosition"].as_f64().expect("Laser root X") as f32;
+        let width = frame["Width"].as_f64().expect("Laser root width") as f32;
+        assert!(delay > 0 && delay <= u64::from(u32::MAX) && x.is_finite() && width.is_finite());
+        out.push_str(&format!("({delay}, {:?}),\n", x + width));
+    }
+    out.push_str("];\n");
+    out
+}
+
+/// bossportraits.xml: VS-screen presentation id, boss type/variant (encoded
+/// in the authored portrait name `Portrait_<type>.<variant>_...`) and portrait.
 fn main() {
     let manifest = PathBuf::from(std::env::var_os("CARGO_MANIFEST_DIR").unwrap());
     let resources = manifest
@@ -815,6 +847,11 @@ fn main() {
     fs::write(output.join("shadow_catalog.rs"), generated).expect("write shadow catalog");
     fs::write(output.join("entity_catalog.rs"), entity_catalog(&xml))
         .expect("write entity catalog");
+    fs::write(
+        output.join("laser_root_catalog.rs"),
+        laser_root_catalog(&npc_clips),
+    )
+    .expect("write authored Laser root definitions");
     fs::write(output.join("clip_catalog.rs"), clip_catalog(&npc_clips))
         .expect("write clip catalog");
     let portraits = resources.join("bossportraits.xml");

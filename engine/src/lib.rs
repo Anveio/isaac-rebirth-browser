@@ -16,6 +16,7 @@ pub mod attack_runtime;
 pub mod audio;
 pub mod blood_effects;
 pub mod bombs;
+mod brimstone;
 pub mod camera;
 pub mod challenges;
 pub mod champions;
@@ -51,6 +52,8 @@ mod knife_path;
 pub mod knives;
 pub mod laser_line;
 mod laser_npc_runtime;
+mod laser_player_runtime;
+mod laser_runtime;
 pub mod lasers;
 pub mod layout;
 pub mod level2_flies;
@@ -67,6 +70,7 @@ pub mod phase;
 pub mod pickups;
 mod plain_npc;
 pub mod player_animation;
+pub mod player_costume118;
 pub mod player_death;
 pub mod player_items;
 pub mod player_save;
@@ -1342,7 +1346,7 @@ impl Game {
         self.state.fire_particles.clear();
         self.state.next_effect = 1;
         self.state.sprite_effects.clear();
-        self.state.lasers.clear();
+        laser_runtime::reset_room(&mut self.state)?;
         self.state.knives.clear();
         self.state.attack_runtime = attack_runtime::AttackRuntime::fresh_player();
         self.state.next_laser = 1;
@@ -1901,6 +1905,7 @@ impl Game {
         }
         if phase == phase::Phase::Update && self.state.screen == Screen::Playing {
             attack_runtime::restore_fast_positions(&mut self.state);
+            laser_runtime::restore_fast_positions(&mut self.state);
         }
         let gameplay_was_paused = self.state.paused;
         if self.state.screen == Screen::Playing {
@@ -2147,6 +2152,7 @@ impl Game {
             familiars::paint_background_effects(&mut self.state)?;
             blood_effects::clear_retired_links(&mut self.state);
             attack_runtime::retire_full(&mut self.state);
+            laser_runtime::retire_full(&mut self.state)?;
             attack_runtime::contacts(&mut self.state)?;
             let pickup_contacts = pickups::contact_candidates(&self.state)?;
             npcs::player_contacts(&mut self.state)?;
@@ -2735,7 +2741,11 @@ impl Game {
                         } else {
                             buttons.aim()
                         };
-                    let ordinary = plan.controller == weapon_plan::ControllerChannel::OrdinaryKnife;
+                    let ordinary = matches!(
+                        plan.controller,
+                        weapon_plan::ControllerChannel::OrdinaryKnife
+                            | weapon_plan::ControllerChannel::ChargedBrimstone
+                    );
                     let controlled =
                         plan.controller == weapon_plan::ControllerChannel::ControlledKnife;
                     let aim_step = if ordinary || controlled {
@@ -2760,6 +2770,7 @@ impl Game {
                             }
                         }
                         shooting_aim_db4 = aim_step.db4_write;
+                        let head_frame_request = if self.state.head_timer > 8 { 2 } else { 0 };
                         if ordinary || controlled {
                             source_weapon_clock = true;
                             if controlled {
@@ -2794,6 +2805,13 @@ impl Game {
                         // 519FC0 returns before the released idle D9C -> DA0 effect.
                         if controlled {
                             attack_runtime::controlled_idle_head(&mut self.state, buttons.held());
+                        }
+                        if plan.controller == weapon_plan::ControllerChannel::ChargedBrimstone {
+                            attack_runtime::ordinary_brimstone_idle_head(
+                                &mut self.state,
+                                buttons.held(),
+                            );
+                            player_costume118::sync_head(&mut self.state, head_frame_request)?;
                         }
                         outcome == attack_runtime::DispatchOutcome::RegularTear
                     } else {
@@ -2976,6 +2994,7 @@ impl Game {
             self.state.attack_runtime.shooting_aim_db4 = Some(aim);
         }
         player_items::advance_item_sprite(&mut self.state, phase);
+        player_costume118::advance_full(&mut self.state, phase);
         if self.state.player.input_cooldown > 0 {
             self.state.player.input_cooldown -= 1;
         }
