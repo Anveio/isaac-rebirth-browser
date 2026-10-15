@@ -23,6 +23,7 @@ pub mod challenges;
 pub mod champions;
 pub mod chests;
 pub mod combat;
+mod creep_effects;
 mod content;
 mod controlled_knife;
 pub mod dingle;
@@ -2652,6 +2653,14 @@ impl Game {
             entities::Birth::Shot(shot) => self.admit_enemy_projectile(|id| {
                 enemy_projectiles::EnemyProjectile::birth(id, parent, shot)
             }),
+            entities::Birth::CreepHit => creep_effects::hurt_player(&mut self.state),
+            entities::Birth::FlungNpc(selector, velocity) => {
+                self.admit_npc_birth(index, entities::Birth::Npc(selector))?;
+                let npc = self.state.room.npcs.last_mut().expect("admitted NPC birth");
+                npc.velocity = velocity;
+                npc.no_appear = true;
+                Ok(())
+            }
             entities::Birth::Npc(selector) => {
                 // Retired NPCs leave the room list, so its length can name a
                 // live handle; take one past every id still held anywhere.

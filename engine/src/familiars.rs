@@ -246,6 +246,8 @@ pub struct SpriteEffect {
     pub poop_effect: Option<crate::poop_effects::Controller>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub blood_effect: Option<crate::blood_effects::Controller>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub creep_effect: Option<crate::creep_effects::Controller>,
 }
 
 impl SpriteEffect {
@@ -405,6 +407,7 @@ impl NpcEffectAdmission<'_> {
             full_updates: 0,
             poop_effect: None,
             blood_effect: None,
+            creep_effect: None,
         });
         self.scheduler.admit(ActorRef {
             kind: ActorKind::Effect,
@@ -415,6 +418,13 @@ impl NpcEffectAdmission<'_> {
 }
 
 pub fn advance_effect(state: &mut State, phase: Phase, id: u32) -> Result<(), String> {
+    if state
+        .sprite_effects
+        .iter()
+        .any(|effect| effect.id == id && effect.creep_effect.is_some())
+    {
+        return crate::creep_effects::advance(state, phase, id);
+    }
     if state
         .sprite_effects
         .iter()
@@ -795,6 +805,7 @@ impl NpcEffectAdmission<'_> {
             full_updates: 0,
             poop_effect: None,
             blood_effect: None,
+            creep_effect: None,
         });
         // Room5c6940 assigns the actual sequence first; Manager4524f0 then routes
         // flags8 to its separate background pool rather than the ordinary array.

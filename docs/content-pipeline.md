@@ -507,6 +507,22 @@ engine work in M1–M5 does not.
     - Open: the head's grid Hurt on poop/TNT 40 px ahead (with grid Init
       after #162), death Explosion effects and gibs, Grub 239 and the
       19.1/subtype branches (The Hollow).
+  - Grub 239.0 with Charger 23, Maggot 21 and Spitty 31 (#306), then
+    Gurglings 237.1 and Gurgling 237.0 with Creep (Red) 1000.22: one family
+    each per shared native AI (`larry.rs` for ai_larry, `maggots.rs` for
+    ai_maggot_leech), so a new type sharing an AI is a branch, not a module.
+    - Research ran in parallel agents (one per AI or effect) while the
+      previous PR's suites ran; each family took about 30-45 minutes of code.
+    - Boss-room seeds come from `boss-scenarios.py` planning; the playtest's
+      own seeds often reach the boss only through hostile rooms, so specs
+      use quiet-route stand-ins and say so.
+    - Shared pieces: `Npc.grid_collided`, CheckLine mode 0, projectile
+      height, flung NPC births without APPEAR, `extract-alpha-masks.py` for
+      texel-gated gameplay (creep), and a creep render pass.
+    - Verified: Grub linking, pooled HP and the head HP sync; Gurglings
+      admission, HP and walk constants. Both diverge at their first
+      MoveRandomly choice after the boss room's decorations/rocks draw
+      (#162 grid admission).
 - [x] Room shapes (coordinator priority 2): one generic admission gate
   (`traversal::admitted_shape`) opens ordinary type-1 rooms in all four
   authored shapes (13x7, 13x14, 26x7, 26x14). Geometry, eight door slots and
