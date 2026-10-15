@@ -213,6 +213,8 @@ pub struct Tear {
     pub vy: f64,
     pub age: u32,
     pub spawn_seed: u32,
+    /// Actual kind1 builder variant copied to Entity+14; None is unqualified.
+    pub source_variant: Option<u32>,
     /// Actual Tear+838, copied from Player+c84 before its increment.
     pub shot_ordinal: u32,
     /// Source setter5411e0 writes collision48c and base83c at birth.
@@ -2948,6 +2950,21 @@ impl Game {
                     },
                 );
                 let final_uniform = self.state.boot_lifecycle.shared.uniform();
+                let source_variant = if plan.flags == self.state.weapon_cache.flags_c98 {
+                    self.state
+                        .player_items
+                        .as_ref()
+                        .and_then(|owner| item_pipeline::ItemInputs::new(owner).ok())
+                        .and_then(|inputs| {
+                            inputs.neutral_regular_tear_variant(
+                                self.state.weapon_admission.source_player_type,
+                                self.state.weapon_cache.primary,
+                                plan.flags,
+                            )
+                        })
+                } else {
+                    None
+                };
                 let mut tear = Tear {
                     id: self.state.next_tear,
                     x: 0.0,
@@ -2956,6 +2973,7 @@ impl Game {
                     vy: 0.0,
                     age: 0,
                     spawn_seed,
+                    source_variant,
                     shot_ordinal: self.state.player.shots_fired,
                     collision_damage: plan.damage,
                     base_damage: plan.damage,

@@ -110,6 +110,28 @@ impl<'a> ItemInputs<'a> {
         self.positive_owned_count(6) || self.number_one_record_present()
     }
 
+    ///50D090's kind1 result word reaches Tear+14 through517896/550A40.
+    ///Only this closed neutral producer returns0; unknown modifiers retain
+    ///an unknown owner, independently of regular-shot dispatch admission.
+    pub(crate) fn neutral_regular_tear_variant(
+        self,
+        source_player_type: Option<u32>,
+        primary: PrimaryWeaponC08,
+        flags: crate::attack_flags::AttackFlags,
+    ) -> Option<u32> {
+        (source_player_type == Some(0)
+            && primary == PrimaryWeaponC08::RegularTears
+            && flags.0 == 0
+            && self.admits_scalar_context()
+            && self
+                .owner
+                .owned_counts
+                .iter()
+                .enumerate()
+                .all(|(id, &count)| count == 0 || (count > 0 && [1, 4, 6].contains(&id))))
+        .then_some(0)
+    }
+
     ///Independent cache32/64 footprint for positive6 with selected1/4/114/118/329/304.
     ///This never widens a controller, contact or temporary-effect frontier.
     pub(crate) fn admits_number_one_appearance(self) -> bool {
