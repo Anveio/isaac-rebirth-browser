@@ -768,6 +768,14 @@ try:
 except Exception as error:
     missing('mandatory typed NPC14/18 contact declaration', None, error)
 
+technology_comparer = None
+technology_result = None
+if case['requires'].get('ordinaryTechnologyFunctional') is not None:
+    technology_spec = importlib.util.spec_from_file_location(
+        'ordinary_technology_comparer', Path(__file__).with_name('composition-technology.py'))
+    technology_module = importlib.util.module_from_spec(technology_spec)
+    technology_spec.loader.exec_module(technology_module)
+    technology_comparer = technology_module.TechnologyComparer(globals(), case)
 check('actual completed original', ('pass', []), (native.get('status'), native.get('failures')), None)
 check('actual completed browser', 'complete', browser.get('captureStatus'), None)
 trace = browser.get('trace') or {}
@@ -845,7 +853,12 @@ for captured in sorted(all_captured, key=lambda row: row['presentation']):
             check('actual complete active attack families/sequence/seeds', native_families, sorted(port_families), t)
         except Exception as error:
             missing('mandatory active attack scheduler group', t, error)
-        if any(actor['identity']['kind'] == 7 for actor in source['attacks']):
+        if technology_comparer is not None:
+            try:
+                technology_comparer.snapshot(source, state, t, observed['systemCounter'])
+            except Exception as error:
+                missing('mandatory actual Technology manager-role body group', t, error)
+        elif any(actor['identity']['kind'] == 7 for actor in source['attacks']):
             try:
                 compare_lasers(source, state, t, observed['systemCounter'])
             except Exception as error:
@@ -1206,6 +1219,8 @@ if 'controlledBrimContact' in case['requires']:
         controlled_ring_contact = contact_module.compare_contact(case, paired_rows, globals())
     except Exception as error:
         missing('mandatory controlled ring typed contact consumer', None, error)
+if technology_comparer is not None:
+    technology_result = technology_comparer.finish()
 
 result = {'schema': 2, 'status': 'fail' if any(not item['passed'] for item in checks) else 'pass', 'checks': checks,
           'coverage': dict(coverage), 'damageChains': list(damage_chains.values()), 'doorwayWitnesses': doorway_witnesses, 'laserLifetimes':list(laser_lifetimes.values()), 'renderWitnesses':render_witnesses,
@@ -1219,6 +1234,8 @@ if common_spec is not None:
     result['commonContactScope'] = 'Actual common-class NPC14/18 FIFO and nonlethal next-Full HP. Player-source FIFO is not a particular Laser callback witness. Native copied EntityRef raw words/P/V are retained, not reconstructed from current sources. Countdown30 is a source callback argument, not a stored queue field. Full copied-history, registry/impulse order, lethal subclass cleanup and explicit Remove/Uninit callbacks remain separately unqualified.'
 if controlled_ring_contact is not None:
     result['controlledRingContact'] = controlled_ring_contact
+if technology_result is not None:
+    result['ordinaryTechnology'] = technology_result
 payload = (json.dumps(result, separators=(',', ':')) + '\n').encode()
 with args.output.open('xb') as stream:
     stream.write(gzip.compress(payload, mtime=0) if str(args.output).endswith('.gz') else payload)

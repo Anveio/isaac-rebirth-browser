@@ -3,3 +3,4 @@ gfx/grid/grid_rock.anm2
 gfx/grid/grid_spikes.anm2
 # Pit autotile frames (GridEntity_Pit 5684c0 stores the frame as variant).
 gfx/grid/grid_pit.anm2
+gfx/grid/grid_poop.anm2
