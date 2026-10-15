@@ -90,6 +90,7 @@ pub const ABI_VERSION: u32 = 2;
 pub const MAX_COMMAND_TICKS: u32 = 36_000;
 pub const MAX_REPLAY_COMMANDS: usize = 36_000;
 const MAX_REQUEST: usize = 65_536;
+const MAX_BOOT_RESOURCE: usize = 512 * 1024;
 
 #[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "lowercase")]
@@ -474,6 +475,10 @@ pub struct State {
     pub initial_seed: u32,
     pub boot_epoch_seed: u32,
     pub boot_lifecycle: mt::BootState,
+    /// Actual Game 10EAD8 word, separate from floor flags and run r8/r9.
+    /// Unknown legacy or restore history remains absent.
+    #[serde(default)]
+    pub source_cache_run_flags: Option<u64>,
     pub saved_run_summary: Option<saved_game::SavedRunSummary>,
     pub audio: audio::AudioState,
     #[serde(default)]
@@ -653,6 +658,7 @@ impl Game {
                 initial_seed,
                 boot_epoch_seed,
                 boot_lifecycle,
+                source_cache_run_flags: Some(0), // Game constructor 554034.
                 saved_run_summary: None,
                 audio: audio::AudioState::default(),
                 pending_menu_initializations: Vec::new(),
@@ -1305,6 +1311,8 @@ impl Game {
         self.state.fire_cooldown = -1;
         self.state.max_fire_delay = 10;
         self.state.player_stats = player_stats::PlayerStats::default();
+        // Fresh reset 54E6A3 initializes the actual Game run-flag word.
+        self.state.source_cache_run_flags = Some(0);
         self.state.weapon_cache = weapon_plan::WeaponCache::fresh_player();
         self.state.weapon_admission = weapon_plan::WeaponAdmission::fresh_isaac();
         self.state.head_timer = -1;
@@ -1325,6 +1333,8 @@ impl Game {
         self.state.player = Player::starting();
         // 519767/519771 initialize the two transformation history counters.
         self.state.player.transformation_counts = Some([0, 0]);
+        // 51985C initializes the actual D64 Luck output.
+        self.state.player_stats.luck = Some(0.0);
         // 51987A initializes D68 to false. Base/config 446A90 independently
         // initializes the authored Player's 40-point grid collision class to 5.
         self.state.player.flying = Some(false);
@@ -2795,6 +2805,7 @@ impl Game {
 thread_local! {
     static GAME: RefCell<Option<Game>> = const { RefCell::new(None) };
     static REQUEST: RefCell<Vec<u8>> = const { RefCell::new(Vec::new()) };
+    static BOOT_RESOURCE: RefCell<Vec<u8>> = const { RefCell::new(Vec::new()) };
     static SNAPSHOT: RefCell<Vec<u8>> = const { RefCell::new(Vec::new()) };
     static ERROR: RefCell<Vec<u8>> = const { RefCell::new(Vec::new()) };
     static PUBLIC_KEYS_JSON: Vec<u8> =
@@ -2818,15 +2829,28 @@ pub extern "C" fn reset(initial_seed: u32, boot_epoch_seed: u32) -> u32 {
         }
     }
 }
-///Additive boot-only resource ingress. REQUEST contains authored XML bytes,
-///not a Command, inventory/stat DTO or captured native simulation state.
+///Existing ABI2 resource reset reads the64KiB REQUEST filled by request_ptr.
 #[no_mangle]
 pub extern "C" fn reset_with_resources(initial_seed: u32, boot_epoch_seed: u32) -> u32 {
-    let result = REQUEST
-        .with(|request| {
-            serde_json::from_slice::<challenges::ResourceInputs>(&request.borrow())
-                .map_err(|error| error.to_string())
-        })
+    REQUEST.with(|request| reset_with_resource_buffer(initial_seed, boot_epoch_seed, request))
+}
+///Additive boot-resource reset pairs only with boot_resource_ptr's512KiB buffer.
+#[no_mangle]
+pub extern "C" fn reset_with_boot_resources(initial_seed: u32, boot_epoch_seed: u32) -> u32 {
+    BOOT_RESOURCE
+        .with(|resource| reset_with_resource_buffer(initial_seed, boot_epoch_seed, resource))
+}
+fn reset_with_resource_buffer(
+    initial_seed: u32,
+    boot_epoch_seed: u32,
+    buffer: &RefCell<Vec<u8>>,
+) -> u32 {
+    let resources = {
+        let input = buffer.borrow();
+        serde_json::from_slice::<challenges::ResourceInputs>(&input)
+            .map_err(|error| error.to_string())
+    };
+    let result = resources
         .and_then(|resources| Game::new_with_resources(initial_seed, boot_epoch_seed, resources));
     match result {
         Ok(game) => {
@@ -2851,6 +2875,20 @@ pub extern "C" fn request_ptr(length: usize) -> *mut u8 {
         bytes.as_mut_ptr()
     })
 }
+///Separate bounded buffer for complete authored resources. Ordinary Command
+///requests retain their64KiB cap; resource bytes only enter a fresh Game reset.
+#[no_mangle]
+pub extern "C" fn boot_resource_ptr(length: usize) -> *mut u8 {
+    if length > MAX_BOOT_RESOURCE {
+        return std::ptr::null_mut();
+    }
+    BOOT_RESOURCE.with(|resource| {
+        let mut bytes = resource.borrow_mut();
+        bytes.resize(length, 0);
+        bytes.as_mut_ptr()
+    })
+}
+
 #[no_mangle]
 pub extern "C" fn command() -> u32 {
     let result = REQUEST
