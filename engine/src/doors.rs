@@ -13,6 +13,7 @@ pub(crate) fn advance(state: &mut State, phase: Phase) -> Result<(), String> {
     // Fresh Door Init starts with class4. The first active full grid update
     // admits opened-door class5 after the inbound transition releases players.
     set_open_collision(state, 5);
+    close_sounds(state);
     let current_type = state.floor.descriptors[state.current_room]
         .template
         .room_type;
@@ -38,6 +39,31 @@ pub(crate) fn advance(state: &mut State, phase: Phase) -> Result<(), String> {
         combat::try_damage_player(state, 1, 60, 0x10000)?;
     }
     Ok(())
+}
+
+/// Door::Update 565000 polls its Close animation: on frame2, two full updates
+/// after the combat close, each closed door admits SFX35 (delay10).
+fn close_sounds(state: &mut State) {
+    if state
+        .room
+        .combat_shut_update
+        .is_none_or(|update| update.wrapping_add(2) != state.game_update_count)
+    {
+        return;
+    }
+    for _ in 0..state.room.combat_shut_door_slots.len() {
+        state.audio.admit(
+            &mut state.boot_lifecycle.shared,
+            state.system_clock.system_counter - 1,
+            crate::audio::SoundRequest {
+                id: 35,
+                volume: 1.0,
+                delay: 10,
+                looping: false,
+                pitch: 1.0,
+            },
+        );
+    }
 }
 
 pub(crate) fn begin_room_admission(state: &mut State) {

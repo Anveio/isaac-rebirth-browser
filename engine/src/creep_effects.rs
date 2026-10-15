@@ -98,6 +98,8 @@ impl NpcEffectAdmission<'_> {
                 size: 1.0,
             }),
             fly_effect: None,
+            footprint: false,
+            critter: None,
         });
         self.scheduler.admit(ActorRef {
             kind: ActorKind::Effect,

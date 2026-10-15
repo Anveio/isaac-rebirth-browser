@@ -97,6 +97,8 @@ fn base(state: &mut State, variant: u32, seed: u32, position: WorldVector) -> Re
         blood_effect: None,
         creep_effect: None,
         fly_effect: None,
+        footprint: false,
+        critter: None,
         epic_fetus: None,
         explosion_effect: Some(Controller {
             permanent_color: AttackColor::WHITE,

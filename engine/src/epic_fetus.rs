@@ -138,6 +138,8 @@ fn admit(
         blood_effect: None,
         creep_effect: None,
         fly_effect: None,
+        footprint: false,
+        critter: None,
         explosion_effect: None,
         epic_fetus: Some(Controller {
             saved_position: None,

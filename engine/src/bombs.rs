@@ -293,8 +293,8 @@ pub fn isaac_blast_velocity(
 pub struct Bomb {
     pub id: u32,
     pub variant: u32,
-    /// Planted-bomb seed admission is separately unaccepted; conversions own
-    /// the actual shared stream draw made by Pickup::Update.
+    /// Player509612 draws the planted bomb's seed; conversions own the
+    /// actual shared stream draw made by Pickup::Update.
     pub spawn_seed: Option<u32>,
     pub birth_game_update: u32,
     pub friction: f32,
@@ -476,6 +476,8 @@ pub fn place(state: &mut State, phase: Phase) -> Result<(), String> {
         return Ok(());
     }
     let next = state.next_bomb.checked_add(1).ok_or("bomb IDs exhausted")?;
+    // Player509612 draws the Game.Spawn seed after the variant/flag queries.
+    let spawn_seed = state.boot_lifecycle.shared.next_u32();
     let mut motion = BombMotion::spawn(player_world(state), player_velocity(state))?;
     motion.present_birth(phase)?;
     state.actor_scheduler.admit(crate::actors::ActorRef {
@@ -485,7 +487,7 @@ pub fn place(state: &mut State, phase: Phase) -> Result<(), String> {
     state.bombs.push(Bomb {
         id: state.next_bomb,
         variant: 0,
-        spawn_seed: None,
+        spawn_seed: Some(spawn_seed),
         birth_game_update: state.game_update_count,
         friction: 1.0,
         animation: "Pulse".into(),
@@ -577,6 +579,20 @@ pub fn advance_explosions(state: &mut State, phase: Phase, fence: usize) {
         return;
     }
     for explosion in state.explosions.iter_mut().take(fence) {
+        // Effect case1 45abd7: the first Update of subtype0 plays SFX182.
+        if explosion.animation_frame == 0 {
+            state.audio.admit(
+                &mut state.boot_lifecycle.shared,
+                state.system_clock.system_counter.wrapping_sub(1),
+                crate::audio::SoundRequest {
+                    id: 182,
+                    volume: 1.0,
+                    delay: 2,
+                    looping: false,
+                    pitch: 1.0,
+                },
+            );
+        }
         explosion.animation_frame += 1;
     }
     state
@@ -733,12 +749,7 @@ pub fn advance_actor(state: &mut State, phase: Phase, id: u32) -> Result<(), Str
             state.bombs[index].motion = next_motion;
             advance_animation(&mut state.bombs[index], true);
         }
-        state.explosions.push(Explosion {
-            id,
-            x: f64::from(position.x) * WORLD_SCALE + 32.0,
-            y: f64::from(position.y) * WORLD_SCALE - 46.0,
-            animation_frame: 0,
-        });
+        spawn_blast_effects(state, id, position);
     }
     if let Some(shot) = &mut state.bombs[index].shot {
         //Explicit Remove may precede natural clocks; never revive that31F.
@@ -951,6 +962,25 @@ pub(crate) fn bomb_contacts(state: &mut State) -> Result<(), String> {
     Ok(())
 }
 
+/// Bomb555385/5554bb and Rock.Destroy56c8ec/56ca46 follow Game554490 with
+/// the same two seeded spawns: the Bomb Crater 1000.18, whose Init459121
+/// draws its alpha U * 0.2 + 0.8 (its frame uses its own RNG35), then the
+/// Bomb Explosion 1000.1, whose Init458e9d draws Random(2) for its 0x2fc
+/// flip. Crater rendering remains deferred.
+pub(crate) fn spawn_blast_effects(state: &mut State, id: u32, position: WorldVector) {
+    let shared = &mut state.boot_lifecycle.shared;
+    let _crater_seed = shared.next_u32();
+    let _crater_alpha = shared.uniform() * 0.2 + 0.8;
+    let _explosion_seed = shared.next_u32();
+    let _explosion_flip = shared.bounded(2) == 0;
+    state.explosions.push(Explosion {
+        id,
+        x: f64::from(position.x) * WORLD_SCALE + 32.0,
+        y: f64::from(position.y) * WORLD_SCALE - 46.0,
+        animation_frame: 0,
+    });
+}
+
 /// Game554490 with the line check on and incoming DamageFlags4. Each circle
 /// target must pass Room::CheckLine(mode2, ignoreWalls); a blocked line skips
 /// knockback and damage alike. Player damage is 2 when the explosion damage
@@ -1018,6 +1048,7 @@ pub(crate) fn explode_with_copied_source(
             4,
         )?;
     }
+    crate::critters::blast(state, position, radius, &clear);
     crate::rock_blast::destroy(state, position, radius)
 }
 

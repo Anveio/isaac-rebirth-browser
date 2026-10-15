@@ -117,6 +117,28 @@ snapshots whose process is gone.
 Pass `--keep-evidence` to retain everything, for example to inspect frames of
 a passing suite.
 
+### Shared-MT draw diagnostic
+
+Original and port consume one shared MT19937 stream, so a missing or misordered
+consumer shifts every later random choice. Paired suites (those built on
+[`runPairedGate`](../foundation/paired-game.mjs)) accept `--mt-draws`, or
+`E2E_MT_DRAWS=1` for a multi-suite run:
+
+```sh
+npm run test:e2e -- roundworms --mt-draws --replay-cases .cache/e2e/run-…/roundworms/paired/<case>/case.json
+```
+
+The original runs with the draw observer
+[`foundation-mt-trace.c`](../original/foundation-mt-trace.c) chained, and the
+browser enables the engine's opt-in draw log (`window.game.mtDraws`). Each
+case report gains an `mtDraws` entry from
+[`mt-draws.mjs`](../foundation/mt-draws.mjs). It compares gameplay draws in
+order by wrapper kind and update counter, and reports the first divergence
+with native return addresses and port source sites. Everything before that
+point used the same stream positions. The diagnostic never changes a case
+status. Drivers that launch the original themselves (traversal, items and
+similar) do not support it yet.
+
 ## No CI
 
 There is deliberately no CI (see [AGENTS.md](../../AGENTS.md)). Before you open

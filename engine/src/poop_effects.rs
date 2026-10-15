@@ -146,6 +146,8 @@ impl Admission<'_> {
             full_updates: 0,
             poop_effect: Some(controller),
             blood_effect: None,
+            footprint: false,
+            critter: None,
             creep_effect: None,
             fly_effect: None,
             epic_fetus: None,
