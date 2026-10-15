@@ -30,6 +30,9 @@ struct Current {
     keys: BTreeMap<String, u64>,
     /// Room types the case's floors contained.
     floor_rooms: BTreeSet<u32>,
+    /// The live NPCs (id to kind) of the room the last observation saw, by
+    /// floor and room.
+    live: Option<((u32, usize), BTreeMap<u32, u32>)>,
 }
 
 static CENSUS: Mutex<Census> = Mutex::new(Census {
@@ -88,6 +91,37 @@ pub fn observe(state: &State) {
         for npc in state.room.npcs.iter().filter(|npc| !npc.removed) {
             keys.push(format!("npc:{}", npc.kind));
         }
+        // Removal: an NPC left a room the player stayed in, killed or retired
+        // by its family. Removed bodies are pruned within the update that
+        // removes them, so a batched tick hides the death but not the
+        // absence.
+        let room = (state.floor.stage_seed, state.current_room);
+        let live: BTreeMap<u32, u32> = state
+            .room
+            .npcs
+            .iter()
+            .filter(|npc| !npc.removed)
+            .map(|npc| (npc.id, npc.kind))
+            .collect();
+        CURRENT.with(|current| {
+            let mut current = current.borrow_mut();
+            if state.room_transition.is_some() {
+                // A transition swaps the room's NPCs; compare after it.
+                current.live = None;
+                return;
+            }
+            if let Some((seen, before)) = &current.live {
+                if *seen == room {
+                    keys.extend(
+                        before
+                            .iter()
+                            .filter(|(id, _)| !live.contains_key(id))
+                            .map(|(_, kind)| format!("removed:{kind}")),
+                    );
+                }
+            }
+            current.live = Some((room, live));
+        });
         for pickup in state.room.pickups.iter().filter(|pickup| !pickup.removed) {
             keys.push(format!("pickup:{}", pickup.variant));
         }
@@ -146,6 +180,9 @@ pub fn observe(state: &State) {
     }
     CURRENT.with(|current| {
         let mut current = current.borrow_mut();
+        if state.screen != Screen::Playing {
+            current.live = None;
+        }
         if state.screen == Screen::Playing {
             let rooms = state.floor.descriptors.iter();
             current
@@ -180,6 +217,13 @@ pub fn report() -> Value {
     let (unreached_npcs, unplaced_npcs): (Vec<u32>, Vec<u32>) = implemented_npc_kinds()
         .filter(|kind| !census.reached.contains_key(&format!("npc:{kind}")))
         .partition(|kind| authored.contains(kind));
+    // Simulated kinds whose death or retirement never ran.
+    let unremoved_npcs: Vec<u32> = implemented_npc_kinds()
+        .filter(|kind| {
+            census.reached.contains_key(&format!("npc:{kind}"))
+                && !census.reached.contains_key(&format!("removed:{kind}"))
+        })
+        .collect();
     let unentered_rooms: Vec<u32> = census
         .floor_reached
         .keys()
@@ -201,6 +245,7 @@ pub fn report() -> Value {
         "floorRoomTypes": census.floor_reached,
         "unreachedNpcKinds": unreached_npcs,
         "unplacedNpcKinds": unplaced_npcs,
+        "unremovedNpcKinds": unremoved_npcs,
         "unenteredRoomTypes": unentered_rooms,
     })
 }

@@ -245,11 +245,13 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | `phase` | system update/interpolation phases against a counter model | 6 | 2 | 0 |
 | `actors` | actor admission order and room identities against a list model | 4 | 2 | 0 |
 | `layout` | rectangular floor growth over every accepted seed, room count and shape mask | 11 | 2 | 1 |
+| `room_spawns` | authored spawn-group selection over every authored room and synthetic edge rooms | 11 | 4 | 0 |
 | `floor` | Basement generation structure, retries and per-descriptor room admission | 18 | 5 | 0 |
 | `grid` | grid queries and ground-collision solvers on generated rooms | 14 | 3 | 0 |
+| `contact` | mass contact responses against momentum, centre-of-mass and overlap oracles | 16 | 3 | 0 |
 | `pathfinder` | FindGridPath's flood against an independent node-weighted Dijkstra | 6 | 5 | 0 |
 | `item_pools` | ItemPool selection, depletion, fallbacks, routing and continuation | 21 | 6 | 3 |
-| `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 63 | 51 | 2 |
+| `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 64 | 53 | 2 |
 | `abi` | the exported C ABI transport the browser bridge drives | 15 | 3 | 0 |
 
 <details><summary>Every declared DST property</summary>
@@ -317,6 +319,21 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Always | layout: the reported draws reproduce the final RNG35 state | [layout.rs](engine/dst/src/units/layout.rs) |
 | Always | layout: dead ends are grown rooms no other room grows from | [layout.rs](engine/dst/src/units/layout.rs) |
 | Always | layout: expansion stops at five dead ends or five attempts | [layout.rs](engine/dst/src/units/layout.rs) |
+| Always | room_spawns: selection admits exactly the rooms and groups the source admits | [room_spawns.rs](engine/dst/src/units/room_spawns.rs) |
+| Sometimes | room_spawns: an invalid room or group is rejected | [room_spawns.rs](engine/dst/src/units/room_spawns.rs) |
+| Always | room_spawns: selection is a pure function of the room and its seed | [room_spawns.rs](engine/dst/src/units/room_spawns.rs) |
+| Always | room_spawns: selection round-trips through JSON | [room_spawns.rs](engine/dst/src/units/room_spawns.rs) |
+| Always | room_spawns: the tinted-rock candidate is an interior cell drawn from the room stream | [room_spawns.rs](engine/dst/src/units/room_spawns.rs) |
+| Always | room_spawns: the room stream advances once per group, empty ones included | [room_spawns.rs](engine/dst/src/units/room_spawns.rs) |
+| Always | room_spawns: every group with entries yields exactly one selector, in authored order | [room_spawns.rs](engine/dst/src/units/room_spawns.rs) |
+| Sometimes | room_spawns: an empty group is skipped | [room_spawns.rs](engine/dst/src/units/room_spawns.rs) |
+| Always | room_spawns: a selector holds one of its group's entries | [room_spawns.rs](engine/dst/src/units/room_spawns.rs) |
+| Always | room_spawns: a weighted entry wins unless the first entry is the fallback | [room_spawns.rs](engine/dst/src/units/room_spawns.rs) |
+| Always | room_spawns: the pick is 0x5d49d0's strict running-sum comparison against the group draw | [room_spawns.rs](engine/dst/src/units/room_spawns.rs) |
+| Always | room_spawns: a lone weighted entry always wins | [room_spawns.rs](engine/dst/src/units/room_spawns.rs) |
+| Sometimes | room_spawns: a group without weight falls back to its first entry | [room_spawns.rs](engine/dst/src/units/room_spawns.rs) |
+| Sometimes | room_spawns: spawnConfig chooses an alternate variant | [room_spawns.rs](engine/dst/src/units/room_spawns.rs) |
+| Always | room_spawns: a selector carries its group's cell, position and stream seeds | [room_spawns.rs](engine/dst/src/units/room_spawns.rs) |
 | Always | floor: requests outside stages 1 and 2 or with stage seed zero are rejected | [floor.rs](engine/dst/src/units/floor.rs) |
 | Always | floor: the first-floor entry is the normal generator with fresh run inputs | [floor.rs](engine/dst/src/units/floor.rs) |
 | Always | floor: generation is a pure function of its request | [floor.rs](engine/dst/src/units/floor.rs) |
@@ -357,6 +374,25 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Sometimes | grid: a player wall contact changes velocity | [grid.rs](engine/dst/src/units/grid.rs) |
 | Always | grid: blast candidates are ascending, unique cells of the room | [grid.rs](engine/dst/src/units/grid.rs) |
 | Always | grid: blast queries reject non-positive, oversized and non-finite radii | [grid.rs](engine/dst/src/units/grid.rs) |
+| Always | contact: pairs outside the source types or with invalid geometry are rejected | [contact.rs](engine/dst/src/units/contact.rs) |
+| Always | contact: every admitted pair at ordinary scales resolves | [contact.rs](engine/dst/src/units/contact.rs) |
+| Always | contact: a rejected pair leaves both bodies unchanged | [contact.rs](engine/dst/src/units/contact.rs) |
+| Always | contact: the response runs exactly for strictly overlapping circles | [contact.rs](engine/dst/src/units/contact.rs) |
+| Always | contact: a pair that does not overlap is left unchanged | [contact.rs](engine/dst/src/units/contact.rs) |
+| Always | contact: coincident centres only run the callbacks | [contact.rs](engine/dst/src/units/contact.rs) |
+| Sometimes | contact: coincident centres collide | [contact.rs](engine/dst/src/units/contact.rs) |
+| Always | contact: positions and velocities change only along the centre line | [contact.rs](engine/dst/src/units/contact.rs) |
+| Always | contact: only the player's collider blocks its displacement | [contact.rs](engine/dst/src/units/contact.rs) |
+| Always | contact: a blocked player keeps its position and velocity | [contact.rs](engine/dst/src/units/contact.rs) |
+| Sometimes | contact: a player's collider blocks its displacement | [contact.rs](engine/dst/src/units/contact.rs) |
+| Always | contact: separation keeps the pair's centre of mass in place | [contact.rs](engine/dst/src/units/contact.rs) |
+| Always | contact: the impulse conserves momentum, the player taking half its share | [contact.rs](engine/dst/src/units/contact.rs) |
+| Always | contact: the player's collider is offered exactly the displacement applied | [contact.rs](engine/dst/src/units/contact.rs) |
+| Always | contact: the impulse carries the pair's relative speed, split by mass | [contact.rs](engine/dst/src/units/contact.rs) |
+| Always | contact: the player's collider is consulted for a colliding player contact | [contact.rs](engine/dst/src/units/contact.rs) |
+| Sometimes | contact: a fast separating pair takes the reversed overlap | [contact.rs](engine/dst/src/units/contact.rs) |
+| Always | contact: an ordinary pair ends exactly a radius sum apart | [contact.rs](engine/dst/src/units/contact.rs) |
+| Always | contact: an NPC pair resolves the same whichever body comes first | [contact.rs](engine/dst/src/units/contact.rs) |
 | Always | pathfinder: the flood runs on every admitted grid and rejects any other | [pathfinder.rs](engine/dst/src/units/pathfinder.rs) |
 | Always | pathfinder: the flood is a pure function of its grid, start and owner | [pathfinder.rs](engine/dst/src/units/pathfinder.rs) |
 | Always | pathfinder: the flood only marks open cells of its grid, with negative distances | [pathfinder.rs](engine/dst/src/units/pathfinder.rs) |
@@ -400,6 +436,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Always | item_pools: a serialized manager continues identically | [item_pools.rs](engine/dst/src/units/item_pools.rs) |
 | Always | game: exactly the documented invalid inputs are rejected | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: valid Tick commands always succeed | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Sometimes | game: a Tick of exactly the command budget is accepted | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: an over-budget Tick is rejected | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: an out-of-range host timestamp is rejected | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: a host timestamp on a batched Tick is rejected | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
@@ -411,6 +448,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Sometimes | game: a locked or unimplemented character is rejected | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: text outside the seed dialog is rejected | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: invalid seed text is rejected | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: the fire cooldown never rises above a max fire delay the command held | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: Tick advances the tick and system clocks by its count (plus run-start alignment) | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: the menu animation clock advances with Tick and restarts on screen changes | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: Tick changes the screen only by starting a run or leaving GameOver | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
@@ -420,6 +458,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Sometimes | game: ticks elapse while paused | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Reachable | game: a run starts through the public menus | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: a run starts in the starting room of its seed's floor | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Sometimes | game: a new run's player walks on from the starting room within its first command | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: a seeded run starts | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: a Random character run starts | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: key events never advance simulation or consume the shared stream | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
