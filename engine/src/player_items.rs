@@ -44,6 +44,8 @@ pub struct PlayerItems {
     pub trinket_rngs: Vec<items::Rng>,
     pub pocket_rngs: Vec<items::Rng>,
     pub entity_spawn_seed: u32,
+    #[serde(default)]
+    pub costume118: Option<crate::player_costume118::Costume118>,
     pub owned_counts: Vec<i32>,
     pub temporary_collectibles: Vec<TemporaryCollectible>,
     #[serde(default)]
@@ -99,6 +101,7 @@ impl PlayerItems {
             trinket_rngs,
             pocket_rngs,
             entity_spawn_seed,
+            costume118: None,
             owned_counts: vec![0; 347],
             temporary_collectibles: Vec::new(),
             // 519680/51968A/519524 and the 28-word loop at 519798.
@@ -540,7 +543,7 @@ pub(crate) fn add_collectible(
         .as_mut()
         .expect("checked Player item owner");
     owner.owned_counts[id as usize] = owner.owned_counts[id as usize].wrapping_add(1);
-    if ![1, 4, 6, 114, 118, 329].contains(&id) {
+    if ![1, 4, 6, 114, 118, 329, 304].contains(&id) {
         // These admitted grant paths preserve the fresh auxiliary words.
         // Nonzero setters and restore need their own producer binding.
         owner.luck_inputs = None;
@@ -550,6 +553,7 @@ pub(crate) fn add_collectible(
         // counts cannot reconstruct these transformation history counters.
         state.player.transformation_counts = None;
     }
+    crate::player_costume118::on_collectible_added(state, id);
     if config.kind != 3 || !touched {
         authored_grants(state, config);
     }

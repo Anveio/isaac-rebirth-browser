@@ -121,10 +121,14 @@ pub(crate) fn dispatch_player(
     match plan.controller {
         ControllerChannel::RegularShots => Ok(DispatchOutcome::RegularTear),
         ControllerChannel::OrdinaryKnife => ordinary_knife(state, plan, input, phase, callback_aim),
+        ControllerChannel::ControlledKnife => {
+            controlled_knife(state, plan, input, phase, callback_aim)
+        }
+        ControllerChannel::ChargedBrimstone => {
+            crate::brimstone::dispatch_player(state, plan, input, phase, callback_aim)
+        }
         unsupported => {
             let channel = match unsupported {
-                ControllerChannel::ControlledKnife => "controlledKnife",
-                ControllerChannel::ChargedBrimstone => "chargedBrimstone",
                 ControllerChannel::ControlledBrimstone => "controlledBrimstone",
                 ControllerChannel::ControlledTear => "controlledTear",
                 ControllerChannel::Unimplemented(_) => "unimplementedPrimary",
@@ -184,6 +188,12 @@ pub struct AttackRuntime {
     ///Actual Player+DB4 fresh519902/519915; unsupported histories remain absent.
     #[serde(default)]
     pub shooting_aim_db4: Option<WorldVector>,
+    /// Actual 5198DA fresh owner, written by 529750 before 52F370.
+    #[serde(default)]
+    pub movement_direction_d9c: Option<i32>,
+    ///Actual51992B/519937 current Player DC4 vector.
+    #[serde(default)]
+    pub player_dc4: Option<WorldVector>,
     /// Player+C18 is a registered slot, not an independently recomputed actor.
     pub persistent: Option<ActorRef>,
     /// Actual C20/C28/C30 slots; absence is distinct from Remove requested.
@@ -197,7 +207,9 @@ impl AttackRuntime {
         Self {
             charge_c0c: Some(0),
             head_direction_da0: Some(3), //5198e4, independently from C0C.
+            movement_direction_d9c: Some(-1),
             shooting_aim_db4: Some(WorldVector { x: 0.0, y: 0.0 }),
+            player_dc4: Some(WorldVector { x: 0.0, y: 0.0 }),
             ..Self::default()
         }
     }
@@ -219,6 +231,292 @@ pub(crate) fn ordinary_head_direction(state: &mut State, aim: WorldVector) {
         } else {
             3
         });
+    }
+}
+
+pub(crate) fn update_movement_direction(state: &mut State, controls: bool) -> Result<(), String> {
+    if state.weapon_admission.source_player_type != Some(0)
+        || !state
+            .player_items
+            .as_ref()
+            .is_some_and(|items| items.active_state_d80 == 0)
+    {
+        state.attack_runtime.movement_direction_d9c = None;
+        return Ok(());
+    }
+    let scale = state.player_stats.move_speed * 0.25 + 0.75;
+    if !scale.is_finite() || scale <= 0.0 {
+        return Err("current movement direction requires its actual positive input scale".into());
+    }
+    let enabled = controls && state.player.controls_enabled && state.player.input_cooldown <= 0;
+    let pressed = &state.pressed;
+    let x = if enabled {
+        f32::from(u8::from(pressed.contains("KeyD")))
+            - f32::from(u8::from(pressed.contains("KeyA")))
+    } else {
+        0.0
+    } * scale;
+    let y = if enabled {
+        f32::from(u8::from(pressed.contains("KeyS")))
+            - f32::from(u8::from(pressed.contains("KeyW")))
+    } else {
+        0.0
+    } * scale;
+    //52981F initializes -1 each invocation; strict X dominance, then Y.
+    state.attack_runtime.movement_direction_d9c = Some(if x.abs() > y.abs() {
+        if x < 0.0 {
+            0
+        } else {
+            2
+        }
+    } else if y < 0.0 {
+        1
+    } else if y > 0.0 {
+        3
+    } else {
+        -1
+    });
+    Ok(())
+}
+
+pub(crate) fn controlled_head_direction(
+    state: &mut State,
+    aim: WorldVector,
+    held: bool,
+) -> Result<(), String> {
+    let head_aim = if held {
+        if let Some(actor) = state.attack_runtime.persistent {
+            if actor.kind != ActorKind::Knife {
+                record_frontier(state, "controlledKnifeHeadReference");
+                return Ok(());
+            }
+            let knife = state
+                .knives
+                .iter()
+                .find(|knife| knife.id == actor.id)
+                .ok_or("controlled head C18 is unresolved")?;
+            let player = crate::bombs::player_world(state);
+            let delta = WorldVector {
+                x: knife.position.x - player.x,
+                y: knife.position.y - player.y,
+            };
+            if !delta.is_finite() {
+                return Err("controlled head vector is nonfinite".into());
+            }
+            state.head_timer = 10;
+            delta
+        } else {
+            aim
+        }
+    } else {
+        aim
+    };
+    ordinary_head_direction(state, head_aim);
+    Ok(())
+}
+
+pub(crate) fn controlled_idle_head(state: &mut State, held: bool) {
+    if !held && state.head_timer < 0 {
+        if let Some(direction) = state.attack_runtime.movement_direction_d9c {
+            state.attack_runtime.head_direction_da0 = Some(match direction {
+                0 => 0,
+                1 => 1,
+                2 => 2,
+                _ => 3,
+            });
+        } else {
+            record_frontier(state, "controlledKnifeMovementHistory");
+        }
+    }
+}
+
+fn controlled_actor_frontier(knife: &Knife) -> Result<Option<&'static str>, String> {
+    if !knife.position.is_finite()
+        || !knife.velocity.is_finite()
+        || !knife.current_friction.is_finite()
+        || !knife.sprite.rotation.is_finite()
+        || !knife.source_color.is_finite()
+        || !knife.current_color.is_finite()
+        || !knife.collision_damage.is_finite()
+    {
+        return Err("controlled Knife requires finite actual actor fields".into());
+    }
+    if knife.variant != 0 || knife.subtype != 0 {
+        return Ok(Some("controlledKnifeSubtypeHistory"));
+    }
+    if knife.parent
+        != Some(ActorRef {
+            kind: ActorKind::Player,
+            id: 0,
+        })
+    {
+        return Ok(Some("controlledKnifeParentHistory"));
+    }
+    if knife.child_chain_4a0 != crate::knives::ChildChain::Empty {
+        return Ok(Some("controlledKnifeChildChainHistory"));
+    }
+    if knife.attack_flags.0 & (4 | 0x400 | 0x800000) != 0 {
+        return Ok(Some("controlledKnifeProperties"));
+    }
+    Ok(None)
+}
+
+fn controlled_knife(
+    state: &mut State,
+    plan: &ResolvedWeaponPlan,
+    input: ShootButtons,
+    phase: Phase,
+    aim: WorldVector,
+) -> Result<DispatchOutcome, String> {
+    if plan.primary.numeric() != 4 || phase == Phase::Skipped {
+        return Err("controlled Knife requires actual C08=4 callback".into());
+    }
+    let request = KnifeBirthProperties {
+        position: crate::bombs::player_world(state),
+        owner: ActorRef {
+            kind: ActorKind::Player,
+            id: 0,
+        },
+        attack_flags: plan.properties.flags.0,
+        color: plan.properties.color,
+        collision_damage: plan.properties.collision_damage,
+    };
+    request.validate_fields()?;
+    if !aim.is_finite() || !plan.source_shot_speed_c7c.is_finite() {
+        return Err("controlled steering requires finite current inputs".into());
+    }
+    let items = crate::item_pipeline::ItemInputs::new(
+        state
+            .player_items
+            .as_ref()
+            .ok_or("controlled Knife item owner absent")?,
+    )?;
+    if !crate::weapon_plan::admits_neutral_knife_properties(
+        items,
+        state.weapon_admission.source_player_type,
+    ) || request.attack_flags & (4 | 0x400 | 0x800000) != 0
+    {
+        record_frontier(state, "controlledKnifeProperties");
+        return Ok(DispatchOutcome::Unadmitted);
+    }
+    let room_age = if !state.room.loaded {
+        -1
+    } else if let Some(initial) = state.room.initialization_game_update {
+        state.game_update_count.wrapping_sub(initial) as i32
+    } else {
+        record_frontier(state, "controlledKnifeRoomAgeHistory");
+        return Ok(DispatchOutcome::Unadmitted);
+    };
+    if let Some(actor) = state.attack_runtime.persistent {
+        if actor.kind == ActorKind::Knife {
+            let knife = state
+                .knives
+                .iter()
+                .find(|knife| knife.id == actor.id)
+                .ok_or("controlled C18 is unresolved")?;
+            if let Some(channel) = controlled_actor_frontier(knife)? {
+                record_frontier(state, channel);
+                return Ok(DispatchOutcome::Unadmitted);
+            }
+        }
+    }
+    let actor = match state.attack_runtime.persistent {
+        Some(actor) if actor.kind == ActorKind::Knife => actor,
+        previous => {
+            if let Some(previous) = previous {
+                remove_referenced_actor(state, previous)?;
+            }
+            let id = state.attack_runtime.next_knife;
+            let next = id
+                .checked_add(1)
+                .ok_or("controlled Knife handle exhausted")?;
+            //50BDD0: SharedRaw -> Init uniform at zeroP -> requestedP/Parent.
+            let seed = state.boot_lifecycle.shared.next_u32();
+            let mut knife = Knife::initialize(
+                id,
+                seed,
+                state.game_update_count,
+                &mut state.boot_lifecycle.shared,
+            );
+            knife.position = request.position;
+            knife.parent = Some(request.owner);
+            knife.render_offset = WorldVector { x: 0.0, y: -10.0 };
+            knife.apply_resolved(
+                request.attack_flags,
+                request.color,
+                request.collision_damage,
+            );
+            knife.raw_7ec = 0.0; // The actual caller passes a literal zero angle.
+            knife.entity_flags |= 0x200000;
+            state.knives.push(knife);
+            state.attack_runtime.next_knife = next;
+            let actor = ActorRef {
+                kind: ActorKind::Knife,
+                id,
+            };
+            state.actor_scheduler.admit(actor)?;
+            replace_c18(state, Some(actor))?;
+            state
+                .knives
+                .last_mut()
+                .expect("just admitted Knife")
+                .apply_resolved(
+                    request.attack_flags | crate::knives::CONTROLLED,
+                    request.color,
+                    request.collision_damage,
+                );
+            //Actual caller v18 remains full even when birth came from fast.
+            advance_actor(state, Phase::Update, id, 4)?;
+            actor
+        }
+    };
+    //51B12B occurs after birth's explicit18. Remove retains registered slots.
+    for extra in state.attack_runtime.secondary.into_iter().flatten() {
+        remove_referenced_actor(state, extra)?;
+    }
+    let knife = state
+        .knives
+        .iter_mut()
+        .find(|knife| knife.id == actor.id)
+        .ok_or("controlled C18 disappeared")?;
+    //51B16B common current-field reapply also runs after a newly born actor.
+    knife.apply_resolved(
+        request.attack_flags | crate::knives::CONTROLLED,
+        request.color,
+        request.collision_damage,
+    );
+    if room_age == 0 {
+        knife.position = request.position;
+    }
+    if input.held() && knife.current_friction != 0.0 {
+        let aim = if crate::knives::squared_length(aim) > 1.0 {
+            crate::knives::normalized(aim)
+        } else {
+            aim
+        };
+        let scaled = ((aim * plan.source_shot_speed_c7c) * 2.5) * 0.5;
+        knife.velocity = knife.velocity
+            + WorldVector {
+                x: scaled.x / knife.current_friction,
+                y: scaled.y / knife.current_friction,
+            };
+    }
+    if !knife.velocity.is_finite() {
+        return Err("controlled steering overflowed actual fields".into());
+    }
+    Ok(DispatchOutcome::Handled)
+}
+
+pub(crate) fn ordinary_brimstone_idle_head(state: &mut State, held: bool) {
+    if !held && state.head_timer < 0 && state.attack_runtime.persistent.is_none() {
+        if let Some(direction) = state.attack_runtime.movement_direction_d9c {
+            state.attack_runtime.head_direction_da0 = Some(match direction {
+                0 => 0,
+                1 => 1,
+                2 => 2,
+                _ => 3,
+            });
+        }
     }
 }
 
@@ -270,12 +568,6 @@ fn ordinary_knife(
     };
     if !(0..=3).contains(&head) || plan.max_fire_delay <= 0 {
         return Err("ordinary Knife charge/head owner violates source domain".into());
-    }
-    if items.positive_owned_count(118) {
-        // The following leaf owns the real ParentKnife subtype1 producer.
-        // Do not emit a parent or mutate charge/slots across that frontier.
-        record_frontier(state, "ordinaryKnifeBrimChild");
-        return Ok(DispatchOutcome::Unadmitted);
     }
     //51e38c/51f0cd Remove the real three extra slots before C18 lookup.
     for extra in state.attack_runtime.secondary.into_iter().flatten() {
@@ -403,6 +695,14 @@ pub(crate) fn remove_referenced_actor(state: &mut State, actor: ActorRef) -> Res
                 .ok_or("registered knife handle is unresolved")?;
             knife.remove();
         }
+        ActorKind::Laser => {
+            state
+                .lasers
+                .iter_mut()
+                .find(|laser| laser.id == actor.id)
+                .ok_or("registered Laser handle is unresolved")?
+                .remove();
+        }
         _ => return Err("referenced attack actor has no admitted Remove callback".into()),
     }
     Ok(())
@@ -414,6 +714,7 @@ pub(crate) fn replace_c18(state: &mut State, actor: Option<ActorRef>) -> Result<
     if let Some(actor) = actor {
         let admitted = match actor.kind {
             ActorKind::Knife => state.knives.iter().any(|knife| knife.id == actor.id),
+            ActorKind::Laser => state.lasers.iter().any(|laser| laser.id == actor.id),
             _ => false,
         };
         if !admitted {
@@ -437,16 +738,6 @@ pub(crate) fn advance_actor(
     let Some(index) = state.knives.iter().position(|knife| knife.id == id) else {
         return Err("updated Knife handle is unresolved".into());
     };
-    if state.knives[index].subtype != 0
-        || state.knives[index].parent
-            != Some(ActorRef {
-                kind: ActorKind::Player,
-                id: 0,
-            })
-    {
-        record_frontier(state, "ordinaryKnifeParentHistory");
-        return Ok(());
-    }
     let grid = crate::grid::Grid::new(
         state
             .room
@@ -454,26 +745,88 @@ pub(crate) fn advance_actor(
             .clone()
             .ok_or("knife requires its admitted actual room grid")?,
     )?;
-    let parent = ParentView {
-        position: crate::bombs::player_world(state),
-        primary_c08,
-    };
-    let parent_has_118 = state
-        .player_items
-        .as_ref()
-        .is_some_and(|items| items.owned_counts[118] > 0);
-    let needs_child = state.knives[index].begin_ordinary_update(
-        phase,
-        parent,
-        state.game_update_count,
-        parent_has_118,
-    )?;
-    if needs_child {
-        // Keep known parent body/tail work while the missing nested factory
-        // remains observable. No child Raw, seed, Line or callback is invented.
-        record_frontier(state, "ordinaryKnifeBrimChild");
-    }
-    if !state.knives[index].finish_ordinary_update(parent, state.game_update_count)? {
+    if state.knives[index].subtype == 0
+        && state.knives[index].attack_flags.0 & crate::knives::CONTROLLED != 0
+    {
+        let parent = ParentView {
+            position: crate::bombs::player_world(state),
+            primary_c08,
+        };
+        if let Some(channel) = controlled_actor_frontier(&state.knives[index])? {
+            record_frontier(state, channel);
+            // Retain known presentation/tail work while the unmapped actor
+            // effect remains an explicit admission failure.
+            if phase == Phase::Interpolate {
+                let knife = &mut state.knives[index];
+                knife.fast = true;
+                knife.saved_position = knife.position;
+                knife.position = knife.position + (knife.velocity * knife.current_friction) * 0.5;
+                if !knife.position.is_finite() {
+                    return Err("unmapped controlled fast wrapper overflowed actual fields".into());
+                }
+                return Ok(());
+            }
+        } else if !crate::controlled_knife::advance(
+            &mut state.knives[index],
+            phase,
+            parent,
+            &grid,
+            state.game_update_count,
+            state.room.manager_counts.countable_total(),
+        )? {
+            return Ok(());
+        }
+    } else if state.knives[index].subtype == 1 {
+        if phase == Phase::Interpolate {
+            return state.knives[index].brim_child_fast();
+        }
+        if let Some(actor) = state.knives[index].parent {
+            if actor.kind == ActorKind::Knife
+                && !state.knives.iter().any(|knife| knife.id == actor.id)
+            {
+                return Err("Brim Knife linked parent is unresolved".into());
+            }
+        }
+        state.knives[index].brim_child_full(&grid, state.game_update_count)?;
+    } else if state.knives[index].subtype == 0
+        && state.knives[index].parent
+            == Some(ActorRef {
+                kind: ActorKind::Player,
+                id: 0,
+            })
+    {
+        let parent = ParentView {
+            position: crate::bombs::player_world(state),
+            primary_c08,
+        };
+        let parent_has_118 = state
+            .player_items
+            .as_ref()
+            .is_some_and(|owner| owner.owned_counts[118] > 0);
+        let needs_child = state.knives[index].begin_ordinary_update(
+            phase,
+            parent,
+            state.game_update_count,
+            parent_has_118,
+        )?;
+        if needs_child {
+            // An unconverted actor across an unadmitted history must not
+            // invent fresh ordinary children while live329 selects control.
+            let controlled = state
+                .player_items
+                .as_ref()
+                .is_some_and(|owner| owner.owned_counts[329] > 0);
+            if controlled {
+                record_frontier(state, "controlledKnife");
+            } else {
+                admit_brim_knife_child(state, index, parent.position, &grid)?;
+            }
+        }
+        if !state.knives[index].finish_ordinary_update(parent, state.game_update_count)? {
+            return Ok(());
+        }
+    } else {
+        record_frontier(state, "ordinaryKnifeParentHistory");
         return Ok(());
     }
     let receiver = crate::attack_grid::knife_callback(
@@ -487,6 +840,54 @@ pub(crate) fn advance_actor(
     }
     state.knives[index].finish_full()?;
     Ok(())
+}
+
+///473BCE prepares the parent's actual818 Line BEFORE473D00 Raw, then births
+///real8/0/1 with cached spawnerKnife and explicit Parent link afterInit.
+fn admit_brim_knife_child(
+    state: &mut State,
+    parent_index: usize,
+    player: WorldVector,
+    grid: &crate::grid::Grid,
+) -> Result<(), String> {
+    let parent = &mut state.knives[parent_index];
+    crate::knife_path::rebuild(&mut parent.line, player, parent.raw_7e8, grid)?;
+    let position = player + crate::knives::degree_direction(parent.raw_7e8) * 30.0;
+    let parent_id = parent.id;
+    let parent_variant = parent.variant;
+    let color = parent.current_color;
+    let damage = parent.collision_damage * 0.3;
+    let line = parent.line.clone();
+    let line_raw_18 = parent.line_raw_18;
+    let id = state.attack_runtime.next_knife;
+    let next = id.checked_add(1).ok_or("Knife child handle exhausted")?;
+    let seed = state.boot_lifecycle.shared.next_u32();
+    let mut child = Knife::initialize(
+        id,
+        seed,
+        state.game_update_count,
+        &mut state.boot_lifecycle.shared,
+    );
+    child.subtype = 1;
+    child.position = position;
+    child.spawner_type = 8;
+    child.spawner_variant = parent_variant;
+    child.render_offset = WorldVector { x: 0.0, y: -10.0 };
+    child.apply_resolved(0, color, damage);
+    child.line = line;
+    child.line_raw_18 = line_raw_18;
+    child.parent = Some(ActorRef {
+        kind: ActorKind::Knife,
+        id: parent_id,
+    });
+    state.knives.push(child);
+    state.attack_runtime.next_knife = next;
+    state.actor_scheduler.admit(ActorRef {
+        kind: ActorKind::Knife,
+        id,
+    })?;
+    let primary = state.weapon_cache.primary.numeric();
+    advance_actor(state, Phase::Update, id, primary)
 }
 
 pub(crate) fn advance_scheduled_actor(
@@ -573,7 +974,7 @@ pub(crate) fn restore_fast_positions(state: &mut State) {
 /// insertion, once for each admitted contact, preserving conditional RNG.
 pub(crate) fn knife_contacts(
     state: &mut State,
-    preflight: impl Fn(&State) -> Result<KnifeContactAdmission, String>,
+    preflight: impl Fn(&State, bool) -> Result<KnifeContactAdmission, String>,
     mut resolve_kind4: impl FnMut(&mut State) -> Result<f32, String>,
 ) -> Result<(), String> {
     let knife_handles: Vec<_> = state
@@ -596,13 +997,16 @@ pub(crate) fn knife_contacts(
         {
             continue;
         }
-        if state.knives[index].subtype != 0
-            || state.knives[index].parent
-                != Some(ActorRef {
-                    kind: ActorKind::Player,
-                    id: 0,
-                })
-        {
+        let parent_is_player = state.knives[index].parent
+            == Some(ActorRef {
+                kind: ActorKind::Player,
+                id: 0,
+            });
+        let child_parent = state.knives[index].subtype == 1
+            && state.knives[index]
+                .parent
+                .is_none_or(|actor| actor.kind == ActorKind::Knife);
+        if !(state.knives[index].subtype == 0 && parent_is_player || child_parent) {
             record_frontier(state, "ordinaryKnifeParentHistory");
             continue;
         }
@@ -669,7 +1073,7 @@ pub(crate) fn knife_contacts(
             {
                 return Err("Knife stored48c damage violates finite source domain".into());
             }
-            let admission = preflight(state)?;
+            let admission = preflight(state, parent_is_player)?;
             if admission != KnifeContactAdmission::Mapped {
                 let channel = match admission {
                     KnifeContactAdmission::UnmappedBuilderModifiers => "knifeContactModifiers",
@@ -681,7 +1085,12 @@ pub(crate) fn knife_contacts(
                 continue;
             }
             state.knives[index].admit_hit_sequence(state.game_update_count, own_sequence, sequence);
-            let base_damage = resolve_kind4(state)?;
+            let base_damage = if parent_is_player {
+                resolve_kind4(state)?
+            } else {
+                // Actual473F/474F child contact uses its own stored48C.
+                state.knives[index].collision_damage
+            };
             let amount = state.knives[index].hit_damage(base_damage)?;
             //475030 calls511d90(firstPlayer,0) after current kind4 resolution
             //and the actor's charge multiplier. Fresh519767 and the selected
@@ -733,7 +1142,7 @@ pub(crate) fn complete_primary_cleanup(
         return Ok(true);
     }
     match state.attack_runtime.persistent {
-        Some(actor) if actor.kind == ActorKind::Knife => {
+        Some(actor) if matches!(actor.kind, ActorKind::Knife | ActorKind::Laser) => {
             remove_referenced_actor(state, actor)?;
             //Virtual48 preserves the registered C18 until actual Uninit.
             Ok(true)
@@ -749,7 +1158,12 @@ pub(crate) fn complete_primary_cleanup(
 pub(crate) fn contacts(state: &mut State) -> Result<(), String> {
     knife_contacts(
         state,
-        |state| {
+        |state, parent_is_player| {
+            if !parent_is_player {
+                return Ok(crate::weapon_plan::admit_knife_transformation_history(
+                    state.player.transformation_counts,
+                ));
+            }
             state.player_stats.validate()?;
             if !state.weapon_cache.color_ca0.is_finite() {
                 return Err("Knife contact requires finite actual Player color".into());

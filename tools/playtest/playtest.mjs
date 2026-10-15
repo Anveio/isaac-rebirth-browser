@@ -210,7 +210,8 @@ try {
   const playStart = Date.now(), playStartTick = state.tick;
   let previous = state, lastAdvance = Date.now(), lastMoveCheck = { at: Date.now(), x: state.player.x, y: state.player.y };
   let previousRoom = startRoom, cameFromDoor = null, segment = 0, lastPause = Date.now(), blackStreak = 0, nextShot = Date.now() + 20_000;
-  const blockedDoors = new Set(), lastVisit = new Map(), visits = new Map(), orbit = { dir: 1, until: 0 };
+  const blockedDoors = new Set(), lastVisit = new Map(), visits = new Map(), orbit = { dir: 1, until: 0 }
+  let bossRoom = null;
   let doorGoal = null, wantReturn = false, stuckSince = null, wiggle = null, itemsBefore = state.items;
   const pickupsAtStart = new Map();
   while (Date.now() - playStart < PLAY_MS) {
@@ -231,7 +232,10 @@ try {
     stats.enemiesSeen = Math.max(stats.enemiesSeen, state.npcs.length);
     // Boss progress: the lowest boss HP fraction reached, and kills (a boss room cleared).
     for (const npc of state.npcs.filter(n => n.boss && n.maxHp > 0)) stats.bossHpLeast = Math.min(stats.bossHpLeast ?? 1, Math.round(npc.hp / npc.maxHp * 100) / 100);
-    if (previous.npcs.some(n => n.boss) && !state.npcs.some(n => n.boss) && state.room === previous.room && state.clear && !state.player.dead) stats.bossesKilled++;
+    // A kill: the room where a boss was seen turns clear while the player is still in it.
+    if (state.npcs.some(n => n.boss)) bossRoom = state.room;
+    if (bossRoom === state.room && previous.room === state.room && !previous.clear && state.clear && !state.player.dead) { stats.bossesKilled++; bossRoom = null; log(`killed the boss in room ${state.room}`); }
+    if (state.room !== bossRoom && !state.transition) bossRoom = null;
     stats.stages.add(state.stage);
     if (state.player.hp < previous.player.hp) stats.damageTaken += previous.player.hp - state.player.hp;
     if (state.items > itemsBefore) { stats.itemsGained += state.items - itemsBefore; itemsBefore = state.items; log(`collected an item (${state.items} owned)`); await shot('item'); }
@@ -324,7 +328,7 @@ try {
         else if (Math.abs(dx) > Math.abs(dy)) { keys.push(dx > 0 ? 'ArrowRight' : 'ArrowLeft'); if (Math.abs(dy) > 16) keys.push(dy > 0 ? 'KeyS' : 'KeyW'); }
         else { keys.push(dy > 0 ? 'ArrowDown' : 'ArrowUp'); if (Math.abs(dx) > 16) keys.push(dx > 0 ? 'KeyD' : 'KeyA'); }
         if (distance < 130) keys.push(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'KeyA' : 'KeyD') : (dy > 0 ? 'KeyW' : 'KeyS'));
-        if (segment % 40 === 0 && state.inventory.bombs > 0 && distance < 180) keys.push('KeyE');
+        if (segment % 40 === 0 && state.inventory.bombs > 0 && state.player.hp > 2 && distance < 180) keys.push('KeyE');
       }
     } else if (state.pickups.length && (pickupsAtStart.get(state.room) ?? 0) < 60) {
       pickupsAtStart.set(state.room, (pickupsAtStart.get(state.room) ?? 0) + 1);
@@ -362,7 +366,8 @@ try {
       else keys.push(['KeyW', 'KeyA', 'KeyS', 'KeyD'][Math.floor(segment / 8) % 4]);
       // Semi-random shooting and occasional bombs while exploring.
       if (segment % 7 < 3) keys.push(['ArrowUp', 'ArrowRight', 'ArrowDown', 'ArrowLeft'][segment % 4]);
-      if (segment % 90 === 45 && state.inventory.bombs > 0) keys.push('KeyE');
+      // Never bomb on one heart or less: the bot cannot dodge its own blast reliably.
+      if (segment % 90 === 45 && state.inventory.bombs > 0 && state.player.hp > 2) keys.push('KeyE');
     }
     if (process.env.PLAYTEST_DEBUG && segment % 15 === 0) log(`p=${Math.round(p.x)},${Math.round(p.y)} npcs=${JSON.stringify(state.npcs.map(n => [Math.round(n.x), Math.round(n.y), n.kind]))} doors=${JSON.stringify(state.doors.map(d => [d.side, d.state, d.target, Math.round(d.x), Math.round(d.y)]))} clear=${state.clear} keys=${keys.join('+')}`);
     if (keys.includes('KeyE') && !held.has('KeyE')) stats.bombsPlaced++;

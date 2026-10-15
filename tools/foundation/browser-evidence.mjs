@@ -1,10 +1,21 @@
 // Lossless complete selected snapshots without one unbounded JSON string.
 import { createHash } from 'node:crypto';
-import { createWriteStream } from 'node:fs';
+import { createWriteStream, existsSync, readFileSync } from 'node:fs';
 import { rename } from 'node:fs/promises';
+import { resolve } from 'node:path';
 import { Readable, Transform } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
-import { createGzip } from 'node:zlib';
+import { createGzip, gunzipSync } from 'node:zlib';
+
+// One side's manifest of a paired case: the raw manifest.json, or the
+// manifest.json.gz written when that side's evidence is archived.
+export function manifestPath(directory, side) {
+  const raw = resolve(directory, side, 'manifest.json');
+  return existsSync(raw) ? raw : `${raw}.gz`;
+}
+
+export const readJsonEvidence = path =>
+  JSON.parse((path.endsWith('.gz') ? gunzipSync(readFileSync(path)) : readFileSync(path)).toString('utf8'));
 
 export async function writeJsonEvidence(path, document) {
   const rawHash = createHash('sha256'), archiveHash = createHash('sha256');

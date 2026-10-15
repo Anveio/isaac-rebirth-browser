@@ -347,67 +347,72 @@ def compare_lasers(source, state, t, native_counter):
         matches = [actor for actor in state['lasers'] if actor['id'] == ref['id']]
         assert len(matches) == 1, 'Referenced Laser unresolved; no NULL coercion'
         actual = matches[0]
-        check('actual Laser identity family/variant/subtype/sequence/seed', identity_tuple(identity), identity_tuple(reference(state, ref)), t)
-        check('actual Laser own-manager membership', original['inActiveManager'], ref in state['actorScheduler']['actors'], t)
+        check_field('actual Laser identity family/variant/subtype/sequence/seed', lambda: identity_tuple(identity), lambda: identity_tuple(reference(state, ref)), t)
+        check_field('actual Laser own-manager membership', lambda: original['inActiveManager'], lambda: ref in state['actorScheduler']['actors'], t)
         for key in ('active', 'dead', 'visible', 'hp', 'maxHp', 'collisionRadius', 'collisionMass', 'collisionDamage',
                     'gridCollisionClass', 'entityCollisionClass', 'raw494'):
-            expected, observed = original[key], actual[key]
-            if type(expected) is float:
-                expected, observed = f32(expected), f32(observed)
-            check('actual Laser ' + key, expected, observed, t)
+            if key in ('hp', 'maxHp'):
+                check_field('actual Laser ' + key + ' Native numeric owner',
+                            lambda: True, lambda: math.isfinite(f32(original[key])), t)
+                check_field('actual Laser ' + key + ' port numeric owner',
+                            lambda: True, lambda: math.isfinite(f32(actual[key])), t)
+            check_field('actual Laser ' + key,
+                        lambda: f32(original[key]) if key in ('hp', 'maxHp') or type(original[key]) is float else original[key],
+                        lambda: f32(actual[key]) if key in ('hp', 'maxHp') or type(original[key]) is float else actual[key], t)
         for source_key, port_key in [('position', 'position'), ('savedPosition450', 'savedPosition'),
                                       ('velocity', 'velocity'), ('renderOffset', 'renderOffset')]:
-            check('actual Laser ' + source_key, vector(original[source_key]), vector(actual[port_key]), t)
-        check('actual Laser born age', original['bornGameAge'], actual['birthGameUpdate'], t)
-        check('actual Laser fast322', original['fast322'], actual['fast'], t)
-        check('actual Laser generic flags318', original['genericFlags318'], actual['entityFlags'], t)
+            check_field('actual Laser ' + source_key, lambda: vector(original[source_key]), lambda: vector(actual[port_key]), t)
+        check_field('actual Laser born age', lambda: original['bornGameAge'], lambda: actual['birthGameUpdate'], t)
+        check_field('actual Laser fast322', lambda: original['fast322'], lambda: actual['fast'], t)
+        check_field('actual Laser generic flags318', lambda: original['genericFlags318'], lambda: actual['entityFlags'], t)
         for source_key, port_key in [('currentFriction470', 'currentFriction'), ('configuredFriction46c', 'configuredFriction')]:
-            check('actual Laser ' + source_key, f32(original[source_key]), f32(actual[port_key]), t)
-        check('actual Laser current RNG words', original['actorRngWords7c0'],
-              [actual['actorRng'][key] for key in ('state', 'rightA', 'left', 'rightB')], t)
-        check('actual Laser permanent3a0 color', original['permanentColor3a0'], color(actual['sourceColor']), t)
-        check('actual Laser current2d0 color', original['currentColor2d0'], color(actual['currentColor']), t)
-        check('actual Laser cached spawner', (original['cachedSpawner']['kind'], original['cachedSpawner']['variant']),
-              (actual['spawnerType'], actual['spawnerVariant']), t)
-        for key, source_ref in [('parent', original['linkedParent']), ('child', original['laser']['child'])]:
+            check_field('actual Laser ' + source_key, lambda: f32(original[source_key]), lambda: f32(actual[port_key]), t)
+        check_field('actual Laser current RNG words', lambda: original['actorRngWords7c0'],
+              lambda: [actual['actorRng'][key] for key in ('state', 'rightA', 'left', 'rightB')], t)
+        check_field('actual Laser permanent3a0 color', lambda: original['permanentColor3a0'], lambda: color(actual['sourceColor']), t)
+        check_field('actual Laser current2d0 color', lambda: original['currentColor2d0'], lambda: color(actual['currentColor']), t)
+        check_field('actual Laser cached spawner', lambda: (original['cachedSpawner']['kind'], original['cachedSpawner']['variant']),
+              lambda: (actual['spawnerType'], actual['spawnerVariant']), t)
+        for key in ('parent', 'child'):
             try:
+                source_ref = original['linkedParent'] if key == 'parent' else original['laser']['child']
                 port_ref = reference(state, actual[key])
-                check('actual Laser ' + key + ' null/reference', source_ref is None, port_ref is None, t)
+                check_field('actual Laser ' + key + ' null/reference', lambda: source_ref is None, lambda: port_ref is None, t)
                 if source_ref and port_ref:
                     fields = ('kind', 'variant', 'subtype', 'sequenceId')
-                    check('actual Laser ' + key + ' source identity', tuple(source_ref[k] for k in fields), tuple(port_ref[k] for k in fields), t)
+                    check_field('actual Laser ' + key + ' source identity', lambda: tuple(source_ref[k] for k in fields), lambda: tuple(port_ref[k] for k in fields), t)
             except Exception as error:
                 missing('actual Laser '+key+' reference group',t,error)
         for key in ('parentOffset', 'endpoint'):
-            check('actual Laser ' + key, vector(original['laser'][key]), vector(actual[key]), t)
+            check_field('actual Laser ' + key, lambda: vector(original['laser'][key]), lambda: vector(actual[key]), t)
         for key in ('angle', 'previousAngle', 'renderSortOffset', 'beamLength', 'maxDistance'):
-            check('actual Laser ' + key, f32(original['laser'][key]), f32(actual[key]), t)
+            check_field('actual Laser ' + key, lambda: f32(original['laser'][key]), lambda: f32(actual[key]), t)
         for key in ('remainingUpdates', 'firstUpdate', 'lineEnabled', 'contactDisabled', 'rotationEnabled', 'lineController'):
-            check('actual Laser ' + key, original['laser'][key], actual[key], t)
-        check('actual Laser attack flags7e8', original['laser']['attackFlags'], flags(actual['attackFlags']), t)
-        check('actual Laser copied line flags818', original['laser']['lineFlags'], flags(actual['lineFlags']), t)
+            check_field('actual Laser ' + key, lambda: original['laser'][key], lambda: actual[key], t)
+        check_field('actual Laser attack flags7e8', lambda: original['laser']['attackFlags'], lambda: flags(actual['attackFlags']), t)
+        check_field('actual Laser copied line flags818', lambda: original['laser']['lineFlags'], lambda: flags(actual['lineFlags']), t)
         try:
-            check('source ordinary ParentPlayer Laser Line writer scope', True, original['laser']['line']['sourceOrdinaryLineWriterScope'], t)
+            check_field('source ordinary ParentPlayer Laser Line writer scope', lambda: True, lambda: original['laser']['line']['sourceOrdinaryLineWriterScope'], t)
             for key in ('origin', 'offset'):
-                check('actual Laser line ' + key, vector(original['laser']['line'][key]), vector(actual['line'][key]), t)
+                check_field('actual Laser line ' + key, lambda: vector(original['laser']['line'][key]), lambda: vector(actual['line'][key]), t)
             for key in ('subdivisions', 'mode'):
-                check('actual Laser line ' + key, original['laser']['line'][key], actual['line'][key], t)
-            check('actual Laser line length86c', f32(original['laser']['line']['length']), f32(actual['line']['length']), t)
-            check('actual ordinary initialized Laser width810', f32(original['laser']['line']['width']), f32(actual['line']['width']), t)
+                check_field('actual Laser line ' + key, lambda: original['laser']['line'][key], lambda: actual['line'][key], t)
+            check_field('actual Laser line length86c', lambda: f32(original['laser']['line']['length']), lambda: f32(actual['line']['length']), t)
+            check_field('actual ordinary initialized Laser width810', lambda: f32(original['laser']['line']['width']), lambda: f32(actual['line']['width']), t)
             for key in ('points', 'priorPoints', 'history'):
-                check('actual Laser complete line ' + key, [vector(v) for v in original['laser']['line'][key]],
-                      [vector(v) for v in actual['line'][key]], t)
+                check_field('actual Laser complete line ' + key, lambda: [vector(v) for v in original['laser']['line'][key]],
+                      lambda: [vector(v) for v in actual['line'][key]], t)
             controls = [[f32(v) for v in values] for values in original['laser']['line']['controls']]
             port_controls = [vector(value['position']) + vector(value['incoming']) + vector(value['outgoing']) for value in actual['line']['controls']]
-            check('actual Laser complete line controls870', controls, port_controls, t)
+            check_field('actual Laser complete line controls870', lambda: controls, lambda: port_controls, t)
         except Exception as error:
             missing('mandatory source-typed ordinary Line body group',t,error)
         for key in ('animation', 'frame', 'playing', 'rotation'):
-            expected, observed = original['sprite'][key], actual['sprite'][key]
-            if type(expected) is float: expected, observed = f32(expected), f32(observed)
-            check('actual Laser Sprite ' + key, expected, observed, t)
+            check_field('actual Laser Sprite ' + key,
+                        lambda: f32(original['sprite'][key]) if type(original['sprite'][key]) is float else original['sprite'][key],
+                        lambda: f32(actual['sprite'][key]) if type(original['sprite'][key]) is float else actual['sprite'][key], t)
         for key in ('scale', 'offset'):
-            check('actual Laser Sprite ' + key, vector(original['sprite'][key]), vector(actual['sprite'][key]), t)
+            check_field('actual Laser Sprite ' + key, lambda: vector(original['sprite'][key]), lambda: vector(actual['sprite'][key]), t)
         try:
             compare_impact(source, original, actual, state, t, native_counter)
         except Exception as error:
@@ -425,7 +430,7 @@ def compare_lasers(source, state, t, native_counter):
 def compare_impact(source, original_laser, actual_laser, state, t, native_counter):
     source_ref = original_laser['laser']['child']
     port_ref = actual_laser['child']
-    check('actual ordinary Impact child relation present', source_ref is None, port_ref is None, t)
+    check_field('actual ordinary Impact child relation present', lambda: source_ref is None, lambda: port_ref is None, t)
     if source_ref is None:
         return
     assert tuple(source_ref[k] for k in ('kind','variant','subtype')) == (1000,50,1)
@@ -435,22 +440,22 @@ def compare_impact(source, original_laser, actual_laser, state, t, native_counte
     actual = actual_laser['impact']
     assert actual is not None and port_ref is not None and port_ref['kind'] == 'effect' and port_ref['id'] == actual['id']
     identity = reference(state, port_ref)
-    check('actual Impact identity/seed', identity_tuple(source_ref), identity_tuple(identity), t)
-    check('actual Impact dead31f', original['dead'], actual['dead'], t)
-    check('actual Impact manager membership', original['inActiveManager'], port_ref in state['actorScheduler']['actors'], t)
-    check('actual Impact Parent NULL relation', original['linkedParent'] is None, actual['parent'] is None, t)
+    check_field('actual Impact identity/seed', lambda: identity_tuple(source_ref), lambda: identity_tuple(identity), t)
+    check_field('actual Impact dead31f', lambda: original['dead'], lambda: actual['dead'], t)
+    check_field('actual Impact manager membership', lambda: original['inActiveManager'], lambda: port_ref in state['actorScheduler']['actors'], t)
+    check_field('actual Impact Parent NULL relation', lambda: original['linkedParent'] is None, lambda: actual['parent'] is None, t)
     if original['linkedParent'] is not None and actual['parent'] is not None:
-        check('actual Impact Parent source identity', identity_tuple(original['linkedParent']), identity_tuple(reference(state,actual['parent'])), t)
+        check_field('actual Impact Parent source identity', lambda: identity_tuple(original['linkedParent']), lambda: identity_tuple(reference(state,actual['parent'])), t)
     for source_key,port_key in [('position','position'),('renderOffset','positionOffset')]:
-        check('actual Impact '+source_key,vector(original[source_key]),vector(actual[port_key]),t)
-    check('actual Impact Sprite scale',vector(original['sprite']['scale']),vector(actual['scale']),t)
-    check('actual Impact Sprite rotation',f32(original['sprite']['rotation']),f32(actual['rotation']),t)
-    check('actual Impact Sprite clip',original['sprite']['animation'],actual['animation'],t)
-    check('actual Impact Sprite frame',f32(original['sprite']['frame']),f32(actual['animationClock']),t)
-    check('actual Impact Sprite playing',original['sprite']['playing'],actual['animationPlaying'],t)
-    check('actual Impact depth7f8',f32(original['impact']['renderSortOffset']),f32(actual['depth']),t)
-    check('actual Impact permanent color3a0',original['permanentColor3a0'],color(actual['sourceColor']),t)
-    check('actual Impact current color2d0',original['currentColor2d0'],color(actual['currentColor']),t)
+        check_field('actual Impact '+source_key,lambda: vector(original[source_key]),lambda: vector(actual[port_key]),t)
+    check_field('actual Impact Sprite scale',lambda: vector(original['sprite']['scale']),lambda: vector(actual['scale']),t)
+    check_field('actual Impact Sprite rotation',lambda: f32(original['sprite']['rotation']),lambda: f32(actual['rotation']),t)
+    check_field('actual Impact Sprite clip',lambda: original['sprite']['animation'],lambda: actual['animation'],t)
+    check_field('actual Impact Sprite frame',lambda: f32(original['sprite']['frame']),lambda: f32(actual['animationClock']),t)
+    check_field('actual Impact Sprite playing',lambda: original['sprite']['playing'],lambda: actual['animationPlaying'],t)
+    check_field('actual Impact depth7f8',lambda: f32(original['impact']['renderSortOffset']),lambda: f32(actual['depth']),t)
+    check_field('actual Impact permanent color3a0',lambda: original['permanentColor3a0'],lambda: color(actual['sourceColor']),t)
+    check_field('actual Impact current color2d0',lambda: original['currentColor2d0'],lambda: color(actual['currentColor']),t)
     coverage['actualImpactBodies'] += 1
     coverage['impactFullBodies' if native_counter % 2 == 1 else 'impactFastBodies'] += 1
 

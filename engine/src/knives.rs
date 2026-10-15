@@ -1,4 +1,4 @@
-//! Actual ordinary type8/subtype0 parent Knife.
+//! Actual ordinary/controlled subtype 0 and Has118 subtype 1 Knife.
 //! Its caller owns composition; this module owns Init, movement and lifetime.
 use crate::{
     actors::ActorRef,
@@ -16,6 +16,16 @@ const ZERO: WorldVector = WorldVector { x: 0.0, y: 0.0 };
 pub(crate) const CONTROLLED: u64 = 0x2_0000_0000;
 pub use crate::attack_flags::AttackFlags;
 
+///Actual Base+4A0 empty-chain proof. Missing/nonempty histories remain unknown;
+///447FC0's Parent+498 registration does not produce this independent owner.
+#[derive(Clone, Copy, Debug, Default, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub enum ChildChain {
+    #[default]
+    Unknown,
+    Empty,
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Knife {
@@ -29,6 +39,8 @@ pub struct Knife {
     pub spawner_type: u32,
     pub spawner_variant: u32,
     pub parent: Option<ActorRef>,
+    #[serde(default)]
+    pub child_chain_4a0: ChildChain,
 
     pub active: bool,
     pub dead: bool,
@@ -70,6 +82,13 @@ pub struct Knife {
     pub raw_80c: f32,
     pub raw_810: f32,
     pub raw_814: bool,
+    ///Actual818 Line constructor and copied curve/history vectors.
+    pub line: crate::laser_line::LaserLine,
+    ///Line+18/+1c are copied by473e7e, but576f50 has no initializer
+    ///and the admitted Knife path has no producer for these opaque words.
+    pub line_raw_18: Option<[u32; 2]>,
+    pub raw_8a0: u32,
+    pub raw_8a4: f32,
     pub raw_8a8: f32,
     pub hit_sequences: BTreeSet<u32>,
 }
@@ -91,6 +110,7 @@ impl Knife {
             spawner_type: 0,
             spawner_variant: 0,
             parent: None,
+            child_chain_4a0: ChildChain::Empty, //441F2A before the Parent498 link.
 
             active: true,
             dead: false,
@@ -129,6 +149,10 @@ impl Knife {
             raw_80c: 100.0,
             raw_810: 0.0,
             raw_814: false,
+            line: crate::laser_line::LaserLine::default(), //4729dc→576f50.
+            line_raw_18: None,
+            raw_8a0: 0,
+            raw_8a4: -100.0,
             raw_8a8: initial_uniform * 50.0 - 25.0,
             hit_sequences: BTreeSet::new(),
         }
@@ -314,6 +338,121 @@ impl Knife {
         Ok(!self.fast)
     }
 
+    ///4726b8 subtype1 fast never dispatches18. It saves450 first and only
+    ///predicts physical448 from the existing velocity/current friction.
+    pub(crate) fn brim_child_fast(&mut self) -> Result<(), String> {
+        self.fast = true;
+        self.saved_position = self.position;
+        self.position = self.position + (self.velocity * self.current_friction) * 0.5;
+        if !self.position.is_finite() {
+            return Err("Brim Knife fast prediction overflowed actual fields".into());
+        }
+        Ok(())
+    }
+
+    ///473570→47424E actual subtype1 cubic following. Full has no read of
+    ///current Player weapon/charge, and the copied line does not follow changes
+    ///to its parent's later818 owner.
+    pub(crate) fn brim_child_full(
+        &mut self,
+        room: &crate::grid::Grid,
+        game_age: u32,
+    ) -> Result<(), String> {
+        if self.subtype != 1 || self.fast || self.attack_flags.0 != 0 {
+            return Err("Brim Knife full requires its actual subtype1 neutral owner".into());
+        }
+        if !self.position.is_finite()
+            || !self.velocity.is_finite()
+            || !self.current_friction.is_finite()
+            || !self.raw_8a4.is_finite()
+            || !self.raw_8a8.is_finite()
+            || self.line.controls.iter().any(|point| {
+                !point.position.is_finite()
+                    || !point.incoming.is_finite()
+                    || !point.outgoing.is_finite()
+            })
+        {
+            return Err("Brim Knife body requires finite actual curve/motion owners".into());
+        }
+        self.current_friction *= 0.7;
+        if self
+            .parent
+            .is_some_and(|parent| parent.kind == crate::actors::ActorKind::Knife)
+        {
+            let (index, parameter) = crate::knife_path::nearest_forward(
+                self.position,
+                &self.line.controls,
+                self.raw_8a0,
+                self.raw_8a4,
+            );
+            if parameter > -99.0 {
+                let a = self.line.controls[index as usize];
+                let b = self.line.controls[index as usize + 1];
+                let on_curve = crate::laser_line::cubic(a, b, parameter);
+                let next = crate::laser_line::cubic(a, b, parameter + 0.1);
+                let tangent = normalized(WorldVector {
+                    x: next.x - on_curve.x,
+                    y: next.y - on_curve.y,
+                });
+                let target = next
+                    + WorldVector {
+                        x: tangent.y,
+                        y: -tangent.x,
+                    } * self.raw_8a8;
+                let delta = WorldVector {
+                    x: target.x - self.position.x,
+                    y: target.y - self.position.y,
+                };
+                let length = squared_length(delta).sqrt();
+                //6128e0 returns the original only for its zero threshold;
+                //otherwise it sets magnitude8, even when the target is nearer.
+                let push = if length > 0.0 {
+                    delta * (8.0 / length)
+                } else {
+                    delta
+                };
+                if self.current_friction != 0.0 {
+                    self.velocity = self.velocity
+                        + WorldVector {
+                            x: push.x / self.current_friction,
+                            y: push.y / self.current_friction,
+                        };
+                }
+                self.sprite.rotation =
+                    crate::source_angles::wrap_180(angle_degrees(self.velocity) - 90.0);
+                self.sprite
+                    .layer_flips
+                    .insert(0, [self.sprite.rotation > 0.0, false]);
+                self.raw_8a0 = index;
+                self.raw_8a4 = parameter;
+            } else {
+                self.remove();
+            }
+            let bounded = room.clamp_room(self.position, -200.0);
+            let difference = WorldVector {
+                x: bounded.x - self.position.x,
+                y: bounded.y - self.position.y,
+            };
+            if squared_length(difference).sqrt() > 1.0
+                || (game_age.wrapping_sub(self.birth_game_update) as i32) > 300
+            {
+                self.remove();
+            }
+        } else {
+            self.remove();
+        }
+        if self.entity_flags & 0x4000 == 0 && (game_age as i32) % 3 == 0 {
+            self.hit_sequences.clear();
+        }
+        if !self.position.is_finite()
+            || !self.velocity.is_finite()
+            || !self.sprite.rotation.is_finite()
+        {
+            return Err("Brim Knife full overflowed actual fields".into());
+        }
+        Ok(())
+    }
+
     pub(crate) fn finish_full(&mut self) -> Result<(), String> {
         self.sprite.advance(&KNIFE_DEFINITION)?;
         self.velocity = self.velocity * self.current_friction;
@@ -334,6 +473,15 @@ pub(crate) struct ParentView {
 
 pub(crate) fn squared_length(vector: WorldVector) -> f32 {
     vector.x * vector.x + vector.y * vector.y
+}
+
+pub(crate) fn normalized(vector: WorldVector) -> WorldVector {
+    let length = squared_length(vector).sqrt();
+    if length > 0.0 {
+        vector * (1.0 / length)
+    } else {
+        vector
+    }
 }
 
 fn radians_to_degrees(angle: f32) -> f32 {
