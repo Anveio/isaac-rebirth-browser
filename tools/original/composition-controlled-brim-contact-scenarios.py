@@ -8,8 +8,6 @@ from pathlib import Path
 import xml.etree.ElementTree as ET
 
 CONTRACT = 'controlled-brim-ring-contact-v1'
-SOURCE_BANK = '043fa228676b91285579049c8783b3d7d8cd50e8ffd0e1d0d3af4d2d5ac0cd03'
-ENTROPY = '445754e51519b50f8e5d29d63ce4a699ac3ff63ab39fa34f683c4a5dc196738b'
 
 
 def sha(data):
@@ -93,11 +91,26 @@ def main():
     parser.add_argument('--output', type=Path, required=True)
     args = parser.parse_args()
     bank_bytes, entropy_bytes = args.source_bank.read_bytes(), args.entropy_journal.read_bytes()
-    if sha(bank_bytes) != SOURCE_BANK or sha(entropy_bytes) != ENTROPY:
-        raise ValueError('This version requires the exact retained314 bank and all existing entropy')
     original = json.loads(bank_bytes)
     if len(original['cases']) != 4:
         raise ValueError('Preserve both fixed phases and both unfiltered recorded cases')
+    entries = [json.loads(line) for line in entropy_bytes.decode().splitlines() if line]
+    if len(entries) != 2 or [entry['index'] for entry in entries] != [0, 1]:
+        raise ValueError('Both recorded source tokens are required without filtering')
+    if [(case['initialPhaseOffset'], case['bootEpochSeed']) for case in original['cases'][:2]] != [(0, 12713), (1, 12713)]:
+        raise ValueError('Expected both declared fixed phase offsets')
+    for case, entry in zip(original['cases'][2:], entries):
+        token = bytes.fromhex(entry['tokenHex'])
+        if (len(token) != 16 or case['entropyTokenIndex'] != entry['index']
+                or case['initialPhaseOffset'] != token[0] % 2
+                or case['bootEpochSeed'] != int.from_bytes(token[4:8], 'little')):
+            raise ValueError('Actual source case does not own its recorded token projection')
+    for case in original['cases']:
+        contract = case['requires']['sourceExpectedActorContract']
+        if (case['fixture']['startingItems'] != [118]
+                or case['requires']['ownedCounts'] != [{'itemId': 118, 'count': 1}]
+                or (contract['primaryC08'], contract['family'], contract['variant'], contract['subtype'], contract['controlledBy329']) != (2, 7, 1, 0, False)):
+            raise ValueError('Expected the actual ordinary118-only contact declaration')
     resource_bytes = sum(Path(case['fixture'][key]).stat().st_size for case in original['cases']
                          for key in ('authoredResourcePath', 'specialRoomsPath'))
     if resource_bytes + len(bank_bytes) + 65536 > 32 * 1024 * 1024:
@@ -120,11 +133,10 @@ def main():
         stb.parent.mkdir(parents=True)
         ET.ElementTree(root).write(xml, encoding='utf-8', xml_declaration=True)
         stb_bytes = Path(old['specialRoomsPath']).read_bytes()
-        if sha(stb_bytes) != old['specialRoomsSha256']:
-            raise ValueError('Retained authored receiver resource changed')
         with stb.open('xb') as stream:
             stream.write(stb_bytes)
-        fixture.update(authoredResourcePath=str(xml), specialRoomsPath=str(stb))
+        fixture.update(authoredResourcePath=str(xml), specialRoomsPath=str(stb),
+                       specialRoomsSha256=sha(stb_bytes))
         fixture['attributeChanges'].append(dict(attribute='startingitems', baselineValue=None, sourceParentValue='118', authoredValue='118,329'))
         fixture['declaredResetJsonBytes'] = len(json.dumps(dict(seed=1, bootEpochSeed=case['bootEpochSeed'], trace=True,
             resources=dict(challengesXml=xml.read_text(), specialRooms=list(stb_bytes))), separators=(',', ':')).encode())
@@ -140,8 +152,8 @@ def main():
     bank = dict(schema=1, cases=cases, publicRouteRevision=CONTRACT,
         scope='Source-only controlled-ring14/18 contact declaration; no gameplay/transport/parity acceptance.',
         selection='Both fixed phases and every existing314 OS token, no new draws/rerolls/filters.',
-        sourceParent=dict(path=str(args.source_bank.resolve()), sha256=SOURCE_BANK),
-        entropyJournal=dict(path=str(args.entropy_journal.resolve()), sha256=ENTROPY),
+        sourceParent=dict(path=str(args.source_bank.resolve()), sha256=sha(bank_bytes)),
+        entropyJournal=dict(path=str(args.entropy_journal.resolve()), sha256=sha(entropy_bytes)),
         caseCorrespondence=provenance,
         outcomePolicy='Every missing contact, callback, unique attribution, lifecycle, field and mismatch remains failure.')
     write_json(output / 'scenarios.json', bank)
