@@ -555,11 +555,21 @@ pub(crate) fn add_collectible(
         && normal_isaac
         && crate::item_pipeline::ItemInputs::new(owner)
             .is_ok_and(|inputs| inputs.admits_technology_cache_context());
+    //Use actual post-increment counts; preserve an existing Some, never
+    //construct unknown Luck words from current inventory.
+    let keep_soy_luck = id == 330
+        && normal_isaac
+        && crate::item_pipeline::ItemInputs::new(owner)
+            .is_ok_and(|inputs| inputs.admits_soy_milk_cache_context());
     let keep_fetus_luck = id == 52
         && normal_isaac
         && crate::item_pipeline::ItemInputs::new(owner)
             .is_ok_and(|inputs| inputs.admits_fetus_grant_context());
-    if ![1, 4, 6, 114, 118, 329, 304].contains(&id) && !keep_technology_luck && !keep_fetus_luck {
+    if ![1, 4, 6, 114, 118, 329, 304].contains(&id)
+        && !keep_technology_luck
+        && !keep_soy_luck
+        && !keep_fetus_luck
+    {
         // These admitted grant paths preserve the fresh auxiliary words.
         // Nonzero setters and restore need their own producer binding.
         owner.luck_inputs = None;

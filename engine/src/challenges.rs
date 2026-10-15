@@ -302,9 +302,17 @@ impl Definition {
                 "Challenge initialization outside the implemented item-focused scope".into(),
             );
         }
+        if self.starting_items.contains(&330)
+            && self
+                .starting_items
+                .iter()
+                .any(|&id| !matches!(id, 1 | 4 | 118 | 330))
+        {
+            return Err("Challenge Soy Milk composition outside the mapped cache frontier".into());
+        }
         for &id in &self.starting_items {
             items::definition(id).ok_or("Challenge starting collectible config absent")?;
-            if !matches!(id, 1 | 4 | 6 | 68 | 114 | 118 | 329 | 304) {
+            if !matches!(id, 1 | 4 | 6 | 68 | 114 | 118 | 329 | 304 | 330) {
                 return Err("Challenge starting grant outside the mapped item frontier".into());
             }
         }
