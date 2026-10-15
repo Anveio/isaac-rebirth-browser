@@ -464,6 +464,7 @@ def compare_history(case_definition, paired_rows, *, sides=('native', 'browser')
                                     and current['counter'] == prior_full['counter'] + 2
                                     and current['presentation'] == prior_full['presentation'] + 2):
                                 expiry.append({'before': prior_full, 'after': current})
+                                break
                             prior_full = current
                         require(side, 'same Laser adjacent full timer1 to0 before deferred114 grant', expiry)
                         if expiry:
