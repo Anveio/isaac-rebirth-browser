@@ -155,6 +155,15 @@ export class Assets {
     const layer = animation.LayerAnimations.find(layer => layer.LayerId === layerId);
     return layer?.Visible ? sampleFrame(layer.Frames, tick, animation.Loop) : undefined;
   }
+  /** The spritesheet image an authored layer samples. */
+  layerImage(path: string, layerId: number): HTMLImageElement {
+    const actor = (sceneData as unknown as Record<string, Actor>)[normalize(path)];
+    if (!actor) throw new Error(`Missing authored animation: ${path}`);
+    const definition = actor.Layers.find(layer => layer.Id === layerId);
+    const sheet = definition && actor.Spritesheets.find(candidate => candidate.Id === definition.SpritesheetId);
+    if (!sheet) throw new Error(`Missing authored layer ${path}:${layerId}`);
+    return this.image(`${actor.BaseSpritesheetPath}/${sheet.Path}`);
+  }
   nullFrame(path: string, name: string, nullId: number, tick: number): SampledFrame | undefined {
     const actor = (sceneData as unknown as Record<string, Actor>)[normalize(path)];
     if (!actor) throw new Error(`Missing authored animation: ${path}`);

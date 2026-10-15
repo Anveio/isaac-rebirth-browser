@@ -106,6 +106,45 @@ export class Renderer {
     this.context.reset(); this.context.imageSmoothingEnabled = false;
     this.context.drawImage(gl.canvas, 0, 0);
   }
+  /** Entity_Laser::Render 479c20, two-layer variant path 47a650: the tip
+   * layer as an ordinary ANM2 draw at the mouth, then (length > 15) one body
+   * quad from 16 px past the mouth to the end, whose V runs 0.65*length
+   * texels over the repeating 64-texel layer-1 column (SetWrap GL_REPEAT). */
+  private drawLaser(ctx: CanvasRenderingContext2D, laser: State["lasers"][number]): void {
+    const origin = { x: laser.presentedPosition.x + laser.positionOffset.x, y: laser.presentedPosition.y + laser.positionOffset.y };
+    const screen = (x: number, y: number): [number, number] => [Math.fround(x * 0.65 + 32), Math.fround(y * 0.65 - 46)];
+    const s0 = screen(origin.x, origin.y);
+    ctx.save();
+    ctx.translate(s0[0], s0[1]);
+    ctx.rotate(laser.rotation * Math.PI / 180);
+    this.assets.draw(ctx, laser.actor, laser.animation, 0, 0, laser.animationClock,
+      { layers: [0], layerScales: { 0: [laser.scale.x, laser.scale.y] } });
+    ctx.restore();
+    if (!(laser.length > 15)) return;
+    const tip = this.assets.layerFrame(laser.actor, laser.animation, 0, laser.animationClock);
+    const body = this.assets.layerFrame(laser.actor, laser.animation, 1, laser.animationClock);
+    const backend = ctx as unknown as { drawTintedImageQuad?: (source: CanvasImageSource, tint: number[], offsets: number[], crop: readonly [number, number, number, number], points: readonly (readonly [number, number])[], pixelSize?: number) => void };
+    if (!tip || !body || !backend.drawTintedImageQuad) return;
+    const radians = laser.angle * Math.PI / 180, dir = [Math.cos(radians), Math.sin(radians)] as const;
+    const along = [dir[0] * 0.5 * tip.Height!, dir[1] * 0.5 * tip.Height!];
+    const reach = laser.length - 0.5 * tip.Height! / 0.65;
+    const s1 = screen(origin.x + dir[0] * reach, origin.y + dir[1] * reach);
+    const half = 0.5 * body.Width! * body.XScale * laser.scale.x, side = [dir[1] * half, -dir[0] * half];
+    const a0 = [s0[0] + along[0] - side[0], s0[1] + along[1] - side[1]];
+    const u = [2 * side[0], 2 * side[1]];
+    const a1 = [s1[0] + along[0] - side[0], s1[1] + along[1] - side[1]];
+    const texels = 0.65 * laser.length, v = [(a1[0] - a0[0]) / texels, (a1[1] - a0[1]) / texels];
+    const point = (fu: number, tv: number): [number, number] => [a0[0] + u[0] * fu + v[0] * tv, a0[1] + u[1] * fu + v[1] * tv];
+    const sheet = this.assets.layerImage(laser.actor, 1);
+    const tint = [body.RedTint, body.GreenTint, body.BlueTint, body.AlphaTint];
+    const offsets = [body.RedOffset, body.GreenOffset, body.BlueOffset];
+    const column = sheet.height;
+    for (let start = 0; start < texels; start += column) {
+      const end = Math.min(texels, start + column);
+      backend.drawTintedImageQuad(sheet, tint, offsets, [body.XCrop!, body.YCrop!, body.Width!, end - start],
+        [point(0, start), point(1, start), point(0, end), point(1, end)]);
+    }
+  }
   /** Room::Render world layer: backdrop, grid, actors and stage composites. */
   private drawWorld(ctx: CanvasRenderingContext2D, state: State, hidePlayer = false): void {
     ctx.save();
@@ -198,20 +237,7 @@ export class Renderer {
     }
     for (const laser of state.lasers) {
       if (laser.removed) continue;
-      // Render479c20's quad builder is not decoded: tile the beam layer from
-      // pos+offset along the sprite rotation and cap it with the tip layer.
-      const start = { x: laser.presentedPosition.x + laser.positionOffset.x, y: laser.presentedPosition.y + laser.positionOffset.y };
-      const body = this.assets.layerFrame(laser.actor, laser.animation, 1, laser.animationClock);
-      const tile = body?.Height ? body.Height : 0;
-      if (laser.length > 15 && tile > 0) {
-        ctx.save();
-        ctx.translate(start.x * 0.65 + 32, start.y * 0.65 - 46);
-        ctx.rotate(laser.rotation * Math.PI / 180);
-        for (let along = 0; along < laser.length; along += tile)
-          this.assets.draw(ctx, laser.actor, laser.animation, 0, along * 0.65, laser.animationClock, { scale: 0.65, layers: [1], layerScales: { 1: [laser.scale.x, 1] } });
-        this.assets.draw(ctx, laser.actor, laser.animation, 0, laser.length * 0.65, laser.animationClock, { scale: 0.65, layers: [0], layerScales: { 0: [laser.scale.x, 1] } });
-        ctx.restore();
-      }
+      // The impact effect keys 500 below its laser, so it draws under the beam.
       const impact = laser.impact;
       if (impact && !impact.removed) {
         ctx.save();
@@ -221,6 +247,7 @@ export class Renderer {
         this.assets.draw(ctx, impact.actor, impact.animation, 0, 0, impact.animationClock);
         ctx.restore();
       }
+      this.drawLaser(ctx, laser);
     }
     for (const projectile of state.enemyProjectiles)
       if (!projectile.removed && projectile.animation)
