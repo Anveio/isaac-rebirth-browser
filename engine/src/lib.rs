@@ -97,6 +97,8 @@ pub mod player_death;
 pub mod player_items;
 pub mod player_save;
 pub mod player_stats;
+mod polyphemus_contact;
+mod contact_candidates;
 pub mod poop_effects;
 pub mod projectiles;
 pub mod public_actions;
@@ -257,6 +259,10 @@ pub struct Tear {
     pub motion: projectiles::TearMotion,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub controlled: Option<controlled_tear::ControlledTear>,
+    ///Actual808/818 owner for the selected born ballistic bit9 family.
+    ///Old restore and untracked flag families retain unknown ownership.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub persistent_contacts: Option<polyphemus_contact::TearHitRegistry>,
 }
 impl Tear {
     fn project(&mut self) {
@@ -2275,7 +2281,17 @@ impl Game {
                     )
                 })
                 .collect();
+            let partitioned_contacts = polyphemus_contact::contacts_all(&mut self.state)?;
             for (id, mut motion, radius, damage) in tears {
+                if self.state.tears.iter().any(|tear| {
+                    tear.id == id
+                        && tear.controlled.is_none()
+                        && (partitioned_contacts == polyphemus_contact::ContactPass::Handled
+                            || (partitioned_contacts == polyphemus_contact::ContactPass::Unadmitted
+                                && tear.attack_flags.0 == 0x200))
+                }) {
+                    continue;
+                }
                 if self
                     .state
                     .tears
@@ -3322,6 +3338,19 @@ impl Game {
                     self.state.player.eye,
                     eye_uniform,
                 )?;
+                let origin = if self
+                    .state
+                    .player_items
+                    .as_ref()
+                    .and_then(|owner| item_pipeline::ItemInputs::new(owner).ok())
+                    .is_some_and(|inputs| inputs.admits_polyphemus_caller_context())
+                {
+                    //52068A consumes the eye draw first;520703..734 then
+                    //copies current Player P for this one real169 shot.
+                    bombs::player_world(&self.state)
+                } else {
+                    origin
+                };
                 let source_variant = if plan.flags == self.state.weapon_cache.flags_c98 {
                     self.state
                         .player_items

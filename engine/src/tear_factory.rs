@@ -41,6 +41,10 @@ pub(crate) fn fire(
         source_variant,
         shot_ordinal: Some(state.player.shots_fired),
         controlled: None,
+        //5424B1..5424F4 clears the fresh actual receiver-ID tree. Only this
+        //independently tracked ballistic family exposes that owner here.
+        persistent_contacts: (plan.flags.0 == 0x200 && source_variant == Some(0))
+            .then(crate::polyphemus_contact::TearHitRegistry::fresh),
         collision_damage: plan.damage,
         base_damage: plan.damage,
         attack_flags: plan.flags,

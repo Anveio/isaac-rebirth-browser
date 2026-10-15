@@ -174,16 +174,24 @@ pub(crate) fn resolve_appearance(
     let mut completed = 0;
     let number_one = source_player_type == Some(0) && items.admits_number_one_appearance();
     let soy_milk = source_player_type == Some(0) && items.admits_soy_milk_cache_context();
-    if source_player_type == Some(0) && (items.admits_selected_appearance() || number_one) {
+    let polyphemus_flags = source_player_type == Some(0)
+        && prior.primary == PrimaryWeaponC08::RegularTears
+        && items.admits_polyphemus_flags_context();
+    if source_player_type == Some(0)
+        && (items.admits_selected_appearance() || number_one || polyphemus_flags)
+    {
         if requested.0 & 32 != 0 {
             prior.flags_c98 = AttackFlags(if prior.primary == PrimaryWeaponC08::Ludovico {
                 3
+            } else if polyphemus_flags {
+                //51316D/513176: permanent169 ORs the independent bit9.
+                0x200
             } else {
                 0
             });
             completed |= 32;
         }
-        if requested.0 & 64 != 0 {
+        if requested.0 & 64 != 0 && !polyphemus_flags {
             //515997/515AB1 Have6, else5E3D70 record-presence. This leaf
             //admits permanent6 only; the two literal ColorMods are distinct.
             if number_one && items.number_one_present() {

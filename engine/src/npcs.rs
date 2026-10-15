@@ -246,55 +246,89 @@ pub fn tear_hit(
         return Err("tear contact requires bounded ground geometry and damage".into());
     }
     for npc in &mut state.room.npcs {
-        if npc.dead || npc.removed || npc.entity_collision_class != 4 {
-            continue;
-        }
-        let dx = ground.x - npc.position.x;
-        let dy = ground.y - npc.position.y;
-        let sum = radius + npc.collision_radius;
-        if dx.abs() > sum || dy.abs() > sum || (dx * dx + dy * dy).sqrt() >= sum {
-            continue;
-        }
-        let health = npc.health();
-        if npc.damage.enqueue(
-            health,
-            combat::DamageEvent {
-                amount: damage,
-                kind: combat::DamageKind::Tear,
-                source: combat::DamageSource {
-                    id: tear_id,
-                    entity_type: 2,
-                },
-                copied_source: None,
-            },
-        )? {
-            let mut tear_body = combat::ContactBody {
-                id: tear_id,
-                entity_type: 2,
-                position: ground,
-                velocity: motion.velocity,
-                radius,
-                mass: 8.0,
-            };
-            let mut npc_body = combat::ContactBody {
-                id: npc.id,
-                entity_type: npc.kind,
-                position: npc.position,
-                velocity: npc.velocity,
-                radius: npc.collision_radius,
-                mass: npc.collision_mass,
-            };
-            combat::resolve_tear_npc_contact(&mut tear_body, &mut npc_body)?;
-            motion.position = tear_body.position;
-            motion.presented_position = tear_body.position;
-            motion.velocity = tear_body.velocity;
-            npc.position = npc_body.position;
-            npc.presented_position = npc_body.position;
-            npc.velocity = npc_body.velocity;
+        if tear_hit_receiver(npc, motion, radius, tear_id, damage)? {
             return Ok(Some(npc.id));
         }
     }
     Ok(None)
+}
+
+///One actual candidate from the canonical source contact partition. The old
+///entry point above retains its previous receiver order when Poly is absent.
+pub(crate) fn tear_hit_target(
+    state: &mut State,
+    motion: &mut crate::projectiles::TearMotion,
+    radius: f32,
+    tear_id: u32,
+    damage: f32,
+    target_id: u32,
+) -> Result<Option<u32>, String> {
+    let ground = motion.position;
+    if !ground.is_finite() || !radius.is_finite() || radius < 0.0 || !damage.is_finite() {
+        return Err("tear contact requires bounded ground geometry and damage".into());
+    }
+    let Some(npc) = state.room.npcs.iter_mut().find(|npc| npc.id == target_id) else {
+        return Ok(None);
+    };
+    Ok(tear_hit_receiver(npc, motion, radius, tear_id, damage)?.then_some(npc.id))
+}
+
+fn tear_hit_receiver(
+    npc: &mut Npc,
+    motion: &mut crate::projectiles::TearMotion,
+    radius: f32,
+    tear_id: u32,
+    damage: f32,
+) -> Result<bool, String> {
+    let ground = motion.position;
+    if npc.dead || npc.removed || npc.entity_collision_class != 4 {
+        return Ok(false);
+    }
+    let dx = ground.x - npc.position.x;
+    let dy = ground.y - npc.position.y;
+    let sum = radius + npc.collision_radius;
+    if dx.abs() > sum || dy.abs() > sum || (dx * dx + dy * dy).sqrt() >= sum {
+        return Ok(false);
+    }
+    let health = npc.health();
+    if npc.damage.enqueue(
+        health,
+        combat::DamageEvent {
+            amount: damage,
+            kind: combat::DamageKind::Tear,
+            source: combat::DamageSource {
+                id: tear_id,
+                entity_type: 2,
+            },
+            copied_source: None,
+        },
+    )? {
+        let mut tear_body = combat::ContactBody {
+            id: tear_id,
+            entity_type: 2,
+            position: ground,
+            velocity: motion.velocity,
+            radius,
+            mass: 8.0,
+        };
+        let mut npc_body = combat::ContactBody {
+            id: npc.id,
+            entity_type: npc.kind,
+            position: npc.position,
+            velocity: npc.velocity,
+            radius: npc.collision_radius,
+            mass: npc.collision_mass,
+        };
+        combat::resolve_tear_npc_contact(&mut tear_body, &mut npc_body)?;
+        motion.position = tear_body.position;
+        motion.presented_position = tear_body.position;
+        motion.velocity = tear_body.velocity;
+        npc.position = npc_body.position;
+        npc.presented_position = npc_body.position;
+        npc.velocity = npc_body.velocity;
+        return Ok(true);
+    }
+    Ok(false)
 }
 
 pub fn player_contacts(state: &mut State) -> Result<(), String> {
