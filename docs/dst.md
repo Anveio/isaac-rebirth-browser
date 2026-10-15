@@ -148,7 +148,10 @@ stayed in, killed or retired by its family; removed bodies are pruned within
 the update that removes them, so the census watches for the absence rather
 than the death frame. The summary also names the simulated kinds whose
 removal never ran (`unremovedNpcKinds`), the death and retirement paths no
-case exercised. The census is a measurement,
+case exercised. Two room fixtures stay on that list by design: a Fireplace
+(33) is extinguished rather than removed (its hp never falls below one, and
+only an extinguished fire on a solid cell retires), and Shopkeepers (17) have
+no admitted death. The census is a measurement,
 not a property. Must-hit properties and coverage tapes make the important
 branches binding.
 
