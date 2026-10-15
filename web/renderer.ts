@@ -635,8 +635,18 @@ export class Renderer {
     }
     this.assets.draw(ctx, PLAYER, `Walk${directionName(player.bodyFacing)}`, x, y, player.walkFrame,
       { layers: [1], overrides: { 1: { RedTint, GreenTint, BlueTint } } });
-    this.assets.draw(ctx, PLAYER, `Head${directionName(player.facing)}`, x, y, player.headFrame,
-      { layers: [4], overrides: { 4: { RedTint, GreenTint, BlueTint } } });
+    const costume = state.playerItems?.costume229, head = costume?.slots[4];
+    if (costume && costume.historyFrontier === null && !costume.mainClipFrontier
+      && head?.layer === 0 && !head.bodyGroup) {
+      //The actual selected head pose owns its clip/frame. Normal Isaac and
+      //this costume both retain skin-1, so50F206 keeps the authored sheet.
+      this.assets.draw(ctx, "gfx/characters/229_monstros lung.anm2",
+        costume.sprite.clip, x, y, costume.sprite.frame,
+        { layers: [0], overrides: { 0: { RedTint, GreenTint, BlueTint } } });
+    } else {
+      this.assets.draw(ctx, PLAYER, `Head${directionName(player.facing)}`, x, y, player.headFrame,
+        { layers: [4], overrides: { 4: { RedTint, GreenTint, BlueTint } } });
+    }
   }
   private hud(ctx: CanvasRenderingContext2D, state: State): void {
     for (let heart = 0; heart < Math.ceil(state.player.maxHp / 2); heart++) {
