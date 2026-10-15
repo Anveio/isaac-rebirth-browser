@@ -49,6 +49,7 @@ pub mod keepers;
 mod knife_path;
 pub mod knives;
 pub mod laser_line;
+mod laser_npc_runtime;
 pub mod lasers;
 pub mod layout;
 pub mod level2_flies;
