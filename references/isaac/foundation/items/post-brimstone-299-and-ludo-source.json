@@ -1,0 +1,286 @@
+{
+  "schema": 1,
+  "status": "SCOPED_SOURCE_BUILD_AND_RETAINED_COMPARISON_SNAPSHOT",
+  "main": "35b440877344e1d1c2fd5d9c9fa28fe7cf80a11a",
+  "merged": {
+    "298": "261dbd60b3921fed421a614ef80c52baaadb0cca",
+    "299": "988ae6355c7956d918ff0e00eb329d313645b864",
+    "304": "1f59bc2fe7311ee19706575f9b704d80830f56bc",
+    "311": "53339e2ea8cdd588b1e47e3f786d9b7e139a2d41",
+    "322": "35b440877344e1d1c2fd5d9c9fa28fe7cf80a11a"
+  },
+  "ordinary299": {
+    "ownBuilds": "production/strict Clippy/floor PASS",
+    "retained405": {
+      "checks": 37958272,
+      "failures": 0
+    },
+    "ordinaryOriginal": {
+      "summarySha256": "79fa8c02ac1137dd372db8262a5e3b2e4ae516b57ca7e995cad6b1ec8e5a54d0",
+      "reportSha256": "995d0a2aca68f81f8d6476c1b33c29e99421a23cacee6093c0bd98c64ba1caf0",
+      "checks": 22111,
+      "failures": 1030,
+      "playingRows": 631,
+      "births": 2,
+      "laserRows": 61,
+      "impactRows": 61,
+      "fullRows": 30,
+      "fastRows": 31,
+      "followingFullAbsenceSlotWitnesses": [
+        861,
+        965
+      ],
+      "callbackEventsObserved": false
+    },
+    "oldV8": {
+      "summarySha256": "b09bb8880b519c7e7a65ab86ce5f8ed6739d777f033789f45ef3cc52bb9881d2",
+      "checks": 88941,
+      "failures": 9079,
+      "historyChecks": 19838,
+      "historyFailures": 774,
+      "historyGaps": 36,
+      "playingRows": 1010,
+      "parentRows": 470,
+      "childRows": 614,
+      "earlyLaserImpactRows": 51,
+      "matchedPendingCleanupNoneRows": 1010,
+      "nonnullCleanupTransientObserved": false
+    },
+    "remaining": [
+      "Required HP/maxHP owners",
+      "identity/seed/RNG",
+      "prelude timers/diagnostics",
+      "typed contact enqueue/next-Full damage",
+      "explicit Native Remove/Uninit events",
+      "DOM/render",
+      "full shared624"
+    ]
+  },
+  "standalone307": {
+    "sourceOnlyPRHead": "4d0040378271ca36adb428d82fcd45a0cab6f27e",
+    "ownProducer": "d1e582784c61e0001d289772c81be6a71db5ec8d",
+    "ownWasmSha256": "d9c35ac74ef3a6240929156579c2e4c3df1a87c45d1d2b6af5d656c6bcb3e7cf",
+    "closureSha256": "b8fc8a88e4827f4ea8bc74da55e445254d279426c2840b6aae1fa2c5ce5e8355",
+    "buildSeconds": {
+      "production": 26.004,
+      "strictClippy": 26.876,
+      "floor": 15.16
+    },
+    "regularCurrent": {
+      "checks": 37965608,
+      "failures": 0,
+      "reportSha256": "394f65e4028a029f9f84d5490fcf8d4f8a97fc09048f8e9420487aabeb2a1d70"
+    },
+    "regularPriorPreserved": {
+      "checks": 37966740,
+      "failures": 2264,
+      "reportSha256": "5b5ce091cb0d8032babb33682d3bf36866eec8c8d0fcd4d19caee027dc593557",
+      "newPersistedRoomFieldWitnessSeparate": true
+    },
+    "retainedLibra": {
+      "checks": 503611,
+      "failures": 0,
+      "gatesEach": 631,
+      "postGrantEach": 93,
+      "firstCaseMissingNativeFamiliarRows": 631,
+      "reportSha256": "0229236ca5178f10f51737a76277b4d9b83da45396bc6a05cd51e8d892646935"
+    },
+    "publicProcessClosures": [
+      {
+        "path": "/dev/shm/isaac-ludo307-public-game-v1/ludovico329-contact-phase1-v1/native-closed.json",
+        "case": "ludovico329-contact-phase1-v1",
+        "status": "CAPTURE_PROCESS_CLOSED",
+        "exitCode": 0,
+        "actualWait": true,
+        "seconds": 38.59804024800542,
+        "pinsStable": true,
+        "guardStopped": false,
+        "sha256": "77c240587e55ab2ced07eae7433f641614569c022cfc790953d0512acaf3cb26"
+      },
+      {
+        "path": "/dev/shm/isaac-ludo307-public-game-v1/ludovico329-contact-phase1-v1/public-wasm/host-closed.json",
+        "case": "ludovico329-contact-phase1-v1",
+        "status": "PUBLIC_WASM_PROCESS_CLOSED",
+        "exitCode": 0,
+        "actualWait": true,
+        "seconds": 3.908732873009285,
+        "pinsStable": true,
+        "guardStopped": false,
+        "sha256": "7152e2e35a6b1b14d23590526be4f1b5f36ff1ebec2c6beb96e094ff53e1620f"
+      },
+      {
+        "path": "/dev/shm/isaac-ludo307-public-game-v1/ludovico329-motion-phase0-v1/native-closed.json",
+        "case": "ludovico329-motion-phase0-v1",
+        "status": "CAPTURE_PROCESS_CLOSED",
+        "exitCode": 0,
+        "actualWait": true,
+        "seconds": 38.70190028601792,
+        "pinsStable": true,
+        "guardStopped": false,
+        "sha256": "ebab4ff1f1a804d82b3c9618a99e45a11d540272768a8deb06252ead986bf36f"
+      },
+      {
+        "path": "/dev/shm/isaac-ludo307-public-game-v1/ludovico329-motion-phase0-v1/public-wasm/host-closed.json",
+        "case": "ludovico329-motion-phase0-v1",
+        "status": "PUBLIC_WASM_PROCESS_CLOSED",
+        "exitCode": 0,
+        "actualWait": true,
+        "seconds": 3.4047722649993375,
+        "pinsStable": true,
+        "guardStopped": false,
+        "sha256": "f13bfa51a7356e9e8d65151fcf5ec59994d0a83fc6009ae267a57b59e5a7af69"
+      },
+      {
+        "path": "/dev/shm/isaac-ludo307-public-game-v1/ludovico329-os-0-v1/attempt2/native-closed.json",
+        "case": "ludovico329-os-0-v1",
+        "status": "CAPTURE_PROCESS_CLOSED",
+        "exitCode": 0,
+        "actualWait": true,
+        "seconds": 38.06537663398194,
+        "pinsStable": true,
+        "guardStopped": false,
+        "sha256": "2c9750f71d0977bd42320612c2aed32d577add953a4e37dcda0e6db789d386fc"
+      },
+      {
+        "path": "/dev/shm/isaac-ludo307-public-game-v1/ludovico329-os-0-v1/native-closed.json",
+        "case": "ludovico329-os-0-v1",
+        "status": "FAIL_OR_GUARD",
+        "exitCode": -15,
+        "actualWait": true,
+        "seconds": 0.6679294090135954,
+        "pinsStable": true,
+        "guardStopped": true,
+        "sha256": "9413ed97c544e635ea5013320aab926ff5fc3e8cf5184f20864c486825e97a75"
+      },
+      {
+        "path": "/dev/shm/isaac-ludo307-public-game-v1/ludovico329-os-0-v1/public-wasm/host-closed.json",
+        "case": "ludovico329-os-0-v1",
+        "status": "PUBLIC_WASM_PROCESS_CLOSED",
+        "exitCode": 0,
+        "actualWait": true,
+        "seconds": 3.5518726320005953,
+        "pinsStable": true,
+        "guardStopped": false,
+        "sha256": "650e0f9bfb5afc9e439bcad14857c964698379a90cbdbd1e86a4b06833daf052"
+      },
+      {
+        "path": "/dev/shm/isaac-ludo307-public-game-v1/ludovico329-os-1-v1/native-closed.json",
+        "case": "ludovico329-os-1-v1",
+        "status": "CAPTURE_PROCESS_CLOSED",
+        "exitCode": 0,
+        "actualWait": true,
+        "seconds": 41.00527680499363,
+        "pinsStable": true,
+        "guardStopped": false,
+        "sha256": "908b6f8b7eef085e408e69500cb01e5c0e10e5ad070c722322ca7bc8c6a8cd7d"
+      },
+      {
+        "path": "/dev/shm/isaac-ludo307-public-game-v1/ludovico329-os-1-v1/public-wasm/host-closed.json",
+        "case": "ludovico329-os-1-v1",
+        "status": "PUBLIC_WASM_PROCESS_CLOSED",
+        "exitCode": 0,
+        "actualWait": true,
+        "seconds": 3.859430522978073,
+        "pinsStable": true,
+        "guardStopped": false,
+        "sha256": "c82222cd75793c20b9979108b5c6a373f4a89cd40f9fa66ea30624bce7db84ca"
+      }
+    ],
+    "processCompletionScope": "Four Native and four public-WASM processes closed0 with stable source/input pins. Prior OS0 guard-stop remains FAIL. This is not full transport audit, functional actor comparison or DOM acceptance.",
+    "functionalComparison": {
+      "path": "/dev/shm/isaac-ludo307-public-game-v1/initial-four-case-functional-summary.json",
+      "sha256": "5fef4810ac2ad99803a2ee98a1a15fb9f51749aa0574e745ae59416b6f981e06",
+      "status": "FAIL",
+      "checks": 85050,
+      "differences": 11620,
+      "scope": "All four original captures and independent public-WASM whole-game replays complete. Single committed journal projection per case followed by thin actual state comparison. Known C98==0 birth-domain bug suppresses port controlled Tears; no whole-game acceptance.",
+      "cases": [
+        {
+          "case": "ludovico329-motion-phase0-v1",
+          "status": "FAIL",
+          "checks": 16448,
+          "differences": 2301,
+          "coverage": {
+            "pairedActualPlayingRows": 571
+          },
+          "reportSha256": "e2860572aafe64c7571d1f1a3557fde3f7b595331c69a52c2eb5e9fffe1689b8"
+        },
+        {
+          "case": "ludovico329-contact-phase1-v1",
+          "status": "FAIL",
+          "checks": 35474,
+          "differences": 4684,
+          "coverage": {
+            "pairedActualPlayingRows": 572
+          },
+          "reportSha256": "374c812e725e7ec9bdfaba4948ba8f14d1fa9adc14f54d0ff8f2a29d085175d6"
+        },
+        {
+          "case": "ludovico329-os-0-v1",
+          "status": "FAIL",
+          "checks": 16477,
+          "differences": 2300,
+          "coverage": {
+            "pairedActualPlayingRows": 572
+          },
+          "reportSha256": "8e36ccdfa406b787e9cf9fa1c2115eeb6a2851ade690b8e4936521315c7b5021"
+        },
+        {
+          "case": "ludovico329-os-1-v1",
+          "status": "FAIL",
+          "checks": 16651,
+          "differences": 2335,
+          "coverage": {
+            "pairedActualPlayingRows": 578
+          },
+          "reportSha256": "e74abf7d7db7db6edb0b9310e2582aee1a988d82d13ffa33bc4a92a34f9ade2b"
+        }
+      ]
+    },
+    "admissionDefect": {
+      "actualCacheC98BothSides": 3,
+      "incorrectGuard": "C98 == 0",
+      "observedPortTears": 0,
+      "correctedProducer": "pending; must reuse identical four Native references",
+      "bodyContactLifecycleAcceptance": false
+    }
+  },
+  "sourceOnlyDrafts": [
+    {
+      "pr": 314,
+      "head": "6e9b5738e465e3a14b7439102c9156259bb6f4bb",
+      "scope": "tools: declare public ordinary Brimstone contact cases",
+      "ownGameAcceptance": false
+    },
+    {
+      "pr": 315,
+      "head": "a1768e04e2b17da708234fddcd575d05471e2115",
+      "scope": "tools: observe typed NPC14/18 contact queues",
+      "ownGameAcceptance": false
+    },
+    {
+      "pr": 316,
+      "head": "35d01c742130b746947214ddfb9154f06c350129",
+      "scope": "Compare controlled Brimstone property and priority histories",
+      "ownGameAcceptance": false
+    },
+    {
+      "pr": 317,
+      "head": "ee14739c2b225c935140550098c186aa663c4ab4",
+      "scope": "tools: expose source-owned kind8 Tear fields",
+      "ownGameAcceptance": false
+    },
+    {
+      "pr": 318,
+      "head": "27780ed2f951c772feebb827a759568f42f5538a",
+      "scope": "Keep Damage ownership beside its pure cache operator",
+      "ownGameAcceptance": false
+    }
+  ],
+  "historicalReportsUnchanged": true,
+  "noCaptureTransportAsFunctionalParity": true,
+  "retainedStandaloneInputs": {
+    "path": "references/isaac/cases/item-composition/ludovico329-v1.json",
+    "scope": "Four declared cases and literal Challenge/STB resources; no passing gameplay result follows from retaining them."
+  }
+}
