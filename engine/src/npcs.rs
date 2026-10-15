@@ -170,6 +170,28 @@ pub fn bomb_hit(
     source: combat::DamageSource,
     line_clear: &dyn Fn(WorldVector) -> bool,
 ) -> Result<(), String> {
+    bomb_hit_with_copied_source(
+        state,
+        center,
+        blast_radius,
+        damage,
+        source,
+        None,
+        line_clear,
+    )
+}
+
+///The same admitted blast path, with a separately owned pre-callback EntityRef.
+///Unclosed ordinary callers retain None through the unchanged public wrapper.
+pub(crate) fn bomb_hit_with_copied_source(
+    state: &mut State,
+    center: WorldVector,
+    blast_radius: f32,
+    damage: f32,
+    source: combat::DamageSource,
+    copied_source: Option<combat::CopiedDamageSource>,
+    line_clear: &dyn Fn(WorldVector) -> bool,
+) -> Result<(), String> {
     for npc in &mut state.room.npcs {
         if npc.dead
             || npc.removed
@@ -203,6 +225,7 @@ pub fn bomb_hit(
                 amount: damage,
                 kind: combat::DamageKind::Bomb,
                 source,
+                copied_source,
             },
         )?;
     }
@@ -242,6 +265,7 @@ pub fn tear_hit(
                     id: tear_id,
                     entity_type: 2,
                 },
+                copied_source: None,
             },
         )? {
             let mut tear_body = combat::ContactBody {
@@ -415,6 +439,7 @@ pub fn nonplayer_contacts(state: &mut State) -> Result<(), String> {
                                 id: first.id,
                                 entity_type: 33,
                             },
+                            copied_source: None,
                         },
                     )?;
                 }
@@ -429,6 +454,7 @@ pub fn nonplayer_contacts(state: &mut State) -> Result<(), String> {
                                 id: second.id,
                                 entity_type: 33,
                             },
+                            copied_source: None,
                         },
                     )?;
                 }

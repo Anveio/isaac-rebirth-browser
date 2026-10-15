@@ -204,6 +204,7 @@ fn contact_callbacks(state: &mut State, index: usize) -> Result<(), String> {
                             id: source.id,
                             entity_type: 1,
                         },
+                        copied_source: None,
                     },
                 )?;
                 //476830 evaluates kind3 AFTER each real callback. Birth kind2

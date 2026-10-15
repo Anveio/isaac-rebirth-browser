@@ -415,6 +415,7 @@ fn damage(state: &mut State, laser: &Laser, heading: WorldVector) -> Result<(), 
                     id: laser.parent.ok_or("NPC Laser Parent link absent")?.id,
                     entity_type: laser.spawner_type,
                 },
+                copied_source: None,
             },
         )?;
     }

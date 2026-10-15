@@ -401,6 +401,22 @@ pub(crate) fn advance(state: &mut State, phase: Phase, id: u32) -> Result<(), St
                 state.player_stats,
             )?;
             let damage = properties.collision_damage * 20.0;
+            let effect = &state.sprite_effects[index];
+            //5547DC..554840 copies the actual Rocket EntityRef before V38.
+            //These are current Rocket fields, independent of current Get6 and
+            //of the target Parent or the later effect/actor retirement.
+            let copied_source = crate::combat::CopiedDamageSource {
+                entity_type: 1000,
+                variant: effect.variant,
+                spawner_type: effect.spawner_type,
+                spawner_variant: effect.spawner_variant,
+                position: effect.position,
+                velocity: effect.velocity,
+                actor_at_copy: Some(ActorRef {
+                    kind: ActorKind::Effect,
+                    id,
+                }),
+            };
             if !crate::explosion_effects::explode_neutral(
                 state,
                 position,
@@ -411,6 +427,7 @@ pub(crate) fn advance(state: &mut State, phase: Phase, id: u32) -> Result<(), St
                     id,
                     entity_type: 1000,
                 },
+                copied_source,
             )? {
                 return Ok(());
             }
