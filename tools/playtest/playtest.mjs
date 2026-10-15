@@ -116,6 +116,8 @@ const observe = () => tab.evaluate(() => {
       poop: s.room.grid.cells.map(c => (c.entity && c.entity.kind === 14 && c.entity.collisionClass !== 0 ? 1 : 0)).join('') },
     doors: s.room.appearance.doors.map(d => ({ side: d.side, state: d.state, target: d.targetRoom, x: d.worldPosition.x, y: d.worldPosition.y })),
     shots: (s.enemyProjectiles ?? []).map(t => t.position ?? t).filter(t => Number.isFinite(t?.x) && Number.isFinite(t?.y)).map(t => ({ x: t.x, y: t.y })),
+    // Boss-room exit: an open trapdoor (Grid17) leads to the next floor.
+    trapdoor: s.room.trapdoor && s.room.grid ? { x: 40 + (s.room.trapdoor.gridIndex % s.room.grid.width) * 40, y: 120 + Math.floor(s.room.trapdoor.gridIndex / s.room.grid.width) * 40, open: s.room.trapdoor.state === 1 } : null,
     tears: s.tears.length, bombs: s.bombs.length, explosions: s.explosions.length,
     inventory: s.inventory, items: s.playerItems ? s.playerItems.ownedCounts.reduce((a, b) => a + b, 0) : 0,
     gameOver: !!s.playerDeath?.gameOver, runSeed: s.runSeed, npcKinds: s.room.npcs.filter(n => !n.removed).map(n => `${n.kind}.${n.variant}${n.champion ? "c" + n.champion.color : ""}`), introduction: s.runIntroduction.active, stage: s.stage,
@@ -238,6 +240,7 @@ try {
     if (state.npcs.some(n => n.boss)) bossRoom = state.room;
     if (bossRoom === state.room && previous.room === state.room && !previous.clear && state.clear && !state.player.dead) { stats.bossesKilled++; bossRoom = null; log(`killed the boss in room ${state.room}`); }
     if (state.room !== bossRoom && !state.transition) bossRoom = null;
+    if (!stats.stages.has(state.stage) && stats.stages.size) { log(`reached stage ${state.stage}`); timeline.push({ event: 'stage', atMs: Date.now() - started, stage: state.stage, runSeed: state.runSeed }); await shot(`stage-${state.stage}`); }
     stats.stages.add(state.stage);
     if (state.player.hp < previous.player.hp) stats.damageTaken += previous.player.hp - state.player.hp;
     if (state.items > itemsBefore) { stats.itemsGained += state.items - itemsBefore; itemsBefore = state.items; log(`collected an item (${state.items} owned)`); await shot('item'); }
@@ -336,6 +339,10 @@ try {
       pickupsAtStart.set(state.room, (pickupsAtStart.get(state.room) ?? 0) + 1);
       const target = state.pickups.reduce((a, b) => Math.hypot(a.x - p.x, a.y - p.y) < Math.hypot(b.x - p.x, b.y - p.y) ? a : b);
       const step = waypoint(target.x, target.y);
+      toward(step.x, step.y, 2);
+    } else if (state.trapdoor?.open && state.clear) {
+      // Take the trapdoor once the room is cleared and its pickups collected.
+      const step = waypoint(state.trapdoor.x, state.trapdoor.y);
       toward(step.x, step.y, 2);
     } else {
       const open = state.doors.filter(d => /^open/i.test(d.state));
