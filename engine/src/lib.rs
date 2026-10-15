@@ -38,6 +38,7 @@ mod effects;
 pub mod enemy_projectiles;
 mod entities;
 pub mod sprite_color;
+mod tear_factory;
 mod technology;
 pub use entities::{implemented_npc_kinds, supports_npc_selector};
 pub mod familiars;
@@ -3103,23 +3104,6 @@ impl Game {
                     self.state.player.eye,
                     eye_uniform,
                 )?;
-                let spawn_seed = self.state.boot_lifecycle.shared.next_u32();
-                // Init computes a falling speed that FireTear overwrites. Its
-                // shared draw is still required before sound admission.
-                let _initializer_falling_speed =
-                    (self.state.boot_lifecycle.shared.uniform() - 0.5) * 0.2;
-                self.state.audio.admit(
-                    &mut self.state.boot_lifecycle.shared,
-                    self.state.system_clock.system_counter - 1,
-                    audio::SoundRequest {
-                        id: 153,
-                        volume: 1.0,
-                        delay: 2,
-                        looping: false,
-                        pitch: 1.0,
-                    },
-                );
-                let final_uniform = self.state.boot_lifecycle.shared.uniform();
                 let source_variant = if plan.flags == self.state.weapon_cache.flags_c98 {
                     self.state
                         .player_items
@@ -3135,44 +3119,7 @@ impl Game {
                 } else {
                     None
                 };
-                let mut tear = Tear {
-                    id: self.state.next_tear,
-                    x: 0.0,
-                    y: 0.0,
-                    vx: 0.0,
-                    vy: 0.0,
-                    age: 0,
-                    spawn_seed,
-                    source_variant,
-                    shot_ordinal: Some(self.state.player.shots_fired),
-                    controlled: None,
-                    collision_damage: plan.damage,
-                    base_damage: plan.damage,
-                    attack_flags: plan.flags,
-                    source_color: plan.color,
-                    scale: plan.scale,
-                    animation_tier: plan.animation_tier,
-                    collision_radius: plan.collision_radius,
-                    grid_contact: false,
-                    motion: projectiles::TearMotion::spawn(
-                        origin,
-                        velocity,
-                        plan.parameters,
-                        final_uniform,
-                    )?,
-                };
-                tear.project();
-                self.state.tears.push(tear);
-                self.state.actor_scheduler.admit(actors::ActorRef {
-                    kind: actors::ActorKind::Tear,
-                    id: self.state.next_tear,
-                })?;
-                self.state.player.shots_fired = self.state.player.shots_fired.wrapping_add(1);
-                self.state.next_tear = self
-                    .state
-                    .next_tear
-                    .checked_add(1)
-                    .ok_or("tear IDs exhausted")?;
+                tear_factory::fire(&mut self.state, plan, source_variant, origin, velocity)?;
                 self.state.fire_cooldown = plan.fire_delay;
                 self.state.head_timer = plan.head_timer;
             }
