@@ -33,6 +33,19 @@ def flags(value):
     return str(value[0] | value[1] << 32)
 
 
+def source_run_flags(state):
+    """Admit only the two actual serialized Game10EAD8 owners, without defaults."""
+    owners = [key for key in ('sourceCacheRunFlags', 'sourceRunFlags') if key in state]
+    assert len(owners) == 1, 'Exactly one actual Game10EAD8 owner required; missing/ambiguous is unqualified'
+    if owners[0] == 'sourceCacheRunFlags':
+        value = state['sourceCacheRunFlags']
+        # This legacy u64 travels through a JavaScript number. Only exact safe
+        # integers are observable; the newer two-limb owner preserves all64bits.
+        assert type(value) is int and 0 <= value <= (1 << 53) - 1, 'Unknown/unsafe actual legacy Game10EAD8 word'
+        return str(value)
+    return flags(state['sourceRunFlags']['raw'])
+
+
 case, native, browser = load(args.case), load(args.original), load(args.browser)
 contract = case['requires']['sourceExpectedActorContract']
 stages = case['requires'].get('actorStages', [])
@@ -679,7 +692,7 @@ for captured in sorted(all_captured, key=lambda row: row['presentation']):
             ('actual Luck D64', weapon.get('luckD64'), lambda: state['playerStats']['luck']),
             ('actual Flight D68', weapon.get('flyingD68'), lambda: state['player']['flying']),
             ('actual Player grid class340', weapon.get('gridCollisionClass340'), lambda: state['player']['gridCollisionClass']),
-            ('actual Game flags10EAD8', source.get('runFlags10ead8'), lambda: flags(state['sourceRunFlags']['raw'])),
+            ('actual Game flags10EAD8', source.get('runFlags10ead8'), lambda: source_run_flags(state)),
             ('actual C0C charge owner', weapon['chargeC0c'], lambda: state['attackRuntime']['chargeC0c']),
             ('actual DA0 head direction', weapon['headDirectionDa0'], lambda: state['attackRuntime']['headDirectionDa0']),
             ('actual retained DB4 shooting direction', vector(weapon['shootingAimDb4']), lambda: vector(state['attackRuntime']['shootingAimDb4'])),
