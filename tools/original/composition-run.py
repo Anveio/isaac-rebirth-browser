@@ -117,14 +117,15 @@ def canonical_original():
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(description=__doc__, allow_abbrev=False)
     parser.add_argument('--scenarios', type=Path, required=True)
     parser.add_argument('--case', required=True)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--prepare-only', action='store_true', help='Write launch inputs without executing either game')
     args, extra = parser.parse_known_args()
     owned_options = {'--seed', '--ordinary-run', '--challenge-run', '--tape', '--output', '--boot-epoch-seed'}
-    if any(flag.split('=', 1)[0] in owned_options for flag in extra):
+    if any(flag.startswith('--') and any(name.startswith(flag.split('=', 1)[0]) for name in owned_options)
+           for flag in extra):
         raise ValueError('The declared case owns mode, public tape, boot input and output')
     if not args.prepare_only and ('--observe-every-step' not in extra or not any(flag.split('=', 1)[0] == '--state-observer' for flag in extra)):
         raise ValueError('Execution requires a read-only source observer at every declared step; preparation is not actor acceptance')
