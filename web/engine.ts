@@ -17,7 +17,7 @@ export interface Player {
 export interface AttackColor { tint: [number,number,number,number]; sourceMiddle: [number,number,number,number]; offsets: [number,number,number]; }
 export interface Tear {
   id: number; x: number; y: number; vx: number; vy: number; age: number;
-  spawnSeed: number; collisionRadius: number; gridContact: boolean;
+  spawnSeed: number; sourceVariant: number | null; collisionRadius: number; gridContact: boolean;
   shotOrdinal: number; collisionDamage: number; baseDamage: number; scale: number; animationTier: number;
   attackFlags: [number,number]; sourceColor: AttackColor;
   motion: {
