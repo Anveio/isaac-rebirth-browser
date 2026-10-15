@@ -695,6 +695,12 @@ pub fn state(state: &State) {
         "game: player motion is finite and health is bounded",
         json!({ "player": player })
     );
+    let unfinite = unfinite_body(state);
+    props::always!(
+        unfinite.is_none(),
+        "game: every room body has finite motion",
+        json!({ "body": unfinite })
+    );
     props::always!(
         state.inventory.coins <= 99 && state.inventory.bombs <= 99 && state.inventory.keys <= 99,
         "game: consumables are capped at 99",
@@ -964,6 +970,75 @@ pub fn state(state: &State) {
 }
 
 /// Laser impacts are effects whose handles come from the effect allocator.
+/// The first body whose motion is NaN or infinite, as (kind, id). One bad
+/// value (a normalized zero vector, say) spreads through every later
+/// contact, so every family's bodies are checked, new families included.
+fn unfinite_body(state: &State) -> Option<(&'static str, u32)> {
+    use rebirth_cleanroom::motion::WorldVector;
+    let finite = |vectors: &[WorldVector], scalars: &[f64]| {
+        vectors.iter().all(|vector| vector.is_finite())
+            && scalars.iter().all(|value| value.is_finite())
+    };
+    let npcs = state.room.npcs.iter().map(|npc| {
+        let ok = finite(
+            &[npc.position, npc.presented_position, npc.velocity],
+            &[f64::from(npc.hp), f64::from(npc.max_hp)],
+        );
+        ("npc", npc.id, ok)
+    });
+    let pickups = state.room.pickups.iter().map(|pickup| {
+        let vectors = [pickup.position, pickup.presented_position, pickup.velocity];
+        ("pickup", pickup.id, finite(&vectors, &[pickup.x, pickup.y]))
+    });
+    let tears = state.tears.iter().map(|tear| {
+        let motion = &tear.motion;
+        let vectors = [motion.position, motion.presented_position, motion.velocity];
+        let scalars = [tear.x, tear.y, tear.vx, tear.vy];
+        ("tear", tear.id, finite(&vectors, &scalars))
+    });
+    let projectiles = state.enemy_projectiles.iter().map(|shot| {
+        let vectors = [shot.position, shot.presented_position, shot.velocity];
+        ("enemy projectile", shot.id, finite(&vectors, &[]))
+    });
+    let familiars = state.familiars.iter().map(|familiar| {
+        let vectors = [
+            familiar.position,
+            familiar.presented_position,
+            familiar.velocity,
+        ];
+        let health = [f64::from(familiar.hp), f64::from(familiar.max_hp)];
+        ("familiar", familiar.id, finite(&vectors, &health))
+    });
+    let bombs = state.bombs.iter().map(|bomb| {
+        let motion = &bomb.motion;
+        let vectors = [motion.position, motion.presented_position, motion.velocity];
+        ("bomb", bomb.id, finite(&vectors, &[bomb.x, bomb.y]))
+    });
+    let lasers = state.lasers.iter().map(|laser| {
+        (
+            "laser",
+            laser.id,
+            finite(&[laser.position, laser.velocity], &[]),
+        )
+    });
+    let knives = state.knives.iter().map(|knife| {
+        (
+            "knife",
+            knife.id,
+            finite(&[knife.position, knife.velocity], &[]),
+        )
+    });
+    npcs.chain(pickups)
+        .chain(tears)
+        .chain(projectiles)
+        .chain(familiars)
+        .chain(bombs)
+        .chain(lasers)
+        .chain(knives)
+        .find(|(_, _, ok)| !ok)
+        .map(|(kind, id, _)| (kind, id))
+}
+
 fn laser_impacts(state: &State) -> impl Iterator<Item = u32> + '_ {
     state
         .lasers

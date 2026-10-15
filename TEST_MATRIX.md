@@ -244,7 +244,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | `floor` | Basement generation structure, retries and per-descriptor room admission | 18 | 4 | 0 |
 | `grid` | grid queries and ground-collision solvers on generated rooms | 14 | 3 | 0 |
 | `item_pools` | ItemPool selection, depletion, fallbacks, routing and continuation | 21 | 6 | 3 |
-| `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 61 | 51 | 2 |
+| `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 62 | 51 | 2 |
 | `abi` | the exported C ABI transport the browser bridge drives | 11 | 1 | 0 |
 
 <details><summary>Every declared DST property</summary>
@@ -440,6 +440,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Always | game: player controls are disabled exactly while the run-start fade or a room transition holds | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: no run-start request is pending during gameplay | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: player motion is finite and health is bounded | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: every room body has finite motion | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: consumables are capped at 99 | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: fire cooldown and head timers stay in range | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: entity identities are unique and below their allocators | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
