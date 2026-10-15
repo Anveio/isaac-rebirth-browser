@@ -247,6 +247,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | `layout` | rectangular floor growth over every accepted seed, room count and shape mask | 11 | 2 | 1 |
 | `floor` | Basement generation structure, retries and per-descriptor room admission | 18 | 5 | 0 |
 | `grid` | grid queries and ground-collision solvers on generated rooms | 14 | 3 | 0 |
+| `pathfinder` | FindGridPath's flood against an independent node-weighted Dijkstra | 6 | 5 | 0 |
 | `item_pools` | ItemPool selection, depletion, fallbacks, routing and continuation | 21 | 6 | 3 |
 | `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 63 | 51 | 2 |
 | `abi` | the exported C ABI transport the browser bridge drives | 15 | 3 | 0 |
@@ -356,6 +357,17 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Sometimes | grid: a player wall contact changes velocity | [grid.rs](engine/dst/src/units/grid.rs) |
 | Always | grid: blast candidates are ascending, unique cells of the room | [grid.rs](engine/dst/src/units/grid.rs) |
 | Always | grid: blast queries reject non-positive, oversized and non-finite radii | [grid.rs](engine/dst/src/units/grid.rs) |
+| Always | pathfinder: the flood runs on every admitted grid and rejects any other | [pathfinder.rs](engine/dst/src/units/pathfinder.rs) |
+| Always | pathfinder: the flood is a pure function of its grid, start and owner | [pathfinder.rs](engine/dst/src/units/pathfinder.rs) |
+| Always | pathfinder: the flood only marks open cells of its grid, with negative distances | [pathfinder.rs](engine/dst/src/units/pathfinder.rs) |
+| Always | pathfinder: every flood label is the cell's shortest distance from the start | [pathfinder.rs](engine/dst/src/units/pathfinder.rs) |
+| Always | pathfinder: the flood visits the owner exactly when it lies within half the room's cells | [pathfinder.rs](engine/dst/src/units/pathfinder.rs) |
+| Always | pathfinder: the flood visits every open cell nearer than where it stops, and no farther one | [pathfinder.rs](engine/dst/src/units/pathfinder.rs) |
+| Sometimes | pathfinder: a flood visits its owner cell | [pathfinder.rs](engine/dst/src/units/pathfinder.rs) |
+| Sometimes | pathfinder: a flood stops at half the room's cells before every reachable cell | [pathfinder.rs](engine/dst/src/units/pathfinder.rs) |
+| Sometimes | pathfinder: equal-distance cells tie at the expansion that visits the owner | [pathfinder.rs](engine/dst/src/units/pathfinder.rs) |
+| Sometimes | pathfinder: a flood relabels its own start cell | [pathfinder.rs](engine/dst/src/units/pathfinder.rs) |
+| Sometimes | pathfinder: a flood crosses a stamped or costly open cell | [pathfinder.rs](engine/dst/src/units/pathfinder.rs) |
 | Unreachable | item_pools: valid construction fails | [item_pools.rs](engine/dst/src/units/item_pools.rs) |
 | Always | item_pools: managers round-trip through JSON | [item_pools.rs](engine/dst/src/units/item_pools.rs) |
 | Always | item_pools: construction rejects a zero seed and malformed achievement tables | [item_pools.rs](engine/dst/src/units/item_pools.rs) |
