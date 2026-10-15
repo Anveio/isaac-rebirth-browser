@@ -17,7 +17,7 @@ ROOT = Path(__file__).resolve().parents[2]
 EXPECTED_SHA = os.environ.get('ISAAC_ORIGINAL_SHA')
 if not isinstance(EXPECTED_SHA, str) or re.fullmatch(r'[0-9a-f]{64}', EXPECTED_SHA) is None:
     raise ValueError('ISAAC_ORIGINAL_SHA must provide the driver-verified canonical binary SHA256')
-SOURCE_FIELDS = frozenset(('playerMovementD9c', 'knifeChildChain4a0', 'npc14And18DamageQueue', 'kind8TearFields', 'ordinaryTechnology'))
+SOURCE_FIELDS = frozenset(('playerMovementD9c', 'knifeChildChain4a0', 'npc14And18DamageQueue', 'kind8TearFields', 'ordinaryTechnology', 'ordinaryDrFetusBombs'))
 spec = importlib.util.spec_from_file_location('composition_items', ROOT / 'tools/original/item-observer.py')
 base = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(base)
@@ -52,6 +52,8 @@ def observe(pid, context):
                     'nativeBinarySha256': EXPECTED_SHA, 'requestedSourceFields': requested_fields, 'players': [], 'attacks': [], 'impacts': [], 'contactNpcs': []}
     if 'npc14And18DamageQueue' in requested_fields:
         supplemental['commonContactNpcs'] = []
+    if 'ordinaryDrFetusBombs' in requested_fields:
+        supplemental['fetusBombs'] = []
     stopped = False
     try:
         parent = next(line.split(':', 1)[1].strip() for line in Path(f'/proc/{pid}/status').read_text().splitlines() if line.startswith('PPid:'))
@@ -167,6 +169,12 @@ def observe(pid, context):
                     'initialized3074': flags(player + 0x3074, 1)[0], 'canShoot3075': flags(player + 0x3075, 1)[0],
                     'transformationCounts': [i32(player + 0x3068), i32(player + 0x306c)],
                     'actorSlots': {f'{offset:x}': actor_slot(pointer) for offset, pointer in slots.items()}})
+                if 'ordinaryDrFetusBombs' in requested_fields:
+                    supplemental['players'][-1]['fetusCaller'] = {
+                        'playerTypeBfc': i32(player + 0xbfc),
+                        'trinketSlotsE14': [i32(player + 0xe14), i32(player + 0xe18)],
+                        'previousVelocityDd4': floats(player + 0xdd4, 2),
+                        'fireCooldownC74': i32(player + 0xc74), 'headTimerBb0': i32(player + 0xbb0)}
                 if 'playerMovementD9c' in requested_fields:
                     supplemental['players'][-1]['movementDirectionD9c'] = i32(player + 0xd9c)
             room = u64(game + 0x8180)
@@ -243,6 +251,36 @@ def observe(pid, context):
                         supplemental['commonContactNpcs'].append(row)
                     else:
                         supplemental['contactNpcs'].append(row)
+                if identity['kind'] == 4 and 'ordinaryDrFetusBombs' in requested_fields:
+                    # 66B4D0: Init456E00/Full457060/Fast4446A0. This is a
+                    # distinct Bomb owner, never a Knife/Laser field alias.
+                    if u64(actor) != 0x66b4d0:
+                        raise ValueError('Typed Bomb4 requires its actual virtual class')
+                    visible, active, dead = flags(actor + 0x31d, 3)
+                    fast = flags(actor + 0x322, 1)[0]
+                    supplemental['fetusBombs'].append({
+                        'identity': identity, 'inActiveManager': actor in active_pointers,
+                        'visible': visible, 'active': active, 'dead': dead,
+                        'bornGameAge': u32(actor + 0x42c),
+                        'position448': floats(actor + 0x448, 2),
+                        'savedPosition450': floats(actor + 0x450, 2) if fast else None,
+                        'velocity464': floats(actor + 0x464, 2),
+                        'fast322': fast,
+                        'currentFriction470': floats(actor + 0x470),
+                        'gridCollisionClass340': u32(actor + 0x340),
+                        'gridCollided34c': flags(actor + 0x34c, 1)[0],
+                        'actorRngWords7c0': [u32(actor + 0x7c0 + 4*i) for i in range(4)],
+                        'fuse7d4': i32(actor + 0x7d4),
+                        'explosionDamage7d8': floats(actor + 0x7d8),
+                        'playerContactCountdown7dc': i32(actor + 0x7dc),
+                        'attackFlags7e0': str(u64(actor + 0x7e0)),
+                        'shotMarker7e8': read(actor + 0x7e8, 1)[0],
+                        'cachedSpawner': {'kind': u32(actor + 0x1c), 'variant': u32(actor + 0x20)},
+                        'linkedParent': actor_ref(u64(actor + 0x498)),
+                        'sourceColor3a0': floats(actor + 0x3a0, 11),
+                        'currentColor2d0': floats(actor + 0x2d0, 11)})
+                    #7EC's initial/global ordinal writer is unowned. Its raw
+                    # padding is not read or substituted with a numeric zero.
                 if identity['kind'] not in VTABLES or (identity['kind'] == 1000 and (identity['variant'],identity['subtype']) != (50,1)):
                     if not ('ordinaryTechnology' in requested_fields and identity['kind'] == 1000
                             and (identity['variant'], identity['subtype']) == (50, 0)):
