@@ -11,6 +11,12 @@ pub(crate) struct CacheMask(pub(crate) u32);
 
 const LIBRA_SCALAR_FLAGS: u32 = 0x1b;
 
+// Source-owned footprints remain independent even when their admitted counts
+// currently match. Cache completion is never a kind5 or grant-history proof.
+const FETUS_CACHE_ITEMS: &[usize] = &[4, 52];
+const FETUS_KIND5_ITEMS: &[usize] = &[4, 52];
+const FETUS_GRANT_ITEMS: &[usize] = &[4, 52];
+
 // Independent source-owned footprints. Equal current sets are deliberately
 // separate: cache additions cannot silently admit a50D090 getter branch.
 const TECHNOLOGY_CACHE_ITEMS: &[usize] = &[1, 4, 68, 329];
@@ -239,44 +245,33 @@ impl<'a> ItemInputs<'a> {
                 .all(|(id, &count)| count == 0 || (count > 0 && supported.contains(&id)))
     }
 
-    /// Independent511F10 footprint for one fresh permanent52. The callback
+    /// Independent511F10 footprint for one actual52 and selected4. The
     /// callers retain normal-Isaac, known auxiliary and retained-C08 owners.
-    /// Add52 evaluates these callbacks before its same passive queue clears.
-    /// This cache capability never grants a kind5/controller/contact scope.
+    /// Both passive grants evaluate cache before their same queue is cleared.
     pub(crate) fn admits_fetus_cache_context(self) -> bool {
-        self.owner.trinket_slots == [0, 0]
-            && self.owner.queued_id.is_none_or(|id| id == 52)
-            && self.owner.temporary_collectibles.is_empty()
-            && self.owned_count(52) == 1
-            && self
-                .owner
-                .owned_counts
-                .iter()
-                .enumerate()
-                .all(|(id, &count)| count == 0 || (id == 52 && count == 1))
+        self.owner.queued_id.is_none_or(|id| matches!(id, 4 | 52))
+            && self.admits_fetus_readset(FETUS_CACHE_ITEMS)
     }
 
-    /// Separate50D090(kind5) query footprint, including its125/140 tail.
-    /// Current C98/C88/CA0 stay actual inputs; cache admission is not reused.
+    /// Separate50D090(kind5) footprint, including its125/140 tail. Actual
+    /// C98/C88/CA0 remain current inputs, independently of cache completion.
     pub(crate) fn admits_fetus_kind5_context(self) -> bool {
-        self.owner.trinket_slots == [0, 0]
-            && self.owner.queued_id.is_none()
-            && self.owner.temporary_collectibles.is_empty()
-            && self.owned_count(52) == 1
-            && self
-                .owner
-                .owned_counts
-                .iter()
-                .enumerate()
-                .all(|(id, &count)| count == 0 || (id == 52 && count == 1))
+        self.owner.queued_id.is_none() && self.admits_fetus_readset(FETUS_KIND5_ITEMS)
     }
 
-    /// Actual post-increment Add52 may still own the same passive queue entry.
-    /// Its specific/default and zero-amount common paths preserve an existing
-    /// LuckInputs owner; they never produce a missing owner from inventory.
+    /// Real post-increment Add52 can preserve an existing LuckInputs owner
+    /// beside4; the same passive queue remains live until after the callback.
+    /// This capability never constructs Some or repairs restored unknowns.
     pub(crate) fn admits_fetus_grant_context(self) -> bool {
+        self.owner.queued_id.is_none_or(|id| matches!(id, 4 | 52))
+            && self.admits_fetus_readset(FETUS_GRANT_ITEMS)
+    }
+
+    /// Mechanical count/context validation; each consumer supplies its own
+    /// source footprint. Repeated52/4, signed negatives and other modifiers
+    /// require separate evidence, rather than inheriting these capabilities.
+    fn admits_fetus_readset(self, supported: &[usize]) -> bool {
         self.owner.trinket_slots == [0, 0]
-            && self.owner.queued_id.is_none_or(|id| id == 52)
             && self.owner.temporary_collectibles.is_empty()
             && self.owned_count(52) == 1
             && self
@@ -284,7 +279,7 @@ impl<'a> ItemInputs<'a> {
                 .owned_counts
                 .iter()
                 .enumerate()
-                .all(|(id, &count)| count == 0 || (id == 52 && count == 1))
+                .all(|(id, &count)| count == 0 || (count == 1 && supported.contains(&id)))
     }
 
     /// Each callback composes its implemented effects with its proven neutral
