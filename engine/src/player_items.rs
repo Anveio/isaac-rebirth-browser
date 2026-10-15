@@ -580,6 +580,10 @@ pub(crate) fn add_collectible(
         && normal_isaac
         && crate::item_pipeline::ItemInputs::new(owner)
             .is_ok_and(|inputs| inputs.admits_soy_milk_cache_context());
+    let keep_technology2_luck = id == 152
+        && normal_isaac
+        && crate::item_pipeline::ItemInputs::new(owner)
+            .is_ok_and(|inputs| inputs.admits_technology2_grant_context());
     let keep_fetus_luck = id == 52
         && normal_isaac
         && crate::item_pipeline::ItemInputs::new(owner)
@@ -594,6 +598,7 @@ pub(crate) fn add_collectible(
             .is_ok_and(|inputs| inputs.admits_epic_fetus_grant_context());
     if ![1, 4, 6, 114, 118, 329, 304].contains(&id)
         && !keep_technology_luck
+        && !keep_technology2_luck
         && !keep_soy_luck
         && !keep_fetus_luck
         && !keep_monstro_luck
