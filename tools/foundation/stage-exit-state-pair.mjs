@@ -10,6 +10,7 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
+import { manifestPath, readJsonEvidence } from './browser-evidence.mjs';
 
 const option = name => {
   const at = process.argv.indexOf(name);
@@ -19,9 +20,9 @@ const option = name => {
 const directory = resolve(option('--case'));
 const load = path => JSON.parse(readFileSync(path, 'utf8'));
 const hash = path => createHash('sha256').update(readFileSync(path)).digest('hex');
-const originalPath = resolve(directory, 'original/manifest.json');
-const browserPath = resolve(directory, 'browser/manifest.json');
-const native = load(originalPath), browser = load(browserPath);
+const originalPath = manifestPath(directory, 'original');
+const browserPath = manifestPath(directory, 'browser');
+const native = readJsonEvidence(originalPath), browser = readJsonEvidence(browserPath);
 const gate = load(resolve(dirname(directory), 'report.json'));
 const replay = load(resolve(directory, 'case.json'));
 assert.equal(browser.status, 'pass', 'Actual production DOM/WASM capture must pass');
