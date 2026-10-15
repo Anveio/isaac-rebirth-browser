@@ -16,6 +16,9 @@ pub struct PlayerStats {
     pub tear_falling_acceleration: f32,
     /// Source Player+d60, consumed before both-phase input acceleration.
     pub move_speed: f32,
+    /// Actual Player D64. Legacy or unadmitted output remains absent.
+    #[serde(default)]
+    pub luck: Option<f32>,
 }
 
 impl Default for PlayerStats {
@@ -27,6 +30,7 @@ impl Default for PlayerStats {
             tear_falling_speed: 0.0,
             tear_falling_acceleration: 0.0,
             move_speed: 1.0,
+            luck: None,
         }
     }
 }
@@ -51,6 +55,7 @@ impl PlayerStats {
             || !self.tear_falling_acceleration.is_finite()
             || !self.move_speed.is_finite()
             || !(0.1..=2.0).contains(&self.move_speed)
+            || self.luck.is_some_and(|luck| !luck.is_finite())
         {
             return Err("Player cached stats violate finite source clamps".into());
         }
@@ -143,6 +148,19 @@ pub(crate) fn evaluate_cache(state: &mut State) -> Result<(), String> {
             == 0
         {
             completed |= 512;
+        }
+    }
+    if requested.0 & 1024 != 0 {
+        let inputs = item_pipeline::ItemInputs::new(
+            state.player_items.as_ref().expect("checked cache owner"),
+        )?;
+        if let Some(luck) = item_pipeline::resolve_luck(
+            inputs,
+            state.weapon_admission.source_player_type,
+            state.source_cache_run_flags,
+        )? {
+            state.player_stats.luck = Some(luck);
+            completed |= 1024;
         }
     }
     state

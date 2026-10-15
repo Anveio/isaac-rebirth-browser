@@ -473,6 +473,10 @@ pub struct State {
     pub initial_seed: u32,
     pub boot_epoch_seed: u32,
     pub boot_lifecycle: mt::BootState,
+    /// Actual Game 10EAD8 word, separate from floor flags and run r8/r9.
+    /// Unknown legacy or restore history remains absent.
+    #[serde(default)]
+    pub source_cache_run_flags: Option<u64>,
     pub saved_run_summary: Option<saved_game::SavedRunSummary>,
     pub audio: audio::AudioState,
     #[serde(default)]
@@ -652,6 +656,7 @@ impl Game {
                 initial_seed,
                 boot_epoch_seed,
                 boot_lifecycle,
+                source_cache_run_flags: Some(0), // Game constructor 554034.
                 saved_run_summary: None,
                 audio: audio::AudioState::default(),
                 pending_menu_initializations: Vec::new(),
@@ -1304,6 +1309,8 @@ impl Game {
         self.state.fire_cooldown = -1;
         self.state.max_fire_delay = 10;
         self.state.player_stats = player_stats::PlayerStats::default();
+        // Fresh reset 54E6A3 initializes the actual Game run-flag word.
+        self.state.source_cache_run_flags = Some(0);
         self.state.weapon_cache = weapon_plan::WeaponCache::fresh_player();
         self.state.weapon_admission = weapon_plan::WeaponAdmission::fresh_isaac();
         self.state.head_timer = -1;
@@ -1324,6 +1331,8 @@ impl Game {
         self.state.player = Player::starting();
         // 519767/519771 initialize the two transformation history counters.
         self.state.player.transformation_counts = Some([0, 0]);
+        // 51985C initializes the actual D64 Luck output.
+        self.state.player_stats.luck = Some(0.0);
         // 51987A initializes D68 to false. Base/config 446A90 independently
         // initializes the authored Player's 40-point grid collision class to 5.
         self.state.player.flying = Some(false);
