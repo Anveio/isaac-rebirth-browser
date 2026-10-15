@@ -260,9 +260,9 @@ pub(crate) struct ResolvedWeaponPlan {
     pub(crate) max_fire_delay: i32,
     pub(crate) regular: Option<RegularTearPlan>,
 }
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub(crate) enum LiveWeaponResolution {
-    Resolved(ResolvedWeaponPlan),
+    Resolved(Box<ResolvedWeaponPlan>),
     Unadmitted(&'static str),
 }
 
@@ -290,7 +290,7 @@ pub(crate) fn resolve_live_weapon(
         return Ok(LiveWeaponResolution::Unadmitted("weaponContext"));
     }
     let controller = resolve_controller(items, cache.primary)?;
-    Ok(LiveWeaponResolution::Resolved(ResolvedWeaponPlan {
+    let plan = ResolvedWeaponPlan {
         primary: cache.primary,
         controller,
         properties: AttackProperties {
@@ -307,7 +307,8 @@ pub(crate) fn resolve_live_weapon(
         } else {
             None
         },
-    }))
+    };
+    Ok(LiveWeaponResolution::Resolved(Box::new(plan)))
 }
 
 ///Concrete owner's read-only adapter. Live dispatch handles typed frontier
