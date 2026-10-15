@@ -83,7 +83,9 @@ export class Renderer {
         const entity = cell.entity;
         if (!entity) continue;
         const x = (40 + index % grid.width * 40) * 0.65 + 32;
-        const y = (120 + Math.floor(index / grid.width) * 40) * 0.65 - 46;
+        // Grid Render projects through WorldToScreen 42eb00 (0.65y - 47);
+        // the -46 actor anchor sits one logical pixel lower.
+        const y = (120 + Math.floor(index / grid.width) * 40) * 0.65 - 47;
         const rock = entity.state === 1 ? rockSprite(entity.kind, entity.variant) : undefined;
         if (entity.kind === 7) {
           // GridEntity_Pit 5684c0 stores its autotile frame as the variant.
