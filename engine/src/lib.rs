@@ -25,6 +25,7 @@ pub mod chests;
 pub mod combat;
 mod content;
 mod controlled_brimstone;
+mod controlled_fetus;
 mod controlled_knife;
 pub mod controlled_tear;
 mod controlled_technology;
@@ -1929,6 +1930,7 @@ impl Game {
         if phase == phase::Phase::Update && self.state.screen == Screen::Playing {
             attack_runtime::restore_fast_positions(&mut self.state);
             laser_runtime::restore_fast_positions(&mut self.state);
+            bombs::restore_shot_fast_positions(&mut self.state);
         }
         let gameplay_was_paused = self.state.paused;
         if self.state.screen == Screen::Playing {
@@ -2182,6 +2184,7 @@ impl Game {
             blood_effects::clear_retired_links(&mut self.state);
             attack_runtime::retire_full(&mut self.state);
             laser_runtime::retire_full(&mut self.state)?;
+            bombs::retire_shots_full(&mut self.state);
             controlled_tear::retire_full(&mut self.state);
             attack_runtime::contacts(&mut self.state)?;
             let pickup_contacts = pickups::contact_candidates(&self.state)?;
@@ -2875,8 +2878,11 @@ impl Game {
                         plan.controller == weapon_plan::ControllerChannel::ControlledBrimstone;
                     let controlled_technology =
                         plan.controller == weapon_plan::ControllerChannel::ControlledTechnology;
-                    let controlled_ring = controlled_brim || controlled_technology;
-                    let aim_step = if ordinary || controlled || controlled_tear || controlled_ring {
+                    let controlled_fetus =
+                        plan.controller == weapon_plan::ControllerChannel::ControlledFetus;
+                    let controlled_target =
+                        controlled_brim || controlled_technology || controlled_fetus;
+                    let aim_step = if ordinary || controlled || controlled_tear || controlled_target {
                         attack_runtime::ordinary_shooting_aim(
                             callback_aim,
                             buttons.held(),
@@ -2891,7 +2897,7 @@ impl Game {
                     };
                     if let Some(mut aim_step) = aim_step {
                         // 52F6B7 normalizes r13 before the callback and DB4 store.
-                        if (controlled || controlled_tear || controlled_ring)
+                        if (controlled || controlled_tear || controlled_target)
                             && knives::squared_length(aim_step.callback_aim) > 1.0
                         {
                             aim_step.callback_aim = knives::normalized(aim_step.callback_aim);
@@ -2901,7 +2907,7 @@ impl Game {
                         }
                         shooting_aim_db4 = aim_step.db4_write;
                         let head_frame_request = if self.state.head_timer > 8 { 2 } else { 0 };
-                        if ordinary || controlled || controlled_tear || controlled_ring {
+                        if ordinary || controlled || controlled_tear || controlled_target {
                             source_weapon_clock = true;
                             if controlled {
                                 attack_runtime::controlled_head_direction(
@@ -2915,7 +2921,7 @@ impl Game {
                                     aim_step.callback_aim,
                                     buttons.held(),
                                 )?;
-                            } else if controlled_ring {
+                            } else if controlled_target {
                                 controlled_brimstone::head_direction(
                                     &mut self.state,
                                     aim_step.callback_aim,
@@ -2949,11 +2955,13 @@ impl Game {
                             attack_runtime::controlled_idle_head(&mut self.state, buttons.held());
                         } else if controlled_tear {
                             controlled_tear::idle_head(&mut self.state, buttons.held());
-                        } else if controlled_ring {
+                        } else if controlled_target {
                             attack_runtime::controlled_idle_head_for(
                                 &mut self.state,
                                 buttons.held(),
-                                if controlled_technology {
+                                if controlled_fetus {
+                                    "controlledFetusMovementHistory"
+                                } else if controlled_technology {
                                     "controlledTechnologyMovementHistory"
                                 } else {
                                     "controlledBrimstoneMovementHistory"

@@ -223,6 +223,7 @@ pub(crate) enum ControllerChannel {
     RegularShots,
     OrdinaryKnife,
     OrdinaryFetus,
+    ControlledFetus,
     ControlledKnife,
     ChargedBrimstone,
     OrdinaryTechnology,
@@ -250,9 +251,10 @@ pub(crate) fn resolve_controller(
             ControllerChannel::ControlledTechnology
         }
         PrimaryWeaponC08::Technology => ControllerChannel::OrdinaryTechnology,
-        PrimaryWeaponC08::DrFetus if !items.primary_permanent_presence(329)? => {
-            ControllerChannel::OrdinaryFetus
+        PrimaryWeaponC08::DrFetus if items.primary_permanent_presence(329)? => {
+            ControllerChannel::ControlledFetus
         }
+        PrimaryWeaponC08::DrFetus => ControllerChannel::OrdinaryFetus,
         PrimaryWeaponC08::Ludovico => ControllerChannel::ControlledTear,
         other => ControllerChannel::Unimplemented(other),
     })

@@ -16,6 +16,16 @@ const LIBRA_SCALAR_FLAGS: u32 = 0x1b;
 const FETUS_CACHE_ITEMS: &[usize] = &[4, 52];
 const FETUS_KIND5_ITEMS: &[usize] = &[4, 52];
 const FETUS_GRANT_ITEMS: &[usize] = &[4, 52];
+//Independent controlled52 cache, kind5 and caller footprints.
+const CONTROLLED_FETUS_CACHE_ITEMS: &[usize] = &[1, 4, 52, 329];
+const CONTROLLED_FETUS_KIND5_ITEMS: &[usize] = &[1, 4, 52, 329];
+const CONTROLLED_FETUS_GRANT_ITEMS: &[usize] = &[1, 4, 52, 329];
+const CONTROLLED_FETUS_CALLER_ITEMS: &[usize] = &[1, 4, 52, 329];
+// Independent current caller and kind5 readsets do not consume the queued
+// passive4 config. Pickup guard release precedes its late real Add callback.
+const CONTROLLED_FETUS_KIND5_QUEUED_ITEMS: &[usize] = &[4];
+const CONTROLLED_FETUS_CALLER_QUEUED_ITEMS: &[usize] = &[4];
+
 
 // Independent source-owned footprints. Equal current sets are deliberately
 // separate: cache additions cannot silently admit a50D090 getter branch.
@@ -287,40 +297,81 @@ impl<'a> ItemInputs<'a> {
     }
 
     /// Independent511F10 footprint for one actual52 and selected4. The
-    /// callers retain normal-Isaac, known auxiliary and retained-C08 owners.
-    /// Both passive grants evaluate cache before their same queue is cleared.
+    /// controlled path retains its separate source-owned cache footprint.
+    /// Callback callers retain actual normal-Isaac and auxiliary owners.
     pub(crate) fn admits_fetus_cache_context(self) -> bool {
+        if self.admits_controlled_fetus_readset(
+            CONTROLLED_FETUS_CACHE_ITEMS,
+            CONTROLLED_FETUS_CACHE_ITEMS,
+        ) {
+            return true;
+        }
         self.owner.queued_id.is_none_or(|id| matches!(id, 4 | 52))
-            && self.admits_fetus_readset(FETUS_CACHE_ITEMS)
+            && self.admits_fetus_readset(FETUS_CACHE_ITEMS, Some(1))
     }
 
-    /// Separate50D090(kind5) footprint, including its125/140 tail. Actual
-    /// C98/C88/CA0 remain current inputs, independently of cache completion.
+    ///Separate50D090(kind5) footprints retain the125/140 tail proof and
+    ///separate queue readsets. Controlled kind5 also admits actual passive4
+    ///queued before its late Add; current C98/C88/CA0 remain independently owned.
     pub(crate) fn admits_fetus_kind5_context(self) -> bool {
-        self.owner.queued_id.is_none() && self.admits_fetus_readset(FETUS_KIND5_ITEMS)
+        if self.admits_controlled_fetus_readset(
+            CONTROLLED_FETUS_KIND5_ITEMS,
+            CONTROLLED_FETUS_KIND5_QUEUED_ITEMS,
+        ) {
+            return true;
+        }
+        self.owner.queued_id.is_none() && self.admits_fetus_readset(FETUS_KIND5_ITEMS, Some(1))
     }
 
-    /// Real post-increment Add52 can preserve an existing LuckInputs owner
-    /// beside4; the same passive queue remains live until after the callback.
-    /// This capability never constructs Some or repairs restored unknowns.
+    ///Only the actual Add52 wrapper consumes this independent grant proof.
+    ///It preserves existing SomeLuck without creating a missing history.
     pub(crate) fn admits_fetus_grant_context(self) -> bool {
+        if self.admits_controlled_fetus_readset(
+            CONTROLLED_FETUS_GRANT_ITEMS,
+            CONTROLLED_FETUS_GRANT_ITEMS,
+        ) {
+            return true;
+        }
         self.owner.queued_id.is_none_or(|id| matches!(id, 4 | 52))
-            && self.admits_fetus_readset(FETUS_GRANT_ITEMS)
+            && self.admits_fetus_readset(FETUS_GRANT_ITEMS, Some(1))
     }
 
-    /// Mechanical count/context validation; each consumer supplies its own
-    /// source footprint. Repeated52/4, signed negatives and other modifiers
-    /// require separate evidence, rather than inheriting these capabilities.
-    fn admits_fetus_readset(self, supported: &[usize]) -> bool {
-        self.owner.trinket_slots == [0, 0]
+    ///519FC0's currentC7C motion branch is separate from cache and kind5.
+    pub(crate) fn admits_controlled_fetus_caller(self) -> bool {
+        self.admits_controlled_fetus_readset(
+            CONTROLLED_FETUS_CALLER_ITEMS,
+            CONTROLLED_FETUS_CALLER_QUEUED_ITEMS,
+        )
+    }
+
+    fn admits_controlled_fetus_readset(self, supported: &[usize], queued: &[usize]) -> bool {
+        self.positive_owned_count(329)
+            && self.admits_fetus_readset(supported, None)
+            && self
+                .owner
+                .queued_id
+                .is_none_or(|id| queued.contains(&(id as usize)))
+    }
+
+    ///Mechanical signed-count/context validation, independent of the caller's
+    ///semantic item set. Both source proofs require exactly one52; their
+    ///separate count bounds and queue rules are explicit inputs, not inherited
+    ///cache/getter/grant/controller permissions.
+    fn admits_fetus_readset(self, supported: &[usize], maximum_count: Option<i32>) -> bool {
+        self.owned_count(52) == 1
+            && self.owner.trinket_slots == [0, 0]
             && self.owner.temporary_collectibles.is_empty()
-            && self.owned_count(52) == 1
             && self
                 .owner
                 .owned_counts
                 .iter()
                 .enumerate()
-                .all(|(id, &count)| count == 0 || (count == 1 && supported.contains(&id)))
+                .all(|(id, &count)| {
+                    count == 0
+                        || (count > 0
+                            && supported.contains(&id)
+                            && maximum_count.is_none_or(|maximum| count <= maximum))
+                })
     }
 
     /// Each callback composes its implemented effects with its proven neutral
