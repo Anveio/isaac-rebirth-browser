@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "status": "SCOPED_MERGED_CONTROLLED_DR_AND_MONSTRO_FIRST_ORIGINAL_FAILURES_PRESERVED",
-  "main": "3ef319fca532ab63d191457cd4dfb9821952a25d",
+  "status": "SCOPED_MERGED_EPIC_ORDINARY2_COPIED_DAMAGE_SHAKE_WITH_STRICT_FAILURES_PRESERVED",
+  "main": "48b9f4ef73d351fb7a72b4b2efe85127b1cdc86d",
   "merged": {
     "298": "261dbd60b3921fed421a614ef80c52baaadb0cca",
     "299": "988ae6355c7956d918ff0e00eb329d313645b864",
@@ -39,7 +39,21 @@
     "377": "20a2883ea7981fb6d70216e33715dd56e2852db3",
     "378": "be1a0003478d112b76926eb4820b5b56723722cb",
     "379": "5312beb380a8db8f906cb0fac0f13aeb075f908f",
-    "380": "3ef319fca532ab63d191457cd4dfb9821952a25d"
+    "380": "3ef319fca532ab63d191457cd4dfb9821952a25d",
+    "374": "09a769c857468023addb4bd1f02588823b35a81c",
+    "375": "dbbc3eb068bf95f2cd24c5539fffb3e1d6d985e7",
+    "384": "e7d06383fe0252dde0712f82635bcd4ec36de1ac",
+    "386": "159adf74822408e40b0306c91d1b118c49d3c576",
+    "387": "f0d52b1dc6eb382d889d506dd067273853c8e520",
+    "388": "dbeab822628a4dbaa66856e10c7c92336b42aae5",
+    "389": "b756dfb50586540d1cfc34e3a93fad2c742c9ce6",
+    "390": "f09af7864a7291dd4d485e6b911f3ec70eabd0a0",
+    "391": "d7ce6e0ae7de51970d6fbccec3d2f8fde3a53655",
+    "392": "ea5fcfc406f1b86f17f3cbc147d7100e79e72c98",
+    "393": "911cc9980277cf0f873f8ac0127d6449bb065170",
+    "362": "0a0deae79209ba0294db3278beea93042f29de5e",
+    "385": "48b9f4ef73d351fb7a72b4b2efe85127b1cdc86d",
+    "382": "375713058d5719df13cac959665652997fdd46fb"
   },
   "ordinary299": {
     "ownBuilds": "production/strict Clippy/floor PASS",
@@ -1245,13 +1259,9 @@
     "sourceTreeScope": "Frozen f1 is not the entire current-main artifact; external NPC/Pickup/format/minimap changes have separate ownership."
   },
   "openPullRequestAudit": {
-    "count": 9,
+    "count": 5,
     "numbers": [
-      375,
-      374,
       366,
-      362,
-      361,
       329,
       292,
       271,
@@ -1263,6 +1273,138 @@
       292,
       329
     ],
-    "provedDuplicateClosures": []
+    "provedDuplicateClosures": [
+      {
+        "number": 361,
+        "supersededBy": [
+          382,
+          384
+        ],
+        "preservation": "/dev/shm/isaac-pr361-supersession-preserved-v1.json"
+      }
+    ],
+    "correctedAndMerged": [
+      362
+    ],
+    "remainingNoDuplicateProved": true
+  },
+  "currentPrivateProduction2Evidence": {
+    "artifact": {
+      "sourceHead": "3ec42d94aed6d6d5e16538a8f8c60c0353eb2f18",
+      "sourceTree": "821bae0a3da77b37546b00c4c1698e748d32fe28",
+      "wasmSha256": "abdb286e328f019c85b37eaa3639138837d519ec95277213786bb736d4147621",
+      "binding": {
+        "path": "/dev/shm/isaac-player-items-production2-own-proof/artifact-binding-own-gameplay.json",
+        "sha256": "2cc0fe88174c6582e7cc09715d5da55bf2b0dc4b2fefdb9bdb5b4a0e4190c3f7"
+      },
+      "normalProductionPassed": true,
+      "floorPending": true,
+      "clippyPending": true,
+      "allStagesPassed": false
+    },
+    "authority": {
+      "path": "/dev/shm/isaac-production2-item-matrix-facts-v1/facts-compact.json",
+      "sha256": "a83542ddfa50d9b3a10ca8406c4178bca28a511e104c731e7cecd8653d21813c"
+    },
+    "regular405": {
+      "checks": 37987905,
+      "failures": 8728,
+      "addedKeyShape": 4364,
+      "newFields": 4364,
+      "changedPreexistingValues": 0,
+      "missingPreexistingValues": 0,
+      "rawFailurePreserved": true
+    },
+    "ordinary2Own8": {
+      "metadata": {
+        "path": "/dev/shm/isaac-inner-eye2-production2-own-summary-v1/report-metadata-summary.json",
+        "sha256": "8257047d3577d7ff52d9bfe73deac46a2cd72e62782c91d545f29d2cad7e25f6"
+      },
+      "totals": {
+        "cases": 8,
+        "checks": 84879,
+        "failures": 72,
+        "actualBirthAgeActors": 198,
+        "actualCompleteThreeTearCohorts": 66,
+        "qualifiedBirthMetadataActors": 198,
+        "unknownTypedBirthMetadataActors": 0,
+        "unknownRawTearPhaseRows": 10015
+      },
+      "readerFinalQuotaFailurePreserved": true,
+      "separateOpaqueComponentVerifiedCompleteReport": true
+    },
+    "scope": [
+      "This packet is separate actualproduction2 evidence, not a rewrite or reclassification of frozenf1 reports.",
+      "Own contact and shake rows prove observed source-state chains, not atomic callback order/arguments, isolated RNG-call attribution, sound/rumble/render or full lifecycle events.",
+      "No Original ordinary2 evidence exists in this packet. RawTear322 unknowns and strict body identity/RNG correspondence remain failures.",
+      "Highdamage first Original covers fixedphase0 NPC14; unexecuted remaining Original cases stay unexecuted.",
+      "No State/native-tuple/journal reread, regrade, capture, reader, codec, compiler, main mutation or source-mask changes by fact author. Existing report metadata only."
+    ],
+    "epicOld70ContactOwn4": {
+      "report": {
+        "path": "/dev/shm/isaac-epic-contact-production2-own-observations-v2/own-epic-npc-contact-nonvacuity.json",
+        "sha256": "2e438e43032734720e8b01924fb1e616d85c0b3f836d728028ff4ec054c104a0"
+      },
+      "totalChecks": 6663,
+      "totalFailures": 56,
+      "sourceBeforeEqualsEnd": true,
+      "cases": 4
+    },
+    "epicHighDamageContactOwn4": {
+      "report": {
+        "path": "/dev/shm/isaac-blast-contact-production2-own-observations-v1/own-epic-npc-contact-nonvacuity.json",
+        "sha256": "9e65c8932630a00b86653c99840fb1efcb14df9d07639a52e7c58d49829ebc52"
+      },
+      "totalChecks": 6663,
+      "totalFailures": 56,
+      "sourceBeforeEqualsEnd": true,
+      "cases": 4
+    },
+    "blastShakeOwn4": {
+      "report": {
+        "path": "/dev/shm/isaac-blast-shake-production2-own-observations-v1/own-blast-camera-shake-nonvacuity.json",
+        "sha256": "efc8f2b7c46ee3072fa4f73735df85881c2a714bd2390e7c5f1773b18f4227a1"
+      },
+      "totalChecks": 867,
+      "totalFailures": 20,
+      "sourceBeforeEqualsEnd": true,
+      "cases": 4
+    },
+    "epicHighDamageFirstOriginalPair": {
+      "compact": {
+        "path": "/dev/shm/isaac-blast-shake-production2-native-evidence-v1/epic-fetus-high-damage-shake-contact-fixed-phase0/paired-functional-v3/compact-summary.json",
+        "sha256": "306ad3c76590ef39744e5bd4b592951e6e9296e568cb6c2c6212067b5d2d3fe9"
+      },
+      "report": {
+        "path": "/dev/shm/isaac-blast-shake-production2-native-evidence-v1/epic-fetus-high-damage-shake-contact-fixed-phase0/paired-functional-v3/functional-report.json.gz",
+        "sha256": "a4fe4c49fbc1104116d0e59a1b2319848e41f453bbd7acc05d42e2ad823b2148"
+      },
+      "closure": {
+        "path": "/dev/shm/isaac-blast-shake-production2-native-evidence-v1/epic-fetus-high-damage-shake-contact-fixed-phase0/paired-functional-v3/closed.json",
+        "sha256": "9e7d010f602839062778d2d6b924cff84d4959f6280fbbac4162ae1e8d05db6a"
+      },
+      "checks": 40872,
+      "failures": 4064,
+      "scope": "Both four-case Epic contact cohorts (70 and132.815673828125 damage) record6,663 checks/56 FAIL. Every case observes one copied-Rocket FIFO append, ordered HP drain, negative-HP death and manager retirement; missing callback/argument/RNG/lifecycle event owners remain failures. The first high-damage Original/port pair retains40,872 checks/4,064 FAIL over476 paired rows and261 typed body rows. Both sides show one target, three rockets, one triple cohort, three explosions/record appends and one FIFO-to-retirement state chain. Selected properties match across261 body rows and receiver HP matches377 observations; receiver geometry, exact identities/RNG/Parent/records/counters and missing owners remain failed. Zero observed transient crater18 births do not prove absent callbacks."
+    },
+    "monstroSameOriginalQueued4Regression": {
+      "compact": {
+        "path": "/dev/shm/isaac-monstro229-production2-public-game-v1/monstro229-cricket4-fixed-phase0/paired-functional-production2-v1/compact-summary.json",
+        "sha256": "6b9123f686adfb48498923eb2729e0d97f516f4890bbe5e30a2a939f5ae99616"
+      },
+      "report": {
+        "path": "/dev/shm/isaac-monstro229-production2-public-game-v1/monstro229-cricket4-fixed-phase0/paired-functional-production2-v1/functional-report.json.gz",
+        "sha256": "5101375acdbfbd6bd9c6432351f4264ed4fa909fdf4648d3b793cc03995b216d"
+      },
+      "closure": {
+        "path": "/dev/shm/isaac-monstro229-production2-public-game-v1/monstro229-cricket4-fixed-phase0/paired-functional-production2-v1/closed.json",
+        "sha256": "9601bcd4a1629a79073f98a8692cecc4014999a42274cd67e23a76d26088702e"
+      },
+      "checks": 62795,
+      "failures": 2520,
+      "scope": "The production2 Monstro queued4 replay reuses the same5149 Original tuples at exactly62,795 checks: failures improve5,346 to2,520. Only three fields change, each942 to0 (historical controller diagnostic, C18 knownNULL and unadmitted controller); all field counts and all other failures are unchanged. Both games retain four complete13-Tear cohorts and three mixed cohorts. Native held/phase owners remain null with mandatory failures; every earlier frozen-f1/e2bb report is preserved."
+    },
+    "notWholeCurrentMainQualification": true,
+    "snapshotMain": "48b9f4ef73d351fb7a72b4b2efe85127b1cdc86d"
   }
 }
