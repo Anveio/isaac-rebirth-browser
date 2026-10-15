@@ -277,6 +277,7 @@ fn spawn_initial_impact(state: &mut State, index: usize) -> Result<(), String> {
     };
     let laser = &state.lasers[index];
     let mut impact = Impact {
+        birth_game_update: Some(state.game_update_count),
         id,
         parent: Some(parent),
         parent_known: true,

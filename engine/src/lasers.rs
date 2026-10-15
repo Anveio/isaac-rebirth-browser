@@ -276,6 +276,9 @@ impl Laser {
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Impact {
+    ///Own actual factory admission clock. Missing inherited histories stay unknown.
+    #[serde(default)]
+    pub birth_game_update: Option<u32>,
     #[serde(default)]
     pub source_subtype: Option<u32>,
     #[serde(default)]
