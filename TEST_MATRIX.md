@@ -251,6 +251,8 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | `floor` | Basement generation structure, retries and per-descriptor room admission | 18 | 5 | 0 |
 | `motion` | player motion steps and held-input runs against an along/across velocity model | 12 | 4 | 0 |
 | `tears` | tear velocity, eye origin, size and flight against f64 and lifecycle models | 28 | 8 | 0 |
+| `bombs` | planted bomb lives, the placement cooldown and Isaac's blast knockback | 18 | 8 | 0 |
+| `pickups` | regular pickup subtype rolls and the pickups each roll spawns as | 5 | 9 | 0 |
 | `grid` | grid queries and ground-collision solvers on generated rooms | 14 | 3 | 0 |
 | `contact` | mass contact responses against momentum, centre-of-mass and overlap oracles | 16 | 3 | 0 |
 | `pathfinder` | FindGridPath's flood against an independent node-weighted Dijkstra | 6 | 5 | 0 |
@@ -426,6 +428,46 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Sometimes | tears: a tear lands | [tears.rs](engine/dst/src/units/tears.rs) |
 | Sometimes | tears: a tear dies on a collision in flight | [tears.rs](engine/dst/src/units/tears.rs) |
 | Always | tears: a tear whose falling speed settles positive is removed within its flight | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | bombs: a bomb is born exactly from finite vectors | [bombs.rs](engine/dst/src/units/bombs.rs) |
+| Sometimes | bombs: a bomb with a non-finite birth is refused | [bombs.rs](engine/dst/src/units/bombs.rs) |
+| Always | bombs: a bomb is born at the player with a tenth of its velocity and a full fuse | [bombs.rs](engine/dst/src/units/bombs.rs) |
+| Always | bombs: a newly placed bomb is presented in any admitted phase, half a step ahead in an intermediate one | [bombs.rs](engine/dst/src/units/bombs.rs) |
+| Always | bombs: a bomb is refused exactly when its clocks or vectors disagree, and left unchanged | [bombs.rs](engine/dst/src/units/bombs.rs) |
+| Sometimes | bombs: a bomb whose clocks disagree is refused | [bombs.rs](engine/dst/src/units/bombs.rs) |
+| Always | bombs: a bomb's own life fails only when its position overflows, and is left unchanged | [bombs.rs](engine/dst/src/units/bombs.rs) |
+| Sometimes | bombs: a bomb step whose position overflows is refused | [bombs.rs](engine/dst/src/units/bombs.rs) |
+| Always | bombs: a bomb's lifetime only moves forward | [bombs.rs](engine/dst/src/units/bombs.rs) |
+| Always | bombs: a skipped phase or a removed bomb changes nothing | [bombs.rs](engine/dst/src/units/bombs.rs) |
+| Always | bombs: an intermediate phase presents a bomb half a step ahead and moves nothing | [bombs.rs](engine/dst/src/units/bombs.rs) |
+| Always | bombs: an update moves a bomb by its velocity and slows it by 0.95, halving it below unit speed | [bombs.rs](engine/dst/src/units/bombs.rs) |
+| Always | bombs: a bomb only ever slows | [bombs.rs](engine/dst/src/units/bombs.rs) |
+| Sometimes | bombs: a slow bomb is halved | [bombs.rs](engine/dst/src/units/bombs.rs) |
+| Always | bombs: a bomb detonates once on its 60th full update and is removed ten updates later | [bombs.rs](engine/dst/src/units/bombs.rs) |
+| Sometimes | bombs: a bomb's life runs to its removal | [bombs.rs](engine/dst/src/units/bombs.rs) |
+| Always | bombs: placement is admitted only once the cooldown is spent, which only full updates spend | [bombs.rs](engine/dst/src/units/bombs.rs) |
+| Always | bombs: placement re-arms after exactly 30 full updates | [bombs.rs](engine/dst/src/units/bombs.rs) |
+| Sometimes | bombs: a player places bombs back to back | [bombs.rs](engine/dst/src/units/bombs.rs) |
+| Always | bombs: a blast is resolved exactly for finite vectors | [bombs.rs](engine/dst/src/units/bombs.rs) |
+| Always | bombs: a blast reaches a player strictly inside its radius plus Isaac's | [bombs.rs](engine/dst/src/units/bombs.rs) |
+| Always | bombs: a blast misses a player beyond its radius plus Isaac's | [bombs.rs](engine/dst/src/units/bombs.rs) |
+| Sometimes | bombs: a player stands on a blast's edge | [bombs.rs](engine/dst/src/units/bombs.rs) |
+| Always | bombs: a blast centred on the player keeps its velocity | [bombs.rs](engine/dst/src/units/bombs.rs) |
+| Always | bombs: a blast halves the player's velocity and pushes it straight away from the bomb by its depth, at most 15 | [bombs.rs](engine/dst/src/units/bombs.rs) |
+| Sometimes | bombs: a deep blast's push is capped at 15 | [bombs.rs](engine/dst/src/units/bombs.rs) |
+| Always | pickups: a subtype roll is a pure function of its selector and seed | [pickups.rs](engine/dst/src/units/pickups.rs) |
+| Always | pickups: a nonzero subtype is kept | [pickups.rs](engine/dst/src/units/pickups.rs) |
+| Always | pickups: a zero subtype is rolled exactly for the regular families from a nonzero seed | [pickups.rs](engine/dst/src/units/pickups.rs) |
+| Always | pickups: a rolled subtype is one its family documents | [pickups.rs](engine/dst/src/units/pickups.rs) |
+| Sometimes | pickups: a soul heart is rolled | [pickups.rs](engine/dst/src/units/pickups.rs) |
+| Sometimes | pickups: an eternal heart is rolled | [pickups.rs](engine/dst/src/units/pickups.rs) |
+| Sometimes | pickups: a black heart is rolled | [pickups.rs](engine/dst/src/units/pickups.rs) |
+| Sometimes | pickups: a nickel is rolled | [pickups.rs](engine/dst/src/units/pickups.rs) |
+| Sometimes | pickups: a dime is rolled | [pickups.rs](engine/dst/src/units/pickups.rs) |
+| Sometimes | pickups: a golden key is rolled | [pickups.rs](engine/dst/src/units/pickups.rs) |
+| Sometimes | pickups: a double bomb is rolled | [pickups.rs](engine/dst/src/units/pickups.rs) |
+| Sometimes | pickups: a troll bomb is rolled | [pickups.rs](engine/dst/src/units/pickups.rs) |
+| Sometimes | pickups: a megatroll bomb is rolled | [pickups.rs](engine/dst/src/units/pickups.rs) |
+| Always | pickups: every rolled subtype spawns as a pickup that keeps it, troll bombs drawing the bomb's visual | [pickups.rs](engine/dst/src/units/pickups.rs) |
 | Always | grid: admitted room grids are valid grids | [grid.rs](engine/dst/src/units/grid.rs) |
 | Always | grid: every cell centre indexes back to its cell | [grid.rs](engine/dst/src/units/grid.rs) |
 | Always | grid: nonplayer ground resolution never fails for bounded motion | [grid.rs](engine/dst/src/units/grid.rs) |

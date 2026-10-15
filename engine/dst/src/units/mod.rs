@@ -5,6 +5,7 @@ use crate::harness::Unit;
 
 mod abi;
 mod actors;
+mod bombs;
 mod contact;
 mod floor;
 mod game;
@@ -15,6 +16,7 @@ mod motion;
 mod mt;
 mod pathfinder;
 mod phase;
+mod pickups;
 mod room_spawns;
 mod room_templates;
 mod seed_codec;
@@ -70,6 +72,16 @@ pub const UNITS: &[Unit] = &[
         name: "tears",
         summary: "tear velocity, eye origin, size and flight against f64 and lifecycle models",
         run: tears::run,
+    },
+    Unit {
+        name: "bombs",
+        summary: "planted bomb lives, the placement cooldown and Isaac's blast knockback",
+        run: bombs::run,
+    },
+    Unit {
+        name: "pickups",
+        summary: "regular pickup subtype rolls and the pickups each roll spawns as",
+        run: pickups::run,
     },
     Unit {
         name: "grid",
