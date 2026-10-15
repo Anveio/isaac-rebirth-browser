@@ -84,7 +84,7 @@
       "path": ".cache/coordination/quality-main/composition-brim10-host-v5-allocation/brim10-final-capture-closure-and-release.json",
       "sha256": "57eb8c81f124cbf879ac636e218617549e4729b9e1c10e7eee729c4959a11701"
     },
-    "archiveAudit": "All ten frozen auditors stop at complete manifest-byte reconstruction and remain FAIL. The separate closed additive classifier passes all ten: only the permitted adjacent root-key swap, exact full raw manifest SHA and no nested-value/input/observation difference. Skipped clock/X11/options/resource validations remain pending. PR217 changes future captures only.",
+    "archiveAudit": "All ten frozen auditors stop at complete manifest-byte reconstruction and remain FAIL. A separate closed additive classifier passes all ten: only the permitted adjacent root-key swap, exact full raw manifest SHA and no nested-value/input/observation difference. Separate executions of every remaining frozen native clock/X11/options/resource validation also pass all ten with protected pins before=end. These addenda establish scoped capture validity, not weapon parity. PR217 changes future captures only.",
     "case0AdditiveDiagnosis": {
       "path": ".cache/coordination/item-weapon-composition/brim0-journal-manifest-classification-v1.json",
       "sha256": "9796fa30936845accd9c1a78c424cfd6236b12de50323a2f4f528443b4f6b69b",
@@ -123,6 +123,15 @@
       "supervisorSha256": "5b09665422e384aa3601597ff05dfea47743032384dc62e6a3042134ce40ed86",
       "classification": "EXACT_DECLARED_OPTIONS_INITIAL_STATE_ROOT_ORDER_ONLY",
       "scope": "All nested data equal; reordered full raw manifest SHA exact. Frozen audit/gameplay grades unchanged; skipped validations separate."
+    },
+    "nativeGuardsAddendum": {
+      "status": "pass",
+      "cases": 10,
+      "supervisorPath": ".cache/coordination/quality-main/composition-brim10-host-v5-allocation/closed-native-guards-addendum-v1/supervisor.json",
+      "supervisorSha256": "a57758b410477652b47a13de8f0f4bfbf2129bb354c7f88f81c4792e0cca620b",
+      "executedFrozenFunction": "native_readback",
+      "unchangedRemainingAssertions": true,
+      "scope": "Actual remaining clock/X11/options/resource validations executed after exact full-byte equivalence; all protected sources, archives and fixtures before=end. Frozen strict and gameplay grades unchanged."
     }
   }
 }

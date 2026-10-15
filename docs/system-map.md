@@ -80,8 +80,11 @@ phases; 16 transient Full-Uninit slot-null witnesses were recorded. All ten
 frozen strict audits failed while reconstructing manifest bytes, before
 later clock/X11/options/resource validation. The separate additive audit passes
 all ten cases: only the permitted adjacent root-key reorder, an exact complete
-manifest SHA and no nested observation/input difference. The skipped guard
-validations remain pending. [PR217](https://github.com/Anveio/isaac-rebirth-browser/pull/217) fixes
+manifest SHA and no nested observation/input difference. Separate executions
+of every remaining unchanged clock/X11/options/resource validation also pass all
+ten with protected sources, archives and fixtures unchanged. These addenda
+establish scoped capture validity; they leave the archived strict and gameplay
+grades unchanged. [PR217](https://github.com/Anveio/isaac-rebirth-browser/pull/217) fixes
 future capture serialization and does not regrade those archived audits.
 [Compact evidence](../references/isaac/foundation/items/public-ingress-and-brim10.json)
 retains the exact producer/report scopes and unresolved fields.
