@@ -129,6 +129,26 @@ impl LaserLine {
         });
     }
 
+    /// 578760 forms seven closed-circle controls. Literal handle angles and
+    /// radius scaling retain their separate f32/f64 rounding boundaries.
+    pub(crate) fn circle(&mut self, center: WorldVector, radius: f32) {
+        let handle_radius = 1.05_f32 * radius;
+        for index in 0..7_u32 {
+            let fraction = index as f32 / 6.0;
+            let radians = ((f64::from(fraction) * std::f64::consts::PI) * 2.0) as f32;
+            let angle = 0.0 - radians;
+            let polar = |at: f32, distance: f32| WorldVector {
+                x: crate::fmath::cos(at) * distance,
+                y: crate::fmath::sin(at) * distance,
+            };
+            self.controls.push(CurvePoint {
+                incoming: add(center, polar(0.25 + angle, handle_radius)),
+                position: add(center, polar(angle, radius)),
+                outgoing: add(center, polar(angle - 0.25, handle_radius)),
+            });
+        }
+    }
+
     ///577D60 uses equal parameter ranges per control pair;579FA0 supplies
     ///an independently computed arc-length remap before calling it.
     fn evaluate(&self, parameter: f32) -> WorldVector {
