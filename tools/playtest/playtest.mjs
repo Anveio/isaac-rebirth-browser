@@ -398,6 +398,11 @@ try {
         stats.stalls++; stuckSince ??= now;
         const options = [['KeyW', 'KeyA'], ['KeyW', 'KeyD'], ['KeyS', 'KeyA'], ['KeyS', 'KeyD'], ['KeyW'], ['KeyS'], ['KeyA'], ['KeyD']];
         wiggle = { until: now + 700, keys: options[(stats.stalls * 3) % options.length] };
+        // Caged by poop (e.g. a boss's tail trail): shoot the adjacent poop instead of wiggling.
+        const c = Math.round((p.x - 40) / 40), r = Math.round((p.y - 120) / 40), g = state.grid;
+        const poop = g && now - stuckSince > 3000 && [[1, 0, 'ArrowRight'], [-1, 0, 'ArrowLeft'], [0, 1, 'ArrowDown'], [0, -1, 'ArrowUp']]
+          .find(([dc, dr]) => g.poop[(r + dr) * g.w + c + dc] === '1');
+        if (poop) wiggle = { until: now + 1500, keys: [poop[2]] };
       } else stuckSince = null;
       if (stuckSince && now - stuckSince > 20_000) { fail('Player has not moved for 20s while movement keys were held'); break; }
       lastMoveCheck = { at: now, x: state.player.x, y: state.player.y };
