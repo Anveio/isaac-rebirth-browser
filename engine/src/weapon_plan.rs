@@ -296,6 +296,11 @@ pub(crate) fn resolve_live_weapon(
         return Ok(LiveWeaponResolution::Unadmitted("weaponContext"));
     }
     let controller = resolve_controller(items, cache.primary)?;
+    if controller == ControllerChannel::RegularShots
+        && items.pending_cache().0 & RegularTearPlan::INPUT_CACHE_MASK.0 != 0
+    {
+        return Ok(LiveWeaponResolution::Unadmitted("regularTearCache"));
+    }
     let plan = ResolvedWeaponPlan {
         primary: cache.primary,
         controller,
@@ -440,6 +445,10 @@ pub(crate) struct RegularTearPlan {
 }
 
 impl RegularTearPlan {
+    /// C88, C78, C7C, C8C/C90/C94, C98 and CA0 are birth inputs.
+    /// Move/Flight/Familiar/Luck requests do not own these copied fields.
+    const INPUT_CACHE_MASK: CacheMask = CacheMask(1 | 2 | 4 | 8 | 32 | 64);
+
     pub(crate) fn resolve(
         stats: PlayerStats,
         max_fire_delay: i32,
