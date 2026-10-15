@@ -112,7 +112,10 @@ pub(crate) fn sample_initial_curse(
 }
 
 impl ResourceInputs {
-    pub(crate) fn catalog(self) -> Result<Catalog, String> {
+    pub(crate) fn catalog(&self) -> Result<Catalog, String> {
+        if self.challenges_xml.len() > 65_536 {
+            return Err("Challenge XML input exceeds 64 KiB".into());
+        }
         Catalog::from_xml(&self.challenges_xml)
     }
 }
@@ -336,7 +339,6 @@ pub(crate) fn initialize_player(state: &mut State, definition: &Definition) -> R
     }
     //52e340 invokes511f10 unconditionally, even when the requested mask is0.
     crate::player_stats::evaluate_cache(state)?;
-    crate::familiars::evaluate_cache(state)?;
     state.player.initialized_3074 = true;
     Ok(())
 }

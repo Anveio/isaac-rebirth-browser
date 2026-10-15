@@ -1,6 +1,6 @@
 // Paired original/browser runs of a scenario helper's tapes, each graded by a
 // state comparator over the retained native observations and browser states.
-// Used by npcs, roundworms, fireplaces and monstro (see suites.mjs).
+// Used by npcs, roundworms, fireplaces, monstro and entities (see suites.mjs).
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { readFileSync, rmSync, writeFileSync } from 'node:fs';
@@ -29,8 +29,9 @@ if (selected) {
 writeJson(resolve(output, 'scenarios.json'), scenarios);
 const tapes = scenarios.cases.map((item, index) => writeJson(resolve(output, `replay-${index}.json`), item));
 
-const paired = await runPairedGate({ output: resolve(output, 'paired'), selected: [], randomCount: 0, replayCases: tapes,
-  productionDirectory: flag('--production-directory'), nativeFrameTimeout: Number(flag('--native-frame-timeout', '60')) });
+const paired = tapes.length ? await runPairedGate({ output: resolve(output, 'paired'), selected: [], randomCount: 0, replayCases: tapes,
+  productionDirectory: flag('--production-directory'), nativeFrameTimeout: Number(flag('--native-frame-timeout', '60')) })
+  : { status: 'fail', cases: [] };
 
 const requireKey = flag('--require-from-case');
 const cases = scenarios.cases.map((scenario, index) => {
@@ -55,8 +56,12 @@ const cases = scenarios.cases.map((scenario, index) => {
   };
 });
 
-const status = paired.status === 'pass' && cases.every(item => item.status === 'pass') ? 'pass' : 'fail';
-writeJson(resolve(output, 'report.json'), { schema: 1, status, pairedStatus: paired.status, cases });
+// A helper may report items it could not build (e.g. one entity spec's room
+// discovery); they fail the suite without hiding the cases that did build.
+const helperFailures = scenarios.failures ?? [];
+const status = paired.status === 'pass' && !helperFailures.length && cases.every(item => item.status === 'pass') ? 'pass' : 'fail';
+writeJson(resolve(output, 'report.json'), { schema: 1, status, pairedStatus: paired.status, helperFailures, cases });
 for (const item of cases) console.log(`${item.status}: ${item.id} (${item.failures}/${item.checks} checks failed)${item.error ? ` ${item.error}` : ''}`);
+for (const failure of helperFailures) console.log(`fail: ${JSON.stringify(failure)}`);
 console.log(JSON.stringify({ status, report: resolve(output, 'report.json') }));
 process.exitCode = status === 'pass' ? 0 : 1;

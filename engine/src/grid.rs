@@ -147,6 +147,13 @@ pub fn for_room(
                 // like an ordinary rock): Block1900 is kind3, the room's
                 // tinted rock kind4. Tinted drops remain a separate callback.
                 1900 => Some((3, rock_frame, 1, 3)),
+                // Factory5ce858: raw1002 is the alt rock kind6 directly (no
+                // Random1001 classification), with the ordinary rock frame.
+                1002 => Some((6, rock_frame, 1, 3)),
+                // Raw1940 spider web kind10 (Init571c70): class0 and no path
+                // cost. Its frame/flip/rotation draws belong to the Room.Init
+                // construction pass and its player slowing is not admitted.
+                1940 => Some((10, 0, 0, 0)),
                 1000 if spawn.grid_index == spawns.tinted_rock_index => Some((4, rock_frame, 1, 3)),
                 // Pit3000 Init568990 collides as class1; its autotile frame is
                 // linked after admission by `link_pits`.

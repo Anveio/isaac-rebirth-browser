@@ -150,6 +150,7 @@ export class GLMenuContext {
     this.setProjection(width, height, surface ? 1 : -1);
     gl.clearColor(0, 0, 0, surface && surface !== this.screen ? 0 : 1);
   }
+  screenSurface(): GLSurface { return this.screen; }
   beginScreen(): void {
     this.screenActive = true;
     this.beginTarget(null);

@@ -40,6 +40,9 @@ export function npcFields(native, actor, phase) {
     ['position', vector(native.position), vector(phase === 0 ? actor.presentedPosition : actor.position)],
     ['velocity', vector(native.velocity), vector(actor.velocity)], ['target', vector(native.npcTarget), vector(actor.target)],
     ['championColor', native.npcChampionColor, actor.champion?.color ?? -1],
+    // Sprite Color +2d0 (champion colour or timed hit flash), every component.
+    ['spriteColor', native.spriteColor?.map(f32), actor.spriteColor &&
+      [...actor.spriteColor.current.tint, ...actor.spriteColor.current.colorize, ...actor.spriteColor.current.offset].map(f32)],
   ];
 }
 
@@ -56,8 +59,9 @@ export function roomRows(rows, source, actual) {
   check(rows, 'hud.bossBarFlash', source.bossBar?.flash, actual.bossBar?.flash);
   for (const field of ['countablePending', 'countableCurrent', 'bossPending', 'bossCurrent'])
     check(rows, `manager.${field}`, source.room[field], actual.room.managerCounts?.[field]);
-  // Admitted grid objects: Block3, Tinted Rock4 and Pit7 (autotile frame).
-  for (const cell of source.grid.filter(cell => [3, 4, 7].includes(cell.type))) {
+  // Admitted grid objects: Block3, Tinted Rock4, Alt Rock6, Pit7 (autotile
+  // frame) and Spider Web10.
+  for (const cell of source.grid.filter(cell => [3, 4, 6, 7, 10].includes(cell.type))) {
     const port = actual.room.grid?.cells[cell.index]?.entity;
     check(rows, `grid${cell.index}`, [cell.type, cell.variant, cell.state, cell.collisionClass],
       port && [port.kind, port.variant, port.state, port.collisionClass]);
@@ -108,7 +112,10 @@ export function entityRows(rows, source, actual, spec, render) {
   const rock = cell => ROCK_ANIMATIONS[cell.type] && cell.state === 1 &&
     (cell.type === 2 && cell.variant >= 1000 ? [cell.index, cell.type, 'big', cell.variant - 1000] : [cell.index, cell.type, ROCK_ANIMATIONS[cell.type], cell.variant]);
   check(rows, 'render.rocks', source.grid.map(rock).filter(Boolean),
-    render?.grid.map(drawn => [drawn.index, drawn.kind, drawn.animation, drawn.frame]));
+    render?.grid.filter(drawn => drawn.kind !== 7).map(drawn => [drawn.index, drawn.kind, drawn.animation, drawn.frame]));
+  // Pit Render draws `pit` frame variant (the autotile frame 5684c0 stores).
+  check(rows, 'render.pits', source.grid.filter(cell => cell.type === 7).map(cell => [cell.index, 'pit', cell.variant]),
+    render?.grid.filter(drawn => drawn.kind === 7).map(drawn => [drawn.index, drawn.animation, drawn.frame]));
   for (const [field, expected, observed] of spec.roomFields?.(source, actual, phase) ?? []) check(rows, field, expected, observed);
   const selected = npcs.filter(actor => spec.matches(actor.type, actor.variant));
   for (const native of selected) {
@@ -153,7 +160,7 @@ export function loadManifest(directory, side) {
   return JSON.parse(gunzipSync(readFileSync(resolve(directory, side, 'manifest.json.gz'))));
 }
 
-export const MARKERS = ['admission', 'damage', 'death', 'retirement', 'clear', 'shape', 'bossRoom'];
+export const MARKERS = ['admission', 'damage', 'death', 'retirement', 'clear', 'shape', 'bossRoom', 'roomType'];
 
 /** Lifecycle markers each game reaches on its own over a whole case. */
 export function markers(directory, spec) {
@@ -174,6 +181,9 @@ export function markers(directory, spec) {
       // The spec's authored shape plus the one-cell wall border.
       const grid = side === 'original' ? [row.room.gridWidth, row.room.gridHeight] : row.room.grid && [row.room.grid.width, row.room.grid.height];
       seen.shape ||= Boolean(spec.shape && grid && grid[0] === spec.shape[0] + 2 && grid[1] === spec.shape[1] + 2);
+      // Room specs: the player stands in a room of the spec's authored type.
+      seen.roomType ||= spec.roomType !== undefined
+        && (side === 'original' ? row.room.type : row.room.descriptor?.template?.type) === spec.roomType;
       // Boss routes: the player stands in a type-5 boss room.
       seen.bossRoom ||= (side === 'original' ? row.room.type : row.room.descriptor?.template?.type) === 5;
       seen.admission ||= actors.length > 0;

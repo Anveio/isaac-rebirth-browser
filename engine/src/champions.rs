@@ -21,6 +21,29 @@ pub struct Champion {
 const SHIFTS: [u32; 3] = [1, 5, 16];
 const CHAMPION_BELT: usize = 208;
 
+/// Static champion Colors at 0x8ec700 (initializer 0x40aa42..0x40ac23):
+/// tint RGBA and offset RGB; colorize is zero for every entry.
+pub(crate) fn color(index: u32) -> crate::sprite_color::Color {
+    use crate::sprite_color::Color;
+    const OFFSET: f32 = crate::sprite_color::OFFSET_200;
+    match index {
+        0 => Color::tinted([1.0, 0.1, 0.1, 1.0], 0.0),
+        1 => Color::tinted([0.6, 0.6, 0.0, 1.0], 0.0),
+        2 => Color::tinted([0.1, 0.8, 0.2, 1.0], 0.0),
+        3 => Color::tinted([1.0, 0.6, 0.2, 1.0], 0.0),
+        4 => Color::tinted([0.2, 0.2, 1.0, 1.0], 0.0),
+        5 => Color::tinted([0.0, 0.15, 0.15, 1.0], 0.0),
+        6 => Color::tinted([1.0, 1.0, 1.0, 1.0], OFFSET),
+        7 => Color::tinted([0.5, 0.5, 0.5, 1.0], 0.0),
+        8 => Color::tinted([1.0, 1.0, 1.0, 0.3], OFFSET),
+        9 => Color::tinted([0.0, 0.0, 0.0, 1.0], 0.0),
+        10 => Color::tinted([1.0, 0.0, 1.0, 1.0], 0.0),
+        11 => Color::tinted([0.75, 0.0, 1.0, 1.0], 0.0),
+        12 => Color::tinted([0.5, 0.0, 0.0, 1.0], 0.0),
+        _ => Color::tinted([0.5, 0.5, 1.0, 1.0], 0.0),
+    }
+}
+
 pub(crate) struct Roll<'a> {
     pub stage: u32,
     pub player_items: Option<&'a PlayerItems>,
@@ -106,5 +129,7 @@ pub(crate) fn roll(npc: &mut Npc, shared: &mut Mt19937, context: &Roll) -> Resul
     };
     npc.hp = npc.max_hp;
     npc.champion = Some(champion);
+    // Champion tail 47f7b2 calls ResetColor with the rolled colour.
+    npc.sprite_color = crate::sprite_color::SpriteColor::reset(npc.base_color());
     Ok(true)
 }
