@@ -244,8 +244,9 @@ and the production `engine.wasm` from a context that
 [Dockerfile.dockerignore](../antithesis/Dockerfile.dockerignore) limits to the
 engine build's inputs; the entrypoint signals `setup_complete` and
 Test Composer runs the [drivers](../antithesis/test/v1/rebirth-engine) with
-`--entropy antithesis`: the kernel units, and one whole-engine game per
-invocation checked against the shipped WASM. Under Antithesis, must-hit
+`--entropy antithesis`: every registered unit but `game` (the driver lists them
+from `rebirth-dst --list`, so new units join without a driver change), and one
+whole-engine game per invocation checked against the shipped WASM. Under Antithesis, must-hit
 properties are judged across the whole exploration, so a single driver
 invocation never fails for leaving some unmet. `--build-arg INSTRUMENT=1` adds
 Antithesis coverage instrumentation and needs the platform's `libvoidstar.so`
