@@ -33,6 +33,11 @@ const MONSTRO_FAMILIAR_ITEMS: &[usize] = &[1, 4, 229];
 const MONSTRO_GRANT_ITEMS: &[usize] = &[1, 4, 229];
 const MONSTRO_KIND1_ITEMS: &[usize] = &[1, 4, 229];
 const MONSTRO_CALLER_ITEMS: &[usize] = &[1, 4, 229];
+// Independent current getter/caller histories admit actual queued passive4.
+// Its late Add has not changed current stats or selected229 costume yet.
+const MONSTRO_KIND1_QUEUED_ITEMS: &[usize] = &[4];
+const MONSTRO_CALLER_QUEUED_ITEMS: &[usize] = &[4];
+
 
 // Independently closed cache, Familiar and actual grant footprints. Equal
 // sets do not transfer getter or controller admission.
@@ -310,41 +315,44 @@ impl<'a> ItemInputs<'a> {
     ///Independent511F10 footprint.229 is neutral for the selected callbacks;
     ///FireDelay separately consumes the actual retained C08=7 multiplier.
     pub(crate) fn admits_monstro_cache_context(self) -> bool {
-        self.admits_monstro_readset(MONSTRO_CACHE_ITEMS, false)
+        self.admits_monstro_readset(MONSTRO_CACHE_ITEMS)
     }
 
     ///Independent strict511F10 path requests the same68 zero familiars.
     pub(crate) fn admits_monstro_zero_familiar_requests(self) -> bool {
-        self.admits_monstro_readset(MONSTRO_FAMILIAR_ITEMS, false)
+        self.admits_monstro_readset(MONSTRO_FAMILIAR_ITEMS)
     }
 
     ///Only actualAdd229 may preserve an existing auxiliary owner. Unknown
     ///restore histories remain None regardless of the current item counts.
     pub(crate) fn admits_monstro_grant_context(self) -> bool {
-        self.admits_monstro_readset(MONSTRO_GRANT_ITEMS, false)
+        self.admits_monstro_readset(MONSTRO_GRANT_ITEMS)
     }
 
     ///Separate50D090(kind1) path: Have229 transforms the actual initial0
     ///variant to BloodTear1. This grants no controller or cache capability.
     pub(crate) fn admits_monstro_kind1_context(self) -> bool {
-        self.admits_monstro_readset(MONSTRO_KIND1_ITEMS, true)
+        self.admits_monstro_readset(MONSTRO_KIND1_ITEMS)
+            && self.owner.queued_id.is_none_or(|id| {
+                MONSTRO_KIND1_QUEUED_ITEMS.contains(&(id as usize))
+            })
     }
 
     ///Separate519FC0 C08=7 caller footprint. Has149/55/87/153/2/245
     ///are false; cache and kind1 admission do not grant this controller.
     pub(crate) fn admits_monstro_caller(self) -> bool {
-        self.admits_monstro_readset(MONSTRO_CALLER_ITEMS, true)
+        self.admits_monstro_readset(MONSTRO_CALLER_ITEMS)
+            && self.owner.queued_id.is_none_or(|id| {
+                MONSTRO_CALLER_QUEUED_ITEMS.contains(&(id as usize))
+            })
     }
 
-    fn admits_monstro_readset(self, supported: &[usize], empty_queue: bool) -> bool {
+    fn admits_monstro_readset(self, supported: &[usize]) -> bool {
         self.admits_permanent_readset(229, supported)
-            && if empty_queue {
-                self.owner.queued_id.is_none()
-            } else {
-                self.owner
-                    .queued_id
-                    .is_none_or(|id| supported.contains(&(id as usize)))
-            }
+            && self
+                .owner
+                .queued_id
+                .is_none_or(|id| supported.contains(&(id as usize)))
     }
 
     ///Independent511F10 footprint for positive168 with selected1/2/4,
