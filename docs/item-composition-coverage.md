@@ -1,7 +1,7 @@
 # Item composition coverage
 
 This map separates current source owners, declared public cases and observed
-functional results. Snapshot main `918303b6` includes ordinary Player Brimstone299,
+functional results. The earlier `918303b6` snapshot below includes ordinary Player Brimstone299,
 FireDelay ownership304, Damage ownership318, optional regular Tear variant298,
 per-field comparer311, standalone Ludovico Tear307 and the Native recorder
 storage fix332. The final C421 artifact fixes the controlled
@@ -9,6 +9,35 @@ saved-position rewind and matches motion across three retained routes; its
 four-case comparison still fails on contacts, identities and missing owners.
 Transport, source review and local replay consistency do not establish Original
 functional parity.
+
+Current main `298738b4` also includes ordinary Dr. Fetus343/356, controlled
+Technology355, mixed52+4 capabilities367, Soy330 stats and118 Mouth-history368,
+and the exercised353/369 observer/capture tools. These merged source slices do
+not imply a whole-current-main product qualification. The private df133 / WASM15f
+producer separately passes normal production42.980s, floor16.618s and strict405
+37,972,668/0 against21/4fa; Clippy remains pending capacity.
+
+All12 Dr/mixed/Soy public routes completed. Mixed52+4 observes all ordered grants,
+three mixed Bomb births per case and matching observed birth/retained properties;
+its17,056/1,558FAIL still includes raw322, first-stage Tear birth ownership,
+coverage and callback gaps. Soy has16/1/16/1 first-observed actor identities,
+not proven Init births. Both118routes now have one post330 Laser with
+birthGameUpdate213/damage.7/radius16/20bodyrows, while360 body-transform frontier
+rows per case and the additional render layer remain. Source-proved fullAdd
+52CF25 selected-override clearing is a separate unconsumed d9d successor.
+
+The first controlled-Technology Original pair is117,717/13,575FAIL across677
+Laser bodies, with all observed material properties and configured Line values
+matching. Unavailable LaserHP/maxHP owners (2,708 checks) are separate from NPC
+contact; the empty room supplies no contact evidence. ControlledDr354 remains
+unmerged: own1,066/40FAIL has one birth/cohort in each route, and the first actual
+Original41,683/3,258FAIL observes3Nativebirths/2cohorts against1portbirth/1cohort.
+Its82paired material body rows match. Native's same-pickup-frame birth keeps
+old10.5damage before lateAdd4; a later birth copies19.92235. This preserves the
+failed dense-prior-cache checks and the real missing-port-birth bug; the queued4
+source correction awaits its next artifact. Other3Original cases per controlled
+family and mixed/Soy Original remain unexecuted. Earlier failed reports below
+retain their own snapshots and are not regraded.
 
 | Ordered boundary | Current owner and scope | Observed evidence and remaining interaction |
 | --- | --- | --- |
@@ -23,7 +52,7 @@ functional parity.
 | Ordinary Player Brimstone | Merged299 uses canonical Laser/Impact storage, charge/live properties, Full/Fast, registered slots and retirement | Retained ordinary case22,111/1,030 FAIL has two births and61 Laser/Impact rows with matching observed geometry/phase/TTL/fade/Sprite/color. Two following-Full absence/slot witnesses do not observe Native Remove/Uninit events |
 | Standalone Ludovico Tear | Merged307 uses the existing Tear store/scheduler and a separately proved neutral329-only kind8 builder | Final C421 owned builds and 37,965,608 / 0 regular regression pass. The four-case comparison remains 134,364 / 20,813 FAIL, with 1,541 bodies (770 Full / 771 Fast). Three motion routes match 1,157 actual position, velocity, B28 and saved450 rows; the contact route still differs and has zero port FIFO/drain witnesses. Original 85,050 / 11,620 and intermediate 134,350 / 24,248 failures remain unchanged. Identity/RNG, strict contact and missing-owner gaps remain |
 | Controlled Brimstone | Merged312 selects actual7/1/1 and consumes307’s real Remove/physical448 capability | Four complete708 pairs retain349,856/30,892 FAIL; all2,188 stable Laser history rows match material fields. Historical prefix failures and missing callbacks remain |
-| Technology68 cache/grant | Merged319 cache/grant and348 independent cache/kind2/kind3 footprints | Current domains stay [1,4,68];027c resolves reviewed registration history without weakening raw regression |
+| Technology68 cache/grant | Merged319 cache/grant and348 independent cache/kind2/kind3 footprints | Cache/kind3 domains include independently proved329; ordinarykind2 remains [1,4,68].027c resolves reviewed registration history without weakening raw regression |
 | Ordinary Technology | Merged320/325 use canonical7/2/0 and a separate manager role | New027c four pairs82,351/5,731 FAIL;152 damage checks match, removing exactly76 prior failures. Old77cd grade stays unchanged |
 | Gimpy225 kill | Separate329 on77cd; old zero-pickup/death coverage stays failed | V2 four own routes observe225 grant, lethal Dip and one bounded100 failure transition; no atomic callback, success/proc or Original claim |
 
@@ -151,7 +180,7 @@ floor15.902s. The later07211886/26cb Dr.Fetus test producer passes production
 strict four-route405 comparison against027c passes37,972,668/0 with no excluded
 or additive paths and no command errors; these are scoped producer results.
 
-Dr.Fetus343 remains a separate Draft. All four declared public9fe7c730 routes
+In the historical26cb snapshot, Dr.Fetus343 was still a separate Draft. All four declared public9fe7c730 routes
 complete and observe real queued52/grant atcounter755, three shot births and
 retirements per case, and birth fuse30/fullUpdates0/damage10.5/ParentPlayer0.
 Each has two Bomb-source FIFO rows and one following-Full HP4 to-6.5 witness.
@@ -166,7 +195,7 @@ strict cross-game identity failures remain. The other three Native captures are
 pending at this snapshot. Source-only idle DA0 correction and controlled Technology68+329
 work establish no new gameplay acceptance.
 
-Soy330's four public routes complete on26cb with the unchanged3a35a3a8 bank and
+The historical Soy330 four-route result on26cb completes with the unchanged3a35a3a8 bank and
 resources/tokens; queue330897→grant981/pending0 is observed in all four. Regular
 [1,4] fire delay7→1 and damage6.6407833→1.3281567 accompany16 Tear births per
 case. The118+330 routes change fire delay30→6 and damage3.5→.7 but have zero
