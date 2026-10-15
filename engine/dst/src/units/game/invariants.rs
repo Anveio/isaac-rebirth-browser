@@ -90,6 +90,11 @@ pub fn outcome(state: &State, command: &Command, result: &Result<(), String>) {
             details()
         );
     }
+    props::sometimes!(
+        matches!(command, Command::Tick { count, .. } if *count == MAX_COMMAND_TICKS)
+            && result.is_ok(),
+        "game: a Tick of exactly the command budget is accepted"
+    );
     if result.is_err() {
         match expected {
             Some("tick budget") => props::sometimes!(true, "game: an over-budget Tick is rejected"),

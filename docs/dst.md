@@ -90,7 +90,10 @@ indexes each one's declared properties from source.
 The `game` driver ([driver.rs](../engine/dst/src/units/game/driver.rs)) only
 emits commands the browser bridge can send, plus adversarial variants of them
 (near misses of public keys, malformed seed text, out-of-range volumes,
-over-budget ticks, stale music callbacks, key repeats and releases). Each case
+over-budget ticks, stale music callbacks, key repeats and releases). A Tick of
+exactly the 36,000-step command budget is sent only while paused or in the
+menus: in play it would simulate ten minutes in one command, repeated by every
+replay and the interpreted WASM differential. Each case
 follows one persona (direct play, menu explorer or seeded run), sends
 browser-style host-timestamped frames (with jitter, hitches and rollbacks) or
 controlled steps, and steers by the published state. In a room it plays

@@ -251,7 +251,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | `contact` | mass contact responses against momentum, centre-of-mass and overlap oracles | 16 | 3 | 0 |
 | `pathfinder` | FindGridPath's flood against an independent node-weighted Dijkstra | 6 | 5 | 0 |
 | `item_pools` | ItemPool selection, depletion, fallbacks, routing and continuation | 21 | 6 | 3 |
-| `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 64 | 52 | 2 |
+| `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 64 | 53 | 2 |
 | `abi` | the exported C ABI transport the browser bridge drives | 15 | 3 | 0 |
 
 <details><summary>Every declared DST property</summary>
@@ -436,6 +436,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Always | item_pools: a serialized manager continues identically | [item_pools.rs](engine/dst/src/units/item_pools.rs) |
 | Always | game: exactly the documented invalid inputs are rejected | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: valid Tick commands always succeed | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Sometimes | game: a Tick of exactly the command budget is accepted | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: an over-budget Tick is rejected | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: an out-of-range host timestamp is rejected | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: a host timestamp on a batched Tick is rejected | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
