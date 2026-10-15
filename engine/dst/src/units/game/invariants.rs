@@ -2,6 +2,7 @@
 use crate::props;
 use rebirth_cleanroom::actors::ActorKind;
 use rebirth_cleanroom::input;
+use rebirth_cleanroom::motion::WorldVector;
 use rebirth_cleanroom::player_death;
 use rebirth_cleanroom::run_admission::{MAX_SAFE_TIMESTAMP_MS, PRESENTATION_INTERVAL_NS};
 use rebirth_cleanroom::traversal::TransitionPhase;
@@ -695,9 +696,12 @@ pub fn state(state: &State) {
         "game: player motion is finite and health is bounded",
         json!({ "player": player })
     );
-    // Grid collision keeps a body's circle off solid wall cells, so the centre
-    // of a colliding NPC, pickup or bomb never leaves the room interior
-    // (`Grid::clamp_room`), whatever its speed or family.
+    // Grid collision reflects a body's motion into solid cells, so the centre
+    // of a colliding NPC, pickup or bomb never moves out of the room interior
+    // (`Grid::clamp_room`), whatever its speed or family. The ground solver
+    // (443117) never moves a body at rest, so one born where the player
+    // stands in an open doorway (a bomb dropped there) rests on the door
+    // cell; the boundary walls and the space beyond them stay out of reach.
     if state.room_transition.is_none() {
         let grid = state
             .room
@@ -713,10 +717,14 @@ pub fn state(state: &State) {
             let pickups = pickups.map(|pickup| ("pickup", pickup.id, pickup.position));
             let bombs = state.bombs.iter();
             let bombs = bombs.map(|bomb| ("bomb", bomb.id, bomb.motion.position));
-            let escaped = npcs
-                .chain(pickups)
-                .chain(bombs)
-                .find(|(_, _, position)| grid.clamp_room(*position, 0.0) != *position);
+            let doorway = |position: WorldVector| {
+                grid.index(position)
+                    .and_then(|index| grid.descriptor().cells[index].entity.as_ref())
+                    .is_some_and(|entity| entity.kind == 16)
+            };
+            let escaped = npcs.chain(pickups).chain(bombs).find(|(_, _, position)| {
+                grid.clamp_room(*position, 0.0) != *position && !doorway(*position)
+            });
             props::always!(
                 escaped.is_none(),
                 "game: grid-colliding bodies stay inside the room's walls",
@@ -1003,7 +1011,6 @@ pub fn state(state: &State) {
 /// value (a normalized zero vector, say) spreads through every later
 /// contact, so every family's bodies are checked, new families included.
 fn unfinite_body(state: &State) -> Option<(&'static str, u32)> {
-    use rebirth_cleanroom::motion::WorldVector;
     let finite = |vectors: &[WorldVector], scalars: &[f64]| {
         vectors.iter().all(|vector| vector.is_finite())
             && scalars.iter().all(|value| value.is_finite())
