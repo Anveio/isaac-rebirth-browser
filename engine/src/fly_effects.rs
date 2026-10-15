@@ -93,6 +93,8 @@ fn base(id: u32, config: u32, seed: u32, position: WorldVector, game_update: u32
         blood_effect: None,
         creep_effect: None,
         fly_effect: None,
+        epic_fetus: None,
+        explosion_effect: None,
     }
 }
 

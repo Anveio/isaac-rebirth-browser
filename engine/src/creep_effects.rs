@@ -91,6 +91,8 @@ impl NpcEffectAdmission<'_> {
             full_updates: 0,
             poop_effect: None,
             blood_effect: None,
+            epic_fetus: None,
+            explosion_effect: None,
             creep_effect: Some(Controller {
                 counter: 0,
                 size: 1.0,

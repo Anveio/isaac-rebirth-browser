@@ -130,6 +130,9 @@ pub(crate) fn dispatch_player(
         ControllerChannel::ControlledFetus => {
             crate::controlled_fetus::dispatch_player(state, plan, input, phase, callback_aim)
         }
+        ControllerChannel::EpicFetus => {
+            crate::epic_fetus::dispatch_player(state, plan, input, phase, callback_aim)
+        }
         ControllerChannel::ControlledKnife => {
             controlled_knife(state, plan, input, phase, callback_aim)
         }
@@ -147,16 +150,6 @@ pub(crate) fn dispatch_player(
         }
         ControllerChannel::ControlledTechnology => {
             crate::controlled_technology::dispatch_player(state, plan, input, phase, callback_aim)
-        }
-        unsupported => {
-            let channel = match unsupported {
-                ControllerChannel::Unimplemented(_) => "unimplementedPrimary",
-                _ => unreachable!("implemented controller matched above"),
-            };
-            //One bounded first-attempt diagnostic persists for this run. This
-            //branch performs no admission, RNG, actor or discharge writes.
-            record_frontier(state, channel);
-            Ok(DispatchOutcome::Unadmitted)
         }
     }
 }
@@ -690,6 +683,7 @@ pub(crate) fn persists_across_room(actor: ActorRef, knives: &[Knife]) -> bool {
 
 pub(crate) fn reset_room_schedule(state: &mut State) {
     crate::bombs::reset_room_shots(state);
+    crate::epic_fetus::reset_room(state);
     //453EC0 Uninit/Remove the transient pool before rebuilding the retained
     //type8/subtype0 pool. Active/dead is not this source pool predicate.
     let transient: Vec<_> = state
@@ -732,6 +726,7 @@ pub(crate) fn admits_referenced_remove(state: &State, actor: ActorRef) -> Result
             .map(|tear| tear.controlled.is_some())
             .ok_or_else(|| "registered Tear handle is unresolved".into()),
         ActorKind::Bomb => crate::bombs::admits_referenced_remove(state, actor.id),
+        ActorKind::Effect => crate::epic_fetus::admits_referenced_remove(state, actor.id),
         _ => Ok(false),
     }
 }
@@ -759,6 +754,7 @@ pub(crate) fn remove_referenced_actor(state: &mut State, actor: ActorRef) -> Res
         }
         ActorKind::Tear => crate::controlled_tear::remove(state, actor.id)?,
         ActorKind::Bomb => crate::bombs::remove_referenced(state, actor.id)?,
+        ActorKind::Effect => crate::epic_fetus::remove_referenced(state, actor.id)?,
         _ => return Err("referenced attack actor has no admitted Remove callback".into()),
     }
     Ok(())
@@ -776,6 +772,7 @@ pub(crate) fn replace_c18(state: &mut State, actor: Option<ActorRef>) -> Result<
                 .iter()
                 .any(|tear| tear.id == actor.id && tear.controlled.is_some()),
             ActorKind::Bomb => crate::bombs::admits_referenced_remove(state, actor.id)?,
+            ActorKind::Effect => crate::epic_fetus::admits_referenced_remove(state, actor.id)?,
             _ => false,
         };
         if !admitted {
@@ -1214,6 +1211,13 @@ pub(crate) fn complete_primary_cleanup(
             Ok(true)
         }
         None if state.weapon_admission.c18_is_known_empty => Ok(true),
+        Some(actor)
+            if actor.kind == ActorKind::Effect
+                && crate::epic_fetus::admits_referenced_remove(state, actor.id)? =>
+        {
+            remove_referenced_actor(state, actor)?;
+            Ok(true)
+        }
         _ => {
             record_frontier(state, "weaponPrimaryCleanupActor");
             Ok(false)
