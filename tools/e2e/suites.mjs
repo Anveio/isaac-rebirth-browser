@@ -11,6 +11,7 @@
 //   entry   driver script, run under a virtual display
 //   args    default driver arguments (caller flags of the same name replace them)
 //   about   one line describing what the suite proves
+//   alias   id of the suite this one runs a subset of; excluded from full runs
 //   replay  flag that replays the suite's recorded scenarios.json
 //           (default --scenarios; paired-game suites replay case.json tapes;
 //           false when the driver has no replay input yet)
@@ -25,17 +26,18 @@ const helper = name => `tools/original/${name}`;
 const statePair = e2e('state-pair');
 // Multi-room routes from a scenario helper (see traversal.mjs).
 const traversal = e2e('traversal');
-// One state-pair suite per entity spec in tools/e2e/entities/: OS-random rooms
-// admitting the entity, plus the spec's contrived seed/door routes.
-const pass = (flag, values) => values.flatMap(value => [flag, String(value)]);
-const entitySuite = spec => suite(`entity-${spec.name}`, statePair, [
-  '--scenario-helper', helper(spec.boss ? 'boss-scenarios.py' : spec.shop ? 'shop-scenarios.py' : 'entity-scenarios.py'),
-  ...pass('--helper-arg', [...(spec.type === undefined ? [] : ['--type', spec.type, '--variant', spec.variant]),
-    ...(spec.shape ? ['--shape', spec.shape.join('x')] : []), '--count', spec.count,
-    ...spec.contrived.flatMap(route => ['--contrived', route])]),
-  '--comparator', 'tools/foundation/entity-state-pair.mjs', ...pass('--comparator-arg', ['--entity', spec.name]),
+// Every entity spec in tools/e2e/entities/ runs in the one `entities` suite:
+// entities-scenarios.py keeps each spec's own room selection and contrived
+// routes but shares OS-random discovery, and a room admitting several specs is
+// launched once and graded for each. `entity-<name>` is an alias that runs one
+// spec alone (the per-entity inner loop); aliases stay out of full runs.
+// An alias also names its spec to the comparator, which grades recordings made
+// before cases carried entity.specs.
+const entities = (only = []) => [
+  '--scenario-helper', helper('entities-scenarios.py'), ...only.flatMap(name => ['--helper-arg', '--only', '--helper-arg', name]),
+  '--comparator', 'tools/foundation/entity-state-pair.mjs', ...only.flatMap(name => ['--comparator-arg', '--entity', '--comparator-arg', name]),
   '--native-frame-timeout', '120',
-], spec.about);
+];
 
 export const SUITES = [
   suite('paired', paired, [], 'Title/menu, movement/fire, pause, bombs and combat rooms; all declared contrived + OS-random runs'),
@@ -75,6 +77,8 @@ export const SUITES = [
   suite('troll-bombs', e2e('troll-bombs'), ['--count', '2'], 'Troll/Megatroll conversion and lifetime'),
   suite('rock-blast', e2e('rock-blast'), ['--count', '2'], 'Ordinary rock destruction by bombs'),
   suite('items', e2e('items'), ['--count', '2'], 'Item pools and treasure-room pedestals'),
+  suite('item-composition', e2e('item-composition'), ['--count', '2'],
+    'Public Challenge resources, ordered pedestal grants, cache and weapon bodies/history across fixed phases and recorded OS cases'),
   suite('item-acquisition', e2e('items'), ['--acquisition', '--count', '2'], 'First collectible acquisition'),
   suite('stat-cache', e2e('items'), ['--stat-cache', '--count', '2'],
     'Player stat cache after acquiring Roid Rage and Speed Ball: stats, motion and tear velocity'),
@@ -102,7 +106,12 @@ export const SUITES = [
     'Initial run admission: menu confirmation clock anchor and Player control enable timing'),
   suite('audio', e2e('audio'), ['--count', '2'], 'SFX admission and Web Audio output'),
   suite('music', e2e('music'), ['--count', '2'], 'Music channels, fades and queued tracks'),
-  ...(await entitySpecs()).map(entitySuite),
+  suite('entities', statePair, entities(),
+    'Every authored entity, room-shape and boss spec in tools/e2e/entities/: admission, AI, damage, death and room state'),
+  ...(await entitySpecs()).map(spec => suite(`entity-${spec.name}`, statePair, entities([spec.name]), spec.about, { alias: 'entities' })),
 ];
+
+// Suites a full run, --list and the matrix cover (aliases run a subset of one).
+export const RUNNABLE = SUITES.filter(item => !item.alias);
 
 export const suiteById = new Map(SUITES.map(item => [item.id, item]));

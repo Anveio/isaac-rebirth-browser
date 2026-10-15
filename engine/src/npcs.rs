@@ -64,6 +64,9 @@ pub struct Npc {
     pub shooter: Option<crate::plain_npc::ShooterTimers>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub champion: Option<crate::champions::Champion>,
+    /// Sprite colour (+2d0) and its timed stack; the renderer draws it.
+    #[serde(default)]
+    pub sprite_color: crate::sprite_color::SpriteColor,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub gluttony: Option<crate::gluttony::GluttonyState>,
     /// NPCAI_Pathfinder (+7d8) for families that walk the grid.
@@ -422,6 +425,19 @@ pub fn admit_room_combat(state: &mut State) {
     }
 }
 
+/// Fresh5cecc0 reads signed current16ac+pending16b0 after factories. A
+/// nonpositive total sets descriptor3d; a positive total preserves its flag.
+/// This is separate from the doorway's immediate update/countdown10 tail.
+pub(crate) fn initialize_startup_clear(state: &mut State) {
+    state.room.combat_clear_countdown = 0;
+    if state.room.manager_counts.countable_total() <= 0 {
+        state.room.combat_clear = true;
+    }
+    if !state.room.combat_clear {
+        change_doors(state, false);
+    }
+}
+
 pub fn advance_room_clear(state: &mut State) {
     // Room5d1487 checks signed dc+e0 after the full manager/contact pass.
     // It is independent of HP, visible actor count and current boss_count2490.
@@ -528,6 +544,24 @@ pub(crate) fn direction(random: &mut Mt19937) -> WorldVector {
 }
 
 impl Npc {
+    /// ResetColor 47f430: a champion's table colour, otherwise plain white.
+    pub(crate) fn base_color(&self) -> crate::sprite_color::Color {
+        self.champion
+            .as_ref()
+            .map_or(crate::sprite_color::Color::WHITE, |champion| {
+                crate::champions::color(champion.color)
+            })
+    }
+    /// BaseUpdate after the damage drain: colour countdown, then hit flashes.
+    pub(crate) fn advance_sprite_color(
+        &mut self,
+        phase: crate::phase::Phase,
+        applied: &[crate::combat::AppliedDamage],
+    ) {
+        let base = self.base_color();
+        self.sprite_color.advance(phase, applied, base);
+    }
+
     /// Actual Entity+318 view for the supported typed NPC owners. Normal
     /// Fly/AttackFly/RoundWorm Init441c80 clears flags then47ed20 ORs4;
     /// concrete subclasses preserve their own later flag writes.
@@ -600,6 +634,7 @@ impl Npc {
             actor: String::new(),
             shooter: None,
             champion: None,
+            sprite_color: crate::sprite_color::SpriteColor::default(),
             flip_x: false,
             pathfinder: None,
             gluttony: None,

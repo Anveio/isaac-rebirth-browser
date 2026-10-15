@@ -115,17 +115,42 @@ impl<'a> ItemInputs<'a> {
                 })
     }
 
-    /// Independent scalar read sets in 511F10 for fresh Isaac: items 114,
-    /// 118 and 329 have no direct term in callbacks 2, 4, 1, 8 and 16.
-    /// Current C08 still changes FireDelay first. Config 118 requests all
-    /// callbacks; that request does not imply another scalar effect.
-    fn admits_selected_scalar_completion(self) -> bool {
+    fn admits_scalar_context(self) -> bool {
         self.owner.trinket_slots == [0, 0]
             && self
                 .owner
                 .queued_id
                 .is_none_or(|id| items::definition(id).is_some_and(|config| config.kind != 2))
             && self.owner.temporary_collectibles.is_empty()
+    }
+
+    /// Each callback composes its implemented effects with its proven neutral
+    /// read set. C08 remains an independent input to the ordered formulas.
+    /// Config 118's request for all callbacks adds no implicit scalar effect.
+    fn admits_scalar_stage(self, stage: CacheStage, effects: &[u32]) -> bool {
+        let neutral: &[u32] = match stage {
+            CacheStage::FireDelay => &[4, 114, 118, 329],
+            CacheStage::ShotSpeed | CacheStage::Damage => &[1, 114, 118, 329],
+            CacheStage::Range | CacheStage::MoveSpeed => &[1, 4, 114, 118, 329],
+            _ => return false,
+        };
+        self.admits_scalar_context()
+            && self
+                .owner
+                .owned_counts
+                .iter()
+                .enumerate()
+                .all(|(id, &count)| {
+                    count == 0
+                        || (count > 0
+                            && (effects.contains(&(id as u32)) || neutral.contains(&(id as u32))))
+                })
+    }
+
+    /// Auxiliary callbacks have their own narrower source proof. Scalar
+    /// effects admitted above do not expand Flight, Familiar, Luck or history.
+    fn admits_selected_auxiliary_callbacks(self) -> bool {
+        self.admits_scalar_context()
             && self
                 .owner
                 .owned_counts
@@ -136,22 +161,14 @@ impl<'a> ItemInputs<'a> {
                 })
     }
 
-    fn has_unmapped_owner(self, flag: u32, supported: &[u32]) -> bool {
-        self.owner
-            .owned_counts
-            .iter()
-            .enumerate()
-            .any(|(id, &count)| {
-                count != 0
-                    && !supported.contains(&(id as u32))
-                    && items::definition(id as u32)
-                        .is_some_and(|config| config.cache_flags & flag != 0)
-            })
-            || self.owner.temporary_collectibles.iter().any(|entry| {
-                !supported.contains(&entry.item_id)
-                    && items::definition(entry.item_id)
-                        .is_some_and(|config| config.cache_flags & flag != 0)
-            })
+    /// An independent strict 511F10 trace proves 68 ordered requests for zero
+    /// familiars with these inputs. Actual manager queries remain required.
+    pub(crate) fn admits_selected_zero_familiar_requests(self) -> bool {
+        self.admits_selected_auxiliary_callbacks()
+    }
+
+    pub(crate) fn admits_complete_selected_tail(self) -> bool {
+        self.admits_selected_auxiliary_callbacks() && self.owner.luck_inputs.is_some()
     }
 }
 
@@ -257,9 +274,7 @@ pub(crate) fn resolve_scalars(
             }
             _ => continue,
         };
-        if (source_player_type == Some(0) && inputs.admits_selected_scalar_completion())
-            || !inputs.has_unmapped_owner(flag, supported)
-        {
+        if source_player_type == Some(0) && inputs.admits_scalar_stage(stage, supported) {
             completed |= flag;
         }
     }
@@ -279,7 +294,45 @@ pub(crate) fn resolve_neutral_flight(
     transformation_counts: Option<[i32; 2]>,
 ) -> Option<(bool, u32)> {
     (source_player_type == Some(0)
-        && inputs.admits_selected_scalar_completion()
+        && inputs.admits_selected_auxiliary_callbacks()
         && transformation_counts == Some([0, 0]))
     .then_some((false, 5))
+}
+
+/// 513C80 computes a signed wrapping sum, then CVTSI2SS and ADDSS. Its
+/// auxiliary words and Game 10EAD8 are distinct inputs; absent history is unknown.
+pub(crate) fn resolve_luck(
+    inputs: ItemInputs<'_>,
+    source_player_type: Option<u32>,
+    source_run_flags: Option<u64>,
+) -> Result<Option<f32>, String> {
+    if inputs
+        .owner
+        .luck_inputs
+        .is_some_and(|auxiliary| !auxiliary.source_d58.is_finite())
+    {
+        return Err("Luck requires a finite actual D58 input".into());
+    }
+    let (Some(auxiliary), Some(run_flags)) = (inputs.owner.luck_inputs, source_run_flags) else {
+        return Ok(None);
+    };
+    if source_player_type != Some(0) || !inputs.admits_selected_auxiliary_callbacks() {
+        return Ok(None);
+    }
+    let sum = auxiliary
+        .source_13d0
+        .wrapping_sub(auxiliary.source_13cc)
+        .wrapping_add(auxiliary.source_d3c)
+        .wrapping_add(auxiliary.source_d40)
+        .wrapping_add(inputs.owned_count(253))
+        .wrapping_add(inputs.owned_count(46))
+        .wrapping_add(inputs.owned_count(343));
+    let mut luck = sum as f32 + auxiliary.source_d58;
+    if run_flags & 0x100 != 0 {
+        luck += 50.0_f32; // 513CFE/513D06, after the trinket and character branches.
+    }
+    if !luck.is_finite() {
+        return Err("Luck callback overflowed its source f32 output".into());
+    }
+    Ok(Some(luck))
 }

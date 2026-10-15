@@ -91,3 +91,28 @@ unchanged; a semantic successor retains every v5 action, resource and entropy
 record. The preexisting subtype1 child at329 still requires actual birth,
 survival, full curve movement and its own retirement; a fixed lifetime is not
 inferred from the parent conversion.
+
+The diagonal-second-pickup route successor adds the public down key to the
+existing second44-presentation release/movement leg. The actual version5
+original capture acquired114, whose physical pickup contact displaced the
+Player above the pedestal row; the later straight horizontal leg missed329.
+The new declaration uses two movement keys and retains every duration, resource,
+epoch, phase and recorded token. It requires a fresh actual329 queue/grant and
+all subsequent witnesses; the earlier missing329 failure remains unchanged.
+
+The route successor with full charge and an aim across the room retains the same four cases,
+recorded tokens, phases, epochs and authored resources. It aims the ordinary
+Knife opposite the pedestal approach, extends the charge to 160 presentations,
+and splits the same 44-presentation diagonal movement into 12 presentations
+with charge held and 32 with charge released. This releases nearer public
+contact while the copied child curve extends across the room.
+
+The preceding version 7 capture observed eight actual subtype1 children, all
+gone before the 329 grant. Starting from each child's first observed full-update state, source
+arithmetic using the current next-curve-point anchor reproduces 99 subsequent
+full-update positions, velocities and curve parameters across all eight children. Finite samples across the full initial lateral-offset interval
+support this new route's feasibility; they do not prove every float outcome or
+actual pickup timing. Original-first execution must still observe maximum
+charge, real queue/grants, a surviving preexisting child, controlled conversion,
+continuation and its own retirement. Every version 7 failure remains unchanged;
+a missing child in this successor remains a failure.

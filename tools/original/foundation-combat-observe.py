@@ -84,6 +84,8 @@ def observe(pid, context):
                     'spriteFlipX': bool(raw[0x2fc]), 'spriteFlipY': bool(raw[0x2fd]),
                     'spriteScale': pair(0x2c4),
                     'spriteTint': list(struct.unpack_from('<ffff', raw, 0x2d0)),
+                    # Whole sprite KColor +2d0: tint RGBA, colorize RGBA, offset RGB.
+                    'spriteColor': list(struct.unpack_from('<11f', raw, 0x2d0)),
                     'spriteOffsets': list(struct.unpack_from('<fff', raw, 0x2e0))}
                 definition = struct.unpack_from('<Q', raw, 0x40)[0]
                 text_pointer = u64(definition) if definition else 0
@@ -257,6 +259,19 @@ def observe(pid, context):
                     'collisionClass': struct.unpack_from('<I', raw, 0x3c)[0],
                     'position': [40 + index % width * 40, 120 + index // width * 40]})
             report['grid'] = cells
+            # FXLayers at Room+1730 (fxlayers.xml, 5489b0): entries (0x58) at
+            # +8/+10 each hold layers (0x14) at +10/+18 whose x/y (+8/+c) are
+            # the per-room RandomFloat*100 offsets drawn from the decoration seed.
+            fx = room + 0x1730
+            entries = []
+            begin, end = struct.unpack('<QQ', read(fx + 8, 16))
+            if (end - begin) % 0x58 or end - begin > 0x58 * 16: raise ValueError('Unexpected fx layer entries')
+            for entry in range(begin, end, 0x58):
+                lbegin, lend = struct.unpack('<QQ', read(entry + 0x10, 16))
+                if (lend - lbegin) % 0x14 or lend - lbegin > 0x14 * 16: raise ValueError('Unexpected fx layers')
+                entries.append([list(struct.unpack_from('<ff', read(layer + 8, 8))) for layer in range(lbegin, lend, 0x14)])
+            report['fxLayers'] = entries
+            report['fxRayGroup'] = struct.unpack('<i', read(fx + 0x38, 4))[0]
             report['gridSelectors'] = list(struct.unpack('<' + 'I' * (width * height),
                 read(room + 0xe98, width * height * 4)))
             report['pathCosts'] = list(struct.unpack('<' + 'i' * 448,

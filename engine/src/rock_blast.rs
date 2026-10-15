@@ -1,8 +1,9 @@
 //! Ordinary Basement Rock destruction reached through a real bomb blast.
 //!
 //! The callback changes collision, the room's destruction marker and linked
-//! authored frames. Modifier drops, tinted rocks and emitted effect actors have
-//! separate source callbacks; no guessed loot or placeholder random draws run.
+//! authored frames. Tinted rocks (kind4) also run their reward 56d440.
+//! Rubble/worm effect actors and alt-rock drops remain unadmitted; no guessed
+//! loot or placeholder random draws run.
 use crate::{grid::Grid, motion::WorldVector, State};
 
 /// Room.Update ages destruction markers before actor dispatch every third full
@@ -115,8 +116,17 @@ pub fn destroy(state: &mut State, origin: WorldVector, radius: f32) -> Result<()
             });
             continue;
         }
-        if rock.kind != 2 || rock.state != 1 {
+        if !matches!(rock.kind, 2 | 4) || rock.state != 1 {
             continue;
+        }
+        let tinted = rock.kind == 4;
+        // Destroy56c670: the rock-local RNG35 on the spawn seed. Its state1
+        // pre-step always draws Int(50); a zero rolls rare Worm effects
+        // (1000.63, shared MT), unadmitted like the rubble particles.
+        let mut local = crate::items::Rng::new(rock.spawn_seed, [5, 9, 7]);
+        if local.bounded(50) == 0 {
+            let worms = local.bounded(5);
+            local.bounded(worms + 1);
         }
         let variant = rock.variant;
         let width = usize::from(grid.width);
@@ -174,6 +184,122 @@ pub fn destroy(state: &mut State, origin: WorldVector, radius: f32) -> Result<()
                 pitch: 1.0,
             },
         );
+        if tinted {
+            tinted_reward(state, index, &mut local)?;
+        }
     }
     Ok(())
+}
+
+/// Tinted rock reward 56d440 for a fresh character without trinkets: one or
+/// two soul hearts, keys or bombs, or a single (locked) chest. Seeds come from
+/// the rock-local RNG; velocities from the shared Chest scatter.
+fn tinted_reward(
+    state: &mut State,
+    index: usize,
+    local: &mut crate::items::Rng,
+) -> Result<(), String> {
+    let grid = Grid::new(state.room.grid.clone().ok_or("tinted reward requires room grid")?)?;
+    let position = grid.position(index).ok_or("tinted rock outside its grid")?;
+    // Int(10)==0 offers Small Rock only once Persistent+0x3c unlocks it; a
+    // fresh profile has not destroyed the tinted rocks that unlock it.
+    local.bounded(10);
+    let mut count = 2;
+    if local.bounded(3) != 0 {
+        // Its velocity only feeds trinket bonuses, which need trinkets.
+        crate::chests::scatter(position, &grid, &mut state.boot_lifecycle.shared);
+    }
+    let mut roll = 0;
+    while roll < count {
+        let choice = local.uniform();
+        let velocity = crate::chests::scatter(position, &grid, &mut state.boot_lifecycle.shared);
+        let (variant, subtype, last) = if choice < 0.6 {
+            (10, Some(3), false)
+        } else if choice < 0.7 {
+            (30, None, false)
+        } else if roll == 0 && choice < 0.71 {
+            (50, None, true)
+        } else if roll == 0 && choice < 0.9 {
+            (60, Some(1), true)
+        } else {
+            (40, None, false)
+        };
+        let seed = local.raw();
+        admit_reward(state, variant, subtype, seed, position, velocity)?;
+        if last {
+            return Ok(());
+        }
+        if variant == 10 && local.bounded(2) == 0 {
+            count -= 1;
+        }
+        roll += 1;
+    }
+    Ok(())
+}
+
+/// Spawns one tinted-rock child immediately, as the source does before the
+/// next local draw.
+fn admit_reward(
+    state: &mut State,
+    variant: u32,
+    subtype: Option<u32>,
+    seed: u32,
+    position: WorldVector,
+    velocity: WorldVector,
+) -> Result<(), String> {
+    let id = state.next_pickup;
+    let mut pickup = match variant {
+        50 => {
+            let selector = crate::room_spawns::SpawnSelector {
+                group_index: 0,
+                grid_index: 0,
+                category: crate::room_spawns::SpawnCategory::Entity,
+                entity_type: 5,
+                variant: 50,
+                subtype: 0,
+                position,
+                group_seed: seed,
+                spawn_seed: seed,
+            };
+            // Pickup::Init's Random20/Random50 replacements stay unsupported.
+            let Some(chest) = crate::chests::from_selector(id, &selector, true)? else {
+                return Err("tinted rock chest replacement is unsupported".into());
+            };
+            chest
+        }
+        60 => {
+            // Init4ffef2 forces the closed subtype1; Locked Chest opening
+            // needs a key and is not admitted.
+            let mut chest = crate::pickups::Pickup::spawn(id, 60, 1, position, true)?;
+            chest.spawn_seed = seed;
+            chest.chest = Some(crate::chests::Chest {
+                rng: crate::items::Rng::new(seed, [4, 3, 17]),
+                grid_collision_class: 5,
+                entity_collision_class: 0,
+                price: 0,
+                cooldown: 0,
+                loot_births: Vec::new(),
+            });
+            chest
+        }
+        _ => {
+            let subtype = match subtype {
+                Some(subtype) => subtype,
+                None => crate::pickups::regular_subtype(variant, 0, seed)?,
+            };
+            let mut pickup = crate::pickups::Pickup::spawn(id, variant, subtype, position, true)?;
+            pickup.initialize_spawn_seed(seed)?;
+            pickup
+        }
+    };
+    pickup.velocity = velocity;
+    pickup.birth_game_update = state.game_update_count;
+    state.next_pickup = id.checked_add(1).ok_or("tinted reward identity exhausted")?;
+    state.room.pickups.push(pickup);
+    let actor = crate::actors::ActorRef {
+        kind: crate::actors::ActorKind::Pickup,
+        id,
+    };
+    state.room.authored_actor_order.push(actor);
+    state.actor_scheduler.admit(actor)
 }

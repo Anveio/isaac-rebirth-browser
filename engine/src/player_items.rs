@@ -22,6 +22,18 @@ pub struct PickupPresentation {
     pub animation_playing: bool,
 }
 
+/// Actual independent inputs of Luck at 513C80. The fresh 519350 constructor
+/// stores zero; unsupported producers and restore histories remain absent.
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct LuckInputs {
+    pub source_d3c: i32,
+    pub source_d40: i32,
+    pub source_d58: f32,
+    pub source_13cc: i32,
+    pub source_13d0: i32,
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct PlayerItems {
@@ -34,6 +46,8 @@ pub struct PlayerItems {
     pub entity_spawn_seed: u32,
     pub owned_counts: Vec<i32>,
     pub temporary_collectibles: Vec<TemporaryCollectible>,
+    #[serde(default)]
+    pub luck_inputs: Option<LuckInputs>,
     ///Actual held trinket slots E14/E18; normal fresh constructor initializes0.
     pub trinket_slots: [u32; 2],
     pub queued_id: Option<u32>,
@@ -87,6 +101,14 @@ impl PlayerItems {
             entity_spawn_seed,
             owned_counts: vec![0; 347],
             temporary_collectibles: Vec::new(),
+            // 519680/51968A/519524 and the 28-word loop at 519798.
+            luck_inputs: Some(LuckInputs {
+                source_d3c: 0,
+                source_d40: 0,
+                source_d58: 0.0,
+                source_13cc: 0,
+                source_13d0: 0,
+            }),
             trinket_slots: [0; 2],
             queued_id: None,
             queued_charge: 0,
@@ -120,6 +142,9 @@ impl PlayerItems {
     /// record. Costume admission and cache evaluation remain caller-owned.
     pub(crate) fn add_temporary_collectible(&mut self, item_id: u32) -> Result<(), String> {
         let config = items::definition(item_id).ok_or("temporary collectible ItemConfig absent")?;
+        // TEMP producers and expiry do not prove the retained modifier inputs.
+        // Removing a later record never restores this history.
+        self.luck_inputs = None;
         if let Some(effect) = self
             .temporary_collectibles
             .iter_mut()
@@ -515,6 +540,11 @@ pub(crate) fn add_collectible(
         .as_mut()
         .expect("checked Player item owner");
     owner.owned_counts[id as usize] = owner.owned_counts[id as usize].wrapping_add(1);
+    if ![1, 4, 114, 118, 329].contains(&id) {
+        // These admitted grant paths preserve the fresh auxiliary words.
+        // Nonzero setters and restore need their own producer binding.
+        owner.luck_inputs = None;
+    }
     if [81, 133, 134, 145, 187, 212].contains(&id) {
         // The 52CC90 producer needs its actual 576BB0 guard. Current item
         // counts cannot reconstruct these transformation history counters.
@@ -571,6 +601,5 @@ pub(crate) fn add_collectible(
     // AddCollectible52d173 calls cache evaluation before52ee40 clears queue
     // fields. The Familiar callback owns its actual local/shared consumers.
     crate::player_stats::evaluate_cache(state)?;
-    crate::familiars::evaluate_cache(state)?;
     Ok(())
 }

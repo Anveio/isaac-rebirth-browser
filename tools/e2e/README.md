@@ -144,19 +144,60 @@ for checking your own change.
    expected values. Keep comparing after the first mismatch so one run shows
    the whole divergence.
 
+## Public item composition
+
+`item-composition` gives both games the same declared raw Challenge XML and,
+when present, full Special room catalogue. It enters Challenge 1 through real
+menu keys and collects authored pedestals through normal movement. Native run
+seeds, caches, actors and RNG observations are comparison evidence only.
+
+```sh
+npm run test:e2e -- item-composition --keep-evidence
+npm run test:e2e -- item-composition --scenarios references/isaac/foundation/item-composition/history/scenarios.json --keep-evidence
+```
+
+The default case generator records every OS token before projecting cases.
+`--scenarios` replays the recorded bank without calling the generator or drawing
+entropy. Resource paths in a bank resolve relative to that bank. `--prepare-only`
+writes launch inputs without running either game and reports `prepared-not-executed`;
+it is not parity evidence. For preparation without a build or display, use
+`node tools/e2e/item-composition.mjs --prepare-only --scenarios BANK`.
+
+The capture retains every admission and gameplay presentation, actual public
+commands, complete backend trace, committed browser journal, native journal and
+declared PNG. A partial prefix cannot pass as a complete capture. The separate
+readback checks transport/resources; the functional comparator retains each
+mismatch and required missing history witness. Recorded histories do not claim
+that their required contact, cleanup or actor stages succeeded. See the
+[source coverage and remaining requirements](../../docs/item-composition-coverage.md).
+The checked-in replay keeps both fixed phases and both previously recorded OS
+projections; none is filtered by its outcome. The first fixed phase has actual
+native and a320 browser captures with functional differences and missing child
+coverage. That result does not qualify every recorded case or the current main
+runtime. A coherent current producer must admit the declared whole Special
+catalogue, ordinary Brimstone/Knife and controlled Knife. Missing support fails
+explicitly; private grants and alternate WASM are never substituted.
+Full-frame pixels remain a separate diagnostic.
+
 ## Adding an entity
 
 Most room entities need no new driver. Add a spec in
-[`entities/`](entities/) and it becomes the `entity-<name>` suite:
+[`entities/`](entities/) and the `entities` suite grades it. `entity-<name>` runs
+that spec alone, which is the per-entity inner loop:
 
 ```js
 export default { type: 12, variant: 0, about: 'Horf rooms: ...', count: 2, required: ['admission'] };
 ```
 
-[`entity-scenarios.py`](../original/entity-scenarios.py) finds OS-random rooms
-next to the start room that admit the entity. Both games then walk in and shoot
-around. [`entity-state-pair.mjs`](../foundation/entity-state-pair.mjs) compares
-the shared NPC, room, door and projectile fields exactly. The whole workflow is
+[`entities-scenarios.py`](../original/entities-scenarios.py) gives every spec its
+own contrived routes and OS-random rooms next to the start room that admit it
+(the rules in [`entity-scenarios.py`](../original/entity-scenarios.py), or the
+boss routes of [`boss-scenarios.py`](../original/boss-scenarios.py)). Specs
+share one seed stream, and a room that admits several of them is launched once
+and graded for each. Both games then walk in and shoot around. [`entity-state-pair.mjs`](../foundation/entity-state-pair.mjs) compares
+the shared NPC, room, door and projectile fields exactly, spec by spec. A spec
+whose rooms cannot be found fails the suite without hiding the others. The
+whole workflow is
 in [docs/content-pipeline.md](../../docs/content-pipeline.md).
 
 ## Large native captures

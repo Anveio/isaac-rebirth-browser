@@ -141,6 +141,7 @@ export interface Pickup {
   presentedPosition: {x: number; y: number}; anchorPosition: {x: number; y: number};
   velocity: {x: number; y: number}; configuredFriction: number; currentFriction: number; collisionMass: number;
 }
+export interface SpriteColorValue { tint: number[]; colorize: number[]; offset: number[]; }
 export interface RunIntroduction { age: number; active: boolean; title: string; stage: boolean; }
 export interface BossBar { fill: number | null; flash: number; maximum: number; }
 export interface PauseMenu {
@@ -179,6 +180,7 @@ export interface Floor {
 export interface Room {
   left: number; right: number; top: number; bottom: number; appearance: RoomAppearance;
   descriptor: RoomDescriptor | null;
+  initializationGameUpdate: number | null; loaded: boolean;
   pathCosts: number[] | null;
   spawns: {tintedRockIndex: number; finalSpawnState: number; selectors: {groupIndex: number; gridIndex: number; category: "entity" | "grid"; type: number; variant: number; subtype: number; position: {x: number; y: number}; groupSeed: number; spawnSeed: number}[]} | null;
   pickups: Pickup[];
@@ -196,6 +198,7 @@ export interface Room {
       animation: string; animationClock: number; animationPlaying: boolean; tint: number[]; offsets: number[]} | null;
     actor?: string;
     champion?: {color: number; scale: number; speed: number; timer: number | null};
+    spriteColor: {current: SpriteColorValue; stack: {priority: number; color: SpriteColorValue; duration: number; remaining: number}[]};
     shooter?: {cooldown: number; delay: number};
     flipX?: boolean;
     dip: {entityFlags: number; birthGameUpdate: number; currentFriction: number; flipX: boolean;
@@ -261,7 +264,8 @@ export interface State {
     pickupPresentation: {itemId: number; animationFrame: number; animationPlaying: boolean} | null;
     collectionDelay: number; activeId: number; activeCharge: number; activeSubordinateCharge: number; saveWordD88: number;
     activeStateD80: number; activeStateD84: number; reserveCharge: number; activeFlag3076: boolean;
-    unevaluatedCacheFlags: number} | null;
+    unevaluatedCacheFlags: number;
+    luckInputs: {sourceD3c: number; sourceD40: number; sourceD58: number; source13cc: number; source13d0: number} | null} | null;
   informationAnimation: {state: number; delay: number; currentActor: string | null;
     currentClip: string | null; spritesheet: string | null; definitionLoaded: boolean; frame: number; playing: boolean};
   savedRunSummary: SavedRunSummary | null;
@@ -278,7 +282,8 @@ export interface State {
   roomDisplayFlags: number[]; revealedSecretConnections: [number, number][];
   persistedRooms: Record<string, Room>;
   roomTransition: {fromRoom: number; targetRoom: number; fromSlot: number; targetSlot: number; phase: "out" | "in" | "bossScene" | "bossCleanup"; fullUpdates: number; bossScene: {presentationIndex: number; animationFrame: number; animationPlaying: boolean} | null} | null;
-  playerStats: {shotSpeed: number; damage: number; tearHeight: number; tearFallingSpeed: number; tearFallingAcceleration: number; moveSpeed: number};
+  sourceCacheRunFlags: number | null;
+  playerStats: {shotSpeed: number; damage: number; tearHeight: number; tearFallingSpeed: number; tearFallingAcceleration: number; moveSpeed: number; luck: number | null};
   player: Player; room: Room; stageEffects: StageEffects; inventory: { coins: number; bombs: number; keys: number };
   publicActions: { menuConfirm: boolean; menuBack: boolean; activePressed: boolean; activeTriggered: boolean; pocketPressed: boolean; pocketTriggered: boolean; enterWasDown: boolean; spaceWasDown: boolean; escapeWasDown: boolean; pocketWasDown: boolean };
   playerAnimation: { current: "Trapdoor" | "Appear" | "Death" | "UseItem" | "Hit" | null; frame: number; playing: boolean; guard: boolean };
@@ -301,11 +306,13 @@ export interface State {
   runIntroduction: RunIntroduction; bossBar: BossBar; pauseMenu: PauseMenu;
   playerDeath: { lastDamageFlags: number; gameOver: { state: number; damageFlags: number; diaryFrame: number; diaryPlaying: boolean } | null; systemPending: "restart" | "exit" | null };
 }
-export interface ResourceInputs { challengesXml: string; }
+export interface ResourceInputs { challengesXml: string; specialRooms?: number[]; }
 export type Command = { type: "key"; code: string; down: boolean } | { type: "text"; text: string } | { type: "tick"; count: number; timestampMillis?: number } | { type: "audioVolume"; sfx_volume: number } | { type: 'musicVolume'; volume: number } | MusicBackendCommand;
 interface Exports extends WebAssembly.Exports {
   memory: WebAssembly.Memory; abi_version: () => number; reset: (initialSeed: number, bootEpochSeed: number) => number; request_ptr: (length: number) => number;
   reset_with_resources: (initialSeed: number, bootEpochSeed: number) => number;
+  reset_with_boot_resources: (initialSeed: number, bootEpochSeed: number) => number;
+  boot_resource_ptr: (length: number) => number;
   command: () => number; snapshot_ptr: () => number; snapshot_len: () => number;
   error_ptr: () => number; error_len: () => number; public_keys_ptr: () => number; public_keys_len: () => number;
 }
@@ -350,14 +357,14 @@ export class Engine {
     let result: number;
     if (resources === undefined) result = this.wasm.reset(initialSeed, bootEpochSeed);
     else {
-      if (typeof this.wasm.reset_with_resources !== "function")
+      if (typeof this.wasm.reset_with_boot_resources !== "function" || typeof this.wasm.boot_resource_ptr !== "function")
         throw new Error("WASM resource ingress is stale; rebuild with npm run build:wasm");
       const bytes = new TextEncoder().encode(JSON.stringify(resources));
-      if (bytes.length > 65_536) throw new Error("Boot resource input exceeds 64 KiB");
-      const ptr = this.wasm.request_ptr(bytes.length);
+      if (bytes.length > 512 * 1024) throw new Error("Boot resource input exceeds 512 KiB");
+      const ptr = this.wasm.boot_resource_ptr(bytes.length);
       if (ptr === 0) throw new Error("WASM resource allocation failed");
       new Uint8Array(this.wasm.memory.buffer, ptr, bytes.length).set(bytes);
-      result = this.wasm.reset_with_resources(initialSeed, bootEpochSeed);
+      result = this.wasm.reset_with_boot_resources(initialSeed, bootEpochSeed);
     }
     if (result !== 0) throw new Error(this.read(this.wasm.error_ptr(), this.wasm.error_len()));
     return this.snapshot();
