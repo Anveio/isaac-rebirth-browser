@@ -81,8 +81,10 @@ def reference(state, ref):
     assert len(identities) == 1, 'Referenced actor must have one actual scheduler identity'
     if ref['kind'] == 'player':
         assert ref['id'] == 0
+        seed = state['playerItems']['entitySpawnSeed']
+        assert type(seed) is int and 0 <= seed <= 0xffffffff, 'Actual PlayerItems Entity+7D0 seed owner required'
         return {'kind': 1, 'variant': 0, 'subtype': 0, 'sequenceId': identities[0]['sequenceId'],
-                'spawnSeed': state['player'].get('spawnSeed')}
+                'spawnSeed': seed}
     arrays = {'knife': 'knives', 'laser': 'lasers', 'tear': 'tears', 'npc': None, 'effect': None}
     assert ref['kind'] in arrays, 'Attack/parent reference has an unbound real actor kind'
     actors = (state['room']['npcs'] if ref['kind'] == 'npc' else
@@ -652,8 +654,8 @@ for captured in sorted(all_captured, key=lambda row: row['presentation']):
                 parent = reference(state, actual['parent'])
                 check('actual Knife linked Parent null/ref', original['linkedParent'] is None, parent is None, t)
                 if original['linkedParent'] and parent:
-                    # Player birth seed is not currently a port field. Its typed
-                    # relation/sequence are still compared, never filled from native.
+                    # This group compares the typed Parent relation and sequence.
+                    # The complete actor-seed roster is a separate required audit.
                     parent_fields = ('kind', 'variant', 'subtype', 'sequenceId')
                     check('actual Knife Parent kind/variant/subtype/sequence',
                           tuple(original['linkedParent'][key] for key in parent_fields), tuple(parent[key] for key in parent_fields), t)
@@ -963,7 +965,7 @@ result = {'schema': 2, 'status': 'fail' if any(not item['passed'] for item in ch
           'coverage': dict(coverage), 'damageChains': list(damage_chains.values()), 'doorwayWitnesses': doorway_witnesses, 'laserLifetimes':list(laser_lifetimes.values()), 'renderWitnesses':render_witnesses,
           'sameGateDuplicateObservations': duplicate_observations, 'history': history, 'childLifetimes': child_lifetimes, 'chargeWitnesses': charge_witnesses,
           'backendAcceptanceStatus': 'incomplete',
-          'requiredBackendCoverageGaps': ['History requirements are graded by their explicit versioned raw witnesses; missing transient Remove flags remain failures even when later manager absence is observed.', 'Body comparison covers ordinary7/1/0 with linked1000/50/1 and actual registered Knife/ParentKnife roles. Other Laser subtypes and general modifier domains require separate admitted comparisons; no whole-backend acceptance is implied.', 'Player birth seed has no port observable; parent kind/variant/subtype/source-sequence still compared. Native regular-Tear physical-position phase binding remains unclosed.'],
+          'requiredBackendCoverageGaps': ['History requirements are graded by their explicit versioned raw witnesses; missing transient Remove flags remain failures even when later manager absence is observed.', 'Body comparison covers ordinary7/1/0 with linked1000/50/1 and actual registered Knife/ParentKnife roles. Other Laser subtypes and general modifier domains require separate admitted comparisons; no whole-backend acceptance is implied.', 'Player birth seed uses the actual PlayerItems.entitySpawnSeed owner; missing or unknown fields remain failures. Native regular-Tear physical-position phase binding remains unclosed.'],
           'scope': 'Public resource game-level composition. Actual declared fields and complete active attack identities/slots. New body correspondence uses each own actual registered C18, no crossside fitted IDs/positions; all independent identity/seed mismatches remain failures. Case PASS cannot accept the whole backend while its separate required gaps remain. Every mismatch/missing field retained; syntax checks are not game acceptance.',
           'sourceSha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest()}
 payload = (json.dumps(result, separators=(',', ':')) + '\n').encode()
