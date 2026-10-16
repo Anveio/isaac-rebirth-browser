@@ -88,6 +88,21 @@ try {
     }
     return { ...declaration, fixture };
   });
+  if (cases.some(item => item.requires?.spoonBender3Functional !== undefined)) {
+    for (const item of cases.filter(value => value.requires?.spoonBender3Functional !== undefined)) {
+      const spoon = item.requires.spoonBender3Functional;
+      const contract = item.requires.sourceExpectedActorContract;
+      assert.equal(spoon.schema, 'ordinary-spoon-bender3-registered-homing-v1');
+      assert.equal(spoon.marker, 'spoonBender3Tears');
+      assert.deepEqual([contract.primaryC08, contract.family, contract.variant, contract.subtype,
+        contract.bornAttackFlags, contract.controlledBy329], [1, 2, 0, 0, '4', false]);
+      assert.ok(item.requires.compositionSourceFields.includes('spoonBender3Tears'));
+      assert.ok(item.requires.actorStages.every(stage => Array.isArray(stage.requiredWitnesses)
+        && stage.requiredWitnesses.every(value => typeof value === 'string')));
+    }
+    sourceFiles.push('tools/foundation/composition-spoon-bender3.py');
+    report.sourceBefore = await sourcePins();
+  }
   const scenarios = join(output, 'scenarios.json');
   await save(scenarios, { ...bank, cases });
   report.recordedBank = { path: bankPath, sha256: hash(bankBytes), replayPath: scenarios };

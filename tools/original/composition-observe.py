@@ -17,7 +17,7 @@ ROOT = Path(__file__).resolve().parents[2]
 EXPECTED_SHA = os.environ.get('ISAAC_ORIGINAL_SHA')
 if not isinstance(EXPECTED_SHA, str) or re.fullmatch(r'[0-9a-f]{64}', EXPECTED_SHA) is None:
     raise ValueError('ISAAC_ORIGINAL_SHA must provide the driver-verified canonical binary SHA256')
-SOURCE_FIELDS = frozenset(('playerMovementD9c', 'knifeChildChain4a0', 'npc14And18DamageQueue', 'kind8TearFields', 'ordinaryTechnology', 'ordinaryDrFetusBombs', 'controlledTechnology7x2x1', 'controlledDrFetusBombs', 'monstrosLung229'))
+SOURCE_FIELDS = frozenset(('playerMovementD9c', 'knifeChildChain4a0', 'npc14And18DamageQueue', 'kind8TearFields', 'ordinaryTechnology', 'ordinaryDrFetusBombs', 'controlledTechnology7x2x1', 'controlledDrFetusBombs', 'monstrosLung229', 'spoonBender3Tears'))
 spec = importlib.util.spec_from_file_location('composition_items', ROOT / 'tools/original/item-observer.py')
 base = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(base)
@@ -183,6 +183,11 @@ def observe(pid, context):
                         'shootingLock7dc': u32(player + 0x7dc),
                         'position448': floats(player + 0x448, 2),
                         'previousVelocityDd4': floats(player + 0xdd4, 2)}
+                if 'spoonBender3Tears' in requested_fields:
+                    supplemental['players'][-1]['spoonMoveSpeedInputs'] = {
+                        'sourceD28': i32(player + 0xd28), 'sourceD44': i32(player + 0xd44),
+                        'source13bc': i32(player + 0x13bc), 'source13c0': i32(player + 0x13c0),
+                        'actualMoveSpeedD60': floats(player + 0xd60)}
                 if 'playerMovementD9c' in requested_fields:
                     supplemental['players'][-1]['movementDirectionD9c'] = i32(player + 0xd9c)
             room = u64(game + 0x8180)
@@ -322,6 +327,40 @@ def observe(pid, context):
                     # 7D8 is falling speed in Tear; its attack flags live at
                     # 7F0. Knife's distinct attack flags are at 7D8 below.
                     row['attackFlags7f0'] = str(u64(actor + 0x7f0))
+                    if 'spoonBender3Tears' in requested_fields:
+                        #Actual671270/type2 above, fresh ordinary0/0 and born4.
+                        #Current4A8 is a live registered slot, never a copied
+                        #historical pointer or first-seen-as-Init alias.
+                        writer = ((identity['variant'], identity['subtype']) == (0, 0)
+                                  and int(row['attackFlags7f0']) == 4
+                                  and row['cachedSpawner'] == {'kind': 1, 'variant': 0})
+                        row['spoonWriterScope'] = writer
+                        row['spoonHoming'] = None
+                        if writer:
+                            #5424B1..F4 creates the actual808 tree;54473F..776
+                            #reads root818 and key20, with children10/18.
+                            count = u64(actor + 0x830)
+                            if count > 256:
+                                raise ValueError('Homing808 registry outside finite observation scope')
+                            pending_nodes = [u64(actor + 0x818)]
+                            seen_nodes, keys = set(), []
+                            while pending_nodes:
+                                node = pending_nodes.pop()
+                                if not node:
+                                    continue
+                                if node in seen_nodes or len(seen_nodes) >= 256:
+                                    raise ValueError('Malformed or unbounded actual homing registry')
+                                seen_nodes.add(node)
+                                keys.append(u32(node + 0x20))
+                                pending_nodes.extend((u64(node + 0x10), u64(node + 0x18)))
+                            if len(keys) != count or len(set(keys)) != len(keys):
+                                raise ValueError('Homing registry actual count/key owners disagree')
+                            row['spoonHoming'] = {
+                                'target4a8': actor_ref(u64(actor + 0x4a8)),
+                                'velocityMultiplier7e0': floats(actor + 0x7e0),
+                                'baseDamage83c': floats(actor + 0x83c),
+                                'shotOrdinal838': u32(actor + 0x838),
+                                'hitSequences808': sorted(keys)}
                     if 'kind8TearFields' in requested_fields:
                         writer = ((identity['variant'], identity['subtype']) == (0, 0)
                                   and bool(int(row['attackFlags7f0']) & (1 << 33)))
