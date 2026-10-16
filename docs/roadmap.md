@@ -194,7 +194,6 @@ Next: Basement II to Caves (#413 first).
 | Bug | Sev | Symptom | Source |
 | --- | --- | --- | --- |
 | #413 | P0 | Basement II boss trapdoor fails every tick; next stage only admits 1 to 2 | playtest |
-| #383 | P0 | Boss kill froze on a poop in the award cell (Larry Jr.). Error path removed by #385; confirm and close | playtest |
 | #449 | P3 | No "BASEMENT I" name streak at run start; Basement II start room keeps the controls drawing | playtest 2026-10-16 `playtest/2045007/` |
 
 ## Player
@@ -307,7 +306,6 @@ Next: remaining Chapter 1 bosses.
 | --- | --- | --- | --- |
 | #174 | P1 | Super Gluttony 49.1 is not admitted (needs lob projectiles and its second laser) | issue |
 | #408 | P2 | #374 changed the Monstro paired random route result | e2e monstro |
-| #448 | P3 | VS screen shows Monstro's portrait for every boss and no player or boss name | playtest 2026-10-16 `playtest/2045007/` |
 
 ## Pickups and chests
 
@@ -389,7 +387,7 @@ parity is a diagnostic only.
 | --- | --- | --- | --- |
 | #173 | P2 | Laser beam render geometry is approximated | issue |
 | #268 | P3 | Tracking: where the full-frame pixel error comes from | e2e |
-| #450 | P3 | Boss rooms lack the blood floor overlay and red edge vignette; nightmare lacks the floor progress bar | playtest 2026-10-16 `playtest/2045007/` |
+| #450 | P3 | Boss rooms lack the blood floor scatter (walls fixed by #483); nightmare lacks the floor progress bar | playtest 2026-10-16 `playtest/9ff507f/` |
 
 ## Audio
 
@@ -433,4 +431,5 @@ Bugs in a test route or tool rather than in the game.
 ## Recently fixed
 
 - #329 removed the Dip-death freeze path with Gimpy/Infestation 2 (#295 awaiting confirmation).
-- #385 destroys a poop occupying the boss clear award cell (#383 awaiting confirmation).
+- #385 destroys a poop occupying the boss clear award cell; playtest 2026-10-16 killed Larry Jr. on WMAJ8HGV without a freeze (#383 closed).
+- #473 selects each boss's authored VS splash and names; footage of four bosses matches (#448 closed).
