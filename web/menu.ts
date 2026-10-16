@@ -38,6 +38,15 @@ export class MenuRenderer {
         ctx.fillStyle = "#000000";
         ctx.fillRect(0, 0, 480, 270); ctx.restore();
       }
+      //59C872 ->593580 draws the retained loading texture in white/current
+      //alpha, centered at its authored size, before the incoming menu tint.
+      const index = state.runStartRequest.loadingImageIndex;
+      if (index !== undefined) {
+        const image = this.assets.image(`gfx/ui/loadimages/loadimages-${String(index).padStart(3, "0")}.png`);
+        ctx.save(); ctx.globalAlpha *= alpha;
+        ctx.drawImage(image, (480 - image.width) / 2, (270 - image.height) / 2);
+        ctx.restore();
+      }
     }
     if (state.menuFade.active && state.menuFade.alpha > 0) {
       const { color, alpha } = state.menuFade;

@@ -307,7 +307,7 @@ export interface State {
   enemyProjectiles: {id:number; spawnSeed:number; position:{x:number;y:number}; presentedPosition:{x:number;y:number}; velocity:{x:number;y:number}; height:number; scale:number; animation:string|null; animationFrame:number; dead:boolean; removed:boolean}[];
   schema: 1; tickRate: 60; tick: number; menuAnimationTick: number; runTick: number; gameUpdateCount: number; screen: Screen;
   titleAnimationFrame: number; menuFade: { active: boolean; alpha: number; color: [number, number, number, number] };
-  runStartRequest: { inputPending: boolean; fading: boolean; fadeAlpha: number; systemPending: boolean; challengeId: number | null };
+  runStartRequest: { inputPending: boolean; fading: boolean; fadeAlpha: number; systemPending: boolean; challengeId: number | null; loadingImageIndex?: number };
   runQuit: { inputPending: boolean; fadeAlpha: number; fadeRate: number; systemPending: boolean; saveEnabled: boolean | null; saveOutcome: "supportedRunCopied" | "deadRunCleared" | null };
   systemClock: { systemCounter: number; interpolationEnabled: boolean };
   runAdmission: { clock: { milliseconds: number; subMillisecondNanoseconds: number; nanosecondsPerStep: number };

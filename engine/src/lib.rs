@@ -515,6 +515,9 @@ pub struct RunStartRequest {
     pub system_pending: bool,
     ///594620 actual challenge argument; None is the existing New Run route.
     pub challenge_id: Option<u32>,
+    ///593470 retains the chosen loading texture independently of later seed changes.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub loading_image_index: Option<u8>,
 }
 impl MenuFade {
     fn first_title() -> Self {
@@ -2456,6 +2459,13 @@ impl Game {
                 request.input_pending = false;
                 request.fading = true;
                 self.state.music.crossfade(95);
+                //59B14B..172 passes the current menu seed to593470 only once.
+                //Its zero fallback stores the raw seed, without encoding a code.
+                let boot = &mut self.state.boot_lifecycle;
+                if boot.menu_run_seed == 0 {
+                    boot.menu_run_seed = boot.shared.next_u32().max(1);
+                }
+                request.loading_image_index = Some((boot.menu_run_seed % 56 + 1) as u8);
                 self.state.run_admission.confirm_menu_request();
             }
         }
