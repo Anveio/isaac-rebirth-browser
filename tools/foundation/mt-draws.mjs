@@ -48,7 +48,8 @@ export function compareMtDraws(nativeDirectory, portDraws, context = 6, independ
   const boundary = independent ? nativeCounter(independent.gameUpdateCount) : Infinity;
   const shared = draws => draws.findIndex(draw => draw.counter > boundary);
   const end = side => { const index = shared(side); return index < 0 ? side.length : index; };
-  const length = Math.min(end(native), end(port));
+  const nativeEnd = end(native), portEnd = end(port);
+  const length = Math.min(nativeEnd, portEnd);
   let divergence = -1;
   for (let i = 0; i < length; i++) {
     if (native[i].kind !== port[i].kind || Math.abs(native[i].counter - port[i].counter) > 1) { divergence = i; break; }
@@ -70,9 +71,9 @@ export function compareMtDraws(nativeDirectory, portDraws, context = 6, independ
         return { draw: at, native: draw, port: port[at] ?? null };
       }),
     };
-  } else if (!independent && native.length !== port.length) {
-    result.unmatchedTail = { side: native.length > port.length ? 'native' : 'port',
-      draws: (native.length > port.length ? native : port).slice(length, length + context) };
+  } else if (nativeEnd !== portEnd) {
+    result.unmatchedTail = { side: nativeEnd > portEnd ? 'native' : 'port',
+      draws: (nativeEnd > portEnd ? native : port).slice(length, Math.min(nativeEnd > portEnd ? nativeEnd : portEnd, length + context)) };
   }
   return result;
 }
