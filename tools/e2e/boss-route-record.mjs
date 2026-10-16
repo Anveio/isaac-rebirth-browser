@@ -158,16 +158,28 @@ try {
     checkpoint('corner');
   }
   if (EXIT) {
-    if (VIA) await walk({ x: VIA[0], y: VIA[1] }, [...AWARD_CELLS, ...AVOID], EXIT, 'exit via');
+    // The shared exit keys step from cell centre to cell centre. Each game's
+    // fight leaves its own poops, and a diagonal shortcut that grazes a corner
+    // solid in one game alone would slow only that game's player.
+    const centreWalk = async (goal, cells, arrived, failure) => {
+      let target = { x: Math.round((state.player.x - 40) / 40) * 40 + 40, y: Math.round((state.player.y - 120) / 40) * 40 + 120 };
+      for (let left = EXIT; !arrived(); left -= STRIDE) {
+        if (left <= 0) throw new Error(failure);
+        if (Math.hypot(target.x - state.player.x, target.y - state.player.y) <= 4) target = waypoint(avoiding(state.grid, cells), state.player, goal, 1);
+        await hold(toward(state.player, target, 2));
+        await step(STRIDE); state = await view();
+      }
+    };
+    if (VIA) {
+      const via = { x: VIA[0], y: VIA[1] };
+      await centreWalk(via, [...AWARD_CELLS, ...AVOID], () => Math.hypot(via.x - state.player.x, via.y - state.player.y) <= 6,
+        `exit via: no way to (${via.x}, ${via.y}) in ${EXIT} frames`);
+    }
     const index = state.trapdoor?.gridIndex;
     if (index === undefined) throw new Error('The cleared boss room has no trapdoor');
     const door = { x: 40 + index % 15 * 40, y: 120 + Math.floor(index / 15) * 40 };
     const pedestal = [...AWARD_CELLS.filter(cell => cell > 60), ...AVOID];
-    for (let left = EXIT; state.stageTransition === 0; left -= STRIDE) {
-      if (left <= 0) throw new Error(`No trapdoor entry in ${EXIT} frames`);
-      await hold(toward(state.player, waypoint(avoiding(state.grid, pedestal), state.player, door), 2));
-      await step(STRIDE); state = await view();
-    }
+    await centreWalk(door, pedestal, () => state.stageTransition !== 0, `No trapdoor entry in ${EXIT} frames`);
     await hold([]);
     for (let left = 1200; state.stageTransition !== 0 || !state.player.controls; left--) {
       if (left <= 0) throw new Error('The stage transition did not finish in 1200 frames');

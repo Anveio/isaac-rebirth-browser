@@ -85,8 +85,8 @@ def padding(total):
 
 def clearance(fixture):
     """The original's solid cells and their eight neighbours (a 15-wide boss
-    room). The recorded walk heads diagonally for a waypoint two cells ahead,
-    so a path that only skips the solid cell still clips its corner."""
+    room). The port, which records the walk, does not hold these cells, so
+    the walk keeps a cell of margin around them."""
     return sorted({cell + dr * 15 + dc for cell in fixture.get('originalSolid', [])
                    for dr in (-1, 0, 1) for dc in (-1, 0, 1)})
 
