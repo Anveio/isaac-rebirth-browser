@@ -170,7 +170,7 @@ export interface Pickup {
   canCollect: boolean; collected: boolean; removed: boolean; collisionRadius: number; shadowSize: number; collectionDelay: number;
   overlay: string | null; overlayFrame: number; overlayPlaying: boolean;
   age: number; birthGameUpdate: number; charge: number; touched: boolean;
-  chest: {rng: ItemRng; gridCollisionClass: number; entityCollisionClass: number; price: number; cooldown: number; openFrontier?: 'playerContext' | 'collectibleMorph' | 'explosionGeometry';
+  chest: {rng: ItemRng; gridCollisionClass: number; entityCollisionClass: number; price: number; cooldown: number; openFrontier?: 'playerContext' | 'collectibleMorph' | 'explosionGeometry' | 'regularChildInit';
     lootBirths: {variant: number; spawnSeed: number; position: {x: number; y: number}; velocity: {x: number; y: number}; spriteScaleMultiplier: number | null}[]} | null;
   morphLinks?: {parent498: ActorRef | null; link4a0: ActorRef | null; link4a8: ActorRef | null};
   regularCollision: {gridCollisionClass: number; entityCollisionClass: number} | null;
