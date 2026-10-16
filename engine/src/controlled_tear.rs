@@ -310,6 +310,7 @@ pub(crate) fn dispatch(
         animation_tier: tier,
         collision_radius: radius,
         grid_contact: false,
+        grid_death: false,
         motion: TearMotion {
             position,
             presented_position: position,

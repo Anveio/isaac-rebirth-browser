@@ -17,6 +17,7 @@ enum LaserFrontier {
     TransformationHistory,
     EffectTargetFields,
     GridKind(u32),
+    GridBranch(&'static str),
 }
 fn record_frontier(state: &mut State, index: usize, reason: LaserFrontier) {
     let channel = match reason {
@@ -24,6 +25,7 @@ fn record_frontier(state: &mut State, index: usize, reason: LaserFrontier) {
         LaserFrontier::TransformationHistory => "ordinaryBrimstoneTransformationHistory".into(),
         LaserFrontier::EffectTargetFields => "ordinaryBrimstoneEffectTargetFields".into(),
         LaserFrontier::GridKind(kind) => format!("ordinaryBrimstoneGridKind{kind}"),
+        LaserFrontier::GridBranch(branch) => format!("ordinaryBrimstone{branch}"),
     };
     if state.lasers[index].origin == crate::lasers::LaserOrigin::PlayerTechnology2 {
         crate::technology2::diagnostic(state, &channel);
@@ -270,13 +272,16 @@ pub(crate) fn run_line_contacts(
 ) -> Result<(), String> {
     state.lasers[index].validate_contact_geometry()?;
     for cell in state.lasers[index].grid_contact_indices(grid)? {
-        let outcome = crate::attack_grid::callback_at_index(
-            &mut state.room,
-            cell,
-            &mut state.boot_lifecycle.shared,
-        )?;
-        if let crate::attack_grid::GridCallbackOutcome::UnadmittedKind(kind) = outcome {
-            record_frontier(state, index, LaserFrontier::GridKind(kind));
+        // 477bb0 passes damage 1 (esi) to 477790's 5cbb30 calls.
+        let outcome = crate::attack_grid::callback_at_index(state, cell, 1)?;
+        match outcome {
+            crate::attack_grid::GridCallbackOutcome::UnadmittedKind(kind) => {
+                record_frontier(state, index, LaserFrontier::GridKind(kind));
+            }
+            crate::attack_grid::GridCallbackOutcome::Unadmitted(branch) => {
+                record_frontier(state, index, LaserFrontier::GridBranch(branch));
+            }
+            crate::attack_grid::GridCallbackOutcome::Handled(_) => {}
         }
     }
     state.lasers[index].finish_grid_contacts();

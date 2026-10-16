@@ -53,6 +53,7 @@ pub(crate) fn fire(
         animation_tier: plan.animation_tier,
         collision_radius: plan.collision_radius,
         grid_contact: false,
+        grid_death: false,
         motion: projectiles::TearMotion::spawn(origin, velocity, plan.parameters, final_uniform)?,
     };
     tear.project();

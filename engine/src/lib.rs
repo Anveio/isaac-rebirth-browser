@@ -285,6 +285,10 @@ pub struct Tear {
     pub animation_tier: u8,
     pub collision_radius: f32,
     pub grid_contact: bool,
+    /// 542f70: the tear died on a grid contact above height -60, so its
+    /// death probes the grid for Hurt (5430a5).
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub grid_death: bool,
     pub motion: projectiles::TearMotion,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub controlled: Option<controlled_tear::ControlledTear>,
@@ -2713,20 +2717,28 @@ impl Game {
                     None
                 };
                 let mut death = None;
+                let mut grid_hurt = None;
                 if let Some(tear) = self.state.tears.iter_mut().find(|tear| tear.id == actor.id) {
                     if newborn {
                         tear.motion.present_birth(phase)?;
                     } else {
                         let dying = tear.motion.lifetime == projectiles::Lifetime::Dying;
-                        if tear.motion.advance(phase, tear.grid_contact)?
-                            == projectiles::Lifetime::Removed
-                            && dying
-                        {
+                        let height = tear.motion.height;
+                        let lifetime = tear.motion.advance(phase, tear.grid_contact)?;
+                        if lifetime == projectiles::Lifetime::Removed && dying {
                             death = Some(tear_deaths::Death {
                                 position: tear.motion.position,
                                 height: tear.motion.height,
                                 scale: tear.scale,
                             });
+                            if tear.grid_death {
+                                grid_hurt = Some((
+                                    tear.motion.position,
+                                    1 + i32::from(tear.collision_damage > 10.0),
+                                ));
+                            }
+                        } else if !dying && lifetime == projectiles::Lifetime::Dying {
+                            tear.grid_death = tear.grid_contact && height > -60.0;
                         }
                         if phase == phase::Phase::Update {
                             tear.age = tear.age.checked_add(1).ok_or("tear age exhausted")?;
@@ -2740,6 +2752,9 @@ impl Game {
                 }
                 if let Some(death) = death {
                     tear_deaths::emit(&mut self.state, death)?;
+                }
+                if let Some((position, damage)) = grid_hurt {
+                    tear_grid_hurt(&mut self.state, position, damage)?;
                 }
             }
             actors::ActorKind::Bomb => bombs::advance_actor(&mut self.state, phase, actor.id)?,
@@ -3036,6 +3051,15 @@ impl Game {
                 enemy_projectiles::EnemyProjectile::birth(id, parent, shot)
             }),
             entities::Birth::CreepHit => creep_effects::hurt_player(&mut self.state),
+            entities::Birth::GridHurt { position, damage } => {
+                let descriptor = self.state.room.grid.clone().ok_or("grid Hurt requires a room grid")?;
+                let Some(cell) = grid::Grid::new(descriptor)?.index(position) else {
+                    return Ok(());
+                };
+                // The NPC callback has no frontier channel; an unported
+                // receiver leaves the cell as it was.
+                attack_grid::callback_at_index(&mut self.state, cell, damage).map(|_| ())
+            }
             entities::Birth::Spawned(spawned) => {
                 self.admit_npc_birth(index, entities::Birth::Npc(spawned.selector))?;
                 let npc = self.state.room.npcs.last_mut().expect("admitted NPC birth");
@@ -3782,4 +3806,23 @@ pub extern "C" fn public_keys_ptr() -> *const u8 {
 #[no_mangle]
 pub extern "C" fn public_keys_len() -> usize {
     PUBLIC_KEYS_JSON.with(Vec::len)
+}
+
+/// 5430a5: after its splash, a tear that died on the grid hurts the cell
+/// under it or, failing that, the cells 10 to either side, stopping at the
+/// first that takes the damage.
+fn tear_grid_hurt(state: &mut State, position: motion::WorldVector, damage: i32) -> Result<(), String> {
+    let Some(descriptor) = state.room.grid.clone() else {
+        return Ok(());
+    };
+    let grid = grid::Grid::new(descriptor)?;
+    for (x, y) in [(0.0, 0.0), (10.0, 0.0), (0.0, 10.0), (-10.0, 0.0), (0.0, -10.0)] {
+        let Some(cell) = grid.index(position + motion::WorldVector { x, y }) else {
+            continue;
+        };
+        if attack_grid::callback_at_index(state, cell, damage)? == attack_grid::GridCallbackOutcome::Handled(true) {
+            break;
+        }
+    }
+    Ok(())
 }
