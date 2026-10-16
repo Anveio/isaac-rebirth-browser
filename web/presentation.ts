@@ -54,8 +54,10 @@ export class RunPresentation {
     const paper = this.assets.layerFrame(PAUSE, animation, 1, tick);
     if (paper?.Visible) this.attached(ctx, paper, 288, 135, () => {
       this.assets.draw(ctx, STATS, "Idle", 0, 0, 0, { layers: [0] });
-      for (const [index, frame] of menu.statFrames.entries())
-        this.assets.draw(ctx, STATS, "Idle", 0, 0, frame, { layers: [index + 1] });
+      for (const [index, frame] of menu.statFrames.entries()) {
+        if (frame !== null)
+          this.assets.draw(ctx, STATS, "Idle", 0, 0, frame, { layers: [index + 1] });
+      }
     });
     const seedPaper = this.assets.layerFrame(PAUSE, animation, 5, tick);
     if (seedPaper?.Visible) this.attached(ctx, seedPaper, 288, 135, () => {

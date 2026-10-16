@@ -182,7 +182,7 @@ export interface RunIntroduction { age: number; active: boolean; title: string; 
 export interface BossBar { fill: number | null; flash: number; maximum: number; }
 export interface PauseMenu {
   phase: "hidden" | "appearing" | "idle" | "disappearing";
-  age: number; selection: number; statFrames: [number, number, number, number, number, number];
+  age: number; selection: number; statFrames: [number | null, number | null, number | null, number | null, number | null, number | null];
 }
 export interface RoomAppearance {
   backdrop: string; columns: number; rows: number; tileSize: number; origin: { x: number; y: number };
