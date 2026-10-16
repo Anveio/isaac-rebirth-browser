@@ -164,8 +164,10 @@ def main():
             continue
         one = argparse.Namespace(**vars(args))
         one.out = corpus / recipe["out"]
-        one.source = corpus / recipe.get("from", recipe["out"])
-        one.at = recipe["at"]
+        # `"from": null` chases from a fresh boot rather than a prefix.
+        source = recipe.get("from", recipe["out"])
+        one.source = corpus / source if source else None
+        one.at = recipe.get("at")
         one.stage = recipe["stages"]
         for key in ("cases", "steps", "rounds", "extend", "final_extend"):
             setattr(one, key, recipe.get(key, getattr(args, key)))

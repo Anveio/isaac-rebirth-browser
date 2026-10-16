@@ -257,7 +257,8 @@ final tape is written only if its replay reaches every stage.
 Every scenario tape built this way keeps its recipe in
 [engine/dst/chases.json](../engine/dst/chases.json): the tape, the command
 its prefix ends at (a boss room entry) and its stages. These tapes are the
-descent regression and the Monstro, Larry Jr. and Gemini kills. Boss fights
+descent and restart regressions, the Monstro, Larry Jr. and Gemini kills,
+and the Dingle entry (`"from": null` chases from a fresh boot). Boss fights
 and descents are the first coverage a shared-MT change moves, so one command
 rebuilds all of them, each from its own prefix:
 

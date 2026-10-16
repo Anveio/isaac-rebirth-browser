@@ -4,26 +4,70 @@
     "at": 302,
     "extend": 0,
     "stages": [
-      ["cleared:5"],
-      ["property:game: the nightmare scene between stages holds the run clock"],
-      ["property:game: Escape during the nightmare scene does not pause"],
-      ["stage:2"],
-      ["new run from the menus after a descent"]
+      [
+        "cleared:5"
+      ],
+      [
+        "property:game: the nightmare scene between stages holds the run clock"
+      ],
+      [
+        "property:game: Escape during the nightmare scene does not pause"
+      ],
+      [
+        "stage:2"
+      ],
+      [
+        "new run from the menus after a descent"
+      ]
     ]
   },
   {
     "out": "coverage-monstro-kill.json",
     "at": 422,
-    "stages": [["removed:20"]]
+    "stages": [
+      [
+        "removed:20"
+      ]
+    ]
   },
   {
     "out": "coverage-larry-segments.json",
     "at": 1678,
-    "stages": [["removed:19", "removed:239"]]
+    "stages": [
+      [
+        "removed:19",
+        "removed:239"
+      ]
+    ]
   },
   {
     "out": "coverage-gemini-kill.json",
     "at": 139,
-    "stages": [["removed:79"]]
+    "stages": [
+      [
+        "removed:79"
+      ]
+    ]
+  },
+  {
+    "out": "regression-restart-walks-on.json",
+    "at": 230,
+    "final_extend": 10,
+    "stages": [
+      [
+        "property:game: a new run's player walks on from the starting room within its first command"
+      ]
+    ]
+  },
+  {
+    "out": "coverage-dingle-entry.json",
+    "from": null,
+    "steps": 6000,
+    "final_extend": 600,
+    "stages": [
+      [
+        "npc:261"
+      ]
+    ]
   }
 ]
