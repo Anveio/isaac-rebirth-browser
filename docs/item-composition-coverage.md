@@ -12,6 +12,43 @@ functional parity.
 
 ## Current gameplay qualification
 
+Current public source is `e56e66f9`; the synchronized checkout remains
+`0bb5487e`, serving scalar artifact `b3555a49` / WASM `ecee6363` (Wecee)
+with its actual six-step production qualification. New public grid admission,
+TNT updates and web shared-MT Init changes are outside that artifact's scope.
+Formatting, documentation and tool changes do not create a new gameplay
+artifact. All 21 current scalar cases close at 187,499 Own
+checks with zero scalar/producer failures, plus 210 independently validated
+Original/Own endpoint checks with zero failures; 85 unknowns remain. Item194's
+cached shot speed is 1.3600000143051147, with matching item RNG and Card seed.
+These endpoints do not establish individual cache/RNG callbacks or full synergy.
+
+Pocket runtime and selected functional proof are partial: 3 of 11 mandatory
+cases have closed. The public-tool AL control has 9,350 checks / 0 failures /
+11 unavailable obligations; the prior immutable AL report remains 9,349 / 0 /
+12 unavailable with SAME-v1 AD0 refresh unreached. Separated fixed and retained
+OS cases each retain 29,385 / 0 / 11 unavailable. Eight cases and browser,
+DOM/render, backend/PCM and broader pocket effects remain obligations. This
+pocket bank supplies no coin/key/bomb/chest coverage credit.
+
+The separate CF8 candidate and cdylib build-tool successor have an actual
+six-step production pass. Fresh Original/Own Use45 checks pass 43/43 for
+TEMP45 TTL0 and continued ticks; positive-TTL expiry and controller invocation
+remain unqualified. Its selected194 Own/reused-Original replay also closed
+with zero failures. These checks do not qualify the newer public grid
+runtime, and the served artifact remains Wecee.
+Get4/C18, new homing satellites, canonical Pill/Range and Luck1024 remain
+private source cuts with limited syntax checks, not build/game passes. The
+room191 case remains unrun in both games. The Original-only menu-audio diagnostic
+retained five real OpenAL SFX starts, its full tail and complete mono PCM
+artifacts. A later Browser-only reuse attempt launched Chrome but stopped at
+the resource floor, with zero pair checks; Browser playback and PCM/audio
+equality remain unqualified.
+Every strict historical red
+and resource-partial result below retains its original artifact and scope.
+
+## Retained 6b260 gameplay qualification snapshot
+
 This source snapshot names actual public main `6b260155`, including external shared-MT ambience/light/DropSound PR492 and upkeep494, plus pickup491, Quit495, web-owner496 and Move-save497. Its exact production artifact passed all six build steps in 42.695s with 3,565 source pins stable, using the explicit LTO-off/CG256, 1.4375 GiB startup and 512 MiB live profile. Build success, port replay comparisons and Original evidence remain separate. The private `658b299e` tests below do not qualify the later external492/494 paths. Every earlier report and snapshot remains historical with its failures preserved.
 
 | Area | Source/public | Own/port-port | Original scope | Remaining behavior or evidence |
