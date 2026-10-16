@@ -12,6 +12,9 @@ pub struct SavedPlayerItems {
     /// Legacy saved data never inherits a fresh constructor's known zero.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub damage_inputs: Option<crate::player_items::DamageInputs>,
+    ///Actual Saved88DC; absence does not inherit a constructor's zero.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub range_inputs: Option<crate::player_items::RangeInputs>,
     ///Actual Saved88D4. Legacy omission remains unknown on restore.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub fire_delay_inputs: Option<crate::player_items::FireDelayInputs>,
@@ -50,6 +53,7 @@ impl SavedPlayerItems {
         }
         Ok(Self {
             damage_inputs: owner.damage_inputs,
+            range_inputs: owner.range_inputs,
             fire_delay_inputs: owner.fire_delay_inputs,
             shot_speed_inputs: owner.shot_speed_inputs,
             owned_counts: owner.owned_counts.clone(),
@@ -107,6 +111,11 @@ impl SavedPlayerItems {
         //51849A/5184A0 stores Saved88D8;511A25/511A2B restores D30.
         //None overwrites constructor Some(0) rather than inventing history.
         owner.damage_inputs = self.damage_inputs;
+        //5184A6/5184AC saves88DC;511A31/511A37 restores the word.
+        owner.range_inputs = self.range_inputs;
+        //511820/82E/1A13/1A67 restore words absent from this bounded DTO.
+        //A fresh zero cannot stand in for the source's saved MoveSpeed terms.
+        owner.move_speed_inputs = None;
         //51848E/518494 saves88D4;511A19/511A1F restores the actual word.
         owner.fire_delay_inputs = self.fire_delay_inputs;
         //5184B2/5184B8 writes Saved88E0;511A43 restores PlayerD38.

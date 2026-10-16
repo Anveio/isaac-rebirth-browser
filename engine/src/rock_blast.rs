@@ -283,8 +283,9 @@ pub(crate) fn admit_reward(
                 group_seed: seed,
                 spawn_seed: seed,
             };
-            // Pickup::Init's Random20/Random50 replacements stay unsupported.
-            let Some(chest) = crate::chests::from_selector(id, &selector, true)? else {
+            // Normal50's actual51 replacement requires the source-owned
+            // empty LeftHand operands; Red360 retains its own frontier.
+            let Some(chest) = crate::chests::from_source_selector(id, &selector, true, state)? else {
                 return Err("tinted rock chest replacement is unsupported".into());
             };
             chest

@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 import secrets
 import subprocess
+import sys
 
 ROOT = Path(__file__).resolve().parents[2]
 spec = importlib.util.spec_from_file_location('clock_capture', ROOT / 'tools/original/foundation-clock-run.py')
@@ -75,12 +76,82 @@ def random_cases(count):
     raise RuntimeError(f'Only {len(found)} natural coin-room seeds found in 5000 recorded OS-random candidates')
 
 
+
+def run_fixture_case(args):
+    """Use the existing authored resource front door and public Challenge tape."""
+    bank_path = args.fixture_scenarios.resolve()
+    bank = json.loads(bank_path.read_text())
+    selected = [row for row in bank['cases'] if row['name'] == args.fixture_case]
+    if len(selected) != 1 or args.seed or args.audio_trace is None or args.output is None:
+        raise ValueError('One declared fixture case, fresh output and actual audio library required')
+    case = selected[0]
+    audio_setup = case.get('audioSetup')
+    volume_args = []
+    if audio_setup is not None:
+        if audio_setup != {'schema': 1, 'sfxVolume': 1, 'requirePositivePlayback': True}:
+            raise ValueError('Explicit authored audible volume-one setup required')
+        volume_args = ['--sfx-volume', '1']
+    if (case['fixture']['startingItems'] != [] or case['fixture']['challengeId'] != 1
+            or case['pickupsGoldenResource']['required'] != [[30, 2], [20, 1], [20, 2], [20, 3], [20, 4]]):
+        raise ValueError('Declared free Golden Key/Coin public fixture required')
+    spec = importlib.util.spec_from_file_location('pickup_fixture_front_door', ROOT / 'tools/original/composition-run.py')
+    fixture = importlib.util.module_from_spec(spec); spec.loader.exec_module(fixture)
+    tape = fixture.public_tape(case)
+    capture.validate_tape(tape)
+    output = args.output.resolve(); output.mkdir(parents=True, exist_ok=False)
+    def resource_path(value):
+        path = Path(value)
+        return (path if path.is_absolute() else ROOT / path).resolve()
+    xml = resource_path(case['fixture']['authoredResourcePath'])
+    stb = resource_path(case['fixture']['specialRoomsPath'])
+    library = args.audio_trace.resolve()
+    inputs = [bank_path, xml, stb, library]
+    digest = lambda path: __import__('hashlib').sha256(path.read_bytes()).hexdigest()
+    before = {str(path): digest(path) for path in inputs}
+    if digest(stb) != case['fixture']['specialRoomsSha256']:
+        raise ValueError('Authored room input differs from declaration')
+    fixture.stage_view(xml, output / 'resource-view', stb)
+    tape_path = output / 'declared-tape.json'; tape_path.write_text(json.dumps(tape, indent=2) + '\n')
+    old_root, old_argv, old_observe = capture.ROOT, sys.argv, capture.checked_observation
+    metadata = dict(scope='Same declared XML/STB, boot epoch and public Challenge inputs as browser. No Native-derived production inputs.',
+        case=case, publicTape=str(tape_path), declaredBefore=before, memoryWritten=False,
+        bootstrap='Native intro only precedes the existing first-Title comparison boundary; no simulation-tick equivalence inferred')
+    sound_windows = {'title', 'profile', 'main', 'challenge-selected', 'challenges', 'gameplay-start'} | {row['label'] for row in case['actions']}
+    def observe(observer, pid, context):
+        context['pickupResourceSound'] = True
+        context['pickupSoundWindow'] = context['label'] in sound_windows
+        return old_observe(observer, pid, context)
+    capture.ROOT = output / 'resource-view'; capture.checked_observation = observe
+    try:
+        sys.argv = [str(ROOT / 'tools/original/foundation-clock-run.py'), '--challenge-run',
+            '--boot-epoch-seed', str(case['bootEpochSeed']), '--tape', str(tape_path),
+            '--observe-every-step', '--state-observer', str(ROOT / 'tools/original/pickup-resource-sound-observer.py'),
+            '--audio-trace', str(library), '--audio-sfx-owners', *volume_args, '--output', str(output)]
+        metadata['actualClockExit'] = capture.main()
+    finally:
+        capture.ROOT, sys.argv, capture.checked_observation = old_root, old_argv, old_observe
+        metadata['declaredAfter'] = {str(path): digest(path) for path in inputs}
+        metadata['declaredBeforeEqualsEnd'] = metadata['declaredAfter'] == before
+        (output / 'pickup-fixture-inputs.json').write_text(json.dumps(metadata, indent=2) + '\n')
+        if metadata['declaredBeforeEqualsEnd'] is not True:
+            raise RuntimeError('Declared pickup inputs changed')
+    if metadata['actualClockExit'] not in (0, None):
+        raise RuntimeError('Original pickup fixture failed')
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--count', type=int, default=2)
     parser.add_argument('--seed')
     parser.add_argument('--delay', type=int, choices=[0, 1], default=0)
+    parser.add_argument('--fixture-scenarios', type=Path)
+    parser.add_argument('--fixture-case')
+    parser.add_argument('--output', type=Path)
+    parser.add_argument('--audio-trace', type=Path)
     args = parser.parse_args()
+    if args.fixture_scenarios is not None:
+        run_fixture_case(args)
+        return
     if args.seed:
         capture.codec.decode_seed(args.seed)
         print(json.dumps(tape(args.seed, args.delay)))

@@ -401,7 +401,7 @@ fn controlled_actor_frontier(knife: &Knife) -> Result<Option<&'static str>, Stri
     {
         return Ok(Some("controlledKnifeParentHistory"));
     }
-    if knife.child_chain_4a0 != crate::knives::ChildChain::Empty {
+    if knife.child_chain_4a0 == crate::knives::ChildChain::Unknown {
         return Ok(Some("controlledKnifeChildChainHistory"));
     }
     if knife.attack_flags.0 & (4 | 0x400 | 0x800000) != 0 {
@@ -440,7 +440,7 @@ fn controlled_knife(
             .as_ref()
             .ok_or("controlled Knife item owner absent")?,
     )?;
-    if !crate::weapon_plan::admits_neutral_knife_properties(
+    if !crate::weapon_plan::admits_controlled_knife_caller(
         items,
         state.weapon_admission.source_player_type,
     ) || request.attack_flags & (4 | 0x400 | 0x800000) != 0
@@ -467,6 +467,10 @@ fn controlled_knife(
                 record_frontier(state, channel);
                 return Ok(DispatchOutcome::Unadmitted);
             }
+            if crate::controlled_knife_satellites::chain(&state.knives, actor.id)?.is_none() {
+                record_frontier(state, "controlledKnifeChildChainHistory");
+                return Ok(DispatchOutcome::Unadmitted);
+            }
         }
     }
     let actor = match state.attack_runtime.persistent {
@@ -488,7 +492,7 @@ fn controlled_knife(
                 &mut state.boot_lifecycle.shared,
             );
             knife.position = request.position;
-            knife.parent = Some(request.owner);
+            knife.set_parent(Some(request.owner));
             knife.render_offset = WorldVector { x: 0.0, y: -10.0 };
             knife.apply_resolved(
                 request.attack_flags,
@@ -553,6 +557,7 @@ fn controlled_knife(
     if !knife.velocity.is_finite() {
         return Err("controlled steering overflowed actual fields".into());
     }
+    crate::controlled_knife_satellites::synchronize(state, actor.id)?;
     Ok(DispatchOutcome::Handled)
 }
 
@@ -638,7 +643,7 @@ fn ordinary_knife(
                 &mut state.boot_lifecycle.shared,
             );
             knife.position = request.position;
-            knife.parent = Some(request.owner);
+            knife.set_parent(Some(request.owner));
             knife.render_offset = WorldVector { x: 0.0, y: -10.0 };
             knife.entity_flags |= 0x200000;
             knife.apply_resolved(
@@ -829,6 +834,24 @@ pub(crate) fn advance_actor(
     let Some(index) = state.knives.iter().position(|knife| knife.id == id) else {
         return Err("updated Knife handle is unresolved".into());
     };
+    //Subtype1 Fast never enters18 or reads Parent498. Every other admitted
+    //body must distinguish an actual NULL store from missing legacy history.
+    let reads_parent = state.knives[index].subtype == 0 || phase == Phase::Update;
+    if reads_parent && state.knives[index].parent.is_none() {
+        if !state.knives[index].parent_null_known {
+            return Err("Knife Parent498 NULL history is unavailable for its body callback".into());
+        }
+        //473584 ->47325E tests attraction0x800000 before473380's Full
+        //operator. The mapped common tail closes only neutral0/bit33.
+        if !matches!(state.knives[index].subtype, 0 | 1)
+            || !matches!(
+                state.knives[index].attack_flags.0,
+                0 | crate::knives::CONTROLLED
+            )
+        {
+            return Err("Knife orphan body flags or subtype have no admitted actor effect".into());
+        }
+    }
     let grid = crate::grid::Grid::new(
         state
             .room
@@ -836,7 +859,24 @@ pub(crate) fn advance_actor(
             .clone()
             .ok_or("knife requires its admitted actual room grid")?,
     )?;
-    if state.knives[index].subtype == 0
+    let linked_satellite = state.knives[index].subtype == 0
+        && state.knives[index].attack_flags.0 == crate::knives::CONTROLLED
+        && state.knives[index]
+            .parent
+            .is_some_and(|parent| parent.kind == ActorKind::Knife);
+    let orphan_body = reads_parent
+        && state.knives[index].parent.is_none()
+        && state.knives[index].parent_null_known;
+    if linked_satellite || orphan_body {
+        if !crate::controlled_knife_satellites::advance_body(
+            &mut state.knives[index],
+            phase,
+            state.game_update_count,
+            orphan_body,
+        )? {
+            return Ok(());
+        }
+    } else if state.knives[index].subtype == 0
         && state.knives[index].attack_flags.0 & crate::knives::CONTROLLED != 0
     {
         let parent = ParentView {
@@ -857,15 +897,43 @@ pub(crate) fn advance_actor(
                 }
                 return Ok(());
             }
-        } else if !crate::controlled_knife::advance(
-            &mut state.knives[index],
-            phase,
-            parent,
-            &grid,
-            state.game_update_count,
-            state.room.manager_counts.countable_total(),
-        )? {
-            return Ok(());
+        } else {
+            let Some(chain) = crate::controlled_knife_satellites::chain(&state.knives, id)? else {
+                record_frontier(state, "controlledKnifeChildChainHistory");
+                return Ok(());
+            };
+            let system_counter = state.system_clock.system_counter.wrapping_sub(1);
+            let (before, rest) = state.knives.split_at_mut(index);
+            let (anchor, after) = rest.split_first_mut().expect("resolved Knife index");
+            if !crate::controlled_knife::advance(
+                anchor,
+                phase,
+                parent,
+                &grid,
+                state.game_update_count,
+                state.room.manager_counts.countable_total(),
+                |anchor| {
+                    for (chain_index, child_id) in chain.iter().enumerate() {
+                        let child = before
+                            .iter_mut()
+                            .chain(after.iter_mut())
+                            .find(|knife| knife.id == *child_id)
+                            .ok_or(
+                                "controlled Knife satellite disappeared during its owner callback",
+                            )?;
+                        crate::controlled_knife_satellites::form(
+                            anchor,
+                            child,
+                            chain_index,
+                            chain.len(),
+                            system_counter,
+                        )?;
+                    }
+                    Ok(())
+                },
+            )? {
+                return Ok(());
+            }
         }
     } else if state.knives[index].subtype == 1 {
         if phase == Phase::Interpolate {
@@ -963,10 +1031,10 @@ fn admit_brim_knife_child(
     child.apply_resolved(0, color, damage);
     child.line = line;
     child.line_raw_18 = line_raw_18;
-    child.parent = Some(ActorRef {
+    child.set_parent(Some(ActorRef {
         kind: ActorKind::Knife,
         id: parent_id,
-    });
+    }));
     state.knives.push(child);
     state.attack_runtime.next_knife = next;
     state.actor_scheduler.admit(ActorRef {
@@ -1033,7 +1101,16 @@ fn clear_knife_links(state: &mut State, retired: &[ActorRef]) {
             }),
         ) || knife.parent.is_some_and(|parent| retired.contains(&parent))
         {
-            knife.parent = None;
+            knife.set_parent(None);
+        }
+        //448040 unregisters this owner's4A0 and clears incoming registered
+        //slots naming the exact retiring actor; Remove alone does neither.
+        if retired.contains(&ActorRef {
+            kind: ActorKind::Knife,
+            id: knife.id,
+        }) || matches!(knife.child_chain_4a0, crate::knives::ChildChain::Linked(target) if retired.contains(&target))
+        {
+            knife.child_chain_4a0 = crate::knives::ChildChain::Empty;
         }
     }
 }
@@ -1089,10 +1166,28 @@ pub(crate) fn knife_contacts(
                 kind: ActorKind::Player,
                 id: 0,
             });
-        let child_parent = state.knives[index].subtype == 1
-            && state.knives[index]
-                .parent
-                .is_none_or(|actor| actor.kind == ActorKind::Knife);
+        let parent_is_known_null =
+            state.knives[index].parent.is_none() && state.knives[index].parent_null_known;
+        if state.knives[index].parent.is_none()
+            && !parent_is_known_null
+            && (state.knives[index].subtype == 1
+                || (state.knives[index].subtype == 0
+                    && state.knives[index].attack_flags.0 == crate::knives::CONTROLLED))
+        {
+            return Err("Knife Parent498 NULL history is unavailable for its contact role".into());
+        }
+        let controlled_satellite = state.knives[index].subtype == 0
+            && state.knives[index].attack_flags.0 == crate::knives::CONTROLLED
+            && (parent_is_known_null
+                || state.knives[index]
+                    .parent
+                    .is_some_and(|actor| actor.kind == ActorKind::Knife));
+        let child_parent = (state.knives[index].subtype == 1
+            && (parent_is_known_null
+                || state.knives[index]
+                    .parent
+                    .is_some_and(|actor| actor.kind == ActorKind::Knife)))
+            || controlled_satellite;
         if !(state.knives[index].subtype == 0 && parent_is_player || child_parent) {
             record_frontier(state, "ordinaryKnifeParentHistory");
             continue;
