@@ -1007,6 +1007,14 @@ if case['requires'].get('controlledDrFetusFunctional') is not None:
     controlled_fetus_spec.loader.exec_module(controlled_fetus_module)
     controlled_fetus_comparer = controlled_fetus_module.ControlledDrFetusComparer(globals(), case)
 
+spoon_comparer = None
+spoon_result = None
+if case['requires'].get('spoonBender3Functional') is not None:
+    spoon_spec = importlib.util.spec_from_file_location(
+        'spoon_bender3_comparer', Path(__file__).with_name('composition-spoon-bender3.py'))
+    spoon_module = importlib.util.module_from_spec(spoon_spec)
+    spoon_spec.loader.exec_module(spoon_module)
+    spoon_comparer = spoon_module.SpoonBenderComparer(globals(), case)
 monstro_comparer = None
 monstro_result = None
 if case['requires'].get('monstrosLungFunctional') is not None:
@@ -1083,6 +1091,13 @@ for captured in sorted(all_captured, key=lambda row: row['presentation']):
             except Exception as error:
                 missing('mandatory actual mixed DrFetus stats group', t, error)
 
+        if spoon_comparer is not None:
+            try:
+                spoon_comparer.snapshot(source, state, t, observed['systemCounter'], observed['players'][0],
+                    native_gameplay_presentation=t - (start - native_title),
+                    port_gameplay_presentation=captured.get('gameplayPresentation'))
+            except Exception as error:
+                missing('mandatory actual Spoon3 target/body states', t, error)
         if monstro_comparer is not None:
             try:
                 monstro_comparer.snapshot(source, state, t, observed['systemCounter'], observed['players'][0],
@@ -1522,6 +1537,8 @@ if controlled_fetus_comparer is not None:
 
 mixed_dr_fetus = mixed_fetus_comparer.finish() if mixed_fetus_comparer is not None else None
 
+if spoon_comparer is not None:
+    spoon_result = spoon_comparer.finish()
 if monstro_comparer is not None:
     monstro_result = monstro_comparer.finish()
 
@@ -1557,6 +1574,8 @@ if mixed_dr_fetus is not None:
 
 if monstro_result is not None:
     result['monstrosLung'] = monstro_result
+if spoon_result is not None:
+    result['spoonBender3'] = spoon_result
 payload = (json.dumps(result, separators=(',', ':')) + '\n').encode()
 with args.output.open('xb') as stream:
     stream.write(gzip.compress(payload, mtime=0) if str(args.output).endswith('.gz') else payload)
