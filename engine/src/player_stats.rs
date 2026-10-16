@@ -115,6 +115,8 @@ pub(crate) fn evaluate_cache(state: &mut State) -> Result<(), String> {
             max_fire_delay: state.max_fire_delay,
         },
         requested,
+        state.player.entity_source,
+        state.source_shot_speed_minimum,
     )?;
     state.player_stats = resolved.values.stats;
     state.max_fire_delay = resolved.values.max_fire_delay;

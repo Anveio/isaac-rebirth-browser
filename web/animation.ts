@@ -9,10 +9,10 @@ import stageData from "./stage-data.json";
 import attackData from "./attack-data.json";
 import bloodTearData from "./blood-tear-data.json";
 import costume229Data from "./costume229-data.json";
+import bossSplashData from "./boss-splash-data.json";
 const sceneData = { ...informationData, ...baseSceneData, ...doorData, ...gridData, ...npcData, ...familiarData, ...gameOverData, ...stageData, ...attackData, ...bloodTearData, ...costume229Data };
 import fontData from "./font-data.json";
 import completionUrl from "./assets/completion_widget.png?url";
-const bossSceneUrls = import.meta.glob("./assets/boss-scene/*.png", { eager: true, query: "?url", import: "default" }) as Record<string, string>;
 import postitOverlapUrl from "./assets/gamemenu_postitoverlap.png?url";
 import { sampleFrame, overrideFrame, frameQuad, type SampledFrame, type Quad } from "./animation-math";
 
@@ -103,6 +103,7 @@ const urls = import.meta.glob([
   "../references/isaac/rebirth/resources/gfx/effects/effect_052_dust cloud.png",
   "../references/isaac/rebirth/resources/gfx/ui/ui_chargebar.png",
   "../references/isaac/rebirth/resources/gfx/ui/ui_bosshealthbar.png",
+  "../references/isaac/rebirth/resources/gfx/ui/boss/*.png",
   "../references/isaac/rebirth/resources/font/*_0.png",
 ], { eager: true, query: "?url", import: "default" }) as Record<string, string>;
 
@@ -141,8 +142,10 @@ export class Assets {
     const entries = Object.entries(urls).map(([path, url]) => [normalize(path.split("/resources/")[1]!), url] as const)
       .filter(([path]) => !/^gfx\/(monsters|bosses)\//.test(path) || referenced.has(path));
     entries.push(["gfx/ui/main menu/completion_widget.png", completionUrl], ["gfx/ui/main menu/gamemenu_postitoverlap.png", postitOverlapUrl]);
-    for (const [path, url] of Object.entries(bossSceneUrls))
-      entries.push([`gfx/ui/boss/${path.split("/").at(-1)!}`, url]);
+    const available = new Set(entries.map(([path]) => path));
+    for (const path of bossSplashData.assets) {
+      if (!available.has(normalize(path))) throw new Error(`Missing original boss presentation asset: ${path}`);
+    }
     // Chromium rejects decode() with EncodingError when many decodes are in
     // flight, even for intact images. Keep a bounded number busy, and on a
     // rejection fall back to the load event: an image that loaded with real

@@ -1,0 +1,140 @@
+#!/usr/bin/env python3
+"""Branch DST game cases stage by stage until one reaches a deep scenario,
+then write the tape that does.
+
+Some coverage needs a chain of rare events: a boss room cleared, then a
+descent, then a new run. Each stage branches `--cases` generated cases from
+the prefix so far (`rebirth-dst --resume`). It keeps the case that reached
+all of the stage's census keys earliest, and cuts its tape `--extend`
+commands past that point. The next stage branches from there.
+
+An engine change that moves the shared RNG moves every tape off its branch.
+A scenario tape is then rebuilt by rerunning its chase, not by hand. Keys
+are the census keys of a report's `coverage.firstSteps`; a met property is
+`property:<message>`.
+
+  python3 tools/dst/chase.py --stage cleared:5 --stage stage:2 \\
+      --stage 'new run from the menus after a descent' \\
+      --out engine/dst/corpus/regression-new-run-resets-stage.json
+
+A stage lists several keys to reach them together. `--from TAPE [--at N]`
+starts from a tape's first N commands, such as a boss room entry. The
+written tape is replayed, and kept only if the replay reaches every stage's
+keys.
+"""
+import argparse
+import json
+import os
+import pathlib
+import subprocess
+import sys
+import time
+
+
+def run(binary, arguments):
+    return subprocess.run([binary, *arguments], check=False, capture_output=True, text=True)
+
+
+def replay(binary, tape, report):
+    """The replayed tape's report: reached keys and failed properties."""
+    run(binary, ["--replay", str(tape), "--report", str(report), "--allow-unmet"])
+    result = json.loads(report.read_text())
+    failed = [p["message"] for p in result["properties"] if p["status"] == "failed"]
+    return set(result["coverage"]["reached"]), failed
+
+
+def write_tape(path, tape, length):
+    path.write_text(json.dumps({**tape, "commands": tape["commands"][:length]}, separators=(",", ":")))
+
+
+def chase(args, work):
+    prefix = None
+    if args.source:
+        source = json.loads(args.source.read_text())
+        prefix = work / "from.json"
+        write_tape(prefix, source, args.at or len(source["commands"]))
+    for index, keys in enumerate(args.stage):
+        keys = set(keys)
+        last = index == len(args.stage) - 1
+        if prefix:
+            before, _ = replay(args.binary, prefix, work / f"stage-{index}-prefix.json")
+            if keys <= before:
+                print(f"stage {index}: the prefix already reaches {sorted(keys)}")
+                continue
+            if keys & before:
+                print(f"stage {index}: the prefix already reaches {sorted(keys & before)}; "
+                      "their first steps cannot show a later hit", file=sys.stderr)
+                return None
+        found = None
+        for attempt in range(args.rounds):
+            seed = args.seed + 1000 * index + attempt
+            out = work / f"stage-{index}-{attempt}"
+            arguments = ["--units", "game", "--cases", str(args.cases), "--steps", str(args.steps),
+                         "--seed", str(seed), "--tapes", str(out / "tapes"),
+                         "--report", str(out / "report.json"), "--retain-all", "--allow-unmet"]
+            if prefix:
+                arguments += ["--resume", str(prefix)]
+            started = time.monotonic()
+            run(args.binary, arguments)
+            first_steps = json.loads((out / "report.json").read_text())["coverage"]["firstSteps"]
+            hits = sorted(
+                (max(first[key] for key in keys), label)
+                for label, first in first_steps.items()
+                if keys <= first.keys()
+            )
+            partial = {key: sum(key in first for first in first_steps.values()) for key in sorted(keys)}
+            print(f"stage {index} round {attempt} (seed {seed}, {time.monotonic() - started:.0f}s): "
+                  f"{len(hits)} of {len(first_steps)} cases reach {sorted(keys)}; per key {partial}")
+            if hits:
+                step, label = hits[0]
+                tape = json.loads((out / "tapes" / f"{label}-case.json").read_text())
+                extend = args.final_extend if last else args.extend
+                length = min(step + 1 + extend, len(tape["commands"]))
+                found = work / f"stage-{index}.json"
+                write_tape(found, tape, length)
+                print(f"stage {index}: {label} reaches it at command {step}; prefix is now {length} commands")
+                break
+        if not found:
+            return None
+        prefix = found
+    return prefix
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--stage", action="append", nargs="+", required=True, metavar="KEY",
+                        help="census keys one stage must reach together (repeat per stage)")
+    parser.add_argument("--from", dest="source", type=pathlib.Path, help="start from this tape")
+    parser.add_argument("--at", type=int, help="with --from, keep only its first N commands")
+    parser.add_argument("--cases", type=int, default=64, help="cases branched per round")
+    parser.add_argument("--steps", type=int, default=3000, help="generated commands per branched case")
+    parser.add_argument("--rounds", type=int, default=4, help="rounds a stage gets before giving up")
+    parser.add_argument("--extend", type=int, default=30, help="commands kept past a stage before branching")
+    parser.add_argument("--final-extend", type=int, default=300, help="commands kept past the last stage")
+    parser.add_argument("--seed", type=int, default=int.from_bytes(os.urandom(6), "little"))
+    parser.add_argument("--work", type=pathlib.Path, help="keep stage runs here (default .cache/dst/chase-*)")
+    parser.add_argument("--out", type=pathlib.Path, required=True, help="where the verified tape goes")
+    parser.add_argument("--binary", default="engine/dst/target/release/rebirth-dst")
+    args = parser.parse_args()
+    work = args.work or pathlib.Path(f".cache/dst/chase-{args.seed}")
+    work.mkdir(parents=True, exist_ok=True)
+    print(f"chase seed {args.seed}, stage runs in {work}")
+    tape = chase(args, work)
+    if not tape:
+        print("no case reached the stage; raise --cases, --steps or --rounds", file=sys.stderr)
+        return 1
+    wanted = set().union(*map(set, args.stage))
+    reached, failed = replay(args.binary, tape, work / "verify.json")
+    if not wanted <= reached:
+        print(f"{tape}: replay misses {sorted(wanted - reached)}; not written", file=sys.stderr)
+        return 1
+    args.out.write_text(tape.read_text())
+    commands = len(json.loads(tape.read_text())["commands"])
+    print(f"wrote {args.out} ({commands} commands)")
+    for message in failed:
+        print(f"the tape fails: {message}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

@@ -266,6 +266,53 @@ impl DecorationRng {
         self.state ^= self.state >> 7;
         self.state
     }
+
+    /// RNG::RandomFloat 5c2db0: the next word times 2.3283064e-10 in f32.
+    fn float(&mut self) -> f32 {
+        self.next() as f32 * 2.328_306_4e-10
+    }
+}
+
+/// Backdrop::pre_render_walls 424440 on the Basement backdrop (1) in a
+/// boss room (type 5, not RoomData 5000): after pre_render_floor's patches
+/// and Random(walls), each grid cell inside the room shrunk by 20 that wins
+/// a local Int(2) gets a BloodSplat 1000.7 scaled local.Float·2.5 + 0.5.
+/// Returns the splat cells and scales in grid order; the caller draws each
+/// splat's MT.next seed and immediate Update in turn (4270ac).
+pub(crate) fn basement_boss_blood(
+    room: &Room,
+    stage: u32,
+) -> Result<Vec<(motion::WorldVector, f32)>, String> {
+    let Some(descriptor) = &room.descriptor else {
+        return Ok(Vec::new());
+    };
+    let template = &descriptor.template;
+    if stage > 2 || template.room_type != 5 || template.variant == 5000 {
+        return Ok(Vec::new());
+    }
+    let grid = crate::grid::Grid::new(
+        room.grid
+            .clone()
+            .ok_or("boss-room blood scatter requires the room grid")?,
+    )?;
+    let mut rng = DecorationRng::new(descriptor.decoration_seed);
+    floor_patches(&mut rng);
+    rng.next();
+    let mut splats = Vec::new();
+    for index in 0..grid.descriptor().cells.len() {
+        if rng.next().is_multiple_of(2) {
+            continue;
+        }
+        let position = grid
+            .position(index)
+            .ok_or("boss-room blood scatter cell outside its grid")?;
+        if grid.clamp_room(position, 20.0) != position {
+            continue;
+        }
+        let scale = rng.float() * 2.5 + 0.5;
+        splats.push((position, scale));
+    }
+    Ok(splats)
 }
 
 /// Room backdrop setup 5c5b30 reloads fxlayers.xml (5c5be3 -> 5489b0) on

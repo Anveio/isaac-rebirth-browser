@@ -11,6 +11,7 @@
     "build": "npm run build:wasm && vite build",
     "playtest:bundle": "node tools/playtest/bundle.mjs",
     "playtest:self": "node tools/playtest/playtest.mjs",
+    "playtest:video": "node tools/playtest/side-by-side.mjs",
     "typecheck": "tsc --noEmit",
     "test:browser": "bash tools/original/with-display.sh node node_modules/@playwright/test/cli.js test",
     "check": "npm run check:build && npm run test:e2e",
