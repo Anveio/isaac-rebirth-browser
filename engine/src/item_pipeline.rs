@@ -1559,5 +1559,7 @@ pub(crate) fn resolve_luck(
     if !LuckStage::admits(inputs, source_player_type) {
         return Ok(None);
     }
-    LuckPlan::from_owned(inputs, auxiliary, run_flags).evaluate().map(Some)
+    LuckPlan::from_owned(inputs, auxiliary, run_flags)
+        .evaluate()
+        .map(Some)
 }

@@ -2,11 +2,11 @@
 //! Caller permissions for each item/cache/getter remain independent of this
 //! concrete actor chain. In particular this does not admit items153/245.
 use crate::{
-    State,
     actors::{ActorKind, ActorRef},
-    knives::{CONTROLLED, ChildChain, Knife},
+    knives::{ChildChain, Knife, CONTROLLED},
     phase::Phase,
     player_items::PlayerItems,
+    State,
 };
 use std::collections::BTreeSet;
 
@@ -236,7 +236,9 @@ pub(crate) fn advance_body(
     if orphan {
         knife.remove();
     }
-    if knife.entity_flags & 0x4000 == 0 && (crate::knives::source_game_counter(game_age) as i32) % 3 == 0 {
+    if knife.entity_flags & 0x4000 == 0
+        && (crate::knives::source_game_counter(game_age) as i32) % 3 == 0
+    {
         knife.hit_sequences.clear();
     }
     if knife.fast {

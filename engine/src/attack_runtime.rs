@@ -844,7 +844,10 @@ pub(crate) fn advance_actor(
         //473584 ->47325E tests attraction0x800000 before473380's Full
         //operator. The mapped common tail closes only neutral0/bit33.
         if !matches!(state.knives[index].subtype, 0 | 1)
-            || !matches!(state.knives[index].attack_flags.0, 0 | crate::knives::CONTROLLED)
+            || !matches!(
+                state.knives[index].attack_flags.0,
+                0 | crate::knives::CONTROLLED
+            )
         {
             return Err("Knife orphan body flags or subtype have no admitted actor effect".into());
         }
@@ -1163,8 +1166,8 @@ pub(crate) fn knife_contacts(
                 kind: ActorKind::Player,
                 id: 0,
             });
-        let parent_is_known_null = state.knives[index].parent.is_none()
-            && state.knives[index].parent_null_known;
+        let parent_is_known_null =
+            state.knives[index].parent.is_none() && state.knives[index].parent_null_known;
         if state.knives[index].parent.is_none()
             && !parent_is_known_null
             && (state.knives[index].subtype == 1
