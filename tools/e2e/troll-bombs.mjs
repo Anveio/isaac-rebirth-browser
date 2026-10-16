@@ -10,7 +10,7 @@ import { fileURLToPath } from 'node:url';
 import { chromium } from '@playwright/test';
 import { browserLaunchOptions, inspectBrowserGraphics } from '../foundation/browser.mjs';
 import { startProductionServer } from '../foundation/production-server.mjs';
-import { assertInputProvenance, enterSeededRun, manualSeedCommands, waitForReady } from '../foundation/verify.mjs';
+import { assertInputProvenance, enterSeededRun, manualSeedCommands, resetBootElapsed, waitForReady } from '../foundation/verify.mjs';
 import { stepSnapshot } from './lib/game.mjs';
 import { ORIGINAL_SHA, assertOriginalBinary } from './lib/original.mjs';
 
@@ -115,9 +115,9 @@ try {
     try {
       await page.goto(`${server.url}/?manual=1`);
       await waitForReady(page);
-      await page.evaluate(({ seedValue, bootEpochSeed }) => {
-        window.game.pause(); window.game.reset(seedValue, { trace: true, bootEpochSeed });
-      }, { seedValue: item.seedValue, bootEpochSeed: scenarios.bootEpochSeed });
+      await page.evaluate(({ seedValue, bootEpochSeed, bootElapsed }) => {
+        window.game.pause(); window.game.reset(seedValue, { trace: true, bootEpochSeed, bootElapsed });
+      }, { seedValue: item.seedValue, bootEpochSeed: scenarios.bootEpochSeed, bootElapsed: resetBootElapsed(native.tape) });
       // Source-qualified menu/seed/run intervals and every tick are declared
       // before execution; deferred Music run admission is never bypassed.
       const expected = [...manualSeedCommands(item.code)];

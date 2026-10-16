@@ -5,6 +5,11 @@ import {mkdir, readFile, writeFile} from 'node:fs/promises';
 import {join} from 'node:path';
 import {writeJsonEvidence} from './browser-evidence.mjs';
 import {BrowserProgress} from './composition-progress.mjs';
+import {resetBootElapsed} from './verify.mjs';
+
+// composition-run.py's declared native intro before the shared Title path.
+const DECLARED_NATIVE_INTRO=[{type:'step',frames:180},{type:'key',key:'Return',down:true},{type:'step',frames:12},
+  {type:'key',key:'Return',down:false},{type:'step',frames:72}];
 
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 const keyNames = {Return:'Enter',Tab:'Tab',Down:'ArrowDown',Up:'ArrowUp',Left:'ArrowLeft',Right:'ArrowRight',space:'Space'};
@@ -133,9 +138,9 @@ export async function captureComposition(browser, server, declaration, directory
     await page.goto(server.url+'/?manual=1');
     await page.waitForFunction(()=>['true','failed'].includes(document.body.dataset.ready));
     assert.equal(await page.evaluate(()=>document.body.dataset.ready),'true');
-    await page.evaluate(({initialSeed,bootEpochSeed,resources})=>{
-      window.game.pause();window.game.reset(initialSeed,{bootEpochSeed,resources,trace:true});
-    },resetInput);
+    await page.evaluate(({initialSeed,bootEpochSeed,resources,bootElapsed})=>{
+      window.game.pause();window.game.reset(initialSeed,{bootEpochSeed,resources,bootElapsed,trace:true});
+    },{...resetInput,bootElapsed:resetBootElapsed(DECLARED_NATIVE_INTRO)});
     if (declaration.pocketInit || declaration.pocketCollection) {
       assert.ok(Number.isFinite(declaration.sfxVolume) && declaration.sfxVolume>=0 && declaration.sfxVolume<=1);
       await page.evaluate(volume=>window.game.command({type:'audioVolume',sfx_volume:volume}),declaration.sfxVolume);

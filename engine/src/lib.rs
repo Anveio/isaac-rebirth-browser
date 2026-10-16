@@ -2774,7 +2774,7 @@ impl Game {
                         .expect("first entered descriptor has authored admission")
                         .selectors
                         .clone();
-                    let counter = self.state.game_update_count.wrapping_add(1);
+                    let counter = self.state.game_update_count;
                     self.admit_room_pickups(&selectors, counter, false)?;
                     item_queries::note_room_placement(&mut self.state);
                     self.admitted_update_footprint(phase)?;
@@ -3586,9 +3586,8 @@ impl Game {
             phase,
             &mut self.state.boot_lifecycle.shared,
             &mut entities::NpcWorld {
-                // Native Game+ce9f4 is one more than game_update_count (the
-                // run-loader origin); AI frame gates read the native value.
-                game_counter: self.state.game_update_count.wrapping_add(1),
+                // AI frame gates read native Game+ce9f4 (game_update_count).
+                game_counter: self.state.game_update_count,
                 player,
                 player_velocity,
                 grid: &grid,

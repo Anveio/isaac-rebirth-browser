@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 import { chromium } from '@playwright/test';
 import { browserLaunchOptions, inspectBrowserGraphics } from '../foundation/browser.mjs';
 import { startProductionServer } from '../foundation/production-server.mjs';
-import { waitForReady } from '../foundation/verify.mjs';
+import { resetBootElapsed, waitForReady } from '../foundation/verify.mjs';
 import { installBrowserAudioObserver } from './audio-api-observer.mjs';
 import { snapshot, step } from './lib/game.mjs';
 import { ORIGINAL_SHA, assertOriginalBinary } from './lib/original.mjs';
@@ -109,8 +109,9 @@ try {
       page = await browser.newPage(); const errors = []; page.on('pageerror', error => errors.push(String(error)));
       await page.addInitScript(installBrowserAudioObserver);
       await page.goto(production.url + '/?manual=1'); await waitForReady(page);
-      await page.evaluate(({ seed, boot, volume }) => { window.game.pause(); window.game.reset(seed, { bootEpochSeed: boot, trace: true });
-        window.game.command({ type: 'audioVolume', sfx_volume: volume }); }, { seed: native.seedValue, boot: scenario.bootEpochSeed, volume: scenario.volume });
+      await page.evaluate(({ seed, boot, bootElapsed, volume }) => { window.game.pause(); window.game.reset(seed, { bootEpochSeed: boot, bootElapsed, trace: true });
+        window.game.command({ type: 'audioVolume', sfx_volume: volume }); },
+        { seed: native.seedValue, boot: scenario.bootEpochSeed, bootElapsed: resetBootElapsed(tape.native), volume: scenario.volume });
       check('initial autoplay suspended', (await page.evaluate(() => window.game.audio())).contextState, 'suspended');
       await page.locator('#game').click();
       await page.waitForFunction(() => window.game.audio().contextState === 'running');

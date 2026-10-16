@@ -67,23 +67,27 @@ export async function waitForReady(page) {
 // foundation-clock-run.py presents this many loader frames before replaying a
 // declared tape (its `step 30` bootstrap).
 export const NATIVE_LOADER_PRESENTATIONS = 30;
-// The browser resets at the original's first rendered Title; the Title settles
-// this many presentations later, before the first menu press.
+// The browser resets at the original's first rendered Title, this many
+// presentations after the intro-skip key is released (audio's `title-ready`).
+export const TITLE_FIRST_RENDER_AFTER_SKIP = 9;
+// The Title then settles for this many presentations before the first press.
 export const TITLE_SETTLE_TICKS = 63;
 export const PRESENTATION_NS = 16_667_000;
 
 // The original's wall clock has advanced through every native presentation
-// before the browser reset: its loader frames and the declared tape up to the
-// first menu press (the press after the intro skip), less the Title settle the
-// browser still replays. Derived from the case's declared tape, never fitted.
+// before the browser reset: its loader frames, the declared tape through the
+// intro-skip release, and the Title's first render. Derived from the case's
+// declared tape, never fitted.
 export function resetBootElapsed(nativeTape) {
   assert.ok(Array.isArray(nativeTape), "Boot clock derivation requires the declared native tape");
-  const presses = nativeTape.flatMap((action, index) => action.type === "key" && action.down ? [index] : []);
-  assert.ok(presses.length >= 2, "Declared native tape must skip the intro and then press a Title menu key");
-  const frames = nativeTape.slice(0, presses[1]).reduce((sum, action) => sum + (action.type === "step" ? action.frames : 0), 0);
-  const presentations = NATIVE_LOADER_PRESENTATIONS + frames - TITLE_SETTLE_TICKS;
-  assert.ok(Number.isSafeInteger(presentations) && presentations >= 0, "Declared tape reaches the Title before the browser reset");
-  const nanoseconds = presentations * PRESENTATION_NS;
+  const release = nativeTape.findIndex(action => action.type === "key" && !action.down);
+  assert.ok(release > 0, "Declared native tape must skip the intro with a key press and release");
+  const frames = nativeTape.slice(0, release).reduce((sum, action) => sum + (action.type === "step" ? action.frames : 0), 0);
+  const after = nativeTape.slice(release + 1);
+  const firstKey = after.findIndex(action => action.type === "key");
+  const settled = after.slice(0, firstKey < 0 ? after.length : firstKey).reduce((sum, action) => sum + (action.type === "step" ? action.frames : 0), 0);
+  assert.ok(settled >= TITLE_FIRST_RENDER_AFTER_SKIP, "Declared tape must reach the Title before its next key");
+  const nanoseconds = (NATIVE_LOADER_PRESENTATIONS + frames + TITLE_FIRST_RENDER_AFTER_SKIP) * PRESENTATION_NS;
   return { milliseconds: Math.floor(nanoseconds / 1e6), subMillisecondNanoseconds: nanoseconds % 1e6 };
 }
 

@@ -185,7 +185,7 @@ pub(crate) fn admit(state: &mut State, parent: u32, birth: LaserBirth) -> Result
         id,
         birth.variant,
         birth.spawn_seed,
-        state.game_update_count.wrapping_add(1),
+        state.game_update_count,
         config,
     );
     laser.parent = Some(ActorRef {
@@ -346,7 +346,7 @@ fn update(
             return Ok(());
         }
     }
-    let counter = state.game_update_count.wrapping_add(1);
+    let counter = state.game_update_count;
     if counter.is_multiple_of(2)
         && !interpolating
         && counter.wrapping_sub(laser.birth_game_update) as i32 > 0

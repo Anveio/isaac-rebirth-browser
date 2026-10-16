@@ -407,8 +407,8 @@ pub(crate) fn advance(state: &mut State, phase: Phase, id: u32) -> Result<(), St
             }
             Ok(())
         }
-        // Inside full callbacks Game+ce9f4 reads game_update_count+1.
-        Phase::Update => update(state, id, state.game_update_count.wrapping_add(1)),
+        // Inside full callbacks Game+ce9f4 reads game_update_count.
+        Phase::Update => update(state, id, state.game_update_count),
     }
 }
 

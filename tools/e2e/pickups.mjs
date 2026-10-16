@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 import { chromium } from '@playwright/test';
 import { browserLaunchOptions, inspectBrowserGraphics } from '../foundation/browser.mjs';
 import { startProductionServer } from '../foundation/production-server.mjs';
-import { assertInputProvenance, assertSeededRun, enterSeededRun, manualSeedCommands, waitForReady } from '../foundation/verify.mjs';
+import { assertInputProvenance, assertSeededRun, enterSeededRun, manualSeedCommands, resetBootElapsed, waitForReady } from '../foundation/verify.mjs';
 import { snapshot, stepSnapshot } from './lib/game.mjs';
 import { ORIGINAL_SHA, assertOriginalBinary } from './lib/original.mjs';
 
@@ -82,9 +82,9 @@ try {
     try {
       await page.goto(`${server.url}/?manual=1`);
       await waitForReady(page);
-      await page.evaluate(({ seedValue, bootEpochSeed }) => {
-        window.game.pause(); window.game.reset(seedValue, { trace: true, bootEpochSeed });
-      }, { seedValue: item.seedValue, bootEpochSeed: scenarios.bootEpochSeed });
+      await page.evaluate(({ seedValue, bootEpochSeed, bootElapsed }) => {
+        window.game.pause(); window.game.reset(seedValue, { trace: true, bootEpochSeed, bootElapsed });
+      }, { seedValue: item.seedValue, bootEpochSeed: scenarios.bootEpochSeed, bootElapsed: resetBootElapsed(native.tape) });
       const start = await enterSeededRun(page, item.code);
       assert.equal(start.screen, 'playing');
       assert.equal(start.runSeedValue, item.seedValue);

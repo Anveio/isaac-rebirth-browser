@@ -256,7 +256,7 @@ pub(crate) fn hurt_player(state: &mut State) -> Result<(), String> {
 
 pub(crate) fn advance(state: &mut State, phase: Phase, id: u32) -> Result<(), String> {
     let player = crate::bombs::player_world(state);
-    let game_counter = state.game_update_count.wrapping_add(1);
+    let game_counter = state.game_update_count;
     let effect = state
         .sprite_effects
         .iter_mut()

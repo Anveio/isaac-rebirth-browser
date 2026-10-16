@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 import { chromium } from '@playwright/test';
 import { browserLaunchOptions, inspectBrowserGraphics } from '../foundation/browser.mjs';
 import { startProductionServer } from '../foundation/production-server.mjs';
-import { waitForReady } from '../foundation/verify.mjs';
+import { resetBootElapsed, waitForReady } from '../foundation/verify.mjs';
 import { TearContracts } from './tear-contracts.mjs';
 import { snapshot, step, stepSnapshot } from './lib/game.mjs';
 import { ORIGINAL_SHA, assertOriginalBinary } from './lib/original.mjs';
@@ -94,7 +94,7 @@ try {
   page=await browser.newPage();const errors=[];page.on('pageerror',error=>errors.push(String(error)));
   await page.goto(`${production.url}/?manual=1`);await waitForReady(page);
   initialSeed=scenario.seedValue??native.seedValue;seedValue=native.seedValue;
-  await page.evaluate(({initialSeed,epoch})=>{window.game.pause();window.game.reset(initialSeed,{trace:true,bootEpochSeed:epoch});},{initialSeed,epoch});
+  await page.evaluate(({initialSeed,epoch,bootElapsed})=>{window.game.pause();window.game.reset(initialSeed,{trace:true,bootEpochSeed:epoch,bootElapsed});},{initialSeed,epoch,bootElapsed:resetBootElapsed(native.tape)});
   // Match the declared native tape through the actual delayed run admission.
   // These intervals are public inputs, never a fitted game/counter offset.
   for(let i=0;i<3;i++){
