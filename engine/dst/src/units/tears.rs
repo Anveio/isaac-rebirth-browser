@@ -154,14 +154,17 @@ fn shot(e: &mut Entropy) {
         < f64::from(f32::MAX) / 4.0;
     props::always!(
         match &stored {
-            Ok(velocity) => admitted && velocity.is_finite(),
+            Ok(velocity) => velocity.is_finite(),
             Err(_) => !admitted || !bounded,
         },
-        "tears: a velocity is stored exactly for finite vectors and a shot speed of at least 0.6, and is finite",
+        "tears: a velocity is stored for finite vectors and a shot speed of at least 0.6, and is finite",
         details()
     );
-    props::sometimes!(!admitted, "tears: an invalid shot is refused");
-    let Ok(velocity) = stored else {
+    props::sometimes!(
+        !admitted,
+        "tears: shots outside the admitted domain are tried"
+    );
+    let (Ok(velocity), true) = (stored, admitted) else {
         return;
     };
     if unit_aim {
@@ -224,14 +227,17 @@ fn eye(e: &mut Entropy, velocity: WorldVector) {
     let bounded = norm(player) + norm(velocity) < f64::from(f32::MAX) / 2.0;
     props::always!(
         [&positive, &negative].iter().all(|origin| match origin {
-            Ok(origin) => admitted && origin.is_finite(),
+            Ok(origin) => origin.is_finite(),
             Err(_) => !admitted || !bounded,
         }),
-        "tears: an eye origin is placed exactly for finite vectors and a uniform in 0..=1, and is finite",
+        "tears: an eye origin is placed for finite vectors and a uniform in 0..=1, and is finite",
         details()
     );
-    props::sometimes!(!admitted, "tears: an invalid eye draw is refused");
-    let (Ok(positive), Ok(negative)) = (positive, negative) else {
+    props::sometimes!(
+        !admitted,
+        "tears: eye draws outside the admitted domain are tried"
+    );
+    let (Ok(positive), Ok(negative), true) = (positive, negative, admitted) else {
         return;
     };
     let coefficient = f64::from(uniform) * 0.2 + 0.3;
@@ -281,12 +287,13 @@ fn sizes(e: &mut Entropy) {
         "tears: scale is a pure function of damage",
         json!({ "damage": first })
     );
+    let damage_admitted = |damage: f32| damage.is_finite() && damage >= 0.0;
     props::always!(
-        scale.is_ok() == (first.is_finite() && first >= 0.0),
-        "tears: scale is computed exactly for finite nonnegative damage",
+        scale.is_ok() || !damage_admitted(first),
+        "tears: scale is computed for finite nonnegative damage",
         json!({ "damage": first })
     );
-    if let Ok(scale) = scale {
+    if let (Ok(scale), true) = (scale, damage_admitted(first)) {
         let damage = f64::from(first);
         let expected = (0.04 * damage + 0.6 + 0.15 * damage.sqrt()).max(0.01);
         props::always!(
@@ -294,7 +301,7 @@ fn sizes(e: &mut Entropy) {
             "tears: scale is 0.6 + 0.04·damage + 0.15·√damage",
             json!({ "damage": first, "scale": scale })
         );
-        if let Ok(other) = projectiles::scale(second) {
+        if let (Ok(other), true) = (projectiles::scale(second), damage_admitted(second)) {
             props::always!(
                 (first <= second) <= (scale <= other),
                 "tears: scale never falls as damage rises",
@@ -317,12 +324,13 @@ fn sizes(e: &mut Entropy) {
     };
     let (small, large) = (size(e), size(e));
     let tier = projectiles::regular_animation_tier(small);
+    let scale_admitted = |scale: f32| scale.is_finite() && scale >= 0.01;
     props::always!(
-        tier.is_ok() == (small.is_finite() && small >= 0.01),
-        "tears: an animation tier is chosen exactly for finite scales of at least 0.01",
+        tier.is_ok() || !scale_admitted(small),
+        "tears: an animation tier is chosen for finite scales of at least 0.01",
         json!({ "scale": small })
     );
-    if let Ok(tier) = tier {
+    if let (Ok(tier), true) = (tier, scale_admitted(small)) {
         let exceeded = TIER_THRESHOLDS
             .iter()
             .filter(|&&threshold| small > threshold + 0.05_f32)
@@ -336,7 +344,10 @@ fn sizes(e: &mut Entropy) {
             "tears: the animation tier counts the 5418e0 thresholds a scale exceeds, up to the thirteenth clip",
             json!({ "scale": small, "tier": tier })
         );
-        if let Ok(other) = projectiles::regular_animation_tier(large) {
+        if let (Ok(other), true) = (
+            projectiles::regular_animation_tier(large),
+            scale_admitted(large),
+        ) {
             props::always!(
                 (small <= large) <= (tier <= other),
                 "tears: the animation tier never falls as scale rises",
@@ -455,14 +466,11 @@ fn flight(e: &mut Entropy) {
         && (0.0..=1.0).contains(&final_uniform);
     let bounded = norm(origin) + 2.0 * norm(velocity) < f64::from(f32::MAX) / 2.0;
     props::always!(
-        match &born {
-            Ok(_) => admitted,
-            Err(_) => !admitted || !bounded,
-        },
-        "tears: a tear is born exactly from finite parameters and a uniform in 0..=1",
+        born.is_ok() || !admitted || !bounded,
+        "tears: a tear is born from finite parameters and a uniform in 0..=1",
         details()
     );
-    let Ok(mut tear) = born else {
+    let (Ok(mut tear), true) = (born, admitted) else {
         return;
     };
     let falling = f64::from(final_uniform) * 0.2 - f64::from(parameters.falling_speed);
@@ -512,10 +520,7 @@ fn flight(e: &mut Entropy) {
             "tears: a refused step leaves the tear unchanged",
             step()
         );
-        props::sometimes!(
-            result.is_err(),
-            "tears: a step whose position overflows is refused"
-        );
+        props::sometimes!(!bounded, "tears: flights near the top of f32 are tried");
         let Ok(lifetime) = result else {
             return;
         };

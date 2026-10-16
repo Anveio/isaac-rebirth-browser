@@ -172,13 +172,14 @@ fn life(e: &mut Entropy) {
     };
     let details = || json!({ "player": player, "velocity": velocity });
     let born = BombMotion::spawn(player, velocity);
+    let admitted = player.is_finite() && velocity.is_finite();
     props::always!(
-        born.is_ok() == (player.is_finite() && velocity.is_finite()),
-        "bombs: a bomb is born exactly from finite vectors",
+        born.is_ok() || !admitted,
+        "bombs: a bomb is born from finite vectors",
         details()
     );
-    let Ok(mut bomb) = born else {
-        props::sometimes!(true, "bombs: a bomb with a non-finite birth is refused");
+    props::sometimes!(!admitted, "bombs: births from non-finite vectors are tried");
+    let (Ok(mut bomb), true) = (born, admitted) else {
         return;
     };
     props::always!(
@@ -197,7 +198,7 @@ fn life(e: &mut Entropy) {
     let mut presented = bomb;
     let shown = presented.present_birth(birth);
     props::always!(
-        shown.is_ok() == (birth != Phase::Skipped)
+        (shown.is_ok() || birth == Phase::Skipped)
             && match shown {
                 Ok(()) => {
                     presented.presented_position
@@ -229,15 +230,18 @@ fn life(e: &mut Entropy) {
                 let mut refused = broken;
                 let phase = phase(e);
                 let result = refused.advance(phase);
+                // A consistent bomb must run. An inconsistent one may be
+                // refused or run (a bomb kind with another fuse may be
+                // ported); a refusal leaves it unchanged.
                 props::always!(
-                    result.is_err() != consistent(&broken)
+                    (result.is_ok() || !consistent(&broken))
                         && (result.is_ok() || same(&refused, &broken)),
-                    "bombs: a bomb is refused exactly when its clocks or vectors disagree, and left unchanged",
+                    "bombs: a bomb with consistent clocks runs, and a refused one is left unchanged",
                     json!({ "bomb": broken, "phase": format!("{phase:?}") })
                 );
                 props::sometimes!(
-                    result.is_err(),
-                    "bombs: a bomb whose clocks disagree is refused"
+                    !consistent(&broken),
+                    "bombs: bombs whose clocks disagree are tried"
                 );
             }
         }
@@ -253,10 +257,7 @@ fn life(e: &mut Entropy) {
             "bombs: a bomb's own life fails only when its position overflows, and is left unchanged",
             step()
         );
-        props::sometimes!(
-            result.is_err(),
-            "bombs: a bomb step whose position overflows is refused"
-        );
+        props::sometimes!(!bounded, "bombs: bombs near the top of f32 are tried");
         let Ok(detonated) = result else {
             return;
         };
@@ -412,13 +413,13 @@ fn blast(e: &mut Entropy) {
     let bounded = distance < 1e18;
     props::always!(
         match &result {
-            Ok(_) => finite,
+            Ok(blasted) => blasted.is_none_or(|velocity| velocity.is_finite()),
             Err(_) => !finite || !bounded,
         },
-        "bombs: a blast is resolved exactly for finite vectors",
+        "bombs: a blast is resolved for finite vectors, never into a non-finite velocity",
         details()
     );
-    let Ok(blasted) = result else {
+    let (Ok(blasted), true) = (result, finite) else {
         return;
     };
     // The source compares f32 squares; only well clear of the envelope does

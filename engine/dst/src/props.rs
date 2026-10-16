@@ -96,6 +96,11 @@ impl Site {
         if !self.registered.swap(true, Ordering::Relaxed) {
             SITES.lock().expect("property ledger").push(self);
         }
+        // What the verdict counts toward meeting the property: a hit for an
+        // `always`, a true hit for a `sometimes` or `reachable`.
+        if self.kind != Kind::Unreachable && (condition || self.kind == Kind::Always) {
+            crate::coverage::met(self as *const Self as usize, self.message);
+        }
         if condition {
             self.passes.fetch_add(1, Ordering::Relaxed);
             return;

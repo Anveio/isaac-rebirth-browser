@@ -333,6 +333,7 @@ export interface State {
   persistedRooms: Record<string, Room>;
   stageTransition: {state: number; counter: number; sameStage: boolean; animation: number};
   roomTransition: {fromRoom: number; targetRoom: number; fromSlot: number; targetSlot: number; phase: "out" | "in" | "bossScene" | "bossCleanup"; fullUpdates: number; bossScene: {presentationIndex: number; animationFrame: number; animationPlaying: boolean} | null} | null;
+  departureVelocity?: {x: number; y: number};
   sourceCacheRunFlags: number | null;
   sourceShotSpeedMinimum?: boolean;
   playerStats: {shotSpeed: number; damage: number; tearHeight: number; tearFallingSpeed: number; tearFallingAcceleration: number; moveSpeed: number; luck: number | null};
