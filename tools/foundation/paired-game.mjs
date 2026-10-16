@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { execFile } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, symlinkSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
@@ -61,7 +61,7 @@ function independentDraws(caseData, directory) {
   return { label: after, gameUpdateCount: frame.state.gameUpdateCount };
 }
 
-async function nativeCapture(caseData, directory, nativeFrameTimeout, originalObserver, archiveNativeEvidence, originalSfxVolume, mtDraws, glTrace) {
+async function nativeCapture(caseData, directory, nativeFrameTimeout, originalObserver, archiveNativeEvidence, originalSfxVolume, mtDraws, glTrace, deferEvidence = false, reuseExisting = false) {
   mkdirSync(directory, { recursive: true });
   const args = ['tools/original/with-display.sh', 'python3', 'tools/original/foundation-clock-run.py',
     '--seed', caseData.seed, '--tape', join(dirname(directory), 'tape.json'),
@@ -71,13 +71,20 @@ async function nativeCapture(caseData, directory, nativeFrameTimeout, originalOb
   if (mtDraws) args.push('--mt-trace');
   if (glTrace) args.push('--gl-trace', glTrace);
   let error;
-  try {
+  if (!reuseExisting) try {
     const result = await runProcess('bash', args, { cwd: ROOT, maxBuffer: 8 * 1024 * 1024 });
     writeFileSync(join(directory, 'controller-output.txt'), result.stdout + result.stderr);
   } catch (failure) {
     error = String(failure.message);
     writeFileSync(join(directory, 'controller-output.txt'), String(failure.stdout || '') + String(failure.stderr || '') + error);
   }
+  if (deferEvidence) return { status: error ? 'fail' : 'deferred-evidence', error, directory,
+    manifestPath: join(directory, archiveNativeEvidence ? 'manifest.json.gz' : 'manifest.json'),
+    deferredEvidence: () => readCapturedNative(directory, archiveNativeEvidence, error) };
+  return readCapturedNative(directory, archiveNativeEvidence, error);
+}
+
+async function readCapturedNative(directory, archiveNativeEvidence, error) {
   let manifest;
   const manifestPath = join(directory, archiveNativeEvidence ? 'manifest.json.gz' : 'manifest.json');
   let evidence;
@@ -295,7 +302,7 @@ function comparePair(caseData, native, browser, directory, exactPixels, stateCom
   return checks;
 }
 
-export async function runPairedGate({ output, selected, randomCount = 2, replaySeeds = [], replayCases = [], exactPixels = false, productionDirectory,
+export async function runPairedGate({ output, selected, randomCount = 2, replaySeeds = [], replayCases = [], exactPixels = false, productionDirectory, reuseOriginalDirectory,
   nativeFrameTimeout = 60, originalObserver = 'tools/original/foundation-paired-observer.py',
   stateComparator = scopedState, archiveBrowserEvidence = false, archiveNativeEvidence = false, captureBrowserAudio = false,
   originalSfxVolume, mtDraws = process.argv.includes('--mt-draws') || process.env.E2E_MT_DRAWS === '1',
@@ -304,7 +311,7 @@ export async function runPairedGate({ output, selected, randomCount = 2, replayS
     'Native frame timeout must be more than 0 and at most 300 host-wall seconds');
   mkdirSync(output, { recursive: true });
   let server, browser;
-  const report = { schema: 1, status: 'starting', mode: 'fresh original process paired with immutable browser production artifact',
+  const report = { schema: 1, status: 'starting', mode: reuseOriginalDirectory ? 'closed independent Original paired with fresh immutable Browser capture' : 'fresh original process paired with immutable browser production artifact',
     nativeFrameTimeout, originalSfxVolume,
     originalObserver, archiveBrowserEvidence, archiveNativeEvidence, captureBrowserAudio, mtDraws, glTrace,
     comparisons: { functional: 'Real input/phase/readback and source title, fade, player motion, pause/controller, HP, immunity, active tear/bomb counts',
@@ -325,12 +332,12 @@ export async function runPairedGate({ output, selected, randomCount = 2, replayS
         '-o', glTraceLibrary, '-ldl', '-lm'], { cwd: ROOT });
     server = await startProductionServer({ directory: productionDirectory });
     report.build = server.build;
-    browser = await chromium.launch({ ...browserLaunchOptions(), headless: false });
-    report.browserGraphics = await inspectBrowserGraphics(browser);
+    report.captureSchedule = 'sequential independent Original then Browser, one Chromium lifetime per case';
     report.status = 'running';
     const definitions = selected.map(id => ({ id, seed: 'T1PK6Y0W' }));
     for (let index = 0; index < randomCount; index++) definitions.push({ id: 'paired-random-run', seed: replaySeeds[index] });
     for (const path of replayCases) definitions.push({ id: JSON.parse(readFileSync(path, 'utf8')).scenario.id, replayCase: path });
+    assert.ok(!reuseOriginalDirectory || definitions.length === 1, 'Closed Original reuse requires exactly one declared case');
     for (const [index, definition] of definitions.entries()) {
       const directory = join(output, `${String(index).padStart(2, '0')}-${definition.id}`);
       const args = ['--scenario', definition.id, '--output', directory];
@@ -342,17 +349,41 @@ export async function runPairedGate({ output, selected, randomCount = 2, replayS
           mkdirSync(directory, { recursive: true });
           save(join(directory, 'case.json'), caseData); save(join(directory, 'tape.json'), caseData.tape);
         } else caseData = await python(args);
+        if (reuseOriginalDirectory) {
+          const source = resolve(reuseOriginalDirectory);
+          assert.deepEqual(JSON.parse(readFileSync(join(dirname(source), 'case.json'), 'utf8')), caseData,
+            'Reused Original declaration must equal the independently supplied Browser case');
+          assert.equal(digest(readFileSync(join(dirname(source), 'tape.json'))), digest(readFileSync(join(directory, 'tape.json'))),
+            'Reused Original must have the exact same public tape bytes');
+          symlinkSync(source, join(directory, 'original'), 'dir');
+          report.reusedOriginal = { directory: source, caseSha256: digest(readFileSync(join(directory, 'case.json'))),
+            scope: 'Caller-pinned completed independent Original; Browser inputs still come only from the declared case bank' };
+        }
         process.stdout.write(`Paired ${definition.id} seed ${caseData.seed}\n`);
-        // Await both independent captures even if one transport/archive fails.
-        // Remaining declared cases still run; failed capture evidence stays red.
-        const captures = await Promise.allSettled([
-          nativeCapture(caseData, join(directory, 'original'), nativeFrameTimeout, originalObserver, archiveNativeEvidence, originalSfxVolume, mtDraws, glTraceLibrary),
-          browserCapture(browser, server, caseData, join(directory, 'browser'), archiveBrowserEvidence, captureBrowserAudio, mtDraws),
+        // Both independent captures are still attempted after a rejection.
+        // Original settles before Chromium starts; each Browser closes before
+        // the next Original. Inputs and comparison laws remain unchanged.
+        const [nativeResult] = await Promise.allSettled([
+          nativeCapture(caseData, join(directory, 'original'), nativeFrameTimeout, originalObserver, archiveNativeEvidence, originalSfxVolume, mtDraws, glTraceLibrary, true, Boolean(reuseOriginalDirectory)),
         ]);
-        native = captures[0].status === 'fulfilled' ? captures[0].value
-          : {status: 'fail', error: String(captures[0].reason), directory: join(directory, 'original')};
-        candidate = captures[1].status === 'fulfilled' ? captures[1].value
-          : {status: 'fail', failures: [String(captures[1].reason)], frames: []};
+        native = nativeResult.status === 'fulfilled' ? nativeResult.value
+          : {status: 'fail', error: String(nativeResult.reason), directory: join(directory, 'original')};
+        let browserResult;
+        try {
+          browser = await chromium.launch({ ...browserLaunchOptions(), headless: false });
+          report.browserGraphics = await inspectBrowserGraphics(browser);
+          [browserResult] = await Promise.allSettled([
+            browserCapture(browser, server, caseData, join(directory, 'browser'), archiveBrowserEvidence, captureBrowserAudio, mtDraws),
+          ]);
+        } catch (error) {
+          browserResult = { status: 'rejected', reason: error };
+        } finally {
+          if (browser) await browser.close();
+          browser = undefined;
+        }
+        candidate = browserResult.status === 'fulfilled' ? browserResult.value
+          : {status: 'fail', failures: [String(browserResult.reason)], frames: []};
+        if (native.deferredEvidence) native = await native.deferredEvidence();
         const checks = comparePair(caseData, native, candidate, join(directory, 'comparison'), exactPixels, stateComparator);
         result = { id: definition.id, seed: caseData.seed, seedValue: caseData.seedValue, bootEpochSeed: caseData.bootEpochSeed,
           caseSha256: digest(readFileSync(join(directory, 'case.json'))),
@@ -377,6 +408,9 @@ export async function runPairedGate({ output, selected, randomCount = 2, replayS
       try { save(join(directory, 'report.json'), result); }
       catch (error) { result.status = 'fail'; result.evidenceWriteError = String(error); }
       process.stdout.write(`${result.status}: ${result.checks.filter(check => check.status === 'pass').length}/${result.checks.length} paired checkpoints\n`);
+      // An unresolved Chromium close must not overlap the next Original.
+      // Its failed case/report is retained; outer finally retries cleanup.
+      if (browser) break;
     }
     report.status = report.cases.length > 0 && report.cases.every(item => item.status === 'pass') ? 'pass' : 'fail';
     report.exactOriginalPixels = report.cases.every(item => item.checks.length > 0 && item.checks.every(check => check.pixels?.exactRGBA));
