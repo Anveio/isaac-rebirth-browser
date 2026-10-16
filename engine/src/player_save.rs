@@ -150,19 +150,6 @@ pub(crate) fn normalize_player(state: &mut State) -> Result<(), String> {
     if owner.active_state_d80 != 0 || owner.active_state_d84 != 0 {
         return Err("Player save normalization requires an unmapped temporary/active owner".into());
     }
-    // 510420(D74, 0): an item under a temporary effect keeps its costume
-    // (Shoop da Whoop 49 excepted), as do 181/130/86/40/299; otherwise
-    // 5102f0 erases the item config's costume entries. A known history only
-    // holds configs whose grants registered there, so this never invents a
-    // removal; an unknown history stays unknown. The null costume2 that
-    // 518120 also removes (57bee0) is not a collectible registration.
-    let active = owner.active_id;
-    let kept = owner.temporary_count(active) > 0 && active != 49;
-    if active != 0 && !kept && !matches!(active, 181 | 130 | 86 | 40 | 299) {
-        if let Some(history) = &mut owner.costume_registrations {
-            history.configuration_ids.retain(|id| *id != active);
-        }
-    }
     if !owner.temporary_collectibles.is_empty() {
         owner.clear_save_temporary_effects()?;
         //5180d0 tests the OR of removed config flags and existingD6C.
@@ -175,6 +162,24 @@ pub(crate) fn normalize_player(state: &mut State) -> Result<(), String> {
         .player_items
         .as_mut()
         .expect("checked first Player owner");
+    //51828B clears temporary effects before51829B removes the active costume.
+    // 510420(D74, 0): an item under a temporary effect keeps its costume
+    // (Shoop da Whoop 49 excepted), as do 181/130/86/40/299; otherwise
+    // 5102f0 erases the item config's costume entries. A known history only
+    // holds configs whose grants registered there, so this never invents a
+    // removal; an unknown history stays unknown. The null costume2 that
+    // 518120 also removes (57bee0) is not a collectible registration.
+    let active = owner.active_id;
+    let kept = active != 49
+        && owner
+            .temporary_collectibles
+            .iter()
+            .any(|record| record.item_id == active);
+    if active != 0 && !kept && !matches!(active, 181 | 130 | 86 | 40 | 299) {
+        if let Some(history) = &mut owner.costume_registrations {
+            history.configuration_ids.retain(|id| *id != active);
+        }
+    }
     //5182c3/5182cd store zero after cancellation. This supported owner is
     //already neutral; no transient owner or missing BF5 value is invented.
     owner.active_state_d80 = 0;
