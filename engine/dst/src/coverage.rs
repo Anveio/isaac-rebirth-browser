@@ -174,6 +174,12 @@ pub fn observe(state: &State) {
         });
         for pickup in state.room.pickups.iter().filter(|pickup| !pickup.removed) {
             keys.push(format!("pickup:{}", pickup.variant));
+            // A transient troll bomb (40/3, 40/5) born moving, as chest loot
+            // is, takes the newborn grid pass under the bomb's definition.
+            let moving = pickup.velocity.x != 0.0 || pickup.velocity.y != 0.0;
+            if pickup.variant == 40 && matches!(pickup.subtype, 3 | 5) && moving {
+                keys.push("moving troll bomb".to_owned());
+            }
         }
         // Owned collectibles that re-resolve the primary weapon (cache 0x100).
         if let Some(items) = &state.player_items {
