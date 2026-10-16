@@ -301,6 +301,7 @@ pub(crate) fn admit_reward(
                 price: 0,
                 cooldown: 0,
                 loot_births: Vec::new(),
+                open_frontier: None,
             });
             chest
         }

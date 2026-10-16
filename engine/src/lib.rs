@@ -1866,7 +1866,12 @@ impl Game {
                 // keep free pickup Init/Collect rules (no shop placeholder).
                 // Other special contexts retain typed selectors until their
                 // prices, pools and replacements are admitted.
-                if let Some(mut pickup) = Pickup::from_selector(next, selector, true)? {
+                let pickup = if selector.entity_type == 5 && selector.variant == 60 {
+                    chests::from_locked_selector(next, selector, true, &self.state)?
+                } else {
+                    Pickup::from_selector(next, selector, true)?
+                };
+                if let Some(mut pickup) = pickup {
                     pickup.birth_game_update = self.state.game_update_count;
                     order.push(actors::ActorRef {
                         kind: actors::ActorKind::Pickup,
