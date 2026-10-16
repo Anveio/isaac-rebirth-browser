@@ -373,9 +373,15 @@ impl Pickup {
     /// Selected free in-place Morph500A10 to an already chosen collectible.
     /// It is not Game.Spawn: no new handle, manager slot or Room sequence.
     pub(crate) fn morph_to_collectible(
-        &mut self, subtype: u32, game_update: u32, scheduler: &mut crate::actors::Scheduler,
+        &mut self,
+        subtype: u32,
+        game_update: u32,
+        scheduler: &mut crate::actors::Scheduler,
     ) -> Result<(), String> {
-        let links = self.morph_links.clone().ok_or("Morph weak-word owner missing")?;
+        let links = self
+            .morph_links
+            .clone()
+            .ok_or("Morph weak-word owner missing")?;
         if !links.known_empty() {
             return Err("Morph positive weak-link lifetime owner unadmitted".into());
         }
@@ -400,7 +406,8 @@ impl Pickup {
         next.overlay_frame = 4.0;
         next.project();
         scheduler.reinitialize_in_place(crate::actors::ActorRef {
-            kind: crate::actors::ActorKind::Pickup, id: self.id,
+            kind: crate::actors::ActorKind::Pickup,
+            id: self.id,
         })?;
         *self = next;
         Ok(())
