@@ -611,7 +611,23 @@ pub(crate) fn add_collectible(
     // the existing owner; later counts/cache work cannot recreate it.
     if !matches!(
         id,
-        1 | 2 | 3 | 4 | 6 | 12 | 52 | 68 | 114 | 118 | 143 | 152 | 168 | 169 | 229 | 304 | 329 | 330
+        1 | 2
+            | 3
+            | 4
+            | 6
+            | 12
+            | 52
+            | 68
+            | 114
+            | 118
+            | 143
+            | 152
+            | 168
+            | 169
+            | 229
+            | 304
+            | 329
+            | 330
     ) && !keep_cupid_damage
     {
         owner.damage_inputs = None;

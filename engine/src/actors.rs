@@ -156,7 +156,10 @@ impl Scheduler {
         if !self.actors.contains(&actor) {
             return Err("in-place Init requires current manager actor".into());
         }
-        let identity = self.identities.iter_mut().find(|identity| identity.actor == actor)
+        let identity = self
+            .identities
+            .iter_mut()
+            .find(|identity| identity.actor == actor)
             .ok_or("in-place Init requires actual identity owner")?;
         identity.sequence_id = 0;
         Ok(())
