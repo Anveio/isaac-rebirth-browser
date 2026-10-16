@@ -11,7 +11,8 @@ import type { ActorSprite, Room, RoomAppearance, RoomQuad, State } from "./engin
 const PLAYER = "gfx/001.000_player.anm2";
 const TEAR = "gfx/002.000_tear.anm2";
 const PARTICLE_ACTORS: Record<number, string> = {
-  27: "gfx/1000.027_wood particle.anm2", 43: "gfx/1000.043_poop explosion.anm2", 58: "gfx/1000.058_poop particle.anm2",
+  5: "gfx/1000.005_blood particle.anm2", 27: "gfx/1000.027_wood particle.anm2", 43: "gfx/1000.043_poop explosion.anm2",
+  58: "gfx/1000.058_poop particle.anm2",
 };
 // Rock Init 56ed00 / Render 56bf80: an intact (state 1) rock-family grid
 // entity sets frame variant of its type's grid_rock.anm2 animation.
@@ -442,10 +443,12 @@ export class Renderer {
     for (const effect of state.spriteEffects) {
       // Source31f dead can coexist with31e active until a later Remove.
       if (!effect.visible || !effect.active || effect.footprint || effect.creepEffect) continue;
-      if (effect.variant === 58 || effect.variant === 43 || effect.variant === 27) {
+      if (effect.variant === 58 || effect.variant === 43 || effect.variant === 27 || effect.variant === 5) {
         const sprite = effect.sprite, controller = effect.poopEffect;
         const rotation = controller && "particle58" in controller && typeof controller.particle58 === "object"
-          ? controller.particle58.flying.layerRotation : 0;
+          ? controller.particle58.flying.layerRotation
+          : controller && "particle5" in controller && typeof controller.particle5.particle === "object"
+            ? controller.particle5.particle.flying.layerRotation : 0;
         ctx.save();
         ctx.translate((effect.presentedPosition.x + effect.renderOffset.x + sprite.offset.x) * 0.65 + 32,
           (effect.presentedPosition.y + effect.renderOffset.y + sprite.offset.y) * 0.65 - 46);

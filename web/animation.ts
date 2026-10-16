@@ -90,6 +90,7 @@ const urls = import.meta.glob([
   "../references/isaac/rebirth/resources/gfx/effects/effect_poopspawn.png",
   "../references/isaac/rebirth/resources/gfx/effects/effect_002b_shitpoof.png",
   "../references/isaac/rebirth/resources/gfx/effects/effect_poopgibs.png",
+  "../references/isaac/rebirth/resources/gfx/effects/effect_030_bloodgibs.png",
   "../references/isaac/rebirth/resources/gfx/monsters/**/*.png",
   "../references/isaac/rebirth/resources/gfx/bosses/**/*.png",
   "../references/isaac/rebirth/resources/gfx/effects/effect_032_bloodstains.png",

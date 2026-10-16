@@ -51,7 +51,8 @@ export interface Familiar {
   sprite: ActorSprite; fullUpdates: number; unresolvedAiUpdates: number;
 }
 type ParticleFlight = "initializing" | {flying: {height: number; verticalVelocity: number; gravity: number; layerRotation: number}};
-export type PoopEffect = { particle58: ParticleFlight } | { particle27: ParticleFlight } | { explosion43: {frameTarget: number} };
+export type PoopEffect = { particle58: ParticleFlight } | { particle27: ParticleFlight } | { explosion43: {frameTarget: number} }
+  | { particle5: { particle: ParticleFlight; subtype: number; stage: number } };
 export interface SpriteEffect {
   id: number; variant: number; subtype: number; spawnSeed: number;
   spawnerType: number; spawnerVariant: number;

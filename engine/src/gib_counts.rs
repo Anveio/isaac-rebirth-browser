@@ -52,3 +52,64 @@ pub fn sample(
     }
     Ok(counts)
 }
+
+/// The 445f40 gib loop for a dying NPC, category by category: speed
+/// Float*4+2, seed, velocity Angle*(1,.5)*speed and offset Angle*.5*radius,
+/// then the effect's immediate Update. Categories 0..4 spawn Blood Particle
+/// 1000.5 with the category as subtype and 5 spawns Poop Particle 1000.58.
+pub(crate) fn burst(
+    npc: &crate::npcs::Npc,
+    random: &mut Mt19937,
+    world: &mut crate::entities::NpcWorld<'_>,
+) -> Result<(), String> {
+    use crate::{
+        actors::{ActorKind, ActorRef},
+        familiars::Parent,
+        motion::WorldVector,
+        poop_effects::{Admission, ParticleBirth},
+    };
+    let config = crate::content::entity(npc.kind, npc.variant);
+    // Challenge23 scales the amount by 8; this caller has no challenge owner.
+    let counts = sample(config.gib_amount, config.gib_flags, AmountScale::Ordinary, random)?;
+    for (category, count) in counts.into_iter().enumerate() {
+        for _ in 0..count {
+            if category == 6 {
+                return Err("Die category6 Effect1000.63 is not admitted".into());
+            }
+            let speed = random.uniform() * 4.0 + 2.0;
+            let seed = random.next_u32();
+            let direction = crate::npcs::direction(random);
+            let velocity = WorldVector {
+                x: direction.x,
+                y: direction.y * 0.5,
+            } * speed;
+            let offset = (crate::npcs::direction(random) * 0.5) * npc.collision_radius;
+            let birth = ParticleBirth {
+                seed,
+                position: npc.position + offset,
+                velocity,
+                spawner: Some(Parent {
+                    actor: ActorRef {
+                        kind: ActorKind::Npc,
+                        id: npc.id,
+                    },
+                    entity_type: npc.kind,
+                    variant: npc.variant,
+                }),
+            };
+            let mut admission = Admission {
+                game_update_count: world.effects.game_update_count,
+                next_effect: world.effects.next_effect,
+                effects: world.effects.effects,
+                scheduler: world.effects.scheduler,
+            };
+            let id = if category == 5 {
+                admission.admit_particle(birth)?
+            } else {
+                admission.admit_blood_particle(birth, category as u32)?
+            };
+            admission.advance_particle_initial(id, random)?;
+        }
+    }
+    Ok(())
+}
