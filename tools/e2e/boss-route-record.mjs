@@ -51,6 +51,8 @@ const AWARD_CELLS = [22, 36, 37, 38, 52, 82, 96, 97, 98, 112];
 // holds after its own fight (a solid Larry Jr. tail poop) that the port's own
 // fight need not leave, so the shared keys take one path in both games.
 const AVOID = (flag('--avoid', '') || '').split(',').filter(Boolean).map(Number);
+// The centre of the room grid cell holding a point.
+const centreOf = point => ({ x: Math.round((point.x - 40) / 40) * 40 + 40, y: Math.round((point.y - 120) / 40) * 40 + 120 });
 const avoiding = (grid, cells) => grid && { ...grid, solid: [...grid.solid].map((c, i) => (cells.includes(i) ? '1' : c)).join('') };
 // The player re-plans on every other frame; the tape holds keys in between.
 const STRIDE = 2;
@@ -115,6 +117,15 @@ try {
   for (let leg = 1; leg < rooms.length; leg++) {
     const target = rooms[leg];
     let budget = ROOM_FRAMES;
+    // Each game's fight leaves its own poops, and a diagonal shortcut that
+    // grazes a corner solid in one game alone would slow only that game's
+    // player: walks in a cleared boss room target the next route cell's
+    // centre once the player stands at the current one.
+    let centre = centreOf(state.player);
+    const centreKeys = (grid, door) => {
+      if (Math.hypot(centre.x - state.player.x, centre.y - state.player.y) <= 4) centre = waypoint(grid, state.player, door, 1);
+      return centre.x === door.x && centre.y === door.y ? doorKeys(grid, state.player, door) : toward(state.player, centre, 2);
+    };
     while (state.room !== target) {
       if (budget <= 0 && process.env.BOSS_ROUTE_DEBUG) writeFileSync(process.env.BOSS_ROUTE_DEBUG, await page.evaluate(() => window.game.snapshotJson()));
       if (budget <= 0) throw new Error(`No way from room ${state.room} to room ${target} in ${ROOM_FRAMES} frames`);
@@ -130,9 +141,12 @@ try {
       const inside = pedestals.includes(state.grid && cell(state.player.x, state.player.y));
       await hold(state.transition || !state.player.controls ? []
         : key ? collectKeys(state, key)
-        // A cleared boss room's open trapdoor must not be walked over.
-        : !usable ? [] : inside ? ['KeyA']
-          : doorKeys(avoiding(state.grid, state.trapdoor ? [...AWARD_CELLS, ...AVOID, ...pedestals] : pedestals), state.player, door));
+        // A cleared boss room's shared keys step from cell centre to cell
+        // centre, off its open trapdoor, until the doorway is next. A centre
+        // beside the trapdoor is 40 units from it, outside its entry radius.
+        : !usable ? [] : inside ? ['KeyA'] : state.trapdoor
+          ? centreKeys(avoiding(state.grid, [state.trapdoor.gridIndex, ...AVOID, ...pedestals]), door)
+          : doorKeys(avoiding(state.grid, pedestals), state.player, door));
       if (process.env.BOSS_ROUTE_DEBUG && budget % 30 === 0) process.stderr.write(`${JSON.stringify({ room: state.room, budget, player: state.player, door, keys: [...held], transition: state.transition })}\n`);
       await step(STRIDE); budget -= STRIDE;
       // Route checkpoints let both games' positions be compared on the way.
@@ -168,11 +182,10 @@ try {
     checkpoint('corner');
   }
   if (EXIT) {
-    // The shared exit keys step from cell centre to cell centre. Each game's
-    // fight leaves its own poops, and a diagonal shortcut that grazes a corner
-    // solid in one game alone would slow only that game's player.
+    // The shared exit keys step from cell centre to cell centre, as the
+    // cleared boss room's door walk does above.
     const centreWalk = async (goal, cells, arrived, failure) => {
-      let target = { x: Math.round((state.player.x - 40) / 40) * 40 + 40, y: Math.round((state.player.y - 120) / 40) * 40 + 120 };
+      let target = centreOf(state.player);
       for (let left = EXIT; !arrived(); left -= STRIDE) {
         if (left <= 0) throw new Error(failure);
         if (Math.hypot(target.x - state.player.x, target.y - state.player.y) <= 4) target = waypoint(avoiding(state.grid, cells), state.player, goal, 1);
