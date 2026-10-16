@@ -313,7 +313,12 @@ fix must follow source evidence rather than merely silence the property.
 `docker build -f antithesis/Dockerfile -t rebirth-dst .` builds the harness
 and the production `engine.wasm` from a context that
 [Dockerfile.dockerignore](../antithesis/Dockerfile.dockerignore) limits to the
-engine build's inputs; the entrypoint signals `setup_complete` and
+engine build's inputs. Those inputs are what Cargo records in the two builds'
+dep-info: sources, `include_str!` files and every path `build.rs` reads.
+`npm run test:dst` runs `tools/dst/sync-context.py` after building them, which
+re-includes any input the list drops and names the change to commit, so an
+engine change that gives `build.rs` a new input cannot silently break the
+image. The entrypoint signals `setup_complete` and
 Test Composer runs the [drivers](../antithesis/test/v1/rebirth-engine) with
 `--entropy antithesis`: every registered unit but `game` (the driver lists them
 from `rebirth-dst --list`, so new units join without a driver change), and one
