@@ -30,6 +30,7 @@ spec.loader.exec_module(routes)
 FIXTURES = ROOT / 'references/isaac/foundation/stage-exit'
 # Frames from boss-room-arrival to exit-start; each game's fight must fit.
 WINDOW = 9000
+PADDING_STEP = 600
 # Cells the approach waypoint avoids: the trapdoor/pedestal column neighbours
 # and the parked corner.
 AWARD_CELLS = {22, 36, 37, 38, 52, 82, 96, 97, 98, 112, 106}
@@ -71,13 +72,22 @@ def fought(fixture):
     return result, fights
 
 
+def padding(total):
+    """The window's remainder in steps of at most PADDING_STEP frames. The
+    original runner bounds each step's host wall time (--native-frame-timeout),
+    and several thousand frames in one step can exceed it on a loaded host.
+    Only the last step carries the `exit-start` label."""
+    steps = [{'type': 'step', 'frames': PADDING_STEP} for _ in range((total - 1) // PADDING_STEP)]
+    return steps + [{'type': 'step', 'frames': total - frames(steps), 'label': 'exit-start'}]
+
+
 def case(fixture, base, fights, identifier, randomized, idle, via):
     result = json.loads(json.dumps(base))
     for name, fight in fights.items():
         # `exit-start` labels the padding step rather than a capture: where
         # each game's corner press releases depends on its fight, so the first
         # graded checkpoint comes after the trapdoor snaps the player.
-        result[name] = result[name] + fight + [{'type': 'step', 'frames': WINDOW - frames(fight) + idle, 'label': 'exit-start'}]
+        result[name] = result[name] + fight + padding(WINDOW - frames(fight) + idle)
     tail = record(result, '--from', 'exit-start', '--exit', 1500, *(['--via', f'{via[0]},{via[1]}'] if via else []))
     if tail['status'] != 'pass':
         return None, f"port-exit: {tail['reason']}"
