@@ -356,6 +356,9 @@ pub(crate) fn collect(state: &mut State, index: usize) -> Result<bool, String> {
         .as_mut()
         .ok_or("ItemPool owner absent")?
         .removed[id as usize] = true;
+    //505DE9 starts the authored title/description streak before505E5E's
+    //Pickup pose and505ED6's queue. Rejected contact never requests it.
+    state.run_introduction = crate::RunIntroduction::collectible(config);
     crate::player_animation::force_pickup(state);
     let owner = state.player_items.as_mut().expect("checked Player owner");
     owner.pickup_presentation = Some(PickupPresentation {

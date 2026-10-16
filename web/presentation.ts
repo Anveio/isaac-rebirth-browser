@@ -19,6 +19,12 @@ export class RunPresentation {
     if (!frame?.Visible) return;
     this.attached(ctx, frame, 240, 48, () => {
       this.assets.font(ctx, "upheaval", state.runIntroduction.title, 0, -9, { align: "center", pixelSnap: true });
+      const subtitle = state.runIntroduction.subtitle;
+      if (subtitle) {
+        //571F68 loads PFTempestaSevenCondensed into HUD+300;5734F0
+        //selects it and draws the second line18 units below the title.
+        this.assets.font(ctx, "pftempestasevencondensed", subtitle, 0, 9, { align: "center", pixelSnap: true });
+      }
     });
   }
 

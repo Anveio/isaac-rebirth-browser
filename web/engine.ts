@@ -177,7 +177,7 @@ export interface Pickup {
   velocity: {x: number; y: number}; configuredFriction: number; currentFriction: number; collisionMass: number;
 }
 export interface SpriteColorValue { tint: number[]; colorize: number[]; offset: number[]; }
-export interface RunIntroduction { age: number; active: boolean; title: string; stage: boolean; }
+export interface RunIntroduction { age: number; active: boolean; title: string; subtitle?: string; stage: boolean; }
 export interface BossBar { fill: number | null; flash: number; maximum: number; }
 export interface PauseMenu {
   phase: "hidden" | "appearing" | "idle" | "disappearing";
