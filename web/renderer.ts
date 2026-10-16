@@ -1,4 +1,5 @@
 import { Assets } from "./animation";
+import { drawBossSplash } from "./boss-splash";
 import { MenuRenderer } from "./menu";
 import { GLMenuContext, type GLSurface } from "./gl-menu";
 import { StageComposer, type StageTargets } from "./gl-stage";
@@ -155,7 +156,7 @@ export class Renderer {
           { spritesheets: info.spritesheet ? { 0: info.spritesheet } : {} });
       const bossScene = state.roomTransition?.bossScene;
       if (bossScene && state.roomTransition?.phase === "bossScene")
-        this.assets.draw(ctx, "gfx/ui/boss/versusscreen.anm2", "Scene", 240, 135, bossScene.animationFrame);
+        drawBossSplash(this.assets, ctx, state);
       // StageTransition::Render5e3bd0: black quad, alpha counter/50 then 1-counter/50.
       const transition = state.stageTransition;
       if (transition.state === 2 || transition.state === 3)

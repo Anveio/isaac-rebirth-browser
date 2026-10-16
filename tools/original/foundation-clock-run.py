@@ -117,6 +117,7 @@ def main():
     parser.add_argument('--manifest-codec', choices=('gzip', 'zstd'), default='gzip', help='Opt-in complete manifest transport; requires archived evidence and qualified Zstd readers; default gzip unchanged')
     parser.add_argument('--gl-trace', type=Path, help='Optional documented graphics API observer to chain; no game instructions/state')
     parser.add_argument('--audio-trace', type=Path, help='Optional forwarding OpenAL API observer to chain; no game instructions/state')
+    parser.add_argument('--audio-sfx-owners', action='store_true', help='Opt-in actual configured-SFX table owner at forwarded backend starts; requires --audio-trace, preserves ambiguous aliases')
     parser.add_argument('--mt-trace', action='store_true', help='Chain the shared-MT draw observer; writes OUTPUT/mt-trace/trace-<pid>.bin')
     parser.add_argument('--sfx-volume', type=float, default=0, help='Owned public SFXVolume option, 0..1; admission still occurs when muted')
     parser.add_argument('--music-volume', type=float, default=0, help='Owned public MusicVolume option, 0..1')
@@ -128,7 +129,7 @@ def main():
     parser.add_argument('--step-ns', type=int, default=16667000, help='Explicit virtual interval; default is 16667 microseconds, above native timer polling threshold')
     parser.add_argument('--output', type=Path, default=ROOT / '.cache/foundation' / f'clock-native-{time.time_ns()}')
     parser.add_argument('--frame-timeout', type=float, default=60,
-                        help='Host-wall socket/gate wait limit in seconds; does not alter released presentation counts')
+                        help='Host-wall socket/gate wait limit in seconds, per 600 frames of a step; does not alter released presentation counts')
     args = parser.parse_args()
     if args.journal_codec != 'gzip' and not args.archive_evidence:
         raise SystemExit('--journal-codec requires --archive-evidence')
@@ -313,6 +314,12 @@ def main():
         trace.mkdir(exist_ok=True)
         env['LD_PRELOAD'] += ' ' + str(args.audio_trace.resolve())
         env['ISAAC_AUDIO_TRACE_DIR'] = str(trace)
+        if args.audio_sfx_owners:
+            env['ISAAC_AUDIO_SFX_OWNERS'] = '1'
+        else:
+            env.pop('ISAAC_AUDIO_SFX_OWNERS', None)
+    elif args.audio_sfx_owners:
+        raise SystemExit('--audio-sfx-owners requires --audio-trace')
     if args.mt_trace:
         trace = out / 'mt-trace'
         trace.mkdir(exist_ok=True)
@@ -431,8 +438,11 @@ def main():
                     before = current['presentedFrame']
                     cpu_before = debug.process_performance(proc.pid, started)
                     step_started = time.monotonic()
+                    # A long step is one acknowledgement; allow the limit per 600 frames.
+                    connection.settimeout(args.frame_timeout * -(-action['frames'] // 600))
                     connection.sendall(f"step {action['frames']}\n".encode())
                     current = acknowledgement()
+                    connection.settimeout(args.frame_timeout)
                     current['requestedPresentationFrames'] = action['frames']
                     current['advanceHostWallMs'] = (time.monotonic()-step_started)*1000
                     cpu_after = debug.process_performance(proc.pid, started)

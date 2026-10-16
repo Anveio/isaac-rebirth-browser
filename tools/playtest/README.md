@@ -60,9 +60,42 @@ frame times, timeline (initial/boot seeds, run seeds, rooms and NPC kinds) and
 screenshots. Frame times come from software WebGL and are not representative
 of real hardware; simulation ticks/s is the liveness figure.
 
+## Side-by-side footage (`side-by-side.mjs`)
+
+Records the fresh original (under a virtual display) and the production build
+replaying one paired case's public tape, then stacks the frame pairs into one
+MP4: original on the left, port on the right, at real-time speed. It only adds
+capture commands to the tape (every `--every` presentations, default 2), so
+neither game receives input the case did not declare. Footage is a viewing aid
+for playtests, not parity evidence.
+
+Any paired case is a state the video can show. The run seed fixes the level
+generation, and the tape's keys walk the route, so scenario helpers reach
+specific boss fights, item pedestals or stage exits:
+
+```sh
+npm run playtest:video -- --case references/isaac/foundation/runtime-progress/1E0WJX06.json
+npm run playtest:video -- --helper tools/original/entities-scenarios.py \
+  --helper-arg --only --helper-arg dingle --from gameplay-start --extra 600 --out DIR
+npm run playtest:video -- --helper tools/original/stage-exit-scenarios.py \
+  --helper-arg --contrived --helper-arg E1T36YXW-monstro --helper-arg --count --helper-arg 0
+npm run playtest:video -- --reel DIR/a/side-by-side.mp4,DIR/b/side-by-side.mp4 --title reel --out DIR
+```
+
+- `--case FILE[#id]` takes a `case.json` or a scenarios file (any e2e run's
+  `scenarios.json`, `references/isaac/cases/`); `--pick ID` selects cases.
+- `--helper SCRIPT --helper-arg A ...` runs a scenario helper first (the
+  entity helper needs `cargo build --manifest-path engine/Cargo.toml --bin floor`).
+- `--from LABEL` starts the footage at a tape capture label (for example
+  `gameplay-start`); `--extra N` keeps both games running N presentations
+  past the tape with no input, which shows how a fight plays out.
+- Output: `DIR/<case>/side-by-side.mp4` and `result.json`; frames are deleted
+  unless `--keep-frames`. A side that stops early holds its last frame.
+
 ## Publishing
 
 Publish `index.html` as the page and the batch files from `manifest.json` via
 the Artifact tool's `files` map to the same artifact URL, labelled with the
-short sha. Keep the previous `manifest.json` to plan the next publish. The
+short sha, and attach the side-by-side videos for the build to the playtest
+thread. Keep the previous `manifest.json` to plan the next publish. The
 publish ledger is the private "Isaac playtest log" artifact.

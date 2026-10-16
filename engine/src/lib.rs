@@ -27,6 +27,7 @@ mod content;
 mod controlled_brimstone;
 mod controlled_fetus;
 mod controlled_knife;
+mod controlled_knife_satellites;
 pub mod controlled_tear;
 mod controlled_technology;
 mod creep_effects;
@@ -386,6 +387,10 @@ pub struct RunIntroduction {
     /// HUD::ShowItemText 5732c0 title on the shared ui_streak sprite.
     #[serde(default = "stage_title")]
     pub title: String,
+    /// HUD5732C0's second authored line. Empty stage/miniboss subtitles
+    /// retain the existing serialized shape and presentation.
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub subtitle: String,
     /// The stage name (Level::ShowName 585500) rather than a later banner
     /// such as the miniboss VS text, which restarts the same streak clock.
     #[serde(default = "stage_streak")]
@@ -403,7 +408,30 @@ impl RunIntroduction {
             age: 0,
             active,
             title: stage_title(),
+            subtitle: String::new(),
             stage: true,
+        }
+    }
+
+    ///505D7F..505DE9 takes the current collectible config's name and
+    ///description before the Pickup pose and deferred AddCollectible queue.
+    pub(crate) fn collectible(config: &items::CollectibleDefinition) -> Self {
+        Self {
+            age: 0,
+            active: true,
+            title: config.name.into(),
+            subtitle: config.description.into(),
+            stage: false,
+        }
+    }
+
+    ///54F920 -> HUD572600 -> Sprite40F9F0 advances the shared streak
+    ///before the Game pause/transition guards. One Full is one authored
+    ///frame; age keeps its existing half-frame presentation unit.
+    fn advance_full(&mut self) {
+        if self.active {
+            self.age += 2;
+            self.active = self.age < 140;
         }
     }
 }
@@ -502,7 +530,7 @@ pub struct PauseMenu {
     pub phase: PausePhase,
     pub age: u32,
     pub selection: u8,
-    pub stat_frames: [u8; 6],
+    pub stat_frames: [Option<u8>; 6],
 }
 impl PauseMenu {
     fn hidden() -> Self {
@@ -510,8 +538,28 @@ impl PauseMenu {
             phase: PausePhase::Hidden,
             age: 0,
             selection: 1,
-            stat_frames: [2, 1, 2, 2, 2, 1],
+            stat_frames: [Some(2), Some(1), Some(2), Some(2), Some(2), Some(1)],
         }
+    }
+    ///PauseOpen5bb560 samples the actual cached Player fields once. It does
+    ///not evaluate caches or infer missing scalar history from inventory.
+    fn open(&mut self, stats: &player_stats::PlayerStats, max_fire_delay: i32) {
+        self.phase = PausePhase::Appearing;
+        self.age = 0;
+        self.selection = 1;
+        //5bb6ce..732: retain the source's individual f32 operations and order.
+        let range_shot_speed = (stats.shot_speed - 1.0_f32) / 0.15_f32 + 1.0_f32;
+        let range_falling_speed =
+            (stats.tear_falling_speed + stats.tear_falling_speed) + range_shot_speed;
+        let range = (-stats.tear_height / 20.0_f32) + range_falling_speed;
+        self.stat_frames = [
+            Some(pause_stat_frame(stats.move_speed + stats.move_speed)),
+            Some(pause_stat_frame(15.0_f32 / max_fire_delay as f32)),
+            Some(pause_stat_frame(stats.damage / 1.5_f32)),
+            Some(pause_stat_frame(range)),
+            Some(pause_stat_frame(stats.shot_speed + stats.shot_speed)),
+            stats.luck.map(pause_stat_frame),
+        ];
     }
     fn advance(&mut self, phase: phase::Phase) {
         if phase != phase::Phase::Update {
@@ -535,6 +583,18 @@ impl PauseMenu {
             PausePhase::Hidden | PausePhase::Idle => {}
         }
     }
+}
+
+///5bb602/64d/694/736/779/7b8 CVTTSS2SI, then signed clamp1..7.
+///An overflowing/NaN input becomes INT_MIN, unlike Rust's saturating cast.
+fn pause_stat_frame(value: f32) -> u8 {
+    let integer =
+        if value.is_finite() && (-2_147_483_648.0_f32..2_147_483_648.0_f32).contains(&value) {
+            value as i32
+        } else {
+            i32::MIN
+        };
+    integer.clamp(1, 7) as u8
 }
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -571,6 +631,10 @@ pub struct State {
     /// Unknown legacy or restore history remains absent.
     #[serde(default)]
     pub source_cache_run_flags: Option<u64>,
+    /// Actual normal-variant5120EE/514AD8 challenge minimum predicate.
+    /// Unknown old Game history stays absent; ID0 skips the Config9C read.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source_shot_speed_minimum: Option<bool>,
     pub saved_run_summary: Option<saved_game::SavedRunSummary>,
     pub audio: audio::AudioState,
     #[serde(default)]
@@ -619,7 +683,8 @@ pub struct State {
     pub stage_transition: stage_transition::StageTransition,
     /// The player's velocity when a door transition began, before departure
     /// cleared it; the post-ChangeRoom admitted update's footprint reads it.
-    #[serde(skip)]
+    /// It lives through the transition, so a state saved during one keeps it.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub departure_velocity: Option<motion::WorldVector>,
     pub stage_effects: StageEffects,
     pub inventory: Inventory,
@@ -791,6 +856,7 @@ impl Game {
                 boot_epoch_seed,
                 boot_lifecycle,
                 source_cache_run_flags: Some(0), // Game constructor 554034.
+                source_shot_speed_minimum: None,
                 saved_run_summary: None,
                 audio: audio::AudioState::default(),
                 pending_menu_initializations: Vec::new(),
@@ -1200,9 +1266,9 @@ impl Game {
                             tear.project();
                         }
                         self.state.paused = true;
-                        self.state.pause_menu.phase = PausePhase::Appearing;
-                        self.state.pause_menu.age = 0;
-                        self.state.pause_menu.selection = 1;
+                        self.state
+                            .pause_menu
+                            .open(&self.state.player_stats, self.state.max_fire_delay);
                     } else if self.state.pause_menu.phase != PausePhase::Disappearing {
                         self.state.pause_menu.phase = PausePhase::Disappearing;
                         self.state.pause_menu.age = 0;
@@ -1431,6 +1497,11 @@ impl Game {
             run_seeds.initialized_fields[12],
         )?);
         self.state.run_seeds = Some(run_seeds);
+        // NewRun54eb20 begins every run on the first stage, whether it comes
+        // from the GameOver Restart or the menus after a descent, and outside
+        // any stage transition the last run was in.
+        self.state.stage = 1;
+        self.state.stage_transition = stage_transition::StageTransition::default();
         self.state.system_clock.align_run_start()?;
         self.state.screen = Screen::Playing;
         self.state.paused = false;
@@ -1460,6 +1531,14 @@ impl Game {
         self.state.player_stats = player_stats::PlayerStats::default();
         // Fresh reset 54E6A3 initializes the actual Game run-flag word.
         self.state.source_cache_run_flags = Some(0);
+        //54EB55 stores the actual challenge key;596170 selects its Config.
+        //The branch for key0 bypasses the9C cap. Other admitted definitions
+        //own their decoded59805A minshotspeed value before Player callbacks.
+        self.state.source_shot_speed_minimum = Some(
+            challenge
+                .as_ref()
+                .is_some_and(|definition| definition.id != 0 && definition.min_shot_speed),
+        );
         self.state.weapon_cache = weapon_plan::WeaponCache::fresh_player();
         self.state.weapon_admission = weapon_plan::WeaponAdmission::fresh_isaac();
         self.state.head_timer = -1;
@@ -1533,6 +1612,7 @@ impl Game {
         self.state.revealed_secret_connections.clear();
         self.state.persisted_rooms.clear();
         self.state.room_transition = None;
+        self.state.departure_velocity = None;
         self.state.room = Room::from_floor_descriptor_with_special(
             &self.state.floor,
             self.state.current_room,
@@ -1582,7 +1662,10 @@ impl Game {
         // This startup caller has no virtual18 or doorway manager update.
         // Room.Init's ambient critters follow inside admission; Game+ce9f4 reads0.
         let counter = self.state.game_update_count;
-        self.admit_room_pickups(&selectors, counter, true)?;
+        let suppressed_entities = self.admit_room_pickups(&selectors, counter, true)?;
+        let requested_entities = requested_entities
+            .checked_sub(suppressed_entities)
+            .ok_or("suppressed authored entity count exceeds selected inputs")?;
         if self.state.room.authored_actor_order.len() != requested_entities {
             return Err(format!(
                 "starting authored entity frontier is incomplete: admitted {} of {requested_entities}",
@@ -1627,6 +1710,14 @@ impl Game {
             left,
             room_before,
         )?;
+        // Backdrop::pre_render_walls runs inside 5c5b30 before the FX rays.
+        for (position, scale) in room::basement_boss_blood(&self.state.room, self.state.stage)? {
+            let seed = self.state.boot_lifecycle.shared.next_u32();
+            let id =
+                familiars::admit_blood_splat(&mut self.state, seed, position, [1.0; 4], [0.0; 3])?;
+            familiars::set_blood_scale(&mut self.state, id, scale)?;
+            familiars::advance_blood_initial(&mut self.state, id)?;
+        }
         // The port builds only ordinary Basement (stage type 0).
         room::load_fx_rays(
             &mut self.state.room,
@@ -1779,11 +1870,47 @@ impl Game {
         selectors: &[room_spawns::SpawnSelector],
         critter_counter: u32,
         loader: bool,
-    ) -> Result<(), String> {
+    ) -> Result<usize, String> {
         let mut pickups = Vec::new();
         let mut npcs = Vec::new();
         let mut order = Vec::new();
         let mut next = self.state.next_pickup;
+        // The source descriptor map survives Room.Init. Only a source-owned
+        // fresh empty map is admitted here; saved payload replay is separate.
+        let room_index = self.state.current_room;
+        let descriptor = self
+            .state
+            .floor
+            .descriptors
+            .get(room_index)
+            .ok_or("persistent spawn map requires current Level descriptor")?;
+        let mut persistent_cells = descriptor
+            .persistent_spawn_cells
+            .clone()
+            .ok_or("persistent spawn map history is unknown")?;
+        let cells = (usize::from(descriptor.template.width) + 2)
+            * (usize::from(descriptor.template.height) + 2);
+        if [&persistent_cells.present, &persistent_cells.unknown]
+            .into_iter()
+            .any(|keys| {
+                keys.windows(2).any(|pair| pair[0] >= pair[1])
+                    || keys.iter().any(|&cell| usize::from(cell) >= cells)
+            })
+            || persistent_cells
+                .unknown
+                .iter()
+                .any(|cell| persistent_cells.present.binary_search(cell).is_ok())
+            || self.state.room.descriptor.as_ref().is_none_or(|room| {
+                room.index != room_index
+                    || room.persistent_spawn_cells.as_ref() != Some(&persistent_cells)
+            })
+        {
+            return Err("persistent spawn map owner is inconsistent".into());
+        }
+        if !persistent_cells.present.is_empty() || !persistent_cells.unknown.is_empty() {
+            return Err("persistent spawn map saved actor replay is unadmitted".into());
+        }
+        let mut suppressed_entities = 0usize;
         let room_type = self
             .state
             .room
@@ -1791,6 +1918,27 @@ impl Game {
             .as_ref()
             .map_or(1, |descriptor| descriptor.template.room_type);
         for selector in selectors {
+            // 5cf230/238 and5cf25e already consumed each authored RNG11
+            // draw/selection. 5cf285..2cc checks the map before entering
+            // SpawnEntity, including grid factories and their local Init.
+            if persistent_cells
+                .present
+                .binary_search(&selector.grid_index)
+                .is_ok()
+            {
+                if selector.category == room_spawns::SpawnCategory::Entity {
+                    suppressed_entities += 1;
+                }
+                continue;
+            }
+            if persistent_cells
+                .unknown
+                .binary_search(&selector.grid_index)
+                .is_ok()
+            {
+                return Err("persistent spawn cell depends on an unadmitted factory".into());
+            }
+            let before_entities = order.len();
             // Room.Init5cecc0 constructs grid objects in the same selector pass.
             grid_records::admit_selector(
                 &mut self.state.room,
@@ -1848,7 +1996,12 @@ impl Game {
                 // keep free pickup Init/Collect rules (no shop placeholder).
                 // Other special contexts retain typed selectors until their
                 // prices, pools and replacements are admitted.
-                if let Some(mut pickup) = Pickup::from_selector(next, selector, true)? {
+                let pickup = if selector.entity_type == 5 && selector.variant == 60 {
+                    chests::from_locked_selector(next, selector, true, &self.state)?
+                } else {
+                    Pickup::from_selector(next, selector, true)?
+                };
+                if let Some(mut pickup) = pickup {
                     pickup.birth_game_update = self.state.game_update_count;
                     order.push(actors::ActorRef {
                         kind: actors::ActorKind::Pickup,
@@ -1859,6 +2012,43 @@ impl Game {
                         .ok_or("pickup identity counter exhausted")?;
                     pickups.push(pickup);
                 }
+            }
+            // SpawnEntity5ce7a8..7d3 calls5c57c0 with the selected type,
+            // variant, edx=0,cl=0 after successful Game.Spawn. For this
+            // authored entity domain1..999, exactly4..6,17,33 persist.
+            // Grid records never insert a key; an occupied key still skips
+            // a later grid group above. This is not coordinate deduplication.
+            if selector.category == room_spawns::SpawnCategory::Entity
+                && matches!(selector.entity_type, 4..=6 | 17 | 33)
+            {
+                if order.len() == before_entities {
+                    // Preserve unrelated traversal when its existing factory
+                    // is unsupported. Only a later lookup of this cell needs
+                    // the missing success/key owner and must stop there.
+                    let insertion = persistent_cells
+                        .unknown
+                        .binary_search(&selector.grid_index)
+                        .expect_err("cell was checked before its factory");
+                    persistent_cells
+                        .unknown
+                        .insert(insertion, selector.grid_index);
+                } else {
+                    let insertion = persistent_cells
+                        .present
+                        .binary_search(&selector.grid_index)
+                        .expect_err("cell was checked before its factory");
+                    persistent_cells
+                        .present
+                        .insert(insertion, selector.grid_index);
+                }
+                self.state.floor.descriptors[room_index].persistent_spawn_cells =
+                    Some(persistent_cells.clone());
+                self.state
+                    .room
+                    .descriptor
+                    .as_mut()
+                    .expect("checked current descriptor")
+                    .persistent_spawn_cells = Some(persistent_cells.clone());
             }
         }
         // Doors, walls and shape0 ambient decoration follow the selectors.
@@ -1908,7 +2098,7 @@ impl Game {
         critters::spawn(&mut self.state, critter_counter, loader)?;
         self.state.room.boss_count = self.state.room.manager_counts.boss_total().max(0) as u32;
         self.refresh_stage_effects();
-        Ok(())
+        Ok(suppressed_entities)
     }
     /// Persisted Room clones retain supported actor handles in authored order.
     pub fn rebuild_room_actor_schedule(&mut self) -> Result<(), String> {
@@ -2018,7 +2208,6 @@ impl Game {
                         let seed = self.state.boot_lifecycle.shared.next_u32().max(1);
                         self.state.boot_lifecycle.commit_character_seed(seed)?;
                     }
-                    self.state.stage = 1;
                     self.start_run()?;
                 }
                 player_death::Request::Exit => {
@@ -2059,6 +2248,10 @@ impl Game {
             //later release never recreates a neutral owner.
             if self.state.screen == Screen::Playing && self.state.public_actions.pocket_pressed {
                 self.state.attack_runtime.aim_rotation_c70 = None;
+                if let Some(items) = &mut self.state.player_items {
+                    //Untracked pill/card execution cannot retain speed history.
+                    items.move_speed_inputs = None;
+                }
             }
         }
         if phase != phase::Phase::Skipped {
@@ -2120,8 +2313,10 @@ impl Game {
             epic_fetus::restore_fast_positions(&mut self.state)?;
             explosion_effects::restore_fast_positions(&mut self.state)?;
         }
-        //54F938 precedes every GameFull popup/transition/age guard.
+        //54F920's shared HUD streak precedes54F938 and every later
+        //GameFull popup/transition/pause guard. Fast has no HUD update.
         if phase == phase::Phase::Update && self.state.screen == Screen::Playing {
+            self.state.run_introduction.advance_full();
             if let Some(shake) = &mut self.state.game_shake {
                 shake.advance_full_clock();
             }
@@ -2151,10 +2346,6 @@ impl Game {
             .run_tick
             .checked_add(1)
             .ok_or("run tick counter exhausted")?;
-        if self.state.run_introduction.active {
-            self.state.run_introduction.age += 1;
-            self.state.run_introduction.active = self.state.run_introduction.age < 140;
-        }
         // Game::Update54f9da: an active StageTransition replaces the whole
         // full Game update, and fast550760 freezes the Room as well.
         if self.state.stage_transition.active() {
@@ -2275,6 +2466,27 @@ impl Game {
                         .clone();
                     let counter = self.state.game_update_count.wrapping_add(1);
                     self.admit_room_pickups(&selectors, counter, false)?;
+                    // Room.Init 5cf628: the first visit to a boss room slams
+                    // its portcullis (SFX 190, 5d0687) after the grid records.
+                    let boss_room = self
+                        .state
+                        .room
+                        .descriptor
+                        .as_ref()
+                        .is_some_and(|descriptor| descriptor.template.room_type == 5);
+                    if boss_room {
+                        self.state.audio.admit(
+                            &mut self.state.boot_lifecycle.shared,
+                            self.state.system_clock.system_counter.wrapping_sub(1),
+                            audio::SoundRequest {
+                                id: 190,
+                                volume: 1.0,
+                                delay: 2,
+                                looping: false,
+                                pitch: 1.0,
+                            },
+                        );
+                    }
                     self.admitted_update_footprint(phase)?;
                     // The admitted Room::Update follows authored mixed order.
                     self.refresh_room_boss_count();
@@ -2872,6 +3084,7 @@ impl Game {
             age: 0,
             active: true,
             title: format!("{player} VS {}", descriptor.template.name),
+            subtitle: String::new(),
             stage: false,
         };
     }

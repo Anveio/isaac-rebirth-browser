@@ -34,6 +34,90 @@ pub struct LuckInputs {
     pub source_13d0: i32,
 }
 
+/// Actual Player+D38, independent of inventory and the evaluated C7C output.
+/// Fresh519676 owns zero; an untracked writer never regains a guessed zero.
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct ShotSpeedInputs {
+    pub source_d38: i32,
+}
+
+impl ShotSpeedInputs {
+    pub(crate) const NEUTRAL: Self = Self { source_d38: 0 };
+}
+
+///Independent mutable MoveSpeed16 inputs, not a Luck or inventory owner.
+///D28 is a signed persistent term; the other three terms remain neutral-only.
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct MoveSpeedInputs {
+    pub source_d28: i32,
+    pub source_d44: i32,
+    pub source_13bc: i32,
+    pub source_13c0: i32,
+}
+impl MoveSpeedInputs {
+    pub(crate) const NEUTRAL: Self = Self {
+        source_d28: 0,
+        source_d44: 0,
+        source_13bc: 0,
+        source_13c0: 0,
+    };
+
+    ///No other source term is approximated by the D28 operator.
+    pub(crate) fn supports_persistent_d28(self) -> bool {
+        self.source_d44 == 0 && self.source_13bc == 0 && self.source_13c0 == 0
+    }
+
+    pub fn apply_signed_delta(&mut self, delta: i32) {
+        self.source_d28 = self.source_d28.wrapping_add(delta);
+    }
+}
+
+/// Actual Player+D30, independent of collectible counts and cached C88.
+/// Fresh519662 owns zero; an untracked writer leaves this input unknown.
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct DamageInputs {
+    pub source_d30: i32,
+}
+
+impl DamageInputs {
+    /// Actual signed ADD/LEA producer law. Call only for an already owned
+    /// input after its source event/RNG plan supplies the delta; never heal None.
+    pub fn apply_signed_delta(&mut self, delta: i32) {
+        self.source_d30 = self.source_d30.wrapping_add(delta);
+    }
+}
+
+/// Actual Player+D2C signed tier input, independent of cached C78.
+/// Constructor519658 owns zero; unknown producers never reconstruct it.
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct FireDelayInputs {
+    pub source_d2c: i32,
+}
+
+impl FireDelayInputs {
+    /// Actual signed32 ADD producer law on an already owned input.
+    pub fn apply_signed_delta(&mut self, delta: i32) {
+        self.source_d2c = self.source_d2c.wrapping_add(delta);
+    }
+}
+
+/// Actual Player+D34 signed height input, independent of cached C8C.
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct RangeInputs {
+    pub source_d34: i32,
+}
+
+impl RangeInputs {
+    pub fn apply_signed_delta(&mut self, delta: i32) {
+        self.source_d34 = self.source_d34.wrapping_add(delta);
+    }
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct PlayerItems {
@@ -63,6 +147,16 @@ pub struct PlayerItems {
     pub temporary_collectibles: Vec<TemporaryCollectible>,
     #[serde(default)]
     pub luck_inputs: Option<LuckInputs>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub move_speed_inputs: Option<MoveSpeedInputs>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub damage_inputs: Option<DamageInputs>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub range_inputs: Option<RangeInputs>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub fire_delay_inputs: Option<FireDelayInputs>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub shot_speed_inputs: Option<ShotSpeedInputs>,
     ///Actual held trinket slots E14/E18; normal fresh constructor initializes0.
     pub trinket_slots: [u32; 2],
     pub queued_id: Option<u32>,
@@ -130,6 +224,15 @@ impl PlayerItems {
                 source_13cc: 0,
                 source_13d0: 0,
             }),
+            shot_speed_inputs: Some(ShotSpeedInputs::NEUTRAL),
+            // Actual519662, not a default reconstructed from inventory.
+            damage_inputs: Some(DamageInputs { source_d30: 0 }),
+            //Actual51966C owns this initial word; no inventory inference.
+            range_inputs: Some(RangeInputs { source_d34: 0 }),
+            //51964E/51954C and519798 own these four original zeros.
+            move_speed_inputs: Some(MoveSpeedInputs::NEUTRAL),
+            //Actual519658, not a cache/count-derived neutral default.
+            fire_delay_inputs: Some(FireDelayInputs { source_d2c: 0 }),
             trinket_slots: [0; 2],
             queued_id: None,
             queued_charge: 0,
@@ -166,6 +269,7 @@ impl PlayerItems {
         // TEMP producers and expiry do not prove the retained modifier inputs.
         // Removing a later record never restores this history.
         self.luck_inputs = None;
+        self.move_speed_inputs = None;
         if let Some(effect) = self
             .temporary_collectibles
             .iter_mut()
@@ -321,6 +425,9 @@ pub(crate) fn collect(state: &mut State, index: usize) -> Result<bool, String> {
         .as_mut()
         .ok_or("ItemPool owner absent")?
         .removed[id as usize] = true;
+    //505DE9 starts the authored title/description streak before505E5E's
+    //Pickup pose and505ED6's queue. Rejected contact never requests it.
+    state.run_introduction = crate::RunIntroduction::collectible(config);
     crate::player_animation::force_pickup(state);
     let owner = state.player_items.as_mut().expect("checked Player owner");
     owner.pickup_presentation = Some(PickupPresentation {
@@ -562,6 +669,154 @@ pub(crate) fn add_collectible(
         .as_mut()
         .expect("checked Player item owner");
     owner.owned_counts[id as usize] = owner.owned_counts[id as usize].wrapping_add(1);
+    //Actual48 independently preserves D28/D44/13BC/13C0 on its
+    //closed common path. This input history gives no stage or caller role.
+    let keep_cupid_move_speed = id == 48
+        && normal_isaac
+        && crate::item_pipeline::ItemInputs::new(owner)
+            .is_ok_and(|inputs| inputs.admits_cupid_grant_context());
+    //Actual14/27/28/143 have cached speed effects but preserve these four
+    //persistent inputs. Each selected source Add retains existing Some only;
+    //untracked240/258/reset routes invalidate, never reconstruct history.
+    if !(normal_isaac
+        && matches!(
+            id,
+            1 | 2
+                | 3
+                | 4
+                | 6
+                | 14
+                | 27
+                | 28
+                | 52
+                | 68
+                | 114
+                | 118
+                | 143
+                | 152
+                | 168
+                | 169
+                | 229
+                | 304
+                | 329
+                | 330
+        ))
+        && !keep_cupid_move_speed
+    {
+        owner.move_speed_inputs = None;
+    }
+    //Actual48's selected common path independently preserves D34.
+    //This input proof grants no Range callback/getter/caller permission.
+    let keep_cupid_range = id == 48
+        && normal_isaac
+        && crate::item_pipeline::ItemInputs::new(owner)
+            .is_ok_and(|inputs| inputs.admits_cupid_grant_context());
+    //Actual14's default Add route preserves D34 despite its cached Range
+    //effect. Untracked240/258/reset routes invalidate this existing owner;
+    //None never inherits constructor zero through counts or cache evaluation.
+    if !matches!(
+        id,
+        1 | 2
+            | 3
+            | 4
+            | 6
+            | 14
+            | 52
+            | 68
+            | 114
+            | 118
+            | 143
+            | 152
+            | 168
+            | 169
+            | 229
+            | 304
+            | 329
+            | 330
+    ) && !keep_cupid_range
+    {
+        owner.range_inputs = None;
+    }
+    //Actual Add48 preserves D2C on its independently closed common path.
+    //Neither D30/D38 preservation nor a cache role supplies this word's proof.
+    let keep_cupid_fire_delay = id == 48
+        && normal_isaac
+        && crate::item_pipeline::ItemInputs::new(owner)
+            .is_ok_and(|inputs| inputs.admits_cupid_grant_context());
+    //These selected Add routes preserve an existing D2C owner. Actual222's
+    //default tail is separately closed; untracked240/258/reset routes lose
+    //proof. None stays None and is never reconstructed from counts/cache.
+    if !matches!(
+        id,
+        1 | 2
+            | 3
+            | 4
+            | 6
+            | 52
+            | 68
+            | 114
+            | 118
+            | 143
+            | 152
+            | 168
+            | 169
+            | 222
+            | 229
+            | 304
+            | 329
+            | 330
+    ) && !keep_cupid_fire_delay
+    {
+        owner.fire_delay_inputs = None;
+    }
+    //Actual Add48's selected default/common path preserves D30.
+    //This word's proof is independent of D38 and every cache role.
+    let keep_cupid_damage = id == 48
+        && normal_isaac
+        && crate::item_pipeline::ItemInputs::new(owner)
+            .is_ok_and(|inputs| inputs.admits_cupid_grant_context());
+    // These actual Add routes preserve D30, independently of their cache,
+    // getter and caller permissions. Unmapped240/258 and other routes lose
+    // the existing owner; later counts/cache work cannot recreate it.
+    if !matches!(
+        id,
+        1 | 2
+            | 3
+            | 4
+            | 6
+            | 12
+            | 52
+            | 68
+            | 114
+            | 118
+            | 143
+            | 152
+            | 168
+            | 169
+            | 229
+            | 304
+            | 329
+            | 330
+    ) && !keep_cupid_damage
+    {
+        owner.damage_inputs = None;
+    }
+    //Actual Add48's selected default/common path preserves D38.
+    //This word's proof is independent of Luck and every cache role.
+    let keep_cupid_shot_speed = id == 48
+        && normal_isaac
+        && crate::item_pipeline::ItemInputs::new(owner)
+            .is_ok_and(|inputs| inputs.admits_cupid_grant_context());
+    // These actual Add paths preserve D38. This event proof grants no stat,
+    // getter or caller permission; unknown Add240/258 and other producers
+    // invalidate an existing owner rather than deriving one from counts.
+    if !matches!(
+        id,
+        1 | 2 | 3 | 4 | 6 | 52 | 68 | 114 | 118 | 143 | 152 | 168 | 169 | 229 | 304 | 329 | 330
+    ) && !keep_cupid_shot_speed
+    {
+        owner.shot_speed_inputs = None;
+    }
     //Only actual2/4/152/169 Add paths have a closed neutral C70 lifetime here.
     //Keep an existing owner for those grants; other producers invalidate it.
     //Neither current counts nor a cache evaluation can recreate this word.
@@ -593,6 +848,10 @@ pub(crate) fn add_collectible(
         && normal_isaac
         && crate::item_pipeline::ItemInputs::new(owner)
             .is_ok_and(|inputs| inputs.admits_monstro_grant_context());
+    let keep_inner_eye_knife_luck = id == 2
+        && normal_isaac
+        && crate::item_pipeline::ItemInputs::new(owner)
+            .is_ok_and(|inputs| inputs.admits_inner_eye_knife_grant());
     let keep_epic_fetus_luck = matches!(id, 2 | 168)
         && normal_isaac
         && crate::item_pipeline::ItemInputs::new(owner)
@@ -604,6 +863,7 @@ pub(crate) fn add_collectible(
         && !keep_fetus_luck
         && !keep_monstro_luck
         && !keep_epic_fetus_luck
+        && !keep_inner_eye_knife_luck
     {
         // These admitted grant paths preserve the fresh auxiliary words.
         // Nonzero setters and restore need their own producer binding.

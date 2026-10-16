@@ -211,6 +211,10 @@ pub(crate) fn advance_trapdoor(state: &mut State, phase: Phase) -> Result<(), St
         return Ok(());
     };
     let position = trapdoor.world_position(width);
+    // The trapdoor opens on every trapdoor stage, but a stage whose next
+    // SetNextStage585620 target has no admitted generator never takes the
+    // player: like an unadmitted doorway, the frontier refuses the entry.
+    let admitted = next_stage(state.stage).is_ok();
     let player = player_world(state);
     let (dx, dy) = (player.x - position.x, player.y - position.y);
     let distance = (dx * dx + dy * dy).sqrt();
@@ -224,7 +228,7 @@ pub(crate) fn advance_trapdoor(state: &mut State, phase: Phase) -> Result<(), St
             trapdoor.state = 1;
         }
     }
-    let enter = 21.0 > distance && trapdoor.state == 1;
+    let enter = 21.0 > distance && trapdoor.state == 1 && admitted;
     if enter && !state.player_animation.guard {
         // Game+a1d8 is 16 only in the same-stage branch; normal runs pass false.
         start(state, false, 0);
@@ -286,6 +290,7 @@ pub(crate) fn advance(state: &mut State) -> Step {
                 age: 0,
                 active: true,
                 title: stage_name(state.stage).into(),
+                subtitle: String::new(),
                 stage: true,
             };
             Step::Done

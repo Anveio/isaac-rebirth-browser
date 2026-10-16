@@ -177,6 +177,7 @@ Next: narrow (1x1 thin) shapes; devil/angel door after a boss.
 | --- | --- | --- | --- |
 | #147 | P1 | Doors into unsupported room types render open but never transition | playtest |
 | #212 | P2 | Seed J8JF7M4M: start room has no top door and hides the bottom door | e2e |
+| #450 | P3 | Doors into boss rooms use the normal frame instead of the boss frame (render part under *Rendering*) | playtest 2026-10-16 `playtest/2045007/` |
 
 ## Stage progression
 
@@ -194,6 +195,7 @@ Next: Basement II to Caves (#413 first).
 | --- | --- | --- | --- |
 | #413 | P0 | Basement II boss trapdoor fails every tick; next stage only admits 1 to 2 | playtest |
 | #383 | P0 | Boss kill froze on a poop in the award cell (Larry Jr.). Error path removed by #385; confirm and close | playtest |
+| #449 | P3 | No "BASEMENT I" name streak at run start; Basement II start room keeps the controls drawing | playtest 2026-10-16 `playtest/2045007/` |
 
 ## Player
 
@@ -211,6 +213,7 @@ Next: transformations once their items exist.
 | --- | --- | --- | --- |
 | #245 | P2 | Seed PQE9YPQP diverges in player position, velocity and health from presentation 269 | e2e damage-fire-delay |
 | #195 | P2 | Round Worm seed T1PK6Y0W: port player stops at counter 156 while the original keeps moving (triage?) | e2e roundworm |
+| #451 | P3 | Death diary has an empty "killed by" picture and no Esc/Space hints (triage?) | playtest 2026-10-16 `playtest/2045007/` |
 
 ## Weapons and tears
 
@@ -265,7 +268,9 @@ Port: rocks, spikes, poop, trapdoor, decorations, grid records and costs.
 Missing: tinted and bomb rocks, pits, TNT, blocks, buttons, crawlspace
 ladders, poop variants.
 
-No open bugs.
+| Bug | Sev | Symptom | Source |
+| --- | --- | --- | --- |
+| #447 | P1 | Authored poop (grid 1500) never appears: the selector leaves its cell empty | playtest 2026-10-16 `playtest/2045007/` dingle-DV02XJWW |
 
 ## Enemies
 
@@ -302,6 +307,7 @@ Next: remaining Chapter 1 bosses.
 | --- | --- | --- | --- |
 | #174 | P1 | Super Gluttony 49.1 is not admitted (needs lob projectiles and its second laser) | issue |
 | #408 | P2 | #374 changed the Monstro paired random route result | e2e monstro |
+| #448 | P3 | VS screen shows Monstro's portrait for every boss and no player or boss name | playtest 2026-10-16 `playtest/2045007/` |
 
 ## Pickups and chests
 
@@ -383,6 +389,7 @@ parity is a diagnostic only.
 | --- | --- | --- | --- |
 | #173 | P2 | Laser beam render geometry is approximated | issue |
 | #268 | P3 | Tracking: where the full-frame pixel error comes from | e2e |
+| #450 | P3 | Boss rooms lack the blood floor overlay and red edge vignette; nightmare lacks the floor progress bar | playtest 2026-10-16 `playtest/2045007/` |
 
 ## Audio
 

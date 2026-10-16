@@ -146,6 +146,21 @@ pub struct SavedRegularPickup {
     pub touched: bool,
 }
 
+/// Actual weak words copied by Pickup::Morph500A8F..AAE/500BB5..BD4.
+/// Fresh supported Init owns NULL; an old restore has no invented owner.
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct MorphLinks {
+    pub parent498: Option<crate::actors::ActorRef>,
+    pub link4a0: Option<crate::actors::ActorRef>,
+    pub link4a8: Option<crate::actors::ActorRef>,
+}
+impl MorphLinks {
+    pub(crate) fn known_empty(&self) -> bool {
+        self.parent498.is_none() && self.link4a0.is_none() && self.link4a8.is_none()
+    }
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Pickup {
@@ -186,6 +201,8 @@ pub struct Pickup {
     pub regular_rng: Option<crate::items::Rng>,
     #[serde(default)]
     pub chest: Option<crate::chests::Chest>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub morph_links: Option<MorphLinks>,
 }
 
 impl Pickup {
@@ -349,7 +366,51 @@ impl Pickup {
             }),
             regular_rng: None,
             chest: None,
+            morph_links: None,
         })
+    }
+
+    /// Selected free in-place Morph500A10 to an already chosen collectible.
+    /// It is not Game.Spawn: no new handle, manager slot or Room sequence.
+    pub(crate) fn morph_to_collectible(
+        &mut self,
+        subtype: u32,
+        game_update: u32,
+        scheduler: &mut crate::actors::Scheduler,
+    ) -> Result<(), String> {
+        let links = self
+            .morph_links
+            .clone()
+            .ok_or("Morph weak-word owner missing")?;
+        if !links.known_empty() {
+            return Err("Morph positive weak-link lifetime owner unadmitted".into());
+        }
+        let config = crate::items::definition(subtype).ok_or("Morph collectible config absent")?;
+        if self.spawn_seed == 0 || !self.position.is_finite() || !self.velocity.is_finite() {
+            return Err("Morph requires actual seed and finite saved vectors".into());
+        }
+        //500A2A..56 local RNG7 advances the OLD spawnSeed exactly once;
+        //the subsequent actual Init resets persistent RNG30 to this new seed.
+        let seed = crate::items::Rng::new(self.spawn_seed, [1, 21, 20]).raw();
+        let mut next = Self::spawn(self.id, 100, subtype, self.position, false)?;
+        next.spawn_seed = seed;
+        next.regular_rng = Some(crate::items::Rng::new(seed, [4, 3, 17]));
+        next.anchor_position = self.anchor_position;
+        next.presented_position = self.presented_position;
+        next.velocity = self.velocity;
+        next.touched = self.touched;
+        next.charge = config.max_charges;
+        next.birth_game_update = game_update;
+        next.morph_links = Some(links);
+        //TryOpen501178..1B0 selects actual locked-Chest Alternates frame4.
+        next.overlay_frame = 4.0;
+        next.project();
+        scheduler.reinitialize_in_place(crate::actors::ActorRef {
+            kind: crate::actors::ActorKind::Pickup,
+            id: self.id,
+        })?;
+        *self = next;
+        Ok(())
     }
 
     /// Base ANM2 playback is admitted only on full nonplayer update phases.
