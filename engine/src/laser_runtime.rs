@@ -278,7 +278,7 @@ pub(crate) fn run_line_contacts(
             crate::attack_grid::GridCallbackOutcome::UnadmittedKind(kind) => {
                 record_frontier(state, index, LaserFrontier::GridKind(kind));
             }
-            crate::attack_grid::GridCallbackOutcome::Unadmitted(branch) => {
+            crate::attack_grid::GridCallbackOutcome::Unadmitted { branch, .. } => {
                 record_frontier(state, index, LaserFrontier::GridBranch(branch));
             }
             crate::attack_grid::GridCallbackOutcome::Handled(_) => {}

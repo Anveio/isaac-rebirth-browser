@@ -10,18 +10,39 @@ pub(crate) enum GridCallbackOutcome {
     /// Hurt's bool: whether the grid entity took the damage.
     Handled(bool),
     UnadmittedKind(u32),
-    /// An admitted receiver reached a branch whose owner is not ported; the
-    /// draws before it ran and the branch's own effects are skipped.
-    Unadmitted(&'static str),
+    /// The receiver's bool is known, but a later branch is not ported. The
+    /// draws before that branch ran; its own effects remain unperformed.
+    Unadmitted { taken: bool, branch: &'static str },
 }
 
 impl GridCallbackOutcome {
+    /// Preserve the actual receiver return independently of its effect frontier.
+    /// An unimplemented receiver kind has no source-owned return value.
+    pub(crate) fn taken(&self) -> Option<bool> {
+        match self {
+            Self::Handled(taken) | Self::Unadmitted { taken, .. } => Some(*taken),
+            Self::UnadmittedKind(_) => None,
+        }
+    }
+
+    /// Retain a non-controller callback gap without invalidating C18 history.
+    pub(crate) fn record_frontier(&self, state: &mut State, caller: &str) {
+        if let Some(channel) = self.frontier() {
+            state.weapon_admission.unadmitted_controller.get_or_insert(
+                crate::weapon_plan::UnadmittedController {
+                    primary: state.weapon_cache.primary.numeric(),
+                    channel: format!("{caller}{channel}"),
+                },
+            );
+        }
+    }
+
     /// The caller's diagnostic channel for an unported receiver or branch.
     pub(crate) fn frontier(&self) -> Option<String> {
         match self {
             Self::Handled(_) => None,
             Self::UnadmittedKind(kind) => Some(format!("GridKind{kind}")),
-            Self::Unadmitted(branch) => Some((*branch).to_string()),
+            Self::Unadmitted { branch, .. } => Some((*branch).to_string()),
         }
     }
 }
@@ -186,6 +207,7 @@ fn particles(state: &mut State, centre: WorldVector, count: u32) -> Result<(), S
 /// 56aa90: a 0.1 chance of a heart (1/4) or a coin, or the Petrified Poop
 /// trinket (1/20 while the pool holds it); boss rooms mostly drop nothing.
 /// Butt Penny, Petrified Poop, Daemon's Tail and E. Coli change the roll.
+/// Every partial return here follows successful Hurt; 56a7b3 still returns true.
 fn drop_roll(
     state: &mut State,
     local: &mut crate::items::Rng,
@@ -194,11 +216,17 @@ fn drop_roll(
     let items = state.player_items.as_ref();
     let trinket = |id: u32| items.is_some_and(|items| items.trinket_slots.contains(&id));
     if trinket(2) || trinket(22) || trinket(24) {
-        return Ok(GridCallbackOutcome::Unadmitted("poopDropTrinket"));
+        return Ok(GridCallbackOutcome::Unadmitted {
+            taken: true,
+            branch: "poopDropTrinket",
+        });
     }
     let e_coli = items.is_some_and(|items| items.owned_counts.get(236).is_some_and(|count| *count > 0));
     let missed = if e_coli {
-        GridCallbackOutcome::Unadmitted("poopDropEColi")
+        GridCallbackOutcome::Unadmitted {
+            taken: true,
+            branch: "poopDropEColi",
+        }
     } else {
         GridCallbackOutcome::Handled(true)
     };
@@ -216,7 +244,10 @@ fn drop_roll(
     if local.bounded(20) == 0 {
         // RemoveTrinket(2) needs the item pool's trinket availability; the
         // Petrified Poop spawn would then draw MT.next.
-        return Ok(GridCallbackOutcome::Unadmitted("poopDropPetrifiedPoop"));
+        return Ok(GridCallbackOutcome::Unadmitted {
+            taken: true,
+            branch: "poopDropPetrifiedPoop",
+        });
     }
     let variant = if local.uniform() < 0.25 { 10 } else { 20 };
     let seed = local.raw();

@@ -3058,9 +3058,9 @@ impl Game {
                 let Some(cell) = grid::Grid::new(descriptor)?.index(position) else {
                     return Ok(());
                 };
-                // The NPC callback has no frontier channel; an unported
-                // receiver leaves the cell as it was.
-                attack_grid::callback_at_index(&mut self.state, cell, damage).map(|_| ())
+                let outcome = attack_grid::callback_at_index(&mut self.state, cell, damage)?;
+                outcome.record_frontier(&mut self.state, "npcGridHurt");
+                Ok(())
             }
             entities::Birth::Spawned(spawned) => {
                 self.admit_npc_birth(index, entities::Birth::Npc(spawned.selector))?;
@@ -3822,7 +3822,9 @@ fn tear_grid_hurt(state: &mut State, position: motion::WorldVector, damage: i32)
         let Some(cell) = grid.index(position + motion::WorldVector { x, y }) else {
             continue;
         };
-        if attack_grid::callback_at_index(state, cell, damage)? == attack_grid::GridCallbackOutcome::Handled(true) {
+        let outcome = attack_grid::callback_at_index(state, cell, damage)?;
+        outcome.record_frontier(state, "tearGridHurt");
+        if outcome.taken() == Some(true) {
             break;
         }
     }

@@ -109,7 +109,8 @@ pub fn destroy(state: &mut State, origin: WorldVector, radius: f32) -> Result<()
         let kind = state.room.grid.as_ref().and_then(|grid| grid.cells[index].entity.as_ref()).map(|entity| entity.kind);
         if kind == Some(14) {
             // DestroyGrid5cbb70 -> Poop's base Destroy561c00 is Hurt(4).
-            crate::attack_grid::callback_at_index(state, index, 4)?;
+            let outcome = crate::attack_grid::callback_at_index(state, index, 4)?;
+            outcome.record_frontier(state, "bombGridHurt");
             continue;
         }
         let grid = state.room.grid.as_mut().expect("admitted room grid");
