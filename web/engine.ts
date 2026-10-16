@@ -12,6 +12,7 @@ export interface Player {
   renderOffset: { x: number; y: number }; controlsEnabled: boolean;
   transformationCounts: [number, number] | null;
   flying: boolean | null; gridCollisionClass: number | null;
+  slowing?: { remaining: number; factor: number; friction: number };
   eye: "negative" | "positive";
   shotsFired: number;
 }
@@ -73,7 +74,7 @@ export interface Knife {
   childChain4a0: "unknown" | "empty" | { linked: ActorRef };
   active: boolean; dead: boolean; visible: boolean;
   position: {x: number; y: number}; savedPosition: {x: number; y: number};
-  homePosition: {x: number; y: number}; homingTarget: ActorRef | null;
+  homePosition: {x: number; y: number}; homingTarget: ActorRef | null; homingTargetKnown?: boolean;
   renderOffset: {x: number; y: number}; velocity: {x: number; y: number};
   configuredFriction: number; currentFriction: number;
   collisionRadius: number; collisionMass: number; collisionDamage: number;
@@ -220,6 +221,9 @@ export interface Floor {
   attemptReports: { attempt: number; initialGeneratorState: number; finalGeneratorState: number;
     initialPrimaryState: number; finalPrimaryState: number; outcome: string }[];
 }
+/** Room ambience loops 5c6980: eased volume, pitch and whether the loop plays. */
+export interface AmbienceLoop { volume: number; pitch: number; playing: boolean; }
+export interface Ambience { fire: AmbienceLoop; swarm: AmbienceLoop; }
 export interface Room {
   left: number; right: number; top: number; bottom: number; appearance: RoomAppearance;
   descriptor: RoomDescriptor | null;
@@ -282,6 +286,7 @@ export interface StageEffects {
   overlay: { asset: string; sourceCrop: Rect; offset: { x: number; y: number }; modulationRGBA: [number, number, number, number]; blend: Blend; simulationTick: number; motionEvidence: string };
 }
 export interface State {
+  knifeQueryPartition?: { gameCounter: number; actors: ActorRef[]; buckets: number[][] };
   weaponCache: {primary: number; flagsC98: [number,number]; colorCa0: AttackColor; colorCcc: AttackColor};
   attackRuntime: {chargeC0c: number | null; aimRotationC70?: number | null; headDirectionDa0: number | null; shootingAimDb4: {x: number; y: number} | null; movementDirectionD9c: number | null; playerDc4: {x: number; y: number} | null; persistent: ActorRef | null; secondary: (ActorRef | null)[]; technology2C40?: {pointerKnown: boolean; actor: ActorRef | null; firstDiagnostic: string | null}; nextKnife: number};
   knives: Knife[];
@@ -297,6 +302,7 @@ export interface State {
   schema: 1; tickRate: 60; tick: number; menuAnimationTick: number; runTick: number; gameUpdateCount: number; screen: Screen;
   titleAnimationFrame: number; menuFade: { active: boolean; alpha: number; color: [number, number, number, number] };
   runStartRequest: { inputPending: boolean; fading: boolean; fadeAlpha: number; systemPending: boolean; challengeId: number | null };
+  runQuit: { inputPending: boolean; fadeAlpha: number; fadeRate: number; systemPending: boolean; saveEnabled: boolean | null; saveOutcome: "supportedRunCopied" | "deadRunCleared" | null };
   systemClock: { systemCounter: number; interpolationEnabled: boolean };
   runAdmission: { clock: { milliseconds: number; subMillisecondNanoseconds: number; nanosecondsPerStep: number };
     requestedTimeAnchorMs: number | null; initialFade: number; fadeRate: number;
@@ -310,6 +316,9 @@ export interface State {
     specialFactor: number; removed: boolean[]; selected: boolean[]; roomRoutes: number[]; pillEffects: number[]} | null;
   playerItems: {initializerSeed: number; managerRng: ItemRng; initializerRng: ItemRng;
     itemRngs: ItemRng[]; trinketRngs: ItemRng[]; pocketRngs: ItemRng[]; entitySpawnSeed: number;
+    heldPockets?: {slots: {id: number; card: boolean}[];
+      frontier: {kind: "cardEffect"; cardId: number} | {kind: "pillEffect"; pillColor: number}
+        | {kind: "modifierConversion"; collectibleId: number} | null} | null;
     technologyEyeRegistered: boolean | null;
     costume229?: Costume229 | null;
     ownedCounts: number[]; temporaryCollectibles: {itemId: number; count: number; cooldown: number}[]; queuedId: number | null; queuedCharge: number; queuedTouched: boolean;
@@ -340,6 +349,7 @@ export interface State {
   roomDisplayFlags: number[]; revealedSecretConnections: [number, number][];
   persistedRooms: Record<string, Room>;
   stageTransition: {state: number; counter: number; sameStage: boolean; animation: number};
+  ambience: Ambience;
   roomTransition: {fromRoom: number; targetRoom: number; fromSlot: number; targetSlot: number; phase: "out" | "in" | "bossScene" | "bossCleanup"; fullUpdates: number; bossScene: {presentationIndex: number; animationFrame: number; animationPlaying: boolean} | null} | null;
   departureVelocity?: {x: number; y: number};
   sourceCacheRunFlags: number | null;

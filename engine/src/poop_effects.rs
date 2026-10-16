@@ -48,7 +48,9 @@ pub enum Controller {
 impl Controller {
     pub fn source_state(&self) -> i32 {
         match self {
-            Self::Particle58(Particle::Initializing) | Self::Particle27(Particle::Initializing) => 0,
+            Self::Particle58(Particle::Initializing) | Self::Particle27(Particle::Initializing) => {
+                0
+            }
             Self::Particle58(Particle::Flying(_)) | Self::Particle27(Particle::Flying(_)) => 1,
             Self::Explosion43 { frame_target } => *frame_target,
         }
@@ -181,7 +183,9 @@ impl Admission<'_> {
             .find(|effect| effect.id == id)
             .ok_or("explicit initial58 Update requires an admitted effect")?;
         if !matches!(effect.variant, 27 | 58) || effect.full_updates != 0 {
-            return Err("explicit initial particle Update must run once on its actual birth".into());
+            return Err(
+                "explicit initial particle Update must run once on its actual birth".into(),
+            );
         }
         base_update(effect)?;
         particle_update(effect, shared)?;
@@ -221,7 +225,11 @@ pub(crate) fn spawn_particles(
         let id = match variant {
             58 => admission.admit_particle(birth)?,
             27 => admission.admit_wood_particle(birth)?,
-            _ => return Err(format!("SpawnParticles Effect 1000.{variant} is not admitted")),
+            _ => {
+                return Err(format!(
+                    "SpawnParticles Effect 1000.{variant} is not admitted"
+                ))
+            }
         };
         admission.advance_particle_initial(id, &mut state.boot_lifecycle.shared)?;
     }
@@ -390,9 +398,7 @@ fn finish_update(effect: &mut SpriteEffect) -> Result<(), String> {
         Some(
             Controller::Particle58(Particle::Flying(flight))
             | Controller::Particle27(Particle::Flying(flight)),
-        ) => {
-            flight.height.is_finite() && flight.vertical_velocity.is_finite()
-        }
+        ) => flight.height.is_finite() && flight.vertical_velocity.is_finite(),
         _ => true,
     };
     if !effect.position.is_finite() || !effect.velocity.is_finite() || !finite_flight {

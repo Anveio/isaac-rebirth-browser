@@ -127,6 +127,10 @@ pub struct PlayerItems {
     pub item_rngs: Vec<items::Rng>,
     pub trinket_rngs: Vec<items::Rng>,
     pub pocket_rngs: Vec<items::Rng>,
+    ///Actual two eight-byte held records, independent of reserve chargeD8C.
+    ///An old restore does not inherit fresh empty pocket ownership.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub held_pockets: Option<crate::pockets::HeldPockets>,
     pub entity_spawn_seed: u32,
     #[serde(default)]
     pub costume118: Option<crate::player_costume118::Costume118>,
@@ -207,6 +211,7 @@ impl PlayerItems {
             item_rngs,
             trinket_rngs,
             pocket_rngs,
+            held_pockets: Some(crate::pockets::HeldPockets::fresh()),
             entity_spawn_seed,
             costume118: None,
             costume229: None,
@@ -654,6 +659,72 @@ pub(crate) fn flush_queued(state: &mut State) -> Result<(), String> {
     Ok(())
 }
 
+///Actual normal-player52CF87 dispatch and52D0D0 transformation tail.
+///These are source effect branches, not an inventory/cache/getter allowlist.
+///The caller separately requires actual passive config and Player1/0+BFC0.
+fn has_default_passive_grant_path(id: u32) -> bool {
+    //Selected dispatch effects: world/pool, spawn, body/sprite scale, health,
+    //active charge and actual240/258 producers stay outside this common path.
+    if matches!(
+        id,
+        10 | 12
+            | 21
+            | 54
+            | 71
+            | 72
+            | 75
+            | 76
+            | 81
+            | 91
+            | 116
+            | 120
+            | 121
+            | 141
+            | 155
+            | 179
+            | 194
+            | 195
+            | 196
+            | 198
+            | 230
+            | 232
+            | 240
+            | 246
+            | 251
+            | 252
+            | 258
+            | 260
+            | 313
+            | 333
+            | 340
+            | 343
+            | 344
+    ) {
+        return false;
+    }
+    //Either source transformation counter/helper path remains independent.
+    !matches!(
+        id,
+        9 | 10
+            | 57
+            | 81
+            | 128
+            | 133
+            | 134
+            | 145
+            | 148
+            | 151
+            | 187
+            | 212
+            | 248
+            | 264
+            | 272
+            | 274
+            | 279
+            | 320
+    )
+}
+
 ///Actual52cc90 common grant callback, shared by queued pickup and Challenge
 ///Player52e1a0. Queue and pool-removal fields remain owned by the caller.
 pub(crate) fn add_collectible(
@@ -664,11 +735,22 @@ pub(crate) fn add_collectible(
 ) -> Result<(), String> {
     let config = items::definition(id).ok_or("granted collectible config absent")?;
     let normal_isaac = state.weapon_admission.source_player_type == Some(0);
+    //The common authored inventory/costume domains independently exclude
+    //D2C, D34 and D28/D44/13BC/13C0. Cache flags are not a writer proof.
+    //This event only retains existing owners; every None remains None.
+    let keep_default_passive_inputs = normal_isaac
+        && state
+            .player
+            .entity_source
+            .is_some_and(|source| source.entity_type == 1 && source.variant == 0)
+        && config.kind == 1
+        && has_default_passive_grant_path(id);
     let owner = state
         .player_items
         .as_mut()
         .expect("checked Player item owner");
     owner.owned_counts[id as usize] = owner.owned_counts[id as usize].wrapping_add(1);
+    crate::pockets::note_modifier_grant(owner, id);
     //Actual48 independently preserves D28/D44/13BC/13C0 on its
     //closed common path. This input history gives no stage or caller role.
     let keep_cupid_move_speed = id == 48
@@ -702,6 +784,7 @@ pub(crate) fn add_collectible(
                 | 330
         ))
         && !keep_cupid_move_speed
+        && !keep_default_passive_inputs
     {
         owner.move_speed_inputs = None;
     }
@@ -734,6 +817,7 @@ pub(crate) fn add_collectible(
             | 329
             | 330
     ) && !keep_cupid_range
+        && !keep_default_passive_inputs
     {
         owner.range_inputs = None;
     }
@@ -766,6 +850,7 @@ pub(crate) fn add_collectible(
             | 329
             | 330
     ) && !keep_cupid_fire_delay
+        && !keep_default_passive_inputs
     {
         owner.fire_delay_inputs = None;
     }

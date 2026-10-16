@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "status": "SCOPED_PUBLIC_FOUNDATIONS_AND_PRIVATE_SELECTED_CONTRACTS_UNRESOLVED_FAILURES_RETAINED",
-  "main": "91519815a5d9a487d45b4ea88fa3e90a485d0a67",
+  "status": "CURRENT_658_RUNTIME_SCOPES_WITH_RETAINED_FAILURES_AND_SEPARATE_ORIGINAL_FRONTIERS",
+  "main": "6b260155fb983f482ffc50edf79b963f322b24ae",
   "merged": {
     "298": "261dbd60b3921fed421a614ef80c52baaadb0cca",
     "299": "988ae6355c7956d918ff0e00eb329d313645b864",
@@ -2567,104 +2567,549 @@
     "scope": "Frozen 80d65135 audit; not the current public open-PR roster."
   },
   "currentGameplayQualification": {
-    "publicHead": "91519815a5d9a487d45b4ea88fa3e90a485d0a67",
-    "publicTree": "22be07f25344ddfdb93a4866f7117f8f98d0a34f",
-    "publicSourceMerges": {
-      "443": "D38 persistent ShotSpeed input",
-      "442": "Original boss assets",
-      "446": "D30 persistent Damage input"
+    "publicHead": "6b260155fb983f482ffc50edf79b963f322b24ae",
+    "publicTree": "80631330b29df4cb00f1445b6abb49635c7e4a2b",
+    "factualSourceBase": "6b260155fb983f482ffc50edf79b963f322b24ae",
+    "qualifiedBuild": {
+      "sourceHead": "6b260155fb983f482ffc50edf79b963f322b24ae",
+      "sourceTree": "80631330b29df4cb00f1445b6abb49635c7e4a2b",
+      "bindingSha256": "6a3240f9324f9870ff2c88495e0eb1aab999ff79092695df19d87cbe7c447b93",
+      "wasmSha256": "95e2277019a974f686731133c6d37e6b3f34a8759ec16d3cdc31c81a8d6e8eea",
+      "productionSha256": "2f8e8b83a9330e54addd05fa8ee5dbe93950095dfeb029b78b8826e3e715961b",
+      "seconds": 42.695,
+      "sourcePins": 3565,
+      "buildProfile": "Explicit six argv; LTO off/CG256; startup1.4375GiB/live512MiB/FS8MiB. Not default npm/fat-LTO acceptance.",
+      "wholeGameplayAcceptance": false
+    },
+    "currentStrict405": {
+      "checks": 40572626,
+      "failures": 723235,
+      "changedExistingValues": 703160,
+      "changedJsonTypes": 1204,
+      "baselineOnly": 4792,
+      "candidateOnly": 7695,
+      "keysets": 6384,
+      "partitionSha256Prefix": "adeff2f2",
+      "status": "FAIL_ATTRIBUTION_OPEN_EXTERNAL492_SHARED_MT_CONSUMERS_SEPARATE_FROM_HELD_ROLE_TRAIN",
+      "firstLocalSourceAttribution": {
+        "index": 122,
+        "extraDraws": 13,
+        "owners": [
+          "one first-visit treasure jingle",
+          "two entered-room light passes times three fires times two uniform draws"
+        ],
+        "all624WordsStillEqual": true,
+        "firstAudio269Index": 141,
+        "noAllCascadeWaiver": true,
+        "noOriginalAmbienceAcceptance": true
+      }
+    },
+    "scope": "Completed actual report facts only. Source-ready systems, own regression observations and independent Original evidence are separate; all previous current and historical JSON values remain retained verbatim.",
+    "privateBuild": {
+      "sourceHead": "12de3e8f872d052ac3680fdd24f465c1c2860cfb",
+      "sourceTree": "9a94e4f59fcd3229b72927e6ed15b4286cac6532",
+      "bindingSha256": "fba2098e7c9253d65168256bd6cd8741505be89ec4891c80e5c617a0fa0a4a59",
+      "wasmSha256": "f83ba86811a766af894e47fb031b927814ec7b04e8227897a8656cda3a106301",
+      "seconds": 45.247602224349976,
+      "sourcePins": 3571,
+      "buildProfile": "Explicit six argv; LTO off/CG256; startup1.4375GiB/live512MiB/FS8MiB; optional floor/Clippy pending.",
+      "productionBuildPassed": true,
+      "gameOriginalAudioAcceptance": false,
+      "priorAttemptsPreserved": [
+        "generated matrix drift before TS/Cargo/Vite",
+        "Cargo101 unresolved foreign Tear module before production seal"
+      ]
+    },
+    "external492AuthorEvidence": {
+      "status": "AUTHOR_REPORTED_NOT_LOCALLY_REPRODUCED",
+      "correction": "https://github.com/Anveio/isaac-rebirth-browser/pull/492#issuecomment-6212688733",
+      "withdrawn": "Body claim blaming458 for a stage-exit failure used stale build-specific closed-loop port fight keys.",
+      "freshReported": "Both41387aa and492 head: contrived0/2512, random0/2516,231/231 checkpoints; agreed draws2985 to5542.",
+      "inputScope": "After boss-room arrival each game fights with different keys; c303/c306 is not a valid same-input divergence. Other author-reported suites retain their own same-input scope.",
+      "actualLocalRawReportFilesLocated": false
     },
     "rows": [
       {
-        "area": "Stat foundations",
-        "sourcePublic": "D38 #443 and D30 #446 merged; each owner has independent source/interface checks.",
-        "ownPortPort": "Private 17acc passed production in 30.725s; all four regular405 tapes retain 40,463,219 checks / 0 differences versus Ebc.",
-        "originalScope": "Artifact-specific selected contracts below; public source merges do not inherit private artifact identity.",
-        "remaining": "Floor/Clippy remain pending on the private production artifact."
+        "area": "Public interfaces and artifact scope",
+        "sourcePublic": "Public 6b260 includes shared-MT room lights/ambience, DropSound, source-ordered pickup transformations, Pause Quit, the web owner correction and optional Move-save fields. Held homing roles and next item/pocket sources are outside main.",
+        "ownPortPort": "Exact 6b260 production passed all six steps in 42.695s with 3,565 stable pins (LTO off/CG256). Four strict405 replays versus exact b319 retain 40,572,626 checks / 723,235 failures, including 703,160 changed values, 1,204 types and 4,792 missing fields; attribution is open. The separate private12de production passed all six steps in45.248s with3,571 stable pins; gameplay acceptance is pending.",
+        "originalScope": "The prior private658 comparison against exact b319 has 40,655,111 checks / 9,452 failures, solely added fields/keysets with no changed or removed existing values/types. It excludes external492/494 and is not whole-current-main acceptance.",
+        "remaining": "The first local13-draw difference is exactly one first-visit treasure jingle plus two light passes over three fires. The later first SFX269 request matches the source half-volume and cooldown. Other723,235 strict failures are not waived; Original ambience evidence remains open."
       },
       {
-        "area": "Experimental Treatment240",
-        "sourcePublic": "Private, unlanded seven-effect event plan and separate persistent inputs; Damage, FireDelay and Luck stages own separate read footprints.",
-        "ownPortPort": "Private0dca four 240 routes: 3,859 checks / 88 unresolved obligations; legacy12/14/222: 10,576 / 12 unresolved. Numeric/RNG/health endpoint failures are zero in those scopes.",
-        "originalScope": "Retained Original: six words/RNG/health and selected caches match 511 rows. Damage1, FireDelay2 and Luck1024 complete in 198 rows per side; corrected raw Luck matches 511 rows.",
-        "remaining": "2,199 strict failures remain. Range8, MoveSpeed16 and other requested tails still prevent full-cache/firing acceptance."
+        "area": "Stat inputs, acquisition history and Experimental Treatment",
+        "sourcePublic": "Independent persistent stat words and the reviewed generic default-passive CFG are public. Remaining D30/D38/Luck and C70 preservation, the corrected240 producer and acquisition-history owner/Add hook are compiled private12de cuts awaiting gameplay qualification.",
+        "ownPortPort": "Actual private658 real199/240 baseline retains 22,402 checks / 9,141 failures. Real199 grants add two keys and retain D2C/D34/four Move words; eight other owners are unavailable. Public240 has no complete producer and all fourteen requested words remain unavailable.",
+        "originalScope": "Historical240 Original comparisons retain six matching words/RNG/health and selected cached fields across 511 rows, with 2,199 failures including pending/cache and other owner gaps. Those old private bodies do not establish current public240 acceptance.",
+        "remaining": "The next exact artifact must verify all fourteen words on unchanged real-grant inputs, initial/save ownership and activation safety. Source-ready240/history and a completed cache request do not grant unrelated getter/caller permissions."
       },
       {
-        "area": "Cupid48 histories",
-        "sourcePublic": "D38/D30 bounded Cupid preservation landed; the remaining independent per-word fixes are private, without a permission union.",
-        "ownPortPort": "Ebc real 48→4 and 48→1 routes: 23,069 checks / 8 unknown-field failures; all three histories preserved and selected pending bits clear.",
-        "originalScope": "No new Original Cupid pair. The earlier missing-history baseline and corrected comparator record remain separate.",
-        "remaining": "This closes selected history/stat behavior, not full item or combat parity."
+        "area": "Controlled Knife and weapon precedence",
+        "sourcePublic": "Satellite prerequisites remain public. The actor, independent source contexts and precise homing roles stay private; retirement and unavailable-plan containment successors are source-reviewed but require fresh qualification. The joined private12de actor/retirement/containment/context/role source now builds; the exact death tape and full cohort remain pending.",
+        "ownPortPort": "The new first homing case on old005de reaches a real3 grant, then fails at tick453 with an unavailable previous mask8 query owner. Source review identifies a retirement boundary also reachable through the new658 roles. The earlier eight-case 2,324 / 2,310 failure cohort remains preserved.",
+        "originalScope": "Historical Knife/Brimstone/Ludovico, FIFO/HP and satellite results retain their named artifacts and failures. Neither a source permission split nor an unchanged ordinary405 partition establishes positive controlled homing or full synergy parity.",
+        "remaining": "Keep the actor and role train joined with its safety successors. A new artifact must cross the exact first death tape, then complete the unchanged full cohort. Generic neutral Get4 remains separate. Ordinary-Tear homing from private005de has unique module/registered-target ownership absent public main; it is explicit integration debt for a later small projection, with its old qualification retained."
       },
       {
-        "area": "Weapons and precedence",
-        "sourcePublic": "Source-ordered primary selection and separate live transformations, getters, births and contacts.",
-        "ownPortPort": "Historical Homing and satellite/retained-child witnesses stay attached to their artifacts.",
-        "originalScope": "Knife + Brimstone + Ludovico has actual controlled Knife, retained-child, Full/Fast and contact witnesses; exact identity/callback obligations remain failed.",
-        "remaining": "Controlled Knife homing nearest-query behavior is still absent; ordinary Tear homing does not supply it."
+        "area": "Currencies, Golden Key and procedural pickup births",
+        "sourcePublic": "Public coins/Golden Key and persistent-cell ownership share source-ordered 203/250 operators with selected heart, coin, key and bomb factories. Card/Pill Init, canonical chest/procedural consumers, held-pocket Save and collection/drop are private12de slices with build-only qualification.",
+        "ownPortPort": "Distinct-cell coverage retains 20,387 checks / 32 unresolved, including five births/collections/removals, eighteen coins and Golden Key false-to-true with zero keys. Same-cell repair retains 193,049 selected passes plus 28 unknowns; the earlier extra-coin failure stays historical.",
+        "originalScope": "The retained Original same-cell route exposed the old extra coin. No new Card/Pill, held-pocket collection or paid/resource-effect Original acceptance is inherited from Init/source review or old private builds.",
+        "remaining": "Paired collection, capacity spill, unknown 251/252 effects, modifiers/prices, return/reentry and unsupported child Init remain independently required. Bulk level descriptors continue to belong to the separate import workflow."
       },
       {
-        "area": "Pickups",
-        "sourcePublic": "Coin/golden-key owners landed. Cell-local persistence repair e013 is source-cleared and unbuilt.",
-        "ownPortPort": "Separate distinct-cell17acc four routes: 20,387 checks / 32 unresolved; every subtype has one positive inventory-delta witness and all five pickups collect/remove. Old same-cell15,501 / 36 is preserved.",
-        "originalScope": "Old same-cell pair: 1,946 Golden body-field checks pass; four port-only coins retain 7,840 UNGRADED obligations. Actual Native0 versus port18 remains a runtime bug.",
-        "remaining": "Unchanged same-cell replay still required for the repair. Door/return, HUD, audible, save/stage and individual Init owners remain unqualified."
+        "area": "Chest60, Bomb51, Mom's Key and modifier interactions",
+        "sourcePublic": "Chest60, Bomb51, Mom's Key and shared 203/250/selected-heart operators are public. Actual player/room inputs remain independent; unsupported input ownership is explicit.",
+        "ownPortPort": "Private658 corrected readers each perform 91,380 checks:203 retains 52 failures (48 mandatory unknowns, two Morph and two recorded-heart minima);250 retains 50 (48 unknowns and two Morph minima). Each fixed case matches three real hearts; observed subtype/property and requested-SFX slot laws pass. Old 1,751/1,747 observer failures remain retained.",
+        "originalScope": "The first actual Mom's Key Native/Own saved endpoint join on005de matches four initial five-word identities, initial/final RNG30 and final typed identities with zero selected mismatches or unmatched identities. Its prior own13 failures remain; no callback, parent/double-factory, Morph, clock or audio parity is inferred.",
+        "remaining": "Remaining callback, rare-child, Morph and recorded-heart coverage failures stay open. Source SFX requests and matched endpoints do not establish played sound or individual factory/RNG callbacks."
       },
       {
-        "area": "Popup, pause and sound",
-        "sourcePublic": "Popup/shared clock and pause six-bar owners have source reviews; actual Native mixer acceptance remains separate.",
-        "ownPortPort": "Private17acc pause four routes: 28,326 selected checks / 0 failures plus 16 mandatory unknowns. Saved popup browser replay stopped at a memory guard before comparison.",
-        "originalScope": "All five selected saved sound calls failed the singleton read with ENOSYS; sound comparison was not reached. Native pause bars remain ungraded.",
-        "remaining": "No audible, pixel, callback or measured memory-saving acceptance from a build or collector transport."
+        "area": "Popup, pause, Quit and transition appearance",
+        "sourcePublic": "Popup, pause/menu clocks, Pause Quit and optional Move-save inputs are public. Loading art, world-entry fade, Brim appearance, Luck-save and initial-save e2e observations are separate compiled private12de cuts with gameplay/pixels unqualified; public Continue remains unfinished.",
+        "ownPortPort": "Eight private658 public-input Quit routes complete two pause entries, resume, outgoing/opaque fade, one supported Save/Stop handoff and incoming/released menu each. The full saved reader checks 28,764 comparisons:112 observer f32 mismatches resolve to zero selected failures, while all 56 mandatory unknowns remain. Original168 failures and complete report inverse are retained.",
+        "originalScope": "Earlier17acc pause routes retain 28,326 selected passes / 16 unknowns. Native lifecycle, framebuffer, Stop/mixer, binary persistence, Continue and callback owners remain independently unobserved in the new own-game Quit result.",
+        "remaining": "Nonzero mutated-input Save, actual frontend pixels, ceremony/iframes/costume/control and Stop audio lifecycle require their own observations. Initial neutral Save cannot certify mutation or restoration."
       },
       {
-        "area": "Boss assets",
-        "sourcePublic": "95 original UI sheets and 56 portrait definitions landed in #442; private selector is a separate owner.",
-        "ownPortPort": "Private 17acc production passed; no selected boss-scene gameplay/pixel result in this snapshot.",
-        "originalScope": "Original decode/PNG census establishes assets, not the VS animation or selected scene.",
-        "remaining": "Portrait/name/spot selection and authored timing still need their declared live witnesses."
+        "area": "Played sound and browser transport",
+        "sourcePublic": "Native backend/PCM ownership, browser archival tools and streamed identities are public. External492 adds actual looping ambience requests and frontend voice updates; these are separate from proving audible equality.",
+        "ownPortPort": "Latest changed-capacity browserv5 reaches the AudioContext-running wait, canonical step and a title JSON snapshot, then guards125 after10.211s with1,089 checks; no sound equality follows. Earliera75 reaches reset/audio-resume-call return with14CHALLENGE/zeroGameplay rows, whilea0ae stops beforepage/reset/helpers. All scopes stay separate.",
+        "originalScope": "Twelve earlier Native starts have actual table owners, accepted PLAYING, positive gain/global1 and nonzero complete PCM matching original samples, with zero selected failures. Latest browser AudioContext readiness is observed; source starts, configured gain, PCM, gameplay sound and played-sound equality remain unestablished.",
+        "remaining": "A returned resume call is not an actual source start. Retain earlier NOT_REACHED/muted/ENOSYS/partial and guard reports. Stop/mixer/loop lifecycle, causal sound windows and full browser equality remain open."
+      },
+      {
+        "area": "Boss assets and scene selection",
+        "sourcePublic": "All 95 original boss UI sheets,56 portrait definitions and the independent source selector are public. Backdrops and bulk level/monster/character imports retain their separate ownership.",
+        "ownPortPort": "Original import inventory/PNG validation and named builds establish asset/type scopes. The current exact production build does not add selected boss-scene gameplay or pixel acceptance.",
+        "originalScope": "Original art and selector source do not establish VS animation, pivot, scene-clock or draw-order parity.",
+        "remaining": "Declared player/boss/spot/name selection, transition timing and visible Original/browser witnesses remain required."
+      },
+      {
+        "area": "Contact regression tooling and source-only comparers",
+        "sourcePublic": "The authorized136 DST exception and existing live comparers remain separate. Unique controlledTechnology comparer366 is being projected onto current main with its FIFO/HP/Impact laws preserved, rather than being abandoned as stale.",
+        "ownPortPort": "The existing Contact DST workload actually passes eight cases of1,500 steps and21 properties in Native rlib-only packaging. This is execution of the allowed harness, not an Original game, WASM or default shipped-build pass.",
+        "originalScope": "Saved comparer equivalence must retain strict cross-game identities and every missing callback/lifecycle obligation. Own observations cannot manufacture an Original tuple or convert endpoint agreement into callback evidence.",
+        "remaining": "Land the independently verified small366 successor and retire the old branch by ancestry or explicit supersession. No CI/hard gate or additional unit harness is introduced."
       }
-    ],
-    "selectedPrivateArtifact": {
-      "head": "17acc2d2545538f4f1d15127ac3b3183c7a400ef",
-      "bindingSha256": "e134a8c45bb7696cd829c3e45082f2d82a7713ced7e131588b0f4d29cfd4f414",
-      "normalProductionSeconds": 30.725,
-      "floorPending": true,
-      "clippyPending": true,
-      "regular405Checks": 40463219,
-      "regular405Failures": 0
-    },
-    "correctedLuck": {
-      "checks": 27736,
-      "failures": 2199,
-      "bit1024CompletionRowsPerSide": 198,
-      "compactSha256": "249f0c72a6dbb6cf44e4fb764c1704bc246223ead89b6b407c174835e4c9fdfe",
-      "rawLuckComparedRows": 511,
-      "rawLuckFailures": 0
-    },
-    "scope": "Frozen selected closed reports through distinct four Own/pause four Own; Original pickup trial and repaired-cell artifact remain outside this snapshot. Historical objects and failures remain literal; private acceptance does not qualify the public tree.",
-    "pauseOwn": {
-      "artifact": "17acc2d2",
-      "checks": 28342,
-      "selectedChecks": 28326,
-      "selectedFailures": 0,
-      "mandatoryUnknowns": 16,
-      "compactShaPrefix": "d123cfd5",
-      "scope": "Four genuine public 6/14 phase0/1 routes; Native six bars, pixels, mixer and callbacks remain ungraded."
-    },
-    "distinctPickupOwn": {
-      "artifact": "17acc2d2",
-      "checks": 20387,
-      "failures": 32,
-      "caseCount": 4,
-      "individualSubtypeWitnessesPerCase": {
-        "1": 1,
-        "2": 1,
-        "3": 1,
-        "4": 1
+    ]
+  },
+  "retainedGameplayQualificationSnapshots": [
+    {
+      "publicHead": "91519815a5d9a487d45b4ea88fa3e90a485d0a67",
+      "publicTree": "22be07f25344ddfdb93a4866f7117f8f98d0a34f",
+      "publicSourceMerges": {
+        "443": "D38 persistent ShotSpeed input",
+        "442": "Original boss assets",
+        "446": "D30 persistent Damage input"
       },
-      "fullReportShaPrefix": "ee1d22f1",
-      "scope": "Separate declared distinct-cell fixture, no Original acceptance and no same-cell runtime repair."
+      "rows": [
+        {
+          "area": "Stat foundations",
+          "sourcePublic": "D38 #443 and D30 #446 merged; each owner has independent source/interface checks.",
+          "ownPortPort": "Private 17acc passed production in 30.725s; all four regular405 tapes retain 40,463,219 checks / 0 differences versus Ebc.",
+          "originalScope": "Artifact-specific selected contracts below; public source merges do not inherit private artifact identity.",
+          "remaining": "Floor/Clippy remain pending on the private production artifact."
+        },
+        {
+          "area": "Experimental Treatment240",
+          "sourcePublic": "Private, unlanded seven-effect event plan and separate persistent inputs; Damage, FireDelay and Luck stages own separate read footprints.",
+          "ownPortPort": "Private0dca four 240 routes: 3,859 checks / 88 unresolved obligations; legacy12/14/222: 10,576 / 12 unresolved. Numeric/RNG/health endpoint failures are zero in those scopes.",
+          "originalScope": "Retained Original: six words/RNG/health and selected caches match 511 rows. Damage1, FireDelay2 and Luck1024 complete in 198 rows per side; corrected raw Luck matches 511 rows.",
+          "remaining": "2,199 strict failures remain. Range8, MoveSpeed16 and other requested tails still prevent full-cache/firing acceptance."
+        },
+        {
+          "area": "Cupid48 histories",
+          "sourcePublic": "D38/D30 bounded Cupid preservation landed; the remaining independent per-word fixes are private, without a permission union.",
+          "ownPortPort": "Ebc real 48→4 and 48→1 routes: 23,069 checks / 8 unknown-field failures; all three histories preserved and selected pending bits clear.",
+          "originalScope": "No new Original Cupid pair. The earlier missing-history baseline and corrected comparator record remain separate.",
+          "remaining": "This closes selected history/stat behavior, not full item or combat parity."
+        },
+        {
+          "area": "Weapons and precedence",
+          "sourcePublic": "Source-ordered primary selection and separate live transformations, getters, births and contacts.",
+          "ownPortPort": "Historical Homing and satellite/retained-child witnesses stay attached to their artifacts.",
+          "originalScope": "Knife + Brimstone + Ludovico has actual controlled Knife, retained-child, Full/Fast and contact witnesses; exact identity/callback obligations remain failed.",
+          "remaining": "Controlled Knife homing nearest-query behavior is still absent; ordinary Tear homing does not supply it."
+        },
+        {
+          "area": "Pickups",
+          "sourcePublic": "Coin/golden-key owners landed. Cell-local persistence repair e013 is source-cleared and unbuilt.",
+          "ownPortPort": "Separate distinct-cell17acc four routes: 20,387 checks / 32 unresolved; every subtype has one positive inventory-delta witness and all five pickups collect/remove. Old same-cell15,501 / 36 is preserved.",
+          "originalScope": "Old same-cell pair: 1,946 Golden body-field checks pass; four port-only coins retain 7,840 UNGRADED obligations. Actual Native0 versus port18 remains a runtime bug.",
+          "remaining": "Unchanged same-cell replay still required for the repair. Door/return, HUD, audible, save/stage and individual Init owners remain unqualified."
+        },
+        {
+          "area": "Popup, pause and sound",
+          "sourcePublic": "Popup/shared clock and pause six-bar owners have source reviews; actual Native mixer acceptance remains separate.",
+          "ownPortPort": "Private17acc pause four routes: 28,326 selected checks / 0 failures plus 16 mandatory unknowns. Saved popup browser replay stopped at a memory guard before comparison.",
+          "originalScope": "All five selected saved sound calls failed the singleton read with ENOSYS; sound comparison was not reached. Native pause bars remain ungraded.",
+          "remaining": "No audible, pixel, callback or measured memory-saving acceptance from a build or collector transport."
+        },
+        {
+          "area": "Boss assets",
+          "sourcePublic": "95 original UI sheets and 56 portrait definitions landed in #442; private selector is a separate owner.",
+          "ownPortPort": "Private 17acc production passed; no selected boss-scene gameplay/pixel result in this snapshot.",
+          "originalScope": "Original decode/PNG census establishes assets, not the VS animation or selected scene.",
+          "remaining": "Portrait/name/spot selection and authored timing still need their declared live witnesses."
+        }
+      ],
+      "selectedPrivateArtifact": {
+        "head": "17acc2d2545538f4f1d15127ac3b3183c7a400ef",
+        "bindingSha256": "e134a8c45bb7696cd829c3e45082f2d82a7713ced7e131588b0f4d29cfd4f414",
+        "normalProductionSeconds": 30.725,
+        "floorPending": true,
+        "clippyPending": true,
+        "regular405Checks": 40463219,
+        "regular405Failures": 0
+      },
+      "correctedLuck": {
+        "checks": 27736,
+        "failures": 2199,
+        "bit1024CompletionRowsPerSide": 198,
+        "compactSha256": "249f0c72a6dbb6cf44e4fb764c1704bc246223ead89b6b407c174835e4c9fdfe",
+        "rawLuckComparedRows": 511,
+        "rawLuckFailures": 0
+      },
+      "scope": "Frozen selected closed reports through distinct four Own/pause four Own; Original pickup trial and repaired-cell artifact remain outside this snapshot. Historical objects and failures remain literal; private acceptance does not qualify the public tree.",
+      "pauseOwn": {
+        "artifact": "17acc2d2",
+        "checks": 28342,
+        "selectedChecks": 28326,
+        "selectedFailures": 0,
+        "mandatoryUnknowns": 16,
+        "compactShaPrefix": "d123cfd5",
+        "scope": "Four genuine public 6/14 phase0/1 routes; Native six bars, pixels, mixer and callbacks remain ungraded."
+      },
+      "distinctPickupOwn": {
+        "artifact": "17acc2d2",
+        "checks": 20387,
+        "failures": 32,
+        "caseCount": 4,
+        "individualSubtypeWitnessesPerCase": {
+          "1": 1,
+          "2": 1,
+          "3": 1,
+          "4": 1
+        },
+        "fullReportShaPrefix": "ee1d22f1",
+        "scope": "Separate declared distinct-cell fixture, no Original acceptance and no same-cell runtime repair."
+      }
+    },
+    {
+      "publicHead": "789af8ae4233f9f125929994b2e3f8a8403e2d92",
+      "publicTree": "f643ca46ca721becb1524f08c29712c7acd9b0e4",
+      "factualSourceBase": "d9973fdb956dd4eb876e123345f65172931c5ebe",
+      "factualSourceTree": "5e3dbee316a8ce68dcadde01d95b454f7e9db00e",
+      "publicSourceMerges": {
+        "455": "Chest60 real opening/Morph",
+        "456": "Collectible title/description popup",
+        "460": "Source pickup sound calls",
+        "464": "Menu fade owner",
+        "467": "Bounded replay pager",
+        "462": "Persistent pickup-cell present/unknown owner",
+        "463": "Pause six-bar operand correction"
+      },
+      "rows": [
+        {
+          "area": "Stat foundations",
+          "sourcePublic": "D38 #443 and D30 #446 are public source owners; each keeps its own input and interface scope.",
+          "ownPortPort": "Private 17acc production and four regular405 tapes retain 40,463,219 checks / 0 differences versus Ebc. The repaired cell artifact has separate results. Later private005de normal production passed in28.051s under the explicitly new LTO-off/CG256/compiler-live512 profile; its gameplay remains pending.",
+          "originalScope": "Selected stat contracts below name their actual artifacts; public source integration does not inherit private identity.",
+          "remaining": "Exact current public build/TS interfaces remain pending the next coherent artifact; floor/Clippy remain pending in named private production scopes."
+        },
+        {
+          "area": "Experimental Treatment240",
+          "sourcePublic": "Private, unlanded seven-effect event plan and separate persistent inputs; Damage, FireDelay and Luck stages own separate read footprints.",
+          "ownPortPort": "Private0dca four 240 routes: 3,859 checks / 88 unresolved obligations; legacy12/14/222: 10,576 / 12 unresolved. Numeric/RNG/health endpoint failures are zero in those scopes.",
+          "originalScope": "Retained Original: six words/RNG/health and selected caches match 511 rows. Damage1, FireDelay2 and Luck1024 complete in 198 rows per side; corrected raw Luck matches 511 rows.",
+          "remaining": "2,199 strict failures remain. Range8, MoveSpeed16 and other requested tails still prevent full-cache/firing acceptance."
+        },
+        {
+          "area": "Cupid48 histories",
+          "sourcePublic": "D38/D30 bounded Cupid preservation landed; the remaining independent per-word fixes are private, without a permission union.",
+          "ownPortPort": "Ebc real 48→4 and 48→1 routes: 23,069 checks / 8 unknown-field failures; all three histories preserved and selected pending bits clear.",
+          "originalScope": "No new Original Cupid pair. The earlier missing-history baseline and corrected comparator record remain separate.",
+          "remaining": "This closes selected history/stat behavior, not full item or combat parity."
+        },
+        {
+          "area": "Weapons and precedence",
+          "sourcePublic": "Source-ordered primary selection, live transformations, getters, births and contacts remain separate. Controlled Knife homing and Satellite public prerequisite cuts are prepared; private source does not establish public runtime acceptance.",
+          "ownPortPort": "Historical Homing, Satellite and retained-child witnesses keep their artifacts. Bomb51 and MomKey199 compiled in private005de; actual gameplay remains pending and real fixed/random fixtures are declared.",
+          "originalScope": "Knife + Brimstone + Ludovico retains actual controlled Knife, preexisting children, Full/Fast and selected contacts; exact identity/callback obligations remain failed.",
+          "remaining": "Controlled Knife nearest-query qualification and new Bomb51/MomKey gameplay remain pending. Ordinary Tear homing supplies no Knife query permission."
+        },
+        {
+          "area": "Pickups",
+          "sourcePublic": "Coin/golden-key, Chest60/Morph #455 and cell-local persistent admission #462 are public source. Parent modifiers and canonical child Init remain separate roles.",
+          "ownPortPort": "Repaired ecb7, unchanged four same-cell routes: 193,049 selected checks pass plus 28 explicit unknowns; one Golden actor, zero coins, four skipped body/allocator effects. Separate distinct-cell 17acc 20,387 / 32 unresolved is retained.",
+          "originalScope": "The retained Original cohort with one Golden actor and zero coins exposed the old port 18-coin bug; its earlier pair and 7,840 unmatched coin obligations remain historical. The repaired own result implies no new Original pair.",
+          "remaining": "Ordinary procedural birth/save exists. Departure/reentry, Morph restoration, priced/context rewards, Room8, hearts/cards/trinkets/pills and unsupported child Init remain precise frontiers; Bomb51/MomKey gameplay remains unqualified."
+        },
+        {
+          "area": "Popup, pause and sound",
+          "sourcePublic": "Popup #456, actual pickup sound #460, menu #464, pager #467 and pause #463 are public source. New backend observations do not qualify all callers or browser playback.",
+          "ownPortPort": "Private 17acc pause, four routes: 28,326 selected checks pass plus 16 unknowns. Saved popup/browser playback comparisons remain stopped by guards or unobserved.",
+          "originalScope": "Native selected audible diagnostic: 12 unique accepted PLAYING owners, positive gain, global gain 1 and nonzero complete PCM; original sample matching has 0 failures (5e3c1abb). Saved 599a guard 125 retains only 830 Native-key checks passing.",
+          "remaining": "Browser playback remains UNOBSERVED; old muted/ENOSYS/guard records remain unchanged. Native pause bars, pixels and callback completion are not inferred."
+        },
+        {
+          "area": "Boss assets",
+          "sourcePublic": "95 original UI sheets and 56 portrait definitions landed in #442; actual selection/intro runtime remains a distinct private owner.",
+          "ownPortPort": "Named production artifacts establish their build scope; no selected boss-scene gameplay/pixel outcome is added here.",
+          "originalScope": "Original decode/PNG census establishes original assets, not VS animation or scene-selection parity.",
+          "remaining": "Player/boss/spot/name selection and authored transition clocks require their declared actual witnesses."
+        }
+      ],
+      "cellOwn": {
+        "selectedChecks": 193049,
+        "selectedFailures": 0,
+        "explicitUnknowns": 28,
+        "artifactLabel": "ecb7",
+        "scope": "Unchanged four same-cell public tapes, source-correct selective own contracts; no new Original pair."
+      },
+      "cellRaw405": {
+        "checks": 40484651,
+        "strictFailures": 42864,
+        "candidateOnly": 21432,
+        "objectKeySetDifferences": 21432,
+        "valueOrTypeChanges": 0,
+        "baselineOnly": 0,
+        "attribution": "Only declared persistentSpawnCells additions and corresponding object keysets under floor.descriptors/room.descriptor/persistedRooms.6; all strict differences preserved.",
+        "partitionSha256Prefix": "1ca13bd2"
+      },
+      "pauseOwn": {
+        "selectedChecks": 28326,
+        "selectedFailures": 0,
+        "explicitUnknowns": 16,
+        "artifactLabel": "17acc"
+      },
+      "audibleNative": {
+        "uniqueAcceptedPlayingOwners": 12,
+        "selectedFailures": 0,
+        "positiveGain": true,
+        "globalGain": 1,
+        "nonzeroCompletePcm": true,
+        "originalSamplesMatch": true,
+        "reportSha256Prefix": "5e3c1abb",
+        "browserStatus": "UNOBSERVED",
+        "savedBrowserGuard": {
+          "exitCode": 125,
+          "nativeKeyChecksPassed": 830,
+          "artifactLabel": "599a"
+        }
+      },
+      "publicQualification": "Exact public normal build/TS interfaces pending next coherent artifact; no private build acceptance transferred.",
+      "scope": "Top compact source/closed-report facts only. The previous current index is retained verbatim as a historical snapshot; all older report objects and failures remain unchanged.",
+      "laterProductionReceiptNote": {
+        "artifactLabel": "005de",
+        "normalProductionSeconds": 28.051,
+        "lto": "off",
+        "codegenUnits": 256,
+        "compilerLiveFloorMiB": 512,
+        "status": "ACTUAL_NORMAL_PRODUCTION_PASS_GAMEPLAY_PENDING",
+        "earlierGuardAttemptsPreserved": true,
+        "scope": "Explicit new profile only; public789a snapshot and old artifact scopes do not inherit this result."
+      },
+      "laterPublicSourceNotes": {
+        "468": "D2C input source merged6861927",
+        "469": "Item3 flags/color source mergeded67497"
+      }
+    },
+    {
+      "publicHead": "306c4f3c8259442c84649e69c20a53f629d7739e",
+      "publicTree": "a93273566410ba24c7bade5de06e8dbe32d23d04",
+      "factualSourceBase": "93052e0730135163569b0d22c11d4315dfdac2da",
+      "rows": [
+        {
+          "area": "Public interfaces and artifact scope",
+          "sourcePublic": "Public snapshot306c includes the small stat, Satellite, pickup, pause, sound and Bomb51/Mom’s Key cuts. The exact9305 foundation source passed ordinary debug Cargo and TypeScript; later478/479/481/482 are outside that check.",
+          "ownPortPort": "Private005de production passed in28.051s under the explicit LTO-off/CG256/compiler-live512 profile. Its four regular405 comparisons retain40,596,003 checks /3,856 strict failures: only1,928 added fields and1,928 keysets, with no changed or missing existing values/types.",
+          "originalScope": "Public interface correctness, port replay regression and Original comparison are separate evidence scopes.",
+          "remaining": "The final public Bomb/Mom’s Key and external joins need their next consolidated interface check. Floor/Clippy and unresolved live comparisons retain their named artifact scopes."
+        },
+        {
+          "area": "Stat foundations and Cupid histories",
+          "sourcePublic": "Independent D38/D30/D2C/D34/four-word MoveSpeed owners and per-word Add/Cupid preservation are public; Item3 flags/color and Luck1024 remain separate selected operators. The seven-effect240 producer is private.",
+          "ownPortPort": "Ebc real48→4 and48→1 routes retain23,069 checks /8 declared unknowns; all three tested histories survive and selected pending bits clear. Source-only common-passive retention is a separate follow-up.",
+          "originalScope": "Retained240 references match six words/RNG/health and selected caches across511 rows. Damage1, FireDelay2 and Luck1024 complete in198 rows per side; raw Luck matches511 numeric pairs.",
+          "remaining": "The240 comparison retains2,199 failures. Range8, MoveSpeed16 and requested tails are not accepted. The Cupid result qualifies only its tested histories and operators."
+        },
+        {
+          "area": "Controlled Knife and weapon precedence",
+          "sourcePublic": "Satellite/id2 prerequisites are public in470. The precise controlled-Knife homing actor and independent stage/Get4/caller roles remain private; ordinary Tear homing gives them no permission.",
+          "ownPortPort": "Corrected homing input cohort: all eight hosts and finite reader closed;2,324 checks /2,310 failures. All eight reached only the329 grant, without3/118, ready state or target witness. Earlier failed setup routes stay retained.",
+          "originalScope": "Historical Knife/Brimstone/Ludovico bodies, FIFO/HP and satellite comparisons retain their exact artifacts and failures; the new cohort adds no Original evidence.",
+          "remaining": "The missing public grant/setup prerequisites must be understood before claiming positive controlled homing. Target selection, actor completion and cross-game identities remain unverified."
+        },
+        {
+          "area": "Currencies, Golden Key and procedural births",
+          "sourcePublic": "Coins/golden-key and the source-ordered persistent-cell present/unknown owner are public. Weighted descriptors feed the existing selective heart/coin/key/bomb factories; regular save/readmit is implemented.",
+          "ownPortPort": "Distinct cells:20,387 checks /32 unresolved, with five births/collections/removals, every coin subtype’s reward delta,18 total coins, Golden false→true/keys0 and requested SFX199/204/232/234. Unchanged same-cell repair:193,049 selected checks pass plus28 unknowns; one Golden/zero coins and four suppressed body/allocator effects.",
+          "originalScope": "The complete retained Original same-cell route exposed the old extra-coin bug. Its earlier paired mismatches remain failed; the repaired own result is not a new Original pair.",
+          "remaining": "Door/return coverage, weak Morph restoration, priced rewards, Room8, spawned chests, hearts/trinkets/cards/pills and unsupported child Init remain explicit per-owner frontiers."
+        },
+        {
+          "area": "Chest60, Bomb51 and Mom’s Key",
+          "sourcePublic": "Chest60/Morph455 and the two immediate Bomb51/Mom’s Key481/482 cuts are public. Current opening inputs replace the inherited blanket neutral restriction. Canonical203/250/heart operators are source-reviewed separate follow-ups.",
+          "ownPortPort": "Chest60:112,223 checks /56 unresolved, including8 return-route coverage and48 unknowns. Corrected005de Bomb four routes:71,195 checks /44 explicit unverified; all selected explosion, four-open, Morph/non-Morph and supported-loot minima pass. Corrected interior Mom’s Key four routes:87,754 /50 failures, comprising48 unverified and2 Morph witness minima; all four grant199 and add2 keys. The earlier84,004 /961 fixed-border failures stay historical.",
+          "originalScope": "No new chest Original, callback or played-audio parity is claimed. The two small public cuts share final005de evidence; the intermediate Bomb-only head has no separate gameplay pass.",
+          "remaining": "The corrected Mom’s Key result closes its four real grants and keys, while two Morph witness minima remain failed. Return/reentry, rare children, pricing and room-specific operators retain their remaining contracts."
+        },
+        {
+          "area": "Popup, pause and transition appearance",
+          "sourcePublic": "Popup456, pause463 and menu464 are public. Loading art, world-entry fade and event-owned118 appearance compiled in005de but remain separate presentation cuts. Pause→Quit is an independent implementation workstream.",
+          "ownPortPort": "Four private17acc pause routes retain28,326 selected passes /16 declared unknowns, including real6/14 grants, falling-speed operands, pause frames/frozen Game and resume. Popup and new presentation browser outcomes remain incomplete or unrun.",
+          "originalScope": "Native pause bars, ceremony callback ownership, pixels and controls remain independently required. Loading-image draw593580 is visual, not an audio owner.",
+          "remaining": "Pause Quit/save/Stop, Continue, authored transition clocks, ceremony/iframes and actual118 pixels/control still need their selected live witnesses."
+        },
+        {
+          "area": "Played pickup sound and browser transport",
+          "sourcePublic": "Actual Native sound owners/procself460, lossless pager467, Native pickup frontdoors472, browser archive471 and streamed identity475 are public opt-in tools.",
+          "ownPortPort": "Resource JSON-string roundtrip/seed probes passed3fb93cd3. The changed browser trial closed at guard125 after7.316s, with source/input pins stable and830 reused Native-key checks passing. Public reset and sound were NOT_REACHED; no browser equality or memory saving is established. Earlier preflight and guard results remain retained.",
+          "originalScope": "Twelve selected Native starts have unique actual table owners, accepted PLAYING, positive gain/global1 and nonzero complete PCM matching original samples, with0 selected failures (5e3c1abb). Browser played-sound equality is UNOBSERVED.",
+          "remaining": "Source SFX requests are not played audio. Earlier muted/ENOSYS/partial830-key and guard records stay unchanged; full browser playback, sound windows and callback completion remain open."
+        },
+        {
+          "area": "Boss assets and scene selection",
+          "sourcePublic": "All95 original boss UI sheets/56 portraits and the independent source selector473 are public. External479 backdrop support stays a separate content owner.",
+          "ownPortPort": "Original import inventory/PNG validation and named production builds establish their own asset/type scopes. No selected boss-scene gameplay or pixel pass is added here.",
+          "originalScope": "Original assets and selector source do not establish VS animation, pivot, draw ordering or scene-clock parity.",
+          "remaining": "Declared player/boss/spot/name selection, transition timing and visible scene/pixel witnesses remain required."
+        }
+      ],
+      "exactPublicInterface": {
+        "head": "93052e0730135163569b0d22c11d4315dfdac2da",
+        "profile": "ORDINARY_DEBUG_START1p25GiB_LIVE512MiB_FS8",
+        "cargoSeconds": 21.493,
+        "typescriptSeconds": 1.101,
+        "sourcePins": 3559,
+        "sourceBeforeEndEqual": true,
+        "closureSha256": "638e785aa99501a80c907b32a37a42dd47c467c9fedcb2dc5735287781714efb",
+        "laterPublicJoinsPending": true
+      },
+      "cellOwn": {
+        "selectedChecks": 193049,
+        "selectedFailures": 0,
+        "explicitUnknowns": 28,
+        "artifactLabel": "ecb7",
+        "scope": "Unchanged four same-cell public tapes, source-correct selective own contracts; no new Original pair."
+      },
+      "cellRaw405": {
+        "checks": 40484651,
+        "strictFailures": 42864,
+        "candidateOnly": 21432,
+        "objectKeySetDifferences": 21432,
+        "valueOrTypeChanges": 0,
+        "baselineOnly": 0,
+        "attribution": "Only declared persistentSpawnCells additions and corresponding object keysets under floor.descriptors/room.descriptor/persistedRooms.6; all strict differences preserved.",
+        "partitionSha256Prefix": "1ca13bd2"
+      },
+      "pauseOwn": {
+        "selectedChecks": 28326,
+        "selectedFailures": 0,
+        "explicitUnknowns": 16,
+        "artifactLabel": "17acc"
+      },
+      "audibleNative": {
+        "uniqueAcceptedPlayingOwners": 12,
+        "selectedFailures": 0,
+        "positiveGain": true,
+        "globalGain": 1,
+        "nonzeroCompletePcm": true,
+        "originalSamplesMatch": true,
+        "reportSha256Prefix": "5e3c1abb",
+        "browserStatus": "UNOBSERVED",
+        "savedBrowserGuard": {
+          "exitCode": 125,
+          "nativeKeyChecksPassed": 830,
+          "artifactLabel": "599a"
+        }
+      },
+      "bombFour": {
+        "checks": 71195,
+        "failures": 44,
+        "allSelectedMinimaPass": true,
+        "explicitUnknownsPerCase": 11,
+        "reportSha256Prefix": "d95d4e77",
+        "compactSha256Prefix": "d11c035c",
+        "artifactLabel": "005de"
+      },
+      "momsKeyFour": {
+        "checks": 84004,
+        "failures": 961,
+        "recordedCasesReal199AndDoubleLoot": 2,
+        "fixedCasesMissingGrant": 2,
+        "sourceFinding": "fixed pedestal occupied border cell6,7; separate input successor uses interior6,5; no reroll or runtime-law change",
+        "historical": true
+      },
+      "controlledHomingEight": {
+        "checks": 2324,
+        "failures": 2310,
+        "compactSha256Prefix": "6f0359b6",
+        "grantsObserved": [
+          329
+        ],
+        "missingWitnesses": [
+          3,
+          118,
+          "ready",
+          "target"
+        ],
+        "noPositiveHomingAcceptance": true
+      },
+      "privateRaw005de": {
+        "checks": 40596003,
+        "strictFailures": 3856,
+        "candidateOnly": 1928,
+        "keysets": 1928,
+        "valueOrTypeChanges": 0,
+        "baselineOnly": 0,
+        "partitionSha256Prefix": "32efc756",
+        "prefixes": [
+          "runStartRequest.loadingImageIndex",
+          "knifeQueryPartition"
+        ]
+      },
+      "resourceResetProbe": {
+        "status": "PASS_ROUNDTRIP_AND_SEED_PROBES_ONLY",
+        "sha256Prefix": "3fb93cd3",
+        "latestChangedBrowserTrial": {
+          "exitCode": 125,
+          "seconds": 7.316,
+          "sourceInputPinsStable": true,
+          "completedGameplayOrPlayedSoundParity": false,
+          "earlierGuardAndPreflightResultsPreserved": true,
+          "reusedNativeKeyChecksPassed": 830,
+          "publicReset": "NOT_REACHED",
+          "sound": "NOT_REACHED",
+          "memorySavingClaim": false
+        }
+      },
+      "publicSourceMerges": {
+        "468": "D2C owner",
+        "469": "Item3 flags/color",
+        "470": "Satellite/id2",
+        "471": "lossless browser archive helper",
+        "472": "Native pickup frontdoors",
+        "473": "boss selector",
+        "474": "Luck1024",
+        "475": "streamed production identity",
+        "476": "D34 owner",
+        "477": "four-word MoveSpeed",
+        "481": "Bomb51",
+        "482": "Mom’s Key/current opening inputs"
+      },
+      "scope": "Compact current source/report index. Older current-named fields below refer to their recorded artifact. All prior report objects, failures and the789a qualification index remain literal historical records.",
+      "momsKeyCorrectedInteriorFour": {
+        "checks": 87754,
+        "failures": 50,
+        "explicitUnknowns": 48,
+        "morphWitnessMinimumFailures": 2,
+        "actualGrant199AndTwoKeysCases": 4,
+        "compactSha256Prefix": "cdea8523",
+        "artifactLabel": "005de"
+      }
     }
-  }
+  ]
 }
