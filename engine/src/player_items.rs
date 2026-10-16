@@ -746,6 +746,42 @@ fn has_default_passive_grant_path(id: u32) -> bool {
     )
 }
 
+///Reached normal passive dispatch effect, separate from its completion.
+///Only closed write domains may retain an existing persistent input owner.
+#[derive(Clone, Copy)]
+enum PassiveGrantSourceEffect {
+    DefaultTail,
+    ItemRngCardSpawn,
+}
+
+impl PassiveGrantSourceEffect {
+    fn from_dispatch(id: u32) -> Option<Self> {
+        //52CF87/52DF20 selects this effect; it is not an inventory role.
+        if id == 194 {
+            Some(Self::ItemRngCardSpawn)
+        } else if has_default_passive_grant_path(id) {
+            Some(Self::DefaultTail)
+        } else {
+            None
+        }
+    }
+
+    fn preserves_default_inputs(self) -> bool {
+        matches!(self, Self::DefaultTail)
+    }
+
+    fn preserves_shot_speed_input(self) -> bool {
+        match self {
+            Self::DefaultTail => true,
+            //52DF20..52DFAE: free-position search, two local item RNG
+            //draws, GetCard, explicit Card Init/admission and ordinary
+            //cache do not write D38. Other words and the actual world
+            //effect's completion retain their independent frontiers.
+            Self::ItemRngCardSpawn => true,
+        }
+    }
+}
+
 ///Actual52cc90 common grant callback, shared by queued pickup and Challenge
 ///Player52e1a0. Queue and pool-removal fields remain owned by the caller.
 pub(crate) fn add_collectible(
@@ -767,13 +803,21 @@ pub(crate) fn add_collectible(
     //D2C/D30/D34/D38, the five Luck inputs, and D28/D44/13BC/13C0.
     //Each input has its own write-domain proof; cache flags grant none.
     //This event only retains existing owners; every None remains None.
-    let keep_default_passive_inputs = normal_isaac
+    let normal_passive_source_context = normal_isaac
         && state
             .player
             .entity_source
             .is_some_and(|source| source.entity_type == 1 && source.variant == 0)
-        && config.kind == 1
-        && has_default_passive_grant_path(id);
+        && config.kind == 1;
+    let source_effect = if normal_passive_source_context {
+        PassiveGrantSourceEffect::from_dispatch(id)
+    } else {
+        None
+    };
+    let keep_default_passive_inputs = source_effect
+        .is_some_and(PassiveGrantSourceEffect::preserves_default_inputs);
+    let keep_shot_speed_inputs = source_effect
+        .is_some_and(PassiveGrantSourceEffect::preserves_shot_speed_input);
     let owner = state
         .player_items
         .as_mut()
@@ -951,7 +995,7 @@ pub(crate) fn add_collectible(
         id,
         1 | 2 | 3 | 4 | 6 | 52 | 68 | 114 | 118 | 143 | 152 | 168 | 169 | 229 | 304 | 329 | 330
     ) && !keep_cupid_shot_speed
-        && !keep_default_passive_inputs
+        && !keep_shot_speed_inputs
         && !treatment.is_some_and(|proof| proof.preserves_normal_inputs())
     {
         owner.shot_speed_inputs = None;
