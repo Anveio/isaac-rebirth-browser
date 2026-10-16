@@ -105,7 +105,8 @@ export interface SavedRunSummary {
   playerItems: {ownedCounts: number[]; itemRngStates: number[];
     trinketRngStates: number[]; pocketRngStates: number[]; activeId: number;
     activeCharge: number; saveWordD88: number; reserveCharge: number;
-    shotSpeedInputs?: {sourceD38: number}};
+    shotSpeedInputs?: {sourceD38: number};
+    damageInputs?: {sourceD30: number}};
   emptyGridCellsSaved: number; occupiedGridSeedsPending: number[];
   currentRoomRecord: number; currentRoomSeedSamples: {gridIndex: number;
     levelSeeds: [number, number]; savedSeeds: [number, number]; occupancy: "empty" | "occupied" | "padding";
@@ -311,6 +312,7 @@ export interface State {
     collectionDelay: number; activeId: number; activeCharge: number; activeSubordinateCharge: number; saveWordD88: number;
     activeStateD80: number; activeStateD84: number; reserveCharge: number; activeFlag3076: boolean;
     unevaluatedCacheFlags: number;
+    damageInputs?: {sourceD30: number};
     shotSpeedInputs?: {sourceD38: number};
     luckInputs: {sourceD3c: number; sourceD40: number; sourceD58: number; source13cc: number; source13d0: number} | null} | null;
   informationAnimation: {state: number; delay: number; currentActor: string | null;
