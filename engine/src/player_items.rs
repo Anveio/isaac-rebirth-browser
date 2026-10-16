@@ -736,7 +736,8 @@ pub(crate) fn add_collectible(
     let config = items::definition(id).ok_or("granted collectible config absent")?;
     let normal_isaac = state.weapon_admission.source_player_type == Some(0);
     //The common authored inventory/costume domains independently exclude
-    //D2C, D34 and D28/D44/13BC/13C0. Cache flags are not a writer proof.
+    //D2C/D30/D34/D38, the five Luck inputs, and D28/D44/13BC/13C0.
+    //Each input has its own write-domain proof; cache flags grant none.
     //This event only retains existing owners; every None remains None.
     let keep_default_passive_inputs = normal_isaac
         && state
@@ -883,6 +884,7 @@ pub(crate) fn add_collectible(
             | 329
             | 330
     ) && !keep_cupid_damage
+        && !keep_default_passive_inputs
     {
         owner.damage_inputs = None;
     }
@@ -899,6 +901,7 @@ pub(crate) fn add_collectible(
         id,
         1 | 2 | 3 | 4 | 6 | 52 | 68 | 114 | 118 | 143 | 152 | 168 | 169 | 229 | 304 | 329 | 330
     ) && !keep_cupid_shot_speed
+        && !keep_default_passive_inputs
     {
         owner.shot_speed_inputs = None;
     }
@@ -906,7 +909,7 @@ pub(crate) fn add_collectible(
     //Keep an existing owner for those grants; other producers invalidate it.
     //Neither current counts nor a cache evaluation can recreate this word.
     //169's default52D0D0..52D170 path preserves this existing owner too.
-    if !matches!(id, 2 | 4 | 152 | 169) {
+    if !matches!(id, 2 | 4 | 152 | 169) && !keep_default_passive_inputs {
         state.attack_runtime.aim_rotation_c70 = None;
     }
     //68 has the same closed zero-amount/common auxiliary producer. Preserve
@@ -948,6 +951,7 @@ pub(crate) fn add_collectible(
         && !keep_fetus_luck
         && !keep_monstro_luck
         && !keep_epic_fetus_luck
+        && !keep_default_passive_inputs
         && !keep_inner_eye_knife_luck
     {
         // These admitted grant paths preserve the fresh auxiliary words.
