@@ -174,6 +174,9 @@ export class Renderer {
         this.assets.draw(ctx, "gfx/ui/backselectwidget.anm2", "Exit", 10, 215, 0);
         this.assets.draw(ctx, "gfx/ui/backselectwidget.anm2", "Restart", 400, 195, 0);
       }
+      //GameRender550350 draws the outgoing black quad after Pause/HUD.
+      if (state.runAdmission.initialFade <= 0 && state.runQuit.fadeAlpha > 0)
+        gl.fillRectRGBA(0, 0, 480, 270, [0, 0, 0, state.runQuit.fadeAlpha]);
     }
     gl.presentScreen(); gl.finish();
     this.context.reset(); this.context.imageSmoothingEnabled = false;
