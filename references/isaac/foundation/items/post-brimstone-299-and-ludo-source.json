@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "status": "SCOPED_STAT_ORIGINAL_PENDING_MISMATCH_HOMING_SATELLITE_AND_NEW_SYSTEM_WORKSTREAMS",
-  "main": "80d65135e7e5cda3ab05bb35ef382f5635d34c3a",
+  "status": "SCOPED_PUBLIC_FOUNDATIONS_AND_PRIVATE_SELECTED_CONTRACTS_UNRESOLVED_FAILURES_RETAINED",
+  "main": "91519815a5d9a487d45b4ea88fa3e90a485d0a67",
   "merged": {
     "298": "261dbd60b3921fed421a614ef80c52baaadb0cca",
     "299": "988ae6355c7956d918ff0e00eb329d313645b864",
@@ -1910,7 +1910,7 @@
       "The latest validated main runtime is source `9a908a6d` / WASM `c720ec0c` (binding `2d6fbb4d`): normal production passed in 29.307s; optional floor and Clippy checks remain pending. Its regular405 comparison against production2 retains 38,005,081 checks / 11,616 FAIL: 5,808 new fields and 5,808 key-shape differences, with zero changed or missing preexisting values. Later tool-only changes, including the corrected Tear identity comparer, are outside this runtime artifact. This source snapshot retains separate Technology 2 and Polyphemus owners; their future joint pipeline is outside this frozen qualification record; no joint/Parent acceptance is inherited.",
       "The separate immutable production3 artifact (`b25a85e7` / WASM `9d30105b`, binding `11f8e079`) has three completed first Original/browser references. Technology 2 alone retains 34,748 checks / 1,964 FAIL: both own histories show one grant, four C40 births, seven primary Tears, 128 Full and 128 Fast stored-body rows, and four C40 NULL transitions. Selected typed material/property checks pass; strict identities, clocks and missing callback owners remain unresolved. Stored phase summaries do not establish callback entry, and zero exact-identity body joins do not establish actor correspondence. Polyphemus retains 84,313 / 5,378 FAIL: both sides show two grants, two pre-mixed plus ten mixed births, two actual NPC217 receivers, two registry appends, remaining-damage changes, copied FIFO appends and HP endpoints, including one same-Tear/two-receiver registry witness. Native Fast classification remains unknown. The starting Knife + Brimstone + Ludovico pair retains 67,254 / 5,206 FAIL: both sides show one controlled Knife across 508 body rows, two copied FIFO appends/Get4 state diagnostics/HP drains, one negative-HP death and one manager retirement. Strict identities, clocks, actor/callback ownership and lifecycle gaps remain failed. The nullable-C18 tool correction is source-only and has not regraded that report.",
       "Separate browser-only Technology 2 contact coverage is 25,378 checks / 45 FAIL across four cases. Only recorded0 (NPC18) shows five flags8-compatible FIFO appends/retained48C diagnostics, six HP drains, one death and one retirement. The other three NPC14 cases have no contact witness and retain 12 failures each. No Original contact comparison ran. The corrected held-case reader covers only two of eight cases (10 FAIL each); the other six have not been regraded, and the older eight-case report is preserved.",
-      "A saved real-pedestal 114\u2192118\u2192329 history replay adds 1,535 checks / 36 FAIL: each side observes eight preexisting and eight continued children, 24 Full and 32 Fast stored-body rows. Native-only event input observes eight Remove post-store and eight Uninit-entry events; browser events remain unknown. Missing birth-copy, current-Get4 callback, dispatch, Uninit completion/weak-link, child-contact and raw-Line owners remain explicit, together with unexercised per-child obligations. The prior 106,884 / 8,755 FAIL plus one history failure is unchanged; this additive own-history check does not establish whole-synergy parity.",
+      "A saved real-pedestal 114→118→329 history replay adds 1,535 checks / 36 FAIL: each side observes eight preexisting and eight continued children, 24 Full and 32 Fast stored-body rows. Native-only event input observes eight Remove post-store and eight Uninit-entry events; browser events remain unknown. Missing birth-copy, current-Get4 callback, dispatch, Uninit completion/weak-link, child-contact and raw-Line owners remain explicit, together with unexercised per-child obligations. The prior 106,884 / 8,755 FAIL plus one history failure is unchanged; this additive own-history check does not establish whole-synergy parity.",
       "The corrected Tear identity comparer was exercised on one saved Polyphemus pair (1,295 playing rows), not the pending ten-case Number One suite. It reports 7,263 checks / 1,319 FAIL with zero exact cross-game joins: all 664 Native and 656 browser manager rows remain unmatched, with 7,304 and 7,216 material-field obligations explicitly UNGRADED. The former comparer reports 13,167 / 2,146 FAIL on the same saved pair. The lower failure count is a reporting/association correction, not improved parity; no ordinal, time or geometry fit supplies a join.",
       "The future joint Technology 2 + Polyphemus typed pipeline and actual Parent-owner slice is outside this frozen qualification record; no joint/Parent acceptance is inherited. Independent item results do not qualify joint admission. These entries consume compact completed reports only; they do not rerun games or rewrite historical failures."
     ],
@@ -2337,7 +2337,7 @@
       "newOwn4": {
         "checks": 12478,
         "fail": 232,
-        "realGrantOrder": "329\u21922",
+        "realGrantOrder": "329→2",
         "birthEndpointsEach": 2,
         "linkedRowsEachRange": [
           275,
@@ -2561,8 +2561,110 @@
       366,
       407
     ],
-    "historical": false,
+    "historical": true,
     "preserveUnique": true,
-    "note": "253 residual next-level FxRay-before-grid order;366 actual controlled68+329 evidence still pending;407 removed tinted-reward integration and Gimpy/Dip workloads lack equivalent demonstrated coverage."
+    "note": "253 residual next-level FxRay-before-grid order;366 actual controlled68+329 evidence still pending;407 removed tinted-reward integration and Gimpy/Dip workloads lack equivalent demonstrated coverage.",
+    "scope": "Frozen 80d65135 audit; not the current public open-PR roster."
+  },
+  "currentGameplayQualification": {
+    "publicHead": "91519815a5d9a487d45b4ea88fa3e90a485d0a67",
+    "publicTree": "22be07f25344ddfdb93a4866f7117f8f98d0a34f",
+    "publicSourceMerges": {
+      "443": "D38 persistent ShotSpeed input",
+      "442": "Original boss assets",
+      "446": "D30 persistent Damage input"
+    },
+    "rows": [
+      {
+        "area": "Stat foundations",
+        "sourcePublic": "D38 #443 and D30 #446 merged; each owner has independent source/interface checks.",
+        "ownPortPort": "Private 17acc passed production in 30.725s; all four regular405 tapes retain 40,463,219 checks / 0 differences versus Ebc.",
+        "originalScope": "Artifact-specific selected contracts below; public source merges do not inherit private artifact identity.",
+        "remaining": "Floor/Clippy remain pending on the private production artifact."
+      },
+      {
+        "area": "Experimental Treatment240",
+        "sourcePublic": "Private, unlanded seven-effect event plan and separate persistent inputs; Damage, FireDelay and Luck stages own separate read footprints.",
+        "ownPortPort": "Private0dca four 240 routes: 3,859 checks / 88 unresolved obligations; legacy12/14/222: 10,576 / 12 unresolved. Numeric/RNG/health endpoint failures are zero in those scopes.",
+        "originalScope": "Retained Original: six words/RNG/health and selected caches match 511 rows. Damage1, FireDelay2 and Luck1024 complete in 198 rows per side; corrected raw Luck matches 511 rows.",
+        "remaining": "2,199 strict failures remain. Range8, MoveSpeed16 and other requested tails still prevent full-cache/firing acceptance."
+      },
+      {
+        "area": "Cupid48 histories",
+        "sourcePublic": "D38/D30 bounded Cupid preservation landed; the remaining independent per-word fixes are private, without a permission union.",
+        "ownPortPort": "Ebc real 48→4 and 48→1 routes: 23,069 checks / 8 unknown-field failures; all three histories preserved and selected pending bits clear.",
+        "originalScope": "No new Original Cupid pair. The earlier missing-history baseline and corrected comparator record remain separate.",
+        "remaining": "This closes selected history/stat behavior, not full item or combat parity."
+      },
+      {
+        "area": "Weapons and precedence",
+        "sourcePublic": "Source-ordered primary selection and separate live transformations, getters, births and contacts.",
+        "ownPortPort": "Historical Homing and satellite/retained-child witnesses stay attached to their artifacts.",
+        "originalScope": "Knife + Brimstone + Ludovico has actual controlled Knife, retained-child, Full/Fast and contact witnesses; exact identity/callback obligations remain failed.",
+        "remaining": "Controlled Knife homing nearest-query behavior is still absent; ordinary Tear homing does not supply it."
+      },
+      {
+        "area": "Pickups",
+        "sourcePublic": "Coin/golden-key owners landed. Cell-local persistence repair e013 is source-cleared and unbuilt.",
+        "ownPortPort": "Separate distinct-cell17acc four routes: 20,387 checks / 32 unresolved; every subtype has one positive inventory-delta witness and all five pickups collect/remove. Old same-cell15,501 / 36 is preserved.",
+        "originalScope": "Old same-cell pair: 1,946 Golden body-field checks pass; four port-only coins retain 7,840 UNGRADED obligations. Actual Native0 versus port18 remains a runtime bug.",
+        "remaining": "Unchanged same-cell replay still required for the repair. Door/return, HUD, audible, save/stage and individual Init owners remain unqualified."
+      },
+      {
+        "area": "Popup, pause and sound",
+        "sourcePublic": "Popup/shared clock and pause six-bar owners have source reviews; actual Native mixer acceptance remains separate.",
+        "ownPortPort": "Private17acc pause four routes: 28,326 selected checks / 0 failures plus 16 mandatory unknowns. Saved popup browser replay stopped at a memory guard before comparison.",
+        "originalScope": "All five selected saved sound calls failed the singleton read with ENOSYS; sound comparison was not reached. Native pause bars remain ungraded.",
+        "remaining": "No audible, pixel, callback or measured memory-saving acceptance from a build or collector transport."
+      },
+      {
+        "area": "Boss assets",
+        "sourcePublic": "95 original UI sheets and 56 portrait definitions landed in #442; private selector is a separate owner.",
+        "ownPortPort": "Private 17acc production passed; no selected boss-scene gameplay/pixel result in this snapshot.",
+        "originalScope": "Original decode/PNG census establishes assets, not the VS animation or selected scene.",
+        "remaining": "Portrait/name/spot selection and authored timing still need their declared live witnesses."
+      }
+    ],
+    "selectedPrivateArtifact": {
+      "head": "17acc2d2545538f4f1d15127ac3b3183c7a400ef",
+      "bindingSha256": "e134a8c45bb7696cd829c3e45082f2d82a7713ced7e131588b0f4d29cfd4f414",
+      "normalProductionSeconds": 30.725,
+      "floorPending": true,
+      "clippyPending": true,
+      "regular405Checks": 40463219,
+      "regular405Failures": 0
+    },
+    "correctedLuck": {
+      "checks": 27736,
+      "failures": 2199,
+      "bit1024CompletionRowsPerSide": 198,
+      "compactSha256": "249f0c72a6dbb6cf44e4fb764c1704bc246223ead89b6b407c174835e4c9fdfe",
+      "rawLuckComparedRows": 511,
+      "rawLuckFailures": 0
+    },
+    "scope": "Frozen selected closed reports through distinct four Own/pause four Own; Original pickup trial and repaired-cell artifact remain outside this snapshot. Historical objects and failures remain literal; private acceptance does not qualify the public tree.",
+    "pauseOwn": {
+      "artifact": "17acc2d2",
+      "checks": 28342,
+      "selectedChecks": 28326,
+      "selectedFailures": 0,
+      "mandatoryUnknowns": 16,
+      "compactShaPrefix": "d123cfd5",
+      "scope": "Four genuine public 6/14 phase0/1 routes; Native six bars, pixels, mixer and callbacks remain ungraded."
+    },
+    "distinctPickupOwn": {
+      "artifact": "17acc2d2",
+      "checks": 20387,
+      "failures": 32,
+      "caseCount": 4,
+      "individualSubtypeWitnessesPerCase": {
+        "1": 1,
+        "2": 1,
+        "3": 1,
+        "4": 1
+      },
+      "fullReportShaPrefix": "ee1d22f1",
+      "scope": "Separate declared distinct-cell fixture, no Original acceptance and no same-cell runtime repair."
+    }
   }
 }
