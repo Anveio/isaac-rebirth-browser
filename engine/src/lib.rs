@@ -19,7 +19,6 @@ pub mod bombs;
 pub mod boss_death;
 mod brimstone;
 pub mod camera;
-pub mod game_shake;
 pub mod challenges;
 pub mod champions;
 pub mod chests;
@@ -38,16 +37,18 @@ mod doors;
 mod dr_fetus;
 pub mod duke;
 mod effects;
-mod epic_fetus;
-mod explosion_effects;
 pub mod enemy_projectiles;
 mod entities;
+mod epic_fetus;
+mod explosion_effects;
+pub mod game_shake;
 pub mod sprite_color;
 pub mod tear_deaths;
 mod tear_factory;
 mod technology;
 mod technology2;
 pub use entities::{implemented_npc_kinds, supports_npc_selector};
+mod contact_candidates;
 pub mod familiars;
 pub mod fireplaces;
 pub mod floor;
@@ -62,8 +63,8 @@ pub mod grid_records;
 mod health_damage;
 mod horfs;
 pub mod information_animation;
-pub mod input;
 mod inner_eye;
+pub mod input;
 mod item_death_effects;
 mod item_pipeline;
 pub mod items;
@@ -102,7 +103,6 @@ pub mod player_items;
 pub mod player_save;
 pub mod player_stats;
 mod polyphemus_contact;
-mod contact_candidates;
 pub mod poop_effects;
 pub mod projectiles;
 pub mod public_actions;
@@ -2410,7 +2410,8 @@ impl Game {
                     tear.id == id
                         && tear.controlled.is_none()
                         && (partitioned_contacts == polyphemus_contact::ContactPass::Handled
-                            || (partitioned_contacts == polyphemus_contact::ContactPass::Unadmitted
+                            || (partitioned_contacts
+                                == polyphemus_contact::ContactPass::Unadmitted
                                 && tear.attack_flags.0 == 0x200))
                 }) {
                     continue;
@@ -3165,7 +3166,7 @@ impl Game {
                 .player_items
                 .as_ref()
                 .is_some_and(|owner| owner.active_state_d80 == 0)
-            && self.state.player.shooting_lock <= 0
+            && self.state.player.shooting_lock == 0
             && !self.state.stage_shooting_guard.active();
         //The secondary callback has its own current readset and runs before
         //primary kind1/cache admission. Its retained beam does not reread C88.
@@ -3214,14 +3215,16 @@ impl Game {
                             buttons.aim()
                         };
                     let inner_eye = inner_eye::selected(&self.state, &plan);
-                    let ordinary = inner_eye || technology2_selected || matches!(
-                        plan.controller,
-                        weapon_plan::ControllerChannel::OrdinaryKnife
-                            | weapon_plan::ControllerChannel::ChargedBrimstone
-                            | weapon_plan::ControllerChannel::OrdinaryTechnology
-                            | weapon_plan::ControllerChannel::OrdinaryFetus
-                            | weapon_plan::ControllerChannel::MonstroLung
-                    );
+                    let ordinary = inner_eye
+                        || technology2_selected
+                        || matches!(
+                            plan.controller,
+                            weapon_plan::ControllerChannel::OrdinaryKnife
+                                | weapon_plan::ControllerChannel::ChargedBrimstone
+                                | weapon_plan::ControllerChannel::OrdinaryTechnology
+                                | weapon_plan::ControllerChannel::OrdinaryFetus
+                                | weapon_plan::ControllerChannel::MonstroLung
+                        );
                     let controlled =
                         plan.controller == weapon_plan::ControllerChannel::ControlledKnife;
                     let controlled_tear =
@@ -3353,18 +3356,22 @@ impl Game {
                                 buttons.held(),
                             );
                         }
-                        if inner_eye || matches!(
-                            plan.controller,
-                            weapon_plan::ControllerChannel::OrdinaryFetus
-                                | weapon_plan::ControllerChannel::MonstroLung
-                        ) {
+                        if inner_eye
+                            || matches!(
+                                plan.controller,
+                                weapon_plan::ControllerChannel::OrdinaryFetus
+                                    | weapon_plan::ControllerChannel::MonstroLung
+                            )
+                        {
                             //5306E0 excludes onlyC08=2; these released callers read D9C.
                             attack_runtime::controlled_idle_head_for(
                                 &mut self.state,
                                 buttons.held(),
                                 if inner_eye {
                                     "innerEyeMovementHistory"
-                                } else if plan.controller == weapon_plan::ControllerChannel::MonstroLung {
+                                } else if plan.controller
+                                    == weapon_plan::ControllerChannel::MonstroLung
+                                {
                                     "monstroLungMovementHistory"
                                 } else {
                                     "drFetusMovementHistory"
