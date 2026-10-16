@@ -1015,6 +1015,14 @@ if case['requires'].get('spoonBender3Functional') is not None:
     spoon_module = importlib.util.module_from_spec(spoon_spec)
     spoon_spec.loader.exec_module(spoon_module)
     spoon_comparer = spoon_module.SpoonBenderComparer(globals(), case)
+knife_satellite_comparer = None
+knife_satellite_result = None
+if case['requires'].get('controlledKnifeSatellites') is not None:
+    knife_satellite_spec = importlib.util.spec_from_file_location(
+        'knife_satellite_comparer', Path(__file__).with_name('composition-controlled-knife-satellites.py'))
+    knife_satellite_module = importlib.util.module_from_spec(knife_satellite_spec)
+    knife_satellite_spec.loader.exec_module(knife_satellite_module)
+    knife_satellite_comparer = knife_satellite_module.KnifeSatelliteComparer(globals(), case)
 monstro_comparer = None
 monstro_result = None
 if case['requires'].get('monstrosLungFunctional') is not None:
@@ -1098,6 +1106,11 @@ for captured in sorted(all_captured, key=lambda row: row['presentation']):
                     port_gameplay_presentation=captured.get('gameplayPresentation'))
             except Exception as error:
                 missing('mandatory actual Spoon3 target/body states', t, error)
+        if knife_satellite_comparer is not None:
+            try:
+                knife_satellite_comparer.snapshot(source, state, t, observed['systemCounter'], observed['players'][0])
+            except Exception as error:
+                missing('mandatory actual Knife4A0 linked satellites group', t, error)
         if monstro_comparer is not None:
             try:
                 monstro_comparer.snapshot(source, state, t, observed['systemCounter'], observed['players'][0],
@@ -1189,7 +1202,7 @@ for captured in sorted(all_captured, key=lambda row: row['presentation']):
                 except Exception as error:
                     missing('actual Knife controlled classification owners', t, error)
                     controlled = None  # Explicitly unknown; cannot establish a controlled witness.
-                if controlled:
+                if controlled and knife_satellite_comparer is None:
                     coverage['actualControlledKnifeBodies'] += 1
                     try:
                         check('controlled actual childChain4A0 eligibility', (True, 'empty'),
@@ -1539,6 +1552,9 @@ mixed_dr_fetus = mixed_fetus_comparer.finish() if mixed_fetus_comparer is not No
 
 if spoon_comparer is not None:
     spoon_result = spoon_comparer.finish()
+if knife_satellite_comparer is not None:
+    knife_satellite_result = knife_satellite_comparer.finish()
+
 if monstro_comparer is not None:
     monstro_result = monstro_comparer.finish()
 
@@ -1576,6 +1592,8 @@ if monstro_result is not None:
     result['monstrosLung'] = monstro_result
 if spoon_result is not None:
     result['spoonBender3'] = spoon_result
+if knife_satellite_result is not None:
+    result['controlledKnifeSatellites'] = knife_satellite_result
 payload = (json.dumps(result, separators=(',', ':')) + '\n').encode()
 with args.output.open('xb') as stream:
     stream.write(gzip.compress(payload, mtime=0) if str(args.output).endswith('.gz') else payload)

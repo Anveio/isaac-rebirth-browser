@@ -1,0 +1,1375 @@
+{
+  "schema": 1,
+  "cases": [
+    {
+      "name": "controlled-knife-satellites-fixed-phase0",
+      "fixture": {
+        "kind": "source-authored-modified-challenge",
+        "challengeId": 1,
+        "startingItems": [
+          114
+        ],
+        "view": "item-only",
+        "authoredResourcePath": "controlled-knife-satellites-v1/challenges-b7b3b25eb0855cd2.xml",
+        "baselineResourcePath": "../../rebirth/resources/challenges.xml",
+        "specialRoomsPath": "controlled-knife-satellites-v1/room-8f351f6091520058.stb",
+        "specialRoomsSha256": "8f351f60915200586723774b410a0786734e45773117157251d6db1edf480ec2",
+        "otherChallengeAttributes": "preserve all rows and attributes except explicit neutral changes and startingitems",
+        "attributeChanges": [
+          {
+            "attribute": "getcurse",
+            "baselineValue": "9",
+            "authoredValue": "0"
+          },
+          {
+            "attribute": "cursefilter",
+            "baselineValue": "6",
+            "authoredValue": "127"
+          },
+          {
+            "attribute": "roomfilter",
+            "baselineValue": "2",
+            "authoredValue": null
+          }
+        ],
+        "startRoomSpawnChange": {
+          "catalogue": 0,
+          "index": 80,
+          "type": 1,
+          "variant": 2,
+          "operation": "append",
+          "groups": [
+            {
+              "x": 7,
+              "y": 3,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 100,
+                  "subtype": 329,
+                  "weight": 1.0
+                }
+              ]
+            },
+            {
+              "x": 9,
+              "y": 3,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 100,
+                  "subtype": 2,
+                  "weight": 1.0
+                }
+              ]
+            }
+          ],
+          "allOtherRowsMetadataDoorsWeightsOrderPreserved": true
+        },
+        "declaredResetJsonBytes": 277637
+      },
+      "bootEpochSeed": 12713,
+      "initialPhaseOffset": 0,
+      "entropy": "fixed declared public history",
+      "actions": [
+        {
+          "label": "ready",
+          "keys": [],
+          "presentations": 1
+        },
+        {
+          "label": "approach-pedestal-row",
+          "keys": [
+            "w"
+          ],
+          "presentations": 28
+        },
+        {
+          "label": "settle-before-charge",
+          "keys": [],
+          "presentations": 24
+        },
+        {
+          "label": "initial-ordinary-knife-charge",
+          "keys": [
+            "Right"
+          ],
+          "presentations": 120
+        },
+        {
+          "label": "release-knife-and-move-to-329",
+          "keys": [
+            "d"
+          ],
+          "presentations": 24
+        },
+        {
+          "label": "controlled-before-inner-eye",
+          "keys": [
+            "Left"
+          ],
+          "presentations": 160
+        },
+        {
+          "label": "approach-inner-eye-while-held",
+          "keys": [
+            "d",
+            "s",
+            "Left"
+          ],
+          "presentations": 12
+        },
+        {
+          "label": "release-and-move-to-inner-eye",
+          "keys": [
+            "d",
+            "s"
+          ],
+          "presentations": 32
+        },
+        {
+          "label": "controlled-inner-eye-satellites",
+          "keys": [
+            "Right"
+          ],
+          "presentations": 120
+        },
+        {
+          "label": "canceled-held",
+          "keys": [
+            "Right",
+            "Left"
+          ],
+          "presentations": 18
+        },
+        {
+          "label": "released",
+          "keys": [],
+          "presentations": 60
+        },
+        {
+          "label": "vertical-steering",
+          "keys": [
+            "Up"
+          ],
+          "presentations": 80
+        },
+        {
+          "label": "final-release",
+          "keys": [],
+          "presentations": 60
+        }
+      ],
+      "requires": {
+        "actualPublicChallengeEntry": true,
+        "bothGamesConsumeIdenticalDeclaredResourceBytes": true,
+        "actualBeforeAndAfterCountsRequired": true,
+        "actualQueueGrantCacheAndControllerFencesRequired": true,
+        "actualFree5_100SelectorContactAndQueuedGrantRequired": true,
+        "canonicalDiagnosticOwner": "weaponAdmission.unadmittedController must be present and null",
+        "actualPendingPrimaryCleanup": "must be present and null",
+        "actualCachePendingFlags": 0,
+        "preserveAllIdentitySeedRngInitNumericFamilyAndCoverageMismatches": true,
+        "unknownDiagnosticOrMissingCoverageIsFailure": true,
+        "actualSourceCurseSamplerDrawsBeforeMask": true,
+        "actualLevelCurseMask": 0,
+        "ownedCounts": [
+          {
+            "itemId": 114,
+            "count": 1
+          }
+        ],
+        "orderedRealPedestalGrants": [
+          329,
+          2
+        ],
+        "sourceExpectedActorContract": {
+          "primaryC08": 4,
+          "family": 8,
+          "variant": 0,
+          "subtype": 0,
+          "registeredC18DuringActualLifetime": true,
+          "managerRoomPersistent": true,
+          "controlledBy329": false,
+          "requiredWhen": "actual admitted source519FC0 callback and independently observed registered lifetime"
+        },
+        "staticActorContractScope": "Initial stage only; actual own counts and source queue define subsequent stages, never the action label/time.",
+        "compositionSourceFields": [
+          "playerMovementD9c",
+          "controlledKnifeSatelliteChain"
+        ],
+        "sourceInferredGrantPath": {
+          "orderedItems": [
+            114
+          ],
+          "each": "actual Challenge1 starting Add114; later actual free pedestals329 then2 use52E1A0\u219252CC90\u2192511F10",
+          "nativeDynamicCallCountObserved": false
+        },
+        "actorStages": [
+          {
+            "ownedCounts": [
+              {
+                "itemId": 114,
+                "count": 1
+              }
+            ],
+            "sourceExpectedActorContract": {
+              "primaryC08": 4,
+              "family": 8,
+              "variant": 0,
+              "subtype": 0,
+              "registeredC18DuringActualLifetime": true,
+              "managerRoomPersistent": true,
+              "controlledBy329": false,
+              "requiredWhen": "actual admitted source519FC0 callback and independently observed registered lifetime"
+            },
+            "requiredWitnesses": [
+              "Actual initial ChallengeAdd114 and ordinary persistent Knife; no real pedestal114 credit."
+            ]
+          },
+          {
+            "ownedCounts": [
+              {
+                "itemId": 114,
+                "count": 1
+              },
+              {
+                "itemId": 329,
+                "count": 1
+              }
+            ],
+            "sourceExpectedActorContract": {
+              "primaryC08": 4,
+              "family": 8,
+              "variant": 0,
+              "subtype": 0,
+              "registeredC18DuringActualLifetime": true,
+              "managerRoomPersistent": true,
+              "controlledBy329": true,
+              "requiredWhen": "actual admitted source519FC0 callback and independently observed registered lifetime"
+            },
+            "requiredWitnesses": [
+              "Actual free329 queued contact and deferred grant; same source-owned primaryKnife becomes controlled before any item2 grant."
+            ]
+          },
+          {
+            "ownedCounts": [
+              {
+                "itemId": 2,
+                "count": 1
+              },
+              {
+                "itemId": 114,
+                "count": 1
+              },
+              {
+                "itemId": 329,
+                "count": 1
+              }
+            ],
+            "sourceExpectedActorContract": {
+              "primaryC08": 4,
+              "family": 8,
+              "variant": 0,
+              "subtype": 0,
+              "registeredC18DuringActualLifetime": true,
+              "managerRoomPersistent": true,
+              "controlledBy329": true,
+              "requiredWhen": "actual admitted source519FC0 callback and independently observed registered lifetime"
+            },
+            "requiredWitnesses": [
+              "Actual free2 queued contact/deferred grant and source cache completion; source-owned anchor4A0 reaches exactly2 actual canonical subtype0/ParentKnife/bit33 satellites."
+            ]
+          }
+        ],
+        "controlledKnifeSatellites": {
+          "schema": "controlled-knife-linked4a0-satellites-v1",
+          "startingGrantScope": "114 is the actual Challenge starting grant. Only329 and2 are real ordered pedestals; this bank makes no actual pickup114 claim.",
+          "minimumAnchorNodesPerGame": 1,
+          "requiredAdditionalNodesPerGame": 2,
+          "minimumLinkedChainRowsPerGame": 1,
+          "minimumActualSatelliteBirthsPerGame": 2,
+          "minimumActualAnchorAndSatelliteBodyRowsPerGame": 1,
+          "minimumCurrentGet4ChecksPerGame": 1,
+          "minimumCopiedBornDamageChecksPerGame": 2,
+          "minimumActualSourceSystemCounterRowsPerGame": 1,
+          "minimumActualGameCadenceRowsPerGame": 1,
+          "countLaw": "Selected actualHave2 produces2 additional satellites.153/245/TEMP245 remain unadmitted; no count multiplication or item-pair union.",
+          "requiredActualWitnesses": [
+            "Actual nonempty4A0 edges resolve through current scheduler identities with seed/lifetime; Parent498 is independent and must not substitute the chain relation.",
+            "Actual anchor C18 owns source8/0/0; every satellite is source8/0/0, bit33, Parent498 points to actualanchorKnife, cachedSpawner0. No subtype1 Has118 or arbitrary actor-role join.",
+            "Actual currentPlayerGet4 foranchor and stored48C fornonPlayerParent satellites remain independent; copied damage/color/flags at birth and later formation stores require their own current source rows.",
+            "Actual chain order determines formation index, angle=(index*360f32)/count+3f32*signedSystemCounter, radius5f32*actualanchor474; compare actual own geometry, never fittedrotation/seed/position.",
+            "Actual canonicalGame period2/3/5 bodies and sourceSystem ring phase have independent clock owners; bornGame age0 repeatedFull on eachPlayercallback is not inferred from body endpoints.",
+            "Full/Fast body, Remove and matchingUninit weak clear require actual owner/event evidence; missing callbacks or endpoint coverage stay FAIL.",
+            "Strict crossgame identity+seed joins only, all unmatched per-field bodies/clock/RNG obligations remain UNGRADED with explicit sidecounts. No ordinal/role/nearest-position fitting or material-own-as-parity credit."
+          ],
+          "unsupportedInputs": [
+            "Item153/245/TEMP245 capability",
+            "Ordinary2+114 firing",
+            "General arbitrary stats auxiliary history",
+            "A new subtype1 Has118 producer from controlled dispatch",
+            "NPC contact/damage attribution without separate real receiver cohort"
+          ],
+          "missingToolingMustFail": true
+        }
+      },
+      "execution": {
+        "status": "not-executed",
+        "blockingPrerequisites": [
+          "Explicit future P4+item2 capability+commonGameclock+satellite+typedbrowser source joins and actual qualified artifact",
+          "New opt-in controlledKnifeSatelliteChain observer typed4A0 references and own-chain consumer; old emptychain comparer is not acceptance",
+          "Pipeline-only fresh Original/browser runs and actual grants/chain/body/clock witnesses"
+        ],
+        "neverSatisfiedBy": "Starting or final loadout alone; static source expected actor; oldemptychain PASS; ordinal/fitted identities; missing birth/body/retirement; outcome filtering or seed rerolls"
+      }
+    },
+    {
+      "name": "controlled-knife-satellites-fixed-phase1",
+      "fixture": {
+        "kind": "source-authored-modified-challenge",
+        "challengeId": 1,
+        "startingItems": [
+          114
+        ],
+        "view": "item-only",
+        "authoredResourcePath": "controlled-knife-satellites-v1/challenges-b7b3b25eb0855cd2.xml",
+        "baselineResourcePath": "../../rebirth/resources/challenges.xml",
+        "specialRoomsPath": "controlled-knife-satellites-v1/room-8f351f6091520058.stb",
+        "specialRoomsSha256": "8f351f60915200586723774b410a0786734e45773117157251d6db1edf480ec2",
+        "otherChallengeAttributes": "preserve all rows and attributes except explicit neutral changes and startingitems",
+        "attributeChanges": [
+          {
+            "attribute": "getcurse",
+            "baselineValue": "9",
+            "authoredValue": "0"
+          },
+          {
+            "attribute": "cursefilter",
+            "baselineValue": "6",
+            "authoredValue": "127"
+          },
+          {
+            "attribute": "roomfilter",
+            "baselineValue": "2",
+            "authoredValue": null
+          }
+        ],
+        "startRoomSpawnChange": {
+          "catalogue": 0,
+          "index": 80,
+          "type": 1,
+          "variant": 2,
+          "operation": "append",
+          "groups": [
+            {
+              "x": 7,
+              "y": 3,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 100,
+                  "subtype": 329,
+                  "weight": 1.0
+                }
+              ]
+            },
+            {
+              "x": 9,
+              "y": 3,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 100,
+                  "subtype": 2,
+                  "weight": 1.0
+                }
+              ]
+            }
+          ],
+          "allOtherRowsMetadataDoorsWeightsOrderPreserved": true
+        },
+        "declaredResetJsonBytes": 277637
+      },
+      "bootEpochSeed": 12713,
+      "initialPhaseOffset": 1,
+      "entropy": "fixed declared public history",
+      "actions": [
+        {
+          "label": "ready",
+          "keys": [],
+          "presentations": 1
+        },
+        {
+          "label": "approach-pedestal-row",
+          "keys": [
+            "w"
+          ],
+          "presentations": 28
+        },
+        {
+          "label": "settle-before-charge",
+          "keys": [],
+          "presentations": 24
+        },
+        {
+          "label": "initial-ordinary-knife-charge",
+          "keys": [
+            "Right"
+          ],
+          "presentations": 120
+        },
+        {
+          "label": "release-knife-and-move-to-329",
+          "keys": [
+            "d"
+          ],
+          "presentations": 24
+        },
+        {
+          "label": "controlled-before-inner-eye",
+          "keys": [
+            "Left"
+          ],
+          "presentations": 160
+        },
+        {
+          "label": "approach-inner-eye-while-held",
+          "keys": [
+            "d",
+            "s",
+            "Left"
+          ],
+          "presentations": 12
+        },
+        {
+          "label": "release-and-move-to-inner-eye",
+          "keys": [
+            "d",
+            "s"
+          ],
+          "presentations": 32
+        },
+        {
+          "label": "controlled-inner-eye-satellites",
+          "keys": [
+            "Right"
+          ],
+          "presentations": 120
+        },
+        {
+          "label": "canceled-held",
+          "keys": [
+            "Right",
+            "Left"
+          ],
+          "presentations": 18
+        },
+        {
+          "label": "released",
+          "keys": [],
+          "presentations": 60
+        },
+        {
+          "label": "vertical-steering",
+          "keys": [
+            "Up"
+          ],
+          "presentations": 80
+        },
+        {
+          "label": "final-release",
+          "keys": [],
+          "presentations": 60
+        }
+      ],
+      "requires": {
+        "actualPublicChallengeEntry": true,
+        "bothGamesConsumeIdenticalDeclaredResourceBytes": true,
+        "actualBeforeAndAfterCountsRequired": true,
+        "actualQueueGrantCacheAndControllerFencesRequired": true,
+        "actualFree5_100SelectorContactAndQueuedGrantRequired": true,
+        "canonicalDiagnosticOwner": "weaponAdmission.unadmittedController must be present and null",
+        "actualPendingPrimaryCleanup": "must be present and null",
+        "actualCachePendingFlags": 0,
+        "preserveAllIdentitySeedRngInitNumericFamilyAndCoverageMismatches": true,
+        "unknownDiagnosticOrMissingCoverageIsFailure": true,
+        "actualSourceCurseSamplerDrawsBeforeMask": true,
+        "actualLevelCurseMask": 0,
+        "ownedCounts": [
+          {
+            "itemId": 114,
+            "count": 1
+          }
+        ],
+        "orderedRealPedestalGrants": [
+          329,
+          2
+        ],
+        "sourceExpectedActorContract": {
+          "primaryC08": 4,
+          "family": 8,
+          "variant": 0,
+          "subtype": 0,
+          "registeredC18DuringActualLifetime": true,
+          "managerRoomPersistent": true,
+          "controlledBy329": false,
+          "requiredWhen": "actual admitted source519FC0 callback and independently observed registered lifetime"
+        },
+        "staticActorContractScope": "Initial stage only; actual own counts and source queue define subsequent stages, never the action label/time.",
+        "compositionSourceFields": [
+          "playerMovementD9c",
+          "controlledKnifeSatelliteChain"
+        ],
+        "sourceInferredGrantPath": {
+          "orderedItems": [
+            114
+          ],
+          "each": "actual Challenge1 starting Add114; later actual free pedestals329 then2 use52E1A0\u219252CC90\u2192511F10",
+          "nativeDynamicCallCountObserved": false
+        },
+        "actorStages": [
+          {
+            "ownedCounts": [
+              {
+                "itemId": 114,
+                "count": 1
+              }
+            ],
+            "sourceExpectedActorContract": {
+              "primaryC08": 4,
+              "family": 8,
+              "variant": 0,
+              "subtype": 0,
+              "registeredC18DuringActualLifetime": true,
+              "managerRoomPersistent": true,
+              "controlledBy329": false,
+              "requiredWhen": "actual admitted source519FC0 callback and independently observed registered lifetime"
+            },
+            "requiredWitnesses": [
+              "Actual initial ChallengeAdd114 and ordinary persistent Knife; no real pedestal114 credit."
+            ]
+          },
+          {
+            "ownedCounts": [
+              {
+                "itemId": 114,
+                "count": 1
+              },
+              {
+                "itemId": 329,
+                "count": 1
+              }
+            ],
+            "sourceExpectedActorContract": {
+              "primaryC08": 4,
+              "family": 8,
+              "variant": 0,
+              "subtype": 0,
+              "registeredC18DuringActualLifetime": true,
+              "managerRoomPersistent": true,
+              "controlledBy329": true,
+              "requiredWhen": "actual admitted source519FC0 callback and independently observed registered lifetime"
+            },
+            "requiredWitnesses": [
+              "Actual free329 queued contact and deferred grant; same source-owned primaryKnife becomes controlled before any item2 grant."
+            ]
+          },
+          {
+            "ownedCounts": [
+              {
+                "itemId": 2,
+                "count": 1
+              },
+              {
+                "itemId": 114,
+                "count": 1
+              },
+              {
+                "itemId": 329,
+                "count": 1
+              }
+            ],
+            "sourceExpectedActorContract": {
+              "primaryC08": 4,
+              "family": 8,
+              "variant": 0,
+              "subtype": 0,
+              "registeredC18DuringActualLifetime": true,
+              "managerRoomPersistent": true,
+              "controlledBy329": true,
+              "requiredWhen": "actual admitted source519FC0 callback and independently observed registered lifetime"
+            },
+            "requiredWitnesses": [
+              "Actual free2 queued contact/deferred grant and source cache completion; source-owned anchor4A0 reaches exactly2 actual canonical subtype0/ParentKnife/bit33 satellites."
+            ]
+          }
+        ],
+        "controlledKnifeSatellites": {
+          "schema": "controlled-knife-linked4a0-satellites-v1",
+          "startingGrantScope": "114 is the actual Challenge starting grant. Only329 and2 are real ordered pedestals; this bank makes no actual pickup114 claim.",
+          "minimumAnchorNodesPerGame": 1,
+          "requiredAdditionalNodesPerGame": 2,
+          "minimumLinkedChainRowsPerGame": 1,
+          "minimumActualSatelliteBirthsPerGame": 2,
+          "minimumActualAnchorAndSatelliteBodyRowsPerGame": 1,
+          "minimumCurrentGet4ChecksPerGame": 1,
+          "minimumCopiedBornDamageChecksPerGame": 2,
+          "minimumActualSourceSystemCounterRowsPerGame": 1,
+          "minimumActualGameCadenceRowsPerGame": 1,
+          "countLaw": "Selected actualHave2 produces2 additional satellites.153/245/TEMP245 remain unadmitted; no count multiplication or item-pair union.",
+          "requiredActualWitnesses": [
+            "Actual nonempty4A0 edges resolve through current scheduler identities with seed/lifetime; Parent498 is independent and must not substitute the chain relation.",
+            "Actual anchor C18 owns source8/0/0; every satellite is source8/0/0, bit33, Parent498 points to actualanchorKnife, cachedSpawner0. No subtype1 Has118 or arbitrary actor-role join.",
+            "Actual currentPlayerGet4 foranchor and stored48C fornonPlayerParent satellites remain independent; copied damage/color/flags at birth and later formation stores require their own current source rows.",
+            "Actual chain order determines formation index, angle=(index*360f32)/count+3f32*signedSystemCounter, radius5f32*actualanchor474; compare actual own geometry, never fittedrotation/seed/position.",
+            "Actual canonicalGame period2/3/5 bodies and sourceSystem ring phase have independent clock owners; bornGame age0 repeatedFull on eachPlayercallback is not inferred from body endpoints.",
+            "Full/Fast body, Remove and matchingUninit weak clear require actual owner/event evidence; missing callbacks or endpoint coverage stay FAIL.",
+            "Strict crossgame identity+seed joins only, all unmatched per-field bodies/clock/RNG obligations remain UNGRADED with explicit sidecounts. No ordinal/role/nearest-position fitting or material-own-as-parity credit."
+          ],
+          "unsupportedInputs": [
+            "Item153/245/TEMP245 capability",
+            "Ordinary2+114 firing",
+            "General arbitrary stats auxiliary history",
+            "A new subtype1 Has118 producer from controlled dispatch",
+            "NPC contact/damage attribution without separate real receiver cohort"
+          ],
+          "missingToolingMustFail": true
+        }
+      },
+      "execution": {
+        "status": "not-executed",
+        "blockingPrerequisites": [
+          "Explicit future P4+item2 capability+commonGameclock+satellite+typedbrowser source joins and actual qualified artifact",
+          "New opt-in controlledKnifeSatelliteChain observer typed4A0 references and own-chain consumer; old emptychain comparer is not acceptance",
+          "Pipeline-only fresh Original/browser runs and actual grants/chain/body/clock witnesses"
+        ],
+        "neverSatisfiedBy": "Starting or final loadout alone; static source expected actor; oldemptychain PASS; ordinal/fitted identities; missing birth/body/retirement; outcome filtering or seed rerolls"
+      }
+    },
+    {
+      "name": "controlled-knife-satellites-recorded-0",
+      "fixture": {
+        "kind": "source-authored-modified-challenge",
+        "challengeId": 1,
+        "startingItems": [
+          114
+        ],
+        "view": "item-only",
+        "authoredResourcePath": "controlled-knife-satellites-v1/challenges-b7b3b25eb0855cd2.xml",
+        "baselineResourcePath": "../../rebirth/resources/challenges.xml",
+        "specialRoomsPath": "controlled-knife-satellites-v1/room-8f351f6091520058.stb",
+        "specialRoomsSha256": "8f351f60915200586723774b410a0786734e45773117157251d6db1edf480ec2",
+        "otherChallengeAttributes": "preserve all rows and attributes except explicit neutral changes and startingitems",
+        "attributeChanges": [
+          {
+            "attribute": "getcurse",
+            "baselineValue": "9",
+            "authoredValue": "0"
+          },
+          {
+            "attribute": "cursefilter",
+            "baselineValue": "6",
+            "authoredValue": "127"
+          },
+          {
+            "attribute": "roomfilter",
+            "baselineValue": "2",
+            "authoredValue": null
+          }
+        ],
+        "startRoomSpawnChange": {
+          "catalogue": 0,
+          "index": 80,
+          "type": 1,
+          "variant": 2,
+          "operation": "append",
+          "groups": [
+            {
+              "x": 7,
+              "y": 3,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 100,
+                  "subtype": 329,
+                  "weight": 1.0
+                }
+              ]
+            },
+            {
+              "x": 9,
+              "y": 3,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 100,
+                  "subtype": 2,
+                  "weight": 1.0
+                }
+              ]
+            }
+          ],
+          "allOtherRowsMetadataDoorsWeightsOrderPreserved": true
+        },
+        "declaredResetJsonBytes": 277642
+      },
+      "bootEpochSeed": 2038552851,
+      "initialPhaseOffset": 1,
+      "entropy": "unfiltered OS token recorded before projection",
+      "actions": [
+        {
+          "label": "ready",
+          "keys": [],
+          "presentations": 1
+        },
+        {
+          "label": "approach-pedestal-row",
+          "keys": [
+            "w"
+          ],
+          "presentations": 28
+        },
+        {
+          "label": "settle-before-charge",
+          "keys": [],
+          "presentations": 24
+        },
+        {
+          "label": "initial-ordinary-knife-charge",
+          "keys": [
+            "Right"
+          ],
+          "presentations": 128
+        },
+        {
+          "label": "release-knife-and-move-to-329",
+          "keys": [
+            "d"
+          ],
+          "presentations": 24
+        },
+        {
+          "label": "controlled-before-inner-eye",
+          "keys": [
+            "Left"
+          ],
+          "presentations": 160
+        },
+        {
+          "label": "approach-inner-eye-while-held",
+          "keys": [
+            "d",
+            "s",
+            "Left"
+          ],
+          "presentations": 12
+        },
+        {
+          "label": "release-and-move-to-inner-eye",
+          "keys": [
+            "d",
+            "s"
+          ],
+          "presentations": 32
+        },
+        {
+          "label": "controlled-inner-eye-satellites",
+          "keys": [
+            "Right"
+          ],
+          "presentations": 120
+        },
+        {
+          "label": "canceled-held",
+          "keys": [
+            "Right",
+            "Left"
+          ],
+          "presentations": 18
+        },
+        {
+          "label": "released",
+          "keys": [],
+          "presentations": 60
+        },
+        {
+          "label": "vertical-steering",
+          "keys": [
+            "Up"
+          ],
+          "presentations": 80
+        },
+        {
+          "label": "final-release",
+          "keys": [],
+          "presentations": 60
+        }
+      ],
+      "requires": {
+        "actualPublicChallengeEntry": true,
+        "bothGamesConsumeIdenticalDeclaredResourceBytes": true,
+        "actualBeforeAndAfterCountsRequired": true,
+        "actualQueueGrantCacheAndControllerFencesRequired": true,
+        "actualFree5_100SelectorContactAndQueuedGrantRequired": true,
+        "canonicalDiagnosticOwner": "weaponAdmission.unadmittedController must be present and null",
+        "actualPendingPrimaryCleanup": "must be present and null",
+        "actualCachePendingFlags": 0,
+        "preserveAllIdentitySeedRngInitNumericFamilyAndCoverageMismatches": true,
+        "unknownDiagnosticOrMissingCoverageIsFailure": true,
+        "actualSourceCurseSamplerDrawsBeforeMask": true,
+        "actualLevelCurseMask": 0,
+        "ownedCounts": [
+          {
+            "itemId": 114,
+            "count": 1
+          }
+        ],
+        "orderedRealPedestalGrants": [
+          329,
+          2
+        ],
+        "sourceExpectedActorContract": {
+          "primaryC08": 4,
+          "family": 8,
+          "variant": 0,
+          "subtype": 0,
+          "registeredC18DuringActualLifetime": true,
+          "managerRoomPersistent": true,
+          "controlledBy329": false,
+          "requiredWhen": "actual admitted source519FC0 callback and independently observed registered lifetime"
+        },
+        "staticActorContractScope": "Initial stage only; actual own counts and source queue define subsequent stages, never the action label/time.",
+        "compositionSourceFields": [
+          "playerMovementD9c",
+          "controlledKnifeSatelliteChain"
+        ],
+        "sourceInferredGrantPath": {
+          "orderedItems": [
+            114
+          ],
+          "each": "actual Challenge1 starting Add114; later actual free pedestals329 then2 use52E1A0\u219252CC90\u2192511F10",
+          "nativeDynamicCallCountObserved": false
+        },
+        "actorStages": [
+          {
+            "ownedCounts": [
+              {
+                "itemId": 114,
+                "count": 1
+              }
+            ],
+            "sourceExpectedActorContract": {
+              "primaryC08": 4,
+              "family": 8,
+              "variant": 0,
+              "subtype": 0,
+              "registeredC18DuringActualLifetime": true,
+              "managerRoomPersistent": true,
+              "controlledBy329": false,
+              "requiredWhen": "actual admitted source519FC0 callback and independently observed registered lifetime"
+            },
+            "requiredWitnesses": [
+              "Actual initial ChallengeAdd114 and ordinary persistent Knife; no real pedestal114 credit."
+            ]
+          },
+          {
+            "ownedCounts": [
+              {
+                "itemId": 114,
+                "count": 1
+              },
+              {
+                "itemId": 329,
+                "count": 1
+              }
+            ],
+            "sourceExpectedActorContract": {
+              "primaryC08": 4,
+              "family": 8,
+              "variant": 0,
+              "subtype": 0,
+              "registeredC18DuringActualLifetime": true,
+              "managerRoomPersistent": true,
+              "controlledBy329": true,
+              "requiredWhen": "actual admitted source519FC0 callback and independently observed registered lifetime"
+            },
+            "requiredWitnesses": [
+              "Actual free329 queued contact and deferred grant; same source-owned primaryKnife becomes controlled before any item2 grant."
+            ]
+          },
+          {
+            "ownedCounts": [
+              {
+                "itemId": 2,
+                "count": 1
+              },
+              {
+                "itemId": 114,
+                "count": 1
+              },
+              {
+                "itemId": 329,
+                "count": 1
+              }
+            ],
+            "sourceExpectedActorContract": {
+              "primaryC08": 4,
+              "family": 8,
+              "variant": 0,
+              "subtype": 0,
+              "registeredC18DuringActualLifetime": true,
+              "managerRoomPersistent": true,
+              "controlledBy329": true,
+              "requiredWhen": "actual admitted source519FC0 callback and independently observed registered lifetime"
+            },
+            "requiredWitnesses": [
+              "Actual free2 queued contact/deferred grant and source cache completion; source-owned anchor4A0 reaches exactly2 actual canonical subtype0/ParentKnife/bit33 satellites."
+            ]
+          }
+        ],
+        "controlledKnifeSatellites": {
+          "schema": "controlled-knife-linked4a0-satellites-v1",
+          "startingGrantScope": "114 is the actual Challenge starting grant. Only329 and2 are real ordered pedestals; this bank makes no actual pickup114 claim.",
+          "minimumAnchorNodesPerGame": 1,
+          "requiredAdditionalNodesPerGame": 2,
+          "minimumLinkedChainRowsPerGame": 1,
+          "minimumActualSatelliteBirthsPerGame": 2,
+          "minimumActualAnchorAndSatelliteBodyRowsPerGame": 1,
+          "minimumCurrentGet4ChecksPerGame": 1,
+          "minimumCopiedBornDamageChecksPerGame": 2,
+          "minimumActualSourceSystemCounterRowsPerGame": 1,
+          "minimumActualGameCadenceRowsPerGame": 1,
+          "countLaw": "Selected actualHave2 produces2 additional satellites.153/245/TEMP245 remain unadmitted; no count multiplication or item-pair union.",
+          "requiredActualWitnesses": [
+            "Actual nonempty4A0 edges resolve through current scheduler identities with seed/lifetime; Parent498 is independent and must not substitute the chain relation.",
+            "Actual anchor C18 owns source8/0/0; every satellite is source8/0/0, bit33, Parent498 points to actualanchorKnife, cachedSpawner0. No subtype1 Has118 or arbitrary actor-role join.",
+            "Actual currentPlayerGet4 foranchor and stored48C fornonPlayerParent satellites remain independent; copied damage/color/flags at birth and later formation stores require their own current source rows.",
+            "Actual chain order determines formation index, angle=(index*360f32)/count+3f32*signedSystemCounter, radius5f32*actualanchor474; compare actual own geometry, never fittedrotation/seed/position.",
+            "Actual canonicalGame period2/3/5 bodies and sourceSystem ring phase have independent clock owners; bornGame age0 repeatedFull on eachPlayercallback is not inferred from body endpoints.",
+            "Full/Fast body, Remove and matchingUninit weak clear require actual owner/event evidence; missing callbacks or endpoint coverage stay FAIL.",
+            "Strict crossgame identity+seed joins only, all unmatched per-field bodies/clock/RNG obligations remain UNGRADED with explicit sidecounts. No ordinal/role/nearest-position fitting or material-own-as-parity credit."
+          ],
+          "unsupportedInputs": [
+            "Item153/245/TEMP245 capability",
+            "Ordinary2+114 firing",
+            "General arbitrary stats auxiliary history",
+            "A new subtype1 Has118 producer from controlled dispatch",
+            "NPC contact/damage attribution without separate real receiver cohort"
+          ],
+          "missingToolingMustFail": true
+        }
+      },
+      "execution": {
+        "status": "not-executed",
+        "blockingPrerequisites": [
+          "Explicit future P4+item2 capability+commonGameclock+satellite+typedbrowser source joins and actual qualified artifact",
+          "New opt-in controlledKnifeSatelliteChain observer typed4A0 references and own-chain consumer; old emptychain comparer is not acceptance",
+          "Pipeline-only fresh Original/browser runs and actual grants/chain/body/clock witnesses"
+        ],
+        "neverSatisfiedBy": "Starting or final loadout alone; static source expected actor; oldemptychain PASS; ordinal/fitted identities; missing birth/body/retirement; outcome filtering or seed rerolls"
+      },
+      "entropyTokenIndex": 0
+    },
+    {
+      "name": "controlled-knife-satellites-recorded-1",
+      "fixture": {
+        "kind": "source-authored-modified-challenge",
+        "challengeId": 1,
+        "startingItems": [
+          114
+        ],
+        "view": "item-only",
+        "authoredResourcePath": "controlled-knife-satellites-v1/challenges-b7b3b25eb0855cd2.xml",
+        "baselineResourcePath": "../../rebirth/resources/challenges.xml",
+        "specialRoomsPath": "controlled-knife-satellites-v1/room-8f351f6091520058.stb",
+        "specialRoomsSha256": "8f351f60915200586723774b410a0786734e45773117157251d6db1edf480ec2",
+        "otherChallengeAttributes": "preserve all rows and attributes except explicit neutral changes and startingitems",
+        "attributeChanges": [
+          {
+            "attribute": "getcurse",
+            "baselineValue": "9",
+            "authoredValue": "0"
+          },
+          {
+            "attribute": "cursefilter",
+            "baselineValue": "6",
+            "authoredValue": "127"
+          },
+          {
+            "attribute": "roomfilter",
+            "baselineValue": "2",
+            "authoredValue": null
+          }
+        ],
+        "startRoomSpawnChange": {
+          "catalogue": 0,
+          "index": 80,
+          "type": 1,
+          "variant": 2,
+          "operation": "append",
+          "groups": [
+            {
+              "x": 7,
+              "y": 3,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 100,
+                  "subtype": 329,
+                  "weight": 1.0
+                }
+              ]
+            },
+            {
+              "x": 9,
+              "y": 3,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 100,
+                  "subtype": 2,
+                  "weight": 1.0
+                }
+              ]
+            }
+          ],
+          "allOtherRowsMetadataDoorsWeightsOrderPreserved": true
+        },
+        "declaredResetJsonBytes": 277642
+      },
+      "bootEpochSeed": 4152429072,
+      "initialPhaseOffset": 1,
+      "entropy": "unfiltered OS token recorded before projection",
+      "actions": [
+        {
+          "label": "ready",
+          "keys": [],
+          "presentations": 1
+        },
+        {
+          "label": "approach-pedestal-row",
+          "keys": [
+            "w"
+          ],
+          "presentations": 28
+        },
+        {
+          "label": "settle-before-charge",
+          "keys": [],
+          "presentations": 24
+        },
+        {
+          "label": "initial-ordinary-knife-charge",
+          "keys": [
+            "Right"
+          ],
+          "presentations": 127
+        },
+        {
+          "label": "release-knife-and-move-to-329",
+          "keys": [
+            "d"
+          ],
+          "presentations": 24
+        },
+        {
+          "label": "controlled-before-inner-eye",
+          "keys": [
+            "Left"
+          ],
+          "presentations": 160
+        },
+        {
+          "label": "approach-inner-eye-while-held",
+          "keys": [
+            "d",
+            "s",
+            "Left"
+          ],
+          "presentations": 12
+        },
+        {
+          "label": "release-and-move-to-inner-eye",
+          "keys": [
+            "d",
+            "s"
+          ],
+          "presentations": 32
+        },
+        {
+          "label": "controlled-inner-eye-satellites",
+          "keys": [
+            "Right"
+          ],
+          "presentations": 120
+        },
+        {
+          "label": "canceled-held",
+          "keys": [
+            "Right",
+            "Left"
+          ],
+          "presentations": 18
+        },
+        {
+          "label": "released",
+          "keys": [],
+          "presentations": 60
+        },
+        {
+          "label": "vertical-steering",
+          "keys": [
+            "Up"
+          ],
+          "presentations": 80
+        },
+        {
+          "label": "final-release",
+          "keys": [],
+          "presentations": 60
+        }
+      ],
+      "requires": {
+        "actualPublicChallengeEntry": true,
+        "bothGamesConsumeIdenticalDeclaredResourceBytes": true,
+        "actualBeforeAndAfterCountsRequired": true,
+        "actualQueueGrantCacheAndControllerFencesRequired": true,
+        "actualFree5_100SelectorContactAndQueuedGrantRequired": true,
+        "canonicalDiagnosticOwner": "weaponAdmission.unadmittedController must be present and null",
+        "actualPendingPrimaryCleanup": "must be present and null",
+        "actualCachePendingFlags": 0,
+        "preserveAllIdentitySeedRngInitNumericFamilyAndCoverageMismatches": true,
+        "unknownDiagnosticOrMissingCoverageIsFailure": true,
+        "actualSourceCurseSamplerDrawsBeforeMask": true,
+        "actualLevelCurseMask": 0,
+        "ownedCounts": [
+          {
+            "itemId": 114,
+            "count": 1
+          }
+        ],
+        "orderedRealPedestalGrants": [
+          329,
+          2
+        ],
+        "sourceExpectedActorContract": {
+          "primaryC08": 4,
+          "family": 8,
+          "variant": 0,
+          "subtype": 0,
+          "registeredC18DuringActualLifetime": true,
+          "managerRoomPersistent": true,
+          "controlledBy329": false,
+          "requiredWhen": "actual admitted source519FC0 callback and independently observed registered lifetime"
+        },
+        "staticActorContractScope": "Initial stage only; actual own counts and source queue define subsequent stages, never the action label/time.",
+        "compositionSourceFields": [
+          "playerMovementD9c",
+          "controlledKnifeSatelliteChain"
+        ],
+        "sourceInferredGrantPath": {
+          "orderedItems": [
+            114
+          ],
+          "each": "actual Challenge1 starting Add114; later actual free pedestals329 then2 use52E1A0\u219252CC90\u2192511F10",
+          "nativeDynamicCallCountObserved": false
+        },
+        "actorStages": [
+          {
+            "ownedCounts": [
+              {
+                "itemId": 114,
+                "count": 1
+              }
+            ],
+            "sourceExpectedActorContract": {
+              "primaryC08": 4,
+              "family": 8,
+              "variant": 0,
+              "subtype": 0,
+              "registeredC18DuringActualLifetime": true,
+              "managerRoomPersistent": true,
+              "controlledBy329": false,
+              "requiredWhen": "actual admitted source519FC0 callback and independently observed registered lifetime"
+            },
+            "requiredWitnesses": [
+              "Actual initial ChallengeAdd114 and ordinary persistent Knife; no real pedestal114 credit."
+            ]
+          },
+          {
+            "ownedCounts": [
+              {
+                "itemId": 114,
+                "count": 1
+              },
+              {
+                "itemId": 329,
+                "count": 1
+              }
+            ],
+            "sourceExpectedActorContract": {
+              "primaryC08": 4,
+              "family": 8,
+              "variant": 0,
+              "subtype": 0,
+              "registeredC18DuringActualLifetime": true,
+              "managerRoomPersistent": true,
+              "controlledBy329": true,
+              "requiredWhen": "actual admitted source519FC0 callback and independently observed registered lifetime"
+            },
+            "requiredWitnesses": [
+              "Actual free329 queued contact and deferred grant; same source-owned primaryKnife becomes controlled before any item2 grant."
+            ]
+          },
+          {
+            "ownedCounts": [
+              {
+                "itemId": 2,
+                "count": 1
+              },
+              {
+                "itemId": 114,
+                "count": 1
+              },
+              {
+                "itemId": 329,
+                "count": 1
+              }
+            ],
+            "sourceExpectedActorContract": {
+              "primaryC08": 4,
+              "family": 8,
+              "variant": 0,
+              "subtype": 0,
+              "registeredC18DuringActualLifetime": true,
+              "managerRoomPersistent": true,
+              "controlledBy329": true,
+              "requiredWhen": "actual admitted source519FC0 callback and independently observed registered lifetime"
+            },
+            "requiredWitnesses": [
+              "Actual free2 queued contact/deferred grant and source cache completion; source-owned anchor4A0 reaches exactly2 actual canonical subtype0/ParentKnife/bit33 satellites."
+            ]
+          }
+        ],
+        "controlledKnifeSatellites": {
+          "schema": "controlled-knife-linked4a0-satellites-v1",
+          "startingGrantScope": "114 is the actual Challenge starting grant. Only329 and2 are real ordered pedestals; this bank makes no actual pickup114 claim.",
+          "minimumAnchorNodesPerGame": 1,
+          "requiredAdditionalNodesPerGame": 2,
+          "minimumLinkedChainRowsPerGame": 1,
+          "minimumActualSatelliteBirthsPerGame": 2,
+          "minimumActualAnchorAndSatelliteBodyRowsPerGame": 1,
+          "minimumCurrentGet4ChecksPerGame": 1,
+          "minimumCopiedBornDamageChecksPerGame": 2,
+          "minimumActualSourceSystemCounterRowsPerGame": 1,
+          "minimumActualGameCadenceRowsPerGame": 1,
+          "countLaw": "Selected actualHave2 produces2 additional satellites.153/245/TEMP245 remain unadmitted; no count multiplication or item-pair union.",
+          "requiredActualWitnesses": [
+            "Actual nonempty4A0 edges resolve through current scheduler identities with seed/lifetime; Parent498 is independent and must not substitute the chain relation.",
+            "Actual anchor C18 owns source8/0/0; every satellite is source8/0/0, bit33, Parent498 points to actualanchorKnife, cachedSpawner0. No subtype1 Has118 or arbitrary actor-role join.",
+            "Actual currentPlayerGet4 foranchor and stored48C fornonPlayerParent satellites remain independent; copied damage/color/flags at birth and later formation stores require their own current source rows.",
+            "Actual chain order determines formation index, angle=(index*360f32)/count+3f32*signedSystemCounter, radius5f32*actualanchor474; compare actual own geometry, never fittedrotation/seed/position.",
+            "Actual canonicalGame period2/3/5 bodies and sourceSystem ring phase have independent clock owners; bornGame age0 repeatedFull on eachPlayercallback is not inferred from body endpoints.",
+            "Full/Fast body, Remove and matchingUninit weak clear require actual owner/event evidence; missing callbacks or endpoint coverage stay FAIL.",
+            "Strict crossgame identity+seed joins only, all unmatched per-field bodies/clock/RNG obligations remain UNGRADED with explicit sidecounts. No ordinal/role/nearest-position fitting or material-own-as-parity credit."
+          ],
+          "unsupportedInputs": [
+            "Item153/245/TEMP245 capability",
+            "Ordinary2+114 firing",
+            "General arbitrary stats auxiliary history",
+            "A new subtype1 Has118 producer from controlled dispatch",
+            "NPC contact/damage attribution without separate real receiver cohort"
+          ],
+          "missingToolingMustFail": true
+        }
+      },
+      "execution": {
+        "status": "not-executed",
+        "blockingPrerequisites": [
+          "Explicit future P4+item2 capability+commonGameclock+satellite+typedbrowser source joins and actual qualified artifact",
+          "New opt-in controlledKnifeSatelliteChain observer typed4A0 references and own-chain consumer; old emptychain comparer is not acceptance",
+          "Pipeline-only fresh Original/browser runs and actual grants/chain/body/clock witnesses"
+        ],
+        "neverSatisfiedBy": "Starting or final loadout alone; static source expected actor; oldemptychain PASS; ordinal/fitted identities; missing birth/body/retirement; outcome filtering or seed rerolls"
+      },
+      "entropyTokenIndex": 1
+    }
+  ],
+  "publicRouteRevision": "controlled-knife-satellites-real329-then2-v1",
+  "scope": "Source-only declared114 ChallengeAdd\u2192real329\u2192real2 controlled linked4A0 satellites; no execution or acceptance",
+  "selection": "Two fixed phases plus every journaled unfiltered OS projection; no outcome filtering or rerolls",
+  "outcomePolicy": "All missing grants/stages/linkedactors/independentnumeric and clock/property owners remain failures. Exact crossidentity/seed only; unmatched bodies explicitly ungraded.",
+  "sourceParent": {
+    "sha256": "b34d985c20dc7422f071e1d4bf25c32f2296ac3cd986ab586718c306894de1ab",
+    "bytes": 45931,
+    "scope": "Original declaration parent identified by recorded digest; its temporary location is not replay input."
+  },
+  "entropyJournal": {
+    "path": "controlled-knife-satellites-v1/entropy-445754e51519b50f.jsonl",
+    "sha256": "445754e51519b50f8e5d29d63ce4a699ac3ff63ab39fa34f683c4a5dc196738b",
+    "bytes": 280
+  },
+  "caseCorrespondence": [
+    {
+      "oldCase": "history-114-118-329-phase0",
+      "newCase": "controlled-knife-satellites-fixed-phase0",
+      "keysDurationsPhaseEpochAndEntropyIndexExact": true,
+      "xmlBytesExactHardlink": true,
+      "stbOnlyTwoSelectedPedestalSubtypesChanged": true,
+      "startingItems": [
+        114
+      ],
+      "realPedestalGrants": [
+        329,
+        2
+      ],
+      "caseName": "controlled-knife-satellites-fixed-phase0"
+    },
+    {
+      "oldCase": "history-114-118-329-phase1",
+      "newCase": "controlled-knife-satellites-fixed-phase1",
+      "keysDurationsPhaseEpochAndEntropyIndexExact": true,
+      "xmlBytesExactHardlink": true,
+      "stbOnlyTwoSelectedPedestalSubtypesChanged": true,
+      "startingItems": [
+        114
+      ],
+      "realPedestalGrants": [
+        329,
+        2
+      ],
+      "caseName": "controlled-knife-satellites-fixed-phase1"
+    },
+    {
+      "oldCase": "knife-first-history-random-0",
+      "newCase": "controlled-knife-satellites-recorded-0",
+      "keysDurationsPhaseEpochAndEntropyIndexExact": true,
+      "xmlBytesExactHardlink": true,
+      "stbOnlyTwoSelectedPedestalSubtypesChanged": true,
+      "startingItems": [
+        114
+      ],
+      "realPedestalGrants": [
+        329,
+        2
+      ],
+      "caseName": "controlled-knife-satellites-recorded-0"
+    },
+    {
+      "oldCase": "knife-first-history-random-1",
+      "newCase": "controlled-knife-satellites-recorded-1",
+      "keysDurationsPhaseEpochAndEntropyIndexExact": true,
+      "xmlBytesExactHardlink": true,
+      "stbOnlyTwoSelectedPedestalSubtypesChanged": true,
+      "startingItems": [
+        114
+      ],
+      "realPedestalGrants": [
+        329,
+        2
+      ],
+      "caseName": "controlled-knife-satellites-recorded-1"
+    }
+  ]
+}
