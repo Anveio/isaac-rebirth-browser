@@ -76,7 +76,20 @@ which seed discovery runs, so `--no-build` never leaves it stale. It runs each
 suite under its own virtual display, and writes `.cache/e2e/run-*/report.json`
 and one log per suite. Every runner on the host shares a cap on concurrent suites (one per 6 GB
 of memory, at least one; override with `E2E_HOST_SLOTS`), so overlapping runs
-queue rather than crash Chromium renderers. A failing suite prints its replay command:
+queue rather than crash Chromium renderers.
+
+Updated runners require Linux `flock` (util-linux). They atomically publish a
+complete PID/start-time record in the existing `slot-N` namespace, so older
+frozen runners recognize active updated runners. Persistent `slot-N.mutex`
+sidecars serialize updated clients; do not remove them while a runner is active.
+
+Quiesce old runners when upgrading concurrent runs. An unmodified old stale-file
+reaper can read a dead record and later unlink an updated runner's live
+replacement. The new mutex cannot serialize that old cleanup code; ordinary
+mixed-client ownership is compatible, but this stale-reaper interleaving remains
+unsafe until the old runners have stopped.
+
+A failing suite prints its replay command:
 
 ```sh
 npm run test:e2e -- keys --scenarios .cache/e2e/run-…/keys/scenarios.json
@@ -149,6 +162,20 @@ status. A case whose games play their own keys from a capture on
 (its first `pairedIndependent` scope, e.g. stage-exit's fight) is compared only
 up to that capture; the report's `independentAfter` names it. Drivers that launch the original themselves (traversal, items and
 similar) do not support it yet.
+
+### Original wall cache draws
+
+The original pre-renders each room's backdrop walls into a cache texture when
+the room loads (`Backdrop::pre_render_walls` 424440) and keeps no wall rects
+afterwards. Paired suites built on `runPairedGate` accept `--gl-trace`: the
+gate compiles the public GL observer
+[`foundation-gl-trace.c`](../original/foundation-gl-trace.c), the original
+preloads it, and the manifest's `graphicsTrace` names the recorded draws. A
+comparator then grades the port's walls with
+[`wall-quads.mjs`](../foundation/wall-quads.mjs): every room the port entered
+must equal one of the original's 44-quad wall cache draws (patch source rects,
+destinations and flips), in entry order. It is off by default and enabled per
+suite in [`suites.mjs`](suites.mjs); `stage-exit` grades it.
 
 ## No CI
 
