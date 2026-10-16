@@ -681,7 +681,25 @@ pub(crate) fn add_collectible(
     if !(normal_isaac
         && matches!(
             id,
-            1 | 2 | 3 | 4 | 6 | 14 | 27 | 28 | 52 | 68 | 114 | 118 | 143 | 152 | 168 | 169 | 229 | 304 | 329 | 330
+            1 | 2
+                | 3
+                | 4
+                | 6
+                | 14
+                | 27
+                | 28
+                | 52
+                | 68
+                | 114
+                | 118
+                | 143
+                | 152
+                | 168
+                | 169
+                | 229
+                | 304
+                | 329
+                | 330
         ))
         && !keep_cupid_move_speed
     {
@@ -698,7 +716,23 @@ pub(crate) fn add_collectible(
     //None never inherits constructor zero through counts or cache evaluation.
     if !matches!(
         id,
-        1 | 2 | 3 | 4 | 6 | 14 | 52 | 68 | 114 | 118 | 143 | 152 | 168 | 169 | 229 | 304 | 329 | 330
+        1 | 2
+            | 3
+            | 4
+            | 6
+            | 14
+            | 52
+            | 68
+            | 114
+            | 118
+            | 143
+            | 152
+            | 168
+            | 169
+            | 229
+            | 304
+            | 329
+            | 330
     ) && !keep_cupid_range
     {
         owner.range_inputs = None;
@@ -714,7 +748,23 @@ pub(crate) fn add_collectible(
     //proof. None stays None and is never reconstructed from counts/cache.
     if !matches!(
         id,
-        1 | 2 | 3 | 4 | 6 | 52 | 68 | 114 | 118 | 143 | 152 | 168 | 169 | 222 | 229 | 304 | 329 | 330
+        1 | 2
+            | 3
+            | 4
+            | 6
+            | 52
+            | 68
+            | 114
+            | 118
+            | 143
+            | 152
+            | 168
+            | 169
+            | 222
+            | 229
+            | 304
+            | 329
+            | 330
     ) && !keep_cupid_fire_delay
     {
         owner.fire_delay_inputs = None;

@@ -588,13 +588,12 @@ impl PauseMenu {
 ///5bb602/64d/694/736/779/7b8 CVTTSS2SI, then signed clamp1..7.
 ///An overflowing/NaN input becomes INT_MIN, unlike Rust's saturating cast.
 fn pause_stat_frame(value: f32) -> u8 {
-    let integer = if value.is_finite()
-        && (-2_147_483_648.0_f32..2_147_483_648.0_f32).contains(&value)
-    {
-        value as i32
-    } else {
-        i32::MIN
-    };
+    let integer =
+        if value.is_finite() && (-2_147_483_648.0_f32..2_147_483_648.0_f32).contains(&value) {
+            value as i32
+        } else {
+            i32::MIN
+        };
     integer.clamp(1, 7) as u8
 }
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
@@ -1714,7 +1713,8 @@ impl Game {
         // Backdrop::pre_render_walls runs inside 5c5b30 before the FX rays.
         for (position, scale) in room::basement_boss_blood(&self.state.room, self.state.stage)? {
             let seed = self.state.boot_lifecycle.shared.next_u32();
-            let id = familiars::admit_blood_splat(&mut self.state, seed, position, [1.0; 4], [0.0; 3])?;
+            let id =
+                familiars::admit_blood_splat(&mut self.state, seed, position, [1.0; 4], [0.0; 3])?;
             familiars::set_blood_scale(&mut self.state, id, scale)?;
             familiars::advance_blood_initial(&mut self.state, id)?;
         }
@@ -1878,19 +1878,28 @@ impl Game {
         // The source descriptor map survives Room.Init. Only a source-owned
         // fresh empty map is admitted here; saved payload replay is separate.
         let room_index = self.state.current_room;
-        let descriptor = self.state.floor.descriptors.get(room_index)
+        let descriptor = self
+            .state
+            .floor
+            .descriptors
+            .get(room_index)
             .ok_or("persistent spawn map requires current Level descriptor")?;
-        let mut persistent_cells = descriptor.persistent_spawn_cells.clone()
+        let mut persistent_cells = descriptor
+            .persistent_spawn_cells
+            .clone()
             .ok_or("persistent spawn map history is unknown")?;
         let cells = (usize::from(descriptor.template.width) + 2)
             * (usize::from(descriptor.template.height) + 2);
-        if [&persistent_cells.present, &persistent_cells.unknown].into_iter().any(|keys| {
-            keys.windows(2).any(|pair| pair[0] >= pair[1])
-                || keys.iter().any(|&cell| usize::from(cell) >= cells)
-        })
-            || persistent_cells.unknown.iter().any(|cell| {
-                persistent_cells.present.binary_search(cell).is_ok()
+        if [&persistent_cells.present, &persistent_cells.unknown]
+            .into_iter()
+            .any(|keys| {
+                keys.windows(2).any(|pair| pair[0] >= pair[1])
+                    || keys.iter().any(|&cell| usize::from(cell) >= cells)
             })
+            || persistent_cells
+                .unknown
+                .iter()
+                .any(|cell| persistent_cells.present.binary_search(cell).is_ok())
             || self.state.room.descriptor.as_ref().is_none_or(|room| {
                 room.index != room_index
                     || room.persistent_spawn_cells.as_ref() != Some(&persistent_cells)
@@ -1912,13 +1921,21 @@ impl Game {
             // 5cf230/238 and5cf25e already consumed each authored RNG11
             // draw/selection. 5cf285..2cc checks the map before entering
             // SpawnEntity, including grid factories and their local Init.
-            if persistent_cells.present.binary_search(&selector.grid_index).is_ok() {
+            if persistent_cells
+                .present
+                .binary_search(&selector.grid_index)
+                .is_ok()
+            {
                 if selector.category == room_spawns::SpawnCategory::Entity {
                     suppressed_entities += 1;
                 }
                 continue;
             }
-            if persistent_cells.unknown.binary_search(&selector.grid_index).is_ok() {
+            if persistent_cells
+                .unknown
+                .binary_search(&selector.grid_index)
+                .is_ok()
+            {
                 return Err("persistent spawn cell depends on an unadmitted factory".into());
             }
             let before_entities = order.len();
@@ -2008,19 +2025,30 @@ impl Game {
                     // Preserve unrelated traversal when its existing factory
                     // is unsupported. Only a later lookup of this cell needs
                     // the missing success/key owner and must stop there.
-                    let insertion = persistent_cells.unknown.binary_search(&selector.grid_index)
+                    let insertion = persistent_cells
+                        .unknown
+                        .binary_search(&selector.grid_index)
                         .expect_err("cell was checked before its factory");
-                    persistent_cells.unknown.insert(insertion, selector.grid_index);
+                    persistent_cells
+                        .unknown
+                        .insert(insertion, selector.grid_index);
                 } else {
-                    let insertion = persistent_cells.present.binary_search(&selector.grid_index)
+                    let insertion = persistent_cells
+                        .present
+                        .binary_search(&selector.grid_index)
                         .expect_err("cell was checked before its factory");
-                    persistent_cells.present.insert(insertion, selector.grid_index);
+                    persistent_cells
+                        .present
+                        .insert(insertion, selector.grid_index);
                 }
                 self.state.floor.descriptors[room_index].persistent_spawn_cells =
                     Some(persistent_cells.clone());
-                self.state.room.descriptor.as_mut()
-                    .expect("checked current descriptor").persistent_spawn_cells =
-                    Some(persistent_cells.clone());
+                self.state
+                    .room
+                    .descriptor
+                    .as_mut()
+                    .expect("checked current descriptor")
+                    .persistent_spawn_cells = Some(persistent_cells.clone());
             }
         }
         // Doors, walls and shape0 ambient decoration follow the selectors.

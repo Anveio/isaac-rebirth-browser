@@ -199,10 +199,7 @@ pub(crate) fn resolve_appearance(
             prior.flags_c98 = AttackFlags(flags);
             completed |= 32;
         }
-        if requested.0 & 64 != 0
-            && !polyphemus_flags
-            && (selected || number_one || homing_colors)
-        {
+        if requested.0 & 64 != 0 && !polyphemus_flags && (selected || number_one || homing_colors) {
             //515997/515AB1 Have6, else5E3D70 record-presence. This leaf
             //admits permanent6 only; the two literal ColorMods are distinct.
             if (number_one || homing_colors) && items.number_one_present() {
