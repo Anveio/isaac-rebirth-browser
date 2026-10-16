@@ -23,7 +23,7 @@ import assert from 'node:assert/strict';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { chromium } from '@playwright/test';
 import { browserLaunchOptions } from '../foundation/browser.mjs';
-import { resetBootElapsed } from '../foundation/verify.mjs';
+import { declaredNativeTape, resetBootElapsed } from '../foundation/verify.mjs';
 import { startProductionServer } from '../foundation/production-server.mjs';
 import { flag } from './lib/cli.mjs';
 import { doorKeys, fightKeys, routingView, toward, waypoint } from './lib/route.mjs';
@@ -68,7 +68,7 @@ try {
   await page.waitForFunction(() => ['true', 'failed'].includes(document.body.dataset.ready));
   await page.evaluate(({ initialSeed, bootEpochSeed, bootElapsed }) => {
     window.game.pause(); window.game.reset(initialSeed, { bootEpochSeed, bootElapsed, trace: true });
-  }, { ...caseData, bootElapsed: resetBootElapsed(caseData.pairedTape) });
+  }, { ...caseData, bootElapsed: resetBootElapsed(declaredNativeTape(caseData)) });
   const start = caseData.pairedTape.findIndex(action => action.label === FROM);
   assert.ok(start >= 0, `The case tape must reach ${FROM}`);
   // A labelled step marker is itself replayed; captures are no-ops here.

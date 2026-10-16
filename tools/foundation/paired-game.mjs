@@ -13,7 +13,7 @@ import { compareMtDraws } from './mt-draws.mjs';
 import { readNativeEvidence } from './native-evidence.mjs';
 import { pixelDifference } from './compare.mjs';
 import { startProductionServer } from './production-server.mjs';
-import { resetBootElapsed } from './verify.mjs';
+import { declaredNativeTape, resetBootElapsed } from './verify.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const SOURCE = 'tools/original/foundation-paired-scenarios.py';
@@ -119,7 +119,7 @@ async function browserCapture(browser, server, caseData, directory, archiveBrows
     await page.evaluate(({ initialSeed, bootEpochSeed, bootElapsed, mtDraws }) => {
       window.game.pause(); window.game.reset(initialSeed, { bootEpochSeed, bootElapsed, trace: true });
       if (mtDraws) window.game.mtDraws.enable();
-    }, { ...caseData, bootElapsed: resetBootElapsed(caseData.tape), mtDraws });
+    }, { ...caseData, bootElapsed: resetBootElapsed(declaredNativeTape(caseData)), mtDraws });
     let presentations = 0;
     for (const action of caseData.pairedTape) {
       if (action.type === 'step') {

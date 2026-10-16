@@ -82,6 +82,8 @@ export function resetBootElapsed(nativeTape) {
   assert.ok(Array.isArray(nativeTape), "Boot clock derivation requires the declared native tape");
   const release = nativeTape.findIndex(action => action.type === "key" && !action.down);
   assert.ok(release > 0, "Declared native tape must skip the intro with a key press and release");
+  assert.ok(!nativeTape.slice(0, release).some(action => action.type === "capture" && /^title/.test(action.label)),
+    "Boot clock derivation needs the native tape with its intro, not a browser tape that starts at the Title");
   const frames = nativeTape.slice(0, release).reduce((sum, action) => sum + (action.type === "step" ? action.frames : 0), 0);
   const after = nativeTape.slice(release + 1);
   const firstKey = after.findIndex(action => action.type === "key");
@@ -89,6 +91,12 @@ export function resetBootElapsed(nativeTape) {
   assert.ok(settled >= TITLE_FIRST_RENDER_AFTER_SKIP, "Declared tape must reach the Title before its next key");
   const nanoseconds = (NATIVE_LOADER_PRESENTATIONS + frames + TITLE_FIRST_RENDER_AFTER_SKIP) * PRESENTATION_NS;
   return { milliseconds: Math.floor(nanoseconds / 1e6), subMillisecondNanoseconds: nanoseconds % 1e6 };
+}
+
+// A paired case's complete native tape: its own `tape`, or the source-only
+// prelude followed by the shared paired tape.
+export function declaredNativeTape(caseData) {
+  return caseData.tape ?? [...(caseData.bootstrap?.sourceOnlyPrelude ?? []), ...caseData.pairedTape];
 }
 
 // The requested setup is independent of the observed trace and browser screen.
