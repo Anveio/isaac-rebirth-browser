@@ -28,6 +28,9 @@ pub struct SavedPlayerItems {
     pub shot_speed_inputs: Option<crate::player_items::ShotSpeedInputs>,
     ///518577 copies347 slots beginning Player+e1c into Saved+893c.
     pub owned_counts: Vec<i32>,
+    ///Only the actual copied count-table domain is saved here.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub query_history: Option<crate::item_queries::ItemQueryHistory>,
     ///5186b0/5186e0/518708 copy current states, not initializer seeds.
     pub item_rng_states: Vec<u32>,
     pub trinket_rng_states: Vec<u32>,
@@ -70,6 +73,7 @@ impl SavedPlayerItems {
             fire_delay_inputs: owner.fire_delay_inputs,
             shot_speed_inputs: owner.shot_speed_inputs,
             owned_counts: owner.owned_counts.clone(),
+            query_history: owner.query_history.as_ref().map(|history| history.saved_counts()),
             item_rng_states: current_states(&owner.item_rngs, 347)?,
             trinket_rng_states: current_states(&owner.trinket_rngs, 62)?,
             pocket_rng_states: current_states(&owner.pocket_rngs, 41)?,
@@ -110,6 +114,9 @@ impl SavedPlayerItems {
         }
         //511710 skips dummy ID0 and copies346 dwords from Saved+8940.
         owner.owned_counts[1..].copy_from_slice(&self.owned_counts[1..]);
+        //Legacy None overwrites constructor knowledge. Even a current
+        //DTO cannot transfer C08/TEMP/trinket facts absent their stores.
+        owner.query_history = self.query_history.as_ref().map(|history| history.saved_counts());
         for (children, states) in [
             (&mut owner.item_rngs, &self.item_rng_states),
             (&mut owner.trinket_rngs, &self.trinket_rng_states),

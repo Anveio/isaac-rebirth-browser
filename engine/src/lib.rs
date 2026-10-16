@@ -75,6 +75,7 @@ mod inner_eye;
 pub mod input;
 mod item_death_effects;
 mod item_pipeline;
+mod item_queries;
 pub mod items;
 pub mod keepers;
 mod knife_path;
@@ -1779,6 +1780,9 @@ impl Game {
                 self.state.room.authored_actor_order.len()
             ));
         }
+        //5BF220 reaches510550 after actual Room.Init. Fresh3074 is
+        //still false here, independently of the later starting grants.
+        item_queries::note_room_placement(&mut self.state);
         npcs::initialize_startup_clear(&mut self.state);
         // Source Level generation loads the start room, then immediately calls
         // RoomMusic. This runtime's Level contract is fresh normal Basement.
@@ -2158,6 +2162,9 @@ impl Game {
                 && matches!(selector.entity_type, 4..=6 | 17 | 33)
             {
                 if order.len() == before_entities {
+                    if selector.entity_type == 5 && selector.variant == 350 {
+                        crate::item_queries::note_unrepresented_trinket_spawn(&mut self.state);
+                    }
                     // Preserve unrelated traversal when its existing factory
                     // is unsupported. Only a later lookup of this cell needs
                     // the missing success/key owner and must stop there.
@@ -2689,6 +2696,7 @@ impl Game {
                     //Saved4/5/6 replay/retirement needs its own full owner.
                     ordinary_placement::invalidate(&mut self.state, ordinary_placement::Frontier::Restore);
                     let restored_pickups = pickups::readmit_regular_records(&mut self.state)?;
+                    item_queries::note_room_placement(&mut self.state);
                     self.admitted_update_footprint(phase)?;
                     self.rebuild_room_actor_schedule()?;
                     //5CF58E replays persistent+B8 records after ordinary5C5860.
@@ -2738,6 +2746,7 @@ impl Game {
                         .clone();
                     let counter = self.state.game_update_count.wrapping_add(1);
                     self.admit_room_pickups(&selectors, counter, false)?;
+                    item_queries::note_room_placement(&mut self.state);
                     self.admitted_update_footprint(phase)?;
                     // The admitted Room::Update follows authored mixed order.
                     self.refresh_room_boss_count();
@@ -3176,6 +3185,7 @@ impl Game {
             &mut self.state.boot_lifecycle.shared,
             self.state.game_update_count,
         )?;
+        item_queries::note_room_placement(&mut self.state);
         // PlayerManager 5bf220 -> Player 510550 after Room.Init: a new level
         // has no enter door (Game+8198 is -1), so 510ac8..510b0e picks one.
         // The first door in slot order is taken; each later door draws
@@ -4183,6 +4193,9 @@ impl Game {
         if phase == phase::Phase::Update {
             player_footprints::advance(&mut self.state, footprint_velocity)?;
         }
+        //531E44 reaches deferred CF8 evaluation only on the full path,
+        //before531E6F copied-item animation and the later queued grant.
+        item_queries::reach_late_temporary_evaluation(&mut self.state, phase);
         player_items::advance_item_sprite(&mut self.state, phase);
         player_costume118::advance_full(&mut self.state, phase);
         player_costume229::advance_full(&mut self.state, phase);

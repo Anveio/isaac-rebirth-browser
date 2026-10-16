@@ -160,6 +160,10 @@ pub struct PlayerItems {
     pub technology_eye_registered: Option<bool>,
     pub owned_counts: Vec<i32>,
     pub temporary_collectibles: Vec<TemporaryCollectible>,
+    ///Provenance of the existing permanent/TEMP/trinket/C08 stores.
+    ///Legacy omission is unknown, never a fresh empty inventory proof.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub query_history: Option<crate::item_queries::ItemQueryHistory>,
     #[serde(default)]
     pub luck_inputs: Option<LuckInputs>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -238,6 +242,7 @@ impl PlayerItems {
             technology_eye_registered: Some(false),
             owned_counts: vec![0; 347],
             temporary_collectibles: Vec::new(),
+            query_history: Some(crate::item_queries::ItemQueryHistory::FRESH),
             // 519680/51968A/519524 and the 28-word loop at 519798.
             luck_inputs: Some(LuckInputs {
                 source_d3c: 0,
@@ -775,6 +780,15 @@ impl PassiveGrantSourceEffect {
         }
     }
 
+    ///Closed E1C/CF8/E14/E18 write footprint, independent of scalar
+    ///input retention and the actual world producer's completion.
+    fn preserves_query_stores(self) -> bool {
+        match self {
+            Self::DefaultTail => true,
+            Self::ItemRngCardSpawn => true,
+        }
+    }
+
     fn preserves_default_inputs(self) -> bool {
         matches!(self, Self::DefaultTail)
     }
@@ -831,6 +845,29 @@ pub(crate) fn add_collectible(
         .player_items
         .as_mut()
         .expect("checked Player item owner");
+    //Query provenance follows the reached source dispatch, independently
+    //of persistent scalar inputs or world-effect completion. A default
+    //active grant from actual empty/D80=0 has the same plain dispatch;
+    //52D1B0 also clears the old active count, modeled below. No Use is
+    //inferred from granting an active.194 only spawns a world pickup.
+    let normal_entity = state.player.entity_source.is_some_and(|source| {
+        source.entity_type == 1 && source.variant == 0
+    });
+    let plain_active_grant = normal_isaac
+        && normal_entity
+        && config.kind == 3
+        && owner.active_id == 0
+        && owner.active_state_d80 == 0
+        && has_default_passive_grant_path(id);
+    let query_stores_preserved = source_effect
+        .is_some_and(PassiveGrantSourceEffect::preserves_query_stores)
+        || plain_active_grant
+        || (normal_isaac && normal_entity && treatment.is_some());
+    if !query_stores_preserved {
+        if let Some(history) = &mut owner.query_history {
+            history.forget_unowned_effect();
+        }
+    }
     owner.owned_counts[id as usize] = owner.owned_counts[id as usize].wrapping_add(1);
     crate::pockets::note_modifier_grant(owner, id);
     //52CEA2..52CEFD: the actual variant0 Add inserts into Game8BA0,

@@ -124,7 +124,9 @@ export interface SavedRunSummary {
   inventory: {coins: number; bombs: number; keys: number};
   playerItems: {
     pickupGrantHistory?: PickupGrantHistory | null;
-    ordinaryProducerHistory?: {frontier: OrdinaryPlacementFrontier | null} | null;ownedCounts: number[]; itemRngStates: number[];
+    ordinaryProducerHistory?: {frontier: OrdinaryPlacementFrontier | null} | null;
+    ownedCounts: number[]; itemRngStates: number[];
+    queryHistory?: { permanentCounts: boolean; temporaryRecords: boolean; temporaryUnknownInputs?: { configKind: number; itemId: number }[]; trinketSlots: boolean; primaryC08: boolean; damageHealthKnown?: boolean; cachedCallbacks?: number; temporaryEvaluation?: { possibleCacheMask: number | null; writerPcs: number[] }; unresolvedEffects?: Record<string, string> };
     trinketRngStates: number[]; pocketRngStates: number[]; activeId: number;
     activeCharge: number; saveWordD88: number; reserveCharge: number;
     shotSpeedInputs?: {sourceD38: number};
@@ -348,6 +350,7 @@ export interface State {
     technologyEyeRegistered: boolean | null;
     costume229?: Costume229 | null;
     ownedCounts: number[]; temporaryCollectibles: {itemId: number; count: number; cooldown: number}[]; queuedId: number | null; queuedCharge: number; queuedTouched: boolean;
+    queryHistory?: { permanentCounts: boolean; temporaryRecords: boolean; temporaryUnknownInputs?: { configKind: number; itemId: number }[]; trinketSlots: boolean; primaryC08: boolean; damageHealthKnown?: boolean; cachedCallbacks?: number; temporaryEvaluation?: { possibleCacheMask: number | null; writerPcs: number[] }; unresolvedEffects?: Record<string, string> };
     pickupAnimationFrame: number; pickupAnimationPlaying: boolean; pickupAnimationGuard: boolean;
     pickupPresentation: {itemId: number; animationFrame: number; animationPlaying: boolean;
       pocket?: {overlay: "Pills" | "CardFronts" | "Runes"; overlayFrame: number}} | null;

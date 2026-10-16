@@ -170,8 +170,12 @@ pub(crate) fn resolve_appearance(
     source_player_type: Option<u32>,
     mut prior: WeaponCache,
     requested: CacheMask,
+    appearance: crate::item_queries::AppearanceQueries<'_>,
 ) -> (WeaponCache, CacheMask) {
+    //The following isolated Flags/Color cuts consume this lazy view.
+    //Retained old branches remain literal in the prerequisite alone.
     let mut completed = 0;
+    let _ = appearance;
     let selected = source_player_type == Some(0) && items.admits_selected_appearance();
     let homing_flags = source_player_type == Some(0) && items.admits_homing_flags();
     let homing_colors = source_player_type == Some(0) && items.admits_homing_colors();
