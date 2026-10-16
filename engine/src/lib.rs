@@ -1674,6 +1674,13 @@ impl Game {
             left,
             room_before,
         )?;
+        // Backdrop::pre_render_walls runs inside 5c5b30 before the FX rays.
+        for (position, scale) in room::basement_boss_blood(&self.state.room, self.state.stage)? {
+            let seed = self.state.boot_lifecycle.shared.next_u32();
+            let id = familiars::admit_blood_splat(&mut self.state, seed, position, [1.0; 4], [0.0; 3])?;
+            familiars::set_blood_scale(&mut self.state, id, scale)?;
+            familiars::advance_blood_initial(&mut self.state, id)?;
+        }
         // The port builds only ordinary Basement (stage type 0).
         room::load_fx_rays(
             &mut self.state.room,
@@ -2324,6 +2331,27 @@ impl Game {
                         .clone();
                     let counter = self.state.game_update_count.wrapping_add(1);
                     self.admit_room_pickups(&selectors, counter, false)?;
+                    // Room.Init 5cf628: the first visit to a boss room slams
+                    // its portcullis (SFX 190, 5d0687) after the grid records.
+                    let boss_room = self
+                        .state
+                        .room
+                        .descriptor
+                        .as_ref()
+                        .is_some_and(|descriptor| descriptor.template.room_type == 5);
+                    if boss_room {
+                        self.state.audio.admit(
+                            &mut self.state.boot_lifecycle.shared,
+                            self.state.system_clock.system_counter.wrapping_sub(1),
+                            audio::SoundRequest {
+                                id: 190,
+                                volume: 1.0,
+                                delay: 2,
+                                looping: false,
+                                pitch: 1.0,
+                            },
+                        );
+                    }
                     self.admitted_update_footprint(phase)?;
                     // The admitted Room::Update follows authored mixed order.
                     self.refresh_room_boss_count();
