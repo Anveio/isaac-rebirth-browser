@@ -89,6 +89,10 @@ def case(fixture, base, fights, identifier, randomized, idle, via):
     result['scenario'] = {'id': identifier,
                           'description': f"Clear boss room {fixture['rooms'][-1]}, enter its trapdoor and arrive in Basement II",
                           'systems': ['room-connectivity', 'grid-entities', 'run-introduction', 'entity-animation', 'input-determinism'], 'randomized': randomized}
+    # Each game fights with its own keys, so red HP after the fight is not a
+    # parity observation; the stage-exit comparator grades the exit itself.
+    result['pairedIndependent'] = [{'after': 'boss-room-arrival', 'fields': ['player.hp'],
+                                    'reason': 'each game fights the boss with its own keys; post-fight red HP depends on that fight'}]
     result['stageExit'] = {'fixture': fixture['name'], 'rooms': fixture['rooms'], 'window': WINDOW, 'idle': idle, 'via': via,
                            'fightFrames': {name: frames(fight) for name, fight in fights.items()}}
     return result, None

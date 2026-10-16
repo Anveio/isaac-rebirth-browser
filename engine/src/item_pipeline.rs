@@ -42,7 +42,6 @@ const MONSTRO_CALLER_ITEMS: &[usize] = &[1, 4, 229];
 const MONSTRO_KIND1_QUEUED_ITEMS: &[usize] = &[4];
 const MONSTRO_CALLER_QUEUED_ITEMS: &[usize] = &[4];
 
-
 // Independently closed cache, Familiar and actual grant footprints. Equal
 // sets do not transfer getter or controller admission.
 const EPIC_FETUS_CACHE_ITEMS: &[usize] = &[1, 2, 4, 168];
@@ -420,18 +419,20 @@ impl<'a> ItemInputs<'a> {
     ///variant to BloodTear1. This grants no controller or cache capability.
     pub(crate) fn admits_monstro_kind1_context(self) -> bool {
         self.admits_monstro_readset(MONSTRO_KIND1_ITEMS)
-            && self.owner.queued_id.is_none_or(|id| {
-                MONSTRO_KIND1_QUEUED_ITEMS.contains(&(id as usize))
-            })
+            && self
+                .owner
+                .queued_id
+                .is_none_or(|id| MONSTRO_KIND1_QUEUED_ITEMS.contains(&(id as usize)))
     }
 
     ///Separate519FC0 C08=7 caller footprint. Has149/55/87/153/2/245
     ///are false; cache and kind1 admission do not grant this controller.
     pub(crate) fn admits_monstro_caller(self) -> bool {
         self.admits_monstro_readset(MONSTRO_CALLER_ITEMS)
-            && self.owner.queued_id.is_none_or(|id| {
-                MONSTRO_CALLER_QUEUED_ITEMS.contains(&(id as usize))
-            })
+            && self
+                .owner
+                .queued_id
+                .is_none_or(|id| MONSTRO_CALLER_QUEUED_ITEMS.contains(&(id as usize)))
     }
 
     fn admits_monstro_readset(self, supported: &[usize]) -> bool {
