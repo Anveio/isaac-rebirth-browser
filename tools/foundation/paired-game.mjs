@@ -260,9 +260,22 @@ function comparePair(caseData, native, browser, directory, exactPixels, stateCom
       check.sourcePNGHash = digest(sourceBytes);
       check.state = stateComparator(observations.get(label), candidate.state, index >= gameplayStart, candidate);
       assert.ok(Array.isArray(check.state) && check.state.length > 0, 'Every paired checkpoint requires typed state checks');
-      for (const scope of independent.filter(scope => index > scope.after))
-        for (const field of check.state.filter(field => scope.fields.includes(field.field)))
-          Object.assign(field, { status: 'independent', reason: scope.reason });
+      // Only an observed scalar mismatch may be incomparable. Missing/error
+      // evidence remains blocking, and an existing exact PASS is retained.
+      const observedScalar = value => typeof value === 'number' ? Number.isFinite(value)
+        : typeof value === 'string' || typeof value === 'boolean';
+      for (const field of check.state) {
+        const scopes = independent.filter(scope => index > scope.after && scope.fields.includes(field.field));
+        if (!scopes.length) continue;
+        const comparisonStatus = field.status;
+        Object.assign(field, { comparisonStatus,
+          independentScopes: scopes.map(scope => ({ after: labels[scope.after], reason: scope.reason })) });
+        if (!['pass', 'fail'].includes(comparisonStatus) || Object.hasOwn(field, 'error') || field.missing
+            || !observedScalar(field.expected) || !observedScalar(field.actual)
+            || typeof field.expected !== typeof field.actual) field.status = 'fail';
+        else if (comparisonStatus === 'fail')
+          Object.assign(field, { status: 'independent', reason: scopes.at(-1).reason });
+      }
       check.status = (!exactPixels || pixels.exactRGBA) && check.state.every(field => ['pass', 'independent'].includes(field.status)) ? 'pass' : 'fail';
     } catch (error) { check.error = String(error.message); }
     checks.push(check);
