@@ -288,6 +288,7 @@ pub(crate) fn advance(state: &mut State) -> Step {
                 age: 0,
                 active: true,
                 title: stage_name(state.stage).into(),
+                subtitle: String::new(),
                 stage: true,
             };
             Step::Done

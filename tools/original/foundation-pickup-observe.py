@@ -107,6 +107,8 @@ def observe(pid, context):
                     # RNG30 words. Read them directly, independently of the
                     # entity spawn seed and Pickup Init's temporary RNG35.
                     result['localRngWords'] = list(struct.unpack_from('<4I', raw, 0x7c0))
+                    if context.get('pickupResourceSound') is True:
+                        result['pickupManagerMember'] = True
                     more = read(address + 0xac0, 0x18)
                     result['pickupPrice'] = struct.unpack_from('<i', more, 0)[0]
                     result['collectionDelay'] = struct.unpack_from('<i', more, 0xc)[0]
@@ -145,6 +147,8 @@ def observe(pid, context):
             game = u64(0x8ecd30)
             system = u64(0x8ed560)
             report['nativePhase'] = {'systemIterations': u32(system + 0x2efa0), 'fullGameUpdates': u32(game + 0xce9f4)}
+            if context.get('pickupResourceSound') is True:
+                report['systemCounter'] = u32(system + 0x2efa0)
             room = u64(game + 0x8180)
             raw = read(room, 0x30)
             width, height = struct.unpack_from('<II', raw, 0x14)
@@ -213,6 +217,11 @@ def observe(pid, context):
                 item['damageCountdown'] = struct.unpack_from('<I', raw, 0x40)[0]
                 item['bombInventory'] = struct.unpack_from('<I', raw, 0x1c)[0]
                 item['bombPlacementCooldown'] = struct.unpack('<i', read(pointer + 0xd90, 4))[0]
+                if context.get('pickupResourceSound') is True:
+                    if raw[0x18] not in (0, 1):
+                        raise ValueError('Actual PlayerBD0 boolean representation unavailable')
+                    item['goldenKeyBd0Byte'] = raw[0x18]
+                    item['goldenKey'] = raw[0x18] == 1
                 item['keyInventory'] = u32(pointer + 0xbcc)
                 item['coinInventory'] = u32(pointer + 0xbd8)
                 item['maxRedHp'] = u32(pointer + 0xbb4)

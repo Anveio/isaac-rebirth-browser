@@ -25,7 +25,24 @@ The definitions below are discovered by executing the actual tape builder. By de
 
 The original introductory cutscene is retained in each native tape as a source-only prelude. The browser currently starts at the independently observed first Title frame0/f32 fade .975 boundary. This alignment is explicit; it does not claim cutscene implementation or native simulation-tick identity. Original state observations never become browser inputs. Actual reports preserve the native binary hash, production build digest, consumed X11 phases/focus, original PNGs, real DOM trace, typed source state, pixel differences and failed functional fields.
 
+## Current gameplay qualification
+
+This factual snapshot uses public main `91519815` (D38 #443, boss assets #442 and D30 #446). Private results name their own artifacts. Source/public integration, Own/port-port execution and Original comparison are independent evidence; unresolved checks stay failed.
+
+| Area | Source/public | Own/port-port | Original scope | Remaining behavior or evidence |
+| --- | --- | --- | --- | --- |
+| Stat foundations | D38 #443 and D30 #446 merged; each owner has independent source/interface checks. | Private 17acc passed production in 30.725s; all four regular405 tapes retain 40,463,219 checks / 0 differences versus Ebc. | Artifact-specific selected contracts below; public source merges do not inherit private artifact identity. | Floor/Clippy remain pending on the private production artifact. |
+| Experimental Treatment240 | Private, unlanded seven-effect event plan and separate persistent inputs; Damage, FireDelay and Luck stages own separate read footprints. | Private0dca four 240 routes: 3,859 checks / 88 unresolved obligations; legacy12/14/222: 10,576 / 12 unresolved. Numeric/RNG/health endpoint failures are zero in those scopes. | Retained Original: six words/RNG/health and selected caches match 511 rows. Damage1, FireDelay2 and Luck1024 complete in 198 rows per side; corrected raw Luck matches 511 rows. | 2,199 strict failures remain. Range8, MoveSpeed16 and other requested tails still prevent full-cache/firing acceptance. |
+| Cupid48 histories | D38/D30 bounded Cupid preservation landed; the remaining independent per-word fixes are private, without a permission union. | Ebc real 48→4 and 48→1 routes: 23,069 checks / 8 unknown-field failures; all three histories preserved and selected pending bits clear. | No new Original Cupid pair. The earlier missing-history baseline and corrected comparator record remain separate. | This closes selected history/stat behavior, not full item or combat parity. |
+| Weapons and precedence | Source-ordered primary selection and separate live transformations, getters, births and contacts. | Historical Homing and satellite/retained-child witnesses stay attached to their artifacts. | Knife + Brimstone + Ludovico has actual controlled Knife, retained-child, Full/Fast and contact witnesses; exact identity/callback obligations remain failed. | Controlled Knife homing nearest-query behavior is still absent; ordinary Tear homing does not supply it. |
+| Pickups | Coin/golden-key owners landed. Cell-local persistence repair e013 is source-cleared and unbuilt. | Separate distinct-cell17acc four routes: 20,387 checks / 32 unresolved; every subtype has one positive inventory-delta witness and all five pickups collect/remove. Old same-cell15,501 / 36 is preserved. | Old same-cell pair: 1,946 Golden body-field checks pass; four port-only coins retain 7,840 UNGRADED obligations. Actual Native0 versus port18 remains a runtime bug. | Unchanged same-cell replay still required for the repair. Door/return, HUD, audible, save/stage and individual Init owners remain unqualified. |
+| Popup, pause and sound | Popup/shared clock and pause six-bar owners have source reviews; actual Native mixer acceptance remains separate. | Private17acc pause four routes: 28,326 selected checks / 0 failures plus 16 mandatory unknowns. Saved popup browser replay stopped at a memory guard before comparison. | All five selected saved sound calls failed the singleton read with ENOSYS; sound comparison was not reached. Native pause bars remain ungraded. | No audible, pixel, callback or measured memory-saving acceptance from a build or collector transport. |
+| Boss assets | 95 original UI sheets and 56 portrait definitions landed in #442; private selector is a separate owner. | Private 17acc production passed; no selected boss-scene gameplay/pixel result in this snapshot. | Original decode/PNG census establishes assets, not the VS animation or selected scene. | Portrait/name/spot selection and authored timing still need their declared live witnesses. |
+
 ## Port subsystem status
+
+The sections and five-column subsystem rows below retain their named historical snapshots. A historical row or field containing “current” refers to that recorded artifact, not the factual snapshot above.
+
 
 The [system map](docs/system-map.md) records original resource/binary evidence, structural asset contracts and parallel implementation acceptance. These rows distinguish independent evidence, current implementation and executable checks. A listed check is a declared contract, not a passing result; consult the actual report. Original presentation repeats and Rust/WASM replay equality do not establish original simulation ticks or complete hidden-state parity. Update this table through [matrix.mjs](tools/foundation/matrix.mjs) as a subsystem changes.
 
@@ -72,7 +89,7 @@ The [system map](docs/system-map.md) records original resource/binary evidence, 
 | `player-death` | Pinned normal-Isaac admitted damage52b080, zero-gib Kill4464c0/common producer445c60, Player full/fast531850 under318bit4000, authored nonlooping Death57 and popup/System callbacks. | Explicit admitted health depletion/NO_KILL, dead flag, actual SFX30/Blood7, both-phase dead callbacks, stopped Death frame56, hidden body, GameOver actor freeze and deferred public Restart/Exit are source implemented. Popup rendering uses actual RGBA graphics; the shared regular pickup entry observes actual dead/main guard rather than redHP or controls. Legacy Pickup/main-name exception ownership remains separately qualified. | Required e2e suite `player-death` registers two contrived public Spike routes and two unfiltered recorded OS cases. Historical1cc/d0a6 cohort is aborted: first two aggregate original/browser cases fail, third captured but comparison directory creation hit ENOSPC, fourth unattempted. All raw/partial evidence and both LSYYET71/7PTEBQ3V draws remain retained. Later rendering/audio precision, menu-owner and lossless streaming/replay source fixes are unbuilt; no complete four-case or current-main acceptance is claimed. | Complete corrected both-game four-case cohort, exact Game full-update origin and all retained motion/control failures; full diary/items/other-cause artwork, native save/reset/revival/co-op/other-character branches. Source-health/body/popup state is never supplied to WASM. |
 | `bombs` | Native rising-edge E, post-motion spawn/velocity, full-only placement cooldown, timer59 and birth-fenced full phases establish120/121 fuse presentations. | Phase-aware f32 actual/predicted bomb motion, player-before-later-bomb dispatch, strict55.25 blast contact/impulse and HP/countdown; independent authored corpse/explosion clocks. | Live original/browser even/odd moving-birth, held-E, pause/release and recorded OS-random tapes; nine existing zero-budget GPU mask cases retain separate exact-pixel results. | Complete typed bomb variant/radial/wall holdouts, converted shared birth seeds, craters and hurt/explosion rendering. Supported NPC/grid damage now has runtime callers and separate required live gates; their failures remain explicit. |
 | `troll-bomb-conversion` | Fresh original/browser capture observes actual Pickup40/3→Bomb4/3 and QJ Pickup40/5→Bomb4/4, fuse/appear/pulse, queued blast and natural regular-family admissions. | Full-phase PU conversion spawns a stationary typed Bomb child with a real shared seed draw and no placement cost; Troll/Mega lifetimes and source Mega targeting/friction are implemented. Complete shared-consumer alignment remains unresolved. | Required e2e suite `troll-bombs` attempts all seven retained public cases, including both unfiltered OS-random outcomes. Fresh immutable c133 pair/class proof attempts3045/3045 phases and retains5543 required failures. Both QJ Mega bodies match146 observations each apart from their wrong causal birth seed, so whole Mega remains unaccepted. Historical2212-phase conversion and3045-phase impulse failures remain preserved; disproved KPF metadata is corrected without changing its tapes or removing assertions. | Complete shared draw ownership and whole Troll/Mega acceptance, rare Rock admission/callbacks including grid18, saved grid/pickup reconstruction, return immunity and complete pixels. |
-| `grid-collision` | Typed source rocks/spikes, independent blast rays and local factory rolls establish ordinary linked frames and sorted destruction callbacks. | Persisted authored Rock and active Spike grids drive player/bomb contacts; raw1000 factory admits source kind5/6 metadata before normal links. Player bombs destroy kind2 Rock collision, repair surviving linked frames and write actual signed Room path cost900; the sole room cost owner ages1..900 by100 every third full game update. Recovered Rock/Spike/wall/door geometry Init stores and Fire950/900 writes feed that same owner; actual room replacement resets transient costs before known Grid.Init stores. The cost-owner correction has no new live acceptance. Unsupported callback families stay explicit. | Spike/grid holdouts retain143 paired checkpoints and5049 fields. Fresh rock-blast pairing passes all4 isolated routes/1652 phases and retained794ZK08P/470 phases; default8 cases remain red on both26T688VM explosive offsets and ZLJJ61ZJ tinted regression, with2957 compared phases and2495 retained field mismatches. | Tinted admission/drops, explosive/alternate callbacks, cosmetic debris/Worm lifecycle and total shared MT alignment, rock reentry/absolute intro clock, other grid factories, blast doors and full graphics parity. |
+| `grid-collision` | Typed source rocks/spikes, independent blast rays and local factory rolls establish ordinary linked frames and sorted destruction callbacks. | Persisted authored Rock and active Spike grids drive player/bomb contacts; raw1000 factory admits source kind5/6 metadata before normal links. Player bombs destroy kind2 Rock collision, repair surviving linked frames and write actual signed Room path cost900; the sole room cost owner ages1..900 by100 every third full game update. Recovered Rock/Spike/wall/door geometry Init stores and Fire950/900 writes feed that same owner; actual room replacement resets transient costs before known Grid.Init stores. The cost-owner correction has no new live acceptance. Spider web1940 (kind10, Update571ab0) slows a ground player within radius21 every fourth game counter: AddSlowing adds four full-update countdown ticks and factor0.75, and each player update scales its next friction by sqrt0.75; webs store no path cost. Unsupported callback families stay explicit. | Spike/grid holdouts retain143 paired checkpoints and5049 fields. Fresh rock-blast pairing passes all4 isolated routes/1652 phases and retained794ZK08P/470 phases; default8 cases remain red on both26T688VM explosive offsets and ZLJJ61ZJ tinted regression, with2957 compared phases and2495 retained field mismatches. e2e suite `traversal` adds a contrived ZJQKAXCG and an OS-random spider-web crossing (Basement room223) graded on exact f32 player motion through the slowed release. | Tinted admission/drops, explosive/alternate callbacks, cosmetic debris/Worm lifecycle and total shared MT alignment, rock reentry/absolute intro clock, other grid factories, blast doors and full graphics parity. The web slowing colour tint (1/1/1.3, offset40), web destruction and nonplayer slowing remain unported. |
 | `large-room-geometry` | Three fresh public original routes establish ordinary13x14 bounds, both vertical contact planes, upper-right and extended lower-left admission/return, and complete authored door geometry. | Authored dimensions project radius-inset bounds; ordinary13x14 admission reuses seeded15x16 grid and transition/persistence paths. Reciprocal doors match both direction and exact generated floor edge. Normal Chest50 selectors create actual anchored actors with source temporary35 rolls, closed subtype1 and full-phase Appear/Idle clocks/classes. | e2e suite `large-rooms` always captures both games fresh. The same-turn source-frozen diagnostic and fresh actual browser compare1843 phases with full selected snapshots; the geometry leaf retained three required missing Chest5/50/1 admissions; the following concrete constructor leaf passes all1843 phases and exact Chest identity/animation/radius/classes/price/delay/cooldown. Persistent RNG words remain static mapped, not directly observed. | Remaining camera contexts and tall backdrop/full pixels, Chest contact/drop/motion/rare variants and actual save/load reconstruction, hostile large rooms, other large shapes, special-door policy/art and floor exits. |
 | `large-room-camera` | Pinned CameraStyle1 constructor/controller, weighted history, eased clamp, authored door blending and both-phase flag clear are joined to complete native camera histories on three public tall-room routes. | Room-owned camera histories and bounded scrolling advance on active full/intermediate phases and reset/freeze at real room admission. Renderer world actors, room and world masks consume the offset; HUD stays in viewport space. | Fresh original plus immutable production DOM passes1843 geometry/motion/camera-bound phases and nine actual camera-projected visibility PNG checks, including extendedslot4 and both0/-182 endpoints. Complete histories/heads/last-player lifecycle match all1545 tall-room phases carrying native readback; starting/returned15x9 histories are unobserved. All selected snapshots and callbacks are retained losslessly. Interior scroll floats remain diagnostic. | Tall backdrop assembly/full pixels, actual guarded shooting aim, queued acquisition/special focus, co-op/shake, hostile camera behavior, alternateStyle2, mutation save/load and boss scenes. |
 | `enemies-bosses` | 495 definitions plus source NPC configuration/AI dispatch, Fly13/AttackFly18 contact, FIFO damage/death and native delayed Room clear; Keeper17/1 first-AI initialization and anchored idle. | Source signed EntityManager dc/e0/e4/e8 now owns admission and fenced post-callback counts, pre-full boss2490 refresh and post-lategrid delayed-clear total; required Monstro gates compare all four actual native words, with private Rust/strict Clippy PASS and production/live parity pending. Ordinary nonplayer Base damage enters Kill strictly below zero; exact zero continues Hit. This boundary correction is source-only, with its required public zero-HP continuation witness pending. Authored persisted13/18/244 actors use XML fields, Player-first scheduling, full Appear/AI/motion/damage, intermediate prediction, typed Tear/Bomb callbacks, retirement and source countability clear timer. Secret Keeper17/1 actors derive subtype directly from spawn seed, retain authored anchored idle/clips/color and never enter Fly AI. Source ordinary Worm appearance/dig/shoot phases and flags-zero hostile type9 birth/motion/contact/retirement are implemented with real shared owners. Its FreePosition retry guard and mode3 projectile line budget read actual signed Room path costs; the required Worm gate compares all448 words including unused tail; this source correction awaits a fresh paired cohort. | e2e suite `npcs` runs actual contrived contact/queued damage and recorded OS-random admission/clear plus a mandatory center-grid regression. Direct actor fields and execution guards are required; exact AI/counter/door and paired player failures are retained. e2e suite `roundworms` requires four public contrived/recorded contact/hostile-return scenarios; immutable leaf proof passes6880 projectile fields while retaining598/50900 direct required mismatches. e2e suite `keepers` passes658 public original/DOM phases through actual NPC17/1 admission,60 idle presentations per case, static/animated clips and return. | Keeper damage/death/drops and other variants, global run counter/shared MT routing, full FX/conditional poop/Fire target callbacks, spatial collection/order, remaining grids/NPCs/projectiles/bosses, rewards and complete graphics/trajectory parity. |
@@ -107,11 +124,12 @@ Generated from [the suite registry](tools/e2e/suites.mjs). Each suite runs the f
 | `ordinary-run` | No-dialog run admission, level descriptors, Game.Save stores, grid records and ambient Room costs | [ordinary-run.mjs](tools/e2e/ordinary-run.mjs) `--ambient-grid --count 4` |
 | `weapons` | Tear cadence, direction and inherited motion | [weapons.mjs](tools/e2e/weapons.mjs) `--count 4` |
 | `tear-lifecycle` | Tear birth, flight and death phases | [weapons.mjs](tools/e2e/weapons.mjs) `--lifecycle --count 4` |
-| `traversal` | Ordinary doorway exit/return and hostile-room locks | [traversal.mjs](tools/e2e/traversal.mjs) |
+| `traversal` | Ordinary doorway exit/return, hostile-room locks and spider-web crossings | [traversal.mjs](tools/e2e/traversal.mjs) |
 | `doors` | Curse and free treasure-room doors | [traversal.mjs](tools/e2e/traversal.mjs) `--scenario-helper tools/original/door-scenarios.py --count 1` |
 | `secrets` | Bomb-revealed secret doors, entry and return | [traversal.mjs](tools/e2e/traversal.mjs) `--scenario-helper tools/original/secret-door-scenarios.py --count 1` |
 | `keepers` | Keeper construction and anchored idle in secret rooms | [traversal.mjs](tools/e2e/traversal.mjs) `--scenario-helper tools/original/keeper-scenarios.py --count 1` |
 | `stage-exit` | Boss-room clear award trapdoor and pedestal, stage transition and Basement II arrival | [state-pair.mjs](tools/e2e/state-pair.mjs) `--scenario-helper tools/original/stage-exit-scenarios.py --helper-arg --contrived --helper-arg E1T36YXW-monstro --helper-arg --contrived --helper-arg SXREBPLT-larry --helper-arg --count --helper-arg 1 --comparator tools/foundation/stage-exit-state-pair.mjs --native-frame-timeout 120` |
+| `bedroom-doors` | Cracked bedroom doorway: one bomb damages it and scatters wood particles | [state-pair.mjs](tools/e2e/state-pair.mjs) `--scenario-helper tools/original/bedroom-door-scenarios.py --helper-arg --count --helper-arg 1 --comparator tools/foundation/bedroom-door-state-pair.mjs` |
 | `key-doors` | Key collection, library unlock and revisit | [traversal.mjs](tools/e2e/traversal.mjs) `--scenario-helper tools/original/key-door-scenarios.py --state-observer tools/original/key-door-observe.py --count 1` |
 | `large-rooms` | Tall-room bounds, doors and camera | [traversal.mjs](tools/e2e/traversal.mjs) `--scenario-helper tools/original/large-room-scenarios.py --count 2` |
 | `chest-opening` | Free normal Chest opening and loot | [traversal.mjs](tools/e2e/traversal.mjs) `--scenario-helper tools/original/chest-scenarios.py --state-observer tools/original/chest-observe.py --boot-epoch-seed 1700000000 --sfx-volume 1 --count 2` |
@@ -263,10 +281,10 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | `bombs` | planted bomb lives, the placement cooldown and Isaac's blast knockback | 18 | 8 | 0 |
 | `pickups` | regular pickup subtype rolls and the pickups each roll spawns as | 5 | 9 | 0 |
 | `grid` | grid queries and ground-collision solvers on generated rooms | 14 | 3 | 0 |
-| `contact` | mass contact responses against momentum, centre-of-mass and overlap oracles | 16 | 3 | 0 |
+| `contact` | mass contact responses against momentum, centre-of-mass and overlap oracles | 15 | 4 | 0 |
 | `pathfinder` | FindGridPath's flood against an independent node-weighted Dijkstra | 6 | 5 | 0 |
 | `item_pools` | ItemPool selection, depletion, fallbacks, routing and continuation | 21 | 6 | 3 |
-| `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 66 | 54 | 2 |
+| `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 68 | 51 | 2 |
 | `abi` | the exported C ABI transport the browser bridge drives | 15 | 3 | 0 |
 
 <details><summary>Every declared DST property</summary>
@@ -362,7 +380,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Sometimes | room_templates: the compatible pool is used though exact masks exist | [room_templates.rs](engine/dst/src/units/room_templates.rs) |
 | Sometimes | room_templates: a template already picked is picked again | [room_templates.rs](engine/dst/src/units/room_templates.rs) |
 | Always | room_templates: the picked template keeps a tenth of its weight | [room_templates.rs](engine/dst/src/units/room_templates.rs) |
-| Always | floor: requests outside stages 1 and 2 or with stage seed zero are rejected | [floor.rs](engine/dst/src/units/floor.rs) |
+| Always | floor: requests for stage 0, a stage past any floor or stage seed zero are rejected | [floor.rs](engine/dst/src/units/floor.rs) |
 | Always | floor: the first-floor entry is the normal generator with fresh run inputs | [floor.rs](engine/dst/src/units/floor.rs) |
 | Always | floor: generation is a pure function of its request | [floor.rs](engine/dst/src/units/floor.rs) |
 | Always | floor: every reachable normal Basement request generates a floor | [floor.rs](engine/dst/src/units/floor.rs) |
@@ -386,9 +404,9 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Always | floor: every descriptor admits as a room without panicking | [floor.rs](engine/dst/src/units/floor.rs) |
 | Always | floor: admitted rooms have one door per neighbor and bounded geometry | [floor.rs](engine/dst/src/units/floor.rs) |
 | Always | motion: a step is a pure function of its inputs | [motion.rs](engine/dst/src/units/motion.rs) |
-| Always | motion: a step runs exactly on digital input, finite vectors and an admitted speed stat, and never returns a non-finite vector | [motion.rs](engine/dst/src/units/motion.rs) |
-| Sometimes | motion: an invalid step is refused | [motion.rs](engine/dst/src/units/motion.rs) |
-| Sometimes | motion: a step whose vectors overflow is refused | [motion.rs](engine/dst/src/units/motion.rs) |
+| Always | motion: a step runs on digital input, finite vectors and an admitted speed stat, and never returns a non-finite vector | [motion.rs](engine/dst/src/units/motion.rs) |
+| Sometimes | motion: steps outside the admitted domain are tried | [motion.rs](engine/dst/src/units/motion.rs) |
+| Sometimes | motion: steps near the top of f32 are tried | [motion.rs](engine/dst/src/units/motion.rs) |
 | Always | motion: a step commutes with the square's symmetries | [motion.rs](engine/dst/src/units/motion.rs) |
 | Always | motion: position advances by the previous velocity | [motion.rs](engine/dst/src/units/motion.rs) |
 | Always | motion: a released player keeps the forward retention of its velocity | [motion.rs](engine/dst/src/units/motion.rs) |
@@ -402,33 +420,33 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Always | motion: a settled player moves at its speed stat's terminal speed, along axes and diagonals alike | [motion.rs](engine/dst/src/units/motion.rs) |
 | Always | motion: a released player glides the geometric sum of its velocity | [motion.rs](engine/dst/src/units/motion.rs) |
 | Always | tears: the stored velocity is a pure function of its shot | [tears.rs](engine/dst/src/units/tears.rs) |
-| Always | tears: a velocity is stored exactly for finite vectors and a shot speed of at least 0.6, and is finite | [tears.rs](engine/dst/src/units/tears.rs) |
-| Sometimes | tears: an invalid shot is refused | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | tears: a velocity is stored for finite vectors and a shot speed of at least 0.6, and is finite | [tears.rs](engine/dst/src/units/tears.rs) |
+| Sometimes | tears: shots outside the admitted domain are tried | [tears.rs](engine/dst/src/units/tears.rs) |
 | Always | tears: along its aim a shot keeps ten plus 1.2 of the player's forward motion, never motion against it | [tears.rs](engine/dst/src/units/tears.rs) |
 | Always | tears: across its aim a shot keeps 1.2 of the player's sideways motion | [tears.rs](engine/dst/src/units/tears.rs) |
 | Sometimes | tears: a shot drops the player's motion against its aim | [tears.rs](engine/dst/src/units/tears.rs) |
 | Sometimes | tears: a shot inherits the player's motion along its aim | [tears.rs](engine/dst/src/units/tears.rs) |
 | Always | tears: the eye origin is a pure function of its shot | [tears.rs](engine/dst/src/units/tears.rs) |
-| Always | tears: an eye origin is placed exactly for finite vectors and a uniform in 0..=1, and is finite | [tears.rs](engine/dst/src/units/tears.rs) |
-| Sometimes | tears: an invalid eye draw is refused | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | tears: an eye origin is placed for finite vectors and a uniform in 0..=1, and is finite | [tears.rs](engine/dst/src/units/tears.rs) |
+| Sometimes | tears: eye draws outside the admitted domain are tried | [tears.rs](engine/dst/src/units/tears.rs) |
 | Always | tears: an eye sits across the shot, 0.3 to 0.5 of its velocity from the player | [tears.rs](engine/dst/src/units/tears.rs) |
 | Always | tears: each eye sits on its own side of the shot | [tears.rs](engine/dst/src/units/tears.rs) |
 | Always | tears: scale is a pure function of damage | [tears.rs](engine/dst/src/units/tears.rs) |
-| Always | tears: scale is computed exactly for finite nonnegative damage | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | tears: scale is computed for finite nonnegative damage | [tears.rs](engine/dst/src/units/tears.rs) |
 | Always | tears: scale is 0.6 + 0.04·damage + 0.15·√damage | [tears.rs](engine/dst/src/units/tears.rs) |
 | Always | tears: scale never falls as damage rises | [tears.rs](engine/dst/src/units/tears.rs) |
-| Always | tears: an animation tier is chosen exactly for finite scales of at least 0.01 | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | tears: an animation tier is chosen for finite scales of at least 0.01 | [tears.rs](engine/dst/src/units/tears.rs) |
 | Always | tears: the animation tier counts the 5418e0 thresholds a scale exceeds, up to the thirteenth clip | [tears.rs](engine/dst/src/units/tears.rs) |
 | Always | tears: the animation tier never falls as scale rises | [tears.rs](engine/dst/src/units/tears.rs) |
 | Sometimes | tears: a scale reaches the largest tier | [tears.rs](engine/dst/src/units/tears.rs) |
 | Always | tears: the collision radius is the authored radius times the scale, for admitted parameters | [tears.rs](engine/dst/src/units/tears.rs) |
 | Always | tears: the render offset bends below 8.5 height, unless the tear accelerates | [tears.rs](engine/dst/src/units/tears.rs) |
 | Always | tears: the render offset never falls as height rises | [tears.rs](engine/dst/src/units/tears.rs) |
-| Always | tears: a tear is born exactly from finite parameters and a uniform in 0..=1 | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | tears: a tear is born from finite parameters and a uniform in 0..=1 | [tears.rs](engine/dst/src/units/tears.rs) |
 | Always | tears: a tear is born one step out, falling once, with its velocity and falling acceleration | [tears.rs](engine/dst/src/units/tears.rs) |
 | Always | tears: a tear's flight fails only when its position overflows | [tears.rs](engine/dst/src/units/tears.rs) |
 | Always | tears: a refused step leaves the tear unchanged | [tears.rs](engine/dst/src/units/tears.rs) |
-| Sometimes | tears: a step whose position overflows is refused | [tears.rs](engine/dst/src/units/tears.rs) |
+| Sometimes | tears: flights near the top of f32 are tried | [tears.rs](engine/dst/src/units/tears.rs) |
 | Always | tears: a tear's lifetime only moves forward | [tears.rs](engine/dst/src/units/tears.rs) |
 | Always | tears: a tear keeps its velocity and falling acceleration through its flight | [tears.rs](engine/dst/src/units/tears.rs) |
 | Always | tears: a skipped phase or a removed tear changes nothing | [tears.rs](engine/dst/src/units/tears.rs) |
@@ -438,14 +456,14 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Sometimes | tears: a tear lands | [tears.rs](engine/dst/src/units/tears.rs) |
 | Sometimes | tears: a tear dies on a collision in flight | [tears.rs](engine/dst/src/units/tears.rs) |
 | Always | tears: a tear whose falling speed settles positive is removed within its flight | [tears.rs](engine/dst/src/units/tears.rs) |
-| Always | bombs: a bomb is born exactly from finite vectors | [bombs.rs](engine/dst/src/units/bombs.rs) |
-| Sometimes | bombs: a bomb with a non-finite birth is refused | [bombs.rs](engine/dst/src/units/bombs.rs) |
+| Always | bombs: a bomb is born from finite vectors | [bombs.rs](engine/dst/src/units/bombs.rs) |
+| Sometimes | bombs: births from non-finite vectors are tried | [bombs.rs](engine/dst/src/units/bombs.rs) |
 | Always | bombs: a bomb is born at the player with a tenth of its velocity and a full fuse | [bombs.rs](engine/dst/src/units/bombs.rs) |
 | Always | bombs: a newly placed bomb is presented in any admitted phase, half a step ahead in an intermediate one | [bombs.rs](engine/dst/src/units/bombs.rs) |
-| Always | bombs: a bomb is refused exactly when its clocks or vectors disagree, and left unchanged | [bombs.rs](engine/dst/src/units/bombs.rs) |
-| Sometimes | bombs: a bomb whose clocks disagree is refused | [bombs.rs](engine/dst/src/units/bombs.rs) |
+| Always | bombs: a bomb with consistent clocks runs, and a refused one is left unchanged | [bombs.rs](engine/dst/src/units/bombs.rs) |
+| Sometimes | bombs: bombs whose clocks disagree are tried | [bombs.rs](engine/dst/src/units/bombs.rs) |
 | Always | bombs: a bomb's own life fails only when its position overflows, and is left unchanged | [bombs.rs](engine/dst/src/units/bombs.rs) |
-| Sometimes | bombs: a bomb step whose position overflows is refused | [bombs.rs](engine/dst/src/units/bombs.rs) |
+| Sometimes | bombs: bombs near the top of f32 are tried | [bombs.rs](engine/dst/src/units/bombs.rs) |
 | Always | bombs: a bomb's lifetime only moves forward | [bombs.rs](engine/dst/src/units/bombs.rs) |
 | Always | bombs: a skipped phase or a removed bomb changes nothing | [bombs.rs](engine/dst/src/units/bombs.rs) |
 | Always | bombs: an intermediate phase presents a bomb half a step ahead and moves nothing | [bombs.rs](engine/dst/src/units/bombs.rs) |
@@ -457,7 +475,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Always | bombs: placement is admitted only once the cooldown is spent, which only full updates spend | [bombs.rs](engine/dst/src/units/bombs.rs) |
 | Always | bombs: placement re-arms after exactly 30 full updates | [bombs.rs](engine/dst/src/units/bombs.rs) |
 | Sometimes | bombs: a player places bombs back to back | [bombs.rs](engine/dst/src/units/bombs.rs) |
-| Always | bombs: a blast is resolved exactly for finite vectors | [bombs.rs](engine/dst/src/units/bombs.rs) |
+| Always | bombs: a blast is resolved for finite vectors, never into a non-finite velocity | [bombs.rs](engine/dst/src/units/bombs.rs) |
 | Always | bombs: a blast reaches a player strictly inside its radius plus Isaac's | [bombs.rs](engine/dst/src/units/bombs.rs) |
 | Always | bombs: a blast misses a player beyond its radius plus Isaac's | [bombs.rs](engine/dst/src/units/bombs.rs) |
 | Sometimes | bombs: a player stands on a blast's edge | [bombs.rs](engine/dst/src/units/bombs.rs) |
@@ -466,7 +484,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Sometimes | bombs: a deep blast's push is capped at 15 | [bombs.rs](engine/dst/src/units/bombs.rs) |
 | Always | pickups: a subtype roll is a pure function of its selector and seed | [pickups.rs](engine/dst/src/units/pickups.rs) |
 | Always | pickups: a nonzero subtype is kept | [pickups.rs](engine/dst/src/units/pickups.rs) |
-| Always | pickups: a zero subtype is rolled exactly for the regular families from a nonzero seed | [pickups.rs](engine/dst/src/units/pickups.rs) |
+| Always | pickups: a zero subtype is rolled for every regular family from a nonzero seed | [pickups.rs](engine/dst/src/units/pickups.rs) |
 | Always | pickups: a rolled subtype is one its family documents | [pickups.rs](engine/dst/src/units/pickups.rs) |
 | Sometimes | pickups: a soul heart is rolled | [pickups.rs](engine/dst/src/units/pickups.rs) |
 | Sometimes | pickups: an eternal heart is rolled | [pickups.rs](engine/dst/src/units/pickups.rs) |
@@ -494,8 +512,8 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Always | grid: player correction moves only out along the contact normal | [grid.rs](engine/dst/src/units/grid.rs) |
 | Sometimes | grid: a player wall contact changes velocity | [grid.rs](engine/dst/src/units/grid.rs) |
 | Always | grid: blast candidates are ascending, unique cells of the room | [grid.rs](engine/dst/src/units/grid.rs) |
-| Always | grid: blast queries reject non-positive, oversized and non-finite radii | [grid.rs](engine/dst/src/units/grid.rs) |
-| Always | contact: pairs outside the source types or with invalid geometry are rejected | [contact.rs](engine/dst/src/units/contact.rs) |
+| Always | grid: blast queries reject negative and non-finite radii | [grid.rs](engine/dst/src/units/grid.rs) |
+| Sometimes | contact: pairs outside the admitted types or geometry are tried | [contact.rs](engine/dst/src/units/contact.rs) |
 | Always | contact: every admitted pair at ordinary scales resolves | [contact.rs](engine/dst/src/units/contact.rs) |
 | Always | contact: a rejected pair leaves both bodies unchanged | [contact.rs](engine/dst/src/units/contact.rs) |
 | Always | contact: the response runs exactly for strictly overlapping circles | [contact.rs](engine/dst/src/units/contact.rs) |
@@ -555,7 +573,9 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Sometimes | item_pools: a drained pool yields Breakfast | [item_pools.rs](engine/dst/src/units/item_pools.rs) |
 | Unreachable | item_pools: a manager fails to serialize or restore | [item_pools.rs](engine/dst/src/units/item_pools.rs) |
 | Always | item_pools: a serialized manager continues identically | [item_pools.rs](engine/dst/src/units/item_pools.rs) |
-| Always | game: exactly the documented invalid inputs are rejected | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: malformed inputs are rejected | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: confirming a locked character never starts a run | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Sometimes | game: a locked character is confirmed | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: valid Tick commands always succeed | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: a Tick of exactly the command budget is accepted | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: an over-budget Tick is rejected | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
@@ -563,20 +583,16 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Sometimes | game: a host timestamp on a batched Tick is rejected | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: an out-of-range volume is rejected | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: an unsupported key is rejected | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
-| Sometimes | game: an unimplemented main menu action is rejected | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
-| Sometimes | game: an unimplemented authored Challenge is rejected | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
-| Sometimes | game: an unimplemented hard-mode run is rejected | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
-| Sometimes | game: a locked or unimplemented character is rejected | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: text outside the seed dialog is rejected | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: invalid seed text is rejected | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: the fire cooldown never rises above a max fire delay the command held | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: Tick advances the tick and system clocks by its count (plus run-start alignment) | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: the menu animation clock advances with Tick and restarts on screen changes | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
-| Always | game: Tick changes the screen only by starting a run or leaving GameOver | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: a Tick moves between menu screens only by starting a run | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: unpaused gameplay advances the run clock once per tick, except while the nightmare scene plays | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: the nightmare scene between stages holds the run clock | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
-| Always | game: within a run the floor changes only by descending to the next stage, and full updates never rewind | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
-| Sometimes | game: a run descends to the next stage's floor | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: within a run the floor changes only by descending to a deeper stage, and full updates never rewind | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Sometimes | game: a run descends to a deeper stage's floor | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: a paused run freezes gameplay and the shared stream | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: ticks elapse while paused | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Reachable | game: a run starts through the public menus | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
@@ -631,7 +647,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Always | game: pause state agrees with the pause menu phase | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: volumes stay within the unit interval | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: the run introduction lasts at most 140 ticks | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
-| Always | game: player controls are disabled exactly while the run-start fade, a room transition or a stage transition holds | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: player controls are disabled while the run-start fade, a room transition or a stage transition holds | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: no run-start request is pending during gameplay | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: player motion is finite and health is bounded | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: grid-colliding bodies stay inside the room's walls | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
@@ -648,10 +664,10 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Always | game: consumable counts stay within 99 | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: the actor schedule names exactly the live player, tears, bombs and room actors | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: room bookkeeping indexes the run's floor | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
-| Always | game: room transitions follow floor neighbor links | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: a door transition leads to the neighbor behind its door | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: a room transition reaches its inbound phase | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: the loaded room is the current descriptor's room | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
-| Always | game: the minimap marks exactly the current room | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: the minimap marks the current room and no other | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: the player enters another room | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: a tear is in flight | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: a tear poof is presented | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
@@ -666,6 +682,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Always | game: boot publishes the first Title with its seeds | [mod.rs](engine/dst/src/units/game/mod.rs) |
 | Always | game: boot is a pure function of its seeds | [mod.rs](engine/dst/src/units/game/mod.rs) |
 | Unreachable | game: public commands never panic the engine | [mod.rs](engine/dst/src/units/game/mod.rs) |
+| Always | game: controls lost outside a named hold come back within 600 full updates | [mod.rs](engine/dst/src/units/game/mod.rs) |
 | Always | game: a rejected command leaves the whole game unchanged | [mod.rs](engine/dst/src/units/game/mod.rs) |
 | Always | game: a batched Tick simulates exactly what single Ticks do | [mod.rs](engine/dst/src/units/game/mod.rs) |
 | Always | game: published states round-trip losslessly through their validators | [mod.rs](engine/dst/src/units/game/mod.rs) |

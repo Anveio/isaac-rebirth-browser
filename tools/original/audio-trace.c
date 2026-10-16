@@ -4,6 +4,7 @@
  * worker timestamps are explicitly real clocks, not presentation phases. */
 #define _GNU_SOURCE
 #include <dlfcn.h>
+#include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
 #include <math.h>
@@ -14,6 +15,7 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/syscall.h>
+#include <sys/uio.h>
 #include <time.h>
 #include <unistd.h>
 
@@ -26,6 +28,10 @@ static pthread_mutex_t trace_lock = PTHREAD_MUTEX_INITIALIZER;
 static FILE *events;
 static pid_t owner_pid, main_tid;
 static uint64_t sequence;
+static int source_owners;
+static ALuint owned_sources[4096];
+static size_t owned_source_count;
+static int source_allocation_overflow;
 static char output_dir[PATH_MAX];
 static const size_t max_pcm_bytes = 16u * 1024u * 1024u;
 
@@ -46,6 +52,7 @@ __attribute__((constructor)) static void initialize_trace(void) {
     snprintf(filename, sizeof(filename), "%s/calls.jsonl", output_dir);
     events = fopen(filename, "a");
     if (!events) return;
+    source_owners = getenv("ISAAC_AUDIO_SFX_OWNERS") && !strcmp(getenv("ISAAC_AUDIO_SFX_OWNERS"), "1");
     owner_pid = getpid();
     main_tid = (pid_t)syscall(SYS_gettid);
     fprintf(events, "{\"schema\":1,\"api\":\"trace-start\",\"pid\":%d,\"mainTid\":%d,\"scope\":\"Forwarded public OpenAL calls and PCM arguments; original hash/direct-child/gate identity validated by paired source observer\"}\n", owner_pid, main_tid);
@@ -82,6 +89,20 @@ static void end_event(void) {
 
 static void ids_event(const char *api, ALsizei count, const ALuint *ids) {
     if (!begin_event(api)) return;
+    if (source_owners && ids && count >= 0) {
+        if (!strcmp(api, "alGenSources")) {
+            for (int i = 0; i < count; i++) {
+                if (owned_source_count == 4096) { source_allocation_overflow = 1; break; }
+                owned_sources[owned_source_count++] = ids[i];
+            }
+        } else if (!strcmp(api, "alDeleteSources")) {
+            for (int i = 0; i < count && i < 4096; i++) {
+                for (size_t j = 0; j < owned_source_count; j++) {
+                    if (owned_sources[j] == ids[i]) { owned_sources[j] = owned_sources[--owned_source_count]; break; }
+                }
+            }
+        }
+    }
     fprintf(events, ",\"count\":%d,\"ids\":[", count);
     int limit = count > 4096 ? 4096 : count;
     for (int i = 0; ids && i < limit; i++) fprintf(events, "%s%u", i ? "," : "", ids[i]);
@@ -155,7 +176,173 @@ void name(ALuint source) { \
     RESOLVE(name, void (*real)(ALuint)); real(source); \
     if (begin_event(#name)) { fprintf(events, ",\"source\":%u", source); end_event(); } \
 }
-SOURCE_WRAPPER(alSourcePlay)
+
+/* Opt-in source ownership at the actual configured-SFX OpenAL call.
+ * Original610d30 keeps its actual backend object in callee-saved RBX and
+ * calls alSourcePlay at610de6 (return610deb). The trampoline captures RBX
+ * before any C prologue may reuse it. No executable/game memory is patched.
+ * Exact table-reference ambiguity is retained; PCM never selects an ID. */
+static uintptr_t last_owner_read_address;
+static size_t last_owner_read_requested;
+static ssize_t last_owner_read_returned;
+static int last_owner_read_errno;
+static int last_owner_read_attempted;
+static int last_owner_open_attempted;
+static int last_owner_open_errno;
+static int own_read(uintptr_t address, void *target, size_t length) {
+    int saved_errno = errno;
+    ssize_t returned = 0;
+    int read_errno = 0;
+    last_owner_read_attempted = 0;
+    last_owner_open_attempted = address != 0;
+    last_owner_open_errno = 0;
+    if (last_owner_open_attempted) {
+        errno = 0;
+        int fd = open("/proc/self/mem", O_RDONLY | O_CLOEXEC);
+        last_owner_open_errno = errno;
+        if (fd >= 0) {
+            last_owner_read_attempted = 1;
+            errno = 0;
+            returned = pread(fd, target, length, (off_t)address);
+            read_errno = errno;
+            close(fd);
+        }
+    }
+    last_owner_read_address = address;
+    last_owner_read_requested = length;
+    last_owner_read_returned = returned;
+    last_owner_read_errno = read_errno;
+    errno = saved_errno;
+    return last_owner_read_attempted && returned == (ssize_t)length;
+}
+static uint32_t word32(const unsigned char *at) {
+    uint32_t value; memcpy(&value, at, sizeof(value)); return value;
+}
+static uintptr_t pointer64(const unsigned char *at) {
+    uintptr_t value; memcpy(&value, at, sizeof(value)); return value;
+}
+static void quoted_bytes(const unsigned char *text, size_t length) {
+    fputc('"', events);
+    for (size_t i = 0; i < length; i++) {
+        unsigned char ch = text[i];
+        if (ch == '"' || ch == '\\') { fputc('\\', events); fputc(ch, events); }
+        else if (ch < 0x20 || ch >= 0x7f) fprintf(events, "\\u%04x", ch);
+        else fputc(ch, events);
+    }
+    fputc('"', events);
+}
+static void configured_sfx_owner(ALuint source, uintptr_t backend, uintptr_t caller) {
+    fprintf(events, ",\"sfxOwner\":{\"schema\":\"actual-openal-sfx-owner-v1\",\"callSite\":\"0x%lx\",\"backendObject\":\"0x%lx\"",
+            (unsigned long)caller, (unsigned long)backend);
+    if ((pid_t)syscall(SYS_gettid) != main_tid || caller != 0x610debUL) {
+        fputs(",\"status\":\"UNKNOWN_UNSELECTED_CALLER_OR_THREAD\"}", events); return;
+    }
+    uintptr_t system = 0, game = 0;
+    uint32_t backend_source = 0, counter = 0, game_counter = 0, volume_bits = 0;
+    unsigned char table[324 * 0x158];
+    const char *failed_stage = NULL;
+    int system_read = 0, backend_source_read = 0;
+    if (!own_read(0x8ed560UL, &system, sizeof(system))) failed_stage = "system-singleton-read";
+    else {
+        system_read = 1;
+        if (!system) failed_stage = "system-singleton-null";
+        else if (!own_read(backend + 0x78, &backend_source, sizeof(backend_source))) failed_stage = "backend-source78-read";
+        else {
+            backend_source_read = 1;
+            if (backend_source != source) failed_stage = "actual-source78-handle-mismatch";
+            else if (!own_read(system + 0x2efa0, &counter, sizeof(counter))) failed_stage = "system-counter-read";
+            else if (!own_read(system + 0x2df94, &volume_bits, sizeof(volume_bits))) failed_stage = "global-volume-read";
+            else if (!own_read(system + 0x12c20, table, sizeof(table))) failed_stage = "configured-table-read";
+        }
+    }
+    if (failed_stage) {
+        fprintf(events, ",\"failedStage\":\"%s\",\"readResult\":{\"api\":\"pread-proc-self-mem\",\"attempted\":%s,\"address\":\"0x%lx\",\"requestedBytes\":%zu,\"returnedBytes\":",
+                failed_stage, last_owner_read_attempted ? "true" : "false",
+                (unsigned long)last_owner_read_address, last_owner_read_requested);
+        if (last_owner_read_attempted) fprintf(events, "%zd,\"errno\":%d}", last_owner_read_returned, last_owner_read_errno);
+        else fputs("null,\"errno\":null}", events);
+        fprintf(events, ",\"openResult\":{\"api\":\"open-proc-self-mem\",\"attempted\":%s,\"errno\":", last_owner_open_attempted ? "true" : "false");
+        if (last_owner_open_attempted) fprintf(events, "%d", last_owner_open_errno); else fputs("null", events);
+        fprintf(events, "},\"actualInputSource\":%u,\"observedSystemPointer\":", source);
+        if (system_read) fprintf(events, "\"0x%lx\"", (unsigned long)system); else fputs("null", events);
+        fputs(",\"observedBackendSource78\":", events);
+        if (backend_source_read) fprintf(events, "%u", backend_source); else fputs("null", events);
+        fputs(",\"status\":\"UNKNOWN_REQUIRED_READ_OR_ACTUAL_SOURCE_HANDLE\"}", events); return;
+    }
+    fprintf(events, ",\"systemCounter\":%u,\"globalVolumeBits\":%u,\"gameUpdateCount\":", counter, volume_bits);
+    if (own_read(0x8ecd30UL, &game, sizeof(game)) && game && own_read(game + 0xce9f4, &game_counter, sizeof(game_counter)))
+        fprintf(events, "%u", game_counter);
+    else fputs("null", events);
+    unsigned matches = 0; int complete = 1;
+    fputs(",\"references\":[", events);
+    for (unsigned id = 0; id < 324; id++) {
+        const unsigned char *slot = table + id * 0x158;
+        uint32_t count = word32(slot + 0x148);
+        if (count > 5) { complete = 0; continue; }
+        if (!count) continue;
+        if (slot[0x150] > 1) complete = 0;
+        for (unsigned sample = 0; sample < count; sample++) {
+            const unsigned char *wrapper = slot + 0x10 + sample * 64;
+            if (pointer64(wrapper) != backend) continue;
+            uintptr_t path = pointer64(slot + 8 + sample * 64);
+            uint64_t length = 0; unsigned char text[512];
+            int path_known = path >= 24 && own_read(path - 24, &length, sizeof(length)) && length > 0 && length <= sizeof(text) && own_read(path, text, (size_t)length);
+            if (!path_known || wrapper[0x14] > 1) complete = 0;
+            uint32_t delay_bits = word32(slot + 4) - word32(slot);
+            fprintf(events, "%s{\"id\":%u,\"sampleIndex\":%u,\"wrapperAddress\":\"0x%lx\",\"lastTickBits\":%u,\"nextAllowedBits\":%u,\"delayBits\":%u,\"requestedVolumeBits\":%u,\"loaded\":%u,\"loopRaw\":%u,\"gainBits\":%u,\"pitchBits\":%u,\"path\":",
+                    matches ? "," : "", id, sample, (unsigned long)(system + 0x12c20 + id * 0x158 + 0x10 + sample * 64),
+                    word32(slot), word32(slot + 4), delay_bits, word32(slot + 0x14c), slot[0x150], wrapper[0x14], word32(wrapper + 0x18), word32(wrapper + 0x20));
+            if (path_known) quoted_bytes(text, (size_t)length); else fputs("null", events);
+            fputc('}', events); matches++;
+        }
+    }
+    fprintf(events, "],\"referenceCount\":%u,\"completeTableAndPathRead\":%s,\"status\":\"%s\"}", matches,
+            complete ? "true" : "false", !complete ? "UNKNOWN_INCOMPLETE_REFERENCE_READ" : matches == 1 ? "UNIQUE_ACTUAL_TABLE_REFERENCE" : matches ? "AMBIGUOUS_ACTUAL_TABLE_REFERENCES" : "UNKNOWN_NO_TABLE_REFERENCE");
+}
+
+/* SysVAMD64 callee-saved owner+actual returnPC capture only. Other architectures
+ * are not this pinned Original executable and must fail compilation. */
+#if !defined(__x86_64__)
+#error "Pinned Original audio ownership requires SysVAMD64"
+#endif
+__attribute__((used, noinline)) static void observe_al_source_play(ALuint source, uintptr_t backend, uintptr_t caller) {
+    RESOLVE(alSourcePlay, void (*real)(ALuint)); real(source);
+    if (begin_event("alSourcePlay")) {
+        fprintf(events, ",\"source\":%u", source);
+        if (source_owners) {
+            int allocated = 0;
+            for (size_t i = 0; i < owned_source_count; i++) if (owned_sources[i] == source) { allocated = 1; break; }
+            fprintf(events, ",\"actualSourceAllocationKnown\":%s,\"sourceAllocationOverflow\":%s,\"postPlayState\":", allocated ? "true" : "false", source_allocation_overflow ? "true" : "false");
+            if (allocated && !source_allocation_overflow && caller == 0x610debUL && (pid_t)syscall(SYS_gettid) == main_tid) {
+                RESOLVE(alGetSourcei, void (*query)(ALuint, ALenum, ALint *));
+                RESOLVE(alGetSourcef, void (*query_float)(ALuint, ALenum, ALfloat *));
+                ALint state = 0, buffer = 0, loop = -1;
+                ALfloat gain = 0, pitch = 0;
+                if (query && query_float) {
+                    query(source, 0x1010, &state);
+                    query(source, 0x1009, &buffer);
+                    query(source, 0x1007, &loop);
+                    query_float(source, 0x100a, &gain);
+                    query_float(source, 0x1003, &pitch);
+                }
+                if (state >= 0x1011 && state <= 0x1014) fprintf(events, "%d", state); else fputs("null", events);
+                uint32_t gain_bits, pitch_bits;
+                memcpy(&gain_bits, &gain, sizeof(gain_bits)); memcpy(&pitch_bits, &pitch, sizeof(pitch_bits));
+                fprintf(events, ",\"actualMixer\":{\"state\":%d,\"buffer\":%u,\"loopRaw\":%d,\"gainBits\":%u,\"pitchBits\":%u,\"complete\":%s}",
+                        state, (ALuint)buffer, loop, gain_bits, pitch_bits,
+                        query && query_float && state >= 0x1011 && state <= 0x1014 && buffer && (loop == 0 || loop == 1) && isfinite(gain) && isfinite(pitch) ? "true" : "false");
+            } else fputs("null,\"actualMixer\":null", events);
+            configured_sfx_owner(source, backend, caller);
+        }
+        end_event();
+    }
+}
+__attribute__((naked)) void alSourcePlay(ALuint source __attribute__((unused))) {
+    __asm__ __volatile__("movq %rbx, %rsi\n\t"
+                         "movq (%rsp), %rdx\n\t"
+                         "jmp observe_al_source_play\n\t");
+}
+
 SOURCE_WRAPPER(alSourcePause)
 SOURCE_WRAPPER(alSourceStop)
 

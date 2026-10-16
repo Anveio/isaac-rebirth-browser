@@ -27,6 +27,18 @@ export class MenuRenderer {
     ctx.imageSmoothingEnabled = false;
     ctx.drawImage(this.assets.image(`${MENU}menushadow.png`), 0, 0, 256, 149, 0, 122, 256, 149);
     ctx.restore();
+    //59C702/59C7F0 draws the outgoing confirmation quad after the menu,
+    //using Menu+4 independently of the incoming Menu+8/+C tint below.
+    if (state.runStartRequest.fading && state.runStartRequest.fadeAlpha > 0) {
+      const alpha = Math.min(1, state.runStartRequest.fadeAlpha);
+      const backend = ctx as unknown as { fillRectRGBA?: (x: number, y: number, width: number, height: number, rgba: readonly number[]) => void };
+      if (backend.fillRectRGBA) backend.fillRectRGBA(0, 0, 480, 270, [0, 0, 0, alpha]);
+      else {
+        ctx.save(); ctx.globalAlpha *= alpha;
+        ctx.fillStyle = "#000000";
+        ctx.fillRect(0, 0, 480, 270); ctx.restore();
+      }
+    }
     if (state.menuFade.active && state.menuFade.alpha > 0) {
       const { color, alpha } = state.menuFade;
       const backend = ctx as unknown as { fillRectRGBA?: (x: number, y: number, width: number, height: number, rgba: readonly number[]) => void };

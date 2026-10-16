@@ -2,9 +2,10 @@
 //! RNG35 rolls, 500150, 4ffcae and 4ffd4e) and the pickups they spawn as.
 //!
 //! A nonzero subtype is kept. A zero one is rolled from a nonzero spawn seed
-//! for the four regular families only, into the set each family documents
+//! for each of the four regular families, into the set each family documents
 //! (hearts 1, 2, 3, 4 and 6; coins 1 to 3; keys 1 and 2; bombs 1, 2, 3 and
-//! 5), and every member is rolled. Every roll spawns as a pickup with its
+//! 5), and every member is rolled. Other variants are left open: the port
+//! may roll them once it implements them. Every roll spawns as a pickup with its
 //! Appear and Idle clips that keeps its rolled subtype, the transient troll
 //! bombs (40/3, 40/5) drawing the regular bomb's visual until converted.
 use crate::entropy::Entropy;
@@ -57,8 +58,8 @@ fn roll(e: &mut Entropy) {
         return;
     }
     props::always!(
-        rolled.is_ok() == (family.is_some() && seed != 0),
-        "pickups: a zero subtype is rolled exactly for the regular families from a nonzero seed",
+        family.is_none() || seed == 0 || rolled.is_ok(),
+        "pickups: a zero subtype is rolled for every regular family from a nonzero seed",
         details()
     );
     let (Ok(rolled), Some((_, members))) = (rolled, family) else {

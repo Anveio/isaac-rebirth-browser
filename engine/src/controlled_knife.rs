@@ -18,6 +18,7 @@ pub(crate) fn advance(
     room: &Grid,
     game_age: u32,
     countable_total: i32,
+    mut form_satellites: impl FnMut(&Knife) -> Result<(), String>,
 ) -> Result<bool, String> {
     if phase == Phase::Skipped {
         return Ok(false);
@@ -70,6 +71,8 @@ pub(crate) fn advance(
     knife.sprite.layer_flips.entry(0).or_insert([false, false])[0] = knife.sprite.rotation > 0.0;
     //5C7E50 with all four margins zero precedes the empty-room return test.
     knife.position = room.clamp_room(knife.position, 0.0);
+    //47374F..474967 traverses4A0 before empty-room return steering.
+    form_satellites(knife)?;
 
     let toward_parent = WorldVector {
         x: parent.position.x - knife.position.x,
@@ -94,7 +97,7 @@ pub(crate) fn advance(
     }
     //444890(period3,offset0) respects intermediate318bit4000. Contact's
     //separate period5/own-sequence admission stays with the contact owner.
-    if knife.entity_flags & 0x4000 == 0 && (game_age as i32) % 3 == 0 {
+    if knife.entity_flags & 0x4000 == 0 && (knives::source_game_counter(game_age) as i32) % 3 == 0 {
         knife.hit_sequences.clear();
     }
     if knife.fast {

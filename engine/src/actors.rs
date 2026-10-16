@@ -150,6 +150,21 @@ impl Scheduler {
             .map(|identity| identity.sequence_id)
     }
 
+    /// In-place Entity.Init441CFD clears the actual Entity+8 word. Morph
+    /// does not call Room5C6940: retain the handle, order and next allocator.
+    pub(crate) fn reinitialize_in_place(&mut self, actor: ActorRef) -> Result<(), String> {
+        if !self.actors.contains(&actor) {
+            return Err("in-place Init requires current manager actor".into());
+        }
+        let identity = self
+            .identities
+            .iter_mut()
+            .find(|identity| identity.actor == actor)
+            .ok_or("in-place Init requires actual identity owner")?;
+        identity.sequence_id = 0;
+        Ok(())
+    }
+
     /// Room.Init resets its allocator before Game.Spawn restores ordinary
     /// records. Manager453ec0 retains the same Player/Familiar pointers and IDs.
     pub fn clear_room(&mut self) {

@@ -29,7 +29,7 @@ def generated(run_seed):
     return json.loads(result.stdout)
 
 
-def actions(slot, return_room=True):
+def actions(slot, return_room=True, cross=0):
     tape = []
     def held(key, count, prefix):
         tape.append({'type': 'key', 'key': key, 'down': True})
@@ -39,7 +39,7 @@ def actions(slot, return_room=True):
     def settle(prefix):
         for index in range(40):
             tape.extend([{'type': 'step', 'frames': 1}, {'type': 'capture', 'label': f'{prefix}-{index + 1}'}])
-    held(['a', 'w', 'd', 's'][slot], [72, 74, 72, 18][slot], 'depart')
+    held(['a', 'w', 'd', 's'][slot], [72, 74, 72, 18][slot] + cross, 'depart')
     settle('entry')
     tape.append({'type': 'capture', 'label': 'neighbor'})
     if not return_room:
@@ -50,7 +50,7 @@ def actions(slot, return_room=True):
     return tape
 
 
-def case(code, slot, provenance, mode="return"):
+def case(code, slot, provenance, mode="return", cross=0):
     value = source.codec.decode_seed(code)
     prefix = runner.default_tape(code)
     end = next(index for index, action in enumerate(prefix) if action.get('label') == 'gameplay-start')
@@ -59,19 +59,71 @@ def case(code, slot, provenance, mode="return"):
     if slot in (0, 2):
         setup += [{'type': 'key', 'key': 'w', 'down': True}, {'type': 'step', 'frames': 27},
                   {'type': 'key', 'key': 'w', 'down': False}, {'type': 'step', 'frames': 30}]
-    route = actions(slot, mode != "entry-only")
+    route = actions(slot, mode != "entry-only", cross)
     tape += setup + route
     runner.validate_tape(tape)
     return {'code': code, 'runSeed': value, 'slot': slot, 'selection': provenance, 'mode': mode,
             'setup': setup, 'actions': route, 'tape': tape}
 
 
+# Extra held frames that carry an entering player across the neighbor's
+# doorway line onto its first web (GridEntity_Web slowing, spider_webs.rs).
+WEB_CROSS = 60
+# Recorded OS-random draw whose right neighbor is the web room (Basement 223).
+WEB_SEED, WEB_SLOT = 'ZJQKAXCG', 2
+
+
+def web_case(code, slot, provenance):
+    return dict(case(code, slot, provenance, 'entry-only', WEB_CROSS), goalRoomType=1)
+
+
+def web_line(asset, slot):
+    """Whether entering `asset` from `slot` walks onto an authored web first.
+
+    The room must hold only rocks, blocks and webs (no actor choices), its entry
+    door must be enabled, and the first nonempty cell on the doorway line must
+    be a web in every authored choice."""
+    if asset['type'] != 1 or (asset['width'], asset['height']) != (13, 7):
+        return False
+    if any(entry['type'] not in (1000, 1900, 1940) for group in asset['spawns'] for entry in group['entries']):
+        return False
+    entry_door = [(13, 3), (6, 7), (-1, 3), (6, -1)][slot]
+    if not any((door['x'], door['y']) == entry_door and door['enabled'] for door in asset['doors']):
+        return False
+    cells = {(group['x'], group['y']): group['entries'] for group in asset['spawns'] if group['entries']}
+    line = [[(x, 3) for x in range(12, -1, -1)], [(6, y) for y in range(6, -1, -1)],
+            [(x, 3) for x in range(13)], [(6, y) for y in range(7)]][slot]
+    for cell in line:
+        if cell in cells:
+            return all(entry['type'] == 1940 for entry in cells[cell])
+    return False
+
+
 def choose(count):
     # Contrived route is a source input, never a production seed exception.
     result = [case('CSTGNPJ8', 2, 'contrived observed ordinary doorway/return'),
-              case('T1PK6Y0W', 2, 'mandatory hostile entrance/return-lock regression', 'blocked-return')]
+              case('T1PK6Y0W', 2, 'mandatory hostile entrance/return-lock regression', 'blocked-return'),
+              web_case(WEB_SEED, WEB_SLOT, 'contrived spider-web crossing')]
     catalog = source.decoder.decode_bytes(source.decoder.base_assets()[1][1], source='authored Basement')
     identities = {entry['runSeed'] for entry in result}
+    web = None
+    for _ in range(8192):
+        vector = source.codec.random_vector()
+        if vector['seedValue'] in identities:
+            continue
+        floor = generated(vector['seedValue'])
+        neighbors = floor['descriptors'][floor['startingDescriptor']]['neighbors'][:4]
+        slot = next((slot for slot, index in enumerate(neighbors) if index is not None
+                     and floor['descriptors'][index]['assetStage'] == 1
+                     and web_line(catalog[floor['descriptors'][index]['catalogIndex']], slot)), None)
+        if slot is not None:
+            web = web_case(source.codec.encode_seed(vector['seedValue']), slot,
+                           'recorded OS-random spider-web crossing')
+            identities.add(vector['seedValue'])
+            break
+    if web is None:
+        raise ValueError('OS-random discovery did not find a spider-web crossing route')
+    result.append(web)
     for _ in range(2048):
         vector = source.codec.random_vector()
         if vector['seedValue'] in identities:
@@ -92,7 +144,7 @@ def choose(count):
             result.append(case(source.codec.encode_seed(vector['seedValue']), slot, 'recorded OS-random ordinary no-hostile authored configuration'))
             identities.add(vector['seedValue'])
             break
-        if len(result) == count + 2:
+        if len(result) == count + 4:
             return {'schema': 1, 'randomSourceCount': count, 'cases': result}
     raise ValueError('OS-random discovery did not find every required ordinary return route')
 
