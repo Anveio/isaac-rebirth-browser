@@ -68,6 +68,12 @@ pub(crate) fn advance(state: &mut State, controls_enabled: bool) -> Result<(), S
     if state.public_actions.active_triggered && controls_enabled {
         if let Some(owner) = state.player_items.as_mut() {
             if !matches!(owner.active_id, 0 | 45) {
+                if let Some(history) = &mut owner.query_history {
+                    //Unimplemented requested effect may change counts,
+                    //CF8, held trinkets or retained C08. This is an
+                    //explicit unknown frontier, not invocation credit.
+                    history.forget_unowned_effect();
+                }
                 owner.damage_inputs = None;
                 owner.range_inputs = None;
                 owner.move_speed_inputs = None;
@@ -107,7 +113,20 @@ pub(crate) fn advance(state: &mut State, controls_enabled: bool) -> Result<(), S
     //522349 costume admission is empty for this actual config.5e4140 owns
     // a temporary record before the dispatch leaf; a zero authored cooldown
     // is persistent, not an immediately expired effect.
+    //529600 can dispatch another active through positiveTrinket4.
+    //The actual known-empty held/queue query closes that producer;
+    //unknown/positive trinket history does not create a CF8 proof.
+    let query_stores_preserved = state.player.entity_source.is_some_and(|source| {
+        source.entity_type == 1 && source.variant == 0
+    }) && crate::item_queries::AppearanceQueries::new(
+        owner, state.weapon_cache.primary, state.player.entity_source, None,
+    ).has_trinket(4) == Some(false);
     let owner = state.player_items.as_mut().expect("checked owner");
+    if !query_stores_preserved {
+        if let Some(history) = &mut owner.query_history {
+            history.forget_unowned_effect();
+        }
+    }
     owner.add_temporary_collectible(45)?;
     //524084->52598b requests157 before508230 heals two native half-hearts.
     // This succeeds and discharges even when red health is already full.

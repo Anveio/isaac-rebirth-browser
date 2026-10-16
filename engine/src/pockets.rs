@@ -168,6 +168,9 @@ pub(crate) fn note_unowned_use(state: &mut State, controls_enabled: bool) {
     //An existing frontier contains historical records, not known-empty
     //current slots. Preserve it, but never retain new input ownership on a
     //later admitted request whose actual effect may still be unknown.
+    if let Some(history) = &mut owner.query_history {
+        history.forget_unowned_effect();
+    }
     state.attack_runtime.aim_rotation_c70 = None;
     owner.move_speed_inputs = None;
 }
