@@ -60,6 +60,10 @@ pub struct Knife {
     pub dead: bool,
     pub visible: bool,
     pub position: WorldVector,
+    ///History of actual source motion callbacks, not a second position store.
+    ///Fresh Init owns it; an omitted legacy fact or skipped homing stays unknown.
+    #[serde(default)]
+    pub source_motion_known: bool,
     ///Actual Base+440, distinct from the saved fast-presentation position.
     pub home_position: WorldVector,
     ///Registered target+4a8, distinct from actual linked parent+498.
@@ -134,6 +138,7 @@ impl Knife {
             dead: false,
             visible: true,
             position: ZERO,
+            source_motion_known: true,
             home_position: ZERO,
             homing_target: None,
             homing_target_known: true, //441F35 before any 447110 registration.
