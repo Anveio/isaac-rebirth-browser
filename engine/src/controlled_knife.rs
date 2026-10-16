@@ -11,6 +11,10 @@ use crate::{
 
 /// True requests the real grid receiver followed by Base447190. The caller
 /// must keep those effects in that order; a fast callback only predicts448.
+#[expect(
+    clippy::too_many_arguments,
+    reason = "each argument is a separate in473590 source input: parent, grid, game counter, manager countable total and the 473615 homing step"
+)]
 pub(crate) fn advance(
     knife: &mut Knife,
     phase: Phase,

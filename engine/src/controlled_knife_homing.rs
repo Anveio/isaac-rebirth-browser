@@ -16,7 +16,10 @@ const DISTANCE_SQUARED: f32 = 22_500.0;
 /// The actual actor flag/registered slot selects the source branch.
 pub(crate) enum Step {
     Disabled,
-    Retained { actor: ActorRef, position: WorldVector },
+    Retained {
+        actor: ActorRef,
+        position: WorldVector,
+    },
     Acquire(Option<ActorRef>),
 }
 
@@ -40,17 +43,28 @@ fn partition_members(state: &State) -> Option<Vec<(ActorRef, Bounds)>> {
                 }
                 //Only these source owners currently prove actual unit478/47C.
                 //Do not borrow visual/sprite scale or a family fallback.
-                if !matches!(npc.kind, 14 | 18 | 217) || npc.variant != 0
-                    || npc.subtype != 0 || npc.boss || npc.champion.is_some()
-                    || !npc.position.is_finite() || !npc.collision_radius.is_finite()
-                    || npc.collision_radius < 0.0 {
+                if !matches!(npc.kind, 14 | 18 | 217)
+                    || npc.variant != 0
+                    || npc.subtype != 0
+                    || npc.boss
+                    || npc.champion.is_some()
+                    || !npc.position.is_finite()
+                    || !npc.collision_radius.is_finite()
+                    || npc.collision_radius < 0.0
+                {
                     return None;
                 }
-                members.push((actor, Bounds {
-                    id: 0,
-                    position: npc.position,
-                    half_extents: WorldVector { x: npc.collision_radius, y: npc.collision_radius },
-                }));
+                members.push((
+                    actor,
+                    Bounds {
+                        id: 0,
+                        position: npc.position,
+                        half_extents: WorldVector {
+                            x: npc.collision_radius,
+                            y: npc.collision_radius,
+                        },
+                    },
+                ));
             }
             //454B53 inserts actual type4 into this same mask8 partition.
             //Its source AABB owner is separate; omitting it changes cap40/order.
@@ -81,7 +95,10 @@ pub(crate) fn prepare(state: &State, knife: &Knife) -> Result<Option<Step>, Stri
             return Err("controlled Knife target position is nonfinite".into());
         }
         //Retained steering does not rerun acquisition eligibility/HP rules.
-        return Ok(Some(Step::Retained { actor, position: npc.position }));
+        return Ok(Some(Step::Retained {
+            actor,
+            position: npc.position,
+        }));
     }
     let Some(snapshot) = state.knife_query_partition.as_ref() else {
         return Ok(None);
@@ -99,8 +116,10 @@ pub(crate) fn prepare(state: &State, knife: &Knife) -> Result<Option<Step>, Stri
         let Some(npc) = state.room.npcs.iter().find(|npc| npc.id == actor.id) else {
             return Ok(None);
         };
-        if !npc.position.is_finite() || !npc.collision_radius.is_finite()
-            || npc.collision_radius < 0.0 {
+        if !npc.position.is_finite()
+            || !npc.collision_radius.is_finite()
+            || npc.collision_radius < 0.0
+        {
             return Err("controlled Knife query current circle is invalid".into());
         }
         let delta = WorldVector {
@@ -151,16 +170,20 @@ pub(crate) fn apply(knife: &mut Knife, step: Step) -> Result<(), String> {
             }
         }
         Step::Acquire(target) => {
-            if knife.attack_flags.0 & 4 == 0 || !knife.homing_target_known
-                || knife.homing_target.is_some() {
+            if knife.attack_flags.0 & 4 == 0
+                || !knife.homing_target_known
+                || knife.homing_target.is_some()
+            {
                 return Err("controlled Knife acquisition slot changed after preflight".into());
             }
             //474C98→447110. A fresh acquisition does not steer this call.
             knife.set_homing_target(target);
         }
         Step::Retained { actor, position } => {
-            if knife.attack_flags.0 & 4 == 0 || !knife.homing_target_known
-                || knife.homing_target != Some(actor) {
+            if knife.attack_flags.0 & 4 == 0
+                || !knife.homing_target_known
+                || knife.homing_target != Some(actor)
+            {
                 return Err("controlled Knife retained target changed after preflight".into());
             }
             let away = WorldVector {
@@ -185,19 +208,33 @@ pub(crate) fn apply(knife: &mut Knife, step: Step) -> Result<(), String> {
 ///The canonical NPC purge is the existing448040 owner, as for Tear4A8.
 ///Do not clear on dead/Remove before actual registered-slot retirement.
 pub(crate) fn unlink_removed_targets(state: &mut State) {
-    let retired: Vec<_> = state.room.npcs.iter().filter(|npc| npc.removed)
-        .map(|npc| ActorRef { kind: ActorKind::Npc, id: npc.id }).collect();
+    let retired: Vec<_> = state
+        .room
+        .npcs
+        .iter()
+        .filter(|npc| npc.removed)
+        .map(|npc| ActorRef {
+            kind: ActorKind::Npc,
+            id: npc.id,
+        })
+        .collect();
     for knife in &mut state.knives {
         if knife.homing_target_known
-            && knife.homing_target.is_some_and(|target| retired.contains(&target)) {
+            && knife
+                .homing_target
+                .is_some_and(|target| retired.contains(&target))
+        {
             knife.set_homing_target(None);
         }
     }
     //Current removed bodies will disappear from the canonical store below.
     //A later query cannot reconstruct stale bucket pointer membership from Vec.
     //Keep this dependent owner unknown until the next real4545D0 rebuild.
-    if state.knife_query_partition.as_ref().is_some_and(|snapshot|
-        retired.iter().any(|&actor| snapshot.contains(actor))) {
+    if state
+        .knife_query_partition
+        .as_ref()
+        .is_some_and(|snapshot| retired.iter().any(|&actor| snapshot.contains(actor)))
+    {
         state.knife_query_partition = None;
     }
 }

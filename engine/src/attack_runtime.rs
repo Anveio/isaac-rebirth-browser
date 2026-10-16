@@ -902,7 +902,9 @@ pub(crate) fn advance_actor(
                 record_frontier(state, "controlledKnifeChildChainHistory");
                 return Ok(());
             };
-            let Some(homing) = crate::controlled_knife_homing::prepare(state, &state.knives[index])? else {
+            let Some(homing) =
+                crate::controlled_knife_homing::prepare(state, &state.knives[index])?
+            else {
                 record_frontier(state, "controlledKnifeHomingSourceInputs");
                 return Ok(());
             };
@@ -1099,7 +1101,10 @@ fn clear_knife_links(state: &mut State, retired: &[ActorRef]) {
         }
     }
     for knife in &mut state.knives {
-        if retired.contains(&ActorRef { kind: ActorKind::Knife, id: knife.id }) {
+        if retired.contains(&ActorRef {
+            kind: ActorKind::Knife,
+            id: knife.id,
+        }) {
             knife.set_homing_target(None);
         }
         if retired.contains(

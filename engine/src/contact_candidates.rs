@@ -101,7 +101,11 @@ pub(crate) struct QuerySnapshot {
 impl QuerySnapshot {
     ///454110 constructor owns an empty manager118 before any rebuild.
     pub(crate) fn empty() -> Self {
-        Self { game_counter: 0, actors: Vec::new(), buckets: vec![Vec::new(); 135] }
+        Self {
+            game_counter: 0,
+            actors: Vec::new(),
+            buckets: vec![Vec::new(); 135],
+        }
     }
 
     pub(crate) fn rebuild(
@@ -119,21 +123,34 @@ impl QuerySnapshot {
             //The supported snapshot must retain source signed CVTT/flatten
             //semantics; extreme legacy coordinates are unknown, not a Rust
             //saturating-cast or checked-arithmetic empty-bucket substitute.
-            for (position, half) in [(bounds.position.x, bounds.half_extents.x),
-                                      (bounds.position.y, bounds.half_extents.y)] {
+            for (position, half) in [
+                (bounds.position.x, bounds.half_extents.x),
+                (bounds.position.y, bounds.half_extents.y),
+            ] {
                 for value in [position - half, position + half] {
                     let q = value / 80.0;
                     if !q.is_finite() || !(-2147483648.0..2147483648.0).contains(&q) {
-                        return Err("query rebuild signed cell owner is outside supported bounds".into());
+                        return Err(
+                            "query rebuild signed cell owner is outside supported bounds".into(),
+                        );
                     }
                 }
             }
             let min_x = ((bounds.position.x - bounds.half_extents.x) / 80.0) as i32;
             let max_x = ((bounds.position.x + bounds.half_extents.x) / 80.0) as i32;
-            for row in [((bounds.position.y - bounds.half_extents.y) / 80.0) as i32,
-                        ((bounds.position.y + bounds.half_extents.y) / 80.0) as i32] {
-                if row.checked_mul(15).and_then(|base| base.checked_add(min_x)).is_none()
-                    || row.checked_mul(15).and_then(|base| base.checked_add(max_x)).is_none() {
+            for row in [
+                ((bounds.position.y - bounds.half_extents.y) / 80.0) as i32,
+                ((bounds.position.y + bounds.half_extents.y) / 80.0) as i32,
+            ] {
+                if row
+                    .checked_mul(15)
+                    .and_then(|base| base.checked_add(min_x))
+                    .is_none()
+                    || row
+                        .checked_mul(15)
+                        .and_then(|base| base.checked_add(max_x))
+                        .is_none()
+                {
                     return Err("query rebuild flattened index would overflow".into());
                 }
             }
@@ -171,18 +188,34 @@ impl QuerySnapshot {
         let min_y = convert(position.y - radius)?;
         let max_y = convert(position.y + radius)?;
         if max_x.checked_sub(min_x).is_none_or(|n| n > 135)
-            || max_y.checked_sub(min_y).is_none_or(|n| n > 135) {
+            || max_y.checked_sub(min_y).is_none_or(|n| n > 135)
+        {
             return Err("query source extent exceeds the admitted partition".into());
         }
-        if self.buckets.len() != 135 || self.actors.len() > u32::MAX as usize
-            || self.actors.iter().enumerate().any(|(i, a)| self.actors[..i].contains(a))
-            || self.buckets.iter().any(|b| b.len() > 40
-                || b.iter().any(|&key| key as usize >= self.actors.len())) {
+        if self.buckets.len() != 135
+            || self.actors.len() > u32::MAX as usize
+            || self
+                .actors
+                .iter()
+                .enumerate()
+                .any(|(i, a)| self.actors[..i].contains(a))
+            || self
+                .buckets
+                .iter()
+                .any(|b| b.len() > 40 || b.iter().any(|&key| key as usize >= self.actors.len()))
+        {
             return Err("query snapshot restored membership is invalid".into());
         }
         for row in [min_y, max_y] {
-            if row.checked_mul(15).and_then(|base| base.checked_add(min_x)).is_none()
-                || row.checked_mul(15).and_then(|base| base.checked_add(max_x)).is_none() {
+            if row
+                .checked_mul(15)
+                .and_then(|base| base.checked_add(min_x))
+                .is_none()
+                || row
+                    .checked_mul(15)
+                    .and_then(|base| base.checked_add(max_x))
+                    .is_none()
+            {
                 return Err("query flattened signed index would overflow".into());
             }
         }
@@ -190,9 +223,13 @@ impl QuerySnapshot {
         let mut result = Vec::new();
         for row in min_y..=max_y {
             for column in min_x..=max_x {
-                let index = row.checked_mul(15).and_then(|base| base.checked_add(column));
-                if let Some(bucket) = index.and_then(|i| usize::try_from(i).ok())
-                    .and_then(|i| self.buckets.get(i)) {
+                let index = row
+                    .checked_mul(15)
+                    .and_then(|base| base.checked_add(column));
+                if let Some(bucket) = index
+                    .and_then(|i| usize::try_from(i).ok())
+                    .and_then(|i| self.buckets.get(i))
+                {
                     for &key in bucket {
                         let key = key as usize;
                         if !seen[key] {

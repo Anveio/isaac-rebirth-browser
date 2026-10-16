@@ -654,20 +654,43 @@ fn admit_child(
     //Rare scaled50/60 and trinket350 retain their independent Init owners.
     //Pocket70/300 now shares the room/reentry/drop resolver; every caller
     //retains its actual seed, scatter velocity and scheduler admission order.
-    if birth.sprite_scale_multiplier.is_some() || !matches!(birth.variant, 10 | 20 | 30 | 40 | 70 | 300) {
+    if birth.sprite_scale_multiplier.is_some()
+        || !matches!(birth.variant, 10 | 20 | 30 | 40 | 70 | 300)
+    {
         return Ok(());
     }
     let id = *next_pickup;
     let mut pickup = if matches!(birth.variant, 70 | 300) {
-        let Some(pickup) = Pickup::from_pocket_parts(id, birth.variant, 0, birth.spawn_seed,
-            birth.position, true, pocket_inputs)? else { return Ok(()) };
+        let Some(pickup) = Pickup::from_pocket_parts(
+            id,
+            birth.variant,
+            0,
+            birth.spawn_seed,
+            birth.position,
+            true,
+            pocket_inputs,
+        )?
+        else {
+            return Ok(());
+        };
         pickup
     } else {
         let Some(subtype) = crate::pickups::regular_subtype_with_inputs(
-            birth.variant, 0, birth.spawn_seed, regular_inputs,
-        )? else { return Ok(()) };
-        let mut pickup = Pickup::spawn(id, birth.variant,
-            crate::pickups::definition_subtype(birth.variant, subtype), birth.position, true)?;
+            birth.variant,
+            0,
+            birth.spawn_seed,
+            regular_inputs,
+        )?
+        else {
+            return Ok(());
+        };
+        let mut pickup = Pickup::spawn(
+            id,
+            birth.variant,
+            crate::pickups::definition_subtype(birth.variant, subtype),
+            birth.position,
+            true,
+        )?;
         pickup.subtype = subtype;
         pickup.initialize_spawn_seed(birth.spawn_seed)?;
         pickup
