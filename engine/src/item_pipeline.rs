@@ -750,6 +750,7 @@ pub(crate) struct CachedScalars {
 pub(crate) struct CacheResolution {
     pub(crate) values: CachedScalars,
     pub(crate) completed: CacheMask,
+    pub(crate) reached_completed: CacheMask,
 }
 
 impl CacheResolution {
@@ -785,40 +786,90 @@ impl KnifeCacheReadRole {
     }
 }
 
-///ShotSpeed4 owns one nonzero143 base operator plus its own neutral reads.
-///The full511F68..51212E CFG never queries/loads4/152/169. Their presence
-///therefore composes here without granting another cache, grant or caller.
-struct ShotSpeedStage;
+///511F68..512126: read actual operands lazily from canonical query history.
+///The complete raw arithmetic is independent of grant, getter and controller.
+#[derive(Clone, Copy)]
+struct ShotSpeedReadPlan {
+    base: f32,
+    raw_contributions: [i32; 13],
+    source_d38: i32,
+    have_five: bool,
+}
 
-impl ShotSpeedStage {
-    fn admits(
+impl ShotSpeedReadPlan {
+    fn read(
         inputs: ItemInputs<'_>,
-        source_player_type: Option<u32>,
-        source_entity: Option<crate::PlayerEntitySource>,
-        source_minimum: Option<bool>,
-    ) -> bool {
-        //The former scalar capability is retained only as a whole for old
-        //neutral/coupled contexts. It supplies no newly combined neutral owner.
-        let legacy_neutral = inputs.admits_scalar_stage(CacheStage::ShotSpeed, &[4, 143]);
-        source_player_type == Some(0)
-            && source_entity.is_some_and(|entity| entity.entity_type == 1 && entity.variant == 0)
-            && source_minimum == Some(false)
-            && inputs.owner.shot_speed_inputs.is_some()
-            && inputs.admits_scalar_context()
-            && inputs
-                .owner
-                .owned_counts
-                .iter()
-                .enumerate()
-                .all(|(id, &count)| {
-                    count == 0
-                        || (count > 0
-                            && (id == 143 //Actual raw nonzero base operator.
-                                || matches!(id, 4 | 152 | 169) //Source-neutral here only.
-                                || legacy_neutral))
-                })
+        queries: crate::item_queries::AppearanceQueries<'_>,
+        source_bfc: Option<u32>,
+        source: CacheSourceInputs,
+    ) -> Option<Self> {
+        //The caller passes actual Player+BFC, independently of Entity+14.
+        if source_bfc != Some(0)
+            || !source.entity.is_some_and(|entity| entity.entity_type == 1 && entity.variant == 0)
+        {
+            return None;
+        }
+        //Raw143 nonzero skips the actual TEMP143 count query entirely.
+        let base = if queries.raw_count(143)? != 0 || queries.temporary_count(143)? != 0 {
+            1.2_f32
+        } else {
+            1.0_f32
+        };
+        //First-read source order; the wrapping sum is resolved below.
+        let raw_contributions = [
+            queries.raw_count(165)?, queries.raw_count(183)?,
+            queries.raw_count(339)?, queries.raw_count(341)?,
+            queries.raw_count(194)?, queries.raw_count(342)?,
+            queries.raw_count(176)?, queries.raw_count(182)?,
+            queries.raw_count(213)?, queries.raw_count(310)?,
+            queries.raw_count(255)?, queries.raw_count(336)?,
+            queries.raw_count(331)?,
+        ];
+        let source_d38 = inputs.owner.shot_speed_inputs?.source_d38;
+        //The supported normal BFC0 path next queries actual trinket27.
+        //Its positive effect remains pending; other held IDs are not scanned.
+        if queries.has_trinket(27)? {
+            return None;
+        }
+        //5090C0 positive skips514B9F's distinct TEMP record-presence query.
+        let have_five = queries.have(5)? || queries.temporary_present(5)?;
+        //Normal variant0 skips Config9C entirely for the actual Game key0.
+        if source.challenge_id != 0 && source.shot_speed_minimum != Some(false) {
+            return None;
+        }
+        Some(Self { base, raw_contributions, source_d38, have_five })
+    }
+
+    fn resolve(self) -> f32 {
+        let [count165, count183, count339, count341, count194, count342, count176,
+            count182, count213, count310, count255, count336, count331] = self.raw_contributions;
+        let mut value = count165 as f32 * 0.23_f32;
+        let sum = count183.wrapping_add(count339).wrapping_add(count341)
+            .wrapping_add(count194).wrapping_sub(count342);
+        value += self.base;
+        value += count176 as f32 * 0.16_f32;
+        value += sum as f32 * 0.16_f32;
+        value -= count182 as f32 * 0.25_f32;
+        value -= count213 as f32 * 0.15_f32;
+        value -= count310 as f32 * 0.5_f32;
+        value += count255 as f32 * 0.2_f32;
+        value -= count336 as f32 * 0.4_f32;
+        value -= count331 as f32 * 0.3_f32;
+        value += self.source_d38 as f32 * 0.2_f32;
+        if self.have_five { value *= 1.6_f32; }
+        value.max(0.6_f32)
     }
 }
+
+///Transient actual source context, never an owner synthesized from inventory.
+#[derive(Clone, Copy)]
+pub(crate) struct CacheSourceInputs {
+    pub(crate) entity: Option<crate::PlayerEntitySource>,
+    pub(crate) challenge_id: u32,
+    pub(crate) damage_maximum: Option<bool>,
+    pub(crate) shot_speed_minimum: Option<bool>,
+}
+
 
 ///519FC0's selected normal Tear caller:152 owns the alternating-eye
 ///branch;169 owns the later current-P override after the eye RNG draw.
@@ -1006,21 +1057,6 @@ enum DamageOperator {
 }
 
 impl DamageOperator {
-    ///Only this callback's implemented producers, including their inactive
-    ///presence reads. New effects extend their operator, not a pair table.
-    fn reads_owned(self, id: usize) -> bool {
-        match self {
-            Self::BaseTier { .. } | Self::SharedFourOrTwelve { .. } => matches!(id, 4 | 12),
-            Self::Polyphemus { mode } => {
-                id == 169
-                    || (!matches!(mode, PolyphemusDamageMode::Disabled) && matches!(id, 2 | 153))
-            }
-            Self::Technology2 { .. } => id == 152,
-            Self::SoyMilk { .. } => id == 330,
-            Self::PersistentAdditive { .. } | Self::MinimumBound => false,
-        }
-    }
-
     fn apply(self, mut damage: f32) -> f32 {
         match self {
             Self::BaseTier {
@@ -1083,7 +1119,6 @@ impl DamageOperator {
 ///No item pair or other callback's permission can supply a missing read owner.
 struct DamagePlan {
     operators: [DamageOperator; 8],
-    reads_admitted: bool,
 }
 
 impl DamagePlan {
@@ -1118,35 +1153,99 @@ impl DamagePlan {
             },
             DamageOperator::MinimumBound,
         ];
-        //514F40/515670 owns the permanent2/153 presence diversion inside
-        //this operator. TEMP2 record presence is a different source query;
-        //the actual no-TEMP context below still excludes every such record.
-        //Preserve existing neutral/coupled-owner capabilities exactly. This
-        //compatibility path does not compose unclosed neutral histories with
-        //new operators. Item1 is independently Damage-neutral in all selected
-        //operator traces; other new neutrals still need their own source proof.
-        let legacy_neutral = inputs.owned_count(12) == 0
-            && inputs.owned_count(152) == 0
-            && inputs.owned_count(169) == 0
-            && inputs.admits_scalar_stage(CacheStage::Damage, DamageStage::EFFECT_ITEMS);
-        let reads_admitted = inputs.owner.damage_inputs.is_some()
-            && inputs.admits_scalar_context()
-            && inputs
-                .owner
-                .owned_counts
-                .iter()
-                .enumerate()
-                .all(|(id, &count)| {
-                    count == 0
-                        || (count > 0
-                            && (id == 1
-                                || operators.iter().any(|operator| operator.reads_owned(id))
-                                || legacy_neutral))
-                });
-        Self {
-            operators,
-            reads_admitted,
+        Self { operators }
+    }
+
+    // Add to the existing DamagePlan impl. Its original new()/partial formula
+    // remains literal; requested1 completes exclusively through this read method.
+    fn read_reached(
+        inputs: ItemInputs<'_>,
+        queries: crate::item_queries::AppearanceQueries<'_>,
+        source_bfc: Option<u32>,
+        source: CacheSourceInputs,
+    ) -> Option<Self> {
+        //The caller passes actual Player+BFC, not the Entity kind/variant.
+        if source_bfc != Some(0)
+            || !source.entity.is_some_and(|entity| entity.entity_type == 1 && entity.variant == 0)
+        {
+            return None;
         }
+        //5134C9 starts the callback with this independent record-presence query.
+        //Its positive pre-tier operator is not implemented by this small cut.
+        if queries.temporary_present(34)? { return None; }
+        for id in [7, 90, 216, 109] {
+            if queries.have(id)? { return None; }
+        }
+        //Have109 false bypasses the coins operand. A present122 record has a
+        //separate squared-count operator; its absence is queried, not assumed.
+        if queries.temporary_present(122)? { return None; }
+
+        //Only actually loaded E1C raw terms constrain this callback. Unknown
+        //unqueried inventory and unrelated TEMP45 do not enter these guards.
+        for id in [50, 51, 70, 345, 79, 259] {
+            if queries.raw_count(id)? != 0 { return None; }
+        }
+        if queries.temporary_count(259)? != 0 { return None; }
+        if queries.raw_count(80)? != 0 { return None; }
+        let signed_four = queries.raw_count(4)?;
+        if queries.raw_count(197)? != 0 { return None; }
+        let signed_twelve = queries.raw_count(12)?.wrapping_add(queries.temporary_count(12)?);
+        for id in [101, 121] {
+            if queries.raw_count(id)? != 0 { return None; }
+        }
+        if queries.temporary_count(121)? != 0 { return None; }
+        for id in [138, 193, 189, 201] {
+            if queries.raw_count(id)? != 0 { return None; }
+        }
+        if queries.temporary_count(201)? != 0 || queries.raw_count(237)? != 0
+            || queries.temporary_count(237)? != 0 {
+            return None;
+        }
+        for id in [206, 230, 307, 208, 331, 165] {
+            if queries.raw_count(id)? != 0 { return None; }
+        }
+        if queries.have(120)? || queries.temporary_present(120)? { return None; }
+        if queries.temporary_present(83)? { return None; }
+        if queries.temporary_trinket_present(58)? { return None; }
+        if queries.temporary_present(126)? { return None; }
+        if queries.temporary_trinket_present(40)? { return None; }
+
+        //Positive169 alone reaches the2→153→TEMP2 short-circuit diversion.
+        let mode = if !queries.have(169)? {
+            PolyphemusDamageMode::Disabled
+        } else if queries.have(2)? || queries.have(153)? || queries.temporary_present(2)? {
+            PolyphemusDamageMode::AddFive
+        } else {
+            PolyphemusDamageMode::AddFourThenDouble
+        };
+        let source_d30 = inputs.owner.damage_inputs?.source_d30;
+        if queries.has_trinket(35)? { return None; }
+        if queries.have(69)? { return None; }
+        if queries.have(261)? || queries.temporary_present(261)? { return None; }
+        if queries.have(182)? { return None; }
+        let technology2 = queries.have(152)?;
+        //These false predicates skip their independent BEC and retainedC08 reads.
+        if queries.have(157)? || queries.have(149)? { return None; }
+        let shared_four_or_twelve = queries.have(4)?
+            || queries.have(12)? || queries.temporary_present(12)?;
+        //The earlier TEMP34 query was false and no records mutate in511F10.
+        if queries.have(310)? { return None; }
+        let soy_milk = queries.have(330)?;
+        if source.challenge_id != 0 && source.damage_maximum != Some(false) {
+            return None;
+        }
+        Some(Self {
+            operators: [
+                DamageOperator::BaseTier { signed_four, signed_twelve },
+                DamageOperator::Polyphemus { mode },
+                DamageOperator::PersistentAdditive { source_d30: Some(source_d30) },
+                DamageOperator::MinimumBound,
+                DamageOperator::Technology2 { enabled: technology2 },
+                DamageOperator::SharedFourOrTwelve { enabled: shared_four_or_twelve },
+                DamageOperator::SoyMilk { enabled: soy_milk },
+                DamageOperator::MinimumBound,
+            ],
+        })
     }
 
     fn resolve(self) -> f32 {
@@ -1165,10 +1264,6 @@ impl DamageStage {
     const EFFECT_ITEMS: &'static [u32] = &[4, 12, 152, 169, 330];
     const NEUTRAL_ITEMS: &'static [u32] = &[1, 6, 114, 118, 329];
 
-    fn admits(inputs: ItemInputs<'_>, source_player_type: Option<u32>) -> bool {
-        source_player_type == Some(0) && DamagePlan::new(inputs).reads_admitted
-    }
-
     fn resolve(inputs: ItemInputs<'_>) -> f32 {
         DamagePlan::new(inputs).resolve()
     }
@@ -1183,16 +1278,25 @@ pub(crate) fn resolve_scalars(
     source_player_type: Option<u32>,
     prior: CachedScalars,
     requested: CacheMask,
-    source_entity: Option<crate::PlayerEntitySource>,
-    source_shot_speed_minimum: Option<bool>,
+    queries: crate::item_queries::AppearanceQueries<'_>,
+    source: CacheSourceInputs,
 ) -> Result<CacheResolution, String> {
     let mut values = prior;
     let mut completed = 0;
+    let mut reached_completed = 0;
     for stage in CacheStage::ORDER {
         let flag = stage.flag();
         if requested.0 & flag == 0 {
             continue;
         }
+        let shot_speed_plan = if stage == CacheStage::ShotSpeed {
+            ShotSpeedReadPlan::read(inputs, queries, source_player_type, source)
+        } else { None };
+        let damage_plan = if stage == CacheStage::Damage {
+            DamagePlan::read_reached(inputs, queries, source_player_type, source)
+        } else { None };
+        let shot_speed_admitted = shot_speed_plan.is_some();
+        let damage_admitted = damage_plan.is_some();
         let supported: &[u32] = match stage {
             CacheStage::FireDelay => {
                 values.max_fire_delay = FireDelayStage::resolve(inputs, primary);
@@ -1214,10 +1318,13 @@ pub(crate) fn resolve_scalars(
                     values.stats.shot_speed += auxiliary.source_d38 as f32 * 0.2_f32;
                 }
                 values.stats.shot_speed = values.stats.shot_speed.max(0.6_f32);
+                if let Some(plan) = shot_speed_plan {
+                    values.stats.shot_speed = plan.resolve();
+                }
                 &[4, 143]
             }
             CacheStage::Damage => {
-                values.stats.damage = DamageStage::resolve(inputs);
+                values.stats.damage = damage_plan.map_or_else(|| DamageStage::resolve(inputs), DamagePlan::resolve);
                 DamageStage::EFFECT_ITEMS
             }
             CacheStage::Range => {
@@ -1268,7 +1375,7 @@ pub(crate) fn resolve_scalars(
         if !unadmitted_number_one
             && match stage {
                 CacheStage::FireDelay => FireDelayStage::admits(inputs, source_player_type),
-                CacheStage::Damage => DamageStage::admits(inputs, source_player_type),
+                CacheStage::Damage => damage_admitted,
                 CacheStage::Range => {
                     source_player_type == Some(0)
                         && inputs.owner.range_inputs.is_some()
@@ -1281,22 +1388,21 @@ pub(crate) fn resolve_scalars(
                         )
                         && inputs.admits_scalar_stage(stage, supported)
                 }
-                CacheStage::ShotSpeed => ShotSpeedStage::admits(
-                    inputs,
-                    source_player_type,
-                    source_entity,
-                    source_shot_speed_minimum,
-                ),
+                CacheStage::ShotSpeed => shot_speed_admitted,
                 _ => source_player_type == Some(0) && inputs.admits_scalar_stage(stage, supported),
             }
         {
             completed |= flag;
+            if matches!(stage, CacheStage::ShotSpeed | CacheStage::Damage) {
+                reached_completed |= flag;
+            }
         }
     }
     values.stats.validate()?;
     Ok(CacheResolution {
         values,
         completed: CacheMask(completed),
+        reached_completed: CacheMask(reached_completed),
     })
 }
 

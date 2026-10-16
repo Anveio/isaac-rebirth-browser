@@ -454,6 +454,33 @@ impl<'a> AppearanceQueries<'a> {
         self.owner.query_history.as_ref()
     }
 
+    // Insert in the existing AppearanceQueries impl. No new inventory or history.
+
+    ///Actual signed E1C load, distinct from source Have(ID)'s positive test.
+    pub(crate) fn raw_count(self, id: usize) -> Option<i32> {
+        self.history()?.permanent_counts.then_some(())?;
+        self.owner.owned_counts.get(id).copied()
+    }
+
+    ///5E3ED0 returns a signed count, or zero for a known absent record.
+    ///Presence remains a separate query: a stored zero count is still present.
+    pub(crate) fn temporary_count(self, id: u32) -> Option<i32> {
+        if !self.temporary_present(id)? {
+            return Some(0);
+        }
+        self.owner.temporary_collectibles.iter()
+            .find(|record| record.item_id == id)
+            .map(|record| record.count)
+    }
+
+    ///5E3E50 searches CF8 kind2 independently of collectible kinds1/3/4.
+    ///The current canonical vector has no implemented kind2 insertion. Fresh
+    ///absence survives only while this exact typed key remains source-owned;
+    ///a reached foreign kind2 writer makes this query unavailable in history.
+    pub(crate) fn temporary_trinket_present(self, id: u32) -> Option<bool> {
+        self.history()?.temporary_key_known(2, id).then_some(false)
+    }
+
     ///5090C0 queries signed E1C+4*ID.327/328 first call actualHaveTrinket21;
     ///known absence bypasses its source-clock branch. Positive/unknown
     ///Paper ownership still leaves that reached query unavailable.
