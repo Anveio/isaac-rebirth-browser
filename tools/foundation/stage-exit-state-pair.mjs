@@ -11,6 +11,7 @@ import { createHash } from 'node:crypto';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { manifestPath, readJsonEvidence } from './browser-evidence.mjs';
+import { compareWallAssemblies, originalWallAssemblies } from './wall-quads.mjs';
 
 const option = name => {
   const at = process.argv.indexOf(name);
@@ -74,6 +75,19 @@ for (const label of labels) {
   check(label, 'pedestals', pedestals, actualPedestals);
 }
 check('next-stage', 'arrivedStage', 2, finalStage);
+// With `--gl-trace`, each room the port entered (the shared route, the boss
+// room on both visits and Basement II) must equal an original wall cache
+// draw, in entry order (wall-quads.mjs).
+if (native.graphicsTrace) {
+  const start = browser.frames.findIndex(frame => frame.label === 'gameplay-start');
+  const rooms = [];
+  for (const frame of browser.frames.slice(start)) {
+    const key = `${frame.state.stage}:${frame.state.currentRoom}`;
+    if (rooms.at(-1)?.key !== key)
+      rooms.push({ key, label: frame.label, room: frame.state.currentRoom, appearance: frame.state.room.appearance });
+  }
+  checks.push(...compareWallAssemblies(originalWallAssemblies(native.graphicsTrace.path), rooms));
+}
 // The original logs each Level::Init seed; the last one is Basement II's.
 check('next-stage', 'stageSeed', native.observedState.stageSeed, frames.get('next-stage').state.stageSeed);
 const report = { schema: 1, status: checks.every(item => item.status === 'pass') ? 'pass' : 'fail',
