@@ -282,15 +282,124 @@ impl FlagsReadPlan {
     }
 }
 
-/// Requested32 follows the complete reached-query source plan.
-/// Requested64 retains its separately owned selected paths.
-/// These cache writes do not admit controller/contact effects.
+///Complete513355..512160 Color64 callback. CCC and CA0 have independent
+///source-ordered first-match chains; no later unread predicate is required.
+#[derive(Clone, Copy)]
+struct ColorReadPlan {
+    color_ccc: AttackColor,
+    color_ca0: AttackColor,
+}
+
+impl ColorReadPlan {
+    fn read(appearance: AppearanceQueries<'_>) -> Option<Self> {
+        Some(Self {
+            color_ccc: Self::read_ccc(appearance)?,
+            color_ca0: Self::read_ca0(appearance)?,
+        })
+    }
+
+    fn read_ccc(appearance: AppearanceQueries<'_>) -> Option<AttackColor> {
+        Some(if appearance.have(115)? || appearance.temporary_present(115)? {
+            Self::tint([1.5, 2.0, 2.0, 0.5])
+        } else if appearance.have(103)? || appearance.have(305)? {
+            Self::byte_offsets([0.4, 0.97, 0.5, 1.0], [0, 150, 0])
+        } else if appearance.have(104)? {
+            Self::byte_offsets([1.0, 0.4, 0.13, 1.0], [30, 0, 0])
+        } else if appearance.have(89)? {
+            Self::byte_offsets([3.0, 3.0, 3.0, 1.0], [150, 150, 150])
+        } else if appearance.have(69)? {
+            Self::byte_offsets([0.33, 0.18, 0.18, 1.0], [66, 40, 40])
+        } else if appearance.have(6)? || appearance.temporary_present(6)? {
+            Self::byte_offsets([0.2, 1.0, 0.0, 1.0], [255, 255, 0])
+        } else if appearance.have(3)?
+            || appearance.temporary_present(3)?
+            || appearance.temporary_present(192)?
+            || appearance.homing_variant()?
+        {
+            Self::byte_offsets([0.4, 0.15, 0.38, 1.0], [90, 0, 180])
+        } else if appearance.have(200)? {
+            Self::byte_offsets([0.4, 0.0, 0.0, 1.0], [180, 0, 180])
+        } else if appearance.have(132)? {
+            Self::tint([0.1, 0.1, 0.1, 1.0])
+        } else {
+            AttackColor::WHITE
+        })
+    }
+
+    fn read_ca0(appearance: AppearanceQueries<'_>) -> Option<AttackColor> {
+        Some(if appearance.have(149)? && appearance.primary()? != PrimaryWeaponC08::DrFetus {
+            Self::tint([0.5, 0.9, 0.4, 1.0])
+        } else if appearance.have(182)? {
+            Self::tint([1.5, 2.0, 2.0, 1.0])
+        } else if appearance.have(115)?
+            || appearance.temporary_present(115)?
+            || appearance.have(159)?
+            || appearance.have(185)?
+        {
+            Self::tint([1.5, 2.0, 2.0, 0.5])
+        } else if appearance.have(132)? {
+            Self::tint([0.2, 0.09, 0.065, 1.0])
+        } else if appearance.have(104)? {
+            Self::tint([0.9, 0.3, 0.08, 1.0])
+        } else if appearance.have(69)? {
+            Self::byte_offsets([0.33, 0.18, 0.18, 1.0], [66, 40, 40])
+        } else if appearance.have(6)? || appearance.temporary_present(6)? {
+            Self::byte_offsets([1.0, 1.0, 0.0, 1.0], [45, 15, 0])
+        } else if appearance.have(3)?
+            || appearance.temporary_present(3)?
+            || appearance.temporary_present(192)?
+            || appearance.homing_variant()?
+        {
+            Self::byte_offsets([0.4, 0.15, 0.38, 1.0], [71, 0, 116])
+        } else if appearance.have(310)? {
+            Self::tint([0.2, 0.2, 0.2, 1.0])
+        } else if appearance.have(221)? {
+            //42F500 copies these f32 offsets directly;42F510 is not reached.
+            AttackColor {
+                tint: [1.0, 1.0, 0.8, 1.0],
+                source_middle: [0.0; 4],
+                offsets: [0.1, 0.1, 0.1],
+            }
+        } else if appearance.have(336)? {
+            Self::tint([0.5, 0.25, 0.1, 0.9])
+        } else if appearance.have(330)? {
+            Self::tint([1.5, 2.0, 2.0, 1.0])
+        } else {
+            AttackColor::WHITE
+        })
+    }
+
+    ///42F450 establishes the middle/offset zeroes;42F480 changes tint only.
+    fn tint(tint: [f32; 4]) -> AttackColor {
+        AttackColor {
+            tint,
+            ..AttackColor::WHITE
+        }
+    }
+
+    ///42F510 converts each signed integer then multiplies by the pinned
+    ///binary32 constant668980. Preserve the three separate f32 products.
+    fn byte_offsets(tint: [f32; 4], offsets: [i32; 3]) -> AttackColor {
+        let byte_scale = 1.0_f32 / 255.0_f32;
+        AttackColor {
+            tint,
+            source_middle: [0.0; 4],
+            offsets: [
+                offsets[0] as f32 * byte_scale,
+                offsets[1] as f32 * byte_scale,
+                offsets[2] as f32 * byte_scale,
+            ],
+        }
+    }
+}
+
+///Each appearance callback follows only its reached source queries.
+///Unavailable facts leave its request pending and cached values intact.
+///These writes do not admit controller, getter or contact effects.
 pub(crate) fn resolve_appearance(
-    items: ItemInputs<'_>,
-    source_player_type: Option<u32>,
     mut prior: WeaponCache,
     requested: CacheMask,
-    appearance: crate::item_queries::AppearanceQueries<'_>,
+    appearance: AppearanceQueries<'_>,
 ) -> (WeaponCache, CacheMask) {
     let mut completed = 0;
     if requested.0 & 32 != 0 {
@@ -299,67 +408,10 @@ pub(crate) fn resolve_appearance(
             completed |= 32;
         }
     }
-    let selected = source_player_type == Some(0) && items.admits_selected_appearance();
-    let homing_flags = source_player_type == Some(0) && items.admits_homing_flags();
-    let homing_colors = source_player_type == Some(0) && items.admits_homing_colors();
-    let number_one = source_player_type == Some(0) && items.admits_number_one_appearance();
-    let soy_milk = source_player_type == Some(0) && items.admits_soy_milk_cache_context();
-    let polyphemus_flags = source_player_type == Some(0)
-        && prior.primary == PrimaryWeaponC08::RegularTears
-        && items.admits_polyphemus_flags_context();
-    let regular = source_player_type == Some(0) && prior.primary == PrimaryWeaponC08::RegularTears;
-    let piercing_flags = regular && items.admits_piercing_flags();
-    let anti_gravity_flags = regular && items.admits_anti_gravity_flags();
-    let item_flags = piercing_flags || anti_gravity_flags;
-    if source_player_type == Some(0)
-        && (selected
-            || number_one
-            || polyphemus_flags
-            || homing_flags
-            || homing_colors
-            || item_flags)
-    {
-        if requested.0 & 64 != 0 && !polyphemus_flags && (selected || number_one || homing_colors) {
-            //515997/515AB1 Have6, else5E3D70 record-presence. This leaf
-            //admits permanent6 only; the two literal ColorMods are distinct.
-            if (number_one || homing_colors) && items.number_one_present() {
-                let byte_scale = 1.0_f32 / 255.0_f32;
-                prior.color_ca0 = AttackColor {
-                    tint: [1.0, 1.0, 0.0, 1.0],
-                    source_middle: [0.0; 4],
-                    offsets: [45.0 * byte_scale, 15.0 * byte_scale, 0.0],
-                };
-                prior.color_ccc = AttackColor {
-                    tint: [0.2, 1.0, 0.0, 1.0],
-                    source_middle: [0.0; 4],
-                    offsets: [255.0 * byte_scale, 255.0 * byte_scale, 0.0],
-                };
-            } else if homing_colors && items.positive_owned_count(3) {
-                //515B41/515BD5 use the same four tint words but different
-                //42F510 offsets. Preserve the source binary32 byte scaling.
-                let byte_scale = 1.0_f32 / 255.0_f32;
-                prior.color_ca0 = AttackColor {
-                    tint: [0.4, 0.15, 0.38, 1.0],
-                    source_middle: [0.0; 4],
-                    offsets: [71.0 * byte_scale, 0.0, 116.0 * byte_scale],
-                };
-                prior.color_ccc = AttackColor {
-                    tint: [0.4, 0.15, 0.38, 1.0],
-                    source_middle: [0.0; 4],
-                    offsets: [90.0 * byte_scale, 0.0, 180.0 * byte_scale],
-                };
-            } else if soy_milk {
-                //515E76 Have330 reaches the late CA0 tint at513480.
-                //This selected context excludes higher-precedence modifiers.
-                prior.color_ca0 = AttackColor {
-                    tint: [1.5, 2.0, 2.0, 1.0],
-                    ..AttackColor::WHITE
-                };
-                prior.color_ccc = AttackColor::WHITE;
-            } else {
-                prior.color_ca0 = AttackColor::WHITE;
-                prior.color_ccc = AttackColor::WHITE;
-            }
+    if requested.0 & 64 != 0 {
+        if let Some(plan) = ColorReadPlan::read(appearance) {
+            prior.color_ccc = plan.color_ccc;
+            prior.color_ca0 = plan.color_ca0;
             completed |= 64;
         }
     }

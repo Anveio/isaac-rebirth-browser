@@ -87,15 +87,6 @@ const POLYPHEMUS_CALLER_ITEMS: &[usize] = &[4, 169];
 //introduced here; cache/getter/caller permissions remain separate.
 const CUPID_GRANT_ITEMS: &[usize] = &[1, 4, 48];
 
-//Separate literal511F10 callback32/64 footprints for permanent3.
-//The existing1/4/6 roles are independent per stage;48 stays unadmitted.
-const SPOON_BENDER_FLAGS_ITEMS: &[usize] = &[1, 3, 4, 6];
-//The same callback's permanent48 (51314D) and permanent222 (513250) reads;
-//1/4/6 stay the Spoon Bender-proven neutral reads of this callback.
-const CUPID_FLAGS_ITEMS: &[usize] = &[1, 4, 6, 48];
-const ANTI_GRAVITY_FLAGS_ITEMS: &[usize] = &[1, 4, 6, 222];
-const SPOON_BENDER_COLOR_ITEMS: &[usize] = &[1, 3, 4, 6];
-
 /// Literal511f10 dispatch order. Weapon selection/removal precedes stats;
 /// Libra304 has additional coupling before and after this sequence.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -232,31 +223,6 @@ impl<'a> ItemInputs<'a> {
         .then_some(0)
     }
 
-    ///Independent cache32/64 footprint for positive6 with selected1/4/114/118/329/304.
-    ///This never widens a controller, contact or temporary-effect frontier.
-    pub(crate) fn admits_number_one_appearance(self) -> bool {
-        self.positive_owned_count(6)
-            && self.owner.trinket_slots == [0, 0]
-            && self
-                .owner
-                .queued_id
-                .is_none_or(|id| items::definition(id).is_some_and(|c| c.kind != 2))
-            && self.owner.temporary_collectibles.is_empty()
-            && self
-                .owner
-                .owned_counts
-                .iter()
-                .enumerate()
-                .all(|(id, &count)| {
-                    count == 0 || (count > 0 && [1, 4, 6, 114, 118, 329, 304].contains(&id))
-                })
-    }
-
-    ///Literal51316D's selected Flags32 callback. No color/grant permission.
-    pub(crate) fn admits_polyphemus_flags_context(self) -> bool {
-        TearFlagsStage::admits_polyphemus(self)
-    }
-
     ///Separate50D090(kind1) readset;169 adds no modifier query or RNG here.
     pub(crate) fn admits_polyphemus_kind1_context(self) -> bool {
         self.positive_owned_count(169) && self.admits_kind1_neutral_fields()
@@ -297,64 +263,6 @@ impl<'a> ItemInputs<'a> {
 
     pub(crate) fn admits_soy_milk_kind3_getter(self) -> bool {
         self.admits_permanent_readset(330, SOY_KIND3_ITEMS)
-    }
-
-    ///5130CA resets C98;514EF8/5130EF applies permanent Have3 bit4.
-    ///TEMP/trinket, other cache and getter/controller owners stay separate.
-    pub(crate) fn admits_homing_flags(self) -> bool {
-        self.admits_permanent_readset(3, SPOON_BENDER_FLAGS_ITEMS)
-    }
-
-    ///51314D Have48 ORs bit1 (its 237/306/C08 8/336 alternates are absent
-    ///from this readset). Tear contact/piercing behavior stays separate.
-    pub(crate) fn admits_piercing_flags(self) -> bool {
-        self.admits_permanent_readset(48, CUPID_FLAGS_ITEMS)
-    }
-
-    ///513250 Have222 with regular C08 reaches515960: without316/69 it ORs
-    ///bit17. Anti-gravity tear motion stays a separate, unported owner.
-    pub(crate) fn admits_anti_gravity_flags(self) -> bool {
-        self.admits_permanent_readset(222, ANTI_GRAVITY_FLAGS_ITEMS)
-    }
-
-    ///Independent64 trace: positive6 precedes3 in both color destinations.
-    ///This capability does not borrow the32 proof or a born-actor owner.
-    pub(crate) fn admits_homing_colors(self) -> bool {
-        self.admits_permanent_readset(3, SPOON_BENDER_COLOR_ITEMS)
-    }
-
-    /// Exact per-callback cache32/64 proof: other modifier and trinket owners
-    /// remain outside this scope. Future property operators extend their own
-    /// cache reads instead of widening controller/contact admission.
-    pub(crate) fn admits_selected_appearance(self) -> bool {
-        if self.admits_knife_cache_stage(CacheStage::TearFlags)
-            && self.admits_knife_cache_stage(CacheStage::Color)
-        {
-            return true;
-        }
-        if self.admits_technology_cache_context() || self.admits_fetus_cache_context() {
-            return true;
-        }
-        if self.admits_soy_milk_cache_context() || self.admits_monstro_cache_context() {
-            return true;
-        }
-        if self.admits_epic_fetus_cache_context() {
-            return true;
-        }
-        self.owner.trinket_slots == [0, 0]
-            && self
-                .owner
-                .queued_id
-                .is_none_or(|id| items::definition(id).is_some_and(|c| c.kind != 2))
-            && self.owner.temporary_collectibles.is_empty()
-            && self
-                .owner
-                .owned_counts
-                .iter()
-                .enumerate()
-                .all(|(id, &count)| {
-                    count == 0 || (count > 0 && [1, 4, 114, 118, 329, 257, 304].contains(&id))
-                })
     }
 
     ///Actual519FC0 primary and52F370 secondary caller footprints remain distinct.
@@ -972,22 +880,6 @@ impl FireDelayReadRole {
             4 | 152 => Some(Self::Neutral),
             _ => None,
         }
-    }
-}
-
-///Only the Flags32 callback's implemented source roles.152 is neutral in
-///this callback, while169 supplies the existing51316D OR0x200 operator.
-///Neither role owns Color64, a returned getter field or a born actor body.
-struct TearFlagsStage;
-
-impl TearFlagsStage {
-    fn admits_polyphemus(inputs: ItemInputs<'_>) -> bool {
-        inputs.positive_owned_count(169)
-            && inputs.admits_stage_owned_roles(|id| match id {
-                4 | 152 => true, //Independently source-neutral Flags32 reads.
-                169 => true,     //Existing one OR0x200 operator.
-                _ => false,
-            })
     }
 }
 

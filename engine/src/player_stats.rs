@@ -145,8 +145,6 @@ pub(crate) fn evaluate_cache(state: &mut State) -> Result<(), String> {
     state.player_stats = resolved.values.stats;
     state.max_fire_delay = resolved.values.max_fire_delay;
     let (cache, appearance) = crate::weapon_plan::resolve_appearance(
-        inputs,
-        state.weapon_admission.source_player_type,
         state.weapon_cache,
         requested,
         crate::item_queries::AppearanceQueries::new(
@@ -175,7 +173,7 @@ pub(crate) fn evaluate_cache(state: &mut State) -> Result<(), String> {
         //they do not repair unknown query stores or other callbacks.
         //The exclusive Flags plan proves every reached query itself;
         //unknown facts that it did not read cannot veto this actual write.
-        history.cached_callbacks |= appearance.0 & 32;
+        history.cached_callbacks |= appearance.0 & (32 | 64);
         if history.permanent_counts && history.temporary_records
             && history.trinket_slots {
             history.cached_callbacks |= appearance.0
