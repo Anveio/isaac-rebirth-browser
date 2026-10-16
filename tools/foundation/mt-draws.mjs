@@ -6,10 +6,11 @@
 // (B bounded, U uniform, R raw u32), and walked in order. The first draw whose
 // kind differs, or whose counter differs by more than one, is the first
 // unported or misordered consumer: everything before it consumed the same
-// stream positions in the same way. Native counters are Game+ce9f4, which is
-// the port's game update count plus one inside full updates; the run loader's
-// extra native update (counter 1) is replayed by the port at count 1, hence
-// the tolerance of one. This is a diagnostic: it never changes a case status.
+// stream positions in the same way. Native counters are Game+ce9f4, which
+// equals the port's game update count (State::native_game_frame) once the
+// harness declares the boot elapsed clock; the counter tolerance of one stays
+// for draws at a full/fast boundary. This is a diagnostic: it never changes a
+// case status.
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -36,8 +37,9 @@ export function readNativeDraws(directory) {
 }
 
 const gameplay = draws => draws.filter(draw => draw.counter >= 1 && draw.counter < 0xffffffff);
-// The port's game update count in native Game+ce9f4 terms.
-const nativeCounter = count => count + 1;
+// The port's game update count in native Game+ce9f4 terms: equal, as
+// State::native_game_frame states, once the boot elapsed clock is declared.
+const nativeCounter = count => count;
 
 // `independent` ({ label, gameUpdateCount }) marks where a case's games start
 // playing their own keys (its first pairedIndependent scope): later draws are
