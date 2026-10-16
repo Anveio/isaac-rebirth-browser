@@ -97,6 +97,7 @@ pub mod npcs;
 pub mod pathfinder;
 pub mod phase;
 pub mod pickups;
+pub mod pockets;
 mod plain_npc;
 pub mod player_animation;
 pub mod player_costume118;
