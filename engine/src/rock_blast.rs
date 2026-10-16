@@ -103,7 +103,7 @@ pub fn destroy(state: &mut State, origin: WorldVector, radius: f32) -> Result<()
         .as_ref()
         .map_or(0, |descriptor| descriptor.decoration_seed);
     for index in selected {
-        if crate::doors::try_blow_open(state, index, true) {
+        if crate::doors::try_blow_open(state, index, true)? {
             continue;
         }
         let kind = state

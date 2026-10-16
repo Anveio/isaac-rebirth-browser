@@ -9,6 +9,9 @@ import type { ActorSprite, Room, RoomAppearance, RoomQuad, State } from "./engin
 
 const PLAYER = "gfx/001.000_player.anm2";
 const TEAR = "gfx/002.000_tear.anm2";
+const PARTICLE_ACTORS: Record<number, string> = {
+  27: "gfx/1000.027_wood particle.anm2", 43: "gfx/1000.043_poop explosion.anm2", 58: "gfx/1000.058_poop particle.anm2",
+};
 // Rock Init 56ed00 / Render 56bf80: an intact (state 1) rock-family grid
 // entity sets frame variant of its type's grid_rock.anm2 animation.
 // Minimap room-type icons from the jump table at 0x678748; challenge rooms
@@ -423,7 +426,7 @@ export class Renderer {
     for (const effect of state.spriteEffects) {
       // Source31f dead can coexist with31e active until a later Remove.
       if (!effect.visible || !effect.active || effect.footprint || effect.creepEffect) continue;
-      if (effect.variant === 58 || effect.variant === 43) {
+      if (effect.variant === 58 || effect.variant === 43 || effect.variant === 27) {
         const sprite = effect.sprite, controller = effect.poopEffect;
         const rotation = controller && "particle58" in controller && typeof controller.particle58 === "object"
           ? controller.particle58.flying.layerRotation : 0;
@@ -431,7 +434,7 @@ export class Renderer {
         ctx.translate((effect.presentedPosition.x + effect.renderOffset.x + sprite.offset.x) * 0.65 + 32,
           (effect.presentedPosition.y + effect.renderOffset.y + sprite.offset.y) * 0.65 - 46);
         ctx.scale(sprite.flipX ? -1 : 1, sprite.flipY ? -1 : 1);
-        this.assets.draw(ctx, effect.variant === 58 ? "gfx/1000.058_poop particle.anm2" : "gfx/1000.043_poop explosion.anm2",
+        this.assets.draw(ctx, PARTICLE_ACTORS[effect.variant],
           sprite.animation, 0, 0, sprite.frame, { layerScales: {0: [sprite.scale.x, sprite.scale.y]}, overrides: {0: {
             Rotation: rotation, RedTint: sprite.tint[0] * 255, GreenTint: sprite.tint[1] * 255,
             BlueTint: sprite.tint[2] * 255, AlphaTint: sprite.tint[3] * 255,
@@ -633,13 +636,12 @@ export class Renderer {
       // sample yet; painting them with zero offsets would draw black marks.
       if (stain.footprint) continue;
       const sprite = stain.sprite;
-      if (stain.variant === 58 || stain.variant === 43) {
+      if (stain.variant === 58 || stain.variant === 43 || stain.variant === 27) {
         ctx.save();
         ctx.translate((stain.position.x + stain.renderOffset.x + sprite.offset.x) * 0.65 + 32 - appearance.origin.x,
           (stain.position.y + stain.renderOffset.y + sprite.offset.y) * 0.65 - 46 - appearance.origin.y);
         ctx.scale(sprite.flipX ? -1 : 1, sprite.flipY ? -1 : 1);
-        const actor = stain.variant === 58 ? "gfx/1000.058_poop particle.anm2" :
-          stain.variant === 43 ? "gfx/1000.043_poop explosion.anm2" : "gfx/1000.007_blood splat.anm2";
+        const actor = PARTICLE_ACTORS[stain.variant];
         this.assets.draw(ctx, actor, sprite.animation, 0, 0, sprite.frame,
           { layerScales: {0: [sprite.scale.x, sprite.scale.y]}, overrides: { 0: {
             ...(stain.layerRotation === null ? {} : {Rotation: stain.layerRotation}),
@@ -694,6 +696,13 @@ export class Renderer {
       if (entity?.kind === 16 && entity.variant === 4 && entity.state !== 2) {
         this.assets.draw(ctx, "gfx/grid/door_17_bardoor.anm2", "Idle", 0, 0);
         this.drawnGrid.push({ index, kind: 16, animation: "Idle", frame: 0 });
+      }
+      // A cracked bedroom door (variant3) shows door_18 Idle while intact and
+      // Damaged after its first blast (state4); both clips are one frame.
+      if (entity?.kind === 16 && entity.variant === 3) {
+        const animation = entity.state === 4 ? "Damaged" : "Idle";
+        this.assets.draw(ctx, "gfx/grid/door_18_crackeddoor.anm2", animation, 0, 0);
+        this.drawnGrid.push({ index, kind: 16, animation, frame: 0 });
       }
       ctx.restore();
     }

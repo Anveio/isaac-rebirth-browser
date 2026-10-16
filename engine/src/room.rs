@@ -58,6 +58,10 @@ pub struct Room {
     /// Game update on which combat played the doors' Close animation.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub combat_shut_update: Option<u32>,
+    /// Frame of the Close clip that cracked bedroom doors (variant3) play
+    /// from every Door::Init (563b70) until its last frame.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cracked_close_frame: Option<u32>,
     pub spawns: Option<crate::room_spawns::RoomSpawns>,
     pub grid: Option<crate::grid::GridDescriptor>,
     /// The actual signed Room+e98 owner; absent until its source Init is admitted.
@@ -500,6 +504,10 @@ impl Room {
                     "Hidden"
                 } else if matches!(destination.template.room_type, 2 | 12 | 21) {
                     "KeyClosed"
+                } else if matches!(destination.template.room_type, 18 | 19) {
+                    // Cracked variant3: the main door holds its closed pose
+                    // under the door_18 overlay until bombs break it.
+                    "Closed"
                 } else {
                     "Opened"
                 }
@@ -546,6 +554,12 @@ impl Room {
                     .template
                     .room_type
                     == 21,
+                cracked: matches!(
+                    floor.descriptors[door.target_room as usize]
+                        .template
+                        .room_type,
+                    18 | 19
+                ),
                 // A freshly constructed room is uncleared (descriptor+3d);
                 // hidden secret connections already took variant6.
                 barred: descriptor.template.room_type == 6 || descriptor.surprise_miniboss,
@@ -557,6 +571,10 @@ impl Room {
             descriptor.decoration_seed,
             &doors,
         )?);
+        room.cracked_close_frame = doors
+            .iter()
+            .any(|door| door.cracked && !door.hidden)
+            .then_some(0);
         room.path_costs = room
             .grid
             .as_ref()
@@ -737,6 +755,7 @@ impl Room {
             combat_clear_countdown: 0,
             combat_shut_door_slots: Vec::new(),
             combat_shut_update: None,
+            cracked_close_frame: None,
             spawns: None,
             grid: None,
             path_costs: None,
