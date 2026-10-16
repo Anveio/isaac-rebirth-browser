@@ -1349,8 +1349,65 @@ pub(crate) fn resolve_neutral_flight(
     .then_some((false, 5))
 }
 
-/// 513C80 computes a signed wrapping sum, then CVTSI2SS and ADDSS. Its
-/// auxiliary words and Game 10EAD8 are distinct inputs; absent history is unknown.
+///All33 instructions of513C80..513D16 and their actual508FE0 helper
+///own this callback's read footprint. Other inventory IDs do not add a Luck
+///operator; they still require independently preserved input histories.
+struct LuckStage;
+
+impl LuckStage {
+    fn admits(inputs: ItemInputs<'_>, source_player_type: Option<u32>) -> bool {
+        //Empty actual slots and a non-trinket queue close helper42/21 for
+        //either Have139 capacity. BFC0 excludes the separate BFC8 operator.
+        source_player_type == Some(0)
+            && inputs.admits_scalar_context()
+            && inputs.owner.owned_counts.iter().all(|&count| count >= 0)
+    }
+}
+
+///One immutable, source-ordered Luck callback. These integer-slot reads are
+///operators, not an admission list. Input history owns all five auxiliary
+///words and Game flags separately; no other cache/getter/caller is admitted.
+struct LuckPlan {
+    signed_sum: i32,
+    float_additive: f32,
+    run_flag_bonus: bool,
+}
+
+impl LuckPlan {
+    fn from_owned(
+        inputs: ItemInputs<'_>,
+        auxiliary: crate::player_items::LuckInputs,
+        run_flags: u64,
+    ) -> Self {
+        let signed_sum = auxiliary
+            .source_13d0
+            .wrapping_sub(auxiliary.source_13cc)
+            .wrapping_add(auxiliary.source_d3c)
+            .wrapping_add(auxiliary.source_d40)
+            .wrapping_add(inputs.owned_count(253))
+            .wrapping_add(inputs.owned_count(46))
+            .wrapping_add(inputs.owned_count(343));
+        Self {
+            signed_sum,
+            float_additive: auxiliary.source_d58,
+            run_flag_bonus: run_flags & 0x100 != 0,
+        }
+    }
+
+    fn evaluate(self) -> Result<f32, String> {
+        let mut luck = self.signed_sum as f32 + self.float_additive;
+        if self.run_flag_bonus {
+            luck += 50.0_f32; //513CFE/513D06, after trinket and character.
+        }
+        if !luck.is_finite() {
+            return Err("Luck callback overflowed its source f32 output".into());
+        }
+        Ok(luck)
+    }
+}
+
+///513C80's auxiliary words and Game10EAD8 are independent actual inputs.
+///Missing histories stay unknown; stage-neutral inventory cannot supply them.
 pub(crate) fn resolve_luck(
     inputs: ItemInputs<'_>,
     source_player_type: Option<u32>,
@@ -1366,23 +1423,8 @@ pub(crate) fn resolve_luck(
     let (Some(auxiliary), Some(run_flags)) = (inputs.owner.luck_inputs, source_run_flags) else {
         return Ok(None);
     };
-    if source_player_type != Some(0) || !inputs.admits_selected_auxiliary_callbacks() {
+    if !LuckStage::admits(inputs, source_player_type) {
         return Ok(None);
     }
-    let sum = auxiliary
-        .source_13d0
-        .wrapping_sub(auxiliary.source_13cc)
-        .wrapping_add(auxiliary.source_d3c)
-        .wrapping_add(auxiliary.source_d40)
-        .wrapping_add(inputs.owned_count(253))
-        .wrapping_add(inputs.owned_count(46))
-        .wrapping_add(inputs.owned_count(343));
-    let mut luck = sum as f32 + auxiliary.source_d58;
-    if run_flags & 0x100 != 0 {
-        luck += 50.0_f32; // 513CFE/513D06, after the trinket and character branches.
-    }
-    if !luck.is_finite() {
-        return Err("Luck callback overflowed its source f32 output".into());
-    }
-    Ok(Some(luck))
+    LuckPlan::from_owned(inputs, auxiliary, run_flags).evaluate().map(Some)
 }
