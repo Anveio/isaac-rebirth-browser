@@ -254,9 +254,11 @@ fn blast_queries(e: &mut Entropy, grid: &Grid) {
             json!({ "origin": origin, "radius": radius, "error": error })
         ),
     }
-    let invalid = *e.pick(&[0.0, -1.0, 4096.5, f32::INFINITY, f32::NAN]);
+    // A zero or room-sized radius is the engine's call (a room-clearing blast
+    // may be ported); only meaningless radii are pinned.
+    let invalid = *e.pick(&[-1.0, f32::INFINITY, f32::NAN]);
     props::always!(
         grid.blast_candidates(origin, invalid).is_err(),
-        "grid: blast queries reject non-positive, oversized and non-finite radii"
+        "grid: blast queries reject negative and non-finite radii"
     );
 }

@@ -16,7 +16,7 @@ use crate::harness::{self, Case};
 use crate::json_diff;
 use crate::props;
 use crate::tape::Tape;
-use rebirth_cleanroom::{Command, Game, State};
+use rebirth_cleanroom::{Command, Game, Screen, State};
 use serde_json::json;
 use std::hash::{DefaultHasher, Hash, Hasher};
 use std::panic::{self, AssertUnwindSafe};
@@ -91,7 +91,15 @@ struct Simulation {
     tape: Tape,
     /// Ok/Err outcome and state digest after each command.
     trace: Vec<(bool, u64)>,
+    /// The full update at which the player lost controls outside any hold
+    /// the state contract names.
+    uncontrolled_since: Option<u32>,
 }
+
+/// Full updates a living player may stay without controls outside the holds
+/// the state contract names (a hold the port has yet to name, say) before
+/// the controls count as lost for good.
+const CONTROLS_RETURN: u32 = 600;
 
 fn digest(state: &State) -> u64 {
     let mut hasher = DefaultHasher::new();
@@ -177,6 +185,7 @@ impl Simulation {
                     game,
                     tape: Tape::new(initial_seed, boot_epoch_seed),
                     trace: Vec::new(),
+                    uncontrolled_since: None,
                 })
             }
             Ok(Err(error)) => {
@@ -197,6 +206,29 @@ impl Simulation {
         }
     }
 
+    /// Controls a living player lost outside every named hold come back:
+    /// a stuck flag freezes the player for good.
+    fn controls_return(&mut self) {
+        let state = &self.game.state;
+        let lost = state.screen == Screen::Playing
+            && !state.player.controls_enabled
+            && !invariants::controls_hold(state)
+            && !state.player.dead
+            && state.player_death.game_over.is_none();
+        let now = state.game_update_count;
+        let since = if lost {
+            *self.uncontrolled_since.get_or_insert(now)
+        } else {
+            self.uncontrolled_since = None;
+            now
+        };
+        props::always!(
+            now.saturating_sub(since) <= CONTROLS_RETURN,
+            "game: controls lost outside a named hold come back within 600 full updates",
+            json!({ "since": since, "now": now })
+        );
+    }
+
     /// Applies one command with every per-step check; false ends the case.
     fn step(&mut self, command: Command, e: &mut Entropy) -> bool {
         let before = self.game.clone();
@@ -211,7 +243,7 @@ impl Simulation {
                 return false;
             }
         };
-        invariants::outcome(&before.state, &command, &result);
+        invariants::outcome(&before.state, &command, &result, &self.game.state);
         match &result {
             Ok(()) => invariants::transition(&before.state, &command, &self.game.state),
             Err(_) => props::always!(
@@ -221,6 +253,7 @@ impl Simulation {
             ),
         }
         invariants::state(&self.game.state);
+        self.controls_return();
         coverage::observe(&self.game.state);
         if e.chance(1, 50) {
             self.snapshot_round_trip();

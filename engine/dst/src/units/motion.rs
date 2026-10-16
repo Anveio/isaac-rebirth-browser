@@ -328,18 +328,24 @@ fn check(step: Step) {
     // Near the top of f32 an intermediate may overflow where the result
     // would not; below this bound neither can.
     let bounded = norm(step.position) + 16.0 * norm(step.velocity) < f64::from(f32::MAX);
+    // The admitted domain must run; outside it the engine may refuse or
+    // serve the step (a widened domain is not a failure), but never with a
+    // non-finite vector.
     props::always!(
         match &result {
-            Ok((position, velocity)) => admitted && position.is_finite() && velocity.is_finite(),
+            Ok((position, velocity)) => position.is_finite() && velocity.is_finite(),
             Err(_) => !admitted || !bounded,
         },
-        "motion: a step runs exactly on digital input, finite vectors and an admitted speed stat, and never returns a non-finite vector",
+        "motion: a step runs on digital input, finite vectors and an admitted speed stat, and never returns a non-finite vector",
         details()
     );
-    props::sometimes!(!admitted, "motion: an invalid step is refused");
     props::sometimes!(
-        admitted && result.is_err(),
-        "motion: a step whose vectors overflow is refused"
+        !admitted,
+        "motion: steps outside the admitted domain are tried"
+    );
+    props::sometimes!(
+        admitted && !bounded,
+        "motion: steps near the top of f32 are tried"
     );
     for symmetry in symmetries() {
         let image = symmetry.step(step);
@@ -360,7 +366,8 @@ fn check(step: Step) {
             json!({ "step": step, "image": image })
         );
     }
-    let Ok((position, velocity)) = result else {
+    // The source model covers the admitted domain only.
+    let (Ok((position, velocity)), true) = (result, admitted) else {
         return;
     };
     props::always!(

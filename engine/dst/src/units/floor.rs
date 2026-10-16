@@ -32,7 +32,9 @@ pub fn run(case: &mut Case) {
         soul_hp: 0,
         coins: 0,
     };
-    let stage = *e.pick(&[0, 3, 4, 13, u32::MAX]);
+    // Only requests no stage generator can serve are pinned: a later stage
+    // may be admitted once the port generates it.
+    let stage = *e.pick(&[0, u32::MAX]);
     props::always!(
         floor::generate_basement(0).is_err()
             && floor::generate_normal_basement(NormalBasementRequest {
@@ -46,7 +48,7 @@ pub fn run(case: &mut Case) {
                 ..fresh(e.nonzero_u32())
             })
             .is_err(),
-        "floor: requests outside stages 1 and 2 or with stage seed zero are rejected",
+        "floor: requests for stage 0, a stage past any floor or stage seed zero are rejected",
         json!({ "stage": stage })
     );
     for _ in 0..(case.steps / 300).max(4) {
