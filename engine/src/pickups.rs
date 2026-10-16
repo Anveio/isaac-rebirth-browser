@@ -225,7 +225,7 @@ impl Pickup {
         let subtype = regular_subtype(variant, u32::from(selector.subtype), selector.spawn_seed)?;
         if !matches!(
             (variant, subtype),
-            (10, 1..=6) | (20, 1..=4) | (30, 1 | 3) | (40, 1 | 2 | 3 | 5)
+            (10, 1..=6) | (20, 1..=4) | (30, 1..=3) | (40, 1 | 2 | 3 | 5)
         ) {
             return Ok(None);
         }
@@ -478,7 +478,7 @@ impl Pickup {
 
     /// Free regular coins, keys and bombs. Other families keep typed room selectors
     /// until their source collection rules and live gates are admitted.
-    pub fn try_collect(&mut self, inventory: &mut Inventory) -> bool {
+    pub fn try_collect(&mut self, inventory: &mut Inventory, player: &mut Player) -> bool {
         if !self.can_collect || self.collected || self.removed || self.collection_delay != 0 {
             return false;
         }
@@ -486,6 +486,10 @@ impl Pickup {
             (20, 1..=4) => {
                 let amount = [1, 5, 10, 2][self.subtype as usize - 1];
                 inventory.coins = inventory.coins.saturating_add(amount).min(99);
+            }
+            (30, 2) => {
+                // Collect504EEB calls508730: BD0 only, without AddKeys.
+                player.golden_key = Some(true);
             }
             (30, 1 | 3) => {
                 let amount = if self.subtype == 3 { 2 } else { 1 };
