@@ -1,7 +1,9 @@
 // Actual observed browser rows only. A committed prefix is never a full pass.
 import {createHash} from 'node:crypto';
 import {open,rename,writeFile} from 'node:fs/promises';
-import {gzipSync} from 'node:zlib';
+import {createReadStream} from 'node:fs';
+import {createInterface} from 'node:readline';
+import {createGunzip,gzipSync} from 'node:zlib';
 
 export class BrowserProgress {
   static async create(directory) {
@@ -24,6 +26,10 @@ export class BrowserProgress {
     await rename(temporary,path);
   }
   async append(kind,value) {
+    if(!this.file) {
+      this.file=await open(this.path,'a');
+      if((await this.file.stat()).size!==this.archiveBytes)throw Error('Committed browser journal changed before append');
+    }
     this.pending.push(JSON.stringify({kind,value})+'\n');
     if(this.pending.length>=8)await this.flush();
   }
@@ -41,9 +47,28 @@ export class BrowserProgress {
     this.rawBytes+=raw.length;this.archiveBytes+=member.length;this.records+=this.pending.length;
     this.pending=[];await this.metadata('running');
   }
+  async closeForRead() {
+    try {await this.flush();}
+    catch(error) {
+      await writeFile(this.path+'.pending.jsonl',this.pending.join(''),{flag:'wx'});
+      throw error;
+    } finally {await this.file.close();this.file=null;}
+  }
+  async *values(kind) {
+    if(this.file)throw Error('Close the committed browser journal before streaming evidence');
+    const input=createReadStream(this.path),decoded=createGunzip();
+    input.on('error',error=>decoded.destroy(error));input.pipe(decoded);
+    const lines=createInterface({input:decoded,crlfDelay:Infinity});
+    try {
+      for await(const line of lines) {
+        const row=JSON.parse(line);
+        if(row.kind===kind)yield row.value;
+      }
+    } finally {lines.close();input.destroy();decoded.destroy();}
+  }
   async close(status) {
     try {await this.flush();}
-    finally {await this.file.close();}
+    finally {if(this.file){await this.file.close();this.file=null;}}
     await this.metadata(status);
   }
 }

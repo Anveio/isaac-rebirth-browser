@@ -88,12 +88,17 @@ pub enum LaserOrigin {
     PlayerCharged,
     PlayerControlled,
     PlayerTechnology,
+    ///Actual50E1C0 mode1 port provenance; not a native actor class or identity.
+    PlayerTechnology2,
 }
 impl LaserOrigin {
     pub(crate) fn is_player(self) -> bool {
         matches!(
             self,
-            Self::PlayerCharged | Self::PlayerControlled | Self::PlayerTechnology
+            Self::PlayerCharged
+                | Self::PlayerControlled
+                | Self::PlayerTechnology
+                | Self::PlayerTechnology2
         )
     }
 }
@@ -276,6 +281,9 @@ impl Laser {
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Impact {
+    ///Own actual factory admission clock. Missing inherited histories stay unknown.
+    #[serde(default)]
+    pub birth_game_update: Option<u32>,
     #[serde(default)]
     pub source_subtype: Option<u32>,
     #[serde(default)]
@@ -391,6 +399,15 @@ impl Laser {
         laser
     }
 
+    ///475EA0 for actual7/2/1. The direct519FC0 caller owns property copies,
+    ///Parent and sort; it does not execute ordinary50E1C0's lifetime3 factory.
+    pub(crate) fn initialize_controlled_technology(id: u32, seed: u32, age: u32) -> Self {
+        let mut laser = Self::initialize_technology(id, seed, age);
+        laser.origin = LaserOrigin::PlayerControlled;
+        laser.subtype = 1;
+        laser
+    }
+
     pub(crate) fn restore_fast_position(&mut self) {
         if self.fast {
             self.position = self.saved_position;
@@ -466,9 +483,22 @@ impl Laser {
         Ok(())
     }
 
+    ///Born7E8/818 are retained actor owners, never the current kind3 result.
+    ///Only the actual Player mode1 thin Laser has the source-closed0x200
+    ///geometry path; other born flags and origins keep their own frontiers.
+    pub(crate) fn has_supported_neutral_body_flags(&self) -> bool {
+        self.attack_flags.0 == 0
+            || (self.origin == LaserOrigin::PlayerTechnology2
+                && self.entity_type == 7
+                && self.variant == 2
+                && self.subtype == 0
+                && self.attack_flags.0 == 0x200
+                && self.line_flags == Some(self.attack_flags))
+    }
+
     pub(crate) fn contacts(&self, targets: &[LaserTarget]) -> Result<Vec<LaserContact>, String> {
         self.validate_contact_geometry()?;
-        if self.attack_flags.0 != 0
+        if !self.has_supported_neutral_body_flags()
             || !self.has_first_player_parent()
             || !self.line_enabled
             || self.line.points.len() < 2
@@ -521,12 +551,17 @@ impl Laser {
     }
 
     pub(crate) fn finish_full(&mut self) -> Result<(), String> {
-        self.sprite
-            .advance(if self.origin == LaserOrigin::PlayerTechnology {
+        self.sprite.advance(
+            if matches!(
+                self.origin,
+                LaserOrigin::PlayerTechnology | LaserOrigin::PlayerTechnology2
+            ) || (self.origin == LaserOrigin::PlayerControlled && self.variant == 2)
+            {
                 technology_definition()
             } else {
                 definition()
-            })?;
+            },
+        )?;
         self.velocity = self.velocity * self.current_friction;
         self.position = self.position + self.velocity;
         self.current_friction = self.configured_friction;

@@ -37,6 +37,9 @@ def observed_state(text):
         matches = re.findall(pattern, text)
         if matches:
             state[key] = matches[-1] if key in ('seed', 'room') else int(matches[-1])
+            # A trapdoor run logs a later Level::Init; keep the run's first.
+            if key in ('stage', 'altStage', 'stageSeed'):
+                state['initial' + key[0].upper() + key[1:]] = int(matches[0])
     return state
 
 

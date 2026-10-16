@@ -20,11 +20,63 @@ const MINIMAP_ICONS: Record<number, string> = {
   20: "IconChestRoom", 21: "IconDiceRoom",
 };
 // Mask 0x3c1204: shown as locked while only shadow-revealed and unvisited.
+// Minimap pickup icon 5af6df: saved type5 records set one bit per kind and
+// the first set bit in draw order wins. Hearts prefer eternal, then black
+// over soul/red, then soul; chests prefer locked (gold), then red.
+function minimapPickupIcon(records: readonly { variant: number; subtype: number }[]): string | undefined {
+  let heart = 0, chest = 0;
+  const kinds = new Set<string>();
+  for (const { variant, subtype } of records) {
+    if (variant === 10) {
+      kinds.add("heart");
+      if (subtype === 4) heart = 4;
+      else if (subtype === 6 && (heart === 0 || heart === 3)) heart = 6;
+      else if (subtype === 3 && heart === 0) heart = 3;
+    } else if (variant === 100 || variant === 350) kinds.add("item");
+    else if (variant === 50 || variant === 60 || variant === 360) {
+      kinds.add("chest");
+      if (variant === 60) chest = 60;
+      else if (variant === 360 && chest !== 60) chest = 360;
+    } else if (variant === 300) kinds.add("card");
+    else if (variant === 70) kinds.add("pill");
+    else if (variant === 30) kinds.add("key");
+    else if (variant === 40) kinds.add("bomb");
+    else if (variant === 20) kinds.add("coin");
+    else if (variant === 90) kinds.add("battery");
+  }
+  if (kinds.has("heart")) return { 4: "IconWhiteHeart", 6: "IconBlackHeart", 3: "IconBlueHeart" }[heart] ?? "IconHeart";
+  if (kinds.has("item")) return "IconItem";
+  if (kinds.has("chest")) return chest === 60 ? "IconGoldChest" : chest === 360 ? "IconRedChest" : "IconChest";
+  const order: [string, string][] = [["card", "IconCard"], ["pill", "IconPill"], ["key", "IconKey"],
+    ["bomb", "IconBomb"], ["coin", "IconCoin"], ["battery", "IconBattery"]];
+  return order.find(([kind]) => kinds.has(kind))?.[1];
+}
 // Base Rebirth's four shapes: bit 1 tall, bit 2 wide (1x1, 1x2, 2x1, 2x2).
 function minimapShape(template: { width: number; height: number }): number {
   return (template.width === 26 ? 2 : 0) + (template.height === 14 ? 1 : 0);
 }
 const LOCKED_MINIMAP_TYPES = new Set([2, 9, 12, 18, 19, 20, 21]);
+// GridEntity_Decoration Init 561e60 picks Props_*.anm2 by backdrop type
+// (3/4 Caves, 5/6 Depths, 7/8 Womb, 9 Sheol, 10 Cathedral, 12 Chest, else
+// Basement). Only the Basement/Cellar backdrops the port builds are listed.
+const DECORATION_PROPS: Record<string, { actor: string; allowCaves: boolean }> = {
+  "gfx/backdrop/01_basement.png": { actor: "gfx/grid/props_01_basement.anm2", allowCaves: false },
+  "gfx/backdrop/02_cellar.png": { actor: "gfx/grid/props_01_basement.anm2", allowCaves: false },
+};
+// 561f07: an RNG seeded (Descriptor+48 + grid index, shift35 = 5/9/7) plays
+// clip raw() % count, retrying (20 tries) while a "Caves" clip lands outside
+// the Caves backdrop.
+function decorationClip(names: readonly string[], seed: number, allowCaves: boolean): string {
+  let state = seed >>> 0, name = names[0]!;
+  for (let attempt = 0; attempt < 20; attempt++) {
+    state = (state ^ (state >>> 5)) >>> 0;
+    state = (state ^ (state << 9)) >>> 0;
+    state = (state ^ (state >>> 7)) >>> 0;
+    name = names[state % names.length]!;
+    if (allowCaves || !name.includes("Caves")) break;
+  }
+  return name;
+}
 const ROCK_ANIMATIONS: Record<number, string> = { 2: "normal", 3: "black", 4: "tinted", 5: "bombrock", 6: "alt" };
 function rockSprite(kind: number, variant: number): { animation: string; frame: number } | undefined {
   const animation = ROCK_ANIMATIONS[kind];
@@ -75,7 +127,7 @@ export class Renderer {
     const gl = this.graphics;
     if (state.screen === "playing") {
       this.prepareRoom(state.room);
-      this.stage.prepare(state.stageEffects, state.camera?.scroll);
+      this.stage.prepare(state.stageEffects, this.worldOffset(state));
     }
     gl.beginScreen(); gl.resetTransform(); gl.globalAlpha = 1; gl.imageSmoothingEnabled = false;
     gl.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -99,6 +151,10 @@ export class Renderer {
       const bossScene = state.roomTransition?.bossScene;
       if (bossScene && state.roomTransition?.phase === "bossScene")
         this.assets.draw(ctx, "gfx/ui/boss/versusscreen.anm2", "Scene", 240, 135, bossScene.animationFrame);
+      // StageTransition::Render5e3bd0: black quad, alpha counter/50 then 1-counter/50.
+      const transition = state.stageTransition;
+      if (transition.state === 2 || transition.state === 3)
+        gl.fillRectRGBA(0, 0, 480, 270, [0, 0, 0, transition.state === 2 ? transition.counter / 50 : 1 - transition.counter / 50]);
       this.presentation.pause(ctx, state);
       if (state.playerDeath.gameOver) {
         gl.fillRectRGBA(0, 0, 480, 270, [0, 0, 0, 128 / 255]);
@@ -159,15 +215,22 @@ export class Renderer {
         [point(0, start), point(1, start), point(0, end), point(1, end)]);
     }
   }
+  /** Source CEA00 is a pixel offset, independent of Room15B8 scrolling. */
+  private worldOffset(state: State): { x: number; y: number } | undefined {
+    const scroll = state.camera?.scroll, shake = state.gameShake?.offsetCea00;
+    if (scroll && shake) return { x: Math.fround(scroll.x + shake.x), y: Math.fround(scroll.y + shake.y) };
+    return shake ?? scroll;
+  }
   /** Room::Render world layer: backdrop, grid, actors and stage composites. */
   private drawWorld(ctx: CanvasRenderingContext2D, state: State, hidePlayer = false): void {
     ctx.save();
-    if (state.camera) ctx.translate(state.camera.scroll.x, state.camera.scroll.y);
-    this.drawRoom(state.room.appearance, state.room.grid);
+    const offset = this.worldOffset(state);
+    if (offset) ctx.translate(offset.x, offset.y);
+    this.drawRoom(state.room.appearance, state.room.grid, state);
     ctx.restore();
     this.stage.ground(state.stageEffects);
     ctx.save();
-    if (state.camera) ctx.translate(state.camera.scroll.x, state.camera.scroll.y);
+    if (offset) ctx.translate(offset.x, offset.y);
     // Creep's render key (seq & 0x3ff) + 2100 sorts every pool under the
     // y-sorted actors, in spawn order; colour multiplies the clip's pulse.
     for (const effect of state.spriteEffects) {
@@ -209,6 +272,11 @@ export class Renderer {
       } else if (entity.kind === 8 && entity.state === 0)
         this.assets.draw(ctx, "gfx/grid/grid_spikes.anm2", `Spikes${String(entity.variant).padStart(2, "0")}`, x, y);
     }
+    const trapdoor = state.room.trapdoor;
+    if (grid && trapdoor)
+      this.assets.draw(ctx, "gfx/grid/door_11_trapdoor.anm2", trapdoor.clip === "closed" ? "Closed" : "Open Animation",
+        (40 + trapdoor.gridIndex % grid.width * 40) * 0.65 + 32,
+        (120 + Math.floor(trapdoor.gridIndex / grid.width) * 40) * 0.65 - 47, Math.floor(trapdoor.frame));
     this.pickups.draw(ctx, state);
     for (const npc of state.room.npcs) {
       // A dying boss (state 16) keeps drawing its death clip.
@@ -331,9 +399,11 @@ export class Renderer {
     if (!hidePlayer) this.drawPlayer(ctx, state);
     for (const tear of state.tears) {
       const color = tear.sourceColor;
-      //RegularTear's white authored layer receives its birth-owned ColorMod.
+      //The selected Regular/Blood authored layer receives its birth-owned ColorMod.
       //Keep all11 components in state; project tint and final RGB offsets.
-      this.assets.draw(ctx, TEAR, `RegularTear${tear.animationTier}`, Math.round(tear.x * 2) / 2, Math.round(tear.y * 2) / 2, tear.age,
+      const blood = tear.sourceVariant === 1;
+      this.assets.draw(ctx, blood ? "gfx/002.001_blood tear.anm2" : TEAR,
+        `${blood ? "BloodTear" : "RegularTear"}${tear.animationTier}`, Math.round(tear.x * 2) / 2, Math.round(tear.y * 2) / 2, tear.age,
         { overrides: { 0: {
           RedTint: color.tint[0]! * 255, GreenTint: color.tint[1]! * 255,
           BlueTint: color.tint[2]! * 255, AlphaTint: color.tint[3]! * 255,
@@ -341,8 +411,6 @@ export class Renderer {
           BlueOffset: color.offsets[2]! * 255,
         } } });
     }
-    for (const impact of state.impacts)
-      this.assets.draw(ctx, "gfx/1000.012_tear poof_small.anm2", "Poof", impact.x, impact.y, impact.age);
     for (const bomb of state.bombs)
       if (bomb.motion.lifetime === "alive")
         this.assets.draw(ctx, bomb.variant === 3 ? "gfx/004.003_troll bomb.anm2" : bomb.variant === 4 ? "gfx/004.004_megatroll bomb.anm2" : "gfx/004.000_bomb.anm2", bomb.animation, bomb.x, bomb.y - 1, bomb.animationFrame, { pixelSnap: this.canvas.width / 480 / 2 });
@@ -354,7 +422,7 @@ export class Renderer {
         this.assets.draw(ctx, bomb.variant === 3 ? "gfx/004.003_troll bomb.anm2" : bomb.variant === 4 ? "gfx/004.004_megatroll bomb.anm2" : "gfx/004.000_bomb.anm2", bomb.animation, bomb.x, bomb.y - 1, bomb.animationFrame, { pixelSnap: this.canvas.width / 480 / 2 });
     for (const effect of state.spriteEffects) {
       // Source31f dead can coexist with31e active until a later Remove.
-      if (!effect.visible || !effect.active || effect.creepEffect) continue;
+      if (!effect.visible || !effect.active || effect.footprint || effect.creepEffect) continue;
       if (effect.variant === 58 || effect.variant === 43) {
         const sprite = effect.sprite, controller = effect.poopEffect;
         const rotation = controller && "particle58" in controller && typeof controller.particle58 === "object"
@@ -399,6 +467,43 @@ export class Renderer {
     }
     ctx.restore();
     this.stage.foreground(state.stageEffects);
+    this.drawFxRays(state);
+  }
+
+  /** FX ray render 547890 (from room render 5cd00d, after entities and
+   * shading). The camera scroll (Room+15B8) moves the rays' anchor C; the
+   * player's offset from the room centre P sets parallax and fades them. Each
+   * ray draws its whole texture twice on one additive quad: alpha a*s, then
+   * mirrored with a*(1-s), s = (sin(phase)+1)/2. Phase advances by
+   * animationSpeed per render call; two calls per game update is assumed. */
+  private drawFxRays(state: State): void {
+    const group = state.room.appearance.fxRays, init = state.room.initializationGameUpdate;
+    if (!group || !group.rays.length || init === null) return;
+    const grid = state.room.grid; if (!grid) return;
+    const scroll = state.camera?.scroll ?? { x: 0, y: 0 }, shake = state.gameShake?.offsetCea00 ?? { x: 0, y: 0 };
+    const centre = { x: (40 + 40 * (grid.width - 1) / 2) * 0.65 + 32, y: (120 + 40 * (grid.height - 1) / 2) * 0.65 - 46 };
+    const C = { x: centre.x + scroll.x, y: centre.y + scroll.y };
+    const P = { x: state.player.x - centre.x, y: state.player.y - centre.y };
+    const topY = scroll.y + shake.y, n = group.rays.length;
+    const W = (group.xMax - group.xMin - (n - 1) * group.raySpacing) / n, h = W / 2;
+    const fade = Math.max(1 - Math.abs(P.x) / C.x, 0) * Math.max(1 - Math.abs(P.y) / C.y, 0);
+    const calls = 2 * Math.max(0, state.gameUpdateCount - init);
+    const gl = this.graphics, ctx = gl.asCanvasContext();
+    const backend = ctx as unknown as { drawTintedImageQuad?: (source: CanvasImageSource, tint: number[], offsets: number[], crop: readonly [number, number, number, number], points: readonly (readonly [number, number])[]) => void };
+    if (!backend.drawTintedImageQuad) return;
+    gl.blendFactors("srcAlpha", "one");
+    for (const [i, ray] of group.rays.entries()) {
+      const x = (W + group.raySpacing) * i + group.xMin, xc = x + h;
+      const topLeft = [C.x + x + P.x * group.topParallax, topY] as const, topRight = [topLeft[0] + W, topY] as const;
+      const bottomY = P.y * group.bottomParallax + group.rayLength;
+      const bottomLeft = [group.perspective * xc + C.x - h + group.bottomParallax * P.x, bottomY] as const;
+      const bottomRight = [group.perspective * xc + C.x + h + group.bottomParallax * P.x, bottomY] as const;
+      const a = fade * ray.opacity, s = (Math.sin(ray.phase + ray.animationSpeed * calls) + 1) * 0.5;
+      const image = this.assets.image(ray.texture), crop = [0, 0, image.width, image.height] as const;
+      backend.drawTintedImageQuad(image, [1, 1, 1, a * s], [0, 0, 0], crop, [topLeft, topRight, bottomLeft, bottomRight]);
+      backend.drawTintedImageQuad(image, [1, 1, 1, a * (1 - s)], [0, 0, 0], crop, [topRight, topLeft, bottomRight, bottomLeft]);
+    }
+    gl.blendFactors("srcAlpha", "oneMinusSrcAlpha");
   }
 
   /** Room transition 5de870: the old room (captured without the player) and
@@ -466,8 +571,11 @@ export class Renderer {
     }
   }
   private drawEffect(ctx: CanvasRenderingContext2D, variant: number, sprite: ActorSprite, x: number, y: number): void {
-    const actors: Record<number, string> = { 7: "gfx/1000.007_blood splat.anm2", 15: "gfx/1000.015_poof01.anm2",
-      17: "gfx/1000.017_poof04.anm2", 42: "gfx/1000.042_blood gush.anm2" };
+    const actors: Record<number, string> = { 2: "gfx/1000.002_blood explosion.anm2", 7: "gfx/1000.007_blood splat.anm2",
+      12: "gfx/1000.012_tear poofa.anm2", 13: "gfx/1000.013_tear poofb.anm2", 15: "gfx/1000.015_poof01.anm2",
+      17: "gfx/1000.017_poof04.anm2", 21: "gfx/1000.021_tiny bug.anm2", 33: "gfx/1000.033_tiny fly.anm2",
+      42: "gfx/1000.042_blood gush.anm2", 68: "gfx/1000.021_tiny bug.anm2",
+      79: "gfx/1000.012_tear poof_small.anm2", 80: "gfx/1000.012_tear poof_verysmall.anm2" };
     const actor = actors[variant];
     if (!actor) throw new Error(`Unadmitted effect renderer ${variant}`);
     ctx.save(); ctx.translate(x, y); ctx.rotate(sprite.rotation * Math.PI / 180);
@@ -521,6 +629,9 @@ export class Renderer {
   private paintStains(appearance: RoomAppearance, stains: Room["backgroundStains"]): void {
     const ctx = this.graphics.asCanvasContext();
     for (const stain of stains) {
+      // Footprints take their color from floor pixels the runtime does not
+      // sample yet; painting them with zero offsets would draw black marks.
+      if (stain.footprint) continue;
       const sprite = stain.sprite;
       if (stain.variant === 58 || stain.variant === 43) {
         ctx.save();
@@ -545,7 +656,21 @@ export class Renderer {
       }
     }
   }
-  private drawRoom(appearance: RoomAppearance, grid: Room["grid"]): void {
+  /** GridEntity_Decoration props draw with the backdrop, under the room's
+   * shading quad, as the original's darker props show. */
+  private drawDecorations(ctx: CanvasRenderingContext2D, state: State): void {
+    const grid = state.room.grid, descriptor = state.room.descriptor;
+    const props = DECORATION_PROPS[state.room.appearance.backdrop];
+    if (!grid || !descriptor || !props || descriptor.template.type === 16) return;
+    for (const [index, cell] of grid.cells.entries()) {
+      if (cell.entity?.kind !== 1) continue;
+      const x = (40 + index % grid.width * 40) * 0.65 + 32, y = (120 + Math.floor(index / grid.width) * 40) * 0.65 - 47;
+      const animation = decorationClip(this.assets.animationNames(props.actor), descriptor.decorationSeed + index, props.allowCaves);
+      this.assets.draw(ctx, props.actor, animation, x, y, state.gameUpdateCount);
+      this.drawnGrid.push({ index, kind: 1, animation, frame: state.gameUpdateCount });
+    }
+  }
+  private drawRoom(appearance: RoomAppearance, grid: Room["grid"], state: State): void {
     const gl = this.graphics, ctx = gl.asCanvasContext(), size = appearance.tileSize, border = size * 2;
     const width = appearance.columns * size, height = appearance.rows * size, { x, y } = appearance.origin;
     gl.drawSurface(this.floor, border, border, width - border * 2, height - border - size,
@@ -572,6 +697,7 @@ export class Renderer {
       }
       ctx.restore();
     }
+    this.drawDecorations(ctx, state);
     gl.drawImage(this.assets.image(appearance.fx.shading), x, y, width, height);
   }
   private drawPlayer(ctx: CanvasRenderingContext2D, state: State): void {
@@ -593,8 +719,18 @@ export class Renderer {
     }
     this.assets.draw(ctx, PLAYER, `Walk${directionName(player.bodyFacing)}`, x, y, player.walkFrame,
       { layers: [1], overrides: { 1: { RedTint, GreenTint, BlueTint } } });
-    this.assets.draw(ctx, PLAYER, `Head${directionName(player.facing)}`, x, y, player.headFrame,
-      { layers: [4], overrides: { 4: { RedTint, GreenTint, BlueTint } } });
+    const costume = state.playerItems?.costume229, head = costume?.slots[4];
+    if (costume && costume.historyFrontier === null && !costume.mainClipFrontier
+      && head?.layer === 0 && !head.bodyGroup) {
+      //The actual selected head pose owns its clip/frame. Normal Isaac and
+      //this costume both retain skin-1, so50F206 keeps the authored sheet.
+      this.assets.draw(ctx, "gfx/characters/229_monstros lung.anm2",
+        costume.sprite.clip, x, y, costume.sprite.frame,
+        { layers: [0], overrides: { 0: { RedTint, GreenTint, BlueTint } } });
+    } else {
+      this.assets.draw(ctx, PLAYER, `Head${directionName(player.facing)}`, x, y, player.headFrame,
+        { layers: [4], overrides: { 4: { RedTint, GreenTint, BlueTint } } });
+    }
   }
   private hud(ctx: CanvasRenderingContext2D, state: State): void {
     for (let heart = 0; heart < Math.ceil(state.player.maxHp / 2); heart++) {
@@ -658,11 +794,16 @@ export class Renderer {
       const room = descriptors[cell.index]!, type = room.template.type;
       const icon = cell.flags & 4 ? MINIMAP_ICONS[type] : undefined;
       const locked = !icon && cell.flags & 2 && !state.visitedRooms.includes(cell.index) && LOCKED_MINIMAP_TYPES.has(type);
-      if (!icon && !locked) continue;
+      // Without a room icon, a non-shop room shows its saved pickups' icon
+      // (Descriptor+70..78 records; one icon by the constructor's limit).
+      const saved = cell.index === state.currentRoom ? state.room.savedRegularPickups
+        : state.persistedRooms[cell.index]?.savedRegularPickups ?? [];
+      const pickup = icon || locked || type === 2 ? undefined : minimapPickupIcon(saved);
+      if (!icon && !locked && !pickup) continue;
       // Multi-cell rooms shift the icon half a cell (3.5, 3) towards the room's centre.
       const shape = minimapShape(room.template);
       const x = cell.x + (shape & 2 ? 3.5 : 0), y = cell.y + (shape & 1 ? 3 : 0);
-      this.assets.draw(ctx, "gfx/ui/minimap1.anm2", icon ?? "IconLockedRoom", Math.round(x), y);
+      this.assets.draw(ctx, "gfx/ui/minimap1.anm2", icon ?? pickup ?? "IconLockedRoom", Math.round(x), y);
     }
   }
 }

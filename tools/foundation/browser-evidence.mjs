@@ -20,27 +20,34 @@ export const readJsonEvidence = path =>
 export async function writeJsonEvidence(path, document) {
   const rawHash = createHash('sha256'), archiveHash = createHash('sha256');
   let rawBytes = 0, archiveBytes = 0;
-  async function* chunks() {
+  async function* valueChunks(value) {
+    if (value?.[Symbol.asyncIterator] || Array.isArray(value)) {
+      yield '[';
+      let first = true;
+      for await (const row of value) {
+        if (!first) yield ',';
+        first = false;
+        yield JSON.stringify(row);
+      }
+      yield ']';
+    } else if (value && typeof value === 'object' &&
+               Object.values(value).some(child => child?.[Symbol.asyncIterator])) {
+      yield* objectChunks(value);
+    } else yield JSON.stringify(value);
+  }
+  async function* objectChunks(value) {
     yield '{';
     let first = true;
-    for (const [key, value] of Object.entries(document)) {
-      if (value === undefined) continue;
+    for (const [key, field] of Object.entries(value)) {
+      if (field === undefined) continue;
       if (!first) yield ',';
       first = false;
       yield JSON.stringify(key) + ':';
-      if (Array.isArray(value)) {
-        yield '[';
-        for (let index = 0; index < value.length; index++) {
-          if (index) yield ',';
-          yield JSON.stringify(value[index]);
-        }
-        yield ']';
-      } else {
-        yield JSON.stringify(value);
-      }
+      yield* valueChunks(field);
     }
-    yield '}\n';
+    yield '}';
   }
+  async function* chunks() {yield* objectChunks(document);yield '\n';}
   const raw = new Transform({transform(chunk, _encoding, done) {
     rawBytes += chunk.length; rawHash.update(chunk); done(null, chunk);
   }});

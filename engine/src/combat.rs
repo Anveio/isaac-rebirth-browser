@@ -414,12 +414,60 @@ pub struct DamageSource {
     pub entity_type: u32,
 }
 
+///The actual EntityRef words copied before a damage callback. This snapshot
+///never resolves a moving/retired actor to fill historical position or spawner.
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct CopiedDamageSource {
+    pub entity_type: u32,
+    pub variant: u32,
+    pub spawner_type: u32,
+    pub spawner_variant: u32,
+    pub position: WorldVector,
+    pub velocity: WorldVector,
+    ///Actual actor reference captured with the copy. This is not a claim that
+    ///the actor is still registered/live or that Uninit clears this raw word.
+    pub actor_at_copy: Option<crate::actors::ActorRef>,
+}
+impl CopiedDamageSource {
+    fn validate(self, source: DamageSource) -> Result<(), String> {
+        if !self.position.is_finite()
+            || !self.velocity.is_finite()
+            || self.entity_type != source.entity_type
+        {
+            return Err("copied damage source requires actual finite matching fields".into());
+        }
+        if let Some(actor) = self.actor_at_copy {
+            use crate::actors::ActorKind;
+            let matches_kind = match actor.kind {
+                ActorKind::Player => self.entity_type == 1,
+                ActorKind::Familiar => self.entity_type == 3,
+                ActorKind::Tear => self.entity_type == 2,
+                ActorKind::Bomb => self.entity_type == 4,
+                ActorKind::Pickup => self.entity_type == 5,
+                ActorKind::Laser => self.entity_type == 7,
+                ActorKind::Knife => self.entity_type == 8,
+                ActorKind::Projectile => self.entity_type == 9,
+                ActorKind::Npc => (10..1000).contains(&self.entity_type),
+                ActorKind::Effect => self.entity_type == 1000,
+            };
+            if !matches_kind || actor.id != source.id {
+                return Err("copied damage source actor differs from its actual source".into());
+            }
+        }
+        Ok(())
+    }
+}
+
 #[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct DamageEvent {
     pub amount: f32,
     pub kind: DamageKind,
     pub source: DamageSource,
+    ///None is an unowned caller/legacy history, never a zero payload.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub copied_source: Option<CopiedDamageSource>,
 }
 
 #[derive(Clone, Debug, Default, Deserialize, Serialize, PartialEq)]
@@ -468,6 +516,9 @@ impl DamageQueue {
     /// admission before this ordinary single-player queue contract.
     pub fn enqueue(&mut self, health: ActorHealth, event: DamageEvent) -> Result<bool, String> {
         health.validate()?;
+        if let Some(copied) = event.copied_source {
+            copied.validate(event.source)?;
+        }
         if !event.amount.is_finite() {
             return Err("damage amount must be finite".into());
         }
