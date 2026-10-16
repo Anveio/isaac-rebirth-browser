@@ -2332,6 +2332,19 @@ impl Game {
                     });
                     npcs::admit_room_combat(&mut self.state);
                     self.show_miniboss_streak();
+                    // ChangeRoom 5dd858 then selects the room's music (5c4bf0).
+                    // A first-visit treasure room (type 4, Room+1 set by
+                    // Room.Init when descriptor+0x3c is clear) draws its jingle
+                    // 87 + Random(4) at 5c4fff. The jingle is not played yet.
+                    if self
+                        .state
+                        .room
+                        .descriptor
+                        .as_ref()
+                        .is_some_and(|descriptor| descriptor.template.room_type == 4)
+                    {
+                        let _jingle = 87 + self.state.boot_lifecycle.shared.bounded(4);
+                    }
                 }
                 // ChangeRoom5dd260 restores Player+7d4=false after the
                 // admitted Room.Update, before the incoming leg or Scene.
