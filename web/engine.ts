@@ -107,7 +107,8 @@ export interface SavedRunSummary {
     activeCharge: number; saveWordD88: number; reserveCharge: number;
     shotSpeedInputs?: {sourceD38: number};
     damageInputs?: {sourceD30: number};
-    fireDelayInputs?: {sourceD2c: number}};
+    fireDelayInputs?: {sourceD2c: number};
+    rangeInputs?: {sourceD34: number}};
   emptyGridCellsSaved: number; occupiedGridSeedsPending: number[];
   currentRoomRecord: number; currentRoomSeedSamples: {gridIndex: number;
     levelSeeds: [number, number]; savedSeeds: [number, number]; occupancy: "empty" | "occupied" | "padding";
@@ -316,6 +317,7 @@ export interface State {
     unevaluatedCacheFlags: number;
     damageInputs?: {sourceD30: number};
     fireDelayInputs?: {sourceD2c: number};
+    rangeInputs?: {sourceD34: number};
     shotSpeedInputs?: {sourceD38: number};
     luckInputs: {sourceD3c: number; sourceD40: number; sourceD58: number; source13cc: number; source13d0: number} | null} | null;
   informationAnimation: {state: number; delay: number; currentActor: string | null;

@@ -77,6 +77,19 @@ impl FireDelayInputs {
     }
 }
 
+/// Actual Player+D34 signed height input, independent of cached C8C.
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct RangeInputs {
+    pub source_d34: i32,
+}
+
+impl RangeInputs {
+    pub fn apply_signed_delta(&mut self, delta: i32) {
+        self.source_d34 = self.source_d34.wrapping_add(delta);
+    }
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct PlayerItems {
@@ -108,6 +121,8 @@ pub struct PlayerItems {
     pub luck_inputs: Option<LuckInputs>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub damage_inputs: Option<DamageInputs>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub range_inputs: Option<RangeInputs>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub fire_delay_inputs: Option<FireDelayInputs>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -182,6 +197,8 @@ impl PlayerItems {
             shot_speed_inputs: Some(ShotSpeedInputs::NEUTRAL),
             // Actual519662, not a default reconstructed from inventory.
             damage_inputs: Some(DamageInputs { source_d30: 0 }),
+            //Actual51966C owns this initial word; no inventory inference.
+            range_inputs: Some(RangeInputs { source_d34: 0 }),
             //Actual519658, not a cache/count-derived neutral default.
             fire_delay_inputs: Some(FireDelayInputs { source_d2c: 0 }),
             trinket_slots: [0; 2],
@@ -619,6 +636,22 @@ pub(crate) fn add_collectible(
         .as_mut()
         .expect("checked Player item owner");
     owner.owned_counts[id as usize] = owner.owned_counts[id as usize].wrapping_add(1);
+    //Actual48's selected common path independently preserves D34.
+    //This input proof grants no Range callback/getter/caller permission.
+    let keep_cupid_range = id == 48
+        && normal_isaac
+        && crate::item_pipeline::ItemInputs::new(owner)
+            .is_ok_and(|inputs| inputs.admits_cupid_grant_context());
+    //Actual14's default Add route preserves D34 despite its cached Range
+    //effect. Untracked240/258/reset routes invalidate this existing owner;
+    //None never inherits constructor zero through counts or cache evaluation.
+    if !matches!(
+        id,
+        1 | 2 | 3 | 4 | 6 | 14 | 52 | 68 | 114 | 118 | 143 | 152 | 168 | 169 | 229 | 304 | 329 | 330
+    ) && !keep_cupid_range
+    {
+        owner.range_inputs = None;
+    }
     //Actual Add48 preserves D2C on its independently closed common path.
     //Neither D30/D38 preservation nor a cache role supplies this word's proof.
     let keep_cupid_fire_delay = id == 48

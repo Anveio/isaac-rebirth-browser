@@ -1227,9 +1227,14 @@ pub(crate) fn resolve_scalars(
                     (-23.75_f32, 0.0_f32)
                 };
                 values.stats.tear_falling_speed = falling + roid * 0.5_f32;
-                values.stats.tear_height = ((height - roid * 5.0_f32)
-                    - values.stats.tear_falling_speed * 0.5_f32)
-                    .min(-7.0);
+                let mut resolved_height = height - roid * 5.0_f32;
+                //512AE9/AF1/B05: signed D34*.5 adds to C8C BEFORE the
+                //512B0D subtraction of current C90*.5. C90/C94 are unchanged.
+                if let Some(input) = inputs.owner.range_inputs {
+                    resolved_height += input.source_d34 as f32 * 0.5_f32;
+                }
+                values.stats.tear_height =
+                    (resolved_height - values.stats.tear_falling_speed * 0.5_f32).min(-7.0);
                 values.stats.tear_falling_acceleration = 0.0;
                 &[6, 14]
             }
@@ -1255,6 +1260,11 @@ pub(crate) fn resolve_scalars(
             && match stage {
                 CacheStage::FireDelay => FireDelayStage::admits(inputs, source_player_type),
                 CacheStage::Damage => DamageStage::admits(inputs, source_player_type),
+                CacheStage::Range => {
+                    source_player_type == Some(0)
+                        && inputs.owner.range_inputs.is_some()
+                        && inputs.admits_scalar_stage(stage, supported)
+                }
                 CacheStage::ShotSpeed => ShotSpeedStage::admits(
                     inputs,
                     source_player_type,
