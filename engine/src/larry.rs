@@ -335,8 +335,8 @@ fn run(
         // 5cbb30 Hurt(1) on the grid entity 40 ahead only affects poop and
         // TNT, whose Hurt draws are not admitted yet.
     } else {
-        follow(npc, &mut target_velocity, world);
-        if npc.kind == 19 && npc.child.is_none() && world.room_type != 11 {
+        let followed = follow(npc, &mut target_velocity, world);
+        if followed && npc.kind == 19 && npc.child.is_none() && world.room_type != 11 {
             tail_poop(npc, state, random, world)?;
         }
     }
@@ -361,7 +361,9 @@ fn run(
 /// 4f37e4: snap to the parent's delayed breadcrumb within 10, otherwise
 /// step 15 toward it. The parent's trail is live: an earlier-listed parent
 /// has already pushed this update.
-fn follow(npc: &mut Npc, target_velocity: &mut WorldVector, world: &NpcWorld) {
+/// Returns false when the parent's trail is still shorter than the delay:
+/// D.2 then jumps straight to the tail (E), skipping the poop roll too.
+fn follow(npc: &mut Npc, target_velocity: &mut WorldVector, world: &NpcWorld) -> bool {
     let Some(entry) = npc
         .parent
         .and_then(|id| world.peers.get(id))
@@ -369,7 +371,7 @@ fn follow(npc: &mut Npc, target_velocity: &mut WorldVector, world: &NpcWorld) {
         .and_then(|parent| parent.trail.get(FOLLOW_DELAY))
         .copied()
     else {
-        return;
+        return false;
     };
     *target_velocity = entry.velocity;
     let offset = minus(entry.position, npc.position);
@@ -386,6 +388,7 @@ fn follow(npc: &mut Npc, target_velocity: &mut WorldVector, world: &NpcWorld) {
         clips[1] = "Butt";
     }
     face(npc, clips, entry.velocity);
+    true
 }
 
 /// 4f4613: the tail rolls bounded(100); a damaged tail also passes on
