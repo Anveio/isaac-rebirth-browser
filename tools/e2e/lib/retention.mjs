@@ -1,7 +1,8 @@
 // Disk retention for live e2e runs. A full run writes several GB of frames,
 // traces and raw states; what replay and triage need is small:
 //   - every suite keeps report.json, scenarios.json, case.json, logs and every
-//     file of at most 1 MB, so a recorded case can always be replayed;
+//     file of at most 1 MB except images (PNG frames and the raw RGBA texture
+//     dumps of a --gl-trace), so a recorded case can always be replayed;
 //   - recorded browser traces are gzipped, not dropped, and the input traces
 //     embedded in large browser evidence archives are kept beside them (the
 //     --affected map is rebuilt from them);
@@ -31,7 +32,7 @@ export async function slimSuite(directory) {
   if (!existsSync(directory)) return { removed, gzipped };
   for (const [path, name] of [...files(directory)]) {
     const size = statSync(path).size;
-    if (ALWAYS.has(name) || name.endsWith('.log') || (size <= SMALL && !name.endsWith('.png'))) continue;
+    if (ALWAYS.has(name) || name.endsWith('.log') || (size <= SMALL && !/\.(png|rgba)$/.test(name))) continue;
     if (/trace.*\.json$/.test(name)) {
       await pipeline(createReadStream(path), createGzip({ level: 6 }), createWriteStream(`${path}.gz`));
       unlinkSync(path);

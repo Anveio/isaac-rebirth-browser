@@ -124,6 +124,7 @@ pub(crate) fn advance(state: &mut State, controls_enabled: bool) -> Result<(), S
         item_id: 45,
         animation_frame: 0.0,
         animation_playing: true,
+        pocket: None,
     });
     owner.unevaluated_cache_flags |= config.cache_flags;
     owner.active_flag_3076 = true;

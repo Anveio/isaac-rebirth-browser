@@ -64,6 +64,9 @@ pub struct Knife {
     pub home_position: WorldVector,
     ///Registered target+4a8, distinct from actual linked parent+498.
     pub homing_target: Option<ActorRef>,
+    ///Actual441F35/447110/registered Uninit owner; legacy None is unknown.
+    #[serde(default)]
+    pub homing_target_known: bool,
     pub saved_position: WorldVector,
     pub render_offset: WorldVector,
     pub velocity: WorldVector,
@@ -133,6 +136,7 @@ impl Knife {
             position: ZERO,
             home_position: ZERO,
             homing_target: None,
+            homing_target_known: true, //441F35 before any 447110 registration.
             saved_position: ZERO,
             render_offset: ZERO,
             velocity: ZERO,
@@ -245,6 +249,12 @@ impl Knife {
 
     ///472a40 neutral bit16-clear launch. The caller owns actual C0C/C78
     ///clamping and the source range input; no per-item distance is guessed here.
+    ///447110 registers or clears this exact weak4A8 slot.
+    pub(crate) fn set_homing_target(&mut self, target: Option<ActorRef>) {
+        self.homing_target = target;
+        self.homing_target_known = true;
+    }
+
     pub(crate) fn launch_ordinary(&mut self, ratio: f32, range: f32) -> Result<(), String> {
         if !ratio.is_finite() || !range.is_finite() || ratio <= 0.0 || range <= 0.0 {
             return Err("ordinary Knife launch requires finite actual charge/range".into());
@@ -306,7 +316,7 @@ impl Knife {
         if self.raw_7f4 < 0.0 {
             //474339 actual440 reset and447110(NULL), not parent unlink.
             self.home_position = ZERO;
-            self.homing_target = None;
+            self.set_homing_target(None);
             self.raw_7f4 = 0.0;
             self.raw_814 = false;
         }

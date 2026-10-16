@@ -224,9 +224,11 @@ pub(crate) fn advance_with(
     advance_full(npc, phase, random, world, births, ai, appear, false)
 }
 
-/// `advance` for a boss whose AI handles its own death: Entity_NPC::Update
-/// calls update_ai once more with dead set (the base kill follows the AI),
-/// and only the post-AI handling enters state16 in that same update.
+/// `advance` for a family whose AI handles its own death: Entity_NPC::Update
+/// calls update_ai once more with dead set (the base kill follows the AI).
+/// A boss's post-AI handling then enters state16 in that same update. Every
+/// non-boss gets that dead update in `advance_full`, opted in or not: it
+/// retires unless its AI cleared dead.
 pub(crate) fn advance_dead_ai(
     npc: &mut Npc,
     phase: Phase,
@@ -260,22 +262,27 @@ fn advance_full(
         return Ok(());
     }
     let mut friction = npc.base_friction;
+    let mut revived = false;
     if npc.dead {
-        if !npc.boss {
-            // Dead NPCs keep negative HP through the next intermediate phase.
-            // The following full Entity_NPC::Update still calls update_ai with
-            // the dead flag, then its base kill retires the actor.
-            ai(npc, random, world, births, &mut friction)?;
+        if npc.boss {
+            if dead_ai && npc.state != 16 {
+                ai(npc, random, world, births, &mut friction)?;
+            }
+            return dying_boss(npc, friction);
+        }
+        // Dead NPCs keep negative HP through the next intermediate phase.
+        // 4fa3eb then runs update_ai with dead set for every family before
+        // the post-AI handling; an AI that clears dead (Gaper's Morph) lives
+        // on, otherwise the base kill retires the actor.
+        ai(npc, random, world, births, &mut friction)?;
+        if npc.dead {
             base_kill(npc, random, world)?;
             npc.removed = true;
             return Ok(());
         }
-        if dead_ai && npc.state != 16 {
-            ai(npc, random, world, births, &mut friction)?;
-        }
-        return dying_boss(npc, friction);
+        revived = true;
     }
-    if npc.state == 1 {
+    if !revived && npc.state == 1 {
         friction *= 0.01;
         match npc.frame_age {
             0 => {
@@ -313,7 +320,7 @@ fn advance_full(
         if npc.state != 1 {
             ai(npc, random, world, births, &mut friction)?;
         }
-    } else {
+    } else if !revived {
         ai(npc, random, world, births, &mut friction)?;
     }
     if npc.dead && npc.boss {

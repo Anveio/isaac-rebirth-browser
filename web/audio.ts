@@ -1,5 +1,5 @@
 import catalogue from './audio-data.json';
-import type { SoundEvent } from './engine';
+import type { Ambience, SoundEvent } from './engine';
 import { MusicRuntime } from './music';
 
 const urls = import.meta.glob('../references/isaac/rebirth/resources/sfx/**/*.wav', {
@@ -87,6 +87,22 @@ export class AudioRuntime {
       // A suspended context retains the same bounded voice graph. The trusted
       // gesture resumes that graph; no second admission or burst queue is used.
       this.play(event);
+    }
+  }
+
+  /** Room ambience loops (SFX 269 fire, SFX 4 insect swarm): the engine
+   * starts each loop through an ordinary looping admission; afterwards the
+   * live voice follows the loop's eased volume and pitch until it stops. */
+  syncAmbience(ambience: Ambience, sfxVolume: number): void {
+    for (const [id, loop] of [[269, ambience.fire], [4, ambience.swarm]] as const) {
+      const paths = new Set(catalogue.sounds.find(sound => sound.id === id)?.samples.map(sample => sample.path) ?? []);
+      for (let i = 0; i < this.voices.length; i++) {
+        const voice = this.voices[i];
+        if (!voice || !paths.has(voice.path) || voice.endsAt !== Infinity) continue;
+        if (!loop.playing) { this.release(i); continue; }
+        voice.gain.gain.value = Math.min(sfxVolume * loop.volume, 1);
+        voice.source.playbackRate.value = loop.pitch;
+      }
     }
   }
 

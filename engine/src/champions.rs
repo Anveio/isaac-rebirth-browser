@@ -69,67 +69,50 @@ pub(crate) fn roll(npc: &mut Npc, shared: &mut Mt19937, context: &Roll) -> Resul
     if rng.uniform() >= chance {
         return Ok(false);
     }
-    // 47f770: double max HP, scale the sprite, contact damage 2, then color.
+    let stage = context.stage;
+    let pick = rng.uniform();
+    let color = if pick < 0.01 && stage > 4 {
+        6
+    } else if pick < 0.05 && stage > 4 {
+        [8, 9, 11][rng.bounded(3) as usize]
+    } else if pick < 0.15 {
+        [3, 4, 12][rng.bounded(3) as usize]
+    } else {
+        [0, 1, 2, 5, 7, 10, 13][rng.bounded(7) as usize]
+    };
+    apply(npc, color, shared)?;
+    Ok(true)
+}
+
+/// 47f770: double max HP, scale the sprite, contact damage 2, then the
+/// color's effects. Init47f500 re-runs it for a champion's kept color when
+/// Morph480750 reloads the config.
+pub(crate) fn apply(npc: &mut Npc, color: u32, shared: &mut Mt19937) -> Result<(), String> {
     npc.max_hp *= 2.0;
     npc.collision_damage = 2.0;
     let mut champion = Champion {
-        color: 0,
+        color,
         scale: 1.15,
         speed: 1.0,
         timer: None,
     };
-    let stage = context.stage;
-    let pick = rng.uniform();
-    champion.color = if pick < 0.01 && stage > 4 {
-        6
-    } else if pick < 0.05 && stage > 4 {
-        match rng.bounded(3) {
-            0 => {
-                npc.grid_collision_class = 3;
-                8
-            }
-            1 => {
-                champion.timer = Some(shared.bounded(30) + 60);
-                9
-            }
-            _ => return Err("champion color 11 requires its actual light effect owner".into()),
+    match color {
+        0 => npc.max_hp *= 1.333,
+        1 => champion.speed = 1.333,
+        4 => champion.speed = 0.8,
+        7 => {
+            npc.max_hp *= 0.333;
+            champion.speed = 0.8;
         }
-    } else if pick < 0.15 {
-        match rng.bounded(3) {
-            0 => 3,
-            1 => {
-                champion.speed = 0.8;
-                4
-            }
-            _ => 12,
-        }
-    } else {
-        match rng.bounded(7) {
-            0 => {
-                npc.max_hp *= 1.333;
-                0
-            }
-            1 => {
-                champion.speed = 1.333;
-                1
-            }
-            2 => 2,
-            3 => 5,
-            4 => {
-                npc.max_hp *= 0.333;
-                champion.speed = 0.8;
-                7
-            }
-            5 => {
-                champion.timer = Some(shared.bounded(20) + 40);
-                10
-            }
-            _ => 13,
-        }
-    };
+        8 => npc.grid_collision_class = 3,
+        9 => champion.timer = Some(shared.bounded(30) + 60),
+        10 => champion.timer = Some(shared.bounded(20) + 40),
+        11 => return Err("champion color 11 requires its actual light effect owner".into()),
+        _ => {}
+    }
     npc.hp = npc.max_hp;
     npc.champion = Some(champion);
     // Champion tail 47f7b2 calls ResetColor with the rolled colour.
     npc.sprite_color = crate::sprite_color::SpriteColor::reset(npc.base_color());
-    Ok(true)
+    Ok(())
 }

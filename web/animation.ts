@@ -10,7 +10,8 @@ import attackData from "./attack-data.json";
 import bloodTearData from "./blood-tear-data.json";
 import costume229Data from "./costume229-data.json";
 import bossSplashData from "./boss-splash-data.json";
-const sceneData = { ...informationData, ...baseSceneData, ...doorData, ...gridData, ...npcData, ...familiarData, ...gameOverData, ...stageData, ...attackData, ...bloodTearData, ...costume229Data };
+import pocketData from "./pocket-data.json";
+const sceneData = { ...informationData, ...baseSceneData, ...doorData, ...gridData, ...npcData, ...familiarData, ...gameOverData, ...stageData, ...attackData, ...bloodTearData, ...costume229Data, ...pocketData };
 import fontData from "./font-data.json";
 import completionUrl from "./assets/completion_widget.png?url";
 import postitOverlapUrl from "./assets/gamemenu_postitoverlap.png?url";
@@ -37,6 +38,8 @@ const urls = import.meta.glob([
   "../references/isaac/rebirth/resources/gfx/ui/death *.png",
   "../references/isaac/rebirth/resources/gfx/ui/ui_hearts.png",
   "../references/isaac/rebirth/resources/gfx/ui/hudpickups.png",
+  "../references/isaac/rebirth/resources/gfx/ui/ui_cardspills.png",
+  "../references/isaac/rebirth/resources/gfx/ui/ui_cardfronts.png",
   "../references/isaac/rebirth/resources/gfx/ui/minimap1.png",
   "../references/isaac/rebirth/resources/gfx/ui/minimap2.png",
   "../references/isaac/rebirth/resources/gfx/ui/bgblack.png",

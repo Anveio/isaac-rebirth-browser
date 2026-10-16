@@ -127,10 +127,12 @@ export function entityRows(rows, source, actual, spec, render) {
     .map(cell => [cell.index, 'Idle']),
     render?.grid.filter(drawn => drawn.kind === 16).map(drawn => [drawn.index, drawn.animation]));
   // Pit Render draws `pit` frame variant (the autotile frame 5684c0 stores).
-  // GridEntity_Decoration Init 561e60 gives every decoration a Props clip.
-  // A render contract against the port's grid; clip parity is a diagnostic.
-  check(rows, 'render.decorations', (actual.room.grid?.cells ?? []).flatMap((cell, index) =>
-    cell.entity?.kind === 1 && actual.room.appearance.backdrop === 'gfx/backdrop/01_basement.png' ? [index] : []),
+  // GridEntity_Decoration Init 561e60 gives every decoration the original
+  // holds a Props clip, chosen by backdrop (Depths props in a sacrifice room,
+  // Sheol in a curse room); crawlspaces (16) draw none. The port must draw
+  // exactly the original's decoration cells; clip parity is a diagnostic.
+  check(rows, 'render.decorations', source.room.type === 16 ? []
+    : source.grid.filter(cell => cell.type === 1).map(cell => cell.index),
     render?.grid.filter(drawn => drawn.kind === 1).map(drawn => drawn.index));
   // Poop.Init569600 gives every ordinary poop (variant0) a grid_poop sprite;
   // an undrawn one is an invisible wall. This is a render contract against

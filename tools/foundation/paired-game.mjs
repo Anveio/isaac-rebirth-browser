@@ -8,7 +8,7 @@ import { promisify } from 'node:util';
 import { chromium } from '@playwright/test';
 import { PNG } from 'pngjs';
 import { browserLaunchOptions, inspectBrowserGraphics } from './browser.mjs';
-import { writeJsonEvidence } from './browser-evidence.mjs';
+import { manifestPath as browserManifestPath, readJsonEvidence, writeJsonEvidence } from './browser-evidence.mjs';
 import { compareMtDraws } from './mt-draws.mjs';
 import { readNativeEvidence } from './native-evidence.mjs';
 import { pixelDifference } from './compare.mjs';
@@ -51,7 +51,17 @@ function keyCode(key) {
   throw new Error(`No public browser key transport for ${key}`);
 }
 
-async function nativeCapture(caseData, directory, nativeFrameTimeout, originalObserver, archiveNativeEvidence, originalSfxVolume, mtDraws) {
+// Where a case's games start playing their own keys (its first
+// pairedIndependent scope), as the port's game update count at that capture.
+function independentDraws(caseData, directory) {
+  const after = caseData.pairedIndependent?.[0]?.after;
+  if (!after) return undefined;
+  const frame = readJsonEvidence(browserManifestPath(directory, 'browser')).frames.find(item => item.label === after);
+  assert.ok(Number.isInteger(frame?.state?.gameUpdateCount), `pairedIndependent capture ${after} has no game update count`);
+  return { label: after, gameUpdateCount: frame.state.gameUpdateCount };
+}
+
+async function nativeCapture(caseData, directory, nativeFrameTimeout, originalObserver, archiveNativeEvidence, originalSfxVolume, mtDraws, glTrace) {
   mkdirSync(directory, { recursive: true });
   const args = ['tools/original/with-display.sh', 'python3', 'tools/original/foundation-clock-run.py',
     '--seed', caseData.seed, '--tape', join(dirname(directory), 'tape.json'),
@@ -59,6 +69,7 @@ async function nativeCapture(caseData, directory, nativeFrameTimeout, originalOb
   if (archiveNativeEvidence) args.push('--archive-evidence');
   if (originalSfxVolume !== undefined) args.push('--sfx-volume', String(originalSfxVolume));
   if (mtDraws) args.push('--mt-trace');
+  if (glTrace) args.push('--gl-trace', glTrace);
   let error;
   try {
     const result = await runProcess('bash', args, { cwd: ROOT, maxBuffer: 8 * 1024 * 1024 });
@@ -287,14 +298,15 @@ function comparePair(caseData, native, browser, directory, exactPixels, stateCom
 export async function runPairedGate({ output, selected, randomCount = 2, replaySeeds = [], replayCases = [], exactPixels = false, productionDirectory,
   nativeFrameTimeout = 60, originalObserver = 'tools/original/foundation-paired-observer.py',
   stateComparator = scopedState, archiveBrowserEvidence = false, archiveNativeEvidence = false, captureBrowserAudio = false,
-  originalSfxVolume, mtDraws = process.argv.includes('--mt-draws') || process.env.E2E_MT_DRAWS === '1' }) {
+  originalSfxVolume, mtDraws = process.argv.includes('--mt-draws') || process.env.E2E_MT_DRAWS === '1',
+  glTrace = process.argv.includes('--gl-trace') }) {
   assert.ok(Number.isFinite(nativeFrameTimeout) && nativeFrameTimeout > 0 && nativeFrameTimeout <= 300,
     'Native frame timeout must be more than 0 and at most 300 host-wall seconds');
   mkdirSync(output, { recursive: true });
   let server, browser;
   const report = { schema: 1, status: 'starting', mode: 'fresh original process paired with immutable browser production artifact',
     nativeFrameTimeout, originalSfxVolume,
-    originalObserver, archiveBrowserEvidence, archiveNativeEvidence, captureBrowserAudio, mtDraws,
+    originalObserver, archiveBrowserEvidence, archiveNativeEvidence, captureBrowserAudio, mtDraws, glTrace,
     comparisons: { functional: 'Real input/phase/readback and source title, fade, player motion, pause/controller, HP, immunity, active tear/bomb counts',
       pixels: 'Strict full RGBA diagnostic; every difference remains a failure in its own pixel result',
       exactPixelsRequired: exactPixels, completeOriginalStateParity: false },
@@ -304,6 +316,13 @@ export async function runPairedGate({ output, selected, randomCount = 2, replayS
     const known = new Set(declarations.map(item => item.id));
     for (const id of selected) assert.ok(known.has(id), `Unknown paired scenario ${id}`);
     report.sourceBinarySha256 = digest(readFileSync(join(ROOT, '.cache/original-runtime/offline-depot/isaac.x64')));
+    // The public GL observer the original preloads (`--gl-trace`): it
+    // records submitted draws, including every room-cache backdrop draw.
+    const glTraceLibrary = glTrace ? join(output, 'gl-trace.so') : null;
+    if (glTraceLibrary)
+      await runProcess('cc', ['-std=c11', '-Wall', '-Wextra', '-Werror', '-fPIC', '-shared', '-Wl,--no-undefined',
+        join(ROOT, 'tools/original/foundation-gl-trace.c'), join(ROOT, 'tools/original/foundation-gl-state.c'),
+        '-o', glTraceLibrary, '-ldl', '-lm'], { cwd: ROOT });
     server = await startProductionServer({ directory: productionDirectory });
     report.build = server.build;
     browser = await chromium.launch({ ...browserLaunchOptions(), headless: false });
@@ -327,7 +346,7 @@ export async function runPairedGate({ output, selected, randomCount = 2, replayS
         // Await both independent captures even if one transport/archive fails.
         // Remaining declared cases still run; failed capture evidence stays red.
         const captures = await Promise.allSettled([
-          nativeCapture(caseData, join(directory, 'original'), nativeFrameTimeout, originalObserver, archiveNativeEvidence, originalSfxVolume, mtDraws),
+          nativeCapture(caseData, join(directory, 'original'), nativeFrameTimeout, originalObserver, archiveNativeEvidence, originalSfxVolume, mtDraws, glTraceLibrary),
           browserCapture(browser, server, caseData, join(directory, 'browser'), archiveBrowserEvidence, captureBrowserAudio, mtDraws),
         ]);
         native = captures[0].status === 'fulfilled' ? captures[0].value
@@ -344,7 +363,7 @@ export async function runPairedGate({ output, selected, randomCount = 2, replayS
         if (mtDraws) {
           try {
             result.mtDraws = compareMtDraws(join(directory, 'original', 'mt-trace'),
-              JSON.parse(readFileSync(join(directory, 'browser', 'mt-draws.json'), 'utf8')));
+              JSON.parse(readFileSync(join(directory, 'browser', 'mt-draws.json'), 'utf8')), 6, independentDraws(caseData, directory));
           } catch (error) { result.mtDraws = { status: 'diagnostic', error: String(error) }; }
         }
       } catch (error) {

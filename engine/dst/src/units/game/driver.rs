@@ -353,10 +353,20 @@ impl Driver {
         // The GameOver popup reads released confirm (Enter/Space) and back
         // (Escape) edges at a tick; other keys must be ignored.
         if state.player_death.game_over.is_some() {
-            return match e.below(8) {
+            return match e.below(9) {
                 0..=2 => self.press(e.pick(&["Enter", "Space"]), e.range(1, 3)),
                 3..=4 => self.press("Escape", e.range(1, 3)),
                 5 => self.press(e.pick(&PUBLIC_KEYS), 0),
+                // Held keys survive the Restart, so confirming while walking
+                // and then ticking long carries the new run's player on from
+                // its starting room (regression-restart-walks-on).
+                6 => {
+                    let walk = *e.pick(&MOVES);
+                    if !state.pressed.contains(walk) {
+                        self.queue.push_back(key(walk, true));
+                    }
+                    self.press(e.pick(&["Enter", "Space"]), e.range(150, 400));
+                }
                 _ => self.ticks(e),
             };
         }

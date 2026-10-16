@@ -31,3 +31,7 @@ gfx/079.000_gemini.anm2
 gfx/079.010_gemini baby.anm2
 gfx/079.020_umbilical cord.anm2
 gfx/1000.050_laserimpact.anm2
+gfx/010.000_frowning gaper.anm2
+gfx/010.001_gaper.anm2
+gfx/011.000_gusher.anm2
+gfx/011.001_pacer.anm2
