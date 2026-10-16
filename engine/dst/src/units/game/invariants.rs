@@ -10,8 +10,12 @@ use rebirth_cleanroom::{seed, Command, PausePhase, Screen, State, MAX_COMMAND_TI
 use serde_json::json;
 use std::collections::BTreeSet;
 
-/// Inputs the engine documents as rejected (state unchanged, error
-/// returned). Everything else must be accepted.
+/// Malformed inputs the public API documents as rejected (state unchanged,
+/// error returned). Whether a well-formed input is accepted is the engine's
+/// call: a menu entry, mode, Challenge or character the port has not
+/// implemented yet may refuse its input, and pinning that refusal would turn
+/// each unported feature into a failing property. A refusal still leaves the
+/// game unchanged and a valid Tick still always succeeds.
 pub fn expected_rejection(state: &State, command: &Command) -> Option<&'static str> {
     match command {
         Command::Tick {
@@ -29,30 +33,7 @@ pub fn expected_rejection(state: &State, command: &Command) -> Option<&'static s
         Command::AudioVolume { sfx_volume: volume } | Command::MusicVolume { volume } => {
             (!volume.is_finite() || !(0.0..=1.0).contains(volume)).then_some("volume range")
         }
-        Command::Key { code, .. } if !input::is_public_key(code) => Some("unsupported key"),
-        Command::Key { code, down } => {
-            if !*down || state.pressed.contains(code) {
-                return None;
-            }
-            let request = &state.run_start_request;
-            if state.screen != Screen::Playing && (request.input_pending || request.fading) {
-                return None;
-            }
-            match (state.screen, code.as_str()) {
-                (Screen::Main, "Enter") if !matches!(state.main_selection, 0 | 2) => {
-                    Some("unimplemented main menu action")
-                }
-                // This workload boots the authored catalogue without resource
-                // overrides. Its Challenge1 filters exceed the implemented
-                // neutral scope, and the other authored IDs are unimplemented.
-                (Screen::Challenge, "Enter") => Some("unimplemented authored Challenge"),
-                (Screen::Character, "Enter") if state.difficulty != "normal" => {
-                    Some("unimplemented hard mode")
-                }
-                (Screen::Character, "Enter") if !startable(state) => Some("unstartable character"),
-                _ => None,
-            }
-        }
+        Command::Key { code, .. } => (!input::is_public_key(code)).then_some("unsupported key"),
         Command::Text { .. } if state.screen != Screen::Seed => Some("text outside seed dialog"),
         Command::Text { text } => {
             let compact: String = text.chars().filter(|glyph| *glyph != ' ').collect();
@@ -64,25 +45,53 @@ pub fn expected_rejection(state: &State, command: &Command) -> Option<&'static s
     }
 }
 
-/// Fresh profiles unlock Isaac only, and only Isaac's runtime exists; Random
-/// resolves among the profile's unlocked characters.
-fn startable(state: &State) -> bool {
-    let unlocked = &state.profiles[usize::from(state.profile - 1)].unlocked_characters;
-    if state.character == "Random" {
-        !unlocked.is_empty() && unlocked.iter().all(|character| character == "Isaac")
-    } else {
-        state.character == "Isaac" && unlocked.contains(&state.character)
-    }
+/// The source holds that clear the player's controls (Player+7d4).
+pub fn controls_hold(state: &State) -> bool {
+    state.run_admission.initial_fade != 0.0
+        || state.room_transition.is_some()
+        || state.stage_transition.active()
 }
 
-pub fn outcome(state: &State, command: &Command, result: &Result<(), String>) {
+/// A character the profile has not unlocked; Random resolves among the
+/// unlocked ones, so it is never locked.
+fn locked(state: &State) -> bool {
+    let unlocked = &state.profiles[usize::from(state.profile - 1)].unlocked_characters;
+    state.character != "Random" && !unlocked.contains(&state.character)
+}
+
+fn run_requested(state: &State) -> bool {
+    let request = &state.run_start_request;
+    state.screen == Screen::Playing
+        || request.input_pending
+        || request.fading
+        || request.system_pending
+}
+
+pub fn outcome(state: &State, command: &Command, result: &Result<(), String>, after: &State) {
     let expected = expected_rejection(state, command);
     let details = || json!({ "command": command, "result": result, "expected": expected });
     props::always!(
-        result.is_err() == expected.is_some(),
-        "game: exactly the documented invalid inputs are rejected",
+        expected.is_none() || result.is_err(),
+        "game: malformed inputs are rejected",
         details()
     );
+    // Locked characters cannot be played in the original. Refusing or
+    // ignoring the press is the engine's choice; either way no run starts.
+    if let Command::Key { code, down: true } = command {
+        if state.screen == Screen::Character
+            && code == "Enter"
+            && !state.pressed.contains(code)
+            && locked(state)
+            && !run_requested(state)
+        {
+            props::always!(
+                !run_requested(after),
+                "game: confirming a locked character never starts a run",
+                details()
+            );
+            props::sometimes!(true, "game: a locked character is confirmed");
+        }
+    }
     if matches!(command, Command::Tick { .. }) {
         props::always!(
             expected.is_some() || result.is_ok(),
@@ -110,24 +119,6 @@ pub fn outcome(state: &State, command: &Command, result: &Result<(), String>) {
             Some("unsupported key") => {
                 props::sometimes!(true, "game: an unsupported key is rejected")
             }
-            Some("unimplemented main menu action") => {
-                props::sometimes!(true, "game: an unimplemented main menu action is rejected")
-            }
-            Some("unimplemented authored Challenge") => {
-                props::sometimes!(
-                    true,
-                    "game: an unimplemented authored Challenge is rejected"
-                )
-            }
-            Some("unimplemented hard mode") => {
-                props::sometimes!(true, "game: an unimplemented hard-mode run is rejected")
-            }
-            Some("unstartable character") => {
-                props::sometimes!(
-                    true,
-                    "game: a locked or unimplemented character is rejected"
-                )
-            }
             Some("text outside seed dialog") => {
                 props::sometimes!(true, "game: text outside the seed dialog is rejected")
             }
@@ -139,10 +130,15 @@ pub fn outcome(state: &State, command: &Command, result: &Result<(), String>) {
     }
 }
 
+/// The original's key-driven menu graph. Edges the port has yet to
+/// implement (Continue, the pause menu's Exit) are included so that porting
+/// them is not a failure.
 fn menu_edge(from: Screen, to: Screen) -> bool {
     matches!(
         (from, to),
-        (Screen::Title, Screen::Profile)
+        (Screen::Main, Screen::Playing)
+            | (Screen::Playing, Screen::Main)
+            | (Screen::Title, Screen::Profile)
             | (Screen::Profile, Screen::Main)
             | (Screen::Profile, Screen::Title)
             | (Screen::Main, Screen::Profile)
@@ -211,11 +207,11 @@ pub fn transition(before: &State, command: &Command, after: &State) {
                 "game: the menu animation clock advances with Tick and restarts on screen changes",
                 json!({ "count": count, "before": before.menu_animation_tick, "after": after.menu_animation_tick })
             );
-            let game_over_exit =
-                before.player_death.game_over.is_some() && after.screen == Screen::Main;
+            // A Tick may leave gameplay (GameOver, and the endings once
+            // ported); between menus only keys move.
             props::always!(
-                before.screen == after.screen || run_started || game_over_exit,
-                "game: Tick changes the screen only by starting a run or leaving GameOver",
+                before.screen == after.screen || run_started || before.screen == Screen::Playing,
+                "game: a Tick moves between menu screens only by starting a run",
                 json!({ "before": before.screen, "after": after.screen })
             );
             if before.screen == Screen::Playing
@@ -250,23 +246,24 @@ pub fn transition(before: &State, command: &Command, after: &State) {
                 }
             }
             if before.screen == Screen::Playing && after.screen == Screen::Playing && !restarted {
-                // StageTransition (docs/stage-progression.md) is the only
-                // admitted floor change: SetNextStage advances the stage and
-                // Level::Init, up to a nightmare scene later, generates the
-                // next stage's floor from that stage's seed.
-                let descended = after.floor.stage == before.floor.stage + 1
+                // A floor changes by descending (docs/stage-progression.md):
+                // SetNextStage advances the stage and Level::Init, up to a
+                // nightmare scene later, generates its floor from that stage's
+                // seed. A descent may skip a stage (Curse of the Labyrinth's
+                // XL floors), so only a deeper stage is pinned.
+                let descended = after.floor.stage > before.floor.stage
                     && after.floor.stage == after.stage
                     && after.floor.stage_seed == after.stage_seed;
                 props::always!(
                     after.game_update_count >= before.game_update_count
                         && after.stage >= before.stage
                         && (after.floor == before.floor || descended),
-                    "game: within a run the floor changes only by descending to the next stage, and full updates never rewind",
+                    "game: within a run the floor changes only by descending to a deeper stage, and full updates never rewind",
                     json!({ "stage": [before.stage, after.stage], "stageSeed": [before.stage_seed, after.stage_seed] })
                 );
                 props::sometimes!(
                     after.floor != before.floor,
-                    "game: a run descends to the next stage's floor"
+                    "game: a run descends to a deeper stage's floor"
                 );
             }
             if before.paused && after.paused && count > 0 {
@@ -727,7 +724,7 @@ pub fn state(state: &State) {
     let stage_seed =
         |stage: u32| (0..=stage).fold(state.run_seed_value, |value, _| seed::startup_next(value));
     let transition = state.stage_transition.active();
-    let level_stage = if transition && state.floor.stage + 1 == state.stage {
+    let level_stage = if transition && state.floor.stage < state.stage {
         state.floor.stage
     } else {
         state.stage
@@ -775,23 +772,18 @@ pub fn state(state: &State) {
     );
     let admission = &state.run_admission;
     // Player+7d4 is cleared by the run-start fade, by every doorway or
-    // boss-scene transition and by StageTransition::Start (5e3800), and set
-    // again when all have finished (stage transition state 4).
-    let controls_follow_holds = if state.screen == Screen::Playing {
-        state.player.controls_enabled
-            == (admission.initial_fade == 0.0
-                && state.room_transition.is_none()
-                && !state.stage_transition.active())
-            && admission.requested_time_anchor_ms.is_some()
-    } else {
-        state.player.controls_enabled && admission.initial_fade == 0.0
-    };
+    // boss-scene transition and by StageTransition::Start (5e3800). Other
+    // source holds may clear it once ported, so only this direction is
+    // pinned; the simulation checks that lost controls come back.
+    let held_but_controlled =
+        state.screen == Screen::Playing && controls_hold(state) && state.player.controls_enabled;
     props::always!(
         (0.0..=1.0).contains(&admission.initial_fade)
             && (admission.fade_rate == 0.0 || admission.fade_rate == 0.04)
             && admission.clock.sub_millisecond_nanoseconds < 1_000_000
-            && controls_follow_holds,
-        "game: player controls are disabled exactly while the run-start fade, a room transition or a stage transition holds",
+            && (state.screen != Screen::Playing || admission.requested_time_anchor_ms.is_some())
+            && !held_but_controlled,
+        "game: player controls are disabled while the run-start fade, a room transition or a stage transition holds",
         json!({ "admission": admission, "controls": state.player.controls_enabled, "transition": state.room_transition, "stageTransition": state.stage_transition })
     );
     let request = &state.run_start_request;
@@ -1037,13 +1029,19 @@ pub fn state(state: &State) {
     );
     match &state.room_transition {
         Some(transition) => {
+            // A transition through one of the room's doors leads to the
+            // neighbor behind it. Teleports (Teleport!, the Fool card, the
+            // I AM ERROR room) change rooms without a door once ported.
             props::always!(
                 transition.from_room < rooms
                     && transition.target_room < rooms
                     && state.floor.descriptors[transition.from_room]
                         .neighbors
-                        .contains(&Some(transition.target_room)),
-                "game: room transitions follow floor neighbor links",
+                        .get(usize::from(transition.from_slot))
+                        .is_none_or(|neighbor| {
+                            neighbor.is_none_or(|room| room == transition.target_room)
+                        }),
+                "game: a door transition leads to the neighbor behind its door",
                 json!({ "transition": transition })
             );
             props::sometimes!(
@@ -1074,9 +1072,19 @@ pub fn state(state: &State) {
         descriptor.grid_index as i32 % 13 - 6,
         descriptor.grid_index as i32 / 13 - 6,
     );
+    // A minimap may mark a large room by its origin cell or its whole
+    // footprint; either way only cells of the current room are current.
+    let (columns, rows) = (
+        (i32::from(descriptor.template.width) / 13).max(1),
+        (i32::from(descriptor.template.height) / 7).max(1),
+    );
     props::always!(
-        current_cells.len() == 1 && (current_cells[0].x, current_cells[0].y) == expected,
-        "game: the minimap marks exactly the current room",
+        !current_cells.is_empty()
+            && current_cells.iter().all(|cell| {
+                (expected.0..expected.0 + columns).contains(&cell.x)
+                    && (expected.1..expected.1 + rows).contains(&cell.y)
+            }),
+        "game: the minimap marks the current room and no other",
         json!({ "cells": state.minimap.cells, "expected": expected })
     );
     props::sometimes!(

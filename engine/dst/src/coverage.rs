@@ -7,11 +7,14 @@
 //!
 //! Each case also records the command at which it first reached every key,
 //! so `tools/dst/cover.py` can cut the shortest tape prefixes that bring a
-//! missing key into the corpus.
+//! missing key into the corpus, and `tools/dst/chase.py` can branch from
+//! where a case first reached one. A property the case met is the key
+//! `property:<message>`, so a must-hit a corpus no longer meets is cut back
+//! the same way.
 use rebirth_cleanroom::{implemented_npc_kinds, items, room_assets, Screen, State};
 use serde_json::{json, Value};
 use std::cell::RefCell;
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::{BTreeMap, BTreeSet, HashSet};
 use std::sync::Mutex;
 
 struct Census {
@@ -33,6 +36,15 @@ struct Current {
     /// The live NPCs (id to kind) of the room the last observation saw, by
     /// floor and room.
     live: Option<((u32, usize), BTreeMap<u32, u32>)>,
+    /// Whether a `game` case is running; other units' properties are not
+    /// part of the census.
+    active: bool,
+    /// Property sites (by address) already met, checked before formatting.
+    met: HashSet<usize>,
+    /// The highest floor stage the case has played.
+    deepest: u32,
+    /// Whether the case reached the menus after playing a deeper stage.
+    menus_after_descent: bool,
 }
 
 static CENSUS: Mutex<Census> = Mutex::new(Census {
@@ -53,7 +65,26 @@ fn census() -> std::sync::MutexGuard<'static, Census> {
 }
 
 pub fn begin_case() {
-    CURRENT.with(|current| *current.borrow_mut() = Current::default());
+    CURRENT.with(|current| {
+        *current.borrow_mut() = Current {
+            active: true,
+            ..Current::default()
+        }
+    });
+}
+
+/// A property call site the running case met (see `props::Site::record`).
+pub fn met(site: usize, message: &'static str) {
+    CURRENT.with(|current| {
+        let mut current = current.borrow_mut();
+        if current.active && current.met.insert(site) {
+            let step = crate::props::step();
+            current
+                .keys
+                .entry(format!("property:{message}"))
+                .or_insert(step);
+        }
+    });
 }
 
 /// Folds the case into the census under `label`, its retained tape's name.
@@ -74,8 +105,21 @@ pub fn end_case(label: &str) {
 pub fn observe(state: &State) {
     let mut keys = vec![format!("screen:{:?}", state.screen)];
     if state.screen == Screen::Playing {
-        // The floor's stage: a descent shows as `stage:2`.
+        // The floor's stage: a descent shows as `stage:2`, and a run started
+        // after one as `new run after a descent`, from the menus also as
+        // `new run from the menus after a descent`.
         keys.push(format!("stage:{}", state.floor.stage));
+        let (deepest, menus) = CURRENT.with(|current| {
+            let mut current = current.borrow_mut();
+            current.deepest = current.deepest.max(state.floor.stage);
+            (current.deepest, current.menus_after_descent)
+        });
+        if state.floor.stage == 1 && deepest > 1 {
+            keys.push("new run after a descent".to_owned());
+            if menus {
+                keys.push("new run from the menus after a descent".to_owned());
+            }
+        }
         if let Some(room) = state.floor.descriptors.get(state.current_room) {
             let template = &room.template;
             keys.push(if (template.width, template.height) == (13, 7) {
@@ -92,6 +136,10 @@ pub fn observe(state: &State) {
         }
         for npc in state.room.npcs.iter().filter(|npc| !npc.removed) {
             keys.push(format!("npc:{}", npc.kind));
+            // A Fireplace dies by going out (state 3, NoFire) and stays put.
+            if npc.kind == 33 && npc.state == 3 {
+                keys.push("extinguished:33".to_owned());
+            }
         }
         // Removal: an NPC left a room the player stayed in, killed or retired
         // by its family. Removed bodies are pruned within the update that
@@ -184,6 +232,7 @@ pub fn observe(state: &State) {
         let mut current = current.borrow_mut();
         if state.screen != Screen::Playing {
             current.live = None;
+            current.menus_after_descent |= current.deepest > 1;
         }
         if state.screen == Screen::Playing {
             let rooms = state.floor.descriptors.iter();
@@ -224,6 +273,7 @@ pub fn report() -> Value {
         .filter(|kind| {
             census.reached.contains_key(&format!("npc:{kind}"))
                 && !census.reached.contains_key(&format!("removed:{kind}"))
+                && !census.reached.contains_key(&format!("extinguished:{kind}"))
         })
         .collect();
     let unentered_rooms: Vec<u32> = census

@@ -148,6 +148,8 @@ try {
         for (const field of ['type', 'variant', 'name', 'width', 'height'])
           phaseAssert.equal(state.room.descriptor.template[field], descriptor.template[field], `${label}:authored identity ${field}`);
         phaseAssert.equal(state.room.descriptor.spawnSeed, original.context.publicLogState.spawnSeed, `${label}:actual room SpawnRNG log join`);
+        // Room.Init backdrop setup 5c5b30 selects Room+1ae0 from the room type and stage.
+        phaseAssert.equal(state.room.appearance.backdropId, observed.contents.room.backdropType, `${label}:source backdrop selection`);
         phaseAssert.deepEqual(state.floor.grid, source.grid, `${label}:floor topology`);
         phaseAssert.deepEqual([state.player.x, state.player.y, state.player.vx, state.player.vy],
           [actor.position[0] * .65 + 32, actor.position[1] * .65 - 46, actor.velocity[0] * .65, actor.velocity[1] * .65], `${label}:source f32 motion projection`);

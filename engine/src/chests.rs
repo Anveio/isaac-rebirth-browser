@@ -27,6 +27,16 @@ pub struct Chest {
     /// These are dynamic births, independent of immutable authored STB groups.
     #[serde(default)]
     pub loot_births: Vec<LootBirth>,
+    /// Missing opening callbacks never grant a substitute loot outcome.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub open_frontier: Option<OpenFrontier>,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub enum OpenFrontier {
+    PlayerContext,
+    CollectibleMorph,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
@@ -139,6 +149,14 @@ pub(crate) fn scatter(position: WorldVector, grid: &Grid, shared: &mut Mt19937) 
 
 /// Fresh free normal Chest contact in the full postactor manager pass.
 pub(crate) fn try_open(state: &mut State, index: usize) -> Result<bool, String> {
+    if state
+        .room
+        .pickups
+        .get(index)
+        .is_some_and(|pickup| pickup.variant == 60)
+    {
+        return try_open_locked(state, index);
+    }
     let Some(pickup) = state.room.pickups.get(index) else {
         return Ok(false);
     };
@@ -227,6 +245,260 @@ pub(crate) fn try_open(state: &mut State, index: usize) -> Result<bool, String> 
     Ok(true)
 }
 
+/// Separate actual Collect504820 and TryOpen500E80 readsets for the selected
+/// free locked Chest. This is not permission inherited from normal Chest50.
+fn locked_context(state: &State) -> bool {
+    state.stage == 1
+        && state
+            .room
+            .descriptor
+            .as_ref()
+            .is_some_and(|room| room.template.room_type == 1)
+        && state.weapon_admission.source_player_type == Some(0)
+        && state
+            .player
+            .entity_source
+            .is_some_and(|source| source.entity_type == 1 && source.variant == 0)
+        && state.player_items.as_ref().is_some_and(|items| {
+            items.owned_counts.len() == 347
+                && items.owned_counts.iter().all(|&count| count == 0)
+                && items.temporary_collectibles.is_empty()
+                && items.trinket_slots == [0, 0]
+                && items.queued_id.is_none()
+                && items.active_state_d80 == 0
+                && items.collection_delay <= 0
+                && !items.pickup_animation_guard
+        })
+}
+
+fn try_open_locked(state: &mut State, index: usize) -> Result<bool, String> {
+    let pickup = &state.room.pickups[index];
+    let Some(chest) = pickup.chest.as_ref() else {
+        return Ok(false);
+    };
+    if pickup.subtype == 0
+        || pickup.removed
+        || !pickup.can_collect
+        || pickup.collection_delay != 0
+        || chest.entity_collision_class != 4
+        || chest.price != 0
+        || chest.cooldown != 0
+        || !pickup.touches(&state.player)
+        || !crate::pickups::player_can_collect(state)
+    {
+        return Ok(false);
+    }
+    if !locked_context(state) || state.player.golden_key.is_none() {
+        state.room.pickups[index]
+            .chest
+            .as_mut()
+            .expect("locked Chest")
+            .open_frontier
+            .get_or_insert(OpenFrontier::PlayerContext);
+        return Ok(false);
+    }
+    // PaperClip19 is independently false in this actual empty trinket/queue
+    // context. A failed real TryUseKey cannot reach the loot callback.
+    if state.player.golden_key == Some(false) && state.inventory.keys == 0 {
+        return Ok(false);
+    }
+    let position = pickup.position;
+    let mut rng = chest.rng;
+    // Capability inspection only. Missing optional weak/pool/manager owners
+    // cannot be manufactured from inventory or consume real key/audio/RNG.
+    let mut branch = rng;
+    let morph = branch.bounded(5) == 0;
+    let actor = ActorRef {
+        kind: ActorKind::Pickup,
+        id: pickup.id,
+    };
+    if morph
+        && (pickup
+            .morph_links
+            .as_ref()
+            .is_none_or(|links| !links.known_empty())
+            || state.item_pools.is_none()
+            || state.actor_scheduler.sequence_id(actor).is_none()
+            || !state.actor_scheduler.full_phase().contains(&actor))
+    {
+        state.room.pickups[index]
+            .chest
+            .as_mut()
+            .expect("locked Chest")
+            .open_frontier
+            .get_or_insert(OpenFrontier::CollectibleMorph);
+        return Ok(false);
+    }
+    let grid = Grid::new(
+        state
+            .room
+            .grid
+            .clone()
+            .ok_or("locked Chest requires room grid")?,
+    )?;
+    // 5052E1 precedes TryOpen. Golden BD0 uses the same actual key API and
+    // never decrements BCC; missing owner was rejected above, not defaulted.
+    if !state.player.try_use_key(&mut state.inventory) {
+        return Ok(false);
+    }
+    let pickup = &mut state.room.pickups[index];
+    pickup.subtype = 0;
+    pickup.animation = "Open".into();
+    pickup.animation_frame = 0.0;
+    pickup.animation_playing = true;
+    pickup.can_collect = false;
+    // 501078 SFX22, then locked-only501576 SFX156, both before local R5.
+    for id in [22, 156] {
+        state.audio.admit(
+            &mut state.boot_lifecycle.shared,
+            state.system_clock.system_counter.wrapping_sub(1),
+            SoundRequest {
+                id,
+                volume: 1.0,
+                delay: 2,
+                looping: false,
+                pitch: 1.0,
+            },
+        );
+    }
+    if morph {
+        //501110 R5==0,50113D raw,50115C pool8(decrease=true).
+        //The copied capability peek above never advances this actual owner.
+        let _morph_roll = rng.bounded(5);
+        let subtype = state
+            .item_pools
+            .as_mut()
+            .expect("admitted Morph pool")
+            .collectible(8, true, rng.raw())?;
+        let pickup = &mut state.room.pickups[index];
+        pickup.anchor_position = pickup.position;
+        pickup.morph_to_collectible(
+            subtype,
+            state.game_update_count,
+            &mut state.actor_scheduler,
+        )?;
+        //5011F2..246 computes current ChestP - FIRSTPlayerP. The actual
+        //near callback changes only PlayerV; cooldown20 follows every path.
+        let player_position = crate::bombs::player_world(state);
+        let delta = WorldVector {
+            x: position.x - player_position.x,
+            y: position.y - player_position.y,
+        };
+        let distance_squared = delta.x * delta.x + delta.y * delta.y;
+        if distance_squared < 1600.0 {
+            let amount = (40.0 - distance_squared.sqrt()) * 0.4;
+            let push = crate::npcs::normalized(delta) * amount;
+            let velocity = crate::bombs::player_velocity(state);
+            let velocity = WorldVector {
+                x: velocity.x - push.x,
+                y: velocity.y - push.y,
+            } * 0.5;
+            state.player.vx = f64::from(velocity.x) * 0.65;
+            state.player.vy = f64::from(velocity.y) * 0.65;
+        }
+        state.room.pickups[index].collection_delay = 20;
+        return Ok(true);
+    }
+    let mut births = Vec::new();
+    let game_update = state.game_update_count;
+    let room = &mut state.room;
+    let scheduler = &mut state.actor_scheduler;
+    let next_pickup = &mut state.next_pickup;
+    locked_opening_loot(
+        &mut rng,
+        position,
+        &grid,
+        &mut state.boot_lifecycle.shared,
+        |birth, _shared| {
+            admit_child(room, scheduler, next_pickup, game_update, &birth)?;
+            births.push(birth);
+            Ok(())
+        },
+    )?;
+    let chest = state.room.pickups[index]
+        .chest
+        .as_mut()
+        .expect("locked Chest opening");
+    chest.rng = rng;
+    chest.loot_births.extend(births);
+    Ok(true)
+}
+
+/// Actual locked60 non-Morph branch. PersistentRNG30, shared scatter and
+/// immediate child callbacks keep their independent native ordering.
+fn locked_opening_loot(
+    rng: &mut Rng,
+    position: WorldVector,
+    grid: &Grid,
+    shared: &mut Mt19937,
+    mut spawn: impl FnMut(LootBirth, &mut Mt19937) -> Result<(), String>,
+) -> Result<(), String> {
+    if rng.bounded(5) == 0 {
+        return Err("locked Chest collectible Morph unadmitted".into());
+    }
+    if rng.bounded(5) == 0 {
+        let velocity = scatter(position, grid, shared);
+        let variant = if rng.bounded(2) == 0 { 350 } else { 300 };
+        let seed = rng.raw();
+        return spawn(
+            LootBirth {
+                variant,
+                spawn_seed: seed,
+                position,
+                velocity: velocity * 0.4,
+                sprite_scale_multiplier: None,
+            },
+            shared,
+        );
+    }
+    let mut count = rng.bounded(7).max(2);
+    if rng.bounded(3) != 0 {
+        let _modifier_scatter = scatter(position, grid, shared);
+    }
+    // Actual no-trinket and no-item199 context leaves count unchanged.
+    let mut completed = 0;
+    while completed < count {
+        let category = rng.uniform();
+        let variant = if category < 0.35 {
+            20
+        } else if category < 0.55 {
+            10
+        } else if category < 0.70 {
+            30
+        } else if completed == 0 && category < 0.71 {
+            50
+        } else if completed == 0 && category < 0.72 {
+            60
+        } else {
+            40
+        };
+        let children = if variant == 20 { rng.bounded(3) + 1 } else { 1 };
+        for _ in 0..children {
+            let velocity = scatter(position, grid, shared);
+            let seed = rng.raw();
+            spawn(
+                LootBirth {
+                    variant,
+                    spawn_seed: seed,
+                    position,
+                    velocity,
+                    sprite_scale_multiplier: matches!(variant, 50 | 60).then_some(0.8),
+                },
+                shared,
+            )?;
+        }
+        // First-iteration .70/.71 rare children end the actual callback.
+        if matches!(variant, 50 | 60) {
+            return Ok(());
+        }
+        if variant == 10 && rng.bounded(2) == 0 {
+            count = count.saturating_sub(1);
+        }
+        completed += 1;
+    }
+    Ok(())
+}
+
 fn admit_child(
     room: &mut Room,
     scheduler: &mut Scheduler,
@@ -273,7 +545,7 @@ fn admit_child(
 pub(crate) fn player_contact(state: &mut State, index: usize) -> Result<(), String> {
     let pickup = &state.room.pickups[index];
     if state.player.dead
-        || pickup.variant != 50
+        || !matches!(pickup.variant, 50 | 60)
         || pickup.removed
         || pickup
             .chest
@@ -282,6 +554,9 @@ pub(crate) fn player_contact(state: &mut State, index: usize) -> Result<(), Stri
     {
         return Ok(());
     }
+    //445765..77B captures the pre-callback radius sum before Collect/Morph.
+    //Current mass and velocity are read only after the real callback returns.
+    let contact_radius = pickup.collision_radius;
     try_open(state, index)?;
     let grid = Grid::new(
         state
@@ -313,7 +588,7 @@ pub(crate) fn player_contact(state: &mut State, index: usize) -> Result<(), Stri
         entity_type: 5,
         position: pickup.position,
         velocity: pickup.velocity,
-        radius: pickup.collision_radius,
+        radius: contact_radius,
         mass: pickup.collision_mass,
     };
     let position = player.position;
@@ -432,6 +707,45 @@ pub(crate) fn from_selector(
         price: 0,
         cooldown: 0,
         loot_births: Vec::new(),
+        open_frontier: None,
+    });
+    Ok(Some(pickup))
+}
+
+/// Init4FFEC5 routes60 straight to the actual LeftHand61 test at4FFF19;
+/// it never takes normal50's temporary R20/R50 replacement draws.
+pub(crate) fn from_locked_selector(
+    id: u32,
+    selector: &SpawnSelector,
+    appear: bool,
+    state: &State,
+) -> Result<Option<Pickup>, String> {
+    if selector.entity_type != 5 || selector.variant != 60 {
+        return Ok(None);
+    }
+    if !locked_context(state) {
+        return Ok(None);
+    }
+    if selector.spawn_seed == 0 {
+        return Err("locked Chest spawn seed must be nonzero".into());
+    }
+    let mut pickup = Pickup::spawn(id, 60, 1, selector.position, appear)?;
+    pickup.spawn_seed = selector.spawn_seed;
+    pickup.chest = Some(Chest {
+        rng: Rng::new(selector.spawn_seed, [4, 3, 17]),
+        grid_collision_class: 5,
+        entity_collision_class: if appear { 0 } else { 4 },
+        price: 0,
+        cooldown: 0,
+        loot_births: Vec::new(),
+        open_frontier: None,
+    });
+    //441F1F..35 clears all three actual weak words; the room no-spawner
+    //Game.Spawn wrapper550ADD goes directly to registration without a setter.
+    pickup.morph_links = Some(crate::pickups::MorphLinks {
+        parent498: None,
+        link4a0: None,
+        link4a8: None,
     });
     Ok(Some(pickup))
 }
