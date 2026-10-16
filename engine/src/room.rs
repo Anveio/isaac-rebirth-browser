@@ -50,6 +50,10 @@ pub struct Room {
     pub authored_actor_order: Vec<crate::actors::ActorRef>,
     #[serde(default)]
     pub manager_counts: crate::actors::ManagerCounts,
+    ///Source ordinary4/5/6 membership completeness, not a current-roster test.
+    ///Legacy restores cannot inherit the fresh Room reset capability.
+    #[serde(default)]
+    pub ordinary_placement: Option<crate::ordinary_placement::Coverage>,
     pub boss_count: u32,
     pub boss_presentation_index: u32,
     pub combat_clear: bool,
@@ -980,6 +984,7 @@ impl Room {
             background_stains: Vec::new(),
             authored_actor_order: Vec::new(),
             manager_counts: crate::actors::ManagerCounts::default(),
+            ordinary_placement: None,
             boss_count: 0,
             boss_presentation_index: 0,
             combat_clear: true,

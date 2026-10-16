@@ -97,6 +97,7 @@ pub mod mt;
 pub mod music;
 pub mod nightmares;
 pub mod npcs;
+pub mod ordinary_placement;
 pub mod pathfinder;
 pub mod phase;
 pub mod pickups;
@@ -1985,6 +1986,8 @@ impl Game {
         critter_counter: u32,
         loader: bool,
     ) -> Result<usize, String> {
+        //453EC0 finished its ordinary-list reset and callbacks.
+        ordinary_placement::begin_fresh_room(&mut self.state);
         let mut pickups = Vec::new();
         let mut npcs = Vec::new();
         let mut order = Vec::new();
@@ -2060,12 +2063,18 @@ impl Game {
                 selector,
                 self.state.game_update_count,
             )?;
+            ordinary_placement::remember_room_frontier(&mut self.state);
             let id = u32::try_from(npcs.len()).map_err(|_| "NPC identity exhausted")?;
             let context = entities::SpawnContext {
                 stage: self.state.stage,
                 game_update_count: self.state.game_update_count,
             };
             if let Some(mut npc) = entities::spawn(id, selector, &context)? {
+                //Registered AI is not a proof of its producer footprint.
+                ordinary_placement::invalidate(&mut self.state,
+                    ordinary_placement::Frontier::ActorEffects {
+                        actor: actors::ActorRef { kind: actors::ActorKind::Npc, id },
+                    });
                 champions::roll(
                     &mut npc,
                     &mut self.state.boot_lifecycle.shared,
@@ -2130,6 +2139,14 @@ impl Game {
                         .ok_or("pickup identity counter exhausted")?;
                     pickups.push(pickup);
                 }
+            }
+            if selector.category == room_spawns::SpawnCategory::Entity
+                && order.len() == before_entities {
+                ordinary_placement::invalidate(&mut self.state,
+                    ordinary_placement::Frontier::Factory {
+                        entity_type: u32::from(selector.entity_type),
+                        variant: u32::from(selector.variant), subtype: u32::from(selector.subtype),
+                    });
             }
             // SpawnEntity5ce7a8..7d3 calls5c57c0 with the selected type,
             // variant, edx=0,cl=0 after successful Game.Spawn. For this
@@ -2470,6 +2487,7 @@ impl Game {
                     .as_ref()
                     .is_none_or(|items| items.held_pockets.is_none())
             {
+                ordinary_placement::invalidate(&mut self.state, ordinary_placement::Frontier::PocketEffects);
                 self.state.attack_runtime.aim_rotation_c70 = None;
                 if let Some(items) = &mut self.state.player_items {
                     //Untracked pill/card execution cannot retain speed history.
@@ -2667,6 +2685,8 @@ impl Game {
                 combat::advance_player_immunity(&mut self.state);
                 combat::advance_player_immunity(&mut self.state);
                 if restoring {
+                    //Saved4/5/6 replay/retirement needs its own full owner.
+                    ordinary_placement::invalidate(&mut self.state, ordinary_placement::Frontier::Restore);
                     let restored_pickups = pickups::readmit_regular_records(&mut self.state)?;
                     self.admitted_update_footprint(phase)?;
                     self.rebuild_room_actor_schedule()?;
@@ -2842,6 +2862,7 @@ impl Game {
         let explosion_fence = self.state.explosions.len();
         grid_hazards::advance(&mut self.state, phase)?;
         spider_webs::advance(&mut self.state, phase)?;
+        ordinary_placement::observe_room_boundary(&mut self.state);
         let existing = self.state.actor_scheduler.full_phase();
         if phase == phase::Phase::Update {
             rock_blast::advance_bomb_rocks(&mut self.state)?;
@@ -3727,6 +3748,17 @@ impl Game {
                 // transition's Trapdoor and Appear clips end.
                 self.state.player_animation.current = None;
             }
+        }
+        let released_shoot = !(self.held("ArrowUp") || self.held("ArrowDown")
+            || self.held("ArrowLeft") || self.held("ArrowRight"));
+        let bomb_callback_owned = !bomb_triggered || !controls_enabled
+            || !self.state.player.controls_enabled || self.state.player.input_cooldown > 0
+            || self.state.inventory.bombs == 0
+            || self.state.bomb_placement_cooldown.remaining_updates > 0;
+        if let Some(frontier) = ordinary_placement::player_update_frontier(
+            &self.state, phase == phase::Phase::Update, !released_shoot, bomb_callback_owned,
+        ) {
+            ordinary_placement::invalidate(&mut self.state, frontier);
         }
         // Base main-sprite time advances before the Player death/shooting caller.
         player_items::advance_presentation(&mut self.state, phase);

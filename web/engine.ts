@@ -68,6 +68,12 @@ export interface SpriteEffect {
   footprint?: boolean;
 }
 export interface ActorRef { kind: "player" | "familiar" | "tear" | "knife" | "laser" | "bomb" | "pickup" | "npc" | "projectile" | "effect"; id: number; }
+export type OrdinaryPlacementFrontier =
+  {kind: "playerUpdate"; field: string} |
+  {kind: "factory"; entityType: number; variant: number; subtype: number} |
+  {kind: "actorEffects" | "missingBody" | "nonfinitePosition"; actor: ActorRef} |
+  {kind: "collectibleEffects"; collectibleId: number} |
+  {kind: "pocketEffects" | "activeEffects" | "playerDamageEffects" | "gridEffects" | "chestEffects" | "restore" | "missingHistory"};
 export interface Knife {
   id: number; entityType: number; variant: number; subtype: number; spawnSeed: number; birthGameUpdate: number; actorRng: ItemRng;
   spawnerType: number; spawnerVariant: number; parent: ActorRef | null; parentNullKnown?: boolean;
@@ -109,7 +115,8 @@ export interface SavedRunSummary {
   runSeed: string; seededRun: boolean; stage: number; gameUpdateCount: number;
   descriptorCount: number; copiedDescriptorCount: number; redHp: number; maxRedHp: number;
   inventory: {coins: number; bombs: number; keys: number};
-  playerItems: {ownedCounts: number[]; itemRngStates: number[];
+  playerItems: {
+    ordinaryProducerHistory?: {frontier: OrdinaryPlacementFrontier | null} | null;ownedCounts: number[]; itemRngStates: number[];
     trinketRngStates: number[]; pocketRngStates: number[]; activeId: number;
     activeCharge: number; saveWordD88: number; reserveCharge: number;
     shotSpeedInputs?: {sourceD38: number};
@@ -269,6 +276,7 @@ export interface Room {
       lootBirth: {parentId: number; variant: number; spawnSeed: number; position: {x: number; y: number}} | null} | null }[];
   authoredActorOrder: {kind: "npc" | "pickup"; id: number}[];
   managerCounts: { countablePending: number; countableCurrent: number; bossPending: number; bossCurrent: number };
+  ordinaryPlacement?: {frontier: OrdinaryPlacementFrontier | null} | null;
   bossCount: number; bossPresentationIndex: number;
   combatClear: boolean; combatClearCountdown: number; combatShutDoorSlots: number[]; combatShutUpdate?: number;
   grid: { width: number; height: number; cells: {selector: number; entity: {kind: number; variant: number; state: number; collisionClass: number; spawnSeed: number; sourceOwner?: {birthGameUpdate: number | null; poopSheet?: number}} | null}[] } | null;
@@ -327,6 +335,7 @@ export interface State {
     heldPockets?: {slots: {id: number; card: boolean}[];
       frontier: {kind: "cardEffect"; cardId: number} | {kind: "pillEffect"; pillColor: number}
         | {kind: "modifierConversion"; collectibleId: number} | null} | null;
+    ordinaryProducerHistory?: {frontier: OrdinaryPlacementFrontier | null} | null;
     technologyEyeRegistered: boolean | null;
     costume229?: Costume229 | null;
     ownedCounts: number[]; temporaryCollectibles: {itemId: number; count: number; cooldown: number}[]; queuedId: number | null; queuedCharge: number; queuedTouched: boolean;
