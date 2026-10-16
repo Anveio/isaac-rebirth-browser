@@ -3843,6 +3843,12 @@ impl Game {
         let regular_dispatch = if shoot_callback_admitted {
             match weapon_plan::resolve_current_weapon(&self.state)? {
                 weapon_plan::LiveWeaponResolution::Unadmitted(channel) => {
+                    //A known regular-shot cache refusal cannot write C18.
+                    //Other unresolved source channels may skip a persistent
+                    //controller/cleanup; current pointers never heal history.
+                    if channel != "regularTearCache" {
+                        self.state.weapon_admission.c18_controller_history_known = false;
+                    }
                     if technology2_selected {
                         technology2::primary_frontier(&mut self.state, channel);
                     } else {
@@ -3979,6 +3985,11 @@ impl Game {
                                 aim_step.callback_aim,
                             )?
                         };
+                        if outcome == attack_runtime::DispatchOutcome::Unadmitted
+                            && plan.controller.writes_c18()
+                        {
+                            self.state.weapon_admission.c18_controller_history_known = false;
+                        }
                         //519FC0 returns before the released idle D9C -> DA0 effect.
                         if controlled {
                             attack_runtime::controlled_idle_head(&mut self.state, buttons.held());
@@ -4044,6 +4055,9 @@ impl Game {
                         }
                         outcome == attack_runtime::DispatchOutcome::RegularTear
                     } else {
+                        if plan.controller.writes_c18() {
+                            self.state.weapon_admission.c18_controller_history_known = false;
+                        }
                         self.state
                             .weapon_admission
                             .record_unadmitted(plan.primary, "ordinaryShootingAimHistory");

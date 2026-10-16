@@ -87,7 +87,7 @@ export interface Knife {
   childChain4a0: "unknown" | "empty" | { linked: ActorRef };
   active: boolean; dead: boolean; visible: boolean;
   position: {x: number; y: number}; savedPosition: {x: number; y: number};
-  homePosition: {x: number; y: number}; homingTarget: ActorRef | null; homingTargetKnown?: boolean;
+  homePosition: {x: number; y: number}; homingTarget: ActorRef | null; homingTargetKnown?: boolean; sourceMotionKnown?: boolean;
   renderOffset: {x: number; y: number}; velocity: {x: number; y: number};
   configuredFriction: number; currentFriction: number;
   collisionRadius: number; collisionMass: number; collisionDamage: number;
@@ -316,7 +316,7 @@ export interface State {
   attackRuntime: {chargeC0c: number | null; aimRotationC70?: number | null; headDirectionDa0: number | null; shootingAimDb4: {x: number; y: number} | null; movementDirectionD9c: number | null; playerDc4: {x: number; y: number} | null; persistent: ActorRef | null; secondary: (ActorRef | null)[]; technology2C40?: {pointerKnown: boolean; actor: ActorRef | null; firstDiagnostic: string | null}; nextKnife: number};
   knives: Knife[];
   stageShootingGuard: {state: number; counter: number};
-  weaponAdmission: {sourcePlayerType: number|null; c18IsKnownEmpty: boolean; pendingPrimaryCleanup: {fromPrimary:number;toPrimary:number}|null; unadmittedController: {primary:number;channel:string}|null};
+  weaponAdmission: {sourcePlayerType: number|null; c18IsKnownEmpty: boolean; c18ControllerHistoryKnown?: boolean; pendingPrimaryCleanup: {fromPrimary:number;toPrimary:number}|null; unadmittedController: {primary:number;channel:string}|null};
   lasers: {id:number; origin:"npcShootAngle"|"playerCharged" | "playerControlled" | "playerTechnology" | "playerTechnology2"; uninitialized:boolean|null; entityType:number; variant:number; subtype:number;
     spawnSeed:number; parent:ActorRef|null; child:ActorRef|null; active:boolean; dead:boolean; visible:boolean;
     position:{x:number;y:number}; savedPosition:{x:number;y:number}; renderOffset:{x:number;y:number};
