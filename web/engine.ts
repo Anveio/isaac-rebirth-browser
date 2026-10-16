@@ -172,6 +172,7 @@ export interface Bomb {
 }
 export interface Explosion { id: number; x: number; y: number; animationFrame: number; }
 export interface Pickup {
+  sourceSpawner?: {entityType: number; variant: number} | null;
   pocketContactDelay?: number | null;
   id: number; spawnSeed: number; variant: number; subtype: number; position: { x: number; y: number };
   x: number; y: number; actor: string; animation: string; animationFrame: number; animationPlaying: boolean;

@@ -422,6 +422,10 @@ impl MorphLinks {
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Pickup {
+    ///Actual Entity1C/20, independent of weak parent498.
+    ///An unowned/legacy caller never acquires an invented null spawner.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source_spawner: Option<SourceSpawner>,
     pub id: u32,
     pub spawn_seed: u32,
     pub variant: u32,
@@ -464,6 +468,15 @@ pub struct Pickup {
     pub chest: Option<crate::chests::Chest>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub morph_links: Option<MorphLinks>,
+}
+
+///Game550ACD..ADA copies these words only for a nonnull spawner.
+///Base441EE8/EF supplies zeros for an actual null-spawner birth.
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct SourceSpawner {
+    pub entity_type: u32,
+    pub variant: u32,
 }
 
 impl Pickup {
@@ -684,6 +697,7 @@ impl Pickup {
             ));
         }
         Ok(Self {
+            source_spawner: None,
             id,
             spawn_seed: 0,
             variant,
