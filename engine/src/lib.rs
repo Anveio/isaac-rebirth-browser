@@ -178,6 +178,10 @@ pub struct Player {
     pub black_heart_mask: u32,
     /// Actual normal-Isaac Player+bbc Eternal half-heart owner.
     pub eternal_hearts: i32,
+    /// Actual Player+BD0; fresh Init and TriggerNewStage own its false writes.
+    /// Missing legacy histories remain unknown rather than an invented key grant.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub golden_key: Option<bool>,
     pub facing: Direction,
     pub body_facing: Direction,
     pub walk_frame: u8,
@@ -222,6 +226,18 @@ impl PlayerEntitySource {
     }
 }
 impl Player {
+    /// Player::TryUseKey5087F0 tests BD0 before BCC and never spends a golden key.
+    pub(crate) fn try_use_key(&self, inventory: &mut Inventory) -> bool {
+        match self.golden_key {
+            Some(true) => true,
+            Some(false) if inventory.keys > 0 => {
+                inventory.keys -= 1;
+                true
+            }
+            _ => false,
+        }
+    }
+
     fn starting() -> Self {
         Self {
             entity_source: None,
@@ -239,6 +255,7 @@ impl Player {
             soul_hp: 0,
             black_heart_mask: 0,
             eternal_hearts: 0,
+            golden_key: None,
             facing: Direction::Down,
             body_facing: Direction::Down,
             walk_frame: 0,
@@ -554,6 +571,10 @@ pub struct State {
     /// Unknown legacy or restore history remains absent.
     #[serde(default)]
     pub source_cache_run_flags: Option<u64>,
+    /// Actual normal-variant5120EE/514AD8 challenge minimum predicate.
+    /// Unknown old Game history stays absent; ID0 skips the Config9C read.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source_shot_speed_minimum: Option<bool>,
     pub saved_run_summary: Option<saved_game::SavedRunSummary>,
     pub audio: audio::AudioState,
     #[serde(default)]
@@ -774,6 +795,7 @@ impl Game {
                 boot_epoch_seed,
                 boot_lifecycle,
                 source_cache_run_flags: Some(0), // Game constructor 554034.
+                source_shot_speed_minimum: None,
                 saved_run_summary: None,
                 audio: audio::AudioState::default(),
                 pending_menu_initializations: Vec::new(),
@@ -1414,6 +1436,11 @@ impl Game {
             run_seeds.initialized_fields[12],
         )?);
         self.state.run_seeds = Some(run_seeds);
+        // NewRun54eb20 begins every run on the first stage, whether it comes
+        // from the GameOver Restart or the menus after a descent, and outside
+        // any stage transition the last run was in.
+        self.state.stage = 1;
+        self.state.stage_transition = stage_transition::StageTransition::default();
         self.state.system_clock.align_run_start()?;
         self.state.screen = Screen::Playing;
         self.state.paused = false;
@@ -1443,6 +1470,14 @@ impl Game {
         self.state.player_stats = player_stats::PlayerStats::default();
         // Fresh reset 54E6A3 initializes the actual Game run-flag word.
         self.state.source_cache_run_flags = Some(0);
+        //54EB55 stores the actual challenge key;596170 selects its Config.
+        //The branch for key0 bypasses the9C cap. Other admitted definitions
+        //own their decoded59805A minshotspeed value before Player callbacks.
+        self.state.source_shot_speed_minimum = Some(
+            challenge
+                .as_ref()
+                .is_some_and(|definition| definition.id != 0 && definition.min_shot_speed),
+        );
         self.state.weapon_cache = weapon_plan::WeaponCache::fresh_player();
         self.state.weapon_admission = weapon_plan::WeaponAdmission::fresh_isaac();
         self.state.head_timer = -1;
@@ -1463,6 +1498,8 @@ impl Game {
         self.state.player = Player::starting();
         //Actual fresh Manager.Init→Player.Init; title/old restores stay None.
         self.state.player.entity_source = Some(PlayerEntitySource::fresh_isaac());
+        // Player.Init5194B4 clears BD0 before starting resources are assigned.
+        self.state.player.golden_key = Some(false);
         // 519767/519771 initialize the two transformation history counters.
         self.state.player.transformation_counts = Some([0, 0]);
         // 51985C initializes the actual D64 Luck output.
@@ -1539,7 +1576,12 @@ impl Game {
         self.state.nightmares.select_normal_basement(1)?;
         // Room.Init's backdrop setup loads the FX rays before its grid records.
         // The port builds only ordinary Basement (stage type 0).
-        room::load_fx_rays(&mut self.state.room, &mut self.state.boot_lifecycle.shared, self.state.stage, 0);
+        room::load_fx_rays(
+            &mut self.state.room,
+            &mut self.state.boot_lifecycle.shared,
+            self.state.stage,
+            0,
+        );
         // admit_room_pickups runs Room.Init's selector pass (grid objects and
         // actors together), the boundary, pit links and the critters.
         let selectors = self
@@ -1604,7 +1646,12 @@ impl Game {
             room_before,
         )?;
         // The port builds only ordinary Basement (stage type 0).
-        room::load_fx_rays(&mut self.state.room, &mut self.state.boot_lifecycle.shared, self.state.stage, 0);
+        room::load_fx_rays(
+            &mut self.state.room,
+            &mut self.state.boot_lifecycle.shared,
+            self.state.stage,
+            0,
+        );
         Ok(())
     }
 
@@ -1686,7 +1733,7 @@ impl Game {
                     &mut self.state.level_progress,
                 )
             } else {
-                pickup.try_collect(&mut self.state.inventory)
+                pickup.try_collect(&mut self.state.inventory, &mut self.state.player)
             })
         {
             // Collect504480 routes key ->504720 and bomb ->5046d0
@@ -1700,6 +1747,15 @@ impl Game {
                     },
                     1.0,
                 )),
+                //Collect504510: only successful free Coin20/1..4 reaches here.
+                //The actual subtype owns the configured sound, not its amount.
+                20 => match pickup.subtype {
+                    1 | 4 => Some((234, 1.0)),
+                    2 => Some((232, 1.0)),
+                    3 => Some((199, 1.0)),
+                    _ => None,
+                },
+                30 if pickup.subtype == 2 => Some((204, 1.0)),
                 30 => Some((58, 0.85)),
                 40 => Some((201, 1.0)),
                 _ => None,
@@ -1980,7 +2036,6 @@ impl Game {
                         let seed = self.state.boot_lifecycle.shared.next_u32().max(1);
                         self.state.boot_lifecycle.commit_character_seed(seed)?;
                     }
-                    self.state.stage = 1;
                     self.start_run()?;
                 }
                 player_death::Request::Exit => {
@@ -2623,6 +2678,13 @@ impl Game {
         self.state.lasers.clear();
         self.state.bombs.clear();
         self.state.explosions.clear();
+        // Room.Init loads current FX layers before the fresh level grid records.
+        room::load_fx_rays(
+            &mut self.state.room,
+            &mut self.state.boot_lifecycle.shared,
+            self.state.stage,
+            0,
+        );
         grid_records::admit_fresh(
             &mut self.state.room,
             &mut self.state.boot_lifecycle.shared,
@@ -2632,6 +2694,8 @@ impl Game {
         // player at the room centre and converts one Eternal heart into a
         // container through GiantBook13. Map/compass item branches remain
         // with their item owners.
+        // TriggerNewStage52A3F3 clears BD0; a room change does not.
+        self.state.player.golden_key = Some(false);
         let centre = motion::WorldVector {
             x: ((self.state.room.left + self.state.room.right) / 2.0) as f32,
             y: ((self.state.room.top + self.state.room.bottom) / 2.0) as f32,
@@ -3054,7 +3118,12 @@ impl Game {
             }),
             entities::Birth::CreepHit => creep_effects::hurt_player(&mut self.state),
             entities::Birth::GridHurt { position, damage } => {
-                let descriptor = self.state.room.grid.clone().ok_or("grid Hurt requires a room grid")?;
+                let descriptor = self
+                    .state
+                    .room
+                    .grid
+                    .clone()
+                    .ok_or("grid Hurt requires a room grid")?;
                 let Some(cell) = grid::Grid::new(descriptor)?.index(position) else {
                     return Ok(());
                 };
@@ -3813,12 +3882,22 @@ pub extern "C" fn public_keys_len() -> usize {
 /// 5430a5: after its splash, a tear that died on the grid hurts the cell
 /// under it or, failing that, the cells 10 to either side, stopping at the
 /// first that takes the damage.
-fn tear_grid_hurt(state: &mut State, position: motion::WorldVector, damage: i32) -> Result<(), String> {
+fn tear_grid_hurt(
+    state: &mut State,
+    position: motion::WorldVector,
+    damage: i32,
+) -> Result<(), String> {
     let Some(descriptor) = state.room.grid.clone() else {
         return Ok(());
     };
     let grid = grid::Grid::new(descriptor)?;
-    for (x, y) in [(0.0, 0.0), (10.0, 0.0), (0.0, 10.0), (-10.0, 0.0), (0.0, -10.0)] {
+    for (x, y) in [
+        (0.0, 0.0),
+        (10.0, 0.0),
+        (0.0, 10.0),
+        (-10.0, 0.0),
+        (0.0, -10.0),
+    ] {
         let Some(cell) = grid.index(position + motion::WorldVector { x, y }) else {
             continue;
         };

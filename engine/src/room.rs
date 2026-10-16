@@ -291,7 +291,11 @@ pub fn load_fx_rays(room: &mut Room, shared: &mut crate::mt::Mt19937, stage: u32
     let mut matched = Vec::new();
     for group in rays.split("<rayGroup ").skip(1) {
         let head = &group[..group.find('>').unwrap_or(group.len())];
-        let number = |name: &str| attribute(head, name).and_then(|value| value.parse::<f32>().ok()).unwrap_or(0.0);
+        let number = |name: &str| {
+            attribute(head, name)
+                .and_then(|value| value.parse::<f32>().ok())
+                .unwrap_or(0.0)
+        };
         let mut parsed = FxRayGroup {
             index: 0,
             x_min: number("xMin"),
@@ -305,7 +309,11 @@ pub fn load_fx_rays(room: &mut Room, shared: &mut crate::mt::Mt19937, stage: u32
         };
         let body = &group[..group.find("</rayGroup>").unwrap_or(group.len())];
         for ray in body.split("<fxRay ").skip(1) {
-            let number = |name: &str| attribute(ray, name).and_then(|value| value.parse::<f32>().ok()).unwrap_or(0.0);
+            let number = |name: &str| {
+                attribute(ray, name)
+                    .and_then(|value| value.parse::<f32>().ok())
+                    .unwrap_or(0.0)
+            };
             parsed.rays.push(FxRay {
                 opacity: number("opacity"),
                 animation_speed: number("animationSpeed"),
@@ -348,7 +356,9 @@ fn stages_match(stages: &str, stage: u32, stage_type: u32) -> bool {
             Some(number) => (number, 1),
             None => (token, 0),
         };
-        number.parse::<u32>().is_ok_and(|n| (stage == 2 * n || stage + 1 == 2 * n) && stage_type == wanted_type)
+        number
+            .parse::<u32>()
+            .is_ok_and(|n| (stage == 2 * n || stage + 1 == 2 * n) && stage_type == wanted_type)
     })
 }
 

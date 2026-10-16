@@ -83,6 +83,10 @@ const SOY_KIND3_ITEMS: &[usize] = &[1, 4, 118, 330];
 // Equal selected sets do not complete grant/history/contact or other stages.
 const POLYPHEMUS_CALLER_ITEMS: &[usize] = &[4, 169];
 
+//Independent actual Add48 footprint. Only this grant-history consumer is
+//introduced here; cache/getter/caller permissions remain separate.
+const CUPID_GRANT_ITEMS: &[usize] = &[1, 4, 48];
+
 /// Literal511f10 dispatch order. Weapon selection/removal precedes stats;
 /// Libra304 has additional coupling before and after this sequence.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -505,6 +509,12 @@ impl<'a> ItemInputs<'a> {
 
     ///Mechanical signed-count/context check, with no item capability implied
     ///by the checker itself. Each caller supplies its own source-owned set.
+    ///Actual zero-amount Add48 preserves an existing D38 owner only.
+    ///No missing stat word or other callback capability is constructed.
+    pub(crate) fn admits_cupid_grant_context(self) -> bool {
+        self.admits_permanent_readset(48, CUPID_GRANT_ITEMS)
+    }
+
     fn admits_permanent_readset(self, required: usize, supported: &[usize]) -> bool {
         self.positive_owned_count(required)
             && self.owner.trinket_slots == [0, 0]
@@ -763,11 +773,19 @@ impl CacheResolution {
 struct ShotSpeedStage;
 
 impl ShotSpeedStage {
-    fn admits(inputs: ItemInputs<'_>, source_player_type: Option<u32>) -> bool {
+    fn admits(
+        inputs: ItemInputs<'_>,
+        source_player_type: Option<u32>,
+        source_entity: Option<crate::PlayerEntitySource>,
+        source_minimum: Option<bool>,
+    ) -> bool {
         //The former scalar capability is retained only as a whole for old
         //neutral/coupled contexts. It supplies no newly combined neutral owner.
         let legacy_neutral = inputs.admits_scalar_stage(CacheStage::ShotSpeed, &[4, 143]);
         source_player_type == Some(0)
+            && source_entity.is_some_and(|entity| entity.entity_type == 1 && entity.variant == 0)
+            && source_minimum == Some(false)
+            && inputs.owner.shot_speed_inputs.is_some()
             && inputs.admits_scalar_context()
             && inputs
                 .owner
@@ -1131,6 +1149,8 @@ pub(crate) fn resolve_scalars(
     source_player_type: Option<u32>,
     prior: CachedScalars,
     requested: CacheMask,
+    source_entity: Option<crate::PlayerEntitySource>,
+    source_shot_speed_minimum: Option<bool>,
 ) -> Result<CacheResolution, String> {
     let mut values = prior;
     let mut completed = 0;
@@ -1153,6 +1173,12 @@ pub(crate) fn resolve_scalars(
                     } else {
                         1.0_f32
                     };
+                //512063/06B/06F consumes the actual independent D38 word
+                //after the selected item terms. An absent owner leaves a
+                //partial value and cannot complete this callback below.
+                if let Some(auxiliary) = inputs.owner.shot_speed_inputs {
+                    values.stats.shot_speed += auxiliary.source_d38 as f32 * 0.2_f32;
+                }
                 values.stats.shot_speed = values.stats.shot_speed.max(0.6_f32);
                 &[4, 143]
             }
@@ -1198,7 +1224,12 @@ pub(crate) fn resolve_scalars(
             && match stage {
                 CacheStage::FireDelay => FireDelayStage::admits(inputs, source_player_type),
                 CacheStage::Damage => DamageStage::admits(inputs, source_player_type),
-                CacheStage::ShotSpeed => ShotSpeedStage::admits(inputs, source_player_type),
+                CacheStage::ShotSpeed => ShotSpeedStage::admits(
+                    inputs,
+                    source_player_type,
+                    source_entity,
+                    source_shot_speed_minimum,
+                ),
                 _ => source_player_type == Some(0) && inputs.admits_scalar_stage(stage, supported),
             }
         {

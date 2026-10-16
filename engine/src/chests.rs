@@ -245,9 +245,6 @@ fn admit_child(
     } else {
         crate::pickups::regular_subtype(birth.variant, 0, birth.spawn_seed)?
     };
-    if birth.variant == 30 && subtype == 2 {
-        return Ok(()); // Actual golden key Init/collection remains unsupported.
-    }
     let id = *next_pickup;
     let mut pickup = Pickup::spawn(
         id,

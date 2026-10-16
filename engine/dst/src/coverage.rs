@@ -74,6 +74,8 @@ pub fn end_case(label: &str) {
 pub fn observe(state: &State) {
     let mut keys = vec![format!("screen:{:?}", state.screen)];
     if state.screen == Screen::Playing {
+        // The floor's stage: a descent shows as `stage:2`.
+        keys.push(format!("stage:{}", state.floor.stage));
         if let Some(room) = state.floor.descriptors.get(state.current_room) {
             let template = &room.template;
             keys.push(if (template.width, template.height) == (13, 7) {

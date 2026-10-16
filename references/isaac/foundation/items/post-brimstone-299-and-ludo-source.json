@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "status": "SCOPED_PRODUCTION3_FIRST_REFERENCES_MAIN_RAW_FAILURES_AND_SAVED_HISTORY_WITH_UNGRADED_IDENTITIES",
-  "main": "30e5ea6279ab8a2eb2424b09bb25133ed4a8f838",
+  "status": "SCOPED_STAT_ORIGINAL_PENDING_MISMATCH_HOMING_SATELLITE_AND_NEW_SYSTEM_WORKSTREAMS",
+  "main": "80d65135e7e5cda3ab05bb35ef382f5635d34c3a",
   "merged": {
     "298": "261dbd60b3921fed421a614ef80c52baaadb0cca",
     "299": "988ae6355c7956d918ff0e00eb329d313645b864",
@@ -2127,5 +2127,442 @@
       "The first fresh contact Original/browser pair retains 94,894 checks / 9,184 FAIL across 1,216 paired rows. All 12 selected copied-source payload checks pass and retained C40 damage matches across 582 body rows. Both sides show six C40 identities, six HP drains, one death and one retirement. Native records six FIFO appends while the port records five; this observed gap remains, together with strict identity/RNG/clock/HP-geometry and callback failures. These selected contracts do not establish full combat parity or the other Original cases.",
       "The explicit Native journal Zstd option412 preserves gzip as the default and leaves the gzip manifest format unchanged. Actual opt-in capture closed with 3,934 records (200,977,212 raw bytes / 394,681 encoded bytes); the first positive-playing projection completed with 1,258 tuples and the full contact comparison above. Node codec probes retain equal decoded bytes and six malformed-input rejections. This establishes the exercised transport scope, not game parity. Spoon Bender3 homing, neutral2/Knife capability and 4A0 satellite followups remain separate source-only work outside this P4 record. Historical P3, saved-history and corrected271 reports remain unchanged; the ten-case Number One replay remains pending."
     ]
+  },
+  "currentScopedStatInputs": {
+    "sourceHead": "0dca907d46891f9ab3cba84a6d92620ba943a94b",
+    "sourceTree": "f73a3f17dfcfc7aa1791d9a3e55dace7386c66e6",
+    "wasmSha256": "4a6ad3e0b92d01964b49b09e07e58c071c6c8e2097ba36bc7c9b9142bdc59e69",
+    "bindingSha256": "0df24fd6b13ca365946a5a39a7c26032489b9b3a9c46e53dd0986df605b89fc6",
+    "normalProduction": {
+      "exit": 0,
+      "seconds": 31.371,
+      "sourcePins": 3508,
+      "floorAndClippyPending": true
+    },
+    "scope": "Private stat-input composite on frozen29c qualifier and Hurt fix; later main427/428/430 are outside the artifact. Not whole-current-main acceptance.",
+    "regular405": {
+      "checks": 40383861,
+      "failures": 17260,
+      "candidateOnly": 12966,
+      "objectKeySet": 4294,
+      "baselineOnly": 0,
+      "changedExistingValueOrType": 0,
+      "errors": 0,
+      "partitionSha256Prefix": "04b06acd"
+    },
+    "own240": {
+      "cases": 4,
+      "checks": 3859,
+      "failures": 88,
+      "numericRngHealthEndpointFailures": 0,
+      "compactSha256": "cd5ac46a918f12a29b9120b9cbc7d84f1308e1154c9b44c67bded0975755b852"
+    },
+    "legacyOwn": {
+      "items": [
+        12,
+        14,
+        222
+      ],
+      "checks": 10576,
+      "failures": 12,
+      "numericFailures": 0,
+      "compactSha256": "caf970d9cc2be2eab55962f7904a804a08a8728df9df41cea9f1dd3770b41d73"
+    },
+    "first240Original": {
+      "checks": 26031,
+      "failures": 2199,
+      "pairedRows": 511,
+      "numericWordsRngHealthCachedFieldsAllPass": true,
+      "pendingFlagMismatchRows": 198,
+      "nativePending": 0,
+      "portPending": 4294966523,
+      "duplicateGenericAndTypedFailures": 396,
+      "remaining": "C74/BB0/D9C/counter/C18/controller differences, callback/identity unknowns and other Native-case coverage remain failed. Endpoint RNG agreement does not prove individual draw invocations.",
+      "compactSha256Prefix": "c4c2e826"
+    }
+  },
+  "currentScopedHomingSatellite": {
+    "privateHoming4433": {
+      "normalProduction": {
+        "actualExit": 0,
+        "seconds": 30.448
+      },
+      "raw405": {
+        "checks": 38028493,
+        "fail": 2024,
+        "partition": {
+          "playerItems.keys": 1012,
+          "newMoveSpeedInputs": 1012
+        },
+        "preexistingChanged": 0,
+        "preexistingMissing": 0,
+        "errors": 0
+      },
+      "own4": {
+        "checks": 24181,
+        "failures": 42,
+        "perCase": [
+          {
+            "name": "spoon-bender3-homing-npc-fixed-phase0",
+            "checks": 6377,
+            "failures": 9,
+            "metrics": {
+              "actualGrants": 1,
+              "bornHomingTears": 29,
+              "fullBodyRows": 630,
+              "fastBodyRows": 630,
+              "nonnullTargetStates": 24,
+              "acquiredTargetTransitions": 2,
+              "laterFullSteeringDiagnostics": 4
+            }
+          },
+          {
+            "name": "spoon-bender3-homing-npc-fixed-phase1",
+            "checks": 6178,
+            "failures": 9,
+            "metrics": {
+              "actualGrants": 1,
+              "bornHomingTears": 28,
+              "fullBodyRows": 543,
+              "fastBodyRows": 549,
+              "nonnullTargetStates": 56,
+              "acquiredTargetTransitions": 4,
+              "laterFullSteeringDiagnostics": 11
+            }
+          },
+          {
+            "name": "spoon-bender3-homing-npc-recorded-0",
+            "checks": 6439,
+            "failures": 12,
+            "metrics": {
+              "actualGrants": 1,
+              "bornHomingTears": 30,
+              "fullBodyRows": 644,
+              "fastBodyRows": 650,
+              "nonnullTargetStates": 0,
+              "acquiredTargetTransitions": 0,
+              "laterFullSteeringDiagnostics": 0
+            }
+          },
+          {
+            "name": "spoon-bender3-homing-npc-recorded-1",
+            "checks": 5187,
+            "failures": 12,
+            "metrics": {
+              "actualGrants": 1,
+              "bornHomingTears": 9,
+              "fullBodyRows": 221,
+              "fastBodyRows": 223,
+              "nonnullTargetStates": 0,
+              "acquiredTargetTransitions": 0,
+              "laterFullSteeringDiagnostics": 0
+            }
+          }
+        ],
+        "authoritySha256": "dccd983f9c427957ba648b7662f1a24ca2330607637812aeff7e37eb075b0351"
+      },
+      "firstNative": {
+        "actualExit": 0,
+        "seconds": 72.05
+      },
+      "firstPairAndFixedConsumer": {
+        "checks": 85739,
+        "failures": 43069,
+        "sideMetrics": {
+          "native": {
+            "actualGrants": 1,
+            "bornHomingTears": 29,
+            "fullBodyRows": 623,
+            "fastBodyRows": 623,
+            "nonnullTargetStates": 36,
+            "acquiredTargetTransitions": 3,
+            "laterFullSteeringDiagnostics": 8
+          },
+          "port": {
+            "actualGrants": 1,
+            "bornHomingTears": 29,
+            "fullBodyRows": 630,
+            "fastBodyRows": 630,
+            "nonnullTargetStates": 24,
+            "acquiredTargetTransitions": 2,
+            "laterFullSteeringDiagnostics": 4
+          }
+        },
+        "coverage": {
+          "pairedActualPlayingRows": 1215,
+          "homingOwnBodyRows_native": 1246,
+          "homingOwnBodyRows_port": 1260,
+          "homingStrictExactIdentityJoins": 0
+        },
+        "scope": "ONEcorrectedactualMoveSpeedfieldowner existing-data stage1 only. Originalcapture/projection/report unchanged.",
+        "rawPerFieldAllPreserved": true,
+        "sourceOwnerRepair": {
+          "Spoon3 native actual independent MoveSpeed history": {
+            "old": [
+              898,
+              898
+            ],
+            "new": null
+          },
+          "Spoon3 native actual independent neutral MoveSpeed inputs": {
+            "old": null,
+            "new": [
+              898,
+              0
+            ]
+          },
+          "Spoon3 native actual source neutral MoveSpeed D60": {
+            "old": null,
+            "new": [
+              898,
+              0
+            ]
+          }
+        },
+        "authoritySha256": "9c584f034eee82a6eb37849892ae21ccd8f0b5f48589c6a62578bfb85244123f"
+      }
+    },
+    "privateSatelliteAb2": {
+      "head": "ab2aa0a596035c161a258525405dc0d2727cf435",
+      "normalProduction": {
+        "actualExit": 0,
+        "seconds": 29.6014,
+        "seal": "a5e16cdfe786cec80f29500fb7ac9566912fa502f05b0af73b14b69b0e47c705"
+      },
+      "raw405": {
+        "checks": 38027481,
+        "fail": 0,
+        "authoritySha256": "966a625c191338194deaae4e66d6ad1b6857cf9112d57131ba1c207ff75f83e9"
+      },
+      "newOwn4": {
+        "checks": 12478,
+        "fail": 232,
+        "realGrantOrder": "329\u21922",
+        "birthEndpointsEach": 2,
+        "linkedRowsEachRange": [
+          275,
+          280
+        ],
+        "perCaseFailurePartition": {
+          "ungraded": 49,
+          "callbacksUnknown": 6,
+          "copiedGet4Minimum": 2,
+          "firstReadyChainCount": 1
+        },
+        "firstReadyObserved": 0,
+        "laterObservedChains": 2,
+        "interpretation": "Firstreadyendpoint0then2 occursinBOTHactualgames; sourcecausaltriageestablishesconsumerboundary, notruntimezerochainfailure. Frozenall232FAIL unchanged."
+      },
+      "old4History": {
+        "checks": 2470,
+        "failures": 108,
+        "perCase": [
+          {
+            "name": "history-114-118-329-phase0",
+            "checks": 753,
+            "failures": 26,
+            "coverage": {
+              "browser": {
+                "observations": 740,
+                "preexistingChildren": 8,
+                "continuedChildren": 8,
+                "fullChildRows": 24,
+                "fastChildRows": 32,
+                "removeEvents": 0,
+                "uninitEntryEvents": 0
+              }
+            }
+          },
+          {
+            "name": "history-114-118-329-phase1",
+            "checks": 482,
+            "failures": 28,
+            "coverage": {
+              "browser": {
+                "observations": 741,
+                "preexistingChildren": 6,
+                "continuedChildren": 4,
+                "fullChildRows": 8,
+                "fastChildRows": 12,
+                "removeEvents": 0,
+                "uninitEntryEvents": 0
+              }
+            }
+          },
+          {
+            "name": "knife-first-history-random-0",
+            "checks": 482,
+            "failures": 28,
+            "coverage": {
+              "browser": {
+                "observations": 749,
+                "preexistingChildren": 6,
+                "continuedChildren": 4,
+                "fullChildRows": 8,
+                "fastChildRows": 12,
+                "removeEvents": 0,
+                "uninitEntryEvents": 0
+              }
+            }
+          },
+          {
+            "name": "knife-first-history-random-1",
+            "checks": 753,
+            "failures": 26,
+            "coverage": {
+              "browser": {
+                "observations": 748,
+                "preexistingChildren": 8,
+                "continuedChildren": 8,
+                "fullChildRows": 24,
+                "fastChildRows": 32,
+                "removeEvents": 0,
+                "uninitEntryEvents": 0
+              }
+            }
+          }
+        ],
+        "authoritySha256": "e17e2b7bc320e3f6e46db3d9464bc1cab994d6c04191071973403d4a39ec2d6e",
+        "retainedFieldChecksPassing": 1064
+      },
+      "firstOriginal": {
+        "checks": 34648,
+        "failures": 3237,
+        "rows": 1010,
+        "ownEach": {
+          "linkedRows": 280,
+          "births": 2,
+          "threeBodyRows": 840,
+          "fast": 420,
+          "nonFast": 421
+        },
+        "exactIdentityJoins": 0,
+        "ungradedFields": 49,
+        "sideActorRows": 2764,
+        "firstAdd2EndpointCount": 0,
+        "laterChainCount": 2,
+        "interpretation": "BothgamesfirstAdd2endpoint0then2; causaltriage supportsconsumerboundary, notruntimezerochainbug. StrictIDs/clocks/cooldown/headremainFAIL.",
+        "authoritySha256": "97f874180f41a60a8ff3146419273664c695effb8db09476de6780ee625f93d8"
+      },
+      "typedCallbacks": {
+        "checks": 726,
+        "failures": 31,
+        "actualFull": 1383,
+        "age0Full": 2,
+        "fast": [
+          175,
+          515
+        ],
+        "cleanupObserved": 0,
+        "portCallbacksUnknown": true,
+        "authoritySha256": "8d8f81cdf2981ddd4cb820ff8ea2c69da549865c44621e8d9e9b749cd2da710b"
+      }
+    },
+    "currentMainQualifier": {
+      "head": "29c8dab609e2748755c0aa882f15e8914edb0cb7",
+      "tree": "4a3af58af65c61e21a4bc187e58819fcc0618aa3",
+      "normalProduction": {
+        "exit": 0,
+        "seconds": 32.2529
+      },
+      "wasmSha256": "b6db68c1b5cbd9e5a8e0860838baca93b95d8f3b9ec2966e9ea1008b8e0b6217",
+      "bindingSha256": "48653087f81df974f7f14595c5a538be003dc4f8b04761651628121eabaa85ba",
+      "raw405": {
+        "checks": 38099273,
+        "failures": 1453039,
+        "errors": 0,
+        "compactSha256": "754693d7115fcbda93a2c169346007b3032e080b84ef04c46f9ecd27b87ed1ee",
+        "scope": "Completefourunchanged405cases againstoldP4e013; materialMT/gridchanges retained. No addedfieldonly or whole-currentmain nonregression claim. Twoearlierfloor-killedattemptshadnocompletedreport."
+      },
+      "currentHomingOwn4": {
+        "checks": 24554,
+        "failures": 42,
+        "births": 100,
+        "fullRows": 2160,
+        "fastRows": 2175,
+        "nonnullTargets": 45,
+        "acquireTransitions": 4,
+        "laterFullSteeringDiagnostics": 4,
+        "caseFailures": [
+          9,
+          12,
+          9,
+          12
+        ],
+        "compactSha256": "fe050fb18998e675508f8d23a49bb692bd72e37f769db29a305ad67ed1632f19"
+      },
+      "ordinarySix": {
+        "status": "GUARD_FAILED_PARTIAL_FIRSTCASE_OTHERFIVE_UNGRADED",
+        "latestReportSha256": "71d84da38e6c491cfd43f4e4a5eb5c2729e762a4eb51f3c23bb678dad44e3887",
+        "scope": "No sixPASS or all624current-source acceptance. Historicalacceptedreport50e09965 six624FAIL remains unchanged."
+      },
+      "stageRestart": {
+        "actualExit": 1,
+        "seconds": 45.9766,
+        "consumed": 5802,
+        "accepted": 5737,
+        "expectedRejections": 65,
+        "allDocumentedOutcomesAndRollbackPass": true,
+        "laterStageObserved": false,
+        "freshRunAfterLaterStageObserved": false,
+        "coverageFailures": 2,
+        "reportSha256": "febddb9999132750992a951148dc6e03768beb92cee60c16a397fe152526adc6"
+      },
+      "scope": "Literal29c8private6cutqualifier; excludes laterpublic427/428/429 andfinalstat0dca. No wholecurrentmainacceptance."
+    },
+    "durableCompanions": {
+      "homing": {
+        "pullRequest": 428,
+        "caseBank": "references/isaac/cases/item-composition/spoon-bender3-v1.json",
+        "evidenceSummary": "references/isaac/cases/item-composition/spoon-bender3-v1/evidence-summary.json",
+        "status": "MERGED",
+        "runtimeScope": "Storedsummaryprivate4433, notcurrentmainruntime."
+      },
+      "satellite": {
+        "status": "MERGED_PR430_CASEKEEP_AND_UNION_SYNTAX_EXIT0",
+        "caseBanks": [
+          "references/isaac/cases/item-composition/controlled-knife-satellites-v1.json",
+          "references/isaac/cases/item-composition/controlled-knife-history-v1.json"
+        ],
+        "runtimeScope": "Actualprivateab2/unlandedruntime; neither toolssource nor retainedsummaryqualifiescurrentmain."
+      }
+    }
+  },
+  "currentSystemWorkstreams": {
+    "pickups": {
+      "owner": "integration",
+      "implemented": "Existing descriptor spawn, motion, contact, ordinary resource/HUD/Collect/Remove and room-save pipeline.",
+      "sourceCandidate": "Coin20/1|4 sound234,20/2 sound232,20/3 sound199. GoldenKey30/2 actual BD0 lifecycle, TryUseKey, HUD and selector/chest child admission.",
+      "qualification": "New candidates unbuilt/unplayed at this snapshot. Locked chests, modifiers, wider variants and procedural reward conversion require actual paired coverage; consume existing level descriptors rather than duplicate generation."
+    },
+    "transitions": {
+      "owner": "quality",
+      "sourceCandidate": "Collectible100 authored title/description before pickup pose and queue; shared70-Full HUD streak before pause guards.",
+      "qualification": "Source candidate only. Menu/world/pause fades, ceremony sounds, sprite/costume, control lock and iframes need independent Original/browser qualification."
+    },
+    "sound": {
+      "owner": "tear",
+      "sourceCandidate": "Actual Native backend owner and mixer state, browser AudioBufferSource starts and causal public-input windows; preserve existing PCM comparisons.",
+      "qualification": "New collectors uncompiled/unrun. AudioState, API forwarding or equal PCM alone does not establish correct logical sound or audible playback; aliases/unknown owners remain explicit."
+    },
+    "prebossAssets": {
+      "owner": "control",
+      "sourceCandidate": "Original95 boss UI PNG sheets/56 portrait definitions and full loader; missing exact MegaGurdy imported.",
+      "qualification": "Original asset decode/CRC census passed. New loader/build/browser playback unrun; transition timing is separate. Existing94 PNG exports preserved."
+    },
+    "nextWeaponComposition": {
+      "sourceCandidate": "Spoon3 homing + InnerEye2 satellites + Cupid48 typed grid-Hurt/poof composed on stat artifact; runtime source candidates are separate from historical reports.",
+      "qualification": "No inherited build/game acceptance. Trace callback delivery, cleanup and exact identity correspondence remain open."
+    }
+  },
+  "currentOpenPullRequestSnapshot": {
+    "numbers": [
+      253,
+      366,
+      407
+    ],
+    "historical": false,
+    "preserveUnique": true,
+    "note": "253 residual next-level FxRay-before-grid order;366 actual controlled68+329 evidence still pending;407 removed tinted-reward integration and Gimpy/Dip workloads lack equivalent demonstrated coverage."
   }
 }

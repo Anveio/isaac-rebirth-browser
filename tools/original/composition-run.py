@@ -149,7 +149,7 @@ def main():
         raise ValueError('A source-backed actor-family obligation is required before fixture preparation')
     source_fields = case.get('requires', {}).get('compositionSourceFields', ['playerMovementD9c', 'knifeChildChain4a0'])
     if (not isinstance(source_fields, list) or len(set(source_fields)) != len(source_fields)
-            or any(name not in ('playerMovementD9c', 'knifeChildChain4a0', 'npc14And18DamageQueue', 'kind8TearFields', 'ordinaryTechnology', 'ordinaryDrFetusBombs', 'controlledTechnology7x2x1', 'controlledDrFetusBombs', 'monstrosLung229', 'spoonBender3Tears') for name in source_fields)):
+            or any(name not in ('playerMovementD9c', 'knifeChildChain4a0', 'npc14And18DamageQueue', 'kind8TearFields', 'ordinaryTechnology', 'ordinaryDrFetusBombs', 'controlledTechnology7x2x1', 'controlledDrFetusBombs', 'monstrosLung229', 'spoonBender3Tears', 'controlledKnifeSatelliteChain') for name in source_fields)):
         raise ValueError('Unknown or duplicate requested composition source field')
     source_fields = list(source_fields)
     if case.get('requires', {}).get('ordinaryTechnologyFunctional') is not None:
@@ -180,6 +180,17 @@ def main():
                     contract.get('subtype'), contract.get('bornAttackFlags'), contract.get('controlledBy329')) != (1, 2, 0, 0, '4', False)):
             raise ValueError('Spoon3 requires its real ordinary bornflag4 Tear declaration')
         for name in ('playerMovementD9c', 'npc14And18DamageQueue', 'spoonBender3Tears'):
+            if name not in source_fields:
+                source_fields.append(name)
+    satellites = case['requires'].get('controlledKnifeSatellites')
+    if satellites is not None:
+        if (not isinstance(satellites, dict)
+                or satellites.get('schema') != 'controlled-knife-linked4a0-satellites-v1'
+                or (contract.get('primaryC08'), contract['family'], contract.get('variant'), contract.get('subtype')) != (4, 8, 0, 0)
+                or case['fixture']['startingItems'] != [114]
+                or case['requires']['orderedRealPedestalGrants'] != [329, 2]):
+            raise ValueError('Knife satellites require their actual supported329-before2 grant stages')
+        for name in ('playerMovementD9c', 'controlledKnifeSatelliteChain'):
             if name not in source_fields:
                 source_fields.append(name)
     monstro = case['requires'].get('monstrosLungFunctional')

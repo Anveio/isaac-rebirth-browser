@@ -107,7 +107,10 @@ pub(crate) enum Birth {
     CreepHit,
     /// Room5cbb30 Hurt(damage) on the grid cell under `position` (a no-op
     /// outside the room or on an empty cell).
-    GridHurt { position: WorldVector, damage: i32 },
+    GridHurt {
+        position: WorldVector,
+        damage: i32,
+    },
     /// A mid-room NPC spawned with a velocity and its APPEAR flag cleared.
     FlungNpc(SpawnSelector, WorldVector),
     /// A mid-room NPC with spawner-written fields (Spawn550a40 then the

@@ -58,6 +58,16 @@ fn discharge(state: &mut State) -> Result<(), String> {
 }
 
 pub(crate) fn advance(state: &mut State, controls_enabled: bool) -> Result<(), String> {
+    //Empty active0 and the closed45 leaf cannot run the D38 writers in
+    //522250. An untracked active-effect request loses only this input proof;
+    //a later release or cache evaluation cannot reconstruct it.
+    if state.public_actions.active_triggered && controls_enabled {
+        if let Some(owner) = state.player_items.as_mut() {
+            if !matches!(owner.active_id, 0 | 45) {
+                owner.shot_speed_inputs = None;
+            }
+        }
+    }
     let Some(owner) = state.player_items.as_ref() else {
         return Ok(());
     };

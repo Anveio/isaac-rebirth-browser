@@ -7,7 +7,7 @@ export interface Player {
   canShoot: boolean; initialized3074: boolean;
   visible: boolean; inputCooldown: number; dead: boolean;
   x: number; y: number; vx: number; vy: number; hp: number; maxHp: number;
-  soulHp: number; blackHeartMask: number; eternalHearts: number;
+  soulHp: number; blackHeartMask: number; eternalHearts: number; goldenKey?: boolean | null;
   facing: Direction; bodyFacing: Direction; walkFrame: number; headFrame: number; shooting: boolean; shootingLock: number;
   renderOffset: { x: number; y: number }; controlsEnabled: boolean;
   transformationCounts: [number, number] | null;
@@ -104,7 +104,8 @@ export interface SavedRunSummary {
   inventory: {coins: number; bombs: number; keys: number};
   playerItems: {ownedCounts: number[]; itemRngStates: number[];
     trinketRngStates: number[]; pocketRngStates: number[]; activeId: number;
-    activeCharge: number; saveWordD88: number; reserveCharge: number};
+    activeCharge: number; saveWordD88: number; reserveCharge: number;
+    shotSpeedInputs?: {sourceD38: number}};
   emptyGridCellsSaved: number; occupiedGridSeedsPending: number[];
   currentRoomRecord: number; currentRoomSeedSamples: {gridIndex: number;
     levelSeeds: [number, number]; savedSeeds: [number, number]; occupancy: "empty" | "occupied" | "padding";
@@ -310,6 +311,7 @@ export interface State {
     collectionDelay: number; activeId: number; activeCharge: number; activeSubordinateCharge: number; saveWordD88: number;
     activeStateD80: number; activeStateD84: number; reserveCharge: number; activeFlag3076: boolean;
     unevaluatedCacheFlags: number;
+    shotSpeedInputs?: {sourceD38: number};
     luckInputs: {sourceD3c: number; sourceD40: number; sourceD58: number; source13cc: number; source13d0: number} | null} | null;
   informationAnimation: {state: number; delay: number; currentActor: string | null;
     currentClip: string | null; spritesheet: string | null; definitionLoaded: boolean; frame: number; playing: boolean};
@@ -329,6 +331,7 @@ export interface State {
   stageTransition: {state: number; counter: number; sameStage: boolean; animation: number};
   roomTransition: {fromRoom: number; targetRoom: number; fromSlot: number; targetSlot: number; phase: "out" | "in" | "bossScene" | "bossCleanup"; fullUpdates: number; bossScene: {presentationIndex: number; animationFrame: number; animationPlaying: boolean} | null} | null;
   sourceCacheRunFlags: number | null;
+  sourceShotSpeedMinimum?: boolean;
   playerStats: {shotSpeed: number; damage: number; tearHeight: number; tearFallingSpeed: number; tearFallingAcceleration: number; moveSpeed: number; luck: number | null};
   player: Player; room: Room; stageEffects: StageEffects; inventory: { coins: number; bombs: number; keys: number };
   publicActions: { menuConfirm: boolean; menuBack: boolean; activePressed: boolean; activeTriggered: boolean; pocketPressed: boolean; pocketTriggered: boolean; enterWasDown: boolean; spaceWasDown: boolean; escapeWasDown: boolean; pocketWasDown: boolean };

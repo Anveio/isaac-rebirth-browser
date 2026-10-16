@@ -12,7 +12,10 @@ pub(crate) enum GridCallbackOutcome {
     UnadmittedKind(u32),
     /// The receiver's bool is known, but a later branch is not ported. The
     /// draws before that branch ran; its own effects remain unperformed.
-    Unadmitted { taken: bool, branch: &'static str },
+    Unadmitted {
+        taken: bool,
+        branch: &'static str,
+    },
 }
 
 impl GridCallbackOutcome {
@@ -107,7 +110,11 @@ pub(crate) fn callback_at_index(
 /// Breaking spawns the 1000.43 explosion, clears the cell (cost 900, class
 /// 0) and rolls the drop on a fresh local RNG of the spawn seed.
 fn hurt_poop(state: &mut State, index: usize, damage: i32) -> Result<GridCallbackOutcome, String> {
-    let grid = state.room.grid.as_mut().ok_or("grid Hurt requires actual room admission")?;
+    let grid = state
+        .room
+        .grid
+        .as_mut()
+        .ok_or("grid Hurt requires actual room admission")?;
     let width = usize::from(grid.width);
     let poop = grid.cells[index].entity.as_mut().expect("poop cell");
     if !matches!(poop.variant, 0 | 2) {
@@ -163,7 +170,11 @@ fn hurt_poop(state: &mut State, index: usize, damage: i32) -> Result<GridCallbac
         .ok_or("poop destruction requires source Room.Init path costs")?
         .store(index, 900)?;
     let grid = state.room.grid.as_mut().expect("admitted room grid");
-    grid.cells[index].entity.as_mut().expect("poop cell").collision_class = 0;
+    grid.cells[index]
+        .entity
+        .as_mut()
+        .expect("poop cell")
+        .collision_class = 0;
     drop_roll(state, &mut local, centre)
 }
 
@@ -221,7 +232,8 @@ fn drop_roll(
             branch: "poopDropTrinket",
         });
     }
-    let e_coli = items.is_some_and(|items| items.owned_counts.get(236).is_some_and(|count| *count > 0));
+    let e_coli =
+        items.is_some_and(|items| items.owned_counts.get(236).is_some_and(|count| *count > 0));
     let missed = if e_coli {
         GridCallbackOutcome::Unadmitted {
             taken: true,
@@ -251,6 +263,13 @@ fn drop_roll(
     }
     let variant = if local.uniform() < 0.25 { 10 } else { 20 };
     let seed = local.raw();
-    crate::rock_blast::admit_reward(state, variant, None, seed, centre, WorldVector { x: 0.0, y: 0.0 })?;
+    crate::rock_blast::admit_reward(
+        state,
+        variant,
+        None,
+        seed,
+        centre,
+        WorldVector { x: 0.0, y: 0.0 },
+    )?;
     Ok(GridCallbackOutcome::Handled(true))
 }
