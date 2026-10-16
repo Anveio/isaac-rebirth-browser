@@ -26,7 +26,10 @@ pub struct RunQuit {
 impl RunQuit {
     /// NewRun dispatcher594AF6 writes the actual save-enable byte.
     pub fn fresh() -> Self {
-        Self { save_enabled: Some(true), ..Self::default() }
+        Self {
+            save_enabled: Some(true),
+            ..Self::default()
+        }
     }
     pub fn active(&self) -> bool {
         self.fade_alpha > 0.0

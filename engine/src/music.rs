@@ -322,7 +322,11 @@ impl MusicState {
         for index in [usize::from(self.active_channel), 2] {
             self.channels[index].pitch = 1.0;
             if let Some(generation) = self.channels[index].generation {
-                self.events.push(MusicEvent::Pitch { channel: index as u8, generation, pitch: 1.0 });
+                self.events.push(MusicEvent::Pitch {
+                    channel: index as u8,
+                    generation,
+                    pitch: 1.0,
+                });
             }
         }
     }

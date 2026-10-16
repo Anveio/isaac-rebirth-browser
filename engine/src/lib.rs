@@ -2281,7 +2281,11 @@ impl Game {
         //MenuInit59A4D0 starts track61; SetMenu(3) from its index0 emits
         //no forward-confirm sound.59B0F0 receives opaque black67C8F8.
         self.state.music.crossfade(61);
-        self.state.menu_fade = MenuFade { active: true, alpha: 1.0, color: [0.0, 0.0, 0.0, 1.0] };
+        self.state.menu_fade = MenuFade {
+            active: true,
+            alpha: 1.0,
+            color: [0.0, 0.0, 0.0, 1.0],
+        };
         self.state.screen = Screen::Main;
         self.load_menu_character();
         self.state.main_selection = if self.saved_run.is_some() { 1 } else { 0 };
