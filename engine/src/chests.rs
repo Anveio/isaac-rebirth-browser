@@ -190,7 +190,10 @@ pub(crate) fn try_open(state: &mut State, index: usize) -> Result<bool, String> 
         coverage.invalidate(crate::ordinary_placement::Frontier::ChestEffects);
     }
     if let Some(owner) = &mut state.player_items {
-        crate::ordinary_placement::remember_owner(owner, crate::ordinary_placement::Frontier::ChestEffects);
+        crate::ordinary_placement::remember_owner(
+            owner,
+            crate::ordinary_placement::Frontier::ChestEffects,
+        );
     }
     let inputs = match opening_inputs(state) {
         Ok(inputs) => inputs,
@@ -361,7 +364,10 @@ fn try_open_locked(state: &mut State, index: usize) -> Result<bool, String> {
                 .expect("locked Chest")
                 .open_frontier
                 .get_or_insert(frontier);
-            crate::ordinary_placement::invalidate(state, crate::ordinary_placement::Frontier::ChestEffects);
+            crate::ordinary_placement::invalidate(
+                state,
+                crate::ordinary_placement::Frontier::ChestEffects,
+            );
             return Ok(false);
         }
     };
@@ -372,7 +378,10 @@ fn try_open_locked(state: &mut State, index: usize) -> Result<bool, String> {
             .expect("locked Chest")
             .open_frontier
             .get_or_insert(OpenFrontier::PlayerContext);
-        crate::ordinary_placement::invalidate(state, crate::ordinary_placement::Frontier::ChestEffects);
+        crate::ordinary_placement::invalidate(
+            state,
+            crate::ordinary_placement::Frontier::ChestEffects,
+        );
         return Ok(false);
     }
     // PaperClip19 is independently false in this actual empty trinket/queue
@@ -401,7 +410,10 @@ pub(crate) fn hurt_bomb_chest(
         coverage.invalidate(crate::ordinary_placement::Frontier::ChestEffects);
     }
     if let Some(owner) = &mut state.player_items {
-        crate::ordinary_placement::remember_owner(owner, crate::ordinary_placement::Frontier::ChestEffects);
+        crate::ordinary_placement::remember_owner(
+            owner,
+            crate::ordinary_placement::Frontier::ChestEffects,
+        );
     }
     if !damage.is_finite() {
         state.room.pickups[index]

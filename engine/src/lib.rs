@@ -2076,10 +2076,15 @@ impl Game {
             };
             if let Some(mut npc) = entities::spawn(id, selector, &context)? {
                 //Registered AI is not a proof of its producer footprint.
-                ordinary_placement::invalidate(&mut self.state,
+                ordinary_placement::invalidate(
+                    &mut self.state,
                     ordinary_placement::Frontier::ActorEffects {
-                        actor: actors::ActorRef { kind: actors::ActorKind::Npc, id },
-                    });
+                        actor: actors::ActorRef {
+                            kind: actors::ActorKind::Npc,
+                            id,
+                        },
+                    },
+                );
                 champions::roll(
                     &mut npc,
                     &mut self.state.boot_lifecycle.shared,
@@ -2146,12 +2151,16 @@ impl Game {
                 }
             }
             if selector.category == room_spawns::SpawnCategory::Entity
-                && order.len() == before_entities {
-                ordinary_placement::invalidate(&mut self.state,
+                && order.len() == before_entities
+            {
+                ordinary_placement::invalidate(
+                    &mut self.state,
                     ordinary_placement::Frontier::Factory {
                         entity_type: u32::from(selector.entity_type),
-                        variant: u32::from(selector.variant), subtype: u32::from(selector.subtype),
-                    });
+                        variant: u32::from(selector.variant),
+                        subtype: u32::from(selector.subtype),
+                    },
+                );
             }
             // SpawnEntity5ce7a8..7d3 calls5c57c0 with the selected type,
             // variant, edx=0,cl=0 after successful Game.Spawn. For this
@@ -2495,7 +2504,10 @@ impl Game {
                     .as_ref()
                     .is_none_or(|items| items.held_pockets.is_none())
             {
-                ordinary_placement::invalidate(&mut self.state, ordinary_placement::Frontier::PocketEffects);
+                ordinary_placement::invalidate(
+                    &mut self.state,
+                    ordinary_placement::Frontier::PocketEffects,
+                );
                 self.state.attack_runtime.aim_rotation_c70 = None;
                 if let Some(items) = &mut self.state.player_items {
                     //Untracked pill/card execution cannot retain speed history.
@@ -2694,7 +2706,10 @@ impl Game {
                 combat::advance_player_immunity(&mut self.state);
                 if restoring {
                     //Saved4/5/6 replay/retirement needs its own full owner.
-                    ordinary_placement::invalidate(&mut self.state, ordinary_placement::Frontier::Restore);
+                    ordinary_placement::invalidate(
+                        &mut self.state,
+                        ordinary_placement::Frontier::Restore,
+                    );
                     let restored_pickups = pickups::readmit_regular_records(&mut self.state)?;
                     item_queries::note_room_placement(&mut self.state);
                     self.admitted_update_footprint(phase)?;
@@ -3760,14 +3775,21 @@ impl Game {
                 self.state.player_animation.current = None;
             }
         }
-        let released_shoot = !(self.held("ArrowUp") || self.held("ArrowDown")
-            || self.held("ArrowLeft") || self.held("ArrowRight"));
-        let bomb_callback_owned = !bomb_triggered || !controls_enabled
-            || !self.state.player.controls_enabled || self.state.player.input_cooldown > 0
+        let released_shoot = !(self.held("ArrowUp")
+            || self.held("ArrowDown")
+            || self.held("ArrowLeft")
+            || self.held("ArrowRight"));
+        let bomb_callback_owned = !bomb_triggered
+            || !controls_enabled
+            || !self.state.player.controls_enabled
+            || self.state.player.input_cooldown > 0
             || self.state.inventory.bombs == 0
             || self.state.bomb_placement_cooldown.remaining_updates > 0;
         if let Some(frontier) = ordinary_placement::player_update_frontier(
-            &self.state, phase == phase::Phase::Update, !released_shoot, bomb_callback_owned,
+            &self.state,
+            phase == phase::Phase::Update,
+            !released_shoot,
+            bomb_callback_owned,
         ) {
             ordinary_placement::invalidate(&mut self.state, frontier);
         }

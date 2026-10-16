@@ -138,7 +138,6 @@ pub(crate) fn source_seed_effect_mode(input: &[u8]) -> u32 {
         .unwrap_or(0)
 }
 
-
 fn checksum(mut seed: u32) -> u8 {
     let mut checksum: u32 = 0;
     while seed != 0 {

@@ -850,9 +850,10 @@ pub(crate) fn add_collectible(
     //active grant from actual empty/D80=0 has the same plain dispatch;
     //52D1B0 also clears the old active count, modeled below. No Use is
     //inferred from granting an active.194 only spawns a world pickup.
-    let normal_entity = state.player.entity_source.is_some_and(|source| {
-        source.entity_type == 1 && source.variant == 0
-    });
+    let normal_entity = state
+        .player
+        .entity_source
+        .is_some_and(|source| source.entity_type == 1 && source.variant == 0);
     let plain_active_grant = normal_isaac
         && normal_entity
         && config.kind == 3
@@ -1124,14 +1125,17 @@ pub(crate) fn add_collectible(
     }
     //This is the actual reached default CFG effect, not an ID/loadout
     //whitelist. It never heals a prior missing producer history.
-    let ordinary_no_world_effect = matches!(source_effect, Some(PassiveGrantSourceEffect::DefaultTail))
-        && config.inventory.iter().all(|amount| *amount == 0)
-        && config.cache_flags & (256 | 512) == 0;
+    let ordinary_no_world_effect =
+        matches!(source_effect, Some(PassiveGrantSourceEffect::DefaultTail))
+            && config.inventory.iter().all(|amount| *amount == 0)
+            && config.cache_flags & (256 | 512) == 0;
     if id == 194 {
         crate::pickup_world_grants::on_card194_added(state);
     } else if !ordinary_no_world_effect {
-        crate::ordinary_placement::invalidate(state,
-            crate::ordinary_placement::Frontier::CollectibleEffects { collectible_id: id });
+        crate::ordinary_placement::invalidate(
+            state,
+            crate::ordinary_placement::Frontier::CollectibleEffects { collectible_id: id },
+        );
     }
     //52D2FF..52D5A6: one source-ordered event after common authored grants.
     //The existing cache-all request/evaluation below retains its own owners.

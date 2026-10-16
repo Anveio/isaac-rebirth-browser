@@ -164,7 +164,10 @@ pub(crate) fn note_unowned_use(state: &mut State, controls_enabled: bool) {
     if let Some(coverage) = &mut state.room.ordinary_placement {
         coverage.invalidate(crate::ordinary_placement::Frontier::PocketEffects);
     }
-    crate::ordinary_placement::remember_owner(owner, crate::ordinary_placement::Frontier::PocketEffects);
+    crate::ordinary_placement::remember_owner(
+        owner,
+        crate::ordinary_placement::Frontier::PocketEffects,
+    );
     //An existing frontier contains historical records, not known-empty
     //current slots. Preserve it, but never retain new input ownership on a
     //later admitted request whose actual effect may still be unknown.
