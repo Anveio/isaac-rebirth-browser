@@ -1340,7 +1340,13 @@ pub(crate) fn resolve_scalars(
                     .wrapping_add(inputs.temporary_count(143));
                 let roid = (inputs.owned_count(14) as f32).min(1.0);
                 let speed = additive as f32 * 0.3_f32 + roid * 0.6_f32;
-                values.stats.move_speed = (speed.min(1.0) + 1.0).clamp(0.1, 2.0);
+                let mut resolved_speed = speed.min(1.0) + 1.0;
+                //512EC1/C9/D1: signed D28*.2 AFTER the base min1+1,
+                //before late modifiers and the existing final .1..2 bound.
+                if let Some(input) = inputs.owner.move_speed_inputs {
+                    resolved_speed += input.source_d28 as f32 * 0.2_f32;
+                }
+                values.stats.move_speed = resolved_speed.clamp(0.1, 2.0);
                 &[14, 27, 28, 143]
             }
             _ => continue,
@@ -1357,6 +1363,13 @@ pub(crate) fn resolve_scalars(
                 CacheStage::Range => {
                     source_player_type == Some(0)
                         && inputs.owner.range_inputs.is_some()
+                        && inputs.admits_scalar_stage(stage, supported)
+                }
+                CacheStage::MoveSpeed => {
+                    source_player_type == Some(0)
+                        && inputs.owner.move_speed_inputs.is_some_and(
+                            crate::player_items::MoveSpeedInputs::supports_persistent_d28,
+                        )
                         && inputs.admits_scalar_stage(stage, supported)
                 }
                 CacheStage::ShotSpeed => ShotSpeedStage::admits(

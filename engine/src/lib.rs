@@ -2220,6 +2220,10 @@ impl Game {
             //later release never recreates a neutral owner.
             if self.state.screen == Screen::Playing && self.state.public_actions.pocket_pressed {
                 self.state.attack_runtime.aim_rotation_c70 = None;
+                if let Some(items) = &mut self.state.player_items {
+                    //Untracked pill/card execution cannot retain speed history.
+                    items.move_speed_inputs = None;
+                }
             }
         }
         if phase != phase::Phase::Skipped {

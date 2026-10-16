@@ -66,6 +66,7 @@ pub(crate) fn advance(state: &mut State, controls_enabled: bool) -> Result<(), S
             if !matches!(owner.active_id, 0 | 45) {
                 owner.damage_inputs = None;
                 owner.range_inputs = None;
+                owner.move_speed_inputs = None;
                 owner.fire_delay_inputs = None;
             }
         }
