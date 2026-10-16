@@ -118,6 +118,8 @@ async function boot() {
       return engine.snapshot();
     },
     trace: () => trace.snapshot(),
+    // Diagnostic shared-MT draw log for the e2e --mt-draws comparator.
+    mtDraws: { enable: (enabled = true) => engine.setMtDrawLog(enabled), take: () => engine.takeMtDraws() },
     capture: () => {
       const start = performance.now();
       const state = engine.snapshot();

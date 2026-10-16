@@ -5,3 +5,4 @@ capstone==5.0.6
 macholib==1.16.3
 pyelftools==0.32
 
+zstandard==0.25.0

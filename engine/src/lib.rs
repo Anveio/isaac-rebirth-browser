@@ -31,6 +31,7 @@ mod controlled_knife;
 pub mod controlled_tear;
 mod controlled_technology;
 mod creep_effects;
+pub mod critters;
 pub mod dingle;
 pub mod dips;
 mod doors;
@@ -42,6 +43,7 @@ mod explosion_effects;
 pub mod enemy_projectiles;
 mod entities;
 pub mod sprite_color;
+pub mod tear_deaths;
 mod tear_factory;
 mod technology;
 mod technology2;
@@ -95,6 +97,7 @@ pub mod player_costume118;
 pub mod player_costume229;
 mod player_costume_registration;
 pub mod player_death;
+mod player_footprints;
 pub mod player_items;
 pub mod player_save;
 pub mod player_stats;
@@ -153,6 +156,9 @@ pub enum Direction {
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Player {
+    ///None is legacy/unowned Entity source history, never a neutral default.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub entity_source: Option<PlayerEntitySource>,
     ///Actual Player+3074 final starting-grant callback completion.
     pub initialized_3074: bool,
     ///Actual Player+3075 constructor byte, then Challenge Config+98 override.
@@ -194,9 +200,31 @@ pub struct Player {
     pub shots_fired: u32,
     pub render_offset: Point,
 }
+///Actual Entity10/14/1C/20 provenance owned by the supported Player Init.
+///It is separate from inventory, current character type and copied P/V.
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct PlayerEntitySource {
+    pub entity_type: u32,
+    pub variant: u32,
+    pub spawner_type: u32,
+    pub spawner_variant: u32,
+}
+impl PlayerEntitySource {
+    ///5BF4F5..505 passes type1/variant0;519480→441EE8/EF clears1C/20.
+    const fn fresh_isaac() -> Self {
+        Self {
+            entity_type: 1,
+            variant: 0,
+            spawner_type: 0,
+            spawner_variant: 0,
+        }
+    }
+}
 impl Player {
     fn starting() -> Self {
         Self {
+            entity_source: None,
             initialized_3074: false,
             can_shoot: true,
             visible: true,
@@ -274,14 +302,6 @@ impl Tear {
         self.vx = f64::from(self.motion.velocity.x) * motion::WORLD_SCALE;
         self.vy = f64::from(self.motion.velocity.y) * motion::WORLD_SCALE;
     }
-}
-#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub struct Impact {
-    pub id: u32,
-    pub x: f64,
-    pub y: f64,
-    pub age: u32,
 }
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -600,7 +620,6 @@ pub struct State {
     pub next_laser: u32,
     pub familiars: Vec<familiars::Familiar>,
     pub next_familiar: u32,
-    pub impacts: Vec<Impact>,
     pub fire_cooldown: i32,
     pub max_fire_delay: i32,
     pub head_timer: i32,
@@ -656,6 +675,9 @@ pub struct Game {
     pub saved_run: Option<saved_game::SavedRun>,
     pub player_manager_secondary_rng: saved_game::PlayerManagerSecondaryRng,
     pub challenge_catalog: challenges::Catalog,
+    /// Process-lifetime GetRoomByIdx static; later runs reuse it.
+    #[serde(default)]
+    pub room_lookup_dummy_constructed: bool,
     ///Immutable authored context belongs to the complete Game continuation,
     ///outside per-frame State snapshots. Selector and admission share it.
     #[serde(default, with = "room_assets::shared_catalogue")]
@@ -811,7 +833,6 @@ impl Game {
                 next_laser: 1,
                 familiars: Vec::new(),
                 next_familiar: 1,
-                impacts: Vec::new(),
                 fire_cooldown: -1,
                 max_fire_delay: 10,
                 head_timer: -1,
@@ -832,6 +853,7 @@ impl Game {
             saved_run: None,
             player_manager_secondary_rng: saved_game::PlayerManagerSecondaryRng::default(),
             challenge_catalog,
+            room_lookup_dummy_constructed: false,
             special_room_assets,
         };
         game.refresh_minimap();
@@ -1393,13 +1415,13 @@ impl Game {
         self.state.paused = false;
         self.state.run_tick = 0;
         self.state.game_update_count = 0;
+        mt::note_update(0);
         //54F471/54F635 clear duration, without writing the independent output.
         self.state
             .game_shake
             .get_or_insert_with(Default::default)
             .reset_duration();
         self.state.tears.clear();
-        self.state.impacts.clear();
         self.state.next_tear = 1;
         self.state.enemy_projectiles.clear();
         self.state.next_enemy_projectile = 1;
@@ -1435,6 +1457,8 @@ impl Game {
         self.state.boss_bar = BossBar::default();
         self.state.pause_menu = PauseMenu::hidden();
         self.state.player = Player::starting();
+        //Actual fresh Manager.Init→Player.Init; title/old restores stay None.
+        self.state.player.entity_source = Some(PlayerEntitySource::fresh_isaac());
         // 519767/519771 initialize the two transformation history counters.
         self.state.player.transformation_counts = Some([0, 0]);
         // 51985C initializes the actual D64 Luck output.
@@ -1452,6 +1476,12 @@ impl Game {
         // floor::generate_basement owns the separate primary xorshift advance.
         self.state.level_progress.begin_level();
         self.boot_level_grid = self.state.boot_lifecycle.initialize_level_grid();
+        // Level generation's first GetRoomByIdx (58a13f) constructs its
+        // static dummy descriptor once per process, after the grid init.
+        if !self.room_lookup_dummy_constructed {
+            mt::DescriptorSeeds::construct_lookup_dummy(&mut self.state.boot_lifecycle.shared);
+            self.room_lookup_dummy_constructed = true;
+        }
         self.state.floor = if let Some(definition) = &challenge {
             //The real curse/local-RNG owner is passed at this Level boundary,
             //before room placement; its sampler cannot be skipped by filter127.
@@ -1503,11 +1533,10 @@ impl Game {
         self.state.stage_seed = seed::stage1_seed(self.state.run_seed_value);
         // Level585600 ->5b8340 records the selected ordinary stage resource.
         self.state.nightmares.select_normal_basement(1)?;
-        grid_records::admit_fresh(
-            &mut self.state.room,
-            &mut self.state.boot_lifecycle.shared,
-            self.state.game_update_count,
-        )?;
+        // Room.Init's backdrop setup loads the FX rays before its grid records.
+        room::load_fx_rays(&self.state.room, &mut self.state.boot_lifecycle.shared);
+        // admit_room_pickups runs Room.Init's selector pass (grid objects and
+        // actors together), the boundary, pit links and the critters.
         let selectors = self
             .state
             .room
@@ -1522,7 +1551,9 @@ impl Game {
             .count();
         // 5cf5c6 constructs/registers actors before loaded5cf614 and Save.
         // This startup caller has no virtual18 or doorway manager update.
-        self.admit_room_pickups(&selectors)?;
+        // Room.Init's ambient critters follow inside admission; Game+ce9f4 reads0.
+        let counter = self.state.game_update_count;
+        self.admit_room_pickups(&selectors, counter, true)?;
         if self.state.room.authored_actor_order.len() != requested_entities {
             return Err(format!(
                 "starting authored entity frontier is incomplete: admitted {} of {requested_entities}",
@@ -1549,6 +1580,25 @@ impl Game {
             .run_admission
             .initialize_fresh(&mut self.state.player)?;
         self.refresh_minimap();
+        Ok(())
+    }
+
+    /// ChangeRoom5509eb saves the room being left (5182c3 -> 58d921 ->
+    /// Room.Save5ce2d0), then the next Room.Init loads its backdrop FX rays.
+    /// Selector, door and wall constructors follow in fresh admission.
+    fn change_room_shared_draws(&mut self, room_before: usize) -> Result<(), String> {
+        let left = self
+            .state
+            .persisted_rooms
+            .get(&room_before)
+            .ok_or("room change requires the persisted room it left")?;
+        saved_game::save_grid_cells(
+            &mut self.boot_level_grid,
+            &mut self.state.boot_lifecycle.shared,
+            left,
+            room_before,
+        )?;
+        room::load_fx_rays(&self.state.room, &mut self.state.boot_lifecycle.shared);
         Ok(())
     }
 
@@ -1667,9 +1717,13 @@ impl Game {
     /// The native list admits Player first, then supported selectors in their
     /// authored order. Persist that order with the room rather than regrouping
     /// NPCs and pickups when rebuilding the shared actor scheduler.
+    /// `critter_counter` is Game+ce9f4 while this Room.Init runs and `loader`
+    /// marks the run loader's starting room (see critters::spawn).
     pub fn admit_room_pickups(
         &mut self,
         selectors: &[room_spawns::SpawnSelector],
+        critter_counter: u32,
+        loader: bool,
     ) -> Result<(), String> {
         let mut pickups = Vec::new();
         let mut npcs = Vec::new();
@@ -1682,6 +1736,13 @@ impl Game {
             .as_ref()
             .map_or(1, |descriptor| descriptor.template.room_type);
         for selector in selectors {
+            // Room.Init5cecc0 constructs grid objects in the same selector pass.
+            grid_records::admit_selector(
+                &mut self.state.room,
+                &mut self.state.boot_lifecycle.shared,
+                selector,
+                self.state.game_update_count,
+            )?;
             let id = u32::try_from(npcs.len()).map_err(|_| "NPC identity exhausted")?;
             let context = entities::SpawnContext {
                 stage: self.state.stage,
@@ -1745,6 +1806,30 @@ impl Game {
                 }
             }
         }
+        // Doors, walls and shape0 ambient decoration follow the selectors.
+        // Other shapes and backdrops keep their boundary draws unadmitted.
+        if self
+            .state
+            .room
+            .descriptor
+            .as_ref()
+            .is_some_and(|descriptor| {
+                descriptor.asset_stage <= 1
+                    && descriptor.template.shape_index() == 0
+                    && descriptor.template.room_type != 16
+            })
+        {
+            grid_records::admit_boundary(
+                &mut self.state.room,
+                &mut self.state.boot_lifecycle.shared,
+                self.state.game_update_count,
+                !loader,
+            )?;
+        }
+        // Room.Init5cf550 then links pits over every grid entity in order.
+        if let Some(grid) = self.state.room.grid.as_mut() {
+            grid::link_pits(grid, &mut self.state.boot_lifecycle.shared);
+        }
         self.state.room.pickups = pickups;
         self.state.room.npcs = npcs;
         // Game551a10: the authored bossportraits.xml presentation of the
@@ -1763,6 +1848,9 @@ impl Game {
         self.state.next_pickup = next;
         self.rebuild_room_actor_schedule()?;
         self.state.room.complete_initialization();
+        // First-visit ambient critters close Room.Init5cf64f inside this full
+        // update, after the selector entities took their manager sequences.
+        critters::spawn(&mut self.state, critter_counter, loader)?;
         self.state.room.boss_count = self.state.room.manager_counts.boss_total().max(0) as u32;
         self.refresh_stage_effects();
         Ok(())
@@ -2060,6 +2148,7 @@ impl Game {
                 self.update_player(phase, false, false)?;
             }
             if room_before != self.state.current_room {
+                self.change_room_shared_draws(room_before)?;
                 self.state.camera = Some(camera::Camera::new(
                     &self.state.room,
                     self.state
@@ -2127,7 +2216,8 @@ impl Game {
                         .expect("first entered descriptor has authored admission")
                         .selectors
                         .clone();
-                    self.admit_room_pickups(&selectors)?;
+                    let counter = self.state.game_update_count.wrapping_add(1);
+                    self.admit_room_pickups(&selectors, counter, false)?;
                     // The admitted Room::Update follows authored mixed order.
                     self.refresh_room_boss_count();
                     let mut counted = actors::FullCounts::default();
@@ -2142,6 +2232,18 @@ impl Game {
                             _ => return Err("invalid authored room actor handle".into()),
                         }
                         self.count_updated_room_actor(actor, &mut counted);
+                    }
+                    // The same Room::Update reaches the critters Room.Init just
+                    // spawned, after the selector entities, at this counter.
+                    let critters: Vec<u32> = self
+                        .state
+                        .sprite_effects
+                        .iter()
+                        .filter(|effect| effect.critter.is_some() && effect.active)
+                        .map(|effect| effect.id)
+                        .collect();
+                    for id in critters {
+                        critters::advance(&mut self.state, phase, id)?;
                     }
                     self.state.room.manager_counts.finish_full(counted);
                     // The admitting manager pass also sets the bar: a fresh
@@ -2213,6 +2315,8 @@ impl Game {
                 .game_update_count
                 .checked_add(1)
                 .ok_or("game update counter exhausted")?;
+            mt::note_update(self.state.game_update_count);
+            critters::replay_loader_update(&mut self.state)?;
         }
         doors::advance(&mut self.state, phase)?;
         // Room grid pass5d1378: GridEntity_TrapDoor::Update before entities.
@@ -2355,24 +2459,9 @@ impl Game {
                 }
             }
         }
-        for impact in &mut self.state.impacts {
-            impact.age += 1;
-        }
-        self.state.impacts.retain(|impact| impact.age < 12);
-        let mut surviving = Vec::new();
-        for tear in std::mem::take(&mut self.state.tears) {
-            if tear.motion.lifetime == projectiles::Lifetime::Removed {
-                self.state.impacts.push(Impact {
-                    id: tear.id,
-                    x: f64::from(tear.motion.position.x) * motion::WORLD_SCALE + 32.0,
-                    y: f64::from(tear.motion.position.y) * motion::WORLD_SCALE - 46.0,
-                    age: 0,
-                });
-            } else {
-                surviving.push(tear);
-            }
-        }
-        self.state.tears = surviving;
+        self.state
+            .tears
+            .retain(|tear| tear.motion.lifetime != projectiles::Lifetime::Removed);
         bombs::advance_explosions(&mut self.state, phase, explosion_fence);
         bombs::retire_removed(&mut self.state);
         self.state.room.pickups.retain(|pickup| !pickup.removed);
@@ -2507,7 +2596,6 @@ impl Game {
         self.state.room = Room::from_starting_floor(&self.state.floor);
         self.state.actor_scheduler.clear_room();
         self.state.tears.clear();
-        self.state.impacts.clear();
         self.state.enemy_projectiles.clear();
         self.state.fire_particles.clear();
         self.state.sprite_effects.clear();
@@ -2609,11 +2697,22 @@ impl Game {
                 } else {
                     None
                 };
+                let mut death = None;
                 if let Some(tear) = self.state.tears.iter_mut().find(|tear| tear.id == actor.id) {
                     if newborn {
                         tear.motion.present_birth(phase)?;
                     } else {
-                        tear.motion.advance(phase, tear.grid_contact)?;
+                        let dying = tear.motion.lifetime == projectiles::Lifetime::Dying;
+                        if tear.motion.advance(phase, tear.grid_contact)?
+                            == projectiles::Lifetime::Removed
+                            && dying
+                        {
+                            death = Some(tear_deaths::Death {
+                                position: tear.motion.position,
+                                height: tear.motion.height,
+                                scale: tear.scale,
+                            });
+                        }
                         if phase == phase::Phase::Update {
                             tear.age = tear.age.checked_add(1).ok_or("tear age exhausted")?;
                             tear.grid_contact = grid
@@ -2623,6 +2722,9 @@ impl Game {
                         }
                     }
                     tear.project();
+                }
+                if let Some(death) = death {
+                    tear_deaths::emit(&mut self.state, death)?;
                 }
             }
             actors::ActorKind::Bomb => bombs::advance_actor(&mut self.state, phase, actor.id)?,
@@ -3301,6 +3403,16 @@ impl Game {
         let bomb_admitted = self.state.bomb_placement_cooldown.advance(phase);
         // Shooting inherits the velocity entering this phase, before input acceleration.
         let inherited_velocity = (self.state.player.vx, self.state.player.vy);
+        // Player531c8f reads the velocity after input but before this
+        // update's grid collision, which the engine applies afterward.
+        let footprint_velocity = motion::advance_world(
+            bombs::player_world(&self.state),
+            bombs::player_velocity(&self.state),
+            dx,
+            dy,
+            self.state.player_stats.move_speed,
+        )?
+        .1;
         motion::advance(
             &mut self.state.player,
             &self.state.room,
@@ -3429,6 +3541,9 @@ impl Game {
         //Release and canceled held input retain the actual prior DB4.
         if let Some(aim) = shooting_aim_db4 {
             self.state.attack_runtime.shooting_aim_db4 = Some(aim);
+        }
+        if phase == phase::Phase::Update {
+            player_footprints::advance(&mut self.state, footprint_velocity)?;
         }
         player_items::advance_item_sprite(&mut self.state, phase);
         player_costume118::advance_full(&mut self.state, phase);
@@ -3622,6 +3737,21 @@ pub extern "C" fn error_ptr() -> *const u8 {
 #[no_mangle]
 pub extern "C" fn error_len() -> usize {
     ERROR.with(|error| error.borrow().len())
+}
+/// Diagnostic shared-MT draw log for the e2e `--mt-draws` comparator.
+/// Nonzero enables (and clears) it; zero disables it. Off by default.
+#[no_mangle]
+pub extern "C" fn mt_draws_enable(enabled: u32) {
+    mt::set_draw_log(enabled != 0);
+}
+/// JSON array of the draws logged since the previous call; empty when off.
+#[no_mangle]
+pub extern "C" fn mt_draws_ptr() -> *const u8 {
+    SNAPSHOT.with(|snapshot| {
+        *snapshot.borrow_mut() =
+            serde_json::to_vec(&mt::take_draws()).expect("draw log serializes");
+        snapshot.borrow().as_ptr()
+    })
 }
 /// The public key surface as a JSON array of key codes; needs no reset.
 #[no_mangle]

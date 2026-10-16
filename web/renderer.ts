@@ -390,8 +390,6 @@ export class Renderer {
           BlueOffset: color.offsets[2]! * 255,
         } } });
     }
-    for (const impact of state.impacts)
-      this.assets.draw(ctx, "gfx/1000.012_tear poof_small.anm2", "Poof", impact.x, impact.y, impact.age);
     for (const bomb of state.bombs)
       if (bomb.motion.lifetime === "alive")
         this.assets.draw(ctx, bomb.variant === 3 ? "gfx/004.003_troll bomb.anm2" : bomb.variant === 4 ? "gfx/004.004_megatroll bomb.anm2" : "gfx/004.000_bomb.anm2", bomb.animation, bomb.x, bomb.y - 1, bomb.animationFrame, { pixelSnap: this.canvas.width / 480 / 2 });
@@ -403,7 +401,7 @@ export class Renderer {
         this.assets.draw(ctx, bomb.variant === 3 ? "gfx/004.003_troll bomb.anm2" : bomb.variant === 4 ? "gfx/004.004_megatroll bomb.anm2" : "gfx/004.000_bomb.anm2", bomb.animation, bomb.x, bomb.y - 1, bomb.animationFrame, { pixelSnap: this.canvas.width / 480 / 2 });
     for (const effect of state.spriteEffects) {
       // Source31f dead can coexist with31e active until a later Remove.
-      if (!effect.visible || !effect.active || effect.creepEffect) continue;
+      if (!effect.visible || !effect.active || effect.footprint || effect.creepEffect) continue;
       if (effect.variant === 58 || effect.variant === 43) {
         const sprite = effect.sprite, controller = effect.poopEffect;
         const rotation = controller && "particle58" in controller && typeof controller.particle58 === "object"
@@ -515,8 +513,11 @@ export class Renderer {
     }
   }
   private drawEffect(ctx: CanvasRenderingContext2D, variant: number, sprite: ActorSprite, x: number, y: number): void {
-    const actors: Record<number, string> = { 7: "gfx/1000.007_blood splat.anm2", 15: "gfx/1000.015_poof01.anm2",
-      17: "gfx/1000.017_poof04.anm2", 42: "gfx/1000.042_blood gush.anm2" };
+    const actors: Record<number, string> = { 2: "gfx/1000.002_blood explosion.anm2", 7: "gfx/1000.007_blood splat.anm2",
+      12: "gfx/1000.012_tear poofa.anm2", 13: "gfx/1000.013_tear poofb.anm2", 15: "gfx/1000.015_poof01.anm2",
+      17: "gfx/1000.017_poof04.anm2", 21: "gfx/1000.021_tiny bug.anm2", 33: "gfx/1000.033_tiny fly.anm2",
+      42: "gfx/1000.042_blood gush.anm2", 68: "gfx/1000.021_tiny bug.anm2",
+      79: "gfx/1000.012_tear poof_small.anm2", 80: "gfx/1000.012_tear poof_verysmall.anm2" };
     const actor = actors[variant];
     if (!actor) throw new Error(`Unadmitted effect renderer ${variant}`);
     ctx.save(); ctx.translate(x, y); ctx.rotate(sprite.rotation * Math.PI / 180);
@@ -570,6 +571,9 @@ export class Renderer {
   private paintStains(appearance: RoomAppearance, stains: Room["backgroundStains"]): void {
     const ctx = this.graphics.asCanvasContext();
     for (const stain of stains) {
+      // Footprints take their color from floor pixels the runtime does not
+      // sample yet; painting them with zero offsets would draw black marks.
+      if (stain.footprint) continue;
       const sprite = stain.sprite;
       if (stain.variant === 58 || stain.variant === 43) {
         ctx.save();

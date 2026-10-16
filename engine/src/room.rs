@@ -55,6 +55,9 @@ pub struct Room {
     pub combat_clear: bool,
     pub combat_clear_countdown: u32,
     pub combat_shut_door_slots: Vec<u8>,
+    /// Game update on which combat played the doors' Close animation.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub combat_shut_update: Option<u32>,
     pub spawns: Option<crate::room_spawns::RoomSpawns>,
     pub grid: Option<crate::grid::GridDescriptor>,
     /// The actual signed Room+e98 owner; absent until its source Init is admitted.
@@ -232,6 +235,26 @@ impl DecorationRng {
         self.state ^= self.state << 9;
         self.state ^= self.state >> 7;
         self.state
+    }
+}
+
+/// Room backdrop setup 5c5b30 reloads fxlayers.xml (5c5be3 -> 5489b0) on
+/// every Room init. Each authored `fxRay`, in every ray group whatever its
+/// stages, draws one phase uniform()*pi at 54a16d. Crawlspace rooms (type 16)
+/// and backdrop 13 (boss RoomData 5000) clear the layers instead. The browser
+/// does not draw rays yet, so only the draws are kept.
+pub fn load_fx_rays(room: &Room, shared: &mut crate::mt::Mt19937) {
+    if let Some(descriptor) = &room.descriptor {
+        let template = &descriptor.template;
+        if template.room_type == 16 || (template.room_type == 5 && template.variant == 5000) {
+            return;
+        }
+    }
+    let rays = include_str!("../../references/isaac/rebirth/resources/fxlayers.xml")
+        .matches("<fxRay ")
+        .count();
+    for _ray in 0..rays {
+        let _phase = (f64::from(shared.uniform()) * std::f64::consts::PI) as f32;
     }
 }
 
@@ -562,6 +585,7 @@ impl Room {
             combat_clear: true,
             combat_clear_countdown: 0,
             combat_shut_door_slots: Vec::new(),
+            combat_shut_update: None,
             spawns: None,
             grid: None,
             path_costs: None,

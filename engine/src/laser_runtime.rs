@@ -192,6 +192,29 @@ fn contact_callbacks(state: &mut State, index: usize) -> Result<(), String> {
                         "Laser damage callback requires its actual NPC/Parent owners".into(),
                     );
                 }
+                //476A77..476AD3 copies CURRENT ParentPlayer fields before
+                //the receiver callback. Actual constructor provenance is a
+                //separate owner; legacy None never invents a zero spawner.
+                let copied_source = state
+                    .player
+                    .entity_source
+                    .map(|metadata| {
+                        if metadata != crate::PlayerEntitySource::fresh_isaac() {
+                            return Err(
+                                "Laser copied Parent requires mapped Player source history",
+                            );
+                        }
+                        Ok(crate::combat::CopiedDamageSource {
+                            entity_type: metadata.entity_type,
+                            variant: metadata.variant,
+                            spawner_type: metadata.spawner_type,
+                            spawner_variant: metadata.spawner_variant,
+                            position: crate::bombs::player_world(state),
+                            velocity: crate::bombs::player_velocity(state),
+                            actor_at_copy: Some(source),
+                        })
+                    })
+                    .transpose()?;
                 let npc = state
                     .room
                     .npcs
@@ -210,13 +233,13 @@ fn contact_callbacks(state: &mut State, index: usize) -> Result<(), String> {
                             id: source.id,
                             entity_type: 1,
                         },
-                        copied_source: None,
+                        copied_source,
                     },
                 )?;
                 //476830 evaluates kind3 AFTER each real callback. Birth kind2
                 //or cached flags cannot replace this current status resolver.
                 let flags = crate::weapon_plan::resolve_current_laser_contact_flags(state)?;
-                if flags.0 & !3 != 0 {
+                if flags.has_laser_status_effect() {
                     record_frontier(state, index, LaserFrontier::ContactModifiers);
                 }
             }

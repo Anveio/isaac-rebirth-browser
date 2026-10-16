@@ -665,6 +665,9 @@ fn change_doors(state: &mut State, open: bool) {
     }
     if open {
         state.room.combat_shut_door_slots.clear();
+        state.room.combat_shut_update = None;
+    } else if !changed.is_empty() {
+        state.room.combat_shut_update = Some(state.game_update_count);
     }
     if let Some(grid) = &mut state.room.grid {
         for position in changed {
@@ -682,7 +685,7 @@ fn change_doors(state: &mut State, open: bool) {
     }
 }
 
-fn normalized(vector: WorldVector) -> WorldVector {
+pub(crate) fn normalized(vector: WorldVector) -> WorldVector {
     let length = (vector.x * vector.x + vector.y * vector.y).sqrt();
     if length > 0.0 {
         vector * (1.0 / length)

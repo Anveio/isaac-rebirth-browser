@@ -309,16 +309,10 @@ pub(crate) fn advance_transition(
     state.current_room = transition.target_room;
     state.room = match state.persisted_rooms.remove(&state.current_room) {
         Some(room) => room,
+        // Room.Init's pit linking (5cf550) follows its grid construction in
+        // admit_room_pickups.
         None => {
-            let mut room = Room::from_floor_descriptor_with_special(
-                &state.floor,
-                state.current_room,
-                special,
-            )?;
-            if let Some(grid) = room.grid.as_mut() {
-                crate::grid::link_pits(grid, &mut state.boot_lifecycle.shared);
-            }
-            room
+            Room::from_floor_descriptor_with_special(&state.floor, state.current_room, special)?
         }
     };
     // Reentry owns a new Room.Init timestamp, independent of saved geometry.
@@ -344,7 +338,6 @@ pub(crate) fn advance_transition(
     state.enemy_projectiles.clear();
     crate::laser_runtime::reset_room(state)?;
     state.fire_particles.clear();
-    state.impacts.clear();
     state.bombs.clear();
     state.explosions.clear();
     crate::attack_runtime::reset_room_schedule(state);

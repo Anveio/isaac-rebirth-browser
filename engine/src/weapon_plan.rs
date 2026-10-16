@@ -610,6 +610,8 @@ pub(crate) fn resolve_monstro_kind1(state: &State) -> Result<RegularTearPlan, St
 
 ///Actual selected50D090(kind1) for positive152: source variant0 and current
 ///C88/C98/CA0/kinematics. The secondary mode1 factory does not use this getter.
+///Current bit9 is copied by kind1 without changing its source variant0.
+///Independent caller, cache and born-body permissions remain separate.
 pub(crate) fn resolve_technology2_kind1(state: &State) -> Result<RegularTearPlan, String> {
     let inputs = ItemInputs::new(
         state
@@ -621,7 +623,7 @@ pub(crate) fn resolve_technology2_kind1(state: &State) -> Result<RegularTearPlan
         || state.weapon_cache.primary != PrimaryWeaponC08::RegularTears
         || !inputs.admits_technology2_kind1_getter()
         || inputs.pending_cache().0 & RegularTearPlan::INPUT_CACHE_MASK.0 != 0
-        || state.weapon_cache.flags_c98.0 != 0
+        || !matches!(state.weapon_cache.flags_c98.0, 0 | 0x200)
     {
         return Err("Technology2 kind1 requires its current source-owned context".into());
     }
@@ -661,8 +663,9 @@ pub(crate) fn admit_current_laser_contact_flags(
     {
         return Ok(LaserStatusAdmission::UnmappedBuilderModifiers);
     }
-    //Actual476869..8A1 status masks start at8; currentlow3 is inert.
-    if state.weapon_cache.flags_c98.0 & !3 != 0 {
+    //The current kind3 status predicate is independent of born Laser flags.
+    //0x200 is source-inert here, even when a retained C40 was born with0.
+    if state.weapon_cache.flags_c98.has_laser_status_effect() {
         return Ok(LaserStatusAdmission::UnmappedStatusFlags);
     }
     Ok(LaserStatusAdmission::Mapped)

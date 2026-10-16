@@ -656,7 +656,7 @@ pub(crate) fn advance_actor(state: &mut State, phase: Phase, id: u32) -> Result<
             }
             LaserOrigin::NpcShootAngle | LaserOrigin::PlayerControlled => true,
         }
-        || laser.attack_flags.0 != 0
+        || !laser.has_supported_neutral_body_flags()
         || laser.rotation_enabled
         || laser.max_distance != 0.0
         || laser.line_controller != 0

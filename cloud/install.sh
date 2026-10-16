@@ -10,7 +10,7 @@ if [[ "$(id -u)" == 0 ]] || { command -v sudo >/dev/null && sudo -n true; }; the
   "${task_root[@]}" apt-get update
   "${task_root[@]}" apt-get install -y --no-install-recommends \
     ca-certificates curl git file unzip zip xz-utils \
-    python3 python3-venv python3-dev ffmpeg \
+    python3 python3-venv python3-dev ffmpeg libzstd1 \
     build-essential clang llvm lldb binutils cmake ninja-build pkg-config \
     emscripten binaryen xvfb xauth xdotool mesa-utils \
     libgl1 libgl1-mesa-dri libglu1-mesa libx11-6 libxxf86vm1 \
