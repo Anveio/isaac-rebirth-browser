@@ -529,7 +529,7 @@ pub struct PauseMenu {
     pub phase: PausePhase,
     pub age: u32,
     pub selection: u8,
-    pub stat_frames: [u8; 6],
+    pub stat_frames: [Option<u8>; 6],
 }
 impl PauseMenu {
     fn hidden() -> Self {
@@ -537,8 +537,28 @@ impl PauseMenu {
             phase: PausePhase::Hidden,
             age: 0,
             selection: 1,
-            stat_frames: [2, 1, 2, 2, 2, 1],
+            stat_frames: [Some(2), Some(1), Some(2), Some(2), Some(2), Some(1)],
         }
+    }
+    ///PauseOpen5bb560 samples the actual cached Player fields once. It does
+    ///not evaluate caches or infer missing scalar history from inventory.
+    fn open(&mut self, stats: &player_stats::PlayerStats, max_fire_delay: i32) {
+        self.phase = PausePhase::Appearing;
+        self.age = 0;
+        self.selection = 1;
+        //5bb6ce..732: retain the source's individual f32 operations and order.
+        let range_shot_speed = (stats.shot_speed - 1.0_f32) / 0.15_f32 + 1.0_f32;
+        let range_falling_speed =
+            (stats.tear_falling_speed + stats.tear_falling_speed) + range_shot_speed;
+        let range = (-stats.tear_height / 20.0_f32) + range_falling_speed;
+        self.stat_frames = [
+            Some(pause_stat_frame(stats.move_speed + stats.move_speed)),
+            Some(pause_stat_frame(15.0_f32 / max_fire_delay as f32)),
+            Some(pause_stat_frame(stats.damage / 1.5_f32)),
+            Some(pause_stat_frame(range)),
+            Some(pause_stat_frame(stats.shot_speed + stats.shot_speed)),
+            stats.luck.map(pause_stat_frame),
+        ];
     }
     fn advance(&mut self, phase: phase::Phase) {
         if phase != phase::Phase::Update {
@@ -562,6 +582,19 @@ impl PauseMenu {
             PausePhase::Hidden | PausePhase::Idle => {}
         }
     }
+}
+
+///5bb602/64d/694/736/779/7b8 CVTTSS2SI, then signed clamp1..7.
+///An overflowing/NaN input becomes INT_MIN, unlike Rust's saturating cast.
+fn pause_stat_frame(value: f32) -> u8 {
+    let integer = if value.is_finite()
+        && (-2_147_483_648.0_f32..2_147_483_648.0_f32).contains(&value)
+    {
+        value as i32
+    } else {
+        i32::MIN
+    };
+    integer.clamp(1, 7) as u8
 }
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -1233,9 +1266,9 @@ impl Game {
                             tear.project();
                         }
                         self.state.paused = true;
-                        self.state.pause_menu.phase = PausePhase::Appearing;
-                        self.state.pause_menu.age = 0;
-                        self.state.pause_menu.selection = 1;
+                        self.state
+                            .pause_menu
+                            .open(&self.state.player_stats, self.state.max_fire_delay);
                     } else if self.state.pause_menu.phase != PausePhase::Disappearing {
                         self.state.pause_menu.phase = PausePhase::Disappearing;
                         self.state.pause_menu.age = 0;
