@@ -575,7 +575,12 @@ impl RegularTearPlan {
 ///Independent selected50D090(kind1) result for ordinary2. Layout, eye,
 ///clock, RNG and actor operations stay with its caller and canonical factory.
 pub(crate) fn resolve_inner_eye_kind1(state: &State) -> Result<RegularTearPlan, String> {
-    let inputs = ItemInputs::new(state.player_items.as_ref().ok_or("Inner Eye items absent")?)?;
+    let inputs = ItemInputs::new(
+        state
+            .player_items
+            .as_ref()
+            .ok_or("Inner Eye items absent")?,
+    )?;
     if state.weapon_admission.source_player_type != Some(0)
         || state.weapon_cache.primary != PrimaryWeaponC08::RegularTears
         || state.weapon_cache.flags_c98.0 != 0

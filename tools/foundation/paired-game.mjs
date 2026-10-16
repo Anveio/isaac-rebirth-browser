@@ -238,6 +238,14 @@ function comparePair(caseData, native, browser, directory, exactPixels, stateCom
   const gameplayStart = labels.indexOf('gameplay-start');
   assert.ok(gameplayStart >= 0, 'Selected paired tape must declare its gameplay boundary');
   const first = originals.get(caseData.bootstrap.boundaryLabel);
+  // A case may declare state fields that stop being comparable after a
+  // checkpoint because each game then plays its own inputs (stage-exit's
+  // per-game boss fights). They stay in the report as 'independent'.
+  const independent = (caseData.pairedIndependent || []).map(scope => {
+    const after = labels.indexOf(scope.after);
+    assert.ok(after >= 0 && scope.fields?.length && scope.reason, `Independent scope needs a captured 'after' label, fields and a reason`);
+    return { ...scope, after };
+  });
   for (const [index, label] of labels.entries()) {
     const check = { label, status: 'fail' };
     try {
@@ -252,7 +260,23 @@ function comparePair(caseData, native, browser, directory, exactPixels, stateCom
       check.sourcePNGHash = digest(sourceBytes);
       check.state = stateComparator(observations.get(label), candidate.state, index >= gameplayStart, candidate);
       assert.ok(Array.isArray(check.state) && check.state.length > 0, 'Every paired checkpoint requires typed state checks');
-      check.status = (!exactPixels || pixels.exactRGBA) && check.state.every(field => field.status === 'pass') ? 'pass' : 'fail';
+      // Only an observed scalar mismatch may be incomparable. Missing/error
+      // evidence remains blocking, and an existing exact PASS is retained.
+      const observedScalar = value => typeof value === 'number' ? Number.isFinite(value)
+        : typeof value === 'string' || typeof value === 'boolean';
+      for (const field of check.state) {
+        const scopes = independent.filter(scope => index > scope.after && scope.fields.includes(field.field));
+        if (!scopes.length) continue;
+        const comparisonStatus = field.status;
+        Object.assign(field, { comparisonStatus,
+          independentScopes: scopes.map(scope => ({ after: labels[scope.after], reason: scope.reason })) });
+        if (!['pass', 'fail'].includes(comparisonStatus) || Object.hasOwn(field, 'error') || field.missing
+            || !observedScalar(field.expected) || !observedScalar(field.actual)
+            || typeof field.expected !== typeof field.actual) field.status = 'fail';
+        else if (comparisonStatus === 'fail')
+          Object.assign(field, { status: 'independent', reason: scopes.at(-1).reason });
+      }
+      check.status = (!exactPixels || pixels.exactRGBA) && check.state.every(field => ['pass', 'independent'].includes(field.status)) ? 'pass' : 'fail';
     } catch (error) { check.error = String(error.message); }
     checks.push(check);
   }

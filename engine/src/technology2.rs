@@ -1,7 +1,7 @@
 //! Actual secondary Technology2 C40 and the independent ordinary Tear caller.
 //! Shared stores/factories own actors; current cache never rewrites beam births.
 use crate::{
-    actors::{ActorKind, ActorRef},
+    actors::ActorKind,
     attack_runtime::{DispatchOutcome, ShootButtons, Technology2Slot},
     item_pipeline::ItemInputs,
     lasers::LaserOrigin,

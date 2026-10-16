@@ -19,7 +19,6 @@ pub mod bombs;
 pub mod boss_death;
 mod brimstone;
 pub mod camera;
-pub mod game_shake;
 pub mod challenges;
 pub mod champions;
 pub mod chests;
@@ -38,16 +37,18 @@ mod doors;
 mod dr_fetus;
 pub mod duke;
 mod effects;
-mod epic_fetus;
-mod explosion_effects;
 pub mod enemy_projectiles;
 mod entities;
+mod epic_fetus;
+mod explosion_effects;
+pub mod game_shake;
 pub mod sprite_color;
 pub mod tear_deaths;
 mod tear_factory;
 mod technology;
 mod technology2;
 pub use entities::{implemented_npc_kinds, supports_npc_selector};
+mod contact_candidates;
 pub mod familiars;
 pub mod fireplaces;
 pub mod floor;
@@ -64,8 +65,8 @@ pub mod grid_records;
 mod health_damage;
 mod horfs;
 pub mod information_animation;
-pub mod input;
 mod inner_eye;
+pub mod input;
 mod item_death_effects;
 mod item_pipeline;
 pub mod items;
@@ -104,7 +105,6 @@ pub mod player_items;
 pub mod player_save;
 pub mod player_stats;
 mod polyphemus_contact;
-mod contact_candidates;
 pub mod poop_effects;
 pub mod projectiles;
 pub mod public_actions;
@@ -287,6 +287,10 @@ pub struct Tear {
     pub animation_tier: u8,
     pub collision_radius: f32,
     pub grid_contact: bool,
+    /// 542f70: the tear died on a grid contact above height -60, so its
+    /// death probes the grid for Hurt (5430a5).
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub grid_death: bool,
     pub motion: projectiles::TearMotion,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub controlled: Option<controlled_tear::ControlledTear>,
@@ -598,6 +602,10 @@ pub struct State {
     pub room_transition: Option<traversal::RoomTransition>,
     #[serde(default)]
     pub stage_transition: stage_transition::StageTransition,
+    /// The player's velocity when a door transition began, before departure
+    /// cleared it; the post-ChangeRoom admitted update's footprint reads it.
+    #[serde(skip)]
+    pub departure_velocity: Option<motion::WorldVector>,
     pub stage_effects: StageEffects,
     pub inventory: Inventory,
     pub next_pickup: u32,
@@ -814,6 +822,7 @@ impl Game {
                 persisted_rooms: BTreeMap::new(),
                 room_transition: None,
                 stage_transition: stage_transition::StageTransition::default(),
+                departure_velocity: None,
                 stage_effects,
                 inventory: Inventory {
                     coins: 0,
@@ -1531,7 +1540,13 @@ impl Game {
         // Level585600 ->5b8340 records the selected ordinary stage resource.
         self.state.nightmares.select_normal_basement(1)?;
         // Room.Init's backdrop setup loads the FX rays before its grid records.
-        room::load_fx_rays(&self.state.room, &mut self.state.boot_lifecycle.shared);
+        // The port builds only ordinary Basement (stage type 0).
+        room::load_fx_rays(
+            &mut self.state.room,
+            &mut self.state.boot_lifecycle.shared,
+            self.state.stage,
+            0,
+        );
         // admit_room_pickups runs Room.Init's selector pass (grid objects and
         // actors together), the boundary, pit links and the critters.
         let selectors = self
@@ -1595,7 +1610,13 @@ impl Game {
             left,
             room_before,
         )?;
-        room::load_fx_rays(&self.state.room, &mut self.state.boot_lifecycle.shared);
+        // The port builds only ordinary Basement (stage type 0).
+        room::load_fx_rays(
+            &mut self.state.room,
+            &mut self.state.boot_lifecycle.shared,
+            self.state.stage,
+            0,
+        );
         Ok(())
     }
 
@@ -1711,6 +1732,17 @@ impl Game {
         }
     }
 
+    /// The ChangeRoom Room.Update5d12a0 tail updates the Player first at the
+    /// unchanged counter. It leaves position and velocity unchanged; its only
+    /// shared draws are the 50c000 footprint, gated by the departing velocity.
+    fn admitted_update_footprint(&mut self, phase: phase::Phase) -> Result<(), String> {
+        if let (phase::Phase::Update, Some(velocity)) =
+            (phase, self.state.departure_velocity.take())
+        {
+            player_footprints::advance(&mut self.state, velocity)?;
+        }
+        Ok(())
+    }
     /// The native list admits Player first, then supported selectors in their
     /// authored order. Persist that order with the room rather than regrouping
     /// NPCs and pickups when rebuilding the shared actor scheduler.
@@ -2168,6 +2200,7 @@ impl Game {
                 combat::advance_player_immunity(&mut self.state);
                 if restoring {
                     let restored_pickups = pickups::readmit_regular_records(&mut self.state)?;
+                    self.admitted_update_footprint(phase)?;
                     self.rebuild_room_actor_schedule()?;
                     //5CF58E replays persistent+B8 records after ordinary5C5860.
                     crate::explosion_effects::replay_dynamic_craters(&mut self.state)?;
@@ -2216,6 +2249,7 @@ impl Game {
                         .clone();
                     let counter = self.state.game_update_count.wrapping_add(1);
                     self.admit_room_pickups(&selectors, counter, false)?;
+                    self.admitted_update_footprint(phase)?;
                     // The admitted Room::Update follows authored mixed order.
                     self.refresh_room_boss_count();
                     let mut counted = actors::FullCounts::default();
@@ -2394,7 +2428,8 @@ impl Game {
                     tear.id == id
                         && tear.controlled.is_none()
                         && (partitioned_contacts == polyphemus_contact::ContactPass::Handled
-                            || (partitioned_contacts == polyphemus_contact::ContactPass::Unadmitted
+                            || (partitioned_contacts
+                                == polyphemus_contact::ContactPass::Unadmitted
                                 && tear.attack_flags.0 == 0x200))
                 }) {
                     continue;
@@ -2696,20 +2731,28 @@ impl Game {
                     None
                 };
                 let mut death = None;
+                let mut grid_hurt = None;
                 if let Some(tear) = self.state.tears.iter_mut().find(|tear| tear.id == actor.id) {
                     if newborn {
                         tear.motion.present_birth(phase)?;
                     } else {
                         let dying = tear.motion.lifetime == projectiles::Lifetime::Dying;
-                        if tear.motion.advance(phase, tear.grid_contact)?
-                            == projectiles::Lifetime::Removed
-                            && dying
-                        {
+                        let height = tear.motion.height;
+                        let lifetime = tear.motion.advance(phase, tear.grid_contact)?;
+                        if lifetime == projectiles::Lifetime::Removed && dying {
                             death = Some(tear_deaths::Death {
                                 position: tear.motion.position,
                                 height: tear.motion.height,
                                 scale: tear.scale,
                             });
+                            if tear.grid_death {
+                                grid_hurt = Some((
+                                    tear.motion.position,
+                                    1 + i32::from(tear.collision_damage > 10.0),
+                                ));
+                            }
+                        } else if !dying && lifetime == projectiles::Lifetime::Dying {
+                            tear.grid_death = tear.grid_contact && height > -60.0;
                         }
                         if phase == phase::Phase::Update {
                             tear.age = tear.age.checked_add(1).ok_or("tear age exhausted")?;
@@ -2723,6 +2766,9 @@ impl Game {
                 }
                 if let Some(death) = death {
                     tear_deaths::emit(&mut self.state, death)?;
+                }
+                if let Some((position, damage)) = grid_hurt {
+                    tear_grid_hurt(&mut self.state, position, damage)?;
                 }
             }
             actors::ActorKind::Bomb => bombs::advance_actor(&mut self.state, phase, actor.id)?,
@@ -3019,6 +3065,20 @@ impl Game {
                 enemy_projectiles::EnemyProjectile::birth(id, parent, shot)
             }),
             entities::Birth::CreepHit => creep_effects::hurt_player(&mut self.state),
+            entities::Birth::GridHurt { position, damage } => {
+                let descriptor = self
+                    .state
+                    .room
+                    .grid
+                    .clone()
+                    .ok_or("grid Hurt requires a room grid")?;
+                let Some(cell) = grid::Grid::new(descriptor)?.index(position) else {
+                    return Ok(());
+                };
+                let outcome = attack_grid::callback_at_index(&mut self.state, cell, damage)?;
+                outcome.record_frontier(&mut self.state, "npcGridHurt");
+                Ok(())
+            }
             entities::Birth::Spawned(spawned) => {
                 self.admit_npc_birth(index, entities::Birth::Npc(spawned.selector))?;
                 let npc = self.state.room.npcs.last_mut().expect("admitted NPC birth");
@@ -3149,7 +3209,7 @@ impl Game {
                 .player_items
                 .as_ref()
                 .is_some_and(|owner| owner.active_state_d80 == 0)
-            && self.state.player.shooting_lock <= 0
+            && self.state.player.shooting_lock == 0
             && !self.state.stage_shooting_guard.active();
         //The secondary callback has its own current readset and runs before
         //primary kind1/cache admission. Its retained beam does not reread C88.
@@ -3198,14 +3258,16 @@ impl Game {
                             buttons.aim()
                         };
                     let inner_eye = inner_eye::selected(&self.state, &plan);
-                    let ordinary = inner_eye || technology2_selected || matches!(
-                        plan.controller,
-                        weapon_plan::ControllerChannel::OrdinaryKnife
-                            | weapon_plan::ControllerChannel::ChargedBrimstone
-                            | weapon_plan::ControllerChannel::OrdinaryTechnology
-                            | weapon_plan::ControllerChannel::OrdinaryFetus
-                            | weapon_plan::ControllerChannel::MonstroLung
-                    );
+                    let ordinary = inner_eye
+                        || technology2_selected
+                        || matches!(
+                            plan.controller,
+                            weapon_plan::ControllerChannel::OrdinaryKnife
+                                | weapon_plan::ControllerChannel::ChargedBrimstone
+                                | weapon_plan::ControllerChannel::OrdinaryTechnology
+                                | weapon_plan::ControllerChannel::OrdinaryFetus
+                                | weapon_plan::ControllerChannel::MonstroLung
+                        );
                     let controlled =
                         plan.controller == weapon_plan::ControllerChannel::ControlledKnife;
                     let controlled_tear =
@@ -3337,18 +3399,22 @@ impl Game {
                                 buttons.held(),
                             );
                         }
-                        if inner_eye || matches!(
-                            plan.controller,
-                            weapon_plan::ControllerChannel::OrdinaryFetus
-                                | weapon_plan::ControllerChannel::MonstroLung
-                        ) {
+                        if inner_eye
+                            || matches!(
+                                plan.controller,
+                                weapon_plan::ControllerChannel::OrdinaryFetus
+                                    | weapon_plan::ControllerChannel::MonstroLung
+                            )
+                        {
                             //5306E0 excludes onlyC08=2; these released callers read D9C.
                             attack_runtime::controlled_idle_head_for(
                                 &mut self.state,
                                 buttons.held(),
                                 if inner_eye {
                                     "innerEyeMovementHistory"
-                                } else if plan.controller == weapon_plan::ControllerChannel::MonstroLung {
+                                } else if plan.controller
+                                    == weapon_plan::ControllerChannel::MonstroLung
+                                {
                                     "monstroLungMovementHistory"
                                 } else {
                                     "drFetusMovementHistory"
@@ -3759,4 +3825,35 @@ pub extern "C" fn public_keys_ptr() -> *const u8 {
 #[no_mangle]
 pub extern "C" fn public_keys_len() -> usize {
     PUBLIC_KEYS_JSON.with(Vec::len)
+}
+
+/// 5430a5: after its splash, a tear that died on the grid hurts the cell
+/// under it or, failing that, the cells 10 to either side, stopping at the
+/// first that takes the damage.
+fn tear_grid_hurt(
+    state: &mut State,
+    position: motion::WorldVector,
+    damage: i32,
+) -> Result<(), String> {
+    let Some(descriptor) = state.room.grid.clone() else {
+        return Ok(());
+    };
+    let grid = grid::Grid::new(descriptor)?;
+    for (x, y) in [
+        (0.0, 0.0),
+        (10.0, 0.0),
+        (0.0, 10.0),
+        (-10.0, 0.0),
+        (0.0, -10.0),
+    ] {
+        let Some(cell) = grid.index(position + motion::WorldVector { x, y }) else {
+            continue;
+        };
+        let outcome = attack_grid::callback_at_index(state, cell, damage)?;
+        outcome.record_frontier(state, "tearGridHurt");
+        if outcome.taken() == Some(true) {
+            break;
+        }
+    }
+    Ok(())
 }

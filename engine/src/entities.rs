@@ -105,6 +105,12 @@ pub(crate) enum Birth {
     Npc(SpawnSelector),
     /// Creep 5516d0 hurt of the player from a spawner-run first update.
     CreepHit,
+    /// Room5cbb30 Hurt(damage) on the grid cell under `position` (a no-op
+    /// outside the room or on an empty cell).
+    GridHurt {
+        position: WorldVector,
+        damage: i32,
+    },
     /// A mid-room NPC spawned with a velocity and its APPEAR flag cleared.
     FlungNpc(SpawnSelector, WorldVector),
     /// A mid-room NPC with spawner-written fields (Spawn550a40 then the

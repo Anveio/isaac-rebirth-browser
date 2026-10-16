@@ -155,7 +155,7 @@ fn ai(
     npc: &mut Npc,
     random: &mut Mt19937,
     world: &mut NpcWorld,
-    _: &mut Vec<Birth>,
+    births: &mut Vec<Birth>,
     friction: &mut f32,
 ) -> Result<(), String> {
     let mut state = npc.larry.take().ok_or("Larry Jr. requires its AI state")?;
@@ -164,7 +164,7 @@ fn ai(
             link(npc, &mut state, world);
             Ok(())
         }
-        4 => run(npc, &mut state, random, world, friction),
+        4 => run(npc, &mut state, random, world, births, friction),
         _ => Ok(()),
     };
     npc.larry = Some(state);
@@ -296,6 +296,7 @@ fn run(
     state: &mut LarryState,
     random: &mut Mt19937,
     world: &mut NpcWorld,
+    births: &mut Vec<Birth>,
     friction: &mut f32,
 ) -> Result<(), String> {
     if npc.kind == 19 && plain_npc::on_frame(npc, world, 10)? {
@@ -332,8 +333,13 @@ fn run(
             npc.dead = true;
             release_death_trigger(state, world);
         }
-        // 5cbb30 Hurt(1) on the grid entity 40 ahead only affects poop and
-        // TNT, whose Hurt draws are not admitted yet.
+        // L35d1: Room5cbb30 Hurt(1) on the cell 40 ahead (612860 leaves a
+        // zero velocity at the head). Only poop and TNT take it; the head
+        // draws nothing after this, so the room applies it as a birth.
+        births.push(Birth::GridHurt {
+            position: npc.position + crate::npcs::normalized(npc.velocity) * 40.0,
+            damage: 1,
+        });
     } else {
         follow(npc, &mut target_velocity, world);
         if npc.kind == 19 && npc.child.is_none() && world.room_type != 11 {

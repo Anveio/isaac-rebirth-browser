@@ -1,0 +1,1084 @@
+{
+  "schema": 1,
+  "cases": [
+    {
+      "name": "spoon-bender3-homing-npc-fixed-phase0",
+      "fixture": {
+        "kind": "source-authored-modified-challenge",
+        "challengeId": 1,
+        "startingItems": [],
+        "view": "item-only",
+        "authoredResourcePath": "spoon-bender3-v1/challenges-fc471e53b24bbb73.xml",
+        "baselineResourcePath": "../../rebirth/resources/challenges.xml",
+        "specialRoomsPath": "spoon-bender3-v1/room-3357852c1b11b513.stb",
+        "specialRoomsSha256": "3357852c1b11b513213a20046c51483aa15906fc10ff3b4dfdace5f7982b2f8c",
+        "otherChallengeAttributes": "preserve all rows and attributes except explicit neutral changes and startingitems",
+        "attributeChanges": [
+          {
+            "attribute": "getcurse",
+            "baselineValue": "9",
+            "authoredValue": "0"
+          },
+          {
+            "attribute": "cursefilter",
+            "baselineValue": "6",
+            "authoredValue": "127"
+          },
+          {
+            "attribute": "roomfilter",
+            "baselineValue": "2",
+            "authoredValue": null
+          },
+          {
+            "attribute": "startingitems",
+            "baselineValue": null,
+            "sourceParentValue": "68,329",
+            "authoredValue": ""
+          }
+        ],
+        "startRoomSpawnChange": {
+          "catalogue": 0,
+          "index": 80,
+          "type": 1,
+          "variant": 2,
+          "operation": "append",
+          "groups": [
+            {
+              "x": 6,
+              "y": 3,
+              "entries": [
+                {
+                  "type": 14,
+                  "variant": 0,
+                  "subtype": 0,
+                  "weight": 1.0
+                }
+              ]
+            },
+            {
+              "x": 6,
+              "y": 6,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 100,
+                  "subtype": 3,
+                  "weight": 1.0
+                }
+              ]
+            }
+          ],
+          "allOtherRowsMetadataDoorsWeightsOrderPreserved": true
+        },
+        "declaredResetJsonBytes": 277632
+      },
+      "bootEpochSeed": 12713,
+      "initialPhaseOffset": 0,
+      "entropy": "fixed declared public contact case",
+      "actions": [
+        {
+          "label": "real3-acquisition-and-all112-cache",
+          "keys": [],
+          "presentations": 160
+        },
+        {
+          "label": "homing-cardinal-1-up",
+          "keys": [
+            "Up"
+          ],
+          "presentations": 96
+        },
+        {
+          "label": "homing-release-1",
+          "keys": [],
+          "presentations": 24
+        },
+        {
+          "label": "homing-cardinal-2-right",
+          "keys": [
+            "Right"
+          ],
+          "presentations": 96
+        },
+        {
+          "label": "homing-release-2",
+          "keys": [],
+          "presentations": 24
+        },
+        {
+          "label": "homing-cardinal-3-down",
+          "keys": [
+            "Down"
+          ],
+          "presentations": 96
+        },
+        {
+          "label": "homing-release-3",
+          "keys": [],
+          "presentations": 24
+        },
+        {
+          "label": "homing-cardinal-4-left",
+          "keys": [
+            "Left"
+          ],
+          "presentations": 96
+        },
+        {
+          "label": "homing-release-4",
+          "keys": [],
+          "presentations": 24
+        },
+        {
+          "label": "homing-cardinal-5-up",
+          "keys": [
+            "Up"
+          ],
+          "presentations": 96
+        },
+        {
+          "label": "homing-release-5",
+          "keys": [],
+          "presentations": 24
+        },
+        {
+          "label": "homing-cardinal-6-right",
+          "keys": [
+            "Right"
+          ],
+          "presentations": 96
+        },
+        {
+          "label": "homing-release-6",
+          "keys": [],
+          "presentations": 24
+        },
+        {
+          "label": "final-target-and-manager-endpoints",
+          "keys": [],
+          "presentations": 64
+        }
+      ],
+      "requires": {
+        "actualPublicChallengeEntry": true,
+        "bothGamesConsumeIdenticalDeclaredResourceBytes": true,
+        "nativeObservationIsNeverBrowserInput": true,
+        "preserveAllIdentitySeedRngNumericAndCoverageMismatches": true,
+        "orderedRealPedestalGrants": [
+          3
+        ],
+        "sourceExpectedActorContract": {
+          "primaryC08": 1,
+          "family": 2,
+          "variant": 0,
+          "subtype": 0,
+          "bornAttackFlags": "4",
+          "controlledBy329": false,
+          "registeredC18DuringActualLifetime": false
+        },
+        "compositionSourceFields": [
+          "playerMovementD9c",
+          "npc14And18DamageQueue",
+          "spoonBender3Tears"
+        ],
+        "ownedCounts": [
+          {
+            "itemId": 3,
+            "count": 1
+          }
+        ],
+        "actorStages": [
+          {
+            "ownedCounts": [
+              {
+                "itemId": 3,
+                "count": 1
+              }
+            ],
+            "sourceExpectedActorContract": {
+              "primaryC08": 1,
+              "family": 2,
+              "variant": 0,
+              "subtype": 0,
+              "bornAttackFlags": "4",
+              "controlledBy329": false,
+              "registeredC18DuringActualLifetime": false
+            },
+            "requiredWitnesses": [
+              "actualQueuedGrantAndCache112Completion",
+              "actualSourcePrimaryC08AndBornFlags4",
+              "actualCanonicalTearAndSourceSequenceIdentity",
+              "actualNonnull4a8AcquisitionState",
+              "laterFullVelocitySteeringState",
+              "FastTargetAndStoredVelocityNonmutation"
+            ]
+          }
+        ],
+        "spoonBender3Functional": {
+          "schema": "ordinary-spoon-bender3-registered-homing-v1",
+          "marker": "spoonBender3Tears",
+          "authoredReceiver": {
+            "type": 14,
+            "variant": 0,
+            "subtype": 0
+          },
+          "minimumActualGrantsPerGame": 1,
+          "minimumBornHomingTearsPerGame": 1,
+          "minimumFullBodyRowsPerGame": 1,
+          "minimumFastBodyRowsPerGame": 1,
+          "minimumActualNonnullTargetStatesPerGame": 1,
+          "minimumAcquiredTargetTransitionsPerGame": 1,
+          "minimumLaterFullSteeringDiagnosticsPerGame": 1,
+          "missingToolingMustFail": true,
+          "requiredWitnesses": [
+            "actualQueuedGrantAndCache112Completion",
+            "actualSourcePrimaryC08AndBornFlags4",
+            "actualCanonicalTearAndSourceSequenceIdentity",
+            "actualNonnull4a8AcquisitionState",
+            "laterFullVelocitySteeringState",
+            "FastTargetAndStoredVelocityNonmutation"
+          ],
+          "requiredActualUnknowns": [
+            "atomic Init/property/immediateFull callback events",
+            "actual source SharedBound2 demand/return events and full stream parity",
+            "actual447110 target-set callback/weak-slot registration events",
+            "exact current target fields at each callback, separate from postmanager snapshots",
+            "actual808/818 insert callback and full collision FIFO owner",
+            "actual Remove versus Uninit weak-slot clear callbacks",
+            "all modifier combinations outside selected bornflags4/variant0",
+            "costume3 actual registration/layers and rendering history"
+          ],
+          "sourceOnlyNoRuntimeClaim": true
+        }
+      },
+      "execution": {
+        "status": "not-executed",
+        "wholeCaseAccepted": false,
+        "routeFeasibility": "Real3 pedestal at actualstart6,6, released160 then fixed cardinal shots. Two contrived NPC cells ahead; recorded geometry/tokens unchanged. Actual grant/survival/acquisition/steering remains unexecuted.",
+        "neverSatisfiedBy": "Declaration, body presence, portlastFull diagnostic, snapshot-to-callback credit, reference-fedtargets or RNG, native identity fitting or outcome filtering"
+      }
+    },
+    {
+      "name": "spoon-bender3-homing-npc-fixed-phase1",
+      "fixture": {
+        "kind": "source-authored-modified-challenge",
+        "challengeId": 1,
+        "startingItems": [],
+        "view": "item-only",
+        "authoredResourcePath": "spoon-bender3-v1/challenges-fc471e53b24bbb73.xml",
+        "baselineResourcePath": "../../rebirth/resources/challenges.xml",
+        "specialRoomsPath": "spoon-bender3-v1/room-83e4d52ff286cfe7.stb",
+        "specialRoomsSha256": "83e4d52ff286cfe7ab38eeb4feaa3b664a952c81d85553dc008d5fe5b9bc5db5",
+        "otherChallengeAttributes": "preserve all rows and attributes except explicit neutral changes and startingitems",
+        "attributeChanges": [
+          {
+            "attribute": "getcurse",
+            "baselineValue": "9",
+            "authoredValue": "0"
+          },
+          {
+            "attribute": "cursefilter",
+            "baselineValue": "6",
+            "authoredValue": "127"
+          },
+          {
+            "attribute": "roomfilter",
+            "baselineValue": "2",
+            "authoredValue": null
+          },
+          {
+            "attribute": "startingitems",
+            "baselineValue": null,
+            "sourceParentValue": "68,329",
+            "authoredValue": ""
+          }
+        ],
+        "startRoomSpawnChange": {
+          "catalogue": 0,
+          "index": 80,
+          "type": 1,
+          "variant": 2,
+          "operation": "append",
+          "groups": [
+            {
+              "x": 8,
+              "y": 6,
+              "entries": [
+                {
+                  "type": 14,
+                  "variant": 0,
+                  "subtype": 0,
+                  "weight": 1.0
+                }
+              ]
+            },
+            {
+              "x": 6,
+              "y": 6,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 100,
+                  "subtype": 3,
+                  "weight": 1.0
+                }
+              ]
+            }
+          ],
+          "allOtherRowsMetadataDoorsWeightsOrderPreserved": true
+        },
+        "declaredResetJsonBytes": 277632
+      },
+      "bootEpochSeed": 12713,
+      "initialPhaseOffset": 1,
+      "entropy": "fixed declared public contact case",
+      "actions": [
+        {
+          "label": "real3-acquisition-and-all112-cache",
+          "keys": [],
+          "presentations": 160
+        },
+        {
+          "label": "homing-cardinal-1-up",
+          "keys": [
+            "Up"
+          ],
+          "presentations": 96
+        },
+        {
+          "label": "homing-release-1",
+          "keys": [],
+          "presentations": 24
+        },
+        {
+          "label": "homing-cardinal-2-right",
+          "keys": [
+            "Right"
+          ],
+          "presentations": 96
+        },
+        {
+          "label": "homing-release-2",
+          "keys": [],
+          "presentations": 24
+        },
+        {
+          "label": "homing-cardinal-3-down",
+          "keys": [
+            "Down"
+          ],
+          "presentations": 96
+        },
+        {
+          "label": "homing-release-3",
+          "keys": [],
+          "presentations": 24
+        },
+        {
+          "label": "homing-cardinal-4-left",
+          "keys": [
+            "Left"
+          ],
+          "presentations": 96
+        },
+        {
+          "label": "homing-release-4",
+          "keys": [],
+          "presentations": 24
+        },
+        {
+          "label": "homing-cardinal-5-up",
+          "keys": [
+            "Up"
+          ],
+          "presentations": 96
+        },
+        {
+          "label": "homing-release-5",
+          "keys": [],
+          "presentations": 24
+        },
+        {
+          "label": "homing-cardinal-6-right",
+          "keys": [
+            "Right"
+          ],
+          "presentations": 96
+        },
+        {
+          "label": "homing-release-6",
+          "keys": [],
+          "presentations": 24
+        },
+        {
+          "label": "final-target-and-manager-endpoints",
+          "keys": [],
+          "presentations": 64
+        }
+      ],
+      "requires": {
+        "actualPublicChallengeEntry": true,
+        "bothGamesConsumeIdenticalDeclaredResourceBytes": true,
+        "nativeObservationIsNeverBrowserInput": true,
+        "preserveAllIdentitySeedRngNumericAndCoverageMismatches": true,
+        "orderedRealPedestalGrants": [
+          3
+        ],
+        "sourceExpectedActorContract": {
+          "primaryC08": 1,
+          "family": 2,
+          "variant": 0,
+          "subtype": 0,
+          "bornAttackFlags": "4",
+          "controlledBy329": false,
+          "registeredC18DuringActualLifetime": false
+        },
+        "compositionSourceFields": [
+          "playerMovementD9c",
+          "npc14And18DamageQueue",
+          "spoonBender3Tears"
+        ],
+        "ownedCounts": [
+          {
+            "itemId": 3,
+            "count": 1
+          }
+        ],
+        "actorStages": [
+          {
+            "ownedCounts": [
+              {
+                "itemId": 3,
+                "count": 1
+              }
+            ],
+            "sourceExpectedActorContract": {
+              "primaryC08": 1,
+              "family": 2,
+              "variant": 0,
+              "subtype": 0,
+              "bornAttackFlags": "4",
+              "controlledBy329": false,
+              "registeredC18DuringActualLifetime": false
+            },
+            "requiredWitnesses": [
+              "actualQueuedGrantAndCache112Completion",
+              "actualSourcePrimaryC08AndBornFlags4",
+              "actualCanonicalTearAndSourceSequenceIdentity",
+              "actualNonnull4a8AcquisitionState",
+              "laterFullVelocitySteeringState",
+              "FastTargetAndStoredVelocityNonmutation"
+            ]
+          }
+        ],
+        "spoonBender3Functional": {
+          "schema": "ordinary-spoon-bender3-registered-homing-v1",
+          "marker": "spoonBender3Tears",
+          "authoredReceiver": {
+            "type": 14,
+            "variant": 0,
+            "subtype": 0
+          },
+          "minimumActualGrantsPerGame": 1,
+          "minimumBornHomingTearsPerGame": 1,
+          "minimumFullBodyRowsPerGame": 1,
+          "minimumFastBodyRowsPerGame": 1,
+          "minimumActualNonnullTargetStatesPerGame": 1,
+          "minimumAcquiredTargetTransitionsPerGame": 1,
+          "minimumLaterFullSteeringDiagnosticsPerGame": 1,
+          "missingToolingMustFail": true,
+          "requiredWitnesses": [
+            "actualQueuedGrantAndCache112Completion",
+            "actualSourcePrimaryC08AndBornFlags4",
+            "actualCanonicalTearAndSourceSequenceIdentity",
+            "actualNonnull4a8AcquisitionState",
+            "laterFullVelocitySteeringState",
+            "FastTargetAndStoredVelocityNonmutation"
+          ],
+          "requiredActualUnknowns": [
+            "atomic Init/property/immediateFull callback events",
+            "actual source SharedBound2 demand/return events and full stream parity",
+            "actual447110 target-set callback/weak-slot registration events",
+            "exact current target fields at each callback, separate from postmanager snapshots",
+            "actual808/818 insert callback and full collision FIFO owner",
+            "actual Remove versus Uninit weak-slot clear callbacks",
+            "all modifier combinations outside selected bornflags4/variant0",
+            "costume3 actual registration/layers and rendering history"
+          ],
+          "sourceOnlyNoRuntimeClaim": true
+        }
+      },
+      "execution": {
+        "status": "not-executed",
+        "wholeCaseAccepted": false,
+        "routeFeasibility": "Real3 pedestal at actualstart6,6, released160 then fixed cardinal shots. Two contrived NPC cells ahead; recorded geometry/tokens unchanged. Actual grant/survival/acquisition/steering remains unexecuted.",
+        "neverSatisfiedBy": "Declaration, body presence, portlastFull diagnostic, snapshot-to-callback credit, reference-fedtargets or RNG, native identity fitting or outcome filtering"
+      }
+    },
+    {
+      "name": "spoon-bender3-homing-npc-recorded-0",
+      "fixture": {
+        "kind": "source-authored-modified-challenge",
+        "challengeId": 1,
+        "startingItems": [],
+        "view": "item-only",
+        "authoredResourcePath": "spoon-bender3-v1/challenges-fc471e53b24bbb73.xml",
+        "baselineResourcePath": "../../rebirth/resources/challenges.xml",
+        "specialRoomsPath": "spoon-bender3-v1/room-9199b03b67726892.stb",
+        "specialRoomsSha256": "9199b03b67726892e9fc465f935f69f33de722c1caeb3f29ee41f11e5793f473",
+        "otherChallengeAttributes": "preserve all rows and attributes except explicit neutral changes and startingitems",
+        "attributeChanges": [
+          {
+            "attribute": "getcurse",
+            "baselineValue": "9",
+            "authoredValue": "0"
+          },
+          {
+            "attribute": "cursefilter",
+            "baselineValue": "6",
+            "authoredValue": "127"
+          },
+          {
+            "attribute": "roomfilter",
+            "baselineValue": "2",
+            "authoredValue": null
+          },
+          {
+            "attribute": "startingitems",
+            "baselineValue": null,
+            "sourceParentValue": "68,329",
+            "authoredValue": ""
+          }
+        ],
+        "startRoomSpawnChange": {
+          "catalogue": 0,
+          "index": 80,
+          "type": 1,
+          "variant": 2,
+          "operation": "append",
+          "groups": [
+            {
+              "x": 6,
+              "y": 5,
+              "entries": [
+                {
+                  "type": 18,
+                  "variant": 0,
+                  "subtype": 0,
+                  "weight": 1.0
+                }
+              ]
+            },
+            {
+              "x": 6,
+              "y": 6,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 100,
+                  "subtype": 3,
+                  "weight": 1.0
+                }
+              ]
+            }
+          ],
+          "allOtherRowsMetadataDoorsWeightsOrderPreserved": true
+        },
+        "declaredResetJsonBytes": 277637
+      },
+      "bootEpochSeed": 2038552851,
+      "initialPhaseOffset": 1,
+      "entropy": "existing unfiltered OS token reused without a new draw",
+      "actions": [
+        {
+          "label": "real3-acquisition-and-all112-cache",
+          "keys": [],
+          "presentations": 160
+        },
+        {
+          "label": "homing-cardinal-1-up",
+          "keys": [
+            "Up"
+          ],
+          "presentations": 96
+        },
+        {
+          "label": "homing-release-1",
+          "keys": [],
+          "presentations": 24
+        },
+        {
+          "label": "homing-cardinal-2-right",
+          "keys": [
+            "Right"
+          ],
+          "presentations": 96
+        },
+        {
+          "label": "homing-release-2",
+          "keys": [],
+          "presentations": 24
+        },
+        {
+          "label": "homing-cardinal-3-down",
+          "keys": [
+            "Down"
+          ],
+          "presentations": 96
+        },
+        {
+          "label": "homing-release-3",
+          "keys": [],
+          "presentations": 24
+        },
+        {
+          "label": "homing-cardinal-4-left",
+          "keys": [
+            "Left"
+          ],
+          "presentations": 96
+        },
+        {
+          "label": "homing-release-4",
+          "keys": [],
+          "presentations": 24
+        },
+        {
+          "label": "homing-cardinal-5-up",
+          "keys": [
+            "Up"
+          ],
+          "presentations": 96
+        },
+        {
+          "label": "homing-release-5",
+          "keys": [],
+          "presentations": 24
+        },
+        {
+          "label": "homing-cardinal-6-right",
+          "keys": [
+            "Right"
+          ],
+          "presentations": 96
+        },
+        {
+          "label": "homing-release-6",
+          "keys": [],
+          "presentations": 24
+        },
+        {
+          "label": "final-target-and-manager-endpoints",
+          "keys": [],
+          "presentations": 64
+        }
+      ],
+      "requires": {
+        "actualPublicChallengeEntry": true,
+        "bothGamesConsumeIdenticalDeclaredResourceBytes": true,
+        "nativeObservationIsNeverBrowserInput": true,
+        "preserveAllIdentitySeedRngNumericAndCoverageMismatches": true,
+        "orderedRealPedestalGrants": [
+          3
+        ],
+        "sourceExpectedActorContract": {
+          "primaryC08": 1,
+          "family": 2,
+          "variant": 0,
+          "subtype": 0,
+          "bornAttackFlags": "4",
+          "controlledBy329": false,
+          "registeredC18DuringActualLifetime": false
+        },
+        "compositionSourceFields": [
+          "playerMovementD9c",
+          "npc14And18DamageQueue",
+          "spoonBender3Tears"
+        ],
+        "ownedCounts": [
+          {
+            "itemId": 3,
+            "count": 1
+          }
+        ],
+        "actorStages": [
+          {
+            "ownedCounts": [
+              {
+                "itemId": 3,
+                "count": 1
+              }
+            ],
+            "sourceExpectedActorContract": {
+              "primaryC08": 1,
+              "family": 2,
+              "variant": 0,
+              "subtype": 0,
+              "bornAttackFlags": "4",
+              "controlledBy329": false,
+              "registeredC18DuringActualLifetime": false
+            },
+            "requiredWitnesses": [
+              "actualQueuedGrantAndCache112Completion",
+              "actualSourcePrimaryC08AndBornFlags4",
+              "actualCanonicalTearAndSourceSequenceIdentity",
+              "actualNonnull4a8AcquisitionState",
+              "laterFullVelocitySteeringState",
+              "FastTargetAndStoredVelocityNonmutation"
+            ]
+          }
+        ],
+        "spoonBender3Functional": {
+          "schema": "ordinary-spoon-bender3-registered-homing-v1",
+          "marker": "spoonBender3Tears",
+          "authoredReceiver": {
+            "type": 18,
+            "variant": 0,
+            "subtype": 0
+          },
+          "minimumActualGrantsPerGame": 1,
+          "minimumBornHomingTearsPerGame": 1,
+          "minimumFullBodyRowsPerGame": 1,
+          "minimumFastBodyRowsPerGame": 1,
+          "minimumActualNonnullTargetStatesPerGame": 1,
+          "minimumAcquiredTargetTransitionsPerGame": 1,
+          "minimumLaterFullSteeringDiagnosticsPerGame": 1,
+          "missingToolingMustFail": true,
+          "requiredWitnesses": [
+            "actualQueuedGrantAndCache112Completion",
+            "actualSourcePrimaryC08AndBornFlags4",
+            "actualCanonicalTearAndSourceSequenceIdentity",
+            "actualNonnull4a8AcquisitionState",
+            "laterFullVelocitySteeringState",
+            "FastTargetAndStoredVelocityNonmutation"
+          ],
+          "requiredActualUnknowns": [
+            "atomic Init/property/immediateFull callback events",
+            "actual source SharedBound2 demand/return events and full stream parity",
+            "actual447110 target-set callback/weak-slot registration events",
+            "exact current target fields at each callback, separate from postmanager snapshots",
+            "actual808/818 insert callback and full collision FIFO owner",
+            "actual Remove versus Uninit weak-slot clear callbacks",
+            "all modifier combinations outside selected bornflags4/variant0",
+            "costume3 actual registration/layers and rendering history"
+          ],
+          "sourceOnlyNoRuntimeClaim": true
+        }
+      },
+      "execution": {
+        "status": "not-executed",
+        "wholeCaseAccepted": false,
+        "routeFeasibility": "Real3 pedestal at actualstart6,6, released160 then fixed cardinal shots. Two contrived NPC cells ahead; recorded geometry/tokens unchanged. Actual grant/survival/acquisition/steering remains unexecuted.",
+        "neverSatisfiedBy": "Declaration, body presence, portlastFull diagnostic, snapshot-to-callback credit, reference-fedtargets or RNG, native identity fitting or outcome filtering"
+      },
+      "entropyTokenIndex": 0
+    },
+    {
+      "name": "spoon-bender3-homing-npc-recorded-1",
+      "fixture": {
+        "kind": "source-authored-modified-challenge",
+        "challengeId": 1,
+        "startingItems": [],
+        "view": "item-only",
+        "authoredResourcePath": "spoon-bender3-v1/challenges-fc471e53b24bbb73.xml",
+        "baselineResourcePath": "../../rebirth/resources/challenges.xml",
+        "specialRoomsPath": "spoon-bender3-v1/room-0c181eaa6ee9e471.stb",
+        "specialRoomsSha256": "0c181eaa6ee9e471af53b84b781c5aa717bbea834be66769e846b3fb4bfe21a6",
+        "otherChallengeAttributes": "preserve all rows and attributes except explicit neutral changes and startingitems",
+        "attributeChanges": [
+          {
+            "attribute": "getcurse",
+            "baselineValue": "9",
+            "authoredValue": "0"
+          },
+          {
+            "attribute": "cursefilter",
+            "baselineValue": "6",
+            "authoredValue": "127"
+          },
+          {
+            "attribute": "roomfilter",
+            "baselineValue": "2",
+            "authoredValue": null
+          },
+          {
+            "attribute": "startingitems",
+            "baselineValue": null,
+            "sourceParentValue": "68,329",
+            "authoredValue": ""
+          }
+        ],
+        "startRoomSpawnChange": {
+          "catalogue": 0,
+          "index": 80,
+          "type": 1,
+          "variant": 2,
+          "operation": "append",
+          "groups": [
+            {
+              "x": 9,
+              "y": 3,
+              "entries": [
+                {
+                  "type": 14,
+                  "variant": 0,
+                  "subtype": 0,
+                  "weight": 1.0
+                }
+              ]
+            },
+            {
+              "x": 6,
+              "y": 6,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 100,
+                  "subtype": 3,
+                  "weight": 1.0
+                }
+              ]
+            }
+          ],
+          "allOtherRowsMetadataDoorsWeightsOrderPreserved": true
+        },
+        "declaredResetJsonBytes": 277637
+      },
+      "bootEpochSeed": 4152429072,
+      "initialPhaseOffset": 1,
+      "entropy": "existing unfiltered OS token reused without a new draw",
+      "actions": [
+        {
+          "label": "real3-acquisition-and-all112-cache",
+          "keys": [],
+          "presentations": 160
+        },
+        {
+          "label": "homing-cardinal-1-up",
+          "keys": [
+            "Up"
+          ],
+          "presentations": 96
+        },
+        {
+          "label": "homing-release-1",
+          "keys": [],
+          "presentations": 24
+        },
+        {
+          "label": "homing-cardinal-2-right",
+          "keys": [
+            "Right"
+          ],
+          "presentations": 96
+        },
+        {
+          "label": "homing-release-2",
+          "keys": [],
+          "presentations": 24
+        },
+        {
+          "label": "homing-cardinal-3-down",
+          "keys": [
+            "Down"
+          ],
+          "presentations": 96
+        },
+        {
+          "label": "homing-release-3",
+          "keys": [],
+          "presentations": 24
+        },
+        {
+          "label": "homing-cardinal-4-left",
+          "keys": [
+            "Left"
+          ],
+          "presentations": 96
+        },
+        {
+          "label": "homing-release-4",
+          "keys": [],
+          "presentations": 24
+        },
+        {
+          "label": "homing-cardinal-5-up",
+          "keys": [
+            "Up"
+          ],
+          "presentations": 96
+        },
+        {
+          "label": "homing-release-5",
+          "keys": [],
+          "presentations": 24
+        },
+        {
+          "label": "homing-cardinal-6-right",
+          "keys": [
+            "Right"
+          ],
+          "presentations": 96
+        },
+        {
+          "label": "homing-release-6",
+          "keys": [],
+          "presentations": 24
+        },
+        {
+          "label": "final-target-and-manager-endpoints",
+          "keys": [],
+          "presentations": 64
+        }
+      ],
+      "requires": {
+        "actualPublicChallengeEntry": true,
+        "bothGamesConsumeIdenticalDeclaredResourceBytes": true,
+        "nativeObservationIsNeverBrowserInput": true,
+        "preserveAllIdentitySeedRngNumericAndCoverageMismatches": true,
+        "orderedRealPedestalGrants": [
+          3
+        ],
+        "sourceExpectedActorContract": {
+          "primaryC08": 1,
+          "family": 2,
+          "variant": 0,
+          "subtype": 0,
+          "bornAttackFlags": "4",
+          "controlledBy329": false,
+          "registeredC18DuringActualLifetime": false
+        },
+        "compositionSourceFields": [
+          "playerMovementD9c",
+          "npc14And18DamageQueue",
+          "spoonBender3Tears"
+        ],
+        "ownedCounts": [
+          {
+            "itemId": 3,
+            "count": 1
+          }
+        ],
+        "actorStages": [
+          {
+            "ownedCounts": [
+              {
+                "itemId": 3,
+                "count": 1
+              }
+            ],
+            "sourceExpectedActorContract": {
+              "primaryC08": 1,
+              "family": 2,
+              "variant": 0,
+              "subtype": 0,
+              "bornAttackFlags": "4",
+              "controlledBy329": false,
+              "registeredC18DuringActualLifetime": false
+            },
+            "requiredWitnesses": [
+              "actualQueuedGrantAndCache112Completion",
+              "actualSourcePrimaryC08AndBornFlags4",
+              "actualCanonicalTearAndSourceSequenceIdentity",
+              "actualNonnull4a8AcquisitionState",
+              "laterFullVelocitySteeringState",
+              "FastTargetAndStoredVelocityNonmutation"
+            ]
+          }
+        ],
+        "spoonBender3Functional": {
+          "schema": "ordinary-spoon-bender3-registered-homing-v1",
+          "marker": "spoonBender3Tears",
+          "authoredReceiver": {
+            "type": 14,
+            "variant": 0,
+            "subtype": 0
+          },
+          "minimumActualGrantsPerGame": 1,
+          "minimumBornHomingTearsPerGame": 1,
+          "minimumFullBodyRowsPerGame": 1,
+          "minimumFastBodyRowsPerGame": 1,
+          "minimumActualNonnullTargetStatesPerGame": 1,
+          "minimumAcquiredTargetTransitionsPerGame": 1,
+          "minimumLaterFullSteeringDiagnosticsPerGame": 1,
+          "missingToolingMustFail": true,
+          "requiredWitnesses": [
+            "actualQueuedGrantAndCache112Completion",
+            "actualSourcePrimaryC08AndBornFlags4",
+            "actualCanonicalTearAndSourceSequenceIdentity",
+            "actualNonnull4a8AcquisitionState",
+            "laterFullVelocitySteeringState",
+            "FastTargetAndStoredVelocityNonmutation"
+          ],
+          "requiredActualUnknowns": [
+            "atomic Init/property/immediateFull callback events",
+            "actual source SharedBound2 demand/return events and full stream parity",
+            "actual447110 target-set callback/weak-slot registration events",
+            "exact current target fields at each callback, separate from postmanager snapshots",
+            "actual808/818 insert callback and full collision FIFO owner",
+            "actual Remove versus Uninit weak-slot clear callbacks",
+            "all modifier combinations outside selected bornflags4/variant0",
+            "costume3 actual registration/layers and rendering history"
+          ],
+          "sourceOnlyNoRuntimeClaim": true
+        }
+      },
+      "execution": {
+        "status": "not-executed",
+        "wholeCaseAccepted": false,
+        "routeFeasibility": "Real3 pedestal at actualstart6,6, released160 then fixed cardinal shots. Two contrived NPC cells ahead; recorded geometry/tokens unchanged. Actual grant/survival/acquisition/steering remains unexecuted.",
+        "neverSatisfiedBy": "Declaration, body presence, portlastFull diagnostic, snapshot-to-callback credit, reference-fedtargets or RNG, native identity fitting or outcome filtering"
+      },
+      "entropyTokenIndex": 1
+    }
+  ],
+  "publicRouteRevision": "ordinary-spoon-bender3-registered-homing-v1",
+  "sourceParent": {
+    "sha256": "d90408856bf236cb79207f03184414046fb459a8e2e8c156e52234860c9b04c6",
+    "scope": "Original declaration parent identified by recorded digest; its temporary location is not replay input."
+  },
+  "entropyJournal": {
+    "path": "spoon-bender3-v1/entropy.jsonl",
+    "sha256": "445754e51519b50f8e5d29d63ce4a699ac3ff63ab39fa34f683c4a5dc196738b"
+  },
+  "caseCorrespondence": [
+    {
+      "name": "spoon-bender3-homing-npc-fixed-phase0",
+      "caseSha256": "1a3a94e0712f3caa72e755383983db03a47459088efd31d19d30270e6a0c8327",
+      "sourceCase": "technology2-thin-npc-contact-fixed-phase0",
+      "epochUnchanged": true,
+      "phaseUnchanged": true,
+      "gameplayPresentations": 944,
+      "caseName": "spoon-bender3-homing-npc-fixed-phase0"
+    },
+    {
+      "name": "spoon-bender3-homing-npc-fixed-phase1",
+      "caseSha256": "1d3c9f4957ac28c71fd6d53bc50702a33560afa537d2d9c3cff12cecbe534a1b",
+      "sourceCase": "technology2-thin-npc-contact-fixed-phase1",
+      "epochUnchanged": true,
+      "phaseUnchanged": true,
+      "gameplayPresentations": 945,
+      "caseName": "spoon-bender3-homing-npc-fixed-phase1"
+    },
+    {
+      "name": "spoon-bender3-homing-npc-recorded-0",
+      "caseSha256": "055adaea03bea3126d66b5a0050416638fbbe12a2ce10a5969ef00da6d310971",
+      "sourceCase": "technology2-thin-npc-contact-recorded-0",
+      "epochUnchanged": true,
+      "phaseUnchanged": true,
+      "gameplayPresentations": 945,
+      "caseName": "spoon-bender3-homing-npc-recorded-0"
+    },
+    {
+      "name": "spoon-bender3-homing-npc-recorded-1",
+      "caseSha256": "a82695704886568267fb6355961b6d898d160465bee6f6b11df05064910fc993",
+      "sourceCase": "technology2-thin-npc-contact-recorded-1",
+      "epochUnchanged": true,
+      "phaseUnchanged": true,
+      "gameplayPresentations": 945,
+      "caseName": "spoon-bender3-homing-npc-recorded-1"
+    }
+  ],
+  "scope": "Source-authored real3 pickup then canonical ordinary bornflag4 homing against one NPC14/18; no source3+48/329/othermodifier permission.",
+  "outcomePolicy": "Retain every actual miss/coverage failure/strictidentity-seed-RNG mismatch/unknown callback. No reroll, forced targets, phasefit or filtering."
+}

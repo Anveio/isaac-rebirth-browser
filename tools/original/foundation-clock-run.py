@@ -114,6 +114,7 @@ def main():
     parser.add_argument('--composition-lifecycle-events', action='store_true', help='Optional source-bound leader-thread Knife8/0/1 hardware event observation; requires canonical ISAAC_ORIGINAL_SHA, no game inputs changed')
     parser.add_argument('--archive-evidence', action='store_true', help='Lossless gzip manifest plus committed native progress journal; public observations and clock unchanged')
     parser.add_argument('--journal-codec', choices=('gzip', 'zstd'), default='gzip', help='Opt-in journal transport only; zstd requires Python zstandard/system libzstd and Node24 readers; default gzip unchanged')
+    parser.add_argument('--manifest-codec', choices=('gzip', 'zstd'), default='gzip', help='Opt-in complete manifest transport; requires archived evidence and qualified Zstd readers; default gzip unchanged')
     parser.add_argument('--gl-trace', type=Path, help='Optional documented graphics API observer to chain; no game instructions/state')
     parser.add_argument('--audio-trace', type=Path, help='Optional forwarding OpenAL API observer to chain; no game instructions/state')
     parser.add_argument('--mt-trace', action='store_true', help='Chain the shared-MT draw observer; writes OUTPUT/mt-trace/trace-<pid>.bin')
@@ -131,6 +132,10 @@ def main():
     args = parser.parse_args()
     if args.journal_codec != 'gzip' and not args.archive_evidence:
         raise SystemExit('--journal-codec requires --archive-evidence')
+    if args.manifest_codec != 'gzip':
+        if not args.archive_evidence:
+            raise SystemExit('--manifest-codec requires --archive-evidence')
+        evidence.require_zstd()
     if not 0 <= args.boot_epoch_seed <= 0xffffffff:
         raise SystemExit('--boot-epoch-seed must be a u32')
     if args.observe_every_step and not args.state_observer:
@@ -523,12 +528,16 @@ def main():
         if (local / 'log.txt').exists():
             (out / 'original.log').write_text((local / 'log.txt').read_text())
         report['controllerElapsedMs'] = (time.monotonic() - started) * 1000
-        manifest = out / ('manifest.json.gz' if args.archive_evidence else 'manifest.json')
+        manifest = out / ('manifest.json.zst' if args.archive_evidence and args.manifest_codec == 'zstd'
+                          else 'manifest.json.gz' if args.archive_evidence else 'manifest.json')
         if progress:
             record('finish', {key: value for key, value in report.items()
                               if key not in ('debugObservations', 'presentations', 'inputs', 'frames', 'tape')})
             progress.close()
-            evidence.write_manifest(manifest, report)
+            if args.manifest_codec == 'zstd':
+                evidence.write_zstd_manifest(manifest, report)
+            else:
+                evidence.write_manifest(manifest, report)
         else:
             manifest.write_text(json.dumps(report, indent=2) + '\n')
     print(json.dumps({'status': report['status'], 'manifest': str(manifest), 'failures': report['failures']}))
