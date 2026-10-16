@@ -21,6 +21,10 @@ A stage lists several keys to reach them together. `--from TAPE [--at N]`
 starts from a tape's first N commands, such as a boss room entry. The
 written tape is replayed, and kept only if the replay reaches every stage's
 keys.
+
+`--recipes engine/dst/chases.json` reruns the recorded chase of every
+scenario tape the corpus holds (`--only NAME` for one), each from its own
+first `at` commands, so one command rebuilds what a shared-MT change moved.
 """
 import argparse
 import json
@@ -100,23 +104,8 @@ def chase(args, work):
     return prefix
 
 
-def main():
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--stage", action="append", nargs="+", required=True, metavar="KEY",
-                        help="census keys one stage must reach together (repeat per stage)")
-    parser.add_argument("--from", dest="source", type=pathlib.Path, help="start from this tape")
-    parser.add_argument("--at", type=int, help="with --from, keep only its first N commands")
-    parser.add_argument("--cases", type=int, default=64, help="cases branched per round")
-    parser.add_argument("--steps", type=int, default=3000, help="generated commands per branched case")
-    parser.add_argument("--rounds", type=int, default=4, help="rounds a stage gets before giving up")
-    parser.add_argument("--extend", type=int, default=30, help="commands kept past a stage before branching")
-    parser.add_argument("--final-extend", type=int, default=300, help="commands kept past the last stage")
-    parser.add_argument("--seed", type=int, default=int.from_bytes(os.urandom(6), "little"))
-    parser.add_argument("--work", type=pathlib.Path, help="keep stage runs here (default .cache/dst/chase-*)")
-    parser.add_argument("--out", type=pathlib.Path, required=True, help="where the verified tape goes")
-    parser.add_argument("--binary", default="engine/dst/target/release/rebirth-dst")
-    args = parser.parse_args()
-    work = args.work or pathlib.Path(f".cache/dst/chase-{args.seed}")
+def build(args, work):
+    """Chase one scenario and write its verified tape to args.out."""
     work.mkdir(parents=True, exist_ok=True)
     print(f"chase seed {args.seed}, stage runs in {work}")
     tape = chase(args, work)
@@ -134,6 +123,49 @@ def main():
     for message in failed:
         print(f"the tape fails: {message}")
     return 0
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--stage", action="append", nargs="+", metavar="KEY",
+                        help="census keys one stage must reach together (repeat per stage)")
+    parser.add_argument("--from", dest="source", type=pathlib.Path, help="start from this tape")
+    parser.add_argument("--at", type=int, help="with --from, keep only its first N commands")
+    parser.add_argument("--cases", type=int, default=64, help="cases branched per round")
+    parser.add_argument("--steps", type=int, default=3000, help="generated commands per branched case")
+    parser.add_argument("--rounds", type=int, default=4, help="rounds a stage gets before giving up")
+    parser.add_argument("--extend", type=int, default=30, help="commands kept past a stage before branching")
+    parser.add_argument("--final-extend", type=int, default=300, help="commands kept past the last stage")
+    parser.add_argument("--seed", type=int, default=int.from_bytes(os.urandom(6), "little"))
+    parser.add_argument("--work", type=pathlib.Path, help="keep stage runs here (default .cache/dst/chase-*)")
+    parser.add_argument("--out", type=pathlib.Path, help="where the verified tape goes")
+    parser.add_argument("--recipes", type=pathlib.Path,
+                        help="rebuild every corpus tape a recipe file names (see engine/dst/chases.json)")
+    parser.add_argument("--only", action="append", default=[], help="with --recipes, only these tapes")
+    parser.add_argument("--binary", default="engine/dst/target/release/rebirth-dst")
+    args = parser.parse_args()
+    if not args.recipes:
+        if not args.stage or not args.out:
+            parser.error("--stage and --out are required without --recipes")
+        return build(args, args.work or pathlib.Path(f".cache/dst/chase-{args.seed}"))
+    # A recipe names a corpus tape, the prefix it branches from (by default
+    # its own first `at` commands) and its stages; other keys override flags.
+    corpus = args.recipes.parent / "corpus"
+    failed = 0
+    for recipe in json.loads(args.recipes.read_text()):
+        if args.only and recipe["out"] not in args.only:
+            continue
+        one = argparse.Namespace(**vars(args))
+        one.out = corpus / recipe["out"]
+        one.source = corpus / recipe.get("from", recipe["out"])
+        one.at = recipe["at"]
+        one.stage = recipe["stages"]
+        for key in ("cases", "steps", "rounds", "extend", "final_extend"):
+            setattr(one, key, recipe.get(key, getattr(args, key)))
+        print(f"== {recipe['out']}")
+        work = (args.work or pathlib.Path(f".cache/dst/chase-{args.seed}")) / recipe["out"].removesuffix(".json")
+        failed += build(one, work)
+    return 1 if failed else 0
 
 
 if __name__ == "__main__":

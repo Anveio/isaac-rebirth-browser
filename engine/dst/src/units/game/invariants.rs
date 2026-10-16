@@ -1,6 +1,7 @@
 //! Per-step state invariants and per-command transition contracts.
 use crate::props;
 use rebirth_cleanroom::actors::ActorKind;
+use rebirth_cleanroom::floor::Floor;
 use rebirth_cleanroom::input;
 use rebirth_cleanroom::motion::WorldVector;
 use rebirth_cleanroom::player_death;
@@ -43,6 +44,36 @@ pub fn expected_rejection(state: &State, command: &Command) -> Option<&'static s
         }
         Command::MusicBackend { .. } => None,
     }
+}
+
+/// Stage `stage`'s seed from the run seed's startup draws (Seeds::SetStartSeed
+/// 5e1470): the (stage+1)-th draw.
+fn startup_stage_seed(run_seed_value: u32, stage: u32) -> u32 {
+    (0..=stage).fold(run_seed_value, |value, _| seed::startup_next(value))
+}
+
+/// Whether two floors share the layout Level::Init generates: stage, seed,
+/// room placement, templates and links. A room's runtime state (its
+/// persistent-spawn map, descriptor+88) is not layout.
+fn same_layout(left: &Floor, right: &Floor) -> bool {
+    (
+        left.stage,
+        left.stage_seed,
+        &left.grid,
+        left.starting_descriptor,
+    ) == (
+        right.stage,
+        right.stage_seed,
+        &right.grid,
+        right.starting_descriptor,
+    ) && left.descriptors.len() == right.descriptors.len()
+        && left
+            .descriptors
+            .iter()
+            .zip(&right.descriptors)
+            .all(|(a, b)| {
+                (a.grid_index, &a.template, a.neighbors) == (b.grid_index, &b.template, b.neighbors)
+            })
 }
 
 /// The source holds that clear the player's controls (Player+7d4).
@@ -246,25 +277,30 @@ pub fn transition(before: &State, command: &Command, after: &State) {
                 }
             }
             if before.screen == Screen::Playing && after.screen == Screen::Playing && !restarted {
-                // A floor changes by descending (docs/stage-progression.md):
-                // SetNextStage advances the stage and Level::Init, up to a
-                // nightmare scene later, generates its floor from that stage's
-                // seed. A descent may skip a stage (Curse of the Labyrinth's
-                // XL floors), so only a deeper stage is pinned.
-                let descended = after.floor.stage > before.floor.stage
-                    && after.floor.stage == after.stage
-                    && after.floor.stage_seed == after.stage_seed;
+                // Level::Init generates a floor's layout from its stage and
+                // seed (docs/stage-progression.md); its rooms keep runtime
+                // state of their own. A descent (SetNextStage, then Level::Init
+                // up to a nightmare scene later) may skip a stage, as Curse of
+                // the Labyrinth's XL floors do, and takes that stage's startup
+                // seed. Forget Me Now and the five-pip Dice Room regenerate the
+                // same stage under a new seed, so only a held stage and seed
+                // pin the layout.
+                let deeper = after.floor.stage > before.floor.stage;
+                let descended = after.floor.stage == after.stage
+                    && after.floor.stage_seed == after.stage_seed
+                    && after.stage_seed == startup_stage_seed(after.run_seed_value, after.stage);
+                let held = after.floor.stage == before.floor.stage
+                    && after.floor.stage_seed == before.floor.stage_seed;
                 props::always!(
                     after.game_update_count >= before.game_update_count
                         && after.stage >= before.stage
-                        && (after.floor == before.floor || descended),
-                    "game: within a run the floor changes only by descending to a deeper stage, and full updates never rewind",
+                        && after.floor.stage >= before.floor.stage
+                        && (!deeper || descended)
+                        && (!held || same_layout(&after.floor, &before.floor)),
+                    "game: within a run the floor only deepens, keeps its layout while its stage and seed hold, and full updates never rewind",
                     json!({ "stage": [before.stage, after.stage], "stageSeed": [before.stage_seed, after.stage_seed] })
                 );
-                props::sometimes!(
-                    after.floor != before.floor,
-                    "game: a run descends to a deeper stage's floor"
-                );
+                props::sometimes!(deeper, "game: a run descends to a deeper stage's floor");
             }
             if before.paused && after.paused && count > 0 {
                 let frozen = after.player == before.player
@@ -293,7 +329,11 @@ pub fn transition(before: &State, command: &Command, after: &State) {
                 // carry the new run's player on through doors once its start
                 // hold ends: the rooms it visits are a walk from the start.
                 props::always!(
-                    floor.as_ref().ok() == Some(&after.floor)
+                    floor
+                        .as_ref()
+                        .is_ok_and(|floor| same_layout(floor, &after.floor))
+                        && after.stage == 1
+                        && after.stage_seed == startup_stage_seed(after.run_seed_value, 1)
                         && after.run_tick <= count
                         && walk_from_start(after),
                     "game: a run starts in the starting room of its seed's floor",
@@ -716,13 +756,11 @@ pub fn state(state: &State) {
         json!({ "text": state.seed_text, "valid": state.seed_valid })
     );
     // Seeds::SetStartSeed5e1470 gives stage s the (s+1)-th startup draw
-    // (stage 1's is `stage1_seed`). A run's floor is its stage's; between
-    // SetNextStage and Level::Init an active stage transition still holds
-    // the previous stage's floor. The menus keep the last run's stage and
-    // floor until the next run starts, while a typed seed already gives the
-    // next run's first-stage seed.
-    let stage_seed =
-        |stage: u32| (0..=stage).fold(state.run_seed_value, |value, _| seed::startup_next(value));
+    // (stage 1's is `stage1_seed`); a run start and a descent take it (see
+    // `transition`), and a forgotten stage seed may replace it later. A run's
+    // floor is its stage's; between SetNextStage and Level::Init an active
+    // stage transition still holds the previous stage's floor. The menus
+    // keep the last run's stage and floor until the next run starts.
     let transition = state.stage_transition.active();
     let level_stage = if transition && state.floor.stage < state.stage {
         state.floor.stage
@@ -731,9 +769,8 @@ pub fn state(state: &State) {
     };
     props::always!(
         seed::encode(state.run_seed_value).as_deref() == Ok(state.run_seed.as_str())
-            && stage_seed(1) == seed::stage1_seed(state.run_seed_value)
-            && (state.stage_seed == stage_seed(level_stage)
-                || (state.screen != Screen::Playing && state.stage_seed == stage_seed(1)))
+            && startup_stage_seed(state.run_seed_value, 1)
+                == seed::stage1_seed(state.run_seed_value)
             && (state.screen != Screen::Playing
                 || (state.floor.stage == level_stage
                     && state.floor.stage_seed == state.stage_seed))

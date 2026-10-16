@@ -593,7 +593,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Always | game: a Tick moves between menu screens only by starting a run | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: unpaused gameplay advances the run clock once per tick, except while the nightmare scene plays | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: the nightmare scene between stages holds the run clock | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
-| Always | game: within a run the floor changes only by descending to a deeper stage, and full updates never rewind | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: within a run the floor only deepens, keeps its layout while its stage and seed hold, and full updates never rewind | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: a run descends to a deeper stage's floor | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: a paused run freezes gameplay and the shared stream | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: ticks elapse while paused | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
