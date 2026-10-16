@@ -112,6 +112,7 @@ pub mod rock_blast;
 mod room;
 pub mod room_assets;
 pub mod room_costs;
+mod room_lights;
 pub mod room_spawns;
 pub mod room_templates;
 pub mod roundworm;
@@ -1056,7 +1057,13 @@ impl Game {
                         .ok_or("tear IDs exhausted")?;
                 }
                 for _ in 0..count {
+                    let presented = self.state.system_clock.next_phase() != phase::Phase::Skipped;
                     self.tick(timestamp_millis)?;
+                    // Room render 5d1a70 runs its light pass on every presented
+                    // gameplay frame, after that frame's updates.
+                    if presented && self.state.screen == Screen::Playing {
+                        room_lights::present(&mut self.state);
+                    }
                 }
             }
         }
