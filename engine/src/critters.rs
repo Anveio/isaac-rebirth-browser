@@ -30,11 +30,6 @@ pub struct Critter {
     pub dying: bool,
     /// Sprite layer0+34: a killed Tiny Fly's fall offset.
     pub fall: f32,
-    /// Spawned by the run loader: the original's first full update after
-    /// admission (Game+ce9f4 = 1) has no runtime counterpart, so the next
-    /// update replays it first.
-    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
-    pub loader_update_pending: bool,
 }
 
 /// 6126c0: the unit vector of an angle in degrees.
@@ -271,7 +266,6 @@ fn admit(state: &mut State, admission: Admission) -> Result<u32, String> {
             previous: ZERO,
             dying: false,
             fall: 0.0,
-            loader_update_pending: false,
         }),
     });
     state.actor_scheduler.admit(ActorRef {
@@ -282,9 +276,11 @@ fn admit(state: &mut State, admission: Admission) -> Result<u32, String> {
 }
 
 /// Room.Init 5cf64f, on the descriptor's first visit after the ambient grid
-/// decoration. `counter` is Game+ce9f4 while this Room.Init runs; `loader`
-/// marks the run loader's starting room.
-pub(crate) fn spawn(state: &mut State, counter: u32, loader: bool) -> Result<(), String> {
+/// decoration. `counter` is Game+ce9f4 while this Room.Init runs. The run
+/// loader's starting-room critters first update on the runtime's first full
+/// update, which is the original's Game+ce9f4 = 1 once the reset clock carries
+/// the declared boot elapsed time (#438).
+pub(crate) fn spawn(state: &mut State, counter: u32) -> Result<(), String> {
     let Some(descriptor) = state.room.descriptor.as_ref() else {
         return Ok(());
     };
@@ -345,11 +341,6 @@ pub(crate) fn spawn(state: &mut State, counter: u32, loader: bool) -> Result<(),
                 },
             )?;
             update(state, id, counter)?;
-            effect_mut(state, id)?
-                .critter
-                .as_mut()
-                .expect("critter")
-                .loader_update_pending = loader;
         }
     }
     for _ in 0..wall_bugs {
@@ -378,11 +369,6 @@ pub(crate) fn spawn(state: &mut State, counter: u32, loader: bool) -> Result<(),
             y: perimeter * 10000.0,
         };
         update(state, id, counter)?;
-        effect_mut(state, id)?
-            .critter
-            .as_mut()
-            .expect("critter")
-            .loader_update_pending = loader;
     }
     Ok(())
 }
@@ -409,40 +395,6 @@ pub(crate) fn advance(state: &mut State, phase: Phase, id: u32) -> Result<(), St
         }
         Phase::Update => update(state, id, state.native_game_frame()),
     }
-}
-
-/// The original's first full update after run admission (Game+ce9f4 = 1)
-/// precedes the runtime's first one. Replay it for the starting room's
-/// critters, in scheduler order, before that runtime update's actor pass.
-pub(crate) fn replay_loader_update(state: &mut State) -> Result<(), String> {
-    let pending: Vec<u32> = state
-        .actor_scheduler
-        .full_phase()
-        .into_iter()
-        .filter(|actor| actor.kind == ActorKind::Effect)
-        .filter_map(|actor| {
-            state
-                .sprite_effects
-                .iter()
-                .find(|effect| effect.id == actor.id)
-                .filter(|effect| {
-                    effect
-                        .critter
-                        .as_ref()
-                        .is_some_and(|critter| critter.loader_update_pending)
-                })
-                .map(|effect| effect.id)
-        })
-        .collect();
-    for id in pending {
-        effect_mut(state, id)?
-            .critter
-            .as_mut()
-            .expect("critter")
-            .loader_update_pending = false;
-        update(state, id, state.game_update_count)?;
-    }
-    Ok(())
 }
 
 /// Effect::Update 45aa70: BaseUpdate 447190, then the variant's AI case.

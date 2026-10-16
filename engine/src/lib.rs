@@ -2291,7 +2291,7 @@ impl Game {
         }
         // First-visit ambient critters close Room.Init5cf64f inside this full
         // update, after the selector entities took their manager sequences.
-        critters::spawn(&mut self.state, critter_counter, loader)?;
+        critters::spawn(&mut self.state, critter_counter)?;
         self.state.room.boss_count = self.state.room.manager_counts.boss_total().max(0) as u32;
         self.refresh_stage_effects();
         Ok(suppressed_entities)
@@ -2907,7 +2907,6 @@ impl Game {
                 .checked_add(1)
                 .ok_or("game update counter exhausted")?;
             mt::note_update(self.state.game_update_count);
-            critters::replay_loader_update(&mut self.state)?;
         }
         doors::advance(&mut self.state, phase)?;
         // Room grid pass5d1378: GridEntity_TrapDoor::Update before entities.
