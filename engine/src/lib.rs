@@ -2999,8 +2999,10 @@ impl Game {
             }
             for index in 0..self.state.room.pickups.len() {
                 if self.state.room.pickups[index].variant == 100 {
-                    if !player_items::collect(&mut self.state, index)? {
-                        player_items::empty_altar_contact(&mut self.state, index)?;
+                    if player_items::collect(&mut self.state, index)?
+                        == player_items::CollectibleContact::Refused
+                    {
+                        player_items::altar_contact(&mut self.state, index)?;
                     }
                     continue;
                 }
