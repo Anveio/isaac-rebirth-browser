@@ -156,7 +156,7 @@ fn starting_wall_catalog() -> Vec<WallVariant> {
         (0, "plain", 7, "starting-room"),
         (1, "rough", 1, "starting-room"),
         (2, "cloth", 1, "starting-room"),
-        (3, "blood", 0, "outside-basement-authored-palette"),
+        (3, "blood", 0, "basement-boss-room"),
     ]
     .into_iter()
     .map(
@@ -273,6 +273,73 @@ impl DecorationRng {
     }
 }
 
+/// Wall tiling after Random(walls): the four corners, then the top/bottom
+/// strips by column and the side strips by row, each tile drawing its own
+/// variant. A boss backdrop overrides the variant but keeps every draw.
+fn tile_walls(rng: &mut DecorationRng, variant: Option<u8>) -> Vec<RoomQuad> {
+    let wall = |rng: &mut DecorationRng| {
+        let drawn = choose_wall(rng);
+        variant.unwrap_or(drawn)
+    };
+    let mut wall_quads = vec![
+        quad(
+            wall(rng),
+            rect(0.0, 0.0, 52.0, 52.0),
+            rect(0.0, 0.0, 52.0, 52.0),
+            false,
+            false,
+        ),
+        quad(
+            wall(rng),
+            rect(0.0, 0.0, 52.0, 52.0),
+            rect(390.0, 0.0, 52.0, 52.0),
+            true,
+            false,
+        ),
+        quad(
+            wall(rng),
+            rect(0.0, 0.0, 52.0, 52.0),
+            rect(0.0, 234.0, 52.0, 52.0),
+            false,
+            true,
+        ),
+        quad(
+            wall(rng),
+            rect(0.0, 0.0, 52.0, 52.0),
+            rect(390.0, 234.0, 52.0, 52.0),
+            true,
+            true,
+        ),
+    ];
+    for column in 0..13 {
+        let x = 52.0 + f64::from(column) * 26.0;
+        let source_x = 52.0 + f64::from(column.min(12 - column)) * 26.0;
+        for bottom in [false, true] {
+            wall_quads.push(quad(
+                wall(rng),
+                rect(source_x, 0.0, 26.0, 52.0),
+                rect(x, if bottom { 234.0 } else { 0.0 }, 26.0, 52.0),
+                column > 6,
+                bottom,
+            ));
+        }
+    }
+    for row in 0..7 {
+        let y = 52.0 + f64::from(row) * 26.0;
+        let source_y = 52.0 + f64::from(row.min(6 - row)) * 26.0;
+        for right in [false, true] {
+            wall_quads.push(quad(
+                wall(rng),
+                rect(0.0, source_y, 52.0, 26.0),
+                rect(if right { 390.0 } else { 0.0 }, y, 52.0, 26.0),
+                right,
+                row > 3,
+            ));
+        }
+    }
+    wall_quads
+}
+
 /// Backdrop::pre_render_walls 424440 on the Basement backdrop (1) in a
 /// boss room (type 5, not RoomData 5000): after pre_render_floor's patches
 /// and Random(walls), each grid cell inside the room shrunk by 20 that wins
@@ -298,6 +365,16 @@ pub(crate) fn basement_boss_blood(
     let mut rng = DecorationRng::new(descriptor.decoration_seed);
     floor_patches(&mut rng);
     rng.next();
+    boss_blood_scatter(&mut rng, &grid)
+}
+
+/// The boss scatter's local draws: one Int(2) per grid cell in grid order,
+/// plus Float for each winning cell inside the room shrunk by 20. Shared by
+/// the splat admission and the wall tiling that follows it in the stream.
+fn boss_blood_scatter(
+    rng: &mut DecorationRng,
+    grid: &crate::grid::Grid,
+) -> Result<Vec<(motion::WorldVector, f32)>, String> {
     let mut splats = Vec::new();
     for index in 0..grid.descriptor().cells.len() {
         if rng.next().is_multiple_of(2) {
@@ -313,6 +390,33 @@ pub(crate) fn basement_boss_blood(
         splats.push((position, scale));
     }
     Ok(splats)
+}
+
+impl Room {
+    /// pre_render_walls 424440 in a Basement boss room: after the scatter the
+    /// boss branch replaces Random(walls) with wallvariants (3), so every wall
+    /// tile shows the bloody boss row while still drawing its Int(3)/Int(1).
+    /// The tiling continues the decoration stream after the scatter's draws.
+    pub(crate) fn apply_boss_backdrop(&mut self, stage: u32) -> Result<(), String> {
+        let Some(descriptor) = &self.descriptor else {
+            return Ok(());
+        };
+        let template = &descriptor.template;
+        if stage > 2 || template.room_type != 5 || template.variant == 5000 {
+            return Ok(());
+        }
+        let grid = crate::grid::Grid::new(
+            self.grid
+                .clone()
+                .ok_or("boss-room backdrop requires the room grid")?,
+        )?;
+        let mut rng = DecorationRng::new(descriptor.decoration_seed);
+        floor_patches(&mut rng);
+        rng.next();
+        boss_blood_scatter(&mut rng, &grid)?;
+        self.appearance.wall_quads = tile_walls(&mut rng, Some(3));
+        Ok(())
+    }
 }
 
 /// Room backdrop setup 5c5b30 reloads fxlayers.xml (5c5be3 -> 5489b0) on
@@ -617,62 +721,7 @@ impl Room {
         ];
         // Random(walls) also advances the stream with Basement walls=1.
         rng.next();
-        let mut wall_quads = vec![
-            quad(
-                choose_wall(&mut rng),
-                rect(0.0, 0.0, 52.0, 52.0),
-                rect(0.0, 0.0, 52.0, 52.0),
-                false,
-                false,
-            ),
-            quad(
-                choose_wall(&mut rng),
-                rect(0.0, 0.0, 52.0, 52.0),
-                rect(390.0, 0.0, 52.0, 52.0),
-                true,
-                false,
-            ),
-            quad(
-                choose_wall(&mut rng),
-                rect(0.0, 0.0, 52.0, 52.0),
-                rect(0.0, 234.0, 52.0, 52.0),
-                false,
-                true,
-            ),
-            quad(
-                choose_wall(&mut rng),
-                rect(0.0, 0.0, 52.0, 52.0),
-                rect(390.0, 234.0, 52.0, 52.0),
-                true,
-                true,
-            ),
-        ];
-        for column in 0..13 {
-            let x = 52.0 + f64::from(column) * 26.0;
-            let source_x = 52.0 + f64::from(column.min(12 - column)) * 26.0;
-            for bottom in [false, true] {
-                wall_quads.push(quad(
-                    choose_wall(&mut rng),
-                    rect(source_x, 0.0, 26.0, 52.0),
-                    rect(x, if bottom { 234.0 } else { 0.0 }, 26.0, 52.0),
-                    column > 6,
-                    bottom,
-                ));
-            }
-        }
-        for row in 0..7 {
-            let y = 52.0 + f64::from(row) * 26.0;
-            let source_y = 52.0 + f64::from(row.min(6 - row)) * 26.0;
-            for right in [false, true] {
-                wall_quads.push(quad(
-                    choose_wall(&mut rng),
-                    rect(0.0, source_y, 52.0, 26.0),
-                    rect(if right { 390.0 } else { 0.0 }, y, 52.0, 26.0),
-                    right,
-                    row > 3,
-                ));
-            }
-        }
+        let wall_quads = tile_walls(&mut rng, None);
         // fxlayers.xml (parsed per room load, 5489b0) seeds a fresh RNG per
         // fx entry from the decoration seed, shift index 35 (5494df): it does
         // not continue the backdrop/wall stream. RandomInt(5) picks the 1x1

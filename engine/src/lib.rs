@@ -1711,6 +1711,7 @@ impl Game {
             room_before,
         )?;
         // Backdrop::pre_render_walls runs inside 5c5b30 before the FX rays.
+        self.state.room.apply_boss_backdrop(self.state.stage)?;
         for (position, scale) in room::basement_boss_blood(&self.state.room, self.state.stage)? {
             let seed = self.state.boot_lifecycle.shared.next_u32();
             let id = familiars::admit_blood_splat(&mut self.state, seed, position, [1.0; 4], [0.0; 3])?;
