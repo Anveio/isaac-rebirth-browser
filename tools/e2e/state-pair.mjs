@@ -18,8 +18,12 @@ assert.ok(helper && comparator, 'state-pair requires --scenario-helper and --com
 const name = basename(comparator, '.mjs');
 const output = outputDirectory(name);
 
-const recorded = flag('--scenarios');
-const scenarios = recorded ? JSON.parse(readFileSync(resolve(recorded), 'utf8'))
+// `--scenarios` replays a recorded run; `--replay-cases a,b` replays single
+// cases from their paired `case.json`, as the other paired suites accept.
+const recorded = flag('--scenarios'), replayCases = flag('--replay-cases');
+const readJson = path => JSON.parse(readFileSync(resolve(path), 'utf8'));
+const scenarios = replayCases ? { schema: 1, cases: replayCases.split(',').map(readJson) }
+  : recorded ? readJson(recorded)
   : JSON.parse(execFileSync('python3', [helper, ...helperArgs], { encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 }));
 const selected = flag('--case');
 if (selected) {
