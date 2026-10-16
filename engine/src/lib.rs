@@ -19,7 +19,6 @@ pub mod bombs;
 pub mod boss_death;
 mod brimstone;
 pub mod camera;
-pub mod game_shake;
 pub mod challenges;
 pub mod champions;
 pub mod chests;
@@ -38,16 +37,18 @@ mod doors;
 mod dr_fetus;
 pub mod duke;
 mod effects;
-mod epic_fetus;
-mod explosion_effects;
 pub mod enemy_projectiles;
 mod entities;
+mod epic_fetus;
+mod explosion_effects;
+pub mod game_shake;
 pub mod sprite_color;
 pub mod tear_deaths;
 mod tear_factory;
 mod technology;
 mod technology2;
 pub use entities::{implemented_npc_kinds, supports_npc_selector};
+mod contact_candidates;
 pub mod familiars;
 pub mod fireplaces;
 pub mod floor;
@@ -62,8 +63,8 @@ pub mod grid_records;
 mod health_damage;
 mod horfs;
 pub mod information_animation;
-pub mod input;
 mod inner_eye;
+pub mod input;
 mod item_death_effects;
 mod item_pipeline;
 pub mod items;
@@ -102,7 +103,6 @@ pub mod player_items;
 pub mod player_save;
 pub mod player_stats;
 mod polyphemus_contact;
-mod contact_candidates;
 pub mod poop_effects;
 pub mod projectiles;
 pub mod public_actions;
@@ -596,6 +596,10 @@ pub struct State {
     pub room_transition: Option<traversal::RoomTransition>,
     #[serde(default)]
     pub stage_transition: stage_transition::StageTransition,
+    /// The player's velocity when a door transition began, before departure
+    /// cleared it; the post-ChangeRoom admitted update's footprint reads it.
+    #[serde(skip)]
+    pub departure_velocity: Option<motion::WorldVector>,
     pub stage_effects: StageEffects,
     pub inventory: Inventory,
     pub next_pickup: u32,
@@ -812,6 +816,7 @@ impl Game {
                 persisted_rooms: BTreeMap::new(),
                 room_transition: None,
                 stage_transition: stage_transition::StageTransition::default(),
+                departure_velocity: None,
                 stage_effects,
                 inventory: Inventory {
                     coins: 0,
@@ -1709,6 +1714,17 @@ impl Game {
         }
     }
 
+    /// The ChangeRoom Room.Update5d12a0 tail updates the Player first at the
+    /// unchanged counter. It leaves position and velocity unchanged; its only
+    /// shared draws are the 50c000 footprint, gated by the departing velocity.
+    fn admitted_update_footprint(&mut self, phase: phase::Phase) -> Result<(), String> {
+        if let (phase::Phase::Update, Some(velocity)) =
+            (phase, self.state.departure_velocity.take())
+        {
+            player_footprints::advance(&mut self.state, velocity)?;
+        }
+        Ok(())
+    }
     /// The native list admits Player first, then supported selectors in their
     /// authored order. Persist that order with the room rather than regrouping
     /// NPCs and pickups when rebuilding the shared actor scheduler.
@@ -2166,6 +2182,7 @@ impl Game {
                 combat::advance_player_immunity(&mut self.state);
                 if restoring {
                     let restored_pickups = pickups::readmit_regular_records(&mut self.state)?;
+                    self.admitted_update_footprint(phase)?;
                     self.rebuild_room_actor_schedule()?;
                     //5CF58E replays persistent+B8 records after ordinary5C5860.
                     crate::explosion_effects::replay_dynamic_craters(&mut self.state)?;
@@ -2214,6 +2231,7 @@ impl Game {
                         .clone();
                     let counter = self.state.game_update_count.wrapping_add(1);
                     self.admit_room_pickups(&selectors, counter, false)?;
+                    self.admitted_update_footprint(phase)?;
                     // The admitted Room::Update follows authored mixed order.
                     self.refresh_room_boss_count();
                     let mut counted = actors::FullCounts::default();
@@ -2392,7 +2410,8 @@ impl Game {
                     tear.id == id
                         && tear.controlled.is_none()
                         && (partitioned_contacts == polyphemus_contact::ContactPass::Handled
-                            || (partitioned_contacts == polyphemus_contact::ContactPass::Unadmitted
+                            || (partitioned_contacts
+                                == polyphemus_contact::ContactPass::Unadmitted
                                 && tear.attack_flags.0 == 0x200))
                 }) {
                     continue;
@@ -3147,7 +3166,7 @@ impl Game {
                 .player_items
                 .as_ref()
                 .is_some_and(|owner| owner.active_state_d80 == 0)
-            && self.state.player.shooting_lock <= 0
+            && self.state.player.shooting_lock == 0
             && !self.state.stage_shooting_guard.active();
         //The secondary callback has its own current readset and runs before
         //primary kind1/cache admission. Its retained beam does not reread C88.
@@ -3196,14 +3215,16 @@ impl Game {
                             buttons.aim()
                         };
                     let inner_eye = inner_eye::selected(&self.state, &plan);
-                    let ordinary = inner_eye || technology2_selected || matches!(
-                        plan.controller,
-                        weapon_plan::ControllerChannel::OrdinaryKnife
-                            | weapon_plan::ControllerChannel::ChargedBrimstone
-                            | weapon_plan::ControllerChannel::OrdinaryTechnology
-                            | weapon_plan::ControllerChannel::OrdinaryFetus
-                            | weapon_plan::ControllerChannel::MonstroLung
-                    );
+                    let ordinary = inner_eye
+                        || technology2_selected
+                        || matches!(
+                            plan.controller,
+                            weapon_plan::ControllerChannel::OrdinaryKnife
+                                | weapon_plan::ControllerChannel::ChargedBrimstone
+                                | weapon_plan::ControllerChannel::OrdinaryTechnology
+                                | weapon_plan::ControllerChannel::OrdinaryFetus
+                                | weapon_plan::ControllerChannel::MonstroLung
+                        );
                     let controlled =
                         plan.controller == weapon_plan::ControllerChannel::ControlledKnife;
                     let controlled_tear =
@@ -3335,18 +3356,22 @@ impl Game {
                                 buttons.held(),
                             );
                         }
-                        if inner_eye || matches!(
-                            plan.controller,
-                            weapon_plan::ControllerChannel::OrdinaryFetus
-                                | weapon_plan::ControllerChannel::MonstroLung
-                        ) {
+                        if inner_eye
+                            || matches!(
+                                plan.controller,
+                                weapon_plan::ControllerChannel::OrdinaryFetus
+                                    | weapon_plan::ControllerChannel::MonstroLung
+                            )
+                        {
                             //5306E0 excludes onlyC08=2; these released callers read D9C.
                             attack_runtime::controlled_idle_head_for(
                                 &mut self.state,
                                 buttons.held(),
                                 if inner_eye {
                                     "innerEyeMovementHistory"
-                                } else if plan.controller == weapon_plan::ControllerChannel::MonstroLung {
+                                } else if plan.controller
+                                    == weapon_plan::ControllerChannel::MonstroLung
+                                {
                                     "monstroLungMovementHistory"
                                 } else {
                                     "drFetusMovementHistory"
