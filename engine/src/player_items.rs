@@ -20,6 +20,10 @@ pub struct PickupPresentation {
     pub item_id: u32,
     pub animation_frame: f32,
     pub animation_playing: bool,
+    ///The same copied Sprite7E0 owns collectible and Card/Pill presentation.
+    ///Absent here preserves the existing collectible representation.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pocket: Option<crate::pockets::PocketPresentation>,
 }
 
 /// Actual independent inputs of Luck at 513C80. The fresh 519350 constructor
@@ -346,6 +350,17 @@ pub(crate) fn advance_item_sprite(state: &mut State, phase: Phase) {
         return;
     };
     if let Some(presentation) = &mut items.pickup_presentation {
+        if presentation.pocket.is_some() {
+            if presentation.animation_playing {
+                presentation.animation_frame += 1.0;
+                if presentation.animation_frame >= crate::pickups::POCKET_SPARKLE_FRAMES as f32 {
+                    presentation.animation_frame =
+                        crate::pickups::POCKET_SPARKLE_FRAMES as f32 - 1.0;
+                    presentation.animation_playing = false;
+                }
+            }
+            return;
+        }
         let clip = crate::pickups::definition(100, presentation.item_id)
             .expect("authored collectible actor")
             .clips
@@ -439,6 +454,7 @@ pub(crate) fn collect(state: &mut State, index: usize) -> Result<bool, String> {
         item_id: id,
         animation_frame: 0.0,
         animation_playing: true,
+        pocket: None,
     });
     let pickup = &mut state.room.pickups[index];
     pickup.animation = "PlayerPickupSparkle".into();
@@ -758,7 +774,9 @@ pub(crate) fn add_collectible(
     //or reread after later effects. Raw first metadata is independently absent.
     let acquisition_variant = state.player.entity_source.map(|source| source.variant);
     let previously_acquired = match acquisition_variant {
-        Some(0) => state.acquisition_history.as_mut()
+        Some(0) => state
+            .acquisition_history
+            .as_mut()
             .map(|history| history.seen_or_insert(id as i32, None)),
         Some(_) => None,
         None => {
