@@ -623,7 +623,8 @@ pub struct State {
     pub stage_transition: stage_transition::StageTransition,
     /// The player's velocity when a door transition began, before departure
     /// cleared it; the post-ChangeRoom admitted update's footprint reads it.
-    #[serde(skip)]
+    /// It lives through the transition, so a state saved during one keeps it.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub departure_velocity: Option<motion::WorldVector>,
     pub stage_effects: StageEffects,
     pub inventory: Inventory,
@@ -1551,6 +1552,7 @@ impl Game {
         self.state.revealed_secret_connections.clear();
         self.state.persisted_rooms.clear();
         self.state.room_transition = None;
+        self.state.departure_velocity = None;
         self.state.room = Room::from_floor_descriptor_with_special(
             &self.state.floor,
             self.state.current_room,
