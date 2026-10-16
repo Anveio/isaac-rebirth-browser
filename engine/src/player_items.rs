@@ -138,6 +138,10 @@ pub struct PlayerItems {
     ///Retained unknown producer footprints survive an otherwise empty Room.
     #[serde(default)]
     pub ordinary_producer_history: Option<crate::ordinary_placement::Coverage>,
+    ///Validity of completed world grants and conditional writes to the
+    ///existing item RNGs. Omitted legacy history remains unknown.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pickup_grant_history: Option<crate::pickup_world_grants::History>,
     pub entity_spawn_seed: u32,
     #[serde(default)]
     pub costume118: Option<crate::player_costume118::Costume118>,
@@ -224,6 +228,7 @@ impl PlayerItems {
             pocket_rngs,
             held_pockets: Some(crate::pockets::HeldPockets::fresh()),
             ordinary_producer_history: Some(crate::ordinary_placement::Coverage::fresh_player()),
+            pickup_grant_history: Some(crate::pickup_world_grants::History::fresh()),
             entity_spawn_seed,
             costume118: None,
             costume229: None,
@@ -1085,7 +1090,9 @@ pub(crate) fn add_collectible(
     let ordinary_no_world_effect = matches!(source_effect, Some(PassiveGrantSourceEffect::DefaultTail))
         && config.inventory.iter().all(|amount| *amount == 0)
         && config.cache_flags & (256 | 512) == 0;
-    if !ordinary_no_world_effect {
+    if id == 194 {
+        crate::pickup_world_grants::on_card194_added(state);
+    } else if !ordinary_no_world_effect {
         crate::ordinary_placement::invalidate(state,
             crate::ordinary_placement::Frontier::CollectibleEffects { collectible_id: id });
     }
