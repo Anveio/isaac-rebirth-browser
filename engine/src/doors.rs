@@ -266,7 +266,11 @@ pub fn try_blow_open(state: &mut State, index: usize, _animated: bool) -> Result
 /// second blast breaks it open; that branch is not admitted yet and only
 /// records its frontier.
 fn crack(state: &mut State, index: usize) -> Result<bool, String> {
-    let door_state = state.room.grid.as_ref().and_then(|grid| grid.cells[index].entity.as_ref())
+    let door_state = state
+        .room
+        .grid
+        .as_ref()
+        .and_then(|grid| grid.cells[index].entity.as_ref())
         .map_or(0, |entity| entity.state);
     if door_state != 1 {
         let primary = state.weapon_cache.primary.numeric();

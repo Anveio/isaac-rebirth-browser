@@ -662,17 +662,61 @@ fn has_default_passive_grant_path(id: u32) -> bool {
     //active charge and actual240/258 producers stay outside this common path.
     if matches!(
         id,
-        10 | 12 | 21 | 54 | 71 | 72 | 75 | 76 | 81 | 91 | 116 | 120 | 121 | 141 | 155
-            | 179 | 194 | 195 | 196 | 198 | 230 | 232 | 240 | 246 | 251 | 252 | 258
-            | 260 | 313 | 333 | 340 | 343 | 344
+        10 | 12
+            | 21
+            | 54
+            | 71
+            | 72
+            | 75
+            | 76
+            | 81
+            | 91
+            | 116
+            | 120
+            | 121
+            | 141
+            | 155
+            | 179
+            | 194
+            | 195
+            | 196
+            | 198
+            | 230
+            | 232
+            | 240
+            | 246
+            | 251
+            | 252
+            | 258
+            | 260
+            | 313
+            | 333
+            | 340
+            | 343
+            | 344
     ) {
         return false;
     }
     //Either source transformation counter/helper path remains independent.
     !matches!(
         id,
-        9 | 10 | 57 | 81 | 128 | 133 | 134 | 145 | 148 | 151 | 187 | 212 | 248
-            | 264 | 272 | 274 | 279 | 320
+        9 | 10
+            | 57
+            | 81
+            | 128
+            | 133
+            | 134
+            | 145
+            | 148
+            | 151
+            | 187
+            | 212
+            | 248
+            | 264
+            | 272
+            | 274
+            | 279
+            | 320
     )
 }
 
@@ -690,9 +734,10 @@ pub(crate) fn add_collectible(
     //D2C, D34 and D28/D44/13BC/13C0. Cache flags are not a writer proof.
     //This event only retains existing owners; every None remains None.
     let keep_default_passive_inputs = normal_isaac
-        && state.player.entity_source.is_some_and(|source| {
-            source.entity_type == 1 && source.variant == 0
-        })
+        && state
+            .player
+            .entity_source
+            .is_some_and(|source| source.entity_type == 1 && source.variant == 0)
         && config.kind == 1
         && has_default_passive_grant_path(id);
     let owner = state
