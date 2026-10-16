@@ -116,6 +116,7 @@ pub mod room_spawns;
 pub mod room_templates;
 pub mod roundworm;
 pub mod run_admission;
+pub mod run_quit;
 pub mod saved_game;
 pub mod seed;
 mod source_angles;
@@ -611,6 +612,8 @@ pub struct State {
     pub title_animation_frame: u32,
     pub menu_fade: MenuFade,
     pub run_start_request: RunStartRequest,
+    #[serde(default)]
+    pub run_quit: run_quit::RunQuit,
     pub system_clock: phase::Clock,
     pub run_admission: run_admission::RunAdmission,
     pub run_tick: u32,
@@ -836,6 +839,7 @@ impl Game {
                 title_animation_frame: 0,
                 menu_fade: MenuFade::first_title(),
                 run_start_request: RunStartRequest::default(),
+                run_quit: run_quit::RunQuit::default(),
                 // The public runtime starts at the first rendered Title,
                 // after the omitted native introductory cutscene. Its next
                 // system iteration is a full update; this clock is relative
@@ -1090,6 +1094,9 @@ impl Game {
         {
             return Ok(());
         }
+        if self.state.screen == Screen::Playing && self.state.run_quit.active() {
+            return Ok(());
+        }
         let previous_screen = self.state.screen;
         match self.state.screen {
             Screen::Title => {
@@ -1279,6 +1286,17 @@ impl Game {
                         self.state.pause_menu.age = 0;
                     }
                 } else if self.state.paused {
+                    if code == "Enter"
+                        && self.state.pause_menu.selection == 2
+                        && self.state.pause_menu.phase != PausePhase::Disappearing
+                        && self.state.room_transition.is_none()
+                        && self.state.run_admission.initial_fade <= 0.0
+                    {
+                        if self.state.run_quit.save_enabled.is_none() {
+                            return Err("Pause Quit requires its source save-enable history".into());
+                        }
+                        self.state.run_quit.input_pending = true;
+                    }
                     match code {
                         "ArrowUp" | "KeyW" => {
                             self.state.pause_menu.selection =
@@ -1561,6 +1579,7 @@ impl Game {
         self.state.run_introduction = RunIntroduction::stage(true);
         self.state.boss_bar = BossBar::default();
         self.state.pause_menu = PauseMenu::hidden();
+        self.state.run_quit = run_quit::RunQuit::fresh();
         self.state.player = Player::starting();
         //Actual fresh Manager.Init→Player.Init; title/old restores stay None.
         self.state.player.entity_source = Some(PlayerEntitySource::fresh_isaac());
@@ -2200,6 +2219,52 @@ impl Game {
         }
         Ok(())
     }
+    ///594CB0 ->5949A0 ->54F3F0. The supported in-memory save happens
+    ///before Stop resets modeled Game fields. Binary encoders55B7B0/55B890,
+    ///audio virtual5E1D00 and manager Uninit callbacks remain separate owners.
+    fn finish_pause_quit(&mut self) -> Result<(), String> {
+        match self.state.run_quit.save_enabled {
+            Some(true) if !self.state.player.dead => {
+                self.state.music.reset_pitch();
+                self.save_supported_run()?;
+                self.state.run_quit.save_outcome = Some(run_quit::SaveOutcome::SupportedRunCopied);
+            }
+            Some(false) => {
+                self.state.music.reset_pitch();
+                //594910 is called again by Stop when the save-enable byte is false.
+                self.saved_game = self.state.boot_lifecycle.clear_saved_game();
+                self.saved_run = None;
+                self.state.saved_run_summary = None;
+                self.state.run_quit.save_outcome = Some(run_quit::SaveOutcome::DeadRunCleared);
+            }
+            _ => return Err("Pause Quit has no admitted live/dead save disposition".into()),
+        }
+        self.state.information_animation.clear();
+        self.state.player_death = player_death::PlayerDeath::default();
+        self.state.stage_transition = stage_transition::StageTransition::default();
+        self.state.room_transition = None;
+        self.state.boss_bar = BossBar::default();
+        self.state.run_introduction.active = false;
+        self.state.game_update_count = 0;
+        if let Some(shake) = &mut self.state.game_shake {
+            shake.reset_duration();
+        }
+        self.state.source_cache_run_flags = Some(0);
+        self.state.run_admission.initial_fade = 0.0;
+        self.state.run_quit.fade_alpha = 0.0;
+        self.state.run_quit.system_pending = false;
+        self.state.run_start_request = RunStartRequest::default();
+        self.state.paused = false;
+        self.state.pause_menu = PauseMenu::hidden();
+        //MenuInit59A4D0 starts track61; SetMenu(3) from its index0 emits
+        //no forward-confirm sound.59B0F0 receives opaque black67C8F8.
+        self.state.music.crossfade(61);
+        self.state.menu_fade = MenuFade { active: true, alpha: 1.0, color: [0.0, 0.0, 0.0, 1.0] };
+        self.state.screen = Screen::Main;
+        self.load_menu_character();
+        self.state.main_selection = if self.saved_run.is_some() { 1 } else { 0 };
+        Ok(())
+    }
     fn tick(&mut self, timestamp_millis: Option<u64>) -> Result<(), String> {
         self.state.run_admission.clock.advance(timestamp_millis)?;
         // Source 594a10 consumes the prior menu request before game dispatch.
@@ -2244,6 +2309,13 @@ impl Game {
             self.state.run_start_request.system_pending = false;
             self.start_run()?;
         }
+        //595110 consumes menu requests on the full System path (including
+        //enabled interpolation), never on the disabled odd/skipped path.
+        if self.state.run_quit.system_pending
+            && self.state.system_clock.next_phase() != phase::Phase::Skipped
+        {
+            self.finish_pause_quit()?;
+        }
         let audio_counter = self.state.system_clock.system_counter;
         let phase = self.state.system_clock.advance()?;
         if phase != phase::Phase::Skipped && self.state.nightmares.apply_request(self.state.stage) {
@@ -2251,6 +2323,25 @@ impl Game {
         }
         if phase != phase::Phase::Skipped {
             self.state.public_actions.advance(&self.state.pressed);
+            if self.state.screen == Screen::Playing && self.state.run_quit.input_pending {
+                self.state.run_quit.input_pending = false;
+                if self.state.paused
+                    && self.state.pause_menu.phase != PausePhase::Disappearing
+                    && self.state.pause_menu.selection == 2
+                    && self.state.player_death.game_over.is_none()
+                    && self.state.room_transition.is_none()
+                    && self.state.run_admission.initial_fade <= 0.0
+                {
+                    if self.state.player.dead {
+                        //5BC1DD invalidates the saved run before requesting the fade.
+                        self.saved_game = self.state.boot_lifecycle.clear_saved_game();
+                        self.saved_run = None;
+                        self.state.saved_run_summary = None;
+                        self.state.run_quit.save_enabled = Some(false);
+                    }
+                    self.state.run_quit.begin();
+                }
+            }
             //5282B0 pocket effects are not reconstructed here. An actual
             //held pocket request invalidates C70 before any Player callback;
             //later release never recreates a neutral owner.
@@ -2328,6 +2419,27 @@ impl Game {
             if let Some(shake) = &mut self.state.game_shake {
                 shake.advance_full_clock();
             }
+        }
+        //54FA20/54FB20 precede Pause update.5BC194 stopped that sprite;
+        //HUD above still advances, while actors/GameAge remain frozen.
+        if self.state.screen == Screen::Playing && self.state.run_quit.active() {
+            if phase == phase::Phase::Update {
+                //54F9DA/54FB88 retain priority over the outgoing fade.
+                if self.state.stage_transition.active() {
+                    self.advance_stage_transition(phase)?;
+                } else {
+                    if self.state.information_animation.active() {
+                        self.state.information_animation.advance_full()?;
+                    }
+                    if self.state.information_animation.state != 2 {
+                        self.state.run_quit.advance_full();
+                    }
+                }
+            }
+            if phase != phase::Phase::Skipped {
+                self.state.music.advance();
+            }
+            return Ok(());
         }
         let gameplay_was_paused = self.state.paused;
         if self.state.screen == Screen::Playing {
