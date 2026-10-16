@@ -36,7 +36,10 @@ native, browser = None, None
 
 def native_readback():
     global native
-    manifest = native_dir / 'manifest.json.gz'
+    manifests = [native_dir / name for name in ('manifest.json.gz', 'manifest.json.zst')
+                 if (native_dir / name).is_file()]
+    assert len(manifests) == 1, 'Exactly one actual declared Native manifest required'
+    manifest = manifests[0]
     journals = [native_dir / name for name in ('native-progress.jsonl.gz', 'native-progress.jsonl.zst')
                 if (native_dir / name).is_file()]
     assert len(journals) == 1, 'Exactly one actual declared Native journal required'
@@ -48,6 +51,9 @@ def native_readback():
     spec = importlib.util.spec_from_file_location('composition_native_evidence', module)
     reader = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(reader)
+    if manifest.suffix == '.zst':
+        assert hasattr(reader, 'validate_manifest_format'), 'Native harness does not own Zstd manifest validation'
+        reader.validate_manifest_format(manifest, json.loads(manifest.with_name(manifest.name + '.meta.json').read_text()))
     if progress.suffix == '.zst':
         assert hasattr(reader, 'validate_progress_format'), 'Native harness does not own Zstd journal validation'
         reader.validate_progress_format(progress, json.loads(progress.with_name(progress.name + '.meta.json').read_text()))

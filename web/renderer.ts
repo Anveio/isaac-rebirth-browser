@@ -56,6 +56,27 @@ function minimapShape(template: { width: number; height: number }): number {
   return (template.width === 26 ? 2 : 0) + (template.height === 14 ? 1 : 0);
 }
 const LOCKED_MINIMAP_TYPES = new Set([2, 9, 12, 18, 19, 20, 21]);
+// GridEntity_Decoration Init 561e60 picks Props_*.anm2 by backdrop type
+// (3/4 Caves, 5/6 Depths, 7/8 Womb, 9 Sheol, 10 Cathedral, 12 Chest, else
+// Basement). Only the Basement/Cellar backdrops the port builds are listed.
+const DECORATION_PROPS: Record<string, { actor: string; allowCaves: boolean }> = {
+  "gfx/backdrop/01_basement.png": { actor: "gfx/grid/props_01_basement.anm2", allowCaves: false },
+  "gfx/backdrop/02_cellar.png": { actor: "gfx/grid/props_01_basement.anm2", allowCaves: false },
+};
+// 561f07: an RNG seeded (Descriptor+48 + grid index, shift35 = 5/9/7) plays
+// clip raw() % count, retrying (20 tries) while a "Caves" clip lands outside
+// the Caves backdrop.
+function decorationClip(names: readonly string[], seed: number, allowCaves: boolean): string {
+  let state = seed >>> 0, name = names[0]!;
+  for (let attempt = 0; attempt < 20; attempt++) {
+    state = (state ^ (state >>> 5)) >>> 0;
+    state = (state ^ (state << 9)) >>> 0;
+    state = (state ^ (state >>> 7)) >>> 0;
+    name = names[state % names.length]!;
+    if (allowCaves || !name.includes("Caves")) break;
+  }
+  return name;
+}
 const ROCK_ANIMATIONS: Record<number, string> = { 2: "normal", 3: "black", 4: "tinted", 5: "bombrock", 6: "alt" };
 function rockSprite(kind: number, variant: number): { animation: string; frame: number } | undefined {
   const animation = ROCK_ANIMATIONS[kind];
@@ -205,7 +226,7 @@ export class Renderer {
     ctx.save();
     const offset = this.worldOffset(state);
     if (offset) ctx.translate(offset.x, offset.y);
-    this.drawRoom(state.room.appearance, state.room.grid);
+    this.drawRoom(state.room.appearance, state.room.grid, state);
     ctx.restore();
     this.stage.ground(state.stageEffects);
     ctx.save();
@@ -446,6 +467,43 @@ export class Renderer {
     }
     ctx.restore();
     this.stage.foreground(state.stageEffects);
+    this.drawFxRays(state);
+  }
+
+  /** FX ray render 547890 (from room render 5cd00d, after entities and
+   * shading). The camera scroll (Room+15B8) moves the rays' anchor C; the
+   * player's offset from the room centre P sets parallax and fades them. Each
+   * ray draws its whole texture twice on one additive quad: alpha a*s, then
+   * mirrored with a*(1-s), s = (sin(phase)+1)/2. Phase advances by
+   * animationSpeed per render call; two calls per game update is assumed. */
+  private drawFxRays(state: State): void {
+    const group = state.room.appearance.fxRays, init = state.room.initializationGameUpdate;
+    if (!group || !group.rays.length || init === null) return;
+    const grid = state.room.grid; if (!grid) return;
+    const scroll = state.camera?.scroll ?? { x: 0, y: 0 }, shake = state.gameShake?.offsetCea00 ?? { x: 0, y: 0 };
+    const centre = { x: (40 + 40 * (grid.width - 1) / 2) * 0.65 + 32, y: (120 + 40 * (grid.height - 1) / 2) * 0.65 - 46 };
+    const C = { x: centre.x + scroll.x, y: centre.y + scroll.y };
+    const P = { x: state.player.x - centre.x, y: state.player.y - centre.y };
+    const topY = scroll.y + shake.y, n = group.rays.length;
+    const W = (group.xMax - group.xMin - (n - 1) * group.raySpacing) / n, h = W / 2;
+    const fade = Math.max(1 - Math.abs(P.x) / C.x, 0) * Math.max(1 - Math.abs(P.y) / C.y, 0);
+    const calls = 2 * Math.max(0, state.gameUpdateCount - init);
+    const gl = this.graphics, ctx = gl.asCanvasContext();
+    const backend = ctx as unknown as { drawTintedImageQuad?: (source: CanvasImageSource, tint: number[], offsets: number[], crop: readonly [number, number, number, number], points: readonly (readonly [number, number])[]) => void };
+    if (!backend.drawTintedImageQuad) return;
+    gl.blendFactors("srcAlpha", "one");
+    for (const [i, ray] of group.rays.entries()) {
+      const x = (W + group.raySpacing) * i + group.xMin, xc = x + h;
+      const topLeft = [C.x + x + P.x * group.topParallax, topY] as const, topRight = [topLeft[0] + W, topY] as const;
+      const bottomY = P.y * group.bottomParallax + group.rayLength;
+      const bottomLeft = [group.perspective * xc + C.x - h + group.bottomParallax * P.x, bottomY] as const;
+      const bottomRight = [group.perspective * xc + C.x + h + group.bottomParallax * P.x, bottomY] as const;
+      const a = fade * ray.opacity, s = (Math.sin(ray.phase + ray.animationSpeed * calls) + 1) * 0.5;
+      const image = this.assets.image(ray.texture), crop = [0, 0, image.width, image.height] as const;
+      backend.drawTintedImageQuad(image, [1, 1, 1, a * s], [0, 0, 0], crop, [topLeft, topRight, bottomLeft, bottomRight]);
+      backend.drawTintedImageQuad(image, [1, 1, 1, a * (1 - s)], [0, 0, 0], crop, [topRight, topLeft, bottomRight, bottomLeft]);
+    }
+    gl.blendFactors("srcAlpha", "oneMinusSrcAlpha");
   }
 
   /** Room transition 5de870: the old room (captured without the player) and
@@ -598,7 +656,21 @@ export class Renderer {
       }
     }
   }
-  private drawRoom(appearance: RoomAppearance, grid: Room["grid"]): void {
+  /** GridEntity_Decoration props draw with the backdrop, under the room's
+   * shading quad, as the original's darker props show. */
+  private drawDecorations(ctx: CanvasRenderingContext2D, state: State): void {
+    const grid = state.room.grid, descriptor = state.room.descriptor;
+    const props = DECORATION_PROPS[state.room.appearance.backdrop];
+    if (!grid || !descriptor || !props || descriptor.template.type === 16) return;
+    for (const [index, cell] of grid.cells.entries()) {
+      if (cell.entity?.kind !== 1) continue;
+      const x = (40 + index % grid.width * 40) * 0.65 + 32, y = (120 + Math.floor(index / grid.width) * 40) * 0.65 - 47;
+      const animation = decorationClip(this.assets.animationNames(props.actor), descriptor.decorationSeed + index, props.allowCaves);
+      this.assets.draw(ctx, props.actor, animation, x, y, state.gameUpdateCount);
+      this.drawnGrid.push({ index, kind: 1, animation, frame: state.gameUpdateCount });
+    }
+  }
+  private drawRoom(appearance: RoomAppearance, grid: Room["grid"], state: State): void {
     const gl = this.graphics, ctx = gl.asCanvasContext(), size = appearance.tileSize, border = size * 2;
     const width = appearance.columns * size, height = appearance.rows * size, { x, y } = appearance.origin;
     gl.drawSurface(this.floor, border, border, width - border * 2, height - border - size,
@@ -625,6 +697,7 @@ export class Renderer {
       }
       ctx.restore();
     }
+    this.drawDecorations(ctx, state);
     gl.drawImage(this.assets.image(appearance.fx.shading), x, y, width, height);
   }
   private drawPlayer(ctx: CanvasRenderingContext2D, state: State): void {

@@ -17,7 +17,7 @@ ROOT = Path(__file__).resolve().parents[2]
 EXPECTED_SHA = os.environ.get('ISAAC_ORIGINAL_SHA')
 if not isinstance(EXPECTED_SHA, str) or re.fullmatch(r'[0-9a-f]{64}', EXPECTED_SHA) is None:
     raise ValueError('ISAAC_ORIGINAL_SHA must provide the driver-verified canonical binary SHA256')
-SOURCE_FIELDS = frozenset(('playerMovementD9c', 'knifeChildChain4a0', 'npc14And18DamageQueue', 'kind8TearFields', 'ordinaryTechnology', 'ordinaryDrFetusBombs', 'controlledTechnology7x2x1', 'controlledDrFetusBombs', 'monstrosLung229'))
+SOURCE_FIELDS = frozenset(('playerMovementD9c', 'knifeChildChain4a0', 'npc14And18DamageQueue', 'kind8TearFields', 'ordinaryTechnology', 'ordinaryDrFetusBombs', 'controlledTechnology7x2x1', 'controlledDrFetusBombs', 'monstrosLung229', 'spoonBender3Tears', 'controlledKnifeSatelliteChain'))
 spec = importlib.util.spec_from_file_location('composition_items', ROOT / 'tools/original/item-observer.py')
 base = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(base)
@@ -183,6 +183,16 @@ def observe(pid, context):
                         'shootingLock7dc': u32(player + 0x7dc),
                         'position448': floats(player + 0x448, 2),
                         'previousVelocityDd4': floats(player + 0xdd4, 2)}
+                if 'spoonBender3Tears' in requested_fields:
+                    supplemental['players'][-1]['spoonMoveSpeedInputs'] = {
+                        'sourceD28': i32(player + 0xd28), 'sourceD44': i32(player + 0xd44),
+                        'source13bc': i32(player + 0x13bc), 'source13c0': i32(player + 0x13c0),
+                        'actualMoveSpeedD60': floats(player + 0xd60)}
+                if 'controlledKnifeSatelliteChain' in requested_fields:
+                    supplemental['players'][-1]['knifeSatelliteCaller'] = {
+                        'playerTypeBfc': i32(player + 0xbfc),
+                        'activeStateD80': i32(player + 0xd80),
+                        'currentDamageC88': floats(player + 0xc88)}
                 if 'playerMovementD9c' in requested_fields:
                     supplemental['players'][-1]['movementDirectionD9c'] = i32(player + 0xd9c)
             room = u64(game + 0x8180)
@@ -219,7 +229,28 @@ def observe(pid, context):
             # actual registered Uninit, not !dead, is the producer of NULL.
             child_pointers = [u64(pointer + 0x4a0) for pointer in [*pointers, *slot_pointers]
                 if pointer and u32(pointer + 0x10) == 7 and u64(pointer) == VTABLES[7]]
-            all_pointers = dict.fromkeys([*pointers, *slot_pointers, *child_pointers])
+            knife_chain_pointers = []
+            if 'controlledKnifeSatelliteChain' in requested_fields:
+                #Actual447F40 registered4A0 is independent of Parent498.
+                #Follow referenced objects after Remove too; manager absence
+                #never supplies NULL. Writable/class checks precede every read.
+                pending_knives = list(dict.fromkeys(pointer for pointer in [*pointers, *slot_pointers]
+                    if pointer and u32(pointer + 0x10) == 8))
+                visited_knives = set()
+                while pending_knives:
+                    owner = pending_knives.pop(0)
+                    if owner in visited_knives:
+                        continue
+                    if len(visited_knives) >= 512 or u32(owner + 0x10) != 8 or u64(owner) != VTABLES[8]:
+                        raise ValueError('Knife4A0 traversal outside actual bounded Knife storage')
+                    visited_knives.add(owner)
+                    child = u64(owner + 0x4a0)
+                    if child:
+                        if u32(child + 0x10) != 8 or u64(child) != VTABLES[8]:
+                            raise ValueError('Actual Knife4A0 target is not canonical Knife')
+                        knife_chain_pointers.append(child)
+                        pending_knives.append(child)
+            all_pointers = dict.fromkeys([*pointers, *slot_pointers, *child_pointers, *knife_chain_pointers])
             for actor in all_pointers:
                 if not actor:
                     continue
@@ -322,6 +353,40 @@ def observe(pid, context):
                     # 7D8 is falling speed in Tear; its attack flags live at
                     # 7F0. Knife's distinct attack flags are at 7D8 below.
                     row['attackFlags7f0'] = str(u64(actor + 0x7f0))
+                    if 'spoonBender3Tears' in requested_fields:
+                        #Actual671270/type2 above, fresh ordinary0/0 and born4.
+                        #Current4A8 is a live registered slot, never a copied
+                        #historical pointer or first-seen-as-Init alias.
+                        writer = ((identity['variant'], identity['subtype']) == (0, 0)
+                                  and int(row['attackFlags7f0']) == 4
+                                  and row['cachedSpawner'] == {'kind': 1, 'variant': 0})
+                        row['spoonWriterScope'] = writer
+                        row['spoonHoming'] = None
+                        if writer:
+                            #5424B1..F4 creates the actual808 tree;54473F..776
+                            #reads root818 and key20, with children10/18.
+                            count = u64(actor + 0x830)
+                            if count > 256:
+                                raise ValueError('Homing808 registry outside finite observation scope')
+                            pending_nodes = [u64(actor + 0x818)]
+                            seen_nodes, keys = set(), []
+                            while pending_nodes:
+                                node = pending_nodes.pop()
+                                if not node:
+                                    continue
+                                if node in seen_nodes or len(seen_nodes) >= 256:
+                                    raise ValueError('Malformed or unbounded actual homing registry')
+                                seen_nodes.add(node)
+                                keys.append(u32(node + 0x20))
+                                pending_nodes.extend((u64(node + 0x10), u64(node + 0x18)))
+                            if len(keys) != count or len(set(keys)) != len(keys):
+                                raise ValueError('Homing registry actual count/key owners disagree')
+                            row['spoonHoming'] = {
+                                'target4a8': actor_ref(u64(actor + 0x4a8)),
+                                'velocityMultiplier7e0': floats(actor + 0x7e0),
+                                'baseDamage83c': floats(actor + 0x83c),
+                                'shotOrdinal838': u32(actor + 0x838),
+                                'hitSequences808': sorted(keys)}
                     if 'kind8TearFields' in requested_fields:
                         writer = ((identity['variant'], identity['subtype']) == (0, 0)
                                   and bool(int(row['attackFlags7f0']) & (1 << 33)))
@@ -343,6 +408,10 @@ def observe(pid, context):
                     row['fallingSpeed7d8'] = floats(actor + 0x7d8)
                     row['fallingAcceleration7dc'] = floats(actor + 0x7dc)
                 elif identity['kind'] == 8:
+                    if 'controlledKnifeSatelliteChain' in requested_fields:
+                        #The successful keyed read owns knownNULL; unavailable
+                        #or invalidated references are errors, never NULL heals.
+                        row['knifeSatelliteChild4a0'] = actor_ref(u64(actor + 0x4a0))
                     if 'knifeChildChain4a0' in requested_fields:
                         child_chain = u64(actor + 0x4a0)
                         row['childChain4a0Null'] = child_chain == 0

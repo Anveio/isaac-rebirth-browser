@@ -1,4 +1,5 @@
-//! Ordinary Basement Rock destruction reached through a real bomb blast.
+//! Ordinary Basement Rock destruction reached through a real bomb blast;
+//! poop takes the blast as Hurt(4) (`attack_grid`).
 //!
 //! The callback changes collision, the room's destruction marker and linked
 //! authored frames. Tinted rocks (kind4) also run their reward 56d440.
@@ -103,6 +104,13 @@ pub fn destroy(state: &mut State, origin: WorldVector, radius: f32) -> Result<()
         .map_or(0, |descriptor| descriptor.decoration_seed);
     for index in selected {
         if crate::doors::try_blow_open(state, index, true) {
+            continue;
+        }
+        let kind = state.room.grid.as_ref().and_then(|grid| grid.cells[index].entity.as_ref()).map(|entity| entity.kind);
+        if kind == Some(14) {
+            // DestroyGrid5cbb70 -> Poop's base Destroy561c00 is Hurt(4).
+            let outcome = crate::attack_grid::callback_at_index(state, index, 4)?;
+            outcome.record_frontier(state, "bombGridHurt");
             continue;
         }
         let grid = state.room.grid.as_mut().expect("admitted room grid");
@@ -248,7 +256,7 @@ fn tinted_reward(
 
 /// Spawns one tinted-rock child immediately, as the source does before the
 /// next local draw.
-fn admit_reward(
+pub(crate) fn admit_reward(
     state: &mut State,
     variant: u32,
     subtype: Option<u32>,
