@@ -62,6 +62,21 @@ impl DamageInputs {
     }
 }
 
+/// Actual Player+D2C signed tier input, independent of cached C78.
+/// Constructor519658 owns zero; unknown producers never reconstruct it.
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct FireDelayInputs {
+    pub source_d2c: i32,
+}
+
+impl FireDelayInputs {
+    /// Actual signed32 ADD producer law on an already owned input.
+    pub fn apply_signed_delta(&mut self, delta: i32) {
+        self.source_d2c = self.source_d2c.wrapping_add(delta);
+    }
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct PlayerItems {
@@ -93,6 +108,8 @@ pub struct PlayerItems {
     pub luck_inputs: Option<LuckInputs>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub damage_inputs: Option<DamageInputs>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub fire_delay_inputs: Option<FireDelayInputs>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub shot_speed_inputs: Option<ShotSpeedInputs>,
     ///Actual held trinket slots E14/E18; normal fresh constructor initializes0.
@@ -165,6 +182,8 @@ impl PlayerItems {
             shot_speed_inputs: Some(ShotSpeedInputs::NEUTRAL),
             // Actual519662, not a default reconstructed from inventory.
             damage_inputs: Some(DamageInputs { source_d30: 0 }),
+            //Actual519658, not a cache/count-derived neutral default.
+            fire_delay_inputs: Some(FireDelayInputs { source_d2c: 0 }),
             trinket_slots: [0; 2],
             queued_id: None,
             queued_charge: 0,
@@ -600,6 +619,22 @@ pub(crate) fn add_collectible(
         .as_mut()
         .expect("checked Player item owner");
     owner.owned_counts[id as usize] = owner.owned_counts[id as usize].wrapping_add(1);
+    //Actual Add48 preserves D2C on its independently closed common path.
+    //Neither D30/D38 preservation nor a cache role supplies this word's proof.
+    let keep_cupid_fire_delay = id == 48
+        && normal_isaac
+        && crate::item_pipeline::ItemInputs::new(owner)
+            .is_ok_and(|inputs| inputs.admits_cupid_grant_context());
+    //These selected Add routes preserve an existing D2C owner. Actual222's
+    //default tail is separately closed; untracked240/258/reset routes lose
+    //proof. None stays None and is never reconstructed from counts/cache.
+    if !matches!(
+        id,
+        1 | 2 | 3 | 4 | 6 | 52 | 68 | 114 | 118 | 143 | 152 | 168 | 169 | 222 | 229 | 304 | 329 | 330
+    ) && !keep_cupid_fire_delay
+    {
+        owner.fire_delay_inputs = None;
+    }
     //Actual Add48's selected default/common path preserves D30.
     //This word's proof is independent of D38 and every cache role.
     let keep_cupid_damage = id == 48

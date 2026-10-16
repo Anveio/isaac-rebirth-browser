@@ -901,7 +901,9 @@ impl FireDelayStage {
             && inputs.admits_scalar_stage(CacheStage::FireDelay, Self::EFFECT_ITEMS);
         let operator_reads = !inputs.positive_owned_count(153)
             && inputs.admits_stage_owned_roles(|id| FireDelayReadRole::of(id).is_some());
-        source_player_type == Some(0) && (legacy || operator_reads)
+        source_player_type == Some(0)
+            && inputs.owner.fire_delay_inputs.is_some()
+            && (legacy || operator_reads)
     }
 
     fn resolve(inputs: ItemInputs<'_>, primary: PrimaryWeaponC08) -> i32 {
@@ -911,8 +913,14 @@ impl FireDelayStage {
         let number_one = inputs
             .owned_count(6)
             .wrapping_add(inputs.temporary_count(6));
-        let tier = number_one as f32 * 1.5_f32
+        let mut tier = number_one as f32 * 1.5_f32
             + (inputs.owned_count(1) as f32 + inputs.temporary_count(1) as f32) * 0.7_f32;
+        //512495/49D/4A3: signed conversion, separate *.5 then ADDSS into
+        //the tier BEFORE the character/nonlinear transform and min5 bound.
+        //An absent owner leaves only a partial value; completion stays pending.
+        if let Some(input) = inputs.owner.fire_delay_inputs {
+            tier += input.source_d2c as f32 * 0.5_f32;
+        }
         let root = (1.3_f32 * tier + 1.0_f32).max(0.0).sqrt();
         let mut delay = 16.0_f32 - 6.0_f32 * root;
         if tier <= 0.0 {
@@ -947,7 +955,15 @@ impl FireDelayStage {
         if inputs.positive_owned_count(330) {
             delay = (delay - 6.0_f32) * 0.25_f32;
         }
-        (delay as i32).max(1)
+        //51279C CVTTSS2SI returns INT_MIN for NaN/overflow. Rust's
+        //saturating cast differs for a large negative signed D2C history.
+        let integer =
+            if delay.is_finite() && (-2_147_483_648.0_f32..2_147_483_648.0_f32).contains(&delay) {
+                delay as i32
+            } else {
+                i32::MIN
+            };
+        integer.max(1)
     }
 }
 
