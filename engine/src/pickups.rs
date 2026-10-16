@@ -45,12 +45,64 @@ pub struct Definition {
 
 include!(concat!(env!("OUT_DIR"), "/pickup_catalog.rs"));
 
-/// Fresh ordinary Isaac pickup Init owns a new RNG35 seeded by the entity's
-/// spawn seed. Item modifiers and special-room replacements are routed by the
-/// caller; zero subtype never means an arbitrary fixed regular subtype.
+/// Direct Pickup.Init4ff1e0 Have operands. Each property is independent:
+/// missing actual Player/count ownership is unknown, never a neutral count.
+#[derive(Clone, Copy)]
+pub(crate) struct RegularSubtypeInputs {
+    humbling_bundle: Option<bool>,
+    bogo_bombs: Option<bool>,
+    // The heart property additionally owns its separate negative operands.
+    heart_humbling_bundle: Option<bool>,
+}
+impl RegularSubtypeInputs {
+    const NEUTRAL: Self = Self { humbling_bundle: Some(false), bogo_bombs: Some(false),
+        heart_humbling_bundle: Some(false) };
+
+    pub(crate) fn from_state(state: &crate::State) -> Self {
+        let items = state.player.entity_source
+            .filter(|source| source.entity_type == 1 && source.variant == 0)
+            .and(state.player_items.as_ref());
+        let humbling_bundle = items.and_then(|items| items.owned_counts.get(203)).map(|count| *count > 0);
+        //500550..638/50045f..53c/500691..6e1: these actual negative
+        //operands skip only their own extra heart draws/replacements.
+        //Room8/+1ae0 and Challenge33 pricing retain separate owners.
+        let heart_humbling_bundle = items.filter(|items| {
+            state.weapon_admission.source_player_type == Some(0)
+                && state.challenge_id != 33
+                && state.room.descriptor.as_ref().is_some_and(|room| room.template.room_type != 8)
+                && [173usize, 238, 239].into_iter()
+                    .all(|id| items.owned_counts.get(id).is_some_and(|count| *count <= 0))
+                && items.trinket_slots == [0, 0]
+                && items.queued_id.is_none_or(|id| {
+                    crate::items::definition(id).is_some_and(|config| config.kind != 2)
+                })
+        }).and(humbling_bundle);
+        Self {
+            humbling_bundle,
+            bogo_bombs: items.and_then(|items| items.owned_counts.get(250)).map(|count| *count > 0),
+            heart_humbling_bundle,
+        }
+    }
+}
+
+/// Existing neutral callers retain their original input role. Source-aware
+/// factories below supply the actual current Have inputs to the same core.
 pub fn regular_subtype(variant: u32, subtype: u32, spawn_seed: u32) -> Result<u32, String> {
+    regular_subtype_with_inputs(variant, subtype, spawn_seed, RegularSubtypeInputs::NEUTRAL)?
+        .ok_or_else(|| "neutral regular subtype inputs unavailable".into())
+}
+
+/// Init owns local RNG35, distinct from the entity's persistent RNG30.
+/// None means a reached Have input is unowned; no body/ID/Init is fabricated.
+pub(crate) fn regular_subtype_with_inputs(
+    variant: u32, subtype: u32, spawn_seed: u32, inputs: RegularSubtypeInputs,
+) -> Result<Option<u32>, String> {
     if subtype != 0 {
-        return Ok(subtype);
+        if variant == 20 && subtype == 1 {
+            //5002fe..33b also transforms an explicitly authored penny.
+            return Ok(inputs.humbling_bundle.map(|have| if have { 4 } else { 1 }));
+        }
+        return Ok(Some(subtype));
     }
     if spawn_seed == 0 {
         return Err("pickup spawn seed must be nonzero".into());
@@ -60,45 +112,51 @@ pub fn regular_subtype(variant: u32, subtype: u32, spawn_seed: u32) -> Result<u3
         state = crate::room_spawns::next35(state);
         state % bound
     };
-    match variant {
-        // Ordinary Isaac500150: independent local35 rolls retain their order.
-        // Collectible/trinket replacements belong to their actual owners.
+    let selected = match variant {
+        //500150..1ff: Have203 selects5 before the same local35 rolls.
+        //The independent heart input closes only its actual negative
+        //173/238/239/trinket/BFC0/non-Room8 footprint above.
         10 => {
-            let mut selected = if random(2) == 0 { 2 } else { 1 };
-            if random(50) == 0 {
-                selected = 4;
-            }
-            if random(10) == 0 {
-                selected = if random(20) == 0 { 6 } else { 3 };
-            }
-            Ok(selected)
+            let Some(humbling) = inputs.heart_humbling_bundle else { return Ok(None) };
+            let mut selected = if humbling { 5 } else { 1 };
+            if random(2) == 0 { selected = 2; }
+            if random(50) == 0 { selected = 4; }
+            if random(10) == 0 { selected = if random(20) == 0 { 6 } else { 3 }; }
+            selected
         }
         20 => {
             let mut selected = if random(20) == 0 { 2 } else { 1 };
-            if random(100) == 0 {
-                selected = 3;
+            if random(100) == 0 { selected = 3; }
+            if selected == 1 {
+                let Some(have) = inputs.humbling_bundle else { return Ok(None) };
+                if have { selected = 4; }
             }
-            Ok(selected)
+            selected
         }
-        // Pickup::Init4ffcae: ordinary Isaac owns no Humbling Bundle;
-        // Random(50)==0 selects the golden key, never a double key.
-        30 => Ok(if random(50) == 0 { 2 } else { 1 }),
-        // Pickup::Init4ffd4e: fresh Isaac owns neither Humbling Bundle nor
-        // BOGO Bombs. Later Megatroll/Troll draws override the regular/double roll.
+        30 => {
+            let Some(have) = inputs.humbling_bundle else { return Ok(None) };
+            let mut selected = if have { 3 } else { 1 };
+            if random(50) == 0 { selected = 2; }
+            selected
+        }
         40 => {
-            let mut selected = if random(7) == 0 { 2 } else { 1 };
-            if random(50) == 0 {
-                selected = 5;
-            }
-            if random(10) == 0 {
-                selected = 3;
-            }
-            Ok(selected)
+            let Some(humbling) = inputs.humbling_bundle else { return Ok(None) };
+            //500409..435 reaches Have250 only after Have203 returned false.
+            let double = if humbling { true } else {
+                let Some(have) = inputs.bogo_bombs else { return Ok(None) };
+                have
+            };
+            let mut selected = if double { 2 } else { 1 };
+            if random(7) == 0 { selected = 2; }
+            if random(50) == 0 { selected = 5; }
+            if random(10) == 0 { selected = 3; }
+            selected
         }
-        _ => Err(format!(
+        _ => return Err(format!(
             "pickup selector {variant}/0 requires its owning pool or subtype resolver"
         )),
-    }
+    };
+    Ok(Some(selected))
 }
 
 /// Init can select transient Troll/Megatroll PU subtypes (40/3, 40/5)
@@ -240,8 +298,38 @@ impl Pickup {
         if selector.entity_type != 5 || !matches!(selector.variant, 10 | 20 | 30 | 40) {
             return Ok(None);
         }
+        Self::from_regular_selector(id, selector, appear, RegularSubtypeInputs::NEUTRAL)
+    }
+
+    /// Current authored10/20/30/40 Init uses actual FIRSTPlayer operands.
+    /// Other families retain their own existing factory/context contracts.
+    pub(crate) fn from_source_selector(
+        id: u32, selector: &crate::room_spawns::SpawnSelector,
+        appear: bool, state: &crate::State,
+    ) -> Result<Option<Self>, String> {
+        if selector.entity_type != 5 || !matches!(selector.variant, 10 | 20 | 30 | 40) {
+            return Self::from_selector(id, selector, appear);
+        }
+        //4ff740 Challenge33 pricing precedes the free pickup postlude.
+        //Unavailable pricing stays local to this actual selected factory.
+        if state.challenge_id == 33 { return Ok(None) }
+        //4ff560/500240 applies Room8 overrides even to explicit hearts.
+        //Other explicit heart subtypes do not read the random-heart inputs.
+        if selector.variant == 10 && state.room.descriptor.as_ref()
+            .is_none_or(|room| room.template.room_type == 8) {
+            return Ok(None);
+        }
+        Self::from_regular_selector(id, selector, appear, RegularSubtypeInputs::from_state(state))
+    }
+
+    fn from_regular_selector(
+        id: u32, selector: &crate::room_spawns::SpawnSelector,
+        appear: bool, inputs: RegularSubtypeInputs,
+    ) -> Result<Option<Self>, String> {
         let variant = u32::from(selector.variant);
-        let subtype = regular_subtype(variant, u32::from(selector.subtype), selector.spawn_seed)?;
+        let Some(subtype) = regular_subtype_with_inputs(
+            variant, u32::from(selector.subtype), selector.spawn_seed, inputs,
+        )? else { return Ok(None) };
         if !matches!(
             (variant, subtype),
             (10, 1..=6) | (20, 1..=4) | (30, 1..=3) | (40, 1 | 2 | 3 | 5)
