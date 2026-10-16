@@ -220,6 +220,9 @@ export interface Floor {
   attemptReports: { attempt: number; initialGeneratorState: number; finalGeneratorState: number;
     initialPrimaryState: number; finalPrimaryState: number; outcome: string }[];
 }
+/** Room ambience loops 5c6980: eased volume, pitch and whether the loop plays. */
+export interface AmbienceLoop { volume: number; pitch: number; playing: boolean; }
+export interface Ambience { fire: AmbienceLoop; swarm: AmbienceLoop; }
 export interface Room {
   left: number; right: number; top: number; bottom: number; appearance: RoomAppearance;
   descriptor: RoomDescriptor | null;
@@ -340,6 +343,7 @@ export interface State {
   roomDisplayFlags: number[]; revealedSecretConnections: [number, number][];
   persistedRooms: Record<string, Room>;
   stageTransition: {state: number; counter: number; sameStage: boolean; animation: number};
+  ambience: Ambience;
   roomTransition: {fromRoom: number; targetRoom: number; fromSlot: number; targetSlot: number; phase: "out" | "in" | "bossScene" | "bossCleanup"; fullUpdates: number; bossScene: {presentationIndex: number; animationFrame: number; animationPlaying: boolean} | null} | null;
   departureVelocity?: {x: number; y: number};
   sourceCacheRunFlags: number | null;

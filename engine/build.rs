@@ -132,13 +132,29 @@ fn pickup_catalog(path: &Path, animations: &Path, entities_xml: &str) -> String 
         .expect("pickup definitions missing")
     {
         let actor = pickup["actor"].as_str().expect("pickup actor missing");
+        let drop_id = actors[actor]["Events"].as_array().and_then(|events| {
+            events
+                .iter()
+                .find(|event| event["Name"] == "DropSound")
+                .and_then(|event| event["Id"].as_u64())
+        });
         let mut clips = String::new();
         for animation in actors[actor]["Animations"]
             .as_array()
             .expect("authored pickup actor missing")
         {
+            let drop_sound = drop_id
+                .and_then(|id| {
+                    animation["Triggers"].as_array().and_then(|triggers| {
+                        triggers
+                            .iter()
+                            .find(|trigger| trigger["EventId"] == id)
+                            .and_then(|trigger| trigger["AtFrame"].as_u64())
+                    })
+                })
+                .map_or("None".to_string(), |frame| format!("Some({frame})"));
             clips.push_str(&format!(
-                "Clip {{ name: {:?}, frames: {}, looping: {} }},",
+                "Clip {{ name: {:?}, frames: {}, looping: {}, drop_sound: {drop_sound} }},",
                 animation["Name"]
                     .as_str()
                     .expect("pickup clip name missing"),

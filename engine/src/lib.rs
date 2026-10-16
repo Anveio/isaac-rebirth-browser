@@ -9,6 +9,7 @@ use std::cell::RefCell;
 use std::collections::{BTreeMap, BTreeSet};
 pub mod active_items;
 pub mod actors;
+pub mod ambience;
 pub mod attack_color;
 pub mod attack_flags;
 mod attack_grid;
@@ -112,6 +113,7 @@ pub mod rock_blast;
 mod room;
 pub mod room_assets;
 pub mod room_costs;
+mod room_lights;
 pub mod room_spawns;
 pub mod room_templates;
 pub mod roundworm;
@@ -686,6 +688,9 @@ pub struct State {
     pub room_transition: Option<traversal::RoomTransition>,
     #[serde(default)]
     pub stage_transition: stage_transition::StageTransition,
+    /// Room ambience loops 5c6980 (insect swarm and fire).
+    #[serde(default)]
+    pub ambience: ambience::Ambience,
     /// The player's velocity when a door transition began, before departure
     /// cleared it; the post-ChangeRoom admitted update's footprint reads it.
     /// It lives through the transition, so a state saved during one keeps it.
@@ -908,6 +913,7 @@ impl Game {
                 persisted_rooms: BTreeMap::new(),
                 room_transition: None,
                 stage_transition: stage_transition::StageTransition::default(),
+                ambience: ambience::Ambience::default(),
                 departure_velocity: None,
                 stage_effects,
                 inventory: Inventory {
@@ -1055,7 +1061,19 @@ impl Game {
                         .ok_or("tear IDs exhausted")?;
                 }
                 for _ in 0..count {
+                    let presented = self.state.system_clock.next_phase() != phase::Phase::Skipped;
+                    let room_before = self.state.current_room;
                     self.tick(timestamp_millis)?;
+                    // Room render 5d1a70 runs its light pass on every presented
+                    // gameplay frame, after that frame's updates. The frame
+                    // that changes rooms renders the entered room twice (the
+                    // native trace shows two back-to-back passes there).
+                    if presented && self.state.screen == Screen::Playing {
+                        room_lights::present(&mut self.state);
+                        if self.state.current_room != room_before {
+                            room_lights::present(&mut self.state);
+                        }
+                    }
                 }
             }
         }
@@ -1643,6 +1661,7 @@ impl Game {
         self.state.nightmares.select_normal_basement(1)?;
         // Room.Init's backdrop setup loads the FX rays before its grid records.
         // The port builds only ordinary Basement (stage type 0).
+        ambience::reset_room(&mut self.state);
         room::load_fx_rays(
             &mut self.state.room,
             &mut self.state.boot_lifecycle.shared,
@@ -1709,6 +1728,8 @@ impl Game {
             .persisted_rooms
             .get(&room_before)
             .ok_or("room change requires the persisted room it left")?;
+        // The transition first renders the room being left (its light pass).
+        room_lights::present_room(left, &mut self.state.boot_lifecycle.shared);
         saved_game::save_grid_cells(
             &mut self.boot_level_grid,
             &mut self.state.boot_lifecycle.shared,
@@ -1725,6 +1746,7 @@ impl Game {
             familiars::advance_blood_initial(&mut self.state, id)?;
         }
         // The port builds only ordinary Basement (stage type 0).
+        ambience::reset_room(&mut self.state);
         room::load_fx_rays(
             &mut self.state.room,
             &mut self.state.boot_lifecycle.shared,
@@ -2541,6 +2563,24 @@ impl Game {
                     });
                     npcs::admit_room_combat(&mut self.state);
                     self.show_miniboss_streak();
+                    // ChangeRoom 5dd858 then selects the room's music (5c4bf0).
+                    // A first-visit treasure room (type 4, Room+1 set by
+                    // Room.Init when descriptor+0x3c is clear) draws its jingle
+                    // 87 + Random(4) at 5c4fff. The jingle is not played yet.
+                    if self
+                        .state
+                        .room
+                        .descriptor
+                        .as_ref()
+                        .is_some_and(|descriptor| descriptor.template.room_type == 4)
+                    {
+                        let _jingle = 87 + self.state.boot_lifecycle.shared.bounded(4);
+                    }
+                }
+                // The admitted Room.Update also ends with 5c6980; the active
+                // transition makes Game550760 report paused.
+                if phase == phase::Phase::Update {
+                    ambience::update(&mut self.state, true);
                 }
                 // ChangeRoom5dd260 restores Player+7d4=false after the
                 // admitted Room.Update, before the incoming leg or Scene.
@@ -2767,6 +2807,10 @@ impl Game {
                 &mut self.state,
                 self.special_room_assets.as_deref().map(Vec::as_slice),
             );
+            // Room.Update ends with the ambience loops 5c6980 (5d1866).
+            let paused =
+                self.state.room_transition.is_some() || self.state.stage_transition.active();
+            ambience::update(&mut self.state, paused);
         }
         let surviving = &self.state.tears;
         let pickups = &self.state.room.pickups;
@@ -2882,6 +2926,7 @@ impl Game {
         self.state.lasers.clear();
         self.state.bombs.clear();
         self.state.explosions.clear();
+        ambience::reset_room(&mut self.state);
         // Room.Init loads current FX layers before the fresh level grid records.
         room::load_fx_rays(
             &mut self.state.room,

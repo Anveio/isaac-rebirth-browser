@@ -31,6 +31,7 @@ async function boot() {
     const state = engine.command(command);
     currentState = state;
     audio.consume(state.audio.events);
+    audio.syncAmbience(state.ambience, state.audio.sfxVolume);
     audio.music.consume(state.music);
     if (backendAudioTime === undefined) trace.record(command, state);
     else if (command.type === 'musicBackend') trace.recordBackend(command, state, backendAudioTime);
