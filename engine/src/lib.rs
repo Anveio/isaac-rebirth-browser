@@ -636,6 +636,7 @@ pub struct State {
     pub system_clock: phase::Clock,
     pub run_admission: run_admission::RunAdmission,
     pub run_tick: u32,
+    /// Equals native Game+ce9f4; read it through `native_game_frame`.
     pub game_update_count: u32,
     pub screen: Screen,
     pub profile: u8,
@@ -772,6 +773,18 @@ pub struct State {
     #[serde(default)]
     pub boss_bar: BossBar,
     pub pause_menu: PauseMenu,
+}
+
+impl State {
+    /// Native Game+ce9f4 as full callbacks read it. Game54fa82 increments it
+    /// before the PlayerManager/Room callbacks and this port increments
+    /// `game_update_count` at the same point, so the two are equal: a fresh
+    /// run's first gameplay update reads the same value in both games once the
+    /// reset clock carries the declared boot elapsed time (#438). An older
+    /// `+1` here compensated for that harness clock offset; never re-add one.
+    pub(crate) fn native_game_frame(&self) -> u32 {
+        self.game_update_count
+    }
 }
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(tag = "type", rename_all = "camelCase", deny_unknown_fields)]
@@ -2774,7 +2787,7 @@ impl Game {
                         .expect("first entered descriptor has authored admission")
                         .selectors
                         .clone();
-                    let counter = self.state.game_update_count;
+                    let counter = self.state.native_game_frame();
                     self.admit_room_pickups(&selectors, counter, false)?;
                     item_queries::note_room_placement(&mut self.state);
                     self.admitted_update_footprint(phase)?;
@@ -3578,6 +3591,7 @@ impl Game {
             .iter()
             .map(|knife| (knife.position, knife.collision_radius))
             .collect();
+        let game_counter = self.state.native_game_frame();
         let mut births = Vec::new();
         let (before, rest) = self.state.room.npcs.split_at_mut(index);
         let (npc, after) = rest.split_first_mut().expect("indexed NPC");
@@ -3586,8 +3600,7 @@ impl Game {
             phase,
             &mut self.state.boot_lifecycle.shared,
             &mut entities::NpcWorld {
-                // AI frame gates read native Game+ce9f4 (game_update_count).
-                game_counter: self.state.game_update_count,
+                game_counter,
                 player,
                 player_velocity,
                 grid: &grid,

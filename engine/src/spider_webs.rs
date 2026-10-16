@@ -52,7 +52,7 @@ impl Slowing {
 
 /// Full grid pass: every intact web applies AddSlowing to a nearby ground player.
 pub fn advance(state: &mut State, phase: Phase) -> Result<(), String> {
-    if phase != Phase::Update || state.game_update_count & 3 != 0 {
+    if phase != Phase::Update || state.native_game_frame() & 3 != 0 {
         return Ok(());
     }
     let Some(grid) = state.room.grid.as_ref() else {
