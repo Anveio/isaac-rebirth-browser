@@ -2053,7 +2053,9 @@ impl Game {
                 // keep free pickup Init/Collect rules (no shop placeholder).
                 // Other special contexts retain typed selectors until their
                 // prices, pools and replacements are admitted.
-                let pickup = if selector.entity_type == 5 && selector.variant == 60 {
+                let pickup = if selector.entity_type == 5 && matches!(selector.variant, 70 | 300) {
+                    Pickup::from_pocket_selector(next, selector, true, &self.state)?
+                } else if selector.entity_type == 5 && selector.variant == 60 {
                     chests::from_locked_selector(next, selector, true, &self.state)?
                 } else if selector.entity_type == 5 && selector.variant == 50 {
                     chests::from_source_selector(next, selector, true, &self.state)?
