@@ -79,6 +79,9 @@ pub struct RoomAppearance {
     /// Room+1ae0, the backdrops.xml id selected by 5c5b30.
     #[serde(default = "basement_backdrop_id")]
     pub backdrop_id: u32,
+    /// Blood splats the backdrop spawns on every Room.Init of this room.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub backdrop_splats: Vec<BackdropSplat>,
     pub columns: u8,
     pub rows: u8,
     pub tile_size: f64,
@@ -241,14 +244,22 @@ pub(crate) fn backdrop(room_type: u32, variant: u32, stage: u32) -> (u32, Option
 struct WallParameters {
     chance: u32,
     variants: u32,
+    /// The sheet r15: a segment's rect is variants * sheet + its variant.
+    sheet: u32,
 }
 
 impl WallParameters {
     fn for_room(backdrop: Backdrop, room_type: u32) -> Self {
         if backdrop.id == 15 && room_type == 2 {
-            return Self { chance: 3, variants: 1 };
+            return Self { chance: 3, variants: 1, sheet: 0 };
         }
-        Self { chance: 3, variants: backdrop.wall_variants }
+        if backdrop == BASEMENT && room_type == 5 {
+            // 426f81: a Basement boss room keeps the old variant count as the
+            // sheet and draws one variant, so every segment is rect 3 (the
+            // bloody wall patch).
+            return Self { chance: 3, variants: 1, sheet: backdrop.wall_variants };
+        }
+        Self { chance: 3, variants: backdrop.wall_variants, sheet: 0 }
     }
 
     /// The patch distribution the conditional draws produce, in units of
@@ -259,7 +270,7 @@ impl WallParameters {
         }
         (0..self.variants)
             .map(|index| WallVariant {
-                source_patch_index: index as u8,
+                source_patch_index: (self.variants * self.sheet + index) as u8,
                 name: format!("variant{index}"),
                 weight: if index == 0 { (self.chance - 1) * self.variants + 1 } else { 1 },
                 eligibility: format!("backdrop{}", backdrop.id),
@@ -271,11 +282,48 @@ impl WallParameters {
 fn choose_wall(rng: &mut DecorationRng, parameters: WallParameters) -> u8 {
     // A variant draw is conditional. Flattening the resulting distribution
     // to one weighted draw changes all subsequent stream state.
+    let base = parameters.variants * parameters.sheet;
     if rng.next().is_multiple_of(parameters.chance) {
-        (rng.next() % parameters.variants) as u8
+        (base + rng.next() % parameters.variants) as u8
     } else {
-        0
+        base as u8
     }
+}
+
+/// One blood splat a Basement boss room's backdrop spawns at Room.Init.
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct BackdropSplat {
+    pub position: motion::WorldVector,
+    pub scale: f32,
+}
+
+/// 426f81..42715d for a Basement boss room: on the backdrop RNG after
+/// Random(walls), each grid cell draws Random(2); a nonzero draw at a cell
+/// whose position the room bounds inset by 20 leave unclamped spawns a Blood
+/// Splat 1000.7 there (its seed is a shared-MT raw draw, taken at admission)
+/// with scale RandomFloat * 2.5 + 0.5, updated at once.
+fn boss_splats(rng: &mut DecorationRng, width: u8, height: u8) -> Vec<BackdropSplat> {
+    let (grid_width, grid_height) = (u32::from(width) + 2, u32::from(height) + 2);
+    let (low_x, low_y) = (60.0_f32 + 20.0, 140.0_f32 + 20.0);
+    let (high_x, high_y) = (60.0 + f32::from(width) * 40.0 - 20.0, 140.0 + f32::from(height) * 40.0 - 20.0);
+    let mut splats = Vec::new();
+    for cell in 0..grid_width * grid_height {
+        if rng.next() % 2 == 0 {
+            continue;
+        }
+        let x = 40.0 + (cell % grid_width) as f32 * 40.0;
+        let y = 120.0 + (cell / grid_width) as f32 * 40.0;
+        if x.clamp(low_x, high_x) != x || y.clamp(low_y, high_y) != y {
+            continue;
+        }
+        let uniform = rng.next() as f32 * 2.328_306_4e-10_f32;
+        splats.push(BackdropSplat {
+            position: motion::WorldVector { x, y },
+            scale: uniform * 2.5 + 0.5,
+        });
+    }
+    splats
 }
 
 fn floor_patches(rng: &mut DecorationRng) -> [u8; 4] {
@@ -686,6 +734,11 @@ impl Room {
         ];
         // Random(walls) also advances the stream with Basement walls=1.
         rng.next();
+        let backdrop_splats = if backdrop == BASEMENT && room_type == 5 {
+            boss_splats(&mut rng, 13, 7)
+        } else {
+            Vec::new()
+        };
         let mut wall_quads = vec![
             quad(
                 choose_wall(&mut rng, walls),
@@ -818,6 +871,7 @@ impl Room {
         appearance: RoomAppearance {
             backdrop: backdrop.gfx.into(),
             backdrop_id: backdrop.id,
+            backdrop_splats,
             columns: ROOM_COLUMNS,
             rows: ROOM_ROWS,
             tile_size: ROOM_TILE_SIZE,

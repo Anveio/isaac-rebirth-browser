@@ -1627,6 +1627,15 @@ impl Game {
             left,
             room_before,
         )?;
+        // Backdrop::Init42a170 precedes the FX layers. A Basement boss room's
+        // splats each take a shared-MT seed, the backdrop scale and their
+        // immediate first update (42715a) on every Room.Init.
+        for splat in self.state.room.appearance.backdrop_splats.clone() {
+            let seed = self.state.boot_lifecycle.shared.next_u32();
+            let id = familiars::admit_blood_splat(&mut self.state, seed, splat.position, [1.0; 4], [0.0; 3])?;
+            familiars::set_blood_scale(&mut self.state, id, splat.scale)?;
+            familiars::advance_blood_initial(&mut self.state, id)?;
+        }
         // The port builds only ordinary Basement (stage type 0).
         room::load_fx_rays(
             &mut self.state.room,
