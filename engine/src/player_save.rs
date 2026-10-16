@@ -135,16 +135,33 @@ impl SavedPlayerItems {
 /// Its caller separately owns queued-grant admission. This bounded callback
 /// clears mapped temporary records and neutral costume-free active state;
 /// other removal, appearance andBF5 owners remain explicit source gaps.
+///
+/// 518120 has no active-item gate: the held active (Player+D74, which the
+/// grant 52cc90 writes at 52d1b7), its charges and reserve pass through to
+/// the save. Its active work is 510420's costume removal for that item and
+/// the D80/D84/BF5 stores.
 pub(crate) fn normalize_player(state: &mut State) -> Result<(), String> {
     let owner = state
         .player_items
         .as_mut()
         .ok_or("Player save requires the actual first Player item owner")?;
-    if !matches!(owner.active_id, 0 | 45)
-        || owner.active_state_d80 != 0
-        || owner.active_state_d84 != 0
-    {
+    // No port writer sets D80/D84; a nonzero value would be an active use
+    // whose transient owner cancellation (5182c3) is not ported.
+    if owner.active_state_d80 != 0 || owner.active_state_d84 != 0 {
         return Err("Player save normalization requires an unmapped temporary/active owner".into());
+    }
+    // 510420(D74, 0): an item under a temporary effect keeps its costume
+    // (Shoop da Whoop 49 excepted), as do 181/130/86/40/299; otherwise
+    // 5102f0 erases the item config's costume entries. A known history only
+    // holds configs whose grants registered there, so this never invents a
+    // removal; an unknown history stays unknown. The null costume2 that
+    // 518120 also removes (57bee0) is not a collectible registration.
+    let active = owner.active_id;
+    let kept = owner.temporary_count(active) > 0 && active != 49;
+    if active != 0 && !kept && !matches!(active, 181 | 130 | 86 | 40 | 299) {
+        if let Some(history) = &mut owner.costume_registrations {
+            history.configuration_ids.retain(|id| *id != active);
+        }
     }
     if !owner.temporary_collectibles.is_empty() {
         owner.clear_save_temporary_effects()?;
