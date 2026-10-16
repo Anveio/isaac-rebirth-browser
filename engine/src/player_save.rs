@@ -8,6 +8,14 @@ const CHILD_SHIFTS: [u32; 3] = [5, 9, 7];
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct SavedPlayerItems {
+    /// Actual Saved+88D8, copied only from an already owned Player+D30.
+    /// Legacy saved data never inherits a fresh constructor's known zero.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub damage_inputs: Option<crate::player_items::DamageInputs>,
+    /// Actual Saved+88E0, copied only from an already owned Player+D38.
+    /// A legacy/incomplete saved table never inherits constructor zero.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub shot_speed_inputs: Option<crate::player_items::ShotSpeedInputs>,
     ///518577 copies347 slots beginning Player+e1c into Saved+893c.
     pub owned_counts: Vec<i32>,
     ///5186b0/5186e0/518708 copy current states, not initializer seeds.
@@ -38,6 +46,8 @@ impl SavedPlayerItems {
             return Err("Player save requires all347 owned count slots".into());
         }
         Ok(Self {
+            damage_inputs: owner.damage_inputs,
+            shot_speed_inputs: owner.shot_speed_inputs,
             owned_counts: owner.owned_counts.clone(),
             item_rng_states: current_states(&owner.item_rngs, 347)?,
             trinket_rng_states: current_states(&owner.trinket_rngs, 62)?,
@@ -90,6 +100,11 @@ impl SavedPlayerItems {
         owner.active_id = self.active_id;
         owner.active_charge = self.active_charge;
         owner.reserve_charge = self.reserve_charge;
+        //51849A/5184A0 stores Saved88D8;511A25/511A2B restores D30.
+        //None overwrites constructor Some(0) rather than inventing history.
+        owner.damage_inputs = self.damage_inputs;
+        //5184B2/5184B8 writes Saved88E0;511A43 restores PlayerD38.
+        owner.shot_speed_inputs = self.shot_speed_inputs;
         Ok(())
     }
 }

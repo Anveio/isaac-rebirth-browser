@@ -11,7 +11,7 @@ const KINDS = { always: 'Always', sometimes: 'Sometimes', reachable: 'Reachable'
 // source. These are declarations, not results; a run's report is the outcome.
 export function discoverDstUnits({ root = ROOT } = {}) {
   const registry = readFileSync(resolve(root, DST_REGISTRY), 'utf8');
-  const units = [...registry.matchAll(/name: "([a-z_]+)",\s*summary: "([^"]+)"/g)].map(([, name, summary]) => ({ name, summary, properties: [] }));
+  const units = [...registry.matchAll(/name: "([a-z_]+)",\s*summary:\s*"([^"]+)"/g)].map(([, name, summary]) => ({ name, summary, properties: [] }));
   assert.ok(units.length > 0, `No DST units registered in ${DST_REGISTRY}`);
   const byName = new Map(units.map(unit => [unit.name, unit]));
   const seen = new Set();

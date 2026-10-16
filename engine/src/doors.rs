@@ -75,7 +75,8 @@ pub(crate) fn begin_room_admission(state: &mut State) {
 /// keyboard movement selects its dominant input axis (vertical on ties) in
 /// Player52981f; an ordinary key lock requires the matching outward direction,
 /// a cleared room and distance strictly below60 from the displaced door point.
-/// Golden keys, double-chain locks and item overrides remain separate.
+/// Golden BD0 and ordinary BCC use the same source TryUseKey; double-chain
+/// locks and item overrides remain separate.
 pub(crate) fn check_unlock(state: &mut State, dx: i32, dy: i32) {
     if state.room_transition.is_some() || !state.room.combat_clear {
         return;
@@ -106,7 +107,9 @@ pub(crate) fn check_unlock(state: &mut State, dx: i32, dy: i32) {
         };
         let delta_x = door.world_position.x + normal.x * 18.0 - position.x;
         let delta_y = door.world_position.y + normal.y * 18.0 - position.y;
-        if (delta_x * delta_x + delta_y * delta_y).sqrt() >= 60.0 || state.inventory.keys == 0 {
+        if (delta_x * delta_x + delta_y * delta_y).sqrt() >= 60.0
+            || (state.player.golden_key != Some(true) && state.inventory.keys == 0)
+        {
             continue;
         }
         let Some(grid) = &mut state.room.grid else {
@@ -119,9 +122,11 @@ pub(crate) fn check_unlock(state: &mut State, dx: i32, dy: i32) {
         if entity.kind != 16 || entity.variant != 1 || entity.state != 1 {
             continue;
         }
-        // Player.TryUseKey5087f0 decrements one ordinary key; Door.TryUnlock
-        // 564d38 selects opened state2, then variant7 and SFX156/delay2.
-        state.inventory.keys -= 1;
+        // Door.TryUnlock564D38 calls Player.TryUseKey5087F0, then selects
+        // opened state2, variant7 and SFX156/delay2 only on success.
+        if !state.player.try_use_key(&mut state.inventory) {
+            continue;
+        }
         door.state = "Opened".into();
         entity.variant = 7;
         entity.state = 2;
