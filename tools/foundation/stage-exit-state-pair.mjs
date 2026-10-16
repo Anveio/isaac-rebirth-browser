@@ -66,6 +66,12 @@ for (const label of labels) {
     check(label, 'trapdoor.frame', Math.floor(trapdoor.animationFrame), Math.floor(actual.frame));
     check(label, 'trapdoor.playing', trapdoor.animationPlaying, actual.playing);
     diagnostic(label, 'trapdoor.spawnSeed', trapdoor.spawnSeed, actual.spawnSeed);
+    // A boss's tail poop can sit on the pedestal cell; each game's own fight
+    // decides whether it is intact, broken or absent there (fix_award_pos).
+    const width = state.room.grid.width, cell = actual.gridIndex + 4 * width;
+    const sourceCell = source.grid.find(item => item.index === cell), actualCell = state.room.grid.cells[cell]?.entity;
+    diagnostic(label, 'pedestalCell', sourceCell ? [sourceCell.type, sourceCell.state] : null,
+      actualCell ? [actualCell.kind, actualCell.state] : null);
   }
   const pedestals = source.entities.filter(entity => entity.type === 5 && entity.variant === 100 && !entity.removed)
     .map(entity => [entity.subtype, entity.position]);

@@ -148,12 +148,8 @@ pub(crate) fn spawn_boss_award(state: &mut State) -> Result<(), String> {
         y: center.y + 80.0,
     };
     let collectible_index = room_index(width, collectible_position);
-    // 5c97c1 fix_award_pos5c8260 runs on the trapdoor cell before its MT
-    // draw; 5c9894 5c8320 on the collectible position after selection. The
-    // admitted clear draws no RNG, so clearing both cells first is equivalent.
-    for index in [trapdoor_index, collectible_index] {
-        clear_award_cell(state, index)?;
-    }
+    // 5c97c1 fix_award_pos5c8260 clears the trapdoor cell before its MT draw.
+    clear_award_cell(state, trapdoor_index)?;
     // Room+8 descriptor+50 seeds the award RNG with shift index 35.
     let mut rng = crate::items::Rng::new(
         state.floor.descriptors[state.current_room].following_seed,
@@ -187,6 +183,8 @@ pub(crate) fn spawn_boss_award(state: &mut State) -> Result<(), String> {
         .ok_or("boss award requires the run item pools")?;
     let pool = pools.room_pool(5, &mut state.boot_lifecycle.shared);
     let subtype = pools.collectible(pool, true, selection_seed)?;
+    // 5c9894 fix_award_pos5c8320 clears the collectible cell after selection.
+    clear_award_cell(state, collectible_index)?;
     let spawn_seed = rng.raw();
     crate::pickups::admit_collectible(state, subtype, collectible_position, spawn_seed)?;
     Ok(())
@@ -355,29 +353,23 @@ fn stage_name(stage: u32) -> &'static str {
 }
 
 /// fix_award_pos5c8260/5c8320: an occupying grid object takes its vtable+30
-/// destroy (561c00 = Damage+28 with 4 hits). A poop (14) reaches hit state4,
-/// collision0 and path cost900 (56a750..56a770). Its Poop Explosion43 effect,
-/// sound, drop rolls and their RNG draws (56a390) are not admitted, nor are
-/// other occupants' destroys or the 5c7f30 relocation when collision remains:
-/// those cells keep their object and the award still spawns there.
+/// destroy. Poop has no Destroy override (561c00 is Hurt(4)), so a tail poop
+/// runs Poop Hurt56a390 with its draws, particles, explosion and drop roll.
+/// Other occupants' destroys, unported Hurt branches and the 5c7f30
+/// relocation when collision remains are not admitted: those cells keep their
+/// object and the award still spawns there.
 fn clear_award_cell(state: &mut crate::State, index: usize) -> Result<(), String> {
-    let grid = state
+    let occupant = state
         .room
         .grid
-        .as_mut()
-        .ok_or("boss clear award requires the admitted room grid")?;
-    let Some(entity) = grid.cells[index].entity.as_mut() else {
-        return Ok(());
-    };
-    if entity.kind == 14 && entity.state <= 3 {
-        entity.state = 4;
-        entity.collision_class = 0;
-        state
-            .room
-            .path_costs
-            .as_mut()
-            .ok_or("boss clear award requires source Room.Init path costs")?
-            .store(index, 900)?;
+        .as_ref()
+        .ok_or("boss clear award requires the admitted room grid")?
+        .cells[index]
+        .entity
+        .as_ref()
+        .map(|entity| entity.kind);
+    if occupant == Some(14) {
+        crate::attack_grid::callback_at_index(state, index, 4)?;
     }
     Ok(())
 }
