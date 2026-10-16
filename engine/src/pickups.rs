@@ -26,6 +26,8 @@ pub struct Clip {
     pub name: &'static str,
     pub frames: u32,
     pub looping: bool,
+    /// Frame of the clip's authored DropSound trigger, if any.
+    pub drop_sound: Option<u32>,
 }
 
 #[derive(Debug)]
@@ -724,6 +726,49 @@ pub(crate) fn readmit_regular_records(state: &mut crate::State) -> Result<Vec<u3
     Ok(ids)
 }
 
+/// Pickup.Update 507940: once the sprite step lands on the clip's DropSound
+/// trigger (IsEventTriggered 410790), 5042a0 plays the variant's drop sound
+/// (delay 2), drawing its shared sample. Chests play theirs in chests.rs.
+fn drop_sound(state: &mut crate::State, index: usize) {
+    let pickup = &state.room.pickups[index];
+    let Some(definition) = definition(
+        pickup.variant,
+        definition_subtype(pickup.variant, pickup.subtype),
+    ) else {
+        return;
+    };
+    let landed = definition
+        .clips
+        .iter()
+        .find(|clip| clip.name == pickup.animation)
+        .and_then(|clip| clip.drop_sound)
+        .is_some_and(|frame| pickup.animation_frame == f64::from(frame));
+    let id = match (pickup.variant, pickup.subtype) {
+        (10, _) => 68,
+        (20, 1) => 233,
+        (20, 2) => 231,
+        (20, 3) => 198,
+        (30, _) => 59,
+        (40, _) => 40,
+        (70, _) => 38,
+        (300, _) => 249,
+        _ => return,
+    };
+    if landed {
+        state.audio.admit(
+            &mut state.boot_lifecycle.shared,
+            state.system_clock.system_counter.wrapping_sub(1),
+            crate::audio::SoundRequest {
+                id,
+                volume: 1.0,
+                delay: 2,
+                looping: false,
+                pitch: 1.0,
+            },
+        );
+    }
+}
+
 /// Full Pickup Update owns motion/friction; the manager owns its later grid
 /// pass. Fast4446a0 predicts and resolves its own ground preview directly.
 pub(crate) fn advance_actor(state: &mut crate::State, phase: Phase, id: u32) -> Result<(), String> {
@@ -731,6 +776,9 @@ pub(crate) fn advance_actor(state: &mut crate::State, phase: Phase, id: u32) -> 
         return Ok(());
     };
     state.room.pickups[index].advance(phase, state.game_update_count);
+    if phase == Phase::Update {
+        drop_sound(state, index);
+    }
     let pickup = &mut state.room.pickups[index];
     if phase != Phase::Interpolate
         || !pickup.has_regular_physics()
