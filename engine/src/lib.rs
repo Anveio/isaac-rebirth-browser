@@ -1593,6 +1593,13 @@ impl Game {
             left,
             room_before,
         )?;
+        // Backdrop::pre_render_walls runs inside 5c5b30 before the FX rays.
+        for (position, scale) in room::basement_boss_blood(&self.state.room, self.state.stage)? {
+            let seed = self.state.boot_lifecycle.shared.next_u32();
+            let id = familiars::admit_blood_splat(&mut self.state, seed, position, [1.0; 4], [0.0; 3])?;
+            familiars::set_blood_scale(&mut self.state, id, scale)?;
+            familiars::advance_blood_initial(&mut self.state, id)?;
+        }
         room::load_fx_rays(&self.state.room, &mut self.state.boot_lifecycle.shared);
         Ok(())
     }
