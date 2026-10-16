@@ -119,6 +119,16 @@ impl Mt19937 {
                 });
             }
         });
+        self.generate()
+    }
+
+    /// Replays a cloned stream without logging: the clone's words are not a
+    /// consumption of the source stream (see `DescriptorSeeds::seed_pair`).
+    fn replay_u32(&mut self) -> u32 {
+        self.generate()
+    }
+
+    fn generate(&mut self) -> u32 {
         if self.index() == STATE_WORDS {
             for i in 0..STATE_WORDS {
                 let y = (self.words[i] & 0x8000_0000)
@@ -238,9 +248,9 @@ impl DescriptorSeeds {
         }
         let mut derived = self.origin.clone();
         for _ in 0..usize::from(key) {
-            let _preceding_cell_seeds = [derived.next_u32(), derived.next_u32()];
+            let _preceding_cell_seeds = [derived.replay_u32(), derived.replay_u32()];
         }
-        Ok([derived.next_u32(), derived.next_u32()])
+        Ok([derived.replay_u32(), derived.replay_u32()])
     }
 
     /// Used by actual cell lifecycle mutations; callers supply freshly routed
@@ -269,7 +279,7 @@ impl DescriptorSeeds {
         let mut derived = source.origin.clone();
         for (room, copy) in copied.into_iter().enumerate() {
             for cell in 0..PADDED_GRID_CELLS {
-                let initial = [derived.next_u32(), derived.next_u32()];
+                let initial = [derived.replay_u32(), derived.replay_u32()];
                 if copy {
                     let key = Self::key(room, cell)?;
                     self.mutations

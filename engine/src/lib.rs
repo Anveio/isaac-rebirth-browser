@@ -3083,6 +3083,27 @@ impl Game {
             &mut self.state.boot_lifecycle.shared,
             self.state.game_update_count,
         )?;
+        // PlayerManager 5bf220 -> Player 510550 after Room.Init: a new level
+        // has no enter door (Game+8198 is -1), so 510ac8..510b0e picks one.
+        // The first door in slot order is taken; each later door draws
+        // Random(7) and replaces it unless that is 0. A doorless room draws
+        // Random(8). TriggerNewStage below then centres the player.
+        let mut door_slots: Vec<u8> = self
+            .state
+            .room
+            .appearance
+            .doors
+            .iter()
+            .map(|door| door.slot)
+            .collect();
+        door_slots.sort_unstable();
+        door_slots.dedup();
+        if door_slots.is_empty() {
+            let _door = self.state.boot_lifecycle.shared.bounded(8);
+        }
+        for _ in door_slots.iter().skip(1) {
+            let _replace = self.state.boot_lifecycle.shared.bounded(7) != 0;
+        }
         // Player::TriggerNewStage52a260 (58c3a3): a later stage places the
         // player at the room centre and converts one Eternal heart into a
         // container through GiantBook13. Map/compass item branches remain
