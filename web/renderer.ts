@@ -747,8 +747,10 @@ export class Renderer {
       this.assets.draw(ctx, "gfx/ui/ui_hearts.anm2", redSlots ? "WhiteHeartOverlay" : "WhiteHeartHalf", 68 + Math.max(0, redSlots - 1) * 12, 24);
     }
     const counts = [state.inventory.coins, state.inventory.bombs, state.inventory.keys];
+    // HUD5741F9 selects golden frame3 from actual Player+BD0; count stays BCC.
+    const pickupFrames = [0, 2, state.player.goldenKey === true ? 3 : 1];
     for (let pickup = 0; pickup < 3; pickup++) {
-      this.assets.draw(ctx, "gfx/ui/hudpickups.anm2", "Idle", 20, 44 + pickup * 12, [0, 2, 1][pickup]!);
+      this.assets.draw(ctx, "gfx/ui/hudpickups.anm2", "Idle", 20, 44 + pickup * 12, pickupFrames[pickup]!);
       this.assets.font(ctx, "pftempestasevencondensed", String(counts[pickup]).padStart(2, "0"), 36, 45 + pickup * 12);
     }
     if (!state.achievementEligibility) this.assets.draw(ctx, "gfx/ui/hudpickups.anm2", "Idle", 24, 84, 5);

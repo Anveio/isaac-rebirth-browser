@@ -7,7 +7,7 @@ export interface Player {
   canShoot: boolean; initialized3074: boolean;
   visible: boolean; inputCooldown: number; dead: boolean;
   x: number; y: number; vx: number; vy: number; hp: number; maxHp: number;
-  soulHp: number; blackHeartMask: number; eternalHearts: number;
+  soulHp: number; blackHeartMask: number; eternalHearts: number; goldenKey?: boolean | null;
   facing: Direction; bodyFacing: Direction; walkFrame: number; headFrame: number; shooting: boolean; shootingLock: number;
   renderOffset: { x: number; y: number }; controlsEnabled: boolean;
   transformationCounts: [number, number] | null;

@@ -178,6 +178,10 @@ pub struct Player {
     pub black_heart_mask: u32,
     /// Actual normal-Isaac Player+bbc Eternal half-heart owner.
     pub eternal_hearts: i32,
+    /// Actual Player+BD0; fresh Init and TriggerNewStage own its false writes.
+    /// Missing legacy histories remain unknown rather than an invented key grant.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub golden_key: Option<bool>,
     pub facing: Direction,
     pub body_facing: Direction,
     pub walk_frame: u8,
@@ -222,6 +226,18 @@ impl PlayerEntitySource {
     }
 }
 impl Player {
+    /// Player::TryUseKey5087F0 tests BD0 before BCC and never spends a golden key.
+    pub(crate) fn try_use_key(&self, inventory: &mut Inventory) -> bool {
+        match self.golden_key {
+            Some(true) => true,
+            Some(false) if inventory.keys > 0 => {
+                inventory.keys -= 1;
+                true
+            }
+            _ => false,
+        }
+    }
+
     fn starting() -> Self {
         Self {
             entity_source: None,
@@ -239,6 +255,7 @@ impl Player {
             soul_hp: 0,
             black_heart_mask: 0,
             eternal_hearts: 0,
+            golden_key: None,
             facing: Direction::Down,
             body_facing: Direction::Down,
             walk_frame: 0,
@@ -1463,6 +1480,8 @@ impl Game {
         self.state.player = Player::starting();
         //Actual fresh Manager.Init→Player.Init; title/old restores stay None.
         self.state.player.entity_source = Some(PlayerEntitySource::fresh_isaac());
+        // Player.Init5194B4 clears BD0 before starting resources are assigned.
+        self.state.player.golden_key = Some(false);
         // 519767/519771 initialize the two transformation history counters.
         self.state.player.transformation_counts = Some([0, 0]);
         // 51985C initializes the actual D64 Luck output.
@@ -1696,7 +1715,7 @@ impl Game {
                     &mut self.state.level_progress,
                 )
             } else {
-                pickup.try_collect(&mut self.state.inventory)
+                pickup.try_collect(&mut self.state.inventory, &mut self.state.player)
             })
         {
             // Collect504480 routes key ->504720 and bomb ->5046d0
@@ -1718,6 +1737,7 @@ impl Game {
                     3 => Some((199, 1.0)),
                     _ => None,
                 },
+                30 if pickup.subtype == 2 => Some((204, 1.0)),
                 30 => Some((58, 0.85)),
                 40 => Some((201, 1.0)),
                 _ => None,
@@ -2650,6 +2670,8 @@ impl Game {
         // player at the room centre and converts one Eternal heart into a
         // container through GiantBook13. Map/compass item branches remain
         // with their item owners.
+        // TriggerNewStage52A3F3 clears BD0; a room change does not.
+        self.state.player.golden_key = Some(false);
         let centre = motion::WorldVector {
             x: ((self.state.room.left + self.state.room.right) / 2.0) as f32,
             y: ((self.state.room.top + self.state.room.bottom) / 2.0) as f32,
