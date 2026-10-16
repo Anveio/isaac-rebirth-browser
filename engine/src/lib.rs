@@ -75,6 +75,7 @@ mod inner_eye;
 pub mod input;
 mod item_death_effects;
 mod item_pipeline;
+mod item_queries;
 pub mod items;
 pub mod keepers;
 mod knife_path;
@@ -97,8 +98,10 @@ pub mod mt;
 pub mod music;
 pub mod nightmares;
 pub mod npcs;
+pub mod ordinary_placement;
 pub mod pathfinder;
 pub mod phase;
+pub mod pickup_world_grants;
 pub mod pickups;
 mod plain_npc;
 pub mod player_animation;
@@ -1570,6 +1573,12 @@ impl Game {
         }
         self.state.character = chosen;
         let mut run_seeds = seed::RunSeeds::new(self.state.run_seed_value)?;
+        //Fresh59D080 constructs an empty Challenge code, then uses
+        //5E1170's9B formatter before forwarding the actual setter.
+        //Restart, typed and legacy paths have separate input owners.
+        if self.state.screen == Screen::Challenge && challenge.is_some() {
+            run_seeds.admit_formatted_seed_effect()?;
+        }
         self.state.item_pools = Some(items::ItemPools::new(
             run_seeds.item_pool_seed(),
             &self.state.profiles[usize::from(self.state.profile - 1)].achievements,
@@ -1771,6 +1780,9 @@ impl Game {
                 self.state.room.authored_actor_order.len()
             ));
         }
+        //5BF220 reaches510550 after actual Room.Init. Fresh3074 is
+        //still false here, independently of the later starting grants.
+        item_queries::note_room_placement(&mut self.state);
         npcs::initialize_startup_clear(&mut self.state);
         // Source Level generation loads the start room, then immediately calls
         // RoomMusic. This runtime's Level contract is fresh normal Basement.
@@ -1979,6 +1991,8 @@ impl Game {
         critter_counter: u32,
         loader: bool,
     ) -> Result<usize, String> {
+        //453EC0 finished its ordinary-list reset and callbacks.
+        ordinary_placement::begin_fresh_room(&mut self.state);
         let mut pickups = Vec::new();
         let mut npcs = Vec::new();
         let mut order = Vec::new();
@@ -2054,12 +2068,23 @@ impl Game {
                 selector,
                 self.state.game_update_count,
             )?;
+            ordinary_placement::remember_room_frontier(&mut self.state);
             let id = u32::try_from(npcs.len()).map_err(|_| "NPC identity exhausted")?;
             let context = entities::SpawnContext {
                 stage: self.state.stage,
                 game_update_count: self.state.game_update_count,
             };
             if let Some(mut npc) = entities::spawn(id, selector, &context)? {
+                //Registered AI is not a proof of its producer footprint.
+                ordinary_placement::invalidate(
+                    &mut self.state,
+                    ordinary_placement::Frontier::ActorEffects {
+                        actor: actors::ActorRef {
+                            kind: actors::ActorKind::Npc,
+                            id,
+                        },
+                    },
+                );
                 champions::roll(
                     &mut npc,
                     &mut self.state.boot_lifecycle.shared,
@@ -2125,6 +2150,18 @@ impl Game {
                     pickups.push(pickup);
                 }
             }
+            if selector.category == room_spawns::SpawnCategory::Entity
+                && order.len() == before_entities
+            {
+                ordinary_placement::invalidate(
+                    &mut self.state,
+                    ordinary_placement::Frontier::Factory {
+                        entity_type: u32::from(selector.entity_type),
+                        variant: u32::from(selector.variant),
+                        subtype: u32::from(selector.subtype),
+                    },
+                );
+            }
             // SpawnEntity5ce7a8..7d3 calls5c57c0 with the selected type,
             // variant, edx=0,cl=0 after successful Game.Spawn. For this
             // authored entity domain1..999, exactly4..6,17,33 persist.
@@ -2134,6 +2171,9 @@ impl Game {
                 && matches!(selector.entity_type, 4..=6 | 17 | 33)
             {
                 if order.len() == before_entities {
+                    if selector.entity_type == 5 && selector.variant == 350 {
+                        crate::item_queries::note_unrepresented_trinket_spawn(&mut self.state);
+                    }
                     // Preserve unrelated traversal when its existing factory
                     // is unsupported. Only a later lookup of this cell needs
                     // the missing success/key owner and must stop there.
@@ -2464,6 +2504,10 @@ impl Game {
                     .as_ref()
                     .is_none_or(|items| items.held_pockets.is_none())
             {
+                ordinary_placement::invalidate(
+                    &mut self.state,
+                    ordinary_placement::Frontier::PocketEffects,
+                );
                 self.state.attack_runtime.aim_rotation_c70 = None;
                 if let Some(items) = &mut self.state.player_items {
                     //Untracked pill/card execution cannot retain speed history.
@@ -2661,7 +2705,13 @@ impl Game {
                 combat::advance_player_immunity(&mut self.state);
                 combat::advance_player_immunity(&mut self.state);
                 if restoring {
+                    //Saved4/5/6 replay/retirement needs its own full owner.
+                    ordinary_placement::invalidate(
+                        &mut self.state,
+                        ordinary_placement::Frontier::Restore,
+                    );
                     let restored_pickups = pickups::readmit_regular_records(&mut self.state)?;
+                    item_queries::note_room_placement(&mut self.state);
                     self.admitted_update_footprint(phase)?;
                     self.rebuild_room_actor_schedule()?;
                     //5CF58E replays persistent+B8 records after ordinary5C5860.
@@ -2711,6 +2761,7 @@ impl Game {
                         .clone();
                     let counter = self.state.game_update_count.wrapping_add(1);
                     self.admit_room_pickups(&selectors, counter, false)?;
+                    item_queries::note_room_placement(&mut self.state);
                     self.admitted_update_footprint(phase)?;
                     // The admitted Room::Update follows authored mixed order.
                     self.refresh_room_boss_count();
@@ -2836,6 +2887,7 @@ impl Game {
         let explosion_fence = self.state.explosions.len();
         grid_hazards::advance(&mut self.state, phase)?;
         spider_webs::advance(&mut self.state, phase)?;
+        ordinary_placement::observe_room_boundary(&mut self.state);
         let existing = self.state.actor_scheduler.full_phase();
         if phase == phase::Phase::Update {
             rock_blast::advance_bomb_rocks(&mut self.state)?;
@@ -3148,6 +3200,7 @@ impl Game {
             &mut self.state.boot_lifecycle.shared,
             self.state.game_update_count,
         )?;
+        item_queries::note_room_placement(&mut self.state);
         // PlayerManager 5bf220 -> Player 510550 after Room.Init: a new level
         // has no enter door (Game+8198 is -1), so 510ac8..510b0e picks one.
         // The first door in slot order is taken; each later door draws
@@ -3722,6 +3775,24 @@ impl Game {
                 self.state.player_animation.current = None;
             }
         }
+        let released_shoot = !(self.held("ArrowUp")
+            || self.held("ArrowDown")
+            || self.held("ArrowLeft")
+            || self.held("ArrowRight"));
+        let bomb_callback_owned = !bomb_triggered
+            || !controls_enabled
+            || !self.state.player.controls_enabled
+            || self.state.player.input_cooldown > 0
+            || self.state.inventory.bombs == 0
+            || self.state.bomb_placement_cooldown.remaining_updates > 0;
+        if let Some(frontier) = ordinary_placement::player_update_frontier(
+            &self.state,
+            phase == phase::Phase::Update,
+            !released_shoot,
+            bomb_callback_owned,
+        ) {
+            ordinary_placement::invalidate(&mut self.state, frontier);
+        }
         // Base main-sprite time advances before the Player death/shooting caller.
         player_items::advance_presentation(&mut self.state, phase);
         player_costume229::begin_full(&mut self.state, phase);
@@ -4144,6 +4215,9 @@ impl Game {
         if phase == phase::Phase::Update {
             player_footprints::advance(&mut self.state, footprint_velocity)?;
         }
+        //531E44 reaches deferred CF8 evaluation only on the full path,
+        //before531E6F copied-item animation and the later queued grant.
+        item_queries::reach_late_temporary_evaluation(&mut self.state, phase);
         player_items::advance_item_sprite(&mut self.state, phase);
         player_costume118::advance_full(&mut self.state, phase);
         player_costume229::advance_full(&mut self.state, phase);

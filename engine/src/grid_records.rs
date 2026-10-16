@@ -283,6 +283,13 @@ pub fn admit_selector(
         _ => {
             // Tinted rocks, poop, blocks, pits and other GridBase objects
             // have no runtime object yet; their constructor still draws.
+            if let Some(coverage) = &mut room.ordinary_placement {
+                coverage.invalidate(crate::ordinary_placement::Frontier::Factory {
+                    entity_type: u32::from(selector.entity_type),
+                    variant: u32::from(selector.variant),
+                    subtype: u32::from(selector.subtype),
+                });
+            }
             let _primary = shared.next_u32();
             let _secondary = shared.next_u32();
             Ok(())
