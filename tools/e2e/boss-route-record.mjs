@@ -44,6 +44,10 @@ const IDLE = Number(flag('--idle', '0'));
 // Cells around the boss-award trapdoor (grid 37) and pedestal (grid 97) that
 // the corner walk and the exit approach keep clear of.
 const AWARD_CELLS = [22, 36, 37, 38, 52, 82, 96, 97, 98, 112];
+// --avoid adds cells those walks also keep clear of: obstacles the original
+// holds after its own fight (a solid Larry Jr. tail poop) that the port's own
+// fight need not leave, so the shared keys take one path in both games.
+const AVOID = (flag('--avoid', '') || '').split(',').filter(Boolean).map(Number);
 const avoiding = (grid, cells) => grid && { ...grid, solid: [...grid.solid].map((c, i) => (cells.includes(i) ? '1' : c)).join('') };
 // The player re-plans on every other frame; the tape holds keys in between.
 const STRIDE = 2;
@@ -118,7 +122,7 @@ try {
       await hold(state.transition || !state.player.controls ? []
         : key ? collectKeys(state, key)
         // A cleared boss room's open trapdoor must not be walked over.
-        : !usable ? [] : doorKeys(state.trapdoor ? avoiding(state.grid, AWARD_CELLS) : state.grid, state.player, door));
+        : !usable ? [] : doorKeys(state.trapdoor ? avoiding(state.grid, [...AWARD_CELLS, ...AVOID]) : state.grid, state.player, door));
       if (process.env.BOSS_ROUTE_DEBUG && budget % 30 === 0) process.stderr.write(`${JSON.stringify({ room: state.room, budget, player: state.player, door, keys: [...held], transition: state.transition })}\n`);
       await step(STRIDE); budget -= STRIDE;
       // Route checkpoints let both games' positions be compared on the way.
@@ -154,11 +158,11 @@ try {
     checkpoint('corner');
   }
   if (EXIT) {
-    if (VIA) await walk({ x: VIA[0], y: VIA[1] }, AWARD_CELLS, EXIT, 'exit via');
+    if (VIA) await walk({ x: VIA[0], y: VIA[1] }, [...AWARD_CELLS, ...AVOID], EXIT, 'exit via');
     const index = state.trapdoor?.gridIndex;
     if (index === undefined) throw new Error('The cleared boss room has no trapdoor');
     const door = { x: 40 + index % 15 * 40, y: 120 + Math.floor(index / 15) * 40 };
-    const pedestal = AWARD_CELLS.filter(cell => cell > 60);
+    const pedestal = [...AWARD_CELLS.filter(cell => cell > 60), ...AVOID];
     for (let left = EXIT; state.stageTransition === 0; left -= STRIDE) {
       if (left <= 0) throw new Error(`No trapdoor entry in ${EXIT} frames`);
       await hold(toward(state.player, waypoint(avoiding(state.grid, pedestal), state.player, door), 2));

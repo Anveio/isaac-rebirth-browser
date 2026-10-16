@@ -96,9 +96,13 @@ def case(fixture, base, fights, identifier, randomized, idle, via):
     # and the idle lets that entry velocity decay, so the shared walk starts
     # from one state. The legs' own route captures still carry the fight
     # offset and are dropped; `re-anchor` is the first paired capture.
+    # The original's own fight can leave solid cells (a Larry Jr. tail poop)
+    # that the port's fight does not; the shared walk keeps clear of them.
     back = f"0,{fixture['rooms'][-2]},0"
+    avoid = fixture.get('originalSolid', [])
     tail = record(result, '--from', 'exit-start', '--idle', ANCHOR_IDLE, '--exit', 1500,
-                  *(['--via', f'{via[0]},{via[1]}'] if via else []), rooms=back, arrival='re-anchor')
+                  *(['--via', f'{via[0]},{via[1]}'] if via else []),
+                  *(['--avoid', ','.join(map(str, avoid))] if avoid else []), rooms=back, arrival='re-anchor')
     if tail['status'] != 'pass':
         return None, f"port-exit: {tail['reason']}"
     anchor = next(index for index, action in enumerate(tail['actions']) if action.get('label') == 're-anchor')
@@ -139,7 +143,8 @@ def main():
         for index in range(args.count):
             # A few draws, since a drawn waypoint can sit on an authored rock.
             for _ in range(3):
-                cell = entropy.choice([c + r * 15 for c in range(1, 14) for r in range(1, 8) if c + r * 15 not in AWARD_CELLS])
+                blocked = AWARD_CELLS | set(fixture.get('originalSolid', []))
+                cell = entropy.choice([c + r * 15 for c in range(1, 14) for r in range(1, 8) if c + r * 15 not in blocked])
                 built, reason = case(fixture, base, fights, f'{name}-random-{index}', True, entropy.randrange(0, 241),
                                      [40 + cell % 15 * 40, 120 + cell // 15 * 40])
                 if built is not None or not reason.startswith('port-exit'):
