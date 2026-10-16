@@ -257,6 +257,11 @@ pub(crate) fn collect(state: &mut State, index: usize) -> Result<PlayerContactDe
         )?
         .ok_or("capacity ejection reached an unowned Pocket Init")?;
         dropped.birth_game_update = state.game_update_count;
+        //50AE90/50AF90 passes null to Game.Spawn, not weak498.
+        dropped.source_spawner = Some(crate::pickups::SourceSpawner {
+            entity_type: 0,
+            variant: 0,
+        });
         dropped.pocket_contact_delay = Some(4);
         state.next_pickup = id
             .checked_add(1)
