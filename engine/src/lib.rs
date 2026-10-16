@@ -2665,12 +2665,9 @@ impl Game {
                     // The admitting manager pass also sets the bar: a fresh
                     // boss is present but not yet summed, so the fill is 0/0.
                     self.update_boss_bar();
-                    familiars::paint_background_effects(&mut self.state)?;
-                    blood_effects::clear_retired_links(&mut self.state);
-                    pickups::full_grid_contacts(&mut self.state)?;
-                    chests::full_grid_contacts(&mut self.state)?;
-                    npcs::post_contact_grid(&mut self.state)?;
-                    bombs::full_grid_contacts(&mut self.state)?;
+                    // The admitted Room.Update ends with the ordinary manager
+                    // tail, so overlapping fresh NPCs separate at this counter.
+                    self.full_contact_pass()?;
                     self.state.room.pickups.retain(|pickup| !pickup.removed);
                     let pickups = &self.state.room.pickups;
                     self.state.actor_scheduler.retain(|actor| {
@@ -2786,92 +2783,7 @@ impl Game {
         // before4545d0 admits entity contacts. Pickups can become idle in this
         // full phase and collect against the player's newly moved position.
         if phase == phase::Phase::Update {
-            // The independent render array paints flags8 at its current count,
-            // including births from the admission-fenced actor callbacks.
-            familiars::paint_background_effects(&mut self.state)?;
-            blood_effects::clear_retired_links(&mut self.state);
-            attack_runtime::retire_full(&mut self.state);
-            laser_runtime::retire_full(&mut self.state)?;
-            bombs::retire_shots_full(&mut self.state);
-            epic_fetus::retire_full(&mut self.state);
-            explosion_effects::retire_full(&mut self.state);
-            controlled_tear::retire_full(&mut self.state);
-            attack_runtime::contacts(&mut self.state)?;
-            let pickup_contacts = pickups::contact_candidates(&self.state)?;
-            bombs::player_contacts(&mut self.state)?;
-            npcs::player_contacts(&mut self.state)?;
-            npcs::nonplayer_contacts(&mut self.state)?;
-            bombs::bomb_contacts(&mut self.state)?;
-            enemy_projectiles::player_contacts(&mut self.state)?;
-            // Actual full manager contact pass uses typed ground coordinates.
-            self.state.tear_partition = self
-                .state
-                .tears
-                .iter()
-                .filter(|tear| tear.motion.lifetime == projectiles::Lifetime::Alive)
-                .map(|tear| tear.id)
-                .collect();
-            let tears: Vec<_> = self
-                .state
-                .tears
-                .iter()
-                .filter(|tear| tear.motion.lifetime == projectiles::Lifetime::Alive)
-                .map(|tear| {
-                    (
-                        tear.id,
-                        tear.motion,
-                        tear.collision_radius,
-                        tear.collision_damage,
-                    )
-                })
-                .collect();
-            let partitioned_contacts = polyphemus_contact::contacts_all(&mut self.state)?;
-            for (id, mut motion, radius, damage) in tears {
-                if self.state.tears.iter().any(|tear| {
-                    tear.id == id
-                        && tear.controlled.is_none()
-                        && (partitioned_contacts == polyphemus_contact::ContactPass::Handled
-                            || (partitioned_contacts
-                                == polyphemus_contact::ContactPass::Unadmitted
-                                && tear.attack_flags.0 == 0x200))
-                }) {
-                    continue;
-                }
-                if self
-                    .state
-                    .tears
-                    .iter()
-                    .any(|tear| tear.id == id && tear.controlled.is_some())
-                {
-                    controlled_tear::contacts_actor(&mut self.state, id)?;
-                    continue;
-                }
-                if npcs::tear_hit(&mut self.state, &mut motion, radius, id, damage)?.is_some() {
-                    if let Some(tear) = self.state.tears.iter_mut().find(|tear| tear.id == id) {
-                        motion.lifetime = projectiles::Lifetime::Dying;
-                        tear.motion = motion;
-                        tear.project();
-                    }
-                }
-            }
-            for index in 0..self.state.room.pickups.len() {
-                if self.state.room.pickups[index].variant == 100 {
-                    if !player_items::collect(&mut self.state, index)? {
-                        player_items::empty_altar_contact(&mut self.state, index)?;
-                    }
-                    continue;
-                }
-                if self.state.room.pickups[index].chest.is_some() {
-                    chests::player_contact(&mut self.state, index)?;
-                    continue;
-                }
-                self.collect_regular_pickup_at(index);
-            }
-            pickups::nonplayer_contacts(&mut self.state, pickup_contacts)?;
-            pickups::full_grid_contacts(&mut self.state)?;
-            chests::full_grid_contacts(&mut self.state)?;
-            npcs::post_contact_grid(&mut self.state)?;
-            bombs::full_grid_contacts(&mut self.state)?;
+            self.full_contact_pass()?;
         }
         if phase == phase::Phase::Update {
             familiars::grid_contacts(&mut self.state)?;
@@ -2972,6 +2884,100 @@ impl Game {
         Ok(())
     }
     /// StageTransition::Update5e38b0 and the Game callbacks it dispatches.
+    /// The full manager tail after the admission-fenced actor updates: the
+    /// late background paint, inactive retirement, the 4545d0 entity contacts
+    /// and the grid contacts. A fresh ChangeRoom's admitted Room.Update runs
+    /// the same tail.
+    fn full_contact_pass(&mut self) -> Result<(), String> {
+        // The independent render array paints flags8 at its current count,
+        // including births from the admission-fenced actor callbacks.
+        familiars::paint_background_effects(&mut self.state)?;
+        blood_effects::clear_retired_links(&mut self.state);
+        attack_runtime::retire_full(&mut self.state);
+        laser_runtime::retire_full(&mut self.state)?;
+        bombs::retire_shots_full(&mut self.state);
+        epic_fetus::retire_full(&mut self.state);
+        explosion_effects::retire_full(&mut self.state);
+        controlled_tear::retire_full(&mut self.state);
+        attack_runtime::contacts(&mut self.state)?;
+        let pickup_contacts = pickups::contact_candidates(&self.state)?;
+        bombs::player_contacts(&mut self.state)?;
+        npcs::player_contacts(&mut self.state)?;
+        npcs::nonplayer_contacts(&mut self.state)?;
+        bombs::bomb_contacts(&mut self.state)?;
+        enemy_projectiles::player_contacts(&mut self.state)?;
+        // Actual full manager contact pass uses typed ground coordinates.
+        self.state.tear_partition = self
+            .state
+            .tears
+            .iter()
+            .filter(|tear| tear.motion.lifetime == projectiles::Lifetime::Alive)
+            .map(|tear| tear.id)
+            .collect();
+        let tears: Vec<_> = self
+            .state
+            .tears
+            .iter()
+            .filter(|tear| tear.motion.lifetime == projectiles::Lifetime::Alive)
+            .map(|tear| {
+                (
+                    tear.id,
+                    tear.motion,
+                    tear.collision_radius,
+                    tear.collision_damage,
+                )
+            })
+            .collect();
+        let partitioned_contacts = polyphemus_contact::contacts_all(&mut self.state)?;
+        for (id, mut motion, radius, damage) in tears {
+            if self.state.tears.iter().any(|tear| {
+                tear.id == id
+                    && tear.controlled.is_none()
+                    && (partitioned_contacts == polyphemus_contact::ContactPass::Handled
+                        || (partitioned_contacts
+                            == polyphemus_contact::ContactPass::Unadmitted
+                            && tear.attack_flags.0 == 0x200))
+            }) {
+                continue;
+            }
+            if self
+                .state
+                .tears
+                .iter()
+                .any(|tear| tear.id == id && tear.controlled.is_some())
+            {
+                controlled_tear::contacts_actor(&mut self.state, id)?;
+                continue;
+            }
+            if npcs::tear_hit(&mut self.state, &mut motion, radius, id, damage)?.is_some() {
+                if let Some(tear) = self.state.tears.iter_mut().find(|tear| tear.id == id) {
+                    motion.lifetime = projectiles::Lifetime::Dying;
+                    tear.motion = motion;
+                    tear.project();
+                }
+            }
+        }
+        for index in 0..self.state.room.pickups.len() {
+            if self.state.room.pickups[index].variant == 100 {
+                if !player_items::collect(&mut self.state, index)? {
+                    player_items::empty_altar_contact(&mut self.state, index)?;
+                }
+                continue;
+            }
+            if self.state.room.pickups[index].chest.is_some() {
+                chests::player_contact(&mut self.state, index)?;
+                continue;
+            }
+            self.collect_regular_pickup_at(index);
+        }
+        pickups::nonplayer_contacts(&mut self.state, pickup_contacts)?;
+        pickups::full_grid_contacts(&mut self.state)?;
+        chests::full_grid_contacts(&mut self.state)?;
+        npcs::post_contact_grid(&mut self.state)?;
+        bombs::full_grid_contacts(&mut self.state)?;
+        Ok(())
+    }
+
     fn advance_stage_transition(&mut self, phase: phase::Phase) -> Result<(), String> {
         match stage_transition::advance(&mut self.state) {
             stage_transition::Step::UpdatePlayer => {
