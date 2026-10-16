@@ -262,8 +262,11 @@ fn advance_full(
     let mut friction = npc.base_friction;
     if npc.dead {
         if !npc.boss {
-            // Dead NPCs keep negative HP through the next intermediate phase
-            // and retire at the following full pass.
+            // Dead NPCs keep negative HP through the next intermediate phase.
+            // The following full Entity_NPC::Update still calls update_ai with
+            // the dead flag, then its base kill retires the actor.
+            ai(npc, random, world, births, &mut friction)?;
+            base_kill(npc, random, world)?;
             npc.removed = true;
             return Ok(());
         }
@@ -352,6 +355,22 @@ fn advance_full(
     }
     if !npc.position.is_finite() || !npc.velocity.is_finite() {
         return Err("NPC source motion overflowed actual world vectors".into());
+    }
+    Ok(())
+}
+
+/// Base kill 4fa95e of a dead NPC's update. The fly family (4fbf48..4fbf75
+/// -> 4fb0a2: types 13, 14, 18, 214, 222 and 249) draws a seed and spawns
+/// Fly Explosion 1000.3 in the actor's current colour. Types 94/85/215/250
+/// (1000.38 at 4faa5a), the gib branch from 4fbf7b and the room-age-900
+/// branch at 4fab00 remain unadmitted.
+fn base_kill(npc: &Npc, random: &mut Mt19937, world: &mut NpcWorld) -> Result<(), String> {
+    if matches!(npc.kind, 13 | 14 | 18 | 214 | 222 | 249) {
+        let seed = random.next_u32();
+        let color = npc.sprite_color.current;
+        world
+            .effects
+            .admit_fly_explosion(seed, npc.position, color.tint, color.offset)?;
     }
     Ok(())
 }

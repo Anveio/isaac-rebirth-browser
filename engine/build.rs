@@ -227,6 +227,7 @@ fn familiar_catalog(path: &Path, entities_xml: &str) -> String {
     for (entity_type, variant, actor) in [
         (3, 56, "gfx/003.056_leech.anm2"),
         (1000, 2, "gfx/1000.002_blood explosion.anm2"),
+        (1000, 3, "gfx/1000.003_fly explosion.anm2"),
         (1000, 7, "gfx/1000.007_blood splat.anm2"),
         (1000, 12, "gfx/1000.012_tear poofa.anm2"),
         (1000, 13, "gfx/1000.013_tear poofb.anm2"),
