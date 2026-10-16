@@ -87,6 +87,13 @@ def main():
     harvest = json.loads(args.harvest.read_text())
     baseline = json.loads(args.baseline.read_text())
     wanted = reached(harvest) - reached(baseline)
+    # A key every reaching case met before its first command comes from case
+    # generation itself (the seed scout), which no tape carries.
+    first_steps = harvest["coverage"]["firstSteps"].values()
+    generated = {key for key in wanted if all(first[key] == 0 for first in first_steps if key in first)}
+    if generated:
+        print(f"generated cases alone reach {sorted(generated)}; no tape can carry them")
+    wanted -= generated
     if args.prefix:
         wanted = {key for key in wanted if key.startswith(tuple(args.prefix))}
     options = list(candidates(harvest, args.tapes, wanted, args.extend))
