@@ -571,6 +571,10 @@ pub struct State {
     /// Unknown legacy or restore history remains absent.
     #[serde(default)]
     pub source_cache_run_flags: Option<u64>,
+    /// Actual normal-variant5120EE/514AD8 challenge minimum predicate.
+    /// Unknown old Game history stays absent; ID0 skips the Config9C read.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source_shot_speed_minimum: Option<bool>,
     pub saved_run_summary: Option<saved_game::SavedRunSummary>,
     pub audio: audio::AudioState,
     #[serde(default)]
@@ -791,6 +795,7 @@ impl Game {
                 boot_epoch_seed,
                 boot_lifecycle,
                 source_cache_run_flags: Some(0), // Game constructor 554034.
+                source_shot_speed_minimum: None,
                 saved_run_summary: None,
                 audio: audio::AudioState::default(),
                 pending_menu_initializations: Vec::new(),
@@ -1460,6 +1465,14 @@ impl Game {
         self.state.player_stats = player_stats::PlayerStats::default();
         // Fresh reset 54E6A3 initializes the actual Game run-flag word.
         self.state.source_cache_run_flags = Some(0);
+        //54EB55 stores the actual challenge key;596170 selects its Config.
+        //The branch for key0 bypasses the9C cap. Other admitted definitions
+        //own their decoded59805A minshotspeed value before Player callbacks.
+        self.state.source_shot_speed_minimum = Some(
+            challenge
+                .as_ref()
+                .is_some_and(|definition| definition.id != 0 && definition.min_shot_speed),
+        );
         self.state.weapon_cache = weapon_plan::WeaponCache::fresh_player();
         self.state.weapon_admission = weapon_plan::WeaponAdmission::fresh_isaac();
         self.state.head_timer = -1;
