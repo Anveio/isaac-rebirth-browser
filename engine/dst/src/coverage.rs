@@ -45,6 +45,8 @@ struct Current {
     deepest: u32,
     /// Whether the case reached the menus after playing a deeper stage.
     menus_after_descent: bool,
+    /// Whether the last state observed was a Random run's GameOver.
+    random_game_over: bool,
 }
 
 static CENSUS: Mutex<Census> = Mutex::new(Census {
@@ -104,6 +106,16 @@ pub fn end_case(label: &str) {
 /// Records what this published state shows the workload reaching.
 pub fn observe(state: &State) {
     let mut keys = vec![format!("screen:{:?}", state.screen)];
+    // A run the profile started from Random: the menus must show Random
+    // again afterwards, not the character it resolved to.
+    let random = state.screen == Screen::Playing
+        && state
+            .profiles
+            .get(usize::from(state.profile.saturating_sub(1)))
+            .is_some_and(|profile| profile.selected_character == "Random");
+    if random {
+        keys.push("Random run".to_owned());
+    }
     if state.screen == Screen::Playing {
         // The floor's stage: a descent shows as `stage:2`, and a run started
         // after one as `new run after a descent`, from the menus also as
@@ -239,8 +251,13 @@ pub fn observe(state: &State) {
         if state.screen != Screen::Playing {
             current.live = None;
             current.menus_after_descent |= current.deepest > 1;
+            // The GameOver popup's Exit took a Random run to the menus.
+            if std::mem::take(&mut current.random_game_over) {
+                keys.push("menus after a Random run's GameOver".to_owned());
+            }
         }
         if state.screen == Screen::Playing {
+            current.random_game_over = random && state.player_death.game_over.is_some();
             let rooms = state.floor.descriptors.iter();
             current
                 .floor_rooms

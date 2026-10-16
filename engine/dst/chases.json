@@ -5,6 +5,9 @@
     "extend": 0,
     "stages": [
       [
+        "room:5"
+      ],
+      [
         "cleared:5"
       ],
       [
@@ -26,6 +29,9 @@
     "at": 422,
     "stages": [
       [
+        "npc:20"
+      ],
+      [
         "removed:20"
       ]
     ]
@@ -34,6 +40,9 @@
     "out": "coverage-larry-segments.json",
     "at": 1678,
     "stages": [
+      [
+        "npc:19"
+      ],
       [
         "removed:19",
         "removed:239"
@@ -45,6 +54,9 @@
     "at": 139,
     "stages": [
       [
+        "npc:79"
+      ],
+      [
         "removed:79"
       ]
     ]
@@ -54,6 +66,9 @@
     "at": 230,
     "final_extend": 10,
     "stages": [
+      [
+        "property:game: the player dies"
+      ],
       [
         "property:game: a new run's player walks on from the starting room within its first command"
       ]
@@ -67,6 +82,19 @@
     "stages": [
       [
         "npc:261"
+      ]
+    ]
+  },
+  {
+    "out": "regression-random-run-exit-menu-character.json",
+    "at": 16,
+    "final_extend": 30,
+    "stages": [
+      [
+        "Random run"
+      ],
+      [
+        "menus after a Random run's GameOver"
       ]
     ]
   }
