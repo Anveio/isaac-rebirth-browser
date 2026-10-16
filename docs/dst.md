@@ -260,12 +260,13 @@ earliest, cut just past them. The next stage branches from that cut, and the
 final tape is written only if its replay reaches every stage.
 
 Every scenario tape built this way keeps its recipe in
-[engine/dst/chases.json](../engine/dst/chases.json): the tape, the command
-its prefix ends at and its stages. The stages start with the scenario's
-preconditions, such as `room:5` or `npc:20` before a boss kill. A prefix that
-still reaches them skips those stages; one that drift moved off them (main's
-Gaper admission moved the descent tape out of Duke's room before command
-302) branches forward until it reaches them again. These tapes are the
+[engine/dst/chases.json](../engine/dst/chases.json): the tape and its stages.
+The first stage is the scenario's precondition, such as `room:5` or `npc:20`
+before a boss kill. A chase starts from the recipe's own tape, cut just after
+its replay first reaches that stage, so the cut follows the tape through
+every rebuild instead of naming a command. When drift moves the tape off its
+precondition (main's Gaper admission moved the descent tape out of Duke's
+room), the chase starts from a fresh boot instead. These tapes are the
 descent, restart and Random-exit regressions, the Monstro, Larry Jr. and
 Gemini kills, and the Dingle entry (`"from": null` chases from a fresh boot).
 Boss fights and descents are the first coverage a shared-MT change moves, so
@@ -319,7 +320,8 @@ fix must follow source evidence rather than merely silence the property.
 
 [antithesis/](../antithesis) packages the harness for the platform:
 `docker build -f antithesis/Dockerfile -t rebirth-dst .` builds the harness
-and the production `engine.wasm` from a context that
+and the production `engine.wasm` (with `tools/build-wasm.sh`, the browser
+artifact's own build, so the image checks the WASM that ships) from a context that
 [Dockerfile.dockerignore](../antithesis/Dockerfile.dockerignore) limits to the
 engine build's inputs. Those inputs are what Cargo records in the two builds'
 dep-info: sources, `include_str!` files and every path `build.rs` reads.
