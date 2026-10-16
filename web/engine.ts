@@ -205,6 +205,8 @@ export interface RoomDescriptor {
   template: RoomTemplate; doorMask: number; neighbors: (number | null)[];
   surpriseMiniboss: boolean;
   roomInitSeed: number; decorationSeed: number; spawnSeed: number; followingSeed: number;
+  /** Owned map: absent cells outside both sets are empty; missing restore history is unknown. */
+  persistentSpawnCells?: {present: number[]; unknown: number[]} | null;
 }
 export interface Floor {
   challengeCurse: {initialLocalState: number; finalLocalState: number; threshold: number; thresholdResult: number | null; selectionResult: number | null; selectedMask: number; filteredMask: number; roomAdjustmentResult: number; localDraws: number} | null;

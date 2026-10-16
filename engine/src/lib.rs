@@ -1629,7 +1629,10 @@ impl Game {
         // This startup caller has no virtual18 or doorway manager update.
         // Room.Init's ambient critters follow inside admission; Game+ce9f4 reads0.
         let counter = self.state.game_update_count;
-        self.admit_room_pickups(&selectors, counter, true)?;
+        let suppressed_entities = self.admit_room_pickups(&selectors, counter, true)?;
+        let requested_entities = requested_entities
+            .checked_sub(suppressed_entities)
+            .ok_or("suppressed authored entity count exceeds selected inputs")?;
         if self.state.room.authored_actor_order.len() != requested_entities {
             return Err(format!(
                 "starting authored entity frontier is incomplete: admitted {} of {requested_entities}",
@@ -1826,11 +1829,38 @@ impl Game {
         selectors: &[room_spawns::SpawnSelector],
         critter_counter: u32,
         loader: bool,
-    ) -> Result<(), String> {
+    ) -> Result<usize, String> {
         let mut pickups = Vec::new();
         let mut npcs = Vec::new();
         let mut order = Vec::new();
         let mut next = self.state.next_pickup;
+        // The source descriptor map survives Room.Init. Only a source-owned
+        // fresh empty map is admitted here; saved payload replay is separate.
+        let room_index = self.state.current_room;
+        let descriptor = self.state.floor.descriptors.get(room_index)
+            .ok_or("persistent spawn map requires current Level descriptor")?;
+        let mut persistent_cells = descriptor.persistent_spawn_cells.clone()
+            .ok_or("persistent spawn map history is unknown")?;
+        let cells = (usize::from(descriptor.template.width) + 2)
+            * (usize::from(descriptor.template.height) + 2);
+        if [&persistent_cells.present, &persistent_cells.unknown].into_iter().any(|keys| {
+            keys.windows(2).any(|pair| pair[0] >= pair[1])
+                || keys.iter().any(|&cell| usize::from(cell) >= cells)
+        })
+            || persistent_cells.unknown.iter().any(|cell| {
+                persistent_cells.present.binary_search(cell).is_ok()
+            })
+            || self.state.room.descriptor.as_ref().is_none_or(|room| {
+                room.index != room_index
+                    || room.persistent_spawn_cells.as_ref() != Some(&persistent_cells)
+            })
+        {
+            return Err("persistent spawn map owner is inconsistent".into());
+        }
+        if !persistent_cells.present.is_empty() || !persistent_cells.unknown.is_empty() {
+            return Err("persistent spawn map saved actor replay is unadmitted".into());
+        }
+        let mut suppressed_entities = 0usize;
         let room_type = self
             .state
             .room
@@ -1838,6 +1868,19 @@ impl Game {
             .as_ref()
             .map_or(1, |descriptor| descriptor.template.room_type);
         for selector in selectors {
+            // 5cf230/238 and5cf25e already consumed each authored RNG11
+            // draw/selection. 5cf285..2cc checks the map before entering
+            // SpawnEntity, including grid factories and their local Init.
+            if persistent_cells.present.binary_search(&selector.grid_index).is_ok() {
+                if selector.category == room_spawns::SpawnCategory::Entity {
+                    suppressed_entities += 1;
+                }
+                continue;
+            }
+            if persistent_cells.unknown.binary_search(&selector.grid_index).is_ok() {
+                return Err("persistent spawn cell depends on an unadmitted factory".into());
+            }
+            let before_entities = order.len();
             // Room.Init5cecc0 constructs grid objects in the same selector pass.
             grid_records::admit_selector(
                 &mut self.state.room,
@@ -1912,6 +1955,32 @@ impl Game {
                     pickups.push(pickup);
                 }
             }
+            // SpawnEntity5ce7a8..7d3 calls5c57c0 with the selected type,
+            // variant, edx=0,cl=0 after successful Game.Spawn. For this
+            // authored entity domain1..999, exactly4..6,17,33 persist.
+            // Grid records never insert a key; an occupied key still skips
+            // a later grid group above. This is not coordinate deduplication.
+            if selector.category == room_spawns::SpawnCategory::Entity
+                && matches!(selector.entity_type, 4..=6 | 17 | 33)
+            {
+                if order.len() == before_entities {
+                    // Preserve unrelated traversal when its existing factory
+                    // is unsupported. Only a later lookup of this cell needs
+                    // the missing success/key owner and must stop there.
+                    let insertion = persistent_cells.unknown.binary_search(&selector.grid_index)
+                        .expect_err("cell was checked before its factory");
+                    persistent_cells.unknown.insert(insertion, selector.grid_index);
+                } else {
+                    let insertion = persistent_cells.present.binary_search(&selector.grid_index)
+                        .expect_err("cell was checked before its factory");
+                    persistent_cells.present.insert(insertion, selector.grid_index);
+                }
+                self.state.floor.descriptors[room_index].persistent_spawn_cells =
+                    Some(persistent_cells.clone());
+                self.state.room.descriptor.as_mut()
+                    .expect("checked current descriptor").persistent_spawn_cells =
+                    Some(persistent_cells.clone());
+            }
         }
         // Doors, walls and shape0 ambient decoration follow the selectors.
         // Other shapes and backdrops keep their boundary draws unadmitted.
@@ -1960,7 +2029,7 @@ impl Game {
         critters::spawn(&mut self.state, critter_counter, loader)?;
         self.state.room.boss_count = self.state.room.manager_counts.boss_total().max(0) as u32;
         self.refresh_stage_effects();
-        Ok(())
+        Ok(suppressed_entities)
     }
     /// Persisted Room clones retain supported actor handles in authored order.
     pub fn rebuild_room_actor_schedule(&mut self) -> Result<(), String> {
