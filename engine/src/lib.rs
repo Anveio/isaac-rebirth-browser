@@ -43,6 +43,7 @@ mod entities;
 mod epic_fetus;
 mod explosion_effects;
 pub mod game_shake;
+pub mod spider_webs;
 pub mod sprite_color;
 pub mod tear_deaths;
 mod tear_factory;
@@ -200,6 +201,9 @@ pub struct Player {
     pub flying: Option<bool>,
     #[serde(default)]
     pub grid_collision_class: Option<u32>,
+    /// Entity+408/+470/+490 slowing state written by spider webs.
+    #[serde(default, skip_serializing_if = "spider_webs::Slowing::is_constructed")]
+    pub slowing: spider_webs::Slowing,
     pub eye: projectiles::Eye,
     /// Actual Player+c84, independent of manager tear handles.
     pub shots_fired: u32,
@@ -267,6 +271,7 @@ impl Player {
             transformation_counts: None,
             flying: None,
             grid_collision_class: None,
+            slowing: spider_webs::Slowing::default(),
             eye: projectiles::Eye::Positive,
             shots_fired: 0,
             // Authored sprite roots and shadow centers are one logical pixel
@@ -2596,6 +2601,7 @@ impl Game {
         stage_transition::advance_trapdoor(&mut self.state, phase)?;
         let explosion_fence = self.state.explosions.len();
         grid_hazards::advance(&mut self.state, phase)?;
+        spider_webs::advance(&mut self.state, phase)?;
         let existing = self.state.actor_scheduler.full_phase();
         if phase == phase::Phase::Update {
             rock_blast::advance_bomb_rocks(&mut self.state)?;
@@ -3444,6 +3450,7 @@ impl Game {
         // Base main-sprite time advances before the Player death/shooting caller.
         player_items::advance_presentation(&mut self.state, phase);
         player_costume229::begin_full(&mut self.state, phase);
+        spider_webs::begin_player_update(&mut self.state, phase)?;
         if player_death::advance(&mut self.state, phase) {
             return Ok(());
         }
@@ -3735,6 +3742,7 @@ impl Game {
             dy,
             self.state.player_stats.move_speed,
         );
+        spider_webs::finish_player_update(&mut self.state);
         if controls_enabled && bomb_triggered && bomb_admitted {
             bombs::place(&mut self.state, phase)?;
         }

@@ -56,7 +56,7 @@ export const SUITES = [
     'No-dialog run admission, level descriptors, Game.Save stores, grid records and ambient Room costs'),
   suite('weapons', e2e('weapons'), ['--count', '4'], 'Tear cadence, direction and inherited motion'),
   suite('tear-lifecycle', e2e('weapons'), ['--lifecycle', '--count', '4'], 'Tear birth, flight and death phases'),
-  suite('traversal', traversal, [], 'Ordinary doorway exit/return and hostile-room locks'),
+  suite('traversal', traversal, [], 'Ordinary doorway exit/return, hostile-room locks and spider-web crossings'),
   suite('doors', traversal, ['--scenario-helper', helper('door-scenarios.py'), '--count', '1'], 'Curse and free treasure-room doors'),
   suite('secrets', traversal, ['--scenario-helper', helper('secret-door-scenarios.py'), '--count', '1'],
     'Bomb-revealed secret doors, entry and return'),

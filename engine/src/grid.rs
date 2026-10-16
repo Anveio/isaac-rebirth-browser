@@ -160,7 +160,7 @@ pub fn for_room(
                 1002 => Some((6, rock_frame, 1, 3)),
                 // Raw1940 spider web kind10 (Init571c70): class0 and no path
                 // cost. Its frame/flip/rotation draws belong to the Room.Init
-                // construction pass and its player slowing is not admitted.
+                // construction pass; `spider_webs` owns its player slowing.
                 1940 => Some((10, 0, 0, 0)),
                 1000 if spawn.grid_index == spawns.tinted_rock_index => Some((4, rock_frame, 1, 3)),
                 // Pit3000 Init568990 collides as class1; its autotile frame is
