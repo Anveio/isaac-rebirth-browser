@@ -12,6 +12,9 @@ pub struct SavedPlayerItems {
     /// Legacy saved data never inherits a fresh constructor's known zero.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub damage_inputs: Option<crate::player_items::DamageInputs>,
+    ///Actual Saved88D4. Legacy omission remains unknown on restore.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub fire_delay_inputs: Option<crate::player_items::FireDelayInputs>,
     /// Actual Saved+88E0, copied only from an already owned Player+D38.
     /// A legacy/incomplete saved table never inherits constructor zero.
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -47,6 +50,7 @@ impl SavedPlayerItems {
         }
         Ok(Self {
             damage_inputs: owner.damage_inputs,
+            fire_delay_inputs: owner.fire_delay_inputs,
             shot_speed_inputs: owner.shot_speed_inputs,
             owned_counts: owner.owned_counts.clone(),
             item_rng_states: current_states(&owner.item_rngs, 347)?,
@@ -103,6 +107,8 @@ impl SavedPlayerItems {
         //51849A/5184A0 stores Saved88D8;511A25/511A2B restores D30.
         //None overwrites constructor Some(0) rather than inventing history.
         owner.damage_inputs = self.damage_inputs;
+        //51848E/518494 saves88D4;511A19/511A1F restores the actual word.
+        owner.fire_delay_inputs = self.fire_delay_inputs;
         //5184B2/5184B8 writes Saved88E0;511A43 restores PlayerD38.
         owner.shot_speed_inputs = self.shot_speed_inputs;
         Ok(())
