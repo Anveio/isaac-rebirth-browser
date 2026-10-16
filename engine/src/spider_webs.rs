@@ -55,17 +55,9 @@ pub fn advance(state: &mut State, phase: Phase) -> Result<(), String> {
     if phase != Phase::Update || state.game_update_count.wrapping_add(1) & 3 != 0 {
         return Ok(());
     }
-    if state
-        .player
-        .grid_collision_class
-        .is_some_and(|class| class <= 3)
-    {
-        return Ok(());
-    }
     let Some(grid) = state.room.grid.as_ref() else {
         return Ok(());
     };
-    let position = bombs::player_world(state);
     let mut applied = 0;
     for (index, cell) in grid.cells.iter().enumerate() {
         if !cell
@@ -75,6 +67,16 @@ pub fn advance(state: &mut State, phase: Phase) -> Result<(), String> {
         {
             continue;
         }
+        // Update571ab0 reads this owner only after reaching an intact web.
+        // An unavailable class is not evidence that the player is grounded.
+        let class = state
+            .player
+            .grid_collision_class
+            .ok_or("spider web Update requires the actual player grid collision class")?;
+        if class <= 3 {
+            return Ok(());
+        }
+        let position = bombs::player_world(state);
         let center = WorldVector {
             x: 40.0 + (index % usize::from(grid.width)) as f32 * 40.0,
             y: 120.0 + (index / usize::from(grid.width)) as f32 * 40.0,

@@ -12,6 +12,7 @@ export interface Player {
   renderOffset: { x: number; y: number }; controlsEnabled: boolean;
   transformationCounts: [number, number] | null;
   flying: boolean | null; gridCollisionClass: number | null;
+  slowing?: { remaining: number; factor: number; friction: number };
   eye: "negative" | "positive";
   shotsFired: number;
 }
