@@ -27,6 +27,7 @@ mod content;
 mod controlled_brimstone;
 mod controlled_fetus;
 mod controlled_knife;
+mod controlled_knife_satellites;
 pub mod controlled_tear;
 mod controlled_technology;
 mod creep_effects;

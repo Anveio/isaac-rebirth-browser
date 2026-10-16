@@ -16,7 +16,15 @@ const ZERO: WorldVector = WorldVector { x: 0.0, y: 0.0 };
 pub(crate) const CONTROLLED: u64 = 0x2_0000_0000;
 pub use crate::attack_flags::AttackFlags;
 
-///Actual Base+4A0 empty-chain proof. Missing/nonempty histories remain unknown;
+///444890 reads CURRENT Game+CE9F4: the same State.game_update_count
+///word reset to0 and incremented before Full actor callbacks. Manual-door
+///and immediate-birth callbacks read that current word without another add.
+///Relative birth ages retain their separate subtraction owner.
+pub(crate) fn source_game_counter(game_update_count: u32) -> u32 {
+    game_update_count
+}
+
+///Actual Base+4A0 registered chain. Missing/restored histories remain unknown;
 ///447FC0's Parent+498 registration does not produce this independent owner.
 #[derive(Clone, Copy, Debug, Default, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
@@ -24,6 +32,8 @@ pub enum ChildChain {
     #[default]
     Unknown,
     Empty,
+    ///Actual447F40-registered relation, independent of Parent498.
+    Linked(ActorRef),
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
@@ -39,6 +49,10 @@ pub struct Knife {
     pub spawner_type: u32,
     pub spawner_variant: u32,
     pub parent: Option<ActorRef>,
+    ///Only actual441F1F/447FC0/registered Uninit stores prove NULL.
+    ///A missing legacy Parent field must not become a known NULL owner.
+    #[serde(default)]
+    pub parent_null_known: bool,
     #[serde(default)]
     pub child_chain_4a0: ChildChain,
 
@@ -110,6 +124,7 @@ impl Knife {
             spawner_type: 0,
             spawner_variant: 0,
             parent: None,
+            parent_null_known: true, //441F1F, separate from441F2A below.
             child_chain_4a0: ChildChain::Empty, //441F2A before the Parent498 link.
 
             active: true,
@@ -158,6 +173,14 @@ impl Knife {
         }
     }
 
+    ///447FC0 registers the actual Parent498 relation independently of4A0.
+    ///Some carries its own non-NULL identity; only an actual NULL store
+    ///allows the new orphan body to distinguish NULL from missing history.
+    pub(crate) fn set_parent(&mut self, parent: Option<ActorRef>) {
+        self.parent = parent;
+        self.parent_null_known = parent.is_none();
+    }
+
     ///441bb0 marks inactive/dead. Registered pointers clear only in Uninit.
     pub(crate) fn remove(&mut self) {
         self.active = false;
@@ -187,7 +210,7 @@ impl Knife {
     ) -> bool {
         !self.hit_sequences.contains(&target_sequence)
             && (self.attack_flags.0 & CONTROLLED == 0
-                || ((game_age.wrapping_add(own_sequence) as i32) % 5 == 0
+                || ((source_game_counter(game_age).wrapping_add(own_sequence) as i32) % 5 == 0
                     && self.entity_flags & 0x4000 == 0))
     }
 
@@ -298,7 +321,7 @@ impl Knife {
         Ok(parent_has_118
             && self.raw_7f8 < 0.0
             && self.entity_flags & 0x4000 == 0
-            && (game_age as i32) % 2 == 0)
+            && (source_game_counter(game_age) as i32) % 2 == 0)
     }
 
     ///473929 runs after an actual nested Brim child callback when requested.
@@ -318,7 +341,7 @@ impl Knife {
         self.sprite
             .layer_flips
             .insert(0, [self.sprite.rotation > 0.0, false]);
-        if self.entity_flags & 0x4000 == 0 && (game_age as i32) % 3 == 0 {
+        if self.entity_flags & 0x4000 == 0 && (source_game_counter(game_age) as i32) % 3 == 0 {
             self.hit_sequences.clear();
         }
         if self.fast {
@@ -441,7 +464,7 @@ impl Knife {
         } else {
             self.remove();
         }
-        if self.entity_flags & 0x4000 == 0 && (game_age as i32) % 3 == 0 {
+        if self.entity_flags & 0x4000 == 0 && (source_game_counter(game_age) as i32) % 3 == 0 {
             self.hit_sequences.clear();
         }
         if !self.position.is_finite()

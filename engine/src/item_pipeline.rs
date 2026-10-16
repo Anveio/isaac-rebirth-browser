@@ -311,6 +311,11 @@ impl<'a> ItemInputs<'a> {
     /// remain outside this scope. Future property operators extend their own
     /// cache reads instead of widening controller/contact admission.
     pub(crate) fn admits_selected_appearance(self) -> bool {
+        if self.admits_knife_cache_stage(CacheStage::TearFlags)
+            && self.admits_knife_cache_stage(CacheStage::Color)
+        {
+            return true;
+        }
         if self.admits_technology_cache_context() || self.admits_fetus_cache_context() {
             return true;
         }
@@ -462,6 +467,43 @@ impl<'a> ItemInputs<'a> {
                 .owner
                 .queued_id
                 .is_none_or(|id| supported.contains(&(id as usize)))
+    }
+
+    ///Each selected511F10 callback owns its own input roles.2 contributes
+    ///only the existing FireDelay multiplier here; the other callbacks have
+    ///separate source-neutral proofs. Numeric operators and noninventory
+    ///history guards stay with their actual stage and consumer.
+    fn admits_knife_cache_stage(self, stage: CacheStage) -> bool {
+        self.positive_owned_count(2)
+            && self.admits_stage_owned_roles(|id| KnifeCacheReadRole::of(stage, id).is_some())
+    }
+
+    ///Independent50D090(kind4) trace: no2 query, RNG or modifier output.
+    ///Actual C88/C98/all11CA0/C8C stay current copied fields. This readset
+    ///does not admit an ordinary multi-Knife emitter or controlled satellites.
+    pub(crate) fn admits_knife_kind4_getter(self) -> bool {
+        self.admits_stage_owned_roles(|id| matches!(id, 1 | 2 | 4 | 114 | 118 | 329))
+    }
+
+    ///Only the selected live114+329 caller may consume the newly closed2
+    ///satellite-count branch. The ordinary caller retains its old capability.
+    pub(crate) fn admits_controlled_knife_caller(self) -> bool {
+        self.positive_owned_count(114)
+            && self.positive_owned_count(329)
+            && self.admits_stage_owned_roles(|id| match id {
+                2 => true,         //Source519FC0 owns the satellite-count branch.
+                114 | 329 => true, //Actual Knife/control selection.
+                118 => true,       //Ordinary Has118 child branch bypassed by control.
+                1 | 4 => true,     //No additional live caller operator.
+                _ => false,
+            })
+    }
+
+    ///ActualAdd2's default tail writes none of the retained Luck inputs.
+    ///Only this wrapper consumes the proof; None is never recreated here.
+    pub(crate) fn admits_inner_eye_knife_grant(self) -> bool {
+        self.positive_owned_count(2)
+            && self.admits_stage_owned_roles(|id| matches!(id, 1 | 2 | 4 | 114 | 118 | 329))
     }
 
     ///Independent511F10 footprint for positive168 with selected1/2/4,
@@ -665,6 +707,7 @@ impl<'a> ItemInputs<'a> {
         let fetus_context = self.admits_fetus_cache_context();
         let neutral_monstro = self.admits_monstro_cache_context();
         let epic_fetus_context = self.admits_epic_fetus_cache_context();
+        let knife_stage_reads = self.admits_knife_cache_stage(stage);
         self.admits_scalar_context()
             && self
                 .owner
@@ -682,13 +725,20 @@ impl<'a> ItemInputs<'a> {
                                 || (id == 52 && fetus_context)
                                 || (id == 229 && neutral_monstro)
                                 || (id == 168 && epic_fetus_context)
-                                || (id == 2 && epic_fetus_context)))
+                                || (id == 2 && epic_fetus_context)
+                                || knife_stage_reads))
                 })
     }
 
     /// Auxiliary callbacks have their own narrower source proof. Scalar
     /// effects admitted above do not expand Flight, Familiar, Luck or history.
     fn admits_selected_auxiliary_callbacks(self) -> bool {
+        if self.admits_knife_cache_stage(CacheStage::Flight)
+            && self.admits_knife_cache_stage(CacheStage::Familiar)
+            && self.admits_knife_cache_stage(CacheStage::Luck)
+        {
+            return true;
+        }
         if self.admits_technology_cache_context() || self.admits_fetus_cache_context() {
             return true;
         }
@@ -781,6 +831,33 @@ pub(crate) struct CacheResolution {
 impl CacheResolution {
     pub(crate) fn pending(self, requested: CacheMask) -> CacheMask {
         CacheMask(requested.0 & !self.completed.0)
+    }
+}
+
+///Known inputs of one callback, classified by their literal source role.
+///This finite footprint has no item-pair result or alternate numeric formula.
+enum KnifeCacheReadRole {
+    Neutral,
+    DelayTier,
+    InnerEyeDelay,
+    DamageTier,
+}
+impl KnifeCacheReadRole {
+    fn of(stage: CacheStage, id: usize) -> Option<Self> {
+        use CacheStage as S;
+        match (stage, id) {
+            (S::FireDelay, 1) => Some(Self::DelayTier),
+            (S::FireDelay, 2) => Some(Self::InnerEyeDelay),
+            (S::FireDelay, 4 | 114 | 118 | 329) => Some(Self::Neutral),
+            (S::Damage, 4) => Some(Self::DamageTier),
+            (S::Damage, 1 | 2 | 114 | 118 | 329) => Some(Self::Neutral),
+            (S::ShotSpeed | S::Range | S::MoveSpeed, 1 | 2 | 4 | 114 | 118 | 329) => {
+                Some(Self::Neutral)
+            }
+            (S::TearFlags | S::Color, 1 | 2 | 4 | 114 | 118 | 329) => Some(Self::Neutral),
+            (S::Flight | S::Familiar | S::Luck, 1 | 2 | 4 | 114 | 118 | 329) => Some(Self::Neutral),
+            _ => None,
+        }
     }
 }
 
