@@ -139,8 +139,18 @@ pub(crate) fn evaluate_cache(state: &mut State) -> Result<(), String> {
             max_fire_delay: state.max_fire_delay,
         },
         requested,
-        state.player.entity_source,
-        state.source_shot_speed_minimum,
+        crate::item_queries::AppearanceQueries::new(
+            state.player_items.as_ref().expect("checked cache owner"),
+            state.weapon_cache.primary,
+            state.player.entity_source,
+            None,
+        ),
+        item_pipeline::CacheSourceInputs {
+            entity: state.player.entity_source,
+            challenge_id: state.challenge_id,
+            damage_maximum: state.source_damage_maximum,
+            shot_speed_minimum: state.source_shot_speed_minimum,
+        },
     )?;
     state.player_stats = resolved.values.stats;
     state.max_fire_delay = resolved.values.max_fire_delay;
@@ -231,6 +241,13 @@ pub(crate) fn evaluate_cache(state: &mut State) -> Result<(), String> {
         item_pipeline::CacheMask(resolved.pending(requested).0 & !completed),
     )
     .0;
+    if let Some(history) = state.player_items.as_mut()
+        .and_then(|owner| owner.query_history.as_mut()) {
+        //Each plan owns its actual reached queries. Unread unknown domains
+        //do not veto its result. A still-pending Libra group independently
+        //withholds knowledge of any coupled final output.
+        history.cached_callbacks |= resolved.reached_completed.0 & !pending;
+    }
     let tail_admitted = state.weapon_admission.source_player_type == Some(0)
         && state.weapon_admission.pending_primary_cleanup.is_none()
         && state.player.transformation_counts == Some([0, 0])
