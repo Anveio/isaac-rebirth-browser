@@ -114,9 +114,14 @@ try {
       const key = collect.has(state.room) && state.pickups.find(p => p.variant === 30)
         || take.has(state.room) && state.pickups.find(p => p.variant === 100 && p.subtype > 0);
       const usable = /^open/i.test(door.state) || (door.state === 'KeyClosed' && state.keys > 0);
+      // A pedestal, taken or not, is solid but not a grid object. The take
+      // walk can end past it inside its cell; step out sideways first.
+      const cell = (x, y) => Math.round((y - 120) / 40) * state.grid.w + Math.round((x - 40) / 40);
+      const pedestals = state.grid ? state.pickups.filter(p => p.variant === 100).map(p => cell(p.x, p.y)) : [];
+      const inside = pedestals.includes(state.grid && cell(state.player.x, state.player.y));
       await hold(state.transition || !state.player.controls ? []
         : key ? collectKeys(state, key)
-        : !usable ? [] : doorKeys(state.grid, state.player, door));
+        : !usable ? [] : inside ? ['KeyA'] : doorKeys(avoiding(state.grid, pedestals), state.player, door));
       if (process.env.BOSS_ROUTE_DEBUG && budget % 30 === 0) process.stderr.write(`${JSON.stringify({ room: state.room, budget, player: state.player, door, keys: [...held], transition: state.transition })}\n`);
       await step(STRIDE); budget -= STRIDE;
       // Route checkpoints let both games' positions be compared on the way.
