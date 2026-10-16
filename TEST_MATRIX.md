@@ -595,7 +595,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Always | game: the nightmare scene between stages holds the run clock | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: within a run the floor only deepens, keeps its layout while its stage and seed hold, and full updates never rewind | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: a run descends to a deeper stage's floor | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
-| Always | game: a paused run freezes gameplay and the shared stream | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: a paused run freezes gameplay and the run clock | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: ticks elapse while paused | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Reachable | game: a run starts through the public menus | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: a run starts in the starting room of its seed's floor | [invariants.rs](engine/dst/src/units/game/invariants.rs) |

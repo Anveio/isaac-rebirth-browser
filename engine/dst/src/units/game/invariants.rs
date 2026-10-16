@@ -303,17 +303,20 @@ pub fn transition(before: &State, command: &Command, after: &State) {
                 props::sometimes!(deeper, "game: a run descends to a deeper stage's floor");
             }
             if before.paused && after.paused && count > 0 {
+                // The shared stream is not frozen: Game::Render 54fcd0 runs
+                // Room render 5d1a70 on every presented frame, pause menu or
+                // not, and its light pass flickers lit fires with shared draws
+                // (5d31b5, 5d31cb).
                 let frozen = after.player == before.player
                     && after.tears == before.tears
                     && after.bombs == before.bombs
                     && after.room == before.room
                     && after.inventory == before.inventory
                     && after.current_room == before.current_room
-                    && after.run_tick == before.run_tick
-                    && after.boot_lifecycle.shared == before.boot_lifecycle.shared;
+                    && after.run_tick == before.run_tick;
                 props::always!(
                     frozen,
-                    "game: a paused run freezes gameplay and the shared stream",
+                    "game: a paused run freezes gameplay and the run clock",
                     json!({ "count": count })
                 );
                 props::sometimes!(true, "game: ticks elapse while paused");
