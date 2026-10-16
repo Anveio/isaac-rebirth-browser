@@ -55,6 +55,10 @@ for (const label of labels) {
   check(label, 'room.clear', source.room.combatClear, state.room.combatClear);
   check(label, 'player.visible', player.visible, state.player.visible);
   check(label, 'player.controls', player.controlsEnabled, state.player.controlsEnabled);
+  // Each fight leaves its own corner position; the shared tail's trapdoor
+  // entry frame (and so the StageTransition counter) follows from it.
+  diagnostic(label, 'player.position', [player.position[0] * 0.65 + 32, player.position[1] * 0.65 - 46],
+    [state.player.x, state.player.y]);
   const clip = PLAYER_CLIPS.includes(player.animation) ? player.animation : null;
   const actualClip = PLAYER_CLIPS.includes(state.playerAnimation.current) ? state.playerAnimation.current : null;
   check(label, 'player.clip', clip, actualClip);
@@ -67,6 +71,12 @@ for (const label of labels) {
     check(label, 'trapdoor.frame', Math.floor(trapdoor.animationFrame), Math.floor(actual.frame));
     check(label, 'trapdoor.playing', trapdoor.animationPlaying, actual.playing);
     diagnostic(label, 'trapdoor.spawnSeed', trapdoor.spawnSeed, actual.spawnSeed);
+    // A boss's tail poop can sit on the pedestal cell; each game's own fight
+    // decides whether it is intact, broken or absent there (fix_award_pos).
+    const width = state.room.grid.width, cell = actual.gridIndex + 4 * width;
+    const sourceCell = source.grid.find(item => item.index === cell), actualCell = state.room.grid.cells[cell]?.entity;
+    diagnostic(label, 'pedestalCell', sourceCell ? [sourceCell.type, sourceCell.state] : null,
+      actualCell ? [actualCell.kind, actualCell.state] : null);
   }
   const pedestals = source.entities.filter(entity => entity.type === 5 && entity.variant === 100 && !entity.removed)
     .map(entity => [entity.subtype, entity.position]);
@@ -76,7 +86,8 @@ for (const label of labels) {
 }
 check('next-stage', 'arrivedStage', 2, finalStage);
 // With `--gl-trace`, each room the port entered (the shared route, the boss
-// room and Basement II) must equal an original wall cache draw, in entry order
+// room, the re-anchor's previous room and the boss room again, then Basement
+// II) must equal an original wall cache draw, in entry order
 // (wall-quads.mjs). A room entry is a change of room index or of its walls:
 // the stage number turns over a few captures before the next level's start
 // room loads, so it does not mark an entry.

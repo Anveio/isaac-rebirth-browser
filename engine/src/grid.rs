@@ -921,7 +921,19 @@ impl Collider {
         velocity: &mut WorldVector,
         preview: bool,
     ) -> Result<Option<GridContact>, String> {
-        self.resolve_nonplayer_ground_class(grid, position, velocity, preview, false)
+        self.resolve_nonplayer_ground_class(grid, position, velocity, preview, false, 1.0)
+    }
+
+    /// 44364a..443681: Dip (217) and type 220 scale the reflection impulse
+    /// `inward * 1.8 - 0.1` by 1.2 (66acfc) before the speed rescale.
+    pub fn resolve_nonplayer_ground_bouncy(
+        &self,
+        grid: &Grid,
+        position: &mut WorldVector,
+        velocity: &mut WorldVector,
+        preview: bool,
+    ) -> Result<Option<GridContact>, String> {
+        self.resolve_nonplayer_ground_class(grid, position, velocity, preview, false, 1.2)
     }
 
     ///442CD4 /443512: class6 ignores grid collision1, and refines six times.
@@ -933,7 +945,7 @@ impl Collider {
         velocity: &mut WorldVector,
         preview: bool,
     ) -> Result<Option<GridContact>, String> {
-        self.resolve_nonplayer_ground_class(grid, position, velocity, preview, true)
+        self.resolve_nonplayer_ground_class(grid, position, velocity, preview, true, 1.0)
     }
 
     fn resolve_nonplayer_ground_class(
@@ -943,6 +955,7 @@ impl Collider {
         velocity: &mut WorldVector,
         preview: bool,
         ignores_pits: bool,
+        reflection_scale: f32,
     ) -> Result<Option<GridContact>, String> {
         if !position.is_finite() || !velocity.is_finite() {
             return Err("nonplayer collision requires finite world vectors".into());
@@ -971,7 +984,7 @@ impl Collider {
             let reflected = if preview {
                 *velocity
             } else {
-                *velocity + normal * (inward * 1.8 - 0.1)
+                *velocity + normal * ((inward * 1.8 - 0.1) * reflection_scale)
             };
             let speed = (reflected.x * reflected.x + reflected.y * reflected.y).sqrt();
             if !reflected.is_finite() || !speed.is_finite() || (!preview && speed <= 0.0) {

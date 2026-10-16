@@ -1657,7 +1657,8 @@ impl Game {
         self.state.damage_cooldown = 0;
         self.state.bomb_placement_cooldown = bombs::BombPlacementCooldown::default();
         self.state.bomb_action_was_down = self.held("KeyE");
-        self.state.run_introduction = RunIntroduction::stage(true);
+        //54FC2B starts the initial stage streak only after the opaque fade.
+        self.state.run_introduction = RunIntroduction::stage(false);
         self.state.boss_bar = BossBar::default();
         self.state.pause_menu = PauseMenu::hidden();
         self.state.run_quit = run_quit::RunQuit::fresh();
@@ -2843,16 +2844,25 @@ impl Game {
             }
             return Ok(());
         }
-        if phase == phase::Phase::Update
-            && self
+        if phase == phase::Phase::Update {
+            let initial_fade_was_positive = self.state.run_admission.initial_fade > 0.0;
+            if self
                 .state
                 .run_admission
                 .blocks_full_update(&mut self.state.player)?
-        {
-            // Fast5507f0 does not take this guard. Music belongs to System and
-            // continues while Game's full update and age are held.
-            self.state.music.advance();
-            return Ok(());
+            {
+                // Fast5507f0 does not take this guard. Music belongs to System and
+                // continues while Game's full update and age are held.
+                self.state.music.advance();
+                return Ok(());
+            }
+            if initial_fade_was_positive {
+                //54FC2B ->585500 restarts the existing HUD streak after this
+                //Full's earlier HUD update, before GameAge and actor callbacks.
+                //The positive-to-zero edge is one-shot;593660 input reset is
+                //still represented by completion_callbacks_pending, not cleared.
+                self.state.run_introduction = RunIntroduction::stage(true);
+            }
         }
 
         // Game54fb88 invokes580330 after its active transition branches.
@@ -3843,6 +3853,12 @@ impl Game {
         let regular_dispatch = if shoot_callback_admitted {
             match weapon_plan::resolve_current_weapon(&self.state)? {
                 weapon_plan::LiveWeaponResolution::Unadmitted(channel) => {
+                    //A known regular-shot cache refusal cannot write C18.
+                    //Other unresolved source channels may skip a persistent
+                    //controller/cleanup; current pointers never heal history.
+                    if channel != "regularTearCache" {
+                        self.state.weapon_admission.c18_controller_history_known = false;
+                    }
                     if technology2_selected {
                         technology2::primary_frontier(&mut self.state, channel);
                     } else {
@@ -3979,6 +3995,11 @@ impl Game {
                                 aim_step.callback_aim,
                             )?
                         };
+                        if outcome == attack_runtime::DispatchOutcome::Unadmitted
+                            && plan.controller.writes_c18()
+                        {
+                            self.state.weapon_admission.c18_controller_history_known = false;
+                        }
                         //519FC0 returns before the released idle D9C -> DA0 effect.
                         if controlled {
                             attack_runtime::controlled_idle_head(&mut self.state, buttons.held());
@@ -4044,6 +4065,9 @@ impl Game {
                         }
                         outcome == attack_runtime::DispatchOutcome::RegularTear
                     } else {
+                        if plan.controller.writes_c18() {
+                            self.state.weapon_admission.c18_controller_history_known = false;
+                        }
                         self.state
                             .weapon_admission
                             .record_unadmitted(plan.primary, "ordinaryShootingAimHistory");

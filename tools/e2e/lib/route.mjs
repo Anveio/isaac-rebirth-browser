@@ -4,9 +4,9 @@
 const cellOf = (x, y) => [Math.round((x - 40) / 40), Math.round((y - 120) / 40)];
 
 // Breadth-first route over `grid` ({ w, h, solid: '0'/'1' string }) from the
-// player to the goal; returns a waypoint two cells ahead, or the goal itself
-// when there is no grid or no route.
-export function waypoint(grid, player, goal) {
+// player to the goal; returns the centre of the cell `ahead` steps along the
+// route, or the goal itself when there is no grid or no route.
+export function waypoint(grid, player, goal, ahead = 2) {
   if (!grid) return { x: goal.x, y: goal.y };
   const [sc, sr] = cellOf(player.x, player.y), [gc, gr] = cellOf(goal.x, goal.y);
   const inside = (c, r) => c >= 0 && r >= 0 && c < grid.w && r < grid.h;
@@ -24,7 +24,7 @@ export function waypoint(grid, player, goal) {
   if (!previous.has(key(gc, gr))) return { x: goal.x, y: goal.y };
   const path = [];
   for (let k = key(gc, gr); k !== -1; k = previous.get(k)) path.unshift(k);
-  const next = path[Math.min(2, path.length - 1)];
+  const next = path[Math.min(ahead, path.length - 1)];
   return next === key(gc, gr) ? { x: goal.x, y: goal.y } : { x: (next % grid.w) * 40 + 40, y: Math.floor(next / grid.w) * 40 + 120 };
 }
 
