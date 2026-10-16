@@ -2221,6 +2221,27 @@ impl Game {
                         .clone();
                     let counter = self.state.game_update_count.wrapping_add(1);
                     self.admit_room_pickups(&selectors, counter, false)?;
+                    // Room.Init 5cf628: the first visit to a boss room slams
+                    // its portcullis (SFX 190, 5d0687) after the grid records.
+                    let boss_room = self
+                        .state
+                        .room
+                        .descriptor
+                        .as_ref()
+                        .is_some_and(|descriptor| descriptor.template.room_type == 5);
+                    if boss_room {
+                        self.state.audio.admit(
+                            &mut self.state.boot_lifecycle.shared,
+                            self.state.system_clock.system_counter.wrapping_sub(1),
+                            audio::SoundRequest {
+                                id: 190,
+                                volume: 1.0,
+                                delay: 2,
+                                looping: false,
+                                pitch: 1.0,
+                            },
+                        );
+                    }
                     // The admitted Room::Update follows authored mixed order.
                     self.refresh_room_boss_count();
                     let mut counted = actors::FullCounts::default();
