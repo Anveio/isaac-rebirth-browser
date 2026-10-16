@@ -1,5 +1,8 @@
 # Base Rebirth systems and evidence
 
+The [roadmap](roadmap.md) is the planning view: every subsystem's state,
+milestones and outstanding bugs triaged by subsystem.
+
 This map tracks the private base Rebirth reference set and the implementation
 wave starting from the Rust/WASM foundation at `936fda4`.
 The [generated test matrix](../TEST_MATRIX.md) indexes executable
