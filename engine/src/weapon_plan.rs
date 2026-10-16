@@ -4,6 +4,7 @@ use crate::{
     attack_color::AttackColor,
     attack_flags::AttackFlags,
     item_pipeline::{CacheMask, ItemInputs},
+    item_queries::AppearanceQueries,
     player_stats::PlayerStats,
     projectiles, State,
 };
@@ -163,8 +164,127 @@ pub(crate) fn resolve_primary(
     })
 }
 
-/// Actual32/64 writes within the source-closed fresh selected cache paths.
-/// This is cache support, not controller/contact admission.
+/// Complete 5130CA..513345 C98 callback. Only reached source predicates are
+/// read; mutable body/controller/copy fields keep their independent owners.
+/// AppearanceQueries reads the canonical stores through their own histories.
+#[derive(Clone, Copy)]
+struct FlagsReadPlan {
+    flags: AttackFlags,
+}
+
+impl FlagsReadPlan {
+    fn read(inputs: AppearanceQueries<'_>) -> Option<Self> {
+        // 5130CA resets the entire qword. No prior cached C98 bit is retained.
+        let mut bits = 0_u32;
+        // 5130DD/514EF8/514F1C/515A3D/515A52/515A5F. Variant and 30E8
+        // are read only after every preceding permanent/TEMP predicate fails.
+        if inputs.have(182)?
+            || inputs.have(3)?
+            || inputs.temporary_present(192)?
+            || inputs.temporary_present(3)?
+            || inputs.have(331)?
+            || inputs.homing_variant()?
+        {
+            bits |= 0x4;
+        }
+        if inputs.have(132)? {
+            bits |= 0x80;
+        }
+        if inputs.have(261)? || inputs.temporary_present(261)? {
+            bits |= 0x20_0000;
+        }
+        // 513133/514CA8..514CF8: earlier positive effects bypass C08 and 336.
+        if inputs.have(185)?
+            || inputs.have(115)?
+            || inputs.have(159)?
+            || inputs.temporary_present(115)?
+            || inputs.primary()? == PrimaryWeaponC08::Ludovico
+            || inputs.have(336)?
+        {
+            bits |= 0x1;
+        }
+        // 513150/514C10..514C60 is a separate ordered piercing chain.
+        if inputs.have(48)?
+            || inputs.have(237)?
+            || inputs.temporary_present(237)?
+            || inputs.have(306)?
+            || inputs.primary()? == PrimaryWeaponC08::Ludovico
+            || inputs.have(336)?
+        {
+            bits |= 0x2;
+        }
+        if inputs.have(169)? {
+            bits |= 0x200;
+        }
+        if inputs.have(305)? {
+            bits |= 0x10;
+        }
+        if inputs.have(104)? {
+            bits |= 0x40;
+        }
+        if inputs.have(5)? || inputs.temporary_present(5)? {
+            bits |= 0x100;
+        }
+        if inputs.has_trinket(10)? {
+            bits |= 0x400;
+        }
+        if inputs.has_trinket(26)? {
+            bits |= 0x4000_0000;
+        }
+        if inputs.have(149)? && inputs.primary()? != PrimaryWeaponC08::Ludovico {
+            bits |= 0x1010;
+        }
+        if inputs.have(233)? {
+            bits |= 0x1_0001;
+        }
+        // 513250..513272/515960..51598A. Have316/69 exist only for C08=1;
+        // positive316 skips69, and weapon7/8 skip both queries and the mask.
+        if inputs.have(222)? {
+            let applies = match inputs.primary()? {
+                PrimaryWeaponC08::Ludovico | PrimaryWeaponC08::MonstrosLung => false,
+                PrimaryWeaponC08::RegularTears => !inputs.have(316)? && !inputs.have(69)?,
+                _ => true,
+            };
+            if applies {
+                bits |= 0x2_0000;
+            }
+        }
+        if inputs.have(224)? {
+            bits |= 0x4_0000;
+        }
+        if inputs.have(315)? {
+            bits |= 0x80_0000;
+        }
+        if inputs.has_trinket(9)? {
+            bits |= 0x200_0000;
+        }
+        if inputs.have(309)? {
+            bits |= 0x100_0000;
+        }
+        if inputs.has_trinket(11)? {
+            bits |= 0x400_0000;
+        }
+        if inputs.has_trinket(12)? {
+            bits |= 0x800_0000;
+        }
+        // 513339 zero-extends EAX before OR into qword C98. Bit33 belongs
+        // to later controlled actor birth, never to this cache callback.
+        if inputs.have(331)? {
+            bits |= 0x8000_0000;
+        }
+        Some(Self {
+            flags: AttackFlags(u64::from(bits)),
+        })
+    }
+
+    fn resolve(self) -> AttackFlags {
+        self.flags
+    }
+}
+
+/// Requested32 follows the complete reached-query source plan.
+/// Requested64 retains its separately owned selected paths.
+/// These cache writes do not admit controller/contact effects.
 pub(crate) fn resolve_appearance(
     items: ItemInputs<'_>,
     source_player_type: Option<u32>,
@@ -172,10 +292,13 @@ pub(crate) fn resolve_appearance(
     requested: CacheMask,
     appearance: crate::item_queries::AppearanceQueries<'_>,
 ) -> (WeaponCache, CacheMask) {
-    //The following isolated Flags/Color cuts consume this lazy view.
-    //Retained old branches remain literal in the prerequisite alone.
     let mut completed = 0;
-    let _ = appearance;
+    if requested.0 & 32 != 0 {
+        if let Some(plan) = FlagsReadPlan::read(appearance) {
+            prior.flags_c98 = plan.resolve();
+            completed |= 32;
+        }
+    }
     let selected = source_player_type == Some(0) && items.admits_selected_appearance();
     let homing_flags = source_player_type == Some(0) && items.admits_homing_flags();
     let homing_colors = source_player_type == Some(0) && items.admits_homing_colors();
@@ -196,32 +319,6 @@ pub(crate) fn resolve_appearance(
             || homing_colors
             || item_flags)
     {
-        if requested.0 & 32 != 0
-            && (selected || number_one || polyphemus_flags || homing_flags || item_flags)
-        {
-            let mut flags = if prior.primary == PrimaryWeaponC08::Ludovico {
-                3
-            } else if polyphemus_flags {
-                //51316D/513176: permanent169 ORs the independent bit9.
-                0x200
-            } else {
-                0
-            };
-            if homing_flags {
-                //514EF8/5130EF is the source permanent3 operator only.
-                flags |= 4;
-            }
-            if piercing_flags {
-                //51315D: permanent48 ORs bit1.
-                flags |= 2;
-            }
-            if anti_gravity_flags {
-                //513272 via515960: regular C08 without316/69 ORs bit17.
-                flags |= 0x20000;
-            }
-            prior.flags_c98 = AttackFlags(flags);
-            completed |= 32;
-        }
         if requested.0 & 64 != 0 && !polyphemus_flags && (selected || number_one || homing_colors) {
             //515997/515AB1 Have6, else5E3D70 record-presence. This leaf
             //admits permanent6 only; the two literal ColorMods are distinct.

@@ -173,6 +173,9 @@ pub(crate) fn evaluate_cache(state: &mut State) -> Result<(), String> {
         .and_then(|owner| owner.query_history.as_mut()) {
         //These actual resolved writes establish only their output fields;
         //they do not repair unknown query stores or other callbacks.
+        //The exclusive Flags plan proves every reached query itself;
+        //unknown facts that it did not read cannot veto this actual write.
+        history.cached_callbacks |= appearance.0 & 32;
         if history.permanent_counts && history.temporary_records
             && history.trinket_slots {
             history.cached_callbacks |= appearance.0
