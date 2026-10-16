@@ -226,7 +226,7 @@ export class Renderer {
     ctx.save();
     const offset = this.worldOffset(state);
     if (offset) ctx.translate(offset.x, offset.y);
-    this.drawRoom(state.room.appearance, state.room.grid);
+    this.drawRoom(state.room.appearance, state.room.grid, state);
     ctx.restore();
     this.stage.ground(state.stageEffects);
     ctx.save();
@@ -259,14 +259,6 @@ export class Renderer {
       } else if (rock) {
         this.assets.draw(ctx, "gfx/grid/grid_rock.anm2", rock.animation, x, y, rock.frame);
         this.drawnGrid.push({ index, kind: entity.kind, ...rock });
-      } else if (entity.kind === 1 && state.room.descriptor && state.room.descriptor.template.type !== 16) {
-        const props = DECORATION_PROPS[state.room.appearance.backdrop];
-        if (props) {
-          const animation = decorationClip(this.assets.animationNames(props.actor),
-            state.room.descriptor.decorationSeed + index, props.allowCaves);
-          this.assets.draw(ctx, props.actor, animation, x, y, state.gameUpdateCount);
-          this.drawnGrid.push({ index, kind: 1, animation, frame: state.gameUpdateCount });
-        }
       } else if (entity.kind === 14 && entity.variant === 0 && entity.sourceOwner?.poopSheet) {
         // Poop.Init569600 picks grid_poop_{1..3} and plays State{state+1}
         // (State5 once broken); a spawn into a loaded room plays Appear first.
@@ -627,7 +619,21 @@ export class Renderer {
       }
     }
   }
-  private drawRoom(appearance: RoomAppearance, grid: Room["grid"]): void {
+  /** GridEntity_Decoration props draw with the backdrop, under the room's
+   * shading quad, as the original's darker props show. */
+  private drawDecorations(ctx: CanvasRenderingContext2D, state: State): void {
+    const grid = state.room.grid, descriptor = state.room.descriptor;
+    const props = DECORATION_PROPS[state.room.appearance.backdrop];
+    if (!grid || !descriptor || !props || descriptor.template.type === 16) return;
+    for (const [index, cell] of grid.cells.entries()) {
+      if (cell.entity?.kind !== 1) continue;
+      const x = (40 + index % grid.width * 40) * 0.65 + 32, y = (120 + Math.floor(index / grid.width) * 40) * 0.65 - 47;
+      const animation = decorationClip(this.assets.animationNames(props.actor), descriptor.decorationSeed + index, props.allowCaves);
+      this.assets.draw(ctx, props.actor, animation, x, y, state.gameUpdateCount);
+      this.drawnGrid.push({ index, kind: 1, animation, frame: state.gameUpdateCount });
+    }
+  }
+  private drawRoom(appearance: RoomAppearance, grid: Room["grid"], state: State): void {
     const gl = this.graphics, ctx = gl.asCanvasContext(), size = appearance.tileSize, border = size * 2;
     const width = appearance.columns * size, height = appearance.rows * size, { x, y } = appearance.origin;
     gl.drawSurface(this.floor, border, border, width - border * 2, height - border - size,
@@ -654,6 +660,7 @@ export class Renderer {
       }
       ctx.restore();
     }
+    this.drawDecorations(ctx, state);
     gl.drawImage(this.assets.image(appearance.fx.shading), x, y, width, height);
   }
   private drawPlayer(ctx: CanvasRenderingContext2D, state: State): void {
