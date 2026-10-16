@@ -4218,7 +4218,7 @@ impl Game {
         }
         //531E44 reaches deferred CF8 evaluation only on the full path,
         //before531E6F copied-item animation and the later queued grant.
-        item_queries::reach_late_temporary_evaluation(&mut self.state, phase);
+        item_queries::reach_late_temporary_evaluation(&mut self.state, phase)?;
         player_items::advance_item_sprite(&mut self.state, phase);
         player_costume118::advance_full(&mut self.state, phase);
         player_costume229::advance_full(&mut self.state, phase);

@@ -293,11 +293,21 @@ impl PlayerItems {
     /// 5e4140 creates or increments the separate temporary count/cooldown
     /// record. Costume admission and cache evaluation remain caller-owned.
     pub(crate) fn add_temporary_collectible(&mut self, item_id: u32) -> Result<(), String> {
-        let config = items::definition(item_id).ok_or("temporary collectible ItemConfig absent")?;
-        // TEMP producers and expiry do not prove the retained modifier inputs.
-        // Removing a later record never restores this history.
+        //The existing Use wrapper retains its independent input policy.
         self.luck_inputs = None;
         self.move_speed_inputs = None;
+        self.insert_source_temporary_collectible(item_id)
+    }
+
+    ///5E4140's canonical record/count/cooldown prefix. The caller separately
+    ///owns costume registration and effect dispatch. This single vector is
+    ///also the source for lazy record queries; unknown prior counts stay
+    ///unknown in query_history after this owned increment.
+    pub(crate) fn insert_source_temporary_collectible(
+        &mut self,
+        item_id: u32,
+    ) -> Result<(), String> {
+        let config = items::definition(item_id).ok_or("temporary collectible ItemConfig absent")?;
         if let Some(effect) = self
             .temporary_collectibles
             .iter_mut()
@@ -311,6 +321,9 @@ impl PlayerItems {
                 count: 1,
                 cooldown: config.cooldown,
             });
+        }
+        if let Some(history) = &mut self.query_history {
+            history.record_temporary_cache_write(config.cache_flags);
         }
         Ok(())
     }
