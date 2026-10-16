@@ -81,6 +81,12 @@ npm run test:e2e -- keys --scenarios .cache/e2e/run-…/keys/scenarios.json
 npm run test:e2e -- paired --replay-cases .cache/e2e/run-…/paired/<case>/case.json
 ```
 
+A replay compares builds only when both games get the same keys. Stage-exit
+cases also carry port fight keys recorded closed-loop against one production
+build (`portRecordedBuild`); replayed on another build they feed stale keys to
+a different game, and the suite prints a warning. To compare such builds, run
+the suite fresh on each.
+
 ### Keeping a cited case
 
 A case cited in an issue or PR must outlive the container that recorded it:
