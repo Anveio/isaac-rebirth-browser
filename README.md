@@ -28,5 +28,6 @@ npm run matrix:update                         # sync TEST_MATRIX.md
 | Toolchain and dev server | [cloud](cloud) |
 | Progress site publishing | [tools/sites](tools/sites) |
 | Private reference assets and captures | [references/isaac](references/isaac) |
+| Roadmap: subsystem status and triaged bugs | [docs/roadmap.md](docs/roadmap.md) |
 | System map and per-system evidence | [docs/system-map.md](docs/system-map.md), [docs](docs) |
 | Scenario coverage and open parity | [TEST_MATRIX.md](TEST_MATRIX.md), [tools/foundation/systems.mjs](tools/foundation/systems.mjs) |
