@@ -1538,7 +1538,8 @@ impl Game {
         // Level585600 ->5b8340 records the selected ordinary stage resource.
         self.state.nightmares.select_normal_basement(1)?;
         // Room.Init's backdrop setup loads the FX rays before its grid records.
-        room::load_fx_rays(&self.state.room, &mut self.state.boot_lifecycle.shared);
+        // The port builds only ordinary Basement (stage type 0).
+        room::load_fx_rays(&mut self.state.room, &mut self.state.boot_lifecycle.shared, self.state.stage, 0);
         // admit_room_pickups runs Room.Init's selector pass (grid objects and
         // actors together), the boundary, pit links and the critters.
         let selectors = self
@@ -1602,7 +1603,8 @@ impl Game {
             left,
             room_before,
         )?;
-        room::load_fx_rays(&self.state.room, &mut self.state.boot_lifecycle.shared);
+        // The port builds only ordinary Basement (stage type 0).
+        room::load_fx_rays(&mut self.state.room, &mut self.state.boot_lifecycle.shared, self.state.stage, 0);
         Ok(())
     }
 

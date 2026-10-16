@@ -467,6 +467,43 @@ export class Renderer {
     }
     ctx.restore();
     this.stage.foreground(state.stageEffects);
+    this.drawFxRays(state);
+  }
+
+  /** FX ray render 547890 (from room render 5cd00d, after entities and
+   * shading). The camera scroll (Room+15B8) moves the rays' anchor C; the
+   * player's offset from the room centre P sets parallax and fades them. Each
+   * ray draws its whole texture twice on one additive quad: alpha a*s, then
+   * mirrored with a*(1-s), s = (sin(phase)+1)/2. Phase advances by
+   * animationSpeed per render call; two calls per game update is assumed. */
+  private drawFxRays(state: State): void {
+    const group = state.room.appearance.fxRays, init = state.room.initializationGameUpdate;
+    if (!group || !group.rays.length || init === null) return;
+    const grid = state.room.grid; if (!grid) return;
+    const scroll = state.camera?.scroll ?? { x: 0, y: 0 }, shake = state.gameShake?.offsetCea00 ?? { x: 0, y: 0 };
+    const centre = { x: (40 + 40 * (grid.width - 1) / 2) * 0.65 + 32, y: (120 + 40 * (grid.height - 1) / 2) * 0.65 - 46 };
+    const C = { x: centre.x + scroll.x, y: centre.y + scroll.y };
+    const P = { x: state.player.x - centre.x, y: state.player.y - centre.y };
+    const topY = scroll.y + shake.y, n = group.rays.length;
+    const W = (group.xMax - group.xMin - (n - 1) * group.raySpacing) / n, h = W / 2;
+    const fade = Math.max(1 - Math.abs(P.x) / C.x, 0) * Math.max(1 - Math.abs(P.y) / C.y, 0);
+    const calls = 2 * Math.max(0, state.gameUpdateCount - init);
+    const gl = this.graphics, ctx = gl.asCanvasContext();
+    const backend = ctx as unknown as { drawTintedImageQuad?: (source: CanvasImageSource, tint: number[], offsets: number[], crop: readonly [number, number, number, number], points: readonly (readonly [number, number])[]) => void };
+    if (!backend.drawTintedImageQuad) return;
+    gl.blendFactors("srcAlpha", "one");
+    for (const [i, ray] of group.rays.entries()) {
+      const x = (W + group.raySpacing) * i + group.xMin, xc = x + h;
+      const topLeft = [C.x + x + P.x * group.topParallax, topY] as const, topRight = [topLeft[0] + W, topY] as const;
+      const bottomY = P.y * group.bottomParallax + group.rayLength;
+      const bottomLeft = [group.perspective * xc + C.x - h + group.bottomParallax * P.x, bottomY] as const;
+      const bottomRight = [group.perspective * xc + C.x + h + group.bottomParallax * P.x, bottomY] as const;
+      const a = fade * ray.opacity, s = (Math.sin(ray.phase + ray.animationSpeed * calls) + 1) * 0.5;
+      const image = this.assets.image(ray.texture), crop = [0, 0, image.width, image.height] as const;
+      backend.drawTintedImageQuad(image, [1, 1, 1, a * s], [0, 0, 0], crop, [topLeft, topRight, bottomLeft, bottomRight]);
+      backend.drawTintedImageQuad(image, [1, 1, 1, a * (1 - s)], [0, 0, 0], crop, [topRight, topLeft, bottomRight, bottomLeft]);
+    }
+    gl.blendFactors("srcAlpha", "oneMinusSrcAlpha");
   }
 
   /** Room transition 5de870: the old room (captured without the player) and

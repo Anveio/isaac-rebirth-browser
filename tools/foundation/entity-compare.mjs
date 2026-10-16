@@ -52,6 +52,8 @@ export function roomRows(rows, source, actual) {
   // The Basement overlay's per-room offsets (fxlayers.xml fx 2): the only
   // layered fx entry; the port's origin adds the 663x429 centring offsets.
   const overlay = actual.room.appearance?.fx?.overlayOrigin;
+  // FX+0x38 (54a5b6): the selected fxRays group, -1 when none.
+  check(rows, 'stage.fxRayGroup', source.fxRayGroup, actual.room.appearance.fxRays?.index ?? -1);
   check(rows, 'stage.overlayOffset', source.fxLayers?.flat().map(([x, y]) => [f32(x), f32(y)]),
     overlay && [[f32(overlay.x - (663 - 480) * 0.5), f32(overlay.y - (429 - 270) * 0.5)]]);
   check(rows, 'room.combatClearCountdown', source.room.combatClearCountdown, actual.room.combatClearCountdown);

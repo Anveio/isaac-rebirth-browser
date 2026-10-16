@@ -91,6 +91,36 @@ pub struct RoomAppearance {
     pub fx: RoomFx,
     pub template: String,
     pub generation: String,
+    /// The selected fxRays group (FX+0x38) with its rays' load phases.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub fx_rays: Option<FxRayGroup>,
+}
+
+/// One authored fxlayers.xml rayGroup (0x40-byte group at FX+0x20).
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct FxRayGroup {
+    /// Index among the stage-matched groups, as stored at FX+0x38.
+    pub index: u32,
+    pub x_min: f32,
+    pub x_max: f32,
+    pub top_parallax: f32,
+    pub bottom_parallax: f32,
+    pub ray_length: f32,
+    pub ray_spacing: f32,
+    pub perspective: f32,
+    pub rays: Vec<FxRay>,
+}
+
+/// One 0x20-byte ray: opacity +0, animationSpeed +4, phase +8, texture +0x10.
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct FxRay {
+    pub opacity: f32,
+    pub animation_speed: f32,
+    /// Load phase uniform()*pi; render 547890 adds animationSpeed per call.
+    pub phase: f32,
+    pub texture: String,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
@@ -241,21 +271,85 @@ impl DecorationRng {
 /// Room backdrop setup 5c5b30 reloads fxlayers.xml (5c5be3 -> 5489b0) on
 /// every Room init. Each authored `fxRay`, in every ray group whatever its
 /// stages, draws one phase uniform()*pi at 54a16d. Crawlspace rooms (type 16)
-/// and backdrop 13 (boss RoomData 5000) clear the layers instead. The browser
-/// does not draw rays yet, so only the draws are kept.
-pub fn load_fx_rays(room: &Room, shared: &mut crate::mt::Mt19937) {
-    if let Some(descriptor) = &room.descriptor {
-        let template = &descriptor.template;
-        if template.room_type == 16 || (template.room_type == 5 && template.variant == 5000) {
-            return;
+/// and backdrop 13 (boss RoomData 5000) clear the layers instead.
+///
+/// 54a5b6 then seeds a fresh RNG with Descriptor+48 (shift35, no warm-up),
+/// stores FX+0x38 = RandomInt(matched groups) and, in an ordinary room
+/// (type 1), clears it when RandomInt(stage < 3 ? 3 : 2) != 0 unless the
+/// stage is 9 with a nonzero stage type.
+pub fn load_fx_rays(room: &mut Room, shared: &mut crate::mt::Mt19937, stage: u32, stage_type: u32) {
+    room.appearance.fx_rays = None;
+    let Some(descriptor) = &room.descriptor else {
+        return;
+    };
+    let template = &descriptor.template;
+    if template.room_type == 16 || (template.room_type == 5 && template.variant == 5000) {
+        return;
+    }
+    let xml = include_str!("../../references/isaac/rebirth/resources/fxlayers.xml");
+    let rays = &xml[xml.find("<fxRays>").unwrap_or(0)..];
+    let mut matched = Vec::new();
+    for group in rays.split("<rayGroup ").skip(1) {
+        let head = &group[..group.find('>').unwrap_or(group.len())];
+        let number = |name: &str| attribute(head, name).and_then(|value| value.parse::<f32>().ok()).unwrap_or(0.0);
+        let mut parsed = FxRayGroup {
+            index: 0,
+            x_min: number("xMin"),
+            x_max: number("xMax"),
+            top_parallax: number("topParallax"),
+            bottom_parallax: number("bottomParallax"),
+            ray_length: number("rayLength"),
+            ray_spacing: number("raySpacing"),
+            perspective: number("perspective"),
+            rays: Vec::new(),
+        };
+        let body = &group[..group.find("</rayGroup>").unwrap_or(group.len())];
+        for ray in body.split("<fxRay ").skip(1) {
+            let number = |name: &str| attribute(ray, name).and_then(|value| value.parse::<f32>().ok()).unwrap_or(0.0);
+            parsed.rays.push(FxRay {
+                opacity: number("opacity"),
+                animation_speed: number("animationSpeed"),
+                phase: (f64::from(shared.uniform()) * std::f64::consts::PI) as f32,
+                texture: format!("gfx/{}", attribute(ray, "path").unwrap_or_default()),
+            });
+        }
+        if attribute(head, "stages").is_some_and(|stages| stages_match(stages, stage, stage_type)) {
+            matched.push(parsed);
         }
     }
-    let rays = include_str!("../../references/isaac/rebirth/resources/fxlayers.xml")
-        .matches("<fxRay ")
-        .count();
-    for _ray in 0..rays {
-        let _phase = (f64::from(shared.uniform()) * std::f64::consts::PI) as f32;
+    if matched.is_empty() {
+        return;
     }
+    let mut random = crate::items::Rng::new(descriptor.decoration_seed, [5, 9, 7]);
+    let index = random.bounded(matched.len() as u32);
+    if template.room_type == 1
+        && random.bounded(if stage < 3 { 3 } else { 2 }) != 0
+        && !(stage == 9 && stage_type != 0)
+    {
+        return;
+    }
+    let mut group = matched.swap_remove(index as usize);
+    group.index = index;
+    room.appearance.fx_rays = Some(group);
+}
+
+fn attribute<'a>(element: &'a str, name: &str) -> Option<&'a str> {
+    let start = element.find(&format!("{name}=\""))? + name.len() + 2;
+    let end = element[start..].find('"')?;
+    Some(&element[start..start + end])
+}
+
+/// 5489b0 stage tokens: "Na" needs stage type 1, a bare N type 0 (a trailing
+/// "b" is stripped), and N covers stages 2N-1 and 2N.
+fn stages_match(stages: &str, stage: u32, stage_type: u32) -> bool {
+    stages.split(',').any(|token| {
+        let token = token.trim().trim_end_matches('b');
+        let (number, wanted_type) = match token.strip_suffix('a') {
+            Some(number) => (number, 1),
+            None => (token, 0),
+        };
+        number.parse::<u32>().is_ok_and(|n| (stage == 2 * n || stage + 1 == 2 * n) && stage_type == wanted_type)
+    })
 }
 
 impl Room {
@@ -631,6 +725,7 @@ impl Room {
             },
             template: "starting-room".into(),
             generation: "recovered-basement-backdrop;supplied-room-decoration-seed;provisional-fx-route".into(),
+            fx_rays: None,
         },
     }
     }
