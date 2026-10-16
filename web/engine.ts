@@ -363,6 +363,9 @@ export interface State {
     fireDelayInputs?: {sourceD2c: number};
     rangeInputs?: {sourceD34: number};
     shotSpeedInputs?: {sourceD38: number};
+    pillEffectHistory: {kind: "current"; version: 1; history: {words: (number | null)[]} | null};
+    moveSpeedTerms?: {sourceD28: number; sourceD44: number};
+    luckTerms: {sourceD3c: number; sourceD40: number; sourceD58: number} | null;
     moveSpeedInputs?: {sourceD28: number; sourceD44: number; source13bc: number; source13c0: number};
     luckInputs: {sourceD3c: number; sourceD40: number; sourceD58: number; source13cc: number; source13d0: number} | null} | null;
   informationAnimation: {state: number; delay: number; currentActor: string | null;

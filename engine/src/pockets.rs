@@ -142,10 +142,14 @@ pub(crate) fn note_unowned_use(state: &mut State, controls_enabled: bool) {
     {
         return;
     }
+    let resolved_pill = crate::pill_effect_history::resolve_held_pill(state);
     let Some(owner) = state.player_items.as_mut() else {
         return;
     };
     let Some(held) = owner.held_pockets.as_mut() else {
+        //An admitted request with legacy unknown slots may run a
+        //Pill writer. Blocked requests returned before this branch.
+        crate::pill_effect_history::forget(owner);
         return;
     };
     if held.frontier.is_none() {
@@ -168,6 +172,15 @@ pub(crate) fn note_unowned_use(state: &mut State, controls_enabled: bool) {
         owner,
         crate::ordinary_placement::Frontier::PocketEffects,
     );
+    //5284A3 commits the actual final-effect increment before dispatch.
+    //The unimplemented effect tail cannot claim its final word history;
+    //forget that ownership afterward, preserving the existing frontier.
+    if let (Some(effect), Some(history)) = (resolved_pill, owner.pill_effect_history.as_mut()) {
+        history
+            .increment_resolved(effect)
+            .expect("bounded actual Pill-effect resolver");
+    }
+    crate::pill_effect_history::forget(owner);
     //An existing frontier contains historical records, not known-empty
     //current slots. Preserve it, but never retain new input ownership on a
     //later admitted request whose actual effect may still be unknown.

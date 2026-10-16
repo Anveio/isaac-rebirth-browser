@@ -82,6 +82,7 @@ pub(crate) fn advance(state: &mut State, controls_enabled: bool) -> Result<(), S
                     //explicit unknown frontier, not invocation credit.
                     history.forget_unowned_effect();
                 }
+                crate::pill_effect_history::forget(owner);
                 owner.damage_inputs = None;
                 owner.range_inputs = None;
                 owner.move_speed_inputs = None;
@@ -138,6 +139,10 @@ pub(crate) fn advance(state: &mut State, controls_enabled: bool) -> Result<(), S
             == Some(false);
     let owner = state.player_items.as_mut().expect("checked owner");
     if !query_stores_preserved {
+        //The admitted529600 suffix can dispatch another active through
+        //Trinket4. Its unclosed writer may change canonical Pill words,
+        //independently of whether query history is still available.
+        crate::pill_effect_history::forget(owner);
         if let Some(history) = &mut owner.query_history {
             history.forget_unowned_effect();
         }
