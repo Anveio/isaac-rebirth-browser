@@ -1077,12 +1077,12 @@ impl FireDelayStage {
     }
 }
 
-///Source514F40/515670 separates169 absence, positive2/153 add4-only,
+///Source514F40/515670 separates169 absence, positive2/153 add5-only,
 ///and no-presence add4-then-double. TEMP2 remains a distinct unknown query.
 #[derive(Clone, Copy)]
 enum PolyphemusDamageMode {
     Disabled,
-    AddFour,
+    AddFive,
     AddFourThenDouble,
 }
 
@@ -1143,7 +1143,8 @@ impl DamageOperator {
             }
             Self::Polyphemus { mode } => match mode {
                 PolyphemusDamageMode::Disabled => damage,
-                PolyphemusDamageMode::AddFour => damage + 4.0_f32, //514F55.
+                //514F5B loads666108=5.0 for the Have2/153 diversion.
+                PolyphemusDamageMode::AddFive => damage + 5.0_f32,
                 PolyphemusDamageMode::AddFourThenDouble => {
                     //515AF6: add4 then self-add, before the same later bound.
                     damage += 4.0_f32;
@@ -1198,7 +1199,7 @@ impl DamagePlan {
         let polyphemus_mode = if !inputs.positive_owned_count(169) {
             PolyphemusDamageMode::Disabled
         } else if inputs.positive_owned_count(2) || inputs.positive_owned_count(153) {
-            PolyphemusDamageMode::AddFour
+            PolyphemusDamageMode::AddFive
         } else {
             PolyphemusDamageMode::AddFourThenDouble
         };
