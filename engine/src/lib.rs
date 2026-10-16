@@ -1539,7 +1539,12 @@ impl Game {
         self.state.nightmares.select_normal_basement(1)?;
         // Room.Init's backdrop setup loads the FX rays before its grid records.
         // The port builds only ordinary Basement (stage type 0).
-        room::load_fx_rays(&mut self.state.room, &mut self.state.boot_lifecycle.shared, self.state.stage, 0);
+        room::load_fx_rays(
+            &mut self.state.room,
+            &mut self.state.boot_lifecycle.shared,
+            self.state.stage,
+            0,
+        );
         // admit_room_pickups runs Room.Init's selector pass (grid objects and
         // actors together), the boundary, pit links and the critters.
         let selectors = self
@@ -1604,7 +1609,12 @@ impl Game {
             room_before,
         )?;
         // The port builds only ordinary Basement (stage type 0).
-        room::load_fx_rays(&mut self.state.room, &mut self.state.boot_lifecycle.shared, self.state.stage, 0);
+        room::load_fx_rays(
+            &mut self.state.room,
+            &mut self.state.boot_lifecycle.shared,
+            self.state.stage,
+            0,
+        );
         Ok(())
     }
 
@@ -3054,7 +3064,12 @@ impl Game {
             }),
             entities::Birth::CreepHit => creep_effects::hurt_player(&mut self.state),
             entities::Birth::GridHurt { position, damage } => {
-                let descriptor = self.state.room.grid.clone().ok_or("grid Hurt requires a room grid")?;
+                let descriptor = self
+                    .state
+                    .room
+                    .grid
+                    .clone()
+                    .ok_or("grid Hurt requires a room grid")?;
                 let Some(cell) = grid::Grid::new(descriptor)?.index(position) else {
                     return Ok(());
                 };
@@ -3813,12 +3828,22 @@ pub extern "C" fn public_keys_len() -> usize {
 /// 5430a5: after its splash, a tear that died on the grid hurts the cell
 /// under it or, failing that, the cells 10 to either side, stopping at the
 /// first that takes the damage.
-fn tear_grid_hurt(state: &mut State, position: motion::WorldVector, damage: i32) -> Result<(), String> {
+fn tear_grid_hurt(
+    state: &mut State,
+    position: motion::WorldVector,
+    damage: i32,
+) -> Result<(), String> {
     let Some(descriptor) = state.room.grid.clone() else {
         return Ok(());
     };
     let grid = grid::Grid::new(descriptor)?;
-    for (x, y) in [(0.0, 0.0), (10.0, 0.0), (0.0, 10.0), (-10.0, 0.0), (0.0, -10.0)] {
+    for (x, y) in [
+        (0.0, 0.0),
+        (10.0, 0.0),
+        (0.0, 10.0),
+        (-10.0, 0.0),
+        (0.0, -10.0),
+    ] {
         let Some(cell) = grid.index(position + motion::WorldVector { x, y }) else {
             continue;
         };
