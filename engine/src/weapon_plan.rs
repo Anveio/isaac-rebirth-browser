@@ -180,10 +180,21 @@ pub(crate) fn resolve_appearance(
     let polyphemus_flags = source_player_type == Some(0)
         && prior.primary == PrimaryWeaponC08::RegularTears
         && items.admits_polyphemus_flags_context();
+    let regular = source_player_type == Some(0) && prior.primary == PrimaryWeaponC08::RegularTears;
+    let piercing_flags = regular && items.admits_piercing_flags();
+    let anti_gravity_flags = regular && items.admits_anti_gravity_flags();
+    let item_flags = piercing_flags || anti_gravity_flags;
     if source_player_type == Some(0)
-        && (selected || number_one || polyphemus_flags || homing_flags || homing_colors)
+        && (selected
+            || number_one
+            || polyphemus_flags
+            || homing_flags
+            || homing_colors
+            || item_flags)
     {
-        if requested.0 & 32 != 0 && (selected || number_one || polyphemus_flags || homing_flags) {
+        if requested.0 & 32 != 0
+            && (selected || number_one || polyphemus_flags || homing_flags || item_flags)
+        {
             let mut flags = if prior.primary == PrimaryWeaponC08::Ludovico {
                 3
             } else if polyphemus_flags {
@@ -195,6 +206,14 @@ pub(crate) fn resolve_appearance(
             if homing_flags {
                 //514EF8/5130EF is the source permanent3 operator only.
                 flags |= 4;
+            }
+            if piercing_flags {
+                //51315D: permanent48 ORs bit1.
+                flags |= 2;
+            }
+            if anti_gravity_flags {
+                //513272 via515960: regular C08 without316/69 ORs bit17.
+                flags |= 0x20000;
             }
             prior.flags_c98 = AttackFlags(flags);
             completed |= 32;

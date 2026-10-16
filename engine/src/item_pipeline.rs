@@ -90,6 +90,10 @@ const CUPID_GRANT_ITEMS: &[usize] = &[1, 4, 48];
 //Separate literal511F10 callback32/64 footprints for permanent3.
 //The existing1/4/6 roles are independent per stage;48 stays unadmitted.
 const SPOON_BENDER_FLAGS_ITEMS: &[usize] = &[1, 3, 4, 6];
+//The same callback's permanent48 (51314D) and permanent222 (513250) reads;
+//1/4/6 stay the Spoon Bender-proven neutral reads of this callback.
+const CUPID_FLAGS_ITEMS: &[usize] = &[1, 4, 6, 48];
+const ANTI_GRAVITY_FLAGS_ITEMS: &[usize] = &[1, 4, 6, 222];
 const SPOON_BENDER_COLOR_ITEMS: &[usize] = &[1, 3, 4, 6];
 
 /// Literal511f10 dispatch order. Weapon selection/removal precedes stats;
@@ -299,6 +303,18 @@ impl<'a> ItemInputs<'a> {
     ///TEMP/trinket, other cache and getter/controller owners stay separate.
     pub(crate) fn admits_homing_flags(self) -> bool {
         self.admits_permanent_readset(3, SPOON_BENDER_FLAGS_ITEMS)
+    }
+
+    ///51314D Have48 ORs bit1 (its 237/306/C08 8/336 alternates are absent
+    ///from this readset). Tear contact/piercing behavior stays separate.
+    pub(crate) fn admits_piercing_flags(self) -> bool {
+        self.admits_permanent_readset(48, CUPID_FLAGS_ITEMS)
+    }
+
+    ///513250 Have222 with regular C08 reaches515960: without316/69 it ORs
+    ///bit17. Anti-gravity tear motion stays a separate, unported owner.
+    pub(crate) fn admits_anti_gravity_flags(self) -> bool {
+        self.admits_permanent_readset(222, ANTI_GRAVITY_FLAGS_ITEMS)
     }
 
     ///Independent64 trace: positive6 precedes3 in both color destinations.
