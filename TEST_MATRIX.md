@@ -143,6 +143,7 @@ Generated from [the suite registry](tools/e2e/suites.mjs). Each suite runs the f
 | `rock-blast` | Ordinary rock destruction by bombs | [rock-blast.mjs](tools/e2e/rock-blast.mjs) `--count 2` |
 | `items` | Item pools and treasure-room pedestals | [items.mjs](tools/e2e/items.mjs) `--count 2` |
 | `item-composition` | Public Challenge resources, ordered pedestal grants, cache and weapon bodies/history across fixed phases and recorded OS cases | [item-composition.mjs](tools/e2e/item-composition.mjs) `--count 2` |
+| `pockets` | Card/Pill procedural Init, held collection and spills, copied presentation and sound requests; fixed and recorded/fresh OS public inputs | [item-composition.mjs](tools/e2e/item-composition.mjs) `--pockets all --count 1` |
 | `item-acquisition` | First collectible acquisition | [items.mjs](tools/e2e/items.mjs) `--acquisition --count 2` |
 | `stat-cache` | Player stat cache after acquiring Roid Rage and Speed Ball: stats, motion and tear velocity | [items.mjs](tools/e2e/items.mjs) `--stat-cache --count 2` |
 | `damage-fire-delay` | Sad Onion and Cricket Head damage/fire delay, born tear properties and actual contacts | [items.mjs](tools/e2e/items.mjs) `--damage-fire-delay --count 2` |
