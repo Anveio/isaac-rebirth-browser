@@ -8,7 +8,7 @@ import { promisify } from 'node:util';
 import { chromium } from '@playwright/test';
 import { PNG } from 'pngjs';
 import { browserLaunchOptions, inspectBrowserGraphics } from './browser.mjs';
-import { writeJsonEvidence } from './browser-evidence.mjs';
+import { manifestPath as browserManifestPath, readJsonEvidence, writeJsonEvidence } from './browser-evidence.mjs';
 import { compareMtDraws } from './mt-draws.mjs';
 import { readNativeEvidence } from './native-evidence.mjs';
 import { pixelDifference } from './compare.mjs';
@@ -49,6 +49,16 @@ function keyCode(key) {
   if (/^[a-z]$/i.test(key)) return 'Key' + key.toUpperCase();
   if (/^[0-9]$/.test(key)) return 'Digit' + key;
   throw new Error(`No public browser key transport for ${key}`);
+}
+
+// Where a case's games start playing their own keys (its first
+// pairedIndependent scope), as the port's game update count at that capture.
+function independentDraws(caseData, directory) {
+  const after = caseData.pairedIndependent?.[0]?.after;
+  if (!after) return undefined;
+  const frame = readJsonEvidence(browserManifestPath(directory, 'browser')).frames.find(item => item.label === after);
+  assert.ok(Number.isInteger(frame?.state?.gameUpdateCount), `pairedIndependent capture ${after} has no game update count`);
+  return { label: after, gameUpdateCount: frame.state.gameUpdateCount };
 }
 
 async function nativeCapture(caseData, directory, nativeFrameTimeout, originalObserver, archiveNativeEvidence, originalSfxVolume, mtDraws) {
@@ -344,7 +354,7 @@ export async function runPairedGate({ output, selected, randomCount = 2, replayS
         if (mtDraws) {
           try {
             result.mtDraws = compareMtDraws(join(directory, 'original', 'mt-trace'),
-              JSON.parse(readFileSync(join(directory, 'browser', 'mt-draws.json'), 'utf8')));
+              JSON.parse(readFileSync(join(directory, 'browser', 'mt-draws.json'), 'utf8')), 6, independentDraws(caseData, directory));
           } catch (error) { result.mtDraws = { status: 'diagnostic', error: String(error) }; }
         }
       } catch (error) {

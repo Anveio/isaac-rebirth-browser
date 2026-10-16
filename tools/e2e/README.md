@@ -145,7 +145,9 @@ case report gains an `mtDraws` entry from
 order by wrapper kind and update counter, and reports the first divergence
 with native return addresses and port source sites. Everything before that
 point used the same stream positions. The diagnostic never changes a case
-status. Drivers that launch the original themselves (traversal, items and
+status. A case whose games play their own keys from a capture on
+(its first `pairedIndependent` scope, e.g. stage-exit's fight) is compared only
+up to that capture; the report's `independentAfter` names it. Drivers that launch the original themselves (traversal, items and
 similar) do not support it yet.
 
 ## No CI
