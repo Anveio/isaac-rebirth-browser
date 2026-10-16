@@ -550,12 +550,17 @@ pub(crate) fn find_grid_path(
         .pathfinder
         .take()
         .ok_or("pathfinding NPC requires its NPCAI_Pathfinder")?;
-    let result = find_with(npc, &mut path, random, world, target, speed, marker, friction);
+    let result = find_with(
+        npc, &mut path, random, world, target, speed, marker, friction,
+    );
     npc.pathfinder = Some(path);
     result
 }
 
-#[expect(clippy::too_many_arguments, reason = "FindGridPath5b41e0's owner, pathfinder, target, speed, marker and friction")]
+#[expect(
+    clippy::too_many_arguments,
+    reason = "FindGridPath5b41e0's owner, pathfinder, target, speed, marker and friction"
+)]
 fn find_with(
     npc: &mut Npc,
     path: &mut Pathfinder,
@@ -578,7 +583,11 @@ fn find_with(
         path.cell_delay -= 10;
         if path.cell_delay < 0 {
             path.cell = cell;
-            path.cell_delay = if speed > 0.2 { (20.0_f32 / speed) as i32 } else { 100 };
+            path.cell_delay = if speed > 0.2 {
+                (20.0_f32 / speed) as i32
+            } else {
+                100
+            };
         }
     }
     let mut slowdown = 1.0;
@@ -605,8 +614,8 @@ fn find_with(
             .path_costs
             .as_deref()
             .ok_or("FindGridPath requires source Room.Init path costs")?;
-        path.direct = world.grid.path_line_clear(origin, sighted, costs, 0)
-            || npc.grid_collision_class == 3;
+        path.direct =
+            world.grid.path_line_clear(origin, sighted, costs, 0) || npc.grid_collision_class == 3;
     }
     let distance = length(sub(target, npc.position));
     let waypoint = if (path.direct && 750.0 > distance) || path.cell == goal {

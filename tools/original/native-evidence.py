@@ -2,6 +2,8 @@
 import gzip
 import hashlib
 import json
+import importlib.util
+from pathlib import Path
 
 
 def atomic_metadata(path, value):
@@ -18,6 +20,53 @@ def file_digest(path):
             digest.update(chunk)
             size += len(chunk)
     return size, digest.hexdigest()
+
+
+_ZSTD = None
+
+
+def zstd_module():
+    global _ZSTD
+    if _ZSTD is None:
+        spec = importlib.util.spec_from_file_location(
+            'native_journal_zstd', Path(__file__).with_name('native-journal-zstd.py'))
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        _ZSTD = module
+    return _ZSTD
+
+
+def make_progress(directory, codec='gzip'):
+    if codec == 'gzip':
+        return Progress(directory)
+    if codec == 'zstd':
+        return zstd_module().Progress(directory, atomic_metadata)
+    raise ValueError('Unknown Native journal codec')
+
+
+def progress_path(directory):
+    paths = [directory / name for name in ('native-progress.jsonl.gz', 'native-progress.jsonl.zst')]
+    present = [path for path in paths if path.exists()]
+    if len(present) > 1:
+        raise ValueError('Multiple Native progress formats in one capture')
+    return present[0] if present else None
+
+
+def validate_progress_format(path, metadata):
+    if path.suffix == '.gz' and (metadata['schema'], metadata['encoding']) == (1, 'gzip-members-jsonl'):
+        return
+    if path.suffix == '.zst' and (metadata['schema'], metadata['encoding']) == (2, 'zstd-stream-jsonl'):
+        if metadata['windowLog'] == 23 and metadata['checksum'] is True:
+            return
+    raise ValueError('Unknown Native progress format')
+
+
+def open_progress(path):
+    if path.suffix == '.gz':
+        return gzip.open(path, 'rb')
+    if path.suffix == '.zst':
+        return zstd_module().open_closed(path)
+    raise ValueError('Unknown Native progress format')
 
 
 class JournalValues:
@@ -38,7 +87,7 @@ class JournalValues:
             raise ValueError('Native progress has an uncommitted tail or changed archive')
         raw_hash = hashlib.sha256()
         raw_bytes = records = 0
-        with gzip.open(progress.path, 'rb') as stream:
+        with open_progress(progress.path) as stream:
             for raw in stream:
                 raw_hash.update(raw)
                 raw_bytes += len(raw)
@@ -114,6 +163,77 @@ def write_manifest(path, report):
     return evidence
 
 
+def require_zstd():
+    """Resolve optional writer/reader dependencies only for explicit Zstd."""
+    from ctypes.util import find_library
+    module = zstd_module()
+    if find_library('zstd') is None:
+        raise RuntimeError('Zstd Native manifests require installed system libzstd')
+    return module
+
+
+def validate_manifest_format(path, metadata):
+    if path.suffix == '.gz' and (metadata['schema'], metadata['encoding']) == (1, 'gzip'):
+        return
+    if path.suffix == '.zst' and (metadata['schema'], metadata['encoding']) == (2, 'zstd-stream-json'):
+        if metadata['windowLog'] == 23 and metadata['checksum'] is True:
+            return
+    raise ValueError('Unknown Native manifest format')
+
+
+def open_manifest(path):
+    if path.suffix == '.gz':
+        return gzip.open(path, 'rb')
+    if path.suffix == '.zst':
+        return zstd_module().open_closed(path)
+    raise ValueError('Unknown Native manifest format')
+
+
+def write_zstd_manifest(path, report):
+    """Same complete manifest bytes, directly into one strict Zstd frame."""
+    if path.suffix != '.zst':
+        raise ValueError('Zstd Native manifest requires an explicit .zst path')
+    module = require_zstd()
+    temporary = path.with_name(path.name + '.part')
+    with temporary.open('xb') as output:
+        archive = module.FlushedZstdTransport(output)
+        pending = bytearray()
+
+        def append(raw):
+            offset = 0
+            while offset < len(raw):
+                take = min(module.CHUNK - len(pending), len(raw) - offset)
+                pending.extend(raw[offset:offset + take])
+                offset += take
+                if len(pending) == module.CHUNK:
+                    archive.write(bytes(pending))
+                    archive.flush()
+                    pending.clear()
+
+        try:
+            for text in manifest_chunks(report):
+                append(text.encode('utf8'))
+            append(b'\n')
+            if pending:
+                archive.write(bytes(pending))
+                archive.flush()
+            archive.close()
+        except BaseException:
+            archive.failed = True
+            raise
+    temporary.replace(path)
+    archive_bytes, archive_sha = file_digest(path)
+    if (archive_bytes, archive_sha) != (archive.transport_bytes, archive.transport_digest.hexdigest()):
+        raise ValueError('Native manifest encoded bytes changed while closing')
+    evidence = {'schema': 2, 'status': 'closed', 'encoding': 'zstd-stream-json', 'path': str(path),
+                'windowLog': 23, 'checksum': True,
+                'rawBytes': archive.input_bytes, 'rawSha256': archive.input_digest.hexdigest(),
+                'archiveBytes': archive_bytes, 'archiveSha256': archive_sha,
+                'scope': 'Complete native manifest, identical decompressed JSON bytes; no observation truncation'}
+    atomic_metadata(path.with_name(path.name + '.meta.json'), evidence)
+    return evidence
+
+
 class Progress:
     """Each committed JSONL record is a complete, independently closed gzip member.
 
@@ -153,14 +273,18 @@ class Progress:
 
 
 def read_manifest(path):
-    if path.suffix == '.gz':
+    if path.suffix in ('.gz', '.zst'):
         metadata = path.with_name(path.name + '.meta.json')
-        progress = path.parent / 'native-progress.jsonl.gz'
-        if metadata.exists() and progress.exists():
+        progress = progress_path(path.parent)
+        if path.suffix == '.zst' and (not metadata.exists() or progress is None):
+            raise ValueError('Zstd Native manifest requires complete metadata and journal')
+        if progress is not None and progress.suffix == '.zst' and not metadata.exists():
+            raise ValueError('Zstd Native evidence requires complete manifest metadata')
+        if metadata.exists() and progress is not None:
             manifest_meta = json.loads(metadata.read_text())
             progress_meta = json.loads(progress.with_name(progress.name + '.meta.json').read_text())
-            if (manifest_meta['schema'], manifest_meta['encoding'], progress_meta['schema'], progress_meta['encoding']) != (1, 'gzip', 1, 'gzip-members-jsonl'):
-                raise ValueError('Unknown native evidence format')
+            validate_manifest_format(path, manifest_meta)
+            validate_progress_format(progress, progress_meta)
             if manifest_meta['status'] != 'closed' or progress_meta['status'] != 'closed':
                 raise ValueError('Native evidence is not closed')
             if file_digest(path) != (manifest_meta['archiveBytes'], manifest_meta['archiveSha256']):
@@ -171,7 +295,7 @@ def read_manifest(path):
             raw_bytes = records = 0
             report = None
             finished = False
-            with gzip.open(progress, 'rb') as stream:
+            with open_progress(progress) as stream:
                 for raw in stream:
                     raw_hash.update(raw)
                     raw_bytes += len(raw)
@@ -216,7 +340,7 @@ def read_manifest(path):
                 raise ValueError('Native journal does not reconstruct the complete manifest bytes')
             digest = hashlib.sha256()
             size = 0
-            with gzip.open(path, 'rb') as stream:
+            with open_manifest(path) as stream:
                 while chunk := stream.read(1024 * 1024):
                     digest.update(chunk)
                     size += len(chunk)

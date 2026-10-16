@@ -172,6 +172,28 @@ pub fn bomb_hit(
     source: combat::DamageSource,
     line_clear: &dyn Fn(WorldVector) -> bool,
 ) -> Result<(), String> {
+    bomb_hit_with_copied_source(
+        state,
+        center,
+        blast_radius,
+        damage,
+        source,
+        None,
+        line_clear,
+    )
+}
+
+///The same admitted blast path, with a separately owned pre-callback EntityRef.
+///Unclosed ordinary callers retain None through the unchanged public wrapper.
+pub(crate) fn bomb_hit_with_copied_source(
+    state: &mut State,
+    center: WorldVector,
+    blast_radius: f32,
+    damage: f32,
+    source: combat::DamageSource,
+    copied_source: Option<combat::CopiedDamageSource>,
+    line_clear: &dyn Fn(WorldVector) -> bool,
+) -> Result<(), String> {
     for npc in &mut state.room.npcs {
         // 554490 skips the blast's own source entity (a Mulligan's EXPLODE).
         if npc.id == source.id && npc.kind == source.entity_type {
@@ -209,6 +231,7 @@ pub fn bomb_hit(
                 amount: damage,
                 kind: combat::DamageKind::Bomb,
                 source,
+                copied_source,
             },
         )?;
     }
@@ -229,54 +252,89 @@ pub fn tear_hit(
         return Err("tear contact requires bounded ground geometry and damage".into());
     }
     for npc in &mut state.room.npcs {
-        if npc.dead || npc.removed || npc.entity_collision_class != 4 {
-            continue;
-        }
-        let dx = ground.x - npc.position.x;
-        let dy = ground.y - npc.position.y;
-        let sum = radius + npc.collision_radius;
-        if dx.abs() > sum || dy.abs() > sum || (dx * dx + dy * dy).sqrt() >= sum {
-            continue;
-        }
-        let health = npc.health();
-        if npc.damage.enqueue(
-            health,
-            combat::DamageEvent {
-                amount: damage,
-                kind: combat::DamageKind::Tear,
-                source: combat::DamageSource {
-                    id: tear_id,
-                    entity_type: 2,
-                },
-            },
-        )? {
-            let mut tear_body = combat::ContactBody {
-                id: tear_id,
-                entity_type: 2,
-                position: ground,
-                velocity: motion.velocity,
-                radius,
-                mass: 8.0,
-            };
-            let mut npc_body = combat::ContactBody {
-                id: npc.id,
-                entity_type: npc.kind,
-                position: npc.position,
-                velocity: npc.velocity,
-                radius: npc.collision_radius,
-                mass: npc.collision_mass,
-            };
-            combat::resolve_tear_npc_contact(&mut tear_body, &mut npc_body)?;
-            motion.position = tear_body.position;
-            motion.presented_position = tear_body.position;
-            motion.velocity = tear_body.velocity;
-            npc.position = npc_body.position;
-            npc.presented_position = npc_body.position;
-            npc.velocity = npc_body.velocity;
+        if tear_hit_receiver(npc, motion, radius, tear_id, damage)? {
             return Ok(Some(npc.id));
         }
     }
     Ok(None)
+}
+
+///One actual candidate from the canonical source contact partition. The old
+///entry point above retains its previous receiver order when Poly is absent.
+pub(crate) fn tear_hit_target(
+    state: &mut State,
+    motion: &mut crate::projectiles::TearMotion,
+    radius: f32,
+    tear_id: u32,
+    damage: f32,
+    target_id: u32,
+) -> Result<Option<u32>, String> {
+    let ground = motion.position;
+    if !ground.is_finite() || !radius.is_finite() || radius < 0.0 || !damage.is_finite() {
+        return Err("tear contact requires bounded ground geometry and damage".into());
+    }
+    let Some(npc) = state.room.npcs.iter_mut().find(|npc| npc.id == target_id) else {
+        return Ok(None);
+    };
+    Ok(tear_hit_receiver(npc, motion, radius, tear_id, damage)?.then_some(npc.id))
+}
+
+fn tear_hit_receiver(
+    npc: &mut Npc,
+    motion: &mut crate::projectiles::TearMotion,
+    radius: f32,
+    tear_id: u32,
+    damage: f32,
+) -> Result<bool, String> {
+    let ground = motion.position;
+    if npc.dead || npc.removed || npc.entity_collision_class != 4 {
+        return Ok(false);
+    }
+    let dx = ground.x - npc.position.x;
+    let dy = ground.y - npc.position.y;
+    let sum = radius + npc.collision_radius;
+    if dx.abs() > sum || dy.abs() > sum || (dx * dx + dy * dy).sqrt() >= sum {
+        return Ok(false);
+    }
+    let health = npc.health();
+    if npc.damage.enqueue(
+        health,
+        combat::DamageEvent {
+            amount: damage,
+            kind: combat::DamageKind::Tear,
+            source: combat::DamageSource {
+                id: tear_id,
+                entity_type: 2,
+            },
+            copied_source: None,
+        },
+    )? {
+        let mut tear_body = combat::ContactBody {
+            id: tear_id,
+            entity_type: 2,
+            position: ground,
+            velocity: motion.velocity,
+            radius,
+            mass: 8.0,
+        };
+        let mut npc_body = combat::ContactBody {
+            id: npc.id,
+            entity_type: npc.kind,
+            position: npc.position,
+            velocity: npc.velocity,
+            radius: npc.collision_radius,
+            mass: npc.collision_mass,
+        };
+        combat::resolve_tear_npc_contact(&mut tear_body, &mut npc_body)?;
+        motion.position = tear_body.position;
+        motion.presented_position = tear_body.position;
+        motion.velocity = tear_body.velocity;
+        npc.position = npc_body.position;
+        npc.presented_position = npc_body.position;
+        npc.velocity = npc_body.velocity;
+        return Ok(true);
+    }
+    Ok(false)
 }
 
 pub fn player_contacts(state: &mut State) -> Result<(), String> {
@@ -421,6 +479,7 @@ pub fn nonplayer_contacts(state: &mut State) -> Result<(), String> {
                                 id: first.id,
                                 entity_type: 33,
                             },
+                            copied_source: None,
                         },
                     )?;
                 }
@@ -435,6 +494,7 @@ pub fn nonplayer_contacts(state: &mut State) -> Result<(), String> {
                                 id: second.id,
                                 entity_type: 33,
                             },
+                            copied_source: None,
                         },
                     )?;
                 }
@@ -526,7 +586,7 @@ pub(crate) fn initialize_startup_clear(state: &mut State) {
     }
 }
 
-pub fn advance_room_clear(state: &mut State) {
+pub fn advance_room_clear(state: &mut State) -> Result<(), String> {
     // Room5d1487 checks signed dc+e0 after the full manager/contact pass.
     // It is independent of HP, visible actor count and current boss_count2490.
     if state.room.manager_counts.countable_total() > 0 {
@@ -539,8 +599,23 @@ pub fn advance_room_clear(state: &mut State) {
         change_doors(state, true);
         if !state.room.combat_clear {
             state.room.combat_clear = true;
+            // 5d19cb..5d19e9 PlaySound(36 door heavy open, volume1, delay2) before
+            // SpawnClearAward5c9240. Ordinary-room pickup awards remain separate.
+            state.audio.admit(
+                &mut state.boot_lifecycle.shared,
+                state.system_clock.system_counter - 1,
+                crate::audio::SoundRequest {
+                    id: 36,
+                    volume: 1.0,
+                    delay: 2,
+                    looping: false,
+                    pitch: 1.0,
+                },
+            );
+            crate::stage_transition::spawn_boss_award(state)?;
         }
     }
+    Ok(())
 }
 
 fn change_doors(state: &mut State, open: bool) {
@@ -596,6 +671,9 @@ fn change_doors(state: &mut State, open: bool) {
     }
     if open {
         state.room.combat_shut_door_slots.clear();
+        state.room.combat_shut_update = None;
+    } else if !changed.is_empty() {
+        state.room.combat_shut_update = Some(state.game_update_count);
     }
     if let Some(grid) = &mut state.room.grid {
         for position in changed {
@@ -613,7 +691,7 @@ fn change_doors(state: &mut State, open: bool) {
     }
 }
 
-fn normalized(vector: WorldVector) -> WorldVector {
+pub(crate) fn normalized(vector: WorldVector) -> WorldVector {
     let length = (vector.x * vector.x + vector.y * vector.y).sqrt();
     if length > 0.0 {
         vector * (1.0 / length)

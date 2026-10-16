@@ -7,8 +7,8 @@
 //     --affected map is rebuilt from them);
 //   - a failing suite keeps everything until its run falls out of the newest
 //     --keep-runs runs.
-// Only runner-created .cache/e2e/run-* directories are ever pruned.
-import { createReadStream, createWriteStream, existsSync, readdirSync, readFileSync, rmSync, statSync, unlinkSync, writeFileSync } from 'node:fs';
+// Only runner-created run directories under .cache/e2e are ever pruned.
+import { createReadStream, createWriteStream, existsSync, readdirSync, readFileSync, rmSync, statfsSync, statSync, unlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pipeline } from 'node:stream/promises';
@@ -64,13 +64,15 @@ function keepInputTraces(path) {
 }
 
 // Slim every suite of the runner-created runs older than the newest `keep`.
+// A runner-created run is any directory directly under `root` holding the
+// runner's schema-2 report, whether named run-* or chosen with --output.
 // Runs still marked running are left alone unless their report is a day old.
 export async function pruneRuns(root, keep, current) {
   if (!existsSync(root)) return [];
   const runs = [];
-  for (const name of readdirSync(root)) {
-    const directory = join(root, name), reportPath = join(directory, 'report.json');
-    if (!/^run-/.test(name) || directory === current || !existsSync(reportPath)) continue;
+  for (const entry of readdirSync(root, { withFileTypes: true })) {
+    const directory = join(root, entry.name), reportPath = join(directory, 'report.json');
+    if (!entry.isDirectory() || directory === current || !existsSync(reportPath)) continue;
     let report;
     try { report = JSON.parse(readFileSync(reportPath, 'utf8')); } catch { continue; }
     if (report.schema !== 2 || !Array.isArray(report.suites) || report.retention?.slimmed) continue;
@@ -110,4 +112,9 @@ export function sweepProductionSnapshots() {
 function isAlive(pid) {
   if (!Number.isInteger(pid) || pid <= 0) return false;
   try { process.kill(pid, 0); return true; } catch (error) { return error.code === 'EPERM'; }
+}
+
+// Free bytes on the filesystem holding `path` (statfs; Infinity if unknown).
+export function freeBytes(path) {
+  try { const stats = statfsSync(path); return stats.bavail * stats.bsize; } catch { return Infinity; }
 }

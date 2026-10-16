@@ -1,0 +1,87 @@
+{
+  "schema": 1,
+  "kind": "retained-private-runtime-evidence-summary",
+  "caseBank": "references/isaac/cases/item-composition/spoon-bender3-v1.json",
+  "replay": "npm run test:e2e -- item-composition --scenarios references/isaac/cases/item-composition/spoon-bender3-v1.json",
+  "runtimeScope": "Actual independent private4433 artifact, not public main or future current-clock successor. Reusable observation tools do not grant runtime qualification.",
+  "sourceHead": "44335023333526c14d0f837528d50d6ad0e1b3b2",
+  "wasmSha256": "b020922f767962a3b90b4e5fdd2cec2627891bd3bcaa1191254ea38131d83860",
+  "normalProduction": {
+    "exit": 0,
+    "seconds": 30.448
+  },
+  "raw405": {
+    "checks": 38028493,
+    "failures": 2024,
+    "newPlayerItemsKeyShape": 1012,
+    "newMoveSpeedInputs": 1012,
+    "preexistingChanged": 0,
+    "preexistingMissing": 0
+  },
+  "own4": {
+    "checks": 24181,
+    "failures": 42,
+    "reportSha256": "143279dbcbbfae2d0cfaeedbf77e5d0bcab603b98eed75fc6f2e5525b3e101b7",
+    "caseNames": [
+      "spoon-bender3-homing-npc-fixed-phase0",
+      "spoon-bender3-homing-npc-fixed-phase1",
+      "spoon-bender3-homing-npc-recorded-0",
+      "spoon-bender3-homing-npc-recorded-1"
+    ],
+    "metrics": {
+      "actualGrants": 4,
+      "bornHomingTears": 96,
+      "fullBodyRows": 2038,
+      "fastBodyRows": 2052,
+      "nonnullTargetStates": 80,
+      "acquiredTargetTransitions": 6,
+      "laterFullSteeringDiagnostics": 15
+    }
+  },
+  "firstOriginal": {
+    "exit": 0,
+    "seconds": 72.05
+  },
+  "correctedSavedPairConsumer": {
+    "checks": 85739,
+    "failures": 43069,
+    "reportSha256": "1f7d54551689aa49066729867986b491d66edcd98e1c880bef286d1e366063ed",
+    "previousReportSha256": "42b6a9c121536c5de71ff71f84eb7f94f2ca67b8c38d9d102a9f994a0933ecdd",
+    "sameActualSavedTuplesSha256": "40e74dee514d6897410b3caa0ec4f1fa8784c9a8b46f8ef2f6eebe043d68c57b",
+    "onlyChangedPerFieldCounters": {
+      "Spoon3 native actual independent MoveSpeed history": {
+        "old": [
+          898,
+          898
+        ],
+        "new": null
+      },
+      "Spoon3 native actual independent neutral MoveSpeed inputs": {
+        "old": null,
+        "new": [
+          898,
+          0
+        ]
+      },
+      "Spoon3 native actual source neutral MoveSpeed D60": {
+        "old": null,
+        "new": [
+          898,
+          0
+        ]
+      }
+    },
+    "identityAndUngradedScope": 37590
+  },
+  "limits": [
+    "Strict identity/seed/RNG and clock differences remain failures.",
+    "Raw Fast/sourcecallback and missing coverage remain failures; observed target/body state does not prove atomic callbacks.",
+    "No whole-current-main or whole-backend parity claim; current-clock runtime successor requires its own artifact."
+  ],
+  "toolSourcePeer": "f02e57f855e3c039fc6d3a3b1da22eac6518f1dc4c06e5557c0a5505bb5fdd7d",
+  "correctedComparerSha256": "f383f84addfdb6217615393adf40606478899b1d75eba4f83be014db6d5935e5",
+  "relatedToolPullRequests": [
+    423,
+    424
+  ]
+}

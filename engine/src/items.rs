@@ -41,6 +41,23 @@ pub fn definition(id: u32) -> Option<&'static CollectibleDefinition> {
         .map(|index| &COLLECTIBLES[index])
 }
 
+///Conservative Add registration readset. False closes an empty ANM/skip
+///branch; true still needs its actual config+58 binding and caller proof.
+///This metadata helper never grants registration or selected-pose capability.
+pub(crate) fn collectible_add_may_register_costume(id: u32) -> bool {
+    let Some(config) = definition(id) else {
+        return false;
+    };
+    if COSTUME_COLLECTIBLE_IDS.binary_search(&id).is_err() {
+        return false;
+    }
+    match config.kind {
+        1 => ![122, 311, 313].contains(&id),
+        3 => [40, 86, 130, 181].contains(&id),
+        _ => true,
+    }
+}
+
 /// Source 5c2d40/5c2d70, represented as its actual four native words.
 #[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]

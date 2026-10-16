@@ -17,7 +17,7 @@ ROOT = Path(__file__).resolve().parents[2]
 EXPECTED_SHA = os.environ.get('ISAAC_ORIGINAL_SHA')
 if not isinstance(EXPECTED_SHA, str) or re.fullmatch(r'[0-9a-f]{64}', EXPECTED_SHA) is None:
     raise ValueError('ISAAC_ORIGINAL_SHA must provide the driver-verified canonical binary SHA256')
-SOURCE_FIELDS = frozenset(('playerMovementD9c', 'knifeChildChain4a0', 'npc14And18DamageQueue', 'kind8TearFields', 'ordinaryTechnology', 'ordinaryDrFetusBombs'))
+SOURCE_FIELDS = frozenset(('playerMovementD9c', 'knifeChildChain4a0', 'npc14And18DamageQueue', 'kind8TearFields', 'ordinaryTechnology', 'ordinaryDrFetusBombs', 'controlledTechnology7x2x1', 'controlledDrFetusBombs', 'monstrosLung229', 'spoonBender3Tears', 'controlledKnifeSatelliteChain'))
 spec = importlib.util.spec_from_file_location('composition_items', ROOT / 'tools/original/item-observer.py')
 base = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(base)
@@ -52,7 +52,7 @@ def observe(pid, context):
                     'nativeBinarySha256': EXPECTED_SHA, 'requestedSourceFields': requested_fields, 'players': [], 'attacks': [], 'impacts': [], 'contactNpcs': []}
     if 'npc14And18DamageQueue' in requested_fields:
         supplemental['commonContactNpcs'] = []
-    if 'ordinaryDrFetusBombs' in requested_fields:
+    if 'ordinaryDrFetusBombs' in requested_fields or 'controlledDrFetusBombs' in requested_fields:
         supplemental['fetusBombs'] = []
     stopped = False
     try:
@@ -169,12 +169,30 @@ def observe(pid, context):
                     'initialized3074': flags(player + 0x3074, 1)[0], 'canShoot3075': flags(player + 0x3075, 1)[0],
                     'transformationCounts': [i32(player + 0x3068), i32(player + 0x306c)],
                     'actorSlots': {f'{offset:x}': actor_slot(pointer) for offset, pointer in slots.items()}})
-                if 'ordinaryDrFetusBombs' in requested_fields:
+                if 'ordinaryDrFetusBombs' in requested_fields or 'controlledDrFetusBombs' in requested_fields:
                     supplemental['players'][-1]['fetusCaller'] = {
                         'playerTypeBfc': i32(player + 0xbfc),
                         'trinketSlotsE14': [i32(player + 0xe14), i32(player + 0xe18)],
                         'previousVelocityDd4': floats(player + 0xdd4, 2),
                         'fireCooldownC74': i32(player + 0xc74), 'headTimerBb0': i32(player + 0xbb0)}
+                if 'monstrosLung229' in requested_fields:
+                    supplemental['players'][-1]['monstroCaller'] = {
+                        'playerTypeBfc': i32(player + 0xbfc),
+                        'trinketSlotsE14': [i32(player + 0xe14), i32(player + 0xe18)],
+                        'playerFlags318': u32(player + 0x318),
+                        'shootingLock7dc': u32(player + 0x7dc),
+                        'position448': floats(player + 0x448, 2),
+                        'previousVelocityDd4': floats(player + 0xdd4, 2)}
+                if 'spoonBender3Tears' in requested_fields:
+                    supplemental['players'][-1]['spoonMoveSpeedInputs'] = {
+                        'sourceD28': i32(player + 0xd28), 'sourceD44': i32(player + 0xd44),
+                        'source13bc': i32(player + 0x13bc), 'source13c0': i32(player + 0x13c0),
+                        'actualMoveSpeedD60': floats(player + 0xd60)}
+                if 'controlledKnifeSatelliteChain' in requested_fields:
+                    supplemental['players'][-1]['knifeSatelliteCaller'] = {
+                        'playerTypeBfc': i32(player + 0xbfc),
+                        'activeStateD80': i32(player + 0xd80),
+                        'currentDamageC88': floats(player + 0xc88)}
                 if 'playerMovementD9c' in requested_fields:
                     supplemental['players'][-1]['movementDirectionD9c'] = i32(player + 0xd9c)
             room = u64(game + 0x8180)
@@ -211,7 +229,28 @@ def observe(pid, context):
             # actual registered Uninit, not !dead, is the producer of NULL.
             child_pointers = [u64(pointer + 0x4a0) for pointer in [*pointers, *slot_pointers]
                 if pointer and u32(pointer + 0x10) == 7 and u64(pointer) == VTABLES[7]]
-            all_pointers = dict.fromkeys([*pointers, *slot_pointers, *child_pointers])
+            knife_chain_pointers = []
+            if 'controlledKnifeSatelliteChain' in requested_fields:
+                #Actual447F40 registered4A0 is independent of Parent498.
+                #Follow referenced objects after Remove too; manager absence
+                #never supplies NULL. Writable/class checks precede every read.
+                pending_knives = list(dict.fromkeys(pointer for pointer in [*pointers, *slot_pointers]
+                    if pointer and u32(pointer + 0x10) == 8))
+                visited_knives = set()
+                while pending_knives:
+                    owner = pending_knives.pop(0)
+                    if owner in visited_knives:
+                        continue
+                    if len(visited_knives) >= 512 or u32(owner + 0x10) != 8 or u64(owner) != VTABLES[8]:
+                        raise ValueError('Knife4A0 traversal outside actual bounded Knife storage')
+                    visited_knives.add(owner)
+                    child = u64(owner + 0x4a0)
+                    if child:
+                        if u32(child + 0x10) != 8 or u64(child) != VTABLES[8]:
+                            raise ValueError('Actual Knife4A0 target is not canonical Knife')
+                        knife_chain_pointers.append(child)
+                        pending_knives.append(child)
+            all_pointers = dict.fromkeys([*pointers, *slot_pointers, *child_pointers, *knife_chain_pointers])
             for actor in all_pointers:
                 if not actor:
                     continue
@@ -251,7 +290,7 @@ def observe(pid, context):
                         supplemental['commonContactNpcs'].append(row)
                     else:
                         supplemental['contactNpcs'].append(row)
-                if identity['kind'] == 4 and 'ordinaryDrFetusBombs' in requested_fields:
+                if identity['kind'] == 4 and ('ordinaryDrFetusBombs' in requested_fields or 'controlledDrFetusBombs' in requested_fields):
                     # 66B4D0: Init456E00/Full457060/Fast4446A0. This is a
                     # distinct Bomb owner, never a Knife/Laser field alias.
                     if u64(actor) != 0x66b4d0:
@@ -279,11 +318,15 @@ def observe(pid, context):
                         'linkedParent': actor_ref(u64(actor + 0x498)),
                         'sourceColor3a0': floats(actor + 0x3a0, 11),
                         'currentColor2d0': floats(actor + 0x2d0, 11)})
+                    if 'controlledDrFetusBombs' in requested_fields:
+                        #519FC0 follows the real reused Bomb4's Child4A0. The
+                        #66B4D0/type4 guard above precedes this typed pointer.
+                        supplemental['fetusBombs'][-1]['controlledChild4a0'] = actor_ref(u64(actor + 0x4a0))
                     #7EC's initial/global ordinal writer is unowned. Its raw
                     # padding is not read or substituted with a numeric zero.
                 if identity['kind'] not in VTABLES or (identity['kind'] == 1000 and (identity['variant'],identity['subtype']) != (50,1)):
-                    if not ('ordinaryTechnology' in requested_fields and identity['kind'] == 1000
-                            and (identity['variant'], identity['subtype']) == (50, 0)):
+                    if not (('ordinaryTechnology' in requested_fields or 'controlledTechnology7x2x1' in requested_fields)
+                            and identity['kind'] == 1000 and (identity['variant'], identity['subtype']) == (50, 0)):
                         continue
                 if u64(actor) != VTABLES[identity['kind']]:
                     raise ValueError('Source attack family has an unexpected virtual class')
@@ -310,6 +353,40 @@ def observe(pid, context):
                     # 7D8 is falling speed in Tear; its attack flags live at
                     # 7F0. Knife's distinct attack flags are at 7D8 below.
                     row['attackFlags7f0'] = str(u64(actor + 0x7f0))
+                    if 'spoonBender3Tears' in requested_fields:
+                        #Actual671270/type2 above, fresh ordinary0/0 and born4.
+                        #Current4A8 is a live registered slot, never a copied
+                        #historical pointer or first-seen-as-Init alias.
+                        writer = ((identity['variant'], identity['subtype']) == (0, 0)
+                                  and int(row['attackFlags7f0']) == 4
+                                  and row['cachedSpawner'] == {'kind': 1, 'variant': 0})
+                        row['spoonWriterScope'] = writer
+                        row['spoonHoming'] = None
+                        if writer:
+                            #5424B1..F4 creates the actual808 tree;54473F..776
+                            #reads root818 and key20, with children10/18.
+                            count = u64(actor + 0x830)
+                            if count > 256:
+                                raise ValueError('Homing808 registry outside finite observation scope')
+                            pending_nodes = [u64(actor + 0x818)]
+                            seen_nodes, keys = set(), []
+                            while pending_nodes:
+                                node = pending_nodes.pop()
+                                if not node:
+                                    continue
+                                if node in seen_nodes or len(seen_nodes) >= 256:
+                                    raise ValueError('Malformed or unbounded actual homing registry')
+                                seen_nodes.add(node)
+                                keys.append(u32(node + 0x20))
+                                pending_nodes.extend((u64(node + 0x10), u64(node + 0x18)))
+                            if len(keys) != count or len(set(keys)) != len(keys):
+                                raise ValueError('Homing registry actual count/key owners disagree')
+                            row['spoonHoming'] = {
+                                'target4a8': actor_ref(u64(actor + 0x4a8)),
+                                'velocityMultiplier7e0': floats(actor + 0x7e0),
+                                'baseDamage83c': floats(actor + 0x83c),
+                                'shotOrdinal838': u32(actor + 0x838),
+                                'hitSequences808': sorted(keys)}
                     if 'kind8TearFields' in requested_fields:
                         writer = ((identity['variant'], identity['subtype']) == (0, 0)
                                   and bool(int(row['attackFlags7f0']) & (1 << 33)))
@@ -320,10 +397,21 @@ def observe(pid, context):
                         # Fast5414A0 retainsB28; do not synthesize a Fast zero.
                         row['baseDamage83c'] = floats(actor + 0x83c) if writer else None
                         row['velocityDeltaB28'] = floats(actor + 0xb28, 2) if writer else None
+                    if ('monstrosLung229' in requested_fields
+                            and (identity['variant'], identity['subtype']) == (1, 0)):
+                        #Canonical2/1/0 passes actual671270 before these reads.
+                        #5411E8/54240F owns83C;5179DB copies actualPlayerC84
+                        #into Tear838. Neither field is a correspondence alias.
+                        row['monstroBaseDamage83c'] = floats(actor + 0x83c)
+                        row['monstroShotOrdinal838'] = u32(actor + 0x838)
                     row['height7d4'] = floats(actor + 0x7d4)
                     row['fallingSpeed7d8'] = floats(actor + 0x7d8)
                     row['fallingAcceleration7dc'] = floats(actor + 0x7dc)
                 elif identity['kind'] == 8:
+                    if 'controlledKnifeSatelliteChain' in requested_fields:
+                        #The successful keyed read owns knownNULL; unavailable
+                        #or invalidated references are errors, never NULL heals.
+                        row['knifeSatelliteChild4a0'] = actor_ref(u64(actor + 0x4a0))
                     if 'knifeChildChain4a0' in requested_fields:
                         child_chain = u64(actor + 0x4a0)
                         row['childChain4a0Null'] = child_chain == 0
@@ -405,6 +493,19 @@ def observe(pid, context):
                             'subdivisions': u32(actor + 0x814) if technology_writer else None,
                             'mode': u32(actor + 0x868) if technology_writer else None,
                             'length': floats(actor + 0x86c) if technology_writer else None}
+                    if 'controlledTechnology7x2x1' in requested_fields:
+                        #4799D0 initializes actual7/2/1 Line50/mode1/width60.
+                        #477DC0 owns the ring vectors; preserve other typed fields.
+                        controlled_technology_writer = (identity['variant'] == 2 and identity['subtype'] == 1
+                            and row['linkedParent'] is not None and row['linkedParent']['kind'] == 1
+                            and not row['laser']['firstUpdate'] and row['laser']['lineEnabled']
+                            and len(points) >= 2)
+                        row['laser']['controlledTechnologyLine'] = {
+                            'sourceWriterScope': controlled_technology_writer,
+                            'width': floats(actor + 0x810) if controlled_technology_writer else None,
+                            'subdivisions': u32(actor + 0x814) if controlled_technology_writer else None,
+                            'mode': u32(actor + 0x868) if controlled_technology_writer else None,
+                            'length': floats(actor + 0x86c) if controlled_technology_writer else None}
                 if identity['kind'] == 1000:
                     # v2 ordinary Impact contract5187908b:7D8 is a raw u8,
                     # render depth lives at7F8; remaining7F0 starts-1.
@@ -415,6 +516,12 @@ def observe(pid, context):
                         #Actual479732 and479773 owners;814 is not Sprite2CC.
                         row['impact']['technology'] = {'spriteFlipX': flags(actor + 0x2fc, 1)[0],
                                                        'raw814': floats(actor + 0x814)}
+                    if ('controlledTechnology7x2x1' in requested_fields
+                            and identity['variant'] == 50 and identity['subtype'] == 0):
+                        #479732/479773 own flip2FC and raw814 before childFull.
+                        #raw814 is independent of Sprite.rotation2CC.
+                        row['impact']['controlledTechnology'] = {
+                            'spriteFlipX': flags(actor + 0x2fc, 1)[0], 'raw814': floats(actor + 0x814)}
                     supplemental['impacts'].append(row)
                 else:
                     supplemental['attacks'].append(row)

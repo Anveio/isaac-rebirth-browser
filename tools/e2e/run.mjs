@@ -18,7 +18,7 @@ import { spawn, spawnSync } from 'node:child_process';
 import { appendFileSync, createWriteStream, existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { pruneRuns, slimSuite, sweepProductionSnapshots } from './lib/retention.mjs';
+import { freeBytes, pruneRuns, slimSuite, sweepProductionSnapshots } from './lib/retention.mjs';
 import { RUNNABLE, SUITES, suiteById } from './suites.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
@@ -117,7 +117,12 @@ writeJson(reportPath, report);
 // scenarios, cases, logs and small files; killed suites' dist copies go.
 if (!keepEvidence) {
   for (const directory of sweepProductionSnapshots()) console.log(`swept stale production snapshot ${directory}`);
-  for (const run of await pruneRuns(join(ROOT, '.cache/e2e'), keepRuns, runDirectory))
+  // A full entities run alone writes several GB; below LOW_DISK free, every
+  // older run is slimmed, not just those beyond --keep-runs.
+  const LOW_DISK = 12 * 2 ** 30;
+  const low = freeBytes(ROOT) < LOW_DISK;
+  if (low) console.log(`low disk (${Math.round(freeBytes(ROOT) / 2 ** 30)} GB free): slimming every older run`);
+  for (const run of await pruneRuns(join(ROOT, '.cache/e2e'), low ? 1 : keepRuns, runDirectory))
     console.log(`slimmed ${relative(ROOT, run.directory)}: ${run.files} files, ${Math.round(run.bytes / 2 ** 20)} MB`);
 }
 

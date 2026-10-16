@@ -1,7 +1,7 @@
 // Complete opt-in native manifest/journal reads without a giant JSON string.
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { createReadStream, readFileSync } from 'node:fs';
+import { createReadStream, existsSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { createInterface } from 'node:readline';
 import { Transform, Writable } from 'node:stream';
@@ -19,16 +19,35 @@ const counted = value => new Transform({ transform(chunk, _encoding, done) {
 
 export async function readNativeEvidence(manifestPath) {
   const evidence = JSON.parse(readFileSync(manifestPath + '.meta.json', 'utf8'));
-  assert.equal(evidence.schema, 1); assert.equal(evidence.encoding, 'gzip');
+  let manifestDecoders;
+  if (manifestPath.endsWith('.gz') && evidence.schema === 1 && evidence.encoding === 'gzip') {
+    manifestDecoders = [createGunzip()];
+  } else {
+    assert.ok(manifestPath.endsWith('.zst') && evidence.schema === 2 && evidence.encoding === 'zstd-stream-json', 'Unknown Native manifest format');
+    assert.equal(evidence.windowLog, 23); assert.equal(evidence.checksum, true);
+    const { nativeJournalZstdDecoders } = await import('./native-journal-zstd.mjs');
+    manifestDecoders = nativeJournalZstdDecoders();
+  }
   assert.equal(evidence.status, 'closed');
   const archive = counter(), raw = counter();
-  await pipeline(createReadStream(manifestPath), counted(archive), createGunzip(),
+  await pipeline(createReadStream(manifestPath), counted(archive), ...manifestDecoders,
     new Writable({ write(chunk, _encoding, done) { raw.write(chunk); done(); } }));
   assert.deepEqual(archive.result(), [evidence.archiveBytes, evidence.archiveSha256]);
   assert.deepEqual(raw.result(), [evidence.rawBytes, evidence.rawSha256]);
-  const path = join(dirname(manifestPath), 'native-progress.jsonl.gz');
+  const journals = ['native-progress.jsonl.gz', 'native-progress.jsonl.zst']
+    .map(name => join(dirname(manifestPath), name)).filter(path => existsSync(path));
+  assert.equal(journals.length, 1, 'Exactly one actual Native progress format required');
+  const path = journals[0];
   const metadata = JSON.parse(readFileSync(path + '.meta.json', 'utf8'));
-  assert.equal(metadata.schema, 1); assert.equal(metadata.encoding, 'gzip-members-jsonl');
+  let progressDecoders;
+  if (path.endsWith('.gz') && metadata.schema === 1 && metadata.encoding === 'gzip-members-jsonl') {
+    progressDecoders = [createGunzip()];
+  } else {
+    assert.ok(path.endsWith('.zst') && metadata.schema === 2 && metadata.encoding === 'zstd-stream-jsonl', 'Unknown Native progress format');
+    assert.equal(metadata.windowLog, 23); assert.equal(metadata.checksum, true);
+    const { nativeJournalZstdDecoders } = await import('./native-journal-zstd.mjs');
+    progressDecoders = nativeJournalZstdDecoders();
+  }
   assert.equal(metadata.status, 'closed');
   const progressArchive = counter(), progressRaw = counter(), decoded = counted(progressRaw);
   let manifest, finished = false, records = 0;
@@ -51,7 +70,7 @@ export async function readNativeEvidence(manifestPath) {
       else throw new Error('Unknown native progress record: ' + kind);
     }
   })();
-  await Promise.all([parse, pipeline(createReadStream(path), counted(progressArchive), createGunzip(), decoded)]);
+  await Promise.all([parse, pipeline(createReadStream(path), counted(progressArchive), ...progressDecoders, decoded)]);
   assert.equal(finished, true); assert.equal(records, metadata.records);
   assert.deepEqual(progressArchive.result(), [metadata.committedArchiveBytes, metadata.archiveSha256]);
   assert.deepEqual(progressRaw.result(), [metadata.rawBytes, metadata.rawSha256]);

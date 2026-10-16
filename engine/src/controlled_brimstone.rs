@@ -25,7 +25,7 @@ fn frontier(state: &mut State, channel: &str) {
 
 /// 51A93A/51C73C copy current C98 into both 7E8 and 818, CCC through v58,
 /// and C88 through v60. This caller does not execute a kind2 builder or OR bit33.
-fn apply_current(laser: &mut Laser, plan: &ResolvedWeaponPlan) {
+pub(crate) fn apply_current(laser: &mut Laser, plan: &ResolvedWeaponPlan) {
     laser.attack_flags = plan.properties.flags;
     laser.line_flags = Some(plan.properties.flags);
     laser.source_color = plan.secondary_color_ccc;
@@ -37,7 +37,7 @@ fn apply_current(laser: &mut Laser, plan: &ResolvedWeaponPlan) {
 
 /// 51C6BF applies reuse motion before the current property stores. The held
 /// path retains two rounded multiplications; neither path reads C7C or C0C.
-fn steer_reused(
+pub(crate) fn steer_reused(
     laser: &mut Laser,
     player: WorldVector,
     mut aim: WorldVector,
@@ -77,7 +77,7 @@ fn steer_reused(
     Ok(())
 }
 
-/// 52F4FB/530340 uses the real C18 displacement for held C08=2/Has329.
+/// 52F4FB/530340 uses C18 displacement for held C08=6 or C08=2/3/5 with Has329.
 /// It changes head presentation only; the callback keeps its processed aim.
 pub(crate) fn head_direction(
     state: &mut State,
@@ -93,6 +93,21 @@ pub(crate) fn head_direction(
                     .iter()
                     .find(|a| a.id == actor.id)
                     .map(|a| a.position),
+                ActorKind::Bomb => {
+                    let Some(position) = crate::bombs::referenced_position(state, actor.id)? else {
+                        frontier(state, "controlledFetusHeadReference");
+                        return Ok(());
+                    };
+                    Some(position)
+                }
+                ActorKind::Effect => {
+                    let Some(position) = crate::epic_fetus::referenced_position(state, actor.id)?
+                    else {
+                        frontier(state, "epicFetusHeadReference");
+                        return Ok(());
+                    };
+                    Some(position)
+                }
                 ActorKind::Knife => state
                     .knives
                     .iter()
@@ -262,13 +277,13 @@ pub(crate) fn advance_actor(state: &mut State, phase: Phase, id: u32) -> Result<
         return Err("controlled Brimstone body contains nonfinite actual owners".into());
     }
     if laser.origin != LaserOrigin::PlayerControlled
-        || laser.variant != 1
+        || !matches!(laser.variant, 1 | 2)
         || laser.subtype != 1
         || laser.parent != Some(PLAYER)
         || laser.uninitialized != Some(false)
         || laser.entity_flags.is_none()
         || laser.attack_flags.0 != 0
-        || laser.child.is_some()
+        || (laser.variant == 1 && laser.child.is_some())
         || laser.rotation_enabled
         || laser.max_distance != 0.0
         || laser.line_controller != 0
@@ -282,7 +297,11 @@ pub(crate) fn advance_actor(state: &mut State, phase: Phase, id: u32) -> Result<
             return Ok(());
         }
     } else if initial {
-        // 476410 suppresses Player subtype1 audio; 47952F skips Impact birth.
+        // 476410/4763D8 suppress Player subtype1 audio for both variants.
+        // Variant2 nevertheless reaches4796BC's real Effect50/sub0 factory.
+        if state.lasers[index].variant == 2 {
+            crate::laser_player_runtime::initialize_controlled_technology_impact(state, index)?;
+        }
         let laser = &mut state.lasers[index];
         laser.line_enabled = true;
         laser.line.initialize(50, 1);
@@ -315,6 +334,29 @@ pub(crate) fn advance_actor(state: &mut State, phase: Phase, id: u32) -> Result<
     laser.line.origin = laser.position; // 477E07 precedes the physical clamp.
     laser.line.offset = ZERO;
     laser.position = grid.clamp_room(laser.position, 80.0);
+    if laser.variant == 2 {
+        // 478120..247: the circular variant2 child consumes the actual Full
+        // endpoint before Base, or the current Fast prediction directly.
+        if let Some(child) = laser.child {
+            let position = if laser.fast {
+                laser.position
+            } else {
+                grid.clamp_room(
+                    laser.position + laser.velocity * laser.current_friction,
+                    80.0,
+                )
+            };
+            let impact = laser
+                .impact
+                .as_mut()
+                .filter(|impact| child.kind == ActorKind::Effect && impact.id == child.id)
+                .ok_or("controlled Technology registered child is unresolved")?;
+            impact.position = position;
+            impact.source_color = Some(laser.current_color);
+            impact.current_color = Some(laser.current_color);
+            impact.position_offset = laser.render_offset;
+        }
+    }
     laser.line.circle(laser.position, 80.0);
     laser.line.resample(0.3)?;
     laser.line.simplify(0.001);

@@ -3,6 +3,7 @@ import wasmUrl from "./generated/engine.wasm?url";
 export type Screen = "title" | "profile" | "main" | "character" | "challenge" | "seed" | "playing";
 export type Direction = "left" | "right" | "up" | "down";
 export interface Player {
+  entitySource?: { entityType: number; variant: number; spawnerType: number; spawnerVariant: number };
   canShoot: boolean; initialized3074: boolean;
   visible: boolean; inputCooldown: number; dead: boolean;
   x: number; y: number; vx: number; vy: number; hp: number; maxHp: number;
@@ -15,6 +16,12 @@ export interface Player {
   shotsFired: number;
 }
 export interface AttackColor { tint: [number,number,number,number]; sourceMiddle: [number,number,number,number]; offsets: [number,number,number]; }
+export interface Costume229 {
+  slots: ({entry: number; layer: number; bodyGroup: boolean} | null)[];
+  sprite: {clip: string; frame: number; playing: boolean; overrideActive: boolean};
+  priority: number; historyFrontier: string | null; mainClipFrontier: boolean;
+  lastShootMainClipBa8: string | null;
+}
 export interface Tear {
   id: number; x: number; y: number; vx: number; vy: number; age: number;
   spawnSeed: number; sourceVariant: number | null; collisionRadius: number; gridContact: boolean;
@@ -56,8 +63,8 @@ export interface SpriteEffect {
   raw7d8: boolean; poopEffect?: PoopEffect; flyEffect?: { kind: string }; creepEffect?: { counter: number; size: number };
   sprite: ActorSprite; fullUpdates: number;
   bloodEffect?: {kind: "poof04" | "bloodGush"};
+  footprint?: boolean;
 }
-export interface Impact { id: number; x: number; y: number; age: number; }
 export interface ActorRef { kind: "player" | "familiar" | "tear" | "knife" | "laser" | "bomb" | "pickup" | "npc" | "projectile" | "effect"; id: number; }
 export interface Knife {
   id: number; entityType: number; variant: number; subtype: number; spawnSeed: number; birthGameUpdate: number; actorRng: ItemRng;
@@ -176,6 +183,8 @@ export interface PauseMenu {
 }
 export interface RoomAppearance {
   backdrop: string; columns: number; rows: number; tileSize: number; origin: { x: number; y: number };
+  fxRays?: { index: number; xMin: number; xMax: number; topParallax: number; bottomParallax: number; rayLength: number;
+    raySpacing: number; perspective: number; rays: { opacity: number; animationSpeed: number; phase: number; texture: string }[] };
   backdropPatchSize: { width: number; height: number }; backdropPatchColumns: number;
   floorQuads: RoomQuad[]; wallQuads: RoomQuad[]; tutorial: boolean;
   wallVariantCatalog: { sourcePatchIndex: number; name: string; weight: number; eligibility: string }[];
@@ -208,10 +217,11 @@ export interface Room {
   descriptor: RoomDescriptor | null;
   initializationGameUpdate: number | null; loaded: boolean; sourceTearSlowdown2494: number | null;
   pathCosts: number[] | null;
+  trapdoor: {gridIndex: number; state: number; spawnSeed: number; clip: "closed" | "openAnimation"; frame: number; playing: boolean} | null;
   spawns: {tintedRockIndex: number; finalSpawnState: number; selectors: {groupIndex: number; gridIndex: number; category: "entity" | "grid"; type: number; variant: number; subtype: number; position: {x: number; y: number}; groupSeed: number; spawnSeed: number}[]} | null;
   pickups: Pickup[];
   backgroundStains: {sourceEffectId: number; spawnSeed: number; birthGameUpdate: number;
-    position: {x: number; y: number}; variant: number; renderOffset: {x: number; y: number}; layerRotation: number | null; sprite: ActorSprite}[];
+    position: {x: number; y: number}; variant: number; renderOffset: {x: number; y: number}; layerRotation: number | null; sprite: ActorSprite; footprint?: boolean}[];
   savedRegularPickups: {handle: number; variant: number; subtype: number; position: {x: number; y: number};
     spawnSeed: number; rngSeed: number; charge: number; touched: boolean}[];
   npcs: { id: number; kind: number; variant: number; subtype: number; spawnSeed: number;
@@ -241,7 +251,7 @@ export interface Room {
   authoredActorOrder: {kind: "npc" | "pickup"; id: number}[];
   managerCounts: { countablePending: number; countableCurrent: number; bossPending: number; bossCurrent: number };
   bossCount: number; bossPresentationIndex: number;
-  combatClear: boolean; combatClearCountdown: number; combatShutDoorSlots: number[];
+  combatClear: boolean; combatClearCountdown: number; combatShutDoorSlots: number[]; combatShutUpdate?: number;
   grid: { width: number; height: number; cells: {selector: number; entity: {kind: number; variant: number; state: number; collisionClass: number; spawnSeed: number; sourceOwner?: {birthGameUpdate: number | null; poopSheet?: number}} | null}[] } | null;
 }
 export interface Rect { x: number; y: number; width: number; height: number; }
@@ -265,11 +275,11 @@ export interface StageEffects {
 }
 export interface State {
   weaponCache: {primary: number; flagsC98: [number,number]; colorCa0: AttackColor; colorCcc: AttackColor};
-  attackRuntime: {chargeC0c: number | null; headDirectionDa0: number | null; shootingAimDb4: {x: number; y: number} | null; movementDirectionD9c: number | null; playerDc4: {x: number; y: number} | null; persistent: ActorRef | null; secondary: (ActorRef | null)[]; nextKnife: number};
+  attackRuntime: {chargeC0c: number | null; aimRotationC70?: number | null; headDirectionDa0: number | null; shootingAimDb4: {x: number; y: number} | null; movementDirectionD9c: number | null; playerDc4: {x: number; y: number} | null; persistent: ActorRef | null; secondary: (ActorRef | null)[]; technology2C40?: {pointerKnown: boolean; actor: ActorRef | null; firstDiagnostic: string | null}; nextKnife: number};
   knives: Knife[];
   stageShootingGuard: {state: number; counter: number};
   weaponAdmission: {sourcePlayerType: number|null; c18IsKnownEmpty: boolean; pendingPrimaryCleanup: {fromPrimary:number;toPrimary:number}|null; unadmittedController: {primary:number;channel:string}|null};
-  lasers: {id:number; origin:"npcShootAngle"|"playerCharged" | "playerControlled" | "playerTechnology"; uninitialized:boolean|null; entityType:number; variant:number; subtype:number;
+  lasers: {id:number; origin:"npcShootAngle"|"playerCharged" | "playerControlled" | "playerTechnology" | "playerTechnology2"; uninitialized:boolean|null; entityType:number; variant:number; subtype:number;
     spawnSeed:number; parent:ActorRef|null; child:ActorRef|null; active:boolean; dead:boolean; visible:boolean;
     position:{x:number;y:number}; savedPosition:{x:number;y:number}; renderOffset:{x:number;y:number};
     parentOffset:{x:number;y:number}; angle:number; renderSortOffset:number; remainingUpdates:number;
@@ -293,6 +303,7 @@ export interface State {
   playerItems: {initializerSeed: number; managerRng: ItemRng; initializerRng: ItemRng;
     itemRngs: ItemRng[]; trinketRngs: ItemRng[]; pocketRngs: ItemRng[]; entitySpawnSeed: number;
     technologyEyeRegistered: boolean | null;
+    costume229?: Costume229 | null;
     ownedCounts: number[]; temporaryCollectibles: {itemId: number; count: number; cooldown: number}[]; queuedId: number | null; queuedCharge: number; queuedTouched: boolean;
     pickupAnimationFrame: number; pickupAnimationPlaying: boolean; pickupAnimationGuard: boolean;
     pickupPresentation: {itemId: number; animationFrame: number; animationPlaying: boolean} | null;
@@ -315,6 +326,7 @@ export interface State {
   floor: Floor; currentRoom: number; visitedRooms: number[];
   roomDisplayFlags: number[]; revealedSecretConnections: [number, number][];
   persistedRooms: Record<string, Room>;
+  stageTransition: {state: number; counter: number; sameStage: boolean; animation: number};
   roomTransition: {fromRoom: number; targetRoom: number; fromSlot: number; targetSlot: number; phase: "out" | "in" | "bossScene" | "bossCleanup"; fullUpdates: number; bossScene: {presentationIndex: number; animationFrame: number; animationPlaying: boolean} | null} | null;
   sourceCacheRunFlags: number | null;
   playerStats: {shotSpeed: number; damage: number; tearHeight: number; tearFallingSpeed: number; tearFallingAcceleration: number; moveSpeed: number; luck: number | null};
@@ -322,11 +334,12 @@ export interface State {
   publicActions: { menuConfirm: boolean; menuBack: boolean; activePressed: boolean; activeTriggered: boolean; pocketPressed: boolean; pocketTriggered: boolean; enterWasDown: boolean; spaceWasDown: boolean; escapeWasDown: boolean; pocketWasDown: boolean };
   playerAnimation: { current: "Trapdoor" | "Appear" | "Death" | "UseItem" | "Hit" | null; frame: number; playing: boolean; guard: boolean };
 
-  camera: {scroll: {x: number; y: number}; lastPlayerPosition: {x: number; y: number};
+  gameShake?: {durationCe9fc: number | null; offsetCea00: {x: number; y: number} | null; frontier: string | null} | null;
+  camera: {scroll: {x: number; y: number}; lastPlayerPosition: {x: number; y: number}; shakeHistoryKnown?: boolean | null;
     histories: {capacity: number; head: number; samples: {x: number; y: number}[]}[]} | null;
   nextPickup: number;
   minimap: { cells: { x: number; y: number; visibility: "unvisited" | "visited" | "current" }[] };
-  tears: Tear[]; impacts: Impact[]; fireCooldown: number; nextTear: number;
+  tears: Tear[]; fireCooldown: number; nextTear: number;
   fireParticles: {id: number; parentNpc: number; parentType: number; parentVariant: number; spawnSeed: number; birthGameUpdate: number;
     position: {x: number; y: number}; presentedPosition: {x: number; y: number}; velocity: {x: number; y: number};
     hp: number; maxHp: number; collisionRadius: number; collisionMass: number; collisionDamage: number; baseFriction: number;
@@ -350,7 +363,10 @@ interface Exports extends WebAssembly.Exports {
   command: () => number; snapshot_ptr: () => number; snapshot_len: () => number;
   frame_snapshot_ptr: () => number; background_stains_ptr: (from: number) => number;
   error_ptr: () => number; error_len: () => number; public_keys_ptr: () => number; public_keys_len: () => number;
+  mt_draws_enable: (enabled: number) => void; mt_draws_ptr: () => number;
 }
+/** One shared-MT draw from the opt-in diagnostic log (e2e `--mt-draws`). */
+export interface MtDraw { counter: number; index: number; kind: "B" | "U" | "R"; site: string; }
 export class Engine {
   /** The engine-owned key surface: the only codes `key` commands accept. */
   readonly publicKeys: ReadonlySet<string>;
@@ -437,6 +453,10 @@ export class Engine {
   }
   /** The complete engine state, stains included, as the engine's JSON text. */
   snapshotJson(): string { const ptr = this.wasm.snapshot_ptr(); return this.read(ptr, this.wasm.snapshot_len()); }
+  /** Diagnostic only: turn the shared-MT draw log on (cleared) or off. */
+  setMtDrawLog(enabled: boolean): void { this.wasm.mt_draws_enable(enabled ? 1 : 0); }
+  /** Diagnostic only: the draws logged since the previous call. */
+  takeMtDraws(): MtDraw[] { const ptr = this.wasm.mt_draws_ptr(); return JSON.parse(this.read(ptr, this.wasm.snapshot_len())) as MtDraw[]; }
   private stains: { room: number | null; initialization: number | null; list: Room["backgroundStains"] } =
     { room: null, initialization: null, list: [] };
   private stainsSince(from: number): { room: number; initialization: number | null; total: number; stains: Room["backgroundStains"] } {

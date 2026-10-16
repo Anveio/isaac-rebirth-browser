@@ -293,8 +293,8 @@ pub fn isaac_blast_velocity(
 pub struct Bomb {
     pub id: u32,
     pub variant: u32,
-    /// Planted-bomb seed admission is separately unaccepted; conversions own
-    /// the actual shared stream draw made by Pickup::Update.
+    /// Player509612 draws the planted bomb's seed; conversions own the
+    /// actual shared stream draw made by Pickup::Update.
     pub spawn_seed: Option<u32>,
     pub birth_game_update: u32,
     pub friction: f32,
@@ -313,6 +313,16 @@ pub struct Bomb {
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct BombShot {
+    ///Actual fresh Base31E/31F owners; old serialized histories stay unknown.
+    #[serde(default)]
+    pub active: Option<bool>,
+    #[serde(default)]
+    pub dead: Option<bool>,
+    ///Registered Child4A0, separately known from inventory or physical Parent.
+    #[serde(default)]
+    pub child: Option<ActorRef>,
+    #[serde(default)]
+    pub child_known: bool,
     pub actor_rng: crate::items::Rng,
     pub spawner_type: u32,
     pub spawner_variant: u32,
@@ -387,6 +397,10 @@ pub(crate) fn admit_dr_fetus(
     let mut motion = BombMotion::spawn_dr_fetus(birth.position, birth.velocity)?;
     motion.present_birth(phase)?;
     let shot = BombShot {
+        active: Some(true),
+        dead: Some(false),
+        child: None,
+        child_known: true,
         actor_rng: crate::items::Rng::new(birth.spawn_seed, [4, 3, 17]),
         spawner_type: 1,
         spawner_variant: 0,
@@ -462,6 +476,8 @@ pub fn place(state: &mut State, phase: Phase) -> Result<(), String> {
         return Ok(());
     }
     let next = state.next_bomb.checked_add(1).ok_or("bomb IDs exhausted")?;
+    // Player509612 draws the Game.Spawn seed after the variant/flag queries.
+    let spawn_seed = state.boot_lifecycle.shared.next_u32();
     let mut motion = BombMotion::spawn(player_world(state), player_velocity(state))?;
     motion.present_birth(phase)?;
     state.actor_scheduler.admit(crate::actors::ActorRef {
@@ -471,7 +487,7 @@ pub fn place(state: &mut State, phase: Phase) -> Result<(), String> {
     state.bombs.push(Bomb {
         id: state.next_bomb,
         variant: 0,
-        spawn_seed: None,
+        spawn_seed: Some(spawn_seed),
         birth_game_update: state.game_update_count,
         friction: 1.0,
         animation: "Pulse".into(),
@@ -563,6 +579,20 @@ pub fn advance_explosions(state: &mut State, phase: Phase, fence: usize) {
         return;
     }
     for explosion in state.explosions.iter_mut().take(fence) {
+        // Effect case1 45abd7: the first Update of subtype0 plays SFX182.
+        if explosion.animation_frame == 0 {
+            state.audio.admit(
+                &mut state.boot_lifecycle.shared,
+                state.system_clock.system_counter.wrapping_sub(1),
+                crate::audio::SoundRequest {
+                    id: 182,
+                    volume: 1.0,
+                    delay: 2,
+                    looping: false,
+                    pitch: 1.0,
+                },
+            );
+        }
         explosion.animation_frame += 1;
     }
     state
@@ -578,6 +608,10 @@ pub fn advance_actor(state: &mut State, phase: Phase, id: u32) -> Result<(), Str
     };
     if let Some(shot) = &state.bombs[index].shot {
         shot.validate()?;
+        //454E8F skips inactive Full callbacks; Fast draw-list calls remain.
+        if phase == Phase::Update && shot.active == Some(false) {
+            return Ok(());
+        }
         if state.bombs[index].variant != 0
             || state.bombs[index].motion.initial_fuse_updates != DR_FETUS_FUSE_UPDATES
         {
@@ -715,12 +749,18 @@ pub fn advance_actor(state: &mut State, phase: Phase, id: u32) -> Result<(), Str
             state.bombs[index].motion = next_motion;
             advance_animation(&mut state.bombs[index], true);
         }
-        state.explosions.push(Explosion {
-            id,
-            x: f64::from(position.x) * WORLD_SCALE + 32.0,
-            y: f64::from(position.y) * WORLD_SCALE - 46.0,
-            animation_frame: 0,
-        });
+        spawn_blast_effects(state, id, position);
+    }
+    if let Some(shot) = &mut state.bombs[index].shot {
+        //Explicit Remove may precede natural clocks; never revive that31F.
+        if shot.active != Some(false) {
+            shot.active = shot
+                .active
+                .map(|_| next_motion.lifetime != BombLifetime::Removed);
+            shot.dead = shot
+                .dead
+                .map(|_| next_motion.lifetime != BombLifetime::Alive);
+        }
     }
     //4575DD..EA follows555300 and the dead/Explode stores. NeverFast.
     if phase == Phase::Update {
@@ -922,6 +962,25 @@ pub(crate) fn bomb_contacts(state: &mut State) -> Result<(), String> {
     Ok(())
 }
 
+/// Bomb555385/5554bb and Rock.Destroy56c8ec/56ca46 follow Game554490 with
+/// the same two seeded spawns: the Bomb Crater 1000.18, whose Init459121
+/// draws its alpha U * 0.2 + 0.8 (its frame uses its own RNG35), then the
+/// Bomb Explosion 1000.1, whose Init458e9d draws Random(2) for its 0x2fc
+/// flip. Crater rendering remains deferred.
+pub(crate) fn spawn_blast_effects(state: &mut State, id: u32, position: WorldVector) {
+    let shared = &mut state.boot_lifecycle.shared;
+    let _crater_seed = shared.next_u32();
+    let _crater_alpha = shared.uniform() * 0.2 + 0.8;
+    let _explosion_seed = shared.next_u32();
+    let _explosion_flip = shared.bounded(2) == 0;
+    state.explosions.push(Explosion {
+        id,
+        x: f64::from(position.x) * WORLD_SCALE + 32.0,
+        y: f64::from(position.y) * WORLD_SCALE - 46.0,
+        animation_frame: 0,
+    });
+}
+
 /// Game554490 with the line check on and incoming DamageFlags4. Each circle
 /// target must pass Room::CheckLine(mode2, ignoreWalls); a blocked line skips
 /// knockback and damage alike. Player damage is 2 when the explosion damage
@@ -933,6 +992,18 @@ pub(crate) fn explode(
     damage: f32,
     source: crate::combat::DamageSource,
 ) -> Result<(), String> {
+    explode_with_copied_source(state, position, radius, damage, source, None)
+}
+
+///Actual common554490 path; only proven callers carry copied EntityRef words.
+pub(crate) fn explode_with_copied_source(
+    state: &mut State,
+    position: WorldVector,
+    radius: f32,
+    damage: f32,
+    source: crate::combat::DamageSource,
+    copied_source: Option<crate::combat::CopiedDamageSource>,
+) -> Result<(), String> {
     let line = state
         .room
         .grid
@@ -943,7 +1014,15 @@ pub(crate) fn explode(
         line.as_ref()
             .is_none_or(|grid| grid.blast_line_clear(position, target, true))
     };
-    crate::npcs::bomb_hit(state, position, radius, damage, source, &clear)?;
+    crate::npcs::bomb_hit_with_copied_source(
+        state,
+        position,
+        radius,
+        damage,
+        source,
+        copied_source,
+        &clear,
+    )?;
     crate::pickups::bomb_hit(state, position, radius, &clear)?;
     crate::fly_effects::bomb_hit(state, position, radius, clear);
     let player_velocity = if clear(player_world(state)) {
@@ -969,7 +1048,141 @@ pub(crate) fn explode(
             4,
         )?;
     }
+    crate::critters::blast(state, position, radius, &clear);
     crate::rock_blast::destroy(state, position, radius)
+}
+
+///Selected neutral50DE10 actor history. A type4 slot alone admits no restore.
+pub(crate) fn admits_registered_shot(bomb: &Bomb) -> Result<bool, String> {
+    let Some(shot) = &bomb.shot else {
+        return Ok(false);
+    };
+    shot.validate()?;
+    if !bomb.friction.is_finite()
+        || !bomb.motion.position.is_finite()
+        || !bomb.motion.presented_position.is_finite()
+        || !bomb.motion.velocity.is_finite()
+    {
+        return Err("registered Bomb contains nonfinite actual motion".into());
+    }
+    Ok(bomb.variant == 0
+        && shot.parent
+            == Some(ActorRef {
+                kind: ActorKind::Player,
+                id: 0,
+            })
+        && shot.active.is_some()
+        && shot.dead.is_some()
+        && shot.child_known
+        && shot.child.is_none())
+}
+
+pub(crate) fn admits_referenced_remove(state: &State, id: u32) -> Result<bool, String> {
+    let bomb = state
+        .bombs
+        .iter()
+        .find(|bomb| bomb.id == id)
+        .ok_or("registered Bomb handle is unresolved")?;
+    admits_registered_shot(bomb)
+}
+
+///441BB0 changes actual31E/31F only; fuse/age/registered links remain intact.
+pub(crate) fn remove_referenced(state: &mut State, id: u32) -> Result<(), String> {
+    let bomb = state
+        .bombs
+        .iter_mut()
+        .find(|bomb| bomb.id == id)
+        .ok_or("registered Bomb handle is unresolved")?;
+    if !admits_registered_shot(bomb)? {
+        return Err("registered Bomb Remove history is not admitted".into());
+    }
+    let shot = bomb.shot.as_mut().expect("validated canonical shot");
+    shot.active = Some(false);
+    shot.dead = Some(true);
+    Ok(())
+}
+
+///System550860 restores each draw-list445370 before any Player Full callback.
+pub(crate) fn restore_shot_fast_positions(state: &mut State) {
+    for bomb in &mut state.bombs {
+        if bomb.shot.is_some() {
+            bomb.motion.presented_position = bomb.motion.position;
+            bomb.x = f64::from(bomb.motion.position.x) * WORLD_SCALE + 32.0;
+            bomb.y = f64::from(bomb.motion.position.y) * WORLD_SCALE - 46.0;
+        }
+    }
+}
+
+pub(crate) fn referenced_position(state: &State, id: u32) -> Result<Option<WorldVector>, String> {
+    let bomb = state
+        .bombs
+        .iter()
+        .find(|bomb| bomb.id == id)
+        .ok_or("registered Bomb handle is unresolved")?;
+    Ok(admits_registered_shot(bomb)?.then_some(bomb.motion.presented_position))
+}
+
+fn uninit_shot_refs(state: &mut State, retired: &[u32]) {
+    let is_retired = |actor: ActorRef| actor.kind == ActorKind::Bomb && retired.contains(&actor.id);
+    for bomb in &mut state.bombs {
+        if let Some(shot) = &mut bomb.shot {
+            if retired.contains(&bomb.id) {
+                shot.parent = None;
+                shot.child = None;
+            } else if shot.child.is_some_and(is_retired) {
+                shot.child = None;
+            }
+        }
+    }
+    if state.attack_runtime.persistent.is_some_and(is_retired) {
+        state.attack_runtime.persistent = None;
+        state.weapon_admission.c18_is_known_empty = true;
+    }
+    for slot in &mut state.attack_runtime.secondary {
+        if slot.is_some_and(is_retired) {
+            *slot = None;
+        }
+    }
+}
+
+///45543E actual inactive Full Uninit precedes the spatial/contact fence.
+pub(crate) fn retire_shots_full(state: &mut State) {
+    let retired: Vec<_> = state
+        .bombs
+        .iter()
+        .filter(|bomb| {
+            bomb.shot.as_ref().is_some_and(|shot| {
+                shot.active == Some(false) || bomb.motion.lifetime == BombLifetime::Removed
+            })
+        })
+        .map(|bomb| bomb.id)
+        .collect();
+    uninit_shot_refs(state, &retired);
+    state.bombs.retain(|bomb| !retired.contains(&bomb.id));
+    state
+        .actor_scheduler
+        .retain(|actor| actor.kind != ActorKind::Bomb || !retired.contains(&actor.id));
+}
+
+///453EC0 invokes transient Uninit before Remove while rebuilding the Room.
+///The inherited untracked planted/conversion adapter remains separate.
+pub(crate) fn reset_room_shots(state: &mut State) {
+    let retired: Vec<_> = state
+        .bombs
+        .iter()
+        .filter(|bomb| bomb.shot.is_some())
+        .map(|bomb| bomb.id)
+        .collect();
+    uninit_shot_refs(state, &retired);
+    for bomb in &mut state.bombs {
+        if retired.contains(&bomb.id) {
+            if let Some(shot) = &mut bomb.shot {
+                shot.active = Some(false);
+                shot.dead = Some(true);
+            }
+        }
+    }
+    state.bombs.retain(|bomb| !retired.contains(&bomb.id));
 }
 
 pub fn retire_removed(state: &mut State) {

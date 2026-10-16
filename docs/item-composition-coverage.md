@@ -1,7 +1,7 @@
 # Item composition coverage
 
 This map separates current source owners, declared public cases and observed
-functional results. Snapshot main `918303b6` includes ordinary Player Brimstone299,
+functional results. The earlier `918303b6` snapshot below includes ordinary Player Brimstone299,
 FireDelay ownership304, Damage ownership318, optional regular Tear variant298,
 per-field comparer311, standalone Ludovico Tear307 and the Native recorder
 storage fix332. The final C421 artifact fixes the controlled
@@ -9,6 +9,67 @@ saved-position rewind and matches motion across three retained routes; its
 four-case comparison still fails on contacts, identities and missing owners.
 Transport, source review and local replay consistency do not establish Original
 functional parity.
+
+The production4 artifact (`d6db18cc` / WASM `e0137262`, binding `a43e576e`) passed normal production in 28.380s with all 3,498 source pins stable. Its full regular405 comparison against qualified main9a retains 38,020,341 checks / 2,856 FAIL: 1,428 added `player.entitySource` fields and 1,428 key-shape differences; changed or missing preexisting values and errors are zero. The item-stage core411 and separate copied-Parent414 are now merged. Their runtime/build/resource inputs match this combined artifact; the standalone intermediate core was not separately built or played. Later tool metadata is outside that build, and optional floor/Clippy checks remain pending.
+
+Six public joint Technology 2 + Polyphemus captures and their finite reader retain 118,443 checks / 79 FAIL. No numeric operator field fails; 78 failures retain strict-join/callback unknowns and one reverse-case Remove-state endpoint coverage minimum remains. Four own contact cases retain 25,397 / 48 FAIL. Only recorded0/NPC18 exercises five complete copied Parent payloads, five FIFO appends, six HP drains, one death and one retirement; the three NPC14 cases retain missing-contact coverage failures.
+
+The first fresh joint Original/browser pair retains 80,714 checks / 3,935 FAIL across 1,567 paired playing rows. All six selected cross-cache fields match across those rows; ordered Damage/Flags match across 32 observations and FireDelay across 1,170 on each side, while C70 ownership matches 1,254 observations. Both sides observe 686 completed joint-cache rows, five joint Tear births, two new born-0x200 C40 actors and 286 retained born-0/current-0x200 rows. Each side has seven C40 births, eleven Tears, 327 Full and 327 Fast body rows and seven NULL transitions. Zero exact identity joins leave all 51 C40 and 16 Tear body fields explicitly UNGRADED/FAIL; clocks, identities, callback and lifecycle owners remain unresolved. Stored retired endpoints differ (Native0/port7); no own-side material witness supplies a cross-game identity.
+
+The first fresh contact Original/browser pair retains 94,894 checks / 9,184 FAIL across 1,216 paired rows. All 12 selected copied-source payload checks pass and retained C40 damage matches across 582 body rows. Both sides show six C40 identities, six HP drains, one death and one retirement. Native records six FIFO appends while the port records five; this observed gap remains, together with strict identity/RNG/clock/HP-geometry and callback failures. These selected contracts do not establish full combat parity or the other Original cases.
+
+The explicit Native journal Zstd option412 preserves gzip as the default and leaves the gzip manifest format unchanged. Actual opt-in capture closed with 3,934 records (200,977,212 raw bytes / 394,681 encoded bytes); the first positive-playing projection completed with 1,258 tuples and the full contact comparison above. Node codec probes retain equal decoded bytes and six malformed-input rejections. This establishes the exercised transport scope, not game parity. Spoon Bender3 homing, neutral2/Knife capability and 4A0 satellite followups remain separate source-only work outside this P4 record. Historical P3, saved-history and corrected271 reports remain unchanged; the ten-case Number One replay remains pending.
+
+The following entries retain their frozen 9a/P3 scope and are not rewritten by P4.
+
+The then-latest validated main runtime is source `9a908a6d` / WASM `c720ec0c` (binding `2d6fbb4d`): normal production passed in 29.307s; optional floor and Clippy checks remain pending. Its regular405 comparison against production2 retains 38,005,081 checks / 11,616 FAIL: 5,808 new fields and 5,808 key-shape differences, with zero changed or missing preexisting values. Later tool-only changes, including the corrected Tear identity comparer, are outside this runtime artifact. This source snapshot retains separate Technology 2 and Polyphemus owners; their future joint pipeline is outside this frozen qualification record; no joint/Parent acceptance is inherited.
+
+The separate immutable production3 artifact (`b25a85e7` / WASM `9d30105b`, binding `11f8e079`) has three completed first Original/browser references. Technology 2 alone retains 34,748 checks / 1,964 FAIL: both own histories show one grant, four C40 births, seven primary Tears, 128 Full and 128 Fast stored-body rows, and four C40 NULL transitions. Selected typed material/property checks pass; strict identities, clocks and missing callback owners remain unresolved. Stored phase summaries do not establish callback entry, and zero exact-identity body joins do not establish actor correspondence. Polyphemus retains 84,313 / 5,378 FAIL: both sides show two grants, two pre-mixed plus ten mixed births, two actual NPC217 receivers, two registry appends, remaining-damage changes, copied FIFO appends and HP endpoints, including one same-Tear/two-receiver registry witness. Native Fast classification remains unknown. The starting Knife + Brimstone + Ludovico pair retains 67,254 / 5,206 FAIL: both sides show one controlled Knife across 508 body rows, two copied FIFO appends/Get4 state diagnostics/HP drains, one negative-HP death and one manager retirement. Strict identities, clocks, actor/callback ownership and lifecycle gaps remain failed. The nullable-C18 tool correction is source-only and has not regraded that report.
+
+Separate browser-only Technology 2 contact coverage is 25,378 checks / 45 FAIL across four cases. Only recorded0 (NPC18) shows five flags8-compatible FIFO appends/retained48C diagnostics, six HP drains, one death and one retirement. The other three NPC14 cases have no contact witness and retain 12 failures each. No Original contact comparison ran. The corrected held-case reader covers only two of eight cases (10 FAIL each); the other six have not been regraded, and the older eight-case report is preserved.
+
+A saved real-pedestal 114→118→329 history replay adds 1,535 checks / 36 FAIL: each side observes eight preexisting and eight continued children, 24 Full and 32 Fast stored-body rows. Native-only event input observes eight Remove post-store and eight Uninit-entry events; browser events remain unknown. Missing birth-copy, current-Get4 callback, dispatch, Uninit completion/weak-link, child-contact and raw-Line owners remain explicit, together with unexercised per-child obligations. The prior 106,884 / 8,755 FAIL plus one history failure is unchanged; this additive own-history check does not establish whole-synergy parity.
+
+The corrected Tear identity comparer was exercised on one saved Polyphemus pair (1,295 playing rows), not the pending ten-case Number One suite. It reports 7,263 checks / 1,319 FAIL with zero exact cross-game joins: all 664 Native and 656 browser manager rows remain unmatched, with 7,304 and 7,216 material-field obligations explicitly UNGRADED. The former comparer reports 13,167 / 2,146 FAIL on the same saved pair. The lower failure count is a reporting/association correction, not improved parity; no ordinal, time or geometry fit supplies a join.
+
+The future joint Technology 2 + Polyphemus typed pipeline and actual Parent-owner slice is outside this frozen qualification record; no joint/Parent acceptance is inherited. Independent item results do not qualify joint admission. These entries consume compact completed reports only; they do not rerun games or rewrite historical failures.
+
+The following production2 and earlier snapshots retain their original artifact scopes and failures.
+
+Snapshot `48b9f4ef` includes Epic cache/grant382 and actor/neutral lifecycle384, Monstro queued4 correction386, Soy full-Add clear387, Monstro head renderer388, Impact birth metadata389, ordinary Inner Eye390, copied damage-source payloads391, selected Epic startup392, and blast/camera shake393. Corrected Monstro comparison tools362 are merged; the original comparer and old results remain preserved. External stage-transition374 and boss-award poop fix385 are retained. These small source integrations do not qualify the entire current main tree against a frozen private artifact.
+
+Separate production2 source3ec42d94/WASMabdb286e passed normal production; floor and Clippy remain pending. Its raw405 comparison against f1 records37,987,905 checks/8,728 FAIL:4,364 added-key-shape and4,364 new GameShake/camera-history/C70 fields, with zero changed or missing preexisting values. All raw failures remain visible. Ordinary Inner Eye has eight completed own cases,198 typed births and66 complete three-Tear cohorts,84,879 checks/72 FAIL. The finite reader hit its final32MiB output quota after writing the complete report; a separate successful opaque component verified all report bytes without rereading State spools. No Native ordinary2 or callback/RNG-draw parity is established.
+
+Both four-case Epic contact cohorts (70 and132.815673828125 damage) record6,663 checks/56 FAIL. Every case observes one copied-Rocket FIFO append, ordered HP drain, negative-HP death and manager retirement; missing callback/argument/RNG/lifecycle event owners remain failures. The first high-damage Original/port pair retains40,872 checks/4,064 FAIL over476 paired rows and261 typed body rows. Both sides show one target, three rockets, one triple cohort, three explosions/record appends and one FIFO-to-retirement state chain. Selected properties match across261 body rows and receiver HP matches377 observations; receiver geometry, exact identities/RNG/Parent/records/counters and missing owners remain failed. Zero observed transient crater18 births do not prove absent callbacks.
+
+Four own shake cases retain867 checks/20 FAIL. The first strict pair observes58/56 positive-duration and64/61 nonzero-offset rows on Native/port; duration62/476, history430/476 and cameraStyle/sharedMT476/476 checks still fail. The port lacks an explicit cameraStyle owner, and matching endpoint MT states would not certify individual draws.
+
+The production2 Monstro queued4 replay reuses the same5149 Original tuples at exactly62,795 checks: failures improve5,346 to2,520. Only three fields change, each942 to0 (historical controller diagnostic, C18 knownNULL and unadmitted controller); all field counts and all other failures are unchanged. Both games retain four complete13-Tear cohorts and three mixed cohorts. Native held/phase owners remain null with mandatory failures; every earlier frozen-f1/e2bb report is preserved.
+
+The following paragraphs retain their frozen-f1 or earlier artifact scopes; later evidence never rewrites those reports.
+
+The immutable f1 artifact b9577ad4 passed normal production; floor and Clippy remain pending. Its regular405 comparison against df133 remains RAW FAIL: 37,979,876 checks / 14,416 differences. Known removed backdrop fields and additive Room/NPC-friction/costume-registration/Tear-birth/partition fields account for the recorded differences; fresh-empty and source-known owner ledgers do not waive any failure or establish whole-game parity.
+
+The first controlled-Dr Native/port pair remains 46,040 checks / 3,508 FAIL. Both games expose three Bomb births, 246 body rows and two born-property cohorts, preserving the damage 10.5 birth before late Add4 and later 19.92235 birth. All four f1 port-own cases now independently show three births, two property cohorts and three C18 cleanup state observations each. Each retains ten failures: two dense-prior cache/birth boundary obligations, two raw Full/Fast unknowns and six callback unknowns. Missing boundary proof does not assert incorrect post-Add damage. Strict identity/RNG/position/counter and callback gaps remain.
+
+All four Monstro port-own cases show both ordered grants and three mixed 13-Tear cohorts each. The corrected first Native/port saved-tuples comparison is 62,795 checks / 5,346 FAIL: both games expose 52 actual Tear births, four actual 13-Tear birth cohorts and three actual mixed-item cohorts. Native held input and callback phase are unavailable; held-specific release/saturation/diagonal metrics remain null with required failures. DB0 is the opposing-direction flag, and post-callback 319 does not identify callback phase. Every common prior per-field count is unchanged. Historical e2bb (64,147 / 6,043 FAIL) is preserved; the changed total is a tool source-owner correction, not a gameplay improvement. No new Native capture or projection ran.
+
+The first Epic strict pair remains 92,164 checks / 5,207 FAIL. Both games show three targets, nine rockets, three triple birth cohorts, nine explosion births and nine crater-record appends. Selected body-property fields match across786 body rows; IDs/RNG/Parent/records/counters and missing event/background/wardrobe evidence remain failures. Observed zero crater18 births do not prove a transient callback never executed. Empty-room observations establish no NPC contact/HP behavior; the later contact attempt was blocked before gameplay at the shared authored Challenge entry frontier.
+
+Other Monstro/Epic Original cases remain queued. Preserve every old report, failed wrapper attempt and unknown owner. This packet uses existing compact summaries only and performs no regrade, raw decode, capture, game or main mutation.
+
+Mixed52+4 retains17,056/1,558FAIL with three mixed Bomb births per case and
+matching observed birth/retained properties. Its raw322/first-stage Tear/event
+owners remain unknown, not evidence of zero Tears. Soy retains16/1/16/1
+first-observed actor identities, including20 Laser rows in both118routes;
+these are not proven Init births. Its360 body-transform frontier rows per118case,
+additional render layer remains a visual frontier. The source-known fullAdd52CF25 clear is now merged387 and consumed by production2, without retroactively regrading these older rows.
+The first controlled-Technology Original remains117,717/13,575FAIL across677
+matching material/configured-Line bodies;2,708 missing LaserHP/maxHP checks are
+separate from absent NPC-contact evidence. Other Original cases, mixed/Soy
+Original, complete costume rendering, lifecycle events and full shared RNG
+remain unqualified. The retained 48b9 audit had five open PRs:253/271/292/329/366. Unique253/271/292/329 remain preserved. Stale361 was closed only after preserving its complete source/commit metadata and landing the qualifying cache/actor successors382/384; corrected362 was updated and merged rather than discarded. No further duplicate is proved. Historical paragraphs below retain
+their original artifact scopes and every old failure.
 
 | Ordered boundary | Current owner and scope | Observed evidence and remaining interaction |
 | --- | --- | --- |
@@ -23,7 +84,7 @@ functional parity.
 | Ordinary Player Brimstone | Merged299 uses canonical Laser/Impact storage, charge/live properties, Full/Fast, registered slots and retirement | Retained ordinary case22,111/1,030 FAIL has two births and61 Laser/Impact rows with matching observed geometry/phase/TTL/fade/Sprite/color. Two following-Full absence/slot witnesses do not observe Native Remove/Uninit events |
 | Standalone Ludovico Tear | Merged307 uses the existing Tear store/scheduler and a separately proved neutral329-only kind8 builder | Final C421 owned builds and 37,965,608 / 0 regular regression pass. The four-case comparison remains 134,364 / 20,813 FAIL, with 1,541 bodies (770 Full / 771 Fast). Three motion routes match 1,157 actual position, velocity, B28 and saved450 rows; the contact route still differs and has zero port FIFO/drain witnesses. Original 85,050 / 11,620 and intermediate 134,350 / 24,248 failures remain unchanged. Identity/RNG, strict contact and missing-owner gaps remain |
 | Controlled Brimstone | Merged312 selects actual7/1/1 and consumes307’s real Remove/physical448 capability | Four complete708 pairs retain349,856/30,892 FAIL; all2,188 stable Laser history rows match material fields. Historical prefix failures and missing callbacks remain |
-| Technology68 cache/grant | Merged319 cache/grant and348 independent cache/kind2/kind3 footprints | Current domains stay [1,4,68];027c resolves reviewed registration history without weakening raw regression |
+| Technology68 cache/grant | Merged319 cache/grant and348 independent cache/kind2/kind3 footprints | Cache/kind3 domains include independently proved329; ordinarykind2 remains [1,4,68].027c resolves reviewed registration history without weakening raw regression |
 | Ordinary Technology | Merged320/325 use canonical7/2/0 and a separate manager role | New027c four pairs82,351/5,731 FAIL;152 damage checks match, removing exactly76 prior failures. Old77cd grade stays unchanged |
 | Gimpy225 kill | Separate329 on77cd; old zero-pickup/death coverage stays failed | V2 four own routes observe225 grant, lethal Dip and one bounded100 failure transition; no atomic callback, success/proc or Original claim |
 
@@ -151,7 +212,7 @@ floor15.902s. The later07211886/26cb Dr.Fetus test producer passes production
 strict four-route405 comparison against027c passes37,972,668/0 with no excluded
 or additive paths and no command errors; these are scoped producer results.
 
-Dr.Fetus343 remains a separate Draft. All four declared public9fe7c730 routes
+In the historical26cb snapshot, Dr.Fetus343 was still a separate Draft. All four declared public9fe7c730 routes
 complete and observe real queued52/grant atcounter755, three shot births and
 retirements per case, and birth fuse30/fullUpdates0/damage10.5/ParentPlayer0.
 Each has two Bomb-source FIFO rows and one following-Full HP4 to-6.5 witness.
@@ -166,7 +227,7 @@ strict cross-game identity failures remain. The other three Native captures are
 pending at this snapshot. Source-only idle DA0 correction and controlled Technology68+329
 work establish no new gameplay acceptance.
 
-Soy330's four public routes complete on26cb with the unchanged3a35a3a8 bank and
+The historical Soy330 four-route result on26cb completes with the unchanged3a35a3a8 bank and
 resources/tokens; queue330897→grant981/pending0 is observed in all four. Regular
 [1,4] fire delay7→1 and damage6.6407833→1.3281567 accompany16 Tear births per
 case. The118+330 routes change fire delay30→6 and damage3.5→.7 but have zero

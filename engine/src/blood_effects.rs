@@ -104,8 +104,12 @@ impl NpcEffectAdmission<'_> {
             sprite: Sprite::new(config),
             full_updates: 0,
             blood_effect: Some(controller),
+            footprint: false,
+            critter: None,
             creep_effect: None,
             fly_effect: None,
+            epic_fetus: None,
+            explosion_effect: None,
             poop_effect: None,
         });
         self.scheduler.admit(ActorRef {

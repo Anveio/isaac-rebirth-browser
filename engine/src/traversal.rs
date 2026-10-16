@@ -40,7 +40,7 @@ pub struct BossScene {
 fn admitted_shape(template: &crate::room_templates::AuthoredTemplate) -> bool {
     match (template.width, template.height) {
         // Shop2 admits its room, doors and Shopkeeper17/0; 5/150 shop
-        // placeholders and the6/8 slot remain unadmitted selectors. Sacrifice
+        // placeholders and the 6/8 slot remain unadmitted selectors. Sacrifice
         // rooms (13) have no Room.Init branch of their own.
         (13, 7) => matches!(template.room_type, 1 | 2 | 4 | 7 | 8 | 10 | 12 | 13),
         (13, 14) | (26, 7) | (26, 14) => template.room_type == 1,
@@ -235,6 +235,7 @@ pub(crate) fn check_departure(
             full_updates: 0,
             boss_scene: None,
         });
+        state.departure_velocity = Some(crate::bombs::player_velocity(state));
         state.player.vx = 0.0;
         state.player.vy = 0.0;
         // Transition request5dcfc0 writes Player+7d4 at5dd048. Fast room
@@ -309,16 +310,10 @@ pub(crate) fn advance_transition(
     state.current_room = transition.target_room;
     state.room = match state.persisted_rooms.remove(&state.current_room) {
         Some(room) => room,
+        // Room.Init's pit linking (5cf550) follows its grid construction in
+        // admit_room_pickups.
         None => {
-            let mut room = Room::from_floor_descriptor_with_special(
-                &state.floor,
-                state.current_room,
-                special,
-            )?;
-            if let Some(grid) = room.grid.as_mut() {
-                crate::grid::link_pits(grid, &mut state.boot_lifecycle.shared);
-            }
-            room
+            Room::from_floor_descriptor_with_special(&state.floor, state.current_room, special)?
         }
     };
     // Reentry owns a new Room.Init timestamp, independent of saved geometry.
@@ -344,7 +339,6 @@ pub(crate) fn advance_transition(
     state.enemy_projectiles.clear();
     crate::laser_runtime::reset_room(state)?;
     state.fire_particles.clear();
-    state.impacts.clear();
     state.bombs.clear();
     state.explosions.clear();
     crate::attack_runtime::reset_room_schedule(state);

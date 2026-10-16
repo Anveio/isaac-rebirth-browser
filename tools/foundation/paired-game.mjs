@@ -9,6 +9,7 @@ import { chromium } from '@playwright/test';
 import { PNG } from 'pngjs';
 import { browserLaunchOptions, inspectBrowserGraphics } from './browser.mjs';
 import { writeJsonEvidence } from './browser-evidence.mjs';
+import { compareMtDraws } from './mt-draws.mjs';
 import { readNativeEvidence } from './native-evidence.mjs';
 import { pixelDifference } from './compare.mjs';
 import { startProductionServer } from './production-server.mjs';
@@ -50,13 +51,14 @@ function keyCode(key) {
   throw new Error(`No public browser key transport for ${key}`);
 }
 
-async function nativeCapture(caseData, directory, nativeFrameTimeout, originalObserver, archiveNativeEvidence, originalSfxVolume) {
+async function nativeCapture(caseData, directory, nativeFrameTimeout, originalObserver, archiveNativeEvidence, originalSfxVolume, mtDraws) {
   mkdirSync(directory, { recursive: true });
   const args = ['tools/original/with-display.sh', 'python3', 'tools/original/foundation-clock-run.py',
     '--seed', caseData.seed, '--tape', join(dirname(directory), 'tape.json'),
     '--state-observer', originalObserver, '--frame-timeout', String(nativeFrameTimeout), '--output', directory];
   if (archiveNativeEvidence) args.push('--archive-evidence');
   if (originalSfxVolume !== undefined) args.push('--sfx-volume', String(originalSfxVolume));
+  if (mtDraws) args.push('--mt-trace');
   let error;
   try {
     const result = await runProcess('bash', args, { cwd: ROOT, maxBuffer: 8 * 1024 * 1024 });
@@ -83,7 +85,7 @@ async function nativeCapture(caseData, directory, nativeFrameTimeout, originalOb
   return { status: error || provenance.status !== 'pass' ? 'fail' : 'pass', error, provenance, directory, manifest, manifestPath, evidence };
 }
 
-async function browserCapture(browser, server, caseData, directory, archiveBrowserEvidence, captureBrowserAudio) {
+async function browserCapture(browser, server, caseData, directory, archiveBrowserEvidence, captureBrowserAudio, mtDraws) {
   mkdirSync(directory, { recursive: true });
   const context = await browser.newContext({ viewport: { width: 960, height: 540 } });
   const page = await context.newPage();
@@ -95,9 +97,10 @@ async function browserCapture(browser, server, caseData, directory, archiveBrows
     await page.goto(server.url + '/?manual=1');
     await page.waitForFunction(() => ['true', 'failed'].includes(document.body.dataset.ready));
     assert.equal(await page.evaluate(() => document.body.dataset.ready), 'true', 'Production browser must boot');
-    await page.evaluate(({ initialSeed, bootEpochSeed }) => {
+    await page.evaluate(({ initialSeed, bootEpochSeed, mtDraws }) => {
       window.game.pause(); window.game.reset(initialSeed, { bootEpochSeed, trace: true });
-    }, caseData);
+      if (mtDraws) window.game.mtDraws.enable();
+    }, { ...caseData, mtDraws });
     let presentations = 0;
     for (const action of caseData.pairedTape) {
       if (action.type === 'step') {
@@ -140,6 +143,7 @@ async function browserCapture(browser, server, caseData, directory, archiveBrows
           state: captured.state, render: captured.render, ...(captureBrowserAudio ? {browserAudio: captured.browserAudio} : {}) });
       }
     }
+    if (mtDraws) save(join(directory, 'mt-draws.json'), await page.evaluate(() => window.game.mtDraws.take()));
     const trace = await page.evaluate(() => window.game.trace());
     if (archiveBrowserEvidence) {
       const evidence = await writeJsonEvidence(join(directory, 'trace.json.gz'), trace);
@@ -167,7 +171,9 @@ async function browserCapture(browser, server, caseData, directory, archiveBrows
   if (archiveBrowserEvidence) {
     const evidence = await writeJsonEvidence(join(directory, 'manifest.json.gz'), result);
     save(join(directory, 'manifest-archive.json'), evidence);
-  } else save(join(directory, 'manifest.json'), result);
+  // Compact JSON: long routes hold hundreds of full snapshots, and indented
+  // output can exceed V8's maximum string length before it is written.
+  } else writeFileSync(join(directory, 'manifest.json'), JSON.stringify(result) + '\n');
   return result;
 }
 
@@ -232,6 +238,14 @@ function comparePair(caseData, native, browser, directory, exactPixels, stateCom
   const gameplayStart = labels.indexOf('gameplay-start');
   assert.ok(gameplayStart >= 0, 'Selected paired tape must declare its gameplay boundary');
   const first = originals.get(caseData.bootstrap.boundaryLabel);
+  // A case may declare state fields that stop being comparable after a
+  // checkpoint because each game then plays its own inputs (stage-exit's
+  // per-game boss fights). They stay in the report as 'independent'.
+  const independent = (caseData.pairedIndependent || []).map(scope => {
+    const after = labels.indexOf(scope.after);
+    assert.ok(after >= 0 && scope.fields?.length && scope.reason, `Independent scope needs a captured 'after' label, fields and a reason`);
+    return { ...scope, after };
+  });
   for (const [index, label] of labels.entries()) {
     const check = { label, status: 'fail' };
     try {
@@ -246,7 +260,23 @@ function comparePair(caseData, native, browser, directory, exactPixels, stateCom
       check.sourcePNGHash = digest(sourceBytes);
       check.state = stateComparator(observations.get(label), candidate.state, index >= gameplayStart, candidate);
       assert.ok(Array.isArray(check.state) && check.state.length > 0, 'Every paired checkpoint requires typed state checks');
-      check.status = (!exactPixels || pixels.exactRGBA) && check.state.every(field => field.status === 'pass') ? 'pass' : 'fail';
+      // Only an observed scalar mismatch may be incomparable. Missing/error
+      // evidence remains blocking, and an existing exact PASS is retained.
+      const observedScalar = value => typeof value === 'number' ? Number.isFinite(value)
+        : typeof value === 'string' || typeof value === 'boolean';
+      for (const field of check.state) {
+        const scopes = independent.filter(scope => index > scope.after && scope.fields.includes(field.field));
+        if (!scopes.length) continue;
+        const comparisonStatus = field.status;
+        Object.assign(field, { comparisonStatus,
+          independentScopes: scopes.map(scope => ({ after: labels[scope.after], reason: scope.reason })) });
+        if (!['pass', 'fail'].includes(comparisonStatus) || Object.hasOwn(field, 'error') || field.missing
+            || !observedScalar(field.expected) || !observedScalar(field.actual)
+            || typeof field.expected !== typeof field.actual) field.status = 'fail';
+        else if (comparisonStatus === 'fail')
+          Object.assign(field, { status: 'independent', reason: scopes.at(-1).reason });
+      }
+      check.status = (!exactPixels || pixels.exactRGBA) && check.state.every(field => ['pass', 'independent'].includes(field.status)) ? 'pass' : 'fail';
     } catch (error) { check.error = String(error.message); }
     checks.push(check);
   }
@@ -257,14 +287,14 @@ function comparePair(caseData, native, browser, directory, exactPixels, stateCom
 export async function runPairedGate({ output, selected, randomCount = 2, replaySeeds = [], replayCases = [], exactPixels = false, productionDirectory,
   nativeFrameTimeout = 60, originalObserver = 'tools/original/foundation-paired-observer.py',
   stateComparator = scopedState, archiveBrowserEvidence = false, archiveNativeEvidence = false, captureBrowserAudio = false,
-  originalSfxVolume }) {
+  originalSfxVolume, mtDraws = process.argv.includes('--mt-draws') || process.env.E2E_MT_DRAWS === '1' }) {
   assert.ok(Number.isFinite(nativeFrameTimeout) && nativeFrameTimeout > 0 && nativeFrameTimeout <= 300,
     'Native frame timeout must be more than 0 and at most 300 host-wall seconds');
   mkdirSync(output, { recursive: true });
   let server, browser;
   const report = { schema: 1, status: 'starting', mode: 'fresh original process paired with immutable browser production artifact',
     nativeFrameTimeout, originalSfxVolume,
-    originalObserver, archiveBrowserEvidence, archiveNativeEvidence, captureBrowserAudio,
+    originalObserver, archiveBrowserEvidence, archiveNativeEvidence, captureBrowserAudio, mtDraws,
     comparisons: { functional: 'Real input/phase/readback and source title, fade, player motion, pause/controller, HP, immunity, active tear/bomb counts',
       pixels: 'Strict full RGBA diagnostic; every difference remains a failure in its own pixel result',
       exactPixelsRequired: exactPixels, completeOriginalStateParity: false },
@@ -297,8 +327,8 @@ export async function runPairedGate({ output, selected, randomCount = 2, replayS
         // Await both independent captures even if one transport/archive fails.
         // Remaining declared cases still run; failed capture evidence stays red.
         const captures = await Promise.allSettled([
-          nativeCapture(caseData, join(directory, 'original'), nativeFrameTimeout, originalObserver, archiveNativeEvidence, originalSfxVolume),
-          browserCapture(browser, server, caseData, join(directory, 'browser'), archiveBrowserEvidence, captureBrowserAudio),
+          nativeCapture(caseData, join(directory, 'original'), nativeFrameTimeout, originalObserver, archiveNativeEvidence, originalSfxVolume, mtDraws),
+          browserCapture(browser, server, caseData, join(directory, 'browser'), archiveBrowserEvidence, captureBrowserAudio, mtDraws),
         ]);
         native = captures[0].status === 'fulfilled' ? captures[0].value
           : {status: 'fail', error: String(captures[0].reason), directory: join(directory, 'original')};
@@ -311,6 +341,12 @@ export async function runPairedGate({ output, selected, randomCount = 2, replayS
             manifestPath: native.manifestPath, evidence: native.evidence },
           browser: { status: candidate.status, failures: candidate.failures }, checks,
           status: native.status === 'pass' && candidate.status === 'pass' && checks.every(check => check.status === 'pass') ? 'pass' : 'fail' };
+        if (mtDraws) {
+          try {
+            result.mtDraws = compareMtDraws(join(directory, 'original', 'mt-trace'),
+              JSON.parse(readFileSync(join(directory, 'browser', 'mt-draws.json'), 'utf8')));
+          } catch (error) { result.mtDraws = { status: 'diagnostic', error: String(error) }; }
+        }
       } catch (error) {
         result = {id: definition.id, seed: caseData?.seed, seedValue: caseData?.seedValue,
           directory, status: 'fail', error: String(error), checks: [],

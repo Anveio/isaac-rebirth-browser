@@ -777,7 +777,14 @@ impl Driver {
             5 => self
                 .queue
                 .push_back(tick(*e.pick(&[0, MAX_COMMAND_TICKS + 1, u32::MAX]))),
-            6 if e.chance(1, 40) => self.queue.push_back(tick(MAX_COMMAND_TICKS)),
+            // The budget itself is accepted. Paused or in the menus that is
+            // cheap; in play it simulates ten minutes in one command, and
+            // every replay, continuation and the interpreted WASM
+            // differential repeat it, which once stretched a test:dst run
+            // from two and a half minutes to twelve.
+            6 if (state.paused || state.screen != Screen::Playing) && e.chance(1, 40) => {
+                self.queue.push_back(tick(MAX_COMMAND_TICKS))
+            }
             6 => {
                 // Out-of-range host clocks and timestamps on batched steps.
                 let (count, timestamp) = if e.chance(1, 2) {
