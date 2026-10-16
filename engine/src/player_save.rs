@@ -36,6 +36,8 @@ pub struct SavedPlayerItems {
     ///Omitted legacy history stays unknown, never constructor-empty.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub held_pockets: Option<crate::pockets::HeldPockets>,
+    #[serde(default)]
+    pub ordinary_producer_history: Option<crate::ordinary_placement::Coverage>,
     /// Saved+8908/890c/8904/8910; D80/D84 are not saved fields.
     pub active_id: u32,
     pub active_charge: i32,
@@ -70,6 +72,7 @@ impl SavedPlayerItems {
             trinket_rng_states: current_states(&owner.trinket_rngs, 62)?,
             pocket_rng_states: current_states(&owner.pocket_rngs, 41)?,
             held_pockets: owner.held_pockets.clone(),
+            ordinary_producer_history: owner.ordinary_producer_history.clone(),
             active_id: owner.active_id,
             active_charge: owner.active_charge,
             save_word_d88: owner.save_word_d88,
@@ -119,6 +122,7 @@ impl SavedPlayerItems {
         owner.active_charge = self.active_charge;
         owner.reserve_charge = self.reserve_charge;
         owner.held_pockets = self.held_pockets.clone();
+        owner.ordinary_producer_history = self.ordinary_producer_history.clone();
         //51849A/5184A0 stores Saved88D8;511A25/511A2B restores D30.
         //None overwrites constructor Some(0) rather than inventing history.
         owner.damage_inputs = self.damage_inputs;

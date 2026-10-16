@@ -1004,6 +1004,8 @@ pub(crate) fn explode_with_copied_source(
     source: crate::combat::DamageSource,
     copied_source: Option<crate::combat::CopiedDamageSource>,
 ) -> Result<(), String> {
+    //Unclosed rock/alt-rock destruction can add4/5/6 despite no current body.
+    crate::ordinary_placement::invalidate(state, crate::ordinary_placement::Frontier::GridEffects);
     let line = state
         .room
         .grid

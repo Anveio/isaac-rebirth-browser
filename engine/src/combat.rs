@@ -19,6 +19,8 @@ pub fn try_damage_player(
     if health_units == 0 || state.player.dead || state.damage_cooldown != 0 {
         return Ok(false);
     }
+    //Reached Player damage can have unclosed item/effect producers.
+    crate::ordinary_placement::invalidate(state, crate::ordinary_placement::Frontier::PlayerDamageEffects);
     crate::health_damage::apply_admitted(state, health_units, flags)?;
     state.damage_cooldown = immunity_presentations;
     crate::player_death::after_damage(state, flags)?;

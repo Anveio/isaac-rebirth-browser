@@ -135,6 +135,9 @@ pub struct PlayerItems {
     ///An old restore does not inherit fresh empty pocket ownership.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub held_pockets: Option<crate::pockets::HeldPockets>,
+    ///Retained unknown producer footprints survive an otherwise empty Room.
+    #[serde(default)]
+    pub ordinary_producer_history: Option<crate::ordinary_placement::Coverage>,
     pub entity_spawn_seed: u32,
     #[serde(default)]
     pub costume118: Option<crate::player_costume118::Costume118>,
@@ -220,6 +223,7 @@ impl PlayerItems {
             trinket_rngs,
             pocket_rngs,
             held_pockets: Some(crate::pockets::HeldPockets::fresh()),
+            ordinary_producer_history: Some(crate::ordinary_placement::Coverage::fresh_player()),
             entity_spawn_seed,
             costume118: None,
             costume229: None,
@@ -1075,6 +1079,15 @@ pub(crate) fn add_collectible(
         } else {
             authored_grants(state, config);
         }
+    }
+    //This is the actual reached default CFG effect, not an ID/loadout
+    //whitelist. It never heals a prior missing producer history.
+    let ordinary_no_world_effect = matches!(source_effect, Some(PassiveGrantSourceEffect::DefaultTail))
+        && config.inventory.iter().all(|amount| *amount == 0)
+        && config.cache_flags & (256 | 512) == 0;
+    if !ordinary_no_world_effect {
+        crate::ordinary_placement::invalidate(state,
+            crate::ordinary_placement::Frontier::CollectibleEffects { collectible_id: id });
     }
     //52D2FF..52D5A6: one source-ordered event after common authored grants.
     //The existing cache-all request/evaluation below retains its own owners.

@@ -58,6 +58,10 @@ fn discharge(state: &mut State) -> Result<(), String> {
 }
 
 pub(crate) fn advance(state: &mut State, controls_enabled: bool) -> Result<(), String> {
+    if state.public_actions.active_triggered && controls_enabled
+        && state.player_items.as_ref().is_none_or(|owner| !matches!(owner.active_id, 0 | 45)) {
+        crate::ordinary_placement::invalidate(state, crate::ordinary_placement::Frontier::ActiveEffects);
+    }
     //Only empty active0 and the closed45 leaf exclude the D30 reset/random
     //writers in522250 here. A requested untracked active loses this input
     //proof before dispatch; no claim of actual callback execution is made.
