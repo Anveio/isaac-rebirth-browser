@@ -12,6 +12,51 @@ functional parity.
 
 ## Current gameplay qualification
 
+Public main `d995a582` includes refused-pedestal runtime PR557 and
+optional Node tools PR558. Primary/playable remains `4543c59b`, serving the
+qualified current-CF8 artifact `ed5b8d1e` / WASM `d869557b` (Wd869), product
+`44ab4b10`/1403, with delivery `d526140f`. Its six production steps passed;
+Use45 passes 43/43 for the real TEMP45 TTL0 record and continued updates, and
+the selected item194 Own/reused-Original endpoint checks have zero failures.
+Item194's five unknown labels, actual cache/Add invocations, positive-TTL expiry
+and unrelated effects remain explicit. This artifact does not qualify557.
+
+The 21 scalar cases belong to the prior Wecee artifact: 187,499 Own
+checks with zero scalar/producer failures, 210 independent Original endpoint
+checks with zero failures, and 85 unknowns. They are not a 21-case rerun on
+Wd869. The old reports and their artifact bindings remain unchanged.
+
+The retained key-fixed Original compared with Wd869 through the public-WASM
+backend passes 422/422 presentations with zero failures (`e07f9f8a`), including
+both real key collections. The unchanged default Pocket AL CLI control on
+the same artifact passes 9,350 checks with zero failures and 11 unavailable
+obligations (`8ec05bef`). This is a transport regression control, not another
+mandatory pocket case: the earlier 3/11 scope remains. The Browser key attempt
+and menu-audio attempts remain resource-partial with zero comparison checks.
+Node results supply no Browser DOM, renderer or backend audio/PCM equality.
+
+The separate Get4+557 source `35e65b91` / WASM `e5b6ace1` has a genuine
+six-step production pass and sealed binding `88933f3a`. Its first fixed0
+live3 case passes all eight new target-lifecycle laws, from actual real3
+acquisition while the target is alive through the same Knife's registration,
+contact, target death/retirement and cleared target slot. The corrected Own
+diagnostic retains five required unknowns. Pending cache16 is MoveSpeed/D60
+and remains recorded; it is not FireDelay and is not cleared or completed.
+The original broad strict report retains 7,009 failures. Its retained-data
+correction records 7,006 failures across 86,561 checks (`60c292d0`), with six
+Get4 diagnostics and all eight target laws passing. Attribution remains open
+until the same fixed0 case is compared on the prior Wd869 artifact; an unlike
+historical case is not that baseline. Full cohort, callback and
+broader synergy acceptance remain open. This result does not qualify191,
+satellites, Get1, canonical Pill/Range/Luck or the separate pickup/transition
+source candidates.
+
+Every earlier row, strict failure and resource-partial report below retains
+its named artifact and scope. A retained section's word “current” refers to
+that recorded snapshot.
+
+## Retained e56e/Wecee qualification snapshot
+
 Current public source is `e56e66f9`; the synchronized checkout remains
 `0bb5487e`, serving scalar artifact `b3555a49` / WASM `ecee6363` (Wecee)
 with its actual six-step production qualification. New public grid admission,
