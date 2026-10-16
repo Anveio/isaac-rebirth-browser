@@ -68,8 +68,8 @@ export interface SpriteEffect {
 export interface ActorRef { kind: "player" | "familiar" | "tear" | "knife" | "laser" | "bomb" | "pickup" | "npc" | "projectile" | "effect"; id: number; }
 export interface Knife {
   id: number; entityType: number; variant: number; subtype: number; spawnSeed: number; birthGameUpdate: number; actorRng: ItemRng;
-  spawnerType: number; spawnerVariant: number; parent: ActorRef | null;
-  childChain4a0: "unknown" | "empty";
+  spawnerType: number; spawnerVariant: number; parent: ActorRef | null; parentNullKnown?: boolean;
+  childChain4a0: "unknown" | "empty" | { linked: ActorRef };
   active: boolean; dead: boolean; visible: boolean;
   position: {x: number; y: number}; savedPosition: {x: number; y: number};
   homePosition: {x: number; y: number}; homingTarget: ActorRef | null;

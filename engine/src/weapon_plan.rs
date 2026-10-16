@@ -403,6 +403,15 @@ pub(crate) fn admits_neutral_knife_properties(
     source_player_type == Some(0) && items.admits_neutral_kind4()
 }
 
+///Selected controlled114+329 caller admission is independent of the ordinary
+///Knife emitter and current kind4 damage. Actor/satellite owners stay concrete.
+pub(crate) fn admits_controlled_knife_caller(
+    items: ItemInputs<'_>,
+    source_player_type: Option<u32>,
+) -> bool {
+    source_player_type == Some(0) && items.admits_controlled_knife_caller()
+}
+
 ///Pure preflight at eligible overlap before hit-registry/queue mutation.
 ///ParentKnife uses only admit_knife_transformation_history; ParentPlayer
 ///also demands its real kind4 builder domain.
@@ -411,7 +420,7 @@ pub(crate) fn admit_neutral_knife_contact(
     source_player_type: Option<u32>,
     counts: Option<[i32; 2]>,
 ) -> KnifeContactAdmission {
-    if !admits_neutral_knife_properties(items, source_player_type) {
+    if source_player_type != Some(0) || !items.admits_knife_kind4_getter() {
         return KnifeContactAdmission::UnmappedBuilderModifiers;
     }
     admit_knife_transformation_history(counts)
@@ -426,7 +435,7 @@ pub(crate) fn resolve_neutral_kind4_damage(
     stats: PlayerStats,
 ) -> Result<f32, String> {
     stats.validate()?;
-    if !admits_neutral_knife_properties(items, source_player_type) {
+    if source_player_type != Some(0) || !items.admits_knife_kind4_getter() {
         return Err("kind4 requires an unadmitted source modifier/context branch".into());
     }
     Ok(stats.damage)

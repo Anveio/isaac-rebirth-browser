@@ -663,6 +663,10 @@ pub(crate) fn add_collectible(
         && normal_isaac
         && crate::item_pipeline::ItemInputs::new(owner)
             .is_ok_and(|inputs| inputs.admits_monstro_grant_context());
+    let keep_inner_eye_knife_luck = id == 2
+        && normal_isaac
+        && crate::item_pipeline::ItemInputs::new(owner)
+            .is_ok_and(|inputs| inputs.admits_inner_eye_knife_grant());
     let keep_epic_fetus_luck = matches!(id, 2 | 168)
         && normal_isaac
         && crate::item_pipeline::ItemInputs::new(owner)
@@ -674,6 +678,7 @@ pub(crate) fn add_collectible(
         && !keep_fetus_luck
         && !keep_monstro_luck
         && !keep_epic_fetus_luck
+        && !keep_inner_eye_knife_luck
     {
         // These admitted grant paths preserve the fresh auxiliary words.
         // Nonzero setters and restore need their own producer binding.
