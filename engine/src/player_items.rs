@@ -127,6 +127,10 @@ pub struct PlayerItems {
     pub item_rngs: Vec<items::Rng>,
     pub trinket_rngs: Vec<items::Rng>,
     pub pocket_rngs: Vec<items::Rng>,
+    ///Actual two eight-byte held records, independent of reserve chargeD8C.
+    ///An old restore does not inherit fresh empty pocket ownership.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub held_pockets: Option<crate::pockets::HeldPockets>,
     pub entity_spawn_seed: u32,
     #[serde(default)]
     pub costume118: Option<crate::player_costume118::Costume118>,
@@ -207,6 +211,7 @@ impl PlayerItems {
             item_rngs,
             trinket_rngs,
             pocket_rngs,
+            held_pockets: Some(crate::pockets::HeldPockets::fresh()),
             entity_spawn_seed,
             costume118: None,
             costume229: None,
@@ -745,6 +750,7 @@ pub(crate) fn add_collectible(
         .as_mut()
         .expect("checked Player item owner");
     owner.owned_counts[id as usize] = owner.owned_counts[id as usize].wrapping_add(1);
+    crate::pockets::note_modifier_grant(owner, id);
     //Actual48 independently preserves D28/D44/13BC/13C0 on its
     //closed common path. This input history gives no stage or caller role.
     let keep_cupid_move_speed = id == 48

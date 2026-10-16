@@ -316,6 +316,9 @@ export interface State {
     specialFactor: number; removed: boolean[]; selected: boolean[]; roomRoutes: number[]; pillEffects: number[]} | null;
   playerItems: {initializerSeed: number; managerRng: ItemRng; initializerRng: ItemRng;
     itemRngs: ItemRng[]; trinketRngs: ItemRng[]; pocketRngs: ItemRng[]; entitySpawnSeed: number;
+    heldPockets?: {slots: {id: number; card: boolean}[];
+      frontier: {kind: "cardEffect"; cardId: number} | {kind: "pillEffect"; pillColor: number}
+        | {kind: "modifierConversion"; collectibleId: number} | null} | null;
     technologyEyeRegistered: boolean | null;
     costume229?: Costume229 | null;
     ownedCounts: number[]; temporaryCollectibles: {itemId: number; count: number; cooldown: number}[]; queuedId: number | null; queuedCharge: number; queuedTouched: boolean;
