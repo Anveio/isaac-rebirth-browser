@@ -56,7 +56,7 @@ export const SUITES = [
     'No-dialog run admission, level descriptors, Game.Save stores, grid records and ambient Room costs'),
   suite('weapons', e2e('weapons'), ['--count', '4'], 'Tear cadence, direction and inherited motion'),
   suite('tear-lifecycle', e2e('weapons'), ['--lifecycle', '--count', '4'], 'Tear birth, flight and death phases'),
-  suite('traversal', traversal, [], 'Ordinary doorway exit/return and hostile-room locks'),
+  suite('traversal', traversal, [], 'Ordinary doorway exit/return, hostile-room locks and spider-web crossings'),
   suite('doors', traversal, ['--scenario-helper', helper('door-scenarios.py'), '--count', '1'], 'Curse and free treasure-room doors'),
   suite('secrets', traversal, ['--scenario-helper', helper('secret-door-scenarios.py'), '--count', '1'],
     'Bomb-revealed secret doors, entry and return'),
@@ -68,6 +68,11 @@ export const SUITES = [
     '--helper-arg', '--contrived', '--helper-arg', 'E1T36YXW-monstro', '--helper-arg', '--count', '--helper-arg', '1',
     '--comparator', 'tools/foundation/stage-exit-state-pair.mjs', '--native-frame-timeout', '120'],
     'Boss-room clear award trapdoor and pedestal, stage transition and Basement II arrival'),
+  // The starting bomb damages a cracked doorway into a bedroom (18/19) and
+  // scatters wood particles; the door stays shut (bedroom-door-scenarios.py).
+  suite('bedroom-doors', statePair, ['--scenario-helper', helper('bedroom-door-scenarios.py'),
+    '--helper-arg', '--count', '--helper-arg', '1', '--comparator', 'tools/foundation/bedroom-door-state-pair.mjs'],
+    'Cracked bedroom doorway: one bomb damages it and scatters wood particles'),
   suite('key-doors', traversal, ['--scenario-helper', helper('key-door-scenarios.py'),
     '--state-observer', helper('key-door-observe.py'), '--count', '1'], 'Key collection, library unlock and revisit'),
   suite('large-rooms', traversal, ['--scenario-helper', helper('large-room-scenarios.py'), '--count', '2'],

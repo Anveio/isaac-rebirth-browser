@@ -27,6 +27,7 @@ mod content;
 mod controlled_brimstone;
 mod controlled_fetus;
 mod controlled_knife;
+mod controlled_knife_satellites;
 pub mod controlled_tear;
 mod controlled_technology;
 mod creep_effects;
@@ -42,6 +43,7 @@ mod entities;
 mod epic_fetus;
 mod explosion_effects;
 pub mod game_shake;
+pub mod spider_webs;
 pub mod sprite_color;
 pub mod tear_deaths;
 mod tear_factory;
@@ -199,6 +201,9 @@ pub struct Player {
     pub flying: Option<bool>,
     #[serde(default)]
     pub grid_collision_class: Option<u32>,
+    /// Entity+408/+470/+490 slowing state written by spider webs.
+    #[serde(default, skip_serializing_if = "spider_webs::Slowing::is_constructed")]
+    pub slowing: spider_webs::Slowing,
     pub eye: projectiles::Eye,
     /// Actual Player+c84, independent of manager tear handles.
     pub shots_fired: u32,
@@ -266,6 +271,7 @@ impl Player {
             transformation_counts: None,
             flying: None,
             grid_collision_class: None,
+            slowing: spider_webs::Slowing::default(),
             eye: projectiles::Eye::Positive,
             shots_fired: 0,
             // Authored sprite roots and shadow centers are one logical pixel
@@ -587,13 +593,12 @@ impl PauseMenu {
 ///5bb602/64d/694/736/779/7b8 CVTTSS2SI, then signed clamp1..7.
 ///An overflowing/NaN input becomes INT_MIN, unlike Rust's saturating cast.
 fn pause_stat_frame(value: f32) -> u8 {
-    let integer = if value.is_finite()
-        && (-2_147_483_648.0_f32..2_147_483_648.0_f32).contains(&value)
-    {
-        value as i32
-    } else {
-        i32::MIN
-    };
+    let integer =
+        if value.is_finite() && (-2_147_483_648.0_f32..2_147_483_648.0_f32).contains(&value) {
+            value as i32
+        } else {
+            i32::MIN
+        };
     integer.clamp(1, 7) as u8
 }
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
@@ -1711,9 +1716,11 @@ impl Game {
             room_before,
         )?;
         // Backdrop::pre_render_walls runs inside 5c5b30 before the FX rays.
+        self.state.room.apply_boss_backdrop(self.state.stage)?;
         for (position, scale) in room::basement_boss_blood(&self.state.room, self.state.stage)? {
             let seed = self.state.boot_lifecycle.shared.next_u32();
-            let id = familiars::admit_blood_splat(&mut self.state, seed, position, [1.0; 4], [0.0; 3])?;
+            let id =
+                familiars::admit_blood_splat(&mut self.state, seed, position, [1.0; 4], [0.0; 3])?;
             familiars::set_blood_scale(&mut self.state, id, scale)?;
             familiars::advance_blood_initial(&mut self.state, id)?;
         }
@@ -1877,19 +1884,28 @@ impl Game {
         // The source descriptor map survives Room.Init. Only a source-owned
         // fresh empty map is admitted here; saved payload replay is separate.
         let room_index = self.state.current_room;
-        let descriptor = self.state.floor.descriptors.get(room_index)
+        let descriptor = self
+            .state
+            .floor
+            .descriptors
+            .get(room_index)
             .ok_or("persistent spawn map requires current Level descriptor")?;
-        let mut persistent_cells = descriptor.persistent_spawn_cells.clone()
+        let mut persistent_cells = descriptor
+            .persistent_spawn_cells
+            .clone()
             .ok_or("persistent spawn map history is unknown")?;
         let cells = (usize::from(descriptor.template.width) + 2)
             * (usize::from(descriptor.template.height) + 2);
-        if [&persistent_cells.present, &persistent_cells.unknown].into_iter().any(|keys| {
-            keys.windows(2).any(|pair| pair[0] >= pair[1])
-                || keys.iter().any(|&cell| usize::from(cell) >= cells)
-        })
-            || persistent_cells.unknown.iter().any(|cell| {
-                persistent_cells.present.binary_search(cell).is_ok()
+        if [&persistent_cells.present, &persistent_cells.unknown]
+            .into_iter()
+            .any(|keys| {
+                keys.windows(2).any(|pair| pair[0] >= pair[1])
+                    || keys.iter().any(|&cell| usize::from(cell) >= cells)
             })
+            || persistent_cells
+                .unknown
+                .iter()
+                .any(|cell| persistent_cells.present.binary_search(cell).is_ok())
             || self.state.room.descriptor.as_ref().is_none_or(|room| {
                 room.index != room_index
                     || room.persistent_spawn_cells.as_ref() != Some(&persistent_cells)
@@ -1911,13 +1927,21 @@ impl Game {
             // 5cf230/238 and5cf25e already consumed each authored RNG11
             // draw/selection. 5cf285..2cc checks the map before entering
             // SpawnEntity, including grid factories and their local Init.
-            if persistent_cells.present.binary_search(&selector.grid_index).is_ok() {
+            if persistent_cells
+                .present
+                .binary_search(&selector.grid_index)
+                .is_ok()
+            {
                 if selector.category == room_spawns::SpawnCategory::Entity {
                     suppressed_entities += 1;
                 }
                 continue;
             }
-            if persistent_cells.unknown.binary_search(&selector.grid_index).is_ok() {
+            if persistent_cells
+                .unknown
+                .binary_search(&selector.grid_index)
+                .is_ok()
+            {
                 return Err("persistent spawn cell depends on an unadmitted factory".into());
             }
             let before_entities = order.len();
@@ -1980,6 +2004,8 @@ impl Game {
                 // prices, pools and replacements are admitted.
                 let pickup = if selector.entity_type == 5 && selector.variant == 60 {
                     chests::from_locked_selector(next, selector, true, &self.state)?
+                } else if selector.entity_type == 5 && selector.variant == 50 {
+                    chests::from_source_selector(next, selector, true, &self.state)?
                 } else {
                     Pickup::from_selector(next, selector, true)?
                 };
@@ -2007,19 +2033,30 @@ impl Game {
                     // Preserve unrelated traversal when its existing factory
                     // is unsupported. Only a later lookup of this cell needs
                     // the missing success/key owner and must stop there.
-                    let insertion = persistent_cells.unknown.binary_search(&selector.grid_index)
+                    let insertion = persistent_cells
+                        .unknown
+                        .binary_search(&selector.grid_index)
                         .expect_err("cell was checked before its factory");
-                    persistent_cells.unknown.insert(insertion, selector.grid_index);
+                    persistent_cells
+                        .unknown
+                        .insert(insertion, selector.grid_index);
                 } else {
-                    let insertion = persistent_cells.present.binary_search(&selector.grid_index)
+                    let insertion = persistent_cells
+                        .present
+                        .binary_search(&selector.grid_index)
                         .expect_err("cell was checked before its factory");
-                    persistent_cells.present.insert(insertion, selector.grid_index);
+                    persistent_cells
+                        .present
+                        .insert(insertion, selector.grid_index);
                 }
                 self.state.floor.descriptors[room_index].persistent_spawn_cells =
                     Some(persistent_cells.clone());
-                self.state.room.descriptor.as_mut()
-                    .expect("checked current descriptor").persistent_spawn_cells =
-                    Some(persistent_cells.clone());
+                self.state
+                    .room
+                    .descriptor
+                    .as_mut()
+                    .expect("checked current descriptor")
+                    .persistent_spawn_cells = Some(persistent_cells.clone());
             }
         }
         // Doors, walls and shape0 ambient decoration follow the selectors.
@@ -2219,6 +2256,10 @@ impl Game {
             //later release never recreates a neutral owner.
             if self.state.screen == Screen::Playing && self.state.public_actions.pocket_pressed {
                 self.state.attack_runtime.aim_rotation_c70 = None;
+                if let Some(items) = &mut self.state.player_items {
+                    //Untracked pill/card execution cannot retain speed history.
+                    items.move_speed_inputs = None;
+                }
             }
         }
         if phase != phase::Phase::Skipped {
@@ -2560,6 +2601,7 @@ impl Game {
         stage_transition::advance_trapdoor(&mut self.state, phase)?;
         let explosion_fence = self.state.explosions.len();
         grid_hazards::advance(&mut self.state, phase)?;
+        spider_webs::advance(&mut self.state, phase)?;
         let existing = self.state.actor_scheduler.full_phase();
         if phase == phase::Phase::Update {
             rock_blast::advance_bomb_rocks(&mut self.state)?;
@@ -3408,6 +3450,7 @@ impl Game {
         // Base main-sprite time advances before the Player death/shooting caller.
         player_items::advance_presentation(&mut self.state, phase);
         player_costume229::begin_full(&mut self.state, phase);
+        spider_webs::begin_player_update(&mut self.state, phase)?;
         if player_death::advance(&mut self.state, phase) {
             return Ok(());
         }
@@ -3699,6 +3742,7 @@ impl Game {
             dy,
             self.state.player_stats.move_speed,
         );
+        spider_webs::finish_player_update(&mut self.state);
         if controls_enabled && bomb_triggered && bomb_admitted {
             bombs::place(&mut self.state, phase)?;
         }

@@ -49,7 +49,8 @@ export interface Familiar {
   flags: number; visible: boolean; active: boolean; removed: boolean; followerIndex: number; appearanceCounter: number;
   sprite: ActorSprite; fullUpdates: number; unresolvedAiUpdates: number;
 }
-export type PoopEffect = { particle58: "initializing" | {flying: {height: number; verticalVelocity: number; gravity: number; layerRotation: number}} } | { explosion43: {frameTarget: number} };
+type ParticleFlight = "initializing" | {flying: {height: number; verticalVelocity: number; gravity: number; layerRotation: number}};
+export type PoopEffect = { particle58: ParticleFlight } | { particle27: ParticleFlight } | { explosion43: {frameTarget: number} };
 export interface SpriteEffect {
   id: number; variant: number; subtype: number; spawnSeed: number;
   spawnerType: number; spawnerVariant: number;
@@ -68,8 +69,8 @@ export interface SpriteEffect {
 export interface ActorRef { kind: "player" | "familiar" | "tear" | "knife" | "laser" | "bomb" | "pickup" | "npc" | "projectile" | "effect"; id: number; }
 export interface Knife {
   id: number; entityType: number; variant: number; subtype: number; spawnSeed: number; birthGameUpdate: number; actorRng: ItemRng;
-  spawnerType: number; spawnerVariant: number; parent: ActorRef | null;
-  childChain4a0: "unknown" | "empty";
+  spawnerType: number; spawnerVariant: number; parent: ActorRef | null; parentNullKnown?: boolean;
+  childChain4a0: "unknown" | "empty" | { linked: ActorRef };
   active: boolean; dead: boolean; visible: boolean;
   position: {x: number; y: number}; savedPosition: {x: number; y: number};
   homePosition: {x: number; y: number}; homingTarget: ActorRef | null;
@@ -106,7 +107,9 @@ export interface SavedRunSummary {
     trinketRngStates: number[]; pocketRngStates: number[]; activeId: number;
     activeCharge: number; saveWordD88: number; reserveCharge: number;
     shotSpeedInputs?: {sourceD38: number};
-    damageInputs?: {sourceD30: number}};
+    damageInputs?: {sourceD30: number};
+    fireDelayInputs?: {sourceD2c: number};
+    rangeInputs?: {sourceD34: number}};
   emptyGridCellsSaved: number; occupiedGridSeedsPending: number[];
   currentRoomRecord: number; currentRoomSeedSamples: {gridIndex: number;
     levelSeeds: [number, number]; savedSeeds: [number, number]; occupancy: "empty" | "occupied" | "padding";
@@ -168,7 +171,7 @@ export interface Pickup {
   canCollect: boolean; collected: boolean; removed: boolean; collisionRadius: number; shadowSize: number; collectionDelay: number;
   overlay: string | null; overlayFrame: number; overlayPlaying: boolean;
   age: number; birthGameUpdate: number; charge: number; touched: boolean;
-  chest: {rng: ItemRng; gridCollisionClass: number; entityCollisionClass: number; price: number; cooldown: number; openFrontier?: 'playerContext' | 'collectibleMorph';
+  chest: {rng: ItemRng; gridCollisionClass: number; entityCollisionClass: number; price: number; cooldown: number; openFrontier?: 'playerContext' | 'collectibleMorph' | 'explosionGeometry' | 'regularChildInit';
     lootBirths: {variant: number; spawnSeed: number; position: {x: number; y: number}; velocity: {x: number; y: number}; spriteScaleMultiplier: number | null}[]} | null;
   morphLinks?: {parent498: ActorRef | null; link4a0: ActorRef | null; link4a8: ActorRef | null};
   regularCollision: {gridCollisionClass: number; entityCollisionClass: number} | null;
@@ -185,7 +188,7 @@ export interface PauseMenu {
   age: number; selection: number; statFrames: [number | null, number | null, number | null, number | null, number | null, number | null];
 }
 export interface RoomAppearance {
-  backdrop: string; columns: number; rows: number; tileSize: number; origin: { x: number; y: number };
+  backdrop: string; backdropId: number; columns: number; rows: number; tileSize: number; origin: { x: number; y: number };
   fxRays?: { index: number; xMin: number; xMax: number; topParallax: number; bottomParallax: number; rayLength: number;
     raySpacing: number; perspective: number; rays: { opacity: number; animationSpeed: number; phase: number; texture: string }[] };
   backdropPatchSize: { width: number; height: number }; backdropPatchColumns: number;
@@ -316,7 +319,10 @@ export interface State {
     activeStateD80: number; activeStateD84: number; reserveCharge: number; activeFlag3076: boolean;
     unevaluatedCacheFlags: number;
     damageInputs?: {sourceD30: number};
+    fireDelayInputs?: {sourceD2c: number};
+    rangeInputs?: {sourceD34: number};
     shotSpeedInputs?: {sourceD38: number};
+    moveSpeedInputs?: {sourceD28: number; sourceD44: number; source13bc: number; source13c0: number};
     luckInputs: {sourceD3c: number; sourceD40: number; sourceD58: number; source13cc: number; source13d0: number} | null} | null;
   informationAnimation: {state: number; delay: number; currentActor: string | null;
     currentClip: string | null; spritesheet: string | null; definitionLoaded: boolean; frame: number; playing: boolean};

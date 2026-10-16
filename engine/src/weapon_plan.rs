@@ -172,29 +172,37 @@ pub(crate) fn resolve_appearance(
     requested: CacheMask,
 ) -> (WeaponCache, CacheMask) {
     let mut completed = 0;
+    let selected = source_player_type == Some(0) && items.admits_selected_appearance();
+    let homing_flags = source_player_type == Some(0) && items.admits_homing_flags();
+    let homing_colors = source_player_type == Some(0) && items.admits_homing_colors();
     let number_one = source_player_type == Some(0) && items.admits_number_one_appearance();
     let soy_milk = source_player_type == Some(0) && items.admits_soy_milk_cache_context();
     let polyphemus_flags = source_player_type == Some(0)
         && prior.primary == PrimaryWeaponC08::RegularTears
         && items.admits_polyphemus_flags_context();
     if source_player_type == Some(0)
-        && (items.admits_selected_appearance() || number_one || polyphemus_flags)
+        && (selected || number_one || polyphemus_flags || homing_flags || homing_colors)
     {
-        if requested.0 & 32 != 0 {
-            prior.flags_c98 = AttackFlags(if prior.primary == PrimaryWeaponC08::Ludovico {
+        if requested.0 & 32 != 0 && (selected || number_one || polyphemus_flags || homing_flags) {
+            let mut flags = if prior.primary == PrimaryWeaponC08::Ludovico {
                 3
             } else if polyphemus_flags {
                 //51316D/513176: permanent169 ORs the independent bit9.
                 0x200
             } else {
                 0
-            });
+            };
+            if homing_flags {
+                //514EF8/5130EF is the source permanent3 operator only.
+                flags |= 4;
+            }
+            prior.flags_c98 = AttackFlags(flags);
             completed |= 32;
         }
-        if requested.0 & 64 != 0 && !polyphemus_flags {
+        if requested.0 & 64 != 0 && !polyphemus_flags && (selected || number_one || homing_colors) {
             //515997/515AB1 Have6, else5E3D70 record-presence. This leaf
             //admits permanent6 only; the two literal ColorMods are distinct.
-            if number_one && items.number_one_present() {
+            if (number_one || homing_colors) && items.number_one_present() {
                 let byte_scale = 1.0_f32 / 255.0_f32;
                 prior.color_ca0 = AttackColor {
                     tint: [1.0, 1.0, 0.0, 1.0],
@@ -205,6 +213,20 @@ pub(crate) fn resolve_appearance(
                     tint: [0.2, 1.0, 0.0, 1.0],
                     source_middle: [0.0; 4],
                     offsets: [255.0 * byte_scale, 255.0 * byte_scale, 0.0],
+                };
+            } else if homing_colors && items.positive_owned_count(3) {
+                //515B41/515BD5 use the same four tint words but different
+                //42F510 offsets. Preserve the source binary32 byte scaling.
+                let byte_scale = 1.0_f32 / 255.0_f32;
+                prior.color_ca0 = AttackColor {
+                    tint: [0.4, 0.15, 0.38, 1.0],
+                    source_middle: [0.0; 4],
+                    offsets: [71.0 * byte_scale, 0.0, 116.0 * byte_scale],
+                };
+                prior.color_ccc = AttackColor {
+                    tint: [0.4, 0.15, 0.38, 1.0],
+                    source_middle: [0.0; 4],
+                    offsets: [90.0 * byte_scale, 0.0, 180.0 * byte_scale],
                 };
             } else if soy_milk {
                 //515E76 Have330 reaches the late CA0 tint at513480.
@@ -403,6 +425,15 @@ pub(crate) fn admits_neutral_knife_properties(
     source_player_type == Some(0) && items.admits_neutral_kind4()
 }
 
+///Selected controlled114+329 caller admission is independent of the ordinary
+///Knife emitter and current kind4 damage. Actor/satellite owners stay concrete.
+pub(crate) fn admits_controlled_knife_caller(
+    items: ItemInputs<'_>,
+    source_player_type: Option<u32>,
+) -> bool {
+    source_player_type == Some(0) && items.admits_controlled_knife_caller()
+}
+
 ///Pure preflight at eligible overlap before hit-registry/queue mutation.
 ///ParentKnife uses only admit_knife_transformation_history; ParentPlayer
 ///also demands its real kind4 builder domain.
@@ -411,7 +442,7 @@ pub(crate) fn admit_neutral_knife_contact(
     source_player_type: Option<u32>,
     counts: Option<[i32; 2]>,
 ) -> KnifeContactAdmission {
-    if !admits_neutral_knife_properties(items, source_player_type) {
+    if source_player_type != Some(0) || !items.admits_knife_kind4_getter() {
         return KnifeContactAdmission::UnmappedBuilderModifiers;
     }
     admit_knife_transformation_history(counts)
@@ -426,7 +457,7 @@ pub(crate) fn resolve_neutral_kind4_damage(
     stats: PlayerStats,
 ) -> Result<f32, String> {
     stats.validate()?;
-    if !admits_neutral_knife_properties(items, source_player_type) {
+    if source_player_type != Some(0) || !items.admits_knife_kind4_getter() {
         return Err("kind4 requires an unadmitted source modifier/context branch".into());
     }
     Ok(stats.damage)

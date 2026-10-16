@@ -232,7 +232,7 @@ impl Pickup {
         selector: &crate::room_spawns::SpawnSelector,
         appear: bool,
     ) -> Result<Option<Self>, String> {
-        if selector.entity_type == 5 && selector.variant == 50 {
+        if selector.entity_type == 5 && matches!(selector.variant, 50 | 51) {
             return crate::chests::from_selector(id, selector, appear);
         }
         if selector.entity_type != 5 || !matches!(selector.variant, 10 | 20 | 30 | 40) {
@@ -938,26 +938,64 @@ pub(crate) fn resolve_grid(
 }
 
 /// The real554490 actor circle changes velocity immediately; ordinary Pickup
-/// HP0 rejects the later damage virtual. No loot or shared-RNG word is sampled.
+/// HP0 rejects ordinary Pickup damage. Closed51 alone owns the actual positive
+/// flags4 Hurt callback after the velocity effect.
 pub(crate) fn bomb_hit(
     state: &mut crate::State,
     center: WorldVector,
     blast_radius: f32,
+    damage: f32,
+    damage_flags: u32,
     line_clear: &dyn Fn(WorldVector) -> bool,
 ) -> Result<(), String> {
     if !center.is_finite() {
         return Err("pickup blast center must be finite".into());
     }
-    for pickup in &mut state.room.pickups {
+    //4536F0 freezes its receiver list before callbacks can append loot. This
+    //retains the existing pickup order; global cross-family query order is a
+    //separate frontier, not an invented second all-actor query.
+    let candidate_count = state.room.pickups.len();
+    let current_actors = state.actor_scheduler.full_phase();
+    for index in 0..candidate_count {
+        let id = state.room.pickups[index].id;
+        let actor = crate::actors::ActorRef {
+            kind: crate::actors::ActorKind::Pickup,
+            id,
+        };
+        let current_owner =
+            current_actors.contains(&actor) && state.actor_scheduler.sequence_id(actor).is_some();
+        let pickup = &mut state.room.pickups[index];
+        let bomb_chest = pickup.variant == 51 && pickup.chest.is_some();
         //Appear has source entity class0; Collect has dead31f. Admitted
         //ordinary families have ground class5 and positive authored mass≤20.
-        if !pickup.has_regular_physics()
-            || !pickup.can_collect
+        if (!pickup.has_regular_physics() && !bomb_chest)
+            || (!bomb_chest && !pickup.can_collect)
             || pickup.collected
             || pickup.removed
             || pickup.collision_mass == 0.0
         {
             continue;
+        }
+        if bomb_chest {
+            let chest = pickup.chest.as_mut().expect("Bomb Chest");
+            //554535/54A skip class0 and gridclass4 before either effect.
+            if chest.entity_collision_class == 0 || chest.grid_collision_class == 4 {
+                continue;
+            }
+            // Fresh51's current geometry is authored12/mass3/class5. Missing
+            // current manager or other legacy geometry remains local unknown.
+            if !current_owner
+                || !pickup.position.is_finite()
+                || !pickup.velocity.is_finite()
+                || pickup.collision_radius != 12.0
+                || pickup.collision_mass != 3.0
+                || chest.grid_collision_class != 5
+            {
+                chest
+                    .open_frontier
+                    .get_or_insert(crate::chests::OpenFrontier::ExplosionGeometry);
+                continue;
+            }
         }
         let delta = WorldVector {
             x: pickup.position.x - center.x,
@@ -966,22 +1004,47 @@ pub(crate) fn bomb_hit(
         let squared = delta.x * delta.x + delta.y * delta.y;
         let radius = blast_radius + pickup.collision_radius;
         if !squared.is_finite() || !radius.is_finite() {
+            if bomb_chest {
+                pickup
+                    .chest
+                    .as_mut()
+                    .expect("Bomb Chest")
+                    .open_frontier
+                    .get_or_insert(crate::chests::OpenFrontier::ExplosionGeometry);
+                continue;
+            }
             return Err("pickup blast geometry overflowed".into());
         }
-        if squared == 0.0 || squared >= radius * radius || !line_clear(pickup.position) {
+        if squared >= radius * radius || !line_clear(pickup.position) {
             continue;
         }
-        let distance = squared.sqrt();
-        let impulse = (radius - distance).min(15.0);
-        //612b30 divides each f32 component before612a70 multiplies impulse;
-        //this differs from Normalize612820's rounded reciprocal multiply.
-        let radial = WorldVector {
-            x: delta.x / distance,
-            y: delta.y / distance,
-        } * impulse;
-        pickup.velocity = pickup.velocity * 0.5 + radial;
-        if !pickup.velocity.is_finite() {
-            return Err("pickup blast velocity overflowed".into());
+        //554625 ->5547AA skips only impulse at exact zero distance; the
+        //positive damage virtual still runs and can actually open51.
+        if squared != 0.0 {
+            let distance = squared.sqrt();
+            let impulse = (radius - distance).min(15.0);
+            //612b30 divides each f32 component before612a70 multiplies impulse;
+            //this differs from Normalize612820's rounded reciprocal multiply.
+            let radial = WorldVector {
+                x: delta.x / distance,
+                y: delta.y / distance,
+            } * impulse;
+            pickup.velocity = pickup.velocity * 0.5 + radial;
+            if !pickup.velocity.is_finite() {
+                if bomb_chest {
+                    pickup
+                        .chest
+                        .as_mut()
+                        .expect("Bomb Chest")
+                        .open_frontier
+                        .get_or_insert(crate::chests::OpenFrontier::ExplosionGeometry);
+                    continue;
+                }
+                return Err("pickup blast velocity overflowed".into());
+            }
+        }
+        if bomb_chest {
+            let _taken = crate::chests::hurt_bomb_chest(state, index, damage, damage_flags)?;
         }
     }
     Ok(())
