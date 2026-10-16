@@ -302,7 +302,15 @@ pub fn transition(before: &State, command: &Command, after: &State) {
                 );
                 props::sometimes!(deeper, "game: a run descends to a deeper stage's floor");
             }
-            if before.paused && after.paused && count > 0 {
+            // A Quit chosen from the pause menu fades the run out, and an
+            // active stage transition keeps priority over that fade (54F9DA,
+            // 54FB88), so a quitting run may still move.
+            let quitting = |state: &State| {
+                state.run_quit.active()
+                    || state.run_quit.input_pending
+                    || state.run_quit.system_pending
+            };
+            if before.paused && after.paused && count > 0 && !quitting(before) && !quitting(after) {
                 // The shared stream is not frozen: Game::Render 54fcd0 runs
                 // Room render 5d1a70 on every presented frame, pause menu or
                 // not, and its light pass flickers lit fires with shared draws
