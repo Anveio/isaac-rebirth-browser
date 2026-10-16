@@ -306,3 +306,18 @@ bytes and record count and retain incomplete status. Only a successful final
 frame/checksum write, file close and metadata commit certify a closed journal.
 Readers reject incomplete frames, uncommitted tails and ambiguous mixed formats.
 No game field, public input, clock, RNG stream or capacity floor changes.
+
+### Functional public-WASM room-frame backend
+
+Existing room-frame suites also accept `--wasm-node WASM --wasm-sha SHA`.
+They replay the same declared menu/key/tick commands through the public ABI
+with the same seed and boot epoch, then use the existing per-frame comparer
+and suite minima. They add no resource or state override.
+`--reuse-original DIR` requires this backend and validates the retained
+Original case and public tape against the requested declaration before using
+its observations. A matching port replay is never its own reference.
+
+This route reports game-functional evidence only. Browser DOM input, renderer
+output and backend audio/PCM remain unavailable and require their separate
+Browser runs. Native and Browser resource-partial reports remain unchanged;
+a complete public-WASM journal alone does not establish a functional pass.
