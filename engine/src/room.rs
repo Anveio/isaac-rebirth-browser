@@ -241,14 +241,24 @@ pub(crate) fn backdrop(room_type: u32, variant: u32, stage: u32) -> (u32, Option
 struct WallParameters {
     chance: u32,
     variants: u32,
+    /// The sheet r15: a segment's rect is variants * sheet + its variant.
+    sheet: u32,
 }
 
 impl WallParameters {
     fn for_room(backdrop: Backdrop, room_type: u32) -> Self {
         if backdrop.id == 15 && room_type == 2 {
-            return Self { chance: 3, variants: 1 };
+            return Self { chance: 3, variants: 1, sheet: 0 };
         }
-        Self { chance: 3, variants: backdrop.wall_variants }
+        if backdrop == BASEMENT && room_type == 5 {
+            // 426f81: a Basement boss room keeps the old variant count as the
+            // sheet and draws one variant, so every segment is rect 3 (the
+            // bloody wall patch). Its blood-splat loop runs between
+            // Random(walls) and the segments; with one variant the segment
+            // rects do not depend on where that loop leaves the stream.
+            return Self { chance: 3, variants: 1, sheet: backdrop.wall_variants };
+        }
+        Self { chance: 3, variants: backdrop.wall_variants, sheet: 0 }
     }
 
     /// The patch distribution the conditional draws produce, in units of
@@ -259,7 +269,7 @@ impl WallParameters {
         }
         (0..self.variants)
             .map(|index| WallVariant {
-                source_patch_index: index as u8,
+                source_patch_index: (self.variants * self.sheet + index) as u8,
                 name: format!("variant{index}"),
                 weight: if index == 0 { (self.chance - 1) * self.variants + 1 } else { 1 },
                 eligibility: format!("backdrop{}", backdrop.id),
@@ -271,10 +281,11 @@ impl WallParameters {
 fn choose_wall(rng: &mut DecorationRng, parameters: WallParameters) -> u8 {
     // A variant draw is conditional. Flattening the resulting distribution
     // to one weighted draw changes all subsequent stream state.
+    let base = parameters.variants * parameters.sheet;
     if rng.next().is_multiple_of(parameters.chance) {
-        (rng.next() % parameters.variants) as u8
+        (base + rng.next() % parameters.variants) as u8
     } else {
-        0
+        base as u8
     }
 }
 
