@@ -258,11 +258,15 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | `room_spawns` | authored spawn-group selection over every authored room and synthetic edge rooms | 11 | 4 | 0 |
 | `room_templates` | authored room-template picks and weight decay against a weight model | 8 | 5 | 0 |
 | `floor` | Basement generation structure, retries and per-descriptor room admission | 18 | 5 | 0 |
+| `motion` | player motion steps and held-input runs against an along/across velocity model | 12 | 4 | 0 |
+| `tears` | tear velocity, eye origin, size and flight against f64 and lifecycle models | 29 | 8 | 0 |
+| `bombs` | planted bomb lives, the placement cooldown and Isaac's blast knockback | 18 | 8 | 0 |
+| `pickups` | regular pickup subtype rolls and the pickups each roll spawns as | 5 | 9 | 0 |
 | `grid` | grid queries and ground-collision solvers on generated rooms | 14 | 3 | 0 |
 | `contact` | mass contact responses against momentum, centre-of-mass and overlap oracles | 16 | 3 | 0 |
 | `pathfinder` | FindGridPath's flood against an independent node-weighted Dijkstra | 6 | 5 | 0 |
 | `item_pools` | ItemPool selection, depletion, fallbacks, routing and continuation | 21 | 6 | 3 |
-| `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 64 | 53 | 2 |
+| `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 66 | 54 | 2 |
 | `abi` | the exported C ABI transport the browser bridge drives | 15 | 3 | 0 |
 
 <details><summary>Every declared DST property</summary>
@@ -381,6 +385,99 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Always | floor: every descriptor resolves authored layout and spawns | [floor.rs](engine/dst/src/units/floor.rs) |
 | Always | floor: every descriptor admits as a room without panicking | [floor.rs](engine/dst/src/units/floor.rs) |
 | Always | floor: admitted rooms have one door per neighbor and bounded geometry | [floor.rs](engine/dst/src/units/floor.rs) |
+| Always | motion: a step is a pure function of its inputs | [motion.rs](engine/dst/src/units/motion.rs) |
+| Always | motion: a step runs exactly on digital input, finite vectors and an admitted speed stat, and never returns a non-finite vector | [motion.rs](engine/dst/src/units/motion.rs) |
+| Sometimes | motion: an invalid step is refused | [motion.rs](engine/dst/src/units/motion.rs) |
+| Sometimes | motion: a step whose vectors overflow is refused | [motion.rs](engine/dst/src/units/motion.rs) |
+| Always | motion: a step commutes with the square's symmetries | [motion.rs](engine/dst/src/units/motion.rs) |
+| Always | motion: position advances by the previous velocity | [motion.rs](engine/dst/src/units/motion.rs) |
+| Always | motion: a released player keeps the forward retention of its velocity | [motion.rs](engine/dst/src/units/motion.rs) |
+| Always | motion: held input damps drift across it by both retentions | [motion.rs](engine/dst/src/units/motion.rs) |
+| Always | motion: held input accelerates along it, braking harder against it | [motion.rs](engine/dst/src/units/motion.rs) |
+| Always | motion: held input contracts speed toward its terminal speed | [motion.rs](engine/dst/src/units/motion.rs) |
+| Sometimes | motion: held input brakes a player moving against it | [motion.rs](engine/dst/src/units/motion.rs) |
+| Sometimes | motion: a speed beyond the terminal speed decays toward it | [motion.rs](engine/dst/src/units/motion.rs) |
+| Always | motion: every step of a settling run is admitted | [motion.rs](engine/dst/src/units/motion.rs) |
+| Always | motion: held input brings the velocity geometrically closer to its terminal velocity | [motion.rs](engine/dst/src/units/motion.rs) |
+| Always | motion: a settled player moves at its speed stat's terminal speed, along axes and diagonals alike | [motion.rs](engine/dst/src/units/motion.rs) |
+| Always | motion: a released player glides the geometric sum of its velocity | [motion.rs](engine/dst/src/units/motion.rs) |
+| Always | tears: the stored velocity is a pure function of its shot | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | tears: a velocity is stored exactly for finite vectors and a shot speed of at least 0.6, and is finite | [tears.rs](engine/dst/src/units/tears.rs) |
+| Sometimes | tears: an invalid shot is refused | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | tears: along its aim a shot keeps ten plus 1.2 of the player's forward motion, never motion against it | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | tears: across its aim a shot keeps 1.2 of the player's sideways motion | [tears.rs](engine/dst/src/units/tears.rs) |
+| Sometimes | tears: a shot drops the player's motion against its aim | [tears.rs](engine/dst/src/units/tears.rs) |
+| Sometimes | tears: a shot inherits the player's motion along its aim | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | tears: the eye origin is a pure function of its shot | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | tears: an eye origin is placed exactly for finite vectors and a uniform in 0..=1, and is finite | [tears.rs](engine/dst/src/units/tears.rs) |
+| Sometimes | tears: an invalid eye draw is refused | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | tears: an eye sits across the shot, 0.3 to 0.5 of its velocity from the player | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | tears: each eye sits on its own side of the shot | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | tears: scale is a pure function of damage | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | tears: scale is computed exactly for finite nonnegative damage | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | tears: scale is 0.6 + 0.04·damage + 0.15·√damage | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | tears: scale never falls as damage rises | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | tears: an animation tier is chosen exactly for finite scales of at least 0.01 | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | tears: the animation tier counts the 5418e0 thresholds a scale exceeds, up to the thirteenth clip | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | tears: the animation tier never falls as scale rises | [tears.rs](engine/dst/src/units/tears.rs) |
+| Sometimes | tears: a scale reaches the largest tier | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | tears: the collision radius is the authored radius times the scale, for admitted parameters | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | tears: the render offset bends below 8.5 height, unless the tear accelerates | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | tears: the render offset never falls as height rises | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | tears: a tear is born exactly from finite parameters and a uniform in 0..=1 | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | tears: a tear is born one step out, falling once, with its velocity and falling acceleration | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | tears: a tear's flight fails only when its position overflows | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | tears: a refused step leaves the tear unchanged | [tears.rs](engine/dst/src/units/tears.rs) |
+| Sometimes | tears: a step whose position overflows is refused | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | tears: a tear's lifetime only moves forward | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | tears: a tear keeps its velocity and falling acceleration through its flight | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | tears: a skipped phase or a removed tear changes nothing | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | tears: an intermediate phase presents half a step ahead and moves nothing | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | tears: a dying tear is removed at the next update, where it died | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | tears: an update moves a tear one step and lets it fall, until it lands or collides | [tears.rs](engine/dst/src/units/tears.rs) |
+| Sometimes | tears: a tear lands | [tears.rs](engine/dst/src/units/tears.rs) |
+| Sometimes | tears: a tear dies on a collision in flight | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | tears: a tear whose falling speed settles positive is removed within its flight | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | bombs: a bomb is born exactly from finite vectors | [bombs.rs](engine/dst/src/units/bombs.rs) |
+| Sometimes | bombs: a bomb with a non-finite birth is refused | [bombs.rs](engine/dst/src/units/bombs.rs) |
+| Always | bombs: a bomb is born at the player with a tenth of its velocity and a full fuse | [bombs.rs](engine/dst/src/units/bombs.rs) |
+| Always | bombs: a newly placed bomb is presented in any admitted phase, half a step ahead in an intermediate one | [bombs.rs](engine/dst/src/units/bombs.rs) |
+| Always | bombs: a bomb is refused exactly when its clocks or vectors disagree, and left unchanged | [bombs.rs](engine/dst/src/units/bombs.rs) |
+| Sometimes | bombs: a bomb whose clocks disagree is refused | [bombs.rs](engine/dst/src/units/bombs.rs) |
+| Always | bombs: a bomb's own life fails only when its position overflows, and is left unchanged | [bombs.rs](engine/dst/src/units/bombs.rs) |
+| Sometimes | bombs: a bomb step whose position overflows is refused | [bombs.rs](engine/dst/src/units/bombs.rs) |
+| Always | bombs: a bomb's lifetime only moves forward | [bombs.rs](engine/dst/src/units/bombs.rs) |
+| Always | bombs: a skipped phase or a removed bomb changes nothing | [bombs.rs](engine/dst/src/units/bombs.rs) |
+| Always | bombs: an intermediate phase presents a bomb half a step ahead and moves nothing | [bombs.rs](engine/dst/src/units/bombs.rs) |
+| Always | bombs: an update moves a bomb by its velocity and slows it by 0.95, halving it below unit speed | [bombs.rs](engine/dst/src/units/bombs.rs) |
+| Always | bombs: a bomb only ever slows | [bombs.rs](engine/dst/src/units/bombs.rs) |
+| Sometimes | bombs: a slow bomb is halved | [bombs.rs](engine/dst/src/units/bombs.rs) |
+| Always | bombs: a bomb detonates once on its 60th full update and is removed ten updates later | [bombs.rs](engine/dst/src/units/bombs.rs) |
+| Sometimes | bombs: a bomb's life runs to its removal | [bombs.rs](engine/dst/src/units/bombs.rs) |
+| Always | bombs: placement is admitted only once the cooldown is spent, which only full updates spend | [bombs.rs](engine/dst/src/units/bombs.rs) |
+| Always | bombs: placement re-arms after exactly 30 full updates | [bombs.rs](engine/dst/src/units/bombs.rs) |
+| Sometimes | bombs: a player places bombs back to back | [bombs.rs](engine/dst/src/units/bombs.rs) |
+| Always | bombs: a blast is resolved exactly for finite vectors | [bombs.rs](engine/dst/src/units/bombs.rs) |
+| Always | bombs: a blast reaches a player strictly inside its radius plus Isaac's | [bombs.rs](engine/dst/src/units/bombs.rs) |
+| Always | bombs: a blast misses a player beyond its radius plus Isaac's | [bombs.rs](engine/dst/src/units/bombs.rs) |
+| Sometimes | bombs: a player stands on a blast's edge | [bombs.rs](engine/dst/src/units/bombs.rs) |
+| Always | bombs: a blast centred on the player keeps its velocity | [bombs.rs](engine/dst/src/units/bombs.rs) |
+| Always | bombs: a blast halves the player's velocity and pushes it straight away from the bomb by its depth, at most 15 | [bombs.rs](engine/dst/src/units/bombs.rs) |
+| Sometimes | bombs: a deep blast's push is capped at 15 | [bombs.rs](engine/dst/src/units/bombs.rs) |
+| Always | pickups: a subtype roll is a pure function of its selector and seed | [pickups.rs](engine/dst/src/units/pickups.rs) |
+| Always | pickups: a nonzero subtype is kept | [pickups.rs](engine/dst/src/units/pickups.rs) |
+| Always | pickups: a zero subtype is rolled exactly for the regular families from a nonzero seed | [pickups.rs](engine/dst/src/units/pickups.rs) |
+| Always | pickups: a rolled subtype is one its family documents | [pickups.rs](engine/dst/src/units/pickups.rs) |
+| Sometimes | pickups: a soul heart is rolled | [pickups.rs](engine/dst/src/units/pickups.rs) |
+| Sometimes | pickups: an eternal heart is rolled | [pickups.rs](engine/dst/src/units/pickups.rs) |
+| Sometimes | pickups: a black heart is rolled | [pickups.rs](engine/dst/src/units/pickups.rs) |
+| Sometimes | pickups: a nickel is rolled | [pickups.rs](engine/dst/src/units/pickups.rs) |
+| Sometimes | pickups: a dime is rolled | [pickups.rs](engine/dst/src/units/pickups.rs) |
+| Sometimes | pickups: a golden key is rolled | [pickups.rs](engine/dst/src/units/pickups.rs) |
+| Sometimes | pickups: a double bomb is rolled | [pickups.rs](engine/dst/src/units/pickups.rs) |
+| Sometimes | pickups: a troll bomb is rolled | [pickups.rs](engine/dst/src/units/pickups.rs) |
+| Sometimes | pickups: a megatroll bomb is rolled | [pickups.rs](engine/dst/src/units/pickups.rs) |
+| Always | pickups: every rolled subtype spawns as a pickup that keeps it, troll bombs drawing the bomb's visual | [pickups.rs](engine/dst/src/units/pickups.rs) |
 | Always | grid: admitted room grids are valid grids | [grid.rs](engine/dst/src/units/grid.rs) |
 | Always | grid: every cell centre indexes back to its cell | [grid.rs](engine/dst/src/units/grid.rs) |
 | Always | grid: nonplayer ground resolution never fails for bounded motion | [grid.rs](engine/dst/src/units/grid.rs) |
@@ -476,8 +573,10 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Always | game: Tick advances the tick and system clocks by its count (plus run-start alignment) | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: the menu animation clock advances with Tick and restarts on screen changes | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: Tick changes the screen only by starting a run or leaving GameOver | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
-| Always | game: unpaused gameplay advances the run clock once per tick | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
-| Always | game: within a run the floor is fixed and full updates never rewind | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: unpaused gameplay advances the run clock once per tick, except while the nightmare scene plays | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: the nightmare scene between stages holds the run clock | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: within a run the floor changes only by descending to the next stage, and full updates never rewind | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Sometimes | game: a run descends to the next stage's floor | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: a paused run freezes gameplay and the shared stream | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: ticks elapse while paused | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Reachable | game: a run starts through the public menus | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
@@ -492,6 +591,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Sometimes | game: a key arrives during the run-start fade | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: key presses during a boss scene are ignored | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: a key arrives during a boss scene | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: Escape during the nightmare scene does not pause | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: Escape during a room transition does not pause | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: Escape arrives during a room transition | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: Escape opens the pause menu | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
@@ -526,12 +626,12 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Always | game: menu selections stay within their menus | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: the highlighted character is the selected character | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: dialog seed text is at most eight uppercase glyphs and its validity is its decode | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
-| Always | game: the run seed code, value, stage seed and eligibility agree | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: the run seed code, value, stage seeds, floor and eligibility agree | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: only supported keys are ever held | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: pause state agrees with the pause menu phase | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: volumes stay within the unit interval | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: the run introduction lasts at most 140 ticks | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
-| Always | game: player controls are disabled exactly while the run-start fade or a room transition holds | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: player controls are disabled exactly while the run-start fade, a room transition or a stage transition holds | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: no run-start request is pending during gameplay | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: player motion is finite and health is bounded | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: grid-colliding bodies stay inside the room's walls | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
@@ -554,7 +654,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Always | game: the minimap marks exactly the current room | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: the player enters another room | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: a tear is in flight | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
-| Sometimes | game: a tear impact is presented | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Sometimes | game: a tear poof is presented | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: a bomb is live | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: a bomb explodes | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: the player takes damage | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
