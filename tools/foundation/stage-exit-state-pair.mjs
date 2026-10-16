@@ -54,6 +54,10 @@ for (const label of labels) {
   check(label, 'room.clear', source.room.combatClear, state.room.combatClear);
   check(label, 'player.visible', player.visible, state.player.visible);
   check(label, 'player.controls', player.controlsEnabled, state.player.controlsEnabled);
+  // Each fight leaves its own corner position; the shared tail's trapdoor
+  // entry frame (and so the StageTransition counter) follows from it.
+  diagnostic(label, 'player.position', [player.position[0] * 0.65 + 32, player.position[1] * 0.65 - 46],
+    [state.player.x, state.player.y]);
   const clip = PLAYER_CLIPS.includes(player.animation) ? player.animation : null;
   const actualClip = PLAYER_CLIPS.includes(state.playerAnimation.current) ? state.playerAnimation.current : null;
   check(label, 'player.clip', clip, actualClip);
