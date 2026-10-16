@@ -411,19 +411,34 @@ fn enqueue(state: &mut State, id: u32, charge: i32, touched: bool) -> Result<(),
     Ok(())
 }
 
+/// What 504820 returns for a Player touching a free collectible pedestal.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum CollectibleContact {
+    /// The collect path returns 1, vetoing 445710's mass response.
+    Collected,
+    /// Every refusal returns 0 through 5048b8/504910 for normal Isaac, so the
+    /// class4 altar separates from the Player: the empty altar (5054ba), a
+    /// FrameCount of at most 20 (505d3a), a held item (50c780), the Player
+    /// delay (5054d3) or the pickup wait (504a30).
+    Refused,
+    /// A removed actor, or the unadmitted active swap: left untouched.
+    Untouched,
+}
+
 /// First free natural collectible, normal Isaac, with no active swap. The
 /// retained empty altar is an actor with stopped Empty main frame0.
-pub(crate) fn collect(state: &mut State, index: usize) -> Result<bool, String> {
+pub(crate) fn collect(state: &mut State, index: usize) -> Result<CollectibleContact, String> {
+    if state.room.pickups[index].variant != 100 || state.room.pickups[index].removed {
+        return Ok(CollectibleContact::Untouched);
+    }
     if !crate::pickups::player_can_collect(state) {
-        return Ok(false);
+        return Ok(CollectibleContact::Refused);
     }
     let pickup = &state.room.pickups[index];
     let Some(owner) = state.player_items.as_ref() else {
-        return Ok(false);
+        return Ok(CollectibleContact::Untouched);
     };
-    if pickup.variant != 100
-        || pickup.subtype == 0
-        || pickup.removed
+    if pickup.subtype == 0
         || pickup.collection_delay != 0
         || pickup.age <= 20
         || owner.collection_delay > 0
@@ -435,14 +450,14 @@ pub(crate) fn collect(state: &mut State, index: usize) -> Result<bool, String> {
         })
         || !pickup.touches(&state.player)
     {
-        return Ok(false);
+        return Ok(CollectibleContact::Refused);
     }
     let id = pickup.subtype;
     let config = items::definition(id).ok_or("natural collectible config absent")?;
     if config.kind == 3 && owner.active_id != 0 {
         // Active swapping also owns Morph/RemoveCollectible callbacks; this
         // first-acquisition leaf leaves that unsupported contact untouched.
-        return Ok(false);
+        return Ok(CollectibleContact::Untouched);
     }
     let (charge, touched) = (pickup.charge, pickup.touched);
     state
@@ -493,20 +508,20 @@ pub(crate) fn collect(state: &mut State, index: usize) -> Result<bool, String> {
             },
         );
     }
-    Ok(true)
+    Ok(CollectibleContact::Collected)
 }
 
-/// Successful Collect returns1 and vetoes445710 mass response. The subsequent
-/// free subtype0 callback returns0, so the retained class4 altar separates from
-/// the Player using the same native impulse/position kernel as other bodies.
-pub(crate) fn empty_altar_contact(state: &mut State, index: usize) -> Result<(), String> {
+/// Successful Collect returns1 and vetoes445710 mass response. Every refused
+/// contact returns0, so the class4 altar, full or empty, separates from the
+/// Player using the same native impulse/position kernel as other bodies.
+pub(crate) fn altar_contact(state: &mut State, index: usize) -> Result<(), String> {
     use crate::{bombs, combat, grid, motion::WorldVector};
     use std::sync::OnceLock;
     let pickup = &state.room.pickups[index];
     //4453e7..4453fe vetoes a dead body independently of the collection
     //callback. A living Player's collection/queue guard still permits the
     //retained free class4 altar's physical response after504820 returns0.
-    if state.player.dead || pickup.variant != 100 || pickup.subtype != 0 || pickup.removed {
+    if state.player.dead || pickup.variant != 100 || pickup.removed {
         return Ok(());
     }
     let lattice = grid::Grid::new(
