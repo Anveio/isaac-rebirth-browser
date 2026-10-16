@@ -290,7 +290,12 @@ fn collider() -> &'static Collider {
 }
 
 pub(crate) fn post_contact_grid(npc: &mut Npc, grid: &Grid) -> Result<(), String> {
-    collider().resolve_nonplayer_ground_bouncy(grid, &mut npc.position, &mut npc.velocity, false)?;
+    collider().resolve_nonplayer_ground_bouncy(
+        grid,
+        &mut npc.position,
+        &mut npc.velocity,
+        false,
+    )?;
     npc.presented_position = npc.position;
     Ok(())
 }
