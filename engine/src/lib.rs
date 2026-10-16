@@ -1710,6 +1710,14 @@ impl Game {
                     },
                     1.0,
                 )),
+                //Collect504510: only successful free Coin20/1..4 reaches here.
+                //The actual subtype owns the configured sound, not its amount.
+                20 => match pickup.subtype {
+                    1 | 4 => Some((234, 1.0)),
+                    2 => Some((232, 1.0)),
+                    3 => Some((199, 1.0)),
+                    _ => None,
+                },
                 30 => Some((58, 0.85)),
                 40 => Some((201, 1.0)),
                 _ => None,
