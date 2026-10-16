@@ -65,6 +65,7 @@ pub(crate) fn advance(state: &mut State, controls_enabled: bool) -> Result<(), S
         if let Some(owner) = state.player_items.as_mut() {
             if !matches!(owner.active_id, 0 | 45) {
                 owner.damage_inputs = None;
+                owner.range_inputs = None;
                 owner.fire_delay_inputs = None;
             }
         }
