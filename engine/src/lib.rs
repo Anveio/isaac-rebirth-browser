@@ -2007,7 +2007,7 @@ impl Game {
                 } else if selector.entity_type == 5 && selector.variant == 50 {
                     chests::from_source_selector(next, selector, true, &self.state)?
                 } else {
-                    Pickup::from_selector(next, selector, true)?
+                    Pickup::from_source_selector(next, selector, true, &self.state)?
                 };
                 if let Some(mut pickup) = pickup {
                     pickup.birth_game_update = self.state.game_update_count;
