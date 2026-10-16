@@ -12,7 +12,8 @@ pub(crate) fn advance(state: &mut State, phase: Phase) -> Result<(), String> {
     }
     // Fresh Door Init starts with class4. The first active full grid update
     // admits opened-door class5 after the inbound transition releases players.
-    set_open_collision(state, 5);
+    let collision_class = if admits_player(state) { 5 } else { 4 };
+    set_open_collision(state, collision_class, collision_class);
     close_sounds(state);
     cracked_close_sounds(state);
     let current_type = state.floor.descriptors[state.current_room]
@@ -106,7 +107,7 @@ fn cracked_close_sounds(state: &mut State) {
 
 pub(crate) fn begin_room_admission(state: &mut State) {
     restore_secret_connections(state);
-    set_open_collision(state, 4);
+    set_open_collision(state, 4, 5);
     let cracked = state.room.grid.as_ref().is_some_and(|grid| {
         grid.cells.iter().any(|cell| {
             cell.entity
@@ -333,7 +334,21 @@ fn restore_secret_connections(state: &mut State) {
     }
 }
 
-fn set_open_collision(state: &mut State, collision_class: u32) {
+/// Door::Update 565000 writes class4 first; an opened door (state2) then
+/// admits class5 unless the Player is held in the room (5654ff..56556e): bf4
+/// set by a guarded extra animation (50a5b0) while an item config is queued
+/// (+3058), or Player+D80 equal to 5. A door whose +614 target is -7 also
+/// waits on its sprite's current clip (565590); no admitted door has it.
+fn admits_player(state: &State) -> bool {
+    let items = state.player_items.as_ref();
+    let extra_animation =
+        state.player_animation.guard || items.is_some_and(|items| items.pickup_animation_guard);
+    let queued = items.is_some_and(|items| items.queued_id.is_some());
+    (!extra_animation || !queued) && items.is_none_or(|items| items.active_state_d80 != 5)
+}
+
+/// Opened doors take `collision_class`; doors blown open take `blown_class`.
+fn set_open_collision(state: &mut State, collision_class: u32, blown_class: u32) {
     let blown = state
         .room
         .appearance
@@ -351,7 +366,7 @@ fn set_open_collision(state: &mut State, collision_class: u32) {
                         .iter()
                         .any(|position| door_index(*position, width) == index)
                     {
-                        5
+                        blown_class
                     } else {
                         collision_class
                     };
