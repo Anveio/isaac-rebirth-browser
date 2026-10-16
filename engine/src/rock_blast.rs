@@ -106,7 +106,12 @@ pub fn destroy(state: &mut State, origin: WorldVector, radius: f32) -> Result<()
         if crate::doors::try_blow_open(state, index, true) {
             continue;
         }
-        let kind = state.room.grid.as_ref().and_then(|grid| grid.cells[index].entity.as_ref()).map(|entity| entity.kind);
+        let kind = state
+            .room
+            .grid
+            .as_ref()
+            .and_then(|grid| grid.cells[index].entity.as_ref())
+            .map(|entity| entity.kind);
         if kind == Some(14) {
             // DestroyGrid5cbb70 -> Poop's base Destroy561c00 is Hurt(4).
             let outcome = crate::attack_grid::callback_at_index(state, index, 4)?;
