@@ -388,6 +388,7 @@ export interface State {
   ambience: Ambience;
   roomTransition: {fromRoom: number; targetRoom: number; fromSlot: number; targetSlot: number; phase: "out" | "in" | "bossScene" | "bossCleanup"; fullUpdates: number; bossScene: {presentationIndex: number; animationFrame: number; animationPlaying: boolean} | null} | null;
   departureVelocity?: {x: number; y: number};
+  departurePosition?: {x: number; y: number};
   sourceCacheRunFlags: number | null;
   sourceShotSpeedMinimum?: boolean;
   sourceDamageMaximum?: boolean;

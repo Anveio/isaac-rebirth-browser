@@ -734,6 +734,11 @@ pub struct State {
     /// It lives through the transition, so a state saved during one keeps it.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub departure_velocity: Option<motion::WorldVector>,
+    /// The player's world position while ChangeRoom runs the entered room's
+    /// Room.Init, before the entry door placement: Room.Init's critter
+    /// updates measure the player there.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub departure_position: Option<motion::WorldVector>,
     pub stage_effects: StageEffects,
     pub inventory: Inventory,
     pub next_pickup: u32,
@@ -963,6 +968,7 @@ impl Game {
                 stage_transition: stage_transition::StageTransition::default(),
                 ambience: ambience::Ambience::default(),
                 departure_velocity: None,
+                departure_position: None,
                 stage_effects,
                 inventory: Inventory {
                     coins: 0,
@@ -1727,6 +1733,7 @@ impl Game {
         self.state.persisted_rooms.clear();
         self.state.room_transition = None;
         self.state.departure_velocity = None;
+        self.state.departure_position = None;
         self.state.room = Room::from_floor_descriptor_with_special(
             &self.state.floor,
             self.state.current_room,
@@ -1777,7 +1784,9 @@ impl Game {
         // This startup caller has no virtual18 or doorway manager update.
         // Room.Init's ambient critters follow inside admission; Game+ce9f4 reads0.
         let counter = self.state.game_update_count;
-        let suppressed_entities = self.admit_room_pickups(&selectors, counter, true)?;
+        // The run's starting room sees the player already at its start.
+        let viewer = bombs::player_world(&self.state);
+        let suppressed_entities = self.admit_room_pickups(&selectors, counter, true, viewer)?;
         let requested_entities = requested_entities
             .checked_sub(suppressed_entities)
             .ok_or("suppressed authored entity count exceeds selected inputs")?;
@@ -1980,6 +1989,7 @@ impl Game {
     /// unchanged counter. It leaves position and velocity unchanged; its only
     /// shared draws are the 50c000 footprint, gated by the departing velocity.
     fn admitted_update_footprint(&mut self, phase: phase::Phase) -> Result<(), String> {
+        self.state.departure_position = None;
         if let (phase::Phase::Update, Some(velocity)) =
             (phase, self.state.departure_velocity.take())
         {
@@ -1992,11 +2002,13 @@ impl Game {
     /// NPCs and pickups when rebuilding the shared actor scheduler.
     /// `critter_counter` is Game+ce9f4 while this Room.Init runs and `loader`
     /// marks the run loader's starting room (see critters::spawn).
+    /// `critter_viewer` is where Room.Init's critter updates see the player.
     pub fn admit_room_pickups(
         &mut self,
         selectors: &[room_spawns::SpawnSelector],
         critter_counter: u32,
         loader: bool,
+        critter_viewer: motion::WorldVector,
     ) -> Result<usize, String> {
         //453EC0 finished its ordinary-list reset and callbacks.
         ordinary_placement::begin_fresh_room(&mut self.state);
@@ -2270,7 +2282,7 @@ impl Game {
         }
         // First-visit ambient critters close Room.Init5cf64f inside this full
         // update, after the selector entities took their manager sequences.
-        critters::spawn(&mut self.state, critter_counter, loader)?;
+        critters::spawn(&mut self.state, critter_counter, loader, critter_viewer)?;
         self.state.room.boss_count = self.state.room.manager_counts.boss_total().max(0) as u32;
         self.refresh_stage_effects();
         Ok(suppressed_entities)
@@ -2767,7 +2779,12 @@ impl Game {
                         .selectors
                         .clone();
                     let counter = self.state.game_update_count.wrapping_add(1);
-                    self.admit_room_pickups(&selectors, counter, false)?;
+                    let viewer = self
+                        .state
+                        .departure_position
+                        .take()
+                        .unwrap_or_else(|| bombs::player_world(&self.state));
+                    self.admit_room_pickups(&selectors, counter, false, viewer)?;
                     item_queries::note_room_placement(&mut self.state);
                     self.admitted_update_footprint(phase)?;
                     // The admitted Room::Update follows authored mixed order.
