@@ -78,7 +78,7 @@ Counts of open bugs are as of the last full review.
 | [Weapons and tears](#weapons-and-tears) | Partial | Tears plus a set of weapon items and synergies | 2 |
 | [Bombs](#bombs) | Partial | Placement, fuse, blast, Troll/Mega conversion | 0 |
 | [Collision and physics](#collision-and-physics) | Partial | Player, actor, grid and pickup contacts | 4 |
-| [Grid objects](#grid-objects) | Partial | Rocks, spikes, poop, trapdoor, decorations | 1 |
+| [Grid objects](#grid-objects) | Partial | Rocks, bomb rocks, spikes, poop, TNT, webs, trapdoor, decorations | 0 |
 | [Enemies](#enemies) | Partial | 18 ordinary NPC types, including the Gaper family | 3 |
 | [Bosses](#bosses) | Partial | 7 bosses and minibosses | 2 |
 | [Pickups and chests](#pickups-and-chests) | Partial | Coins, keys, bombs, hearts, chests | 2 |
@@ -263,13 +263,11 @@ including large rooms.
 Rebirth scope: rocks (normal, tinted, bomb, marked), pots, poop variants,
 spikes, TNT, pits, blocks, keys blocks, trapdoors, crawlspaces, buttons.
 
-Port: rocks, spikes, poop, trapdoor, decorations, grid records and costs.
-Missing: tinted and bomb rocks, pits, TNT, blocks, buttons, crawlspace
-ladders, poop variants.
+Port: rocks, authored bomb rocks, spikes, poop (authored too), TNT, spider
+webs, trapdoor, decorations, grid records and costs. Missing: tinted rocks,
+pits, blocks, buttons, crawlspace ladders, poop variants.
 
-| Bug | Sev | Symptom | Source |
-| --- | --- | --- | --- |
-| #447 | P1 | Authored poop (grid 1500) never appears: the selector leaves its cell empty | playtest 2026-10-16 `playtest/2045007/` dingle-DV02XJWW |
+No open bugs.
 
 ## Enemies
 
@@ -451,3 +449,4 @@ Bugs in a test route or tool rather than in the game.
 - #329 removed the Dip-death freeze path with Gimpy/Infestation 2 (#295 awaiting confirmation).
 - #385 destroys a poop occupying the boss clear award cell; playtest 2026-10-16 killed Larry Jr. on WMAJ8HGV without a freeze (#383 closed).
 - #473 selects each boss's authored VS splash and names; footage of four bosses matches (#448 closed).
+- #551 admits authored poop, bomb rocks and TNT; playtest 2026-10-16 `playtest/b2f08ac/` shows Dingle's and the Gusher room's poops (#447 closed).
