@@ -188,6 +188,10 @@ pub struct PlayerItems {
     /// Source AddCollectible requests these bits. Keeping them pending does
     /// not claim that native 511f10 stat/familiar evaluation has occurred.
     pub unevaluated_cache_flags: u32,
+    ///Typed unresolved effects from an actual240 grant. These do not mark
+    ///profile achievements complete or admit any missing cache/weapon role.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub treatment240_frontiers: Option<crate::experimental_treatment::Frontiers>,
 }
 
 impl PlayerItems {
@@ -260,6 +264,7 @@ impl PlayerItems {
             reserve_charge: 0,
             active_flag_3076: false,
             unevaluated_cache_flags: 0,
+            treatment240_frontiers: None,
         })
     }
 
@@ -556,7 +561,7 @@ fn add_inventory(value: u32, delta: i32) -> u32 {
     (value as i32).wrapping_add(delta).clamp(0, 99) as u32
 }
 
-fn normalize_black_hearts(player: &mut crate::Player) {
+pub(crate) fn normalize_black_hearts(player: &mut crate::Player) {
     if player.soul_hp == 0 {
         player.black_heart_mask = 0;
         return;
@@ -750,6 +755,13 @@ pub(crate) fn add_collectible(
     touched: bool,
 ) -> Result<(), String> {
     let config = items::definition(id).ok_or("granted collectible config absent")?;
+    //Validate the actual240 RNG owner before count or draws. Gameplay
+    //contexts retain independent partial ownership and never refuse pickup.
+    let treatment = if id == 240 {
+        Some(crate::experimental_treatment::preflight(state)?)
+    } else {
+        None
+    };
     let normal_isaac = state.weapon_admission.source_player_type == Some(0);
     //The common authored inventory/costume domains independently exclude
     //D2C/D30/D34/D38, the five Luck inputs, and D28/D44/13BC/13C0.
@@ -794,7 +806,7 @@ pub(crate) fn add_collectible(
             .is_ok_and(|inputs| inputs.admits_cupid_grant_context());
     //Actual14/27/28/143 have cached speed effects but preserve these four
     //persistent inputs. Each selected source Add retains existing Some only;
-    //untracked240/258/reset routes invalidate, never reconstruct history.
+    //untracked258/reset routes invalidate, never reconstruct history.
     if !(normal_isaac
         && matches!(
             id,
@@ -820,6 +832,7 @@ pub(crate) fn add_collectible(
         ))
         && !keep_cupid_move_speed
         && !keep_default_passive_inputs
+        && !treatment.is_some_and(|proof| proof.preserves_move_speed_history())
     {
         owner.move_speed_inputs = None;
     }
@@ -830,7 +843,7 @@ pub(crate) fn add_collectible(
         && crate::item_pipeline::ItemInputs::new(owner)
             .is_ok_and(|inputs| inputs.admits_cupid_grant_context());
     //Actual14's default Add route preserves D34 despite its cached Range
-    //effect. Untracked240/258/reset routes invalidate this existing owner;
+    //effect. Untracked258/reset routes invalidate this existing owner;
     //None never inherits constructor zero through counts or cache evaluation.
     if !matches!(
         id,
@@ -853,6 +866,7 @@ pub(crate) fn add_collectible(
             | 330
     ) && !keep_cupid_range
         && !keep_default_passive_inputs
+        && !treatment.is_some_and(|proof| proof.preserves_normal_inputs())
     {
         owner.range_inputs = None;
     }
@@ -886,6 +900,7 @@ pub(crate) fn add_collectible(
             | 330
     ) && !keep_cupid_fire_delay
         && !keep_default_passive_inputs
+        && !treatment.is_some_and(|proof| proof.preserves_normal_inputs())
     {
         owner.fire_delay_inputs = None;
     }
@@ -896,7 +911,7 @@ pub(crate) fn add_collectible(
         && crate::item_pipeline::ItemInputs::new(owner)
             .is_ok_and(|inputs| inputs.admits_cupid_grant_context());
     // These actual Add routes preserve D30, independently of their cache,
-    // getter and caller permissions. Unmapped240/258 and other routes lose
+    // getter and caller permissions. Unmapped258 and other routes lose
     // the existing owner; later counts/cache work cannot recreate it.
     if !matches!(
         id,
@@ -919,6 +934,7 @@ pub(crate) fn add_collectible(
             | 330
     ) && !keep_cupid_damage
         && !keep_default_passive_inputs
+        && !treatment.is_some_and(|proof| proof.preserves_normal_inputs())
     {
         owner.damage_inputs = None;
     }
@@ -929,13 +945,14 @@ pub(crate) fn add_collectible(
         && crate::item_pipeline::ItemInputs::new(owner)
             .is_ok_and(|inputs| inputs.admits_cupid_grant_context());
     // These actual Add paths preserve D38. This event proof grants no stat,
-    // getter or caller permission; unknown Add240/258 and other producers
+    // getter or caller permission; unknown Add258 and other producers
     // invalidate an existing owner rather than deriving one from counts.
     if !matches!(
         id,
         1 | 2 | 3 | 4 | 6 | 52 | 68 | 114 | 118 | 143 | 152 | 168 | 169 | 229 | 304 | 329 | 330
     ) && !keep_cupid_shot_speed
         && !keep_default_passive_inputs
+        && !treatment.is_some_and(|proof| proof.preserves_normal_inputs())
     {
         owner.shot_speed_inputs = None;
     }
@@ -943,7 +960,10 @@ pub(crate) fn add_collectible(
     //Keep an existing owner for those grants; other producers invalidate it.
     //Neither current counts nor a cache evaluation can recreate this word.
     //169's default52D0D0..52D170 path preserves this existing owner too.
-    if !matches!(id, 2 | 4 | 152 | 169) && !keep_default_passive_inputs {
+    if !matches!(id, 2 | 4 | 152 | 169)
+        && !keep_default_passive_inputs
+        && !treatment.is_some_and(|proof| proof.preserves_c70_history())
+    {
         state.attack_runtime.aim_rotation_c70 = None;
     }
     //68 has the same closed zero-amount/common auxiliary producer. Preserve
@@ -987,6 +1007,7 @@ pub(crate) fn add_collectible(
         && !keep_epic_fetus_luck
         && !keep_default_passive_inputs
         && !keep_inner_eye_knife_luck
+        && !treatment.is_some_and(|proof| proof.preserves_luck_history())
     {
         // These admitted grant paths preserve the fresh auxiliary words.
         // Nonzero setters and restore need their own producer binding.
@@ -1005,7 +1026,16 @@ pub(crate) fn add_collectible(
     crate::player_costume229::on_collectible_added(state, id);
     crate::technology::on_collectible_added(state, id);
     if config.kind != 3 || !touched {
-        authored_grants(state, config);
+        if let Some(proof) = treatment {
+            crate::experimental_treatment::authored_grants(state, proof);
+        } else {
+            authored_grants(state, config);
+        }
+    }
+    //52D2FF..52D5A6: one source-ordered event after common authored grants.
+    //The existing cache-all request/evaluation below retains its own owners.
+    if let Some(proof) = treatment {
+        crate::experimental_treatment::apply(state, proof);
     }
     let owner = state
         .player_items

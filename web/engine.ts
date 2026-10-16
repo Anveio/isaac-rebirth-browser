@@ -335,6 +335,8 @@ export interface State {
     collectionDelay: number; activeId: number; activeCharge: number; activeSubordinateCharge: number; saveWordD88: number;
     activeStateD80: number; activeStateD84: number; reserveCharge: number; activeFlag3076: boolean;
     unevaluatedCacheFlags: number;
+    treatment240Frontiers?: {healthSourceUnresolved: boolean;
+      achievementUnlocks: {achievementId: number}[]};
     damageInputs?: {sourceD30: number};
     fireDelayInputs?: {sourceD2c: number};
     rangeInputs?: {sourceD34: number};
