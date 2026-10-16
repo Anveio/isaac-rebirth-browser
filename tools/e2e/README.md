@@ -74,7 +74,9 @@ The runner rebuilds `dist/` when `web/` or `engine/` sources are newer than it
 (use `--no-build` to skip). It always builds the native `floor` generator,
 which seed discovery runs, so `--no-build` never leaves it stale. It runs each
 suite under its own virtual display, and writes `.cache/e2e/run-*/report.json`
-and one log per suite. A failing suite prints its replay command:
+and one log per suite. Every runner on the host shares a cap on concurrent suites (one per 6 GB
+of memory, at least one; override with `E2E_HOST_SLOTS`), so overlapping runs
+queue rather than crash Chromium renderers. A failing suite prints its replay command:
 
 ```sh
 npm run test:e2e -- keys --scenarios .cache/e2e/run-…/keys/scenarios.json
