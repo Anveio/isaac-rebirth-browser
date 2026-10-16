@@ -117,6 +117,8 @@ impl GridEntity {
                 owner.poop_sheet = Some(owner.local_rng.bounded(3) + 1);
                 owner.local_rng.bounded(2);
             }
+            // Web.Init571c70 keeps class0 and stores no path cost.
+            10 => {}
             // TNT.Init: class0, path cost1300 whatever its state.
             12 => {
                 self.collision_class = 0;
@@ -291,6 +293,17 @@ pub fn admit_selector(
         Some(entity) if matches!(entity.kind, 2 | 5 | 6 | 8 | 12 | 14) => {
             entity.construct_owner(shared)?;
             entity.init_seed(selector.spawn_seed, game_update, costs, index)
+        }
+        Some(entity) if entity.kind == 10 => {
+            // Web.Init571c70 (state0) draws the shared MT for its Swaying
+            // frame (4 frames), its flip (+314) and its rotation (·90,
+            // +2e4); the browser does not draw them.
+            entity.construct_owner(shared)?;
+            entity.init_seed(selector.spawn_seed, game_update, costs, index)?;
+            shared.bounded(4);
+            shared.bounded(2);
+            shared.bounded(4);
+            Ok(())
         }
         _ => {
             // Tinted rocks, poop, blocks, pits and other GridBase objects
