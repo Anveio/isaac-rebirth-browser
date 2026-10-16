@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { createReadStream, rmSync } from "node:fs";
-import { cp, mkdtemp, readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
+import { cp, mkdtemp, readdir, rm, stat, writeFile } from "node:fs/promises";
 import { createServer } from "node:http";
 import { tmpdir } from "node:os";
 import { extname, join, relative, resolve, sep } from "node:path";
@@ -30,9 +30,16 @@ async function buildIdentity(directory) {
   await visit(directory);
   const hash = createHash("sha256");
   for (const file of files) {
-    const bytes = await readFile(file);
+    const before = await stat(file);
     hash.update(relative(directory, file).split(sep).join("/")).update("\0");
-    hash.update(String(bytes.length)).update("\0").update(bytes);
+    hash.update(String(before.size)).update("\0");
+    let bytes = 0;
+    for await (const chunk of createReadStream(file, { highWaterMark: 64 * 1024 })) {
+      bytes += chunk.length; hash.update(chunk);
+    }
+    const end = await stat(file);
+    assert.equal(bytes, before.size, "Production identity stream must read every byte");
+    assert.deepEqual([end.dev, end.ino, end.size, end.mtimeMs], [before.dev, before.ino, before.size, before.mtimeMs], "Production snapshot changed while hashing");
   }
   return { sha256: hash.digest("hex"), files: files.length };
 }
