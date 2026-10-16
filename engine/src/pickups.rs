@@ -55,31 +55,47 @@ pub(crate) struct RegularSubtypeInputs {
     heart_humbling_bundle: Option<bool>,
 }
 impl RegularSubtypeInputs {
-    const NEUTRAL: Self = Self { humbling_bundle: Some(false), bogo_bombs: Some(false),
-        heart_humbling_bundle: Some(false) };
+    const NEUTRAL: Self = Self {
+        humbling_bundle: Some(false),
+        bogo_bombs: Some(false),
+        heart_humbling_bundle: Some(false),
+    };
 
     pub(crate) fn from_state(state: &crate::State) -> Self {
-        let items = state.player.entity_source
+        let items = state
+            .player
+            .entity_source
             .filter(|source| source.entity_type == 1 && source.variant == 0)
             .and(state.player_items.as_ref());
-        let humbling_bundle = items.and_then(|items| items.owned_counts.get(203)).map(|count| *count > 0);
+        let humbling_bundle = items
+            .and_then(|items| items.owned_counts.get(203))
+            .map(|count| *count > 0);
         //500550..638/50045f..53c/500691..6e1: these actual negative
         //operands skip only their own extra heart draws/replacements.
         //Room8/+1ae0 and Challenge33 pricing retain separate owners.
-        let heart_humbling_bundle = items.filter(|items| {
-            state.weapon_admission.source_player_type == Some(0)
-                && state.challenge_id != 33
-                && state.room.descriptor.as_ref().is_some_and(|room| room.template.room_type != 8)
-                && [173usize, 238, 239].into_iter()
-                    .all(|id| items.owned_counts.get(id).is_some_and(|count| *count <= 0))
-                && items.trinket_slots == [0, 0]
-                && items.queued_id.is_none_or(|id| {
-                    crate::items::definition(id).is_some_and(|config| config.kind != 2)
-                })
-        }).and(humbling_bundle);
+        let heart_humbling_bundle = items
+            .filter(|items| {
+                state.weapon_admission.source_player_type == Some(0)
+                    && state.challenge_id != 33
+                    && state
+                        .room
+                        .descriptor
+                        .as_ref()
+                        .is_some_and(|room| room.template.room_type != 8)
+                    && [173usize, 238, 239]
+                        .into_iter()
+                        .all(|id| items.owned_counts.get(id).is_some_and(|count| *count <= 0))
+                    && items.trinket_slots == [0, 0]
+                    && items.queued_id.is_none_or(|id| {
+                        crate::items::definition(id).is_some_and(|config| config.kind != 2)
+                    })
+            })
+            .and(humbling_bundle);
         Self {
             humbling_bundle,
-            bogo_bombs: items.and_then(|items| items.owned_counts.get(250)).map(|count| *count > 0),
+            bogo_bombs: items
+                .and_then(|items| items.owned_counts.get(250))
+                .map(|count| *count > 0),
             heart_humbling_bundle,
         }
     }
@@ -95,7 +111,10 @@ pub fn regular_subtype(variant: u32, subtype: u32, spawn_seed: u32) -> Result<u3
 /// Init owns local RNG35, distinct from the entity's persistent RNG30.
 /// None means a reached Have input is unowned; no body/ID/Init is fabricated.
 pub(crate) fn regular_subtype_with_inputs(
-    variant: u32, subtype: u32, spawn_seed: u32, inputs: RegularSubtypeInputs,
+    variant: u32,
+    subtype: u32,
+    spawn_seed: u32,
+    inputs: RegularSubtypeInputs,
 ) -> Result<Option<u32>, String> {
     if subtype != 0 {
         if variant == 20 && subtype == 1 {
@@ -117,44 +136,76 @@ pub(crate) fn regular_subtype_with_inputs(
         //The independent heart input closes only its actual negative
         //173/238/239/trinket/BFC0/non-Room8 footprint above.
         10 => {
-            let Some(humbling) = inputs.heart_humbling_bundle else { return Ok(None) };
+            let Some(humbling) = inputs.heart_humbling_bundle else {
+                return Ok(None);
+            };
             let mut selected = if humbling { 5 } else { 1 };
-            if random(2) == 0 { selected = 2; }
-            if random(50) == 0 { selected = 4; }
-            if random(10) == 0 { selected = if random(20) == 0 { 6 } else { 3 }; }
+            if random(2) == 0 {
+                selected = 2;
+            }
+            if random(50) == 0 {
+                selected = 4;
+            }
+            if random(10) == 0 {
+                selected = if random(20) == 0 { 6 } else { 3 };
+            }
             selected
         }
         20 => {
             let mut selected = if random(20) == 0 { 2 } else { 1 };
-            if random(100) == 0 { selected = 3; }
+            if random(100) == 0 {
+                selected = 3;
+            }
             if selected == 1 {
-                let Some(have) = inputs.humbling_bundle else { return Ok(None) };
-                if have { selected = 4; }
+                let Some(have) = inputs.humbling_bundle else {
+                    return Ok(None);
+                };
+                if have {
+                    selected = 4;
+                }
             }
             selected
         }
         30 => {
-            let Some(have) = inputs.humbling_bundle else { return Ok(None) };
+            let Some(have) = inputs.humbling_bundle else {
+                return Ok(None);
+            };
             let mut selected = if have { 3 } else { 1 };
-            if random(50) == 0 { selected = 2; }
+            if random(50) == 0 {
+                selected = 2;
+            }
             selected
         }
         40 => {
-            let Some(humbling) = inputs.humbling_bundle else { return Ok(None) };
+            let Some(humbling) = inputs.humbling_bundle else {
+                return Ok(None);
+            };
             //500409..435 reaches Have250 only after Have203 returned false.
-            let double = if humbling { true } else {
-                let Some(have) = inputs.bogo_bombs else { return Ok(None) };
+            let double = if humbling {
+                true
+            } else {
+                let Some(have) = inputs.bogo_bombs else {
+                    return Ok(None);
+                };
                 have
             };
             let mut selected = if double { 2 } else { 1 };
-            if random(7) == 0 { selected = 2; }
-            if random(50) == 0 { selected = 5; }
-            if random(10) == 0 { selected = 3; }
+            if random(7) == 0 {
+                selected = 2;
+            }
+            if random(50) == 0 {
+                selected = 5;
+            }
+            if random(10) == 0 {
+                selected = 3;
+            }
             selected
         }
-        _ => return Err(format!(
-            "pickup selector {variant}/0 requires its owning pool or subtype resolver"
-        )),
+        _ => {
+            return Err(format!(
+                "pickup selector {variant}/0 requires its owning pool or subtype resolver"
+            ))
+        }
     };
     Ok(Some(selected))
 }
@@ -304,32 +355,54 @@ impl Pickup {
     /// Current authored10/20/30/40 Init uses actual FIRSTPlayer operands.
     /// Other families retain their own existing factory/context contracts.
     pub(crate) fn from_source_selector(
-        id: u32, selector: &crate::room_spawns::SpawnSelector,
-        appear: bool, state: &crate::State,
+        id: u32,
+        selector: &crate::room_spawns::SpawnSelector,
+        appear: bool,
+        state: &crate::State,
     ) -> Result<Option<Self>, String> {
         if selector.entity_type != 5 || !matches!(selector.variant, 10 | 20 | 30 | 40) {
             return Self::from_selector(id, selector, appear);
         }
         //4ff740 Challenge33 pricing precedes the free pickup postlude.
         //Unavailable pricing stays local to this actual selected factory.
-        if state.challenge_id == 33 { return Ok(None) }
-        //4ff560/500240 applies Room8 overrides even to explicit hearts.
-        //Other explicit heart subtypes do not read the random-heart inputs.
-        if selector.variant == 10 && state.room.descriptor.as_ref()
-            .is_none_or(|room| room.template.room_type == 8) {
+        if state.challenge_id == 33 {
             return Ok(None);
         }
-        Self::from_regular_selector(id, selector, appear, RegularSubtypeInputs::from_state(state))
+        //4ff560/500240 applies Room8 overrides even to explicit hearts.
+        //Other explicit heart subtypes do not read the random-heart inputs.
+        if selector.variant == 10
+            && state
+                .room
+                .descriptor
+                .as_ref()
+                .is_none_or(|room| room.template.room_type == 8)
+        {
+            return Ok(None);
+        }
+        Self::from_regular_selector(
+            id,
+            selector,
+            appear,
+            RegularSubtypeInputs::from_state(state),
+        )
     }
 
     fn from_regular_selector(
-        id: u32, selector: &crate::room_spawns::SpawnSelector,
-        appear: bool, inputs: RegularSubtypeInputs,
+        id: u32,
+        selector: &crate::room_spawns::SpawnSelector,
+        appear: bool,
+        inputs: RegularSubtypeInputs,
     ) -> Result<Option<Self>, String> {
         let variant = u32::from(selector.variant);
         let Some(subtype) = regular_subtype_with_inputs(
-            variant, u32::from(selector.subtype), selector.spawn_seed, inputs,
-        )? else { return Ok(None) };
+            variant,
+            u32::from(selector.subtype),
+            selector.spawn_seed,
+            inputs,
+        )?
+        else {
+            return Ok(None);
+        };
         if !matches!(
             (variant, subtype),
             (10, 1..=6) | (20, 1..=4) | (30, 1..=3) | (40, 1 | 2 | 3 | 5)
