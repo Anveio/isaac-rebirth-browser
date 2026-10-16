@@ -44,6 +44,7 @@ pub mod enemy_projectiles;
 mod entities;
 mod epic_fetus;
 mod explosion_effects;
+mod experimental_treatment;
 pub mod game_shake;
 pub mod spider_webs;
 pub mod sprite_color;
