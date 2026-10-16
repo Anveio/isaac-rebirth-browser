@@ -58,6 +58,10 @@ pub struct Room {
     /// Game update on which combat played the doors' Close animation.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub combat_shut_update: Option<u32>,
+    /// Frame of the Close clip that cracked bedroom doors (variant3) play
+    /// from every Door::Init (563b70) until its last frame.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cracked_close_frame: Option<u32>,
     pub spawns: Option<crate::room_spawns::RoomSpawns>,
     pub grid: Option<crate::grid::GridDescriptor>,
     /// The actual signed Room+e98 owner; absent until its source Init is admitted.
@@ -76,6 +80,9 @@ pub struct Room {
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct RoomAppearance {
     pub backdrop: String,
+    /// Room+1ae0, the backdrops.xml id selected by 5c5b30.
+    #[serde(default = "basement_backdrop_id")]
+    pub backdrop_id: u32,
     pub columns: u8,
     pub rows: u8,
     pub tile_size: f64,
@@ -151,12 +158,16 @@ pub struct WallVariant {
     pub eligibility: String,
 }
 
+fn basement_backdrop_id() -> u32 {
+    BASEMENT.id
+}
+
 fn starting_wall_catalog() -> Vec<WallVariant> {
     [
         (0, "plain", 7, "starting-room"),
         (1, "rough", 1, "starting-room"),
         (2, "cloth", 1, "starting-room"),
-        (3, "blood", 0, "outside-basement-authored-palette"),
+        (3, "blood", 0, "basement-boss-room"),
     ]
     .into_iter()
     .map(
@@ -170,11 +181,155 @@ fn starting_wall_catalog() -> Vec<WallVariant> {
     .collect()
 }
 
-fn choose_wall(rng: &mut DecorationRng) -> u8 {
-    // A variant draw is conditional. Flattening the resulting 7:1:1
-    // distribution to one weighted draw changes all subsequent stream state.
-    if rng.next().is_multiple_of(3) {
-        (rng.next() % 3) as u8
+/// A backdrops.xml row a room's backdrop setup selects. Every admitted id
+/// is a 468x468 sheet with Basement's patch layout (walls1, floors1,
+/// floorvariants6); only the sheet and its wall-variant count differ.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) struct Backdrop {
+    pub id: u32,
+    pub gfx: &'static str,
+    pub wall_variants: u32,
+}
+
+const BASEMENT: Backdrop = Backdrop {
+    id: 1,
+    gfx: "gfx/backdrop/01_basement.png",
+    wall_variants: 3,
+};
+const BACKDROPS: [Backdrop; 10] = [
+    BASEMENT,
+    Backdrop {
+        id: 5,
+        gfx: "gfx/backdrop/05_depths.png",
+        wall_variants: 3,
+    },
+    Backdrop {
+        id: 9,
+        gfx: "gfx/backdrop/09_sheol.png",
+        wall_variants: 3,
+    },
+    Backdrop {
+        id: 14,
+        gfx: "gfx/backdrop/0a_library.png",
+        wall_variants: 3,
+    },
+    Backdrop {
+        id: 15,
+        gfx: "gfx/backdrop/0b_shop.png",
+        wall_variants: 2,
+    },
+    Backdrop {
+        id: 16,
+        gfx: "gfx/backdrop/0c_isaacsroom.png",
+        wall_variants: 2,
+    },
+    Backdrop {
+        id: 17,
+        gfx: "gfx/backdrop/0d_barrenroom.png",
+        wall_variants: 2,
+    },
+    Backdrop {
+        id: 18,
+        gfx: "gfx/backdrop/0f_secretroom.png",
+        wall_variants: 3,
+    },
+    Backdrop {
+        id: 19,
+        gfx: "gfx/backdrop/0e_diceroom.png",
+        wall_variants: 4,
+    },
+    Backdrop {
+        id: 20,
+        gfx: "gfx/backdrop/0e_arcade.png",
+        wall_variants: 4,
+    },
+];
+
+/// Room backdrop setup 5c5b30: types 0/1/4/5/6 take the stage backdrop
+/// (5d49b0; Basement for the admitted stages 1 and 2), the others their
+/// jump-table entry at 0x67a630. Returns the selected id (Room+1ae0) and the
+/// generation the port admits for it. Ids with a different layout or path
+/// (0 no backdrop, 10 Cathedral, 12 Chest, 13 Mega Satan, 21 error) keep the
+/// Basement generation until admitted.
+pub(crate) fn backdrop(room_type: u32, variant: u32, stage: u32) -> (u32, Option<Backdrop>) {
+    let id = match room_type {
+        5 if variant == 5000 => 13,
+        0 | 1 | 4 | 5 | 6 => {
+            if !matches!(stage, 1 | 2) {
+                return (0, None);
+            }
+            1
+        }
+        2 => 15,
+        3 => 21,
+        7 => 18,
+        9 => 20,
+        10 | 11 | 14 | 17 | 22 => 9,
+        12 => 14,
+        13 => 5,
+        15 => 10,
+        18 => 16,
+        19 => 17,
+        20 => 12,
+        21 => 19,
+        _ => 0,
+    };
+    (
+        id,
+        BACKDROPS.iter().find(|backdrop| backdrop.id == id).copied(),
+    )
+}
+
+/// Wall generation 424440's variant parameters: chance Random(chance) == 0
+/// then Random(variants). A shop backdrop (15) in a shop room reads the shop
+/// level Room+2158; a fresh profile owns none of the System+c7..ca store
+/// upgrades, so the level is 1: one variant at chance 3.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+struct WallParameters {
+    chance: u32,
+    variants: u32,
+}
+
+impl WallParameters {
+    fn for_room(backdrop: Backdrop, room_type: u32) -> Self {
+        if backdrop.id == 15 && room_type == 2 {
+            return Self {
+                chance: 3,
+                variants: 1,
+            };
+        }
+        Self {
+            chance: 3,
+            variants: backdrop.wall_variants,
+        }
+    }
+
+    /// The patch distribution the conditional draws produce, in units of
+    /// 1/(chance*variants), for the appearance's evidence catalogue.
+    fn catalog(self, backdrop: Backdrop) -> Vec<WallVariant> {
+        if backdrop == BASEMENT && self.variants == 3 {
+            return starting_wall_catalog();
+        }
+        (0..self.variants)
+            .map(|index| WallVariant {
+                source_patch_index: index as u8,
+                name: format!("variant{index}"),
+                weight: if index == 0 {
+                    (self.chance - 1) * self.variants + 1
+                } else {
+                    1
+                },
+                eligibility: format!("backdrop{}", backdrop.id),
+            })
+            .collect()
+    }
+}
+
+fn choose_wall(rng: &mut DecorationRng, parameters: WallParameters) -> u8 {
+    // A variant draw is conditional. Flattening the resulting distribution
+    // to one weighted draw changes all subsequent stream state.
+    if rng.next().is_multiple_of(parameters.chance) {
+        (rng.next() % parameters.variants) as u8
     } else {
         0
     }
@@ -265,6 +420,170 @@ impl DecorationRng {
         self.state ^= self.state << 9;
         self.state ^= self.state >> 7;
         self.state
+    }
+
+    /// RNG::RandomFloat 5c2db0: the next word times 2.3283064e-10 in f32.
+    fn float(&mut self) -> f32 {
+        self.next() as f32 * 2.328_306_4e-10
+    }
+}
+
+/// Wall tiling after Random(walls): the four corners, then the top/bottom
+/// strips by column and the side strips by row, each tile drawing its own
+/// variant. A boss backdrop overrides the variant but keeps every draw.
+fn tile_walls(
+    rng: &mut DecorationRng,
+    walls: WallParameters,
+    variant: Option<u8>,
+) -> Vec<RoomQuad> {
+    let wall = |rng: &mut DecorationRng| {
+        let drawn = choose_wall(rng, walls);
+        variant.unwrap_or(drawn)
+    };
+    let mut wall_quads = vec![
+        quad(
+            wall(rng),
+            rect(0.0, 0.0, 52.0, 52.0),
+            rect(0.0, 0.0, 52.0, 52.0),
+            false,
+            false,
+        ),
+        quad(
+            wall(rng),
+            rect(0.0, 0.0, 52.0, 52.0),
+            rect(390.0, 0.0, 52.0, 52.0),
+            true,
+            false,
+        ),
+        quad(
+            wall(rng),
+            rect(0.0, 0.0, 52.0, 52.0),
+            rect(0.0, 234.0, 52.0, 52.0),
+            false,
+            true,
+        ),
+        quad(
+            wall(rng),
+            rect(0.0, 0.0, 52.0, 52.0),
+            rect(390.0, 234.0, 52.0, 52.0),
+            true,
+            true,
+        ),
+    ];
+    for column in 0..13 {
+        let x = 52.0 + f64::from(column) * 26.0;
+        let source_x = 52.0 + f64::from(column.min(12 - column)) * 26.0;
+        for bottom in [false, true] {
+            wall_quads.push(quad(
+                wall(rng),
+                rect(source_x, 0.0, 26.0, 52.0),
+                rect(x, if bottom { 234.0 } else { 0.0 }, 26.0, 52.0),
+                column > 6,
+                bottom,
+            ));
+        }
+    }
+    for row in 0..7 {
+        let y = 52.0 + f64::from(row) * 26.0;
+        let source_y = 52.0 + f64::from(row.min(6 - row)) * 26.0;
+        for right in [false, true] {
+            wall_quads.push(quad(
+                wall(rng),
+                rect(0.0, source_y, 52.0, 26.0),
+                rect(if right { 390.0 } else { 0.0 }, y, 52.0, 26.0),
+                right,
+                row > 3,
+            ));
+        }
+    }
+    wall_quads
+}
+
+/// Backdrop::pre_render_walls 424440 on the Basement backdrop (1) in a
+/// boss room (type 5, not RoomData 5000): after pre_render_floor's patches
+/// and Random(walls), each grid cell inside the room shrunk by 20 that wins
+/// a local Int(2) gets a BloodSplat 1000.7 scaled local.Float·2.5 + 0.5.
+/// Returns the splat cells and scales in grid order; the caller draws each
+/// splat's MT.next seed and immediate Update in turn (4270ac).
+pub(crate) fn basement_boss_blood(
+    room: &Room,
+    stage: u32,
+) -> Result<Vec<(motion::WorldVector, f32)>, String> {
+    let Some(descriptor) = &room.descriptor else {
+        return Ok(Vec::new());
+    };
+    let template = &descriptor.template;
+    if stage > 2 || template.room_type != 5 || template.variant == 5000 {
+        return Ok(Vec::new());
+    }
+    let grid = crate::grid::Grid::new(
+        room.grid
+            .clone()
+            .ok_or("boss-room blood scatter requires the room grid")?,
+    )?;
+    let mut rng = DecorationRng::new(descriptor.decoration_seed);
+    floor_patches(&mut rng);
+    rng.next();
+    boss_blood_scatter(&mut rng, &grid)
+}
+
+/// The boss scatter's local draws: one Int(2) per grid cell in grid order,
+/// plus Float for each winning cell inside the room shrunk by 20. Shared by
+/// the splat admission and the wall tiling that follows it in the stream.
+fn boss_blood_scatter(
+    rng: &mut DecorationRng,
+    grid: &crate::grid::Grid,
+) -> Result<Vec<(motion::WorldVector, f32)>, String> {
+    let mut splats = Vec::new();
+    for index in 0..grid.descriptor().cells.len() {
+        if rng.next().is_multiple_of(2) {
+            continue;
+        }
+        let position = grid
+            .position(index)
+            .ok_or("boss-room blood scatter cell outside its grid")?;
+        if grid.clamp_room(position, 20.0) != position {
+            continue;
+        }
+        let scale = rng.float() * 2.5 + 0.5;
+        splats.push((position, scale));
+    }
+    Ok(splats)
+}
+
+impl Room {
+    /// pre_render_walls 424440 in a Basement boss room: after the scatter the
+    /// boss branch replaces Random(walls) with wallvariants (3), so every wall
+    /// tile shows the bloody boss row while still drawing its Int(3)/Int(1).
+    /// The tiling continues the decoration stream after the scatter's draws.
+    pub(crate) fn apply_boss_backdrop(&mut self, stage: u32) -> Result<(), String> {
+        let Some(descriptor) = &self.descriptor else {
+            return Ok(());
+        };
+        let template = &descriptor.template;
+        if stage > 2 || template.room_type != 5 || template.variant == 5000 {
+            return Ok(());
+        }
+        let grid = crate::grid::Grid::new(
+            self.grid
+                .clone()
+                .ok_or("boss-room backdrop requires the room grid")?,
+        )?;
+        let mut rng = DecorationRng::new(descriptor.decoration_seed);
+        floor_patches(&mut rng);
+        rng.next();
+        boss_blood_scatter(&mut rng, &grid)?;
+        // The boss branch sets wallvariants to 1, so each tile draws Int(3)
+        // then Int(1); the shown patch is the boss row (variant 3).
+        self.appearance.wall_quads = tile_walls(
+            &mut rng,
+            WallParameters {
+                chance: 3,
+                variants: 1,
+            },
+            Some(3),
+        );
+        Ok(())
     }
 }
 
@@ -394,7 +713,14 @@ impl Room {
             .descriptors
             .get(index)
             .ok_or("Room descriptor index outside Floor")?;
-        let mut room = Self::from_decoration_seed(descriptor.decoration_seed);
+        let template = &descriptor.template;
+        let (backdrop_id, admitted) = backdrop(template.room_type, template.variant, floor.stage);
+        let mut room = Self::from_backdrop(
+            descriptor.decoration_seed,
+            admitted.unwrap_or(BASEMENT),
+            template.room_type,
+        );
+        room.appearance.backdrop_id = backdrop_id;
         room.descriptor = Some(descriptor.clone());
         // Room load5cedf0..5ceec7 uses GridPosition(gridWidth+1)-(20,20)
         // for minimum(60,140), then adds authored dimensions*40. Project the
@@ -453,6 +779,10 @@ impl Room {
                     "Hidden"
                 } else if matches!(destination.template.room_type, 2 | 12 | 21) {
                     "KeyClosed"
+                } else if matches!(destination.template.room_type, 18 | 19) {
+                    // Cracked variant3: the main door holds its closed pose
+                    // under the door_18 overlay until bombs break it.
+                    "Closed"
                 } else {
                     "Opened"
                 }
@@ -499,6 +829,12 @@ impl Room {
                     .template
                     .room_type
                     == 21,
+                cracked: matches!(
+                    floor.descriptors[door.target_room as usize]
+                        .template
+                        .room_type,
+                    18 | 19
+                ),
                 // A freshly constructed room is uncleared (descriptor+3d);
                 // hidden secret connections already took variant6.
                 barred: descriptor.template.room_type == 6 || descriptor.surprise_miniboss,
@@ -510,14 +846,22 @@ impl Room {
             descriptor.decoration_seed,
             &doors,
         )?);
+        room.cracked_close_frame = doors
+            .iter()
+            .any(|door| door.cracked && !door.hidden)
+            .then_some(0);
         room.path_costs = room
             .grid
             .as_ref()
             .map(crate::room_costs::RoomCosts::for_supported_grid)
             .transpose()?;
-        room.appearance.generation =
-            "source-fresh-normal-basement-floor;descriptor-decoration12;authored-spawn11;provisional-fx-route"
-                .into();
+        room.appearance.generation = format!(
+            "source-fresh-{};descriptor-decoration12;authored-spawn11;provisional-fx-route",
+            match admitted {
+                Some(backdrop) => format!("backdrop{}-floor", backdrop.id),
+                None => format!("unadmitted-backdrop{backdrop_id}-basement-floor"),
+            }
+        );
         Ok(room)
     }
 
@@ -535,9 +879,16 @@ impl Room {
     /// decoration seed. This is also the original-observation verification entry.
     /// The seed is not a run seed; this method does not generate floor topology.
     pub fn from_decoration_seed(decoration_seed: u32) -> Self {
+        Self::from_backdrop(decoration_seed, BASEMENT, 1)
+    }
+
+    /// Backdrop::Init 42a170 for a 1x1 room: floors (428020), then walls
+    /// (424440), both on the backdrop RNG35 seeded by the decoration word.
+    fn from_backdrop(decoration_seed: u32, backdrop: Backdrop, room_type: u32) -> Self {
+        let walls = WallParameters::for_room(backdrop, room_type);
         let mut rng = DecorationRng::new(decoration_seed);
         let [upper_left, upper_right, lower, _] = floor_patches(&mut rng);
-        let wall_variant_catalog = starting_wall_catalog();
+        let wall_variant_catalog = walls.catalog(backdrop);
         let floor_quads = vec![
             quad(
                 upper_left,
@@ -570,62 +921,7 @@ impl Room {
         ];
         // Random(walls) also advances the stream with Basement walls=1.
         rng.next();
-        let mut wall_quads = vec![
-            quad(
-                choose_wall(&mut rng),
-                rect(0.0, 0.0, 52.0, 52.0),
-                rect(0.0, 0.0, 52.0, 52.0),
-                false,
-                false,
-            ),
-            quad(
-                choose_wall(&mut rng),
-                rect(0.0, 0.0, 52.0, 52.0),
-                rect(390.0, 0.0, 52.0, 52.0),
-                true,
-                false,
-            ),
-            quad(
-                choose_wall(&mut rng),
-                rect(0.0, 0.0, 52.0, 52.0),
-                rect(0.0, 234.0, 52.0, 52.0),
-                false,
-                true,
-            ),
-            quad(
-                choose_wall(&mut rng),
-                rect(0.0, 0.0, 52.0, 52.0),
-                rect(390.0, 234.0, 52.0, 52.0),
-                true,
-                true,
-            ),
-        ];
-        for column in 0..13 {
-            let x = 52.0 + f64::from(column) * 26.0;
-            let source_x = 52.0 + f64::from(column.min(12 - column)) * 26.0;
-            for bottom in [false, true] {
-                wall_quads.push(quad(
-                    choose_wall(&mut rng),
-                    rect(source_x, 0.0, 26.0, 52.0),
-                    rect(x, if bottom { 234.0 } else { 0.0 }, 26.0, 52.0),
-                    column > 6,
-                    bottom,
-                ));
-            }
-        }
-        for row in 0..7 {
-            let y = 52.0 + f64::from(row) * 26.0;
-            let source_y = 52.0 + f64::from(row.min(6 - row)) * 26.0;
-            for right in [false, true] {
-                wall_quads.push(quad(
-                    choose_wall(&mut rng),
-                    rect(0.0, source_y, 52.0, 26.0),
-                    rect(if right { 390.0 } else { 0.0 }, y, 52.0, 26.0),
-                    right,
-                    row > 3,
-                ));
-            }
-        }
+        let wall_quads = tile_walls(&mut rng, walls, None);
         // fxlayers.xml (parsed per room load, 5489b0) seeds a fresh RNG per
         // fx entry from the decoration seed, shift index 35 (5494df): it does
         // not continue the backdrop/wall stream. RandomInt(5) picks the 1x1
@@ -690,6 +986,7 @@ impl Room {
             combat_clear_countdown: 0,
             combat_shut_door_slots: Vec::new(),
             combat_shut_update: None,
+            cracked_close_frame: None,
             spawns: None,
             grid: None,
             path_costs: None,
@@ -700,7 +997,8 @@ impl Room {
             top: top_plane + radius,
             bottom: bottom_plane - radius,
         appearance: RoomAppearance {
-            backdrop: "gfx/backdrop/01_basement.png".into(),
+            backdrop: backdrop.gfx.into(),
+            backdrop_id: backdrop.id,
             columns: ROOM_COLUMNS,
             rows: ROOM_ROWS,
             tile_size: ROOM_TILE_SIZE,

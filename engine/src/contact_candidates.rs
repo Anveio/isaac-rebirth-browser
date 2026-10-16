@@ -86,3 +86,160 @@ pub(crate) fn pairs(left: &[Bounds], right: &[Bounds]) -> Result<Vec<(u32, u32)>
     }
     Ok(result)
 }
+
+/// Membership of the last actual4545D0 mask8 partition rebuild. The local
+/// indices are a bijection of source Entity+C dedup keys, never actor roles
+/// or cross-game identities. Query reads current geometry separately.
+#[derive(Clone, Debug, serde::Deserialize, serde::Serialize, PartialEq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub(crate) struct QuerySnapshot {
+    pub(crate) game_counter: u32,
+    actors: Vec<crate::actors::ActorRef>,
+    buckets: Vec<Vec<u32>>,
+}
+
+impl QuerySnapshot {
+    ///454110 constructor owns an empty manager118 before any rebuild.
+    pub(crate) fn empty() -> Self {
+        Self {
+            game_counter: 0,
+            actors: Vec::new(),
+            buckets: vec![Vec::new(); 135],
+        }
+    }
+
+    pub(crate) fn rebuild(
+        game_counter: u32,
+        members: &[(crate::actors::ActorRef, Bounds)],
+    ) -> Result<Self, String> {
+        let mut result = Self::empty();
+        result.game_counter = game_counter;
+        for &(actor, mut bounds) in members {
+            //ActorRef lacks an ordering contract; the supplied current manager
+            //position supplies the local dense key and equality owns uniqueness.
+            if result.actors.contains(&actor) {
+                return Err("query rebuild repeated an actual manager actor".into());
+            }
+            //The supported snapshot must retain source signed CVTT/flatten
+            //semantics; extreme legacy coordinates are unknown, not a Rust
+            //saturating-cast or checked-arithmetic empty-bucket substitute.
+            for (position, half) in [
+                (bounds.position.x, bounds.half_extents.x),
+                (bounds.position.y, bounds.half_extents.y),
+            ] {
+                for value in [position - half, position + half] {
+                    let q = value / 80.0;
+                    if !q.is_finite() || !(-2147483648.0..2147483648.0).contains(&q) {
+                        return Err(
+                            "query rebuild signed cell owner is outside supported bounds".into(),
+                        );
+                    }
+                }
+            }
+            let min_x = ((bounds.position.x - bounds.half_extents.x) / 80.0) as i32;
+            let max_x = ((bounds.position.x + bounds.half_extents.x) / 80.0) as i32;
+            for row in [
+                ((bounds.position.y - bounds.half_extents.y) / 80.0) as i32,
+                ((bounds.position.y + bounds.half_extents.y) / 80.0) as i32,
+            ] {
+                if row
+                    .checked_mul(15)
+                    .and_then(|base| base.checked_add(min_x))
+                    .is_none()
+                    || row
+                        .checked_mul(15)
+                        .and_then(|base| base.checked_add(max_x))
+                        .is_none()
+                {
+                    return Err("query rebuild flattened index would overflow".into());
+                }
+            }
+            bounds.id = u32::try_from(result.actors.len())
+                .map_err(|_| "query rebuild dense index overflow")?;
+            result.actors.push(actor);
+            insert(&mut result.buckets, bounds)?;
+        }
+        Ok(result)
+    }
+
+    pub(crate) fn contains(&self, actor: crate::actors::ActorRef) -> bool {
+        self.actors.contains(&actor)
+    }
+
+    ///4534E0 scans signed flattened cells row first, then each bucket's
+    ///admission order; Entity+C suppresses repeats only after first encounter.
+    pub(crate) fn query(
+        &self,
+        position: WorldVector,
+        radius: f32,
+    ) -> Result<Vec<crate::actors::ActorRef>, String> {
+        if !position.is_finite() || !radius.is_finite() || radius < 0.0 {
+            return Err("query requires finite actual position and radius".into());
+        }
+        let convert = |value: f32| -> Result<i32, String> {
+            let q = value / 80.0;
+            if !q.is_finite() || !(-2147483648.0..2147483648.0).contains(&q) {
+                return Err("query signed source cell index is outside owned bounds".into());
+            }
+            Ok(q as i32)
+        };
+        let min_x = convert(position.x - radius)?;
+        let max_x = convert(position.x + radius)?;
+        let min_y = convert(position.y - radius)?;
+        let max_y = convert(position.y + radius)?;
+        if max_x.checked_sub(min_x).is_none_or(|n| n > 135)
+            || max_y.checked_sub(min_y).is_none_or(|n| n > 135)
+        {
+            return Err("query source extent exceeds the admitted partition".into());
+        }
+        if self.buckets.len() != 135
+            || self.actors.len() > u32::MAX as usize
+            || self
+                .actors
+                .iter()
+                .enumerate()
+                .any(|(i, a)| self.actors[..i].contains(a))
+            || self
+                .buckets
+                .iter()
+                .any(|b| b.len() > 40 || b.iter().any(|&key| key as usize >= self.actors.len()))
+        {
+            return Err("query snapshot restored membership is invalid".into());
+        }
+        for row in [min_y, max_y] {
+            if row
+                .checked_mul(15)
+                .and_then(|base| base.checked_add(min_x))
+                .is_none()
+                || row
+                    .checked_mul(15)
+                    .and_then(|base| base.checked_add(max_x))
+                    .is_none()
+            {
+                return Err("query flattened signed index would overflow".into());
+            }
+        }
+        let mut seen = vec![false; self.actors.len()];
+        let mut result = Vec::new();
+        for row in min_y..=max_y {
+            for column in min_x..=max_x {
+                let index = row
+                    .checked_mul(15)
+                    .and_then(|base| base.checked_add(column));
+                if let Some(bucket) = index
+                    .and_then(|i| usize::try_from(i).ok())
+                    .and_then(|i| self.buckets.get(i))
+                {
+                    for &key in bucket {
+                        let key = key as usize;
+                        if !seen[key] {
+                            seen[key] = true;
+                            result.push(self.actors[key]);
+                        }
+                    }
+                }
+            }
+        }
+        Ok(result)
+    }
+}

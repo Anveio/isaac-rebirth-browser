@@ -23,6 +23,16 @@ pub struct NormalBasementRequest {
     pub coins: u32,
 }
 
+/// A keys-only view of the descriptor map. With an owned fresh map, cells
+/// outside both sets are known absent. Unsupported factories invalidate only
+/// their selected cell; they do not create an actual persistence key.
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct PersistentSpawnCells {
+    pub present: Vec<u16>,
+    pub unknown: Vec<u16>,
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Descriptor {
@@ -39,6 +49,11 @@ pub struct Descriptor {
     pub decoration_seed: u32,
     pub spawn_seed: u32,
     pub following_seed: u32,
+    /// Keys of the actual descriptor+88 persistent-spawn map. Level reset
+    /// 5882f0..588314 owns an empty map; legacy restores have no owner.
+    /// This key view does not certify saved actor payloads or re-Init.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub persistent_spawn_cells: Option<PersistentSpawnCells>,
     /// Descriptor+40 selects generated surprise-miniboss substitution. Source
     /// constructors clear it; secret/shop producers require stage>4/>3, so
     /// fresh Basement's ordinary generated descriptors retain false.
@@ -431,6 +446,10 @@ fn record(
         decoration_seed,
         spawn_seed,
         following_seed,
+        persistent_spawn_cells: Some(PersistentSpawnCells {
+            present: Vec::new(),
+            unknown: Vec::new(),
+        }),
         surprise_miniboss: false,
     });
 }

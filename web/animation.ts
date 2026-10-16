@@ -9,10 +9,11 @@ import stageData from "./stage-data.json";
 import attackData from "./attack-data.json";
 import bloodTearData from "./blood-tear-data.json";
 import costume229Data from "./costume229-data.json";
-const sceneData = { ...informationData, ...baseSceneData, ...doorData, ...gridData, ...npcData, ...familiarData, ...gameOverData, ...stageData, ...attackData, ...bloodTearData, ...costume229Data };
+import bossSplashData from "./boss-splash-data.json";
+import pocketData from "./pocket-data.json";
+const sceneData = { ...informationData, ...baseSceneData, ...doorData, ...gridData, ...npcData, ...familiarData, ...gameOverData, ...stageData, ...attackData, ...bloodTearData, ...costume229Data, ...pocketData };
 import fontData from "./font-data.json";
 import completionUrl from "./assets/completion_widget.png?url";
-const bossSceneUrls = import.meta.glob("./assets/boss-scene/*.png", { eager: true, query: "?url", import: "default" }) as Record<string, string>;
 import postitOverlapUrl from "./assets/gamemenu_postitoverlap.png?url";
 import { sampleFrame, overrideFrame, frameQuad, type SampledFrame, type Quad } from "./animation-math";
 
@@ -37,6 +38,8 @@ const urls = import.meta.glob([
   "../references/isaac/rebirth/resources/gfx/ui/death *.png",
   "../references/isaac/rebirth/resources/gfx/ui/ui_hearts.png",
   "../references/isaac/rebirth/resources/gfx/ui/hudpickups.png",
+  "../references/isaac/rebirth/resources/gfx/ui/ui_cardspills.png",
+  "../references/isaac/rebirth/resources/gfx/ui/ui_cardfronts.png",
   "../references/isaac/rebirth/resources/gfx/ui/minimap1.png",
   "../references/isaac/rebirth/resources/gfx/ui/minimap2.png",
   "../references/isaac/rebirth/resources/gfx/ui/bgblack.png",
@@ -50,6 +53,15 @@ const urls = import.meta.glob([
   "../references/isaac/rebirth/resources/gfx/characters/costumes/ghost.png",
   "../references/isaac/rebirth/resources/gfx/characters/costumes/costume_monstros lung.png",
   "../references/isaac/rebirth/resources/gfx/backdrop/01_basement.png",
+  "../references/isaac/rebirth/resources/gfx/backdrop/05_depths.png",
+  "../references/isaac/rebirth/resources/gfx/backdrop/09_sheol.png",
+  "../references/isaac/rebirth/resources/gfx/backdrop/0a_library.png",
+  "../references/isaac/rebirth/resources/gfx/backdrop/0b_shop.png",
+  "../references/isaac/rebirth/resources/gfx/backdrop/0c_isaacsroom.png",
+  "../references/isaac/rebirth/resources/gfx/backdrop/0d_barrenroom.png",
+  "../references/isaac/rebirth/resources/gfx/backdrop/0e_arcade.png",
+  "../references/isaac/rebirth/resources/gfx/backdrop/0e_diceroom.png",
+  "../references/isaac/rebirth/resources/gfx/backdrop/0f_secretroom.png",
   "../references/isaac/rebirth/resources/gfx/backdrop/controls.png",
   "../references/isaac/rebirth/resources/gfx/backdrop/shading.png",
   "../references/isaac/rebirth/resources/gfx/backdrop/light_gradient.png",
@@ -59,6 +71,8 @@ const urls = import.meta.glob([
   "../references/isaac/rebirth/resources/gfx/grid/door_04_selfsacrificeroomdoor.png",
   "../references/isaac/rebirth/resources/gfx/grid/door_08_holeinwall.png",
   "../references/isaac/rebirth/resources/gfx/grid/door_17_bardoor.png",
+  "../references/isaac/rebirth/resources/gfx/grid/door_18_crackeddoor.png",
+  "../references/isaac/rebirth/resources/gfx/grid/grid_tnt.png",
   "../references/isaac/rebirth/resources/gfx/grid/door_13_librarydoor.png",
   "../references/isaac/rebirth/resources/gfx/grid/rocks_basement.png",
   "../references/isaac/rebirth/resources/gfx/grid/door_11_trapdoor.png",
@@ -66,6 +80,8 @@ const urls = import.meta.glob([
   "../references/isaac/rebirth/resources/gfx/grid/grid_poop_[123].png",
   "../references/isaac/rebirth/resources/gfx/backdrop/fx_ray*.png",
   "../references/isaac/rebirth/resources/gfx/grid/props_01_basement.png",
+  "../references/isaac/rebirth/resources/gfx/grid/props_05_depths.png",
+  "../references/isaac/rebirth/resources/gfx/grid/props_09_sheol.png",
   "../references/isaac/rebirth/resources/gfx/grid/grid_pit.png",
   "../references/isaac/rebirth/resources/gfx/grid/grid_fireplace.png",
   "../references/isaac/rebirth/resources/gfx/grid/effect_005_fire.png",
@@ -103,6 +119,7 @@ const urls = import.meta.glob([
   "../references/isaac/rebirth/resources/gfx/effects/effect_052_dust cloud.png",
   "../references/isaac/rebirth/resources/gfx/ui/ui_chargebar.png",
   "../references/isaac/rebirth/resources/gfx/ui/ui_bosshealthbar.png",
+  "../references/isaac/rebirth/resources/gfx/ui/boss/*.png",
   "../references/isaac/rebirth/resources/font/*_0.png",
 ], { eager: true, query: "?url", import: "default" }) as Record<string, string>;
 
@@ -141,8 +158,10 @@ export class Assets {
     const entries = Object.entries(urls).map(([path, url]) => [normalize(path.split("/resources/")[1]!), url] as const)
       .filter(([path]) => !/^gfx\/(monsters|bosses)\//.test(path) || referenced.has(path));
     entries.push(["gfx/ui/main menu/completion_widget.png", completionUrl], ["gfx/ui/main menu/gamemenu_postitoverlap.png", postitOverlapUrl]);
-    for (const [path, url] of Object.entries(bossSceneUrls))
-      entries.push([`gfx/ui/boss/${path.split("/").at(-1)!}`, url]);
+    const available = new Set(entries.map(([path]) => path));
+    for (const path of bossSplashData.assets) {
+      if (!available.has(normalize(path))) throw new Error(`Missing original boss presentation asset: ${path}`);
+    }
     // Chromium rejects decode() with EncodingError when many decodes are in
     // flight, even for intact images. Keep a bounded number busy, and on a
     // rejection fall back to the load event: an image that loaded with real

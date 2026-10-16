@@ -149,6 +149,17 @@
         "output_paths": [
           "references/isaac/rebirth/resources/gfx/grid/effect_005_fire.png"
         ]
+      },
+      {
+        "kind": "Missing base pre-boss presentation assets and inventory completion",
+        "extractor": "tools/foundation/import-boss-splash.py",
+        "decoder_sha256": "c62ad90e54177bcd8586ade5da1c0327d1253531e725745f601181b660ceb4e1",
+        "archive": "graphics.a",
+        "archive_sha256": "b1286fcfc4f3dd899cd225d46db9132a787352b4169b9de56a5d2c65e43ee23e",
+        "output_paths": [
+          "references/isaac/rebirth/resources/gfx/ui/boss/portrait_266.0_megagurdy.png",
+          "references/isaac/rebirth/resources/gfx/ui/boss/vsnames.png"
+        ]
       }
     ]
   },
@@ -12937,6 +12948,16 @@
       "path": "references/isaac/rebirth/resources/gfx/grid/effect_005_fire.png",
       "bytes": 19109,
       "sha256": "56dbfc5dff2517dc3c192cee77849dbd1518d9267a67a8e5520e0c72c264a050"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/gfx/ui/boss/portrait_266.0_megagurdy.png",
+      "bytes": 22381,
+      "sha256": "95a7f01b9cd60d12b78302048e5ad5bd6c287563ddd061cb41b7ecc05d2d72aa"
+    },
+    {
+      "path": "references/isaac/rebirth/resources/gfx/ui/boss/vsnames.png",
+      "bytes": 62536,
+      "sha256": "9d981e2c693b09f1e802723e17b109df4ecb749e15d55afc241f4097e23768b9"
     }
   ]
 }

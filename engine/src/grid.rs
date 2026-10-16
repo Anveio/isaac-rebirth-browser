@@ -48,6 +48,9 @@ pub struct DoorCollision {
     pub hidden: bool,
     /// Dice-room doorways are closed with the double-lock variant2.
     pub double_lock: bool,
+    /// SetRoomTypes565b00 closes a doorway into a bedroom (18/19) with the
+    /// cracked variant3, which only bombs damage and break.
+    pub cracked: bool,
     /// SetRoomTypes565b00: an uncleared miniboss (type6 or surprise flag)
     /// room bars its ordinary non-secret doorways with variant4.
     pub barred: bool,
@@ -117,6 +120,8 @@ pub fn for_room(
                 }
             } else if door.double_lock {
                 2
+            } else if door.cracked {
+                3
             } else {
                 1
             },
@@ -160,7 +165,7 @@ pub fn for_room(
                 1002 => Some((6, rock_frame, 1, 3)),
                 // Raw1940 spider web kind10 (Init571c70): class0 and no path
                 // cost. Its frame/flip/rotation draws belong to the Room.Init
-                // construction pass and its player slowing is not admitted.
+                // construction pass; `spider_webs` owns its player slowing.
                 1940 => Some((10, 0, 0, 0)),
                 1000 if spawn.grid_index == spawns.tinted_rock_index => Some((4, rock_frame, 1, 3)),
                 // Pit3000 Init568990 collides as class1; its autotile frame is

@@ -1530,6 +1530,17 @@ for label, controlled, required in [('ordinary Knife', False, ordinary_knife_req
             missing('mandatory actual ' + label + ' rendered-frame group', t, error)
     check('required actual ' + label + ' rendered-frame witness', True, any(w['passed'] for w in seen), None)
 
+controlled_technology_ring_contact = None
+if 'controlledTechnologyContact' in case['requires']:
+    try:
+        technology_contact_path = Path(__file__).with_name('composition-controlled-technology-contact.py')
+        technology_contact_spec = importlib.util.spec_from_file_location('controlled_technology_ring_contact', technology_contact_path)
+        technology_contact_module = importlib.util.module_from_spec(technology_contact_spec)
+        technology_contact_spec.loader.exec_module(technology_contact_module)
+        controlled_technology_ring_contact = technology_contact_module.compare_contact(case, paired_rows, globals())
+    except Exception as error:
+        missing('mandatory controlled Technology ring typed contact consumer', None, error)
+
 controlled_ring_contact = None
 if 'controlledBrimContact' in case['requires']:
     try:
@@ -1577,6 +1588,8 @@ if common_spec is not None:
     result['commonContactScope'] = 'Actual common-class NPC14/18 FIFO and nonlethal next-Full HP. Player-source FIFO is not a particular Laser callback witness. Native copied EntityRef raw words/P/V are retained, not reconstructed from current sources. Countdown30 is a source callback argument, not a stored queue field. Full copied-history, registry/impulse order, lethal subclass cleanup and explicit Remove/Uninit callbacks remain separately unqualified.'
 if controlled_ring_contact is not None:
     result['controlledRingContact'] = controlled_ring_contact
+if controlled_technology_ring_contact is not None:
+    result['controlledTechnologyRingContact'] = controlled_technology_ring_contact
 if technology_result is not None:
     result['ordinaryTechnology'] = technology_result
 if controlled_technology_result is not None:

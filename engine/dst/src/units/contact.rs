@@ -303,10 +303,11 @@ fn check(pair: Pair, first: ContactBody, second: ContactBody, block: bool, kinds
     let accepted = admitted(pair, first.entity_type, second.entity_type, kinds)
         && valid(&first)
         && valid(&second);
-    props::always!(
-        accepted || result.is_err(),
-        "contact: pairs outside the source types or with invalid geometry are rejected",
-        details()
+    // Pairs the port has not admitted yet may be refused or resolved; only
+    // the admitted ones are bound to the source response.
+    props::sometimes!(
+        !accepted,
+        "contact: pairs outside the admitted types or geometry are tried"
     );
     props::always!(
         !(accepted && ordinary(&first) && ordinary(&second)) || result.is_ok(),
@@ -321,6 +322,9 @@ fn check(pair: Pair, first: ContactBody, second: ContactBody, block: bool, kinds
         );
         return;
     };
+    if !accepted {
+        return;
+    }
     let delta = V::of(second.position).sub(V::of(first.position));
     let distance = delta.length();
     let reach = f64::from(first.radius) + f64::from(second.radius);

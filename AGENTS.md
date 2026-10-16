@@ -26,7 +26,9 @@ checks engine safety, determinism, native/WASM agreement and documented
 contracts. It is not original-game evidence, never replaces live e2e parity
 and is an inner-loop regression tool, not a merge gate: `check:build` does
 not run it. Fix or record every DST violation; never weaken a property or its
-workload to pass.
+workload to pass. Never pin a port gap either: no property may require an
+unimplemented feature to stay refused or today's set of ported stages,
+families or menus to stay complete.
 
 Every live suite is registered in `tools/e2e/suites.mjs` and mixes contrived
 cases with OS-random fuzz cases; read `tools/e2e/README.md` before adding or

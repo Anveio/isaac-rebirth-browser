@@ -93,6 +93,9 @@ def case(fixture, base, fights, identifier, randomized, idle, via):
     # parity observation; the stage-exit comparator grades the exit itself.
     result['pairedIndependent'] = [{'after': 'boss-room-arrival', 'fields': ['player.hp'],
                                     'reason': 'each game fights the boss with its own keys; post-fight red HP depends on that fight'}]
+    # The port's fight keys are closed-loop against this production build; a
+    # replay on another build feeds them to a different game (state-pair warns).
+    result['portRecordedBuild'] = tail.get('build')
     result['stageExit'] = {'fixture': fixture['name'], 'rooms': fixture['rooms'], 'window': WINDOW, 'idle': idle, 'via': via,
                            'fightFrames': {name: frames(fight) for name, fight in fights.items()}}
     return result, None

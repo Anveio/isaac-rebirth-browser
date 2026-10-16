@@ -172,5 +172,5 @@ try {
   await browser.close();
   await server.close();
 }
-process.stdout.write(JSON.stringify({ status, reason, actions, checkpoints, frames, rooms }) + '\n');
+process.stdout.write(JSON.stringify({ status, reason, actions, checkpoints, frames, rooms, build: server.build.sha256 }) + '\n');
 process.exitCode = status === 'pass' ? 0 : 1;

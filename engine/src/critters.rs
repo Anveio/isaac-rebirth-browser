@@ -578,15 +578,15 @@ fn tiny_bug(state: &mut State, id: u32) -> Result<(), String> {
                 };
                 effect.velocity.x *= 0.1;
             }
-            // A Pit (grid type7) returns the bug to its previous position.
-            // No supported room admits a Pit object yet.
+            // A Pit (grid type7) returns the bug to its previous position
+            // (Effect+440). Admitted Basement rooms do place pits.
             let pit = grid
                 .cells
                 .get(index)
                 .and_then(|cell| cell.entity.as_ref())
                 .is_some_and(|entity| entity.kind == 7);
             if pit {
-                return Err("Tiny Bug pit recovery is outside supported grid objects".into());
+                effect.position = critter.previous;
             }
         }
     }

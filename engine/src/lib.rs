@@ -9,6 +9,7 @@ use std::cell::RefCell;
 use std::collections::{BTreeMap, BTreeSet};
 pub mod active_items;
 pub mod actors;
+pub mod ambience;
 pub mod attack_color;
 pub mod attack_flags;
 mod attack_grid;
@@ -27,6 +28,7 @@ mod content;
 mod controlled_brimstone;
 mod controlled_fetus;
 mod controlled_knife;
+mod controlled_knife_satellites;
 pub mod controlled_tear;
 mod controlled_technology;
 mod creep_effects;
@@ -42,6 +44,7 @@ mod entities;
 mod epic_fetus;
 mod explosion_effects;
 pub mod game_shake;
+pub mod spider_webs;
 pub mod sprite_color;
 pub mod tear_deaths;
 mod tear_factory;
@@ -49,6 +52,7 @@ mod technology;
 mod technology2;
 pub use entities::{implemented_npc_kinds, supports_npc_selector};
 mod contact_candidates;
+mod controlled_knife_homing;
 pub mod familiars;
 pub mod fireplaces;
 pub mod floor;
@@ -102,6 +106,7 @@ mod player_footprints;
 pub mod player_items;
 pub mod player_save;
 pub mod player_stats;
+pub mod pockets;
 mod polyphemus_contact;
 pub mod poop_effects;
 pub mod projectiles;
@@ -110,15 +115,18 @@ pub mod rock_blast;
 mod room;
 pub mod room_assets;
 pub mod room_costs;
+mod room_lights;
 pub mod room_spawns;
 pub mod room_templates;
 pub mod roundworm;
 pub mod run_admission;
+pub mod run_quit;
 pub mod saved_game;
 pub mod seed;
 mod source_angles;
 pub mod stage_shooting_guard;
 pub mod stage_transition;
+mod target_eligibility;
 pub mod traversal;
 pub mod wall_hugger;
 mod weapon_plan;
@@ -178,6 +186,10 @@ pub struct Player {
     pub black_heart_mask: u32,
     /// Actual normal-Isaac Player+bbc Eternal half-heart owner.
     pub eternal_hearts: i32,
+    /// Actual Player+BD0; fresh Init and TriggerNewStage own its false writes.
+    /// Missing legacy histories remain unknown rather than an invented key grant.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub golden_key: Option<bool>,
     pub facing: Direction,
     pub body_facing: Direction,
     pub walk_frame: u8,
@@ -195,6 +207,9 @@ pub struct Player {
     pub flying: Option<bool>,
     #[serde(default)]
     pub grid_collision_class: Option<u32>,
+    /// Entity+408/+470/+490 slowing state written by spider webs.
+    #[serde(default, skip_serializing_if = "spider_webs::Slowing::is_constructed")]
+    pub slowing: spider_webs::Slowing,
     pub eye: projectiles::Eye,
     /// Actual Player+c84, independent of manager tear handles.
     pub shots_fired: u32,
@@ -222,6 +237,18 @@ impl PlayerEntitySource {
     }
 }
 impl Player {
+    /// Player::TryUseKey5087F0 tests BD0 before BCC and never spends a golden key.
+    pub(crate) fn try_use_key(&self, inventory: &mut Inventory) -> bool {
+        match self.golden_key {
+            Some(true) => true,
+            Some(false) if inventory.keys > 0 => {
+                inventory.keys -= 1;
+                true
+            }
+            _ => false,
+        }
+    }
+
     fn starting() -> Self {
         Self {
             entity_source: None,
@@ -239,6 +266,7 @@ impl Player {
             soul_hp: 0,
             black_heart_mask: 0,
             eternal_hearts: 0,
+            golden_key: None,
             facing: Direction::Down,
             body_facing: Direction::Down,
             walk_frame: 0,
@@ -249,6 +277,7 @@ impl Player {
             transformation_counts: None,
             flying: None,
             grid_collision_class: None,
+            slowing: spider_webs::Slowing::default(),
             eye: projectiles::Eye::Positive,
             shots_fired: 0,
             // Authored sprite roots and shadow centers are one logical pixel
@@ -369,6 +398,10 @@ pub struct RunIntroduction {
     /// HUD::ShowItemText 5732c0 title on the shared ui_streak sprite.
     #[serde(default = "stage_title")]
     pub title: String,
+    /// HUD5732C0's second authored line. Empty stage/miniboss subtitles
+    /// retain the existing serialized shape and presentation.
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub subtitle: String,
     /// The stage name (Level::ShowName 585500) rather than a later banner
     /// such as the miniboss VS text, which restarts the same streak clock.
     #[serde(default = "stage_streak")]
@@ -386,7 +419,30 @@ impl RunIntroduction {
             age: 0,
             active,
             title: stage_title(),
+            subtitle: String::new(),
             stage: true,
+        }
+    }
+
+    ///505D7F..505DE9 takes the current collectible config's name and
+    ///description before the Pickup pose and deferred AddCollectible queue.
+    pub(crate) fn collectible(config: &items::CollectibleDefinition) -> Self {
+        Self {
+            age: 0,
+            active: true,
+            title: config.name.into(),
+            subtitle: config.description.into(),
+            stage: false,
+        }
+    }
+
+    ///54F920 -> HUD572600 -> Sprite40F9F0 advances the shared streak
+    ///before the Game pause/transition guards. One Full is one authored
+    ///frame; age keeps its existing half-frame presentation unit.
+    fn advance_full(&mut self) {
+        if self.active {
+            self.age += 2;
+            self.active = self.age < 140;
         }
     }
 }
@@ -485,7 +541,7 @@ pub struct PauseMenu {
     pub phase: PausePhase,
     pub age: u32,
     pub selection: u8,
-    pub stat_frames: [u8; 6],
+    pub stat_frames: [Option<u8>; 6],
 }
 impl PauseMenu {
     fn hidden() -> Self {
@@ -493,8 +549,28 @@ impl PauseMenu {
             phase: PausePhase::Hidden,
             age: 0,
             selection: 1,
-            stat_frames: [2, 1, 2, 2, 2, 1],
+            stat_frames: [Some(2), Some(1), Some(2), Some(2), Some(2), Some(1)],
         }
+    }
+    ///PauseOpen5bb560 samples the actual cached Player fields once. It does
+    ///not evaluate caches or infer missing scalar history from inventory.
+    fn open(&mut self, stats: &player_stats::PlayerStats, max_fire_delay: i32) {
+        self.phase = PausePhase::Appearing;
+        self.age = 0;
+        self.selection = 1;
+        //5bb6ce..732: retain the source's individual f32 operations and order.
+        let range_shot_speed = (stats.shot_speed - 1.0_f32) / 0.15_f32 + 1.0_f32;
+        let range_falling_speed =
+            (stats.tear_falling_speed + stats.tear_falling_speed) + range_shot_speed;
+        let range = (-stats.tear_height / 20.0_f32) + range_falling_speed;
+        self.stat_frames = [
+            Some(pause_stat_frame(stats.move_speed + stats.move_speed)),
+            Some(pause_stat_frame(15.0_f32 / max_fire_delay as f32)),
+            Some(pause_stat_frame(stats.damage / 1.5_f32)),
+            Some(pause_stat_frame(range)),
+            Some(pause_stat_frame(stats.shot_speed + stats.shot_speed)),
+            stats.luck.map(pause_stat_frame),
+        ];
     }
     fn advance(&mut self, phase: phase::Phase) {
         if phase != phase::Phase::Update {
@@ -519,6 +595,18 @@ impl PauseMenu {
         }
     }
 }
+
+///5bb602/64d/694/736/779/7b8 CVTTSS2SI, then signed clamp1..7.
+///An overflowing/NaN input becomes INT_MIN, unlike Rust's saturating cast.
+fn pause_stat_frame(value: f32) -> u8 {
+    let integer =
+        if value.is_finite() && (-2_147_483_648.0_f32..2_147_483_648.0_f32).contains(&value) {
+            value as i32
+        } else {
+            i32::MIN
+        };
+    integer.clamp(1, 7) as u8
+}
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct State {
@@ -529,6 +617,8 @@ pub struct State {
     pub title_animation_frame: u32,
     pub menu_fade: MenuFade,
     pub run_start_request: RunStartRequest,
+    #[serde(default)]
+    pub run_quit: run_quit::RunQuit,
     pub system_clock: phase::Clock,
     pub run_admission: run_admission::RunAdmission,
     pub run_tick: u32,
@@ -554,6 +644,10 @@ pub struct State {
     /// Unknown legacy or restore history remains absent.
     #[serde(default)]
     pub source_cache_run_flags: Option<u64>,
+    /// Actual normal-variant5120EE/514AD8 challenge minimum predicate.
+    /// Unknown old Game history stays absent; ID0 skips the Config9C read.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source_shot_speed_minimum: Option<bool>,
     pub saved_run_summary: Option<saved_game::SavedRunSummary>,
     pub audio: audio::AudioState,
     #[serde(default)]
@@ -600,9 +694,13 @@ pub struct State {
     pub room_transition: Option<traversal::RoomTransition>,
     #[serde(default)]
     pub stage_transition: stage_transition::StageTransition,
+    /// Room ambience loops 5c6980 (insect swarm and fire).
+    #[serde(default)]
+    pub ambience: ambience::Ambience,
     /// The player's velocity when a door transition began, before departure
     /// cleared it; the post-ChangeRoom admitted update's footprint reads it.
-    #[serde(skip)]
+    /// It lives through the transition, so a state saved during one keeps it.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub departure_velocity: Option<motion::WorldVector>,
     pub stage_effects: StageEffects,
     pub inventory: Inventory,
@@ -618,6 +716,11 @@ pub struct State {
     /// tiny flies at live positions in the next actor pass.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub tear_partition: Vec<u32>,
+    ///Previous source4545D0 query membership; a missing restore has no owner.
+    ///Explicit continuation preserves known membership; missing legacy data
+    ///stays unknown until its actual rebuild, never a default empty query.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub(crate) knife_query_partition: Option<contact_candidates::QuerySnapshot>,
     #[serde(default)]
     pub lasers: Vec<lasers::Laser>,
     #[serde(default)]
@@ -749,6 +852,7 @@ impl Game {
                 title_animation_frame: 0,
                 menu_fade: MenuFade::first_title(),
                 run_start_request: RunStartRequest::default(),
+                run_quit: run_quit::RunQuit::default(),
                 // The public runtime starts at the first rendered Title,
                 // after the omitted native introductory cutscene. Its next
                 // system iteration is a full update; this clock is relative
@@ -774,6 +878,7 @@ impl Game {
                 boot_epoch_seed,
                 boot_lifecycle,
                 source_cache_run_flags: Some(0), // Game constructor 554034.
+                source_shot_speed_minimum: None,
                 saved_run_summary: None,
                 audio: audio::AudioState::default(),
                 pending_menu_initializations: Vec::new(),
@@ -820,6 +925,7 @@ impl Game {
                 persisted_rooms: BTreeMap::new(),
                 room_transition: None,
                 stage_transition: stage_transition::StageTransition::default(),
+                ambience: ambience::Ambience::default(),
                 departure_velocity: None,
                 stage_effects,
                 inventory: Inventory {
@@ -836,6 +942,7 @@ impl Game {
                 next_effect: 1,
                 sprite_effects: Vec::new(),
                 tear_partition: Vec::new(),
+                knife_query_partition: Some(contact_candidates::QuerySnapshot::empty()),
                 lasers: Vec::new(),
                 knives: Vec::new(),
                 attack_runtime: attack_runtime::AttackRuntime::default(),
@@ -967,7 +1074,19 @@ impl Game {
                         .ok_or("tear IDs exhausted")?;
                 }
                 for _ in 0..count {
+                    let presented = self.state.system_clock.next_phase() != phase::Phase::Skipped;
+                    let room_before = self.state.current_room;
                     self.tick(timestamp_millis)?;
+                    // Room render 5d1a70 runs its light pass on every presented
+                    // gameplay frame, after that frame's updates. The frame
+                    // that changes rooms renders the entered room twice (the
+                    // native trace shows two back-to-back passes there).
+                    if presented && self.state.screen == Screen::Playing {
+                        room_lights::present(&mut self.state);
+                        if self.state.current_room != room_before {
+                            room_lights::present(&mut self.state);
+                        }
+                    }
                 }
             }
         }
@@ -1000,6 +1119,9 @@ impl Game {
             || self.state.nightmares.system_active
             || self.state.nightmares.request_pending
         {
+            return Ok(());
+        }
+        if self.state.screen == Screen::Playing && self.state.run_quit.active() {
             return Ok(());
         }
         let previous_screen = self.state.screen;
@@ -1183,14 +1305,25 @@ impl Game {
                             tear.project();
                         }
                         self.state.paused = true;
-                        self.state.pause_menu.phase = PausePhase::Appearing;
-                        self.state.pause_menu.age = 0;
-                        self.state.pause_menu.selection = 1;
+                        self.state
+                            .pause_menu
+                            .open(&self.state.player_stats, self.state.max_fire_delay);
                     } else if self.state.pause_menu.phase != PausePhase::Disappearing {
                         self.state.pause_menu.phase = PausePhase::Disappearing;
                         self.state.pause_menu.age = 0;
                     }
                 } else if self.state.paused {
+                    if code == "Enter"
+                        && self.state.pause_menu.selection == 2
+                        && self.state.pause_menu.phase != PausePhase::Disappearing
+                        && self.state.room_transition.is_none()
+                        && self.state.run_admission.initial_fade <= 0.0
+                    {
+                        if self.state.run_quit.save_enabled.is_none() {
+                            return Err("Pause Quit requires its source save-enable history".into());
+                        }
+                        self.state.run_quit.input_pending = true;
+                    }
                     match code {
                         "ArrowUp" | "KeyW" => {
                             self.state.pause_menu.selection =
@@ -1414,6 +1547,11 @@ impl Game {
             run_seeds.initialized_fields[12],
         )?);
         self.state.run_seeds = Some(run_seeds);
+        // NewRun54eb20 begins every run on the first stage, whether it comes
+        // from the GameOver Restart or the menus after a descent, and outside
+        // any stage transition the last run was in.
+        self.state.stage = 1;
+        self.state.stage_transition = stage_transition::StageTransition::default();
         self.state.system_clock.align_run_start()?;
         self.state.screen = Screen::Playing;
         self.state.paused = false;
@@ -1443,6 +1581,14 @@ impl Game {
         self.state.player_stats = player_stats::PlayerStats::default();
         // Fresh reset 54E6A3 initializes the actual Game run-flag word.
         self.state.source_cache_run_flags = Some(0);
+        //54EB55 stores the actual challenge key;596170 selects its Config.
+        //The branch for key0 bypasses the9C cap. Other admitted definitions
+        //own their decoded59805A minshotspeed value before Player callbacks.
+        self.state.source_shot_speed_minimum = Some(
+            challenge
+                .as_ref()
+                .is_some_and(|definition| definition.id != 0 && definition.min_shot_speed),
+        );
         self.state.weapon_cache = weapon_plan::WeaponCache::fresh_player();
         self.state.weapon_admission = weapon_plan::WeaponAdmission::fresh_isaac();
         self.state.head_timer = -1;
@@ -1460,9 +1606,12 @@ impl Game {
         self.state.run_introduction = RunIntroduction::stage(true);
         self.state.boss_bar = BossBar::default();
         self.state.pause_menu = PauseMenu::hidden();
+        self.state.run_quit = run_quit::RunQuit::fresh();
         self.state.player = Player::starting();
         //Actual fresh Manager.Init→Player.Init; title/old restores stay None.
         self.state.player.entity_source = Some(PlayerEntitySource::fresh_isaac());
+        // Player.Init5194B4 clears BD0 before starting resources are assigned.
+        self.state.player.golden_key = Some(false);
         // 519767/519771 initialize the two transformation history counters.
         self.state.player.transformation_counts = Some([0, 0]);
         // 51985C initializes the actual D64 Luck output.
@@ -1508,12 +1657,15 @@ impl Game {
                 self.special_room_assets.as_deref().map(Vec::as_slice),
             )?
         };
+        //Neither fresh Level nor a reused manager owns empty query buckets.
+        self.state.knife_query_partition = None;
         self.state.current_room = self.state.floor.starting_descriptor;
         self.state.visited_rooms = BTreeSet::from([self.state.current_room]);
         self.state.room_display_flags = vec![0; self.state.floor.descriptors.len()];
         self.state.revealed_secret_connections.clear();
         self.state.persisted_rooms.clear();
         self.state.room_transition = None;
+        self.state.departure_velocity = None;
         self.state.room = Room::from_floor_descriptor_with_special(
             &self.state.floor,
             self.state.current_room,
@@ -1539,6 +1691,7 @@ impl Game {
         self.state.nightmares.select_normal_basement(1)?;
         // Room.Init's backdrop setup loads the FX rays before its grid records.
         // The port builds only ordinary Basement (stage type 0).
+        ambience::reset_room(&mut self.state);
         room::load_fx_rays(
             &mut self.state.room,
             &mut self.state.boot_lifecycle.shared,
@@ -1563,7 +1716,10 @@ impl Game {
         // This startup caller has no virtual18 or doorway manager update.
         // Room.Init's ambient critters follow inside admission; Game+ce9f4 reads0.
         let counter = self.state.game_update_count;
-        self.admit_room_pickups(&selectors, counter, true)?;
+        let suppressed_entities = self.admit_room_pickups(&selectors, counter, true)?;
+        let requested_entities = requested_entities
+            .checked_sub(suppressed_entities)
+            .ok_or("suppressed authored entity count exceeds selected inputs")?;
         if self.state.room.authored_actor_order.len() != requested_entities {
             return Err(format!(
                 "starting authored entity frontier is incomplete: admitted {} of {requested_entities}",
@@ -1602,13 +1758,25 @@ impl Game {
             .persisted_rooms
             .get(&room_before)
             .ok_or("room change requires the persisted room it left")?;
+        // The transition first renders the room being left (its light pass).
+        room_lights::present_room(left, &mut self.state.boot_lifecycle.shared);
         saved_game::save_grid_cells(
             &mut self.boot_level_grid,
             &mut self.state.boot_lifecycle.shared,
             left,
             room_before,
         )?;
+        // Backdrop::pre_render_walls runs inside 5c5b30 before the FX rays.
+        self.state.room.apply_boss_backdrop(self.state.stage)?;
+        for (position, scale) in room::basement_boss_blood(&self.state.room, self.state.stage)? {
+            let seed = self.state.boot_lifecycle.shared.next_u32();
+            let id =
+                familiars::admit_blood_splat(&mut self.state, seed, position, [1.0; 4], [0.0; 3])?;
+            familiars::set_blood_scale(&mut self.state, id, scale)?;
+            familiars::advance_blood_initial(&mut self.state, id)?;
+        }
         // The port builds only ordinary Basement (stage type 0).
+        ambience::reset_room(&mut self.state);
         room::load_fx_rays(
             &mut self.state.room,
             &mut self.state.boot_lifecycle.shared,
@@ -1696,7 +1864,7 @@ impl Game {
                     &mut self.state.level_progress,
                 )
             } else {
-                pickup.try_collect(&mut self.state.inventory)
+                pickup.try_collect(&mut self.state.inventory, &mut self.state.player)
             })
         {
             // Collect504480 routes key ->504720 and bomb ->5046d0
@@ -1710,6 +1878,15 @@ impl Game {
                     },
                     1.0,
                 )),
+                //Collect504510: only successful free Coin20/1..4 reaches here.
+                //The actual subtype owns the configured sound, not its amount.
+                20 => match pickup.subtype {
+                    1 | 4 => Some((234, 1.0)),
+                    2 => Some((232, 1.0)),
+                    3 => Some((199, 1.0)),
+                    _ => None,
+                },
+                30 if pickup.subtype == 2 => Some((204, 1.0)),
                 30 => Some((58, 0.85)),
                 40 => Some((201, 1.0)),
                 _ => None,
@@ -1751,11 +1928,47 @@ impl Game {
         selectors: &[room_spawns::SpawnSelector],
         critter_counter: u32,
         loader: bool,
-    ) -> Result<(), String> {
+    ) -> Result<usize, String> {
         let mut pickups = Vec::new();
         let mut npcs = Vec::new();
         let mut order = Vec::new();
         let mut next = self.state.next_pickup;
+        // The source descriptor map survives Room.Init. Only a source-owned
+        // fresh empty map is admitted here; saved payload replay is separate.
+        let room_index = self.state.current_room;
+        let descriptor = self
+            .state
+            .floor
+            .descriptors
+            .get(room_index)
+            .ok_or("persistent spawn map requires current Level descriptor")?;
+        let mut persistent_cells = descriptor
+            .persistent_spawn_cells
+            .clone()
+            .ok_or("persistent spawn map history is unknown")?;
+        let cells = (usize::from(descriptor.template.width) + 2)
+            * (usize::from(descriptor.template.height) + 2);
+        if [&persistent_cells.present, &persistent_cells.unknown]
+            .into_iter()
+            .any(|keys| {
+                keys.windows(2).any(|pair| pair[0] >= pair[1])
+                    || keys.iter().any(|&cell| usize::from(cell) >= cells)
+            })
+            || persistent_cells
+                .unknown
+                .iter()
+                .any(|cell| persistent_cells.present.binary_search(cell).is_ok())
+            || self.state.room.descriptor.as_ref().is_none_or(|room| {
+                room.index != room_index
+                    || room.persistent_spawn_cells.as_ref() != Some(&persistent_cells)
+            })
+        {
+            return Err("persistent spawn map owner is inconsistent".into());
+        }
+        if !persistent_cells.present.is_empty() || !persistent_cells.unknown.is_empty() {
+            return Err("persistent spawn map saved actor replay is unadmitted".into());
+        }
+        let mut suppressed_entities = 0usize;
         let room_type = self
             .state
             .room
@@ -1763,6 +1976,27 @@ impl Game {
             .as_ref()
             .map_or(1, |descriptor| descriptor.template.room_type);
         for selector in selectors {
+            // 5cf230/238 and5cf25e already consumed each authored RNG11
+            // draw/selection. 5cf285..2cc checks the map before entering
+            // SpawnEntity, including grid factories and their local Init.
+            if persistent_cells
+                .present
+                .binary_search(&selector.grid_index)
+                .is_ok()
+            {
+                if selector.category == room_spawns::SpawnCategory::Entity {
+                    suppressed_entities += 1;
+                }
+                continue;
+            }
+            if persistent_cells
+                .unknown
+                .binary_search(&selector.grid_index)
+                .is_ok()
+            {
+                return Err("persistent spawn cell depends on an unadmitted factory".into());
+            }
+            let before_entities = order.len();
             // Room.Init5cecc0 constructs grid objects in the same selector pass.
             grid_records::admit_selector(
                 &mut self.state.room,
@@ -1820,7 +2054,16 @@ impl Game {
                 // keep free pickup Init/Collect rules (no shop placeholder).
                 // Other special contexts retain typed selectors until their
                 // prices, pools and replacements are admitted.
-                if let Some(mut pickup) = Pickup::from_selector(next, selector, true)? {
+                let pickup = if selector.entity_type == 5 && matches!(selector.variant, 70 | 300) {
+                    Pickup::from_pocket_selector(next, selector, true, &self.state)?
+                } else if selector.entity_type == 5 && selector.variant == 60 {
+                    chests::from_locked_selector(next, selector, true, &self.state)?
+                } else if selector.entity_type == 5 && selector.variant == 50 {
+                    chests::from_source_selector(next, selector, true, &self.state)?
+                } else {
+                    Pickup::from_source_selector(next, selector, true, &self.state)?
+                };
+                if let Some(mut pickup) = pickup {
                     pickup.birth_game_update = self.state.game_update_count;
                     order.push(actors::ActorRef {
                         kind: actors::ActorKind::Pickup,
@@ -1831,6 +2074,43 @@ impl Game {
                         .ok_or("pickup identity counter exhausted")?;
                     pickups.push(pickup);
                 }
+            }
+            // SpawnEntity5ce7a8..7d3 calls5c57c0 with the selected type,
+            // variant, edx=0,cl=0 after successful Game.Spawn. For this
+            // authored entity domain1..999, exactly4..6,17,33 persist.
+            // Grid records never insert a key; an occupied key still skips
+            // a later grid group above. This is not coordinate deduplication.
+            if selector.category == room_spawns::SpawnCategory::Entity
+                && matches!(selector.entity_type, 4..=6 | 17 | 33)
+            {
+                if order.len() == before_entities {
+                    // Preserve unrelated traversal when its existing factory
+                    // is unsupported. Only a later lookup of this cell needs
+                    // the missing success/key owner and must stop there.
+                    let insertion = persistent_cells
+                        .unknown
+                        .binary_search(&selector.grid_index)
+                        .expect_err("cell was checked before its factory");
+                    persistent_cells
+                        .unknown
+                        .insert(insertion, selector.grid_index);
+                } else {
+                    let insertion = persistent_cells
+                        .present
+                        .binary_search(&selector.grid_index)
+                        .expect_err("cell was checked before its factory");
+                    persistent_cells
+                        .present
+                        .insert(insertion, selector.grid_index);
+                }
+                self.state.floor.descriptors[room_index].persistent_spawn_cells =
+                    Some(persistent_cells.clone());
+                self.state
+                    .room
+                    .descriptor
+                    .as_mut()
+                    .expect("checked current descriptor")
+                    .persistent_spawn_cells = Some(persistent_cells.clone());
             }
         }
         // Doors, walls and shape0 ambient decoration follow the selectors.
@@ -1880,7 +2160,7 @@ impl Game {
         critters::spawn(&mut self.state, critter_counter, loader)?;
         self.state.room.boss_count = self.state.room.manager_counts.boss_total().max(0) as u32;
         self.refresh_stage_effects();
-        Ok(())
+        Ok(suppressed_entities)
     }
     /// Persisted Room clones retain supported actor handles in authored order.
     pub fn rebuild_room_actor_schedule(&mut self) -> Result<(), String> {
@@ -1974,6 +2254,56 @@ impl Game {
         }
         Ok(())
     }
+    ///594CB0 ->5949A0 ->54F3F0. The supported in-memory save happens
+    ///before Stop resets modeled Game fields. Binary encoders55B7B0/55B890,
+    ///audio virtual5E1D00 and manager Uninit callbacks remain separate owners.
+    fn finish_pause_quit(&mut self) -> Result<(), String> {
+        match self.state.run_quit.save_enabled {
+            Some(true) if !self.state.player.dead => {
+                self.state.music.reset_pitch();
+                self.save_supported_run()?;
+                self.state.run_quit.save_outcome = Some(run_quit::SaveOutcome::SupportedRunCopied);
+            }
+            Some(false) => {
+                self.state.music.reset_pitch();
+                //594910 is called again by Stop when the save-enable byte is false.
+                self.saved_game = self.state.boot_lifecycle.clear_saved_game();
+                self.saved_run = None;
+                self.state.saved_run_summary = None;
+                self.state.run_quit.save_outcome = Some(run_quit::SaveOutcome::DeadRunCleared);
+            }
+            _ => return Err("Pause Quit has no admitted live/dead save disposition".into()),
+        }
+        self.state.information_animation.clear();
+        self.state.player_death = player_death::PlayerDeath::default();
+        self.state.stage_transition = stage_transition::StageTransition::default();
+        self.state.room_transition = None;
+        self.state.boss_bar = BossBar::default();
+        self.state.run_introduction.active = false;
+        self.state.game_update_count = 0;
+        if let Some(shake) = &mut self.state.game_shake {
+            shake.reset_duration();
+        }
+        self.state.source_cache_run_flags = Some(0);
+        self.state.run_admission.initial_fade = 0.0;
+        self.state.run_quit.fade_alpha = 0.0;
+        self.state.run_quit.system_pending = false;
+        self.state.run_start_request = RunStartRequest::default();
+        self.state.paused = false;
+        self.state.pause_menu = PauseMenu::hidden();
+        //MenuInit59A4D0 starts track61; SetMenu(3) from its index0 emits
+        //no forward-confirm sound.59B0F0 receives opaque black67C8F8.
+        self.state.music.crossfade(61);
+        self.state.menu_fade = MenuFade {
+            active: true,
+            alpha: 1.0,
+            color: [0.0, 0.0, 0.0, 1.0],
+        };
+        self.state.screen = Screen::Main;
+        self.load_menu_character();
+        self.state.main_selection = if self.saved_run.is_some() { 1 } else { 0 };
+        Ok(())
+    }
     fn tick(&mut self, timestamp_millis: Option<u64>) -> Result<(), String> {
         self.state.run_admission.clock.advance(timestamp_millis)?;
         // Source 594a10 consumes the prior menu request before game dispatch.
@@ -1990,7 +2320,6 @@ impl Game {
                         let seed = self.state.boot_lifecycle.shared.next_u32().max(1);
                         self.state.boot_lifecycle.commit_character_seed(seed)?;
                     }
-                    self.state.stage = 1;
                     self.start_run()?;
                 }
                 player_death::Request::Exit => {
@@ -2019,6 +2348,13 @@ impl Game {
             self.state.run_start_request.system_pending = false;
             self.start_run()?;
         }
+        //595110 consumes menu requests on the full System path (including
+        //enabled interpolation), never on the disabled odd/skipped path.
+        if self.state.run_quit.system_pending
+            && self.state.system_clock.next_phase() != phase::Phase::Skipped
+        {
+            self.finish_pause_quit()?;
+        }
         let audio_counter = self.state.system_clock.system_counter;
         let phase = self.state.system_clock.advance()?;
         if phase != phase::Phase::Skipped && self.state.nightmares.apply_request(self.state.stage) {
@@ -2026,11 +2362,34 @@ impl Game {
         }
         if phase != phase::Phase::Skipped {
             self.state.public_actions.advance(&self.state.pressed);
+            if self.state.screen == Screen::Playing && self.state.run_quit.input_pending {
+                self.state.run_quit.input_pending = false;
+                if self.state.paused
+                    && self.state.pause_menu.phase != PausePhase::Disappearing
+                    && self.state.pause_menu.selection == 2
+                    && self.state.player_death.game_over.is_none()
+                    && self.state.room_transition.is_none()
+                    && self.state.run_admission.initial_fade <= 0.0
+                {
+                    if self.state.player.dead {
+                        //5BC1DD invalidates the saved run before requesting the fade.
+                        self.saved_game = self.state.boot_lifecycle.clear_saved_game();
+                        self.saved_run = None;
+                        self.state.saved_run_summary = None;
+                        self.state.run_quit.save_enabled = Some(false);
+                    }
+                    self.state.run_quit.begin();
+                }
+            }
             //5282B0 pocket effects are not reconstructed here. An actual
             //held pocket request invalidates C70 before any Player callback;
             //later release never recreates a neutral owner.
             if self.state.screen == Screen::Playing && self.state.public_actions.pocket_pressed {
                 self.state.attack_runtime.aim_rotation_c70 = None;
+                if let Some(items) = &mut self.state.player_items {
+                    //Untracked pill/card execution cannot retain speed history.
+                    items.move_speed_inputs = None;
+                }
             }
         }
         if phase != phase::Phase::Skipped {
@@ -2092,11 +2451,34 @@ impl Game {
             epic_fetus::restore_fast_positions(&mut self.state)?;
             explosion_effects::restore_fast_positions(&mut self.state)?;
         }
-        //54F938 precedes every GameFull popup/transition/age guard.
+        //54F920's shared HUD streak precedes54F938 and every later
+        //GameFull popup/transition/pause guard. Fast has no HUD update.
         if phase == phase::Phase::Update && self.state.screen == Screen::Playing {
+            self.state.run_introduction.advance_full();
             if let Some(shake) = &mut self.state.game_shake {
                 shake.advance_full_clock();
             }
+        }
+        //54FA20/54FB20 precede Pause update.5BC194 stopped that sprite;
+        //HUD above still advances, while actors/GameAge remain frozen.
+        if self.state.screen == Screen::Playing && self.state.run_quit.active() {
+            if phase == phase::Phase::Update {
+                //54F9DA/54FB88 retain priority over the outgoing fade.
+                if self.state.stage_transition.active() {
+                    self.advance_stage_transition(phase)?;
+                } else {
+                    if self.state.information_animation.active() {
+                        self.state.information_animation.advance_full()?;
+                    }
+                    if self.state.information_animation.state != 2 {
+                        self.state.run_quit.advance_full();
+                    }
+                }
+            }
+            if phase != phase::Phase::Skipped {
+                self.state.music.advance();
+            }
+            return Ok(());
         }
         let gameplay_was_paused = self.state.paused;
         if self.state.screen == Screen::Playing {
@@ -2123,10 +2505,6 @@ impl Game {
             .run_tick
             .checked_add(1)
             .ok_or("run tick counter exhausted")?;
-        if self.state.run_introduction.active {
-            self.state.run_introduction.age += 1;
-            self.state.run_introduction.active = self.state.run_introduction.age < 140;
-        }
         // Game::Update54f9da: an active StageTransition replaces the whole
         // full Game update, and fast550760 freezes the Room as well.
         if self.state.stage_transition.active() {
@@ -2247,6 +2625,27 @@ impl Game {
                         .clone();
                     let counter = self.state.game_update_count.wrapping_add(1);
                     self.admit_room_pickups(&selectors, counter, false)?;
+                    // Room.Init 5cf628: the first visit to a boss room slams
+                    // its portcullis (SFX 190, 5d0687) after the grid records.
+                    let boss_room = self
+                        .state
+                        .room
+                        .descriptor
+                        .as_ref()
+                        .is_some_and(|descriptor| descriptor.template.room_type == 5);
+                    if boss_room {
+                        self.state.audio.admit(
+                            &mut self.state.boot_lifecycle.shared,
+                            self.state.system_clock.system_counter.wrapping_sub(1),
+                            audio::SoundRequest {
+                                id: 190,
+                                volume: 1.0,
+                                delay: 2,
+                                looping: false,
+                                pitch: 1.0,
+                            },
+                        );
+                    }
                     self.admitted_update_footprint(phase)?;
                     // The admitted Room::Update follows authored mixed order.
                     self.refresh_room_boss_count();
@@ -2293,6 +2692,24 @@ impl Game {
                     });
                     npcs::admit_room_combat(&mut self.state);
                     self.show_miniboss_streak();
+                    // ChangeRoom 5dd858 then selects the room's music (5c4bf0).
+                    // A first-visit treasure room (type 4, Room+1 set by
+                    // Room.Init when descriptor+0x3c is clear) draws its jingle
+                    // 87 + Random(4) at 5c4fff. The jingle is not played yet.
+                    if self
+                        .state
+                        .room
+                        .descriptor
+                        .as_ref()
+                        .is_some_and(|descriptor| descriptor.template.room_type == 4)
+                    {
+                        let _jingle = 87 + self.state.boot_lifecycle.shared.bounded(4);
+                    }
+                }
+                // The admitted Room.Update also ends with 5c6980; the active
+                // transition makes Game550760 report paused.
+                if phase == phase::Phase::Update {
+                    ambience::update(&mut self.state, true);
                 }
                 // ChangeRoom5dd260 restores Player+7d4=false after the
                 // admitted Room.Update, before the incoming leg or Scene.
@@ -2354,6 +2771,7 @@ impl Game {
         grid_records::advance_tnt(&mut self.state, phase);
         let explosion_fence = self.state.explosions.len();
         grid_hazards::advance(&mut self.state, phase)?;
+        spider_webs::advance(&mut self.state, phase)?;
         let existing = self.state.actor_scheduler.full_phase();
         if phase == phase::Phase::Update {
             rock_blast::advance_bomb_rocks(&mut self.state)?;
@@ -2392,6 +2810,18 @@ impl Game {
             epic_fetus::retire_full(&mut self.state);
             explosion_effects::retire_full(&mut self.state);
             controlled_tear::retire_full(&mut self.state);
+            //454DF0: after fenced actors, inactive31E Uninit/registered
+            //unlink and stable manager compaction precede455292->4545D0.
+            //Retain the prior snapshot throughout those actor callbacks;
+            //only the real rebuild below replaces it for the next phase.
+            controlled_knife_homing::unlink_removed_targets(&mut self.state);
+            npcs::unlink_removed(&mut self.state.room.npcs);
+            self.state.room.npcs.retain(|npc| !npc.removed);
+            self.state.actor_scheduler.retain(|actor| {
+                actor.kind != actors::ActorKind::Npc
+                    || self.state.room.npcs.iter().any(|npc| npc.id == actor.id)
+            });
+            controlled_knife_homing::rebuild_partition(&mut self.state);
             attack_runtime::contacts(&mut self.state)?;
             let pickup_contacts = pickups::contact_candidates(&self.state)?;
             bombs::player_contacts(&mut self.state)?;
@@ -2497,6 +2927,7 @@ impl Game {
         bombs::advance_explosions(&mut self.state, phase, explosion_fence);
         bombs::retire_removed(&mut self.state);
         self.state.room.pickups.retain(|pickup| !pickup.removed);
+        controlled_knife_homing::unlink_removed_targets(&mut self.state);
         npcs::unlink_removed(&mut self.state.room.npcs);
         self.state.room.npcs.retain(|npc| !npc.removed);
         self.state.familiars.retain(|familiar| !familiar.removed);
@@ -2519,6 +2950,10 @@ impl Game {
                 &mut self.state,
                 self.special_room_assets.as_deref().map(Vec::as_slice),
             );
+            // Room.Update ends with the ambience loops 5c6980 (5d1866).
+            let paused =
+                self.state.room_transition.is_some() || self.state.stage_transition.active();
+            ambience::update(&mut self.state, paused);
         }
         let surviving = &self.state.tears;
         let pickups = &self.state.room.pickups;
@@ -2619,6 +3054,8 @@ impl Game {
             coins: self.state.inventory.coins,
         })?;
         self.state.stage_seed = stage_seed;
+        //Neither fresh Level nor a reused manager owns empty query buckets.
+        self.state.knife_query_partition = None;
         self.state.current_room = self.state.floor.starting_descriptor;
         self.state.visited_rooms = BTreeSet::from([self.state.current_room]);
         self.state.room_display_flags = vec![0; self.state.floor.descriptors.len()];
@@ -2634,15 +3071,46 @@ impl Game {
         self.state.lasers.clear();
         self.state.bombs.clear();
         self.state.explosions.clear();
+        ambience::reset_room(&mut self.state);
+        // Room.Init loads current FX layers before the fresh level grid records.
+        room::load_fx_rays(
+            &mut self.state.room,
+            &mut self.state.boot_lifecycle.shared,
+            self.state.stage,
+            0,
+        );
         grid_records::admit_fresh(
             &mut self.state.room,
             &mut self.state.boot_lifecycle.shared,
             self.state.game_update_count,
         )?;
+        // PlayerManager 5bf220 -> Player 510550 after Room.Init: a new level
+        // has no enter door (Game+8198 is -1), so 510ac8..510b0e picks one.
+        // The first door in slot order is taken; each later door draws
+        // Random(7) and replaces it unless that is 0. A doorless room draws
+        // Random(8). TriggerNewStage below then centres the player.
+        let mut door_slots: Vec<u8> = self
+            .state
+            .room
+            .appearance
+            .doors
+            .iter()
+            .map(|door| door.slot)
+            .collect();
+        door_slots.sort_unstable();
+        door_slots.dedup();
+        if door_slots.is_empty() {
+            let _door = self.state.boot_lifecycle.shared.bounded(8);
+        }
+        for _ in door_slots.iter().skip(1) {
+            let _replace = self.state.boot_lifecycle.shared.bounded(7) != 0;
+        }
         // Player::TriggerNewStage52a260 (58c3a3): a later stage places the
         // player at the room centre and converts one Eternal heart into a
         // container through GiantBook13. Map/compass item branches remain
         // with their item owners.
+        // TriggerNewStage52A3F3 clears BD0; a room change does not.
+        self.state.player.golden_key = Some(false);
         let centre = motion::WorldVector {
             x: ((self.state.room.left + self.state.room.right) / 2.0) as f32,
             y: ((self.state.room.top + self.state.room.bottom) / 2.0) as f32,
@@ -2836,6 +3304,7 @@ impl Game {
             age: 0,
             active: true,
             title: format!("{player} VS {}", descriptor.template.name),
+            subtitle: String::new(),
             stage: false,
         };
     }
@@ -3192,6 +3661,7 @@ impl Game {
         // Base main-sprite time advances before the Player death/shooting caller.
         player_items::advance_presentation(&mut self.state, phase);
         player_costume229::begin_full(&mut self.state, phase);
+        spider_webs::begin_player_update(&mut self.state, phase)?;
         if player_death::advance(&mut self.state, phase) {
             return Ok(());
         }
@@ -3483,6 +3953,7 @@ impl Game {
             dy,
             self.state.player_stats.move_speed,
         );
+        spider_webs::finish_player_update(&mut self.state);
         if controls_enabled && bomb_triggered && bomb_admitted {
             bombs::place(&mut self.state, phase)?;
         }

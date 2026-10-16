@@ -315,6 +315,21 @@ impl MusicState {
     pub fn begin_command(&mut self) {
         self.events.clear();
     }
+    /// GameStop54F41C ->5B31B0 resets controller pitch and active/layer wrappers.
+    pub fn reset_pitch(&mut self) {
+        self.pitch = 1.0;
+        self.target_pitch = 1.0;
+        for index in [usize::from(self.active_channel), 2] {
+            self.channels[index].pitch = 1.0;
+            if let Some(generation) = self.channels[index].generation {
+                self.events.push(MusicEvent::Pitch {
+                    channel: index as u8,
+                    generation,
+                    pitch: 1.0,
+                });
+            }
+        }
+    }
     pub fn set_volume(&mut self, volume: f32) {
         self.volume = volume;
         self.music_enabled = volume > 0.0;
