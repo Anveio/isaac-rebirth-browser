@@ -719,7 +719,9 @@ impl Npc {
     ) -> Result<(), String> {
         let config = content::entity(kind, variant);
         if config.stage_hp != 0.0 {
-            return Err(format!("morph target {kind}.{variant} needs the stage HP formula"));
+            return Err(format!(
+                "morph target {kind}.{variant} needs the stage HP formula"
+            ));
         }
         self.kind = kind;
         self.variant = variant;
