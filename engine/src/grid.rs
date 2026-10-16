@@ -48,6 +48,9 @@ pub struct DoorCollision {
     pub hidden: bool,
     /// Dice-room doorways are closed with the double-lock variant2.
     pub double_lock: bool,
+    /// SetRoomTypes565b00 closes a doorway into a bedroom (18/19) with the
+    /// cracked variant3, which only bombs damage and break.
+    pub cracked: bool,
     /// SetRoomTypes565b00: an uncleared miniboss (type6 or surprise flag)
     /// room bars its ordinary non-secret doorways with variant4.
     pub barred: bool,
@@ -117,6 +120,8 @@ pub fn for_room(
                 }
             } else if door.double_lock {
                 2
+            } else if door.cracked {
+                3
             } else {
                 1
             },

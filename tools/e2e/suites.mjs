@@ -68,6 +68,11 @@ export const SUITES = [
     '--helper-arg', '--contrived', '--helper-arg', 'E1T36YXW-monstro', '--helper-arg', '--count', '--helper-arg', '1',
     '--comparator', 'tools/foundation/stage-exit-state-pair.mjs', '--native-frame-timeout', '120'],
     'Boss-room clear award trapdoor and pedestal, stage transition and Basement II arrival'),
+  // The starting bomb damages a cracked doorway into a bedroom (18/19) and
+  // scatters wood particles; the door stays shut (bedroom-door-scenarios.py).
+  suite('bedroom-doors', statePair, ['--scenario-helper', helper('bedroom-door-scenarios.py'),
+    '--helper-arg', '--count', '--helper-arg', '1', '--comparator', 'tools/foundation/bedroom-door-state-pair.mjs'],
+    'Cracked bedroom doorway: one bomb damages it and scatters wood particles'),
   suite('key-doors', traversal, ['--scenario-helper', helper('key-door-scenarios.py'),
     '--state-observer', helper('key-door-observe.py'), '--count', '1'], 'Key collection, library unlock and revisit'),
   suite('large-rooms', traversal, ['--scenario-helper', helper('large-room-scenarios.py'), '--count', '2'],

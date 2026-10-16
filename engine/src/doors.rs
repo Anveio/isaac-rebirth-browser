@@ -14,6 +14,7 @@ pub(crate) fn advance(state: &mut State, phase: Phase) -> Result<(), String> {
     // admits opened-door class5 after the inbound transition releases players.
     set_open_collision(state, 5);
     close_sounds(state);
+    cracked_close_sounds(state);
     let current_type = state.floor.descriptors[state.current_room]
         .template
         .room_type;
@@ -66,9 +67,54 @@ fn close_sounds(state: &mut State) {
     }
 }
 
+/// A cracked bedroom door's Init (563b70) plays the main sprite's Close clip
+/// from frame0, so Door::Update 565000 reaches its frame2 SFX35 (delay10) on
+/// the second full update of every room load, like a combat close.
+fn cracked_close_sounds(state: &mut State) {
+    let Some(frame) = state.room.cracked_close_frame else {
+        return;
+    };
+    let frame = frame + 1;
+    state.room.cracked_close_frame = (frame < 11).then_some(frame);
+    if frame != 2 {
+        return;
+    }
+    let cracked = state.room.grid.as_ref().map_or(0, |grid| {
+        grid.cells
+            .iter()
+            .filter(|cell| {
+                cell.entity
+                    .as_ref()
+                    .is_some_and(|entity| entity.kind == 16 && entity.variant == 3)
+            })
+            .count()
+    });
+    for _ in 0..cracked {
+        state.audio.admit(
+            &mut state.boot_lifecycle.shared,
+            state.system_clock.system_counter - 1,
+            crate::audio::SoundRequest {
+                id: 35,
+                volume: 1.0,
+                delay: 10,
+                looping: false,
+                pitch: 1.0,
+            },
+        );
+    }
+}
+
 pub(crate) fn begin_room_admission(state: &mut State) {
     restore_secret_connections(state);
     set_open_collision(state, 4);
+    let cracked = state.room.grid.as_ref().is_some_and(|grid| {
+        grid.cells.iter().any(|cell| {
+            cell.entity
+                .as_ref()
+                .is_some_and(|entity| entity.kind == 16 && entity.variant == 3)
+        })
+    });
+    state.room.cracked_close_frame = cracked.then_some(0);
 }
 
 /// Room.check_player_enter_door5c71c0 runs after full actor callbacks. Fresh
@@ -159,15 +205,18 @@ fn door_index(position: WorldVector, width: u16) -> usize {
 /// ordinary NPC countability does not block this source secret-door policy.
 /// Later surprise-room failure transitions and animated dust/rock effects
 /// remain separate from this first-floor callback.
-pub fn try_blow_open(state: &mut State, index: usize, _animated: bool) -> bool {
+pub fn try_blow_open(state: &mut State, index: usize, _animated: bool) -> Result<bool, String> {
     let Some(grid) = &state.room.grid else {
-        return false;
+        return Ok(false);
     };
     let Some(entity) = grid.cells.get(index).and_then(|cell| cell.entity.as_ref()) else {
-        return false;
+        return Ok(false);
     };
+    if entity.kind == 16 && entity.variant == 3 {
+        return crack(state, index);
+    }
     if entity.kind != 16 || entity.variant != 6 || entity.state != 1 {
-        return false;
+        return Ok(false);
     }
     let Some(door) = state
         .room
@@ -176,7 +225,7 @@ pub fn try_blow_open(state: &mut State, index: usize, _animated: bool) -> bool {
         .iter()
         .position(|door| door_index(door.world_position, grid.width) == index)
     else {
-        return false;
+        return Ok(false);
     };
     let target = state.room.appearance.doors[door].target_room as usize;
     let current_type = state.floor.descriptors[state.current_room]
@@ -192,7 +241,7 @@ pub fn try_blow_open(state: &mut State, index: usize, _animated: bool) -> bool {
         || state.stage != 1
         || state.floor.descriptors[state.current_room].surprise_miniboss
     {
-        return false;
+        return Ok(false);
     }
     state
         .revealed_secret_connections
@@ -207,7 +256,47 @@ pub fn try_blow_open(state: &mut State, index: usize, _animated: bool) -> bool {
     entity.variant = 7;
     entity.state = 2;
     entity.collision_class = 4;
-    true
+    Ok(true)
+}
+
+/// TryBlowOpen564870 on a cracked bedroom door (variant3, 564b68): one
+/// Random(5) and SpawnParticles 5515b0 of 6..10 Wood Particle27 at the door
+/// with speed 8, then an intact (state1) door takes damage (state4, its
+/// door_18 overlay plays Damaged) and the blast moves on. A damaged door's
+/// second blast breaks it open; that branch is not admitted yet and only
+/// records its frontier.
+fn crack(state: &mut State, index: usize) -> Result<bool, String> {
+    let door_state = state.room.grid.as_ref().and_then(|grid| grid.cells[index].entity.as_ref())
+        .map_or(0, |entity| entity.state);
+    if door_state != 1 {
+        let primary = state.weapon_cache.primary.numeric();
+        state.weapon_admission.unadmitted_controller.get_or_insert(
+            crate::weapon_plan::UnadmittedController {
+                primary,
+                channel: "bombGridCrackedDoorBreak".into(),
+            },
+        );
+        return Ok(false);
+    }
+    let width = state.room.grid.as_ref().map_or(0, |grid| grid.width);
+    let Some(position) = state
+        .room
+        .appearance
+        .doors
+        .iter()
+        .find(|door| door_index(door.world_position, width) == index)
+        .map(|door| door.world_position)
+    else {
+        return Ok(false);
+    };
+    let count = state.boot_lifecycle.shared.bounded(5) + 6;
+    crate::poop_effects::spawn_particles(state, 27, position, count, 8.0)?;
+    let entity = state.room.grid.as_mut().expect("admitted door grid").cells[index]
+        .entity
+        .as_mut()
+        .expect("admitted cracked door");
+    entity.state = 4;
+    Ok(false)
 }
 
 fn restore_secret_connections(state: &mut State) {
