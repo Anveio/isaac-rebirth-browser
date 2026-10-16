@@ -65,7 +65,7 @@ function compare(source, actual, gameplay, capture) {
     check('player.dead', d.dead, actual.player.dead);
     check('player.visible', d.visible, actual.player.visible);
     check('player.controls7d4', d.controlsEnabled, actual.player.controlsEnabled);
-    // Native Game+ce9f4 starts at the run loader's 1; game_update_count is 0.
+    // Native Game+ce9f4 equals game_update_count (State::native_game_frame).
     check('Game.fullUpdates', d.fullGameUpdates, actual.gameUpdateCount);
     check('items.ownedCounts', h.ownedCounts, actual.playerItems?.ownedCounts);
     check('items.temporaryRecords', h.temporaryCollectibles, actual.playerItems?.temporaryCollectibles);
