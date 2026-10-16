@@ -104,6 +104,32 @@ def public_tape(case):
     return tape
 
 
+
+def pocket_tape(case, clock):
+    """Accepted public normal/Challenge pickup seam; no Native output input."""
+    challenge = public_tape(case)
+    if case['publicMenuRoute'] == 'retained-unfiltered-challenge':
+        return challenge, ['--challenge-run']
+    if case['publicMenuRoute'] != 'seeded-normal':
+        raise ValueError('Pocket fixture requires declared normal or Challenge menu route')
+    code = case['publicSeedCode']
+    if clock.codec.decode_seed(code) != case['publicRunSeed']:
+        raise ValueError('Declared pocket seed code/value mismatch')
+    normal = clock.default_tape(code)
+    end = next(index for index, action in enumerate(normal) if action.get('label') == 'gameplay-start')
+    prefix = normal[:end + 1]
+    expected = [dict(type='key', key='Return', down=True), dict(type='step', frames=12),
+                dict(type='key', key='Return', down=False), dict(type='step', frames=300),
+                dict(type='capture', label='gameplay-start')]
+    if prefix[-5:] != expected:
+        raise ValueError('Canonical seed route admission changed')
+    prefix[-5:] = ([expected[0]] + [dict(type='step', frames=1) for _ in range(12)]
+                  + [expected[2]] + [dict(type='step', frames=1) for _ in range(300)]
+                  + [expected[4]])
+    tail = next(index for index, action in enumerate(challenge) if action.get('label') == 'gameplay-start')
+    return prefix + challenge[tail + 1:], ['--seed', code]
+
+
 def canonical_original():
     # There is one checked-in binary pin. Resolve and validate it through the
     # existing public module instead of copying a second constant into Python.
@@ -124,9 +150,12 @@ def main():
     parser.add_argument('--scenarios', type=Path, required=True)
     parser.add_argument('--case', required=True)
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--pockets', choices=('init', 'collection'))
     parser.add_argument('--prepare-only', action='store_true', help='Write launch inputs without executing either game')
     args, extra = parser.parse_known_args()
     owned_options = {'--seed', '--ordinary-run', '--challenge-run', '--tape', '--output', '--boot-epoch-seed'}
+    if args.pockets:
+        owned_options.add('--sfx-volume')
     if any(flag.startswith('--') and any(name.startswith(flag.split('=', 1)[0]) for name in owned_options)
            for flag in extra):
         raise ValueError('The declared case owns mode, public tape, boot input and output')
@@ -144,25 +173,35 @@ def main():
     epoch = case.get('bootEpochSeed')
     if type(epoch) is not int or not 0 <= epoch <= 0xffffffff:
         raise ValueError('Case must declare a public unsigned32 boot epoch')
+    pocket_key = {'init': 'pocketInit', 'collection': 'pocketCollection'}.get(args.pockets)
+    pocket_contract = case.get(pocket_key) if pocket_key else None
+    if args.pockets:
+        expected_schema = {'init': 'source-public-card-pill-init-v1', 'collection': 'source-public-pocket-collection-v1'}[args.pockets]
+        if (not isinstance(pocket_contract, dict) or pocket_contract.get('schema') != expected_schema
+                or case['fixture']['startingItems'] != [] or case['fixture']['challengeId'] != 1):
+            raise ValueError('One declared empty-start pocket fixture required')
+        sfx = case.get('sfxVolume')
+        if type(sfx) not in (int, float) or not 0 <= sfx <= 1:
+            raise ValueError('Pocket fixture must declare its matched public SFX volume')
     contract = case.get('requires', {}).get('sourceExpectedActorContract')
-    if not isinstance(contract, dict) or type(contract.get('family')) is not int:
+    if not args.pockets and (not isinstance(contract, dict) or type(contract.get('family')) is not int):
         raise ValueError('A source-backed actor-family obligation is required before fixture preparation')
-    source_fields = case.get('requires', {}).get('compositionSourceFields', ['playerMovementD9c', 'knifeChildChain4a0'])
+    source_fields = [] if args.pockets else case.get('requires', {}).get('compositionSourceFields', ['playerMovementD9c', 'knifeChildChain4a0'])
     if (not isinstance(source_fields, list) or len(set(source_fields)) != len(source_fields)
             or any(name not in ('playerMovementD9c', 'knifeChildChain4a0', 'npc14And18DamageQueue', 'kind8TearFields', 'ordinaryTechnology', 'ordinaryDrFetusBombs', 'controlledTechnology7x2x1', 'controlledDrFetusBombs', 'monstrosLung229', 'spoonBender3Tears', 'controlledKnifeSatelliteChain') for name in source_fields)):
         raise ValueError('Unknown or duplicate requested composition source field')
     source_fields = list(source_fields)
     if case.get('requires', {}).get('ordinaryTechnologyFunctional') is not None:
         source_fields = [*source_fields, *([] if 'ordinaryTechnology' in source_fields else ['ordinaryTechnology'])]
-    if any(name in case['requires'] for name in ('ordinaryBrimContact', 'controlledTearContact')):
+    if any(name in case.get('requires', {}) for name in ('ordinaryBrimContact', 'controlledTearContact')):
         if 'npc14And18DamageQueue' not in source_fields:
             source_fields.append('npc14And18DamageQueue')
-    if (contract.get('primaryC08') == 8 and contract['family'] == 2
+    if (contract is not None and contract.get('primaryC08') == 8 and contract['family'] == 2
             and contract.get('controlledBy329') is True and 'kind8TearFields' not in source_fields):
         source_fields.append('kind8TearFields')
     if case.get('requires', {}).get('controlledTechnologyFunctional') is not None:
         source_fields = [*source_fields, *([] if 'controlledTechnology7x2x1' in source_fields else ['controlledTechnology7x2x1'])]
-    controlled_fetus = case['requires'].get('controlledDrFetusFunctional')
+    controlled_fetus = case.get('requires', {}).get('controlledDrFetusFunctional')
     if controlled_fetus is not None:
         if (not isinstance(controlled_fetus, dict) or controlled_fetus.get('schema') != 'controlled-dr-fetus52-bomb-c18-v1'
                 or (contract.get('primaryC08'), contract['family'], contract.get('variant'),
@@ -171,7 +210,7 @@ def main():
         for name in ('playerMovementD9c', 'controlledDrFetusBombs'):
             if name not in source_fields:
                 source_fields.append(name)
-    spoon = case['requires'].get('spoonBender3Functional')
+    spoon = case.get('requires', {}).get('spoonBender3Functional')
     if spoon is not None:
         if (not isinstance(spoon, dict)
                 or spoon.get('schema') != 'ordinary-spoon-bender3-registered-homing-v1'
@@ -182,18 +221,18 @@ def main():
         for name in ('playerMovementD9c', 'npc14And18DamageQueue', 'spoonBender3Tears'):
             if name not in source_fields:
                 source_fields.append(name)
-    satellites = case['requires'].get('controlledKnifeSatellites')
+    satellites = case.get('requires', {}).get('controlledKnifeSatellites')
     if satellites is not None:
         if (not isinstance(satellites, dict)
                 or satellites.get('schema') != 'controlled-knife-linked4a0-satellites-v1'
                 or (contract.get('primaryC08'), contract['family'], contract.get('variant'), contract.get('subtype')) != (4, 8, 0, 0)
                 or case['fixture']['startingItems'] != [114]
-                or case['requires']['orderedRealPedestalGrants'] != [329, 2]):
+                or case.get('requires', {})['orderedRealPedestalGrants'] != [329, 2]):
             raise ValueError('Knife satellites require their actual supported329-before2 grant stages')
         for name in ('playerMovementD9c', 'controlledKnifeSatelliteChain'):
             if name not in source_fields:
                 source_fields.append(name)
-    monstro = case['requires'].get('monstrosLungFunctional')
+    monstro = case.get('requires', {}).get('monstrosLungFunctional')
     if monstro is not None:
         if (not isinstance(monstro, dict) or monstro.get('schema') != 'monstro229-charge-release-kind1-burst-v1'
                 or (contract.get('primaryC08'), contract['family'], contract.get('variant'),
@@ -202,7 +241,7 @@ def main():
         for name in ('playerMovementD9c', 'monstrosLung229'):
             if name not in source_fields:
                 source_fields.append(name)
-    fetus = case['requires'].get('ordinaryDrFetus')
+    fetus = case.get('requires', {}).get('ordinaryDrFetus')
     if fetus is not None:
         if (not isinstance(fetus, dict) or fetus.get('schema') != 'ordinary-dr-fetus52-bomb-shots-v1'
                 or (contract.get('primaryC08'), contract['family'], contract.get('variant'),
@@ -214,6 +253,9 @@ def main():
     spec = importlib.util.spec_from_file_location('composition_clock', ROOT / 'tools/original/foundation-clock-run.py')
     clock = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(clock)
+    route = ['--challenge-run']
+    if args.pockets:
+        tape, route = pocket_tape(case, clock)
     clock.validate_tape(tape)
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=False)
@@ -243,6 +285,10 @@ def main():
                 'bootstrapBoundary': 'Existing first-Title boundary: native intro is a source-only prelude; no browser intro or simulation-tick parity claim',
                 'browserInputRequirement': 'exact declared XML and boot inputs; independently declared post-Title public commands; no native output import',
                 'execution': 'prepared-not-executed', 'requiredActorContract': contract}
+    if args.pockets:
+        metadata['requiredPocketContract'] = pocket_contract
+        metadata['declaredSfxVolume'] = case['sfxVolume']
+        metadata['scope'] = 'Source-authored public pocket fixture; declared normal/Challenge route, no Native output input'
     metadata_path = output / 'composition-input.json'
     metadata_path.write_text(json.dumps(metadata, indent=2) + '\n')
     if args.prepare_only:
@@ -258,11 +304,15 @@ def main():
     old_argv, old_observation = sys.argv, clock.checked_observation
     def source_observation(observer, pid, context):
         context['compositionSourceFields'] = source_fields
+        if args.pockets:
+            context['heldPocketRecords'] = True
+            context['pickupResourceSound'] = True
         return old_observation(observer, pid, context)
     clock.checked_observation = source_observation
     try:
-        sys.argv = [str(ROOT / 'tools/original/foundation-clock-run.py'), '--challenge-run',
-                    '--boot-epoch-seed', str(epoch), '--tape', str(tape_path), '--output', str(output), *extra]
+        sys.argv = [str(ROOT / 'tools/original/foundation-clock-run.py'), *route,
+                    '--boot-epoch-seed', str(epoch), '--tape', str(tape_path), '--output', str(output),
+                    *(['--sfx-volume', str(case['sfxVolume'])] if args.pockets else []), *extra]
         metadata['execution'] = 'original-started'
         result = clock.main()
         metadata['execution'] = 'original-closed'

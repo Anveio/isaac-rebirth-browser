@@ -1,0 +1,2748 @@
+{
+  "schema": 1,
+  "cases": [
+    {
+      "bootEpochSeed": 12713,
+      "initialPhaseOffset": 0,
+      "entropy": "fixed source-designed public seed, declared before gameplay",
+      "publicMenuRoute": "seeded-normal",
+      "publicRunSeed": 2,
+      "publicSeedCode": "B911992E",
+      "name": "card-pill-init-fixed-phase0",
+      "fixture": {
+        "kind": "source-authored-start-room-STB-on-public-seeded-normal-run",
+        "challengeId": 1,
+        "startingItems": [],
+        "view": "item-only",
+        "authoredResourcePath": "../resources/challenges.xml",
+        "baselineResourcePath": "/workspace/isaac-rebirth-browser/references/isaac/rebirth/resources/challenges.xml",
+        "specialRoomsPath": "../resources/init-special.stb",
+        "specialRoomsSha256": "50861c29864cf19399267bc098515b44d156cc6c64a6f49a50e79135da94fce5",
+        "attributeChanges": [
+          {
+            "attribute": "getcurse",
+            "baselineValue": "9",
+            "authoredValue": "0"
+          },
+          {
+            "attribute": "cursefilter",
+            "baselineValue": "6",
+            "authoredValue": "127"
+          },
+          {
+            "attribute": "roomfilter",
+            "baselineValue": "2",
+            "authoredValue": null
+          },
+          {
+            "attribute": "startingitems",
+            "baselineValue": null,
+            "authoredValue": ""
+          }
+        ],
+        "startRoomSpawnChange": {
+          "catalogue": 0,
+          "index": 80,
+          "type": 1,
+          "variant": 2,
+          "operation": "append",
+          "groups": [
+            {
+              "x": 2,
+              "y": 1,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 300,
+                  "subtype": 1,
+                  "weight": 1.0
+                }
+              ]
+            },
+            {
+              "x": 3,
+              "y": 1,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 300,
+                  "subtype": 23,
+                  "weight": 1.0
+                }
+              ]
+            },
+            {
+              "x": 4,
+              "y": 1,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 300,
+                  "subtype": 28,
+                  "weight": 1.0
+                }
+              ]
+            },
+            {
+              "x": 5,
+              "y": 1,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 300,
+                  "subtype": 32,
+                  "weight": 1.0
+                }
+              ]
+            },
+            {
+              "x": 6,
+              "y": 1,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 300,
+                  "subtype": 36,
+                  "weight": 1.0
+                }
+              ]
+            },
+            {
+              "x": 2,
+              "y": 2,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 300,
+                  "subtype": 40,
+                  "weight": 1.0
+                }
+              ]
+            },
+            {
+              "x": 3,
+              "y": 2,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 300,
+                  "subtype": 0,
+                  "weight": 1.0
+                }
+              ]
+            },
+            {
+              "x": 4,
+              "y": 2,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 70,
+                  "subtype": 1,
+                  "weight": 1.0
+                }
+              ]
+            },
+            {
+              "x": 5,
+              "y": 2,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 70,
+                  "subtype": 9,
+                  "weight": 1.0
+                }
+              ]
+            },
+            {
+              "x": 6,
+              "y": 2,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 70,
+                  "subtype": 0,
+                  "weight": 1.0
+                }
+              ]
+            }
+          ],
+          "allOtherRowsMetadataDoorsWeightsOrderPreserved": true
+        },
+        "challengeConfigurationUsed": false,
+        "samePassPersistentCells": "Every original/authored group has a distinct cell. Real group RNG11/selection remains before the descriptor+98 cell check; this bank neither needs nor waives duplicate suppression."
+      },
+      "actions": [
+        {
+          "label": "released-appear-idle-and-card-pill-init-observations",
+          "keys": [],
+          "presentations": 240
+        }
+      ],
+      "pocketInit": {
+        "schema": "source-public-card-pill-init-v1",
+        "originalRoomGroupCount": 2,
+        "groups": [
+          {
+            "x": 2,
+            "y": 1,
+            "entries": [
+              {
+                "type": 5,
+                "variant": 300,
+                "subtype": 1,
+                "weight": 1.0
+              }
+            ]
+          },
+          {
+            "x": 3,
+            "y": 1,
+            "entries": [
+              {
+                "type": 5,
+                "variant": 300,
+                "subtype": 23,
+                "weight": 1.0
+              }
+            ]
+          },
+          {
+            "x": 4,
+            "y": 1,
+            "entries": [
+              {
+                "type": 5,
+                "variant": 300,
+                "subtype": 28,
+                "weight": 1.0
+              }
+            ]
+          },
+          {
+            "x": 5,
+            "y": 1,
+            "entries": [
+              {
+                "type": 5,
+                "variant": 300,
+                "subtype": 32,
+                "weight": 1.0
+              }
+            ]
+          },
+          {
+            "x": 6,
+            "y": 1,
+            "entries": [
+              {
+                "type": 5,
+                "variant": 300,
+                "subtype": 36,
+                "weight": 1.0
+              }
+            ]
+          },
+          {
+            "x": 2,
+            "y": 2,
+            "entries": [
+              {
+                "type": 5,
+                "variant": 300,
+                "subtype": 40,
+                "weight": 1.0
+              }
+            ]
+          },
+          {
+            "x": 3,
+            "y": 2,
+            "entries": [
+              {
+                "type": 5,
+                "variant": 300,
+                "subtype": 0,
+                "weight": 1.0
+              }
+            ]
+          },
+          {
+            "x": 4,
+            "y": 2,
+            "entries": [
+              {
+                "type": 5,
+                "variant": 70,
+                "subtype": 1,
+                "weight": 1.0
+              }
+            ]
+          },
+          {
+            "x": 5,
+            "y": 2,
+            "entries": [
+              {
+                "type": 5,
+                "variant": 70,
+                "subtype": 9,
+                "weight": 1.0
+              }
+            ]
+          },
+          {
+            "x": 6,
+            "y": 2,
+            "entries": [
+              {
+                "type": 5,
+                "variant": 70,
+                "subtype": 0,
+                "weight": 1.0
+              }
+            ]
+          }
+        ],
+        "minimumActualInitialBodies": 10,
+        "minimumActualCardArtFamilies": 4,
+        "minimumActualRandomCards": 1,
+        "minimumActualRandomPills": 1,
+        "minimumFullObservations": 1,
+        "minimumFastObservations": 1,
+        "required": [
+          "ActualPublicMenuAndResourceReset",
+          "ActualRoomSelectorAndMatchingManagerSeed",
+          "ExplicitCardIDsIncludingLockedRunesRemainExplicit",
+          "CardZeroAndPillZeroResolveToConcreteBodies",
+          "ActualFourCardVisualActors",
+          "ActualAppearThenIdleAndGroundCollisionFields"
+        ],
+        "unknown": [
+          "OriginalGameCounterpartAndExactRandomCardIdentity",
+          "Actual4FF1E0AndGetCardGetPillInvocation",
+          "Positive251And252RealAddAndConversion",
+          "CanonicalHeldPocketCollectionAndSwap",
+          "BackendAudioAndPixels",
+          "SavedRoomReentryHistory"
+        ],
+        "missingWitnessPolicy": "FAIL; preserve every case and unknown; no output-fitted seeds, body injection or relaxed minima"
+      },
+      "sfxVolume": 0,
+      "evidenceScope": {
+        "functional": "Fresh Original/production public-input comparison required",
+        "audio": "Request/slot/sample settings only; muted gain cannot satisfy playback evidence",
+        "remaining": [
+          "Private helper invocation ledger",
+          "Capacity2 modifiers and pocket effects",
+          "Saved reentry",
+          "Backend played audio and PCM",
+          "Full-frame pixels"
+        ]
+      }
+    },
+    {
+      "bootEpochSeed": 12713,
+      "initialPhaseOffset": 1,
+      "entropy": "fixed source-designed public seed, declared before gameplay",
+      "publicMenuRoute": "seeded-normal",
+      "publicRunSeed": 2,
+      "publicSeedCode": "B911992E",
+      "name": "card-pill-init-fixed-phase1",
+      "fixture": {
+        "kind": "source-authored-start-room-STB-on-public-seeded-normal-run",
+        "challengeId": 1,
+        "startingItems": [],
+        "view": "item-only",
+        "authoredResourcePath": "../resources/challenges.xml",
+        "baselineResourcePath": "/workspace/isaac-rebirth-browser/references/isaac/rebirth/resources/challenges.xml",
+        "specialRoomsPath": "../resources/init-special.stb",
+        "specialRoomsSha256": "50861c29864cf19399267bc098515b44d156cc6c64a6f49a50e79135da94fce5",
+        "attributeChanges": [
+          {
+            "attribute": "getcurse",
+            "baselineValue": "9",
+            "authoredValue": "0"
+          },
+          {
+            "attribute": "cursefilter",
+            "baselineValue": "6",
+            "authoredValue": "127"
+          },
+          {
+            "attribute": "roomfilter",
+            "baselineValue": "2",
+            "authoredValue": null
+          },
+          {
+            "attribute": "startingitems",
+            "baselineValue": null,
+            "authoredValue": ""
+          }
+        ],
+        "startRoomSpawnChange": {
+          "catalogue": 0,
+          "index": 80,
+          "type": 1,
+          "variant": 2,
+          "operation": "append",
+          "groups": [
+            {
+              "x": 2,
+              "y": 1,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 300,
+                  "subtype": 1,
+                  "weight": 1.0
+                }
+              ]
+            },
+            {
+              "x": 3,
+              "y": 1,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 300,
+                  "subtype": 23,
+                  "weight": 1.0
+                }
+              ]
+            },
+            {
+              "x": 4,
+              "y": 1,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 300,
+                  "subtype": 28,
+                  "weight": 1.0
+                }
+              ]
+            },
+            {
+              "x": 5,
+              "y": 1,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 300,
+                  "subtype": 32,
+                  "weight": 1.0
+                }
+              ]
+            },
+            {
+              "x": 6,
+              "y": 1,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 300,
+                  "subtype": 36,
+                  "weight": 1.0
+                }
+              ]
+            },
+            {
+              "x": 2,
+              "y": 2,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 300,
+                  "subtype": 40,
+                  "weight": 1.0
+                }
+              ]
+            },
+            {
+              "x": 3,
+              "y": 2,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 300,
+                  "subtype": 0,
+                  "weight": 1.0
+                }
+              ]
+            },
+            {
+              "x": 4,
+              "y": 2,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 70,
+                  "subtype": 1,
+                  "weight": 1.0
+                }
+              ]
+            },
+            {
+              "x": 5,
+              "y": 2,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 70,
+                  "subtype": 9,
+                  "weight": 1.0
+                }
+              ]
+            },
+            {
+              "x": 6,
+              "y": 2,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 70,
+                  "subtype": 0,
+                  "weight": 1.0
+                }
+              ]
+            }
+          ],
+          "allOtherRowsMetadataDoorsWeightsOrderPreserved": true
+        },
+        "challengeConfigurationUsed": false,
+        "samePassPersistentCells": "Every original/authored group has a distinct cell. Real group RNG11/selection remains before the descriptor+98 cell check; this bank neither needs nor waives duplicate suppression."
+      },
+      "actions": [
+        {
+          "label": "released-appear-idle-and-card-pill-init-observations",
+          "keys": [],
+          "presentations": 240
+        }
+      ],
+      "pocketInit": {
+        "schema": "source-public-card-pill-init-v1",
+        "originalRoomGroupCount": 2,
+        "groups": [
+          {
+            "x": 2,
+            "y": 1,
+            "entries": [
+              {
+                "type": 5,
+                "variant": 300,
+                "subtype": 1,
+                "weight": 1.0
+              }
+            ]
+          },
+          {
+            "x": 3,
+            "y": 1,
+            "entries": [
+              {
+                "type": 5,
+                "variant": 300,
+                "subtype": 23,
+                "weight": 1.0
+              }
+            ]
+          },
+          {
+            "x": 4,
+            "y": 1,
+            "entries": [
+              {
+                "type": 5,
+                "variant": 300,
+                "subtype": 28,
+                "weight": 1.0
+              }
+            ]
+          },
+          {
+            "x": 5,
+            "y": 1,
+            "entries": [
+              {
+                "type": 5,
+                "variant": 300,
+                "subtype": 32,
+                "weight": 1.0
+              }
+            ]
+          },
+          {
+            "x": 6,
+            "y": 1,
+            "entries": [
+              {
+                "type": 5,
+                "variant": 300,
+                "subtype": 36,
+                "weight": 1.0
+              }
+            ]
+          },
+          {
+            "x": 2,
+            "y": 2,
+            "entries": [
+              {
+                "type": 5,
+                "variant": 300,
+                "subtype": 40,
+                "weight": 1.0
+              }
+            ]
+          },
+          {
+            "x": 3,
+            "y": 2,
+            "entries": [
+              {
+                "type": 5,
+                "variant": 300,
+                "subtype": 0,
+                "weight": 1.0
+              }
+            ]
+          },
+          {
+            "x": 4,
+            "y": 2,
+            "entries": [
+              {
+                "type": 5,
+                "variant": 70,
+                "subtype": 1,
+                "weight": 1.0
+              }
+            ]
+          },
+          {
+            "x": 5,
+            "y": 2,
+            "entries": [
+              {
+                "type": 5,
+                "variant": 70,
+                "subtype": 9,
+                "weight": 1.0
+              }
+            ]
+          },
+          {
+            "x": 6,
+            "y": 2,
+            "entries": [
+              {
+                "type": 5,
+                "variant": 70,
+                "subtype": 0,
+                "weight": 1.0
+              }
+            ]
+          }
+        ],
+        "minimumActualInitialBodies": 10,
+        "minimumActualCardArtFamilies": 4,
+        "minimumActualRandomCards": 1,
+        "minimumActualRandomPills": 1,
+        "minimumFullObservations": 1,
+        "minimumFastObservations": 1,
+        "required": [
+          "ActualPublicMenuAndResourceReset",
+          "ActualRoomSelectorAndMatchingManagerSeed",
+          "ExplicitCardIDsIncludingLockedRunesRemainExplicit",
+          "CardZeroAndPillZeroResolveToConcreteBodies",
+          "ActualFourCardVisualActors",
+          "ActualAppearThenIdleAndGroundCollisionFields"
+        ],
+        "unknown": [
+          "OriginalGameCounterpartAndExactRandomCardIdentity",
+          "Actual4FF1E0AndGetCardGetPillInvocation",
+          "Positive251And252RealAddAndConversion",
+          "CanonicalHeldPocketCollectionAndSwap",
+          "BackendAudioAndPixels",
+          "SavedRoomReentryHistory"
+        ],
+        "missingWitnessPolicy": "FAIL; preserve every case and unknown; no output-fitted seeds, body injection or relaxed minima"
+      },
+      "sfxVolume": 1,
+      "evidenceScope": {
+        "functional": "Fresh Original/production public-input comparison required",
+        "audio": "Request/slot/sample settings only; muted gain cannot satisfy playback evidence",
+        "remaining": [
+          "Private helper invocation ledger",
+          "Capacity2 modifiers and pocket effects",
+          "Saved reentry",
+          "Backend played audio and PCM",
+          "Full-frame pixels"
+        ]
+      }
+    },
+    {
+      "bootEpochSeed": 2038552851,
+      "initialPhaseOffset": 0,
+      "entropy": "retained unfiltered OS epoch; no result selection",
+      "publicMenuRoute": "retained-unfiltered-challenge",
+      "name": "card-pill-init-recorded-0",
+      "fixture": {
+        "kind": "source-authored-modified-challenge",
+        "challengeId": 1,
+        "startingItems": [],
+        "view": "item-only",
+        "authoredResourcePath": "../resources/challenges.xml",
+        "baselineResourcePath": "/workspace/isaac-rebirth-browser/references/isaac/rebirth/resources/challenges.xml",
+        "specialRoomsPath": "../resources/init-special.stb",
+        "specialRoomsSha256": "50861c29864cf19399267bc098515b44d156cc6c64a6f49a50e79135da94fce5",
+        "attributeChanges": [
+          {
+            "attribute": "getcurse",
+            "baselineValue": "9",
+            "authoredValue": "0"
+          },
+          {
+            "attribute": "cursefilter",
+            "baselineValue": "6",
+            "authoredValue": "127"
+          },
+          {
+            "attribute": "roomfilter",
+            "baselineValue": "2",
+            "authoredValue": null
+          },
+          {
+            "attribute": "startingitems",
+            "baselineValue": null,
+            "authoredValue": ""
+          }
+        ],
+        "startRoomSpawnChange": {
+          "catalogue": 0,
+          "index": 80,
+          "type": 1,
+          "variant": 2,
+          "operation": "append",
+          "groups": [
+            {
+              "x": 2,
+              "y": 1,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 300,
+                  "subtype": 1,
+                  "weight": 1.0
+                }
+              ]
+            },
+            {
+              "x": 3,
+              "y": 1,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 300,
+                  "subtype": 23,
+                  "weight": 1.0
+                }
+              ]
+            },
+            {
+              "x": 4,
+              "y": 1,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 300,
+                  "subtype": 28,
+                  "weight": 1.0
+                }
+              ]
+            },
+            {
+              "x": 5,
+              "y": 1,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 300,
+                  "subtype": 32,
+                  "weight": 1.0
+                }
+              ]
+            },
+            {
+              "x": 6,
+              "y": 1,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 300,
+                  "subtype": 36,
+                  "weight": 1.0
+                }
+              ]
+            },
+            {
+              "x": 2,
+              "y": 2,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 300,
+                  "subtype": 40,
+                  "weight": 1.0
+                }
+              ]
+            },
+            {
+              "x": 3,
+              "y": 2,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 300,
+                  "subtype": 0,
+                  "weight": 1.0
+                }
+              ]
+            },
+            {
+              "x": 4,
+              "y": 2,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 70,
+                  "subtype": 1,
+                  "weight": 1.0
+                }
+              ]
+            },
+            {
+              "x": 5,
+              "y": 2,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 70,
+                  "subtype": 9,
+                  "weight": 1.0
+                }
+              ]
+            },
+            {
+              "x": 6,
+              "y": 2,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 70,
+                  "subtype": 0,
+                  "weight": 1.0
+                }
+              ]
+            }
+          ],
+          "allOtherRowsMetadataDoorsWeightsOrderPreserved": true
+        },
+        "challengeConfigurationUsed": true,
+        "samePassPersistentCells": "Every original/authored group has a distinct cell. Real group RNG11/selection remains before the descriptor+98 cell check; this bank neither needs nor waives duplicate suppression."
+      },
+      "actions": [
+        {
+          "label": "released-appear-idle-and-card-pill-init-observations",
+          "keys": [],
+          "presentations": 240
+        }
+      ],
+      "pocketInit": {
+        "schema": "source-public-card-pill-init-v1",
+        "originalRoomGroupCount": 2,
+        "groups": [
+          {
+            "x": 2,
+            "y": 1,
+            "entries": [
+              {
+                "type": 5,
+                "variant": 300,
+                "subtype": 1,
+                "weight": 1.0
+              }
+            ]
+          },
+          {
+            "x": 3,
+            "y": 1,
+            "entries": [
+              {
+                "type": 5,
+                "variant": 300,
+                "subtype": 23,
+                "weight": 1.0
+              }
+            ]
+          },
+          {
+            "x": 4,
+            "y": 1,
+            "entries": [
+              {
+                "type": 5,
+                "variant": 300,
+                "subtype": 28,
+                "weight": 1.0
+              }
+            ]
+          },
+          {
+            "x": 5,
+            "y": 1,
+            "entries": [
+              {
+                "type": 5,
+                "variant": 300,
+                "subtype": 32,
+                "weight": 1.0
+              }
+            ]
+          },
+          {
+            "x": 6,
+            "y": 1,
+            "entries": [
+              {
+                "type": 5,
+                "variant": 300,
+                "subtype": 36,
+                "weight": 1.0
+              }
+            ]
+          },
+          {
+            "x": 2,
+            "y": 2,
+            "entries": [
+              {
+                "type": 5,
+                "variant": 300,
+                "subtype": 40,
+                "weight": 1.0
+              }
+            ]
+          },
+          {
+            "x": 3,
+            "y": 2,
+            "entries": [
+              {
+                "type": 5,
+                "variant": 300,
+                "subtype": 0,
+                "weight": 1.0
+              }
+            ]
+          },
+          {
+            "x": 4,
+            "y": 2,
+            "entries": [
+              {
+                "type": 5,
+                "variant": 70,
+                "subtype": 1,
+                "weight": 1.0
+              }
+            ]
+          },
+          {
+            "x": 5,
+            "y": 2,
+            "entries": [
+              {
+                "type": 5,
+                "variant": 70,
+                "subtype": 9,
+                "weight": 1.0
+              }
+            ]
+          },
+          {
+            "x": 6,
+            "y": 2,
+            "entries": [
+              {
+                "type": 5,
+                "variant": 70,
+                "subtype": 0,
+                "weight": 1.0
+              }
+            ]
+          }
+        ],
+        "minimumActualInitialBodies": 10,
+        "minimumActualCardArtFamilies": 4,
+        "minimumActualRandomCards": 1,
+        "minimumActualRandomPills": 1,
+        "minimumFullObservations": 1,
+        "minimumFastObservations": 1,
+        "required": [
+          "ActualPublicMenuAndResourceReset",
+          "ActualRoomSelectorAndMatchingManagerSeed",
+          "ExplicitCardIDsIncludingLockedRunesRemainExplicit",
+          "CardZeroAndPillZeroResolveToConcreteBodies",
+          "ActualFourCardVisualActors",
+          "ActualAppearThenIdleAndGroundCollisionFields"
+        ],
+        "unknown": [
+          "OriginalGameCounterpartAndExactRandomCardIdentity",
+          "Actual4FF1E0AndGetCardGetPillInvocation",
+          "Positive251And252RealAddAndConversion",
+          "CanonicalHeldPocketCollectionAndSwap",
+          "BackendAudioAndPixels",
+          "SavedRoomReentryHistory"
+        ],
+        "missingWitnessPolicy": "FAIL; preserve every case and unknown; no output-fitted seeds, body injection or relaxed minima"
+      },
+      "sfxVolume": 0,
+      "evidenceScope": {
+        "functional": "Fresh Original/production public-input comparison required",
+        "audio": "Request/slot/sample settings only; muted gain cannot satisfy playback evidence",
+        "remaining": [
+          "Private helper invocation ledger",
+          "Capacity2 modifiers and pocket effects",
+          "Saved reentry",
+          "Backend played audio and PCM",
+          "Full-frame pixels"
+        ]
+      }
+    },
+    {
+      "bootEpochSeed": 4152429072,
+      "initialPhaseOffset": 1,
+      "entropy": "retained unfiltered OS epoch; no result selection",
+      "publicMenuRoute": "retained-unfiltered-challenge",
+      "name": "card-pill-init-recorded-1",
+      "fixture": {
+        "kind": "source-authored-modified-challenge",
+        "challengeId": 1,
+        "startingItems": [],
+        "view": "item-only",
+        "authoredResourcePath": "../resources/challenges.xml",
+        "baselineResourcePath": "/workspace/isaac-rebirth-browser/references/isaac/rebirth/resources/challenges.xml",
+        "specialRoomsPath": "../resources/init-special.stb",
+        "specialRoomsSha256": "50861c29864cf19399267bc098515b44d156cc6c64a6f49a50e79135da94fce5",
+        "attributeChanges": [
+          {
+            "attribute": "getcurse",
+            "baselineValue": "9",
+            "authoredValue": "0"
+          },
+          {
+            "attribute": "cursefilter",
+            "baselineValue": "6",
+            "authoredValue": "127"
+          },
+          {
+            "attribute": "roomfilter",
+            "baselineValue": "2",
+            "authoredValue": null
+          },
+          {
+            "attribute": "startingitems",
+            "baselineValue": null,
+            "authoredValue": ""
+          }
+        ],
+        "startRoomSpawnChange": {
+          "catalogue": 0,
+          "index": 80,
+          "type": 1,
+          "variant": 2,
+          "operation": "append",
+          "groups": [
+            {
+              "x": 2,
+              "y": 1,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 300,
+                  "subtype": 1,
+                  "weight": 1.0
+                }
+              ]
+            },
+            {
+              "x": 3,
+              "y": 1,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 300,
+                  "subtype": 23,
+                  "weight": 1.0
+                }
+              ]
+            },
+            {
+              "x": 4,
+              "y": 1,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 300,
+                  "subtype": 28,
+                  "weight": 1.0
+                }
+              ]
+            },
+            {
+              "x": 5,
+              "y": 1,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 300,
+                  "subtype": 32,
+                  "weight": 1.0
+                }
+              ]
+            },
+            {
+              "x": 6,
+              "y": 1,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 300,
+                  "subtype": 36,
+                  "weight": 1.0
+                }
+              ]
+            },
+            {
+              "x": 2,
+              "y": 2,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 300,
+                  "subtype": 40,
+                  "weight": 1.0
+                }
+              ]
+            },
+            {
+              "x": 3,
+              "y": 2,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 300,
+                  "subtype": 0,
+                  "weight": 1.0
+                }
+              ]
+            },
+            {
+              "x": 4,
+              "y": 2,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 70,
+                  "subtype": 1,
+                  "weight": 1.0
+                }
+              ]
+            },
+            {
+              "x": 5,
+              "y": 2,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 70,
+                  "subtype": 9,
+                  "weight": 1.0
+                }
+              ]
+            },
+            {
+              "x": 6,
+              "y": 2,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 70,
+                  "subtype": 0,
+                  "weight": 1.0
+                }
+              ]
+            }
+          ],
+          "allOtherRowsMetadataDoorsWeightsOrderPreserved": true
+        },
+        "challengeConfigurationUsed": true,
+        "samePassPersistentCells": "Every original/authored group has a distinct cell. Real group RNG11/selection remains before the descriptor+98 cell check; this bank neither needs nor waives duplicate suppression."
+      },
+      "actions": [
+        {
+          "label": "released-appear-idle-and-card-pill-init-observations",
+          "keys": [],
+          "presentations": 240
+        }
+      ],
+      "pocketInit": {
+        "schema": "source-public-card-pill-init-v1",
+        "originalRoomGroupCount": 2,
+        "groups": [
+          {
+            "x": 2,
+            "y": 1,
+            "entries": [
+              {
+                "type": 5,
+                "variant": 300,
+                "subtype": 1,
+                "weight": 1.0
+              }
+            ]
+          },
+          {
+            "x": 3,
+            "y": 1,
+            "entries": [
+              {
+                "type": 5,
+                "variant": 300,
+                "subtype": 23,
+                "weight": 1.0
+              }
+            ]
+          },
+          {
+            "x": 4,
+            "y": 1,
+            "entries": [
+              {
+                "type": 5,
+                "variant": 300,
+                "subtype": 28,
+                "weight": 1.0
+              }
+            ]
+          },
+          {
+            "x": 5,
+            "y": 1,
+            "entries": [
+              {
+                "type": 5,
+                "variant": 300,
+                "subtype": 32,
+                "weight": 1.0
+              }
+            ]
+          },
+          {
+            "x": 6,
+            "y": 1,
+            "entries": [
+              {
+                "type": 5,
+                "variant": 300,
+                "subtype": 36,
+                "weight": 1.0
+              }
+            ]
+          },
+          {
+            "x": 2,
+            "y": 2,
+            "entries": [
+              {
+                "type": 5,
+                "variant": 300,
+                "subtype": 40,
+                "weight": 1.0
+              }
+            ]
+          },
+          {
+            "x": 3,
+            "y": 2,
+            "entries": [
+              {
+                "type": 5,
+                "variant": 300,
+                "subtype": 0,
+                "weight": 1.0
+              }
+            ]
+          },
+          {
+            "x": 4,
+            "y": 2,
+            "entries": [
+              {
+                "type": 5,
+                "variant": 70,
+                "subtype": 1,
+                "weight": 1.0
+              }
+            ]
+          },
+          {
+            "x": 5,
+            "y": 2,
+            "entries": [
+              {
+                "type": 5,
+                "variant": 70,
+                "subtype": 9,
+                "weight": 1.0
+              }
+            ]
+          },
+          {
+            "x": 6,
+            "y": 2,
+            "entries": [
+              {
+                "type": 5,
+                "variant": 70,
+                "subtype": 0,
+                "weight": 1.0
+              }
+            ]
+          }
+        ],
+        "minimumActualInitialBodies": 10,
+        "minimumActualCardArtFamilies": 4,
+        "minimumActualRandomCards": 1,
+        "minimumActualRandomPills": 1,
+        "minimumFullObservations": 1,
+        "minimumFastObservations": 1,
+        "required": [
+          "ActualPublicMenuAndResourceReset",
+          "ActualRoomSelectorAndMatchingManagerSeed",
+          "ExplicitCardIDsIncludingLockedRunesRemainExplicit",
+          "CardZeroAndPillZeroResolveToConcreteBodies",
+          "ActualFourCardVisualActors",
+          "ActualAppearThenIdleAndGroundCollisionFields"
+        ],
+        "unknown": [
+          "OriginalGameCounterpartAndExactRandomCardIdentity",
+          "Actual4FF1E0AndGetCardGetPillInvocation",
+          "Positive251And252RealAddAndConversion",
+          "CanonicalHeldPocketCollectionAndSwap",
+          "BackendAudioAndPixels",
+          "SavedRoomReentryHistory"
+        ],
+        "missingWitnessPolicy": "FAIL; preserve every case and unknown; no output-fitted seeds, body injection or relaxed minima"
+      },
+      "sfxVolume": 1,
+      "evidenceScope": {
+        "functional": "Fresh Original/production public-input comparison required",
+        "audio": "Request/slot/sample settings only; muted gain cannot satisfy playback evidence",
+        "remaining": [
+          "Private helper invocation ledger",
+          "Capacity2 modifiers and pocket effects",
+          "Saved reentry",
+          "Backend played audio and PCM",
+          "Full-frame pixels"
+        ]
+      }
+    },
+    {
+      "bootEpochSeed": 12713,
+      "initialPhaseOffset": 0,
+      "entropy": "fixed source-designed public seed, declared before gameplay",
+      "publicMenuRoute": "seeded-normal",
+      "publicRunSeed": 2,
+      "publicSeedCode": "B911992E",
+      "name": "pocket-refused-contact-fixed-phase0",
+      "fixture": {
+        "kind": "source-authored-start-room-STB-on-public-seeded-normal-run",
+        "challengeId": 1,
+        "startingItems": [],
+        "view": "item-only",
+        "authoredResourcePath": "../resources/challenges.xml",
+        "baselineResourcePath": "/workspace/isaac-rebirth-browser/references/isaac/rebirth/resources/challenges.xml",
+        "specialRoomsPath": "../resources/collection-special.stb",
+        "specialRoomsSha256": "ce73d3efa8c25ee5314e928945e15fd5b3bc68aeb6904dc40532ae05d96aa315",
+        "attributeChanges": [
+          {
+            "attribute": "getcurse",
+            "baselineValue": "9",
+            "authoredValue": "0"
+          },
+          {
+            "attribute": "cursefilter",
+            "baselineValue": "6",
+            "authoredValue": "127"
+          },
+          {
+            "attribute": "roomfilter",
+            "baselineValue": "2",
+            "authoredValue": null
+          },
+          {
+            "attribute": "startingitems",
+            "baselineValue": null,
+            "authoredValue": ""
+          }
+        ],
+        "startRoomSpawnChange": {
+          "catalogue": 0,
+          "index": 80,
+          "type": 1,
+          "variant": 2,
+          "operation": "append",
+          "groups": [
+            {
+              "x": 6,
+              "y": 5,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 300,
+                  "subtype": 1,
+                  "weight": 1.0
+                }
+              ]
+            },
+            {
+              "x": 6,
+              "y": 4,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 70,
+                  "subtype": 1,
+                  "weight": 1.0
+                }
+              ]
+            },
+            {
+              "x": 6,
+              "y": 3,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 300,
+                  "subtype": 40,
+                  "weight": 1.0
+                }
+              ]
+            }
+          ],
+          "allOtherRowsMetadataDoorsWeightsOrderPreserved": true
+        },
+        "challengeConfigurationUsed": false,
+        "samePassPersistentCells": "Every original/authored group has a distinct cell. Real group RNG11/selection remains before the descriptor+98 cell check; this bank neither needs nor waives duplicate suppression."
+      },
+      "actions": [
+        {
+          "label": "released-appear-and-idle",
+          "keys": [],
+          "presentations": 96
+        },
+        {
+          "label": "public-known-empty-pocket-edge",
+          "keys": [
+            "q"
+          ],
+          "presentations": 2
+        },
+        {
+          "label": "released-after-empty-request",
+          "keys": [],
+          "presentations": 2
+        },
+        {
+          "label": "declared-north-approach-1-300-1",
+          "keys": [
+            "w"
+          ],
+          "presentations": 26
+        },
+        {
+          "label": "released-collection-presentation-1",
+          "keys": [],
+          "presentations": 80
+        },
+        {
+          "label": "declared-north-approach-2-70-1",
+          "keys": [
+            "w"
+          ],
+          "presentations": 26
+        },
+        {
+          "label": "released-collection-presentation-2",
+          "keys": [],
+          "presentations": 80
+        },
+        {
+          "label": "declared-north-approach-3-300-40",
+          "keys": [
+            "w"
+          ],
+          "presentations": 26
+        },
+        {
+          "label": "released-collection-presentation-3",
+          "keys": [],
+          "presentations": 80
+        }
+      ],
+      "pocketCollection": {
+        "schema": "source-public-pocket-collection-v1",
+        "originalRoomGroupCount": 2,
+        "groups": [
+          {
+            "x": 6,
+            "y": 5,
+            "entries": [
+              {
+                "type": 5,
+                "variant": 300,
+                "subtype": 1,
+                "weight": 1.0
+              }
+            ]
+          },
+          {
+            "x": 6,
+            "y": 4,
+            "entries": [
+              {
+                "type": 5,
+                "variant": 70,
+                "subtype": 1,
+                "weight": 1.0
+              }
+            ]
+          },
+          {
+            "x": 6,
+            "y": 3,
+            "entries": [
+              {
+                "type": 5,
+                "variant": 300,
+                "subtype": 40,
+                "weight": 1.0
+              }
+            ]
+          }
+        ],
+        "expectedSlot0History": [
+          {
+            "id": 1,
+            "card": true
+          },
+          {
+            "id": 1,
+            "card": false
+          },
+          {
+            "id": 40,
+            "card": true
+          }
+        ],
+        "minimumCollectedSelectors": 3,
+        "minimumObservedCapacityEjections": 2,
+        "minimumActualCardRequests": 2,
+        "minimumActualPillRequests": 1,
+        "minimumActualUseItemPresentations": 3,
+        "minimumObservedPositiveDropAD0": 2,
+        "minimumObservedDropAD0Refresh": 1,
+        "minimumFullObservations": 1,
+        "minimumFastObservations": 1,
+        "required": [
+          "ActualPublicResourceAndMenuReset",
+          "ActualSourceSelectorManagerIdentity",
+          "ActualKnownHeldSlot0Transitions",
+          "ActualTwoFullCapacityOldSlot0Drops",
+          "ActualFullContactAD0Refresh",
+          "ActualMainUseItemAndCopied7E0Overlay",
+          "ActualAudioRequestEventAndSlotJoin"
+        ],
+        "unknown": [
+          "OriginalGameSameInputCounterpart",
+          "ActualPrivateAddHelperInvocation",
+          "Capacity2Real251252Acquisition",
+          "ExactSharedMTDropSeedAndParentCall",
+          "SavedPocketRoomReentry",
+          "BackendPlayedAudioAndPixels",
+          "CardPillEffectsAndModifierAddConversion"
+        ],
+        "missingWitnessPolicy": "FAIL and retain all missing witnesses, cases, epochs, actions and unknowns. No output-fit seed changes, injected bodies, inferred callback success or relaxed coverage minima."
+      },
+      "sfxVolume": 0,
+      "pocketRefusedContact": {
+        "schema": "source-guarded-pocket-contact-v1",
+        "requiredActualInitialSourceResponse": true,
+        "scope": "Exact originalv1 fixed0 tape/resources/epoch/phase; actor identities only within observed starting-room lifetime. Actual guard, held, pose and physical response compare against fresh Original. Known-unreachedv1 AD0refresh remains unavailable; immutable strict3279 grade is not regraded."
+      }
+    },
+    {
+      "bootEpochSeed": 12713,
+      "initialPhaseOffset": 0,
+      "entropy": "fixed source-designed public seed, declared before gameplay",
+      "publicMenuRoute": "seeded-normal",
+      "publicRunSeed": 2,
+      "publicSeedCode": "B911992E",
+      "name": "pocket-collection-separated-fixed-phase0",
+      "fixture": {
+        "kind": "source-authored-start-room-STB-on-public-seeded-normal-run",
+        "challengeId": 1,
+        "startingItems": [],
+        "view": "item-only",
+        "authoredResourcePath": "../resources/challenges.xml",
+        "baselineResourcePath": "/workspace/isaac-rebirth-browser/references/isaac/rebirth/resources/challenges.xml",
+        "specialRoomsPath": "../resources/collection-special.stb",
+        "specialRoomsSha256": "ce73d3efa8c25ee5314e928945e15fd5b3bc68aeb6904dc40532ae05d96aa315",
+        "attributeChanges": [
+          {
+            "attribute": "getcurse",
+            "baselineValue": "9",
+            "authoredValue": "0"
+          },
+          {
+            "attribute": "cursefilter",
+            "baselineValue": "6",
+            "authoredValue": "127"
+          },
+          {
+            "attribute": "roomfilter",
+            "baselineValue": "2",
+            "authoredValue": null
+          },
+          {
+            "attribute": "startingitems",
+            "baselineValue": null,
+            "authoredValue": ""
+          }
+        ],
+        "startRoomSpawnChange": {
+          "catalogue": 0,
+          "index": 80,
+          "type": 1,
+          "variant": 2,
+          "operation": "append",
+          "groups": [
+            {
+              "x": 6,
+              "y": 5,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 300,
+                  "subtype": 1,
+                  "weight": 1.0
+                }
+              ]
+            },
+            {
+              "x": 6,
+              "y": 4,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 70,
+                  "subtype": 1,
+                  "weight": 1.0
+                }
+              ]
+            },
+            {
+              "x": 6,
+              "y": 3,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 300,
+                  "subtype": 40,
+                  "weight": 1.0
+                }
+              ]
+            }
+          ],
+          "allOtherRowsMetadataDoorsWeightsOrderPreserved": true
+        },
+        "challengeConfigurationUsed": false,
+        "samePassPersistentCells": "Every original/authored group has a distinct cell. Real group RNG11/selection remains before the descriptor+98 cell check; this bank neither needs nor waives duplicate suppression."
+      },
+      "actions": [
+        {
+          "label": "released-appear-and-idle",
+          "keys": [],
+          "presentations": 96
+        },
+        {
+          "label": "public-known-empty-pocket-edge",
+          "keys": [
+            "q"
+          ],
+          "presentations": 2
+        },
+        {
+          "label": "released-after-empty-request",
+          "keys": [],
+          "presentations": 2
+        },
+        {
+          "label": "declared-short-north-pulse-1",
+          "keys": [
+            "w"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "declared-separated-ceremony-release-1",
+          "keys": [],
+          "presentations": 192
+        },
+        {
+          "label": "declared-short-north-pulse-2",
+          "keys": [
+            "w"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "declared-separated-ceremony-release-2",
+          "keys": [],
+          "presentations": 192
+        },
+        {
+          "label": "declared-short-north-pulse-3",
+          "keys": [
+            "w"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "declared-separated-ceremony-release-3",
+          "keys": [],
+          "presentations": 192
+        },
+        {
+          "label": "declared-short-north-pulse-4",
+          "keys": [
+            "w"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "declared-separated-ceremony-release-4",
+          "keys": [],
+          "presentations": 192
+        },
+        {
+          "label": "declared-short-north-pulse-5",
+          "keys": [
+            "w"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "declared-separated-ceremony-release-5",
+          "keys": [],
+          "presentations": 192
+        },
+        {
+          "label": "declared-short-north-pulse-6",
+          "keys": [
+            "w"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "declared-separated-ceremony-release-6",
+          "keys": [],
+          "presentations": 192
+        },
+        {
+          "label": "declared-short-north-pulse-7",
+          "keys": [
+            "w"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "declared-separated-ceremony-release-7",
+          "keys": [],
+          "presentations": 192
+        }
+      ],
+      "pocketCollection": {
+        "schema": "source-public-pocket-collection-v1",
+        "originalRoomGroupCount": 2,
+        "groups": [
+          {
+            "x": 6,
+            "y": 5,
+            "entries": [
+              {
+                "type": 5,
+                "variant": 300,
+                "subtype": 1,
+                "weight": 1.0
+              }
+            ]
+          },
+          {
+            "x": 6,
+            "y": 4,
+            "entries": [
+              {
+                "type": 5,
+                "variant": 70,
+                "subtype": 1,
+                "weight": 1.0
+              }
+            ]
+          },
+          {
+            "x": 6,
+            "y": 3,
+            "entries": [
+              {
+                "type": 5,
+                "variant": 300,
+                "subtype": 40,
+                "weight": 1.0
+              }
+            ]
+          }
+        ],
+        "expectedSlot0History": [
+          {
+            "id": 1,
+            "card": true
+          },
+          {
+            "id": 1,
+            "card": false
+          },
+          {
+            "id": 40,
+            "card": true
+          }
+        ],
+        "minimumCollectedSelectors": 3,
+        "minimumObservedCapacityEjections": 2,
+        "minimumActualCardRequests": 2,
+        "minimumActualPillRequests": 1,
+        "minimumActualUseItemPresentations": 3,
+        "minimumObservedPositiveDropAD0": 2,
+        "minimumObservedDropAD0Refresh": 1,
+        "minimumFullObservations": 1,
+        "minimumFastObservations": 1,
+        "required": [
+          "ActualPublicResourceAndMenuReset",
+          "ActualSourceSelectorManagerIdentity",
+          "ActualKnownHeldSlot0Transitions",
+          "ActualTwoFullCapacityOldSlot0Drops",
+          "ActualFullContactAD0Refresh",
+          "ActualMainUseItemAndCopied7E0Overlay",
+          "ActualAudioRequestEventAndSlotJoin"
+        ],
+        "unknown": [
+          "OriginalGameSameInputCounterpart",
+          "ActualPrivateAddHelperInvocation",
+          "Capacity2Real251252Acquisition",
+          "ExactSharedMTDropSeedAndParentCall",
+          "SavedPocketRoomReentry",
+          "BackendPlayedAudioAndPixels",
+          "CardPillEffectsAndModifierAddConversion"
+        ],
+        "missingWitnessPolicy": "FAIL and retain all missing witnesses, cases, epochs, actions and unknowns. No output-fit seed changes, injected bodies, inferred callback success or relaxed coverage minima."
+      },
+      "sfxVolume": 0,
+      "evidenceScope": {
+        "functional": "Fresh Original/production public-input comparison required",
+        "audio": "Request/slot/sample settings only; muted gain cannot satisfy playback evidence",
+        "remaining": [
+          "Private helper invocation ledger",
+          "Capacity2 modifiers and pocket effects",
+          "Saved reentry",
+          "Backend played audio and PCM",
+          "Full-frame pixels"
+        ]
+      }
+    },
+    {
+      "bootEpochSeed": 12713,
+      "initialPhaseOffset": 1,
+      "entropy": "fixed source-designed public seed, declared before gameplay",
+      "publicMenuRoute": "seeded-normal",
+      "publicRunSeed": 2,
+      "publicSeedCode": "B911992E",
+      "name": "pocket-collection-separated-fixed-phase1",
+      "fixture": {
+        "kind": "source-authored-start-room-STB-on-public-seeded-normal-run",
+        "challengeId": 1,
+        "startingItems": [],
+        "view": "item-only",
+        "authoredResourcePath": "../resources/challenges.xml",
+        "baselineResourcePath": "/workspace/isaac-rebirth-browser/references/isaac/rebirth/resources/challenges.xml",
+        "specialRoomsPath": "../resources/collection-special.stb",
+        "specialRoomsSha256": "ce73d3efa8c25ee5314e928945e15fd5b3bc68aeb6904dc40532ae05d96aa315",
+        "attributeChanges": [
+          {
+            "attribute": "getcurse",
+            "baselineValue": "9",
+            "authoredValue": "0"
+          },
+          {
+            "attribute": "cursefilter",
+            "baselineValue": "6",
+            "authoredValue": "127"
+          },
+          {
+            "attribute": "roomfilter",
+            "baselineValue": "2",
+            "authoredValue": null
+          },
+          {
+            "attribute": "startingitems",
+            "baselineValue": null,
+            "authoredValue": ""
+          }
+        ],
+        "startRoomSpawnChange": {
+          "catalogue": 0,
+          "index": 80,
+          "type": 1,
+          "variant": 2,
+          "operation": "append",
+          "groups": [
+            {
+              "x": 6,
+              "y": 5,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 300,
+                  "subtype": 1,
+                  "weight": 1.0
+                }
+              ]
+            },
+            {
+              "x": 6,
+              "y": 4,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 70,
+                  "subtype": 1,
+                  "weight": 1.0
+                }
+              ]
+            },
+            {
+              "x": 6,
+              "y": 3,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 300,
+                  "subtype": 40,
+                  "weight": 1.0
+                }
+              ]
+            }
+          ],
+          "allOtherRowsMetadataDoorsWeightsOrderPreserved": true
+        },
+        "challengeConfigurationUsed": false,
+        "samePassPersistentCells": "Every original/authored group has a distinct cell. Real group RNG11/selection remains before the descriptor+98 cell check; this bank neither needs nor waives duplicate suppression."
+      },
+      "actions": [
+        {
+          "label": "released-appear-and-idle",
+          "keys": [],
+          "presentations": 96
+        },
+        {
+          "label": "public-known-empty-pocket-edge",
+          "keys": [
+            "q"
+          ],
+          "presentations": 2
+        },
+        {
+          "label": "released-after-empty-request",
+          "keys": [],
+          "presentations": 2
+        },
+        {
+          "label": "declared-short-north-pulse-1",
+          "keys": [
+            "w"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "declared-separated-ceremony-release-1",
+          "keys": [],
+          "presentations": 192
+        },
+        {
+          "label": "declared-short-north-pulse-2",
+          "keys": [
+            "w"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "declared-separated-ceremony-release-2",
+          "keys": [],
+          "presentations": 192
+        },
+        {
+          "label": "declared-short-north-pulse-3",
+          "keys": [
+            "w"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "declared-separated-ceremony-release-3",
+          "keys": [],
+          "presentations": 192
+        },
+        {
+          "label": "declared-short-north-pulse-4",
+          "keys": [
+            "w"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "declared-separated-ceremony-release-4",
+          "keys": [],
+          "presentations": 192
+        },
+        {
+          "label": "declared-short-north-pulse-5",
+          "keys": [
+            "w"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "declared-separated-ceremony-release-5",
+          "keys": [],
+          "presentations": 192
+        },
+        {
+          "label": "declared-short-north-pulse-6",
+          "keys": [
+            "w"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "declared-separated-ceremony-release-6",
+          "keys": [],
+          "presentations": 192
+        },
+        {
+          "label": "declared-short-north-pulse-7",
+          "keys": [
+            "w"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "declared-separated-ceremony-release-7",
+          "keys": [],
+          "presentations": 192
+        }
+      ],
+      "pocketCollection": {
+        "schema": "source-public-pocket-collection-v1",
+        "originalRoomGroupCount": 2,
+        "groups": [
+          {
+            "x": 6,
+            "y": 5,
+            "entries": [
+              {
+                "type": 5,
+                "variant": 300,
+                "subtype": 1,
+                "weight": 1.0
+              }
+            ]
+          },
+          {
+            "x": 6,
+            "y": 4,
+            "entries": [
+              {
+                "type": 5,
+                "variant": 70,
+                "subtype": 1,
+                "weight": 1.0
+              }
+            ]
+          },
+          {
+            "x": 6,
+            "y": 3,
+            "entries": [
+              {
+                "type": 5,
+                "variant": 300,
+                "subtype": 40,
+                "weight": 1.0
+              }
+            ]
+          }
+        ],
+        "expectedSlot0History": [
+          {
+            "id": 1,
+            "card": true
+          },
+          {
+            "id": 1,
+            "card": false
+          },
+          {
+            "id": 40,
+            "card": true
+          }
+        ],
+        "minimumCollectedSelectors": 3,
+        "minimumObservedCapacityEjections": 2,
+        "minimumActualCardRequests": 2,
+        "minimumActualPillRequests": 1,
+        "minimumActualUseItemPresentations": 3,
+        "minimumObservedPositiveDropAD0": 2,
+        "minimumObservedDropAD0Refresh": 1,
+        "minimumFullObservations": 1,
+        "minimumFastObservations": 1,
+        "required": [
+          "ActualPublicResourceAndMenuReset",
+          "ActualSourceSelectorManagerIdentity",
+          "ActualKnownHeldSlot0Transitions",
+          "ActualTwoFullCapacityOldSlot0Drops",
+          "ActualFullContactAD0Refresh",
+          "ActualMainUseItemAndCopied7E0Overlay",
+          "ActualAudioRequestEventAndSlotJoin"
+        ],
+        "unknown": [
+          "OriginalGameSameInputCounterpart",
+          "ActualPrivateAddHelperInvocation",
+          "Capacity2Real251252Acquisition",
+          "ExactSharedMTDropSeedAndParentCall",
+          "SavedPocketRoomReentry",
+          "BackendPlayedAudioAndPixels",
+          "CardPillEffectsAndModifierAddConversion"
+        ],
+        "missingWitnessPolicy": "FAIL and retain all missing witnesses, cases, epochs, actions and unknowns. No output-fit seed changes, injected bodies, inferred callback success or relaxed coverage minima."
+      },
+      "sfxVolume": 1,
+      "evidenceScope": {
+        "functional": "Fresh Original/production public-input comparison required",
+        "audio": "Request/slot/sample settings only; muted gain cannot satisfy playback evidence",
+        "remaining": [
+          "Private helper invocation ledger",
+          "Capacity2 modifiers and pocket effects",
+          "Saved reentry",
+          "Backend played audio and PCM",
+          "Full-frame pixels"
+        ]
+      }
+    },
+    {
+      "bootEpochSeed": 2038552851,
+      "initialPhaseOffset": 0,
+      "entropy": "retained unfiltered OS epoch; no result selection",
+      "publicMenuRoute": "retained-unfiltered-challenge",
+      "name": "pocket-collection-separated-recorded-0",
+      "fixture": {
+        "kind": "source-authored-modified-challenge",
+        "challengeId": 1,
+        "startingItems": [],
+        "view": "item-only",
+        "authoredResourcePath": "../resources/challenges.xml",
+        "baselineResourcePath": "/workspace/isaac-rebirth-browser/references/isaac/rebirth/resources/challenges.xml",
+        "specialRoomsPath": "../resources/collection-special.stb",
+        "specialRoomsSha256": "ce73d3efa8c25ee5314e928945e15fd5b3bc68aeb6904dc40532ae05d96aa315",
+        "attributeChanges": [
+          {
+            "attribute": "getcurse",
+            "baselineValue": "9",
+            "authoredValue": "0"
+          },
+          {
+            "attribute": "cursefilter",
+            "baselineValue": "6",
+            "authoredValue": "127"
+          },
+          {
+            "attribute": "roomfilter",
+            "baselineValue": "2",
+            "authoredValue": null
+          },
+          {
+            "attribute": "startingitems",
+            "baselineValue": null,
+            "authoredValue": ""
+          }
+        ],
+        "startRoomSpawnChange": {
+          "catalogue": 0,
+          "index": 80,
+          "type": 1,
+          "variant": 2,
+          "operation": "append",
+          "groups": [
+            {
+              "x": 6,
+              "y": 5,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 300,
+                  "subtype": 1,
+                  "weight": 1.0
+                }
+              ]
+            },
+            {
+              "x": 6,
+              "y": 4,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 70,
+                  "subtype": 1,
+                  "weight": 1.0
+                }
+              ]
+            },
+            {
+              "x": 6,
+              "y": 3,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 300,
+                  "subtype": 40,
+                  "weight": 1.0
+                }
+              ]
+            }
+          ],
+          "allOtherRowsMetadataDoorsWeightsOrderPreserved": true
+        },
+        "challengeConfigurationUsed": true,
+        "samePassPersistentCells": "Every original/authored group has a distinct cell. Real group RNG11/selection remains before the descriptor+98 cell check; this bank neither needs nor waives duplicate suppression."
+      },
+      "actions": [
+        {
+          "label": "released-appear-and-idle",
+          "keys": [],
+          "presentations": 96
+        },
+        {
+          "label": "public-known-empty-pocket-edge",
+          "keys": [
+            "q"
+          ],
+          "presentations": 2
+        },
+        {
+          "label": "released-after-empty-request",
+          "keys": [],
+          "presentations": 2
+        },
+        {
+          "label": "declared-short-north-pulse-1",
+          "keys": [
+            "w"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "declared-separated-ceremony-release-1",
+          "keys": [],
+          "presentations": 192
+        },
+        {
+          "label": "declared-short-north-pulse-2",
+          "keys": [
+            "w"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "declared-separated-ceremony-release-2",
+          "keys": [],
+          "presentations": 192
+        },
+        {
+          "label": "declared-short-north-pulse-3",
+          "keys": [
+            "w"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "declared-separated-ceremony-release-3",
+          "keys": [],
+          "presentations": 192
+        },
+        {
+          "label": "declared-short-north-pulse-4",
+          "keys": [
+            "w"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "declared-separated-ceremony-release-4",
+          "keys": [],
+          "presentations": 192
+        },
+        {
+          "label": "declared-short-north-pulse-5",
+          "keys": [
+            "w"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "declared-separated-ceremony-release-5",
+          "keys": [],
+          "presentations": 192
+        },
+        {
+          "label": "declared-short-north-pulse-6",
+          "keys": [
+            "w"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "declared-separated-ceremony-release-6",
+          "keys": [],
+          "presentations": 192
+        },
+        {
+          "label": "declared-short-north-pulse-7",
+          "keys": [
+            "w"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "declared-separated-ceremony-release-7",
+          "keys": [],
+          "presentations": 192
+        }
+      ],
+      "pocketCollection": {
+        "schema": "source-public-pocket-collection-v1",
+        "originalRoomGroupCount": 2,
+        "groups": [
+          {
+            "x": 6,
+            "y": 5,
+            "entries": [
+              {
+                "type": 5,
+                "variant": 300,
+                "subtype": 1,
+                "weight": 1.0
+              }
+            ]
+          },
+          {
+            "x": 6,
+            "y": 4,
+            "entries": [
+              {
+                "type": 5,
+                "variant": 70,
+                "subtype": 1,
+                "weight": 1.0
+              }
+            ]
+          },
+          {
+            "x": 6,
+            "y": 3,
+            "entries": [
+              {
+                "type": 5,
+                "variant": 300,
+                "subtype": 40,
+                "weight": 1.0
+              }
+            ]
+          }
+        ],
+        "expectedSlot0History": [
+          {
+            "id": 1,
+            "card": true
+          },
+          {
+            "id": 1,
+            "card": false
+          },
+          {
+            "id": 40,
+            "card": true
+          }
+        ],
+        "minimumCollectedSelectors": 3,
+        "minimumObservedCapacityEjections": 2,
+        "minimumActualCardRequests": 2,
+        "minimumActualPillRequests": 1,
+        "minimumActualUseItemPresentations": 3,
+        "minimumObservedPositiveDropAD0": 2,
+        "minimumObservedDropAD0Refresh": 1,
+        "minimumFullObservations": 1,
+        "minimumFastObservations": 1,
+        "required": [
+          "ActualPublicResourceAndMenuReset",
+          "ActualSourceSelectorManagerIdentity",
+          "ActualKnownHeldSlot0Transitions",
+          "ActualTwoFullCapacityOldSlot0Drops",
+          "ActualFullContactAD0Refresh",
+          "ActualMainUseItemAndCopied7E0Overlay",
+          "ActualAudioRequestEventAndSlotJoin"
+        ],
+        "unknown": [
+          "OriginalGameSameInputCounterpart",
+          "ActualPrivateAddHelperInvocation",
+          "Capacity2Real251252Acquisition",
+          "ExactSharedMTDropSeedAndParentCall",
+          "SavedPocketRoomReentry",
+          "BackendPlayedAudioAndPixels",
+          "CardPillEffectsAndModifierAddConversion"
+        ],
+        "missingWitnessPolicy": "FAIL and retain all missing witnesses, cases, epochs, actions and unknowns. No output-fit seed changes, injected bodies, inferred callback success or relaxed coverage minima."
+      },
+      "sfxVolume": 0,
+      "evidenceScope": {
+        "functional": "Fresh Original/production public-input comparison required",
+        "audio": "Request/slot/sample settings only; muted gain cannot satisfy playback evidence",
+        "remaining": [
+          "Private helper invocation ledger",
+          "Capacity2 modifiers and pocket effects",
+          "Saved reentry",
+          "Backend played audio and PCM",
+          "Full-frame pixels"
+        ]
+      }
+    },
+    {
+      "bootEpochSeed": 4152429072,
+      "initialPhaseOffset": 1,
+      "entropy": "retained unfiltered OS epoch; no result selection",
+      "publicMenuRoute": "retained-unfiltered-challenge",
+      "name": "pocket-collection-separated-recorded-1",
+      "fixture": {
+        "kind": "source-authored-modified-challenge",
+        "challengeId": 1,
+        "startingItems": [],
+        "view": "item-only",
+        "authoredResourcePath": "../resources/challenges.xml",
+        "baselineResourcePath": "/workspace/isaac-rebirth-browser/references/isaac/rebirth/resources/challenges.xml",
+        "specialRoomsPath": "../resources/collection-special.stb",
+        "specialRoomsSha256": "ce73d3efa8c25ee5314e928945e15fd5b3bc68aeb6904dc40532ae05d96aa315",
+        "attributeChanges": [
+          {
+            "attribute": "getcurse",
+            "baselineValue": "9",
+            "authoredValue": "0"
+          },
+          {
+            "attribute": "cursefilter",
+            "baselineValue": "6",
+            "authoredValue": "127"
+          },
+          {
+            "attribute": "roomfilter",
+            "baselineValue": "2",
+            "authoredValue": null
+          },
+          {
+            "attribute": "startingitems",
+            "baselineValue": null,
+            "authoredValue": ""
+          }
+        ],
+        "startRoomSpawnChange": {
+          "catalogue": 0,
+          "index": 80,
+          "type": 1,
+          "variant": 2,
+          "operation": "append",
+          "groups": [
+            {
+              "x": 6,
+              "y": 5,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 300,
+                  "subtype": 1,
+                  "weight": 1.0
+                }
+              ]
+            },
+            {
+              "x": 6,
+              "y": 4,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 70,
+                  "subtype": 1,
+                  "weight": 1.0
+                }
+              ]
+            },
+            {
+              "x": 6,
+              "y": 3,
+              "entries": [
+                {
+                  "type": 5,
+                  "variant": 300,
+                  "subtype": 40,
+                  "weight": 1.0
+                }
+              ]
+            }
+          ],
+          "allOtherRowsMetadataDoorsWeightsOrderPreserved": true
+        },
+        "challengeConfigurationUsed": true,
+        "samePassPersistentCells": "Every original/authored group has a distinct cell. Real group RNG11/selection remains before the descriptor+98 cell check; this bank neither needs nor waives duplicate suppression."
+      },
+      "actions": [
+        {
+          "label": "released-appear-and-idle",
+          "keys": [],
+          "presentations": 96
+        },
+        {
+          "label": "public-known-empty-pocket-edge",
+          "keys": [
+            "q"
+          ],
+          "presentations": 2
+        },
+        {
+          "label": "released-after-empty-request",
+          "keys": [],
+          "presentations": 2
+        },
+        {
+          "label": "declared-short-north-pulse-1",
+          "keys": [
+            "w"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "declared-separated-ceremony-release-1",
+          "keys": [],
+          "presentations": 192
+        },
+        {
+          "label": "declared-short-north-pulse-2",
+          "keys": [
+            "w"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "declared-separated-ceremony-release-2",
+          "keys": [],
+          "presentations": 192
+        },
+        {
+          "label": "declared-short-north-pulse-3",
+          "keys": [
+            "w"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "declared-separated-ceremony-release-3",
+          "keys": [],
+          "presentations": 192
+        },
+        {
+          "label": "declared-short-north-pulse-4",
+          "keys": [
+            "w"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "declared-separated-ceremony-release-4",
+          "keys": [],
+          "presentations": 192
+        },
+        {
+          "label": "declared-short-north-pulse-5",
+          "keys": [
+            "w"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "declared-separated-ceremony-release-5",
+          "keys": [],
+          "presentations": 192
+        },
+        {
+          "label": "declared-short-north-pulse-6",
+          "keys": [
+            "w"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "declared-separated-ceremony-release-6",
+          "keys": [],
+          "presentations": 192
+        },
+        {
+          "label": "declared-short-north-pulse-7",
+          "keys": [
+            "w"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "declared-separated-ceremony-release-7",
+          "keys": [],
+          "presentations": 192
+        }
+      ],
+      "pocketCollection": {
+        "schema": "source-public-pocket-collection-v1",
+        "originalRoomGroupCount": 2,
+        "groups": [
+          {
+            "x": 6,
+            "y": 5,
+            "entries": [
+              {
+                "type": 5,
+                "variant": 300,
+                "subtype": 1,
+                "weight": 1.0
+              }
+            ]
+          },
+          {
+            "x": 6,
+            "y": 4,
+            "entries": [
+              {
+                "type": 5,
+                "variant": 70,
+                "subtype": 1,
+                "weight": 1.0
+              }
+            ]
+          },
+          {
+            "x": 6,
+            "y": 3,
+            "entries": [
+              {
+                "type": 5,
+                "variant": 300,
+                "subtype": 40,
+                "weight": 1.0
+              }
+            ]
+          }
+        ],
+        "expectedSlot0History": [
+          {
+            "id": 1,
+            "card": true
+          },
+          {
+            "id": 1,
+            "card": false
+          },
+          {
+            "id": 40,
+            "card": true
+          }
+        ],
+        "minimumCollectedSelectors": 3,
+        "minimumObservedCapacityEjections": 2,
+        "minimumActualCardRequests": 2,
+        "minimumActualPillRequests": 1,
+        "minimumActualUseItemPresentations": 3,
+        "minimumObservedPositiveDropAD0": 2,
+        "minimumObservedDropAD0Refresh": 1,
+        "minimumFullObservations": 1,
+        "minimumFastObservations": 1,
+        "required": [
+          "ActualPublicResourceAndMenuReset",
+          "ActualSourceSelectorManagerIdentity",
+          "ActualKnownHeldSlot0Transitions",
+          "ActualTwoFullCapacityOldSlot0Drops",
+          "ActualFullContactAD0Refresh",
+          "ActualMainUseItemAndCopied7E0Overlay",
+          "ActualAudioRequestEventAndSlotJoin"
+        ],
+        "unknown": [
+          "OriginalGameSameInputCounterpart",
+          "ActualPrivateAddHelperInvocation",
+          "Capacity2Real251252Acquisition",
+          "ExactSharedMTDropSeedAndParentCall",
+          "SavedPocketRoomReentry",
+          "BackendPlayedAudioAndPixels",
+          "CardPillEffectsAndModifierAddConversion"
+        ],
+        "missingWitnessPolicy": "FAIL and retain all missing witnesses, cases, epochs, actions and unknowns. No output-fit seed changes, injected bodies, inferred callback success or relaxed coverage minima."
+      },
+      "sfxVolume": 1,
+      "evidenceScope": {
+        "functional": "Fresh Original/production public-input comparison required",
+        "audio": "Request/slot/sample settings only; muted gain cannot satisfy playback evidence",
+        "remaining": [
+          "Private helper invocation ledger",
+          "Capacity2 modifiers and pocket effects",
+          "Saved reentry",
+          "Backend played audio and PCM",
+          "Full-frame pixels"
+        ]
+      }
+    }
+  ],
+  "source": "Retained fixed phases and unfiltered recorded OS choices. Accepted Init and separated collection resources/gameplay tapes remain exact. New matched public SFX preferences are declared independently for the durable suite. Exact originalv1 fixed0 guarded-refusal regression is additionally retained, without changing its gameplay inputs or its old strict report."
+}
