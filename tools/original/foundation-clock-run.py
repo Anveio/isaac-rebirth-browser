@@ -128,7 +128,7 @@ def main():
     parser.add_argument('--step-ns', type=int, default=16667000, help='Explicit virtual interval; default is 16667 microseconds, above native timer polling threshold')
     parser.add_argument('--output', type=Path, default=ROOT / '.cache/foundation' / f'clock-native-{time.time_ns()}')
     parser.add_argument('--frame-timeout', type=float, default=60,
-                        help='Host-wall socket/gate wait limit in seconds; does not alter released presentation counts')
+                        help='Host-wall socket/gate wait limit in seconds, per 600 frames of a step; does not alter released presentation counts')
     args = parser.parse_args()
     if args.journal_codec != 'gzip' and not args.archive_evidence:
         raise SystemExit('--journal-codec requires --archive-evidence')
@@ -431,8 +431,11 @@ def main():
                     before = current['presentedFrame']
                     cpu_before = debug.process_performance(proc.pid, started)
                     step_started = time.monotonic()
+                    # A long step is one acknowledgement; allow the limit per 600 frames.
+                    connection.settimeout(args.frame_timeout * -(-action['frames'] // 600))
                     connection.sendall(f"step {action['frames']}\n".encode())
                     current = acknowledgement()
+                    connection.settimeout(args.frame_timeout)
                     current['requestedPresentationFrames'] = action['frames']
                     current['advanceHostWallMs'] = (time.monotonic()-step_started)*1000
                     cpu_after = debug.process_performance(proc.pid, started)
