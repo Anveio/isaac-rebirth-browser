@@ -7,7 +7,7 @@ import {writeJsonEvidence} from './browser-evidence.mjs';
 import {BrowserProgress} from './composition-progress.mjs';
 
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
-const keyNames = {Return:'Enter',Down:'ArrowDown',Up:'ArrowUp',Left:'ArrowLeft',Right:'ArrowRight',space:'Space'};
+const keyNames = {Return:'Enter',Tab:'Tab',Down:'ArrowDown',Up:'ArrowUp',Left:'ArrowLeft',Right:'ArrowRight',space:'Space'};
 const gameplayKeys = new Set(['Right','Left','Up','Down','w','a','s','d','space','e','q']);
 const keyCode = key => {
   if (keyNames[key]) return keyNames[key];
@@ -136,12 +136,37 @@ export async function captureComposition(browser, server, declaration, directory
     await page.evaluate(({initialSeed,bootEpochSeed,resources})=>{
       window.game.pause();window.game.reset(initialSeed,{bootEpochSeed,resources,trace:true});
     },resetInput);
+    if (declaration.pocketInit || declaration.pocketCollection) {
+      assert.ok(Number.isFinite(declaration.sfxVolume) && declaration.sfxVolume>=0 && declaration.sfxVolume<=1);
+      await page.evaluate(volume=>window.game.command({type:'audioVolume',sfx_volume:volume}),declaration.sfxVolume);
+      commands.push({type:'audioVolume',sfx_volume:declaration.sfxVolume});
+    }
     // Native intro is separately declared. The shared public path begins at
     // the existing first-Title boundary, not at an invented common boot tick.
     await step(63);await checkpoint('title');
     await press('Return',72,'profile');await press('Return',72,'main');
-    await press('Down',72,'challenge-selected');await press('Return',72,'challenges');
-    await press('Return',300,'gameplay-start');
+    const seededPocket = Boolean((declaration.pocketInit || declaration.pocketCollection)
+      && declaration.publicMenuRoute === 'seeded-normal');
+    if (seededPocket) {
+      assert.match(declaration.publicSeedCode, /^[ABCDEFGHJKLMNPQRSTWXYZ01234V6789]{8}$/);
+      await press('Return',72,'character');await press('Tab',108,'seed-entry');
+      for (const text of declaration.publicSeedCode) {
+        const code = /^[0-9]$/.test(text) ? 'Digit' + text : keyCode(text);
+        await page.keyboard.down(text);commands.push({type:'text',text});
+        inputs.push({name:text,code,down:true,presentation,sourceText:true});
+        await step(12);await page.keyboard.up(text);
+        inputs.push({name:text,code,down:false,presentation,sourceText:true});await step(6);
+      }
+      assert.equal((await page.evaluate(()=>window.game.snapshot())).screen,'seed');
+      await press('Return',72,'character-seeded');
+    } else {
+      await press('Down',72,'challenge-selected');await press('Return',72,'challenges');
+    }
+    const entered = await press('Return',300,'gameplay-start');
+    if (seededPocket) {
+      assert.equal(entered.runSeedValue,declaration.publicRunSeed);
+      assert.equal(entered.runSeed.replaceAll(' ',''),declaration.publicSeedCode);
+    }
     gameplayPresentation = 0;
     await progress.append('state',{presentation,gameplayPresentation,state:await page.evaluate(()=>window.game.snapshot())});
     stateCount++;
@@ -225,11 +250,19 @@ export async function captureComposition(browser, server, declaration, directory
     assert.ok(traceInfo.arrayCounts.backendEvents>0&&traceInfo.backendStatesComplete);
     assert.equal(stateCount,1+declaration.initialPhaseOffset+declaration.actions.reduce((n,a)=>n+a.presentations,0));
     assert.equal(preludeStateCount,312,'Every real run-confirm/admission presentation is retained');
-    for (const [label,screen] of [['title','title'],['profile','profile'],['main','main'],['challenge-selected','main'],['challenges','challenge'],['gameplay-start','playing']]) {
+    const normalPocket = Boolean((declaration.pocketInit || declaration.pocketCollection)
+      && declaration.publicMenuRoute === 'seeded-normal');
+    const checkpoints = normalPocket
+      ? [['title','title'],['profile','profile'],['main','main'],['character','character'],
+        ['seed-entry','seed'],['character-seeded','character'],['gameplay-start','playing']]
+      : [['title','title'],['profile','profile'],['main','main'],['challenge-selected','main'],['challenges','challenge'],['gameplay-start','playing']];
+    for (const [label,screen] of checkpoints) {
       assert.equal(captureScreens.get(label)?.screen,screen,'Actual navigation checkpoint '+label);
     }
-    assert.equal(captureScreens.get('challenge-selected').mainSelection,2);
-    assert.equal(captureScreens.get('challenges').challengeSelection,1);
+    if (!normalPocket) {
+      assert.equal(captureScreens.get('challenge-selected').mainSelection,2);
+      assert.equal(captureScreens.get('challenges').challengeSelection,1);
+    }
     assert.equal(hash(await readFile(declaration.fixture.authoredResourcePath)),declaredResourceHashes.challengesXml);
     if (resources.specialRooms) assert.equal(hash(await readFile(declaration.fixture.specialRoomsPath)),declaredResourceHashes.specialRooms);
     validation.push({field:'actual public input/backend/resource readback',passed:true});

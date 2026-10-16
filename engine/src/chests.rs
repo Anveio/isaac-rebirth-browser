@@ -186,6 +186,15 @@ pub(crate) fn try_open(state: &mut State, index: usize) -> Result<bool, String> 
     {
         return Ok(false);
     }
+    if let Some(coverage) = &mut state.room.ordinary_placement {
+        coverage.invalidate(crate::ordinary_placement::Frontier::ChestEffects);
+    }
+    if let Some(owner) = &mut state.player_items {
+        crate::ordinary_placement::remember_owner(
+            owner,
+            crate::ordinary_placement::Frontier::ChestEffects,
+        );
+    }
     let inputs = match opening_inputs(state) {
         Ok(inputs) => inputs,
         Err(frontier) => {
@@ -355,6 +364,10 @@ fn try_open_locked(state: &mut State, index: usize) -> Result<bool, String> {
                 .expect("locked Chest")
                 .open_frontier
                 .get_or_insert(frontier);
+            crate::ordinary_placement::invalidate(
+                state,
+                crate::ordinary_placement::Frontier::ChestEffects,
+            );
             return Ok(false);
         }
     };
@@ -365,6 +378,10 @@ fn try_open_locked(state: &mut State, index: usize) -> Result<bool, String> {
             .expect("locked Chest")
             .open_frontier
             .get_or_insert(OpenFrontier::PlayerContext);
+        crate::ordinary_placement::invalidate(
+            state,
+            crate::ordinary_placement::Frontier::ChestEffects,
+        );
         return Ok(false);
     }
     // PaperClip19 is independently false in this actual empty trinket/queue
@@ -372,6 +389,7 @@ fn try_open_locked(state: &mut State, index: usize) -> Result<bool, String> {
     if state.player.golden_key == Some(false) && state.inventory.keys == 0 {
         return Ok(false);
     }
+    crate::ordinary_placement::invalidate(state, crate::ordinary_placement::Frontier::ChestEffects);
     open_bounded_chest(state, index, inputs)
 }
 
@@ -387,6 +405,15 @@ pub(crate) fn hurt_bomb_chest(
     let pickup = &state.room.pickups[index];
     if damage <= 0.0 || damage_flags & 4 == 0 || pickup.variant != 51 || pickup.subtype == 0 {
         return Ok(false);
+    }
+    if let Some(coverage) = &mut state.room.ordinary_placement {
+        coverage.invalidate(crate::ordinary_placement::Frontier::ChestEffects);
+    }
+    if let Some(owner) = &mut state.player_items {
+        crate::ordinary_placement::remember_owner(
+            owner,
+            crate::ordinary_placement::Frontier::ChestEffects,
+        );
     }
     if !damage.is_finite() {
         state.room.pickups[index]

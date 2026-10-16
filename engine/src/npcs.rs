@@ -704,6 +704,54 @@ pub(crate) fn direction(random: &mut Mt19937) -> WorldVector {
 }
 
 impl Npc {
+    /// Morph480750: rewrite type/variant/subtype, then Init47f500 reloads the
+    /// config row and anm2 (overlay cleared, default clip stopped at frame 0)
+    /// and re-applies a kept champion color. HP is clamped to the new max;
+    /// state, counters, motion, age and visibility are kept. The pathfinder
+    /// is Reset5b4010. Only live-room morphs exist, where the Room+0 gate at
+    /// 47f750 closes the champion roll.
+    pub(crate) fn morph(
+        &mut self,
+        kind: u32,
+        variant: u32,
+        default_animation: &str,
+        shared: &mut Mt19937,
+    ) -> Result<(), String> {
+        let config = content::entity(kind, variant);
+        if config.stage_hp != 0.0 {
+            return Err(format!(
+                "morph target {kind}.{variant} needs the stage HP formula"
+            ));
+        }
+        self.kind = kind;
+        self.variant = variant;
+        self.subtype = 0;
+        self.actor = config.actor.into();
+        self.max_hp = config.base_hp;
+        self.collision_radius = config.collision_radius;
+        self.collision_mass = config.collision_mass;
+        self.collision_damage = config.collision_damage;
+        self.base_friction = config.friction;
+        self.shadow_size = config.shadow_size;
+        self.grid_collision_class = config.grid_class;
+        self.can_shut_doors = config.can_shut_doors;
+        self.boss = config.boss;
+        self.overlay = None;
+        self.animation = default_animation.into();
+        self.animation_frame = 0;
+        self.animation_clock = 0.0;
+        self.animation_playing = false;
+        self.sprite_events = SpriteEvents::default();
+        if let Some(color) = self.champion.take().map(|champion| champion.color) {
+            crate::champions::apply(self, color, shared)?;
+        }
+        self.hp = self.hp.min(self.max_hp);
+        if let Some(path) = self.pathfinder.as_mut() {
+            path.reset();
+        }
+        Ok(())
+    }
+
     /// ResetColor 47f430: a champion's table colour, otherwise plain white.
     pub(crate) fn base_color(&self) -> crate::sprite_color::Color {
         self.champion
