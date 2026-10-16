@@ -1,0 +1,99 @@
+{
+  "schema": 1,
+  "kind": "retained-private-runtime-evidence-summary",
+  "caseBanks": [
+    "references/isaac/cases/item-composition/controlled-knife-satellites-v1.json",
+    "references/isaac/cases/item-composition/controlled-knife-history-v1.json"
+  ],
+  "replay": "npm run test:e2e -- item-composition --scenarios references/isaac/cases/item-composition/controlled-knife-satellites-v1.json",
+  "runtimeScope": "Actual independent privateab2 artifact based on qualifiedP4; unlandedruntime, not publicmain or freshcurrent-mainqualifier. Reusableobservationtools do notgrant runtimequalification.",
+  "sourceHead": "ab2aa0a596035c161a258525405dc0d2727cf435",
+  "wasmSha256": "0994d1d289057e9e76d060ce6863f46775dbf2a9ee1c79a1244526790c48dbb6",
+  "normalProduction": {
+    "exit": 0,
+    "seconds": 29.6014
+  },
+  "raw405": {
+    "checks": 38027481,
+    "failures": 0
+  },
+  "new4Own": {
+    "checks": 12478,
+    "failures": 232,
+    "reportSha256": "bcbe7ebc586e01f9cf9b61df79c1cd21c90316eac7a4782dd2ea58cfed36db96",
+    "realGrantOrder": [
+      329,
+      2
+    ],
+    "eachObservedBirths": 2,
+    "caseNames": [
+      "controlled-knife-satellites-fixed-phase0",
+      "controlled-knife-satellites-fixed-phase1",
+      "controlled-knife-satellites-recorded-0",
+      "controlled-knife-satellites-recorded-1"
+    ]
+  },
+  "old4History": {
+    "checks": 2470,
+    "failures": 108,
+    "reportSha256": "28e0022f00050082979ea711f37180b95e198e1e8156bc8b1eed8bb22f108536",
+    "retentionChecksPass": 1064,
+    "actualPreexistingChildren": [
+      8,
+      6,
+      6,
+      8
+    ],
+    "actuallyContinuedChildren": [
+      8,
+      4,
+      4,
+      8
+    ],
+    "scope": "Retainedunknown/callback/coveragefailures, not1064whole-casepasses."
+  },
+  "firstOriginal": {
+    "exit": 0,
+    "seconds": 65.065
+  },
+  "firstStrictPair": {
+    "checks": 34648,
+    "failures": 3237,
+    "reportSha256": "7f08b421eb43d1f18d733c64af5aa3f0c02e646716d7935e6e6526b4157086bc",
+    "pairedRows": 1010,
+    "eachOwnLinkedRows": 280,
+    "eachOwnBirths": 2,
+    "eachThreeBodyRows": 840,
+    "eachFastRows": 420,
+    "eachNonFastRows": 421,
+    "exactIdentityJoins": 0,
+    "ungradedFieldCount": 49,
+    "sideActorRows": 2764,
+    "bothFirstAdd2EndpointCount": 0,
+    "bothLaterChains": 2
+  },
+  "nativeTypedCallbackRead": {
+    "checks": 726,
+    "failures": 31,
+    "summarySha256": "8d8f81cdf2981ddd4cb820ff8ea2c69da549865c44621e8d9e9b749cd2da710b",
+    "actualFull": 1383,
+    "actualNativePlayerAge0Full": 2,
+    "fastCounts": [
+      175,
+      515
+    ],
+    "cleanupObserved": 0,
+    "portCallbacks": "unknown"
+  },
+  "limits": [
+    "ExactIDs/RNG/clocks/cooldown/head and49ungradedfields remainfailures.",
+    "BothgamesfirstAdd2endpoint0then2 is a consumerboundary, notproof of missingfunctionalchains.",
+    "Nativecallbackcoverage is independent; portcallback producer andcleanup remainunknown.",
+    "No whole-current-main/backendparity or all-green claim."
+  ],
+  "comparerSha256": "589c559e925d4d1efb525c1ca38fc8e8125ae03b30ed843da605c7a04edef134",
+  "relatedToolPullRequests": [
+    423,
+    424
+  ]
+}

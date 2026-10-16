@@ -103,6 +103,10 @@ try {
     sourceFiles.push('tools/foundation/composition-spoon-bender3.py');
     report.sourceBefore = await sourcePins();
   }
+  if (cases.some(item => item.requires?.controlledKnifeSatellites !== undefined)) {
+    sourceFiles.push('tools/foundation/composition-controlled-knife-satellites.py');
+    report.sourceBefore = await sourcePins();
+  }
   const scenarios = join(output, 'scenarios.json');
   await save(scenarios, { ...bank, cases });
   report.recordedBank = { path: bankPath, sha256: hash(bankBytes), replayPath: scenarios };
